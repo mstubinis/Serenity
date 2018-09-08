@@ -772,10 +772,10 @@ class Mesh::impl final{
             }
         }
         void _loadFromFile(Mesh* super, string& file, CollisionType::Type type, float threshold) {
-            string extention = boost::filesystem::extension(file);
+            string extension = boost::filesystem::extension(file);
             epriv::ImportedMeshData d;
 
-            if (extention == ".objc") {
+            if (extension == ".objc") {
                 _readFromObjCompressed(file, d);
                 _finalizeData(d, threshold);
             }
@@ -1085,31 +1085,24 @@ class Mesh::impl final{
             fileparser.read(headerBuffer, 24);
 
             //pos,uv,norm,indices sizes
-            uint32_t posSize, uvSize, normSize, posIndiceSize,uvIndiceSize,normIndiceSize;
-            posSize = *(uint32_t*)&headerBuffer[0];
-            uvSize = *(uint32_t*)&headerBuffer[4];
-            normSize = *(uint32_t*)&headerBuffer[8];
+            uint32_t numOfPoints, numOfUvs, numOfNormals, posIndiceSize,uvIndiceSize,normIndiceSize;
+			numOfPoints = *(uint32_t*)&headerBuffer[0];
+			numOfUvs = *(uint32_t*)&headerBuffer[4];
+			numOfNormals = *(uint32_t*)&headerBuffer[8];
 
             posIndiceSize = *(uint32_t*)&headerBuffer[12];
             uvIndiceSize = *(uint32_t*)&headerBuffer[16];
             normIndiceSize = *(uint32_t*)&headerBuffer[20];
 
             //base
-            uint32_t numOfPoints = posSize / 6;
-            uint32_t numOfUvs = uvSize / 4;
-            uint32_t numOfNormals = normSize / 6;
             data.file_points.resize(numOfPoints);
             data.file_uvs.resize(numOfUvs);
             data.file_normals.resize(numOfNormals);
 
-
-            vector<uint> positionIndices;
-            vector<uint> uvIndices;
-            vector<uint> normalIndices;
+            vector<uint> positionIndices, uvIndices, normalIndices;
             positionIndices.resize(posIndiceSize);
             uvIndices.resize(uvIndiceSize);
             normalIndices.resize(normIndiceSize);
-
 
             //positions
             for (uint i = 0; i < numOfPoints; ++i) {
@@ -1148,17 +1141,17 @@ class Mesh::impl final{
             //indices
             for (uint i = 0; i < posIndiceSize; ++i) {
                 ushort c;
-                fileparser.read(reinterpret_cast<char *>(&c), sizeof(char)*2);
+                fileparser.read(reinterpret_cast<char *>(&c), sizeof(c));
                 positionIndices.at(i) = c;
             }
             for (uint i = 0; i < uvIndiceSize; ++i) {
                 ushort c;
-                fileparser.read(reinterpret_cast<char *>(&c), sizeof(char) * 2);
+                fileparser.read(reinterpret_cast<char *>(&c), sizeof(c));
                 uvIndices.at(i) = c;
             }
             for (uint i = 0; i < normIndiceSize; ++i) {
                 ushort c;
-                fileparser.read(reinterpret_cast<char *>(&c), sizeof(char) * 2);
+                fileparser.read(reinterpret_cast<char *>(&c), sizeof(c));
                 normalIndices.at(i) = c;
             }
             fileparser.close();
@@ -1186,9 +1179,9 @@ class Mesh::impl final{
             ofstream stream(f,ios::binary);
 
             //header
-            unsigned posSize = d.file_points.size() * 6;
-            unsigned uvSize = d.file_uvs.size() * 4;
-            unsigned normSize = d.file_normals.size() * 6;
+            unsigned posSize = d.file_points.size();
+            unsigned uvSize = d.file_uvs.size();
+            unsigned normSize = d.file_normals.size();
 
             unsigned positionIndicesSize = positionIndices.size();
             unsigned uvIndicesSize = uvIndices.size();
