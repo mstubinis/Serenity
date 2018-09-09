@@ -47,7 +47,7 @@ namespace Engine{
                 vector<LineVertex> vertices;
 
                 void init(){
-					m_Mode = btIDebugDraw::DBG_DrawWireframe + btIDebugDraw::DBG_DrawContactPoints + btIDebugDraw::DBG_DrawConstraints + btIDebugDraw::DBG_DrawConstraintLimits;
+                    m_Mode = btIDebugDraw::DBG_DrawWireframe + btIDebugDraw::DBG_DrawContactPoints + btIDebugDraw::DBG_DrawConstraints + btIDebugDraw::DBG_DrawConstraintLimits;
                     C_MAX_POINTS = 262144;
                     m_VAO = m_VertexBuffer = 0;
                     registerEvent(EventType::WindowFullscreenChanged);
@@ -100,24 +100,24 @@ namespace Engine{
                     //support vao's
                     buildVAO();
                 }
-				void drawAccumulatedLines() {
-					glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-					glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LineVertex) * vertices.size(), &vertices[0]);
-					renderLines();
-				}
-				void onEvent(const Event& e) {
-					if (e.type == EventType::WindowFullscreenChanged) {
-						buildVAO();
-					}
-				}
-			    void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3&, const btVector3&, const btVector3&, const btVector3& color, btScalar alpha){
-					drawTriangle(v0, v1, v2, color, alpha);
-				}
-				void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar){
-					drawLine(v0, v1, color);
-					drawLine(v1, v2, color);
-					drawLine(v2, v0, color);
-				}
+                void drawAccumulatedLines() {
+                    glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LineVertex) * vertices.size(), &vertices[0]);
+                    renderLines();
+                }
+                void onEvent(const Event& e) {
+                    if (e.type == EventType::WindowFullscreenChanged) {
+                        buildVAO();
+                    }
+                }
+                void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3&, const btVector3&, const btVector3&, const btVector3& color, btScalar alpha){
+                    drawTriangle(v0, v1, v2, color, alpha);
+                }
+                void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar){
+                    drawLine(v0, v1, color);
+                    drawLine(v1, v2, color);
+                    drawLine(v2, v0, color);
+                }
                 void drawLine(const btVector3& from, const btVector3& to, const btVector3& color){
                     if(vertices.size() >= (C_MAX_POINTS)) return;
                     LineVertex v1, v2;
@@ -126,278 +126,278 @@ namespace Engine{
                     v1.position = glm::vec3(from.x(),from.y(),from.z());  v2.position = glm::vec3(to.x(),to.y(),to.z());
                     vertices.push_back(v1);  vertices.push_back(v2);
                 }
-				void drawSphere(btScalar radius, const btTransform& transform, const btVector3& color){
-					btVector3 center = transform.getOrigin();
-					btVector3 up = transform.getBasis().getColumn(1);
-					btVector3 axis = transform.getBasis().getColumn(0);
-					btScalar minTh = -SIMD_HALF_PI;
-					btScalar maxTh = SIMD_HALF_PI;
-					btScalar minPs = -SIMD_HALF_PI;
-					btScalar maxPs = SIMD_HALF_PI;
-					btScalar stepDegrees = 30.f;
-					drawSpherePatch(center, up, axis, radius, minTh, maxTh, minPs, maxPs, color, stepDegrees, false);
-					drawSpherePatch(center, up, -axis, radius, minTh, maxTh, minPs, maxPs, color, stepDegrees, false);
-				}
-				void drawSphere(const btVector3& p, btScalar radius, const btVector3& color){
-					btTransform tr;
-					tr.setIdentity();
-					tr.setOrigin(p);
-					drawSphere(radius, tr, color);
-				}
-				void drawArc(const btVector3& center, const btVector3& normal, const btVector3& axis, btScalar radiusA, btScalar radiusB, btScalar minAngle, btScalar maxAngle,const btVector3& color, bool drawSect, btScalar stepDegrees = btScalar(10.f)){
-					const btVector3& vx = axis;
-					btVector3 vy = normal.cross(axis);
-					btScalar step = stepDegrees * SIMD_RADS_PER_DEG;
-					int nSteps = (int)btFabs((maxAngle - minAngle) / step);
-					if (!nSteps) nSteps = 1;
-					btVector3 prev = center + radiusA * vx * btCos(minAngle) + radiusB * vy * btSin(minAngle);
-					if (drawSect){
-						drawLine(center, prev, color);
-					}
-					for (int i = 1; i <= nSteps; i++){
-						btScalar angle = minAngle + (maxAngle - minAngle) * btScalar(i) / btScalar(nSteps);
-						btVector3 next = center + radiusA * vx * btCos(angle) + radiusB * vy * btSin(angle);
-						drawLine(prev, next, color);
-						prev = next;
-					}
-					if (drawSect){
-						drawLine(center, prev, color);
-					}
-				}
-				void drawSpherePatch(const btVector3& center, const btVector3& up, const btVector3& axis, btScalar radius,btScalar minTh, btScalar maxTh, btScalar minPs, btScalar maxPs, const btVector3& color, btScalar stepDegrees = btScalar(10.f), bool drawCenter = true){
-					btVector3 vA[74];
-					btVector3 vB[74];
-					btVector3 *pvA = vA, *pvB = vB, *pT;
-					btVector3 npole = center + up * radius;
-					btVector3 spole = center - up * radius;
-					btVector3 arcStart;
-					btScalar step = stepDegrees * SIMD_RADS_PER_DEG;
-					const btVector3& kv = up;
-					const btVector3& iv = axis;
-					btVector3 jv = kv.cross(iv);
-					bool drawN = false;
-					bool drawS = false;
-					if (minTh <= -SIMD_HALF_PI){
-						minTh = -SIMD_HALF_PI + step;
-						drawN = true;
-					}
-					if (maxTh >= SIMD_HALF_PI){
-						maxTh = SIMD_HALF_PI - step;
-						drawS = true;
-					}
-					if (minTh > maxTh){
-						minTh = -SIMD_HALF_PI + step;
-						maxTh = SIMD_HALF_PI - step;
-						drawN = drawS = true;
-					}
-					int n_hor = (int)((maxTh - minTh) / step) + 1;
-					if (n_hor < 2) n_hor = 2;
-					btScalar step_h = (maxTh - minTh) / btScalar(n_hor - 1);
-					bool isClosed = false;
-					if (minPs > maxPs){
-						minPs = -SIMD_PI + step;
-						maxPs = SIMD_PI;
-						isClosed = true;
-					}
-					else if ((maxPs - minPs) >= SIMD_PI * btScalar(2.f)){
-						isClosed = true;
-					}else{
-						isClosed = false;
-					}
-					int n_vert = (int)((maxPs - minPs) / step) + 1;
-					if (n_vert < 2) n_vert = 2;
-					btScalar step_v = (maxPs - minPs) / btScalar(n_vert - 1);
-					for (int i = 0; i < n_hor; i++){
-						btScalar th = minTh + btScalar(i) * step_h;
-						btScalar sth = radius * btSin(th);
-						btScalar cth = radius * btCos(th);
-						for (int j = 0; j < n_vert; j++){
-							btScalar psi = minPs + btScalar(j) * step_v;
-							btScalar sps = btSin(psi);
-							btScalar cps = btCos(psi);
-							pvB[j] = center + cth * cps * iv + cth * sps * jv + sth * kv;
-							if (i){
-								drawLine(pvA[j], pvB[j], color);
-							}else if (drawS){
-								drawLine(spole, pvB[j], color);
-							}
-							if (j){
-								drawLine(pvB[j - 1], pvB[j], color);
-							}else{
-								arcStart = pvB[j];
-							}
-							if ((i == (n_hor - 1)) && drawN){
-								drawLine(npole, pvB[j], color);
-							}
-							if (drawCenter){
-								if (isClosed){
-									if (j == (n_vert - 1)){
-										drawLine(arcStart, pvB[j], color);
-									}
-								}else{
-									if (((!i) || (i == (n_hor - 1))) && ((!j) || (j == (n_vert - 1)))){
-										drawLine(center, pvB[j], color);
-									}
-								}
-							}
-						}
-						pT = pvA; pvA = pvB; pvB = pT;
-					}
-				}
-				void drawTransform(const btTransform& transform, btScalar orthoLen){
-					btVector3 start = transform.getOrigin();
-					drawLine(start, start + transform.getBasis() * btVector3(orthoLen, 0, 0), btVector3(btScalar(1.), btScalar(0.3), btScalar(0.3)));
-					drawLine(start, start + transform.getBasis() * btVector3(0, orthoLen, 0), btVector3(btScalar(0.3), btScalar(1.), btScalar(0.3)));
-					drawLine(start, start + transform.getBasis() * btVector3(0, 0, orthoLen), btVector3(btScalar(0.3), btScalar(0.3), btScalar(1.)));
-				}
-                void drawAabb(const btVector3 &from, const btVector3 &to, const btVector3 &color){
-					btVector3 halfExtents = (to - from)* 0.5f;
-					btVector3 center = (to + from) *0.5f;
-					int i, j;
-					btVector3 edgecoord(1.f, 1.f, 1.f), pa, pb;
-					for (i = 0; i < 4; i++){
-						for (j = 0; j < 3; j++){
-							pa = btVector3(edgecoord[0] * halfExtents[0], edgecoord[1] * halfExtents[1], edgecoord[2] * halfExtents[2]);
-							pa += center;
-							int othercoord = j % 3;
-							edgecoord[othercoord] *= -1.f;
-							pb = btVector3(edgecoord[0] * halfExtents[0], edgecoord[1] * halfExtents[1], edgecoord[2] * halfExtents[2]);
-							pb += center;
-							drawLine(pa, pb, color);
-						}
-						edgecoord = btVector3(-1.f, -1.f, -1.f);
-						if (i < 3)
-							edgecoord[i] *= -1.f;
-					}
+                void drawSphere(btScalar radius, const btTransform& transform, const btVector3& color){
+                    btVector3 center = transform.getOrigin();
+                    btVector3 up = transform.getBasis().getColumn(1);
+                    btVector3 axis = transform.getBasis().getColumn(0);
+                    btScalar minTh = -SIMD_HALF_PI;
+                    btScalar maxTh = SIMD_HALF_PI;
+                    btScalar minPs = -SIMD_HALF_PI;
+                    btScalar maxPs = SIMD_HALF_PI;
+                    btScalar stepDegrees = 30.f;
+                    drawSpherePatch(center, up, axis, radius, minTh, maxTh, minPs, maxPs, color, stepDegrees, false);
+                    drawSpherePatch(center, up, -axis, radius, minTh, maxTh, minPs, maxPs, color, stepDegrees, false);
                 }
-				void drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color){
-					btVector3 start = transform.getOrigin();
-					btVector3	offsetHeight(0, 0, 0);
-					offsetHeight[upAxis] = halfHeight;
-					int stepDegrees = 30;
-					btVector3 capStart(0.f, 0.f, 0.f);
-					capStart[upAxis] = -halfHeight;
-					btVector3 capEnd(0.f, 0.f, 0.f);
-					capEnd[upAxis] = halfHeight;
-					for (int i = 0; i < 360; i += stepDegrees){
-						capEnd[(upAxis + 1) % 3] = capStart[(upAxis + 1) % 3] = btSin(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
-						capEnd[(upAxis + 2) % 3] = capStart[(upAxis + 2) % 3] = btCos(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
-						drawLine(start + transform.getBasis() * capStart, start + transform.getBasis() * capEnd, color);
-					}
-					// Drawing top and bottom caps of the cylinder
-					btVector3 yaxis(0, 0, 0);
-					yaxis[upAxis] = btScalar(1.0);
-					btVector3 xaxis(0, 0, 0);
-					xaxis[(upAxis + 1) % 3] = btScalar(1.0);
-					drawArc(start - transform.getBasis()*(offsetHeight), transform.getBasis()*yaxis, transform.getBasis()*xaxis, radius, radius, 0, SIMD_2_PI, color, false, btScalar(10.0));
-					drawArc(start + transform.getBasis()*(offsetHeight), transform.getBasis()*yaxis, transform.getBasis()*xaxis, radius, radius, 0, SIMD_2_PI, color, false, btScalar(10.0));
-				}
-				void drawCapsule(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color){
-					int stepDegrees = 30;
-					btVector3 capStart(0.f, 0.f, 0.f);
-					capStart[upAxis] = -halfHeight;
+                void drawSphere(const btVector3& p, btScalar radius, const btVector3& color){
+                    btTransform tr;
+                    tr.setIdentity();
+                    tr.setOrigin(p);
+                    drawSphere(radius, tr, color);
+                }
+                void drawArc(const btVector3& center, const btVector3& normal, const btVector3& axis, btScalar radiusA, btScalar radiusB, btScalar minAngle, btScalar maxAngle,const btVector3& color, bool drawSect, btScalar stepDegrees = btScalar(10.f)){
+                    const btVector3& vx = axis;
+                    btVector3 vy = normal.cross(axis);
+                    btScalar step = stepDegrees * SIMD_RADS_PER_DEG;
+                    int nSteps = (int)btFabs((maxAngle - minAngle) / step);
+                    if (!nSteps) nSteps = 1;
+                    btVector3 prev = center + radiusA * vx * btCos(minAngle) + radiusB * vy * btSin(minAngle);
+                    if (drawSect){
+                        drawLine(center, prev, color);
+                    }
+                    for (int i = 1; i <= nSteps; i++){
+                        btScalar angle = minAngle + (maxAngle - minAngle) * btScalar(i) / btScalar(nSteps);
+                        btVector3 next = center + radiusA * vx * btCos(angle) + radiusB * vy * btSin(angle);
+                        drawLine(prev, next, color);
+                        prev = next;
+                    }
+                    if (drawSect){
+                        drawLine(center, prev, color);
+                    }
+                }
+                void drawSpherePatch(const btVector3& center, const btVector3& up, const btVector3& axis, btScalar radius,btScalar minTh, btScalar maxTh, btScalar minPs, btScalar maxPs, const btVector3& color, btScalar stepDegrees = btScalar(10.f), bool drawCenter = true){
+                    btVector3 vA[74];
+                    btVector3 vB[74];
+                    btVector3 *pvA = vA, *pvB = vB, *pT;
+                    btVector3 npole = center + up * radius;
+                    btVector3 spole = center - up * radius;
+                    btVector3 arcStart;
+                    btScalar step = stepDegrees * SIMD_RADS_PER_DEG;
+                    const btVector3& kv = up;
+                    const btVector3& iv = axis;
+                    btVector3 jv = kv.cross(iv);
+                    bool drawN = false;
+                    bool drawS = false;
+                    if (minTh <= -SIMD_HALF_PI){
+                        minTh = -SIMD_HALF_PI + step;
+                        drawN = true;
+                    }
+                    if (maxTh >= SIMD_HALF_PI){
+                        maxTh = SIMD_HALF_PI - step;
+                        drawS = true;
+                    }
+                    if (minTh > maxTh){
+                        minTh = -SIMD_HALF_PI + step;
+                        maxTh = SIMD_HALF_PI - step;
+                        drawN = drawS = true;
+                    }
+                    int n_hor = (int)((maxTh - minTh) / step) + 1;
+                    if (n_hor < 2) n_hor = 2;
+                    btScalar step_h = (maxTh - minTh) / btScalar(n_hor - 1);
+                    bool isClosed = false;
+                    if (minPs > maxPs){
+                        minPs = -SIMD_PI + step;
+                        maxPs = SIMD_PI;
+                        isClosed = true;
+                    }
+                    else if ((maxPs - minPs) >= SIMD_PI * btScalar(2.f)){
+                        isClosed = true;
+                    }else{
+                        isClosed = false;
+                    }
+                    int n_vert = (int)((maxPs - minPs) / step) + 1;
+                    if (n_vert < 2) n_vert = 2;
+                    btScalar step_v = (maxPs - minPs) / btScalar(n_vert - 1);
+                    for (int i = 0; i < n_hor; i++){
+                        btScalar th = minTh + btScalar(i) * step_h;
+                        btScalar sth = radius * btSin(th);
+                        btScalar cth = radius * btCos(th);
+                        for (int j = 0; j < n_vert; j++){
+                            btScalar psi = minPs + btScalar(j) * step_v;
+                            btScalar sps = btSin(psi);
+                            btScalar cps = btCos(psi);
+                            pvB[j] = center + cth * cps * iv + cth * sps * jv + sth * kv;
+                            if (i){
+                                drawLine(pvA[j], pvB[j], color);
+                            }else if (drawS){
+                                drawLine(spole, pvB[j], color);
+                            }
+                            if (j){
+                                drawLine(pvB[j - 1], pvB[j], color);
+                            }else{
+                                arcStart = pvB[j];
+                            }
+                            if ((i == (n_hor - 1)) && drawN){
+                                drawLine(npole, pvB[j], color);
+                            }
+                            if (drawCenter){
+                                if (isClosed){
+                                    if (j == (n_vert - 1)){
+                                        drawLine(arcStart, pvB[j], color);
+                                    }
+                                }else{
+                                    if (((!i) || (i == (n_hor - 1))) && ((!j) || (j == (n_vert - 1)))){
+                                        drawLine(center, pvB[j], color);
+                                    }
+                                }
+                            }
+                        }
+                        pT = pvA; pvA = pvB; pvB = pT;
+                    }
+                }
+                void drawTransform(const btTransform& transform, btScalar orthoLen){
+                    btVector3 start = transform.getOrigin();
+                    drawLine(start, start + transform.getBasis() * btVector3(orthoLen, 0, 0), btVector3(btScalar(1.), btScalar(0.3), btScalar(0.3)));
+                    drawLine(start, start + transform.getBasis() * btVector3(0, orthoLen, 0), btVector3(btScalar(0.3), btScalar(1.), btScalar(0.3)));
+                    drawLine(start, start + transform.getBasis() * btVector3(0, 0, orthoLen), btVector3(btScalar(0.3), btScalar(0.3), btScalar(1.)));
+                }
+                void drawAabb(const btVector3 &from, const btVector3 &to, const btVector3 &color){
+                    btVector3 halfExtents = (to - from)* 0.5f;
+                    btVector3 center = (to + from) *0.5f;
+                    int i, j;
+                    btVector3 edgecoord(1.f, 1.f, 1.f), pa, pb;
+                    for (i = 0; i < 4; i++){
+                        for (j = 0; j < 3; j++){
+                            pa = btVector3(edgecoord[0] * halfExtents[0], edgecoord[1] * halfExtents[1], edgecoord[2] * halfExtents[2]);
+                            pa += center;
+                            int othercoord = j % 3;
+                            edgecoord[othercoord] *= -1.f;
+                            pb = btVector3(edgecoord[0] * halfExtents[0], edgecoord[1] * halfExtents[1], edgecoord[2] * halfExtents[2]);
+                            pb += center;
+                            drawLine(pa, pb, color);
+                        }
+                        edgecoord = btVector3(-1.f, -1.f, -1.f);
+                        if (i < 3)
+                            edgecoord[i] *= -1.f;
+                    }
+                }
+                void drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color){
+                    btVector3 start = transform.getOrigin();
+                    btVector3	offsetHeight(0, 0, 0);
+                    offsetHeight[upAxis] = halfHeight;
+                    int stepDegrees = 30;
+                    btVector3 capStart(0.f, 0.f, 0.f);
+                    capStart[upAxis] = -halfHeight;
+                    btVector3 capEnd(0.f, 0.f, 0.f);
+                    capEnd[upAxis] = halfHeight;
+                    for (int i = 0; i < 360; i += stepDegrees){
+                        capEnd[(upAxis + 1) % 3] = capStart[(upAxis + 1) % 3] = btSin(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
+                        capEnd[(upAxis + 2) % 3] = capStart[(upAxis + 2) % 3] = btCos(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
+                        drawLine(start + transform.getBasis() * capStart, start + transform.getBasis() * capEnd, color);
+                    }
+                    // Drawing top and bottom caps of the cylinder
+                    btVector3 yaxis(0, 0, 0);
+                    yaxis[upAxis] = btScalar(1.0);
+                    btVector3 xaxis(0, 0, 0);
+                    xaxis[(upAxis + 1) % 3] = btScalar(1.0);
+                    drawArc(start - transform.getBasis()*(offsetHeight), transform.getBasis()*yaxis, transform.getBasis()*xaxis, radius, radius, 0, SIMD_2_PI, color, false, btScalar(10.0));
+                    drawArc(start + transform.getBasis()*(offsetHeight), transform.getBasis()*yaxis, transform.getBasis()*xaxis, radius, radius, 0, SIMD_2_PI, color, false, btScalar(10.0));
+                }
+                void drawCapsule(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color){
+                    int stepDegrees = 30;
+                    btVector3 capStart(0.f, 0.f, 0.f);
+                    capStart[upAxis] = -halfHeight;
 
-					btVector3 capEnd(0.f, 0.f, 0.f);
-					capEnd[upAxis] = halfHeight;
+                    btVector3 capEnd(0.f, 0.f, 0.f);
+                    capEnd[upAxis] = halfHeight;
 
-					// Draw the ends		
-					btTransform childTransform = transform;
-					childTransform.getOrigin() = transform * capStart;	
-					btVector3 center = childTransform.getOrigin();
-					btVector3 up = childTransform.getBasis().getColumn((upAxis + 1) % 3);
-					btVector3 axis = -childTransform.getBasis().getColumn(upAxis);
-					btScalar minTh = -SIMD_HALF_PI;
-					btScalar maxTh = SIMD_HALF_PI;
-					btScalar minPs = -SIMD_HALF_PI;
-					btScalar maxPs = SIMD_HALF_PI;
-					drawSpherePatch(center, up, axis, radius, minTh, maxTh, minPs, maxPs, color, btScalar(stepDegrees), false);
-								
-					childTransform = transform;
-					childTransform.getOrigin() = transform * capEnd;
-					center = childTransform.getOrigin();
-					up = childTransform.getBasis().getColumn((upAxis + 1) % 3);
-					axis = childTransform.getBasis().getColumn(upAxis);
-					drawSpherePatch(center, up, axis, radius, minTh, maxTh, minPs, maxPs, color, btScalar(stepDegrees), false);
+                    // Draw the ends		
+                    btTransform childTransform = transform;
+                    childTransform.getOrigin() = transform * capStart;	
+                    btVector3 center = childTransform.getOrigin();
+                    btVector3 up = childTransform.getBasis().getColumn((upAxis + 1) % 3);
+                    btVector3 axis = -childTransform.getBasis().getColumn(upAxis);
+                    btScalar minTh = -SIMD_HALF_PI;
+                    btScalar maxTh = SIMD_HALF_PI;
+                    btScalar minPs = -SIMD_HALF_PI;
+                    btScalar maxPs = SIMD_HALF_PI;
+                    drawSpherePatch(center, up, axis, radius, minTh, maxTh, minPs, maxPs, color, btScalar(stepDegrees), false);
+                                
+                    childTransform = transform;
+                    childTransform.getOrigin() = transform * capEnd;
+                    center = childTransform.getOrigin();
+                    up = childTransform.getBasis().getColumn((upAxis + 1) % 3);
+                    axis = childTransform.getBasis().getColumn(upAxis);
+                    drawSpherePatch(center, up, axis, radius, minTh, maxTh, minPs, maxPs, color, btScalar(stepDegrees), false);
 
-					// Draw some additional lines
-					btVector3 start = transform.getOrigin();
-					for (int i = 0; i < 360; i += stepDegrees){
-						capEnd[(upAxis + 1) % 3] = capStart[(upAxis + 1) % 3] = btSin(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
-						capEnd[(upAxis + 2) % 3] = capStart[(upAxis + 2) % 3] = btCos(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
-						drawLine(start + transform.getBasis() * capStart, start + transform.getBasis() * capEnd, color);
-					}
-				}
-				void drawBox(const btVector3& bbMin, const btVector3& bbMax, const btVector3& color){
-					drawLine(btVector3(bbMin[0], bbMin[1], bbMin[2]), btVector3(bbMax[0], bbMin[1], bbMin[2]), color);
-					drawLine(btVector3(bbMax[0], bbMin[1], bbMin[2]), btVector3(bbMax[0], bbMax[1], bbMin[2]), color);
-					drawLine(btVector3(bbMax[0], bbMax[1], bbMin[2]), btVector3(bbMin[0], bbMax[1], bbMin[2]), color);
-					drawLine(btVector3(bbMin[0], bbMax[1], bbMin[2]), btVector3(bbMin[0], bbMin[1], bbMin[2]), color);
-					drawLine(btVector3(bbMin[0], bbMin[1], bbMin[2]), btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
-					drawLine(btVector3(bbMax[0], bbMin[1], bbMin[2]), btVector3(bbMax[0], bbMin[1], bbMax[2]), color);
-					drawLine(btVector3(bbMax[0], bbMax[1], bbMin[2]), btVector3(bbMax[0], bbMax[1], bbMax[2]), color);
-					drawLine(btVector3(bbMin[0], bbMax[1], bbMin[2]), btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
-					drawLine(btVector3(bbMin[0], bbMin[1], bbMax[2]), btVector3(bbMax[0], bbMin[1], bbMax[2]), color);
-					drawLine(btVector3(bbMax[0], bbMin[1], bbMax[2]), btVector3(bbMax[0], bbMax[1], bbMax[2]), color);
-					drawLine(btVector3(bbMax[0], bbMax[1], bbMax[2]), btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
-					drawLine(btVector3(bbMin[0], bbMax[1], bbMax[2]), btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
-				}
-				void drawBox(const btVector3& bbMin, const btVector3& bbMax, const btTransform& trans, const btVector3& color) {
-					drawLine(trans * btVector3(bbMin[0], bbMin[1], bbMin[2]), trans * btVector3(bbMax[0], bbMin[1], bbMin[2]), color);
-					drawLine(trans * btVector3(bbMax[0], bbMin[1], bbMin[2]), trans * btVector3(bbMax[0], bbMax[1], bbMin[2]), color);
-					drawLine(trans * btVector3(bbMax[0], bbMax[1], bbMin[2]), trans * btVector3(bbMin[0], bbMax[1], bbMin[2]), color);
-					drawLine(trans * btVector3(bbMin[0], bbMax[1], bbMin[2]), trans * btVector3(bbMin[0], bbMin[1], bbMin[2]), color);
-					drawLine(trans * btVector3(bbMin[0], bbMin[1], bbMin[2]), trans * btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
-					drawLine(trans * btVector3(bbMax[0], bbMin[1], bbMin[2]), trans * btVector3(bbMax[0], bbMin[1], bbMax[2]), color);
-					drawLine(trans * btVector3(bbMax[0], bbMax[1], bbMin[2]), trans * btVector3(bbMax[0], bbMax[1], bbMax[2]), color);
-					drawLine(trans * btVector3(bbMin[0], bbMax[1], bbMin[2]), trans * btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
-					drawLine(trans * btVector3(bbMin[0], bbMin[1], bbMax[2]), trans * btVector3(bbMax[0], bbMin[1], bbMax[2]), color);
-					drawLine(trans * btVector3(bbMax[0], bbMin[1], bbMax[2]), trans * btVector3(bbMax[0], bbMax[1], bbMax[2]), color);
-					drawLine(trans * btVector3(bbMax[0], bbMax[1], bbMax[2]), trans * btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
-					drawLine(trans * btVector3(bbMin[0], bbMax[1], bbMax[2]), trans * btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
-				}
+                    // Draw some additional lines
+                    btVector3 start = transform.getOrigin();
+                    for (int i = 0; i < 360; i += stepDegrees){
+                        capEnd[(upAxis + 1) % 3] = capStart[(upAxis + 1) % 3] = btSin(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
+                        capEnd[(upAxis + 2) % 3] = capStart[(upAxis + 2) % 3] = btCos(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
+                        drawLine(start + transform.getBasis() * capStart, start + transform.getBasis() * capEnd, color);
+                    }
+                }
+                void drawBox(const btVector3& bbMin, const btVector3& bbMax, const btVector3& color){
+                    drawLine(btVector3(bbMin[0], bbMin[1], bbMin[2]), btVector3(bbMax[0], bbMin[1], bbMin[2]), color);
+                    drawLine(btVector3(bbMax[0], bbMin[1], bbMin[2]), btVector3(bbMax[0], bbMax[1], bbMin[2]), color);
+                    drawLine(btVector3(bbMax[0], bbMax[1], bbMin[2]), btVector3(bbMin[0], bbMax[1], bbMin[2]), color);
+                    drawLine(btVector3(bbMin[0], bbMax[1], bbMin[2]), btVector3(bbMin[0], bbMin[1], bbMin[2]), color);
+                    drawLine(btVector3(bbMin[0], bbMin[1], bbMin[2]), btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
+                    drawLine(btVector3(bbMax[0], bbMin[1], bbMin[2]), btVector3(bbMax[0], bbMin[1], bbMax[2]), color);
+                    drawLine(btVector3(bbMax[0], bbMax[1], bbMin[2]), btVector3(bbMax[0], bbMax[1], bbMax[2]), color);
+                    drawLine(btVector3(bbMin[0], bbMax[1], bbMin[2]), btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
+                    drawLine(btVector3(bbMin[0], bbMin[1], bbMax[2]), btVector3(bbMax[0], bbMin[1], bbMax[2]), color);
+                    drawLine(btVector3(bbMax[0], bbMin[1], bbMax[2]), btVector3(bbMax[0], bbMax[1], bbMax[2]), color);
+                    drawLine(btVector3(bbMax[0], bbMax[1], bbMax[2]), btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
+                    drawLine(btVector3(bbMin[0], bbMax[1], bbMax[2]), btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
+                }
+                void drawBox(const btVector3& bbMin, const btVector3& bbMax, const btTransform& trans, const btVector3& color) {
+                    drawLine(trans * btVector3(bbMin[0], bbMin[1], bbMin[2]), trans * btVector3(bbMax[0], bbMin[1], bbMin[2]), color);
+                    drawLine(trans * btVector3(bbMax[0], bbMin[1], bbMin[2]), trans * btVector3(bbMax[0], bbMax[1], bbMin[2]), color);
+                    drawLine(trans * btVector3(bbMax[0], bbMax[1], bbMin[2]), trans * btVector3(bbMin[0], bbMax[1], bbMin[2]), color);
+                    drawLine(trans * btVector3(bbMin[0], bbMax[1], bbMin[2]), trans * btVector3(bbMin[0], bbMin[1], bbMin[2]), color);
+                    drawLine(trans * btVector3(bbMin[0], bbMin[1], bbMin[2]), trans * btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
+                    drawLine(trans * btVector3(bbMax[0], bbMin[1], bbMin[2]), trans * btVector3(bbMax[0], bbMin[1], bbMax[2]), color);
+                    drawLine(trans * btVector3(bbMax[0], bbMax[1], bbMin[2]), trans * btVector3(bbMax[0], bbMax[1], bbMax[2]), color);
+                    drawLine(trans * btVector3(bbMin[0], bbMax[1], bbMin[2]), trans * btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
+                    drawLine(trans * btVector3(bbMin[0], bbMin[1], bbMax[2]), trans * btVector3(bbMax[0], bbMin[1], bbMax[2]), color);
+                    drawLine(trans * btVector3(bbMax[0], bbMin[1], bbMax[2]), trans * btVector3(bbMax[0], bbMax[1], bbMax[2]), color);
+                    drawLine(trans * btVector3(bbMax[0], bbMax[1], bbMax[2]), trans * btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
+                    drawLine(trans * btVector3(bbMin[0], bbMax[1], bbMax[2]), trans * btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
+                }
                 void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB,btScalar distance,int lifeTime, const btVector3& color){
                 }
-				void drawPlane(const btVector3& planeNormal, btScalar planeConst, const btTransform& transform, const btVector3& color){
-					btVector3 planeOrigin = planeNormal * planeConst;
-					btVector3 vec0, vec1;
-					btPlaneSpace1(planeNormal, vec0, vec1);
-					btScalar vecLen = 100.f;
-					btVector3 pt0 = planeOrigin + vec0 * vecLen;
-					btVector3 pt1 = planeOrigin - vec0 * vecLen;
-					btVector3 pt2 = planeOrigin + vec1 * vecLen;
-					btVector3 pt3 = planeOrigin - vec1 * vecLen;
-					drawLine(transform*pt0, transform*pt1, color);
-					drawLine(transform*pt2, transform*pt3, color);
-				}
-				void drawCone(btScalar radius, btScalar height, int upAxis, const btTransform& transform, const btVector3& color){
-					int stepDegrees = 30;
-					btVector3 start = transform.getOrigin();
-					btVector3	offsetHeight(0, 0, 0);
-					btScalar halfHeight = height * btScalar(0.5);
-					offsetHeight[upAxis] = halfHeight;
-					btVector3	offsetRadius(0, 0, 0);
-					offsetRadius[(upAxis + 1) % 3] = radius;
-					btVector3	offset2Radius(0, 0, 0);
-					offset2Radius[(upAxis + 2) % 3] = radius;
-					btVector3 capEnd(0.f, 0.f, 0.f);
-					capEnd[upAxis] = -halfHeight;
-					for (int i = 0; i < 360; i += stepDegrees){
-						capEnd[(upAxis + 1) % 3] = btSin(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
-						capEnd[(upAxis + 2) % 3] = btCos(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
-						drawLine(start + transform.getBasis() * (offsetHeight), start + transform.getBasis() * capEnd, color);
-					}
-					drawLine(start + transform.getBasis() * (offsetHeight), start + transform.getBasis() * (-offsetHeight + offsetRadius), color);
-					drawLine(start + transform.getBasis() * (offsetHeight), start + transform.getBasis() * (-offsetHeight - offsetRadius), color);
-					drawLine(start + transform.getBasis() * (offsetHeight), start + transform.getBasis() * (-offsetHeight + offset2Radius), color);
-					drawLine(start + transform.getBasis() * (offsetHeight), start + transform.getBasis() * (-offsetHeight - offset2Radius), color);
+                void drawPlane(const btVector3& planeNormal, btScalar planeConst, const btTransform& transform, const btVector3& color){
+                    btVector3 planeOrigin = planeNormal * planeConst;
+                    btVector3 vec0, vec1;
+                    btPlaneSpace1(planeNormal, vec0, vec1);
+                    btScalar vecLen = 100.f;
+                    btVector3 pt0 = planeOrigin + vec0 * vecLen;
+                    btVector3 pt1 = planeOrigin - vec0 * vecLen;
+                    btVector3 pt2 = planeOrigin + vec1 * vecLen;
+                    btVector3 pt3 = planeOrigin - vec1 * vecLen;
+                    drawLine(transform*pt0, transform*pt1, color);
+                    drawLine(transform*pt2, transform*pt3, color);
+                }
+                void drawCone(btScalar radius, btScalar height, int upAxis, const btTransform& transform, const btVector3& color){
+                    int stepDegrees = 30;
+                    btVector3 start = transform.getOrigin();
+                    btVector3	offsetHeight(0, 0, 0);
+                    btScalar halfHeight = height * btScalar(0.5);
+                    offsetHeight[upAxis] = halfHeight;
+                    btVector3	offsetRadius(0, 0, 0);
+                    offsetRadius[(upAxis + 1) % 3] = radius;
+                    btVector3	offset2Radius(0, 0, 0);
+                    offset2Radius[(upAxis + 2) % 3] = radius;
+                    btVector3 capEnd(0.f, 0.f, 0.f);
+                    capEnd[upAxis] = -halfHeight;
+                    for (int i = 0; i < 360; i += stepDegrees){
+                        capEnd[(upAxis + 1) % 3] = btSin(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
+                        capEnd[(upAxis + 2) % 3] = btCos(btScalar(i)*SIMD_RADS_PER_DEG)*radius;
+                        drawLine(start + transform.getBasis() * (offsetHeight), start + transform.getBasis() * capEnd, color);
+                    }
+                    drawLine(start + transform.getBasis() * (offsetHeight), start + transform.getBasis() * (-offsetHeight + offsetRadius), color);
+                    drawLine(start + transform.getBasis() * (offsetHeight), start + transform.getBasis() * (-offsetHeight - offsetRadius), color);
+                    drawLine(start + transform.getBasis() * (offsetHeight), start + transform.getBasis() * (-offsetHeight + offset2Radius), color);
+                    drawLine(start + transform.getBasis() * (offsetHeight), start + transform.getBasis() * (-offsetHeight - offset2Radius), color);
 
-					// Drawing the base of the cone
-					btVector3 yaxis(0, 0, 0);
-					yaxis[upAxis] = btScalar(1.0);
-					btVector3 xaxis(0, 0, 0);
-					xaxis[(upAxis + 1) % 3] = btScalar(1.0);
-					drawArc(start - transform.getBasis()*(offsetHeight), transform.getBasis()*yaxis, transform.getBasis()*xaxis, radius, radius, 0, SIMD_2_PI, color, false, 10.0);
-				}
+                    // Drawing the base of the cone
+                    btVector3 yaxis(0, 0, 0);
+                    yaxis[upAxis] = btScalar(1.0);
+                    btVector3 xaxis(0, 0, 0);
+                    xaxis[(upAxis + 1) % 3] = btScalar(1.0);
+                    drawArc(start - transform.getBasis()*(offsetHeight), transform.getBasis()*yaxis, transform.getBasis()*xaxis, radius, radius, 0, SIMD_2_PI, color, false, 10.0);
+                }
                 void reportErrorWarning(const char* errWarning){
                 }
                 void draw3dText(const btVector3& location, const char* text){
@@ -418,11 +418,11 @@ void _postTicCallback(btDynamicsWorld* world, btScalar timeStep){
 
 class epriv::PhysicsManager::impl final{
     public:
-		btBroadphaseInterface* m_Broadphase;
-		btDefaultCollisionConfiguration* m_CollisionConfiguration;
-		btCollisionDispatcher* m_Dispatcher;
-		btSequentialImpulseConstraintSolver* m_Solver;
-		btDiscreteDynamicsWorld* m_World;
+        btBroadphaseInterface* m_Broadphase;
+        btDefaultCollisionConfiguration* m_CollisionConfiguration;
+        btCollisionDispatcher* m_Dispatcher;
+        btSequentialImpulseConstraintSolver* m_Solver;
+        btDiscreteDynamicsWorld* m_World;
         GLDebugDrawer* m_DebugDrawer;
         bool m_Paused;
         vector<Collision*> m_CollisionObjects;
@@ -575,135 +575,151 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
     }
     return Engine::Physics::rayCast(_s,_e,objs);
 }
-Collision::Collision(btCollisionShape* shape,CollisionType::Type type, float mass){
-    m_Shape = shape;
-    m_Type = type;
-    _init(mass);
-}
-Collision::Collision(epriv::ImportedMeshData& data,CollisionType::Type type, float mass,glm::vec3 scale){ 
-    _load(data,type,scale);
-    _init(mass);
-}
-void Collision::_init(float mass){
-    m_Inertia = btVector3(0.0f,0.0f,0.0f);
-    setMass(mass);
-    physicsManager->m_CollisionObjects.push_back(this);
-}
-Collision::~Collision(){ 
-    SAFE_DELETE(m_InternalMeshData);
-	btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
-	if (compoundCast) {
-		for (uint i = 0; i < compoundCast->getNumChildShapes(); ++i) {
-			btCollisionShape* shape = compoundCast->getChildShape(i);
-			SAFE_DELETE(shape);
-		}
-	}
-	SAFE_DELETE(m_Shape);
-}
-void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisionType,glm::vec3 _scale){
-    if(m_Shape){
-        SAFE_DELETE(m_Shape);
-    }
-    if(m_InternalMeshData){
-        SAFE_DELETE(m_InternalMeshData);
-    }
 
-    m_InternalMeshData = nullptr;
-    btCollisionShape* shape = nullptr;
-    m_Type = collisionType;
-    switch(collisionType){
-        case CollisionType::ConvexHull:{
-            shape = new btConvexHullShape();
-            btConvexHullShape& convexCast = *(btConvexHullShape*)shape;
-            for(auto vertex:data.points){ 
-                convexCast.addPoint(btVector3(vertex.x * _scale.x,vertex.y * _scale.y,vertex.z * _scale.z)); 
-            }
-            btShapeHull hull = btShapeHull(&convexCast);
-            hull.buildHull(convexCast.getMargin());
-            SAFE_DELETE(shape);
-            const btVector3* ptsArray = hull.getVertexPointer();
-            shape = new btConvexHullShape();
-            btConvexHullShape& convexShape = *(btConvexHullShape*)shape;
-            for(int i = 0; i < hull.numVertices(); ++i){
-                convexShape.addPoint(btVector3(ptsArray[i].x(),ptsArray[i].y(),ptsArray[i].z()));
-            }
-            convexShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
-            convexShape.setMargin(0.001f);
-            convexShape.recalcLocalAabb();
-            break;
+
+
+
+class Collision::impl final {
+    public:
+        btTriangleMesh* m_InternalMeshData;
+        btVector3 m_Inertia;
+        uint m_Type;
+        btCollisionShape* m_Shape;
+
+        void _init(Collision* super,float mass) {
+            m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
+            _setMass(mass);
+            physicsManager->m_CollisionObjects.push_back(super);
         }
-        case CollisionType::TriangleShape:{
-            m_InternalMeshData = new btTriangleMesh();
-            for(auto triangle:data.file_triangles){
-                btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position * _scale);
-                btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position * _scale);
-                btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position * _scale);
-                m_InternalMeshData->addTriangle(v1, v2, v3,true);
-            }
-            shape = new btGImpactMeshShape(m_InternalMeshData);
-            btGImpactMeshShape& giShape = *((btGImpactMeshShape*)shape);
-            giShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
-            giShape.setMargin(0.001f);
-            giShape.updateBound();
-            break;
-        }
-        case CollisionType::TriangleShapeStatic:{
-            m_InternalMeshData = new btTriangleMesh();
-            for(auto triangle:data.file_triangles){
-                btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position * _scale);
-                btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position * _scale);
-                btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position * _scale);
-                m_InternalMeshData->addTriangle(v1, v2, v3,true);
-            }
-            shape = new btBvhTriangleMeshShape(m_InternalMeshData,true);
-            btBvhTriangleMeshShape& triShape = *((btBvhTriangleMeshShape*)shape);
-            triShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
-            triShape.setMargin(0.001f);
-            triShape.recalcLocalAabb();
-            break;
-        }
-        case CollisionType::Sphere:{
-            float radius = 0;
-            for(auto vertex:data.points){
-                float length = glm::length(vertex);
-                if(length > radius){
-                    radius = length;
+        void _destruct() {
+            SAFE_DELETE(m_InternalMeshData);
+            btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
+            if (compoundCast) {
+                for (int i = 0; i < compoundCast->getNumChildShapes(); ++i) {
+                    btCollisionShape* shape = compoundCast->getChildShape(i);
+                    SAFE_DELETE(shape);
                 }
             }
-            shape = new btSphereShape(radius * _scale.x);
-            btSphereShape& sphere = *((btSphereShape*)shape);
-            sphere.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
-            sphere.setMargin(0.001f);
-            break;
-        };
-        case CollisionType::Box:{
-            glm::vec3 max = glm::vec3(0.0f);
-            for(auto vertex:data.file_points){
-                float x = abs(vertex.x); float y = abs(vertex.y); float z = abs(vertex.z);
-                if(x > max.x) max.x = x; if(y > max.y) max.y = y; if(z > max.z) max.z = z;
-            }
-            shape = new btBoxShape(btVector3(max.x * _scale.x,max.y * _scale.y,max.z * _scale.z));
-            btBoxShape& boxShape = *(btBoxShape*)shape;
-            boxShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
-            boxShape.setMargin(0.001f);
-            break;
+            SAFE_DELETE(m_Shape);
         }
-        default:{
-            break;
-        }
-    }
-    m_Shape = shape;
-}
-void Collision::setMass(float mass){
-    if(!m_Shape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) return;
+        void _load(Engine::epriv::ImportedMeshData& data, CollisionType::Type collisionType, glm::vec3 _scale) {
+            _destruct();
 
-    if(m_Type != CollisionType::TriangleShape){
-        m_Shape->calculateLocalInertia(mass,m_Inertia);
-    }
-    else{
-        ((btGImpactMeshShape*)m_Shape)->calculateLocalInertia(mass,m_Inertia);
-    }
+            m_InternalMeshData = nullptr;
+            btCollisionShape* shape = nullptr;
+            m_Type = collisionType;
+            switch (collisionType) {
+                case CollisionType::ConvexHull: {
+                    shape = new btConvexHullShape();
+                    btConvexHullShape& convexCast = *(btConvexHullShape*)shape;
+                    for (auto vertex : data.points) {
+                        convexCast.addPoint(btVector3(vertex.x * _scale.x, vertex.y * _scale.y, vertex.z * _scale.z));
+                    }
+                    btShapeHull hull = btShapeHull(&convexCast);
+                    hull.buildHull(convexCast.getMargin());
+                    SAFE_DELETE(shape);
+                    const btVector3* ptsArray = hull.getVertexPointer();
+                    shape = new btConvexHullShape();
+                    btConvexHullShape& convexShape = *(btConvexHullShape*)shape;
+                    for (int i = 0; i < hull.numVertices(); ++i) {
+                        convexShape.addPoint(btVector3(ptsArray[i].x(), ptsArray[i].y(), ptsArray[i].z()));
+                    }
+                    convexShape.setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
+                    convexShape.setMargin(0.001f);
+                    convexShape.recalcLocalAabb();
+                    break;
+                }
+                case CollisionType::TriangleShape: {
+                    m_InternalMeshData = new btTriangleMesh();
+                    for (auto triangle : data.file_triangles) {
+                        btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position * _scale);
+                        btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position * _scale);
+                        btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position * _scale);
+                        m_InternalMeshData->addTriangle(v1, v2, v3, true);
+                    }
+                    shape = new btGImpactMeshShape(m_InternalMeshData);
+                    btGImpactMeshShape& giShape = *((btGImpactMeshShape*)shape);
+                    giShape.setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
+                    giShape.setMargin(0.001f);
+                    giShape.updateBound();
+                    break;
+                }
+                case CollisionType::TriangleShapeStatic: {
+                    m_InternalMeshData = new btTriangleMesh();
+                    for (auto triangle : data.file_triangles) {
+                        btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position * _scale);
+                        btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position * _scale);
+                        btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position * _scale);
+                        m_InternalMeshData->addTriangle(v1, v2, v3, true);
+                    }
+                    shape = new btBvhTriangleMeshShape(m_InternalMeshData, true);
+                    btBvhTriangleMeshShape& triShape = *((btBvhTriangleMeshShape*)shape);
+                    triShape.setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
+                    triShape.setMargin(0.001f);
+                    triShape.recalcLocalAabb();
+                    break;
+                }
+                case CollisionType::Sphere: {
+                    float radius = 0;
+                    for (auto vertex : data.points) {
+                        float length = glm::length(vertex);
+                        if (length > radius) {
+                            radius = length;
+                        }
+                    }
+                    shape = new btSphereShape(radius * _scale.x);
+                    btSphereShape& sphere = *((btSphereShape*)shape);
+                    sphere.setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
+                    sphere.setMargin(0.001f);
+                    break;
+                }
+                case CollisionType::Box: {
+                    glm::vec3 max = glm::vec3(0.0f);
+                    for (auto vertex : data.file_points) {
+                        float x = abs(vertex.x);
+                        float y = abs(vertex.y);
+                        float z = abs(vertex.z);
+                        if (x > max.x) 
+                            max.x = x;
+                        if (y > max.y)
+                            max.y = y;
+                        if (z > max.z)
+                            max.z = z;
+                    }
+                    shape = new btBoxShape(btVector3(max.x * _scale.x, max.y * _scale.y, max.z * _scale.z));
+                    btBoxShape& boxShape = *(btBoxShape*)shape;
+                    boxShape.setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
+                    boxShape.setMargin(0.001f);
+                    break;
+                }
+            }
+            m_Shape = shape;
+        }
+        void _setMass(float _mass) {
+            if (!m_Shape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) return;
+            m_Shape->calculateLocalInertia(_mass, m_Inertia);
+            /*
+            if(m_Type != CollisionType::TriangleShape){
+                m_Shape->calculateLocalInertia(mass,m_Inertia);
+            }else{
+                ((btGImpactMeshShape*)m_Shape)->calculateLocalInertia(mass,m_Inertia);
+            }
+            */
+        }
+};
+
+
+Collision::Collision(btCollisionShape* shape,CollisionType::Type type, float mass):m_i(new impl){
+    m_i->m_Shape = shape;
+    m_i->m_Type = type;
+    m_i->_init(this,mass);
 }
-const btVector3& Collision::getInertia() const { return m_Inertia; }
-btCollisionShape* Collision::getShape() const { return m_Shape; }
-const uint Collision::getType() const { return m_Type; }
+Collision::Collision(epriv::ImportedMeshData& data,CollisionType::Type type, float mass,glm::vec3 scale):m_i(new impl){ 
+    m_i->_load(data,type,scale);
+    m_i->_init(this,mass);
+}
+Collision::~Collision(){ m_i->_destruct(); }
+void Collision::setMass(float mass){ m_i->_setMass(mass); }
+const btVector3& Collision::getInertia() const { return m_i->m_Inertia; }
+btCollisionShape* Collision::getShape() const { return m_i->m_Shape; }
+const uint Collision::getType() const { return m_i->m_Type; }

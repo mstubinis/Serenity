@@ -35,12 +35,7 @@ class CollisionType{public: enum Type{
 _TOTAL,};};
 class Collision final{
     private:
-        btTriangleMesh* m_InternalMeshData;
-        btVector3 m_Inertia;
-        uint m_Type;
-        btCollisionShape* m_Shape;
-        void _init(float mass);
-        void _load(Engine::epriv::ImportedMeshData&, CollisionType::Type,glm::vec3 scale = glm::vec3(1.0f));
+		class impl; std::unique_ptr<impl> m_i;
     public:
         Collision(btCollisionShape* shape = nullptr,CollisionType::Type = CollisionType::None, float mass = 0);
         Collision(Engine::epriv::ImportedMeshData&,CollisionType::Type = CollisionType::None, float mass = 0,glm::vec3 scale = glm::vec3(1.0f));

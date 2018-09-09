@@ -192,7 +192,7 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>%(AdditionalDependencies);assimp-d.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletFileLoader_Debug.lib;BulletSoftBody_Debug.lib;BulletWorldImporter_Debug.lib;LinearMath_Debug.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);assimp-d.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;Bullet2FileLoader_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib\assimp;C:\boost\stage\lib;$(SolutionDir)dependencies\lib\SFML;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -236,7 +236,7 @@ xcopy "$(SolutionDir)Engine\bin" "$(TargetDir)" /e /y</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib\assimp;C:\boost\stage\lib;$(SolutionDir)dependencies\lib\SFML;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkStatus>true</LinkStatus>
-      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletFileLoader.lib;BulletSoftBody.lib;BulletWorldImporter.lib;LinearMath.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;Bullet2FileLoader.lib;BulletSoftBody.lib;LinearMath.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 /NODEFAULTLIB:LIBCMT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>

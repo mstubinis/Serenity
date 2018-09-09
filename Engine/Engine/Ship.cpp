@@ -7,8 +7,6 @@
 #include "SolarSystem.h"
 #include "ResourceManifest.h"
 
-#include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
-
 using namespace Engine;
 using namespace std;
 
@@ -223,16 +221,16 @@ void ShipSystemSensors::update(const float& dt){
 
 Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, Collision* collision, Scene* scene) :Entity() {
 	scene->addEntity(this);
-	ComponentModel* model = new ComponentModel(mesh, mat, this);
-	addComponent(model);
-	ComponentBody* rigidBody = new ComponentBody(collision, this, scl);
-	addComponent(rigidBody);
+	ComponentModel* modelComponent = new ComponentModel(mesh, mat, this);
+	addComponent(modelComponent);
+	ComponentBody* rigidBodyComponent = new ComponentBody(collision, this, scl);
+	addComponent(rigidBodyComponent);
 
-	float radius = model->radius();
-	rigidBody->setMass(0.5f * radius);
-	rigidBody->setPosition(pos);
-	rigidBody->setScale(scl);
-	rigidBody->setDamping(0, 0);//we dont want default dampening, we want the ship systems to manually control that
+	float radius = modelComponent->radius();
+	rigidBodyComponent->setMass(0.5f * radius);
+	rigidBodyComponent->setPosition(pos);
+	rigidBodyComponent->setScale(scl);
+	rigidBodyComponent->setDamping(0, 0);//we dont want default dampening, we want the ship systems to manually control that
 
 	m_WarpFactor = 0;
 	m_IsPlayer = player;
@@ -257,7 +255,7 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
 	}
 }
 Ship::~Ship(){
-    for(auto shipSystem:m_ShipSystems) SAFE_DELETE(shipSystem.second);
+	SAFE_DELETE_MAP(m_ShipSystems);
 }
 void Ship::update(const float& dt){
     Scene* currentScene = Resources::getCurrentScene();
@@ -317,9 +315,6 @@ void Ship::update(const float& dt){
             setTarget(m_PlayerCamera->getObjectInCenterRay(this));
         }
     }
-    else{
-    }
-
     for(auto shipSystem:m_ShipSystems) shipSystem.second->update(dt);
 }
 void Ship::translateWarp(float amount,float dt){

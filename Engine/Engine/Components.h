@@ -219,10 +219,16 @@ class ComponentBody: public ComponentBaseClass{
     friend class ::Engine::epriv::ComponentManager;
     private:
         struct PhysicsData{
-            Collision* collision;   btRigidBody* rigidBody;   btDefaultMotionState* motionState; float mass;
+            Collision* collision;
+			btRigidBody* rigidBody;
+			btDefaultMotionState* motionState;
+			float mass;
         };
         struct NormalData{
-            glm::vec3* scale;   glm::vec3* position;   glm::quat* rotation;   glm::mat4* modelMatrix;
+            glm::vec3* scale;
+			glm::vec3* position;
+			glm::quat* rotation;
+			glm::mat4* modelMatrix;
         };
         union{
             NormalData n;
