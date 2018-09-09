@@ -197,7 +197,6 @@
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)data\" mkdir "$(TargetDir)data\"
-xcopy "$(SolutionDir)dependencies\bin" "$(TargetDir)" /e /y
 xcopy "$(SolutionDir)Engine\data" "$(TargetDir)data" /e /y
 xcopy "$(SolutionDir)Engine\bin" "$(TargetDir)" /e /y</Command>
       <Message>Copying binary...</Message>
@@ -241,7 +240,6 @@ xcopy "$(SolutionDir)Engine\bin" "$(TargetDir)" /e /y</Command>
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)data\" mkdir "$(TargetDir)data\"
-xcopy "$(SolutionDir)dependencies\bin" "$(TargetDir)" /e /y
 xcopy "$(SolutionDir)Engine\data" "$(TargetDir)data" /e /y
 xcopy "$(SolutionDir)Engine\bin" "$(TargetDir)" /e /y</Command>
     </PostBuildEvent>
