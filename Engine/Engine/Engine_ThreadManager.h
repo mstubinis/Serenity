@@ -9,27 +9,21 @@
 #define BOOST_RESULT_OF_USE_DECLTYPE
 #endif
 
-#include <boost/make_shared.hpp>
+#include "Engine_Utils.h"
 #include <boost/thread/future.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-#include <SFML/System/Clock.hpp>
-#include "Engine_Utils.h"
-
 #include <memory>
 
-typedef unsigned int uint;
-
-typedef boost::packaged_task<void> boost_packed_task;
-typedef boost::shared_ptr<boost_packed_task> boost_packed_task_ptr;
-typedef boost::function<void()> boost_void_func;
+typedef boost::packaged_task<void>             boost_packed_task;
+typedef boost::shared_ptr<boost_packed_task>   boost_packed_task_ptr;
+typedef boost::function<void()>                boost_void_func;
 
 namespace Engine{
     namespace epriv{
         class ThreadManager final: private Engine::epriv::noncopyable{
             public:
-                class impl;
-                std::unique_ptr<impl> m_i;
+                class impl; std::unique_ptr<impl> m_i;
 
                 ThreadManager(const char* name,uint w, uint h);
                 ~ThreadManager();

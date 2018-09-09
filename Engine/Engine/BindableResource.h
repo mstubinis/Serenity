@@ -3,8 +3,6 @@
 #define ENGINE_BINDABLE_RESOURCE_H
 
 #include "Engine_ResourceBasic.h"
-#include <memory>
-
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 

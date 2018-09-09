@@ -1,32 +1,24 @@
 #ifndef ENGINE_CONSTRAINTS_H
 #define ENGINE_CONSTRAINTS_H
 
-class btBroadphaseInterface;
-class btDefaultCollisionConfiguration;
-class btCollisionDispatcher;
-class btSequentialImpulseConstraintSolver;
-class btDynamicsWorld;
-class btDiscreteDynamicsWorld;
-class GLDebugDrawer;
-class btCollisionShape;
 class btRigidBody;
 class btVector3;
 class btTypedConstraint;
-class btTriangleMesh;
 
 #include <glm/fwd.hpp>
 #include <glm/vec3.hpp>
 
-enum ConstraintType{
-    CONSTRAINT_TYPE_FIXED,
-    CONSTRAINT_TYPE_HINGE,
-};
+class ConstraintType final {public: enum Type {
+	Fixed,
+	Hinge,
+_TOTAL};};
+
 
 class Constraint{
     private:
         btRigidBody* m_RigidBodyA;
         btRigidBody* m_RigidBodyB;
-        ConstraintType m_ConstraintType;
+        ConstraintType::Type m_ConstraintType;
         btTypedConstraint* m_Constraint;
     public:
         Constraint(btRigidBody* a, btRigidBody* b);

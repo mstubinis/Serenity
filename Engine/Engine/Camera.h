@@ -7,6 +7,7 @@
 class Scene;
 class LightProbe;
 class Camera;
+
 class CameraType{public: enum Type { 
     Perspective, 
     Orthographic,

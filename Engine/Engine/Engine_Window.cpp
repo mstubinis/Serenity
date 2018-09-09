@@ -8,6 +8,8 @@
 #include "GBuffer.h"
 #include "Engine_BuiltInShaders.h"
 
+#include <iostream>
+
 using namespace Engine;
 using namespace std;
 

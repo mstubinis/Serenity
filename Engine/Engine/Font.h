@@ -3,19 +3,15 @@
 #define ENGINE_FONT_H
 
 #include "Engine_ResourceBasic.h"
-
-#include <GLM/gtc/matrix_transform.hpp>
 #include <string>
-#include <unordered_map>
-
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
-//class Mesh;
 class Texture;
-typedef unsigned int uint;
+
 typedef unsigned char uchar;
+
 struct FontGlyph final{
      uint id;
      uint x; uint y;

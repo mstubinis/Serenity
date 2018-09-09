@@ -6,6 +6,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <unordered_map>
+#include <iostream>
 
 using namespace Engine;
 using namespace std;

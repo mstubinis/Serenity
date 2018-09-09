@@ -3,17 +3,8 @@
 #define ENGINE_ENGINE_RESOURCES_H
 
 #include "Engine_Physics.h"
-#include "Engine_Utils.h"
 #include "ShaderProgram.h"
 #include "GLImageConstants.h"
-
-#include <unordered_map>
-#include <map>
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <iostream>
 
 typedef unsigned int uint;
 typedef std::uint32_t uint32;
@@ -61,8 +52,7 @@ namespace Engine{
     namespace epriv{
         class ResourceManager final: Engine::epriv::noncopyable{
             public:
-				class impl;
-                std::unique_ptr<impl> m_i;
+				class impl; std::unique_ptr<impl> m_i;
 
                 ResourceManager(const char* name,uint width,uint height);
                 ~ResourceManager();
@@ -71,7 +61,9 @@ namespace Engine{
  
                 Handle _addTexture(Texture*);
 
-                bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
+                bool _hasScene(std::string);
+				void _addScene(Scene*);
+				std::string _buildSceneName(std::string);
                 void _addMeshInstance(MeshInstance*);
                 Texture* _hasTexture(std::string);
                 uint _numScenes();

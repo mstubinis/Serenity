@@ -8,8 +8,6 @@
 #include <SFML/OpenGL.hpp>
 #include <unordered_map>
 
-typedef unsigned int uint;
-
 class Texture;
 namespace Engine{
     namespace epriv{

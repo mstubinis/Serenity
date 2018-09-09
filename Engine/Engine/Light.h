@@ -3,7 +3,6 @@
 #define ENGINE_LIGHT_H
 
 #include "Camera.h"
-#include <unordered_map>
 
 class Scene;
 class ShaderP;
@@ -14,8 +13,8 @@ class SpotLight;
 class RodLight;
 
 class LightType{public: enum Type{
-    Sun,Point,Directional,Spot,Rod
-};};
+    Sun,Point,Directional,Spot,Rod,
+_TOTAL};};
 class LightRange{public:enum Range{
     _7,_13,_20,_32,_50,_65,_100,_160,_200,_325,_600,_3250,
 _TOTAL};};
@@ -25,7 +24,7 @@ class LightAttenuation{public:enum Model{
     Distance_Squared,
     Constant_Linear_Exponent,
     Distance_Radius_Squared,
-};};
+_TOTAL};};
 class SunLight: public Entity{
     private:
         class impl;

@@ -8,8 +8,6 @@
 #include "Engine_Utils.h"
 
 class Texture;
-typedef unsigned int uint;
-
 namespace Engine{
     namespace epriv{
         class FramebufferTexture;

@@ -14,6 +14,8 @@
 using namespace Engine;
 using namespace std;
 
+typedef unsigned char uchar;
+
 void Math::extractViewFrustumPlanesHartmannGribbs(glm::mat4 inViewProjection,glm::vec4* outPlanes){
     glm::vec4 rows[4];
     for(ushort i = 0; i < 4; ++i)

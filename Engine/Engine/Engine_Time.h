@@ -2,11 +2,8 @@
 #ifndef ENGINE_TIME_CLASS_H
 #define ENGINE_TIME_CLASS_H
 
-#include <memory>
-#include <string>
 #include "Engine_Utils.h"
 #include "Engine_Resources.h"
-typedef unsigned int uint;
 
 namespace Engine{
     namespace epriv{

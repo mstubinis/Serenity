@@ -4,39 +4,35 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <memory>
-#include <vector>
 #include "Engine_EventObject.h"
 #include "Engine_ObjectPool.h"
 
 #include <boost/type_index.hpp>
 #include <boost/unordered_map.hpp>
-#include <limits>
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-typedef unsigned int uint;
 typedef unsigned short ushort;
 
+struct Handle;
 class Entity;
 class Scene;
 class Camera;
 class Mesh;
 class Material;
+class MeshInstance;
 class Collision;
 class btRigidBody;
 struct btDefaultMotionState;
 class btVector3;
-struct Handle;
-class MeshInstance;
 
 class ComponentBaseClass;
 class ComponentBody;
 class ComponentModel;
 class ComponentCamera;
 
-typedef boost::typeindex::type_index boost_type_index;
+typedef boost::typeindex::type_index   boost_type_index;
 
 namespace Engine{
     namespace epriv{

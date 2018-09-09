@@ -8,6 +8,7 @@
 #include "Engine_Math.h"
 #include "ShaderProgram.h"
 #include "FramebufferObject.h"
+
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/type_ptr.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
@@ -15,6 +16,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/filesystem.hpp>
+#include <SFML/Graphics.hpp>
+
 #include <iostream>
 #include <fstream>
 
@@ -202,7 +205,6 @@ namespace Engine{
                         BitMaskA = _mskA;
                     }
                     void fill(uchar _header[128]){
-						bool bigEndian = !isLittleEndian();
                         pxl_size           = *(uint32_t*)&_header[76];
                         pxl_flags          = *(uint32_t*)&_header[80];
                         fourCC             = *(uint32_t*)&_header[84];
@@ -211,16 +213,6 @@ namespace Engine{
                         BitMaskG           = *(uint32_t*)&_header[96];
                         BitMaskB           = *(uint32_t*)&_header[100];
                         BitMaskA           = *(uint32_t*)&_header[104];
-						if(bigEndian){
-							endianSwap(&pxl_size);
-							endianSwap(&pxl_flags);
-							endianSwap(&fourCC);
-							endianSwap(&BitCountRGB);
-							endianSwap(&BitMaskR);
-							endianSwap(&BitMaskG);
-							endianSwap(&BitMaskB);
-							endianSwap(&BitMaskA);
-						}
                     }
                     DDS_PixelFormat(uchar _header[128]){ fill(_header); }
                     ~DDS_PixelFormat(){}
@@ -231,19 +223,11 @@ namespace Engine{
                     uint32_t miscFlag, arraySize, miscFlags2;
                     DDS_Header_DX10(){}
                     void fill(uchar _headerDX10[20]){
-						bool bigEndian = !isLittleEndian();
                         dxgiFormat        = (textures::DXGI_FORMAT::Format)(*(uint32_t*)&_headerDX10[0]);
                         resourceDimension = (textures::D3D_RESOURCE_DIMENSION::Dimension)(*(uint32_t*)&_headerDX10[4]);
                         miscFlag          = *(uint32_t*)&_headerDX10[8];
                         arraySize         = *(uint32_t*)&_headerDX10[12];
                         miscFlags2        = *(uint32_t*)&_headerDX10[16];
-						if (bigEndian) {
-							endianSwap(&dxgiFormat);
-							endianSwap(&resourceDimension);
-							endianSwap(&miscFlag);
-							endianSwap(&arraySize);
-							endianSwap(&miscFlags2);
-						}
                     }
                     ~DDS_Header_DX10(){}
                 };
@@ -260,7 +244,6 @@ namespace Engine{
                     uint32_t reserved2;
                     DDS_Header(){}
                     DDS_Header(uchar _header[128]){
-						bool bigEndian = !isLittleEndian();
                         magic              = *(uint32_t*)&_header[0];
                         header_size        = *(uint32_t*)&_header[4];
                         header_flags       = *(uint32_t*)&_header[8];
@@ -270,17 +253,6 @@ namespace Engine{
                         depth              = *(uint32_t*)&_header[24];
                         mipMapCount        = *(uint32_t*)&_header[28];
 
-						if (bigEndian) {
-							endianSwap(&magic);
-							endianSwap(&header_size);
-							endianSwap(&header_flags);
-							endianSwap(&h);
-							endianSwap(&w);
-							endianSwap(&pitchOrlinearSize);
-							endianSwap(&depth);
-							endianSwap(&mipMapCount);
-						}
-
                         //reserved1[11]    = *(uint32_t*)&_header[32-72];
                         format.fill(_header);
 
@@ -289,14 +261,6 @@ namespace Engine{
                         caps3              = *(uint32_t*)&_header[116];
                         caps4              = *(uint32_t*)&_header[120];
                         reserved2          = *(uint32_t*)&_header[124];
-
-						if (bigEndian) {
-							endianSwap(&caps);
-							endianSwap(&caps2);
-							endianSwap(&caps3);
-							endianSwap(&caps4);
-							endianSwap(&reserved2);
-						}
                     }
                     ~DDS_Header(){}
                 };
