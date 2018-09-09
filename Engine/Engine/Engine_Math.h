@@ -6,7 +6,6 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include <vector>
-#include <cstdint>
 #include <assimp/Importer.hpp>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
@@ -15,10 +14,8 @@ class btVector3;
 class btRigidBody;
 class btQuaternion;
 class Camera;
-class ComponentCamera;
 typedef unsigned int uint;
 typedef unsigned short ushort;
-typedef unsigned char uchar;
 namespace glm{
     //floats
     typedef glm::tquat<float> q_f;	

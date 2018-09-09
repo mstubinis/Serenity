@@ -3,27 +3,19 @@
 #define ENGINE_ENGINE_PHYSICS_H
 
 #include <glm/glm.hpp>
-#include <vector>
 #include <memory>
 #include "Engine_Utils.h"
 #include <Bullet/LinearMath/btVector3.h>
 
 class Entity;
-class btCollisionDispatcher;
-class btDynamicsWorld;
-class btDiscreteDynamicsWorld;
 class btCollisionShape;
 class btRigidBody;
-class btTriangleMesh;
 namespace Engine{
     namespace epriv{
         struct ImportedMeshData;
         class GLDebugDrawer;
     };
 };
-typedef float btScalar;
-typedef unsigned int uint;
-
 class CollisionType{public: enum Type{
     ConvexHull, 
     TriangleShape,
@@ -51,8 +43,7 @@ namespace Engine{
     namespace epriv{
         class PhysicsManager final: private Engine::epriv::noncopyable{
             public:
-                class impl;
-                std::unique_ptr<impl> m_i;
+                class impl; std::unique_ptr<impl> m_i;
 
                 PhysicsManager(const char* name,uint w,uint h);
                 ~PhysicsManager();
@@ -63,14 +54,8 @@ namespace Engine{
                 void _render();
 
                 void _removeCollision(Collision*);
-                const btDiscreteDynamicsWorld* _world() const;
         };
     };
-
-
-
-
-
     namespace Physics{
         // vector[0] = end point, vector[1] = hit normal
         std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,btRigidBody* ignoredObject = nullptr);

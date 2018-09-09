@@ -2,17 +2,15 @@
 #ifndef ENGINE_ENGINE_RENDERER_H
 #define ENGINE_ENGINE_RENDERER_H
 
-#include "Engine_Math.h"
-#include "Engine_GLStateMachine.h"
-#include "Engine_Utils.h"
-#include "ShaderProgram.h"
-
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
 #include <SFML/Window.hpp>
 
 typedef unsigned int uint;
 
+class Material;
+class ShaderP;
 class Texture;
 class Font;
 class Camera;

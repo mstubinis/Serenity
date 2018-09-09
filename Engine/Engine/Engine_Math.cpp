@@ -3,9 +3,6 @@
 #include "Camera.h"
 #include "Scene.h"
 
-#include <math.h>
-
-#include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/gtc/matrix_transform.hpp>

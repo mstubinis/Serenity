@@ -2,6 +2,7 @@
 #include "Engine_Physics.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
+#include "Engine_Math.h"
 #include "Camera.h"
 #include "Mesh.h"
 #include "Scene.h"
@@ -428,12 +429,12 @@ class epriv::PhysicsManager::impl final{
         vector<Collision*> m_CollisionObjects;
 
         void _init(const char* name,uint& w,uint& h){
+			m_Paused = false;
             m_Broadphase = new btDbvtBroadphase();
             m_CollisionConfiguration = new btDefaultCollisionConfiguration();
             m_Dispatcher = new btCollisionDispatcher(m_CollisionConfiguration);
             m_Solver = new btSequentialImpulseConstraintSolver;
             m_World = new btDiscreteDynamicsWorld(m_Dispatcher,m_Broadphase,m_Solver,m_CollisionConfiguration);
-            m_Paused = false;
             m_DebugDrawer = new GLDebugDrawer();
             m_DebugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
             m_World->setDebugDrawer(m_DebugDrawer);
@@ -454,8 +455,7 @@ class epriv::PhysicsManager::impl final{
             SAFE_DELETE(m_Dispatcher);
             SAFE_DELETE(m_CollisionConfiguration);
             SAFE_DELETE(m_Broadphase);
-            for(auto collision:m_CollisionObjects)
-                SAFE_DELETE(collision);
+			SAFE_DELETE_VECTOR(m_CollisionObjects);
         }
         void _update(float& dt, int& maxSteps, float& other){
             if(m_Paused) return;
@@ -475,8 +475,7 @@ class epriv::PhysicsManager::impl final{
                         ComponentBody* a = (ComponentBody*)(obA->getUserPointer());
                         ComponentBody* b = (ComponentBody*)(obB->getUserPointer());
 
-                        //a->collisionResponse(b);
-                        //b->collisionResponse(a);
+                        //a->collisionResponse(b);    b->collisionResponse(a);
                     }
                 }
             }
@@ -503,25 +502,12 @@ class epriv::PhysicsManager::impl final{
 };
 epriv::PhysicsManager::impl* physicsManager;
 
-vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end){
-    btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
-    physicsManager->m_World->rayTest(start, end, RayCallback);
-    vector<glm::vec3> result;
-    if(RayCallback.hasHit()){
-        glm::vec3 res1 = glm::vec3(RayCallback.m_hitPointWorld.x(),RayCallback.m_hitPointWorld.y(),RayCallback.m_hitPointWorld.z()); 
-        glm::vec3 res2 = glm::vec3(RayCallback.m_hitNormalWorld.x(),RayCallback.m_hitNormalWorld.y(),RayCallback.m_hitNormalWorld.z());
-        result.push_back(res1);
-        result.push_back(res2);
-    }
-    return result;
-}
 epriv::PhysicsManager::PhysicsManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); physicsManager = m_i.get(); }
 epriv::PhysicsManager::~PhysicsManager(){ m_i->_destruct(); }
 void epriv::PhysicsManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::PhysicsManager::_update(float dt,int maxsteps,float other){ m_i->_update(dt,maxsteps,other); }
 void epriv::PhysicsManager::_render(){ m_i->_render(); }
 void epriv::PhysicsManager::_removeCollision(Collision* collisionObject){ m_i->_removeCollision(collisionObject); }
-const btDiscreteDynamicsWorld* epriv::PhysicsManager::_world() const{ return m_i->m_World; }
 
 void Physics::pause(bool b){ physicsManager->m_Paused = b; }
 void Physics::unpause(){ physicsManager->m_Paused = false; }
@@ -531,7 +517,18 @@ void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ phy
 void Physics::addRigidBody(btRigidBody* rigidBody){ physicsManager->m_World->addRigidBody(rigidBody); }
 void Physics::removeRigidBody(btRigidBody* rigidBody){ physicsManager->m_World->removeRigidBody(rigidBody); }
 void Physics::updateRigidBody(btRigidBody* rigidBody){ physicsManager->m_World->updateSingleAabb(rigidBody); }
-
+vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end) {
+	btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
+	physicsManager->m_World->rayTest(start, end, RayCallback);
+	vector<glm::vec3> result;
+	if (RayCallback.hasHit()) {
+		glm::vec3 res1 = glm::vec3(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
+		glm::vec3 res2 = glm::vec3(RayCallback.m_hitNormalWorld.x(), RayCallback.m_hitNormalWorld.y(), RayCallback.m_hitNormalWorld.z());
+		result.push_back(res1);
+		result.push_back(res2);
+	}
+	return result;
+}
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
     if(ignored){
         physicsManager->m_World->removeRigidBody(ignored);
@@ -698,13 +695,6 @@ class Collision::impl final {
         void _setMass(float _mass) {
             if (!m_Shape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) return;
             m_Shape->calculateLocalInertia(_mass, m_Inertia);
-            /*
-            if(m_Type != CollisionType::TriangleShape){
-                m_Shape->calculateLocalInertia(mass,m_Inertia);
-            }else{
-                ((btGImpactMeshShape*)m_Shape)->calculateLocalInertia(mass,m_Inertia);
-            }
-            */
         }
 };
 

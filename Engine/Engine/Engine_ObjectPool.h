@@ -2,14 +2,8 @@
 #ifndef ENGINE_OBJECT_POOL_H
 #define ENGINE_OBJECT_POOL_H
 
-#include <memory>
-#include <cstdint>
-
 #include "Engine_Resources.h"
 #include "Engine_Utils.h"
-
-typedef unsigned int uint;
-typedef std::uint32_t uint32;
 
 namespace Engine{
     namespace epriv{
@@ -51,9 +45,7 @@ namespace Engine{
 
                 void destruct(){
                     for(uint i = 0; i < MAX_ENTRIES; ++i){
-                        if(m_Pool[i].resource){
-                            SAFE_DELETE(m_Pool[i].resource);
-                        }
+                        SAFE_DELETE(m_Pool[i].resource);
                     }
                     delete[] m_Pool;
                 }
@@ -120,9 +112,7 @@ namespace Engine{
                     if(m_Pool[realIndex].active){
                         m_Pool[realIndex].nextFreeIndex = m_firstFreeEntry;
                         m_Pool[realIndex].active = false;
-                        if(m_Pool[realIndex].resource){
-                            SAFE_DELETE(m_Pool[realIndex].resource);
-                        }
+                        SAFE_DELETE(m_Pool[realIndex].resource);
                         m_firstFreeEntry = index;
                         --m_activeEntryCount;		
                     }
@@ -138,7 +128,6 @@ namespace Engine{
                         --m_activeEntryCount;		
                     }
                 }
-
                 T* get(Handle& handle){
                     T* outPtr = nullptr;
                     if (!get(handle, outPtr)) return nullptr;

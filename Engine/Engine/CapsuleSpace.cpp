@@ -5,6 +5,7 @@
 #include "GameCamera.h"
 #include "Light.h"
 #include "Engine_Renderer.h"
+#include "Engine_GLStateMachine.h"
 #include "Texture.h"
 #include "GameSkybox.h"
 #include "Mesh.h"

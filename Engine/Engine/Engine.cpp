@@ -18,14 +18,9 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include <glm/vec2.hpp>
 
 #include <SFML/System.hpp>
-
-#ifdef _DEBUG
-    #include <iostream>
-#endif
 
 using namespace Engine;
 

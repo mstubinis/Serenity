@@ -2,8 +2,6 @@
 #ifndef ENGINE_EVENT_OBJECT_H
 #define ENGINE_EVENT_OBJECT_H
 
-#include <string>
-#include <cstdint>
 #include "Engine_EventEnums.h"
 #include "Engine_Utils.h"
 

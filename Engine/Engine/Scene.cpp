@@ -3,6 +3,7 @@
 #include "Light.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
+#include "Engine_Math.h"
 #include "Camera.h"
 #include "Skybox.h"
 #include <boost/shared_ptr.hpp>

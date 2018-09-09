@@ -230,7 +230,7 @@ class ComponentBody: public ComponentBaseClass{
 			glm::quat* rotation;
 			glm::mat4* modelMatrix;
         };
-        union{
+        struct{
             NormalData n;
             PhysicsData p;
         } data;

@@ -3,9 +3,8 @@
 #define ENGINE_ENGINE_EVENTS_H
 
 #include <string>
-#include <unordered_map>
 #include <memory>
-#include "Engine_Math.h"
+#include <glm/vec2.hpp>
 #include "Engine_EventEnums.h"
 #include "Engine_Utils.h"
 
@@ -13,8 +12,7 @@ namespace Engine{
     namespace epriv{
         class EventManager final: private Engine::epriv::noncopyable{
             public:
-				class impl;
-                std::unique_ptr<impl> m_i;
+				class impl; std::unique_ptr<impl> m_i;
 
                 EventManager(const char* name,uint w,uint h);
                 ~EventManager();
@@ -32,7 +30,6 @@ namespace Engine{
                 void _update(const float& dt);
         };
     };
-
     //keyboard functions
     bool isKeyDown(std::string str);
     bool isKeyDownOnce(std::string str);

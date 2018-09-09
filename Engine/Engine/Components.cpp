@@ -709,20 +709,20 @@ void ComponentBody::setScale(float x,float y,float z){
     if(_physics){
         if(data.p.collision){
             if (data.p.collision->getType() == CollisionType::Compound) {
-                btCompoundShape* cast = dynamic_cast<btCompoundShape*>(data.p.collision->getShape());
-                if (cast) {
-                    int numChildren = cast->getNumChildShapes();
+                btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(data.p.collision->getShape());
+                if (compoundShapeCast) {
+                    int numChildren = compoundShapeCast->getNumChildShapes();
                     if (numChildren > 0) {
                         for (int i = 0; i < numChildren; ++i) {
-                            btCollisionShape* shape = cast->getChildShape(i);
-                            btUniformScalingShape* convexHull = dynamic_cast<btUniformScalingShape*>(shape);
-                            if (convexHull) {
-                                convexHull->setLocalScaling(btVector3(x, y, z));
+                            btCollisionShape* shape = compoundShapeCast->getChildShape(i);
+                            btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
+                            if (convexHullCast) {
+								convexHullCast->setLocalScaling(btVector3(x, y, z));
                                 continue;
                             }
-                            btScaledBvhTriangleMeshShape* triHull = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                            if (triHull) {
-                                triHull->setLocalScaling(btVector3(x, y, z));
+                            btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
+                            if (triHullCast) {
+								triHullCast->setLocalScaling(btVector3(x, y, z));
                             }
                         }
                     }
@@ -756,19 +756,19 @@ glm::vec3 ComponentBody::getScale(){
     if(_physics){
         if(data.p.collision){
             if(data.p.collision->getType() == CollisionType::Compound){
-                btCompoundShape* cast = dynamic_cast<btCompoundShape*>(data.p.collision->getShape());
-                if (cast) {
-                    int numChildren = cast->getNumChildShapes();
+                btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(data.p.collision->getShape());
+                if (compoundShapeCast) {
+                    int numChildren = compoundShapeCast->getNumChildShapes();
                     if (numChildren > 0) {
                         for (int i = 0; i < numChildren; ++i) {
-                            btCollisionShape* shape = cast->getChildShape(i);
-                            btUniformScalingShape* convexHull = dynamic_cast<btUniformScalingShape*>(shape);
-                            if (convexHull) {
-                                return Math::btVectorToGLM(const_cast<btVector3&>(convexHull->getLocalScaling()));
+                            btCollisionShape* shape = compoundShapeCast->getChildShape(i);
+                            btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
+                            if (convexHullCast) {
+                                return Math::btVectorToGLM(const_cast<btVector3&>(convexHullCast->getLocalScaling()));
                             }
-                            btScaledBvhTriangleMeshShape* triHull = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                            if (triHull) {
-                                return Math::btVectorToGLM(const_cast<btVector3&>(triHull->getLocalScaling()));
+                            btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
+                            if (triHullCast) {
+                                return Math::btVectorToGLM(const_cast<btVector3&>(triHullCast->getLocalScaling()));
                             }
                         }
                     }

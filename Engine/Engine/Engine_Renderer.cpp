@@ -5,6 +5,7 @@
 #include "Engine_FullscreenItems.h"
 #include "Engine_BuiltInShaders.h"
 #include "Engine_BuiltInResources.h"
+#include "Engine_GLStateMachine.h"
 #include "GBuffer.h"
 #include "Camera.h"
 #include "Light.h"

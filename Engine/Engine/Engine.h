@@ -5,7 +5,6 @@
 class Texture;
 class Engine_Window;
 
-#include <memory>
 #include <glm/fwd.hpp>
 
 typedef unsigned int uint;

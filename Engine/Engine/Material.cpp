@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
+#include "Engine_Math.h"
 #include "ShaderProgram.h"
 #include "Scene.h"
 #include "Skybox.h"

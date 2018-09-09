@@ -2,20 +2,16 @@
 #ifndef ENGINE_NOISE_H
 #define ENGINE_NOISE_H
 
-#include <glm/glm.hpp>
-#include <vector>
 #include <memory>
 #include "Engine_Utils.h"
 
 typedef unsigned int uint;
 
 namespace Engine{
-
     namespace epriv{
         class NoiseManager final: private Engine::epriv::noncopyable{
             public:
-				class impl;
-                std::unique_ptr<impl> m_i;
+				class impl; std::unique_ptr<impl> m_i;
 
                 NoiseManager(const char* name,uint w,uint h);
                 ~NoiseManager();

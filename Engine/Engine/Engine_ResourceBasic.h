@@ -3,13 +3,7 @@
 #define ENGINE_RESOURCE_BASIC_H
 
 #include <string>
-#include <vector>
-#include <boost/weak_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include "Engine_Utils.h"
-
-typedef unsigned int uint;
 
 class EngineResource: private Engine::epriv::noncopyable{
     private:

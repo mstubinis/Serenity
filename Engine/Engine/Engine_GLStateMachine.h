@@ -5,11 +5,8 @@
 #include <vector>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-
 #include <boost/function.hpp>
-#include <boost/bind.hpp>
 
-typedef unsigned int uint;
 typedef boost::function<void()> BF;
 
 struct GLStateT{
