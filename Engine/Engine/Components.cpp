@@ -522,6 +522,7 @@ ComponentBody::~ComponentBody(){
     if(_physics){
         Physics::removeRigidBody(data.p.rigidBody);
         SAFE_DELETE(data.p.rigidBody);
+        SAFE_DELETE(data.p.collision);
         SAFE_DELETE(data.p.motionState);
     }else{
         SAFE_DELETE(data.n.position);
@@ -543,6 +544,7 @@ void ComponentBody::alignTo(glm::vec3 direction,float speed){
     }
 }
 void ComponentBody::setCollision(CollisionType::Type _type,float _mass,glm::vec3 _scale){
+    SAFE_DELETE(data.p.collision);
     auto* modelComponent = m_Owner->getComponent<ComponentModel>();
     if (_type == CollisionType::Compound) {   
         if (modelComponent) {

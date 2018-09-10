@@ -220,12 +220,18 @@ class ComponentBody: public ComponentBaseClass{
 			btRigidBody* rigidBody;
 			btDefaultMotionState* motionState;
 			float mass;
+            PhysicsData() {
+                collision = nullptr; rigidBody = nullptr; motionState = nullptr;
+            }
         };
         struct NormalData{
             glm::vec3* scale;
 			glm::vec3* position;
 			glm::quat* rotation;
 			glm::mat4* modelMatrix;
+            NormalData() {
+                scale = nullptr; position = nullptr; rotation = nullptr; modelMatrix = nullptr;
+            }
         };
         struct{
             NormalData n;

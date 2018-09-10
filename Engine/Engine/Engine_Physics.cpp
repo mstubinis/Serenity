@@ -446,8 +446,6 @@ class epriv::PhysicsManager::impl final{
         epriv::PhysicsWorld* data;
 
         bool m_Paused;
-        vector<Collision*> m_CollisionObjects;
-
         void _init(const char* name,uint& w,uint& h){
             m_Paused = false;
             data = new epriv::PhysicsWorld();
@@ -456,7 +454,6 @@ class epriv::PhysicsManager::impl final{
             data->debugDrawer->initRenderingContext();
         }
         void _destruct(){
-            SAFE_DELETE_VECTOR(m_CollisionObjects);
             SAFE_DELETE(data);
         }
         void _update(float& dt, int& maxSteps, float& other){
@@ -580,7 +577,6 @@ class Collision::impl final {
         void _init(Collision* super, vector<Mesh*>& meshes, float& mass, glm::vec3& scale) {
             m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
             m_Type = CollisionType::Compound;
-
             //get the shape here
             btCompoundShape* compound = new btCompoundShape();
             btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
@@ -591,9 +587,7 @@ class Collision::impl final {
             compound->setMargin(0.001f);
             compound->recalculateLocalAabb();
             m_Shape = compound;
-
             _setMass(mass);
-            physicsManager->m_CollisionObjects.push_back(super);
         }
         void _init(Collision* super,ComponentModel* modelComponent, float& mass, glm::vec3& scale) {
             vector<Mesh*> meshes;
@@ -605,12 +599,9 @@ class Collision::impl final {
         void _init(Collision* super,CollisionType::Type _type,Mesh* mesh,float& mass,glm::vec3& scale) {
             m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
             m_Type = _type;
-
             //get the shape here
             m_Shape = InternalMeshPublicInterface::BuildCollision(mesh,_type);
-
             _setMass(mass);
-            physicsManager->m_CollisionObjects.push_back(super);
         }
         void _destruct() {
             btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
