@@ -2,19 +2,11 @@
 #include "Engine.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
-#include "ShaderProgram.h"
-#include "Camera.h"
-#include "Mesh.h"
 #include "Texture.h"
 #include "Scene.h"
 
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 using namespace Engine;
 using namespace std;
-
-
 
 GLuint m_Buffer = 0;
 GLuint m_VAO = 0;

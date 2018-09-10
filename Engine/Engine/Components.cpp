@@ -713,12 +713,12 @@ void ComponentBody::setScale(float x,float y,float z){
                             btCollisionShape* shape = compoundShapeCast->getChildShape(i);
                             btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
                             if (convexHullCast) {
-								convexHullCast->setLocalScaling(btVector3(x, y, z));
+                                convexHullCast->setLocalScaling(btVector3(x, y, z));
                                 continue;
                             }
                             btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
                             if (triHullCast) {
-								triHullCast->setLocalScaling(btVector3(x, y, z));
+                                triHullCast->setLocalScaling(btVector3(x, y, z));
                             }
                         }
                     }

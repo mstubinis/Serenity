@@ -1,22 +1,23 @@
+#include "Mesh.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "Engine_Math.h"
-#include "Mesh.h"
 #include "MeshInstance.h"
-#include "Engine_ThreadManager.h"
 
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
+#include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
+
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -280,8 +281,6 @@ namespace Engine{
                 Parent = nullptr;
                 Transform = glm::mat4(1.0f);
             }
-            ~BoneNode(){
-            }
         };
         struct Vector3Key final {
             glm::vec3 value;
@@ -297,12 +296,7 @@ namespace Engine{
             vector<Vector3Key> PositionKeys;
             vector<QuatKey>    RotationKeys;
             vector<Vector3Key> ScalingKeys;
-            AnimationChannel() {
-            }
-            ~AnimationChannel() {
-            }
         };
-
         class MeshSkeleton final : private Engine::epriv::noncopyable {
             friend class ::Engine::epriv::AnimationData;
             friend class ::Mesh;
@@ -318,7 +312,7 @@ namespace Engine{
                 glm::mat4                              m_GlobalInverseTransform;
                 void fill(Engine::epriv::ImportedMeshData& data) {
                     for (auto _b : data.m_Bones) {
-						VertexBoneData& b = _b.second;
+                        VertexBoneData& b = _b.second;
                         m_BoneIDs.push_back(new glm::vec4(b.IDs[0], b.IDs[1], b.IDs[2], b.IDs[3]));
                         m_BoneWeights.push_back(new glm::vec4(b.Weights[0], b.Weights[1], b.Weights[2], b.Weights[3]));
                     }
@@ -348,6 +342,107 @@ namespace Engine{
                 ~MeshSkeleton() { clear();cleanup(); }
                 uint numBones() { return m_NumBones; }
         };
+        class CollisionFactory final : private Engine::epriv::noncopyable {
+            friend class ::Mesh;
+            private:
+                void _initConvexData(vector<MeshVertexData>& _vertices) {
+                    if (!m_ConvexHullData) {
+                        m_ConvesHullShape = new btConvexHullShape();
+                        for (auto vertex : _vertices) {
+                            m_ConvesHullShape->addPoint(btVector3(vertex.position.x, vertex.position.y, vertex.position.z));
+                        }
+                        m_ConvexHullData = new btShapeHull(m_ConvesHullShape);
+                        m_ConvexHullData->buildHull(m_ConvesHullShape->getMargin());
+                        SAFE_DELETE(m_ConvesHullShape);
+                        const btVector3* ptsArray = m_ConvexHullData->getVertexPointer();
+                        m_ConvesHullShape = new btConvexHullShape();
+                        for (int i = 0; i < m_ConvexHullData->numVertices(); ++i) {
+                            m_ConvesHullShape->addPoint(btVector3(ptsArray[i].x(), ptsArray[i].y(), ptsArray[i].z()));
+                        }
+                        //m_ConvesHullShape->setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
+                        m_ConvesHullShape->setMargin(0.001f);
+                        m_ConvesHullShape->recalcLocalAabb();
+                    }
+                }
+                void _initTriangleData(vector<MeshVertexData>& _vertices, vector<ushort>& _indices) {
+                    if (!m_TriangleStaticData) {
+                        vector<glm::vec3> triangles;
+                        for (auto indice : _indices) {
+                            triangles.push_back(_vertices.at(indice).position);
+                        }
+                        m_TriangleStaticData = new btTriangleMesh();
+                        uint count = 0;
+                        vector<glm::vec3> tri;
+                        for (auto position : triangles) {
+                            tri.push_back(position);
+                            ++count;
+                            if (count == 3) {
+                                btVector3 v1 = Math::btVectorFromGLM(tri.at(0));
+                                btVector3 v2 = Math::btVectorFromGLM(tri.at(1));
+                                btVector3 v3 = Math::btVectorFromGLM(tri.at(2));
+                                m_TriangleStaticData->addTriangle(v1, v2, v3, true);
+                                vector_clear(tri);
+                                count = 0;
+                            }
+                        }
+                        m_TriangleStaticShape = new btBvhTriangleMeshShape(m_TriangleStaticData, true);
+                        //m_TriangleStaticShape->setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
+                        m_TriangleStaticShape->setMargin(0.001f);
+                        m_TriangleStaticShape->recalcLocalAabb();
+                    }
+                }
+            public:
+                Mesh* m_Mesh;
+
+                btShapeHull* m_ConvexHullData;
+                btConvexHullShape* m_ConvesHullShape;
+
+                btTriangleMesh* m_TriangleStaticData;
+                btBvhTriangleMeshShape* m_TriangleStaticShape;
+
+                CollisionFactory(Mesh* _mesh, vector<MeshVertexData>& _vertices, vector<ushort>& _indices) {
+                    m_Mesh = _mesh;
+                    m_ConvexHullData = nullptr;
+                    m_ConvesHullShape = nullptr;
+                    m_TriangleStaticData = nullptr;
+                    m_TriangleStaticShape = nullptr;
+
+                    _initConvexData(_vertices);
+                    _initTriangleData(_vertices,_indices);
+                }
+                ~CollisionFactory() {
+                    SAFE_DELETE(m_ConvexHullData);
+                    SAFE_DELETE(m_ConvesHullShape);
+                    SAFE_DELETE(m_TriangleStaticData);
+                    SAFE_DELETE(m_TriangleStaticShape);
+                }
+                btSphereShape* buildSphereShape() {
+                    btSphereShape* sphere = new btSphereShape(m_Mesh->getRadius());
+                    sphere->setMargin(0.001f);
+                    return sphere;
+                }
+                btBoxShape* buildBoxShape() {
+                    btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_Mesh->getRadiusBox()));
+                    box->setMargin(0.001f);
+                    return box;
+                }
+                btUniformScalingShape* buildConvexHull() {
+                    btUniformScalingShape* convexShape = new btUniformScalingShape(m_ConvesHullShape, 1.0f);
+                    return convexShape;
+                }
+                btScaledBvhTriangleMeshShape* buildTriangleShape() {
+                    btScaledBvhTriangleMeshShape* triShape = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape, btVector3(1.0f, 1.0f, 1.0f));
+                    return triShape;
+                }
+                btGImpactMeshShape* buildTriangleShapeGImpact() {
+                    btGImpactMeshShape* giShape = new btGImpactMeshShape(m_TriangleStaticData);
+                    //giShape->setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
+                    giShape->setMargin(0.001f);
+                    giShape->updateBound();
+                    return giShape;
+                }
+            };
+
     };
 };
 
@@ -360,6 +455,7 @@ class Mesh::impl final{
 
         vector<GLuint> m_buffers;
         Collision* m_Collision;
+        Engine::epriv::CollisionFactory* m_CollisionFactory;
 
         epriv::MeshSkeleton* m_Skeleton;
         string m_File;
@@ -515,12 +611,6 @@ class Mesh::impl final{
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             if(loadNow)
                 super->load();
-        }
-        void _clearData(){
-            vector_clear(m_Vertices);
-            if(m_Skeleton){
-                SAFE_DELETE(m_Skeleton);
-            }
         }
         void _loadInternal(Mesh* mesh,epriv::ImportedMeshData& data,string& file){
             Assimp::Importer importer;
@@ -1017,9 +1107,9 @@ class Mesh::impl final{
             }
         }
         void _unload_CPU(Mesh* super){
-            if(m_File != ""){
-                _clearData();
-            }
+            vector_clear(m_Vertices);
+            SAFE_DELETE(m_Skeleton);
+            SAFE_DELETE(m_CollisionFactory);
             cout << "(Mesh) ";
         }
         void _unload_GPU(Mesh* super){
@@ -1034,6 +1124,7 @@ class Mesh::impl final{
                 _loadFromFile(super,m_File,m_Type,m_threshold);
             }
             _calculateMeshRadius(super);
+            m_CollisionFactory = new Engine::epriv::CollisionFactory(super,m_Vertices,m_Indices);
         }
         void _load_GPU(Mesh* super){
             if(m_buffers.size() > 0){
@@ -1078,32 +1169,31 @@ class Mesh::impl final{
             _buildVAO();
             cout << "(Mesh) ";
         }
-
         void _readFromObjCompressed(string& filename, epriv::ImportedMeshData& data) {
             ifstream stream(filename.c_str(), ios::binary);
 
-			uint32_t sizes[6];
-			for (uint i = 0; i < 6; ++i) {
-				readUint32tBigEndian(sizes[i], stream);
-			}
+            uint32_t sizes[6];
+            for (uint i = 0; i < 6; ++i) {
+                readUint32tBigEndian(sizes[i], stream);
+            }
             //base
             data.file_points.resize(sizes[0]);
             data.file_uvs.resize(sizes[1]);
             data.file_normals.resize(sizes[2]);
 
-			vector<vector<uint>> _indices;
-			_indices.resize(3);
-			_indices.at(0).resize(sizes[3]);
-			_indices.at(1).resize(sizes[4]);
-			_indices.at(2).resize(sizes[5]);
+            vector<vector<uint>> _indices;
+            _indices.resize(3);
+            _indices.at(0).resize(sizes[3]);
+            _indices.at(1).resize(sizes[4]);
+            _indices.at(2).resize(sizes[5]);
 
             //positions
             for (uint i = 0; i < sizes[0]; ++i) {
-				float out[3];
-				uint16_t in[3];
-				for (uint i = 0; i < 3; ++i) {
-					readUint16tBigEndian(in[i], stream);
-				}
+                float out[3];
+                uint16_t in[3];
+                for (uint i = 0; i < 3; ++i) {
+                    readUint16tBigEndian(in[i], stream);
+                }
                 float32(&out[0], in[0]);
                 float32(&out[1], in[1]);
                 float32(&out[2], in[2]);
@@ -1111,44 +1201,44 @@ class Mesh::impl final{
             }
             //uvs
             for (uint i = 0; i < sizes[1]; ++i) {
-				float out[2];
-				uint16_t in[2];
-				for (uint i = 0; i < 2; ++i) {
-					readUint16tBigEndian(in[i], stream);
-				}
-				float32(&out[0], in[0]);
-				float32(&out[1], in[1]);
-				data.file_uvs.at(i) = glm::vec2(out[0], out[1]);
+                float out[2];
+                uint16_t in[2];
+                for (uint i = 0; i < 2; ++i) {
+                    readUint16tBigEndian(in[i], stream);
+                }
+                float32(&out[0], in[0]);
+                float32(&out[1], in[1]);
+                data.file_uvs.at(i) = glm::vec2(out[0], out[1]);
             }
             //normals
             for (uint i = 0; i < sizes[2]; ++i) {
-				float out[3];
-				uint16_t in[3];
-				for (uint i = 0; i < 3; ++i) {
-					readUint16tBigEndian(in[i], stream);
-				}
-				float32(&out[0], in[0]);
-				float32(&out[1], in[1]);
-				float32(&out[2], in[2]);
-				data.file_normals.at(i) = glm::vec3(out[0], out[1], out[2]);
+                float out[3];
+                uint16_t in[3];
+                for (uint i = 0; i < 3; ++i) {
+                    readUint16tBigEndian(in[i], stream);
+                }
+                float32(&out[0], in[0]);
+                float32(&out[1], in[1]);
+                float32(&out[2], in[2]);
+                data.file_normals.at(i) = glm::vec3(out[0], out[1], out[2]);
             }
             //indices
-			for (uint i = 0; i < _indices.size(); ++i) {
-				for (uint j = 0; j < sizes[3+i]; ++j) {
-					uint16_t c;
-					readUint16tBigEndian(c, stream);
-					_indices.at(i).at(j) = c;
-				}
-			}
-			stream.close();
+            for (uint i = 0; i < _indices.size(); ++i) {
+                for (uint j = 0; j < sizes[3+i]; ++j) {
+                    uint16_t c;
+                    readUint16tBigEndian(c, stream);
+                    _indices.at(i).at(j) = c;
+                }
+            }
+            stream.close();
             _loadDataIntoTriangles(data, _indices.at(0), _indices.at(1), _indices.at(2), epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
             epriv::MeshLoader::CalculateTBNAssimp(data);
         }
         void _writeToObjCompressed() {
             epriv::ImportedMeshData d;
 
-			vector<vector<uint>> _indices;
-			_indices.resize(3);
+            vector<vector<uint>> _indices;
+            _indices.resize(3);
 
             ifstream input(m_File);
 
@@ -1164,54 +1254,57 @@ class Mesh::impl final{
             ofstream stream(f,ios::binary);
 
             //header
-			uint32_t sizes[6];
-			sizes[0] = d.file_points.size();
-			sizes[1] = d.file_uvs.size();
-			sizes[2] = d.file_normals.size();
-			for (uint i = 0; i < _indices.size(); ++i) {
-				sizes[3+i] = _indices.at(i).size();
-			}
+            uint32_t sizes[6];
+            sizes[0] = d.file_points.size();
+            sizes[1] = d.file_uvs.size();
+            sizes[2] = d.file_normals.size();
+            for (uint i = 0; i < _indices.size(); ++i) {
+                sizes[3+i] = _indices.at(i).size();
+            }
 
-			for (uint i = 0; i < 6; ++i) {
-				writeUint32tBigEndian(sizes[i], stream);
-			}
+            for (uint i = 0; i < 6; ++i) {
+                writeUint32tBigEndian(sizes[i], stream);
+            }
             for (auto pos : d.file_points) {
                 uint16_t out[3];
                 float16(&out[0], pos.x);
                 float16(&out[1], pos.y);
                 float16(&out[2], pos.z);
-				for (uint i = 0; i < 3; ++i) {
-					writeUint16tBigEndian(out[i], stream);
-				}
+                for (uint i = 0; i < 3; ++i) {
+                    writeUint16tBigEndian(out[i], stream);
+                }
             }
             for (auto uv : d.file_uvs) {
                 uint16_t out[2];
                 float16(&out[0], uv.x);
                 float16(&out[1], uv.y);
-				for (uint i = 0; i < 2; ++i) {
-					writeUint16tBigEndian(out[i], stream);
-				}
+                for (uint i = 0; i < 2; ++i) {
+                    writeUint16tBigEndian(out[i], stream);
+                }
             }
             for (auto norm : d.file_normals) {
-				uint16_t out[3];
-				float16(&out[0], norm.x);
-				float16(&out[1], norm.y);
-				float16(&out[2], norm.z);
-				for (uint i = 0; i < 3; ++i) {
-					writeUint16tBigEndian(out[i], stream);
-				}
+                uint16_t out[3];
+                float16(&out[0], norm.x);
+                float16(&out[1], norm.y);
+                float16(&out[2], norm.z);
+                for (uint i = 0; i < 3; ++i) {
+                    writeUint16tBigEndian(out[i], stream);
+                }
             }
-			//indices
-			for (uint i = 0; i < _indices.size(); ++i) {
-				for (auto ind : _indices.at(i)) {
-					uint16_t _ind = (uint16_t)ind;
-					writeUint16tBigEndian(_ind, stream);
-				}
-			}
+            //indices
+            for (uint i = 0; i < _indices.size(); ++i) {
+                for (auto ind : _indices.at(i)) {
+                    uint16_t _ind = (uint16_t)ind;
+                    writeUint16tBigEndian(_ind, stream);
+                }
+            }
             stream.close();
         }
         
 };
+
+
+
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     auto& m = *((Mesh*)r)->m_i;
     if(m.m_VAO){
@@ -1359,36 +1452,24 @@ class epriv::AnimationData::impl{
             float TicksPerSecond(float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f));return float(float(m_DurationInTicks) / TicksPerSecond);
         }
 };
-epriv::AnimationData::AnimationData(Mesh* m, aiAnimation* aiAnim):m_i(new impl) {
-    m_i->_Init(m, aiAnim);
-}
-epriv::AnimationData::~AnimationData() { 
-    m_i->_Destruct();
-}
+epriv::AnimationData::AnimationData(Mesh* m, aiAnimation* aiAnim):m_i(new impl) { m_i->_Init(m, aiAnim); }
+epriv::AnimationData::~AnimationData() { m_i->_Destruct(); }
 float epriv::AnimationData::duration() { return m_i->_Duration(); }
 
 
 void InternalMeshPublicInterface::LoadCPU(Mesh* mesh){
-    //if(!mesh->isLoaded()){
-        mesh->m_i->_load_CPU(mesh);
-    //}
+    mesh->m_i->_load_CPU(mesh);
 }
 void InternalMeshPublicInterface::LoadGPU(Mesh* mesh){
-    //if(!mesh->isLoaded()){
-        mesh->m_i->_load_GPU(mesh);
-        mesh->EngineResource::load();
-    //}
+    mesh->m_i->_load_GPU(mesh);
+    mesh->EngineResource::load();
 }
 void InternalMeshPublicInterface::UnloadCPU(Mesh* mesh){
-    //if(mesh->isLoaded()){
-        mesh->m_i->_unload_CPU(mesh);
-        mesh->EngineResource::unload();
-    //}
+    mesh->m_i->_unload_CPU(mesh);
+    mesh->EngineResource::unload();
 }
 void InternalMeshPublicInterface::UnloadGPU(Mesh* mesh){
-    //if(mesh->isLoaded()){
-        mesh->m_i->_unload_GPU(mesh);
-    //}
+    mesh->m_i->_unload_GPU(mesh);
 }
 void InternalMeshPublicInterface::UpdateInstance(Mesh* mesh,uint _id, glm::mat4 _modelMatrix){
     auto& i = *mesh->m_i;
@@ -1432,7 +1513,6 @@ Mesh::Mesh(string fileOrData,CollisionType::Type type,bool notMemory,float thres
 Mesh::~Mesh(){
     unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
-    m_i->_clearData();
 }
 Collision* Mesh::getCollision() const { return m_i->m_Collision; }
 
@@ -1473,7 +1553,7 @@ void Mesh::load(){
     }
 }
 void Mesh::unload(){
-    if(isLoaded() && useCount() == 0){
+    if(isLoaded() /*&& useCount() == 0*/){
         auto& i = *m_i;
         i._unload_GPU(this);
         i._unload_CPU(this);

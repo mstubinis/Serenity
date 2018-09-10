@@ -1,6 +1,5 @@
-#include "Engine.h"
 #include "ShaderProgram.h"
-#include "Mesh.h"
+#include "Engine.h"
 #include "Material.h"
 #include "Camera.h"
 #include "Engine_Resources.h"
@@ -13,7 +12,6 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <iostream>
-#include <SFML/OpenGL.hpp>
 
 using namespace Engine;
 using namespace std;

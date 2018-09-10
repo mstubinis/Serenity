@@ -1,6 +1,6 @@
+#include "MeshInstance.h"
 #include "Engine.h"
 #include "Components.h"
-#include "MeshInstance.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "Engine_Math.h"
@@ -11,8 +11,6 @@
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-#include <boost/weak_ptr.hpp>
 
 using namespace Engine;
 using namespace std;

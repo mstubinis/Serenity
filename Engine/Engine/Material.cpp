@@ -1,6 +1,6 @@
+#include "Material.h"
 #include "Engine.h"
 #include "Mesh.h"
-#include "Material.h"
 #include "Texture.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
@@ -10,7 +10,6 @@
 #include "Skybox.h"
 #include "Components.h"
 
-#include <unordered_map>
 #include <algorithm>
 #include <iostream>
 #include <boost/tuple/tuple.hpp>
@@ -190,8 +189,7 @@ class Material::impl final{
             glm::vec4* data = nullptr;
             if(!add){
                 data = &Material::m_MaterialProperities.at(m_ID);
-            }
-            else{
+            }else{
                 m_ID = Material::m_MaterialProperities.size();
                 data = new glm::vec4(0.0f);
             }

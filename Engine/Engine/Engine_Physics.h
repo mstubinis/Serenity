@@ -27,14 +27,14 @@ class CollisionType{public: enum Type{
 _TOTAL,};};
 class Collision final{
     private:
-		class impl; std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         Collision(btCollisionShape* shape = nullptr,CollisionType::Type = CollisionType::None, float mass = 0);
         Collision(Engine::epriv::ImportedMeshData&,CollisionType::Type = CollisionType::None, float mass = 0,glm::vec3 scale = glm::vec3(1.0f));
         ~Collision();
 
         void setMass(float mass);
-		const btVector3& getInertia() const;
+        const btVector3& getInertia() const;
         btCollisionShape* getShape() const;
         const uint getType() const;
 };

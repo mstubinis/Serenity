@@ -9,12 +9,9 @@
 #include "ShaderProgram.h"
 #include "FramebufferObject.h"
 
-#include <GLM/gtc/matrix_transform.hpp>
-#include <GLM/gtc/type_ptr.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/filesystem.hpp>
 #include <SFML/Graphics.hpp>
 

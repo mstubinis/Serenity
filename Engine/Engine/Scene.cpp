@@ -1,14 +1,10 @@
-#include "Engine.h"
 #include "Scene.h"
+#include "Engine.h"
 #include "Light.h"
 #include "Engine_Resources.h"
-#include "Engine_Renderer.h"
 #include "Engine_Math.h"
 #include "Camera.h"
 #include "Skybox.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/make_shared.hpp>
 
 using namespace Engine;
 using namespace std;
@@ -74,7 +70,7 @@ void Scene::centerSceneToObject(Entity* center){
     }
 }
 Scene::~Scene(){
-	unregisterEvent(EventType::SceneChanged);
+    unregisterEvent(EventType::SceneChanged);
     SAFE_DELETE(m_Skybox);
 }
 void Scene::update(const float& dt){

@@ -421,7 +421,7 @@ class epriv::PhysicsManager::impl final{
         vector<Collision*> m_CollisionObjects;
 
         void _init(const char* name,uint& w,uint& h){
-			m_Paused = false;
+            m_Paused = false;
             m_Broadphase = new btDbvtBroadphase();
             m_CollisionConfiguration = new btDefaultCollisionConfiguration();
             m_Dispatcher = new btCollisionDispatcher(m_CollisionConfiguration);
@@ -447,7 +447,7 @@ class epriv::PhysicsManager::impl final{
             SAFE_DELETE(m_Dispatcher);
             SAFE_DELETE(m_CollisionConfiguration);
             SAFE_DELETE(m_Broadphase);
-			SAFE_DELETE_VECTOR(m_CollisionObjects);
+            SAFE_DELETE_VECTOR(m_CollisionObjects);
         }
         void _update(float& dt, int& maxSteps, float& other){
             if(m_Paused) return;
@@ -510,16 +510,16 @@ void Physics::addRigidBody(btRigidBody* rigidBody){ physicsManager->m_World->add
 void Physics::removeRigidBody(btRigidBody* rigidBody){ physicsManager->m_World->removeRigidBody(rigidBody); }
 void Physics::updateRigidBody(btRigidBody* rigidBody){ physicsManager->m_World->updateSingleAabb(rigidBody); }
 vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end) {
-	btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
-	physicsManager->m_World->rayTest(start, end, RayCallback);
-	vector<glm::vec3> result;
-	if (RayCallback.hasHit()) {
-		glm::vec3 res1 = glm::vec3(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
-		glm::vec3 res2 = glm::vec3(RayCallback.m_hitNormalWorld.x(), RayCallback.m_hitNormalWorld.y(), RayCallback.m_hitNormalWorld.z());
-		result.push_back(res1);
-		result.push_back(res2);
-	}
-	return result;
+    btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
+    physicsManager->m_World->rayTest(start, end, RayCallback);
+    vector<glm::vec3> result;
+    if (RayCallback.hasHit()) {
+        glm::vec3 res1 = glm::vec3(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
+        glm::vec3 res2 = glm::vec3(RayCallback.m_hitNormalWorld.x(), RayCallback.m_hitNormalWorld.y(), RayCallback.m_hitNormalWorld.z());
+        result.push_back(res1);
+        result.push_back(res2);
+    }
+    return result;
 }
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
     if(ignored){

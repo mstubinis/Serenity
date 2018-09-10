@@ -34,6 +34,7 @@ namespace Engine{
     namespace epriv{
         class MeshLoader;
         class MeshSkeleton;
+        class CollisionFactory;
         class VertexFormat final{ public: enum Format{
             Position,UV,Normal,Binormal,Tangent,
         _TOTAL};};
@@ -75,7 +76,7 @@ namespace Engine{
             }
         };
         struct ImportedMeshData final{
-			std::map<uint,VertexBoneData> m_Bones;
+            std::map<uint,VertexBoneData> m_Bones;
 
             std::vector<glm::vec3> file_points;
             std::vector<glm::vec2> file_uvs;
@@ -89,7 +90,7 @@ namespace Engine{
             std::vector<glm::vec3> tangents;
             std::vector<ushort> indices;
             void clear(){
-				vector_clear(file_points); vector_clear(file_uvs); vector_clear(file_normals); vector_clear(file_triangles);
+                vector_clear(file_points); vector_clear(file_uvs); vector_clear(file_normals); vector_clear(file_triangles);
                 vector_clear(points); vector_clear(uvs); vector_clear(normals); vector_clear(binormals); vector_clear(tangents); vector_clear(indices);
             }
             ImportedMeshData(){ }
@@ -123,6 +124,7 @@ class Mesh final: public BindableResource, public EventObserver{
     friend class ::Engine::epriv::MeshSkeleton;
     friend class ::InternalMeshPublicInterface;
     friend class ::Engine::epriv::MeshLoader;
+    friend class ::Engine::epriv::CollisionFactory;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
