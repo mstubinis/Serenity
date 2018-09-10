@@ -454,7 +454,6 @@ class Mesh::impl final{
         static DefaultMeshUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
         vector<GLuint> m_buffers;
-        Collision* m_Collision;
         Engine::epriv::CollisionFactory* m_CollisionFactory;
 
         epriv::MeshSkeleton* m_Skeleton;
@@ -463,7 +462,6 @@ class Mesh::impl final{
         glm::vec3 m_radiusBox;
         float m_radius;
         float m_threshold;
-        CollisionType::Type m_Type;
 
         vector<epriv::MeshVertexData> m_Vertices;
         vector<ushort> m_Indices;
@@ -475,7 +473,6 @@ class Mesh::impl final{
             m_InstanceCount = 0;
             m_VAO = 0;
             m_File = "";
-            m_Collision = nullptr;
             m_Skeleton = nullptr;
             m_threshold = threshold;
         }
@@ -597,15 +594,12 @@ class Mesh::impl final{
             d.normals.resize(6,glm::vec3(1));  d.binormals.resize(6,glm::vec3(1));  d.tangents.resize(6,glm::vec3(1));
             _initGlobalTwo(super,d,threshold);
         }
-        void _init(Mesh* super,string& fileOrData,CollisionType::Type type,bool notMemory,float threshold,bool loadNow){//from file / data
+        void _init(Mesh* super,string& fileOrData,bool notMemory,float threshold,bool loadNow){//from file / data
             _initGlobal(threshold);
-            m_Type = type;
             if(notMemory){
                 m_File = fileOrData;
-                if (m_File == "data/Models/defiant.obj")
-                    _loadFromOBJMemory(super, type, threshold, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN, fileOrData);
             }else{
-                _loadFromOBJMemory(super,type,threshold, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN,fileOrData);
+                _loadFromOBJMemory(super,threshold, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN,fileOrData);
             }
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
@@ -862,7 +856,7 @@ class Mesh::impl final{
                 vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
             }
         }
-        void _loadFromFile(Mesh* super, string& file, CollisionType::Type type, float threshold) {
+        void _loadFromFile(Mesh* super, string& file, float threshold) {
             string extension = boost::filesystem::extension(file);
             epriv::ImportedMeshData d;
 
@@ -873,11 +867,6 @@ class Mesh::impl final{
             else {
                 _loadInternal(super, d, m_File);
                 _finalizeData(d, threshold);
-            }
-            if(type == CollisionType::None){
-                m_Collision = new Collision(new btEmptyShape());
-            }else{
-                m_Collision = new Collision(d,type);
             }
         }
         void _loadDataIntoTriangles(epriv::ImportedMeshData& data,vector<uint>& _pi,vector<uint>& _ui,vector<uint>& _ni,unsigned char _flags){
@@ -976,7 +965,7 @@ class Mesh::impl final{
                 }
             }
         }
-        void _loadFromOBJMemory(Mesh* super,CollisionType::Type type,float threshold,unsigned char _flags,string input){
+        void _loadFromOBJMemory(Mesh* super,float threshold,unsigned char _flags,string input){
             epriv::ImportedMeshData d;
 
             vector<uint> positionIndices;
@@ -997,12 +986,6 @@ class Mesh::impl final{
                 epriv::MeshLoader::CalculateTBNAssimp(d);
             }
             _finalizeData(d,threshold);
-            if(type == CollisionType::None){
-                m_Collision = new Collision(new btEmptyShape);
-            }
-            else{
-                m_Collision = new Collision(d,type);
-            }
         }
         void _calculateMeshRadius(Mesh* super){
             float maxX = 0; float maxY = 0; float maxZ = 0;
@@ -1121,7 +1104,7 @@ class Mesh::impl final{
         }
         void _load_CPU(Mesh* super){
             if(m_File != ""){
-                _loadFromFile(super,m_File,m_Type,m_threshold);
+                _loadFromFile(super,m_File,m_threshold);
             }
             _calculateMeshRadius(super);
             m_CollisionFactory = new Engine::epriv::CollisionFactory(super,m_Vertices,m_Indices);
@@ -1457,28 +1440,28 @@ epriv::AnimationData::~AnimationData() { m_i->_Destruct(); }
 float epriv::AnimationData::duration() { return m_i->_Duration(); }
 
 
-void InternalMeshPublicInterface::LoadCPU(Mesh* mesh){
-    mesh->m_i->_load_CPU(mesh);
+void InternalMeshPublicInterface::LoadCPU(Mesh* _mesh){
+    _mesh->m_i->_load_CPU(_mesh);
 }
-void InternalMeshPublicInterface::LoadGPU(Mesh* mesh){
-    mesh->m_i->_load_GPU(mesh);
-    mesh->EngineResource::load();
+void InternalMeshPublicInterface::LoadGPU(Mesh* _mesh){
+    _mesh->m_i->_load_GPU(_mesh);
+    _mesh->EngineResource::load();
 }
-void InternalMeshPublicInterface::UnloadCPU(Mesh* mesh){
-    mesh->m_i->_unload_CPU(mesh);
-    mesh->EngineResource::unload();
+void InternalMeshPublicInterface::UnloadCPU(Mesh* _mesh){
+    _mesh->m_i->_unload_CPU(_mesh);
+    _mesh->EngineResource::unload();
 }
-void InternalMeshPublicInterface::UnloadGPU(Mesh* mesh){
-    mesh->m_i->_unload_GPU(mesh);
+void InternalMeshPublicInterface::UnloadGPU(Mesh* _mesh){
+    _mesh->m_i->_unload_GPU(_mesh);
 }
-void InternalMeshPublicInterface::UpdateInstance(Mesh* mesh,uint _id, glm::mat4 _modelMatrix){
-    auto& i = *mesh->m_i;
+void InternalMeshPublicInterface::UpdateInstance(Mesh* _mesh,uint _id, glm::mat4 _modelMatrix){
+    auto& i = *_mesh->m_i;
     glBindBuffer(GL_ARRAY_BUFFER, i.m_buffers.at(2));
     glBufferSubData(GL_ARRAY_BUFFER, _id * sizeof(glm::mat4), sizeof(glm::mat4), &_modelMatrix);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
-void InternalMeshPublicInterface::UpdateInstances(Mesh* mesh,vector<glm::mat4>& _modelMatrices){
-    auto& i = *mesh->m_i;
+void InternalMeshPublicInterface::UpdateInstances(Mesh* _mesh,vector<glm::mat4>& _modelMatrices){
+    auto& i = *_mesh->m_i;
     i.m_InstanceCount = _modelMatrices.size();
     if(_modelMatrices.size() == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, i.m_buffers.at(2));
@@ -1493,6 +1476,21 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
     }
     return false;
 }
+
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* _mesh, CollisionType::Type _type) {
+    switch (_type) {
+        case CollisionType::None: { return new btEmptyShape(); }
+        case CollisionType::Box: { return _mesh->m_i->m_CollisionFactory->buildBoxShape(); }
+        case CollisionType::ConvexHull: { return _mesh->m_i->m_CollisionFactory->buildConvexHull(); }
+        case CollisionType::Sphere: { return _mesh->m_i->m_CollisionFactory->buildSphereShape(); }
+        case CollisionType::TriangleShapeStatic: { return _mesh->m_i->m_CollisionFactory->buildTriangleShape(); }
+        case CollisionType::TriangleShape: { return _mesh->m_i->m_CollisionFactory->buildTriangleShapeGImpact(); }
+        default: { return new btEmptyShape(); }
+    }
+    return new btEmptyShape();
+}
+
+
 Mesh::Mesh(string name,unordered_map<string,float>& grid,uint width,uint length,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,grid,width,length,threshold);
     registerEvent(EventType::WindowFullscreenChanged);
@@ -1505,16 +1503,15 @@ Mesh::Mesh(string name,float width, float height,float threshold):BindableResour
     m_i->_init(this,name,width,height,threshold);
     registerEvent(EventType::WindowFullscreenChanged);
 }
-Mesh::Mesh(string fileOrData,CollisionType::Type type,bool notMemory,float threshold,bool loadNow):BindableResource(fileOrData),m_i(new impl){
-    if(!notMemory) setName("CustomMesh");
-    m_i->_init(this,fileOrData,type,notMemory,threshold,loadNow);
+Mesh::Mesh(string fileOrData,bool notMemory,float threshold,bool loadNow):BindableResource(fileOrData),m_i(new impl){
+    if (!notMemory) setName("CustomMesh");
+    m_i->_init(this,fileOrData,notMemory,threshold,loadNow);
     registerEvent(EventType::WindowFullscreenChanged);
 }
 Mesh::~Mesh(){
     unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
 }
-Collision* Mesh::getCollision() const { return m_i->m_Collision; }
 
 unordered_map<string, epriv::AnimationData*>& Mesh::animationData(){ return m_i->m_Skeleton->m_AnimationData; }
 

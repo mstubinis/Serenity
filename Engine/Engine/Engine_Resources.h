@@ -99,11 +99,11 @@ namespace Engine{
 
         Handle addFont(std::string filename);
 
-        Handle addMesh(std::string file, CollisionType::Type = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
+        Handle addMesh(std::string file, bool fromFile = true,float threshhold = 0.0005f);
         Handle addMesh(std::string name, float x, float y, float w, float h,float threshhold = 0.0005f);
         Handle addMesh(std::string name, float w, float h,float threshhold = 0.0005f);
         Handle addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length,float threshhold = 0.0005f);
-        Handle addMeshAsync(std::string file, CollisionType::Type = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
+        Handle addMeshAsync(std::string file,bool fromFile = true,float threshhold = 0.0005f);
 
         Handle addTexture(std::string file,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8,bool mipmaps = false);
 

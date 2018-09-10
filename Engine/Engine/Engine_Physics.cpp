@@ -4,6 +4,7 @@
 #include "Engine_Math.h"
 #include "Camera.h"
 #include "Mesh.h"
+#include "MeshInstance.h"
 #include "Scene.h"
 
 #include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
@@ -25,6 +26,10 @@
 using namespace Engine;
 using namespace std;
 
+void _preTicCallback(btDynamicsWorld* world, btScalar timeStep) {
+}
+void _postTicCallback(btDynamicsWorld* world, btScalar timeStep) {
+}
 
 namespace Engine{
     namespace epriv{
@@ -400,61 +405,66 @@ namespace Engine{
                 GLDebugDrawer(){ init(); }
                 ~GLDebugDrawer(){ destruct(); }
         };
+        struct PhysicsWorld {
+            btBroadphaseInterface* broadphase;
+            btDefaultCollisionConfiguration* collisionConfiguration;
+            btCollisionDispatcher* dispatcher;
+            btSequentialImpulseConstraintSolver* solver;
+            btDiscreteDynamicsWorld* world;
+            GLDebugDrawer* debugDrawer;
+            PhysicsWorld() {
+                broadphase = new btDbvtBroadphase();
+                collisionConfiguration = new btDefaultCollisionConfiguration();
+                dispatcher = new btCollisionDispatcher(collisionConfiguration);
+                solver = new btSequentialImpulseConstraintSolver;
+                world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+                debugDrawer = new GLDebugDrawer();
+                debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
+                world->setDebugDrawer(debugDrawer);
+                world->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+
+                btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher);
+
+                world->setInternalTickCallback(_preTicCallback, (void*)world, true);
+                world->setInternalTickCallback(_postTicCallback, (void*)world, false);
+            }
+            ~PhysicsWorld() {
+                SAFE_DELETE(debugDrawer);
+                SAFE_DELETE(world);
+                SAFE_DELETE(solver);
+                SAFE_DELETE(dispatcher);
+                SAFE_DELETE(collisionConfiguration);
+                SAFE_DELETE(broadphase);
+            }
+        };
     };
 };
 
-
-void _preTicCallback(btDynamicsWorld* world, btScalar timeStep){
-}
-void _postTicCallback(btDynamicsWorld* world, btScalar timeStep){
-}
-
 class epriv::PhysicsManager::impl final{
     public:
-        btBroadphaseInterface* m_Broadphase;
-        btDefaultCollisionConfiguration* m_CollisionConfiguration;
-        btCollisionDispatcher* m_Dispatcher;
-        btSequentialImpulseConstraintSolver* m_Solver;
-        btDiscreteDynamicsWorld* m_World;
-        GLDebugDrawer* m_DebugDrawer;
+
+        epriv::PhysicsWorld* data;
+
         bool m_Paused;
         vector<Collision*> m_CollisionObjects;
 
         void _init(const char* name,uint& w,uint& h){
             m_Paused = false;
-            m_Broadphase = new btDbvtBroadphase();
-            m_CollisionConfiguration = new btDefaultCollisionConfiguration();
-            m_Dispatcher = new btCollisionDispatcher(m_CollisionConfiguration);
-            m_Solver = new btSequentialImpulseConstraintSolver;
-            m_World = new btDiscreteDynamicsWorld(m_Dispatcher,m_Broadphase,m_Solver,m_CollisionConfiguration);
-            m_DebugDrawer = new GLDebugDrawer();
-            m_DebugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
-            m_World->setDebugDrawer(m_DebugDrawer);
-            m_World->setGravity(btVector3(0.0f,0.0f,0.0f));
-
-            btGImpactCollisionAlgorithm::registerAlgorithm(m_Dispatcher);
-
-            m_World->setInternalTickCallback(_preTicCallback,(void*)m_World,true);
-            m_World->setInternalTickCallback(_postTicCallback,(void*)m_World,false);
+            data = new epriv::PhysicsWorld();
         }
         void _postInit(const char* name,uint w,uint h){
-            m_DebugDrawer->initRenderingContext();
+            data->debugDrawer->initRenderingContext();
         }
         void _destruct(){
-            SAFE_DELETE(m_DebugDrawer);
-            SAFE_DELETE(m_World);
-            SAFE_DELETE(m_Solver);
-            SAFE_DELETE(m_Dispatcher);
-            SAFE_DELETE(m_CollisionConfiguration);
-            SAFE_DELETE(m_Broadphase);
             SAFE_DELETE_VECTOR(m_CollisionObjects);
+            SAFE_DELETE(data);
         }
         void _update(float& dt, int& maxSteps, float& other){
             if(m_Paused) return;
-            m_World->stepSimulation(dt,maxSteps,other);
-            uint numManifolds = m_World->getDispatcher()->getNumManifolds();
+            data->world->stepSimulation(dt,maxSteps,other);
+            uint numManifolds = data->dispatcher->getNumManifolds();
             for (uint i = 0; i < numManifolds; ++i){
-                btPersistentManifold* contactManifold =  m_World->getDispatcher()->getManifoldByIndexInternal(i);
+                btPersistentManifold* contactManifold =  data->dispatcher->getManifoldByIndexInternal(i);
                 btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
                 btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
                 for (int j = 0; j < contactManifold->getNumContacts(); ++j){
@@ -473,7 +483,7 @@ class epriv::PhysicsManager::impl final{
             }
         }
         void _render(){
-            m_World->debugDrawWorld();
+            data->world->debugDrawWorld();
 
             Camera* c = Resources::getCurrentScene()->getActiveCamera();
             glm::vec3 camPos = c->getPosition();
@@ -484,12 +494,8 @@ class epriv::PhysicsManager::impl final{
             Renderer::sendUniformMatrix4f("Model",model);
             Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
 
-            m_DebugDrawer->drawAccumulatedLines();
-            m_DebugDrawer->postRender();
-        }
-        void _removeCollision(Collision* collisionObject){
-            removeFromVector(m_CollisionObjects,collisionObject);
-            SAFE_DELETE(collisionObject);
+            data->debugDrawer->drawAccumulatedLines();
+            data->debugDrawer->postRender();
         }
 };
 epriv::PhysicsManager::impl* physicsManager;
@@ -499,19 +505,18 @@ epriv::PhysicsManager::~PhysicsManager(){ m_i->_destruct(); }
 void epriv::PhysicsManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::PhysicsManager::_update(float dt,int maxsteps,float other){ m_i->_update(dt,maxsteps,other); }
 void epriv::PhysicsManager::_render(){ m_i->_render(); }
-void epriv::PhysicsManager::_removeCollision(Collision* collisionObject){ m_i->_removeCollision(collisionObject); }
 
 void Physics::pause(bool b){ physicsManager->m_Paused = b; }
 void Physics::unpause(){ physicsManager->m_Paused = false; }
-void Physics::setGravity(float x,float y,float z){ physicsManager->m_World->setGravity(btVector3(x,y,z)); }
+void Physics::setGravity(float x,float y,float z){ physicsManager->data->world->setGravity(btVector3(x,y,z)); }
 void Physics::setGravity(glm::vec3& gravity){ Physics::setGravity(gravity.x,gravity.y,gravity.z); }
-void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ physicsManager->m_World->addRigidBody(rigidBody,group,mask); }
-void Physics::addRigidBody(btRigidBody* rigidBody){ physicsManager->m_World->addRigidBody(rigidBody); }
-void Physics::removeRigidBody(btRigidBody* rigidBody){ physicsManager->m_World->removeRigidBody(rigidBody); }
-void Physics::updateRigidBody(btRigidBody* rigidBody){ physicsManager->m_World->updateSingleAabb(rigidBody); }
+void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ physicsManager->data->world->addRigidBody(rigidBody,group,mask); }
+void Physics::addRigidBody(btRigidBody* rigidBody){ physicsManager->data->world->addRigidBody(rigidBody); }
+void Physics::removeRigidBody(btRigidBody* rigidBody){ physicsManager->data->world->removeRigidBody(rigidBody); }
+void Physics::updateRigidBody(btRigidBody* rigidBody){ physicsManager->data->world->updateSingleAabb(rigidBody); }
 vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end) {
     btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
-    physicsManager->m_World->rayTest(start, end, RayCallback);
+    physicsManager->data->world->rayTest(start, end, RayCallback);
     vector<glm::vec3> result;
     if (RayCallback.hasHit()) {
         glm::vec3 res1 = glm::vec3(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
@@ -523,21 +528,21 @@ vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end)
 }
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
     if(ignored){
-        physicsManager->m_World->removeRigidBody(ignored);
+        physicsManager->data->world->removeRigidBody(ignored);
     }
     vector<glm::vec3> result = _rayCastInternal(s,e);
     if(ignored){
-        physicsManager->m_World->addRigidBody(ignored);
+        physicsManager->data->world->addRigidBody(ignored);
     }
     return result;
 }
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector<btRigidBody*>& ignored){
     for(auto object:ignored){
-        physicsManager->m_World->removeRigidBody(object);
+        physicsManager->data->world->removeRigidBody(object);
     }
     vector<glm::vec3> result = _rayCastInternal(s,e);
     for(auto object:ignored){
-        physicsManager->m_World->addRigidBody(object);
+        physicsManager->data->world->addRigidBody(object);
     }
     return result;
  }
@@ -566,22 +571,48 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
 }
 
 
-
-
 class Collision::impl final {
     public:
-        btTriangleMesh* m_InternalMeshData;
         btVector3 m_Inertia;
-        uint m_Type;
+        CollisionType::Type m_Type;
         btCollisionShape* m_Shape;
 
-        void _init(Collision* super,float mass) {
+        void _init(Collision* super, vector<Mesh*>& meshes, float& mass, glm::vec3& scale) {
             m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
+            m_Type = CollisionType::Compound;
+
+            //get the shape here
+            btCompoundShape* compound = new btCompoundShape();
+            btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
+            for (auto mesh : meshes) {
+                btCollisionShape* shape = InternalMeshPublicInterface::BuildCollision(mesh,CollisionType::ConvexHull);
+                compound->addChildShape(t, shape);
+            }
+            compound->setMargin(0.001f);
+            compound->recalculateLocalAabb();
+            m_Shape = compound;
+
+            _setMass(mass);
+            physicsManager->m_CollisionObjects.push_back(super);
+        }
+        void _init(Collision* super,ComponentModel* modelComponent, float& mass, glm::vec3& scale) {
+            vector<Mesh*> meshes;
+            for (uint i = 0; i < modelComponent->getNumModels(); ++i) {
+                meshes.push_back(modelComponent->getModel(i)->mesh());
+            }
+            _init(super, meshes, mass, scale);
+        }
+        void _init(Collision* super,CollisionType::Type _type,Mesh* mesh,float& mass,glm::vec3& scale) {
+            m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
+            m_Type = _type;
+
+            //get the shape here
+            m_Shape = InternalMeshPublicInterface::BuildCollision(mesh,_type);
+
             _setMass(mass);
             physicsManager->m_CollisionObjects.push_back(super);
         }
         void _destruct() {
-            SAFE_DELETE(m_InternalMeshData);
             btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
             if (compoundCast) {
                 for (int i = 0; i < compoundCast->getNumChildShapes(); ++i) {
@@ -591,114 +622,20 @@ class Collision::impl final {
             }
             SAFE_DELETE(m_Shape);
         }
-        void _load(Engine::epriv::ImportedMeshData& data, CollisionType::Type collisionType, glm::vec3 _scale) {
-            _destruct();
-
-            m_InternalMeshData = nullptr;
-            btCollisionShape* shape = nullptr;
-            m_Type = collisionType;
-            switch (collisionType) {
-                case CollisionType::ConvexHull: {
-                    shape = new btConvexHullShape();
-                    btConvexHullShape& convexCast = *(btConvexHullShape*)shape;
-                    for (auto vertex : data.points) {
-                        convexCast.addPoint(btVector3(vertex.x * _scale.x, vertex.y * _scale.y, vertex.z * _scale.z));
-                    }
-                    btShapeHull hull = btShapeHull(&convexCast);
-                    hull.buildHull(convexCast.getMargin());
-                    SAFE_DELETE(shape);
-                    const btVector3* ptsArray = hull.getVertexPointer();
-                    shape = new btConvexHullShape();
-                    btConvexHullShape& convexShape = *(btConvexHullShape*)shape;
-                    for (int i = 0; i < hull.numVertices(); ++i) {
-                        convexShape.addPoint(btVector3(ptsArray[i].x(), ptsArray[i].y(), ptsArray[i].z()));
-                    }
-                    convexShape.setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
-                    convexShape.setMargin(0.001f);
-                    convexShape.recalcLocalAabb();
-                    break;
-                }
-                case CollisionType::TriangleShape: {
-                    m_InternalMeshData = new btTriangleMesh();
-                    for (auto triangle : data.file_triangles) {
-                        btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position * _scale);
-                        btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position * _scale);
-                        btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position * _scale);
-                        m_InternalMeshData->addTriangle(v1, v2, v3, true);
-                    }
-                    shape = new btGImpactMeshShape(m_InternalMeshData);
-                    btGImpactMeshShape& giShape = *((btGImpactMeshShape*)shape);
-                    giShape.setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
-                    giShape.setMargin(0.001f);
-                    giShape.updateBound();
-                    break;
-                }
-                case CollisionType::TriangleShapeStatic: {
-                    m_InternalMeshData = new btTriangleMesh();
-                    for (auto triangle : data.file_triangles) {
-                        btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position * _scale);
-                        btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position * _scale);
-                        btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position * _scale);
-                        m_InternalMeshData->addTriangle(v1, v2, v3, true);
-                    }
-                    shape = new btBvhTriangleMeshShape(m_InternalMeshData, true);
-                    btBvhTriangleMeshShape& triShape = *((btBvhTriangleMeshShape*)shape);
-                    triShape.setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
-                    triShape.setMargin(0.001f);
-                    triShape.recalcLocalAabb();
-                    break;
-                }
-                case CollisionType::Sphere: {
-                    float radius = 0;
-                    for (auto vertex : data.points) {
-                        float length = glm::length(vertex);
-                        if (length > radius) {
-                            radius = length;
-                        }
-                    }
-                    shape = new btSphereShape(radius * _scale.x);
-                    btSphereShape& sphere = *((btSphereShape*)shape);
-                    sphere.setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
-                    sphere.setMargin(0.001f);
-                    break;
-                }
-                case CollisionType::Box: {
-                    glm::vec3 max = glm::vec3(0.0f);
-                    for (auto vertex : data.file_points) {
-                        float x = abs(vertex.x);
-                        float y = abs(vertex.y);
-                        float z = abs(vertex.z);
-                        if (x > max.x) 
-                            max.x = x;
-                        if (y > max.y)
-                            max.y = y;
-                        if (z > max.z)
-                            max.z = z;
-                    }
-                    shape = new btBoxShape(btVector3(max.x * _scale.x, max.y * _scale.y, max.z * _scale.z));
-                    btBoxShape& boxShape = *(btBoxShape*)shape;
-                    boxShape.setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
-                    boxShape.setMargin(0.001f);
-                    break;
-                }
-            }
-            m_Shape = shape;
-        }
         void _setMass(float _mass) {
             if (!m_Shape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) return;
             m_Shape->calculateLocalInertia(_mass, m_Inertia);
         }
 };
 
-
-Collision::Collision(btCollisionShape* shape,CollisionType::Type type, float mass):m_i(new impl){
-    m_i->m_Shape = shape;
-    m_i->m_Type = type;
-    m_i->_init(this,mass);
+Collision::Collision(vector<Mesh*>& meshes, float mass, glm::vec3 scale):m_i(new impl) {
+    m_i->_init(this, meshes, mass, scale);
 }
-Collision::Collision(epriv::ImportedMeshData& data,CollisionType::Type type, float mass,glm::vec3 scale):m_i(new impl){ 
-    m_i->_load(data,type,scale);
-    m_i->_init(this,mass);
+Collision::Collision(ComponentModel* modelComponent, float mass, glm::vec3 scale) :m_i(new impl) {
+    m_i->_init(this, modelComponent, mass, scale);
+}
+Collision::Collision(CollisionType::Type type, Mesh* mesh,float mass,glm::vec3 scale):m_i(new impl){ 
+    m_i->_init(this, type,mesh,mass,scale); 
 }
 Collision::~Collision(){ m_i->_destruct(); }
 void Collision::setMass(float mass){ m_i->_setMass(mass); }

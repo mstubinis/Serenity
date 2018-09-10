@@ -108,7 +108,7 @@ class Ship: public Entity{
             std::string = "Ship",     //Name
             glm::vec3 = glm::vec3(0), //Position
             glm::vec3 = glm::vec3(1), //Scale
-            Collision* = nullptr,     //Bullet Collision Shape
+            CollisionType::Type = CollisionType::ConvexHull,
             Scene* = nullptr
         );
         virtual ~Ship();

@@ -436,6 +436,7 @@ ComponentModel::ComponentModel(Mesh* mesh,Material* material,Entity* owner):Comp
 ComponentModel::~ComponentModel(){
     models.clear();
 }
+uint ComponentModel::getNumModels() { return models.size(); }
 MeshInstance* ComponentModel::getModel(uint index){ return models.at(index); }
 bool ComponentModel::passedRenderCheck(){ return m_i->m_PassedRenderCheck; }
 bool ComponentModel::visible(){ return m_i->m_Visible; }
@@ -488,7 +489,7 @@ ComponentBody::ComponentBody():ComponentBaseClass(){
     Math::recalculateForwardRightUp(*data.n.rotation,_forward,_right,_up);
 }
 //rigid body constructor
-ComponentBody::ComponentBody(Collision* _collision,Entity* owner,glm::vec3 _scale):ComponentBaseClass(){
+ComponentBody::ComponentBody(CollisionType::Type _collisionType,Entity* owner,glm::vec3 _scale):ComponentBaseClass(){
     data.p = PhysicsData();	
     _physics = true;
     _forward = glm::vec3(0.0f,0.0f,-1.0f);  _right = glm::vec3(1.0f,0.0f,0.0f);  _up = glm::vec3(0.0f,1.0f,0.0f);
@@ -498,7 +499,7 @@ ComponentBody::ComponentBody(Collision* _collision,Entity* owner,glm::vec3 _scal
     float _mass = 1.0f;
     data.p.mass = _mass;
 
-    setCollision(_collision, false, _scale);
+    setCollision(_collisionType, _mass, _scale);
 
     setMass(_mass);
     btDefaultMotionState* _motionState = data.p.motionState;
@@ -541,41 +542,16 @@ void ComponentBody::alignTo(glm::vec3 direction,float speed){
         Math::recalculateForwardRightUp(*data.n.rotation,_forward,_right,_up);
     }
 }
-void ComponentBody::setCollision(Collision* collision,bool emptyCollision,glm::vec3 _scale){
-    btCollisionShape* newShape = nullptr;
-    Collision* meshCollision = nullptr;
-    if (!collision) {
-        if (!emptyCollision) {
-            auto* modelComponent = m_Owner->getComponent<ComponentModel>();
-            btCompoundShape* compoundShape = new btCompoundShape();
-            for (auto meshInstance : modelComponent->models) {
-                auto& mesh = *meshInstance->mesh();
-                btTransform t; t.setFromOpenGLMatrix(glm::value_ptr(meshInstance->model()));
-                meshCollision = mesh.getCollision();		
-                if (meshCollision) {
-                    if (meshCollision->getType() == CollisionType::ConvexHull) {
-                        btConvexHullShape* cast = static_cast<btConvexHullShape*>(meshCollision->getShape());
-                        newShape = new btUniformScalingShape(cast, 1.0f);
-                        newShape->setLocalScaling(Math::btVectorFromGLM(_scale));
-                    }else if (meshCollision->getType() == CollisionType::TriangleShapeStatic){
-                        btBvhTriangleMeshShape* cast = static_cast<btBvhTriangleMeshShape*>(meshCollision->getShape());
-                        newShape = new btScaledBvhTriangleMeshShape(cast, Math::btVectorFromGLM(_scale));
-                    }else{
-                        newShape = meshCollision->getShape();
-                    }
-                }
-                if (newShape) {
-                    newShape->setMargin(0.001f);
-                    compoundShape->addChildShape(t, newShape);
-                    compoundShape->recalculateLocalAabb();
-                }
-            }
-            data.p.collision = new Collision(compoundShape, CollisionType::Compound, data.p.mass); //double check this mass value?
-        }else{
-            data.p.collision = new Collision(new btEmptyShape(), CollisionType::None, 0.0f);
+void ComponentBody::setCollision(CollisionType::Type _type,float _mass,glm::vec3 _scale){
+    auto* modelComponent = m_Owner->getComponent<ComponentModel>();
+    if (_type == CollisionType::Compound) {   
+        if (modelComponent) {
+            data.p.collision = new Collision(modelComponent, _mass, _scale);
+        }else {
+            data.p.collision = new Collision(CollisionType::None,nullptr,_mass, _scale);
         }
-    }else{
-        data.p.collision = collision;
+    }else {
+        data.p.collision = new Collision(_type, modelComponent->getModel()->mesh(), _mass, _scale);
     }
     data.p.collision->getShape()->setUserPointer(this);
 }

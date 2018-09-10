@@ -10,6 +10,8 @@
 class Entity;
 class btCollisionShape;
 class btRigidBody;
+class Mesh;
+class ComponentModel;
 namespace Engine{
     namespace epriv{
         struct ImportedMeshData;
@@ -17,20 +19,21 @@ namespace Engine{
     };
 };
 class CollisionType{public: enum Type{
+    None,
+    Sphere,
+    Box,
     ConvexHull, 
     TriangleShape,
     TriangleShapeStatic,
     Compound,
-    Box,
-    Sphere,
-    None,
 _TOTAL,};};
 class Collision final{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        Collision(btCollisionShape* shape = nullptr,CollisionType::Type = CollisionType::None, float mass = 0);
-        Collision(Engine::epriv::ImportedMeshData&,CollisionType::Type = CollisionType::None, float mass = 0,glm::vec3 scale = glm::vec3(1.0f));
+        Collision(std::vector<Mesh*>& meshes, float mass = 0, glm::vec3 scale = glm::vec3(1.0f));
+        Collision(ComponentModel*, float mass = 0, glm::vec3 scale = glm::vec3(1.0f));
+        Collision(CollisionType::Type, Mesh* mesh,float mass = 0,glm::vec3 scale = glm::vec3(1.0f));
         ~Collision();
 
         void setMass(float mass);
@@ -52,8 +55,6 @@ namespace Engine{
 
                 void _update(float dt,int maxSteps = 1,float = 0.0166666f);
                 void _render();
-
-                void _removeCollision(Collision*);
         };
     };
     namespace Physics{

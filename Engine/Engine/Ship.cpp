@@ -219,11 +219,11 @@ void ShipSystemSensors::update(const float& dt){
 }
 #pragma endregion
 
-Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, Collision* collision, Scene* scene) :Entity() {
+Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,Scene* scene) :Entity() {
 	scene->addEntity(this);
 	ComponentModel* modelComponent = new ComponentModel(mesh, mat, this);
 	addComponent(modelComponent);
-	ComponentBody* rigidBodyComponent = new ComponentBody(collision, this, scl);
+	ComponentBody* rigidBodyComponent = new ComponentBody(_type, this, scl);
 	addComponent(rigidBodyComponent);
 
 	float radius = modelComponent->radius();

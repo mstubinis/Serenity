@@ -1236,13 +1236,13 @@ class epriv::RenderManager::impl final{
                 "f 12 10 16";
             #pragma endregion
 
-            epriv::InternalMeshes::PointLightBounds = new Mesh(pointLightMesh,CollisionType::None,false,0.0005f);
-            epriv::InternalMeshes::RodLightBounds = new Mesh(rodLightData,CollisionType::None,false,0.0005f);
-            epriv::InternalMeshes::SpotLightBounds = new Mesh(spotLightData,CollisionType::None,false,0.0005f);
+            epriv::InternalMeshes::PointLightBounds = new Mesh(pointLightMesh,false,0.0005f);
+            epriv::InternalMeshes::RodLightBounds = new Mesh(rodLightData,false,0.0005f);
+            epriv::InternalMeshes::SpotLightBounds = new Mesh(spotLightData,false,0.0005f);
 
             Mesh::FontPlane = new Mesh("FontPlane",1.0f,1.0f,0.0005f);
             Mesh::Plane = new Mesh("Plane",1.0f,1.0f,0.0005f);
-            Mesh::Cube = new Mesh(cubeMesh,CollisionType::None,false,0.0005f);
+            Mesh::Cube = new Mesh(cubeMesh,false,0.0005f);
 
             brdfCook = new Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
             brdfCook->setWrapping(TextureWrap::ClampToEdge);	
@@ -2205,10 +2205,10 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             if(mainRenderFunc){
-                //if(draw_physics_debug  &&  &camera == s->getActiveCamera()){
+                if(draw_physics_debug  &&  &camera == s->getActiveCamera()){
                     m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BulletPhysics)->bind();
                     Core::m_Engine->m_PhysicsManager->_render();
-                //}
+                }
             }
             #pragma endregion
 

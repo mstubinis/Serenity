@@ -185,6 +185,7 @@ class ComponentModel: public ComponentBaseClass{
         ComponentModel(Mesh*,Material*,Entity*);
         ~ComponentModel();
 
+        uint getNumModels();
         float radius();
         bool passedRenderCheck();
         bool visible();
@@ -234,7 +235,7 @@ class ComponentBody: public ComponentBaseClass{
         glm::vec3 _forward, _right, _up;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentBody(Collision*,Entity* owner,glm::vec3 scale = glm::vec3(1.0f));
+        ComponentBody(CollisionType::Type,Entity* owner,glm::vec3 scale = glm::vec3(1.0f));
         ComponentBody();
         ~ComponentBody();
 
@@ -261,7 +262,7 @@ class ComponentBody: public ComponentBaseClass{
         glm::mat4 modelMatrix();
         const btRigidBody* getBody() const;
 
-        void setCollision(Collision*,bool emptyCollision = false,glm::vec3 _scale = glm::vec3(1.0f));
+        void setCollision(CollisionType::Type,float mass,glm::vec3 _scale = glm::vec3(1.0f));
         void setDamping(float linear,float angular);
 
         void setDynamic(bool dynamic);

@@ -116,6 +116,7 @@ class InternalMeshPublicInterface final{
         static void UpdateInstance(Mesh*,uint _id, glm::mat4 _modelMatrix);
         static void UpdateInstances(Mesh*, std::vector<glm::mat4>& _modelMatrices);
         static bool SupportsInstancing();
+        static btCollisionShape* BuildCollision(Mesh*,CollisionType::Type);
 };
 class Mesh final: public BindableResource, public EventObserver{
     friend struct ::DefaultMeshBindFunctor;
@@ -133,10 +134,9 @@ class Mesh final: public BindableResource, public EventObserver{
         Mesh(std::string name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
         Mesh(std::string name,float width, float height,float threshhold);
         Mesh(std::string name,float x, float y, float width, float height,float threshhold);
-        Mesh(std::string fileOrData,CollisionType::Type = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f,bool loadNow = true);
+        Mesh(std::string fileOrData, bool notMemory = true,float threshhold = 0.0005f,bool loadNow = true);
         ~Mesh();
 
-        Collision* getCollision() const;
         std::unordered_map<std::string, Engine::epriv::AnimationData*>& animationData();
         const glm::vec3& getRadiusBox() const;
         const float getRadius() const;

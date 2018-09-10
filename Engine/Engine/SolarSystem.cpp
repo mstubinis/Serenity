@@ -215,7 +215,7 @@ void SolarSystem::_loadFromFile(string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f),nullptr,this));
+                    setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f), CollisionType::ConvexHull,this));
                     GameCamera* playerCamera = (GameCamera*)getActiveCamera();
                     playerCamera->follow(getPlayer());
                 }
@@ -226,7 +226,7 @@ void SolarSystem::_loadFromFile(string filename){
                         //xPos += parentX;
                         //zPos += parentZ;
                     }
-                    //new Ship(ResourceManifest::AkiraMesh,ResourceManifest::AkiraMaterial,false,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this);
+                    //new Ship(ResourceManifest::AkiraMesh,ResourceManifest::AkiraMaterial,false,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),CollisionType::ConvexHull,this);
                 }
                 else if(line[0] == 'R'){//Rings
                     if(PARENT != ""){
@@ -266,7 +266,7 @@ void SolarSystem::_loadFromFile(string filename){
     mmodel->getModel()->playAnimation("Skeleton|fire_hammer", 0.0f, -1.0f, 0);
     
     for(uint k = 0; k < 1; ++k){
-        Ship* _starbase = new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Starfleet Command " + to_string(k),glm::vec3(xPos+50+(k*5),0,zPos+50+(k*5)),glm::vec3(1.0f),nullptr,this);
+        Ship* _starbase = new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Starfleet Command " + to_string(k),glm::vec3(xPos+50+(k*5),0,zPos+50+(k*5)),glm::vec3(1.0f), CollisionType::TriangleShapeStatic,this);
     }
     body.translate(0,0,2);
 

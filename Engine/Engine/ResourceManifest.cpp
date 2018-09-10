@@ -62,23 +62,23 @@ void ResourceManifest::init(){
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag,ShaderRenderPass::Geometry);
 
 
-    TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",CollisionType::None,true,0.0f);
+    TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",true,0.0f);
 
-    PlanetMesh = Resources::addMeshAsync("data/Models/planet.objc",CollisionType::None);
-    DefiantMesh = Resources::addMeshAsync("data/Models/defiant.objc",CollisionType::ConvexHull); //220 metres long (0.22 km)
-    StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.objc",CollisionType::TriangleShapeStatic); //6950 meters in height (6.95 km)
-    RingMesh = Resources::addMeshAsync("data/Models/ring.objc",CollisionType::None);
-    DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.objc",CollisionType::ConvexHull);
+    PlanetMesh = Resources::addMeshAsync("data/Models/planet.objc");
+    DefiantMesh = Resources::addMeshAsync("data/Models/defiant.objc"); //220 metres long (0.22 km)
+    StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.objc"); //6950 meters in height (6.95 km)
+    RingMesh = Resources::addMeshAsync("data/Models/ring.objc");
+    DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.objc");
     /*
-    AkiraMesh = Resources::addMeshAsync("data/Models/akira.objc",CollisionType::ConvexHull);
-    MirandaMesh = Resources::addMeshAsync("data/Models/miranda.objc",CollisionType::ConvexHull);
-    IntrepidMesh = Resources::addMeshAsync("data/Models/intrepid.objc",CollisionType::ConvexHull);
-    NorwayMesh = Resources::addMeshAsync("data/Models/norway.objc",CollisionType::ConvexHull);
-    VenerexMesh = Resources::addMeshAsync("data/Models/venerex.objc",CollisionType::ConvexHull);
-    OberthMesh = Resources::addMeshAsync("data/Models/oberth.objc",CollisionType::ConvexHull);
+    AkiraMesh = Resources::addMeshAsync("data/Models/akira.objc");
+    MirandaMesh = Resources::addMeshAsync("data/Models/miranda.objc");
+    IntrepidMesh = Resources::addMeshAsync("data/Models/intrepid.objc");
+    NorwayMesh = Resources::addMeshAsync("data/Models/norway.objc");
+    VenerexMesh = Resources::addMeshAsync("data/Models/venerex.objc");
+    OberthMesh = Resources::addMeshAsync("data/Models/oberth.objc");
     */
-    CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.objc",CollisionType::None);
-    CapsuleRibbonMesh = Resources::addMeshAsync("data/Models/capsuleRibbon.objc",CollisionType::None);
+    CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.objc");
+    CapsuleRibbonMesh = Resources::addMeshAsync("data/Models/capsuleRibbon.objc");
 
     Engine::epriv::threading::waitForAll();
 
