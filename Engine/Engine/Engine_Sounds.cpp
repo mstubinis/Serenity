@@ -1,8 +1,4 @@
-#include "Engine.h"
 #include "Engine_Sounds.h"
-#include "Engine_Resources.h"
-
-#include <glm/glm.hpp>
 
 using namespace Engine;
 using namespace std;
@@ -64,7 +60,7 @@ class SoundQueue::impl final{
         }
         void _clear(){
             for(auto it1 = m_Queue.begin(); it1 != m_Queue.end();){
-                delete (*it1);
+				SAFE_DELETE(*it1);
                 it1 = m_Queue.erase(it1);
             }
             vector_clear(m_Queue);
@@ -75,7 +71,7 @@ class SoundQueue::impl final{
         void _dequeue(){
             if(m_Queue.size() > 0){
                 auto it = m_Queue.begin();
-                delete (*it);
+				SAFE_DELETE(*it);
                 it = m_Queue.erase(it);
                 m_IsDelayProcess = true;
                 //do we need to manually delete? i dont think so
@@ -105,7 +101,7 @@ class SoundQueue::impl final{
                     else if(stat == SoundStatus::Stopped){
                         if(s->getLoopsLeft() <= 1){
                             //this sound has finished, remove it from the queue and start the delay process
-                            delete (*it);
+							SAFE_DELETE(*it);
                             it = m_Queue.erase(it);
                             m_IsDelayProcess = true;
                         }
@@ -124,10 +120,8 @@ class Engine::epriv::SoundManager::impl final{
         void _postInit(const char* name,uint& w,uint& h){
         }
         void _destruct(){
-            for(auto q:m_SoundQueues){ delete q; }
-            for(auto s:m_CurrentlyPlayingSounds){ delete s; }
-            vector_clear(m_SoundQueues);
-            vector_clear(m_CurrentlyPlayingSounds);
+			SAFE_DELETE_VECTOR(m_SoundQueues);
+			SAFE_DELETE_VECTOR(m_CurrentlyPlayingSounds);
         }
         void _updateSoundStatus(SoundBaseClass* sound,sf::SoundSource::Status sfStatus){
             if(sfStatus == sf::SoundSource::Status::Stopped){
@@ -156,9 +150,7 @@ class Engine::epriv::SoundManager::impl final{
                 if(s->status() == SoundStatus::Stopped){
                     it = m_CurrentlyPlayingSounds.erase(it);
                 }
-                else{
-                    ++it;
-                }
+                else{ ++it; }
             }
             for(auto it1 = m_SoundQueues.begin(); it1 != m_SoundQueues.end();){
                 SoundQueue* s = (*it1);
@@ -166,9 +158,7 @@ class Engine::epriv::SoundManager::impl final{
                 if(s->empty()){
                     it1 = m_SoundQueues.erase(it1);
                 }
-                else{
-                    ++it1;
-                }
+                else{ ++it1; }
             }
         }
 };
@@ -191,7 +181,7 @@ class SoundEffect::impl final{
             s->setVolume( data->getVolume() );
 
             m_Sound.setBuffer( *(data->getBuffer()) );
-            if(queue == false){
+            if(!queue){
                 soundManager->m_CurrentlyPlayingSounds.push_back(s);
                 s->play();
             }
@@ -220,7 +210,7 @@ class SoundMusic::impl final{
             else{
                 s->setVolume( data->getVolume() );
             }
-            if(queue == false){ 
+            if(!queue){ 
                 soundManager->m_CurrentlyPlayingSounds.push_back(s);
                 s->play();
             }

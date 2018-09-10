@@ -7,17 +7,11 @@
 #include "Engine_Sounds.h"
 #include "Engine_Events.h"
 #include "Engine_Noise.h"
-#include "Components.h"
-#include "Camera.h"
-#include "GBuffer.h"
-#include "Scene.h"
-#include "Texture.h"
-#include "Light.h"
 #include "Engine_Window.h"
 
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "Components.h"
+#include "Scene.h"
+
 #include <glm/vec2.hpp>
 
 #include <SFML/System.hpp>

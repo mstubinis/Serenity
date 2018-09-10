@@ -5,6 +5,7 @@
 #include "Engine_FullscreenItems.h"
 #include "Engine_BuiltInShaders.h"
 #include "Engine_BuiltInResources.h"
+#include "Engine_Math.h"
 #include "Engine_GLStateMachine.h"
 #include "GBuffer.h"
 #include "Camera.h"
@@ -24,9 +25,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <boost/lexical_cast.hpp>
 #include <random>
-#include <math.h>
-
-#include <boost/container/vector.hpp>
+#include <iostream>
 
 using namespace Engine;
 using namespace Engine::Renderer;
@@ -261,8 +260,8 @@ class epriv::RenderManager::impl final{
 
         GBuffer* m_gBuffer;
         glm::mat4 m_2DProjectionMatrix;
-        boost::container::vector<FontRenderInfo> m_FontsToBeRendered;
-        boost::container::vector<TextureRenderInfo> m_TexturesToBeRendered;
+        vector<FontRenderInfo> m_FontsToBeRendered;
+        vector<TextureRenderInfo> m_TexturesToBeRendered;
         vector<ShaderP*> m_GeometryPassShaderPrograms;
         vector<ShaderP*> m_ForwardPassShaderPrograms;
         glm::mat4 m_IdentityMat4;

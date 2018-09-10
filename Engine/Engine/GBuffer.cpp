@@ -1,7 +1,5 @@
 #include "GBuffer.h"
 #include "Texture.h"
-#include "Engine_Resources.h"
-#include "Engine_Window.h"
 #include "Engine_Renderer.h"
 #include "FramebufferObject.h"
 

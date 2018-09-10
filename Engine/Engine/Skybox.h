@@ -3,9 +3,7 @@
 #define ENGINE_SKYBOX_H
 
 #include <string>
-#include <vector>
 #include <memory>
-#include <glm/glm.hpp>
 #include "Engine_EventObject.h"
 
 typedef unsigned int GLuint;

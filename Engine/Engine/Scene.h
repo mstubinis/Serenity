@@ -3,17 +3,20 @@
 #define ENGINE_SCENE_H
 
 #include "Engine_ResourceBasic.h"
-#include "Engine_Utils.h"
-#include "Components.h"
+#include "Engine_EventObject.h"
 #include <unordered_map>
-#include <glm/glm.hpp>
-#include <iostream>
-
+#include <glm/vec3.hpp>
 class Entity;
 class Camera;
 class SunLight;
 class SkyboxEmpty;
 class LightProbe;
+
+namespace Engine {
+	namespace epriv {
+		class ComponentManager;
+	};
+};
 
 class Scene: public EngineResource, public EventObserver{
     friend class LightProbe;

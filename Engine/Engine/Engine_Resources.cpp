@@ -8,7 +8,6 @@
 #include "Engine_EventDispatcher.h"
 #include "Engine_Sounds.h"
 #include "Engine_Window.h"
-#include "Light.h"
 #include "Skybox.h"
 #include "Mesh.h"
 #include "MeshInstance.h"
@@ -18,7 +17,7 @@
 #include "Font.h"
 #include "Scene.h"
 
-#include <SFML/Graphics.hpp>
+#include <iostream>
 
 using namespace Engine;
 using namespace std;

@@ -359,6 +359,7 @@ MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Textur
 MaterialComponentRefraction::~MaterialComponentRefraction(){
     MaterialComponentReflection::~MaterialComponentReflection();
 }
+void MaterialComponentRefraction::setRefractionIndex(float _index){ m_RefractionIndex = _index; }
 void MaterialComponentRefraction::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];

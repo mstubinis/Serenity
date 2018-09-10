@@ -3,11 +3,6 @@
 #include "Engine_Resources.h"
 #include "Texture.h"
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <unordered_map>
-#include <iostream>
-
 using namespace Engine;
 using namespace std;
 
@@ -199,8 +194,8 @@ class epriv::FramebufferObject::impl{
             super->bind();
             GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
             if(err != GL_FRAMEBUFFER_COMPLETE){
-                cout << "Framebuffer completeness in FramebufferObject::impl _check() is incomplete!" << endl;
-                cout << "Error is: " << err << std::endl;
+                //cout << "Framebuffer completeness in FramebufferObject::impl _check() is incomplete!" << endl;
+                //cout << "Error is: " << err << std::endl;
                 return false;
             }
             return true;

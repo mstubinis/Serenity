@@ -2,6 +2,7 @@
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "Engine_GLStateMachine.h"
+#include "Engine_Math.h"
 #include "Light.h"
 #include "Planet.h"
 #include "ShaderProgram.h"

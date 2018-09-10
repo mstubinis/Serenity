@@ -6,14 +6,17 @@
 #include <SFML/OpenGL.hpp>
 
 #include "BindableResource.h"
+#include "Engine_EventObject.h"
 #include "Engine_Physics.h"
-#include "Engine_Resources.h"
-#include "Components.h"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <map>
 
-#include <glm/glm.hpp>
+#include <map>
+#include <unordered_map>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
+
+typedef unsigned short ushort;
 
 namespace sf{ class Image; };
 
@@ -72,7 +75,7 @@ namespace Engine{
             }
         };
         struct ImportedMeshData final{
-            std::map<uint,VertexBoneData> m_Bones;
+			std::map<uint,VertexBoneData> m_Bones;
 
             std::vector<glm::vec3> file_points;
             std::vector<glm::vec2> file_uvs;
@@ -86,7 +89,7 @@ namespace Engine{
             std::vector<glm::vec3> tangents;
             std::vector<ushort> indices;
             void clear(){
-                vector_clear(file_points); vector_clear(file_uvs); vector_clear(file_normals); vector_clear(file_triangles);
+				vector_clear(file_points); vector_clear(file_uvs); vector_clear(file_normals); vector_clear(file_triangles);
                 vector_clear(points); vector_clear(uvs); vector_clear(normals); vector_clear(binormals); vector_clear(tangents); vector_clear(indices);
             }
             ImportedMeshData(){ }

@@ -1,5 +1,6 @@
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
+#include "Engine_Math.h"
 #include "Mesh.h"
 #include "MeshInstance.h"
 #include "Engine_ThreadManager.h"
@@ -316,8 +317,8 @@ namespace Engine{
                 unordered_map<string, AnimationData*>  m_AnimationData;
                 glm::mat4                              m_GlobalInverseTransform;
                 void fill(Engine::epriv::ImportedMeshData& data) {
-                    for (auto bone : data.m_Bones) {
-                        VertexBoneData& b = bone.second;
+                    for (auto _b : data.m_Bones) {
+						VertexBoneData& b = _b.second;
                         m_BoneIDs.push_back(new glm::vec4(b.IDs[0], b.IDs[1], b.IDs[2], b.IDs[3]));
                         m_BoneWeights.push_back(new glm::vec4(b.Weights[0], b.Weights[1], b.Weights[2], b.Weights[3]));
                     }

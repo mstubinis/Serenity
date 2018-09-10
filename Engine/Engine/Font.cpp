@@ -1,17 +1,10 @@
-#include "Engine.h"
 #include "Font.h"
+#include "Engine.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
-#include "ShaderProgram.h"
-#include "Camera.h"
-#include "Mesh.h"
 #include "Texture.h"
-#include <sstream>
-#include <GLM/gtc/type_ptr.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 
 using namespace Engine;
 using namespace std;

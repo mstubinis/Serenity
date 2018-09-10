@@ -5,8 +5,6 @@
 #include "Engine_Renderer.h"
 #include "Components.h"
 #include "Texture.h"
-#include "GBuffer.h"
-#include "Engine_BuiltInShaders.h"
 
 #include <iostream>
 

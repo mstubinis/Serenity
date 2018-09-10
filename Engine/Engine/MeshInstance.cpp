@@ -3,6 +3,7 @@
 #include "MeshInstance.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
+#include "Engine_Math.h"
 #include "Mesh.h"
 #include "Material.h"
 #include "Camera.h"

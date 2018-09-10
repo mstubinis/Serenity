@@ -1,10 +1,8 @@
 #include "Components.h"
 #include "Engine_Resources.h"
-#include "Engine_Renderer.h"
-#include "Engine_BuiltInResources.h"
+#include "Engine_Math.h"
 #include "Engine.h"
 #include "Mesh.h"
-#include "Material.h"
 #include "Scene.h"
 #include "Camera.h"
 #include "Skybox.h"
@@ -12,10 +10,8 @@
 #include "Engine_ThreadManager.h"
 #include "Engine_Time.h"
 
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_access.hpp>
 
 #include "Engine_Physics.h"
 #include <bullet/btBulletCollisionCommon.h>

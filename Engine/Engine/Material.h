@@ -3,13 +3,10 @@
 #define ENGINE_MATERIAL_H
 
 #include "BindableResource.h"
-#include "Engine_Resources.h"
-#include <unordered_map>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <glm/vec4.hpp>
-
-typedef unsigned int uint;
+#include <unordered_map>
 
 class MeshInstance;
 class Texture;
@@ -168,8 +165,6 @@ class Material final: public BindableResource{
         const MaterialComponentReflection* getComponentReflection() const;
         const MaterialComponentRefraction* getComponentRefraction() const;
         const MaterialComponentParallaxOcclusion* getComponentParallaxOcclusion() const;
-
-        void addComponent(uint type, Texture* texture);
 
         void addComponentDiffuse(Texture* texture);
         void addComponentDiffuse(std::string textureFile);

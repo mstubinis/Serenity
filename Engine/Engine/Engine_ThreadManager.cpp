@@ -1,17 +1,11 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
-#include <boost/move/move.hpp>
 #include <boost/atomic.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "Engine.h"
 #include "Engine_ThreadManager.h"
 #include "Engine_Utils.h"
-
-#include <iostream>
-
-#include <chrono>
 
 using namespace Engine;
 using namespace std;
@@ -86,14 +80,14 @@ void epriv::ThreadManager::_update(const float& dt){ m_i->_update(dt,this); }
 const uint epriv::ThreadManager::cores() const{ return threadManager->m_Cores; }
 void epriv::threading::finalizeJob( boost_packed_task_ptr&& task){
     auto& mgr = *threadManager;
-    mgr.m_Callbacks.emplace_back( boost::move(boost_shared_fut( task->get_future() )) );
+    mgr.m_Callbacks.emplace_back( std::move(boost_shared_fut( task->get_future() )) );
     mgr.m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 }
 void epriv::threading::finalizeJob( boost_packed_task_ptr&& task, boost_void_func&& then_task){
     auto& mgr = *threadManager;
-    EngineCallback e(boost::move(boost_shared_fut( task->get_future())));
+    EngineCallback e(std::move(boost_shared_fut( task->get_future())));
     e.cbk = boost::bind<void>(then_task); 
-    mgr.m_Callbacks.push_back( boost::move(e) );
+    mgr.m_Callbacks.push_back( std::move(e) );
     mgr.m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 }
 void epriv::threading::waitForAll(){ 

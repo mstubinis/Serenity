@@ -1,4 +1,3 @@
-#include "Engine.h"
 #include "Engine_Physics.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
@@ -15,15 +14,8 @@
 #include <bullet/BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 //yes, this code is needed or stuff breaks. find out why
 #include <SFML/OpenGL.hpp>

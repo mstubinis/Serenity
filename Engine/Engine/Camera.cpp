@@ -1,15 +1,6 @@
-#include "Engine.h"
-#include "Scene.h"
 #include "Camera.h"
-#include "Engine_Resources.h"
+#include "Scene.h"
 #include "Engine_Math.h"
-
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/matrix_access.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <boost/make_shared.hpp>
 
 using namespace Engine;
 using namespace boost;
@@ -65,12 +56,6 @@ glm::vec3 Camera::getViewVectorNoTranslation(){ return m_Camera->getViewVectorNo
 glm::vec3 Camera::forward(){ return m_Body->forward(); }
 glm::vec3 Camera::right(){ return m_Body->right(); }
 glm::vec3 Camera::up(){ return m_Body->up(); }
-/*
-void Camera::lookAt(glm::vec3 _eye, glm::vec3 _forward, glm::vec3 _up){
-    //m_Camera->lookAt(_eye,_forward,_up);
-    //m_Body->setPosition(_eye);
-}
-*/
 float Camera::getDistance(Entity* e){
     auto* b = e->getComponent<ComponentBody>();
     return glm::distance(b->position(),getPosition());

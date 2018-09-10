@@ -2,7 +2,10 @@
 #ifndef ENGINE_MESH_INSTANCE_H
 #define ENGINE_MESH_INSTANCE_H
 
-#include "Engine_Math.h"
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include "BindableResource.h"
 
 struct Handle;

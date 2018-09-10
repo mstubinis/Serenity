@@ -1,26 +1,21 @@
 #include "Engine_FullscreenItems.h"
 #include "Engine_Renderer.h"
 #include <vector>
-#include <glm/glm.hpp>
-
-#include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 using namespace Engine;
 using namespace std;
 
-typedef unsigned int uint;
 typedef unsigned short ushort;
 
 namespace Engine{
     namespace epriv{
         struct MeshVertexDataFullscreen final{
-            public:
-                glm::vec3 position;
-                glm::vec2 uv;
+            glm::vec3 position;
+            glm::vec2 uv;
 
-                MeshVertexDataFullscreen(){}
-                ~MeshVertexDataFullscreen(){}
+            ~MeshVertexDataFullscreen(){}
         };
     };
 };
@@ -145,7 +140,7 @@ class epriv::FullscreenQuad::impl final{
         void _render(){
 			if(m_VAO){
 				Renderer::bindVAO(m_VAO);
-				glDrawElements(GL_TRIANGLES,m_Indices.size(),GL_UNSIGNED_SHORT,0);
+				glDrawElements(GL_QUADS,m_Indices.size(),GL_UNSIGNED_SHORT,0);
 				//Renderer::bindVAO(0);
 			}else{
 				_bindDataToGPU();

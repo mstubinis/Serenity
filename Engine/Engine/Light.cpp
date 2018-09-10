@@ -1,26 +1,19 @@
 #include "Light.h"
-#include "Engine.h"
 #include "Engine_Renderer.h"
 #include "Engine_Resources.h"
 #include "Engine_BuiltInResources.h"
 #include "Engine_Math.h"
 #include "Engine_GLStateMachine.h"
-#include "ShaderProgram.h"
 #include "Camera.h"
 #include "Mesh.h"
 #include "Scene.h"
-#include "Skybox.h"
 #include "Texture.h"
-#include "GBuffer.h"
 #include "FramebufferObject.h"
 #include "Engine_Window.h"
 #include "Scene.h"
 
 #include <glm/gtx/transform.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 
 using namespace Engine;

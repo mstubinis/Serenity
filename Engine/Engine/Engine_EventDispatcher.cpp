@@ -1,6 +1,4 @@
 #include "Engine_EventDispatcher.h"
-#include "Engine_ResourceBasic.h"
-#include "Components.h"
 #include <vector>
 
 using namespace Engine;
