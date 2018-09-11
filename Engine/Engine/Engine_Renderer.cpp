@@ -2205,10 +2205,10 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             if(mainRenderFunc){
-                if(draw_physics_debug  &&  &camera == s->getActiveCamera()){
+                //if(draw_physics_debug  &&  &camera == s->getActiveCamera()){
                     m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BulletPhysics)->bind();
                     Core::m_Engine->m_PhysicsManager->_render();
-                }
+                //}
             }
             #pragma endregion
 

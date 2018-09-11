@@ -508,15 +508,15 @@ ComponentBody::ComponentBody(CollisionType::Type _collisionType,Entity* owner,gl
 
     btRigidBody::btRigidBodyConstructionInfo CI(_mass,_motionState, _shape,_inertia);
     data.p.rigidBody = new btRigidBody(CI);
+    if (m_Owner->scene() == Resources::getCurrentScene())
+        Physics::addRigidBody(data.p.rigidBody);
     data.p.rigidBody->setSleepingThresholds(0.015f,0.015f);
     data.p.rigidBody->setFriction(0.3f);
-    data.p.rigidBody->setDamping(0.1f,0.4f);//this makes the objects slowly slow down in space, like air friction 
+    data.p.rigidBody->setDamping(0.1f,0.4f);//air friction 
     data.p.rigidBody->setMassProps(_mass,_inertia);
     data.p.rigidBody->updateInertiaTensor();
     data.p.rigidBody->setUserPointer(this);
 
-    if(m_Owner->scene() == Resources::getCurrentScene())
-        Physics::addRigidBody(data.p.rigidBody);
 }
 ComponentBody::~ComponentBody(){
     if(_physics){

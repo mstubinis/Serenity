@@ -51,7 +51,7 @@ namespace Engine{
                 PhysicsManager(const char* name,uint w,uint h);
                 ~PhysicsManager();
 
-                void _init(const char* name,uint w,uint h);
+                void _init(const char* name,uint w,uint h,uint numCores);
 
                 void _update(float dt,int maxSteps = 1,float = 0.0166666f);
                 void _render();

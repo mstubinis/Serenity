@@ -69,9 +69,9 @@ void Engine::init(const char* name,uint w,uint h){
 	engine.m_TimeManager->_init(name,w,h);
 	engine.m_SoundManager->_init(name,w,h);
 	engine.m_RenderManager->_init(name,w,h);
-	engine.m_PhysicsManager->_init(name,w,h);
+    engine.m_ThreadManager->_init(name, w, h);
+	engine.m_PhysicsManager->_init(name,w,h,engine.m_ThreadManager->cores());
 	engine.m_ComponentManager->_init(name,w,h);
-	engine.m_ThreadManager->_init(name,w,h);
 	engine.m_NoiseManager->_init(name,w,h);
 
     //init the game here

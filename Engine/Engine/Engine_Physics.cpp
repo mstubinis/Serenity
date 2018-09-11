@@ -1,3 +1,4 @@
+#define BT_THREADSAFE 1
 #include "Engine_Physics.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
@@ -14,6 +15,12 @@
 #include <bullet/BulletCollision/Gimpact/btCompoundFromGimpact.h>
 #include <bullet/BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
+
+//Multi-threading
+#include "Engine_ThreadManager.h"
+#include <bullet/BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h>
+#include <bullet/BulletDynamics/Dynamics/btSimulationIslandManagerMt.h>
+#include <bullet/BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -410,21 +417,27 @@ namespace Engine{
             btDefaultCollisionConfiguration* collisionConfiguration;
             btCollisionDispatcher* dispatcher;
             btSequentialImpulseConstraintSolver* solver;
+            btSequentialImpulseConstraintSolverMt* solverMT;
             btDiscreteDynamicsWorld* world;
             GLDebugDrawer* debugDrawer;
-            PhysicsWorld() {
+            PhysicsWorld(uint numCores) {
                 broadphase = new btDbvtBroadphase();
                 collisionConfiguration = new btDefaultCollisionConfiguration();
                 dispatcher = new btCollisionDispatcher(collisionConfiguration);
-                solver = new btSequentialImpulseConstraintSolver;
-                world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+                //if (numCores <= 1) {
+                    solver = new btSequentialImpulseConstraintSolver();
+                    solverMT = nullptr;
+                    world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+                //}else{
+                //    solver = new btSequentialImpulseConstraintSolver();
+                //    solverMT = new btSequentialImpulseConstraintSolverMt();
+                //    world = new btDiscreteDynamicsWorldMt(dispatcher,broadphase,(btConstraintSolverPoolMt*)solverMT, solver, collisionConfiguration);
+                //}
                 debugDrawer = new GLDebugDrawer();
                 debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
                 world->setDebugDrawer(debugDrawer);
                 world->setGravity(btVector3(0.0f, 0.0f, 0.0f));
-
                 btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher);
-
                 world->setInternalTickCallback(_preTicCallback, (void*)world, true);
                 world->setInternalTickCallback(_postTicCallback, (void*)world, false);
             }
@@ -432,6 +445,7 @@ namespace Engine{
                 SAFE_DELETE(debugDrawer);
                 SAFE_DELETE(world);
                 SAFE_DELETE(solver);
+                SAFE_DELETE(solverMT);
                 SAFE_DELETE(dispatcher);
                 SAFE_DELETE(collisionConfiguration);
                 SAFE_DELETE(broadphase);
@@ -439,18 +453,16 @@ namespace Engine{
         };
     };
 };
-
 class epriv::PhysicsManager::impl final{
     public:
-
         epriv::PhysicsWorld* data;
-
         bool m_Paused;
+
         void _init(const char* name,uint& w,uint& h){
-            m_Paused = false;
-            data = new epriv::PhysicsWorld();
+            m_Paused = false;      
         }
-        void _postInit(const char* name,uint w,uint h){
+        void _postInit(const char* name,uint w,uint h,uint numCores){
+            data = new epriv::PhysicsWorld(numCores);
             data->debugDrawer->initRenderingContext();
         }
         void _destruct(){
@@ -481,7 +493,6 @@ class epriv::PhysicsManager::impl final{
         }
         void _render(){
             data->world->debugDrawWorld();
-
             Camera* c = Resources::getCurrentScene()->getActiveCamera();
             glm::vec3 camPos = c->getPosition();
             glm::mat4 model = glm::mat4(1.0f);
@@ -490,7 +501,6 @@ class epriv::PhysicsManager::impl final{
             model[3][2] -= camPos.z;
             Renderer::sendUniformMatrix4f("Model",model);
             Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
-
             data->debugDrawer->drawAccumulatedLines();
             data->debugDrawer->postRender();
         }
@@ -499,7 +509,7 @@ epriv::PhysicsManager::impl* physicsManager;
 
 epriv::PhysicsManager::PhysicsManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); physicsManager = m_i.get(); }
 epriv::PhysicsManager::~PhysicsManager(){ m_i->_destruct(); }
-void epriv::PhysicsManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
+void epriv::PhysicsManager::_init(const char* name,uint w,uint h,uint numCores){ m_i->_postInit(name,w,h,numCores); }
 void epriv::PhysicsManager::_update(float dt,int maxsteps,float other){ m_i->_update(dt,maxsteps,other); }
 void epriv::PhysicsManager::_render(){ m_i->_render(); }
 
@@ -574,10 +584,14 @@ class Collision::impl final {
         CollisionType::Type m_Type;
         btCollisionShape* m_Shape;
 
-        void _init(Collision* super, vector<Mesh*>& meshes, float& mass, glm::vec3& scale) {
+        //TODO: fix btUniformScalingShape and its triangle equivalent during debug drawing. problem is NOT with compound objects
+
+        void _baseInit(CollisionType::Type _type, float& mass) {
             m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
-            m_Type = CollisionType::Compound;
-            //get the shape here
+            m_Type = _type;
+            _setMass(mass);
+        }
+        void _init(Collision* super, vector<Mesh*>& meshes, float& mass, glm::vec3& scale) {
             btCompoundShape* compound = new btCompoundShape();
             btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
             for (auto mesh : meshes) {
@@ -585,9 +599,9 @@ class Collision::impl final {
                 compound->addChildShape(t, shape);
             }
             compound->setMargin(0.001f);
-            compound->recalculateLocalAabb();
+            compound->recalculateLocalAabb();   
             m_Shape = compound;
-            _setMass(mass);
+            _baseInit(CollisionType::Compound, mass);
         }
         void _init(Collision* super,ComponentModel* modelComponent, float& mass, glm::vec3& scale) {
             vector<Mesh*> meshes;
@@ -597,11 +611,9 @@ class Collision::impl final {
             _init(super, meshes, mass, scale);
         }
         void _init(Collision* super,CollisionType::Type _type,Mesh* mesh,float& mass,glm::vec3& scale) {
-            m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
-            m_Type = _type;
-            //get the shape here
-            m_Shape = InternalMeshPublicInterface::BuildCollision(mesh,_type);
-            _setMass(mass);
+            btCollisionShape* shape = InternalMeshPublicInterface::BuildCollision(mesh, _type);
+            m_Shape = shape;
+            _baseInit(_type, mass);
         }
         void _destruct() {
             btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
@@ -619,15 +631,9 @@ class Collision::impl final {
         }
 };
 
-Collision::Collision(vector<Mesh*>& meshes, float mass, glm::vec3 scale):m_i(new impl) {
-    m_i->_init(this, meshes, mass, scale);
-}
-Collision::Collision(ComponentModel* modelComponent, float mass, glm::vec3 scale) :m_i(new impl) {
-    m_i->_init(this, modelComponent, mass, scale);
-}
-Collision::Collision(CollisionType::Type type, Mesh* mesh,float mass,glm::vec3 scale):m_i(new impl){ 
-    m_i->_init(this, type,mesh,mass,scale); 
-}
+Collision::Collision(vector<Mesh*>& meshes, float mass, glm::vec3 scale):m_i(new impl) {m_i->_init(this, meshes, mass, scale);}
+Collision::Collision(ComponentModel* modelComponent, float mass, glm::vec3 scale) :m_i(new impl) {m_i->_init(this, modelComponent, mass, scale);}
+Collision::Collision(CollisionType::Type type, Mesh* mesh,float mass,glm::vec3 scale):m_i(new impl){ m_i->_init(this, type,mesh,mass,scale); }
 Collision::~Collision(){ m_i->_destruct(); }
 void Collision::setMass(float mass){ m_i->_setMass(mass); }
 const btVector3& Collision::getInertia() const { return m_i->m_Inertia; }
