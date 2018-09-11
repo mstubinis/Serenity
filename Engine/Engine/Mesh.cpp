@@ -393,20 +393,16 @@ namespace Engine{
                 }
             public:
                 Mesh* m_Mesh;
-
                 btShapeHull* m_ConvexHullData;
                 btConvexHullShape* m_ConvesHullShape;
-
                 btTriangleMesh* m_TriangleStaticData;
                 btBvhTriangleMeshShape* m_TriangleStaticShape;
-
                 CollisionFactory(Mesh* _mesh, vector<MeshVertexData>& _vertices, vector<ushort>& _indices) {
                     m_Mesh = _mesh;
                     m_ConvexHullData = nullptr;
                     m_ConvesHullShape = nullptr;
                     m_TriangleStaticData = nullptr;
                     m_TriangleStaticShape = nullptr;
-
                     _initConvexData(_vertices);
                     _initTriangleData(_vertices,_indices);
                 }
@@ -427,22 +423,20 @@ namespace Engine{
                     return box;
                 }
                 btUniformScalingShape* buildConvexHull() {
-                    btUniformScalingShape* convexShape = new btUniformScalingShape(m_ConvesHullShape, 1.0f);
-                    return convexShape;
+                    btUniformScalingShape* shape = new btUniformScalingShape(m_ConvesHullShape,1.0f);
+                    return shape;
                 }
                 btScaledBvhTriangleMeshShape* buildTriangleShape() {
-                    btScaledBvhTriangleMeshShape* triShape = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape, btVector3(1.0f, 1.0f, 1.0f));
-                    return triShape;
+                    btScaledBvhTriangleMeshShape* shape = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape,btVector3(1.0f,1.0f,1.0f));
+                    return shape;
                 }
                 btGImpactMeshShape* buildTriangleShapeGImpact() {
-                    btGImpactMeshShape* giShape = new btGImpactMeshShape(m_TriangleStaticData);
-                    //giShape->setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
-                    giShape->setMargin(0.001f);
-                    giShape->updateBound();
-                    return giShape;
+                    btGImpactMeshShape* shape = new btGImpactMeshShape(m_TriangleStaticData);
+                    shape->setMargin(0.001f);
+                    shape->updateBound();
+                    return shape;
                 }
             };
-
     };
 };
 
