@@ -421,8 +421,22 @@ class ShaderP::impl final{
                     }
                 }
             }
-
-
+            //deal with MRT binding points
+            if (versionNumber >= 130) {
+                for (uint i = 0; i < 100; ++i) {
+                    const string fragDataStr = "gl_FragData[" + to_string(i) + "]";
+                    if (sfind(_d, fragDataStr)) {
+                        const string outFragData = "FRAG_COL_" + to_string(i);
+                        if (versionNumber >= 130 && versionNumber < 330) {
+                            insertStringAtLine(_d, "out vec4 " + outFragData + ";//130", 1);
+                        }
+                        else if (versionNumber >= 330) {
+                            insertStringAtLine(_d, "layout (location = " + to_string(i) + ") out vec4 " + outFragData + ";", 1);
+                        }
+                        boost::replace_all(_d, fragDataStr, outFragData);
+                    }
+                }
+            }
 
             if(versionNumber >= 110){
                 if(shader->type() == ShaderType::Vertex){
@@ -554,6 +568,14 @@ class ShaderP::impl final{
                 // Link the program id
                 m_ShaderProgram=glCreateProgram();
                 glAttachShader(m_ShaderProgram,vid);glAttachShader(m_ShaderProgram,fid);
+
+                for (uint i = 0; i < 100; ++i) {
+                    string outFragCol = "out vec4 FRAG_COL_" + to_string(i) + ";//130";
+                    if (sfind(FragmentCode, outFragCol)){
+                        glBindFragDataLocation(m_ShaderProgram, i, string("FRAG_COL_" + to_string(i)).c_str());
+                    }
+                }
+
                 glLinkProgram(m_ShaderProgram);
                 glDetachShader(m_ShaderProgram,vid);glDetachShader(m_ShaderProgram,fid);
                 glDeleteShader(vid);glDeleteShader(fid);

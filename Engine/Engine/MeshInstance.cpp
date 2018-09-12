@@ -15,42 +15,43 @@
 using namespace Engine;
 using namespace std;
 
-class MeshInstanceAnimation::impl{
-    public:
-        uint m_CurrentLoops, m_RequestedLoops;
-        float m_CurrentTime, m_StartTime, m_EndTime;
-        string m_AnimationName;
-        Mesh* m_Mesh;
+namespace Engine {
+    namespace epriv {
+        struct MeshInstanceAnimation final : private Engine::epriv::noncopyable {
+            friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
+            friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
 
-		void _init(Mesh* _mesh, const string& _animName, float _startTime, float _endTime, uint _requestedLoops) {
-			m_CurrentLoops = 0;
-			m_RequestedLoops = _requestedLoops;
-			m_CurrentTime = 0;
-			m_StartTime = _startTime;
-			m_AnimationName = _animName;
-			m_Mesh = _mesh;
-			if (_endTime < 0) {
-				m_EndTime = m_Mesh->animationData().at(_animName)->duration();
-			}
-			else {
-			    m_EndTime = _endTime;
-		    }
-        }
+            uint m_CurrentLoops, m_RequestedLoops;
+            float m_CurrentTime, m_StartTime, m_EndTime;
+            string m_AnimationName;
+            Mesh* m_Mesh;
+
+            MeshInstanceAnimation(Mesh* _mesh, const std::string& _animName, float _startTime, float _endTime, uint _requestedLoops = 1) {
+                m_CurrentLoops = 0;
+                m_RequestedLoops = _requestedLoops;
+                m_CurrentTime = 0;
+                m_StartTime = _startTime;
+                m_AnimationName = _animName;
+                m_Mesh = _mesh;
+                if (_endTime < 0) {
+                    m_EndTime = m_Mesh->animationData().at(_animName)->duration();
+                }else{
+                    m_EndTime = _endTime;
+                }
+            }
+        };
+    };
 };
 class MeshInstance::impl{
     public:  
-        vector<MeshInstanceAnimation*> m_AnimationQueue;
+        vector<epriv::MeshInstanceAnimation*> m_AnimationQueue;
         Entity* m_Entity;
         Mesh* m_Mesh;
         Material* m_Material;
-        glm::vec3 m_Position;
+        glm::vec3 m_Position, m_Scale, m_GodRaysColor;
         glm::quat m_Orientation;
-        glm::vec3 m_Scale;
         glm::mat4 m_Model;
-        bool m_NeedsUpdate;
         glm::vec4 m_Color;
-        glm::vec3 m_GodRaysColor;
-    
         void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,MeshInstance* super,Entity* entity){
             m_Entity = entity;
             _setMaterial(mat,super);
@@ -62,7 +63,6 @@ class MeshInstance::impl{
             m_Orientation = rot;
             m_Scale = scl;
             _updateModelMatrix();
-            m_NeedsUpdate = false;
         }
         void _setMesh(Mesh* mesh,MeshInstance* super){
             _removeMeshFromInstance(super);
@@ -133,35 +133,29 @@ class MeshInstance::impl{
             if(del){ m_Material->removeMeshEntry(m_Mesh); }
         }		  
         void _destruct(MeshInstance* super){
-            for(auto queue:m_AnimationQueue){
-                SAFE_DELETE(queue);
-            }
+            SAFE_DELETE_VECTOR(m_AnimationQueue);
             _removeMeshFromInstance(super);
             _removeMaterialFromInstance(super);
         }
-        void _setPosition(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; m_NeedsUpdate = true; }
-        void _setScale(float x, float y,float z){ m_Scale.x = x; m_Scale.y = y; m_Scale.z = z; m_NeedsUpdate = true; }
-        void _translate(float x, float y, float z){ m_Position.x += x; m_Position.y += y; m_Position.z += z; m_NeedsUpdate = true; }
-        void _scale(float x,float y,float z){ m_Scale.x += x; m_Scale.y += y; m_Scale.z += z; m_NeedsUpdate = true; }
+        void _setPosition(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; _updateModelMatrix(); }
+        void _setScale(float x, float y,float z){ m_Scale.x = x; m_Scale.y = y; m_Scale.z = z; _updateModelMatrix(); }
+        void _translate(float x, float y, float z){ m_Position.x += x; m_Position.y += y; m_Position.z += z; _updateModelMatrix(); }
+        void _scale(float x,float y,float z){ m_Scale.x += x; m_Scale.y += y; m_Scale.z += z; _updateModelMatrix(); }
         void _rotate(float x,float y,float z){
             float threshold = 0;
             if(abs(x) > threshold) m_Orientation = m_Orientation * (glm::angleAxis(-x, glm::vec3(1,0,0)));   //pitch
             if(abs(y) > threshold) m_Orientation = m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));   //yaw
             if(abs(z) > threshold) m_Orientation = m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));   //roll
-            m_NeedsUpdate = true;
+            _updateModelMatrix();
         }
         void _updateModelMatrix(){
-            if(m_NeedsUpdate){
-                m_Model = glm::mat4(1.0f);
-                glm::mat4 translationMatrix = glm::translate(m_Position);
-                glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
-                glm::mat4 scaleMatrix = glm::scale(m_Scale);
-                m_Model = translationMatrix * rotationMatrix * scaleMatrix * m_Model;
-                m_NeedsUpdate = false;
-            }
+            m_Model = glm::mat4(1.0f);
+            glm::mat4 translationMatrix = glm::translate(m_Position);
+            glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
+            glm::mat4 scaleMatrix = glm::scale(m_Scale);
+            m_Model = translationMatrix * rotationMatrix * scaleMatrix * m_Model;
         }
 };
-
 
 struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance::impl& i = *((MeshInstance*)r)->m_i;
@@ -177,7 +171,7 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
         vector<glm::mat4> transforms;
         //process the animation here
         for(uint j = 0; j < animationQueue.size(); ++j){
-            auto& a = *(animationQueue.at(j)->m_i);
+            auto& a = *(animationQueue.at(j));
             if(a.m_Mesh == i.m_Mesh){
                 a.m_CurrentTime += Resources::dt();
                 a.m_Mesh->playAnimation(transforms,a.m_AnimationName,a.m_CurrentTime);
@@ -193,7 +187,7 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
         //cleanup the animation queue
         for (auto it = animationQueue.cbegin(); it != animationQueue.cend();){
             MeshInstanceAnimation* anim = (*it);
-            auto& a = *(anim->m_i);
+            auto& a = *(anim);
             if (a.m_RequestedLoops > 0 && (a.m_CurrentLoops >= a.m_RequestedLoops)){
                 SAFE_DELETE(anim); //do we need this?
                 it = animationQueue.erase(it);
@@ -219,13 +213,6 @@ struct epriv::DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r
 epriv::DefaultMeshInstanceBindFunctor   DEFAULT_BIND_FUNCTOR;
 epriv::DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
-
-
-MeshInstanceAnimation::MeshInstanceAnimation(Mesh* m,const string& a,float s,float e,uint l):m_i(new impl){
-    m_i->_init(m,a,s,e,l);
-}
-MeshInstanceAnimation::~MeshInstanceAnimation(){
-}
 
 MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat,glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
     m_i->_init(mesh,mat,pos,rot,scl,this,entity);
@@ -291,12 +278,9 @@ void MeshInstance::setOrientation(float x,float y,float z){
     if(abs(z) > 0.001f) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));//roll
     m_i->_updateModelMatrix();
 }
-void MeshInstance::update(const float& dt){ m_i->_updateModelMatrix(); }
-void MeshInstance::render(){ m_i->m_Mesh->render(); }
-void MeshInstance::playAnimation(const string& animName,float startTime){
-    m_i->m_AnimationQueue.push_back(new MeshInstanceAnimation(mesh(),animName,startTime,mesh()->animationData().at(animName)->duration(),1));
+void MeshInstance::playAnimation(const string& animName,float start,float end,uint reqLoops){
+    epriv::MeshInstanceAnimation* anim = nullptr;
+    Mesh* _mesh = mesh();
+    anim = new epriv::MeshInstanceAnimation(_mesh,animName, start,(end < 0) ? _mesh->animationData().at(animName)->duration() : end, reqLoops);
+    m_i->m_AnimationQueue.push_back(anim);
 }
-void MeshInstance::playAnimation(const string& animName,float startTime,float endTime,uint requestedLoops){
-    m_i->m_AnimationQueue.push_back(new MeshInstanceAnimation(mesh(),animName,startTime,endTime,requestedLoops));
-}
-vector<MeshInstanceAnimation*>& MeshInstance::animationQueue(){ return m_i->m_AnimationQueue; }
