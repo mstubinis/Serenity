@@ -9,28 +9,72 @@
 using namespace Engine;
 using namespace std;
 
-Scene::Scene(string name){
-    m_Skybox = nullptr;
-    m_ActiveCamera = nullptr;
-    m_BackgroundColor = glm::vec3(0.0f);
-    name = epriv::Core::m_Engine->m_ResourceManager->_buildSceneName(name);
-    setName(name);
+class Scene::impl final {
+    public:
+        SkyboxEmpty* m_Skybox;
+        Camera* m_ActiveCamera;
+        std::vector<uint> m_Entities;
+        std::vector<SunLight*> m_Lights;
+        std::unordered_map<std::string, LightProbe*> m_LightProbes;
+        glm::vec3 m_BackgroundColor;
 
-    epriv::Core::m_Engine->m_ResourceManager->_addScene(this);
+        void _init(Scene* super,string& _name) {
+            m_Skybox = nullptr;
+            m_ActiveCamera = nullptr;
+            m_BackgroundColor = glm::vec3(0.0f);
+            _name = epriv::Core::m_Engine->m_ResourceManager->_buildSceneName(_name);
+            super->setName(_name);
+            epriv::Core::m_Engine->m_ResourceManager->_addScene(super);
+            if (!Resources::getCurrentScene()) {
+                Resources::setCurrentScene(super);
+            }
+        }
+        void _destruct() {
+            SAFE_DELETE(m_Skybox);
+        }
+        uint _addEntity(Scene* super, Entity* _entity) {
+            for (auto entityInScene : m_Entities) { if (_entity->m_ID == entityInScene) return entityInScene; } //rethink this maybe use a fixed size array?
+            uint entityID = epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->add(_entity);
+            _entity->m_ID = entityID;
+            _entity->m_Scene = super;
+            m_Entities.push_back(entityID);
+            return entityID;
+        }
+        bool _hasEntity(Scene* super, uint& _id) {
+            for (auto entityInScene : m_Entities) {
+                if (_id == entityInScene)
+                    return true;
+            }
+            return false;
+        }
+        bool _hasEntity(Scene* super, Entity* _entity) { return _hasEntity(super, _entity->m_ID); }
+        void _centerToObject(Scene* super,uint& centerID) {
+            Entity* center = super->getEntity(centerID);
+            ComponentBody& bodyBase = *(center->getComponent<ComponentBody>());
+            for (auto entityID : m_Entities) {
+                Entity* e = super->getEntity(entityID);
+                ComponentBody& entityBody = *(e->getComponent<ComponentBody>());
+                if (e != center && !e->parent()) {
+                    entityBody.setPosition(entityBody.position() - bodyBase.position());
+                }
+            }
+            if (!center->parent()) {
+                bodyBase.setPosition(0.0f, 0.0f, 0.0f);
+            }
+        }
+};
 
-    if(!Resources::getCurrentScene()){
-        Resources::setCurrentScene(this);
-    }
+
+vector<uint>& epriv::InternalScenePublicInterface::GetEntities(Scene* _scene) { return _scene->m_i->m_Entities; }
+vector<SunLight*>& epriv::InternalScenePublicInterface::GetLights(Scene* _scene) { return _scene->m_i->m_Lights; }
+
+
+
+Scene::Scene(string name):m_i(new impl){
+    m_i->_init(this, name);
     registerEvent(EventType::SceneChanged);
 }
-uint Scene::addEntity(Entity* entity){
-    for(auto entityInScene:m_Entities){if (entity->m_ID == entityInScene) return entityInScene; } //rethink this maybe use a fixed size array?
-    uint entityID = epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->add(entity);
-    entity->m_ID = entityID;
-    entity->m_Scene = this;
-    m_Entities.push_back(entityID);
-    return entityID;
-}
+uint Scene::addEntity(Entity* entity){ return m_i->_addEntity(this,entity); }
 void Scene::removeEntity(Entity* e,bool immediate){
     e->destroy(immediate);
 }
@@ -39,46 +83,23 @@ void Scene::removeEntity(uint id,bool immediate){
     removeEntity(e,immediate);
 }
 Entity* Scene::getEntity(uint entityID){
-    if(entityID == 0)
-        return nullptr;
+    if(entityID == 0) return nullptr;
     return epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->getAsFast<Entity>(entityID);
 }
-bool Scene::hasEntity(Entity* entity){
-    for(auto entityInScene:m_Entities){if (entity->m_ID == entityInScene) return true; } //rethink this maybe use a fixed size array?
-    return false;
-}
-bool Scene::hasEntity(uint entityID){
-    for(auto entityInScene:m_Entities){if (entityID == entityInScene) return true; } //rethink this maybe use a fixed size array?
-    return false;
-}
-Camera* Scene::getActiveCamera(){ return m_ActiveCamera; }
-void Scene::setActiveCamera(Camera* c){
-    m_ActiveCamera = c;
-}
-
-void Scene::centerSceneToObject(Entity* center){
-    ComponentBody& bodyBase = *(center->getComponent<ComponentBody>());
-    for(auto entityID:m_Entities){
-        Entity* e = getEntity(entityID);
-        ComponentBody& entityBody = *(e->getComponent<ComponentBody>());
-        if(e != center && !e->parent()){
-            entityBody.setPosition(entityBody.position() - bodyBase.position());
-        }
-    }
-    if(!center->parent()){
-        bodyBase.setPosition(0.0f,0.0f,0.0f);
-    }
-}
+bool Scene::hasEntity(Entity* entity){ return m_i->_hasEntity(this, entity); }
+bool Scene::hasEntity(uint entityID){ return m_i->_hasEntity(this, entityID); }
+Camera* Scene::getActiveCamera(){ return m_i->m_ActiveCamera; }
+void Scene::setActiveCamera(Camera* c){ m_i->m_ActiveCamera = c; }
+void Scene::centerSceneToObject(Entity* center){ return m_i->_centerToObject(this, center->m_ID); }
+void Scene::centerSceneToObject(uint centerID) { return m_i->_centerToObject(this, centerID); }
 Scene::~Scene(){
     unregisterEvent(EventType::SceneChanged);
-    SAFE_DELETE(m_Skybox);
+    m_i->_destruct();
 }
 void Scene::update(const float& dt){
 }
-glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
-std::vector<uint>& Scene::entities(){ return m_Entities; }
-vector<SunLight*>& Scene::lights() { return m_Lights; }
-unordered_map<string,LightProbe*>& Scene::lightProbes(){ return m_LightProbes; }
-SkyboxEmpty* Scene::skybox() const { return m_Skybox; }
-void Scene::setSkybox(SkyboxEmpty* s){ m_Skybox = s; }
-void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_BackgroundColor,r,g,b); }
+glm::vec3 Scene::getBackgroundColor(){ return m_i->m_BackgroundColor; }
+unordered_map<string,LightProbe*>& Scene::lightProbes(){ return m_i->m_LightProbes; }
+SkyboxEmpty* Scene::skybox() const { return m_i->m_Skybox; }
+void Scene::setSkybox(SkyboxEmpty* s){ m_i->m_Skybox = s; }
+void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_i->m_BackgroundColor,r,g,b); }

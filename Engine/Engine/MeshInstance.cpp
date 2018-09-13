@@ -243,7 +243,6 @@ MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat,glm::vec3 po
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::~MeshInstance(){ m_i->_destruct(this); }
-
 void MeshInstance::setColor(float r,float g,float b,float a){ Engine::Math::setColor(m_i->m_Color,r,g,b,a); }
 void MeshInstance::setColor(glm::vec4 color){ MeshInstance::setColor(color.r,color.g,color.b,color.a); }
 void MeshInstance::setGodRaysColor(float r,float g,float b){ Engine::Math::setColor(m_i->m_GodRaysColor,r,g,b); }
@@ -273,14 +272,14 @@ void MeshInstance::setMaterial(Handle& materialHandle){ m_i->_setMaterial(((Mate
 void MeshInstance::setMaterial(Material* m){ m_i->_setMaterial(m,this); }
 void MeshInstance::setOrientation(glm::quat o){ m_i->m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 
-    if(abs(x) > 0.001f) m_i->m_Orientation =                      (glm::angleAxis(-x, glm::vec3(1,0,0)));//pitch
-    if(abs(y) > 0.001f) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));//yaw
-    if(abs(z) > 0.001f) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));//roll
+    if(abs(x) > 0.001f) m_i->m_Orientation =                      (glm::angleAxis(-x, glm::vec3(1,0,0)));
+    if(abs(y) > 0.001f) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));
+    if(abs(z) > 0.001f) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));
     m_i->_updateModelMatrix();
 }
 void MeshInstance::playAnimation(const string& animName,float start,float end,uint reqLoops){
     epriv::MeshInstanceAnimation* anim = nullptr;
     Mesh* _mesh = mesh();
-    anim = new epriv::MeshInstanceAnimation(_mesh,animName, start,(end < 0) ? _mesh->animationData().at(animName)->duration() : end, reqLoops);
+    anim = new epriv::MeshInstanceAnimation(_mesh,animName, start, end, reqLoops);
     m_i->m_AnimationQueue.push_back(anim);
 }

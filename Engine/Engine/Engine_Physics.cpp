@@ -452,7 +452,7 @@ namespace Engine{
                 void debugDrawObject(const btTransform& worldTransform, const btCollisionShape* shape, const btVector3& color) {
                     // Draw a small simplex at the center of the object
                     if (getDebugDrawer() && getDebugDrawer()->getDebugMode() & btIDebugDraw::DBG_DrawFrames) {
-                        getDebugDrawer()->drawTransform(worldTransform, .3);
+                        getDebugDrawer()->drawTransform(worldTransform, btScalar(0.3));
                     }
                     if (shape->getShapeType() == COMPOUND_SHAPE_PROXYTYPE) {
                         const btCompoundShape* compoundShape = static_cast<const btCompoundShape*>(shape);

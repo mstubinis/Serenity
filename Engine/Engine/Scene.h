@@ -6,31 +6,31 @@
 #include "Engine_EventObject.h"
 #include <unordered_map>
 #include <glm/vec3.hpp>
+
 class Entity;
 class Camera;
 class SunLight;
 class SkyboxEmpty;
 class LightProbe;
-
+class Scene;
 namespace Engine {
 	namespace epriv {
 		class ComponentManager;
+
+        class InternalScenePublicInterface final {
+            friend class ::Scene;
+            public:
+                static std::vector<uint>& GetEntities(Scene*);
+                static std::vector<SunLight*>& GetLights(Scene*);
+        };
 	};
 };
-
 class Scene: public EngineResource, public EventObserver{
-    friend class LightProbe;
+    friend class ::LightProbe;
     friend class ::Engine::epriv::ComponentManager;
+    friend class ::Engine::epriv::InternalScenePublicInterface;
     private:
-        SkyboxEmpty* m_Skybox;
-        Camera* m_ActiveCamera;
-    protected:
-        std::vector<uint> m_Entities;
-
-        std::vector<SunLight*> m_Lights;
-        std::unordered_map<std::string,LightProbe*> m_LightProbes;
-
-        glm::vec3 m_BackgroundColor;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         Scene(std::string name);
         virtual ~Scene();
@@ -43,9 +43,6 @@ class Scene: public EngineResource, public EventObserver{
         bool hasEntity(uint entityID);
 
         virtual void update(const float& dt);
-
-        std::vector<uint>& entities();
-        std::vector<SunLight*>& lights();
         std::unordered_map<std::string,LightProbe*>& lightProbes();
 
         Camera* getActiveCamera();
@@ -56,6 +53,7 @@ class Scene: public EngineResource, public EventObserver{
         SkyboxEmpty* skybox() const;
         void setSkybox(SkyboxEmpty*);
         void centerSceneToObject(Entity*);
+        void centerSceneToObject(uint entityID);
         void setActiveCamera(Camera*);
 };
 #endif

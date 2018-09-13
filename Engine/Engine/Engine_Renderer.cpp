@@ -1645,40 +1645,6 @@ class epriv::RenderManager::impl final{
                                 mesh->bind();
 								/*
                                 if(InternalMeshPublicInterface::SupportsInstancing()){
-                                    MeshInstance* _meshInstance = nullptr;
-                                    vector<glm::mat4> instanceMatrices;
-                                    for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
-                                        const uint& entityID = meshInstance.first;
-                                        auto& instances = meshInstance.second;
-                                        if(scene->hasEntity(entityID)){
-                                            auto* model = scene->getEntity(entityID)->getComponent<ComponentModel>();
-                                            if(model){
-                                                if(model->passedRenderCheck()){
-                                                    for(auto instance:instances){
-                                                        if(!_meshInstance) _meshInstance = instance;
-                                                        Entity* parent = instance->parent();
-                                                        if(parent){
-                                                            auto* body = parent->getComponent<ComponentBody>();
-                                                            if(body){
-                                                                glm::mat4& _modelMatrix = body->modelMatrix() * instance->model();
-                                                                _modelMatrix[3][0] -= camPos.x;
-                                                                _modelMatrix[3][1] -= camPos.y;
-                                                                _modelMatrix[3][2] -= camPos.z;
-                                                                instanceMatrices.emplace_back(_modelMatrix);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if(instanceMatrices.size() > 0){
-										InternalMeshPublicInterface::UpdateInstances(mesh,instanceMatrices);
-                                        _meshInstance->bind();
-                                        mesh->render();
-                                        mesh->unbind();
-                                        _meshInstance->unbind();
-                                    }
                                 }
 								*/
                                 //else{
@@ -1792,7 +1758,7 @@ class epriv::RenderManager::impl final{
             sendTexture("gMiscMap",gbuffer.getTexture(GBufferType::Misc),2);
             sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
 
-            for (auto light:s->lights()){
+            for (auto light: epriv::InternalScenePublicInterface::GetLights(s)){
                 light->lighten();
             }
             if(mainRenderFunc){
@@ -2143,7 +2109,8 @@ class epriv::RenderManager::impl final{
             GLEnable(GLState::BLEND);
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_ONE, GL_ONE);
-            if(lighting && s->lights().size() > 0){
+
+            if(lighting && epriv::InternalScenePublicInterface::GetLights(s).size() > 0){
                 gbuffer.start(GBufferType::Lighting,"RGB");
                 Renderer::Settings::clear(true,false,false);//this is needed for godrays
                 _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);

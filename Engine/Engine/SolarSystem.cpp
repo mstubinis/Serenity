@@ -254,7 +254,7 @@ void SolarSystem::_loadFromFile(string filename){
     auto& body = *player->getComponent<ComponentBody>();
     float xPos = body.position().x;
     float zPos = body.position().z;
-
+    /*
     Entity* ent = new Entity();
     addEntity(ent);
     ComponentBody* bbody = new ComponentBody();
@@ -264,7 +264,7 @@ void SolarSystem::_loadFromFile(string filename){
     mmodel->getModel()->playAnimation("Skeleton|fire", 0.0f, -1.0f, 0);
     mmodel->getModel()->playAnimation("Skeleton|fire_top", 0.0f, -1.0f, 0);
     mmodel->getModel()->playAnimation("Skeleton|fire_hammer", 0.0f, -1.0f, 0);
-    
+    */
     for(uint k = 0; k < 1; ++k){
         Ship* _starbase = new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Starfleet Command " + to_string(k),glm::vec3(xPos+50+(k*5),0,zPos+50+(k*5)),glm::vec3(1.0f), CollisionType::TriangleShapeStatic,this);
     }
