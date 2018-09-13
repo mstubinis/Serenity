@@ -104,7 +104,7 @@ class epriv::ComponentManager::impl final{
         void _updateCurrentScene(const float& dt){
             auto* currentScene = Resources::getCurrentScene();
             for(auto entityID:InternalScenePublicInterface::GetEntities(currentScene)){
-                Entity* e = componentManager->_getEntity(entityID);
+                Entity* e = Components::GetEntity(entityID);
                 e->update(dt);
             }
             if(currentScene->skybox()) currentScene->skybox()->update();
@@ -159,7 +159,7 @@ void epriv::ComponentManager::_deleteEntityImmediately(Entity* entity){
     for(uint i = 0; i < ComponentType::_TOTAL; ++i){
         uint& componentID = entity->m_Components.at(i);
         if(componentID != 0){
-            ComponentBaseClass* component = m_ComponentPool->getAsFast<ComponentBaseClass>(componentID);
+            ComponentBaseClass* component = Components::GetComponent(componentID);
             componentManager->_removeComponent(component);
             m_ComponentPool->remove(componentID);
             componentID = 0;
@@ -188,7 +188,7 @@ void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
         for(uint index = 0; index < ComponentType::_TOTAL; ++index){
             uint componentID = e->m_Components.at(index);
             if(componentID != 0){
-                ComponentBaseClass* component = m_ComponentPool->getAsFast<ComponentBaseClass>(componentID);
+                ComponentBaseClass* component = Components::GetComponent(componentID);
                 if(component){
                     uint slot = Components::getSlot(component);
                     m_ComponentVectorsScene.at(slot).push_back(component);
@@ -197,12 +197,8 @@ void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
         }
     }
 }
-Entity* epriv::ComponentManager::_getEntity(uint id){ return m_EntityPool->getAsFast<Entity>(id); }
-ComponentBaseClass* epriv::ComponentManager::_getComponent(uint index){
-    return m_ComponentPool->getAsFast<ComponentBaseClass>(index);
-}
 void epriv::ComponentManager::_removeComponent(uint componentID){
-    ComponentBaseClass* component = m_ComponentPool->getAsFast<ComponentBaseClass>(componentID);
+    ComponentBaseClass* component = Components::GetComponent(componentID);
     epriv::ComponentManager::_removeComponent(component);
 }
 void epriv::ComponentManager::_removeComponent(ComponentBaseClass* component){
@@ -308,7 +304,7 @@ void epriv::ComponentBodySystem::update(const float& dt) { m_i->_update(dt); }
 
 ComponentBaseClass::ComponentBaseClass(){ m_Owner = 0; }
 ComponentBaseClass::~ComponentBaseClass(){}
-Entity* ComponentBaseClass::owner() { return componentManager->_getEntity(m_Owner); }
+Entity* ComponentBaseClass::owner() { return Components::GetEntity(m_Owner); }
 
 #pragma endregion
 
@@ -877,10 +873,18 @@ void Entity::destroy(bool immediate){
 Entity* Entity::parent(){
     if(m_ParentID == 0)
         return nullptr;
-    return componentManager->_getEntity(m_ParentID);
+    return Components::GetEntity(m_ParentID);
 }
 void Entity::addChild(Entity* child){
     child->m_ParentID = m_ID;
 }
 
 #pragma endregion
+
+
+ComponentBaseClass* Components::GetComponent(uint index) {
+    return componentManager->m_ComponentPool->getAsFast<ComponentBaseClass>(index);
+}
+Entity* Components::GetEntity(uint id) {
+    return componentManager->m_EntityPool->getAsFast<Entity>(id);
+}

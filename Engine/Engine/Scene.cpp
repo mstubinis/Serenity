@@ -79,12 +79,12 @@ void Scene::removeEntity(Entity* e,bool immediate){
     e->destroy(immediate);
 }
 void Scene::removeEntity(uint id,bool immediate){
-    Entity* e = epriv::Core::m_Engine->m_ComponentManager->_getEntity(id);
+    Entity* e = Components::GetEntity(id);
     removeEntity(e,immediate);
 }
 Entity* Scene::getEntity(uint entityID){
     if(entityID == 0) return nullptr;
-    return epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->getAsFast<Entity>(entityID);
+    return Components::GetEntity(entityID);
 }
 bool Scene::hasEntity(Entity* entity){ return m_i->_hasEntity(this, entity); }
 bool Scene::hasEntity(uint entityID){ return m_i->_hasEntity(this, entityID); }

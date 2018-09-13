@@ -2330,7 +2330,7 @@ void Renderer::Settings::GodRays::setWeight(float w){ renderManager->godRays_wei
 void Renderer::Settings::GodRays::setSamples(uint s){ renderManager->godRays_samples = s; }
 void Renderer::Settings::GodRays::setFOVDegrees(float d){ renderManager->godRays_fovDegrees = d; }
 void Renderer::Settings::GodRays::setAlphaFalloff(float a){ renderManager->godRays_alphaFalloff = a; }
-void Renderer::Settings::GodRays::setObject(uint& id){ renderManager->godRays_Object = epriv::Core::m_Engine->m_ComponentManager->_getEntity(id); }
+void Renderer::Settings::GodRays::setObject(uint& id){ renderManager->godRays_Object = Components::GetEntity(id); }
 void Renderer::Settings::GodRays::setObject(Entity* entity){ renderManager->godRays_Object = entity; }
 Entity* Renderer::Settings::GodRays::getObject(){ return renderManager->godRays_Object; }
 void Renderer::Settings::Lighting::enable(bool b){ renderManager->lighting = b; }

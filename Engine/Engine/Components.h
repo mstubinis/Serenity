@@ -31,6 +31,7 @@ class ComponentBaseClass;
 class ComponentBody;
 class ComponentModel;
 class ComponentCamera;
+class Components;
 
 typedef boost::typeindex::type_index   boost_type_index;
 
@@ -79,19 +80,18 @@ namespace Engine{
         class ComponentManager final: private Engine::epriv::noncopyable{
             friend class ::Entity;
             friend class ::Scene;
+            friend class ::Components;
             friend class ::Engine::epriv::ComponentTypeRegistry;
             friend class ::Engine::epriv::ComponentCameraSystem;
             friend class ::Engine::epriv::ComponentModelSystem;
             friend class ::Engine::epriv::ComponentBodySystem;
             private:
-                class impl;
+                class impl; std::unique_ptr<impl> m_i;
                 ObjectPool<Entity>*                                                 m_EntityPool;
                 static ObjectPool<ComponentBaseClass>*                              m_ComponentPool;
                 static boost::unordered_map<uint, std::vector<ComponentBaseClass*>> m_ComponentVectors;
                 static boost::unordered_map<uint, std::vector<ComponentBaseClass*>> m_ComponentVectorsScene;
             public:
-                std::unique_ptr<impl> m_i;
-
                 ComponentManager(const char* name, uint w, uint h);
                 ~ComponentManager();
 
@@ -105,9 +105,7 @@ namespace Engine{
                 void _deleteEntityImmediately(Entity*);
                 void _addEntityToBeDestroyed(uint id);
                 void _addEntityToBeDestroyed(Entity*);
-                Entity* _getEntity(uint id);
 
-                ComponentBaseClass* _getComponent(uint index);
                 void _removeComponent(uint componentID);
                 void _removeComponent(ComponentBaseClass* component);
         };
@@ -149,10 +147,8 @@ namespace Engine{
         class ComponentModelSystem final: private Engine::epriv::noncopyable{
             friend class ::Engine::epriv::ComponentManager;
             private:
-                class impl;
+                class impl; std::unique_ptr<impl> m_i;
             public:
-                std::unique_ptr<impl> m_i;
-
                 ComponentModelSystem();
                 ~ComponentModelSystem();
                 void update(const float& dt);
@@ -160,10 +156,8 @@ namespace Engine{
         class ComponentCameraSystem final: private Engine::epriv::noncopyable{
             friend class ::Engine::epriv::ComponentManager;
             private:
-                class impl; 
+                class impl; std::unique_ptr<impl> m_i;
             public:
-                std::unique_ptr<impl> m_i;
-
                 ComponentCameraSystem();
                 ~ComponentCameraSystem();
                 void update(const float& dt);
@@ -171,10 +165,8 @@ namespace Engine{
         class ComponentBodySystem final : private Engine::epriv::noncopyable {
             friend class ::Engine::epriv::ComponentManager;
             private:
-                class impl;
+                class impl; std::unique_ptr<impl> m_i;
             public:
-                std::unique_ptr<impl> m_i;
-
                 ComponentBodySystem();
                 ~ComponentBodySystem();
                 void update(const float& dt);
@@ -233,18 +225,18 @@ class ComponentBody: public ComponentBaseClass{
     private:
         struct PhysicsData{
             Collision* collision;
-			btRigidBody* rigidBody;
-			btDefaultMotionState* motionState;
-			float mass;
+            btRigidBody* rigidBody;
+            btDefaultMotionState* motionState;
+            float mass;
             PhysicsData() {
                 collision = 0; rigidBody = 0; motionState = 0;
             }
         };
         struct NormalData{
             glm::vec3* scale;
-			glm::vec3* position;
-			glm::quat* rotation;
-			glm::mat4* modelMatrix;
+            glm::vec3* position;
+            glm::quat* rotation;
+            glm::mat4* modelMatrix;
             NormalData() {
                 scale = 0; position = 0; rotation = 0; modelMatrix = 0;
             }
@@ -401,7 +393,13 @@ class Entity: public EventObserver{
 };
 
 class Components final{
+    friend class ::Engine::epriv::ComponentManager;
     public:
+
+        static ComponentBaseClass* GetComponent(uint id);
+        static Entity* GetEntity(uint id);
+
+
         template <typename T> static uint getSlot() {
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
             return Engine::epriv::ComponentTypeRegistry::m_Registry.at(typeIndex);
