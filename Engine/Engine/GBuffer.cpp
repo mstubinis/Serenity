@@ -35,7 +35,7 @@ class epriv::GBuffer::impl final{
 
             m_Buffers.resize(GBufferType::_TOTAL);
 
-            m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height,1.0f);
+            m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height,1.0f,3);
             m_FBO->bind();
             _constructTextureBuffer(m_FBO,GBufferType::Diffuse,   m_Width,m_Height);
             _constructTextureBuffer(m_FBO,GBufferType::Normal,    m_Width,m_Height);
@@ -45,7 +45,7 @@ class epriv::GBuffer::impl final{
 
             if(!m_FBO->check()) return false;
 
-            m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height,0.5f);
+            m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height,0.5f,3);
             m_SmallFBO->bind();
 
             _constructTextureBuffer(m_SmallFBO,GBufferType::Bloom,   m_Width,m_Height);

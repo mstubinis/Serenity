@@ -15,8 +15,11 @@ namespace Engine{
         class FramebufferObjectAttatchment;
         class FramebufferTexture;
         class RenderbufferObject;
+        struct FramebufferObjectDefaultBindFunctor;
+        struct FramebufferObjectDefaultUnbindFunctor;
         
 		class FramebufferObjectAttatchment: private Engine::epriv::noncopyable{
+            friend class ::Engine::epriv::FramebufferObject;
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
@@ -34,8 +37,8 @@ namespace Engine{
                 virtual void bind();
                 virtual void unbind();
         };
-
         class FramebufferTexture final: public FramebufferObjectAttatchment{
+            friend class ::Engine::epriv::FramebufferObject;
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
@@ -49,6 +52,7 @@ namespace Engine{
                 void unbind();
         };
         class RenderbufferObject final: public FramebufferObjectAttatchment{
+            friend class ::Engine::epriv::FramebufferObject;
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
@@ -61,11 +65,15 @@ namespace Engine{
                 void unbind();
         };
         class FramebufferObject final: public BindableResource{
+            friend class ::Engine::epriv::FramebufferTexture;
+            friend class ::Engine::epriv::RenderbufferObject;
+            friend struct ::Engine::epriv::FramebufferObjectDefaultBindFunctor;
+            friend struct ::Engine::epriv::FramebufferObjectDefaultUnbindFunctor;
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
-                FramebufferObject(std::string name,uint width,uint height,float divisor = 1.0f);
-                FramebufferObject(std::string name,uint width,uint height,ImageInternalFormat::Format,float divisor = 1.0f);
+                FramebufferObject(std::string name,uint width,uint height,float divisor = 1.0f,uint swapBufferCount = 1);
+                FramebufferObject(std::string name,uint width,uint height,ImageInternalFormat::Format,float divisor = 1.0f, uint swapBufferCount = 1);
                 virtual ~FramebufferObject();
 
                 void resize(uint width,uint height);
