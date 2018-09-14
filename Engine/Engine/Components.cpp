@@ -96,10 +96,7 @@ class epriv::ComponentManager::impl final{
                 auto* body = parent->getComponent<ComponentBody>();
                 modelMatrix = body->modelMatrix();
             }
-            glm::mat4 translationMat = glm::translate(position);
-            glm::mat4 rotationMat = glm::mat4_cast(rotation);
-            glm::mat4 scaleMat = glm::scale(scale);
-            modelMatrix = translationMat * rotationMat * scaleMat * modelMatrix;
+            modelMatrix = glm::translate(position) * glm::mat4_cast(rotation) * glm::scale(scale) * modelMatrix;
         }
         void _updateCurrentScene(const float& dt){
             auto* currentScene = Resources::getCurrentScene();

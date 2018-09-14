@@ -116,8 +116,7 @@ class Shader::impl final{
                 super->setName(filenameOrCode);
                 m_FileName = filenameOrCode;
                 m_Code = "";
-            }
-            else{
+            }else{
                 super->setName("NULL");
                 m_FileName = "";
                 m_Code = filenameOrCode;
@@ -179,8 +178,7 @@ class ShaderP::impl final{
                 while(true){
                     getline(str,versionLine); if(sfind(versionLine,"#version ")){ break; }
                 }
-            }
-            else{
+            }else{
                 //generate one
                 string core = "";
                 if(epriv::RenderManager::GLSL_VERSION >= 330) core = " core";
@@ -231,7 +229,6 @@ class ShaderP::impl final{
                 }
             }
             */
-
             //check for normal map texture extraction
             //refer to mesh.cpp dirCorrection comment about using an uncompressed normal map and not reconstructing z
             if(sfind(_d,"CalcBumpedNormal(") || sfind(_d,"CalcBumpedNormalCompressed(")){
@@ -268,7 +265,6 @@ class ShaderP::impl final{
                     insertStringAtLine(_d,painters,1);
                 }
             }
-
             //see if we need a UBO for the camera
             if(sfind(_d,"CameraView") || sfind(_d,"CameraProj") || sfind(_d,"CameraViewProj") || sfind(_d,"CameraInvView") || sfind(_d,"CameraInvProj") || 
             sfind(_d,"CameraInvViewProj") || sfind(_d,"CameraPosition") || sfind(_d,"CameraNear") || sfind(_d,"CameraFar") || sfind(_d,"CameraInfo1") ||
@@ -295,8 +291,7 @@ class ShaderP::impl final{
                          "\n";
                          insertStringAtLine(_d,uboCameraString,1);
                      }
-                }
-                else{ //no UBO's, just add a uniform struct
+                }else{ //no UBO's, just add a uniform struct
                     if(!sfind(_d,"uniform mat4 CameraView;//generated")){
                          uboCameraString = "\n"
                          "uniform mat4 CameraView;//generated;\n"
@@ -316,7 +311,6 @@ class ShaderP::impl final{
                     }
                 }	
             }
-
             //check for log depth - vertex
             if(sfind(_d,"USE_LOG_DEPTH_VERTEX") && !sfind(_d,"//USE_LOG_DEPTH_VERTEX") && shader->type() == ShaderType::Vertex){
                 boost::replace_all(_d,"USE_LOG_DEPTH_VERTEX","");
@@ -350,7 +344,6 @@ class ShaderP::impl final{
                 insertStringAtEndOfMainFunc(_d,log_frag_code);
                 #endif
                 if(sfind(_d,"GetWorldPosition(") || sfind(_d,"GetViewPosition(")){
-                    
                     if(!sfind(_d,"vec3 GetWorldPosition(")){
                         #ifndef ENGINE_FORCE_NO_LOG_DEPTH
                              insertStringRightAfterLineContent(_d,getLogDepthFunctions(),"uniform sampler2D gDepthMap;");
@@ -358,7 +351,6 @@ class ShaderP::impl final{
                              insertStringRightAfterLineContent(_d,getNormalDepthFunctions(),"uniform sampler2D gDepthMap;");
                         #endif
                     }
-
                 }
             }
             else{
@@ -372,8 +364,7 @@ class ShaderP::impl final{
                             #else
                                     insertStringRightAfterLineContent(_d,getNormalDepthFunctions(),"uniform sampler2D gDepthMap;");
                             #endif
-                        }
-                        else{
+                        }else{
                             //normal
                             insertStringRightAfterLineContent(_d,getNormalDepthFunctions(),"uniform sampler2D gDepthMap;");
                         }
@@ -387,18 +378,14 @@ class ShaderP::impl final{
                         if(versionNumber > 130){
                             if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_separate_shader_objects)){
                                 insertStringAtLine(_d,"#extension GL_EXT_seperate_shader_objects : enable",1);
-                            }
-                            else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_separate_shader_objects)){
+                            }else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_separate_shader_objects)){
                                 insertStringAtLine(_d,"#extension GL_ARB_seperate_shader_objects : enable",1);
-                            }
-                            if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_explicit_attrib_location)){
+                            }if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_explicit_attrib_location)){
                                 insertStringAtLine(_d,"#extension GL_EXT_explicit_attrib_location : enable",1);
-                            }
-                            else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_explicit_attrib_location)){
+                            }else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_explicit_attrib_location)){
                                 insertStringAtLine(_d,"#extension GL_ARB_explicit_attrib_location : enable",1);
                             }
-                        }
-                        else{
+                        }else{
                             //replace with attribute
                             istringstream str(_d); string line; uint count = 0;
                             while(getline(str,line)){
@@ -429,8 +416,7 @@ class ShaderP::impl final{
                         const string outFragData = "FRAG_COL_" + to_string(i);
                         if (versionNumber >= 130 && versionNumber < 330) {
                             insertStringAtLine(_d, "out vec4 " + outFragData + ";//130", 1);
-                        }
-                        else if (versionNumber >= 330) {
+                        }else if (versionNumber >= 330) {
                             insertStringAtLine(_d, "layout (location = " + to_string(i) + ") out vec4 " + outFragData + ";", 1);
                         }
                         boost::replace_all(_d, fragDataStr, outFragData);
@@ -444,8 +430,7 @@ class ShaderP::impl final{
                     boost::replace_all(_d, "highp ", "");
                     boost::replace_all(_d, "mediump ", "");
                     boost::replace_all(_d, "lowp ", "");
-                }
-                else if(shader->type() == ShaderType::Fragment){
+                }else if(shader->type() == ShaderType::Fragment){
                     boost::replace_all(_d, "flat", "");
                     boost::replace_all(_d, "highp ", "");
                     boost::replace_all(_d, "mediump ", "");
@@ -455,8 +440,7 @@ class ShaderP::impl final{
             if(versionNumber >= 130){
                 if(shader->type() == ShaderType::Vertex){
                     boost::replace_all(_d, "varying", "out");
-                }
-                else if(shader->type() == ShaderType::Fragment){
+                }else if(shader->type() == ShaderType::Fragment){
                     boost::replace_all(_d, "varying", "in");
                     boost::replace_all(_d, "gl_FragColor", "FRAG_COL");
                     insertStringAtLine(_d,"out vec4 FRAG_COL;",1);
@@ -464,8 +448,7 @@ class ShaderP::impl final{
             }
             if(versionNumber >= 140){
                 if(shader->type() == ShaderType::Vertex){
-                }
-                else if(shader->type() == ShaderType::Fragment){
+                }else if(shader->type() == ShaderType::Fragment){
                     boost::replace_all(_d, "textureCube(", "texture(");
                     boost::replace_all(_d, "textureCubeLod(", "textureLod(");
                     boost::replace_all(_d, "texture2DLod(", "textureLod(");
@@ -474,8 +457,7 @@ class ShaderP::impl final{
             }	
             if(versionNumber >= 150){
                 if(shader->type() == ShaderType::Vertex){
-                }
-                else if(shader->type() == ShaderType::Fragment){
+                }else if(shader->type() == ShaderType::Fragment){
                 }
             }
             if(versionNumber >= 330){
@@ -501,8 +483,7 @@ class ShaderP::impl final{
                         }
                         ++count;
                     }
-                }
-                else if(shader->type() == ShaderType::Fragment){
+                }else if(shader->type() == ShaderType::Fragment){
                 }
             }
         }
@@ -519,13 +500,11 @@ class ShaderP::impl final{
                 if(m_VertexShader->fromFile()){
                     boost_stream_mapped_file str(m_VertexShader->m_i->m_FileName);
                     for(string line;getline(str,line,'\n');){VertexCode+="\n"+line;}
-                }
-                else{ VertexCode=m_VertexShader->data(); }
+                }else{ VertexCode=m_VertexShader->data(); }
                 if(m_FragmentShader->fromFile()){
                     boost_stream_mapped_file str(m_FragmentShader->m_i->m_FileName);
                     for(string line;getline(str,line,'\n');){FragmentCode+="\n"+line; }
-                }
-                else{FragmentCode=m_FragmentShader->data();}
+                }else{FragmentCode=m_FragmentShader->data();}
                 //convert the code
                 _convertCode(VertexCode,FragmentCode,super);
                 m_LoadedCPU = true;
@@ -657,16 +636,9 @@ void ShaderP::unload(){
         EngineResource::unload();
     }
 }
-void ShaderP::bind(){
-    epriv::Core::m_Engine->m_RenderManager->_bindShaderProgram(this);
-    BindableResource::bind();
-}
-void ShaderP::unbind(){
-    BindableResource::unbind();
-}
-void ShaderP::addMaterial(Handle& materialHandle){
-    ShaderP::addMaterial(((Material*)materialHandle.get()));
-}
+void ShaderP::bind(){ epriv::Core::m_Engine->m_RenderManager->_bindShaderProgram(this); }
+void ShaderP::unbind(){ epriv::Core::m_Engine->m_RenderManager->_unbindShaderProgram(); }
+void ShaderP::addMaterial(Handle& materialHandle){ ShaderP::addMaterial(((Material*)materialHandle.get())); }
 void ShaderP::addMaterial(Material* material){
     auto& i = *m_i;
     i.m_Materials.push_back(material);

@@ -2237,12 +2237,10 @@ void epriv::RenderManager::_addShaderToStage(ShaderP* program,uint stage){
     if(stage == ShaderRenderPass::Geometry){
         m_i->m_GeometryPassShaderPrograms.push_back(program);
         sort(m_i->m_GeometryPassShaderPrograms.begin(),m_i->m_GeometryPassShaderPrograms.end(),epriv::srtKeyShaderP());
-    }
-    else if(stage == ShaderRenderPass::Forward){
+    }else if(stage == ShaderRenderPass::Forward){
         m_i->m_ForwardPassShaderPrograms.push_back(program);
         sort(m_i->m_ForwardPassShaderPrograms.begin(),m_i->m_ForwardPassShaderPrograms.end(),epriv::srtKeyShaderP());
-    }
-    else{
+    }else{
     }
 }
 void epriv::RenderManager::_bindShaderProgram(ShaderP* p){
@@ -2250,21 +2248,30 @@ void epriv::RenderManager::_bindShaderProgram(ShaderP* p){
     if(currentShaderPgrm != p){
         glUseProgram(p->program());
         currentShaderPgrm = p;
+        currentShaderPgrm->BindableResource::bind();
     }
 }
-bool epriv::RenderManager::_bindMaterial(Material* m){
-    if(m_i->current_bound_material != m){
-        m_i->current_bound_material = m;
-        return true;
+void epriv::RenderManager::_unbindShaderProgram() {
+    auto& currentShaderPgrm = m_i->current_shader_program;
+    if (currentShaderPgrm) {
+        currentShaderPgrm->BindableResource::unbind();
+        currentShaderPgrm = nullptr;
+        glUseProgram(0);
     }
-    return false;
 }
-bool epriv::RenderManager::_unbindMaterial(){
-    if(m_i->current_bound_material){   
-        m_i->current_bound_material = nullptr;
-        return true;
+void epriv::RenderManager::_bindMaterial(Material* m){
+    auto& currentMaterial = m_i->current_bound_material;
+    if(currentMaterial != m){
+        currentMaterial = m;
+        currentMaterial->BindableResource::bind();
     }
-    return false;
+}
+void epriv::RenderManager::_unbindMaterial(){
+    auto& currentMaterial = m_i->current_bound_material;
+    if(currentMaterial){
+        currentMaterial->BindableResource::unbind();
+        currentMaterial = nullptr;
+    }
 }
 void epriv::RenderManager::_genPBREnvMapData(Texture* texture, uint size1, uint size2){
     m_i->_generatePBREnvMapData(texture,size1,size2);
@@ -2391,7 +2398,6 @@ void Renderer::Settings::enableDrawPhysicsInfo(bool b){ renderManager->draw_phys
 void Renderer::Settings::disableDrawPhysicsInfo(){ renderManager->draw_physics_debug = false; }
 void Renderer::Settings::setGamma(float g){ renderManager->gamma = g; }
 float Renderer::Settings::getGamma(){ return renderManager->gamma; }
-
 void Renderer::setDepthFunc(DepthFunc::Func func){ renderManager->_setDepthFunc(func); }
 void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManager->_setViewport(x,y,w,h); }
 void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){

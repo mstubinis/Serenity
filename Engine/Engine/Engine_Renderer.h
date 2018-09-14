@@ -73,8 +73,9 @@ namespace Engine{
                 void _renderTexture(Texture*,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth);
                 void _addShaderToStage(ShaderP*,uint stage);
                 void _bindShaderProgram(ShaderP*);
-                bool _bindMaterial(Material*);
-                bool _unbindMaterial();
+                void _unbindShaderProgram();
+                void _bindMaterial(Material*);
+                void _unbindMaterial();
                 void _genPBREnvMapData(Texture*,uint,uint);
         };
         class OpenGLExtensionEnum final{

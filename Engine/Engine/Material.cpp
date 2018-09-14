@@ -662,14 +662,8 @@ void Material::removeMeshEntry(Mesh* mesh){
         else ++it;
     }
 }
-void Material::bind(){
-    bool res = epriv::Core::m_Engine->m_RenderManager->_bindMaterial(this);
-    if(res) BindableResource::bind();
-}
-void Material::unbind(){
-    bool res = epriv::Core::m_Engine->m_RenderManager->_unbindMaterial();
-    if(res) BindableResource::unbind();
-}
+void Material::bind(){ epriv::Core::m_Engine->m_RenderManager->_bindMaterial(this); }
+void Material::unbind(){ epriv::Core::m_Engine->m_RenderManager->_unbindMaterial(); }
 void Material::load(){
     if(!isLoaded()){
         m_i->_load();
