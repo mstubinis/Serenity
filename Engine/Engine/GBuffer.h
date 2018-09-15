@@ -24,7 +24,6 @@ namespace Engine{
 
                 void resize(uint width,uint height);
 
-                void start(std::vector<uint>&,std::string = "RGBA",bool = true);
                 void start(uint,std::string = "RGBA",bool = true);
                 void start(uint,uint,std::string = "RGBA",bool = true);
                 void start(uint,uint,uint,std::string = "RGBA",bool = true);

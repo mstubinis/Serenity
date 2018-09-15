@@ -27,16 +27,15 @@ class epriv::GBuffer::impl final{
         FramebufferObject *m_FBO, *m_SmallFBO;
         vector<FramebufferTexture*> m_Buffers;
         uint m_Width, m_Height;
-
-        bool _init(uint w,uint h){
+        bool _init(const uint& w, const uint& h){
+            m_FBO = m_SmallFBO = nullptr;
             _destruct(); //just incase this method is called on resize, we want to delete any previous buffers
 
             m_Width = w; m_Height = h;
 
-            m_Buffers.resize(GBufferType::_TOTAL);
+            m_Buffers.resize(GBufferType::_TOTAL,nullptr);
 
             m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height,1.0f,2);
-            m_FBO->bind();
             _constructTextureBuffer(m_FBO,GBufferType::Diffuse,   m_Width,m_Height);
             _constructTextureBuffer(m_FBO,GBufferType::Normal,    m_Width,m_Height);
             _constructTextureBuffer(m_FBO,GBufferType::Misc,      m_Width,m_Height);
@@ -46,7 +45,6 @@ class epriv::GBuffer::impl final{
             if(!m_FBO->check()) return false;
 
             m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height,0.25f,2);
-            m_SmallFBO->bind();
             _constructTextureBuffer(m_SmallFBO,GBufferType::Bloom,   m_Width,m_Height);
             _constructTextureBuffer(m_SmallFBO,GBufferType::GodRays, m_Width,m_Height);
             
@@ -71,12 +69,12 @@ class epriv::GBuffer::impl final{
 
             return true;
         }
-        void _resize(uint w, uint h){
+        void _resize(const uint& w, const uint& h){
             m_Width = w; m_Height = h;
             m_FBO->resize(w,h);
             m_SmallFBO->resize(w,h);
         }
-        void _constructTextureBuffer(FramebufferObject* fbo,uint t,uint w,uint h){
+        void _constructTextureBuffer(FramebufferObject* fbo, const uint& t, const uint& w, const uint& h){
             auto& i = GBUFFER_TYPE_DATA.at(t);
             m_Buffers.at(t) = fbo->attatchTexture(new Texture(w,h,i.get<2>(),i.get<1>(),i.get<0>(),fbo->divisor()),i.get<3>());
         }
@@ -87,71 +85,48 @@ class epriv::GBuffer::impl final{
             Renderer::unbindFBO();
             vector_clear(m_Buffers);
         }
-        void _start(vector<uint>& types,string& channels,bool first_fbo){
+        void _start(uint* types,uint size,const string& channels,bool first_fbo){
             if(first_fbo){ m_FBO->bind(); }
             else{ m_SmallFBO->bind(); }
             GLboolean r,g,b,a;
-            if(channels.find("R") != string::npos) r=GL_TRUE; else r=GL_FALSE;
-            if(channels.find("G") != string::npos) g=GL_TRUE; else g=GL_FALSE;
-            if(channels.find("B") != string::npos) b=GL_TRUE; else b=GL_FALSE;
-            if(channels.find("A") != string::npos) a=GL_TRUE; else a=GL_FALSE;
+            channels.find("R") != string::npos ? r = GL_TRUE : r = GL_FALSE;
+            channels.find("G") != string::npos ? g = GL_TRUE : g = GL_FALSE;
+            channels.find("B") != string::npos ? b = GL_TRUE : b = GL_FALSE;
+            channels.find("A") != string::npos ? a = GL_TRUE : a = GL_FALSE;
             glColorMask(r,g,b,a);
-            glDrawBuffers(types.size(), &types[0]); // Specify what to render an start acquiring
-            vector_clear(types);
+            glDrawBuffers(size, types); // Specify what to render an start acquiring
         }
-        void _start(uint t1,string& c,bool f){
-            vector<uint> t;
-            t.push_back(m_Buffers.at(t1)->attatchment());
-            _start(t,c,f);
+        void _start(const uint& t1, const string& c,bool f){
+            uint t[1] = { m_Buffers.at(t1)->attatchment()  };
+            _start(t,1,c,f);
         }
-        void _start(uint t1,uint t2,string& c,bool f){
-            vector<uint> t;
-            t.push_back(m_Buffers.at(t1)->attatchment());
-            t.push_back(m_Buffers.at(t2)->attatchment());
-            _start(t,c,f);
+        void _start(const uint& t1, const uint& t2, const string& c,bool f){
+            uint t[2] = { m_Buffers.at(t1)->attatchment(),m_Buffers.at(t2)->attatchment() };
+            _start(t,2,c,f);
         }
-        void _start(uint t1,uint t2,uint t3,string& c,bool f){
-            vector<uint> t;
-            t.push_back(m_Buffers.at(t1)->attatchment());
-            t.push_back(m_Buffers.at(t2)->attatchment());
-            t.push_back(m_Buffers.at(t3)->attatchment());
-            _start(t,c,f);
+        void _start(const uint& t1, const uint& t2, const uint& t3, const string& c,bool f){
+            uint t[3] = { m_Buffers.at(t1)->attatchment(),m_Buffers.at(t2)->attatchment(),m_Buffers.at(t3)->attatchment() };
+            _start(t,3,c,f);
         }
-        void _start(uint t1,uint t2,uint t3,uint t4,string& c,bool f){
-            vector<uint> t;
-            t.push_back(m_Buffers.at(t1)->attatchment());
-            t.push_back(m_Buffers.at(t2)->attatchment());
-            t.push_back(m_Buffers.at(t3)->attatchment());
-            t.push_back(m_Buffers.at(t4)->attatchment());
-            _start(t,c,f);
+        void _start(const uint& t1, const uint& t2, const uint& t3, const uint& t4, const string& c,bool f){
+            uint t[4] = { m_Buffers.at(t1)->attatchment(),m_Buffers.at(t2)->attatchment(),m_Buffers.at(t3)->attatchment(),m_Buffers.at(t4)->attatchment() };
+            _start(t,4,c,f);
         }
-        void _start(uint t1,uint t2,uint t3,uint t4,uint t5,string& c,bool f){
-            vector<uint> t;
-            t.push_back(m_Buffers.at(t1)->attatchment());
-            t.push_back(m_Buffers.at(t2)->attatchment());
-            t.push_back(m_Buffers.at(t3)->attatchment());
-            t.push_back(m_Buffers.at(t4)->attatchment());
-            t.push_back(m_Buffers.at(t5)->attatchment());
-            _start(t,c,f);
+        void _start(const uint& t1, const uint& t2, const uint& t3, const uint& t4, const uint& t5, const string& c,bool f){
+            uint t[5] = { m_Buffers.at(t1)->attatchment(),m_Buffers.at(t2)->attatchment(),m_Buffers.at(t3)->attatchment(),
+            m_Buffers.at(t4)->attatchment(),m_Buffers.at(t5)->attatchment() };
+            _start(t,5,c,f);
         }
-        void _stop(GLuint final_fbo, GLuint final_rbo){
+        void _stop(const GLuint& final_fbo, const GLuint& final_rbo){
             Renderer::bindFBO(final_fbo);
             Renderer::bindRBO(final_rbo); //probably dont even need this. or only implement this if final_rbo != 0
             glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
             glClear(GL_COLOR_BUFFER_BIT);
         }
 };
-epriv::GBuffer::GBuffer(uint width,uint height):m_i(new impl){
-    m_i->m_FBO = m_i->m_SmallFBO = nullptr;
-    m_i->_init(width,height);
-}
-epriv::GBuffer::~GBuffer(){
-    m_i->_destruct();
-}
-void epriv::GBuffer::resize(uint width, uint height){
-    m_i->_resize(width,height);
-}
-void epriv::GBuffer::start(vector<uint>& t,string c,bool mainFBO){m_i->_start(t,c,mainFBO);}
+epriv::GBuffer::GBuffer(uint width,uint height):m_i(new impl){ m_i->_init(width,height); }
+epriv::GBuffer::~GBuffer(){ m_i->_destruct(); }
+void epriv::GBuffer::resize(uint width, uint height){ m_i->_resize(width,height); }
 void epriv::GBuffer::start(uint t,string c,bool mainFBO){m_i->_start(t,c,mainFBO);}
 void epriv::GBuffer::start(uint t,uint t1,string c,bool mainFBO){m_i->_start(t,t1,c,mainFBO);}
 void epriv::GBuffer::start(uint t,uint t1,uint t2,string c,bool mainFBO){m_i->_start(t,t1,t2,c,mainFBO);}
