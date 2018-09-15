@@ -40,7 +40,6 @@ class epriv::ResourceManager::impl final{
         Engine_Window*                                 m_Window;
         Scene*                                         m_CurrentScene;
         bool                                           m_DynamicMemory;
-        vector<MeshInstance*>                          m_MeshInstances;
         unordered_map<string,boost::shared_ptr<Scene>> m_Scenes;
         void _init(const char* name,const uint& width,const uint& height){
             m_CurrentScene = nullptr;
@@ -51,40 +50,26 @@ class epriv::ResourceManager::impl final{
             m_Window = new Engine_Window(name,width,height);
         }
         void _destruct(){
-            for (auto it:m_MeshInstances)                                 SAFE_DELETE(it);
-            for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )  it->second.reset();
             SAFE_DELETE(m_Resources);
             SAFE_DELETE(m_Window);
         }
 };
-Handle::Handle() {
-	index = 0; counter = 0; type = 0;
-}
-Handle::Handle(uint32 _index, uint32 _counter, uint32 _type) {
-	index = _index; counter = _counter; type = _type;
-}
-inline Handle::operator uint32() const {
-	return type << 27 | counter << 12 | index;
-}
+Handle::Handle() { index = 0; counter = 0; type = 0; }
+Handle::Handle(uint32 _index, uint32 _counter, uint32 _type) { index = _index; counter = _counter; type = _type; }
+inline Handle::operator uint32() const { return type << 27 | counter << 12 | index; }
 const bool Handle::null() const { if (type == ResourceType::Empty) return true; return false; }
 const EngineResource* Handle::get() const {
 	if (null()) return nullptr;
 	return resourceManager->m_Resources->getAsFast<EngineResource>(index);
 }
-inline const EngineResource* Handle::operator ->() const {
-	return get();
-}
+inline const EngineResource* Handle::operator ->() const { return get(); }
 
 epriv::ResourceManager::ResourceManager(const char* name,uint width,uint height):m_i(new impl){
     m_i->_init(name,width,height);
     resourceManager = m_i.get();
 }
-epriv::ResourceManager::~ResourceManager(){
-    m_i->_destruct();
-}
-void epriv::ResourceManager::_init(const char* n,uint w,uint h){
-    m_i->_postInit(n,w,h);
-}
+epriv::ResourceManager::~ResourceManager(){ m_i->_destruct(); }
+void epriv::ResourceManager::_init(const char* n,uint w,uint h){ m_i->_postInit(n,w,h); }
 
 string Engine::Data::reportTime(){
     return epriv::Core::m_Engine->m_TimeManager->reportTime();
@@ -104,9 +89,6 @@ Texture* epriv::ResourceManager::_hasTexture(string n){
 void epriv::ResourceManager::_addScene(Scene* s){
     boost::shared_ptr<Scene> ptr(s);
     _addToContainer(m_i->m_Scenes,s->name(), ptr);
-}
-void epriv::ResourceManager::_addMeshInstance(MeshInstance* m){
-    m_i->m_MeshInstances.push_back(m);
 }
 string epriv::ResourceManager::_buildSceneName(string n){return _incrementName(m_i->m_Scenes,n);}
 

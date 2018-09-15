@@ -246,12 +246,7 @@ epriv::RenderbufferObject* epriv::FramebufferObject::attatchRenderBuffer(epriv::
 }
 uint epriv::FramebufferObject::width(){ return m_i->m_FramebufferWidth; }
 uint epriv::FramebufferObject::height(){ return m_i->m_FramebufferHeight; }
-const GLuint& epriv::FramebufferObject::address() const {
-
-    //profile this versus m_i->m_FBO.at(0);
-
-    return m_i->m_FBO.at(m_i->m_CurrentFBOIndex); 
-}
+const GLuint& epriv::FramebufferObject::address() const { return m_i->m_FBO.at(m_i->m_CurrentFBOIndex); }
 unordered_map<uint,epriv::FramebufferObjectAttatchment*>& epriv::FramebufferObject::attatchments(){ return m_i->m_Attatchments; }
 bool epriv::FramebufferObject::check(){ return m_i->_check(this); }
 float epriv::FramebufferObject::divisor(){ return m_i->m_Divisor; }

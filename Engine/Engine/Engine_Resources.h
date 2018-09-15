@@ -17,7 +17,6 @@ class Camera;
 class Mesh;
 class Material;
 class SunLight;
-class MeshInstance;
 class SoundData;
 
 class ResourceType final {public: enum Type {
@@ -26,7 +25,6 @@ class ResourceType final {public: enum Type {
 	Mesh,
 	Material,
 	Sound,
-	MeshInstance,
 	Object,
 	Font,
 	Camera,
@@ -64,7 +62,6 @@ namespace Engine{
                 bool _hasScene(std::string);
 				void _addScene(Scene*);
 				std::string _buildSceneName(std::string);
-                void _addMeshInstance(MeshInstance*);
                 Texture* _hasTexture(std::string);
                 uint _numScenes();
         };

@@ -405,7 +405,9 @@ ComponentModel::ComponentModel(Mesh* mesh,Material* material,Entity* _owner):Com
         models.push_back( new MeshInstance(owner(),mesh,material) );
     epriv::ComponentInternalFunctionality::CalculateRadius(this);
 }
-ComponentModel::~ComponentModel(){ models.clear(); }
+ComponentModel::~ComponentModel(){ 
+    SAFE_DELETE_VECTOR(models);
+}
 uint ComponentModel::getNumModels() { return models.size(); }
 MeshInstance* ComponentModel::getModel(uint index){ return models.at(index); }
 bool ComponentModel::passedRenderCheck(){ return _passedRenderCheck; }

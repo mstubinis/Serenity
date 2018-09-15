@@ -240,6 +240,9 @@ class epriv::RenderManager::impl final{
         #pragma endregion
 
         #pragma region GeneralInfo
+
+        bool enabled1;
+
         float gamma;
         Texture* brdfCook;
         ShaderP* current_shader_program;
@@ -355,6 +358,9 @@ class epriv::RenderManager::impl final{
             #pragma endregion
 
             #pragma region GeneralInfo
+
+            enabled1 = true;
+
             gamma = 2.2f;
             brdfCook = nullptr;
             current_shader_program = nullptr;
@@ -2276,6 +2282,18 @@ void epriv::RenderManager::_unbindMaterial(){
 void epriv::RenderManager::_genPBREnvMapData(Texture* texture, uint size1, uint size2){
     m_i->_generatePBREnvMapData(texture,size1,size2);
 }
+
+
+void Renderer::Settings::General::enable1(bool b) {
+    renderManager->enabled1 = b;
+}
+void Renderer::Settings::General::disable1() {
+    renderManager->enabled1 = false;
+}
+bool Renderer::Settings::General::enabled1() {
+    return renderManager->enabled1;
+}
+
 bool Renderer::Settings::Fog::enabled(){ return renderManager->fog; }
 void Renderer::Settings::Fog::enable(bool b){ renderManager->fog = b; }
 void Renderer::Settings::Fog::disable(){ renderManager->fog = false; }

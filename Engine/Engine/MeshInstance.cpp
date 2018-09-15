@@ -1,5 +1,4 @@
 #include "MeshInstance.h"
-#include "Engine.h"
 #include "Components.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
@@ -216,7 +215,6 @@ epriv::DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
 MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat,glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
     m_i->_init(mesh,mat,pos,rot,scl,this,entity);
-    epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
@@ -224,21 +222,18 @@ MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat,glm::vec3 pos,g
 	Mesh* _mesh = (Mesh*)mesh.get();
 	Material* _mat = (Material*)mat.get();
     m_i->_init(_mesh,_mat,pos,rot,scl,this,entity);
-    epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::MeshInstance(Entity* entity,Mesh* mesh,Handle mat,glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
 	Material* _mat = (Material*)mat.get();
     m_i->_init(mesh,_mat,pos,rot,scl,this,entity);
-    epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat,glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
 	Mesh* _mesh = (Mesh*)mesh.get();
     m_i->_init(_mesh,mat,pos,rot,scl,this,entity);
-    epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }

@@ -88,7 +88,10 @@ class Engine_Window::impl final{
             if(m_Style != sf::Style::Fullscreen && !fullscreen) return;
             if(!m_SFMLWindow->hasFocus()) return;
 
-            m_VideoMode = sf::VideoMode::getDesktopMode();
+            auto validModes = sf::VideoMode::getFullscreenModes();
+            if (validModes.size() > 0) m_VideoMode = validModes.at(0);
+            else                       m_VideoMode = sf::VideoMode::getDesktopMode();
+
             m_Style = sf::Style::Fullscreen;
             if(!fullscreen){
                 m_Style = sf::Style::Default;
@@ -168,6 +171,9 @@ class Engine_Window::impl final{
                 m_MouseCursorGrabbed = keep;
             }
         }
+        void _display() {
+            m_SFMLWindow->display();
+        }
 };
 
 Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new impl){
@@ -190,7 +196,7 @@ bool Engine_Window::hasFocus(){return m_i->m_SFMLWindow->hasFocus();}
 bool Engine_Window::isOpen(){return m_i->m_SFMLWindow->isOpen();}
 bool Engine_Window::isActive(){ return m_i->m_Active; }
 bool Engine_Window::isFullscreen(){return m_i->m_Fullscreen;}
-void Engine_Window::display(){m_i->m_SFMLWindow->display();}
+void Engine_Window::display(){m_i->_display();}
 void Engine_Window::setActive(bool active){m_i->_setActive(active);}
 void Engine_Window::setSize(uint w, uint h){m_i->_setSize(w,h);}
 void Engine_Window::setStyle(uint style){m_i->_setStyle(style);}

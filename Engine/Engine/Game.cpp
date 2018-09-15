@@ -47,7 +47,7 @@ void Game::initLogic(){
     window.setMouseCursorVisible(false);
     window.setKeyRepeatEnabled(false);
     //apparently these 2 should not be used together, but i have not found any issues with it so far
-    //window.setVerticalSyncEnabled(true);
+    window.setVerticalSyncEnabled(true);
     //window.setFramerateLimit(60);
     SolarSystem* sol = new SolarSystem("Sol","data/Systems/Sol.txt");
     CapsuleSpace* cap = new CapsuleSpace();
@@ -75,6 +75,7 @@ void Game::update(const float& dt){
     if(Engine::isKeyDownOnce(KeyboardKey::F8)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
     if(Engine::isKeyDownOnce(KeyboardKey::F9)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
     if(Engine::isKeyDownOnce(KeyboardKey::F10)){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
+    if (Engine::isKeyDownOnce(KeyboardKey::F11)) { Renderer::Settings::General::enable1(!Renderer::Settings::General::enabled1()); }
 
     if(Engine::isKeyDown(KeyboardKey::N)){ ((Material*)ResourceManifest::DefiantMaterial.get())->setMetalness(((Material*)ResourceManifest::DefiantMaterial.get())->metalness() - 0.025f); }
     if(Engine::isKeyDown(KeyboardKey::M)){ ((Material*)ResourceManifest::DefiantMaterial.get())->setMetalness(((Material*)ResourceManifest::DefiantMaterial.get())->metalness() + 0.025f); }

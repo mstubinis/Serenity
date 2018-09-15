@@ -104,6 +104,11 @@ namespace Engine{
 
             void enableDrawPhysicsInfo(bool b = true);   void disableDrawPhysicsInfo();
 
+            namespace General {
+                void enable1(bool b = true);
+                void disable1();
+                bool enabled1();
+            };
             namespace Fog{
                 void enable(bool b = true);
                 void disable();
