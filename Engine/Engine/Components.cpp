@@ -208,6 +208,7 @@ void epriv::ComponentManager::_removeComponent(ComponentBaseClass* component){
     }
 }
 void epriv::ComponentManager::onEntityAddedToScene(Scene* scene, Entity* entity) {
+    entity->m_Scene = scene;
     for (uint i = 0; i < entity->m_Components.size(); ++i) {
         const uint& componentID = entity->m_Components.at(i);
         if (componentID != 0){
@@ -215,7 +216,6 @@ void epriv::ComponentManager::onEntityAddedToScene(Scene* scene, Entity* entity)
             componentManager->m_i->m_Systems.at(i)->onEntityAddedToScene(scene, component, entity);
         }
     }
-    entity->m_Scene = scene;
 }
 
 
