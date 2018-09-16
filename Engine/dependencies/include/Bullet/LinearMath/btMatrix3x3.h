@@ -1063,30 +1063,23 @@ btMatrix3x3::transpose() const
 #endif
 }
 
-SIMD_FORCE_INLINE btMatrix3x3 
-btMatrix3x3::adjoint() const 
-{
+SIMD_FORCE_INLINE btMatrix3x3 btMatrix3x3::adjoint() const {
 	return btMatrix3x3(cofac(1, 1, 2, 2), cofac(0, 2, 2, 1), cofac(0, 1, 1, 2),
 		cofac(1, 2, 2, 0), cofac(0, 0, 2, 2), cofac(0, 2, 1, 0),
 		cofac(1, 0, 2, 1), cofac(0, 1, 2, 0), cofac(0, 0, 1, 1));
 }
 
-SIMD_FORCE_INLINE btMatrix3x3 
-btMatrix3x3::inverse() const
-{
+SIMD_FORCE_INLINE btMatrix3x3 btMatrix3x3::inverse() const{
 	btVector3 co(cofac(1, 1, 2, 2), cofac(1, 2, 2, 0), cofac(1, 0, 2, 1));
 	btScalar det = (*this)[0].dot(co);
-	//btFullAssert(det != btScalar(0.0));
-	btAssert(det != btScalar(0.0));
+	//btAssert(det != btScalar(0.0));
 	btScalar s = btScalar(1.0) / det;
 	return btMatrix3x3(co.x() * s, cofac(0, 2, 2, 1) * s, cofac(0, 1, 1, 2) * s,
 		co.y() * s, cofac(0, 0, 2, 2) * s, cofac(0, 2, 1, 0) * s,
 		co.z() * s, cofac(0, 1, 2, 0) * s, cofac(0, 0, 1, 1) * s);
 }
 
-SIMD_FORCE_INLINE btMatrix3x3 
-btMatrix3x3::transposeTimes(const btMatrix3x3& m) const
-{
+SIMD_FORCE_INLINE btMatrix3x3 btMatrix3x3::transposeTimes(const btMatrix3x3& m) const{
 #if defined BT_USE_SIMD_VECTOR3 && (defined (BT_USE_SSE_IN_API) && defined (BT_USE_SSE))
     // zeros w
 //    static const __m128i xyzMask = (const __m128i){ -1ULL, 0xffffffffULL };
@@ -1140,9 +1133,7 @@ btMatrix3x3::transposeTimes(const btMatrix3x3& m) const
 #endif
 }
 
-SIMD_FORCE_INLINE btMatrix3x3 
-btMatrix3x3::timesTranspose(const btMatrix3x3& m) const
-{
+SIMD_FORCE_INLINE btMatrix3x3 btMatrix3x3::timesTranspose(const btMatrix3x3& m) const{
 #if (defined (BT_USE_SSE_IN_API) && defined (BT_USE_SSE))
     __m128 a0 = m_el[0].mVec128;
     __m128 a1 = m_el[1].mVec128;

@@ -11,8 +11,6 @@ class epriv::EventDispatcher::impl final{
         void _init(const char* name,uint& w,uint& h){
             m_Observers.resize(EventType::_TOTAL); //replace later with a constant?
         }
-        void _postInit(const char* name,uint& w,uint& h){
-        }
         void _destruct(){
             for(auto v:m_Observers){
                 vector_clear(v);
@@ -41,7 +39,6 @@ class epriv::EventDispatcher::impl final{
 
 epriv::EventDispatcher::EventDispatcher(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); }
 epriv::EventDispatcher::~EventDispatcher(){ m_i->_destruct(); }
-void epriv::EventDispatcher::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::EventDispatcher::_update(const float& dt){ m_i->_update(dt); }
 void epriv::EventDispatcher::_registerObject(EventObserver* obj,EventType::Type type){ m_i->_registerObject(obj,type); }
 void epriv::EventDispatcher::_unregisterObject(EventObserver* obj,EventType::Type type){ m_i->_unregisterObject(obj,type); }

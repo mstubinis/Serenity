@@ -24,6 +24,7 @@ class SoundStatus final{public: enum Status{
 };};
 
 class SoundData final: public EngineResource{
+    friend class ::Engine::epriv::SoundManager;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -64,6 +65,7 @@ class SoundBaseClass{
         virtual void setPitch(float);
 };
 class SoundEffect: public SoundBaseClass{
+    friend class ::Engine::epriv::SoundManager;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -88,6 +90,7 @@ class SoundEffect: public SoundBaseClass{
         void setPitch(float);
 };
 class SoundMusic: public SoundBaseClass{
+    friend class ::Engine::epriv::SoundManager;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -111,6 +114,7 @@ class SoundMusic: public SoundBaseClass{
         void setPitch(float);
 };
 class SoundQueue final{
+    friend class ::Engine::epriv::SoundManager;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -128,15 +132,14 @@ class SoundQueue final{
 namespace Engine{
     namespace epriv{
         class SoundManager final: private Engine::epriv::noncopyable{
-            friend class ::SoundBaseClass;  friend class ::SoundBaseClass::impl;
+            friend class ::SoundBaseClass;
+            //friend class ::SoundBaseClass::impl;
             public:
-				class impl;
-                std::unique_ptr<impl> m_i;
+				class impl; std::unique_ptr<impl> m_i;
 
                 SoundManager(const char* name,uint w,uint h);
                 ~SoundManager();
 
-                void _init(const char* name,uint w,uint h);
                 void _update(const float& dt);
         };
     };

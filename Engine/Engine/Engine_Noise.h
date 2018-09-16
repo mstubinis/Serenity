@@ -15,8 +15,6 @@ namespace Engine{
 
                 NoiseManager(const char* name,uint w,uint h);
                 ~NoiseManager();
-
-                void _init(const char* name,uint w,uint h);
         };
     };
     namespace Noise{

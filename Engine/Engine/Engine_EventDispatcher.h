@@ -15,7 +15,6 @@ namespace Engine{
                 ~EventDispatcher();
 
                 void _update(const float& dt);
-                void _init(const char* name,uint w,uint h);
 
                 void _registerObject(EventObserver*,EventType::Type);
                 void _unregisterObject(EventObserver*,EventType::Type);

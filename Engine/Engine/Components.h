@@ -59,6 +59,7 @@ class ComponentBaseClass{
         uint m_Owner;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
+        ComponentBaseClass(uint owner);
         ComponentBaseClass();
         Entity* owner();
         virtual ~ComponentBaseClass();
@@ -95,7 +96,8 @@ namespace Engine{
                 ComponentManager(const char* name, uint w, uint h);
                 ~ComponentManager();
 
-                void _init(const char* name, uint w, uint h);
+                static void onEntityAddedToScene(Scene*, Entity*);
+
                 void _pause(bool=true);
                 void _unpause();
                 void _update(const float& dt);
@@ -144,7 +146,16 @@ namespace Engine{
                     ++m_NextIndex;
                 }
         };
-        class ComponentModelSystem final: private Engine::epriv::noncopyable{
+        class ComponentSystemBaseClass : private Engine::epriv::noncopyable {
+            friend class ::Engine::epriv::ComponentManager;
+            private:
+            public:
+                ComponentSystemBaseClass(){}
+                virtual ~ComponentSystemBaseClass(){}
+                virtual void update(const float& dt){}
+                virtual void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*) {}
+        };
+        class ComponentModelSystem final: public ComponentSystemBaseClass {
             friend class ::Engine::epriv::ComponentManager;
             private:
                 class impl; std::unique_ptr<impl> m_i;
@@ -152,8 +163,9 @@ namespace Engine{
                 ComponentModelSystem();
                 ~ComponentModelSystem();
                 void update(const float& dt);
+                void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
         };
-        class ComponentCameraSystem final: private Engine::epriv::noncopyable{
+        class ComponentCameraSystem final : public ComponentSystemBaseClass {
             friend class ::Engine::epriv::ComponentManager;
             private:
                 class impl; std::unique_ptr<impl> m_i;
@@ -161,8 +173,9 @@ namespace Engine{
                 ComponentCameraSystem();
                 ~ComponentCameraSystem();
                 void update(const float& dt);
+                void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
         };
-        class ComponentBodySystem final : private Engine::epriv::noncopyable {
+        class ComponentBodySystem final : public ComponentSystemBaseClass {
             friend class ::Engine::epriv::ComponentManager;
             private:
                 class impl; std::unique_ptr<impl> m_i;
@@ -170,6 +183,7 @@ namespace Engine{
                 ComponentBodySystem();
                 ~ComponentBodySystem();
                 void update(const float& dt);
+                void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
         };
     };
 };
@@ -373,11 +387,12 @@ class Entity: public EventObserver{
             if(componentID != 0) return;
             uint generatedID = Engine::epriv::ComponentManager::m_ComponentPool->add(component);
             Engine::epriv::ComponentManager::m_ComponentVectors.at(slot).push_back(component);
-            if(m_Scene && m_Scene == Resources::getCurrentScene()){
-                Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(slot).push_back(component);
-            }
             component->m_Owner = m_ID;
             componentID = generatedID;
+            if (m_Scene) {
+                Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(slot).push_back(component);
+                Engine::epriv::ComponentManager::onEntityAddedToScene(m_Scene, this);
+            }
         }
         template<class T> void removeComponent(T* component){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());

@@ -679,6 +679,42 @@ class epriv::PhysicsManager::impl final{
             data->debugDrawer->drawAccumulatedLines();
             data->debugDrawer->postRender();
         }
+        void _addRigidBody(btRigidBody* _rigidBody) {
+            for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
+                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray().at(i));
+                if (rigidBody) {
+                    if (rigidBody == _rigidBody) {
+                        return;
+                    }
+                }
+            }
+            data->world->addRigidBody(_rigidBody);
+        }
+        void _addRigidBody(btRigidBody* _rigidBody, short group, short mask) {
+            for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
+                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray().at(i));
+                if (rigidBody) {
+                    if (rigidBody == _rigidBody) {
+                        return;
+                    }
+                }
+            }
+            data->world->addRigidBody(_rigidBody, group, mask);
+        }
+        void _removeRigidBody(btRigidBody* _rigidBody) {
+            for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
+                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray().at(i));
+                if (rigidBody) {
+                    if (rigidBody == _rigidBody) {
+                        data->world->removeRigidBody(_rigidBody);
+                        return;
+                    }
+                }
+            }
+        }
+        void _updateRigidBody(btRigidBody* rigidBody) {
+            data->world->updateSingleAabb(rigidBody);
+        }
 };
 epriv::PhysicsManager::impl* physicsManager;
 
@@ -692,10 +728,10 @@ void Physics::pause(bool b){ physicsManager->m_Paused = b; }
 void Physics::unpause(){ physicsManager->m_Paused = false; }
 void Physics::setGravity(float x,float y,float z){ physicsManager->data->world->setGravity(btVector3(x,y,z)); }
 void Physics::setGravity(glm::vec3& gravity){ Physics::setGravity(gravity.x,gravity.y,gravity.z); }
-void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ physicsManager->data->world->addRigidBody(rigidBody,group,mask); }
-void Physics::addRigidBody(btRigidBody* rigidBody){ physicsManager->data->world->addRigidBody(rigidBody); }
-void Physics::removeRigidBody(btRigidBody* rigidBody){ physicsManager->data->world->removeRigidBody(rigidBody); }
-void Physics::updateRigidBody(btRigidBody* rigidBody){ physicsManager->data->world->updateSingleAabb(rigidBody); }
+void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ physicsManager->_addRigidBody(rigidBody,group,mask); }
+void Physics::addRigidBody(btRigidBody* rigidBody){ physicsManager->_addRigidBody(rigidBody); }
+void Physics::removeRigidBody(btRigidBody* rigidBody){ physicsManager->_removeRigidBody(rigidBody); }
+void Physics::updateRigidBody(btRigidBody* rigidBody){ physicsManager->_updateRigidBody(rigidBody); }
 vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end) {
     btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
     physicsManager->data->world->rayTest(start, end, RayCallback);

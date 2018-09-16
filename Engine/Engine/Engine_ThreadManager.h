@@ -28,7 +28,6 @@ namespace Engine{
                 ThreadManager(const char* name,uint w, uint h);
                 ~ThreadManager();
 
-                void _init(const char* name,uint w, uint h);
                 void _update(const float& dt);
 
                 const uint cores() const;

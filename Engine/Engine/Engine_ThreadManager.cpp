@@ -49,9 +49,6 @@ class epriv::ThreadManager::impl final{
                 m_Threads.create_thread(boost::bind(&boost_asio_service::run, &m_IOService));
             }
         }
-        void _postInit(const char* name, uint& w, uint& h,ThreadManager* super){
-
-        }
         void _destruct(ThreadManager* super){
             delete(m_Work);
             m_IOService.stop();
@@ -75,7 +72,6 @@ class epriv::ThreadManager::impl final{
 
 epriv::ThreadManager::ThreadManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,this); threadManager = m_i.get(); }
 epriv::ThreadManager::~ThreadManager(){ m_i->_destruct(this); }
-void epriv::ThreadManager::_init(const char* name, uint w, uint h){ m_i->_postInit(name,w,h,this); }
 void epriv::ThreadManager::_update(const float& dt){ m_i->_update(dt,this); }
 const uint epriv::ThreadManager::cores() const{ return threadManager->m_Cores; }
 void epriv::threading::finalizeJob( boost_packed_task_ptr&& task){

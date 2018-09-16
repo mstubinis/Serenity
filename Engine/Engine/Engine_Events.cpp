@@ -25,8 +25,6 @@ class epriv::EventManager::impl final{
             _initKeyMap();
             _initMouseMap();
         }
-        void _postInit(const char* name,uint& w,uint& h){
-        }
         void _initVars(){
             m_Delta = 0;
             m_Position = m_Position_Previous = m_Difference = glm::vec2(0.0f);
@@ -373,7 +371,6 @@ epriv::EventManager::EventManager(const char* name,uint w,uint h):m_i(new impl){
 	eventManager = m_i.get();
 }
 epriv::EventManager::~EventManager(){ m_i->_destruct(); }
-void epriv::EventManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::EventManager::_onEventKeyPressed(uint& key){ m_i->_onEventKeyPressed(key); }
 void epriv::EventManager::_onEventKeyReleased(uint& key){ m_i->_onEventKeyReleased(key); }
 void epriv::EventManager::_onEventMouseButtonPressed(uint mouseButton){ m_i->_onEventMouseButtonPressed(mouseButton); }

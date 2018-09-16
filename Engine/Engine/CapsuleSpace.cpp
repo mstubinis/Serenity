@@ -20,13 +20,12 @@ using namespace std;
 
 CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, Scene* scene):Entity(){
     scene->addEntity(this);
-
     ComponentModel* model = new ComponentModel(Mesh::Plane, ResourceManifest::CapsuleD,this);  addComponent(model);
     model->getModel()->setColor(color.x,color.y,color.z,1.0f);
     
     m_Body = new ComponentBody();  addComponent(m_Body);
     m_Body->setPosition(pos);
-    m_Body->setScale(size,size,size);	
+    m_Body->setScale(size,size,size);	    
 }
 CapsuleEnd::~CapsuleEnd(){
 }
@@ -34,7 +33,6 @@ void CapsuleEnd::update(const float& dt){
 }
 CapsuleStar::CapsuleStar(float size,glm::vec3 pos,Scene* scene,bool makeLight):Entity(){
     scene->addEntity(this);
-    
     ComponentModel* model = new ComponentModel(Mesh::Plane, ResourceManifest::StarFlareMaterial,this);  addComponent(model);
     model->getModel()->setColor(255,235,206,255);
     
@@ -76,7 +74,7 @@ CapsuleTunnel::CapsuleTunnel(float tunnelRadius,Handle& material, Scene* scene):
     ComponentModel* model = new ComponentModel(ResourceManifest::CapsuleTunnelMesh,material,this);  addComponent(model);
     m_Body = new ComponentBody();  addComponent(m_Body);
     m_Body->setPosition(0.0f,0.0f,0.0f);
-    m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
+    m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);  
 }
 CapsuleTunnel::~CapsuleTunnel(){}
 
@@ -86,7 +84,7 @@ CapsuleRibbon::CapsuleRibbon(float tunnelRadius,Handle& material, Scene* scene):
     ComponentModel* model = new ComponentModel(ResourceManifest::CapsuleRibbonMesh,material,this);  addComponent(model);
     m_Body = new ComponentBody();  addComponent(m_Body);
     m_Body->setPosition(0.0f,0.0f,0.0f);
-    m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
+    m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);   
 }
 CapsuleRibbon::~CapsuleRibbon(){}
 void CapsuleRibbon::bind(){

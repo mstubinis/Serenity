@@ -132,8 +132,7 @@ class epriv::NoiseManager::impl final{
             m_Grad4[61] = glm::ivec4(-1, -3, -1, -1);
             m_Grad4[62] = glm::ivec4(-1, -1, -3, -1); 
             m_Grad4[63] = glm::ivec4(-1, -1, -1, -3);
-        }
-        void _postInit(const char* name,uint& w,uint& h){
+
             unsigned long long zero(time(0));
             _initFromSeed(zero);
         }
@@ -1882,7 +1881,6 @@ epriv::NoiseManager::NoiseManager(const char* name,uint w,uint h):m_i(new impl){
 	noiseManager = m_i.get();
 }
 epriv::NoiseManager::~NoiseManager(){ m_i->_destruct(); }
-void epriv::NoiseManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 
 double Noise::noiseOpenSimplex2D(double x, double y){
     return noiseManager->_noiseOpenSimplex2D(x,y);

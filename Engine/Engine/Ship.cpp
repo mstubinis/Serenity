@@ -220,8 +220,8 @@ void ShipSystemSensors::update(const float& dt){
 #pragma endregion
 
 Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,Scene* scene) :Entity() {
-	scene->addEntity(this);
-	ComponentModel* modelComponent = new ComponentModel(mesh, mat, this);
+    scene->addEntity(this);
+    ComponentModel* modelComponent = new ComponentModel(mesh, mat, this);
 	addComponent(modelComponent);
 	ComponentBody* rigidBodyComponent = new ComponentBody(_type, this, scl);
 	addComponent(rigidBodyComponent);
@@ -251,7 +251,7 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
 		else if (i == 5)  system = new ShipSystemMainThrusters(this);
 		else if (i == 6)  system = new ShipSystemWarpDrive(this);
 		else if (i == 7)  system = new ShipSystemSensors(this);
-		m_ShipSystems[i] = system;
+        m_ShipSystems.emplace(i, system);
 	}
 }
 Ship::~Ship(){

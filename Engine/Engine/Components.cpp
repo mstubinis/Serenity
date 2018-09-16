@@ -62,21 +62,19 @@ class epriv::ComponentInternalFunctionality final{
 
 class epriv::ComponentManager::impl final{
     public:	
-        ComponentTypeRegistry       m_TypeRegistry;
-        vector<Entity*>             m_EntitiesToBeDestroyed;
-        bool                        m_Paused;
-        ComponentCameraSystem*      m_ComponentCameraSystem;
-        ComponentModelSystem*       m_ComponentModelSystem;
-        ComponentBodySystem*        m_ComponentBodySystem;
+        ComponentTypeRegistry              m_TypeRegistry;
+        vector<Entity*>                    m_EntitiesToBeDestroyed;
+        bool                               m_Paused;
+        vector<ComponentSystemBaseClass*>  m_Systems;
         void _init(const char* name, uint& w, uint& h,ComponentManager* super){
+            m_Paused = false;
             super->m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
             super->m_EntityPool    = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
 
-            m_ComponentCameraSystem = new ComponentCameraSystem();
-            m_ComponentModelSystem = new ComponentModelSystem();
-            m_ComponentBodySystem = new ComponentBodySystem();
-
-            m_Paused = false;
+            m_Systems.resize(ComponentType::_TOTAL, nullptr);
+            m_Systems.at(0) = new ComponentBodySystem();
+            m_Systems.at(1) = new ComponentModelSystem();
+            m_Systems.at(2) = new ComponentCameraSystem();
 
             m_TypeRegistry.emplace<ComponentBody>();
             m_TypeRegistry.emplace<ComponentModel>();
@@ -85,9 +83,7 @@ class epriv::ComponentManager::impl final{
         void _destruct(ComponentManager* super){
             SAFE_DELETE(super->m_ComponentPool);
             SAFE_DELETE(super->m_EntityPool);
-            SAFE_DELETE(m_ComponentCameraSystem);
-            SAFE_DELETE(m_ComponentModelSystem);
-            SAFE_DELETE(m_ComponentBodySystem);
+            SAFE_DELETE_VECTOR(m_Systems);
         }
         static void _performTransformation(Entity* parent,glm::vec3& position,glm::quat& rotation,glm::vec3& scale,glm::mat4& modelMatrix){
             if(!parent){
@@ -127,11 +123,11 @@ class epriv::ComponentManager::impl final{
             _updateCurrentScene(dt); //take player input and perform player actions
             _updatePhysicsEngine(dt);
             if(!m_Paused){
-                m_ComponentBodySystem->update(dt);
+                m_Systems.at(ComponentType::Body)->update(dt);
             }
-            m_ComponentCameraSystem->update(dt); //update frustum planes
+            m_Systems.at(ComponentType::Camera)->update(dt); //update frustum planes
             if(!m_Paused){
-                m_ComponentModelSystem->update(dt); //transform model matrices and perform render check
+                m_Systems.at(ComponentType::Model)->update(dt); //transform model matrices and perform render check
             }
             _destroyQueuedEntities(super);
         }
@@ -139,7 +135,6 @@ class epriv::ComponentManager::impl final{
 
 epriv::ComponentManager::ComponentManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,this); componentManager = this; }
 epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(this); }
-void epriv::ComponentManager::_init(const char* name, uint w, uint h){ }
 void epriv::ComponentManager::_pause(bool b){ m_i->m_Paused = b; }
 void epriv::ComponentManager::_unpause(){ m_i->m_Paused = false; }
 void epriv::ComponentManager::_update(const float& dt){ m_i->_update(dt,this); }
@@ -174,10 +169,16 @@ void epriv::ComponentManager::_addEntityToBeDestroyed(Entity* entity){
     m_i->m_EntitiesToBeDestroyed.push_back(entity);
 }
 void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
-
     //TODO: add method to handle each component type on scene swap (like remove/add rigid body from physics world)
     for(auto iterator:m_ComponentVectorsScene){
         vector_clear(m_ComponentVectorsScene.at(iterator.first));
+    }
+    //cleanup scene specific data for components belonging to the old scene
+    if (oldScene) {
+        for (auto entityID : InternalScenePublicInterface::GetEntities(oldScene)) {
+            Entity* e = oldScene->getEntity(entityID);
+            epriv::ComponentManager::onEntityAddedToScene(oldScene, e);
+        }
     }
     //transfers the newScene's components into the vector used for scenes
     for(auto entityID:InternalScenePublicInterface::GetEntities(newScene)){
@@ -192,6 +193,7 @@ void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
                 }
             }
         }
+        epriv::ComponentManager::onEntityAddedToScene(newScene, e);
     }
 }
 void epriv::ComponentManager::_removeComponent(uint componentID){
@@ -205,6 +207,17 @@ void epriv::ComponentManager::_removeComponent(ComponentBaseClass* component){
         removeFromVector(m_ComponentVectorsScene.at(slot),component);
     }
 }
+void epriv::ComponentManager::onEntityAddedToScene(Scene* scene, Entity* entity) {
+    for (uint i = 0; i < entity->m_Components.size(); ++i) {
+        const uint& componentID = entity->m_Components.at(i);
+        if (componentID != 0){
+            ComponentBaseClass* component = Components::GetComponent(entity->m_Components.at(i));
+            componentManager->m_i->m_Systems.at(i)->onEntityAddedToScene(scene, component, entity);
+        }
+    }
+    entity->m_Scene = scene;
+}
+
 
 #pragma region ComponentSystems
 
@@ -226,10 +239,14 @@ class epriv::ComponentCameraSystem::impl final {
             }
             epriv::threading::waitForAll();
         }
+        void _onEntityAddedToScene(Scene* scene, ComponentBaseClass* component, Entity* _entity) {
+            ComponentCamera& componentCamera = *(ComponentCamera*)component;
+        }
 };
-epriv::ComponentCameraSystem::ComponentCameraSystem() :m_i(new impl) { }
+epriv::ComponentCameraSystem::ComponentCameraSystem() :ComponentSystemBaseClass(),m_i(new impl) { }
 epriv::ComponentCameraSystem::~ComponentCameraSystem() { }
 void epriv::ComponentCameraSystem::update(const float& dt) { m_i->_update(dt); }
+void epriv::ComponentCameraSystem::onEntityAddedToScene(Scene* s, ComponentBaseClass* c,Entity* e) { m_i->_onEntityAddedToScene(s,c,e); }
 class epriv::ComponentModelSystem::impl final {
     public:
         static void _calculateRenderCheck(ComponentModel& m, Camera* camera) {
@@ -264,10 +281,14 @@ class epriv::ComponentModelSystem::impl final {
             }
             epriv::threading::waitForAll();
         }
+        void _onEntityAddedToScene(Scene* scene,ComponentBaseClass* component, Entity* _entity) {
+            ComponentModel& componentModel = *(ComponentModel*)component;
+        }
 };
-epriv::ComponentModelSystem::ComponentModelSystem() :m_i(new impl) { }
+epriv::ComponentModelSystem::ComponentModelSystem() :ComponentSystemBaseClass(),m_i(new impl) { }
 epriv::ComponentModelSystem::~ComponentModelSystem() { }
 void epriv::ComponentModelSystem::update(const float& dt) { m_i->_update(dt); }
+void epriv::ComponentModelSystem::onEntityAddedToScene(Scene* s,ComponentBaseClass* c,Entity* e) { m_i->_onEntityAddedToScene(s,c, e); }
 class epriv::ComponentBodySystem::impl final {
     public:
         static void _defaultUpdate(vector<ComponentBaseClass*>& vec) {
@@ -289,10 +310,20 @@ class epriv::ComponentBodySystem::impl final {
             }
             epriv::threading::waitForAll();
         }
+        void _onEntityAddedToScene(Scene* scene,ComponentBaseClass* component,Entity* _entity) {
+            ComponentBody& componentBody = *(ComponentBody*)component;
+            if (componentBody._physics){
+                if (scene == Resources::getCurrentScene())
+                    Physics::addRigidBody(componentBody.data.p.rigidBody);
+                else
+                    Physics::removeRigidBody(componentBody.data.p.rigidBody);
+            }
+        }
 };
-epriv::ComponentBodySystem::ComponentBodySystem() :m_i(new impl) { }
+epriv::ComponentBodySystem::ComponentBodySystem() :ComponentSystemBaseClass(),m_i(new impl) { }
 epriv::ComponentBodySystem::~ComponentBodySystem() { }
 void epriv::ComponentBodySystem::update(const float& dt) { m_i->_update(dt); }
+void epriv::ComponentBodySystem::onEntityAddedToScene(Scene* s,ComponentBaseClass* c,Entity* e) { m_i->_onEntityAddedToScene(s,c,e); }
 
 #pragma endregion
 
@@ -300,6 +331,7 @@ void epriv::ComponentBodySystem::update(const float& dt) { m_i->_update(dt); }
 #pragma region BaseClass
 
 ComponentBaseClass::ComponentBaseClass(){ m_Owner = 0; }
+ComponentBaseClass::ComponentBaseClass(uint owner) { m_Owner = owner; }
 ComponentBaseClass::~ComponentBaseClass(){}
 Entity* ComponentBaseClass::owner() { return Components::GetEntity(m_Owner); }
 
@@ -383,27 +415,23 @@ void ComponentCamera::setFar(float f){ _farPlane = f; epriv::ComponentInternalFu
 
 ComponentModel::ComponentModel(Handle& meshHandle,Handle& materialHandle,Entity* _owner):ComponentBaseClass(){
     _passedRenderCheck = false; _visible = true; m_Owner = _owner->id();
-    if(!meshHandle.null())
-        models.push_back( new MeshInstance(owner(),meshHandle,materialHandle) );
-    epriv::ComponentInternalFunctionality::CalculateRadius(this);
+    if (!meshHandle.null())
+        addModel(meshHandle, materialHandle);
 }
 ComponentModel::ComponentModel(Mesh* mesh,Handle& materialHandle,Entity* _owner):ComponentBaseClass(){
     _passedRenderCheck = false; _visible = true; m_Owner = _owner->id();
     if(mesh)
-        models.push_back( new MeshInstance(owner(),mesh,materialHandle) );
-    epriv::ComponentInternalFunctionality::CalculateRadius(this);
+        addModel(mesh, (Material*)materialHandle.get());
 }
 ComponentModel::ComponentModel(Handle& meshHandle,Material* material,Entity* _owner):ComponentBaseClass(){
     _passedRenderCheck = false; _visible = true; m_Owner = _owner->id();
     if(!meshHandle.null())
-        models.push_back( new MeshInstance(owner(),meshHandle,material) );
-    epriv::ComponentInternalFunctionality::CalculateRadius(this);
+        addModel((Mesh*)meshHandle.get(), material);
 }
 ComponentModel::ComponentModel(Mesh* mesh,Material* material,Entity* _owner):ComponentBaseClass(){
     _passedRenderCheck = false; _visible = true; m_Owner = _owner->id();
     if(mesh)
-        models.push_back( new MeshInstance(owner(),mesh,material) );
-    epriv::ComponentInternalFunctionality::CalculateRadius(this);
+        addModel(mesh, material);
 }
 ComponentModel::~ComponentModel(){ 
     SAFE_DELETE_VECTOR(models);
@@ -456,10 +484,10 @@ ComponentBody::ComponentBody():ComponentBaseClass(){
 ComponentBody::ComponentBody(CollisionType::Type _collisionType,Entity* _owner,glm::vec3 _scale):ComponentBaseClass(){
     data.p = PhysicsData();	
     _physics = true;
-    _forward = glm::vec3(0.0f,0.0f,-1.0f);  _right = glm::vec3(1.0f,0.0f,0.0f);  _up = glm::vec3(0.0f,1.0f,0.0f);
+    _forward = glm::vec3(0,0,-1);  _right = glm::vec3(1,0,0);  _up = glm::vec3(0,1,0);
     m_Owner = _owner->id();
 
-    data.p.motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1)));
+    data.p.motionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1)));
     float _mass = 1.0f;
     data.p.mass = _mass;
 
@@ -472,15 +500,13 @@ ComponentBody::ComponentBody(CollisionType::Type _collisionType,Entity* _owner,g
 
     btRigidBody::btRigidBodyConstructionInfo CI(_mass,_motionState, _shape,_inertia);
     data.p.rigidBody = new btRigidBody(CI);
-    if (owner()->scene() == Resources::getCurrentScene())
-        Physics::addRigidBody(data.p.rigidBody);
-    data.p.rigidBody->setSleepingThresholds(0.015f,0.015f);
-    data.p.rigidBody->setFriction(0.3f);
-    data.p.rigidBody->setDamping(0.1f,0.4f);//air friction 
-    data.p.rigidBody->setMassProps(_mass,_inertia);
-    data.p.rigidBody->updateInertiaTensor();
-    data.p.rigidBody->setUserPointer(this);
-
+    auto& rigidBody = *data.p.rigidBody;
+    rigidBody.setSleepingThresholds(0.015f,0.015f);
+    rigidBody.setFriction(0.3f);
+    rigidBody.setDamping(0.1f,0.4f);//air friction 
+    rigidBody.setMassProps(_mass,_inertia);
+    rigidBody.updateInertiaTensor();
+    rigidBody.setUserPointer(this);
 }
 ComponentBody::~ComponentBody(){
     if(_physics){

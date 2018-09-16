@@ -321,8 +321,8 @@ struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineR
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):Entity(){
     scene->addEntity(this);
     m_Model = new ComponentModel(ResourceManifest::PlanetMesh,mat,this);
-    m_AtmosphereHeight = atmosphere;
     addComponent(m_Model);
+    m_AtmosphereHeight = atmosphere;
     if(type != PlanetType::Star){
         AtmosphericScatteringGroundMeshInstanceBindFunctor f;
         AtmosphericScatteringGroundMeshInstanceUnbindFunctor f1;

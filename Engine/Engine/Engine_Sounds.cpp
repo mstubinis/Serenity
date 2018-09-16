@@ -115,10 +115,6 @@ class Engine::epriv::SoundManager::impl final{
         vector<SoundBaseClass*> m_CurrentlyPlayingSounds;
         vector<SoundQueue*> m_SoundQueues;
 
-        void _init(const char* name,uint& w,uint& h){
-        }
-        void _postInit(const char* name,uint& w,uint& h){
-        }
         void _destruct(){
 			SAFE_DELETE_VECTOR(m_SoundQueues);
 			SAFE_DELETE_VECTOR(m_CurrentlyPlayingSounds);
@@ -366,11 +362,9 @@ void SoundQueue::clear(){ m_i->_clear(); }
 bool SoundQueue::empty(){ if(m_i->m_Queue.size() > 0) return false; return true; }
 
 epriv::SoundManager::SoundManager(const char* name,uint w,uint h):m_i(new impl){ 
-	m_i->_init(name,w,h); 
 	soundManager = m_i.get();
 }
 epriv::SoundManager::~SoundManager(){ m_i->_destruct(); }
-void epriv::SoundManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::SoundManager::_update(const float& dt){ m_i->_update(dt); }
 
 void Engine::Sound::playEffect(Handle& handle,uint loops){

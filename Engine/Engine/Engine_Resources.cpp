@@ -192,24 +192,25 @@ Handle Resources::addSoundData(string file,string n,bool music){
     return resourceManager->m_Resources->add(new SoundData(file,music),ResourceType::SoundData);
 }
 
-void Resources::setCurrentScene(Scene* scene){
-    epriv::EventSceneChanged e;
-    e.oldScene = resourceManager->m_CurrentScene; e.newScene = scene;
+void Resources::setCurrentScene(Scene* newScene){
+    Scene* oldScene = resourceManager->m_CurrentScene;
+
+    epriv::EventSceneChanged e; e.oldScene = oldScene; e.newScene = newScene;
     Event ev; ev.eventSceneChanged = e; ev.type = EventType::SceneChanged;
     epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::SceneChanged,ev);
-
-    if(!resourceManager->m_CurrentScene){
-        epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(nullptr,scene);
-        resourceManager->m_CurrentScene = scene;
+    
+    if(!oldScene){
+        epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(nullptr, newScene);
+        resourceManager->m_CurrentScene = newScene;
         return;
     }
-    if(resourceManager->m_CurrentScene != scene){
-        cout << "---- Scene Change started (" << resourceManager->m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << endl;
+    if(oldScene != newScene){
+        cout << "---- Scene Change started (" << oldScene->name() << ") to (" << newScene->name() << ") ----" << endl;
         if(epriv::Core::m_Engine->m_ResourceManager->m_i->m_DynamicMemory){
             //mark game object resources to minus use count
         }
-        epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(resourceManager->m_CurrentScene,scene);
-        resourceManager->m_CurrentScene = scene;
+        resourceManager->m_CurrentScene = newScene;
+        epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(oldScene, newScene);
         if(resourceManager->m_DynamicMemory){
             //mark game object resources to add use count
         }

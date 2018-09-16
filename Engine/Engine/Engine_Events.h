@@ -17,8 +17,6 @@ namespace Engine{
                 EventManager(const char* name,uint w,uint h);
                 ~EventManager();
 
-                void _init(const char* name,uint w,uint h);
-
                 void _onEventKeyPressed(uint& key);
                 void _onEventKeyReleased(uint& key);
                 void _onEventMouseButtonPressed(uint mouseButton);

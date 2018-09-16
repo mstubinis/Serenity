@@ -34,9 +34,9 @@ class Scene::impl final {
         }
         uint _addEntity(Scene* super, Entity* _entity) {
             for (auto entityInScene : m_Entities) { if (_entity->m_ID == entityInScene) return entityInScene; } //rethink this maybe use a fixed size array?
-            uint entityID = epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->add(_entity);
+            const uint entityID = epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->add(_entity);
             _entity->m_ID = entityID;
-            _entity->m_Scene = super;
+            epriv::Core::m_Engine->m_ComponentManager->onEntityAddedToScene(super, _entity);
             m_Entities.push_back(entityID);
             return entityID;
         }
