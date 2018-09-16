@@ -263,8 +263,8 @@ class ComponentBody: public ComponentBaseClass{
         glm::vec3 _forward, _right, _up;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentBody(CollisionType::Type,Entity* owner,glm::vec3 scale = glm::vec3(1.0f));
         ComponentBody();
+        ComponentBody(CollisionType::Type,glm::vec3 scale = glm::vec3(1.0f));
         ~ComponentBody();
 
         void alignTo(glm::vec3 direction,float speed);

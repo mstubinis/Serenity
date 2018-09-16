@@ -313,10 +313,17 @@ class epriv::ComponentBodySystem::impl final {
         void _onEntityAddedToScene(Scene* scene,ComponentBaseClass* component,Entity* _entity) {
             ComponentBody& componentBody = *(ComponentBody*)component;
             if (componentBody._physics){
-                if (scene == Resources::getCurrentScene())
+                auto* _collision = componentBody.data.p.collision;
+                componentBody.setCollision(
+                    (CollisionType::Type)_collision->getType(),
+                    componentBody.data.p.mass,
+                    Math::btVectorToGLM(_collision->getShape()->getLocalScaling())
+                );
+                if (scene == Resources::getCurrentScene()) {
                     Physics::addRigidBody(componentBody.data.p.rigidBody);
-                else
+                }else {
                     Physics::removeRigidBody(componentBody.data.p.rigidBody);
+                }
             }
         }
 };
@@ -481,11 +488,10 @@ ComponentBody::ComponentBody():ComponentBaseClass(){
     data.n.modelMatrix = new glm::mat4(1.0f);
     Math::recalculateForwardRightUp(*data.n.rotation,_forward,_right,_up);
 }
-ComponentBody::ComponentBody(CollisionType::Type _collisionType,Entity* _owner,glm::vec3 _scale):ComponentBaseClass(){
+ComponentBody::ComponentBody(CollisionType::Type _collisionType,glm::vec3 _scale):ComponentBaseClass(){
     data.p = PhysicsData();	
     _physics = true;
     _forward = glm::vec3(0,0,-1);  _right = glm::vec3(1,0,0);  _up = glm::vec3(0,1,0);
-    m_Owner = _owner->id();
 
     data.p.motionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1)));
     float _mass = 1.0f;
@@ -535,17 +541,27 @@ void ComponentBody::alignTo(glm::vec3 direction,float speed){
 }
 void ComponentBody::setCollision(CollisionType::Type _type,float _mass,glm::vec3 _scale){
     SAFE_DELETE(data.p.collision);
-    auto* modelComponent = owner()->getComponent<ComponentModel>();
-    if (_type == CollisionType::Compound) {   
-        if (modelComponent) {
+    ComponentModel* modelComponent = nullptr;
+    if (m_Owner != 0) {
+        modelComponent = owner()->getComponent<ComponentModel>();
+    }
+    if (modelComponent) {
+        if (_type == CollisionType::Compound) {
             data.p.collision = new Collision(modelComponent, _mass, _scale);
         }else {
-            data.p.collision = new Collision(CollisionType::None,nullptr,_mass, _scale);
+            data.p.collision = new Collision(_type, modelComponent->getModel()->mesh(), _mass, _scale);
         }
-    }else {
-        data.p.collision = new Collision(_type, modelComponent->getModel()->mesh(), _mass, _scale);
+    }else{
+        data.p.collision = new Collision(_type, nullptr, _mass, _scale);
     }
     data.p.collision->getShape()->setUserPointer(this);
+    if (data.p.rigidBody) {
+        Physics::removeRigidBody(data.p.rigidBody);
+        data.p.rigidBody->setCollisionShape(data.p.collision->getShape());
+        data.p.rigidBody->setMassProps(data.p.mass, data.p.collision->getInertia());
+        data.p.rigidBody->updateInertiaTensor();
+        Physics::addRigidBody(data.p.rigidBody);
+    }
 }
 void ComponentBody::translate(glm::vec3 translation,bool local){ ComponentBody::translate(translation.x,translation.y,translation.z,local); }
 void ComponentBody::translate(float x,float y,float z,bool local){
@@ -608,7 +624,7 @@ void ComponentBody::scale(float x,float y,float z){
         glm::vec3& _scale = *data.n.scale;
         _scale.x += x; _scale.y += y; _scale.z += z;
     }
-    if(m_Owner){
+    if(m_Owner != 0){
         auto* models = owner()->getComponent<ComponentModel>();
         if(models){
             epriv::ComponentInternalFunctionality::CalculateRadius(models);
@@ -697,7 +713,7 @@ void ComponentBody::setScale(float x,float y,float z){
         glm::vec3& _scale = *data.n.scale;
         _scale.x = x; _scale.y = y; _scale.z = z;
     }
-    if(m_Owner){
+    if(m_Owner != 0){
         auto* models = owner()->getComponent<ComponentModel>();
         if(models){
             epriv::ComponentInternalFunctionality::CalculateRadius(models);
@@ -847,14 +863,12 @@ void ComponentBody::applyTorqueImpulse(glm::vec3 torqueImpulse,bool local){ Comp
 void ComponentBody::clearLinearForces(){
     data.p.rigidBody->setActivationState(0);
     data.p.rigidBody->activate();
-    btVector3 v(0,0,0);
-    data.p.rigidBody->setLinearVelocity(v); 
+    data.p.rigidBody->setLinearVelocity(btVector3(0, 0, 0));
 }
 void ComponentBody::clearAngularForces(){
     data.p.rigidBody->setActivationState(0);
     data.p.rigidBody->activate();
-    btVector3 v(0,0,0);
-    data.p.rigidBody->setAngularVelocity(v); 
+    data.p.rigidBody->setAngularVelocity(btVector3(0,0,0));
 }
 void ComponentBody::clearAllForces(){
     data.p.rigidBody->setActivationState(0);

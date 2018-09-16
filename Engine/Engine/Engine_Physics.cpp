@@ -31,7 +31,6 @@
 ////////////////////////////////////////////
 
 //bullet rendering fixes (see the custom world class below)
-#include <iostream>
 #include <bullet/BulletCollision/CollisionShapes/btConvexPolyhedron.h>
 class DebugDrawcallback : public btTriangleCallback, public btInternalTriangleIndexCallback {
     btIDebugDraw* m_debugDrawer;  btVector3	m_color;  btTransform m_worldTrans;
@@ -795,8 +794,6 @@ class Collision::impl final {
         CollisionType::Type m_Type;
         btCollisionShape* m_Shape;
 
-        //TODO: fix btUniformScalingShape and its triangle equivalent during debug drawing. problem is NOT with compound objects
-
         void _baseInit(CollisionType::Type _type, float& mass) {
             m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
             m_Type = _type;
@@ -838,7 +835,9 @@ class Collision::impl final {
         }
         void _setMass(float _mass) {
             if (!m_Shape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) return;
-            m_Shape->calculateLocalInertia(_mass, m_Inertia);
+            if (m_Shape->getShapeType() != EMPTY_SHAPE_PROXYTYPE) {
+                m_Shape->calculateLocalInertia(_mass, m_Inertia);
+            }
         }
 };
 

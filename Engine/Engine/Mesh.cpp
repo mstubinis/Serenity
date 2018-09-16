@@ -1472,6 +1472,7 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
 }
 
 btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* _mesh, CollisionType::Type _type) {
+    if(!_mesh) return new btEmptyShape();
     switch (_type) {
         case CollisionType::None: { return new btEmptyShape(); }
         case CollisionType::Box: { return _mesh->m_i->m_CollisionFactory->buildBoxShape(); }

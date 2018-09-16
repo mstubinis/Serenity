@@ -10,6 +10,7 @@
 class Entity;
 class btCollisionShape;
 class btRigidBody;
+class btCollisionObject;
 class Mesh;
 class ComponentModel;
 namespace Engine{
