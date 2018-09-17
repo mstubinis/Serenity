@@ -68,8 +68,7 @@ namespace Engine{
             float Weights[NUM_BONES_PER_VERTEX];
             VertexBoneData() {
                 for (uint i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
-                    IDs[i] = 0.0f;
-                    Weights[i] = 0.0f;
+                    IDs[i] = 0.0f; Weights[i] = 0.0f;
                 }
             }
             void AddBoneData(uint BoneID, float Weight){
