@@ -43,16 +43,12 @@ class epriv::ComponentInternalFunctionality final{
                 glm::mat4& m = pair.model();
                 glm::vec3 localPosition = glm::vec3(m[3][0], m[3][1], m[3][2]);
                 float length = glm::length(localPosition) + pair.mesh()->getRadius() * Engine::Math::Max(pair.getScale());
-                if (length > maxLength) {
-                    maxLength = length;
-                }
+                if (length > maxLength) { maxLength = length; }
             }
             super->_radius = maxLength;
-            if (super->m_Owner) {
+            if (super->m_Owner != 0) {
                 auto* body = super->owner()->getComponent<ComponentBody>();
-                if (body) {
-                    super->_radius *= Engine::Math::Max(body->getScale());
-                }
+                if (body) { super->_radius *= Engine::Math::Max(body->getScale()); }
             }
             return super->_radius;
         }
@@ -283,6 +279,7 @@ class epriv::ComponentModelSystem::impl final {
         }
         void _onEntityAddedToScene(Scene* scene,ComponentBaseClass* component, Entity* _entity) {
             ComponentModel& componentModel = *(ComponentModel*)component;
+            epriv::ComponentInternalFunctionality::CalculateRadius(&componentModel);
         }
 };
 epriv::ComponentModelSystem::ComponentModelSystem() :ComponentSystemBaseClass(),m_i(new impl) { }

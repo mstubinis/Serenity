@@ -66,11 +66,18 @@ namespace Engine{
         struct VertexBoneData final{
             float IDs[NUM_BONES_PER_VERTEX];
             float Weights[NUM_BONES_PER_VERTEX];
+            VertexBoneData() {
+                for (uint i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
+                    IDs[i] = 0.0f;
+                    Weights[i] = 0.0f;
+                }
+            }
             void AddBoneData(uint BoneID, float Weight){
-                uint size = sizeof(IDs) / sizeof(IDs[0]);
-                for (uint i = 0; i < size; ++i) {
-                    if (Weights[i] == 0.0) {
-                        IDs[i] = float(BoneID); Weights[i] = Weight; return;
+                for (uint i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
+                    if (Weights[i] == 0.0f) {
+                        IDs[i] = float(BoneID);
+                        Weights[i] = Weight;
+                        return;
                     } 
                 }
             }
