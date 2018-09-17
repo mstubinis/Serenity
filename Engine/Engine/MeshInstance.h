@@ -42,6 +42,12 @@ class MeshInstance final: public BindableResource{
         glm::quat& orientation();
         glm::vec3& getScale();
 
+        bool visible();
+        bool passedRenderCheck();
+        void setPassedRenderCheck(bool);
+        void show();
+        void hide();
+
         void playAnimation(const std::string& animName,float startTime,float endTime = -1.0f, uint requestedLoops = 1);
 
         void setColor(float r,float g,float b,float a = 1.0f);

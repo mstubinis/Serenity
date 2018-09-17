@@ -196,7 +196,6 @@ class ComponentModel: public ComponentBaseClass{
     private:
         std::vector<MeshInstance*> models;
         float _radius;
-        bool _passedRenderCheck, _visible;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentModel(Handle& meshHandle,Handle& materialHandle,Entity*);
@@ -207,8 +206,6 @@ class ComponentModel: public ComponentBaseClass{
 
         uint getNumModels();
         float radius();
-        bool passedRenderCheck();
-        bool visible();
         void show();
         void hide();
 

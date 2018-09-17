@@ -246,14 +246,18 @@ void epriv::ComponentCameraSystem::onEntityAddedToScene(Scene* s, ComponentBaseC
 class epriv::ComponentModelSystem::impl final {
     public:
         static void _calculateRenderCheck(ComponentModel& m, Camera* camera) {
-            auto& body = *(m.owner()->getComponent<ComponentBody>());
-            auto pos = body.position();
-            uint sphereTest = camera->sphereIntersectTest(pos, m._radius);
-            if (!m.visible() || sphereTest == 0 || camera->getDistance(pos) > m._radius * 1100.0f) { //1100 is the visibility threshold
-                m._passedRenderCheck = false;
-                return;
+            auto& body = *(m.owner()->getComponent<ComponentBody>());      
+            for (auto meshInstance : m.models) {
+                auto& _meshInstance = *meshInstance;
+                auto pos = body.position() + _meshInstance.position();
+                                                                   //per mesh instance radius instead?
+                uint sphereTest = camera->sphereIntersectTest(pos, m._radius);                //per mesh instance radius instead?
+                if (!_meshInstance.visible() || sphereTest == 0 || camera->getDistance(pos) > m._radius * 1100.0f) {
+                    _meshInstance.setPassedRenderCheck(false);
+                    continue;
+                }
+                _meshInstance.setPassedRenderCheck(true);
             }
-            m._passedRenderCheck = true;
         }
         static void _defaultUpdate(vector<ComponentBaseClass*>& vec, Camera* camera) {
             for (uint j = 0; j < vec.size(); ++j) {
@@ -418,22 +422,22 @@ void ComponentCamera::setFar(float f){ _farPlane = f; epriv::ComponentInternalFu
 #pragma region Model
 
 ComponentModel::ComponentModel(Handle& meshHandle,Handle& materialHandle,Entity* _owner):ComponentBaseClass(){
-    _passedRenderCheck = false; _visible = true; m_Owner = _owner->id();
+    m_Owner = _owner->id();
     if (!meshHandle.null())
         addModel(meshHandle, materialHandle);
 }
 ComponentModel::ComponentModel(Mesh* mesh,Handle& materialHandle,Entity* _owner):ComponentBaseClass(){
-    _passedRenderCheck = false; _visible = true; m_Owner = _owner->id();
+    m_Owner = _owner->id();
     if(mesh)
         addModel(mesh, (Material*)materialHandle.get());
 }
 ComponentModel::ComponentModel(Handle& meshHandle,Material* material,Entity* _owner):ComponentBaseClass(){
-    _passedRenderCheck = false; _visible = true; m_Owner = _owner->id();
+    m_Owner = _owner->id();
     if(!meshHandle.null())
         addModel((Mesh*)meshHandle.get(), material);
 }
 ComponentModel::ComponentModel(Mesh* mesh,Material* material,Entity* _owner):ComponentBaseClass(){
-    _passedRenderCheck = false; _visible = true; m_Owner = _owner->id();
+    m_Owner = _owner->id();
     if(mesh)
         addModel(mesh, material);
 }
@@ -442,10 +446,8 @@ ComponentModel::~ComponentModel(){
 }
 uint ComponentModel::getNumModels() { return models.size(); }
 MeshInstance* ComponentModel::getModel(uint index){ return models.at(index); }
-bool ComponentModel::passedRenderCheck(){ return _passedRenderCheck; }
-bool ComponentModel::visible(){ return _visible; }
-void ComponentModel::show(){ _visible = true; }
-void ComponentModel::hide(){ _visible = false; }
+void ComponentModel::show() { for (auto model : models) model->show(); }
+void ComponentModel::hide() { for (auto model : models) model->hide(); }
 float ComponentModel::radius(){ return _radius; }
 uint ComponentModel::addModel(Handle& mesh, Handle& mat){ return ComponentModel::addModel((Mesh*)mesh.get(),(Material*)mat.get()); }
 uint ComponentModel::addModel(Mesh* mesh,Material* material){

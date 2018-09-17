@@ -144,10 +144,7 @@ Handle Resources::addMeshAsync(string f, bool b,float threshhold){
 }
 
 
-Handle epriv::ResourceManager::_addTexture(Texture* t){
-    return resourceManager->m_Resources->add(t,ResourceType::Texture);
-}
-
+Handle epriv::ResourceManager::_addTexture(Texture* t){ return resourceManager->m_Resources->add(t,ResourceType::Texture); }
 Handle Resources::addTexture(string file,ImageInternalFormat::Format internFormat,bool mipmaps){
     return resourceManager->m_Resources->add(new Texture(file,mipmaps,internFormat),ResourceType::Texture);
 }

@@ -9,7 +9,9 @@
 
 typedef unsigned int uint;
 
+class Mesh;
 class Material;
+class MeshInstance;
 class ShaderP;
 class Texture;
 class Font;
@@ -35,11 +37,46 @@ class HDRAlgorithm{public: enum Algorithm{
 class AntiAliasingAlgorithm{public: enum Algorithm{
     None,FXAA,SMAA,
 };};
-namespace Engine{
-    namespace epriv{
+
+namespace Engine {
+    namespace epriv {
         class GBuffer;
         class FramebufferObject;
         class RenderbufferObject;
+        class RenderManager;
+        struct MaterialNode;
+        struct MeshNode;
+        struct InstanceNode;
+    };
+};
+
+
+namespace Engine{
+    namespace epriv{
+
+        struct MaterialNode {
+            Material* material;
+            std::vector<MeshNode*> meshNodes;
+        };
+        struct MeshNode {
+            Mesh* mesh;
+            std::vector<InstanceNode*> instanceNodes;
+        };
+        struct InstanceNode {
+            MeshInstance* instance;
+        };
+        class RenderPipeline final: private Engine::epriv::noncopyable {
+            private:
+                ShaderP* shaderProgram;
+                std::vector<MaterialNode*> materialNodes;
+            public:
+                RenderPipeline();
+                ~RenderPipeline();
+
+                void render();
+        };
+
+
         class RenderManager final: private Engine::epriv::noncopyable{
             public:
                 class impl;

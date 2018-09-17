@@ -128,6 +128,7 @@ namespace Engine{
             m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,boneWeights));
             return m;
         }();
+        //https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
         unordered_map<uint, boost::tuple<uint, GLuint, GLuint, GLuint>> VERTEX_ANIMATED_FORMAT_DATA_COMPRESSED = []() {
             unordered_map<uint, boost::tuple<uint, GLuint, GLuint, GLuint>> m;
             m[VertexFormatAnimatedCompressed::PositionAndUV]  = boost::make_tuple(4,       GL_FLOAT, GL_FALSE,               0);

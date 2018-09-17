@@ -1659,8 +1659,8 @@ class epriv::RenderManager::impl final{
                                         auto& instances = meshInstance.second;
                                         if(scene->hasEntity(entityID)){
                                             auto* model = scene->getEntity(entityID)->getComponent<ComponentModel>();
-                                            if(model->passedRenderCheck()){
-                                                for(auto instance:instances){
+                                            for(auto instance:instances){
+                                                if (instance->passedRenderCheck()) {
                                                     instance->bind();
                                                     mesh->render(false);
                                                     instance->unbind();
@@ -1709,8 +1709,8 @@ class epriv::RenderManager::impl final{
                                     auto& instances = meshInstance.second;
                                     if(scene->hasEntity(entityID)){
                                         auto& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
-                                        if(model.passedRenderCheck()){
-                                            for(auto instance:instances){
+                                        for(auto instance:instances){
+                                            if (instance->passedRenderCheck()) {
                                                 instance->bind();
                                                 mesh->render(false);
                                                 instance->unbind();
@@ -2232,7 +2232,6 @@ void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
 void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ m_i->m_gBuffer->resize(w,h); }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
 void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h,uint _glslVersion,uint _openglVersion){ m_i->_onOpenGLContextCreation(w,h,_glslVersion,_openglVersion); }
-
 void epriv::RenderManager::_renderText(Font* font,string& text,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth){
     m_i->m_FontsToBeRendered.emplace_back(font,text,pos,color,scl,angle,depth);
 }
@@ -2282,6 +2281,59 @@ void epriv::RenderManager::_unbindMaterial(){
 void epriv::RenderManager::_genPBREnvMapData(Texture* texture, uint size1, uint size2){
     m_i->_generatePBREnvMapData(texture,size1,size2);
 }
+
+
+
+
+
+
+
+
+epriv::RenderPipeline::RenderPipeline() {
+
+}
+epriv::RenderPipeline::~RenderPipeline() {
+
+}
+void epriv::RenderPipeline::render() {
+    shaderProgram->bind();
+    for (auto materialNode : materialNodes) {
+        if (materialNode->meshNodes.size() > 0) {
+            materialNode->material->bind();
+            for (auto meshNode : materialNode->meshNodes) {
+                if (meshNode->instanceNodes.size() > 0) {
+                    meshNode->mesh->bind();
+                    for (auto instanceNode : meshNode->instanceNodes) {
+                        if (instanceNode->instance->passedRenderCheck()) {
+                            instanceNode->instance->bind();
+                            meshNode->mesh->render(false);
+                            instanceNode->instance->unbind();
+                        }
+                    }
+                    //protect against any custom changes by restoring to the regular shader and material
+                    if (renderManager->current_shader_program != shaderProgram) {
+                        shaderProgram->bind();
+                        materialNode->material->bind();
+                    }
+                    meshNode->mesh->unbind();
+                }
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void Renderer::Settings::General::enable1(bool b) {

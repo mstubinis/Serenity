@@ -51,7 +51,10 @@ class MeshInstance::impl{
         glm::quat m_Orientation;
         glm::mat4 m_Model;
         glm::vec4 m_Color;
+        bool m_PassedRenderCheck, m_Visible;
         void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,MeshInstance* super,Entity* entity){
+            m_PassedRenderCheck = false;
+            m_Visible = true;
             m_Entity = entity;
             _setMaterial(mat,super);
             _setMesh(mesh,super);
@@ -238,6 +241,11 @@ MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat,glm::vec3 po
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::~MeshInstance(){ m_i->_destruct(this); }
+void MeshInstance::show() { m_i->m_Visible = true; }
+void MeshInstance::hide() { m_i->m_Visible = false; }
+bool MeshInstance::visible() { return m_i->m_Visible; }
+bool MeshInstance::passedRenderCheck(){ return m_i->m_PassedRenderCheck; }
+void MeshInstance::setPassedRenderCheck(bool b) { m_i->m_PassedRenderCheck = b; }
 void MeshInstance::setColor(float r,float g,float b,float a){ Engine::Math::setColor(m_i->m_Color,r,g,b,a); }
 void MeshInstance::setColor(glm::vec4 color){ MeshInstance::setColor(color.r,color.g,color.b,color.a); }
 void MeshInstance::setGodRaysColor(float r,float g,float b){ Engine::Math::setColor(m_i->m_GodRaysColor,r,g,b); }
