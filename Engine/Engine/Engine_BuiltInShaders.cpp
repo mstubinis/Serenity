@@ -1734,29 +1734,24 @@ epriv::EShaders::hdr_frag +=
 
 #pragma region Blur
 epriv::EShaders::blur_frag =
-    "uniform sampler2D textureMap;\n"
+    "uniform sampler2D image;\n"
     "uniform vec4 RGBA;\n"
-    "uniform vec4 UniformsA;\n"//radius, divisor, HV
+    "uniform vec4 DataA;\n"//radius, divisor, H,V
     "uniform vec4 strengthModifier;\n"
     "\n"
     "varying vec2 texcoords;\n"
     "\n"
-    "vec2 offset[14];\n"
-    "float weights[7] = float[](0.028,0.024,0.020,0.016,0.012,0.008,0.004);\n"
-    "float gauss[7] = float[](0.0044299121055113265,0.00895781211794,0.0215963866053,0.0443683338718,0.0776744219933,0.115876621105,0.147308056121);\n"
+    "const int NUM_SAMPLES = 9;\n"
+    "float weight[NUM_SAMPLES] = float[](0.227,0.21,0.1946,0.162,0.12,0.08,0.054,0.03,0.016);\n"
     "\n"
     "void main(){\n"
-    "    for(int i = 0; i < 7; ++i){\n"
-    "        offset[i] = vec2(-weights[i] * UniformsA.x * UniformsA.z, -weights[i] * UniformsA.x * UniformsA.w);\n"
-    "        offset[13-i] = vec2(weights[i] * UniformsA.x * UniformsA.z, weights[i] * UniformsA.x * UniformsA.w);\n"
-    "    }\n"
+    "    vec2 texOffset = vec2(1.0) / textureSize(image,0);\n"
     "    vec4 v4Sum = vec4(0.0);\n"
-    "    vec4 v4Strength = max(vec4(1.0), UniformsA.x * strengthModifier);\n"
-    "    for(int i = 0; i < 7; ++i){\n"
-    "        v4Sum += texture2D(textureMap, texcoords + offset[i])    * gauss[i] * v4Strength;\n"
-    "        v4Sum += texture2D(textureMap, texcoords + offset[13-i]) * gauss[i] * v4Strength;\n"
+    "    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
+    "        vec2 offset = (texOffset * float(i)) * DataA.x;\n"
+    "        v4Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;\n"
+    "        v4Sum += (texture2D(image,texcoords - vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;\n"
     "    }\n"
-    "    v4Sum += texture2D(textureMap, texcoords ) * 0.159576912161 * v4Strength;\n"
     "    gl_FragColor = (v4Sum * RGBA) + (gl_FragColor * (vec4(1.0) - RGBA));\n" //fancy way of saying if(RGBA.whatever == 1.0) gl_FragColor.whatever = v4Sum.whatever;
     "}";
 #pragma endregion
