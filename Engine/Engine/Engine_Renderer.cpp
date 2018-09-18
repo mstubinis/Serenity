@@ -192,6 +192,7 @@ class epriv::RenderManager::impl final{
         #pragma endregion
 
         #pragma region BloomInfo
+        uint bloom_num_passes;
         bool bloom;
         float bloom_radius;
         float bloom_strength;
@@ -314,9 +315,10 @@ class epriv::RenderManager::impl final{
             #pragma endregion
 
             #pragma region BloomInfo
+            bloom_num_passes = 3;
             bloom = true;
-            bloom_radius = 0.84f;
-            bloom_strength = 2.5f;
+            bloom_radius = 0.75f;
+            bloom_strength = 0.6f;
             bloom_scale = 7.1f;
             #pragma endregion
 
@@ -1904,9 +1906,9 @@ class epriv::RenderManager::impl final{
             else{            hv = glm::vec2(0.0f,1.0f); }
 
             sendUniform4f("strengthModifier",bloom_strength,bloom_strength,bloom_strength,ssao_blur_strength);
-            sendUniform4f("UniformsA",bloom_radius,1.0f,hv.x,hv.y);
+            sendUniform4f("DataA",bloom_radius,bloom_scale,hv.x,hv.y);
             sendUniform4f("RGBA",rgba);
-            sendTexture("textureMap",gbuffer.getTexture(texture),0);
+            sendTexture("image",gbuffer.getTexture(texture),0);
 
             uint _x = uint(float(fboWidth) * _divisor);
             uint _y = uint(float(fboHeight) * _divisor);
@@ -2143,10 +2145,13 @@ class epriv::RenderManager::impl final{
             gbuffer.start(GBufferType::Bloom,_channels,false);
             _passSSAO(gbuffer,camera,fboWidth,fboHeight); //ssao AND bloom
             if(ssao_do_blur || bloom){
-                gbuffer.start(GBufferType::GodRays,_channels,false);
-                _passBlur(gbuffer,camera,fboWidth,fboHeight,"H",GBufferType::Bloom,_channels);
-                gbuffer.start(GBufferType::Bloom,_channels,false);
-                _passBlur(gbuffer,camera,fboWidth,fboHeight,"V",GBufferType::GodRays,_channels);
+                for (uint i = 0; i < bloom_num_passes; ++i){
+                    gbuffer.start(GBufferType::GodRays, _channels, false);
+                    _passBlur(gbuffer, camera, fboWidth, fboHeight, "H", GBufferType::Bloom, _channels);
+                    gbuffer.start(GBufferType::Bloom, _channels, false);
+                    _passBlur(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays, _channels);
+                }
+
             }
             #pragma endregion
 
@@ -2367,6 +2372,8 @@ void Renderer::Settings::HDR::disable(){ renderManager->hdr = false; }
 float Renderer::Settings::HDR::getExposure(){ return renderManager->hdr_exposure; }
 void Renderer::Settings::HDR::setExposure(float e){ renderManager->hdr_exposure = e; }
 void Renderer::Settings::HDR::setAlgorithm(HDRAlgorithm::Algorithm a){ renderManager->hdr_algorithm = a; }
+uint Renderer::Settings::Bloom::getNumPasses() { return renderManager->bloom_num_passes; }
+void Renderer::Settings::Bloom::setNumPasses(uint p) { renderManager->bloom_num_passes = p; }
 void Renderer::Settings::Bloom::enable(bool b){ renderManager->bloom = b; }
 void Renderer::Settings::Bloom::disable(){ renderManager->bloom = false; }
 float Renderer::Settings::Bloom::getRadius(){ return renderManager->bloom_radius; }

@@ -44,7 +44,7 @@ class epriv::GBuffer::impl final{
 
             if(!m_FBO->check()) return false;
 
-            m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height,0.25f,2);
+            m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height,0.5f,2);
             _constructTextureBuffer(m_SmallFBO,GBufferType::Bloom,   m_Width,m_Height);
             _constructTextureBuffer(m_SmallFBO,GBufferType::GodRays, m_Width,m_Height);
             

@@ -187,6 +187,7 @@ namespace Engine{
                 void setAlgorithm(HDRAlgorithm::Algorithm a);
             };
             namespace Bloom{
+                uint getNumPasses();           void setNumPasses(uint);
                 void enable(bool b = true);   void disable();
                 float getRadius();            void setRadius(float r);
                 float getStrength();          void setStrength(float r);

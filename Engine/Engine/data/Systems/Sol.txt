@@ -258,7 +258,7 @@ M name=Charon parent=Pluto radius=606 r=1 g=1 b=1 position=17536 type=Rock atmos
 
 #P name=20000-Varuna parent=Sun radius=330 r=1 g=1 b=1 position=6450000000 atmosphereHeight=0 
 
-* name=Player parent=Earth position=6779
+* name=Player parent=Europa position=6779
 $ name=Valiant parent=Player position=2
 
 L name=Earth_Lagrange_Point_L1 lp1=Earth lp2=Moon lType=L1
