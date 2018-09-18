@@ -630,7 +630,7 @@ epriv::EShaders::fxaa_frag =
     "uniform vec2 resolution;\n"
     "varying vec2 texcoords;\n"
     "void main(){\n"
-    "   float depth = texture2D(depthTexture,texcoords);\n"
+    "   float depth = texture2D(depthTexture,texcoords).r;\n"
     //"   float edge = texture2D(edgeTexture,texcoords).r;\n"
     "   if(depth >= 0.999){\n"
     "       gl_FragColor = texture2D(sampler0, texcoords);\n"
