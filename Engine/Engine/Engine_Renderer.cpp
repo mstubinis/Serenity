@@ -1638,6 +1638,7 @@ class epriv::RenderManager::impl final{
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);      
 
             //RENDER NORMAL OBJECTS HERE
+            /*
             for(auto shader:m_GeometryPassShaderPrograms){
                 auto& shaderMaterials = shader->getMaterials(); 
                 if(shaderMaterials.size() > 0){
@@ -1650,10 +1651,10 @@ class epriv::RenderManager::impl final{
                                 MaterialMeshEntry* entry = materialMeshEntry;
                                 Mesh* mesh = entry->mesh();
                                 mesh->bind();
-                                /*
+                                
                                 if(InternalMeshPublicInterface::SupportsInstancing()){
                                 }
-                                */
+                                
                                 //else{
                                     for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
                                         const uint& entityID = meshInstance.first;
@@ -1682,6 +1683,7 @@ class epriv::RenderManager::impl final{
                     }
                 }
             }
+            */
 
             gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
             _renderSkybox(scene->skybox());
@@ -1693,6 +1695,7 @@ class epriv::RenderManager::impl final{
             gbuffer.start(GBufferType::Diffuse);
 
             //RENDER NORMAL OBJECTS HERE
+            /*
             for(auto shader:m_ForwardPassShaderPrograms){
                 auto& shaderMaterials = shader->getMaterials(); 
                 if(shaderMaterials.size() > 0){
@@ -1731,6 +1734,7 @@ class epriv::RenderManager::impl final{
                     }
                 }
             }
+            */
         }
         void _passCopyDepth(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
             glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);

@@ -149,26 +149,12 @@ Handle Resources::addTexture(string file,ImageInternalFormat::Format internForma
     return resourceManager->m_Resources->add(new Texture(file,mipmaps,internFormat),ResourceType::Texture);
 }
 
-Handle Resources::addMaterial(string name, string diffuse, string normal,string glow, string specular,Handle programHandle){
-    ShaderP* program = nullptr;
-    if(programHandle.null()){ program = epriv::InternalShaderPrograms::Deferred; }
-    else{                     program = Resources::getShaderProgram(programHandle); }
+Handle Resources::addMaterial(string name, string diffuse, string normal,string glow, string specular){
     Material* material = new Material(name,diffuse,normal,glow,specular);
-    program->addMaterial(material);
     return resourceManager->m_Resources->add(material,ResourceType::Material);
 }
-Handle Resources::addMaterial(string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular,ShaderP* program){
-    if(!program) program = epriv::InternalShaderPrograms::Deferred;
+Handle Resources::addMaterial(string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular){
     Material* material = new Material(name,diffuse,normal,glow,specular);
-    program->addMaterial(material);
-    return resourceManager->m_Resources->add(material,ResourceType::Material);
-}
-Handle Resources::addMaterial(string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular,Handle programHandle){
-    ShaderP* program = nullptr;
-    if(programHandle.null()){ program = epriv::InternalShaderPrograms::Deferred; }
-    else{                     program = Resources::getShaderProgram(programHandle); }
-    Material* material = new Material(name,diffuse,normal,glow,specular);
-    program->addMaterial(material);
     return resourceManager->m_Resources->add(material,ResourceType::Material);
 }
 

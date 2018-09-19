@@ -8,7 +8,6 @@
 #include <glm/vec4.hpp>
 #include <unordered_map>
 
-class MeshInstance;
 class Texture;
 class ShaderP;
 class Mesh;
@@ -130,21 +129,6 @@ namespace Engine{
     namespace epriv{
         struct DefaultMaterialBindFunctor;
         struct DefaultMaterialUnbindFunctor;
-        class MaterialMeshEntry: private Engine::epriv::noncopyable{
-            private:
-                class impl; std::unique_ptr<impl> m_i;
-            public:
-                MaterialMeshEntry(Mesh*);
-                ~MaterialMeshEntry();
-
-                Mesh* mesh();
-                std::unordered_map<uint,std::vector<MeshInstance*>>& meshInstancesEntities();
-
-                void addMeshInstance(Entity* entity,MeshInstance*);
-                void addMeshInstance(uint entityID,MeshInstance*);
-                void removeMeshInstance(Entity* entity,MeshInstance*);
-                void removeMeshInstance(uint entityID,MeshInstance*);
-        };
     };
 };
 
@@ -227,9 +211,5 @@ class Material final: public BindableResource{
 
         void load();
         void unload();
-
-        void addMeshEntry(Mesh*);
-        void removeMeshEntry(Mesh*);
-        std::vector<Engine::epriv::MaterialMeshEntry*>& getMeshEntries();
 };
 #endif

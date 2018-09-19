@@ -1,6 +1,5 @@
 #include "ShaderProgram.h"
 #include "Engine.h"
-#include "Material.h"
 #include "Camera.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
@@ -96,7 +95,6 @@ namespace Engine{
         }};
         struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
         }};
-        struct srtKey{inline bool operator() ( Material* _1,  Material* _2){return (_1->name() < _2->name());}};
     };
 };
 GLint UniformBufferObject::MAX_UBO_BINDINGS;
@@ -138,7 +136,6 @@ class ShaderP::impl final{
     public:
         ShaderRenderPass::Pass m_Stage;
         GLuint m_ShaderProgram;
-        vector<Material*> m_Materials;
         unordered_map<string,GLint> m_UniformLocations;
         unordered_map<GLuint,bool> m_AttachedUBOs;
         Shader* m_VertexShader;
@@ -596,7 +593,6 @@ ShaderP::~ShaderP(){
 }
 GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 ShaderRenderPass::Pass ShaderP::stage(){ return m_i->m_Stage; }
-vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
 void InternalShaderProgramPublicInterface::LoadCPU(ShaderP* shaderP){
     //if(!shaderP->isLoaded()){
@@ -638,12 +634,6 @@ void ShaderP::unload(){
 }
 void ShaderP::bind(){ epriv::Core::m_Engine->m_RenderManager->_bindShaderProgram(this); }
 void ShaderP::unbind(){ epriv::Core::m_Engine->m_RenderManager->_unbindShaderProgram(); }
-void ShaderP::addMaterial(Handle& materialHandle){ ShaderP::addMaterial(((Material*)materialHandle.get())); }
-void ShaderP::addMaterial(Material* material){
-    auto& i = *m_i;
-    i.m_Materials.push_back(material);
-    sort(i.m_Materials.begin(),i.m_Materials.end(),epriv::srtKey());
-}
 const unordered_map<string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }
 void ShaderP::onEvent(const Event& e){
     if(e.type == EventType::WindowFullscreenChanged){

@@ -10,7 +10,6 @@
 #include <SFML/OpenGL.hpp>
 
 struct Handle;
-class Material;
 class Shader;
 class ShaderP;
 class UniformBufferObject;
@@ -89,11 +88,6 @@ class ShaderP final: public BindableResource, public EventObserver{
 
         GLuint program();
         ShaderRenderPass::Pass stage();
-        std::vector<Material*>& getMaterials();
-
-        void addMaterial(Handle& materialHandle);
-        void addMaterial(Material*);
         const std::unordered_map<std::string,GLint>& uniforms() const;
 };
-
 #endif

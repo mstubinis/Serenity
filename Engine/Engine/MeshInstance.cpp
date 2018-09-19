@@ -67,77 +67,13 @@ class MeshInstance::impl{
             _updateModelMatrix();
         }
         void _setMesh(Mesh* mesh,MeshInstance* super){
-            _removeMeshFromInstance(super);
-            _addMeshToInstance(mesh,super);
+            m_Mesh = mesh;
         }
         void _setMaterial(Material* mat,MeshInstance* super){
-            _removeMaterialFromInstance(super);
-            _addMaterialToInstance(mat,super);
-        }
-        void _removeMeshFromInstance(MeshInstance* super){
-            if(m_Mesh && m_Material){	
-                _removeMeshInstanceFromMaterial(super);
-                _removeMeshEntryFromMaterial();
-                m_Mesh->decrementUseCount();
-                m_Mesh = nullptr;
-            }
-        }
-        void _addMeshToInstance(Mesh* mesh,MeshInstance* super){
-            m_Mesh = mesh;
-            if(m_Mesh){
-                m_Mesh->incrementUseCount();
-                m_Material->addMeshEntry(m_Mesh);
-                for(auto meshEntry:m_Material->getMeshEntries()){
-                    if(meshEntry->mesh() == m_Mesh){
-                        meshEntry->addMeshInstance(m_Entity,super);
-                        break;
-                    }
-                }
-            }
-        }
-        void _removeMaterialFromInstance(MeshInstance* super){
-            if(m_Material){
-                m_Material->decrementUseCount();
-                _removeMeshInstanceFromMaterial(super);
-                m_Material = nullptr;
-            }
-        }
-        void _addMaterialToInstance(Material* mat,MeshInstance* super){
             m_Material = mat;
-            if(m_Material){
-                m_Material->incrementUseCount();
-                if(m_Mesh){
-                    m_Material->addMeshEntry(m_Mesh); //this checks if theres an entry already
-                    for(auto entry:m_Material->getMeshEntries()){
-                        if(entry->mesh() == m_Mesh){
-                            entry->addMeshInstance(m_Entity,super);
-                        }
-                    }
-                }
-            }
         }
-        void _removeMeshInstanceFromMaterial(MeshInstance* super){
-            for(auto materialMeshEntry:m_Material->getMeshEntries()){
-                if(materialMeshEntry->mesh() == m_Mesh){
-                    materialMeshEntry->removeMeshInstance(m_Entity,super);
-                    break;
-                }
-            }
-        }
-        void _removeMeshEntryFromMaterial(){
-            bool del = true;
-            for(auto meshEntry:m_Material->getMeshEntries()){
-                if(meshEntry->mesh() == m_Mesh){
-                    del = false; 
-                    break;
-                }
-            }
-            if(del){ m_Material->removeMeshEntry(m_Mesh); }
-        }		  
         void _destruct(MeshInstance* super){
             SAFE_DELETE_VECTOR(m_AnimationQueue);
-            _removeMeshFromInstance(super);
-            _removeMaterialFromInstance(super);
         }
         void _setPosition(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; _updateModelMatrix(); }
         void _setScale(float x, float y,float z){ m_Scale.x = x; m_Scale.y = y; m_Scale.z = z; _updateModelMatrix(); }
