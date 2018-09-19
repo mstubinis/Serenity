@@ -108,7 +108,6 @@ namespace Engine{
                 void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
                 void _renderText(Font*,std::string& text,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth);
                 void _renderTexture(Texture*,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth);
-                void _addShaderToStage(ShaderP*,uint stage);
                 void _bindShaderProgram(ShaderP*);
                 void _unbindShaderProgram();
                 void _bindMaterial(Material*);

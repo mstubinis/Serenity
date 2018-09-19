@@ -19,6 +19,7 @@ struct Handle;
 class Entity;
 class Scene;
 class Camera;
+class ShaderP;
 class Mesh;
 class Material;
 class MeshInstance;
@@ -198,10 +199,16 @@ class ComponentModel: public ComponentBaseClass{
         float _radius;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentModel(Handle& meshHandle,Handle& materialHandle,Entity*);
-        ComponentModel(Mesh*,Handle& materialHandle,Entity*);
-        ComponentModel(Handle& meshHandle,Material*,Entity*);
-        ComponentModel(Mesh*,Material*,Entity*);
+        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity*, ShaderP* = nullptr);
+        ComponentModel(Mesh*, Handle& materialHandle, Entity*, ShaderP* = nullptr);
+        ComponentModel(Handle& meshHandle, Material*, Entity*, ShaderP* = nullptr);
+        ComponentModel(Mesh*, Material*, Entity*, ShaderP* = nullptr);
+
+        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity*, Handle& shaderPHandle);
+        ComponentModel(Mesh*, Handle& materialHandle, Entity*, Handle& shaderPHandle);
+        ComponentModel(Handle& meshHandle, Material*, Entity*, Handle& shaderPHandle);
+        ComponentModel(Mesh*, Material*, Entity*, Handle& shaderPHandle);
+
         ~ComponentModel();
 
         uint getNumModels();
@@ -211,17 +218,20 @@ class ComponentModel: public ComponentBaseClass{
 
         MeshInstance* getModel(uint index = 0);
 
-        uint addModel(Handle& meshHandle, Handle& materialHandle);
-        uint addModel(Mesh*,Material*);
+        uint addModel(Handle& meshHandle, Handle& materialHandle, ShaderP* = 0);
+        uint addModel(Mesh*,Material*, ShaderP* = 0);
 
-        void setModel(Handle& meshHandle,Handle& materialHandle,uint index);
-        void setModel(Mesh*,Material*,uint index);
+        void setModel(Handle& meshHandle,Handle& materialHandle,uint index, ShaderP* = 0);
+        void setModel(Mesh*,Material*,uint index, ShaderP* = 0);
 
         void setModelMesh(Mesh*,uint index);
         void setModelMesh(Handle& meshHandle, uint index);
         
         void setModelMaterial(Material*,uint index);
         void setModelMaterial(Handle& materialHandle,uint index);
+
+        void setModelShaderProgram(ShaderP*, uint index);
+        void setModelShaderProgram(Handle& materialHandle, uint index);
 
         bool rayIntersectSphere(ComponentCamera* camera);
 

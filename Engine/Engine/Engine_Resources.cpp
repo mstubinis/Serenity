@@ -162,13 +162,13 @@ Handle Resources::addShader(string fileOrData, ShaderType::Type type, bool fromF
     return resourceManager->m_Resources->add(new Shader(fileOrData,type,fromFile),ResourceType::Shader);
 }
 
-Handle Resources::addShaderProgram(string n, Shader* v, Shader* f, ShaderRenderPass::Pass s){
-    return resourceManager->m_Resources->add(new ShaderP(n,v,f,s),ResourceType::ShaderProgram);
+Handle Resources::addShaderProgram(string n, Shader* v, Shader* f){
+    return resourceManager->m_Resources->add(new ShaderP(n,v,f),ResourceType::ShaderProgram);
 }
-Handle Resources::addShaderProgram(string n, Handle& v, Handle& f, ShaderRenderPass::Pass s){
+Handle Resources::addShaderProgram(string n, Handle& v, Handle& f){
     Shader* vS = nullptr; resourceManager->m_Resources->getAs(v,vS);
     Shader* fS = nullptr; resourceManager->m_Resources->getAs(f,fS);
-    return resourceManager->m_Resources->add(new ShaderP(n,vS,fS,s),ResourceType::ShaderProgram);
+    return resourceManager->m_Resources->add(new ShaderP(n,vS,fS),ResourceType::ShaderProgram);
 }
 
 Handle Resources::addSoundData(string file,string n,bool music){

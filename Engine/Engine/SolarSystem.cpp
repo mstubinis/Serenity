@@ -151,7 +151,7 @@ void SolarSystem::_loadFromFile(string filename){
                     }
                     if(!loadedMaterials.count(MATERIAL_NAME)){
                         Handle handle;
-                        handle = Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile,"",ResourceManifest::groundFromSpace);
+                        handle = Resources::addMaterial(MATERIAL_NAME, TEXTURE, normalFile, glowFile, "");
                         loadedMaterials.emplace(MATERIAL_NAME,handle);
                     }
                 }

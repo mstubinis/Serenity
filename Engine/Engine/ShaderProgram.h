@@ -16,11 +16,9 @@ class UniformBufferObject;
 typedef unsigned int uint;
 
 class ShaderRenderPass{public: enum Pass{
+    None,
     Geometry,
     Forward,
-    Lighting,
-    Postprocess,
-    None,
 };};
 class ShaderType{public:enum Type{
     Vertex,
@@ -75,7 +73,7 @@ class ShaderP final: public BindableResource, public EventObserver{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        ShaderP(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+        ShaderP(std::string name, Shader* vertexShader, Shader* fragmentShader);
         virtual ~ShaderP();
 
         void onEvent(const Event& e);
@@ -87,7 +85,6 @@ class ShaderP final: public BindableResource, public EventObserver{
         void unbind();
 
         GLuint program();
-        ShaderRenderPass::Pass stage();
         const std::unordered_map<std::string,GLint>& uniforms() const;
 };
 #endif

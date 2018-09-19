@@ -109,8 +109,8 @@ namespace Engine{
 
         Handle addShader(std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         Handle addSoundData(std::string file,std::string name = "",bool music = false);
-        Handle addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-        Handle addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+        Handle addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader);
+        Handle addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader);
     };
     namespace Data{
         std::string reportTime();

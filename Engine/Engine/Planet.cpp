@@ -311,6 +311,7 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 
     Renderer::sendUniform4f("FragDataGravity",g,g*g,exposure,0.0f);
 }};
+
 struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
     Renderer::Settings::cullFace(GL_BACK);
     Renderer::GLDisable(GLState::BLEND);
@@ -320,26 +321,19 @@ struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineR
 
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):Entity(){
     scene->addEntity(this);
-    m_Model = new ComponentModel(ResourceManifest::PlanetMesh,mat,this);
+    m_Model = new ComponentModel(ResourceManifest::PlanetMesh,mat,this,ResourceManifest::groundFromSpace);
     addComponent(m_Model);
     m_AtmosphereHeight = atmosphere;
     if(type != PlanetType::Star){
-        AtmosphericScatteringGroundMeshInstanceBindFunctor f;
-        AtmosphericScatteringGroundMeshInstanceUnbindFunctor f1;
-        m_Model->setCustomBindFunctor(f);
-        m_Model->setCustomUnbindFunctor(f1);
+        AtmosphericScatteringGroundMeshInstanceBindFunctor f;  AtmosphericScatteringGroundMeshInstanceUnbindFunctor f1;
+        m_Model->setCustomBindFunctor(f);  m_Model->setCustomUnbindFunctor(f1);
     }
     if(m_AtmosphereHeight > 0){
-        AtmosphericScatteringSkyMeshInstanceBindFunctor f;
-        AtmosphericScatteringSkyMeshInstanceUnbindFunctor f1;
-
+        AtmosphericScatteringSkyMeshInstanceBindFunctor f;  AtmosphericScatteringSkyMeshInstanceUnbindFunctor f1;
         uint index = m_Model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial);
         MeshInstance* skyMesh = m_Model->getModel(index);
         float aScale = 1.0f + m_AtmosphereHeight;
-
-        skyMesh->setCustomBindFunctor(f);
-        skyMesh->setCustomUnbindFunctor(f1);
-        skyMesh->setScale(aScale,aScale,aScale);
+        skyMesh->setCustomBindFunctor(f);  skyMesh->setCustomUnbindFunctor(f1);  skyMesh->setScale(aScale,aScale,aScale);
     }
     m_Body = new ComponentBody();
     addComponent(m_Body);
@@ -350,9 +344,8 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
     m_OrbitInfo = nullptr;
     m_RotationInfo = nullptr;
 }
-Planet::~Planet(){
-    for(auto ring:m_Rings)    
-        SAFE_DELETE(ring);
+Planet::~Planet(){  
+    SAFE_DELETE_VECTOR(m_Rings);
     SAFE_DELETE(m_OrbitInfo);
     SAFE_DELETE(m_RotationInfo);
 }
@@ -382,8 +375,6 @@ float Planet::getGroundRadius(){ return m_Model->radius() - (m_Model->radius() *
 float Planet::getRadius() { return m_Model->radius(); }
 float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
 
-
-
 Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name,Scene* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
@@ -396,7 +387,6 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
 
     //addChild(m_Light);
     m_Light->setPosition(pos);
-
     if(!Renderer::Settings::GodRays::getObject()){
         Renderer::Settings::GodRays::setObject(this);
     }
@@ -407,10 +397,8 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     m_Parent = parent;
     _makeRingImage(rings,parent);
     m_Parent->addRing(this);
-
     PlanetaryRingMeshInstanceBindFunctor f;
-
-    uint index = parent->m_Model->addModel(ResourceManifest::RingMesh,m_MaterialHandle);
+    uint index = parent->m_Model->addModel(ResourceManifest::RingMesh,m_MaterialHandle,(ShaderP*)ResourceManifest::groundFromSpace.get());
     MeshInstance* ringMesh = parent->m_Model->getModel(index);
     ringMesh->setCustomBindFunctor(f);
     float aScale = 1.0f;
@@ -422,7 +410,6 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
     sf::Image ringImage;
     ringImage.create(1024,2,sf::Color());
     ringImage.createMaskFromColor(sf::Color(),0);
-
     uint count = 0;
     for(auto ringInfo: rings){
         glm::vec4 pC = glm::vec4(ringInfo.color.r/255.0f,ringInfo.color.g/255.0f,ringInfo.color.b/255.0f,1.0f);
@@ -433,8 +420,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
                 uint numerator = alphaChangeRange - newI;
                 pC.a = float(numerator/(alphaChangeRange));
                 ++newI;
-            }
-            else{
+            }else{
                 pC.a = 1;
             }
 
@@ -465,8 +451,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
                 _fcb += glm::vec4(ra1,ra1,ra1,0);
                 fFront = sf::Color(sf::Uint8(_fcf.r * 255.0f), sf::Uint8(_fcf.g * 255.0f), sf::Uint8(_fcf.b * 255.0f), sf::Uint8(_fcf.a * 255.0f));
                 fBack = sf::Color(sf::Uint8(_fcb.r * 255.0f), sf::Uint8(_fcb.g * 255.0f), sf::Uint8(_fcb.b * 255.0f), sf::Uint8(_fcb.a * 255.0f));
-            }
-            else{
+            }else{
                 int ra = rand() % 10 - 5;
                 pC += glm::vec4(ra,ra,ra,0);
                 fFront = sf::Color(sf::Uint8(pC.r * 255.0f), sf::Uint8(pC.g * 255.0f), sf::Uint8(pC.b * 255.0f), sf::Uint8(pC.a * 255.0f));
@@ -481,10 +466,9 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
     }
     Texture* diffuse = new Texture(ringImage,"RingDiffuse",false,ImageInternalFormat::SRGB8_ALPHA8);
     epriv::Core::m_Engine->m_ResourceManager->_addTexture(diffuse);
-    m_MaterialHandle = Resources::addMaterial("RingMaterial",diffuse,nullptr,nullptr,nullptr,ResourceManifest::groundFromSpace);
+    m_MaterialHandle = Resources::addMaterial("RingMaterial", diffuse, nullptr, nullptr, nullptr);
 	((Material*)m_MaterialHandle.get())->setSpecularModel(SpecularModel::None);
 }
-
 OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,uint _parent,float _inclination){
     //x = eccentricity, y = days, z = minorRadius, w = majorRadius
     angle = _angle;
@@ -501,10 +485,8 @@ glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet* thisPlanet){
     Planet* parentPlanet = (Planet*)Resources::getCurrentScene()->getEntity(parent);
     if(parentPlanet){
         glm::vec3 parentPos = parentPlanet->getPosition();
-
         float newX = parentPos.x - glm::cos(angle) * info.w;
         float newZ = parentPos.z - glm::sin(angle) * info.z;
-
         offset = glm::vec3(newX - currentPos.x,0.0f,newZ - currentPos.z);
     }
     return (currentPos + offset);

@@ -421,25 +421,29 @@ void ComponentCamera::setFar(float f){ _farPlane = f; epriv::ComponentInternalFu
 
 #pragma region Model
 
-ComponentModel::ComponentModel(Handle& meshHandle,Handle& materialHandle,Entity* _owner):ComponentBaseClass(){
-    m_Owner = _owner->id();
-    if (!meshHandle.null())
-        addModel(meshHandle, materialHandle);
+ComponentModel::ComponentModel(Handle& mesh,Handle& mat,Entity* _e, ShaderP* _prog):ComponentBaseClass(){
+    m_Owner = _e->id(); if (!mesh.null()) addModel(mesh, mat, _prog);
 }
-ComponentModel::ComponentModel(Mesh* mesh,Handle& materialHandle,Entity* _owner):ComponentBaseClass(){
-    m_Owner = _owner->id();
-    if(mesh)
-        addModel(mesh, (Material*)materialHandle.get());
+ComponentModel::ComponentModel(Mesh* mesh,Handle& mat,Entity* _e, ShaderP* _prog):ComponentBaseClass(){
+    m_Owner = _e->id(); if(mesh) addModel(mesh, (Material*)mat.get(), _prog);
 }
-ComponentModel::ComponentModel(Handle& meshHandle,Material* material,Entity* _owner):ComponentBaseClass(){
-    m_Owner = _owner->id();
-    if(!meshHandle.null())
-        addModel((Mesh*)meshHandle.get(), material);
+ComponentModel::ComponentModel(Handle& mesh,Material* mat,Entity* _e, ShaderP* _prog):ComponentBaseClass(){
+    m_Owner = _e->id(); if(!mesh.null()) addModel((Mesh*)mesh.get(), mat, _prog);
 }
-ComponentModel::ComponentModel(Mesh* mesh,Material* material,Entity* _owner):ComponentBaseClass(){
-    m_Owner = _owner->id();
-    if(mesh)
-        addModel(mesh, material);
+ComponentModel::ComponentModel(Mesh* mesh,Material* mat,Entity* _e, ShaderP* _prog):ComponentBaseClass(){
+    m_Owner = _e->id(); if(mesh) addModel(mesh, mat, _prog);
+}
+ComponentModel::ComponentModel(Handle& mesh, Handle& mat, Entity* _e, Handle& _prog) {
+    m_Owner = _e->id(); if (!mesh.null()) addModel(mesh, mat, (ShaderP*)_prog.get());
+}
+ComponentModel::ComponentModel(Mesh* mesh, Handle& mat, Entity* _e, Handle& _prog) {
+    m_Owner = _e->id(); if (mesh) addModel(mesh, (Material*)mat.get(), (ShaderP*)_prog.get());
+}
+ComponentModel::ComponentModel(Handle& mesh, Material* mat, Entity* _e, Handle& _prog) {
+    m_Owner = _e->id(); if (!mesh.null()) addModel((Mesh*)mesh.get(), mat, (ShaderP*)_prog.get());
+}
+ComponentModel::ComponentModel(Mesh* mesh, Material* mat, Entity* _e, Handle& _prog) {
+    m_Owner = _e->id(); if (mesh) addModel(mesh, mat, (ShaderP*)_prog.get());
 }
 ComponentModel::~ComponentModel(){ 
     SAFE_DELETE_VECTOR(models);
@@ -449,19 +453,25 @@ MeshInstance* ComponentModel::getModel(uint index){ return models.at(index); }
 void ComponentModel::show() { for (auto model : models) model->show(); }
 void ComponentModel::hide() { for (auto model : models) model->hide(); }
 float ComponentModel::radius(){ return _radius; }
-uint ComponentModel::addModel(Handle& mesh, Handle& mat){ return ComponentModel::addModel((Mesh*)mesh.get(),(Material*)mat.get()); }
-uint ComponentModel::addModel(Mesh* mesh,Material* material){
-    models.push_back( new MeshInstance(owner(),mesh,material) );
+uint ComponentModel::addModel(Handle& mesh, Handle& mat, ShaderP* shaderProgram){ return ComponentModel::addModel((Mesh*)mesh.get(),(Material*)mat.get(), shaderProgram); }
+uint ComponentModel::addModel(Mesh* mesh,Material* material,ShaderP* shaderProgram){
+    models.push_back( new MeshInstance(owner(),mesh,material, shaderProgram) );
     epriv::ComponentInternalFunctionality::CalculateRadius(this);
     return models.size() - 1;
 }
-void ComponentModel::setModel(Handle& mesh,Handle& mat,uint index){ ComponentModel::setModel((Mesh*)mesh.get(),(Material*)mat.get(), index); }
-void ComponentModel::setModel(Mesh* mesh,Material* material,uint index){
+void ComponentModel::setModel(Handle& mesh,Handle& mat,uint index, ShaderP* shaderProgram){ ComponentModel::setModel((Mesh*)mesh.get(),(Material*)mat.get(), index, shaderProgram); }
+void ComponentModel::setModel(Mesh* mesh,Material* material,uint index, ShaderP* shaderProgram){
     MeshInstance& pair = *(models.at(index));
+    pair.setShaderProgram(shaderProgram);
     pair.setMesh(mesh);
     pair.setMaterial(material);
     epriv::ComponentInternalFunctionality::CalculateRadius(this);
 }
+void ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint index) {
+    models.at(index)->setShaderProgram(shaderProgram);
+    epriv::ComponentInternalFunctionality::CalculateRadius(this);
+}
+void ComponentModel::setModelShaderProgram(Handle& shaderPHandle, uint index) { ComponentModel::setModelShaderProgram((ShaderP*)shaderPHandle.get(),index); }
 void ComponentModel::setModelMesh(Mesh* mesh,uint index){
     models.at(index)->setMesh(mesh);
     epriv::ComponentInternalFunctionality::CalculateRadius(this);

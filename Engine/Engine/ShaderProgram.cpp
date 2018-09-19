@@ -134,7 +134,6 @@ epriv::DefaultShaderBindFunctor DEFAULT_BIND_FUNCTOR;
 epriv::DefaultShaderUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 class ShaderP::impl final{
     public:
-        ShaderRenderPass::Pass m_Stage;
         GLuint m_ShaderProgram;
         unordered_map<string,GLint> m_UniformLocations;
         unordered_map<GLuint,bool> m_AttachedUBOs;
@@ -143,8 +142,7 @@ class ShaderP::impl final{
         bool m_LoadedCPU;
         bool m_LoadedGPU;
 
-        void _init(string& name, Shader* vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){
-            m_Stage = stage;
+        void _init(string& name, Shader* vs, Shader* fs,ShaderP* super){
             m_VertexShader = vs;
             m_FragmentShader = fs;
             m_LoadedGPU = m_LoadedCPU = false;
@@ -152,8 +150,7 @@ class ShaderP::impl final{
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             super->setName(name);
-            epriv::Core::m_Engine->m_RenderManager->_addShaderToStage(super,stage);
-            
+
             string& _name = super->name();
             if(vs->name() == "NULL") vs->setName(_name + ".vert");
             if(fs->name() == "NULL") fs->setName(_name + ".frag");
@@ -583,8 +580,8 @@ class ShaderP::impl final{
             }
         }
 };
-ShaderP::ShaderP(string n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){
-    m_i->_init(n,vs,fs,s,this);
+ShaderP::ShaderP(string n, Shader* vs, Shader* fs):m_i(new impl){
+    m_i->_init(n,vs,fs,this);
     registerEvent(EventType::WindowFullscreenChanged);
 }
 ShaderP::~ShaderP(){ 
@@ -592,7 +589,6 @@ ShaderP::~ShaderP(){
     unload(); 
 }
 GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
-ShaderRenderPass::Pass ShaderP::stage(){ return m_i->m_Stage; }
 
 void InternalShaderProgramPublicInterface::LoadCPU(ShaderP* shaderP){
     //if(!shaderP->isLoaded()){
