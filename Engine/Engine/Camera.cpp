@@ -12,8 +12,8 @@ class Camera::impl final{
             if(!scene)
                 scene = Resources::getCurrentScene();   
             scene->addEntity(super);
-			super->m_Body = new ComponentBody();
-			super->addComponent(super->m_Body);
+            super->m_Body = new ComponentBody();
+            super->addComponent(super->m_Body);
             super->m_Camera->lookAt(super->m_Body->position(),super->m_Body->position() + super->m_Body->forward(),super->m_Body->up());      
             super->addComponent(super->m_Camera); 
         }

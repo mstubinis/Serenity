@@ -187,7 +187,7 @@ namespace Engine{
                 void setAlgorithm(HDRAlgorithm::Algorithm a);
             };
             namespace Bloom{
-                uint getNumPasses();           void setNumPasses(uint);
+                uint getNumPasses();          void setNumPasses(uint);
                 void enable(bool b = true);   void disable();
                 float getRadius();            void setRadius(float r);
                 float getStrength();          void setStrength(float r);
@@ -242,10 +242,10 @@ namespace Engine{
         void bindDrawFBO(GLuint fbo);
 
         void bindTexture(GLuint _textureType,GLuint _textureObject);
-		void bindVAO(const GLuint _vaoObject);
+        void bindVAO(const GLuint _vaoObject);
         void genAndBindTexture(GLuint _textureType,GLuint& _textureObject);
-		void genAndBindVAO(GLuint& _vaoObject);
-		void deleteVAO(GLuint& _vaoObject);
+        void genAndBindVAO(GLuint& _vaoObject);
+        void deleteVAO(GLuint& _vaoObject);
 
         void sendTexture(const char* location,Texture* texture,const uint slot);
         void sendTexture(const char* location,const GLuint textureAddress,const uint slot,const GLuint glTextureType);

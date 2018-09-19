@@ -47,14 +47,11 @@ void SolarSystem::_loadFromFile(string filename){
         if(line[0] != '#'){//ignore commented lines
             if(count == 1){//this line has the system's name
                 setName(line);
-            }
-            else if(count == 2){//this line has the system's skybox
+            }else if(count == 2){//this line has the system's skybox
                 skyboxDirectory = line;
-            }
-            else if(count == 3){//this line has the system's skybox's number of flares
+            }else if(count == 3){//this line has the system's skybox's number of flares
                 GameSkybox* box = new GameSkybox(skyboxDirectory,boost::lexical_cast<uint>(line),this);
-            }
-            else if(count == 4){//this line has the system's GI contribution
+            }else if(count == 4){//this line has the system's GI contribution
                 string token;
                 istringstream stream(line);
                 while(getline(stream, token, ' ')) {
@@ -164,8 +161,7 @@ void SolarSystem::_loadFromFile(string filename){
                         star->setPosition(m_Planets.at(PARENT)->getPosition()+glm::vec3(xPos,0,zPos));
                     }
                     m_Planets.emplace(NAME,star);
-                }
-                else if(line[0] == 'P'){//Planet
+                }else if(line[0] == 'P'){//Planet
                     PlanetType::Type PLANET_TYPE;
                          if(TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
                     else if(TYPE == "Ice")      PLANET_TYPE = PlanetType::Ice;
@@ -185,8 +181,7 @@ void SolarSystem::_loadFromFile(string filename){
                         }
                     }
                     m_Planets.emplace(NAME,planetoid);
-                }
-                else if(line[0] == 'M'){//Moon
+                }else if(line[0] == 'M'){//Moon
                     PlanetType::Type PLANET_TYPE;
                          if(TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
                     else if(TYPE == "Ice")      PLANET_TYPE = PlanetType::Ice;
@@ -207,19 +202,17 @@ void SolarSystem::_loadFromFile(string filename){
                     }
                     m_Planets.emplace(NAME,planetoid);
                     
-                }
-                else if(line[0] == '*'){//Player ship
+                }else if(line[0] == '*'){//Player ship
                     if(PARENT != ""){
                         float parentX = m_Planets.at(PARENT)->getPosition().x;
                         float parentZ = m_Planets.at(PARENT)->getPosition().z;
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f), CollisionType::ConvexHull,this));
+                    setPlayer(new Ship(ResourceManifest::LeviathanMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f), CollisionType::ConvexHull,this));
                     GameCamera* playerCamera = (GameCamera*)getActiveCamera();
                     playerCamera->follow(getPlayer());
-                }
-                else if(line[0] == '$'){//Other ship
+                }else if(line[0] == '$'){//Other ship
                     if(PARENT != ""){
                         //float parentX = objects().at(PARENT)->getPosition().x;
                         //float parentZ = objects().at(PARENT)->getPosition().z;
@@ -227,8 +220,7 @@ void SolarSystem::_loadFromFile(string filename){
                         //zPos += parentZ;
                     }
                     //new Ship(ResourceManifest::AkiraMesh,ResourceManifest::AkiraMaterial,false,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),CollisionType::ConvexHull,this);
-                }
-                else if(line[0] == 'R'){//Rings
+                }else if(line[0] == 'R'){//Rings
                     if(PARENT != ""){
                         if(!planetRings.count(PARENT)){
                             vector<RingInfo> rings;
@@ -236,8 +228,7 @@ void SolarSystem::_loadFromFile(string filename){
                         }
                         planetRings.at(PARENT).push_back(RingInfo((uint)POSITION/10,(uint)RADIUS/10,glm::uvec3(R,G,B),BREAK));
                     }
-                }
-                else if(line[0] == 'L'){//Lagrange Point
+                }else if(line[0] == 'L'){//Lagrange Point
                     
                 }
             }

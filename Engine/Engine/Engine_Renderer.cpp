@@ -391,8 +391,7 @@ class epriv::RenderManager::impl final{
             m_IdentityMat3 = glm::mat3(1.0f);
             #pragma endregion
 
-        }
-        
+        }      
         void _postInit(const char* name,uint& width,uint& height){
             glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS,&UniformBufferObject::MAX_UBO_BINDINGS);
 
@@ -1614,7 +1613,7 @@ class epriv::RenderManager::impl final{
         }
         void _passGeometry(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,Entity* ignore){
             Scene* scene = Resources::getCurrentScene();
-			glm::vec3 camPos = scene->getActiveCamera()->getPosition();
+            glm::vec3 camPos = scene->getActiveCamera()->getPosition();
             const glm::vec3& clear = scene->getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
@@ -1651,10 +1650,10 @@ class epriv::RenderManager::impl final{
                                 MaterialMeshEntry* entry = materialMeshEntry;
                                 Mesh* mesh = entry->mesh();
                                 mesh->bind();
-								/*
+                                /*
                                 if(InternalMeshPublicInterface::SupportsInstancing()){
                                 }
-								*/
+                                */
                                 //else{
                                     for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
                                         const uint& entityID = meshInstance.first;
@@ -2518,10 +2517,10 @@ void Renderer::bindVAO(const GLuint _vaoObject){
     }
 }
 void Renderer::deleteVAO(GLuint& _vaoObject) {
-	if (_vaoObject) {
-		glDeleteVertexArrays(1,&_vaoObject);
-		_vaoObject = 0;
-	}
+    if (_vaoObject) {
+        glDeleteVertexArrays(1,&_vaoObject);
+        _vaoObject = 0;
+    }
 }
 void Renderer::genAndBindTexture(GLuint _textureType,GLuint& _textureObject){
     glGenTextures(1, &_textureObject);

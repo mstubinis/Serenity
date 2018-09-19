@@ -50,23 +50,23 @@ void Engine::unpause(){
 
 void Engine::init(const char* name,uint w,uint h){
     epriv::Core::m_Engine = new epriv::Core(name,w,h);
-	auto& engine = *epriv::Core::m_Engine;
+    auto& engine = *epriv::Core::m_Engine;
 
-	engine.m_EventManager      = new epriv::EventManager(name, w, h);
-	engine.m_EventDispatcher   = new epriv::EventDispatcher(name, w, h);
-	engine.m_ResourceManager   = new epriv::ResourceManager(name, w, h);
-	engine.m_TimeManager       = new epriv::TimeManager(name, w, h);
-	engine.m_SoundManager      = new epriv::SoundManager(name, w, h);
-	engine.m_RenderManager     = new epriv::RenderManager(name, w, h);
-	engine.m_PhysicsManager    = new epriv::PhysicsManager(name, w, h);
-	engine.m_ComponentManager  = new epriv::ComponentManager(name, w, h);
-	engine.m_ThreadManager     = new epriv::ThreadManager(name, w, h);
-	engine.m_NoiseManager      = new epriv::NoiseManager(name, w, h);
+    engine.m_EventManager      = new epriv::EventManager(name, w, h);
+    engine.m_EventDispatcher   = new epriv::EventDispatcher(name, w, h);
+    engine.m_ResourceManager   = new epriv::ResourceManager(name, w, h);
+    engine.m_TimeManager       = new epriv::TimeManager(name, w, h);
+    engine.m_SoundManager      = new epriv::SoundManager(name, w, h);
+    engine.m_RenderManager     = new epriv::RenderManager(name, w, h);
+    engine.m_PhysicsManager    = new epriv::PhysicsManager(name, w, h);
+    engine.m_ComponentManager  = new epriv::ComponentManager(name, w, h);
+    engine.m_ThreadManager     = new epriv::ThreadManager(name, w, h);
+    engine.m_NoiseManager      = new epriv::NoiseManager(name, w, h);
 
-	engine.m_ResourceManager->_init(name,w,h);
-	engine.m_TimeManager->_init(name,w,h);
-	engine.m_RenderManager->_init(name,w,h);
-	engine.m_PhysicsManager->_init(name,w,h,engine.m_ThreadManager->cores());
+    engine.m_ResourceManager->_init(name,w,h);
+    engine.m_TimeManager->_init(name,w,h);
+    engine.m_RenderManager->_init(name,w,h);
+    engine.m_PhysicsManager->_init(name,w,h,engine.m_ThreadManager->cores());
 
     //init the game here
     Engine::setMousePosition(w/2,h/2);

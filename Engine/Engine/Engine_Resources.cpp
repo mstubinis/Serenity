@@ -59,8 +59,8 @@ Handle::Handle(uint32 _index, uint32 _counter, uint32 _type) { index = _index; c
 inline Handle::operator uint32() const { return type << 27 | counter << 12 | index; }
 const bool Handle::null() const { if (type == ResourceType::Empty) return true; return false; }
 const EngineResource* Handle::get() const {
-	if (null()) return nullptr;
-	return resourceManager->m_Resources->getAsFast<EngineResource>(index);
+    if (null()) return nullptr;
+    return resourceManager->m_Resources->getAsFast<EngineResource>(index);
 }
 inline const EngineResource* Handle::operator ->() const { return get(); }
 

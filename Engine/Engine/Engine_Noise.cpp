@@ -141,14 +141,14 @@ class epriv::NoiseManager::impl final{
             delete[] m_Grad2;
             delete[] m_Grad3;
             delete[] m_Grad4;
-			vector_clear(m_Perm);
-			vector_clear(m_PermGradIndex3D);
+            vector_clear(m_Perm);
+            vector_clear(m_PermGradIndex3D);
         }
         void _initFromSeed(unsigned long long& seed){
-			vector_clear(m_Perm);
-			vector_clear(m_PermGradIndex3D);
-			m_Perm.resize(256);
-			m_PermGradIndex3D.resize(256);
+            vector_clear(m_Perm);
+            vector_clear(m_PermGradIndex3D);
+            m_Perm.resize(256);
+            m_PermGradIndex3D.resize(256);
             vector<short> source; source.resize(256);
             for (short i = 0; i < 256; ++i)
                 source.at(i) = i;
@@ -1873,30 +1873,12 @@ class epriv::NoiseManager::impl final{
             return _noiseOpenSimplex4D(x,y,z,w);
         }
 };
-
 epriv::NoiseManager::impl* noiseManager;
-
-epriv::NoiseManager::NoiseManager(const char* name,uint w,uint h):m_i(new impl){ 
-	m_i->_init(name,w,h);
-	noiseManager = m_i.get();
-}
+epriv::NoiseManager::NoiseManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); noiseManager = m_i.get(); }
 epriv::NoiseManager::~NoiseManager(){ m_i->_destruct(); }
-
-double Noise::noiseOpenSimplex2D(double x, double y){
-    return noiseManager->_noiseOpenSimplex2D(x,y);
-}
-double Noise::noiseOpenSimplex3D(double x, double y, double z){
-    return noiseManager->_noiseOpenSimplex3D(x,y,z);
-}
-double Noise::noiseOpenSimplex4D(double x, double y, double z, double w){
-    return noiseManager->_noiseOpenSimplex4D(x,y,z,w);
-}
-double Noise::noiseOpenSimplex2D(double x, double y,unsigned long long seed){
-    return noiseManager->_noiseOpenSimplex2D(x,y,seed);
-}
-double Noise::noiseOpenSimplex3D(double x, double y, double z,unsigned long long seed){
-    return noiseManager->_noiseOpenSimplex3D(x,y,z,seed);
-}
-double Noise::noiseOpenSimplex4D(double x, double y, double z, double w,unsigned long long seed){
-    return noiseManager->_noiseOpenSimplex4D(x,y,z,w,seed);
-}
+double Noise::noiseOpenSimplex2D(double x, double y){ return noiseManager->_noiseOpenSimplex2D(x,y); }
+double Noise::noiseOpenSimplex3D(double x, double y, double z){ return noiseManager->_noiseOpenSimplex3D(x,y,z); }
+double Noise::noiseOpenSimplex4D(double x, double y, double z, double w){ return noiseManager->_noiseOpenSimplex4D(x,y,z,w); }
+double Noise::noiseOpenSimplex2D(double x, double y,unsigned long long seed){ return noiseManager->_noiseOpenSimplex2D(x,y,seed); }
+double Noise::noiseOpenSimplex3D(double x, double y, double z,unsigned long long seed){ return noiseManager->_noiseOpenSimplex3D(x,y,z,seed); }
+double Noise::noiseOpenSimplex4D(double x, double y, double z, double w,unsigned long long seed){ return noiseManager->_noiseOpenSimplex4D(x,y,z,w,seed); }

@@ -31,7 +31,7 @@ class ShaderType{public:enum Type{
 
 //Core since version 3.1 (GLSL 140)
 class UniformBufferObject final: public EventObserver{
-	friend class ::Shader;
+    friend class ::Shader;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -43,15 +43,15 @@ class UniformBufferObject final: public EventObserver{
         UniformBufferObject(const char* nameInShader,uint sizeofStruct,int globalBindingPointIndex = -1);
         ~UniformBufferObject();
 
-		void onEvent(const Event& e);
-		GLuint address();
+        void onEvent(const Event& e);
+        GLuint address();
 
         void attachToShader(ShaderP* shaderProgram);
         void updateData(void* data);
 };
 
 class Shader final: public EngineResource{
-	friend class ::ShaderP;
+    friend class ::ShaderP;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -66,23 +66,23 @@ class InternalShaderProgramPublicInterface final{
     public:
         static void LoadCPU(ShaderP*);
         static void LoadGPU(ShaderP*);
-		static void UnloadCPU(ShaderP*);
-		static void UnloadGPU(ShaderP*);
+        static void UnloadCPU(ShaderP*);
+        static void UnloadGPU(ShaderP*);
 };
 class ShaderP final: public BindableResource, public EventObserver{
     friend class ::UniformBufferObject;
-	friend class ::Shader;
-	friend class ::InternalShaderProgramPublicInterface;
+    friend class ::Shader;
+    friend class ::InternalShaderProgramPublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
         ShaderP(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
         virtual ~ShaderP();
 
-		void onEvent(const Event& e);
+        void onEvent(const Event& e);
 
-		void load();
-		void unload();
+        void load();
+        void unload();
 
         void bind();
         void unbind();

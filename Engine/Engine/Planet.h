@@ -59,8 +59,8 @@ class Planet: public Entity{
     friend struct ::AtmosphericScatteringGroundMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringGroundMeshInstanceUnbindFunctor;
     friend struct ::AtmosphericScatteringSkyMeshInstanceBindFunctor;
-	friend struct ::AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
-	friend struct ::StarMeshInstanceBindFunctor;
+    friend struct ::AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
+    friend struct ::StarMeshInstanceBindFunctor;
     protected:
         ComponentModel* m_Model;
         ComponentBody* m_Body;

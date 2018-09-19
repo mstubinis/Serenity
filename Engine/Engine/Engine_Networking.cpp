@@ -88,11 +88,11 @@ class Networking::SocketUDP::impl{
         sf::Socket::Status _send(sf::Packet& _packet,const string& _ip){ return m_Socket.send(_packet,_ip,m_Port); }
         sf::Socket::Status _send(const void* _data, size_t _size,const string& _ip){ return m_Socket.send(_data,_size,_ip,m_Port); }
         sf::Socket::Status _receive(sf::Packet& _packet,const string& _ip){ 
-			sf::IpAddress ip(_ip); return m_Socket.receive(_packet,ip,m_Port);
-		}
+            sf::IpAddress ip(_ip); return m_Socket.receive(_packet,ip,m_Port);
+        }
         sf::Socket::Status _receive(void* _data, size_t _size,size_t& _received,const string& _ip){ 
-			sf::IpAddress ip(_ip); return m_Socket.receive(_data,_size,_received,ip,m_Port);
-		}
+            sf::IpAddress ip(_ip); return m_Socket.receive(_data,_size,_received,ip,m_Port);
+        }
 };
 Networking::SocketUDP::SocketUDP(const uint _port):m_i(new impl){
     m_i->_init(_port);

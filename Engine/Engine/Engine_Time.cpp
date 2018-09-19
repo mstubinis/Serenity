@@ -14,9 +14,9 @@ class epriv::TimeManager::impl{
         uint decimals;
         string output;
 
-		//opengl timers
-		uint queryID;
-		GLuint queryObject;
+        //opengl timers
+        uint queryID;
+        GLuint queryObject;
 
         void _init(const char* name,uint& w,uint& h){
             clock = sf::Clock();
@@ -29,26 +29,26 @@ class epriv::TimeManager::impl{
             decimals = 6;
         }
         void _postInit(const char* name,uint& w,uint& h){
-			glGenQueries(1, &queryID);
-			glQueryCounter(queryID, GL_TIMESTAMP);// dummy query to prevent OpenGL errors from popping out
+            glGenQueries(1, &queryID);
+            glQueryCounter(queryID, GL_TIMESTAMP);// dummy query to prevent OpenGL errors from popping out
         }
-		void _beginQuery(){
-			glBeginQuery(GL_TIME_ELAPSED,queryID);
-		}
-		void _endQuery(string& tag){
-			string _s = tag + ": %f ms\n";
-			glEndQuery(GL_TIME_ELAPSED);
+        void _beginQuery(){
+            glBeginQuery(GL_TIME_ELAPSED,queryID);
+        }
+        void _endQuery(string& tag){
+            string _s = tag + ": %f ms\n";
+            glEndQuery(GL_TIME_ELAPSED);
 
-			glGetQueryObjectuiv(queryID, GL_QUERY_RESULT,&queryObject);
-			
-			printf(_s.c_str(),queryObject / 1000000.0);
-		}
+            glGetQueryObjectuiv(queryID, GL_QUERY_RESULT,&queryObject);
+            
+            printf(_s.c_str(),queryObject / 1000000.0);
+        }
 };
 epriv::TimeManager::TimeManager(const char* name,uint w,uint h):m_i(new impl){m_i->_init(name,w,h);}
 epriv::TimeManager::~TimeManager(){}
 void epriv::TimeManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::TimeManager::calculate(){
-	auto& i = *m_i.get();
+    auto& i = *m_i.get();
     i.deltaTime = float(i.logicTime + i.physicsTime + i.renderTime + i.displayTime + i.soundTime);
 
     ++i.output_frame;
@@ -75,7 +75,7 @@ const float& epriv::TimeManager::displayTime() const{ return m_i->displayTime; }
 
 string& epriv::TimeManager::reportTime(){ return epriv::TimeManager::reportTime(m_i->decimals); }
 string& epriv::TimeManager::reportTime(uint decimals){
-	auto& i = *m_i.get();
+    auto& i = *m_i.get();
     i.decimals = decimals;
     if((i.output_frame >= i.output_frame_delay - 1) || i.output_frame_delay == 0){
         uint fps = uint(1.0f / i.deltaTime);

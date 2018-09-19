@@ -15,7 +15,7 @@ namespace Engine{
                 ~FullscreenTriangle();
 
                 void render();
-				void onEvent(const Event& e);
+                void onEvent(const Event& e);
         };
         class FullscreenQuad final: public EventObserver{
             private:
@@ -25,7 +25,7 @@ namespace Engine{
                 ~FullscreenQuad();
 
                 void render();
-				void onEvent(const Event& e);
+                void onEvent(const Event& e);
         };
     };
 };

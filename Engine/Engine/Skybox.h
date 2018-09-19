@@ -28,8 +28,8 @@ class ISkybox{public:
 class SkyboxEmpty: public ISkybox{public:
     SkyboxEmpty(Scene* = nullptr);
     virtual ~SkyboxEmpty();
-	virtual void update();
-	virtual void draw();
+    virtual void update();
+    virtual void draw();
 };
 class Skybox: public SkyboxEmpty, public EventObserver{
     friend class Engine::epriv::SkyboxImplInterface;
@@ -39,8 +39,8 @@ class Skybox: public SkyboxEmpty, public EventObserver{
         Skybox(std::string* files, Scene* = nullptr);
         Skybox(std::string file, Scene* = nullptr);
         virtual ~Skybox();
-		virtual void update();
-		virtual void draw();
+        virtual void update();
+        virtual void draw();
         Texture* texture();
         static void bindMesh();
 

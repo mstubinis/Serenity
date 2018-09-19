@@ -23,6 +23,7 @@ class ResourceManifest{
         static Handle DreadnaughtMesh;
         static Handle VenerexMesh;
         static Handle OberthMesh;
+        static Handle LeviathanMesh;
 
         static Handle StarbaseMaterial;
         static Handle StarMaterial;

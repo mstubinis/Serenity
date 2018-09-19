@@ -26,7 +26,7 @@ class epriv::EventDispatcher::impl final{
         }
         void _unregisterObject(EventObserver* obj, EventType::Type type){
             auto& v = m_Observers.at(type);
-			removeFromVector(v,obj);
+            removeFromVector(v,obj);
         }
         void _dispatchEvent(EventType::Type type,const Event& e){
             auto& v = m_Observers.at(type);

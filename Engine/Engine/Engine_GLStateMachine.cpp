@@ -9,7 +9,7 @@ typedef unsigned int uint;
 void _add(vector<GLStateT>& v,uint key,GLStateT value){ v.at(key) = value; }
 vector<GLStateT> GLState::SM = [](){
     vector<GLStateT> m; m.resize(GLState::_TOTAL);
-	                                    //enabled?              //enableGLFunc                      //disableGLFunc
+                                        //enabled?              //enableGLFunc                      //disableGLFunc
     _add(m,GLState::TEXTURE_1D,GLStateT(false,B::bind<void>(glEnable,GL_TEXTURE_1D),B::bind<void>(glDisable,GL_TEXTURE_1D)));
     _add(m,GLState::TEXTURE_1D,GLStateT(false,B::bind<void>(glEnable,GL_TEXTURE_1D),B::bind<void>(glDisable,GL_TEXTURE_1D)));
     _add(m,GLState::TEXTURE_2D,GLStateT(false,B::bind<void>(glEnable,GL_TEXTURE_2D),B::bind<void>(glDisable,GL_TEXTURE_2D)));

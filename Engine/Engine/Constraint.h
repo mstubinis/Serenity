@@ -9,11 +9,9 @@ class btTypedConstraint;
 #include <glm/vec3.hpp>
 
 class ConstraintType final {public: enum Type {
-	Fixed,
-	Hinge,
+    Fixed,
+    Hinge,
 _TOTAL};};
-
-
 class Constraint{
     private:
         btRigidBody* m_RigidBodyA;
@@ -26,5 +24,4 @@ class Constraint{
 
         void makeHingeConstraint(glm::vec3& axisA,glm::vec3& axisB,glm::vec3 locationA = glm::vec3(0.0f),glm::vec3 locationB = glm::vec3(0.0f));
 };
-
 #endif

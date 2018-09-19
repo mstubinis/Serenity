@@ -792,8 +792,7 @@ class Mesh::impl final{
                         if (c <= data.tangents.size() - 1)
                             vert.tangent = Math::pack3NormalsInto32Int(data.tangents.at(c));
                         m_Vertices.push_back(vert);
-                    }
-                    else {
+                    }else {
                         epriv::MeshVertexData vert;
                         vert.position = pt;
                         //vert.uv = Math::pack2FloatsInto1Float(data.uvs.at(c));
@@ -822,14 +821,12 @@ class Mesh::impl final{
                     //average out TBN. But it cancels out normal mapping on some flat surfaces
                     //temp_binormals.at(index) += data.binormals.at(i);
                     //temp_tangents.at(index) += data.tangents.at(i);
-                }
-                else {
+                }else {
                     if (m_Skeleton) {
                         epriv::MeshVertexDataAnimated vert;
                         vert.position = data.points.at(i);
                         m_Vertices.push_back(vert);
-                    }
-                    else {
+                    }else {
                         epriv::MeshVertexData vert;
                         vert.position = data.points.at(i);
                         m_Vertices.push_back(vert);
@@ -858,8 +855,7 @@ class Mesh::impl final{
             if (extension == ".objc") {
                 _readFromObjCompressed(file, d);
                 _finalizeData(d, threshold);
-            }
-            else {
+            }else{
                 _loadInternal(super, d, m_File);
                 _finalizeData(d, threshold);
             }
@@ -905,50 +901,38 @@ class Mesh::impl final{
         }
         void _loadObjDataFromLine(string& l,epriv::ImportedMeshData& _d,vector<uint>& _pi,vector<uint>& _ui,vector<uint>& _ni,const char _f){
             if(l[0] == 'o'){
-            }
-            //vertex positions
-            else if(l[0] == 'v' && l[1] == ' '){ 
+            }else if(l[0] == 'v' && l[1] == ' '){ 
                 if(_f && epriv::LOAD_POINTS){
                     glm::vec3 p;
                     sscanf(l.substr(2,l.size()).c_str(),"%f %f %f",&p.x,&p.y,&p.z);
                     _d.file_points.push_back(p);
                 }
-            }
-            //vertex uvs
-            else if(l[0] == 'v' && l[1] == 't'){
+            }else if(l[0] == 'v' && l[1] == 't'){
                 if(_f && epriv::LOAD_UVS){
                     glm::vec2 uv;
                     sscanf(l.substr(2,l.size()).c_str(),"%f %f",&uv.x,&uv.y);
                     uv.y = 1.0f - uv.y;
                     _d.file_uvs.push_back(uv);
                 }
-            }
-            //vertex normals
-            else if(l[0] == 'v' && l[1] == 'n'){
+            }else if(l[0] == 'v' && l[1] == 'n'){
                 if(_f && epriv::LOAD_NORMALS){
                     glm::vec3 n;
                     sscanf(l.substr(2,l.size()).c_str(),"%f %f %f",&n.x,&n.y,&n.z);
                     _d.file_normals.push_back(n);
                 }
-            }
-            //faces
-            else if(l[0] == 'f' && l[1] == ' '){
+            }else if(l[0] == 'f' && l[1] == ' '){
                 if(_f && epriv::LOAD_FACES){
                     glm::uvec3 f1,f2,f3,f4 = glm::uvec3(1);
                     int matches = sscanf(l.substr(2,l.size()).c_str(),"%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",&f1.x,&f1.y,&f1.z,&f2.x,&f2.y,&f2.z,&f3.x,&f3.y,&f3.z,&f4.x,&f4.y,&f4.z);
-
                     if(matches < 3){
                         matches = sscanf(l.substr(2,l.size()).c_str(),"%d %d %d %d",&f1.x,&f2.x,&f3.x,&f4.x);
                     }
-
                     f1 = glm::max(f1,glm::uvec3(1)); f2 = glm::max(f2,glm::uvec3(1)); f3 = glm::max(f3,glm::uvec3(1)); f4 = glm::max(f4,glm::uvec3(1));
-
                     if(matches == 3 || matches == 6 || matches == 9){ //triangle
                         _pi.push_back(f1.x); _pi.push_back(f2.x); _pi.push_back(f3.x);
                         _ui.push_back(f1.y); _ui.push_back(f2.y); _ui.push_back(f3.y);
                         _ni.push_back(f1.z); _ni.push_back(f2.z); _ni.push_back(f3.z);
-                    }
-                    else if(matches == 4 || matches == 8 || matches == 12){//quad
+                    }else if(matches == 4 || matches == 8 || matches == 12){//quad
                         _pi.push_back(f1.x); _pi.push_back(f2.x); _pi.push_back(f3.x);
                         _ui.push_back(f1.y); _ui.push_back(f2.y); _ui.push_back(f3.y);
                         _ni.push_back(f1.z); _ni.push_back(f2.z); _ni.push_back(f3.z);

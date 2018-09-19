@@ -568,19 +568,19 @@ class Texture::impl final{
 void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageLoadedStructure& image){
     auto& i = *_texture->m_i;
 
-	ifstream stream(_filename.c_str(), ios::binary);
-	if (!stream) return;
+    ifstream stream(_filename.c_str(), ios::binary);
+    if (!stream) return;
 
     uchar header_buffer[128];
-	stream.read((char*)header_buffer, sizeof(header_buffer));
+    stream.read((char*)header_buffer, sizeof(header_buffer));
 
     DDS::DDS_Header head(header_buffer);
-	if (head.magic != 0x20534444) { stream.close(); return; } //check if this is "DDS "
+    if (head.magic != 0x20534444) { stream.close(); return; } //check if this is "DDS "
     //DX10 header here
     DDS::DDS_Header_DX10 headDX10;
     if( (head.header_flags & DDS::DDPF_FOURCC) && head.format.fourCC == FourCC_DX10 ){
         uchar header_buffer_DX10[20];
-		stream.read((char*)header_buffer_DX10, sizeof(header_buffer_DX10));
+        stream.read((char*)header_buffer_DX10, sizeof(header_buffer_DX10));
         headDX10.fill(header_buffer_DX10);
     }
     uint32_t factor, blockSize, offset = 0;
@@ -704,8 +704,8 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageL
     
     const uint& bufferSize = (head.mipMapCount >= 2 ? head.pitchOrlinearSize * factor : head.pitchOrlinearSize);
     uchar* pxls = (uchar*)malloc(bufferSize * numberOfMainImages);
-	stream.read((char*)pxls, bufferSize * numberOfMainImages);
-	stream.close();
+    stream.read((char*)pxls, bufferSize * numberOfMainImages);
+    stream.close();
 
     image.pixelFormat = ImagePixelFormat::RGBA;
     image.pixelType = ImagePixelType::UNSIGNED_BYTE;	

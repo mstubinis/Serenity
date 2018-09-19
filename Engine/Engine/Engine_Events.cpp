@@ -368,7 +368,7 @@ epriv::EventManager::impl* eventManager;
 
 epriv::EventManager::EventManager(const char* name,uint w,uint h):m_i(new impl){
     m_i->_init(name,w,h);
-	eventManager = m_i.get();
+    eventManager = m_i.get();
 }
 epriv::EventManager::~EventManager(){ m_i->_destruct(); }
 void epriv::EventManager::_onEventKeyPressed(uint& key){ m_i->_onEventKeyPressed(key); }

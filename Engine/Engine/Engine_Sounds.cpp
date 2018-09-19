@@ -60,7 +60,7 @@ class SoundQueue::impl final{
         }
         void _clear(){
             for(auto it1 = m_Queue.begin(); it1 != m_Queue.end();){
-				SAFE_DELETE(*it1);
+                SAFE_DELETE(*it1);
                 it1 = m_Queue.erase(it1);
             }
             vector_clear(m_Queue);
@@ -71,7 +71,7 @@ class SoundQueue::impl final{
         void _dequeue(){
             if(m_Queue.size() > 0){
                 auto it = m_Queue.begin();
-				SAFE_DELETE(*it);
+                SAFE_DELETE(*it);
                 it = m_Queue.erase(it);
                 m_IsDelayProcess = true;
                 //do we need to manually delete? i dont think so
@@ -101,7 +101,7 @@ class SoundQueue::impl final{
                     else if(stat == SoundStatus::Stopped){
                         if(s->getLoopsLeft() <= 1){
                             //this sound has finished, remove it from the queue and start the delay process
-							SAFE_DELETE(*it);
+                            SAFE_DELETE(*it);
                             it = m_Queue.erase(it);
                             m_IsDelayProcess = true;
                         }
@@ -116,8 +116,8 @@ class Engine::epriv::SoundManager::impl final{
         vector<SoundQueue*> m_SoundQueues;
 
         void _destruct(){
-			SAFE_DELETE_VECTOR(m_SoundQueues);
-			SAFE_DELETE_VECTOR(m_CurrentlyPlayingSounds);
+            SAFE_DELETE_VECTOR(m_SoundQueues);
+            SAFE_DELETE_VECTOR(m_CurrentlyPlayingSounds);
         }
         void _updateSoundStatus(SoundBaseClass* sound,sf::SoundSource::Status sfStatus){
             if(sfStatus == sf::SoundSource::Status::Stopped){
@@ -238,10 +238,10 @@ SoundBaseClass::SoundBaseClass(uint loops):m_i(new impl){ m_i->_init(loops); }
 SoundBaseClass::~SoundBaseClass(){ m_i->_destruct(); }
 SoundStatus::Status SoundBaseClass::status(){ return m_i->m_Status; }
 void SoundBaseClass::play(uint loop){
-	auto& i = *m_i; loop != 1? i.m_Status = SoundStatus::PlayingLooped : i.m_Status = SoundStatus::Playing; i.m_Loops = loop; 
+    auto& i = *m_i; loop != 1? i.m_Status = SoundStatus::PlayingLooped : i.m_Status = SoundStatus::Playing; i.m_Loops = loop; 
 }
 void SoundBaseClass::play(){ 
-	auto& i = *m_i; i.m_Loops != 1? i.m_Status = SoundStatus::PlayingLooped : i.m_Status = SoundStatus::Playing; 
+    auto& i = *m_i; i.m_Loops != 1? i.m_Status = SoundStatus::PlayingLooped : i.m_Status = SoundStatus::Playing; 
 }
 void SoundBaseClass::pause(){ m_i->m_Status = SoundStatus::Paused; }
 void SoundBaseClass::stop(){ m_i->m_Status = SoundStatus::Stopped; }
@@ -362,7 +362,7 @@ void SoundQueue::clear(){ m_i->_clear(); }
 bool SoundQueue::empty(){ if(m_i->m_Queue.size() > 0) return false; return true; }
 
 epriv::SoundManager::SoundManager(const char* name,uint w,uint h):m_i(new impl){ 
-	soundManager = m_i.get();
+    soundManager = m_i.get();
 }
 epriv::SoundManager::~SoundManager(){ m_i->_destruct(); }
 void epriv::SoundManager::_update(const float& dt){ m_i->_update(dt); }

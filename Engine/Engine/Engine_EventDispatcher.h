@@ -19,7 +19,7 @@ namespace Engine{
                 void _registerObject(EventObserver*,EventType::Type);
                 void _unregisterObject(EventObserver*,EventType::Type);
                 void _dispatchEvent(EventType::Type,const Event& e);
-				void _dispatchEvent(const Event& e);
+                void _dispatchEvent(const Event& e);
         };
     };
 };

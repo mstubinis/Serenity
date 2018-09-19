@@ -10,8 +10,8 @@ namespace Engine{
             public:
                 static void init();
 
-				static std::string bullet_physics_vert;
-				static std::string bullet_physcis_frag;
+                static std::string bullet_physics_vert;
+                static std::string bullet_physcis_frag;
 
                 static std::string constants;
                 static std::string conditional_functions;

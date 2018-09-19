@@ -17,8 +17,8 @@ namespace Engine{
                 void _init(const char* name,uint w,uint h);
 
                 void calculate();
-				void beginGLQuery();
-				void endGLQuery(std::string& tag);
+                void beginGLQuery();
+                void endGLQuery(std::string& tag);
                 void stop_clock();
 
                 void calculate_logic();

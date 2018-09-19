@@ -5,7 +5,6 @@
 #include "Skybox.h"
 #include <memory>
 
-
 class GameSkybox: public Skybox{
     private:
         class impl; std::unique_ptr<impl> m_i;
@@ -17,5 +16,4 @@ class GameSkybox: public Skybox{
         void update();
         void draw();
 };
-
 #endif

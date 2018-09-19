@@ -135,7 +135,7 @@ namespace Engine{
             friend class ::SoundBaseClass;
             //friend class ::SoundBaseClass::impl;
             public:
-				class impl; std::unique_ptr<impl> m_i;
+                class impl; std::unique_ptr<impl> m_i;
 
                 SoundManager(const char* name,uint w,uint h);
                 ~SoundManager();

@@ -312,30 +312,30 @@ epriv::EShaders::lighting_vert =
 
 #pragma region BulletPhysicsVertex
 epriv::EShaders::bullet_physics_vert = 
-	"\n"
-	"layout (location = 0) in vec3 position;\n"
-	"layout (location = 1) in vec3 color;\n"
     "\n"
-	"varying vec3 OutColor;\n"
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec3 color;\n"
     "\n"
-	"uniform mat4 Model;\n"
-	"uniform mat4 VP;\n"
-	"\n"
-	"void main(){\n"
-	"	gl_Position = VP * Model * vec4(position, 1.0f);\n"
-	"	OutColor = color;\n"
-	"}\n"
-	"\n";
+    "varying vec3 OutColor;\n"
+    "\n"
+    "uniform mat4 Model;\n"
+    "uniform mat4 VP;\n"
+    "\n"
+    "void main(){\n"
+    "	gl_Position = VP * Model * vec4(position, 1.0f);\n"
+    "	OutColor = color;\n"
+    "}\n"
+    "\n";
 #pragma endregion
 
 #pragma region BulletPhysicsFragment
 epriv::EShaders::bullet_physcis_frag =
-	"\n"
-	"in vec3 OutColor;\n"
-	"void main(){\n"
-	"	gl_FragColor = vec4(OutColor,1.0);\n" 
-	"}\n"
-	"\n";
+    "\n"
+    "in vec3 OutColor;\n"
+    "void main(){\n"
+    "	gl_FragColor = vec4(OutColor,1.0);\n" 
+    "}\n"
+    "\n";
 #pragma endregion
 
 #pragma region VertexBasic

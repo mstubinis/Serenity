@@ -12,7 +12,7 @@ namespace Engine{
     namespace epriv{
         class EventManager final: private Engine::epriv::noncopyable{
             public:
-				class impl; std::unique_ptr<impl> m_i;
+                class impl; std::unique_ptr<impl> m_i;
 
                 EventManager(const char* name,uint w,uint h);
                 ~EventManager();

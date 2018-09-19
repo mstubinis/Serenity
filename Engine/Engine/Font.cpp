@@ -13,10 +13,8 @@ class Font::impl final{
     public:
         Texture* m_FontTexture;
         unordered_map<uchar,FontGlyph*> m_FontGlyphs;
-
         void _init(const string& _FontFilename){
             _loadTextFile(_FontFilename);
-
             string rawname = _FontFilename;
             const size_t& lastindex = _FontFilename.find_last_of("."); 
             if(lastindex != string::npos){
@@ -27,16 +25,14 @@ class Font::impl final{
             epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_FontTexture);
         }
         void _destruct(){
-            for(auto glyph:m_FontGlyphs){
-                SAFE_DELETE(glyph.second);
-            }
+            SAFE_DELETE_MAP(m_FontGlyphs);
         }
         void _loadTextFile(const string& filename){
             boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
             for(string line; getline(str, line, '\n');){
                 if(line[0] == 'c' && line[1] == 'h' && line[2] == 'a' && line[3] == 'r' && line[4] == ' '){
                     FontGlyph* f = new FontGlyph();
-					FontGlyph& _f = *f;
+                    FontGlyph& _f = *f;
                     string token;
                     istringstream stream(line);
                     while(getline(stream, token, ' ')) {
@@ -53,27 +49,23 @@ class Font::impl final{
                         else if(key == "yoffset")  _f.yoffset = stoi(value);
                         else if(key == "xadvance") _f.xadvance = stoi(value);
                     }
-					_f.pts.emplace_back(0.0f,0.0f,0.0f);
-					_f.pts.emplace_back(f->width,f->height,0.0f);
-					_f.pts.emplace_back(0.0f,f->height,0.0f);
-					_f.pts.emplace_back(f->width,0.0f,0.0f);
+                    _f.pts.emplace_back(0.0f,0.0f,0.0f);
+                    _f.pts.emplace_back(f->width,f->height,0.0f);
+                    _f.pts.emplace_back(0.0f,f->height,0.0f);
+                    _f.pts.emplace_back(f->width,0.0f,0.0f);
 
-					_f.uvs.emplace_back(float(f->x / 256.0f),float(f->y / 256.0f) + float(f->height / 256.0f));
-					_f.uvs.emplace_back(float(f->x / 256.0f) + float(f->width / 256.0f),float(f->y / 256.0f));
-					_f.uvs.emplace_back(float(f->x / 256.0f),float(f->y / 256.0f));
-					_f.uvs.emplace_back(float(f->x / 256.0f) + float(f->width / 256.0f),float(f->y / 256.0f) + float(f->height / 256.0f));
+                    _f.uvs.emplace_back(float(f->x / 256.0f),float(f->y / 256.0f) + float(f->height / 256.0f));
+                    _f.uvs.emplace_back(float(f->x / 256.0f) + float(f->width / 256.0f),float(f->y / 256.0f));
+                    _f.uvs.emplace_back(float(f->x / 256.0f),float(f->y / 256.0f));
+                    _f.uvs.emplace_back(float(f->x / 256.0f) + float(f->width / 256.0f),float(f->y / 256.0f) + float(f->height / 256.0f));
 
                     m_FontGlyphs.emplace(f->id,f);
                 }
             }
         }
 };
-Font::Font(string filename):EngineResource(filename),m_i(new impl){
-    m_i->_init(filename);
-}
-Font::~Font(){
-    m_i->_destruct();
-}
+Font::Font(string filename):EngineResource(filename),m_i(new impl){ m_i->_init(filename); }
+Font::~Font(){ m_i->_destruct(); }
 Texture* Font::getGlyphTexture(){ return m_i->m_FontTexture; }
 FontGlyph* Font::getGlyphData(uchar c){ return m_i->m_FontGlyphs.at(c); }
 void Font::renderText(string text, glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){

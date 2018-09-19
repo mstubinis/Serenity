@@ -14,8 +14,8 @@ class SkyboxEmpty;
 class LightProbe;
 class Scene;
 namespace Engine {
-	namespace epriv {
-		class ComponentManager;
+    namespace epriv {
+        class ComponentManager;
 
         class InternalScenePublicInterface final {
             friend class ::Scene;
@@ -23,7 +23,7 @@ namespace Engine {
                 static std::vector<uint>& GetEntities(Scene*);
                 static std::vector<SunLight*>& GetLights(Scene*);
         };
-	};
+    };
 };
 class Scene: public EngineResource, public EventObserver{
     friend class ::LightProbe;

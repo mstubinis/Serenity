@@ -18,7 +18,7 @@ namespace Engine{
         struct FramebufferObjectDefaultBindFunctor;
         struct FramebufferObjectDefaultUnbindFunctor;
         
-		class FramebufferObjectAttatchment: private Engine::epriv::noncopyable{
+        class FramebufferObjectAttatchment: private Engine::epriv::noncopyable{
             friend class ::Engine::epriv::FramebufferObject;
             private:
                 class impl; std::unique_ptr<impl> m_i;
@@ -84,7 +84,7 @@ namespace Engine{
                 std::unordered_map<uint,FramebufferObjectAttatchment*>& attatchments();
                 const GLuint& address() const;
                 bool check();
-				float divisor();
+                float divisor();
         };
     };
 };

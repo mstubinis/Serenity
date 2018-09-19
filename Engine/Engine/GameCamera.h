@@ -20,8 +20,6 @@ class GameCameraComponent: public ComponentCamera{
 
         void update(const float& dt);
 };
-
-
 class GameCamera: public Camera{
     public:
         GameCamera(float angle, float aspectRatio, float clipStart, float clipEnd,Scene* = nullptr);                   // Perspective camera Constructor

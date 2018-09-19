@@ -587,12 +587,12 @@ class ShaderP::impl final{
         }
 };
 ShaderP::ShaderP(string n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){
-	m_i->_init(n,vs,fs,s,this);
-	registerEvent(EventType::WindowFullscreenChanged);
+    m_i->_init(n,vs,fs,s,this);
+    registerEvent(EventType::WindowFullscreenChanged);
 }
 ShaderP::~ShaderP(){ 
-	unregisterEvent(EventType::WindowFullscreenChanged);
-	unload(); 
+    unregisterEvent(EventType::WindowFullscreenChanged);
+    unload(); 
 }
 GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 ShaderRenderPass::Pass ShaderP::stage(){ return m_i->m_Stage; }
@@ -709,13 +709,13 @@ class UniformBufferObject::impl final{
         }
 };
 UniformBufferObject::UniformBufferObject(const char* _nameInShader,uint _sizeofStruct,int _globalBindingPointNumber):m_i(new impl){ 
-	m_i->_init(_nameInShader,_sizeofStruct,_globalBindingPointNumber,this);
-	registerEvent(EventType::WindowFullscreenChanged);
+    m_i->_init(_nameInShader,_sizeofStruct,_globalBindingPointNumber,this);
+    registerEvent(EventType::WindowFullscreenChanged);
 }
 UniformBufferObject::~UniformBufferObject(){ 
-	unregisterEvent(EventType::WindowFullscreenChanged);
-	m_i->_unload_GPU(this);
-	m_i->_unload_CPU(this);
+    unregisterEvent(EventType::WindowFullscreenChanged);
+    m_i->_unload_GPU(this);
+    m_i->_unload_CPU(this);
 }
 void UniformBufferObject::updateData(void* _data){ m_i->_update(_data); }
 void UniformBufferObject::attachToShader(ShaderP* _shaderProgram){ m_i->_attachToShader(this,_shaderProgram); }

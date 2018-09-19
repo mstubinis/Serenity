@@ -20,37 +20,37 @@ class SunLight;
 class SoundData;
 
 class ResourceType final {public: enum Type {
-	Empty, //do NOT move this specific enum
-	Texture,
-	Mesh,
-	Material,
-	Sound,
-	Object,
-	Font,
-	Camera,
-	Shader,
-	ShaderProgram,
-	SoundData,
-	Scene,
+    Empty, //do NOT move this specific enum
+    Texture,
+    Mesh,
+    Material,
+    Sound,
+    Object,
+    Font,
+    Camera,
+    Shader,
+    ShaderProgram,
+    SoundData,
+    Scene,
 _TOTAL};};
 
 struct Handle final {
-	uint32 index : 12;
-	uint32 counter : 15;
-	uint32 type : 5;
-	Handle();
-	Handle(uint32 _index, uint32 _counter, uint32 _type);
-	inline operator uint32() const;
-	const bool null() const;
-	const EngineResource* get() const;
-	inline const EngineResource* operator ->() const;
+    uint32 index : 12;
+    uint32 counter : 15;
+    uint32 type : 5;
+    Handle();
+    Handle(uint32 _index, uint32 _counter, uint32 _type);
+    inline operator uint32() const;
+    const bool null() const;
+    const EngineResource* get() const;
+    inline const EngineResource* operator ->() const;
 };
 
 namespace Engine{
     namespace epriv{
         class ResourceManager final: Engine::epriv::noncopyable{
             public:
-				class impl; std::unique_ptr<impl> m_i;
+                class impl; std::unique_ptr<impl> m_i;
 
                 ResourceManager(const char* name,uint width,uint height);
                 ~ResourceManager();
@@ -60,8 +60,8 @@ namespace Engine{
                 Handle _addTexture(Texture*);
 
                 bool _hasScene(std::string);
-				void _addScene(Scene*);
-				std::string _buildSceneName(std::string);
+                void _addScene(Scene*);
+                std::string _buildSceneName(std::string);
                 Texture* _hasTexture(std::string);
                 uint _numScenes();
         };
@@ -106,7 +106,7 @@ namespace Engine{
 
         Handle addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "",Handle shaderHandle = Handle());
         Handle addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
-		Handle addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,Handle shaderHandle = Handle());
+        Handle addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,Handle shaderHandle = Handle());
 
         Handle addShader(std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         Handle addSoundData(std::string file,std::string name = "",bool music = false);
