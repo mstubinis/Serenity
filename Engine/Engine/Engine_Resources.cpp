@@ -43,6 +43,7 @@ class epriv::ResourceManager::impl final{
         unordered_map<string,boost::shared_ptr<Scene>> m_Scenes;
         void _init(const char* name,const uint& width,const uint& height){
             m_CurrentScene = nullptr;
+            m_Window = nullptr;
             m_DynamicMemory = false;
             m_Resources = new ObjectPool<EngineResource>(32768);
         }
@@ -166,8 +167,8 @@ Handle Resources::addShaderProgram(string n, Shader* v, Shader* f){
     return resourceManager->m_Resources->add(new ShaderP(n,v,f),ResourceType::ShaderProgram);
 }
 Handle Resources::addShaderProgram(string n, Handle& v, Handle& f){
-    Shader* vS = nullptr; resourceManager->m_Resources->getAs(v,vS);
-    Shader* fS = nullptr; resourceManager->m_Resources->getAs(f,fS);
+    Shader* vS = 0; resourceManager->m_Resources->getAs(v,vS);
+    Shader* fS = 0; resourceManager->m_Resources->getAs(f,fS);
     return resourceManager->m_Resources->add(new ShaderP(n,vS,fS),ResourceType::ShaderProgram);
 }
 
@@ -183,8 +184,9 @@ void Resources::setCurrentScene(Scene* newScene){
     epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::SceneChanged,ev);
     
     if(!oldScene){
-        epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(nullptr, newScene);
+        cout << "---- Initial scene set to: " << newScene->name() << endl;
         resourceManager->m_CurrentScene = newScene;
+        epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(nullptr, newScene);       
         return;
     }
     if(oldScene != newScene){

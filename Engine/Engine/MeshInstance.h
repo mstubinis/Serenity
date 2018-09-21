@@ -33,6 +33,7 @@ class MeshInstance final: public BindableResource{
         MeshInstance(Entity*,Handle mesh,Material*, ShaderP* =0, glm::vec3 pos=glm::vec3(0),glm::quat rot=glm::quat(1,0,0,0),glm::vec3 scl=glm::vec3(1));
         ~MeshInstance();
 
+        ShaderP* shaderProgram();
         Mesh* mesh();
         Material* material();
         Entity* parent();

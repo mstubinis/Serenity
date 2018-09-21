@@ -213,6 +213,7 @@ glm::mat4& MeshInstance::model(){ return m_i->m_Model; }
 glm::vec3& MeshInstance::getScale(){ return m_i->m_Scale; }
 glm::vec3& MeshInstance::position(){ return m_i->m_Position; }
 glm::quat& MeshInstance::orientation(){ return m_i->m_Orientation; }
+ShaderP* MeshInstance::shaderProgram() { return m_i->m_ShaderProgram; }
 Mesh* MeshInstance::mesh(){ return m_i->m_Mesh; }
 Material* MeshInstance::material(){ return m_i->m_Material; }
 void MeshInstance::setShaderProgram(Handle& shaderPHandle) { m_i->_setShaderProgram(((ShaderP*)shaderPHandle.get()), this); }

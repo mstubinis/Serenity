@@ -13,15 +13,19 @@ class SunLight;
 class SkyboxEmpty;
 class LightProbe;
 class Scene;
+class MeshInstance;
 namespace Engine {
     namespace epriv {
         class ComponentManager;
-
+        class RenderPipeline;
         class InternalScenePublicInterface final {
             friend class ::Scene;
+            friend class ::Engine::epriv::RenderPipeline;
             public:
                 static std::vector<uint>& GetEntities(Scene*);
                 static std::vector<SunLight*>& GetLights(Scene*);
+                static void Render(Scene*);
+                static void AddMeshInstanceToPipeline(Scene*, MeshInstance*);
         };
     };
 };

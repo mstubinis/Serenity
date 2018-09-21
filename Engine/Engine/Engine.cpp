@@ -74,8 +74,10 @@ void Engine::init(const char* name,uint w,uint h){
     epriv::threading::waitForAll();
     Game::initLogic();
     //the scene is the root of all games. create the default scene if 1 does not exist already
-    if(engine.m_ResourceManager->_numScenes() == 0)
+    if (engine.m_ResourceManager->_numScenes() == 0) {
         new Scene("Default");
+        if (!Resources::getCurrentScene()) { Resources::setCurrentScene("Default"); }
+    }
 }
 void RESET_EVENTS(){
     epriv::Core::m_Engine->m_EventManager->_onResetEvents();

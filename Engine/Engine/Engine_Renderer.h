@@ -47,30 +47,37 @@ namespace Engine {
         struct MaterialNode;
         struct MeshNode;
         struct InstanceNode;
+        class InternalScenePublicInterface;
     };
 };
 
 
 namespace Engine{
     namespace epriv{
-
-        struct MaterialNode {
-            Material* material;
-            std::vector<MeshNode*> meshNodes;
+        struct InstanceNode {
+            MeshInstance* instance;
         };
         struct MeshNode {
             Mesh* mesh;
             std::vector<InstanceNode*> instanceNodes;
+            ~MeshNode() {
+                SAFE_DELETE_VECTOR(instanceNodes);
+            }
         };
-        struct InstanceNode {
-            MeshInstance* instance;
+        struct MaterialNode {
+            Material* material;
+            std::vector<MeshNode*> meshNodes;
+            ~MaterialNode() {
+                SAFE_DELETE_VECTOR(meshNodes);
+            }
         };
         class RenderPipeline final: private Engine::epriv::noncopyable {
+            friend class Engine::epriv::InternalScenePublicInterface;
             private:
                 ShaderP* shaderProgram;
                 std::vector<MaterialNode*> materialNodes;
             public:
-                RenderPipeline();
+                RenderPipeline(ShaderP*);
                 ~RenderPipeline();
 
                 void render();

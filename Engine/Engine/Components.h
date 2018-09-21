@@ -97,6 +97,7 @@ namespace Engine{
                 ComponentManager(const char* name, uint w, uint h);
                 ~ComponentManager();
 
+                static void onComponentAddedToEntity(Entity*);
                 static void onEntityAddedToScene(Scene*, Entity*);
 
                 void _pause(bool=true);
@@ -155,6 +156,7 @@ namespace Engine{
                 virtual ~ComponentSystemBaseClass(){}
                 virtual void update(const float& dt){}
                 virtual void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*) {}
+                virtual void onComponentAddedToEntity(ComponentBaseClass*, Entity*) {}
         };
         class ComponentModelSystem final: public ComponentSystemBaseClass {
             friend class ::Engine::epriv::ComponentManager;
@@ -165,6 +167,7 @@ namespace Engine{
                 ~ComponentModelSystem();
                 void update(const float& dt);
                 void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
+                void onComponentAddedToEntity(ComponentBaseClass*, Entity*);
         };
         class ComponentCameraSystem final : public ComponentSystemBaseClass {
             friend class ::Engine::epriv::ComponentManager;
@@ -175,6 +178,7 @@ namespace Engine{
                 ~ComponentCameraSystem();
                 void update(const float& dt);
                 void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
+                void onComponentAddedToEntity(ComponentBaseClass*, Entity*);
         };
         class ComponentBodySystem final : public ComponentSystemBaseClass {
             friend class ::Engine::epriv::ComponentManager;
@@ -185,6 +189,7 @@ namespace Engine{
                 ~ComponentBodySystem();
                 void update(const float& dt);
                 void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
+                void onComponentAddedToEntity(ComponentBaseClass*, Entity*);
         };
     };
 };
@@ -396,9 +401,10 @@ class Entity: public EventObserver{
             Engine::epriv::ComponentManager::m_ComponentVectors.at(slot).push_back(component);
             component->m_Owner = m_ID;
             componentID = generatedID;
+
+            Engine::epriv::ComponentManager::onComponentAddedToEntity(this);
             if (m_Scene) {
-                Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(slot).push_back(component);
-                Engine::epriv::ComponentManager::onEntityAddedToScene(m_Scene, this);
+                Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(slot).push_back(component);       
             }
         }
         template<class T> void removeComponent(T* component){

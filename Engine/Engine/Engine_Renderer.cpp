@@ -1635,6 +1635,9 @@ class epriv::RenderManager::impl final{
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);      
 
             //RENDER NORMAL OBJECTS HERE
+
+            InternalScenePublicInterface::Render(scene);
+
             /*
             for(auto shader:m_GeometryPassShaderPrograms){
                 auto& shaderMaterials = shader->getMaterials(); 
@@ -2242,11 +2245,11 @@ void epriv::RenderManager::_genPBREnvMapData(Texture* texture, uint size1, uint 
 
 
 
-epriv::RenderPipeline::RenderPipeline() {
-
+epriv::RenderPipeline::RenderPipeline(ShaderP* _shaderProgram) {
+    shaderProgram = _shaderProgram;
 }
 epriv::RenderPipeline::~RenderPipeline() {
-
+    SAFE_DELETE_VECTOR(materialNodes);
 }
 void epriv::RenderPipeline::render() {
     shaderProgram->bind();
@@ -2501,20 +2504,6 @@ void Renderer::unbindFBO(){ Renderer::bindFBO(GLuint(0)); }
 void Renderer::unbindRBO(){ Renderer::bindRBO(GLuint(0)); }
 void Renderer::unbindReadFBO(){ Renderer::bindReadFBO(0); }
 void Renderer::unbindDrawFBO(){ Renderer::bindDrawFBO(0); }
-/*
-void Renderer::unbindTexture(uint slot,Texture* texture){
-    glActiveTexture(GL_TEXTURE0 + slot);
-    bindTexture(texture->type(),0);
-}
-void Renderer::unbindTexture2D(uint slot){
-    glActiveTexture(GL_TEXTURE0 + slot);
-    bindTexture(GL_TEXTURE_2D,0);
-}
-void Renderer::unbindTextureCubemap(uint slot){
-    glActiveTexture(GL_TEXTURE0 + slot);
-    bindTexture(GL_TEXTURE_CUBE_MAP,0);
-}
-*/
 void Renderer::renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h, float angle, float depth){
     renderManager->m_TexturesToBeRendered.emplace_back(nullptr,pos,col,glm::vec2(w,h),angle,depth);
 }
