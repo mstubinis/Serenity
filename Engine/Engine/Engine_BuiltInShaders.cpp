@@ -1697,9 +1697,7 @@ epriv::EShaders::hdr_frag =
     "uniform vec4 HDRInfo;\n"// exposure | HasHDR | HasBloom | HDRAlgorithm
     "uniform int HasRays;\n"
     "\n"
-    "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){\n"
-    "    return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f);\n"
-    "}\n";
+    "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){ return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f); }\n";
 epriv::EShaders::hdr_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::hdr_frag +=
     "void main(){\n"
@@ -1715,7 +1713,7 @@ epriv::EShaders::hdr_frag +=
     "            lighting = lighting / (lighting + ConstantOneVec3);\n"
     "        }else if(HDRInfo.w == 1.0){\n"// Filmic tone mapping
     "            vec3 x = max(vec3(0), lighting - vec3(0.004));\n"
-    "            lighting = (x * (vec3(6.2) * x + vec3(0.5))) / (x * (vec3(6.2) * x + vec3(1.7)) + vec3(0.06));\n"
+    "            lighting = (x * (vec3(6.20) * x + vec3(0.5))) / (x * (vec3(6.2) * x + vec3(1.7)) + vec3(0.06));\n"
     "        }else if(HDRInfo.w == 2.0){\n"// Exposure tone mapping
     "            lighting = ConstantOneVec3 - exp(-lighting * HDRInfo.x);\n"
     "        }else if(HDRInfo.w == 3.0){\n"// Uncharted tone mapping

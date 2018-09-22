@@ -12,10 +12,29 @@ varying vec3 WorldPosition;
 
 uniform int HasGodsRays;
 
-const vec3 ConstVec3Zero = vec3(0.0);
-const vec2 ConstVec2Zero = vec2(0.0);
-const vec2 ConstVec2One = vec2(1.0);
+const vec4 ConstantZeroVec4 = vec4(0.0,0.0,0.0,0.0);
+const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);
+const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);
+const vec2 ConstantOneVec2 = vec2(1.0,1.0);
+const vec2 ConstantZeroVec2 = vec2(0.0,0.0);
+const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);
 
+float Pack2FloatIntoFloat16(float x,float y){
+    x = clamp(x,0.0001,0.9999);
+    y = clamp(y,0.0001,0.9999);
+    float _x = (x + 1.0) * 0.5;
+    float _y = (y + 1.0) * 0.5;
+    return floor(_x * 100.0) + _y;
+}
+vec2 sign_not_zero(vec2 v) {
+    return vec2(v.x >= 0 ? 1.0 : -1.0,v.y >= 0 ? 1.0 : -1.0);
+}
+vec2 EncodeOctahedron(vec3 v) {
+    if(  all(greaterThan(v,ConstantAlmostOneVec3))  )
+        return ConstantOneVec2;
+    v.xy /= dot(abs(v), ConstantOneVec3);
+    return mix(v.xy, (1.0 - abs(v.yx)) * sign_not_zero(v.xy), step(v.z, 0.0));
+}
 void main(){
     float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);
     float fCos2 = fCos * fCos;
@@ -33,9 +52,9 @@ void main(){
     //gl_FragColor = vec4(HDR.xyz,nightmult);
     
     gl_FragData[0] = vec4(HDR.xyz,nightmult);
-    gl_FragData[1].rgb = vec3(ConstVec2One,0.0); //out normals, out ao
-    gl_FragData[2].rg = ConstVec2Zero;
+    gl_FragData[1] = vec4(ConstantOneVec2,0.0,1.0); //out normals, out ao, out packed metalness and smoothness
+    gl_FragData[2].rg = ConstantZeroVec2;
     if(HasGodsRays == 1){
-        gl_FragData[3] = vec4(ConstVec3Zero,1.0);
+        gl_FragData[3] = vec4(ConstantZeroVec3,1.0);
     }
 }

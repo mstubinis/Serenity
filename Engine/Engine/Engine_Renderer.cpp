@@ -1302,6 +1302,7 @@ class epriv::RenderManager::impl final{
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
             GLEnable(GLState::DEPTH_TEST);
             Renderer::setDepthFunc(DepthFunc::LEqual);
+            Renderer::clearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClearDepth(1.0f);
             glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
@@ -1828,7 +1829,7 @@ class epriv::RenderManager::impl final{
         void _passHDR(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHDR)->bind();
 
-            sendUniform4f("HDRInfo",hdr_exposure,float(int(hdr)),float(int(bloom)),float(int(hdr_algorithm)));
+            sendUniform4fSafe("HDRInfo",hdr_exposure,float(int(hdr)),float(int(bloom)),float(int(hdr_algorithm)));
             sendUniform1fSafe("godRaysExposure",godRays_exposure);
             sendUniform1iSafe("HasRays",int(godRays));
 
@@ -2059,7 +2060,6 @@ class epriv::RenderManager::impl final{
 
             #pragma region GodRays
             if (godRays && godRays_Object) {
-                /*
                 gbuffer.start(GBufferType::GodRays, "RGBA", false);
                 auto& body = *godRays_Object->getComponent<ComponentBody>();
                 glm::vec3 oPos = body.position();
@@ -2074,16 +2074,15 @@ class epriv::RenderManager::impl final{
 
                 Settings::clear(true,false,false);
                 _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), !behind, 1.0f - alpha);
-                */
             }
             #pragma endregion
 
+            //the clear color calls here are a problem, preventing the atmospheric sky shader from appearing (and looks black)
             #pragma region SSAO
             gbuffer.start(GBufferType::Bloom, "A", false);
             //Renderer::clearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            //Settings::clear(true, false, false);
+            Settings::clear(true, false, false);
             if (ssao) {
-                /*
                 _passSSAO(gbuffer, camera, fboWidth, fboHeight);
                 //blur it
                 if (ssao_do_blur) {
@@ -2094,8 +2093,8 @@ class epriv::RenderManager::impl final{
                         _passBlurSSAO(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays);
                     }
                 }
-                */
-            }           
+            }   
+            //Renderer::clearColor(0.0f, 0.0f, 0.0f, 0.0f);
             #pragma endregion
 
 
@@ -2108,7 +2107,6 @@ class epriv::RenderManager::impl final{
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_ONE, GL_ONE);
 
-            //Renderer::clearColor(0.0f, 0.0f, 0.0f, 0.0f); //this needs to be fixed, should only be alpha channel...
             if(lighting && epriv::InternalScenePublicInterface::GetLights(s).size() > 0){
                 gbuffer.start(GBufferType::Lighting,"RGB");
                 Settings::clear(true,false,false);//this is needed for godrays
@@ -2119,7 +2117,7 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::STENCIL_TEST);
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
-            //_passForwardRendering(gbuffer,camera,fboWidth,fboHeight,nullptr);
+            _passForwardRendering(gbuffer,camera,fboWidth,fboHeight,nullptr);
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             
@@ -2130,7 +2128,6 @@ class epriv::RenderManager::impl final{
 
             #pragma region Bloom
             if (bloom) {
-                /*
                 gbuffer.start(GBufferType::Bloom, "RGB", false);
                 _passBloom(gbuffer, camera, fboWidth, fboHeight);
                 //blur the bloom
@@ -2140,7 +2137,6 @@ class epriv::RenderManager::impl final{
                     gbuffer.start(GBufferType::Bloom, "RGB", false);
                     _passBlur(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays, "RGB");
                 }
-                */
             }
             #pragma endregion
 
