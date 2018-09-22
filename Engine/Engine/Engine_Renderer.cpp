@@ -2080,11 +2080,9 @@ class epriv::RenderManager::impl final{
             //the clear color calls here are a problem, preventing the atmospheric sky shader from appearing (and looks black)
             #pragma region SSAO
             gbuffer.start(GBufferType::Bloom, "A", false);
-            //Renderer::clearColor(1.0f, 1.0f, 1.0f, 1.0f);
             Settings::clear(true, false, false);
             if (ssao) {
                 _passSSAO(gbuffer, camera, fboWidth, fboHeight);
-                //blur it
                 if (ssao_do_blur) {
                     for (uint i = 0; i < ssao_blur_num_passes; ++i) {
                         gbuffer.start(GBufferType::GodRays, "A", false);
@@ -2094,14 +2092,12 @@ class epriv::RenderManager::impl final{
                     }
                 }
             }   
-            //Renderer::clearColor(0.0f, 0.0f, 0.0f, 0.0f);
             #pragma endregion
 
 
             GLDisable(GLState::BLEND);
 
-            //confirmed, stencil rejection does help
-            _passStencil(gbuffer,camera,fboWidth,fboHeight);
+            _passStencil(gbuffer,camera,fboWidth,fboHeight); //confirmed, stencil rejection does help
 
             GLEnable(GLState::BLEND);
             glBlendEquation(GL_FUNC_ADD);
@@ -2130,7 +2126,6 @@ class epriv::RenderManager::impl final{
             if (bloom) {
                 gbuffer.start(GBufferType::Bloom, "RGB", false);
                 _passBloom(gbuffer, camera, fboWidth, fboHeight);
-                //blur the bloom
                 for (uint i = 0; i < bloom_num_passes; ++i) {
                     gbuffer.start(GBufferType::GodRays, "RGB", false);
                     _passBlur(gbuffer, camera, fboWidth, fboHeight, "H", GBufferType::Bloom, "RGB");

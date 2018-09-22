@@ -25,6 +25,7 @@ namespace Engine {
                 static std::vector<uint>& GetEntities(Scene*);
                 static std::vector<SunLight*>& GetLights(Scene*);
                 static void Render(Scene*);
+                static void RenderForward(Scene*);
                 static void AddMeshInstanceToPipeline(Scene*, MeshInstance*);
                 static void RemoveMeshInstanceFromPipeline(Scene*, MeshInstance*);
         };
@@ -32,6 +33,7 @@ namespace Engine {
 };
 class Scene: public EngineResource, public EventObserver{
     friend class ::LightProbe;
+    friend class ::Engine::epriv::RenderPipeline;
     friend class ::Engine::epriv::ComponentManager;
     friend class ::Engine::epriv::InternalScenePublicInterface;
     private:

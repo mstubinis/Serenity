@@ -17,6 +17,7 @@ class Texture;
 class Font;
 class Camera;
 class Entity;
+class Scene;
 
 class DepthFunc{public: enum Func{
     Never = 0x0200,
@@ -73,6 +74,7 @@ namespace Engine{
         };
         class RenderPipeline final: private Engine::epriv::noncopyable {
             friend class Engine::epriv::InternalScenePublicInterface;
+            friend class ::Scene;
             private:
                 ShaderP* shaderProgram;
                 std::vector<MaterialNode*> materialNodes;
