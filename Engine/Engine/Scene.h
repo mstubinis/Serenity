@@ -26,6 +26,7 @@ namespace Engine {
                 static std::vector<SunLight*>& GetLights(Scene*);
                 static void Render(Scene*);
                 static void AddMeshInstanceToPipeline(Scene*, MeshInstance*);
+                static void RemoveMeshInstanceFromPipeline(Scene*, MeshInstance*);
         };
     };
 };

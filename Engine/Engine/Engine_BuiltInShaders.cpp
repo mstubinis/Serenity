@@ -54,9 +54,11 @@ string epriv::EShaders::cubemap_convolude_frag;
 string epriv::EShaders::cubemap_prefilter_envmap_frag;
 string epriv::EShaders::brdf_precompute;
 string epriv::EShaders::ssao_frag;
+string epriv::EShaders::bloom_frag;
 string epriv::EShaders::hdr_frag;
 string epriv::EShaders::godRays_frag;
 string epriv::EShaders::blur_frag;
+string epriv::EShaders::ssao_blur_frag;
 string epriv::EShaders::greyscale_frag;
 string epriv::EShaders::final_frag;
 string epriv::EShaders::lighting_frag;
@@ -1616,70 +1618,69 @@ epriv::EShaders::copy_depth_frag =
 #pragma endregion
 
 #pragma region SSAO
+
 epriv::EShaders::ssao_frag =
-    "\n"
     "USE_LOG_DEPTH_FRAG_WORLD_POSITION\n"
     "\n"
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gRandomMap;\n"
-    "uniform sampler2D gMiscMap;\n"
-    "uniform sampler2D gLightMap;\n"
     "uniform sampler2D gDepthMap;\n"
     "\n"
-    "uniform float bloomScale;\n"
-    "\n"
-    "uniform vec4 SSAOInfo;\n"  //x - radius | y - intensity | z - bias | w - scale
-    "uniform ivec4 SSAOInfoA;\n"//X = doSSAO Y = doBloom Z = Samples W = NoiseTextureSize
+    "uniform vec4 SSAOInfo;\n"  //   x = radius     y = intensity    z = bias        w = scale
+    "uniform ivec4 SSAOInfoA;\n"//   X = UNUSED     Y = UNUSED       Z = Samples     W = NoiseTextureSize
     "\n"
     "uniform vec3 poisson[32];\n"
     "\n"
-    "varying vec2 texcoords;\n"
-    "\n";
+    "varying vec2 texcoords;\n";
 epriv::EShaders::ssao_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::ssao_frag +=
-    "float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){\n"
-    "    vec3 diff = GetWorldPosition(uv + offsetUV,CameraNear,CameraFar) - origin;\n"
-    "    vec3 vec = normalize(diff);\n"
-    "    float dist = length(diff) * SSAOInfo.w;\n"
+    "float occlude(vec2 offsetUV, vec3 origin, vec3 normal){\n"
+    "    vec3 diff = GetWorldPosition(offsetUV,CameraNear,CameraFar) - origin;\n"
+    "    float DistDiff = length(diff);\n"
+    "    vec3 vec = diff / DistDiff;\n"
+    "    float dist = DistDiff * SSAOInfo.w;\n"
     "    return max(0.0, dot(normal,vec) - SSAOInfo.z) * (1.0 / (1.0 + dist)) * SSAOInfo.y;\n"
     "}\n"
     "void main(){\n"
     "    vec3 worldPosition = GetWorldPosition(texcoords,CameraNear,CameraFar);\n"
     "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
     "    vec3 randomVector = normalize(texture2D(gRandomMap, texcoords / SSAOInfoA.w).xyz);\n" //should texcoords be uv here?
-    "\n"
     "    float _distance = distance(worldPosition, CameraPosition) + 0.0001;\n"//cuz we dont like divide by zeros ;)
     "    float radius = max(0.05,SSAOInfo.x / _distance);\n"
+    "    float o = 0.0;\n"
+    "    for (int i = 0; i < SSAOInfoA.z; ++i) {\n"
+    "       vec2 coord1 = reflect(poisson[i].xy, randomVector.xy) * radius;\n"
+    "       vec2 coord2 = vec2(coord1.x * 0.707 - coord1.y * 0.707, coord1.x * 0.707 + coord1.y * 0.707);\n"
+    "       o += occlude(texcoords + (coord1 * 0.25), worldPosition, normal);\n"
+    "       o += occlude(texcoords + (coord2 * 0.50), worldPosition, normal);\n"
+    "       o += occlude(texcoords + (coord1 * 0.75), worldPosition, normal);\n"
+    "       o += occlude(texcoords + coord2,          worldPosition, normal);\n"
+    "    }\n"
+    "    o /= SSAOInfoA.z * 4.0;\n"
+    "    o = clamp(o,0.0001,0.9999);\n"
+    "    o = mix(0.0,o,(o >= 0.999 ? 0.0 : 1.0 ));\n"//this gets rid of the dark annoying edges around models. in a very hacky way...
+    "    gl_FragColor.a = 1.0 - o;\n"
+    "}";
+#pragma endregion
+
+#pragma region Bloom
+epriv::EShaders::bloom_frag =
     "\n"
-    "    if(SSAOInfoA.x == 1){\n"
-    "        if(distance(normal,ConstantOneVec3) < 0.01){ gl_FragColor.a = 1.0; }\n"
-    "        else{\n"
-    "            float o = 0.0;\n"
-    "            for (int i = 0; i < SSAOInfoA.z; ++i) {\n"
-    "               vec2 coord1 = reflect(poisson[i].xy, randomVector.xy)*radius;\n"
-    "               vec2 coord2 = vec2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);\n"
-    "               o += occlude(texcoords, coord1 * 0.25, worldPosition, normal);\n"
-    "               o += occlude(texcoords, coord2 * 0.50, worldPosition, normal);\n"
-    "               o += occlude(texcoords, coord1 * 0.75, worldPosition, normal);\n"
-    "               o += occlude(texcoords, coord2,        worldPosition, normal);\n"
-    "           }\n"
-    "           o /= SSAOInfoA.z * 4.0;\n"
-    "           o = clamp(o,0.0001,0.9999);\n"
-    "           o = mix(0.0,o,(o >= 0.999 ? 0.0 : 1.0 ));\n"//this gets rid of the dark annoying edges around models. in a very hacky way...
-    "           gl_FragColor.a = 1.0 - o;\n"
-    "       }\n"
-    "    }else{\n"
-    "        gl_FragColor.a = 1.0;\n"
-    "    }\n"
-    "    if(SSAOInfoA.y == 1){\n"
-    "        float Glow = texture2D(gMiscMap,texcoords).r;\n"
-    "        vec3 lighting = texture2D(gLightMap,texcoords).rgb;\n"
-    "        float baseBright = log(dot(lighting, vec3(0.2126, 0.7152, 0.0722)));\n"
-    "        float brightness = max(Glow, baseBright);\n"
-    "        gl_FragColor.rgb = lighting * pow(brightness,bloomScale);\n"
-    "    }else{\n"
-    "        gl_FragColor.rgb = ConstantZeroVec3;\n"
-    "    }\n"
+    "const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n"
+    "const vec3 Grayscale = vec3(0.2126, 0.7152, 0.0722);\n"
+    "\n"
+    "uniform sampler2D gMiscMap;\n"
+    "uniform sampler2D gLightMap;\n"
+    "\n"
+    "uniform float bloomScale;\n"
+    "varying vec2 texcoords;\n"
+    "\n"
+    "void main(){\n"
+    "    float Glow = texture2D(gMiscMap,texcoords).r;\n"
+    "    vec3 lighting = texture2D(gLightMap,texcoords).rgb;\n"
+    "    float baseBright = log(dot(lighting, Grayscale));\n"
+    "    float brightness = max(Glow, baseBright);\n"
+    "    gl_FragColor.rgb = lighting * pow(brightness,bloomScale);\n"
     "}";
 #pragma endregion
 
@@ -1736,7 +1737,7 @@ epriv::EShaders::hdr_frag +=
 epriv::EShaders::blur_frag =
     "uniform sampler2D image;\n"
     "uniform vec4 RGBA;\n"
-    "uniform vec4 DataA;\n"//radius, divisor, H,V
+    "uniform vec4 DataA;\n"//radius, UNUSED, H,V
     "uniform vec4 strengthModifier;\n"
     "\n"
     "varying vec2 texcoords;\n"
@@ -1752,8 +1753,31 @@ epriv::EShaders::blur_frag =
     "        v4Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;\n"
     "        v4Sum += (texture2D(image,texcoords - vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;\n"
     "    }\n"
-    "    gl_FragColor = (v4Sum * RGBA) + (gl_FragColor * (vec4(1.0) - RGBA));\n" //fancy way of saying if(RGBA.whatever == 1.0) gl_FragColor.whatever = v4Sum.whatever;
+    "    gl_FragColor = (v4Sum * RGBA) + (gl_FragColor * (vec4(1.0) - RGBA));\n"
     "}";
+#pragma endregion
+
+#pragma region SSAO Blur
+epriv::EShaders::ssao_blur_frag =
+"uniform sampler2D image;\n"
+"uniform vec4 Data;\n"//radius, UNUSED, H,V
+"uniform float strengthModifier;\n"
+"\n"
+"varying vec2 texcoords;\n"
+"\n"
+"const int NUM_SAMPLES = 9;\n"
+"float weight[NUM_SAMPLES] = float[](0.227,0.21,0.1946,0.162,0.12,0.08,0.054,0.03,0.016);\n"
+"\n"
+"void main(){\n"
+"    vec2 texOffset = vec2(1.0) / textureSize(image,0);\n"
+"    float Sum = 0.0;\n"
+"    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
+"        vec2 offset = (texOffset * float(i)) * Data.x;\n"
+"        Sum += (texture2D(image,texcoords + vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i]) * strengthModifier;\n"
+"        Sum += (texture2D(image,texcoords - vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i]) * strengthModifier;\n"
+"    }\n"
+"    gl_FragColor.a = Sum;\n"
+"}";
 #pragma endregion
 
 #pragma region GodRays
@@ -1808,7 +1832,6 @@ epriv::EShaders::final_frag =
     "uniform sampler2D gBloomMap;\n"
     "uniform sampler2D gDepthMap;\n"
     "\n"
-    "uniform int HasSSAO;\n"
     "uniform int HasBloom;\n"
     "uniform int HasFog;\n"
     "\n"
@@ -1825,18 +1848,12 @@ epriv::EShaders::final_frag +=
     "void main(){\n"
     "    vec3 diffuse = texture2D(gDiffuseMap, texcoords).rgb;\n"
     "    vec3 hdr = texture2D(gMiscMap,texcoords).rgb;\n"
-    "    if(HasSSAO == 1){ \n"
-    "        float ssao = 1.0;\n"
-    "        float brightness = dot(hdr, vec3(0.2126, 0.7152, 0.0722));\n"
-    "        ssao = texture2D(gBloomMap,texcoords).a + 0.0001;\n"
-    "        brightness = min(1.0,pow(brightness,0.125));\n"
-    "        hdr *= max(brightness, ssao);\n"
-    "    }\n"
     "    if(HasBloom == 1){\n"
     "        vec3 bloom = texture2D(gBloomMap,texcoords).rgb;\n"
     "        hdr += bloom;\n"
     "    }\n"
-    "    gl_FragColor = (vec4(hdr,1.0));\n"
+    //"    gl_FragColor = ((vec4(hdr,1.0)) * 0.001) + texture2D(gBloomMap,texcoords).a;\n"
+    "    gl_FragColor = vec4(hdr,1.0);\n"
     "\n"
     "    if(HasFog == 1){\n"
     "        float distFrag = abs(distance(GetWorldPosition(texcoords,CameraNear,CameraFar),CameraPosition));\n"
@@ -1865,6 +1882,7 @@ epriv::EShaders::lighting_frag =
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gMiscMap;\n"
     "uniform sampler2D gDepthMap;\n"
+    "uniform sampler2D gSSAOMap;\n"
     "\n"
     "uniform vec4 ScreenData;\n" //x = UNUSED, y = screenGamma, z = winSize.x, w = winSize.y
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
@@ -1898,7 +1916,6 @@ epriv::EShaders::lighting_frag +=
     "    vec3 ret = _F0 + (ConstantOneVec3 - _F0) * pow(1.0 - theta,5.0);\n"
     "    return ret;\n"
     "}\n"
-    //make this a uniform if possible?
     "float CalculateAttenuation(float Dist,float LightRadius){\n"
     "    float attenuation = 0.0;\n"
     //"   if(LightDataE.z == 0.0){\n" //constant
@@ -1995,6 +2012,8 @@ epriv::EShaders::lighting_frag +=
     "\n"
     "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
     "    highp int matID = int(floor(matIDandAO));\n"
+    "    float ssaoValue = texture2D(gSSAOMap,uv).a;\n"
+    "    float ao = (fract(matIDandAO)+0.0001) * ssaoValue;\n"//the 0.0001 makes up for the clamp in material class
     "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n"
     "    float metalness = stuff.x;\n"
     "    float smoothness = stuff.y;\n"
@@ -2008,10 +2027,10 @@ epriv::EShaders::lighting_frag +=
     "\n"
     "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
     "    vec3 Half = normalize(LightDir + ViewDir);\n"
-    "    float NdotL = max(0.0, dot(PxlNormal, LightDir));\n"
-    "    float NdotH = max(0.0, dot(PxlNormal, Half));\n"
-    "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"
-    "    float VdotH = max(0.0, dot(ViewDir,Half));\n"
+    "    float NdotL = clamp(dot(PxlNormal, LightDir),0.0,1.0);\n"
+    "    float NdotH = clamp(dot(PxlNormal, Half),0.0,1.0);\n"
+    "    float VdotN = clamp(dot(ViewDir,PxlNormal),0.0,1.0);\n"
+    "    float VdotH = clamp(dot(ViewDir,Half),0.0,1.0);\n"
     "\n"
     "    float MaterialTypeDiffuse = materials[matID].a;\n"
     "    float MaterialTypeSpecular = materials[matID].b;\n"
@@ -2045,7 +2064,7 @@ epriv::EShaders::lighting_frag +=
     "    vec3 componentDiffuse = ConstantOneVec3 - Frensel;\n"
     "    componentDiffuse *= 1.0 - metalness;\n"
     "\n"
-    "    TotalLight = componentDiffuse * MaterialAlbedoTexture;\n"
+    "    TotalLight = (componentDiffuse * ao) * MaterialAlbedoTexture;\n"
     "    TotalLight /= KPI;\n"
     "    TotalLight += LightSpecularColor;\n"
     "    TotalLight *= (LightDiffuseColor * NdotL);\n"
@@ -2053,8 +2072,9 @@ epriv::EShaders::lighting_frag +=
     "    return max(vec3(Glow) * MaterialAlbedoTexture,TotalLight);\n"
     "}\n"
     "vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
-    "    vec3 LightDir = normalize(LightPos - PxlWorldPos);\n"
-    "    float Dist = length(LightPos - PxlWorldPos);\n"
+    "    vec3 RawDirection = LightPos - PxlWorldPos;\n"
+    "    float Dist = length(RawDirection);\n"
+    "    vec3 LightDir = RawDirection / Dist;\n"
     "    vec3 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);\n"
     "    float attenuation = CalculateAttenuation(Dist,1.0);\n"
     "    return c * attenuation;\n"
@@ -2069,8 +2089,9 @@ epriv::EShaders::lighting_frag +=
     "vec3 CalcRodLight(vec3 A, vec3 B,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
     "    vec3 BMinusA = B - A;\n"
     "    vec3 CMinusA = PxlWorldPos - A;\n"
-    "    vec3 N = normalize(BMinusA);\n"
-    "    float t = clamp(dot(CMinusA, N / length(BMinusA)),0.0,1.0);\n"
+    "    float Dist = length(BMinusA);\n"
+    "    vec3 _Normal = BMinusA / Dist;\n"
+    "    float t = clamp(dot(CMinusA, _Normal / Dist),0.0,1.0);\n" //recheck this: normalize(BMinusA) / length(BMinusA)
     "    vec3 LightPos = A + t * BMinusA;\n"
     "    vec3 c = CalcPointLight(LightPos, PxlWorldPos, PxlNormal, uv);\n"
     "    return c;\n"
@@ -2112,6 +2133,7 @@ epriv::EShaders::lighting_frag_gi =
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gDepthMap;\n"
+    "uniform sampler2D gSSAOMap;\n"
     "uniform samplerCube irradianceMap;\n"
     "uniform samplerCube prefilterMap;\n"
     "uniform sampler2D brdfLUT;\n"
@@ -2145,7 +2167,8 @@ epriv::EShaders::lighting_frag_gi +=
     "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"
     "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
     "    highp int index = int(floor(matIDandAO));\n"
-    "    float ao = fract(matIDandAO)+0.0001;\n"//the 0.0001 makes up for the clamp in material class
+    "    float ssaoValue = texture2D(gSSAOMap,uv).a;\n"
+    "    float ao = (fract(matIDandAO)+0.0001) * ssaoValue;\n"//the 0.0001 makes up for the clamp in material class
     "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n" //x is metalness, y is smoothness
     "    vec3 MaterialF0 = Unpack3FloatsInto1FloatUnsigned(materials[index].r);\n"
     "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(stuff.x));\n"

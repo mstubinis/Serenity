@@ -65,32 +65,19 @@ ShipSystemMainThrusters::~ShipSystemMainThrusters(){
 }
 void ShipSystemMainThrusters::update(const float& dt){
     if(isOnline()){
-        ComponentBody* body = m_Ship->getComponent<ComponentBody>();
-        glm::vec3 velocity = body->getLinearVelocity();
+        ComponentBody& body = *m_Ship->getComponent<ComponentBody>();
+        glm::vec3 velocity = body.getLinearVelocity();
         // apply dampening
-        body->setLinearVelocity(velocity * 0.9991f,false);
-
+        body.setLinearVelocity(velocity * 0.9991f,false);
         if(m_Ship->IsPlayer()){
             if(!m_Ship->IsWarping()){
-                float amount = body->mass() * 3.0f;
-                if(Engine::isKeyDown("w")){
-                    body->applyForce(0,0,-amount);
-                }
-                if(Engine::isKeyDown("s")){
-                    body->applyForce(0,0,amount);
-                }
-                if(Engine::isKeyDown("a")){
-                    body->applyForce(-amount,0,0);
-                }
-                if(Engine::isKeyDown("d")){
-                    body->applyForce(amount,0,0);
-                }
-                if(Engine::isKeyDown("f")){
-                    body->applyForce(0,-amount,0);
-                }
-                if(Engine::isKeyDown("r")){
-                    body->applyForce(0,amount,0);
-                }
+                float amount = (  (body.mass() * 0.4f)  +  1.3f  );
+                if(Engine::isKeyDown("w")){ body.applyForce(0,0,-amount); }
+                if(Engine::isKeyDown("s")){ body.applyForce(0,0, amount); }
+                if(Engine::isKeyDown("a")){ body.applyForce(-amount,0,0); }
+                if(Engine::isKeyDown("d")){ body.applyForce( amount,0,0); }
+                if(Engine::isKeyDown("f")){ body.applyForce(0,-amount,0); }
+                if(Engine::isKeyDown("r")){ body.applyForce(0, amount,0); }
             }
         }
     }
@@ -107,15 +94,17 @@ ShipSystemPitchThrusters::~ShipSystemPitchThrusters(){
 }
 void ShipSystemPitchThrusters::update(const float& dt){
     if(isOnline()){
-        ComponentBody* body = m_Ship->getComponent<ComponentBody>();
-        glm::vec3 velocity = body->getAngularVelocity();
+        ComponentBody& body = *m_Ship->getComponent<ComponentBody>();
+        glm::vec3 velocity = body.getAngularVelocity();
         velocity.x *= 0.9970f;
         // apply dampening
-        body->setAngularVelocity(velocity,false);
+        body.setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
             if(m_Ship->getPlayerCamera()->getState() != CAMERA_STATE_ORBIT){
-                float amount = Engine::getMouseDifference().y * 0.002f * (1.0f / (body->mass() * 3.0f));
-                body->applyTorque(-amount,0,0);
+                float mouseAmount = Engine::getMouseDifference().y * 0.02f;
+                float massFactor = 1.0f / (body.mass() * 3.0f);
+                float amount = mouseAmount * massFactor;
+                body.applyTorque(-amount,0,0);
             }
         }
     }
@@ -132,19 +121,20 @@ ShipSystemYawThrusters::~ShipSystemYawThrusters(){
 }
 void ShipSystemYawThrusters::update(const float& dt){
     if(isOnline()){
-        ComponentBody* body = m_Ship->getComponent<ComponentBody>();
-        glm::vec3 velocity = body->getAngularVelocity();
+        ComponentBody& body = *m_Ship->getComponent<ComponentBody>();
+        glm::vec3 velocity = body.getAngularVelocity();
         velocity.y *= 0.9970f;
         // apply dampening
-        body->setAngularVelocity(velocity,false);
+        body.setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
             if(m_Ship->getPlayerCamera()->getState() != CAMERA_STATE_ORBIT){
-                float amount = Engine::getMouseDifference().x * 0.002f * (1.0f / (body->mass() * 3.0f));
-                body->applyTorque(0,-amount,0);
+                float mouseAmount = Engine::getMouseDifference().x * 0.02f;
+                float massFactor = 1.0f / (body.mass() * 3.0f);
+                float amount = mouseAmount * massFactor;
+                body.applyTorque(0,-amount,0);
             }
         }
     }
-
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -226,8 +216,10 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
     ComponentModel* modelComponent = new ComponentModel(mesh, mat, this);
     addComponent(modelComponent);
 
-	float radius = modelComponent->radius();
-	rigidBodyComponent->setMass(0.5f * radius);
+    glm::vec3 boundingBox = modelComponent->boundingBox();
+    float volume = boundingBox.x * boundingBox.y * boundingBox.z;
+
+	rigidBodyComponent->setMass(  ( volume * 0.004f ) + 1.0f  );
 	rigidBodyComponent->setPosition(pos);
 	rigidBodyComponent->setScale(scl);
 	rigidBodyComponent->setDamping(0, 0);//we dont want default dampening, we want the ship systems to manually control that

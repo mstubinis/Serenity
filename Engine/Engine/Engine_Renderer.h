@@ -195,6 +195,7 @@ namespace Engine{
             namespace Bloom{
                 uint getNumPasses();          void setNumPasses(uint);
                 void enable(bool b = true);   void disable();
+                bool enabled();
                 float getRadius();            void setRadius(float r);
                 float getStrength();          void setStrength(float r);
                 float getScale();             void setScale(float s);
@@ -217,6 +218,7 @@ namespace Engine{
                 bool enabled();
                 void enable(bool b = true);       void disable();
                 void enableBlur(bool b = true);   void disableBlur();
+                float getBlurRadius();            void setBlurRadius(float r);
                 float getBlurStrength();          void setBlurStrength(float s);
                 float getIntensity();             void setIntensity(float i);
                 float getRadius();                void setRadius(float r);

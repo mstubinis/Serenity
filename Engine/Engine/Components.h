@@ -99,6 +99,7 @@ namespace Engine{
 
                 static void onComponentAddedToEntity(Entity*);
                 static void onEntityAddedToScene(Scene*, Entity*);
+                static void onSceneSwap(Scene*, Scene*, Entity*);
 
                 void _pause(bool=true);
                 void _unpause();
@@ -155,6 +156,7 @@ namespace Engine{
                 ComponentSystemBaseClass(){}
                 virtual ~ComponentSystemBaseClass(){}
                 virtual void update(const float& dt){}
+                virtual void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity*) {}
                 virtual void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*) {}
                 virtual void onComponentAddedToEntity(ComponentBaseClass*, Entity*) {}
         };
@@ -166,6 +168,7 @@ namespace Engine{
                 ComponentModelSystem();
                 ~ComponentModelSystem();
                 void update(const float& dt);
+                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity*);
                 void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
                 void onComponentAddedToEntity(ComponentBaseClass*, Entity*);
         };
@@ -177,6 +180,7 @@ namespace Engine{
                 ComponentCameraSystem();
                 ~ComponentCameraSystem();
                 void update(const float& dt);
+                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity*);
                 void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
                 void onComponentAddedToEntity(ComponentBaseClass*, Entity*);
         };
@@ -188,6 +192,7 @@ namespace Engine{
                 ComponentBodySystem();
                 ~ComponentBodySystem();
                 void update(const float& dt);
+                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity*);
                 void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
                 void onComponentAddedToEntity(ComponentBaseClass*, Entity*);
         };
@@ -202,6 +207,7 @@ class ComponentModel: public ComponentBaseClass{
     private:
         std::vector<MeshInstance*> models;
         float _radius;
+        glm::vec3 _radiusBox;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity*, ShaderP* = nullptr);
@@ -218,6 +224,7 @@ class ComponentModel: public ComponentBaseClass{
 
         uint getNumModels();
         float radius();
+        glm::vec3 boundingBox();
         void show();
         void hide();
 

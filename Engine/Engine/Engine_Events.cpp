@@ -358,9 +358,8 @@ class epriv::EventManager::impl final{
             for(auto iterator:m_KeyStatus){ iterator.second = false; }
             for(auto iterator:m_MouseStatus){ iterator.second = false; }
             m_Delta *= 0.97f * (1.0f-Resources::dt());
-        }
-        void _update(const float& dt){
-            m_Difference *= (0.975f);
+
+            m_Difference.x = 0.0f; m_Difference.y = 0.0f;
         }
 };
 
@@ -377,7 +376,6 @@ void epriv::EventManager::_onEventMouseButtonPressed(uint mouseButton){ m_i->_on
 void epriv::EventManager::_onEventMouseButtonReleased(uint mouseButton){ m_i->_onEventMouseButtonReleased(mouseButton); }
 void epriv::EventManager::_onEventMouseWheelMoved(int& delta){ m_i->_onEventMouseWheelMoved(delta); }
 void epriv::EventManager::_onResetEvents(){ m_i->_onResetEvents(); }
-void epriv::EventManager::_update(const float& dt){ m_i->_update(dt); }
 void epriv::EventManager::_setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition){ m_i->_setMousePositionInternal(x,y,resetDifference,resetPreviousPosition); }
 bool Engine::isKeyDown(string str){ return eventManager->_isKeyDown(str); }
 bool Engine::isKeyDownOnce(string str){ return eventManager->_isKeyDownOnce(str); }

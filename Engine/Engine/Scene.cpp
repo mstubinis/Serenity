@@ -117,6 +117,48 @@ void epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(Scene* _scen
         meshNode->instanceNodes.push_back(instanceNode);
     }
 }
+void epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(Scene* _scene, MeshInstance* _meshInstance){
+    epriv::RenderPipeline* _pipeline = nullptr;
+    for (auto pipeline : _scene->m_i->m_Pipelines) {
+        if (pipeline->shaderProgram == _meshInstance->shaderProgram()) {
+            _pipeline = pipeline;
+            break;
+        }
+    }
+    if (_pipeline) {
+        //material node check
+        epriv::MaterialNode* materialNode = nullptr;
+        epriv::MeshNode* meshNode = nullptr;
+        epriv::InstanceNode* instanceNode = nullptr;
+        for (auto itr : _pipeline->materialNodes) {
+            if (itr->material == _meshInstance->material()) {
+                materialNode = itr;
+                //mesh node check
+                for (auto itr1 : materialNode->meshNodes) {
+                    if (itr1->mesh == _meshInstance->mesh()) {
+                        meshNode = itr1;
+                        //instance check
+                        for (auto itr2 : meshNode->instanceNodes) {
+                            if (itr2->instance == _meshInstance) {
+                                instanceNode = itr2;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (meshNode) {
+            removeFromVector(meshNode->instanceNodes, instanceNode);
+            if (meshNode->instanceNodes.size() == 0) {
+                removeFromVector(materialNode->meshNodes, meshNode);
+                if (materialNode->meshNodes.size() == 0) {
+                    removeFromVector(_pipeline->materialNodes, materialNode);
+                }
+            }
+        }
+    }
+}
 
 Scene::Scene(string name):m_i(new impl){
     m_i->_init(this, name);

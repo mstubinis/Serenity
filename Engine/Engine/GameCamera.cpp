@@ -17,12 +17,13 @@ GameCameraComponent::GameCameraComponent(float angle,float aspectRatio,float nea
     m_Target = nullptr;
     m_Player = nullptr;
     m_OrbitRadius = 0;
+    m_CameraMouseFactor = glm::vec2(0.0f);
 }
 GameCameraComponent::GameCameraComponent(float left,float right,float bottom,float top,float nearPlane,float farPlane):ComponentCamera(left,right,bottom,top,nearPlane,farPlane){
     m_State = CAMERA_STATE_FREEFORM;
     m_Target = nullptr;
     m_Player = nullptr;
-    m_OrbitRadius = 0;
+    m_CameraMouseFactor = glm::vec2(0.0f);
 }
 GameCameraComponent::~GameCameraComponent(){
 }
@@ -75,7 +76,11 @@ void GameCameraComponent::update(const float& dt){
             if( m_OrbitRadius < 0)      m_OrbitRadius = 0;
             else if(m_OrbitRadius > 70) m_OrbitRadius = 70;
 
-            m_Body->rotate(-Engine::getMouseDifference().y * 0.02f * dt, -Engine::getMouseDifference().x * 0.02f * dt,0);
+            m_CameraMouseFactor += glm::vec2(-Engine::getMouseDifference().y * 0.02f, -Engine::getMouseDifference().x * 0.02f);
+
+            m_Body->rotate(m_CameraMouseFactor.x * dt, m_CameraMouseFactor.y * dt,0);
+
+            m_CameraMouseFactor *= 0.93f;
 
             glm::vec3 pos = (glm::vec3(0,0,1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0,0,1) * glm::length(targetModel.radius() * (1.0f + m_OrbitRadius)));
 
@@ -165,6 +170,7 @@ void GameCamera::orbit(Entity* target){
     cam.m_Target = target;
     cam.m_Player = target;
     cam.m_State = CAMERA_STATE_ORBIT;
+    cam.m_CameraMouseFactor = glm::vec2(0.0f);
 }
 void GameCamera::setTarget(Entity* target) { ((GameCameraComponent*)m_Camera)->m_Target = target; }
 const Entity* GameCamera::getTarget() const { return ((GameCameraComponent*)m_Camera)->m_Target; }

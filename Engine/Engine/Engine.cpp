@@ -90,7 +90,6 @@ void updateLogic(float dt){
     Resources::getCurrentScene()->update(dt);
     epriv::Core::m_Engine->m_ComponentManager->_update(dt);
     epriv::Core::m_Engine->m_ThreadManager->_update(dt);
-    epriv::Core::m_Engine->m_EventManager->_update(dt);
     RESET_EVENTS();
     Game::onPostUpdate(dt);
 

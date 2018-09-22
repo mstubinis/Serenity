@@ -59,10 +59,11 @@ class MeshInstance::impl{
             m_PassedRenderCheck = false;
             m_Visible = true;
             m_Entity = entity;
-            _setShaderProgram(program,super);
-            _setMaterial(mat,super);
-            _setMesh(mesh,super);
-            
+
+            _setShaderProgram(program, super);
+            _setMaterial(mat, super);
+            _setMesh(mesh, super); 
+
             m_Color = glm::vec4(1.0f);
             m_GodRaysColor = glm::vec3(0.0f);
             m_Position = pos;
@@ -71,9 +72,7 @@ class MeshInstance::impl{
             _updateModelMatrix();
         }
         void _setShaderProgram(ShaderP* program, MeshInstance* super) {
-            if (!program) {
-                program = epriv::InternalShaderPrograms::Deferred;
-            }
+            if (!program) { program = epriv::InternalShaderPrograms::Deferred; }
             m_ShaderProgram = program;
         }
         void _setMesh(Mesh* mesh,MeshInstance* super){

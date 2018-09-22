@@ -57,9 +57,11 @@ namespace Engine{
                 static std::string brdf_precompute;
 
                 static std::string ssao_frag;
+                static std::string bloom_frag;
                 static std::string hdr_frag;
                 static std::string godRays_frag;
                 static std::string blur_frag;
+                static std::string ssao_blur_frag;
 
                 static std::string greyscale_frag;
 

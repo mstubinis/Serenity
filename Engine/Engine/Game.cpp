@@ -50,7 +50,7 @@ void Game::initLogic(){
     window.setVerticalSyncEnabled(true);
     //window.setFramerateLimit(60);
     SolarSystem* sol = new SolarSystem("Sol","data/Systems/Sol.txt");
-    CapsuleSpace* cap = new CapsuleSpace();
+    //CapsuleSpace* cap = new CapsuleSpace();
 
     Resources::setCurrentScene("Sol");
     //Resources::Settings::enableDynamicMemory();
@@ -75,19 +75,24 @@ void Game::update(const float& dt){
     if(Engine::isKeyDownOnce(KeyboardKey::F8)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
     if(Engine::isKeyDownOnce(KeyboardKey::F9)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
     if(Engine::isKeyDownOnce(KeyboardKey::F10)){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
-    if (Engine::isKeyDownOnce(KeyboardKey::F11)) { Renderer::Settings::General::enable1(!Renderer::Settings::General::enabled1()); }
+    if (Engine::isKeyDownOnce(KeyboardKey::F11)) { 
+        //Renderer::Settings::General::enable1(!Renderer::Settings::General::enabled1()); 
+        Renderer::Settings::Bloom::enable(!Renderer::Settings::Bloom::enabled());
+    }
 
-    if(Engine::isKeyDown(KeyboardKey::N)){ ((Material*)ResourceManifest::DefiantMaterial.get())->setMetalness(((Material*)ResourceManifest::DefiantMaterial.get())->metalness() - 0.025f); }
-    if(Engine::isKeyDown(KeyboardKey::M)){ ((Material*)ResourceManifest::DefiantMaterial.get())->setMetalness(((Material*)ResourceManifest::DefiantMaterial.get())->metalness() + 0.025f); }
-    if(Engine::isKeyDown(KeyboardKey::V)){ ((Material*)ResourceManifest::DefiantMaterial.get())->setSmoothness(((Material*)ResourceManifest::DefiantMaterial.get())->smoothness() - 0.025f); }
-    if(Engine::isKeyDown(KeyboardKey::B)){ ((Material*)ResourceManifest::DefiantMaterial.get())->setSmoothness(((Material*)ResourceManifest::DefiantMaterial.get())->smoothness() + 0.025f); }
+    if (Engine::isKeyDown(KeyboardKey::N)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() - 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::M)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() + 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::V)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() - 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::B)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() + 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::X)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() - 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::C)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() + 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::H)) { Renderer::Settings::SSAO::setBlurStrength(Renderer::Settings::SSAO::getBlurStrength() - 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::J)) { Renderer::Settings::SSAO::setBlurStrength(Renderer::Settings::SSAO::getBlurStrength() + 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::O)) { Renderer::Settings::SSAO::setBias(Renderer::Settings::SSAO::getBias() - 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::P)) { Renderer::Settings::SSAO::setBias(Renderer::Settings::SSAO::getBias() + 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::F)) { Renderer::Settings::SSAO::setBlurRadius(Renderer::Settings::SSAO::getBlurRadius() - 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::G)) { Renderer::Settings::SSAO::setBlurRadius(Renderer::Settings::SSAO::getBlurRadius() + 0.02f); }
 
-    if(Engine::isKeyDown(KeyboardKey::Z)){ Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() - 0.025f); }
-    if(Engine::isKeyDown(KeyboardKey::X)){ Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() + 0.025f); }
-    if(Engine::isKeyDown(KeyboardKey::G)){ Renderer::Settings::Lighting::setGIContributionDiffuse(Renderer::Settings::Lighting::getGIContributionDiffuse() - 0.025f); }
-    if(Engine::isKeyDown(KeyboardKey::H)){ Renderer::Settings::Lighting::setGIContributionDiffuse(Renderer::Settings::Lighting::getGIContributionDiffuse() + 0.025f); }
-    if(Engine::isKeyDown(KeyboardKey::J)){ Renderer::Settings::Lighting::setGIContributionSpecular(Renderer::Settings::Lighting::getGIContributionSpecular() - 0.025f); }
-    if(Engine::isKeyDown(KeyboardKey::K)){ Renderer::Settings::Lighting::setGIContributionSpecular(Renderer::Settings::Lighting::getGIContributionSpecular() + 0.025f); }
     m_HUD->update(dt);
 }
 void Game::render(){

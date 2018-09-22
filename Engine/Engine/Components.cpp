@@ -18,6 +18,8 @@
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
 
+#include <iostream>
+
 using namespace Engine;
 using namespace std;
 
@@ -39,17 +41,29 @@ class epriv::ComponentInternalFunctionality final{
         }
         static float CalculateRadius(ComponentModel* super) {
             float maxLength = 0;
+            glm::vec3 boundingBox = glm::vec3(0.0f);
             for (auto meshInstance : super->models) {
                 auto& pair = *meshInstance;
                 glm::mat4& m = pair.model();
                 glm::vec3 localPosition = glm::vec3(m[3][0], m[3][1], m[3][2]);
                 float length = glm::length(localPosition) + pair.mesh()->getRadius() * Engine::Math::Max(pair.getScale());
-                if (length > maxLength) { maxLength = length; }
+                glm::vec3 box = localPosition + pair.mesh()->getRadiusBox() * Engine::Math::Max(pair.getScale());
+                if (length > maxLength) { 
+                    maxLength = length; 
+                }
+                if (box.x > boundingBox.x || box.y > boundingBox.y || box.z > boundingBox.z) {
+                    boundingBox = box;
+                }
             }
             super->_radius = maxLength;
+            super->_radiusBox = boundingBox;
             if (super->m_Owner != 0) {
                 auto* body = super->owner()->getComponent<ComponentBody>();
-                if (body) { super->_radius *= Engine::Math::Max(body->getScale()); }
+                if (body) { 
+                    float _bodyScale = Engine::Math::Max(body->getScale());
+                    super->_radius *= _bodyScale;
+                    super->_radiusBox *= _bodyScale;
+                }
             }
             return super->_radius;
         }
@@ -171,12 +185,12 @@ void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
         vector_clear(m_ComponentVectorsScene.at(iterator.first));
     }
     //cleanup scene specific data for components belonging to the old scene
-    if (oldScene) {
-        for (auto entityID : InternalScenePublicInterface::GetEntities(oldScene)) {
-            Entity* e = oldScene->getEntity(entityID);
-            epriv::ComponentManager::onEntityAddedToScene(oldScene, e);
-        }
-    }
+    //if (oldScene) {
+        //for (auto entityID : InternalScenePublicInterface::GetEntities(oldScene)) {
+            //Entity* e = oldScene->getEntity(entityID);
+            //epriv::ComponentManager::onSceneSwap(oldScene, newScene,e);
+        //}
+    //}
     //transfers the newScene's components into the vector used for scenes
     for(auto entityID:InternalScenePublicInterface::GetEntities(newScene)){
         Entity* e = newScene->getEntity(entityID);
@@ -190,7 +204,7 @@ void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
                 }
             }
         }
-        epriv::ComponentManager::onEntityAddedToScene(newScene, e);
+        epriv::ComponentManager::onSceneSwap(oldScene,newScene, e);
     }
 }
 void epriv::ComponentManager::_removeComponent(uint componentID){
@@ -211,6 +225,16 @@ void epriv::ComponentManager::onEntityAddedToScene(Scene* scene, Entity* entity)
         if (componentID != 0){
             ComponentBaseClass* component = Components::GetComponent(entity->m_Components.at(i));
             componentManager->m_i->m_Systems.at(i)->onEntityAddedToScene(scene, component, entity);
+        }
+    }
+}
+void epriv::ComponentManager::onSceneSwap(Scene* oldScene,Scene* newScene, Entity* entity) {
+    //entity->m_Scene = newScene;
+    for (uint i = 0; i < entity->m_Components.size(); ++i) {
+        const uint& componentID = entity->m_Components.at(i);
+        if (componentID != 0) {
+            ComponentBaseClass* component = Components::GetComponent(entity->m_Components.at(i));
+            componentManager->m_i->m_Systems.at(i)->onSceneSwap(oldScene,newScene, component, entity);
         }
     }
 }
@@ -250,10 +274,14 @@ class epriv::ComponentCameraSystem::impl final {
         void _onEntityAddedToScene(Scene* scene, ComponentBaseClass* component, Entity* _entity) {
             ComponentCamera& componentCamera = *(ComponentCamera*)component;
         }
+        void _onSceneSwap(Scene* oldScene,Scene* newScene, ComponentBaseClass* component, Entity* _entity) {
+            ComponentCamera& componentCamera = *(ComponentCamera*)component;
+        }
 };
 epriv::ComponentCameraSystem::ComponentCameraSystem() :ComponentSystemBaseClass(),m_i(new impl) { }
 epriv::ComponentCameraSystem::~ComponentCameraSystem() { }
 void epriv::ComponentCameraSystem::update(const float& dt) { m_i->_update(dt); }
+void epriv::ComponentCameraSystem::onSceneSwap(Scene* o, Scene* s, ComponentBaseClass* c, Entity* e) { m_i->_onSceneSwap(o,s, c, e); }
 void epriv::ComponentCameraSystem::onEntityAddedToScene(Scene* s, ComponentBaseClass* c,Entity* e) { m_i->_onEntityAddedToScene(s,c,e); }
 void epriv::ComponentCameraSystem::onComponentAddedToEntity(ComponentBaseClass* c, Entity* e) { m_i->_onComponentAddedToEntity(c, e); }
 class epriv::ComponentModelSystem::impl final {
@@ -296,18 +324,22 @@ class epriv::ComponentModelSystem::impl final {
         }
         void _onComponentAddedToEntity(ComponentBaseClass* component, Entity* _entity) {
             ComponentModel& componentModel = *(ComponentModel*)component;
-            epriv::ComponentInternalFunctionality::CalculateRadius(&componentModel);
+            ComponentInternalFunctionality::CalculateRadius(&componentModel);
         }
         void _onEntityAddedToScene(Scene* scene,ComponentBaseClass* component, Entity* _entity) {
             ComponentModel& componentModel = *(ComponentModel*)component;
             for (auto _meshInstance : componentModel.models) {
-                epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(scene, _meshInstance);
+                InternalScenePublicInterface::AddMeshInstanceToPipeline(scene, _meshInstance);
             }
+        }
+        void _onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass* component, Entity* _entity) {
+            _onEntityAddedToScene(newScene, component, _entity);
         }
 };
 epriv::ComponentModelSystem::ComponentModelSystem() :ComponentSystemBaseClass(),m_i(new impl) { }
 epriv::ComponentModelSystem::~ComponentModelSystem() { }
 void epriv::ComponentModelSystem::update(const float& dt) { m_i->_update(dt); }
+void epriv::ComponentModelSystem::onSceneSwap(Scene* o, Scene* s, ComponentBaseClass* c, Entity* e) { m_i->_onSceneSwap(o, s, c, e); }
 void epriv::ComponentModelSystem::onComponentAddedToEntity(ComponentBaseClass* c, Entity* e) { m_i->_onComponentAddedToEntity(c, e); }
 void epriv::ComponentModelSystem::onEntityAddedToScene(Scene* s,ComponentBaseClass* c,Entity* e) { m_i->_onEntityAddedToScene(s,c, e); }
 class epriv::ComponentBodySystem::impl final {
@@ -346,12 +378,16 @@ class epriv::ComponentBodySystem::impl final {
                 }else{
                     Physics::removeRigidBody(componentBody.data.p.rigidBody);
                 }
-            }
+            }       
+        }
+        void _onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass* component, Entity* _entity) {
+            _onEntityAddedToScene(newScene, component, _entity);
         }
 };
 epriv::ComponentBodySystem::ComponentBodySystem() :ComponentSystemBaseClass(),m_i(new impl) { }
 epriv::ComponentBodySystem::~ComponentBodySystem() { }
 void epriv::ComponentBodySystem::update(const float& dt) { m_i->_update(dt); }
+void epriv::ComponentBodySystem::onSceneSwap(Scene* o, Scene* s, ComponentBaseClass* c, Entity* e) { m_i->_onSceneSwap(o, s, c, e); }
 void epriv::ComponentBodySystem::onEntityAddedToScene(Scene* s,ComponentBaseClass* c,Entity* e) { m_i->_onEntityAddedToScene(s,c,e); }
 void epriv::ComponentBodySystem::onComponentAddedToEntity(ComponentBaseClass* c, Entity* e) { m_i->_onComponentAddedToEntity(c, e); }
 
@@ -475,31 +511,82 @@ MeshInstance* ComponentModel::getModel(uint index){ return models.at(index); }
 void ComponentModel::show() { for (auto model : models) model->show(); }
 void ComponentModel::hide() { for (auto model : models) model->hide(); }
 float ComponentModel::radius(){ return _radius; }
+glm::vec3 ComponentModel::boundingBox() { return _radiusBox; }
 uint ComponentModel::addModel(Handle& mesh, Handle& mat, ShaderP* shaderProgram){ return ComponentModel::addModel((Mesh*)mesh.get(),(Material*)mat.get(), shaderProgram); }
-uint ComponentModel::addModel(Mesh* mesh,Material* material,ShaderP* shaderProgram){
-    models.push_back( new MeshInstance(owner(),mesh,material, shaderProgram) );
+uint ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* shaderProgram) {
+    MeshInstance* instance = new MeshInstance(owner(), mesh, material, shaderProgram);
+    models.push_back(instance);  
+    if (m_Owner != 0) {
+        auto* _scene = owner()->scene();
+        if (_scene) {
+            epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance);
+        }
+    }
     epriv::ComponentInternalFunctionality::CalculateRadius(this);
     return models.size() - 1;
 }
 void ComponentModel::setModel(Handle& mesh,Handle& mat,uint index, ShaderP* shaderProgram){ ComponentModel::setModel((Mesh*)mesh.get(),(Material*)mat.get(), index, shaderProgram); }
 void ComponentModel::setModel(Mesh* mesh,Material* material,uint index, ShaderP* shaderProgram){
-    MeshInstance& pair = *(models.at(index));
-    pair.setShaderProgram(shaderProgram);
-    pair.setMesh(mesh);
-    pair.setMaterial(material);
+    MeshInstance& instance = *(models.at(index));
+    if (m_Owner != 0) {
+        auto* _scene = owner()->scene();
+        if (_scene) {
+            epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, &instance);
+            instance.setShaderProgram(shaderProgram);
+            instance.setMesh(mesh);
+            instance.setMaterial(material);
+            epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, &instance);
+        }
+    }else{
+        instance.setShaderProgram(shaderProgram);
+        instance.setMesh(mesh);
+        instance.setMaterial(material);
+    }
     epriv::ComponentInternalFunctionality::CalculateRadius(this);
 }
 void ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint index) {
-    models.at(index)->setShaderProgram(shaderProgram);
+    auto* instance = models.at(index);
+    if (m_Owner != 0) {
+        auto* _scene = owner()->scene();
+        if (_scene) {
+            epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance);
+            instance->setShaderProgram(shaderProgram);
+            epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance);
+        }
+    }else{
+        instance->setShaderProgram(shaderProgram);
+    }
     epriv::ComponentInternalFunctionality::CalculateRadius(this);
 }
 void ComponentModel::setModelShaderProgram(Handle& shaderPHandle, uint index) { ComponentModel::setModelShaderProgram((ShaderP*)shaderPHandle.get(),index); }
 void ComponentModel::setModelMesh(Mesh* mesh,uint index){
-    models.at(index)->setMesh(mesh);
+    auto* instance = models.at(index);
+    if (m_Owner != 0) {
+        auto* _scene = owner()->scene();
+        if (_scene) {
+            epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance);
+            instance->setMesh(mesh);
+            epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance);
+        }
+    }else{
+        instance->setMesh(mesh);
+    }
     epriv::ComponentInternalFunctionality::CalculateRadius(this);
 }
 void ComponentModel::setModelMesh(Handle& mesh, uint index){ ComponentModel::setModelMesh((Mesh*)mesh.get(),index); }
-void ComponentModel::setModelMaterial(Material* material,uint index){ models.at(index)->setMaterial(material); }
+void ComponentModel::setModelMaterial(Material* material,uint index){ 
+    auto* instance = models.at(index);   
+    if (m_Owner != 0) {
+        auto* _scene = owner()->scene();
+        if (_scene) {
+            epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance);
+            instance->setMaterial(material);
+            epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance);
+        }
+    }else{
+        instance->setMaterial(material);
+    }
+}
 void ComponentModel::setModelMaterial(Handle& mat,uint index){ ComponentModel::setModelMaterial((Material*)mat.get(),index); }
 bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
     auto* body = owner()->getComponent<ComponentBody>();
@@ -952,9 +1039,5 @@ void Entity::addChild(Entity* child){
 #pragma endregion
 
 
-ComponentBaseClass* Components::GetComponent(uint index) {
-    return componentManager->m_ComponentPool->getAsFast<ComponentBaseClass>(index);
-}
-Entity* Components::GetEntity(uint id) {
-    return componentManager->m_EntityPool->getAsFast<Entity>(id);
-}
+ComponentBaseClass* Components::GetComponent(uint index) { return componentManager->m_ComponentPool->getAsFast<ComponentBaseClass>(index); }
+Entity* Components::GetEntity(uint id) { return componentManager->m_EntityPool->getAsFast<Entity>(id); }

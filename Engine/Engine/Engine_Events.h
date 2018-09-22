@@ -24,8 +24,6 @@ namespace Engine{
                 void _onEventMouseWheelMoved(int& delta);
                 void _onResetEvents();
                 void _setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition);
-
-                void _update(const float& dt);
         };
     };
     //keyboard functions

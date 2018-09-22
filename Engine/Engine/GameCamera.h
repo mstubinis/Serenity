@@ -13,6 +13,7 @@ class GameCameraComponent: public ComponentCamera{
         Entity* m_Target;
         Entity* m_Player;
         ComponentBody* m_Body;
+        glm::vec2 m_CameraMouseFactor;
 
         GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane);
         GameCameraComponent(float left,float right,float bottom,float top,float nearPlane,float farPlane);

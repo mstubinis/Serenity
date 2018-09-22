@@ -325,15 +325,20 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
     addComponent(m_Model);
     m_AtmosphereHeight = atmosphere;
     if(type != PlanetType::Star){
-        AtmosphericScatteringGroundMeshInstanceBindFunctor f;  AtmosphericScatteringGroundMeshInstanceUnbindFunctor f1;
-        m_Model->setCustomBindFunctor(f);  m_Model->setCustomUnbindFunctor(f1);
+        AtmosphericScatteringGroundMeshInstanceBindFunctor f;
+        AtmosphericScatteringGroundMeshInstanceUnbindFunctor f1;
+        m_Model->setCustomBindFunctor(f);
+        m_Model->setCustomUnbindFunctor(f1);
     }
     if(m_AtmosphereHeight > 0){
-        AtmosphericScatteringSkyMeshInstanceBindFunctor f;  AtmosphericScatteringSkyMeshInstanceUnbindFunctor f1;
-        uint index = m_Model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial);
-        MeshInstance* skyMesh = m_Model->getModel(index);
+        AtmosphericScatteringSkyMeshInstanceBindFunctor f;
+        AtmosphericScatteringSkyMeshInstanceUnbindFunctor f1;
+        uint index = m_Model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial,(ShaderP*)ResourceManifest::skyFromSpace.get());
+        MeshInstance& skyMesh = *m_Model->getModel(index);
         float aScale = 1.0f + m_AtmosphereHeight;
-        skyMesh->setCustomBindFunctor(f);  skyMesh->setCustomUnbindFunctor(f1);  skyMesh->setScale(aScale,aScale,aScale);
+        skyMesh.setCustomBindFunctor(f);
+        skyMesh.setCustomUnbindFunctor(f1);
+        skyMesh.setScale(aScale,aScale,aScale);
     }
     m_Body = new ComponentBody();
     addComponent(m_Body);
@@ -381,6 +386,7 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
 
     m_Model->getModel()->setColor(starColor.x,starColor.y,starColor.z,1.0f);
     m_Model->getModel()->setGodRaysColor(starColor.x,starColor.y,starColor.z);
+    m_Model->getModel()->setShaderProgram(nullptr);
 
     StarMeshInstanceBindFunctor f;
     m_Model->setCustomBindFunctor(f);
