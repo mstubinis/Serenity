@@ -266,6 +266,7 @@ class epriv::RenderManager::impl final{
         GLboolean color_mask_g;
         GLboolean color_mask_b;
         GLboolean color_mask_a;
+        glm::vec4 clear_color;
         AntiAliasingAlgorithm::Algorithm aa_algorithm;
         DepthFunc::Func depth_func;
         glm::uvec4 gl_viewport_data;
@@ -389,6 +390,7 @@ class epriv::RenderManager::impl final{
             color_mask_g = GL_TRUE;
             color_mask_b = GL_TRUE;
             color_mask_a = GL_TRUE;
+            clear_color = glm::vec4(0.0f);
             aa_algorithm = AntiAliasingAlgorithm::FXAA;
             depth_func = DepthFunc::Less;
             gl_viewport_data = glm::uvec4(0,0,0,0);
@@ -1513,6 +1515,15 @@ class epriv::RenderManager::impl final{
                 depth_func = func;
             }
         }
+        void _clearColor(float& r, float& g, float& b, float& a) {
+            if (r == clear_color.r && g == clear_color.g && b == clear_color.b && a == clear_color.a)
+                return;
+            clear_color.r = r;
+            clear_color.g = g;
+            clear_color.b = b;
+            clear_color.a = a;
+            glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+        }
         void _colorMask(bool& r, bool& g, bool& b, bool& a) {
             if ((GLboolean)r == color_mask_r && (GLboolean)g == color_mask_g && (GLboolean)b == color_mask_b && (GLboolean)a == color_mask_a)
                 return;
@@ -1730,8 +1741,7 @@ class epriv::RenderManager::impl final{
                         break;
                     }
                     */
-                }
-                else{
+                }else{
                     if(skybox && skybox->texture()->numAddresses() >= 3){
                         sendTextureSafe("irradianceMap",skybox->texture()->address(1),4,GL_TEXTURE_CUBE_MAP);
                         sendTextureSafe("prefilterMap",skybox->texture()->address(2),5,GL_TEXTURE_CUBE_MAP);
@@ -1802,7 +1812,6 @@ class epriv::RenderManager::impl final{
             Renderer::colorMask(true, true, true, true);
         }
         void _passGodsRays(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,glm::vec2 lightScrnPos,bool behind,float alpha){
-            Settings::clear(true,false,false);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays)->bind();
             float _divisor = gbuffer.getSmallFBO()->divisor();
             sendUniform4f("RaysInfo",godRays_exposure,godRays_decay,godRays_density,godRays_weight);
@@ -2039,9 +2048,9 @@ class epriv::RenderManager::impl final{
                 }
                 #pragma endregion
             }
-            if(!doSSAO) Renderer::Settings::SSAO::disable();
+            if(!doSSAO)    Renderer::Settings::SSAO::disable();
             if(!doGodRays) Renderer::Settings::GodRays::disable();
-            if(!doAA) aa_algorithm = AntiAliasingAlgorithm::None;
+            if(!doAA)      aa_algorithm = AntiAliasingAlgorithm::None;
 
             _passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
 
@@ -2050,6 +2059,7 @@ class epriv::RenderManager::impl final{
 
             #pragma region GodRays
             if (godRays && godRays_Object) {
+                /*
                 gbuffer.start(GBufferType::GodRays, "RGBA", false);
                 auto& body = *godRays_Object->getComponent<ComponentBody>();
                 glm::vec3 oPos = body.position();
@@ -2062,15 +2072,18 @@ class epriv::RenderManager::impl final{
                 alpha = glm::pow(alpha, godRays_alphaFalloff);
                 alpha = glm::clamp(alpha, 0.0001f, 0.9999f);
 
+                Settings::clear(true,false,false);
                 _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), !behind, 1.0f - alpha);
+                */
             }
             #pragma endregion
 
             #pragma region SSAO
             gbuffer.start(GBufferType::Bloom, "A", false);
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            Settings::clear(true, false, false);
-            if (ssao) {     
+            //Renderer::clearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            //Settings::clear(true, false, false);
+            if (ssao) {
+                /*
                 _passSSAO(gbuffer, camera, fboWidth, fboHeight);
                 //blur it
                 if (ssao_do_blur) {
@@ -2081,8 +2094,8 @@ class epriv::RenderManager::impl final{
                         _passBlurSSAO(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays);
                     }
                 }
-            }
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //this needs to be fixed, should only be alpha channel...
+                */
+            }           
             #pragma endregion
 
 
@@ -2095,9 +2108,10 @@ class epriv::RenderManager::impl final{
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_ONE, GL_ONE);
 
+            //Renderer::clearColor(0.0f, 0.0f, 0.0f, 0.0f); //this needs to be fixed, should only be alpha channel...
             if(lighting && epriv::InternalScenePublicInterface::GetLights(s).size() > 0){
                 gbuffer.start(GBufferType::Lighting,"RGB");
-                Renderer::Settings::clear(true,false,false);//this is needed for godrays
+                Settings::clear(true,false,false);//this is needed for godrays
                 _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
             }
 
@@ -2105,7 +2119,7 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::STENCIL_TEST);
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
-            _passForwardRendering(gbuffer,camera,fboWidth,fboHeight,nullptr);
+            //_passForwardRendering(gbuffer,camera,fboWidth,fboHeight,nullptr);
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             
@@ -2116,6 +2130,7 @@ class epriv::RenderManager::impl final{
 
             #pragma region Bloom
             if (bloom) {
+                /*
                 gbuffer.start(GBufferType::Bloom, "RGB", false);
                 _passBloom(gbuffer, camera, fboWidth, fboHeight);
                 //blur the bloom
@@ -2125,6 +2140,7 @@ class epriv::RenderManager::impl final{
                     gbuffer.start(GBufferType::Bloom, "RGB", false);
                     _passBlur(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays, "RGB");
                 }
+                */
             }
             #pragma endregion
 
@@ -2421,6 +2437,7 @@ float Renderer::Settings::getGamma(){ return renderManager->gamma; }
 void Renderer::setDepthFunc(DepthFunc::Func func){ renderManager->_setDepthFunc(func); }
 void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManager->_setViewport(x,y,w,h); }
 void Renderer::colorMask(bool r, bool g, bool b, bool a) { renderManager->_colorMask(r,g,b,a); }
+void Renderer::clearColor(float r, float g, float b, float a) { renderManager->_clearColor(r, g, b, a); }
 void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
     auto& i = *renderManager;
     switch(_textureType){

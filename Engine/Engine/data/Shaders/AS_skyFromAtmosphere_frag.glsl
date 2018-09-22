@@ -15,6 +15,9 @@ varying vec3 WorldPosition;
 
 uniform int HasGodsRays;
 
+const vec2 ConstVec2Zero = vec2(0.0);
+const vec2 ConstVec2One = vec2(1.0);
+
 void main(){
     float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);
     float fCos2 = fCos * fCos;
@@ -40,8 +43,8 @@ void main(){
     //TODO: fix the code below after (if / when) this is moved back to the geometry pass
     
     gl_FragData[0] = vec4(OutDiffuse.rgb,clamp(alpha * (OutDiffuse.rgb * 5.5), 0.01, 0.99));
-    gl_FragData[1].rg = vec2(1.0);
-    gl_FragData[2].rg = vec2(0.0); //outglow, outspecular
+    gl_FragData[1].rgb = vec3(ConstVec2One,0.0); //out normals, out ao
+    gl_FragData[2].rg = ConstVec2Zero; //outglow, outspecular
     if(HasGodsRays == 1){
         gl_FragData[3] = clamp(vec4(HDR.xyz,nightmult), 0.01, 0.99);
 

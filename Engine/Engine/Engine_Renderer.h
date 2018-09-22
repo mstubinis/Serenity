@@ -255,6 +255,7 @@ namespace Engine{
         void genAndBindVAO(GLuint& _vaoObject);
         void deleteVAO(GLuint& _vaoObject);
         void colorMask(bool r, bool g, bool b, bool a);
+        void clearColor(float r, float g, float b, float a);
 
         void sendTexture(const char* location,Texture* texture,const uint slot);
         void sendTexture(const char* location,const GLuint textureAddress,const uint slot,const GLuint glTextureType);

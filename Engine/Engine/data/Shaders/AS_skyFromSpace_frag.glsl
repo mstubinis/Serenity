@@ -33,7 +33,7 @@ void main(){
     //gl_FragColor = vec4(HDR.xyz,nightmult);
     
     gl_FragData[0] = vec4(HDR.xyz,nightmult);
-    gl_FragData[1].rg = ConstVec2One;
+    gl_FragData[1].rgb = vec3(ConstVec2One,0.0); //out normals, out ao
     gl_FragData[2].rg = ConstVec2Zero;
     if(HasGodsRays == 1){
         gl_FragData[3] = vec4(ConstVec3Zero,1.0);
