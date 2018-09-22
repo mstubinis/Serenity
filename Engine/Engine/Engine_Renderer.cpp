@@ -262,6 +262,10 @@ class epriv::RenderManager::impl final{
         GLuint current_bound_texture_2D;
         GLuint current_bound_texture_3D;
         GLuint current_bound_texture_cube_map;
+        GLboolean color_mask_r;
+        GLboolean color_mask_g;
+        GLboolean color_mask_b;
+        GLboolean color_mask_a;
         AntiAliasingAlgorithm::Algorithm aa_algorithm;
         DepthFunc::Func depth_func;
         glm::uvec4 gl_viewport_data;
@@ -381,6 +385,10 @@ class epriv::RenderManager::impl final{
             current_bound_texture_2D = 0;
             current_bound_texture_3D = 0;
             current_bound_texture_cube_map = 0;
+            color_mask_r = GL_TRUE;
+            color_mask_g = GL_TRUE;
+            color_mask_b = GL_TRUE;
+            color_mask_a = GL_TRUE;
             aa_algorithm = AntiAliasingAlgorithm::FXAA;
             depth_func = DepthFunc::Less;
             gl_viewport_data = glm::uvec4(0,0,0,0);
@@ -1330,8 +1338,8 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(epriv::InternalShaderPrograms::Deferred);
             SAFE_DELETE(epriv::InternalShaderPrograms::Forward);
 
-            for(auto program:m_InternalShaderPrograms) SAFE_DELETE(program);
-            for(auto shader:m_InternalShaders) SAFE_DELETE(shader);
+            SAFE_DELETE_VECTOR(m_InternalShaderPrograms);
+            SAFE_DELETE_VECTOR(m_InternalShaders);
 
             glDeleteTextures(1,&ssao_noise_texture);
             glDeleteTextures(1,&SMAA_SearchTexture);
@@ -1469,11 +1477,11 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance)->bind();
             sendUniform1i("NUM_SAMPLES",256);
             Settings::clear(true,true,false);
-            glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
+            Renderer::colorMask(true,true,false,false);
             _renderFullscreenTriangle(brdfSize,brdfSize,0,0);
             //cout << "----  BRDF LUT (Cook Torrance) completed ----" << endl;
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance)->unbind();
-            glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+            Renderer::colorMask(true, true, true, true);
 
             delete fbo;
             bindReadFBO(prevReadBuffer);
@@ -1504,6 +1512,15 @@ class epriv::RenderManager::impl final{
                 glDepthFunc(func);
                 depth_func = func;
             }
+        }
+        void _colorMask(bool& r, bool& g, bool& b, bool& a) {
+            if ((GLboolean)r == color_mask_r && (GLboolean)g == color_mask_g && (GLboolean)b == color_mask_b && (GLboolean)a == color_mask_a)
+                return;
+            color_mask_r = (GLboolean)r;
+            color_mask_g = (GLboolean)g;
+            color_mask_b = (GLboolean)b;
+            color_mask_a = (GLboolean)a;
+            glColorMask(color_mask_r, color_mask_g, color_mask_b, color_mask_a);
         }
         void _cullFace(uint s){
             //0 = back | 1 = front | 2 = front and back
@@ -1647,14 +1664,13 @@ class epriv::RenderManager::impl final{
             //RENDER NORMAL OBJECTS HERE
         }
         void _passCopyDepth(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
-            glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+            Renderer::colorMask(false, false, false, false);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CopyDepth)->bind();
 
             sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),0);
 
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
-
-            glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+            Renderer::colorMask(true, true, true, true);
         }
         void _passLighting(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,bool mainRenderFunc){
             Scene* s = Resources::getCurrentScene(); 
@@ -1761,7 +1777,7 @@ class epriv::RenderManager::impl final{
             _renderFullscreenTriangle(_x, _y, 0, 0);
         }
         void _passStencil(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
-            glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+            Renderer::colorMask(false, false, false, false);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::StencilPass)->bind();
 
             Scene& s = *Resources::getCurrentScene();
@@ -1783,7 +1799,7 @@ class epriv::RenderManager::impl final{
             glStencilFunc(GL_NOTEQUAL, 0x00000000, 0xFFFFFFFF);
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Do not change stencil
 
-            glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+            Renderer::colorMask(true, true, true, true);
         }
         void _passGodsRays(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,glm::vec2 lightScrnPos,bool behind,float alpha){
             Settings::clear(true,false,false);
@@ -1990,6 +2006,7 @@ class epriv::RenderManager::impl final{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,0);
             }
             if(mainRenderFunc){
+                #pragma region Camera UBO
                 //Camera UBO update
                 //NOTE: camera render info is different than simulated camera info, the position of the camera is always at the origin to prevent
                 //shading and render calculation errors. Likewise the model matrices of the objects sent to the rendering pipeline
@@ -2004,7 +2021,11 @@ class epriv::RenderManager::impl final{
                     m_UBOCameraData.Info1 = glm::vec4(glm::vec3(0.0001f),camera.getNear());
                     m_UBOCameraData.Info2 = glm::vec4(camera.getViewVectorNoTranslation(),camera.getFar());
                     UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
+                
+                
                 }
+                #pragma endregion
+                #pragma region LightProbes
                 if(s->lightProbes().size() > 0){
                     /*
                     for(auto lightProbe:s->lightProbes()){
@@ -2016,6 +2037,7 @@ class epriv::RenderManager::impl final{
                     */
                     m_gBuffer->resize(fboWidth,fboHeight);
                 }
+                #pragma endregion
             }
             if(!doSSAO) Renderer::Settings::SSAO::disable();
             if(!doGodRays) Renderer::Settings::GodRays::disable();
@@ -2060,7 +2082,7 @@ class epriv::RenderManager::impl final{
                     }
                 }
             }
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //this needs to be fixed, should only be alpha channel...
             #pragma endregion
 
 
@@ -2398,6 +2420,7 @@ void Renderer::Settings::setGamma(float g){ renderManager->gamma = g; }
 float Renderer::Settings::getGamma(){ return renderManager->gamma; }
 void Renderer::setDepthFunc(DepthFunc::Func func){ renderManager->_setDepthFunc(func); }
 void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManager->_setViewport(x,y,w,h); }
+void Renderer::colorMask(bool r, bool g, bool b, bool a) { renderManager->_colorMask(r,g,b,a); }
 void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
     auto& i = *renderManager;
     switch(_textureType){

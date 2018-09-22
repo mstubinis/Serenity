@@ -30,13 +30,12 @@ void main(){
     vec4 HDR = 1.0 - exp(f4Color * -FragDataGravity.z);
     float nightmult = clamp(max(HDR.x, max(HDR.y, HDR.z))*1.5,0.0,1.0);
 
-    gl_FragColor = vec4(HDR.xyz,nightmult);
-    /*
+    //gl_FragColor = vec4(HDR.xyz,nightmult);
+    
     gl_FragData[0] = vec4(HDR.xyz,nightmult);
     gl_FragData[1].rg = ConstVec2One;
     gl_FragData[2].rg = ConstVec2Zero;
     if(HasGodsRays == 1){
         gl_FragData[3] = vec4(ConstVec3Zero,1.0);
     }
-    */
 }

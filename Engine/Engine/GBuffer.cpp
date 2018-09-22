@@ -88,12 +88,12 @@ class epriv::GBuffer::impl final{
         void _start(uint* types,uint size,const string& channels,bool first_fbo){
             if(first_fbo){ m_FBO->bind(); }
             else{ m_SmallFBO->bind(); }
-            GLboolean r,g,b,a;
-            channels.find("R") != string::npos ? r = GL_TRUE : r = GL_FALSE;
-            channels.find("G") != string::npos ? g = GL_TRUE : g = GL_FALSE;
-            channels.find("B") != string::npos ? b = GL_TRUE : b = GL_FALSE;
-            channels.find("A") != string::npos ? a = GL_TRUE : a = GL_FALSE;
-            glColorMask(r,g,b,a);
+            bool r,g,b,a;
+            channels.find("R") != string::npos ? r = 1 : r = 0;
+            channels.find("G") != string::npos ? g = 1 : g = 0;
+            channels.find("B") != string::npos ? b = 1 : b = 0;
+            channels.find("A") != string::npos ? a = 1 : a = 0;
+            Renderer::colorMask(r,g,b,a);
             glDrawBuffers(size, types); // Specify what to render an start acquiring
         }
         void _start(const uint& t1, const string& c,bool f){
@@ -120,8 +120,8 @@ class epriv::GBuffer::impl final{
         void _stop(const GLuint& final_fbo, const GLuint& final_rbo){
             Renderer::bindFBO(final_fbo);
             Renderer::bindRBO(final_rbo); //probably dont even need this. or only implement this if final_rbo != 0
-            glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-            glClear(GL_COLOR_BUFFER_BIT);
+            Renderer::colorMask(true,true,true,true);
+            glClear(GL_COLOR_BUFFER_BIT); //should probably remove or rethink how this is handled
         }
 };
 epriv::GBuffer::GBuffer(uint width,uint height):m_i(new impl){ m_i->_init(width,height); }

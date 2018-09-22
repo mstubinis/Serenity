@@ -35,11 +35,11 @@ void main(){
 
     vec4 OutDiffuse;
     OutDiffuse.rgb = vec3(clamp(vec4(HDR.xyz, nightmult), 0.01, 0.99));
-    gl_FragColor = vec4(OutDiffuse.rgb,clamp(alpha * (OutDiffuse.rgb * 5.5), 0.01, 0.99));
+    //gl_FragColor = vec4(OutDiffuse.rgb,clamp(alpha * (OutDiffuse.rgb * 5.5), 0.01, 0.99));
 
     //TODO: fix the code below after (if / when) this is moved back to the geometry pass
-    /*
-    gl_FragData[0] = vec4(vec3(clamp(vec4(HDR.xyz, nightmult), 0.01, 0.99)),   clamp(alpha * (gl_FragColor.rgb * 5.5), 0.01, 0.99));
+    
+    gl_FragData[0] = vec4(OutDiffuse.rgb,clamp(alpha * (OutDiffuse.rgb * 5.5), 0.01, 0.99));
     gl_FragData[1].rg = vec2(1.0);
     gl_FragData[2].rg = vec2(0.0); //outglow, outspecular
     if(HasGodsRays == 1){
@@ -52,5 +52,5 @@ void main(){
         gl_FragData[3] = clamp(gl_FragData[4], 0.01, 0.99);
         gl_FragData[3].rgb = max(gl_FragData[4].rgb, vec3(0.125, 0.116, 0.25)) * 0.7;
     }
-    */
+    
 }
