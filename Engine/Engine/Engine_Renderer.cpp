@@ -1664,6 +1664,7 @@ class epriv::RenderManager::impl final{
             //RENDER NORMAL OBJECTS HERE
             InternalScenePublicInterface::Render(scene);
 
+            //skybox here
             gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
             _renderSkybox(scene->skybox());
             if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }          
@@ -1674,6 +1675,7 @@ class epriv::RenderManager::impl final{
             gbuffer.start(GBufferType::Diffuse);
 
             //RENDER NORMAL OBJECTS HERE
+            InternalScenePublicInterface::RenderForward(scene);
         }
         void _passCopyDepth(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
@@ -1829,11 +1831,8 @@ class epriv::RenderManager::impl final{
         void _passHDR(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHDR)->bind();
 
-            sendUniform4fSafe("HDRInfo",hdr_exposure,float(int(hdr)),float(int(bloom)),float(int(hdr_algorithm)));
-            sendUniform1fSafe("godRaysExposure",godRays_exposure);
-            sendUniform1iSafe("HasRays",int(godRays));
-
-            sendUniform1iSafe("HasLighting",int(lighting));
+            sendUniform4fSafe("HDRInfo",hdr_exposure,float(int(hdr)), godRays_exposure,float(int(hdr_algorithm)));
+            sendUniform2iSafe("Has",int(godRays), int(lighting));
 
             sendTextureSafe("lightingBuffer",gbuffer.getTexture(GBufferType::Lighting),0);
             sendTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),1);

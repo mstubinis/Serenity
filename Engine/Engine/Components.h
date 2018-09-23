@@ -262,7 +262,7 @@ class ComponentBody: public ComponentBaseClass{
             btDefaultMotionState* motionState;
             float mass;
             PhysicsData() {
-                collision = 0; rigidBody = 0; motionState = 0;
+                collision = 0; rigidBody = 0; motionState = 0; mass = 0;
             }
         };
         struct NormalData{
@@ -274,9 +274,9 @@ class ComponentBody: public ComponentBaseClass{
                 scale = 0; position = 0; rotation = 0; modelMatrix = 0;
             }
         };
-        struct{
-            NormalData n;
-            PhysicsData p;
+        union{
+            NormalData* n;
+            PhysicsData* p;
         } data;
         bool _physics;
         glm::vec3 _forward, _right, _up;

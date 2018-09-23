@@ -1691,11 +1691,9 @@ epriv::EShaders::hdr_frag =
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gGodsRaysMap;\n"
-    "uniform float godRaysExposure;\n"
-    "uniform int HasLighting;\n"
     "varying vec2 texcoords;\n"
-    "uniform vec4 HDRInfo;\n"// exposure | HasHDR | HasBloom | HDRAlgorithm
-    "uniform int HasRays;\n"
+    "uniform vec4 HDRInfo;\n"// exposure | HasHDR | godRaysExposure | HDRAlgorithm
+    "uniform ivec2 Has;\n" //HasGodRays | HasLighting
     "\n"
     "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){ return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f); }\n";
 epriv::EShaders::hdr_frag += epriv::EShaders::normals_octahedron_compression_functions;
@@ -1705,7 +1703,7 @@ epriv::EShaders::hdr_frag +=
     "    vec3 lighting = texture2D(lightingBuffer, texcoords).rgb;\n"
     "    vec3 normals = DecodeOctahedron(texture2D(gNormalMap,texcoords).rg);\n"
     "\n"
-    "    if(distance(normals,ConstantOneVec3) < 0.01 || HasLighting == 0){\n" //if normals are damn near 1.0,1.0,1.0 or no lighting
+    "    if(distance(normals,ConstantOneVec3) < 0.01 || Has.y == 0){\n" //if normals are damn near 1.0,1.0,1.0 or no lighting
     "        lighting = diffuse;\n"
     "    }\n"
     "    if(HDRInfo.y == 1.0){\n"//HasHDR
@@ -1723,9 +1721,9 @@ epriv::EShaders::hdr_frag +=
     "            lighting *= white;\n"
     "        }\n"
     "    }\n"
-    "    if(HasRays == 1){\n"
+    "    if(Has.x == 1){\n"
     "        vec3 rays = texture2D(gGodsRaysMap,texcoords).rgb;\n"
-    "        lighting = (lighting * 1.1) + (rays * godRaysExposure);\n"
+    "        lighting = (lighting * 1.1) + (rays * HDRInfo.z);\n"
     "    }\n"
     "    gl_FragColor = vec4(lighting, 1.0);\n"
     "}";
