@@ -450,19 +450,17 @@ class epriv::RenderManager::impl final{
             OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_explicit_attrib_location) = _checkOpenGLExtension("GL_ARB_explicit_attrib_location");
             #pragma endregion
 
-
-
             epriv::EShaders::init();
 
-            #pragma region EngineInternalShadersAndPrograms
+            #pragma region EngineInternalShaderUBOs
             UniformBufferObject::UBO_CAMERA = new UniformBufferObject("Camera",sizeof(epriv::UBOCamera));
             UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
             #pragma endregion
 
-            m_InternalShaders.resize(EngineInternalShaders::_TOTAL,nullptr);
-            m_InternalShaderPrograms.resize(EngineInternalShaderPrograms::_TOTAL,nullptr);
 
             #pragma region EngineInternalShadersAndPrograms
+            m_InternalShaders.resize(EngineInternalShaders::_TOTAL, nullptr);
+            m_InternalShaderPrograms.resize(EngineInternalShaderPrograms::_TOTAL, nullptr);
 
             m_InternalShaders.at(EngineInternalShaders::BulletPhysicsVertex) = new Shader(epriv::EShaders::bullet_physics_vert,ShaderType::Vertex,false);
             m_InternalShaders.at(EngineInternalShaders::BulletPhysicsFrag) = new Shader(epriv::EShaders::bullet_physcis_frag,ShaderType::Fragment,false);
@@ -1325,6 +1323,8 @@ class epriv::RenderManager::impl final{
             Renderer::setDepthFunc(DepthFunc::LEqual);
             Renderer::clearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClearDepth(1.0f);
+            glClearStencil(0);
+            GLDisable(GLState::STENCIL_TEST);
             glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
             //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very wierd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
@@ -1339,9 +1339,6 @@ class epriv::RenderManager::impl final{
             Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
             Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
             glTexImage2D(GL_TEXTURE_2D,0,GL_R8,64,16,0,GL_RED,GL_UNSIGNED_BYTE,searchTexBytes);
-
-            glClearStencil(0);
-            GLDisable(GLState::STENCIL_TEST);
 
             _generateBRDFLUTCookTorrance(512);
         }
@@ -1402,13 +1399,16 @@ class epriv::RenderManager::impl final{
 
             //oh yea the opengl context is lost, gotta restore the state machine
             Renderer::RestoreGLState();
-            glClearStencil(0);
+  
             glDepthFunc(GL_LEQUAL);
             glCullFace(GL_BACK);
             glEnable(GL_CULL_FACE);
             glEnable(GL_DEPTH_CLAMP);
             glEnable(GL_TEXTURE_2D);
-            glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
+            glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+            glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+            glClearDepth(1.0f);
+            glClearStencil(0);
 
             m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
         }
@@ -1547,12 +1547,16 @@ class epriv::RenderManager::impl final{
             glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
         }
         void _colorMask(bool& r, bool& g, bool& b, bool& a) {
-            if ((GLboolean)r == color_mask_r && (GLboolean)g == color_mask_g && (GLboolean)b == color_mask_b && (GLboolean)a == color_mask_a)
+            GLboolean _r = (GLboolean)r;
+            GLboolean _g = (GLboolean)g;
+            GLboolean _b = (GLboolean)b;
+            GLboolean _a = (GLboolean)a;
+            if (_r == color_mask_r && _g == color_mask_g && _b == color_mask_b && _a == color_mask_a)
                 return;
-            color_mask_r = (GLboolean)r;
-            color_mask_g = (GLboolean)g;
-            color_mask_b = (GLboolean)b;
-            color_mask_a = (GLboolean)a;
+            color_mask_r = _r;
+            color_mask_g = _g;
+            color_mask_b = _b;
+            color_mask_a = _a;
             glColorMask(color_mask_r, color_mask_g, color_mask_b, color_mask_a);
         }
         void _cullFace(uint s){
@@ -1928,10 +1932,11 @@ class epriv::RenderManager::impl final{
             glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / _fboWidth, 1.0f / _fboHeight, _fboWidth, _fboHeight);
 
             #pragma region PassEdge
+            Renderer::clearColor(0.0f, 0.0f, 0.0f, 0.0f); //for some reason alpha needs to be cleared to 0.0 or there will be inaccuracies.
             gbuffer.start(GBufferType::Misc);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1)->bind();
 
-            Settings::clear(true,false,true);//stencil is completely filled with 0's
+            Settings::clear(true,false,true);//color, stencil is completely filled with 0's
 
             glStencilMask(0xFFFFFFFF);
             glStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
@@ -2033,9 +2038,9 @@ class epriv::RenderManager::impl final{
             setViewport(startX,startY,width,height);
             m_FullscreenTriangle->render();
         }
-        void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& doSSAO, bool& doGodRays, bool& doAA,bool& HUD, Entity* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
+        void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& HUD, Entity* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
             Scene* s = Resources::getCurrentScene();
-
+            Renderer::clearColor(0.0f, 0.0f, 0.0f, 1.0f);
             //restore default state, might have to increase this as we use more textures
             for(uint i = 0; i < 7; ++i){ 
                 glActiveTexture(GL_TEXTURE0 + i);
@@ -2076,9 +2081,6 @@ class epriv::RenderManager::impl final{
                 }
                 #pragma endregion
             }
-            if(!doSSAO)    Renderer::Settings::SSAO::disable();
-            if(!doGodRays) Renderer::Settings::GodRays::disable();
-            if(!doAA)      aa_algorithm = AntiAliasingAlgorithm::None;
 
             _passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
 
@@ -2242,8 +2244,8 @@ class epriv::RenderManager::impl final{
 epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); renderManager = m_i.get(); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
-void epriv::RenderManager::_render(GBuffer* g,Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){ m_i->_render(*g,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo); }
-void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){m_i->_render(*m_i->m_gBuffer,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo);}
+void epriv::RenderManager::_render(GBuffer* g,Camera* c,uint fboW,uint fboH,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){ m_i->_render(*g,*c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo); }
+void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){m_i->_render(*m_i->m_gBuffer,*c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo);}
 void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
 void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ m_i->m_gBuffer->resize(w,h); }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
