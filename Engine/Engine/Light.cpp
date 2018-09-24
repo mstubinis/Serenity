@@ -360,7 +360,7 @@ class LightProbe::impl{
             m_FBO->bind();
             _update(0,super,viewMatrix);
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureEnvMap,0);
-            Renderer::Settings::clear();
+            Renderer::Settings::clear(true,true,true);
             epriv::Core::m_Engine->m_RenderManager->_render(super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),0);
             m_FBO->unbind();
         }

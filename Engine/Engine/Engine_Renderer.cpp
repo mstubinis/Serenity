@@ -223,6 +223,7 @@ class epriv::RenderManager::impl final{
 
         #pragma region GodRaysInfo
         bool godRays;
+        glm::vec4 godRays_clearColor;
         float godRays_exposure;
         float godRays_decay;
         float godRays_density;
@@ -359,6 +360,7 @@ class epriv::RenderManager::impl final{
 
             #pragma region GodRaysInfo
             godRays = true;
+            godRays_clearColor = glm::vec4(0.030f, 0.023f, 0.032f, 1.0f);
             godRays_exposure = 0.15f;
             godRays_decay = 0.96815f;
             godRays_density = 0.926f;
@@ -1658,21 +1660,21 @@ class epriv::RenderManager::impl final{
         }
         void _passGeometry(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,Entity* ignore){
             Scene* scene = Resources::getCurrentScene();
-            glm::vec3 camPos = scene->getActiveCamera()->getPosition();
             const glm::vec3& clear = scene->getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
             if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
             else{        gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA"); }
 
-            Settings::clear(true,true,true);
+            Settings::clear(true,true,true); // (0,0,0,0)
+            
             Renderer::setDepthFunc(DepthFunc::LEqual);
             GLDisable(GLState::BLEND);//disable blending on all mrts
 
             glClearBufferfv(GL_COLOR,0,colors);
             if(godRays){
-                const float godRays[4] = { 0.03f,0.023f,0.032f,1.0f };
-                glClearBufferfv(GL_COLOR,3,godRays);
+                const float _godraysclearcolor[4] = { godRays_clearColor.r, godRays_clearColor.g, godRays_clearColor.b, godRays_clearColor.a };
+                glClearBufferfv(GL_COLOR,3, _godraysclearcolor);
             }
 
             GLEnable(GLState::DEPTH_TEST);
@@ -1835,13 +1837,12 @@ class epriv::RenderManager::impl final{
 
             Renderer::colorMask(true, true, true, true);
         }
-        void _passGodsRays(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,glm::vec2 lightScrnPos,bool behind,float alpha){
+        void _passGodsRays(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,glm::vec2 lightScrnPos,float alpha){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays)->bind();
             float _divisor = gbuffer.getSmallFBO()->divisor();
             sendUniform4f("RaysInfo",godRays_exposure,godRays_decay,godRays_density,godRays_weight);
             sendUniform2f("lightPositionOnScreen",lightScrnPos.x/float(fboWidth),lightScrnPos.y/float(fboHeight));
             sendUniform1i("samples",godRays_samples);
-            sendUniform1i("behind",int(behind));
             sendUniform1f("alpha",alpha);
             sendTexture("firstPass",gbuffer.getTexture(GBufferType::Lighting),0);
 
@@ -2083,26 +2084,26 @@ class epriv::RenderManager::impl final{
             #pragma region GodRays
 
             gbuffer.start(GBufferType::GodRays, "RGB", false);
-            Settings::clear(true,false,false); //this is needed
+            Settings::clear(true,false,false); //this is needed, clear color should be (0,0,0,0)
             if (godRays && godRays_Object) {
                 auto& body = *godRays_Object->getComponent<ComponentBody>();
-                glm::vec3 oPos = body.position();
-                glm::vec3 sp = Math::getScreenCoordinates(oPos, false);
+                glm::vec3 oPos = body.position();       
                 glm::vec3 camPos = camera.getPosition();
                 glm::vec3 camVec = camera.getViewVector();
-                bool behind = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRays_fovDegrees));
-                float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRays_fovDegrees;
-
-                alpha = glm::pow(alpha, godRays_alphaFalloff);
-                alpha = glm::clamp(alpha, 0.01f, 0.99f);
-
-                _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), !behind, 1.0f - alpha);          
+                bool infront = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRays_fovDegrees));
+                if (infront) {
+                    glm::vec3 sp = Math::getScreenCoordinates(oPos, false);
+                    float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRays_fovDegrees;
+                    alpha = glm::pow(alpha, godRays_alphaFalloff);
+                    alpha = glm::clamp(alpha, 0.01f, 0.99f);
+                    _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), 1.0f - alpha);
+                }
             }
             #pragma endregion
 
             #pragma region SSAO
             gbuffer.start(GBufferType::Bloom, GBufferType::GodRays, "A", false);
-            Settings::clear(true, false, false);
+            Settings::clear(true, false, false); //0,0,0,0
             if (ssao) {
                 _passSSAO(gbuffer, camera, fboWidth, fboHeight);      
                 if (ssao_do_blur) {
@@ -2128,7 +2129,7 @@ class epriv::RenderManager::impl final{
             //this needs to be cleaned up
             if(lighting && epriv::InternalScenePublicInterface::GetLights(s).size() > 0){
                 gbuffer.start(GBufferType::Lighting,"RGB");
-                Settings::clear(true,false,false);//this is needed for godrays
+                Settings::clear(true,false,false);//this is needed for godrays 0,0,0,0
                 _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
             }
 
@@ -2202,7 +2203,7 @@ class epriv::RenderManager::impl final{
 
             //to try and see what the lightprobe is outputting
             /*
-            Renderer::unbindFBO();
+            Renderer::unbindFBO(true,true,true);
             Settings::clear();
             LightProbe* pr  = (LightProbe*)(Resources::getCamera("CapsuleLightProbe"));
             Skybox* skybox = (Skybox*)(s->getSkybox());

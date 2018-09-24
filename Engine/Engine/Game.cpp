@@ -81,18 +81,30 @@ void Game::update(const float& dt){
         //Renderer::Settings::DepthOfField::enable(!Renderer::Settings::DepthOfField::enabled());
     }
 
-    if (Engine::isKeyDown(KeyboardKey::N)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::M)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::V)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::B)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::X)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::C)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::H)) { Renderer::Settings::SSAO::setBlurStrength(Renderer::Settings::SSAO::getBlurStrength() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::J)) { Renderer::Settings::SSAO::setBlurStrength(Renderer::Settings::SSAO::getBlurStrength() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::O)) { Renderer::Settings::SSAO::setBias(Renderer::Settings::SSAO::getBias() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::P)) { Renderer::Settings::SSAO::setBias(Renderer::Settings::SSAO::getBias() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::F)) { Renderer::Settings::SSAO::setBlurRadius(Renderer::Settings::SSAO::getBlurRadius() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::G)) { Renderer::Settings::SSAO::setBlurRadius(Renderer::Settings::SSAO::getBlurRadius() + 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::N)) { 
+        Renderer::Settings::GodRays::setDecay(Renderer::Settings::GodRays::getDecay() - 0.02f);
+    }
+    if (Engine::isKeyDown(KeyboardKey::M)) { 
+        Renderer::Settings::GodRays::setDecay(Renderer::Settings::GodRays::getDecay() + 0.02f);
+    }
+    if (Engine::isKeyDown(KeyboardKey::V)) { 
+        Renderer::Settings::GodRays::setDensity(Renderer::Settings::GodRays::getDensity() - 0.02f);
+    }
+    if (Engine::isKeyDown(KeyboardKey::B)) { 
+        Renderer::Settings::GodRays::setDensity(Renderer::Settings::GodRays::getDensity() + 0.02f);
+    }
+    if (Engine::isKeyDown(KeyboardKey::X)) { 
+        Renderer::Settings::GodRays::setExposure(Renderer::Settings::GodRays::getExposure() - 0.02f);
+    }
+    if (Engine::isKeyDown(KeyboardKey::C)) { 
+        Renderer::Settings::GodRays::setExposure(Renderer::Settings::GodRays::getExposure() + 0.02f);
+    }
+    if (Engine::isKeyDown(KeyboardKey::O)) {
+        Renderer::Settings::GodRays::setWeight(Renderer::Settings::GodRays::getWeight() - 0.02f);
+    }
+    if (Engine::isKeyDown(KeyboardKey::P)) {
+        Renderer::Settings::GodRays::setWeight(Renderer::Settings::GodRays::getWeight() + 0.02f);
+    }
 
     m_HUD->update(dt);
 }

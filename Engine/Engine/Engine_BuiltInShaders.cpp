@@ -17,6 +17,7 @@ GLSL Version    OpenGL Version
 430              4.3
 440              4.4
 450              4.5
+460              4.6
 */
 
 #pragma region Declarations
@@ -1836,25 +1837,22 @@ epriv::EShaders::godRays_frag =
     "uniform sampler2D firstPass;\n"
     "uniform int samples;\n"
     "\n"
-    "uniform int behind;\n"
     "uniform float alpha;\n"
     "varying vec2 texcoords;\n"
     "void main(){\n"
-    "    if(behind == 0){\n"
-    "        vec2 uv = texcoords;\n"
-    "        vec2 deltaUV = vec2(uv - lightPositionOnScreen);\n"
-    "        deltaUV *= 1.0 /  float(samples) * RaysInfo.z;\n"
-    "        float illuminationDecay = 1.0;\n"
-    "        vec3 totalColor = vec3(0.0);\n"
-    "        for(int i=0; i < samples; ++i){\n"
-    "            uv -= deltaUV / 2.0;\n"
-    "            vec3 sample = texture2D(firstPass,uv).rgb;\n"
-    "            sample *= illuminationDecay * RaysInfo.w;\n"
-    "            totalColor += sample;\n"
-    "            illuminationDecay *= RaysInfo.y;\n"
-    "        }\n"
-    "        gl_FragColor.rgb = (totalColor * alpha) * RaysInfo.x;\n"
+    "    vec2 uv = texcoords;\n"
+    "    vec2 deltaUV = vec2(uv - lightPositionOnScreen);\n"
+    "    deltaUV *= 1.0 /  float(samples) * RaysInfo.z;\n"
+    "    float illuminationDecay = 1.0;\n"
+    "    vec3 totalColor = vec3(0.0);\n"
+    "    for(int i=0; i < samples; ++i){\n"
+    "        uv -= deltaUV / 2.0;\n"
+    "        vec3 sample = texture2D(firstPass,uv).rgb;\n"
+    "        sample *= illuminationDecay * RaysInfo.w;\n"
+    "        totalColor += sample;\n"
+    "        illuminationDecay *= RaysInfo.y;\n"
     "    }\n"
+    "    gl_FragColor.rgb = (totalColor * alpha) * RaysInfo.x;\n"
     "}";
 #pragma endregion
 
@@ -1898,9 +1896,7 @@ epriv::EShaders::final_frag +=
     "        vec3 bloom = texture2D(gBloomMap,texcoords).rgb;\n"
     "        hdr += bloom;\n"
     "    }\n"
-    //"    gl_FragColor = ((vec4(hdr,1.0)) * 0.001) + texture2D(gBloomMap,texcoords).a;\n"
     "    gl_FragColor = vec4(hdr,1.0);\n"
-    "\n"
     "    if(HasFog == 1){\n"
     "        float distFrag = abs(distance(GetWorldPosition(texcoords,CameraNear,CameraFar),CameraPosition));\n"
     "        float distVoid = FogDistNull + FogDistBlend;\n"
