@@ -73,6 +73,7 @@ namespace Engine{
             BloomFrag,
             HDRFrag,
             BlurFrag,
+            DOFFrag,
             SSAOBlurFrag,
             GodRaysFrag,
             FinalFrag,
@@ -104,6 +105,7 @@ namespace Engine{
             DeferredBlurSSAO,
             DeferredHDR,
             DeferredSSAO,
+            DeferredDOF,
             DeferredBloom,
             DeferredFinal,
             DeferredFXAA,
@@ -160,6 +162,15 @@ namespace Engine{
 
 class epriv::RenderManager::impl final{
     public:
+
+        #pragma region DepthOfFieldInfo
+        float dof_bias;
+        float dof_focus;
+        float dof_blur_radius;
+        float dof_aspect_ratio;
+        bool dof;
+        #pragma endregion
+
         #pragma region FogInfo
         bool fog;
         float fog_distNull;
@@ -290,6 +301,14 @@ class epriv::RenderManager::impl final{
         #pragma endregion
 
         void _init(const char* name,uint& w,uint& h){
+            #pragma region DepthOfFieldInfo
+            dof_bias = 0.6f;
+            dof_focus = 2.0f;
+            dof_blur_radius = 3.0f;
+            dof_aspect_ratio = 1.0f;
+            dof = false;
+            #pragma endregion
+
             #pragma region FogInfo
             fog = false;
             fog_distNull = 5.0f;
@@ -455,6 +474,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaders.at(EngineInternalShaders::VertexSkybox) = new Shader(epriv::EShaders::vertex_skybox,ShaderType::Vertex,false);
             m_InternalShaders.at(EngineInternalShaders::ForwardFrag) = new Shader(epriv::EShaders::forward_frag,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::DeferredFrag) = new Shader(epriv::EShaders::deferred_frag,ShaderType::Fragment,false);
+            m_InternalShaders.at(EngineInternalShaders::DOFFrag) = new Shader(epriv::EShaders::depth_of_field, ShaderType::Fragment, false);
             m_InternalShaders.at(EngineInternalShaders::DeferredFragHUD) = new Shader(epriv::EShaders::deferred_frag_hud,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::DeferredFragSkybox) = new Shader(epriv::EShaders::deferred_frag_skybox,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::DeferredFragSkyboxFake) = new Shader(epriv::EShaders::deferred_frag_skybox_fake,ShaderType::Fragment,false);
@@ -492,6 +512,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlurSSAO) = new ShaderP("Deferred_Blur_SSAO", m_InternalShaders.at(EngineInternalShaders::FullscreenVertex), m_InternalShaders.at(EngineInternalShaders::SSAOBlurFrag));
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHDR) = new ShaderP("Deferred_HDR",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::HDRFrag));
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSSAO) = new ShaderP("Deferred_SSAO",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::SSAOFrag));
+            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredDOF) = new ShaderP("Deferred_DOF", m_InternalShaders.at(EngineInternalShaders::FullscreenVertex), m_InternalShaders.at(EngineInternalShaders::DOFFrag));
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBloom) = new ShaderP("Deferred_Bloom", m_InternalShaders.at(EngineInternalShaders::FullscreenVertex), m_InternalShaders.at(EngineInternalShaders::BloomFrag));
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFinal) = new ShaderP("Deferred_Final",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::FinalFrag));
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFXAA) = new ShaderP("Deferred_FXAA",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::FXAAFrag));
@@ -1840,6 +1861,16 @@ class epriv::RenderManager::impl final{
             sendTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),3);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
         }
+        void _passDOF(GBuffer& gbuffer, Camera& c, uint& fboWidth, uint& fboHeight) {
+            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredDOF)->bind();
+
+            sendUniform4fSafe("Data",dof_blur_radius,dof_bias,dof_focus,dof_aspect_ratio);
+    
+            sendTextureSafe("inTexture", gbuffer.getTexture(GBufferType::Lighting), 0);
+            sendTextureSafe("textureDepth", gbuffer.getTexture(GBufferType::Depth), 1);
+
+            _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
+        }
         void _passBlur(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,string type, GLuint texture,string channels){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur)->bind();
 
@@ -1878,23 +1909,20 @@ class epriv::RenderManager::impl final{
             uint _y = uint(float(fboHeight) * _divisor);
             _renderFullscreenTriangle(_x, _y, 0, 0);
         }
-        void _passFXAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,bool renderAA){
-            if(!renderAA) return;
-
+        void _passFXAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFXAA)->bind();
 
             sendUniform1f("FXAA_REDUCE_MIN",FXAA_REDUCE_MIN);
             sendUniform1f("FXAA_REDUCE_MUL",FXAA_REDUCE_MUL);
             sendUniform1f("FXAA_SPAN_MAX",FXAA_SPAN_MAX);
 
-            sendUniform2f("resolution",float(fboWidth),float(fboHeight));
-            sendTexture("sampler0",gbuffer.getTexture(GBufferType::Lighting),0);
+            sendUniform2f("invRes",1.0f / float(fboWidth),1.0f / float(fboHeight));
+            sendTexture("inTexture",gbuffer.getTexture(GBufferType::Lighting),0);
             sendTextureSafe("edgeTexture",gbuffer.getTexture(GBufferType::Misc),1);
             sendTexture("depthTexture",gbuffer.getTexture(GBufferType::Depth),2);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
         }
-        void _passSMAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,bool renderAA){
-            if(!renderAA) return;
+        void _passSMAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
             float _fboWidth = float(fboWidth);
             float _fboHeight = float(fboHeight);
             glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / _fboWidth, 1.0f / _fboHeight, _fboWidth, _fboHeight);
@@ -1975,16 +2003,16 @@ class epriv::RenderManager::impl final{
 
             sendUniform1iSafe("HasBloom",int(bloom));
             sendUniform1iSafe("HasFog",int(fog));
+
             if(fog){
                 sendUniform1fSafe("FogDistNull",fog_distNull);
                 sendUniform1fSafe("FogDistBlend",fog_distBlend);
                 sendUniform4fSafe("FogColor",fog_color);
                 sendTextureSafe("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
             }
-            sendTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0); 
-            sendTextureSafe("gMiscMap",gbuffer.getTexture(GBufferType::Misc),1);
-            sendTextureSafe("gBloomMap",gbuffer.getTexture(GBufferType::Bloom),2);
-
+            sendTextureSafe("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
+            sendTextureSafe("gMiscMap", gbuffer.getTexture(GBufferType::Misc), 1);
+            sendTextureSafe("gBloomMap", gbuffer.getTexture(GBufferType::Bloom), 2);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
         }
         void _renderFullscreenQuad(uint& width,uint& height,uint startX,uint startY){
@@ -2076,7 +2104,6 @@ class epriv::RenderManager::impl final{
             }
             #pragma endregion
 
-            //the clear color calls here are a problem, preventing the atmospheric sky shader from appearing (and looks black)
             #pragma region SSAO
             gbuffer.start(GBufferType::Bloom, "A", false);
             Settings::clear(true, false, false);
@@ -2092,7 +2119,6 @@ class epriv::RenderManager::impl final{
                 }
             }   
             #pragma endregion
-
 
             GLDisable(GLState::BLEND);
 
@@ -2134,25 +2160,32 @@ class epriv::RenderManager::impl final{
             }
             #pragma endregion
 
-            #pragma region Finalization and AA
-    
-            bool doingaa = false;
-            if(doAA && aa_algorithm != AntiAliasingAlgorithm::None) doingaa = true;
+            #pragma region DOF
+            if (dof) {
+                gbuffer.start(GBufferType::Lighting);
+                _passDOF(gbuffer, camera, fboWidth, fboHeight);
+            }
+            #pragma endregion
 
-            if(aa_algorithm == AntiAliasingAlgorithm::None || !doingaa){
-                gbuffer.stop(fbo,rbo);
-                _passFinal(gbuffer,camera,fboWidth,fboHeight);
-            }
-            else if(aa_algorithm == AntiAliasingAlgorithm::FXAA && doingaa){
-                gbuffer.start(GBufferType::Lighting);
-                _passFinal(gbuffer,camera,fboWidth,fboHeight);
-                gbuffer.stop(fbo,rbo);
-                _passFXAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
-            }
-            else if(aa_algorithm == AntiAliasingAlgorithm::SMAA && doingaa){
-                gbuffer.start(GBufferType::Lighting);
-                _passFinal(gbuffer,camera,fboWidth,fboHeight);
-                _passSMAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
+            #pragma region Finalization and AA
+            //not the main render function - dont do AA
+            if (!mainRenderFunc){
+                gbuffer.stop(fbo, rbo);
+                _passFinal(gbuffer, camera, fboWidth, fboHeight);
+            }else{
+                if (aa_algorithm == AntiAliasingAlgorithm::None){
+                    gbuffer.stop(fbo, rbo);
+                    _passFinal(gbuffer, camera, fboWidth, fboHeight);
+                }else if (aa_algorithm == AntiAliasingAlgorithm::FXAA){
+                    gbuffer.start(GBufferType::Lighting);
+                    _passFinal(gbuffer, camera, fboWidth, fboHeight);
+                    gbuffer.stop(fbo, rbo);
+                    _passFXAA(gbuffer, camera, fboWidth, fboHeight);
+                }else if (aa_algorithm == AntiAliasingAlgorithm::SMAA){
+                    gbuffer.start(GBufferType::Lighting);
+                    _passFinal(gbuffer, camera, fboWidth, fboHeight);
+                    _passSMAA(gbuffer, camera, fboWidth, fboHeight);
+                }
             }
             #pragma endregion
             //_passCopyDepth(gbuffer,camera,fboWidth,fboHeight);
@@ -2290,13 +2323,22 @@ void epriv::RenderPipeline::render() {
     }
 }
 
-
 void Renderer::Settings::General::enable1(bool b) { renderManager->enabled1 = b; }
 void Renderer::Settings::General::disable1() { renderManager->enabled1 = false; }
 bool Renderer::Settings::General::enabled1() { return renderManager->enabled1; }
 
 
-
+void Renderer::Settings::DepthOfField::enable(bool b) { renderManager->dof = b; }
+void Renderer::Settings::DepthOfField::disable() { renderManager->dof = false; }
+bool Renderer::Settings::DepthOfField::enabled() { return renderManager->dof; }
+float Renderer::Settings::DepthOfField::getFocus() { return renderManager->dof_focus; }
+void Renderer::Settings::DepthOfField::setFocus(float f) { renderManager->dof_focus = glm::max(0.0f, f); }
+float Renderer::Settings::DepthOfField::getBias() { return renderManager->dof_bias; }
+void Renderer::Settings::DepthOfField::setBias(float b) { renderManager->dof_bias = b; }
+float Renderer::Settings::DepthOfField::getBlurRadius() { return renderManager->dof_blur_radius; }
+void Renderer::Settings::DepthOfField::setBlurRadius(float r) { renderManager->dof_blur_radius = glm::max(0.0f, r); }
+float Renderer::Settings::DepthOfField::getAspectRatio() { return renderManager->dof_aspect_ratio; }
+void Renderer::Settings::DepthOfField::setAspectRatio(float r) { renderManager->dof_aspect_ratio = r; }
 bool Renderer::Settings::Fog::enabled(){ return renderManager->fog; }
 void Renderer::Settings::Fog::enable(bool b){ renderManager->fog = b; }
 void Renderer::Settings::Fog::disable(){ renderManager->fog = false; }

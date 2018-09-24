@@ -154,6 +154,15 @@ namespace Engine{
                 void disable1();
                 bool enabled1();
             };
+            namespace DepthOfField {
+                void enable(bool b = true);
+                void disable();
+                bool enabled();
+                float getFocus(); void setFocus(float);
+                float getBias(); void setBias(float);
+                float getBlurRadius(); void setBlurRadius(float);
+                float getAspectRatio(); void setAspectRatio(float);
+            }
             namespace Fog{
                 void enable(bool b = true);
                 void disable();

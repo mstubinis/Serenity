@@ -27,6 +27,8 @@ namespace Engine{
                 static std::string lighting_vert;
                 static std::string stencil_passover;
 
+                static std::string depth_of_field;
+
                 static std::string smaa_common;
 
                 static std::string smaa_frag_1_stencil;

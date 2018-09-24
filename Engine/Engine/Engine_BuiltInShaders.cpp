@@ -33,6 +33,7 @@ string epriv::EShaders::vertex_hud;
 string epriv::EShaders::vertex_skybox;
 string epriv::EShaders::lighting_vert;
 string epriv::EShaders::stencil_passover;
+string epriv::EShaders::depth_of_field;
 string epriv::EShaders::smaa_common;
 string epriv::EShaders::smaa_frag_1_stencil;
 string epriv::EShaders::smaa_vertex_1;
@@ -626,24 +627,23 @@ epriv::EShaders::fxaa_frag =
     "uniform float FXAA_REDUCE_MIN;\n"
     "uniform float FXAA_REDUCE_MUL;\n"
     "uniform float FXAA_SPAN_MAX;\n"
-    "uniform sampler2D sampler0;\n"
+    "uniform sampler2D inTexture;\n"
     //"uniform sampler2D edgeTexture;\n"
     "uniform sampler2D depthTexture;\n"
-    "uniform vec2 resolution;\n"
+    "uniform vec2 invRes;\n"
     "varying vec2 texcoords;\n"
     "void main(){\n"
     "   float depth = texture2D(depthTexture,texcoords).r;\n"
     //"   float edge = texture2D(edgeTexture,texcoords).r;\n"
     "   if(depth >= 0.999){\n"
-    "       gl_FragColor = texture2D(sampler0, texcoords);\n"
+    "       gl_FragColor = texture2D(inTexture, texcoords);\n"
     "       return;\n"
     "   }\n"
-    "   vec2 invRes = vec2(1.0/resolution.x, 1.0/resolution.y);\n"
-    "   vec3 rgbNW = texture2D(sampler0, texcoords + (vec2(-1.0,-1.0)) * invRes).xyz;\n"
-    "   vec3 rgbNE = texture2D(sampler0, texcoords + (vec2(1.0,-1.0)) * invRes).xyz;\n"
-    "   vec3 rgbSW = texture2D(sampler0, texcoords + (vec2(-1.0,1.0)) * invRes).xyz;\n"
-    "   vec3 rgbSE = texture2D(sampler0, texcoords + (vec2(1.0,1.0)) * invRes).xyz;\n"
-    "   vec3 rgbM  = texture2D(sampler0, texcoords).xyz;\n"
+    "   vec3 rgbNW = texture2D(inTexture, texcoords + (vec2(-1.0,-1.0)) * invRes).xyz;\n"
+    "   vec3 rgbNE = texture2D(inTexture, texcoords + (vec2(1.0,-1.0)) * invRes).xyz;\n"
+    "   vec3 rgbSW = texture2D(inTexture, texcoords + (vec2(-1.0,1.0)) * invRes).xyz;\n"
+    "   vec3 rgbSE = texture2D(inTexture, texcoords + (vec2(1.0,1.0)) * invRes).xyz;\n"
+    "   vec3 rgbM  = texture2D(inTexture, texcoords).xyz;\n"
     "   vec3 luma = vec3(0.299, 0.587, 0.114);\n"
     "   float lumaNW = dot(rgbNW, luma);\n"
     "   float lumaNE = dot(rgbNE, luma);\n"
@@ -658,8 +658,8 @@ epriv::EShaders::fxaa_frag =
     "   float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * FXAA_REDUCE_MUL),FXAA_REDUCE_MIN);\n"
     "   float rcpDirMin = 1.0/(min(abs(dir.x), abs(dir.y)) + dirReduce);\n"
     "   dir = min(vec2(FXAA_SPAN_MAX,FXAA_SPAN_MAX),max(vec2(-FXAA_SPAN_MAX,-FXAA_SPAN_MAX),dir * rcpDirMin)) * invRes;\n"
-    "   vec3 rgbA = 0.5 * (texture2D(sampler0, texcoords   + dir * (1.0/3.0 - 0.5)).xyz + texture2D(sampler0,texcoords + dir * (2.0/3.0 - 0.5)).xyz);\n"
-    "   vec3 rgbB = rgbA * 0.5 + 0.25 * (texture2D(sampler0,texcoords + dir * - 0.5).xyz + texture2D(sampler0,texcoords + dir * 0.5).xyz);\n"
+    "   vec3 rgbA = 0.5 * (texture2D(inTexture, texcoords   + dir * (1.0/3.0 - 0.5)).xyz + texture2D(inTexture,texcoords + dir * (2.0/3.0 - 0.5)).xyz);\n"
+    "   vec3 rgbB = rgbA * 0.5 + 0.25 * (texture2D(inTexture,texcoords + dir * - 0.5).xyz + texture2D(inTexture,texcoords + dir * 0.5).xyz);\n"
     "   float lumaB = dot(rgbB,luma);\n"
     "   if((lumaB < lumaMin) || (lumaB > lumaMax)){\n"
     "       gl_FragColor = vec4(rgbA,1.0);\n"
@@ -703,6 +703,58 @@ epriv::EShaders::fullscreen_quad_vertex =
     "    texcoords = uv;\n"
     "    gl_Position = MVP * vec4(vert,1.0);\n"
     "}";
+#pragma endregion
+
+#pragma region DepthOfField
+epriv::EShaders::depth_of_field =
+    "\n"
+    "float weight[4] = float[](1.0,0.9,0.7,0.4);\n"
+    "\n"
+    "uniform sampler2D inTexture;\n"
+    "uniform sampler2D depthTexture;\n"
+    "\n"
+    "uniform vec4 Data;\n" //x = blurClamp, y = bias, z = focus, w = aspectRatio
+    "\n"
+    "varying vec2 texcoords;\n"
+    "void main(){\n"
+    "    vec2 aspectcorrect = vec2(1.0, Data.w);\n"
+    "    float depth = texture2D(depthTexture, texcoords).r;\n"
+    "    float factor = (depth - Data.z);\n"
+    "    vec2 dofblur = vec2(clamp(factor * Data.y, -Data.x, Data.x));\n"
+    "    vec4 col = vec4(0.0);\n"
+    "    col += texture2D(inTexture, texcoords);\n"
+    "    col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4)*aspectcorrect)     * dofblur);\n"
+    "    col += texture2D(inTexture, texcoords + (vec2(0.0, -0.4)*aspectcorrect)    * dofblur);\n"
+    "    col += texture2D(inTexture, texcoords + (vec2(0.4, 0.0)*aspectcorrect)     * dofblur);\n"
+    "    col += texture2D(inTexture, texcoords + (vec2(-0.4, 0.0)*aspectcorrect)    * dofblur);\n"
+    "    col += texture2D(inTexture, texcoords + (vec2(0.29, 0.29)*aspectcorrect)   * dofblur);\n"
+    "    col += texture2D(inTexture, texcoords + (vec2(-0.29, 0.29)*aspectcorrect)  * dofblur);\n"
+    "    col += texture2D(inTexture, texcoords + (vec2(0.29, -0.29)*aspectcorrect)  * dofblur);\n"
+    "    col += texture2D(inTexture, texcoords + (vec2(-0.29, -0.29)*aspectcorrect) * dofblur);\n"
+    "    for (int i = 0; i < 2; ++i) {\n"
+    "        int k = i+2;\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(0.15, 0.37)*aspectcorrect)   * dofblur * weight[i]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(-0.15, -0.37)*aspectcorrect) * dofblur * weight[i]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(-0.15, 0.37)*aspectcorrect)  * dofblur * weight[i]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(0.15, -0.37)*aspectcorrect)  * dofblur * weight[i]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(-0.37, 0.15)*aspectcorrect)  * dofblur * weight[i]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(0.37, -0.15)*aspectcorrect)  * dofblur * weight[i]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(0.37, 0.15)*aspectcorrect)   * dofblur * weight[i]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(-0.37, -0.15)*aspectcorrect) * dofblur * weight[i]);\n"
+    "\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(0.29, 0.29)*aspectcorrect)   * dofblur * weight[k]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(0.4, 0.0)*aspectcorrect)     * dofblur * weight[k]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(0.29, -0.29)*aspectcorrect)  * dofblur * weight[k]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(0.0, -0.4)*aspectcorrect)    * dofblur * weight[k]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(-0.29, 0.29)*aspectcorrect)  * dofblur * weight[k]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(-0.4, 0.0)*aspectcorrect)    * dofblur * weight[k]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(-0.29, -0.29)*aspectcorrect) * dofblur * weight[k]);\n"
+    "        col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4)*aspectcorrect)     * dofblur * weight[k]);\n"
+    "    }\n"
+    "    gl_FragColor.rgb = col.rgb * 0.02439; \n" //0.02439 = 1.0 / 41.0
+    "    gl_FragColor.a = 1.0; \n"
+    "}\n"
+    "\n";
 #pragma endregion
 
 #pragma region SMAA
