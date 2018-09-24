@@ -283,7 +283,7 @@ class epriv::RenderManager::impl final{
         glm::uvec4 gl_viewport_data;
         bool draw_physics_debug;
 
-        GBuffer* m_gBuffer;
+        GBuffer* m_GBuffer;
         glm::mat4 m_2DProjectionMatrix;
         vector<FontRenderInfo> m_FontsToBeRendered;
         vector<TextureRenderInfo> m_TexturesToBeRendered;
@@ -409,7 +409,7 @@ class epriv::RenderManager::impl final{
             color_mask_g = GL_TRUE;
             color_mask_b = GL_TRUE;
             color_mask_a = GL_TRUE;
-            clear_color = glm::vec4(0.0f);
+            clear_color = glm::vec4(0.0f,0.0f,0.0f,0.0f);
             aa_algorithm = AntiAliasingAlgorithm::FXAA;
             depth_func = DepthFunc::Less;
             gl_viewport_data = glm::uvec4(0,0,0,0);
@@ -419,12 +419,11 @@ class epriv::RenderManager::impl final{
                 draw_physics_debug = false;
             #endif
 
-            m_gBuffer = nullptr;
+            m_GBuffer = nullptr;
             m_2DProjectionMatrix = glm::ortho(0.0f,float(w),0.0f,float(h),0.005f,1000.0f);
             m_IdentityMat4 = glm::mat4(1.0f);
             m_IdentityMat3 = glm::mat3(1.0f);
             #pragma endregion
-
         }      
         void _postInit(const char* name,uint& width,uint& height){
             glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS,&UniformBufferObject::MAX_UBO_BINDINGS);
@@ -1344,7 +1343,7 @@ class epriv::RenderManager::impl final{
         void _destruct(){
             SAFE_DELETE(UniformBufferObject::UBO_CAMERA);
 
-            SAFE_DELETE(m_gBuffer);
+            SAFE_DELETE(m_GBuffer);
             SAFE_DELETE(m_FullscreenQuad);
             SAFE_DELETE(m_FullscreenTriangle);
 
@@ -1377,22 +1376,20 @@ class epriv::RenderManager::impl final{
                 sendTexture("Texture",skybox->texture()->address(0),0,GL_TEXTURE_CUBE_MAP);
                 Skybox::bindMesh();
                 skybox->draw();
-                m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->unbind();
             }else{//render a fake skybox.
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkyboxFake)->bind();
                 glm::vec3 bgColor = scene->getBackgroundColor();
                 sendUniformMatrix4f("VP",c->getProjection() * view);
                 sendUniform4f("Color",bgColor.r,bgColor.g,bgColor.b,1.0f);
                 Skybox::bindMesh();
-                m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkyboxFake)->unbind();
             }
         }
         void _resize(uint& w, uint& h){
-            m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
-            m_gBuffer->resize(w,h);
+            m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,3000.0f);
+            m_GBuffer->resize(w,h);
         }
         void _onFullscreen(sf::Window* sfWindow,sf::VideoMode& videoMode,const char* winName,uint& style,sf::ContextSettings& settings){
-            SAFE_DELETE(m_gBuffer);
+            SAFE_DELETE(m_GBuffer);
 
             sfWindow->create(videoMode,winName,style,settings);
 
@@ -1409,7 +1406,7 @@ class epriv::RenderManager::impl final{
             glClearDepth(1.0f);
             glClearStencil(0);
 
-            m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
+            m_GBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
         }
         void _onOpenGLContextCreation(uint& width,uint& height,uint& _glslVersion,uint _openglVersion){
             epriv::RenderManager::GLSL_VERSION = _glslVersion;
@@ -1419,8 +1416,8 @@ class epriv::RenderManager::impl final{
             GLEnable(GLState::TEXTURE_2D); //is this really needed?
             GLEnable(GLState::CULL_FACE);
             Settings::cullFace(GL_BACK);
-            SAFE_DELETE(m_gBuffer);
-            m_gBuffer = new GBuffer(width,height);
+            SAFE_DELETE(m_GBuffer);
+            m_GBuffer = new GBuffer(width,height);
         }
         void _generatePBREnvMapData(Texture* texture,uint& convoludeTextureSize, uint& preEnvFilterSize){
             uint texType = texture->type();
@@ -2074,7 +2071,7 @@ class epriv::RenderManager::impl final{
                         );
                     }
                     */
-                    m_gBuffer->resize(fboWidth,fboHeight);
+                    m_GBuffer->resize(fboWidth,fboHeight);
                 }
                 #pragma endregion
             }
@@ -2241,10 +2238,9 @@ class epriv::RenderManager::impl final{
 epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); renderManager = m_i.get(); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
-void epriv::RenderManager::_render(GBuffer* g,Camera* c,uint fboW,uint fboH,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){ m_i->_render(*g,*c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo); }
-void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){m_i->_render(*m_i->m_gBuffer,*c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo);}
+void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){m_i->_render(*m_i->m_GBuffer,*c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo);}
 void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
-void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ m_i->m_gBuffer->resize(w,h); }
+void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ m_i->m_GBuffer->resize(w,h); }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
 void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h,uint _glslVersion,uint _openglVersion){ m_i->_onOpenGLContextCreation(w,h,_glslVersion,_openglVersion); }
 void epriv::RenderManager::_renderText(Font* font,string& text,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth){

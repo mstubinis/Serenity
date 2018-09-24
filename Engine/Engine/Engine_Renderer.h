@@ -104,10 +104,6 @@ namespace Engine{
                 void _resizeGbuffer(uint width,uint height);
 
                 void _render(
-                    epriv::GBuffer*,Camera*,uint fboWidth,uint fboHeight,bool HUD=true,
-                    Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
-                );
-                void _render(
                     Camera*,uint fboWidth,uint fboHeight,bool HUD=true,
                     Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
                 );
