@@ -333,7 +333,7 @@ void Math::alignTo(glm::quat& o,glm::vec3& direction,float speed){
     if(speed != 0.0f){
         float angle = Math::getAngleBetweenTwoVectors(direction,glm::vec3(getForward(original)),true); // degrees
         speed *= 1.0f/angle;
-        speed *= Resources::dt();
+        speed *= (float)Resources::dt();
         o = glm::mix(original,o,speed*5.0f);
     }
     o = glm::normalize(o);

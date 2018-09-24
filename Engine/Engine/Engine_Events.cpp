@@ -357,7 +357,7 @@ class epriv::EventManager::impl final{
             m_currentKey = sf::Keyboard::Unknown;
             for(auto iterator:m_KeyStatus){ iterator.second = false; }
             for(auto iterator:m_MouseStatus){ iterator.second = false; }
-            m_Delta *= 0.97f * (1.0f-Resources::dt());
+            m_Delta *= (float)(0.97 * (1.0-Resources::dt()));
 
             m_Difference.x = 0.0f; m_Difference.y = 0.0f;
         }

@@ -271,7 +271,7 @@ void EVENT_JOYSTICK_DISCONNECTED(uint& id){
     epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 
-const float Engine::getFPS(){ return 1.0f / Resources::dt(); }
+const float Engine::getFPS(){ return (float)(1.0 / Resources::dt()); }
 Engine_Window* Engine::getWindow(){ return Engine::Resources::getWindow(); }
 const glm::uvec2 Engine::getWindowSize(){ return Engine::Resources::getWindowSize(); }
 void Engine::setWindowIcon(Texture* texture){ Resources::getWindow()->setIcon(texture); }
@@ -308,7 +308,7 @@ void handleEvents(){
 void Engine::run(){
     const Engine_Window& window = *Resources::getWindow();
     while(!epriv::Core::m_Engine->m_Destroyed /*&& window.isOpen()*/){
-        float& dt = epriv::Core::m_Engine->m_TimeManager->dt();
+        float dt = (float)epriv::Core::m_Engine->m_TimeManager->dt();
         handleEvents();
         update(dt);
         render();

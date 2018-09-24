@@ -27,13 +27,12 @@ namespace Engine{
                 void calculate_render();
                 void calculate_display();
 
-                float& dt() const;
-
-                const float& logicTime() const;
-                const float& physicsTime() const;
-                const float& soundsTime() const;
-                const float& renderTime() const;
-                const float& displayTime() const;
+                const double dt() const;
+                const double logicTime() const;
+                const double physicsTime() const;
+                const double soundsTime() const;
+                const double renderTime() const;
+                const double displayTime() const;
 
                 std::string& reportTime();
                 std::string& reportTime(uint decimals);

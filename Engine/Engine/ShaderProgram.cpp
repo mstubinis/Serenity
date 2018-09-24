@@ -61,13 +61,13 @@ string getLogDepthFunctions(){
 string getNormalDepthFunctions(){
     string res = "\n"
         "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n"
+        "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n" //* 2.0 - 1.0?
         "	 vec4 space = vec4(_uv * 2.0 - 1.0, depth, 1.0);\n"
         "	 space = CameraInvViewProj * space;\n"
         "	 return space.xyz / space.w;\n"
         "}//normal depth world\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n"
+        "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n" //* 2.0 - 1.0?
         "	 vec4 space = vec4(_uv * 2.0 - 1.0, depth, 1.0);\n"
         "	 space = CameraInvProj * space;\n"
         "	 return space.xyz / space.w;\n"

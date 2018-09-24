@@ -371,7 +371,7 @@ class epriv::RenderManager::impl final{
 
             #pragma region SSAOInfo
             ssao = true;
-            ssao_samples = 16;
+            ssao_samples = 7;
             ssao_do_blur = true;
             ssao_blur_num_passes = 1;
             ssao_blur_radius = 0.36f;
@@ -1902,6 +1902,7 @@ class epriv::RenderManager::impl final{
             if (type == "H") { hv = glm::vec2(1.0f, 0.0f); } else { hv = glm::vec2(0.0f, 1.0f); }
 
             sendUniform1f("strengthModifier", ssao_blur_strength);
+            sendUniform2f("invRes", 1.0f / (float)(fboWidth * _divisor), 1.0f / (float)(fboHeight * _divisor));
             sendUniform4f("Data", ssao_blur_radius, 0.0f, hv.x, hv.y);
             sendTexture("image", gbuffer.getTexture(texture), 0);
 

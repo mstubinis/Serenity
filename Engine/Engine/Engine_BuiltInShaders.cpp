@@ -708,7 +708,7 @@ epriv::EShaders::fullscreen_quad_vertex =
 #pragma region DepthOfField
 epriv::EShaders::depth_of_field =
     "\n"
-    "float weight[4] = float[](1.0,0.9,0.7,0.4);\n"
+    "const float weight[4] = float[](1.0,0.9,0.7,0.4);\n"
     "\n"
     "uniform sampler2D inTexture;\n"
     "uniform sampler2D depthTexture;\n"
@@ -1709,8 +1709,8 @@ epriv::EShaders::ssao_frag +=
     "       o += occlude(texcoords + coord2,          worldPosition, normal);\n"
     "    }\n"
     "    o /= SSAOInfoA.z * 4.0;\n"
-    "    o = clamp(o,0.0001,0.9999);\n"
-    "    o = mix(0.0,o,(o >= 0.999 ? 0.0 : 1.0 ));\n"//this gets rid of the dark annoying edges around models. in a very hacky way...
+    "    o = clamp(o,0.01,0.99);\n"
+    "    o = mix(0.0,o,(o >= 0.99 ? 0.0 : 1.0 ));\n"//this gets rid of the dark annoying edges around models. in a very hacky way...
     "    gl_FragColor.a = o;\n"
     "}";
 #pragma endregion
@@ -1791,7 +1791,7 @@ epriv::EShaders::blur_frag =
     "varying vec2 texcoords;\n"
     "\n"
     "const int NUM_SAMPLES = 9;\n"
-    "float weight[NUM_SAMPLES] = float[](0.227,0.21,0.1946,0.162,0.12,0.08,0.054,0.03,0.016);\n"
+    "const float weight[NUM_SAMPLES] = float[](0.227,0.21,0.1946,0.162,0.12,0.08,0.054,0.03,0.016);\n"
     "\n"
     "void main(){\n"
     "    vec2 texOffset = vec2(1.0) / textureSize(image,0);\n"
@@ -1810,19 +1810,19 @@ epriv::EShaders::ssao_blur_frag =
 "uniform sampler2D image;\n"
 "uniform vec4 Data;\n"//radius, UNUSED, H,V
 "uniform float strengthModifier;\n"
+"uniform vec2 invRes;\n"
 "\n"
 "varying vec2 texcoords;\n"
 "\n"
 "const int NUM_SAMPLES = 9;\n"
-"float weight[NUM_SAMPLES] = float[](0.227,0.21,0.1946,0.162,0.12,0.08,0.054,0.03,0.016);\n"
+"const float weight[NUM_SAMPLES] = float[](0.227,0.21,0.1946,0.162,0.12,0.08,0.054,0.03,0.016);\n"
 "\n"
 "void main(){\n"
-"    vec2 texOffset = vec2(1.0) / textureSize(image,0);\n"
 "    float Sum = 0.0;\n"
 "    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
-"        vec2 offset = (texOffset * float(i)) * Data.x;\n"
-"        Sum += (texture2D(image,texcoords + vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i]) * strengthModifier;\n"
-"        Sum += (texture2D(image,texcoords - vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i]) * strengthModifier;\n"
+"        vec2 offset = invRes * float(i) * Data.x;\n"
+"        Sum += texture2D(image,texcoords + vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i] * strengthModifier;\n"
+"        Sum += texture2D(image,texcoords - vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i] * strengthModifier;\n"
 "    }\n"
 "    gl_FragColor.a = Sum;\n"
 "}";

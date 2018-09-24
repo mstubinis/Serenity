@@ -75,7 +75,7 @@ void epriv::ResourceManager::_init(const char* n,uint w,uint h){ m_i->_postInit(
 string Engine::Data::reportTime(){
     return epriv::Core::m_Engine->m_TimeManager->reportTime();
 }
-float& Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(); }
+const double Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_CurrentScene; }
 
 bool epriv::ResourceManager::_hasScene(string n){ if(m_i->m_Scenes.count(n)) return true; return false; }

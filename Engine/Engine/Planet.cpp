@@ -189,8 +189,7 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     if(atmosphereHeight <= 0){
         outerRadius += (outerRadius *  0.025f);
         Renderer::sendUniform1i("HasAtmosphere",0);   
-    }
-    else{
+    }else{
         Renderer::sendUniform1i("HasAtmosphere",1);   
     }
     float fScale = 1.0f / (outerRadius - innerRadius);
@@ -199,8 +198,7 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     //pass ground based parameters to the gpu
     if(camHeight <= outerRadius){
         Renderer::sendUniform1i("fromAtmosphere", 1);
-    }
-    else{
+    }else{
         Renderer::sendUniform1i("fromAtmosphere", 0);
     }
     Renderer::sendUniform4fSafe("Object_Color",i.color());
@@ -261,20 +259,19 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     model = glm::scale(model,scl);
     model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
 
-    /*
+    
     //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
-    float _distanceReal = glm::abs(glm::distance(camPosR,pos));
-    float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
+    //float _distanceReal = glm::abs(glm::distance(camPosR,pos));
+    //float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
     //2.718281828459045235360287471352 = euler's number
-    float _distance = _factor * _distanceReal;
-    glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
-    float _newScale = scl.x * _factor;
-    model = glm::mat4(1.0f);
-    model = glm::translate(model,camPosR - _newPosition);
-    model = glm::scale(model,glm::vec3(_newScale));
-    model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
-    */
-
+    //float _distance = _factor * _distanceReal;
+    //glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
+    //float _newScale = scl.x * _factor;
+    //model = glm::mat4(1.0f);
+    //model = glm::translate(model,camPosR - _newPosition);
+    //model = glm::scale(model,glm::vec3(_newScale));
+    //model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
+    
     model[3][0] -= camPosR.x;
     model[3][1] -= camPosR.y;
     model[3][2] -= camPosR.z;
@@ -283,8 +280,7 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     //and now render the atmosphere
     if(camHeight > outerRadius){
         program = Resources::getShaderProgram(ResourceManifest::skyFromSpace); 
-    }
-    else{
+    }else{
         program = Resources::getShaderProgram(ResourceManifest::skyFromAtmosphere);
     }
     program->bind();
