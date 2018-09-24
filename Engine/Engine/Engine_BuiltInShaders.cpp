@@ -1711,7 +1711,7 @@ epriv::EShaders::ssao_frag +=
     "    o /= SSAOInfoA.z * 4.0;\n"
     "    o = clamp(o,0.0001,0.9999);\n"
     "    o = mix(0.0,o,(o >= 0.999 ? 0.0 : 1.0 ));\n"//this gets rid of the dark annoying edges around models. in a very hacky way...
-    "    gl_FragColor.a = 1.0 - o;\n"
+    "    gl_FragColor.a = o;\n"
     "}";
 #pragma endregion
 
@@ -2060,7 +2060,7 @@ epriv::EShaders::lighting_frag +=
     "\n"
     "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
     "    highp int matID = int(floor(matIDandAO));\n"
-    "    float ssaoValue = texture2D(gSSAOMap,uv).a;\n"
+    "    float ssaoValue = 1.0 - texture2D(gSSAOMap,uv).a;\n"
     "    float ao = (fract(matIDandAO)+0.0001) * ssaoValue;\n"//the 0.0001 makes up for the clamp in material class
     "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n"
     "    float metalness = stuff.x;\n"
@@ -2215,7 +2215,7 @@ epriv::EShaders::lighting_frag_gi +=
     "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"
     "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
     "    highp int index = int(floor(matIDandAO));\n"
-    "    float ssaoValue = texture2D(gSSAOMap,uv).a;\n"
+    "    float ssaoValue = 1.0 - texture2D(gSSAOMap,uv).a;\n"
     "    float ao = (fract(matIDandAO)+0.0001) * ssaoValue;\n"//the 0.0001 makes up for the clamp in material class
     "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n" //x is metalness, y is smoothness
     "    vec3 MaterialF0 = Unpack3FloatsInto1FloatUnsigned(materials[index].r);\n"

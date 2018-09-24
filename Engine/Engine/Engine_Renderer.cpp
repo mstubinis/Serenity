@@ -1321,7 +1321,6 @@ class epriv::RenderManager::impl final{
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
             GLEnable(GLState::DEPTH_TEST);
             Renderer::setDepthFunc(DepthFunc::LEqual);
-            Renderer::clearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClearDepth(1.0f);
             glClearStencil(0);
             GLDisable(GLState::STENCIL_TEST);
@@ -1932,7 +1931,6 @@ class epriv::RenderManager::impl final{
             glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / _fboWidth, 1.0f / _fboHeight, _fboWidth, _fboHeight);
 
             #pragma region PassEdge
-            Renderer::clearColor(0.0f, 0.0f, 0.0f, 0.0f); //for some reason alpha needs to be cleared to 0.0 or there will be inaccuracies.
             gbuffer.start(GBufferType::Misc);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1)->bind();
 
@@ -2040,7 +2038,6 @@ class epriv::RenderManager::impl final{
         }
         void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& HUD, Entity* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
             Scene* s = Resources::getCurrentScene();
-            Renderer::clearColor(0.0f, 0.0f, 0.0f, 1.0f);
             //restore default state, might have to increase this as we use more textures
             for(uint i = 0; i < 7; ++i){ 
                 glActiveTexture(GL_TEXTURE0 + i);
