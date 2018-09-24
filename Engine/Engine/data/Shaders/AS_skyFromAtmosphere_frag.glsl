@@ -67,13 +67,8 @@ void main(){
     gl_FragData[2].rg = ConstantZeroVec2; //outglow, outspecular
     if(HasGodsRays == 1){
         gl_FragData[3] = clamp(vec4(HDR.xyz,nightmult), 0.01, 0.99);
-
-        //WTF is gl_FragData[4]?????
-
-        gl_FragData[3] = pow(gl_FragData[4], vec4(11.0));
-
-        gl_FragData[3] = clamp(gl_FragData[4], 0.01, 0.99);
-        gl_FragData[3].rgb = max(gl_FragData[4].rgb, vec3(0.125, 0.116, 0.25)) * 0.7;
-    }
-    
+        gl_FragData[3] = pow(gl_FragData[3], vec4(11.0));
+        gl_FragData[3] = clamp(gl_FragData[3], 0.01, 0.99);
+        gl_FragData[3].rgb = max(gl_FragData[3].rgb, vec3(0.125, 0.116, 0.25)) * 0.7;
+    }    
 }

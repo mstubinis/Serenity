@@ -1830,7 +1830,6 @@ epriv::EShaders::ssao_blur_frag =
 
 #pragma region GodRays
 epriv::EShaders::godRays_frag =
-    "\n"
     "uniform vec4 RaysInfo;\n"//exposure | decay | density | weight
     "\n"
     "uniform vec2 lightPositionOnScreen;\n"
@@ -1846,16 +1845,15 @@ epriv::EShaders::godRays_frag =
     "        vec2 deltaUV = vec2(uv - lightPositionOnScreen);\n"
     "        deltaUV *= 1.0 /  float(samples) * RaysInfo.z;\n"
     "        float illuminationDecay = 1.0;\n"
-    "        vec4 totalColor = vec4(0.0);\n"
+    "        vec3 totalColor = vec3(0.0);\n"
     "        for(int i=0; i < samples; ++i){\n"
     "            uv -= deltaUV / 2.0;\n"
-    "            vec4 sample = texture2D(firstPass,uv);\n"
+    "            vec3 sample = texture2D(firstPass,uv).rgb;\n"
     "            sample *= illuminationDecay * RaysInfo.w;\n"
     "            totalColor += sample;\n"
     "            illuminationDecay *= RaysInfo.y;\n"
     "        }\n"
-    "        gl_FragColor = totalColor * alpha;\n"
-    "        gl_FragColor *= RaysInfo.x;\n"
+    "        gl_FragColor.rgb = (totalColor * alpha) * RaysInfo.x;\n"
     "    }\n"
     "}";
 #pragma endregion

@@ -89,12 +89,12 @@ class epriv::GBuffer::impl final{
             if(first_fbo){ m_FBO->bind(); }
             else{ m_SmallFBO->bind(); }
             bool r,g,b,a;
-            channels.find("R") != string::npos ? r = 1 : r = 0;
-            channels.find("G") != string::npos ? g = 1 : g = 0;
-            channels.find("B") != string::npos ? b = 1 : b = 0;
-            channels.find("A") != string::npos ? a = 1 : a = 0;
-            Renderer::colorMask(r,g,b,a);
-            glDrawBuffers(size, types); // Specify what to render an start acquiring
+            channels.find("R") != string::npos ? r = true : r = false;
+            channels.find("G") != string::npos ? g = true : g = false;
+            channels.find("B") != string::npos ? b = true : b = false;
+            channels.find("A") != string::npos ? a = true : a = false;     
+            glDrawBuffers(size, types);
+            Renderer::colorMask(r, g, b, a);
         }
         void _start(const uint& t1, const string& c,bool f){
             uint t[1] = { m_Buffers.at(t1)->attatchment()  };

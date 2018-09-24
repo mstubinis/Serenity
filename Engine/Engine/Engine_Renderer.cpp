@@ -2037,7 +2037,7 @@ class epriv::RenderManager::impl final{
         void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& HUD, Entity* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
             Scene* s = Resources::getCurrentScene();
             //restore default state, might have to increase this as we use more textures
-            for(uint i = 0; i < 7; ++i){ 
+            for(uint i = 0; i < 9; ++i){ 
                 glActiveTexture(GL_TEXTURE0 + i);
                 glBindTexture(GL_TEXTURE_2D,0);
                 glBindTexture(GL_TEXTURE_CUBE_MAP,0);
@@ -2055,11 +2055,9 @@ class epriv::RenderManager::impl final{
                     m_UBOCameraData.InvProj = camera.getProjectionInverse();
                     m_UBOCameraData.InvView = camera.getViewInverse();
                     m_UBOCameraData.InvViewProj = camera.getViewProjectionInverse();
-                    m_UBOCameraData.Info1 = glm::vec4(glm::vec3(0.0001f),camera.getNear());
+                    m_UBOCameraData.Info1 = glm::vec4(glm::vec3(0.0f),camera.getNear());
                     m_UBOCameraData.Info2 = glm::vec4(camera.getViewVectorNoTranslation(),camera.getFar());
-                    UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
-                
-                
+                    UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);           
                 }
                 #pragma endregion
                 #pragma region LightProbes
@@ -2083,8 +2081,10 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_MASK);
 
             #pragma region GodRays
+
+            gbuffer.start(GBufferType::GodRays, "RGB", false);
+            Settings::clear(true,false,false); //this is needed
             if (godRays && godRays_Object) {
-                gbuffer.start(GBufferType::GodRays, "RGBA", false);
                 auto& body = *godRays_Object->getComponent<ComponentBody>();
                 glm::vec3 oPos = body.position();
                 glm::vec3 sp = Math::getScreenCoordinates(oPos, false);
@@ -2094,18 +2094,17 @@ class epriv::RenderManager::impl final{
                 float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRays_fovDegrees;
 
                 alpha = glm::pow(alpha, godRays_alphaFalloff);
-                alpha = glm::clamp(alpha, 0.0001f, 0.9999f);
+                alpha = glm::clamp(alpha, 0.01f, 0.99f);
 
-                Settings::clear(true,false,false);
-                _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), !behind, 1.0f - alpha);
+                _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), !behind, 1.0f - alpha);          
             }
             #pragma endregion
 
             #pragma region SSAO
-            gbuffer.start(GBufferType::Bloom, "A", false);
+            gbuffer.start(GBufferType::Bloom, GBufferType::GodRays, "A", false);
             Settings::clear(true, false, false);
             if (ssao) {
-                _passSSAO(gbuffer, camera, fboWidth, fboHeight);
+                _passSSAO(gbuffer, camera, fboWidth, fboHeight);      
                 if (ssao_do_blur) {
                     for (uint i = 0; i < ssao_blur_num_passes; ++i) {
                         gbuffer.start(GBufferType::GodRays, "A", false);
@@ -2114,6 +2113,7 @@ class epriv::RenderManager::impl final{
                         _passBlurSSAO(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays);
                     }
                 }
+                
             }   
             #pragma endregion
 
@@ -2125,6 +2125,7 @@ class epriv::RenderManager::impl final{
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_ONE, GL_ONE);
 
+            //this needs to be cleaned up
             if(lighting && epriv::InternalScenePublicInterface::GetLights(s).size() > 0){
                 gbuffer.start(GBufferType::Lighting,"RGB");
                 Settings::clear(true,false,false);//this is needed for godrays

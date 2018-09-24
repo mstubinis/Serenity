@@ -77,8 +77,8 @@ void Game::update(const float& dt){
     if(Engine::isKeyDownOnce(KeyboardKey::F10)){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
     if (Engine::isKeyDownOnce(KeyboardKey::F11)) { 
         //Renderer::Settings::General::enable1(!Renderer::Settings::General::enabled1()); 
-        //Renderer::Settings::Bloom::enable(!Renderer::Settings::Bloom::enabled());
-        Renderer::Settings::DepthOfField::enable(!Renderer::Settings::DepthOfField::enabled());
+        Renderer::Settings::Bloom::enable(!Renderer::Settings::Bloom::enabled());
+        //Renderer::Settings::DepthOfField::enable(!Renderer::Settings::DepthOfField::enabled());
     }
 
     if (Engine::isKeyDown(KeyboardKey::N)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() - 0.02f); }

@@ -155,6 +155,7 @@ void SolarSystem::_loadFromFile(string filename){
                         loadedMaterials.emplace(MATERIAL_NAME,handle);
                     }
                 }
+                
                 if(line[0] == 'S'){//Sun
                     Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::vec3(0),(float)RADIUS,NAME,this);
                     if(PARENT != ""){
@@ -192,7 +193,6 @@ void SolarSystem::_loadFromFile(string filename){
                     if(PARENT != ""){
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
-
                         if(ORBIT_PERIOD != -1.0f){
                             planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,parent->id(),INCLINATION));
                         }
@@ -200,8 +200,7 @@ void SolarSystem::_loadFromFile(string filename){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
                         }
                     }
-                    m_Planets.emplace(NAME,planetoid);
-                    
+                    m_Planets.emplace(NAME,planetoid);                   
                 }else if(line[0] == '*'){//Player ship
                     if(PARENT != ""){
                         float parentX = m_Planets.at(PARENT)->getPosition().x;
@@ -228,8 +227,7 @@ void SolarSystem::_loadFromFile(string filename){
                         }
                         planetRings.at(PARENT).push_back(RingInfo((uint)POSITION/10,(uint)RADIUS/10,glm::uvec3(R,G,B),BREAK));
                     }
-                }else if(line[0] == 'L'){//Lagrange Point
-                    
+                }else if(line[0] == 'L'){//Lagrange Point               
                 }
             }
         }

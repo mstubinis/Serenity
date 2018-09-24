@@ -196,10 +196,8 @@ void CapsuleSpace::update(const float& dt){
     float roll  = glm::sin(m_Timer * 2.4f) * 5.0f;
     float pitch = glm::sin(m_Timer * 2.4f) * 3.7f;
 
-
     model.getModel()->setPosition(glm::vec3(x * 1.2f, -y ,0));
     model.getModel()->setOrientation(  glm::radians(pitch), 0 , glm::radians(roll)  );
-
 
     //double check this (this is the light probe)
     //getPlayer()->getChildren().at(0)->setPosition(glm::vec3(x*1.2f,-y,0));
