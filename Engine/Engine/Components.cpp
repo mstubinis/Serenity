@@ -463,10 +463,10 @@ void ComponentCamera::lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up){
 }
 glm::mat4 ComponentCamera::getProjection(){ return _projectionMatrix; }
 glm::mat4 ComponentCamera::getProjectionInverse(){ return glm::inverse(_projectionMatrix); }
-glm::mat4 ComponentCamera::getView(){ return _viewMatrixNoTranslation; }
-glm::mat4 ComponentCamera::getViewInverse(){ return glm::inverse(_viewMatrixNoTranslation); }
-glm::mat4 ComponentCamera::getViewProjection(){ return _projectionMatrix * _viewMatrixNoTranslation; }
-glm::mat4 ComponentCamera::getViewProjectionInverse(){ return glm::inverse(_projectionMatrix * _viewMatrixNoTranslation); }
+glm::mat4 ComponentCamera::getView(){ return _viewMatrix; }
+glm::mat4 ComponentCamera::getViewInverse(){ return glm::inverse(_viewMatrix); }
+glm::mat4 ComponentCamera::getViewProjection(){ return _projectionMatrix * _viewMatrix; }
+glm::mat4 ComponentCamera::getViewProjectionInverse(){ return glm::inverse(_projectionMatrix * _viewMatrix); }
 glm::vec3 ComponentCamera::getViewVector(){ return glm::vec3(_viewMatrix[0][2],_viewMatrix[1][2],_viewMatrix[2][2]); }
 glm::vec3 ComponentCamera::getViewVectorNoTranslation(){ return glm::vec3(_viewMatrixNoTranslation[0][2],_viewMatrixNoTranslation[1][2],_viewMatrixNoTranslation[2][2]); }
 float ComponentCamera::getAngle(){ return _angle; }

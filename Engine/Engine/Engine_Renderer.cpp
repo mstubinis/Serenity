@@ -1720,8 +1720,8 @@ class epriv::RenderManager::impl final{
                 sendUniformMatrix4fSafe("CameraInvView",c.getViewInverse());
                 sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
                 sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
-                sendUniform4fSafe("CameraInfo1",glm::vec4(glm::vec3(0.0001f),c.getNear()));
-                sendUniform4fSafe("CameraInfo2",glm::vec4(c.getViewVectorNoTranslation(),c.getFar()));
+                sendUniform4fSafe("CameraInfo1",glm::vec4(c.getPosition(),c.getNear()));
+                sendUniform4fSafe("CameraInfo2",glm::vec4(c.getViewVector(),c.getFar()));
             }
             
             sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
@@ -1744,8 +1744,8 @@ class epriv::RenderManager::impl final{
                     sendUniformMatrix4fSafe("CameraInvView",c.getViewInverse());
                     sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
                     sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
-                    sendUniform4fSafe("CameraInfo1",glm::vec4(glm::vec3(0.0001f),c.getNear()));
-                    sendUniform4fSafe("CameraInfo2",glm::vec4(c.getViewVectorNoTranslation(),c.getFar()));
+                    sendUniform4fSafe("CameraInfo1",glm::vec4(c.getPosition(),c.getNear()));
+                    sendUniform4fSafe("CameraInfo2",glm::vec4(c.getViewVector(),c.getFar()));
                 }
                 
                 sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
@@ -1784,8 +1784,8 @@ class epriv::RenderManager::impl final{
             if(RenderManager::GLSL_VERSION < 140){
                 sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
                 sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
-                sendUniform4fSafe("CameraInfo1",glm::vec4(glm::vec3(0.0001f),c.getNear()));
-                sendUniform4fSafe("CameraInfo2",glm::vec4(c.getViewVectorNoTranslation(),c.getFar()));
+                sendUniform4fSafe("CameraInfo1",glm::vec4(c.getPosition(),c.getNear()));
+                sendUniform4fSafe("CameraInfo2",glm::vec4(c.getViewVector(),c.getFar()));
             }  
             sendUniform4f("SSAOInfo",ssao_radius,ssao_intensity,ssao_bias,ssao_scale);
             sendUniform4i("SSAOInfoA",int(ssao),int(bloom),ssao_samples,SSAO_NORMALMAP_SIZE);//change to 4f eventually?
@@ -2056,8 +2056,8 @@ class epriv::RenderManager::impl final{
                     m_UBOCameraData.InvProj = camera.getProjectionInverse();
                     m_UBOCameraData.InvView = camera.getViewInverse();
                     m_UBOCameraData.InvViewProj = camera.getViewProjectionInverse();
-                    m_UBOCameraData.Info1 = glm::vec4(glm::vec3(0.0f),camera.getNear());
-                    m_UBOCameraData.Info2 = glm::vec4(camera.getViewVectorNoTranslation(),camera.getFar());
+                    m_UBOCameraData.Info1 = glm::vec4(camera.getPosition(),camera.getNear());
+                    m_UBOCameraData.Info2 = glm::vec4(camera.getViewVector(),camera.getFar());
                     UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);           
                 }
                 #pragma endregion

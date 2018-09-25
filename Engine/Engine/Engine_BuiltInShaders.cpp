@@ -24,7 +24,6 @@ GLSL Version    OpenGL Version
 string epriv::EShaders::constants;
 string epriv::EShaders::conditional_functions;
 string epriv::EShaders::float_into_2_floats;
-string epriv::EShaders::determinent_mat3;
 string epriv::EShaders::normals_octahedron_compression_functions;
 string epriv::EShaders::bullet_physics_vert;
 string epriv::EShaders::bullet_physcis_frag;
@@ -81,7 +80,6 @@ epriv::EShaders::constants =
     "const vec2 ConstantZeroVec2 = vec2(0.0,0.0);\n"
     "\n"
     "const float KPI = 3.1415926535898;\n"
-    "const float StereoConst = 1.7777777777;\n"
     "\n";
 #pragma endregion
 
@@ -145,7 +143,8 @@ epriv::EShaders::conditional_functions =
     "int inot(int a) { return 1 - a; }\n"
     "\n";
 
-epriv::EShaders::float_into_2_floats = 
+epriv::EShaders::float_into_2_floats =
+    //designed to work with uniform floats coming from the cpu
     "vec3 Unpack3FloatsInto1FloatUnsigned(float v){\n"
     "    vec3 ret;\n"
     "    ret.r = mod(v,          1.0);\n"
@@ -161,6 +160,7 @@ epriv::EShaders::float_into_2_floats =
     "    ret = ret * 2.0 - 1.0;\n"
     "    return ret;\n"
     "}\n"
+    //designed to work with gbuffer 16-bit floating point buffers
     "float Pack2FloatIntoFloat16(float x,float y){\n"
     "    x = clamp(x,0.0001,0.9999);\n"
     "    y = clamp(y,0.0001,0.9999);\n"
@@ -176,6 +176,8 @@ epriv::EShaders::float_into_2_floats =
     "    res.y = (res.y - 0.5) * 2.0;\n"
     "    return res;\n"
     "}\n"
+    //currently unused
+    /*
     "float Pack2FloatIntoFloat32(float x,float y){\n"
     "    x = clamp(x,0.0001,0.9999);\n"
     "    y = clamp(y,0.0001,0.9999);\n"
@@ -190,95 +192,25 @@ epriv::EShaders::float_into_2_floats =
     "    res.x = (res.x - 0.5) * 2.0;\n"
     "    res.y = (res.y - 0.5) * 2.0;\n"
     "    return res;\n"
-    "}\n";
-epriv::EShaders::determinent_mat3 = 
-    "float det(mat3 m){\n"
-    "    return m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2])-m[1][0]*(m[0][1]*m[2][2]-m[2][1]*m[0][2])+m[2][0]*(m[0][1]*m[1][2]-m[1][1]*m[0][2]);\n"
-    "}\n";
-
-epriv::EShaders::normals_octahedron_compression_functions = epriv::EShaders::constants +
-    "float Round(float x){\n"
-    "    return x < 0.0 ? int(x - 0.5) : int(x + 0.5);\n"
     "}\n"
-    "vec2 sign_not_zero(vec2 v) {\n"
+    */
+    "\n";
+epriv::EShaders::normals_octahedron_compression_functions = epriv::EShaders::constants +
+    "vec2 SignNotZero(vec2 v) {\n"
     "    return vec2(v.x >= 0 ? 1.0 : -1.0, v.y >= 0 ? 1.0 : -1.0);\n"
     "}\n"
     "vec2 EncodeOctahedron(vec3 n) {\n"
     "    if(   all(greaterThan(n,ConstantAlmostOneVec3))   )\n"
-    "        return ConstantOneVec2;\n"
+    "        return ConstantOneVec2;\n" 
     "	 n.xy /= dot(abs(n), ConstantOneVec3);\n"
-    "	 return mix(n.xy, (1.0 - abs(n.yx)) * sign_not_zero(n.xy), step(n.z, 0.0));\n"
+    "	 return mix(n.xy, (1.0 - abs(n.yx)) * SignNotZero(n.xy), step(n.z, 0.0));\n"
     "}\n"
     "vec3 DecodeOctahedron(vec2 n) {\n"
     "    if(    all(greaterThan(n,ConstantAlmostOneVec2))    )\n"
     "        return ConstantOneVec3;\n"
     "	 vec3 v = vec3(n.xy, 1.0 - abs(n.x) - abs(n.y));\n"
-    "	 if (v.z < 0) v.xy = (1.0 - abs(v.yx)) * sign_not_zero(v.xy);\n"
+    "	 if (v.z < 0) v.xy = (1.0 - abs(v.yx)) * SignNotZero(v.xy);\n"
     "	 return normalize(v);\n"
-    "}\n"
-    "vec2 EncodeSpherical(vec3 n){\n"
-    "    if(    all(greaterThan(n,ConstantAlmostOneVec3))    )\n"
-    "        return ConstantOneVec2;\n"
-    "    vec2 encN;\n"
-    "    encN.x = atan( n.x, n.y ) * 1.0 / KPI;\n"
-    "    encN.y = n.z;\n"
-    "    encN = encN * 0.5 + 0.5;\n"
-    "    return encN;\n"
-    "}\n"
-    "vec3 DecodeSpherical(vec2 encN){\n"
-    "    if(    all(greaterThan(encN,ConstantAlmostOneVec2))    )\n"
-    "        return ConstantOneVec3;\n"
-    "    vec2 ang = encN * 2.0 - 1.0;\n"
-    "    vec2 scth;\n"
-    "    float ang2 = ang.x * KPI;\n"
-    "    scth.x = sin(ang2);\n"
-    "    scth.y = cos(ang2);\n"
-    "    vec2 scphi = vec2( sqrt( 1.0 - ang.y * ang.y ), ang.y );\n"
-    "    vec3 n;\n"
-    "    n.x = scth.y * scphi.x;\n"
-    "    n.y = scth.x * scphi.x;\n"
-    "    n.z = scphi.y;\n"
-    "    return normalize(n);\n"
-    "}\n"
-    "vec2 EncodeStereographic(vec3 n){\n"
-    "    if(    all(greaterThan(n,ConstantAlmostOneVec3))    )\n"
-    "        return ConstantOneVec2;\n"
-    "    float scale = StereoConst;\n"
-    "    vec2 enc = n.xy / (n.z + 1.0);\n"
-    "    enc /= scale;\n"
-    "    enc = enc * 0.5 + 0.5;\n"
-    "    return enc;\n"
-    "}\n"
-    "vec3 DecodeStereographic(vec2 enc){\n"
-    "    if(    all(greaterThan(enc,ConstantAlmostOneVec2))    )\n"
-    "        return ConstantOneVec3;\n"
-    "    float scale = StereoConst;\n"
-    "    vec3 nn = vec3(enc.xy,1.0) * vec3(2.0 * scale,2.0 * scale,0.0) + vec3(-scale,-scale,1.0);\n"
-    "    float g = 2.0 / dot(nn.xyz,nn.xyz);\n"
-    "    vec3 n;\n"
-    "    n.xy = g * nn.xy;\n"
-    "    n.z = g - 1.0;\n"
-    "    return normalize(n);\n"
-    "}\n"
-    "vec2 EncodeXYRestoreZ(vec3 n){\n"
-    "    if(    all(greaterThan(n,ConstantAlmostOneVec3))    ){\n"
-    "        return ConstantOneVec2;\n"
-    "    }\n"
-    "    vec2 enc = ConstantZeroVec2;\n"
-    "    enc = vec2(0.5) * n.xy + ConstantOneVec2;\n"
-    "    enc.x *= n.z < 0.0 ? -1.0 : 1.0;\n"
-    "    return enc;\n"
-    "}\n"
-    "vec3 DecodeXYRestoreZ(vec2 n){\n"
-    "    if(    all(greaterThan(n,ConstantAlmostOneVec2))    ){\n"
-    "        return ConstantOneVec3;\n"
-    "    }\n"
-    "    vec3 enc = ConstantZeroVec3;\n"
-    "    enc.x = 2.0 * abs(n.r) - 1.0;\n"
-    "    enc.y = 2.0 * abs(n.g) - 1.0;\n"
-    "    enc.z = n.r < 0.0 ? -1.0 : 1.0;\n"
-    "    enc.z *= sqrt(abs(1.0 - enc.x * enc.x - enc.y * enc.y));\n"
-    "    return normalize(enc);\n"
     "}\n";
 
 #pragma endregion
@@ -1697,7 +1629,7 @@ epriv::EShaders::ssao_frag +=
     "void main(){\n"
     "    vec3 worldPosition = GetWorldPosition(texcoords,CameraNear,CameraFar);\n"
     "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
-    "    vec3 randomVector = normalize(texture2D(gRandomMap, texcoords / SSAOInfoA.w).xyz);\n" //should texcoords be uv here?
+    "    vec3 randomVector = normalize(texture2D(gRandomMap, texcoords / SSAOInfoA.w).xyz) * 2.0 - 1.0;\n" //should texcoords be uv here?
     "    float _distance = distance(worldPosition, CameraPosition) + 0.0001;\n"//cuz we dont like divide by zeros ;)
     "    float radius = max(0.05,SSAOInfo.x / _distance);\n"
     "    float o = 0.0;\n"

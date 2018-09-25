@@ -34,40 +34,44 @@ void insertStringRightAfterLineContent(string& src, const string& newContent,con
     istringstream str(src);string l; vector<string> lines; bool a = false;
     while(getline(str,l)){lines.push_back(l+"\n");if(sfind(l,lineContent) && !a){lines.push_back(newContent+"\n"); a=true;}}src="";for(auto ln:lines){src+=ln;}
 }
-
+//this needs some work.
 string getLogDepthFunctions(){
     string res =  "\n"
         "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float log_depth = (texture2D(gDepthMap, _uv).r);\n" //* 2.0 - 1.0?
-        "    float regularDepth = pow(_far + 1.0, log_depth) - 1.0;\n"//log to regular depth
+        "    float gBufferDepth = texture2D(gDepthMap, _uv).r;\n"
+        "    float log_depth = pow(_near + 1.0, gBufferDepth) - 1.0;\n"
         "    float a = _far / (_far - _near);\n"
         "    float b = _far * _near / (_near - _far);\n"
-        "    float linearDepth = (a + b / regularDepth);\n"
-        "    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
-        "    vec4 worldPos = CameraInvViewProj * clipSpace;\n"
-        "    return worldPos.xyz / worldPos.w;\n"
+        "    float linearDepth = (a + b / log_depth);\n"
+        "	 vec4 space = vec4(_uv * 2.0 - 1.0, linearDepth * 2.0 - 1.0, 1.0);\n"
+        "	 space = CameraInvViewProj * space;\n"
+        "	 return space.xyz / space.w;\n"
         "}//log depth world\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r;\n" //* 2.0 - 1.0?
-        "    depth = pow(_far + 1.0, depth) - 1.0;\n"//log to regular depth
-        "    float a = _far / (_far - _near);\n"//linearize regular depth
+        "    float gBufferDepth = texture2D(gDepthMap, _uv).r;\n"
+        "    float log_depth = pow(_near + 1.0, gBufferDepth) - 1.0;\n"
+        "    float a = _far / (_far - _near);\n"
         "    float b = _far * _near / (_near - _far);\n"
-        "    float linearDepth = (a + b / depth);\n"
-        "    vec4 viewPos = CameraInvProj * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
-        "    return viewPos.xyz / viewPos.w;\n"
+        "    float linearDepth = (a + b / log_depth);\n"
+        "	 vec4 space = vec4(_uv * 2.0 - 1.0, linearDepth * 2.0 - 1.0, 1.0);\n"
+        "	 space = CameraInvProj * space;\n"
+        "	 return space.xyz / space.w;\n"
         "}//log depth view\n";
     return res;
 }
+
+
+//this is working great right now, do not modify
 string getNormalDepthFunctions(){
     string res = "\n"
         "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n" //* 2.0 - 1.0?
+        "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n"
         "	 vec4 space = vec4(_uv * 2.0 - 1.0, depth, 1.0);\n"
         "	 space = CameraInvViewProj * space;\n"
         "	 return space.xyz / space.w;\n"
         "}//normal depth world\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n" //* 2.0 - 1.0?
+        "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n"
         "	 vec4 space = vec4(_uv * 2.0 - 1.0, depth, 1.0);\n"
         "	 space = CameraInvProj * space;\n"
         "	 return space.xyz / space.w;\n"

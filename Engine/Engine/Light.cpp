@@ -159,9 +159,9 @@ void PointLight::lighten(){
 
     glm::vec3 camPos = c->getPosition();
     glm::mat4 model = m_i->m_Body->modelMatrix();
-    model[3][0] -= camPos.x;
-    model[3][1] -= camPos.y;
-    model[3][2] -= camPos.z;
+    //model[3][0] -= camPos.x;
+    //model[3][1] -= camPos.y;
+    //model[3][2] -= camPos.z;
     glm::mat4 vp = c->getViewProjection();
 
     sendUniformMatrix4f("MVP",vp * model);
@@ -210,9 +210,9 @@ void SpotLight::lighten(){
 
     glm::vec3 camPos = c->getPosition();
     glm::mat4 model = m_i->m_Body->modelMatrix();
-    model[3][0] -= camPos.x;
-    model[3][1] -= camPos.y;
-    model[3][2] -= camPos.z;
+    //model[3][0] -= camPos.x;
+    //model[3][1] -= camPos.y;
+    //model[3][2] -= camPos.z;
     glm::mat4 vp = c->getViewProjection();
 
     sendUniformMatrix4f("MVP",vp * model);
@@ -266,9 +266,9 @@ void RodLight::lighten(){
 
     glm::vec3 camPos = c->getPosition();
     glm::mat4 model = m_i->m_Body->modelMatrix();
-    model[3][0] -= camPos.x;
-    model[3][1] -= camPos.y;
-    model[3][2] -= camPos.z;
+    //model[3][0] -= camPos.x;
+    //model[3][1] -= camPos.y;
+    //model[3][2] -= camPos.z;
     glm::mat4 vp = c->getViewProjection();
 
     sendUniformMatrix4f("MVP",vp * model);

@@ -120,7 +120,7 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
         for(uint j = 0; j < animationQueue.size(); ++j){
             auto& a = *(animationQueue.at(j));
             if(a.m_Mesh == i.m_Mesh){
-                a.m_CurrentTime += Resources::dt();
+                a.m_CurrentTime += (float)Resources::dt();
                 a.m_Mesh->playAnimation(transforms,a.m_AnimationName,a.m_CurrentTime);
                 if(a.m_CurrentTime >= a.m_EndTime){
                     a.m_CurrentTime = 0;
@@ -145,9 +145,9 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
         Renderer::sendUniform1iSafe("AnimationPlaying",0);
     }
     glm::mat4 model = parentModel * i.m_Model; //might need to reverse this order.
-    model[3][0] -= camPos.x;
-    model[3][1] -= camPos.y;
-    model[3][2] -= camPos.z;
+    //model[3][0] -= camPos.x;
+    //model[3][1] -= camPos.y;
+    //model[3][2] -= camPos.z;
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
      

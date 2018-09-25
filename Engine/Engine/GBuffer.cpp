@@ -11,8 +11,12 @@ using namespace std;
 vector<boost::tuple<ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = [](){
     vector<boost::tuple<ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m; m.resize(epriv::GBufferType::_TOTAL);
                                                            //internFormat        //pxl_components                   //pxl_format
+
+
     m.at(epriv::GBufferType::Diffuse)  = boost::make_tuple(ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);
+    //r,g = Normals as Octahedron Compressed. b = MaterialID and AO. a = Packed Metalness / Smoothness
     m.at(epriv::GBufferType::Normal)   = boost::make_tuple(ImageInternalFormat::RGBA16F,  ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
+    //r = OutGlow. g = OutSpecular. b = UNUSED a = UNUSED 
     m.at(epriv::GBufferType::Misc)     = boost::make_tuple(ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
     m.at(epriv::GBufferType::Lighting) = boost::make_tuple(ImageInternalFormat::RGB16F,   ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_3);
     m.at(epriv::GBufferType::Bloom)    = boost::make_tuple(ImageInternalFormat::RGBA4,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);

@@ -68,9 +68,9 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
 
-    model[3][0] -= camPosR.x;
-    model[3][1] -= camPosR.y;
-    model[3][2] -= camPosR.z;
+    //model[3][0] -= camPosR.x;
+    //model[3][1] -= camPosR.y;
+    //model[3][2] -= camPosR.z;
 
     outerRadius += (outerRadius *  0.025f);
     Renderer::sendUniform1i("HasAtmosphere",0);   
@@ -125,9 +125,9 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
 
-    model[3][0] -= camPos.x;
-    model[3][1] -= camPos.y;
-    model[3][2] -= camPos.z;
+    //model[3][0] -= camPos.x;
+    //model[3][1] -= camPos.y;
+    //model[3][2] -= camPos.z;
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     
@@ -180,9 +180,9 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
 
-    model[3][0] -= camPosR.x;
-    model[3][1] -= camPosR.y;
-    model[3][2] -= camPosR.z;
+    //model[3][0] -= camPosR.x;
+    //model[3][1] -= camPosR.y;
+    //model[3][2] -= camPosR.z;
 
 
     Renderer::GLEnable(GLState::BLEND);
@@ -272,9 +272,9 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     //model = glm::scale(model,glm::vec3(_newScale));
     //model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
     
-    model[3][0] -= camPosR.x;
-    model[3][1] -= camPosR.y;
-    model[3][2] -= camPosR.z;
+    //model[3][0] -= camPosR.x;
+    //model[3][1] -= camPosR.y;
+    //model[3][2] -= camPosR.z;
 
     ShaderP* program;
     //and now render the atmosphere

@@ -670,9 +670,9 @@ class epriv::PhysicsManager::impl final{
             Camera* c = Resources::getCurrentScene()->getActiveCamera();
             glm::vec3 camPos = c->getPosition();
             glm::mat4 model = glm::mat4(1.0f);
-            model[3][0] -= camPos.x;
-            model[3][1] -= camPos.y;
-            model[3][2] -= camPos.z;
+            //model[3][0] -= camPos.x;
+            //model[3][1] -= camPos.y;
+            //model[3][2] -= camPos.z;
             Renderer::sendUniformMatrix4f("Model",model);
             Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
             data->debugDrawer->drawAccumulatedLines();
