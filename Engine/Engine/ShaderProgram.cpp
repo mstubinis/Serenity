@@ -39,14 +39,15 @@ string getLogDepthFunctions(){
     string res =  "\n"
         "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
         "    float gBufferDepth = texture2D(gDepthMap, _uv).r;\n"
-        "    float log_depth = pow(_near + 1.0, gBufferDepth) - 1.0;\n"
+        "    float depth_value = log(gBufferDepth + 1.0) / log(_far + 1.0);\n"
+        "    float log_depth = pow(_far + 1.0, depth_value) - 1.0;\n"
         "    float a = _far / (_far - _near);\n"
         "    float b = _far * _near / (_near - _far);\n"
-        "    float linearDepth = (a + b / log_depth);\n"
-        "	 vec4 space = vec4(_uv * 2.0 - 1.0, linearDepth * 2.0 - 1.0, 1.0);\n"
+        "    float linearDepth = (a + b / log_depth) / _far;\n"
+        "	 vec4 space = vec4(_uv, linearDepth, 1.0) * 2.0 - 1.0;\n"
         "	 space = CameraInvViewProj * space;\n"
         "	 return space.xyz / space.w;\n"
-        "}//log depth world\n"
+        "}\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
         "    float gBufferDepth = texture2D(gDepthMap, _uv).r;\n"
         "    float log_depth = pow(_near + 1.0, gBufferDepth) - 1.0;\n"
@@ -56,7 +57,7 @@ string getLogDepthFunctions(){
         "	 vec4 space = vec4(_uv * 2.0 - 1.0, linearDepth * 2.0 - 1.0, 1.0);\n"
         "	 space = CameraInvProj * space;\n"
         "	 return space.xyz / space.w;\n"
-        "}//log depth view\n";
+        "}\n";
     return res;
 }
 
@@ -69,13 +70,13 @@ string getNormalDepthFunctions(){
         "	 vec4 space = vec4(_uv * 2.0 - 1.0, depth, 1.0);\n"
         "	 space = CameraInvViewProj * space;\n"
         "	 return space.xyz / space.w;\n"
-        "}//normal depth world\n"
+        "}\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
         "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n"
         "	 vec4 space = vec4(_uv * 2.0 - 1.0, depth, 1.0);\n"
         "	 space = CameraInvProj * space;\n"
         "	 return space.xyz / space.w;\n"
-        "}//normal depth view\n";
+        "}\n";
     return res;
 }
 
