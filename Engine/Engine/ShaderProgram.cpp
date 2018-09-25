@@ -43,18 +43,19 @@ string getLogDepthFunctions(){
         "    float log_depth = pow(_far + 1.0, depth_value) - 1.0;\n"
         "    float a = _far / (_far - _near);\n"
         "    float b = _far * _near / (_near - _far);\n"
-        "    float linearDepth = (a + b / log_depth) / _far;\n"
+        "    float linearDepth = (a + b / log_depth);\n"
         "	 vec4 space = vec4(_uv, linearDepth, 1.0) * 2.0 - 1.0;\n"
         "	 space = CameraInvViewProj * space;\n"
         "	 return space.xyz / space.w;\n"
         "}\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
         "    float gBufferDepth = texture2D(gDepthMap, _uv).r;\n"
-        "    float log_depth = pow(_near + 1.0, gBufferDepth) - 1.0;\n"
+        "    float depth_value = log(gBufferDepth + 1.0) / log(_far + 1.0);\n"
+        "    float log_depth = pow(_far + 1.0, depth_value) - 1.0;\n"
         "    float a = _far / (_far - _near);\n"
         "    float b = _far * _near / (_near - _far);\n"
         "    float linearDepth = (a + b / log_depth);\n"
-        "	 vec4 space = vec4(_uv * 2.0 - 1.0, linearDepth * 2.0 - 1.0, 1.0);\n"
+        "	 vec4 space = vec4(_uv, linearDepth, 1.0) * 2.0 - 1.0;\n"
         "	 space = CameraInvProj * space;\n"
         "	 return space.xyz / space.w;\n"
         "}\n";
@@ -324,7 +325,7 @@ class ShaderP::impl final{
                 insertStringAtLine(_d,log_vertex_code,1);
                 log_vertex_code = "\n"
                     "logz_f = 1.0 + gl_Position.w;\n"
-                    "gl_Position.z = (log2(max(0.000001, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
+                    "gl_Position.z = (log2(max(0.000001, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n" //this line is optional i think... since gl_FragDepth may be written manually
                     "FC = fcoeff;\n"
                     "\n";
                 insertStringAtEndOfMainFunc(_d,log_vertex_code);

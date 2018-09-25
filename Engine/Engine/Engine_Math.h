@@ -16,6 +16,7 @@ class btQuaternion;
 class Camera;
 typedef unsigned int uint;
 typedef unsigned short ushort;
+typedef unsigned char uchar;
 namespace glm{
     //floats
     typedef glm::tquat<float> q_f;	
@@ -153,9 +154,15 @@ namespace Engine{
 
         glm::vec3 direction(glm::vec3& eye,glm::vec3& target);
 
+
         void lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up);
 
         void translate(btRigidBody*,btVector3&,bool local);
+
+        uchar pack2NibblesIntoChar(float x, float y);
+        glm::vec2 unpack2NibblesFromChar(uchar);
+        uchar pack2NibblesIntoCharBasic(float x, float y);
+        glm::vec2 unpack2NibblesFromCharBasic(uchar);
 
         GLuint pack3NormalsInto32Int(float x, float y, float z);
         GLuint pack3NormalsInto32Int(glm::vec3 v);

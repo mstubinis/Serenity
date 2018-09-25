@@ -24,6 +24,8 @@
 
 #include "ResourceManifest.h"
 
+#include "Engine_Math.h"
+
 
 using namespace Engine;
 
@@ -47,7 +49,7 @@ void Game::initLogic(){
     window.setMouseCursorVisible(false);
     window.setKeyRepeatEnabled(false);
     //apparently these 2 should not be used together, but i have not found any issues with it so far
-    window.setVerticalSyncEnabled(true);
+    //window.setVerticalSyncEnabled(true);
     //window.setFramerateLimit(60);
     SolarSystem* sol = new SolarSystem("Sol","data/Systems/Sol.txt");
     CapsuleSpace* cap = new CapsuleSpace();
@@ -57,7 +59,6 @@ void Game::initLogic(){
 
     m_HUD = new HUD();
 }
-
 void Game::update(const float& dt){
     if(Engine::isKeyDown(KeyboardKey::Escape)){
         Engine::stop();
