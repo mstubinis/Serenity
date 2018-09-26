@@ -208,9 +208,11 @@ class epriv::RenderManager::impl final{
         #pragma region BloomInfo
         uint bloom_num_passes;
         bool bloom;
-        float bloom_radius;
-        float bloom_strength;
+        float bloom_blur_radius;
+        float bloom_blur_strength;
         float bloom_scale;
+        float bloom_threshold;
+        float bloom_exposure;
         #pragma endregion
 
         #pragma region LightingInfo
@@ -345,9 +347,11 @@ class epriv::RenderManager::impl final{
             #pragma region BloomInfo
             bloom_num_passes = 3;
             bloom = true;
-            bloom_radius = 0.75f;
-            bloom_strength = 0.6f;
-            bloom_scale = 7.1f;
+            bloom_blur_radius = 0.75f;
+            bloom_blur_strength = 0.6f;
+            bloom_scale = 1.32f;
+            bloom_threshold = 0.48f;
+            bloom_exposure = 1.42f;
             #pragma endregion
 
             #pragma region LightingInfo
@@ -1803,10 +1807,9 @@ class epriv::RenderManager::impl final{
         void _passBloom(GBuffer& gbuffer, Camera& c, uint& fboWidth, uint& fboHeight) {
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBloom)->bind();
             float _divisor = gbuffer.getSmallFBO()->divisor();
-            sendUniform1f("bloomScale", bloom_scale);
 
-            sendTexture("gMiscMap", gbuffer.getTexture(GBufferType::Misc), 0);
-            sendTexture("gLightMap", gbuffer.getTexture(GBufferType::Lighting), 1);
+            sendUniform4f("Data", bloom_scale,bloom_threshold,bloom_exposure,0.0f);
+            sendTexture("gLightMap", gbuffer.getTexture(GBufferType::Lighting), 0);
 
             uint _x = uint(float(fboWidth) * _divisor);
             uint _y = uint(float(fboHeight) * _divisor);
@@ -1885,8 +1888,8 @@ class epriv::RenderManager::impl final{
             if(type == "H"){ hv = glm::vec2(1.0f,0.0f); }
             else{            hv = glm::vec2(0.0f,1.0f); }
 
-            sendUniform4f("strengthModifier",bloom_strength,bloom_strength,bloom_strength,ssao_blur_strength);
-            sendUniform4f("DataA",bloom_radius,0.0f,hv.x,hv.y);
+            sendUniform4f("strengthModifier", bloom_blur_strength, bloom_blur_strength, bloom_blur_strength,ssao_blur_strength);
+            sendUniform4f("DataA",bloom_blur_radius,0.0f,hv.x,hv.y);
             sendUniform4f("RGBA",rgba);
             sendTexture("image",gbuffer.getTexture(texture),0);
 
@@ -2358,15 +2361,19 @@ void Renderer::Settings::HDR::disable(){ renderManager->hdr = false; }
 float Renderer::Settings::HDR::getExposure(){ return renderManager->hdr_exposure; }
 void Renderer::Settings::HDR::setExposure(float e){ renderManager->hdr_exposure = e; }
 void Renderer::Settings::HDR::setAlgorithm(HDRAlgorithm::Algorithm a){ renderManager->hdr_algorithm = a; }
+float Renderer::Settings::Bloom::getThreshold() { return renderManager->bloom_threshold; }
+void Renderer::Settings::Bloom::setThreshold(float t) { renderManager->bloom_threshold = t; }
+float Renderer::Settings::Bloom::getExposure() { return renderManager->bloom_exposure; }
+void Renderer::Settings::Bloom::setExposure(float e) { renderManager->bloom_exposure = e; }
 bool Renderer::Settings::Bloom::enabled() { return renderManager->bloom; }
 uint Renderer::Settings::Bloom::getNumPasses() { return renderManager->bloom_num_passes; }
 void Renderer::Settings::Bloom::setNumPasses(uint p) { renderManager->bloom_num_passes = p; }
 void Renderer::Settings::Bloom::enable(bool b){ renderManager->bloom = b; }
 void Renderer::Settings::Bloom::disable(){ renderManager->bloom = false; }
-float Renderer::Settings::Bloom::getRadius(){ return renderManager->bloom_radius; }
-float Renderer::Settings::Bloom::getStrength(){ return renderManager->bloom_strength; }
-void Renderer::Settings::Bloom::setRadius(float r){ renderManager->bloom_radius = glm::max(0.0f,r); }
-void Renderer::Settings::Bloom::setStrength(float r){ renderManager->bloom_strength = glm::max(0.0f,r); }
+float Renderer::Settings::Bloom::getBlurRadius(){ return renderManager->bloom_blur_radius; }
+float Renderer::Settings::Bloom::getBlurStrength(){ return renderManager->bloom_blur_strength; }
+void Renderer::Settings::Bloom::setBlurRadius(float r){ renderManager->bloom_blur_radius = glm::max(0.0f,r); }
+void Renderer::Settings::Bloom::setBlurStrength(float r){ renderManager->bloom_blur_strength = glm::max(0.0f,r); }
 float Renderer::Settings::Bloom::getScale(){ return renderManager->bloom_scale; }
 void Renderer::Settings::Bloom::setScale(float s){ renderManager->bloom_scale = glm::max(0.0f,s); }
 void Renderer::Settings::SMAA::setThreshold(float f){ renderManager->SMAA_THRESHOLD = f; }

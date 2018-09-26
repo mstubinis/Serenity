@@ -161,8 +161,8 @@ namespace Engine{
 
         uchar pack2NibblesIntoChar(float x, float y);
         glm::vec2 unpack2NibblesFromChar(uchar);
-        uchar pack2NibblesIntoCharBasic(float x, float y);
-        glm::vec2 unpack2NibblesFromCharBasic(uchar);
+        float pack2NibblesIntoCharBasic(float x, float y);
+        glm::vec2 unpack2NibblesFromCharBasic(float);
 
         GLuint pack3NormalsInto32Int(float x, float y, float z);
         GLuint pack3NormalsInto32Int(glm::vec3 v);

@@ -81,12 +81,21 @@ void Game::update(const float& dt){
         Renderer::Settings::Bloom::enable(!Renderer::Settings::Bloom::enabled());
         //Renderer::Settings::DepthOfField::enable(!Renderer::Settings::DepthOfField::enabled());
     }
-    if (Engine::isKeyDown(KeyboardKey::N)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::M)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::V)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::B)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::X)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::C)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() + 0.02f); }
+    //if (Engine::isKeyDown(KeyboardKey::N)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() - 0.02f); }
+    //if (Engine::isKeyDown(KeyboardKey::M)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() + 0.02f); }
+
+    if (Engine::isKeyDown(KeyboardKey::N)) { Renderer::Settings::Bloom::setScale(Renderer::Settings::Bloom::getScale() - 0.04f); }
+    if (Engine::isKeyDown(KeyboardKey::M)) { Renderer::Settings::Bloom::setScale(Renderer::Settings::Bloom::getScale() + 0.04f); }
+    if (Engine::isKeyDown(KeyboardKey::V)) { Renderer::Settings::Bloom::setThreshold(Renderer::Settings::Bloom::getThreshold() - 0.04f); }
+    if (Engine::isKeyDown(KeyboardKey::B)) { Renderer::Settings::Bloom::setThreshold(Renderer::Settings::Bloom::getThreshold() + 0.04f); }
+    if (Engine::isKeyDown(KeyboardKey::X)) { Renderer::Settings::Bloom::setExposure(Renderer::Settings::Bloom::getExposure() - 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::C)) { Renderer::Settings::Bloom::setExposure(Renderer::Settings::Bloom::getExposure() + 0.02f); }
+
+
+    //if (Engine::isKeyDown(KeyboardKey::V)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() - 0.02f); }
+    //if (Engine::isKeyDown(KeyboardKey::B)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() + 0.02f); }
+    //if (Engine::isKeyDown(KeyboardKey::X)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() - 0.02f); }
+    //if (Engine::isKeyDown(KeyboardKey::C)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() + 0.02f); }
     if (Engine::isKeyDown(KeyboardKey::H)) { Renderer::Settings::SSAO::setBlurStrength(Renderer::Settings::SSAO::getBlurStrength() - 0.02f); }
     if (Engine::isKeyDown(KeyboardKey::J)) { Renderer::Settings::SSAO::setBlurStrength(Renderer::Settings::SSAO::getBlurStrength() + 0.02f); }
     if (Engine::isKeyDown(KeyboardKey::O)) { Renderer::Settings::SSAO::setBias(Renderer::Settings::SSAO::getBias() - 0.02f); }

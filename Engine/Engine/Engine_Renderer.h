@@ -201,8 +201,10 @@ namespace Engine{
                 uint getNumPasses();          void setNumPasses(uint);
                 void enable(bool b = true);   void disable();
                 bool enabled();
-                float getRadius();            void setRadius(float r);
-                float getStrength();          void setStrength(float r);
+                float getThreshold();         void setThreshold(float t);
+                float getExposure();          void setExposure(float e);
+                float getBlurRadius();        void setBlurRadius(float r);
+                float getBlurStrength();      void setBlurStrength(float r);
                 float getScale();             void setScale(float s);
             };
             namespace GodRays{

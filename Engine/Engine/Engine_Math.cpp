@@ -240,23 +240,16 @@ glm::vec2 Math::unpack2NibblesFromChar(uchar _packedData) {
     return glm::vec2((float)low * 0.0666f, (float)high * 0.0666f);
 }
 //attempt to do the above using non bitwise operations for glsl versions that do not support bitwise operations
-uchar Math::pack2NibblesIntoCharBasic(float x, float y) {
-    uchar _packedData = 0;
-    /*
-    int bits = (int)round(x / 0.0666f);
-    int bits1 = (int)round(y / 0.0666f);
-    _packedData |= (bits & 0x0F);
-    _packedData |= ((bits1 << 4) & 0xF0);
-    */
-    return _packedData;
+float Math::pack2NibblesIntoCharBasic(float x, float y) {
+    float lowEnd = (float)round(x / 0.0666f);
+    float highEnd = (float)(round(y / 0.0666f) * 16.0f);
+    return float(lowEnd + highEnd);
 }
-glm::vec2 Math::unpack2NibblesFromCharBasic(uchar _packedData) {
-    /*
-    int low = _packedData & 0x0F; //binary 00000001
-    int high = (_packedData >> 4); //binary 10000000
-    return glm::vec2((float)low * 0.0666f, (float)high * 0.0666f);
-    */
-    return glm::vec2(0.0f);
+glm::vec2 Math::unpack2NibblesFromCharBasic(float _packedData) {
+    float highEnd = (_packedData / 16.0f);
+    highEnd = highEnd - glm::floor(highEnd);
+    float lowEnd = (float)(_packedData - (highEnd * 16.0f));
+    return glm::vec2(highEnd, (float)(lowEnd / 255.0));
 }
 float Math::pack2FloatsInto1Float(float x,float y){
     x = (x + 1.0f) * 0.5f;

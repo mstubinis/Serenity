@@ -128,6 +128,8 @@ void HUD::render(){
 
     font->renderText(Engine::Data::reportTime() + 
                      "\nBloom Scale: " + to_string(Renderer::Settings::Bloom::getScale()) +
+                     "\nBloom Exposure: " + to_string(Renderer::Settings::Bloom::getExposure()) +
+                     "\nBloom Threshold: " + to_string(Renderer::Settings::Bloom::getThreshold()) +
                      "\nEnabled1: " + stuff +
                      "\nSSAO Bias: " + to_string(Renderer::Settings::SSAO::getBias()) + 
                      "\nSSAO Radius: " + to_string(Renderer::Settings::SSAO::getRadius()) +
