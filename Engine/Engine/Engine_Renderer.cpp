@@ -238,7 +238,7 @@ class epriv::RenderManager::impl final{
 
         #pragma region SSAOInfo
         static const int SSAO_KERNEL_COUNT = 32;
-        static const int SSAO_NORMALMAP_SIZE = 128;
+        static const int SSAO_NORMALMAP_SIZE = 4;
         bool ssao;
         bool ssao_do_blur;
         uint ssao_samples;
@@ -377,15 +377,15 @@ class epriv::RenderManager::impl final{
 
             #pragma region SSAOInfo
             ssao = true;
-            ssao_samples = 7;
+            ssao_samples = 3;
             ssao_do_blur = true;
-            ssao_blur_num_passes = 1;
-            ssao_blur_radius = 0.36f;
+            ssao_blur_num_passes = 2;
+            ssao_blur_radius = 0.66f;
             ssao_blur_strength = 0.48f;
             ssao_scale = 1.0f;
-            ssao_intensity = 1.7f;
-            ssao_bias = 0.1f;
-            ssao_radius = 0.24f;
+            ssao_intensity = 2.63f;
+            ssao_bias = 0.36f;
+            ssao_radius = 0.14f;
             #pragma endregion
 
             #pragma region HDRInfo
@@ -1302,21 +1302,23 @@ class epriv::RenderManager::impl final{
             m_FullscreenQuad = new FullscreenQuad();
             m_FullscreenTriangle = new FullscreenTriangle();
 
-            uniform_real_distribution<float> randFloats(0.0f,1.0f);
+            uniform_real_distribution<float> rand(0.0f,1.0f);
             default_random_engine gen;
             for(uint i = 0; i < SSAO_KERNEL_COUNT; ++i){
-                glm::vec3 sample(randFloats(gen)*2.0-1.0,randFloats(gen)*2.0-1.0,randFloats(gen));
+                glm::vec3 sample(rand(gen)*2.0f - 1.0f, rand(gen)*2.0f - 1.0f, rand(gen));
                 sample = glm::normalize(sample);
-                sample *= randFloats(gen);
+                sample *= rand(gen);
                 float scale = float(i) / float(SSAO_KERNEL_COUNT);
-                float a = 0.1f; float b = 1.0f; float f = scale * scale;
-                scale = a + f * (b - a); //basic lerp   
+                float a = 0.1f;
+                float b = 1.0f;
+                float f = scale * scale;
+                scale = a + f * (b - a);
                 sample *= scale;
                 ssao_Kernels[i] = sample;
             }
             vector<glm::vec3> ssaoNoise;
             for(uint i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i){
-                ssaoNoise.emplace_back(randFloats(gen)*2.0-1.0,randFloats(gen)*2.0-1.0,0.0f);
+                ssaoNoise.emplace_back(rand(gen)*2.0-1.0, rand(gen)*2.0-1.0,0.0f);
             }
             genAndBindTexture(GL_TEXTURE_2D,ssao_noise_texture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE,SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
@@ -1790,9 +1792,12 @@ class epriv::RenderManager::impl final{
                 sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
                 sendUniform4fSafe("CameraInfo1",glm::vec4(c.getPosition(),c.getNear()));
                 sendUniform4fSafe("CameraInfo2",glm::vec4(c.getViewVector(),c.getFar()));
-            }  
+            } 
+            uint _x = uint(float(fboWidth) * _divisor);
+            uint _y = uint(float(fboHeight) * _divisor);
+            sendUniform2f("ScreenSize", (float)_x, (float)_y);
             sendUniform4f("SSAOInfo",ssao_radius,ssao_intensity,ssao_bias,ssao_scale);
-            sendUniform4i("SSAOInfoA",int(ssao),int(bloom),ssao_samples,SSAO_NORMALMAP_SIZE);//change to 4f eventually?
+            sendUniform4i("SSAOInfoA",0,0,ssao_samples,SSAO_NORMALMAP_SIZE);//change to 4f eventually?
 
             sendUniform3fv("poisson[0]",ssao_Kernels,SSAO_KERNEL_COUNT);
 
@@ -1800,8 +1805,6 @@ class epriv::RenderManager::impl final{
             sendTexture("gRandomMap",ssao_noise_texture,1,GL_TEXTURE_2D);
             sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
 
-            uint _x = uint(float(fboWidth) * _divisor);
-            uint _y = uint(float(fboHeight) * _divisor);
             _renderFullscreenTriangle(_x,_y,0,0);
         }
         void _passBloom(GBuffer& gbuffer, Camera& c, uint& fboWidth, uint& fboHeight) {
@@ -1865,12 +1868,12 @@ class epriv::RenderManager::impl final{
             sendTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),3);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
         }
-        void _passDOF(GBuffer& gbuffer, Camera& c, uint& fboWidth, uint& fboHeight) {
+        void _passDOF(GBuffer& gbuffer, Camera& c, uint& fboWidth, uint& fboHeight, GBufferType::Type sceneTexture) {
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredDOF)->bind();
 
             sendUniform4fSafe("Data",dof_blur_radius,dof_bias,dof_focus,dof_aspect_ratio);
     
-            sendTextureSafe("inTexture", gbuffer.getTexture(GBufferType::Lighting), 0);
+            sendTextureSafe("inTexture", gbuffer.getTexture(sceneTexture), 0);
             sendTextureSafe("textureDepth", gbuffer.getTexture(GBufferType::Depth), 1);
 
             _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
@@ -1914,7 +1917,7 @@ class epriv::RenderManager::impl final{
             uint _y = uint(float(fboHeight) * _divisor);
             _renderFullscreenTriangle(_x, _y, 0, 0);
         }
-        void _passFXAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
+        void _passFXAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight, GBufferType::Type sceneTexture){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFXAA)->bind();
 
             sendUniform1f("FXAA_REDUCE_MIN",FXAA_REDUCE_MIN);
@@ -1922,7 +1925,7 @@ class epriv::RenderManager::impl final{
             sendUniform1f("FXAA_SPAN_MAX",FXAA_SPAN_MAX);
 
             sendUniform2f("invRes",1.0f / float(fboWidth),1.0f / float(fboHeight));
-            sendTexture("inTexture",gbuffer.getTexture(GBufferType::Lighting),0);
+            sendTexture("inTexture",gbuffer.getTexture(sceneTexture),0);
             sendTextureSafe("edgeTexture",gbuffer.getTexture(GBufferType::Misc),1);
             sendTexture("depthTexture",gbuffer.getTexture(GBufferType::Depth),2);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
@@ -2003,7 +2006,7 @@ class epriv::RenderManager::impl final{
             */  
             #pragma endregion
         }
-        void _passFinal(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
+        void _passFinal(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight, GBufferType::Type sceneTexture){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFinal)->bind();
 
             sendUniform1iSafe("HasBloom",int(bloom));
@@ -2013,11 +2016,10 @@ class epriv::RenderManager::impl final{
                 sendUniform1fSafe("FogDistNull",fog_distNull);
                 sendUniform1fSafe("FogDistBlend",fog_distBlend);
                 sendUniform4fSafe("FogColor",fog_color);
-                sendTextureSafe("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
+                sendTextureSafe("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
             }
-            sendTextureSafe("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
-            sendTextureSafe("gMiscMap", gbuffer.getTexture(GBufferType::Misc), 1);
-            sendTextureSafe("gBloomMap", gbuffer.getTexture(GBufferType::Bloom), 2);
+            sendTextureSafe("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
+            sendTextureSafe("gBloomMap", gbuffer.getTexture(GBufferType::Bloom), 1);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
         }
         void _renderFullscreenQuad(uint& width,uint& height,uint startX,uint startY){
@@ -2162,30 +2164,28 @@ class epriv::RenderManager::impl final{
             }
             #pragma endregion
 
+            //Misc buffer has the scene data right now.
             #pragma region DOF
             if (dof) {
                 gbuffer.start(GBufferType::Lighting);
-                _passDOF(gbuffer, camera, fboWidth, fboHeight);
+                _passDOF(gbuffer, camera, fboWidth, fboHeight, GBufferType::Misc);
             }
             #pragma endregion
 
             #pragma region Finalization and AA
             //not the main render function - dont do AA
-            if (!mainRenderFunc){
+            if (!mainRenderFunc || aa_algorithm == AntiAliasingAlgorithm::None){
                 gbuffer.stop(fbo, rbo);
-                _passFinal(gbuffer, camera, fboWidth, fboHeight);
+                _passFinal(gbuffer, camera, fboWidth, fboHeight,GBufferType::Misc);
             }else{
-                if (aa_algorithm == AntiAliasingAlgorithm::None){
-                    gbuffer.stop(fbo, rbo);
-                    _passFinal(gbuffer, camera, fboWidth, fboHeight);
-                }else if (aa_algorithm == AntiAliasingAlgorithm::FXAA){
+                if (aa_algorithm == AntiAliasingAlgorithm::FXAA){
                     gbuffer.start(GBufferType::Lighting);
-                    _passFinal(gbuffer, camera, fboWidth, fboHeight);
+                    _passFinal(gbuffer, camera, fboWidth, fboHeight, GBufferType::Misc);
                     gbuffer.stop(fbo, rbo);
-                    _passFXAA(gbuffer, camera, fboWidth, fboHeight);
+                    _passFXAA(gbuffer, camera, fboWidth, fboHeight,GBufferType::Lighting);
                 }else if (aa_algorithm == AntiAliasingAlgorithm::SMAA){
                     gbuffer.start(GBufferType::Lighting);
-                    _passFinal(gbuffer, camera, fboWidth, fboHeight);
+                    _passFinal(gbuffer, camera, fboWidth, fboHeight, GBufferType::Misc);
                     _passSMAA(gbuffer, camera, fboWidth, fboHeight);
                 }
             }

@@ -1492,8 +1492,9 @@ epriv::EShaders::ssao_frag =
     "uniform sampler2D gRandomMap;\n"
     "uniform sampler2D gDepthMap;\n"
     "\n"
-    "uniform vec4 SSAOInfo;\n"  //   x = radius     y = intensity    z = bias        w = scale
-    "uniform ivec4 SSAOInfoA;\n"//   X = UNUSED     Y = UNUSED       Z = Samples     W = NoiseTextureSize
+    "uniform vec2  ScreenSize;\n"
+    "uniform vec4  SSAOInfo;\n"  //   x = radius     y = intensity    z = bias        w = scale
+    "uniform ivec4 SSAOInfoA;\n"//    x = UNUSED     y = UNUSED       z = Samples     w = NoiseTextureSize
     "\n"
     "uniform vec3 poisson[32];\n"
     "\n"
@@ -1501,26 +1502,25 @@ epriv::EShaders::ssao_frag =
 epriv::EShaders::ssao_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::ssao_frag +=
     "float occlude(vec2 offsetUV, vec3 origin, vec3 normal){\n"
-    "    vec3 diff = GetWorldPosition(offsetUV,CameraNear,CameraFar) - origin;\n"
-    "    float DistDiff = length(diff);\n"
-    "    vec3 vec = diff / DistDiff;\n"
-    "    float dist = DistDiff * SSAOInfo.w;\n"
-    "    return max(0.0, dot(normal,vec) - SSAOInfo.z) * (1.0 / (1.0 + dist)) * SSAOInfo.y;\n"
+    "    vec3 PositionOffset = GetWorldPosition(offsetUV,CameraNear,CameraFar) - origin;\n"
+    "    float Len = length(PositionOffset);\n"
+    "    vec3 vec = PositionOffset / Len;\n"
+    "    return max(0.0, dot(normal,vec) - SSAOInfo.z) * (1.0 / (1.0 + (Len * SSAOInfo.w))) * SSAOInfo.y;\n"
     "}\n"
     "void main(){\n"
-    "    vec3 worldPosition = GetWorldPosition(texcoords,CameraNear,CameraFar);\n"
-    "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
-    "    vec3 randomVector = normalize(texture2D(gRandomMap, texcoords / SSAOInfoA.w).xyz) * 2.0 - 1.0;\n" //should texcoords be uv here?
-    "    float _distance = distance(worldPosition, CameraPosition) + 0.0001;\n"//cuz we dont like divide by zeros ;)
-    "    float radius = max(0.05,SSAOInfo.x / _distance);\n"
+    "    vec3 WorldPos = GetWorldPosition(texcoords,CameraNear,CameraFar);\n"
+    "    vec3 Normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
+    "    vec2 RandVector = normalize(texture2D(gRandomMap, ScreenSize * texcoords / SSAOInfoA.w).xy) * 2.0 - 1.0;\n"
+    "    float Distance = distance(WorldPos, CameraPosition) + 0.0001;\n"//cuz we dont like divide by zeros ;)
+    "    float Radius = max(0.05,SSAOInfo.x / Distance);\n"
     "    float o = 0.0;\n"
     "    for (int i = 0; i < SSAOInfoA.z; ++i) {\n"
-    "       vec2 coord1 = reflect(poisson[i].xy, randomVector.xy) * radius;\n"
+    "       vec2 coord1 = reflect(poisson[i].xy, RandVector) * Radius;\n"
     "       vec2 coord2 = vec2(coord1.x * 0.707 - coord1.y * 0.707, coord1.x * 0.707 + coord1.y * 0.707);\n"
-    "       o += occlude(texcoords + (coord1 * 0.25), worldPosition, normal);\n"
-    "       o += occlude(texcoords + (coord2 * 0.50), worldPosition, normal);\n"
-    "       o += occlude(texcoords + (coord1 * 0.75), worldPosition, normal);\n"
-    "       o += occlude(texcoords + coord2,          worldPosition, normal);\n"
+    "       o += occlude(texcoords + (coord1 * 0.25), WorldPos, Normal);\n"
+    "       o += occlude(texcoords + (coord2 * 0.50), WorldPos, Normal);\n"
+    "       o += occlude(texcoords + (coord1 * 0.75), WorldPos, Normal);\n"
+    "       o += occlude(texcoords + coord2,          WorldPos, Normal);\n"
     "    }\n"
     "    o /= SSAOInfoA.z * 4.0;\n"
     "    o = clamp(o,0.01,0.99);\n"
@@ -1533,8 +1533,6 @@ epriv::EShaders::ssao_frag +=
 epriv::EShaders::bloom_frag =
     "\n"
     "const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n"
-    "const vec3 Grayscale = vec3(0.2126, 0.7152, 0.0722);\n"
-    "\n"
     "uniform sampler2D gLightMap;\n"
     "\n"
     "uniform vec4 Data;\n" //x = scale y = threshold z = exposure w = UNUSED
@@ -1544,7 +1542,6 @@ epriv::EShaders::bloom_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::bloom_frag +=
     "void main(){\n"
     "    vec3 lighting = texture2D(gLightMap,texcoords).rgb;\n"
-    "    float baseBright = dot(lighting, Grayscale);\n"
     "    lighting = vec3(1.0) - exp(-lighting * Data.z);\n"
     "    gl_FragColor.rgb = max(ConstantZeroVec3,lighting - vec3(Data.y)) * Data.x;\n"
     "}";
@@ -1684,8 +1681,7 @@ epriv::EShaders::greyscale_frag =
 #pragma region FinalFrag
 epriv::EShaders::final_frag =
     "\n"
-    "uniform sampler2D gDiffuseMap;\n"
-    "uniform sampler2D gMiscMap;\n"
+    "uniform sampler2D SceneTexture;\n"
     "uniform sampler2D gBloomMap;\n"
     "uniform sampler2D gDepthMap;\n"
     "\n"
@@ -1703,13 +1699,12 @@ epriv::EShaders::final_frag += epriv::EShaders::normals_octahedron_compression_f
 epriv::EShaders::final_frag +=
     "\n"
     "void main(){\n"
-    "    vec3 diffuse = texture2D(gDiffuseMap, texcoords).rgb;\n"
-    "    vec3 hdr = texture2D(gMiscMap,texcoords).rgb;\n"
+    "    vec3 scene = texture2D(SceneTexture,texcoords).rgb;\n"
     "    if(HasBloom == 1){\n"
     "        vec3 bloom = texture2D(gBloomMap,texcoords).rgb;\n"
-    "        hdr += bloom;\n"
+    "        scene += bloom;\n"
     "    }\n"
-    "    gl_FragColor = vec4(hdr,1.0);\n"
+    "    gl_FragColor = vec4(scene,1.0);\n"
     "    if(HasFog == 1){\n"
     "        float distFrag = abs(distance(GetWorldPosition(texcoords,CameraNear,CameraFar),CameraPosition));\n"
     "        float distVoid = FogDistNull + FogDistBlend;\n"
