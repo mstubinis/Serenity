@@ -455,11 +455,11 @@ uint ComponentCamera::sphereIntersectTest(glm::vec3& position,float radius){
     }
     return res;
 }
-void ComponentCamera::lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up){
+void ComponentCamera::lookAt(glm::vec3 eye,glm::vec3 center,glm::vec3 up){
     _eye = eye;
     _up = up;
-    _viewMatrix = glm::lookAt(_eye,forward,_up);
-    _viewMatrixNoTranslation = glm::lookAt(glm::vec3(0.0f),forward - _eye,_up);
+    _viewMatrix              = glm::lookAt(_eye, center,_up);
+    _viewMatrixNoTranslation = glm::lookAt(glm::vec3(0.0f), center - _eye,_up);
 }
 glm::mat4 ComponentCamera::getProjection(){ return _projectionMatrix; }
 glm::mat4 ComponentCamera::getProjectionInverse(){ return glm::inverse(_projectionMatrix); }
@@ -468,7 +468,6 @@ glm::mat4 ComponentCamera::getViewInverse(){ return glm::inverse(_viewMatrix); }
 glm::mat4 ComponentCamera::getViewProjection(){ return _projectionMatrix * _viewMatrix; }
 glm::mat4 ComponentCamera::getViewProjectionInverse(){ return glm::inverse(_projectionMatrix * _viewMatrix); }
 glm::vec3 ComponentCamera::getViewVector(){ return glm::vec3(_viewMatrix[0][2],_viewMatrix[1][2],_viewMatrix[2][2]); }
-glm::vec3 ComponentCamera::getViewVectorNoTranslation(){ return glm::vec3(_viewMatrixNoTranslation[0][2],_viewMatrixNoTranslation[1][2],_viewMatrixNoTranslation[2][2]); }
 float ComponentCamera::getAngle(){ return _angle; }
 float ComponentCamera::getAspect(){ return _aspectRatio; }
 float ComponentCamera::getNear(){ return _nearPlane; }
@@ -477,6 +476,29 @@ void ComponentCamera::setAngle(float a){ _angle = a; epriv::ComponentInternalFun
 void ComponentCamera::setAspect(float a){ _aspectRatio = a; epriv::ComponentInternalFunctionality::RebuildProjectionMatrix(*this); }
 void ComponentCamera::setNear(float n){ _nearPlane = n; epriv::ComponentInternalFunctionality::RebuildProjectionMatrix(*this); }
 void ComponentCamera::setFar(float f){ _farPlane = f; epriv::ComponentInternalFunctionality::RebuildProjectionMatrix(*this); }
+
+
+
+glm::mat4 epriv::InternalComponentPublicInterface::GetViewNoTranslation(const Camera& c) {
+    return c.m_Camera->_viewMatrixNoTranslation;
+}
+glm::mat4 epriv::InternalComponentPublicInterface::GetViewInverseNoTranslation(const Camera& c) {
+    return glm::inverse(c.m_Camera->_viewMatrixNoTranslation);
+}
+glm::mat4 epriv::InternalComponentPublicInterface::GetViewProjectionNoTranslation(const Camera& c) {
+    auto& component = *c.m_Camera;
+    return component._projectionMatrix * component._viewMatrixNoTranslation;
+}
+glm::mat4 epriv::InternalComponentPublicInterface::GetViewProjectionInverseNoTranslation(const Camera& c) {
+    auto& component = *c.m_Camera;
+    return glm::inverse(component._projectionMatrix * component._viewMatrixNoTranslation);
+}
+glm::vec3 epriv::InternalComponentPublicInterface::GetViewVectorNoTranslation(const Camera& c) {
+    auto& matrix = c.m_Camera->_viewMatrixNoTranslation;
+    return glm::vec3(matrix[0][2], matrix[1][2], matrix[2][2]);
+}
+
+
 
 #pragma endregion
 

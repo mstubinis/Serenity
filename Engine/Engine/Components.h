@@ -38,6 +38,17 @@ typedef boost::typeindex::type_index   boost_type_index;
 
 namespace Engine{
     namespace epriv{
+        class InternalComponentPublicInterface final {
+            friend class ::ComponentCamera;
+            friend class ::Camera;
+            public:
+                static glm::mat4 GetViewNoTranslation(const Camera&);
+                static glm::mat4 GetViewInverseNoTranslation(const Camera&);
+                static glm::mat4 GetViewProjectionNoTranslation(const Camera&);
+                static glm::mat4 GetViewProjectionInverseNoTranslation(const Camera&);
+                static glm::vec3 GetViewVectorNoTranslation(const Camera&);
+
+        };
         class ComponentInternalFunctionality;
         struct MeshMaterialPair;
         class ComponentTypeRegistry;
@@ -203,6 +214,7 @@ class ComponentModel: public ComponentBaseClass{
     friend class ::Engine::epriv::ComponentManager;
     friend class ::Engine::epriv::ComponentModelSystem;
     friend class ::Engine::epriv::ComponentInternalFunctionality;
+    friend class ::Engine::epriv::InternalComponentPublicInterface;
     friend class ::ComponentBody;
     private:
         std::vector<MeshInstance*> models;
@@ -254,6 +266,7 @@ class ComponentModel: public ComponentBaseClass{
 class ComponentBody: public ComponentBaseClass{
     friend class ::Engine::epriv::ComponentManager;
     friend class ::Engine::epriv::ComponentBodySystem;
+    friend class ::Engine::epriv::InternalComponentPublicInterface;
     friend class ::ComponentModel;
     private:
         struct PhysicsData{
@@ -331,6 +344,7 @@ class ComponentCamera: public ComponentBaseClass{
     friend class ::Engine::epriv::ComponentManager;
     friend class ::Engine::epriv::ComponentCameraSystem;
     friend class ::Engine::epriv::ComponentInternalFunctionality;
+    friend class ::Engine::epriv::InternalComponentPublicInterface;
     friend class ::ComponentModel;
     friend class ::Camera;
     private:
@@ -352,15 +366,14 @@ class ComponentCamera: public ComponentBaseClass{
         virtual void update(const float& dt);
         void resize(uint width,uint height);
         void lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up);
-
-        glm::mat4 getViewProjectionInverse();
+        
         glm::mat4 getProjection();
+        glm::mat4 getProjectionInverse();
         glm::mat4 getView();
         glm::mat4 getViewInverse();
-        glm::mat4 getProjectionInverse();
         glm::mat4 getViewProjection();
+        glm::mat4 getViewProjectionInverse();
         glm::vec3 getViewVector();
-        glm::vec3 getViewVectorNoTranslation();
 
         float getAngle();    void setAngle(float);
         float getAspect();   void setAspect(float);

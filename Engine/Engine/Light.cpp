@@ -159,12 +159,10 @@ void PointLight::lighten(){
 
     glm::vec3 camPos = c->getPosition();
     glm::mat4 model = m_i->m_Body->modelMatrix();
-    //model[3][0] -= camPos.x;
-    //model[3][1] -= camPos.y;
-    //model[3][2] -= camPos.z;
     glm::mat4 vp = c->getViewProjection();
 
-    sendUniformMatrix4f("MVP",vp * model);
+    sendUniformMatrix4f("Model",model);
+    sendUniformMatrix4f("VP", vp);
 
     GLEnable(GLState::DEPTH_TEST);
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){ //inside the light volume
@@ -210,12 +208,10 @@ void SpotLight::lighten(){
 
     glm::vec3 camPos = c->getPosition();
     glm::mat4 model = m_i->m_Body->modelMatrix();
-    //model[3][0] -= camPos.x;
-    //model[3][1] -= camPos.y;
-    //model[3][2] -= camPos.z;
     glm::mat4 vp = c->getViewProjection();
 
-    sendUniformMatrix4f("MVP",vp * model);
+    sendUniformMatrix4f("Model", model);
+    sendUniformMatrix4f("VP", vp);
 
     GLEnable(GLState::DEPTH_TEST);
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){ //inside the light volume                                                 
@@ -266,12 +262,10 @@ void RodLight::lighten(){
 
     glm::vec3 camPos = c->getPosition();
     glm::mat4 model = m_i->m_Body->modelMatrix();
-    //model[3][0] -= camPos.x;
-    //model[3][1] -= camPos.y;
-    //model[3][2] -= camPos.z;
     glm::mat4 vp = c->getViewProjection();
 
-    sendUniformMatrix4f("MVP",vp * model);
+    sendUniformMatrix4f("Model", model);
+    sendUniformMatrix4f("VP", vp);
 
     GLEnable(GLState::DEPTH_TEST);
     if(glm::distance(c->getPosition(),pos) <= cullingDistance){                                                  

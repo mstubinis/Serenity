@@ -270,13 +270,12 @@ class ShaderP::impl final{
             //see if we need a UBO for the camera
             if(sfind(_d,"CameraView") || sfind(_d,"CameraProj") || sfind(_d,"CameraViewProj") || sfind(_d,"CameraInvView") || sfind(_d,"CameraInvProj") || 
             sfind(_d,"CameraInvViewProj") || sfind(_d,"CameraPosition") || sfind(_d,"CameraNear") || sfind(_d,"CameraFar") || sfind(_d,"CameraInfo1") ||
-            sfind(_d,"CameraInfo2") || sfind(_d,"CameraViewVector")){
+            sfind(_d,"CameraInfo2") || sfind(_d,"CameraViewVector") || sfind(_d,"CameraRealPosition") || sfind(_d, "CameraInfo3")){
                 string uboCameraString;
                 if(versionNumber >= 140){ //UBO
                      if(!sfind(_d,"layout (std140) uniform Camera //generated")){
                          uboCameraString = "\n"
-                         "layout (std140) uniform Camera //generated\n"
-                         "{\n"
+                         "layout (std140) uniform Camera{ //generated\n"
                          "    mat4 CameraView;\n"
                          "    mat4 CameraProj;\n"
                          "    mat4 CameraViewProj;\n"
@@ -285,9 +284,11 @@ class ShaderP::impl final{
                          "    mat4 CameraInvViewProj;\n"
                          "    vec4 CameraInfo1;\n"
                          "    vec4 CameraInfo2;\n"
+                         "    vec4 CameraInfo3;\n"
                          "};\n"
                          "vec3 CameraPosition = CameraInfo1.xyz;\n"
                          "vec3 CameraViewVector = CameraInfo2.xyz;\n"
+                         "vec3 CameraRealPosition = CameraInfo3.xyz;\n"
                          "float CameraNear = CameraInfo1.w;\n"
                          "float CameraFar = CameraInfo2.w;\n"
                          "\n";
@@ -304,8 +305,10 @@ class ShaderP::impl final{
                          "uniform mat4 CameraInvViewProj;\n"
                          "uniform vec4 CameraInfo1;\n"
                          "uniform vec4 CameraInfo2;\n"
+                         "uniform vec4 CameraInfo3;\n"
                          "vec3 CameraPosition = CameraInfo1.xyz;\n"
                          "vec3 CameraViewVector = CameraInfo2.xyz;\n"
+                         "vec3 CameraRealPosition = CameraInfo3.xyz;\n"
                          "float CameraNear = CameraInfo1.w;\n"
                          "float CameraFar = CameraInfo2.w;\n"
                          "\n";

@@ -36,6 +36,11 @@ float scale(float fCos){
     return VertDataScale.y * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.80 + x * 5.25))));
 }
 void main(){
+    mat4 ModelClone = Model;
+    ModelClone[3][0] -= CameraRealPosition.x;
+    ModelClone[3][1] -= CameraRealPosition.y;
+    ModelClone[3][2] -= CameraRealPosition.z;
+
     vec3 v3Pos = position * vec3(VertDataRadius.x);
     vec3 v3Ray = v3Pos - VertDataMisc1.xyz;
     vec3 v3LightDir = vec3(VertDataMisc1.w,VertDataMisc2.w,VertDataMisc3.w);
@@ -69,7 +74,7 @@ void main(){
         v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
         v3SamplePoint += v3SampleRay;
     }
-    gl_Position = CameraViewProj * Model * vec4(position, 1.0);
+    gl_Position = CameraViewProj * ModelClone * vec4(position, 1.0);
 
     v3LightPosition = v3LightDir;
     v3Direction = VertDataMisc1.xyz - v3Pos;
@@ -81,5 +86,5 @@ void main(){
     outerRadius = VertDataRadius.x;
     planetRadius = VertDataRadius.z;
 
-    WorldPosition = (Model * vec4(position, 1.0)).xyz;
+    WorldPosition = (ModelClone * vec4(position, 1.0)).xyz;
 }

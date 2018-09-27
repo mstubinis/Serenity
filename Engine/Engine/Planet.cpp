@@ -68,10 +68,6 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
 
-    //model[3][0] -= camPosR.x;
-    //model[3][1] -= camPosR.y;
-    //model[3][2] -= camPosR.z;
-
     outerRadius += (outerRadius *  0.025f);
     Renderer::sendUniform1i("HasAtmosphere",0);   
 
@@ -85,7 +81,7 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
 
     Renderer::sendUniform1i("nSamples", numberSamples); 
     float exposure = 2.0f;
-    Renderer::sendUniformMatrix4f("Rot",rot);
+    Renderer::sendUniformMatrix4f("Rot",rot); 
 
     Renderer::sendUniform4f("VertDataMisc1",camPos.x,camPos.y,camPos.z,lightDir.x);
     Renderer::sendUniform4f("VertDataMisc2",camPosR.x,camPosR.y,camPosR.z,lightDir.y);
@@ -124,10 +120,6 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     model = glm::translate(model,camPos - _newPosition);
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
-
-    //model[3][0] -= camPos.x;
-    //model[3][1] -= camPos.y;
-    //model[3][2] -= camPos.z;
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     
@@ -179,11 +171,6 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     model = glm::translate(model,camPosR - _newPosition);
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
-
-    //model[3][0] -= camPosR.x;
-    //model[3][1] -= camPosR.y;
-    //model[3][2] -= camPosR.z;
-
 
     Renderer::GLEnable(GLState::BLEND);
     if(atmosphereHeight <= 0){
@@ -272,10 +259,6 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     //model = glm::scale(model,glm::vec3(_newScale));
     //model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
     
-    //model[3][0] -= camPosR.x;
-    //model[3][1] -= camPosR.y;
-    //model[3][2] -= camPosR.z;
-
     ShaderP* program;
     //and now render the atmosphere
     if(camHeight > outerRadius){

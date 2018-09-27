@@ -38,6 +38,12 @@ float getNearIntersection(vec3 v3Pos, vec3 v3Ray, float fDistance2, float fRadiu
     return 0.5 * (-B - sqrt(fDet));
 }
 void main(){
+    mat4 ModelClone = Model;
+    ModelClone[3][0] -= CameraRealPosition.x;
+    ModelClone[3][1] -= CameraRealPosition.y;
+    ModelClone[3][2] -= CameraRealPosition.z;
+
+
     vec3 v3Pos = position * vec3(VertDataRadius.x);
     vec3 v3Ray = v3Pos - VertDataMisc1.xyz;
     vec3 v3LightDir = vec3(VertDataMisc1.w,VertDataMisc2.w,VertDataMisc3.w);
@@ -71,12 +77,12 @@ void main(){
         v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
         v3SamplePoint += v3SampleRay;
     }
-    gl_Position = CameraViewProj * Model * vec4(position, 1.0);
+    gl_Position = CameraViewProj * ModelClone * vec4(position, 1.0);
 
     v3LightPosition = v3LightDir;
     v3Direction = VertDataMisc1.xyz - v3Pos;
     c0 = v3FrontColor * (VertDataMisc3.xyz * VertDatafK.x);
     c1 = v3FrontColor * VertDatafK.y;
 
-    WorldPosition = (Model * vec4(position, 1.0)).xyz;
+    WorldPosition = (ModelClone * vec4(position, 1.0)).xyz;
 }

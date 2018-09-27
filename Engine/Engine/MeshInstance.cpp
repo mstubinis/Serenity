@@ -145,9 +145,6 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
         Renderer::sendUniform1iSafe("AnimationPlaying",0);
     }
     glm::mat4 model = parentModel * i.m_Model; //might need to reverse this order.
-    //model[3][0] -= camPos.x;
-    //model[3][1] -= camPos.y;
-    //model[3][2] -= camPos.z;
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
      

@@ -53,16 +53,22 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
     return 0.5 * (-B - sqrt(_det));
 }
 void main(){
-    WorldPosition = (Model * vec4(position,1.0)).xyz;
 
-          Normals   = (Model * vec4(normal.zyx,0.0)).xyz;
-    vec3  Binormals = (Model * vec4(binormal.zyx,0.0)).xyz;
-    vec3  Tangents  = (Model * vec4(tangent.zyx,0.0)).xyz;
+    mat4 ModelClone = Model;
+    ModelClone[3][0] -= CameraRealPosition.x;
+    ModelClone[3][1] -= CameraRealPosition.y;
+    ModelClone[3][2] -= CameraRealPosition.z;
+
+    WorldPosition = (ModelClone * vec4(position,1.0)).xyz;
+
+          Normals   = (ModelClone * vec4(normal.zyx,0.0)).xyz;
+    vec3  Binormals = (ModelClone * vec4(binormal.zyx,0.0)).xyz;
+    vec3  Tangents  = (ModelClone * vec4(tangent.zyx,0.0)).xyz;
     TBN = (mat3(Tangents,Binormals,Normals));
 
     UV = uv;
 
-    gl_Position = CameraViewProj * Model * vec4(position, 1.0);
+    gl_Position = CameraViewProj * ModelClone * vec4(position, 1.0);
 
     //UV = UnpackFloat32Into2Floats(uv);
     VCameraPositionReal = VertDataMisc2.xyz;

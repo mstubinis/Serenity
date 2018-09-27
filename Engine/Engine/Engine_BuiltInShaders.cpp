@@ -231,14 +231,14 @@ epriv::EShaders::normals_octahedron_compression_functions = epriv::EShaders::con
 
 #pragma region LightingVertex
 epriv::EShaders::lighting_vert = 
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec2 uv;\n"
     "\n"
-    "uniform mat4 MVP;\n"
+    "uniform mat4 Model;\n"
+    "uniform mat4 VP;\n"
     "uniform vec2 VertexShaderData;\n" //x = outercutoff, y = radius
     "uniform float Type;\n" // 2.0 = spot light. 1.0 = any other light. 0.0 = fullscreen quad / triangle
     "uniform vec2 screenSizeDivideBy2;\n"  //x = width/2, y = height/2
-    "\n"
-    "layout (location = 0) in vec3 position;\n"
-    "layout (location = 1) in vec2 uv;\n"
     "\n"
     "varying vec2 texcoords;\n"
     "\n"
@@ -248,15 +248,23 @@ epriv::EShaders::lighting_vert =
     "    return v;\n"
     "}\n"
     "void main(){\n"
+    "    mat4 ModelClone = Model;\n"
     "    vec3 vert = position;\n"
-    "    if(Type == 2.0){\n"
+    "    if(Type == 2.0){\n" //spot light
     "        vert = doSpotLightStuff(vert);\n"
-    "    }else if(Type == 0.0){\n"
+    "        ModelClone[3][0] -= CameraRealPosition.x;\n"
+    "        ModelClone[3][1] -= CameraRealPosition.y;\n"
+    "        ModelClone[3][2] -= CameraRealPosition.z;\n"
+    "    }else if(Type == 1.0){\n" //point / rod / etc
+    "        ModelClone[3][0] -= CameraRealPosition.x;\n"
+    "        ModelClone[3][1] -= CameraRealPosition.y;\n"
+    "        ModelClone[3][2] -= CameraRealPosition.z;\n"
+    "    }else if(Type == 0.0){\n" //fullscreen quad / triangle
     "        vert.x *= screenSizeDivideBy2.x;\n"
     "        vert.y *= screenSizeDivideBy2.y;\n"
     "    }\n"
     "    texcoords = uv;\n"
-    "    gl_Position = MVP * vec4(vert,1.0);\n"
+    "    gl_Position = VP * ModelClone * vec4(vert,1.0);\n"
     "}";
 #pragma endregion
 
@@ -319,7 +327,11 @@ epriv::EShaders::vertex_basic =
     "\n";
 epriv::EShaders::vertex_basic += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::vertex_basic +=
-    "void main(){\n"
+"void main(){\n"
+    "    mat4 ModelClone = Model;\n"
+    "    ModelClone[3][0] -= CameraRealPosition.x;\n"
+    "    ModelClone[3][1] -= CameraRealPosition.y;\n"
+    "    ModelClone[3][2] -= CameraRealPosition.z;\n"
     "    mat4 BoneTransform = mat4(1.0);\n"
     "    if(AnimationPlaying == 1.0){\n"
     "        BoneTransform  = gBones[int(BoneIDs.x)] * Weights.x;\n"
@@ -337,8 +349,8 @@ epriv::EShaders::vertex_basic +=
     "    vec3  Tangents = (NormalMatrix * TangentTrans);\n"
     "    TBN = (mat3(Tangents,Binormals,Normals));\n"
     "\n"
-    "    gl_Position = CameraViewProj * Model * PosTrans;\n"
-    "    WorldPosition = (Model * PosTrans).xyz;\n"
+    "    gl_Position = CameraViewProj * ModelClone * PosTrans;\n"
+    "    WorldPosition = (ModelClone * PosTrans).xyz;\n"
     "\n"
     "    CamPosition = CameraPosition;\n"
     "    TangentCameraPos = TBN * CameraPosition;\n"
@@ -638,7 +650,8 @@ epriv::EShaders::fullscreen_quad_vertex =
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 uv;\n"
     "\n"
-    "uniform mat4 MVP;\n"
+    "uniform mat4 Model;\n"
+    "uniform mat4 VP;\n"
     "uniform vec2 screenSizeDivideBy2;\n"  //x = width/2, y = height/2
     "\n"
     "varying vec2 texcoords;\n"
@@ -648,7 +661,7 @@ epriv::EShaders::fullscreen_quad_vertex =
     "    vert.x *= screenSizeDivideBy2.x;\n"
     "    vert.y *= screenSizeDivideBy2.y;\n"
     "    texcoords = uv;\n"
-    "    gl_Position = MVP * vec4(vert,1.0);\n"
+    "    gl_Position = VP * Model * vec4(vert,1.0);\n"
     "}";
 #pragma endregion
 

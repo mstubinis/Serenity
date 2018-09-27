@@ -15,6 +15,7 @@ class CameraType{public: enum Type {
 
 class Camera: public Entity{
     friend class LightProbe;
+    friend class ::Engine::epriv::InternalComponentPublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     protected:
@@ -40,14 +41,14 @@ class Camera: public Entity{
         const float getNear() const;     void setNear(float);
         const float getFar() const;      void setFar(float);
 
-        glm::mat4 getViewProjectionInverse();
         glm::mat4 getProjection();
+        glm::mat4 getProjectionInverse();
+        glm::vec3 getViewVector();
+
         glm::mat4 getView();
         glm::mat4 getViewInverse();
-        glm::mat4 getProjectionInverse();
         glm::mat4 getViewProjection();
-        glm::vec3 getViewVector();
-        glm::vec3 getViewVectorNoTranslation();
+        glm::mat4 getViewProjectionInverse();
 
         uint sphereIntersectTest(glm::vec3 pos,float radius);
         uint pointIntersectTest(glm::vec3 pos);

@@ -52,7 +52,6 @@ glm::mat4 Camera::getViewInverse(){ return m_Camera->getViewInverse(); }
 glm::mat4 Camera::getProjectionInverse(){ return m_Camera->getProjectionInverse(); }
 glm::mat4 Camera::getViewProjection(){ return m_Camera->getViewProjection(); }
 glm::vec3 Camera::getViewVector(){ return m_Camera->getViewVector(); }
-glm::vec3 Camera::getViewVectorNoTranslation(){ return m_Camera->getViewVectorNoTranslation(); }
 glm::vec3 Camera::forward(){ return m_Body->forward(); }
 glm::vec3 Camera::right(){ return m_Body->right(); }
 glm::vec3 Camera::up(){ return m_Body->up(); }
@@ -70,5 +69,4 @@ bool Camera::rayIntersectSphere(Entity* entity){
     if(model) radius = model->radius();
     return Math::rayIntersectSphere(body.position(),radius,m_Body->position(),m_Camera->getViewVector());
 }
-
 

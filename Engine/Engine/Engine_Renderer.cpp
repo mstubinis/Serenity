@@ -154,8 +154,9 @@ namespace Engine{
             glm::mat4 InvProj;
             glm::mat4 InvViewProj;
 
-            glm::vec4 Info1; //posx,posy,posz,near
+            glm::vec4 Info1; //renderPosX,renderPosY,renderPosZ,near
             glm::vec4 Info2; //viewVecX,viewVecY,viewVecZ,far
+            glm::vec4 Info3; //realposX,realposY,realposZ,UNUSED
         };
     };
 };
@@ -2024,19 +2025,21 @@ class epriv::RenderManager::impl final{
         void _renderFullscreenQuad(uint& width,uint& height,uint startX,uint startY){
             float w2 = float(width) * 0.5f;
             float h2 = float(height) * 0.5f;
-            glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
-            sendUniformMatrix4f("MVP",p);
-            sendUniform2fSafe("screenSizeDivideBy2",w2,h2);
-            setViewport(startX,startY,width,height);
+            glm::mat4 p = glm::ortho(-w2, w2, -h2, h2);
+            sendUniformMatrix4f("Model", m_IdentityMat4);
+            sendUniformMatrix4f("VP", p);
+            sendUniform2fSafe("screenSizeDivideBy2", w2, h2);
+            setViewport(startX, startY, width, height);
             m_FullscreenQuad->render();
         }
         void _renderFullscreenTriangle(uint& width,uint& height,uint startX,uint startY){
             float w2 = float(width) * 0.5f;
             float h2 = float(height) * 0.5f;
-            glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
-            sendUniformMatrix4f("MVP",p);
-            sendUniform2fSafe("screenSizeDivideBy2",w2,h2);
-            setViewport(startX,startY,width,height);
+            glm::mat4 p = glm::ortho(-w2, w2, -h2, h2);
+            sendUniformMatrix4f("Model", m_IdentityMat4);
+            sendUniformMatrix4f("VP", p);
+            sendUniform2fSafe("screenSizeDivideBy2", w2, h2);
+            setViewport(startX, startY, width, height);
             m_FullscreenTriangle->render();
         }
         void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& HUD, Entity* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
@@ -2049,11 +2052,10 @@ class epriv::RenderManager::impl final{
             }
             if(mainRenderFunc){
                 #pragma region Camera UBO
-                //Camera UBO update
-                //NOTE: camera render info is different than simulated camera info, the position of the camera is always at the origin to prevent
-                //shading and render calculation errors. Likewise the model matrices of the objects sent to the rendering pipeline
-                //have their positions offset by the camera to make up for this shift
-                if(RenderManager::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA){
+                if(RenderManager::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA){  
+                    //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
+
+                    //same simulation and render space
                     m_UBOCameraData.View = camera.getView();
                     m_UBOCameraData.Proj = camera.getProjection();
                     m_UBOCameraData.ViewProj = camera.getViewProjection();
@@ -2062,6 +2064,20 @@ class epriv::RenderManager::impl final{
                     m_UBOCameraData.InvViewProj = camera.getViewProjectionInverse();
                     m_UBOCameraData.Info1 = glm::vec4(camera.getPosition(),camera.getNear());
                     m_UBOCameraData.Info2 = glm::vec4(camera.getViewVector(),camera.getFar());
+                    m_UBOCameraData.Info3 = glm::vec4(0.0f,0.0f,0.0f, 0.0f);
+                    
+                    /*
+                    //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders by the camera's real simulation position
+                    m_UBOCameraData.View = InternalComponentPublicInterface::GetViewNoTranslation(camera);
+                    m_UBOCameraData.Proj = camera.getProjection();
+                    m_UBOCameraData.ViewProj = InternalComponentPublicInterface::GetViewProjectionNoTranslation(camera);
+                    m_UBOCameraData.InvProj = camera.getProjectionInverse();
+                    m_UBOCameraData.InvView = InternalComponentPublicInterface::GetViewInverseNoTranslation(camera);
+                    m_UBOCameraData.InvViewProj = InternalComponentPublicInterface::GetViewProjectionInverseNoTranslation(camera);
+                    m_UBOCameraData.Info1 = glm::vec4(0.0f,0.0f,0.0f, camera.getNear());
+                    m_UBOCameraData.Info2 = glm::vec4(InternalComponentPublicInterface::GetViewVectorNoTranslation(camera), camera.getFar());
+                    m_UBOCameraData.Info3 = glm::vec4(camera.getPosition(), 0.0f);
+                    */
                     UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);           
                 }
                 #pragma endregion
@@ -2163,7 +2179,6 @@ class epriv::RenderManager::impl final{
             }
             #pragma endregion
 
-            //Misc buffer has the scene data right now.
             GBufferType::Type sceneTexture = GBufferType::Misc;
             GBufferType::Type outTexture = GBufferType::Lighting;
             #pragma region DOF
@@ -2407,7 +2422,7 @@ void Renderer::Settings::GodRays::setExposure(float e){ renderManager->godRays_e
 void Renderer::Settings::GodRays::setDecay(float d){ renderManager->godRays_decay = d; }
 void Renderer::Settings::GodRays::setDensity(float d){ renderManager->godRays_density = d; }
 void Renderer::Settings::GodRays::setWeight(float w){ renderManager->godRays_weight = w; }
-void Renderer::Settings::GodRays::setSamples(uint s){ renderManager->godRays_samples = s; }
+void Renderer::Settings::GodRays::setSamples(uint s){ renderManager->godRays_samples = glm::max((uint)0,s); }
 void Renderer::Settings::GodRays::setFOVDegrees(float d){ renderManager->godRays_fovDegrees = d; }
 void Renderer::Settings::GodRays::setAlphaFalloff(float a){ renderManager->godRays_alphaFalloff = a; }
 void Renderer::Settings::GodRays::setObject(uint& id){ renderManager->godRays_Object = Components::GetEntity(id); }
@@ -2458,7 +2473,7 @@ void Renderer::Settings::SSAO::setIntensity(float i){ renderManager->ssao_intens
 void Renderer::Settings::SSAO::setRadius(float r){ renderManager->ssao_radius = glm::max(0.0f,r); }
 void Renderer::Settings::SSAO::setScale(float s){ renderManager->ssao_scale = glm::max(0.0f,s); }
 void Renderer::Settings::SSAO::setBias(float b){ renderManager->ssao_bias = b; }
-void Renderer::Settings::SSAO::setSamples(uint s){ renderManager->ssao_samples = s; }
+void Renderer::Settings::SSAO::setSamples(uint s){ renderManager->ssao_samples = glm::max((uint)0, s); }
 void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){ renderManager->_setAntiAliasingAlgorithm(algorithm); }
 void Renderer::Settings::cullFace(uint s){ renderManager->_cullFace(s); }
 void Renderer::Settings::clear(bool color, bool depth, bool stencil){
