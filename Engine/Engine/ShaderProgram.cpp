@@ -275,7 +275,8 @@ class ShaderP::impl final{
                 if(versionNumber >= 140){ //UBO
                      if(!sfind(_d,"layout (std140) uniform Camera //generated")){
                          uboCameraString = "\n"
-                         "layout (std140) uniform Camera{ //generated\n"
+                         "layout (std140) uniform Camera //generated\n"
+                         "{\n"
                          "    mat4 CameraView;\n"
                          "    mat4 CameraProj;\n"
                          "    mat4 CameraViewProj;\n"

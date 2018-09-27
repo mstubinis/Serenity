@@ -119,12 +119,10 @@ class MouseButton final{public: enum Button{
     XButton2,
 
 ButtonCount,};};
-
 class MouseWheel final{public: enum Wheel{
     VerticalWheel,
     HorizontalWheel,
 };};
-
 class JoystickAxis final{public: enum Axis{
     X,
     Y,

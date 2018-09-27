@@ -2,14 +2,30 @@
 #ifndef ENGINE_FULLSCREEN_ITEMS_H
 #define ENGINE_FULLSCREEN_ITEMS_H
 
-#include <memory>
+#include <vector>
 #include "Engine_EventObject.h"
+#include "Engine_Renderer.h"
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
+typedef unsigned short ushort;
 
 namespace Engine{
     namespace epriv{
+        struct MeshVertexDataFullscreen final {
+            glm::vec3 position;
+            glm::vec2 uv;
+        };
+
         class FullscreenTriangle final: public EventObserver{
             private:
-                class impl; std::unique_ptr<impl> m_i;
+                std::vector<ushort> m_Indices;
+                std::vector<MeshVertexDataFullscreen> m_Vertices;
+                std::vector<GLuint> m_Buffers;
+                GLuint m_VAO;
+
+                void bindToGPU();
+                void buildVAO();
             public:
                 FullscreenTriangle();
                 ~FullscreenTriangle();
@@ -19,7 +35,13 @@ namespace Engine{
         };
         class FullscreenQuad final: public EventObserver{
             private:
-                class impl; std::unique_ptr<impl> m_i;
+                std::vector<ushort> m_Indices;
+                std::vector<MeshVertexDataFullscreen> m_Vertices;
+                std::vector<GLuint> m_Buffers;
+                GLuint m_VAO;
+
+                void bindToGPU();
+                void buildVAO();
             public:
                 FullscreenQuad();
                 ~FullscreenQuad();

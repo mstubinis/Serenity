@@ -27,16 +27,11 @@ namespace Engine{
         };
     };
     //keyboard functions
-    bool isKeyDown(std::string str);
-    bool isKeyDownOnce(std::string str);
-    bool isKeyUp(std::string str);
     bool isKeyDown(KeyboardKey::Key);
     bool isKeyDownOnce(KeyboardKey::Key);
     bool isKeyUp(KeyboardKey::Key);
 
     //mouse functions
-    bool isMouseButtonDown(std::string str);
-    bool isMouseButtonDownOnce(std::string str);
     bool isMouseButtonDown(MouseButton::Button);
     bool isMouseButtonDownOnce(MouseButton::Button);
 

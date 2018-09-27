@@ -2,14 +2,14 @@
 #ifndef ENGINE_EVENT_DISPATCHER_H
 #define ENGINE_EVENT_DISPATCHER_H
 
-#include <memory>
+#include <vector>
 #include "Engine_EventObject.h"
 
 namespace Engine{
     namespace epriv{
         class EventDispatcher final: private Engine::epriv::noncopyable{
             private:
-                class impl; std::unique_ptr<impl> m_i;
+                std::vector<std::vector<EventObserver*>> m_Observers;
             public:
                 EventDispatcher(const char* name,uint w,uint h);
                 ~EventDispatcher();

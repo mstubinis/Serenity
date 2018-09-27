@@ -34,7 +34,7 @@ void HUD::setColor(glm::vec3 c){ m_Color = c; }
 
 uint _count = 0;
 void HUD::update(const float& dt){
-    if(Engine::isKeyDownOnce(",")){
+    if(Engine::isKeyDownOnce(KeyboardKey::Comma)){
         SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
         const unordered_map<string,Planet*>& planets = scene->getPlanets();
         uint a = 0;
@@ -48,7 +48,7 @@ void HUD::update(const float& dt){
         ++_count;
         if (_count > scene->getPlanets().size()-1){ _count = 0; }
     }
-    else if(Engine::isKeyDownOnce(".")){
+    else if(Engine::isKeyDownOnce(KeyboardKey::Period)){
         SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
         const unordered_map<string,Planet*>& planets = scene->getPlanets();
         uint a = 0;

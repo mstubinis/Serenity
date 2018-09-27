@@ -72,12 +72,12 @@ void ShipSystemMainThrusters::update(const float& dt){
         if(m_Ship->IsPlayer()){
             if(!m_Ship->IsWarping()){
                 float amount = (  (body.mass() * 0.4f)  +  1.3f  );
-                if(Engine::isKeyDown("w")){ body.applyForce(0,0,-amount); }
-                if(Engine::isKeyDown("s")){ body.applyForce(0,0, amount); }
-                if(Engine::isKeyDown("a")){ body.applyForce(-amount,0,0); }
-                if(Engine::isKeyDown("d")){ body.applyForce( amount,0,0); }
-                if(Engine::isKeyDown("f")){ body.applyForce(0,-amount,0); }
-                if(Engine::isKeyDown("r")){ body.applyForce(0, amount,0); }
+                if(Engine::isKeyDown(KeyboardKey::W)){ body.applyForce(0,0,-amount); }
+                if(Engine::isKeyDown(KeyboardKey::S)){ body.applyForce(0,0, amount); }
+                if(Engine::isKeyDown(KeyboardKey::A)){ body.applyForce(-amount,0,0); }
+                if(Engine::isKeyDown(KeyboardKey::D)){ body.applyForce( amount,0,0); }
+                if(Engine::isKeyDown(KeyboardKey::F)){ body.applyForce(0,-amount,0); }
+                if(Engine::isKeyDown(KeyboardKey::R)){ body.applyForce(0, amount,0); }
             }
         }
     }
@@ -155,10 +155,10 @@ void ShipSystemRollThrusters::update(const float& dt){
         body->setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
             float amount = 1.0f / body->mass();
-            if(Engine::isKeyDown("q")){
+            if(Engine::isKeyDown(KeyboardKey::Q)){
                 body->applyTorque(0,0,amount);
             }
-            if(Engine::isKeyDown("e")){
+            if(Engine::isKeyDown(KeyboardKey::E)){
                 body->applyTorque(0,0,-amount);
             }
         }
@@ -178,14 +178,14 @@ void ShipSystemWarpDrive::update(const float& dt){
     if(isOnline()){	
         if(!Engine::paused()){	
             if(m_Ship->IsPlayer()){
-                if(Engine::isKeyDownOnce("l")){
+                if(Engine::isKeyDownOnce(KeyboardKey::L)){
                     m_Ship->toggleWarp();
                 }
                 if(m_Ship->IsWarping()){
-                    if(Engine::isKeyDown("w")){
+                    if(Engine::isKeyDown(KeyboardKey::W)){
                         m_Ship->translateWarp(0.1f,dt);
                     }
-                    else if(Engine::isKeyDown("s")){
+                    else if(Engine::isKeyDown(KeyboardKey::S)){
                         m_Ship->translateWarp(-0.1f,dt);
                     }
                 }
@@ -275,13 +275,13 @@ void Ship::update(const float& dt){
         #pragma endregion
 
         #pragma region PlayerCameraControls
-        if(Engine::isKeyDownOnce("f1")){
+        if(Engine::isKeyDownOnce(KeyboardKey::F1)){
             if(m_PlayerCamera->getState() != CAMERA_STATE_FOLLOW || (m_PlayerCamera->getState() == CAMERA_STATE_FOLLOW && m_PlayerCamera->getTarget() != this)){
                 Resources::getCurrentScene()->centerSceneToObject(this);
                 m_PlayerCamera->follow(this);
             }
         }
-        else if(Engine::isKeyDownOnce("f2")){
+        else if(Engine::isKeyDownOnce(KeyboardKey::F2)){
             if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOW || !m_Target || m_PlayerCamera->getTarget() != this){
                 Resources::getCurrentScene()->centerSceneToObject(this);
                 m_PlayerCamera->orbit(this);
@@ -291,7 +291,7 @@ void Ship::update(const float& dt){
                 m_PlayerCamera->orbit(m_Target);
             }
         }
-        else if(Engine::isKeyDownOnce("f3")){
+        else if(Engine::isKeyDownOnce(KeyboardKey::F3)){
             if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOWTARGET || (!m_Target && m_PlayerCamera->getState() != CAMERA_STATE_FOLLOW) || m_PlayerCamera->getTarget() != this){
                 Resources::getCurrentScene()->centerSceneToObject(this);
                 m_PlayerCamera->follow(this);
@@ -303,7 +303,7 @@ void Ship::update(const float& dt){
         }
         #pragma endregion
 
-        if(Engine::isKeyDownOnce("t") && Resources::getCurrentScene()->name() != "CapsuleSpace"){
+        if(Engine::isKeyDownOnce(KeyboardKey::T) && Resources::getCurrentScene()->name() != "CapsuleSpace"){
             setTarget(m_PlayerCamera->getObjectInCenterRay(this));
         }
     }

@@ -79,6 +79,4 @@ class EventObserver: private Engine::epriv::noncopyable{
         void unregisterEvent(const EventType::Type& type);
         virtual void onEvent(const Event& e);
 };
-
-
 #endif
