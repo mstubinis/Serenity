@@ -155,7 +155,6 @@ namespace Engine{
                 float getFocus(); void setFocus(float);
                 float getBias(); void setBias(float);
                 float getBlurRadius(); void setBlurRadius(float);
-                float getAspectRatio(); void setAspectRatio(float);
             }
             namespace Fog{
                 void enable(bool b = true);

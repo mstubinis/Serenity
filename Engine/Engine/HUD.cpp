@@ -127,13 +127,9 @@ void HUD::render(){
         stuff = "false";
 
     font->renderText(Engine::Data::reportTime() + 
-                     "\nSSAO Bias: " + to_string(Renderer::Settings::SSAO::getBias()) + 
-                     "\nSSAO Radius: " + to_string(Renderer::Settings::SSAO::getRadius()) +
-                     "\nSSAO Scale: " + to_string(Renderer::Settings::SSAO::getScale()) +
-                     "\nSSAO Blur Strength: " + to_string(Renderer::Settings::SSAO::getBlurStrength()) +
-                     "\nSSAO Blur Radius: " + to_string(Renderer::Settings::SSAO::getBlurRadius()) +
-                     "\nSSAO Intensity: " + to_string(Renderer::Settings::SSAO::getIntensity()) +
-                     "\nSSAO Samples: " + to_string(Renderer::Settings::SSAO::getSamples()),
+                     "\nDOF Bias: " + to_string(Renderer::Settings::DepthOfField::getBias()) + 
+                     "\nDOF Blur Radius: " + to_string(Renderer::Settings::DepthOfField::getBlurRadius()) +
+                     "\nDOF Focus: " + to_string(Renderer::Settings::DepthOfField::getFocus()),
                      glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
 
     #pragma endregion

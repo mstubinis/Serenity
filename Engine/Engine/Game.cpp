@@ -79,22 +79,7 @@ void Game::update(const float& dt){
     if (Engine::isKeyDownOnce(KeyboardKey::F11)) { 
         //Renderer::Settings::General::enable1(!Renderer::Settings::General::enabled1()); 
         Renderer::Settings::Bloom::enable(!Renderer::Settings::Bloom::enabled());
-        //Renderer::Settings::DepthOfField::enable(!Renderer::Settings::DepthOfField::enabled());
     }
-    if (Engine::isKeyDown(KeyboardKey::N)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::M)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::V)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::B)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::X)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::C)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::H)) { Renderer::Settings::SSAO::setBlurStrength(Renderer::Settings::SSAO::getBlurStrength() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::J)) { Renderer::Settings::SSAO::setBlurStrength(Renderer::Settings::SSAO::getBlurStrength() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::O)) { Renderer::Settings::SSAO::setBias(Renderer::Settings::SSAO::getBias() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::P)) { Renderer::Settings::SSAO::setBias(Renderer::Settings::SSAO::getBias() + 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::F)) { Renderer::Settings::SSAO::setBlurRadius(Renderer::Settings::SSAO::getBlurRadius() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::G)) { Renderer::Settings::SSAO::setBlurRadius(Renderer::Settings::SSAO::getBlurRadius() + 0.02f); }
-    if (Engine::isKeyDownOnce(KeyboardKey::U)) { Renderer::Settings::SSAO::setSamples(Renderer::Settings::SSAO::getSamples() - 1); }
-    if (Engine::isKeyDownOnce(KeyboardKey::I)) { Renderer::Settings::SSAO::setSamples(Renderer::Settings::SSAO::getSamples() + 1); }
 
     m_HUD->update(dt);
 }

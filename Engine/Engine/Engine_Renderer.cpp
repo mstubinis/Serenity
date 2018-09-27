@@ -308,7 +308,6 @@ class epriv::RenderManager::impl final{
             dof_bias = 0.6f;
             dof_focus = 2.0f;
             dof_blur_radius = 3.0f;
-            dof_aspect_ratio = 1.0f;
             dof = false;
             #pragma endregion
 
@@ -1871,7 +1870,7 @@ class epriv::RenderManager::impl final{
         void _passDOF(GBuffer& gbuffer, Camera& c, uint& fboWidth, uint& fboHeight, GBufferType::Type sceneTexture) {
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredDOF)->bind();
 
-            sendUniform4fSafe("Data",dof_blur_radius,dof_bias,dof_focus,dof_aspect_ratio);
+            sendUniform4fSafe("Data",dof_blur_radius,dof_bias,dof_focus, fboWidth / (float)fboHeight);
     
             sendTextureSafe("inTexture", gbuffer.getTexture(sceneTexture), 0);
             sendTextureSafe("textureDepth", gbuffer.getTexture(GBufferType::Depth), 1);
@@ -1930,13 +1929,13 @@ class epriv::RenderManager::impl final{
             sendTexture("depthTexture",gbuffer.getTexture(GBufferType::Depth),2);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
         }
-        void _passSMAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
+        void _passSMAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,GBufferType::Type sceneTexture,GBufferType::Type outTexture){
             float _fboWidth = float(fboWidth);
             float _fboHeight = float(fboHeight);
             glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / _fboWidth, 1.0f / _fboHeight, _fboWidth, _fboHeight);
 
             #pragma region PassEdge
-            gbuffer.start(GBufferType::Misc);
+            gbuffer.start(outTexture);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1)->bind();
 
             Settings::clear(true,false,true);//color, stencil is completely filled with 0's
@@ -1953,7 +1952,7 @@ class epriv::RenderManager::impl final{
 
             sendUniform1iSafe("SMAA_PREDICATION",int(SMAA_PREDICATION));
 
-            sendTexture("textureMap",gbuffer.getTexture(GBufferType::Lighting),0);
+            sendTexture("textureMap",gbuffer.getTexture(sceneTexture),0);
             sendTextureSafe("texturePredication",gbuffer.getTexture(GBufferType::Diffuse),1);
 
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
@@ -1971,7 +1970,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA2)->bind();
             sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
 
-            sendTexture("edge_tex",gbuffer.getTexture(GBufferType::Misc),0);
+            sendTexture("edge_tex",gbuffer.getTexture(outTexture),0);
             sendTexture("area_tex",SMAA_AreaTexture,1,GL_TEXTURE_2D);
             sendTexture("search_tex",SMAA_SearchTexture,2,GL_TEXTURE_2D);
 
@@ -1990,7 +1989,7 @@ class epriv::RenderManager::impl final{
             gbuffer.stop();
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA3)->bind();
             sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
-            sendTextureSafe("textureMap",gbuffer.getTexture(GBufferType::Lighting),0); //need original final image from first smaa pass
+            sendTextureSafe("textureMap",gbuffer.getTexture(sceneTexture),0); //need original final image from first smaa pass
             sendTextureSafe("blend_tex",gbuffer.getTexture(GBufferType::Normal),1);
 
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
@@ -2165,26 +2164,34 @@ class epriv::RenderManager::impl final{
             #pragma endregion
 
             //Misc buffer has the scene data right now.
+            GBufferType::Type sceneTexture = GBufferType::Misc;
+            GBufferType::Type outTexture = GBufferType::Lighting;
             #pragma region DOF
             if (dof) {
-                gbuffer.start(GBufferType::Lighting);
-                _passDOF(gbuffer, camera, fboWidth, fboHeight, GBufferType::Misc);
+                gbuffer.start(outTexture);
+                _passDOF(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
+                sceneTexture = GBufferType::Lighting;
+                outTexture = GBufferType::Misc;
             }
             #pragma endregion
 
             #pragma region Finalization and AA
             if (!mainRenderFunc || aa_algorithm == AntiAliasingAlgorithm::None){
                 gbuffer.stop(fbo, rbo);
-                _passFinal(gbuffer, camera, fboWidth, fboHeight,GBufferType::Misc);
+                _passFinal(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
             }else if (aa_algorithm == AntiAliasingAlgorithm::FXAA){
-                gbuffer.start(GBufferType::Lighting);
-                _passFinal(gbuffer, camera, fboWidth, fboHeight, GBufferType::Misc);
+                gbuffer.start(outTexture);
+                _passFinal(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
+                sceneTexture = outTexture;
                 gbuffer.stop(fbo, rbo);
-                _passFXAA(gbuffer, camera, fboWidth, fboHeight,GBufferType::Lighting);
+                _passFXAA(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
             }else if (aa_algorithm == AntiAliasingAlgorithm::SMAA){
-                gbuffer.start(GBufferType::Lighting);
-                _passFinal(gbuffer, camera, fboWidth, fboHeight, GBufferType::Misc);
-                _passSMAA(gbuffer, camera, fboWidth, fboHeight);
+                gbuffer.start(outTexture);
+                _passFinal(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
+                auto copy = sceneTexture;
+                sceneTexture = outTexture;
+                outTexture = copy;
+                _passSMAA(gbuffer, camera, fboWidth, fboHeight, sceneTexture, outTexture);
             }
             #pragma endregion
             //_passCopyDepth(gbuffer,camera,fboWidth,fboHeight);
@@ -2335,8 +2342,6 @@ float Renderer::Settings::DepthOfField::getBias() { return renderManager->dof_bi
 void Renderer::Settings::DepthOfField::setBias(float b) { renderManager->dof_bias = b; }
 float Renderer::Settings::DepthOfField::getBlurRadius() { return renderManager->dof_blur_radius; }
 void Renderer::Settings::DepthOfField::setBlurRadius(float r) { renderManager->dof_blur_radius = glm::max(0.0f, r); }
-float Renderer::Settings::DepthOfField::getAspectRatio() { return renderManager->dof_aspect_ratio; }
-void Renderer::Settings::DepthOfField::setAspectRatio(float r) { renderManager->dof_aspect_ratio = r; }
 bool Renderer::Settings::Fog::enabled(){ return renderManager->fog; }
 void Renderer::Settings::Fog::enable(bool b){ renderManager->fog = b; }
 void Renderer::Settings::Fog::disable(){ renderManager->fog = false; }
