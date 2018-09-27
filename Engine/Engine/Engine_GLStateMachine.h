@@ -7,16 +7,16 @@
 #include <SFML/OpenGL.hpp>
 #include <boost/function.hpp>
 
-typedef boost::function<void()> BF;
+typedef boost::function<void()> boost_func;
 
 struct GLStateT{
     bool enabled; 
-    BF enableFunc, disableFunc;
+    boost_func enableFunc, disableFunc;
     GLStateT(){}
-    GLStateT(const bool& b, const BF& en, const BF& dis){
-        enabled = b;
-        enableFunc = en;
-        disableFunc = dis;
+    GLStateT(const bool& _enabled, const boost_func& _enableFunc, const boost_func& _disableFunc){
+        enabled = _enabled;
+        enableFunc = _enableFunc;
+        disableFunc = _disableFunc;
     }
 };
 class GLState{
@@ -29,11 +29,11 @@ class GLState{
 
 namespace Engine{
     namespace Renderer{
-        inline void GLEnable(const GLState::State s){ auto& t=GLState::SM.at(s);if(t.enabled)return;t.enableFunc();t.enabled=1; }
-        inline void GLDisable(const GLState::State s){ auto& t=GLState::SM.at(s);if(!t.enabled)return;t.disableFunc();t.enabled=0; }
-        inline bool GLEnabled(const GLState::State s){ auto& t=GLState::SM.at(s);return t.enabled; }
-        inline bool GLDisabled(const GLState::State s){ auto& t=GLState::SM.at(s);return !t.enabled; }
-        inline void RestoreGLState(){ for(auto t:GLState::SM){ t.enabled? t.enableFunc() : t.disableFunc(); } }
+        inline       void GLEnable(const GLState::State s){ auto& t=GLState::SM.at(s);if(t.enabled)return;t.enableFunc();t.enabled=1; }
+        inline       void GLDisable(const GLState::State s){ auto& t=GLState::SM.at(s);if(!t.enabled)return;t.disableFunc();t.enabled=0; }
+        inline const bool GLEnabled(const GLState::State s){ auto& t=GLState::SM.at(s);return t.enabled; }
+        inline const bool GLDisabled(const GLState::State s){ auto& t=GLState::SM.at(s);return !t.enabled; }
+        inline       void RestoreGLState(){ for(auto t:GLState::SM){ t.enabled? t.enableFunc() : t.disableFunc(); } }
     };
 };
 

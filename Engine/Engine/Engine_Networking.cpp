@@ -7,8 +7,7 @@ class Networking::SocketTCP::impl{
     public:
         sf::TcpSocket m_Socket;
         string m_IP;
-        ushort m_Port;
-        ushort m_Timeout;
+        ushort m_Port, m_Timeout;
         void _init(const string& _ip, const ushort _port,ushort _timeout){
             m_IP = _ip;
             m_Port = _port;

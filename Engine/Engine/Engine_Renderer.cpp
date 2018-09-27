@@ -2054,7 +2054,7 @@ class epriv::RenderManager::impl final{
                 #pragma region Camera UBO
                 if(RenderManager::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA){  
                     //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
-
+                    /*
                     //same simulation and render space
                     m_UBOCameraData.View = camera.getView();
                     m_UBOCameraData.Proj = camera.getProjection();
@@ -2065,8 +2065,8 @@ class epriv::RenderManager::impl final{
                     m_UBOCameraData.Info1 = glm::vec4(camera.getPosition(),camera.getNear());
                     m_UBOCameraData.Info2 = glm::vec4(camera.getViewVector(),camera.getFar());
                     m_UBOCameraData.Info3 = glm::vec4(0.0f,0.0f,0.0f, 0.0f);
+                    */
                     
-                    /*
                     //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders by the camera's real simulation position
                     m_UBOCameraData.View = InternalComponentPublicInterface::GetViewNoTranslation(camera);
                     m_UBOCameraData.Proj = camera.getProjection();
@@ -2074,10 +2074,10 @@ class epriv::RenderManager::impl final{
                     m_UBOCameraData.InvProj = camera.getProjectionInverse();
                     m_UBOCameraData.InvView = InternalComponentPublicInterface::GetViewInverseNoTranslation(camera);
                     m_UBOCameraData.InvViewProj = InternalComponentPublicInterface::GetViewProjectionInverseNoTranslation(camera);
-                    m_UBOCameraData.Info1 = glm::vec4(0.0f,0.0f,0.0f, camera.getNear());
+                    m_UBOCameraData.Info1 = glm::vec4(0.001f,0.001f,0.001f, camera.getNear());
                     m_UBOCameraData.Info2 = glm::vec4(InternalComponentPublicInterface::GetViewVectorNoTranslation(camera), camera.getFar());
                     m_UBOCameraData.Info3 = glm::vec4(camera.getPosition(), 0.0f);
-                    */
+                    
                     UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);           
                 }
                 #pragma endregion

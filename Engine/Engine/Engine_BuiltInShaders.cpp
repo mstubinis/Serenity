@@ -819,7 +819,8 @@ epriv::EShaders::smaa_vertex_1 = epriv::EShaders::smaa_common +
     "layout (location = 1) in vec2 UV;\n"
     "\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
-    "uniform mat4 MVP;\n"
+    "uniform mat4 Model;\n"
+    "uniform mat4 VP;\n"
     "uniform vec2 screenSizeDivideBy2;\n"
     "\n"
     "varying vec2 uv;\n"
@@ -833,7 +834,7 @@ epriv::EShaders::smaa_vertex_1 = epriv::EShaders::smaa_common +
     "    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-1.0, 0.0, 0.0, API_V_DIR(-1.0)),uv.xyxy);\n"
     "    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy,vec4( 1.0, 0.0, 0.0,  API_V_DIR(1.0)),uv.xyxy);\n"
     "    _offset[2] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-2.0, 0.0, 0.0, API_V_DIR(-2.0)),uv.xyxy);\n"
-    "    gl_Position = MVP * vec4(vert,1.0);\n"
+    "    gl_Position = VP * Model * vec4(vert,1.0);\n"
     "}\n";  
     
 epriv::EShaders::smaa_frag_1 = epriv::EShaders::smaa_common +
@@ -945,7 +946,8 @@ epriv::EShaders::smaa_vertex_2 = epriv::EShaders::smaa_common +
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 UV;\n"
     "\n"
-    "uniform mat4 MVP;\n"
+    "uniform mat4 Model;\n"
+    "uniform mat4 VP;\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "uniform int SMAA_MAX_SEARCH_STEPS;\n" //make this globally inherit for all smaa shaders
     "uniform vec2 screenSizeDivideBy2;\n"
@@ -965,7 +967,7 @@ epriv::EShaders::smaa_vertex_2 = epriv::EShaders::smaa_common +
     "    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-0.25,API_V_DIR(-0.125), 1.25,API_V_DIR(-0.125)),uv.xyxy);\n"
     "    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-0.125,API_V_DIR(-0.25),-0.125,API_V_DIR(1.25)),uv.xyxy);\n"
     "    _offset[2] = mad(SMAA_PIXEL_SIZE.xxyy,vec4(-2.0, 2.0, API_V_DIR(-2.0), API_V_DIR(2.0)) * float(SMAA_MAX_SEARCH_STEPS),vec4(_offset[0].xz, _offset[1].yw));\n"
-    "    gl_Position = MVP * vec4(vert,1.0);\n"
+    "    gl_Position = VP * Model * vec4(vert,1.0);\n"
     "    _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;\n"
     "}\n";
 epriv::EShaders::smaa_frag_2 = epriv::EShaders::smaa_common +
@@ -1207,7 +1209,8 @@ epriv::EShaders::smaa_vertex_3 = epriv::EShaders::smaa_common +
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 UV;\n"
     "\n"
-    "uniform mat4 MVP;\n"
+    "uniform mat4 Model;\n"
+    "uniform mat4 VP;\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "uniform vec2 screenSizeDivideBy2;\n"
     "\n"
@@ -1222,7 +1225,7 @@ epriv::EShaders::smaa_vertex_3 = epriv::EShaders::smaa_common +
     "    vert.x *= screenSizeDivideBy2.x;\n"
     "    vert.y *= screenSizeDivideBy2.y;\n"
     "    _offset = mad(SMAA_PIXEL_SIZE.xyxy,vec4(1.0,0.0,0.0,API_V_DIR(1.0)),uv.xyxy);\n"
-    "    gl_Position = MVP * vec4(vert,1.0);\n"
+    "    gl_Position = VP * Model * vec4(vert,1.0);\n"
     "    _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;\n"
     "}\n";
 epriv::EShaders::smaa_frag_3 = epriv::EShaders::smaa_common +
@@ -1266,7 +1269,8 @@ epriv::EShaders::smaa_vertex_4 = epriv::EShaders::smaa_common +
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 UV;\n"
     "\n"
-    "uniform mat4 MVP;\n"
+    "uniform mat4 Model;\n"
+    "uniform mat4 VP;\n"
     "uniform vec2 screenSizeDivideBy2;\n"
     "\n"
     "varying vec2 uv;\n"
@@ -1280,7 +1284,7 @@ epriv::EShaders::smaa_vertex_4 = epriv::EShaders::smaa_common +
     "    vec3 vert = position;\n"
     "    vert.x *= screenSizeDivideBy2.x;\n"
     "    vert.y *= screenSizeDivideBy2.y;\n"
-    "    gl_Position = MVP * vec4(vert,1.0);\n"
+    "    gl_Position = VP * Model * vec4(vert,1.0);\n"
     "}";
 epriv::EShaders::smaa_frag_4 = epriv::EShaders::smaa_common +
     "\n"
