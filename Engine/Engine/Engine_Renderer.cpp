@@ -2173,21 +2173,18 @@ class epriv::RenderManager::impl final{
             #pragma endregion
 
             #pragma region Finalization and AA
-            //not the main render function - dont do AA
             if (!mainRenderFunc || aa_algorithm == AntiAliasingAlgorithm::None){
                 gbuffer.stop(fbo, rbo);
                 _passFinal(gbuffer, camera, fboWidth, fboHeight,GBufferType::Misc);
-            }else{
-                if (aa_algorithm == AntiAliasingAlgorithm::FXAA){
-                    gbuffer.start(GBufferType::Lighting);
-                    _passFinal(gbuffer, camera, fboWidth, fboHeight, GBufferType::Misc);
-                    gbuffer.stop(fbo, rbo);
-                    _passFXAA(gbuffer, camera, fboWidth, fboHeight,GBufferType::Lighting);
-                }else if (aa_algorithm == AntiAliasingAlgorithm::SMAA){
-                    gbuffer.start(GBufferType::Lighting);
-                    _passFinal(gbuffer, camera, fboWidth, fboHeight, GBufferType::Misc);
-                    _passSMAA(gbuffer, camera, fboWidth, fboHeight);
-                }
+            }else if (aa_algorithm == AntiAliasingAlgorithm::FXAA){
+                gbuffer.start(GBufferType::Lighting);
+                _passFinal(gbuffer, camera, fboWidth, fboHeight, GBufferType::Misc);
+                gbuffer.stop(fbo, rbo);
+                _passFXAA(gbuffer, camera, fboWidth, fboHeight,GBufferType::Lighting);
+            }else if (aa_algorithm == AntiAliasingAlgorithm::SMAA){
+                gbuffer.start(GBufferType::Lighting);
+                _passFinal(gbuffer, camera, fboWidth, fboHeight, GBufferType::Misc);
+                _passSMAA(gbuffer, camera, fboWidth, fboHeight);
             }
             #pragma endregion
             //_passCopyDepth(gbuffer,camera,fboWidth,fboHeight);
