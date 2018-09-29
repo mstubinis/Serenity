@@ -306,7 +306,8 @@ class epriv::ComponentModelSystem::impl final {
                 for (uint i = 0; i < model.models.size(); ++i) {
                     auto& pair = *model.models.at(i);
                     if (pair.mesh()) {
-                        componentManager->m_i->_performTransformation(model.owner()->parent(), pair.position(), pair.orientation(), pair.getScale(), pair.model());
+                        //TODO: implement parent->child relationship...?
+                        componentManager->m_i->_performTransformation(nullptr, pair.position(), pair.orientation(), pair.getScale(), pair.model());
                         _calculateRenderCheck(model, camera);
                     }
                 }
@@ -352,7 +353,7 @@ class epriv::ComponentBodySystem::impl final {
                     Engine::Math::recalculateForwardRightUp(physicsData.rigidBody, b._forward, b._right, b._up);
                 }else{
                     auto& normalData = *b.data.n;
-                    componentManager->m_i->_performTransformation(b.owner()->parent(), *normalData.position, *normalData.rotation, *normalData.scale, *normalData.modelMatrix);
+                    componentManager->m_i->_performTransformation(nullptr, *normalData.position, *normalData.rotation, *normalData.scale, *normalData.modelMatrix);
                 }
             }
         }
@@ -1099,32 +1100,23 @@ void ComponentBody::setMass(float mass){
 
 Entity::Entity(){
     m_Scene = 0;
-    m_ID = m_ParentID = 0;
+    m_ID = 0;
     m_Components.resize(ComponentType::_TOTAL, 0);
 }
 Entity::~Entity(){
-    m_ID = m_ParentID = 0;
+    m_ID = 0;
     m_Scene = 0;
 }
 const uint Entity::id() const { return m_ID; }
 Scene* Entity::scene(){ return m_Scene; }
 void Entity::destroy(bool immediate){
     if(!immediate)
-        componentManager->_addEntityToBeDestroyed(m_ID); //add to the deletion queue
+        componentManager->_addEntityToBeDestroyed(m_ID);  //add to the deletion queue
     else
         componentManager->_deleteEntityImmediately(this); //delete immediately    
 }
-Entity* Entity::parent(){
-    if(m_ParentID == 0)
-        return nullptr;
-    return Components::GetEntity(m_ParentID);
-}
-void Entity::addChild(Entity* child){
-    child->m_ParentID = m_ID;
-}
 
 #pragma endregion
-
 
 ComponentBaseClass* Components::GetComponent(uint index) { return componentManager->m_ComponentPool->getAsFast<ComponentBaseClass>(index); }
 Entity* Components::GetEntity(uint id) { return componentManager->m_EntityPool->getAsFast<Entity>(id); }

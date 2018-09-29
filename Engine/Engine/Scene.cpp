@@ -54,18 +54,17 @@ class Scene::impl final {
         }
         bool _hasEntity(Scene* super, Entity* _entity) { return _hasEntity(super, _entity->m_ID); }
         void _centerToObject(Scene* super,uint& centerID) {
+            //TODO: handle parent->child relationship
             Entity* center = super->getEntity(centerID);
             ComponentBody& bodyBase = *(center->getComponent<ComponentBody>());
             for (auto entityID : m_Entities) {
                 Entity* e = super->getEntity(entityID);
                 ComponentBody& entityBody = *(e->getComponent<ComponentBody>());
-                if (e != center && !e->parent()) {
+                if (e != center) {
                     entityBody.setPosition(entityBody.position() - bodyBase.position());
                 }
             }
-            if (!center->parent()) {
-                bodyBase.setPosition(0.0f, 0.0f, 0.0f);
-            }
+            bodyBase.setPosition(0.0f, 0.0f, 0.0f);
         }
         void _addMeshInstanceToPipeline(Scene* _scene, MeshInstance* _meshInstance, const vector<epriv::RenderPipeline*>& _pipelinesList) {
             epriv::RenderPipeline* _pipeline = nullptr;

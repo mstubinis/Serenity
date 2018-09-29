@@ -63,7 +63,6 @@ void ResourceManifest::init(){
     Handle groundFromSpaceFrag = Resources::addShader("data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag);
 
-
     TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",true,0.0f);
 
     PlanetMesh = Resources::addMeshAsync("data/Models/planet.objc");

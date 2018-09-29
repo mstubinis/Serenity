@@ -389,7 +389,7 @@ class Entity: public EventObserver{
     friend class ::Engine::epriv::ComponentManager;
     private:
         Scene* m_Scene;
-        uint m_ParentID, m_ID;
+        uint m_ID;
         std::vector<uint> m_Components;
     public:
         Entity();
@@ -400,8 +400,6 @@ class Entity: public EventObserver{
         virtual void update(const float& dt){}
 
         void destroy(bool immediate = false); //completely eradicate from memory. by default it its eradicated at the end of the update frame before rendering logic, but can be overrided to be deleted immediately after the call
-        Entity* parent();
-        void addChild(Entity* child);
 
         template<class T> T* getComponent(){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());

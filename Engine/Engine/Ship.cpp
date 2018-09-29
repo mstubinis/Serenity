@@ -264,7 +264,8 @@ void Ship::update(const float& dt){
                     if(e){
                         auto* cam = e->getComponent<ComponentCamera>();
                         auto* camGame = (e->getComponent<GameCameraComponent>());
-                        if(e != this && !e->parent() && !cam && !camGame){
+                        //TODO: parent->child relationship
+                        if(e != this && !cam && !camGame){
                             auto* ebody = e->getComponent<ComponentBody>();
                             ebody->setPosition(ebody->position() + (s * dt));
                         }
@@ -280,8 +281,7 @@ void Ship::update(const float& dt){
                 Resources::getCurrentScene()->centerSceneToObject(this);
                 m_PlayerCamera->follow(this);
             }
-        }
-        else if(Engine::isKeyDownOnce(KeyboardKey::F2)){
+        }else if(Engine::isKeyDownOnce(KeyboardKey::F2)){
             if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOW || !m_Target || m_PlayerCamera->getTarget() != this){
                 Resources::getCurrentScene()->centerSceneToObject(this);
                 m_PlayerCamera->orbit(this);
@@ -290,13 +290,11 @@ void Ship::update(const float& dt){
                 Resources::getCurrentScene()->centerSceneToObject(m_Target);
                 m_PlayerCamera->orbit(m_Target);
             }
-        }
-        else if(Engine::isKeyDownOnce(KeyboardKey::F3)){
+        }else if(Engine::isKeyDownOnce(KeyboardKey::F3)){
             if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOWTARGET || (!m_Target && m_PlayerCamera->getState() != CAMERA_STATE_FOLLOW) || m_PlayerCamera->getTarget() != this){
                 Resources::getCurrentScene()->centerSceneToObject(this);
                 m_PlayerCamera->follow(this);
-            }
-            else if(m_Target){
+            }else if(m_Target){
                 Resources::getCurrentScene()->centerSceneToObject(this);
                 m_PlayerCamera->followTarget(m_Target,this);
             }
