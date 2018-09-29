@@ -1605,11 +1605,10 @@ class epriv::RenderManager::impl final{
             glm::mat4 m = m_IdentityMat4;
             for(auto item:m_TexturesToBeRendered){
                 if(item.texture){
-                    sendTexture("DiffuseTexture",item.texture,0);
+                    sendTexture("DiffuseTexture",*item.texture,0);
                     sendUniform1("DiffuseTextureEnabled",1);
-                }
-                else{
-                    sendTexture("DiffuseTexture",0,0);
+                }else{
+                    sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
                     sendUniform1("DiffuseTextureEnabled",0);
                 }
                 sendUniform4("Object_Color",item.col);
@@ -1635,7 +1634,7 @@ class epriv::RenderManager::impl final{
             Mesh& mesh = *(Mesh::FontPlane);
             for(auto item:m_FontsToBeRendered){
                 Font& font = *item.font;
-                sendTexture("DiffuseTexture",font.getGlyphTexture(),0);
+                sendTexture("DiffuseTexture",*font.getGlyphTexture(),0);
                 sendUniform1("DiffuseTextureEnabled",1);
                 sendUniform4("Object_Color",item.col);
                 y_offset = 0;
@@ -1644,8 +1643,7 @@ class epriv::RenderManager::impl final{
                     if(c == '\n'){
                         y_offset += (font.getGlyphData('X')->height + 6) * item.scl.y;
                         x = item.pos.x;
-                    }
-                    else{
+                    }else{
                         FontGlyph& chr = *(font.getGlyphData(c));
                         m = m_IdentityMat4;
                         m = glm::translate(m, glm::vec3(x + chr.xoffset ,item.pos.y - (chr.height + chr.yoffset) - y_offset,-0.001f - item.depth));
@@ -1777,7 +1775,7 @@ class epriv::RenderManager::impl final{
                     if(skybox && skybox->texture()->numAddresses() >= 3){
                         sendTextureSafe("irradianceMap",skybox->texture()->address(1),4,GL_TEXTURE_CUBE_MAP);
                         sendTextureSafe("prefilterMap",skybox->texture()->address(2),5,GL_TEXTURE_CUBE_MAP);
-                        sendTextureSafe("brdfLUT",brdfCook,6);
+                        sendTextureSafe("brdfLUT",*brdfCook,6);
                     }
                 }
                 _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
@@ -2546,13 +2544,13 @@ void Renderer::genAndBindVAO(GLuint& _vaoObject){
     glGenVertexArrays(1, &_vaoObject);
     bindVAO(_vaoObject);
 }
-void Renderer::sendTexture(const char* location,Texture* texture,const int slot){Renderer::sendTexture(location,texture->address(),slot,texture->type());}
+void Renderer::sendTexture(const char* location,Texture& texture,const int slot){Renderer::sendTexture(location,texture.address(),slot,texture.type());}
 void Renderer::sendTexture(const char* location,const GLuint textureAddress,const int slot,const GLuint targetType){
     glActiveTexture(GL_TEXTURE0 + slot);
     bindTexture(targetType,textureAddress);
     sendUniform1(location,slot);
 }
-void Renderer::sendTextureSafe(const char* location,Texture* texture,const int slot){Renderer::sendTextureSafe(location,texture->address(),slot,texture->type());}
+void Renderer::sendTextureSafe(const char* location,Texture& texture,const int slot){Renderer::sendTextureSafe(location,texture.address(),slot,texture.type());}
 void Renderer::sendTextureSafe(const char* location,const GLuint textureAddress,const int slot,const GLuint targetType){
     glActiveTexture(GL_TEXTURE0 + slot);
     bindTexture(targetType,textureAddress);

@@ -32,8 +32,8 @@ namespace Engine{
                 void stop(GLuint fbo = 0,GLuint rbo = 0);
 
                 const std::vector<FramebufferTexture*>& getBuffers() const;
-                FramebufferTexture* getBuffer(uint);
-                Texture* getTexture(uint);
+                FramebufferTexture& getBuffer(uint);
+                Texture& getTexture(uint);
 
                 FramebufferObject* getMainFBO();
                 FramebufferObject* getSmallFBO();

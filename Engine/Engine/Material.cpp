@@ -317,7 +317,7 @@ void MaterialComponent::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     for(uint i = 0; i < slots.size(); ++i){
-        sendTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(i));
+        sendTextureSafe(textureTypeName.c_str(),*m_Texture,slots.at(i));
     }
 }
 void MaterialComponent::unbind(){
@@ -339,10 +339,10 @@ void MaterialComponentReflection::bind(){
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     sendUniform1Safe("CubemapMixFactor",m_MixFactor);
     if(!m_Texture)
-        sendTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
+        sendTextureSafe(textureTypeName.c_str(),*Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
     else
-        sendTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
-    sendTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
+        sendTextureSafe(textureTypeName.c_str(),*m_Texture,slots.at(0));
+    sendTextureSafe((textureTypeName+"Map").c_str(),*m_Map,slots.at(1));
 }
 void MaterialComponentReflection::unbind(){
     //vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
@@ -362,10 +362,10 @@ void MaterialComponentRefraction::bind(){
     sendUniform1Safe("CubemapMixFactor",m_MixFactor);
     sendUniform1Safe("RefractionIndex",m_RefractionIndex);
     if(!m_Texture)
-        sendTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
+        sendTextureSafe(textureTypeName.c_str(),*Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
     else
-        sendTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
-    sendTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
+        sendTextureSafe(textureTypeName.c_str(),*m_Texture,slots.at(0));
+    sendTextureSafe((textureTypeName+"Map").c_str(),*m_Map,slots.at(1));
 }
 
 MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(Texture* map,float heightScale):MaterialComponent(MaterialComponentType::ParallaxOcclusion,map){
@@ -381,7 +381,7 @@ void MaterialComponentParallaxOcclusion::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     sendUniform1Safe("ParallaxHeightScale",m_HeightScale);
-    sendTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
+    sendTextureSafe(textureTypeName.c_str(),*m_Texture,slots.at(0));
 }
 void MaterialComponentParallaxOcclusion::unbind(){
     //vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);

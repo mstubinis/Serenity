@@ -36,7 +36,7 @@ class epriv::GBuffer::impl final{
 
             m_Width = w; m_Height = h;
 
-            m_Buffers.resize(GBufferType::_TOTAL,nullptr);
+            m_Buffers.resize(GBufferType::_TOTAL);
 
             m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height,1.0f,2);
             _constructTextureBuffer(m_FBO,GBufferType::Diffuse,   m_Width,m_Height);
@@ -137,7 +137,7 @@ void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,string c,bool mainFBO)
 void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,c,mainFBO);}
 void epriv::GBuffer::stop(GLuint fbo, GLuint rbo){m_i->_stop(fbo,rbo);}
 const vector<epriv::FramebufferTexture*>& epriv::GBuffer::getBuffers() const{ return m_i->m_Buffers; }
-Texture* epriv::GBuffer::getTexture(uint t){ return m_i->m_Buffers.at(t)->texture();}
-epriv::FramebufferTexture* epriv::GBuffer::getBuffer(uint t){ return m_i->m_Buffers.at(t); }
+Texture& epriv::GBuffer::getTexture(uint t){ return *m_i->m_Buffers.at(t)->texture();}
+epriv::FramebufferTexture& epriv::GBuffer::getBuffer(uint t){ return *m_i->m_Buffers.at(t); }
 epriv::FramebufferObject* epriv::GBuffer::getMainFBO(){ return m_i->m_FBO; }
 epriv::FramebufferObject* epriv::GBuffer::getSmallFBO(){ return m_i->m_SmallFBO; }

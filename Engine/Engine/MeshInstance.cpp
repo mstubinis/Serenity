@@ -55,7 +55,7 @@ class MeshInstance::impl{
         glm::mat4 m_Model;
         glm::vec4 m_Color;
         bool m_PassedRenderCheck, m_Visible;
-        void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,MeshInstance* super,Entity* entity,ShaderP* program){
+        void _init(Mesh* mesh,Material* mat,MeshInstance* super,Entity* entity,ShaderP* program){
             m_PassedRenderCheck = false;
             m_Visible = true;
             m_Entity = entity;
@@ -66,9 +66,9 @@ class MeshInstance::impl{
 
             m_Color = glm::vec4(1.0f);
             m_GodRaysColor = glm::vec3(0.0f);
-            m_Position = pos;
-            m_Orientation = rot;
-            m_Scale = scl;
+            m_Position = glm::vec3(0.0f);
+            m_Orientation = glm::quat(1.0f,0.0f,0.0f,0.0f);
+            m_Scale = glm::vec3(1.0f);
             _updateModelMatrix();
         }
         void _setShaderProgram(ShaderP* program, MeshInstance* super) {
@@ -158,27 +158,27 @@ epriv::DefaultMeshInstanceBindFunctor   DEFAULT_BIND_FUNCTOR;
 epriv::DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
 
-MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat, ShaderP* program, glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
-    m_i->_init(mesh,mat,pos,rot,scl,this,entity, program);
+MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat, ShaderP* program):m_i(new impl){
+    m_i->_init(mesh,mat,this,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat, ShaderP* program, glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
+MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat, ShaderP* program):m_i(new impl){
     Mesh* _mesh = (Mesh*)mesh.get();
     Material* _mat = (Material*)mat.get();
-    m_i->_init(_mesh,_mat,pos,rot,scl,this,entity, program);
+    m_i->_init(_mesh,_mat,this,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(Entity* entity,Mesh* mesh,Handle mat, ShaderP* program, glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
+MeshInstance::MeshInstance(Entity* entity,Mesh* mesh,Handle mat, ShaderP* program):m_i(new impl){
     Material* _mat = (Material*)mat.get();
-    m_i->_init(mesh,_mat,pos,rot,scl,this,entity, program);
+    m_i->_init(mesh,_mat,this,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat, ShaderP* program, glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
+MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat, ShaderP* program):m_i(new impl){
     Mesh* _mesh = (Mesh*)mesh.get();
-    m_i->_init(_mesh,mat,pos,rot,scl,this,entity, program);
+    m_i->_init(_mesh,mat,this,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
@@ -212,11 +212,11 @@ glm::quat& MeshInstance::orientation(){ return m_i->m_Orientation; }
 ShaderP* MeshInstance::shaderProgram() { return m_i->m_ShaderProgram; }
 Mesh* MeshInstance::mesh(){ return m_i->m_Mesh; }
 Material* MeshInstance::material(){ return m_i->m_Material; }
-void MeshInstance::setShaderProgram(Handle& shaderPHandle) { m_i->_setShaderProgram(((ShaderP*)shaderPHandle.get()), this); }
+void MeshInstance::setShaderProgram(const Handle& shaderPHandle) { m_i->_setShaderProgram(((ShaderP*)shaderPHandle.get()), this); }
 void MeshInstance::setShaderProgram(ShaderP* shaderProgram) { m_i->_setShaderProgram(shaderProgram, this); }
-void MeshInstance::setMesh(Handle& meshHandle){ m_i->_setMesh(((Mesh*)meshHandle.get()),this); }
+void MeshInstance::setMesh(const Handle& meshHandle){ m_i->_setMesh(((Mesh*)meshHandle.get()),this); }
 void MeshInstance::setMesh(Mesh* m){ m_i->_setMesh(m,this); }
-void MeshInstance::setMaterial(Handle& materialHandle){ m_i->_setMaterial(((Material*)materialHandle.get()),this); }
+void MeshInstance::setMaterial(const Handle& materialHandle){ m_i->_setMaterial(((Material*)materialHandle.get()),this); }
 void MeshInstance::setMaterial(Material* m){ m_i->_setMaterial(m,this); }
 void MeshInstance::setOrientation(glm::quat o){ m_i->m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 

@@ -263,9 +263,9 @@ namespace Engine{
         void colorMask(bool r, bool g, bool b, bool a);
         void clearColor(float r, float g, float b, float a);
 
-        void sendTexture(const char* location,Texture* texture,const int slot);
+        void sendTexture(const char* location,Texture& texture,const int slot);
         void sendTexture(const char* location,const GLuint textureAddress,const int slot,const GLuint glTextureType);
-        void sendTextureSafe(const char* location,Texture* texture,const int slot);
+        void sendTextureSafe(const char* location,Texture& texture,const int slot);
         void sendTextureSafe(const char* location,const GLuint textureAddress,const int slot,const GLuint glTextureType);
 
         void unbindFBO();
