@@ -125,11 +125,11 @@ void HUD::render(){
         stuff = "false";
 
     font->renderText(Engine::Data::reportTime() + 
-                    "\nGodRays Decay: " + to_string(Renderer::Settings::GodRays::getDecay()) + 
-                    "\nGodRays Density: " + to_string(Renderer::Settings::GodRays::getDensity()) +
-                    "\nGodRays Samples: " + to_string(Renderer::Settings::GodRays::getSamples()) +
-                    "\nGodRays Weight: " + to_string(Renderer::Settings::GodRays::getWeight()) +
-                    "\nGodRays Exposure: " + to_string(Renderer::Settings::GodRays::getExposure()),
+                    "\nBloom Exposure: " + to_string(Renderer::Settings::Bloom::getExposure()) + 
+                    "\nBloom Scale: " + to_string(Renderer::Settings::Bloom::getScale()) +
+                    "\nBloom Threshold: " + to_string(Renderer::Settings::Bloom::getThreshold()) +
+                    "\nBloom Blur Radius: " + to_string(Renderer::Settings::Bloom::getBlurRadius()) +
+                    "\nBloom Blur Strength: " + to_string(Renderer::Settings::Bloom::getBlurStrength()),
                     glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
 
     #pragma endregion

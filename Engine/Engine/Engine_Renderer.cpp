@@ -347,10 +347,10 @@ class epriv::RenderManager::impl final{
             #pragma region BloomInfo
             bloom_num_passes = 3;
             bloom = true;
-            bloom_blur_radius = 0.75f;
+            bloom_blur_radius = 1.00f;
             bloom_blur_strength = 0.6f;
             bloom_scale = 1.32f;
-            bloom_threshold = 0.48f;
+            bloom_threshold = 0.54f;
             bloom_exposure = 1.42f;
             #pragma endregion
 
@@ -1876,22 +1876,19 @@ class epriv::RenderManager::impl final{
 
             _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
         }
-        void _passBlur(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,string type, GLuint texture,string channels){
+        void _passBlur(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,string type, GLuint texture){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur)->bind();
 
             float _divisor = gbuffer.getSmallFBO()->divisor();
-            glm::vec4 rgba(0.0f);
             glm::vec2 hv(0.0f);
-            if(channels.find("R") != string::npos) rgba.x = 1.0f;
-            if(channels.find("G") != string::npos) rgba.y = 1.0f;
-            if(channels.find("B") != string::npos) rgba.z = 1.0f;
-            if(channels.find("A") != string::npos) rgba.w = 1.0f;
             if(type == "H"){ hv = glm::vec2(1.0f,0.0f); }
             else{            hv = glm::vec2(0.0f,1.0f); }
 
+            glm::ivec2 Res(fboWidth, fboHeight);
+
             sendUniform4("strengthModifier", bloom_blur_strength, bloom_blur_strength, bloom_blur_strength,ssao_blur_strength);
+            sendUniform2("Resolution", Res);
             sendUniform4("DataA",bloom_blur_radius,0.0f,hv.x,hv.y);
-            sendUniform4("RGBA",rgba);
             sendTexture("image",gbuffer.getTexture(texture),0);
 
             uint _x = uint(float(fboWidth) * _divisor);
@@ -1906,8 +1903,10 @@ class epriv::RenderManager::impl final{
 
             if (type == "H") { hv = glm::vec2(1.0f, 0.0f); } else { hv = glm::vec2(0.0f, 1.0f); }
 
+            glm::ivec2 Res(fboWidth, fboHeight);
+
             sendUniform1("strengthModifier", ssao_blur_strength);
-            sendUniform2("invRes", 1.0f / (float)(fboWidth * _divisor), 1.0f / (float)(fboHeight * _divisor));
+            sendUniform2("Resolution", Res);
             sendUniform4("Data", ssao_blur_radius, 0.0f, hv.x, hv.y);
             sendTexture("image", gbuffer.getTexture(texture), 0);
 
@@ -2066,6 +2065,7 @@ class epriv::RenderManager::impl final{
                     */
                     
                     //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders by the camera's real simulation position
+                    //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
                     m_UBOCameraData.View = InternalComponentPublicInterface::GetViewNoTranslation(camera);
                     m_UBOCameraData.Proj = camera.getProjection();
                     m_UBOCameraData.ViewProj = InternalComponentPublicInterface::GetViewProjectionNoTranslation(camera);
@@ -2103,6 +2103,7 @@ class epriv::RenderManager::impl final{
 
             gbuffer.start(GBufferType::GodRays, "RGB", false);
             Settings::clear(true,false,false); //this is needed, clear color should be (0,0,0,0)
+            
             if (godRays && godRays_Object) {
                 auto& body = *godRays_Object->getComponent<ComponentBody>();
                 glm::vec3 oPos = body.position();       
@@ -2117,23 +2118,28 @@ class epriv::RenderManager::impl final{
                     _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), 1.0f - alpha);
                 }
             }
+            
             #pragma endregion
 
             #pragma region SSAO
+
             gbuffer.start(GBufferType::Bloom, GBufferType::GodRays, "A", false);
             Settings::clear(true, false, false); //0,0,0,0
             if (ssao) {
+                GLEnable(GLState::BLEND);//yes this is absolutely needed
+                gbuffer.start(GBufferType::Bloom, "A", false);
                 _passSSAO(gbuffer, camera, fboWidth, fboHeight);      
                 if (ssao_do_blur) {
+                    GLDisable(GLState::BLEND); //yes this is absolutely needed
                     for (uint i = 0; i < ssao_blur_num_passes; ++i) {
                         gbuffer.start(GBufferType::GodRays, "A", false);
                         _passBlurSSAO(gbuffer, camera, fboWidth, fboHeight, "H", GBufferType::Bloom);
                         gbuffer.start(GBufferType::Bloom, "A", false);
                         _passBlurSSAO(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays);
                     }
-                }
-                
+                }         
             }   
+
             #pragma endregion
 
             GLDisable(GLState::BLEND);
@@ -2170,9 +2176,9 @@ class epriv::RenderManager::impl final{
                 _passBloom(gbuffer, camera, fboWidth, fboHeight);
                 for (uint i = 0; i < bloom_num_passes; ++i) {
                     gbuffer.start(GBufferType::GodRays, "RGB", false);
-                    _passBlur(gbuffer, camera, fboWidth, fboHeight, "H", GBufferType::Bloom, "RGB");
+                    _passBlur(gbuffer, camera, fboWidth, fboHeight, "H", GBufferType::Bloom);
                     gbuffer.start(GBufferType::Bloom, "RGB", false);
-                    _passBlur(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays, "RGB");
+                    _passBlur(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays);
                 }
             }
             #pragma endregion

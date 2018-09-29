@@ -172,7 +172,6 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
 
-    Renderer::GLEnable(GLState::BLEND);
     if(atmosphereHeight <= 0){
         outerRadius += (outerRadius *  0.025f);
         Renderer::sendUniform1("HasAtmosphere",0);   
@@ -207,7 +206,6 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
 }};
 
 struct AtmosphericScatteringGroundMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
-    Renderer::GLDisable(GLState::BLEND);
 }};
 
 struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineResource* r) const {

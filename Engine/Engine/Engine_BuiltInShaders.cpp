@@ -1612,9 +1612,9 @@ epriv::EShaders::hdr_frag +=
 #pragma region Blur
 epriv::EShaders::blur_frag =
     "uniform sampler2D image;\n"
-    "uniform vec4 RGBA;\n"
     "uniform vec4 DataA;\n"//radius, UNUSED, H,V
     "uniform vec4 strengthModifier;\n"
+    "uniform ivec2 Resolution;\n"
     "\n"
     "varying vec2 texcoords;\n"
     "\n"
@@ -1622,38 +1622,39 @@ epriv::EShaders::blur_frag =
     "const float weight[NUM_SAMPLES] = float[](0.227,0.21,0.1946,0.162,0.12,0.08,0.054,0.03,0.016);\n"
     "\n"
     "void main(){\n"
-    "    vec2 texOffset = vec2(1.0) / textureSize(image,0);\n"
-    "    vec4 v4Sum = vec4(0.0);\n"
+    "    vec4 Sum = vec4(0.0);\n"
+    "    vec2 inverseResolution = vec2(1.0) / Resolution;\n"
     "    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
-    "        vec2 offset = (texOffset * float(i)) * DataA.x;\n"
-    "        v4Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;\n"
-    "        v4Sum += (texture2D(image,texcoords - vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;\n"
+    "        vec2 offset = (inverseResolution * float(i)) * DataA.x;\n"
+    "        Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;\n"
+    "        Sum += (texture2D(image,texcoords - vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;\n"
     "    }\n"
-    "    gl_FragColor = (v4Sum * RGBA) + (gl_FragColor * (vec4(1.0) - RGBA));\n"
+    "    gl_FragColor = Sum;\n"
     "}";
 #pragma endregion
 
 #pragma region SSAO Blur
 epriv::EShaders::ssao_blur_frag =
-"uniform sampler2D image;\n"
-"uniform vec4 Data;\n"//radius, UNUSED, H,V
-"uniform float strengthModifier;\n"
-"uniform vec2 invRes;\n"
-"\n"
-"varying vec2 texcoords;\n"
-"\n"
-"const int NUM_SAMPLES = 9;\n"
-"const float weight[NUM_SAMPLES] = float[](0.227,0.21,0.1946,0.162,0.12,0.08,0.054,0.03,0.016);\n"
-"\n"
-"void main(){\n"
-"    float Sum = 0.0;\n"
-"    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
-"        vec2 offset = invRes * float(i) * Data.x;\n"
-"        Sum += texture2D(image,texcoords + vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i] * strengthModifier;\n"
-"        Sum += texture2D(image,texcoords - vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i] * strengthModifier;\n"
-"    }\n"
-"    gl_FragColor.a = Sum;\n"
-"}";
+    "uniform sampler2D image;\n"
+    "uniform vec4 Data;\n"//radius, UNUSED, H,V
+    "uniform float strengthModifier;\n"
+    "uniform ivec2 Resolution;\n"
+    "\n"
+    "varying vec2 texcoords;\n"
+    "\n"
+    "const int NUM_SAMPLES = 9;\n"
+    "const float weight[NUM_SAMPLES] = float[](0.227,0.21,0.1946,0.162,0.12,0.08,0.054,0.03,0.016);\n"
+    "\n"
+    "void main(){\n"
+    "    float Sum = 0.0;\n"
+    "    vec2 inverseResolution = vec2(1.0) / Resolution;\n"
+    "    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
+    "        vec2 offset = (inverseResolution * float(i)) * Data.x;\n"
+    "        Sum += texture2D(image,texcoords + vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i] * strengthModifier;\n"
+    "        Sum += texture2D(image,texcoords - vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i] * strengthModifier;\n"
+    "    }\n"
+    "    gl_FragColor.a = Sum;\n"
+    "}";
 #pragma endregion
 
 #pragma region GodRays
