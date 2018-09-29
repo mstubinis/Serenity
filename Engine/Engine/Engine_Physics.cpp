@@ -673,8 +673,8 @@ class epriv::PhysicsManager::impl final{
             //model[3][0] -= camPos.x;
             //model[3][1] -= camPos.y;
             //model[3][2] -= camPos.z;
-            Renderer::sendUniformMatrix4f("Model",model);
-            Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
+            Renderer::sendUniformMatrix4("Model",model);
+            Renderer::sendUniformMatrix4("VP",c->getViewProjection());
             data->debugDrawer->drawAccumulatedLines();
             data->debugDrawer->postRender();
         }

@@ -1115,9 +1115,9 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
         setMaxFilter(TextureFilter::Linear);
         glGenerateMipmap(m_i->m_Type);
     }
-    Core::m_Engine->m_RenderManager->_genPBREnvMapData(this,convoludeTextureSize,preEnvFilterSize);
+    Core::m_Engine->m_RenderManager->_genPBREnvMapData(*this,convoludeTextureSize,preEnvFilterSize);
 }
-void Texture::resize(epriv::FramebufferObject* fbo,uint w, uint h){ m_i->_resize(*fbo,w,h); }
+void Texture::resize(epriv::FramebufferObject& fbo,uint w, uint h){ m_i->_resize(fbo,w,h); }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
 bool Texture::compressed(){
     //if(m_i->m_ImagesDatas.size() == 0) return false;

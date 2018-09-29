@@ -74,10 +74,10 @@ SunLight::~SunLight(){
 void SunLight::lighten(){
     if(!isActive()) return;
     glm::vec3 pos = m_i->m_Body->position();
-    sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
-    sendUniform4f("LightDataC",0.0f,pos.x,pos.y,pos.z);
-    sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
-    sendUniform1fSafe("Type",0.0f);
+    sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
+    sendUniform4("LightDataC",0.0f,pos.x,pos.y,pos.z);
+    sendUniform4("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform1Safe("Type",0.0f);
 
     renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
@@ -104,10 +104,10 @@ DirectionalLight::~DirectionalLight(){
 void DirectionalLight::lighten(){
     if(!isActive()) return;
     glm::vec3 _forward = m_i->m_Body->forward();
-    sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
-    sendUniform4f("LightDataB", _forward.y,_forward.z,0.0f, 0.0f);
-    sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
-    sendUniform1fSafe("Type",0.0f);
+    sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
+    sendUniform4("LightDataB", _forward.y,_forward.z,0.0f, 0.0f);
+    sendUniform4("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform1Safe("Type",0.0f);
     renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 PointLight::PointLight(glm::vec3 pos,Scene* scene): SunLight(pos,LightType::Point,scene){
@@ -150,19 +150,19 @@ void PointLight::lighten(){
     glm::vec3 pos = m_i->m_Body->position();
     if((!c->sphereIntersectTest(pos,m_CullingRadius)) || (c->getDistance(pos) > 1100.0f * m_CullingRadius)) //1100.0f is the visibility threshold
         return;
-    sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
-    sendUniform4f("LightDataB", 0.0f,0.0f,m_C,m_L);
-    sendUniform4f("LightDataC", m_E,pos.x,pos.y,pos.z);
-    sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
-    sendUniform4fSafe("LightDataE", 0.0f, 0.0f, float(m_AttenuationModel),0.0f);
-    sendUniform1fSafe("Type",1.0f);
+    sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
+    sendUniform4("LightDataB", 0.0f,0.0f,m_C,m_L);
+    sendUniform4("LightDataC", m_E,pos.x,pos.y,pos.z);
+    sendUniform4("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform4Safe("LightDataE", 0.0f, 0.0f, float(m_AttenuationModel),0.0f);
+    sendUniform1Safe("Type",1.0f);
 
     glm::vec3 camPos = c->getPosition();
     glm::mat4 model = m_i->m_Body->modelMatrix();
     glm::mat4 vp = c->getViewProjection();
 
-    sendUniformMatrix4f("Model",model);
-    sendUniformMatrix4f("VP", vp);
+    sendUniformMatrix4("Model",model);
+    sendUniformMatrix4("VP", vp);
 
     GLEnable(GLState::DEPTH_TEST);
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){ //inside the light volume
@@ -198,20 +198,20 @@ void SpotLight::lighten(){
     glm::vec3 _forward = m_i->m_Body->forward();
     if(!c->sphereIntersectTest(pos,m_CullingRadius) || (c->getDistance(pos) > 1100.0f * m_CullingRadius))
         return;
-    sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
-    sendUniform4f("LightDataB", _forward.y,_forward.z,m_C,m_L);
-    sendUniform4f("LightDataC", m_E,pos.x,pos.y,pos.z);
-    sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
-    sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, float(m_AttenuationModel),0.0f);
-    sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
-    sendUniform1fSafe("Type",2.0f);
+    sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
+    sendUniform4("LightDataB", _forward.y,_forward.z,m_C,m_L);
+    sendUniform4("LightDataC", m_E,pos.x,pos.y,pos.z);
+    sendUniform4("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform4Safe("LightDataE", m_Cutoff, m_OuterCutoff, float(m_AttenuationModel),0.0f);
+    sendUniform2Safe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
+    sendUniform1Safe("Type",2.0f);
 
     glm::vec3 camPos = c->getPosition();
     glm::mat4 model = m_i->m_Body->modelMatrix();
     glm::mat4 vp = c->getViewProjection();
 
-    sendUniformMatrix4f("Model", model);
-    sendUniformMatrix4f("VP", vp);
+    sendUniformMatrix4("Model", model);
+    sendUniformMatrix4("VP", vp);
 
     GLEnable(GLState::DEPTH_TEST);
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){ //inside the light volume                                                 
@@ -224,7 +224,7 @@ void SpotLight::lighten(){
     Settings::cullFace(GL_BACK);
     Renderer::setDepthFunc(DepthFunc::LEqual);
 
-    sendUniform1fSafe("Type",0.0f); //is this really needed?
+    sendUniform1Safe("Type",0.0f); //is this really needed?
     GLDisable(GLState::DEPTH_TEST);
 }
 RodLight::RodLight(glm::vec3 pos,float rodLength,Scene* scene): PointLight(pos,scene){
@@ -253,19 +253,19 @@ void RodLight::lighten(){
     float half = m_RodLength / 2.0f;
     glm::vec3 firstEndPt = pos + (m_i->m_Body->forward() * half);
     glm::vec3 secndEndPt = pos - (m_i->m_Body->forward() * half);
-    sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,firstEndPt.x);
-    sendUniform4f("LightDataB", firstEndPt.y,firstEndPt.z,m_C,m_L);
-    sendUniform4f("LightDataC", m_E,secndEndPt.x,secndEndPt.y,secndEndPt.z);
-    sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
-    sendUniform4fSafe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
-    sendUniform1fSafe("Type",1.0f);
+    sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,firstEndPt.x);
+    sendUniform4("LightDataB", firstEndPt.y,firstEndPt.z,m_C,m_L);
+    sendUniform4("LightDataC", m_E,secndEndPt.x,secndEndPt.y,secndEndPt.z);
+    sendUniform4("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform4Safe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
+    sendUniform1Safe("Type",1.0f);
 
     glm::vec3 camPos = c->getPosition();
     glm::mat4 model = m_i->m_Body->modelMatrix();
     glm::mat4 vp = c->getViewProjection();
 
-    sendUniformMatrix4f("Model", model);
-    sendUniformMatrix4f("VP", vp);
+    sendUniformMatrix4("Model", model);
+    sendUniformMatrix4("VP", vp);
 
     GLEnable(GLState::DEPTH_TEST);
     if(glm::distance(c->getPosition(),pos) <= cullingDistance){                                                  
@@ -279,7 +279,7 @@ void RodLight::lighten(){
     Renderer::setDepthFunc(DepthFunc::LEqual);
     GLDisable(GLState::DEPTH_TEST);
 
-    sendUniform1fSafe("Type",0.0f); //is this really needed?
+    sendUniform1Safe("Type",0.0f); //is this really needed?
 }
 float RodLight::rodLength(){ return m_RodLength; }
 
@@ -340,8 +340,7 @@ class LightProbe::impl{
 
             if(super->m_Parent != nullptr){
                 super->m_Model = super->m_Parent->getModel(); 
-            }
-            else{
+            }else{
                 super->m_Model = glm::mat4(1.0f);
             }
             glm::mat4 translationMatrix = glm::translate(super->getPosition());
@@ -361,7 +360,7 @@ class LightProbe::impl{
         void _renderConvolution(LightProbe* super,glm::mat4& viewMatrix,uint& i,uint& size){
             Engine::Math::removeMatrixPosition(viewMatrix);
             glm::mat4 vp = super->m_Projection * viewMatrix;
-            Renderer::sendUniformMatrix4f("VP", vp);
+            Renderer::sendUniformMatrix4("VP", vp);
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureConvolutionMap,0);
             Renderer::Settings::clear(true,true,false);
             Skybox::bindMesh();
@@ -369,7 +368,7 @@ class LightProbe::impl{
         void _renderPrefilter(LightProbe* super,glm::mat4& viewMatrix,uint& i,uint& m,uint& mipSize){
             Engine::Math::removeMatrixPosition(viewMatrix);
             glm::mat4 vp = super->m_Projection * viewMatrix;
-            Renderer::sendUniformMatrix4f("VP", vp);
+            Renderer::sendUniformMatrix4("VP", vp);
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TexturePrefilterMap,m);
             Renderer::Settings::clear(true,true,false);
             Skybox::bindMesh();
@@ -421,8 +420,7 @@ class LightProbe::impl{
 
             if(super->m_Parent != nullptr){
                 super->m_Model = super->m_Parent->getModel(); 
-            }
-            else{
+            }else{
                 super->m_Model = glm::mat4(1.0f);
             }
             glm::mat4 translationMatrix = glm::translate(super->getPosition());
@@ -498,8 +496,7 @@ class LightProbe::impl{
 
                 glGenerateMipmap(GL_TEXTURE_CUBE_MAP); 
                 m_TexturesMade++;
-            }
-            else{
+            }else{
                 bindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
             }
 
@@ -519,7 +516,6 @@ class LightProbe::impl{
                     _renderPrefilter(super,m_Views[side],side,m,mipSize);
                 }
             }
-
             m_FBO->unbind();
             #pragma endregion
             m_DidFirst = true;

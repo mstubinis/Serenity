@@ -35,7 +35,7 @@ Camera::Camera(float left, float right, float bottom, float top, float _near, fl
 }
 Camera::~Camera(){ 
 }
-glm::vec3 Camera::getPosition(){ return m_Body->position(); }
+const glm::vec3 Camera::getPosition(){ return m_Body->position(); }
 glm::quat Camera::getOrientation(){ return glm::conjugate(glm::quat_cast(m_Camera->getView())); }
 const float Camera::getAngle() const{ return m_Camera->_angle; }
 const float Camera::getAspect() const{ return m_Camera->_aspectRatio; }
@@ -45,16 +45,16 @@ void Camera::setAngle(float _Angle){ m_Camera->_angle = _Angle; }
 void Camera::setAspect(float _Aspect){ m_Camera->_aspectRatio = _Aspect; }
 void Camera::setNear(float _near){ m_Camera->setNear(_near); }
 void Camera::setFar(float _far){ m_Camera->setFar(_far); }
-glm::mat4 Camera::getViewProjectionInverse(){ return m_Camera->getViewProjectionInverse(); }
-glm::mat4 Camera::getProjection(){ return m_Camera->getProjection(); }
-glm::mat4 Camera::getView(){ return m_Camera->getView(); }
-glm::mat4 Camera::getViewInverse(){ return m_Camera->getViewInverse(); }
-glm::mat4 Camera::getProjectionInverse(){ return m_Camera->getProjectionInverse(); }
-glm::mat4 Camera::getViewProjection(){ return m_Camera->getViewProjection(); }
-glm::vec3 Camera::getViewVector(){ return m_Camera->getViewVector(); }
-glm::vec3 Camera::forward(){ return m_Body->forward(); }
-glm::vec3 Camera::right(){ return m_Body->right(); }
-glm::vec3 Camera::up(){ return m_Body->up(); }
+const glm::mat4 Camera::getViewProjectionInverse(){ return m_Camera->getViewProjectionInverse(); }
+const glm::mat4 Camera::getProjection(){ return m_Camera->getProjection(); }
+const glm::mat4 Camera::getView(){ return m_Camera->getView(); }
+const glm::mat4 Camera::getViewInverse(){ return m_Camera->getViewInverse(); }
+const glm::mat4 Camera::getProjectionInverse(){ return m_Camera->getProjectionInverse(); }
+const glm::mat4 Camera::getViewProjection(){ return m_Camera->getViewProjection(); }
+const glm::vec3 Camera::getViewVector(){ return m_Camera->getViewVector(); }
+const glm::vec3 Camera::forward(){ return m_Body->forward(); }
+const glm::vec3 Camera::right(){ return m_Body->right(); }
+const glm::vec3 Camera::up(){ return m_Body->up(); }
 float Camera::getDistance(Entity* e){
     auto* b = e->getComponent<ComponentBody>();
     return glm::distance(b->position(),getPosition());

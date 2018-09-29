@@ -27,15 +27,15 @@ namespace Engine {
             string m_AnimationName;
             Mesh* m_Mesh;
 
-            MeshInstanceAnimation(Mesh* _mesh, const std::string& _animName, float _startTime, float _endTime, uint _requestedLoops = 1) {
+            MeshInstanceAnimation(Mesh& _mesh, const std::string& _animName, float _startTime, float _endTime, uint _requestedLoops = 1) {
                 m_CurrentLoops = 0;
                 m_RequestedLoops = _requestedLoops;
                 m_CurrentTime = 0;
                 m_StartTime = _startTime;
                 m_AnimationName = _animName;
-                m_Mesh = _mesh;
+                m_Mesh = &_mesh;
                 if (_endTime < 0) {
-                    m_EndTime = m_Mesh->animationData().at(_animName)->duration();
+                    m_EndTime = _mesh.animationData().at(_animName).duration();
                 }else{
                     m_EndTime = _endTime;
                 }
@@ -112,8 +112,8 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
     glm::mat4 parentModel = body.modelMatrix();
 
     vector<MeshInstanceAnimation*>& animationQueue = i.m_AnimationQueue;
-    Renderer::sendUniform4fSafe("Object_Color",i.m_Color);
-    Renderer::sendUniform3fSafe("Gods_Rays_Color",i.m_GodRaysColor);
+    Renderer::sendUniform4Safe("Object_Color",i.m_Color);
+    Renderer::sendUniform3Safe("Gods_Rays_Color",i.m_GodRaysColor);
     if(animationQueue.size() > 0){
         vector<glm::mat4> transforms;
         //process the animation here
@@ -128,8 +128,8 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
                 }
             }
         }
-        Renderer::sendUniform1iSafe("AnimationPlaying",1);
-        Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
+        Renderer::sendUniform1Safe("AnimationPlaying",1);
+        Renderer::sendUniformMatrix4vSafe("gBones[0]",transforms,transforms.size());
 
         //cleanup the animation queue
         for (auto it = animationQueue.cbegin(); it != animationQueue.cend();){
@@ -142,14 +142,14 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
             else{ ++it; }
         }
     }else{
-        Renderer::sendUniform1iSafe("AnimationPlaying",0);
+        Renderer::sendUniform1Safe("AnimationPlaying",0);
     }
     glm::mat4 model = parentModel * i.m_Model; //might need to reverse this order.
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
      
-    Renderer::sendUniformMatrix4fSafe("Model",model);
-    Renderer::sendUniformMatrix3fSafe("NormalMatrix",normalMatrix);
+    Renderer::sendUniformMatrix4Safe("Model",model);
+    Renderer::sendUniformMatrix3Safe("NormalMatrix",normalMatrix);
 }};
 struct epriv::DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
 }};
@@ -227,7 +227,6 @@ void MeshInstance::setOrientation(float x,float y,float z){
 }
 void MeshInstance::playAnimation(const string& animName,float start,float end,uint reqLoops){
     epriv::MeshInstanceAnimation* anim = nullptr;
-    Mesh* _mesh = mesh();
-    anim = new epriv::MeshInstanceAnimation(_mesh,animName, start, end, reqLoops);
+    anim = new epriv::MeshInstanceAnimation(*mesh(),animName, start, end, reqLoops);
     m_i->m_AnimationQueue.push_back(anim);
 }

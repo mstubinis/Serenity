@@ -280,18 +280,17 @@ namespace Engine{
                         else if(i == 10){ third.z = 1.0f; }
                         else if(i == 11){ third.w = 1.0f; }
                         component.bind();
-                    }
-                    else{ 
+                    }else{ 
                         component.unbind(); 
                     }
                 }
             }
-            sendUniform1iSafe("Shadeless",int(material.m_Shadeless));
-            sendUniform4fSafe("Material_F0AndID",glm::vec4(material.m_F0Color,float(material.m_ID)));
-            sendUniform4fSafe("MaterialBasePropertiesOne",material.m_BaseGlow,material.m_BaseAO,material.m_BaseMetalness,material.m_BaseSmoothness);
-            sendUniform4fSafe("FirstConditionals", first);
-            sendUniform4fSafe("SecondConditionals",second);
-            sendUniform4fSafe("ThirdConditionals",third);
+            sendUniform1Safe("Shadeless",int(material.m_Shadeless));
+            sendUniform4Safe("Material_F0AndID",glm::vec4(material.m_F0Color,float(material.m_ID)));
+            sendUniform4Safe("MaterialBasePropertiesOne",material.m_BaseGlow,material.m_BaseAO,material.m_BaseMetalness,material.m_BaseSmoothness);
+            sendUniform4Safe("FirstConditionals", first);
+            sendUniform4Safe("SecondConditionals",second);
+            sendUniform4Safe("ThirdConditionals",third);
         }};
         struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
             //Material& material = *(Material*)r;
@@ -338,7 +337,7 @@ void MaterialComponentReflection::setMixFactor(float factor){
 void MaterialComponentReflection::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
+    sendUniform1Safe("CubemapMixFactor",m_MixFactor);
     if(!m_Texture)
         sendTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
     else
@@ -360,8 +359,8 @@ void MaterialComponentRefraction::setRefractionIndex(float _index){ m_Refraction
 void MaterialComponentRefraction::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
-    sendUniform1fSafe("RefractionIndex",m_RefractionIndex);
+    sendUniform1Safe("CubemapMixFactor",m_MixFactor);
+    sendUniform1Safe("RefractionIndex",m_RefractionIndex);
     if(!m_Texture)
         sendTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
     else
@@ -381,7 +380,7 @@ void MaterialComponentParallaxOcclusion::setHeightScale(float factor){
 void MaterialComponentParallaxOcclusion::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    sendUniform1fSafe("ParallaxHeightScale",m_HeightScale);
+    sendUniform1Safe("ParallaxHeightScale",m_HeightScale);
     sendTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
 }
 void MaterialComponentParallaxOcclusion::unbind(){

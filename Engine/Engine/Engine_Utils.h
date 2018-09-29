@@ -16,11 +16,6 @@ namespace Engine{
             private:
                 const noncopyable& operator=(const noncopyable&) = delete;// non copyable
                 noncopyable(const noncopyable&) = delete;                 // non construction-copyable
-                noncopyable(const noncopyable&&) = delete;                // non moveable 1
-                noncopyable(noncopyable&&) = delete;                      // non moveable 2
-                noncopyable& operator=(const noncopyable&&) = delete;     // non move assignable 1
-                noncopyable& operator=(noncopyable&&) = delete;           // non move assignable 2
-                //noncopyable& operator=(noncopyable) = delete;           // copy and swap 1
         };
     };
 };

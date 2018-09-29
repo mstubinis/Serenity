@@ -91,15 +91,15 @@ namespace Engine{
             Camera& c = *camera;
 
             float fcoeff = (2.0f / glm::log2(c.getFar() + 1.0f)) * 0.5f;
-            Renderer::sendUniform1fSafe("fcoeff",fcoeff);
+            Renderer::sendUniform1Safe("fcoeff",fcoeff);
 
             //yes this is needed
             if(RenderManager::GLSL_VERSION < 140){
-                Renderer::sendUniformMatrix4fSafe("CameraViewProj",c.getViewProjection());
+                Renderer::sendUniformMatrix4Safe("CameraViewProj",c.getViewProjection());
             }
 
-            if(Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1iSafe("HasGodsRays",1);
-            else                                       Renderer::sendUniform1iSafe("HasGodsRays",0);
+            if(Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1Safe("HasGodsRays",1);
+            else                                       Renderer::sendUniform1Safe("HasGodsRays",0);
         }};
         struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
         }};

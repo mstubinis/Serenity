@@ -16,6 +16,8 @@
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
+#include <assimp/scene.h>
+
 typedef unsigned short ushort;
 
 namespace sf{ class Image; };
@@ -23,7 +25,6 @@ namespace sf{ class Image; };
 const uint NUM_BONES_PER_VERTEX = 4;
 const uint NUM_MAX_INSTANCES = 65536;
 
-struct aiAnimation;
 struct DefaultMeshBindFunctor;
 struct DefaultMeshUnbindFunctor;
 class MeshInstance;
@@ -102,12 +103,43 @@ namespace Engine{
             ImportedMeshData(){ }
             ~ImportedMeshData(){ clear(); }
         };
-        class AnimationData final: private Engine::epriv::noncopyable{
+        struct Vector3Key final {
+            glm::vec3 value;
+            double time;
+            Vector3Key(double _time, glm::vec3 _value) { value = _value; time = _time; }
+        };
+        struct QuatKey final {
+            aiQuaternion value;
+            double time;
+            QuatKey(double _time, aiQuaternion _value) { value = _value; time = _time; }
+        };
+        struct AnimationChannel final {
+            std::vector<Vector3Key> PositionKeys;
+            std::vector<QuatKey>    RotationKeys;
+            std::vector<Vector3Key> ScalingKeys;
+        };
+        struct BoneNode;
+        class AnimationData final{
             friend class ::Mesh;
             private:
-                class impl; std::unique_ptr<impl> m_i;
+                Mesh* m_Mesh;
+                double m_TicksPerSecond;
+                double m_DurationInTicks;
+                std::unordered_map<std::string, AnimationChannel> m_KeyframeData;
+
+                void ReadNodeHeirarchy(const std::string& animationName, float time, const BoneNode* node, glm::mat4& ParentTransform, std::vector<glm::mat4>& Transforms);
+                void BoneTransform(const std::string& animationName, float TimeInSeconds, std::vector<glm::mat4>& Transforms);
+                void CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const AnimationChannel& node);
+                void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const AnimationChannel& node);
+                void CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const AnimationChannel& node);
+                uint FindPosition(float AnimationTime, const AnimationChannel& node);
+                uint FindRotation(float AnimationTime, const AnimationChannel& node);
+                uint FindScaling(float AnimationTime, const AnimationChannel& node);
             public:
-                AnimationData(Mesh*, aiAnimation*);
+                AnimationData(const Mesh&, const aiAnimation&);
+                const AnimationData& operator=(const AnimationData&) = delete;// non copyable
+                AnimationData(const AnimationData&) = delete;                 // non construction-copyable
+                AnimationData(AnimationData&&) = default;
                 ~AnimationData();
                 float duration();
         };
@@ -115,12 +147,12 @@ namespace Engine{
 };
 class InternalMeshPublicInterface final{
     public:
-        static void LoadCPU(Mesh*);
-        static void LoadGPU(Mesh*);
-        static void UnloadCPU(Mesh*);
-        static void UnloadGPU(Mesh*);
-        static void UpdateInstance(Mesh*,uint _id, glm::mat4 _modelMatrix);
-        static void UpdateInstances(Mesh*, std::vector<glm::mat4>& _modelMatrices);
+        static void LoadCPU( Mesh&);
+        static void LoadGPU( Mesh&);
+        static void UnloadCPU( Mesh&);
+        static void UnloadGPU( Mesh&);
+        static void UpdateInstance( Mesh&,uint _id, glm::mat4 _modelMatrix);
+        static void UpdateInstances( Mesh&, std::vector<glm::mat4>& _modelMatrices);
         static bool SupportsInstancing();
         static btCollisionShape* BuildCollision(Mesh*,CollisionType::Type);
 };
@@ -143,7 +175,7 @@ class Mesh final: public BindableResource, public EventObserver{
         Mesh(std::string fileOrData, bool notMemory = true,float threshhold = 0.0005f,bool loadNow = true);
         ~Mesh();
 
-        std::unordered_map<std::string, Engine::epriv::AnimationData*>& animationData();
+        std::unordered_map<std::string, Engine::epriv::AnimationData>& animationData();
         const glm::vec3& getRadiusBox() const;
         const float getRadius() const;
 

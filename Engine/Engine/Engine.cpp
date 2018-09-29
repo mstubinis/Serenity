@@ -113,7 +113,7 @@ void render(){
     epriv::Core::m_Engine->m_TimeManager->stop_clock();
     Game::render();
     glm::uvec2 winSize = Resources::getWindowSize();
-    epriv::Core::m_Engine->m_RenderManager->_render(Resources::getCurrentScene()->getActiveCamera(),winSize.x,winSize.y);
+    epriv::Core::m_Engine->m_RenderManager->_render(*Resources::getCurrentScene()->getActiveCamera(),winSize.x,winSize.y);
     epriv::Core::m_Engine->m_TimeManager->calculate_render();
 
     //display

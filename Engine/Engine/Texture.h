@@ -87,7 +87,7 @@ class Texture: public EngineResource{
         bool mipmapped();
         bool compressed();
         void setAnisotropicFiltering(float aniso);
-        void resize(Engine::epriv::FramebufferObject*,uint width,uint height);
+        void resize(Engine::epriv::FramebufferObject&,uint width,uint height);
 
         ImageInternalFormat::Format internalFormat();
         ImagePixelFormat::Format pixelFormat();

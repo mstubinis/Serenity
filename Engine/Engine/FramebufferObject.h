@@ -23,16 +23,15 @@ namespace Engine{
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
-                FramebufferObjectAttatchment(FramebufferObject*,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
-                FramebufferObjectAttatchment(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*);
+                FramebufferObjectAttatchment(FramebufferObject&,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
+                FramebufferObjectAttatchment(FramebufferObject&,FramebufferAttatchment::Attatchment,Texture*);
                 virtual ~FramebufferObjectAttatchment();
 
-                virtual uint width();
-                virtual uint height();
-                virtual GLuint internalFormat();
-                virtual FramebufferObject* fbo();
-                virtual uint attatchment();
-                virtual void resize(FramebufferObject*,uint width,uint height);
+                uint width();
+                uint height();
+                GLuint internalFormat();
+                uint attatchment();
+                virtual void resize(FramebufferObject&,uint width,uint height);
                 virtual GLuint address();
                 virtual void bind();
                 virtual void unbind();
@@ -42,10 +41,10 @@ namespace Engine{
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
-                FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*);
+                FramebufferTexture(FramebufferObject&,FramebufferAttatchment::Attatchment,Texture*);
                 virtual ~FramebufferTexture();
 
-                void resize(FramebufferObject*,uint width,uint height);
+                void resize(FramebufferObject&,uint width,uint height);
                 GLuint address();
                 Texture* texture();
                 void bind();
@@ -56,10 +55,10 @@ namespace Engine{
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
-                RenderbufferObject(FramebufferObject*,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
+                RenderbufferObject(FramebufferObject&,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
                 virtual ~RenderbufferObject();
 
-                void resize(FramebufferObject*,uint width,uint height);
+                void resize(FramebufferObject&,uint width,uint height);
                 GLuint address();
                 void bind();
                 void unbind();

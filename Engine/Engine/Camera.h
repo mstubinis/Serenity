@@ -26,11 +26,10 @@ class Camera: public Entity{
         Camera(float left,float right,float bottom,float top,float nearPlane,float farPlane,Scene* = nullptr);
         virtual ~Camera();
 
-        //void lookAt(glm::vec3 _eye, glm::vec3 _forward, glm::vec3 _up);
-        glm::vec3 getPosition();
-        glm::vec3 forward();
-        glm::vec3 right();
-        glm::vec3 up();
+        const glm::vec3 getPosition();
+        const glm::vec3 forward();
+        const glm::vec3 right();
+        const glm::vec3 up();
         glm::quat getOrientation();
 
         float getDistance(Entity*);
@@ -41,14 +40,14 @@ class Camera: public Entity{
         const float getNear() const;     void setNear(float);
         const float getFar() const;      void setFar(float);
 
-        glm::mat4 getProjection();
-        glm::mat4 getProjectionInverse();
-        glm::vec3 getViewVector();
+        const glm::mat4 getProjection();
+        const glm::mat4 getProjectionInverse();
+        const glm::vec3 getViewVector();
 
-        glm::mat4 getView();
-        glm::mat4 getViewInverse();
-        glm::mat4 getViewProjection();
-        glm::mat4 getViewProjectionInverse();
+        const glm::mat4 getView();
+        const glm::mat4 getViewInverse();
+        const glm::mat4 getViewProjection();
+        const glm::mat4 getViewProjectionInverse();
 
         uint sphereIntersectTest(glm::vec3 pos,float radius);
         uint pointIntersectTest(glm::vec3 pos);
