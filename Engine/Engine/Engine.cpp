@@ -118,14 +118,14 @@ void render(){
 
     //display
     epriv::Core::m_Engine->m_TimeManager->stop_clock();
-    Resources::getWindow()->display();
+    Resources::getWindow().display();
     epriv::Core::m_Engine->m_TimeManager->calculate_display();	
 }
 void EVENT_RESIZE(uint w, uint h,bool saveSize){
     epriv::Core::m_Engine->m_RenderManager->_resize(w,h);
 
     epriv::Core::m_Engine->m_ComponentManager->_resize(w,h);
-    if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
+    if(saveSize) Engine::Resources::getWindow().setSize(w,h);
     Game::onResize(w,h);
 
     epriv::EventWindowResized e;  e.width = w; e.height = h;
@@ -133,7 +133,7 @@ void EVENT_RESIZE(uint w, uint h,bool saveSize){
     epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_CLOSE(){
-    Resources::getWindow()->close();
+    Resources::getWindow().close();
     Game::onClose();
 
     Event e; e.type = EventType::WindowClosed;
@@ -210,7 +210,7 @@ void EVENT_MOUSE_BUTTON_RELEASED(uint mouseButton){
 }
 void EVENT_MOUSE_MOVED(int mouseX, int mouseY){
     float mX = (float)mouseX; float mY = (float)mouseY;
-    if(Resources::getWindow()->hasFocus()){
+    if(Resources::getWindow().hasFocus()){
         epriv::Core::m_Engine->m_EventManager->setMousePositionInternal(mX,mY,false,false);
     }
     Game::onMouseMoved(mX,mY);
@@ -272,17 +272,17 @@ void EVENT_JOYSTICK_DISCONNECTED(uint& id){
 }
 
 const float Engine::getFPS(){ return (float)(1.0 / Resources::dt()); }
-Engine_Window* Engine::getWindow(){ return Engine::Resources::getWindow(); }
+Engine_Window& Engine::getWindow(){ return Engine::Resources::getWindow(); }
 const glm::uvec2 Engine::getWindowSize(){ return Engine::Resources::getWindowSize(); }
-void Engine::setWindowIcon(Texture* texture){ Resources::getWindow()->setIcon(texture); }
-void Engine::showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(true); }
-void Engine::hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }
+void Engine::setWindowIcon(const Texture& texture){ Resources::getWindow().setIcon(texture); }
+void Engine::showMouseCursor(){ Resources::getWindow().setMouseCursorVisible(true); }
+void Engine::hideMouseCursor(){ Resources::getWindow().setMouseCursorVisible(false); }
 void Engine::stop(){ epriv::Core::m_Engine->m_Destroyed = true; }
-void Engine::setFullScreen(bool b){ Engine::Resources::getWindow()->setFullScreen(b); }
+void Engine::setFullScreen(bool b){ Engine::Resources::getWindow().setFullScreen(b); }
 
 void handleEvents(){
     sf::Event e;
-    while(Resources::getWindow()->getSFMLHandle()->pollEvent(e)){
+    while(Resources::getWindow().getSFMLHandle().pollEvent(e)){
         switch(e.type){
             case sf::Event::Closed:{                    EVENT_CLOSE();break;}
             case sf::Event::KeyReleased:{               EVENT_KEY_RELEASED(e.key.code);break;}
@@ -306,8 +306,7 @@ void handleEvents(){
 }
 
 void Engine::run(){
-    const Engine_Window& window = *Resources::getWindow();
-    while(!epriv::Core::m_Engine->m_Destroyed /*&& window.isOpen()*/){
+    while(!epriv::Core::m_Engine->m_Destroyed /*&& Resources::getWindow().isOpen()*/){
         float dt = (float)epriv::Core::m_Engine->m_TimeManager->dt();
         handleEvents();
         update(dt);

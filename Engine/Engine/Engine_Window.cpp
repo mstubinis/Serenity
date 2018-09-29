@@ -142,8 +142,8 @@ class Engine_Window::impl final{
             }
             m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
         }
-        void _setIcon(Texture* texture){
-            m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
+        void _setIcon(Texture& texture){
+            m_SFMLWindow->setIcon(texture.width(),texture.height(),texture.pixels());
         }
         void _setMouseCursorVisible(bool& visible){
             if(m_MouseCursorVisible != visible){
@@ -183,7 +183,7 @@ Engine_Window::~Engine_Window(){
     m_i->_destruct();
 }
 glm::uvec2 Engine_Window::getSize(){ sf::Vector2u size = m_i->m_SFMLWindow->getSize(); return glm::uvec2(size.x,size.y); }
-void Engine_Window::setIcon(Texture* texture){m_i->_setIcon(texture);}
+void Engine_Window::setIcon(const Texture& texture){m_i->_setIcon(const_cast<Texture&>(texture));}
 void Engine_Window::setIcon(const char* file){m_i->_setIcon(file);}
 const char* Engine_Window::name() const {return m_i->m_WindowName;}
 void Engine_Window::setName(const char* name){m_i->_setName(name);}
@@ -203,6 +203,6 @@ void Engine_Window::setStyle(uint style){m_i->_setStyle(style);}
 void Engine_Window::setFullScreen(bool fullscreen){ m_i->_setFullScreen(fullscreen); }
 void Engine_Window::keepMouseInWindow(bool keep){ m_i->_keepMouseInWindow(keep); }
 void Engine_Window::setFramerateLimit(uint limit){ m_i->_setFramerateLimit(limit); }
-sf::Window* Engine_Window::getSFMLHandle() const { return m_i->m_SFMLWindow; }
+sf::Window& Engine_Window::getSFMLHandle() const { return *m_i->m_SFMLWindow; }
 uint Engine_Window::getStyle(){ return m_i->m_Style; }
 uint Engine_Window::getFramerateLimit() const{ return m_i->m_FramerateLimit; }

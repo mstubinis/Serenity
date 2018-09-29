@@ -104,7 +104,7 @@ class MeshInstance::impl{
         }
 };
 
-struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
+void epriv::DefaultMeshInstanceBindFunctor::operator()(EngineResource* r) const {
     MeshInstance::impl& i = *((MeshInstance*)r)->m_i;
     glm::vec3 camPos = Resources::getCurrentScene()->getActiveCamera()->getPosition();
     Entity* parent = i.m_Entity;
@@ -150,9 +150,9 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
      
     Renderer::sendUniformMatrix4Safe("Model",model);
     Renderer::sendUniformMatrix3Safe("NormalMatrix",normalMatrix);
-}};
-struct epriv::DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
-}};
+};
+void epriv::DefaultMeshInstanceUnbindFunctor::operator()(EngineResource* r) const {
+};
 
 epriv::DefaultMeshInstanceBindFunctor   DEFAULT_BIND_FUNCTOR;
 epriv::DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;

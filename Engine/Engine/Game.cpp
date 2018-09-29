@@ -35,8 +35,7 @@ void Game::cleanup(){
 }
 
 void Game::initResources(){
-    Engine_Window& window = *Resources::getWindow();
-    window.setIcon("data/Textures/icon.png");
+    Resources::getWindow().setIcon("data/Textures/icon.png");
 
     ResourceManifest::init();
 }
@@ -44,7 +43,7 @@ void Game::initLogic(){
 
     Engine::registerComponent<ComponentCamera,GameCameraComponent>();
 
-    Engine_Window& window = *Resources::getWindow();
+    Engine_Window& window = Resources::getWindow();
     window.keepMouseInWindow(true);
     window.setMouseCursorVisible(false);
     window.setKeyRepeatEnabled(false);
@@ -70,7 +69,7 @@ void Game::update(const float& dt){
         Resources::setCurrentScene("CapsuleSpace");
     }
     if(Engine::isKeyDownOnce(KeyboardKey::F6)){
-        Resources::getWindow()->setFullScreen(!Resources::getWindow()->isFullscreen());
+        Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen());
     }
     if(Engine::isKeyDownOnce(KeyboardKey::F7)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
     if(Engine::isKeyDownOnce(KeyboardKey::F8)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
@@ -103,14 +102,14 @@ void Game::onResize(uint width,uint height){
 void Game::onClose(){
 }
 void Game::onLostFocus(){
-    Engine::getWindow()->keepMouseInWindow(false);
+    Engine::getWindow().keepMouseInWindow(false);
     //Engine::getWindow()->setMouseCursorVisible(true);
 }
 void Game::onGainedFocus(){
-    Engine::getWindow()->keepMouseInWindow(true);
+    Engine::getWindow().keepMouseInWindow(true);
     //Engine::getWindow()->setMouseCursorVisible(false);
     const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
-    sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
+    sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),Resources::getWindow().getSFMLHandle());
 
     Engine::setMousePosition(halfRes,true);
 }
@@ -129,23 +128,23 @@ void Game::onMouseButtonReleased(uint button){
 void Game::onMouseMoved(float mouseX,float mouseY){
 }
 void Game::onMouseEntered(){
-    Engine::getWindow()->requestFocus();
-    Engine::getWindow()->keepMouseInWindow(true);
-    //Engine::getWindow()->setMouseCursorVisible(true);
+    Engine::getWindow().requestFocus();
+    Engine::getWindow().keepMouseInWindow(true);
+    //Engine::getWindow().setMouseCursorVisible(true);
 }
 void Game::onMouseLeft(){
-    Engine::getWindow()->keepMouseInWindow(false);
-    //Engine::getWindow()->setMouseCursorVisible(true);
+    Engine::getWindow().keepMouseInWindow(false);
+    //Engine::getWindow().setMouseCursorVisible(true);
 }
 void Game::onPreUpdate(float dt){
 }
 void Game::onPostUpdate(float dt){
     const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
-    if(Resources::getWindow()->hasFocus()){
+    if(Resources::getWindow().hasFocus()){
         glm::vec2 mousePos = Engine::getMousePosition();
         float mouseDistFromCenter = glm::distance(mousePos,halfRes);
         if(mouseDistFromCenter > 1.0f){
-            sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
+            sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),Resources::getWindow().getSFMLHandle());
             Engine::setMousePosition(halfRes,false,true);
         }
     }

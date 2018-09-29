@@ -38,19 +38,18 @@ class CapsuleRibbon final: public Entity{
         float m_TunnelRadius;
     public:
         ComponentBody* m_Body;
-        CapsuleRibbon(float tunnelRadius, Handle& material, Scene* = nullptr);
+        CapsuleRibbon(float tunnelRadius, Handle& mesh,Handle& material, Scene* = nullptr);
         ~CapsuleRibbon();
 
         float getTunnelRadius(){ return m_TunnelRadius; }
-        void bind();
-        void unbind();
 };
 class CapsuleSpace final: public SolarSystem{
     private:
         float m_Timer;
         CapsuleTunnel* m_TunnelA;
         CapsuleTunnel* m_TunnelB;
-        CapsuleRibbon* m_Ribbon;
+        CapsuleRibbon* m_RibbonA;
+        CapsuleRibbon* m_RibbonB;
         CapsuleEnd* m_FrontEnd;
         CapsuleEnd* m_BackEnd;
         std::vector<CapsuleStar*> m_CapsuleStars;

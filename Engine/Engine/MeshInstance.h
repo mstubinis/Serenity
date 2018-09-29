@@ -16,8 +16,8 @@ class Mesh;
 class MeshInstance;
 namespace Engine{
     namespace epriv{
-        struct DefaultMeshInstanceBindFunctor;
-        struct DefaultMeshInstanceUnbindFunctor;
+        struct DefaultMeshInstanceBindFunctor { void operator()(EngineResource* r) const; };
+        struct DefaultMeshInstanceUnbindFunctor { void operator()(EngineResource* r) const; };
         struct MeshInstanceAnimation;
     };
 };

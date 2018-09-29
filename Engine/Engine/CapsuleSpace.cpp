@@ -78,23 +78,34 @@ CapsuleTunnel::CapsuleTunnel(float tunnelRadius,Handle& material, Scene* scene):
 }
 CapsuleTunnel::~CapsuleTunnel(){}
 
-CapsuleRibbon::CapsuleRibbon(float tunnelRadius,Handle& material, Scene* scene):Entity(){
+struct RibbonBindFunctor {void operator()(EngineResource* r) const {
+    Renderer::GLDisable(GLState::DEPTH_TEST);
+    Renderer::GLDisable(GLState::DEPTH_MASK);
+
+    epriv::DefaultMeshInstanceBindFunctor()(r);
+}};
+struct RibbonUnbindFunctor {void operator()(EngineResource* r) const {
+    Renderer::GLEnable(GLState::DEPTH_TEST);
+    Renderer::GLEnable(GLState::DEPTH_MASK);
+}};
+
+CapsuleRibbon::CapsuleRibbon(float tunnelRadius, Handle& mesh,Handle& material, Scene* scene):Entity(){
     scene->addEntity(this);
     m_TunnelRadius = tunnelRadius;
-    ComponentModel* model = new ComponentModel(ResourceManifest::CapsuleRibbonMesh,material,this);  addComponent(model);
-    m_Body = new ComponentBody();  addComponent(m_Body);
+    ComponentModel* model = new ComponentModel(mesh,material,this);
+
+    RibbonBindFunctor fB;
+    RibbonUnbindFunctor fUB;
+
+    model->getModel()->setCustomBindFunctor(fB);
+    model->getModel()->setCustomUnbindFunctor(fUB);
+    addComponent(model);
+    m_Body = new ComponentBody();
+    addComponent(m_Body);
     m_Body->setPosition(0.0f,0.0f,0.0f);
     m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);   
 }
 CapsuleRibbon::~CapsuleRibbon(){}
-void CapsuleRibbon::bind(){
-    Renderer::GLDisable(GLState::DEPTH_TEST);
-    Renderer::GLDisable(GLState::DEPTH_MASK);
-}
-void CapsuleRibbon::unbind(){
-    Renderer::GLEnable(GLState::DEPTH_TEST);
-    Renderer::GLEnable(GLState::DEPTH_MASK);
-}
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     m_Timer = 0;
@@ -112,7 +123,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 
     m_TunnelA = new CapsuleTunnel(5000,ResourceManifest::CapsuleA,this);
     m_TunnelB = new CapsuleTunnel(5000,ResourceManifest::CapsuleB,this);
-    m_Ribbon = new CapsuleRibbon(5000,ResourceManifest::CapsuleC,this);
+    m_RibbonA = new CapsuleRibbon(5000,ResourceManifest::CapsuleRibbonAMesh,ResourceManifest::CapsuleC,this);
+    m_RibbonB = new CapsuleRibbon(5000,ResourceManifest::CapsuleRibbonBMesh,ResourceManifest::CapsuleC,this);
 
     m_FrontEnd = new CapsuleEnd(2250,glm::vec3(0,0,-25000),glm::vec3(1),this);
     m_BackEnd = new CapsuleEnd(1700,glm::vec3(0,0,25000),glm::vec3(0),this);
@@ -125,7 +137,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     m_TunnelA->m_Body->setPosition(0,0,0);
     m_TunnelB->m_Body->setPosition(0,0,0);
 
-    m_Ribbon->m_Body->setPosition(0,300,0);
+    m_RibbonA->m_Body->setPosition(0,300,0);
+    m_RibbonB->m_Body->setPosition(0, 300, 0);
 
     float step = -10.0f;
     for(uint i = 0; i < 300; ++i){
@@ -163,7 +176,8 @@ void CapsuleSpace::update(const float& dt){
 
     m_TunnelA->m_Body->translate(0,0,(25 * aRadius) * dt,false);
     m_TunnelB->m_Body->translate(0,0,(8 * bRadius) * dt,false);
-    m_Ribbon->m_Body->translate(0,0,(7 * aRadius) * dt,false);
+    m_RibbonA->m_Body->translate(0,0,(7 * aRadius) * dt,false);
+    m_RibbonB->m_Body->translate(0, 0, (7 * aRadius) * dt, false);
 
     float tunnelARotRand = float(rand() % 3) + 2;
     float tunnelBRotRand = float(rand() % 2) + 2;
@@ -175,7 +189,8 @@ void CapsuleSpace::update(const float& dt){
 
     glm::vec3 aPos = m_TunnelA->m_Body->position();
     glm::vec3 bPos = m_TunnelB->m_Body->position();
-    glm::vec3 rPos = m_Ribbon->m_Body->position();
+    glm::vec3 rPosA = m_RibbonA->m_Body->position();
+    glm::vec3 rPosB = m_RibbonB->m_Body->position();
 
     if(aPos.z >= 12.112 * aRadius || aPos.z <= -12.112 * aRadius){
         m_TunnelA->m_Body->setPosition(0,0,0);
@@ -183,8 +198,11 @@ void CapsuleSpace::update(const float& dt){
     if(bPos.z >= 12.112 * bRadius || bPos.z <= -12.112 * bRadius){
         m_TunnelB->m_Body->setPosition(0,0,0);
     }
-    if(rPos.z >= 20 * aRadius || rPos.z <= -20 * aRadius){
-        m_Ribbon->m_Body->setPosition(0,300,0);
+    if(rPosA.z >= 20 * aRadius || rPosA.z <= -20 * aRadius){
+        m_RibbonA->m_Body->setPosition(0,300,0);
+    }
+    if (rPosB.z >= 20 * aRadius || rPosB.z <= -20 * aRadius) {
+        m_RibbonB->m_Body->setPosition(0, 300, 0);
     }
     ComponentBody& body = *getPlayer()->getComponent<ComponentBody>();
     ComponentModel& model = *getPlayer()->getComponent<ComponentModel>();

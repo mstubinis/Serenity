@@ -1459,7 +1459,7 @@ class epriv::RenderManager::impl final{
                 Settings::clear(true,true,false);
                 Skybox::bindMesh();
             }
-            Resources::getWindow()->display(); //prevent opengl & windows timeout
+            Resources::getWindow().display(); //prevent opengl & windows timeout
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapConvolude)->unbind();
 
             //now gen EnvPrefilterMap for specular IBL
@@ -1485,7 +1485,7 @@ class epriv::RenderManager::impl final{
                     Skybox::bindMesh();
                 }
             }
-            Resources::getWindow()->display(); //prevent opengl & windows timeout
+            Resources::getWindow().display(); //prevent opengl & windows timeout
             fbo->unbind();
             delete fbo;
         }

@@ -67,7 +67,7 @@ void HUD::render(){
     //render hud stuff
     SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
     Ship* player = scene->getPlayer();
-    glm::vec2 winSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+    glm::vec2 winSize = glm::vec2(Resources::getWindow().getSize().x,Resources::getWindow().getSize().y);
 
     // render warp drive
     //Engine::Renderer::renderRectangle(glm::vec2(winSize.x/2 - 100,winSize.y - m_WarpIndicatorSize.y/2),glm::vec4(m_Color.x,m_Color.y,m_Color.z,0.3f),m_WarpIndicatorSize.x,m_WarpIndicatorSize.y,0,0);
@@ -94,22 +94,20 @@ void HUD::render(){
                 //stringRepresentation = to_string(uint(distanceInm)) + " m";
             //}
             font->renderText(/*player->getTarget()->name() + */"\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
-        }
-        else{
+        }else{
             Material* crosshairArrow = (Material*)ResourceManifest::CrosshairArrowMaterial.get();
-            glm::vec2 winSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+            glm::vec2 winSize = glm::vec2(Resources::getWindow().getSize().x,Resources::getWindow().getSize().y);
             scl = 1;
 
             float angle = 0;
-            if(pos.y > 2 && pos.y < winSize.y - 2)
-                if(pos.x < 2)                      angle = 45;
+            if (pos.y > 2 && pos.y < winSize.y - 2) {
+                if (pos.x < 2)                     angle = 45;
                 else                               angle = 225;
-            else if(pos.y <= 1){
+            }else if(pos.y <= 1){
                 if(pos.x <= 1)                     angle = 0;
                 else if(pos.x > winSize.x - 2)     angle = -90;
                 else                               angle = -45;
-            }
-            else{
+            }else{
                 if(pos.x < 2)                      angle = 90;
                 else if(pos.x > winSize.x - 2)     angle = 180;
                 else                               angle = 135;

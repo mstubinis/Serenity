@@ -40,7 +40,8 @@ Handle ResourceManifest::StarFlareMaterial;
 Handle ResourceManifest::GoldMaterial;
 
 Handle ResourceManifest::CapsuleTunnelMesh;
-Handle ResourceManifest::CapsuleRibbonMesh;
+Handle ResourceManifest::CapsuleRibbonAMesh;
+Handle ResourceManifest::CapsuleRibbonBMesh;
 Handle ResourceManifest::CapsuleA;
 Handle ResourceManifest::CapsuleB;
 Handle ResourceManifest::CapsuleC;
@@ -80,7 +81,8 @@ void ResourceManifest::init(){
     OberthMesh = Resources::addMeshAsync("data/Models/oberth.objc");
     */
     CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.objc");
-    CapsuleRibbonMesh = Resources::addMeshAsync("data/Models/capsuleRibbon.objc");
+    CapsuleRibbonAMesh = Resources::addMeshAsync("data/Models/capsuleRA.objc");
+    CapsuleRibbonBMesh = Resources::addMeshAsync("data/Models/capsuleRB.objc");
 
     Engine::epriv::threading::waitForAll();
 
@@ -116,7 +118,7 @@ void ResourceManifest::init(){
     ((Material*)CapsuleB.get())->setShadeless(true);
     CapsuleC = Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.dds");
     ((Material*)CapsuleC.get())->setShadeless(true);
-    ((Material*)CapsuleC.get())->setGlow(0.01f);
+    ((Material*)CapsuleC.get())->setGlow(1.0f);
     CapsuleD = Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.dds");
     ((Material*)CapsuleD.get())->setShadeless(true);
 

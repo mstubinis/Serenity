@@ -96,18 +96,18 @@ const float Engine::getMouseWheelDelta(){
     return epriv::EventManager::m_EventManager->m_Delta;
 }
 void Engine::setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition){
-    sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),*Resources::getWindow()->getSFMLHandle());
+    sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),Resources::getWindow().getSFMLHandle());
     epriv::EventManager::m_EventManager->setMousePositionInternal(x,y,resetDifference,resetPreviousPosition);
 }
 void Engine::setMousePosition(uint x,uint y,bool resetDifference,bool resetPreviousPosition){
-    sf::Mouse::setPosition(sf::Vector2i(x,y),*Resources::getWindow()->getSFMLHandle());
+    sf::Mouse::setPosition(sf::Vector2i(x,y),Resources::getWindow().getSFMLHandle());
     epriv::EventManager::m_EventManager->setMousePositionInternal((float)x,(float)y,resetDifference,resetPreviousPosition);
 }
 void Engine::setMousePosition(glm::vec2 pos,bool resetDifference,bool resetPreviousPosition){
-    sf::Mouse::setPosition(sf::Vector2i(int(pos.x),int(pos.y)),*Resources::getWindow()->getSFMLHandle());
+    sf::Mouse::setPosition(sf::Vector2i(int(pos.x),int(pos.y)),Resources::getWindow().getSFMLHandle());
     epriv::EventManager::m_EventManager->setMousePositionInternal(pos.x,pos.y,resetDifference,resetPreviousPosition);
 }
 void Engine::setMousePosition(glm::uvec2 pos,bool resetDifference,bool resetPreviousPosition){
-    sf::Mouse::setPosition(sf::Vector2i(pos.x,pos.y),*Resources::getWindow()->getSFMLHandle());
+    sf::Mouse::setPosition(sf::Vector2i(pos.x,pos.y),Resources::getWindow().getSFMLHandle());
     epriv::EventManager::m_EventManager->setMousePositionInternal((float)pos.x,(float)pos.y,resetDifference,resetPreviousPosition);
 }

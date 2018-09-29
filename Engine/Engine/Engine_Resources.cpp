@@ -98,7 +98,7 @@ uint epriv::ResourceManager::_numScenes(){return m_i->m_Scenes.size();}
 void Resources::Settings::enableDynamicMemory(bool b){ resourceManager->m_DynamicMemory = b; }
 void Resources::Settings::disableDynamicMemory(){ resourceManager->m_DynamicMemory = false; }
 
-Engine_Window* Resources::getWindow(){ return resourceManager->m_Window; }
+Engine_Window& Resources::getWindow(){ return *resourceManager->m_Window; }
 glm::uvec2 Resources::getWindowSize(){ return resourceManager->m_Window->getSize(); }
 
 Scene* Resources::getScene(string n){return (Scene*)(_getFromContainer(resourceManager->m_Scenes,n));}

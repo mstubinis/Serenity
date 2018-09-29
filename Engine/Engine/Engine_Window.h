@@ -19,7 +19,7 @@ class Engine_Window final: private Engine::epriv::noncopyable{
         glm::uvec2 getSize();
         void setName(const char* name);
         void setSize(uint w, uint h);
-        void setIcon(Texture* texture);
+        void setIcon(const Texture& texture);
         void setIcon(const char* file);
         void setMouseCursorVisible(bool);
 
@@ -72,6 +72,6 @@ class Engine_Window final: private Engine::epriv::noncopyable{
 
         uint getFramerateLimit() const;
 
-        sf::Window* getSFMLHandle() const;
+        sf::Window& getSFMLHandle() const;
 };
 #endif

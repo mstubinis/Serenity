@@ -49,9 +49,9 @@ namespace Engine{
     void run();
 
     const float getFPS();
-    Engine_Window* getWindow();
+    Engine_Window& getWindow();
     const glm::uvec2 getWindowSize();
-    void setWindowIcon(Texture* texture);
+    void setWindowIcon(const Texture& texture);
     void showMouseCursor();
     void hideMouseCursor();
     void stop();

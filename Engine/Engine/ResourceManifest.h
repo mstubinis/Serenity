@@ -42,7 +42,8 @@ class ResourceManifest{
         static Handle GoldMaterial;
 
         static Handle CapsuleTunnelMesh;
-        static Handle CapsuleRibbonMesh;
+        static Handle CapsuleRibbonAMesh;
+        static Handle CapsuleRibbonBMesh;
         static Handle CapsuleA;
         static Handle CapsuleB;
         static Handle CapsuleC;
