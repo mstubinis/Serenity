@@ -98,13 +98,13 @@ class Skybox::impl final {
             //instead of using files[0] generate a proper name using the directory?
             m_Texture = new Texture(names, files[0] + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
             m_Texture->genPBREnvMapData(32, m_Texture->width() / 4);
-            epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_Texture);
+            epriv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
         }
         void _init(string filename, Scene* scene) {
             glActiveTexture(GL_TEXTURE0);
             m_Texture = new Texture(filename, false, ImageInternalFormat::SRGB8_ALPHA8);
             m_Texture->genPBREnvMapData(32, m_Texture->width() / 4);
-            epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_Texture);
+            epriv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
         }
         void _destruct() {
         }

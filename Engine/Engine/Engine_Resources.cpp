@@ -73,9 +73,9 @@ epriv::ResourceManager::~ResourceManager(){ m_i->_destruct(); }
 void epriv::ResourceManager::_init(const char* n,uint w,uint h){ m_i->_postInit(n,w,h); }
 
 string Engine::Data::reportTime(){
-    return epriv::Core::m_Engine->m_TimeManager->reportTime();
+    return epriv::Core::m_Engine->m_TimeManager.reportTime();
 }
-const double Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(); }
+const double Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager.dt(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_CurrentScene; }
 
 bool epriv::ResourceManager::_hasScene(string n){ if(m_i->m_Scenes.count(n)) return true; return false; }
@@ -182,21 +182,21 @@ void Resources::setCurrentScene(Scene* newScene){
 
     epriv::EventSceneChanged e; e.oldScene = oldScene; e.newScene = newScene;
     Event ev; ev.eventSceneChanged = e; ev.type = EventType::SceneChanged;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::SceneChanged,ev);
+    epriv::Core::m_Engine->m_EventDispatcher._dispatchEvent(EventType::SceneChanged,ev);
     
     if(!oldScene){
         cout << "---- Initial scene set to: " << newScene->name() << endl;
         resourceManager->m_CurrentScene = newScene;
-        epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(nullptr, newScene);       
+        epriv::Core::m_Engine->m_ComponentManager._sceneSwap(nullptr, newScene);       
         return;
     }
     if(oldScene != newScene){
         cout << "---- Scene Change started (" << oldScene->name() << ") to (" << newScene->name() << ") ----" << endl;
-        if(epriv::Core::m_Engine->m_ResourceManager->m_i->m_DynamicMemory){
+        if(epriv::Core::m_Engine->m_ResourceManager.m_i->m_DynamicMemory){
             //mark game object resources to minus use count
         }
         resourceManager->m_CurrentScene = newScene;
-        epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(oldScene, newScene);
+        epriv::Core::m_Engine->m_ComponentManager._sceneSwap(oldScene, newScene);
         if(resourceManager->m_DynamicMemory){
             //mark game object resources to add use count
         }

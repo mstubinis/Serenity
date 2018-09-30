@@ -2,44 +2,36 @@
 #ifndef ENGINE_ENGINE_H
 #define ENGINE_ENGINE_H
 
-class Texture;
-class Engine_Window;
-
-#include <glm/fwd.hpp>
+#include "Engine_Time.h"
+#include "Engine_EventDispatcher.h"
+#include "Engine_ThreadManager.h"
+#include "Engine_Resources.h"
+#include "Engine_Renderer.h"
+#include "Engine_Sounds.h"
+#include "Engine_Events.h"
+#include "Engine_Noise.h"
+#include "Engine_Window.h"
+#include "Components.h"
 
 typedef unsigned int uint;
-
 namespace Engine{
     namespace epriv{
-        class EventManager;
-        class SoundManager;
-        class RenderManager;
-        class ComponentManager;
-        class ThreadManager;
-        class ResourceManager;
-        class TimeManager;
-        class PhysicsManager;
-        class EventDispatcher;
-        class NoiseManager;
-        class Core final{
-            public:
-                static Core* m_Engine;
+        struct Core final{
+            static Core*      m_Engine;
 
-                EventManager* m_EventManager;
-                ResourceManager* m_ResourceManager;
-                TimeManager* m_TimeManager;
-                SoundManager* m_SoundManager;
-                PhysicsManager* m_PhysicsManager;
-                RenderManager* m_RenderManager;
-                EventDispatcher* m_EventDispatcher;
-                ComponentManager* m_ComponentManager;
-                ThreadManager* m_ThreadManager;
-                NoiseManager* m_NoiseManager;
-                bool m_Paused;
-                bool m_Destroyed;
-
-                Core(const char* name,uint width,uint height);
-                ~Core();
+            EventManager      m_EventManager;
+            EventDispatcher   m_EventDispatcher;
+            ResourceManager   m_ResourceManager;
+            TimeManager       m_TimeManager;
+            SoundManager      m_SoundManager;
+            PhysicsManager    m_PhysicsManager;
+            RenderManager     m_RenderManager;
+            ComponentManager  m_ComponentManager;
+            ThreadManager     m_ThreadManager;
+            NoiseManager      m_NoiseManager;
+            bool              m_Paused, m_Destroyed;
+            Core(const char* name,uint width,uint height);
+            ~Core();
         };
     };
     void init(const char* name,uint width=0,uint height=0);

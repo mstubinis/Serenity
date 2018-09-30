@@ -78,7 +78,7 @@ class Engine_Window::impl final{
             }
             m_SFMLWindow->create(m_VideoMode,name,m_Style,settings);
             uint opengl_version = stoi(to_string(settings.majorVersion) + to_string(settings.minorVersion));
-            epriv::Core::m_Engine->m_RenderManager->_onOpenGLContextCreation(m_Width,m_Height,_glslVersion,opengl_version);
+            epriv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_Width,m_Height,_glslVersion,opengl_version);
 
             return m_SFMLWindow->getSettings();
         }
@@ -98,18 +98,18 @@ class Engine_Window::impl final{
                 m_VideoMode.width = m_Width;
                 m_VideoMode.height = m_Height;
             }
-            epriv::Core::m_Engine->m_RenderManager->_onFullscreen(m_SFMLWindow,m_VideoMode,m_WindowName,m_Style,m_SFContextSettings);
+            epriv::Core::m_Engine->m_RenderManager._onFullscreen(m_SFMLWindow,m_VideoMode,m_WindowName,m_Style,m_SFContextSettings);
 
             //event dispatch
             epriv::EventWindowFullscreenChanged e; e.isFullscreen = fullscreen;
             Event ev; ev.eventWindowFullscreenChanged = e; ev.type = EventType::WindowFullscreenChanged;
-            epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
+            epriv::Core::m_Engine->m_EventDispatcher._dispatchEvent(ev);
 
             glm::uvec2 winSize = Engine::getWindowSize();
 
             //basically this block of code is a copy of EVENT_RESIZE, i wish this would trigger the event resize method...
-            epriv::Core::m_Engine->m_RenderManager->_resize(winSize.x,winSize.y);
-            epriv::Core::m_Engine->m_ComponentManager->_resize(winSize.x,winSize.y);
+            epriv::Core::m_Engine->m_RenderManager._resize(winSize.x,winSize.y);
+            epriv::Core::m_Engine->m_ComponentManager._resize(winSize.x,winSize.y);
             Game::onResize(winSize.x,winSize.y);
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -135,10 +135,10 @@ class Engine_Window::impl final{
             m_SFMLWindow->setTitle(m_WindowName);
         }
         void _setIcon(const char* file){
-            Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(file);
+            Texture* texture = epriv::Core::m_Engine->m_ResourceManager._hasTexture(file);
             if(!texture){
                 texture = new Texture(file,false,ImageInternalFormat::RGBA8);
-                epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+                epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
             }
             m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
         }

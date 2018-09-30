@@ -988,7 +988,7 @@ Texture::~Texture(){
 }
 void Texture::render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
     if(m_i->m_TextureType == TextureType::CubeMap) return;
-    Core::m_Engine->m_RenderManager->_renderTexture(this,pos,color,scl,angle,depth);
+    Core::m_Engine->m_RenderManager._renderTexture(this,pos,color,scl,angle,depth);
 }
 void Texture::setXWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(m_i->m_Type,w); }
 void Texture::setYWrapping(TextureWrap::Wrap w){ Texture::setYWrapping(m_i->m_Type,w); }
@@ -1115,7 +1115,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
         setMaxFilter(TextureFilter::Linear);
         glGenerateMipmap(m_i->m_Type);
     }
-    Core::m_Engine->m_RenderManager->_genPBREnvMapData(*this,convoludeTextureSize,preEnvFilterSize);
+    Core::m_Engine->m_RenderManager._genPBREnvMapData(*this,convoludeTextureSize,preEnvFilterSize);
 }
 void Texture::resize(epriv::FramebufferObject& fbo,uint w, uint h){ m_i->_resize(fbo,w,h); }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }

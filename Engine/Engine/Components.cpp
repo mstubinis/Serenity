@@ -120,15 +120,15 @@ class epriv::ComponentManager::impl final{
             vector_clear(m_EntitiesToBeDestroyed);
         }
         void _updatePhysicsEngine(const float& dt){
-            Core::m_Engine->m_TimeManager->stop_clock();
+            Core::m_Engine->m_TimeManager.stop_clock();
             //It's important that timeStep is always less than maxSubSteps * fixedTimeStep, otherwise you are losing time. dt < maxSubSteps * fixedTimeStep
             float minStep = 0.0166666f; // == 0.0166666 at 1 fps
             uint maxSubSteps = 0;
             while(true){
                 ++maxSubSteps; if(dt < (maxSubSteps * minStep)) break;
             }
-            Core::m_Engine->m_PhysicsManager->_update(dt,maxSubSteps,minStep);
-            Core::m_Engine->m_TimeManager->calculate_physics();
+            Core::m_Engine->m_PhysicsManager._update(dt,maxSubSteps,minStep);
+            Core::m_Engine->m_TimeManager.calculate_physics();
         }
         void _update(const float& dt,ComponentManager* super){
             _updateCurrentScene(dt); //take player input and perform player actions

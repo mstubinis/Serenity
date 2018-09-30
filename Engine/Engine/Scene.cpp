@@ -27,9 +27,9 @@ class Scene::impl final {
             m_Skybox = nullptr;
             m_ActiveCamera = nullptr;
             m_BackgroundColor = glm::vec3(0.0f);
-            _name = epriv::Core::m_Engine->m_ResourceManager->_buildSceneName(_name);
+            _name = epriv::Core::m_Engine->m_ResourceManager._buildSceneName(_name);
             super->setName(_name);
-            epriv::Core::m_Engine->m_ResourceManager->_addScene(super);
+            epriv::Core::m_Engine->m_ResourceManager._addScene(super);
         }
         void _destruct() {
             SAFE_DELETE(m_Skybox);
@@ -39,7 +39,7 @@ class Scene::impl final {
         uint _addEntity(Scene* super, Entity* _entity) {
             if (_entity->m_ID != 0) return 0;
             for (auto entityInScene : m_Entities) { if (_entity->m_ID == entityInScene) return entityInScene; } //rethink this maybe use a fixed size array?
-            const uint entityID = epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->add(_entity);
+            const uint entityID = epriv::Core::m_Engine->m_ComponentManager.m_EntityPool->add(_entity);
             _entity->m_ID = entityID;
             epriv::ComponentManager::onEntityAddedToScene(super, _entity);
             m_Entities.push_back(entityID);

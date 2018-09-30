@@ -112,8 +112,7 @@ class Shader::impl final{
     public:
         ShaderType::Type m_Type;
         bool m_FromFile;
-        string m_FileName;
-        string m_Code;
+        string m_FileName, m_Code;
         void _init(string& filenameOrCode, ShaderType::Type type, bool fromFile,Shader* super){
             m_FileName = filenameOrCode;
             m_Type = type;
@@ -128,12 +127,9 @@ class Shader::impl final{
                 m_Code = filenameOrCode;
             }
         }
-        void _destruct(){
-        }
-
 };
 Shader::Shader(string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){ m_i->_init(shaderFileOrData,shaderType,fromFile,this); }
-Shader::~Shader(){ m_i->_destruct(); }
+Shader::~Shader(){ }
 ShaderType::Type Shader::type(){ return m_i->m_Type; }
 string Shader::data(){ return m_i->m_Code; }
 bool Shader::fromFile(){ return m_i->m_FromFile; }
@@ -150,19 +146,19 @@ class ShaderP::impl final{
         bool m_LoadedCPU;
         bool m_LoadedGPU;
 
-        void _init(string& name, Shader* vs, Shader* fs,ShaderP* super){
+        void _init(string& name, Shader* vs, Shader* fs,ShaderP& super){
             m_VertexShader = vs;
             m_FragmentShader = fs;
             m_LoadedGPU = m_LoadedCPU = false;
 
-            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-            super->setName(name);
+            super.setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+            super.setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+            super.setName(name);
 
-            string& _name = super->name();
+            string& _name = super.name();
             if(vs->name() == "NULL") vs->setName(_name + ".vert");
             if(fs->name() == "NULL") fs->setName(_name + ".frag");
-            super->load();
+            super.load();
         }
         void _convertCode(string& vCode,string& fCode,ShaderP* super){ 
             _convertCode(vCode,m_VertexShader,super); 
@@ -593,7 +589,7 @@ class ShaderP::impl final{
         }
 };
 ShaderP::ShaderP(string n, Shader* vs, Shader* fs):m_i(new impl){
-    m_i->_init(n,vs,fs,this);
+    m_i->_init(n,vs,fs,*this);
     registerEvent(EventType::WindowFullscreenChanged);
 }
 ShaderP::~ShaderP(){ 
@@ -640,8 +636,8 @@ void ShaderP::unload(){
         EngineResource::unload();
     }
 }
-void ShaderP::bind(){ epriv::Core::m_Engine->m_RenderManager->_bindShaderProgram(this); }
-void ShaderP::unbind(){ epriv::Core::m_Engine->m_RenderManager->_unbindShaderProgram(); }
+void ShaderP::bind(){ epriv::Core::m_Engine->m_RenderManager._bindShaderProgram(this); }
+void ShaderP::unbind(){ epriv::Core::m_Engine->m_RenderManager._unbindShaderProgram(); }
 const unordered_map<string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }
 void ShaderP::onEvent(const Event& e){
     if(e.type == EventType::WindowFullscreenChanged){
@@ -711,7 +707,7 @@ UniformBufferObject::UniformBufferObject(const char* _nameInShader,uint _sizeofS
     registerEvent(EventType::WindowFullscreenChanged);
 }
 UniformBufferObject::~UniformBufferObject(){ 
-    unregisterEvent(EventType::WindowFullscreenChanged);
+    //unregisterEvent(EventType::WindowFullscreenChanged);
     m_i->_unload_GPU(this);
     m_i->_unload_CPU(this);
 }

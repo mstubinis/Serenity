@@ -29,7 +29,6 @@ epriv::FullscreenTriangle::FullscreenTriangle(){
     registerEvent(EventType::WindowFullscreenChanged);
 }
 epriv::FullscreenTriangle::~FullscreenTriangle(){ 
-    unregisterEvent(EventType::WindowFullscreenChanged);
     for (uint i = 0; i < m_Buffers.size(); ++i)
         glDeleteBuffers(1, &m_Buffers.at(i));
     Renderer::deleteVAO(m_VAO);
@@ -104,7 +103,6 @@ epriv::FullscreenQuad::FullscreenQuad(){
     registerEvent(EventType::WindowFullscreenChanged);
 }
 epriv::FullscreenQuad::~FullscreenQuad(){ 
-    unregisterEvent(EventType::WindowFullscreenChanged);
     for (uint i = 0; i < m_Buffers.size(); ++i)
         glDeleteBuffers(1, &m_Buffers.at(i));
     Renderer::deleteVAO(m_VAO);

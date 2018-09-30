@@ -35,7 +35,7 @@ namespace Engine{
         namespace threading{
             //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
             template<typename T> std::vector<std::vector<T>> splitVector(const std::vector<T>& v,uint n = 0){
-                if(n == 0) n = Core::m_Engine->m_ThreadManager->cores();
+                if(n == 0) n = Core::m_Engine->m_ThreadManager.cores();
                 const uint& vs = v.size();
                 std::vector<std::vector<T>> outVec;  uint length = vs / n;  uint remain = vs % n;  uint begin = 0;  uint end = 0;
                 for (uint i = 0; i < std::min(n, vs); ++i){

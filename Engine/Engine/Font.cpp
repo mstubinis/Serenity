@@ -22,7 +22,7 @@ class Font::impl final{
                 rawname += ".png";
             }
             m_FontTexture = new Texture(rawname,false,ImageInternalFormat::SRGB8_ALPHA8);
-            epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_FontTexture);
+            epriv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
         }
         void _destruct(){
             SAFE_DELETE_MAP(m_FontGlyphs);
@@ -69,5 +69,5 @@ Font::~Font(){ m_i->_destruct(); }
 Texture* Font::getGlyphTexture(){ return m_i->m_FontTexture; }
 FontGlyph* Font::getGlyphData(uchar c){ return m_i->m_FontGlyphs.at(c); }
 void Font::renderText(string text, glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
-    epriv::Core::m_Engine->m_RenderManager->_renderText(this,text,pos,color,scl,angle,depth);
+    epriv::Core::m_Engine->m_RenderManager._renderText(this,text,pos,color,scl,angle,depth);
 }

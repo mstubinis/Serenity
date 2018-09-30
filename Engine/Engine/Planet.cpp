@@ -448,7 +448,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
         ++count;
     }
     Texture* diffuse = new Texture(ringImage,"RingDiffuse",false,ImageInternalFormat::SRGB8_ALPHA8);
-    epriv::Core::m_Engine->m_ResourceManager->_addTexture(diffuse);
+    epriv::Core::m_Engine->m_ResourceManager._addTexture(diffuse);
     m_MaterialHandle = Resources::addMaterial("RingMaterial", diffuse, nullptr, nullptr, nullptr);
 	((Material*)m_MaterialHandle.get())->setSpecularModel(SpecularModel::None);
 }

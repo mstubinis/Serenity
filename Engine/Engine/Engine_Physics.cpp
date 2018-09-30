@@ -83,7 +83,6 @@ namespace Engine{
                     registerEvent(EventType::WindowFullscreenChanged);
                 }
                 void destruct(){
-                    unregisterEvent(EventType::WindowFullscreenChanged);
                     glDeleteBuffers(1, &m_VertexBuffer);
                     Renderer::deleteVAO(m_VAO);
                     vector_clear(vertices);

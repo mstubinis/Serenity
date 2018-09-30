@@ -347,11 +347,11 @@ class epriv::RenderManager::impl final{
             #pragma region BloomInfo
             bloom_num_passes = 3;
             bloom = true;
-            bloom_blur_radius = 1.00f;
-            bloom_blur_strength = 0.6f;
-            bloom_scale = 1.32f;
-            bloom_threshold = 0.54f;
-            bloom_exposure = 1.42f;
+            bloom_blur_radius = 1.24f;
+            bloom_blur_strength = 0.62f;
+            bloom_scale = 1.48f;
+            bloom_threshold = 0.52f;
+            bloom_exposure = 1.15f;
             #pragma endregion
 
             #pragma region LightingInfo
@@ -1295,7 +1295,7 @@ class epriv::RenderManager::impl final{
 
             brdfCook = new Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
             brdfCook->setWrapping(TextureWrap::ClampToEdge);	
-            epriv::Core::m_Engine->m_ResourceManager->_addTexture(brdfCook);
+            epriv::Core::m_Engine->m_ResourceManager._addTexture(brdfCook);
 
             #pragma endregion
 
@@ -2222,7 +2222,7 @@ class epriv::RenderManager::impl final{
             if(mainRenderFunc){
                 if(draw_physics_debug  &&  &camera == s->getActiveCamera()){
                     m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BulletPhysics)->bind();
-                    Core::m_Engine->m_PhysicsManager->_render();
+                    Core::m_Engine->m_PhysicsManager._render();
                 }
             }
             #pragma endregion
