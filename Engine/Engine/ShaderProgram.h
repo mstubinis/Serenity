@@ -30,7 +30,13 @@ class ShaderType{public:enum Type{
 class UniformBufferObject final: public EventObserver{
     friend class ::Shader;
     private:
-        class impl; std::unique_ptr<impl> m_i;
+        const char* m_NameInShader;
+        uint m_SizeOfStruct;
+        int m_GlobalBindingPointNumber;
+        GLuint m_UBOObject;
+
+        void _load_CPU(); void _unload_CPU();
+        void _load_GPU(); void _unload_GPU();
     public:
         static UniformBufferObject* UBO_CAMERA;
 
@@ -57,6 +63,10 @@ class Shader final: public EngineResource{
         Shader(std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         virtual ~Shader();
 
+        Shader& operator=(const Shader&) = delete;
+        Shader(const Shader&) = default;
+        Shader(Shader&&) noexcept = default;
+
         ShaderType::Type type();
         std::string data();
         bool fromFile();
@@ -73,7 +83,18 @@ class ShaderP final: public BindableResource, public EventObserver{
     friend class ::Shader;
     friend class ::InternalShaderProgramPublicInterface;
     private:
-        class impl; std::unique_ptr<impl> m_i;
+        GLuint m_ShaderProgram;
+        std::unordered_map<std::string, GLint> m_UniformLocations;
+        std::unordered_map<GLuint, bool> m_AttachedUBOs;
+        Shader* m_VertexShader;
+        Shader* m_FragmentShader;
+        bool m_LoadedCPU, m_LoadedGPU;
+
+        void _convertCode(std::string& vCode, std::string& fCode, ShaderP&);
+        void _convertCode(std::string&, Shader&, ShaderP&);
+
+        void _load_CPU(ShaderP&); void _unload_CPU(ShaderP&);
+        void _load_GPU(ShaderP&); void _unload_GPU(ShaderP&);
     public:
         ShaderP(std::string name, Shader& vertexShader, Shader& fragmentShader);
         virtual ~ShaderP();
