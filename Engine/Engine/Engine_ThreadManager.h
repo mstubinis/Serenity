@@ -21,7 +21,7 @@ typedef boost::function<void()>                boost_void_func;
 
 namespace Engine{
     namespace epriv{
-        class ThreadManager final: private Engine::epriv::noncopyable{
+        class ThreadManager final{
             public:
                 class impl; std::unique_ptr<impl> m_i;
 

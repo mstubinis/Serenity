@@ -108,31 +108,24 @@ namespace Engine{
 GLint UniformBufferObject::MAX_UBO_BINDINGS;
 uint UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT = 0;
 
-class Shader::impl final{
-    public:
-        ShaderType::Type m_Type;
-        bool m_FromFile;
-        string m_FileName, m_Code;
-        void _init(string& filenameOrCode, ShaderType::Type type, bool fromFile,Shader* super){
-            m_FileName = filenameOrCode;
-            m_Type = type;
-            m_FromFile = fromFile;
-            if(fromFile){
-                super->setName(filenameOrCode);
-                m_FileName = filenameOrCode;
-                m_Code = "";
-            }else{
-                super->setName("NULL");
-                m_FileName = "";
-                m_Code = filenameOrCode;
-            }
-        }
-};
-Shader::Shader(string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){ m_i->_init(shaderFileOrData,shaderType,fromFile,this); }
+Shader::Shader(string filenameOrCode, ShaderType::Type shaderType,bool fromFile){
+    m_FileName = filenameOrCode;
+    m_Type = shaderType;
+    m_FromFile = fromFile;
+    if (fromFile) {
+        setName(filenameOrCode);
+        m_FileName = filenameOrCode;
+        m_Code = "";
+    }else{
+        setName("NULL");
+        m_FileName = "";
+        m_Code = filenameOrCode;
+    }
+}
 Shader::~Shader(){ }
-ShaderType::Type Shader::type(){ return m_i->m_Type; }
-string Shader::data(){ return m_i->m_Code; }
-bool Shader::fromFile(){ return m_i->m_FromFile; }
+ShaderType::Type Shader::type(){ return m_Type; }
+string Shader::data(){ return m_Code; }
+bool Shader::fromFile(){ return m_FromFile; }
 
 epriv::DefaultShaderBindFunctor DEFAULT_BIND_FUNCTOR;
 epriv::DefaultShaderUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
@@ -146,9 +139,9 @@ class ShaderP::impl final{
         bool m_LoadedCPU;
         bool m_LoadedGPU;
 
-        void _init(string& name, Shader* vs, Shader* fs,ShaderP& super){
-            m_VertexShader = vs;
-            m_FragmentShader = fs;
+        void _init(string& name, Shader& vs, Shader& fs,ShaderP& super){
+            m_VertexShader = &vs;
+            m_FragmentShader = &fs;
             m_LoadedGPU = m_LoadedCPU = false;
 
             super.setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
@@ -156,17 +149,17 @@ class ShaderP::impl final{
             super.setName(name);
 
             string& _name = super.name();
-            if(vs->name() == "NULL") vs->setName(_name + ".vert");
-            if(fs->name() == "NULL") fs->setName(_name + ".frag");
+            if(vs.name() == "NULL") vs.setName(_name + ".vert");
+            if(fs.name() == "NULL") fs.setName(_name + ".frag");
             super.load();
         }
-        void _convertCode(string& vCode,string& fCode,ShaderP* super){ 
-            _convertCode(vCode,m_VertexShader,super); 
-            _convertCode(fCode,m_FragmentShader,super);
-            m_VertexShader->m_i->m_Code = vCode;
-            m_FragmentShader->m_i->m_Code = fCode;
+        void _convertCode(string& vCode,string& fCode,ShaderP& super){ 
+            _convertCode(vCode,*m_VertexShader,super); 
+            _convertCode(fCode,*m_FragmentShader,super);
+            m_VertexShader->m_Code = vCode;
+            m_FragmentShader->m_Code = fCode;
         }
-        void _convertCode(string& _d,Shader* shader,ShaderP* super){
+        void _convertCode(string& _d,Shader& shader,ShaderP& super){
             istringstream str(_d); 
             
             //see if we actually have a version line
@@ -314,7 +307,7 @@ class ShaderP::impl final{
                 }	
             }
             //check for log depth - vertex
-            if(sfind(_d,"USE_LOG_DEPTH_VERTEX") && !sfind(_d,"//USE_LOG_DEPTH_VERTEX") && shader->type() == ShaderType::Vertex){
+            if(sfind(_d,"USE_LOG_DEPTH_VERTEX") && !sfind(_d,"//USE_LOG_DEPTH_VERTEX") && shader.type() == ShaderType::Vertex){
                 boost::replace_all(_d,"USE_LOG_DEPTH_VERTEX","");
                 #ifndef ENGINE_FORCE_NO_LOG_DEPTH
                 string log_vertex_code = "\n"
@@ -332,7 +325,7 @@ class ShaderP::impl final{
                 #endif
             }
             //check for log depth - fragment
-            if(sfind(_d,"USE_LOG_DEPTH_FRAGMENT") && !sfind(_d,"//USE_LOG_DEPTH_FRAGMENT") && shader->type() == ShaderType::Fragment){
+            if(sfind(_d,"USE_LOG_DEPTH_FRAGMENT") && !sfind(_d,"//USE_LOG_DEPTH_FRAGMENT") && shader.type() == ShaderType::Fragment){
                 boost::replace_all(_d,"USE_LOG_DEPTH_FRAGMENT","");
                 #ifndef ENGINE_FORCE_NO_LOG_DEPTH
                 string log_frag_code = "\n"
@@ -358,7 +351,7 @@ class ShaderP::impl final{
             else{
                 if(sfind(_d,"GetWorldPosition(") || sfind(_d,"GetViewPosition(")){
                     if(!sfind(_d,"vec3 GetWorldPosition(")){
-                        if(sfind(_d,"USE_LOG_DEPTH_FRAG_WORLD_POSITION") && !sfind(_d,"//USE_LOG_DEPTH_FRAG_WORLD_POSITION") && shader->type() == ShaderType::Fragment){
+                        if(sfind(_d,"USE_LOG_DEPTH_FRAG_WORLD_POSITION") && !sfind(_d,"//USE_LOG_DEPTH_FRAG_WORLD_POSITION") && shader.type() == ShaderType::Fragment){
                             //log
                             boost::replace_all(_d,"USE_LOG_DEPTH_FRAG_WORLD_POSITION","");
                             #ifndef ENGINE_FORCE_NO_LOG_DEPTH
@@ -375,7 +368,7 @@ class ShaderP::impl final{
             }
             //deal with layout (location = X) in
             if(versionNumber < 330){
-                if(shader->type() == ShaderType::Vertex){
+                if(shader.type() == ShaderType::Vertex){
                     if(sfind(_d,"layout") && sfind(_d,"location") && sfind(_d,"=")){
                         if(versionNumber > 130){
                             if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_separate_shader_objects)){
@@ -427,12 +420,12 @@ class ShaderP::impl final{
             }
 
             if(versionNumber >= 110){
-                if(shader->type() == ShaderType::Vertex){
+                if(shader.type() == ShaderType::Vertex){
                     boost::replace_all(_d, "flat", "");
                     boost::replace_all(_d, "highp ", "");
                     boost::replace_all(_d, "mediump ", "");
                     boost::replace_all(_d, "lowp ", "");
-                }else if(shader->type() == ShaderType::Fragment){
+                }else if(shader.type() == ShaderType::Fragment){
                     boost::replace_all(_d, "flat", "");
                     boost::replace_all(_d, "highp ", "");
                     boost::replace_all(_d, "mediump ", "");
@@ -440,17 +433,17 @@ class ShaderP::impl final{
                 }
             }
             if(versionNumber >= 130){
-                if(shader->type() == ShaderType::Vertex){
+                if(shader.type() == ShaderType::Vertex){
                     boost::replace_all(_d, "varying", "out");
-                }else if(shader->type() == ShaderType::Fragment){
+                }else if(shader.type() == ShaderType::Fragment){
                     boost::replace_all(_d, "varying", "in");
                     boost::replace_all(_d, "gl_FragColor", "FRAG_COL");
                     insertStringAtLine(_d,"out vec4 FRAG_COL;",1);
                 }
             }
             if(versionNumber >= 140){
-                if(shader->type() == ShaderType::Vertex){
-                }else if(shader->type() == ShaderType::Fragment){
+                if(shader.type() == ShaderType::Vertex){
+                }else if(shader.type() == ShaderType::Fragment){
                     boost::replace_all(_d, "textureCube(", "texture(");
                     boost::replace_all(_d, "textureCubeLod(", "textureLod(");
                     boost::replace_all(_d, "texture2DLod(", "textureLod(");
@@ -458,12 +451,12 @@ class ShaderP::impl final{
                 }
             }	
             if(versionNumber >= 150){
-                if(shader->type() == ShaderType::Vertex){
-                }else if(shader->type() == ShaderType::Fragment){
+                if(shader.type() == ShaderType::Vertex){
+                }else if(shader.type() == ShaderType::Fragment){
                 }
             }
             if(versionNumber >= 330){
-                if(shader->type() == ShaderType::Vertex){
+                if(shader.type() == ShaderType::Vertex){
                     //attribute to layout (location = X) in
                     istringstream str(_d); string line; uint count = 0; uint aCount = 0;
                     while(getline(str,line)){
@@ -485,26 +478,26 @@ class ShaderP::impl final{
                         }
                         ++count;
                     }
-                }else if(shader->type() == ShaderType::Fragment){
+                }else if(shader.type() == ShaderType::Fragment){
                 }
             }
         }
-        void _unload_CPU(ShaderP* super){
+        void _unload_CPU(ShaderP& super){
             if(m_LoadedCPU){
                 m_LoadedCPU = false;
             }
         }
-        void _load_CPU(ShaderP* super){
+        void _load_CPU(ShaderP& super){
             _unload_CPU(super);
             if(!m_LoadedCPU){
                 string VertexCode, FragmentCode = "";
                 //load initial code
                 if(m_VertexShader->fromFile()){
-                    boost_stream_mapped_file str(m_VertexShader->m_i->m_FileName);
+                    boost_stream_mapped_file str(m_VertexShader->m_FileName);
                     for(string line;getline(str,line,'\n');){VertexCode+="\n"+line;}
                 }else{ VertexCode=m_VertexShader->data(); }
                 if(m_FragmentShader->fromFile()){
-                    boost_stream_mapped_file str(m_FragmentShader->m_i->m_FileName);
+                    boost_stream_mapped_file str(m_FragmentShader->m_FileName);
                     for(string line;getline(str,line,'\n');){FragmentCode+="\n"+line; }
                 }else{FragmentCode=m_FragmentShader->data();}
                 //convert the code
@@ -512,7 +505,7 @@ class ShaderP::impl final{
                 m_LoadedCPU = true;
             }
         }
-        void _unload_GPU(ShaderP* super){
+        void _unload_GPU(ShaderP& super){
             if(m_LoadedGPU){
                 m_UniformLocations.clear();
                 m_AttachedUBOs.clear();
@@ -520,10 +513,10 @@ class ShaderP::impl final{
                 m_LoadedGPU = false;
             }
         }
-        void _load_GPU(ShaderP* super){
+        void _load_GPU(ShaderP& super){
             _unload_GPU(super);
             if(!m_LoadedGPU){
-                string& VertexCode = m_VertexShader->m_i->m_Code;string& FragmentCode = m_FragmentShader->m_i->m_Code;
+                string& VertexCode = m_VertexShader->m_Code;string& FragmentCode = m_FragmentShader->m_Code;
                 GLuint vid=glCreateShader(GL_VERTEX_SHADER);GLuint fid=glCreateShader(GL_FRAGMENT_SHADER);
                 GLint res=GL_FALSE; int ll;
                 // Compile Vertex Shader
@@ -532,7 +525,7 @@ class ShaderP::impl final{
                 glGetShaderiv(vid,GL_COMPILE_STATUS,&res);glGetShaderiv(vid,GL_INFO_LOG_LENGTH,&ll);vector<char>ve(ll);
                 glGetShaderInfoLog(vid,ll,NULL,&ve[0]);
                 if(res==GL_FALSE){
-                    if(m_VertexShader->fromFile()){cout<<"VertexShader Log ("+m_VertexShader->m_i->m_FileName+"): "<<endl;}
+                    if(m_VertexShader->fromFile()){cout<<"VertexShader Log ("+m_VertexShader->m_FileName+"): "<<endl;}
                     else{cout<<"VertexShader Log ("+m_VertexShader->name()+"): "<<endl;}
                     cout<<&ve[0]<<endl;
                 }
@@ -542,7 +535,7 @@ class ShaderP::impl final{
                 glGetShaderiv(fid,GL_COMPILE_STATUS,&res);glGetShaderiv(fid,GL_INFO_LOG_LENGTH,&ll);vector<char>fe(ll);
                 glGetShaderInfoLog(fid,ll,NULL,&fe[0]);
                 if(res==GL_FALSE){
-                    if(m_FragmentShader->fromFile()){cout<<"FragmentShader Log ("+m_FragmentShader->m_i->m_FileName+"): "<<endl;}
+                    if(m_FragmentShader->fromFile()){cout<<"FragmentShader Log ("+m_FragmentShader->m_FileName+"): "<<endl;}
                     else{cout<<"FragmentShader Log ("+m_FragmentShader->name()+"): "<<endl;}
                     cout<<&fe[0]<<endl;
                 }
@@ -588,7 +581,7 @@ class ShaderP::impl final{
             }
         }
 };
-ShaderP::ShaderP(string n, Shader* vs, Shader* fs):m_i(new impl){
+ShaderP::ShaderP(string n, Shader& vs, Shader& fs):m_i(new impl){
     m_i->_init(n,vs,fs,*this);
     registerEvent(EventType::WindowFullscreenChanged);
 }
@@ -598,40 +591,42 @@ ShaderP::~ShaderP(){
 }
 GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 
-void InternalShaderProgramPublicInterface::LoadCPU(ShaderP* shaderP){
-    //if(!shaderP->isLoaded()){
-        shaderP->m_i->_load_CPU(shaderP);
+void InternalShaderProgramPublicInterface::LoadCPU(ShaderP& shaderP){
+    //if(!shaderP.isLoaded()){
+        shaderP.m_i->_load_CPU(shaderP);
     //}
 }
-void InternalShaderProgramPublicInterface::LoadGPU(ShaderP* shaderP){
-    //if(!shaderP->isLoaded()){
-        shaderP->m_i->_load_GPU(shaderP);
-        shaderP->EngineResource::load();
+void InternalShaderProgramPublicInterface::LoadGPU(ShaderP& shaderP){
+    //if(!shaderP.isLoaded()){
+        shaderP.m_i->_load_GPU(shaderP);
+        shaderP.EngineResource::load();
     //}
 }
-void InternalShaderProgramPublicInterface::UnloadCPU(ShaderP* shaderP){
-    //if(shaderP->isLoaded()){
-        shaderP->m_i->_unload_CPU(shaderP);
-        shaderP->EngineResource::unload();
+void InternalShaderProgramPublicInterface::UnloadCPU(ShaderP& shaderP){
+    //if(shaderP.isLoaded()){
+        shaderP.m_i->_unload_CPU(shaderP);
+        shaderP.EngineResource::unload();
     //}
 }
-void InternalShaderProgramPublicInterface::UnloadGPU(ShaderP* shaderP){
-    //if(shaderP->isLoaded()){
-        shaderP->m_i->_unload_GPU(shaderP);        
+void InternalShaderProgramPublicInterface::UnloadGPU(ShaderP& shaderP){
+    //if(shaderP.isLoaded()){
+        shaderP.m_i->_unload_GPU(shaderP);        
     //}
 }
 void ShaderP::load(){
     if(!isLoaded()){
-        m_i->_load_CPU(this);
-        m_i->_load_GPU(this);
+        auto& _this = *this;
+        m_i->_load_CPU(_this);
+        m_i->_load_GPU(_this);
         cout << "(Shader Program) ";
         EngineResource::load();
     }
 }
 void ShaderP::unload(){
     if(isLoaded() /*&& useCount() == 0*/){
-        m_i->_unload_GPU(this);
-        m_i->_unload_CPU(this);
+        auto& _this = *this;
+        m_i->_unload_GPU(_this);
+        m_i->_unload_CPU(_this);
         cout << "(Shader Program) ";
         EngineResource::unload();
     }
@@ -662,28 +657,27 @@ class UniformBufferObject::impl final{
                     cout << "Warning: Max UBO Limit reached!" << std::endl;
                     globalBindingPointNumber = 0;
                 }
-            }
-            else{
+            }else{
                 globalBindingPointNumber = _globalBindingPointNumber;
             }
             sizeOfStruct = _sizeofStruct;
-            _load_CPU(super);
-            _load_GPU(super);
+            _load_CPU();
+            _load_GPU();
         }
-        void _unload_CPU(UniformBufferObject* super){
+        void _unload_CPU(){
             if(epriv::RenderManager::GLSL_VERSION < 140) return;
         }
-        void _load_CPU(UniformBufferObject* super){
+        void _load_CPU(){
             if(epriv::RenderManager::GLSL_VERSION < 140) return;
-            _unload_CPU(super);
+            _unload_CPU();
         }
-        void _unload_GPU(UniformBufferObject* super){
+        void _unload_GPU(){
             if(epriv::RenderManager::GLSL_VERSION < 140) return;
             glDeleteBuffers(1,&uboObject);
         }
-        void _load_GPU(UniformBufferObject* super){
+        void _load_GPU(){
             if(epriv::RenderManager::GLSL_VERSION < 140) return;
-            _unload_GPU(super);
+            _unload_GPU();
             glGenBuffers(1, &uboObject);
             glBindBuffer(GL_UNIFORM_BUFFER, uboObject);//gen and bind buffer
             glBufferData(GL_UNIFORM_BUFFER, sizeOfStruct, NULL, GL_DYNAMIC_DRAW); //create buffer data storage
@@ -694,12 +688,12 @@ class UniformBufferObject::impl final{
             glBindBuffer(GL_UNIFORM_BUFFER, uboObject);
             glBufferSubData(GL_UNIFORM_BUFFER,0, sizeOfStruct, _data);
         }
-        void _attachToShader(UniformBufferObject* super,ShaderP* _shaderProgram){
-            GLuint program = _shaderProgram->program();
-            if(epriv::RenderManager::GLSL_VERSION < 140 || _shaderProgram->m_i->m_AttachedUBOs.count(uboObject)) return;
+        void _attachToShader(ShaderP& _shaderProgram){
+            GLuint program = _shaderProgram.program();
+            if(epriv::RenderManager::GLSL_VERSION < 140 || _shaderProgram.m_i->m_AttachedUBOs.count(uboObject)) return;
             uint programBlockIndex = glGetUniformBlockIndex(program,nameInShader);
             glUniformBlockBinding(program, programBlockIndex, globalBindingPointNumber);
-            _shaderProgram->m_i->m_AttachedUBOs.emplace(uboObject,true);
+            _shaderProgram.m_i->m_AttachedUBOs.emplace(uboObject,true);
         }
 };
 UniformBufferObject::UniformBufferObject(const char* _nameInShader,uint _sizeofStruct,int _globalBindingPointNumber):m_i(new impl){ 
@@ -708,14 +702,14 @@ UniformBufferObject::UniformBufferObject(const char* _nameInShader,uint _sizeofS
 }
 UniformBufferObject::~UniformBufferObject(){ 
     //unregisterEvent(EventType::WindowFullscreenChanged);
-    m_i->_unload_GPU(this);
-    m_i->_unload_CPU(this);
+    m_i->_unload_GPU();
+    m_i->_unload_CPU();
 }
 void UniformBufferObject::updateData(void* _data){ m_i->_update(_data); }
-void UniformBufferObject::attachToShader(ShaderP* _shaderProgram){ m_i->_attachToShader(this,_shaderProgram); }
+void UniformBufferObject::attachToShader(ShaderP& _shaderProgram){ m_i->_attachToShader(_shaderProgram); }
 GLuint UniformBufferObject::address(){ return m_i->uboObject; }
 void UniformBufferObject::onEvent(const Event& e){
     if(e.type == EventType::WindowFullscreenChanged){
-        m_i->_load_GPU(this);
+        m_i->_load_GPU();
     }
 }

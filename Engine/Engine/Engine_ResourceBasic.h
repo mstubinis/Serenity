@@ -5,7 +5,7 @@
 #include <string>
 #include "Engine_Utils.h"
 
-class EngineResource: private Engine::epriv::noncopyable{
+class EngineResource{
     private:
         bool m_IsLoaded;
         std::string m_Name;

@@ -15,7 +15,7 @@ namespace Engine{
         class GBufferType{public: enum Type{
             Diffuse, Normal, Misc, Lighting, Bloom, GodRays, Depth,
         _TOTAL};};
-        class GBuffer final: private Engine::epriv::noncopyable{
+        class GBuffer final{
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:

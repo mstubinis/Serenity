@@ -18,7 +18,7 @@ using namespace std;
 
 namespace Engine {
     namespace epriv {
-        struct MeshInstanceAnimation final : private Engine::epriv::noncopyable {
+        struct MeshInstanceAnimation final{
             friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
             friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
 

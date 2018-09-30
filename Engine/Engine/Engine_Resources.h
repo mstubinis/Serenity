@@ -48,7 +48,7 @@ struct Handle final {
 
 namespace Engine{
     namespace epriv{
-        class ResourceManager final: Engine::epriv::noncopyable{
+        class ResourceManager final{
             public:
                 class impl; std::unique_ptr<impl> m_i;
 
@@ -109,7 +109,7 @@ namespace Engine{
 
         Handle addShader(std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         Handle addSoundData(std::string file,std::string name = "",bool music = false);
-        Handle addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader);
+        Handle addShaderProgram(std::string name, Shader& vertexShader, Shader& fragmentShader);
         Handle addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader);
     };
     namespace Data{

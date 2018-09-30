@@ -7,7 +7,7 @@
 
 namespace Engine{
     namespace epriv{
-        class TimeManager: private Engine::epriv::noncopyable{
+        class TimeManager{
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:

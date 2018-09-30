@@ -29,7 +29,7 @@ namespace Engine{
         };
         #pragma region ObjectPool
         template<typename T>
-        class ObjectPool final: private Engine::epriv::noncopyable{
+        class ObjectPool final{
             private:
                 uint32 MAX_ENTRIES;
                 HandleEntry<T>* m_Pool;

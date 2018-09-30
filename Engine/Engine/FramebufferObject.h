@@ -18,7 +18,7 @@ namespace Engine{
         struct FramebufferObjectDefaultBindFunctor;
         struct FramebufferObjectDefaultUnbindFunctor;
         
-        class FramebufferObjectAttatchment: private Engine::epriv::noncopyable{
+        class FramebufferObjectAttatchment{
             friend class ::Engine::epriv::FramebufferObject;
             private:
                 class impl; std::unique_ptr<impl> m_i;

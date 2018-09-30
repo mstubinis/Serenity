@@ -7,18 +7,6 @@
 
 typedef unsigned int uint;
 
-namespace Engine{
-    namespace epriv{
-        class noncopyable{
-            protected:
-                noncopyable(){}
-                ~noncopyable(){}
-            private:
-                const noncopyable& operator=(const noncopyable&) = delete;// non copyable
-                noncopyable(const noncopyable&) = delete;                 // non construction-copyable
-        };
-    };
-};
 template <typename Stream> void readUint32tBigEndian(uint32_t& out,Stream& stream) {
     uint8_t buf[4];
     stream.read((char *)buf, sizeof(buf));

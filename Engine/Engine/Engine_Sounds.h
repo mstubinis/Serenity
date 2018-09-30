@@ -131,7 +131,7 @@ class SoundQueue final{
 
 namespace Engine{
     namespace epriv{
-        class SoundManager final: private Engine::epriv::noncopyable{
+        class SoundManager final{
             friend class ::SoundBaseClass;
             //friend class ::SoundBaseClass::impl;
             public:

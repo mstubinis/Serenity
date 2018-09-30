@@ -7,7 +7,7 @@
 
 namespace Engine{
     namespace epriv{
-        class EventDispatcher final: private Engine::epriv::noncopyable{
+        class EventDispatcher final{
             private:
                 std::vector<std::vector<EventObserver*>> m_Observers;
             public:

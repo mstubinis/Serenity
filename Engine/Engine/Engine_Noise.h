@@ -9,7 +9,7 @@ typedef unsigned int uint;
 
 namespace Engine{
     namespace epriv{
-        class NoiseManager final: private Engine::epriv::noncopyable{
+        class NoiseManager final{
             public:
                 class impl; std::unique_ptr<impl> m_i;
 

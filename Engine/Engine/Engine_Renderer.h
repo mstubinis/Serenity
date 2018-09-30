@@ -72,7 +72,7 @@ namespace Engine{
                 SAFE_DELETE_VECTOR(meshNodes);
             }
         };
-        class RenderPipeline final: private Engine::epriv::noncopyable {
+        class RenderPipeline final{
             friend class Engine::epriv::InternalScenePublicInterface;
             friend class ::Scene;
             private:
@@ -86,7 +86,7 @@ namespace Engine{
         };
 
 
-        class RenderManager final: private Engine::epriv::noncopyable{
+        class RenderManager final{
             public:
                 class impl;
                 std::unique_ptr<impl> m_i;

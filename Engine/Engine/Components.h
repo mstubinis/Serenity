@@ -90,7 +90,7 @@ namespace Engine{
 
     namespace epriv{
         const uint MAX_NUM_ENTITIES = 131072;
-        class ComponentManager final: private Engine::epriv::noncopyable{
+        class ComponentManager final{
             friend class ::Entity;
             friend class ::Scene;
             friend class ::Components;
@@ -125,7 +125,7 @@ namespace Engine{
                 void _removeComponent(uint componentID);
                 void _removeComponent(ComponentBaseClass* component);
         };
-        class ComponentTypeRegistry final: private Engine::epriv::noncopyable{
+        class ComponentTypeRegistry final{
             friend class ::Entity;
             friend class ::Engine::epriv::ComponentManager;
             private:
@@ -160,7 +160,7 @@ namespace Engine{
                     ++m_NextIndex;
                 }
         };
-        class ComponentSystemBaseClass : private Engine::epriv::noncopyable {
+        class ComponentSystemBaseClass{
             friend class ::Engine::epriv::ComponentManager;
             private:
             public:

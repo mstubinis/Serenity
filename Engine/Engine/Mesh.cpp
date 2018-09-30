@@ -282,7 +282,7 @@ namespace Engine{
                 Transform = glm::mat4(1.0f);
             }
         };
-        class MeshSkeleton final : private Engine::epriv::noncopyable {
+        class MeshSkeleton final{
             friend class ::Engine::epriv::AnimationData;
             friend class ::Mesh;
             friend struct ::DefaultMeshBindFunctor;
@@ -323,7 +323,7 @@ namespace Engine{
                 ~MeshSkeleton() { clear();cleanup(); }
                 uint numBones() { return m_NumBones; }
         };
-        class CollisionFactory final : private Engine::epriv::noncopyable {
+        class CollisionFactory final{
             friend class ::Mesh;
             private:
                 void _initConvexData(vector<MeshVertexData>& _vertices) {

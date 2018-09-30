@@ -43,14 +43,16 @@ class UniformBufferObject final: public EventObserver{
         void onEvent(const Event& e);
         GLuint address();
 
-        void attachToShader(ShaderP* shaderProgram);
+        void attachToShader(ShaderP& shaderProgram);
         void updateData(void* data);
 };
 
 class Shader final: public EngineResource{
     friend class ::ShaderP;
     private:
-        class impl; std::unique_ptr<impl> m_i;
+        ShaderType::Type m_Type;
+        bool m_FromFile;
+        std::string m_FileName, m_Code;
     public:
         Shader(std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         virtual ~Shader();
@@ -61,10 +63,10 @@ class Shader final: public EngineResource{
 };
 class InternalShaderProgramPublicInterface final{
     public:
-        static void LoadCPU(ShaderP*);
-        static void LoadGPU(ShaderP*);
-        static void UnloadCPU(ShaderP*);
-        static void UnloadGPU(ShaderP*);
+        static void LoadCPU(ShaderP&);
+        static void LoadGPU(ShaderP&);
+        static void UnloadCPU(ShaderP&);
+        static void UnloadGPU(ShaderP&);
 };
 class ShaderP final: public BindableResource, public EventObserver{
     friend class ::UniformBufferObject;
@@ -73,7 +75,7 @@ class ShaderP final: public BindableResource, public EventObserver{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        ShaderP(std::string name, Shader* vertexShader, Shader* fragmentShader);
+        ShaderP(std::string name, Shader& vertexShader, Shader& fragmentShader);
         virtual ~ShaderP();
 
         void onEvent(const Event& e);

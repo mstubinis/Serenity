@@ -10,7 +10,7 @@
 
 namespace Engine{
     namespace epriv{
-        class EventManager final: private Engine::epriv::noncopyable{
+        class EventManager final{
             public:
                 static EventManager* m_EventManager;
 

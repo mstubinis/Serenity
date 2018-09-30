@@ -70,7 +70,7 @@ Inherit from this class to expose your class to events and event dispatching, sp
     void unregisterEvent(const EventType::Type& type)  -  unregister this object as an observer to the parameterized event type
     virtual void onEvent(const Event& e)               -  execute this function when the parameter event occurs
 */
-class EventObserver: private Engine::epriv::noncopyable{
+class EventObserver{
     public:
         EventObserver();
         virtual ~EventObserver();

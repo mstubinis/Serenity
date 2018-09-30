@@ -9,7 +9,7 @@
 
 typedef unsigned int uint;
 
-class Engine_Window final: private Engine::epriv::noncopyable{
+class Engine_Window final{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
