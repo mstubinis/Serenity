@@ -29,18 +29,12 @@ namespace Engine{
                 static std::string depth_of_field;
 
                 static std::string smaa_common;
-
-                static std::string smaa_frag_1_stencil;
-
                 static std::string smaa_vertex_1;
                 static std::string smaa_frag_1;
-
                 static std::string smaa_vertex_2;
                 static std::string smaa_frag_2;
-
                 static std::string smaa_vertex_3;
                 static std::string smaa_frag_3;
-
                 static std::string smaa_vertex_4;
                 static std::string smaa_frag_4;
 

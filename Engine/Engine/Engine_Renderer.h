@@ -57,10 +57,12 @@ namespace Engine{
     namespace epriv{
         struct InstanceNode {
             MeshInstance* instance;
+            InstanceNode(MeshInstance& i):instance(&i) {}
         };
         struct MeshNode {
             Mesh* mesh;
             std::vector<InstanceNode*> instanceNodes;
+            MeshNode(Mesh& m):mesh(&m){}
             ~MeshNode() {
                 SAFE_DELETE_VECTOR(instanceNodes);
             }
@@ -68,7 +70,8 @@ namespace Engine{
         struct MaterialNode {
             Material* material;
             std::vector<MeshNode*> meshNodes;
-            ~MaterialNode() {
+            MaterialNode(Material& m) :material(&m) {}
+            ~MaterialNode(){
                 SAFE_DELETE_VECTOR(meshNodes);
             }
         };
@@ -76,10 +79,10 @@ namespace Engine{
             friend class Engine::epriv::InternalScenePublicInterface;
             friend class ::Scene;
             private:
-                ShaderP* shaderProgram;
+                ShaderP& shaderProgram;
                 std::vector<MaterialNode*> materialNodes;
             public:
-                RenderPipeline(ShaderP*);
+                RenderPipeline(ShaderP&);
                 ~RenderPipeline();
 
                 void render();

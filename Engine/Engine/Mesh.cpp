@@ -259,7 +259,6 @@ namespace Engine{
                         glm::vec3& n = data.normals.at(i);
                         glm::vec3& t = data.binormals.at(i);
                         glm::vec3& b = data.tangents.at(i);
-
                         t = glm::normalize(t - n * glm::dot(n, t)); // Gram-Schmidt orthogonalize
                     }
                 }
@@ -340,7 +339,6 @@ namespace Engine{
                         for (int i = 0; i < m_ConvexHullData->numVertices(); ++i) {
                             m_ConvesHullShape->addPoint(btVector3(ptsArray[i].x(), ptsArray[i].y(), ptsArray[i].z()));
                         }
-                        //m_ConvesHullShape->setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
                         m_ConvesHullShape->setMargin(0.001f);
                         m_ConvesHullShape->recalcLocalAabb();
                     }
@@ -367,19 +365,17 @@ namespace Engine{
                             }
                         }
                         m_TriangleStaticShape = new btBvhTriangleMeshShape(m_TriangleStaticData, true);
-                        //m_TriangleStaticShape->setLocalScaling(btVector3(1.0f, 1.0f, 1.0f));
                         m_TriangleStaticShape->setMargin(0.001f);
                         m_TriangleStaticShape->recalcLocalAabb();
                     }
                 }
             public:
-                Mesh* m_Mesh;
+                Mesh& m_Mesh;
                 btShapeHull* m_ConvexHullData;
                 btConvexHullShape* m_ConvesHullShape;
                 btTriangleMesh* m_TriangleStaticData;
                 btBvhTriangleMeshShape* m_TriangleStaticShape;
-                CollisionFactory(Mesh& _mesh, vector<MeshVertexData>& _vertices, vector<ushort>& _indices) {
-                    m_Mesh = &_mesh;
+                CollisionFactory(Mesh& _mesh, vector<MeshVertexData>& _vertices, vector<ushort>& _indices):m_Mesh(_mesh){
                     m_ConvexHullData = nullptr;
                     m_ConvesHullShape = nullptr;
                     m_TriangleStaticData = nullptr;
@@ -394,12 +390,12 @@ namespace Engine{
                     SAFE_DELETE(m_TriangleStaticShape);
                 }
                 btSphereShape* buildSphereShape() {
-                    btSphereShape* sphere = new btSphereShape(m_Mesh->getRadius());
+                    btSphereShape* sphere = new btSphereShape(m_Mesh.getRadius());
                     sphere->setMargin(0.001f);
                     return sphere;
                 }
                 btBoxShape* buildBoxShape() {
-                    btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_Mesh->getRadiusBox()));
+                    btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_Mesh.getRadiusBox()));
                     box->setMargin(0.001f);
                     return box;
                 }
@@ -835,8 +831,6 @@ class Mesh::impl final{
                 _readFromObjCompressed(file, d);
                 _finalizeData(d, threshold);
             }else{
-                if (extension == ".obj")
-                   _writeToObjCompressed();
                 _loadInternal(super, d, m_File);
                 _finalizeData(d, threshold);
             }
@@ -1237,11 +1231,8 @@ class Mesh::impl final{
                 }
             }
             stream.close();
-        }
-        
+        }    
 };
-
-
 
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     auto& m = *((Mesh*)r)->m_i;

@@ -35,7 +35,6 @@ string epriv::EShaders::lighting_vert;
 string epriv::EShaders::stencil_passover;
 string epriv::EShaders::depth_of_field;
 string epriv::EShaders::smaa_common;
-string epriv::EShaders::smaa_frag_1_stencil;
 string epriv::EShaders::smaa_vertex_1;
 string epriv::EShaders::smaa_frag_1;
 string epriv::EShaders::smaa_vertex_2;
@@ -751,67 +750,6 @@ epriv::EShaders::smaa_common =
     //"bool API_V_BELOW(float v1, float v2){ if(v1 > v2) return true; return false; }\n"
     //"bool API_V_ABOVE(float v1, float v2){ if(v1 < v2) return true; return false; }\n"
     "\n";
- 
-epriv::EShaders::smaa_frag_1_stencil = epriv::EShaders::smaa_common +
-    "\n"//edge frag
-    "const vec2 comparison = vec2(1.0,1.0);\n"
-    "\n"
-    "uniform sampler2D textureMap;\n"
-    "\n"
-    "uniform vec2 SMAAInfo0Floats;\n" //SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD
-    "\n"
-    "varying vec2 uv;\n"
-    "varying vec4 _offset[3];\n"
-    "\n"
-    "vec3 SMAAGatherNeighbours(vec2 texcoord,vec4 offset[3],sampler2D tex) {\n"
-    "    float P = texture2D(tex, texcoord).r;\n"
-    "    float Pleft = texture2D(tex, offset[0].xy).r;\n"
-    "    float Ptop  = texture2D(tex, offset[0].zw).r;\n"
-    "    return vec3(P, Pleft, Ptop);\n"
-    "}\n"
-    "void SMAADepthEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D depthTex) {\n"
-    "    vec3 neighbours = SMAAGatherNeighbours(texcoord, offset, depthTex);\n"
-    "    vec2 delta = abs(neighbours.xx - vec2(neighbours.y, neighbours.z));\n"
-    "    vec2 edges = step(SMAAInfo0Floats.y, delta);\n"
-    "    if (dot(edges, comparison) == 0.0){\n"
-    "        discard;\n"
-    "    }\n"
-    "}\n"
-    "void SMAAColorEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D colorTex){\n"
-    "    vec2 threshold = vec2(SMAAInfo0Floats.x, SMAAInfo0Floats.x);\n"
-    "    vec4 delta;\n"
-    "    vec3 C = texture2D(colorTex, texcoord).rgb;\n"
-    "    vec3 Cleft = texture2D(colorTex, offset[0].xy).rgb;\n"
-    "    vec3 t = abs(C - Cleft);\n"
-    "    delta.x = max(max(t.r, t.g), t.b);\n"
-    "    vec3 Ctop  = texture2D(colorTex, offset[0].zw).rgb;\n"
-    "    t = abs(C - Ctop);\n"
-    "    delta.y = max(max(t.r, t.g), t.b);\n"
-    "    vec2 edges = step(threshold, delta.xy);\n"
-    "    if (dot(edges, comparison) == 0.0){\n"
-    "        discard;\n"
-    "    }\n"
-    "}\n"
-    "void SMAALumaEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D colorTex) {\n"
-    "    vec2 threshold = vec2(SMAAInfo0Floats.x, SMAAInfo0Floats.x);\n"
-    "    vec3 weights = vec3(0.2126, 0.7152, 0.0722);\n"
-    "    float L =     dot(texture2D(colorTex, texcoord).rgb,     weights);\n"
-    "    float Lleft = dot(texture2D(colorTex, offset[0].xy).rgb, weights);\n"
-    "    float Ltop  = dot(texture2D(colorTex, offset[0].zw).rgb, weights);\n"
-    "    vec4 delta;\n"
-    "    delta.xy = abs(L - vec2(Lleft, Ltop));\n"
-    "    vec2 edges = step(threshold, delta.xy);\n"
-    "    if (dot(edges, comparison) == 0.0){\n"
-    "        discard;\n"
-    "    }\n"
-    "}\n"
-    "void main(){\n"
-    "    SMAAColorEdgeDetectionPS(uv, _offset, textureMap);\n"
-    //"    SMAADepthEdgeDetectionPS(uv, _offset, textureMap);\n"
-    //"    SMAALumaEdgeDetectionPS(uv, _offset, textureMap);\n"
-    "}\n"
-    "\n";
-
 
 epriv::EShaders::smaa_vertex_1 = epriv::EShaders::smaa_common +
     "\n"//edge vert

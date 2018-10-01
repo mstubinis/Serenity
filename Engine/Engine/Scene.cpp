@@ -69,13 +69,13 @@ class Scene::impl final {
         void _addMeshInstanceToPipeline(Scene* _scene, MeshInstance* _meshInstance, const vector<epriv::RenderPipeline*>& _pipelinesList) {
             epriv::RenderPipeline* _pipeline = nullptr;
             for (auto pipeline : _pipelinesList) {
-                if (pipeline->shaderProgram == _meshInstance->shaderProgram()) {
+                if (&pipeline->shaderProgram == _meshInstance->shaderProgram()) {
                     _pipeline = pipeline;
                     break;
                 }
             }
             if (!_pipeline) {
-                _pipeline = new epriv::RenderPipeline(_meshInstance->shaderProgram());
+                _pipeline = new epriv::RenderPipeline(*_meshInstance->shaderProgram());
                 _scene->m_i->m_Pipelines.push_back(_pipeline);
             }
             //material node check
@@ -101,22 +101,22 @@ class Scene::impl final {
                 }
             }
             if (!materialNode) {
-                materialNode = new epriv::MaterialNode(); materialNode->material = _meshInstance->material();
-                _pipeline->materialNodes.push_back(materialNode);
+                materialNode = new epriv::MaterialNode(*_meshInstance->material());
+                _pipeline->materialNodes.emplace_back(materialNode);
             }
             if (!meshNode) {
-                meshNode = new epriv::MeshNode(); meshNode->mesh = _meshInstance->mesh();
-                materialNode->meshNodes.push_back(meshNode);
+                meshNode = new epriv::MeshNode(*_meshInstance->mesh());
+                materialNode->meshNodes.emplace_back(meshNode);
             }
             if (!instanceNode) {
-                instanceNode = new epriv::InstanceNode(); instanceNode->instance = _meshInstance;
-                meshNode->instanceNodes.push_back(instanceNode);
+                instanceNode = new epriv::InstanceNode(*_meshInstance);
+                meshNode->instanceNodes.emplace_back(instanceNode);
             }
         }
         void _removeMeshInstanceFromPipeline(Scene* _scene, MeshInstance* _meshInstance, const vector<epriv::RenderPipeline*>& _pipelinesList) {
             epriv::RenderPipeline* _pipeline = nullptr;
             for (auto pipeline : _pipelinesList) {
-                if (pipeline->shaderProgram == _meshInstance->shaderProgram()) {
+                if (&pipeline->shaderProgram == _meshInstance->shaderProgram()) {
                     _pipeline = pipeline;
                     break;
                 }

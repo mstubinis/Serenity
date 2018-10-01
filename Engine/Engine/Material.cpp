@@ -203,8 +203,7 @@ class Material::impl final{
             }
         }
         void _destruct(){
-            for(auto component:m_Components)
-                SAFE_DELETE(component);
+            SAFE_DELETE_VECTOR(m_Components);
         }
         void _addComponentGeneric(Texture* texture,MaterialComponentType::Type type){
             if(m_Components.at(type) || !texture)
@@ -237,9 +236,9 @@ class Material::impl final{
             m_Components.at(type) = new MaterialComponentParallaxOcclusion(texture,heightScale);
         }
         void _setF0Color(float r,float g,float b){
-            m_F0Color.r = glm::clamp(r,0.0001f,0.9999f); 
-            m_F0Color.g = glm::clamp(g,0.0001f,0.9999f); 
-            m_F0Color.b = glm::clamp(b,0.0001f,0.9999f);
+            m_F0Color.r = glm::clamp(r,0.001f,0.999f); 
+            m_F0Color.g = glm::clamp(g,0.001f,0.999f); 
+            m_F0Color.b = glm::clamp(b,0.001f,0.999f);
             _updateGlobalMaterialPool(false);
         }
         void _setMaterialProperties(float& r,float& g,float& b,float& smoothness,float& metalness){

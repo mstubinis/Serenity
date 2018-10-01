@@ -88,7 +88,6 @@ namespace Engine{
             SMAAVertex2,
             SMAAVertex3,
             SMAAVertex4,
-            SMAAFrag1Stencil,
             SMAAFrag1,
             SMAAFrag2,
             SMAAFrag3,
@@ -119,7 +118,6 @@ namespace Engine{
             BRDFPrecomputeCookTorrance,
             Grayscale,
             StencilPass,
-            SMAA1Stencil,
             SMAA1,
             SMAA2,
             SMAA3,
@@ -462,7 +460,6 @@ class epriv::RenderManager::impl final{
             UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
             #pragma endregion
 
-
             #pragma region EngineInternalShadersAndPrograms
             m_InternalShaderPrograms.resize(EngineInternalShaderPrograms::_TOTAL, nullptr);
 
@@ -499,7 +496,6 @@ class epriv::RenderManager::impl final{
             m_InternalShaders.emplace_back(EShaders::smaa_vertex_2,ShaderType::Vertex,false);
             m_InternalShaders.emplace_back(EShaders::smaa_vertex_3,ShaderType::Vertex,false);
             m_InternalShaders.emplace_back(EShaders::smaa_vertex_4,ShaderType::Vertex,false);
-            m_InternalShaders.emplace_back(EShaders::smaa_frag_1_stencil,ShaderType::Fragment,false);
             m_InternalShaders.emplace_back(EShaders::smaa_frag_1,ShaderType::Fragment,false);
             m_InternalShaders.emplace_back(EShaders::smaa_frag_2,ShaderType::Fragment,false);
             m_InternalShaders.emplace_back(EShaders::smaa_frag_3,ShaderType::Fragment,false);
@@ -529,7 +525,6 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance) = new ShaderP("BRDF_Precompute_CookTorrance",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::BRDFPrecomputeFrag));
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::Grayscale) = new ShaderP("Greyscale_Frag",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::GrayscaleFrag));
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::StencilPass) = new ShaderP("Stencil_Pass",m_InternalShaders.at(EngineInternalShaders::LightingVertex),m_InternalShaders.at(EngineInternalShaders::StencilPassFrag));
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1Stencil) = new ShaderP("Deferred_SMAA_1_Stencil",m_InternalShaders.at(EngineInternalShaders::SMAAVertex1),m_InternalShaders.at(EngineInternalShaders::SMAAFrag1Stencil));
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1) = new ShaderP("Deferred_SMAA_1",m_InternalShaders.at(EngineInternalShaders::SMAAVertex1),m_InternalShaders.at(EngineInternalShaders::SMAAFrag1));
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA2) = new ShaderP("Deferred_SMAA_2",m_InternalShaders.at(EngineInternalShaders::SMAAVertex2),m_InternalShaders.at(EngineInternalShaders::SMAAFrag2));
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA3) = new ShaderP("Deferred_SMAA_3",m_InternalShaders.at(EngineInternalShaders::SMAAVertex3),m_InternalShaders.at(EngineInternalShaders::SMAAFrag3));
@@ -2312,14 +2307,13 @@ void epriv::RenderManager::_genPBREnvMapData(Texture& texture, uint size1, uint 
 
 
 
-epriv::RenderPipeline::RenderPipeline(ShaderP* _shaderProgram) {
-    shaderProgram = _shaderProgram;
+epriv::RenderPipeline::RenderPipeline(ShaderP& _shaderProgram):shaderProgram(_shaderProgram){
 }
 epriv::RenderPipeline::~RenderPipeline() {
     SAFE_DELETE_VECTOR(materialNodes);
 }
 void epriv::RenderPipeline::render() {
-    shaderProgram->bind();
+    shaderProgram.bind();
     for (auto materialNode : materialNodes) {
         if (materialNode->meshNodes.size() > 0) {
             materialNode->material->bind();
@@ -2334,8 +2328,8 @@ void epriv::RenderPipeline::render() {
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material
-                    if (renderManager->current_shader_program != shaderProgram) {
-                        shaderProgram->bind();
+                    if (renderManager->current_shader_program != &shaderProgram) {
+                        shaderProgram.bind();
                         materialNode->material->bind();
                     }
                     meshNode->mesh->unbind();
