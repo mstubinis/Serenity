@@ -77,10 +77,10 @@ class epriv::ComponentManager::impl final{
         vector<Entity*>                    m_EntitiesToBeDestroyed;
         bool                               m_Paused;
         vector<ComponentSystemBaseClass*>  m_Systems;
-        void _init(const char* name, uint& w, uint& h,ComponentManager* super){
+        void _init(const char* name, uint& w, uint& h,ComponentManager& super){
             m_Paused = false;
-            super->m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
-            super->m_EntityPool    = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
+            super.m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
+            super.m_EntityPool    = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
 
             m_Systems.resize(ComponentType::_TOTAL, nullptr);
             m_Systems.at(0) = new ComponentBodySystem();
@@ -91,9 +91,9 @@ class epriv::ComponentManager::impl final{
             m_TypeRegistry.emplace<ComponentModel>();
             m_TypeRegistry.emplace<ComponentCamera>();
         }
-        void _destruct(ComponentManager* super){
-            SAFE_DELETE(super->m_ComponentPool);
-            SAFE_DELETE(super->m_EntityPool);
+        void _destruct(ComponentManager& super){
+            SAFE_DELETE(super.m_ComponentPool);
+            SAFE_DELETE(super.m_EntityPool);
             SAFE_DELETE_VECTOR(m_Systems);
         }
         static void _performTransformation(Entity* parent,glm::vec3& position,glm::quat& rotation,glm::vec3& scale,glm::mat4& modelMatrix){
@@ -113,9 +113,9 @@ class epriv::ComponentManager::impl final{
             }
             if(currentScene->skybox()) currentScene->skybox()->update();
         }
-        void _destroyQueuedEntities(ComponentManager* super){
+        void _destroyQueuedEntities(ComponentManager& super){
             for(auto e:m_EntitiesToBeDestroyed){
-                super->_deleteEntityImmediately(e);
+                super._deleteEntityImmediately(*e);
             }
             vector_clear(m_EntitiesToBeDestroyed);
         }
@@ -130,7 +130,7 @@ class epriv::ComponentManager::impl final{
             Core::m_Engine->m_PhysicsManager._update(dt,maxSubSteps,minStep);
             Core::m_Engine->m_TimeManager.calculate_physics();
         }
-        void _update(const float& dt,ComponentManager* super){
+        void _update(const float& dt,ComponentManager& super){
             _updateCurrentScene(dt); //take player input and perform player actions
             _updatePhysicsEngine(dt);
             if(!m_Paused){
@@ -144,11 +144,11 @@ class epriv::ComponentManager::impl final{
         }
 };
 
-epriv::ComponentManager::ComponentManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,this); componentManager = this; }
-epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(this); }
+epriv::ComponentManager::ComponentManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,*this); componentManager = this; }
+epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(*this); }
 void epriv::ComponentManager::_pause(bool b){ m_i->m_Paused = b; }
 void epriv::ComponentManager::_unpause(){ m_i->m_Paused = false; }
-void epriv::ComponentManager::_update(const float& dt){ m_i->_update(dt,this); }
+void epriv::ComponentManager::_update(const float& dt){ m_i->_update(dt,*this); }
 void epriv::ComponentManager::_resize(uint width,uint height){
     uint slot = Components::getSlot<ComponentCamera>();
     for(auto camera:ComponentManager::m_ComponentVectors.at(slot)){ 
@@ -156,11 +156,11 @@ void epriv::ComponentManager::_resize(uint width,uint height){
         cam.resize(width,height);
     }
 }
-void epriv::ComponentManager::_deleteEntityImmediately(Entity* entity){
+void epriv::ComponentManager::_deleteEntityImmediately(Entity& entity){
     //obviously try to improve this performance wise
-    removeFromVector(epriv::InternalScenePublicInterface::GetEntities(entity->scene()), entity->m_ID);
+    removeFromVector(epriv::InternalScenePublicInterface::GetEntities(entity.scene()), entity.m_ID);
     for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-        uint& componentID = entity->m_Components.at(i);
+        uint& componentID = entity.m_Components.at(i);
         if(componentID != 0){
             ComponentBaseClass* component = Components::GetComponent(componentID);
             componentManager->_removeComponent(component);
@@ -168,16 +168,16 @@ void epriv::ComponentManager::_deleteEntityImmediately(Entity* entity){
             componentID = 0;
         }
     }
-    m_EntityPool->remove(entity->m_ID);
+    m_EntityPool->remove(entity.m_ID);
 }
-void epriv::ComponentManager::_addEntityToBeDestroyed(uint id){ _addEntityToBeDestroyed(m_EntityPool->getAsFast<Entity>(id)); }
-void epriv::ComponentManager::_addEntityToBeDestroyed(Entity* entity){
+void epriv::ComponentManager::_addEntityToBeDestroyed(uint id){ _addEntityToBeDestroyed(*m_EntityPool->getAsFast<Entity>(id)); }
+void epriv::ComponentManager::_addEntityToBeDestroyed(Entity& entity){
     for(auto destroyed:m_i->m_EntitiesToBeDestroyed){ 
-        if(destroyed->m_ID == entity->m_ID){
+        if(destroyed->m_ID == entity.m_ID){
             return; 
         } 
     }
-    m_i->m_EntitiesToBeDestroyed.push_back(entity);
+    m_i->m_EntitiesToBeDestroyed.push_back(&entity);
 }
 void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
     //TODO: add method to handle each component type on scene swap (like remove/add rigid body from physics world)
@@ -229,7 +229,6 @@ void epriv::ComponentManager::onEntityAddedToScene(Scene* scene, Entity* entity)
     }
 }
 void epriv::ComponentManager::onSceneSwap(Scene* oldScene,Scene* newScene, Entity* entity) {
-    //entity->m_Scene = newScene;
     for (uint i = 0; i < entity->m_Components.size(); ++i) {
         const uint& componentID = entity->m_Components.at(i);
         if (componentID != 0) {
@@ -394,16 +393,6 @@ void epriv::ComponentBodySystem::update(const float& dt) { m_i->_update(dt); }
 void epriv::ComponentBodySystem::onSceneSwap(Scene* o, Scene* s, ComponentBaseClass* c, Entity* e) { m_i->_onSceneSwap(o, s, c, e); }
 void epriv::ComponentBodySystem::onEntityAddedToScene(Scene* s,ComponentBaseClass* c,Entity* e) { m_i->_onEntityAddedToScene(s,c,e); }
 void epriv::ComponentBodySystem::onComponentAddedToEntity(ComponentBaseClass* c, Entity* e) { m_i->_onComponentAddedToEntity(c, e); }
-
-#pragma endregion
-
-
-#pragma region BaseClass
-
-ComponentBaseClass::ComponentBaseClass(){ m_Owner = 0; }
-ComponentBaseClass::ComponentBaseClass(uint owner) { m_Owner = owner; }
-ComponentBaseClass::~ComponentBaseClass(){}
-Entity* ComponentBaseClass::owner() { return Components::GetEntity(m_Owner); }
 
 #pragma endregion
 
@@ -1113,7 +1102,7 @@ void Entity::destroy(bool immediate){
     if(!immediate)
         componentManager->_addEntityToBeDestroyed(m_ID);  //add to the deletion queue
     else
-        componentManager->_deleteEntityImmediately(this); //delete immediately    
+        componentManager->_deleteEntityImmediately(*this); //delete immediately    
 }
 
 #pragma endregion

@@ -36,6 +36,9 @@ class Components;
 
 typedef boost::typeindex::type_index   boost_type_index;
 
+template <typename T> const boost_type_index type_id() { return boost_type_index(boost::typeindex::type_id<T>()); }
+template <typename T> const boost_type_index type_id(T* component) { return boost_type_index(boost::typeindex::type_id_runtime(*component)); }
+
 namespace Engine{
     namespace epriv{
         class InternalComponentPublicInterface final {
@@ -47,7 +50,6 @@ namespace Engine{
                 static glm::mat4 GetViewProjectionNoTranslation(const Camera&);
                 static glm::mat4 GetViewProjectionInverseNoTranslation(const Camera&);
                 static glm::vec3 GetViewVectorNoTranslation(const Camera&);
-
         };
         class ComponentInternalFunctionality;
         struct MeshMaterialPair;
@@ -64,6 +66,20 @@ class ComponentType{public:enum Type{
     Camera, //Can contain: ComponentCamera, ComponentGameCamera
 _TOTAL,};};
 
+class Components final {
+    friend class ::Engine::epriv::ComponentManager;
+    public:
+        static ComponentBaseClass* GetComponent(uint id);
+        static Entity* GetEntity(uint id);
+        template <typename T> static uint getSlot() {
+            return Engine::epriv::ComponentTypeRegistry::m_Registry.at(type_id<T>());
+        }
+        template <typename T> static uint getSlot(T* component) {
+            return Engine::epriv::ComponentTypeRegistry::m_Registry.at(type_id(component));
+        }
+};
+
+
 class ComponentBaseClass{
     friend class ::Engine::epriv::ComponentManager;
     friend class ::Entity;
@@ -71,16 +87,15 @@ class ComponentBaseClass{
         uint m_Owner;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentBaseClass(uint owner);
-        ComponentBaseClass();
-        Entity* owner();
-        virtual ~ComponentBaseClass();
+        ComponentBaseClass() { m_Owner = 0; }
+        Entity* owner() { return Components::GetEntity(m_Owner); }
+        virtual ~ComponentBaseClass() {}
 };
 namespace Engine{
 
     template<class Base,class Derived> void registerComponent(){
-        const boost_type_index baseType    = boost_type_index(boost::typeindex::type_id<Base>());
-        const boost_type_index derivedType = boost_type_index(boost::typeindex::type_id<Derived>());
+        const boost_type_index baseType    = type_id<Base>();
+        const boost_type_index derivedType = type_id<Derived>();
         auto& map = epriv::ComponentTypeRegistry::m_Registry;
         if(!map.count(derivedType)){
             const uint& baseClassSlot = map.at(baseType);
@@ -118,9 +133,9 @@ namespace Engine{
                 void _resize(uint width,uint height);
 
                 void _sceneSwap(Scene* oldScene, Scene* newScene);
-                void _deleteEntityImmediately(Entity*);
+                void _deleteEntityImmediately(Entity&);
                 void _addEntityToBeDestroyed(uint id);
-                void _addEntityToBeDestroyed(Entity*);
+                void _addEntityToBeDestroyed(Entity&);
 
                 void _removeComponent(uint componentID);
                 void _removeComponent(ComponentBaseClass* component);
@@ -133,28 +148,28 @@ namespace Engine{
             public:
                 static boost::unordered_map<boost_type_index,uint> m_Registry;
 
-                static uint slot(const boost_type_index _index) { return m_Registry.at(_index); }
+                static uint slot(const boost_type_index& _index) { return m_Registry.at(_index); }
 
                 ComponentTypeRegistry() { m_NextIndex = 0; }
                 ~ComponentTypeRegistry() { m_Registry.clear(); m_NextIndex = 0; }
 
                 template<class T> void emplace(){
-                    m_Registry.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndex);
+                    m_Registry.emplace(type_id<T>(),m_NextIndex);
                     ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
                     ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
                     ++m_NextIndex;
                 }
                 template<class T,class V> void emplace(){
-                    m_Registry.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndex);
-                    m_Registry.emplace(boost_type_index(boost::typeindex::type_id<V>()),m_NextIndex);
+                    m_Registry.emplace(type_id<T>(),m_NextIndex);
+                    m_Registry.emplace(type_id<V>(),m_NextIndex);
                     ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
                     ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
                     ++m_NextIndex;
                 }
                 template<class T,class V,class W> void emplace(){
-                    m_Registry.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndex);
-                    m_Registry.emplace(boost_type_index(boost::typeindex::type_id<V>()),m_NextIndex);
-                    m_Registry.emplace(boost_type_index(boost::typeindex::type_id<W>()),m_NextIndex);
+                    m_Registry.emplace(type_id<T>(),m_NextIndex);
+                    m_Registry.emplace(type_id<V>(),m_NextIndex);
+                    m_Registry.emplace(type_id<W>(),m_NextIndex);
                     ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
                     ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
                     ++m_NextIndex;
@@ -162,7 +177,6 @@ namespace Engine{
         };
         class ComponentSystemBaseClass{
             friend class ::Engine::epriv::ComponentManager;
-            private:
             public:
                 ComponentSystemBaseClass(){}
                 virtual ~ComponentSystemBaseClass(){}
@@ -402,8 +416,7 @@ class Entity: public EventObserver{
         void destroy(bool immediate = false); //completely eradicate from memory. by default it its eradicated at the end of the update frame before rendering logic, but can be overrided to be deleted immediately after the call
 
         template<class T> T* getComponent(){
-            const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
-            const uint& slot = Engine::epriv::ComponentTypeRegistry::slot(typeIndex);
+            const uint& slot = Engine::epriv::ComponentTypeRegistry::slot(type_id<T>());
             const uint& componentID = m_Components.at(slot);
             if(componentID == 0){
                 return nullptr;
@@ -411,8 +424,7 @@ class Entity: public EventObserver{
             return Engine::epriv::ComponentManager::m_ComponentPool->getAsFast<T>(componentID);
         }
         template<class T> void addComponent(T* component){
-            const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
-            const uint& slot = Engine::epriv::ComponentTypeRegistry::slot(typeIndex);
+            const uint& slot = Engine::epriv::ComponentTypeRegistry::slot(type_id<T>());
             uint& componentID = m_Components.at(slot);
             if(componentID != 0) return;
             uint generatedID = Engine::epriv::ComponentManager::m_ComponentPool->add(component);
@@ -426,8 +438,7 @@ class Entity: public EventObserver{
             }
         }
         template<class T> void removeComponent(T* component){
-            const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
-            const uint& slot = Engine::epriv::ComponentTypeRegistry::slot(typeIndex);
+            const uint& slot = Engine::epriv::ComponentTypeRegistry::slot(type_id<T>());
             uint& componentID = m_Components.at(slot);
             if(componentID == 0) return;
             component->m_Owner = 0;
@@ -437,23 +448,4 @@ class Entity: public EventObserver{
             componentID = 0;
         }
 };
-
-class Components final{
-    friend class ::Engine::epriv::ComponentManager;
-    public:
-
-        static ComponentBaseClass* GetComponent(uint id);
-        static Entity* GetEntity(uint id);
-
-
-        template <typename T> static uint getSlot() {
-            const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
-            return Engine::epriv::ComponentTypeRegistry::m_Registry.at(typeIndex);
-        }
-        template <typename T> static uint getSlot(T* component) {
-            const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id_runtime(*component));
-            return Engine::epriv::ComponentTypeRegistry::m_Registry.at(typeIndex);
-        }
-};
-
 #endif
