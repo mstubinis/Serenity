@@ -85,6 +85,7 @@ namespace Engine{
                 RenderPipeline(ShaderP&);
                 ~RenderPipeline();
 
+                void sort(Camera& c);
                 void render();
         };
 

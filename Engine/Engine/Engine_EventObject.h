@@ -7,6 +7,14 @@
 
 class Scene;
 
+struct RenderStage {enum Stage {
+    GeometryOpaque,
+    GeometryTransparent,
+    ForwardOpaque,
+    ForwardTransparent,
+_TOTAL};};
+
+
 struct EventType final{enum Type{
     WindowResized,
     WindowGainedFocus,

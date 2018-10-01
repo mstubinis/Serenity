@@ -7,6 +7,7 @@
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include "BindableResource.h"
+#include "Engine_EventObject.h"
 
 struct Handle;
 class Entity;
@@ -49,6 +50,9 @@ class MeshInstance final: public BindableResource{
         void setPassedRenderCheck(bool);
         void show();
         void hide();
+
+        RenderStage::Stage stage();
+        void setStage(RenderStage::Stage);
 
         void playAnimation(const std::string& animName,float startTime,float endTime = -1.0f, uint requestedLoops = 1);
 

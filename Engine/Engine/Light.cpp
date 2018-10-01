@@ -64,7 +64,7 @@ SunLight::SunLight(glm::vec3 pos,LightType::Type type,Scene* scene):Entity(),m_i
         scene = Resources::getCurrentScene();
     }
     scene->addEntity(this); //keep lights out of the global per scene entity pool?
-    epriv::InternalScenePublicInterface::GetLights(scene).push_back(this);
+    epriv::InternalScenePublicInterface::GetLights(*scene).push_back(this);
 
     m_i->_init(this,type);
     m_i->m_Body->setPosition(pos);

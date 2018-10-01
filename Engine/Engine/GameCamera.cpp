@@ -129,9 +129,9 @@ void GameCamera::update(const float& dt){
 Entity* GameCamera::getObjectInCenterRay(Entity* exclusion){
     Entity* ret = 0;
     vector<Entity*> objs;
-    Scene* s = Resources::getCurrentScene();
+    Scene& s = *Resources::getCurrentScene();
     for(auto id:epriv::InternalScenePublicInterface::GetEntities(s)){
-        Entity* e = s->getEntity(id);
+        Entity* e = s.getEntity(id);
         if(rayIntersectSphere(e)){
             if(e != exclusion){
                 objs.push_back(e);

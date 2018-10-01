@@ -250,7 +250,7 @@ Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
 void Ship::update(const float& dt){
-    Scene* currentScene = Resources::getCurrentScene();
+    Scene& currentScene = *Resources::getCurrentScene();
     if(m_IsPlayer){
         #pragma region PlayerFlightControls
 
@@ -260,7 +260,7 @@ void Ship::update(const float& dt){
                 float speed = (m_WarpFactor * 1.0f / 0.46f) * 2.0f;
                 glm::vec3 s = (body->forward() * glm::pow(speed, 15.0f)) / body->mass();
                 for(auto id: epriv::InternalScenePublicInterface::GetEntities(currentScene)){
-                    Entity* e = currentScene->getEntity(id);
+                    Entity* e = currentScene.getEntity(id);
                     if(e){
                         auto* cam = e->getComponent<ComponentCamera>();
                         auto* camGame = (e->getComponent<GameCameraComponent>());

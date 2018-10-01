@@ -50,12 +50,14 @@ class MeshInstance::impl{
         ShaderP* m_ShaderProgram;
         Mesh* m_Mesh;
         Material* m_Material;
+        RenderStage::Stage m_Stage;
         glm::vec3 m_Position, m_Scale, m_GodRaysColor;
         glm::quat m_Orientation;
         glm::mat4 m_Model;
         glm::vec4 m_Color;
         bool m_PassedRenderCheck, m_Visible;
         void _init(Mesh* mesh,Material* mat,MeshInstance* super,Entity* entity,ShaderP* program){
+            m_Stage = RenderStage::GeometryOpaque;
             m_PassedRenderCheck = false;
             m_Visible = true;
             m_Entity = entity;
@@ -183,6 +185,7 @@ MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat, ShaderP* pr
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::~MeshInstance(){ m_i->_destruct(this); }
+void MeshInstance::setStage(RenderStage::Stage s) { m_i->m_Stage = s; }
 void MeshInstance::show() { m_i->m_Visible = true; }
 void MeshInstance::hide() { m_i->m_Visible = false; }
 bool MeshInstance::visible() { return m_i->m_Visible; }
@@ -212,6 +215,7 @@ glm::quat& MeshInstance::orientation(){ return m_i->m_Orientation; }
 ShaderP* MeshInstance::shaderProgram() { return m_i->m_ShaderProgram; }
 Mesh* MeshInstance::mesh(){ return m_i->m_Mesh; }
 Material* MeshInstance::material(){ return m_i->m_Material; }
+RenderStage::Stage MeshInstance::stage() { return m_i->m_Stage; }
 void MeshInstance::setShaderProgram(const Handle& shaderPHandle) { m_i->_setShaderProgram(((ShaderP*)shaderPHandle.get()), this); }
 void MeshInstance::setShaderProgram(ShaderP* shaderProgram) { m_i->_setShaderProgram(shaderProgram, this); }
 void MeshInstance::setMesh(const Handle& meshHandle){ m_i->_setMesh(((Mesh*)meshHandle.get()),this); }

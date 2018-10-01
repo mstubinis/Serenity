@@ -14,6 +14,7 @@ class SkyboxEmpty;
 class LightProbe;
 class Scene;
 class MeshInstance;
+
 namespace Engine {
     namespace epriv {
         class ComponentManager;
@@ -22,12 +23,14 @@ namespace Engine {
             friend class ::Scene;
             friend class ::Engine::epriv::RenderPipeline;
             public:
-                static std::vector<uint>& GetEntities(Scene*);
-                static std::vector<SunLight*>& GetLights(Scene*);
-                static void Render(Scene*);
-                static void RenderForward(Scene*);
-                static void AddMeshInstanceToPipeline(Scene*, MeshInstance*);
-                static void RemoveMeshInstanceFromPipeline(Scene*, MeshInstance*);
+                static std::vector<uint>& GetEntities(Scene&);
+                static std::vector<SunLight*>& GetLights(Scene&);
+                static void RenderGeometryOpaque(Scene&, Camera&);
+                static void RenderGeometryTransparent(Scene&, Camera&);
+                static void RenderForwardOpaque(Scene&, Camera&);
+                static void RenderForwardTransparent(Scene&, Camera&);
+                static void AddMeshInstanceToPipeline(Scene&, MeshInstance*, RenderStage::Stage);
+                static void RemoveMeshInstanceFromPipeline(Scene&, MeshInstance*, RenderStage::Stage);
         };
     };
 };

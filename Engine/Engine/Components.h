@@ -236,15 +236,15 @@ class ComponentModel: public ComponentBaseClass{
         glm::vec3 _radiusBox;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity*, ShaderP* = nullptr);
-        ComponentModel(Mesh*, Handle& materialHandle, Entity*, ShaderP* = nullptr);
-        ComponentModel(Handle& meshHandle, Material*, Entity*, ShaderP* = nullptr);
-        ComponentModel(Mesh*, Material*, Entity*, ShaderP* = nullptr);
+        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity*, ShaderP* = 0,RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Mesh*, Handle& materialHandle, Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Handle& meshHandle, Material*, Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Mesh*, Material*, Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity*, Handle& shaderPHandle);
-        ComponentModel(Mesh*, Handle& materialHandle, Entity*, Handle& shaderPHandle);
-        ComponentModel(Handle& meshHandle, Material*, Entity*, Handle& shaderPHandle);
-        ComponentModel(Mesh*, Material*, Entity*, Handle& shaderPHandle);
+        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Mesh*, Handle& materialHandle, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Handle& meshHandle, Material*, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Mesh*, Material*, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
 
         ~ComponentModel();
 
@@ -256,20 +256,20 @@ class ComponentModel: public ComponentBaseClass{
 
         MeshInstance* getModel(uint index = 0);
 
-        uint addModel(Handle& meshHandle, Handle& materialHandle, ShaderP* = 0);
-        uint addModel(Mesh*,Material*, ShaderP* = 0);
+        uint addModel(Handle& meshHandle, Handle& materialHandle, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        uint addModel(Mesh*,Material*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        void setModel(Handle& meshHandle,Handle& materialHandle,uint index, ShaderP* = 0);
-        void setModel(Mesh*,Material*,uint index, ShaderP* = 0);
+        void setModel(Handle& meshHandle,Handle& materialHandle,uint index, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setModel(Mesh*,Material*,uint index, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        void setModelMesh(Mesh*,uint index);
-        void setModelMesh(Handle& meshHandle, uint index);
+        void setModelMesh(Mesh*,uint index, RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setModelMesh(Handle& meshHandle, uint index, RenderStage::Stage = RenderStage::GeometryOpaque);
         
-        void setModelMaterial(Material*,uint index);
-        void setModelMaterial(Handle& materialHandle,uint index);
+        void setModelMaterial(Material*,uint index, RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setModelMaterial(Handle& materialHandle,uint index, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        void setModelShaderProgram(ShaderP*, uint index);
-        void setModelShaderProgram(Handle& materialHandle, uint index);
+        void setModelShaderProgram(ShaderP*, uint index, RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setModelShaderProgram(Handle& materialHandle, uint index, RenderStage::Stage = RenderStage::GeometryOpaque);
 
         bool rayIntersectSphere(ComponentCamera* camera);
 

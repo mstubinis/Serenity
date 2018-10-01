@@ -1367,8 +1367,8 @@ class epriv::RenderManager::impl final{
         }
         bool _checkOpenGLExtension(const char* e){ if(glewIsExtensionSupported(e)!=0) return true;return 0!=glewIsSupported(e); }
         void _renderSkybox(SkyboxEmpty* skybox){
-            Scene* scene = Resources::getCurrentScene();
-            Camera* c = scene->getActiveCamera();
+            Scene& scene = *Resources::getCurrentScene();
+            Camera* c = scene.getActiveCamera();
             glm::mat4 view = c->getView();
             Math::removeMatrixPosition(view);
             if(skybox){
@@ -1379,7 +1379,7 @@ class epriv::RenderManager::impl final{
                 skybox->draw();
             }else{//render a fake skybox.
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkyboxFake)->bind();
-                glm::vec3 bgColor = scene->getBackgroundColor();
+                glm::vec3 bgColor = scene.getBackgroundColor();
                 sendUniformMatrix4("VP",c->getProjection() * view);
                 sendUniform4("Color",bgColor.r,bgColor.g,bgColor.b,1.0f);
                 Skybox::bindMesh();
@@ -1656,8 +1656,8 @@ class epriv::RenderManager::impl final{
             }
         }
         void _passGeometry(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,Entity* ignore){
-            Scene* scene = Resources::getCurrentScene();
-            const glm::vec3& clear = scene->getBackgroundColor();
+            Scene& scene = *Resources::getCurrentScene();
+            const glm::vec3& clear = scene.getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
             if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
@@ -1682,20 +1682,25 @@ class epriv::RenderManager::impl final{
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);      
 
             //RENDER NORMAL OBJECTS HERE
-            InternalScenePublicInterface::Render(scene);
+            InternalScenePublicInterface::RenderGeometryOpaque(scene,c);
 
             //skybox here
             gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
-            _renderSkybox(scene->skybox());
-            if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }          
+            _renderSkybox(scene.skybox());
+            if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
+
+
+            InternalScenePublicInterface::RenderGeometryTransparent(scene,c);
         }
         void _passForwardRendering(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,Entity* ignore){
-            Scene* scene = Resources::getCurrentScene();
+            Scene& scene = *Resources::getCurrentScene();
 
             gbuffer.start(GBufferType::Diffuse);
 
             //RENDER NORMAL OBJECTS HERE
-            InternalScenePublicInterface::RenderForward(scene);
+            InternalScenePublicInterface::RenderForwardOpaque(scene,c);
+
+            InternalScenePublicInterface::RenderForwardTransparent(scene,c);
         }
         void _passCopyDepth(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
@@ -1707,7 +1712,7 @@ class epriv::RenderManager::impl final{
             Renderer::colorMask(true, true, true, true);
         }
         void _passLighting(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,bool mainRenderFunc){
-            Scene* s = Resources::getCurrentScene(); 
+            Scene& s = *Resources::getCurrentScene(); 
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting)->bind();
             
             if(RenderManager::GLSL_VERSION < 140){
@@ -1752,9 +1757,9 @@ class epriv::RenderManager::impl final{
                 sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
                 sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 3);
 
-                SkyboxEmpty* skybox = s->skybox();
+                SkyboxEmpty* skybox = s.skybox();
 
-                if(s->lightProbes().size() > 0){
+                if(s.lightProbes().size() > 0){
                     /*
                     for(auto probe:s->lightProbes()){
                         LightProbe* p = probe.second;
@@ -2033,7 +2038,7 @@ class epriv::RenderManager::impl final{
             m_FullscreenTriangle->render();
         }
         void _render(GBuffer& gbuffer, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool& HUD, Entity* ignore,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
-            Scene* s = Resources::getCurrentScene();
+            Scene& s = *Resources::getCurrentScene();
             //restore default state, might have to increase this as we use more textures
             for(uint i = 0; i < 9; ++i){ 
                 glActiveTexture(GL_TEXTURE0 + i);
@@ -2073,7 +2078,7 @@ class epriv::RenderManager::impl final{
                 }
                 #pragma endregion
                 #pragma region LightProbes
-                if(s->lightProbes().size() > 0){
+                if(s.lightProbes().size() > 0){
                     /*
                     for(auto lightProbe:s->lightProbes()){
                         lightProbe.second->renderCubemap(
@@ -2213,7 +2218,7 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             if(mainRenderFunc){
-                if(draw_physics_debug  &&  &camera == s->getActiveCamera()){
+                if(draw_physics_debug  &&  &camera == s.getActiveCamera()){
                     m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BulletPhysics)->bind();
                     Core::m_Engine->m_PhysicsManager._render();
                 }
@@ -2311,6 +2316,26 @@ epriv::RenderPipeline::RenderPipeline(ShaderP& _shaderProgram):shaderProgram(_sh
 }
 epriv::RenderPipeline::~RenderPipeline() {
     SAFE_DELETE_VECTOR(materialNodes);
+}
+
+float dist(Camera& lhs, const glm::vec3& rhs) {
+    return glm::distance(lhs.getPosition(), rhs);
+}
+
+void epriv::RenderPipeline::sort(Camera& c) {
+    for (auto materialNode : materialNodes) {
+        for (auto meshNode : materialNode->meshNodes) {
+            auto& vect = meshNode->instanceNodes;
+            std::sort(
+                vect.begin(), vect.end(),
+                [&c](InstanceNode* lhs,InstanceNode* rhs) { 
+                    const glm::vec3& lhsPos = lhs->instance->parent()->getComponent<ComponentBody>()->position();
+                    const glm::vec3& rhsPos = rhs->instance->parent()->getComponent<ComponentBody>()->position();
+                    return dist(c, lhsPos) < dist(c, rhsPos);
+                }
+            );
+        }
+    }
 }
 void epriv::RenderPipeline::render() {
     shaderProgram.bind();

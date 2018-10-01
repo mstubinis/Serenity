@@ -42,7 +42,7 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     glm::mat4 rot = glm::mat4(1.0f);
     rot *= glm::mat4_cast(orientation);
     
-    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetLights(Resources::getCurrentScene()).at(0)->position();
+    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetLights(*Resources::getCurrentScene()).at(0)->position();
     glm::vec3 lightDir = glm::normalize(lightPos - pos);
     float Km = 0.0025f;
     float Kr = 0.0015f;
@@ -146,7 +146,7 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     glm::mat4 rot = glm::mat4(1.0f);
     rot *= glm::mat4_cast(orientation);
     
-    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetLights(Resources::getCurrentScene()).at(0)->position();
+    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetLights(*Resources::getCurrentScene()).at(0)->position();
     glm::vec3 lightDir = glm::normalize(lightPos - pos);
     float Km = 0.0025f;
     float Kr = 0.0015f;
@@ -224,7 +224,7 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 
     int numberSamples = 1;
     
-    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetLights(Resources::getCurrentScene()).at(0)->position();
+    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetLights(*Resources::getCurrentScene()).at(0)->position();
     glm::vec3 lightDir = glm::normalize(lightPos - pos);
     float Km = 0.0025f;
     float Kr = 0.0015f;
@@ -310,7 +310,7 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
     if(m_AtmosphereHeight > 0){
         AtmosphericScatteringSkyMeshInstanceBindFunctor f;
         AtmosphericScatteringSkyMeshInstanceUnbindFunctor f1;
-        uint index = m_Model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial,(ShaderP*)ResourceManifest::skyFromSpace.get());
+        uint index = m_Model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial,(ShaderP*)ResourceManifest::skyFromSpace.get(),RenderStage::GeometryTransparent);
         MeshInstance& skyMesh = *m_Model->getModel(index);
         float aScale = 1.0f + m_AtmosphereHeight;
         skyMesh.setCustomBindFunctor(f);
@@ -381,7 +381,7 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     _makeRingImage(rings,parent);
     m_Parent->addRing(this);
     PlanetaryRingMeshInstanceBindFunctor f;
-    uint index = parent->m_Model->addModel(ResourceManifest::RingMesh,m_MaterialHandle,(ShaderP*)ResourceManifest::groundFromSpace.get());
+    uint index = parent->m_Model->addModel(ResourceManifest::RingMesh,m_MaterialHandle,(ShaderP*)ResourceManifest::groundFromSpace.get(), RenderStage::GeometryTransparent);
     MeshInstance* ringMesh = parent->m_Model->getModel(index);
     ringMesh->setCustomBindFunctor(f);
     float aScale = 1.0f;
