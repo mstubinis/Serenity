@@ -725,11 +725,7 @@ class Mesh::impl final{
                                  key = "Animation " + to_string(skeleton.m_AnimationData.size());
                              }
                              if(!skeleton.m_AnimationData.count(key)){
-                                 skeleton.m_AnimationData.emplace(
-                                     std::piecewise_construct,
-                                     std::forward_as_tuple(key),
-                                     std::forward_as_tuple(mesh, anim)
-                                 );
+                                 skeleton.m_AnimationData.emplace(std::piecewise_construct,std::forward_as_tuple(key),std::forward_as_tuple(mesh, anim));
                              }
                         }
                     }
@@ -869,13 +865,11 @@ class Mesh::impl final{
                     triangle.v1.position = pos;
                     triangle.v1.uv = uv;
                     triangle.v1.normal = norm;
-                }
-                else if(count == 2){
+                }else if(count == 2){
                     triangle.v2.position = pos;
                     triangle.v2.uv = uv;
                     triangle.v2.normal = norm;
-                }
-                else if(count >= 3){
+                }else if(count >= 3){
                     triangle.v3.position = pos;
                     triangle.v3.uv = uv;
                     triangle.v3.normal = norm;

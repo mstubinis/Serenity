@@ -1632,17 +1632,17 @@ class epriv::RenderManager::impl final{
             Mesh& mesh = *(Mesh::FontPlane);
             for(auto item:m_FontsToBeRendered){
                 Font& font = *item.font;
-                sendTexture("DiffuseTexture",*font.getGlyphTexture(),0);
+                sendTexture("DiffuseTexture",font.getGlyphTexture(),0);
                 sendUniform1("DiffuseTextureEnabled",1);
                 sendUniform4("Object_Color",item.col);
                 y_offset = 0;
                 x = item.pos.x;        
                 for(auto c:item.text){
                     if(c == '\n'){
-                        y_offset += (font.getGlyphData('X')->height + 6) * item.scl.y;
+                        y_offset += (font.getGlyphData('X').height + 6) * item.scl.y;
                         x = item.pos.x;
                     }else{
-                        FontGlyph& chr = *(font.getGlyphData(c));
+                        FontGlyph& chr = font.getGlyphData(c);
                         m = m_IdentityMat4;
                         m = glm::translate(m, glm::vec3(x + chr.xoffset ,item.pos.y - (chr.height + chr.yoffset) - y_offset,-0.001f - item.depth));
                         m = glm::rotate(m, item.rot,glm::vec3(0,0,1));

@@ -86,8 +86,8 @@ class ShaderP final: public BindableResource, public EventObserver{
         GLuint m_ShaderProgram;
         std::unordered_map<std::string, GLint> m_UniformLocations;
         std::unordered_map<GLuint, bool> m_AttachedUBOs;
-        Shader* m_VertexShader;
-        Shader* m_FragmentShader;
+        Shader& m_VertexShader;
+        Shader& m_FragmentShader;
         bool m_LoadedCPU, m_LoadedGPU;
 
         void _convertCode(std::string& vCode, std::string& fCode, ShaderP&);
@@ -98,6 +98,10 @@ class ShaderP final: public BindableResource, public EventObserver{
     public:
         ShaderP(std::string name, Shader& vertexShader, Shader& fragmentShader);
         virtual ~ShaderP();
+
+        ShaderP& operator=(const ShaderP&) = delete;
+        ShaderP(const ShaderP&) = default;
+        ShaderP(ShaderP&&) noexcept = default;
 
         void onEvent(const Event& e);
 

@@ -36,18 +36,18 @@ namespace Engine{
             friend class ::Texture;
             public:
 
-                static void LoadDDSFile(Texture* texture, std::string filename,epriv::textures::ImageLoadedStructure& image);
+                static void LoadDDSFile(Texture& texture, std::string filename,epriv::textures::ImageLoadedStructure& image);
 
-                static void LoadTexture2DIntoOpenGL(Texture* texture);
-                static void LoadTextureFramebufferIntoOpenGL(Texture* texture);
-                static void LoadTextureCubemapIntoOpenGL(Texture* texture);
+                static void LoadTexture2DIntoOpenGL(Texture& texture);
+                static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
+                static void LoadTextureCubemapIntoOpenGL(Texture& texture);
 
                 static void EnumWrapToGL(uint& gl, TextureWrap::Wrap& wrap);
                 static void EnumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min);
                 static bool IsCompressedType(ImageInternalFormat::Format);
 
-                static void GenerateMipmapsOpenGL(Texture* texture);
-                static void WithdrawPixelsFromOpenGLMemory(Texture* texture,uint imageIndex = 0,uint mipmapLevel = 0);
+                static void GenerateMipmapsOpenGL(Texture& texture);
+                static void WithdrawPixelsFromOpenGLMemory(Texture& texture,uint imageIndex = 0,uint mipmapLevel = 0);
                 static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat,ImageInternalFormat::Format& inInternalFormat);
         };
 
@@ -55,10 +55,10 @@ namespace Engine{
 };
 class InternalTexturePublicInterface final{
     public:
-        static void LoadCPU(Texture*);
-        static void LoadGPU(Texture*);
-        static void UnloadCPU(Texture*);
-        static void UnloadGPU(Texture*);
+        static void LoadCPU(Texture&);
+        static void LoadGPU(Texture&);
+        static void UnloadCPU(Texture&);
+        static void UnloadGPU(Texture&);
 };
 
 class Texture: public EngineResource{

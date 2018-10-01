@@ -130,9 +130,8 @@ bool Shader::fromFile(){ return m_FromFile; }
 epriv::DefaultShaderBindFunctor DEFAULT_BIND_FUNCTOR;
 epriv::DefaultShaderUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
-ShaderP::ShaderP(string _name, Shader& vs, Shader& fs){
-    m_VertexShader = &vs;
-    m_FragmentShader = &fs;
+ShaderP::ShaderP(string _name, Shader& vs, Shader& fs):
+m_VertexShader(vs), m_FragmentShader(fs){
     m_LoadedGPU = m_LoadedCPU = false;
 
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
@@ -150,10 +149,10 @@ ShaderP::~ShaderP(){
     unload(); 
 }
 void ShaderP::_convertCode(string& vCode, string& fCode, ShaderP& super) {
-    _convertCode(vCode, *m_VertexShader, super);
-    _convertCode(fCode, *m_FragmentShader, super);
-    m_VertexShader->m_Code = vCode;
-    m_FragmentShader->m_Code = fCode;
+    _convertCode(vCode, m_VertexShader, super);
+    _convertCode(fCode, m_FragmentShader, super);
+    m_VertexShader.m_Code = vCode;
+    m_FragmentShader.m_Code = fCode;
 }
 void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
     istringstream str(_d);
@@ -481,16 +480,14 @@ void ShaderP::_load_CPU(ShaderP& super) {
     if (!m_LoadedCPU) {
         string VertexCode, FragmentCode = "";
         //load initial code
-        if (m_VertexShader->fromFile()) {
-            boost_stream_mapped_file str(m_VertexShader->m_FileName);
+        if (m_VertexShader.fromFile()) {
+            boost_stream_mapped_file str(m_VertexShader.m_FileName);
             for (string line; getline(str, line, '\n');) { VertexCode += "\n" + line; }
-        }
-        else { VertexCode = m_VertexShader->data(); }
-        if (m_FragmentShader->fromFile()) {
-            boost_stream_mapped_file str(m_FragmentShader->m_FileName);
+        }else { VertexCode = m_VertexShader.data(); }
+        if (m_FragmentShader.fromFile()) {
+            boost_stream_mapped_file str(m_FragmentShader.m_FileName);
             for (string line; getline(str, line, '\n');) { FragmentCode += "\n" + line; }
-        }
-        else { FragmentCode = m_FragmentShader->data(); }
+        }else { FragmentCode = m_FragmentShader.data(); }
         //convert the code
         _convertCode(VertexCode, FragmentCode, super);
         m_LoadedCPU = true;
@@ -504,7 +501,7 @@ void ShaderP::_unload_CPU(ShaderP& super) {
 void ShaderP::_load_GPU(ShaderP& super) {
     _unload_GPU(super);
     if (!m_LoadedGPU) {
-        string& VertexCode = m_VertexShader->m_Code; string& FragmentCode = m_FragmentShader->m_Code;
+        string& VertexCode = m_VertexShader.m_Code; string& FragmentCode = m_FragmentShader.m_Code;
         GLuint vid = glCreateShader(GL_VERTEX_SHADER); GLuint fid = glCreateShader(GL_FRAGMENT_SHADER);
         GLint res = GL_FALSE; int ll;
         // Compile Vertex Shader
@@ -513,8 +510,8 @@ void ShaderP::_load_GPU(ShaderP& super) {
         glGetShaderiv(vid, GL_COMPILE_STATUS, &res); glGetShaderiv(vid, GL_INFO_LOG_LENGTH, &ll); vector<char>ve(ll);
         glGetShaderInfoLog(vid, ll, NULL, &ve[0]);
         if (res == GL_FALSE) {
-            if (m_VertexShader->fromFile()) { cout << "VertexShader Log (" + m_VertexShader->m_FileName + "): " << endl; }
-            else { cout << "VertexShader Log (" + m_VertexShader->name() + "): " << endl; }
+            if (m_VertexShader.fromFile()) { cout << "VertexShader Log (" + m_VertexShader.m_FileName + "): " << endl; }
+            else { cout << "VertexShader Log (" + m_VertexShader.name() + "): " << endl; }
             cout << &ve[0] << endl;
         }
         // Compile Fragment Shader
@@ -523,8 +520,8 @@ void ShaderP::_load_GPU(ShaderP& super) {
         glGetShaderiv(fid, GL_COMPILE_STATUS, &res); glGetShaderiv(fid, GL_INFO_LOG_LENGTH, &ll); vector<char>fe(ll);
         glGetShaderInfoLog(fid, ll, NULL, &fe[0]);
         if (res == GL_FALSE) {
-            if (m_FragmentShader->fromFile()) { cout << "FragmentShader Log (" + m_FragmentShader->m_FileName + "): " << endl; }
-            else { cout << "FragmentShader Log (" + m_FragmentShader->name() + "): " << endl; }
+            if (m_FragmentShader.fromFile()) { cout << "FragmentShader Log (" + m_FragmentShader.m_FileName + "): " << endl; }
+            else { cout << "FragmentShader Log (" + m_FragmentShader.name() + "): " << endl; }
             cout << &fe[0] << endl;
         }
         // Link the program id

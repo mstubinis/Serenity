@@ -4,6 +4,7 @@
 
 #include "Engine_ResourceBasic.h"
 #include <string>
+#include <unordered_map>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -25,12 +26,13 @@ struct FontGlyph final{
 };
 class Font final: public EngineResource{
     private:
-        class impl; std::unique_ptr<impl> m_i;
+        Texture* m_FontTexture;
+        std::unordered_map<uchar, FontGlyph> m_FontGlyphs;
     public:
         Font(std::string);
         ~Font();
         void renderText(std::string text,glm::vec2 pos,glm::vec4 color = glm::vec4(1),float angle = 0.0f,glm::vec2 scl = glm::vec2(1.0f),float depth = 0.1f);
-        Texture* getGlyphTexture();
-        FontGlyph* getGlyphData(uchar);
+        Texture& getGlyphTexture();
+        FontGlyph& getGlyphData(uchar);
 };
 #endif
