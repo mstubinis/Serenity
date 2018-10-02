@@ -15,16 +15,14 @@ class ShaderP;
 class UniformBufferObject;
 typedef unsigned int uint;
 
-class ShaderRenderPass{public: enum Pass{
-    None,
-    Geometry,
-    Forward,
-};};
-class ShaderType{public:enum Type{
-    Vertex,
-    Fragment,
-    Geometry,
-};};
+struct ShaderType{enum Type{
+    Vertex,                // GL_VERTEX_SHADER
+    Fragment,              // GL_FRAGMENT_SHADER
+    Geometry,              // GL_GEOMETRY_SHADER
+    Compute,               // GL_COMPUTE_SHADER          (requires GL 4.3 or ARB_compute_shader)
+    TessellationControl,   // GL_TESS_CONTROL_SHADER     (requires GL 4.0 or ARB_tessellation_shader)
+    Evaluation,            // GL_TESS_EVALUATION_SHADER  (requires GL 4.0 or ARB_tessellation_shader)
+_TOTAL};};
 
 //Core since version 3.1 (GLSL 140)
 class UniformBufferObject final: public EventObserver{

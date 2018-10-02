@@ -14,8 +14,8 @@ GL_UNSIGNED_SHORT_5_6_5_REV, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_4_4_4_
 GL_UNSIGNED_SHORT_1_5_5_5_REV, GL_UNSIGNED_INT_8_8_8_8, GL_UNSIGNED_INT_8_8_8_8_REV, GL_UNSIGNED_INT_10_10_10_2,
 and GL_UNSIGNED_INT_2_10_10_10_REV.
 */
-class ImagePixelType{
-    public: enum Type{
+struct ImagePixelType{
+    enum Type{
         #pragma region ImagePixelTypes
         UNSIGNED_BYTE,
         BYTE,
@@ -49,8 +49,8 @@ For transfers of depth, stencil, or depth/stencil data, you must use GL_DEPTH_CO
 For transfers of normalized integer or floating-point color image data, you must use one of the following: GL_RED, GL_GREEN, GL_BLUE, GL_RG, GL_RGB, GL_BGR, GL_RGBA, and GL_BGRA.
 For transfers of non-normalized integer data, you must use one of the following: GL_RED_INTEGER, GL_GREEN_INTEGER, GL_BLUE_INTEGER, GL_RG_INTEGER, GL_RGB_INTEGER, GL_BGR_INTEGER, GL_RGBA_INTEGER, and GL_BGRA_INTEGER.
 */
-class ImagePixelFormat{
-    public: enum Format{
+struct ImagePixelFormat{
+    enum Format{
         #pragma region ImagePixelFormats
         RED,
         RG,
@@ -79,8 +79,8 @@ one of the sized internal formats given in Table 2,
 or one of the compressed internal formats given in Table 3, below.
 https://www.khronos.org/opengl/wiki/GLAPI/glTexImage2D
 */
-class ImageInternalFormat{
-    public: enum Format{
+struct ImageInternalFormat{
+    enum Format{
         #pragma region ImageInternalFormats
         //Base Internal Formats - recheck these
         DEPTH_COMPONENT,
@@ -192,8 +192,8 @@ class ImageInternalFormat{
     static std::vector<GLuint> IMAGE_INTERNAL_FORMATS;
     static inline GLuint at(ImageInternalFormat::Format f){ return IMAGE_INTERNAL_FORMATS[f]; }
 };
-class FramebufferAttatchment{
-    public: enum Attatchment{
+struct FramebufferAttatchment{
+    enum Attatchment{
         #pragma region FramebufferAttatchments
         Color_0,
         Color_1,

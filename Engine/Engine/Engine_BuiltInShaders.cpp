@@ -1486,9 +1486,8 @@ epriv::EShaders::ssao_frag +=
 
 #pragma region Bloom
 epriv::EShaders::bloom_frag =
-    "\n"
     "const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n"
-    "uniform sampler2D gLightMap;\n"
+    "uniform sampler2D SceneTexture;\n"
     "\n"
     "uniform vec4 Data;\n" //x = scale y = threshold z = exposure w = UNUSED
     "varying vec2 texcoords;\n"
@@ -1496,9 +1495,9 @@ epriv::EShaders::bloom_frag =
 epriv::EShaders::bloom_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::bloom_frag +=
     "void main(){\n"
-    "    vec3 lighting = texture2D(gLightMap,texcoords).rgb;\n"
-    "    lighting = vec3(1.0) - exp(-lighting * Data.z);\n"
-    "    gl_FragColor.rgb = max(ConstantZeroVec3,lighting - vec3(Data.y)) * Data.x;\n"
+    "    vec3 sceneColor = texture2D(SceneTexture,texcoords).rgb;\n"
+    "    sceneColor = vec3(1.0) - exp(-sceneColor * Data.z);\n"
+    "    gl_FragColor.rgb = max(ConstantZeroVec3,sceneColor - vec3(Data.y)) * Data.x;\n"
     "}";
 #pragma endregion
 

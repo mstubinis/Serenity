@@ -25,6 +25,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <boost/lexical_cast.hpp>
 #include <random>
+
 #include <iostream>
 
 using namespace Engine;
@@ -443,14 +444,20 @@ class epriv::RenderManager::impl final{
             }
             */
 
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_Ansiotropic_Filtering] = _checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_Ansiotropic_Filtering] = _checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_draw_instanced] = _checkOpenGLExtension("GL_EXT_draw_instanced");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_draw_instanced] = _checkOpenGLExtension("GL_ARB_draw_instanced");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_separate_shader_objects] = _checkOpenGLExtension("GL_EXT_separate_shader_objects");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_separate_shader_objects] = _checkOpenGLExtension("GL_ARB_separate_shader_objects");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_Ansiotropic_Filtering]    = _checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_Ansiotropic_Filtering]    = _checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_draw_instanced]           = _checkOpenGLExtension("GL_EXT_draw_instanced");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_draw_instanced]           = _checkOpenGLExtension("GL_ARB_draw_instanced");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_separate_shader_objects]  = _checkOpenGLExtension("GL_EXT_separate_shader_objects");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_separate_shader_objects]  = _checkOpenGLExtension("GL_ARB_separate_shader_objects");
             OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_explicit_attrib_location] = _checkOpenGLExtension("GL_EXT_explicit_attrib_location");
             OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_explicit_attrib_location] = _checkOpenGLExtension("GL_ARB_explicit_attrib_location");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_geometry_shader_4]        = _checkOpenGLExtension("GL_EXT_geometry_shader4");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_geometry_shader_4]        = _checkOpenGLExtension("GL_ARB_geometry_shader4");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_compute_shader]           = _checkOpenGLExtension("GL_EXT_compute_shader");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_compute_shader]           = _checkOpenGLExtension("GL_ARB_compute_shader");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_tessellation_shader]      = _checkOpenGLExtension("GL_EXT_tessellation_shader");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_tessellation_shader]      = _checkOpenGLExtension("GL_ARB_tessellation_shader");
             #pragma endregion
 
             epriv::EShaders::init();
@@ -1803,12 +1810,12 @@ class epriv::RenderManager::impl final{
 
             _renderFullscreenTriangle(_x,_y,0,0);
         }
-        void _passBloom(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight) {
+        void _passBloom(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture) {
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom]->bind();
             float _divisor = gbuffer.getSmallFBO()->divisor();
 
             sendUniform4("Data", bloom_scale,bloom_threshold,bloom_exposure,0.0f);
-            sendTexture("gLightMap", gbuffer.getTexture(GBufferType::Lighting), 0);
+            sendTexture("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
 
             uint _x = uint(float(fboWidth) * _divisor);
             uint _y = uint(float(fboHeight) * _divisor);
@@ -2120,7 +2127,7 @@ class epriv::RenderManager::impl final{
             #pragma endregion
 
             #pragma region SSAO
-
+            //TODO: investigate why enabling SSAO makes things FASTER
             gbuffer.start(GBufferType::Bloom, GBufferType::GodRays, "A", false);
             Settings::clear(true, false, false); //0,0,0,0
             if (ssao) {
@@ -2137,7 +2144,6 @@ class epriv::RenderManager::impl final{
                     }
                 }         
             }   
-
             #pragma endregion
 
             GLDisable(GLState::BLEND);
@@ -2171,7 +2177,7 @@ class epriv::RenderManager::impl final{
             #pragma region Bloom
             if (bloom) {
                 gbuffer.start(GBufferType::Bloom, "RGB", false);
-                _passBloom(gbuffer, camera, fboWidth, fboHeight);
+                _passBloom(gbuffer, camera, fboWidth, fboHeight, GBufferType::Lighting);
                 for (uint i = 0; i < bloom_num_passes; ++i) {
                     gbuffer.start(GBufferType::GodRays, "RGB", false);
                     _passBlur(gbuffer, camera, fboWidth, fboHeight, "H", GBufferType::Bloom);

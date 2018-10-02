@@ -2,6 +2,8 @@
 #ifndef ENGINE_ENGINE_RENDERER_H
 #define ENGINE_ENGINE_RENDERER_H
 
+#include "Engine_Utils.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
@@ -51,7 +53,6 @@ namespace Engine {
         class InternalScenePublicInterface;
     };
 };
-
 
 namespace Engine{
     namespace epriv{
@@ -121,8 +122,8 @@ namespace Engine{
                 void _unbindMaterial();
                 void _genPBREnvMapData(Texture&,uint,uint);
         };
-        class OpenGLExtensionEnum final{
-            public: enum Extension{
+        struct OpenGLExtensionEnum final{
+            enum Extension{
                 EXT_Ansiotropic_Filtering,
                 ARB_Ansiotropic_Filtering,
                 EXT_draw_instanced,
@@ -131,8 +132,14 @@ namespace Engine{
                 ARB_separate_shader_objects,
                 EXT_explicit_attrib_location,
                 ARB_explicit_attrib_location,
+                EXT_geometry_shader_4,
+                ARB_geometry_shader_4,
+                EXT_compute_shader,
+                ARB_compute_shader,
+                EXT_tessellation_shader,
+                ARB_tessellation_shader,
             _TOTAL};
-            public: static bool supported(OpenGLExtensionEnum::Extension e){ return RenderManager::OPENGL_EXTENSIONS[e]; }
+            static bool supported(OpenGLExtensionEnum::Extension e){ return RenderManager::OPENGL_EXTENSIONS[e]; }
         };
     };
     namespace Renderer{

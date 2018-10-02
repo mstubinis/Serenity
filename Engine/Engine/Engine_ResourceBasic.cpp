@@ -1,4 +1,6 @@
 #include "Engine_ResourceBasic.h"
+#include "Engine_Utils.h"
+
 #include <iostream>
 
 using namespace std;
@@ -19,13 +21,13 @@ string& EngineResource::name(){
 void EngineResource::load(){
     if(!m_IsLoaded){
         m_IsLoaded = true;
-        cout << ": " << m_Name << " - loaded." << endl;
+        std::cout << ": " << m_Name << " - loaded." << std::endl;
     }
 }
 void EngineResource::unload(){
     if(m_IsLoaded && m_UsageCount == 0){
         m_IsLoaded = false;
-        cout << ": " << m_Name << " - unloaded." << endl;
+        std::cout << ": " << m_Name << " - unloaded." << std::endl;
     }
 }
 bool EngineResource::isLoaded(){ return m_IsLoaded; }

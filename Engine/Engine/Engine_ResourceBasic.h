@@ -3,7 +3,8 @@
 #define ENGINE_RESOURCE_BASIC_H
 
 #include <string>
-#include "Engine_Utils.h"
+
+typedef unsigned int uint;
 
 class EngineResource{
     private:

@@ -40,8 +40,7 @@ void Game::initResources(){
     ResourceManifest::init();
 }
 void Game::initLogic(){
-
-    Engine::registerComponent<ComponentCamera,GameCameraComponent>();
+    Engine::registerComponent<ComponentCamera, GameCameraComponent>();
 
     Engine_Window& window = Resources::getWindow();
     window.keepMouseInWindow(true);
@@ -50,7 +49,7 @@ void Game::initLogic(){
     //apparently these 2 should not be used together, but i have not found any issues with it so far
     //window.setVerticalSyncEnabled(true);
     //window.setFramerateLimit(60);
-    SolarSystem* sol = new SolarSystem("Sol","data/Systems/Sol.txt");
+    SolarSystem* sol = new SolarSystem("Sol", "data/Systems/Sol.txt");
     CapsuleSpace* cap = new CapsuleSpace();
 
     Resources::setCurrentScene("Sol");
@@ -59,22 +58,22 @@ void Game::initLogic(){
     m_HUD = new HUD();
 }
 void Game::update(const float& dt){
-    if(Engine::isKeyDown(KeyboardKey::Escape)){
+    if (Engine::isKeyDown(KeyboardKey::Escape)) {
         Engine::stop();
     }
-    if(Engine::isKeyDownOnce(KeyboardKey::F4)){
+    if (Engine::isKeyDownOnce(KeyboardKey::F4)) {
         Resources::setCurrentScene("Sol");
     }
-    if(Engine::isKeyDownOnce(KeyboardKey::F5)){
+    if (Engine::isKeyDownOnce(KeyboardKey::F5)) {
         Resources::setCurrentScene("CapsuleSpace");
     }
-    if(Engine::isKeyDownOnce(KeyboardKey::F6)){
+    if (Engine::isKeyDownOnce(KeyboardKey::F6)) {
         Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen());
     }
-    if(Engine::isKeyDownOnce(KeyboardKey::F7)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
-    if(Engine::isKeyDownOnce(KeyboardKey::F8)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
-    if(Engine::isKeyDownOnce(KeyboardKey::F9)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
-    if(Engine::isKeyDownOnce(KeyboardKey::F10)){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
+    if (Engine::isKeyDownOnce(KeyboardKey::F7)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
+    if (Engine::isKeyDownOnce(KeyboardKey::F8)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
+    if (Engine::isKeyDownOnce(KeyboardKey::F9)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
+    if (Engine::isKeyDownOnce(KeyboardKey::F10)) { Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
     if (Engine::isKeyDownOnce(KeyboardKey::F11)) { 
         //Renderer::Settings::General::enable1(!Renderer::Settings::General::enabled1()); 
         Renderer::Settings::Bloom::enable(!Renderer::Settings::Bloom::enabled());
@@ -103,15 +102,17 @@ void Game::onClose(){
 }
 void Game::onLostFocus(){
     Engine::getWindow().keepMouseInWindow(false);
-    //Engine::getWindow()->setMouseCursorVisible(true);
+    //Engine::getWindow().setMouseCursorVisible(true);
 }
 void Game::onGainedFocus(){
     Engine::getWindow().keepMouseInWindow(true);
-    //Engine::getWindow()->setMouseCursorVisible(false);
-    const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
-    sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),Resources::getWindow().getSFMLHandle());
+    //Engine::getWindow().setMouseCursorVisible(false);
+    auto& window = Resources::getWindow();
+    const auto& size = window.getSize();
+    const glm::vec2 halfRes = glm::vec2(size.x / 2, size.y / 2);
+    sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x), int(halfRes.y)), window.getSFMLHandle());
 
-    Engine::setMousePosition(halfRes,true);
+    Engine::setMousePosition(halfRes, true);
 }
 void Game::onTextEntered(uint unicode){
 }
@@ -139,13 +140,15 @@ void Game::onMouseLeft(){
 void Game::onPreUpdate(float dt){
 }
 void Game::onPostUpdate(float dt){
-    const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
-    if(Resources::getWindow().hasFocus()){
+    auto& window = Resources::getWindow();
+    const auto& size = window.getSize();
+    const glm::vec2 halfRes = glm::vec2(size.x / 2, size.y / 2);
+    if (window.hasFocus()) {
         glm::vec2 mousePos = Engine::getMousePosition();
-        float mouseDistFromCenter = glm::distance(mousePos,halfRes);
-        if(mouseDistFromCenter > 1.0f){
-            sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),Resources::getWindow().getSFMLHandle());
-            Engine::setMousePosition(halfRes,false,true);
+        float mouseDistFromCenter = glm::distance(mousePos, halfRes);
+        if (mouseDistFromCenter > 1.0f) {
+            sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x), int(halfRes.y)), window.getSFMLHandle());
+            Engine::setMousePosition(halfRes, false, true);
         }
     }
 }

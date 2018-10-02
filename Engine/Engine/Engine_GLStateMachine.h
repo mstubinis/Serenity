@@ -19,12 +19,12 @@ struct GLStateT{
         disableFunc = _disableFunc;
     }
 };
-class GLState{
-    public: enum State{
+struct GLState final{
+    enum State{
         TEXTURE_1D,TEXTURE_2D,TEXTURE_3D,CULL_FACE,ALPHA_TEST,DEPTH_TEST,DEPTH_CLAMP,STENCIL_TEST,TEXTURE_CUBE_MAP_SEAMLESS,BLEND,DEPTH_MASK,DITHER,
         SCISSOR_TEST,
     _TOTAL};
-    public: static std::vector<GLStateT> SM;
+    static std::vector<GLStateT> SM;
 };
 
 namespace Engine{
