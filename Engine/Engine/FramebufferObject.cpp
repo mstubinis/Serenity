@@ -120,7 +120,7 @@ class epriv::FramebufferObject::impl{
             m_FramebufferWidth = uint(float(width) * m_Divisor);
             m_FramebufferHeight = uint(float(height) * m_Divisor);
             for(uint i = 0; i < m_FBO.size(); ++i)
-                glGenFramebuffers(1, &m_FBO.at(i));
+                glGenFramebuffers(1, &m_FBO[i]);
         }
         void _init(uint width, uint height,float divisor,uint swapBufferCount){
             _baseInit(width,height,divisor, swapBufferCount);
@@ -139,14 +139,14 @@ class epriv::FramebufferObject::impl{
         void _destruct(){
             SAFE_DELETE_MAP(m_Attatchments);         
             for (uint i = 0; i < m_FBO.size(); ++i)
-                glDeleteFramebuffers(1, &m_FBO.at(i));
+                glDeleteFramebuffers(1, &m_FBO[i]);
         }
         void _resize(FramebufferObject& super,uint new_width,uint new_height){
             m_FramebufferWidth = uint(float(new_width) * m_Divisor);
             m_FramebufferHeight = uint(float(new_height) * m_Divisor);
             Renderer::setViewport(0,0,m_FramebufferWidth,m_FramebufferHeight);
             for (uint i = 0; i < m_FBO.size(); ++i) {
-                Renderer::bindFBO(m_FBO.at(i));
+                Renderer::bindFBO(m_FBO[i]);
                 for (auto attatchment : m_Attatchments) {
                     attatchment.second->resize(super, new_width, new_height);
                 }
@@ -156,7 +156,7 @@ class epriv::FramebufferObject::impl{
             if(m_Attatchments.count(a)) return nullptr;
             FramebufferTexture* t = new FramebufferTexture(super, a, _t);
             for (uint i = 0; i < m_FBO.size(); ++i) {
-                Renderer::bindFBO(m_FBO.at(i));
+                Renderer::bindFBO(m_FBO[i]);
                 t->m_i->_bindGPUDataToFBO(*t);
             }    
             m_Attatchments.emplace(a,t);
@@ -166,7 +166,7 @@ class epriv::FramebufferObject::impl{
         RenderbufferObject* _attatchRenderbuffer(FramebufferObject& super,RenderbufferObject& rbo){
             if(m_Attatchments.count(rbo.attatchment())){ return nullptr; }
             for (uint i = 0; i < m_FBO.size(); ++i) {
-                Renderer::bindFBO(m_FBO.at(i));
+                Renderer::bindFBO(m_FBO[i]);
                 Renderer::bindRBO(rbo);
                 glRenderbufferStorage(GL_RENDERBUFFER, rbo.internalFormat(), super.width(), super.height());
                 glFramebufferRenderbuffer(GL_FRAMEBUFFER, rbo.internalFormat(), GL_RENDERBUFFER, rbo.address());
@@ -179,7 +179,7 @@ class epriv::FramebufferObject::impl{
         }
         bool _check(){
             for (uint i = 0; i < m_FBO.size(); ++i) {
-                Renderer::bindFBO(m_FBO.at(i));
+                Renderer::bindFBO(m_FBO[i]);
                 GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
                 if (err != GL_FRAMEBUFFER_COMPLETE) {
                     cout << "Framebuffer completeness in FramebufferObject::impl _check() (index " + to_string(i) + ") is incomplete!" << endl; cout << "Error is: " << err << std::endl;
@@ -243,7 +243,7 @@ epriv::RenderbufferObject* epriv::FramebufferObject::attatchRenderBuffer(epriv::
 }
 uint epriv::FramebufferObject::width(){ return m_i->m_FramebufferWidth; }
 uint epriv::FramebufferObject::height(){ return m_i->m_FramebufferHeight; }
-const GLuint& epriv::FramebufferObject::address() const { return m_i->m_FBO.at(m_i->m_CurrentFBOIndex); }
+const GLuint& epriv::FramebufferObject::address() const { return m_i->m_FBO[m_i->m_CurrentFBOIndex]; }
 unordered_map<uint,epriv::FramebufferObjectAttatchment*>& epriv::FramebufferObject::attatchments(){ return m_i->m_Attatchments; }
 bool epriv::FramebufferObject::check(){ return m_i->_check(); }
 float epriv::FramebufferObject::divisor(){ return m_i->m_Divisor; }

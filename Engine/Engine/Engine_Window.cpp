@@ -89,7 +89,7 @@ class Engine_Window::impl final{
             if(!m_SFMLWindow->hasFocus()) return;
 
             auto validModes = sf::VideoMode::getFullscreenModes();
-            if (validModes.size() > 0) m_VideoMode = validModes.at(0);
+            if (validModes.size() > 0) m_VideoMode = validModes[0];
             else                       m_VideoMode = sf::VideoMode::getDesktopMode();
 
             m_Style = sf::Style::Fullscreen;

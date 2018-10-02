@@ -59,7 +59,6 @@
     <ClCompile Include="Engine\GLImageConstants.cpp" />
     <ClCompile Include="Engine\HUD.cpp" />
     <ClCompile Include="Engine\Light.cpp" />
-    <ClCompile Include="Engine\Main.cpp" />
     <ClCompile Include="Engine\Material.cpp" />
     <ClCompile Include="Engine\Mesh.cpp" />
     <ClCompile Include="Engine\MeshInstance.cpp" />

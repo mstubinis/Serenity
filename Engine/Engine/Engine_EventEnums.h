@@ -110,21 +110,24 @@ class KeyboardKey final{public: enum Key{
     F15,
     Pause,
 
-KeyCount,};};
+_TOTAL};};
 class MouseButton final{public: enum Button{
-    Left,
+    Unknown = -1,
+    Left = 0,
     Right,
     Middle,
     XButton1,
     XButton2,
 
-ButtonCount,};};
+_TOTAL};};
 class MouseWheel final{public: enum Wheel{
-    VerticalWheel,
+    Unknown = -1,
+    VerticalWheel = 0,
     HorizontalWheel,
-};};
+_TOTAL};};
 class JoystickAxis final{public: enum Axis{
-    X,
+    Unknown = -1,
+    X = 0,
     Y,
     Z,
     R,
@@ -132,6 +135,6 @@ class JoystickAxis final{public: enum Axis{
     V,
     PovX,
     PovY,
-};};
+_TOTAL};};
 
 #endif

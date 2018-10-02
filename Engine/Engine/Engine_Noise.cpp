@@ -151,7 +151,7 @@ class epriv::NoiseManager::impl final{
             m_PermGradIndex3D.resize(256);
             vector<short> source; source.resize(256);
             for (short i = 0; i < 256; ++i)
-                source.at(i) = i;
+                source[i] = i;
             seed = seed * (6364136223846793005LL) + (1442695040888963407LL);
             seed = seed * (6364136223846793005LL) + (1442695040888963407LL);
             seed = seed * (6364136223846793005LL) + (1442695040888963407LL);
@@ -160,21 +160,21 @@ class epriv::NoiseManager::impl final{
                 int r = (int)((seed + 31) % (i + 1));
                 if (r < 0)
                     r += (i + 1);
-                m_Perm.at(i) = source.at(r);
-                m_PermGradIndex3D.at(i) = (short)((m_Perm.at(i) % 8) * 3);
-                source.at(r) = source.at(i);
+                m_Perm[i] = source[r];
+                m_PermGradIndex3D[i] = (short)((m_Perm[i] % 8) * 3);
+                source[r] = source[i];
             }
         }
         double _extrapolate(int xsb, int ysb, double dx, double dy){
-            int index = m_Perm.at((m_Perm.at(xsb & 0xFF) + ysb) & 0xFF) & 0x0E;
+            int index = m_Perm[(m_Perm[xsb & 0xFF] + ysb) & 0xFF] & 0x0E;
             return m_Grad2[index].x * dx + m_Grad2[index].y * dy;
         }
         double _extrapolate(int xsb, int ysb, int zsb, double dx, double dy, double dz){
-            int index = m_PermGradIndex3D.at((m_Perm.at((m_Perm.at(xsb & 0xFF) + ysb) & 0xFF) + zsb) & 0xFF);
+            int index = m_PermGradIndex3D[(m_Perm[(m_Perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF];
             return m_Grad3[index].x * dx + m_Grad3[index].y * dy + m_Grad3[index].z * dz;
         }
         double _extrapolate(int xsb, int ysb, int zsb, int wsb, double dx, double dy, double dz, double dw){
-            int index = m_Perm.at((m_Perm.at((m_Perm.at((m_Perm.at(xsb & 0xFF) + ysb) & 0xFF) + zsb) & 0xFF) + wsb) & 0xFF) & 0xFC;
+            int index = m_Perm[(m_Perm[(m_Perm[(m_Perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF] + wsb) & 0xFF] & 0xFC;
             return m_Grad4[index].x * dx + m_Grad4[index].y * dy + m_Grad4[index].z * dz + m_Grad4[index].w * dw;
         }
         double _noiseOpenSimplex2D(double& x, double& y){

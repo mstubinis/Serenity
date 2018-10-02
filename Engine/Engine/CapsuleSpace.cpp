@@ -218,5 +218,5 @@ void CapsuleSpace::update(const float& dt){
     model.getModel()->setOrientation(  glm::radians(pitch), 0 , glm::radians(roll)  );
 
     //double check this (this is the light probe)
-    //getPlayer()->getChildren().at(0)->setPosition(glm::vec3(x*1.2f,-y,0));
+    //getPlayer()->getChildren()[0]->setPosition(glm::vec3(x*1.2f,-y,0));
 }

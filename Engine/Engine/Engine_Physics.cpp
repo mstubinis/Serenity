@@ -679,7 +679,7 @@ class epriv::PhysicsManager::impl final{
         }
         void _addRigidBody(btRigidBody* _rigidBody) {
             for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
-                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray().at(i));
+                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray()[i]);
                 if (rigidBody) {
                     if (rigidBody == _rigidBody) {
                         return;
@@ -690,7 +690,7 @@ class epriv::PhysicsManager::impl final{
         }
         void _addRigidBody(btRigidBody* _rigidBody, short group, short mask) {
             for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
-                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray().at(i));
+                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray()[i]);
                 if (rigidBody) {
                     if (rigidBody == _rigidBody) {
                         return;
@@ -701,7 +701,7 @@ class epriv::PhysicsManager::impl final{
         }
         void _removeRigidBody(btRigidBody* _rigidBody) {
             for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
-                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray().at(i));
+                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray()[i]);
                 if (rigidBody) {
                     if (rigidBody == _rigidBody) {
                         data->world->removeRigidBody(_rigidBody);

@@ -28,7 +28,7 @@ void insertStringAtAndReplaceLine(string& src, const string& newcontent,uint lin
     uint c = 0;src="";for(auto ln:lines){if(c==line)ln=newcontent+"\n";src+=ln;++c;}
 }
 void insertStringAtEndOfMainFunc(string& src, const string& content){
-    uint p=src.size()-1;while(p>0){char c=src.at(p);--p;if(c=='}'){break;}}src.insert(p,content);
+    uint p=src.size()-1;while(p>0){char c=src[p];--p;if(c=='}'){break;}}src.insert(p,content);
 }
 void insertStringRightAfterLineContent(string& src, const string& newContent,const string& lineContent){
     istringstream str(src);string l; vector<string> lines; bool a = false;

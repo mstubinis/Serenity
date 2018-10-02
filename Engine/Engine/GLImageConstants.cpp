@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void _add(vector<GLuint>& v,unsigned int key,GLuint value){ v.at(key) = value; }
+void _add(vector<GLuint>& v,unsigned int key,GLuint value){ v[key] = value; }
 
 vector<GLuint> ImageInternalFormat::IMAGE_INTERNAL_FORMATS = [](){
     vector<GLuint> m; m.resize(ImageInternalFormat::_TOTAL,0x0000);

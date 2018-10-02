@@ -41,7 +41,7 @@ class ImagePixelType{
         #pragma endregion
     _TOTAL};
     static std::vector<GLuint> IMAGE_PIXEL_TYPES;
-    static inline GLuint at(ImagePixelType::Type t){ return IMAGE_PIXEL_TYPES.at(t); }
+    static inline GLuint at(ImagePixelType::Type t){ return IMAGE_PIXEL_TYPES[t]; }
 };
 /*
 Specifies the format of the pixel data.
@@ -70,7 +70,7 @@ class ImagePixelFormat{
         #pragma endregion
     _TOTAL};
     static std::vector<GLuint> IMAGE_PIXEL_FORMATS;
-    static inline GLuint at(ImagePixelFormat::Format f){ return IMAGE_PIXEL_FORMATS.at(f); }
+    static inline GLuint at(ImagePixelFormat::Format f){ return IMAGE_PIXEL_FORMATS[f]; }
 };
 /*
 Specifies the number of color components in the texture.
@@ -190,7 +190,7 @@ class ImageInternalFormat{
         #pragma endregion
     _TOTAL};
     static std::vector<GLuint> IMAGE_INTERNAL_FORMATS;
-    static inline GLuint at(ImageInternalFormat::Format f){ return IMAGE_INTERNAL_FORMATS.at(f); }
+    static inline GLuint at(ImageInternalFormat::Format f){ return IMAGE_INTERNAL_FORMATS[f]; }
 };
 class FramebufferAttatchment{
     public: enum Attatchment{
@@ -217,6 +217,6 @@ class FramebufferAttatchment{
         #pragma endregion
     _TOTAL};
     static std::vector<GLuint> FRAMEBUFFER_ATTATCHMENT_FORMATS;
-    static inline GLuint at(FramebufferAttatchment::Attatchment a){ return FRAMEBUFFER_ATTATCHMENT_FORMATS.at(a); }
+    static inline GLuint at(FramebufferAttatchment::Attatchment a){ return FRAMEBUFFER_ATTATCHMENT_FORMATS[a]; }
 };
 #endif

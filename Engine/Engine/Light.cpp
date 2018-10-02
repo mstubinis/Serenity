@@ -24,18 +24,18 @@ vector<boost::tuple<float,float,float>> LIGHT_RANGES = [](){
     vector<boost::tuple<float,float,float>> m;
     m.resize(LightRange::_TOTAL,boost::make_tuple(0.0f,0.0f,0.0f));
 
-    m.at(LightRange::_7)    = boost::make_tuple(1.0f, 0.7f, 1.8f);
-    m.at(LightRange::_13)   = boost::make_tuple(1.0f, 0.35f, 0.44f);
-    m.at(LightRange::_20)   = boost::make_tuple(1.0f, 0.22f, 0.20f);
-    m.at(LightRange::_32)   = boost::make_tuple(1.0f, 0.14f, 0.07f);
-    m.at(LightRange::_50)   = boost::make_tuple(1.0f, 0.09f, 0.032f);
-    m.at(LightRange::_65)   = boost::make_tuple(1.0f, 0.07f, 0.017f);
-    m.at(LightRange::_100)  = boost::make_tuple(1.0f, 0.045f, 0.0075f);
-    m.at(LightRange::_160)  = boost::make_tuple(1.0f, 0.027f, 0.0028f);
-    m.at(LightRange::_200)  = boost::make_tuple(1.0f, 0.022f, 0.0019f);
-    m.at(LightRange::_325)  = boost::make_tuple(1.0f, 0.014f, 0.0007f);
-    m.at(LightRange::_600)  = boost::make_tuple(1.0f, 0.007f, 0.0002f);
-    m.at(LightRange::_3250) = boost::make_tuple(1.0f, 0.0014f, 0.000007f);
+    m[LightRange::_7]    = boost::make_tuple(1.0f, 0.7f, 1.8f);
+    m[LightRange::_13]   = boost::make_tuple(1.0f, 0.35f, 0.44f);
+    m[LightRange::_20]   = boost::make_tuple(1.0f, 0.22f, 0.20f);
+    m[LightRange::_32]   = boost::make_tuple(1.0f, 0.14f, 0.07f);
+    m[LightRange::_50]   = boost::make_tuple(1.0f, 0.09f, 0.032f);
+    m[LightRange::_65]   = boost::make_tuple(1.0f, 0.07f, 0.017f);
+    m[LightRange::_100]  = boost::make_tuple(1.0f, 0.045f, 0.0075f);
+    m[LightRange::_160]  = boost::make_tuple(1.0f, 0.027f, 0.0028f);
+    m[LightRange::_200]  = boost::make_tuple(1.0f, 0.022f, 0.0019f);
+    m[LightRange::_325]  = boost::make_tuple(1.0f, 0.014f, 0.0007f);
+    m[LightRange::_600]  = boost::make_tuple(1.0f, 0.007f, 0.0002f);
+    m[LightRange::_3250] = boost::make_tuple(1.0f, 0.0014f, 0.000007f);
 
     return m;
 }();
@@ -140,7 +140,7 @@ void PointLight::setConstant(float c){ m_C = c; m_CullingRadius = calculateCulli
 void PointLight::setLinear(float l){ m_L = l; m_CullingRadius = calculateCullingRadius(); }
 void PointLight::setExponent(float e){ m_E = e; m_CullingRadius = calculateCullingRadius(); }
 void PointLight::setAttenuation(float c,float l, float e){ m_C = c; m_L = l; m_E = e; m_CullingRadius = calculateCullingRadius(); }
-void PointLight::setAttenuation(LightRange::Range r){ auto& d=LIGHT_RANGES.at(uint(r)); PointLight::setAttenuation(d.get<0>(),d.get<1>(),d.get<2>()); }
+void PointLight::setAttenuation(LightRange::Range r){ auto& d=LIGHT_RANGES[uint(r)]; PointLight::setAttenuation(d.get<0>(),d.get<1>(),d.get<2>()); }
 void PointLight::setAttenuationModel(LightAttenuation::Model model){
     m_AttenuationModel = model; m_CullingRadius = calculateCullingRadius();
 }

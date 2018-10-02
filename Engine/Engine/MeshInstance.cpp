@@ -120,7 +120,7 @@ void epriv::DefaultMeshInstanceBindFunctor::operator()(EngineResource* r) const 
         vector<glm::mat4> transforms;
         //process the animation here
         for(uint j = 0; j < animationQueue.size(); ++j){
-            auto& a = *(animationQueue.at(j));
+            auto& a = *(animationQueue[j]);
             if(a.m_Mesh == i.m_Mesh){
                 a.m_CurrentTime += (float)Resources::dt();
                 a.m_Mesh->playAnimation(transforms,a.m_AnimationName,a.m_CurrentTime);

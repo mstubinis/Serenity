@@ -6,7 +6,7 @@ namespace B = ::boost;
 
 typedef unsigned int uint;
 
-void _add(vector<GLStateT>& v,uint key,GLStateT value){ v.at(key) = value; }
+void _add(vector<GLStateT>& v,uint key,GLStateT value){ v[key] = value; }
 vector<GLStateT> GLState::SM = [](){
     vector<GLStateT> m; m.resize(GLState::_TOTAL);
                                         //enabled?              //enableGLFunc                      //disableGLFunc

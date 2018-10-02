@@ -21,7 +21,7 @@ namespace Engine{
                 void setMousePositionInternal(float x, float y, bool resetDifference, bool resetPrevious);
 
  
-                EventManager(const char* name,uint w,uint h);
+                EventManager(const char* name, uint w, uint h);
                 ~EventManager();
 
                 void onEventKeyPressed(uint& key);
@@ -46,9 +46,9 @@ namespace Engine{
     const glm::vec2& getMousePosition();
     const float getMouseWheelDelta();
 
-    void setMousePosition(float x,float y,bool resetDifference = false,bool resetPreviousPosition = false);
-    void setMousePosition(uint x,uint y,bool resetDifference = false,bool resetPreviousPosition = false);
-    void setMousePosition(glm::vec2,bool resetDifference = false,bool resetPreviousPosition = false);
-    void setMousePosition(glm::uvec2,bool resetDifference = false,bool resetPreviousPosition = false);
+    void setMousePosition(float x, float y, bool resetDifference = false, bool resetPreviousPosition = false);
+    void setMousePosition(uint x, uint y, bool resetDifference = false, bool resetPreviousPosition = false);
+    void setMousePosition(glm::vec2, bool resetDifference = false, bool resetPreviousPosition = false);
+    void setMousePosition(glm::uvec2, bool resetDifference = false, bool resetPreviousPosition = false);
 };
 #endif

@@ -76,7 +76,7 @@ class Scene::impl final {
             }
             if (!_pipeline) {
                 _pipeline = new epriv::RenderPipeline(*_meshInstance->shaderProgram());
-                _scene.m_i->m_Pipelines.at(_stage).push_back(_pipeline);
+                _scene.m_i->m_Pipelines[_stage].push_back(_pipeline);
             }
             //material node check
             epriv::MaterialNode* materialNode = nullptr;
@@ -160,23 +160,23 @@ vector<uint>& epriv::InternalScenePublicInterface::GetEntities(Scene& _scene) { 
 vector<SunLight*>& epriv::InternalScenePublicInterface::GetLights(Scene& _scene) { return _scene.m_i->m_Lights; }
 
 void epriv::InternalScenePublicInterface::RenderGeometryOpaque(Scene& _scene,Camera& _camera) {
-    for (auto pipeline : _scene.m_i->m_Pipelines.at(RenderStage::GeometryOpaque)) { 
+    for (auto pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 
         pipeline->render(); 
     } 
 }
 void epriv::InternalScenePublicInterface::RenderGeometryTransparent(Scene& _scene, Camera& _camera) {
-    for (auto pipeline : _scene.m_i->m_Pipelines.at(RenderStage::GeometryTransparent)) { 
+    for (auto pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryTransparent]) { 
         pipeline->sort(_camera);
         pipeline->render(); 
     } 
 }
 void epriv::InternalScenePublicInterface::RenderForwardOpaque(Scene& _scene, Camera& _camera) {
-    for (auto pipeline : _scene.m_i->m_Pipelines.at(RenderStage::ForwardOpaque)) { 
+    for (auto pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) { 
         pipeline->render(); 
     }
 }
 void epriv::InternalScenePublicInterface::RenderForwardTransparent(Scene& _scene, Camera& _camera) {
-    for (auto pipeline : _scene.m_i->m_Pipelines.at(RenderStage::ForwardTransparent)) { 
+    for (auto pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardTransparent]) { 
         pipeline->sort(_camera);
         pipeline->render(); 
     }
@@ -184,10 +184,10 @@ void epriv::InternalScenePublicInterface::RenderForwardTransparent(Scene& _scene
 
 
 void epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(Scene& _scene, MeshInstance* _meshInstance, RenderStage::Stage _stage) {
-    _scene.m_i->_addMeshInstanceToPipeline(_scene, _meshInstance, _scene.m_i->m_Pipelines.at(_stage), _stage);
+    _scene.m_i->_addMeshInstanceToPipeline(_scene, _meshInstance, _scene.m_i->m_Pipelines[_stage], _stage);
 }
 void epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(Scene& _scene, MeshInstance* _meshInstance, RenderStage::Stage _stage){
-    _scene.m_i->_removeMeshInstanceFromPipeline(_scene, _meshInstance, _scene.m_i->m_Pipelines.at(_stage), _stage);
+    _scene.m_i->_removeMeshInstanceFromPipeline(_scene, _meshInstance, _scene.m_i->m_Pipelines[_stage], _stage);
 }
 
 Scene::Scene(string name):m_i(new impl){

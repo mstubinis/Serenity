@@ -74,10 +74,10 @@ namespace Engine {
 
                 for (uint i = 0; i < 6; ++i) {
                     glm::vec3 v1, v2, v3, v4;
-                    v1 = temp.at(0 + (i * 4));
-                    v2 = temp.at(1 + (i * 4));
-                    v3 = temp.at(2 + (i * 4));
-                    v4 = temp.at(3 + (i * 4));
+                    v1 = temp[0 + (i * 4)];
+                    v2 = temp[1 + (i * 4)];
+                    v3 = temp[2 + (i * 4)];
+                    v4 = temp[3 + (i * 4)];
                     m_Vertices.push_back(v1); m_Vertices.push_back(v2); m_Vertices.push_back(v3);
                     m_Vertices.push_back(v1); m_Vertices.push_back(v3); m_Vertices.push_back(v4);
                 }

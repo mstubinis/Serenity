@@ -139,7 +139,7 @@ Entity* GameCamera::getObjectInCenterRay(Entity* exclusion){
         }
     }
     if(objs.size() == 0) return nullptr;
-    if(objs.size() == 1) return objs.at(0);
+    if(objs.size() == 1) return objs[0];
 
     float distance = -1;
     for(auto object:objs){

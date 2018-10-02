@@ -132,7 +132,7 @@ namespace Engine{
                 EXT_explicit_attrib_location,
                 ARB_explicit_attrib_location,
             _TOTAL};
-            public: static bool supported(OpenGLExtensionEnum::Extension e){ return RenderManager::OPENGL_EXTENSIONS.at(e); }
+            public: static bool supported(OpenGLExtensionEnum::Extension e){ return RenderManager::OPENGL_EXTENSIONS[e]; }
         };
     };
     namespace Renderer{

@@ -98,9 +98,6 @@
     <ClCompile Include="Engine\Mesh.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Main.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Light.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
