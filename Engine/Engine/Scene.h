@@ -11,7 +11,6 @@ class Entity;
 class Camera;
 class SunLight;
 class SkyboxEmpty;
-class LightProbe;
 class Scene;
 class MeshInstance;
 
@@ -21,7 +20,7 @@ namespace Engine {
         class RenderPipeline;
         class InternalScenePublicInterface final {
             friend class ::Scene;
-            friend class ::Engine::epriv::RenderPipeline;
+            friend class Engine::epriv::RenderPipeline;
             public:
                 static std::vector<uint>& GetEntities(Scene&);
                 static std::vector<SunLight*>& GetLights(Scene&);
@@ -35,10 +34,9 @@ namespace Engine {
     };
 };
 class Scene: public EngineResource, public EventObserver{
-    friend class ::LightProbe;
-    friend class ::Engine::epriv::RenderPipeline;
-    friend class ::Engine::epriv::ComponentManager;
-    friend class ::Engine::epriv::InternalScenePublicInterface;
+    friend class Engine::epriv::RenderPipeline;
+    friend class Engine::epriv::ComponentManager;
+    friend class Engine::epriv::InternalScenePublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -53,7 +51,6 @@ class Scene: public EngineResource, public EventObserver{
         bool hasEntity(uint entityID);
 
         virtual void update(const float& dt);
-        std::unordered_map<std::string,LightProbe*>& lightProbes();
 
         Camera* getActiveCamera();
 

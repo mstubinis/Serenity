@@ -17,7 +17,6 @@ class Scene::impl final {
         Camera* m_ActiveCamera;
         vector<uint> m_Entities;
         vector<SunLight*> m_Lights;
-        unordered_map<string, LightProbe*> m_LightProbes;
         glm::vec3 m_BackgroundColor;
 
         vector<vector<epriv::RenderPipeline*>> m_Pipelines;
@@ -216,7 +215,6 @@ Scene::~Scene(){
 void Scene::update(const float& dt){
 }
 glm::vec3 Scene::getBackgroundColor(){ return m_i->m_BackgroundColor; }
-unordered_map<string,LightProbe*>& Scene::lightProbes(){ return m_i->m_LightProbes; }
 SkyboxEmpty* Scene::skybox() const { return m_i->m_Skybox; }
 void Scene::setSkybox(SkyboxEmpty* s){ m_i->m_Skybox = s; }
 void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_i->m_BackgroundColor,r,g,b); }

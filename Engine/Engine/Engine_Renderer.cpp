@@ -1766,7 +1766,7 @@ class epriv::RenderManager::impl final{
 
                 SkyboxEmpty* skybox = s.skybox();
 
-                if(s.lightProbes().size() > 0){
+                //if(s.lightProbes().size() > 0){
                     /*
                     for(auto probe:s->lightProbes()){
                         LightProbe* p = probe.second;
@@ -1776,13 +1776,13 @@ class epriv::RenderManager::impl final{
                         break;
                     }
                     */
-                }else{
+                //}else{
                     if(skybox && skybox->texture()->numAddresses() >= 3){
                         sendTextureSafe("irradianceMap",skybox->texture()->address(1),4,GL_TEXTURE_CUBE_MAP);
                         sendTextureSafe("prefilterMap",skybox->texture()->address(2),5,GL_TEXTURE_CUBE_MAP);
                         sendTextureSafe("brdfLUT",*brdfCook,6);
                     }
-                }
+                //}
                 _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
             }
             GLDisable(GLState::STENCIL_TEST);
@@ -2085,7 +2085,7 @@ class epriv::RenderManager::impl final{
                 }
                 #pragma endregion
                 #pragma region LightProbes
-                if(s.lightProbes().size() > 0){
+                //if(s.lightProbes().size() > 0){
                     /*
                     for(auto lightProbe:s->lightProbes()){
                         lightProbe.second->renderCubemap(
@@ -2094,8 +2094,8 @@ class epriv::RenderManager::impl final{
                         );
                     }
                     */
-                    m_GBuffer->resize(fboWidth,fboHeight);
-                }
+                    //m_GBuffer->resize(fboWidth,fboHeight);
+                //}
                 #pragma endregion
             }
 

@@ -396,10 +396,13 @@ void Ring::_makeRingImage(vector<RingInfo>& rings){
             }else{
                 pC.a = 1;
             } 
-            if (ringInfo.position - i >= 0 && ringInfo.position - i <= ringImage.getSize().x) {
+
+            int xBack = ringInfo.position - i;
+            int xFront = ringInfo.position + i;
+            if (xBack > 0 && xFront < ringImage.getSize().x) {
                 sf::Color fFront, fBack;
-                sf::Color bgFrontPixel = ringImage.getPixel(ringInfo.position + i, 0);
-                sf::Color bgBackPixel = ringImage.getPixel(ringInfo.position - i, 0);
+                sf::Color bgFrontPixel = ringImage.getPixel(xFront, 0);
+                sf::Color bgBackPixel = ringImage.getPixel(xBack, 0);
                 glm::vec4 bgColorFront = glm::vec4(bgFrontPixel.r, bgFrontPixel.g, bgFrontPixel.b, bgFrontPixel.a) / 255.0f;
                 glm::vec4 bgColorBack = glm::vec4(bgBackPixel.r, bgBackPixel.g, bgBackPixel.b, bgBackPixel.a) / 255.0f;
                 glm::vec4 _fcf = Engine::Math::PaintersAlgorithm(pC, bgColorFront);
@@ -413,8 +416,8 @@ void Ring::_makeRingImage(vector<RingInfo>& rings){
                 fBack = sf::Color(sf::Uint8(_fcb.r * 255.0f), sf::Uint8(_fcb.g * 255.0f), sf::Uint8(_fcb.b * 255.0f), sf::Uint8(_fcb.a * 255.0f));
 
                 for (uint s = 0; s < ringImage.getSize().y; ++s) { 
-                    ringImage.setPixel(ringInfo.position + i, s, fFront);
-                    ringImage.setPixel(ringInfo.position - i, s, fBack);
+                    ringImage.setPixel(xFront, s, fFront);
+                    ringImage.setPixel(xBack, s, fBack);
                 }
             }
         }

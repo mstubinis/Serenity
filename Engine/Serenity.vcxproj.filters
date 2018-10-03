@@ -40,6 +40,12 @@
     <Filter Include="Source Files\Engine\Objects">
       <UniqueIdentifier>{5c3b2925-225b-4cad-8e38-f49affdfd7f7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\ECS">
+      <UniqueIdentifier>{ef4803df-7cc4-4f62-8467-cc0306e2f6da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\ECS">
+      <UniqueIdentifier>{6a0389db-2099-432c-8284-234f6e518100}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Engine\data\Shaders\AS_groundFromSpace_frag.glsl">
@@ -194,6 +200,9 @@
     <ClCompile Include="Engine\Components.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\ecs\ECSRegistry.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h">
@@ -339,6 +348,24 @@
     </ClInclude>
     <ClInclude Include="Engine\Constraint.h">
       <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ecs\ComponentBaseClass.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ecs\ComponentPool.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ecs\ComponentSystem.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ecs\ECSRegistry.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ecs\Entity.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ecs\EntityPool.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
