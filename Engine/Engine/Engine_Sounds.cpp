@@ -119,23 +119,19 @@ class Engine::epriv::SoundManager::impl final{
             SAFE_DELETE_VECTOR(m_SoundQueues);
             SAFE_DELETE_VECTOR(m_CurrentlyPlayingSounds);
         }
-        void _updateSoundStatus(SoundBaseClass* sound,sf::SoundSource::Status sfStatus){
+        void _updateSoundStatus(SoundBaseClass& sound,sf::SoundSource::Status sfStatus){
             if(sfStatus == sf::SoundSource::Status::Stopped){
-                if(sound->m_i->m_Loops != 1 && sound->m_i->m_Loops != 0){//handle the looping logic
-                    if(sound->getLoopsLeft() >= 2){
-                        sound->m_i->m_CurrentLoop++;
-                        sound->play(sound->m_i->m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
-                        //sound->restart();
+                if(sound.m_i->m_Loops != 1 && sound.m_i->m_Loops != 0){//handle the looping logic
+                    if(sound.getLoopsLeft() >= 2){
+                        sound.m_i->m_CurrentLoop++;
+                        sound.play(sound.m_i->m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
+                    }else{
+                        sound.stop();
                     }
-                    else{
-                        sound->stop();
-                    }
-                }
-                else if(sound->m_i->m_Loops == 1){//only once
-                    sound->stop();
-                }
-                else{//endless loop (sound will have to be stoped manually by the user to end an endless loop)
-                    sound->play(sound->m_i->m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
+                }else if(sound.m_i->m_Loops == 1){//only once
+                    sound.stop();
+                }else{//endless loop (sound will have to be stoped manually by the user to end an endless loop)
+                    sound.play(sound.m_i->m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
                 }
             }
         }
@@ -165,33 +161,33 @@ class SoundEffect::impl final{
     public:	
         sf::Sound m_Sound;
 
-        void _init(SoundBaseClass* s,Handle& handle,bool queue){
+        void _init(SoundBaseClass& super,Handle& handle,bool queue){
             SoundData* data = Engine::Resources::getSoundData(handle);
-            _init(s,data,queue);
+            _init(super,data,queue);
         }
-        void _init(SoundBaseClass* s,SoundData* data,bool queue){
+        void _init(SoundBaseClass& super,SoundData* data,bool queue){
             if(!data->getBuffer()){
                 data->buildBuffer();
             }
             m_Sound.setBuffer( *(data->getBuffer()) );
-            s->setVolume( data->getVolume() );
+            super.setVolume( data->getVolume() );
 
             m_Sound.setBuffer( *(data->getBuffer()) );
             if(!queue){
-                soundManager->m_CurrentlyPlayingSounds.push_back(s);
-                s->play();
+                soundManager->m_CurrentlyPlayingSounds.push_back(&super);
+                super.play();
             }
         }
-        void _update(const float& dt,SoundBaseClass* super){
+        void _update(const float& dt,SoundBaseClass& super){
             soundManager->_updateSoundStatus(super,m_Sound.getStatus());
         }
-        void _play(SoundBaseClass* super){
+        void _play(){
             m_Sound.play();
         }
-        void _pause(SoundBaseClass* super){
+        void _pause(){
             m_Sound.pause();
         }
-        void _stop(SoundBaseClass* super){
+        void _stop(){
             m_Sound.stop();
         }
 };
@@ -211,16 +207,16 @@ class SoundMusic::impl final{
                 s->play();
             }
         }
-        void _update(const float& dt,SoundBaseClass* super){
+        void _update(const float& dt,SoundBaseClass& super){
             soundManager->_updateSoundStatus(super,m_Sound.getStatus());
         }
-        void _play(SoundBaseClass* super){
+        void _play(){
             m_Sound.play();
         }
-        void _pause(SoundBaseClass* super){
+        void _pause(){
             m_Sound.pause();
         }
-        void _stop(SoundBaseClass* super){
+        void _stop(){
             m_Sound.stop();
         }
 };
@@ -258,46 +254,38 @@ float SoundBaseClass::getPitch(){ return 0; }
 void SoundBaseClass::setPitch(float p){}
 
 
-SoundEffect::SoundEffect(Handle& handle,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){ m_i->_init(this,handle,queue); }
-SoundEffect::SoundEffect(SoundData* buffer,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){ m_i->_init(this,buffer,queue); }
+SoundEffect::SoundEffect(Handle& handle,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){ m_i->_init(*this,handle,queue); }
+SoundEffect::SoundEffect(SoundData* buffer,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){ m_i->_init(*this,buffer,queue); }
 SoundEffect::~SoundEffect(){}
 void SoundEffect::play(uint loop){
     SoundBaseClass::play(loop);
-    m_i->_play(this);
+    m_i->_play();
 }
 void SoundEffect::play(){
     SoundBaseClass::play();
-    m_i->_play(this);
+    m_i->_play();
 }
 void SoundEffect::pause(){
     if(status() == SoundStatus::Paused) return;
     SoundBaseClass::pause();
-    m_i->_pause(this);
+    m_i->_pause();
 }
 void SoundEffect::stop(){
     if(status() == SoundStatus::Stopped) return;
     SoundBaseClass::stop();
-    m_i->_stop(this);
+    m_i->_stop();
 }
 void SoundEffect::restart(){ 
     m_i->m_Sound.setPlayingOffset(sf::Time()); 
 }
-void SoundEffect::update(const float& dt){
-    m_i->_update(dt,this);
-}
+void SoundEffect::update(const float& dt){ m_i->_update(dt,*this); }
 glm::vec3 SoundEffect::getPosition(){
     sf::Vector3f v = m_i->m_Sound.getPosition();
     return glm::vec3(v.x,v.y,v.z);
 }
-float SoundEffect::getAttenuation(){
-    return m_i->m_Sound.getAttenuation();
-}
-void SoundEffect::setPosition(float x,float y,float z){
-    m_i->m_Sound.setPosition(x,y,z);
-}
-void SoundEffect::setPosition(glm::vec3 pos){
-    m_i->m_Sound.setPosition(pos.x,pos.y,pos.z);
-}
+float SoundEffect::getAttenuation(){ return m_i->m_Sound.getAttenuation(); }
+void SoundEffect::setPosition(float x,float y,float z){ m_i->m_Sound.setPosition(x,y,z); }
+void SoundEffect::setPosition(glm::vec3 pos){ m_i->m_Sound.setPosition(pos.x,pos.y,pos.z); }
 void SoundEffect::setVolume(float v){ m_i->m_Sound.setVolume(v); }
 float SoundEffect::getVolume(){ return m_i->m_Sound.getVolume(); }
 float SoundEffect::getPitch(){ return m_i->m_Sound.getPitch(); }
@@ -308,41 +296,33 @@ SoundMusic::SoundMusic(Handle& handle,uint loops,bool queue):SoundBaseClass(loop
 SoundMusic::~SoundMusic(){}
 void SoundMusic::play(uint loop){
     SoundBaseClass::play(loop);
-    m_i->_play(this);
+    m_i->_play();
 }
 void SoundMusic::play(){
     SoundBaseClass::play();
-    m_i->_play(this);
+    m_i->_play();
 }
 void SoundMusic::pause(){
     if(status() == SoundStatus::Paused) return;
     SoundBaseClass::pause();
-    m_i->_pause(this);
+    m_i->_pause();
 }
 void SoundMusic::stop(){
     if(status() == SoundStatus::Stopped) return;
     SoundBaseClass::stop();
-    m_i->_stop(this);
+    m_i->_stop();
 }
 void SoundMusic::restart(){ 
     m_i->m_Sound.setPlayingOffset(sf::Time());
 }
-void SoundMusic::update(const float& dt){
-    m_i->_update(dt,this);
-}
+void SoundMusic::update(const float& dt){ m_i->_update(dt,*this); }
 glm::vec3 SoundMusic::getPosition(){
     sf::Vector3f v = m_i->m_Sound.getPosition();
     return glm::vec3(v.x,v.y,v.z);
 }
-float SoundMusic::getAttenuation(){
-    return m_i->m_Sound.getAttenuation();
-}
-void SoundMusic::setPosition(float x,float y,float z){
-    m_i->m_Sound.setPosition(x,y,z);
-}
-void SoundMusic::setPosition(glm::vec3 pos){
-    m_i->m_Sound.setPosition(pos.x,pos.y,pos.z);
-}
+float SoundMusic::getAttenuation(){ return m_i->m_Sound.getAttenuation(); }
+void SoundMusic::setPosition(float x,float y,float z){ m_i->m_Sound.setPosition(x,y,z); }
+void SoundMusic::setPosition(glm::vec3 pos){ m_i->m_Sound.setPosition(pos.x,pos.y,pos.z); }
 void SoundMusic::setVolume(float v){ m_i->m_Sound.setVolume(v); }
 float SoundMusic::getVolume(){ return m_i->m_Sound.getVolume(); }
 float SoundMusic::getPitch(){ return m_i->m_Sound.getPitch(); }

@@ -107,7 +107,7 @@ class Material::impl final{
         float m_BaseGlow, m_BaseAO, m_BaseMetalness, m_BaseSmoothness;
         uint m_ID;
 
-        void _init(string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
+        void _init(string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material& super){
             m_Components.resize(MaterialComponentType::_TOTAL,nullptr);
 
             _addComponentDiffuse(diffuse);
@@ -128,9 +128,9 @@ class Material::impl final{
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
 
-            super->load();
+            super.load();
         }
-        void _init(string& name,string& diffuseFile,string& normalFile,string& glowFile,string& specularFile,Material* super){
+        void _init(string& name,string& diffuseFile,string& normalFile,string& glowFile,string& specularFile,Material& super){
             Texture* d = 0; Texture* n = 0; Texture* g = 0; Texture* s = 0;
             if(diffuseFile != ""){
                 d = epriv::Core::m_Engine->m_ResourceManager._hasTexture(diffuseFile);
@@ -393,12 +393,12 @@ void MaterialComponentParallaxOcclusion::unbind(){
 #pragma region Material
 
 Material::Material(string name,string diffuse,string normal,string glow,string specular):m_i(new impl),BindableResource(name){
-    m_i->_init(name,diffuse,normal,glow,specular,this);
+    m_i->_init(name,diffuse,normal,glow,specular,*this);
     setCustomBindFunctor(epriv::DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(epriv::DEFAULT_UNBIND_FUNCTOR);
 }
 Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular):m_i(new impl),BindableResource(name){
-    m_i->_init(name,diffuse,normal,glow,specular,this);
+    m_i->_init(name,diffuse,normal,glow,specular,*this);
     setCustomBindFunctor(epriv::DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(epriv::DEFAULT_UNBIND_FUNCTOR);
 }

@@ -56,15 +56,15 @@ class MeshInstance::impl{
         glm::mat4 m_Model;
         glm::vec4 m_Color;
         bool m_PassedRenderCheck, m_Visible;
-        void _init(Mesh* mesh,Material* mat,MeshInstance* super,Entity* entity,ShaderP* program){
+        void _init(Mesh* mesh,Material* mat,Entity* entity,ShaderP* program){
             m_Stage = RenderStage::GeometryOpaque;
             m_PassedRenderCheck = false;
             m_Visible = true;
             m_Entity = entity;
 
-            _setShaderProgram(program, super);
-            _setMaterial(mat, super);
-            _setMesh(mesh, super); 
+            _setShaderProgram(program);
+            _setMaterial(mat);
+            _setMesh(mesh); 
 
             m_Color = glm::vec4(1.0f);
             m_GodRaysColor = glm::vec3(0.0f);
@@ -73,17 +73,17 @@ class MeshInstance::impl{
             m_Scale = glm::vec3(1.0f);
             _updateModelMatrix();
         }
-        void _setShaderProgram(ShaderP* program, MeshInstance* super) {
+        void _setShaderProgram(ShaderP* program) {
             if (!program) { program = epriv::InternalShaderPrograms::Deferred; }
             m_ShaderProgram = program;
         }
-        void _setMesh(Mesh* mesh,MeshInstance* super){
+        void _setMesh(Mesh* mesh){
             m_Mesh = mesh;
         }
-        void _setMaterial(Material* mat,MeshInstance* super){
+        void _setMaterial(Material* mat){
             m_Material = mat;
         }
-        void _destruct(MeshInstance* super){
+        void _destruct(){
             SAFE_DELETE_VECTOR(m_AnimationQueue);
         }
         void _setPosition(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; _updateModelMatrix(); }
@@ -161,30 +161,30 @@ epriv::DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
 
 MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat, ShaderP* program):m_i(new impl){
-    m_i->_init(mesh,mat,this,entity, program);
+    m_i->_init(mesh,mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat, ShaderP* program):m_i(new impl){
     Mesh* _mesh = (Mesh*)mesh.get();
     Material* _mat = (Material*)mat.get();
-    m_i->_init(_mesh,_mat,this,entity, program);
+    m_i->_init(_mesh,_mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::MeshInstance(Entity* entity,Mesh* mesh,Handle mat, ShaderP* program):m_i(new impl){
     Material* _mat = (Material*)mat.get();
-    m_i->_init(mesh,_mat,this,entity, program);
+    m_i->_init(mesh,_mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat, ShaderP* program):m_i(new impl){
     Mesh* _mesh = (Mesh*)mesh.get();
-    m_i->_init(_mesh,mat,this,entity, program);
+    m_i->_init(_mesh,mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::~MeshInstance(){ m_i->_destruct(this); }
+MeshInstance::~MeshInstance(){ m_i->_destruct(); }
 void MeshInstance::setStage(RenderStage::Stage s) { m_i->m_Stage = s; }
 void MeshInstance::show() { m_i->m_Visible = true; }
 void MeshInstance::hide() { m_i->m_Visible = false; }
@@ -216,12 +216,12 @@ ShaderP* MeshInstance::shaderProgram() { return m_i->m_ShaderProgram; }
 Mesh* MeshInstance::mesh(){ return m_i->m_Mesh; }
 Material* MeshInstance::material(){ return m_i->m_Material; }
 RenderStage::Stage MeshInstance::stage() { return m_i->m_Stage; }
-void MeshInstance::setShaderProgram(const Handle& shaderPHandle) { m_i->_setShaderProgram(((ShaderP*)shaderPHandle.get()), this); }
-void MeshInstance::setShaderProgram(ShaderP* shaderProgram) { m_i->_setShaderProgram(shaderProgram, this); }
-void MeshInstance::setMesh(const Handle& meshHandle){ m_i->_setMesh(((Mesh*)meshHandle.get()),this); }
-void MeshInstance::setMesh(Mesh* m){ m_i->_setMesh(m,this); }
-void MeshInstance::setMaterial(const Handle& materialHandle){ m_i->_setMaterial(((Material*)materialHandle.get()),this); }
-void MeshInstance::setMaterial(Material* m){ m_i->_setMaterial(m,this); }
+void MeshInstance::setShaderProgram(const Handle& shaderPHandle) { m_i->_setShaderProgram(((ShaderP*)shaderPHandle.get())); }
+void MeshInstance::setShaderProgram(ShaderP* shaderProgram) { m_i->_setShaderProgram(shaderProgram); }
+void MeshInstance::setMesh(const Handle& meshHandle){ m_i->_setMesh(((Mesh*)meshHandle.get())); }
+void MeshInstance::setMesh(Mesh* m){ m_i->_setMesh(m); }
+void MeshInstance::setMaterial(const Handle& materialHandle){ m_i->_setMaterial(((Material*)materialHandle.get())); }
+void MeshInstance::setMaterial(Material* m){ m_i->_setMaterial(m); }
 void MeshInstance::setOrientation(glm::quat o){ m_i->m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 
     if(abs(x) > 0.001f) m_i->m_Orientation =                      (glm::angleAxis(-x, glm::vec3(1,0,0)));

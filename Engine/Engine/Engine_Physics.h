@@ -32,9 +32,9 @@ class Collision final{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        Collision(std::vector<Mesh*>& meshes, float mass = 0, glm::vec3 scale = glm::vec3(1.0f));
-        Collision(ComponentModel*, float mass = 0, glm::vec3 scale = glm::vec3(1.0f));
-        Collision(CollisionType::Type, Mesh* mesh,float mass = 0,glm::vec3 scale = glm::vec3(1.0f));
+        Collision(std::vector<Mesh*>& meshes, float mass = 0);
+        Collision(ComponentModel*, float mass = 0);
+        Collision(CollisionType::Type, Mesh* mesh,float mass = 0);
         ~Collision();
 
         void setMass(float mass);

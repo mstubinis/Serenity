@@ -210,8 +210,8 @@ void ShipSystemSensors::update(const float& dt){
 #pragma endregion
 
 Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,Scene* scene) :Entity() {
-    scene->addEntity(this);
-	ComponentBody* rigidBodyComponent = new ComponentBody(_type, scl);
+    scene->addEntity(*this);
+	ComponentBody* rigidBodyComponent = new ComponentBody(_type);
 	addComponent(rigidBodyComponent);
     ComponentModel* modelComponent = new ComponentModel(mesh, mat, this);
     addComponent(modelComponent);
@@ -278,24 +278,24 @@ void Ship::update(const float& dt){
         #pragma region PlayerCameraControls
         if(Engine::isKeyDownOnce(KeyboardKey::F1)){
             if(m_PlayerCamera->getState() != CAMERA_STATE_FOLLOW || (m_PlayerCamera->getState() == CAMERA_STATE_FOLLOW && m_PlayerCamera->getTarget() != this)){
-                Resources::getCurrentScene()->centerSceneToObject(this);
+                Resources::getCurrentScene()->centerSceneToObject(*this);
                 m_PlayerCamera->follow(this);
             }
         }else if(Engine::isKeyDownOnce(KeyboardKey::F2)){
             if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOW || !m_Target || m_PlayerCamera->getTarget() != this){
-                Resources::getCurrentScene()->centerSceneToObject(this);
+                Resources::getCurrentScene()->centerSceneToObject(*this);
                 m_PlayerCamera->orbit(this);
             }
             else if(m_Target){
-                Resources::getCurrentScene()->centerSceneToObject(m_Target);
+                Resources::getCurrentScene()->centerSceneToObject(*m_Target);
                 m_PlayerCamera->orbit(m_Target);
             }
         }else if(Engine::isKeyDownOnce(KeyboardKey::F3)){
             if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOWTARGET || (!m_Target && m_PlayerCamera->getState() != CAMERA_STATE_FOLLOW) || m_PlayerCamera->getTarget() != this){
-                Resources::getCurrentScene()->centerSceneToObject(this);
+                Resources::getCurrentScene()->centerSceneToObject(*this);
                 m_PlayerCamera->follow(this);
             }else if(m_Target){
-                Resources::getCurrentScene()->centerSceneToObject(this);
+                Resources::getCurrentScene()->centerSceneToObject(*this);
                 m_PlayerCamera->followTarget(m_Target,this);
             }
         }

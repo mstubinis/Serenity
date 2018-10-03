@@ -29,8 +29,8 @@ namespace Engine {
                 static void RenderGeometryTransparent(Scene&, Camera&);
                 static void RenderForwardOpaque(Scene&, Camera&);
                 static void RenderForwardTransparent(Scene&, Camera&);
-                static void AddMeshInstanceToPipeline(Scene&, MeshInstance*, RenderStage::Stage);
-                static void RemoveMeshInstanceFromPipeline(Scene&, MeshInstance*, RenderStage::Stage);
+                static void AddMeshInstanceToPipeline(Scene&, MeshInstance&, RenderStage::Stage);
+                static void RemoveMeshInstanceFromPipeline(Scene&, MeshInstance&, RenderStage::Stage);
         };
     };
 };
@@ -46,10 +46,10 @@ class Scene: public EngineResource, public EventObserver{
         virtual ~Scene();
 
         Entity* getEntity(uint entityID);
-        uint addEntity(Entity*);
-        void removeEntity(Entity*,bool immediate = false);
+        uint addEntity(Entity&);
+        void removeEntity(Entity&,bool immediate = false);
         void removeEntity(uint id,bool immediate = false);
-        bool hasEntity(Entity*);
+        bool hasEntity(Entity&);
         bool hasEntity(uint entityID);
 
         virtual void update(const float& dt);
@@ -62,8 +62,8 @@ class Scene: public EngineResource, public EventObserver{
 
         SkyboxEmpty* skybox() const;
         void setSkybox(SkyboxEmpty*);
-        void centerSceneToObject(Entity*);
+        void centerSceneToObject(Entity&);
         void centerSceneToObject(uint entityID);
-        void setActiveCamera(Camera*);
+        void setActiveCamera(Camera&);
 };
 #endif

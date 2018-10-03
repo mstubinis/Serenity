@@ -47,7 +47,7 @@ class SunLight::impl final{
         glm::vec4 m_Color;
         LightType::Type m_Type;
         float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularIntensity;
-        void _init(SunLight* super,LightType::Type& type){
+        void _init(SunLight& super,LightType::Type& type){
             m_Active = true;
             m_Color = glm::vec4(1.0f);
             m_Type = type;
@@ -55,7 +55,8 @@ class SunLight::impl final{
             m_DiffuseIntensity = 2.0f;
             m_SpecularIntensity = 1.0f;
 
-            m_Body = new ComponentBody();  super->addComponent(m_Body);
+            m_Body = new ComponentBody();
+            super.addComponent(m_Body);
         }
 };
 
@@ -63,10 +64,10 @@ SunLight::SunLight(glm::vec3 pos,LightType::Type type,Scene* scene):Entity(),m_i
     if(!scene){
         scene = Resources::getCurrentScene();
     }
-    scene->addEntity(this); //keep lights out of the global per scene entity pool?
+    scene->addEntity(*this); //keep lights out of the global per scene entity pool?
     epriv::InternalScenePublicInterface::GetLights(*scene).push_back(this);
 
-    m_i->_init(this,type);
+    m_i->_init(*this,type);
     m_i->m_Body->setPosition(pos);
 }
 SunLight::~SunLight(){
@@ -331,25 +332,25 @@ class LightProbe::impl{
             bindTexture(GL_TEXTURE_CUBE_MAP,0);
             SAFE_DELETE(m_FBO);
         }
-        void _update(float dt,LightProbe* super,glm::mat4& viewMatrix){
-            super->m_View = viewMatrix;
-            super->m_Orientation = glm::conjugate(glm::quat_cast(super->m_View));
-            super->m_Forward = Engine::Math::getForward(super->m_Orientation);
-            super->m_Up = Engine::Math::getUp(super->m_Orientation);
-            super->m_Right = glm::normalize(glm::cross(super->m_Forward,super->m_Up));
+        void _update(float dt,LightProbe& super,glm::mat4& viewMatrix){
+            super.m_View = viewMatrix;
+            super.m_Orientation = glm::conjugate(glm::quat_cast(super.m_View));
+            super.m_Forward = Engine::Math::getForward(super.m_Orientation);
+            super.m_Up = Engine::Math::getUp(super.m_Orientation);
+            super.m_Right = glm::normalize(glm::cross(super.m_Forward,super.m_Up));
 
-            if(super->m_Parent != nullptr){
-                super->m_Model = super->m_Parent->getModel(); 
+            if(super.m_Parent){
+                super.m_Model = super.m_Parent->getModel(); 
             }else{
-                super->m_Model = glm::mat4(1.0f);
+                super.m_Model = glm::mat4(1.0f);
             }
-            glm::mat4 translationMatrix = glm::translate(super->getPosition());
-            glm::mat4 rotationMatrix = glm::mat4_cast(super->m_Orientation);
+            glm::mat4 translationMatrix = glm::translate(super.getPosition());
+            glm::mat4 rotationMatrix = glm::mat4_cast(super.m_Orientation);
 
-            super->m_Model = translationMatrix * rotationMatrix * super->m_Model;
-            super->_constructFrustrum();
+            super.m_Model = translationMatrix * rotationMatrix * super.m_Model;
+            super._constructFrustrum();
         }
-        void _renderScene(LightProbe* super,glm::mat4& viewMatrix,uint& i){
+        void _renderScene(LightProbe& super,glm::mat4& viewMatrix,uint& i){
             m_FBO->bind();
             _update(0,super,viewMatrix);
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureEnvMap,0);
@@ -357,23 +358,23 @@ class LightProbe::impl{
             epriv::Core::m_Engine->m_RenderManager->_render(super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),0);
             m_FBO->unbind();
         }
-        void _renderConvolution(LightProbe* super,glm::mat4& viewMatrix,uint& i,uint& size){
+        void _renderConvolution(LightProbe& super,glm::mat4& viewMatrix,uint& i,uint& size){
             Engine::Math::removeMatrixPosition(viewMatrix);
-            glm::mat4 vp = super->m_Projection * viewMatrix;
+            glm::mat4 vp = super.m_Projection * viewMatrix;
             Renderer::sendUniformMatrix4("VP", vp);
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureConvolutionMap,0);
             Renderer::Settings::clear(true,true,false);
             Skybox::bindMesh();
         }
-        void _renderPrefilter(LightProbe* super,glm::mat4& viewMatrix,uint& i,uint& m,uint& mipSize){
+        void _renderPrefilter(LightProbe& super,glm::mat4& viewMatrix,uint& i,uint& m,uint& mipSize){
             Engine::Math::removeMatrixPosition(viewMatrix);
-            glm::mat4 vp = super->m_Projection * viewMatrix;
+            glm::mat4 vp = super.m_Projection * viewMatrix;
             Renderer::sendUniformMatrix4("VP", vp);
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TexturePrefilterMap,m);
             Renderer::Settings::clear(true,true,false);
             Skybox::bindMesh();
         }
-        void _render(LightProbe* super,ShaderP* convolude,ShaderP* prefilter){
+        void _render(LightProbe& super,ShaderP& convolude,ShaderP& prefilter){
             #pragma region FindOutWhatToRender
             if(m_SecondFrame == false){ m_SecondFrame = true; return; }
             if(m_DidFirst == true && m_OnlyOnce == true) return;
@@ -462,8 +463,7 @@ class LightProbe::impl{
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0); 
                 m_TexturesMade++;
                 bindTexture(GL_TEXTURE_CUBE_MAP,0);
-            }
-            else{
+            }else{
                 bindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
             }
             m_FBO->bind();

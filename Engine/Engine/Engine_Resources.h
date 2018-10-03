@@ -60,8 +60,7 @@ namespace Engine{
                 Handle _addTexture(Texture*);
 
                 bool _hasScene(std::string);
-                void _addScene(Scene*);
-                std::string _buildSceneName(std::string);
+                void _addScene(Scene&);
                 Texture* _hasTexture(std::string);
                 uint _numScenes();
         };

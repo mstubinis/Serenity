@@ -8,30 +8,30 @@ using namespace std;
 
 class Camera::impl final{
     public:
-        void _baseInit(Scene* scene, Camera* super){
+        void _baseInit(Scene* scene, Camera& super){
             if(!scene)
                 scene = Resources::getCurrentScene();   
             scene->addEntity(super);
-            super->m_Body = new ComponentBody();
-            super->addComponent(super->m_Body);
-            super->m_Camera->lookAt(super->m_Body->position(),super->m_Body->position() + super->m_Body->forward(),super->m_Body->up());      
-            super->addComponent(super->m_Camera); 
+            super.m_Body = new ComponentBody();
+            super.addComponent(super.m_Body);
+            super.m_Camera->lookAt(super.m_Body->position(),super.m_Body->position() + super.m_Body->forward(),super.m_Body->up());      
+            super.addComponent(super.m_Camera); 
         }
-        void _init(float& angle, float& aspectRatio, float& _near, float& _far,Scene* scene,Camera* super){
-            super->m_Camera = new ComponentCamera(angle,aspectRatio,_near,_far);
+        void _init(float& angle, float& aspectRatio, float& _near, float& _far,Scene* scene,Camera& super){
+            super.m_Camera = new ComponentCamera(angle,aspectRatio,_near,_far);
             _baseInit(scene,super);
         }
-        void _init(float& left, float& right, float& bottom, float& top, float& _near, float& _far,Scene* scene,Camera* super){		
-            super->m_Camera = new ComponentCamera(left,right,bottom,top,_near,_far);
+        void _init(float& left, float& right, float& bottom, float& top, float& _near, float& _far,Scene* scene,Camera& super){		
+            super.m_Camera = new ComponentCamera(left,right,bottom,top,_near,_far);
             _baseInit(scene,super);
         }
 };
 
 Camera::Camera(float angle, float aspectRatio, float _near, float _far,Scene* scene):Entity(),m_i(new impl){//create a perspective camera
-    m_i->_init(angle,aspectRatio,_near,_far,scene,this);
+    m_i->_init(angle,aspectRatio,_near,_far,scene,*this);
 }
 Camera::Camera(float left, float right, float bottom, float top, float _near, float _far,Scene* scene):Entity(),m_i(new impl){//create an orthographic camera
-    m_i->_init(left,right,bottom,top,_near,_far,scene,this);
+    m_i->_init(left,right,bottom,top,_near,_far,scene,*this);
 }
 Camera::~Camera(){ 
 }

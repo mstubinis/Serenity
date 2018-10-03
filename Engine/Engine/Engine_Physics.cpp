@@ -798,7 +798,7 @@ class Collision::impl final {
             m_Type = _type;
             _setMass(mass);
         }
-        void _init(Collision* super, vector<Mesh*>& meshes, float& mass, glm::vec3& scale) {
+        void _init(vector<Mesh*>& meshes, float& mass) {
             btCompoundShape* compound = new btCompoundShape();
             btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
             for (auto mesh : meshes) {
@@ -810,14 +810,14 @@ class Collision::impl final {
             m_Shape = compound;
             _baseInit(CollisionType::Compound, mass);
         }
-        void _init(Collision* super,ComponentModel* modelComponent, float& mass, glm::vec3& scale) {
+        void _init(ComponentModel* modelComponent, float& mass) {
             vector<Mesh*> meshes;
             for (uint i = 0; i < modelComponent->getNumModels(); ++i) {
                 meshes.push_back(modelComponent->getModel(i)->mesh());
             }
-            _init(super, meshes, mass, scale);
+            _init(meshes, mass);
         }
-        void _init(Collision* super,CollisionType::Type _type,Mesh* mesh,float& mass,glm::vec3& scale) {
+        void _init(CollisionType::Type _type,Mesh* mesh,float& mass) {
             btCollisionShape* shape = InternalMeshPublicInterface::BuildCollision(mesh, _type);
             m_Shape = shape;
             _baseInit(_type, mass);
@@ -840,9 +840,9 @@ class Collision::impl final {
         }
 };
 
-Collision::Collision(vector<Mesh*>& meshes, float mass, glm::vec3 scale):m_i(new impl) {m_i->_init(this, meshes, mass, scale);}
-Collision::Collision(ComponentModel* modelComponent, float mass, glm::vec3 scale) :m_i(new impl) {m_i->_init(this, modelComponent, mass, scale);}
-Collision::Collision(CollisionType::Type type, Mesh* mesh,float mass,glm::vec3 scale):m_i(new impl){ m_i->_init(this, type,mesh,mass,scale); }
+Collision::Collision(vector<Mesh*>& meshes, float mass):m_i(new impl) {m_i->_init(meshes, mass);}
+Collision::Collision(ComponentModel* modelComponent, float mass) :m_i(new impl) {m_i->_init(modelComponent, mass);}
+Collision::Collision(CollisionType::Type type, Mesh* mesh,float mass):m_i(new impl){ m_i->_init(type,mesh,mass); }
 Collision::~Collision(){ m_i->_destruct(); }
 void Collision::setMass(float mass){ m_i->_setMass(mass); }
 const btVector3& Collision::getInertia() const { return m_i->m_Inertia; }

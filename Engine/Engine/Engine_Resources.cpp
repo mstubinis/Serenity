@@ -22,15 +22,6 @@
 using namespace Engine;
 using namespace std;
 
-template<class V,class S>S _incrementName(unordered_map<S,V>& m,const S n){S r=n;if(m.size()>0){uint c=0;while(m.count(r)){r=n+" "+boost::lexical_cast<S>(c);c++;}}return r;}
-template<class V,class S>S _incrementName(map<S,V>& m,const S n){S r=n;if(m.size()>0){uint c=0;while(m.count(r)){r=n+" "+boost::lexical_cast<S>(c);c++;}}return r;}
-template<class V, class O,class S>void _addToContainer(map<S,V>& m,const S& n,O& o){if(m.size()>0&&m.count(n)){o.reset();return;}m.emplace(n,o);}
-template<class V, class O,class S>void _addToContainer(unordered_map<S,V>& m,const S& n,O& o){if(m.size()>0&&m.count(n)){o.reset();return;}m.emplace(n,o);}
-template<class V,class S>void* _getFromContainer(map<S,V>& m,const S& n){if(!m.count(n))return nullptr;return m.at(n).get();}
-template<class V,class S>void* _getFromContainer(unordered_map<S,V>& m,const S& n){if(!m.count(n))return nullptr;return m.at(n).get();}
-template<class V,class S>void _removeFromContainer(map<S,V>& m,const S& n){if(m.size()>0&&m.count(n)){m.at(n).reset();m.erase(n);}}
-template<class V,class S>void _removeFromContainer(unordered_map<S,V>& m,const S& n){if(m.size()>0&&m.count(n)){m.at(n).reset();m.erase(n);}}
-
 epriv::ResourceManager::impl* resourceManager;
 
 class epriv::ResourceManager::impl final{
@@ -40,7 +31,7 @@ class epriv::ResourceManager::impl final{
         Engine_Window*                                 m_Window;
         Scene*                                         m_CurrentScene;
         bool                                           m_DynamicMemory;
-        unordered_map<string,boost::shared_ptr<Scene>> m_Scenes;
+        unordered_map<string,Scene*>                   m_Scenes;
         void _init(const char* name,const uint& width,const uint& height){
             m_CurrentScene = nullptr;
             m_Window = nullptr;
@@ -53,6 +44,7 @@ class epriv::ResourceManager::impl final{
         void _destruct(){
             SAFE_DELETE(m_Resources);
             SAFE_DELETE(m_Window);
+            SAFE_DELETE_MAP(m_Scenes);
         }
 };
 Handle::Handle() { index = 0; counter = 0; type = 0; }
@@ -87,12 +79,9 @@ Texture* epriv::ResourceManager::_hasTexture(string n){
     }
     return 0;
 }
-void epriv::ResourceManager::_addScene(Scene* s){
-    boost::shared_ptr<Scene> ptr(s);
-    _addToContainer(m_i->m_Scenes,s->name(), ptr);
+void epriv::ResourceManager::_addScene(Scene& s){
+    m_i->m_Scenes.emplace(s.name(), &s);
 }
-string epriv::ResourceManager::_buildSceneName(string n){return _incrementName(m_i->m_Scenes,n);}
-
 uint epriv::ResourceManager::_numScenes(){return m_i->m_Scenes.size();}
 
 void Resources::Settings::enableDynamicMemory(bool b){ resourceManager->m_DynamicMemory = b; }
@@ -101,7 +90,7 @@ void Resources::Settings::disableDynamicMemory(){ resourceManager->m_DynamicMemo
 Engine_Window& Resources::getWindow(){ return *resourceManager->m_Window; }
 glm::uvec2 Resources::getWindowSize(){ return resourceManager->m_Window->getSize(); }
 
-Scene* Resources::getScene(string n){return (Scene*)(_getFromContainer(resourceManager->m_Scenes,n));}
+Scene* Resources::getScene(string n){ return resourceManager->m_Scenes.at(n); }
 
 void Resources::getShader(Handle& h,Shader*& p){ resourceManager->m_Resources->getAs(h,p); }
 Shader* Resources::getShader(Handle& h){ Shader* p; resourceManager->m_Resources->getAs(h,p); return p; }
@@ -203,4 +192,4 @@ void Resources::setCurrentScene(Scene* newScene){
         cout << "-------- Scene Change ended --------" << endl;
     }
 }
-void Resources::setCurrentScene(string s){Resources::setCurrentScene((Scene*)(_getFromContainer(resourceManager->m_Scenes,s)));}
+void Resources::setCurrentScene(string s){ Resources::setCurrentScene(Resources::getScene(s)); }

@@ -26,7 +26,7 @@ using namespace std;
 
 SolarSystem::SolarSystem(string n, string file):Scene(n){
     GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.35f,7000000000.0f,this);
-    setActiveCamera(playerCamera);
+    setActiveCamera(*playerCamera);
     giGlobal = giSpecular = giDiffuse = 1.0f;
     if(file != "NULL")
         SolarSystem::_loadFromFile(file);	
@@ -225,7 +225,7 @@ void SolarSystem::_loadFromFile(string filename){
                             vector<RingInfo> rings;
                             planetRings.emplace(PARENT,rings);
                         }
-                        planetRings.at(PARENT).push_back(RingInfo((uint)POSITION/10,(uint)RADIUS/10,glm::uvec3(R,G,B),BREAK));
+                        planetRings.at(PARENT).push_back(RingInfo((uint)POSITION/10,(uint)RADIUS/10,glm::ivec3(R,G,B),BREAK));
                     }
                 }else if(line[0] == 'L'){//Lagrange Point               
                 }
@@ -239,13 +239,13 @@ void SolarSystem::_loadFromFile(string filename){
         new Ring(rings.second,m_Planets.at(rings.first));
     }
 
-    centerSceneToObject(player);
+    centerSceneToObject(*player);
     auto& body = *player->getComponent<ComponentBody>();
     float xPos = body.position().x;
     float zPos = body.position().z;
     
     Entity* ent = new Entity();
-    addEntity(ent);
+    addEntity(*ent);
     ComponentBody* bbody = new ComponentBody();
     ent->addComponent(bbody);
     ComponentModel* mmodel = new ComponentModel(ResourceManifest::TestMesh, ResourceManifest::DefiantMaterial, ent);

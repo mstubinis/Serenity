@@ -448,13 +448,13 @@ class Mesh::impl final{
             m_Skeleton = nullptr;
             m_threshold = threshold;
         }
-        void _initGlobalTwo(Mesh* super,epriv::ImportedMeshData& data,float threshold){
+        void _initGlobalTwo(Mesh& super,epriv::ImportedMeshData& data,float threshold){
             _finalizeData(data,threshold);
-            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-            super->load();
+            super.setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+            super.setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+            super.load();
         }
-        void _init(Mesh* super,string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold){//grid
+        void _init(Mesh& super,string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold){//grid
             epriv::ImportedMeshData d;
             _initGlobal(threshold);  
             for(uint i = 0; i < width-1; ++i){
@@ -497,7 +497,7 @@ class Mesh::impl final{
             }
             _initGlobalTwo(super,d,threshold);
         }
-        void _init(Mesh* super,string& name,float x, float y,float width, float height,float threshold){//plane with offset uvs
+        void _init(Mesh& super,string& name,float x, float y,float width, float height,float threshold){//plane with offset uvs
             epriv::ImportedMeshData d;
             _initGlobal(threshold);
 
@@ -532,7 +532,7 @@ class Mesh::impl final{
             d.normals.resize(6,glm::vec3(1));  d.binormals.resize(6,glm::vec3(1));  d.tangents.resize(6,glm::vec3(1));
             _initGlobalTwo(super,d,threshold);
         }
-        void _init(Mesh* super,string& name,float width, float height,float threshold){//plane
+        void _init(Mesh& super,string& name,float width, float height,float threshold){//plane
             epriv::ImportedMeshData d;
             _initGlobal(threshold);
             d.points.emplace_back(-width/2.0f,-height/2.0f,0);
@@ -566,17 +566,17 @@ class Mesh::impl final{
             d.normals.resize(6,glm::vec3(1));  d.binormals.resize(6,glm::vec3(1));  d.tangents.resize(6,glm::vec3(1));
             _initGlobalTwo(super,d,threshold);
         }
-        void _init(Mesh* super,string& fileOrData,bool notMemory,float threshold,bool loadNow){//from file / data
+        void _init(Mesh& super,string& fileOrData,bool notMemory,float threshold,bool loadNow){//from file / data
             _initGlobal(threshold);
             if(notMemory){
                 m_File = fileOrData;
             }else{
-                _loadFromOBJMemory(super,threshold, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN,fileOrData);
+                _loadFromOBJMemory(threshold, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN,fileOrData);
             }
-            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+            super.setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+            super.setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             if(loadNow)
-                super->load();
+                super.load();
         }
         void _loadInternal(Mesh& mesh,epriv::ImportedMeshData& data,string& file){
             Assimp::Importer importer;
@@ -918,7 +918,7 @@ class Mesh::impl final{
                 }
             }
         }
-        void _loadFromOBJMemory(Mesh* super,float threshold,unsigned char _flags,string input){
+        void _loadFromOBJMemory(float threshold,unsigned char _flags,string input){
             epriv::ImportedMeshData d;
 
             vector<uint> positionIndices;
@@ -1427,20 +1427,20 @@ btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* _mesh, Colli
 
 
 Mesh::Mesh(string name,unordered_map<string,float>& grid,uint width,uint length,float threshold):BindableResource(name),m_i(new impl){
-    m_i->_init(this,name,grid,width,length,threshold);
+    m_i->_init(*this,name,grid,width,length,threshold);
     registerEvent(EventType::WindowFullscreenChanged);
 }
 Mesh::Mesh(string name,float x, float y,float width, float height,float threshold):BindableResource(name),m_i(new impl){
-    m_i->_init(this,name,x,y,width,height,threshold);
+    m_i->_init(*this,name,x,y,width,height,threshold);
     registerEvent(EventType::WindowFullscreenChanged);
 }
 Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name),m_i(new impl){
-    m_i->_init(this,name,width,height,threshold);
+    m_i->_init(*this,name,width,height,threshold);
     registerEvent(EventType::WindowFullscreenChanged);
 }
 Mesh::Mesh(string fileOrData,bool notMemory,float threshold,bool loadNow):BindableResource(fileOrData),m_i(new impl){
     if (!notMemory) setName("CustomMesh");
-    m_i->_init(this,fileOrData,notMemory,threshold,loadNow);
+    m_i->_init(*this,fileOrData,notMemory,threshold,loadNow);
     registerEvent(EventType::WindowFullscreenChanged);
 }
 Mesh::~Mesh(){

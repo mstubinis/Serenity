@@ -19,7 +19,7 @@ using namespace Engine;
 using namespace std;
 
 CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, Scene* scene):Entity(){
-    scene->addEntity(this);
+    scene->addEntity(*this);
     ComponentModel* model = new ComponentModel(Mesh::Plane, ResourceManifest::CapsuleD,this);  addComponent(model);
     model->getModel()->setColor(color.x,color.y,color.z,1.0f);
     
@@ -32,7 +32,7 @@ CapsuleEnd::~CapsuleEnd(){
 void CapsuleEnd::update(const float& dt){
 }
 CapsuleStar::CapsuleStar(float size,glm::vec3 pos,Scene* scene,bool makeLight):Entity(){
-    scene->addEntity(this);
+    scene->addEntity(*this);
     ComponentModel* model = new ComponentModel(Mesh::Plane, ResourceManifest::StarFlareMaterial,this);  addComponent(model);
     model->getModel()->setColor(255,235,206,255);
     
@@ -69,7 +69,7 @@ void CapsuleStar::update(const float& dt){
 }
 
 CapsuleTunnel::CapsuleTunnel(float tunnelRadius,Handle& material, Scene* scene):Entity(){
-    scene->addEntity(this);
+    scene->addEntity(*this);
     m_TunnelRadius = tunnelRadius;
     ComponentModel* model = new ComponentModel(ResourceManifest::CapsuleTunnelMesh,material,this);  addComponent(model);
     m_Body = new ComponentBody();  addComponent(m_Body);
@@ -90,7 +90,7 @@ struct RibbonUnbindFunctor {void operator()(EngineResource* r) const {
 }};
 
 CapsuleRibbon::CapsuleRibbon(float tunnelRadius, Handle& mesh,Handle& material, Scene* scene):Entity(){
-    scene->addEntity(this);
+    scene->addEntity(*this);
     m_TunnelRadius = tunnelRadius;
     ComponentModel* model = new ComponentModel(mesh,material,this);
 
@@ -162,7 +162,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     GameCamera* playerCamera = (GameCamera*)this->getActiveCamera();
     playerCamera->follow(dread);
 
-    centerSceneToObject(dread);
+    centerSceneToObject(*dread);
 
     //LightProbe* lp = new LightProbe("CapsuleLightProbe",256,glm::vec3(0.0f),true,this);
     //dread->addChild(lp);

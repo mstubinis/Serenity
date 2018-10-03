@@ -123,9 +123,9 @@ namespace Engine{
                 ComponentManager(const char* name, uint w, uint h);
                 ~ComponentManager();
 
-                static void onComponentAddedToEntity(Entity*);
-                static void onEntityAddedToScene(Scene*, Entity*);
-                static void onSceneSwap(Scene*, Scene*, Entity*);
+                static void onComponentAddedToEntity(Entity&);
+                static void onEntityAddedToScene(Scene&, Entity&);
+                static void onSceneSwap(Scene*, Scene*, Entity&);
 
                 void _pause(bool=true);
                 void _unpause();
@@ -181,9 +181,9 @@ namespace Engine{
                 ComponentSystemBaseClass(){}
                 virtual ~ComponentSystemBaseClass(){}
                 virtual void update(const float& dt){}
-                virtual void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity*) {}
-                virtual void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*) {}
-                virtual void onComponentAddedToEntity(ComponentBaseClass*, Entity*) {}
+                virtual void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity&) {}
+                virtual void onEntityAddedToScene(Scene&, ComponentBaseClass*, Entity&) {}
+                virtual void onComponentAddedToEntity(ComponentBaseClass*, Entity&) {}
         };
         class ComponentModelSystem final: public ComponentSystemBaseClass {
             friend class ::Engine::epriv::ComponentManager;
@@ -193,9 +193,9 @@ namespace Engine{
                 ComponentModelSystem();
                 ~ComponentModelSystem();
                 void update(const float& dt);
-                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity*);
-                void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
-                void onComponentAddedToEntity(ComponentBaseClass*, Entity*);
+                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity&);
+                void onEntityAddedToScene(Scene&, ComponentBaseClass*, Entity&);
+                void onComponentAddedToEntity(ComponentBaseClass*, Entity&);
         };
         class ComponentCameraSystem final : public ComponentSystemBaseClass {
             friend class ::Engine::epriv::ComponentManager;
@@ -205,9 +205,9 @@ namespace Engine{
                 ComponentCameraSystem();
                 ~ComponentCameraSystem();
                 void update(const float& dt);
-                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity*);
-                void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
-                void onComponentAddedToEntity(ComponentBaseClass*, Entity*);
+                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity&);
+                void onEntityAddedToScene(Scene&, ComponentBaseClass*, Entity&);
+                void onComponentAddedToEntity(ComponentBaseClass*, Entity&);
         };
         class ComponentBodySystem final : public ComponentSystemBaseClass {
             friend class ::Engine::epriv::ComponentManager;
@@ -217,9 +217,9 @@ namespace Engine{
                 ComponentBodySystem();
                 ~ComponentBodySystem();
                 void update(const float& dt);
-                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity*);
-                void onEntityAddedToScene(Scene*, ComponentBaseClass*, Entity*);
-                void onComponentAddedToEntity(ComponentBaseClass*, Entity*);
+                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity&);
+                void onEntityAddedToScene(Scene&, ComponentBaseClass*, Entity&);
+                void onComponentAddedToEntity(ComponentBaseClass*, Entity&);
         };
     };
 };
@@ -310,7 +310,7 @@ class ComponentBody: public ComponentBaseClass{
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentBody();
-        ComponentBody(CollisionType::Type,glm::vec3 scale = glm::vec3(1.0f));
+        ComponentBody(CollisionType::Type);
         ~ComponentBody();
 
         void alignTo(glm::vec3 direction,float speed);
@@ -336,7 +336,7 @@ class ComponentBody: public ComponentBaseClass{
         glm::mat4 modelMatrix();
         const btRigidBody* getBody() const;
 
-        void setCollision(CollisionType::Type,float mass,glm::vec3 _scale = glm::vec3(1.0f));
+        void setCollision(CollisionType::Type,float mass);
         void setDamping(float linear,float angular);
 
         void setDynamic(bool dynamic);
@@ -432,7 +432,7 @@ class Entity: public EventObserver{
             component->m_Owner = m_ID;
             componentID = generatedID;
 
-            Engine::epriv::ComponentManager::onComponentAddedToEntity(this);
+            Engine::epriv::ComponentManager::onComponentAddedToEntity(*this);
             if (m_Scene) {
                 Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(slot).push_back(component);       
             }

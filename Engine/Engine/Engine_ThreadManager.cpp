@@ -42,14 +42,14 @@ class epriv::ThreadManager::impl final{
         uint                                m_Cores;
         boost_asio_service::work*           m_Work;
         vector<EngineCallback>              m_Callbacks;
-        void _init(const char* name, uint& w, uint& h,ThreadManager* super){
+        void _init(const char* name, uint& w, uint& h){
             m_Cores = boost::thread::hardware_concurrency(); if(m_Cores==0) m_Cores=1;
             m_Work = new boost_asio_service::work(m_IOService);
             for(uint i = 0; i < m_Cores; ++i){
                 m_Threads.create_thread(boost::bind(&boost_asio_service::run, &m_IOService));
             }
         }
-        void _destruct(ThreadManager* super){
+        void _destruct(){
             delete(m_Work);
             m_IOService.stop();
             m_Threads.join_all();
@@ -65,14 +65,14 @@ class epriv::ThreadManager::impl final{
                 else{ ++it; } 
             }
         }
-        void _update(const float& dt, epriv::ThreadManager* super){      
+        void _update(const float& dt){      
             _clearDoneCallbacks();
         }
 };
 
-epriv::ThreadManager::ThreadManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,this); threadManager = m_i.get(); }
-epriv::ThreadManager::~ThreadManager(){ m_i->_destruct(this); }
-void epriv::ThreadManager::_update(const float& dt){ m_i->_update(dt,this); }
+epriv::ThreadManager::ThreadManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h); threadManager = m_i.get(); }
+epriv::ThreadManager::~ThreadManager(){ m_i->_destruct(); }
+void epriv::ThreadManager::_update(const float& dt){ m_i->_update(dt); }
 const uint epriv::ThreadManager::cores() const{ return threadManager->m_Cores; }
 void epriv::threading::finalizeJob( boost_packed_task_ptr&& task){
     auto& mgr = *threadManager;

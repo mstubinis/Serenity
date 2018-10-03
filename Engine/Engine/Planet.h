@@ -44,8 +44,8 @@ struct RingInfo final{
     uint position;
     uint size;
     uint alphaBreakpoint;
-    glm::uvec3 color;
-    RingInfo(uint p, uint s, glm::uvec3 col,uint ab = 1){ 
+    glm::ivec3 color;
+    RingInfo(uint p, uint s, glm::ivec3 col,uint ab = 1){ 
         position = p;
         size = s; 
         color = col; 
@@ -119,7 +119,7 @@ class Ring final{
     private:
         Handle m_MaterialHandle;
         Planet* m_Parent;
-        void _makeRingImage(std::vector<RingInfo>&,Planet*);
+        void _makeRingImage(std::vector<RingInfo>&);
     public:
         Ring(std::vector<RingInfo>&,Planet*);
         ~Ring();

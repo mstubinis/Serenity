@@ -20,6 +20,8 @@
 
 #include "ResourceManifest.h"
 
+#include <iostream>
+
 using namespace Engine;
 using namespace std;
 
@@ -74,11 +76,10 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     float fScale = 1.0f / (outerRadius - innerRadius);
     glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.65f,4.0f),1.0f/glm::pow(0.57f,4.0f),1.0f/glm::pow(0.475f,4.0f));
 
-    //pass ground based parameters to the gpu
+
     Renderer::sendUniform1("fromAtmosphere", 0); 
     Renderer::sendUniform4Safe("Object_Color",i.color());
     Renderer::sendUniform3Safe("Gods_Rays_Color",i.godRaysColor());
-
     Renderer::sendUniform1("nSamples", numberSamples); 
     float exposure = 2.0f;
     Renderer::sendUniformMatrix4("Rot",rot); 
@@ -266,26 +267,17 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     }
     program->bind();
 
-    //if(Engine::Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1iSafe("HasGodsRays",1);
-    //else                                               Renderer::sendUniform1iSafe("HasGodsRays",0);
-
     Renderer::Settings::cullFace(GL_FRONT);
     Renderer::GLEnable(GLState::BLEND);
-    //Renderer::GLDisable(GLState::DEPTH_TEST);
-    //Renderer::GLDisable(GLState::DEPTH_MASK);
 
-    //pass atmosphere based parameters to the gpu
     Renderer::sendUniformMatrix4Safe("Model",model);
-
     Renderer::sendUniform1("nSamples", numberSamples);  
-
     Renderer::sendUniform4("VertDataMisc1",camPos.x,camPos.y,camPos.z,lightDir.x);
     Renderer::sendUniform4("VertDataMisc2",camHeight,camHeight2,0.0f,lightDir.y);
     Renderer::sendUniform4("VertDataMisc3",v3InvWaveLength.x,v3InvWaveLength.y,v3InvWaveLength.z,lightDir.z);
     Renderer::sendUniform4("VertDataScale",fScale,fScaledepth,fScale / fScaledepth,float(numberSamples));
     Renderer::sendUniform4("VertDataRadius",outerRadius,outerRadius*outerRadius,innerRadius,innerRadius*innerRadius);
     Renderer::sendUniform4("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
-
     Renderer::sendUniform4("FragDataGravity",g,g*g,exposure,0.0f);
 }};
 
@@ -297,7 +289,7 @@ struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineR
 }};
 
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):Entity(){
-    scene->addEntity(this);
+    scene->addEntity(*this);
     m_Model = new ComponentModel(ResourceManifest::PlanetMesh,mat,this,ResourceManifest::groundFromSpace);
     addComponent(m_Model);
     m_AtmosphereHeight = atmosphere;
@@ -378,7 +370,7 @@ Star::~Star(){
 }
 Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     m_Parent = parent;
-    _makeRingImage(rings,parent);
+    _makeRingImage(rings);
     m_Parent->addRing(this);
     PlanetaryRingMeshInstanceBindFunctor f;
     uint index = parent->m_Model->addModel(ResourceManifest::RingMesh,m_MaterialHandle,(ShaderP*)ResourceManifest::groundFromSpace.get(), RenderStage::GeometryTransparent);
@@ -389,60 +381,41 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
 }
 Ring::~Ring(){
 }
-void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
+void Ring::_makeRingImage(vector<RingInfo>& rings){
     sf::Image ringImage;
-    ringImage.create(1024,2,sf::Color());
-    ringImage.createMaskFromColor(sf::Color(),0);
+    ringImage.create(1024, 2, sf::Color(0,0,0,0));
     uint count = 0;
     for(auto ringInfo: rings){
-        glm::vec4 pC = glm::vec4(ringInfo.color.r/255.0f,ringInfo.color.g/255.0f,ringInfo.color.b/255.0f,1.0f);
+        glm::vec4 pC = glm::vec4((float)ringInfo.color.r, (float)ringInfo.color.g, (float)ringInfo.color.b, 255.0f) / 255.0f;
         uint alphaChangeRange = ringInfo.size - ringInfo.alphaBreakpoint;
         uint newI = 0;
         for(uint i = 0; i < ringInfo.size; ++i){
-            if(i > ringInfo.alphaBreakpoint){
-                uint numerator = alphaChangeRange - newI;
-                pC.a = float(numerator/(alphaChangeRange));
+            if (i > ringInfo.alphaBreakpoint) {
+                pC.a = float(alphaChangeRange - newI) / (float)alphaChangeRange;
                 ++newI;
             }else{
                 pC.a = 1;
-            }
-
-            sf::Color fFront;
-            sf::Color fBack;
-            if(count > 0){
-                sf::Color bgFrontPixel = ringImage.getPixel(ringInfo.position + i,0);
-                sf::Color bgBackPixel = ringImage.getPixel(ringInfo.position - i,0);
-
-                glm::vec4 bgColorFront = glm::vec4(bgFrontPixel.r/255.0f,bgFrontPixel.g/255.0f,bgFrontPixel.b/255.0f,bgFrontPixel.a/255.0f);
-                glm::vec4 bgColorBack = glm::vec4(bgBackPixel.r/255.0f,bgBackPixel.g/255.0f,bgBackPixel.b/255.0f,bgBackPixel.a/255.0f);
-
-                glm::vec4 _fcf = Engine::Math::PaintersAlgorithm(bgColorFront,pC);
-                glm::vec4 _fcb = Engine::Math::PaintersAlgorithm(bgColorBack,pC);
-
-                if(ringInfo.color.r < 0 || ringInfo.color.g < 0 || ringInfo.color.b < 0){
-                    _fcf = glm::vec4(bgColorFront.r,bgColorFront.g,bgColorFront.b,0);
-                    _fcb = glm::vec4(bgColorBack.r,bgColorBack.g,bgColorBack.b,0);
-
-                    uint numerator = ringInfo.size - i;
-                    pC.a = float(numerator/(ringInfo.size));
-                    _fcf.a = 1.0f - pC.a;
-                    _fcb.a = 1.0f - pC.a;
+            } 
+            if (ringInfo.position - i >= 0 && ringInfo.position - i <= ringImage.getSize().x) {
+                sf::Color fFront, fBack;
+                sf::Color bgFrontPixel = ringImage.getPixel(ringInfo.position + i, 0);
+                sf::Color bgBackPixel = ringImage.getPixel(ringInfo.position - i, 0);
+                glm::vec4 bgColorFront = glm::vec4(bgFrontPixel.r, bgFrontPixel.g, bgFrontPixel.b, bgFrontPixel.a) / 255.0f;
+                glm::vec4 bgColorBack = glm::vec4(bgBackPixel.r, bgBackPixel.g, bgBackPixel.b, bgBackPixel.a) / 255.0f;
+                glm::vec4 _fcf = Engine::Math::PaintersAlgorithm(pC, bgColorFront);
+                glm::vec4 _fcb = Engine::Math::PaintersAlgorithm(pC, bgColorBack); 
+                if (ringInfo.color.r < 0 || ringInfo.color.g < 0 || ringInfo.color.b < 0) {
+                    //transparent color, removing the BG color 
+                    _fcf = glm::vec4(bgColorFront.r, bgColorFront.g, bgColorFront.b, 1.0f - pC.a);
+                    _fcb = glm::vec4(bgColorBack.r, bgColorBack.g, bgColorBack.b, 1.0f - pC.a);
                 }
-                float ra = float(int(rand() % 10 - 5))/255.0f;
-                float ra1 = float(int(rand() % 10 - 5))/255.0f;
-                _fcf += glm::vec4(ra,ra,ra,0);
-                _fcb += glm::vec4(ra1,ra1,ra1,0);
                 fFront = sf::Color(sf::Uint8(_fcf.r * 255.0f), sf::Uint8(_fcf.g * 255.0f), sf::Uint8(_fcf.b * 255.0f), sf::Uint8(_fcf.a * 255.0f));
                 fBack = sf::Color(sf::Uint8(_fcb.r * 255.0f), sf::Uint8(_fcb.g * 255.0f), sf::Uint8(_fcb.b * 255.0f), sf::Uint8(_fcb.a * 255.0f));
-            }else{
-                int ra = rand() % 10 - 5;
-                pC += glm::vec4(ra,ra,ra,0);
-                fFront = sf::Color(sf::Uint8(pC.r * 255.0f), sf::Uint8(pC.g * 255.0f), sf::Uint8(pC.b * 255.0f), sf::Uint8(pC.a * 255.0f));
-                fBack = fFront;
-            }
-            for(uint s = 0; s < ringImage.getSize().y; ++s){
-                ringImage.setPixel(ringInfo.position + i,s,fFront);
-                ringImage.setPixel(ringInfo.position - i,s,fBack);
+
+                for (uint s = 0; s < ringImage.getSize().y; ++s) { 
+                    ringImage.setPixel(ringInfo.position + i, s, fFront);
+                    ringImage.setPixel(ringInfo.position - i, s, fBack);
+                }
             }
         }
         ++count;
