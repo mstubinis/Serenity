@@ -18,7 +18,7 @@ class Scene::impl final {
         vector<uint> m_Entities;
         vector<SunLight*> m_Lights;
         glm::vec3 m_BackgroundColor;
-
+        uint m_ID;
         vector<vector<epriv::RenderPipeline*>> m_Pipelines;
 
         void _init(Scene& super,string& _name) {
@@ -192,6 +192,7 @@ Scene::Scene(string name):m_i(new impl){
     m_i->_init(*this, name);
     registerEvent(EventType::SceneChanged);
 }
+uint Scene::id() { return m_i->m_ID; }
 uint Scene::addEntity(Entity& entity){ return m_i->_addEntity(*this,entity); }
 void Scene::removeEntity(Entity& e,bool immediate){ e.destroy(immediate); }
 void Scene::removeEntity(uint id,bool immediate){

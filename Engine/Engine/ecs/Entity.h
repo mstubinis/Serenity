@@ -3,10 +3,12 @@
 #define ENGINE_ECS_ENTITY_H
 
 #include <cstdint>
+#include "../Scene.h"
 
 typedef std::uint32_t uint;
 
 const unsigned int MAX_ENTITIES = 16777216;
+const unsigned int MAX_SCENES = 256;
 
 
 //Scenes,Entities, and Components should be given ids. an id of 0 means invalid or null.
@@ -27,8 +29,7 @@ struct Entity{
 	inline uint arrayIndex() const{ return ID - 1; }
 	inline operator uint() const{ return sceneID << 24 | ID; }
 	
-	//add a method to scene that adds entities
-	
+
 	
 	
 	template<typename T> T* addComponent(){

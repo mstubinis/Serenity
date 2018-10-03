@@ -4,21 +4,20 @@
 
 #include "ComponentPool.h"
 
-class IComponentSystem{
-    public:
-	    virtual void update(const float& dt) = 0;
+namespace Engine {
+    namespace epriv {
+        class IECSComponentSystem {
+            public:
+                virtual void update(const float& dt) = 0;
+        };
+        template<typename T> class ECSComponentSystem : public IECSComponentSystem {
+            private:
+                ECSComponentSystem<T> pool;
+            public:
+                ECSComponentSystem() {}
+                ~ECSComponentSystem() {}
+                virtual void update(const float& dt) {}
+        };
+    };
 };
-
-template<typename T>
-class ComponentSystem: public IComponentSystem{
-	private:
-	    ComponentPool<T> pool;
-	public:
-	
-	    ComponentSystem(){}
-		~ComponentSystem(){}
-	
-	    virtual void update(const float& dt){}
-};
-
 #endif

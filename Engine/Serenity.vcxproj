@@ -32,6 +32,7 @@
     <ClCompile Include="Engine\CapsuleSpace.cpp" />
     <ClCompile Include="Engine\Components.cpp" />
     <ClCompile Include="Engine\Constraint.cpp" />
+    <ClCompile Include="Engine\ecs\ECS.cpp" />
     <ClCompile Include="Engine\ecs\ECSRegistry.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="Engine\Engine_BuiltInShaders.cpp" />
@@ -84,7 +85,7 @@
     <ClInclude Include="Engine\ecs\ComponentSystem.h" />
     <ClInclude Include="Engine\ecs\ECSRegistry.h" />
     <ClInclude Include="Engine\ecs\Entity.h" />
-    <ClInclude Include="Engine\ecs\EntityPool.h" />
+    <ClInclude Include="Engine\ecs\ECS.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Engine\Engine_BuiltInResources.h" />
     <ClInclude Include="Engine\Engine_BuiltInShaders.h" />

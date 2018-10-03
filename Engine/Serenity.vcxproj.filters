@@ -203,6 +203,9 @@
     <ClCompile Include="Engine\ecs\ECSRegistry.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\ecs\ECS.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h">
@@ -364,7 +367,7 @@
     <ClInclude Include="Engine\ecs\Entity.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\ecs\EntityPool.h">
+    <ClInclude Include="Engine\ecs\ECS.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
   </ItemGroup>

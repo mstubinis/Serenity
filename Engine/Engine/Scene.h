@@ -43,6 +43,7 @@ class Scene: public EngineResource, public EventObserver{
         Scene(std::string name);
         virtual ~Scene();
 
+        uint id();
         Entity* getEntity(uint entityID);
         uint addEntity(Entity&);
         void removeEntity(Entity&,bool immediate = false);
