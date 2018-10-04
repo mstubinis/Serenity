@@ -82,23 +82,23 @@ namespace Engine {
                 ECS() = default;
                 ~ECS() = default;
 
-                TEntity* createEntity(Scene& _scene) { return entityPool.createEntity<TEntity>(_scene); }
+                TEntity* createEntity(Scene& _scene) { return entityPool.createEntity(_scene); }
                 void removeEntity(uint _entityID) { entityPool.removeEntity(_entityID); }
                 void removeEntity(TEntity& _entity) { ECS::removeEntity(_entity.ID); }
 
 
-                template<typename TComponent> TComponent* addComponent(uint _entityID) {
+                template<typename TComponent> TComponent* addComponent(TEntity& _entity) {
                     uint type_slot = ECSRegistry::type_slot<TComponent>();
                     buildPool<TComponent>(type_slot);
-                    return componentPools[type_slot]->addComponent<TComponent>(_entityID);
+                    return componentPools[type_slot]->addComponent<TComponent>(_entity.ID);
                 }
-                template<typename TComponent> void removeComponent(uint _entityID) {
+                template<typename TComponent> void removeComponent(TEntity& _entity) {
                     uint type_slot = ECSRegistry::type_slot<TComponent>();
-                    componentPools[type_slot]->removeComponent<TComponent>(_entityID);
+                    componentPools[type_slot]->removeComponent<TComponent>(_entity.ID);
                 }
-                template<typename TComponent> TComponent* getComponent(uint _entityID) {
+                template<typename TComponent> TComponent* getComponent(TEntity& _entity) {
                     uint type_slot = ECSRegistry::type_slot<TComponent>();
-                    return componentPools[type_slot]->getComponent<TComponent>(_entityID);
+                    return componentPools[type_slot]->getComponent<TComponent>(_entity.ID);
                 }
         };
     };

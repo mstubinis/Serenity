@@ -40,11 +40,7 @@ struct test {
     float x;
     float y;
 };
-struct test1 {
-    float z;
-    float w;
-    float t;
-};
+
 
 void Game::initResources(){
     Resources::getWindow().setIcon("data/Textures/icon.png");

@@ -13,7 +13,8 @@ namespace Engine {
         template <typename TEntity> class ECSComponentPool<TEntity>{
             protected:
                 uint                              amount;   //number of components created
-                std::vector<TEntity>              sparse; //maps entity ID to component Index in dense
+              //std::vector<TEntity>              sparse; //maps entity ID to component Index in dense
+                std::vector<uint>                 sparse; //maps entity ID to component Index in dense
             public:
                 ECSComponentPool() : amount(0) {}
                 ~ECSComponentPool() { amount = 0; sparse.clear(); }
