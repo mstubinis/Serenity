@@ -32,9 +32,11 @@
     <ClCompile Include="Engine\CapsuleSpace.cpp" />
     <ClCompile Include="Engine\Components.cpp" />
     <ClCompile Include="Engine\Constraint.cpp" />
+    <ClCompile Include="Engine\ecs\ComponentBody.cpp" />
     <ClCompile Include="Engine\ecs\ComponentCamera.cpp" />
     <ClCompile Include="Engine\ecs\ComponentModel.cpp" />
     <ClCompile Include="Engine\ecs\ECSRegistry.cpp" />
+    <ClCompile Include="Engine\ecs\Entity.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="Engine\Engine_BuiltInShaders.cpp" />
     <ClCompile Include="Engine\Engine_EventDispatcher.cpp" />
@@ -82,6 +84,7 @@
     <ClInclude Include="Engine\Components.h" />
     <ClInclude Include="Engine\Constraint.h" />
     <ClInclude Include="Engine\ecs\ComponentBaseClass.h" />
+    <ClInclude Include="Engine\ecs\ComponentBody.h" />
     <ClInclude Include="Engine\ecs\ComponentCamera.h" />
     <ClInclude Include="Engine\ecs\ComponentModel.h" />
     <ClInclude Include="Engine\ecs\ECSComponentPool.h" />

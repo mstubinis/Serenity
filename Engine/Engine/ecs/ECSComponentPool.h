@@ -2,7 +2,7 @@
 #ifndef ENGINE_ECS_COMPONENT_POOL_H
 #define ENGINE_ECS_COMPONENT_POOL_H
 
-#include "Entity.h"
+//#include "Entity.h"
 #include <algorithm> //std::swap (until C++11)
 #include <utility>   //std::swap (since C++11)
 #include <vector>
@@ -22,9 +22,9 @@ namespace Engine {
 
 
         template <typename TEntity,typename TComponent> class ECSComponentPool<TEntity,TComponent> : public ECSComponentPool<TEntity>{
-            using super = ECSComponentPool<Entity>;
+            using super = ECSComponentPool<TEntity>;
             private:
-                std::vector<TComponent>        dense;  //actual component pool
+                std::vector<TComponent>           dense;  //actual component pool
             public:
                 ECSComponentPool(){
                 }
@@ -33,16 +33,10 @@ namespace Engine {
                 }
                 TComponent* addComponent(uint _entityID) {
                     uint sparseID = _entityID - 1;
-                    //todo: improve this
-                    if (super::sparse.size() <= sparseID) {
-                        for (uint i = 0; i < 2048; ++i) { 
-                            super::sparse.emplace_back(0); 
-                        }
-                    }
-
-                    if (super::sparse[sparseID] != 0) {
+                    if (!(sparseID < super::sparse.size()))
+                        super::sparse.resize(sparseID + 1,0);
+                    if (super::sparse[sparseID] != 0)
                         return nullptr;
-                    }
                     dense.push_back(TComponent());
                     //dense.emplace_back(TComponent()); use this instead?
                     ++super::amount;
@@ -51,9 +45,8 @@ namespace Engine {
                 }
                 void removeComponent(uint _entityID) {
                     uint sparseID = _entityID - 1;
-                    if (super::sparse[sparseID] == 0) {
+                    if (super::sparse[sparseID] == 0)
                         return;
-                    }
                     uint removedCID = super::sparse[sparseID];
                     std::swap(dense[removedCID], dense[super::amount]);
                     --super::amount;
@@ -62,9 +55,8 @@ namespace Engine {
                 }
                 TComponent* getComponent(uint _entityID) {
                     uint sparseID = _entityID - 1;
-                    if (super::sparse[sparseID] == 0) {
+                    if (super::sparse[sparseID] == 0)
                         return nullptr;
-                    }
                     return &(dense[super::sparse[sparseID]]);
                 }
         };

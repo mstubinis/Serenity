@@ -11,6 +11,7 @@
 
 struct Handle;
 class OLD_Entity;
+struct Entity;
 class ShaderP;
 class Material;
 class Mesh;
@@ -32,6 +33,10 @@ class MeshInstance final: public BindableResource{
         MeshInstance(OLD_Entity*, Handle mesh, Handle mat, ShaderP* = 0);
         MeshInstance(OLD_Entity*, Mesh*,       Handle mat, ShaderP* = 0);
         MeshInstance(OLD_Entity*, Handle mesh, Material*,  ShaderP* = 0);
+        MeshInstance(Entity&, Mesh*, Material*, ShaderP* = 0);
+        MeshInstance(Entity&, Handle mesh, Handle mat, ShaderP* = 0);
+        MeshInstance(Entity&, Mesh*, Handle mat, ShaderP* = 0);
+        MeshInstance(Entity&, Handle mesh, Material*, ShaderP* = 0);
         ~MeshInstance();
 
         ShaderP* shaderProgram();

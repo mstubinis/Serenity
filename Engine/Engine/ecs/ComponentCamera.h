@@ -8,12 +8,12 @@
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
-/*
-class Camera;
 
+class Camera;
+class ComponentModel;
 class ComponentCamera : public ComponentBaseClass {
     friend class ::Camera;
-    friend class ::Engine::epriv::ComponentCameraSystem;
+    friend class ::ComponentModel;
     private:
         enum Type { Perspective, Orthographic, };
         Type _type;
@@ -25,9 +25,9 @@ class ComponentCamera : public ComponentBaseClass {
         union { float _aspectRatio;  float _right; };
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentCamera();
-        ComponentCamera(float angle, float aspectRatio, float nearPlane, float farPlane);
-        ComponentCamera(float left, float right, float bottom, float top, float nearPlane, float farPlane);
+        ComponentCamera(Entity&);
+        ComponentCamera(Entity&,float angle, float aspectRatio, float nearPlane, float farPlane);
+        ComponentCamera(Entity&,float left, float right, float bottom, float top, float nearPlane, float farPlane);
         ~ComponentCamera();
 
         virtual void update(const float& dt);
@@ -51,6 +51,5 @@ class ComponentCamera : public ComponentBaseClass {
         uint sphereIntersectTest(glm::vec3& objectPosition, float objectRadius);
 };
 
-*/
 
 #endif

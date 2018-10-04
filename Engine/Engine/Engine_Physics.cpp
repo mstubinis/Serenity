@@ -8,6 +8,9 @@
 #include "MeshInstance.h"
 #include "Scene.h"
 
+//new ecs
+#include "ecs/ComponentModel.h"
+
 #include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/btBulletCollisionCommon.h>
@@ -817,6 +820,13 @@ class Collision::impl final {
             }
             _init(meshes, mass);
         }
+        void _init(ComponentModel& modelComponent, float& mass) {
+            vector<Mesh*> meshes;
+            for (uint i = 0; i < modelComponent.getNumModels(); ++i) {
+                meshes.push_back(modelComponent.getModel(i)->mesh());
+            }
+            _init(meshes, mass);
+        }
         void _init(CollisionType::Type _type,Mesh* mesh,float& mass) {
             btCollisionShape* shape = InternalMeshPublicInterface::BuildCollision(mesh, _type);
             m_Shape = shape;
@@ -842,6 +852,7 @@ class Collision::impl final {
 
 Collision::Collision(vector<Mesh*>& meshes, float mass):m_i(new impl) {m_i->_init(meshes, mass);}
 Collision::Collision(OLD_ComponentModel* modelComponent, float mass) :m_i(new impl) {m_i->_init(modelComponent, mass);}
+Collision::Collision(ComponentModel& modelComponent, float mass) : m_i(new impl) { m_i->_init(modelComponent, mass); }
 Collision::Collision(CollisionType::Type type, Mesh* mesh,float mass):m_i(new impl){ m_i->_init(type,mesh,mass); }
 Collision::~Collision(){ m_i->_destruct(); }
 void Collision::setMass(float mass){ m_i->_setMass(mass); }

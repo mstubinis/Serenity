@@ -11,7 +11,6 @@
 class Texture;
 class ShaderP;
 class Mesh;
-class Entity;
 
 class MaterialComponentType{public: enum Type{
     Diffuse,

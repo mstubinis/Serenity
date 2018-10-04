@@ -3,17 +3,10 @@
 #define ENGINE_ECS_H
 
 #include "ECSRegistry.h"
-#include "Entity.h"
 #include "ECSComponentPool.h"
-#include "ComponentBaseClass.h"
-#include <algorithm> //std::swap (until C++11)
-#include <utility>   //std::swap (since C++11)
-#include <vector>
 #include <memory>
 
 #include <iostream>
-
-
 
 class Scene;
 namespace Engine {
@@ -44,7 +37,7 @@ namespace Engine {
                     if (indexToRemove != lastIndex) {
                         std::swap(pool[indexToRemove], pool[lastIndex]);
                     }
-                    Entity& e = pool[pool.size()];
+                    TEntity& e = pool[pool.size()];
                     /*
                     for(auto system : componentSystems){
                         system.removeComponent(this);
@@ -55,7 +48,7 @@ namespace Engine {
                 }
                 void removeEntity(TEntity& _entity) { removeEntity(_entity.ID); }
                 void moveEntity(ECSEntityPool<TEntity>& other, uint _entityID) {
-                    Entity& e = pool[_entityID - 1];
+                    TEntity& e = pool[_entityID - 1];
                     other.addEntity(e);
                     removeEntity(e);
                 }

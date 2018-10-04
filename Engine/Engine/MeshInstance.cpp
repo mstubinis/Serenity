@@ -73,6 +73,23 @@ class MeshInstance::impl{
             m_Scale = glm::vec3(1.0f);
             _updateModelMatrix();
         }
+        void _init(Mesh* mesh, Material* mat, Entity& entity, ShaderP* program) {
+            m_Stage = RenderStage::GeometryOpaque;
+            m_PassedRenderCheck = false;
+            m_Visible = true;
+            //m_Entity = entity;
+
+            _setShaderProgram(program);
+            _setMaterial(mat);
+            _setMesh(mesh);
+
+            m_Color = glm::vec4(1.0f);
+            m_GodRaysColor = glm::vec3(0.0f);
+            m_Position = glm::vec3(0.0f);
+            m_Orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+            m_Scale = glm::vec3(1.0f);
+            _updateModelMatrix();
+        }
         void _setShaderProgram(ShaderP* program) {
             if (!program) { program = epriv::InternalShaderPrograms::Deferred; }
             m_ShaderProgram = program;
@@ -184,6 +201,36 @@ MeshInstance::MeshInstance(OLD_Entity* entity,Handle mesh,Material* mat, ShaderP
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
+
+
+
+MeshInstance::MeshInstance(Entity& entity, Mesh* mesh, Material* mat, ShaderP* program) :m_i(new impl) {
+    m_i->_init(mesh, mat, entity, program);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+}
+MeshInstance::MeshInstance(Entity& entity, Handle mesh, Handle mat, ShaderP* program) : m_i(new impl) {
+    Mesh* _mesh = (Mesh*)mesh.get();
+    Material* _mat = (Material*)mat.get();
+    m_i->_init(_mesh, _mat, entity, program);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+}
+MeshInstance::MeshInstance(Entity& entity, Mesh* mesh, Handle mat, ShaderP* program) :m_i(new impl) {
+    Material* _mat = (Material*)mat.get();
+    m_i->_init(mesh, _mat, entity, program);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+}
+MeshInstance::MeshInstance(Entity& entity, Handle mesh, Material* mat, ShaderP* program) :m_i(new impl) {
+    Mesh* _mesh = (Mesh*)mesh.get();
+    m_i->_init(_mesh, mat, entity, program);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+}
+
+
+
 MeshInstance::~MeshInstance(){ m_i->_destruct(); }
 void MeshInstance::setStage(RenderStage::Stage s) { m_i->m_Stage = s; }
 void MeshInstance::show() { m_i->m_Visible = true; }

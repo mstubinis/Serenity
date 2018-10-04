@@ -10,43 +10,7 @@ using namespace Engine;
 using namespace std;
 
 
-/*
-
-epriv::ComponentCameraSystem::ComponentCameraSystem() {
-
-}
-epriv::ComponentCameraSystem::~ComponentCameraSystem() {
-
-}
-void epriv::ComponentCameraSystem::RebuildProjectionMatrix(ComponentCamera& cam) {
-    if (cam._type == ComponentCamera::Type::Perspective) {
-        cam._projectionMatrix = glm::perspective(cam._angle, cam._aspectRatio, cam._nearPlane, cam._farPlane);
-    }else{
-        cam._projectionMatrix = glm::ortho(cam._left, cam._right, cam._bottom, cam._top, cam._nearPlane, cam._farPlane);
-    }
-}
-
-static void _defaultUpdate(vector<ComponentBaseClass*>& vec, const float& dt) {
-    for (auto camera : vec) {
-        auto& cmpnt = *(ComponentCamera*)camera;
-        cmpnt.update(dt);//custom camera user code
-        Math::extractViewFrustumPlanesHartmannGribbs(cmpnt._projectionMatrix * cmpnt._viewMatrix, cmpnt._planes);//update view frustrum 
-    }
-}
-void epriv::ComponentCameraSystem::update(const float& dt) {
-    uint slot = Components::getSlot<ComponentCamera>();
-    auto& v = ComponentManager::m_ComponentVectorsScene.at(slot);
-    auto split = epriv::threading::splitVector(v);
-    for (auto vec : split) {
-        epriv::threading::addJob(_defaultUpdate, vec, dt);
-    }
-    epriv::threading::waitForAll();
-}
-
-
-
-
-ComponentCamera::ComponentCamera() :ComponentBaseClass() {
+ComponentCamera::ComponentCamera(Entity& _e) : ComponentBaseClass(_e){
     _eye = glm::vec3(0.0f); _up = glm::vec3(0.0f, 1.0f, 0.0f);
     const glm::uvec2& winSize = Resources::getWindowSize();
     _angle = glm::radians(60.0f); _aspectRatio = winSize.x / (float)winSize.y;
@@ -55,14 +19,14 @@ ComponentCamera::ComponentCamera() :ComponentBaseClass() {
     _viewMatrix = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     _type = Type::Perspective;
 }
-ComponentCamera::ComponentCamera(float angle, float aspectRatio, float nearPlane, float farPlane) :ComponentBaseClass() {
+ComponentCamera::ComponentCamera(Entity& _e,float angle, float aspectRatio, float nearPlane, float farPlane) : ComponentBaseClass(_e) {
     _eye = glm::vec3(0.0f); _up = glm::vec3(0.0f, 1.0f, 0.0f);
     _angle = glm::radians(angle); _aspectRatio = aspectRatio; _nearPlane = nearPlane; _farPlane = farPlane;
     _projectionMatrix = glm::perspective(_angle, _aspectRatio, _nearPlane, _farPlane);
     _viewMatrix = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     _type = Type::Perspective;
 }
-ComponentCamera::ComponentCamera(float left, float right, float bottom, float top, float nearPlane, float farPlane) :ComponentBaseClass() {
+ComponentCamera::ComponentCamera(Entity& _e,float left, float right, float bottom, float top, float nearPlane, float farPlane) : ComponentBaseClass(_e) {
     _eye = glm::vec3(0.0f); _up = glm::vec3(0.0f, 1.0f, 0.0f);
     _left = left; _right = right; _bottom = bottom; _top = top; _nearPlane = nearPlane; _farPlane = farPlane;
     _projectionMatrix = glm::ortho(_left, _right, _bottom, _top, _nearPlane, _farPlane);
@@ -75,7 +39,7 @@ void ComponentCamera::resize(uint width, uint height) {
     if (_type == Type::Perspective) {
         _aspectRatio = width / (float)height;
     }
-    epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);
+    //epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);
 }
 uint ComponentCamera::pointIntersectTest(glm::vec3& position) {
     for (int i = 0; i < 6; ++i) {
@@ -111,9 +75,8 @@ float ComponentCamera::getAngle() { return _angle; }
 float ComponentCamera::getAspect() { return _aspectRatio; }
 float ComponentCamera::getNear() { return _nearPlane; }
 float ComponentCamera::getFar() { return _farPlane; }
-void ComponentCamera::setAngle(float a) { _angle = a; epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setAspect(float a) { _aspectRatio = a; epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setNear(float n) { _nearPlane = n; epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setFar(float f) { _farPlane = f; epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this); }
+void ComponentCamera::setAngle(float a) { _angle = a; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
+void ComponentCamera::setAspect(float a) { _aspectRatio = a; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
+void ComponentCamera::setNear(float n) { _nearPlane = n; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
+void ComponentCamera::setFar(float f) { _farPlane = f; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
 
-*/

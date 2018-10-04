@@ -215,6 +215,12 @@
     <ClCompile Include="Engine\ecs\ComponentModel.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\ecs\ComponentBody.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\ecs\Entity.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h">
@@ -380,6 +386,9 @@
       <Filter>Header Files\Engine\Core\ECS\Components</Filter>
     </ClInclude>
     <ClInclude Include="Engine\ecs\ComponentModel.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ecs\ComponentBody.h">
       <Filter>Header Files\Engine\Core\ECS\Components</Filter>
     </ClInclude>
   </ItemGroup>

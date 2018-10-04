@@ -4,7 +4,6 @@
 
 #include "ComponentBaseClass.h"
 
-/*
 
 struct Handle;
 class ShaderP;
@@ -13,23 +12,23 @@ class Material;
 class MeshInstance;
 
 class ComponentCamera;
-
 class ComponentModel : public ComponentBaseClass {
+    friend class ::ComponentCamera;
     private:
         std::vector<MeshInstance*> models;
         float _radius;
         glm::vec3 _radiusBox;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Handle& materialHandle, Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Handle& meshHandle, Material*, Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Material*, Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity&, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Mesh*, Handle& materialHandle, Entity&, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Handle& meshHandle, Material*, Entity&, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Mesh*, Material*, Entity&, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Handle& materialHandle, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Handle& meshHandle, Material*, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Material*, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity&, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Mesh*, Handle& materialHandle, Entity&, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Handle& meshHandle, Material*, Entity&, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Mesh*, Material*, Entity&, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
 
         ~ComponentModel();
 
@@ -61,7 +60,5 @@ class ComponentModel : public ComponentBaseClass {
         template<class T> void setCustomBindFunctor(T& functor, uint index = 0) { models.at(index)->setCustomBindFunctor(functor); }
         template<class T> void setCustomUnbindFunctor(T& functor, uint index = 0) { models.at(index)->setCustomUnbindFunctor(functor); }
 };
-
-*/
 
 #endif

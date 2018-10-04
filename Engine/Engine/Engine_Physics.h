@@ -13,6 +13,7 @@ class btRigidBody;
 class btCollisionObject;
 class Mesh;
 class OLD_ComponentModel;
+class ComponentModel;
 namespace Engine{
     namespace epriv{
         struct ImportedMeshData;
@@ -34,6 +35,7 @@ class Collision final{
     public:
         Collision(std::vector<Mesh*>& meshes, float mass = 0);
         Collision(OLD_ComponentModel*, float mass = 0);
+        Collision(ComponentModel&, float mass = 0);
         Collision(CollisionType::Type, Mesh* mesh,float mass = 0);
         ~Collision();
 
