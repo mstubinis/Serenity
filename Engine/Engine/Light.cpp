@@ -42,7 +42,7 @@ vector<boost::tuple<float,float,float>> LIGHT_RANGES = [](){
 
 class SunLight::impl final{
     public:
-        ComponentBody* m_Body;
+        OLD_ComponentBody* m_Body;
         bool m_Active;
         glm::vec4 m_Color;
         LightType::Type m_Type;
@@ -55,12 +55,12 @@ class SunLight::impl final{
             m_DiffuseIntensity = 2.0f;
             m_SpecularIntensity = 1.0f;
 
-            m_Body = new ComponentBody();
+            m_Body = new OLD_ComponentBody();
             super.addComponent(m_Body);
         }
 };
 
-SunLight::SunLight(glm::vec3 pos,LightType::Type type,Scene* scene):Entity(),m_i(new impl){
+SunLight::SunLight(glm::vec3 pos,LightType::Type type,Scene* scene):m_i(new impl){
     if(!scene){
         scene = Resources::getCurrentScene();
     }

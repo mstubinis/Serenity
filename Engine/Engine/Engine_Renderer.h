@@ -18,7 +18,7 @@ class ShaderP;
 class Texture;
 class Font;
 class Camera;
-class Entity;
+class OLD_Entity;
 class Scene;
 
 class DepthFunc{public: enum Func{
@@ -110,7 +110,7 @@ namespace Engine{
 
                 void _render(
                     Camera&, const uint fboWidth, const uint fboHeight,bool HUD=true,
-                    Entity* ignore=nullptr,const bool mainRenderFunc=true,const GLuint display_fbo=0, const GLuint display_rbo=0
+                    OLD_Entity* ignore=nullptr,const bool mainRenderFunc=true,const GLuint display_fbo=0, const GLuint display_rbo=0
                 );
                 void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
                 void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
@@ -228,8 +228,8 @@ namespace Engine{
                 float getFOVDegrees();    void setFOVDegrees(float d);
                 float getAlphaFalloff();  void setAlphaFalloff(float a);
                 void setObject(uint&);
-                void setObject(Entity*);
-                Entity* getObject();
+                void setObject(OLD_Entity*);
+                OLD_Entity* getObject();
             };
             namespace SSAO{
                 bool enabled();

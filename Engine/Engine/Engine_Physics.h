@@ -7,12 +7,12 @@
 #include "Engine_Utils.h"
 #include <Bullet/LinearMath/btVector3.h>
 
-class Entity;
+class OLD_Entity;
 class btCollisionShape;
 class btRigidBody;
 class btCollisionObject;
 class Mesh;
-class ComponentModel;
+class OLD_ComponentModel;
 namespace Engine{
     namespace epriv{
         struct ImportedMeshData;
@@ -33,7 +33,7 @@ class Collision final{
         class impl; std::unique_ptr<impl> m_i;
     public:
         Collision(std::vector<Mesh*>& meshes, float mass = 0);
-        Collision(ComponentModel*, float mass = 0);
+        Collision(OLD_ComponentModel*, float mass = 0);
         Collision(CollisionType::Type, Mesh* mesh,float mass = 0);
         ~Collision();
 
@@ -63,8 +63,8 @@ namespace Engine{
         std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,btRigidBody* ignoredObject = nullptr);
         std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,std::vector<btRigidBody*>& ignoredObjects);
 
-        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,Entity* ignoredObject = nullptr);
-        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,std::vector<Entity*>& ignoredObjects);
+        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end, OLD_Entity* ignoredObject = nullptr);
+        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,std::vector<OLD_Entity*>& ignoredObjects);
 
         void setGravity(float,float,float); 
         void setGravity(glm::vec3&);

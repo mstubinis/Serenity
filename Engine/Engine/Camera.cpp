@@ -12,25 +12,25 @@ class Camera::impl final{
             if(!scene)
                 scene = Resources::getCurrentScene();   
             scene->addEntity(super);
-            super.m_Body = new ComponentBody();
+            super.m_Body = new OLD_ComponentBody();
             super.addComponent(super.m_Body);
             super.m_Camera->lookAt(super.m_Body->position(),super.m_Body->position() + super.m_Body->forward(),super.m_Body->up());      
             super.addComponent(super.m_Camera); 
         }
         void _init(float& angle, float& aspectRatio, float& _near, float& _far,Scene* scene,Camera& super){
-            super.m_Camera = new ComponentCamera(angle,aspectRatio,_near,_far);
+            super.m_Camera = new OLD_ComponentCamera(angle,aspectRatio,_near,_far);
             _baseInit(scene,super);
         }
         void _init(float& left, float& right, float& bottom, float& top, float& _near, float& _far,Scene* scene,Camera& super){		
-            super.m_Camera = new ComponentCamera(left,right,bottom,top,_near,_far);
+            super.m_Camera = new OLD_ComponentCamera(left,right,bottom,top,_near,_far);
             _baseInit(scene,super);
         }
 };
 
-Camera::Camera(float angle, float aspectRatio, float _near, float _far,Scene* scene):Entity(),m_i(new impl){//create a perspective camera
+Camera::Camera(float angle, float aspectRatio, float _near, float _far,Scene* scene):m_i(new impl){//create a perspective camera
     m_i->_init(angle,aspectRatio,_near,_far,scene,*this);
 }
-Camera::Camera(float left, float right, float bottom, float top, float _near, float _far,Scene* scene):Entity(),m_i(new impl){//create an orthographic camera
+Camera::Camera(float left, float right, float bottom, float top, float _near, float _far,Scene* scene):m_i(new impl){//create an orthographic camera
     m_i->_init(left,right,bottom,top,_near,_far,scene,*this);
 }
 Camera::~Camera(){ 
@@ -55,16 +55,16 @@ const glm::vec3 Camera::getViewVector(){ return m_Camera->getViewVector(); }
 const glm::vec3 Camera::forward(){ return m_Body->forward(); }
 const glm::vec3 Camera::right(){ return m_Body->right(); }
 const glm::vec3 Camera::up(){ return m_Body->up(); }
-float Camera::getDistance(Entity* e){
-    auto* b = e->getComponent<ComponentBody>();
+float Camera::getDistance(OLD_Entity* e){
+    auto* b = e->getComponent<OLD_ComponentBody>();
     return glm::distance(b->position(),getPosition());
 }
 float Camera::getDistance(glm::vec3 objPos){ return glm::distance(objPos,getPosition()); }
 uint Camera::sphereIntersectTest(glm::vec3 pos, float radius){ return m_Camera->sphereIntersectTest(pos,radius); }
 uint Camera::pointIntersectTest(glm::vec3 pos){ return m_Camera->pointIntersectTest(pos); }
-bool Camera::rayIntersectSphere(Entity* entity){
-    auto& body = *(entity->getComponent<ComponentBody>());
-    auto* model = entity->getComponent<ComponentModel>();
+bool Camera::rayIntersectSphere(OLD_Entity* entity){
+    auto& body = *(entity->getComponent<OLD_ComponentBody>());
+    auto* model = entity->getComponent<OLD_ComponentModel>();
     float radius = 0.0f;
     if(model) radius = model->radius();
     return Math::rayIntersectSphere(body.position(),radius,m_Body->position(),m_Camera->getViewVector());

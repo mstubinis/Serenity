@@ -656,8 +656,8 @@ class epriv::PhysicsManager::impl final{
                         const btVector3& ptB = pt.getPositionWorldOnB();
                         const btVector3& normalOnB = pt.m_normalWorldOnB;
 
-                        ComponentBody* a = (ComponentBody*)(obA->getUserPointer());
-                        ComponentBody* b = (ComponentBody*)(obB->getUserPointer());
+                        OLD_ComponentBody* a = (OLD_ComponentBody*)(obA->getUserPointer());
+                        OLD_ComponentBody* b = (OLD_ComponentBody*)(obB->getUserPointer());
 
                         //a->collisionResponse(b);    b->collisionResponse(a);
                     }
@@ -762,23 +762,23 @@ vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector
     }
     return result;
  }
-vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,Entity* ignored){
+vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e, OLD_Entity* ignored){
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
     
-    ComponentBody* body = ignored->getComponent<ComponentBody>();
+    OLD_ComponentBody* body = ignored->getComponent<OLD_ComponentBody>();
 
     if(body){
         return Physics::rayCast(_s,_e,const_cast<btRigidBody*>(body->getBody()));
     }
     return Physics::rayCast(_s,_e,nullptr);
  }
-vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<Entity*>& ignored){
+vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<OLD_Entity*>& ignored){
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
     vector<btRigidBody*> objs;
     for(auto o:ignored){
-        ComponentBody* body = o->getComponent<ComponentBody>();
+        OLD_ComponentBody* body = o->getComponent<OLD_ComponentBody>();
         if(body){
             objs.push_back(const_cast<btRigidBody*>(body->getBody()));
         }
@@ -810,7 +810,7 @@ class Collision::impl final {
             m_Shape = compound;
             _baseInit(CollisionType::Compound, mass);
         }
-        void _init(ComponentModel* modelComponent, float& mass) {
+        void _init(OLD_ComponentModel* modelComponent, float& mass) {
             vector<Mesh*> meshes;
             for (uint i = 0; i < modelComponent->getNumModels(); ++i) {
                 meshes.push_back(modelComponent->getModel(i)->mesh());
@@ -841,7 +841,7 @@ class Collision::impl final {
 };
 
 Collision::Collision(vector<Mesh*>& meshes, float mass):m_i(new impl) {m_i->_init(meshes, mass);}
-Collision::Collision(ComponentModel* modelComponent, float mass) :m_i(new impl) {m_i->_init(modelComponent, mass);}
+Collision::Collision(OLD_ComponentModel* modelComponent, float mass) :m_i(new impl) {m_i->_init(modelComponent, mass);}
 Collision::Collision(CollisionType::Type type, Mesh* mesh,float mass):m_i(new impl){ m_i->_init(type,mesh,mass); }
 Collision::~Collision(){ m_i->_destruct(); }
 void Collision::setMass(float mass){ m_i->_setMass(mass); }

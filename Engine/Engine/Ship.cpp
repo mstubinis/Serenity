@@ -65,7 +65,7 @@ ShipSystemMainThrusters::~ShipSystemMainThrusters(){
 }
 void ShipSystemMainThrusters::update(const float& dt){
     if(isOnline()){
-        ComponentBody& body = *m_Ship->getComponent<ComponentBody>();
+        OLD_ComponentBody& body = *m_Ship->getComponent<OLD_ComponentBody>();
         glm::vec3 velocity = body.getLinearVelocity();
         // apply dampening
         body.setLinearVelocity(velocity * 0.9991f,false);
@@ -94,7 +94,7 @@ ShipSystemPitchThrusters::~ShipSystemPitchThrusters(){
 }
 void ShipSystemPitchThrusters::update(const float& dt){
     if(isOnline()){
-        ComponentBody& body = *m_Ship->getComponent<ComponentBody>();
+        OLD_ComponentBody& body = *m_Ship->getComponent<OLD_ComponentBody>();
         glm::vec3 velocity = body.getAngularVelocity();
         velocity.x *= 0.9970f;
         // apply dampening
@@ -121,7 +121,7 @@ ShipSystemYawThrusters::~ShipSystemYawThrusters(){
 }
 void ShipSystemYawThrusters::update(const float& dt){
     if(isOnline()){
-        ComponentBody& body = *m_Ship->getComponent<ComponentBody>();
+        OLD_ComponentBody& body = *m_Ship->getComponent<OLD_ComponentBody>();
         glm::vec3 velocity = body.getAngularVelocity();
         velocity.y *= 0.9970f;
         // apply dampening
@@ -148,7 +148,7 @@ ShipSystemRollThrusters::~ShipSystemRollThrusters(){
 }
 void ShipSystemRollThrusters::update(const float& dt){
     if(isOnline()){
-        auto* body = m_Ship->getComponent<ComponentBody>();
+        auto* body = m_Ship->getComponent<OLD_ComponentBody>();
         glm::vec3 velocity = body->getAngularVelocity();
         velocity.z *= 0.9970f;
         // apply dampening
@@ -209,11 +209,11 @@ void ShipSystemSensors::update(const float& dt){
 }
 #pragma endregion
 
-Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,Scene* scene) :Entity() {
+Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,Scene* scene){
     scene->addEntity(*this);
-	ComponentBody* rigidBodyComponent = new ComponentBody(_type);
+    OLD_ComponentBody* rigidBodyComponent = new OLD_ComponentBody(_type);
 	addComponent(rigidBodyComponent);
-    ComponentModel* modelComponent = new ComponentModel(mesh, mat, this);
+    OLD_ComponentModel* modelComponent = new OLD_ComponentModel(mesh, mat, this);
     addComponent(modelComponent);
 
     glm::vec3 boundingBox = modelComponent->boundingBox();
@@ -256,17 +256,17 @@ void Ship::update(const float& dt){
 
         if(!Engine::paused()){
             if(m_IsWarping && m_WarpFactor > 0){
-                auto* body = getComponent<ComponentBody>();
+                auto* body = getComponent<OLD_ComponentBody>();
                 float speed = (m_WarpFactor * 1.0f / 0.46f) * 2.0f;
                 glm::vec3 s = (body->forward() * glm::pow(speed, 15.0f)) / body->mass();
                 for(auto id: epriv::InternalScenePublicInterface::GetEntities(currentScene)){
-                    Entity* e = currentScene.getEntity(id);
+                    OLD_Entity* e = currentScene.getEntity(id);
                     if(e){
-                        auto* cam = e->getComponent<ComponentCamera>();
+                        auto* cam = e->getComponent<OLD_ComponentCamera>();
                         auto* camGame = (e->getComponent<GameCameraComponent>());
                         //TODO: parent->child relationship
                         if(e != this && !cam && !camGame){
-                            auto* ebody = e->getComponent<ComponentBody>();
+                            auto* ebody = e->getComponent<OLD_ComponentBody>();
                             ebody->setPosition(ebody->position() + (s * dt));
                         }
                     }
@@ -313,7 +313,7 @@ void Ship::translateWarp(float amount,float dt){
         m_WarpFactor += amountToAdd * dt;
     }
 }
-void Ship::setTarget(Entity* target){
+void Ship::setTarget(OLD_Entity* target){
     m_Target = target;
 }
 void Ship::onEvent(const Event& e){

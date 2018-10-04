@@ -46,7 +46,7 @@ namespace Engine {
 class MeshInstance::impl{
     public:  
         vector<epriv::MeshInstanceAnimation*> m_AnimationQueue;
-        Entity* m_Entity;
+        OLD_Entity* m_Entity;
         ShaderP* m_ShaderProgram;
         Mesh* m_Mesh;
         Material* m_Material;
@@ -56,7 +56,7 @@ class MeshInstance::impl{
         glm::mat4 m_Model;
         glm::vec4 m_Color;
         bool m_PassedRenderCheck, m_Visible;
-        void _init(Mesh* mesh,Material* mat,Entity* entity,ShaderP* program){
+        void _init(Mesh* mesh,Material* mat, OLD_Entity* entity,ShaderP* program){
             m_Stage = RenderStage::GeometryOpaque;
             m_PassedRenderCheck = false;
             m_Visible = true;
@@ -109,8 +109,8 @@ class MeshInstance::impl{
 void epriv::DefaultMeshInstanceBindFunctor::operator()(EngineResource* r) const {
     MeshInstance::impl& i = *((MeshInstance*)r)->m_i;
     glm::vec3 camPos = Resources::getCurrentScene()->getActiveCamera()->getPosition();
-    Entity* parent = i.m_Entity;
-    auto& body = *(parent->getComponent<ComponentBody>());
+    OLD_Entity* parent = i.m_Entity;
+    auto& body = *(parent->getComponent<OLD_ComponentBody>());
     glm::mat4 parentModel = body.modelMatrix();
 
     vector<MeshInstanceAnimation*>& animationQueue = i.m_AnimationQueue;
@@ -160,25 +160,25 @@ epriv::DefaultMeshInstanceBindFunctor   DEFAULT_BIND_FUNCTOR;
 epriv::DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
 
-MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat, ShaderP* program):m_i(new impl){
+MeshInstance::MeshInstance(OLD_Entity* entity, Mesh* mesh,Material* mat, ShaderP* program):m_i(new impl){
     m_i->_init(mesh,mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat, ShaderP* program):m_i(new impl){
+MeshInstance::MeshInstance(OLD_Entity* entity,Handle mesh,Handle mat, ShaderP* program):m_i(new impl){
     Mesh* _mesh = (Mesh*)mesh.get();
     Material* _mat = (Material*)mat.get();
     m_i->_init(_mesh,_mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(Entity* entity,Mesh* mesh,Handle mat, ShaderP* program):m_i(new impl){
+MeshInstance::MeshInstance(OLD_Entity* entity,Mesh* mesh,Handle mat, ShaderP* program):m_i(new impl){
     Material* _mat = (Material*)mat.get();
     m_i->_init(mesh,_mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat, ShaderP* program):m_i(new impl){
+MeshInstance::MeshInstance(OLD_Entity* entity,Handle mesh,Material* mat, ShaderP* program):m_i(new impl){
     Mesh* _mesh = (Mesh*)mesh.get();
     m_i->_init(_mesh,mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
@@ -205,7 +205,7 @@ void MeshInstance::setScale(glm::vec3 v){ m_i->_setScale(v.x,v.y,v.z); }
 void MeshInstance::translate(glm::vec3 v){ m_i->_translate(v.x,v.y,v.z); }
 void MeshInstance::rotate(glm::vec3 v){ m_i->_rotate(v.x,v.y,v.z); }
 void MeshInstance::scale(glm::vec3 v){ m_i->_scale(v.x,v.y,v.z); }
-Entity* MeshInstance::parent(){ return m_i->m_Entity; }
+OLD_Entity* MeshInstance::parent(){ return m_i->m_Entity; }
 glm::vec4& MeshInstance::color(){ return m_i->m_Color; }
 glm::vec3& MeshInstance::godRaysColor(){ return m_i->m_GodRaysColor; }
 glm::mat4& MeshInstance::model(){ return m_i->m_Model; }

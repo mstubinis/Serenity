@@ -25,7 +25,7 @@ class LightAttenuation{public:enum Model{
     Constant_Linear_Exponent,
     Distance_Radius_Squared,
 _TOTAL};};
-class SunLight: public Entity{
+class SunLight: public OLD_Entity{
     private:
         class impl;
     protected:

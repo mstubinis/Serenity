@@ -10,7 +10,7 @@
 #include "Engine_EventObject.h"
 
 struct Handle;
-class Entity;
+class OLD_Entity;
 class ShaderP;
 class Material;
 class Mesh;
@@ -28,16 +28,16 @@ class MeshInstance final: public BindableResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        MeshInstance(Entity*, Mesh*,       Material*,  ShaderP* = 0);
-        MeshInstance(Entity*, Handle mesh, Handle mat, ShaderP* = 0);
-        MeshInstance(Entity*, Mesh*,       Handle mat, ShaderP* = 0);
-        MeshInstance(Entity*, Handle mesh, Material*,  ShaderP* = 0);
+        MeshInstance(OLD_Entity*, Mesh*,       Material*,  ShaderP* = 0);
+        MeshInstance(OLD_Entity*, Handle mesh, Handle mat, ShaderP* = 0);
+        MeshInstance(OLD_Entity*, Mesh*,       Handle mat, ShaderP* = 0);
+        MeshInstance(OLD_Entity*, Handle mesh, Material*,  ShaderP* = 0);
         ~MeshInstance();
 
         ShaderP* shaderProgram();
         Mesh* mesh();
         Material* material();
-        Entity* parent();
+        OLD_Entity* parent();
         glm::vec4& color();
         glm::vec3& godRaysColor();
         glm::mat4& model();

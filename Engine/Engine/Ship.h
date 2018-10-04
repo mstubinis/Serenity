@@ -92,14 +92,14 @@ class ShipSystemSensors final: public ShipSystem{
         void update(const float& dt);
 };
 
-class Ship: public Entity{
+class Ship: public OLD_Entity{
     protected:
         std::unordered_map<uint,ShipSystem*> m_ShipSystems;
         bool m_IsPlayer;
         GameCamera* m_PlayerCamera;
         bool m_IsWarping;
         float m_WarpFactor;
-        Entity* m_Target;
+        OLD_Entity* m_Target;
     public:
         Ship(
             Handle& meshHandle,       //Mesh
@@ -124,8 +124,8 @@ class Ship: public Entity{
         bool IsPlayer(){ return m_IsPlayer; }
         bool IsWarping(){ return m_IsWarping; }
         ShipSystem* getShipSystem(uint type){ return m_ShipSystems[type]; }
-        Entity* getTarget() { return m_Target; }
-        virtual void setTarget(Entity*);
+        OLD_Entity* getTarget() { return m_Target; }
+        virtual void setTarget(OLD_Entity*);
         virtual void update(const float& dt);
 
 

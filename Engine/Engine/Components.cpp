@@ -23,23 +23,23 @@
 using namespace Engine;
 using namespace std;
 
-boost::unordered_map<boost_type_index,uint>               epriv::ComponentTypeRegistry::m_Registry;
-boost::unordered_map<uint, vector<ComponentBaseClass*>>   epriv::ComponentManager::m_ComponentVectors;
-boost::unordered_map<uint, vector<ComponentBaseClass*>>   epriv::ComponentManager::m_ComponentVectorsScene;
-epriv::ObjectPool<ComponentBaseClass>*                    epriv::ComponentManager::m_ComponentPool;
+boost::unordered_map<boost_type_index,uint>                   epriv::OLD_ComponentTypeRegistry::m_Registry;
+boost::unordered_map<uint, vector<OLD_ComponentBaseClass*>>   epriv::OLD_ComponentManager::m_ComponentVectors;
+boost::unordered_map<uint, vector<OLD_ComponentBaseClass*>>   epriv::OLD_ComponentManager::m_ComponentVectorsScene;
+epriv::ObjectPool<OLD_ComponentBaseClass>*                    epriv::OLD_ComponentManager::m_ComponentPool;
 
-epriv::ComponentManager* componentManager = nullptr;
+epriv::OLD_ComponentManager* componentManager = nullptr;
 
-class epriv::ComponentInternalFunctionality final{
+class epriv::OLD_ComponentInternalFunctionality final{
     public:
-        static void RebuildProjectionMatrix(ComponentCamera& cam){
-            if(cam._type == ComponentCamera::Type::Perspective){
+        static void RebuildProjectionMatrix(OLD_ComponentCamera& cam){
+            if(cam._type == OLD_ComponentCamera::Type::Perspective){
                 cam._projectionMatrix = glm::perspective(cam._angle,cam._aspectRatio,cam._nearPlane,cam._farPlane);
             }else{
                 cam._projectionMatrix = glm::ortho(cam._left,cam._right,cam._bottom,cam._top,cam._nearPlane,cam._farPlane);
             }
         }
-        static float CalculateRadius(ComponentModel& super) {
+        static float CalculateRadius(OLD_ComponentModel& super) {
             float maxLength = 0;
             glm::vec3 boundingBox = glm::vec3(0.0f);
             for (auto meshInstance : super.models) {
@@ -58,7 +58,7 @@ class epriv::ComponentInternalFunctionality final{
             super._radius = maxLength;
             super._radiusBox = boundingBox;
             if (super.m_Owner != 0) {
-                auto* body = super.owner()->getComponent<ComponentBody>();
+                auto* body = super.owner()->getComponent<OLD_ComponentBody>();
                 if (body) { 
                     float _bodyScale = Engine::Math::Max(body->getScale());
                     super._radius *= _bodyScale;
@@ -71,36 +71,36 @@ class epriv::ComponentInternalFunctionality final{
 
 
 
-class epriv::ComponentManager::impl final{
+class epriv::OLD_ComponentManager::impl final{
     public:	
-        ComponentTypeRegistry              m_TypeRegistry;
-        vector<Entity*>                    m_EntitiesToBeDestroyed;
-        bool                               m_Paused;
-        vector<ComponentSystemBaseClass*>  m_Systems;
-        void _init(const char* name, uint& w, uint& h,ComponentManager& super){
+        OLD_ComponentTypeRegistry              m_TypeRegistry;
+        vector<OLD_Entity*>                    m_EntitiesToBeDestroyed;
+        bool                                   m_Paused;
+        vector<OLD_ComponentSystemBaseClass*>  m_Systems;
+        void _init(const char* name, uint& w, uint& h, OLD_ComponentManager& super){
             m_Paused = false;
-            super.m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
-            super.m_EntityPool    = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
+            super.m_ComponentPool = new ObjectPool<OLD_ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * OLD_ComponentType::_TOTAL);
+            super.m_EntityPool    = new ObjectPool<OLD_Entity>(epriv::MAX_NUM_ENTITIES);
 
-            m_Systems.resize(ComponentType::_TOTAL, nullptr);
-            m_Systems[0] = new ComponentBodySystem();
-            m_Systems[1] = new ComponentModelSystem();
-            m_Systems[2] = new ComponentCameraSystem();
+            m_Systems.resize(OLD_ComponentType::_TOTAL, nullptr);
+            m_Systems[0] = new OLD_ComponentBodySystem();
+            m_Systems[1] = new OLD_ComponentModelSystem();
+            m_Systems[2] = new OLD_ComponentCameraSystem();
 
-            m_TypeRegistry.emplace<ComponentBody>();
-            m_TypeRegistry.emplace<ComponentModel>();
-            m_TypeRegistry.emplace<ComponentCamera>();
+            m_TypeRegistry.emplace<OLD_ComponentBody>();
+            m_TypeRegistry.emplace<OLD_ComponentModel>();
+            m_TypeRegistry.emplace<OLD_ComponentCamera>();
         }
-        void _destruct(ComponentManager& super){
+        void _destruct(OLD_ComponentManager& super){
             SAFE_DELETE(super.m_ComponentPool);
             SAFE_DELETE(super.m_EntityPool);
             SAFE_DELETE_VECTOR(m_Systems);
         }
-        static void _performTransformation(Entity* parent,glm::vec3& position,glm::quat& rotation,glm::vec3& scale,glm::mat4& modelMatrix){
+        static void _performTransformation(OLD_Entity* parent,glm::vec3& position,glm::quat& rotation,glm::vec3& scale,glm::mat4& modelMatrix){
             if(!parent){
                 modelMatrix = glm::mat4(1.0f);
             }else{
-                auto* body = parent->getComponent<ComponentBody>();
+                auto* body = parent->getComponent<OLD_ComponentBody>();
                 modelMatrix = body->modelMatrix();
             }
             modelMatrix = glm::translate(position) * glm::mat4_cast(rotation) * glm::scale(scale) * modelMatrix;
@@ -108,12 +108,12 @@ class epriv::ComponentManager::impl final{
         void _updateCurrentScene(const float& dt){
             auto& currentScene = *Resources::getCurrentScene();
             for(auto entityID:InternalScenePublicInterface::GetEntities(currentScene)){
-                Entity& e = *Components::GetEntity(entityID);
+                OLD_Entity& e = *OLD_Components::GetEntity(entityID);
                 e.update(dt);
             }
             if(currentScene.skybox()) currentScene.skybox()->update();
         }
-        void _destroyQueuedEntities(ComponentManager& super){
+        void _destroyQueuedEntities(OLD_ComponentManager& super){
             for(auto e:m_EntitiesToBeDestroyed){
                 super._deleteEntityImmediately(*e);
             }
@@ -130,39 +130,39 @@ class epriv::ComponentManager::impl final{
             Core::m_Engine->m_PhysicsManager._update(dt,maxSubSteps,minStep);
             Core::m_Engine->m_TimeManager.calculate_physics();
         }
-        void _update(const float& dt,ComponentManager& super){
+        void _update(const float& dt, OLD_ComponentManager& super){
             _updateCurrentScene(dt); //take player input and perform player actions
             _updatePhysicsEngine(dt);
             if(!m_Paused){
-                m_Systems.at(ComponentType::Body)->update(dt);
+                m_Systems[OLD_ComponentType::Body]->update(dt);
             }
-            m_Systems.at(ComponentType::Camera)->update(dt); //update frustum planes
+            m_Systems[OLD_ComponentType::Camera]->update(dt); //update frustum planes
             if(!m_Paused){
-                m_Systems.at(ComponentType::Model)->update(dt); //transform model matrices and perform render check
+                m_Systems[OLD_ComponentType::Model]->update(dt); //transform model matrices and perform render check
             }
             _destroyQueuedEntities(super);
         }
 };
 
-epriv::ComponentManager::ComponentManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,*this); componentManager = this; }
-epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(*this); }
-void epriv::ComponentManager::_pause(bool b){ m_i->m_Paused = b; }
-void epriv::ComponentManager::_unpause(){ m_i->m_Paused = false; }
-void epriv::ComponentManager::_update(const float& dt){ m_i->_update(dt,*this); }
-void epriv::ComponentManager::_resize(uint width,uint height){
-    uint slot = Components::getSlot<ComponentCamera>();
-    for(auto camera:ComponentManager::m_ComponentVectors.at(slot)){ 
-        auto& cam = *(ComponentCamera*)camera;
+epriv::OLD_ComponentManager::OLD_ComponentManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,*this); componentManager = this; }
+epriv::OLD_ComponentManager::~OLD_ComponentManager(){ m_i->_destruct(*this); }
+void epriv::OLD_ComponentManager::_pause(bool b){ m_i->m_Paused = b; }
+void epriv::OLD_ComponentManager::_unpause(){ m_i->m_Paused = false; }
+void epriv::OLD_ComponentManager::_update(const float& dt){ m_i->_update(dt,*this); }
+void epriv::OLD_ComponentManager::_resize(uint width,uint height){
+    uint slot = OLD_Components::getSlot<OLD_ComponentCamera>();
+    for(auto camera: OLD_ComponentManager::m_ComponentVectors.at(slot)){
+        auto& cam = *(OLD_ComponentCamera*)camera;
         cam.resize(width,height);
     }
 }
-void epriv::ComponentManager::_deleteEntityImmediately(Entity& entity){
+void epriv::OLD_ComponentManager::_deleteEntityImmediately(OLD_Entity& entity){
     //obviously try to improve this performance wise
     removeFromVector(epriv::InternalScenePublicInterface::GetEntities(*entity.scene()), entity.ID);
-    for(uint i = 0; i < ComponentType::_TOTAL; ++i){
+    for(uint i = 0; i < OLD_ComponentType::_TOTAL; ++i){
         uint& componentID = entity.m_Components[i];
         if(componentID != 0){
-            ComponentBaseClass* component = Components::GetComponent(componentID);
+            OLD_ComponentBaseClass* component = OLD_Components::GetComponent(componentID);
             componentManager->_removeComponent(component);
             m_ComponentPool->remove(componentID);
             componentID = 0;
@@ -170,8 +170,8 @@ void epriv::ComponentManager::_deleteEntityImmediately(Entity& entity){
     }
     m_EntityPool->remove(entity.ID);
 }
-void epriv::ComponentManager::_addEntityToBeDestroyed(uint id){ _addEntityToBeDestroyed(*m_EntityPool->getAsFast<Entity>(id)); }
-void epriv::ComponentManager::_addEntityToBeDestroyed(Entity& entity){
+void epriv::OLD_ComponentManager::_addEntityToBeDestroyed(uint id){ _addEntityToBeDestroyed(*m_EntityPool->getAsFast<OLD_Entity>(id)); }
+void epriv::OLD_ComponentManager::_addEntityToBeDestroyed(OLD_Entity& entity){
     for(auto destroyed:m_i->m_EntitiesToBeDestroyed){ 
         if(destroyed->ID == entity.ID){
             return; 
@@ -179,7 +179,7 @@ void epriv::ComponentManager::_addEntityToBeDestroyed(Entity& entity){
     }
     m_i->m_EntitiesToBeDestroyed.push_back(&entity);
 }
-void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
+void epriv::OLD_ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
     //TODO: add method to handle each component type on scene swap (like remove/add rigid body from physics world)
     for(auto iterator:m_ComponentVectorsScene){
         vector_clear(m_ComponentVectorsScene.at(iterator.first));
@@ -193,100 +193,100 @@ void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
     //}
     //transfers the newScene's components into the vector used for scenes
     for(auto entityID:InternalScenePublicInterface::GetEntities(*newScene)){
-        Entity& e = *newScene->getEntity(entityID);
-        for(uint index = 0; index < ComponentType::_TOTAL; ++index){
-            uint componentID = e.m_Components.at(index);
+        OLD_Entity& e = *newScene->getEntity(entityID);
+        for(uint index = 0; index < OLD_ComponentType::_TOTAL; ++index){
+            uint componentID = e.m_Components[index];
             if(componentID != 0){
-                ComponentBaseClass* component = Components::GetComponent(componentID);
+                OLD_ComponentBaseClass* component = OLD_Components::GetComponent(componentID);
                 if(component){
-                    uint slot = Components::getSlot(component);
+                    uint slot = OLD_Components::getSlot(component);
                     m_ComponentVectorsScene.at(slot).push_back(component);
                 }
             }
         }
-        epriv::ComponentManager::onSceneSwap(oldScene,newScene, e);
+        epriv::OLD_ComponentManager::onSceneSwap(oldScene,newScene, e);
     }
 }
-void epriv::ComponentManager::_removeComponent(uint componentID){
-    ComponentBaseClass* component = Components::GetComponent(componentID);
-    epriv::ComponentManager::_removeComponent(component);
+void epriv::OLD_ComponentManager::_removeComponent(uint componentID){
+    OLD_ComponentBaseClass* component = OLD_Components::GetComponent(componentID);
+    epriv::OLD_ComponentManager::_removeComponent(component);
 }
-void epriv::ComponentManager::_removeComponent(ComponentBaseClass* component){
+void epriv::OLD_ComponentManager::_removeComponent(OLD_ComponentBaseClass* component){
     if(component){
-        uint slot = Components::getSlot(component);
+        uint slot = OLD_Components::getSlot(component);
         removeFromVector(m_ComponentVectors.at(slot),component);
         removeFromVector(m_ComponentVectorsScene.at(slot),component);
     }
 }
-void epriv::ComponentManager::onEntityAddedToScene(Scene& scene, Entity& entity) {
+void epriv::OLD_ComponentManager::onEntityAddedToScene(Scene& scene, OLD_Entity& entity) {
     entity.m_Scene = &scene;
     for (uint i = 0; i < entity.m_Components.size(); ++i) {
         const uint& componentID = entity.m_Components.at(i);
         if (componentID != 0){
-            ComponentBaseClass* component = Components::GetComponent(entity.m_Components.at(i));
-            componentManager->m_i->m_Systems.at(i)->onEntityAddedToScene(scene, component, entity);
+            OLD_ComponentBaseClass* component = OLD_Components::GetComponent(entity.m_Components[i]);
+            componentManager->m_i->m_Systems[i]->onEntityAddedToScene(scene, component, entity);
         }
     }
 }
-void epriv::ComponentManager::onSceneSwap(Scene* oldScene,Scene* newScene, Entity& entity) {
+void epriv::OLD_ComponentManager::onSceneSwap(Scene* oldScene,Scene* newScene, OLD_Entity& entity) {
     for (uint i = 0; i < entity.m_Components.size(); ++i) {
         const uint& componentID = entity.m_Components.at(i);
         if (componentID != 0) {
-            ComponentBaseClass* component = Components::GetComponent(entity.m_Components.at(i));
-            componentManager->m_i->m_Systems.at(i)->onSceneSwap(oldScene,newScene, component, entity);
+            OLD_ComponentBaseClass* component = OLD_Components::GetComponent(entity.m_Components[i]);
+            componentManager->m_i->m_Systems[i]->onSceneSwap(oldScene,newScene, component, entity);
         }
     }
 }
-void epriv::ComponentManager::onComponentAddedToEntity(Entity& entity) {
+void epriv::OLD_ComponentManager::onComponentAddedToEntity(OLD_Entity& entity) {
     for (uint i = 0; i < entity.m_Components.size(); ++i) {
         const uint& componentID = entity.m_Components.at(i);
         if (componentID != 0) {
-            ComponentBaseClass* component = Components::GetComponent(entity.m_Components.at(i));
-            componentManager->m_i->m_Systems.at(i)->onComponentAddedToEntity(component, entity);
+            OLD_ComponentBaseClass* component = OLD_Components::GetComponent(entity.m_Components[i]);
+            componentManager->m_i->m_Systems[i]->onComponentAddedToEntity(component, entity);
         }
     }
 }
 
 #pragma region ComponentSystems
 
-class epriv::ComponentCameraSystem::impl final {
+class epriv::OLD_ComponentCameraSystem::impl final {
     public:
-        static void _defaultUpdate(vector<ComponentBaseClass*>& vec, const float& dt) {
+        static void _defaultUpdate(vector<OLD_ComponentBaseClass*>& vec, const float& dt) {
             for (auto camera : vec) {
-                auto& cmpnt = *(ComponentCamera*)camera;
+                auto& cmpnt = *(OLD_ComponentCamera*)camera;
                 cmpnt.update(dt);//custom camera user code
                 Math::extractViewFrustumPlanesHartmannGribbs(cmpnt._projectionMatrix * cmpnt._viewMatrix, cmpnt._planes);//update view frustrum 
             }
         }
         void _update(const float& dt) {
-            uint slot = Components::getSlot<ComponentCamera>();
-            auto& v = ComponentManager::m_ComponentVectorsScene.at(slot);
+            uint slot = OLD_Components::getSlot<OLD_ComponentCamera>();
+            auto& v = OLD_ComponentManager::m_ComponentVectorsScene.at(slot);
             auto split = epriv::threading::splitVector(v);
             for (auto vec : split) {
                 epriv::threading::addJob(_defaultUpdate, vec, dt);
             }
             epriv::threading::waitForAll();
         }
-        void _onComponentAddedToEntity(ComponentBaseClass* component, Entity& _entity) {
-            ComponentCamera& componentCamera = *(ComponentCamera*)component;
+        void _onComponentAddedToEntity(OLD_ComponentBaseClass* component, OLD_Entity& _entity) {
+            OLD_ComponentCamera& componentCamera = *(OLD_ComponentCamera*)component;
         }
-        void _onEntityAddedToScene(Scene& scene, ComponentBaseClass* component, Entity& _entity) {
-            ComponentCamera& componentCamera = *(ComponentCamera*)component;
+        void _onEntityAddedToScene(Scene& scene, OLD_ComponentBaseClass* component, OLD_Entity& _entity) {
+            OLD_ComponentCamera& componentCamera = *(OLD_ComponentCamera*)component;
         }
-        void _onSceneSwap(Scene* oldScene,Scene* newScene, ComponentBaseClass* component, Entity& _entity) {
-            ComponentCamera& componentCamera = *(ComponentCamera*)component;
+        void _onSceneSwap(Scene* oldScene,Scene* newScene, OLD_ComponentBaseClass* component, OLD_Entity& _entity) {
+            OLD_ComponentCamera& componentCamera = *(OLD_ComponentCamera*)component;
         }
 };
-epriv::ComponentCameraSystem::ComponentCameraSystem() :ComponentSystemBaseClass(),m_i(new impl) { }
-epriv::ComponentCameraSystem::~ComponentCameraSystem() { }
-void epriv::ComponentCameraSystem::update(const float& dt) { m_i->_update(dt); }
-void epriv::ComponentCameraSystem::onSceneSwap(Scene* o, Scene* s, ComponentBaseClass* c, Entity& e) { m_i->_onSceneSwap(o,s, c, e); }
-void epriv::ComponentCameraSystem::onEntityAddedToScene(Scene& s, ComponentBaseClass* c,Entity& e) { m_i->_onEntityAddedToScene(s,c,e); }
-void epriv::ComponentCameraSystem::onComponentAddedToEntity(ComponentBaseClass* c, Entity& e) { m_i->_onComponentAddedToEntity(c, e); }
-class epriv::ComponentModelSystem::impl final {
+epriv::OLD_ComponentCameraSystem::OLD_ComponentCameraSystem() :OLD_ComponentSystemBaseClass(),m_i(new impl) { }
+epriv::OLD_ComponentCameraSystem::~OLD_ComponentCameraSystem() { }
+void epriv::OLD_ComponentCameraSystem::update(const float& dt) { m_i->_update(dt); }
+void epriv::OLD_ComponentCameraSystem::onSceneSwap(Scene* o, Scene* s, OLD_ComponentBaseClass* c, OLD_Entity& e) { m_i->_onSceneSwap(o,s, c, e); }
+void epriv::OLD_ComponentCameraSystem::onEntityAddedToScene(Scene& s, OLD_ComponentBaseClass* c, OLD_Entity& e) { m_i->_onEntityAddedToScene(s,c,e); }
+void epriv::OLD_ComponentCameraSystem::onComponentAddedToEntity(OLD_ComponentBaseClass* c, OLD_Entity& e) { m_i->_onComponentAddedToEntity(c, e); }
+class epriv::OLD_ComponentModelSystem::impl final {
     public:
-        static void _calculateRenderCheck(ComponentModel& m, Camera* camera) {
-            auto& body = *(m.owner()->getComponent<ComponentBody>());      
+        static void _calculateRenderCheck(OLD_ComponentModel& m, Camera* camera) {
+            auto& body = *(m.owner()->getComponent<OLD_ComponentBody>());
             for (auto meshInstance : m.models) {
                 auto& _meshInstance = *meshInstance;
                 auto pos = body.position() + _meshInstance.position();
@@ -299,9 +299,9 @@ class epriv::ComponentModelSystem::impl final {
                 _meshInstance.setPassedRenderCheck(true);
             }
         }
-        static void _defaultUpdate(vector<ComponentBaseClass*>& vec, Camera* camera) {
+        static void _defaultUpdate(vector<OLD_ComponentBaseClass*>& vec, Camera* camera) {
             for (uint j = 0; j < vec.size(); ++j) {
-                auto& model = *(ComponentModel*)vec[j];
+                auto& model = *(OLD_ComponentModel*)vec[j];
                 for (uint i = 0; i < model.models.size(); ++i) {
                     auto& pair = *model.models[i];
                     if (pair.mesh()) {
@@ -314,39 +314,39 @@ class epriv::ComponentModelSystem::impl final {
         }
         void _update(const float& dt) {
             auto* camera = Resources::getCurrentScene()->getActiveCamera();
-            uint slot = Components::getSlot<ComponentModel>();
-            auto& v = ComponentManager::m_ComponentVectorsScene.at(slot);
+            uint slot = OLD_Components::getSlot<OLD_ComponentModel>();
+            auto& v = OLD_ComponentManager::m_ComponentVectorsScene.at(slot);
             auto split = epriv::threading::splitVector(v);
             for (auto vec : split) {
                 epriv::threading::addJob(_defaultUpdate, vec, camera);
             }
             epriv::threading::waitForAll();
         }
-        void _onComponentAddedToEntity(ComponentBaseClass* component, Entity& _entity) {
-            ComponentModel& componentModel = *(ComponentModel*)component;
-            ComponentInternalFunctionality::CalculateRadius(componentModel);
+        void _onComponentAddedToEntity(OLD_ComponentBaseClass* component, OLD_Entity& _entity) {
+            OLD_ComponentModel& componentModel = *(OLD_ComponentModel*)component;
+            OLD_ComponentInternalFunctionality::CalculateRadius(componentModel);
         }
-        void _onEntityAddedToScene(Scene& scene,ComponentBaseClass* component, Entity& _entity) {
-            ComponentModel& componentModel = *(ComponentModel*)component;
+        void _onEntityAddedToScene(Scene& scene, OLD_ComponentBaseClass* component, OLD_Entity& _entity) {
+            OLD_ComponentModel& componentModel = *(OLD_ComponentModel*)component;
             for (auto _meshInstance : componentModel.models) {
                 InternalScenePublicInterface::AddMeshInstanceToPipeline(scene, *_meshInstance, _meshInstance->stage());
             }
         }
-        void _onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass* component, Entity& _entity) {
+        void _onSceneSwap(Scene* oldScene, Scene* newScene, OLD_ComponentBaseClass* component, OLD_Entity& _entity) {
             _onEntityAddedToScene(*newScene, component, _entity);
         }
 };
-epriv::ComponentModelSystem::ComponentModelSystem() :ComponentSystemBaseClass(),m_i(new impl) { }
-epriv::ComponentModelSystem::~ComponentModelSystem() { }
-void epriv::ComponentModelSystem::update(const float& dt) { m_i->_update(dt); }
-void epriv::ComponentModelSystem::onSceneSwap(Scene* o, Scene* s, ComponentBaseClass* c, Entity& e) { m_i->_onSceneSwap(o, s, c, e); }
-void epriv::ComponentModelSystem::onComponentAddedToEntity(ComponentBaseClass* c, Entity& e) { m_i->_onComponentAddedToEntity(c, e); }
-void epriv::ComponentModelSystem::onEntityAddedToScene(Scene& s,ComponentBaseClass* c,Entity& e) { m_i->_onEntityAddedToScene(s,c, e); }
-class epriv::ComponentBodySystem::impl final {
+epriv::OLD_ComponentModelSystem::OLD_ComponentModelSystem() :OLD_ComponentSystemBaseClass(),m_i(new impl) { }
+epriv::OLD_ComponentModelSystem::~OLD_ComponentModelSystem() { }
+void epriv::OLD_ComponentModelSystem::update(const float& dt) { m_i->_update(dt); }
+void epriv::OLD_ComponentModelSystem::onSceneSwap(Scene* o, Scene* s, OLD_ComponentBaseClass* c, OLD_Entity& e) { m_i->_onSceneSwap(o, s, c, e); }
+void epriv::OLD_ComponentModelSystem::onComponentAddedToEntity(OLD_ComponentBaseClass* c, OLD_Entity& e) { m_i->_onComponentAddedToEntity(c, e); }
+void epriv::OLD_ComponentModelSystem::onEntityAddedToScene(Scene& s, OLD_ComponentBaseClass* c, OLD_Entity& e) { m_i->_onEntityAddedToScene(s,c, e); }
+class epriv::OLD_ComponentBodySystem::impl final {
     public:
-        static void _defaultUpdate(vector<ComponentBaseClass*>& vec) {
+        static void _defaultUpdate(vector<OLD_ComponentBaseClass*>& vec) {
             for (uint j = 0; j < vec.size(); ++j) {
-                auto& b = *(ComponentBody*)vec[j];
+                auto& b = *(OLD_ComponentBody*)vec[j];
                 if (b._physics) {
                     auto& physicsData = *b.data.p;
                     Engine::Math::recalculateForwardRightUp(physicsData.rigidBody, b._forward, b._right, b._up);
@@ -357,23 +357,23 @@ class epriv::ComponentBodySystem::impl final {
             }
         }
         void _update(const float& dt) {
-            const uint slot = Components::getSlot<ComponentBody>();
-            vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
+            const uint slot = OLD_Components::getSlot<OLD_ComponentBody>();
+            vector<OLD_ComponentBaseClass*>& v = OLD_ComponentManager::m_ComponentVectorsScene.at(slot);
             auto split = epriv::threading::splitVector(v);
             for (auto vec : split) {
                 epriv::threading::addJob(_defaultUpdate, vec);
             }
             epriv::threading::waitForAll();
         }
-        void _onComponentAddedToEntity(ComponentBaseClass* component, Entity& _entity) {
-            ComponentBody& componentBody = *(ComponentBody*)component;
+        void _onComponentAddedToEntity(OLD_ComponentBaseClass* component, OLD_Entity& _entity) {
+            OLD_ComponentBody& componentBody = *(OLD_ComponentBody*)component;
             if (componentBody._physics) {
                 auto* _collision = componentBody.data.p->collision;
                 componentBody.setCollision((CollisionType::Type)_collision->getType(), componentBody.data.p->mass);
             }
         }
-        void _onEntityAddedToScene(Scene& scene,ComponentBaseClass* component,Entity& _entity) {
-            ComponentBody& componentBody = *(ComponentBody*)component;
+        void _onEntityAddedToScene(Scene& scene, OLD_ComponentBaseClass* component, OLD_Entity& _entity) {
+            OLD_ComponentBody& componentBody = *(OLD_ComponentBody*)component;
             if (componentBody._physics) {
                 auto& physicsData = *componentBody.data.p;
                 if (&scene == Resources::getCurrentScene()) {
@@ -383,22 +383,22 @@ class epriv::ComponentBodySystem::impl final {
                 }
             }       
         }
-        void _onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass* component, Entity& _entity) {
+        void _onSceneSwap(Scene* oldScene, Scene* newScene, OLD_ComponentBaseClass* component, OLD_Entity& _entity) {
             _onEntityAddedToScene(*newScene, component, _entity);
         }
 };
-epriv::ComponentBodySystem::ComponentBodySystem() :ComponentSystemBaseClass(),m_i(new impl) { }
-epriv::ComponentBodySystem::~ComponentBodySystem() { }
-void epriv::ComponentBodySystem::update(const float& dt) { m_i->_update(dt); }
-void epriv::ComponentBodySystem::onSceneSwap(Scene* o, Scene* s, ComponentBaseClass* c, Entity& e) { m_i->_onSceneSwap(o, s, c, e); }
-void epriv::ComponentBodySystem::onEntityAddedToScene(Scene& s,ComponentBaseClass* c,Entity& e) { m_i->_onEntityAddedToScene(s,c,e); }
-void epriv::ComponentBodySystem::onComponentAddedToEntity(ComponentBaseClass* c, Entity& e) { m_i->_onComponentAddedToEntity(c, e); }
+epriv::OLD_ComponentBodySystem::OLD_ComponentBodySystem() :OLD_ComponentSystemBaseClass(),m_i(new impl) { }
+epriv::OLD_ComponentBodySystem::~OLD_ComponentBodySystem() { }
+void epriv::OLD_ComponentBodySystem::update(const float& dt) { m_i->_update(dt); }
+void epriv::OLD_ComponentBodySystem::onSceneSwap(Scene* o, Scene* s, OLD_ComponentBaseClass* c, OLD_Entity& e) { m_i->_onSceneSwap(o, s, c, e); }
+void epriv::OLD_ComponentBodySystem::onEntityAddedToScene(Scene& s, OLD_ComponentBaseClass* c, OLD_Entity& e) { m_i->_onEntityAddedToScene(s,c,e); }
+void epriv::OLD_ComponentBodySystem::onComponentAddedToEntity(OLD_ComponentBaseClass* c, OLD_Entity& e) { m_i->_onComponentAddedToEntity(c, e); }
 
 #pragma endregion
 
 #pragma region Camera
 
-ComponentCamera::ComponentCamera():ComponentBaseClass(){
+OLD_ComponentCamera::OLD_ComponentCamera(){
     _eye = glm::vec3(0.0f); _up = glm::vec3(0.0f,1.0f,0.0f);
     _angle = glm::radians(60.0f); _aspectRatio = Resources::getWindowSize().x/(float)Resources::getWindowSize().y;
     _nearPlane = 0.1f; _farPlane = 5000.0f;
@@ -406,36 +406,36 @@ ComponentCamera::ComponentCamera():ComponentBaseClass(){
     _viewMatrix = glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,1.0f,0.0f));
     _type = Type::Perspective;
 }
-ComponentCamera::ComponentCamera(float angle,float aspectRatio,float nearPlane,float farPlane):ComponentBaseClass(){
+OLD_ComponentCamera::OLD_ComponentCamera(float angle,float aspectRatio,float nearPlane,float farPlane){
     _eye = glm::vec3(0.0f); _up = glm::vec3(0.0f,1.0f,0.0f);
     _angle = glm::radians(angle); _aspectRatio = aspectRatio; _nearPlane = nearPlane; _farPlane = farPlane;
     _projectionMatrix = glm::perspective(_angle,_aspectRatio,_nearPlane,_farPlane);
     _viewMatrix = glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,1.0f,0.0f));
     _type = Type::Perspective;
 }
-ComponentCamera::ComponentCamera(float left,float right,float bottom,float top,float nearPlane,float farPlane):ComponentBaseClass(){
+OLD_ComponentCamera::OLD_ComponentCamera(float left,float right,float bottom,float top,float nearPlane,float farPlane){
     _eye = glm::vec3(0.0f); _up = glm::vec3(0.0f,1.0f,0.0f);
     _left = left; _right = right; _bottom = bottom; _top = top; _nearPlane = nearPlane; _farPlane = farPlane;
     _projectionMatrix = glm::ortho(_left,_right,_bottom,_top,_nearPlane,_farPlane);
     _viewMatrix = glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,1.0f,0.0f));
     _type = Type::Orthographic;
 }
-ComponentCamera::~ComponentCamera(){}
-void ComponentCamera::update(const float& dt){}
-void ComponentCamera::resize(uint width, uint height){	
+OLD_ComponentCamera::~OLD_ComponentCamera(){}
+void OLD_ComponentCamera::update(const float& dt){}
+void OLD_ComponentCamera::resize(uint width, uint height){
     if(_type == Type::Perspective){
         _aspectRatio = width/(float)height;
     }
-    epriv::ComponentInternalFunctionality::RebuildProjectionMatrix(*this);
+    epriv::OLD_ComponentInternalFunctionality::RebuildProjectionMatrix(*this);
 }
-uint ComponentCamera::pointIntersectTest(glm::vec3& position){
+uint OLD_ComponentCamera::pointIntersectTest(glm::vec3& position){
     for(ushort i=0; i < 6; ++i){
         float d = _planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w;
         if (d > 0.0f) return 0; //outside
     }
     return 1;//inside
 }
-uint ComponentCamera::sphereIntersectTest(glm::vec3& position,float radius){
+uint OLD_ComponentCamera::sphereIntersectTest(glm::vec3& position,float radius){
     uint res = 1; //inside the viewing frustum
     if(radius <= 0.0f) return 0;
     for (ushort i = 0; i < 6; ++i){
@@ -445,27 +445,27 @@ uint ComponentCamera::sphereIntersectTest(glm::vec3& position,float radius){
     }
     return res;
 }
-void ComponentCamera::lookAt(glm::vec3 eye,glm::vec3 center,glm::vec3 up){
+void OLD_ComponentCamera::lookAt(glm::vec3 eye,glm::vec3 center,glm::vec3 up){
     _eye = eye;
     _up = up;
     _viewMatrix              = glm::lookAt(_eye, center,_up);
     _viewMatrixNoTranslation = glm::lookAt(glm::vec3(0.0f), center - _eye,_up);
 }
-glm::mat4 ComponentCamera::getProjection(){ return _projectionMatrix; }
-glm::mat4 ComponentCamera::getProjectionInverse(){ return glm::inverse(_projectionMatrix); }
-glm::mat4 ComponentCamera::getView(){ return _viewMatrix; }
-glm::mat4 ComponentCamera::getViewInverse(){ return glm::inverse(_viewMatrix); }
-glm::mat4 ComponentCamera::getViewProjection(){ return _projectionMatrix * _viewMatrix; }
-glm::mat4 ComponentCamera::getViewProjectionInverse(){ return glm::inverse(_projectionMatrix * _viewMatrix); }
-glm::vec3 ComponentCamera::getViewVector(){ return glm::vec3(_viewMatrix[0][2],_viewMatrix[1][2],_viewMatrix[2][2]); }
-float ComponentCamera::getAngle(){ return _angle; }
-float ComponentCamera::getAspect(){ return _aspectRatio; }
-float ComponentCamera::getNear(){ return _nearPlane; }
-float ComponentCamera::getFar(){ return _farPlane; }
-void ComponentCamera::setAngle(float a){ _angle = a; epriv::ComponentInternalFunctionality::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setAspect(float a){ _aspectRatio = a; epriv::ComponentInternalFunctionality::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setNear(float n){ _nearPlane = n; epriv::ComponentInternalFunctionality::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setFar(float f){ _farPlane = f; epriv::ComponentInternalFunctionality::RebuildProjectionMatrix(*this); }
+glm::mat4 OLD_ComponentCamera::getProjection(){ return _projectionMatrix; }
+glm::mat4 OLD_ComponentCamera::getProjectionInverse(){ return glm::inverse(_projectionMatrix); }
+glm::mat4 OLD_ComponentCamera::getView(){ return _viewMatrix; }
+glm::mat4 OLD_ComponentCamera::getViewInverse(){ return glm::inverse(_viewMatrix); }
+glm::mat4 OLD_ComponentCamera::getViewProjection(){ return _projectionMatrix * _viewMatrix; }
+glm::mat4 OLD_ComponentCamera::getViewProjectionInverse(){ return glm::inverse(_projectionMatrix * _viewMatrix); }
+glm::vec3 OLD_ComponentCamera::getViewVector(){ return glm::vec3(_viewMatrix[0][2],_viewMatrix[1][2],_viewMatrix[2][2]); }
+float OLD_ComponentCamera::getAngle(){ return _angle; }
+float OLD_ComponentCamera::getAspect(){ return _aspectRatio; }
+float OLD_ComponentCamera::getNear(){ return _nearPlane; }
+float OLD_ComponentCamera::getFar(){ return _farPlane; }
+void OLD_ComponentCamera::setAngle(float a){ _angle = a; epriv::OLD_ComponentInternalFunctionality::RebuildProjectionMatrix(*this); }
+void OLD_ComponentCamera::setAspect(float a){ _aspectRatio = a; epriv::OLD_ComponentInternalFunctionality::RebuildProjectionMatrix(*this); }
+void OLD_ComponentCamera::setNear(float n){ _nearPlane = n; epriv::OLD_ComponentInternalFunctionality::RebuildProjectionMatrix(*this); }
+void OLD_ComponentCamera::setFar(float f){ _farPlane = f; epriv::OLD_ComponentInternalFunctionality::RebuildProjectionMatrix(*this); }
 
 
 
@@ -494,41 +494,41 @@ glm::vec3 epriv::InternalComponentPublicInterface::GetViewVectorNoTranslation(co
 
 #pragma region Model
 
-ComponentModel::ComponentModel(Handle& mesh,Handle& mat,Entity* _e, ShaderP* _prog, RenderStage::Stage _stage){
+OLD_ComponentModel::OLD_ComponentModel(Handle& mesh,Handle& mat, OLD_Entity* _e, ShaderP* _prog, RenderStage::Stage _stage){
     m_Owner = _e->id(); if (!mesh.null()) addModel(mesh, mat, _prog, _stage);
 }
-ComponentModel::ComponentModel(Mesh* mesh,Handle& mat,Entity* _e, ShaderP* _prog, RenderStage::Stage _stage){
+OLD_ComponentModel::OLD_ComponentModel(Mesh* mesh,Handle& mat, OLD_Entity* _e, ShaderP* _prog, RenderStage::Stage _stage){
     m_Owner = _e->id(); if(mesh) addModel(mesh, (Material*)mat.get(), _prog, _stage);
 }
-ComponentModel::ComponentModel(Handle& mesh,Material* mat,Entity* _e, ShaderP* _prog, RenderStage::Stage _stage){
+OLD_ComponentModel::OLD_ComponentModel(Handle& mesh,Material* mat, OLD_Entity* _e, ShaderP* _prog, RenderStage::Stage _stage){
     m_Owner = _e->id(); if(!mesh.null()) addModel((Mesh*)mesh.get(), mat, _prog, _stage);
 }
-ComponentModel::ComponentModel(Mesh* mesh,Material* mat,Entity* _e, ShaderP* _prog, RenderStage::Stage _stage){
+OLD_ComponentModel::OLD_ComponentModel(Mesh* mesh,Material* mat, OLD_Entity* _e, ShaderP* _prog, RenderStage::Stage _stage){
     m_Owner = _e->id(); if(mesh) addModel(mesh, mat, _prog, _stage);
 }
-ComponentModel::ComponentModel(Handle& mesh, Handle& mat, Entity* _e, Handle& _prog, RenderStage::Stage _stage) {
+OLD_ComponentModel::OLD_ComponentModel(Handle& mesh, Handle& mat, OLD_Entity* _e, Handle& _prog, RenderStage::Stage _stage) {
     m_Owner = _e->id(); if (!mesh.null()) addModel(mesh, mat, (ShaderP*)_prog.get(), _stage);
 }
-ComponentModel::ComponentModel(Mesh* mesh, Handle& mat, Entity* _e, Handle& _prog, RenderStage::Stage _stage) {
+OLD_ComponentModel::OLD_ComponentModel(Mesh* mesh, Handle& mat, OLD_Entity* _e, Handle& _prog, RenderStage::Stage _stage) {
     m_Owner = _e->id(); if (mesh) addModel(mesh, (Material*)mat.get(), (ShaderP*)_prog.get(), _stage);
 }
-ComponentModel::ComponentModel(Handle& mesh, Material* mat, Entity* _e, Handle& _prog, RenderStage::Stage _stage) {
+OLD_ComponentModel::OLD_ComponentModel(Handle& mesh, Material* mat, OLD_Entity* _e, Handle& _prog, RenderStage::Stage _stage) {
     m_Owner = _e->id(); if (!mesh.null()) addModel((Mesh*)mesh.get(), mat, (ShaderP*)_prog.get(), _stage);
 }
-ComponentModel::ComponentModel(Mesh* mesh, Material* mat, Entity* _e, Handle& _prog, RenderStage::Stage _stage) {
+OLD_ComponentModel::OLD_ComponentModel(Mesh* mesh, Material* mat, OLD_Entity* _e, Handle& _prog, RenderStage::Stage _stage) {
     m_Owner = _e->id(); if (mesh) addModel(mesh, mat, (ShaderP*)_prog.get(), _stage);
 }
-ComponentModel::~ComponentModel(){ 
+OLD_ComponentModel::~OLD_ComponentModel(){
     SAFE_DELETE_VECTOR(models);
 }
-uint ComponentModel::getNumModels() { return models.size(); }
-MeshInstance* ComponentModel::getModel(uint index){ return models[index]; }
-void ComponentModel::show() { for (auto model : models) model->show(); }
-void ComponentModel::hide() { for (auto model : models) model->hide(); }
-float ComponentModel::radius(){ return _radius; }
-glm::vec3 ComponentModel::boundingBox() { return _radiusBox; }
-uint ComponentModel::addModel(Handle& mesh, Handle& mat, ShaderP* shaderProgram, RenderStage::Stage _stage){ return ComponentModel::addModel((Mesh*)mesh.get(),(Material*)mat.get(), shaderProgram, _stage); }
-uint ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* shaderProgram, RenderStage::Stage _stage) {
+uint OLD_ComponentModel::getNumModels() { return models.size(); }
+MeshInstance* OLD_ComponentModel::getModel(uint index){ return models[index]; }
+void OLD_ComponentModel::show() { for (auto model : models) model->show(); }
+void OLD_ComponentModel::hide() { for (auto model : models) model->hide(); }
+float OLD_ComponentModel::radius(){ return _radius; }
+glm::vec3 OLD_ComponentModel::boundingBox() { return _radiusBox; }
+uint OLD_ComponentModel::addModel(Handle& mesh, Handle& mat, ShaderP* shaderProgram, RenderStage::Stage _stage){ return OLD_ComponentModel::addModel((Mesh*)mesh.get(),(Material*)mat.get(), shaderProgram, _stage); }
+uint OLD_ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* shaderProgram, RenderStage::Stage _stage) {
     MeshInstance* instance = new MeshInstance(owner(), mesh, material, shaderProgram);
     models.push_back(instance);  
     if (m_Owner != 0) {
@@ -538,11 +538,11 @@ uint ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* shaderPro
             epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(*_scene, *instance, _stage);
         }
     }
-    epriv::ComponentInternalFunctionality::CalculateRadius(*this);
+    epriv::OLD_ComponentInternalFunctionality::CalculateRadius(*this);
     return models.size() - 1;
 }
-void ComponentModel::setModel(Handle& mesh,Handle& mat,uint index, ShaderP* shaderProgram, RenderStage::Stage _stage){ ComponentModel::setModel((Mesh*)mesh.get(),(Material*)mat.get(), index, shaderProgram, _stage); }
-void ComponentModel::setModel(Mesh* mesh,Material* material,uint index, ShaderP* shaderProgram, RenderStage::Stage _stage){
+void OLD_ComponentModel::setModel(Handle& mesh,Handle& mat,uint index, ShaderP* shaderProgram, RenderStage::Stage _stage){ OLD_ComponentModel::setModel((Mesh*)mesh.get(),(Material*)mat.get(), index, shaderProgram, _stage); }
+void OLD_ComponentModel::setModel(Mesh* mesh,Material* material,uint index, ShaderP* shaderProgram, RenderStage::Stage _stage){
     auto& instance = *models[index];
     if (m_Owner != 0) {
         auto* _scene = owner()->scene();
@@ -560,9 +560,9 @@ void ComponentModel::setModel(Mesh* mesh,Material* material,uint index, ShaderP*
         instance.setMaterial(material);
         instance.setStage(_stage);
     }
-    epriv::ComponentInternalFunctionality::CalculateRadius(*this);
+    epriv::OLD_ComponentInternalFunctionality::CalculateRadius(*this);
 }
-void ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint index, RenderStage::Stage _stage) {
+void OLD_ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint index, RenderStage::Stage _stage) {
     auto& instance = *models[index];
     if (m_Owner != 0) {
         auto* _scene = owner()->scene();
@@ -576,10 +576,10 @@ void ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint index, R
         instance.setShaderProgram(shaderProgram);
         instance.setStage(_stage);
     }
-    epriv::ComponentInternalFunctionality::CalculateRadius(*this);
+    epriv::OLD_ComponentInternalFunctionality::CalculateRadius(*this);
 }
-void ComponentModel::setModelShaderProgram(Handle& shaderPHandle, uint index, RenderStage::Stage _stage) { ComponentModel::setModelShaderProgram((ShaderP*)shaderPHandle.get(),index, _stage); }
-void ComponentModel::setModelMesh(Mesh* mesh,uint index, RenderStage::Stage _stage){
+void OLD_ComponentModel::setModelShaderProgram(Handle& shaderPHandle, uint index, RenderStage::Stage _stage) { OLD_ComponentModel::setModelShaderProgram((ShaderP*)shaderPHandle.get(),index, _stage); }
+void OLD_ComponentModel::setModelMesh(Mesh* mesh,uint index, RenderStage::Stage _stage){
     auto& instance = *models[index];
     if (m_Owner != 0) {
         auto* _scene = owner()->scene();
@@ -593,10 +593,10 @@ void ComponentModel::setModelMesh(Mesh* mesh,uint index, RenderStage::Stage _sta
         instance.setMesh(mesh);
         instance.setStage(_stage);
     }
-    epriv::ComponentInternalFunctionality::CalculateRadius(*this);
+    epriv::OLD_ComponentInternalFunctionality::CalculateRadius(*this);
 }
-void ComponentModel::setModelMesh(Handle& mesh, uint index, RenderStage::Stage _stage){ ComponentModel::setModelMesh((Mesh*)mesh.get(),index, _stage); }
-void ComponentModel::setModelMaterial(Material* material,uint index, RenderStage::Stage _stage){
+void OLD_ComponentModel::setModelMesh(Handle& mesh, uint index, RenderStage::Stage _stage){ OLD_ComponentModel::setModelMesh((Mesh*)mesh.get(),index, _stage); }
+void OLD_ComponentModel::setModelMaterial(Material* material,uint index, RenderStage::Stage _stage){
     auto& instance = *models[index];
     if (m_Owner != 0) {
         auto* _scene = owner()->scene();
@@ -611,9 +611,9 @@ void ComponentModel::setModelMaterial(Material* material,uint index, RenderStage
         instance.setStage(_stage);
     }
 }
-void ComponentModel::setModelMaterial(Handle& mat,uint index, RenderStage::Stage _stage){ ComponentModel::setModelMaterial((Material*)mat.get(),index, _stage); }
-bool ComponentModel::rayIntersectSphere(ComponentCamera& camera){
-    auto& body = *owner()->getComponent<ComponentBody>();
+void OLD_ComponentModel::setModelMaterial(Handle& mat,uint index, RenderStage::Stage _stage){ OLD_ComponentModel::setModelMaterial((Material*)mat.get(),index, _stage); }
+bool OLD_ComponentModel::rayIntersectSphere(OLD_ComponentCamera& camera){
+    auto& body = *owner()->getComponent<OLD_ComponentBody>();
     return Math::rayIntersectSphere(body.position(),_radius,camera._eye,camera.getViewVector());
 }
 
@@ -621,7 +621,7 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera& camera){
 
 #pragma region Body
 
-ComponentBody::ComponentBody():ComponentBaseClass(){
+OLD_ComponentBody::OLD_ComponentBody(){
     data.n = new NormalData();
     _physics = false;
     auto& normalData = *data.n;
@@ -631,7 +631,7 @@ ComponentBody::ComponentBody():ComponentBaseClass(){
     normalData.modelMatrix = new glm::mat4(1.0f);
     Math::recalculateForwardRightUp(*normalData.rotation,_forward,_right,_up);
 }
-ComponentBody::ComponentBody(CollisionType::Type _collisionType):ComponentBaseClass(){
+OLD_ComponentBody::OLD_ComponentBody(CollisionType::Type _collisionType){
     data.p = new PhysicsData();	
     _physics = true;
     auto& physicsData = *data.p;
@@ -658,7 +658,7 @@ ComponentBody::ComponentBody(CollisionType::Type _collisionType):ComponentBaseCl
     rigidBody.updateInertiaTensor();
     rigidBody.setUserPointer(this);
 }
-ComponentBody::~ComponentBody(){
+OLD_ComponentBody::~OLD_ComponentBody(){
     if(_physics){
         auto& physicsData = *data.p;
         Physics::removeRigidBody(physicsData.rigidBody);
@@ -675,7 +675,7 @@ ComponentBody::~ComponentBody(){
         SAFE_DELETE(data.n);
     }
 }
-void ComponentBody::alignTo(glm::vec3 direction,float speed){
+void OLD_ComponentBody::alignTo(glm::vec3 direction,float speed){
     if(_physics){
         auto& physicsData = *data.p;
         //recheck this
@@ -689,12 +689,12 @@ void ComponentBody::alignTo(glm::vec3 direction,float speed){
         Math::recalculateForwardRightUp(*normalData.rotation,_forward,_right,_up);
     }
 }
-void ComponentBody::setCollision(CollisionType::Type _type,float _mass){
+void OLD_ComponentBody::setCollision(CollisionType::Type _type,float _mass){
     auto& physicsData = *data.p;
     SAFE_DELETE(physicsData.collision);
-    ComponentModel* modelComponent = nullptr;
+    OLD_ComponentModel* modelComponent = nullptr;
     if (m_Owner != 0) {
-        modelComponent = owner()->getComponent<ComponentModel>();
+        modelComponent = owner()->getComponent<OLD_ComponentModel>();
     }
     if (modelComponent) {
         if (_type == CollisionType::Compound) {
@@ -714,8 +714,8 @@ void ComponentBody::setCollision(CollisionType::Type _type,float _mass){
         Physics::addRigidBody(physicsData.rigidBody);
     }
 }
-void ComponentBody::translate(glm::vec3 translation,bool local){ ComponentBody::translate(translation.x,translation.y,translation.z,local); }
-void ComponentBody::translate(float x,float y,float z,bool local){
+void OLD_ComponentBody::translate(glm::vec3 translation,bool local){ OLD_ComponentBody::translate(translation.x,translation.y,translation.z,local); }
+void OLD_ComponentBody::translate(float x,float y,float z,bool local){
     if(_physics){
         auto& physicsData = *data.p;
         physicsData.rigidBody->activate();
@@ -733,8 +733,8 @@ void ComponentBody::translate(float x,float y,float z,bool local){
         setPosition(_position + offset);
     }
 }
-void ComponentBody::rotate(glm::vec3 rotation,bool local){ ComponentBody::rotate(rotation.x,rotation.y,rotation.z,local); }
-void ComponentBody::rotate(float pitch,float yaw,float roll,bool local){
+void OLD_ComponentBody::rotate(glm::vec3 rotation,bool local){ OLD_ComponentBody::rotate(rotation.x,rotation.y,rotation.z,local); }
+void OLD_ComponentBody::rotate(float pitch,float yaw,float roll,bool local){
     if(_physics){
         auto& physicsData = *data.p;
         btQuaternion quat = physicsData.rigidBody->getWorldTransform().getRotation().normalize();
@@ -755,8 +755,8 @@ void ComponentBody::rotate(float pitch,float yaw,float roll,bool local){
         Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
     }
 }
-void ComponentBody::scale(glm::vec3 amount){ ComponentBody::scale(amount.x,amount.y,amount.z); }
-void ComponentBody::scale(float x,float y,float z){
+void OLD_ComponentBody::scale(glm::vec3 amount){ OLD_ComponentBody::scale(amount.x,amount.y,amount.z); }
+void OLD_ComponentBody::scale(float x,float y,float z){
     if(_physics){
         auto& physicsData = *data.p;
         if(physicsData.collision){
@@ -782,14 +782,14 @@ void ComponentBody::scale(float x,float y,float z){
         _scale.x += x; _scale.y += y; _scale.z += z;
     }
     if(m_Owner != 0){
-        auto* models = owner()->getComponent<ComponentModel>();
+        auto* models = owner()->getComponent<OLD_ComponentModel>();
         if(models){
-            epriv::ComponentInternalFunctionality::CalculateRadius(*models);
+            epriv::OLD_ComponentInternalFunctionality::CalculateRadius(*models);
         }
     }
 }
-void ComponentBody::setPosition(glm::vec3 newPosition){ ComponentBody::setPosition(newPosition.x,newPosition.y,newPosition.z); }
-void ComponentBody::setPosition(float x,float y,float z){
+void OLD_ComponentBody::setPosition(glm::vec3 newPosition){ OLD_ComponentBody::setPosition(newPosition.x,newPosition.y,newPosition.z); }
+void OLD_ComponentBody::setPosition(float x,float y,float z){
     if(_physics){
         auto& physicsData = *data.p;
         btTransform tr;
@@ -819,8 +819,8 @@ void ComponentBody::setPosition(float x,float y,float z){
         _matrix[3][2] = z;
     }
 }
-void ComponentBody::setRotation(glm::quat newRotation){ ComponentBody::setRotation(newRotation.x,newRotation.y,newRotation.z,newRotation.w); }
-void ComponentBody::setRotation(float x,float y,float z,float w){
+void OLD_ComponentBody::setRotation(glm::quat newRotation){ OLD_ComponentBody::setRotation(newRotation.x,newRotation.y,newRotation.z,newRotation.w); }
+void OLD_ComponentBody::setRotation(float x,float y,float z,float w){
     if(_physics){
         auto& physicsData = *data.p;
         btQuaternion quat(x,y,z,w);
@@ -845,8 +845,8 @@ void ComponentBody::setRotation(float x,float y,float z,float w){
         Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
     }
 }
-void ComponentBody::setScale(glm::vec3 newScale){ ComponentBody::setScale(newScale.x,newScale.y,newScale.z); }
-void ComponentBody::setScale(float x,float y,float z){
+void OLD_ComponentBody::setScale(glm::vec3 newScale){ OLD_ComponentBody::setScale(newScale.x,newScale.y,newScale.z); }
+void OLD_ComponentBody::setScale(float x,float y,float z){
     if(_physics){
         auto& physicsData = *data.p;
         if(physicsData.collision){
@@ -877,14 +877,14 @@ void ComponentBody::setScale(float x,float y,float z){
         _scale.x = x; _scale.y = y; _scale.z = z;
     }
     if(m_Owner != 0){
-        auto* models = owner()->getComponent<ComponentModel>();
+        auto* models = owner()->getComponent<OLD_ComponentModel>();
         if(models){
-            epriv::ComponentInternalFunctionality::CalculateRadius(*models);
+            epriv::OLD_ComponentInternalFunctionality::CalculateRadius(*models);
         }
     }
 }  
-const btRigidBody* ComponentBody::getBody() const{ return data.p->rigidBody; }
-glm::vec3 ComponentBody::position(){ //theres prob a better way to do this
+const btRigidBody* OLD_ComponentBody::getBody() const{ return data.p->rigidBody; }
+glm::vec3 OLD_ComponentBody::position(){ //theres prob a better way to do this
     if(_physics){
         glm::mat4 m(1.0f);
         btTransform tr;  data.p->rigidBody->getMotionState()->getWorldTransform(tr);
@@ -894,8 +894,8 @@ glm::vec3 ComponentBody::position(){ //theres prob a better way to do this
     glm::mat4& _matrix = *data.n->modelMatrix;
     return glm::vec3(_matrix[3][0],_matrix[3][1],_matrix[3][2]);
 }
-glm::vec3 ComponentBody::getScreenCoordinates(){ return Math::getScreenCoordinates(position(),false); }
-glm::vec3 ComponentBody::getScale(){
+glm::vec3 OLD_ComponentBody::getScreenCoordinates(){ return Math::getScreenCoordinates(position(),false); }
+glm::vec3 OLD_ComponentBody::getScale(){
     if(_physics){
         auto& physicsData = *data.p;
         if(physicsData.collision){
@@ -923,19 +923,19 @@ glm::vec3 ComponentBody::getScale(){
     }
     return *data.n->scale; 
 }
-glm::quat ComponentBody::rotation(){
+glm::quat OLD_ComponentBody::rotation(){
     if(_physics){
         return Engine::Math::btToGLMQuat(data.p->rigidBody->getWorldTransform().getRotation());
     }
     return *data.n->rotation;
 }
-glm::vec3 ComponentBody::forward(){ return _forward; }
-glm::vec3 ComponentBody::right(){ return _right; }
-glm::vec3 ComponentBody::up(){ return _up; }
-glm::vec3 ComponentBody::getLinearVelocity(){ btVector3 v = data.p->rigidBody->getLinearVelocity(); return Engine::Math::btVectorToGLM(v); }
-glm::vec3 ComponentBody::getAngularVelocity(){ btVector3 v = data.p->rigidBody->getAngularVelocity(); return Engine::Math::btVectorToGLM(v); }
-float ComponentBody::mass(){ return data.p->mass; }
-glm::mat4 ComponentBody::modelMatrix(){ //theres prob a better way to do this
+glm::vec3 OLD_ComponentBody::forward(){ return _forward; }
+glm::vec3 OLD_ComponentBody::right(){ return _right; }
+glm::vec3 OLD_ComponentBody::up(){ return _up; }
+glm::vec3 OLD_ComponentBody::getLinearVelocity(){ btVector3 v = data.p->rigidBody->getLinearVelocity(); return Engine::Math::btVectorToGLM(v); }
+glm::vec3 OLD_ComponentBody::getAngularVelocity(){ btVector3 v = data.p->rigidBody->getAngularVelocity(); return Engine::Math::btVectorToGLM(v); }
+float OLD_ComponentBody::mass(){ return data.p->mass; }
+glm::mat4 OLD_ComponentBody::modelMatrix(){ //theres prob a better way to do this
     if(_physics){
         auto& physicsData = *data.p;
         glm::mat4 m(1.0f);
@@ -948,8 +948,8 @@ glm::mat4 ComponentBody::modelMatrix(){ //theres prob a better way to do this
     }
     return *data.n->modelMatrix;
 }
-void ComponentBody::setDamping(float linear,float angular){ data.p->rigidBody->setDamping(linear,angular); }
-void ComponentBody::setDynamic(bool dynamic){
+void OLD_ComponentBody::setDamping(float linear,float angular){ data.p->rigidBody->setDamping(linear,angular); }
+void OLD_ComponentBody::setDynamic(bool dynamic){
     if (_physics) {
         auto& physicsData = *data.p;
         if (dynamic) {
@@ -960,13 +960,13 @@ void ComponentBody::setDynamic(bool dynamic){
         }else {
             Physics::removeRigidBody(physicsData.rigidBody);
             physicsData.rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
-            ComponentBody::clearAllForces();
+            OLD_ComponentBody::clearAllForces();
             Physics::addRigidBody(physicsData.rigidBody);
             physicsData.rigidBody->activate();
         }
     }
 }
-void ComponentBody::setLinearVelocity(float x,float y,float z,bool local){
+void OLD_ComponentBody::setLinearVelocity(float x,float y,float z,bool local){
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.rigidBody->activate();
@@ -975,8 +975,8 @@ void ComponentBody::setLinearVelocity(float x,float y,float z,bool local){
         physicsData.rigidBody->setLinearVelocity(v);
     }
 }
-void ComponentBody::setLinearVelocity(glm::vec3 velocity,bool local){ ComponentBody::setLinearVelocity(velocity.x,velocity.y,velocity.z,local); }
-void ComponentBody::setAngularVelocity(float x,float y,float z,bool local){
+void OLD_ComponentBody::setLinearVelocity(glm::vec3 velocity,bool local){ OLD_ComponentBody::setLinearVelocity(velocity.x,velocity.y,velocity.z,local); }
+void OLD_ComponentBody::setAngularVelocity(float x,float y,float z,bool local){
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.rigidBody->activate();
@@ -985,8 +985,8 @@ void ComponentBody::setAngularVelocity(float x,float y,float z,bool local){
         physicsData.rigidBody->setAngularVelocity(v);
     }
 }
-void ComponentBody::setAngularVelocity(glm::vec3 velocity,bool local){ ComponentBody::setAngularVelocity(velocity.x,velocity.y,velocity.z,local); }
-void ComponentBody::applyForce(float x,float y,float z,bool local){
+void OLD_ComponentBody::setAngularVelocity(glm::vec3 velocity,bool local){ OLD_ComponentBody::setAngularVelocity(velocity.x,velocity.y,velocity.z,local); }
+void OLD_ComponentBody::applyForce(float x,float y,float z,bool local){
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.rigidBody->activate();
@@ -995,7 +995,7 @@ void ComponentBody::applyForce(float x,float y,float z,bool local){
         physicsData.rigidBody->applyCentralForce(v);
     }
 }
-void ComponentBody::applyForce(glm::vec3 force,glm::vec3 origin,bool local){
+void OLD_ComponentBody::applyForce(glm::vec3 force,glm::vec3 origin,bool local){
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.rigidBody->activate();
@@ -1007,7 +1007,7 @@ void ComponentBody::applyForce(glm::vec3 force,glm::vec3 origin,bool local){
         physicsData.rigidBody->applyForce(v, btVector3(origin.x, origin.y, origin.z));
     }
 }
-void ComponentBody::applyImpulse(float x,float y,float z,bool local){
+void OLD_ComponentBody::applyImpulse(float x,float y,float z,bool local){
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.rigidBody->activate();
@@ -1016,7 +1016,7 @@ void ComponentBody::applyImpulse(float x,float y,float z,bool local){
         physicsData.rigidBody->applyCentralImpulse(v);
     }
 }
-void ComponentBody::applyImpulse(glm::vec3 impulse,glm::vec3 origin,bool local){
+void OLD_ComponentBody::applyImpulse(glm::vec3 impulse,glm::vec3 origin,bool local){
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.rigidBody->activate();
@@ -1028,7 +1028,7 @@ void ComponentBody::applyImpulse(glm::vec3 impulse,glm::vec3 origin,bool local){
         physicsData.rigidBody->applyImpulse(v, btVector3(origin.x, origin.y, origin.z));
     }
 }
-void ComponentBody::applyTorque(float x,float y,float z,bool local){
+void OLD_ComponentBody::applyTorque(float x,float y,float z,bool local){
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.rigidBody->activate();
@@ -1039,8 +1039,8 @@ void ComponentBody::applyTorque(float x,float y,float z,bool local){
         physicsData.rigidBody->applyTorque(t);
     }
 }
-void ComponentBody::applyTorque(glm::vec3 torque,bool local){ ComponentBody::applyTorque(torque.x,torque.y,torque.z,local); }
-void ComponentBody::applyTorqueImpulse(float x,float y,float z,bool local){
+void OLD_ComponentBody::applyTorque(glm::vec3 torque,bool local){ OLD_ComponentBody::applyTorque(torque.x,torque.y,torque.z,local); }
+void OLD_ComponentBody::applyTorqueImpulse(float x,float y,float z,bool local){
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.rigidBody->activate();
@@ -1051,8 +1051,8 @@ void ComponentBody::applyTorqueImpulse(float x,float y,float z,bool local){
         physicsData.rigidBody->applyTorqueImpulse(t);
     }
 }
-void ComponentBody::applyTorqueImpulse(glm::vec3 torqueImpulse,bool local){ ComponentBody::applyTorqueImpulse(torqueImpulse.x,torqueImpulse.y,torqueImpulse.z,local); }
-void ComponentBody::clearLinearForces(){
+void OLD_ComponentBody::applyTorqueImpulse(glm::vec3 torqueImpulse,bool local){ OLD_ComponentBody::applyTorqueImpulse(torqueImpulse.x,torqueImpulse.y,torqueImpulse.z,local); }
+void OLD_ComponentBody::clearLinearForces(){
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.rigidBody->setActivationState(0);
@@ -1060,7 +1060,7 @@ void ComponentBody::clearLinearForces(){
         physicsData.rigidBody->setLinearVelocity(btVector3(0, 0, 0));
     }
 }
-void ComponentBody::clearAngularForces(){
+void OLD_ComponentBody::clearAngularForces(){
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.rigidBody->setActivationState(0);
@@ -1068,7 +1068,7 @@ void ComponentBody::clearAngularForces(){
         physicsData.rigidBody->setAngularVelocity(btVector3(0, 0, 0));
     }
 }
-void ComponentBody::clearAllForces(){
+void OLD_ComponentBody::clearAllForces(){
     if (_physics) {
         auto& physicsData = *data.p;
         btVector3 v(0, 0, 0);
@@ -1078,7 +1078,7 @@ void ComponentBody::clearAllForces(){
         physicsData.rigidBody->setAngularVelocity(v);
     }
 }
-void ComponentBody::setMass(float mass){
+void OLD_ComponentBody::setMass(float mass){
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.mass = mass;
@@ -1096,25 +1096,22 @@ void ComponentBody::setMass(float mass){
 
 #pragma region Entity
 
-Entity::Entity(){
+OLD_Entity::OLD_Entity(){
     m_Scene = 0;
     ID = 0;
-    m_Components.resize(ComponentType::_TOTAL, 0);
+    m_Components.resize(OLD_ComponentType::_TOTAL, 0);
 }
-Entity::~Entity(){
+OLD_Entity::~OLD_Entity(){
     ID = 0;
     m_Scene = 0;
 }
-const uint Entity::id() const { return ID; }
-Scene* Entity::scene(){ return m_Scene; }
-void Entity::destroy(bool immediate){
-    if(!immediate)
-        componentManager->_addEntityToBeDestroyed(ID);  //add to the deletion queue
-    else
-        componentManager->_deleteEntityImmediately(*this); //delete immediately    
+const uint OLD_Entity::id() const { return ID; }
+Scene* OLD_Entity::scene(){ return m_Scene; }
+void OLD_Entity::destroy(){
+    componentManager->_addEntityToBeDestroyed(ID);  //add to the deletion queue
 }
 
 #pragma endregion
 
-ComponentBaseClass* Components::GetComponent(uint index) { return componentManager->m_ComponentPool->getAsFast<ComponentBaseClass>(index); }
-Entity* Components::GetEntity(uint id) { return componentManager->m_EntityPool->getAsFast<Entity>(id); }
+OLD_ComponentBaseClass* OLD_Components::GetComponent(uint index) { return componentManager->m_ComponentPool->getAsFast<OLD_ComponentBaseClass>(index); }
+OLD_Entity* OLD_Components::GetEntity(uint id) { return componentManager->m_EntityPool->getAsFast<OLD_Entity>(id); }

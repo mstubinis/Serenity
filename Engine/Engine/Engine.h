@@ -26,7 +26,7 @@ namespace Engine{
             SoundManager      m_SoundManager;
             PhysicsManager    m_PhysicsManager;
             RenderManager     m_RenderManager;
-            ComponentManager  m_ComponentManager;
+            OLD_ComponentManager  m_ComponentManager;
             ThreadManager     m_ThreadManager;
             NoiseManager      m_NoiseManager;
             bool              m_Paused, m_Destroyed;

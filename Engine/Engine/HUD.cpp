@@ -77,8 +77,8 @@ void HUD::render(){
     #pragma region renderCrossHairAndOtherInfo
     
     if(player->getTarget()){
-        auto* body = player->getTarget()->getComponent<ComponentBody>();
-        auto* model = player->getTarget()->getComponent<ComponentModel>();
+        auto* body = player->getTarget()->getComponent<OLD_ComponentBody>();
+        auto* model = player->getTarget()->getComponent<OLD_ComponentModel>();
         const glm::vec3& pos = body->getScreenCoordinates();
         float scl = glm::max(0.5f,model->radius()*23.0f / Resources::getCurrentScene()->getActiveCamera()->getDistance(player->getTarget()));
         if(pos.z == 1){

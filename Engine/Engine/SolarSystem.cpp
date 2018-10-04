@@ -240,15 +240,15 @@ void SolarSystem::_loadFromFile(string filename){
     }
 
     centerSceneToObject(*player);
-    auto& body = *player->getComponent<ComponentBody>();
+    auto& body = *player->getComponent<OLD_ComponentBody>();
     float xPos = body.position().x;
     float zPos = body.position().z;
     /*
     Entity* ent = new Entity();
     addEntity(*ent);
-    ComponentBody* bbody = new ComponentBody();
+    OLD_ComponentBody* bbody = new OLD_ComponentBody();
     ent->addComponent(bbody);
-    ComponentModel* mmodel = new ComponentModel(ResourceManifest::TestMesh, ResourceManifest::DefiantMaterial, ent);
+    OLD_ComponentModel* mmodel = new OLD_ComponentModel(ResourceManifest::TestMesh, ResourceManifest::DefiantMaterial, ent);
     ent->addComponent(mmodel);
     
     mmodel->getModel()->playAnimation("Skeleton|fire", 0.0f, -1.0f, 0);

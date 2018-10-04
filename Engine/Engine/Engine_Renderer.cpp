@@ -233,7 +233,7 @@ class epriv::RenderManager::impl final{
         int godRays_samples;
         float godRays_fovDegrees;
         float godRays_alphaFalloff;
-        Entity* godRays_Object;
+        OLD_Entity* godRays_Object;
         #pragma endregion
 
         #pragma region SSAOInfo
@@ -1662,7 +1662,7 @@ class epriv::RenderManager::impl final{
                 }
             }
         }
-        void _passGeometry(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,Entity* ignore){
+        void _passGeometry(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, OLD_Entity* ignore){
             Scene& scene = *Resources::getCurrentScene();
             const glm::vec3& clear = scene.getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
@@ -1699,7 +1699,7 @@ class epriv::RenderManager::impl final{
 
             InternalScenePublicInterface::RenderGeometryTransparent(scene,c);
         }
-        void _passForwardRendering(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,Entity* ignore){
+        void _passForwardRendering(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, OLD_Entity* ignore){
             Scene& scene = *Resources::getCurrentScene();
 
             gbuffer.start(GBufferType::Diffuse);
@@ -2044,7 +2044,7 @@ class epriv::RenderManager::impl final{
             setViewport(startX, startY, width, height);
             m_FullscreenTriangle->render();
         }
-        void _render(GBuffer& gbuffer, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool& HUD, Entity* ignore,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
+        void _render(GBuffer& gbuffer, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool& HUD, OLD_Entity* ignore,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
             Scene& s = *Resources::getCurrentScene();
             //restore default state, might have to increase this as we use more textures
             for(uint i = 0; i < 9; ++i){ 
@@ -2110,7 +2110,7 @@ class epriv::RenderManager::impl final{
             Settings::clear(true,false,false); //this is needed, clear color should be (0,0,0,0)
             
             if (godRays && godRays_Object) {
-                auto& body = *godRays_Object->getComponent<ComponentBody>();
+                auto& body = *godRays_Object->getComponent<OLD_ComponentBody>();
                 glm::vec3 oPos = body.position();       
                 glm::vec3 camPos = camera.getPosition();
                 glm::vec3 camVec = camera.getViewVector();
@@ -2271,7 +2271,7 @@ class epriv::RenderManager::impl final{
 epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); renderManager = m_i.get(); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
-void epriv::RenderManager::_render(Camera& c, const uint fboW, const uint fboH,bool HUD,Entity* ignore,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){m_i->_render(*m_i->m_GBuffer,c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo);}
+void epriv::RenderManager::_render(Camera& c, const uint fboW, const uint fboH,bool HUD, OLD_Entity* ignore,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){m_i->_render(*m_i->m_GBuffer,c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo);}
 void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
 void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ m_i->m_GBuffer->resize(w,h); }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
@@ -2335,8 +2335,8 @@ void epriv::RenderPipeline::sort(Camera& c) {
             std::sort(
                 vect.begin(), vect.end(),
                 [&c](InstanceNode* lhs,InstanceNode* rhs) { 
-                    const glm::vec3& lhsPos = lhs->instance->parent()->getComponent<ComponentBody>()->position();
-                    const glm::vec3& rhsPos = rhs->instance->parent()->getComponent<ComponentBody>()->position();
+                    const glm::vec3& lhsPos = lhs->instance->parent()->getComponent<OLD_ComponentBody>()->position();
+                    const glm::vec3& rhsPos = rhs->instance->parent()->getComponent<OLD_ComponentBody>()->position();
                     return dist(c, lhsPos) < dist(c, rhsPos);
                 }
             );
@@ -2452,9 +2452,9 @@ void Renderer::Settings::GodRays::setWeight(float w){ renderManager->godRays_wei
 void Renderer::Settings::GodRays::setSamples(uint s){ renderManager->godRays_samples = glm::max((uint)0,s); }
 void Renderer::Settings::GodRays::setFOVDegrees(float d){ renderManager->godRays_fovDegrees = d; }
 void Renderer::Settings::GodRays::setAlphaFalloff(float a){ renderManager->godRays_alphaFalloff = a; }
-void Renderer::Settings::GodRays::setObject(uint& id){ renderManager->godRays_Object = Components::GetEntity(id); }
-void Renderer::Settings::GodRays::setObject(Entity* entity){ renderManager->godRays_Object = entity; }
-Entity* Renderer::Settings::GodRays::getObject(){ return renderManager->godRays_Object; }
+void Renderer::Settings::GodRays::setObject(uint& id){ renderManager->godRays_Object = OLD_Components::GetEntity(id); }
+void Renderer::Settings::GodRays::setObject(OLD_Entity* entity){ renderManager->godRays_Object = entity; }
+OLD_Entity* Renderer::Settings::GodRays::getObject(){ return renderManager->godRays_Object; }
 void Renderer::Settings::Lighting::enable(bool b){ renderManager->lighting = b; }
 void Renderer::Settings::Lighting::disable(){ renderManager->lighting = false; }
 float Renderer::Settings::Lighting::getGIContributionGlobal(){ return renderManager->lighting_gi_contribution_global; }

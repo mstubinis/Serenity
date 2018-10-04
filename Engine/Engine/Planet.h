@@ -53,7 +53,7 @@ struct RingInfo final{
     }
 };
 
-class Planet: public Entity{
+class Planet: public OLD_Entity{
     friend class ::Ring;
     friend struct ::PlanetaryRingMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringGroundMeshInstanceBindFunctor;
@@ -62,8 +62,8 @@ class Planet: public Entity{
     friend struct ::AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
     friend struct ::StarMeshInstanceBindFunctor;
     protected:
-        ComponentModel* m_Model;
-        ComponentBody* m_Body;
+        OLD_ComponentModel* m_Model;
+        OLD_ComponentBody* m_Body;
         std::vector<Ring*> m_Rings;
         PlanetType::Type m_Type;
         OrbitInfo* m_OrbitInfo;

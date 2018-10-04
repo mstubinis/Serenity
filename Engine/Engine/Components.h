@@ -16,7 +16,7 @@
 typedef unsigned short ushort;
 
 struct Handle;
-class Entity;
+class OLD_Entity;
 class Scene;
 class Camera;
 class ShaderP;
@@ -28,11 +28,11 @@ class btRigidBody;
 struct btDefaultMotionState;
 class btVector3;
 
-class ComponentBaseClass;
-class ComponentBody;
-class ComponentModel;
-class ComponentCamera;
-class Components;
+class OLD_ComponentBaseClass;
+class OLD_ComponentBody;
+class OLD_ComponentModel;
+class OLD_ComponentCamera;
+class OLD_Components;
 
 typedef boost::typeindex::type_index   boost_type_index;
 
@@ -42,7 +42,7 @@ template <typename T> const boost_type_index type_id(T* component) { return boos
 namespace Engine{
     namespace epriv{
         class InternalComponentPublicInterface final {
-            friend class ::ComponentCamera;
+            friend class ::OLD_ComponentCamera;
             friend class ::Camera;
             public:
                 static glm::mat4 GetViewNoTranslation(const Camera&);
@@ -51,52 +51,52 @@ namespace Engine{
                 static glm::mat4 GetViewProjectionInverseNoTranslation(const Camera&);
                 static glm::vec3 GetViewVectorNoTranslation(const Camera&);
         };
-        class ComponentInternalFunctionality;
+        class OLD_ComponentInternalFunctionality;
         struct MeshMaterialPair;
-        class ComponentTypeRegistry;
-        class ComponentManager;
-        class ComponentCameraSystem;
-        class ComponentModelSystem;
-        class ComponentBodySystem;
+        class OLD_ComponentTypeRegistry;
+        class OLD_ComponentManager;
+        class OLD_ComponentCameraSystem;
+        class OLD_ComponentModelSystem;
+        class OLD_ComponentBodySystem;
     };
 };
-class ComponentType{public:enum Type{
+class OLD_ComponentType{public:enum Type{
     Body,
     Model,
     Camera, //Can contain: ComponentCamera, ComponentGameCamera
 _TOTAL,};};
 
-class Components final {
-    friend class ::Engine::epriv::ComponentManager;
+class OLD_Components final {
+    friend class ::Engine::epriv::OLD_ComponentManager;
     public:
-        static ComponentBaseClass* GetComponent(uint id);
-        static Entity* GetEntity(uint id);
+        static OLD_ComponentBaseClass* GetComponent(uint id);
+        static OLD_Entity* GetEntity(uint id);
         template <typename T> static uint getSlot() {
-            return Engine::epriv::ComponentTypeRegistry::m_Registry.at(type_id<T>());
+            return Engine::epriv::OLD_ComponentTypeRegistry::m_Registry.at(type_id<T>());
         }
         template <typename T> static uint getSlot(T* component) {
-            return Engine::epriv::ComponentTypeRegistry::m_Registry.at(type_id(component));
+            return Engine::epriv::OLD_ComponentTypeRegistry::m_Registry.at(type_id(component));
         }
 };
 
 
-class ComponentBaseClass{
-    friend class ::Engine::epriv::ComponentManager;
-    friend class ::Entity;
+class OLD_ComponentBaseClass{
+    friend class ::Engine::epriv::OLD_ComponentManager;
+    friend class ::OLD_Entity;
     protected:
         uint m_Owner;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentBaseClass() { m_Owner = 0; }
-        Entity* owner() { return Components::GetEntity(m_Owner); }
-        virtual ~ComponentBaseClass() {}
+        OLD_ComponentBaseClass() { m_Owner = 0; }
+        OLD_Entity* owner() { return OLD_Components::GetEntity(m_Owner); }
+        virtual ~OLD_ComponentBaseClass() {}
 };
 namespace Engine{
 
     template<class Base,class Derived> void registerComponent(){
         const boost_type_index baseType    = type_id<Base>();
         const boost_type_index derivedType = type_id<Derived>();
-        auto& map = epriv::ComponentTypeRegistry::m_Registry;
+        auto& map = epriv::OLD_ComponentTypeRegistry::m_Registry;
         if(!map.count(derivedType)){
             const uint& baseClassSlot = map.at(baseType);
             map.emplace(derivedType,baseClassSlot);
@@ -105,27 +105,27 @@ namespace Engine{
 
     namespace epriv{
         const uint MAX_NUM_ENTITIES = 131072;
-        class ComponentManager final{
-            friend class ::Entity;
+        class OLD_ComponentManager final{
+            friend class ::OLD_Entity;
             friend class ::Scene;
-            friend class ::Components;
-            friend class ::Engine::epriv::ComponentTypeRegistry;
-            friend class ::Engine::epriv::ComponentCameraSystem;
-            friend class ::Engine::epriv::ComponentModelSystem;
-            friend class ::Engine::epriv::ComponentBodySystem;
+            friend class ::OLD_Components;
+            friend class ::Engine::epriv::OLD_ComponentTypeRegistry;
+            friend class ::Engine::epriv::OLD_ComponentCameraSystem;
+            friend class ::Engine::epriv::OLD_ComponentModelSystem;
+            friend class ::Engine::epriv::OLD_ComponentBodySystem;
             private:
                 class impl; std::unique_ptr<impl> m_i;
-                ObjectPool<Entity>*                                                 m_EntityPool;
-                static ObjectPool<ComponentBaseClass>*                              m_ComponentPool;
-                static boost::unordered_map<uint, std::vector<ComponentBaseClass*>> m_ComponentVectors;
-                static boost::unordered_map<uint, std::vector<ComponentBaseClass*>> m_ComponentVectorsScene;
+                ObjectPool<OLD_Entity>*                                                 m_EntityPool;
+                static ObjectPool<OLD_ComponentBaseClass>*                              m_ComponentPool;
+                static boost::unordered_map<uint, std::vector<OLD_ComponentBaseClass*>> m_ComponentVectors;
+                static boost::unordered_map<uint, std::vector<OLD_ComponentBaseClass*>> m_ComponentVectorsScene;
             public:
-                ComponentManager(const char* name, uint w, uint h);
-                ~ComponentManager();
+                OLD_ComponentManager(const char* name, uint w, uint h);
+                ~OLD_ComponentManager();
 
-                static void onComponentAddedToEntity(Entity&);
-                static void onEntityAddedToScene(Scene&, Entity&);
-                static void onSceneSwap(Scene*, Scene*, Entity&);
+                static void onComponentAddedToEntity(OLD_Entity&);
+                static void onEntityAddedToScene(Scene&, OLD_Entity&);
+                static void onSceneSwap(Scene*, Scene*, OLD_Entity&);
 
                 void _pause(bool=true);
                 void _unpause();
@@ -133,16 +133,16 @@ namespace Engine{
                 void _resize(uint width,uint height);
 
                 void _sceneSwap(Scene* oldScene, Scene* newScene);
-                void _deleteEntityImmediately(Entity&);
+                void _deleteEntityImmediately(OLD_Entity&);
                 void _addEntityToBeDestroyed(uint id);
-                void _addEntityToBeDestroyed(Entity&);
+                void _addEntityToBeDestroyed(OLD_Entity&);
 
                 void _removeComponent(uint componentID);
-                void _removeComponent(ComponentBaseClass* component);
+                void _removeComponent(OLD_ComponentBaseClass* component);
         };
-        class ComponentTypeRegistry final{
-            friend class ::Entity;
-            friend class ::Engine::epriv::ComponentManager;
+        class OLD_ComponentTypeRegistry final{
+            friend class ::OLD_Entity;
+            friend class ::Engine::epriv::OLD_ComponentManager;
             private:
                 uint m_NextIndex;
             public:
@@ -150,103 +150,103 @@ namespace Engine{
 
                 static uint slot(const boost_type_index& _index) { return m_Registry.at(_index); }
 
-                ComponentTypeRegistry() { m_NextIndex = 0; }
-                ~ComponentTypeRegistry() { m_Registry.clear(); m_NextIndex = 0; }
+                OLD_ComponentTypeRegistry() { m_NextIndex = 0; }
+                ~OLD_ComponentTypeRegistry() { m_Registry.clear(); m_NextIndex = 0; }
 
                 template<class T> void emplace(){
                     m_Registry.emplace(type_id<T>(),m_NextIndex);
-                    ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
-                    ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
+                    OLD_ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<OLD_ComponentBaseClass*>());
+                    OLD_ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<OLD_ComponentBaseClass*>());
                     ++m_NextIndex;
                 }
                 template<class T,class V> void emplace(){
                     m_Registry.emplace(type_id<T>(),m_NextIndex);
                     m_Registry.emplace(type_id<V>(),m_NextIndex);
-                    ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
-                    ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
+                    OLD_ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<OLD_ComponentBaseClass*>());
+                    OLD_ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<OLD_ComponentBaseClass*>());
                     ++m_NextIndex;
                 }
                 template<class T,class V,class W> void emplace(){
                     m_Registry.emplace(type_id<T>(),m_NextIndex);
                     m_Registry.emplace(type_id<V>(),m_NextIndex);
                     m_Registry.emplace(type_id<W>(),m_NextIndex);
-                    ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
-                    ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
+                    OLD_ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<OLD_ComponentBaseClass*>());
+                    OLD_ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<OLD_ComponentBaseClass*>());
                     ++m_NextIndex;
                 }
         };
-        class ComponentSystemBaseClass{
-            friend class ::Engine::epriv::ComponentManager;
+        class OLD_ComponentSystemBaseClass{
+            friend class ::Engine::epriv::OLD_ComponentManager;
             public:
-                ComponentSystemBaseClass(){}
-                virtual ~ComponentSystemBaseClass(){}
+                OLD_ComponentSystemBaseClass(){}
+                virtual ~OLD_ComponentSystemBaseClass(){}
                 virtual void update(const float& dt){}
-                virtual void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity&) {}
-                virtual void onEntityAddedToScene(Scene&, ComponentBaseClass*, Entity&) {}
-                virtual void onComponentAddedToEntity(ComponentBaseClass*, Entity&) {}
+                virtual void onSceneSwap(Scene* oldScene, Scene* newScene, OLD_ComponentBaseClass*, OLD_Entity&) {}
+                virtual void onEntityAddedToScene(Scene&, OLD_ComponentBaseClass*, OLD_Entity&) {}
+                virtual void onComponentAddedToEntity(OLD_ComponentBaseClass*, OLD_Entity&) {}
         };
-        class ComponentModelSystem final: public ComponentSystemBaseClass {
-            friend class ::Engine::epriv::ComponentManager;
+        class OLD_ComponentModelSystem final: public OLD_ComponentSystemBaseClass {
+            friend class ::Engine::epriv::OLD_ComponentManager;
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
-                ComponentModelSystem();
-                ~ComponentModelSystem();
+                OLD_ComponentModelSystem();
+                ~OLD_ComponentModelSystem();
                 void update(const float& dt);
-                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity&);
-                void onEntityAddedToScene(Scene&, ComponentBaseClass*, Entity&);
-                void onComponentAddedToEntity(ComponentBaseClass*, Entity&);
+                void onSceneSwap(Scene* oldScene, Scene* newScene, OLD_ComponentBaseClass*, OLD_Entity&);
+                void onEntityAddedToScene(Scene&, OLD_ComponentBaseClass*, OLD_Entity&);
+                void onComponentAddedToEntity(OLD_ComponentBaseClass*, OLD_Entity&);
         };
-        class ComponentCameraSystem final : public ComponentSystemBaseClass {
-            friend class ::Engine::epriv::ComponentManager;
+        class OLD_ComponentCameraSystem final : public OLD_ComponentSystemBaseClass {
+            friend class ::Engine::epriv::OLD_ComponentManager;
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
-                ComponentCameraSystem();
-                ~ComponentCameraSystem();
+                OLD_ComponentCameraSystem();
+                ~OLD_ComponentCameraSystem();
                 void update(const float& dt);
-                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity&);
-                void onEntityAddedToScene(Scene&, ComponentBaseClass*, Entity&);
-                void onComponentAddedToEntity(ComponentBaseClass*, Entity&);
+                void onSceneSwap(Scene* oldScene, Scene* newScene, OLD_ComponentBaseClass*, OLD_Entity&);
+                void onEntityAddedToScene(Scene&, OLD_ComponentBaseClass*, OLD_Entity&);
+                void onComponentAddedToEntity(OLD_ComponentBaseClass*, OLD_Entity&);
         };
-        class ComponentBodySystem final : public ComponentSystemBaseClass {
-            friend class ::Engine::epriv::ComponentManager;
+        class OLD_ComponentBodySystem final : public OLD_ComponentSystemBaseClass {
+            friend class ::Engine::epriv::OLD_ComponentManager;
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
-                ComponentBodySystem();
-                ~ComponentBodySystem();
+                OLD_ComponentBodySystem();
+                ~OLD_ComponentBodySystem();
                 void update(const float& dt);
-                void onSceneSwap(Scene* oldScene, Scene* newScene, ComponentBaseClass*, Entity&);
-                void onEntityAddedToScene(Scene&, ComponentBaseClass*, Entity&);
-                void onComponentAddedToEntity(ComponentBaseClass*, Entity&);
+                void onSceneSwap(Scene* oldScene, Scene* newScene, OLD_ComponentBaseClass*, OLD_Entity&);
+                void onEntityAddedToScene(Scene&, OLD_ComponentBaseClass*, OLD_Entity&);
+                void onComponentAddedToEntity(OLD_ComponentBaseClass*, OLD_Entity&);
         };
     };
 };
 
-class ComponentModel: public ComponentBaseClass{
-    friend class ::Engine::epriv::ComponentManager;
-    friend class ::Engine::epriv::ComponentModelSystem;
-    friend class ::Engine::epriv::ComponentInternalFunctionality;
+class OLD_ComponentModel: public OLD_ComponentBaseClass{
+    friend class ::Engine::epriv::OLD_ComponentManager;
+    friend class ::Engine::epriv::OLD_ComponentModelSystem;
+    friend class ::Engine::epriv::OLD_ComponentInternalFunctionality;
     friend class ::Engine::epriv::InternalComponentPublicInterface;
-    friend class ::ComponentBody;
+    friend class ::OLD_ComponentBody;
     private:
         std::vector<MeshInstance*> models;
         float _radius;
         glm::vec3 _radiusBox;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity*, ShaderP* = 0,RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Handle& materialHandle, Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Handle& meshHandle, Material*, Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Material*, Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        OLD_ComponentModel(Handle& meshHandle, Handle& materialHandle, OLD_Entity*, ShaderP* = 0,RenderStage::Stage = RenderStage::GeometryOpaque);
+        OLD_ComponentModel(Mesh*, Handle& materialHandle, OLD_Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        OLD_ComponentModel(Handle& meshHandle, Material*, OLD_Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        OLD_ComponentModel(Mesh*, Material*, OLD_Entity*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Handle& materialHandle, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Handle& meshHandle, Material*, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Material*, Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        OLD_ComponentModel(Handle& meshHandle, Handle& materialHandle, OLD_Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        OLD_ComponentModel(Mesh*, Handle& materialHandle, OLD_Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        OLD_ComponentModel(Handle& meshHandle, Material*, OLD_Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        OLD_ComponentModel(Mesh*, Material*, OLD_Entity*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        ~ComponentModel();
+        ~OLD_ComponentModel();
 
         uint getNumModels();
         float radius();
@@ -271,17 +271,17 @@ class ComponentModel: public ComponentBaseClass{
         void setModelShaderProgram(ShaderP*, uint index, RenderStage::Stage = RenderStage::GeometryOpaque);
         void setModelShaderProgram(Handle& materialHandle, uint index, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        bool rayIntersectSphere(ComponentCamera& camera);
+        bool rayIntersectSphere(OLD_ComponentCamera& camera);
 
-        template<class T> void setCustomBindFunctor  (T& functor,uint index = 0){ models.at(index)->setCustomBindFunctor(functor); }
-        template<class T> void setCustomUnbindFunctor(T& functor,uint index = 0){ models.at(index)->setCustomUnbindFunctor(functor); }
+        template<class T> void setCustomBindFunctor  (T& functor,uint index = 0){ models[index]->setCustomBindFunctor(functor); }
+        template<class T> void setCustomUnbindFunctor(T& functor,uint index = 0){ models[index]->setCustomUnbindFunctor(functor); }
 };
 
-class ComponentBody: public ComponentBaseClass{
-    friend class ::Engine::epriv::ComponentManager;
-    friend class ::Engine::epriv::ComponentBodySystem;
+class OLD_ComponentBody: public OLD_ComponentBaseClass{
+    friend class ::Engine::epriv::OLD_ComponentManager;
+    friend class ::Engine::epriv::OLD_ComponentBodySystem;
     friend class ::Engine::epriv::InternalComponentPublicInterface;
-    friend class ::ComponentModel;
+    friend class ::OLD_ComponentModel;
     private:
         struct PhysicsData{
             Collision* collision;
@@ -309,9 +309,9 @@ class ComponentBody: public ComponentBaseClass{
         glm::vec3 _forward, _right, _up;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentBody();
-        ComponentBody(CollisionType::Type);
-        ~ComponentBody();
+        OLD_ComponentBody();
+        OLD_ComponentBody(CollisionType::Type);
+        ~OLD_ComponentBody();
 
         void alignTo(glm::vec3 direction,float speed);
 
@@ -354,12 +354,12 @@ class ComponentBody: public ComponentBaseClass{
         void applyTorqueImpulse(float x,float y,float z,bool local=true);    void applyTorqueImpulse(glm::vec3 torqueImpulse,bool local=true);
 };
 
-class ComponentCamera: public ComponentBaseClass{
-    friend class ::Engine::epriv::ComponentManager;
-    friend class ::Engine::epriv::ComponentCameraSystem;
-    friend class ::Engine::epriv::ComponentInternalFunctionality;
+class OLD_ComponentCamera: public OLD_ComponentBaseClass{
+    friend class ::Engine::epriv::OLD_ComponentManager;
+    friend class ::Engine::epriv::OLD_ComponentCameraSystem;
+    friend class ::Engine::epriv::OLD_ComponentInternalFunctionality;
     friend class ::Engine::epriv::InternalComponentPublicInterface;
-    friend class ::ComponentModel;
+    friend class ::OLD_ComponentModel;
     friend class ::Camera;
     private:
         enum Type{ Perspective, Orthographic, };
@@ -372,10 +372,10 @@ class ComponentCamera: public ComponentBaseClass{
         union{ float _aspectRatio;  float _right; };
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentCamera();
-        ComponentCamera(float angle,float aspectRatio,float nearPlane,float farPlane);
-        ComponentCamera(float left,float right,float bottom,float top,float nearPlane,float farPlane);
-        ~ComponentCamera();
+        OLD_ComponentCamera();
+        OLD_ComponentCamera(float angle,float aspectRatio,float nearPlane,float farPlane);
+        OLD_ComponentCamera(float left,float right,float bottom,float top,float nearPlane,float farPlane);
+        ~OLD_ComponentCamera();
 
         virtual void update(const float& dt);
         void resize(uint width,uint height);
@@ -398,53 +398,53 @@ class ComponentCamera: public ComponentBaseClass{
         uint sphereIntersectTest(glm::vec3& objectPosition,float objectRadius);
 };
 
-class Entity: public EventObserver{
+class OLD_Entity: public EventObserver{
     friend class ::Scene;
-    friend class ::Engine::epriv::ComponentManager;
+    friend class ::Engine::epriv::OLD_ComponentManager;
     private:
         Scene* m_Scene;
         uint ID;
         std::vector<uint> m_Components;
     public:
-        Entity();
-        virtual ~Entity();
+        OLD_Entity();
+        virtual ~OLD_Entity();
 
         const uint id() const;
         Scene* scene();
         virtual void update(const float& dt){}
 
-        void destroy(bool immediate = false); //completely eradicate from memory. by default it its eradicated at the end of the update frame before rendering logic, but can be overrided to be deleted immediately after the call
+        void destroy();
 
         template<class T> T* getComponent(){
-            const uint& slot = Engine::epriv::ComponentTypeRegistry::slot(type_id<T>());
+            const uint& slot = Engine::epriv::OLD_ComponentTypeRegistry::slot(type_id<T>());
             const uint& componentID = m_Components.at(slot);
             if(componentID == 0){
                 return nullptr;
             }
-            return Engine::epriv::ComponentManager::m_ComponentPool->getAsFast<T>(componentID);
+            return Engine::epriv::OLD_ComponentManager::m_ComponentPool->getAsFast<T>(componentID);
         }
         template<class T> void addComponent(T* component){
-            const uint& slot = Engine::epriv::ComponentTypeRegistry::slot(type_id<T>());
+            const uint& slot = Engine::epriv::OLD_ComponentTypeRegistry::slot(type_id<T>());
             uint& componentID = m_Components.at(slot);
             if(componentID != 0) return;
-            uint generatedID = Engine::epriv::ComponentManager::m_ComponentPool->add(component);
-            Engine::epriv::ComponentManager::m_ComponentVectors.at(slot).push_back(component);
+            uint generatedID = Engine::epriv::OLD_ComponentManager::m_ComponentPool->add(component);
+            Engine::epriv::OLD_ComponentManager::m_ComponentVectors.at(slot).push_back(component);
             component->m_Owner = ID;
             componentID = generatedID;
 
-            Engine::epriv::ComponentManager::onComponentAddedToEntity(*this);
+            Engine::epriv::OLD_ComponentManager::onComponentAddedToEntity(*this);
             if (m_Scene) {
-                Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(slot).push_back(component);       
+                Engine::epriv::OLD_ComponentManager::m_ComponentVectorsScene.at(slot).push_back(component);
             }
         }
         template<class T> void removeComponent(T* component){
-            const uint& slot = Engine::epriv::ComponentTypeRegistry::slot(type_id<T>());
+            const uint& slot = Engine::epriv::OLD_ComponentTypeRegistry::slot(type_id<T>());
             uint& componentID = m_Components.at(slot);
             if(componentID == 0) return;
             component->m_Owner = 0;
-            removeFromVector(Engine::epriv::ComponentManager::m_ComponentVectors.at(slot),component);
-            removeFromVector(Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(slot),component);
-            Engine::epriv::ComponentManager::m_ComponentPool->remove(componentID);
+            removeFromVector(Engine::epriv::OLD_ComponentManager::m_ComponentVectors.at(slot),component);
+            removeFromVector(Engine::epriv::OLD_ComponentManager::m_ComponentVectorsScene.at(slot),component);
+            Engine::epriv::OLD_ComponentManager::m_ComponentPool->remove(componentID);
             componentID = 0;
         }
 };

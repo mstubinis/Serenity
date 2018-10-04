@@ -288,9 +288,9 @@ struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineR
     //Renderer::GLEnable(GLState::DEPTH_MASK);
 }};
 
-Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):Entity(){
+Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene){
     scene->addEntity(*this);
-    m_Model = new ComponentModel(ResourceManifest::PlanetMesh,mat,this,ResourceManifest::groundFromSpace);
+    m_Model = new OLD_ComponentModel(ResourceManifest::PlanetMesh,mat,this,ResourceManifest::groundFromSpace);
     addComponent(m_Model);
     m_AtmosphereHeight = atmosphere;
     if(type != PlanetType::Star){
@@ -309,7 +309,7 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
         skyMesh.setCustomUnbindFunctor(f1);
         skyMesh.setScale(aScale,aScale,aScale);
     }
-    m_Body = new ComponentBody();
+    m_Body = new OLD_ComponentBody();
     addComponent(m_Body);
     m_Body->setScale(scl,scl,scl);
     m_Body->setPosition(pos);

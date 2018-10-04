@@ -8,36 +8,36 @@
 class PointLight;
 struct Handle;
 
-class CapsuleEnd final: public Entity{
+class CapsuleEnd final: public OLD_Entity{
     public:
-        ComponentBody* m_Body;
+        OLD_ComponentBody* m_Body;
         CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, Scene* = nullptr);
         ~CapsuleEnd();
         void update(const float& dt);
 };
-class CapsuleStar final: public Entity{
+class CapsuleStar final: public OLD_Entity{
     private:
         PointLight* m_Light;
-        ComponentBody* m_Body;
+        OLD_ComponentBody* m_Body;
     public:
         CapsuleStar(float size,glm::vec3 pos, Scene* = nullptr,bool=true);
         ~CapsuleStar();
         void update(const float& dt);
 };
-class CapsuleTunnel final: public Entity{
+class CapsuleTunnel final: public OLD_Entity{
     private:
         float m_TunnelRadius;
     public:
-        ComponentBody* m_Body;
+        OLD_ComponentBody* m_Body;
         CapsuleTunnel(float tunnelRadius, Handle& material, Scene* = nullptr);
         ~CapsuleTunnel();
         float getTunnelRadius(){ return m_TunnelRadius; }
 };
-class CapsuleRibbon final: public Entity{
+class CapsuleRibbon final: public OLD_Entity{
     private:
         float m_TunnelRadius;
     public:
-        ComponentBody* m_Body;
+        OLD_ComponentBody* m_Body;
         CapsuleRibbon(float tunnelRadius, Handle& mesh,Handle& material, Scene* = nullptr);
         ~CapsuleRibbon();
 

@@ -9,7 +9,7 @@
 
 class Font;
 class Ship;
-class Entity;
+class OLD_Entity;
 class HUD final{
     private:
         unsigned int m_TargetIterator;

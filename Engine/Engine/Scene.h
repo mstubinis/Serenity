@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <glm/vec3.hpp>
 
-class Entity;
+class OLD_Entity;
 class Camera;
 class SunLight;
 class SkyboxEmpty;
@@ -16,7 +16,7 @@ class MeshInstance;
 
 namespace Engine {
     namespace epriv {
-        class ComponentManager;
+        class OLD_ComponentManager;
         class RenderPipeline;
         class InternalScenePublicInterface final {
             friend class ::Scene;
@@ -35,7 +35,7 @@ namespace Engine {
 };
 class Scene: public EngineResource, public EventObserver{
     friend class Engine::epriv::RenderPipeline;
-    friend class Engine::epriv::ComponentManager;
+    friend class Engine::epriv::OLD_ComponentManager;
     friend class Engine::epriv::InternalScenePublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
@@ -44,11 +44,11 @@ class Scene: public EngineResource, public EventObserver{
         virtual ~Scene();
 
         uint id();
-        Entity* getEntity(uint entityID);
-        uint addEntity(Entity&);
-        void removeEntity(Entity&,bool immediate = false);
-        void removeEntity(uint id,bool immediate = false);
-        bool hasEntity(Entity&);
+        OLD_Entity* getEntity(uint entityID);
+        uint addEntity(OLD_Entity&);
+        void removeEntity(OLD_Entity&);
+        void removeEntity(uint id);
+        bool hasEntity(OLD_Entity&);
         bool hasEntity(uint entityID);
 
         virtual void update(const float& dt);
@@ -60,7 +60,7 @@ class Scene: public EngineResource, public EventObserver{
 
         SkyboxEmpty* skybox() const;
         void setSkybox(SkyboxEmpty*);
-        void centerSceneToObject(Entity&);
+        void centerSceneToObject(OLD_Entity&);
         void centerSceneToObject(uint entityID);
         void setActiveCamera(Camera&);
 };

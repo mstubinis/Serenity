@@ -6,13 +6,13 @@
 
 enum CAMERA_STATE { CAMERA_STATE_FREEFORM,CAMERA_STATE_ORBIT,CAMERA_STATE_FOLLOW,CAMERA_STATE_FOLLOWTARGET };
 
-class GameCameraComponent: public ComponentCamera{
+class GameCameraComponent: public OLD_ComponentCamera{
     public:
         CAMERA_STATE m_State;
         float m_OrbitRadius;
-        Entity* m_Target;
-        Entity* m_Player;
-        ComponentBody* m_Body;
+        OLD_Entity* m_Target;
+        OLD_Entity* m_Player;
+        OLD_ComponentBody* m_Body;
         glm::vec2 m_CameraMouseFactor;
 
         GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane);
@@ -27,17 +27,17 @@ class GameCamera: public Camera{
         GameCamera(float left, float right, float bottom, float top, float clipStart, float clipEnd,Scene* = nullptr); // Orthographic camera Constructor
         virtual ~GameCamera();
 
-        void follow(Entity*);
-        void followTarget(Entity* target,Entity* player);
-        void orbit(Entity*);
+        void follow(OLD_Entity*);
+        void followTarget(OLD_Entity* target, OLD_Entity* player);
+        void orbit(OLD_Entity*);
 
         void update(const float& dt);
         void render();
 
-        void setTarget(Entity* target);
-        const Entity* getTarget() const;
+        void setTarget(OLD_Entity* target);
+        const OLD_Entity* getTarget() const;
         const CAMERA_STATE getState() const;
 
-        Entity* getObjectInCenterRay(Entity* exclusion);
+        OLD_Entity* getObjectInCenterRay(OLD_Entity* exclusion);
 };
 #endif
