@@ -2,7 +2,7 @@
 #ifndef ENGINE_ECS_COMPONENT_SYSTEM_H
 #define ENGINE_ECS_COMPONENT_SYSTEM_H
 
-#include "ComponentPool.h"
+#include "ECSComponentPool.h"
 
 namespace Engine {
     namespace epriv {
@@ -12,7 +12,7 @@ namespace Engine {
         };
         template<typename T> class ECSComponentSystem : public IECSComponentSystem {
             private:
-                ECSComponentSystem<T> pool;
+                ECSComponentPool<T> pool;
             public:
                 ECSComponentSystem() {}
                 ~ECSComponentSystem() {}

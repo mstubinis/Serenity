@@ -46,6 +46,12 @@
     <Filter Include="Source Files\Engine\Core\ECS">
       <UniqueIdentifier>{6a0389db-2099-432c-8284-234f6e518100}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\ECS\Components">
+      <UniqueIdentifier>{97c2c27e-7de9-48f9-9f03-6effe66ac518}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\ECS\Components">
+      <UniqueIdentifier>{e877f0fd-85bd-4d3e-94b9-63ba56e5c250}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Engine\data\Shaders\AS_groundFromSpace_frag.glsl">
@@ -206,6 +212,12 @@
     <ClCompile Include="Engine\ecs\ECS.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\ecs\ComponentCamera.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\ecs\ComponentModel.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h">
@@ -355,12 +367,6 @@
     <ClInclude Include="Engine\ecs\ComponentBaseClass.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\ecs\ComponentPool.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\ecs\ComponentSystem.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\ecs\ECSRegistry.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
@@ -369,6 +375,18 @@
     </ClInclude>
     <ClInclude Include="Engine\ecs\ECS.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ecs\ECSComponentPool.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ecs\ECSComponentSystem.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ecs\ComponentCamera.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ecs\ComponentModel.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

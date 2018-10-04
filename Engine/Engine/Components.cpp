@@ -83,9 +83,9 @@ class epriv::ComponentManager::impl final{
             super.m_EntityPool    = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
 
             m_Systems.resize(ComponentType::_TOTAL, nullptr);
-            m_Systems.at(0) = new ComponentBodySystem();
-            m_Systems.at(1) = new ComponentModelSystem();
-            m_Systems.at(2) = new ComponentCameraSystem();
+            m_Systems[0] = new ComponentBodySystem();
+            m_Systems[1] = new ComponentModelSystem();
+            m_Systems[2] = new ComponentCameraSystem();
 
             m_TypeRegistry.emplace<ComponentBody>();
             m_TypeRegistry.emplace<ComponentModel>();
@@ -108,8 +108,8 @@ class epriv::ComponentManager::impl final{
         void _updateCurrentScene(const float& dt){
             auto& currentScene = *Resources::getCurrentScene();
             for(auto entityID:InternalScenePublicInterface::GetEntities(currentScene)){
-                Entity* e = Components::GetEntity(entityID);
-                e->update(dt);
+                Entity& e = *Components::GetEntity(entityID);
+                e.update(dt);
             }
             if(currentScene.skybox()) currentScene.skybox()->update();
         }
@@ -160,7 +160,7 @@ void epriv::ComponentManager::_deleteEntityImmediately(Entity& entity){
     //obviously try to improve this performance wise
     removeFromVector(epriv::InternalScenePublicInterface::GetEntities(*entity.scene()), entity.m_ID);
     for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-        uint& componentID = entity.m_Components.at(i);
+        uint& componentID = entity.m_Components[i];
         if(componentID != 0){
             ComponentBaseClass* component = Components::GetComponent(componentID);
             componentManager->_removeComponent(component);
@@ -301,9 +301,9 @@ class epriv::ComponentModelSystem::impl final {
         }
         static void _defaultUpdate(vector<ComponentBaseClass*>& vec, Camera* camera) {
             for (uint j = 0; j < vec.size(); ++j) {
-                auto& model = *(ComponentModel*)vec.at(j);
+                auto& model = *(ComponentModel*)vec[j];
                 for (uint i = 0; i < model.models.size(); ++i) {
-                    auto& pair = *model.models.at(i);
+                    auto& pair = *model.models[i];
                     if (pair.mesh()) {
                         //TODO: implement parent->child relationship...?
                         componentManager->m_i->_performTransformation(nullptr, pair.position(), pair.orientation(), pair.getScale(), pair.model());
@@ -346,7 +346,7 @@ class epriv::ComponentBodySystem::impl final {
     public:
         static void _defaultUpdate(vector<ComponentBaseClass*>& vec) {
             for (uint j = 0; j < vec.size(); ++j) {
-                auto& b = *(ComponentBody*)vec.at(j);
+                auto& b = *(ComponentBody*)vec[j];
                 if (b._physics) {
                     auto& physicsData = *b.data.p;
                     Engine::Math::recalculateForwardRightUp(physicsData.rigidBody, b._forward, b._right, b._up);
@@ -522,7 +522,7 @@ ComponentModel::~ComponentModel(){
     SAFE_DELETE_VECTOR(models);
 }
 uint ComponentModel::getNumModels() { return models.size(); }
-MeshInstance* ComponentModel::getModel(uint index){ return models.at(index); }
+MeshInstance* ComponentModel::getModel(uint index){ return models[index]; }
 void ComponentModel::show() { for (auto model : models) model->show(); }
 void ComponentModel::hide() { for (auto model : models) model->hide(); }
 float ComponentModel::radius(){ return _radius; }
@@ -597,7 +597,7 @@ void ComponentModel::setModelMesh(Mesh* mesh,uint index, RenderStage::Stage _sta
 }
 void ComponentModel::setModelMesh(Handle& mesh, uint index, RenderStage::Stage _stage){ ComponentModel::setModelMesh((Mesh*)mesh.get(),index, _stage); }
 void ComponentModel::setModelMaterial(Material* material,uint index, RenderStage::Stage _stage){
-    auto& instance = *models[index];   
+    auto& instance = *models[index];
     if (m_Owner != 0) {
         auto* _scene = owner()->scene();
         if (_scene) {
@@ -612,9 +612,9 @@ void ComponentModel::setModelMaterial(Material* material,uint index, RenderStage
     }
 }
 void ComponentModel::setModelMaterial(Handle& mat,uint index, RenderStage::Stage _stage){ ComponentModel::setModelMaterial((Material*)mat.get(),index, _stage); }
-bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
-    auto* body = owner()->getComponent<ComponentBody>();
-    return Math::rayIntersectSphere(body->position(),_radius,camera->_eye,camera->getViewVector());
+bool ComponentModel::rayIntersectSphere(ComponentCamera& camera){
+    auto& body = *owner()->getComponent<ComponentBody>();
+    return Math::rayIntersectSphere(body.position(),_radius,camera._eye,camera.getViewVector());
 }
 
 #pragma endregion

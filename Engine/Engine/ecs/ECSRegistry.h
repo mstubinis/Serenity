@@ -10,7 +10,7 @@ typedef std::uint32_t                    uint;
 typedef boost::typeindex::type_index     boost_type_index;
 
 template <typename T> const boost_type_index type_id() { return boost_type_index(boost::typeindex::type_id<T>()); }
-template <typename T> const boost_type_index type_id(T* component) { return boost_type_index(boost::typeindex::type_id_runtime(*component)); }
+template <typename T> const boost_type_index type_id(T* t) { return boost_type_index(boost::typeindex::type_id_runtime(*t)); }
 
 namespace Engine {
     namespace epriv {
@@ -23,8 +23,7 @@ namespace Engine {
                 ECSRegistry() {
                 }
                 ~ECSRegistry() {
-                    lastIndex = 0;
-                    slotMap.clear();
+                    lastIndex = 0; slotMap.clear();
                 }
                 template<typename T> static void registerComponent() {
                     auto type = type_id<T>();

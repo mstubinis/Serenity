@@ -271,7 +271,7 @@ class ComponentModel: public ComponentBaseClass{
         void setModelShaderProgram(ShaderP*, uint index, RenderStage::Stage = RenderStage::GeometryOpaque);
         void setModelShaderProgram(Handle& materialHandle, uint index, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        bool rayIntersectSphere(ComponentCamera* camera);
+        bool rayIntersectSphere(ComponentCamera& camera);
 
         template<class T> void setCustomBindFunctor  (T& functor,uint index = 0){ models.at(index)->setCustomBindFunctor(functor); }
         template<class T> void setCustomUnbindFunctor(T& functor,uint index = 0){ models.at(index)->setCustomUnbindFunctor(functor); }

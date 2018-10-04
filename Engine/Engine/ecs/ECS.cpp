@@ -17,8 +17,6 @@ void ECSEntityPool::addEntity(const Entity& _entity) {
     pool.push_back(std::move(_entity));
     ++lastIndex;
 }
-//example: pool = {1,2,3,4,5,6,7} (lastIndex = 6)
-//remove entityID: 3
 void ECSEntityPool::removeEntity(uint _entityID) {
     uint indexToRemove = _entityID - 1;
     if (indexToRemove != lastIndex) {

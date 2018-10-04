@@ -399,7 +399,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings){
 
             int xBack = ringInfo.position - i;
             int xFront = ringInfo.position + i;
-            if (xBack > 0 && xFront < ringImage.getSize().x) {
+            if (xBack > 0 && xFront < (int)ringImage.getSize().x) {
                 sf::Color fFront, fBack;
                 sf::Color bgFrontPixel = ringImage.getPixel(xFront, 0);
                 sf::Color bgBackPixel = ringImage.getPixel(xBack, 0);

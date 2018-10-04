@@ -58,7 +58,7 @@ void epriv::EventManager::onResetEvents(){
     m_currentKey = KeyboardKey::Unknown;
     for (auto iterator : m_KeyStatus) { iterator.second = false; }
     for (auto iterator : m_MouseStatus) { iterator.second = false; }
-    float dt = Resources::dt();
+    float dt = (float)Resources::dt();
     m_Delta *= (1.0f - (glm::clamp(dt * 0.01f,0.0f,1.0f))) * 0.95f;
 
     m_Difference.x = 0.0f; m_Difference.y = 0.0f;
