@@ -338,7 +338,7 @@ void MaterialComponentReflection::bind(){
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     sendUniform1Safe("CubemapMixFactor",m_MixFactor);
     if(!m_Texture)
-        sendTextureSafe(textureTypeName.c_str(),*Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
+        sendTextureSafe(textureTypeName.c_str(),*Resources::getCurrentScene()->skybox()->texture(),slots[0]);
     else
         sendTextureSafe(textureTypeName.c_str(),*m_Texture,slots[0]);
     sendTextureSafe((textureTypeName+"Map").c_str(),*m_Map,slots[1]);
