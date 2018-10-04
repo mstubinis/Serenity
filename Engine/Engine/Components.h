@@ -403,7 +403,7 @@ class Entity: public EventObserver{
     friend class ::Engine::epriv::ComponentManager;
     private:
         Scene* m_Scene;
-        uint m_ID;
+        uint ID;
         std::vector<uint> m_Components;
     public:
         Entity();
@@ -429,7 +429,7 @@ class Entity: public EventObserver{
             if(componentID != 0) return;
             uint generatedID = Engine::epriv::ComponentManager::m_ComponentPool->add(component);
             Engine::epriv::ComponentManager::m_ComponentVectors.at(slot).push_back(component);
-            component->m_Owner = m_ID;
+            component->m_Owner = ID;
             componentID = generatedID;
 
             Engine::epriv::ComponentManager::onComponentAddedToEntity(*this);

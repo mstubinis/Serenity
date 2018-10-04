@@ -35,10 +35,10 @@ class Scene::impl final {
                 SAFE_DELETE_VECTOR(vec);
         }
         uint _addEntity(Scene& super, Entity& _entity) {
-            if (_entity.m_ID != 0) return 0;
-            for (auto entityInScene : m_Entities) { if (_entity.m_ID == entityInScene) return entityInScene; } //rethink this maybe use a fixed size array?
+            if (_entity.ID != 0) return 0;
+            for (auto entityInScene : m_Entities) { if (_entity.ID == entityInScene) return entityInScene; } //rethink this maybe use a fixed size array?
             const uint entityID = epriv::Core::m_Engine->m_ComponentManager.m_EntityPool->add(&_entity);
-            _entity.m_ID = entityID;
+            _entity.ID = entityID;
             epriv::ComponentManager::onEntityAddedToScene(super, _entity);
             m_Entities.push_back(entityID);
             return entityID;
@@ -50,7 +50,7 @@ class Scene::impl final {
             }
             return false;
         }
-        bool _hasEntity(Entity& _entity) { return _hasEntity(_entity.m_ID); }
+        bool _hasEntity(Entity& _entity) { return _hasEntity(_entity.ID); }
         void _centerToObject(Scene& super,uint& centerID) {
             //TODO: handle parent->child relationship
             Entity* center = super.getEntity(centerID);
@@ -207,7 +207,7 @@ bool Scene::hasEntity(Entity& entity){ return m_i->_hasEntity(entity); }
 bool Scene::hasEntity(uint entityID){ return m_i->_hasEntity(entityID); }
 Camera* Scene::getActiveCamera(){ return m_i->m_ActiveCamera; }
 void Scene::setActiveCamera(Camera& c){ m_i->m_ActiveCamera = &c; }
-void Scene::centerSceneToObject(Entity& center){ return m_i->_centerToObject(*this, center.m_ID); }
+void Scene::centerSceneToObject(Entity& center){ return m_i->_centerToObject(*this, center.ID); }
 void Scene::centerSceneToObject(uint centerID) { return m_i->_centerToObject(*this, centerID); }
 Scene::~Scene(){
     unregisterEvent(EventType::SceneChanged);

@@ -24,7 +24,9 @@
 
 #include "ResourceManifest.h"
 
-#include "Engine_Math.h"
+
+
+#include "ecs/ECS.h"
 
 
 using namespace Engine;
@@ -33,6 +35,16 @@ HUD* m_HUD;
 void Game::cleanup(){
     delete m_HUD;
 }
+
+struct test {
+    float x;
+    float y;
+};
+struct test1 {
+    float z;
+    float w;
+    float t;
+};
 
 void Game::initResources(){
     Resources::getWindow().setIcon("data/Textures/icon.png");

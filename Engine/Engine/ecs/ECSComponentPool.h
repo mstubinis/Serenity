@@ -9,59 +9,70 @@
 
 namespace Engine {
     namespace epriv {
-
-        template <typename T> class IECSComponentPool {
+        template<typename...> class ECSComponentPool;
+        template <typename TEntity> class ECSComponentPool<TEntity>{
+            protected:
+                uint                              amount;   //number of components created
+                std::vector<TEntity>              sparse; //maps entity ID to component Index in dense
             public:
-                virtual T*   addComponent(Entity&)    = 0;
-                virtual void removeComponent(Entity&) = 0;
-                virtual T*   getComponent(Entity&)    = 0;
-            };
+                ECSComponentPool() : amount(0) {}
+                ~ECSComponentPool() { amount = 0; sparse.clear(); }
+        };
 
-        template <typename T> class ECSComponentPool : public IECSComponentPool<T> {
+
+        template <typename TEntity,typename TComponent> class ECSComponentPool<TEntity,TComponent> : public ECSComponentPool<TEntity>{
+            using super = ECSComponentPool<Entity>;
             private:
-                uint               size;   //number of components created
-                std::vector<uint>  sparse; //maps entity ID to component Index in dense
-                std::vector<T>     dense;  //actual component pool
+                std::vector<TComponent>        dense;  //actual component pool
             public:
-                ECSComponentPool() :size(0) {
+                ECSComponentPool(){
                 }
                 ~ECSComponentPool() {
-                    size = 0;
-                    sparse.clear();
                     dense.clear();
                 }
-                T* addComponent(Entity& _entity) {
-                    uint sparseID = _entity.ID - 1;
-                    if (sparse.size() <= sparseID) {
-                        for (uint i = 0; i < 2048; ++i) { sparse.emplace_back(0); }
+                TComponent* addComponent(uint _entityID) {
+                    uint sparseID = _entityID - 1;
+                    //todo: improve this
+                    if (super::sparse.size() <= sparseID) {
+                        for (uint i = 0; i < 2048; ++i) { 
+                            super::sparse.emplace_back(0); 
+                        }
                     }
-                    if (sparse[sparseID] != 0) {
+
+                    if (super::sparse[sparseID] != 0) {
                         return nullptr;
                     }
-                    dense.push_back(T());
-                    ++size;
-                    sparse[sparseID] = size;
-                    return &dense[size];
+                    dense.push_back(TComponent());
+                    //dense.emplace_back(TComponent()); use this instead?
+                    ++super::amount;
+                    super::sparse[sparseID] = super::amount;
+                    return &dense[super::amount];
                 }
-                void removeComponent(Entity& _entity) {
-                    uint sparseID = _entity.ID - 1;
-                    if (sparse[sparseID] == 0) {
+                void removeComponent(uint _entityID) {
+                    uint sparseID = _entityID - 1;
+                    if (super::sparse[sparseID] == 0) {
                         return;
                     }
-                    uint removedCID = sparse[sparseID];
-                    std::swap(dense[removedCID], dense[size]);
-                    --size;
-                    sparse[size] = removedCID;
+                    uint removedCID = super::sparse[sparseID];
+                    std::swap(dense[removedCID], dense[super::amount]);
+                    --super::amount;
+                    super::sparse[super::amount] = removedCID;
                     dense.pop_back();
                 }
-                T* getComponent(Entity& _entity) {
-                    uint sparseID = _entity.ID - 1;
-                    if (sparse[sparseID] == 0) {
+                TComponent* getComponent(uint _entityID) {
+                    uint sparseID = _entityID - 1;
+                    if (super::sparse[sparseID] == 0) {
                         return nullptr;
                     }
-                    return &(dense[sparse[sparseID]]);
+                    return &(dense[super::sparse[sparseID]]);
                 }
-            };
+        };
+
+
+
+
+
+
     };
 };
 #endif

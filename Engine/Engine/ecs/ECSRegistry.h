@@ -9,8 +9,8 @@
 typedef std::uint32_t                    uint;
 typedef boost::typeindex::type_index     boost_type_index;
 
-template <typename T> const boost_type_index type_id() { return boost_type_index(boost::typeindex::type_id<T>()); }
-template <typename T> const boost_type_index type_id(T* t) { return boost_type_index(boost::typeindex::type_id_runtime(*t)); }
+template <typename T> const boost_type_index type_ID() { return boost_type_index(boost::typeindex::type_id<T>()); }
+//template <typename T> const boost_type_index type_ID(T* t) { return boost_type_index(boost::typeindex::type_id_runtime(*t)); }
 
 namespace Engine {
     namespace epriv {
@@ -25,11 +25,13 @@ namespace Engine {
                 ~ECSRegistry() {
                     lastIndex = 0; slotMap.clear();
                 }
-                template<typename T> static void registerComponent() {
-                    auto type = type_id<T>();
-                    if (slotMap.count(type)) return;
-                    slotMap.emplace(type, lastIndex);
-                    ++lastIndex;
+                template <typename T> static const uint type_slot() {
+                    auto type = type_ID<T>();
+                    if (!slotMap.count(type)) {
+                        slotMap.emplace(type, lastIndex);
+                        ++lastIndex;
+                    }
+                    return slotMap.at(type);
                 }
             };
     };

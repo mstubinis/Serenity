@@ -4,7 +4,7 @@
 
 #include "Entity.h"
 #include <boost/type_index.hpp>
-
+/*
 struct ComponentBaseClass{
     BOOST_TYPE_INDEX_REGISTER_CLASS
     uint entityOwnerID;
@@ -16,5 +16,5 @@ struct ComponentBaseClass{
 	virtual ~ComponentBaseClass(){
 	}
 };
-
+*/
 #endif

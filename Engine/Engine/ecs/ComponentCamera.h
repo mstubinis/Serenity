@@ -3,21 +3,13 @@
 #define ENGINE_ECS_COMPONENT_CAMERA_H
 
 #include "ComponentBaseClass.h"
-#include "ECSComponentSystem.h"
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
 /*
-
 class Camera;
-class ComponentCamera;
-namespace Engine {
-    namespace epriv {
-        class ComponentCameraSystem;
-    };
-};
 
 class ComponentCamera : public ComponentBaseClass {
     friend class ::Camera;
@@ -57,22 +49,6 @@ class ComponentCamera : public ComponentBaseClass {
 
         uint pointIntersectTest(glm::vec3& objectPosition);
         uint sphereIntersectTest(glm::vec3& objectPosition, float objectRadius);
-};
-
-namespace Engine {
-    namespace epriv {
-        class ComponentCameraSystem final : public ECSComponentSystem<ComponentCamera> {
-            friend class ::Camera;
-            friend class ::ComponentCamera;
-            private:
-                static void RebuildProjectionMatrix(ComponentCamera&);
-            public:
-                ComponentCameraSystem();
-                ~ComponentCameraSystem();
-
-                void update(const float& dt);
-        };
-    };
 };
 
 */

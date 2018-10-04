@@ -3,7 +3,6 @@
 #define ENGINE_ECS_COMPONENT_MODEL_H
 
 #include "ComponentBaseClass.h"
-#include "ECSComponentSystem.h"
 
 /*
 
@@ -14,11 +13,6 @@ class Material;
 class MeshInstance;
 
 class ComponentCamera;
-namespace Engine {
-    namespace epriv {
-        class ComponentModelSystem;
-    };
-};
 
 class ComponentModel : public ComponentBaseClass {
     private:
@@ -66,20 +60,6 @@ class ComponentModel : public ComponentBaseClass {
 
         template<class T> void setCustomBindFunctor(T& functor, uint index = 0) { models.at(index)->setCustomBindFunctor(functor); }
         template<class T> void setCustomUnbindFunctor(T& functor, uint index = 0) { models.at(index)->setCustomUnbindFunctor(functor); }
-};
-
-namespace Engine {
-    namespace epriv {
-        class ComponentModelSystem final : public ECSComponentSystem<ComponentModel> {
-            friend class ::MeshInstance;
-            friend class ::ComponentModel;
-            public:
-                ComponentModelSystem();
-                ~ComponentModelSystem();
-
-                void update(const float& dt);
-        };
-    };
 };
 
 */

@@ -158,7 +158,7 @@ void epriv::ComponentManager::_resize(uint width,uint height){
 }
 void epriv::ComponentManager::_deleteEntityImmediately(Entity& entity){
     //obviously try to improve this performance wise
-    removeFromVector(epriv::InternalScenePublicInterface::GetEntities(*entity.scene()), entity.m_ID);
+    removeFromVector(epriv::InternalScenePublicInterface::GetEntities(*entity.scene()), entity.ID);
     for(uint i = 0; i < ComponentType::_TOTAL; ++i){
         uint& componentID = entity.m_Components[i];
         if(componentID != 0){
@@ -168,12 +168,12 @@ void epriv::ComponentManager::_deleteEntityImmediately(Entity& entity){
             componentID = 0;
         }
     }
-    m_EntityPool->remove(entity.m_ID);
+    m_EntityPool->remove(entity.ID);
 }
 void epriv::ComponentManager::_addEntityToBeDestroyed(uint id){ _addEntityToBeDestroyed(*m_EntityPool->getAsFast<Entity>(id)); }
 void epriv::ComponentManager::_addEntityToBeDestroyed(Entity& entity){
     for(auto destroyed:m_i->m_EntitiesToBeDestroyed){ 
-        if(destroyed->m_ID == entity.m_ID){
+        if(destroyed->ID == entity.ID){
             return; 
         } 
     }
@@ -1098,18 +1098,18 @@ void ComponentBody::setMass(float mass){
 
 Entity::Entity(){
     m_Scene = 0;
-    m_ID = 0;
+    ID = 0;
     m_Components.resize(ComponentType::_TOTAL, 0);
 }
 Entity::~Entity(){
-    m_ID = 0;
+    ID = 0;
     m_Scene = 0;
 }
-const uint Entity::id() const { return m_ID; }
+const uint Entity::id() const { return ID; }
 Scene* Entity::scene(){ return m_Scene; }
 void Entity::destroy(bool immediate){
     if(!immediate)
-        componentManager->_addEntityToBeDestroyed(m_ID);  //add to the deletion queue
+        componentManager->_addEntityToBeDestroyed(ID);  //add to the deletion queue
     else
         componentManager->_deleteEntityImmediately(*this); //delete immediately    
 }

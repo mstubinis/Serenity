@@ -209,9 +209,6 @@
     <ClCompile Include="Engine\ecs\ECSRegistry.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\ecs\ECS.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\ecs\ComponentCamera.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
     </ClCompile>
@@ -377,9 +374,6 @@
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Engine\ecs\ECSComponentPool.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\ecs\ECSComponentSystem.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Engine\ecs\ComponentCamera.h">
