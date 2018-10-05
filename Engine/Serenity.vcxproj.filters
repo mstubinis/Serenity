@@ -391,5 +391,8 @@
     <ClInclude Include="Engine\ecs\ComponentBody.h">
       <Filter>Header Files\Engine\Core\ECS\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\ecs\ECSEntityPool.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

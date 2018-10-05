@@ -41,15 +41,14 @@ template <typename T> const boost_type_index type_id(T* component) { return boos
 
 namespace Engine{
     namespace epriv{
-        class InternalComponentPublicInterface final {
+        struct InternalComponentPublicInterface final {
             friend class ::OLD_ComponentCamera;
             friend class ::Camera;
-            public:
-                static glm::mat4 GetViewNoTranslation(const Camera&);
-                static glm::mat4 GetViewInverseNoTranslation(const Camera&);
-                static glm::mat4 GetViewProjectionNoTranslation(const Camera&);
-                static glm::mat4 GetViewProjectionInverseNoTranslation(const Camera&);
-                static glm::vec3 GetViewVectorNoTranslation(const Camera&);
+            static glm::mat4 GetViewNoTranslation(const Camera&);
+            static glm::mat4 GetViewInverseNoTranslation(const Camera&);
+            static glm::mat4 GetViewProjectionNoTranslation(const Camera&);
+            static glm::mat4 GetViewProjectionInverseNoTranslation(const Camera&);
+            static glm::vec3 GetViewVectorNoTranslation(const Camera&);
         };
         class OLD_ComponentInternalFunctionality;
         struct MeshMaterialPair;
@@ -228,7 +227,7 @@ class OLD_ComponentModel: public OLD_ComponentBaseClass{
     friend class ::Engine::epriv::OLD_ComponentManager;
     friend class ::Engine::epriv::OLD_ComponentModelSystem;
     friend class ::Engine::epriv::OLD_ComponentInternalFunctionality;
-    friend class ::Engine::epriv::InternalComponentPublicInterface;
+    friend struct ::Engine::epriv::InternalComponentPublicInterface;
     friend class ::OLD_ComponentBody;
     private:
         std::vector<MeshInstance*> models;
@@ -280,7 +279,7 @@ class OLD_ComponentModel: public OLD_ComponentBaseClass{
 class OLD_ComponentBody: public OLD_ComponentBaseClass{
     friend class ::Engine::epriv::OLD_ComponentManager;
     friend class ::Engine::epriv::OLD_ComponentBodySystem;
-    friend class ::Engine::epriv::InternalComponentPublicInterface;
+    friend struct ::Engine::epriv::InternalComponentPublicInterface;
     friend class ::OLD_ComponentModel;
     private:
         struct PhysicsData{
@@ -358,7 +357,7 @@ class OLD_ComponentCamera: public OLD_ComponentBaseClass{
     friend class ::Engine::epriv::OLD_ComponentManager;
     friend class ::Engine::epriv::OLD_ComponentCameraSystem;
     friend class ::Engine::epriv::OLD_ComponentInternalFunctionality;
-    friend class ::Engine::epriv::InternalComponentPublicInterface;
+    friend struct ::Engine::epriv::InternalComponentPublicInterface;
     friend class ::OLD_ComponentModel;
     friend class ::Camera;
     private:

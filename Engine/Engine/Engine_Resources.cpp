@@ -31,7 +31,7 @@ class epriv::ResourceManager::impl final{
         Engine_Window*                                 m_Window;
         Scene*                                         m_CurrentScene;
         bool                                           m_DynamicMemory;
-        unordered_map<string,Scene*>                   m_Scenes;
+        vector<Scene*>                                 m_Scenes;
         void _init(const char* name,const uint& width,const uint& height){
             m_CurrentScene = nullptr;
             m_Window = nullptr;
@@ -44,7 +44,7 @@ class epriv::ResourceManager::impl final{
         void _destruct(){
             SAFE_DELETE(m_Resources);
             SAFE_DELETE(m_Window);
-            SAFE_DELETE_MAP(m_Scenes);
+            SAFE_DELETE_VECTOR(m_Scenes);
         }
 };
 Handle::Handle() { index = 0; counter = 0; type = 0; }
@@ -70,7 +70,13 @@ string Engine::Data::reportTime(){
 const double Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager.dt(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_CurrentScene; }
 
-bool epriv::ResourceManager::_hasScene(string n){ if(m_i->m_Scenes.count(n)) return true; return false; }
+bool epriv::ResourceManager::_hasScene(string n){ 
+    for (auto scene : m_i->m_Scenes) {
+        if (scene->name() == n)
+            return true;
+    }
+    return false;
+}
 Texture* epriv::ResourceManager::_hasTexture(string n){
     auto& resourcePool = *(m_i->m_Resources);
     for(uint i = 0; i < resourcePool.maxEntries(); ++i){
@@ -79,8 +85,11 @@ Texture* epriv::ResourceManager::_hasTexture(string n){
     }
     return 0;
 }
+Scene& epriv::ResourceManager::_getSceneByID(uint id) {
+    return *(m_i->m_Scenes[id-1]);
+}
 void epriv::ResourceManager::_addScene(Scene& s){
-    m_i->m_Scenes.emplace(s.name(), &s);
+    m_i->m_Scenes.push_back(&s);
 }
 uint epriv::ResourceManager::_numScenes(){return m_i->m_Scenes.size();}
 
@@ -90,7 +99,13 @@ void Resources::Settings::disableDynamicMemory(){ resourceManager->m_DynamicMemo
 Engine_Window& Resources::getWindow(){ return *resourceManager->m_Window; }
 glm::uvec2 Resources::getWindowSize(){ return resourceManager->m_Window->getSize(); }
 
-Scene* Resources::getScene(string n){ return resourceManager->m_Scenes.at(n); }
+Scene* Resources::getScene(string n){ 
+    for (auto scene : resourceManager->m_Scenes) {
+        if (scene->name() == n)
+            return scene;
+    }
+    return nullptr;
+}
 
 void Resources::getShader(Handle& h,Shader*& p){ resourceManager->m_Resources->getAs(h,p); }
 Shader* Resources::getShader(Handle& h){ Shader* p; resourceManager->m_Resources->getAs(h,p); return p; }

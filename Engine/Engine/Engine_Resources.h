@@ -58,6 +58,7 @@ namespace Engine{
                 void _init(const char* name,uint width,uint height);
  
                 Handle _addTexture(Texture*);
+                Scene& _getSceneByID(uint id);
 
                 bool _hasScene(std::string);
                 void _addScene(Scene&);

@@ -529,7 +529,7 @@ float OLD_ComponentModel::radius(){ return _radius; }
 glm::vec3 OLD_ComponentModel::boundingBox() { return _radiusBox; }
 uint OLD_ComponentModel::addModel(Handle& mesh, Handle& mat, ShaderP* shaderProgram, RenderStage::Stage _stage){ return OLD_ComponentModel::addModel((Mesh*)mesh.get(),(Material*)mat.get(), shaderProgram, _stage); }
 uint OLD_ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* shaderProgram, RenderStage::Stage _stage) {
-    MeshInstance* instance = new MeshInstance(owner(), mesh, material, shaderProgram);
+    MeshInstance* instance = new MeshInstance(*owner(), mesh, material, shaderProgram);
     models.push_back(instance);  
     if (m_Owner != 0) {
         auto* _scene = owner()->scene();

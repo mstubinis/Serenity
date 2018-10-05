@@ -3,7 +3,7 @@
 #define ENGINE_ECS_COMPONENT_MODEL_H
 
 #include "ComponentBaseClass.h"
-
+#include "../Engine_EventObject.h"
 
 struct Handle;
 class ShaderP;
@@ -57,8 +57,8 @@ class ComponentModel : public ComponentBaseClass {
 
         bool rayIntersectSphere(ComponentCamera& camera);
 
-        template<class T> void setCustomBindFunctor(T& functor, uint index = 0) { models.at(index)->setCustomBindFunctor(functor); }
-        template<class T> void setCustomUnbindFunctor(T& functor, uint index = 0) { models.at(index)->setCustomUnbindFunctor(functor); }
+        template<class T> void setCustomBindFunctor(T& functor, uint index = 0) { models[index]->setCustomBindFunctor(functor); }
+        template<class T> void setCustomUnbindFunctor(T& functor, uint index = 0) { models[index]->setCustomUnbindFunctor(functor); }
 };
 
 #endif

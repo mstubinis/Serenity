@@ -56,11 +56,11 @@ class MeshInstance::impl{
         glm::mat4 m_Model;
         glm::vec4 m_Color;
         bool m_PassedRenderCheck, m_Visible;
-        void _init(Mesh* mesh,Material* mat, OLD_Entity* entity,ShaderP* program){
+        void _init(Mesh* mesh,Material* mat, OLD_Entity& entity,ShaderP* program){
             m_Stage = RenderStage::GeometryOpaque;
             m_PassedRenderCheck = false;
             m_Visible = true;
-            m_Entity = entity;
+            m_Entity = &entity;
 
             _setShaderProgram(program);
             _setMaterial(mat);
@@ -177,25 +177,25 @@ epriv::DefaultMeshInstanceBindFunctor   DEFAULT_BIND_FUNCTOR;
 epriv::DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
 
-MeshInstance::MeshInstance(OLD_Entity* entity, Mesh* mesh,Material* mat, ShaderP* program):m_i(new impl){
+MeshInstance::MeshInstance(OLD_Entity& entity, Mesh* mesh,Material* mat, ShaderP* program):m_i(new impl){
     m_i->_init(mesh,mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(OLD_Entity* entity,Handle mesh,Handle mat, ShaderP* program):m_i(new impl){
+MeshInstance::MeshInstance(OLD_Entity& entity,Handle mesh,Handle mat, ShaderP* program):m_i(new impl){
     Mesh* _mesh = (Mesh*)mesh.get();
     Material* _mat = (Material*)mat.get();
     m_i->_init(_mesh,_mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(OLD_Entity* entity,Mesh* mesh,Handle mat, ShaderP* program):m_i(new impl){
+MeshInstance::MeshInstance(OLD_Entity& entity,Mesh* mesh,Handle mat, ShaderP* program):m_i(new impl){
     Material* _mat = (Material*)mat.get();
     m_i->_init(mesh,_mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(OLD_Entity* entity,Handle mesh,Material* mat, ShaderP* program):m_i(new impl){
+MeshInstance::MeshInstance(OLD_Entity& entity,Handle mesh,Material* mat, ShaderP* program):m_i(new impl){
     Mesh* _mesh = (Mesh*)mesh.get();
     m_i->_init(_mesh,mat,entity, program);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);

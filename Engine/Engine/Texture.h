@@ -53,17 +53,16 @@ namespace Engine{
 
     };
 };
-class InternalTexturePublicInterface final{
-    public:
-        static void LoadCPU(Texture&);
-        static void LoadGPU(Texture&);
-        static void UnloadCPU(Texture&);
-        static void UnloadGPU(Texture&);
+struct InternalTexturePublicInterface final{
+    static void LoadCPU(Texture&);
+    static void LoadGPU(Texture&);
+    static void UnloadCPU(Texture&);
+    static void UnloadGPU(Texture&);
 };
 
 class Texture: public EngineResource{
     friend class Engine::epriv::TextureLoader;
-    friend class ::InternalTexturePublicInterface;
+    friend struct ::InternalTexturePublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

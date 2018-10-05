@@ -15,7 +15,7 @@ class CameraType{public: enum Type {
 
 class Camera: public OLD_Entity{
     friend class LightProbe;
-    friend class ::Engine::epriv::InternalComponentPublicInterface;
+    friend struct ::Engine::epriv::InternalComponentPublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     protected:

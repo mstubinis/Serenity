@@ -6,12 +6,9 @@
 
 struct ComponentBaseClass{
     Entity& owner;
-
-    ComponentBaseClass():owner(Entity::_null)
-    {
+    ComponentBaseClass():owner(Entity::_null){
     }
-    ComponentBaseClass(Entity& owner_):owner(owner_)
-    {
+    ComponentBaseClass(Entity& owner_):owner(owner_){
     }
     virtual ~ComponentBaseClass() = default;
 };

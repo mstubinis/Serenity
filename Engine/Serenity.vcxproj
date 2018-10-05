@@ -88,6 +88,7 @@
     <ClInclude Include="Engine\ecs\ComponentCamera.h" />
     <ClInclude Include="Engine\ecs\ComponentModel.h" />
     <ClInclude Include="Engine\ecs\ECSComponentPool.h" />
+    <ClInclude Include="Engine\ecs\ECSEntityPool.h" />
     <ClInclude Include="Engine\ecs\ECSRegistry.h" />
     <ClInclude Include="Engine\ecs\Entity.h" />
     <ClInclude Include="Engine\ecs\ECS.h" />

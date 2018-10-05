@@ -17,19 +17,20 @@ typedef unsigned int uint;
 namespace Engine{
     namespace epriv{
         struct Core final{
-            static Core*      m_Engine;
+            static Core*          m_Engine;
 
-            EventManager      m_EventManager;
-            EventDispatcher   m_EventDispatcher;
-            ResourceManager   m_ResourceManager;
-            TimeManager       m_TimeManager;
-            SoundManager      m_SoundManager;
-            PhysicsManager    m_PhysicsManager;
-            RenderManager     m_RenderManager;
+            EventManager          m_EventManager;
+            EventDispatcher       m_EventDispatcher;
+            ResourceManager       m_ResourceManager;
+            TimeManager           m_TimeManager;
+            SoundManager          m_SoundManager;
+            PhysicsManager        m_PhysicsManager;
+            RenderManager         m_RenderManager;
             OLD_ComponentManager  m_ComponentManager;
-            ThreadManager     m_ThreadManager;
-            NoiseManager      m_NoiseManager;
-            bool              m_Paused, m_Destroyed;
+            ThreadManager         m_ThreadManager;
+            NoiseManager          m_NoiseManager;
+            bool                  m_Paused, m_Destroyed;
+
             Core(const char* name,uint width,uint height);
             ~Core();
         };

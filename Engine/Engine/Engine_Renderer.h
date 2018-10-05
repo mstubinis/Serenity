@@ -50,7 +50,7 @@ namespace Engine {
         struct MaterialNode;
         struct MeshNode;
         struct InstanceNode;
-        class InternalScenePublicInterface;
+        //struct InternalScenePublicInterface;
     };
 };
 
@@ -77,7 +77,7 @@ namespace Engine{
             }
         };
         class RenderPipeline final{
-            friend class Engine::epriv::InternalScenePublicInterface;
+            //friend struct Engine::epriv::InternalScenePublicInterface;
             friend class ::Scene;
             private:
                 ShaderP& shaderProgram;

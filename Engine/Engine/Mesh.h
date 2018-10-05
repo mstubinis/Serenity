@@ -28,7 +28,7 @@ const uint NUM_MAX_INSTANCES = 65536;
 struct DefaultMeshBindFunctor;
 struct DefaultMeshUnbindFunctor;
 class MeshInstance;
-class InternalMeshPublicInterface;
+struct InternalMeshPublicInterface;
 class Mesh;
 
 namespace Engine{
@@ -145,23 +145,22 @@ namespace Engine{
         };
     };
 };
-class InternalMeshPublicInterface final{
-    public:
-        static void LoadCPU( Mesh&);
-        static void LoadGPU( Mesh&);
-        static void UnloadCPU( Mesh&);
-        static void UnloadGPU( Mesh&);
-        static void UpdateInstance( Mesh&,uint _id, glm::mat4 _modelMatrix);
-        static void UpdateInstances( Mesh&, std::vector<glm::mat4>& _modelMatrices);
-        static bool SupportsInstancing();
-        static btCollisionShape* BuildCollision(Mesh*,CollisionType::Type);
+struct InternalMeshPublicInterface final{
+    static void LoadCPU( Mesh&);
+    static void LoadGPU( Mesh&);
+    static void UnloadCPU( Mesh&);
+    static void UnloadGPU( Mesh&);
+    static void UpdateInstance( Mesh&,uint _id, glm::mat4 _modelMatrix);
+    static void UpdateInstances( Mesh&, std::vector<glm::mat4>& _modelMatrices);
+    static bool SupportsInstancing();
+    static btCollisionShape* BuildCollision(Mesh*,CollisionType::Type);
 };
 class Mesh final: public BindableResource, public EventObserver{
     friend struct ::DefaultMeshBindFunctor;
     friend struct ::DefaultMeshUnbindFunctor;
     friend class ::Engine::epriv::AnimationData;
     friend class ::Engine::epriv::MeshSkeleton;
-    friend class ::InternalMeshPublicInterface;
+    friend struct ::InternalMeshPublicInterface;
     friend class ::Engine::epriv::MeshLoader;
     friend class ::Engine::epriv::CollisionFactory;
     private:

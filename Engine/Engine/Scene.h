@@ -7,36 +7,27 @@
 #include <unordered_map>
 #include <glm/vec3.hpp>
 
+
 class OLD_Entity;
 class Camera;
 class SunLight;
 class SkyboxEmpty;
-class Scene;
 class MeshInstance;
+struct Entity;
 
 namespace Engine {
     namespace epriv {
         class OLD_ComponentManager;
         class RenderPipeline;
-        class InternalScenePublicInterface final {
-            friend class ::Scene;
-            friend class Engine::epriv::RenderPipeline;
-            public:
-                static std::vector<uint>& GetEntities(Scene&);
-                static std::vector<SunLight*>& GetLights(Scene&);
-                static void RenderGeometryOpaque(Scene&, Camera&);
-                static void RenderGeometryTransparent(Scene&, Camera&);
-                static void RenderForwardOpaque(Scene&, Camera&);
-                static void RenderForwardTransparent(Scene&, Camera&);
-                static void AddMeshInstanceToPipeline(Scene&, MeshInstance&, RenderStage::Stage);
-                static void RemoveMeshInstanceFromPipeline(Scene&, MeshInstance&, RenderStage::Stage);
-        };
+        struct InternalScenePublicInterface;
+        
+        template<typename T> class ECS;
     };
 };
 class Scene: public EngineResource, public EventObserver{
     friend class Engine::epriv::RenderPipeline;
     friend class Engine::epriv::OLD_ComponentManager;
-    friend class Engine::epriv::InternalScenePublicInterface;
+    friend struct Engine::epriv::InternalScenePublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -64,4 +55,25 @@ class Scene: public EngineResource, public EventObserver{
         void centerSceneToObject(uint entityID);
         void setActiveCamera(Camera&);
 };
+namespace Engine {
+    namespace epriv {
+        struct InternalScenePublicInterface final {
+            friend class ::Scene;
+            friend class Engine::epriv::RenderPipeline;
+            static std::vector<uint>& GetEntities(Scene&);
+            static std::vector<SunLight*>& GetLights(Scene&);
+            static void RenderGeometryOpaque(Scene&, Camera&);
+            static void RenderGeometryTransparent(Scene&, Camera&);
+            static void RenderForwardOpaque(Scene&, Camera&);
+            static void RenderForwardTransparent(Scene&, Camera&);
+            static void AddMeshInstanceToPipeline(Scene&, MeshInstance&, RenderStage::Stage);
+            static void RemoveMeshInstanceFromPipeline(Scene&, MeshInstance&, RenderStage::Stage);
+            static ECS<Entity>& GetECS(Scene&);
+
+            static uint NumScenes;
+        };
+    };
+};
+
+
 #endif

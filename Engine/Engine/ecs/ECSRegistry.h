@@ -20,8 +20,7 @@ namespace Engine {
                 //maps type_info's to unsigned ints that will be used as array indices
                 static boost::unordered_map<boost_type_index, uint> slotMap;
             public:
-                ECSRegistry() {
-                }
+                ECSRegistry() = default;
                 ~ECSRegistry() {
                     lastIndex = 0; slotMap.clear();
                 }
