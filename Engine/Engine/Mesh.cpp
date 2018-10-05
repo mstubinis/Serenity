@@ -832,8 +832,8 @@ class Mesh::impl final{
                 _readFromObjCompressed(file, d);
                 _finalizeData(d, threshold);
             }else{
-                if (extension == ".obj")
-                    _writeToObjCompressed();
+                //if (extension == ".obj")
+                    //_writeToObjCompressed(); 
                 _loadInternal(super, d, m_File);
                 _finalizeData(d, threshold);
             }

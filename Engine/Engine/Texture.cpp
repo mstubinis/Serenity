@@ -392,8 +392,7 @@ struct textures::ImageLoadedStructure final{
         ImageMipmap* baseImage = nullptr;
         if(mipmaps.size() > 0){
             baseImage = &(mipmaps[0]);
-        }
-        else{
+        }else{
             baseImage = new ImageMipmap();
         }
         filename = _filename;
@@ -463,8 +462,7 @@ class Texture::impl final{
             _initCommon(_openglTextureType,_genMipMaps);      
             if(extension == ".dds"){
                 TextureLoader::LoadDDSFile(super,_filename,*image);
-            }
-            else{
+            }else{
                 image->pixelType = ImagePixelType::UNSIGNED_BYTE;
                 image->internalFormat = _internalFormat;
             }
@@ -496,8 +494,7 @@ class Texture::impl final{
                         string extension = boost::filesystem::extension(image->filename);
                         if(extension == ".dds"){
                             TextureLoader::LoadDDSFile(super,image->filename,*image);
-                        }
-                        else{
+                        }else{
                             sf::Image _sfImage;
                             _sfImage.loadFromFile(image->filename);
                             image->load(_sfImage,image->filename);
