@@ -26,8 +26,8 @@ class ComponentCamera : public ComponentBaseClass {
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentCamera(Entity&);
-        ComponentCamera(Entity&,float angle, float aspectRatio, float nearPlane, float farPlane);
-        ComponentCamera(Entity&,float left, float right, float bottom, float top, float nearPlane, float farPlane);
+        ComponentCamera(Entity&, float angle, float aspectRatio, float nearPlane, float farPlane);
+        ComponentCamera(Entity&, float left, float right, float bottom, float top, float nearPlane, float farPlane);
         ~ComponentCamera();
 
         virtual void update(const float& dt);

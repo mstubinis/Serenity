@@ -20,15 +20,15 @@ class ComponentModel : public ComponentBaseClass {
         glm::vec3 _radiusBox;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity&, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Handle& materialHandle, Entity&, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Handle& meshHandle, Material*, Entity&, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Material*, Entity&, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity&, Handle& meshHandle, Handle& materialHandle, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity&, Mesh*, Handle& materialHandle, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity&, Handle& meshHandle, Material*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity&, Mesh*, Material*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        ComponentModel(Handle& meshHandle, Handle& materialHandle, Entity&, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Handle& materialHandle, Entity&, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Handle& meshHandle, Material*, Entity&, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
-        ComponentModel(Mesh*, Material*, Entity&, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity&, Handle& meshHandle, Handle& materialHandle, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity&, Mesh*, Handle& materialHandle, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity&, Handle& meshHandle, Material*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity&, Mesh*, Material*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
 
         ~ComponentModel();
 

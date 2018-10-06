@@ -62,32 +62,31 @@ namespace Engine{
 struct Event final{
     EventType::Type type;
     union{
-        Engine::epriv::EventWindowResized eventWindowResized;
-        Engine::epriv::EventWindowFullscreenChanged eventWindowFullscreenChanged;
-        Engine::epriv::EventKeyboard eventKeyboard;
-        Engine::epriv::EventTextEntered eventTextEntered;
-        Engine::epriv::EventMouseButton eventMouseButton;
-        Engine::epriv::EventMouseMove eventMouseMoved;
-        Engine::epriv::EventMouseWheel eventMouseWheel;
-        Engine::epriv::EventJoystickMoved eventJoystickMoved;
-        Engine::epriv::EventJoystickButton eventJoystickButton;
-        Engine::epriv::EventJoystickConnection eventJoystickConnection;
-        Engine::epriv::EventSceneChanged eventSceneChanged;
+        Engine::epriv::EventWindowResized              eventWindowResized;
+        Engine::epriv::EventWindowFullscreenChanged    eventWindowFullscreenChanged;
+        Engine::epriv::EventKeyboard                   eventKeyboard;
+        Engine::epriv::EventTextEntered                eventTextEntered;
+        Engine::epriv::EventMouseButton                eventMouseButton;
+        Engine::epriv::EventMouseMove                  eventMouseMoved;
+        Engine::epriv::EventMouseWheel                 eventMouseWheel;
+        Engine::epriv::EventJoystickMoved              eventJoystickMoved;
+        Engine::epriv::EventJoystickButton             eventJoystickButton;
+        Engine::epriv::EventJoystickConnection         eventJoystickConnection;
+        Engine::epriv::EventSceneChanged               eventSceneChanged;
     };
 };
 /*
-Inherit from this class to expose your class to events and event dispatching, specifically the following functions:
+Inherit from this struct to expose your class to events and event dispatching, specifically the following functions:
     void registerEvent(const EventType::Type& type)    -  register this object as an observer to the parameterized event type
     void unregisterEvent(const EventType::Type& type)  -  unregister this object as an observer to the parameterized event type
     virtual void onEvent(const Event& e)               -  execute this function when the parameter event occurs
 */
-class EventObserver{
-    public:
-        EventObserver();
-        virtual ~EventObserver();
+struct EventObserver{
+    EventObserver();
+    virtual ~EventObserver();
 
-        void registerEvent(const EventType::Type& type);
-        void unregisterEvent(const EventType::Type& type);
-        virtual void onEvent(const Event& e);
+    void registerEvent(const EventType::Type& type);
+    void unregisterEvent(const EventType::Type& type);
+    virtual void onEvent(const Event& e);
 };
 #endif

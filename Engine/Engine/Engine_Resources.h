@@ -19,7 +19,7 @@ class Material;
 class SunLight;
 class SoundData;
 
-class ResourceType final {public: enum Type {
+struct ResourceType final {enum Type {
     Empty, //do NOT move this specific enum
     Texture,
     Mesh,

@@ -415,7 +415,7 @@ struct textures::ImageLoadedStructure final{
 
 
 class Texture::impl final{
-    friend class epriv::TextureLoader;
+    friend struct epriv::TextureLoader;
     friend class ::Texture;
     public:
         vector<ImageLoadedStructure*> m_ImagesDatas;
@@ -950,8 +950,7 @@ void epriv::TextureLoader::EnumFilterToGL(uint& gl, TextureFilter::Filter& filte
         else if(filter == TextureFilter::Linear_Mipmap_Nearest)   gl = GL_LINEAR_MIPMAP_NEAREST;
         else if(filter == TextureFilter::Nearest_Mipmap_Linear)   gl = GL_NEAREST_MIPMAP_LINEAR;
         else if(filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST_MIPMAP_NEAREST;
-    }
-    else{
+    }else{
         if(filter == TextureFilter::Linear)                       gl = GL_LINEAR;
         else if(filter == TextureFilter::Nearest)                 gl = GL_NEAREST;
         else if(filter == TextureFilter::Linear_Mipmap_Linear)    gl = GL_LINEAR;
@@ -1054,24 +1053,24 @@ void Texture::setAnisotropicFiltering(float aniso){
     //}
 }
 
-void InternalTexturePublicInterface::LoadCPU(Texture& _texture){
+void epriv::InternalTexturePublicInterface::LoadCPU(Texture& _texture){
     //if(!_texture.isLoaded()){
         _texture.m_i->_load_CPU(_texture);
     //}
 }
-void InternalTexturePublicInterface::LoadGPU(Texture& _texture){
+void epriv::InternalTexturePublicInterface::LoadGPU(Texture& _texture){
     //if(!_texture.isLoaded()){
         _texture.m_i->_load_GPU(_texture);
         _texture.EngineResource::load();
     //}
 }
-void InternalTexturePublicInterface::UnloadCPU(Texture& _texture){
+void epriv::InternalTexturePublicInterface::UnloadCPU(Texture& _texture){
     //if(_texture.isLoaded()){
         _texture.m_i->_unload_CPU(_texture);
         _texture.EngineResource::unload();
     //}
 }
-void InternalTexturePublicInterface::UnloadGPU(Texture& _texture){
+void epriv::InternalTexturePublicInterface::UnloadGPU(Texture& _texture){
     //if(_texture.isLoaded()){
         _texture.m_i->_unload_GPU(_texture);      
     //}

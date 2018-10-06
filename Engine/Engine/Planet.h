@@ -15,10 +15,9 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor;
 struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
 struct StarMeshInstanceBindFunctor;
 
-class PlanetType{ public:enum Type { 
+struct PlanetType{ enum Type {
     Rocky,Ice,GasGiant,IceGiant,Moon,Star,Asteroid,
 };};
-
 struct RotationInfo final{
     float tilt;
     float speed;
@@ -27,7 +26,6 @@ struct RotationInfo final{
         speed = 1.0f / (_days * 86400.0f * 360.0f);
     }
 };
-
 class OrbitInfo final{
     public:
         glm::vec4 info; //x = eccentricity, y = days, z = minorRadius, w = majorRadius
@@ -39,7 +37,6 @@ class OrbitInfo final{
         void setOrbitalPosition(float angle,Planet* planet);
         glm::vec3 getOrbitalPosition(float angle,Planet* planet);
 };
-
 struct RingInfo final{
     uint position;
     uint size;
@@ -52,7 +49,6 @@ struct RingInfo final{
         alphaBreakpoint = ab;
     }
 };
-
 class Planet: public OLD_Entity{
     friend class ::Ring;
     friend struct ::PlanetaryRingMeshInstanceBindFunctor;
@@ -98,7 +94,6 @@ class Planet: public OLD_Entity{
 
         void update(const float& dt);
 };
-
 class Star: public Planet{
     private:
         SunLight* m_Light;
@@ -113,7 +108,6 @@ class Star: public Planet{
         );
         virtual ~Star();
 };
-
 class Ring final{
     friend class ::Planet;
     private:

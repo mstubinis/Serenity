@@ -10,28 +10,28 @@
 using namespace Engine;
 using namespace std;
 
-ComponentModel::ComponentModel(Handle& mesh, Handle& mat, Entity& _e, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e){
+ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Handle& mat, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e){
     if (!mesh.null()) addModel(mesh, mat, _prog, _stage);
 }
-ComponentModel::ComponentModel(Mesh* mesh, Handle& mat, Entity& _e, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Handle& mat,  ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     if (mesh) addModel(mesh, (Material*)mat.get(), _prog, _stage);
 }
-ComponentModel::ComponentModel(Handle& mesh, Material* mat, Entity& _e, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Material* mat,  ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     if (!mesh.null()) addModel((Mesh*)mesh.get(), mat, _prog, _stage);
 }
-ComponentModel::ComponentModel(Mesh* mesh, Material* mat, Entity& _e, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Material* mat, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     if (mesh) addModel(mesh, mat, _prog, _stage);
 }
-ComponentModel::ComponentModel(Handle& mesh, Handle& mat, Entity& _e, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Handle& mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     if (!mesh.null()) addModel(mesh, mat, (ShaderP*)_prog.get(), _stage);
 }
-ComponentModel::ComponentModel(Mesh* mesh, Handle& mat, Entity& _e, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Handle& mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     if (mesh) addModel(mesh, (Material*)mat.get(), (ShaderP*)_prog.get(), _stage);
 }
-ComponentModel::ComponentModel(Handle& mesh, Material* mat, Entity& _e, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Material* mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     if (!mesh.null()) addModel((Mesh*)mesh.get(), mat, (ShaderP*)_prog.get(), _stage);
 }
-ComponentModel::ComponentModel(Mesh* mesh, Material* mat, Entity& _e, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Material* mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     if (mesh) addModel(mesh, mat, (ShaderP*)_prog.get(), _stage);
 }
 ComponentModel::~ComponentModel() {

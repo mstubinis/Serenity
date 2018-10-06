@@ -20,7 +20,7 @@ namespace Engine{
         class GLDebugDrawer;
     };
 };
-class CollisionType{public: enum Type{
+struct CollisionType{enum Type{
     None,
     Sphere,
     Box,
@@ -36,7 +36,7 @@ class Collision final{
         Collision(std::vector<Mesh*>& meshes, float mass = 0);
         Collision(OLD_ComponentModel*, float mass = 0);
         Collision(ComponentModel&, float mass = 0);
-        Collision(CollisionType::Type, Mesh* mesh,float mass = 0);
+        Collision(CollisionType::Type, Mesh* mesh, float mass = 0);
         ~Collision();
 
         void setMass(float mass);

@@ -69,16 +69,21 @@ class Shader final: public EngineResource{
         std::string data();
         bool fromFile();
 };
-struct InternalShaderProgramPublicInterface final{
-    static void LoadCPU(ShaderP&);
-    static void LoadGPU(ShaderP&);
-    static void UnloadCPU(ShaderP&);
-    static void UnloadGPU(ShaderP&);
+
+namespace Engine {
+    namespace epriv {
+        struct InternalShaderProgramPublicInterface final {
+            static void LoadCPU(ShaderP&);
+            static void LoadGPU(ShaderP&);
+            static void UnloadCPU(ShaderP&);
+            static void UnloadGPU(ShaderP&);
+        };
+    };
 };
 class ShaderP final: public BindableResource, public EventObserver{
     friend class ::UniformBufferObject;
     friend class ::Shader;
-    friend struct ::InternalShaderProgramPublicInterface;
+    friend struct Engine::epriv::InternalShaderProgramPublicInterface;
     private:
         GLuint m_ShaderProgram;
         std::unordered_map<std::string, GLint> m_UniformLocations;

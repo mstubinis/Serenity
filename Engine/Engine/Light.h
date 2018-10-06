@@ -12,13 +12,13 @@ class PointLight;
 class SpotLight;
 class RodLight;
 
-class LightType{public: enum Type{
+struct LightType{enum Type{
     Sun,Point,Directional,Spot,Rod,
 _TOTAL};};
-class LightRange{public:enum Range{
+struct LightRange{enum Range{
     _7,_13,_20,_32,_50,_65,_100,_160,_200,_325,_600,_3250,
 _TOTAL};};
-class LightAttenuation{public:enum Model{
+struct LightAttenuation{enum Model{
     Constant,
     Distance,
     Distance_Squared,

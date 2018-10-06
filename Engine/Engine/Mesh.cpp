@@ -1376,27 +1376,27 @@ float epriv::AnimationData::duration() {
 }
 
 
-void InternalMeshPublicInterface::LoadCPU( Mesh& _mesh){
+void epriv::InternalMeshPublicInterface::LoadCPU( Mesh& _mesh){
     _mesh.m_i->_load_CPU(_mesh);
 }
-void InternalMeshPublicInterface::LoadGPU( Mesh& _mesh){
+void epriv::InternalMeshPublicInterface::LoadGPU( Mesh& _mesh){
     _mesh.m_i->_load_GPU(_mesh);
     _mesh.EngineResource::load();
 }
-void InternalMeshPublicInterface::UnloadCPU( Mesh& _mesh){
+void epriv::InternalMeshPublicInterface::UnloadCPU( Mesh& _mesh){
     _mesh.m_i->_unload_CPU(_mesh);
     _mesh.EngineResource::unload();
 }
-void InternalMeshPublicInterface::UnloadGPU( Mesh& _mesh){
+void epriv::InternalMeshPublicInterface::UnloadGPU( Mesh& _mesh){
     _mesh.m_i->_unload_GPU(_mesh);
 }
-void InternalMeshPublicInterface::UpdateInstance( Mesh& _mesh,uint _id, glm::mat4 _modelMatrix){
+void epriv::InternalMeshPublicInterface::UpdateInstance( Mesh& _mesh,uint _id, glm::mat4 _modelMatrix){
     auto& i = *_mesh.m_i;
     glBindBuffer(GL_ARRAY_BUFFER, i.m_buffers[2]);
     glBufferSubData(GL_ARRAY_BUFFER, _id * sizeof(glm::mat4), sizeof(glm::mat4), &_modelMatrix);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
-void InternalMeshPublicInterface::UpdateInstances( Mesh& _mesh,vector<glm::mat4>& _modelMatrices){
+void epriv::InternalMeshPublicInterface::UpdateInstances( Mesh& _mesh,vector<glm::mat4>& _modelMatrices){
     auto& i = *_mesh.m_i;
     i.m_InstanceCount = _modelMatrices.size();
     if(_modelMatrices.size() == 0) return;
@@ -1404,7 +1404,7 @@ void InternalMeshPublicInterface::UpdateInstances( Mesh& _mesh,vector<glm::mat4>
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * i.m_InstanceCount, &_modelMatrices[0]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
-bool InternalMeshPublicInterface::SupportsInstancing(){
+bool epriv::InternalMeshPublicInterface::SupportsInstancing(){
     if(epriv::RenderManager::OPENGL_VERSION >= 31 || 
     epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_draw_instanced) || 
     epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_draw_instanced)){
@@ -1413,7 +1413,7 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
     return false;
 }
 
-btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* _mesh, CollisionType::Type _type) {
+btCollisionShape* epriv::InternalMeshPublicInterface::BuildCollision(Mesh* _mesh, CollisionType::Type _type) {
     if(!_mesh) return new btEmptyShape();
     switch (_type) {
         case CollisionType::None: { return new btEmptyShape(); }
@@ -1457,7 +1457,7 @@ const float Mesh::getRadius() const { return m_i->m_radius; }
 void Mesh::render(bool instancing,GLuint mode){
     auto& i = *m_i;
     const uint& indicesSize = i.m_Indices.size();
-    if(instancing && InternalMeshPublicInterface::SupportsInstancing()){
+    if(instancing && epriv::InternalMeshPublicInterface::SupportsInstancing()){
         const uint& instancesCount = i.m_InstanceCount;
         if(instancesCount == 0) return;
         if(epriv::RenderManager::OPENGL_VERSION >= 31){

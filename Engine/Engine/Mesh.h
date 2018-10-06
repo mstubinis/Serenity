@@ -28,7 +28,6 @@ const uint NUM_MAX_INSTANCES = 65536;
 struct DefaultMeshBindFunctor;
 struct DefaultMeshUnbindFunctor;
 class MeshInstance;
-struct InternalMeshPublicInterface;
 class Mesh;
 
 namespace Engine{
@@ -36,16 +35,16 @@ namespace Engine{
         class MeshLoader;
         class MeshSkeleton;
         class CollisionFactory;
-        class VertexFormat final{ public: enum Format{
-            Position,UV,Normal,Binormal,Tangent,
-        _TOTAL};};
-        class VertexFormatCompressed final {public: enum Format {
+        struct VertexFormat final {enum Format {
+            Position, UV, Normal, Binormal, Tangent,
+         _TOTAL};};
+        struct VertexFormatCompressed final {enum Format {
             PositionAndUV, Normal, Binormal, Tangent,
         _TOTAL};};
-        class VertexFormatAnimated final{ public: enum Format{
-            Position,UV,Normal,Binormal,Tangent,BoneIDs,BoneWeights,
+        struct VertexFormatAnimated final {enum Format {
+            Position, UV, Normal, Binormal, Tangent, BoneIDs, BoneWeights,
         _TOTAL};};
-        class VertexFormatAnimatedCompressed final {public: enum Format {
+        struct VertexFormatAnimatedCompressed final {enum Format {
             PositionAndUV, Normal, Binormal, Tangent, BoneIDs, BoneWeights,
         _TOTAL};};
         struct Vertex final{
@@ -143,26 +142,26 @@ namespace Engine{
                 ~AnimationData();
                 float duration();
         };
+        struct InternalMeshPublicInterface final {
+            static void LoadCPU(Mesh&);
+            static void LoadGPU(Mesh&);
+            static void UnloadCPU(Mesh&);
+            static void UnloadGPU(Mesh&);
+            static void UpdateInstance(Mesh&, uint _id, glm::mat4 _modelMatrix);
+            static void UpdateInstances(Mesh&, std::vector<glm::mat4>& _modelMatrices);
+            static bool SupportsInstancing();
+            static btCollisionShape* BuildCollision(Mesh*, CollisionType::Type);
+        };
     };
-};
-struct InternalMeshPublicInterface final{
-    static void LoadCPU( Mesh&);
-    static void LoadGPU( Mesh&);
-    static void UnloadCPU( Mesh&);
-    static void UnloadGPU( Mesh&);
-    static void UpdateInstance( Mesh&,uint _id, glm::mat4 _modelMatrix);
-    static void UpdateInstances( Mesh&, std::vector<glm::mat4>& _modelMatrices);
-    static bool SupportsInstancing();
-    static btCollisionShape* BuildCollision(Mesh*,CollisionType::Type);
 };
 class Mesh final: public BindableResource, public EventObserver{
     friend struct ::DefaultMeshBindFunctor;
     friend struct ::DefaultMeshUnbindFunctor;
-    friend class ::Engine::epriv::AnimationData;
-    friend class ::Engine::epriv::MeshSkeleton;
-    friend struct ::InternalMeshPublicInterface;
-    friend class ::Engine::epriv::MeshLoader;
-    friend class ::Engine::epriv::CollisionFactory;
+    friend class Engine::epriv::AnimationData;
+    friend class Engine::epriv::MeshSkeleton;
+    friend struct Engine::epriv::InternalMeshPublicInterface;
+    friend class Engine::epriv::MeshLoader;
+    friend class Engine::epriv::CollisionFactory;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

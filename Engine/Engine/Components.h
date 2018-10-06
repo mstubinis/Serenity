@@ -59,7 +59,7 @@ namespace Engine{
         class OLD_ComponentBodySystem;
     };
 };
-class OLD_ComponentType{public:enum Type{
+struct OLD_ComponentType{enum Type{
     Body,
     Model,
     Camera, //Can contain: ComponentCamera, ComponentGameCamera

@@ -19,7 +19,7 @@ namespace Engine{
     };
 };
 
-class SoundStatus final{public: enum Status{
+struct SoundStatus final{enum Status{
     Playing,PlayingLooped,Paused,Stopped,Fresh
 };};
 

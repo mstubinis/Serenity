@@ -14,13 +14,13 @@ typedef unsigned char uchar;
 typedef unsigned short ushort;
 
 class Texture;
-class TextureWrap{public: enum Wrap{
+struct TextureWrap{enum Wrap{
     Repeat,RepeatMirrored,ClampToEdge,ClampToBorder,
 _TOTAL};};
-class TextureFilter{public: enum Filter{
+struct TextureFilter{enum Filter{
     Linear,Nearest,Nearest_Mipmap_Nearest,Nearest_Mipmap_Linear,Linear_Mipmap_Nearest,Linear_Mipmap_Linear,
 _TOTAL};};
-class TextureType{public: enum Type{
+struct TextureType{enum Type{
     Texture1D,Texture2D,Texture3D,CubeMap,RenderTarget,
 _TOTAL};};
 
@@ -32,37 +32,35 @@ namespace Engine{
             struct ImageLoadedStructure;
         };
         class FramebufferObject;
-        class TextureLoader final{
+        struct TextureLoader final{
             friend class ::Texture;
-            public:
 
-                static void LoadDDSFile(Texture& texture, std::string filename,epriv::textures::ImageLoadedStructure& image);
+            static void LoadDDSFile(Texture& texture, std::string filename,epriv::textures::ImageLoadedStructure& image);
 
-                static void LoadTexture2DIntoOpenGL(Texture& texture);
-                static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
-                static void LoadTextureCubemapIntoOpenGL(Texture& texture);
+            static void LoadTexture2DIntoOpenGL(Texture& texture);
+            static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
+            static void LoadTextureCubemapIntoOpenGL(Texture& texture);
 
-                static void EnumWrapToGL(uint& gl, TextureWrap::Wrap& wrap);
-                static void EnumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min);
-                static bool IsCompressedType(ImageInternalFormat::Format);
+            static void EnumWrapToGL(uint& gl, TextureWrap::Wrap& wrap);
+            static void EnumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min);
+            static bool IsCompressedType(ImageInternalFormat::Format);
 
-                static void GenerateMipmapsOpenGL(Texture& texture);
-                static void WithdrawPixelsFromOpenGLMemory(Texture& texture,uint imageIndex = 0,uint mipmapLevel = 0);
-                static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat,ImageInternalFormat::Format& inInternalFormat);
+            static void GenerateMipmapsOpenGL(Texture& texture);
+            static void WithdrawPixelsFromOpenGLMemory(Texture& texture,uint imageIndex = 0,uint mipmapLevel = 0);
+            static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat,ImageInternalFormat::Format& inInternalFormat);
         };
-
+        struct InternalTexturePublicInterface final {
+            static void LoadCPU(Texture&);
+            static void LoadGPU(Texture&);
+            static void UnloadCPU(Texture&);
+            static void UnloadGPU(Texture&);
+        };
     };
-};
-struct InternalTexturePublicInterface final{
-    static void LoadCPU(Texture&);
-    static void LoadGPU(Texture&);
-    static void UnloadCPU(Texture&);
-    static void UnloadGPU(Texture&);
 };
 
 class Texture: public EngineResource{
-    friend class Engine::epriv::TextureLoader;
-    friend struct ::InternalTexturePublicInterface;
+    friend struct Engine::epriv::TextureLoader;
+    friend struct Engine::epriv::InternalTexturePublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

@@ -6,7 +6,7 @@
 
 typedef unsigned int uint;
 
-class KeyboardKey final{public: enum Key{
+struct KeyboardKey final{enum Key{
     Unknown = -1,
     A = 0,
     B,
@@ -109,23 +109,21 @@ class KeyboardKey final{public: enum Key{
     F14,
     F15,
     Pause,
-
 _TOTAL};};
-class MouseButton final{public: enum Button{
+struct MouseButton final{enum Button{
     Unknown = -1,
     Left = 0,
     Right,
     Middle,
     XButton1,
     XButton2,
-
 _TOTAL};};
-class MouseWheel final{public: enum Wheel{
+struct MouseWheel final{enum Wheel{
     Unknown = -1,
     VerticalWheel = 0,
     HorizontalWheel,
 _TOTAL};};
-class JoystickAxis final{public: enum Axis{
+struct JoystickAxis final{enum Axis{
     Unknown = -1,
     X = 0,
     Y,

@@ -8,7 +8,7 @@ class Scene;
 class LightProbe;
 class Camera;
 
-class CameraType{public: enum Type { 
+struct CameraType{enum Type {
     Perspective, 
     Orthographic,
 };};

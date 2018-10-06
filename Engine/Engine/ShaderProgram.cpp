@@ -575,24 +575,24 @@ void ShaderP::_unload_GPU(ShaderP& super) {
 }
 GLuint ShaderP::program(){ return m_ShaderProgram; }
 
-void InternalShaderProgramPublicInterface::LoadCPU(ShaderP& shaderP){
+void epriv::InternalShaderProgramPublicInterface::LoadCPU(ShaderP& shaderP){
     //if(!shaderP.isLoaded()){
         shaderP._load_CPU(shaderP);
     //}
 }
-void InternalShaderProgramPublicInterface::LoadGPU(ShaderP& shaderP){
+void epriv::InternalShaderProgramPublicInterface::LoadGPU(ShaderP& shaderP){
     //if(!shaderP.isLoaded()){
         shaderP._load_GPU(shaderP);
         shaderP.EngineResource::load();
     //}
 }
-void InternalShaderProgramPublicInterface::UnloadCPU(ShaderP& shaderP){
+void epriv::InternalShaderProgramPublicInterface::UnloadCPU(ShaderP& shaderP){
     //if(shaderP.isLoaded()){
         shaderP._unload_CPU(shaderP);
         shaderP.EngineResource::unload();
     //}
 }
-void InternalShaderProgramPublicInterface::UnloadGPU(ShaderP& shaderP){
+void epriv::InternalShaderProgramPublicInterface::UnloadGPU(ShaderP& shaderP){
     //if(shaderP.isLoaded()){
         shaderP._unload_GPU(shaderP);        
     //}

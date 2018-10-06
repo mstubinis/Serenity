@@ -8,7 +8,7 @@ class btTypedConstraint;
 #include <glm/fwd.hpp>
 #include <glm/vec3.hpp>
 
-class ConstraintType final {public: enum Type {
+struct ConstraintType final {enum Type {
     Fixed,
     Hinge,
 _TOTAL};};

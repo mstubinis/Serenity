@@ -12,7 +12,7 @@ namespace Engine{
     namespace epriv{
         class FramebufferTexture;
         class FramebufferObject;
-        class GBufferType{public: enum Type{
+        struct GBufferType{enum Type{
             Diffuse, Normal, Misc, Lighting, Bloom, GodRays, Depth,
         _TOTAL};};
         class GBuffer final{

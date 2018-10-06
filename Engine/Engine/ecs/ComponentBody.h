@@ -43,7 +43,7 @@ class ComponentBody : public ComponentBaseClass {
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentBody(Entity&);
-        ComponentBody(Entity&,CollisionType::Type);
+        ComponentBody(Entity&, CollisionType::Type);
         ~ComponentBody();
 
         void alignTo(glm::vec3 direction, float speed);

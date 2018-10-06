@@ -21,7 +21,7 @@ class Camera;
 class OLD_Entity;
 class Scene;
 
-class DepthFunc{public: enum Func{
+struct DepthFunc{enum Func{
     Never = 0x0200,
     Less = 0x0201,
     Equal = 0x0202,
@@ -31,13 +31,13 @@ class DepthFunc{public: enum Func{
     GEqual = 0x0206,
     Always = 0x0207,
 };};
-class SMAAQualityLevel{public: enum Level{
+struct SMAAQualityLevel{enum Level{
     Low,Medium,High,Ultra,
 };};
-class HDRAlgorithm{public: enum Algorithm{
+struct HDRAlgorithm{enum Algorithm{
     Reinhard,Filmic,Exposure,Uncharted,
 };};
-class AntiAliasingAlgorithm{public: enum Algorithm{
+struct AntiAliasingAlgorithm{enum Algorithm{
     None,FXAA,SMAA,
 };};
 
@@ -50,7 +50,6 @@ namespace Engine {
         struct MaterialNode;
         struct MeshNode;
         struct InstanceNode;
-        //struct InternalScenePublicInterface;
     };
 };
 

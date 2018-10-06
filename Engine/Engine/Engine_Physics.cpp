@@ -230,8 +230,7 @@ namespace Engine{
                         minPs = -SIMD_PI + step;
                         maxPs = SIMD_PI;
                         isClosed = true;
-                    }
-                    else if ((maxPs - minPs) >= SIMD_PI * btScalar(2.f)){
+                    }else if ((maxPs - minPs) >= SIMD_PI * btScalar(2.f)){
                         isClosed = true;
                     }else{
                         isClosed = false;
@@ -672,9 +671,6 @@ class epriv::PhysicsManager::impl final{
             Camera* c = Resources::getCurrentScene()->getActiveCamera();
             glm::vec3 camPos = c->getPosition();
             glm::mat4 model = glm::mat4(1.0f);
-            //model[3][0] -= camPos.x;
-            //model[3][1] -= camPos.y;
-            //model[3][2] -= camPos.z;
             Renderer::sendUniformMatrix4("Model",model);
             Renderer::sendUniformMatrix4("VP",c->getViewProjection());
             data->debugDrawer->drawAccumulatedLines();
@@ -805,7 +801,7 @@ class Collision::impl final {
             btCompoundShape* compound = new btCompoundShape();
             btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
             for (auto mesh : meshes) {
-                btCollisionShape* shape = InternalMeshPublicInterface::BuildCollision(mesh,CollisionType::ConvexHull);
+                btCollisionShape* shape = epriv::InternalMeshPublicInterface::BuildCollision(mesh,CollisionType::ConvexHull);
                 compound->addChildShape(t, shape);
             }
             compound->setMargin(0.001f);
@@ -828,7 +824,7 @@ class Collision::impl final {
             _init(meshes, mass);
         }
         void _init(CollisionType::Type _type,Mesh* mesh,float& mass) {
-            btCollisionShape* shape = InternalMeshPublicInterface::BuildCollision(mesh, _type);
+            btCollisionShape* shape = epriv::InternalMeshPublicInterface::BuildCollision(mesh, _type);
             m_Shape = shape;
             _baseInit(_type, mass);
         }
@@ -850,11 +846,21 @@ class Collision::impl final {
         }
 };
 
-Collision::Collision(vector<Mesh*>& meshes, float mass):m_i(new impl) {m_i->_init(meshes, mass);}
-Collision::Collision(OLD_ComponentModel* modelComponent, float mass) :m_i(new impl) {m_i->_init(modelComponent, mass);}
-Collision::Collision(ComponentModel& modelComponent, float mass) : m_i(new impl) { m_i->_init(modelComponent, mass); }
-Collision::Collision(CollisionType::Type type, Mesh* mesh,float mass):m_i(new impl){ m_i->_init(type,mesh,mass); }
-Collision::~Collision(){ m_i->_destruct(); }
+Collision::Collision(vector<Mesh*>& meshes, float mass) :m_i(new impl) {
+    m_i->_init(meshes, mass);
+}
+Collision::Collision(OLD_ComponentModel* modelComponent, float mass) : m_i(new impl) {
+    m_i->_init(modelComponent, mass);
+}
+Collision::Collision(ComponentModel& modelComponent, float mass) : m_i(new impl) {
+    m_i->_init(modelComponent, mass);
+}
+Collision::Collision(CollisionType::Type type, Mesh* mesh, float mass) : m_i(new impl) {
+    m_i->_init(type, mesh, mass);
+}
+Collision::~Collision() {
+    m_i->_destruct();
+}
 void Collision::setMass(float mass){ m_i->_setMass(mass); }
 const btVector3& Collision::getInertia() const { return m_i->m_Inertia; }
 btCollisionShape* Collision::getShape() const { return m_i->m_Shape; }

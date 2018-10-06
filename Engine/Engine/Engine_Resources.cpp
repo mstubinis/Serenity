@@ -143,8 +143,8 @@ Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint
 Handle Resources::addMeshAsync(string f, bool b,float threshhold){
     Mesh* mesh = new Mesh(f,b,threshhold,false);
     auto ref = std::ref(*mesh);
-    auto job = boost::bind(&InternalMeshPublicInterface::LoadCPU, ref);
-    auto cbk = boost::bind(&InternalMeshPublicInterface::LoadGPU, ref);
+    auto job = boost::bind(&epriv::InternalMeshPublicInterface::LoadCPU, ref);
+    auto cbk = boost::bind(&epriv::InternalMeshPublicInterface::LoadGPU, ref);
     Engine::epriv::threading::addJobWithPostCallback(job,cbk);
     return resourceManager->m_Resources->add(mesh, ResourceType::Mesh);
 }

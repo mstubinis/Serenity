@@ -12,7 +12,7 @@ class Texture;
 class ShaderP;
 class Mesh;
 
-class MaterialComponentType{public: enum Type{
+struct MaterialComponentType{enum Type{
     Diffuse,
     Normal,
     Glow,
@@ -24,7 +24,7 @@ class MaterialComponentType{public: enum Type{
     Refraction,
     ParallaxOcclusion,
 _TOTAL};};
-class MaterialPhysics{public: enum Physics{
+struct MaterialPhysics{enum Physics{
     Water,
     Plastic_Or_Glass_Low,
     Plastic_High,
@@ -52,14 +52,14 @@ class MaterialPhysics{public: enum Physics{
     Platinum,
     Nickel,
 _TOTAL};};
-class DiffuseModel{public: enum Model{
+struct DiffuseModel{enum Model{
     None,
     Lambert,
     Oren_Nayar,
     Ashikhmin_Shirley,
     Minnaert,
 _TOTAL};};
-class SpecularModel{public: enum Model{
+struct SpecularModel{enum Model{
     None,
     Blinn_Phong,
     Phong,
