@@ -472,3 +472,29 @@ void ComponentBody::setMass(float mass) {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+struct UpdateFunction final{void operator()(const float& dt) const {
+
+};};
+
+/*
+                                                                                  //add the pool here
+ComponentBodySystem::ComponentBodySystem():epriv::ECSSystem<Entity, ComponentBody>()
+{
+
+}
+ComponentBodySystem::~ComponentBodySystem() {
+
+}
+*/

@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <boost/function.hpp>
+#include "ecs/ECS.h"
 
 typedef boost::function<void()>                boost_void_func;
 typedef boost::function<void(const float&)>    boost_update_func;

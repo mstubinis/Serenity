@@ -88,4 +88,13 @@ class ComponentBody : public ComponentBaseClass {
         void applyTorqueImpulse(float x, float y, float z, bool local = true);    void applyTorqueImpulse(glm::vec3 torqueImpulse, bool local = true);
 };
 
+
+
+/*
+class ComponentBodySystem : public Engine::epriv::ECSSystem<Entity, ComponentBody> {
+    public:
+        ComponentBodySystem();
+        ~ComponentBodySystem();
+};
+*/
 #endif

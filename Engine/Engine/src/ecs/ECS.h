@@ -55,6 +55,8 @@ namespace Engine {
                     if (systems[type_slot]) {
                         systems[type_slot].reset();
                     }
+                    using CPoolType = ECSComponentPool<TEntity, TComponent>;
+                    auto& cPool = *(CPoolType*)componentPools[type_slot].get();
                     systems[type_slot] = std::unique_ptr<ECSSystem<TEntity, TComponent>>(_system);
                 }
 
