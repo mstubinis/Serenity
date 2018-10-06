@@ -10,6 +10,8 @@
 using namespace Engine;
 using namespace std;
 
+
+
 ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Handle& mat, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e){
     if (!mesh.null()) addModel(mesh, mat, _prog, _stage);
 }

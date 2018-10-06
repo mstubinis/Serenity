@@ -24,24 +24,22 @@ struct Entity{
     Entity(uint _id);
     Entity(uint _id, Scene& _scene);
     ~Entity();
+
     Scene& scene();
     inline uint arrayIndex() const;
     inline operator uint() const;
     bool null();
-	template<typename T> T* addComponent(){
+	template<typename TComponent, typename... ARGS> TComponent* addComponent(ARGS&&... _args){
         auto& _this = *this;
-        //return Engine::epriv::InternalEntityPublicInterface::GetECS<Entity>(_this).addComponent<T>(_this);
-        return nullptr;
+        return Engine::epriv::InternalEntityPublicInterface::GetECS(_this).addComponent<TComponent>(_this, std::forward<ARGS>(_args)...);
 	}
-	template<typename T> bool removeComponent(){
+	template<typename TComponent> bool removeComponent(){
         auto& _this = *this;
-        //return Engine::epriv::InternalEntityPublicInterface::GetECS<Entity>(_this).removeComponent<T>(_this);
-        return true;
+        return Engine::epriv::InternalEntityPublicInterface::GetECS(_this).removeComponent<TComponent>(_this);
 	}
-	template<typename T> T* getComponent(){
+	template<typename TComponent> TComponent* getComponent(){
         auto& _this = *this;
-        //return Engine::epriv::InternalEntityPublicInterface::GetECS<Entity>(_this).getComponent<T>(_this);
-        return nullptr;
+        return Engine::epriv::InternalEntityPublicInterface::GetECS(_this).getComponent<TComponent>(_this);
 	}
     void move(Scene& destination);
     static Entity _null;

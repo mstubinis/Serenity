@@ -109,7 +109,7 @@ class epriv::OLD_ComponentManager::impl final{
         }
         void _updateCurrentScene(const float& dt){
             auto& currentScene = *Resources::getCurrentScene();
-            for(auto entityID:InternalScenePublicInterface::GetEntities(currentScene)){
+            for(auto entityID:InternalScenePublicInterface::OLD_GetEntities(currentScene)){
                 OLD_Entity& e = *OLD_Components::GetEntity(entityID);
                 e.update(dt);
             }
@@ -160,7 +160,7 @@ void epriv::OLD_ComponentManager::_resize(uint width,uint height){
 }
 void epriv::OLD_ComponentManager::_deleteEntityImmediately(OLD_Entity& entity){
     //obviously try to improve this performance wise
-    removeFromVector(epriv::InternalScenePublicInterface::GetEntities(*entity.scene()), entity.ID);
+    removeFromVector(epriv::InternalScenePublicInterface::OLD_GetEntities(*entity.scene()), entity.ID);
     for(uint i = 0; i < OLD_ComponentType::_TOTAL; ++i){
         uint& componentID = entity.m_Components[i];
         if(componentID != 0){
@@ -194,7 +194,7 @@ void epriv::OLD_ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
         //}
     //}
     //transfers the newScene's components into the vector used for scenes
-    for(auto entityID:InternalScenePublicInterface::GetEntities(*newScene)){
+    for(auto entityID:InternalScenePublicInterface::OLD_GetEntities(*newScene)){
         OLD_Entity& e = *newScene->OLD_getEntity(entityID);
         for(uint index = 0; index < OLD_ComponentType::_TOTAL; ++index){
             uint componentID = e.m_Components[index];

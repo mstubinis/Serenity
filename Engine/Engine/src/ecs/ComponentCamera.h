@@ -3,6 +3,7 @@
 #define ENGINE_ECS_COMPONENT_CAMERA_H
 
 #include "ecs/ComponentBaseClass.h"
+#include "ecs/ECSSystem.h"
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -25,9 +26,12 @@ class ComponentCamera : public ComponentBaseClass {
         union { float _aspectRatio;  float _right; };
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentCamera(Entity&);
         ComponentCamera(Entity&, float angle, float aspectRatio, float nearPlane, float farPlane);
         ComponentCamera(Entity&, float left, float right, float bottom, float top, float nearPlane, float farPlane);
+
+        ComponentCamera& operator=(const ComponentCamera& other) = default;
+        ComponentCamera(const ComponentCamera& other) = default;
+        ComponentCamera(ComponentCamera&& other) noexcept = default;
         ~ComponentCamera();
 
         virtual void update(const float& dt);

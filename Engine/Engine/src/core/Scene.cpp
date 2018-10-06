@@ -7,6 +7,7 @@
 #include "core/Skybox.h"
 
 #include "ecs/Entity.h"
+#include "ecs/ComponentBody.h"
 
 using namespace Engine;
 using namespace Engine::epriv;
@@ -162,7 +163,7 @@ class Scene::impl final {
             }
         }
 };
-vector<uint>& InternalScenePublicInterface::GetEntities(Scene& _scene) { return _scene.m_i->m_Entities; }
+vector<uint>& InternalScenePublicInterface::OLD_GetEntities(Scene& _scene) { return _scene.m_i->m_Entities; }
 vector<SunLight*>& InternalScenePublicInterface::GetLights(Scene& _scene) { return _scene.m_i->m_Lights; }
 
 void InternalScenePublicInterface::RenderGeometryOpaque(Scene& _scene,Camera& _camera) {

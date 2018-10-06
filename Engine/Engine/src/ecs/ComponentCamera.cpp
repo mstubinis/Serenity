@@ -10,15 +10,6 @@ using namespace Engine;
 using namespace std;
 
 
-ComponentCamera::ComponentCamera(Entity& _e) : ComponentBaseClass(_e){
-    _eye = glm::vec3(0.0f); _up = glm::vec3(0.0f, 1.0f, 0.0f);
-    const glm::uvec2& winSize = Resources::getWindowSize();
-    _angle = glm::radians(60.0f); _aspectRatio = winSize.x / (float)winSize.y;
-    _nearPlane = 0.1f; _farPlane = 5000.0f;
-    _projectionMatrix = glm::perspective(_angle, _aspectRatio, _nearPlane, _farPlane);
-    _viewMatrix = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    _type = Type::Perspective;
-}
 ComponentCamera::ComponentCamera(Entity& _e,float angle, float aspectRatio, float nearPlane, float farPlane) : ComponentBaseClass(_e) {
     _eye = glm::vec3(0.0f); _up = glm::vec3(0.0f, 1.0f, 0.0f);
     _angle = glm::radians(angle); _aspectRatio = aspectRatio; _nearPlane = nearPlane; _farPlane = farPlane;

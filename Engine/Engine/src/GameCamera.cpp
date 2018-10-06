@@ -130,7 +130,7 @@ OLD_Entity* GameCamera::getObjectInCenterRay(OLD_Entity* exclusion){
     OLD_Entity* ret = 0;
     vector<OLD_Entity*> objs;
     Scene& s = *Resources::getCurrentScene();
-    for(auto id:epriv::InternalScenePublicInterface::GetEntities(s)){
+    for(auto id:epriv::InternalScenePublicInterface::OLD_GetEntities(s)){
         OLD_Entity* e = s.OLD_getEntity(id);
         if(rayIntersectSphere(e)){
             if(e != exclusion){

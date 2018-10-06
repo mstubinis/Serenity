@@ -60,7 +60,7 @@ namespace Engine {
         struct InternalScenePublicInterface final {
             friend class ::Scene;
             friend class Engine::epriv::RenderPipeline;
-            static std::vector<uint>& GetEntities(Scene&);
+            static std::vector<uint>& OLD_GetEntities(Scene&);
             static std::vector<SunLight*>& GetLights(Scene&);
             static void RenderGeometryOpaque(Scene&, Camera&);
             static void RenderGeometryTransparent(Scene&, Camera&);

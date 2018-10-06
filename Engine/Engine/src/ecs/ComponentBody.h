@@ -4,6 +4,7 @@
 
 #include "core/engine/Engine_Physics.h"
 #include "ecs/ComponentBaseClass.h"
+#include "ecs/ECSSystem.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -40,6 +41,10 @@ class ComponentBody : public ComponentBaseClass {
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentBody(Entity&);
         ComponentBody(Entity&, CollisionType::Type);
+
+        ComponentBody& operator=(const ComponentBody& other) = default;
+        ComponentBody(const ComponentBody& other) = default;
+        ComponentBody(ComponentBody&& other) noexcept = default;
         ~ComponentBody();
 
         void alignTo(glm::vec3 direction, float speed);

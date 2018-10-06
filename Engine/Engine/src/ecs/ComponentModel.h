@@ -3,6 +3,8 @@
 #define ENGINE_ECS_COMPONENT_MODEL_H
 
 #include "ecs/ComponentBaseClass.h"
+#include "ecs/ECSSystem.h"
+
 #include "core/engine/Engine_EventObject.h"
 
 struct Handle;
@@ -30,6 +32,9 @@ class ComponentModel : public ComponentBaseClass {
         ComponentModel(Entity&, Handle& meshHandle, Material*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
         ComponentModel(Entity&, Mesh*, Material*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
 
+        ComponentModel& operator=(const ComponentModel& other) = default;
+        ComponentModel(const ComponentModel& other) = default;
+        ComponentModel(ComponentModel&& other) noexcept = default;
         ~ComponentModel();
 
         uint getNumModels();

@@ -259,7 +259,7 @@ void Ship::update(const float& dt){
                 auto* body = getComponent<OLD_ComponentBody>();
                 float speed = (m_WarpFactor * 1.0f / 0.46f) * 2.0f;
                 glm::vec3 s = (body->forward() * glm::pow(speed, 15.0f)) / body->mass();
-                for(auto id: epriv::InternalScenePublicInterface::GetEntities(currentScene)){
+                for(auto id: epriv::InternalScenePublicInterface::OLD_GetEntities(currentScene)){
                     OLD_Entity* e = currentScene.OLD_getEntity(id);
                     if(e){
                         auto* cam = e->getComponent<OLD_ComponentCamera>();
