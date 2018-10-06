@@ -8,31 +8,27 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-class Collision;
-class btRigidBody;
-struct btDefaultMotionState;
+#include <Bullet/LinearMath/btDefaultMotionState.h>
+#include <Bullet/BulletDynamics/Dynamics/btRigidBody.h>
 
+class Collision;
 class ComponentModel;
 class ComponentBody : public ComponentBaseClass {
     friend class ::ComponentModel;
     private:
         struct PhysicsData {
             Collision* collision;
-            btRigidBody* rigidBody;
-            btDefaultMotionState* motionState;
+            btRigidBody rigidBody;
+            btDefaultMotionState motionState;
             float mass;
-            PhysicsData() {
-                collision = 0; rigidBody = 0; motionState = 0; mass = 0;
-            }
+            PhysicsData():rigidBody(0,0,0), collision(nullptr), mass(0){}
         };
         struct NormalData {
-            glm::vec3* scale;
-            glm::vec3* position;
-            glm::quat* rotation;
-            glm::mat4* modelMatrix;
-            NormalData() {
-                scale = 0; position = 0; rotation = 0; modelMatrix = 0;
-            }
+            glm::vec3 scale;
+            glm::vec3 position;
+            glm::quat rotation;
+            glm::mat4 modelMatrix;
+            NormalData() = default;
         };
         union {
             NormalData* n;
@@ -67,7 +63,7 @@ class ComponentBody : public ComponentBaseClass {
         glm::vec3 getLinearVelocity();
         glm::vec3 getAngularVelocity();
         glm::mat4 modelMatrix();
-        const btRigidBody* getBody() const;
+        btRigidBody& getBody();
 
         void setCollision(CollisionType::Type, float mass);
         void setDamping(float linear, float angular);

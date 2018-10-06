@@ -17,13 +17,10 @@ namespace Engine {
         class ECSRegistry final{
             private:
                 static uint lastIndex;
-                //maps type_info's to unsigned ints that will be used as array indices
                 static boost::unordered_map<boost_type_index, uint> slotMap;
             public:
                 ECSRegistry() = default;
-                ~ECSRegistry() {
-                    lastIndex = 0; slotMap.clear();
-                }
+                ~ECSRegistry() { lastIndex = 0; slotMap.clear(); }
                 template <typename T> static const uint type_slot() {
                     auto type = type_ID<T>();
                     if (!slotMap.count(type)) {

@@ -2128,6 +2128,7 @@ class epriv::RenderManager::impl final{
 
             #pragma region SSAO
             //TODO: investigate why enabling SSAO makes things FASTER
+            //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
             gbuffer.start(GBufferType::Bloom, GBufferType::GodRays, "A", false);
             Settings::clear(true, false, false); //0,0,0,0
             if (ssao) {
@@ -2175,6 +2176,7 @@ class epriv::RenderManager::impl final{
             #pragma endregion
 
             #pragma region Bloom
+            //TODO: possible optimization: use stencil buffer to reject completely black pixels during blur passes
             if (bloom) {
                 gbuffer.start(GBufferType::Bloom, "RGB", false);
                 _passBloom(gbuffer, camera, fboWidth, fboHeight, GBufferType::Lighting);

@@ -43,15 +43,16 @@ namespace Engine {
                     super::sparse[sparseID] = super::amount;
                     return &dense[super::amount];
                 }
-                void removeComponent(uint _entityID) {
+                bool removeComponent(uint _entityID) {
                     uint sparseID = _entityID - 1;
                     if (super::sparse[sparseID] == 0)
-                        return;
+                        return false;
                     uint removedCID = super::sparse[sparseID];
                     std::swap(dense[removedCID], dense[super::amount]);
                     --super::amount;
                     super::sparse[super::amount] = removedCID;
                     dense.pop_back();
+                    return true;
                 }
                 TComponent* getComponent(uint _entityID) {
                     uint sparseID = _entityID - 1;

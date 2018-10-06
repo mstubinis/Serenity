@@ -33,10 +33,10 @@ struct Entity{
         //return Engine::epriv::InternalEntityPublicInterface::GetECS<Entity>(_this).addComponent<T>(_this);
         return nullptr;
 	}
-	template<typename T> void removeComponent(){
+	template<typename T> bool removeComponent(){
         auto& _this = *this;
-        //Engine::epriv::InternalEntityPublicInterface::GetECS<Entity>(_this).removeComponent<T>(_this);
-        return nullptr;
+        //return Engine::epriv::InternalEntityPublicInterface::GetECS<Entity>(_this).removeComponent<T>(_this);
+        return true;
 	}
 	template<typename T> T* getComponent(){
         auto& _this = *this;

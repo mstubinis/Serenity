@@ -265,10 +265,9 @@ glm::vec2 Math::unpack2FloatsInto1Float(float i){
     res.y = (res.y - 0.5f) * 2.0f;
     return res;
 }
-void Math::translate(btRigidBody* body,btVector3& vec,bool local){
+void Math::translate(btRigidBody& body,btVector3& vec,bool local){
     if(local){
-        btQuaternion q = body->getWorldTransform().getRotation();
-        q = q.normalize();
+        btQuaternion q = body.getWorldTransform().getRotation().normalize();
         vec = vec.rotate(q.getAxis(),q.getAngle());
     }
 }
@@ -326,17 +325,17 @@ glm::vec3 Math::direction(glm::vec3& eye,glm::vec3& target){ return glm::normali
 glm::vec3 Math::getForward(glm::quat& q){return glm::normalize(q * glm::vec3(0.0f,0.0f,-1.0f));}
 glm::vec3 Math::getRight(glm::quat& q){return glm::normalize(q * glm::vec3(1.0f,0.0f,0.0f));}
 glm::vec3 Math::getUp(glm::quat& q){return glm::normalize(q * glm::vec3(0.0f,1.0f,0.0f));}
-glm::vec3 Math::getColumnVector(const btRigidBody* b, uint column){
+glm::vec3 Math::getColumnVector(btRigidBody& b, uint column){
     btTransform t;
-    b->getMotionState()->getWorldTransform(t);
+    b.getMotionState()->getWorldTransform(t);
     btVector3 v = t.getBasis().getColumn(column);
     return glm::normalize(glm::vec3(v.x(),v.y(),v.z()));
 }
-glm::vec3 Math::getForward(const btRigidBody* b){ return Math::getColumnVector(b,2); }
-glm::vec3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0); }
-glm::vec3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); }
+glm::vec3 Math::getForward(btRigidBody& b){ return Math::getColumnVector(b,2); }
+glm::vec3 Math::getRight(btRigidBody& b){ return Math::getColumnVector(b,0); }
+glm::vec3 Math::getUp(btRigidBody& b){ return Math::getColumnVector(b,1); }
 void Math::recalculateForwardRightUp(glm::quat& o,glm::vec3& f,glm::vec3& r,glm::vec3& u){ f = Math::getForward(o); r = Math::getRight(o); u = Math::getUp(o); }
-void Math::recalculateForwardRightUp(const btRigidBody* b,glm::vec3& f,glm::vec3& r,glm::vec3& u){f = Math::getForward(b); r = Math::getRight(b); u = Math::getUp(b);}
+void Math::recalculateForwardRightUp(btRigidBody& b,glm::vec3& f,glm::vec3& r,glm::vec3& u){f = Math::getForward(b); r = Math::getRight(b); u = Math::getUp(b);}
 float Math::getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees){
     // forced protection against NaN if a and b happen to be equal
     a.x += 0.0000001f;

@@ -17,19 +17,26 @@ namespace Engine {
                 //builds a component pool for the component type if it is not built already.
                 template<typename TComponent> void buildPool(uint type_slot) {
                     if (componentPools[type_slot]) return;
-                    if (!(type_slot < componentPools.size()))
-                        componentPools.resize(type_slot + 1);
-                    if (!componentPools[type_slot])
-                        componentPools[type_slot] = std::make_unique<ECSComponentPool<TEntity, TComponent>>();
+                    if (!(type_slot < componentPools.size())) componentPools.resize(type_slot + 1);
+                    if (!componentPools[type_slot]) componentPools[type_slot] = std::make_unique<ECSComponentPool<TEntity, TComponent>>();
                 }
 
             public:
                 ECS() = default;
                 ~ECS() = default;
 
+
+                //we may or may not need these...
                 TEntity* createEntity(Scene& _scene) { return entityPool.createEntity(_scene); }
                 void removeEntity(uint _entityID) { entityPool.removeEntity(_entityID); }
-                void removeEntity(TEntity& _entity) { removeEntity(_entity.ID); }
+                void removeEntity(TEntity& _entity) { entityPool.removeEntity(_entity.ID); }
+                TEntity* getEntity(uint _entityID) { return entityPool.getEntity(_entityID); }
+                void addEntity(const TEntity& _entity) { entityPool.addEntity(_entity); }
+                void moveEntity(ECSEntityPool<TEntity>& other, uint _entityID) { entityPool.moveEntity(other, _entityID); }
+                void moveEntity(ECSEntityPool<TEntity>& other, TEntity& _entity) { entityPool.moveEntity(other, _entity.ID); }
+
+
+
 
 
                 template<typename TComponent> TComponent* addComponent(TEntity& _entity) {
@@ -37,9 +44,9 @@ namespace Engine {
                     buildPool<TComponent>(type_slot);
                     return componentPools[type_slot]->addComponent<TComponent>(_entity.ID);
                 }
-                template<typename TComponent> void removeComponent(TEntity& _entity) {
+                template<typename TComponent> bool removeComponent(TEntity& _entity) {
                     uint type_slot = ECSRegistry::type_slot<TComponent>();
-                    componentPools[type_slot]->removeComponent<TComponent>(_entity.ID);
+                    return componentPools[type_slot]->removeComponent<TComponent>(_entity.ID);
                 }
                 template<typename TComponent> TComponent* getComponent(TEntity& _entity) {
                     uint type_slot = ECSRegistry::type_slot<TComponent>();

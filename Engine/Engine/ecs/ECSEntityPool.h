@@ -30,11 +30,6 @@ namespace Engine {
                         std::swap(pool[indexToRemove], pool[lastIndex]);
                     }
                     TEntity& e = pool[pool.size()];
-                    /*
-                    for(auto system : componentSystems){
-                        system.removeComponent(this);
-                    }
-                    */
                     pool.pop_back();
                     --lastIndex;
                 }

@@ -157,7 +157,7 @@ namespace Engine{
 
         void lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up);
 
-        void translate(btRigidBody*,btVector3&,bool local);
+        void translate(btRigidBody&,btVector3&,bool local);
 
         uchar pack2NibblesIntoChar(float x, float y);
         glm::vec2 unpack2NibblesFromChar(uchar);
@@ -184,15 +184,15 @@ namespace Engine{
         void removeMatrixPosition(glm::mat4&);
 
         void recalculateForwardRightUp(glm::quat&,glm::vec3&,glm::vec3&,glm::vec3&);
-        void recalculateForwardRightUp(const btRigidBody*,glm::vec3&,glm::vec3&,glm::vec3&);
+        void recalculateForwardRightUp(btRigidBody&,glm::vec3&,glm::vec3&,glm::vec3&);
 
         glm::vec3 getForward(glm::quat& q);
         glm::vec3 getRight(glm::quat& q);
         glm::vec3 getUp(glm::quat& q);
-        glm::vec3 getColumnVector(const btRigidBody* b, uint column);
-        glm::vec3 getForward(const btRigidBody* b);
-        glm::vec3 getRight(const btRigidBody* b);
-        glm::vec3 getUp(const btRigidBody* b);
+        glm::vec3 getColumnVector(btRigidBody& b, uint column);
+        glm::vec3 getForward(btRigidBody& b);
+        glm::vec3 getRight(btRigidBody& b);
+        glm::vec3 getUp(btRigidBody& b);
 
         float getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees = true);
         void alignTo(glm::quat& o, glm::vec3& direction,float speed=0);

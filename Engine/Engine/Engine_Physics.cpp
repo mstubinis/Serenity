@@ -676,41 +676,41 @@ class epriv::PhysicsManager::impl final{
             data->debugDrawer->drawAccumulatedLines();
             data->debugDrawer->postRender();
         }
-        void _addRigidBody(btRigidBody* _rigidBody) {
+        void _addRigidBody(btRigidBody& _rigidBody) {
             for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
                 btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray()[i]);
                 if (rigidBody) {
-                    if (rigidBody == _rigidBody) {
+                    if (rigidBody == &_rigidBody) {
                         return;
                     }
                 }
             }
-            data->world->addRigidBody(_rigidBody);
+            data->world->addRigidBody(&_rigidBody);
         }
-        void _addRigidBody(btRigidBody* _rigidBody, short group, short mask) {
+        void _addRigidBody(btRigidBody& _rigidBody, short group, short mask) {
             for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
                 btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray()[i]);
                 if (rigidBody) {
-                    if (rigidBody == _rigidBody) {
+                    if (rigidBody == &_rigidBody) {
                         return;
                     }
                 }
             }
-            data->world->addRigidBody(_rigidBody, group, mask);
+            data->world->addRigidBody(&_rigidBody, group, mask);
         }
-        void _removeRigidBody(btRigidBody* _rigidBody) {
+        void _removeRigidBody(btRigidBody& _rigidBody) {
             for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
                 btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray()[i]);
                 if (rigidBody) {
-                    if (rigidBody == _rigidBody) {
-                        data->world->removeRigidBody(_rigidBody);
+                    if (rigidBody == &_rigidBody) {
+                        data->world->removeRigidBody(&_rigidBody);
                         return;
                     }
                 }
             }
         }
-        void _updateRigidBody(btRigidBody* rigidBody) {
-            data->world->updateSingleAabb(rigidBody);
+        void _updateRigidBody(btRigidBody& rigidBody) {
+            data->world->updateSingleAabb(&rigidBody);
         }
 };
 epriv::PhysicsManager::impl* physicsManager;
@@ -725,10 +725,10 @@ void Physics::pause(bool b){ physicsManager->m_Paused = b; }
 void Physics::unpause(){ physicsManager->m_Paused = false; }
 void Physics::setGravity(float x,float y,float z){ physicsManager->data->world->setGravity(btVector3(x,y,z)); }
 void Physics::setGravity(glm::vec3& gravity){ Physics::setGravity(gravity.x,gravity.y,gravity.z); }
-void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ physicsManager->_addRigidBody(rigidBody,group,mask); }
-void Physics::addRigidBody(btRigidBody* rigidBody){ physicsManager->_addRigidBody(rigidBody); }
-void Physics::removeRigidBody(btRigidBody* rigidBody){ physicsManager->_removeRigidBody(rigidBody); }
-void Physics::updateRigidBody(btRigidBody* rigidBody){ physicsManager->_updateRigidBody(rigidBody); }
+void Physics::addRigidBody(btRigidBody& rigidBody, short group, short mask){ physicsManager->_addRigidBody(rigidBody,group,mask); }
+void Physics::addRigidBody(btRigidBody& rigidBody){ physicsManager->_addRigidBody(rigidBody); }
+void Physics::removeRigidBody(btRigidBody& rigidBody){ physicsManager->_removeRigidBody(rigidBody); }
+void Physics::updateRigidBody(btRigidBody& rigidBody){ physicsManager->_updateRigidBody(rigidBody); }
 vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end) {
     btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
     physicsManager->data->world->rayTest(start, end, RayCallback);
@@ -762,106 +762,87 @@ vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector
     return result;
  }
 vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e, OLD_Entity* ignored){
-    btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
-    btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
-    
+    btVector3 _s = Math::btVectorFromGLM(s);
+    btVector3 _e = Math::btVectorFromGLM(e);
     OLD_ComponentBody* body = ignored->getComponent<OLD_ComponentBody>();
-
     if(body){
-        return Physics::rayCast(_s,_e,const_cast<btRigidBody*>(body->getBody()));
+        return Physics::rayCast(_s,_e,&body->getBody());
     }
     return Physics::rayCast(_s,_e,nullptr);
  }
 vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<OLD_Entity*>& ignored){
-    btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
-    btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
+    btVector3 _s = Math::btVectorFromGLM(s);
+    btVector3 _e = Math::btVectorFromGLM(e);
     vector<btRigidBody*> objs;
     for(auto o:ignored){
         OLD_ComponentBody* body = o->getComponent<OLD_ComponentBody>();
         if(body){
-            objs.push_back(const_cast<btRigidBody*>(body->getBody()));
+            objs.push_back(&body->getBody());
         }
     }
     return Engine::Physics::rayCast(_s,_e,objs);
 }
 
 
-class Collision::impl final {
-    public:
-        btVector3 m_Inertia;
-        CollisionType::Type m_Type;
-        btCollisionShape* m_Shape;
 
-        void _baseInit(CollisionType::Type _type, float& mass) {
-            m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
-            m_Type = _type;
-            _setMass(mass);
-        }
-        void _init(vector<Mesh*>& meshes, float& mass) {
-            btCompoundShape* compound = new btCompoundShape();
-            btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
-            for (auto mesh : meshes) {
-                btCollisionShape* shape = epriv::InternalMeshPublicInterface::BuildCollision(mesh,CollisionType::ConvexHull);
-                compound->addChildShape(t, shape);
-            }
-            compound->setMargin(0.001f);
-            compound->recalculateLocalAabb();   
-            m_Shape = compound;
-            _baseInit(CollisionType::Compound, mass);
-        }
-        void _init(OLD_ComponentModel* modelComponent, float& mass) {
-            vector<Mesh*> meshes;
-            for (uint i = 0; i < modelComponent->getNumModels(); ++i) {
-                meshes.push_back(modelComponent->getModel(i)->mesh());
-            }
-            _init(meshes, mass);
-        }
-        void _init(ComponentModel& modelComponent, float& mass) {
-            vector<Mesh*> meshes;
-            for (uint i = 0; i < modelComponent.getNumModels(); ++i) {
-                meshes.push_back(modelComponent.getModel(i)->mesh());
-            }
-            _init(meshes, mass);
-        }
-        void _init(CollisionType::Type _type,Mesh* mesh,float& mass) {
-            btCollisionShape* shape = epriv::InternalMeshPublicInterface::BuildCollision(mesh, _type);
-            m_Shape = shape;
-            _baseInit(_type, mass);
-        }
-        void _destruct() {
-            btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
-            if (compoundCast) {
-                for (int i = 0; i < compoundCast->getNumChildShapes(); ++i) {
-                    btCollisionShape* shape = compoundCast->getChildShape(i);
-                    SAFE_DELETE(shape);
-                }
-            }
-            SAFE_DELETE(m_Shape);
-        }
-        void _setMass(float _mass) {
-            if (!m_Shape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) return;
-            if (m_Shape->getShapeType() != EMPTY_SHAPE_PROXYTYPE) {
-                m_Shape->calculateLocalInertia(_mass, m_Inertia);
-            }
-        }
-};
 
-Collision::Collision(vector<Mesh*>& meshes, float mass) :m_i(new impl) {
-    m_i->_init(meshes, mass);
+
+void Collision::_init(vector<Mesh*>& _meshes, float mass) {
+    btCompoundShape* compound = new btCompoundShape();
+    btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
+    for (auto mesh : _meshes) {
+        btCollisionShape* shape = epriv::InternalMeshPublicInterface::BuildCollision(mesh, CollisionType::ConvexHull);
+        compound->addChildShape(t, shape);
+    }
+    compound->setMargin(0.001f);
+    compound->recalculateLocalAabb();
+    m_Shape = compound;
 }
-Collision::Collision(OLD_ComponentModel* modelComponent, float mass) : m_i(new impl) {
-    m_i->_init(modelComponent, mass);
+void Collision::_baseInit(CollisionType::Type _type, float& _mass) {
+    m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
+    m_Type = _type;
+    setMass(_mass);
 }
-Collision::Collision(ComponentModel& modelComponent, float mass) : m_i(new impl) {
-    m_i->_init(modelComponent, mass);
+
+Collision::Collision(vector<Mesh*>& _meshes, float _mass){
+    _init(_meshes, _mass);
+    _baseInit(CollisionType::Compound, _mass);
 }
-Collision::Collision(CollisionType::Type type, Mesh* mesh, float mass) : m_i(new impl) {
-    m_i->_init(type, mesh, mass);
+Collision::Collision(OLD_ComponentModel* _modelComponent, float _mass){
+    vector<Mesh*> meshes;
+    for (uint i = 0; i < _modelComponent->getNumModels(); ++i) {
+        meshes.push_back(_modelComponent->getModel(i)->mesh());
+    }
+    _init(meshes, _mass);
+}
+Collision::Collision(ComponentModel& _modelComponent, float _mass){
+    vector<Mesh*> meshes;
+    for (uint i = 0; i < _modelComponent.getNumModels(); ++i) {
+        meshes.push_back(_modelComponent.getModel(i)->mesh());
+    }
+    _init(meshes, _mass);
+}
+Collision::Collision(CollisionType::Type _type, Mesh* _mesh, float _mass){
+    btCollisionShape* shape = epriv::InternalMeshPublicInterface::BuildCollision(_mesh, _type);
+    m_Shape = shape;
+    _baseInit(_type, _mass);
 }
 Collision::~Collision() {
-    m_i->_destruct();
+    btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
+    if (compoundCast) {
+        for (int i = 0; i < compoundCast->getNumChildShapes(); ++i) {
+            btCollisionShape* shape = compoundCast->getChildShape(i);
+            SAFE_DELETE(shape);
+        }
+    }
+    SAFE_DELETE(m_Shape);
 }
-void Collision::setMass(float mass){ m_i->_setMass(mass); }
-const btVector3& Collision::getInertia() const { return m_i->m_Inertia; }
-btCollisionShape* Collision::getShape() const { return m_i->m_Shape; }
-const uint Collision::getType() const { return m_i->m_Type; }
+void Collision::setMass(float _mass){ 
+    if (!m_Shape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) return;
+    if (m_Shape->getShapeType() != EMPTY_SHAPE_PROXYTYPE) {
+        m_Shape->calculateLocalInertia(_mass, m_Inertia);
+    }
+}
+const btVector3& Collision::getInertia() const { return m_Inertia; }
+btCollisionShape* Collision::getShape() const { return m_Shape; }
+const uint Collision::getType() const { return m_Type; }

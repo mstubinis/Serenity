@@ -552,15 +552,17 @@ class Texture::impl final{
             Renderer::bindTexture(m_Type, m_TextureAddress[0]);
             uint _w(uint(float(w) * _divisor));
             uint _h(uint(float(h) * _divisor));
-            m_ImagesDatas[0]->mipmaps[0].width = _w; 
-            m_ImagesDatas[0]->mipmaps[0].height = _h;
-            glTexImage2D(m_Type,0,ImageInternalFormat::at(m_ImagesDatas[0]->internalFormat),_w,_h,0,ImagePixelFormat::at(m_ImagesDatas[0]->pixelFormat),ImagePixelType::at(m_ImagesDatas[0]->pixelType),NULL);
+            auto& imageData = *m_ImagesDatas[0];
+            imageData.mipmaps[0].width = _w;
+            imageData.mipmaps[0].height = _h;
+            glTexImage2D(m_Type,0,ImageInternalFormat::at(imageData.internalFormat),_w,_h,0,ImagePixelFormat::at(imageData.pixelFormat),ImagePixelType::at(imageData.pixelType),NULL);
         }
         void _importIntoOpenGL(ImageMipmap& mipmap,GLuint _OpenGLType){
-            if(TextureLoader::IsCompressedType(m_ImagesDatas[0]->internalFormat) && mipmap.compressedSize != 0)
-                glCompressedTexImage2D(_OpenGLType,mipmap.level,ImageInternalFormat::at(m_ImagesDatas[0]->internalFormat),mipmap.width,mipmap.height,0,mipmap.compressedSize,&(mipmap.pixels)[0]);
+            auto& imageData = *m_ImagesDatas[0];
+            if(TextureLoader::IsCompressedType(imageData.internalFormat) && mipmap.compressedSize != 0)
+                glCompressedTexImage2D(_OpenGLType,mipmap.level,ImageInternalFormat::at(imageData.internalFormat),mipmap.width,mipmap.height,0,mipmap.compressedSize,&(mipmap.pixels)[0]);
             else
-                glTexImage2D(_OpenGLType,mipmap.level,ImageInternalFormat::at(m_ImagesDatas[0]->internalFormat),mipmap.width,mipmap.height,0,ImagePixelFormat::at(m_ImagesDatas[0]->pixelFormat),ImagePixelType::at(m_ImagesDatas[0]->pixelType),&(mipmap.pixels)[0]);   
+                glTexImage2D(_OpenGLType,mipmap.level,ImageInternalFormat::at(imageData.internalFormat),mipmap.width,mipmap.height,0,ImagePixelFormat::at(imageData.pixelFormat),ImagePixelType::at(imageData.pixelType),&(mipmap.pixels)[0]);
         }
 };
 
@@ -716,15 +718,13 @@ void epriv::TextureLoader::LoadDDSFile(Texture& _texture,string _filename,ImageL
         ImageLoadedStructure* imgPtr = nullptr;
         if(mainImageLevel == 0){ 
             imgPtr = &image; 
-        }
-        else if(i.m_ImagesDatas.size() < mainImageLevel){                    
+        }else if(i.m_ImagesDatas.size() < mainImageLevel){                    
             imgPtr = new ImageLoadedStructure();
             imgPtr->pixelFormat = image.pixelFormat;
             imgPtr->pixelType = image.pixelType;
             imgPtr->internalFormat = image.internalFormat;
             i.m_ImagesDatas.push_back(imgPtr);
-        }
-        else{
+        }else{
             imgPtr = i.m_ImagesDatas[mainImageLevel];
         }
 
@@ -921,8 +921,9 @@ bool epriv::TextureLoader::IsCompressedType(ImageInternalFormat::Format _format)
 }
 void epriv::TextureLoader::GenerateMipmapsOpenGL(Texture& _texture){
     Texture::impl& i = *_texture.m_i; if(i.m_Mipmapped) return;
-    uint& _w = i.m_ImagesDatas[0]->mipmaps[0].width;
-    uint& _h = i.m_ImagesDatas[0]->mipmaps[0].height;
+    auto& image = *i.m_ImagesDatas[0];
+    uint& _w = image.mipmaps[0].width;
+    uint& _h = image.mipmaps[0].height;
     Renderer::bindTexture(i.m_Type, i.m_TextureAddress[0]);
     glTexParameteri(i.m_Type, GL_TEXTURE_BASE_LEVEL, 0);
     if(i.m_MinFilter == GL_LINEAR){        
@@ -983,8 +984,7 @@ Texture::Texture(string files[],string _name,bool _genMipMaps,ImageInternalForma
 }
 Texture::~Texture(){
     unload();
-    for(auto data:m_i->m_ImagesDatas)
-        SAFE_DELETE(data);
+    SAFE_DELETE_VECTOR(m_i->m_ImagesDatas);
 }
 void Texture::render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
     if(m_i->m_TextureType == TextureType::CubeMap) return;
@@ -1045,8 +1045,7 @@ void Texture::setAnisotropicFiltering(float aniso){
         if(OpenGLExtensionEnum::supported(OpenGLExtensionEnum::ARB_Ansiotropic_Filtering)){
             glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_ARB, &aniso);
             glTexParameterf(m_i->m_Type, GL_TEXTURE_MAX_ANISOTROPY_ARB, aniso);
-        }
-        else*/ if(OpenGLExtensionEnum::supported(OpenGLExtensionEnum::EXT_Ansiotropic_Filtering)){
+        }else*/ if(OpenGLExtensionEnum::supported(OpenGLExtensionEnum::EXT_Ansiotropic_Filtering)){
             glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
             glTexParameterf(m_i->m_Type, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
         }

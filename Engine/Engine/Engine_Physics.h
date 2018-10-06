@@ -31,7 +31,12 @@ struct CollisionType{enum Type{
 _TOTAL,};};
 class Collision final{
     private:
-        class impl; std::unique_ptr<impl> m_i;
+        CollisionType::Type   m_Type;
+        btCollisionShape*     m_Shape;
+        btVector3             m_Inertia;
+
+        void _init(std::vector<Mesh*>& meshes, float mass);
+        void _baseInit(CollisionType::Type _type, float& mass);
     public:
         Collision(std::vector<Mesh*>& meshes, float mass = 0);
         Collision(OLD_ComponentModel*, float mass = 0);
@@ -72,10 +77,10 @@ namespace Engine{
         void setGravity(glm::vec3&);
         void pause(bool=true);
         void unpause();
-        void addRigidBody(btRigidBody*, short group, short mask);
-        void addRigidBody(btRigidBody*);
-        void removeRigidBody(btRigidBody*);
-        void updateRigidBody(btRigidBody*);
+        void addRigidBody(btRigidBody&, short group, short mask);
+        void addRigidBody(btRigidBody&);
+        void removeRigidBody(btRigidBody&);
+        void updateRigidBody(btRigidBody&);
     };
 };
 #endif
