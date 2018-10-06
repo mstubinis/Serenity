@@ -14,10 +14,12 @@ namespace Engine {
             private:
                 ECSEntityPool<TEntity>                                    entityPool;
                 std::vector<std::unique_ptr<ECSComponentPool<TEntity>>>   componentPools;
-                std::vector<std::unique_ptr<ECSSystem<TEntity>>>          systems;
+                std::vector<std::unique_ptr<ECSSystemBase<TEntity>>>      systems;
 
                 //builds a component pool and system for the component type if it is not built already.
                 template<typename TComponent> void buildPool(uint type_slot) {
+                    using CSystemType = ECSSystem<TEntity, TComponent>;
+                    using CPoolType = ECSComponentPool<TEntity, TComponent>;
                     if (type_slot >= componentPools.size()) {
                         componentPools.resize(type_slot + 1);
                     }
@@ -26,28 +28,36 @@ namespace Engine {
                         systems.resize(type_slot + 1);
                     }
                     if (!componentPools[type_slot]) {
-                        componentPools[type_slot] = std::make_unique<ECSComponentPool<TEntity, TComponent>>();
+                        componentPools[type_slot] = std::make_unique<CPoolType>();
                     }
                     if (!systems[type_slot]) {
-                        using CPoolType = ECSComponentPool<TEntity, TComponent>;
                         auto& cPool = *(CPoolType*)componentPools[type_slot].get();
-                        systems[type_slot] = std::make_unique<ECSSystem<TEntity, TComponent>>(cPool);
+                        ECSSystemCI _ci;
+                        systems[type_slot] = std::make_unique<CSystemType>(_ci,*this);
                     }
                 }
-
             public:
                 ECS() = default;
                 ~ECS() = default;
-                ECS(const ECS&) = delete;            // non construction-copyable
-                ECS& operator=(const ECS&) = delete; // non copyable
+                ECS(const ECS&) = delete;                      // non construction-copyable
+                ECS& operator=(const ECS&) = delete;           // non copyable
+                ECS(ECS&& other) noexcept = delete;            // non construction-moveable
+                ECS& operator=(ECS&& other) noexcept = delete; // non moveable
 
-                template<typename TComponent> void assignSystem(ECSSystem<TEntity>& _system) {
+                template<typename TComponent> ECSComponentPool<TEntity, TComponent>& getPool() {
+                    using CPoolType = ECSComponentPool<TEntity, TComponent>;
                     uint type_slot = ECSRegistry::type_slot<TComponent>();
+                    return *(CPoolType*)componentPools[type_slot].get();
+                }
+                template<typename TComponent> void assignSystem(ECSSystemCI& _systemCI) {
+                    uint type_slot = ECSRegistry::type_slot<TComponent>();
+                    using CPoolType = ECSComponentPool<TEntity, TComponent>;
+                    using CSystemType = ECSSystem<TEntity, TComponent>;
                     if (!(type_slot < componentPools.size())) {
                         componentPools.resize(type_slot + 1);
                     }
                     if (!componentPools[type_slot]) {
-                        componentPools[type_slot] = std::make_unique<ECSComponentPool<TEntity, TComponent>>();
+                        componentPools[type_slot] = std::make_unique<CPoolType>();
                     }
                     if (!(type_slot < systems.size())) {
                         systems.resize(type_slot + 1);
@@ -55,11 +65,9 @@ namespace Engine {
                     if (systems[type_slot]) {
                         systems[type_slot].reset();
                     }
-                    using CPoolType = ECSComponentPool<TEntity, TComponent>;
                     auto& cPool = *(CPoolType*)componentPools[type_slot].get();
-                    systems[type_slot] = std::unique_ptr<ECSSystem<TEntity, TComponent>>(_system);
+                    systems[type_slot] = std::make_unique<CSystemType>(_systemCI,*this);
                 }
-
 
                 //we may or may not need these...
                 TEntity* createEntity(Scene& _scene) { return entityPool.createEntity(_scene); }
