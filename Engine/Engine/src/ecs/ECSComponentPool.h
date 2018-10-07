@@ -22,13 +22,13 @@ namespace Engine {
 
         template <typename TEntity,typename TComponent> class ECSComponentPool<TEntity,TComponent> : public ECSComponentPool<TEntity>{
             using super = ECSComponentPool<TEntity>;
-            private:
-                std::vector<TComponent>           dense;  //actual component pool
             public:
+                std::vector<TComponent>           dense;  //actual component pool
+
                 ECSComponentPool() = default;
-                ~ECSComponentPool() {
-                    if(dense.size() > 0) dense.clear();
-                }
+                ECSComponentPool(const ECSComponentPool& other) = default;
+                ECSComponentPool& operator=(const ECSComponentPool& other) = default;
+                ~ECSComponentPool() { if(dense.size() > 0) dense.clear(); }
                 template<typename... ARGS> TComponent* addComponent(TEntity& _entity, ARGS&&... _args) {
                     uint sparseID = _entity.ID - 1;
                     if (sparseID >= super::sparse.size())
@@ -40,7 +40,7 @@ namespace Engine {
                     super::sparse[sparseID] = super::amount;
                     return &dense[super::amount - 1];
                 }
-                bool  removeComponent(TEntity& _entity) {
+                bool removeComponent(TEntity& _entity) {
                     uint sparseID = _entity.ID - 1;
                     if (super::sparse[sparseID] == 0)
                         return false;

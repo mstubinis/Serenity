@@ -12,7 +12,10 @@
 #include <iostream>
 
 using namespace Engine;
+using namespace Engine::epriv;
 using namespace std;
+
+#pragma region Component
 
 ComponentBody::ComponentBody(Entity& _e) : ComponentBaseClass(_e) {
     data.n = new NormalData();
@@ -473,6 +476,7 @@ void ComponentBody::setMass(float mass) {
     }
 }
 
+#pragma endregion
 
 
 
@@ -481,20 +485,38 @@ void ComponentBody::setMass(float mass) {
 
 
 
+#pragma region System
 
 
+struct ComponentBodyUpdateFunction final {void operator()(boost::any& componentPool, const float& dt) const {
+    auto& pool = boost::any_cast<ECSComponentPool<Entity, ComponentBody>&>(componentPool);
+    auto& components = pool.dense;
+   
+}};
+struct ComponentBodyComponentAddedToSceneFunction final {void operator()(boost::any& componentPool) const {
+}};
+struct ComponentBodyEntityAddedToSceneFunction final {void operator()(boost::any& componentPool) const {
+}};
+struct ComponentBodySceneChangeFunction final {void operator()(boost::any& componentPool) const {
+}};
+    
 
-struct UpdateFunction final{void operator()(const float& dt) const {
+class ComponentBodySystem : public Engine::epriv::ECSSystemCI{
+    public:
+        ComponentBodySystem() {
+            ComponentBodyUpdateFunction _update;
+            setUpdateFunction(_update);
+            ComponentBodyComponentAddedToSceneFunction _cats;
+            setOnComponentAddedToEntityFunction(_cats);
+            ComponentBodyEntityAddedToSceneFunction _eats;
+            setOnEntityAddedToSceneFunctionFunction(_eats);
+            ComponentBodySceneChangeFunction _sc;
+            setOnSceneChangedFunctionFunction(_sc);
+        }
+        ~ComponentBodySystem() {
 
-};};
+        }
+};
 
-/*
-                                                                                  //add the pool here
-ComponentBodySystem::ComponentBodySystem():epriv::ECSSystem<Entity, ComponentBody>()
-{
 
-}
-ComponentBodySystem::~ComponentBodySystem() {
-
-}
-*/
+#pragma endregion
