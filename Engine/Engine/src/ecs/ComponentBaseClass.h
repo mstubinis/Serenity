@@ -7,12 +7,13 @@
 struct ComponentBaseClass{
     Entity owner;
 
-    ComponentBaseClass() = delete;
+    ComponentBaseClass() = default;
     ComponentBaseClass(Entity& owner_) :owner(owner_) {}
 
     ComponentBaseClass& operator=(const ComponentBaseClass& other) = default;
     ComponentBaseClass(const ComponentBaseClass& other) = default;
     ComponentBaseClass(ComponentBaseClass&& other) noexcept = default;
+    ComponentBaseClass& operator=(ComponentBaseClass&& other) noexcept = default;
 
     virtual ~ComponentBaseClass() = default;
 };

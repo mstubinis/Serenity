@@ -32,9 +32,11 @@ class ComponentModel : public ComponentBaseClass {
         ComponentModel(Entity&, Handle& meshHandle, Material*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
         ComponentModel(Entity&, Mesh*, Material*, Handle& shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        ComponentModel& operator=(const ComponentModel& other) = default;
-        ComponentModel(const ComponentModel& other) = default;
+        ComponentModel& operator=(const ComponentModel& other) noexcept = default;
+        ComponentModel(const ComponentModel& other) noexcept = default;
         ComponentModel(ComponentModel&& other) noexcept = default;
+        ComponentModel& operator=(ComponentModel&& other) noexcept = default;
+
         ~ComponentModel();
 
         uint getNumModels();

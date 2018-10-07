@@ -372,8 +372,7 @@ struct textures::ImageLoadedStructure final{
         ImageMipmap* baseImage = nullptr;
         if(mipmaps.size() > 0){
             baseImage = &(mipmaps[0]);
-        }
-        else{
+        }else{
             baseImage = new ImageMipmap();
         }
         filename = "";

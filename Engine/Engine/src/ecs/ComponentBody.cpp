@@ -21,8 +21,8 @@ ComponentBody::ComponentBody(Entity& _e) : ComponentBaseClass(_e) {
     data.n = new NormalData();
     _physics = false;
     auto& normalData = *data.n;
-    normalData.position = glm::vec3(0.0f);
-    normalData.scale = glm::vec3(1.0f);
+    normalData.position = glm::vec3(0.0f,0.0f,0.0f);
+    normalData.scale = glm::vec3(1.0f,1.0f,1.0f);
     normalData.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     normalData.modelMatrix = glm::mat4(1.0f);
     Math::recalculateForwardRightUp(normalData.rotation, _forward, _right, _up);
@@ -31,7 +31,7 @@ ComponentBody::ComponentBody(Entity& _e,CollisionType::Type _collisionType) : Co
     data.p = new PhysicsData();
     _physics = true;
     auto& physicsData = *data.p;
-    _forward = glm::vec3(0, 0, -1);  _right = glm::vec3(1, 0, 0);  _up = glm::vec3(0, 1, 0);
+    _forward = glm::vec3(0.0f, 0.0f, -1.0f);  _right = glm::vec3(1.0f, 0.0f, 0.0f);  _up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     physicsData.motionState = btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1)));
     float _mass = 1.0f;
@@ -40,8 +40,8 @@ ComponentBody::ComponentBody(Entity& _e,CollisionType::Type _collisionType) : Co
     setCollision(_collisionType, _mass);
 
     setMass(_mass);
-    btCollisionShape* _shape = physicsData.collision->getShape();
-    const btVector3& _inertia = physicsData.collision->getInertia();
+    btCollisionShape* _shape = physicsData.collision.getShape();
+    const btVector3& _inertia = physicsData.collision.getInertia();
 
     btRigidBody::btRigidBodyConstructionInfo CI(_mass, &physicsData.motionState, _shape, _inertia);
     physicsData.rigidBody = btRigidBody(CI);
@@ -55,12 +55,9 @@ ComponentBody::ComponentBody(Entity& _e,CollisionType::Type _collisionType) : Co
 }
 ComponentBody::~ComponentBody() {
     if (_physics) {
-        auto& physicsData = *data.p;
-        Physics::removeRigidBody(physicsData.rigidBody);
-        SAFE_DELETE(physicsData.collision);
+        Physics::removeRigidBody(data.p->rigidBody);
         SAFE_DELETE(data.p);
     }else{
-        auto& normalData = *data.n;
         SAFE_DELETE(data.n);
     }
 }
@@ -80,22 +77,21 @@ void ComponentBody::alignTo(glm::vec3 direction, float speed) {
 }
 void ComponentBody::setCollision(CollisionType::Type _type, float _mass) {
     auto& physicsData = *data.p;
-    SAFE_DELETE(physicsData.collision);
     ComponentModel* modelComponent = owner.getComponent<ComponentModel>();
     if (modelComponent) {
         if (_type == CollisionType::Compound) {
-            physicsData.collision = new Collision(*modelComponent, _mass);
+            physicsData.collision = Collision(*modelComponent, _mass);
         }else{
-            physicsData.collision = new Collision(_type, modelComponent->getModel()->mesh(), _mass);
+            physicsData.collision = Collision(_type, modelComponent->getModel()->mesh(), _mass);
         }
     }else{
-        physicsData.collision = new Collision(_type, nullptr, _mass);
+        physicsData.collision = Collision(_type, nullptr, _mass);
     }
-    physicsData.collision->getShape()->setUserPointer(this);
+    physicsData.collision.getShape()->setUserPointer(this);
     auto& rigidBody = physicsData.rigidBody;
     Physics::removeRigidBody(rigidBody);
-    rigidBody.setCollisionShape(physicsData.collision->getShape());
-    rigidBody.setMassProps(physicsData.mass, physicsData.collision->getInertia());
+    rigidBody.setCollisionShape(physicsData.collision.getShape());
+    rigidBody.setMassProps(physicsData.mass, physicsData.collision.getInertia());
     rigidBody.updateInertiaTensor();
     Physics::addRigidBody(rigidBody);
 }
@@ -144,20 +140,18 @@ void ComponentBody::scale(glm::vec3 amount) { ComponentBody::scale(amount.x, amo
 void ComponentBody::scale(float x, float y, float z) {
     if (_physics) {
         auto& physicsData = *data.p;
-        if (physicsData.collision) {
-            if (physicsData.collision->getType() == CollisionType::Compound) {
-                btCompoundShape* cast = ((btCompoundShape*)(physicsData.collision->getShape()));
-                for (int i = 0; i < cast->getNumChildShapes(); ++i) {
-                    btCollisionShape* shape = cast->getChildShape(i);
-                    btUniformScalingShape* convexHull = dynamic_cast<btUniformScalingShape*>(shape);
-                    if (convexHull) {
-                        convexHull->setLocalScaling(convexHull->getLocalScaling() + btVector3(x, y, z));
-                        continue;
-                    }
-                    btScaledBvhTriangleMeshShape* triHull = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                    if (triHull) {
-                        triHull->setLocalScaling(triHull->getLocalScaling() + btVector3(x, y, z));
-                    }
+        if (physicsData.collision.getShape() && physicsData.collision.getType() == CollisionType::Compound) {
+            btCompoundShape* cast = ((btCompoundShape*)(physicsData.collision.getShape()));
+            for (int i = 0; i < cast->getNumChildShapes(); ++i) {
+                btCollisionShape* shape = cast->getChildShape(i);
+                btUniformScalingShape* convexHull = dynamic_cast<btUniformScalingShape*>(shape);
+                if (convexHull) {
+                    convexHull->setLocalScaling(convexHull->getLocalScaling() + btVector3(x, y, z));
+                    continue;
+                }
+                btScaledBvhTriangleMeshShape* triHull = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
+                if (triHull) {
+                    triHull->setLocalScaling(triHull->getLocalScaling() + btVector3(x, y, z));
                 }
             }
         }
@@ -179,12 +173,12 @@ void ComponentBody::setPosition(float x, float y, float z) {
         btTransform tr;
         tr.setOrigin(btVector3(x, y, z));
         tr.setRotation(rigidBody.getOrientation());
-        if (physicsData.collision->getType() == CollisionType::TriangleShapeStatic) {
+        if (physicsData.collision.getType() == CollisionType::TriangleShapeStatic) {
             Physics::removeRigidBody(rigidBody);
         }
         physicsData.motionState.setWorldTransform(tr);
-        if (physicsData.collision->getType() == CollisionType::TriangleShapeStatic) {
-            btRigidBody::btRigidBodyConstructionInfo ci(physicsData.mass, &physicsData.motionState, physicsData.collision->getShape(), physicsData.collision->getInertia());
+        if (physicsData.collision.getType() == CollisionType::TriangleShapeStatic) {
+            btRigidBody::btRigidBodyConstructionInfo ci(physicsData.mass, &physicsData.motionState, physicsData.collision.getShape(), physicsData.collision.getInertia());
             rigidBody = btRigidBody(ci);
             rigidBody.setUserPointer(this);
             Physics::addRigidBody(rigidBody);
@@ -232,23 +226,21 @@ void ComponentBody::setScale(glm::vec3 newScale) { ComponentBody::setScale(newSc
 void ComponentBody::setScale(float x, float y, float z) {
     if (_physics) {
         auto& physicsData = *data.p;
-        if (physicsData.collision) {
-            if (physicsData.collision->getType() == CollisionType::Compound) {
-                btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(physicsData.collision->getShape());
-                if (compoundShapeCast) {
-                    int numChildren = compoundShapeCast->getNumChildShapes();
-                    if (numChildren > 0) {
-                        for (int i = 0; i < numChildren; ++i) {
-                            btCollisionShape* shape = compoundShapeCast->getChildShape(i);
-                            btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
-                            if (convexHullCast) {
-                                convexHullCast->setLocalScaling(btVector3(x, y, z));
-                                continue;
-                            }
-                            btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                            if (triHullCast) {
-                                triHullCast->setLocalScaling(btVector3(x, y, z));
-                            }
+        if (physicsData.collision.getShape() && physicsData.collision.getType() == CollisionType::Compound) {
+            btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(physicsData.collision.getShape());
+            if (compoundShapeCast) {
+                int numChildren = compoundShapeCast->getNumChildShapes();
+                if (numChildren > 0) {
+                    for (int i = 0; i < numChildren; ++i) {
+                        btCollisionShape* shape = compoundShapeCast->getChildShape(i);
+                        btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
+                        if (convexHullCast) {
+                            convexHullCast->setLocalScaling(btVector3(x, y, z));
+                            continue;
+                        }
+                        btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
+                        if (triHullCast) {
+                            triHullCast->setLocalScaling(btVector3(x, y, z));
                         }
                     }
                 }
@@ -279,22 +271,20 @@ glm::vec3 ComponentBody::getScreenCoordinates() { return Math::getScreenCoordina
 glm::vec3 ComponentBody::getScale() {
     if (_physics) {
         auto& physicsData = *data.p;
-        if (physicsData.collision) {
-            if (physicsData.collision->getType() == CollisionType::Compound) {
-                btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(physicsData.collision->getShape());
-                if (compoundShapeCast) {
-                    int numChildren = compoundShapeCast->getNumChildShapes();
-                    if (numChildren > 0) {
-                        for (int i = 0; i < numChildren; ++i) {
-                            btCollisionShape* shape = compoundShapeCast->getChildShape(i);
-                            btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
-                            if (convexHullCast) {
-                                return Math::btVectorToGLM(const_cast<btVector3&>(convexHullCast->getLocalScaling()));
-                            }
-                            btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                            if (triHullCast) {
-                                return Math::btVectorToGLM(const_cast<btVector3&>(triHullCast->getLocalScaling()));
-                            }
+        if (physicsData.collision.getShape() && physicsData.collision.getType() == CollisionType::Compound) {
+            btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(physicsData.collision.getShape());
+            if (compoundShapeCast) {
+                int numChildren = compoundShapeCast->getNumChildShapes();
+                if (numChildren > 0) {
+                    for (int i = 0; i < numChildren; ++i) {
+                        btCollisionShape* shape = compoundShapeCast->getChildShape(i);
+                        btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
+                        if (convexHullCast) {
+                            return Math::btVectorToGLM(const_cast<btVector3&>(convexHullCast->getLocalScaling()));
+                        }
+                        btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
+                        if (triHullCast) {
+                            return Math::btVectorToGLM(const_cast<btVector3&>(triHullCast->getLocalScaling()));
                         }
                     }
                 }
@@ -322,7 +312,7 @@ glm::mat4 ComponentBody::modelMatrix() { //theres prob a better way to do this
         glm::mat4 m(1.0f);
         btTransform tr;  physicsData.rigidBody.getMotionState()->getWorldTransform(tr);
         tr.getOpenGLMatrix(glm::value_ptr(m));
-        if (physicsData.collision) {
+        if (physicsData.collision.getShape()) {
             m = glm::scale(m, getScale());
         }
         return m;
@@ -469,9 +459,9 @@ void ComponentBody::setMass(float mass) {
     if (_physics) {
         auto& physicsData = *data.p;
         physicsData.mass = mass;
-        if (physicsData.collision) {
-            physicsData.collision->setMass(physicsData.mass);
-            physicsData.rigidBody.setMassProps(physicsData.mass, physicsData.collision->getInertia());
+        if (physicsData.collision.getShape()) {
+            physicsData.collision.setMass(physicsData.mass);
+            physicsData.rigidBody.setMassProps(physicsData.mass, physicsData.collision.getInertia());
         }
     }
 }
@@ -488,35 +478,32 @@ void ComponentBody::setMass(float mass) {
 #pragma region System
 
 
-struct ComponentBodyUpdateFunction final {void operator()(boost::any& componentPool, const float& dt) const {
-    auto& pool = boost::any_cast<ECSComponentPool<Entity, ComponentBody>&>(componentPool);
+struct ComponentBodyUpdateFunction final {void operator()(void* componentPool, const float& dt) const {
+    auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)componentPool;
     auto& components = pool.dense;
-   
+
 }};
-struct ComponentBodyComponentAddedToSceneFunction final {void operator()(boost::any& componentPool) const {
+struct ComponentBodyComponentAddedToSceneFunction final {void operator()(void* componentPool) const {
 }};
-struct ComponentBodyEntityAddedToSceneFunction final {void operator()(boost::any& componentPool) const {
+struct ComponentBodyEntityAddedToSceneFunction final {void operator()(void* componentPool) const {
 }};
-struct ComponentBodySceneChangeFunction final {void operator()(boost::any& componentPool) const {
+struct ComponentBodySceneChangeFunction final {void operator()(void* componentPool) const {
 }};
     
 
-class ComponentBodySystem : public Engine::epriv::ECSSystemCI{
-    public:
-        ComponentBodySystem() {
-            ComponentBodyUpdateFunction _update;
-            setUpdateFunction(_update);
-            ComponentBodyComponentAddedToSceneFunction _cats;
-            setOnComponentAddedToEntityFunction(_cats);
-            ComponentBodyEntityAddedToSceneFunction _eats;
-            setOnEntityAddedToSceneFunctionFunction(_eats);
-            ComponentBodySceneChangeFunction _sc;
-            setOnSceneChangedFunctionFunction(_sc);
-        }
-        ~ComponentBodySystem() {
+ComponentBodySystem::ComponentBodySystem() {
+    ComponentBodyUpdateFunction _update;
+    setUpdateFunction(_update);
+    ComponentBodyComponentAddedToSceneFunction _cats;
+    setOnComponentAddedToEntityFunction(_cats);
+    ComponentBodyEntityAddedToSceneFunction _eats;
+    setOnEntityAddedToSceneFunctionFunction(_eats);
+    ComponentBodySceneChangeFunction _sc;
+    setOnSceneChangedFunctionFunction(_sc);
+}
+ComponentBodySystem::~ComponentBodySystem() {
 
-        }
-};
+}
 
 
 #pragma endregion

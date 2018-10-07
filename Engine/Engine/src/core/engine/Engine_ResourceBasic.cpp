@@ -25,7 +25,7 @@ void EngineResource::load(){
     }
 }
 void EngineResource::unload(){
-    if(m_IsLoaded && m_UsageCount == 0){
+    if(m_IsLoaded /*&& m_UsageCount == 0*/){
         m_IsLoaded = false;
         std::cout << ": " << m_Name << " - unloaded." << std::endl;
     }

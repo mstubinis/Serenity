@@ -38,6 +38,7 @@ class Collision final{
         void _init(std::vector<Mesh*>& meshes, float mass);
         void _baseInit(CollisionType::Type _type, float& mass);
     public:
+        Collision();
         Collision(std::vector<Mesh*>& meshes, float mass = 0);
         Collision(OLD_ComponentModel*, float mass = 0);
         Collision(ComponentModel&, float mass = 0);

@@ -29,9 +29,11 @@ class ComponentCamera : public ComponentBaseClass {
         ComponentCamera(Entity&, float angle, float aspectRatio, float nearPlane, float farPlane);
         ComponentCamera(Entity&, float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
-        ComponentCamera& operator=(const ComponentCamera& other) = default;
-        ComponentCamera(const ComponentCamera& other) = default;
+        ComponentCamera& operator=(const ComponentCamera& other) noexcept = default;
+        ComponentCamera(const ComponentCamera& other) noexcept = default;
         ComponentCamera(ComponentCamera&& other) noexcept = default;
+        ComponentCamera& operator=(ComponentCamera&& other) noexcept = default;
+
         ~ComponentCamera();
 
         virtual void update(const float& dt);

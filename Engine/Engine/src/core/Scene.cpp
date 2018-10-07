@@ -37,6 +37,17 @@ class Scene::impl final {
             Core::m_Engine->m_ResourceManager._addScene(super);
             ++InternalScenePublicInterface::NumScenes;
             m_ID = InternalScenePublicInterface::NumScenes;
+            
+
+
+            ComponentBodySystem _b;
+            m_ECS.assignSystem<ComponentBody>(_b);
+            auto* e = m_ECS.createEntity(super);
+            e->addComponent<ComponentBody>();
+            auto* e1 = m_ECS.createEntity(super);
+            e1->addComponent<ComponentBody>();
+            auto* e2 = m_ECS.createEntity(super);
+            e2->addComponent<ComponentBody>();
         }
         void _destruct() {
             SAFE_DELETE(m_Skybox);
@@ -225,6 +236,7 @@ Scene::~Scene(){
     m_i->_destruct();
 }
 void Scene::update(const float& dt){
+    m_i->m_ECS.update(dt);
 }
 glm::vec3 Scene::getBackgroundColor(){ return m_i->m_BackgroundColor; }
 SkyboxEmpty* Scene::skybox() const { return m_i->m_Skybox; }

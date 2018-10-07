@@ -12,17 +12,19 @@
 #include <Bullet/LinearMath/btDefaultMotionState.h>
 #include <Bullet/BulletDynamics/Dynamics/btRigidBody.h>
 
+#include <iostream>
+
 class Collision;
 class ComponentModel;
 class ComponentBody : public ComponentBaseClass {
     friend class ::ComponentModel;
     private:
         struct PhysicsData {
-            Collision* collision;
+            Collision collision;
             btRigidBody rigidBody;
             btDefaultMotionState motionState;
             float mass;
-            PhysicsData():rigidBody(0,0,0), collision(nullptr), mass(0){}
+            PhysicsData():rigidBody(0,0,0), mass(0){}
         };
         struct NormalData {
             glm::vec3 scale;
@@ -42,9 +44,11 @@ class ComponentBody : public ComponentBaseClass {
         ComponentBody(Entity&);
         ComponentBody(Entity&, CollisionType::Type);
 
-        ComponentBody& operator=(const ComponentBody& other) = default;
-        ComponentBody(const ComponentBody& other) = default;
+        ComponentBody& operator=(const ComponentBody& other) noexcept = default;
+        ComponentBody(const ComponentBody& other) noexcept = default;
         ComponentBody(ComponentBody&& other) noexcept = default;
+        ComponentBody& operator=(ComponentBody&& other) noexcept = default;
+
         ~ComponentBody();
 
         void alignTo(glm::vec3 direction, float speed);
@@ -86,6 +90,12 @@ class ComponentBody : public ComponentBaseClass {
         void applyImpulse(float x, float y, float z, bool local = true);          void applyImpulse(glm::vec3 impulse, glm::vec3 origin = glm::vec3(0.0f), bool local = true);
         void applyTorque(float x, float y, float z, bool local = true);           void applyTorque(glm::vec3 torque, bool local = true);
         void applyTorqueImpulse(float x, float y, float z, bool local = true);    void applyTorqueImpulse(glm::vec3 torqueImpulse, bool local = true);
+};
+
+class ComponentBodySystem : public Engine::epriv::ECSSystemCI {
+    public:
+        ComponentBodySystem();
+        ~ComponentBodySystem();
 };
 
 #endif

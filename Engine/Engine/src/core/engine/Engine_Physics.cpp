@@ -803,7 +803,12 @@ void Collision::_baseInit(CollisionType::Type _type, float& _mass) {
     m_Type = _type;
     setMass(_mass);
 }
-
+Collision::Collision() {
+    m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
+    m_Type = CollisionType::None;
+    m_Shape = nullptr;
+    setMass(0.0f);
+}
 Collision::Collision(vector<Mesh*>& _meshes, float _mass){
     _init(_meshes, _mass);
     _baseInit(CollisionType::Compound, _mass);
