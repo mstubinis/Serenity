@@ -14,10 +14,24 @@ class Material;
 class MeshInstance;
 
 class ComponentCamera;
+
+struct ComponentModelUpdateFunction;
+struct ComponentModelEntityAddedToSceneFunction;
+struct ComponentModelComponentAddedToEntityFunction;
+struct ComponentModelSceneEnteredFunction;
+struct ComponentModelSceneLeftFunction;
+struct ComponentModelFunctions;
+
 class ComponentModel : public ComponentBaseClass {
-    friend class ::ComponentCamera;
+    friend struct ::ComponentModelUpdateFunction;
+    friend struct ::ComponentModelEntityAddedToSceneFunction;
+    friend struct ::ComponentModelComponentAddedToEntityFunction;
+    friend struct ::ComponentModelSceneEnteredFunction;
+    friend struct ::ComponentModelSceneLeftFunction;
+    friend struct ::ComponentModelFunctions;
+    friend class  ::ComponentCamera;
     private:
-        std::vector<MeshInstance*> models;
+        std::vector<MeshInstance> models;
         float _radius;
         glm::vec3 _radiusBox;
     public:
@@ -45,7 +59,7 @@ class ComponentModel : public ComponentBaseClass {
         void show();
         void hide();
 
-        MeshInstance* getModel(uint index = 0);
+        MeshInstance& getModel(uint index = 0);
 
         uint addModel(Handle& meshHandle, Handle& materialHandle, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
         uint addModel(Mesh*, Material*, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
@@ -64,8 +78,14 @@ class ComponentModel : public ComponentBaseClass {
 
         bool rayIntersectSphere(ComponentCamera& camera);
 
-        template<class T> void setCustomBindFunctor(T& functor, uint index = 0) { models[index]->setCustomBindFunctor(functor); }
-        template<class T> void setCustomUnbindFunctor(T& functor, uint index = 0) { models[index]->setCustomUnbindFunctor(functor); }
+        template<class T> void setCustomBindFunctor(T& functor, uint index = 0) { models[index].setCustomBindFunctor(functor); }
+        template<class T> void setCustomUnbindFunctor(T& functor, uint index = 0) { models[index].setCustomUnbindFunctor(functor); }
+};
+
+class ComponentModelSystem : public Engine::epriv::ECSSystemCI {
+    public:
+        ComponentModelSystem();
+        ~ComponentModelSystem() = default;
 };
 
 #endif

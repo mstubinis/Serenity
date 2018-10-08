@@ -11,9 +11,21 @@
 
 class Camera;
 class ComponentModel;
+
+struct ComponentCameraUpdateFunction;
+struct ComponentCameraEntityAddedToSceneFunction;
+struct ComponentCameraComponentAddedToEntityFunction;
+struct ComponentCameraSceneEnteredFunction;
+struct ComponentCameraSceneLeftFunction;
+
 class ComponentCamera : public ComponentBaseClass {
-    friend class ::Camera;
-    friend class ::ComponentModel;
+    friend struct ::ComponentCameraUpdateFunction;
+    friend struct ::ComponentCameraEntityAddedToSceneFunction;
+    friend struct ::ComponentCameraComponentAddedToEntityFunction;
+    friend struct ::ComponentCameraSceneEnteredFunction;
+    friend struct ::ComponentCameraSceneLeftFunction;
+    friend class  ::Camera;
+    friend class  ::ComponentModel;
     private:
         enum Type { Perspective, Orthographic, };
         Type _type;
@@ -56,5 +68,10 @@ class ComponentCamera : public ComponentBaseClass {
         uint sphereIntersectTest(glm::vec3& objectPosition, float objectRadius);
 };
 
+class ComponentCameraSystem : public Engine::epriv::ECSSystemCI {
+    public:
+        ComponentCameraSystem();
+        ~ComponentCameraSystem() = default;
+};
 
 #endif

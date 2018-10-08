@@ -20,13 +20,15 @@ class ComponentModel;
 struct ComponentBodyUpdateFunction;
 struct ComponentBodyEntityAddedToSceneFunction;
 struct ComponentBodyComponentAddedToEntityFunction;
-struct ComponentBodySceneChangeFunction;
+struct ComponentBodySceneEnteredFunction;
+struct ComponentBodySceneLeftFunction;
 
 class ComponentBody : public ComponentBaseClass {
     friend struct ::ComponentBodyUpdateFunction;
     friend struct ::ComponentBodyComponentAddedToEntityFunction;
     friend struct ::ComponentBodyEntityAddedToSceneFunction;
-    friend struct ::ComponentBodySceneChangeFunction;
+    friend struct ::ComponentBodySceneEnteredFunction;
+    friend struct ::ComponentBodySceneLeftFunction;
     friend class  ::ComponentModel;
     private:
         struct PhysicsData {

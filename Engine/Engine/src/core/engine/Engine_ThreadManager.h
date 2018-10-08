@@ -58,7 +58,7 @@ namespace Engine{
                     end += (remain > 0) ? (length + !!(remain--)) : length;
                     uint splitSize = end - begin;
                     outVec[i].resize(splitSize);
-                    for (auto j = 0; j < splitSize; ++j) {
+                    for (uint j = 0; j < splitSize; ++j) {
                         outVec[i][j] = begin + j;
                     }
                     begin = end;

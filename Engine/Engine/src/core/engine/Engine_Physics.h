@@ -40,7 +40,7 @@ class Collision final{
     public:
         Collision();
         Collision(std::vector<Mesh*>& meshes, float mass = 0);
-        Collision(OLD_ComponentModel*, float mass = 0);
+        Collision(OLD_ComponentModel&, float mass = 0);
         Collision(ComponentModel&, float mass = 0);
         Collision(CollisionType::Type, Mesh* mesh, float mass = 0);
         ~Collision();

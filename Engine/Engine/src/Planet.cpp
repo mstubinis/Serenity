@@ -301,7 +301,7 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
         AtmosphericScatteringSkyMeshInstanceBindFunctor f;
         AtmosphericScatteringSkyMeshInstanceUnbindFunctor f1;
         uint index = m_Model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial,(ShaderP*)ResourceManifest::skyFromSpace.get(),RenderStage::GeometryTransparent);
-        MeshInstance& skyMesh = *m_Model->getModel(index);
+        MeshInstance& skyMesh = m_Model->getModel(index);
         float aScale = 1.0f + m_AtmosphereHeight;
         skyMesh.setCustomBindFunctor(f);
         skyMesh.setCustomUnbindFunctor(f1);
@@ -351,9 +351,9 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
 
-    m_Model->getModel()->setColor(starColor.x,starColor.y,starColor.z,1.0f);
-    m_Model->getModel()->setGodRaysColor(starColor.x,starColor.y,starColor.z);
-    m_Model->getModel()->setShaderProgram(nullptr);
+    m_Model->getModel().setColor(starColor.x,starColor.y,starColor.z,1.0f);
+    m_Model->getModel().setGodRaysColor(starColor.x,starColor.y,starColor.z);
+    m_Model->getModel().setShaderProgram(nullptr);
 
     StarMeshInstanceBindFunctor f;
     m_Model->setCustomBindFunctor(f);
@@ -372,10 +372,10 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     m_Parent->addRing(this);
     PlanetaryRingMeshInstanceBindFunctor f;
     uint index = parent->m_Model->addModel(ResourceManifest::RingMesh,m_MaterialHandle,(ShaderP*)ResourceManifest::groundFromSpace.get(), RenderStage::GeometryTransparent);
-    MeshInstance* ringMesh = parent->m_Model->getModel(index);
-    ringMesh->setCustomBindFunctor(f);
+    MeshInstance& ringMesh = parent->m_Model->getModel(index);
+    ringMesh.setCustomBindFunctor(f);
     float aScale = 1.0f;
-    ringMesh->setScale(aScale,aScale,aScale);
+    ringMesh.setScale(aScale,aScale,aScale);
 }
 Ring::~Ring(){
 }

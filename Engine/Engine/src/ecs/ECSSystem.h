@@ -18,7 +18,7 @@ namespace Engine {
         typedef boost::function<void(void*, const float&)>  func_update;
         typedef boost::function<void(void*, Entity&)>       func_entity;
         typedef boost::function<void(void*)>                func_component;
-        typedef boost::function<void(void*,Scene&,Scene&)>  func_scene;
+        typedef boost::function<void(void*,Scene&)>         func_scene;
 
         template<typename T> struct FunctorHolder {
             T functor;
@@ -26,31 +26,26 @@ namespace Engine {
             FunctorHolder(const T& _f) { functor = _f; }
             virtual ~FunctorHolder() = default;
         };
-        struct FunctorHolderUpdate final : public FunctorHolder<func_update>{
-            FunctorHolderUpdate(){} FunctorHolderUpdate(const func_update& _f) { FunctorHolder<func_update>::functor = _f; }
+        struct FunctorUpdate final : public FunctorHolder<func_update>{
+            FunctorUpdate(){} FunctorUpdate(const func_update& _f) { FunctorHolder<func_update>::functor = _f; }
         };
-        struct FunctorHolderEntity final : public FunctorHolder<func_entity> {
-            FunctorHolderEntity() {} FunctorHolderEntity(const func_entity& _f) { FunctorHolder<func_entity>::functor = _f; }
+        struct FunctorEntity final : public FunctorHolder<func_entity> {
+            FunctorEntity() {} FunctorEntity(const func_entity& _f) { FunctorHolder<func_entity>::functor = _f; }
         };
-        struct FunctorHolderComponent : public FunctorHolder<func_component> {
-            FunctorHolderComponent() {} FunctorHolderComponent(const func_component& _f) { FunctorHolder<func_component>::functor = _f; }
+        struct FunctorComponent : public FunctorHolder<func_component> {
+            FunctorComponent() {} FunctorComponent(const func_component& _f) { FunctorHolder<func_component>::functor = _f; }
         };
-        struct FunctorHolderScene final : public FunctorHolder<func_scene> {
-            FunctorHolderScene() {} FunctorHolderScene(const func_scene& _f) { FunctorHolder<func_scene>::functor = _f; }
+        struct FunctorScene final : public FunctorHolder<func_scene> {
+            FunctorScene() {} FunctorScene(const func_scene& _f) { FunctorHolder<func_scene>::functor = _f; }
         };
 
         struct ECSSystemCI {
-            FunctorHolderUpdate        updateFunction;
-            FunctorHolderComponent     onComponentAddedToEntityFunction;
-            FunctorHolderEntity        onEntityAddedToSceneFunction;
-            FunctorHolderScene         onSceneChangedFunction;
-
-            ECSSystemCI() {
-                updateFunction = FunctorHolderUpdate();
-                onComponentAddedToEntityFunction = FunctorHolderComponent();
-                onEntityAddedToSceneFunction = FunctorHolderEntity();
-                onSceneChangedFunction = FunctorHolderScene();
-            }
+            FunctorUpdate        updateFunction;
+            FunctorComponent     onComponentAddedToEntityFunction;
+            FunctorEntity        onEntityAddedToSceneFunction;
+            FunctorScene         onSceneEnteredFunction;
+            FunctorScene         onSceneLeftFunction;
+            ECSSystemCI() = default;
             virtual ~ECSSystemCI() = default;
             ECSSystemCI(const ECSSystemCI&) = delete;                      // non construction-copyable
             ECSSystemCI& operator=(const ECSSystemCI&) = delete;           // non copyable
@@ -58,26 +53,30 @@ namespace Engine {
             ECSSystemCI& operator=(ECSSystemCI&& other) noexcept = delete; // non moveable
 
             template<typename T> void setUpdateFunction(const T& functor) {
-                updateFunction = FunctorHolderUpdate(functor);
+                updateFunction = FunctorUpdate(functor);
             }
             template<typename T> void setOnComponentAddedToEntityFunction(const T& functor) {
-                onComponentAddedToEntityFunction = FunctorHolderComponent(functor);
+                onComponentAddedToEntityFunction = FunctorComponent(functor);
             }
-            template<typename T> void setOnEntityAddedToSceneFunctionFunction(const T& functor) {
-                onEntityAddedToSceneFunction = FunctorHolderEntity(functor);
+            template<typename T> void setOnEntityAddedToSceneFunction(const T& functor) {
+                onEntityAddedToSceneFunction = FunctorEntity(functor);
             }
-            template<typename T> void setOnSceneChangedFunctionFunction(const T& functor) {
-                onSceneChangedFunction = FunctorHolderScene(functor);
+            template<typename T> void setOnSceneEnteredFunction(const T& functor) {
+                onSceneEnteredFunction = FunctorScene(functor);
+            }
+            template<typename T> void setOnSceneLeftFunction(const T& functor) {
+                onSceneLeftFunction = FunctorScene(functor);
             }
         };
 
 
         template <typename TEntity> class ECSSystemBase<TEntity> {
             protected:
-                func_update         updateFunction;
-                func_component      onComponentAddedToEntityFunction;
-                func_entity         onEntityAddedToSceneFunction;
-                func_scene          onSceneChangedFunction;
+                func_update         _SUF;
+                func_component      _CAE;
+                func_entity         _EAS;
+                func_scene          _SEF;
+                func_scene          _SLF;
             public:
                 ECSSystemBase() = default;
                 virtual ~ECSSystemBase() = default;
@@ -89,20 +88,38 @@ namespace Engine {
                 virtual void update(const float& dt) {}
                 virtual void onComponentAddedToEntity(void*) {}
                 virtual void onEntityAddedToScene(Entity&) {}
-                virtual void onSceneChanged(Scene& _oldScene, Scene& _newScene) {}
+                virtual void onSceneLeft(Scene& _Scene) {}
+                virtual void onSceneEntered(Scene& _Scene) {}
         };
         template <typename TEntity, typename TComponent> class ECSSystem<TEntity, TComponent> final : public ECSSystemBase<TEntity> {
             using super     = ECSSystemBase<TEntity>;
             using CPoolType = ECSComponentPool<TEntity, TComponent>;
             private:
                 CPoolType& componentPool;
+
+                void _SUF(const FunctorUpdate& _functor) {
+                    super::_SUF = boost::bind(_functor.functor, (void*)&componentPool, _2);
+                }
+                void _CAE(const FunctorComponent& _functor) {
+                    super::_CAE = boost::bind(_functor.functor, _1);
+                }
+                void _EAS(const FunctorEntity& _functor) {
+                    super::_EAS = boost::bind(_functor.functor, (void*)&componentPool, _2);
+                }
+                void _SEF(const FunctorScene& _functor) {
+                    super::_SEF = boost::bind(_functor.functor, (void*)&componentPool, _2);
+                }
+                void _SLF(const FunctorScene& _functor) {
+                    super::_SLF = boost::bind(_functor.functor, (void*)&componentPool, _2);
+                }
             public:
                 ECSSystem() = delete;
                 ECSSystem(const ECSSystemCI& _systemCI, ECS<TEntity>& _ecs):componentPool(_ecs.template getPool<TComponent>()){
-                    setUpdateFunction(_systemCI.updateFunction);
-                    setOnComponentAddedToEntityFunction(_systemCI.onComponentAddedToEntityFunction);
-                    setOnEntityAddedToSceneFunctionFunction(_systemCI.onEntityAddedToSceneFunction);
-                    setOnSceneChangedFunctionFunction(_systemCI.onSceneChangedFunction);
+                    _SUF(_systemCI.updateFunction);
+                    _CAE(_systemCI.onComponentAddedToEntityFunction);
+                    _EAS(_systemCI.onEntityAddedToSceneFunction);
+                    _SEF(_systemCI.onSceneEnteredFunction);
+                    _SLF(_systemCI.onSceneLeftFunction);
                 }
                 ~ECSSystem() = default;
 
@@ -111,30 +128,21 @@ namespace Engine {
                 ECSSystem(ECSSystem&& other) noexcept = delete;            // non construction-moveable
                 ECSSystem& operator=(ECSSystem&& other) noexcept = delete; // non moveable
 
-                void setUpdateFunction(const FunctorHolderUpdate& _functor) {
-                    super::updateFunction = boost::bind(_functor.functor, (void*)&componentPool,_2);
-                }
-                void setOnComponentAddedToEntityFunction(const FunctorHolderComponent& _functor) {
-                    super::onComponentAddedToEntityFunction = boost::bind(_functor.functor,_1);
-                }
-                void setOnEntityAddedToSceneFunctionFunction(const FunctorHolderEntity& _functor) {
-                    super::onEntityAddedToSceneFunction = boost::bind(_functor.functor, (void*)&componentPool,_2);
-                }
-                void setOnSceneChangedFunctionFunction(const FunctorHolderScene& _functor) {
-                    super::onSceneChangedFunction = boost::bind(_functor.functor, (void*)&componentPool,_2,_3);
-                }
 
                 void update(const float& dt) { 
-                    super::updateFunction((void*)&componentPool,dt);
+                    super::_SUF((void*)&componentPool,dt);
                 }
                 void onComponentAddedToEntity(void* _component) {
-                    super::onComponentAddedToEntityFunction(_component);
+                    super::_CAE(_component);
                 }
                 void onEntityAddedToScene(Entity& _entity) { 
-                    super::onEntityAddedToSceneFunction((void*)&componentPool, _entity);
+                    super::_EAS((void*)&componentPool, _entity);
                 }
-                void onSceneChanged(Scene& _oldScene, Scene& _newScene) {
-                    super::onSceneChangedFunction((void*)&componentPool, _oldScene, _newScene);
+                void onSceneEntered(Scene& _Scene) {
+                    super::_SEF((void*)&componentPool, _Scene);
+                }
+                void onSceneLeft(Scene& _Scene) {
+                    super::_SLF((void*)&componentPool, _Scene);
                 }
         };
     };

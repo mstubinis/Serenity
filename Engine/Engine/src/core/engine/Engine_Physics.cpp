@@ -826,17 +826,17 @@ Collision::Collision(vector<Mesh*>& _meshes, float _mass){
     _init(_meshes, _mass);
     _baseInit(CollisionType::Compound, _mass);
 }
-Collision::Collision(OLD_ComponentModel* _modelComponent, float _mass){
+Collision::Collision(OLD_ComponentModel& _modelComponent, float _mass){
     vector<Mesh*> meshes;
-    for (uint i = 0; i < _modelComponent->getNumModels(); ++i) {
-        meshes.push_back(_modelComponent->getModel(i)->mesh());
+    for (uint i = 0; i < _modelComponent.getNumModels(); ++i) {
+        meshes.push_back(_modelComponent.getModel(i).mesh());
     }
     _init(meshes, _mass);
 }
 Collision::Collision(ComponentModel& _modelComponent, float _mass){
     vector<Mesh*> meshes;
     for (uint i = 0; i < _modelComponent.getNumModels(); ++i) {
-        meshes.push_back(_modelComponent.getModel(i)->mesh());
+        meshes.push_back(_modelComponent.getModel(i).mesh());
     }
     _init(meshes, _mass);
 }

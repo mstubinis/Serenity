@@ -209,7 +209,7 @@ void ComponentBody::setCollision(CollisionType::Type _type, float _mass) {
         if (_type == CollisionType::Compound) {
             physicsData.collision = new Collision(*modelComponent, _mass);
         }else{
-            physicsData.collision = new Collision(_type, modelComponent->getModel()->mesh(), _mass);
+            physicsData.collision = new Collision(_type, modelComponent->getModel().mesh(), _mass);
         }
     }else{
         physicsData.collision = new Collision(_type, nullptr, _mass);
@@ -594,20 +594,12 @@ void ComponentBody::setMass(float mass) {
 
 #pragma endregion
 
-
-
-
-
-
-
-
 #pragma region System
 
-
 struct ComponentBodyUpdateFunction final {
-    static void _defaultUpdate(vector<uint>& vec, vector<ComponentBody>& _components) {
-        for (uint j = 0; j < vec.size(); ++j) {
-            ComponentBody& b = _components[vec[j]];
+    static void _defaultUpdate(vector<uint>& _vec, vector<ComponentBody>& _components) {
+        for (uint j = 0; j < _vec.size(); ++j) {
+            ComponentBody& b = _components[_vec[j]];
             if (b._physics) {
                 auto& rigidBody = *b.data.p->rigidBody;
                 Engine::Math::recalculateForwardRightUp(rigidBody, b._forward, b._right, b._up);
@@ -620,9 +612,8 @@ struct ComponentBodyUpdateFunction final {
     void operator()(void* _componentPool, const float& dt) const {
         auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
         auto& components = pool.dense();
-
         auto split = epriv::threading::splitVectorIndices(components);
-        for (auto vec : split) {
+        for (auto& vec : split) {
             epriv::threading::addJobRef(_defaultUpdate, vec, components);
         }
         epriv::threading::waitForAll();
@@ -648,14 +639,19 @@ struct ComponentBodyEntityAddedToSceneFunction final {void operator()(void* _com
         }
     }
 }};
-struct ComponentBodySceneChangeFunction final {void operator()(void* _componentPool,Scene& _oldScene, Scene& _newScene) const {
+struct ComponentBodySceneEnteredFunction final {void operator()(void* _componentPool,Scene& _Scene) const {
+
+}};
+struct ComponentBodySceneLeftFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
+
 }};
     
 ComponentBodySystem::ComponentBodySystem() {
     setUpdateFunction(ComponentBodyUpdateFunction());
     setOnComponentAddedToEntityFunction(ComponentBodyComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunctionFunction(ComponentBodyEntityAddedToSceneFunction());
-    setOnSceneChangedFunctionFunction(ComponentBodySceneChangeFunction());
+    setOnEntityAddedToSceneFunction(ComponentBodyEntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(ComponentBodySceneEnteredFunction());
+    setOnSceneLeftFunction(ComponentBodySceneLeftFunction());
 }
 
 #pragma endregion

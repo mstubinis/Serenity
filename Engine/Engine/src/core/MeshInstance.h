@@ -27,7 +27,21 @@ class MeshInstance final: public BindableResource{
     friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
     friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
     private:
-        class impl; std::unique_ptr<impl> m_i;
+        std::vector<Engine::epriv::MeshInstanceAnimation*> m_AnimationQueue;
+        OLD_Entity* m_Entity;
+        ShaderP* m_ShaderProgram;
+        Mesh* m_Mesh;
+        Material* m_Material;
+        RenderStage::Stage m_Stage;
+        glm::vec3 m_Position, m_Scale, m_GodRaysColor;
+        glm::quat m_Orientation;
+        glm::mat4 m_Model;
+        glm::vec4 m_Color;
+        bool m_PassedRenderCheck, m_Visible;
+
+        void _init(Mesh* mesh, Material* mat, OLD_Entity& entity, ShaderP* program);
+        void _init(Mesh* mesh, Material* mat, Entity& entity, ShaderP* program);
+        void _updateModelMatrix();
     public:
         MeshInstance(OLD_Entity&, Mesh*,       Material*,  ShaderP* = 0);
         MeshInstance(OLD_Entity&, Handle mesh, Handle mat, ShaderP* = 0);
@@ -37,6 +51,12 @@ class MeshInstance final: public BindableResource{
         MeshInstance(Entity&, Handle mesh, Handle mat, ShaderP* = 0);
         MeshInstance(Entity&, Mesh*, Handle mat, ShaderP* = 0);
         MeshInstance(Entity&, Handle mesh, Material*, ShaderP* = 0);
+
+        MeshInstance(const MeshInstance& other) = default;
+        MeshInstance& operator=(const MeshInstance& other) = default;
+        MeshInstance(MeshInstance&& other) noexcept = default;
+        MeshInstance& operator=(MeshInstance&& other) noexcept = default;
+
         ~MeshInstance();
 
         ShaderP* shaderProgram();

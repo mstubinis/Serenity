@@ -2354,10 +2354,11 @@ void epriv::RenderPipeline::render() {
                 if (meshNode->instanceNodes.size() > 0) {
                     meshNode->mesh->bind();
                     for (auto instanceNode : meshNode->instanceNodes) {
-                        if (instanceNode->instance->passedRenderCheck()) {
-                            instanceNode->instance->bind();
+                        auto& meshInstance = *instanceNode->instance;
+                        if (meshInstance.passedRenderCheck()) {
+                            meshInstance.bind();
                             meshNode->mesh->render(false);
-                            instanceNode->instance->unbind();
+                            meshInstance.unbind();
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material

@@ -7,8 +7,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace Engine;
+using namespace Engine::epriv;
 using namespace std;
 
+#pragma region Component
 
 ComponentCamera::ComponentCamera(Entity& _e,float angle, float aspectRatio, float nearPlane, float farPlane) : ComponentBaseClass(_e) {
     _eye = glm::vec3(0.0f); _up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -71,3 +73,50 @@ void ComponentCamera::setAspect(float a) { _aspectRatio = a; /*epriv::ComponentC
 void ComponentCamera::setNear(float n) { _nearPlane = n; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
 void ComponentCamera::setFar(float f) { _farPlane = f; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
 
+#pragma endregion
+
+#pragma region System
+
+struct ComponentCameraUpdateFunction final {
+    static void _defaultUpdate(vector<uint>& _vec, vector<ComponentCamera>& _components,const float& dt) {
+        for (uint j = 0; j < _vec.size(); ++j) {
+            ComponentCamera& b = _components[_vec[j]];
+            b.update(dt);//custom camera user code
+            Math::extractViewFrustumPlanesHartmannGribbs(b._projectionMatrix * b._viewMatrix, b._planes);//update view frustrum 
+        }
+    }
+    void operator()(void* _componentPool, const float& dt) const {
+        auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)_componentPool;
+        auto& components = pool.dense();
+
+        auto split = epriv::threading::splitVectorIndices(components);
+        for (auto& vec : split) {
+            epriv::threading::addJobRef(_defaultUpdate, vec, components, dt);
+        }
+        epriv::threading::waitForAll();
+    }
+};
+struct ComponentCameraComponentAddedToEntityFunction final {void operator()(void* _component) const {
+
+}};
+struct ComponentCameraEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity) const {
+    //auto& scene = _entity.scene();
+    //auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)_componentPool;
+    //auto& component = pool.component(_entity);
+}};
+struct ComponentCameraSceneEnteredFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
+
+}};
+struct ComponentCameraSceneLeftFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
+
+}};
+
+ComponentCameraSystem::ComponentCameraSystem() {
+    setUpdateFunction(ComponentCameraUpdateFunction());
+    setOnComponentAddedToEntityFunction(ComponentCameraComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(ComponentCameraEntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(ComponentCameraSceneEnteredFunction());
+    setOnSceneLeftFunction(ComponentCameraSceneLeftFunction());
+}
+
+#pragma endregion
