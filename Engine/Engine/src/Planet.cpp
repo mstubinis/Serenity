@@ -1,7 +1,5 @@
 ﻿#include "Planet.h"
 #include "core/engine/Engine.h"
-//#include "core/engine/Engine_Resources.h"
-//#include "core/engine/Engine_Renderer.h"
 #include "core/engine/Engine_GLStateMachine.h"
 #include "core/engine/Engine_Math.h"
 #include "core/Light.h"

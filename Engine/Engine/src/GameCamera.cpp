@@ -11,7 +11,6 @@
 using namespace Engine;
 using namespace std;
 
-
 GameCameraComponent::GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane):OLD_ComponentCamera(angle,aspectRatio,nearPlane,farPlane){
     m_State = CAMERA_STATE_FREEFORM;
     m_Target = nullptr;

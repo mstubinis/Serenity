@@ -18,6 +18,7 @@
 using namespace Engine;
 using namespace std;
 
+
 CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, Scene* scene){
     scene->OLD_addEntity(*this);
     OLD_ComponentModel* model = new OLD_ComponentModel(Mesh::Plane, ResourceManifest::CapsuleD,this);  addComponent(model);

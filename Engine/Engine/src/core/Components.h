@@ -287,11 +287,11 @@ class OLD_ComponentBody: public OLD_ComponentBaseClass{
     private:
         struct PhysicsData{
             Collision* collision;
-            btRigidBody rigidBody;
+            btRigidBody* rigidBody;
             btDefaultMotionState motionState;
             float mass;
-            PhysicsData():rigidBody(0,0,0){
-                collision = 0; mass = 0;
+            PhysicsData():rigidBody(0){
+                rigidBody = 0; collision = 0; mass = 0;
             }
         };
         struct NormalData{

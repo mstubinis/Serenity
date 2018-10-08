@@ -78,10 +78,10 @@ namespace Engine{
         void setGravity(glm::vec3&);
         void pause(bool=true);
         void unpause();
-        void addRigidBody(btRigidBody&, short group, short mask);
-        void addRigidBody(btRigidBody&);
-        void removeRigidBody(btRigidBody&);
-        void updateRigidBody(btRigidBody&);
+        void addRigidBody(btRigidBody*, short group, short mask);
+        void addRigidBody(btRigidBody*);
+        void removeRigidBody(btRigidBody*);
+        void updateRigidBody(btRigidBody*);
     };
 };
 #endif

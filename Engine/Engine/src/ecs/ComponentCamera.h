@@ -9,7 +9,6 @@
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
-
 class Camera;
 class ComponentModel;
 class ComponentCamera : public ComponentBaseClass {

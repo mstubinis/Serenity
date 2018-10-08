@@ -208,6 +208,7 @@
       <AdditionalOptions>/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>%(AdditionalDependencies);assimp-d.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;Bullet2FileLoader_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib\assimp;C:\boost\stage\lib;$(SolutionDir)dependencies\lib\SFML;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)data\" mkdir "$(TargetDir)data\"

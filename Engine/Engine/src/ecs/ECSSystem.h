@@ -24,11 +24,13 @@ namespace Engine {
             func_update functor;
             FunctorHolderUpdate() { updateEmpty f; functor = f; }
             FunctorHolderUpdate(const func_update& _functor) :functor(_functor) {}
+            ~FunctorHolderUpdate() = default;
         };
         struct FunctorHolderOther final {
             func_other functor;
             FunctorHolderOther() { otherEmpty f; functor = f; }
             FunctorHolderOther(const func_other& _functor):functor(_functor){}
+            ~FunctorHolderOther() = default;
         };
 
         struct ECSSystemCI {
@@ -43,7 +45,7 @@ namespace Engine {
                 onEntityAddedToSceneFunction = FunctorHolderOther();
                 onSceneChangedFunction = FunctorHolderOther();
             }
-            ~ECSSystemCI() = default;
+            virtual ~ECSSystemCI() = default;
             ECSSystemCI(const ECSSystemCI&) = delete;                      // non construction-copyable
             ECSSystemCI& operator=(const ECSSystemCI&) = delete;           // non copyable
             ECSSystemCI(ECSSystemCI&& other) noexcept = delete;            // non construction-moveable

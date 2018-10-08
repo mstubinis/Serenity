@@ -3,8 +3,6 @@
 #include "core/Mesh.h"
 #include "core/Skybox.h"
 #include "core/engine/Engine_Window.h"
-//#include "core/engine/Engine_Resources.h"
-//#include "core/engine/Engine_Renderer.h"
 #include "core/engine/Engine_Math.h"
 #include "core/ShaderProgram.h"
 #include "core/engine/FramebufferObject.h"

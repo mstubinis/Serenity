@@ -6,17 +6,16 @@
 #include <time.h>
 #include <memory>
 
+using namespace Engine;
+
 #ifdef _WIN32
     #include <windows.h>
     #include <windowsx.h>
 #endif
-
 #ifdef _DEBUG
-    #include <vld.h> //TODO: remove this header eventually, it's only used to track memory leaks in debug mode
+    #include <vld.h> //memory leak printing
 #endif
 
-
-using namespace Engine;
 
 epriv::Core* epriv::Core::m_Engine = nullptr;
 

@@ -46,8 +46,8 @@ class Scene::impl final {
             e->addComponent<ComponentBody>();
             auto* e1 = m_ECS.createEntity(super);
             e1->addComponent<ComponentBody>();
-            auto* e2 = m_ECS.createEntity(super);
-            e2->addComponent<ComponentBody>();
+            //auto* e2 = m_ECS.createEntity(super);
+            //e2->addComponent<ComponentBody>();
         }
         void _destruct() {
             SAFE_DELETE(m_Skybox);

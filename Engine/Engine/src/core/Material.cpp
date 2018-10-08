@@ -2,13 +2,10 @@
 #include "core/engine/Engine.h"
 #include "core/Mesh.h"
 #include "core/Texture.h"
-//#include "core/engine/Engine_Resources.h"
-//#include "core/engine/Engine_Renderer.h"
 #include "core/engine/Engine_Math.h"
 #include "core/ShaderProgram.h"
 #include "core/Scene.h"
 #include "core/Skybox.h"
-//#include "core/Components.h"
 
 #include <algorithm>
 #include <iostream>

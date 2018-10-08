@@ -20,18 +20,30 @@ class ComponentBody : public ComponentBaseClass {
     friend class ::ComponentModel;
     private:
         struct PhysicsData {
-            Collision collision;
-            btRigidBody rigidBody;
+            Collision* collision;
+            btRigidBody* rigidBody;
             btDefaultMotionState motionState;
             float mass;
-            PhysicsData():rigidBody(0,0,0), mass(0){}
+            void _copy(const PhysicsData& other);
+            PhysicsData();
+            PhysicsData(const PhysicsData& other);
+            PhysicsData& operator=(const PhysicsData& other);
+            PhysicsData& operator=(PhysicsData&& other) noexcept = default;
+            PhysicsData(PhysicsData&& other) noexcept = default;
+            ~PhysicsData();         
         };
         struct NormalData {
             glm::vec3 scale;
             glm::vec3 position;
             glm::quat rotation;
             glm::mat4 modelMatrix;
-            NormalData() = default;
+            void _copy(const NormalData& other);
+            NormalData();
+            NormalData(const NormalData& other);
+            NormalData& operator=(const NormalData& other);
+            NormalData& operator=(NormalData&& other) noexcept = default;
+            NormalData(NormalData&& other) noexcept = default;
+            ~NormalData();
         };
         union {
             NormalData* n;
@@ -39,15 +51,18 @@ class ComponentBody : public ComponentBaseClass {
         } data;
         bool _physics;
         glm::vec3 _forward, _right, _up;
+
+        void _copy(const ComponentBody& other);
+        void _move(ComponentBody&& other);
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentBody(Entity&);
         ComponentBody(Entity&, CollisionType::Type);
 
-        ComponentBody& operator=(const ComponentBody& other) noexcept = default;
-        ComponentBody(const ComponentBody& other) noexcept = default;
-        ComponentBody(ComponentBody&& other) noexcept = default;
-        ComponentBody& operator=(ComponentBody&& other) noexcept = default;
+        ComponentBody& operator=(const ComponentBody& other);
+        ComponentBody(const ComponentBody& other);
+        ComponentBody(ComponentBody&& other) noexcept;
+        ComponentBody& operator=(ComponentBody&& other) noexcept;
 
         ~ComponentBody();
 

@@ -1,7 +1,5 @@
 #include "core/Font.h"
 #include "core/engine/Engine.h"
-//#include "Engine_Resources.h"
-//#include "Engine_Renderer.h"
 #include "core/Texture.h"
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>

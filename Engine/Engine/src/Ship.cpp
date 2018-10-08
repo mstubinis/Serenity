@@ -1,8 +1,6 @@
 #include "Ship.h"
 #include "core/engine/Engine.h"
-//#include "core/engine/Engine_Resources.h"
 #include "core/Light.h"
-//#include "core/engine/Engine_Events.h"
 #include "GameCamera.h"
 #include "SolarSystem.h"
 #include "ResourceManifest.h"
@@ -211,10 +209,10 @@ void ShipSystemSensors::update(const float& dt){
 
 Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,Scene* scene){
     scene->OLD_addEntity(*this);
-    OLD_ComponentBody* rigidBodyComponent = new OLD_ComponentBody(_type);
-	addComponent(rigidBodyComponent);
     OLD_ComponentModel* modelComponent = new OLD_ComponentModel(mesh, mat, this);
     addComponent(modelComponent);
+    OLD_ComponentBody* rigidBodyComponent = new OLD_ComponentBody(_type);
+	addComponent(rigidBodyComponent);
 
     glm::vec3 boundingBox = modelComponent->boundingBox();
     float volume = boundingBox.x * boundingBox.y * boundingBox.z;
