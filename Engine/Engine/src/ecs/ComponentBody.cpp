@@ -605,20 +605,15 @@ void ComponentBody::setMass(float mass) {
 
 
 struct ComponentBodyUpdateFunction final {
-    static void _defaultUpdate(vector<uint>& vec, ECSComponentPool<Entity, ComponentBody>& _componentPool) {
+    static void _defaultUpdate(vector<uint>& vec, vector<ComponentBody>& _components) {
         for (uint j = 0; j < vec.size(); ++j) {
-            auto& components = _componentPool.dense();
-            ComponentBody& b = components[vec[j]];
+            ComponentBody& b = _components[vec[j]];
             if (b._physics) {
                 auto& rigidBody = *b.data.p->rigidBody;
                 Engine::Math::recalculateForwardRightUp(rigidBody, b._forward, b._right, b._up);
             }else{
-                auto& normalData = *b.data.n;
-                normalData.modelMatrix = 
-                    glm::translate(normalData.position) * 
-                    glm::mat4_cast(normalData.rotation) * 
-                    glm::scale(normalData.scale) * 
-                    normalData.modelMatrix;
+                auto& n = *b.data.n;
+                n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
             }
         }
     }
@@ -626,12 +621,11 @@ struct ComponentBodyUpdateFunction final {
         auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
         auto& components = pool.dense();
 
-        //TODO: fix this
-        //auto split = epriv::threading::splitVectorIndices(components);
-        //for (auto vec : split) {
-        //    epriv::threading::addJob(_defaultUpdate, vec, pool);
-        //}
-        //epriv::threading::waitForAll();
+        auto split = epriv::threading::splitVectorIndices(components);
+        for (auto vec : split) {
+            epriv::threading::addJobRef(_defaultUpdate, vec, components);
+        }
+        epriv::threading::waitForAll();
     }
 };
 struct ComponentBodyComponentAddedToEntityFunction final {void operator()(void* _component) const {
