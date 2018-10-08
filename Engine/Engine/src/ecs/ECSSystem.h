@@ -45,6 +45,7 @@ namespace Engine {
             FunctorEntity        onEntityAddedToSceneFunction;
             FunctorScene         onSceneEnteredFunction;
             FunctorScene         onSceneLeftFunction;
+
             ECSSystemCI() = default;
             virtual ~ECSSystemCI() = default;
             ECSSystemCI(const ECSSystemCI&) = delete;                      // non construction-copyable
@@ -78,12 +79,8 @@ namespace Engine {
                 func_scene          _SEF;
                 func_scene          _SLF;
             public:
-                ECSSystemBase() = default;
-                virtual ~ECSSystemBase() = default;
-                ECSSystemBase(const ECSSystemBase&) = delete;                      // non construction-copyable
-                ECSSystemBase& operator=(const ECSSystemBase&) = delete;           // non copyable
-                ECSSystemBase(ECSSystemBase&& other) noexcept = delete;            // non construction-moveable
-                ECSSystemBase& operator=(ECSSystemBase&& other) noexcept = delete; // non moveable
+                ECSSystemBase() {}
+                virtual ~ECSSystemBase() {}
 
                 virtual void update(const float& dt) {}
                 virtual void onComponentAddedToEntity(void*) {}
@@ -123,11 +120,10 @@ namespace Engine {
                 }
                 ~ECSSystem() = default;
 
-                ECSSystem(const ECSSystem&) = delete;                      // non construction-copyable
-                ECSSystem& operator=(const ECSSystem&) = delete;           // non copyable
-                ECSSystem(ECSSystem&& other) noexcept = delete;            // non construction-moveable
-                ECSSystem& operator=(ECSSystem&& other) noexcept = delete; // non moveable
-
+                ECSSystem(const ECSSystem&) = delete;                       // non construction-copyable
+                ECSSystem& operator=(const ECSSystem&) = delete;            // non copyable
+                ECSSystem(ECSSystem&& other) noexcept = delete;             // non construction-moveable
+                ECSSystem& operator=(ECSSystem&& other) noexcept = delete;  // non moveable
 
                 void update(const float& dt) { 
                     super::_SUF((void*)&componentPool,dt);

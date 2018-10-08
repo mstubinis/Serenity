@@ -171,7 +171,7 @@ struct ComponentModelComponentAddedToEntityFunction final {void operator()(void*
 struct ComponentModelEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity) const {
     auto& scene = _entity.scene();
     auto& pool = *(ECSComponentPool<Entity, ComponentModel>*)_componentPool;
-    auto& component = pool.component(_entity);
+    auto& component = *pool.getComponent(_entity);
     for (auto& _meshInstance : component.models) {
         InternalScenePublicInterface::AddMeshInstanceToPipeline(scene, _meshInstance, _meshInstance.stage());
     }

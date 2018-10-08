@@ -629,7 +629,7 @@ struct ComponentBodyComponentAddedToEntityFunction final {void operator()(void* 
 struct ComponentBodyEntityAddedToSceneFunction final {void operator()(void* _componentPool,Entity& _entity) const {
     auto& scene = _entity.scene();
     auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
-    auto& component = pool.component(_entity);
+    auto& component = *pool.getComponent(_entity);
     if (component._physics) {
         auto& rigidBody = *component.data.p->rigidBody;
         if (&scene == Resources::getCurrentScene()) {

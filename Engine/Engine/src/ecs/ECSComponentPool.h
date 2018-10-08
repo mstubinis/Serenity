@@ -12,7 +12,6 @@ namespace Engine {
         template <typename TEntity> class ECSComponentPool<TEntity>{
             protected:
                 uint                              _amount;   //number of components created
-              //std::vector<TEntity>              _sparse; //maps entity ID to component Index in dense
                 std::vector<uint>                 _sparse; //maps entity ID to component Index in dense
             public:
                 std::vector<uint>& sparse() { return _sparse; }
@@ -23,16 +22,18 @@ namespace Engine {
         template <typename TEntity,typename TComponent> class ECSComponentPool<TEntity,TComponent> : public ECSComponentPool<TEntity>{
             using super = ECSComponentPool<TEntity>;
             private:
-                std::vector<TComponent>           _dense;  //actual component pool
+                std::vector<TComponent>                      _dense;  //actual component pool
             public:
                 std::vector<TComponent>& dense() { return _dense; }
-                TComponent& component(uint _EntityID) { return _dense[super::_sparse[_EntityID - 1]]; }
-                TComponent& component(TEntity& _Entity) { return component(_Entity.ID); }
 
                 ECSComponentPool() = default;
                 ECSComponentPool(const ECSComponentPool& other) = default;
                 ECSComponentPool& operator=(const ECSComponentPool& other) = default;
-                ~ECSComponentPool() { }
+                ECSComponentPool(ECSComponentPool&& other) noexcept = default;
+                ECSComponentPool& operator=(ECSComponentPool&& other) noexcept = default;
+
+                ~ECSComponentPool() = default;
+
                 template<typename... ARGS> TComponent* addComponent(const TEntity& _entity, ARGS&&... _args) {
                     uint sparseID = _entity.ID - 1;
                     if (sparseID >= super::_sparse.size())

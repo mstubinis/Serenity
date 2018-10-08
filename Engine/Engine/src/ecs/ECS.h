@@ -14,7 +14,6 @@ namespace Engine {
             private:
                 ECSEntityPool<TEntity>                                    entityPool;
                 std::vector<std::unique_ptr<ECSComponentPool<TEntity>>>   componentPools;
-              //std::vector< std::unique_ptr<ECSSystemBase<TEntity>>>     systems;
                 std::vector<ECSSystemBase<TEntity>*>                      systems;
 
                 //builds a component pool and system for the component type if it is not built already.
@@ -33,7 +32,6 @@ namespace Engine {
                     }
                     if (!systems[type_slot]) {
                         ECSSystemCI _ci;
-                        //systems[type_slot] = std::make_unique<CSystemType>(_ci, *this);
                         systems[type_slot] = new CSystemType(_ci,*this);
                     }
                 }
@@ -48,8 +46,9 @@ namespace Engine {
                 ECS& operator=(ECS&& other) noexcept = delete; // non moveable
 
                 void update(const float& dt) {
-                    for (auto system : systems) {
-                        system->update(dt);
+                    for (uint i = 0; i < systems.size(); ++i) {
+                        auto& system = *systems[i];
+                        system.update(dt);
                     }
                 }
 
@@ -73,9 +72,7 @@ namespace Engine {
                     }
                     if (systems[type_slot]) {
                         SAFE_DELETE(systems[type_slot]);
-                        //systems[type_slot].reset();
                     }
-                    //systems[type_slot] = std::make_unique<CSystemType>(_systemCI, *this);
                     systems[type_slot] = new CSystemType(_systemCI,*this);
                 }
 

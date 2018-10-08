@@ -102,7 +102,7 @@ struct ComponentCameraComponentAddedToEntityFunction final {void operator()(void
 struct ComponentCameraEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity) const {
     //auto& scene = _entity.scene();
     //auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)_componentPool;
-    //auto& component = pool.component(_entity);
+    //auto& component = *pool.getComponent(_entity);
 }};
 struct ComponentCameraSceneEnteredFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
 
