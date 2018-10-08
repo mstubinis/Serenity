@@ -1,6 +1,7 @@
 #include "ecs/ComponentBody.h"
 #include "ecs/ComponentModel.h"
 #include "core/engine/Engine_Math.h"
+#include "core/engine/Engine_ThreadManager.h"
 #include "core/MeshInstance.h"
 #include "core/Mesh.h"
 
@@ -19,8 +20,8 @@ using namespace std;
 
 ComponentBody::PhysicsData::PhysicsData(){ 
     mass = 0;
-    rigidBody = 0;
-    collision = 0; 
+    rigidBody = nullptr;
+    collision = nullptr;
 }
 void ComponentBody::PhysicsData::_copy(const ComponentBody::PhysicsData& other) {
     mass = other.mass;
@@ -36,11 +37,11 @@ void ComponentBody::PhysicsData::_copy(const ComponentBody::PhysicsData& other) 
     rigidBody = copyBody;
 }
 ComponentBody::PhysicsData::PhysicsData(const ComponentBody::PhysicsData& other) : rigidBody(other.rigidBody) {
-    std::cout << "physics data copy constructor" << std::endl;
+    rigidBody = nullptr;
+    collision = nullptr;
     _copy(other);
 }
 ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(const ComponentBody::PhysicsData& other) {
-    std::cout << "physics data copy assignment operator" << std::endl;
     if (&other == this)
         return *this;
     _copy(other);
@@ -68,11 +69,9 @@ void ComponentBody::NormalData::_copy(const ComponentBody::NormalData& other) {
     modelMatrix = other.modelMatrix;
 }
 ComponentBody::NormalData::NormalData(const ComponentBody::NormalData& other) {
-    std::cout << "normal data copy constructor" << std::endl;
     _copy(other);
 }
 ComponentBody::NormalData& ComponentBody::NormalData::operator=(const ComponentBody::NormalData& other) {
-    std::cout << "normal data copy assignment operator" << std::endl;
     if (&other == this)
         return *this;
     _copy(other);
@@ -87,6 +86,8 @@ ComponentBody::NormalData::~NormalData() {
 #pragma region Component
 
 ComponentBody::ComponentBody(Entity& _e) : ComponentBaseClass(_e) {
+    data.n = nullptr;
+    data.p = nullptr;
     data.n = new NormalData();
     _physics = false;
     auto& normalData = *data.n;
@@ -97,6 +98,8 @@ ComponentBody::ComponentBody(Entity& _e) : ComponentBaseClass(_e) {
     Math::recalculateForwardRightUp(normalData.rotation, _forward, _right, _up);
 }
 ComponentBody::ComponentBody(Entity& _e,CollisionType::Type _collisionType) : ComponentBaseClass(_e) {
+    data.n = nullptr;
+    data.p = nullptr;
     data.p = new PhysicsData();
     _physics = true;
     auto& physicsData = *data.p;
@@ -163,16 +166,20 @@ ComponentBody::~ComponentBody() {
         SAFE_DELETE(data.n);
     }
 }
+ComponentBody::ComponentBody(const ComponentBody& other) {
+    data.n = nullptr;
+    data.p = nullptr;
+    _copy(other);
+}
 ComponentBody& ComponentBody::operator=(const ComponentBody& other) {
     if (&other == this)
         return *this;
     _copy(other);
     return *this;
 }
-ComponentBody::ComponentBody(const ComponentBody& other) {
-    _copy(other);
-}
 ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
+    data.n = nullptr;
+    data.p = nullptr;
     _move(std::move(other));
 }
 ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
@@ -597,32 +604,64 @@ void ComponentBody::setMass(float mass) {
 #pragma region System
 
 
-struct ComponentBodyUpdateFunction final {void operator()(void* componentPool, const float& dt) const {
-    auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)componentPool;
-    auto& components = pool.dense;
+struct ComponentBodyUpdateFunction final {
+    static void _defaultUpdate(vector<uint>& vec, ECSComponentPool<Entity, ComponentBody>& _componentPool) {
+        for (uint j = 0; j < vec.size(); ++j) {
+            auto& components = _componentPool.dense();
+            ComponentBody& b = components[vec[j]];
+            if (b._physics) {
+                auto& rigidBody = *b.data.p->rigidBody;
+                Engine::Math::recalculateForwardRightUp(rigidBody, b._forward, b._right, b._up);
+            }else{
+                auto& normalData = *b.data.n;
+                normalData.modelMatrix = 
+                    glm::translate(normalData.position) * 
+                    glm::mat4_cast(normalData.rotation) * 
+                    glm::scale(normalData.scale) * 
+                    normalData.modelMatrix;
+            }
+        }
+    }
+    void operator()(void* _componentPool, const float& dt) const {
+        auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
+        auto& components = pool.dense();
 
+        //TODO: fix this
+        //auto split = epriv::threading::splitVectorIndices(components);
+        //for (auto vec : split) {
+        //    epriv::threading::addJob(_defaultUpdate, vec, pool);
+        //}
+        //epriv::threading::waitForAll();
+    }
+};
+struct ComponentBodyComponentAddedToEntityFunction final {void operator()(void* _component) const {
+    ComponentBody& component = *(ComponentBody*)_component;
+    if (component._physics) {
+        auto* _collision = component.data.p->collision;
+        component.setCollision((CollisionType::Type)_collision->getType(), component.data.p->mass);
+    }
 }};
-struct ComponentBodyComponentAddedToSceneFunction final {void operator()(void* componentPool) const {
+struct ComponentBodyEntityAddedToSceneFunction final {void operator()(void* _componentPool,Entity& _entity) const {
+    auto& scene = _entity.scene();
+    auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
+    auto& component = pool.component(_entity);
+    if (component._physics) {
+        auto& rigidBody = *component.data.p->rigidBody;
+        if (&scene == Resources::getCurrentScene()) {
+            Physics::addRigidBody(&rigidBody);
+        }else{
+            Physics::removeRigidBody(&rigidBody);
+        }
+    }
 }};
-struct ComponentBodyEntityAddedToSceneFunction final {void operator()(void* componentPool) const {
-}};
-struct ComponentBodySceneChangeFunction final {void operator()(void* componentPool) const {
+struct ComponentBodySceneChangeFunction final {void operator()(void* _componentPool,Scene& _oldScene, Scene& _newScene) const {
 }};
     
-
 ComponentBodySystem::ComponentBodySystem() {
-    ComponentBodyUpdateFunction _update;
-    setUpdateFunction(_update);
-    ComponentBodyComponentAddedToSceneFunction _cats;
-    setOnComponentAddedToEntityFunction(_cats);
-    ComponentBodyEntityAddedToSceneFunction _eats;
-    setOnEntityAddedToSceneFunctionFunction(_eats);
-    ComponentBodySceneChangeFunction _sc;
-    setOnSceneChangedFunctionFunction(_sc);
+    setUpdateFunction(ComponentBodyUpdateFunction());
+    setOnComponentAddedToEntityFunction(ComponentBodyComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunctionFunction(ComponentBodyEntityAddedToSceneFunction());
+    setOnSceneChangedFunctionFunction(ComponentBodySceneChangeFunction());
 }
-ComponentBodySystem::~ComponentBodySystem() {
-
-}
-
 
 #pragma endregion

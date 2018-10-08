@@ -17,11 +17,14 @@ Entity::Entity(uint _id, Scene& _scene) :ID(_id), sceneID(_scene.id()) {
 Entity::~Entity() { 
     ID = 0; sceneID = 0; 
 }
-inline uint Entity::arrayIndex() const { 
-    return ID - 1; 
-}
+//inline uint Entity::arrayIndex() const { 
+//    return ID - 1; 
+//}
 inline Entity::operator uint() const { 
     return sceneID << 24 | ID; 
+}
+Scene& Entity::scene() {
+    return epriv::Core::m_Engine->m_ResourceManager._getSceneByID(sceneID);
 }
 bool Entity::null() { 
     if (ID == 0) return true; 
@@ -36,7 +39,3 @@ void Entity::move(Scene& _scene) {
     sceneID = _scene.id();
 }
 
-
-Scene& Entity::scene() { 
-    return epriv::Core::m_Engine->m_ResourceManager._getSceneByID(sceneID); 
-}

@@ -26,7 +26,7 @@ struct Entity{
     ~Entity();
 
     Scene& scene();
-    inline uint arrayIndex() const;
+    //inline uint arrayIndex() const;
     inline operator uint() const;
     bool null();
 	template<typename TComponent, typename... ARGS> TComponent* addComponent(ARGS&&... _args){

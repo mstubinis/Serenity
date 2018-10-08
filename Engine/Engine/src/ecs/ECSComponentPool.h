@@ -11,53 +11,59 @@ namespace Engine {
         template <typename...>      class ECSComponentPool;
         template <typename TEntity> class ECSComponentPool<TEntity>{
             protected:
-                uint                              amount;   //number of components created
-              //std::vector<TEntity>              sparse; //maps entity ID to component Index in dense
-                std::vector<uint>                 sparse; //maps entity ID to component Index in dense
+                uint                              _amount;   //number of components created
+              //std::vector<TEntity>              _sparse; //maps entity ID to component Index in dense
+                std::vector<uint>                 _sparse; //maps entity ID to component Index in dense
             public:
-                ECSComponentPool() : amount(0) {}
-                virtual ~ECSComponentPool() { amount = 0; if (sparse.size() > 0) sparse.clear(); }
+                std::vector<uint>& sparse() { return _sparse; }
+
+                ECSComponentPool() { _amount = 0; }
+                virtual ~ECSComponentPool() { _amount = 0; _sparse.clear(); }
         };
         template <typename TEntity,typename TComponent> class ECSComponentPool<TEntity,TComponent> : public ECSComponentPool<TEntity>{
             using super = ECSComponentPool<TEntity>;
+            private:
+                std::vector<TComponent>           _dense;  //actual component pool
             public:
-                std::vector<TComponent>           dense;  //actual component pool
+                std::vector<TComponent>& dense() { return _dense; }
+                TComponent& component(uint _EntityID) { return _dense[super::_sparse[_EntityID - 1]]; }
+                TComponent& component(TEntity& _Entity) { return component(_Entity.ID); }
 
                 ECSComponentPool() = default;
                 ECSComponentPool(const ECSComponentPool& other) = default;
                 ECSComponentPool& operator=(const ECSComponentPool& other) = default;
-                ~ECSComponentPool() {  }
+                ~ECSComponentPool() { }
                 template<typename... ARGS> TComponent* addComponent(const TEntity& _entity, ARGS&&... _args) {
                     uint sparseID = _entity.ID - 1;
-                    if (sparseID >= super::sparse.size())
-                        super::sparse.resize(sparseID + 1,0);
-                    if (super::sparse[sparseID] != 0)
+                    if (sparseID >= super::_sparse.size())
+                        super::_sparse.resize(sparseID + 1,0);
+                    if (super::_sparse[sparseID] != 0)
                         return nullptr;
-                    dense.emplace_back(const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
-                    ++super::amount;
-                    super::sparse[sparseID] = super::amount;
-                    return &dense[super::amount - 1];
+                    _dense.emplace_back(const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
+                    ++super::_amount;
+                    super::_sparse[sparseID] = super::_amount;
+                    return &_dense[super::_amount - 1];
                 }
                 bool removeComponent(const TEntity& _entity) {
                     uint sparseID = _entity.ID - 1;
-                    if (super::sparse[sparseID] == 0)
+                    if (super::_sparse[sparseID] == 0)
                         return false;
-                    uint removedCID = super::sparse[sparseID];
-                    if (dense.size() > 1){
-                        std::swap(dense[removedCID], dense[super::amount]);
-                        super::sparse[super::amount] = removedCID;
+                    uint removedCID = super::_sparse[sparseID];
+                    if (_dense.size() > 1){
+                        std::swap(_dense[removedCID], _dense[super::_amount]);
+                        super::_sparse[super::_amount] = removedCID;
                     }
-                    --super::amount;
-                    dense.pop_back();
+                    --super::_amount;
+                    _dense.pop_back();
                     return true;
                 }
                 TComponent* getComponent(const TEntity& _entity) {
                     uint sparseID = _entity.ID - 1;
-                    if (super::sparse.size() == 0)
+                    if (super::_sparse.size() == 0)
                         return nullptr;
-                    if (super::sparse[sparseID] == 0)
+                    if (super::_sparse[sparseID] == 0)
                         return nullptr;
-                    return &(dense[super::sparse[sparseID]]);
+                    return &(_dense[super::_sparse[sparseID]]);
                 }
         };
     };

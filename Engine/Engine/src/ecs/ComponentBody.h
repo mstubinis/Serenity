@@ -16,8 +16,18 @@
 
 class Collision;
 class ComponentModel;
+
+struct ComponentBodyUpdateFunction;
+struct ComponentBodyEntityAddedToSceneFunction;
+struct ComponentBodyComponentAddedToEntityFunction;
+struct ComponentBodySceneChangeFunction;
+
 class ComponentBody : public ComponentBaseClass {
-    friend class ::ComponentModel;
+    friend struct ::ComponentBodyUpdateFunction;
+    friend struct ::ComponentBodyComponentAddedToEntityFunction;
+    friend struct ::ComponentBodyEntityAddedToSceneFunction;
+    friend struct ::ComponentBodySceneChangeFunction;
+    friend class  ::ComponentModel;
     private:
         struct PhysicsData {
             Collision* collision;
@@ -110,7 +120,7 @@ class ComponentBody : public ComponentBaseClass {
 class ComponentBodySystem : public Engine::epriv::ECSSystemCI {
     public:
         ComponentBodySystem();
-        ~ComponentBodySystem();
+        ~ComponentBodySystem() = default;
 };
 
 #endif
