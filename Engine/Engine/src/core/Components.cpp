@@ -36,14 +36,14 @@ class epriv::OLD_ComponentInternalFunctionality final{
         static float CalculateRadius(OLD_ComponentModel& super) {
             float maxLength = 0;
             glm::vec3 boundingBox = glm::vec3(0.0f);
-            for (auto& meshInstance : super.models) {
-                auto& pair = meshInstance;
+            for (uint i = 0; i < super.models.size(); ++i) {
+                auto& pair = *super.models[i];
                 glm::mat4& m = pair.model();
                 glm::vec3 localPosition = glm::vec3(m[3][0], m[3][1], m[3][2]);
                 float length = glm::length(localPosition) + pair.mesh()->getRadius() * Engine::Math::Max(pair.getScale());
                 glm::vec3 box = localPosition + pair.mesh()->getRadiusBox() * Engine::Math::Max(pair.getScale());
-                if (length > maxLength) { 
-                    maxLength = length; 
+                if (length > maxLength) {
+                    maxLength = length;
                 }
                 if (box.x > boundingBox.x || box.y > boundingBox.y || box.z > boundingBox.z) {
                     boundingBox = box;
@@ -281,9 +281,10 @@ class epriv::OLD_ComponentModelSystem::impl final {
     public:
         static void _calculateRenderCheck(OLD_ComponentModel& m, Camera& _camera) {
             auto& body = *(m.owner()->getComponent<OLD_ComponentBody>());
-            for (auto& meshInstance : m.models) {
+            for (uint i = 0; i < m.models.size(); ++i) {
+                auto& meshInstance = *m.models[i];
                 auto pos = body.position() + meshInstance.position();
-                                                                   //per mesh instance radius instead?
+                //per mesh instance radius instead?
                 uint sphereTest = _camera.sphereIntersectTest(pos, m._radius);                //per mesh instance radius instead?
                 if (!meshInstance.visible() || sphereTest == 0 || _camera.getDistance(pos) > m._radius * 1100.0f) {
                     meshInstance.setPassedRenderCheck(false);
@@ -296,7 +297,7 @@ class epriv::OLD_ComponentModelSystem::impl final {
             for (uint j = 0; j < vec.size(); ++j) {
                 auto& model = *(OLD_ComponentModel*)vec[j];
                 for (uint i = 0; i < model.models.size(); ++i) {
-                    auto& pair = model.models[i];
+                    auto& pair = *model.models[i];
                     if (pair.mesh()) {
                         //TODO: implement parent->child relationship...?
                         componentManager->m_i->_performTransformation(nullptr, pair.position(), pair.orientation(), pair.getScale(), pair.model());
@@ -321,8 +322,10 @@ class epriv::OLD_ComponentModelSystem::impl final {
         }
         void _onEntityAddedToScene(Scene& scene, OLD_ComponentBaseClass* component, OLD_Entity& _entity) {
             OLD_ComponentModel& componentModel = *(OLD_ComponentModel*)component;
-            for (auto& _meshInstance : componentModel.models) {
-                InternalScenePublicInterface::AddMeshInstanceToPipeline(scene, _meshInstance, _meshInstance.stage());
+
+            for (uint i = 0; i < componentModel.models.size(); ++i) {
+                auto& meshInstance = *componentModel.models[i];
+                InternalScenePublicInterface::AddMeshInstanceToPipeline(scene, meshInstance, meshInstance.stage());
             }
         }
         void _onSceneSwap(Scene* oldScene, Scene* newScene, OLD_ComponentBaseClass* component, OLD_Entity& _entity) {
@@ -510,17 +513,19 @@ OLD_ComponentModel::OLD_ComponentModel(Mesh* mesh, Material* mat, OLD_Entity* _e
     m_Owner = _e->id(); if (mesh) addModel(mesh, mat, (ShaderP*)_prog.get(), _stage);
 }
 OLD_ComponentModel::~OLD_ComponentModel(){
+    SAFE_DELETE_VECTOR(models);
 }
 uint OLD_ComponentModel::getNumModels() { return models.size(); }
-MeshInstance& OLD_ComponentModel::getModel(uint index){ return models[index]; }
-void OLD_ComponentModel::show() { for (auto& model : models) model.show(); }
-void OLD_ComponentModel::hide() { for (auto& model : models) model.hide(); }
+MeshInstance& OLD_ComponentModel::getModel(uint index){ return *models[index]; }
+void OLD_ComponentModel::show() { for (auto model : models) model->show(); }
+void OLD_ComponentModel::hide() { for (auto model : models) model->hide(); }
 float OLD_ComponentModel::radius(){ return _radius; }
 glm::vec3 OLD_ComponentModel::boundingBox() { return _radiusBox; }
 uint OLD_ComponentModel::addModel(Handle& mesh, Handle& mat, ShaderP* shaderProgram, RenderStage::Stage _stage){ return OLD_ComponentModel::addModel((Mesh*)mesh.get(),(Material*)mat.get(), shaderProgram, _stage); }
 uint OLD_ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* shaderProgram, RenderStage::Stage _stage) {
-    models.emplace_back(*owner(), mesh, material, shaderProgram);
-    auto& instance = models[models.size() - 1];
+    models.push_back(new MeshInstance(*owner(), mesh, material, shaderProgram));
+    //models.emplace_back(*owner(), mesh, material, shaderProgram);
+    auto& instance = *models[models.size() - 1];
     if (m_Owner != 0) {
         auto* _scene = owner()->scene();
         if (_scene) {
@@ -533,7 +538,7 @@ uint OLD_ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* shade
 }
 void OLD_ComponentModel::setModel(Handle& mesh,Handle& mat,uint index, ShaderP* shaderProgram, RenderStage::Stage _stage){ OLD_ComponentModel::setModel((Mesh*)mesh.get(),(Material*)mat.get(), index, shaderProgram, _stage); }
 void OLD_ComponentModel::setModel(Mesh* mesh,Material* material,uint index, ShaderP* shaderProgram, RenderStage::Stage _stage){
-    auto& instance = models[index];
+    auto& instance = *models[index];
     if (m_Owner != 0) {
         auto* _scene = owner()->scene();
         if (_scene) {
@@ -553,7 +558,7 @@ void OLD_ComponentModel::setModel(Mesh* mesh,Material* material,uint index, Shad
     epriv::OLD_ComponentInternalFunctionality::CalculateRadius(*this);
 }
 void OLD_ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint index, RenderStage::Stage _stage) {
-    auto& instance = models[index];
+    auto& instance = *models[index];
     if (m_Owner != 0) {
         auto* _scene = owner()->scene();
         if (_scene) {
@@ -570,7 +575,7 @@ void OLD_ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint inde
 }
 void OLD_ComponentModel::setModelShaderProgram(Handle& shaderPHandle, uint index, RenderStage::Stage _stage) { OLD_ComponentModel::setModelShaderProgram((ShaderP*)shaderPHandle.get(),index, _stage); }
 void OLD_ComponentModel::setModelMesh(Mesh* mesh,uint index, RenderStage::Stage _stage){
-    auto& instance = models[index];
+    auto& instance = *models[index];
     if (m_Owner != 0) {
         auto* _scene = owner()->scene();
         if (_scene) {
@@ -587,7 +592,7 @@ void OLD_ComponentModel::setModelMesh(Mesh* mesh,uint index, RenderStage::Stage 
 }
 void OLD_ComponentModel::setModelMesh(Handle& mesh, uint index, RenderStage::Stage _stage){ OLD_ComponentModel::setModelMesh((Mesh*)mesh.get(),index, _stage); }
 void OLD_ComponentModel::setModelMaterial(Material* material,uint index, RenderStage::Stage _stage){
-    auto& instance = models[index];
+    auto& instance = *models[index];
     if (m_Owner != 0) {
         auto* _scene = owner()->scene();
         if (_scene) {
@@ -873,7 +878,8 @@ btRigidBody& OLD_ComponentBody::getBody(){ return *data.p->rigidBody; }
 glm::vec3 OLD_ComponentBody::position(){ //theres prob a better way to do this
     if(_physics){
         glm::mat4 m(1.0f);
-        btTransform tr;  data.p->rigidBody->getMotionState()->getWorldTransform(tr);
+        btTransform tr;
+        data.p->rigidBody->getMotionState()->getWorldTransform(tr);
         tr.getOpenGLMatrix(glm::value_ptr(m));
         return glm::vec3(m[3][0],m[3][1],m[3][2]);
     }

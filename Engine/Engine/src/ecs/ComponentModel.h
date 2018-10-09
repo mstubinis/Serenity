@@ -31,7 +31,7 @@ class ComponentModel : public ComponentBaseClass {
     friend struct ::ComponentModelFunctions;
     friend class  ::ComponentCamera;
     private:
-        std::vector<MeshInstance> models;
+        std::vector<MeshInstance*> models;
         float _radius;
         glm::vec3 _radiusBox;
     public:
@@ -78,8 +78,8 @@ class ComponentModel : public ComponentBaseClass {
 
         bool rayIntersectSphere(ComponentCamera& camera);
 
-        template<class T> void setCustomBindFunctor(T& functor, uint index = 0) { models[index].setCustomBindFunctor(functor); }
-        template<class T> void setCustomUnbindFunctor(T& functor, uint index = 0) { models[index].setCustomUnbindFunctor(functor); }
+        template<class T> void setCustomBindFunctor(T& functor, uint index = 0) { models[index]->setCustomBindFunctor(functor); }
+        template<class T> void setCustomUnbindFunctor(T& functor, uint index = 0) { models[index]->setCustomUnbindFunctor(functor); }
 };
 
 class ComponentModelSystem : public Engine::epriv::ECSSystemCI {
