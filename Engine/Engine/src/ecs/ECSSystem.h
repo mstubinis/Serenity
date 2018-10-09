@@ -12,7 +12,6 @@ struct Entity;
 class Scene;
 namespace Engine {
     namespace epriv {
-        template<typename ...> class ECSSystemBase;
         template<typename ...> class ECSSystem;
 
         typedef boost::function<void(void*, const float&)>  func_update;
@@ -71,7 +70,7 @@ namespace Engine {
         };
 
 
-        template <typename TEntity> class ECSSystemBase<TEntity> {
+        template <typename TEntity> class ECSSystem<TEntity> {
             protected:
                 func_update         _SUF;
                 func_component      _CAE;
@@ -79,8 +78,8 @@ namespace Engine {
                 func_scene          _SEF;
                 func_scene          _SLF;
             public:
-                ECSSystemBase() {}
-                virtual ~ECSSystemBase() {}
+                ECSSystem() = default;
+                virtual ~ECSSystem() = default;
 
                 virtual void update(const float& dt) {}
                 virtual void onComponentAddedToEntity(void*) {}
@@ -88,8 +87,8 @@ namespace Engine {
                 virtual void onSceneLeft(Scene& _Scene) {}
                 virtual void onSceneEntered(Scene& _Scene) {}
         };
-        template <typename TEntity, typename TComponent> class ECSSystem<TEntity, TComponent> final : public ECSSystemBase<TEntity> {
-            using super     = ECSSystemBase<TEntity>;
+        template <typename TEntity, typename TComponent> class ECSSystem<TEntity, TComponent> final : public ECSSystem<TEntity> {
+            using super     = ECSSystem<TEntity>;
             using CPoolType = ECSComponentPool<TEntity, TComponent>;
             private:
                 CPoolType& componentPool;
@@ -110,7 +109,7 @@ namespace Engine {
                     super::_SLF = boost::bind(_functor.functor, (void*)&componentPool, _2);
                 }
             public:
-                ECSSystem() = delete;
+                ECSSystem() = default;
                 ECSSystem(const ECSSystemCI& _systemCI, ECS<TEntity>& _ecs):componentPool(_ecs.template getPool<TComponent>()){
                     _SUF(_systemCI.updateFunction);
                     _CAE(_systemCI.onComponentAddedToEntityFunction);
@@ -120,10 +119,10 @@ namespace Engine {
                 }
                 ~ECSSystem() = default;
 
-                ECSSystem(const ECSSystem&) = delete;                       // non construction-copyable
-                ECSSystem& operator=(const ECSSystem&) = delete;            // non copyable
-                ECSSystem(ECSSystem&& other) noexcept = delete;             // non construction-moveable
-                ECSSystem& operator=(ECSSystem&& other) noexcept = delete;  // non moveable
+                ECSSystem(const ECSSystem&) = default;                       // non construction-copyable
+                ECSSystem& operator=(const ECSSystem&) = default;            // non copyable
+                ECSSystem(ECSSystem&& other) noexcept = default;             // non construction-moveable
+                ECSSystem& operator=(ECSSystem&& other) noexcept = default;  // non moveable
 
                 void update(const float& dt) { 
                     super::_SUF((void*)&componentPool,dt);

@@ -87,7 +87,7 @@ struct ComponentCameraUpdateFunction final {
     }
     void operator()(void* _componentPool, const float& dt) const {
         auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)_componentPool;
-        auto& components = pool.dense();
+        auto& components = pool.pool();
 
         auto split = epriv::threading::splitVectorIndices(components);
         for (auto& vec : split) {

@@ -2,42 +2,38 @@
 #ifndef ENGINE_ECS_ENTITY_POOL_H
 #define ENGINE_ECS_ENTITY_POOL_H
 
+#include "ecs/SparseSet.h"
+
+class Scene;
 namespace Engine {
     namespace epriv {
-        template<typename TEntity> class ECSEntityPool final {
-            private:
-                uint lastIndex;
-                std::vector<TEntity> pool;
+
+        struct IDObject {
+            uint ID;
+            IDObject() :ID(0) {}
+            IDObject(uint _id):ID(_id){}
+        };
+
+        template<typename TEntity> class ECSEntityPool final : public SparseSet<IDObject, TEntity> {
+            using super = SparseSet<IDObject, TEntity>;
             public:
-                ECSEntityPool() :lastIndex(0) {}
-                ~ECSEntityPool() { lastIndex = 0; pool.clear(); }
-                TEntity* getEntity(uint _entityID) {
-                    if (_entityID == 0) return nullptr;
-                    return &pool[_entityID - 1];
+                ECSEntityPool() {}
+                ~ECSEntityPool() {}
+
+                TEntity* addEntity(Scene& _scene) {
+                    IDObject _id(super::pool().size() + 1);
+                    return super::_add(_id, _id.ID, _scene);
                 }
-                TEntity& createEntity(Scene& _scene) {
-                    pool.emplace_back(lastIndex + 1, _scene);
-                    ++lastIndex;
-                    return pool[pool.size() - 1];
+                bool removeEntity(const TEntity& _entity) {
+                    return super::_remove(_entity);
                 }
-                void addEntity(const TEntity& _entity) {
-                    pool.push_back(std::move(_entity));
-                    ++lastIndex;
+                TEntity* getEntity(const TEntity& _entity) {
+                    return super::_get(_entity);
                 }
-                void removeEntity(uint _entityID) {
-                    uint indexToRemove = _entityID - 1;
-                    if (indexToRemove != lastIndex) {
-                        std::swap(pool[indexToRemove], pool[lastIndex]);
-                    }
-                    TEntity& e = pool[pool.size()];
-                    pool.pop_back();
-                    --lastIndex;
-                }
-                void removeEntity(TEntity& _entity) { removeEntity(_entity.ID); }
                 void moveEntity(ECSEntityPool<TEntity>& other, uint _entityID) {
-                    TEntity& e = pool[_entityID - 1];
-                    other.addEntity(e);
-                    removeEntity(e);
+                    //TEntity& e = pool[_entityID - 1];
+                    //other.addEntity(e);
+                    //removeEntity(e);
                 }
                 void moveEntity(ECSEntityPool<TEntity>& other, TEntity& _entity) { moveEntity(other, _entity.ID); }
         };

@@ -32,15 +32,18 @@ struct Entity{
     bool null();
 	template<typename TComponent, typename... ARGS> TComponent* addComponent(ARGS&&... _args){
         auto& _this = *this;
-        return Engine::epriv::InternalEntityPublicInterface::GetECS(_this).addComponent<TComponent>(_this, std::forward<ARGS>(_args)...);
+        auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
+        return _ecs.addComponent<TComponent>(_this, std::forward<ARGS>(_args)...);
 	}
 	template<typename TComponent> bool removeComponent(){
         auto& _this = *this;
-        return Engine::epriv::InternalEntityPublicInterface::GetECS(_this).removeComponent<TComponent>(_this);
+        auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
+        return _ecs.removeComponent<TComponent>(_this);
 	}
 	template<typename TComponent> TComponent* getComponent(){
         auto& _this = *this;
-        return Engine::epriv::InternalEntityPublicInterface::GetECS(_this).getComponent<TComponent>(_this);
+        auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
+        return _ecs.getComponent<TComponent>(_this);
 	}
     void move(Scene& destination);
     static Entity _null;

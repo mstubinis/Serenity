@@ -155,7 +155,7 @@ struct ComponentModelUpdateFunction final {
     void operator()(void* _componentPool, const float& dt) const {
         auto* camera = Resources::getCurrentScene()->getActiveCamera();
         auto& pool = *(ECSComponentPool<Entity, ComponentModel>*)_componentPool;
-        auto& components = pool.dense();
+        auto& components = pool.pool();
         auto split = epriv::threading::splitVectorIndices(components);
         //TODO: might have to pass camera as a reference to a pointer (*&)
         for (auto& vec : split) {
