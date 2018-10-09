@@ -77,7 +77,7 @@ namespace Engine {
                 }
 
                 //we may or may not need these...
-                TEntity* createEntity(Scene& _scene) { return entityPool.createEntity(_scene); }
+                TEntity& createEntity(Scene& _scene) { return entityPool.createEntity(_scene); }
                 void removeEntity(uint _entityID) { entityPool.removeEntity(_entityID); }
                 void removeEntity(TEntity& _entity) { entityPool.removeEntity(_entity.ID); }
                 TEntity* getEntity(uint _entityID) { return entityPool.getEntity(_entityID); }

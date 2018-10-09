@@ -11,10 +11,6 @@ typedef std::uint32_t uint;
 const uint MAX_ENTITIES = 16777216;
 const uint MAX_SCENES = 256;
 
-//Scenes,Entities, and Components should be given ids. an id of 0 means invalid or null.
-//anything higher represents a valid id. An index into any array via id is array[id - 1]. only
-//do this if the id != 0
-
 class Scene;
 struct Entity{   
     uint ID : 24;     //16,777,216 possible entities (2 ^ 24)
@@ -23,10 +19,15 @@ struct Entity{
     Entity();
     Entity(uint _id);
     Entity(uint _id, Scene& _scene);
+
+    Entity(const Entity& other);
+    Entity& operator=(const Entity& other);
+    Entity(Entity&& other) noexcept  = default;
+    Entity& operator=(Entity&& other) noexcept = default;
+
     ~Entity();
 
     Scene& scene();
-    //inline uint arrayIndex() const;
     inline operator uint() const;
     bool null();
 	template<typename TComponent, typename... ARGS> TComponent* addComponent(ARGS&&... _args){

@@ -8,7 +8,10 @@ struct ComponentBaseClass{
     Entity owner;
 
     ComponentBaseClass() = default;
-    ComponentBaseClass(Entity& owner_) :owner(owner_) {}
+    ComponentBaseClass(Entity& owner_) {
+        owner.ID = owner_.ID;
+        owner.sceneID = owner_.sceneID;
+    }
 
     ComponentBaseClass& operator=(const ComponentBaseClass& other) = default;
     ComponentBaseClass(const ComponentBaseClass& other) = default;

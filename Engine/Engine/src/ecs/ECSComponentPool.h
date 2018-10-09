@@ -5,19 +5,20 @@
 #include <algorithm> //std::swap (until C++11)
 #include <utility>   //std::swap (since C++11)
 #include <vector>
+#include <iostream>
 
 namespace Engine {
     namespace epriv {
         template <typename...>      class ECSComponentPool;
         template <typename TEntity> class ECSComponentPool<TEntity>{
             protected:
-                uint                              _amount;   //number of components created
+                uint                              _maxLast;
                 std::vector<uint>                 _sparse; //maps entity ID to component Index in dense
             public:
                 std::vector<uint>& sparse() { return _sparse; }
 
-                ECSComponentPool() { _amount = 0; }
-                virtual ~ECSComponentPool() { _amount = 0; _sparse.clear(); }
+                ECSComponentPool() { _maxLast = 0; }
+                virtual ~ECSComponentPool() { _maxLast = 0; _sparse.clear(); }
         };
         template <typename TEntity,typename TComponent> class ECSComponentPool<TEntity,TComponent> : public ECSComponentPool<TEntity>{
             using super = ECSComponentPool<TEntity>;
@@ -35,36 +36,38 @@ namespace Engine {
                 ~ECSComponentPool() = default;
 
                 template<typename... ARGS> TComponent* addComponent(const TEntity& _entity, ARGS&&... _args) {
-                    uint sparseID = _entity.ID - 1;
-                    if (sparseID >= super::_sparse.size())
-                        super::_sparse.resize(sparseID + 1,0);
-                    if (super::_sparse[sparseID] != 0)
+                    uint sparseIndex = _entity.ID - 1;
+                    if (sparseIndex >= super::_sparse.size())
+                        super::_sparse.resize(sparseIndex + 1,0);
+                    if (super::_sparse[sparseIndex] != 0)
                         return nullptr;
                     _dense.emplace_back(const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
-                    ++super::_amount;
-                    super::_sparse[sparseID] = super::_amount;
-                    return &_dense[super::_amount - 1];
+                    super::_sparse[sparseIndex] = _dense.size();
+                    super::_maxLast = sparseIndex;
+                    return &_dense[_dense.size() - 1];
                 }
                 bool removeComponent(const TEntity& _entity) {
-                    uint sparseID = _entity.ID - 1;
-                    if (super::_sparse[sparseID] == 0)
+                    //TODO: find a way to optimize the search for the maxLast entity...
+                    uint removedEntityIndex = _entity.ID - 1;
+                    uint removedComponentID = super::_sparse[removedEntityIndex];
+                    super::_sparse[removedEntityIndex] = 0;
+                    if (removedComponentID == 0)
                         return false;
-                    uint removedCID = super::_sparse[sparseID];
+                    if (removedEntityIndex >= super::_maxLast) { super::_maxLast = 0; for (uint i = super::_sparse.size(); i-- > 0;) { if (super::_sparse[i] > 0) { super::_maxLast = i; break; } } }
                     if (_dense.size() > 1){
-                        std::swap(_dense[removedCID], _dense[super::_amount]);
-                        super::_sparse[super::_amount] = removedCID;
+                        std::swap(_dense[removedComponentID - 1], _dense[_dense.size() - 1]);
+                        super::_sparse[super::_maxLast] = removedComponentID;
                     }
-                    --super::_amount;
                     _dense.pop_back();
                     return true;
                 }
                 TComponent* getComponent(const TEntity& _entity) {
-                    uint sparseID = _entity.ID - 1;
+                    uint sparseIndex = _entity.ID - 1;
                     if (super::_sparse.size() == 0)
                         return nullptr;
-                    if (super::_sparse[sparseID] == 0)
+                    if (super::_sparse[sparseIndex] == 0)
                         return nullptr;
-                    return &(_dense[super::_sparse[sparseID]]);
+                    return &(_dense[super::_sparse[sparseIndex]]);
                 }
         };
     };

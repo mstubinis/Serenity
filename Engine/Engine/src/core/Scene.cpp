@@ -42,16 +42,23 @@ class Scene::impl final {
 
             ComponentBodySystem _b;
             m_ECS.assignSystem<ComponentBody>(_b);
-            auto* e = m_ECS.createEntity(super);
-            e->addComponent<ComponentBody>();
-            auto* e1 = m_ECS.createEntity(super);
-            e1->addComponent<ComponentBody>();
-            auto* e2 = m_ECS.createEntity(super);
-            e2->addComponent<ComponentBody>();
-            auto* e3 = m_ECS.createEntity(super);
-            e3->addComponent<ComponentBody>();
-            auto* e4 = m_ECS.createEntity(super);
-            e4->addComponent<ComponentBody>();
+            auto e0 = m_ECS.createEntity(super);
+            auto e1 = m_ECS.createEntity(super);
+            auto e2 = m_ECS.createEntity(super);
+            auto e3 = m_ECS.createEntity(super);
+            auto e4 = m_ECS.createEntity(super);
+
+            e0.addComponent<ComponentBody>();
+            e1.addComponent<ComponentBody>();
+            e2.addComponent<ComponentBody>();
+            e3.addComponent<ComponentBody>();
+            e4.addComponent<ComponentBody>();
+
+            e2.removeComponent<ComponentBody>();
+            e4.removeComponent<ComponentBody>();
+            e0.removeComponent<ComponentBody>();
+            e3.removeComponent<ComponentBody>();
+            e1.removeComponent<ComponentBody>();
         }
         void _destruct() {
             SAFE_DELETE(m_Skybox);

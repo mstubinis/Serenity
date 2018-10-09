@@ -15,10 +15,10 @@ namespace Engine {
                     if (_entityID == 0) return nullptr;
                     return &pool[_entityID - 1];
                 }
-                TEntity* createEntity(Scene& _scene) {
-                    TEntity e = TEntity(lastIndex + 1, _scene);
-                    addEntity(e);
-                    return &pool[pool.size() - 1];
+                TEntity& createEntity(Scene& _scene) {
+                    pool.emplace_back(lastIndex + 1, _scene);
+                    ++lastIndex;
+                    return pool[pool.size() - 1];
                 }
                 void addEntity(const TEntity& _entity) {
                     pool.push_back(std::move(_entity));
