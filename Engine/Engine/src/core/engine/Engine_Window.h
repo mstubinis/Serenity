@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_WINDOW_H
-#define ENGINE_WINDOW_H
+#ifndef ENGINE_WINDOW_H_INCLUDE_GUARD
+#define ENGINE_WINDOW_H_INCLUDE_GUARD
 
 #include <memory>
 #include <glm/fwd.hpp>

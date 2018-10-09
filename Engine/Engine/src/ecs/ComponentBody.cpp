@@ -169,7 +169,7 @@ ComponentBody::ComponentBody(const ComponentBody& other) {
     _forward = other._forward;
     _right = other._right;
     _up = other._up;
-    owner = other.owner;
+    owner.data = other.owner.data;
     if (other._physics) {
         if (other.data.p) data.p = new PhysicsData(*other.data.p);
         else              data.p = nullptr;

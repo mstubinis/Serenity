@@ -10,6 +10,16 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
+struct ComponentCameraFunctions final {
+    static void RebuildProjectionMatrix(ComponentCamera& cam) {
+        if (cam._type == ComponentCamera::Type::Perspective) {
+            cam._projectionMatrix = glm::perspective(cam._angle, cam._aspectRatio, cam._nearPlane, cam._farPlane);
+        }else{
+            cam._projectionMatrix = glm::ortho(cam._left, cam._right, cam._bottom, cam._top, cam._nearPlane, cam._farPlane);
+        }
+    }
+};
+
 #pragma region Component
 
 ComponentCamera::ComponentCamera(Entity& _e,float angle, float aspectRatio, float nearPlane, float farPlane) : ComponentBaseClass(_e) {
@@ -68,10 +78,10 @@ float ComponentCamera::getAngle() { return _angle; }
 float ComponentCamera::getAspect() { return _aspectRatio; }
 float ComponentCamera::getNear() { return _nearPlane; }
 float ComponentCamera::getFar() { return _farPlane; }
-void ComponentCamera::setAngle(float a) { _angle = a; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
-void ComponentCamera::setAspect(float a) { _aspectRatio = a; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
-void ComponentCamera::setNear(float n) { _nearPlane = n; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
-void ComponentCamera::setFar(float f) { _farPlane = f; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
+void ComponentCamera::setAngle(float a) { _angle = a; ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
+void ComponentCamera::setAspect(float a) { _aspectRatio = a; ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
+void ComponentCamera::setNear(float n) { _nearPlane = n; ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
+void ComponentCamera::setFar(float f) { _farPlane = f; ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
 
 #pragma endregion
 

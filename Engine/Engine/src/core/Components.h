@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_OBJECT_COMPONENTS_H
-#define ENGINE_OBJECT_COMPONENTS_H
+#ifndef ENGINE_OBJECT_COMPONENTS_H_INCLUDE_GUARD
+#define ENGINE_OBJECT_COMPONENTS_H_INCLUDE_GUARD
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>

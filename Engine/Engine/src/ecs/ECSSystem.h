@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ECS_SYSTEM_H
-#define ENGINE_ECS_SYSTEM_H
+#ifndef ENGINE_ECS_SYSTEM_H_INCLUDE_GUARD
+#define ENGINE_ECS_SYSTEM_H_INCLUDE_GUARD
 
 #include <vector>
 #include <boost/function.hpp>
@@ -110,7 +110,7 @@ namespace Engine {
                 }
             public:
                 ECSSystem() = default;
-                ECSSystem(const ECSSystemCI& _systemCI, ECS<TEntity>& _ecs):componentPool(_ecs.template getPool<TComponent>()){
+                ECSSystem(const ECSSystemCI& _systemCI, ECS& _ecs):componentPool(_ecs.getPool<TComponent>()){
                     _SUF(_systemCI.updateFunction);
                     _CAE(_systemCI.onComponentAddedToEntityFunction);
                     _EAS(_systemCI.onEntityAddedToSceneFunction);
@@ -119,10 +119,10 @@ namespace Engine {
                 }
                 ~ECSSystem() = default;
 
-                ECSSystem(const ECSSystem&) = default;                       // non construction-copyable
-                ECSSystem& operator=(const ECSSystem&) = default;            // non copyable
-                ECSSystem(ECSSystem&& other) noexcept = default;             // non construction-moveable
-                ECSSystem& operator=(ECSSystem&& other) noexcept = default;  // non moveable
+                ECSSystem(const ECSSystem&) = default;                       // construction-copyable
+                ECSSystem& operator=(const ECSSystem&) = default;            // copyable
+                ECSSystem(ECSSystem&&) noexcept = default;             // construction-moveable
+                ECSSystem& operator=(ECSSystem&&) noexcept = default;  // moveable
 
                 void update(const float& dt) { 
                     super::_SUF((void*)&componentPool,dt);

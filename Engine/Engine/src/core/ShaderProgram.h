@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_SHADERPROGRAM_H
-#define ENGINE_SHADERPROGRAM_H
+#ifndef ENGINE_SHADERPROGRAM_H_INCLUDE_GUARD
+#define ENGINE_SHADERPROGRAM_H_INCLUDE_GUARD
 
 #include "core/engine/BindableResource.h"
 #include "core/engine/Engine_EventObject.h"

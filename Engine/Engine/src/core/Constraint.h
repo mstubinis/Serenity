@@ -1,5 +1,6 @@
-#ifndef ENGINE_CONSTRAINTS_H
-#define ENGINE_CONSTRAINTS_H
+#pragma once
+#ifndef ENGINE_CONSTRAINTS_H_INCLUDE_GUARD
+#define ENGINE_CONSTRAINTS_H_INCLUDE_GUARD
 
 class btRigidBody;
 class btVector3;

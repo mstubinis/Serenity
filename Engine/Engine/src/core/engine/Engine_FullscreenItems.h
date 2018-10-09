@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_FULLSCREEN_ITEMS_H
-#define ENGINE_FULLSCREEN_ITEMS_H
+#ifndef ENGINE_FULLSCREEN_ITEMS_H_INCLUDE_GUARD
+#define ENGINE_FULLSCREEN_ITEMS_H_INCLUDE_GUARD
 
 #include <vector>
 #include "core/engine/Engine_EventObject.h"

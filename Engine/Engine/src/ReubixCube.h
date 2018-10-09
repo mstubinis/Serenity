@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_REUBIX_CUBE_OBJECT
-#define ENGINE_REUBIX_CUBE_OBJECT
+#ifndef GAME_REUBIX_CUBE_OBJECT_INCLUDE_GUARD
+#define GAME_REUBIX_CUBE_OBJECT_INCLUDE_GUARD
 
 #include <vector>
 #include <memory>

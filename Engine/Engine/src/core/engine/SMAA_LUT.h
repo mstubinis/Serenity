@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_SMAA_LUT_H
-#define ENGINE_SMAA_LUT_H
+#ifndef ENGINE_SMAA_LUT_H_INCLUDE_GUARD
+#define ENGINE_SMAA_LUT_H_INCLUDE_GUARD
 
 /**
  * Stored in R8G8 format. Load it in the following format:

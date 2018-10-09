@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_EVENT_ENUMS_H
-#define ENGINE_EVENT_ENUMS_H
+#ifndef ENGINE_EVENT_ENUMS_H_INCLUDE_GUARD
+#define ENGINE_EVENT_ENUMS_H_INCLUDE_GUARD
 
 #include <SFML/System.hpp>
 

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ENGINE_RESOURCES_H
-#define ENGINE_ENGINE_RESOURCES_H
+#ifndef ENGINE_ENGINE_RESOURCES_H_INCLUDE_GUARD
+#define ENGINE_ENGINE_RESOURCES_H_INCLUDE_GUARD
 
 #include "core/engine/Engine_Physics.h"
 #include "core/engine/GLImageConstants.h"

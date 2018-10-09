@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_TIME_CLASS_H
-#define ENGINE_TIME_CLASS_H
+#ifndef ENGINE_TIME_CLASS_H_INCLUDE_GUARD
+#define ENGINE_TIME_CLASS_H_INCLUDE_GUARD
 
 #include "core/engine/Engine_Utils.h"
 #include "core/engine/Engine_Resources.h"

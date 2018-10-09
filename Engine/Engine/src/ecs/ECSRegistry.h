@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ECS_REGISTRY_H
-#define ENGINE_ECS_REGISTRY_H
+#ifndef ENGINE_ECS_REGISTRY_H_INCLUDE_GUARD
+#define ENGINE_ECS_REGISTRY_H_INCLUDE_GUARD
 
 #include <cstdint>
 #include <boost/type_index.hpp>

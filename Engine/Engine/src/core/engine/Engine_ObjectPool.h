@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_OBJECT_POOL_H
-#define ENGINE_OBJECT_POOL_H
+#ifndef ENGINE_OBJECT_POOL_H_INCLUDE_GUARD
+#define ENGINE_OBJECT_POOL_H_INCLUDE_GUARD
 
 #include "core/engine/Engine_Resources.h"
 #include "core/engine/Engine_Utils.h"

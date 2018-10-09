@@ -1,6 +1,5 @@
 #include "core/Light.h"
-#include "core/engine/Engine_Resources.h"
-#include "core/engine/Engine_Renderer.h"
+#include "core/engine/Engine.h"
 #include "core/engine/Engine_Math.h"
 #include "core/MeshInstance.h"
 #include "core/Camera.h"
@@ -26,7 +25,7 @@ class Scene::impl final {
         vector<vector<RenderPipeline*>> m_Pipelines;
 
 
-        ECS<Entity> m_ECS;
+        ECS m_ECS;
 
         void _init(Scene& super,string& _name) {
             m_Pipelines.resize(RenderStage::_TOTAL);
@@ -42,11 +41,11 @@ class Scene::impl final {
             
             ComponentBodySystem _b;
             m_ECS.assignSystem<ComponentBody>(_b);
-            auto e0 = m_ECS.createEntity(super);
-            auto e1 = m_ECS.createEntity(super);
-            auto e2 = m_ECS.createEntity(super);
-            auto e3 = m_ECS.createEntity(super);
-            auto e4 = m_ECS.createEntity(super);
+            Entity e0 = m_ECS.addEntity(super);
+            Entity e1 = m_ECS.addEntity(super);
+            Entity e2 = m_ECS.addEntity(super);
+            Entity e3 = m_ECS.addEntity(super);
+            Entity e4 = m_ECS.addEntity(super);
 
             e0.addComponent<ComponentBody>();
             e1.addComponent<ComponentBody>();
@@ -212,7 +211,7 @@ void InternalScenePublicInterface::RenderForwardTransparent(Scene& _scene, Camer
     }
 }
 
-ECS<Entity>& InternalScenePublicInterface::GetECS(Scene& _scene) {
+ECS& InternalScenePublicInterface::GetECS(Scene& _scene) {
     return _scene.m_i->m_ECS;
 }
 void InternalScenePublicInterface::AddMeshInstanceToPipeline(Scene& _scene, MeshInstance& _meshInstance, RenderStage::Stage _stage) {

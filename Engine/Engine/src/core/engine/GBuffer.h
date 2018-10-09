@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_GBUFFER_H
-#define ENGINE_GBUFFER_H
+#ifndef ENGINE_GBUFFER_H_INCLUDE_GUARD
+#define ENGINE_GBUFFER_H_INCLUDE_GUARD
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>

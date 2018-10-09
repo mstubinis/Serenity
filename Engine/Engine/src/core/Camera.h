@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_CAMERA_H
-#define ENGINE_CAMERA_H
+#ifndef ENGINE_CAMERA_H_INCLUDE_GUARD
+#define ENGINE_CAMERA_H_INCLUDE_GUARD
 
 #include "core/Components.h"
 

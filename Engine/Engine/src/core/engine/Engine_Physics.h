@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ENGINE_PHYSICS_H
-#define ENGINE_ENGINE_PHYSICS_H
+#ifndef ENGINE_ENGINE_PHYSICS_H_INCLUDE_GUARD
+#define ENGINE_ENGINE_PHYSICS_H_INCLUDE_GUARD
 
 #include <glm/glm.hpp>
 #include <memory>

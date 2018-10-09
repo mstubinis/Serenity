@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_GL_IMAGE_CONSTANTS_H
-#define ENGINE_GL_IMAGE_CONSTANTS_H
+#ifndef ENGINE_GL_IMAGE_CONSTANTS_H_INCLUDE_GUARD
+#define ENGINE_GL_IMAGE_CONSTANTS_H_INCLUDE_GUARD
 
 #include <vector>
 #include <GL/glew.h>

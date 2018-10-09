@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ENGINE_SOUNDS_H
-#define ENGINE_ENGINE_SOUNDS_H
+#ifndef ENGINE_ENGINE_SOUNDS_H_INCLUDE_GUARD
+#define ENGINE_ENGINE_SOUNDS_H_INCLUDE_GUARD
 
 #include "core/engine/Engine_Resources.h"
 #include <SFML/Audio.hpp>

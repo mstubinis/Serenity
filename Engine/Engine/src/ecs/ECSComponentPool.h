@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ECS_COMPONENT_POOL_H
-#define ENGINE_ECS_COMPONENT_POOL_H
+#ifndef ENGINE_ECS_COMPONENT_POOL_H_INCLUDE_GUARD
+#define ENGINE_ECS_COMPONENT_POOL_H_INCLUDE_GUARD
 
 #include "ecs/SparseSet.h"
 
@@ -21,13 +21,13 @@ namespace Engine {
                 ~ECSComponentPool() = default;
 
                 template<typename... ARGS> TComponent* addComponent(const TEntity& _entity, ARGS&&... _args) {
-                    return super::_add(_entity, const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
+                    return super::_add(_entity.ID, const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
                 }
                 bool removeComponent(const TEntity& _entity) {
-                    return super::_remove(_entity);
+                    return super::_remove(_entity.ID);
                 }
                 TComponent* getComponent(const TEntity& _entity) {
-                    return super::_get(_entity);
+                    return super::_get(_entity.ID);
                 }
         };
     };
