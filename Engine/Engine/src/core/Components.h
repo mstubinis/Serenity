@@ -290,7 +290,7 @@ class OLD_ComponentBody: public OLD_ComponentBaseClass{
             btRigidBody* rigidBody;
             btDefaultMotionState motionState;
             float mass;
-            PhysicsData():rigidBody(0){
+            PhysicsData(){
                 rigidBody = 0; collision = 0; mass = 0;
             }
         };

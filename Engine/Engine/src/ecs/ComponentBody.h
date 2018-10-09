@@ -36,12 +36,12 @@ class ComponentBody : public ComponentBaseClass {
             btRigidBody* rigidBody;
             btDefaultMotionState motionState;
             float mass;
-            void _copy(const PhysicsData& other);
+
             PhysicsData();
             PhysicsData(const PhysicsData& other);
             PhysicsData& operator=(const PhysicsData& other);
-            PhysicsData& operator=(PhysicsData&& other) noexcept = default;
-            PhysicsData(PhysicsData&& other) noexcept = default;
+            PhysicsData& operator=(PhysicsData&& other) noexcept;
+            PhysicsData(PhysicsData&& other) noexcept;
             ~PhysicsData();         
         };
         struct NormalData {
@@ -49,12 +49,12 @@ class ComponentBody : public ComponentBaseClass {
             glm::vec3 position;
             glm::quat rotation;
             glm::mat4 modelMatrix;
-            void _copy(const NormalData& other);
+
             NormalData();
             NormalData(const NormalData& other);
             NormalData& operator=(const NormalData& other);
-            NormalData& operator=(NormalData&& other) noexcept = default;
-            NormalData(NormalData&& other) noexcept = default;
+            NormalData& operator=(NormalData&& other) noexcept;
+            NormalData(NormalData&& other) noexcept;
             ~NormalData();
         };
         union {
@@ -63,9 +63,6 @@ class ComponentBody : public ComponentBaseClass {
         } data;
         bool _physics;
         glm::vec3 _forward, _right, _up;
-
-        void _copy(const ComponentBody& other);
-        void _move(ComponentBody&& other);
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentBody(Entity&);

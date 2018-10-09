@@ -612,35 +612,37 @@ bool OLD_ComponentModel::rayIntersectSphere(OLD_ComponentCamera& camera){
 #pragma region Body
 
 OLD_ComponentBody::OLD_ComponentBody(){
+    data.p = nullptr;
+    _physics = 0;
     data.n = new NormalData();
-    _physics = false;
-    auto& normalData = *data.n;
-    normalData.position =  glm::vec3(0.0f);
-    normalData.scale =  glm::vec3(1.0f);
-    normalData.rotation =  glm::quat(1.0f,0.0f,0.0f,0.0f);
-    normalData.modelMatrix =  glm::mat4(1.0f);
-    Math::recalculateForwardRightUp(normalData.rotation,_forward,_right,_up);
+    auto& n = *data.n;
+    n.position =  glm::vec3(0.0f);
+    n.scale =  glm::vec3(1.0f);
+    n.rotation =  glm::quat(1.0f,0.0f,0.0f,0.0f);
+    n.modelMatrix =  glm::mat4(1.0f);
+    Math::recalculateForwardRightUp(n.rotation,_forward,_right,_up);
 }
 OLD_ComponentBody::OLD_ComponentBody(CollisionType::Type _collisionType){
+    data.n = nullptr;
+    _physics = 1;
     data.p = new PhysicsData();	
-    _physics = true;
-    auto& physicsData = *data.p;
+    auto& p = *data.p;
     _forward = glm::vec3(0,0,-1);  _right = glm::vec3(1,0,0);  _up = glm::vec3(0,1,0);
 
-    physicsData.motionState = btDefaultMotionState(btTransform(btQuaternion(0,0,0,1)));
+    p.motionState = btDefaultMotionState(btTransform(btQuaternion(0,0,0,1)));
     float _mass = 1.0f;
-    physicsData.mass = _mass;
+    p.mass = _mass;
 
     setCollision(_collisionType, _mass);
 
     setMass(_mass);
-    btDefaultMotionState* _motionState = &physicsData.motionState;
-    btCollisionShape* _shape = physicsData.collision->getShape();
-    const btVector3& _inertia = physicsData.collision->getInertia();
+    btDefaultMotionState* _motionState = &p.motionState;
+    btCollisionShape* _shape = p.collision->getShape();
+    const btVector3& _inertia = p.collision->getInertia();
 
     btRigidBody::btRigidBodyConstructionInfo CI(_mass,_motionState, _shape,_inertia);
-    physicsData.rigidBody = new btRigidBody(CI);
-    auto& rigidBody = *physicsData.rigidBody;
+    p.rigidBody = new btRigidBody(CI);
+    auto& rigidBody = *p.rigidBody;
     rigidBody.setSleepingThresholds(0.015f,0.015f);
     rigidBody.setFriction(0.3f);
     rigidBody.setDamping(0.1f,0.4f);//air friction 

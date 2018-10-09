@@ -39,7 +39,7 @@ class Scene::impl final {
             m_ID = InternalScenePublicInterface::NumScenes;
             
 
-
+            
             ComponentBodySystem _b;
             m_ECS.assignSystem<ComponentBody>(_b);
             auto e0 = m_ECS.createEntity(super);
@@ -59,6 +59,7 @@ class Scene::impl final {
             e0.removeComponent<ComponentBody>();
             e3.removeComponent<ComponentBody>();
             e1.removeComponent<ComponentBody>();
+            
         }
         void _destruct() {
             SAFE_DELETE(m_Skybox);

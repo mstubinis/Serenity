@@ -19,35 +19,48 @@ using namespace std;
 #pragma region PhysicsData
 
 ComponentBody::PhysicsData::PhysicsData(){ 
+    //constructor
     mass = 0;
     rigidBody = nullptr;
     collision = nullptr;
 }
-void ComponentBody::PhysicsData::_copy(const ComponentBody::PhysicsData& other) {
+ComponentBody::PhysicsData::PhysicsData(const ComponentBody::PhysicsData& other) : rigidBody(other.rigidBody) {
+    //copy constructor
     mass = other.mass;
     motionState = other.motionState;
     rigidBody = other.rigidBody;
 
-    Collision* copyCollision = new Collision(*other.collision);
-    SAFE_DELETE(collision);
-    collision = copyCollision;
+    if (other.collision) collision = new Collision(*other.collision);
+    else                 collision = nullptr;
 
-    btRigidBody* copyBody = new btRigidBody(*other.rigidBody);
-    SAFE_DELETE(rigidBody);
-    rigidBody = copyBody;
-}
-ComponentBody::PhysicsData::PhysicsData(const ComponentBody::PhysicsData& other) : rigidBody(other.rigidBody) {
-    rigidBody = nullptr;
-    collision = nullptr;
-    _copy(other);
+    if (other.rigidBody) rigidBody = new btRigidBody(*other.rigidBody);
+    else                 rigidBody = nullptr;
 }
 ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(const ComponentBody::PhysicsData& other) {
+    //copy assignment
     if (&other == this)
         return *this;
-    _copy(other);
+    ComponentBody::PhysicsData tmp(other); // re-use copy-constructor
+    *this = std::move(tmp);                // re-use move-assignment
+    return *this;
+}
+ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& other) noexcept {
+    //move constructor
+    std::swap(mass, other.mass);
+    std::swap(motionState, other.motionState);
+    std::swap(collision, other.collision);
+    std::swap(rigidBody, other.rigidBody);
+}
+ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody::PhysicsData&& other) noexcept {
+    //move assignment
+    std::swap(mass, other.mass);
+    std::swap(motionState, other.motionState);
+    std::swap(collision, other.collision);
+    std::swap(rigidBody, other.rigidBody);
     return *this;
 }
 ComponentBody::PhysicsData::~PhysicsData() {
+    //destructor
     SAFE_DELETE(rigidBody);
     SAFE_DELETE(collision);
 }
@@ -57,39 +70,55 @@ ComponentBody::PhysicsData::~PhysicsData() {
 #pragma region NormalData
 
 ComponentBody::NormalData::NormalData(){
+    //constructor
     scale = glm::vec3(1.0f, 1.0f, 1.0f);
     position = glm::vec3(0.0f, 0.0f, 0.0f);
     rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     modelMatrix = glm::mat4(1.0f);
 }
-void ComponentBody::NormalData::_copy(const ComponentBody::NormalData& other) {
+ComponentBody::NormalData::NormalData(const ComponentBody::NormalData& other) {
+    //copy constructor
     scale = other.scale;
     position = other.position;
     rotation = other.rotation;
     modelMatrix = other.modelMatrix;
 }
-ComponentBody::NormalData::NormalData(const ComponentBody::NormalData& other) {
-    _copy(other);
-}
 ComponentBody::NormalData& ComponentBody::NormalData::operator=(const ComponentBody::NormalData& other) {
+    //copy assignment
     if (&other == this)
         return *this;
-    _copy(other);
+    ComponentBody::NormalData tmp(other); // re-use copy-constructor
+    *this = std::move(tmp);               // re-use move-assignment
+    return *this;
+}
+ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcept {
+    //move constructor
+    std::swap(position, other.position);
+    std::swap(rotation, other.rotation);
+    std::swap(scale, other.scale);
+    std::swap(modelMatrix, other.modelMatrix);
+}
+ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::NormalData&& other) noexcept {
+    //move assignment
+    std::swap(position, other.position);
+    std::swap(rotation, other.rotation);
+    std::swap(scale, other.scale);
+    std::swap(modelMatrix, other.modelMatrix);
     return *this;
 }
 ComponentBody::NormalData::~NormalData() {
-
+    //destructor
 }
+
 
 #pragma endregion
 
 #pragma region Component
 
 ComponentBody::ComponentBody(Entity& _e) : ComponentBaseClass(_e) {
-    data.n = nullptr;
     data.p = nullptr;
+    _physics = 0;
     data.n = new NormalData();
-    _physics = false;
     auto& normalData = *data.n;
     normalData.position = glm::vec3(0.0f,0.0f,0.0f);
     normalData.scale = glm::vec3(1.0f,1.0f,1.0f);
@@ -99,9 +128,8 @@ ComponentBody::ComponentBody(Entity& _e) : ComponentBaseClass(_e) {
 }
 ComponentBody::ComponentBody(Entity& _e,CollisionType::Type _collisionType) : ComponentBaseClass(_e) {
     data.n = nullptr;
-    data.p = nullptr;
+    _physics = 1;
     data.p = new PhysicsData();
-    _physics = true;
     auto& physicsData = *data.p;
     _forward = glm::vec3(0.0f, 0.0f, -1.0f);  _right = glm::vec3(1.0f, 0.0f, 0.0f);  _up = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -126,39 +154,8 @@ ComponentBody::ComponentBody(Entity& _e,CollisionType::Type _collisionType) : Co
     rigidBody.updateInertiaTensor();
     rigidBody.setUserPointer(this);
 }
-void ComponentBody::_copy(const ComponentBody& other) {
-    _physics = other._physics;
-    owner = other.owner;
-    if (_physics) {
-        PhysicsData* _newData = new PhysicsData();
-        _newData = other.data.p;
-        SAFE_DELETE(data.p);
-        data.p = _newData;
-    }else {
-        NormalData* _newData = new NormalData();
-        _newData = other.data.n;
-        SAFE_DELETE(data.n);
-        data.n = _newData;
-    }
-    _forward = other._forward;
-    _right = other._right;
-    _up = other._up;
-}
-void ComponentBody::_move(ComponentBody&& other) {
-    owner = other.owner;
-    _physics = other._physics;
-    if (_physics) {
-        data.p = new PhysicsData();
-        data.p->_copy(*other.data.p);
-    }else{
-        data.n = new NormalData();
-        data.n->_copy(*other.data.n);
-    }
-    _forward = other._forward;
-    _right = other._right;
-    _up = other._up;
-}
 ComponentBody::~ComponentBody() {
+    //destructor
     if (_physics) {
         Physics::removeRigidBody(data.p->rigidBody);
         SAFE_DELETE(data.p);
@@ -167,23 +164,56 @@ ComponentBody::~ComponentBody() {
     }
 }
 ComponentBody::ComponentBody(const ComponentBody& other) {
-    data.n = nullptr;
-    data.p = nullptr;
-    _copy(other);
+    //copy constructor
+    //Might need more testing here...
+    _forward = other._forward;
+    _right = other._right;
+    _up = other._up;
+    owner = other.owner;
+    if (other._physics) {
+        if (other.data.p) data.p = new PhysicsData(*other.data.p);
+        else              data.p = nullptr;
+    }else{
+        if (other.data.n) data.n = new NormalData(*other.data.n);
+        else              data.n = nullptr;
+    }
 }
 ComponentBody& ComponentBody::operator=(const ComponentBody& other) {
-    if (&other == this)
-        return *this;
-    _copy(other);
+    //copy assignment
+    //Might need more testing here...
+    ComponentBody tmp(other); // re-use copy-constructor
+    *this = std::move(tmp);   // re-use move-assignment
     return *this;
 }
 ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
-    data.n = nullptr;
-    data.p = nullptr;
-    _move(std::move(other));
+    //move constructor
+    //this seems OK
+    _physics = other._physics;
+    std::swap(_forward, other._forward);
+    std::swap(_right, other._right);
+    std::swap(_up, other._up);
+    std::swap(owner, other.owner);
+    if (other._physics) {
+        std::swap(data.p, other.data.p);
+        other.data.p = nullptr;
+    }else {
+        std::swap(data.n, other.data.n);
+        other.data.n = nullptr;
+    }
 }
 ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
-    _move(std::move(other));
+    //move assignment
+    //this seems OK
+    _physics = other._physics;
+    std::swap(_forward, other._forward);
+    std::swap(_right, other._right);
+    std::swap(_up, other._up);
+    std::swap(owner, other.owner);
+    if (other._physics) {
+        std::swap(data.p, other.data.p);
+    }else{
+        std::swap(data.n, other.data.n);
+    }
     return *this;
 }
 
@@ -612,6 +642,7 @@ struct ComponentBodyUpdateFunction final {
     void operator()(void* _componentPool, const float& dt) const {
         auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
         auto& components = pool.dense();
+
         auto split = epriv::threading::splitVectorIndices(components);
         for (auto& vec : split) {
             epriv::threading::addJobRef(_defaultUpdate, vec, components);
