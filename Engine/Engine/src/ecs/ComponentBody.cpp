@@ -157,7 +157,8 @@ ComponentBody::ComponentBody(Entity& _e,CollisionType::Type _collisionType) : Co
 ComponentBody::~ComponentBody() {
     //destructor
     if (_physics) {
-        Physics::removeRigidBody(data.p->rigidBody);
+        if(data.p)
+            Physics::removeRigidBody(data.p->rigidBody);
         SAFE_DELETE(data.p);
     }else{
         SAFE_DELETE(data.n);
@@ -246,12 +247,14 @@ void ComponentBody::setCollision(CollisionType::Type _type, float _mass) {
     }
     Collision& collision_ = *physicsData.collision;
     collision_.getShape()->setUserPointer(this);
-    auto& rigidBody = *physicsData.rigidBody;
-    Physics::removeRigidBody(&rigidBody);
-    rigidBody.setCollisionShape(collision_.getShape());
-    rigidBody.setMassProps(physicsData.mass, collision_.getInertia());
-    rigidBody.updateInertiaTensor();
-    Physics::addRigidBody(&rigidBody);
+    if (physicsData.rigidBody) {
+        auto& rigidBody = *physicsData.rigidBody;
+        Physics::removeRigidBody(&rigidBody);
+        rigidBody.setCollisionShape(collision_.getShape());
+        rigidBody.setMassProps(physicsData.mass, collision_.getInertia());
+        rigidBody.updateInertiaTensor();
+        Physics::addRigidBody(&rigidBody);
+    }
 }
 void ComponentBody::translate(glm::vec3 translation, bool local) { ComponentBody::translate(translation.x, translation.y, translation.z, local); }
 void ComponentBody::translate(float x, float y, float z, bool local) {

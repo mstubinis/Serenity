@@ -21,12 +21,12 @@ namespace Engine{
 
             EventManager          m_EventManager;
             EventDispatcher       m_EventDispatcher;
+            PhysicsManager        m_PhysicsManager;
+            OLD_ComponentManager  m_ComponentManager;
             ResourceManager       m_ResourceManager;
             TimeManager           m_TimeManager;
             SoundManager          m_SoundManager;
-            PhysicsManager        m_PhysicsManager;
             RenderManager         m_RenderManager;
-            OLD_ComponentManager  m_ComponentManager;
             ThreadManager         m_ThreadManager;
             NoiseManager          m_NoiseManager;
             bool                  m_Paused, m_Destroyed;

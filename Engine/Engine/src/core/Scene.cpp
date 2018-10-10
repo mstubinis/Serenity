@@ -49,11 +49,11 @@ class Scene::impl final {
             Entity e3 = m_ECS.createEntity(super);
             Entity e4 = m_ECS.createEntity(super);
 
-            e0.addComponent<ComponentName>("e0");
-            e1.addComponent<ComponentName>("e1");
-            e2.addComponent<ComponentName>("e2");
-            e3.addComponent<ComponentName>("e3");
-            e4.addComponent<ComponentName>("e4");
+            e0.addComponent<ComponentBody>(CollisionType::None);
+            e1.addComponent<ComponentBody>(CollisionType::None);
+            e2.addComponent<ComponentBody>(CollisionType::None);
+            e3.addComponent<ComponentBody>(CollisionType::None);
+            e4.addComponent<ComponentBody>(CollisionType::None);
             /*
             e2.removeComponent<ComponentName>();
             e4.removeComponent<ComponentName>();
