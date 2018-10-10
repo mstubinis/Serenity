@@ -16,6 +16,14 @@ class ComponentName : public ComponentBaseClass {
         ComponentName(Entity&, std::string&);
         ComponentName(Entity&, const char*);
 
+        ComponentName& operator=(const ComponentName& other) = delete;
+        ComponentName(const ComponentName& other) = delete;
+        ComponentName(ComponentName&& other) noexcept = default;
+        ComponentName& operator=(ComponentName&& other) noexcept = default;
+
+        const std::string& name();
+        const uint size();
+
         ~ComponentName();
 };
 

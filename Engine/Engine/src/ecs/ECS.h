@@ -15,7 +15,6 @@ namespace Engine {
                 ECSEntityPool<TEntity>                                    entityPool;
                 std::vector<std::unique_ptr<SparseSet<TEntity>>>          componentPools;
                 std::vector<ECSSystem<TEntity>*>                          systems;
-              //std::vector<std::unique_ptr<ECSSystem<TEntity>>>          systems;
 
                 //builds a component pool and system for the component type if it is not built already.
                 template<typename TComponent> void buildPool(uint type_slot) {
@@ -34,7 +33,6 @@ namespace Engine {
                     if (!systems[type_slot]) {
                         ECSSystemCI _ci;
                         systems[type_slot] = new CSystemType(_ci,*this);
-                      //systems[type_slot] = std::make_unique<CSystemType>(_ci, *this);
                     }
                 }
             public:
@@ -49,7 +47,6 @@ namespace Engine {
 
                 void update(const float& dt) {
                     for (uint i = 0; i < systems.size(); ++i) {
-                      //auto& system = *systems[i].get();
                         auto& system = *systems[i];
                         system.update(dt);
                     }
@@ -75,19 +72,15 @@ namespace Engine {
                     }
                     if (systems[type_slot]) {
                         SAFE_DELETE(systems[type_slot]);
-                      //systems[type_slot].reset();
                     }
                     systems[type_slot] = new CSystemType(_systemCI,*this);
-                  //systems[type_slot] = std::make_unique<CSystemType>(_systemCI, *this);
                 }
 
                 //we may or may not need these...
-                TEntity& createEntity(Scene& _scene) { return *entityPool.addEntity(_scene); }
+                TEntity createEntity(Scene& _scene) { return entityPool.addEntity(_scene); }
                 void removeEntity(uint _entityID) { entityPool.removeEntity(_entityID); }
                 void removeEntity(TEntity& _entity) { entityPool.removeEntity(_entity.ID); }
                 TEntity* getEntity(uint _entityID) { return entityPool.getEntity(_entityID); }
-                void moveEntity(ECSEntityPool<TEntity>& other, uint _entityID) { entityPool.moveEntity(other, _entityID); }
-                void moveEntity(ECSEntityPool<TEntity>& other, TEntity& _entity) { entityPool.moveEntity(other, _entity.ID); }
 
 
                 template<typename TComponent, typename... ARGS> TComponent* addComponent(const TEntity& _entity, ARGS&&... _args) {

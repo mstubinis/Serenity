@@ -3,6 +3,7 @@
 #define ENGINE_ECS_COMPONENT_POOL_H
 
 #include "ecs/SparseSet.h"
+#include "ecs/EntitySerialization.h"
 
 namespace Engine {
     namespace epriv {
@@ -21,13 +22,16 @@ namespace Engine {
                 ~ECSComponentPool() = default;
 
                 template<typename... ARGS> TComponent* addComponent(const TEntity& _entity, ARGS&&... _args) {
-                    return super::_add(_entity, const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
+                    EntitySerialization _s(_entity);
+                    return super::_add(_s.ID, const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
                 }
                 bool removeComponent(const TEntity& _entity) {
-                    return super::_remove(_entity);
+                    EntitySerialization _s(_entity);
+                    return super::_remove(_s.ID);
                 }
                 TComponent* getComponent(const TEntity& _entity) {
-                    return super::_get(_entity);
+                    EntitySerialization _s(_entity);
+                    return super::_get(_s.ID);
                 }
         };
     };

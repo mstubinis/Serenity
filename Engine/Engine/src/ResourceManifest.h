@@ -1,6 +1,6 @@
 #pragma once
-#ifndef RESOURCE_MANIFEST_H
-#define RESOURCE_MANIFEST_H
+#ifndef GAME_RESOURCE_MANIFEST_H
+#define GAME_RESOURCE_MANIFEST_H
 
 struct Handle;
 

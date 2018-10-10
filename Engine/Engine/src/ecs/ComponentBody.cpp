@@ -169,7 +169,7 @@ ComponentBody::ComponentBody(const ComponentBody& other) {
     _forward = other._forward;
     _right = other._right;
     _up = other._up;
-    owner = other.owner;
+    owner.data = other.owner.data;
     if (other._physics) {
         if (other.data.p) data.p = new PhysicsData(*other.data.p);
         else              data.p = nullptr;
@@ -192,7 +192,7 @@ ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
     std::swap(_forward, other._forward);
     std::swap(_right, other._right);
     std::swap(_up, other._up);
-    std::swap(owner, other.owner);
+    std::swap(owner.data, other.owner.data);
     if (other._physics) {
         std::swap(data.p, other.data.p);
         other.data.p = nullptr;
@@ -208,7 +208,7 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     std::swap(_forward, other._forward);
     std::swap(_right, other._right);
     std::swap(_up, other._up);
-    std::swap(owner, other.owner);
+    std::swap(owner.data, other.owner.data);
     if (other._physics) {
         std::swap(data.p, other.data.p);
     }else{

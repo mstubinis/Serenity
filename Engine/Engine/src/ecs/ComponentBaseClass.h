@@ -8,10 +8,7 @@ struct ComponentBaseClass{
     Entity owner;
 
     ComponentBaseClass() = default;
-    ComponentBaseClass(Entity& owner_) {
-        owner.ID = owner_.ID;
-        owner.sceneID = owner_.sceneID;
-    }
+    ComponentBaseClass(Entity& owner_) { owner.data = owner_.data; }
 
     ComponentBaseClass& operator=(const ComponentBaseClass& other) = default;
     ComponentBaseClass(const ComponentBaseClass& other) = default;

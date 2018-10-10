@@ -38,8 +38,8 @@ namespace Engine {
 
                 virtual ~SparseSet() = default;
 
-                template<typename... ARGS> TItem* _add(const TID& _IDObject, ARGS&&... _args) {
-                    uint sparseIndex = _IDObject.ID - 1;
+                template<typename... ARGS> TItem* _add(const uint& _IDObject, ARGS&&... _args) {
+                    uint sparseIndex = _IDObject - 1;
                     if (sparseIndex >= super::_sparse.size())
                         super::_sparse.resize(sparseIndex + 1, 0);
                     if (super::_sparse[sparseIndex] != 0)
@@ -49,9 +49,9 @@ namespace Engine {
                     super::_maxLast = sparseIndex;
                     return &_dense[_dense.size() - 1];
                 }
-                bool _remove(const TID& _IDObject) {
+                bool _remove(const uint& _IDObject) {
                     //TODO: find a way to optimize the search for the maxLast entity...
-                    uint removedEntityIndex = _IDObject.ID - 1;
+                    uint removedEntityIndex = _IDObject - 1;
                     uint removedComponentID = super::_sparse[removedEntityIndex];
                     super::_sparse[removedEntityIndex] = 0;
                     if (removedComponentID == 0)
@@ -64,13 +64,13 @@ namespace Engine {
                     _dense.pop_back();
                     return true;
                 }
-                TItem* _get(const TID& _IDObject) {
-                    uint sparseIndex = _IDObject.ID - 1;
+                TItem* _get(const uint& _IDObject) {
+                    uint sparseIndex = _IDObject - 1;
                     if (super::_sparse.size() == 0)
                         return nullptr;
                     if (super::_sparse[sparseIndex] == 0)
                         return nullptr;
-                    return &(_dense[super::_sparse[sparseIndex]]);
+                    return &(_dense[super::_sparse[sparseIndex] - 1]);
                 }
         };
 

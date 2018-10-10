@@ -221,6 +221,12 @@
     <ClCompile Include="Engine\src\SolarSystem.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\src\ecs\ComponentName.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\ecs\EntitySerialization.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -245,9 +251,6 @@
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\ECSRegistry.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\ecs\ECSSystem.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\Entity.h">
@@ -398,6 +401,15 @@
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\SparseSet.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\ComponentName.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\EntitySerialization.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\ECSSystem.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
   </ItemGroup>

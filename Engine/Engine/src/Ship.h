@@ -1,6 +1,6 @@
 #pragma once
-#ifndef SHIP_H
-#define SHIP_H
+#ifndef GAME_SHIP_H
+#define GAME_SHIP_H
 
 #include "core/Components.h"
 

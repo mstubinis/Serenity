@@ -1,6 +1,6 @@
 #pragma once
-#ifndef PLANET_H
-#define PLANET_H
+#ifndef GAME_PLANET_H
+#define GAME_PLANET_H
 
 #include "core/Components.h"
 

@@ -8,6 +8,7 @@
 
 #include "ecs/Entity.h"
 #include "ecs/ComponentBody.h"
+#include "ecs/ComponentName.h"
 
 using namespace Engine;
 using namespace Engine::epriv;
@@ -40,25 +41,26 @@ class Scene::impl final {
             
 
             
-            ComponentBodySystem _b;
-            m_ECS.assignSystem<ComponentBody>(_b);
-            auto e0 = m_ECS.createEntity(super);
-            auto e1 = m_ECS.createEntity(super);
-            auto e2 = m_ECS.createEntity(super);
-            auto e3 = m_ECS.createEntity(super);
-            auto e4 = m_ECS.createEntity(super);
+            //ComponentBodySystem _b;
+            //m_ECS.assignSystem<ComponentBody>(_b);
+            Entity e0 = m_ECS.createEntity(super);
+            Entity e1 = m_ECS.createEntity(super);
+            Entity e2 = m_ECS.createEntity(super);
+            Entity e3 = m_ECS.createEntity(super);
+            Entity e4 = m_ECS.createEntity(super);
 
-            e0.addComponent<ComponentBody>();
-            e1.addComponent<ComponentBody>();
-            e2.addComponent<ComponentBody>();
-            e3.addComponent<ComponentBody>();
-            e4.addComponent<ComponentBody>();
-
-            e2.removeComponent<ComponentBody>();
-            e4.removeComponent<ComponentBody>();
-            e0.removeComponent<ComponentBody>();
-            e3.removeComponent<ComponentBody>();
-            e1.removeComponent<ComponentBody>();
+            e0.addComponent<ComponentName>("e0");
+            e1.addComponent<ComponentName>("e1");
+            e2.addComponent<ComponentName>("e2");
+            e3.addComponent<ComponentName>("e3");
+            e4.addComponent<ComponentName>("e4");
+            /*
+            e2.removeComponent<ComponentName>();
+            e4.removeComponent<ComponentName>();
+            e0.removeComponent<ComponentName>();
+            e3.removeComponent<ComponentName>();
+            e1.removeComponent<ComponentName>();
+            */
             
         }
         void _destruct() {

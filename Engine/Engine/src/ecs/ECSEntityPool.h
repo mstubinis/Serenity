@@ -3,40 +3,55 @@
 #define ENGINE_ECS_ENTITY_POOL_H
 
 #include "ecs/SparseSet.h"
+#include "ecs/EntitySerialization.h"
 
 class Scene;
 namespace Engine {
     namespace epriv {
 
-        struct IDObject {
-            uint ID;
-            IDObject() :ID(0) {}
-            IDObject(uint _id):ID(_id){}
-        };
+        struct EntityPOD;
 
-        template<typename TEntity> class ECSEntityPool final : public SparseSet<IDObject, TEntity> {
-            using super = SparseSet<IDObject, TEntity>;
+        template<typename TEntity> class ECSEntityPool final{
+
+            private:
+                std::vector<EntityPOD>    _pool;
+                std::vector<uint>         _freelist;
             public:
-                ECSEntityPool() {}
-                ~ECSEntityPool() {}
+                ECSEntityPool() = default;
+                ~ECSEntityPool() = default;
 
-                TEntity* addEntity(Scene& _scene) {
-                    IDObject _id(super::pool().size() + 1);
-                    return super::_add(_id, _id.ID, _scene);
+                TEntity addEntity(Scene& _scene) {
+                    if (_freelist.empty()) {
+                        _pool.push_back(EntityPOD(0));
+                        _freelist.push_back(uint(_pool.size() - 1));
+                    }
+                    uint _id = _freelist.back();
+                    _freelist.pop_back();
+                    auto& element = _pool[_id];
+                    element.ID = _id + 1;
+                    element.sceneID = _scene.id();
+                    return TEntity(element.ID, element.sceneID, _pool[_id].versionID);
+                }
+                bool removeEntity(const uint& _id) {
+                    EntitySerialization _s(_id);
+                    uint index = _s.ID;
+                    ++_pool[index].versionID;
+                    _freelist.push_back(index);
                 }
                 bool removeEntity(const TEntity& _entity) {
-                    return super::_remove(_entity);
+                    return removeEntity(_entity.data);
                 }
-                TEntity* getEntity(const TEntity& _entity) {
-                    return super::_get(_entity);
+                EntityPOD* getEntity(const uint& _id) {
+                    EntitySerialization _s(_id);
+                    if (_s.ID < _pool.size() && _pool[_s.ID].versionID == _s.versionID) {
+                        return &_pool[_s.ID];
+                    }
+                    return nullptr;
                 }
-                void moveEntity(ECSEntityPool<TEntity>& other, uint _entityID) {
-                    //TEntity& e = pool[_entityID - 1];
-                    //other.addEntity(e);
-                    //removeEntity(e);
+                EntityPOD* getEntity(const TEntity& _entity) {
+                    return getEntity(_entity.data);
                 }
-                void moveEntity(ECSEntityPool<TEntity>& other, TEntity& _entity) { moveEntity(other, _entity.ID); }
-        };
+            };
     };
 };
 

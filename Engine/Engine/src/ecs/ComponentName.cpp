@@ -17,6 +17,8 @@ ComponentName::ComponentName(Entity& _entity, const char* _name) : ComponentBase
 ComponentName::~ComponentName() {
     _data = "";
 }
+const std::string& ComponentName::name() { return _data; }
+const uint ComponentName::size() { return _data.size(); }
 
 #pragma endregion
 

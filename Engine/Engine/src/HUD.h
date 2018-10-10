@@ -1,6 +1,6 @@
 #pragma once
-#ifndef HUD_H
-#define HUD_H
+#ifndef GAME_HUD_H
+#define GAME_HUD_H
 
 #include <glm/fwd.hpp>
 #include <glm/vec2.hpp>

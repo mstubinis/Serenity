@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CAPSULE_SPACE_H
-#define CAPSULE_SPACE_H
+#ifndef GAME_CAPSULE_SPACE_H
+#define GAME_CAPSULE_SPACE_H
 
 #include "SolarSystem.h"
 #include "core/Components.h"

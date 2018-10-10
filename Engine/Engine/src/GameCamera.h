@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GAMECAMERA_H
-#define GAMECAMERA_H
+#ifndef GAME_GAME_CAMERA_H
+#define GAME_GAME_CAMERA_H
 
 #include "core/Camera.h"
 

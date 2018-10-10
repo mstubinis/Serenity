@@ -1,6 +1,6 @@
 #pragma once
-#ifndef SOLARSYSTEM_H
-#define SOLARSYSTEM_H
+#ifndef GAME_SOLARSYSTEM_H
+#define GAME_SOLARSYSTEM_H
 
 #include "core/Scene.h"
 
