@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_SCENE_H_INCLUDE_GUARD
-#define ENGINE_SCENE_H_INCLUDE_GUARD
+#ifndef ENGINE_SCENE_H
+#define ENGINE_SCENE_H
 
 #include "core/engine/Engine_ResourceBasic.h"
 #include "core/engine/Engine_EventObject.h"
@@ -20,7 +20,8 @@ namespace Engine {
         class OLD_ComponentManager;
         class RenderPipeline;
         struct InternalScenePublicInterface;
-        class ECS;
+        
+        template<typename T> class ECS;
     };
 };
 class Scene: public EngineResource, public EventObserver{
@@ -35,11 +36,11 @@ class Scene: public EngineResource, public EventObserver{
 
         uint id();
         OLD_Entity* OLD_getEntity(uint entityID);
-        uint        OLD_addEntity(OLD_Entity&);
-        void        OLD_removeEntity(OLD_Entity&);
-        void        OLD_removeEntity(uint id);
-        bool        OLD_hasEntity(OLD_Entity&);
-        bool        OLD_hasEntity(uint entityID);
+        uint OLD_addEntity(OLD_Entity&);
+        void OLD_removeEntity(OLD_Entity&);
+        void OLD_removeEntity(uint id);
+        bool OLD_hasEntity(OLD_Entity&);
+        bool OLD_hasEntity(uint entityID);
 
         virtual void update(const float& dt);
 
@@ -67,7 +68,7 @@ namespace Engine {
             static void RenderForwardTransparent(Scene&, Camera&);
             static void AddMeshInstanceToPipeline(Scene&, MeshInstance&, RenderStage::Stage);
             static void RemoveMeshInstanceFromPipeline(Scene&, MeshInstance&, RenderStage::Stage);
-            static ECS& GetECS(Scene&);
+            static ECS<Entity>& GetECS(Scene&);
 
             static uint NumScenes;
         };

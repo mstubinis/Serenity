@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_NOISE_H_INCLUDE_GUARD
-#define ENGINE_NOISE_H_INCLUDE_GUARD
+#ifndef ENGINE_NOISE_H
+#define ENGINE_NOISE_H
 
 #include <memory>
 #include "core/engine/Engine_Utils.h"

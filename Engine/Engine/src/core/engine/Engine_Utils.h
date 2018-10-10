@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_UTILS_H_INCLUDE_GUARD
-#define ENGINE_UTILS_H_INCLUDE_GUARD
+#ifndef ENGINE_UTILS_H
+#define ENGINE_UTILS_H
 
 #include <vector>
 #include <boost/lexical_cast.hpp>

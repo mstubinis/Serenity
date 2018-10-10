@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ENGINE_MATH_H_INCLUDE_GUARD
-#define ENGINE_ENGINE_MATH_H_INCLUDE_GUARD
+#ifndef ENGINE_ENGINE_MATH_H
+#define ENGINE_ENGINE_MATH_H
 
 #include <glm/fwd.hpp>
 #include <glm/gtc/quaternion.hpp>

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GAME_HUD_H_INCLUDE_GUARD
-#define GAME_HUD_H_INCLUDE_GUARD
+#ifndef HUD_H
+#define HUD_H
 
 #include <glm/fwd.hpp>
 #include <glm/vec2.hpp>

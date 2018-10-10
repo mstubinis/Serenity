@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_NETWORKING_H_INCLUDE_GUARD
-#define ENGINE_NETWORKING_H_INCLUDE_GUARD
+#ifndef ENGINE_NETWORKING_H
+#define ENGINE_NETWORKING_H
 
 #include <SFML/Network.hpp>
 #include <memory>

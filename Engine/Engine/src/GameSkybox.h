@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GAME_GAMESKYBOX_H_INCLUDE_GUARD
-#define GAME_GAMESKYBOX_H_INCLUDE_GUARD
+#ifndef GAMESKYBOX_H
+#define GAMESKYBOX_H
 
 #include "core/Skybox.h"
 #include <memory>

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_BINDABLE_RESOURCE_H_INCLUDE_GUARD
-#define ENGINE_BINDABLE_RESOURCE_H_INCLUDE_GUARD
+#ifndef ENGINE_BINDABLE_RESOURCE_H
+#define ENGINE_BINDABLE_RESOURCE_H
 
 #include "core/engine/Engine_ResourceBasic.h"
 #include <boost/function.hpp>

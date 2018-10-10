@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_GL_STATE_MACHINE_H_INCLUDE_GUARD
-#define ENGINE_GL_STATE_MACHINE_H_INCLUDE_GUARD
+#ifndef ENGINE_GL_STATE_MACHINE_H
+#define ENGINE_GL_STATE_MACHINE_H
 
 #include <vector>
 #include <GL/glew.h>

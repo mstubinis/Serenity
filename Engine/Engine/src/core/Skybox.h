@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_SKYBOX_H_INCLUDE_GUARD
-#define ENGINE_SKYBOX_H_INCLUDE_GUARD
+#ifndef ENGINE_SKYBOX_H
+#define ENGINE_SKYBOX_H
 
 #include <string>
 #include <memory>

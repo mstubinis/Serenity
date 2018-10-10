@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ECS_COMPONENT_BASE_CLASS_H_INCLUDE_GUARD
-#define ENGINE_ECS_COMPONENT_BASE_CLASS_H_INCLUDE_GUARD
+#ifndef ENGINE_ECS_COMPONENT_BASE_CLASS_H
+#define ENGINE_ECS_COMPONENT_BASE_CLASS_H
 
 #include "ecs/Entity.h"
 
@@ -9,7 +9,8 @@ struct ComponentBaseClass{
 
     ComponentBaseClass() = default;
     ComponentBaseClass(Entity& owner_) {
-        owner.data = owner_.data;
+        owner.ID = owner_.ID;
+        owner.sceneID = owner_.sceneID;
     }
 
     ComponentBaseClass& operator=(const ComponentBaseClass& other) = default;

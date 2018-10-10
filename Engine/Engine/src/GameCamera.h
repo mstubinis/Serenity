@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GAME_GAMECAMERA_H_INCLUDE_GUARD
-#define GAME_GAMECAMERA_H_INCLUDE_GUARD
+#ifndef GAMECAMERA_H
+#define GAMECAMERA_H
 
 #include "core/Camera.h"
 

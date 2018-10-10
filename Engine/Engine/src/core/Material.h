@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_MATERIAL_H_INCLUDE_GUARD
-#define ENGINE_MATERIAL_H_INCLUDE_GUARD
+#ifndef ENGINE_MATERIAL_H
+#define ENGINE_MATERIAL_H
 
 #include "core/engine/BindableResource.h"
 #include <GL/glew.h>

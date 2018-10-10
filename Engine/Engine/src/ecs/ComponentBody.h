@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ECS_COMPONENT_BODY_H_INCLUDE_GUARD
-#define ENGINE_ECS_COMPONENT_BODY_H_INCLUDE_GUARD
+#ifndef ENGINE_ECS_COMPONENT_BODY_H
+#define ENGINE_ECS_COMPONENT_BODY_H
 
 #include "core/engine/Engine_Physics.h"
 #include "ecs/ComponentBaseClass.h"

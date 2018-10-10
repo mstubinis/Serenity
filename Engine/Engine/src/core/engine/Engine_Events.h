@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ENGINE_EVENTS_H_INCLUDE_GUARD
-#define ENGINE_ENGINE_EVENTS_H_INCLUDE_GUARD
+#ifndef ENGINE_ENGINE_EVENTS_H
+#define ENGINE_ENGINE_EVENTS_H
 
 #include <string>
 #include <glm/vec2.hpp>

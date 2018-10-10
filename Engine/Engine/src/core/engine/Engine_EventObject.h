@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_EVENT_OBJECT_H_INCLUDE_GUARD
-#define ENGINE_EVENT_OBJECT_H_INCLUDE_GUARD
+#ifndef ENGINE_EVENT_OBJECT_H
+#define ENGINE_EVENT_OBJECT_H
 
 #include "core/engine/Engine_EventEnums.h"
 #include "core/engine/Engine_Utils.h"

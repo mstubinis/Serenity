@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_MESH_H_INCLUDE_GUARD
-#define ENGINE_MESH_H_INCLUDE_GUARD
+#ifndef ENGINE_MESH_H
+#define ENGINE_MESH_H
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>

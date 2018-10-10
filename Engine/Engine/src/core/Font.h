@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_FONT_H_INCLUDE_GUARD
-#define ENGINE_FONT_H_INCLUDE_GUARD
+#ifndef ENGINE_FONT_H
+#define ENGINE_FONT_H
 
 #include "core/engine/Engine_ResourceBasic.h"
 #include <string>

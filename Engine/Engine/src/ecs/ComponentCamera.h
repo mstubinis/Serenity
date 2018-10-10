@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ECS_COMPONENT_CAMERA_H_INCLUDE_GUARD
-#define ENGINE_ECS_COMPONENT_CAMERA_H_INCLUDE_GUARD
+#ifndef ENGINE_ECS_COMPONENT_CAMERA_H
+#define ENGINE_ECS_COMPONENT_CAMERA_H
 
 #include "ecs/ComponentBaseClass.h"
 #include "ecs/ECSSystem.h"
@@ -17,7 +17,6 @@ struct ComponentCameraEntityAddedToSceneFunction;
 struct ComponentCameraComponentAddedToEntityFunction;
 struct ComponentCameraSceneEnteredFunction;
 struct ComponentCameraSceneLeftFunction;
-struct ComponentCameraFunctions;
 
 class ComponentCamera : public ComponentBaseClass {
     friend struct ::ComponentCameraUpdateFunction;
@@ -25,7 +24,6 @@ class ComponentCamera : public ComponentBaseClass {
     friend struct ::ComponentCameraComponentAddedToEntityFunction;
     friend struct ::ComponentCameraSceneEnteredFunction;
     friend struct ::ComponentCameraSceneLeftFunction;
-    friend struct ::ComponentCameraFunctions;
     friend class  ::Camera;
     friend class  ::ComponentModel;
     private:

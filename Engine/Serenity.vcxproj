@@ -65,11 +65,8 @@
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentCamera.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentModel.cpp" />
-    <ClCompile Include="Engine\src\ecs\ComponentName.cpp" />
-    <ClCompile Include="Engine\src\ecs\ECSEntityPool.cpp" />
     <ClCompile Include="Engine\src\ecs\ECSRegistry.cpp" />
     <ClCompile Include="Engine\src\ecs\Entity.cpp" />
-    <ClCompile Include="Engine\src\ecs\EntitySerialization.cpp" />
     <ClCompile Include="Engine\src\Game.cpp" />
     <ClCompile Include="Engine\src\GameCamera.cpp" />
     <ClCompile Include="Engine\src\GameSkybox.cpp" />
@@ -125,14 +122,12 @@
     <ClInclude Include="Engine\src\ecs\ComponentBody.h" />
     <ClInclude Include="Engine\src\ecs\ComponentCamera.h" />
     <ClInclude Include="Engine\src\ecs\ComponentModel.h" />
-    <ClInclude Include="Engine\src\ecs\ComponentName.h" />
     <ClInclude Include="Engine\src\ecs\ECS.h" />
     <ClInclude Include="Engine\src\ecs\ECSComponentPool.h" />
     <ClInclude Include="Engine\src\ecs\ECSEntityPool.h" />
     <ClInclude Include="Engine\src\ecs\ECSRegistry.h" />
     <ClInclude Include="Engine\src\ecs\ECSSystem.h" />
     <ClInclude Include="Engine\src\ecs\Entity.h" />
-    <ClInclude Include="Engine\src\ecs\EntitySerialization.h" />
     <ClInclude Include="Engine\src\ecs\SparseSet.h" />
     <ClInclude Include="Engine\src\GameCamera.h" />
     <ClInclude Include="Engine\src\GameSkybox.h" />

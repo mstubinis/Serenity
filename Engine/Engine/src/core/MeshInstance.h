@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_MESH_INSTANCE_H_INCLUDE_GUARD
-#define ENGINE_MESH_INSTANCE_H_INCLUDE_GUARD
+#ifndef ENGINE_MESH_INSTANCE_H
+#define ENGINE_MESH_INSTANCE_H
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>

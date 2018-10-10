@@ -1,32 +1,56 @@
 #include "ecs/Entity.h"
-#include "ecs/EntitySerialization.h"
 #include "core/engine/Engine.h"
 #include "core/Scene.h"
-
-#include <algorithm> //std::swap (until C++11)
-#include <utility>   //std::swap (since C++11)
 
 using namespace Engine;
 using namespace std;
 
-Entity Entity::_null = Entity(0,0,0);
+Entity Entity::_null = Entity(0);
 
+
+Entity::Entity(){
+    ID = 0; sceneID = 0;
+}
+Entity::Entity(uint _id){
+    ID = _id;
+    sceneID = 0;
+}
+Entity::Entity(uint _id, Scene& _scene){
+    ID = _id;
+    sceneID = _scene.id();
+}
+
+Entity::Entity(const Entity& other) {
+    ID = other.ID;
+    sceneID = other.sceneID;
+}
+Entity& Entity::operator=(const Entity& other) {
+    if (&other == this)
+        return *this;
+    ID = other.ID;
+    sceneID = other.sceneID;
+    return *this;
+}
+
+Entity::~Entity() { 
+    ID = 0; sceneID = 0; 
+}
+inline Entity::operator uint() const { 
+    return sceneID << 24 | ID; 
+}
 Scene& Entity::scene() {
-    epriv::EntitySerialization _s(*this);
-    return epriv::Core::m_Engine->m_ResourceManager._getSceneByID(_s.sceneID);
+    return epriv::Core::m_Engine->m_ResourceManager._getSceneByID(sceneID);
 }
-bool Entity::null() { return data == 0 ? true : false; }
+bool Entity::null() { 
+    if (ID == 0) return true; 
+    return false; 
+}
 void Entity::move(Scene& _scene) {
-    epriv::EntitySerialization _s(*this);
-    if (_scene.id() == _s.sceneID) return;
+    if (_scene.id() == sceneID) return;
     //do whatever is needed
-    serialize(_s.ID, _scene.id(), _s.versionID);
+    //for(auto system: allComponentSystems){
+    //	system.removeComponent(this);
+    //}
+    sceneID = _scene.id();
 }
 
-
-
-ECS& epriv::InternalEntityPublicInterface::GetECS(Entity& _entity) {
-    EntitySerialization _s(_entity);
-    Scene& s = epriv::Core::m_Engine->m_ResourceManager._getSceneByID(_s.sceneID);
-    return Engine::epriv::InternalScenePublicInterface::GetECS(s);
-}

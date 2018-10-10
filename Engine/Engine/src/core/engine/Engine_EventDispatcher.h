@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_EVENT_DISPATCHER_H_INCLUDE_GUARD
-#define ENGINE_EVENT_DISPATCHER_H_INCLUDE_GUARD
+#ifndef ENGINE_EVENT_DISPATCHER_H
+#define ENGINE_EVENT_DISPATCHER_H
 
 #include <vector>
 #include "core/engine/Engine_EventObject.h"

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GAME_PLANET_H_INCLUDE_GUARD
-#define GAME_PLANET_H_INCLUDE_GUARD
+#ifndef PLANET_H
+#define PLANET_H
 
 #include "core/Components.h"
 

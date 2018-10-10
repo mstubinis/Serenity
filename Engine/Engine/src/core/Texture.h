@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_TEXTURE_H_INCLUDE_GUARD
-#define ENGINE_TEXTURE_H_INCLUDE_GUARD
+#ifndef ENGINE_TEXTURE_H
+#define ENGINE_TEXTURE_H
 
 #include "core/engine/Engine_ResourceBasic.h"
 #include <glm/fwd.hpp>
