@@ -12,7 +12,7 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-struct ComponentModelFunctions final {
+struct epriv::ComponentModelFunctions final {
     static float CalculateRadius(ComponentModel& super) {
         float maxLength = 0;
         glm::vec3 boundingBox = glm::vec3(0.0f);
@@ -134,7 +134,7 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera& camera) {
 
 #pragma region System
 
-struct ComponentModelUpdateFunction final {
+struct epriv::ComponentModelUpdateFunction final {
     static void _defaultUpdate(vector<uint>& vec, vector<ComponentModel>& _components,Camera* _camera) {
         for (uint j = 0; j < vec.size(); ++j) {
             ComponentModel& m = _components[vec[j]];
@@ -164,11 +164,11 @@ struct ComponentModelUpdateFunction final {
         epriv::threading::waitForAll();
     }
 };
-struct ComponentModelComponentAddedToEntityFunction final {void operator()(void* _component) const {
+struct epriv::ComponentModelComponentAddedToEntityFunction final {void operator()(void* _component) const {
     ComponentModel& componentModel = *(ComponentModel*)_component;
     ComponentModelFunctions::CalculateRadius(componentModel);
 }};
-struct ComponentModelEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity) const {
+struct epriv::ComponentModelEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity) const {
     auto& scene = _entity.scene();
     auto& pool = *(ECSComponentPool<Entity, ComponentModel>*)_componentPool;
     auto& component = *pool.getComponent(_entity);
@@ -177,20 +177,20 @@ struct ComponentModelEntityAddedToSceneFunction final {void operator()(void* _co
         InternalScenePublicInterface::AddMeshInstanceToPipeline(scene, meshInstance, meshInstance.stage());
     }
 }};
-struct ComponentModelSceneEnteredFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
+struct epriv::ComponentModelSceneEnteredFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
 
 }};
-struct ComponentModelSceneLeftFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
+struct epriv::ComponentModelSceneLeftFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
 
 }};
 
 
 ComponentModelSystem::ComponentModelSystem() {
-    setUpdateFunction(ComponentModelUpdateFunction());
-    setOnComponentAddedToEntityFunction(ComponentModelComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(ComponentModelEntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(ComponentModelSceneEnteredFunction());
-    setOnSceneLeftFunction(ComponentModelSceneLeftFunction());
+    setUpdateFunction(epriv::ComponentModelUpdateFunction());
+    setOnComponentAddedToEntityFunction(epriv::ComponentModelComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(epriv::ComponentModelEntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(epriv::ComponentModelSceneEnteredFunction());
+    setOnSceneLeftFunction(epriv::ComponentModelSceneLeftFunction());
 }
 
 #pragma endregion

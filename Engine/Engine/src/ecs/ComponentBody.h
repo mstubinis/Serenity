@@ -17,18 +17,22 @@
 class Collision;
 class ComponentModel;
 
-struct ComponentBodyUpdateFunction;
-struct ComponentBodyEntityAddedToSceneFunction;
-struct ComponentBodyComponentAddedToEntityFunction;
-struct ComponentBodySceneEnteredFunction;
-struct ComponentBodySceneLeftFunction;
+namespace Engine {
+    namespace epriv {
+        struct ComponentBodyUpdateFunction;
+        struct ComponentBodyEntityAddedToSceneFunction;
+        struct ComponentBodyComponentAddedToEntityFunction;
+        struct ComponentBodySceneEnteredFunction;
+        struct ComponentBodySceneLeftFunction;
+    };
+};
 
 class ComponentBody : public ComponentBaseClass {
-    friend struct ::ComponentBodyUpdateFunction;
-    friend struct ::ComponentBodyComponentAddedToEntityFunction;
-    friend struct ::ComponentBodyEntityAddedToSceneFunction;
-    friend struct ::ComponentBodySceneEnteredFunction;
-    friend struct ::ComponentBodySceneLeftFunction;
+    friend struct Engine::epriv::ComponentBodyUpdateFunction;
+    friend struct Engine::epriv::ComponentBodyComponentAddedToEntityFunction;
+    friend struct Engine::epriv::ComponentBodyEntityAddedToSceneFunction;
+    friend struct Engine::epriv::ComponentBodySceneEnteredFunction;
+    friend struct Engine::epriv::ComponentBodySceneLeftFunction;
     friend class  ::ComponentModel;
     private:
         struct PhysicsData {

@@ -626,7 +626,7 @@ void ComponentBody::setMass(float mass) {
 
 #pragma region System
 
-struct ComponentBodyUpdateFunction final {
+struct epriv::ComponentBodyUpdateFunction final {
     static void _defaultUpdate(vector<uint>& _vec, vector<ComponentBody>& _components) {
         for (uint j = 0; j < _vec.size(); ++j) {
             ComponentBody& b = _components[_vec[j]];
@@ -650,14 +650,14 @@ struct ComponentBodyUpdateFunction final {
         epriv::threading::waitForAll();
     }
 };
-struct ComponentBodyComponentAddedToEntityFunction final {void operator()(void* _component) const {
+struct epriv::ComponentBodyComponentAddedToEntityFunction final {void operator()(void* _component) const {
     ComponentBody& component = *(ComponentBody*)_component;
     if (component._physics) {
         auto* _collision = component.data.p->collision;
         component.setCollision((CollisionType::Type)_collision->getType(), component.data.p->mass);
     }
 }};
-struct ComponentBodyEntityAddedToSceneFunction final {void operator()(void* _componentPool,Entity& _entity) const {
+struct epriv::ComponentBodyEntityAddedToSceneFunction final {void operator()(void* _componentPool,Entity& _entity) const {
     auto& scene = _entity.scene();
     auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
     auto& component = *pool.getComponent(_entity);
@@ -670,19 +670,19 @@ struct ComponentBodyEntityAddedToSceneFunction final {void operator()(void* _com
         }
     }
 }};
-struct ComponentBodySceneEnteredFunction final {void operator()(void* _componentPool,Scene& _Scene) const {
+struct epriv::ComponentBodySceneEnteredFunction final {void operator()(void* _componentPool,Scene& _Scene) const {
 
 }};
-struct ComponentBodySceneLeftFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
+struct epriv::ComponentBodySceneLeftFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
 
 }};
     
 ComponentBodySystem::ComponentBodySystem() {
-    setUpdateFunction(ComponentBodyUpdateFunction());
-    setOnComponentAddedToEntityFunction(ComponentBodyComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(ComponentBodyEntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(ComponentBodySceneEnteredFunction());
-    setOnSceneLeftFunction(ComponentBodySceneLeftFunction());
+    setUpdateFunction(epriv::ComponentBodyUpdateFunction());
+    setOnComponentAddedToEntityFunction(epriv::ComponentBodyComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(epriv::ComponentBodyEntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(epriv::ComponentBodySceneEnteredFunction());
+    setOnSceneLeftFunction(epriv::ComponentBodySceneLeftFunction());
 }
 
 #pragma endregion

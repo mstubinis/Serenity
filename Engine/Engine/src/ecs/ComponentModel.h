@@ -15,20 +15,24 @@ class MeshInstance;
 
 class ComponentCamera;
 
-struct ComponentModelUpdateFunction;
-struct ComponentModelEntityAddedToSceneFunction;
-struct ComponentModelComponentAddedToEntityFunction;
-struct ComponentModelSceneEnteredFunction;
-struct ComponentModelSceneLeftFunction;
-struct ComponentModelFunctions;
+namespace Engine {
+    namespace epriv {
+        struct ComponentModelUpdateFunction;
+        struct ComponentModelEntityAddedToSceneFunction;
+        struct ComponentModelComponentAddedToEntityFunction;
+        struct ComponentModelSceneEnteredFunction;
+        struct ComponentModelSceneLeftFunction;
+        struct ComponentModelFunctions;
+    };
+};
 
 class ComponentModel : public ComponentBaseClass {
-    friend struct ::ComponentModelUpdateFunction;
-    friend struct ::ComponentModelEntityAddedToSceneFunction;
-    friend struct ::ComponentModelComponentAddedToEntityFunction;
-    friend struct ::ComponentModelSceneEnteredFunction;
-    friend struct ::ComponentModelSceneLeftFunction;
-    friend struct ::ComponentModelFunctions;
+    friend struct Engine::epriv::ComponentModelUpdateFunction;
+    friend struct Engine::epriv::ComponentModelEntityAddedToSceneFunction;
+    friend struct Engine::epriv::ComponentModelComponentAddedToEntityFunction;
+    friend struct Engine::epriv::ComponentModelSceneEnteredFunction;
+    friend struct Engine::epriv::ComponentModelSceneLeftFunction;
+    friend struct Engine::epriv::ComponentModelFunctions;
     friend class  ::ComponentCamera;
     private:
         std::vector<MeshInstance*> models;

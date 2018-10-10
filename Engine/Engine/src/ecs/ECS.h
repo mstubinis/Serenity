@@ -45,12 +45,35 @@ namespace Engine {
                 ECS(ECS&& other) noexcept = delete;            // non construction-moveable
                 ECS& operator=(ECS&& other) noexcept = delete; // non moveable
 
-                void update(const float& dt) {
+
+                //"event handlers"
+                void update(const float& dt) { 
                     for (uint i = 0; i < systems.size(); ++i) {
-                        auto& system = *systems[i];
-                        system.update(dt);
+                        auto& system = *systems[i]; system.update(dt);
                     }
                 }
+                void onComponentAddedToEntity(void* _component) { 
+                    for (uint i = 0; i < systems.size(); ++i) {
+                        auto& system = *systems[i]; system.onComponentAddedToEntity(_component);
+                    }
+                }
+                void onEntityAddedToScene(Entity& _entity) { 
+                    for (uint i = 0; i < systems.size(); ++i) {
+                        auto& system = *systems[i]; system.onEntityAddedToScene(_entity);
+                    }
+                }
+                void onSceneEntered(Scene& _Scene) { 
+                    for (uint i = 0; i < systems.size(); ++i) {
+                        auto& system = *systems[i]; system.onSceneEntered(_Scene);
+                    }
+                }
+                void onSceneLeft(Scene& _Scene) { 
+                    for (uint i = 0; i < systems.size(); ++i) {
+                        auto& system = *systems[i]; system.onSceneLeft(_Scene);
+                    }
+                }
+
+
 
                 template<typename TComponent> ECSComponentPool<TEntity, TComponent>& getPool() {
                     using CPoolType = ECSComponentPool<TEntity, TComponent>;

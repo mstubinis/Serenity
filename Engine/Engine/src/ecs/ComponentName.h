@@ -27,10 +27,4 @@ class ComponentName : public ComponentBaseClass {
         ~ComponentName();
 };
 
-class ComponentNameSystem : public Engine::epriv::ECSSystemCI {
-    public:
-        ComponentNameSystem();
-        ~ComponentNameSystem() = default;
-};
-
 #endif

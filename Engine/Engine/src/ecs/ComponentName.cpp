@@ -1,7 +1,7 @@
 #include "ComponentName.h"
 
-using namespace std;
 using namespace Engine;
+using namespace std;
 
 #pragma region Component
 
@@ -25,8 +25,6 @@ const uint ComponentName::size() { return _data.size(); }
 
 #pragma region System
 
-ComponentNameSystem::ComponentNameSystem(){
 
-}
 
 #pragma endregion

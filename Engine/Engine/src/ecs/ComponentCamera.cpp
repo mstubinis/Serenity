@@ -77,7 +77,7 @@ void ComponentCamera::setFar(float f) { _farPlane = f; /*epriv::ComponentCameraS
 
 #pragma region System
 
-struct ComponentCameraUpdateFunction final {
+struct epriv::ComponentCameraUpdateFunction final {
     static void _defaultUpdate(vector<uint>& _vec, vector<ComponentCamera>& _components,const float& dt) {
         for (uint j = 0; j < _vec.size(); ++j) {
             ComponentCamera& b = _components[_vec[j]];
@@ -96,27 +96,27 @@ struct ComponentCameraUpdateFunction final {
         epriv::threading::waitForAll();
     }
 };
-struct ComponentCameraComponentAddedToEntityFunction final {void operator()(void* _component) const {
+struct epriv::ComponentCameraComponentAddedToEntityFunction final {void operator()(void* _component) const {
 
 }};
-struct ComponentCameraEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity) const {
+struct epriv::ComponentCameraEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity) const {
     //auto& scene = _entity.scene();
     //auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)_componentPool;
     //auto& component = *pool.getComponent(_entity);
 }};
-struct ComponentCameraSceneEnteredFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
+struct epriv::ComponentCameraSceneEnteredFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
 
 }};
-struct ComponentCameraSceneLeftFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
+struct epriv::ComponentCameraSceneLeftFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
 
 }};
 
 ComponentCameraSystem::ComponentCameraSystem() {
-    setUpdateFunction(ComponentCameraUpdateFunction());
-    setOnComponentAddedToEntityFunction(ComponentCameraComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(ComponentCameraEntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(ComponentCameraSceneEnteredFunction());
-    setOnSceneLeftFunction(ComponentCameraSceneLeftFunction());
+    setUpdateFunction(epriv::ComponentCameraUpdateFunction());
+    setOnComponentAddedToEntityFunction(epriv::ComponentCameraComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(epriv::ComponentCameraEntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(epriv::ComponentCameraSceneEnteredFunction());
+    setOnSceneLeftFunction(epriv::ComponentCameraSceneLeftFunction());
 }
 
 #pragma endregion

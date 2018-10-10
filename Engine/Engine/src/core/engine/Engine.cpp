@@ -2,6 +2,7 @@
 #include "core/Scene.h"
 #include <glm/vec2.hpp>
 #include <SFML/System.hpp>
+#include <ecs/ECS.h>
 
 #include <time.h>
 #include <memory>
@@ -77,7 +78,13 @@ void updateLogic(float dt){
     epriv::Core::m_Engine->m_TimeManager.stop_clock();
     Game::onPreUpdate(dt);
     Game::update(dt);
-    Resources::getCurrentScene()->update(dt);
+
+    //update current scene
+    Scene& scene = *Resources::getCurrentScene();
+    scene.update(dt);
+    epriv::InternalScenePublicInterface::GetECS(scene).update(dt);
+
+
     epriv::Core::m_Engine->m_ComponentManager._update(dt);
     epriv::Core::m_Engine->m_ThreadManager._update(dt);
     RESET_EVENTS();

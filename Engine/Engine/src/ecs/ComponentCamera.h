@@ -12,18 +12,22 @@
 class Camera;
 class ComponentModel;
 
-struct ComponentCameraUpdateFunction;
-struct ComponentCameraEntityAddedToSceneFunction;
-struct ComponentCameraComponentAddedToEntityFunction;
-struct ComponentCameraSceneEnteredFunction;
-struct ComponentCameraSceneLeftFunction;
+namespace Engine {
+    namespace epriv {
+        struct ComponentCameraUpdateFunction;
+        struct ComponentCameraEntityAddedToSceneFunction;
+        struct ComponentCameraComponentAddedToEntityFunction;
+        struct ComponentCameraSceneEnteredFunction;
+        struct ComponentCameraSceneLeftFunction;
+    };
+};
 
 class ComponentCamera : public ComponentBaseClass {
-    friend struct ::ComponentCameraUpdateFunction;
-    friend struct ::ComponentCameraEntityAddedToSceneFunction;
-    friend struct ::ComponentCameraComponentAddedToEntityFunction;
-    friend struct ::ComponentCameraSceneEnteredFunction;
-    friend struct ::ComponentCameraSceneLeftFunction;
+    friend struct Engine::epriv::ComponentCameraUpdateFunction;
+    friend struct Engine::epriv::ComponentCameraEntityAddedToSceneFunction;
+    friend struct Engine::epriv::ComponentCameraComponentAddedToEntityFunction;
+    friend struct Engine::epriv::ComponentCameraSceneEnteredFunction;
+    friend struct Engine::epriv::ComponentCameraSceneLeftFunction;
     friend class  ::Camera;
     friend class  ::ComponentModel;
     private:

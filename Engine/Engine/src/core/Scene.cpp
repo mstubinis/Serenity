@@ -250,7 +250,6 @@ Scene::~Scene(){
     m_i->_destruct();
 }
 void Scene::update(const float& dt){
-    m_i->m_ECS.update(dt);
 }
 glm::vec3 Scene::getBackgroundColor(){ return m_i->m_BackgroundColor; }
 SkyboxEmpty* Scene::skybox() const { return m_i->m_Skybox; }
