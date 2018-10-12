@@ -643,13 +643,15 @@ class epriv::PhysicsManager::impl final{
         void _destructWorldObjectsOnly() {
             for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
                 btCollisionObject* obj = data->world->getCollisionObjectArray()[i];
-                btRigidBody* body = btRigidBody::upcast(obj);
-                //if (body) {
-                    //auto* motionState = body->getMotionState();
-                    //SAFE_DELETE(motionState);
-                //}
-                data->world->removeCollisionObject(obj);
-                SAFE_DELETE(obj);
+                if (obj) {
+                    //btRigidBody* body = btRigidBody::upcast(obj);
+                    //if (body) {
+                        //auto* motionState = body->getMotionState();
+                        //SAFE_DELETE(motionState);
+                    //}
+                    data->world->removeCollisionObject(obj);
+                    SAFE_DELETE(obj);
+                }
             }
         }
         void _destruct(){

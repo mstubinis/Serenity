@@ -125,8 +125,8 @@ class epriv::OLD_ComponentManager::impl final{
             Core::m_Engine->m_TimeManager.calculate_physics();
         }
         void _update(const float& dt, OLD_ComponentManager& super){
-            _updateCurrentScene(dt); //take player input and perform player actions
             _updatePhysicsEngine(dt);
+            _updateCurrentScene(dt); //take player input and perform player actions
             if(!m_Paused){
                 m_Systems[OLD_ComponentType::Body]->update(dt);
             }

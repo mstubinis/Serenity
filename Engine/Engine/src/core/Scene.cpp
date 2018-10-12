@@ -9,6 +9,9 @@
 #include "ecs/Entity.h"
 #include "ecs/ComponentBody.h"
 #include "ecs/ComponentName.h"
+#include "ecs/ComponentModel.h"
+#include "ecs/ComponentLogic.h"
+#include "ecs/ComponentCamera.h"
 
 using namespace Engine;
 using namespace Engine::epriv;
@@ -40,9 +43,13 @@ class Scene::impl final {
             m_ID = InternalScenePublicInterface::NumScenes;
             
 
-            
-            //ComponentBodySystem _b;
-            //m_ECS.assignSystem<ComponentBody>(_b);
+            m_ECS.assignSystem<ComponentLogic>(ComponentLogicSystem());
+            m_ECS.assignSystem<ComponentBody>(ComponentBodySystem());
+            m_ECS.assignSystem<ComponentCamera>(ComponentCameraSystem());
+            m_ECS.assignSystem<ComponentModel>(ComponentModelSystem());
+
+
+            /*
             Entity e0 = m_ECS.createEntity(super);
             Entity e1 = m_ECS.createEntity(super);
             Entity e2 = m_ECS.createEntity(super);
@@ -54,14 +61,13 @@ class Scene::impl final {
             e2.addComponent<ComponentBody>(CollisionType::None);
             e3.addComponent<ComponentBody>(CollisionType::None);
             e4.addComponent<ComponentBody>(CollisionType::None);
-            /*
-            e2.removeComponent<ComponentName>();
-            e4.removeComponent<ComponentName>();
-            e0.removeComponent<ComponentName>();
-            e3.removeComponent<ComponentName>();
-            e1.removeComponent<ComponentName>();
-            */
             
+            //e2.removeComponent<ComponentBody>();
+            //e4.removeComponent<ComponentBody>();
+            //e0.removeComponent<ComponentBody>();
+            //e3.removeComponent<ComponentBody>();
+            //e1.removeComponent<ComponentBody>();
+            */
         }
         void _destruct() {
             SAFE_DELETE(m_Skybox);

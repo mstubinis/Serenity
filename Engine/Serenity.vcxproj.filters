@@ -227,6 +227,9 @@
     <ClCompile Include="Engine\src\ecs\EntitySerialization.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\src\ecs\ComponentLogic.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -411,6 +414,9 @@
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\ECSSystem.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\ComponentLogic.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

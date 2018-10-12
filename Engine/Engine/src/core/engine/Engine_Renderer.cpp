@@ -2045,6 +2045,9 @@ class epriv::RenderManager::impl final{
             m_FullscreenTriangle->render();
         }
         void _render(GBuffer& gbuffer, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool& HUD, OLD_Entity* ignore,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
+            //TODO: find out why facing a certain direction causes around 2 - 3 ms frame spike times. determine if this is due to an object or a rendering
+            //algorithm. also find out why enabling ssao REDUCES frame ms time. use opengl timers to isolate the troubling functions.
+            
             Scene& s = *Resources::getCurrentScene();
             //restore default state, might have to increase this as we use more textures
             for(uint i = 0; i < 9; ++i){ 

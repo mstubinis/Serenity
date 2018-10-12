@@ -10,7 +10,7 @@
 
 namespace Engine {
     namespace epriv {
-        template<typename TEntity> class ECS final {
+        template<typename TEntity> class ECS{
             private:
                 ECSEntityPool<TEntity>                                    entityPool;
                 std::vector<std::unique_ptr<SparseSet<TEntity>>>          componentPools;
@@ -37,7 +37,7 @@ namespace Engine {
                 }
             public:
                 ECS() = default;
-                ~ECS() {
+                virtual ~ECS() {
                     SAFE_DELETE_VECTOR(systems);
                 }
                 ECS(const ECS&) = delete;                      // non construction-copyable
@@ -80,7 +80,7 @@ namespace Engine {
                     uint type_slot = ECSRegistry::type_slot<TComponent>();
                     return *(CPoolType*)componentPools[type_slot].get();
                 }
-                template<typename TComponent> void assignSystem(ECSSystemCI& _systemCI) {
+                template<typename TComponent> void assignSystem(const ECSSystemCI& _systemCI) {
                     uint type_slot = ECSRegistry::type_slot<TComponent>();
                     using CPoolType = ECSComponentPool<TEntity, TComponent>;
                     using CSystemType = ECSSystem<TEntity, TComponent>;
