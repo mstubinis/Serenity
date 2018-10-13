@@ -42,8 +42,8 @@ class ComponentBody : public ComponentBaseClass {
             float mass;
 
             PhysicsData();
-            PhysicsData(const PhysicsData& other);
-            PhysicsData& operator=(const PhysicsData& other);
+            PhysicsData(const PhysicsData& other) = delete;
+            PhysicsData& operator=(const PhysicsData& other) = delete;
             PhysicsData& operator=(PhysicsData&& other) noexcept;
             PhysicsData(PhysicsData&& other) noexcept;
             ~PhysicsData();         
@@ -55,8 +55,8 @@ class ComponentBody : public ComponentBaseClass {
             glm::mat4 modelMatrix;
 
             NormalData();
-            NormalData(const NormalData& other);
-            NormalData& operator=(const NormalData& other);
+            NormalData(const NormalData& other) = delete;
+            NormalData& operator=(const NormalData& other) = delete;
             NormalData& operator=(NormalData&& other) noexcept;
             NormalData(NormalData&& other) noexcept;
             ~NormalData();
@@ -72,8 +72,8 @@ class ComponentBody : public ComponentBaseClass {
         ComponentBody(Entity&);
         ComponentBody(Entity&, CollisionType::Type);
 
-        ComponentBody& operator=(const ComponentBody& other);
-        ComponentBody(const ComponentBody& other);
+        ComponentBody& operator=(const ComponentBody& other) = delete;
+        ComponentBody(const ComponentBody& other) = delete;
         ComponentBody(ComponentBody&& other) noexcept;
         ComponentBody& operator=(ComponentBody&& other) noexcept;
 

@@ -165,16 +165,23 @@ struct epriv::ComponentModelUpdateFunction final {
     }
 };
 struct epriv::ComponentModelComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
-    ComponentModel& componentModel = *(ComponentModel*)_component;
-    ComponentModelFunctions::CalculateRadius(componentModel);
+    ComponentModel& component = *(ComponentModel*)_component;
+    ComponentModelFunctions::CalculateRadius(component);
+
+    for (uint i = 0; i < component.models.size(); ++i) {
+        auto& meshInstance = *component.models[i];
+        InternalScenePublicInterface::AddMeshInstanceToPipeline(_entity.scene(), meshInstance, meshInstance.stage());
+    }
 }};
 struct epriv::ComponentModelEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
+    /*
     auto& pool = *(ECSComponentPool<Entity, ComponentModel>*)_componentPool;
     auto& component = *pool.getComponent(_entity);
     for (uint i = 0; i < component.models.size(); ++i) {
         auto& meshInstance = *component.models[i];
         InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, meshInstance, meshInstance.stage());
     }
+    */
 }};
 struct epriv::ComponentModelSceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 

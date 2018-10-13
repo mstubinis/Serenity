@@ -43,6 +43,13 @@ class Collision final{
         Collision(OLD_ComponentModel&, float mass = 0);
         Collision(ComponentModel&, float mass = 0);
         Collision(CollisionType::Type, Mesh* mesh, float mass = 0);
+
+        Collision(const Collision& other) = delete;
+        Collision& operator=(const Collision& other) = delete;
+        Collision(Collision&& other) noexcept;
+        Collision& operator=(Collision&& other) noexcept;
+
+
         ~Collision();
 
         void setMass(float mass);

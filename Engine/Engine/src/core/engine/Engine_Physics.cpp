@@ -641,7 +641,8 @@ class epriv::PhysicsManager::impl final{
             data->debugDrawer->initRenderingContext();
         }
         void _destructWorldObjectsOnly() {
-            for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
+            int collisionObjCount = data->world->getNumCollisionObjects();
+            for (int i = 0; i < collisionObjCount; ++i) {
                 btCollisionObject* obj = data->world->getCollisionObjectArray()[i];
                 if (obj) {
                     //btRigidBody* body = btRigidBody::upcast(obj);
@@ -692,10 +693,11 @@ class epriv::PhysicsManager::impl final{
             data->debugDrawer->postRender();
         }
         void _addRigidBody(btRigidBody* _rigidBody) {
-            for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
-                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray()[i]);
-                if (rigidBody) {
-                    if (rigidBody == _rigidBody) {
+            int collisionObjCount = data->world->getNumCollisionObjects();
+            for (int i = 0; i < collisionObjCount; ++i) {
+                btRigidBody* body = btRigidBody::upcast(data->world->getCollisionObjectArray()[i]);
+                if (body) {
+                    if (body == _rigidBody) {
                         return;
                     }
                 }
@@ -703,10 +705,11 @@ class epriv::PhysicsManager::impl final{
             data->world->addRigidBody(_rigidBody);
         }
         void _addRigidBody(btRigidBody* _rigidBody, short group, short mask) {
-            for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
-                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray()[i]);
-                if (rigidBody) {
-                    if (rigidBody == _rigidBody) {
+            int collisionObjCount = data->world->getNumCollisionObjects();
+            for (int i = 0; i < collisionObjCount; ++i) {
+                btRigidBody* body = btRigidBody::upcast(data->world->getCollisionObjectArray()[i]);
+                if (body) {
+                    if (body == _rigidBody) {
                         return;
                     }
                 }
@@ -714,10 +717,11 @@ class epriv::PhysicsManager::impl final{
             data->world->addRigidBody(_rigidBody, group, mask);
         }
         void _removeRigidBody(btRigidBody* _rigidBody) {
-            for (int i = 0; i < data->world->getNumCollisionObjects(); ++i) {
-                btRigidBody* rigidBody = dynamic_cast<btRigidBody*>(data->world->getCollisionObjectArray()[i]);
-                if (rigidBody) {
-                    if (rigidBody == _rigidBody) {
+            int collisionObjCount = data->world->getNumCollisionObjects();
+            for (int i = 0; i < collisionObjCount; ++i) {
+                btRigidBody* body = btRigidBody::upcast(data->world->getCollisionObjectArray()[i]);
+                if (body) {
+                    if (body == _rigidBody) {
                         data->world->removeRigidBody(_rigidBody);
                         return;
                     }
@@ -850,13 +854,44 @@ Collision::Collision(CollisionType::Type _type, Mesh* _mesh, float _mass){
 Collision::~Collision() {
     btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
     if (compoundCast) {
-        for (int i = 0; i < compoundCast->getNumChildShapes(); ++i) {
+        int numChildShapes = compoundCast->getNumChildShapes();
+        for (int i = 0; i < numChildShapes; ++i) {
             btCollisionShape* shape = compoundCast->getChildShape(i);
             SAFE_DELETE(shape);
         }
     }
     SAFE_DELETE(m_Shape);
 }
+/*
+Collision::Collision(const Collision& other) noexcept {
+    m_Inertia = other.m_Inertia;
+    m_Type = other.m_Type;
+    if (other.m_Shape) m_Shape = other.m_Shape;
+    else               m_Shape = nullptr;
+}
+Collision& Collision::operator=(const Collision& other) noexcept {
+    m_Inertia = other.m_Inertia;
+    m_Type = other.m_Type;
+    if (other.m_Shape) m_Shape = other.m_Shape;
+    else               m_Shape = nullptr;
+    return *this;
+}
+*/
+Collision::Collision(Collision&& other) noexcept {
+    std::swap(m_Inertia, other.m_Inertia);
+    std::swap(m_Type, other.m_Type);
+    std::swap(m_Shape, other.m_Shape);
+    other.m_Shape = nullptr;
+}
+Collision& Collision::operator=(Collision&& other) noexcept {
+    std::swap(m_Inertia, other.m_Inertia);
+    std::swap(m_Type, other.m_Type);
+    std::swap(m_Shape, other.m_Shape);
+    other.m_Shape = nullptr;
+    return *this;
+}
+
+
 void Collision::setMass(float _mass){ 
     if (!m_Shape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) return;
     if (m_Shape->getShapeType() != EMPTY_SHAPE_PROXYTYPE) {

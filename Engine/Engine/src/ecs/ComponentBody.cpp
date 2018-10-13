@@ -24,45 +24,30 @@ ComponentBody::PhysicsData::PhysicsData(){
     rigidBody = nullptr;
     collision = nullptr;
 }
-ComponentBody::PhysicsData::PhysicsData(const ComponentBody::PhysicsData& other) : rigidBody(other.rigidBody) {
-    //copy constructor
-    mass = other.mass;
-    motionState = other.motionState;
-    rigidBody = other.rigidBody;
-
-    if (other.collision) collision = new Collision(*other.collision);
-    else                 collision = nullptr;
-
-    if (other.rigidBody) rigidBody = new btRigidBody(*other.rigidBody);
-    else                 rigidBody = nullptr;
-}
-ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(const ComponentBody::PhysicsData& other) {
-    //copy assignment
-    if (&other == this)
-        return *this;
-    ComponentBody::PhysicsData tmp(other); // re-use copy-constructor
-    *this = std::move(tmp);                // re-use move-assignment
-    return *this;
-}
 ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& other) noexcept {
     //move constructor
     std::swap(mass, other.mass);
     std::swap(motionState, other.motionState);
-    std::swap(collision, other.collision);
-    std::swap(rigidBody, other.rigidBody);
+
+    if (other.collision) std::swap(collision, other.collision);
+    else                 collision = nullptr;
+    if (other.rigidBody) std::swap(rigidBody, other.rigidBody);
+    else                 rigidBody = nullptr;
 }
 ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody::PhysicsData&& other) noexcept {
     //move assignment
     std::swap(mass, other.mass);
     std::swap(motionState, other.motionState);
-    std::swap(collision, other.collision);
-    std::swap(rigidBody, other.rigidBody);
+    if (other.collision) std::swap(collision, other.collision);
+    else                 collision = nullptr;
+    if (other.rigidBody) std::swap(rigidBody, other.rigidBody);
+    else                 rigidBody = nullptr;
     return *this;
 }
 ComponentBody::PhysicsData::~PhysicsData() {
     //destructor
-    SAFE_DELETE(rigidBody);
     SAFE_DELETE(collision);
+    SAFE_DELETE(rigidBody);
 }
 
 #pragma endregion
@@ -75,21 +60,6 @@ ComponentBody::NormalData::NormalData(){
     position = glm::vec3(0.0f, 0.0f, 0.0f);
     rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     modelMatrix = glm::mat4(1.0f);
-}
-ComponentBody::NormalData::NormalData(const ComponentBody::NormalData& other) {
-    //copy constructor
-    scale = other.scale;
-    position = other.position;
-    rotation = other.rotation;
-    modelMatrix = other.modelMatrix;
-}
-ComponentBody::NormalData& ComponentBody::NormalData::operator=(const ComponentBody::NormalData& other) {
-    //copy assignment
-    if (&other == this)
-        return *this;
-    ComponentBody::NormalData tmp(other); // re-use copy-constructor
-    *this = std::move(tmp);               // re-use move-assignment
-    return *this;
 }
 ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcept {
     //move constructor
@@ -164,28 +134,6 @@ ComponentBody::~ComponentBody() {
         SAFE_DELETE(data.n);
     }
 }
-ComponentBody::ComponentBody(const ComponentBody& other) {
-    //copy constructor
-    //Might need more testing here...
-    _forward = other._forward;
-    _right = other._right;
-    _up = other._up;
-    owner.data = other.owner.data;
-    if (other._physics) {
-        if (other.data.p) data.p = new PhysicsData(*other.data.p);
-        else              data.p = nullptr;
-    }else{
-        if (other.data.n) data.n = new NormalData(*other.data.n);
-        else              data.n = nullptr;
-    }
-}
-ComponentBody& ComponentBody::operator=(const ComponentBody& other) {
-    //copy assignment
-    //Might need more testing here...
-    ComponentBody tmp(other); // re-use copy-constructor
-    *this = std::move(tmp);   // re-use move-assignment
-    return *this;
-}
 ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
     //move constructor
     //this seems OK
@@ -235,9 +183,10 @@ void ComponentBody::alignTo(glm::vec3 direction, float speed) {
 }
 void ComponentBody::setCollision(CollisionType::Type _type, float _mass) {
     auto& physicsData = *data.p;
+    SAFE_DELETE(physicsData.collision);
     ComponentModel* modelComponent = owner.getComponent<ComponentModel>();
     if (modelComponent) {
-        if (_type == CollisionType::Compound) {
+        if (_type == CollisionType::Compound) {      
             physicsData.collision = new Collision(*modelComponent, _mass);
         }else{
             physicsData.collision = new Collision(_type, modelComponent->getModel().mesh(), _mass);
@@ -249,11 +198,11 @@ void ComponentBody::setCollision(CollisionType::Type _type, float _mass) {
     collision_.getShape()->setUserPointer(this);
     if (physicsData.rigidBody) {
         auto& rigidBody = *physicsData.rigidBody;
-        Physics::removeRigidBody(&rigidBody);
+        //Physics::removeRigidBody(&rigidBody);
         rigidBody.setCollisionShape(collision_.getShape());
         rigidBody.setMassProps(physicsData.mass, collision_.getInertia());
         rigidBody.updateInertiaTensor();
-        Physics::addRigidBody(&rigidBody);
+        //Physics::addRigidBody(&rigidBody);
     }
 }
 void ComponentBody::translate(glm::vec3 translation, bool local) { ComponentBody::translate(translation.x, translation.y, translation.z, local); }
@@ -661,22 +610,25 @@ struct epriv::ComponentBodyComponentAddedToEntityFunction final {void operator()
     }
 }};
 struct epriv::ComponentBodyEntityAddedToSceneFunction final {void operator()(void* _componentPool,Entity& _entity, Scene& _scene) const {
+
+}};
+struct epriv::ComponentBodySceneEnteredFunction final {void operator()(void* _componentPool,Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
-    auto& component = *pool.getComponent(_entity);
-    if (component._physics) {
-        auto& rigidBody = *component.data.p->rigidBody;
-        if (&_scene == Resources::getCurrentScene()) {
+    for (auto& component : pool.pool()) {
+        if (component._physics) {
+            auto& rigidBody = *component.data.p->rigidBody;
             Physics::addRigidBody(&rigidBody);
-        }else{
-            Physics::removeRigidBody(&rigidBody);
         }
     }
 }};
-struct epriv::ComponentBodySceneEnteredFunction final {void operator()(void* _componentPool,Scene& _scene) const {
-
-}};
 struct epriv::ComponentBodySceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
-
+    auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
+    for (auto& component : pool.pool()) {
+        if (component._physics) {
+            auto& rigidBody = *component.data.p->rigidBody;
+            Physics::removeRigidBody(&rigidBody);
+        }
+    }
 }};
     
 ComponentBodySystem::ComponentBodySystem() {

@@ -1112,9 +1112,9 @@ class Mesh::impl final{
                 readUint32tBigEndian(sizes[i], stream);
             }
             //base
-            data.file_points.resize(sizes[0]);
-            data.file_uvs.resize(sizes[1]);
-            data.file_normals.resize(sizes[2]);
+            data.file_points.reserve(sizes[0]);
+            data.file_uvs.reserve(sizes[1]);
+            data.file_normals.reserve(sizes[2]);
 
             vector<vector<uint>> _indices;
             _indices.resize(3);
@@ -1132,7 +1132,7 @@ class Mesh::impl final{
                 float32(&out[0], in[0]);
                 float32(&out[1], in[1]);
                 float32(&out[2], in[2]);
-                data.file_points[i] = glm::vec3(out[0], out[1], out[2]);
+                data.file_points.emplace_back(out[0], out[1], out[2]);
             }
             //uvs
             for (uint i = 0; i < sizes[1]; ++i) {
@@ -1143,7 +1143,7 @@ class Mesh::impl final{
                 }
                 float32(&out[0], in[0]);
                 float32(&out[1], in[1]);
-                data.file_uvs[i] = glm::vec2(out[0], out[1]);
+                data.file_uvs.emplace_back(out[0], out[1]);
             }
             //normals
             for (uint i = 0; i < sizes[2]; ++i) {
@@ -1155,7 +1155,7 @@ class Mesh::impl final{
                 float32(&out[0], in[0]);
                 float32(&out[1], in[1]);
                 float32(&out[2], in[2]);
-                data.file_normals[i] = glm::vec3(out[0], out[1], out[2]);
+                data.file_normals.emplace_back(out[0], out[1], out[2]);
             }
             //indices
             for (uint i = 0; i < _indices.size(); ++i) {
