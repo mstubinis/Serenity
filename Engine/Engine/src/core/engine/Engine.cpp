@@ -73,7 +73,18 @@ void Engine::init(const char* name,uint w,uint h){
 void RESET_EVENTS(){
     epriv::Core::m_Engine->m_EventManager.onResetEvents();
 }
-void updateLogic(float dt){
+void updatePhysics(const float& dt) {
+    epriv::Core::m_Engine->m_TimeManager.stop_clock();
+    //It's important that timeStep is always less than maxSubSteps * fixedTimeStep, otherwise you are losing time. dt < maxSubSteps * fixedTimeStep
+    float minStep = 0.0166666f; // == 0.0166666 at 1 fps
+    uint maxSubSteps = 0;
+    while (true) {
+        ++maxSubSteps; if (dt < (maxSubSteps * minStep)) break;
+    }
+    epriv::Core::m_Engine->m_PhysicsManager._update(dt, maxSubSteps, minStep);
+    epriv::Core::m_Engine->m_TimeManager.calculate_physics();
+}
+void updateLogic(const float& dt){
     // update logic   //////////////////////////////////////////
     epriv::Core::m_Engine->m_TimeManager.stop_clock();
     Game::onPreUpdate(dt);
@@ -84,8 +95,9 @@ void updateLogic(float dt){
     scene.update(dt);
     epriv::InternalScenePublicInterface::GetECS(scene).update(dt);
 
-
+    updatePhysics(dt);
     epriv::Core::m_Engine->m_ComponentManager._update(dt);
+
     epriv::Core::m_Engine->m_ThreadManager._update(dt);
     RESET_EVENTS();
     Game::onPostUpdate(dt);
@@ -93,7 +105,7 @@ void updateLogic(float dt){
     epriv::Core::m_Engine->m_TimeManager.calculate_logic();
     ////////////////////////////////////////////////////////////
 }
-void updateSounds(float dt){
+void updateSounds(const float& dt){
     // update sounds ///////////////////////////////////////////
     epriv::Core::m_Engine->m_TimeManager.stop_clock();
     epriv::Core::m_Engine->m_SoundManager._update(dt);

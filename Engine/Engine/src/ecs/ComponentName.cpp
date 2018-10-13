@@ -8,7 +8,7 @@ using namespace std;
 ComponentName::ComponentName(Entity& _entity) : ComponentBaseClass(_entity){
     _data = "";
 }
-ComponentName::ComponentName(Entity& _entity, std::string& _name) : ComponentBaseClass(_entity) {
+ComponentName::ComponentName(Entity& _entity, string& _name) : ComponentBaseClass(_entity) {
     _data = _name;
 }
 ComponentName::ComponentName(Entity& _entity, const char* _name) : ComponentBaseClass(_entity) {
@@ -17,7 +17,7 @@ ComponentName::ComponentName(Entity& _entity, const char* _name) : ComponentBase
 ComponentName::~ComponentName() {
     _data = "";
 }
-const std::string& ComponentName::name() { return _data; }
+const string& ComponentName::name() { return _data; }
 const uint ComponentName::size() { return _data.size(); }
 
 #pragma endregion

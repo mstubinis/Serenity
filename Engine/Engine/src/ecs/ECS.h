@@ -52,14 +52,14 @@ namespace Engine {
                         auto& system = *systems[i]; system.update(dt);
                     }
                 }
-                void onComponentAddedToEntity(void* _component) { 
+                void onComponentAddedToEntity(void* _component, Entity& _entity) {
                     for (uint i = 0; i < systems.size(); ++i) {
-                        auto& system = *systems[i]; system.onComponentAddedToEntity(_component);
+                        auto& system = *systems[i]; system.onComponentAddedToEntity(_component, _entity);
                     }
                 }
-                void onEntityAddedToScene(Entity& _entity) { 
+                void onEntityAddedToScene(Entity& _entity, Scene& _scene) {
                     for (uint i = 0; i < systems.size(); ++i) {
-                        auto& system = *systems[i]; system.onEntityAddedToScene(_entity);
+                        auto& system = *systems[i]; system.onEntityAddedToScene(_entity, _scene);
                     }
                 }
                 void onSceneEntered(Scene& _Scene) { 

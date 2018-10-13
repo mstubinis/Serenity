@@ -96,18 +96,16 @@ struct epriv::ComponentCameraUpdateFunction final {
         epriv::threading::waitForAll();
     }
 };
-struct epriv::ComponentCameraComponentAddedToEntityFunction final {void operator()(void* _component) const {
+struct epriv::ComponentCameraComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
 
 }};
-struct epriv::ComponentCameraEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity) const {
-    //auto& scene = _entity.scene();
-    //auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)_componentPool;
-    //auto& component = *pool.getComponent(_entity);
-}};
-struct epriv::ComponentCameraSceneEnteredFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
+struct epriv::ComponentCameraEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
 
 }};
-struct epriv::ComponentCameraSceneLeftFunction final {void operator()(void* _componentPool, Scene& _Scene) const {
+struct epriv::ComponentCameraSceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+
+}};
+struct epriv::ComponentCameraSceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 
 }};
 

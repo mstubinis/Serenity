@@ -5,11 +5,8 @@ using namespace std;
 
 #pragma region Component
 
-ComponentLogic::ComponentLogic(Entity& _entity) : ComponentBaseClass(_entity){
-}
-ComponentLogic::~ComponentLogic(){
-}
-
+ComponentLogic::ComponentLogic(Entity& _entity) : ComponentBaseClass(_entity){}
+ComponentLogic::~ComponentLogic(){}
 void ComponentLogic::call(const float& dt) { _functor(dt); }
 
 #pragma endregion
@@ -24,19 +21,16 @@ struct epriv::ComponentLogicUpdateFunction final { void operator()(void* _compon
         component.call(dt);
     }
 }};
-struct epriv::ComponentLogicComponentAddedToEntityFunction final { void operator()(void* _component) const {
-    ComponentLogic& component = *(ComponentLogic*)_component;
+struct epriv::ComponentLogicComponentAddedToEntityFunction final { void operator()(void* _component, Entity& _entity) const {
 
 }};
-struct epriv::ComponentLogicEntityAddedToSceneFunction final { void operator()(void* _componentPool, Entity& _entity) const {
-    auto& scene = _entity.scene();
-    auto& pool = *(ECSComponentPool<Entity, ComponentLogic>*)_componentPool;
-    auto& component = *pool.getComponent(_entity);
-}};
-struct epriv::ComponentLogicSceneEnteredFunction final { void operator()(void* _componentPool, Scene& _Scene) const {
+struct epriv::ComponentLogicEntityAddedToSceneFunction final { void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
 
 }};
-struct epriv::ComponentLogicSceneLeftFunction final { void operator()(void* _componentPool, Scene& _Scene) const {
+struct epriv::ComponentLogicSceneEnteredFunction final { void operator()(void* _componentPool, Scene& _scene) const {
+
+}};
+struct epriv::ComponentLogicSceneLeftFunction final { void operator()(void* _componentPool, Scene& _scene) const {
 
 }};
 
