@@ -1,13 +1,8 @@
 #include <boost/make_shared.hpp>
 #include "core/engine/Engine.h"
-#include "core/engine/Engine_ThreadManager.h"
-#include "core/engine/Engine_Time.h"
-#include "core/engine/Engine_Resources.h"
 #include "core/engine/Engine_ObjectPool.h"
 #include "core/engine/Engine_BuiltInResources.h"
-#include "core/engine/Engine_EventDispatcher.h"
-#include "core/engine/Engine_Sounds.h"
-#include "core/engine/Engine_Window.h"
+#include "ecs/ECS.h"
 #include "core/Skybox.h"
 #include "core/Mesh.h"
 #include "core/MeshInstance.h"
@@ -145,7 +140,7 @@ Handle Resources::addMeshAsync(string f, bool b,float threshhold){
     auto ref = std::ref(*mesh);
     auto job = boost::bind(&epriv::InternalMeshPublicInterface::LoadCPU, ref);
     auto cbk = boost::bind(&epriv::InternalMeshPublicInterface::LoadGPU, ref);
-    Engine::epriv::threading::addJobWithPostCallback(job,cbk);
+    epriv::threading::addJobWithPostCallback(job,cbk);
     return resourceManager->m_Resources->add(mesh, ResourceType::Mesh);
 }
 
@@ -191,7 +186,8 @@ void Resources::setCurrentScene(Scene* newScene){
     if(!oldScene){
         cout << "---- Initial scene set to: " << newScene->name() << endl;
         resourceManager->m_CurrentScene = newScene;
-        epriv::Core::m_Engine->m_ComponentManager._sceneSwap(nullptr, newScene);       
+        epriv::Core::m_Engine->m_ComponentManager._sceneSwap(nullptr, newScene); 
+        epriv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
         return;
     }
     if(oldScene != newScene){
@@ -199,8 +195,10 @@ void Resources::setCurrentScene(Scene* newScene){
         if(epriv::Core::m_Engine->m_ResourceManager.m_i->m_DynamicMemory){
             //mark game object resources to minus use count
         }
+        epriv::InternalScenePublicInterface::GetECS(*oldScene).onSceneLeft(*oldScene);
         resourceManager->m_CurrentScene = newScene;
-        epriv::Core::m_Engine->m_ComponentManager._sceneSwap(oldScene, newScene);
+        epriv::Core::m_Engine->m_ComponentManager._sceneSwap(oldScene, newScene);    
+        epriv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
         if(resourceManager->m_DynamicMemory){
             //mark game object resources to add use count
         }

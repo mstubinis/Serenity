@@ -10,6 +10,17 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
+struct epriv::ComponentCameraFunctions final {
+    static void RebuildProjectionMatrix(ComponentCamera& cam) {
+        if (cam._type == ComponentCamera::Type::Perspective) {
+            cam._projectionMatrix = glm::perspective(cam._angle, cam._aspectRatio, cam._nearPlane, cam._farPlane);
+        }
+        else {
+            cam._projectionMatrix = glm::ortho(cam._left, cam._right, cam._bottom, cam._top, cam._nearPlane, cam._farPlane);
+        }
+    }
+};
+
 #pragma region Component
 
 ComponentCamera::ComponentCamera(Entity& _e,float angle, float aspectRatio, float nearPlane, float farPlane) : ComponentBaseClass(_e) {
@@ -32,7 +43,7 @@ void ComponentCamera::resize(uint width, uint height) {
     if (_type == Type::Perspective) {
         _aspectRatio = width / (float)height;
     }
-    //epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);
+    epriv::ComponentCameraFunctions::RebuildProjectionMatrix(*this);
 }
 uint ComponentCamera::pointIntersectTest(glm::vec3& position) {
     for (int i = 0; i < 6; ++i) {
@@ -68,10 +79,10 @@ float ComponentCamera::getAngle() { return _angle; }
 float ComponentCamera::getAspect() { return _aspectRatio; }
 float ComponentCamera::getNear() { return _nearPlane; }
 float ComponentCamera::getFar() { return _farPlane; }
-void ComponentCamera::setAngle(float a) { _angle = a; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
-void ComponentCamera::setAspect(float a) { _aspectRatio = a; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
-void ComponentCamera::setNear(float n) { _nearPlane = n; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
-void ComponentCamera::setFar(float f) { _farPlane = f; /*epriv::ComponentCameraSystem::RebuildProjectionMatrix(*this);*/ }
+void ComponentCamera::setAngle(float a) { _angle = a; epriv::ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
+void ComponentCamera::setAspect(float a) { _aspectRatio = a; epriv::ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
+void ComponentCamera::setNear(float n) { _nearPlane = n; epriv::ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
+void ComponentCamera::setFar(float f) { _farPlane = f; epriv::ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
 
 #pragma endregion
 

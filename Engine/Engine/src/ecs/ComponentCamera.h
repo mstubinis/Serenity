@@ -19,6 +19,7 @@ namespace Engine {
         struct ComponentCameraComponentAddedToEntityFunction;
         struct ComponentCameraSceneEnteredFunction;
         struct ComponentCameraSceneLeftFunction;
+        struct ComponentCameraFunctions;
     };
 };
 
@@ -28,6 +29,7 @@ class ComponentCamera : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentCameraComponentAddedToEntityFunction;
     friend struct Engine::epriv::ComponentCameraSceneEnteredFunction;
     friend struct Engine::epriv::ComponentCameraSceneLeftFunction;
+    friend struct Engine::epriv::ComponentCameraFunctions;
     friend class  ::Camera;
     friend class  ::ComponentModel;
     private:

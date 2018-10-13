@@ -18,6 +18,10 @@ namespace Engine {
             void serialize(const uint& _data);
             EntitySerialization(const uint& _data);
             EntitySerialization(const Entity& _input);
+            EntitySerialization(const EntitySerialization& other) = delete;
+            EntitySerialization& operator=(const EntitySerialization& other) = delete;
+            EntitySerialization(EntitySerialization&& other) noexcept;
+            EntitySerialization& operator=(EntitySerialization&& other) noexcept;
             ~EntitySerialization();
         };
         struct EntityPOD final {
@@ -28,7 +32,10 @@ namespace Engine {
             EntityPOD();
             EntityPOD(uint _id);
             EntityPOD(uint _id, Scene& _scene);
-
+            EntityPOD(const EntityPOD& other) = delete;
+            EntityPOD& operator=(const EntityPOD& other) = delete;
+            EntityPOD(EntityPOD&& other) noexcept;
+            EntityPOD& operator=(EntityPOD&& other) noexcept;
             ~EntityPOD();
         };
     };

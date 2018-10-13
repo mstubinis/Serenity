@@ -4,8 +4,9 @@
 
 #include "ecs/SparseSet.h"
 #include "ecs/EntitySerialization.h"
+#include "core/Scene.h"
 
-class Scene;
+
 namespace Engine {
     namespace epriv {
 
@@ -22,8 +23,8 @@ namespace Engine {
 
                 TEntity addEntity(Scene& _scene) {
                     if (_freelist.empty()) {
-                        _pool.push_back(EntityPOD(0));
-                        _freelist.push_back(uint(_pool.size() - 1));
+                        _pool.emplace_back(0);
+                        _freelist.emplace_back(_pool.size() - 1);
                     }
                     uint _id = _freelist.back();
                     _freelist.pop_back();
@@ -38,9 +39,7 @@ namespace Engine {
                     ++_pool[index].versionID;
                     _freelist.push_back(index);
                 }
-                bool removeEntity(const TEntity& _entity) {
-                    return removeEntity(_entity.data);
-                }
+                bool removeEntity(const TEntity& _entity) { return removeEntity(_entity.data); }
                 EntityPOD* getEntity(const uint& _id) {
                     EntitySerialization _s(_id);
                     if (_s.ID < _pool.size() && _pool[_s.ID].versionID == _s.versionID) {
@@ -48,9 +47,7 @@ namespace Engine {
                     }
                     return nullptr;
                 }
-                EntityPOD* getEntity(const TEntity& _entity) {
-                    return getEntity(_entity.data);
-                }
+                EntityPOD* getEntity(const TEntity& _entity) { return getEntity(_entity.data); }
             };
     };
 };

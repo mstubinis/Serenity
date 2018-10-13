@@ -35,6 +35,10 @@ class Scene: public EngineResource, public EventObserver{
         virtual ~Scene();
 
         uint id();
+
+
+
+
         OLD_Entity* OLD_getEntity(uint entityID);
         uint OLD_addEntity(OLD_Entity&);
         void OLD_removeEntity(OLD_Entity&);

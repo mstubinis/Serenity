@@ -73,6 +73,7 @@
     <ClCompile Include="Engine\src\Game.cpp" />
     <ClCompile Include="Engine\src\GameCamera.cpp" />
     <ClCompile Include="Engine\src\GameSkybox.cpp" />
+    <ClCompile Include="Engine\src\game\components\ComponentGameCamera.cpp" />
     <ClCompile Include="Engine\src\HUD.cpp" />
     <ClCompile Include="Engine\src\Planet.cpp" />
     <ClCompile Include="Engine\src\ResourceManifest.cpp" />
@@ -137,6 +138,7 @@
     <ClInclude Include="Engine\src\ecs\SparseSet.h" />
     <ClInclude Include="Engine\src\GameCamera.h" />
     <ClInclude Include="Engine\src\GameSkybox.h" />
+    <ClInclude Include="Engine\src\game\components\ComponentGameCamera.h" />
     <ClInclude Include="Engine\src\HUD.h" />
     <ClInclude Include="Engine\src\Planet.h" />
     <ClInclude Include="Engine\src\ResourceManifest.h" />
