@@ -49,7 +49,7 @@ class Scene::impl final {
             m_ECS.assignSystem<ComponentModel>(ComponentModelSystem());
 
 
-            /*
+            
             Entity e0 = m_ECS.createEntity(super);
             Entity e1 = m_ECS.createEntity(super);
             Entity e2 = m_ECS.createEntity(super);
@@ -67,7 +67,7 @@ class Scene::impl final {
             //e0.removeComponent<ComponentBody>();
             //e3.removeComponent<ComponentBody>();
             //e1.removeComponent<ComponentBody>();
-            */
+            
         }
         void _destruct() {
             SAFE_DELETE(m_Skybox);
@@ -241,6 +241,12 @@ void Scene::OLD_removeEntity(uint id){
     OLD_Entity& e = *OLD_Components::GetEntity(id);
     OLD_removeEntity(e);
 }
+epriv::EntityPOD* Scene::getEntity(uint entityID) { return epriv::InternalScenePublicInterface::GetECS(*this).getEntity(entityID); }
+bool Scene::removeEntity(uint entityID) { return epriv::InternalScenePublicInterface::GetECS(*this).getEntity(entityID); }
+bool Scene::removeEntity(Entity& entity) { epriv::EntitySerialization _s(entity); return epriv::InternalScenePublicInterface::GetECS(*this).getEntity(_s.ID); }
+
+
+
 OLD_Entity* Scene::OLD_getEntity(uint entityID){
     if(entityID == 0) return nullptr;
     return OLD_Components::GetEntity(entityID);

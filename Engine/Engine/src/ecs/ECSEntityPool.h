@@ -9,9 +9,6 @@
 
 namespace Engine {
     namespace epriv {
-
-        struct EntityPOD;
-
         template<typename TEntity> class ECSEntityPool final{
 
             private:
@@ -39,15 +36,16 @@ namespace Engine {
                     ++_pool[index].versionID;
                     _freelist.push_back(index);
                 }
-                bool removeEntity(const TEntity& _entity) { return removeEntity(_entity.data); }
+                bool removeEntity(TEntity& _entity) { return removeEntity(_entity.data); }
                 EntityPOD* getEntity(const uint& _id) {
+                    if (_id == 0) return nullptr;
                     EntitySerialization _s(_id);
                     if (_s.ID < _pool.size() && _pool[_s.ID].versionID == _s.versionID) {
                         return &_pool[_s.ID];
                     }
                     return nullptr;
                 }
-                EntityPOD* getEntity(const TEntity& _entity) { return getEntity(_entity.data); }
+                EntityPOD* getEntity(TEntity& _entity) { return getEntity(_entity.data); }
             };
     };
 };

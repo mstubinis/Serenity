@@ -20,7 +20,7 @@ namespace Engine {
         class OLD_ComponentManager;
         class RenderPipeline;
         struct InternalScenePublicInterface;
-        
+        struct EntityPOD;
         template<typename T> class ECS;
     };
 };
@@ -37,7 +37,11 @@ class Scene: public EngineResource, public EventObserver{
         uint id();
 
 
-
+        Engine::epriv::EntityPOD* getEntity(uint entityID);
+        bool removeEntity(uint entityID);
+        bool removeEntity(Entity& entity);
+        //bool hasEntity(uint entityID);
+        //bool hasEntity(Entity& entity);
 
         OLD_Entity* OLD_getEntity(uint entityID);
         uint OLD_addEntity(OLD_Entity&);
