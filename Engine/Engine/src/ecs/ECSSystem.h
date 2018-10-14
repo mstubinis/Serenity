@@ -12,7 +12,6 @@ struct Entity;
 class Scene;
 namespace Engine {
     namespace epriv {
-
         struct FunctorUpdateEmpty final { void operator()(void* _cPool, const float& dt) const { } };
         struct FunctorComponentEmpty final { void operator()(void* _component, Entity&) const { } };
         struct FunctorEntityEmpty final { void operator()(void* _cPool, Entity&, Scene&) const { } };
@@ -69,7 +68,6 @@ namespace Engine {
             template<typename T> void setOnSceneLeftFunction(const T& functor) { onSceneLeftFunction = FunctorScene(functor); }
         };
 
-
         template <typename TEntity> class ECSSystem<TEntity> {
             protected:
                 func_update         _SUF;
@@ -109,10 +107,10 @@ namespace Engine {
                 }
                 ~ECSSystem() = default;
 
-                ECSSystem(const ECSSystem&) = default;
-                ECSSystem& operator=(const ECSSystem&) = default;
-                ECSSystem(ECSSystem&& other) noexcept = default;
-                ECSSystem& operator=(ECSSystem&& other) noexcept = default;
+                ECSSystem(const ECSSystem&) = delete;
+                ECSSystem& operator=(const ECSSystem&) = delete;
+                ECSSystem(ECSSystem&& other) noexcept = delete;
+                ECSSystem& operator=(ECSSystem&& other) noexcept = delete;
 
                 void update(const float& dt) { super::_SUF(&componentPool,dt); }
                 void onComponentAddedToEntity(void* _component, Entity& _entity) { super::_CAE(_component, _entity); }

@@ -804,8 +804,6 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
 
 
 
-
-
 void Collision::_init(vector<Mesh*>& _meshes, float mass) {
     btCompoundShape* compound = new btCompoundShape();
     btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
@@ -823,16 +821,19 @@ void Collision::_baseInit(CollisionType::Type _type, float& _mass) {
     setMass(_mass);
 }
 Collision::Collision() {
+    //construtor
     m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
     m_Type = CollisionType::None;
     m_Shape = nullptr;
     setMass(0.0f);
 }
 Collision::Collision(vector<Mesh*>& _meshes, float _mass){
+    //construtor
     _init(_meshes, _mass);
     _baseInit(CollisionType::Compound, _mass);
 }
 Collision::Collision(OLD_ComponentModel& _modelComponent, float _mass){
+    //construtor
     vector<Mesh*> meshes;
     for (uint i = 0; i < _modelComponent.getNumModels(); ++i) {
         meshes.push_back(_modelComponent.getModel(i).mesh());
@@ -840,6 +841,7 @@ Collision::Collision(OLD_ComponentModel& _modelComponent, float _mass){
     _init(meshes, _mass);
 }
 Collision::Collision(ComponentModel& _modelComponent, float _mass){
+    //construtor
     vector<Mesh*> meshes;
     for (uint i = 0; i < _modelComponent.getNumModels(); ++i) {
         meshes.push_back(_modelComponent.getModel(i).mesh());
@@ -847,11 +849,13 @@ Collision::Collision(ComponentModel& _modelComponent, float _mass){
     _init(meshes, _mass);
 }
 Collision::Collision(CollisionType::Type _type, Mesh* _mesh, float _mass){
+    //construtor
     btCollisionShape* shape = epriv::InternalMeshPublicInterface::BuildCollision(_mesh, _type);
     m_Shape = shape;
     _baseInit(_type, _mass);
 }
 Collision::~Collision() {
+    //destructor
     btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
     if (compoundCast) {
         int numChildShapes = compoundCast->getNumChildShapes();
@@ -862,31 +866,35 @@ Collision::~Collision() {
     }
     SAFE_DELETE(m_Shape);
 }
-/*
-Collision::Collision(const Collision& other) noexcept {
+Collision::Collision(const Collision& other) {
+    //copy constructor
     m_Inertia = other.m_Inertia;
     m_Type = other.m_Type;
     if (other.m_Shape) m_Shape = other.m_Shape;
     else               m_Shape = nullptr;
 }
-Collision& Collision::operator=(const Collision& other) noexcept {
+Collision& Collision::operator=(const Collision& other) {
+    //copy assignment
     m_Inertia = other.m_Inertia;
     m_Type = other.m_Type;
     if (other.m_Shape) m_Shape = other.m_Shape;
     else               m_Shape = nullptr;
     return *this;
 }
-*/
 Collision::Collision(Collision&& other) noexcept {
-    std::swap(m_Inertia, other.m_Inertia);
-    std::swap(m_Type, other.m_Type);
-    std::swap(m_Shape, other.m_Shape);
+    //move constructor
+    using std::swap;
+    swap(m_Inertia, other.m_Inertia);
+    swap(m_Type, other.m_Type);
+    swap(m_Shape, other.m_Shape);
     other.m_Shape = nullptr;
 }
 Collision& Collision::operator=(Collision&& other) noexcept {
-    std::swap(m_Inertia, other.m_Inertia);
-    std::swap(m_Type, other.m_Type);
-    std::swap(m_Shape, other.m_Shape);
+    //move assignment
+    using std::swap;
+    swap(m_Inertia, other.m_Inertia);
+    swap(m_Type, other.m_Type);
+    swap(m_Shape, other.m_Shape);
     other.m_Shape = nullptr;
     return *this;
 }

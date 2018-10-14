@@ -30,6 +30,12 @@ class ComponentLogic : public ComponentBaseClass {
         boost::function<void(const float&)> _functor;
     public:
         ComponentLogic(Entity&);
+
+        ComponentLogic(const ComponentLogic& other) = default;
+        ComponentLogic& operator=(const ComponentLogic& other) = default;
+        ComponentLogic(ComponentLogic&& other) noexcept = default;
+        ComponentLogic& operator=(ComponentLogic&& other) noexcept = default;
+
         ~ComponentLogic();
 
         template<typename T> void setFunctor(T& functor) { _functor = boost::bind<void>(functor, this, _1); }

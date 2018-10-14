@@ -6,18 +6,22 @@
 #include "ecs/EntitySerialization.h"
 #include "core/Scene.h"
 
-
 namespace Engine {
     namespace epriv {
         template<typename TEntity> class ECSEntityPool final{
-
             private:
                 std::vector<EntityPOD>    _pool;
                 std::vector<uint>         _freelist;
             public:
-                ECSEntityPool() = default;
+                ECSEntityPool() {
+                }
                 ~ECSEntityPool() = default;
 
+                void destroyFlaggedEntity(uint& i) {
+                    uint index = i - 1;
+                    ++_pool[index].versionID;
+                    _freelist.emplace_back(index);
+                }
                 TEntity addEntity(Scene& _scene) {
                     if (_freelist.empty()) {
                         _pool.emplace_back(0);
@@ -30,18 +34,12 @@ namespace Engine {
                     element.sceneID = _scene.id();
                     return TEntity(element.ID, element.sceneID, _pool[_id].versionID);
                 }
-                bool removeEntity(const uint& _id) {
-                    EntitySerialization _s(_id);
-                    uint index = _s.ID;
-                    ++_pool[index].versionID;
-                    _freelist.push_back(index);
-                }
-                bool removeEntity(TEntity& _entity) { return removeEntity(_entity.data); }
-                EntityPOD* getEntity(const uint& _id) {
-                    if (_id == 0) return nullptr;
-                    EntitySerialization _s(_id);
-                    if (_s.ID < _pool.size() && _pool[_s.ID].versionID == _s.versionID) {
-                        return &_pool[_s.ID];
+                EntityPOD* getEntity(const uint& _entityData) {
+                    if (_entityData == 0) return nullptr;
+                    EntitySerialization _s(_entityData);
+                    uint index = _s.ID - 1;
+                    if (index < _pool.size() && _pool[index].versionID == _s.versionID) {
+                        return &_pool[index];
                     }
                     return nullptr;
                 }

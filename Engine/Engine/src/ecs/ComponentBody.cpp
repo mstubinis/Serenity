@@ -24,23 +24,45 @@ ComponentBody::PhysicsData::PhysicsData(){
     rigidBody = nullptr;
     collision = nullptr;
 }
+ComponentBody::PhysicsData::PhysicsData(const ComponentBody::PhysicsData& other){
+    //copy constructor
+    mass = other.mass;
+    motionState = other.motionState;
+    rigidBody = other.rigidBody;
+
+    if (other.collision) collision = new Collision(*other.collision);
+    else                 collision = nullptr;
+
+    if (other.rigidBody) rigidBody = new btRigidBody(*other.rigidBody);
+    else                 rigidBody = nullptr;
+}
+ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(const ComponentBody::PhysicsData& other) {
+    //copy assignment
+    if (&other == this)
+        return *this;
+    ComponentBody::PhysicsData tmp(other); // re-use copy-constructor
+    *this = std::move(tmp);                // re-use move-assignment
+    return *this;
+}
 ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& other) noexcept {
     //move constructor
-    std::swap(mass, other.mass);
-    std::swap(motionState, other.motionState);
+    using std::swap;
+    swap(mass, other.mass);
+    swap(motionState, other.motionState);
 
-    if (other.collision) std::swap(collision, other.collision);
+    if (other.collision) swap(collision, other.collision);
     else                 collision = nullptr;
-    if (other.rigidBody) std::swap(rigidBody, other.rigidBody);
+    if (other.rigidBody) swap(rigidBody, other.rigidBody);
     else                 rigidBody = nullptr;
 }
 ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody::PhysicsData&& other) noexcept {
     //move assignment
-    std::swap(mass, other.mass);
-    std::swap(motionState, other.motionState);
-    if (other.collision) std::swap(collision, other.collision);
+    using std::swap;
+    swap(mass, other.mass);
+    swap(motionState, other.motionState);
+    if (other.collision) swap(collision, other.collision);
     else                 collision = nullptr;
-    if (other.rigidBody) std::swap(rigidBody, other.rigidBody);
+    if (other.rigidBody) swap(rigidBody, other.rigidBody);
     else                 rigidBody = nullptr;
     return *this;
 }
@@ -61,19 +83,36 @@ ComponentBody::NormalData::NormalData(){
     rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     modelMatrix = glm::mat4(1.0f);
 }
+ComponentBody::NormalData::NormalData(const ComponentBody::NormalData& other) {
+    //copy constructor
+    position = other.position;
+    rotation = other.rotation;
+    scale = other.scale;
+    modelMatrix = other.modelMatrix;
+}
+ComponentBody::NormalData& ComponentBody::NormalData::operator=(const ComponentBody::NormalData& other) {
+    //copy assignment
+    if (&other == this)
+        return *this;
+    ComponentBody::NormalData tmp(other); // re-use copy-constructor
+    *this = std::move(tmp);               // re-use move-assignment
+    return *this;
+}
 ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcept {
     //move constructor
-    std::swap(position, other.position);
-    std::swap(rotation, other.rotation);
-    std::swap(scale, other.scale);
-    std::swap(modelMatrix, other.modelMatrix);
+    using std::swap;
+    swap(position, other.position);
+    swap(rotation, other.rotation);
+    swap(scale, other.scale);
+    swap(modelMatrix, other.modelMatrix);
 }
 ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::NormalData&& other) noexcept {
     //move assignment
-    std::swap(position, other.position);
-    std::swap(rotation, other.rotation);
-    std::swap(scale, other.scale);
-    std::swap(modelMatrix, other.modelMatrix);
+    using std::swap;
+    swap(position, other.position);
+    swap(rotation, other.rotation);
+    swap(scale, other.scale);
+    swap(modelMatrix, other.modelMatrix);
     return *this;
 }
 ComponentBody::NormalData::~NormalData() {
@@ -134,34 +173,60 @@ ComponentBody::~ComponentBody() {
         SAFE_DELETE(data.n);
     }
 }
+
+ComponentBody::ComponentBody(const ComponentBody& other) {
+    //copy constructor
+    //Might need more testing here...
+    _forward = other._forward;
+    _right = other._right;
+    _up = other._up;
+    owner.data = other.owner.data;
+    if (other._physics) {
+        if (other.data.p) data.p = new PhysicsData(*other.data.p);
+        else              data.p = nullptr;
+    }
+    else {
+        if (other.data.n) data.n = new NormalData(*other.data.n);
+        else              data.n = nullptr;
+    }
+}
+ComponentBody& ComponentBody::operator=(const ComponentBody& other) {
+    //copy assignment
+    //Might need more testing here...
+    ComponentBody tmp(other); // re-use copy-constructor
+    *this = std::move(tmp);   // re-use move-assignment
+    return *this;
+}
 ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
     //move constructor
     //this seems OK
+    using std::swap;
     _physics = other._physics;
-    std::swap(_forward, other._forward);
-    std::swap(_right, other._right);
-    std::swap(_up, other._up);
-    std::swap(owner.data, other.owner.data);
+    swap(_forward, other._forward);
+    swap(_right, other._right);
+    swap(_up, other._up);
+    swap(owner.data, other.owner.data);
     if (other._physics) {
-        std::swap(data.p, other.data.p);
+        swap(data.p, other.data.p);
         other.data.p = nullptr;
     }else {
-        std::swap(data.n, other.data.n);
+        swap(data.n, other.data.n);
         other.data.n = nullptr;
     }
 }
 ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     //move assignment
     //this seems OK
+    using std::swap;
     _physics = other._physics;
-    std::swap(_forward, other._forward);
-    std::swap(_right, other._right);
-    std::swap(_up, other._up);
-    std::swap(owner.data, other.owner.data);
+    swap(_forward, other._forward);
+    swap(_right, other._right);
+    swap(_up, other._up);
+    swap(owner.data, other.owner.data);
     if (other._physics) {
-        std::swap(data.p, other.data.p);
+        swap(data.p, other.data.p);
     }else{
-        std::swap(data.n, other.data.n);
+        swap(data.n, other.data.n);
     }
     return *this;
 }

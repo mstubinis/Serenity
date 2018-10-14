@@ -61,13 +61,16 @@ class Scene::impl final {
             e2.addComponent<ComponentBody>(CollisionType::None);
             e3.addComponent<ComponentBody>(CollisionType::None);
             e4.addComponent<ComponentBody>(CollisionType::None);
-            
-            //e2.removeComponent<ComponentBody>();
-            //e4.removeComponent<ComponentBody>();
+            /*
+            e2.removeComponent<ComponentBody>();
+            e4.removeComponent<ComponentBody>();
             //e0.removeComponent<ComponentBody>();
             //e3.removeComponent<ComponentBody>();
             //e1.removeComponent<ComponentBody>();
-            
+
+            super.removeEntity(e3);
+            super.removeEntity(e4);
+            */
         }
         void _destruct() {
             SAFE_DELETE(m_Skybox);
@@ -235,18 +238,19 @@ Scene::Scene(string name):m_i(new impl){
     registerEvent(EventType::SceneChanged);
 }
 uint Scene::id() { return m_i->m_ID; }
+
+//new ecs
+epriv::EntityPOD* Scene::getEntity(uint entityData) { return epriv::InternalScenePublicInterface::GetECS(*this).getEntity(entityData); }
+void Scene::removeEntity(uint entityData) { epriv::InternalScenePublicInterface::GetECS(*this).removeEntity(entityData); }
+void Scene::removeEntity(Entity& entity) { epriv::EntitySerialization _s(entity); epriv::InternalScenePublicInterface::GetECS(*this).removeEntity(_s.ID); }
+
+
 uint Scene::OLD_addEntity(OLD_Entity& entity){ return m_i->_OLD_addEntity(*this,entity); }
 void Scene::OLD_removeEntity(OLD_Entity& e){ e.destroy(); }
 void Scene::OLD_removeEntity(uint id){
     OLD_Entity& e = *OLD_Components::GetEntity(id);
     OLD_removeEntity(e);
 }
-epriv::EntityPOD* Scene::getEntity(uint entityID) { return epriv::InternalScenePublicInterface::GetECS(*this).getEntity(entityID); }
-bool Scene::removeEntity(uint entityID) { return epriv::InternalScenePublicInterface::GetECS(*this).getEntity(entityID); }
-bool Scene::removeEntity(Entity& entity) { epriv::EntitySerialization _s(entity); return epriv::InternalScenePublicInterface::GetECS(*this).getEntity(_s.ID); }
-
-
-
 OLD_Entity* Scene::OLD_getEntity(uint entityID){
     if(entityID == 0) return nullptr;
     return OLD_Components::GetEntity(entityID);

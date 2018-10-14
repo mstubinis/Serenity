@@ -15,13 +15,13 @@ namespace Engine {
             uint   sceneID : 7;
             uint versionID : 4;
 
-            void serialize(const uint& _data);
-            EntitySerialization(const uint& _data);
-            EntitySerialization(const Entity& _input);
-            EntitySerialization(const EntitySerialization& other) = delete;
-            EntitySerialization& operator=(const EntitySerialization& other) = delete;
-            EntitySerialization(EntitySerialization&& other) noexcept;
-            EntitySerialization& operator=(EntitySerialization&& other) noexcept;
+            void serialize(const uint& _entityData);
+            EntitySerialization(const uint& _entityData);
+            EntitySerialization(const Entity& _entity);
+            EntitySerialization(const EntitySerialization& _other) = delete;
+            EntitySerialization& operator=(const EntitySerialization& _other) = delete;
+            EntitySerialization(EntitySerialization&& _other) noexcept;
+            EntitySerialization& operator=(EntitySerialization&& _other) noexcept;
             ~EntitySerialization();
         };
         struct EntityPOD final {
@@ -32,10 +32,10 @@ namespace Engine {
             EntityPOD();
             EntityPOD(uint _id);
             EntityPOD(uint _id, Scene& _scene);
-            EntityPOD(const EntityPOD& other) = delete;
-            EntityPOD& operator=(const EntityPOD& other) = delete;
-            EntityPOD(EntityPOD&& other) noexcept;
-            EntityPOD& operator=(EntityPOD&& other) noexcept;
+            EntityPOD(const EntityPOD& _other) = delete;
+            EntityPOD& operator=(const EntityPOD& _other) = delete;
+            EntityPOD(EntityPOD&& _other) noexcept;
+            EntityPOD& operator=(EntityPOD&& _other) noexcept;
             ~EntityPOD();
         };
     };

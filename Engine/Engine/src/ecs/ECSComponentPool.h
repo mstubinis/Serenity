@@ -29,9 +29,15 @@ namespace Engine {
                     EntitySerialization _s(_entity);
                     return super::_remove(_s.ID);
                 }
+                bool removeComponentByIndex(uint& _index) {
+                    return super::_remove(_index);
+                }
                 TComponent* getComponent(TEntity& _entity) {
                     EntitySerialization _s(_entity);
                     return super::_get(_s.ID);
+                }
+                TComponent* getComponent(const uint& _index) {
+                    return super::_get(_index);
                 }
         };
     };

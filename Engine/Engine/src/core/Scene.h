@@ -36,10 +36,10 @@ class Scene: public EngineResource, public EventObserver{
 
         uint id();
 
-
+        //new ecs
         Engine::epriv::EntityPOD* getEntity(uint entityID);
-        bool removeEntity(uint entityID);
-        bool removeEntity(Entity& entity);
+        void removeEntity(uint entityID);
+        void removeEntity(Entity& entity);
         //bool hasEntity(uint entityID);
         //bool hasEntity(Entity& entity);
 

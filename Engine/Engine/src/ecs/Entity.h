@@ -22,14 +22,15 @@ struct Entity{
 
     void serialize(const uint& _id, const uint& _sceneID, const uint& _versionID) { data = _versionID << 28 | _sceneID << 21 | _id; }
 
-    Entity(const Entity& other) = delete;
-    Entity& operator=(const Entity& other) = delete;
+    Entity(const Entity& other) = default;
+    Entity& operator=(const Entity& other) = default;
     Entity(Entity&& other) noexcept = default;
     Entity& operator=(Entity&& other) noexcept = default;
 
     ~Entity() { data = 0; }
 
     Scene& scene();
+    void destroy();
     bool null();
     template<typename TComponent, typename... ARGS> TComponent* addComponent(ARGS&&... _args) {
         auto& _this = *this; auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);

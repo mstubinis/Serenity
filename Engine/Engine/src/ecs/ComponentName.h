@@ -16,8 +16,8 @@ class ComponentName : public ComponentBaseClass {
         ComponentName(Entity&, std::string&);
         ComponentName(Entity&, const char*);
 
-        ComponentName& operator=(const ComponentName& other) = delete;
-        ComponentName(const ComponentName& other) = delete;
+        ComponentName(const ComponentName& other) = default;
+        ComponentName& operator=(const ComponentName& other) = default;
         ComponentName(ComponentName&& other) noexcept = default;
         ComponentName& operator=(ComponentName&& other) noexcept = default;
 
