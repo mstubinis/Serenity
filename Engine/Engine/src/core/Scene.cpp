@@ -61,7 +61,7 @@ class Scene::impl final {
             e2.addComponent<ComponentBody>(CollisionType::None);
             e3.addComponent<ComponentBody>(CollisionType::None);
             e4.addComponent<ComponentBody>(CollisionType::None);
-            /*
+            
             e2.removeComponent<ComponentBody>();
             e4.removeComponent<ComponentBody>();
             //e0.removeComponent<ComponentBody>();
@@ -70,7 +70,7 @@ class Scene::impl final {
 
             super.removeEntity(e3);
             super.removeEntity(e4);
-            */
+            
         }
         void _destruct() {
             SAFE_DELETE(m_Skybox);

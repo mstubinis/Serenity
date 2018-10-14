@@ -55,7 +55,7 @@ namespace Engine {
                     //TODO: find a way to optimize the search for the maxLast entity...
                     uint removedEntityIndex = _IDObject - 1;
                     if (removedEntityIndex >= super::_sparse.size()) {     //needed for scene.removeEntity(), as it iterates over all systems and some might not have the entity in them
-                        super::_sparse.resize(removedEntityIndex + 1, 0);
+                        return false;
                     }
                     uint removedComponentID = super::_sparse[removedEntityIndex];
                     if (removedComponentID == 0)
