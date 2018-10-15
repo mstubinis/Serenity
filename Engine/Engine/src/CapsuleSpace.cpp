@@ -160,7 +160,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     OLD_ComponentBody* playerBody = dread->getComponent<OLD_ComponentBody>();
 
     setPlayer(dread);
-    GameCamera* playerCamera = (GameCamera*)this->getActiveCamera();
+    OLD_GameCamera* playerCamera = (OLD_GameCamera*)getActiveCamera();
     playerCamera->follow(dread);
 
     centerSceneToObject(*dread);

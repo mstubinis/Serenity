@@ -138,17 +138,25 @@ struct epriv::ComponentModelUpdateFunction final {
     static void _defaultUpdate(vector<uint>& vec, vector<ComponentModel>& _components,Camera* _camera) {
         for (uint j = 0; j < vec.size(); ++j) {
             ComponentModel& m = _components[vec[j]];
-            ComponentBody& b = *m.owner.getComponent<ComponentBody>();
-            for (uint k = 0; k < m.models.size(); ++k) {
-                auto& meshInstance = *m.models[k];
-                auto pos = b.position() + meshInstance.position();
-                //per mesh instance radius instead?
-                uint sphereTest = _camera->sphereIntersectTest(pos, m._radius);                //per mesh instance radius instead?
-                if (!meshInstance.visible() || sphereTest == 0 || _camera->getDistance(pos) > m._radius * 1100.0f) {
-                    meshInstance.setPassedRenderCheck(false);
-                    continue;
+            ComponentBody* b = m.owner.getComponent<ComponentBody>();
+            if (b) {
+                ComponentBody& _b = *b;
+                for (uint k = 0; k < m.models.size(); ++k) {
+                    auto& meshInstance = *m.models[k];
+                    auto pos = _b.position() + meshInstance.position();
+                    //per mesh instance radius instead?
+                    uint sphereTest = _camera->sphereIntersectTest(pos, m._radius);                //per mesh instance radius instead?
+                    if (!meshInstance.visible() || sphereTest == 0 || _camera->getDistance(pos) > m._radius * 1100.0f) {
+                        meshInstance.setPassedRenderCheck(false);
+                        continue;
+                    }
+                    meshInstance.setPassedRenderCheck(true);
                 }
-                meshInstance.setPassedRenderCheck(true);
+            }else {
+                for (uint k = 0; k < m.models.size(); ++k) {
+                    auto& meshInstance = *m.models[k];
+                    meshInstance.setPassedRenderCheck(false);
+                }
             }
         }
     }
@@ -167,7 +175,6 @@ struct epriv::ComponentModelUpdateFunction final {
 struct epriv::ComponentModelComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
     ComponentModel& component = *(ComponentModel*)_component;
     ComponentModelFunctions::CalculateRadius(component);
-
     for (uint i = 0; i < component.models.size(); ++i) {
         auto& meshInstance = *component.models[i];
         InternalScenePublicInterface::AddMeshInstanceToPipeline(_entity.scene(), meshInstance, meshInstance.stage());

@@ -9,7 +9,7 @@ using namespace Engine;
 using namespace std;
 
 #pragma region ShipSystem
-ShipSystem::ShipSystem(unsigned int _type, Ship* _ship){
+ShipSystem::ShipSystem(uint _type, Ship* _ship){
     m_Ship = _ship;
     m_Health = 1.0f;
     m_Power = 1.0f;
@@ -25,7 +25,7 @@ void ShipSystem::update(const float& dt){
 #pragma endregion
 
 #pragma region ShipSystemReactor
-ShipSystemReactor::ShipSystemReactor(Ship* _ship, float maxPower, float currentPower):ShipSystem(SHIP_SYSTEM_REACTOR,_ship){
+ShipSystemReactor::ShipSystemReactor(Ship* _ship, float maxPower, float currentPower):ShipSystem(ShipSystemType::Reactor,_ship){
     if( currentPower == -1){
         m_TotalPower = maxPower;
     }
@@ -43,7 +43,7 @@ void ShipSystemReactor::update(const float& dt){
 #pragma endregion
 
 #pragma region ShipSystemShields
-ShipSystemShields::ShipSystemShields(Ship* _ship):ShipSystem(SHIP_SYSTEM_SHIELDS, _ship){
+ShipSystemShields::ShipSystemShields(Ship* _ship):ShipSystem(ShipSystemType::Shields, _ship){
 
 }
 ShipSystemShields::~ShipSystemShields(){
@@ -55,7 +55,7 @@ void ShipSystemShields::update(const float& dt){
 #pragma endregion
 
 #pragma region ShipSystemMainThrusters
-ShipSystemMainThrusters::ShipSystemMainThrusters(Ship* _ship):ShipSystem(SHIP_SYSTEM_MAIN_THRUSTERS, _ship){
+ShipSystemMainThrusters::ShipSystemMainThrusters(Ship* _ship):ShipSystem(ShipSystemType::ThrustersMain, _ship){
 
 }
 ShipSystemMainThrusters::~ShipSystemMainThrusters(){
@@ -84,7 +84,7 @@ void ShipSystemMainThrusters::update(const float& dt){
 #pragma endregion
 
 #pragma region ShipSystemPitchThrusters
-ShipSystemPitchThrusters::ShipSystemPitchThrusters(Ship* _ship):ShipSystem(SHIP_SYSTEM_PITCH_THRUSTERS, _ship){
+ShipSystemPitchThrusters::ShipSystemPitchThrusters(Ship* _ship):ShipSystem(ShipSystemType::ThrustersPitch, _ship){
 
 }
 ShipSystemPitchThrusters::~ShipSystemPitchThrusters(){
@@ -98,7 +98,7 @@ void ShipSystemPitchThrusters::update(const float& dt){
         // apply dampening
         body.setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
-            if(m_Ship->getPlayerCamera()->getState() != CAMERA_STATE_ORBIT){
+            if(m_Ship->OLD_getPlayerCamera()->getState() != CameraState::Orbit){
                 float mouseAmount = Engine::getMouseDifference().y * 0.02f;
                 float massFactor = 1.0f / (body.mass() * 3.0f);
                 float amount = mouseAmount * massFactor;
@@ -111,7 +111,7 @@ void ShipSystemPitchThrusters::update(const float& dt){
 #pragma endregion
 
 #pragma region ShipSystemYawThrusters
-ShipSystemYawThrusters::ShipSystemYawThrusters(Ship* _ship):ShipSystem(SHIP_SYSTEM_YAW_THRUSTERS, _ship){
+ShipSystemYawThrusters::ShipSystemYawThrusters(Ship* _ship):ShipSystem(ShipSystemType::ThrustersYaw, _ship){
 
 }
 ShipSystemYawThrusters::~ShipSystemYawThrusters(){
@@ -125,7 +125,7 @@ void ShipSystemYawThrusters::update(const float& dt){
         // apply dampening
         body.setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
-            if(m_Ship->getPlayerCamera()->getState() != CAMERA_STATE_ORBIT){
+            if(m_Ship->OLD_getPlayerCamera()->getState() != CameraState::Orbit){
                 float mouseAmount = Engine::getMouseDifference().x * 0.02f;
                 float massFactor = 1.0f / (body.mass() * 3.0f);
                 float amount = mouseAmount * massFactor;
@@ -138,7 +138,7 @@ void ShipSystemYawThrusters::update(const float& dt){
 #pragma endregion
 
 #pragma region ShipSystemRollThrusters
-ShipSystemRollThrusters::ShipSystemRollThrusters(Ship* _ship):ShipSystem(SHIP_SYSTEM_ROLL_THRUSTERS, _ship){
+ShipSystemRollThrusters::ShipSystemRollThrusters(Ship* _ship):ShipSystem(ShipSystemType::ThrustersRoll, _ship){
 
 }
 ShipSystemRollThrusters::~ShipSystemRollThrusters(){
@@ -166,7 +166,7 @@ void ShipSystemRollThrusters::update(const float& dt){
 #pragma endregion
 
 #pragma region ShipSystemWarpDrive
-ShipSystemWarpDrive::ShipSystemWarpDrive(Ship* _ship):ShipSystem(SHIP_SYSTEM_WARP_DRIVE, _ship){
+ShipSystemWarpDrive::ShipSystemWarpDrive(Ship* _ship):ShipSystem(ShipSystemType::WarpDrive, _ship){
 
 }
 ShipSystemWarpDrive::~ShipSystemWarpDrive(){
@@ -195,7 +195,7 @@ void ShipSystemWarpDrive::update(const float& dt){
 #pragma endregion
 
 #pragma region ShipSystemSensors
-ShipSystemSensors::ShipSystemSensors(Ship* _ship):ShipSystem(SHIP_SYSTEM_SENSORS, _ship){
+ShipSystemSensors::ShipSystemSensors(Ship* _ship):ShipSystem(ShipSystemType::Sensors, _ship){
 
 }
 ShipSystemSensors::~ShipSystemSensors(){
@@ -229,9 +229,9 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
 	m_PlayerCamera = nullptr;
 
 	if (player) {
-		m_PlayerCamera = (GameCamera*)(scene->getActiveCamera());
+		m_PlayerCamera = (OLD_GameCamera*)(scene->getActiveCamera());
 	}
-	for (uint i = 0; i < SHIP_SYSTEM_NUMBER; ++i) {
+	for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
 		ShipSystem* system = nullptr;
 		if (i == 0)       system = new ShipSystemReactor(this, 1000);
 		else if (i == 1)  system = new ShipSystemPitchThrusters(this);
@@ -261,7 +261,7 @@ void Ship::update(const float& dt){
                     OLD_Entity* e = currentScene.OLD_getEntity(id);
                     if(e){
                         auto* cam = e->getComponent<OLD_ComponentCamera>();
-                        auto* camGame = (e->getComponent<GameCameraComponent>());
+                        auto* camGame = (e->getComponent<OLD_GameCameraComponent>());
                         //TODO: parent->child relationship
                         if(e != this && !cam && !camGame){
                             auto* ebody = e->getComponent<OLD_ComponentBody>();
@@ -274,33 +274,34 @@ void Ship::update(const float& dt){
         #pragma endregion
 
         #pragma region PlayerCameraControls
+        auto& camera = *m_PlayerCamera;
+        const auto& cameraState = camera.getState();
         if(Engine::isKeyDownOnce(KeyboardKey::F1)){
-            if(m_PlayerCamera->getState() != CAMERA_STATE_FOLLOW || (m_PlayerCamera->getState() == CAMERA_STATE_FOLLOW && m_PlayerCamera->getTarget() != this)){
+            if(cameraState != CameraState::Follow || (cameraState == CameraState::Follow && camera.getTarget() != this)){
                 Resources::getCurrentScene()->centerSceneToObject(*this);
-                m_PlayerCamera->follow(this);
+                camera.follow(this);
             }
         }else if(Engine::isKeyDownOnce(KeyboardKey::F2)){
-            if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOW || !m_Target || m_PlayerCamera->getTarget() != this){
+            if(cameraState == CameraState::Follow || !m_Target || camera.getTarget() != this){
                 Resources::getCurrentScene()->centerSceneToObject(*this);
-                m_PlayerCamera->orbit(this);
-            }
-            else if(m_Target){
+                camera.orbit(this);
+            }else if(m_Target){
                 Resources::getCurrentScene()->centerSceneToObject(*m_Target);
-                m_PlayerCamera->orbit(m_Target);
+                camera.orbit(m_Target);
             }
         }else if(Engine::isKeyDownOnce(KeyboardKey::F3)){
-            if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOWTARGET || (!m_Target && m_PlayerCamera->getState() != CAMERA_STATE_FOLLOW) || m_PlayerCamera->getTarget() != this){
+            if(cameraState == CameraState::FollowTarget || (!m_Target && cameraState != CameraState::Follow) || camera.getTarget() != this){
                 Resources::getCurrentScene()->centerSceneToObject(*this);
-                m_PlayerCamera->follow(this);
+                camera.follow(this);
             }else if(m_Target){
                 Resources::getCurrentScene()->centerSceneToObject(*this);
-                m_PlayerCamera->followTarget(m_Target,this);
+                camera.followTarget(m_Target,this);
             }
         }
         #pragma endregion
 
-        if(Engine::isKeyDownOnce(KeyboardKey::T) && Resources::getCurrentScene()->name() != "CapsuleSpace"){
-            setTarget(m_PlayerCamera->getObjectInCenterRay(this));
+        if(Engine::isKeyDownOnce(KeyboardKey::T) && currentScene.name() != "CapsuleSpace"){
+            setTarget(camera.getObjectInCenterRay(this));
         }
     }
     for(auto shipSystem:m_ShipSystems) shipSystem.second->update(dt);

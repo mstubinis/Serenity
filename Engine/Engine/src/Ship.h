@@ -4,19 +4,19 @@
 
 #include "core/Components.h"
 
-class GameCamera;
+class OLD_GameCamera;
 class Ship;
 typedef unsigned int uint;
-enum SHIP_SYSTEM_TYPE { 
-    SHIP_SYSTEM_REACTOR,
-    SHIP_SYSTEM_PITCH_THRUSTERS,
-    SHIP_SYSTEM_YAW_THRUSTERS,
-    SHIP_SYSTEM_ROLL_THRUSTERS,
-    SHIP_SYSTEM_SHIELDS,
-    SHIP_SYSTEM_MAIN_THRUSTERS,
-    SHIP_SYSTEM_WARP_DRIVE,
-    SHIP_SYSTEM_SENSORS,
-SHIP_SYSTEM_NUMBER};
+struct ShipSystemType {enum Type {
+    Reactor,
+    ThrustersPitch,
+    ThrustersYaw,
+    ThrustersRoll,
+    Shields,
+    ThrustersMain,
+    WarpDrive,
+    Sensors,
+_TOTAL}; };
 
 class ShipSystem{
     protected:
@@ -96,7 +96,7 @@ class Ship: public OLD_Entity{
     protected:
         std::unordered_map<uint,ShipSystem*> m_ShipSystems;
         bool m_IsPlayer;
-        GameCamera* m_PlayerCamera;
+        OLD_GameCamera* m_PlayerCamera;
         bool m_IsWarping;
         float m_WarpFactor;
         OLD_Entity* m_Target;
@@ -120,7 +120,7 @@ class Ship: public OLD_Entity{
             m_IsWarping = !m_IsWarping;
             m_WarpFactor = 0;
         }
-        GameCamera* getPlayerCamera(){ return m_PlayerCamera; }
+        OLD_GameCamera* OLD_getPlayerCamera(){ return m_PlayerCamera; }
         bool IsPlayer(){ return m_IsPlayer; }
         bool IsWarping(){ return m_IsWarping; }
         ShipSystem* getShipSystem(uint type){ return m_ShipSystems[type]; }

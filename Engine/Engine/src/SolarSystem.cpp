@@ -30,7 +30,7 @@ using namespace std;
 
 
 SolarSystem::SolarSystem(string n, string file):Scene(n){
-    GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.35f,7000000000.0f,this);
+    OLD_GameCamera* playerCamera = new OLD_GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.35f,7000000000.0f,this);
     setActiveCamera(*playerCamera);
     giGlobal = giSpecular = giDiffuse = 1.0f;
     if(file != "NULL")
@@ -214,7 +214,7 @@ void SolarSystem::_loadFromFile(string filename){
                         zPos += parentZ;
                     }
                     setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f), CollisionType::ConvexHull,this));
-                    GameCamera* playerCamera = (GameCamera*)getActiveCamera();
+                    OLD_GameCamera* playerCamera = (OLD_GameCamera*)getActiveCamera();
                     playerCamera->follow(getPlayer());
                 }else if(line[0] == '$'){//Other ship
                     if(PARENT != ""){

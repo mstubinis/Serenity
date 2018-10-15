@@ -28,6 +28,7 @@ class ComponentLogic : public ComponentBaseClass {
 
     private:
         boost::function<void(const float&)> _functor;
+        void*                               _userPtr;
     public:
         ComponentLogic(Entity&);
 
@@ -39,7 +40,9 @@ class ComponentLogic : public ComponentBaseClass {
         ~ComponentLogic();
 
         template<typename T> void setFunctor(T& functor) { _functor = boost::bind<void>(functor, *this, _1); }
+        template<typename T> void setUserPointer(T* ptr) { _userPtr = ptr; }
         void call(const float& dt);
+        const void* getUserPointer() { return _userPtr; }
 };
 
 class ComponentLogicSystem : public Engine::epriv::ECSSystemCI {

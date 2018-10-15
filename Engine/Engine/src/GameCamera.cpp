@@ -13,24 +13,24 @@ using namespace std;
 
 #pragma region Component
 
-GameCameraComponent::GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane):OLD_ComponentCamera(angle,aspectRatio,nearPlane,farPlane){
-    m_State = CAMERA_STATE_FREEFORM;
+OLD_GameCameraComponent::OLD_GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane):OLD_ComponentCamera(angle,aspectRatio,nearPlane,farPlane){
+    m_State = CameraState::Freeform;
     m_Target = nullptr;
     m_Player = nullptr;
     m_OrbitRadius = 0;
     m_CameraMouseFactor = glm::vec2(0.0f);
 }
-GameCameraComponent::GameCameraComponent(float left,float right,float bottom,float top,float nearPlane,float farPlane):OLD_ComponentCamera(left,right,bottom,top,nearPlane,farPlane){
-    m_State = CAMERA_STATE_FREEFORM;
+OLD_GameCameraComponent::OLD_GameCameraComponent(float left,float right,float bottom,float top,float nearPlane,float farPlane):OLD_ComponentCamera(left,right,bottom,top,nearPlane,farPlane){
+    m_State = CameraState::Freeform;
     m_Target = nullptr;
     m_Player = nullptr;
     m_CameraMouseFactor = glm::vec2(0.0f);
 }
-GameCameraComponent::~GameCameraComponent(){
+OLD_GameCameraComponent::~OLD_GameCameraComponent(){
 }
-void GameCameraComponent::update(const float& dt){
+void OLD_GameCameraComponent::update(const float& dt){
     switch(m_State){
-        case CAMERA_STATE_FOLLOW:{
+        case CameraState::Follow:{
             auto& targetBody = *(m_Target->getComponent<OLD_ComponentBody>());
             auto& targetModel = *(m_Target->getComponent<OLD_ComponentModel>());
             float targetRadius = targetModel.radius();
@@ -47,7 +47,7 @@ void GameCameraComponent::update(const float& dt){
             lookAt(pos,targetBody.position() - targetBody.forward() * 50.0f,targetBody.up());
             break;
         }
-        case CAMERA_STATE_FOLLOWTARGET:{
+        case CameraState::FollowTarget:{
             auto& target = *(m_Target->getComponent<OLD_ComponentBody>());
             auto& player = *(m_Player->getComponent<OLD_ComponentBody>());
             auto& playerModel = *(m_Player->getComponent<OLD_ComponentModel>());
@@ -68,7 +68,7 @@ void GameCameraComponent::update(const float& dt){
             lookAt(pos,target.position(),player.up());
             break;
         }
-        case CAMERA_STATE_ORBIT:{
+        case CameraState::Orbit:{
             auto& targetBody = *(m_Target->getComponent<OLD_ComponentBody>());
             auto& targetModel = *(m_Target->getComponent<OLD_ComponentModel>());
 
@@ -97,7 +97,7 @@ void GameCameraComponent::update(const float& dt){
             lookAt(eye,targetBody.position(),m_Body->up());
             break;
         }
-        case CAMERA_STATE_FREEFORM:{
+        case CameraState::Freeform:{
             lookAt(m_Body->position(),m_Body->position() + m_Body->forward(), m_Body->up());
             break;
         }
@@ -108,28 +108,26 @@ void GameCameraComponent::update(const float& dt){
 
 #pragma region GameCamera
 
-GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a,r,n,f,scene){
+OLD_GameCamera::OLD_GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a,r,n,f,scene){
     removeComponent(m_Camera);
-    m_Camera = new GameCameraComponent(a,r,n,f);
+    m_Camera = new OLD_GameCameraComponent(a,r,n,f);
     addComponent(m_Camera);
     
-    ((GameCameraComponent*)m_Camera)->m_Body = m_Body;
+    ((OLD_GameCameraComponent*)m_Camera)->m_Body = m_Body;
 }
-GameCamera::GameCamera(float l, float r, float b, float t, float n, float f, Scene* scene):Camera(l,r,b,t,n,f,scene){
+OLD_GameCamera::OLD_GameCamera(float l, float r, float b, float t, float n, float f, Scene* scene):Camera(l,r,b,t,n,f,scene){
     removeComponent(m_Camera);
-    m_Camera = new GameCameraComponent(l,r,b,t,n,f);
+    m_Camera = new OLD_GameCameraComponent(l,r,b,t,n,f);
     addComponent(m_Camera);
 
-    ((GameCameraComponent*)m_Camera)->m_Body = m_Body;
+    ((OLD_GameCameraComponent*)m_Camera)->m_Body = m_Body;
 }
-GameCamera::~GameCamera()
-{
+OLD_GameCamera::~OLD_GameCamera(){
 }
-void GameCamera::update(const float& dt){
-
+void OLD_GameCamera::update(const float& dt){
 }
 
-OLD_Entity* GameCamera::getObjectInCenterRay(OLD_Entity* exclusion){
+OLD_Entity* OLD_GameCamera::getObjectInCenterRay(OLD_Entity* exclusion){
     OLD_Entity* ret = 0;
     vector<OLD_Entity*> objs;
     Scene& s = *Resources::getCurrentScene();
@@ -155,28 +153,28 @@ OLD_Entity* GameCamera::getObjectInCenterRay(OLD_Entity* exclusion){
     }
     return ret;
 }
-void GameCamera::render(){}
-void GameCamera::follow(OLD_Entity* target){
-    GameCameraComponent& cam = *((GameCameraComponent*)m_Camera);
+void OLD_GameCamera::render(){}
+void OLD_GameCamera::follow(OLD_Entity* target){
+    OLD_GameCameraComponent& cam = *((OLD_GameCameraComponent*)m_Camera);
     cam.m_Target = target;
     cam.m_Player = target;
-    cam.m_State = CAMERA_STATE_FOLLOW;
+    cam.m_State = CameraState::Follow;
 }
-void GameCamera::followTarget(OLD_Entity* target, OLD_Entity* player){
-    auto& cam = *((GameCameraComponent*)m_Camera);
+void OLD_GameCamera::followTarget(OLD_Entity* target, OLD_Entity* player){
+    auto& cam = *((OLD_GameCameraComponent*)m_Camera);
     cam.m_Target = target;
     cam.m_Player = player;
-    cam.m_State = CAMERA_STATE_FOLLOWTARGET;
+    cam.m_State = CameraState::FollowTarget;
 }
-void GameCamera::orbit(OLD_Entity* target){
-    auto& cam = *((GameCameraComponent*)m_Camera);
+void OLD_GameCamera::orbit(OLD_Entity* target){
+    auto& cam = *((OLD_GameCameraComponent*)m_Camera);
     cam.m_Target = target;
     cam.m_Player = target;
-    cam.m_State = CAMERA_STATE_ORBIT;
+    cam.m_State = CameraState::Orbit;
     cam.m_CameraMouseFactor = glm::vec2(0.0f);
 }
-void GameCamera::setTarget(OLD_Entity* target) { ((GameCameraComponent*)m_Camera)->m_Target = target; }
-const OLD_Entity* GameCamera::getTarget() const { return ((GameCameraComponent*)m_Camera)->m_Target; }
-const CAMERA_STATE GameCamera::getState() const { return ((GameCameraComponent*)m_Camera)->m_State; }
+void OLD_GameCamera::setTarget(OLD_Entity* target) { ((OLD_GameCameraComponent*)m_Camera)->m_Target = target; }
+const OLD_Entity* OLD_GameCamera::getTarget() const { return ((OLD_GameCameraComponent*)m_Camera)->m_Target; }
+const CameraState::State OLD_GameCamera::getState() const { return ((OLD_GameCameraComponent*)m_Camera)->m_State; }
 
 #pragma endregion

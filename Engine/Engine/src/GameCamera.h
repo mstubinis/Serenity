@@ -4,32 +4,37 @@
 
 #include "core/Camera.h"
 
-enum CAMERA_STATE { 
-    CAMERA_STATE_FREEFORM,
-    CAMERA_STATE_ORBIT,
-    CAMERA_STATE_FOLLOW,
-    CAMERA_STATE_FOLLOWTARGET 
-};
-class GameCameraComponent: public OLD_ComponentCamera{
+//
+// OLD
+//
+#pragma region Old
+
+struct CameraState {enum State {
+    Freeform,
+    Orbit,
+    Follow,
+    FollowTarget,
+_TOTAL};};
+class OLD_GameCameraComponent: public OLD_ComponentCamera{
     public:
-        CAMERA_STATE m_State;
+        CameraState::State m_State;
         float m_OrbitRadius;
         OLD_Entity* m_Target;
         OLD_Entity* m_Player;
         OLD_ComponentBody* m_Body;
         glm::vec2 m_CameraMouseFactor;
 
-        GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane);
-        GameCameraComponent(float left,float right,float bottom,float top,float nearPlane,float farPlane);
-        ~GameCameraComponent();
+        OLD_GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane);
+        OLD_GameCameraComponent(float left,float right,float bottom,float top,float nearPlane,float farPlane);
+        ~OLD_GameCameraComponent();
 
         void update(const float& dt);
 };
-class GameCamera: public Camera{
+class OLD_GameCamera: public Camera{
     public:
-        GameCamera(float angle, float aspectRatio, float clipStart, float clipEnd,Scene* = nullptr);                   // Perspective camera Constructor
-        GameCamera(float left, float right, float bottom, float top, float clipStart, float clipEnd,Scene* = nullptr); // Orthographic camera Constructor
-        virtual ~GameCamera();
+        OLD_GameCamera(float angle, float aspectRatio, float clipStart, float clipEnd,Scene* = nullptr);                   // Perspective camera Constructor
+        OLD_GameCamera(float left, float right, float bottom, float top, float clipStart, float clipEnd,Scene* = nullptr); // Orthographic camera Constructor
+        virtual ~OLD_GameCamera();
 
         void follow(OLD_Entity*);
         void followTarget(OLD_Entity* target, OLD_Entity* player);
@@ -40,8 +45,20 @@ class GameCamera: public Camera{
 
         void setTarget(OLD_Entity* target);
         const OLD_Entity* getTarget() const;
-        const CAMERA_STATE getState() const;
+        const CameraState::State getState() const;
 
         OLD_Entity* getObjectInCenterRay(OLD_Entity* exclusion);
 };
+
+#pragma endregion
+
+
+//
+// NEW
+//
+
+#pragma region New
+
+#pragma endregion
+
 #endif

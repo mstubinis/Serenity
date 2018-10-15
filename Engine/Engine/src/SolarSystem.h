@@ -6,7 +6,6 @@
 
 class Star;
 class Ship;
-class GameCamera;
 class Planet;
 
 class SolarSystem: public Scene{
