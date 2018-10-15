@@ -5,7 +5,14 @@ using namespace std;
 
 #pragma region Component
 
-ComponentLogic2::ComponentLogic2(Entity& _entity) : ComponentBaseClass(_entity) {}
+struct ComponentLogic2EmptyFunctor final {void operator()(ComponentLogic2& _component, const float& dt) const {
+
+}};
+
+ComponentLogic2::ComponentLogic2(Entity& _entity) : ComponentBaseClass(_entity) {
+    ComponentLogic2EmptyFunctor f;
+    setFunctor(f);
+}
 ComponentLogic2::~ComponentLogic2() {}
 void ComponentLogic2::call(const float& dt) { _functor(dt); }
 

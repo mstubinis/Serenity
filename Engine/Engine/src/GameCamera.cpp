@@ -11,6 +11,8 @@
 using namespace Engine;
 using namespace std;
 
+#pragma region Component
+
 GameCameraComponent::GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane):OLD_ComponentCamera(angle,aspectRatio,nearPlane,farPlane){
     m_State = CAMERA_STATE_FREEFORM;
     m_Target = nullptr;
@@ -102,7 +104,9 @@ void GameCameraComponent::update(const float& dt){
     }
 }
 
+#pragma endregion
 
+#pragma region GameCamera
 
 GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a,r,n,f,scene){
     removeComponent(m_Camera);
@@ -174,3 +178,5 @@ void GameCamera::orbit(OLD_Entity* target){
 void GameCamera::setTarget(OLD_Entity* target) { ((GameCameraComponent*)m_Camera)->m_Target = target; }
 const OLD_Entity* GameCamera::getTarget() const { return ((GameCameraComponent*)m_Camera)->m_Target; }
 const CAMERA_STATE GameCamera::getState() const { return ((GameCameraComponent*)m_Camera)->m_State; }
+
+#pragma endregion

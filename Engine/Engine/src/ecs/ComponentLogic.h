@@ -38,7 +38,7 @@ class ComponentLogic : public ComponentBaseClass {
 
         ~ComponentLogic();
 
-        template<typename T> void setFunctor(T& functor) { _functor = boost::bind<void>(functor, this, _1); }
+        template<typename T> void setFunctor(T& functor) { _functor = boost::bind<void>(functor, *this, _1); }
         void call(const float& dt);
 };
 

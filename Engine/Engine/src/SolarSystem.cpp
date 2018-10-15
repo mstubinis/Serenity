@@ -283,7 +283,7 @@ void SolarSystem::_loadFromFile(string filename){
     e3.addComponent<ComponentBody>(CollisionType::None);
     e4.addComponent<ComponentBody>(CollisionType::None);
 
-    e0.getComponent<ComponentBody>()->setPosition(-2,-5,1);
+    e0.getComponent<ComponentBody>()->setPosition(-2, -5, 1);
     e1.getComponent<ComponentBody>()->setPosition(-2, 5, 1);
     e2.getComponent<ComponentBody>()->setPosition(2, -5, 1);
     e3.getComponent<ComponentBody>()->setPosition(2, 5, 1);
