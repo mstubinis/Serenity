@@ -98,7 +98,7 @@ void updateLogic(const float& dt){
     updatePhysics(dt);
     epriv::Core::m_Engine->m_ComponentManager._update(dt);
 
-    epriv::InternalScenePublicInterface::GetECS(scene).postUpdate(dt);
+    epriv::InternalScenePublicInterface::GetECS(scene).postUpdate(scene,dt);
 
     epriv::Core::m_Engine->m_ThreadManager._update(dt);
     RESET_EVENTS();

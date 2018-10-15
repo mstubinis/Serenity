@@ -239,6 +239,15 @@
     <ClCompile Include="Engine\src\game\components\ComponentGameCamera.cpp">
       <Filter>Source Files\Game\Components</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\src\ecs\ComponentLogic1.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\ecs\ComponentLogic2.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\ecs\ComponentLogic3.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -429,6 +438,15 @@
     </ClInclude>
     <ClInclude Include="Engine\src\game\components\ComponentGameCamera.h">
       <Filter>Header Files\Game\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\ComponentLogic1.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\ComponentLogic2.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\ComponentLogic3.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

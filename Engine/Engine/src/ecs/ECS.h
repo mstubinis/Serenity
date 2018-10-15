@@ -6,6 +6,7 @@
 #include "ecs/ECSEntityPool.h"
 #include "ecs/ECSComponentPool.h"
 #include "ecs/ECSSystem.h"
+#include "ecs/Entity.h"
 #include <memory>
 
 namespace Engine {
@@ -14,6 +15,7 @@ namespace Engine {
         template<typename TEntity> class ECS{
             private:
                 ECSEntityPool<TEntity>                                    entityPool;
+                std::vector<TEntity>                                      justAddedEntities;
                 std::vector<uint>                                         destroyedEntities;
                 std::vector<SparseSet<TEntity>*>                          componentPools;
                 std::vector<ECSSystem<TEntity>*>                          systems;
@@ -53,21 +55,25 @@ namespace Engine {
                 void update(const float& dt) { 
                     for (uint i = 0; i < systems.size(); ++i) { auto& system = *systems[i]; system.update(dt); }
                 }
-                void onComponentAddedToEntity(void* _component,Entity& _entity, const uint& type_slot) {
+                void onComponentAddedToEntity(void* _component, TEntity& _entity, const uint& type_slot) {
                     auto& system = *systems[type_slot]; system.onComponentAddedToEntity(_component, _entity);
-                }
-                void onEntityAddedToScene(Entity& _entity, Scene& _scene) {
-                    for (uint i = 0; i < systems.size(); ++i) { auto& system = *systems[i]; system.onEntityAddedToScene(_entity, _scene); }
                 }
                 void onSceneEntered(Scene& _Scene) { 
                     for (uint i = 0; i < systems.size(); ++i) { auto& system = *systems[i]; system.onSceneEntered(_Scene); }
                 }
                 void onSceneLeft(Scene& _Scene) { 
-                    for (uint i = 0; i < systems.size(); ++i) {
-                        auto& system = *systems[i]; system.onSceneLeft(_Scene);
-                    }
+                    for (uint i = 0; i < systems.size(); ++i) { auto& system = *systems[i]; system.onSceneLeft(_Scene); }
                 }
-                void postUpdate(const float& dt) {
+                void postUpdate(Scene& _scene,const float& dt) {
+                    if (justAddedEntities.size() > 0) {
+                        for (uint i = 0; i < systems.size(); ++i) {
+                            auto& system = *systems[i];
+                            for (auto& _entity : justAddedEntities) {
+                                system.onEntityAddedToScene(_entity, _scene);
+                            }
+                        }
+                        vector_clear(justAddedEntities);
+                    }
                     if (destroyedEntities.size() > 0) {
                         for (uint i = 0; i < componentPools.size(); ++i) {
                             auto& pool = *componentPools[i];
@@ -107,7 +113,11 @@ namespace Engine {
                 }
 
                 //we may or may not need these...
-                TEntity createEntity(Scene& _scene) { return entityPool.addEntity(_scene); }
+                TEntity createEntity(Scene& _scene) { 
+                    TEntity res = entityPool.addEntity(_scene);
+                    justAddedEntities.push_back(res);
+                    return res;
+                }
                 void removeEntity(const uint& _index) { destroyedEntities.push_back(_index); }
                 void removeEntity(TEntity& _entity) { EntitySerialization _s(_entity); destroyedEntities.push_back(_s.ID); }
                 epriv::EntityPOD* getEntity(const uint& _entityID) { return entityPool.getEntity(_entityID); }

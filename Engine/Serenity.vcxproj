@@ -65,6 +65,9 @@
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentCamera.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentLogic.cpp" />
+    <ClCompile Include="Engine\src\ecs\ComponentLogic1.cpp" />
+    <ClCompile Include="Engine\src\ecs\ComponentLogic2.cpp" />
+    <ClCompile Include="Engine\src\ecs\ComponentLogic3.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentModel.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentName.cpp" />
     <ClCompile Include="Engine\src\ecs\ECSRegistry.cpp" />
@@ -126,6 +129,9 @@
     <ClInclude Include="Engine\src\ecs\ComponentBody.h" />
     <ClInclude Include="Engine\src\ecs\ComponentCamera.h" />
     <ClInclude Include="Engine\src\ecs\ComponentLogic.h" />
+    <ClInclude Include="Engine\src\ecs\ComponentLogic1.h" />
+    <ClInclude Include="Engine\src\ecs\ComponentLogic2.h" />
+    <ClInclude Include="Engine\src\ecs\ComponentLogic3.h" />
     <ClInclude Include="Engine\src\ecs\ComponentModel.h" />
     <ClInclude Include="Engine\src\ecs\ComponentName.h" />
     <ClInclude Include="Engine\src\ecs\ECS.h" />

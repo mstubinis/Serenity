@@ -80,8 +80,8 @@ namespace Engine {
                 virtual ~ECSSystem() = default;
 
                 virtual void update(const float& dt) {}
-                virtual void onComponentAddedToEntity(void*, Entity&) {}
-                virtual void onEntityAddedToScene(Entity&, Scene&) {}
+                virtual void onComponentAddedToEntity(void*, TEntity&) {}
+                virtual void onEntityAddedToScene(TEntity&, Scene&) {}
                 virtual void onSceneLeft(Scene&) {}
                 virtual void onSceneEntered(Scene&) {}
         };
@@ -113,8 +113,8 @@ namespace Engine {
                 ECSSystem& operator=(ECSSystem&& other) noexcept = delete;
 
                 void update(const float& dt) { super::_SUF(&componentPool,dt); }
-                void onComponentAddedToEntity(void* _component, Entity& _entity) { super::_CAE(_component, _entity); }
-                void onEntityAddedToScene(Entity& _entity, Scene& _scene) { super::_EAS(&componentPool, _entity, _scene); }
+                void onComponentAddedToEntity(void* _component, TEntity& _entity) { super::_CAE(_component, _entity); }
+                void onEntityAddedToScene(TEntity& _entity, Scene& _scene) { super::_EAS(&componentPool, _entity, _scene); }
                 void onSceneEntered(Scene& _scene) { super::_SEF(&componentPool, _scene); }
                 void onSceneLeft(Scene& _scene) { super::_SLF(&componentPool, _scene); }
         };

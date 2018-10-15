@@ -11,6 +11,9 @@
 #include "ecs/ComponentName.h"
 #include "ecs/ComponentModel.h"
 #include "ecs/ComponentLogic.h"
+#include "ecs/ComponentLogic1.h"
+#include "ecs/ComponentLogic2.h"
+#include "ecs/ComponentLogic3.h"
 #include "ecs/ComponentCamera.h"
 
 using namespace Engine;
@@ -45,8 +48,11 @@ class Scene::impl final {
 
             m_ECS.assignSystem<ComponentLogic>(ComponentLogicSystem());
             m_ECS.assignSystem<ComponentBody>(ComponentBodySystem());
+            m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1System());
             m_ECS.assignSystem<ComponentCamera>(ComponentCameraSystem());
+            m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2System());
             m_ECS.assignSystem<ComponentModel>(ComponentModelSystem());
+            m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3System());
 
 
             
