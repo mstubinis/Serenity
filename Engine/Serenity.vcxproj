@@ -134,6 +134,7 @@
     <ClInclude Include="Engine\src\ecs\ComponentLogic3.h" />
     <ClInclude Include="Engine\src\ecs\ComponentModel.h" />
     <ClInclude Include="Engine\src\ecs\ComponentName.h" />
+    <ClInclude Include="Engine\src\ecs\Components.h" />
     <ClInclude Include="Engine\src\ecs\ECS.h" />
     <ClInclude Include="Engine\src\ecs\ECSComponentPool.h" />
     <ClInclude Include="Engine\src\ecs\ECSEntityPool.h" />

@@ -22,6 +22,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <ecs/Entity.h>
+#include <ecs/Components.h>
+
 using namespace Engine;
 using namespace std;
 
@@ -265,6 +268,35 @@ void SolarSystem::_loadFromFile(string filename){
 
     //LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
     //player->addChild(lightP);
+
+
+    Entity e0 = createEntity();
+    Entity e1 = createEntity();
+    Entity e2 = createEntity();
+    Entity e3 = createEntity();
+    Entity e4 = createEntity();
+
+
+    e0.addComponent<ComponentBody>(CollisionType::None);
+    e1.addComponent<ComponentBody>(CollisionType::None);
+    e2.addComponent<ComponentBody>(CollisionType::None);
+    e3.addComponent<ComponentBody>(CollisionType::None);
+    e4.addComponent<ComponentBody>(CollisionType::None);
+
+    e0.getComponent<ComponentBody>()->setPosition(-2,-5,1);
+    e1.getComponent<ComponentBody>()->setPosition(-2, 5, 1);
+    e2.getComponent<ComponentBody>()->setPosition(2, -5, 1);
+    e3.getComponent<ComponentBody>()->setPosition(2, 5, 1);
+    e4.getComponent<ComponentBody>()->setPosition(-2, 5, -3);
+
+    //e2.removeComponent<ComponentBody>();
+    //e4.removeComponent<ComponentBody>();
+    //e0.removeComponent<ComponentBody>();
+    //e3.removeComponent<ComponentBody>();
+    //e1.removeComponent<ComponentBody>();
+
+    //removeEntity(e3);
+    //removeEntity(e4);
 }
 void SolarSystem::update(const float& dt){
     Scene::update(dt);

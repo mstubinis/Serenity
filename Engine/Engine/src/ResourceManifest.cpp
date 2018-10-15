@@ -63,13 +63,13 @@ void ResourceManifest::init(){
     Handle groundFromSpaceFrag = Resources::addShader("data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag);
 
-    //TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",true,0.0f);
+    TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",true,0.0f);
 
     PlanetMesh = Resources::addMeshAsync("data/Models/planet.objc");
     DefiantMesh = Resources::addMeshAsync("data/Models/defiant.objc"); //220 metres long (0.22 km)
     StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.objc"); //6950 meters in height (6.95 km)
     RingMesh = Resources::addMeshAsync("data/Models/ring.objc");
-    //DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.objc");
+    DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.objc");
     //LeviathanMesh = Resources::addMeshAsync("data/Models/leviathan.objc");
     /*
     AkiraMesh = Resources::addMeshAsync("data/Models/akira.objc");
@@ -79,9 +79,9 @@ void ResourceManifest::init(){
     VenerexMesh = Resources::addMeshAsync("data/Models/venerex.objc");
     OberthMesh = Resources::addMeshAsync("data/Models/oberth.objc");
     */
-    //CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.objc");
-    //CapsuleRibbonAMesh = Resources::addMeshAsync("data/Models/capsuleRA.objc");
-    //CapsuleRibbonBMesh = Resources::addMeshAsync("data/Models/capsuleRB.objc");
+    CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.objc");
+    CapsuleRibbonAMesh = Resources::addMeshAsync("data/Models/capsuleRA.objc");
+    CapsuleRibbonBMesh = Resources::addMeshAsync("data/Models/capsuleRB.objc");
 
     Engine::epriv::threading::waitForAll();
 
@@ -92,14 +92,14 @@ void ResourceManifest::init(){
 
     EarthSkyMaterial = Resources::addMaterial("EarthSky","data/Textures/Planets/Earth.dds","","","");
 
-    //DreadnaughtMaterial = Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.dds","data/Textures/dreadnaught_Normal.dds","data/Textures/dreadnaught_Glow.dds");
+    DreadnaughtMaterial = Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.dds","data/Textures/dreadnaught_Normal.dds","data/Textures/dreadnaught_Glow.dds");
     DefiantMaterial = Resources::addMaterial("Defiant","data/Textures/defiant.dds","data/Textures/defiant_Normal.dds","data/Textures/defiant_Glow.dds");
-    //AkiraMaterial = Resources::addMaterial("Akira","data/Textures/akira.dds","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
-    //MirandaMaterial = Resources::addMaterial("Miranda","data/Textures/miranda.dds","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
-    //IntrepidMaterial = Resources::addMaterial("Intrepid","data/Textures/intrepid.dds","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
-    //NorwayMaterial = Resources::addMaterial("Norway","data/Textures/norway.dds","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
-    //VenerexMaterial = Resources::addMaterial("Venerex","data/Textures/venerex.dds","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
-    //OberthMaterial = Resources::addMaterial("Oberth","data/Textures/oberth.dds","data/Textures/oberth_Normal.png","data/Textures/oberth_Glow.png");
+    AkiraMaterial = Resources::addMaterial("Akira","data/Textures/akira.dds","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
+    MirandaMaterial = Resources::addMaterial("Miranda","data/Textures/miranda.dds","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
+    IntrepidMaterial = Resources::addMaterial("Intrepid","data/Textures/intrepid.dds","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
+    NorwayMaterial = Resources::addMaterial("Norway","data/Textures/norway.dds","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
+    VenerexMaterial = Resources::addMaterial("Venerex","data/Textures/venerex.dds","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
+    OberthMaterial = Resources::addMaterial("Oberth","data/Textures/oberth.dds","data/Textures/oberth_Normal.png","data/Textures/oberth_Glow.png");
     CrosshairMaterial = Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.dds","","","");
     CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.dds","","","");
     StarFlareMaterial = Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.dds");
@@ -110,7 +110,7 @@ void ResourceManifest::init(){
 
     PBCSound = Resources::addSoundData("data/Sounds/Effects/pbc.ogg","pbc");
     SniperSound = Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
-    /*
+    
     CapsuleA = Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.dds");
     ((Material*)CapsuleA.get())->setShadeless(true);
     CapsuleB = Resources::addMaterial("Capsule_B","data/Textures/Effects/capsule_b.dds");
@@ -119,6 +119,5 @@ void ResourceManifest::init(){
     ((Material*)CapsuleC.get())->setShadeless(true);
     ((Material*)CapsuleC.get())->setGlow(1.0f);
     CapsuleD = Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.dds");
-    ((Material*)CapsuleD.get())->setShadeless(true);
-    */
+    ((Material*)CapsuleD.get())->setShadeless(true);    
 }

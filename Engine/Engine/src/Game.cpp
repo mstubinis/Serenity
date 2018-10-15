@@ -42,7 +42,7 @@ void Game::initLogic(){
     //window.setVerticalSyncEnabled(true);
     //window.setFramerateLimit(60);
     SolarSystem* sol = new SolarSystem("Sol", "data/Systems/Sol.txt");
-    //CapsuleSpace* cap = new CapsuleSpace();
+    CapsuleSpace* cap = new CapsuleSpace();
 
     Resources::setCurrentScene("Sol");
     //Resources::Settings::enableDynamicMemory();
@@ -54,10 +54,10 @@ void Game::update(const float& dt){
         Engine::stop();
     }
     if (Engine::isKeyDownOnce(KeyboardKey::F4)) {
-        //Resources::setCurrentScene("Sol");
+        Resources::setCurrentScene("Sol");
     }
     if (Engine::isKeyDownOnce(KeyboardKey::F5)) {
-        //Resources::setCurrentScene("CapsuleSpace");
+        Resources::setCurrentScene("CapsuleSpace");
     }
     if (Engine::isKeyDownOnce(KeyboardKey::F6)) {
         Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen());

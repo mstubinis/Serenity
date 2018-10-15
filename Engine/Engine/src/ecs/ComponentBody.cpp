@@ -673,8 +673,10 @@ struct epriv::ComponentBodyComponentAddedToEntityFunction final {void operator()
         auto* _collision = component.data.p->collision;
         component.setCollision((CollisionType::Type)_collision->getType(), component.data.p->mass);
     }
+    std::cout << "component body added to entity" << std::endl;
 }};
 struct epriv::ComponentBodyEntityAddedToSceneFunction final {void operator()(void* _componentPool,Entity& _entity, Scene& _scene) const {
+    std::cout << "component body entity added to scene" << std::endl;
 
 }};
 struct epriv::ComponentBodySceneEnteredFunction final {void operator()(void* _componentPool,Scene& _scene) const {
@@ -684,6 +686,7 @@ struct epriv::ComponentBodySceneEnteredFunction final {void operator()(void* _co
             auto& rigidBody = *component.data.p->rigidBody;
             Physics::addRigidBody(&rigidBody);
         }
+        std::cout << "component body entered scene" << std::endl;
     }
 }};
 struct epriv::ComponentBodySceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
@@ -693,6 +696,7 @@ struct epriv::ComponentBodySceneLeftFunction final {void operator()(void* _compo
             auto& rigidBody = *component.data.p->rigidBody;
             Physics::removeRigidBody(&rigidBody);
         }
+        std::cout << "component body left scene" << std::endl;
     }
 }};
     

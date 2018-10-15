@@ -53,30 +53,7 @@ class Scene::impl final {
             m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2System());
             m_ECS.assignSystem<ComponentModel>(ComponentModelSystem());
             m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3System());
-
-
-            
-            Entity e0 = m_ECS.createEntity(super);
-            Entity e1 = m_ECS.createEntity(super);
-            Entity e2 = m_ECS.createEntity(super);
-            Entity e3 = m_ECS.createEntity(super);
-            Entity e4 = m_ECS.createEntity(super);
-
-            e0.addComponent<ComponentBody>(CollisionType::None);
-            e1.addComponent<ComponentBody>(CollisionType::None);
-            e2.addComponent<ComponentBody>(CollisionType::None);
-            e3.addComponent<ComponentBody>(CollisionType::None);
-            e4.addComponent<ComponentBody>(CollisionType::None);
-            
-            e2.removeComponent<ComponentBody>();
-            e4.removeComponent<ComponentBody>();
-            //e0.removeComponent<ComponentBody>();
-            //e3.removeComponent<ComponentBody>();
-            //e1.removeComponent<ComponentBody>();
-
-            super.removeEntity(e3);
-            super.removeEntity(e4);
-            
+       
         }
         void _destruct() {
             SAFE_DELETE(m_Skybox);
@@ -246,9 +223,10 @@ Scene::Scene(string name):m_i(new impl){
 uint Scene::id() { return m_i->m_ID; }
 
 //new ecs
-epriv::EntityPOD* Scene::getEntity(uint entityData) { return epriv::InternalScenePublicInterface::GetECS(*this).getEntity(entityData); }
-void Scene::removeEntity(uint entityData) { epriv::InternalScenePublicInterface::GetECS(*this).removeEntity(entityData); }
-void Scene::removeEntity(Entity& entity) { epriv::EntitySerialization _s(entity); epriv::InternalScenePublicInterface::GetECS(*this).removeEntity(_s.ID); }
+Entity Scene::createEntity() { return m_i->m_ECS.createEntity(*this); }
+epriv::EntityPOD* Scene::getEntity(uint entityData) { return m_i->m_ECS.getEntity(entityData); }
+void Scene::removeEntity(uint entityData) { m_i->m_ECS.removeEntity(entityData); }
+void Scene::removeEntity(Entity& entity) { epriv::EntitySerialization _s(entity); m_i->m_ECS.removeEntity(_s.ID); }
 
 
 uint Scene::OLD_addEntity(OLD_Entity& entity){ return m_i->_OLD_addEntity(*this,entity); }

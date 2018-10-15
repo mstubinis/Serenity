@@ -37,6 +37,7 @@ class Scene: public EngineResource, public EventObserver{
         uint id();
 
         //new ecs
+        Entity createEntity();
         Engine::epriv::EntityPOD* getEntity(uint entityID);
         void removeEntity(uint entityID);
         void removeEntity(Entity& entity);

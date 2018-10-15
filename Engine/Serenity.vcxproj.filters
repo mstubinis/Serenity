@@ -448,5 +448,8 @@
     <ClInclude Include="Engine\src\ecs\ComponentLogic3.h">
       <Filter>Header Files\Engine\Core\ECS\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\ecs\Components.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
