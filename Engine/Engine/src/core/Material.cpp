@@ -291,8 +291,6 @@ namespace Engine{
         struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
             //Material& material = *(Material*)r;
         }};
-        DefaultMaterialBindFunctor DEFAULT_BIND_FUNCTOR;
-        DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     };
 };
 
@@ -391,13 +389,13 @@ void MaterialComponentParallaxOcclusion::unbind(){
 
 Material::Material(string name,string diffuse,string normal,string glow,string specular):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,*this);
-    setCustomBindFunctor(epriv::DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(epriv::DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(epriv::DefaultMaterialBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMaterialUnbindFunctor());
 }
 Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,*this);
-    setCustomBindFunctor(epriv::DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(epriv::DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(epriv::DefaultMaterialBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMaterialUnbindFunctor());
 }
 Material::~Material(){
     m_i->_destruct();

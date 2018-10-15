@@ -127,15 +127,12 @@ ShaderType::Type Shader::type(){ return m_Type; }
 string Shader::data(){ return m_Code; }
 bool Shader::fromFile(){ return m_FromFile; }
 
-epriv::DefaultShaderBindFunctor DEFAULT_BIND_FUNCTOR;
-epriv::DefaultShaderUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-
 ShaderP::ShaderP(string _name, Shader& vs, Shader& fs):
 m_VertexShader(vs), m_FragmentShader(fs){
     m_LoadedGPU = m_LoadedCPU = false;
 
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(epriv::DefaultShaderBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultShaderUnbindFunctor());
     setName(_name);
 
     string& name_ = name();

@@ -16,7 +16,7 @@ class BindableResource: public EngineResource{
         virtual void bind();
         virtual void unbind();
 
-        template<class T> void setCustomBindFunctor  (T& functor){ m_CustomBindFunctor   = boost::bind<void>(functor,this); }
-        template<class T> void setCustomUnbindFunctor(T& functor){ m_CustomUnbindFunctor = boost::bind<void>(functor,this); }
+        template<class T> void setCustomBindFunctor  (const T& functor){ m_CustomBindFunctor   = boost::bind<void>(functor,this); }
+        template<class T> void setCustomUnbindFunctor(const T& functor){ m_CustomUnbindFunctor = boost::bind<void>(functor,this); }
 };
 #endif

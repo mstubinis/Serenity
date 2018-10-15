@@ -25,8 +25,6 @@ namespace sf{ class Image; };
 const uint NUM_BONES_PER_VERTEX = 4;
 const uint NUM_MAX_INSTANCES = 65536;
 
-struct DefaultMeshBindFunctor;
-struct DefaultMeshUnbindFunctor;
 class MeshInstance;
 class Mesh;
 
@@ -35,6 +33,8 @@ namespace Engine{
         class MeshLoader;
         class MeshSkeleton;
         class CollisionFactory;
+        struct DefaultMeshBindFunctor;
+        struct DefaultMeshUnbindFunctor;
         struct VertexFormat final {enum Format {
             Position, UV, Normal, Binormal, Tangent,
          _TOTAL};};
@@ -155,13 +155,13 @@ namespace Engine{
     };
 };
 class Mesh final: public BindableResource, public EventObserver{
-    friend struct ::DefaultMeshBindFunctor;
-    friend struct ::DefaultMeshUnbindFunctor;
-    friend class Engine::epriv::AnimationData;
-    friend class Engine::epriv::MeshSkeleton;
+    friend struct Engine::epriv::DefaultMeshBindFunctor;
+    friend struct Engine::epriv::DefaultMeshUnbindFunctor;
+    friend class  Engine::epriv::AnimationData;
+    friend class  Engine::epriv::MeshSkeleton;
     friend struct Engine::epriv::InternalMeshPublicInterface;
-    friend class Engine::epriv::MeshLoader;
-    friend class Engine::epriv::CollisionFactory;
+    friend class  Engine::epriv::MeshLoader;
+    friend class  Engine::epriv::CollisionFactory;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

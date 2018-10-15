@@ -283,10 +283,10 @@ namespace Engine{
             }
         };
         class MeshSkeleton final{
-            friend class ::Engine::epriv::AnimationData;
-            friend class ::Mesh;
-            friend struct ::DefaultMeshBindFunctor;
-            friend struct ::DefaultMeshUnbindFunctor;
+            friend class  Mesh;
+            friend class  Engine::epriv::AnimationData;
+            friend struct Engine::epriv::DefaultMeshBindFunctor;
+            friend struct Engine::epriv::DefaultMeshUnbindFunctor;
             private:
                 BoneNode*                             m_RootNode;
                 uint                                  m_NumBones;
@@ -422,9 +422,6 @@ namespace Engine{
 
 class Mesh::impl final{
     public:
-        static DefaultMeshBindFunctor DEFAULT_BIND_FUNCTOR;
-        static DefaultMeshUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-
         vector<GLuint> m_buffers;
         Engine::epriv::CollisionFactory* m_CollisionFactory;
 
@@ -450,8 +447,6 @@ class Mesh::impl final{
         }
         void _initGlobalTwo(Mesh& super,epriv::ImportedMeshData& data,float threshold){
             _finalizeData(data,threshold);
-            super.setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super.setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             super.load();
         }
         void _init(Mesh& super,string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold){//grid
@@ -573,8 +568,6 @@ class Mesh::impl final{
             }else{
                 _loadFromOBJMemory(threshold, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN,fileOrData);
             }
-            super.setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super.setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             if(loadNow)
                 super.load();
         }
@@ -1237,30 +1230,32 @@ class Mesh::impl final{
         }    
 };
 
-struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
-    auto& m = *((Mesh*)r)->m_i;
-    if(m.m_VAO){
-        Renderer::bindVAO(m.m_VAO);
-    }else{
-        m._bindMeshDataToGPU();
-    }
-}};
-struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
-    auto& m = *((Mesh*)r)->m_i;
-    if(m.m_VAO){
-        Renderer::bindVAO(0);
-    }else{
-        uint _enumTotal  = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
-        for(uint i = 0; i < _enumTotal; ++i){ glDisableVertexAttribArray(i); }
-        //instances
-        if(m.m_buffers.size() >= 3){
-            uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
-            for(uint j = 0; j < 4; ++j){ glDisableVertexAttribArray(attributeIndex + j); }
-        }
-    }
-}};
-DefaultMeshBindFunctor Mesh::impl::DEFAULT_BIND_FUNCTOR;
-DefaultMeshUnbindFunctor Mesh::impl::DEFAULT_UNBIND_FUNCTOR;
+namespace Engine {
+    namespace epriv {
+        struct DefaultMeshBindFunctor final{void operator()(BindableResource* r) const {
+            auto& m = *((Mesh*)r)->m_i;
+            if (m.m_VAO) {
+                Renderer::bindVAO(m.m_VAO);
+            }else{
+                m._bindMeshDataToGPU();
+            }
+        }};
+        struct DefaultMeshUnbindFunctor final {void operator()(BindableResource* r) const {
+            auto& m = *((Mesh*)r)->m_i;
+            if (m.m_VAO) {
+                Renderer::bindVAO(0);
+            }else{
+                uint _enumTotal = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
+                for (uint i = 0; i < _enumTotal; ++i) { glDisableVertexAttribArray(i); }
+                //instances
+                if (m.m_buffers.size() >= 3) {
+                    uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
+                    for (uint j = 0; j < 4; ++j) { glDisableVertexAttribArray(attributeIndex + j); }
+                }
+            }
+        }};
+    };
+};
 
 epriv::AnimationData::AnimationData(const Mesh& mesh,const aiAnimation& assimpAnimation){
     m_Mesh = const_cast<Mesh*>(&mesh);
@@ -1431,19 +1426,27 @@ btCollisionShape* epriv::InternalMeshPublicInterface::BuildCollision(Mesh* _mesh
 Mesh::Mesh(string name,unordered_map<string,float>& grid,uint width,uint length,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(*this,name,grid,width,length,threshold);
     registerEvent(EventType::WindowFullscreenChanged);
+    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
 }
 Mesh::Mesh(string name,float x, float y,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(*this,name,x,y,width,height,threshold);
     registerEvent(EventType::WindowFullscreenChanged);
+    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
 }
 Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(*this,name,width,height,threshold);
     registerEvent(EventType::WindowFullscreenChanged);
+    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
 }
 Mesh::Mesh(string fileOrData,bool notMemory,float threshold,bool loadNow):BindableResource(fileOrData),m_i(new impl){
     if (!notMemory) setName("CustomMesh");
     m_i->_init(*this,fileOrData,notMemory,threshold,loadNow);
     registerEvent(EventType::WindowFullscreenChanged);
+    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
 }
 Mesh::~Mesh(){
     unregisterEvent(EventType::WindowFullscreenChanged);

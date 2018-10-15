@@ -9,6 +9,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
+class ComponentLogic3;
 namespace Engine {
     namespace epriv {
         struct ComponentLogic3UpdateFunction;
@@ -16,6 +17,7 @@ namespace Engine {
         struct ComponentLogic3ComponentAddedToEntityFunction;
         struct ComponentLogic3SceneEnteredFunction;
         struct ComponentLogic3SceneLeftFunction;
+        struct ComponentLogic3EmptyFunctor final { void operator()(ComponentLogic3& _component, const float& dt) const {} };
     };
 };
 
@@ -30,7 +32,9 @@ class ComponentLogic3 : public ComponentBaseClass {
         boost::function<void(const float&)> _functor;
         void*                               _userPtr;
     public:
-        ComponentLogic3(Entity&);
+        ComponentLogic3(Entity&) { setFunctor(Engine::epriv::ComponentLogic3EmptyFunctor()); _userPtr = nullptr; }
+        template<typename T> ComponentLogic3(Entity&, const T& functor) { setFunctor(functor); _userPtr = nullptr; }
+        template<typename T> ComponentLogic3(Entity&, const T& functor, void* userPointer) { setFunctor(functor); _userPtr = userPointer; }
 
         ComponentLogic3(const ComponentLogic3& other) = default;
         ComponentLogic3& operator=(const ComponentLogic3& other) = default;
@@ -39,7 +43,7 @@ class ComponentLogic3 : public ComponentBaseClass {
 
         ~ComponentLogic3();
 
-        template<typename T> void setFunctor(T& functor) { _functor = boost::bind<void>(functor, *this, _1); }
+        template<typename T> void setFunctor(const T& functor) { _functor = boost::bind<void>(functor, *this, _1); }
         template<typename T> void setUserPointer(T* ptr) { _userPtr = ptr; }
         void call(const float& dt);
         const void* getUserPointer() { return _userPtr; }

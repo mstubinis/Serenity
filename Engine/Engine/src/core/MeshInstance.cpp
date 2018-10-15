@@ -95,33 +95,30 @@ void epriv::DefaultMeshInstanceBindFunctor::operator()(EngineResource* r) const 
 void epriv::DefaultMeshInstanceUnbindFunctor::operator()(EngineResource* r) const {
 };
 
-epriv::DefaultMeshInstanceBindFunctor   DEFAULT_BIND_FUNCTOR;
-epriv::DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-
 
 MeshInstance::MeshInstance(OLD_Entity& entity, Mesh* mesh,Material* mat, ShaderP* program){
     _init(mesh,mat,entity, program);
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
 }
 MeshInstance::MeshInstance(OLD_Entity& entity,Handle mesh,Handle mat, ShaderP* program){
     Mesh* _mesh = (Mesh*)mesh.get();
     Material* _mat = (Material*)mat.get();
     _init(_mesh,_mat,entity, program);
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
 }
 MeshInstance::MeshInstance(OLD_Entity& entity,Mesh* mesh,Handle mat, ShaderP* program){
     Material* _mat = (Material*)mat.get();
     _init(mesh,_mat,entity, program);
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
 }
 MeshInstance::MeshInstance(OLD_Entity& entity,Handle mesh,Material* mat, ShaderP* program){
     Mesh* _mesh = (Mesh*)mesh.get();
     _init(_mesh,mat,entity, program);
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
 }
 void MeshInstance::_init(Mesh* mesh, Material* mat, OLD_Entity& entity, ShaderP* program) {
     m_Stage = RenderStage::GeometryOpaque;
@@ -173,27 +170,27 @@ void MeshInstance::_updateModelMatrix() {
 
 MeshInstance::MeshInstance(Entity& entity, Mesh* mesh, Material* mat, ShaderP* program){
     _init(mesh, mat, entity, program);
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
 }
 MeshInstance::MeshInstance(Entity& entity, Handle mesh, Handle mat, ShaderP* program){
     Mesh* _mesh = (Mesh*)mesh.get();
     Material* _mat = (Material*)mat.get();
     _init(_mesh, _mat, entity, program);
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
 }
 MeshInstance::MeshInstance(Entity& entity, Mesh* mesh, Handle mat, ShaderP* program){
     Material* _mat = (Material*)mat.get();
     _init(mesh, _mat, entity, program);
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
 }
 MeshInstance::MeshInstance(Entity& entity, Handle mesh, Material* mat, ShaderP* program){
     Mesh* _mesh = (Mesh*)mesh.get();
     _init(_mesh, mat, entity, program);
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
 }
 
 
