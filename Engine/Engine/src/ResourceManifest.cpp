@@ -63,25 +63,25 @@ void ResourceManifest::init(){
     Handle groundFromSpaceFrag = Resources::addShader("data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag);
 
-    TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",true,0.0f);
+    TestMesh = Resources::addMesh("data/Models/1911.fbx",true,0.0f);
 
-    PlanetMesh = Resources::addMeshAsync("data/Models/planet.objc");
-    DefiantMesh = Resources::addMeshAsync("data/Models/defiant.objc"); //220 metres long (0.22 km)
-    StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.objc"); //6950 meters in height (6.95 km)
-    RingMesh = Resources::addMeshAsync("data/Models/ring.objc");
-    DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.objc");
-    LeviathanMesh = Resources::addMeshAsync("data/Models/leviathan.objc");
-    /*
-    AkiraMesh = Resources::addMeshAsync("data/Models/akira.objc");
-    MirandaMesh = Resources::addMeshAsync("data/Models/miranda.objc");
-    IntrepidMesh = Resources::addMeshAsync("data/Models/intrepid.objc");
-    NorwayMesh = Resources::addMeshAsync("data/Models/norway.objc");
-    VenerexMesh = Resources::addMeshAsync("data/Models/venerex.objc");
-    OberthMesh = Resources::addMeshAsync("data/Models/oberth.objc");
-    */
-    CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.objc");
-    CapsuleRibbonAMesh = Resources::addMeshAsync("data/Models/capsuleRA.objc");
-    CapsuleRibbonBMesh = Resources::addMeshAsync("data/Models/capsuleRB.objc");
+    PlanetMesh = Resources::addMesh("data/Models/planet.objcc");
+    DefiantMesh = Resources::addMesh("data/Models/defiant.objcc"); //220 metres long (0.22 km)
+    StarbaseMesh = Resources::addMesh("data/Models/starbase.objcc"); //6950 meters in height (6.95 km)
+    RingMesh = Resources::addMesh("data/Models/ring.objcc");
+    DreadnaughtMesh = Resources::addMesh("data/Models/dreadnaught.objcc");
+    LeviathanMesh = Resources::addMesh("data/Models/leviathan.objcc");
+    
+    AkiraMesh = Resources::addMesh("data/Models/akira.objcc");
+    MirandaMesh = Resources::addMesh("data/Models/miranda.objcc");
+    IntrepidMesh = Resources::addMesh("data/Models/intrepid.objcc");
+    NorwayMesh = Resources::addMesh("data/Models/norway.objcc");
+    VenerexMesh = Resources::addMesh("data/Models/venerex.objcc");
+    OberthMesh = Resources::addMesh("data/Models/oberth.objcc");
+    
+    CapsuleTunnelMesh = Resources::addMesh("data/Models/capsuleTunnel.objcc");
+    CapsuleRibbonAMesh = Resources::addMesh("data/Models/capsuleRA.objc");
+    CapsuleRibbonBMesh = Resources::addMesh("data/Models/capsuleRB.objc");
 
     Engine::epriv::threading::waitForAll();
 

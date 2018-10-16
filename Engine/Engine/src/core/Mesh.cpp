@@ -828,9 +828,11 @@ class Mesh::impl final{
             if (extension == ".objc") {
                 _readFromObjCompressed(file, d);
                 _finalizeData(d, threshold);
+            }else if (extension == ".objcc") {
+                _readFromObjCompressed1(file, d);
             }else{
-                //if (extension == ".obj")
-                    //_writeToObjCompressed(); 
+                if (extension == ".obj")
+                    _writeToObjCompressed1(); 
                 _loadInternal(super, d, m_File);
                 _finalizeData(d, threshold);
             }
@@ -1102,6 +1104,7 @@ class Mesh::impl final{
             _buildVAO();
             cout << "(Mesh) ";
         }
+        //slow loading, but smaller file size than .objcc
         void _readFromObjCompressed(string& filename, epriv::ImportedMeshData& data) {
             boost::iostreams::mapped_file_source stream(filename.c_str());
             //TODO: try possible optimizations
@@ -1188,6 +1191,7 @@ class Mesh::impl final{
             _loadDataIntoTriangles(data, _indices[0], _indices[1], _indices[2], epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
             epriv::MeshLoader::CalculateTBNAssimp(data);
         }
+        //slow loading, but smaller file size than .objcc
         void _writeToObjCompressed() {
             epriv::ImportedMeshData d;
 
@@ -1254,92 +1258,144 @@ class Mesh::impl final{
             }
             stream.close();
         }  
+        //very fast loading, might be slightly larger than .objc
         void _readFromObjCompressed1(string& filename, epriv::ImportedMeshData& data) {
             boost::iostreams::mapped_file_source stream(filename.c_str());
             //TODO: try possible optimizations
 
-            uint count1 = 0;
-            uint count = 12;
+            uint blockStart = 0;
             const uint8_t* _data = (uint8_t*)stream.data();
 
-            uint32_t sizes[6];
-            for (uint i = 0; i < 6; ++i) {
-                const uint& _count = count1 * 4;
-                sizes[i] = (uint32_t)_data[_count] << 24;
-                sizes[i] |= (uint32_t)_data[_count + 1] << 16;
-                sizes[i] |= (uint32_t)_data[_count + 2] << 8;
-                sizes[i] |= (uint32_t)_data[_count + 3];
-                ++count1;
+            uint32_t sizes[3];
+            for (uint i = 0; i < 3; ++i) {
+                sizes[i]  = (uint32_t)_data[blockStart    ] << 24;
+                sizes[i] |= (uint32_t)_data[blockStart + 1] << 16;
+                sizes[i] |= (uint32_t)_data[blockStart + 2] << 8;
+                sizes[i] |= (uint32_t)_data[blockStart + 3];
+                blockStart += 4;
             }
-            data.file_points.reserve(sizes[0]);
-            data.file_uvs.reserve(sizes[1]);
-            data.file_normals.reserve(sizes[2]);
+            m_Vertices.reserve(sizes[0]);
+            m_Indices.reserve(sizes[1]);
 
-            vector<vector<uint>> _indices;
-            _indices.reserve(3); for (uint i = 0; i < 3; ++i) _indices.emplace_back();
-            _indices[0].reserve(sizes[3]);
-            _indices[1].reserve(sizes[4]);
-            _indices[2].reserve(sizes[5]);
+            if (sizes[2] == 1) {
+                //skeleton
+                for (uint i = 0; i < sizes[0]; ++i) {
+                    epriv::MeshVertexDataAnimated _vertex;
 
-            //positions
-            for (uint i = 0; i < sizes[0]; ++i) {
-                float out[3];
-                uint16_t in[3];
-                for (uint j = 0; j < 3; ++j) {
-                    const uint& _count = count * 2;
-                    in[j] = (uint32_t)_data[_count] << 8;
-                    in[j] |= (uint32_t)_data[_count + 1];
-                    ++count;
+                    //positions
+                    float outPos[3];
+                    uint16_t inPos[3];
+                    for (uint j = 0; j < 3; ++j) {
+                        inPos[j]  = (uint32_t)_data[blockStart    ] << 8;
+                        inPos[j] |= (uint32_t)_data[blockStart + 1];
+                        blockStart += 2;
+                    }
+                    float32(&outPos[0], inPos[0]); float32(&outPos[1], inPos[1]); float32(&outPos[2], inPos[2]);
+                    _vertex.position = glm::vec3(outPos[0], outPos[1], outPos[2]);
+                    //uvs
+                    float outUV[2];
+                    uint16_t inUV[2];
+                    for (uint j = 0; j < 2; ++j) {
+                        inUV[j]  = (uint32_t)_data[blockStart    ] << 8;
+                        inUV[j] |= (uint32_t)_data[blockStart + 1];
+                        blockStart += 2;
+                    }
+                    float32(&outUV[0], inUV[0]);
+                    float32(&outUV[1], inUV[1]);
+                    _vertex.uv = glm::vec2(outUV[0], outUV[1]);
+                    //normals (remember they are GLuints right now)
+                    uint32_t inn[3];
+                    for (uint i = 0; i < 3; ++i) {
+                        inn[i]  = (uint32_t)_data[blockStart    ] << 24;
+                        inn[i] |= (uint32_t)_data[blockStart + 1] << 16;
+                        inn[i] |= (uint32_t)_data[blockStart + 2] << 8;
+                        inn[i] |= (uint32_t)_data[blockStart + 3];
+                        blockStart += 4;
+                    }
+                    _vertex.normal = inn[0];
+                    _vertex.binormal = inn[1];
+                    _vertex.tangent = inn[2];
+
+                    //boneID's
+                    float outBI[4];
+                    uint16_t inbI[4];
+                    for (uint j = 0; j < 4; ++j) {
+                        inbI[j]  = (uint32_t)_data[blockStart    ] << 8;
+                        inbI[j] |= (uint32_t)_data[blockStart + 1];
+                        blockStart += 2;
+                    }
+                    float32(&outBI[0], inbI[0]);
+                    float32(&outBI[1], inbI[1]);
+                    float32(&outBI[2], inbI[2]);
+                    float32(&outBI[3], inbI[3]);
+                    _vertex.boneIDs = glm::vec4(outBI[0], outBI[1], outBI[2], outBI[3]);
+                    //boneWeight's
+                    float outBW[4];
+                    uint16_t inBW[4];
+                    for (uint j = 0; j < 4; ++j) {
+                        inBW[j]  = (uint32_t)_data[blockStart    ] << 8;
+                        inBW[j] |= (uint32_t)_data[blockStart + 1];
+                        blockStart += 2;
+                    }
+                    float32(&outBW[0], inBW[0]);
+                    float32(&outBW[1], inBW[1]);
+                    float32(&outBW[2], inBW[2]);
+                    float32(&outBW[3], inBW[3]);
+                    _vertex.boneWeights = glm::vec4(outBW[0], outBW[1], outBW[2], outBW[3]);
+
+                    m_Vertices.push_back(_vertex);
                 }
-                float32(&out[0], in[0]);
-                float32(&out[1], in[1]);
-                float32(&out[2], in[2]);
-                data.file_points.emplace_back(out[0], out[1], out[2]);
-            }
-            //uvs
-            for (uint i = 0; i < sizes[1]; ++i) {
-                float out[2];
-                uint16_t in[2];
-                for (uint j = 0; j < 2; ++j) {
-                    const uint& _count = count * 2;
-                    in[j] = (uint32_t)_data[_count] << 8;
-                    in[j] |= (uint32_t)_data[_count + 1];
-                    ++count;
+            }else {
+                for (uint i = 0; i < sizes[0]; ++i) {
+                    epriv::MeshVertexData _vertex;
+
+                    //positions
+                    float outPos[3];
+                    uint16_t inPos[3];
+                    for (uint j = 0; j < 3; ++j) {
+                        inPos[j]  = (uint32_t)_data[blockStart    ] << 8;
+                        inPos[j] |= (uint32_t)_data[blockStart + 1];
+                        blockStart += 2;
+                    }
+                    float32(&outPos[0], inPos[0]); float32(&outPos[1], inPos[1]); float32(&outPos[2], inPos[2]);
+                    _vertex.position = glm::vec3(outPos[0], outPos[1], outPos[2]);
+                    //uvs
+                    float outUV[2];
+                    uint16_t inUV[2];
+                    for (uint j = 0; j < 2; ++j) {
+                        inUV[j]  = (uint32_t)_data[blockStart    ] << 8;
+                        inUV[j] |= (uint32_t)_data[blockStart + 1];
+                        blockStart += 2;
+                    }
+                    float32(&outUV[0], inUV[0]);
+                    float32(&outUV[1], inUV[1]);
+                    _vertex.uv = glm::vec2(outUV[0], outUV[1]);
+                    //normals (remember they are GLuints right now)
+                    uint32_t inn[3];
+                    for (uint i = 0; i < 3; ++i) {
+                        inn[i]  = (uint32_t)_data[blockStart    ] << 24;
+                        inn[i] |= (uint32_t)_data[blockStart + 1] << 16;
+                        inn[i] |= (uint32_t)_data[blockStart + 2] << 8;
+                        inn[i] |= (uint32_t)_data[blockStart + 3];
+                        blockStart += 4;
+                    }
+                    _vertex.normal = inn[0];
+                    _vertex.binormal = inn[1];
+                    _vertex.tangent = inn[2];
+
+                    m_Vertices.emplace_back(_vertex);
                 }
-                float32(&out[0], in[0]);
-                float32(&out[1], in[1]);
-                data.file_uvs.emplace_back(out[0], out[1]);
-            }
-            //normals
-            for (uint i = 0; i < sizes[2]; ++i) {
-                float out[3];
-                uint16_t in[3];
-                for (uint j = 0; j < 3; ++j) {
-                    const uint& _count = count * 2;
-                    in[j] = (uint32_t)_data[_count] << 8;
-                    in[j] |= (uint32_t)_data[_count + 1];
-                    ++count;
-                }
-                float32(&out[0], in[0]);
-                float32(&out[1], in[1]);
-                float32(&out[2], in[2]);
-                data.file_normals.emplace_back(out[0], out[1], out[2]);
             }
             //indices
-            for (uint i = 0; i < _indices.size(); ++i) {
-                for (uint j = 0; j < sizes[3 + i]; ++j) {
-                    uint16_t c;
-                    const uint& _count = count * 2;
-                    c = (uint32_t)_data[_count] << 8;
-                    c |= (uint32_t)_data[_count + 1];
-                    _indices[i].emplace_back(c);
-                    ++count;
-                }
+            for (uint i = 0; i < sizes[1]; ++i) {
+                uint16_t inindices;
+                inindices  = (uint32_t)_data[blockStart    ] << 8;
+                inindices |= (uint32_t)_data[blockStart + 1];
+                blockStart += 2;
+                m_Indices.emplace_back((uint16_t)inindices);
             }
-            stream.close();
-            _loadDataIntoTriangles(data, _indices[0], _indices[1], _indices[2], epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
-            epriv::MeshLoader::CalculateTBNAssimp(data);
         }
+        //very fast loading, might be slightly larger than .objc
         void _writeToObjCompressed1() {
             string f = m_File;
             string ext = boost::filesystem::extension(m_File);
