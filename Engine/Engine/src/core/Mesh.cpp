@@ -1119,8 +1119,8 @@ class Mesh::impl final{
             for (uint i = 0; i < sizes[0]; ++i) {
                 float out[3];
                 uint16_t in[3];
-                for (uint i = 0; i < 3; ++i) {
-                    readUint16tBigEndian(in[i], stream);
+                for (uint j = 0; j < 3; ++j) {
+                    readUint16tBigEndian(in[j], stream);
                 }
                 float32(&out[0], in[0]);
                 float32(&out[1], in[1]);
@@ -1131,8 +1131,8 @@ class Mesh::impl final{
             for (uint i = 0; i < sizes[1]; ++i) {
                 float out[2];
                 uint16_t in[2];
-                for (uint i = 0; i < 2; ++i) {
-                    readUint16tBigEndian(in[i], stream);
+                for (uint j = 0; j < 2; ++j) {
+                    readUint16tBigEndian(in[j], stream);
                 }
                 float32(&out[0], in[0]);
                 float32(&out[1], in[1]);
@@ -1142,8 +1142,8 @@ class Mesh::impl final{
             for (uint i = 0; i < sizes[2]; ++i) {
                 float out[3];
                 uint16_t in[3];
-                for (uint i = 0; i < 3; ++i) {
-                    readUint16tBigEndian(in[i], stream);
+                for (uint j = 0; j < 3; ++j) {
+                    readUint16tBigEndian(in[j], stream);
                 }
                 float32(&out[0], in[0]);
                 float32(&out[1], in[1]);
