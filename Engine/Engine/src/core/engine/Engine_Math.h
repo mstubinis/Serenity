@@ -164,8 +164,8 @@ namespace Engine{
         float pack2NibblesIntoCharBasic(float x, float y);
         glm::vec2 unpack2NibblesFromCharBasic(float);
 
-        GLuint pack3NormalsInto32Int(float x, float y, float z);
-        GLuint pack3NormalsInto32Int(glm::vec3 v);
+        GLuint pack3NormalsInto32Int(float& x, float& y, float& z);
+        GLuint pack3NormalsInto32Int(glm::vec3&);
 
         float pack3FloatsInto1Float(float,float,float);
         float pack3FloatsInto1Float(glm::vec3&);
@@ -176,7 +176,7 @@ namespace Engine{
         glm::vec3 unpack3FloatsInto1FloatUnsigned(float i);
         
         float pack2FloatsInto1Float(float,float);
-        float pack2FloatsInto1Float(glm::vec2);
+        float pack2FloatsInto1Float(glm::vec2&);
         glm::vec2 unpack2FloatsInto1Float(float i);
 
         float remainder(float,float);

@@ -18,6 +18,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+#include <boost/iostreams/device/mapped_file.hpp>
 #include <iostream>
 #include <fstream>
 
@@ -142,29 +143,33 @@ namespace Engine{
         class MeshLoader final {
             friend class ::Mesh;
             public:
-                static bool IsNear(float v1, float v2, float threshold) { return fabs(v1 - v2) < threshold; }
-                static bool IsSpecialFloat(float f) {
+                static inline bool IsNear(float& v1, float& v2, float& threshold) { 
+                    return std::abs(v1 - v2) < threshold;
+                }
+                static inline bool IsNear(glm::vec2& v1, glm::vec2& v2, float& threshold) {
+                    return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold) ? true : false;
+                }
+                static inline bool IsNear(glm::vec3& v1, glm::vec3& v2, float& threshold) {
+                    return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold && std::abs(v1.z - v2.z) < threshold) ? true : false;
+                }
+                static inline bool IsSpecialFloat(float& f) {
                     if (boostm::isnan(f)) return true;
                     if (boostm::isinf(f)) return true;
                     return false;
                 }
-                static bool IsSpecialFloat(glm::vec2& v) {
+                static inline bool IsSpecialFloat(glm::vec2& v) {
                     if (boostm::isnan(v.x) || boostm::isnan(v.y)) return true;
                     if (boostm::isinf(v.x) || boostm::isinf(v.y)) return true;
                     return false;
                 }
-                static bool IsSpecialFloat(glm::vec3& v) {
+                static inline bool IsSpecialFloat(glm::vec3& v) {
                     if (boostm::isnan(v.x) || boostm::isnan(v.y) || boostm::isnan(v.z)) return true;
                     if (boostm::isinf(v.x) || boostm::isinf(v.y) || boostm::isinf(v.z)) return true;
                     return false;
                 }
-                static bool GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts,vector<glm::vec2>& uvs, vector<glm::vec3>& norms, ushort& result, float threshold) {
+                static inline bool GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts,vector<glm::vec2>& uvs, vector<glm::vec3>& norms, ushort& result, float& threshold) {
                     for (uint t = 0; t < pts.size(); ++t){
-                        if (IsNear(in_pos.x,pts[t].x,threshold) && IsNear(in_pos.y,pts[t].y,threshold) &&
-                            IsNear(in_pos.z,pts[t].z,threshold) && IsNear(in_uv.x,uvs[t].x,threshold) &&
-                            IsNear(in_uv.y,uvs[t].y,threshold) && IsNear(in_norm.x,norms[t].x,threshold) &&
-                            IsNear(in_norm.y,norms[t].y,threshold) && IsNear(in_norm.z,norms[t].z,threshold)
-                        ){
+                        if (IsNear(in_pos,pts[t],threshold) && IsNear(in_uv,uvs[t],threshold) && IsNear(in_norm,norms[t],threshold)){
                             result = t;
                             return true;
                         }
@@ -749,7 +754,7 @@ class Mesh::impl final{
 
             if (threshold == 0.0f) {
                 uint c = 0;
-                for (auto pt : data.points) {
+                for (auto& pt : data.points) {
                     if (m_Skeleton) {
                         epriv::MeshVertexDataAnimated vert;
                         vert.position = pt;
@@ -760,7 +765,7 @@ class Mesh::impl final{
                             vert.binormal = Math::pack3NormalsInto32Int(data.binormals[c]);
                         if (c <= data.tangents.size() - 1)
                             vert.tangent = Math::pack3NormalsInto32Int(data.tangents[c]);
-                        m_Vertices.push_back(vert);
+                        m_Vertices.emplace_back(vert);
                     }else {
                         epriv::MeshVertexData vert;
                         vert.position = pt;
@@ -769,23 +774,23 @@ class Mesh::impl final{
                         vert.normal = Math::pack3NormalsInto32Int(data.normals[c]);
                         vert.binormal = Math::pack3NormalsInto32Int(data.binormals[c]);
                         vert.tangent = Math::pack3NormalsInto32Int(data.tangents[c]);
-                        m_Vertices.push_back(vert);
+                        m_Vertices.emplace_back(vert);
                     }
                     ++c;
                 }
                 m_Indices = data.indices;
                 return;
             }
-            vector<glm::vec3> temp_pos;
-            vector<glm::vec2> temp_uvs;
-            vector<glm::vec3> temp_normals;
-            vector<glm::vec3> temp_binormals;
-            vector<glm::vec3> temp_tangents;
+            vector<glm::vec3> temp_pos; temp_pos.reserve(data.points.size());
+            vector<glm::vec2> temp_uvs; temp_uvs.reserve(data.uvs.size());
+            vector<glm::vec3> temp_normals; temp_normals.reserve(data.normals.size());
+            vector<glm::vec3> temp_binormals; temp_binormals.reserve(data.binormals.size());
+            vector<glm::vec3> temp_tangents; temp_tangents.reserve(data.tangents.size());
             for (uint i = 0; i < data.points.size(); ++i) {
                 ushort index;
-                bool found = epriv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, threshold);
+                bool found = epriv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, m_threshold);
                 if (found) {
-                    m_Indices.push_back(index);
+                    m_Indices.emplace_back(index);
 
                     //average out TBN. But it cancels out normal mapping on some flat surfaces
                     //temp_binormals[index] += data.binormals[i];
@@ -794,18 +799,18 @@ class Mesh::impl final{
                     if (m_Skeleton) {
                         epriv::MeshVertexDataAnimated vert;
                         vert.position = data.points[i];
-                        m_Vertices.push_back(vert);
+                        m_Vertices.emplace_back(vert);
                     }else {
                         epriv::MeshVertexData vert;
                         vert.position = data.points[i];
-                        m_Vertices.push_back(vert);
+                        m_Vertices.emplace_back(vert);
                     }
-                    temp_pos.push_back(data.points[i]);
-                    temp_uvs.push_back(data.uvs[i]);
-                    temp_normals.push_back(data.normals[i]);
-                    temp_binormals.push_back(data.binormals[i]);
-                    temp_tangents.push_back(data.tangents[i]);
-                    m_Indices.push_back((ushort)m_Vertices.size() - 1);
+                    temp_pos.emplace_back(data.points[i]);
+                    temp_uvs.emplace_back(data.uvs[i]);
+                    temp_normals.emplace_back(data.normals[i]);
+                    temp_binormals.emplace_back(data.binormals[i]);
+                    temp_tangents.emplace_back(data.tangents[i]);
+                    m_Indices.emplace_back((ushort)m_Vertices.size() - 1);
                 }
             }
             for (uint i = 0; i < m_Vertices.size(); ++i) {
@@ -1098,29 +1103,41 @@ class Mesh::impl final{
             cout << "(Mesh) ";
         }
         void _readFromObjCompressed(string& filename, epriv::ImportedMeshData& data) {
-            ifstream stream(filename.c_str(), ios::binary);
+            boost::iostreams::mapped_file_source stream(filename.c_str());
+            //TODO: try possible optimizations
+
+            uint count1 = 0;
+            uint count = 12;
+            const uint8_t* _data = (uint8_t*)stream.data();
 
             uint32_t sizes[6];
             for (uint i = 0; i < 6; ++i) {
-                readUint32tBigEndian(sizes[i], stream);
+                const uint& _count = count1 * 4;
+                sizes[i]  = (uint32_t)_data[_count    ] << 24;
+                sizes[i] |= (uint32_t)_data[_count + 1] << 16;
+                sizes[i] |= (uint32_t)_data[_count + 2] << 8;
+                sizes[i] |= (uint32_t)_data[_count + 3];
+                ++count1;
             }
-            //base
             data.file_points.reserve(sizes[0]);
             data.file_uvs.reserve(sizes[1]);
             data.file_normals.reserve(sizes[2]);
 
             vector<vector<uint>> _indices;
-            _indices.resize(3);
-            _indices[0].resize(sizes[3]);
-            _indices[1].resize(sizes[4]);
-            _indices[2].resize(sizes[5]);
+            _indices.reserve(3); for (uint i = 0; i < 3; ++i) _indices.emplace_back();
+            _indices[0].reserve(sizes[3]);
+            _indices[1].reserve(sizes[4]);
+            _indices[2].reserve(sizes[5]);
 
             //positions
             for (uint i = 0; i < sizes[0]; ++i) {
                 float out[3];
                 uint16_t in[3];
                 for (uint j = 0; j < 3; ++j) {
-                    readUint16tBigEndian(in[j], stream);
+                    const uint& _count = count * 2;
+                    in[j]  = (uint32_t)_data[_count    ] << 8;
+                    in[j] |= (uint32_t)_data[_count + 1];
+                    ++count;
                 }
                 float32(&out[0], in[0]);
                 float32(&out[1], in[1]);
@@ -1132,7 +1149,10 @@ class Mesh::impl final{
                 float out[2];
                 uint16_t in[2];
                 for (uint j = 0; j < 2; ++j) {
-                    readUint16tBigEndian(in[j], stream);
+                    const uint& _count = count * 2;
+                    in[j]  = (uint32_t)_data[_count    ] << 8;
+                    in[j] |= (uint32_t)_data[_count + 1];
+                    ++count;
                 }
                 float32(&out[0], in[0]);
                 float32(&out[1], in[1]);
@@ -1143,7 +1163,10 @@ class Mesh::impl final{
                 float out[3];
                 uint16_t in[3];
                 for (uint j = 0; j < 3; ++j) {
-                    readUint16tBigEndian(in[j], stream);
+                    const uint& _count = count * 2;
+                    in[j]  = (uint32_t)_data[_count    ] << 8;
+                    in[j] |= (uint32_t)_data[_count + 1];
+                    ++count;
                 }
                 float32(&out[0], in[0]);
                 float32(&out[1], in[1]);
@@ -1154,8 +1177,11 @@ class Mesh::impl final{
             for (uint i = 0; i < _indices.size(); ++i) {
                 for (uint j = 0; j < sizes[3+i]; ++j) {
                     uint16_t c;
-                    readUint16tBigEndian(c, stream);
-                    _indices[i][j] = c;
+                    const uint& _count = count * 2;
+                    c  = (uint32_t)_data[_count     ] << 8;
+                    c |= (uint32_t)_data[_count + 1];
+                    _indices[i].emplace_back(c);
+                    ++count;
                 }
             }
             stream.close();

@@ -185,21 +185,20 @@ uint Math::Max(uint x,uint y){ return glm::max(x,y); }
 uint Math::Max(uint x,uint y,uint z){ return glm::max(x,glm::max(y,z)); }
 uint Math::Max(uint x,uint y,uint z,uint w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
 
-GLuint Math::pack3NormalsInto32Int(float x, float y, float z){
-   // Convert to signed integer -511 to +511 range
-   int iX = int(x * 511.0f);
-   int iY = int(y * 511.0f);
-   int iZ = int(z * 511.0f);
-   return (iX & 0x3FF) | ((iY & 0x3FF) << 10) | ((iZ & 0x3FF) << 20);
+GLuint Math::pack3NormalsInto32Int(float& x, float& y, float& z){
+   int _X = (int)(x * 511.0f);
+   int _Y = (int)(y * 511.0f);
+   int _Z = (int)(z * 511.0f);
+   return (_X & 0x3FF) | ((_Y & 0x3FF) << 10) | ((_Z & 0x3FF) << 20);
 }
-GLuint Math::pack3NormalsInto32Int(glm::vec3 v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
+GLuint Math::pack3NormalsInto32Int(glm::vec3& v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
 
 
 float Math::pack3FloatsInto1Float(float r,float g,float b){
     //Scale and bias
-    r = (r + 1.0f) * 0.5f; uchar _r = (uchar)(r*255.0f);
-    g = (g + 1.0f) * 0.5f; uchar _g = (uchar)(g*255.0f);
-    b = (b + 1.0f) * 0.5f; uchar _b = (uchar)(b*255.0f);
+    r = (r + 1.0f) * 0.5f; uchar _r = (uchar)(r * 255.0f);
+    g = (g + 1.0f) * 0.5f; uchar _g = (uchar)(g * 255.0f);
+    b = (b + 1.0f) * 0.5f; uchar _b = (uchar)(b * 255.0f);
     uint packedColor = (_r << 16) | (_g << 8) | _b;
     float packedFloat = (float) ( ((double)packedColor) / ((double) (1 << 24)) );
     return packedFloat;
@@ -214,9 +213,9 @@ glm::vec3 Math::unpack3FloatsInto1Float(float v){
     return ret;
 }
 float Math::pack3FloatsInto1FloatUnsigned(float r,float g,float b){
-    uchar _r = (uchar)(r*255.0f);
-    uchar _g = (uchar)(g*255.0f);
-    uchar _b = (uchar)(b*255.0f);
+    uchar _r = (uchar)(r * 255.0f);
+    uchar _g = (uchar)(g * 255.0f);
+    uchar _b = (uchar)(b * 255.0f);
     uint packedColor = (_r << 16) | (_g << 8) | _b;
     float packedFloat = (float) ( ((double)packedColor) / ((double) (1 << 24)) );
     return packedFloat;
@@ -256,7 +255,7 @@ float Math::pack2FloatsInto1Float(float x,float y){
     y = (y + 1.0f) * 0.5f;
     return glm::floor(x * 1000.0f) + y; 
 }
-float Math::pack2FloatsInto1Float(glm::vec2 v){ return Math::pack2FloatsInto1Float(v.x,v.y); }
+float Math::pack2FloatsInto1Float(glm::vec2& v){ return Math::pack2FloatsInto1Float(v.x,v.y); }
 glm::vec2 Math::unpack2FloatsInto1Float(float i){
     glm::vec2 res;
     res.y = i - glm::floor(i); //glm::fract(i)

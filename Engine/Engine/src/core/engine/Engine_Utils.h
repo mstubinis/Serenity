@@ -9,16 +9,16 @@ typedef unsigned int uint;
 
 template <typename Stream> void readUint32tBigEndian(uint32_t& out,Stream& stream) {
     uint8_t buf[4];
-    stream.read((char *)buf, sizeof(buf));
-    out = (uint32_t)buf[0] << 24;
+    stream.read((char *)buf, 4);
+    out  = (uint32_t)buf[0] << 24;
     out |= (uint32_t)buf[1] << 16;
     out |= (uint32_t)buf[2] << 8;
     out |= (uint32_t)buf[3];
 }
 template <typename Stream> void readUint16tBigEndian(uint16_t& out, Stream& stream) {
     uint8_t buf[2];
-    stream.read((char *)buf, sizeof(buf));
-    out = (uint32_t)buf[0] << 8;
+    stream.read((char *)buf, 2);
+    out  = (uint32_t)buf[0] << 8;
     out |= (uint32_t)buf[1];
 }
 template <typename Stream> void writeUint32tBigEndian(uint32_t& in, Stream& stream) {
