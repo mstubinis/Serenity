@@ -396,7 +396,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings){
     sf::Image ringImage;
     ringImage.create(1024, 2, sf::Color(0,0,0,0));
     uint count = 0;
-    for(auto ringInfo: rings){
+    for(auto& ringInfo: rings){
         glm::vec4 pC = glm::vec4((float)ringInfo.color.r, (float)ringInfo.color.g, (float)ringInfo.color.b, 255.0f) / 255.0f;
         uint alphaChangeRange = ringInfo.size - ringInfo.alphaBreakpoint;
         uint newI = 0;

@@ -104,7 +104,7 @@ class Ship{
         GameCamera* m_PlayerCamera;
         bool m_IsWarping;
         float m_WarpFactor;
-        Entity* m_Target;
+        Entity m_Target;
     public:
         Ship(
             Handle& meshHandle,       //Mesh
@@ -129,8 +129,8 @@ class Ship{
         bool IsPlayer(){ return m_IsPlayer; }
         bool IsWarping(){ return m_IsWarping; }
         ShipSystem* getShipSystem(uint type){ return m_ShipSystems[type]; }
-        Entity* getTarget() { return m_Target; }
+        Entity& getTarget() { return m_Target; }
         Entity& entity() { return m_Entity; }
-        virtual void setTarget(Entity*);
+        void setTarget(const Entity&);
 };
 #endif

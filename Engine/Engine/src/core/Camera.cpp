@@ -13,7 +13,7 @@ class Camera::impl final{
                 scene = Resources::getCurrentScene();           
             auto* m_Body = super.m_Entity.addComponent<ComponentBody>();
             super.m_Entity.getComponent<ComponentCamera>()->lookAt(m_Body->position(),m_Body->position() + m_Body->forward(),m_Body->up());
-            auto* m_Logic = super.m_Entity.addComponent<ComponentLogic>();
+            auto* m_Logic = super.m_Entity.addComponent<ComponentLogic2>();
             m_Logic->setUserPointer(&super);
         }
         void _init(float& angle, float& aspectRatio, float& _near, float& _far,Scene* scene,Camera& super){
@@ -64,10 +64,12 @@ float Camera::getDistance(glm::vec3 objPos){ return glm::distance(objPos,getPosi
 uint Camera::sphereIntersectTest(glm::vec3 pos, float radius){ return m_Entity.getComponent<ComponentCamera>()->sphereIntersectTest(pos,radius); }
 uint Camera::pointIntersectTest(glm::vec3 pos){ return m_Entity.getComponent<ComponentCamera>()->pointIntersectTest(pos); }
 bool Camera::rayIntersectSphere(Entity& entity){
-    auto& body = *(entity.getComponent<ComponentBody>());
+    auto& body = *entity.getComponent<ComponentBody>();
     auto* model = entity.getComponent<ComponentModel>();
+    auto& thisBody = *m_Entity.getComponent<ComponentBody>();
+    auto& thisCamera = *m_Entity.getComponent<ComponentCamera>();
     float radius = 0.0f;
     if(model) radius = model->radius();
-    return Math::rayIntersectSphere(body.position(),radius, m_Entity.getComponent<ComponentBody>()->position(), m_Entity.getComponent<ComponentCamera>()->getViewVector());
+    return Math::rayIntersectSphere(body.position(), radius, thisBody.position(), thisCamera.getViewVector());
 }
 

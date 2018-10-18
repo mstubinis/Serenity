@@ -88,7 +88,7 @@ void epriv::threading::finalizeJob( boost_packed_task_ptr&& task, boost_void_fun
 }
 void epriv::threading::waitForAll(){ 
     if(threadManager->m_Callbacks.size() > 0){
-        for(auto callback: threadManager->m_Callbacks){
+        for(auto& callback: threadManager->m_Callbacks){
             callback.fut.wait();
         }
         threadManager->_clearDoneCallbacks();

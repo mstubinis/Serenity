@@ -69,8 +69,8 @@ ComponentModel::~ComponentModel() {
 }
 uint ComponentModel::getNumModels() { return models.size(); }
 MeshInstance& ComponentModel::getModel(uint index) { return *models[index]; }
-void ComponentModel::show() { for (auto model : models) model->show(); }
-void ComponentModel::hide() { for (auto model : models) model->hide(); }
+void ComponentModel::show() { for (auto& model : models) model->show(); }
+void ComponentModel::hide() { for (auto& model : models) model->hide(); }
 float ComponentModel::radius() { return _radius; }
 glm::vec3 ComponentModel::boundingBox() { return _radiusBox; }
 uint ComponentModel::addModel(Handle& mesh, Handle& mat, ShaderP* shaderProgram, RenderStage::Stage _stage) { return ComponentModel::addModel((Mesh*)mesh.get(), (Material*)mat.get(), shaderProgram, _stage); }

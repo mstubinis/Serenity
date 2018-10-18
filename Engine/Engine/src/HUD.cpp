@@ -47,8 +47,7 @@ void HUD::update(const float& dt){
         }
         ++_count;
         if (_count > scene->getPlanets().size()-1){ _count = 0; }
-    }
-    else if(Engine::isKeyDownOnce(KeyboardKey::Period)){
+    }else if(Engine::isKeyDownOnce(KeyboardKey::Period)){
         SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
         const unordered_map<string,Planet*>& planets = scene->getPlanets();
         uint a = 0;
@@ -76,24 +75,25 @@ void HUD::render(){
 
     #pragma region renderCrossHairAndOtherInfo
     
-    if(player->getTarget()){
-        auto* body = player->getTarget()->getComponent<ComponentBody>();
-        auto* model = player->getTarget()->getComponent<ComponentModel>();
+    auto& target = player->getTarget();
+    if(!target.null()){
+        auto* body = target.getComponent<ComponentBody>();
+        auto* model = target.getComponent<ComponentModel>();
         const glm::vec3& pos = body->getScreenCoordinates();
-        float scl = glm::max(0.5f,model->radius()*23.0f / Resources::getCurrentScene()->getActiveCamera()->getDistance(*player->getTarget()));
+        float scl = glm::max(0.5f,model->radius()*23.0f / Resources::getCurrentScene()->getActiveCamera()->getDistance(target));
         if(pos.z == 1){
             Material* crosshair = (Material*)ResourceManifest::CrosshairMaterial.get();
             crosshair->getComponent(MaterialComponentType::Diffuse)->texture()->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
-            //unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
+            //unsigned long long distanceInKm = (target.getDistanceLL(player) / 10);
             string stringRepresentation = "";
             //if(distanceInKm > 0){
                 //stringRepresentation = Engine::convertNumToNumWithCommas(unsigned long long(distanceInKm)) + " Km";
             //}
             //else{
-                //float distanceInm = (player->getTarget()->getDistance(player))*100.0f;
+                //float distanceInm = (target.getDistance(player))*100.0f;
                 //stringRepresentation = to_string(uint(distanceInm)) + " m";
             //}
-            font->renderText(/*player->getTarget()->name() + */"\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
+            font->renderText(/*target.name() + */"\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
         }else{
             Material* crosshairArrow = (Material*)ResourceManifest::CrosshairArrowMaterial.get();
             glm::vec2 winSize = glm::vec2(Resources::getWindow().getSize().x,Resources::getWindow().getSize().y);

@@ -1604,7 +1604,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
             Mesh::Plane->bind();
             glm::mat4 m = m_IdentityMat4;
-            for(auto item:m_TexturesToBeRendered){
+            for(auto& item:m_TexturesToBeRendered){
                 if(item.texture){
                     sendTexture("DiffuseTexture",*item.texture,0);
                     sendUniform1("DiffuseTextureEnabled",1);
@@ -1633,14 +1633,14 @@ class epriv::RenderManager::impl final{
             float y_offset = 0.0f;
             float x = 0.0f;  
             Mesh& mesh = *(Mesh::FontPlane);
-            for(auto item:m_FontsToBeRendered){
+            for(auto& item:m_FontsToBeRendered){
                 Font& font = *item.font;
                 sendTexture("DiffuseTexture",font.getGlyphTexture(),0);
                 sendUniform1("DiffuseTextureEnabled",1);
                 sendUniform4("Object_Color",item.col);
                 y_offset = 0;
                 x = item.pos.x;        
-                for(auto c:item.text){
+                for(auto& c:item.text){
                     if(c == '\n'){
                         y_offset += (font.getGlyphData('X').height + 6) * item.scl.y;
                         x = item.pos.x;
@@ -1743,7 +1743,7 @@ class epriv::RenderManager::impl final{
             sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
             sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 4);
 
-            for (auto light: epriv::InternalScenePublicInterface::GetLights(s)){
+            for (auto& light: epriv::InternalScenePublicInterface::GetLights(s)){
                 light->lighten();
             }
             if(mainRenderFunc){
@@ -1769,7 +1769,7 @@ class epriv::RenderManager::impl final{
 
                 //if(s.lightProbes().size() > 0){
                     /*
-                    for(auto probe:s->lightProbes()){
+                    for(auto& probe:s->lightProbes()){
                         LightProbe* p = probe.second;
                         sendTextureSafe("irradianceMap",p->getIrriadianceMap(),4,GL_TEXTURE_CUBE_MAP);
                         sendTextureSafe("prefilterMap",p->getPrefilterMap(),5,GL_TEXTURE_CUBE_MAP);
@@ -2091,7 +2091,7 @@ class epriv::RenderManager::impl final{
                 #pragma region LightProbes
                 //if(s.lightProbes().size() > 0){
                     /*
-                    for(auto lightProbe:s->lightProbes()){
+                    for(auto& lightProbe:s->lightProbes()){
                         lightProbe.second->renderCubemap(
                             m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude],
                             m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapPrefilterEnv]
@@ -2336,8 +2336,8 @@ float dist(Camera& lhs, const glm::vec3& rhs) {
 
 void epriv::RenderPipeline::sort(Camera& c) {
     /*
-    for (auto materialNode : materialNodes) {
-        for (auto meshNode : materialNode->meshNodes) {
+    for (auto& materialNode : materialNodes) {
+        for (auto& meshNode : materialNode->meshNodes) {
             auto& vect = meshNode->instanceNodes;
             std::sort(
                 vect.begin(), vect.end(),
@@ -2354,13 +2354,13 @@ void epriv::RenderPipeline::sort(Camera& c) {
 
 void epriv::RenderPipeline::render() {
     shaderProgram.bind();
-    for (auto materialNode : materialNodes) {
+    for (auto& materialNode : materialNodes) {
         if (materialNode->meshNodes.size() > 0) {
             materialNode->material->bind();
-            for (auto meshNode : materialNode->meshNodes) {
+            for (auto& meshNode : materialNode->meshNodes) {
                 if (meshNode->instanceNodes.size() > 0) {
                     meshNode->mesh->bind();
-                    for (auto instanceNode : meshNode->instanceNodes) {
+                    for (auto& instanceNode : meshNode->instanceNodes) {
                         auto& meshInstance = *instanceNode->instance;
                         if (meshInstance.passedRenderCheck()) {
                             meshInstance.bind();

@@ -445,7 +445,7 @@ class LightProbe::impl{
             m_Views[4] = glm::lookAt(pos, pos + glm::vec3( 0, 0, 1), glm::vec3(0,-1, 0));
             m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0, 0,-1), glm::vec3(0,-1, 0));
             
-            for(auto side:m_Sides){
+            for(auto& side:m_Sides){
                 _renderScene(super,m_Views[side],side);
             }
             Resources::getCurrentScene()->setActiveCamera(old);
@@ -481,7 +481,7 @@ class LightProbe::impl{
 
             m_FBO->resize(size,size);
 
-            for(auto side:m_Sides){
+            for(auto& side:m_Sides){
                 _renderConvolution(super,m_Views[side],side,size);
             }
             #pragma endregion
@@ -520,7 +520,7 @@ class LightProbe::impl{
                 Renderer::sendUniform1f("roughness",roughness);
                 float a = roughness * roughness;
                 Renderer::sendUniform1f("a2",a*a);
-                for(auto side:m_Sides){
+                for(auto& side:m_Sides){
                     _renderPrefilter(super,m_Views[side],side,m,mipSize);
                 }
             }

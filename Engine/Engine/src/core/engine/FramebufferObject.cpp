@@ -147,7 +147,7 @@ class epriv::FramebufferObject::impl{
             Renderer::setViewport(0,0,m_FramebufferWidth,m_FramebufferHeight);
             for (uint i = 0; i < m_FBO.size(); ++i) {
                 Renderer::bindFBO(m_FBO[i]);
-                for (auto attatchment : m_Attatchments) {
+                for (auto& attatchment : m_Attatchments) {
                     attatchment.second->resize(super, new_width, new_height);
                 }
             }
@@ -205,13 +205,13 @@ namespace Engine {
 
 
                 Renderer::bindFBO(fbo);
-                for (auto attatchment : fbo.attatchments()) { attatchment.second->bind(); }
+                for (auto& attatchment : fbo.attatchments()) { attatchment.second->bind(); }
             }
         };
         struct FramebufferObjectDefaultUnbindFunctor {
             void operator()(BindableResource* r) const {
                 FramebufferObject& fbo = *(FramebufferObject*)r;
-                for (auto attatchment : fbo.attatchments()) { attatchment.second->unbind(); }
+                for (auto& attatchment : fbo.attatchments()) { attatchment.second->unbind(); }
                 Renderer::unbindFBO();
                 glm::uvec2 winSize = Resources::getWindowSize();
                 Renderer::setViewport(0, 0, winSize.x, winSize.y);

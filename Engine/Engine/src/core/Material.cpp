@@ -160,7 +160,7 @@ class Material::impl final{
             _init(name,d,n,g,s,super);
         }
         void _load(){
-            for(auto component:m_Components){
+            for(auto& component:m_Components){
                 if(component){
                     Texture& texture = *component->texture();
                     texture.incrementUseCount();
@@ -171,7 +171,7 @@ class Material::impl final{
             }
         }
         void _unload(){
-            for(auto component:m_Components){
+            for(auto& component:m_Components){
                 if(component){
                     Texture& texture = *component->texture();
                     texture.decrementUseCount();

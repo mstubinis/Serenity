@@ -241,26 +241,29 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                 camera.follow(ship.m_Entity);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
-            if (cameraState == CameraState::Follow || !ship.m_Target || target != ship.m_Entity) {
+            if (cameraState == CameraState::Follow || ship.m_Target.null() || target != ship.m_Entity) {
                 Resources::getCurrentScene()->centerSceneToObject(ship.m_Entity);
                 camera.orbit(ship.m_Entity);
-            }else if (ship.m_Target) {
-                Resources::getCurrentScene()->centerSceneToObject(*ship.m_Target);
-                camera.orbit(*ship.m_Target);
+            }else if (!ship.m_Target.null()) {
+                Resources::getCurrentScene()->centerSceneToObject(ship.m_Target);
+                camera.orbit(ship.m_Target);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
-            if (cameraState == CameraState::FollowTarget || (!ship.m_Target && cameraState != CameraState::Follow) || target != ship.m_Entity) {
+            if (cameraState == CameraState::FollowTarget || (ship.m_Target.null() && cameraState != CameraState::Follow) || target != ship.m_Entity) {
                 Resources::getCurrentScene()->centerSceneToObject(ship.m_Entity);
                 camera.follow(ship.m_Entity);
-            }else if (ship.m_Target) {
+            }else if (!ship.m_Target.null()) {
                 Resources::getCurrentScene()->centerSceneToObject(ship.m_Entity);
-                camera.followTarget(*ship.m_Target, ship.m_Entity);
+                camera.followTarget(ship.m_Target, ship.m_Entity);
             }
         }
         #pragma endregion
 
         if (Engine::isKeyDownOnce(KeyboardKey::T) && currentScene.name() != "CapsuleSpace") {
-            ship.setTarget(&camera.getObjectInCenterRay(ship.m_Entity));
+            Entity scan = camera.getObjectInCenterRay(ship.m_Entity);
+            if (!scan.null()) {
+                ship.setTarget(scan);
+            }
         }
     }
     for (auto& shipSystem : ship.m_ShipSystems) shipSystem.second->update(dt);
@@ -285,7 +288,7 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
 	m_WarpFactor = 0;
 	m_IsPlayer = player;
 	m_IsWarping = false;
-	m_Target = nullptr;
+	m_Target = Entity::_null;
 	m_PlayerCamera = nullptr;
 
 	if (player) {
@@ -313,7 +316,7 @@ void Ship::translateWarp(float amount,float dt){
         m_WarpFactor += amountToAdd * dt;
     }
 }
-void Ship::setTarget(Entity* target){
+void Ship::setTarget(const Entity& target){
     m_Target = target;
 }
 void Ship::onEvent(const Event& e){

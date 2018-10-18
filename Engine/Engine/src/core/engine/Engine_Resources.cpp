@@ -66,7 +66,7 @@ const double Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManage
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_CurrentScene; }
 
 bool epriv::ResourceManager::_hasScene(string n){ 
-    for (auto scene : m_i->m_Scenes) {
+    for (auto& scene : m_i->m_Scenes) {
         if (scene->name() == n)
             return true;
     }
@@ -95,7 +95,7 @@ Engine_Window& Resources::getWindow(){ return *resourceManager->m_Window; }
 glm::uvec2 Resources::getWindowSize(){ return resourceManager->m_Window->getSize(); }
 
 Scene* Resources::getScene(string n){ 
-    for (auto scene : resourceManager->m_Scenes) {
+    for (auto& scene : resourceManager->m_Scenes) {
         if (scene->name() == n)
             return scene;
     }

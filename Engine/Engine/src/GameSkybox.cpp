@@ -64,7 +64,7 @@ class GameSkybox::impl final{
             if(sunFlares.size() > 0){
                 Material* mat = Resources::getMaterial(ResourceManifest::StarFlareMaterial);
                 Texture* texture = mat->getComponent(MaterialComponentType::Diffuse)->texture();
-                for(auto flare:sunFlares){
+                for(auto& flare:sunFlares){
                     //glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getCurrentScene()->getActiveCamera()->getPosition()) - flare.position,false);
                     glm::vec3 pos = Math::getScreenCoordinates(flare.position,false);
                     glm::vec4 col = glm::vec4(flare.color.x,flare.color.y,flare.color.z,1);

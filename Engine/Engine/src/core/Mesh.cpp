@@ -301,15 +301,15 @@ namespace Engine{
                 unordered_map<string, AnimationData>  m_AnimationData;
                 glm::mat4                             m_GlobalInverseTransform;
                 void fill(const ImportedMeshData& data) {
-                    for (auto _b : data.m_Bones) {
-                        VertexBoneData& b = _b.second;
+                    for (auto& _b : data.m_Bones) {
+                        const VertexBoneData& b = _b.second;
                         m_BoneIDs.push_back( glm::vec4(b.IDs[0], b.IDs[1], b.IDs[2], b.IDs[3]));
                         m_BoneWeights.push_back( glm::vec4(b.Weights[0], b.Weights[1], b.Weights[2], b.Weights[3]));
                     }
                 }
                 void populateCleanupMap(BoneNode* node, unordered_map<string, BoneNode*>& _map) {
                     if (!_map.count(node->Name)) _map.emplace(node->Name, node);
-                    for (auto child : node->Children) {
+                    for (auto& child : node->Children) {
                         populateCleanupMap(child, _map);
                     }
                 }
@@ -334,7 +334,7 @@ namespace Engine{
                 void _initConvexData(vector<MeshVertexData>& _vertices) {
                     if (!m_ConvexHullData) {
                         m_ConvesHullShape = new btConvexHullShape();
-                        for (auto vertex : _vertices) {
+                        for (auto& vertex : _vertices) {
                             m_ConvesHullShape->addPoint(btVector3(vertex.position.x, vertex.position.y, vertex.position.z));
                         }
                         m_ConvexHullData = new btShapeHull(m_ConvesHullShape);
@@ -352,13 +352,13 @@ namespace Engine{
                 void _initTriangleData(vector<MeshVertexData>& _vertices, vector<ushort>& _indices) {
                     if (!m_TriangleStaticData) {
                         vector<glm::vec3> triangles;
-                        for (auto indice : _indices) {
+                        for (auto& indice : _indices) {
                             triangles.push_back(_vertices[indice].position);
                         }
                         m_TriangleStaticData = new btTriangleMesh();
                         uint count = 0;
                         vector<glm::vec3> tri;
-                        for (auto position : triangles) {
+                        for (auto& position : triangles) {
                             tri.push_back(position);
                             ++count;
                             if (count == 3) {
@@ -688,7 +688,7 @@ class Mesh::impl final{
                         }
                     }	
                     //build skeleton parent child relationship
-                    for (auto node : _map) {
+                    for (auto& node : _map) {
                         const auto& assimpNode = root.FindNode(node.first.c_str());
                         auto iter = assimpNode;
                         while (iter != 0 && iter->mParent != 0){
@@ -702,7 +702,7 @@ class Mesh::impl final{
                     }
                     //and finalize the root node
                     if (!skeleton.m_RootNode) {
-                        for (auto node : _map) {
+                        for (auto& node : _map) {
                             if (!node.second->Parent) {
                                 skeleton.m_RootNode = node.second;
                                 break;
@@ -1223,7 +1223,7 @@ class Mesh::impl final{
             for (uint i = 0; i < 6; ++i) {
                 writeUint32tBigEndian(sizes[i], stream);
             }
-            for (auto pos : d.file_points) {
+            for (auto& pos : d.file_points) {
                 uint16_t out[3];
                 float16(&out[0], pos.x);
                 float16(&out[1], pos.y);
@@ -1232,7 +1232,7 @@ class Mesh::impl final{
                     writeUint16tBigEndian(out[i], stream);
                 }
             }
-            for (auto uv : d.file_uvs) {
+            for (auto& uv : d.file_uvs) {
                 uint16_t out[2];
                 float16(&out[0], uv.x);
                 float16(&out[1], uv.y);
@@ -1240,7 +1240,7 @@ class Mesh::impl final{
                     writeUint16tBigEndian(out[i], stream);
                 }
             }
-            for (auto norm : d.file_normals) {
+            for (auto& norm : d.file_normals) {
                 uint16_t out[3];
                 float16(&out[0], norm.x);
                 float16(&out[1], norm.y);
@@ -1251,7 +1251,7 @@ class Mesh::impl final{
             }
             //indices
             for (uint i = 0; i < _indices.size(); ++i) {
-                for (auto ind : _indices[i]) {
+                for (auto& ind : _indices[i]) {
                     uint16_t _ind = (uint16_t)ind;
                     writeUint16tBigEndian(_ind, stream);
                 }

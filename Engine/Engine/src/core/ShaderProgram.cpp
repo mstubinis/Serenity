@@ -20,19 +20,19 @@ typedef boost::iostreams::stream<boost::iostreams::mapped_file_source> boost_str
 bool sfind(string whole,string part){ if(whole.find(part) != string::npos) return true; return false; }
 void insertStringAtLine(string& src, const string& newcontent,uint line){   
     if(line == 0){src=newcontent+"\n"+src;}else{istringstream str(src);string l; vector<string> lines;uint c=0;
-        while(getline(str,l)){lines.push_back(l+"\n");if(c==line){lines.push_back(newcontent+"\n");}++c;}src="";for(auto ln:lines){src+=ln;}
+        while(getline(str,l)){lines.push_back(l+"\n");if(c==line){lines.push_back(newcontent+"\n");}++c;}src="";for(auto& ln:lines){src+=ln;}
     }
 }
 void insertStringAtAndReplaceLine(string& src, const string& newcontent,uint line){
     istringstream str(src);string l;vector<string> lines;while(getline(str,l)){lines.push_back(l+"\n");}
-    uint c = 0;src="";for(auto ln:lines){if(c==line)ln=newcontent+"\n";src+=ln;++c;}
+    uint c = 0;src="";for(auto& ln:lines){if(c==line)ln=newcontent+"\n";src+=ln;++c;}
 }
 void insertStringAtEndOfMainFunc(string& src, const string& content){
     uint p=src.size()-1;while(p>0){char c=src[p];--p;if(c=='}'){break;}}src.insert(p,content);
 }
 void insertStringRightAfterLineContent(string& src, const string& newContent,const string& lineContent){
     istringstream str(src);string l; vector<string> lines; bool a = false;
-    while(getline(str,l)){lines.push_back(l+"\n");if(sfind(l,lineContent) && !a){lines.push_back(newContent+"\n"); a=true;}}src="";for(auto ln:lines){src+=ln;}
+    while(getline(str,l)){lines.push_back(l+"\n");if(sfind(l,lineContent) && !a){lines.push_back(newContent+"\n"); a=true;}}src="";for(auto& ln:lines){src+=ln;}
 }
 //this needs some work.
 string getLogDepthFunctions(){
@@ -376,7 +376,7 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
                     istringstream str(_d); string line; uint count = 0;
                     while (getline(str, line)) {
                         if (sfind(line, "layout") && sfind(line, "location") && sfind(line, "=")) {
-                            for (auto type : _types) {
+                            for (auto& type : _types) {
                                 size_t found = line.find(type);
                                 size_t firstFound = line.find("layout");
                                 if (firstFound != string::npos && found != string::npos) {
@@ -451,7 +451,7 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
             istringstream str(_d); string line; uint count = 0; uint aCount = 0;
             while (getline(str, line)) {
                 if (sfind(line, "attribute")) {
-                    for (auto type : _types) {
+                    for (auto& type : _types) {
                         size_t found = line.find(type);
                         size_t firstFound = line.find("attribute");
                         if (firstFound != string::npos && found != string::npos) {

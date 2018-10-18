@@ -809,7 +809,7 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
 void Collision::_init(vector<Mesh*>& _meshes, float mass) {
     btCompoundShape* compound = new btCompoundShape();
     btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
-    for (auto mesh : _meshes) {
+    for (auto& mesh : _meshes) {
         btCollisionShape* shape = epriv::InternalMeshPublicInterface::BuildCollision(mesh, CollisionType::ConvexHull);
         compound->addChildShape(t, shape);
     }

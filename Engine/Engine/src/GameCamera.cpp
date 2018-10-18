@@ -12,7 +12,7 @@ using namespace Engine;
 using namespace std;
 
 
-struct GameCameraLogicFunctor final { void operator()(ComponentLogic& _component, const float& dt) const {
+struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _component, const float& dt) const {
     GameCamera& camera = *((GameCamera*)_component.getUserPointer());
     ComponentCamera& componentCamera = *_component.owner.getComponent<ComponentCamera>();
     auto& m_Body = *camera.m_Entity.getComponent<ComponentBody>();
@@ -100,7 +100,7 @@ GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a
     m_Player = Entity::_null;
     m_OrbitRadius = 0;
     m_CameraMouseFactor = glm::vec2(0.0f);
-    auto& m_Logic = *m_Entity.getComponent<ComponentLogic>();
+    auto& m_Logic = *m_Entity.getComponent<ComponentLogic2>();
     m_Logic.setUserPointer(this);
     m_Logic.setFunctor(GameCameraLogicFunctor());
 }
@@ -110,7 +110,7 @@ GameCamera::GameCamera(float l, float r, float b, float t, float n, float f, Sce
     m_Player = Entity::_null;
     m_OrbitRadius = 0;
     m_CameraMouseFactor = glm::vec2(0.0f);
-    auto& m_Logic = *m_Entity.getComponent<ComponentLogic>();
+    auto& m_Logic = *m_Entity.getComponent<ComponentLogic2>();
     m_Logic.setUserPointer(this);
     m_Logic.setFunctor(GameCameraLogicFunctor());
 }
@@ -127,12 +127,12 @@ Entity GameCamera::getObjectInCenterRay(Entity& exclusion){
             }
         }
     }
-    if(objs.size() == 0) return Entity(0,0,0);
+    if(objs.size() == 0) return ret;
     if(objs.size() == 1) return objs[0];
 
     float distance = -1;
-    for(auto object:objs){
-        auto& body = *(object.getComponent<ComponentBody>());
+    for(auto& object:objs){
+        auto& body = *object.getComponent<ComponentBody>();
         float d = glm::distance(body.position(), getPosition());
         if(distance == -1 || d < distance){
             distance = d;

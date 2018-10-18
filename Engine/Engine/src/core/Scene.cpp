@@ -57,32 +57,24 @@ class Scene::impl final {
         }
         void _destruct() {
             SAFE_DELETE(m_Skybox);
-            for(auto vec: m_Pipelines)
+            for(auto& vec: m_Pipelines)
                 SAFE_DELETE_VECTOR(vec);
         }
-        //bool _OLD_hasEntity(uint& _id) {
-        //    for (auto entityInScene : m_Entities) {
-        //        if (_id == entityInScene)
-        //            return true;
-        //    }
-        //    return false;
-        //}
-        //bool _hasEntity(Entity& _entity) { return _OLD_hasEntity(_entity.ID); }
         void _centerToObject(Scene& super,Entity& center) {
             //TODO: handle parent->child relationship
-            ComponentBody& bodyBase = *(center.getComponent<ComponentBody>());
+            ComponentBody& centerBody = *center.getComponent<ComponentBody>();
             for (auto& data : epriv::InternalScenePublicInterface::GetEntities(super)) {
                 Entity e = super.getEntity(data);
-                ComponentBody& entityBody = *(e.getComponent<ComponentBody>());
                 if (e != center) {
-                    entityBody.setPosition(entityBody.position() - bodyBase.position());
+                    ComponentBody& entityBody = *e.getComponent<ComponentBody>();
+                    entityBody.setPosition(entityBody.position() - centerBody.position());
                 }
             }
-            bodyBase.setPosition(0.0f, 0.0f, 0.0f);
+            centerBody.setPosition(0.0f, 0.0f, 0.0f);
         }
         void _addMeshInstanceToPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, RenderStage::Stage _stage) {
             epriv::RenderPipeline* _pipeline = nullptr;
-            for (auto pipeline : _pipelinesList) {
+            for (auto& pipeline : _pipelinesList) {
                 if (&pipeline->shaderProgram == _meshInstance.shaderProgram()) {
                     _pipeline = pipeline;
                     break;
@@ -96,15 +88,15 @@ class Scene::impl final {
             MaterialNode* materialNode = nullptr;
             MeshNode* meshNode = nullptr;
             InstanceNode* instanceNode = nullptr;
-            for (auto itr : _pipeline->materialNodes) {
+            for (auto& itr : _pipeline->materialNodes) {
                 if (itr->material == _meshInstance.material()) {
                     materialNode = itr;
                     //mesh node check
-                    for (auto itr1 : materialNode->meshNodes) {
+                    for (auto& itr1 : materialNode->meshNodes) {
                         if (itr1->mesh == _meshInstance.mesh()) {
                             meshNode = itr1;
                             //instance check
-                            for (auto itr2 : meshNode->instanceNodes) {
+                            for (auto& itr2 : meshNode->instanceNodes) {
                                 if (itr2->instance == &_meshInstance) {
                                     instanceNode = itr2;
                                     break;
@@ -129,7 +121,7 @@ class Scene::impl final {
         }
         void _removeMeshInstanceFromPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, RenderStage::Stage _stage) {
             RenderPipeline* _pipeline = nullptr;
-            for (auto pipeline : _pipelinesList) {
+            for (auto& pipeline : _pipelinesList) {
                 if (&pipeline->shaderProgram == _meshInstance.shaderProgram()) {
                     _pipeline = pipeline;
                     break;
@@ -140,15 +132,15 @@ class Scene::impl final {
                 MaterialNode* materialNode = nullptr;
                 MeshNode* meshNode = nullptr;
                 InstanceNode* instanceNode = nullptr;
-                for (auto itr : _pipeline->materialNodes) {
+                for (auto& itr : _pipeline->materialNodes) {
                     if (itr->material == _meshInstance.material()) {
                         materialNode = itr;
                         //mesh node check
-                        for (auto itr1 : materialNode->meshNodes) {
+                        for (auto& itr1 : materialNode->meshNodes) {
                             if (itr1->mesh == _meshInstance.mesh()) {
                                 meshNode = itr1;
                                 //instance check
-                                for (auto itr2 : meshNode->instanceNodes) {
+                                for (auto& itr2 : meshNode->instanceNodes) {
                                     if (itr2->instance == &_meshInstance) {
                                         instanceNode = itr2;
                                         break;
@@ -176,23 +168,23 @@ vector<Engine::epriv::EntityPOD>& InternalScenePublicInterface::GetEntities(Scen
 vector<SunLight*>& InternalScenePublicInterface::GetLights(Scene& _scene) { return _scene.m_i->m_Lights; }
 
 void InternalScenePublicInterface::RenderGeometryOpaque(Scene& _scene,Camera& _camera) {
-    for (auto pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 
+    for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 
         pipeline->render(); 
     } 
 }
 void InternalScenePublicInterface::RenderGeometryTransparent(Scene& _scene, Camera& _camera) {
-    for (auto pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryTransparent]) { 
+    for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryTransparent]) { 
         pipeline->sort(_camera);
         pipeline->render(); 
     } 
 }
 void InternalScenePublicInterface::RenderForwardOpaque(Scene& _scene, Camera& _camera) {
-    for (auto pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) { 
+    for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) { 
         pipeline->render(); 
     }
 }
 void InternalScenePublicInterface::RenderForwardTransparent(Scene& _scene, Camera& _camera) {
-    for (auto pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardTransparent]) { 
+    for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardTransparent]) { 
         pipeline->sort(_camera);
         pipeline->render(); 
     }
@@ -220,17 +212,9 @@ Entity Scene::getEntity(Engine::epriv::EntityPOD& data) { return Entity(data.ID,
 void Scene::removeEntity(uint entityData) { m_i->m_ECS.removeEntity(entityData); }
 void Scene::removeEntity(Entity& entity) { epriv::EntitySerialization _s(entity); m_i->m_ECS.removeEntity(_s.ID); }
 
-
-//Entity* Scene::getEntity(uint entityID){
-//    if(entityID == 0) return nullptr;
-//    return OLD_Components::GetEntity(entityID);
-//}
-//bool Scene::OLD_hasEntity(OLD_Entity& entity){ return m_i->_OLD_hasEntity(entity); }
-//bool Scene::OLD_hasEntity(uint entityID){ return m_i->_OLD_hasEntity(entityID); }
 Camera* Scene::getActiveCamera(){ return m_i->m_ActiveCamera; }
 void Scene::setActiveCamera(Camera& c){ m_i->m_ActiveCamera = &c; }
 void Scene::centerSceneToObject(Entity& center){ return m_i->_centerToObject(*this, center); }
-//void Scene::centerSceneToObject(uint centerID) { return m_i->_centerToObject(*this, centerID); }
 Scene::~Scene(){
     unregisterEvent(EventType::SceneChanged);
     m_i->_destruct();

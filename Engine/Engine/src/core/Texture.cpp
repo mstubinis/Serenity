@@ -470,7 +470,7 @@ class Texture::impl final{
             super.load();
         }
         void _initCubemap(string _name,ImageInternalFormat::Format _internalFormat,bool _genMipMaps,Texture& super){
-            for(auto sideImage:m_ImagesDatas){
+            for(auto& sideImage:m_ImagesDatas){
                 m_Type = GL_TEXTURE_CUBE_MAP;
                 sideImage->pixelType = ImagePixelType::UNSIGNED_BYTE;
                 sideImage->internalFormat = _internalFormat;
@@ -480,11 +480,11 @@ class Texture::impl final{
             super.load();
         }
         void _load_CPU(Texture& super){
-            for(auto image:m_ImagesDatas){
+            for(auto& image:m_ImagesDatas){
                 if(image->filename != ""){
                     bool _do = false;
                     if(image->mipmaps.size() == 0){ _do = true; }
-                    for(auto mip:image->mipmaps){
+                    for(auto& mip:image->mipmaps){
                         if(mip.pixels.size() == 0){ _do = true; }
                     }
                     if(_do){
@@ -529,9 +529,9 @@ class Texture::impl final{
             vector_clear(m_TextureAddress);
         }
         void _unload_CPU(Texture& super){
-            for(auto image:m_ImagesDatas){
+            for(auto& image:m_ImagesDatas){
                 if(image->filename != ""){
-                    for(auto mipmap:image->mipmaps){
+                    for(auto& mipmap:image->mipmaps){
                         if(mipmap.pixels.size() == 0){
                             vector_clear(mipmap.pixels);
                         }
@@ -754,7 +754,7 @@ void epriv::TextureLoader::LoadDDSFile(Texture& _texture,string _filename,ImageL
 void epriv::TextureLoader::LoadTexture2DIntoOpenGL(Texture& _texture){
     auto& i = *_texture.m_i;
     Renderer::bindTexture(i.m_Type,i.m_TextureAddress[0]);
-    for(auto mipmap:i.m_ImagesDatas[0]->mipmaps){
+    for(auto& mipmap:i.m_ImagesDatas[0]->mipmaps){
         i._importIntoOpenGL(mipmap,i.m_Type);
         //TextureLoader::WithdrawPixelsFromOpenGLMemory(_texture,0,mipmap.level);
     }
@@ -775,7 +775,7 @@ void epriv::TextureLoader::LoadTextureCubemapIntoOpenGL(Texture& _texture){
     Renderer::bindTexture(i.m_Type,i.m_TextureAddress[0]);
     uint imageIndex = 0;
     for(auto image:i.m_ImagesDatas){
-        for(auto mipmap:image->mipmaps){
+        for(auto& mipmap:image->mipmaps){
             i._importIntoOpenGL(mipmap,GL_TEXTURE_CUBE_MAP_POSITIVE_X + imageIndex);
             //TextureLoader::WithdrawPixelsFromOpenGLMemory(_texture,imageIndex,mipmap.level);
         }

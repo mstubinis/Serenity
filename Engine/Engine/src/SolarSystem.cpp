@@ -34,7 +34,7 @@ SolarSystem::SolarSystem(string n, string file):Scene(n){
     setActiveCamera(*playerCamera);
     giGlobal = giSpecular = giDiffuse = 1.0f;
     if(file != "NULL")
-        SolarSystem::_loadFromFile(file);	
+        SolarSystem::_loadFromFile(file);
 }
 SolarSystem::~SolarSystem(){
 
@@ -61,14 +61,11 @@ void SolarSystem::_loadFromFile(string filename){
                 istringstream stream(line);
                 while(getline(stream, token, ' ')) {
                     size_t pos = token.find("=");
-
                     string key = token.substr(0, pos);
                     string value = token.substr(pos + 1,string::npos);
-
                          if(key == "giDiffuse")   giDiffuse = stof(value);
                     else if(key == "giSpecular")  giSpecular = stof(value);
                     else if(key == "giGlobal")    giGlobal = stof(value);
-
                 }
             }
             if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
@@ -239,7 +236,7 @@ void SolarSystem::_loadFromFile(string filename){
     }
 
     //add planetary rings
-    for(auto rings:planetRings){
+    for(auto& rings:planetRings){
         new Ring(rings.second,m_Planets.at(rings.first));
     }
 
@@ -248,12 +245,9 @@ void SolarSystem::_loadFromFile(string filename){
     float xPos = body.position().x;
     float zPos = body.position().z;
     /*
-    Entity* ent = new Entity();
-    addEntity(*ent);
-    ComponentBody* bbody = new OLD_ComponentBody();
-    ent->addComponent(bbody);
-    ComponentModel* mmodel = new OLD_ComponentModel(ResourceManifest::TestMesh, ResourceManifest::DefiantMaterial, ent);
-    ent->addComponent(mmodel);
+    Entity ent = createEntity()
+    ComponentBody* bbody = ent.addComponent<ComponentBody>();
+    ComponentModel* mmodel = ent.addComponent<ComponentModel>(ResourceManifest::TestMesh, ResourceManifest::DefiantMaterial);
     
     mmodel->getModel()->playAnimation("Skeleton|fire", 0.0f, -1.0f, 0);
     mmodel->getModel()->playAnimation("Skeleton|fire_top", 0.0f, -1.0f, 0);

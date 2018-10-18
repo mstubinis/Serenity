@@ -97,10 +97,12 @@ void updateLogic(const float& dt){
 
 
     epriv::Core::m_Engine->m_ThreadManager._update(dt);
-    RESET_EVENTS();
     Game::onPostUpdate(dt);
 
     epriv::Core::m_Engine->m_TimeManager.calculate_logic();
+
+    RESET_EVENTS();
+
     ////////////////////////////////////////////////////////////
 }
 void updateSounds(const float& dt){
