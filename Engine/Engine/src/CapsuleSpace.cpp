@@ -18,28 +18,57 @@
 using namespace Engine;
 using namespace std;
 
+struct CapsuleEndLogicFunctor final {void operator()(ComponentLogic& _component, const float& dt) const {
+    CapsuleEnd& end = *(CapsuleEnd*)_component.getUserPointer();
+}};
+struct CapsuleStarLogicFunctor final {void operator()(ComponentLogic& _component, const float& dt) const {
+    CapsuleStar& star = *(CapsuleStar*)_component.getUserPointer();
+
+    auto& m_Body = *star.m_Entity.getComponent<ComponentBody>();
+
+    glm::vec3 pos = m_Body.position();
+    m_Body.translate(0, 0, (45 * 50) * dt, false);
+    if (pos.z >= 200 * 225) {
+        float x = float(((rand() % 200) - 100) / 100.0f) * 3.7f; if (x > 0) x += 1.5f; if (x < 0) x -= 1.5f;
+        float y = float(((rand() % 200) - 100) / 100.0f) * 3.7f; if (y > 0) y += 1.5f; if (y < 0) y -= 1.5f;
+        m_Body.setPosition(x * 50, y * 50, -200 * 225);
+    }
+    if (star.m_Light) {
+        star.m_Light->setPosition(pos * 0.015f);
+        if (glm::distance(star.m_Light->position(), Resources::getCurrentScene()->getActiveCamera()->getPosition()) > star.m_Light->getCullingRadius() * 75.0f) {
+            star.m_Light->deactivate();
+        }else{
+            star.m_Light->activate();
+        }
+    }
+    m_Body.setRotation(Resources::getCurrentScene()->getActiveCamera()->getOrientation());
+}};
+
+
 
 CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, Scene* scene){
-    scene->OLD_addEntity(*this);
-    OLD_ComponentModel* model = new OLD_ComponentModel(Mesh::Plane, ResourceManifest::CapsuleD,this);  addComponent(model);
+    m_Entity = scene->createEntity();
+    ComponentModel* model = m_Entity.addComponent<ComponentModel>(Mesh::Plane, ResourceManifest::CapsuleD);
     model->getModel().setColor(color.x,color.y,color.z,1.0f);
     
-    m_Body = new OLD_ComponentBody();  addComponent(m_Body);
+    auto* m_Body = m_Entity.addComponent<ComponentBody>();
     m_Body->setPosition(pos);
-    m_Body->setScale(size,size,size);	    
+    m_Body->setScale(size,size,size);	 
+
+    m_Entity.addComponent<ComponentLogic>(CapsuleEndLogicFunctor(), this);
 }
 CapsuleEnd::~CapsuleEnd(){
 }
-void CapsuleEnd::update(const float& dt){
-}
 CapsuleStar::CapsuleStar(float size,glm::vec3 pos,Scene* scene,bool makeLight){
-    scene->OLD_addEntity(*this);
-    OLD_ComponentModel* model = new OLD_ComponentModel(Mesh::Plane, ResourceManifest::StarFlareMaterial,this);  addComponent(model);
+    m_Entity = scene->createEntity();
+    ComponentModel* model = m_Entity.addComponent<ComponentModel>(Mesh::Plane, ResourceManifest::StarFlareMaterial);
     model->getModel().setColor(255,235,206,255);
     
-    m_Body = new OLD_ComponentBody();  addComponent(m_Body);
+    auto* m_Body = m_Entity.addComponent<ComponentBody>();
     m_Body->setPosition(pos);
     m_Body->setScale(size,size,size);
+
+    m_Entity.addComponent<ComponentLogic>(CapsuleStarLogicFunctor(), this);
 
     m_Light = nullptr;
     if(makeLight){
@@ -49,31 +78,12 @@ CapsuleStar::CapsuleStar(float size,glm::vec3 pos,Scene* scene,bool makeLight){
     }
 }
 CapsuleStar::~CapsuleStar(){}
-void CapsuleStar::update(const float& dt){
-    glm::vec3 pos = m_Body->position();
-    m_Body->translate(0,0,(45 * 50 ) * dt,false);
-    if(pos.z >= 200 * 225){
-        float x = float(((rand() % 200) - 100) / 100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
-        float y = float(((rand() % 200) - 100) / 100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
-        m_Body->setPosition( x * 50, y * 50, -200 * 225);
-    }
-    if(m_Light != nullptr){
-        m_Light->setPosition(pos * 0.015f);
-        if(glm::distance(m_Light->position(),Resources::getCurrentScene()->getActiveCamera()->getPosition()) > m_Light->getCullingRadius() * 75.0f){
-            m_Light->deactivate();
-        }
-        else{
-            m_Light->activate();
-        }
-    }
-    m_Body->setRotation( Resources::getCurrentScene()->getActiveCamera()->getOrientation() );
-}
 
 CapsuleTunnel::CapsuleTunnel(float tunnelRadius,Handle& material, Scene* scene){
-    scene->OLD_addEntity(*this);
+    m_Entity = scene->createEntity();
     m_TunnelRadius = tunnelRadius;
-    OLD_ComponentModel* model = new OLD_ComponentModel(ResourceManifest::CapsuleTunnelMesh,material,this);  addComponent(model);
-    m_Body = new OLD_ComponentBody();  addComponent(m_Body);
+    ComponentModel* model = m_Entity.addComponent<ComponentModel>(ResourceManifest::CapsuleTunnelMesh,material);
+    auto* m_Body = m_Entity.addComponent<ComponentBody>();
     m_Body->setPosition(0.0f,0.0f,0.0f);
     m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);  
 }
@@ -91,18 +101,14 @@ struct RibbonUnbindFunctor {void operator()(EngineResource* r) const {
 }};
 
 CapsuleRibbon::CapsuleRibbon(float tunnelRadius, Handle& mesh,Handle& material, Scene* scene){
-    scene->OLD_addEntity(*this);
+    m_Entity = scene->createEntity();
     m_TunnelRadius = tunnelRadius;
-    OLD_ComponentModel* model = new OLD_ComponentModel(mesh,material,this);
+    ComponentModel* model = m_Entity.addComponent<ComponentModel>(mesh,material);
 
-    RibbonBindFunctor fB;
-    RibbonUnbindFunctor fUB;
+    model->getModel().setCustomBindFunctor(RibbonBindFunctor());
+    model->getModel().setCustomUnbindFunctor(RibbonUnbindFunctor());
 
-    model->getModel().setCustomBindFunctor(fB);
-    model->getModel().setCustomUnbindFunctor(fUB);
-    addComponent(model);
-    m_Body = new OLD_ComponentBody();
-    addComponent(m_Body);
+    auto* m_Body = m_Entity.addComponent<ComponentBody>();
     m_Body->setPosition(0.0f,0.0f,0.0f);
     m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);   
 }
@@ -130,16 +136,22 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     m_FrontEnd = new CapsuleEnd(2250,glm::vec3(0,0,-25000),glm::vec3(1),this);
     m_BackEnd = new CapsuleEnd(1700,glm::vec3(0,0,25000),glm::vec3(0),this);
 
-    m_BackEnd->m_Body->rotate(0.0f,glm::radians(180.0f),0.0f);
+    auto& backBody = *(m_BackEnd->m_Entity.getComponent<ComponentBody>());
+    auto& tunnelBBody = *(m_TunnelB->m_Entity.getComponent<ComponentBody>());
+    auto& tunnelABody = *(m_TunnelA->m_Entity.getComponent<ComponentBody>());
+    auto& ribbonBBody = *(m_RibbonB->m_Entity.getComponent<ComponentBody>());
+    auto& ribbonABody = *(m_RibbonA->m_Entity.getComponent<ComponentBody>());
 
-    glm::vec3 oldScale = m_TunnelB->m_Body->getScale();
-    m_TunnelB->m_Body->setScale(oldScale.x-(0.62f * m_TunnelB->getTunnelRadius()),oldScale.y-(0.62f * m_TunnelB->getTunnelRadius()),oldScale.z);
+    backBody.rotate(0.0f,glm::radians(180.0f),0.0f);
 
-    m_TunnelA->m_Body->setPosition(0,0,0);
-    m_TunnelB->m_Body->setPosition(0,0,0);
+    glm::vec3 oldScale = tunnelBBody.getScale();
+    tunnelBBody.setScale(oldScale.x-(0.62f * m_TunnelB->getTunnelRadius()),oldScale.y-(0.62f * m_TunnelB->getTunnelRadius()),oldScale.z);
 
-    m_RibbonA->m_Body->setPosition(0,300,0);
-    m_RibbonB->m_Body->setPosition(0, 300, 0);
+    tunnelABody.setPosition(0,0,0);
+    tunnelBBody.setPosition(0,0,0);
+
+    ribbonBBody.setPosition(0,300,0);
+    ribbonABody.setPosition(0, 300, 0);
 
     float step = -10.0f;
     for(uint i = 0; i < 300; ++i){
@@ -157,13 +169,13 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     }
     //this to just test. should set player / camera dynamically
     Ship* dread = new Ship(ResourceManifest::DreadnaughtMesh,ResourceManifest::DreadnaughtMaterial,true,"Dreadnaught",glm::vec3(0),glm::vec3(1),CollisionType::None,this);
-    OLD_ComponentBody* playerBody = dread->getComponent<OLD_ComponentBody>();
+    ComponentBody* playerBody = dread->entity().getComponent<ComponentBody>();
 
     setPlayer(dread);
-    OLD_GameCamera* playerCamera = (OLD_GameCamera*)getActiveCamera();
-    playerCamera->follow(dread);
+    GameCamera* playerCamera = (GameCamera*)getActiveCamera();
+    playerCamera->follow(dread->entity());
 
-    centerSceneToObject(*dread);
+    centerSceneToObject(dread->entity());
 
     //LightProbe* lp = new LightProbe("CapsuleLightProbe",256,glm::vec3(0.0f),true,this);
     //dread->addChild(lp);
@@ -175,38 +187,46 @@ void CapsuleSpace::update(const float& dt){
     float aRadius = m_TunnelA->getTunnelRadius();
     float bRadius = m_TunnelB->getTunnelRadius();
 
-    m_TunnelA->m_Body->translate(0,0,(25 * aRadius) * dt,false);
-    m_TunnelB->m_Body->translate(0,0,(8 * bRadius) * dt,false);
-    m_RibbonA->m_Body->translate(0,0,(7 * aRadius) * dt,false);
-    m_RibbonB->m_Body->translate(0, 0, (7 * aRadius) * dt, false);
+    auto& frontBody = *(m_FrontEnd->m_Entity.getComponent<ComponentBody>());
+    auto& backBody = *(m_BackEnd->m_Entity.getComponent<ComponentBody>());
+    auto& tunnelBBody = *(m_TunnelB->m_Entity.getComponent<ComponentBody>());
+    auto& tunnelABody = *(m_TunnelA->m_Entity.getComponent<ComponentBody>());
+    auto& ribbonBBody = *(m_RibbonB->m_Entity.getComponent<ComponentBody>());
+    auto& ribbonABody = *(m_RibbonA->m_Entity.getComponent<ComponentBody>());
+
+
+    tunnelABody.translate(0,0,(25 * aRadius) * dt,false);
+    tunnelBBody.translate(0,0,(8 * bRadius) * dt,false);
+    ribbonABody.translate(0,0,(7 * aRadius) * dt,false);
+    ribbonBBody.translate(0, 0, (7 * aRadius) * dt, false);
 
     float tunnelARotRand = float(rand() % 3) + 2;
     float tunnelBRotRand = float(rand() % 2) + 2;
 
-    m_TunnelA->m_Body->rotate(0,0,glm::radians(tunnelARotRand*15.0f)*dt);
-    m_TunnelB->m_Body->rotate(0,0,-glm::radians(tunnelBRotRand*15.0f)*dt);
-    m_BackEnd->m_Body->rotate(0,0,4.0f*dt);
-    m_FrontEnd->m_Body->rotate(0,0,-4.0f*dt);
+    tunnelABody.rotate(0,0,glm::radians(tunnelARotRand*15.0f)*dt);
+    tunnelBBody.rotate(0,0,-glm::radians(tunnelBRotRand*15.0f)*dt);
+    backBody.rotate(0,0,4.0f*dt);
+    frontBody.rotate(0,0,-4.0f*dt);
 
-    glm::vec3 aPos = m_TunnelA->m_Body->position();
-    glm::vec3 bPos = m_TunnelB->m_Body->position();
-    glm::vec3 rPosA = m_RibbonA->m_Body->position();
-    glm::vec3 rPosB = m_RibbonB->m_Body->position();
+    glm::vec3 aPos = tunnelABody.position();
+    glm::vec3 bPos = tunnelBBody.position();
+    glm::vec3 rPosA = ribbonABody.position();
+    glm::vec3 rPosB = ribbonBBody.position();
 
     if(aPos.z >= 12.112 * aRadius || aPos.z <= -12.112 * aRadius){
-        m_TunnelA->m_Body->setPosition(0,0,0);
+        tunnelABody.setPosition(0,0,0);
     }
     if(bPos.z >= 12.112 * bRadius || bPos.z <= -12.112 * bRadius){
-        m_TunnelB->m_Body->setPosition(0,0,0);
+        tunnelBBody.setPosition(0,0,0);
     }
     if(rPosA.z >= 20 * aRadius || rPosA.z <= -20 * aRadius){
-        m_RibbonA->m_Body->setPosition(0,300,0);
+        ribbonABody.setPosition(0,300,0);
     }
     if (rPosB.z >= 20 * aRadius || rPosB.z <= -20 * aRadius) {
-        m_RibbonB->m_Body->setPosition(0, 300, 0);
+        ribbonBBody.setPosition(0, 300, 0);
     }
-    OLD_ComponentBody& body = *getPlayer()->getComponent<OLD_ComponentBody>();
-    OLD_ComponentModel& model = *getPlayer()->getComponent<OLD_ComponentModel>();
+    ComponentBody& body = *getPlayer()->entity().getComponent<ComponentBody>();
+    ComponentModel& model = *getPlayer()->entity().getComponent<ComponentModel>();
     body.setPosition(0,0,0);
 
     float x = glm::sin(m_Timer * 2.4f) * 0.07f;

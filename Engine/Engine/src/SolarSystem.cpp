@@ -30,7 +30,7 @@ using namespace std;
 
 
 SolarSystem::SolarSystem(string n, string file):Scene(n){
-    OLD_GameCamera* playerCamera = new OLD_GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.35f,7000000000.0f,this);
+    GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.35f,7000000000.0f,this);
     setActiveCamera(*playerCamera);
     giGlobal = giSpecular = giDiffuse = 1.0f;
     if(file != "NULL")
@@ -178,9 +178,8 @@ void SolarSystem::_loadFromFile(string filename){
                     if(PARENT != ""){
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
-
                         if(ORBIT_PERIOD != -1.0f){
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,parent->id(),INCLINATION));
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,*parent,INCLINATION));
                         }
                         if(ROTATIONAL_TILT != -1.0f){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
@@ -199,7 +198,7 @@ void SolarSystem::_loadFromFile(string filename){
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
                         if(ORBIT_PERIOD != -1.0f){
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,parent->id(),INCLINATION));
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,*parent,INCLINATION));
                         }
                         if(ROTATIONAL_TILT != -1.0f){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
@@ -214,8 +213,8 @@ void SolarSystem::_loadFromFile(string filename){
                         zPos += parentZ;
                     }
                     setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f), CollisionType::ConvexHull,this));
-                    OLD_GameCamera* playerCamera = (OLD_GameCamera*)getActiveCamera();
-                    playerCamera->follow(getPlayer());
+                    GameCamera* playerCamera = (GameCamera*)getActiveCamera();
+                    playerCamera->follow(getPlayer()->entity());
                 }else if(line[0] == '$'){//Other ship
                     if(PARENT != ""){
                         //float parentX = objects().at(PARENT)->getPosition().x;
@@ -244,16 +243,16 @@ void SolarSystem::_loadFromFile(string filename){
         new Ring(rings.second,m_Planets.at(rings.first));
     }
 
-    centerSceneToObject(*player);
-    auto& body = *player->getComponent<OLD_ComponentBody>();
+    centerSceneToObject(player->entity());
+    auto& body = *player->entity().getComponent<ComponentBody>();
     float xPos = body.position().x;
     float zPos = body.position().z;
     /*
     Entity* ent = new Entity();
     addEntity(*ent);
-    OLD_ComponentBody* bbody = new OLD_ComponentBody();
+    ComponentBody* bbody = new OLD_ComponentBody();
     ent->addComponent(bbody);
-    OLD_ComponentModel* mmodel = new OLD_ComponentModel(ResourceManifest::TestMesh, ResourceManifest::DefiantMaterial, ent);
+    ComponentModel* mmodel = new OLD_ComponentModel(ResourceManifest::TestMesh, ResourceManifest::DefiantMaterial, ent);
     ent->addComponent(mmodel);
     
     mmodel->getModel()->playAnimation("Skeleton|fire", 0.0f, -1.0f, 0);
@@ -268,35 +267,6 @@ void SolarSystem::_loadFromFile(string filename){
 
     //LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
     //player->addChild(lightP);
-
-
-    Entity e0 = createEntity();
-    Entity e1 = createEntity();
-    Entity e2 = createEntity();
-    Entity e3 = createEntity();
-    Entity e4 = createEntity();
-
-
-    e0.addComponent<ComponentBody>(CollisionType::None);
-    e1.addComponent<ComponentBody>(CollisionType::None);
-    e2.addComponent<ComponentBody>(CollisionType::None);
-    e3.addComponent<ComponentBody>(CollisionType::None);
-    e4.addComponent<ComponentBody>(CollisionType::None);
-
-    e0.getComponent<ComponentBody>()->setPosition(-2, -5, 1);
-    e1.getComponent<ComponentBody>()->setPosition(-2, 5, 1);
-    e2.getComponent<ComponentBody>()->setPosition(2, -5, 1);
-    e3.getComponent<ComponentBody>()->setPosition(2, 5, 1);
-    e4.getComponent<ComponentBody>()->setPosition(-2, 5, -3);
-
-    //e2.removeComponent<ComponentBody>();
-    //e4.removeComponent<ComponentBody>();
-    //e0.removeComponent<ComponentBody>();
-    //e3.removeComponent<ComponentBody>();
-    //e1.removeComponent<ComponentBody>();
-
-    //removeEntity(e3);
-    //removeEntity(e4);
 }
 void SolarSystem::update(const float& dt){
     Scene::update(dt);

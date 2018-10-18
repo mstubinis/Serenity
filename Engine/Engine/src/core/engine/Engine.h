@@ -11,7 +11,6 @@
 #include "core/engine/Engine_Events.h"
 #include "core/engine/Engine_Noise.h"
 #include "core/engine/Engine_Window.h"
-#include "core/Components.h"
 
 typedef unsigned int uint;
 namespace Engine{
@@ -22,7 +21,6 @@ namespace Engine{
             EventManager          m_EventManager;
             EventDispatcher       m_EventDispatcher;
             PhysicsManager        m_PhysicsManager;
-            OLD_ComponentManager  m_ComponentManager;
             ResourceManager       m_ResourceManager;
             TimeManager           m_TimeManager;
             SoundManager          m_SoundManager;

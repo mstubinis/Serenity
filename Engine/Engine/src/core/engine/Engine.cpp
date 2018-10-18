@@ -28,7 +28,6 @@ m_TimeManager(name,w,h),
 m_SoundManager(name,w,h),
 m_RenderManager(name,w,h),
 m_PhysicsManager(name,w,h),
-m_ComponentManager(name,w,h),
 m_ThreadManager(name,w,h),
 m_NoiseManager(name,w,h)
 {
@@ -40,12 +39,10 @@ epriv::Core::~Core(){
 
 bool Engine::paused(){ return epriv::Core::m_Engine->m_Paused; }
 void Engine::pause(bool b){
-    epriv::Core::m_Engine->m_ComponentManager._pause(b);
     Engine::Physics::pause(b);
     epriv::Core::m_Engine->m_Paused = b;
 }
 void Engine::unpause(){
-    epriv::Core::m_Engine->m_ComponentManager._unpause();
     Engine::Physics::unpause();
     epriv::Core::m_Engine->m_Paused = false;
 }
@@ -90,15 +87,13 @@ void updateLogic(const float& dt){
     Game::onPreUpdate(dt);
     Game::update(dt);
 
+    updatePhysics(dt);
     //update current scene
     Scene& scene = *Resources::getCurrentScene();
     scene.update(dt);
     epriv::InternalScenePublicInterface::GetECS(scene).update(dt);
-
-    updatePhysics(dt);
-    epriv::Core::m_Engine->m_ComponentManager._update(dt);
-
     epriv::InternalScenePublicInterface::GetECS(scene).postUpdate(scene,dt);
+
 
     epriv::Core::m_Engine->m_ThreadManager._update(dt);
     RESET_EVENTS();
@@ -135,9 +130,9 @@ void render(){
 void EVENT_RESIZE(uint w, uint h,bool saveSize){
     epriv::Core::m_Engine->m_RenderManager._resize(w,h);
 
-    epriv::Core::m_Engine->m_ComponentManager._resize(w,h);
     if(saveSize) Engine::Resources::getWindow().setSize(w,h);
     Game::onResize(w,h);
+    //resize cameras here
 
     epriv::EventWindowResized e;  e.width = w; e.height = h;
     Event ev; ev.eventWindowResized = e; ev.type = EventType::WindowResized;

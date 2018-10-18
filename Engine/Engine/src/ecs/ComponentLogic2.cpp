@@ -5,7 +5,36 @@ using namespace std;
 
 #pragma region Component
 
-ComponentLogic2::~ComponentLogic2() {}
+ComponentLogic2::~ComponentLogic2() {
+}
+
+ComponentLogic2::ComponentLogic2(const ComponentLogic2& other) {
+    owner = other.owner;
+    _functor = other._functor;
+    _userPtr = other._userPtr;
+}
+ComponentLogic2& ComponentLogic2::operator=(const ComponentLogic2& other) {
+    if (&other == this)
+        return *this;
+    owner = other.owner;
+    _functor = other._functor;
+    _userPtr = other._userPtr;
+    return *this;
+}
+ComponentLogic2::ComponentLogic2(ComponentLogic2&& other) noexcept {
+    using std::swap;
+    swap(owner, other.owner);
+    swap(_functor, other._functor);
+    swap(_userPtr, other._userPtr);
+}
+ComponentLogic2& ComponentLogic2::operator=(ComponentLogic2&& other) noexcept {
+    using std::swap;
+    swap(owner, other.owner);
+    swap(_functor, other._functor);
+    swap(_userPtr, other._userPtr);
+    return *this;
+}
+
 void ComponentLogic2::call(const float& dt) { _functor(dt); }
 
 #pragma endregion

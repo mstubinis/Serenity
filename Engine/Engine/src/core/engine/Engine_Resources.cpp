@@ -185,8 +185,7 @@ void Resources::setCurrentScene(Scene* newScene){
     
     if(!oldScene){
         cout << "---- Initial scene set to: " << newScene->name() << endl;
-        resourceManager->m_CurrentScene = newScene;
-        epriv::Core::m_Engine->m_ComponentManager._sceneSwap(nullptr, newScene); 
+        resourceManager->m_CurrentScene = newScene; 
         epriv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
         return;
     }
@@ -196,8 +195,7 @@ void Resources::setCurrentScene(Scene* newScene){
             //mark game object resources to minus use count
         }
         epriv::InternalScenePublicInterface::GetECS(*oldScene).onSceneLeft(*oldScene);
-        resourceManager->m_CurrentScene = newScene;
-        epriv::Core::m_Engine->m_ComponentManager._sceneSwap(oldScene, newScene);    
+        resourceManager->m_CurrentScene = newScene;    
         epriv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
         if(resourceManager->m_DynamicMemory){
             //mark game object resources to add use count

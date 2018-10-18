@@ -77,10 +77,10 @@ void HUD::render(){
     #pragma region renderCrossHairAndOtherInfo
     
     if(player->getTarget()){
-        auto* body = player->getTarget()->getComponent<OLD_ComponentBody>();
-        auto* model = player->getTarget()->getComponent<OLD_ComponentModel>();
+        auto* body = player->getTarget()->getComponent<ComponentBody>();
+        auto* model = player->getTarget()->getComponent<ComponentModel>();
         const glm::vec3& pos = body->getScreenCoordinates();
-        float scl = glm::max(0.5f,model->radius()*23.0f / Resources::getCurrentScene()->getActiveCamera()->getDistance(player->getTarget()));
+        float scl = glm::max(0.5f,model->radius()*23.0f / Resources::getCurrentScene()->getActiveCamera()->getDistance(*player->getTarget()));
         if(pos.z == 1){
             Material* crosshair = (Material*)ResourceManifest::CrosshairMaterial.get();
             crosshair->getComponent(MaterialComponentType::Diffuse)->texture()->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);

@@ -29,24 +29,24 @@ class ComponentLogic2 : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentLogic2SceneLeftFunction;
 
     private:
-        boost::function<void(const float&)> _functor;
         void*                               _userPtr;
+        boost::function<void(const float&)> _functor;
     public:
-        ComponentLogic2(Entity&) { setFunctor(Engine::epriv::ComponentLogic2EmptyFunctor()); _userPtr = nullptr; }
-        template<typename T> ComponentLogic2(Entity&, const T& functor) { setFunctor(functor); _userPtr = nullptr; }
-        template<typename T> ComponentLogic2(Entity&, const T& functor, void* userPointer) { setFunctor(functor); _userPtr = userPointer; }
+        ComponentLogic2(Entity& _e) : ComponentBaseClass(_e) { _userPtr = nullptr; setFunctor(Engine::epriv::ComponentLogic2EmptyFunctor()); }
+        template<typename T> ComponentLogic2(Entity& _e, const T& functor) : ComponentBaseClass(_e) { _userPtr = nullptr; setFunctor(functor); }
+        template<typename T,typename V> ComponentLogic2(Entity& _e, const T& functor, V* userPointer) : ComponentBaseClass(_e) { _userPtr = userPointer; setFunctor(functor); }
 
-        ComponentLogic2(const ComponentLogic2& other) = default;
-        ComponentLogic2& operator=(const ComponentLogic2& other) = default;
-        ComponentLogic2(ComponentLogic2&& other) noexcept = default;
-        ComponentLogic2& operator=(ComponentLogic2&& other) noexcept = default;
+        ComponentLogic2(const ComponentLogic2& other);
+        ComponentLogic2& operator=(const ComponentLogic2& other);
+        ComponentLogic2(ComponentLogic2&& other) noexcept;
+        ComponentLogic2& operator=(ComponentLogic2&& other) noexcept;
 
         ~ComponentLogic2();
 
         template<typename T> void setFunctor(const T& functor) { _functor = boost::bind<void>(functor, *this, _1); }
         template<typename T> void setUserPointer(T* ptr) { _userPtr = ptr; }
         void call(const float& dt);
-        const void* getUserPointer() { return _userPtr; }
+        void* getUserPointer() { return _userPtr; }
 };
 
 class ComponentLogic2System : public Engine::epriv::ECSSystemCI {

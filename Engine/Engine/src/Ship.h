@@ -2,11 +2,14 @@
 #ifndef GAME_SHIP_H
 #define GAME_SHIP_H
 
-#include "core/Components.h"
+#include "ecs/Components.h"
 
-class OLD_GameCamera;
+class GameCamera;
 class Ship;
 typedef unsigned int uint;
+
+struct ShipLogicFunctor;
+
 struct ShipSystemType {enum Type {
     Reactor,
     ThrustersPitch,
@@ -92,14 +95,16 @@ class ShipSystemSensors final: public ShipSystem{
         void update(const float& dt);
 };
 
-class Ship: public OLD_Entity{
+class Ship{
+    friend struct ::ShipLogicFunctor;
     protected:
+        Entity m_Entity;
         std::unordered_map<uint,ShipSystem*> m_ShipSystems;
         bool m_IsPlayer;
-        OLD_GameCamera* m_PlayerCamera;
+        GameCamera* m_PlayerCamera;
         bool m_IsWarping;
         float m_WarpFactor;
-        OLD_Entity* m_Target;
+        Entity* m_Target;
     public:
         Ship(
             Handle& meshHandle,       //Mesh
@@ -120,14 +125,12 @@ class Ship: public OLD_Entity{
             m_IsWarping = !m_IsWarping;
             m_WarpFactor = 0;
         }
-        OLD_GameCamera* OLD_getPlayerCamera(){ return m_PlayerCamera; }
+        GameCamera* getPlayerCamera(){ return m_PlayerCamera; }
         bool IsPlayer(){ return m_IsPlayer; }
         bool IsWarping(){ return m_IsWarping; }
         ShipSystem* getShipSystem(uint type){ return m_ShipSystems[type]; }
-        OLD_Entity* getTarget() { return m_Target; }
-        virtual void setTarget(OLD_Entity*);
-        virtual void update(const float& dt);
-
-
+        Entity* getTarget() { return m_Target; }
+        Entity& entity() { return m_Entity; }
+        virtual void setTarget(Entity*);
 };
 #endif

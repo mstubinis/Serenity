@@ -23,15 +23,28 @@
 using namespace Engine;
 using namespace std;
 
+struct PlanetLogicFunctor final {void operator()(ComponentLogic& _component, const float& dt) const {
+    Planet& planet = *(Planet*)_component.getUserPointer();
+    if (planet.m_RotationInfo) {
+        planet.m_Entity.getComponent<ComponentBody>()->rotate(0.0f, glm::radians(planet.m_RotationInfo->speed * dt), 0.0f);
+    }
+    if (planet.m_OrbitInfo) {
+        //planet.m_OrbitInfo->setOrbitalPosition(((1.0f/(planet.m_OrbitInfo->info.y*86400.0f))*dt)*6.283188f,this);
+    }
+}};
+
 struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
-    Planet* obj = (Planet*)(i.parent());
+    Planet& obj = *(Planet*)i.getUserPointer();
+    
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     
-    float atmosphereHeight = obj->getAtmosphereHeight();
+    float atmosphereHeight = obj.getAtmosphereHeight();
 
-    glm::vec3 pos = obj->m_Body->position();
-    glm::quat orientation = obj->m_Body->rotation();
+    auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
+
+    glm::vec3 pos = m_Body->position();
+    glm::quat orientation = m_Body->rotation();
     glm::vec3 camPosR = c->getPosition();
     glm::vec3 camPos = camPosR - pos;
     float camHeight = glm::length(camPos);
@@ -47,13 +60,13 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     float Km = 0.0025f;
     float Kr = 0.0015f;
     float ESun = 20.0f;
-    glm::vec3 scl = obj->m_Body->getScale();
+    glm::vec3 scl = m_Body->getScale();
     
     float fScaledepth = 0.25f;
-    float innerRadius = obj->getGroundRadius() * 0.5f; //includes rings too
-    float outerRadius = obj->getRadius();
+    float innerRadius = obj.getGroundRadius() * 0.5f; //includes rings too
+    float outerRadius = obj.getRadius();
 
-    glm::mat4 model = obj->m_Body->modelMatrix();
+    glm::mat4 model = m_Body->modelMatrix();
 
     //TODO: add this to stars and further tweak the _factor, and find out how to fix this in the game camera's orbit feature
     //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
@@ -95,11 +108,12 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
 
 struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
-    Planet* obj = (Planet*)(i.parent());
+    Planet& obj = *(Planet*)i.getUserPointer();
+    auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    glm::vec3 pos = obj->m_Body->position();
+    glm::vec3 pos = m_Body->position();
     glm::vec3 camPos = c->getPosition();
-    glm::quat orientation = obj->m_Body->rotation();
+    glm::quat orientation = m_Body->rotation();
 
     Renderer::sendUniform4Safe("Object_Color",i.color());
     Renderer::sendUniform3Safe("Gods_Rays_Color",i.godRaysColor());
@@ -114,7 +128,7 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     //2.718281828459045235360287471352 = euler's number
     float _distance = _factor * _distanceReal;
     glm::vec3 _newPosition = glm::normalize(camPos - pos) * _distance;
-    float _newScale = obj->getRadius() * _factor;
+    float _newScale = obj.getRadius() * _factor;
     model = glm::mat4(1.0f);
     model = glm::translate(model,camPos - _newPosition);
     model *= glm::mat4_cast(orientation);
@@ -128,13 +142,13 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
 
 struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
-    Planet* obj = (Planet*)(i.parent());
+    Planet& obj = *(Planet*)i.getUserPointer();
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    
-    float atmosphereHeight = obj->getAtmosphereHeight();
+    auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
+    float atmosphereHeight = obj.getAtmosphereHeight();
 
-    glm::vec3 pos = obj->m_Body->position();
-    glm::quat orientation = obj->m_Body->rotation();
+    glm::vec3 pos = m_Body->position();
+    glm::quat orientation = m_Body->rotation();
     glm::vec3 camPosR = c->getPosition();
     glm::vec3 camPos = camPosR - pos;
     float camHeight = glm::length(camPos);
@@ -150,13 +164,13 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     float Km = 0.0025f;
     float Kr = 0.0015f;
     float ESun = 20.0f;
-    glm::vec3 scl = obj->m_Body->getScale();
+    glm::vec3 scl = m_Body->getScale();
     
     float fScaledepth = 0.25f;
-    float innerRadius = obj->getGroundRadius(); //includes rings too
-    float outerRadius = obj->getRadius();
+    float innerRadius = obj.getGroundRadius(); //includes rings too
+    float outerRadius = obj.getRadius();
 
-    glm::mat4 model = obj->m_Body->modelMatrix();
+    glm::mat4 model = m_Body->modelMatrix();
 
     //TODO: add this to stars and further tweak the _factor, and find out how to fix this in the game camera's orbit feature
     //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
@@ -209,13 +223,13 @@ struct AtmosphericScatteringGroundMeshInstanceUnbindFunctor{void operator()(Engi
 
 struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
-    Planet* obj = (Planet*)(i.parent());
+    Planet& obj = *(Planet*)i.getUserPointer();
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    
-    float atmosphereHeight = obj->getAtmosphereHeight();
+    auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
+    float atmosphereHeight = obj.getAtmosphereHeight();
 
-    glm::vec3 pos = obj->m_Body->position();
-    glm::quat orientation = obj->m_Body->rotation();
+    glm::vec3 pos = m_Body->position();
+    glm::quat orientation = m_Body->rotation();
     glm::vec3 camPosR = c->getPosition();
     glm::vec3 camPos = camPosR - pos;
     float camHeight = glm::length(camPos);
@@ -228,11 +242,11 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     float Km = 0.0025f;
     float Kr = 0.0015f;
     float ESun = 20.0f;
-    glm::vec3 scl = obj->m_Body->getScale();
+    glm::vec3 scl = m_Body->getScale();
     
     float fScaledepth = 0.25f;
-    float innerRadius = obj->getGroundRadius();
-    float outerRadius = obj->getRadius();
+    float innerRadius = obj.getGroundRadius();
+    float outerRadius = obj.getRadius();
     float fScale = 1.0f / (outerRadius - innerRadius);
     float exposure = 2.0f;
     float g = -0.98f;
@@ -287,81 +301,77 @@ struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineR
 }};
 
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene){
-    scene->OLD_addEntity(*this);
-    m_Model = new OLD_ComponentModel(ResourceManifest::PlanetMesh,mat,this,ResourceManifest::groundFromSpace);
-    addComponent(m_Model);
+    m_Entity = scene->createEntity();
+    auto* m_Model = m_Entity.addComponent<ComponentModel>(ResourceManifest::PlanetMesh,mat,ResourceManifest::groundFromSpace);
+    auto& model = m_Model->getModel();
+    model.setUserPointer(this);
+
+    auto* m_Body = m_Entity.addComponent<ComponentBody>();
+    m_Body->setScale(scl, scl, scl);
+    m_Body->setPosition(pos);
+
     m_AtmosphereHeight = atmosphere;
     if(type != PlanetType::Star){
-        AtmosphericScatteringGroundMeshInstanceBindFunctor f;
-        AtmosphericScatteringGroundMeshInstanceUnbindFunctor f1;
-        m_Model->setCustomBindFunctor(f);
-        m_Model->setCustomUnbindFunctor(f1);
+        model.setCustomBindFunctor(AtmosphericScatteringGroundMeshInstanceBindFunctor());
+        model.setCustomUnbindFunctor(AtmosphericScatteringGroundMeshInstanceUnbindFunctor());
     }
     if(m_AtmosphereHeight > 0){
-        AtmosphericScatteringSkyMeshInstanceBindFunctor f;
-        AtmosphericScatteringSkyMeshInstanceUnbindFunctor f1;
         uint index = m_Model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial,(ShaderP*)ResourceManifest::skyFromSpace.get(),RenderStage::GeometryTransparent);
         MeshInstance& skyMesh = m_Model->getModel(index);
         float aScale = 1.0f + m_AtmosphereHeight;
-        skyMesh.setCustomBindFunctor(f);
-        skyMesh.setCustomUnbindFunctor(f1);
+        skyMesh.setCustomBindFunctor(AtmosphericScatteringSkyMeshInstanceBindFunctor());
+        skyMesh.setCustomUnbindFunctor(AtmosphericScatteringSkyMeshInstanceUnbindFunctor());
         skyMesh.setScale(aScale,aScale,aScale);
+        skyMesh.setUserPointer(this);
     }
-    m_Body = new OLD_ComponentBody();
-    addComponent(m_Body);
-    m_Body->setScale(scl,scl,scl);
-    m_Body->setPosition(pos);
 
     m_Type = type;
     m_OrbitInfo = nullptr;
     m_RotationInfo = nullptr;
+
+    m_Entity.addComponent<ComponentLogic>(PlanetLogicFunctor(), this);
 }
 Planet::~Planet(){  
     SAFE_DELETE_VECTOR(m_Rings);
     SAFE_DELETE(m_OrbitInfo);
     SAFE_DELETE(m_RotationInfo);
 }
-glm::vec3 Planet::getPosition(){ return m_Body->position(); }
-void Planet::setPosition(float x,float y,float z){ m_Body->setPosition(x,y,z); }
-void Planet::setPosition(glm::vec3 pos){ m_Body->setPosition(pos); }
-void Planet::update(const float& dt){
-    if(m_RotationInfo){
-        m_Body->rotate(0.0f,glm::radians(m_RotationInfo->speed * dt),0.0f);
-    }
-    if(m_OrbitInfo){
-        //m_OrbitInfo->setOrbitalPosition(((1.0f/(m_OrbitInfo->info.y*86400.0f))*dt)*6.283188f,this);
-    }
-}
+glm::vec3 Planet::getPosition(){ return m_Entity.getComponent<ComponentBody>()->position(); }
+void Planet::setPosition(float x,float y,float z){ m_Entity.getComponent<ComponentBody>()->setPosition(x,y,z); }
+void Planet::setPosition(glm::vec3 pos){ m_Entity.getComponent<ComponentBody>()->setPosition(pos); }
 void Planet::setOrbit(OrbitInfo* o){ 
     m_OrbitInfo = o; 
-    update(0);
+    m_Entity.getComponent<ComponentLogic>()->call(0);
 }
 void Planet::setRotation(RotationInfo* r){ 
     m_RotationInfo = r;
-    m_Body->rotate(glm::radians(-r->tilt),0.0f,0.0f);
+    m_Entity.getComponent<ComponentBody>()->rotate(glm::radians(-r->tilt),0.0f,0.0f);
 }
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
 glm::vec2 Planet::getGravityInfo(){ return glm::vec2(getRadius()*5,getRadius()*7); }
 OrbitInfo* Planet::getOrbitInfo() const { return m_OrbitInfo; }
-float Planet::getGroundRadius(){ return m_Model->radius() - (m_Model->radius() * m_AtmosphereHeight); }
-float Planet::getRadius() { return m_Model->radius(); }
+float Planet::getGroundRadius(){ 
+    auto& model = *m_Entity.getComponent<ComponentModel>();
+    return model.radius() - (model.radius() * m_AtmosphereHeight); 
+}
+float Planet::getRadius() { return m_Entity.getComponent<ComponentModel>()->radius(); }
 float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
 
 Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name,Scene* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
 
-    m_Model->getModel().setColor(starColor.x,starColor.y,starColor.z,1.0f);
-    m_Model->getModel().setGodRaysColor(starColor.x,starColor.y,starColor.z);
-    m_Model->getModel().setShaderProgram(nullptr);
+    auto& model = (*m_Entity.getComponent<ComponentModel>()).getModel();
 
-    StarMeshInstanceBindFunctor f;
-    m_Model->setCustomBindFunctor(f);
+    model.setColor(starColor.x,starColor.y,starColor.z,1.0f);
+    model.setGodRaysColor(starColor.x,starColor.y,starColor.z);
+    model.setShaderProgram(nullptr);
+    model.setCustomBindFunctor(StarMeshInstanceBindFunctor());
 
     //addChild(m_Light);
     m_Light->setPosition(pos);
     if(!Renderer::Settings::GodRays::getObject()){
-        Renderer::Settings::GodRays::setObject(this);
+        Renderer::Settings::GodRays::setObject(&m_Entity);
     }
 }
 Star::~Star(){
@@ -370,12 +380,15 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     m_Parent = parent;
     _makeRingImage(rings);
     m_Parent->addRing(this);
-    PlanetaryRingMeshInstanceBindFunctor f;
-    uint index = parent->m_Model->addModel(ResourceManifest::RingMesh,m_MaterialHandle,(ShaderP*)ResourceManifest::groundFromSpace.get(), RenderStage::GeometryTransparent);
-    MeshInstance& ringMesh = parent->m_Model->getModel(index);
-    ringMesh.setCustomBindFunctor(f);
+
+    auto& model = *m_Parent->m_Entity.getComponent<ComponentModel>();
+
+    uint index = model.addModel(ResourceManifest::RingMesh,m_MaterialHandle,(ShaderP*)ResourceManifest::groundFromSpace.get(), RenderStage::GeometryTransparent);
+    MeshInstance& ringMesh = model.getModel(index);
+    ringMesh.setCustomBindFunctor(PlanetaryRingMeshInstanceBindFunctor());
     float aScale = 1.0f;
     ringMesh.setScale(aScale,aScale,aScale);
+    ringMesh.setUserPointer(parent);
 }
 Ring::~Ring(){
 }
@@ -427,7 +440,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings){
     m_MaterialHandle = Resources::addMaterial("RingMaterial", diffuse, nullptr, nullptr, nullptr);
 	((Material*)m_MaterialHandle.get())->setSpecularModel(SpecularModel::None);
 }
-OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,uint _parent,float _inclination){
+OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,Planet& _parent,float _inclination){
     //x = eccentricity, y = days, z = minorRadius, w = majorRadius
     angle = _angle;
     inclination = glm::radians(_inclination);
@@ -435,14 +448,13 @@ OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float 
     info.y = _days;
     info.w = _majorRadius;
     info.z = glm::sqrt(_majorRadius * _majorRadius * (1.0f - (_eccentricity * _eccentricity)));
-    parent = _parent;
+    parent = &_parent;
 }
 glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet* thisPlanet){
     glm::vec3 offset = glm::vec3(0.0f);
     glm::vec3 currentPos = thisPlanet->getPosition();
-    Planet* parentPlanet = (Planet*)Resources::getCurrentScene()->OLD_getEntity(parent);
-    if(parentPlanet){
-        glm::vec3 parentPos = parentPlanet->getPosition();
+    if(parent){
+        glm::vec3 parentPos = parent->getPosition();
         float newX = parentPos.x - glm::cos(angle) * info.w;
         float newZ = parentPos.z - glm::sin(angle) * info.z;
         offset = glm::vec3(newX - currentPos.x,0.0f,newZ - currentPos.z);

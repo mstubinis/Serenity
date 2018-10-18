@@ -2,7 +2,7 @@
 #ifndef ENGINE_CAMERA_H
 #define ENGINE_CAMERA_H
 
-#include "core/Components.h"
+#include <ecs/Components.h>
 
 class Scene;
 class LightProbe;
@@ -13,14 +13,13 @@ struct CameraType{enum Type {
     Orthographic,
 };};
 
-class Camera: public OLD_Entity{
-    friend class LightProbe;
-    friend struct ::Engine::epriv::InternalComponentPublicInterface;
+class Camera{
+    friend class  ::LightProbe;
+    friend struct ::Engine::epriv::ComponentCameraFunctions;
     private:
         class impl; std::unique_ptr<impl> m_i;
     protected:
-        OLD_ComponentBody* m_Body;
-        OLD_ComponentCamera* m_Camera;
+        Entity           m_Entity;
     public:
         Camera(float angle,float aspectRatio,float nearPlane,float farPlane,Scene* = nullptr);
         Camera(float left,float right,float bottom,float top,float nearPlane,float farPlane,Scene* = nullptr);
@@ -32,13 +31,13 @@ class Camera: public OLD_Entity{
         const glm::vec3 up();
         glm::quat getOrientation();
 
-        float getDistance(OLD_Entity*);
+        float getDistance(Entity&);
         float getDistance(glm::vec3);
 
-        const float getAngle() const;    void setAngle(float);
-        const float getAspect() const;   void setAspect(float);
-        const float getNear() const;     void setNear(float);
-        const float getFar() const;      void setFar(float);
+        const float getAngle();    void setAngle(float);
+        const float getAspect();   void setAspect(float);
+        const float getNear();     void setNear(float);
+        const float getFar();      void setFar(float);
 
         const glm::mat4 getProjection();
         const glm::mat4 getProjectionInverse();
@@ -52,6 +51,6 @@ class Camera: public OLD_Entity{
         uint sphereIntersectTest(glm::vec3 pos,float radius);
         uint pointIntersectTest(glm::vec3 pos);
 
-        bool rayIntersectSphere(OLD_Entity*);
+        bool rayIntersectSphere(Entity&);
 };
 #endif

@@ -29,7 +29,6 @@
   <ItemGroup>
     <ClCompile Include="Engine\src\CapsuleSpace.cpp" />
     <ClCompile Include="Engine\src\core\Camera.cpp" />
-    <ClCompile Include="Engine\src\core\Components.cpp" />
     <ClCompile Include="Engine\src\core\Constraint.cpp" />
     <ClCompile Include="Engine\src\core\engine\BindableResource.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine.cpp" />
@@ -76,7 +75,6 @@
     <ClCompile Include="Engine\src\Game.cpp" />
     <ClCompile Include="Engine\src\GameCamera.cpp" />
     <ClCompile Include="Engine\src\GameSkybox.cpp" />
-    <ClCompile Include="Engine\src\game\components\ComponentGameCamera.cpp" />
     <ClCompile Include="Engine\src\HUD.cpp" />
     <ClCompile Include="Engine\src\Planet.cpp" />
     <ClCompile Include="Engine\src\ResourceManifest.cpp" />
@@ -87,7 +85,6 @@
   <ItemGroup>
     <ClInclude Include="Engine\src\CapsuleSpace.h" />
     <ClInclude Include="Engine\src\core\Camera.h" />
-    <ClInclude Include="Engine\src\core\Components.h" />
     <ClInclude Include="Engine\src\core\Constraint.h" />
     <ClInclude Include="Engine\src\core\engine\BindableResource.h" />
     <ClInclude Include="Engine\src\core\engine\Engine.h" />
@@ -145,7 +142,6 @@
     <ClInclude Include="Engine\src\ecs\SparseSet.h" />
     <ClInclude Include="Engine\src\GameCamera.h" />
     <ClInclude Include="Engine\src\GameSkybox.h" />
-    <ClInclude Include="Engine\src\game\components\ComponentGameCamera.h" />
     <ClInclude Include="Engine\src\HUD.h" />
     <ClInclude Include="Engine\src\Planet.h" />
     <ClInclude Include="Engine\src\ResourceManifest.h" />

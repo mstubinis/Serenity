@@ -7,9 +7,9 @@
 #include <glm/vec3.hpp>
 #include "core/engine/Engine_Resources.h"
 
-class Font;
-class Ship;
-class OLD_Entity;
+class  Font;
+class  Ship;
+struct Entity;
 class HUD final{
     private:
         unsigned int m_TargetIterator;

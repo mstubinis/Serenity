@@ -11,15 +11,15 @@
 
 typedef unsigned int uint;
 
-class Mesh;
-class Material;
-class MeshInstance;
-class ShaderP;
-class Texture;
-class Font;
-class Camera;
-class OLD_Entity;
-class Scene;
+class  Mesh;
+class  Material;
+class  MeshInstance;
+class  ShaderP;
+class  Texture;
+class  Font;
+class  Camera;
+struct Entity;
+class  Scene;
 
 struct DepthFunc{enum Func{
     Never = 0x0200,
@@ -109,7 +109,7 @@ namespace Engine{
 
                 void _render(
                     Camera&, const uint fboWidth, const uint fboHeight,bool HUD=true,
-                    OLD_Entity* ignore=nullptr,const bool mainRenderFunc=true,const GLuint display_fbo=0, const GLuint display_rbo=0
+                    Entity* ignore=nullptr,const bool mainRenderFunc=true,const GLuint display_fbo=0, const GLuint display_rbo=0
                 );
                 void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
                 void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
@@ -226,9 +226,8 @@ namespace Engine{
                 uint getSamples();        void setSamples(uint s);
                 float getFOVDegrees();    void setFOVDegrees(float d);
                 float getAlphaFalloff();  void setAlphaFalloff(float a);
-                void setObject(uint&);
-                void setObject(OLD_Entity*);
-                OLD_Entity* getObject();
+                void setObject(Entity*);
+                Entity* getObject();
             };
             namespace SSAO{
                 bool enabled();

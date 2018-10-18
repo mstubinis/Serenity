@@ -32,8 +32,6 @@ void Game::initResources(){
     ResourceManifest::init();
 }
 void Game::initLogic(){
-    Engine::registerComponent<OLD_ComponentCamera, OLD_GameCameraComponent>();
-
     Engine_Window& window = Resources::getWindow();
     window.keepMouseInWindow(true);
     window.setMouseCursorVisible(false);

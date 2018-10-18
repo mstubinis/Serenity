@@ -25,10 +25,11 @@ struct LightAttenuation{enum Model{
     Constant_Linear_Exponent,
     Distance_Radius_Squared,
 _TOTAL};};
-class SunLight: public OLD_Entity{
+class SunLight{
     private:
         class impl;
     protected:
+        Entity m_Entity;
         std::unique_ptr<impl> m_i;
     public:
         SunLight(glm::vec3 = glm::vec3(0.0f),LightType::Type = LightType::Sun,Scene* = nullptr);

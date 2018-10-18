@@ -82,8 +82,8 @@ class ComponentModel : public ComponentBaseClass {
 
         bool rayIntersectSphere(ComponentCamera& camera);
 
-        template<class T> void setCustomBindFunctor(T& functor, uint index = 0) { models[index]->setCustomBindFunctor(functor); }
-        template<class T> void setCustomUnbindFunctor(T& functor, uint index = 0) { models[index]->setCustomUnbindFunctor(functor); }
+        template<class T> void setCustomBindFunctor(const T& functor, uint index = 0) { models[index]->setCustomBindFunctor(functor); }
+        template<class T> void setCustomUnbindFunctor(const T& functor, uint index = 0) { models[index]->setCustomUnbindFunctor(functor); }
 };
 
 class ComponentModelSystem : public Engine::epriv::ECSSystemCI {

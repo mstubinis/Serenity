@@ -42,12 +42,11 @@ vector<boost::tuple<float,float,float>> LIGHT_RANGES = [](){
 
 class SunLight::impl final{
     public:
-        OLD_ComponentBody* m_Body;
         bool m_Active;
         glm::vec4 m_Color;
         LightType::Type m_Type;
         float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularIntensity;
-        void _init(SunLight& super,LightType::Type& type){
+        void _init(SunLight& super,LightType::Type& type,glm::vec3& pos){
             m_Active = true;
             m_Color = glm::vec4(1.0f);
             m_Type = type;
@@ -55,8 +54,8 @@ class SunLight::impl final{
             m_DiffuseIntensity = 2.0f;
             m_SpecularIntensity = 1.0f;
 
-            m_Body = new OLD_ComponentBody();
-            super.addComponent(m_Body);
+            auto& body = *super.m_Entity.addComponent<ComponentBody>();
+            body.setPosition(pos);
         }
 };
 
@@ -64,17 +63,17 @@ SunLight::SunLight(glm::vec3 pos,LightType::Type type,Scene* scene):m_i(new impl
     if(!scene){
         scene = Resources::getCurrentScene();
     }
-    scene->OLD_addEntity(*this); //keep lights out of the global per scene entity pool?
+    m_Entity = scene->createEntity(); //keep lights out of the global per scene entity pool?
     epriv::InternalScenePublicInterface::GetLights(*scene).push_back(this);
 
-    m_i->_init(*this,type);
-    m_i->m_Body->setPosition(pos);
+    m_i->_init(*this,type,pos);
 }
 SunLight::~SunLight(){
 }
 void SunLight::lighten(){
     if(!isActive()) return;
-    glm::vec3 pos = m_i->m_Body->position();
+    auto& body = *m_Entity.getComponent<ComponentBody>();
+    glm::vec3 pos = body.position();
     sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
     sendUniform4("LightDataC",0.0f,pos.x,pos.y,pos.z);
     sendUniform4("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
@@ -82,11 +81,11 @@ void SunLight::lighten(){
 
     renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
-glm::vec3 SunLight::position(){ return m_i->m_Body->position(); }
+glm::vec3 SunLight::position(){ return m_Entity.getComponent<ComponentBody>()->position(); }
 void SunLight::setColor(float r,float g,float b,float a){ Engine::Math::setColor(m_i->m_Color,r,g,b,a); }
 void SunLight::setColor(glm::vec4 col){ Engine::Math::setColor(m_i->m_Color,col.r,col.g,col.b,col.a); }
-void SunLight::setPosition(float x,float y,float z){ m_i->m_Body->setPosition(x,y,z); }
-void SunLight::setPosition(glm::vec3 pos){ m_i->m_Body->setPosition(pos); }
+void SunLight::setPosition(float x,float y,float z){ m_Entity.getComponent<ComponentBody>()->setPosition(x,y,z); }
+void SunLight::setPosition(glm::vec3 pos){ m_Entity.getComponent<ComponentBody>()->setPosition(pos); }
 float SunLight::getAmbientIntensity(){ return m_i->m_AmbientIntensity; }
 void SunLight::setAmbientIntensity(float a){ m_i->m_AmbientIntensity = a; }
 float SunLight::getDiffuseIntensity(){ return m_i->m_DiffuseIntensity; }
@@ -98,13 +97,14 @@ void SunLight::deactivate(){ m_i->m_Active = false; }
 bool SunLight::isActive(){ return m_i->m_Active; }
 uint SunLight::type(){ return m_i->m_Type; }
 DirectionalLight::DirectionalLight(glm::vec3 dir,Scene* scene):SunLight(glm::vec3(0),LightType::Directional,scene){
-    m_i->m_Body->alignTo(dir,0);
+    m_Entity.getComponent<ComponentBody>()->alignTo(dir,0);
 }
 DirectionalLight::~DirectionalLight(){
 }
 void DirectionalLight::lighten(){
     if(!isActive()) return;
-    glm::vec3 _forward = m_i->m_Body->forward();
+    auto& body = *m_Entity.getComponent<ComponentBody>();
+    glm::vec3 _forward = body.forward();
     sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
     sendUniform4("LightDataB", _forward.y,_forward.z,0.0f, 0.0f);
     sendUniform4("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
@@ -130,7 +130,8 @@ float PointLight::calculateCullingRadius(){
     //else if(m_AttenuationModel == LightAttenuation::Distance){
     //    radius = (lightMax * (256.0f / 5.0f));
     //}
-    m_i->m_Body->setScale(radius,radius,radius);
+    auto& body = *m_Entity.getComponent<ComponentBody>();
+    body.setScale(radius,radius,radius);
     return radius;
 }
 float PointLight::getCullingRadius(){ return m_CullingRadius; }
@@ -147,9 +148,10 @@ void PointLight::setAttenuationModel(LightAttenuation::Model model){
 }
 void PointLight::lighten(){
     if(!isActive()) return;
-    Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    glm::vec3 pos = m_i->m_Body->position();
-    if((!c->sphereIntersectTest(pos,m_CullingRadius)) || (c->getDistance(pos) > 1100.0f * m_CullingRadius)) //1100.0f is the visibility threshold
+    Camera& c = *Resources::getCurrentScene()->getActiveCamera();
+    auto& body = *m_Entity.getComponent<ComponentBody>();
+    glm::vec3 pos = body.position();
+    if((!c.sphereIntersectTest(pos,m_CullingRadius)) || (c.getDistance(pos) > 1100.0f * m_CullingRadius)) //1100.0f is the visibility threshold
         return;
     sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
     sendUniform4("LightDataB", 0.0f,0.0f,m_C,m_L);
@@ -158,15 +160,15 @@ void PointLight::lighten(){
     sendUniform4Safe("LightDataE", 0.0f, 0.0f, float(m_AttenuationModel),0.0f);
     sendUniform1Safe("Type",1.0f);
 
-    glm::vec3 camPos = c->getPosition();
-    glm::mat4 model = m_i->m_Body->modelMatrix();
-    glm::mat4 vp = c->getViewProjection();
+    glm::vec3 camPos = c.getPosition();
+    glm::mat4 model = body.modelMatrix();
+    glm::mat4 vp = c.getViewProjection();
 
     sendUniformMatrix4("Model",model);
     sendUniformMatrix4("VP", vp);
 
     GLEnable(GLState::DEPTH_TEST);
-    if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){ //inside the light volume
+    if(glm::distance(c.getPosition(),pos) <= m_CullingRadius){ //inside the light volume
         Settings::cullFace(GL_FRONT);
         Renderer::setDepthFunc(DepthFunc::GEqual);
     }
@@ -178,7 +180,8 @@ void PointLight::lighten(){
     GLDisable(GLState::DEPTH_TEST);
 }
 SpotLight::SpotLight(glm::vec3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(pos,scene){
-    m_i->m_Body->alignTo(direction,0);
+    auto& body = *m_Entity.getComponent<ComponentBody>();
+    body.alignTo(direction,0);
     setCutoff(cutoff);
     setCutoffOuter(outerCutoff);
     m_i->m_Type = LightType::Spot;
@@ -194,10 +197,11 @@ void SpotLight::setCutoffOuter(float outerCutoff){
 
 void SpotLight::lighten(){
     if(!isActive()) return;
-    Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    glm::vec3 pos = m_i->m_Body->position();
-    glm::vec3 _forward = m_i->m_Body->forward();
-    if(!c->sphereIntersectTest(pos,m_CullingRadius) || (c->getDistance(pos) > 1100.0f * m_CullingRadius))
+    Camera& c = *Resources::getCurrentScene()->getActiveCamera();
+    auto& body = *m_Entity.getComponent<ComponentBody>();
+    glm::vec3 pos = body.position();
+    glm::vec3 _forward = body.forward();
+    if(!c.sphereIntersectTest(pos,m_CullingRadius) || (c.getDistance(pos) > 1100.0f * m_CullingRadius))
         return;
     sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
     sendUniform4("LightDataB", _forward.y,_forward.z,m_C,m_L);
@@ -207,15 +211,15 @@ void SpotLight::lighten(){
     sendUniform2Safe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
     sendUniform1Safe("Type",2.0f);
 
-    glm::vec3 camPos = c->getPosition();
-    glm::mat4 model = m_i->m_Body->modelMatrix();
-    glm::mat4 vp = c->getViewProjection();
+    glm::vec3 camPos = c.getPosition();
+    glm::mat4 model = body.modelMatrix();
+    glm::mat4 vp = c.getViewProjection();
 
     sendUniformMatrix4("Model", model);
     sendUniformMatrix4("VP", vp);
 
     GLEnable(GLState::DEPTH_TEST);
-    if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){ //inside the light volume                                                 
+    if(glm::distance(c.getPosition(),pos) <= m_CullingRadius){ //inside the light volume                                                 
         Settings::cullFace(GL_FRONT);
         Renderer::setDepthFunc(DepthFunc::GEqual);
     }
@@ -231,29 +235,33 @@ void SpotLight::lighten(){
 RodLight::RodLight(glm::vec3 pos,float rodLength,Scene* scene): PointLight(pos,scene){
     setRodLength(rodLength);
     m_i->m_Type = LightType::Rod;
-    m_i->m_Body->setScale(m_CullingRadius,m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius );
+    auto& body = *m_Entity.getComponent<ComponentBody>();
+    body.setScale(m_CullingRadius,m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius );
 }
 RodLight::~RodLight(){
 }
 float RodLight::calculateCullingRadius(){
     float res = PointLight::calculateCullingRadius();
-    m_i->m_Body->setScale(m_CullingRadius,m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius );
+    auto& body = *m_Entity.getComponent<ComponentBody>();
+    body.setScale(m_CullingRadius,m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius );
     return res;
 }
 void RodLight::setRodLength(float length){ 
     m_RodLength = length;
-    m_i->m_Body->setScale(m_CullingRadius,m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius );
+    auto& body = *m_Entity.getComponent<ComponentBody>();
+    body.setScale(m_CullingRadius,m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius );
 }
 void RodLight::lighten(){
     if(!isActive()) return;
-    Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    glm::vec3 pos = m_i->m_Body->position();
+    Camera& c = *Resources::getCurrentScene()->getActiveCamera();
+    auto& body = *m_Entity.getComponent<ComponentBody>();
+    glm::vec3 pos = body.position();
     float cullingDistance = m_RodLength + (m_CullingRadius * 2.0f);
-    if(!c->sphereIntersectTest(pos,cullingDistance) || (c->getDistance(pos) > 1100.0f * cullingDistance))
+    if(!c.sphereIntersectTest(pos,cullingDistance) || (c.getDistance(pos) > 1100.0f * cullingDistance))
         return;
     float half = m_RodLength / 2.0f;
-    glm::vec3 firstEndPt = pos + (m_i->m_Body->forward() * half);
-    glm::vec3 secndEndPt = pos - (m_i->m_Body->forward() * half);
+    glm::vec3 firstEndPt = pos + (body.forward() * half);
+    glm::vec3 secndEndPt = pos - (body.forward() * half);
     sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,firstEndPt.x);
     sendUniform4("LightDataB", firstEndPt.y,firstEndPt.z,m_C,m_L);
     sendUniform4("LightDataC", m_E,secndEndPt.x,secndEndPt.y,secndEndPt.z);
@@ -261,15 +269,15 @@ void RodLight::lighten(){
     sendUniform4Safe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
     sendUniform1Safe("Type",1.0f);
 
-    glm::vec3 camPos = c->getPosition();
-    glm::mat4 model = m_i->m_Body->modelMatrix();
-    glm::mat4 vp = c->getViewProjection();
+    glm::vec3 camPos = c.getPosition();
+    glm::mat4 model = body.modelMatrix();
+    glm::mat4 vp = c.getViewProjection();
 
     sendUniformMatrix4("Model", model);
     sendUniformMatrix4("VP", vp);
 
     GLEnable(GLState::DEPTH_TEST);
-    if(glm::distance(c->getPosition(),pos) <= cullingDistance){                                                  
+    if(glm::distance(c.getPosition(),pos) <= cullingDistance){                                                  
         Settings::cullFace(GL_FRONT);
         Renderer::setDepthFunc(DepthFunc::GEqual);
     }

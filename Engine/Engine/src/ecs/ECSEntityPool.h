@@ -9,6 +9,7 @@
 namespace Engine {
     namespace epriv {
         template<typename TEntity> class ECSEntityPool final{
+            friend struct Engine::epriv::InternalScenePublicInterface;
             private:
                 std::vector<EntityPOD>    _pool;
                 std::vector<uint>         _freelist;

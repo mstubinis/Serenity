@@ -8,14 +8,13 @@
 #include <glm/gtc/quaternion.hpp>
 #include "core/engine/BindableResource.h"
 #include "core/engine/Engine_EventObject.h"
+#include <ecs/Entity.h>
 
 struct Handle;
-class OLD_Entity;
-struct Entity;
-class ShaderP;
-class Material;
-class Mesh;
-class MeshInstance;
+class  ShaderP;
+class  Material;
+class  Mesh;
+class  MeshInstance;
 namespace Engine{
     namespace epriv{
         struct DefaultMeshInstanceBindFunctor { void operator()(EngineResource* r) const; };
@@ -27,8 +26,9 @@ class MeshInstance final: public BindableResource{
     friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
     friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
     private:
+        void* m_UserPointer;
         std::vector<Engine::epriv::MeshInstanceAnimation*> m_AnimationQueue;
-        OLD_Entity* m_Entity;
+        Entity m_Parent;
         ShaderP* m_ShaderProgram;
         Mesh* m_Mesh;
         Material* m_Material;
@@ -39,14 +39,9 @@ class MeshInstance final: public BindableResource{
         glm::vec4 m_Color;
         bool m_PassedRenderCheck, m_Visible;
 
-        void _init(Mesh* mesh, Material* mat, OLD_Entity& entity, ShaderP* program);
-        void _init(Mesh* mesh, Material* mat, Entity& entity, ShaderP* program);
+        void _init(Mesh* mesh, Material* mat, Entity& parent, ShaderP* program);
         void _updateModelMatrix();
     public:
-        MeshInstance(OLD_Entity&, Mesh*,       Material*,  ShaderP* = 0);
-        MeshInstance(OLD_Entity&, Handle mesh, Handle mat, ShaderP* = 0);
-        MeshInstance(OLD_Entity&, Mesh*,       Handle mat, ShaderP* = 0);
-        MeshInstance(OLD_Entity&, Handle mesh, Material*,  ShaderP* = 0);
         MeshInstance(Entity&, Mesh*, Material*, ShaderP* = 0);
         MeshInstance(Entity&, Handle mesh, Handle mat, ShaderP* = 0);
         MeshInstance(Entity&, Mesh*, Handle mat, ShaderP* = 0);
@@ -62,7 +57,9 @@ class MeshInstance final: public BindableResource{
         ShaderP* shaderProgram();
         Mesh* mesh();
         Material* material();
-        OLD_Entity* parent();
+        void* getUserPointer() { return m_UserPointer; }
+        template<typename T> void setUserPointer(T* t) { m_UserPointer = t; }
+        Entity& parent() { return m_Parent; }
         glm::vec4& color();
         glm::vec3& godRaysColor();
         glm::mat4& model();

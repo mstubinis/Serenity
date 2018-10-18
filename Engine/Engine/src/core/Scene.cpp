@@ -60,30 +60,20 @@ class Scene::impl final {
             for(auto vec: m_Pipelines)
                 SAFE_DELETE_VECTOR(vec);
         }
-        uint _OLD_addEntity(Scene& super, OLD_Entity& _entity) {
-            if (_entity.ID != 0) return 0;
-            for (auto entityInScene : m_Entities) { if (_entity.ID == entityInScene) return entityInScene; } //rethink this maybe use a fixed size array?
-            const uint entityID = Core::m_Engine->m_ComponentManager.m_EntityPool->add(&_entity);
-            _entity.ID = entityID;
-            OLD_ComponentManager::onEntityAddedToScene(super, _entity);
-            m_Entities.push_back(entityID);
-            return entityID;
-        }
-        bool _OLD_hasEntity(uint& _id) {
-            for (auto entityInScene : m_Entities) {
-                if (_id == entityInScene)
-                    return true;
-            }
-            return false;
-        }
-        bool _OLD_hasEntity(OLD_Entity& _entity) { return _OLD_hasEntity(_entity.ID); }
-        void _centerToObject(Scene& super,uint& centerID) {
+        //bool _OLD_hasEntity(uint& _id) {
+        //    for (auto entityInScene : m_Entities) {
+        //        if (_id == entityInScene)
+        //            return true;
+        //    }
+        //    return false;
+        //}
+        //bool _hasEntity(Entity& _entity) { return _OLD_hasEntity(_entity.ID); }
+        void _centerToObject(Scene& super,Entity& center) {
             //TODO: handle parent->child relationship
-            OLD_Entity* center = super.OLD_getEntity(centerID);
-            OLD_ComponentBody& bodyBase = *(center->getComponent<OLD_ComponentBody>());
-            for (auto entityID : m_Entities) {
-                OLD_Entity* e = super.OLD_getEntity(entityID);
-                OLD_ComponentBody& entityBody = *(e->getComponent<OLD_ComponentBody>());
+            ComponentBody& bodyBase = *(center.getComponent<ComponentBody>());
+            for (auto& data : epriv::InternalScenePublicInterface::GetEntities(super)) {
+                Entity e = super.getEntity(data);
+                ComponentBody& entityBody = *(e.getComponent<ComponentBody>());
                 if (e != center) {
                     entityBody.setPosition(entityBody.position() - bodyBase.position());
                 }
@@ -180,7 +170,9 @@ class Scene::impl final {
             }
         }
 };
-vector<uint>& InternalScenePublicInterface::OLD_GetEntities(Scene& _scene) { return _scene.m_i->m_Entities; }
+vector<Engine::epriv::EntityPOD>& InternalScenePublicInterface::GetEntities(Scene& _scene) {
+    return _scene.m_i->m_ECS.entityPool._pool;
+}
 vector<SunLight*>& InternalScenePublicInterface::GetLights(Scene& _scene) { return _scene.m_i->m_Lights; }
 
 void InternalScenePublicInterface::RenderGeometryOpaque(Scene& _scene,Camera& _camera) {
@@ -224,27 +216,21 @@ uint Scene::id() { return m_i->m_ID; }
 
 //new ecs
 Entity Scene::createEntity() { return m_i->m_ECS.createEntity(*this); }
-epriv::EntityPOD* Scene::getEntity(uint entityData) { return m_i->m_ECS.getEntity(entityData); }
+Entity Scene::getEntity(Engine::epriv::EntityPOD& data) { return Entity(data.ID, data.sceneID, data.versionID); }
 void Scene::removeEntity(uint entityData) { m_i->m_ECS.removeEntity(entityData); }
 void Scene::removeEntity(Entity& entity) { epriv::EntitySerialization _s(entity); m_i->m_ECS.removeEntity(_s.ID); }
 
 
-uint Scene::OLD_addEntity(OLD_Entity& entity){ return m_i->_OLD_addEntity(*this,entity); }
-void Scene::OLD_removeEntity(OLD_Entity& e){ e.destroy(); }
-void Scene::OLD_removeEntity(uint id){
-    OLD_Entity& e = *OLD_Components::GetEntity(id);
-    OLD_removeEntity(e);
-}
-OLD_Entity* Scene::OLD_getEntity(uint entityID){
-    if(entityID == 0) return nullptr;
-    return OLD_Components::GetEntity(entityID);
-}
-bool Scene::OLD_hasEntity(OLD_Entity& entity){ return m_i->_OLD_hasEntity(entity); }
-bool Scene::OLD_hasEntity(uint entityID){ return m_i->_OLD_hasEntity(entityID); }
+//Entity* Scene::getEntity(uint entityID){
+//    if(entityID == 0) return nullptr;
+//    return OLD_Components::GetEntity(entityID);
+//}
+//bool Scene::OLD_hasEntity(OLD_Entity& entity){ return m_i->_OLD_hasEntity(entity); }
+//bool Scene::OLD_hasEntity(uint entityID){ return m_i->_OLD_hasEntity(entityID); }
 Camera* Scene::getActiveCamera(){ return m_i->m_ActiveCamera; }
 void Scene::setActiveCamera(Camera& c){ m_i->m_ActiveCamera = &c; }
-void Scene::centerSceneToObject(OLD_Entity& center){ return m_i->_centerToObject(*this, center.ID); }
-void Scene::centerSceneToObject(uint centerID) { return m_i->_centerToObject(*this, centerID); }
+void Scene::centerSceneToObject(Entity& center){ return m_i->_centerToObject(*this, center); }
+//void Scene::centerSceneToObject(uint centerID) { return m_i->_centerToObject(*this, centerID); }
 Scene::~Scene(){
     unregisterEvent(EventType::SceneChanged);
     m_i->_destruct();

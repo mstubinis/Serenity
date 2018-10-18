@@ -13,6 +13,7 @@ namespace Engine {
     namespace epriv {
 
         template<typename TEntity> class ECS{
+            friend struct Engine::epriv::InternalScenePublicInterface;
             private:
                 ECSEntityPool<TEntity>                                    entityPool;
                 std::vector<TEntity>                                      justAddedEntities;

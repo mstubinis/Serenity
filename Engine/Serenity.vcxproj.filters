@@ -52,12 +52,6 @@
     <Filter Include="Source Files\Engine\Core\ECS\Components">
       <UniqueIdentifier>{e877f0fd-85bd-4d3e-94b9-63ba56e5c250}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Game\Components">
-      <UniqueIdentifier>{56bc294c-6eed-42ee-b379-e07ac86e4bac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Game\Components">
-      <UniqueIdentifier>{93508386-e42b-479d-8839-bb3de11480fb}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Engine\data\Shaders\AS_groundFromSpace_frag.glsl">
@@ -152,9 +146,6 @@
     <ClCompile Include="Engine\src\core\Camera.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\Components.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\Constraint.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
@@ -235,9 +226,6 @@
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\ComponentLogic.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\game\components\ComponentGameCamera.cpp">
-      <Filter>Source Files\Game\Components</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\ComponentLogic1.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
@@ -349,9 +337,6 @@
     <ClInclude Include="Engine\src\core\Camera.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\Components.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\Constraint.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
@@ -435,9 +420,6 @@
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\ComponentLogic.h">
       <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\game\components\ComponentGameCamera.h">
-      <Filter>Header Files\Game\Components</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\ComponentLogic1.h">
       <Filter>Header Files\Engine\Core\ECS\Components</Filter>

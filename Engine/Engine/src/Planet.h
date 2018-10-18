@@ -2,12 +2,13 @@
 #ifndef GAME_PLANET_H
 #define GAME_PLANET_H
 
-#include "core/Components.h"
+#include "ecs/Components.h"
 
 class SunLight;
 class Ring;
 class Planet;
 
+struct PlanetLogicFunctor;
 struct PlanetaryRingMeshInstanceBindFunctor;
 struct AtmosphericScatteringGroundMeshInstanceBindFunctor;
 struct AtmosphericScatteringGroundMeshInstanceUnbindFunctor;
@@ -31,8 +32,8 @@ class OrbitInfo final{
         glm::vec4 info; //x = eccentricity, y = days, z = minorRadius, w = majorRadius
         float inclination;
         float angle;
-        uint parent;
-        OrbitInfo(float eccentricity, float days, float majorRadius,float angle,uint parent,float inclination = 0);
+        Planet* parent;
+        OrbitInfo(float eccentricity, float days, float majorRadius,float angle,Planet& parent,float inclination = 0);
         ~OrbitInfo(){}
         void setOrbitalPosition(float angle,Planet* planet);
         glm::vec3 getOrbitalPosition(float angle,Planet* planet);
@@ -49,8 +50,9 @@ struct RingInfo final{
         alphaBreakpoint = ab;
     }
 };
-class Planet: public OLD_Entity{
-    friend class ::Ring;
+class Planet{
+    friend class  ::Ring;
+    friend struct ::PlanetLogicFunctor;
     friend struct ::PlanetaryRingMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringGroundMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringGroundMeshInstanceUnbindFunctor;
@@ -58,13 +60,12 @@ class Planet: public OLD_Entity{
     friend struct ::AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
     friend struct ::StarMeshInstanceBindFunctor;
     protected:
-        OLD_ComponentModel* m_Model;
-        OLD_ComponentBody* m_Body;
-        std::vector<Ring*> m_Rings;
-        PlanetType::Type m_Type;
-        OrbitInfo* m_OrbitInfo;
-        RotationInfo* m_RotationInfo;
-        float m_AtmosphereHeight;
+        Entity              m_Entity;
+        std::vector<Ring*>  m_Rings;
+        PlanetType::Type    m_Type;
+        OrbitInfo*          m_OrbitInfo;
+        RotationInfo*       m_RotationInfo;
+        float               m_AtmosphereHeight;
     public:
         Planet(
             Handle& materialHandle,               //Material
@@ -91,8 +92,6 @@ class Planet: public OLD_Entity{
 
         void setOrbit(OrbitInfo* o);
         void setRotation(RotationInfo* r);
-
-        void update(const float& dt);
 };
 class Star: public Planet{
     private:

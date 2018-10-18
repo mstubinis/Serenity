@@ -63,7 +63,7 @@ ShipSystemMainThrusters::~ShipSystemMainThrusters(){
 }
 void ShipSystemMainThrusters::update(const float& dt){
     if(isOnline()){
-        OLD_ComponentBody& body = *m_Ship->getComponent<OLD_ComponentBody>();
+        auto& body = *m_Ship->entity().getComponent<ComponentBody>();
         glm::vec3 velocity = body.getLinearVelocity();
         // apply dampening
         body.setLinearVelocity(velocity * 0.9991f,false);
@@ -92,13 +92,13 @@ ShipSystemPitchThrusters::~ShipSystemPitchThrusters(){
 }
 void ShipSystemPitchThrusters::update(const float& dt){
     if(isOnline()){
-        OLD_ComponentBody& body = *m_Ship->getComponent<OLD_ComponentBody>();
+        auto& body = *m_Ship->entity().getComponent<ComponentBody>();
         glm::vec3 velocity = body.getAngularVelocity();
         velocity.x *= 0.9970f;
         // apply dampening
         body.setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
-            if(m_Ship->OLD_getPlayerCamera()->getState() != CameraState::Orbit){
+            if(m_Ship->getPlayerCamera()->getState() != CameraState::Orbit){
                 float mouseAmount = Engine::getMouseDifference().y * 0.02f;
                 float massFactor = 1.0f / (body.mass() * 3.0f);
                 float amount = mouseAmount * massFactor;
@@ -119,13 +119,13 @@ ShipSystemYawThrusters::~ShipSystemYawThrusters(){
 }
 void ShipSystemYawThrusters::update(const float& dt){
     if(isOnline()){
-        OLD_ComponentBody& body = *m_Ship->getComponent<OLD_ComponentBody>();
+        auto& body = *m_Ship->entity().getComponent<ComponentBody>();
         glm::vec3 velocity = body.getAngularVelocity();
         velocity.y *= 0.9970f;
         // apply dampening
         body.setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
-            if(m_Ship->OLD_getPlayerCamera()->getState() != CameraState::Orbit){
+            if(m_Ship->getPlayerCamera()->getState() != CameraState::Orbit){
                 float mouseAmount = Engine::getMouseDifference().x * 0.02f;
                 float massFactor = 1.0f / (body.mass() * 3.0f);
                 float amount = mouseAmount * massFactor;
@@ -146,18 +146,18 @@ ShipSystemRollThrusters::~ShipSystemRollThrusters(){
 }
 void ShipSystemRollThrusters::update(const float& dt){
     if(isOnline()){
-        auto* body = m_Ship->getComponent<OLD_ComponentBody>();
-        glm::vec3 velocity = body->getAngularVelocity();
+        auto& body = *m_Ship->entity().getComponent<ComponentBody>();
+        glm::vec3 velocity = body.getAngularVelocity();
         velocity.z *= 0.9970f;
         // apply dampening
-        body->setAngularVelocity(velocity,false);
+        body.setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
-            float amount = 1.0f / body->mass();
+            float amount = 1.0f / body.mass();
             if(Engine::isKeyDown(KeyboardKey::Q)){
-                body->applyTorque(0,0,amount);
+                body.applyTorque(0,0,amount);
             }
             if(Engine::isKeyDown(KeyboardKey::E)){
-                body->applyTorque(0,0,-amount);
+                body.applyTorque(0,0,-amount);
             }
         }
     }
@@ -182,8 +182,7 @@ void ShipSystemWarpDrive::update(const float& dt){
                 if(m_Ship->IsWarping()){
                     if(Engine::isKeyDown(KeyboardKey::W)){
                         m_Ship->translateWarp(0.1f,dt);
-                    }
-                    else if(Engine::isKeyDown(KeyboardKey::S)){
+                    }else if(Engine::isKeyDown(KeyboardKey::S)){
                         m_Ship->translateWarp(-0.1f,dt);
                     }
                 }
@@ -207,20 +206,81 @@ void ShipSystemSensors::update(const float& dt){
 }
 #pragma endregion
 
+struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const float& dt) const {
+    Ship& ship = *(Ship*)_component.getUserPointer();
+    Scene& currentScene = *Resources::getCurrentScene();
+
+    if (ship.m_IsPlayer) {
+        #pragma region PlayerFlightControls
+
+        if (!Engine::paused()) {
+            if (ship.m_IsWarping && ship.m_WarpFactor > 0) {
+                auto& body = *ship.m_Entity.getComponent<ComponentBody>();
+                float speed = (ship.m_WarpFactor * 1.0f / 0.46f) * 2.0f;
+                glm::vec3 s = (body.forward() * glm::pow(speed, 15.0f)) / body.mass();
+                for (auto& data : epriv::InternalScenePublicInterface::GetEntities(currentScene)) {
+                    Entity e = currentScene.getEntity(data);
+                    auto* cam = e.getComponent<ComponentCamera>();
+                    //TODO: parent->child relationship
+                    if (e != ship.m_Entity && !cam) {
+                        auto& ebody = *e.getComponent<ComponentBody>();
+                        ebody.setPosition(ebody.position() + (s * dt));
+                    }
+                }
+            }
+        }
+        #pragma endregion
+
+        #pragma region PlayerCameraControls
+        auto& camera = *ship.m_PlayerCamera;
+        const auto& cameraState = camera.getState();
+        const Entity& target = camera.getTarget();
+        if (Engine::isKeyDownOnce(KeyboardKey::F1)) {
+            if (cameraState != CameraState::Follow || (cameraState == CameraState::Follow && target != ship.m_Entity)) {
+                Resources::getCurrentScene()->centerSceneToObject(ship.m_Entity);
+                camera.follow(ship.m_Entity);
+            }
+        }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
+            if (cameraState == CameraState::Follow || !ship.m_Target || target != ship.m_Entity) {
+                Resources::getCurrentScene()->centerSceneToObject(ship.m_Entity);
+                camera.orbit(ship.m_Entity);
+            }else if (ship.m_Target) {
+                Resources::getCurrentScene()->centerSceneToObject(*ship.m_Target);
+                camera.orbit(*ship.m_Target);
+            }
+        }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
+            if (cameraState == CameraState::FollowTarget || (!ship.m_Target && cameraState != CameraState::Follow) || target != ship.m_Entity) {
+                Resources::getCurrentScene()->centerSceneToObject(ship.m_Entity);
+                camera.follow(ship.m_Entity);
+            }else if (ship.m_Target) {
+                Resources::getCurrentScene()->centerSceneToObject(ship.m_Entity);
+                camera.followTarget(*ship.m_Target, ship.m_Entity);
+            }
+        }
+        #pragma endregion
+
+        if (Engine::isKeyDownOnce(KeyboardKey::T) && currentScene.name() != "CapsuleSpace") {
+            ship.setTarget(&camera.getObjectInCenterRay(ship.m_Entity));
+        }
+    }
+    for (auto& shipSystem : ship.m_ShipSystems) shipSystem.second->update(dt);
+}};
+
+
 Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,Scene* scene){
-    scene->OLD_addEntity(*this);
-    OLD_ComponentModel* modelComponent = new OLD_ComponentModel(mesh, mat, this);
-    addComponent(modelComponent);
-    OLD_ComponentBody* rigidBodyComponent = new OLD_ComponentBody(_type);
-	addComponent(rigidBodyComponent);
+    m_Entity = scene->createEntity();
+
+    auto* modelComponent = m_Entity.addComponent<ComponentModel>(mesh, mat);
+    auto& rigidBodyComponent = *m_Entity.addComponent<ComponentBody>(_type);
+    m_Entity.addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
     glm::vec3 boundingBox = modelComponent->boundingBox();
     float volume = boundingBox.x * boundingBox.y * boundingBox.z;
 
-	rigidBodyComponent->setMass(  ( volume * 0.004f ) + 1.0f  );
-	rigidBodyComponent->setPosition(pos);
-	rigidBodyComponent->setScale(scl);
-	rigidBodyComponent->setDamping(0, 0);//we dont want default dampening, we want the ship systems to manually control that
+	rigidBodyComponent.setMass(  ( volume * 0.004f ) + 1.0f  );
+	rigidBodyComponent.setPosition(pos);
+	rigidBodyComponent.setScale(scl);
+	rigidBodyComponent.setDamping(0, 0);//we dont want default dampening, we want the ship systems to manually control that
 
 	m_WarpFactor = 0;
 	m_IsPlayer = player;
@@ -229,7 +289,7 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
 	m_PlayerCamera = nullptr;
 
 	if (player) {
-		m_PlayerCamera = (OLD_GameCamera*)(scene->getActiveCamera());
+		m_PlayerCamera = (GameCamera*)(scene->getActiveCamera());
 	}
 	for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
 		ShipSystem* system = nullptr;
@@ -247,72 +307,13 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
 Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
-void Ship::update(const float& dt){
-    Scene& currentScene = *Resources::getCurrentScene();
-    if(m_IsPlayer){
-        #pragma region PlayerFlightControls
-
-        if(!Engine::paused()){
-            if(m_IsWarping && m_WarpFactor > 0){
-                auto* body = getComponent<OLD_ComponentBody>();
-                float speed = (m_WarpFactor * 1.0f / 0.46f) * 2.0f;
-                glm::vec3 s = (body->forward() * glm::pow(speed, 15.0f)) / body->mass();
-                for(auto id: epriv::InternalScenePublicInterface::OLD_GetEntities(currentScene)){
-                    OLD_Entity* e = currentScene.OLD_getEntity(id);
-                    if(e){
-                        auto* cam = e->getComponent<OLD_ComponentCamera>();
-                        auto* camGame = (e->getComponent<OLD_GameCameraComponent>());
-                        //TODO: parent->child relationship
-                        if(e != this && !cam && !camGame){
-                            auto* ebody = e->getComponent<OLD_ComponentBody>();
-                            ebody->setPosition(ebody->position() + (s * dt));
-                        }
-                    }
-                }
-            }
-        }
-        #pragma endregion
-
-        #pragma region PlayerCameraControls
-        auto& camera = *m_PlayerCamera;
-        const auto& cameraState = camera.getState();
-        if(Engine::isKeyDownOnce(KeyboardKey::F1)){
-            if(cameraState != CameraState::Follow || (cameraState == CameraState::Follow && camera.getTarget() != this)){
-                Resources::getCurrentScene()->centerSceneToObject(*this);
-                camera.follow(this);
-            }
-        }else if(Engine::isKeyDownOnce(KeyboardKey::F2)){
-            if(cameraState == CameraState::Follow || !m_Target || camera.getTarget() != this){
-                Resources::getCurrentScene()->centerSceneToObject(*this);
-                camera.orbit(this);
-            }else if(m_Target){
-                Resources::getCurrentScene()->centerSceneToObject(*m_Target);
-                camera.orbit(m_Target);
-            }
-        }else if(Engine::isKeyDownOnce(KeyboardKey::F3)){
-            if(cameraState == CameraState::FollowTarget || (!m_Target && cameraState != CameraState::Follow) || camera.getTarget() != this){
-                Resources::getCurrentScene()->centerSceneToObject(*this);
-                camera.follow(this);
-            }else if(m_Target){
-                Resources::getCurrentScene()->centerSceneToObject(*this);
-                camera.followTarget(m_Target,this);
-            }
-        }
-        #pragma endregion
-
-        if(Engine::isKeyDownOnce(KeyboardKey::T) && currentScene.name() != "CapsuleSpace"){
-            setTarget(camera.getObjectInCenterRay(this));
-        }
-    }
-    for(auto shipSystem:m_ShipSystems) shipSystem.second->update(dt);
-}
 void Ship::translateWarp(float amount,float dt){
     float amountToAdd = amount * (1.0f / 0.5f);
     if((amount > 0 && m_WarpFactor + amount < 1) || (amount < 0 && m_WarpFactor > 0)){
         m_WarpFactor += amountToAdd * dt;
     }
 }
-void Ship::setTarget(OLD_Entity* target){
+void Ship::setTarget(Entity* target){
     m_Target = target;
 }
 void Ship::onEvent(const Event& e){

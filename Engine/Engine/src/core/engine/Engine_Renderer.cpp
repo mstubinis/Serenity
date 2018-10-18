@@ -19,6 +19,7 @@
 #include "core/MeshInstance.h"
 #include "core/Skybox.h"
 #include "core/Material.h"
+#include <ecs/ComponentBody.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -233,7 +234,7 @@ class epriv::RenderManager::impl final{
         int godRays_samples;
         float godRays_fovDegrees;
         float godRays_alphaFalloff;
-        OLD_Entity* godRays_Object;
+        Entity* godRays_Object;
         #pragma endregion
 
         #pragma region SSAOInfo
@@ -1662,7 +1663,7 @@ class epriv::RenderManager::impl final{
                 }
             }
         }
-        void _passGeometry(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, OLD_Entity* ignore){
+        void _passGeometry(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, Entity* ignore){
             Scene& scene = *Resources::getCurrentScene();
             const glm::vec3& clear = scene.getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
@@ -1699,7 +1700,7 @@ class epriv::RenderManager::impl final{
 
             InternalScenePublicInterface::RenderGeometryTransparent(scene,c);
         }
-        void _passForwardRendering(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, OLD_Entity* ignore){
+        void _passForwardRendering(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, Entity* ignore){
             Scene& scene = *Resources::getCurrentScene();
 
             gbuffer.start(GBufferType::Diffuse);
@@ -2044,7 +2045,7 @@ class epriv::RenderManager::impl final{
             setViewport(startX, startY, width, height);
             m_FullscreenTriangle->render();
         }
-        void _render(GBuffer& gbuffer, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool& HUD, OLD_Entity* ignore,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
+        void _render(GBuffer& gbuffer, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool& HUD, Entity* ignore,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
             //TODO: find out why facing a certain direction causes around 2 - 3 ms frame spike times. determine if this is due to an object or a rendering
             //algorithm. also find out why enabling ssao REDUCES frame ms time. use opengl timers to isolate the troubling functions.
             
@@ -2074,14 +2075,14 @@ class epriv::RenderManager::impl final{
                     
                     //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders by the camera's real simulation position
                     //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
-                    m_UBOCameraData.View = InternalComponentPublicInterface::GetViewNoTranslation(camera);
+                    m_UBOCameraData.View = ComponentCameraFunctions::GetViewNoTranslation(camera);
                     m_UBOCameraData.Proj = camera.getProjection();
-                    m_UBOCameraData.ViewProj = InternalComponentPublicInterface::GetViewProjectionNoTranslation(camera);
+                    m_UBOCameraData.ViewProj = ComponentCameraFunctions::GetViewProjectionNoTranslation(camera);
                     m_UBOCameraData.InvProj = camera.getProjectionInverse();
-                    m_UBOCameraData.InvView = InternalComponentPublicInterface::GetViewInverseNoTranslation(camera);
-                    m_UBOCameraData.InvViewProj = InternalComponentPublicInterface::GetViewProjectionInverseNoTranslation(camera);
+                    m_UBOCameraData.InvView = ComponentCameraFunctions::GetViewInverseNoTranslation(camera);
+                    m_UBOCameraData.InvViewProj = ComponentCameraFunctions::GetViewProjectionInverseNoTranslation(camera);
                     m_UBOCameraData.Info1 = glm::vec4(0.001f,0.001f,0.001f, camera.getNear());
-                    m_UBOCameraData.Info2 = glm::vec4(InternalComponentPublicInterface::GetViewVectorNoTranslation(camera), camera.getFar());
+                    m_UBOCameraData.Info2 = glm::vec4(ComponentCameraFunctions::GetViewVectorNoTranslation(camera), camera.getFar());
                     m_UBOCameraData.Info3 = glm::vec4(camera.getPosition(), 0.0f);
                     
                     UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);           
@@ -2113,7 +2114,7 @@ class epriv::RenderManager::impl final{
             Settings::clear(true,false,false); //this is needed, clear color should be (0,0,0,0)
             
             if (godRays && godRays_Object) {
-                auto& body = *godRays_Object->getComponent<OLD_ComponentBody>();
+                auto& body = *godRays_Object->getComponent<ComponentBody>();
                 glm::vec3 oPos = body.position();       
                 glm::vec3 camPos = camera.getPosition();
                 glm::vec3 camVec = camera.getViewVector();
@@ -2276,7 +2277,7 @@ class epriv::RenderManager::impl final{
 epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); renderManager = m_i.get(); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
-void epriv::RenderManager::_render(Camera& c, const uint fboW, const uint fboH,bool HUD, OLD_Entity* ignore,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){m_i->_render(*m_i->m_GBuffer,c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo);}
+void epriv::RenderManager::_render(Camera& c, const uint fboW, const uint fboH,bool HUD, Entity* ignore,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){m_i->_render(*m_i->m_GBuffer,c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo);}
 void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
 void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ m_i->m_GBuffer->resize(w,h); }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
@@ -2334,20 +2335,23 @@ float dist(Camera& lhs, const glm::vec3& rhs) {
 }
 
 void epriv::RenderPipeline::sort(Camera& c) {
+    /*
     for (auto materialNode : materialNodes) {
         for (auto meshNode : materialNode->meshNodes) {
             auto& vect = meshNode->instanceNodes;
             std::sort(
                 vect.begin(), vect.end(),
                 [&c](InstanceNode* lhs,InstanceNode* rhs) { 
-                    const glm::vec3& lhsPos = lhs->instance->parent()->getComponent<OLD_ComponentBody>()->position();
-                    const glm::vec3& rhsPos = rhs->instance->parent()->getComponent<OLD_ComponentBody>()->position();
+                    const glm::vec3& lhsPos = lhs->instance->parent()->getComponent<ComponentBody>()->position();
+                    const glm::vec3& rhsPos = rhs->instance->parent()->getComponent<ComponentBody>()->position();
                     return dist(c, lhsPos) < dist(c, rhsPos);
                 }
             );
         }
     }
+    */
 }
+
 void epriv::RenderPipeline::render() {
     shaderProgram.bind();
     for (auto materialNode : materialNodes) {
@@ -2458,9 +2462,8 @@ void Renderer::Settings::GodRays::setWeight(float w){ renderManager->godRays_wei
 void Renderer::Settings::GodRays::setSamples(uint s){ renderManager->godRays_samples = glm::max((uint)0,s); }
 void Renderer::Settings::GodRays::setFOVDegrees(float d){ renderManager->godRays_fovDegrees = d; }
 void Renderer::Settings::GodRays::setAlphaFalloff(float a){ renderManager->godRays_alphaFalloff = a; }
-void Renderer::Settings::GodRays::setObject(uint& id){ renderManager->godRays_Object = OLD_Components::GetEntity(id); }
-void Renderer::Settings::GodRays::setObject(OLD_Entity* entity){ renderManager->godRays_Object = entity; }
-OLD_Entity* Renderer::Settings::GodRays::getObject(){ return renderManager->godRays_Object; }
+void Renderer::Settings::GodRays::setObject(Entity* entity){ renderManager->godRays_Object = entity; }
+Entity* Renderer::Settings::GodRays::getObject(){ return renderManager->godRays_Object; }
 void Renderer::Settings::Lighting::enable(bool b){ renderManager->lighting = b; }
 void Renderer::Settings::Lighting::disable(){ renderManager->lighting = false; }
 float Renderer::Settings::Lighting::getGIContributionGlobal(){ return renderManager->lighting_gi_contribution_global; }

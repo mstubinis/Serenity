@@ -11,6 +11,7 @@
 
 class Camera;
 class ComponentModel;
+class ComponentCamera;
 
 namespace Engine {
     namespace epriv {
@@ -19,7 +20,15 @@ namespace Engine {
         struct ComponentCameraComponentAddedToEntityFunction;
         struct ComponentCameraSceneEnteredFunction;
         struct ComponentCameraSceneLeftFunction;
-        struct ComponentCameraFunctions;
+
+        struct ComponentCameraFunctions final {
+            static void      RebuildProjectionMatrix(ComponentCamera& cam);
+            static glm::mat4 GetViewNoTranslation(Camera& c);
+            static glm::mat4 GetViewInverseNoTranslation(Camera& c);
+            static glm::mat4 GetViewProjectionNoTranslation(Camera& c);
+            static glm::mat4 GetViewProjectionInverseNoTranslation(Camera& c);
+            static glm::vec3 GetViewVectorNoTranslation(Camera& c);
+        };
     };
 };
 
@@ -53,7 +62,6 @@ class ComponentCamera : public ComponentBaseClass {
 
         ~ComponentCamera();
 
-        virtual void update(const float& dt);
         void resize(uint width, uint height);
         void lookAt(glm::vec3 eye, glm::vec3 forward, glm::vec3 up);
 

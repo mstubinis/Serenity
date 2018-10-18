@@ -27,6 +27,9 @@ struct Entity{
     Entity(Entity&& other) noexcept = default;
     Entity& operator=(Entity&& other) noexcept = default;
 
+    const bool operator==(const Entity& other) const { return (data == other.data) ? true : false; }
+    const bool operator!=(const Entity& other) const { return (data == other.data) ? false : true; }
+
     ~Entity() { data = 0; }
 
     Scene& scene();

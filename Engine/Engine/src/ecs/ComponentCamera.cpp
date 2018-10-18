@@ -2,6 +2,7 @@
 #include "core/engine/Engine_Resources.h"
 #include "core/engine/Engine_Math.h"
 #include "core/engine/Engine_ThreadManager.h"
+#include "core/Camera.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -10,16 +11,33 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-struct epriv::ComponentCameraFunctions final {
-    static void RebuildProjectionMatrix(ComponentCamera& cam) {
-        if (cam._type == ComponentCamera::Type::Perspective) {
-            cam._projectionMatrix = glm::perspective(cam._angle, cam._aspectRatio, cam._nearPlane, cam._farPlane);
-        }
-        else {
-            cam._projectionMatrix = glm::ortho(cam._left, cam._right, cam._bottom, cam._top, cam._nearPlane, cam._farPlane);
-        }
+
+void epriv::ComponentCameraFunctions::RebuildProjectionMatrix(ComponentCamera& cam) {
+    if (cam._type == ComponentCamera::Type::Perspective) {
+        cam._projectionMatrix = glm::perspective(cam._angle, cam._aspectRatio, cam._nearPlane, cam._farPlane);
+    }else{
+        cam._projectionMatrix = glm::ortho(cam._left, cam._right, cam._bottom, cam._top, cam._nearPlane, cam._farPlane);
     }
-};
+}
+glm::mat4 epriv::ComponentCameraFunctions::GetViewNoTranslation(Camera& c) {
+    return c.m_Entity.getComponent<ComponentCamera>()->_viewMatrixNoTranslation;
+}
+glm::mat4 epriv::ComponentCameraFunctions::GetViewInverseNoTranslation(Camera& c) {
+    return glm::inverse(c.m_Entity.getComponent<ComponentCamera>()->_viewMatrixNoTranslation);
+}
+glm::mat4 epriv::ComponentCameraFunctions::GetViewProjectionNoTranslation(Camera& c) {
+    auto& component = *c.m_Entity.getComponent<ComponentCamera>();
+    return component._projectionMatrix * component._viewMatrixNoTranslation;
+}
+glm::mat4 epriv::ComponentCameraFunctions::GetViewProjectionInverseNoTranslation(Camera& c) {
+    auto& component = *c.m_Entity.getComponent<ComponentCamera>();
+    return glm::inverse(component._projectionMatrix * component._viewMatrixNoTranslation);
+}
+glm::vec3 epriv::ComponentCameraFunctions::GetViewVectorNoTranslation(Camera& c) {
+    auto& matrix = c.m_Entity.getComponent<ComponentCamera>()->_viewMatrixNoTranslation;
+    return glm::vec3(matrix[0][2], matrix[1][2], matrix[2][2]);
+}
+
 
 #pragma region Component
 
@@ -38,7 +56,6 @@ ComponentCamera::ComponentCamera(Entity& _e,float left, float right, float botto
     _type = Type::Orthographic;
 }
 ComponentCamera::~ComponentCamera() {}
-void ComponentCamera::update(const float& dt) {}
 void ComponentCamera::resize(uint width, uint height) {
     if (_type == Type::Perspective) {
         _aspectRatio = width / (float)height;
@@ -92,7 +109,6 @@ struct epriv::ComponentCameraUpdateFunction final {
     static void _defaultUpdate(vector<uint>& _vec, vector<ComponentCamera>& _components,const float& dt) {
         for (uint j = 0; j < _vec.size(); ++j) {
             ComponentCamera& b = _components[_vec[j]];
-            b.update(dt);//custom camera user code
             Math::extractViewFrustumPlanesHartmannGribbs(b._projectionMatrix * b._viewMatrix, b._planes);//update view frustrum 
         }
     }

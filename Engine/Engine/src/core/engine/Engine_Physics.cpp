@@ -674,8 +674,8 @@ class epriv::PhysicsManager::impl final{
                         const btVector3& ptB = pt.getPositionWorldOnB();
                         const btVector3& normalOnB = pt.m_normalWorldOnB;
 
-                        OLD_ComponentBody* a = (OLD_ComponentBody*)(obA->getUserPointer());
-                        OLD_ComponentBody* b = (OLD_ComponentBody*)(obB->getUserPointer());
+                        ComponentBody* a = (ComponentBody*)(obA->getUserPointer());
+                        ComponentBody* b = (ComponentBody*)(obB->getUserPointer());
 
                         //a->collisionResponse(b);    b->collisionResponse(a);
                     }
@@ -771,30 +771,32 @@ vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigi
     return result;
 }
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector<btRigidBody*>& ignored){
-    for(auto object:ignored){
+    for(auto& object:ignored){
         physicsManager->data->world->removeRigidBody(object);
     }
     vector<glm::vec3> result = _rayCastInternal(s,e);
-    for(auto object:ignored){
+    for(auto& object:ignored){
         physicsManager->data->world->addRigidBody(object);
     }
     return result;
  }
-vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e, OLD_Entity* ignored){
+vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e, Entity* ignored){
     btVector3 _s = Math::btVectorFromGLM(s);
     btVector3 _e = Math::btVectorFromGLM(e);
-    OLD_ComponentBody* body = ignored->getComponent<OLD_ComponentBody>();
-    if(body){
-        return Physics::rayCast(_s,_e,&body->getBody());
+    if (ignored) {
+        ComponentBody* body = ignored->getComponent<ComponentBody>();
+        if (body) {
+            return Physics::rayCast(_s, _e, &body->getBody());
+        }
     }
     return Physics::rayCast(_s,_e,nullptr);
  }
-vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<OLD_Entity*>& ignored){
+vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<Entity>& ignored){
     btVector3 _s = Math::btVectorFromGLM(s);
     btVector3 _e = Math::btVectorFromGLM(e);
     vector<btRigidBody*> objs;
-    for(auto o:ignored){
-        OLD_ComponentBody* body = o->getComponent<OLD_ComponentBody>();
+    for(auto& o:ignored){
+        ComponentBody* body = o.getComponent<ComponentBody>();
         if(body){
             objs.push_back(&body->getBody());
         }
@@ -831,14 +833,6 @@ Collision::Collision(vector<Mesh*>& _meshes, float _mass){
     //construtor
     _init(_meshes, _mass);
     _baseInit(CollisionType::Compound, _mass);
-}
-Collision::Collision(OLD_ComponentModel& _modelComponent, float _mass){
-    //construtor
-    vector<Mesh*> meshes;
-    for (uint i = 0; i < _modelComponent.getNumModels(); ++i) {
-        meshes.push_back(_modelComponent.getModel(i).mesh());
-    }
-    _init(meshes, _mass);
 }
 Collision::Collision(ComponentModel& _modelComponent, float _mass){
     //construtor

@@ -72,8 +72,9 @@ namespace Engine {
                 }
                 TItem* _get(const uint& _IDObject) {
                     uint sparseIndex = _IDObject - 1;
-                    if (super::_sparse.size() == 0)        return nullptr;
-                    if (super::_sparse[sparseIndex] == 0)  return nullptr;
+                    if (super::_sparse.size() == 0)           return nullptr;
+                    if (sparseIndex >= super::_sparse.size()) return nullptr;
+                    if (super::_sparse[sparseIndex] == 0)     return nullptr;
                     return &(_dense[super::_sparse[sparseIndex] - 1]);
                 }
         };

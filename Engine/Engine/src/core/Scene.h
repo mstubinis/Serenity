@@ -7,8 +7,6 @@
 #include <unordered_map>
 #include <glm/vec3.hpp>
 
-
-class OLD_Entity;
 class Camera;
 class SunLight;
 class SkyboxEmpty;
@@ -17,7 +15,6 @@ struct Entity;
 
 namespace Engine {
     namespace epriv {
-        class OLD_ComponentManager;
         class RenderPipeline;
         struct InternalScenePublicInterface;
         struct EntityPOD;
@@ -26,7 +23,6 @@ namespace Engine {
 };
 class Scene: public EngineResource, public EventObserver{
     friend class  Engine::epriv::RenderPipeline;
-    friend class  Engine::epriv::OLD_ComponentManager;
     friend struct Engine::epriv::InternalScenePublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
@@ -38,18 +34,14 @@ class Scene: public EngineResource, public EventObserver{
 
         //new ecs
         Entity createEntity();
-        Engine::epriv::EntityPOD* getEntity(uint entityID);
+        Entity getEntity(Engine::epriv::EntityPOD&);
         void removeEntity(uint entityID);
         void removeEntity(Entity& entity);
         //bool hasEntity(uint entityID);
         //bool hasEntity(Entity& entity);
 
-        OLD_Entity* OLD_getEntity(uint entityID);
-        uint OLD_addEntity(OLD_Entity&);
-        void OLD_removeEntity(OLD_Entity&);
-        void OLD_removeEntity(uint id);
-        bool OLD_hasEntity(OLD_Entity&);
-        bool OLD_hasEntity(uint entityID);
+        //bool OLD_hasEntity(OLD_Entity&);
+        //bool OLD_hasEntity(uint entityID);
 
         virtual void update(const float& dt);
 
@@ -60,8 +52,8 @@ class Scene: public EngineResource, public EventObserver{
 
         SkyboxEmpty* skybox() const;
         void setSkybox(SkyboxEmpty*);
-        void centerSceneToObject(OLD_Entity&);
-        void centerSceneToObject(uint entityID);
+        void centerSceneToObject(Entity&);
+        //void centerSceneToObject(uint entityID);
         void setActiveCamera(Camera&);
 };
 namespace Engine {
@@ -69,7 +61,7 @@ namespace Engine {
         struct InternalScenePublicInterface final {
             friend class ::Scene;
             friend class Engine::epriv::RenderPipeline;
-            static std::vector<uint>& OLD_GetEntities(Scene&);
+            static std::vector<EntityPOD>& GetEntities(Scene&);
             static std::vector<SunLight*>& GetLights(Scene&);
             static void RenderGeometryOpaque(Scene&, Camera&);
             static void RenderGeometryTransparent(Scene&, Camera&);

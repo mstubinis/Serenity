@@ -27,26 +27,25 @@ class ComponentLogic3 : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentLogic3EntityAddedToSceneFunction;
     friend struct Engine::epriv::ComponentLogic3SceneEnteredFunction;
     friend struct Engine::epriv::ComponentLogic3SceneLeftFunction;
-
     private:
-        boost::function<void(const float&)> _functor;
         void*                               _userPtr;
+        boost::function<void(const float&)> _functor;
     public:
-        ComponentLogic3(Entity&) { setFunctor(Engine::epriv::ComponentLogic3EmptyFunctor()); _userPtr = nullptr; }
-        template<typename T> ComponentLogic3(Entity&, const T& functor) { setFunctor(functor); _userPtr = nullptr; }
-        template<typename T> ComponentLogic3(Entity&, const T& functor, void* userPointer) { setFunctor(functor); _userPtr = userPointer; }
+        ComponentLogic3(Entity& _e) : ComponentBaseClass(_e) { _userPtr = nullptr; setFunctor(Engine::epriv::ComponentLogic3EmptyFunctor()); }
+        template<typename T> ComponentLogic3(Entity& _e, const T& functor) : ComponentBaseClass(_e) { _userPtr = nullptr; setFunctor(functor); }
+        template<typename T,typename V> ComponentLogic3(Entity& _e, const T& functor, V* userPointer) : ComponentBaseClass(_e) { _userPtr = userPointer; setFunctor(functor); }
 
-        ComponentLogic3(const ComponentLogic3& other) = default;
-        ComponentLogic3& operator=(const ComponentLogic3& other) = default;
-        ComponentLogic3(ComponentLogic3&& other) noexcept = default;
-        ComponentLogic3& operator=(ComponentLogic3&& other) noexcept = default;
+        ComponentLogic3(const ComponentLogic3& other);
+        ComponentLogic3& operator=(const ComponentLogic3& other);
+        ComponentLogic3(ComponentLogic3&& other) noexcept;
+        ComponentLogic3& operator=(ComponentLogic3&& other) noexcept;
 
         ~ComponentLogic3();
 
         template<typename T> void setFunctor(const T& functor) { _functor = boost::bind<void>(functor, *this, _1); }
         template<typename T> void setUserPointer(T* ptr) { _userPtr = ptr; }
         void call(const float& dt);
-        const void* getUserPointer() { return _userPtr; }
+        void* getUserPointer() { return _userPtr; }
 };
 
 class ComponentLogic3System : public Engine::epriv::ECSSystemCI {
