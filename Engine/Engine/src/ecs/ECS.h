@@ -53,6 +53,14 @@ namespace Engine {
 
 
                 //"event handlers"
+                template<typename T> void onResize(uint& w, uint& h) {
+                    using CPoolType = ECSComponentPool<TEntity, T>;
+                    uint type_slot = ECSRegistry::type_slot<T>();
+                    std::vector<T>& components = (*(CPoolType*)componentPools[type_slot]).pool();
+                    for (auto& camera : components) {
+                        camera.resize(w, h);
+                    }
+                }
                 void update(const float& dt) { 
                     for (uint i = 0; i < systems.size(); ++i) { auto& system = *systems[i]; system.update(dt); }
                 }

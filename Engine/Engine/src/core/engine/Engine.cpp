@@ -3,6 +3,7 @@
 #include <glm/vec2.hpp>
 #include <SFML/System.hpp>
 #include <ecs/ECS.h>
+#include "ecs/ComponentCamera.h"
 
 #include <time.h>
 #include <memory>
@@ -133,6 +134,8 @@ void EVENT_RESIZE(uint w, uint h,bool saveSize){
     if(saveSize) Engine::Resources::getWindow().setSize(w,h);
     Game::onResize(w,h);
     //resize cameras here
+    Scene& scene = *Resources::getCurrentScene();
+    epriv::InternalScenePublicInterface::GetECS(scene).onResize<ComponentCamera>(w,h);
 
     epriv::EventWindowResized e;  e.width = w; e.height = h;
     Event ev; ev.eventWindowResized = e; ev.type = EventType::WindowResized;
