@@ -67,8 +67,9 @@ class Scene::impl final {
                 Entity e = super.getEntity(data);
                 if (e != center) {
                     ComponentBody& entityBody = *e.getComponent<ComponentBody>();
-                    entityBody.setPosition(entityBody.position() - centerBody.position());
-                    float a = 1.0f;
+                    //if (entityBody) {
+                        entityBody.setPosition(entityBody.position() - centerBody.position());
+                    //}
                 }
             }
             centerBody.setPosition(0.0f, 0.0f, 0.0f);

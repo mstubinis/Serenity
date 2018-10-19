@@ -46,8 +46,7 @@ struct CapsuleStarLogicFunctor final {void operator()(ComponentLogic& _component
 
 
 
-CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, Scene* scene){
-    m_Entity = scene->createEntity();
+CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, SolarSystem* scene):EntityWrapper(*scene){
     ComponentModel* model = m_Entity.addComponent<ComponentModel>(Mesh::Plane, ResourceManifest::CapsuleD);
     model->getModel().setColor(color.x,color.y,color.z,1.0f);
     
@@ -56,11 +55,11 @@ CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, Scene* scene){
     m_Body->setScale(size,size,size);	 
 
     m_Entity.addComponent<ComponentLogic>(CapsuleEndLogicFunctor(), this);
+    scene->m_Objects.push_back(this);
 }
 CapsuleEnd::~CapsuleEnd(){
 }
-CapsuleStar::CapsuleStar(float size,glm::vec3 pos,Scene* scene,bool makeLight){
-    m_Entity = scene->createEntity();
+CapsuleStar::CapsuleStar(float size,glm::vec3 pos, SolarSystem* scene,bool makeLight) :EntityWrapper(*scene) {
     ComponentModel* model = m_Entity.addComponent<ComponentModel>(Mesh::Plane, ResourceManifest::StarFlareMaterial);
     model->getModel().setColor(255,235,206,255);
     
@@ -75,17 +74,19 @@ CapsuleStar::CapsuleStar(float size,glm::vec3 pos,Scene* scene,bool makeLight){
         m_Light = new PointLight(pos/float(100),scene);
         m_Light->setAttenuation(LightRange::_50);
         m_Light->setColor(255,124,27,255);
+        scene->m_Objects.push_back(m_Light);
     }
+    scene->m_Objects.push_back(this);
 }
 CapsuleStar::~CapsuleStar(){}
 
-CapsuleTunnel::CapsuleTunnel(float tunnelRadius,Handle& material, Scene* scene){
-    m_Entity = scene->createEntity();
+CapsuleTunnel::CapsuleTunnel(float tunnelRadius,Handle& material, SolarSystem* scene) :EntityWrapper(*scene) {
     m_TunnelRadius = tunnelRadius;
     ComponentModel* model = m_Entity.addComponent<ComponentModel>(ResourceManifest::CapsuleTunnelMesh,material);
     auto* m_Body = m_Entity.addComponent<ComponentBody>();
     m_Body->setPosition(0.0f,0.0f,0.0f);
     m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);  
+    scene->m_Objects.push_back(this);
 }
 CapsuleTunnel::~CapsuleTunnel(){}
 
@@ -100,8 +101,7 @@ struct RibbonUnbindFunctor {void operator()(EngineResource* r) const {
     Renderer::GLEnable(GLState::DEPTH_MASK);
 }};
 
-CapsuleRibbon::CapsuleRibbon(float tunnelRadius, Handle& mesh,Handle& material, Scene* scene){
-    m_Entity = scene->createEntity();
+CapsuleRibbon::CapsuleRibbon(float tunnelRadius, Handle& mesh,Handle& material, SolarSystem* scene) :EntityWrapper(*scene) {
     m_TunnelRadius = tunnelRadius;
     ComponentModel* model = m_Entity.addComponent<ComponentModel>(mesh,material);
 
@@ -110,7 +110,8 @@ CapsuleRibbon::CapsuleRibbon(float tunnelRadius, Handle& mesh,Handle& material, 
 
     auto* m_Body = m_Entity.addComponent<ComponentBody>();
     m_Body->setPosition(0.0f,0.0f,0.0f);
-    m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);   
+    m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);  
+    scene->m_Objects.push_back(this);
 }
 CapsuleRibbon::~CapsuleRibbon(){}
 
@@ -126,6 +127,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     l->setColor(255,200,215,255);
     l->setSpecularIntensity(0.0f);
     l->setAttenuation(LightRange::_32);
+    m_Objects.push_back(l);
 
 
     m_TunnelA = new CapsuleTunnel(5000,ResourceManifest::CapsuleA,this);

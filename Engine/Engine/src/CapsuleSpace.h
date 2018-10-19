@@ -13,42 +13,37 @@ struct CapsuleStarLogicFunctor;
 
 class CapsuleSpace;
 
-class CapsuleEnd final{
+class CapsuleEnd final: public EntityWrapper {
     friend class  ::CapsuleSpace;
     friend struct ::CapsuleEndLogicFunctor;
-    private:
-        Entity m_Entity;
     public:
-        CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, Scene* = nullptr);
+        CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, SolarSystem* = nullptr);
         ~CapsuleEnd();
 };
-class CapsuleStar final{
+class CapsuleStar final : public EntityWrapper {
     friend class  ::CapsuleSpace;
     friend struct ::CapsuleStarLogicFunctor;
     private:
-        Entity m_Entity;
         PointLight* m_Light;
     public:
-        CapsuleStar(float size,glm::vec3 pos, Scene* = nullptr,bool=true);
+        CapsuleStar(float size,glm::vec3 pos, SolarSystem* = nullptr,bool=true);
         ~CapsuleStar();
 };
-class CapsuleTunnel final{
+class CapsuleTunnel final : public EntityWrapper {
     friend class  ::CapsuleSpace;
     private:
-        Entity m_Entity;
         float m_TunnelRadius;
     public:
-        CapsuleTunnel(float tunnelRadius, Handle& material, Scene* = nullptr);
+        CapsuleTunnel(float tunnelRadius, Handle& material, SolarSystem* = nullptr);
         ~CapsuleTunnel();
         float getTunnelRadius(){ return m_TunnelRadius; }
 };
-class CapsuleRibbon final{
+class CapsuleRibbon final : public EntityWrapper {
     friend class  ::CapsuleSpace;
     private:
-        Entity m_Entity;
         float m_TunnelRadius;
     public:
-        CapsuleRibbon(float tunnelRadius, Handle& mesh,Handle& material, Scene* = nullptr);
+        CapsuleRibbon(float tunnelRadius, Handle& mesh,Handle& material, SolarSystem* = nullptr);
         ~CapsuleRibbon();
 
         float getTunnelRadius(){ return m_TunnelRadius; }

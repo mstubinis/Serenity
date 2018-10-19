@@ -7,6 +7,7 @@
 class SunLight;
 class Ring;
 class Planet;
+class SolarSystem;
 
 struct PlanetLogicFunctor;
 struct PlanetaryRingMeshInstanceBindFunctor;
@@ -50,7 +51,7 @@ struct RingInfo final{
         alphaBreakpoint = ab;
     }
 };
-class Planet{
+class Planet:public EntityWrapper {
     friend class  ::Ring;
     friend struct ::PlanetLogicFunctor;
     friend struct ::PlanetaryRingMeshInstanceBindFunctor;
@@ -60,7 +61,6 @@ class Planet{
     friend struct ::AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
     friend struct ::StarMeshInstanceBindFunctor;
     protected:
-        Entity              m_Entity;
         std::vector<Ring*>  m_Rings;
         PlanetType::Type    m_Type;
         OrbitInfo*          m_OrbitInfo;
@@ -74,7 +74,7 @@ class Planet{
             float = 1,                            //Radius
             std::string = "Planet",               //Name
             float = 0,                            //Atmosphere size
-            Scene* = nullptr
+            SolarSystem* = nullptr
         );
         virtual ~Planet();
 
@@ -103,7 +103,7 @@ class Star: public Planet{
             glm::vec3 = glm::vec3(0.0f),             //Position
             float = 1,                               //Scale
             std::string = "Star",                    //Name
-            Scene* = nullptr
+            SolarSystem* = nullptr
         );
         virtual ~Star();
 };

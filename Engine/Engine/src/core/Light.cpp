@@ -59,11 +59,10 @@ class SunLight::impl final{
         }
 };
 
-SunLight::SunLight(glm::vec3 pos,LightType::Type type,Scene* scene):m_i(new impl){
+SunLight::SunLight(glm::vec3 pos,LightType::Type type,Scene* scene):EntityWrapper(*scene),m_i(new impl){
     if(!scene){
         scene = Resources::getCurrentScene();
     }
-    m_Entity = scene->createEntity(); //keep lights out of the global per scene entity pool?
     epriv::InternalScenePublicInterface::GetLights(*scene).push_back(this);
 
     m_i->_init(*this,type,pos);

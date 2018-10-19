@@ -113,8 +113,9 @@ class Engine_Window::impl final{
             epriv::Core::m_Engine->m_RenderManager._resize(winSize.x,winSize.y);
             //resize cameras here
             Game::onResize(winSize.x,winSize.y);
-            Scene& scene = *Resources::getCurrentScene();
-            epriv::InternalScenePublicInterface::GetECS(scene).onResize<ComponentCamera>(winSize.x, winSize.y);
+            for (auto scene : epriv::Core::m_Engine->m_ResourceManager.scenes()) {
+                epriv::InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(winSize.x, winSize.y);
+            }
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             //for some reason the mouse is shown even if it was hidden at first

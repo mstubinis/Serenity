@@ -20,7 +20,7 @@ struct Entity{
     Entity() { data = 0; }
     Entity(uint _id, uint _sceneID, uint _versionID) { serialize(_id, _sceneID, _versionID); }
 
-    void serialize(const uint& _id, const uint& _sceneID, const uint& _versionID) { data = _versionID << 28 | _sceneID << 21 | _id; }
+    inline void serialize(const uint& _id, const uint& _sceneID, const uint& _versionID) { data = _versionID << 28 | _sceneID << 21 | _id; }
 
     Entity(const Entity& other) = default;
     Entity& operator=(const Entity& other) = default;
@@ -35,20 +35,28 @@ struct Entity{
     Scene& scene();
     void destroy();
     bool null();
-    template<typename TComponent, typename... ARGS> TComponent* addComponent(ARGS&&... _args) {
+    template<typename TComponent, typename... ARGS> inline TComponent* addComponent(ARGS&&... _args) {
         auto& _this = *this; auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
         return _ecs.addComponent<TComponent>(_this, std::forward<ARGS>(_args)...);
     }
-    template<typename TComponent> bool removeComponent() {
+    template<typename TComponent> inline bool removeComponent() {
         auto& _this = *this; auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
         return _ecs.removeComponent<TComponent>(_this);
     }
-    template<typename TComponent> TComponent* getComponent() {
+    template<typename TComponent> inline TComponent* getComponent() {
         auto& _this = *this; auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
         return _ecs.getComponent<TComponent>(_this);
     }
     void move(Scene& destination);
     static Entity _null;
+};
+
+class EntityWrapper {
+    protected:
+        Entity m_Entity;
+    public:
+        EntityWrapper(Scene& _scene) { m_Entity = _scene.createEntity(); }
+        virtual ~EntityWrapper() { m_Entity = Entity::_null; }
 };
 
 namespace Engine {

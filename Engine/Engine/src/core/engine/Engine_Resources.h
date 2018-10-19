@@ -60,6 +60,8 @@ namespace Engine{
                 Handle _addTexture(Texture*);
                 Scene& _getSceneByID(uint id);
 
+                std::vector<Scene*>& scenes();
+
                 bool _hasScene(std::string);
                 void _addScene(Scene&);
                 Texture* _hasTexture(std::string);

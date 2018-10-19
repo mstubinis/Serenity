@@ -1,4 +1,5 @@
 ﻿#include "Planet.h"
+#include "SolarSystem.h"
 #include "core/engine/Engine.h"
 #include "core/engine/Engine_GLStateMachine.h"
 #include "core/engine/Engine_Math.h"
@@ -300,8 +301,7 @@ struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineR
     //Renderer::GLEnable(GLState::DEPTH_MASK);
 }};
 
-Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene){
-    m_Entity = scene->createEntity();
+Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere, SolarSystem* scene):EntityWrapper(*scene){
     auto* m_Model = m_Entity.addComponent<ComponentModel>(ResourceManifest::PlanetMesh,mat,ResourceManifest::groundFromSpace);
     auto& model = m_Model->getModel();
     model.setUserPointer(this);
@@ -330,6 +330,8 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
     m_RotationInfo = nullptr;
 
     m_Entity.addComponent<ComponentLogic>(PlanetLogicFunctor(), this);
+
+    scene->m_Objects.push_back(this);
 }
 Planet::~Planet(){  
     SAFE_DELETE_VECTOR(m_Rings);
@@ -357,7 +359,7 @@ float Planet::getGroundRadius(){
 float Planet::getRadius() { return m_Entity.getComponent<ComponentModel>()->radius(); }
 float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
 
-Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name,Scene* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
+Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name, SolarSystem* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
 
@@ -370,6 +372,7 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
 
     //addChild(m_Light);
     m_Light->setPosition(pos);
+    scene->m_Objects.push_back(m_Light);
     if(!Renderer::Settings::GodRays::getObject()){
         Renderer::Settings::GodRays::setObject(&m_Entity);
     }

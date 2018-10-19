@@ -237,23 +237,23 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         const Entity& target = camera.getTarget();
         if (Engine::isKeyDownOnce(KeyboardKey::F1)) {
             if (cameraState != CameraState::Follow || (cameraState == CameraState::Follow && target != ship.m_Entity)) {
-                //currentScene.centerSceneToObject(ship.m_Entity);
+                currentScene.centerSceneToObject(ship.m_Entity);
                 camera.follow(ship.m_Entity);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
             if (cameraState == CameraState::Follow || ship.m_Target.null() || target != ship.m_Entity) {
-                //currentScene.centerSceneToObject(ship.m_Entity);
+                currentScene.centerSceneToObject(ship.m_Entity);
                 camera.orbit(ship.m_Entity);
             }else if (!ship.m_Target.null()) {
-                //currentScene.centerSceneToObject(ship.m_Target);
+                currentScene.centerSceneToObject(ship.m_Target);
                 camera.orbit(ship.m_Target);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
             if (cameraState == CameraState::FollowTarget || (ship.m_Target.null() && cameraState != CameraState::Follow) || target != ship.m_Entity) {
-                //currentScene.centerSceneToObject(ship.m_Entity);
+                currentScene.centerSceneToObject(ship.m_Entity);
                 camera.follow(ship.m_Entity);
             }else if (!ship.m_Target.null()) {
-                //currentScene.centerSceneToObject(ship.m_Entity);
+                currentScene.centerSceneToObject(ship.m_Entity);
                 camera.followTarget(ship.m_Target, ship.m_Entity);
             }
         }
@@ -270,9 +270,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
 }};
 
 
-Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,Scene* scene){
-    m_Entity = scene->createEntity();
-
+Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,SolarSystem* scene):EntityWrapper(*scene){
     auto* modelComponent = m_Entity.addComponent<ComponentModel>(mesh, mat);
     auto& rigidBodyComponent = *m_Entity.addComponent<ComponentBody>(_type);
     m_Entity.addComponent<ComponentLogic>(ShipLogicFunctor(), this);
@@ -306,6 +304,7 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
 		else if (i == 7)  system = new ShipSystemSensors(this);
         m_ShipSystems.emplace(i, system);
 	}
+    scene->m_Objects.push_back(this);
 }
 Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);

@@ -13,13 +13,11 @@ struct CameraType{enum Type {
     Orthographic,
 };};
 
-class Camera{
+class Camera: public EntityWrapper{
     friend class  ::LightProbe;
     friend struct ::Engine::epriv::ComponentCameraFunctions;
     private:
         class impl; std::unique_ptr<impl> m_i;
-    protected:
-        Entity           m_Entity;
     public:
         Camera(float angle,float aspectRatio,float nearPlane,float farPlane,Scene* = nullptr);
         Camera(float left,float right,float bottom,float top,float nearPlane,float farPlane,Scene* = nullptr);

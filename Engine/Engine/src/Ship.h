@@ -6,6 +6,7 @@
 
 class GameCamera;
 class Ship;
+class SolarSystem;
 typedef unsigned int uint;
 
 struct ShipLogicFunctor;
@@ -95,10 +96,9 @@ class ShipSystemSensors final: public ShipSystem{
         void update(const float& dt);
 };
 
-class Ship{
+class Ship: public EntityWrapper {
     friend struct ::ShipLogicFunctor;
     protected:
-        Entity m_Entity;
         std::unordered_map<uint,ShipSystem*> m_ShipSystems;
         bool m_IsPlayer;
         GameCamera* m_PlayerCamera;
@@ -114,7 +114,7 @@ class Ship{
             glm::vec3 = glm::vec3(0), //Position
             glm::vec3 = glm::vec3(1), //Scale
             CollisionType::Type = CollisionType::ConvexHull,
-            Scene* = nullptr
+            SolarSystem* = nullptr
         );
         virtual ~Ship();
 

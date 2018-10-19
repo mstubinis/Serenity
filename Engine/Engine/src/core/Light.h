@@ -11,6 +11,7 @@ class DirectionalLight;
 class PointLight;
 class SpotLight;
 class RodLight;
+class EntityWrapper;
 
 struct LightType{enum Type{
     Sun,Point,Directional,Spot,Rod,
@@ -25,11 +26,10 @@ struct LightAttenuation{enum Model{
     Constant_Linear_Exponent,
     Distance_Radius_Squared,
 _TOTAL};};
-class SunLight{
+class SunLight: public EntityWrapper{
     private:
         class impl;
     protected:
-        Entity m_Entity;
         std::unique_ptr<impl> m_i;
     public:
         SunLight(glm::vec3 = glm::vec3(0.0f),LightType::Type = LightType::Sun,Scene* = nullptr);

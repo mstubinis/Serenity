@@ -32,12 +32,13 @@ using namespace std;
 SolarSystem::SolarSystem(string n, string file):Scene(n){
     GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.35f,7000000000.0f,this);
     setActiveCamera(*playerCamera);
+    m_Objects.push_back(playerCamera);
     giGlobal = giSpecular = giDiffuse = 1.0f;
     if(file != "NULL")
         SolarSystem::_loadFromFile(file);
 }
 SolarSystem::~SolarSystem(){
-
+    SAFE_DELETE_VECTOR(m_Objects);
 }
 void SolarSystem::_loadFromFile(string filename){
     uint count = 0;

@@ -65,6 +65,8 @@ string Engine::Data::reportTime(){
 const double Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager.dt(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_CurrentScene; }
 
+vector<Scene*>& epriv::ResourceManager::scenes() {return m_i->m_Scenes;}
+
 bool epriv::ResourceManager::_hasScene(string n){ 
     for (auto& scene : m_i->m_Scenes) {
         if (scene->name() == n)

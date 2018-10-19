@@ -7,6 +7,8 @@
 class Star;
 class Ship;
 class Planet;
+class GameObject;
+class EntityWrapper;
 
 class SolarSystem: public Scene{
     private:
@@ -19,6 +21,8 @@ class SolarSystem: public Scene{
 
         void _loadFromFile(std::string);
     public:
+        std::vector<EntityWrapper*> m_Objects;
+
         SolarSystem(std::string name, std::string file);
         virtual ~SolarSystem();
 
