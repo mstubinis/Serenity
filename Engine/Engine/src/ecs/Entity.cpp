@@ -19,8 +19,9 @@ void Entity::move(Scene& _scene) {
     serialize(_s.ID, _scene.id(), _s.versionID);
 }
 void Entity::destroy() {
-    epriv::EntitySerialization _s(*this);
+    auto& _this = *this;
+    epriv::EntitySerialization _s(_this);
     Scene& s = epriv::Core::m_Engine->m_ResourceManager._getSceneByID(_s.sceneID);
     auto& _ecs = Engine::epriv::InternalScenePublicInterface::GetECS(s);
-    _ecs.removeEntity(*this);
+    _ecs.removeEntity(_this);
 }

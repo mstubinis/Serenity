@@ -338,7 +338,7 @@ void ComponentBody::scale(float x, float y, float z) {
     }
     auto* models = owner.getComponent<ComponentModel>();
     if (models) {
-        //epriv::ComponentInternalFunctionality::CalculateRadius(*models);
+        epriv::ComponentModelFunctions::CalculateRadius(*models);
     }
 }
 void ComponentBody::setPosition(glm::vec3 newPosition) { ComponentBody::setPosition(newPosition.x, newPosition.y, newPosition.z); }
@@ -432,7 +432,7 @@ void ComponentBody::setScale(float x, float y, float z) {
     }
     auto* models = owner.getComponent<ComponentModel>();
     if (models) {
-        //epriv::ComponentInternalFunctionality::CalculateRadius(*models);
+        epriv::ComponentModelFunctions::CalculateRadius(*models);
     }
 }
 btRigidBody& ComponentBody::getBody(){ return *data.p->rigidBody; }
@@ -652,7 +652,9 @@ struct epriv::ComponentBodyUpdateFunction final {
                 Engine::Math::recalculateForwardRightUp(rigidBody, b._forward, b._right, b._up);
             }else{
                 auto& n = *b.data.n;
-                n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
+                //TODO: implement parent->child relations
+                //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
+                n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
             }
         }
     }

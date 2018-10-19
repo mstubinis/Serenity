@@ -40,7 +40,7 @@ namespace Engine {
 
                 virtual ~SparseSet() = default;
 
-                template<typename... ARGS> TItem* _add(const uint& _IDObject, ARGS&&... _args) {
+                template<typename... ARGS> inline TItem* _add(const uint& _IDObject, ARGS&&... _args) {
                     uint sparseIndex = _IDObject - 1;
                     if (sparseIndex >= super::_sparse.size())
                         super::_sparse.resize(sparseIndex + 1, 0);
@@ -51,7 +51,7 @@ namespace Engine {
                     super::_maxLast = sparseIndex;
                     return &_dense[_dense.size() - 1];
                 }
-                bool _remove(const uint& _IDObject) {
+                inline bool _remove(const uint& _IDObject) {
                     //TODO: find a way to optimize the search for the maxLast entity...
                     uint removedEntityIndex = _IDObject - 1;
                     if (removedEntityIndex >= super::_sparse.size()) {     //needed for scene.removeEntity(), as it iterates over all systems and some might not have the entity in them
@@ -70,7 +70,7 @@ namespace Engine {
                     _dense.pop_back();
                     return true;
                 }
-                TItem* _get(const uint& _IDObject) {
+                inline TItem* _get(const uint& _IDObject) {
                     uint sparseIndex = _IDObject - 1;
                     if (super::_sparse.size() == 0)           return nullptr;
                     if (sparseIndex >= super::_sparse.size()) return nullptr;

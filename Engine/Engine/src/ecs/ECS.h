@@ -121,7 +121,6 @@ namespace Engine {
                     systems[type_slot] = new CSystemType(_systemCI, *this);
                 }
 
-                //we may or may not need these...
                 TEntity createEntity(Scene& _scene) { 
                     TEntity res = entityPool.addEntity(_scene);
                     justAddedEntities.push_back(res);

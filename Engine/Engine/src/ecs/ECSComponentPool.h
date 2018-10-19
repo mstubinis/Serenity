@@ -21,22 +21,22 @@ namespace Engine {
 
                 ~ECSComponentPool() = default;
 
-                template<typename... ARGS> TComponent* addComponent(TEntity& _entity, ARGS&&... _args) {
+                template<typename... ARGS> inline TComponent* addComponent(TEntity& _entity, ARGS&&... _args) {
                     EntitySerialization _s(_entity);
                     return super::_add(_s.ID, const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
                 }
-                bool removeComponent(TEntity& _entity) {
+                inline bool removeComponent(TEntity& _entity) {
                     EntitySerialization _s(_entity);
                     return super::_remove(_s.ID);
                 }
-                bool removeComponentByIndex(uint& _index) {
+                inline bool removeComponentByIndex(uint& _index) {
                     return super::_remove(_index);
                 }
-                TComponent* getComponent(TEntity& _entity) {
+                inline TComponent* getComponent(TEntity& _entity) {
                     EntitySerialization _s(_entity);
                     return super::_get(_s.ID);
                 }
-                TComponent* getComponent(const uint& _index) {
+                inline TComponent* getComponent(const uint& _index) {
                     return super::_get(_index);
                 }
         };

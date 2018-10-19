@@ -218,8 +218,8 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                 auto& body = *ship.m_Entity.getComponent<ComponentBody>();
                 float speed = (ship.m_WarpFactor * 1.0f / 0.46f) * 2.0f;
                 glm::vec3 s = (body.forward() * glm::pow(speed, 15.0f)) / body.mass();
-                for (auto& data : epriv::InternalScenePublicInterface::GetEntities(currentScene)) {
-                    Entity e = currentScene.getEntity(data);
+                for (auto& pod : epriv::InternalScenePublicInterface::GetEntities(currentScene)) {
+                    Entity e = currentScene.getEntity(pod);
                     auto* cam = e.getComponent<ComponentCamera>();
                     //TODO: parent->child relationship
                     if (e != ship.m_Entity && !cam) {
@@ -237,23 +237,23 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         const Entity& target = camera.getTarget();
         if (Engine::isKeyDownOnce(KeyboardKey::F1)) {
             if (cameraState != CameraState::Follow || (cameraState == CameraState::Follow && target != ship.m_Entity)) {
-                Resources::getCurrentScene()->centerSceneToObject(ship.m_Entity);
+                //currentScene.centerSceneToObject(ship.m_Entity);
                 camera.follow(ship.m_Entity);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
             if (cameraState == CameraState::Follow || ship.m_Target.null() || target != ship.m_Entity) {
-                Resources::getCurrentScene()->centerSceneToObject(ship.m_Entity);
+                //currentScene.centerSceneToObject(ship.m_Entity);
                 camera.orbit(ship.m_Entity);
             }else if (!ship.m_Target.null()) {
-                Resources::getCurrentScene()->centerSceneToObject(ship.m_Target);
+                //currentScene.centerSceneToObject(ship.m_Target);
                 camera.orbit(ship.m_Target);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
             if (cameraState == CameraState::FollowTarget || (ship.m_Target.null() && cameraState != CameraState::Follow) || target != ship.m_Entity) {
-                Resources::getCurrentScene()->centerSceneToObject(ship.m_Entity);
+                //currentScene.centerSceneToObject(ship.m_Entity);
                 camera.follow(ship.m_Entity);
             }else if (!ship.m_Target.null()) {
-                Resources::getCurrentScene()->centerSceneToObject(ship.m_Entity);
+                //currentScene.centerSceneToObject(ship.m_Entity);
                 camera.followTarget(ship.m_Target, ship.m_Entity);
             }
         }

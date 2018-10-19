@@ -13,6 +13,7 @@ class Mesh;
 class Material;
 class MeshInstance;
 
+class ComponentModel;
 class ComponentCamera;
 
 namespace Engine {
@@ -22,7 +23,9 @@ namespace Engine {
         struct ComponentModelComponentAddedToEntityFunction;
         struct ComponentModelSceneEnteredFunction;
         struct ComponentModelSceneLeftFunction;
-        struct ComponentModelFunctions;
+        struct ComponentModelFunctions final {
+            static float CalculateRadius(ComponentModel& super);
+        };
     };
 };
 

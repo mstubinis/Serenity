@@ -12,29 +12,27 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-struct epriv::ComponentModelFunctions final {
-    static float CalculateRadius(ComponentModel& super) {
-        float maxLength = 0;
-        glm::vec3 boundingBox = glm::vec3(0.0f);
-        for (uint i = 0; i < super.models.size(); ++i) {
-            auto& pair = *super.models[i];
-            glm::mat4& m = pair.model();
-            glm::vec3 localPosition = glm::vec3(m[3][0], m[3][1], m[3][2]);
-            float length = glm::length(localPosition) + pair.mesh()->getRadius() * Engine::Math::Max(pair.getScale());
-            glm::vec3 box = localPosition + pair.mesh()->getRadiusBox() * Engine::Math::Max(pair.getScale());
-            if (length > maxLength) { maxLength = length; }
-            if (box.x > boundingBox.x || box.y > boundingBox.y || box.z > boundingBox.z) { boundingBox = box; }
-        }
-        super._radius = maxLength;
-        super._radiusBox = boundingBox;
-        auto* body = super.owner.getComponent<ComponentBody>();
-        if (body) {
-            float _bodyScale = Engine::Math::Max(body->getScale());
-            super._radius *= _bodyScale;
-            super._radiusBox *= _bodyScale;
-        }
-        return super._radius;
+float epriv::ComponentModelFunctions::CalculateRadius(ComponentModel& super) {
+    float maxLength = 0;
+    glm::vec3 boundingBox = glm::vec3(0.0f);
+    for (uint i = 0; i < super.models.size(); ++i) {
+        auto& pair = *super.models[i];
+        glm::mat4& m = pair.model();
+        glm::vec3 localPosition = glm::vec3(m[3][0], m[3][1], m[3][2]);
+        float length = glm::length(localPosition) + pair.mesh()->getRadius() * Engine::Math::Max(pair.getScale());
+        glm::vec3 box = localPosition + pair.mesh()->getRadiusBox() * Engine::Math::Max(pair.getScale());
+        if (length > maxLength) { maxLength = length; }
+        if (box.x > boundingBox.x || box.y > boundingBox.y || box.z > boundingBox.z) { boundingBox = box; }
     }
+    super._radius = maxLength;
+    super._radiusBox = boundingBox;
+    auto* body = super.owner.getComponent<ComponentBody>();
+    if (body) {
+        float _bodyScale = Engine::Math::Max(body->getScale());
+        super._radius *= _bodyScale;
+        super._radiusBox *= _bodyScale;
+    }
+    return super._radius;
 };
 
 

@@ -14,8 +14,11 @@ namespace Engine {
             uint        ID : 21;
             uint   sceneID : 7;
             uint versionID : 4;
-
-            void serialize(const uint& _entityData);
+            inline void serialize(const uint& _entityData) {
+                ID = (_entityData & 0x003FFFFF) >> 0;
+                sceneID = (_entityData & 0x1FE00000) >> 21;
+                versionID = (_entityData & 4026531840) >> 28;
+            }
             EntitySerialization(const uint& _entityData);
             EntitySerialization(const Entity& _entity);
             EntitySerialization(const EntitySerialization& _other) = delete;

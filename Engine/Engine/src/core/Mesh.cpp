@@ -752,7 +752,7 @@ class Mesh::impl final{
             if(data.binormals.size() == 0) data.binormals.resize(data.points.size());
             if(data.tangents.size() == 0) data.tangents.resize(data.points.size());
 
-            if (threshold == 0.0f) {
+            if (m_threshold == 0.0f) {
                 uint c = 0;
                 for (auto& pt : data.points) {
                     if (m_Skeleton) {

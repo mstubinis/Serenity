@@ -116,7 +116,7 @@ GameCamera::GameCamera(float l, float r, float b, float t, float n, float f, Sce
 }
 GameCamera::~GameCamera(){}
 Entity GameCamera::getObjectInCenterRay(Entity& exclusion){
-    Entity ret(0, 0, 0);
+    Entity ret = Entity::_null;
     vector<Entity> objs;
     Scene& s = *Resources::getCurrentScene();
     for(auto& data:epriv::InternalScenePublicInterface::GetEntities(s)){
@@ -132,26 +132,31 @@ Entity GameCamera::getObjectInCenterRay(Entity& exclusion){
 
     float distance = -1;
     for(auto& object:objs){
-        auto& body = *object.getComponent<ComponentBody>();
-        float d = glm::distance(body.position(), getPosition());
-        if(distance == -1 || d < distance){
-            distance = d;
-            ret = object;
+        auto* body = object.getComponent<ComponentBody>();
+        if (body) {
+            float d = glm::distance(body->position(), getPosition());
+            if (distance == -1 || d < distance) {
+                distance = d;
+                ret = object;
+            }
         }
     }
     return ret;
 }
 void GameCamera::follow(Entity& target){
+    if (target.null()) return;
     m_Target = target;
     m_Player = target;
     m_State = CameraState::Follow;
 }
 void GameCamera::followTarget(Entity& target, Entity& player){
+    if (target.null()) return;
     m_Target = target;
     m_Player = player;
     m_State = CameraState::FollowTarget;
 }
 void GameCamera::orbit(Entity& target){
+    if (target.null()) return;
     m_Target = target;
     m_Player = target;
     m_State = CameraState::Orbit;

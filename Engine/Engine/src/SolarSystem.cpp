@@ -241,6 +241,7 @@ void SolarSystem::_loadFromFile(string filename){
     }
 
     centerSceneToObject(player->entity());
+
     auto& body = *player->entity().getComponent<ComponentBody>();
     float xPos = body.position().x;
     float zPos = body.position().z;
