@@ -73,7 +73,7 @@ CapsuleStar::CapsuleStar(float size,glm::vec3 pos, SolarSystem* scene,bool makeL
     if(makeLight){
         m_Light = new PointLight(pos/float(100),scene);
         m_Light->setAttenuation(LightRange::_50);
-        m_Light->setColor(255,124,27,255);
+        m_Light->setColor(1.0f, 0.486f, 0.106f);
         scene->m_Objects.push_back(m_Light);
     }
     scene->m_Objects.push_back(this);
@@ -124,7 +124,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     this->getActiveCamera()->setFar(70000000.0f);
 
     PointLight* l = new PointLight(glm::vec3(0,1.7f,0),this);
-    l->setColor(255,200,215,255);
+    l->setColor(1.0f * 1.3f,0.784f * 1.3f,0.843f * 1.3f);
     l->setSpecularIntensity(0.0f);
     l->setAttenuation(LightRange::_32);
     m_Objects.push_back(l);

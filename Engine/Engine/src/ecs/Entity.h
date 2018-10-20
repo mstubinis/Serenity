@@ -17,8 +17,8 @@ class Scene;
 struct Entity{   
     uint data;
 
-    Entity() { data = 0; }
-    Entity(uint _id, uint _sceneID, uint _versionID) { serialize(_id, _sceneID, _versionID); }
+    inline Entity() { data = 0; }
+    inline Entity(uint _id, uint _sceneID, uint _versionID) { serialize(_id, _sceneID, _versionID); }
 
     inline void serialize(const uint& _id, const uint& _sceneID, const uint& _versionID) { data = _versionID << 28 | _sceneID << 21 | _id; }
 
@@ -55,8 +55,9 @@ class EntityWrapper {
     protected:
         Entity m_Entity;
     public:
-        EntityWrapper(Scene& _scene) { m_Entity = _scene.createEntity(); }
+        inline EntityWrapper(Scene& _scene) { m_Entity = _scene.createEntity(); }
         virtual ~EntityWrapper() { m_Entity = Entity::_null; }
+        inline void destroy() { m_Entity.destroy(); }
 };
 
 namespace Engine {

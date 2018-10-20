@@ -7,8 +7,8 @@
 struct ComponentBaseClass{
     Entity owner;
 
-    ComponentBaseClass() = default;
-    ComponentBaseClass(Entity& owner_) { owner.data = owner_.data; }
+    inline ComponentBaseClass() { owner = Entity::_null; }
+    inline ComponentBaseClass(Entity& owner_) { owner.data = owner_.data; }
 
     ComponentBaseClass& operator=(const ComponentBaseClass& other) = default;
     ComponentBaseClass(const ComponentBaseClass& other) = default;

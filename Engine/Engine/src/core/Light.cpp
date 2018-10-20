@@ -83,6 +83,8 @@ void SunLight::lighten(){
 glm::vec3 SunLight::position(){ return m_Entity.getComponent<ComponentBody>()->position(); }
 void SunLight::setColor(float r,float g,float b,float a){ m_i->m_Color = glm::vec4(r,g,b,a); }
 void SunLight::setColor(glm::vec4 col){ m_i->m_Color = col; }
+void SunLight::setColor(float r, float g, float b) { auto& i = *m_i; i.m_Color.r = r; i.m_Color.g = g; i.m_Color.b = b; }
+void SunLight::setColor(glm::vec3 col) { auto& i = *m_i; i.m_Color.r = col.r; i.m_Color.g = col.g; i.m_Color.b = col.b; }
 void SunLight::setPosition(float x,float y,float z){ m_Entity.getComponent<ComponentBody>()->setPosition(x,y,z); }
 void SunLight::setPosition(glm::vec3 pos){ m_Entity.getComponent<ComponentBody>()->setPosition(pos); }
 float SunLight::getAmbientIntensity(){ return m_i->m_AmbientIntensity; }

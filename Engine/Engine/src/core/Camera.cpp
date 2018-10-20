@@ -34,8 +34,8 @@ const float Camera::getAngle(){ return m_Entity.getComponent<ComponentCamera>()-
 const float Camera::getAspect(){ return m_Entity.getComponent<ComponentCamera>()->_aspectRatio; }
 const float Camera::getNear(){ return m_Entity.getComponent<ComponentCamera>()->_nearPlane; }
 const float Camera::getFar(){ return m_Entity.getComponent<ComponentCamera>()->_farPlane; }
-void Camera::setAngle(float _Angle){ m_Entity.getComponent<ComponentCamera>()->_angle = _Angle; }
-void Camera::setAspect(float _Aspect){ m_Entity.getComponent<ComponentCamera>()->_aspectRatio = _Aspect; }
+void Camera::setAngle(float _Angle){ m_Entity.getComponent<ComponentCamera>()->setAngle(_Angle); }
+void Camera::setAspect(float _Aspect){ m_Entity.getComponent<ComponentCamera>()->setAspect(_Aspect); }
 void Camera::setNear(float _near){ m_Entity.getComponent<ComponentCamera>()->setNear(_near); }
 void Camera::setFar(float _far){ m_Entity.getComponent<ComponentCamera>()->setFar(_far); }
 const glm::mat4 Camera::getViewProjectionInverse(){ return m_Entity.getComponent<ComponentCamera>()->getViewProjectionInverse(); }
