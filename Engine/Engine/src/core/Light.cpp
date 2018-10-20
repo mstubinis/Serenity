@@ -81,8 +81,8 @@ void SunLight::lighten(){
     renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 glm::vec3 SunLight::position(){ return m_Entity.getComponent<ComponentBody>()->position(); }
-void SunLight::setColor(float r,float g,float b,float a){ Engine::Math::setColor(m_i->m_Color,r,g,b,a); }
-void SunLight::setColor(glm::vec4 col){ Engine::Math::setColor(m_i->m_Color,col.r,col.g,col.b,col.a); }
+void SunLight::setColor(float r,float g,float b,float a){ m_i->m_Color = glm::vec4(r,g,b,a); }
+void SunLight::setColor(glm::vec4 col){ m_i->m_Color = col; }
 void SunLight::setPosition(float x,float y,float z){ m_Entity.getComponent<ComponentBody>()->setPosition(x,y,z); }
 void SunLight::setPosition(glm::vec3 pos){ m_Entity.getComponent<ComponentBody>()->setPosition(pos); }
 float SunLight::getAmbientIntensity(){ return m_i->m_AmbientIntensity; }
@@ -102,11 +102,12 @@ DirectionalLight::~DirectionalLight(){
 }
 void DirectionalLight::lighten(){
     if(!isActive()) return;
+    auto& i = *m_i;
     auto& body = *m_Entity.getComponent<ComponentBody>();
     glm::vec3 _forward = body.forward();
-    sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
+    sendUniform4("LightDataA", i.m_AmbientIntensity,i.m_DiffuseIntensity,i.m_SpecularIntensity,_forward.x);
     sendUniform4("LightDataB", _forward.y,_forward.z,0.0f, 0.0f);
-    sendUniform4("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform4("LightDataD",i.m_Color.x, i.m_Color.y, i.m_Color.z,float(i.m_Type));
     sendUniform1Safe("Type",0.0f);
     renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
@@ -147,15 +148,16 @@ void PointLight::setAttenuationModel(LightAttenuation::Model model){
 }
 void PointLight::lighten(){
     if(!isActive()) return;
+    auto& i = *m_i;
     Camera& c = *Resources::getCurrentScene()->getActiveCamera();
     auto& body = *m_Entity.getComponent<ComponentBody>();
     glm::vec3 pos = body.position();
     if((!c.sphereIntersectTest(pos,m_CullingRadius)) || (c.getDistance(pos) > 1100.0f * m_CullingRadius)) //1100.0f is the visibility threshold
         return;
-    sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
+    sendUniform4("LightDataA", i.m_AmbientIntensity,i.m_DiffuseIntensity,i.m_SpecularIntensity,0.0f);
     sendUniform4("LightDataB", 0.0f,0.0f,m_C,m_L);
     sendUniform4("LightDataC", m_E,pos.x,pos.y,pos.z);
-    sendUniform4("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform4("LightDataD",i.m_Color.x, i.m_Color.y, i.m_Color.z,float(i.m_Type));
     sendUniform4Safe("LightDataE", 0.0f, 0.0f, float(m_AttenuationModel),0.0f);
     sendUniform1Safe("Type",1.0f);
 
@@ -196,16 +198,17 @@ void SpotLight::setCutoffOuter(float outerCutoff){
 
 void SpotLight::lighten(){
     if(!isActive()) return;
+    auto& i = *m_i;
     Camera& c = *Resources::getCurrentScene()->getActiveCamera();
     auto& body = *m_Entity.getComponent<ComponentBody>();
     glm::vec3 pos = body.position();
     glm::vec3 _forward = body.forward();
     if(!c.sphereIntersectTest(pos,m_CullingRadius) || (c.getDistance(pos) > 1100.0f * m_CullingRadius))
         return;
-    sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
+    sendUniform4("LightDataA", i.m_AmbientIntensity,i.m_DiffuseIntensity,i.m_SpecularIntensity,_forward.x);
     sendUniform4("LightDataB", _forward.y,_forward.z,m_C,m_L);
     sendUniform4("LightDataC", m_E,pos.x,pos.y,pos.z);
-    sendUniform4("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform4("LightDataD",i.m_Color.x, i.m_Color.y, i.m_Color.z,float(i.m_Type));
     sendUniform4Safe("LightDataE", m_Cutoff, m_OuterCutoff, float(m_AttenuationModel),0.0f);
     sendUniform2Safe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
     sendUniform1Safe("Type",2.0f);
@@ -252,6 +255,7 @@ void RodLight::setRodLength(float length){
 }
 void RodLight::lighten(){
     if(!isActive()) return;
+    auto& i = *m_i;
     Camera& c = *Resources::getCurrentScene()->getActiveCamera();
     auto& body = *m_Entity.getComponent<ComponentBody>();
     glm::vec3 pos = body.position();
@@ -261,10 +265,10 @@ void RodLight::lighten(){
     float half = m_RodLength / 2.0f;
     glm::vec3 firstEndPt = pos + (body.forward() * half);
     glm::vec3 secndEndPt = pos - (body.forward() * half);
-    sendUniform4("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,firstEndPt.x);
+    sendUniform4("LightDataA", i.m_AmbientIntensity,i.m_DiffuseIntensity,i.m_SpecularIntensity,firstEndPt.x);
     sendUniform4("LightDataB", firstEndPt.y,firstEndPt.z,m_C,m_L);
     sendUniform4("LightDataC", m_E,secndEndPt.x,secndEndPt.y,secndEndPt.z);
-    sendUniform4("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform4("LightDataD",i.m_Color.x, i.m_Color.y, i.m_Color.z,float(i.m_Type));
     sendUniform4Safe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
     sendUniform1Safe("Type",1.0f);
 
