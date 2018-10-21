@@ -14,13 +14,17 @@ using namespace std;
 
 struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _component, const float& dt) const {
     GameCamera& camera = *((GameCamera*)_component.getUserPointer());
-    ComponentCamera& componentCamera = *_component.owner.getComponent<ComponentCamera>();
-    auto& m_Body = *camera.m_Entity.getComponent<ComponentBody>();
+    auto& entity = camera.m_Entity;
+    epriv::EntitySerialization _s(entity);
+    auto& thisCamera = *entity.getComponent<ComponentCamera>(_s);
+    auto& thisBody   = *entity.getComponent<ComponentBody>(_s);
 
     switch (camera.m_State) {
         case CameraState::Follow: {
-            auto& targetBody = *(camera.m_Target.getComponent<ComponentBody>());
-            auto& targetModel = *(camera.m_Target.getComponent<ComponentModel>());
+            auto& targetEntity = camera.m_Target; epriv::EntitySerialization _st(targetEntity);
+
+            auto& targetBody = *(targetEntity.getComponent<ComponentBody>(_st));
+            auto& targetModel = *(targetEntity.getComponent<ComponentModel>(_st));
             float targetRadius = targetModel.radius();
 
             camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
@@ -28,17 +32,19 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             else if (camera.m_OrbitRadius > 3) camera.m_OrbitRadius = 3;
 
             glm::vec3 pos = targetBody.position() + ((targetBody.forward() * glm::length(targetRadius) * 1.7f) + targetBody.up() * glm::length(targetRadius) * 0.3f) * (1.0f + camera.m_OrbitRadius);
-            pos -= glm::vec3(-0.00001f, -0.00001f, 0.00001f);//for some reason this is needed to remove lighting bugs...
 
-            m_Body.setPosition(pos);
+            thisBody.setPosition(pos);
 
-            componentCamera.lookAt(pos, targetBody.position() - targetBody.forward() * 50.0f, targetBody.up());
+            thisCamera.lookAt(pos, targetBody.position() - targetBody.forward() * 50.0f, targetBody.up());
             break;
         }
         case CameraState::FollowTarget: {
-            auto& target = *(camera.m_Target.getComponent<ComponentBody>());
-            auto& player = *(camera.m_Player.getComponent<ComponentBody>());
-            auto& playerModel = *(camera.m_Player.getComponent<ComponentModel>());
+            auto& targetEntity = camera.m_Target; epriv::EntitySerialization _st(targetEntity);
+            auto& playerEntity = camera.m_Player; epriv::EntitySerialization _sp(playerEntity);
+
+            auto& target = *(targetEntity.getComponent<ComponentBody>(_st));
+            auto& player = *(playerEntity.getComponent<ComponentBody>(_sp));
+            auto& playerModel = *(playerEntity.getComponent<ComponentModel>(_sp));
 
             camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
             if (camera.m_OrbitRadius < 0)     camera.m_OrbitRadius = 0;
@@ -51,14 +57,16 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 
             glm::vec3 pos(model[3][0], model[3][1], model[3][2]);
 
-            m_Body.setPosition(pos);
+            thisBody.setPosition(pos);
 
-            componentCamera.lookAt(pos, target.position(), player.up());
+            thisCamera.lookAt(pos, target.position(), player.up());
             break;
         }
         case CameraState::Orbit: {
-            auto& targetBody = *(camera.m_Target.getComponent<ComponentBody>());
-            auto& targetModel = *(camera.m_Target.getComponent<ComponentModel>());
+            auto& targetEntity = camera.m_Target; epriv::EntitySerialization _st(targetEntity);
+
+            auto& targetBody = *(targetEntity.getComponent<ComponentBody>(_st));
+            auto& targetModel = *(targetEntity.getComponent<ComponentModel>(_st));
 
 
             camera.m_OrbitRadius += Engine::getMouseWheelDelta() * 0.01f;
@@ -67,7 +75,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 
             camera.m_CameraMouseFactor += glm::vec2(-Engine::getMouseDifference().y * 0.02f, -Engine::getMouseDifference().x * 0.02f);
 
-            m_Body.rotate(camera.m_CameraMouseFactor.x * dt, camera.m_CameraMouseFactor.y * dt, 0);
+            thisBody.rotate(camera.m_CameraMouseFactor.x * dt, camera.m_CameraMouseFactor.y * dt, 0);
 
             camera.m_CameraMouseFactor *= 0.93f;
 
@@ -75,18 +83,17 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 
             glm::mat4 cameraModel = glm::mat4(1.0f);
             cameraModel = glm::translate(cameraModel, targetBody.position());
-            cameraModel *= glm::mat4_cast(m_Body.rotation());
+            cameraModel *= glm::mat4_cast(thisBody.rotation());
             cameraModel = glm::translate(cameraModel, pos);
 
             glm::vec3 eye(cameraModel[3][0], cameraModel[3][1], cameraModel[3][2]);
-            eye -= glm::vec3(-0.00001f, -0.00001f, 0.00001f);//for some reason this is needed to remove lighting bugs...
-            m_Body.setPosition(eye);
+            thisBody.setPosition(eye);
 
-            componentCamera.lookAt(eye, targetBody.position(), m_Body.up());
+            thisCamera.lookAt(eye, targetBody.position(), thisBody.up());
             break;
         }
         case CameraState::Freeform: {
-            componentCamera.lookAt(m_Body.position(), m_Body.position() + m_Body.forward(), m_Body.up());
+            thisCamera.lookAt(thisBody.position(), thisBody.position() + thisBody.forward(), thisBody.up());
             break;
         }
     }

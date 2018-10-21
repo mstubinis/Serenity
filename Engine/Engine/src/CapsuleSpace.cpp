@@ -227,8 +227,11 @@ void CapsuleSpace::update(const float& dt){
     if (rPosB.z >= 20 * aRadius || rPosB.z <= -20 * aRadius) {
         ribbonBBody.setPosition(0, 300, 0);
     }
-    ComponentBody& body = *getPlayer()->entity().getComponent<ComponentBody>();
-    ComponentModel& model = *getPlayer()->entity().getComponent<ComponentModel>();
+    auto& playerEntity = getPlayer()->entity();
+    epriv::EntitySerialization _s(playerEntity);
+
+    ComponentBody& body = *playerEntity.getComponent<ComponentBody>(_s);
+    ComponentModel& model = *playerEntity.getComponent<ComponentModel>(_s);
     body.setPosition(0,0,0);
 
     float x = glm::sin(m_Timer * 2.4f) * 0.07f;

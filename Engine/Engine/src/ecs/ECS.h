@@ -157,6 +157,13 @@ namespace Engine {
                     auto& cPool = *(CPoolType*)componentPools[type_slot];
                     return cPool.getComponent(_entity);
                 }
+                template<typename TComponent> TComponent* getComponent(const EntitySerialization& _s) {
+                    using CPoolType = ECSComponentPool<TEntity, TComponent>;
+                    uint type_slot = ECSRegistry::type_slot<TComponent>();
+                    buildPool<TComponent>(type_slot);
+                    auto& cPool = *(CPoolType*)componentPools[type_slot];
+                    return cPool.getComponent(_s);
+                }
         };
     };
 };

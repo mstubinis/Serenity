@@ -220,10 +220,11 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                 glm::vec3 s = (body.forward() * glm::pow(speed, 15.0f)) / body.mass();
                 for (auto& pod : epriv::InternalScenePublicInterface::GetEntities(currentScene)) {
                     Entity e = currentScene.getEntity(pod);
-                    auto* cam = e.getComponent<ComponentCamera>();
+                    epriv::EntitySerialization _s(e);
+                    auto* cam = e.getComponent<ComponentCamera>(_s);
                     //TODO: parent->child relationship
                     if (e != ship.m_Entity && !cam) {
-                        auto& ebody = *e.getComponent<ComponentBody>();
+                        auto& ebody = *e.getComponent<ComponentBody>(_s);
                         ebody.setPosition(ebody.position() + (s * dt));
                     }
                 }

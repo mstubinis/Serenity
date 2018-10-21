@@ -47,6 +47,10 @@ struct Entity{
         auto& _this = *this; auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
         return _ecs.getComponent<TComponent>(_this);
     }
+    template<typename TComponent> inline TComponent* getComponent(const Engine::epriv::EntitySerialization& _s) {
+        auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(*this);
+        return _ecs.getComponent<TComponent>(_s);
+    }
     void move(Scene& destination);
     static Entity _null;
 };

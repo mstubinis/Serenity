@@ -29,16 +29,14 @@ namespace Engine {
                     EntitySerialization _s(_entity);
                     return super::_remove(_s.ID);
                 }
-                inline bool removeComponentByIndex(uint& _index) {
-                    return super::_remove(_index);
-                }
+                inline bool removeComponent(const EntitySerialization& _s) { return super::_remove(_s.ID); }
+                inline bool removeComponent(uint& _index) { return super::_remove(_index); }
                 inline TComponent* getComponent(TEntity& _entity) {
                     EntitySerialization _s(_entity);
                     return super::_get(_s.ID);
                 }
-                inline TComponent* getComponent(const uint& _index) {
-                    return super::_get(_index);
-                }
+                inline TComponent* getComponent(const EntitySerialization& _s) { return super::_get(_s.ID); }
+                inline TComponent* getComponent(const uint& _index) { return super::_get(_index); }
         };
     };
 };

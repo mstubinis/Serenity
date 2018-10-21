@@ -66,13 +66,14 @@ class Scene::impl final {
             for (auto& data : epriv::InternalScenePublicInterface::GetEntities(super)) {
                 Entity e = super.getEntity(data);
                 if (e != center) {
-                    ComponentBody& entityBody = *e.getComponent<ComponentBody>();
-                    //if (entityBody) {
-                        entityBody.setPosition(entityBody.position() - centerBody.position());
-                    //}
+                    auto* eBody = e.getComponent<ComponentBody>();
+                    if (eBody) {
+                        auto& _eBody = *eBody;
+                        _eBody.setPosition(_eBody.position() - centerBody.position());
+                    }
                 }
             }
-            centerBody.setPosition(0.0f, 0.0f, 0.0f);
+            centerBody.setPosition(0.0f);
         }
         void _addMeshInstanceToPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, RenderStage::Stage _stage) {
             epriv::RenderPipeline* _pipeline = nullptr;

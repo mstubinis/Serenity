@@ -271,13 +271,14 @@ void ComponentBody::setCollision(CollisionType::Type _type, float _mass) {
     }
 }
 void ComponentBody::translate(glm::vec3 translation, bool local) { ComponentBody::translate(translation.x, translation.y, translation.z, local); }
+void ComponentBody::translate(float t, bool local) { ComponentBody::translate(t, t, t, local); }
 void ComponentBody::translate(float x, float y, float z, bool local) {
     if (_physics) {
         auto& rigidBody = *data.p->rigidBody;
         rigidBody.activate();
         btVector3 v(x, y, z);
         Math::translate(rigidBody, v, local);
-        setPosition(position() + Engine::Math::btVectorToGLM(v));
+        ComponentBody::setPosition(position() + Engine::Math::btVectorToGLM(v));
     }else{
         auto& normalData = *data.n;
         glm::vec3& _position = normalData.position;
@@ -302,36 +303,48 @@ void ComponentBody::rotate(float pitch, float yaw, float roll, bool local) {
 
         quat = btQuaternion(glmquat.x, glmquat.y, glmquat.z, glmquat.w);
         rigidBody.getWorldTransform().setRotation(quat);
+        Math::recalculateForwardRightUp(rigidBody, _forward, _right, _up);
     }else{
         auto& normalData = *data.n;
-        glm::quat& _rotation = normalData.rotation;
-        if (abs(pitch) >= 0.001f) _rotation = _rotation * (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));
-        if (abs(yaw) >= 0.001f)   _rotation = _rotation * (glm::angleAxis(-yaw, glm::vec3(0, 1, 0)));
-        if (abs(roll) >= 0.001f)  _rotation = _rotation * (glm::angleAxis(roll, glm::vec3(0, 0, 1)));
-        Math::recalculateForwardRightUp(_rotation, _forward, _right, _up);
+        glm::quat& glmquat = normalData.rotation;
+        if (abs(pitch) >= 0.001f) glmquat = glmquat * (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));
+        if (abs(yaw) >= 0.001f)   glmquat = glmquat * (glm::angleAxis(-yaw, glm::vec3(0, 1, 0)));
+        if (abs(roll) >= 0.001f)  glmquat = glmquat * (glm::angleAxis(roll, glm::vec3(0, 0, 1)));
+        Math::recalculateForwardRightUp(glmquat, _forward, _right, _up);
     }
 }
 void ComponentBody::scale(glm::vec3 amount) { ComponentBody::scale(amount.x, amount.y, amount.z); }
-void ComponentBody::scale(float x, float y, float z) {
+void ComponentBody::scale(float s) { ComponentBody::scale(s,s,s); }
+void ComponentBody::scale(float x,float y,float z) { 
     if (_physics) {
+        const auto& newScale = btVector3(x, y, z);
         auto& physicsData = *data.p;
         Collision& collision_ = *physicsData.collision;
         if (collision_.getShape() && collision_.getType() == CollisionType::Compound) {
-            btCompoundShape* cast = ((btCompoundShape*)(collision_.getShape()));
-            for (int i = 0; i < cast->getNumChildShapes(); ++i) {
-                btCollisionShape* shape = cast->getChildShape(i);
-                btUniformScalingShape* convexHull = dynamic_cast<btUniformScalingShape*>(shape);
-                if (convexHull) {
-                    convexHull->setLocalScaling(convexHull->getLocalScaling() + btVector3(x, y, z));
-                    continue;
-                }
-                btScaledBvhTriangleMeshShape* triHull = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                if (triHull) {
-                    triHull->setLocalScaling(triHull->getLocalScaling() + btVector3(x, y, z));
+            btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collision_.getShape());
+            if (compoundShapeCast) {
+                int numChildren = compoundShapeCast->getNumChildShapes();
+                if (numChildren > 0) {
+                    for (int i = 0; i < numChildren; ++i) {
+                        btCollisionShape* shape = compoundShapeCast->getChildShape(i);
+                        btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
+                        if (convexHullCast) {
+                            auto& _convexHullCast = *convexHullCast;
+                            const auto& _scl = _convexHullCast.getLocalScaling();
+                            _convexHullCast.setLocalScaling(_scl + newScale);
+                            continue;
+                        }
+                        btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
+                        if (triHullCast) {
+                            auto _triHullCast = *triHullCast;
+                            const auto& _scl = _triHullCast.getLocalScaling();
+                            _triHullCast.setLocalScaling(_scl + newScale);
+                        }
+                    }
                 }
             }
         }
-    }else{
+    }else {
         auto& normalData = *data.n;
         glm::vec3& _scale = normalData.scale;
         _scale.x += x; _scale.y += y; _scale.z += z;
@@ -342,6 +355,7 @@ void ComponentBody::scale(float x, float y, float z) {
     }
 }
 void ComponentBody::setPosition(glm::vec3 newPosition) { ComponentBody::setPosition(newPosition.x, newPosition.y, newPosition.z); }
+void ComponentBody::setPosition(float p) { ComponentBody::setPosition(p, p, p); }
 void ComponentBody::setPosition(float x, float y, float z) {
     if (_physics) {
         auto& physicsData = *data.p;
@@ -401,6 +415,7 @@ void ComponentBody::setRotation(float x, float y, float z, float w) {
     }
 }
 void ComponentBody::setScale(glm::vec3 newScale) { ComponentBody::setScale(newScale.x, newScale.y, newScale.z); }
+void ComponentBody::setScale(float s) { ComponentBody::setScale(s, s, s); }
 void ComponentBody::setScale(float x, float y, float z) {
     if (_physics) {
         auto& physicsData = *data.p;
