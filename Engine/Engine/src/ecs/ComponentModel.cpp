@@ -144,13 +144,15 @@ struct epriv::ComponentModelUpdateFunction final {
                     auto pos = _b.position() + meshInstance.position();
                     //per mesh instance radius instead?
                     uint sphereTest = _camera->sphereIntersectTest(pos, m._radius);                //per mesh instance radius instead?
-                    if (!meshInstance.visible() || sphereTest == 0 || _camera->getDistance(pos) > m._radius * 1100.0f) {
+                    auto comparison = m._radius * 1100.0f;
+                    //if (!meshInstance.visible() || sphereTest == 0 || _camera->getDistance(pos) > comparison) {
+                    if (!meshInstance.visible() || sphereTest == 0 || _camera->getDistanceSquared(pos) > comparison*comparison) { //optimization: using squared distance to remove the sqrt()
                         meshInstance.setPassedRenderCheck(false);
                         continue;
                     }
                     meshInstance.setPassedRenderCheck(true);
                 }
-            }else {
+            }else{
                 for (uint k = 0; k < m.models.size(); ++k) {
                     auto& meshInstance = *m.models[k];
                     meshInstance.setPassedRenderCheck(false);
@@ -171,12 +173,14 @@ struct epriv::ComponentModelUpdateFunction final {
     }
 };
 struct epriv::ComponentModelComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
-    ComponentModel& component = *(ComponentModel*)_component;
+    
+    auto& component = *(ComponentModel*)_component;
     ComponentModelFunctions::CalculateRadius(component);
     for (uint i = 0; i < component.models.size(); ++i) {
         auto& meshInstance = *component.models[i];
         InternalScenePublicInterface::AddMeshInstanceToPipeline(_entity.scene(), meshInstance, meshInstance.stage());
     }
+    
 }};
 struct epriv::ComponentModelEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
     /*

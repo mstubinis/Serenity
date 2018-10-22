@@ -91,9 +91,11 @@ void updateLogic(const float& dt){
     updatePhysics(dt);
     //update current scene
     Scene& scene = *Resources::getCurrentScene();
+    auto& _ecs = epriv::InternalScenePublicInterface::GetECS(scene);
+    _ecs.preUpdate(scene, dt);
     scene.update(dt);
-    epriv::InternalScenePublicInterface::GetECS(scene).update(dt);
-    epriv::InternalScenePublicInterface::GetECS(scene).postUpdate(scene,dt);
+    _ecs.update(dt);
+    _ecs.postUpdate(scene,dt);
 
 
     epriv::Core::m_Engine->m_ThreadManager._update(dt);

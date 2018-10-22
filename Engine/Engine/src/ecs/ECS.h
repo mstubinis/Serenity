@@ -73,7 +73,7 @@ namespace Engine {
                 void onSceneLeft(Scene& _Scene) { 
                     for (uint i = 0; i < systems.size(); ++i) { auto& system = *systems[i]; system.onSceneLeft(_Scene); }
                 }
-                void postUpdate(Scene& _scene,const float& dt) {
+                void preUpdate(Scene& _scene, const float& dt) {
                     if (justAddedEntities.size() > 0) {
                         for (uint i = 0; i < systems.size(); ++i) {
                             auto& system = *systems[i];
@@ -83,6 +83,8 @@ namespace Engine {
                         }
                         vector_clear(justAddedEntities);
                     }
+                }
+                void postUpdate(Scene& _scene,const float& dt) {
                     if (destroyedEntities.size() > 0) {
                         for (uint i = 0; i < componentPools.size(); ++i) {
                             auto& pool = *componentPools[i];

@@ -30,7 +30,9 @@ class Camera: public EntityWrapper{
         glm::quat getOrientation();
 
         float getDistance(Entity&);
-        float getDistance(glm::vec3);
+        float getDistance(glm::vec3&);
+        float getDistanceSquared(Entity&);
+        float getDistanceSquared(glm::vec3&);
 
         const float getAngle();    void setAngle(float);
         const float getAspect();   void setAspect(float);
@@ -46,8 +48,8 @@ class Camera: public EntityWrapper{
         const glm::mat4 getViewProjection();
         const glm::mat4 getViewProjectionInverse();
 
-        uint sphereIntersectTest(glm::vec3 pos,float radius);
-        uint pointIntersectTest(glm::vec3 pos);
+        uint sphereIntersectTest(glm::vec3& pos,float radius);
+        uint pointIntersectTest(glm::vec3& pos);
 
         bool rayIntersectSphere(Entity&);
 };

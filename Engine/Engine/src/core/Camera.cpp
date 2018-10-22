@@ -1,6 +1,7 @@
 #include "core/Camera.h"
 #include "core/Scene.h"
 #include "core/engine/Engine_Math.h"
+#include <glm/gtx/norm.hpp>
 
 using namespace Engine;
 using namespace boost;
@@ -52,9 +53,14 @@ float Camera::getDistance(Entity& e){
     auto& b = *e.getComponent<ComponentBody>();
     return glm::distance(b.position(),getPosition());
 }
-float Camera::getDistance(glm::vec3 objPos){ return glm::distance(objPos,getPosition()); }
-uint Camera::sphereIntersectTest(glm::vec3 pos, float radius){ return m_Entity.getComponent<ComponentCamera>()->sphereIntersectTest(pos,radius); }
-uint Camera::pointIntersectTest(glm::vec3 pos){ return m_Entity.getComponent<ComponentCamera>()->pointIntersectTest(pos); }
+float Camera::getDistance(glm::vec3& objPos){ return glm::distance(objPos,getPosition()); }
+float Camera::getDistanceSquared(Entity& e) {
+    auto& b = *e.getComponent<ComponentBody>();
+    return glm::distance2(b.position(), getPosition());
+}
+float Camera::getDistanceSquared(glm::vec3& objPos) { return glm::distance2(objPos, getPosition()); }
+uint Camera::sphereIntersectTest(glm::vec3& pos, float radius){ return m_Entity.getComponent<ComponentCamera>()->sphereIntersectTest(pos,radius); }
+uint Camera::pointIntersectTest(glm::vec3& pos){ return m_Entity.getComponent<ComponentCamera>()->pointIntersectTest(pos); }
 bool Camera::rayIntersectSphere(Entity& entity){
     auto& body = *entity.getComponent<ComponentBody>();
     auto* model = entity.getComponent<ComponentModel>();
