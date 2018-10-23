@@ -685,14 +685,18 @@ struct epriv::ComponentBodyUpdateFunction final {
     }
 };
 struct epriv::ComponentBodyComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
-    ComponentBody& component = *(ComponentBody*)_component;
-    if (component._physics) {
-        auto* _collision = component.data.p->collision;
-        component.setCollision((CollisionType::Type)_collision->getType(), component.data.p->mass);
-    }
+
 }};
 struct epriv::ComponentBodyEntityAddedToSceneFunction final {void operator()(void* _componentPool,Entity& _entity, Scene& _scene) const {
-
+    auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
+    auto* component = pool.getComponent(_entity);
+    if (component) {
+        auto& _component = *component;
+        if (_component._physics) {
+            auto* _collision = _component.data.p->collision;
+            _component.setCollision((CollisionType::Type)_collision->getType(), _component.data.p->mass);
+        }
+    }
 }};
 struct epriv::ComponentBodySceneEnteredFunction final {void operator()(void* _componentPool,Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
