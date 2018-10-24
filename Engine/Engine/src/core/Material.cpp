@@ -194,9 +194,8 @@ class Material::impl final{
             data->b = float(m_SpecularModel);
             data->a = float(m_DiffuseModel);
             if(add){
-                glm::vec4 dataCopy = glm::vec4(*data);
-                Material::m_MaterialProperities.push_back(dataCopy);
-                delete data;
+                Material::m_MaterialProperities.push_back(std::move(*data));
+                SAFE_DELETE(data);
             }
         }
         void _destruct(){

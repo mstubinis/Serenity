@@ -693,28 +693,18 @@ struct epriv::ComponentBodyEntityAddedToSceneFunction final {void operator()(voi
     if (component) {
         auto& _component = *component;
         if (_component._physics) {
-            auto* _collision = _component.data.p->collision;
-            _component.setCollision((CollisionType::Type)_collision->getType(), _component.data.p->mass);
+            auto& pData = *_component.data.p;
+            _component.setCollision((CollisionType::Type)pData.collision->getType(), pData.mass);
         }
     }
 }};
 struct epriv::ComponentBodySceneEnteredFunction final {void operator()(void* _componentPool,Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
-    for (auto& component : pool.pool()) {
-        if (component._physics) {
-            auto& rigidBody = *component.data.p->rigidBody;
-            Physics::addRigidBody(&rigidBody);
-        }
-    }
+    for (auto& component : pool.pool()) { if (component._physics) { Physics::addRigidBody(component.data.p->rigidBody); } }
 }};
 struct epriv::ComponentBodySceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
-    for (auto& component : pool.pool()) {
-        if (component._physics) {
-            auto& rigidBody = *component.data.p->rigidBody;
-            Physics::removeRigidBody(&rigidBody);
-        }
-    }
+    for (auto& component : pool.pool()) { if (component._physics) { Physics::removeRigidBody(component.data.p->rigidBody); } }
 }};
     
 ComponentBodySystem::ComponentBodySystem() {
