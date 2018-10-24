@@ -14,9 +14,9 @@ class btVector3;
 class btRigidBody;
 class btQuaternion;
 class Camera;
-typedef unsigned int uint;
-typedef unsigned short ushort;
-typedef unsigned char uchar;
+typedef std::uint32_t   uint;
+typedef unsigned short  ushort;
+typedef unsigned char   uchar;
 namespace glm{
     //floats
     typedef glm::tquat<float> q_f;	

@@ -12,7 +12,7 @@
 #include "core/engine/Engine_Noise.h"
 #include "core/engine/Engine_Window.h"
 
-typedef unsigned int uint;
+typedef std::uint32_t uint;
 namespace Engine{
     namespace epriv{
         struct Core final{

@@ -7,7 +7,7 @@
 class GameCamera;
 class Ship;
 class SolarSystem;
-typedef unsigned int uint;
+typedef std::uint32_t   uint;
 
 struct ShipLogicFunctor;
 

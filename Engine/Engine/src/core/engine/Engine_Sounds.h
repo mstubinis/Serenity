@@ -7,7 +7,7 @@
 #include <glm/vec3.hpp>
 #include <memory>
 
-typedef unsigned int uint;
+typedef std::uint32_t uint;
 
 class SoundBaseClass;
 class SoundEffect;

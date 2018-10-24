@@ -9,9 +9,9 @@
 #include <SFML/OpenGL.hpp>
 #include <memory>
 
-typedef unsigned int uint;
-typedef unsigned char uchar;
-typedef unsigned short ushort;
+typedef std::uint32_t     uint;
+typedef unsigned char     uchar;
+typedef unsigned short    ushort;
 
 class Texture;
 struct TextureWrap{enum Wrap{

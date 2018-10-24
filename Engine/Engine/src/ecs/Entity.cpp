@@ -1,6 +1,4 @@
 #include "ecs/Entity.h"
-#include "core/engine/Engine.h"
-#include "core/Scene.h"
 
 using namespace Engine;
 using namespace std;
@@ -11,7 +9,6 @@ Scene& Entity::scene() {
     epriv::EntitySerialization _s(*this);
     return epriv::Core::m_Engine->m_ResourceManager._getSceneByID(_s.sceneID);
 }
-bool Entity::null() { return data == 0 ? true : false; }
 void Entity::move(Scene& _scene) {
     epriv::EntitySerialization _s(*this);
     if (_scene.id() == _s.sceneID) return;

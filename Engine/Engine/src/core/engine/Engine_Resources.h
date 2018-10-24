@@ -6,8 +6,7 @@
 #include "core/engine/GLImageConstants.h"
 #include "core/ShaderProgram.h"
 
-typedef unsigned int uint;
-typedef std::uint32_t uint32;
+typedef std::uint32_t uint;
 
 class Engine_Window;
 class Scene;
@@ -35,15 +34,15 @@ struct ResourceType final {enum Type {
 _TOTAL};};
 
 struct Handle final {
-    uint32 index : 12;
-    uint32 counter : 15;
-    uint32 type : 5;
-    Handle();
-    Handle(uint32 _index, uint32 _counter, uint32 _type);
-    inline operator uint32() const;
-    const bool null() const;
+    uint index : 12;
+    uint version : 15;
+    uint type : 5;
+    explicit Handle() { index = 0; version = 0; type = 0; }
+    explicit Handle(uint _index, uint _version, uint _type) { index = _index; version = _version; type = _type; }
+    inline operator uint() const { return type << 27 | version << 12 | index; }
+    inline const bool null() const { return (type == ResourceType::Empty) ? true : false; }
     const EngineResource* get() const;
-    inline const EngineResource* operator ->() const;
+    inline const EngineResource* operator ->() const { return get(); }
 };
 
 namespace Engine{

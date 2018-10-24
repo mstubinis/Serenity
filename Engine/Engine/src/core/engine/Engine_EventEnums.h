@@ -4,7 +4,7 @@
 
 #include <SFML/System.hpp>
 
-typedef unsigned int uint;
+typedef std::uint32_t uint;
 
 struct KeyboardKey final{enum Key{
     Unknown = -1,

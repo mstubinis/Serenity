@@ -3,8 +3,9 @@
 #define ENGINE_RESOURCE_BASIC_H
 
 #include <string>
+#include <cstdint>
 
-typedef unsigned int uint;
+typedef std::uint32_t   uint;
 
 class EngineResource{
     private:

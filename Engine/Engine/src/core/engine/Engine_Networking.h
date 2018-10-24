@@ -5,8 +5,8 @@
 #include <SFML/Network.hpp>
 #include <memory>
 
-typedef unsigned int uint;
-typedef unsigned short ushort;
+typedef std::uint32_t   uint;
+typedef unsigned short  ushort;
 
 namespace Engine{
     namespace Networking{

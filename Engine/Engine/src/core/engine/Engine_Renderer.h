@@ -9,7 +9,7 @@
 #include <SFML/OpenGL.hpp>
 #include <SFML/Window.hpp>
 
-typedef unsigned int uint;
+typedef std::uint32_t uint;
 
 class  Mesh;
 class  Material;

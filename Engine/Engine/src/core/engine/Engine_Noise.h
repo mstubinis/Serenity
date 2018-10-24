@@ -5,7 +5,7 @@
 #include <memory>
 #include "core/engine/Engine_Utils.h"
 
-typedef unsigned int uint;
+typedef std::uint32_t   uint;
 
 namespace Engine{
     namespace epriv{

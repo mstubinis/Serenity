@@ -42,15 +42,10 @@ class epriv::ResourceManager::impl final{
             SAFE_DELETE_VECTOR(m_Scenes);
         }
 };
-Handle::Handle() { index = 0; counter = 0; type = 0; }
-Handle::Handle(uint32 _index, uint32 _counter, uint32 _type) { index = _index; counter = _counter; type = _type; }
-inline Handle::operator uint32() const { return type << 27 | counter << 12 | index; }
-const bool Handle::null() const { if (type == ResourceType::Empty) return true; return false; }
 const EngineResource* Handle::get() const {
     if (null()) return nullptr;
     return resourceManager->m_Resources->getAsFast<EngineResource>(index);
 }
-inline const EngineResource* Handle::operator ->() const { return get(); }
 
 epriv::ResourceManager::ResourceManager(const char* name,uint width,uint height):m_i(new impl){
     m_i->_init(name,width,height);

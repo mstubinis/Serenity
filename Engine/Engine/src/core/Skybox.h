@@ -6,8 +6,8 @@
 #include <memory>
 #include "core/engine/Engine_EventObject.h"
 
-typedef unsigned int GLuint;
-typedef unsigned int uint;
+typedef unsigned int     GLuint;
+typedef std::uint32_t    uint;
 
 class Scene;
 class Texture;

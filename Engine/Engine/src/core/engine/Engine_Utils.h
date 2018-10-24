@@ -3,9 +3,10 @@
 #define ENGINE_UTILS_H
 
 #include <vector>
+#include <cstdint>
 #include <boost/lexical_cast.hpp>
 
-typedef unsigned int uint;
+typedef std::uint32_t   uint;
 
 template <typename Stream> void readUint32tBigEndian(uint32_t& out,Stream& stream) {
     uint8_t buf[4];

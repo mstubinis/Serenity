@@ -13,7 +13,7 @@ struct Handle;
 class Shader;
 class ShaderP;
 class UniformBufferObject;
-typedef unsigned int uint;
+typedef std::uint32_t   uint;
 
 struct ShaderType{enum Type{
     Vertex,                // GL_VERTEX_SHADER

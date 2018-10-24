@@ -13,7 +13,6 @@ const uint MAX_ENTITIES = 2097152;
 const uint MAX_SCENES = 128;
 const uint MAX_VERSIONS = 16;
 
-class Scene;
 struct Entity{   
     uint data;
 
@@ -34,7 +33,7 @@ struct Entity{
 
     Scene& scene();
     void destroy();
-    bool null();
+    inline bool null() { return data == 0 ? true : false; }
     template<typename TComponent, typename... ARGS> inline TComponent* addComponent(ARGS&&... _args) {
         auto& _this = *this; auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
         return _ecs.addComponent<TComponent>(_this, std::forward<ARGS>(_args)...);
