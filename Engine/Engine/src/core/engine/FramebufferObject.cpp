@@ -17,13 +17,13 @@ class epriv::FramebufferObjectAttatchment::impl{
         GLuint m_GL_Attatchment;
         void _init(FramebufferObject& _fbo,FramebufferAttatchment::Attatchment a,ImageInternalFormat::Format i){
             m_FBO = &_fbo;
-            m_GL_Attatchment = FramebufferAttatchment::at(a);
-            m_InternalFormat = ImageInternalFormat::at(i);
+            m_GL_Attatchment = a;
+            m_InternalFormat = i;
         }
         void _init(FramebufferObject& _fbo,FramebufferAttatchment::Attatchment a,Texture* t){
             m_FBO = &_fbo;
-            m_GL_Attatchment = FramebufferAttatchment::at(a);
-            m_InternalFormat = ImageInternalFormat::at(t->internalFormat());
+            m_GL_Attatchment = a;
+            m_InternalFormat = t->internalFormat();
         }
 };
 epriv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(FramebufferObject& _fbo,FramebufferAttatchment::Attatchment a,ImageInternalFormat::Format i):m_i(new impl){ m_i->_init(_fbo,a,i); }
@@ -47,10 +47,10 @@ class epriv::FramebufferTexture::impl{
         GLuint m_PixelType;
         void _init(Texture* t){
             m_Texture = t;
-            m_PixelFormat = ImagePixelFormat::at(t->pixelFormat());
-            m_PixelType = ImagePixelType::at(t->pixelType());
+            m_PixelFormat = t->pixelFormat();
+            m_PixelType = t->pixelType();
         }
-        void _bindGPUDataToFBO(FramebufferTexture& super) {               //force as GL_TEXTURE_2D?                      //mipmap level
+        void _bindGPUDataToFBO(FramebufferTexture& super) {               //force as GL_TEXTURE_2D?                    //mipmap level
             glFramebufferTexture2D(GL_FRAMEBUFFER, super.attatchment(), super.texture()->type(), m_Texture->address(), 0);
         }
         void _destruct(){

@@ -35,18 +35,6 @@ namespace Engine{
         class CollisionFactory;
         struct DefaultMeshBindFunctor;
         struct DefaultMeshUnbindFunctor;
-        struct VertexFormat final {enum Format {
-            Position, UV, Normal, Binormal, Tangent,
-         _TOTAL};};
-        struct VertexFormatCompressed final {enum Format {
-            PositionAndUV, Normal, Binormal, Tangent,
-        _TOTAL};};
-        struct VertexFormatAnimated final {enum Format {
-            Position, UV, Normal, Binormal, Tangent, BoneIDs, BoneWeights,
-        _TOTAL};};
-        struct VertexFormatAnimatedCompressed final {enum Format {
-            PositionAndUV, Normal, Binormal, Tangent, BoneIDs, BoneWeights,
-        _TOTAL};};
         struct Vertex final{
             glm::vec3 position;
             glm::vec2 uv;

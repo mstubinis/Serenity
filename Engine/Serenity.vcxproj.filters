@@ -52,6 +52,12 @@
     <Filter Include="Source Files\Engine\Core\ECS\Components">
       <UniqueIdentifier>{e877f0fd-85bd-4d3e-94b9-63ba56e5c250}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Mesh">
+      <UniqueIdentifier>{14e2a4e5-b5a6-4652-a768-ed67448184cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Mesh">
+      <UniqueIdentifier>{bff1fa72-d8ff-4da2-9cc0-fbf10be17520}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Engine\data\Shaders\AS_groundFromSpace_frag.glsl">
@@ -158,9 +164,6 @@
     <ClCompile Include="Engine\src\core\Material.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\Mesh.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\MeshInstance.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
@@ -183,9 +186,6 @@
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\GBuffer.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\GLImageConstants.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\CapsuleSpace.cpp">
@@ -232,6 +232,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\ComponentLogic3.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\Mesh.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\VertexData.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -346,9 +352,6 @@
     <ClInclude Include="Engine\src\core\Material.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\Mesh.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\MeshInstance.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
@@ -426,6 +429,15 @@
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\Components.h">
       <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\Mesh.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\VertexAttribute.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\VertexData.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

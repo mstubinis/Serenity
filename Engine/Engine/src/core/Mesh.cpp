@@ -1,4 +1,5 @@
 #include "core/Mesh.h"
+#include "core/engine/mesh/VertexData.h"
 #include "core/engine/Engine_Resources.h"
 #include "core/engine/Engine_Renderer.h"
 #include "core/engine/Engine_Math.h"
@@ -86,15 +87,6 @@ namespace Engine{
             }
             ~MeshVertexData(){ }
         };
-        struct MeshVertexDataCompressed {
-            glm::vec4 positionAndUV;
-            GLuint normal, binormal, tangent;
-            MeshVertexDataCompressed() { }
-            MeshVertexDataCompressed(const MeshVertexDataCompressed& c) {
-                positionAndUV = c.positionAndUV; normal = c.normal; binormal = c.binormal; tangent = c.tangent;
-            }
-            ~MeshVertexDataCompressed() { }
-        };
         struct MeshVertexDataAnimated final: public MeshVertexData{
             glm::vec4 boneIDs, boneWeights;
             MeshVertexDataAnimated():MeshVertexData(){ }
@@ -106,40 +98,6 @@ namespace Engine{
             }
             ~MeshVertexDataAnimated(){ }
         };
-        struct MeshVertexDataAnimatedCompressed final : public MeshVertexDataCompressed {
-            glm::vec4 boneIDs, boneWeights;
-            MeshVertexDataAnimatedCompressed() :MeshVertexDataCompressed() { }
-            MeshVertexDataAnimatedCompressed(const MeshVertexDataCompressed& c) {
-                positionAndUV = c.positionAndUV; normal = c.normal; binormal = c.binormal; tangent = c.tangent;
-            }
-            MeshVertexDataAnimatedCompressed(const MeshVertexDataAnimatedCompressed& c) {
-                positionAndUV = c.positionAndUV; normal = c.normal; binormal = c.binormal; tangent = c.tangent; boneIDs = c.boneIDs; boneWeights = c.boneWeights;
-            }
-            ~MeshVertexDataAnimatedCompressed() { }
-        };
-        unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORMAT_DATA = [](){
-            unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> m;
-            m[VertexFormatAnimated::Position]    = boost::make_tuple(3,        GL_FLOAT,              GL_FALSE,  0);
-            m[VertexFormatAnimated::UV]          = boost::make_tuple(2,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
-            m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimated,normal));
-            m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimated,binormal));
-            m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimated,tangent));
-            m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,boneIDs));
-            m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,boneWeights));
-            return m;
-        }();
-        //https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
-        unordered_map<uint, boost::tuple<uint, GLuint, GLuint, GLuint>> VERTEX_ANIMATED_FORMAT_DATA_COMPRESSED = []() {
-            unordered_map<uint, boost::tuple<uint, GLuint, GLuint, GLuint>> m;
-            m[VertexFormatAnimatedCompressed::PositionAndUV]  = boost::make_tuple(4,       GL_FLOAT, GL_FALSE,               0);
-            m[VertexFormatAnimatedCompressed::Normal]         = boost::make_tuple(GL_BGRA, GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimatedCompressed, normal));
-            m[VertexFormatAnimatedCompressed::Binormal]       = boost::make_tuple(GL_BGRA, GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimatedCompressed, binormal));
-            m[VertexFormatAnimatedCompressed::Tangent]        = boost::make_tuple(GL_BGRA, GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimatedCompressed, tangent));
-            m[VertexFormatAnimatedCompressed::BoneIDs]        = boost::make_tuple(4,       GL_FLOAT, GL_FALSE,               offsetof(MeshVertexDataAnimatedCompressed, boneIDs));
-            m[VertexFormatAnimatedCompressed::BoneWeights]    = boost::make_tuple(4,       GL_FLOAT, GL_FALSE,               offsetof(MeshVertexDataAnimatedCompressed, boneWeights));
-            return m;
-        }();
-
         class MeshLoader final {
             friend class ::Mesh;
             public:
@@ -1014,24 +972,25 @@ class Mesh::impl final{
         }
         void _bindMeshDataToGPU(){
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
-            uint _structSize = m_Skeleton ? sizeof(epriv::MeshVertexDataAnimated) : sizeof(epriv::MeshVertexData);
-            uint _enumTotal = m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
-            for (uint i = 0; i < _enumTotal; ++i) {
-                auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA[i];
-                glEnableVertexAttribArray(i);
-                glVertexAttribPointer(i, d.get<0>(), d.get<1>(), d.get<2>(), _structSize, (void*)d.get<3>());
+
+            if (m_Skeleton) {
+                VertexData::VertexDataAnimated.bind();
+            }else{
+                VertexData::VertexDataBasic.bind();
             }
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers[1]);
             //instances
+            /*
             if (m_buffers.size() >= 3) {
                 glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
-                uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
+                uint attributeIndex = VertexData::VertexDataAnimated.attributes.size();
                 for (uint j = 0; j < 4; ++j) {
                     glEnableVertexAttribArray(attributeIndex + j);
                     glVertexAttribPointer(attributeIndex + j, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(j * sizeof(glm::vec4)));
                     if (epriv::RenderManager::OPENGL_VERSION >= 33) { glVertexAttribDivisor(attributeIndex + j, 1); }
                 }
             }
+            */
         }
         void _buildVAO(){
             Renderer::deleteVAO(m_VAO);
@@ -1512,13 +1471,18 @@ namespace Engine {
             if (m.m_VAO) {
                 Renderer::bindVAO(0);
             }else{
-                uint _enumTotal = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
-                for (uint i = 0; i < _enumTotal; ++i) { glDisableVertexAttribArray(i); }
+                if (m.m_Skeleton) {
+                    VertexData::VertexDataAnimated.unbind();
+                }else {
+                    VertexData::VertexDataBasic.unbind();
+                }
                 //instances
+                /*
                 if (m.m_buffers.size() >= 3) {
                     uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
                     for (uint j = 0; j < 4; ++j) { glDisableVertexAttribArray(attributeIndex + j); }
                 }
+                */
             }
         }};
     };

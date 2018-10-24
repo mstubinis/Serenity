@@ -51,7 +51,7 @@
     <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp" />
     <ClCompile Include="Engine\src\core\engine\FramebufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\GBuffer.cpp" />
-    <ClCompile Include="Engine\src\core\engine\GLImageConstants.cpp" />
+    <ClCompile Include="Engine\src\core\engine\mesh\VertexData.cpp" />
     <ClCompile Include="Engine\src\core\Font.cpp" />
     <ClCompile Include="Engine\src\core\Light.cpp" />
     <ClCompile Include="Engine\src\core\Material.cpp" />
@@ -111,6 +111,8 @@
     <ClInclude Include="Engine\src\core\engine\FramebufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\GBuffer.h" />
     <ClInclude Include="Engine\src\core\engine\GLImageConstants.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\VertexAttribute.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\VertexData.h" />
     <ClInclude Include="Engine\src\core\engine\SMAA_LUT.h" />
     <ClInclude Include="Engine\src\core\Font.h" />
     <ClInclude Include="Engine\src\core\Light.h" />

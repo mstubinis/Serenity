@@ -552,14 +552,14 @@ class Texture::impl final{
             auto& imageData = *m_ImagesDatas[0];
             imageData.mipmaps[0].width = _w;
             imageData.mipmaps[0].height = _h;
-            glTexImage2D(m_Type,0,ImageInternalFormat::at(imageData.internalFormat),_w,_h,0,ImagePixelFormat::at(imageData.pixelFormat),ImagePixelType::at(imageData.pixelType),NULL);
+            glTexImage2D(m_Type,0,imageData.internalFormat,_w,_h,0,imageData.pixelFormat,imageData.pixelType,NULL);
         }
         void _importIntoOpenGL(ImageMipmap& mipmap,GLuint _OpenGLType){
             auto& imageData = *m_ImagesDatas[0];
             if(TextureLoader::IsCompressedType(imageData.internalFormat) && mipmap.compressedSize != 0)
-                glCompressedTexImage2D(_OpenGLType,mipmap.level,ImageInternalFormat::at(imageData.internalFormat),mipmap.width,mipmap.height,0,mipmap.compressedSize,&(mipmap.pixels)[0]);
+                glCompressedTexImage2D(_OpenGLType,mipmap.level,imageData.internalFormat,mipmap.width,mipmap.height,0,mipmap.compressedSize,&(mipmap.pixels)[0]);
             else
-                glTexImage2D(_OpenGLType,mipmap.level,ImageInternalFormat::at(imageData.internalFormat),mipmap.width,mipmap.height,0,ImagePixelFormat::at(imageData.pixelFormat),ImagePixelType::at(imageData.pixelType),&(mipmap.pixels)[0]);
+                glTexImage2D(_OpenGLType,mipmap.level,imageData.internalFormat,mipmap.width,mipmap.height,0,imageData.pixelFormat,imageData.pixelType,&(mipmap.pixels)[0]);
         }
 };
 
@@ -766,7 +766,7 @@ void epriv::TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture& _texture){
     auto& image = *i.m_ImagesDatas[0];
     uint& _w(image.mipmaps[0].width);
     uint& _h(image.mipmaps[0].height);
-    glTexImage2D(i.m_Type,0,ImageInternalFormat::at(image.internalFormat),_w,_h,0,ImagePixelFormat::at(image.pixelFormat),ImagePixelType::at(image.pixelType),NULL);
+    glTexImage2D(i.m_Type,0,image.internalFormat,_w,_h,0,image.pixelFormat,image.pixelType,NULL);
     _texture.setFilter(TextureFilter::Linear);
     _texture.setWrapping(TextureWrap::ClampToEdge);
 }
@@ -793,7 +793,7 @@ void epriv::TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture& _texture,uint
     uint& _h(image.mipmaps[mipmapLevel].height);
     pxls.resize(_w * _h * 4);
     Renderer::bindTexture(i.m_Type,i.m_TextureAddress[0]);
-    glGetTexImage(i.m_Type,0,ImagePixelFormat::at(image.pixelFormat),ImagePixelType::at(image.pixelType),&pxls[0]);
+    glGetTexImage(i.m_Type,0,image.pixelFormat,image.pixelType,&pxls[0]);
 }
 void epriv::TextureLoader::ChoosePixelFormat(ImagePixelFormat::Format& _out,ImageInternalFormat::Format& _in){
     switch(_in){
