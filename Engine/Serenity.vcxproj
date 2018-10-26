@@ -112,6 +112,7 @@
     <ClInclude Include="Engine\src\core\engine\GBuffer.h" />
     <ClInclude Include="Engine\src\core\engine\GLImageConstants.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexAttribute.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\VertexBufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexData.h" />
     <ClInclude Include="Engine\src\core\engine\SMAA_LUT.h" />
     <ClInclude Include="Engine\src\core\Font.h" />

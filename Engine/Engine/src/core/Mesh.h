@@ -135,8 +135,8 @@ namespace Engine{
             static void LoadGPU(Mesh&);
             static void UnloadCPU(Mesh&);
             static void UnloadGPU(Mesh&);
-            static void UpdateInstance(Mesh&, uint _id, glm::mat4 _modelMatrix);
-            static void UpdateInstances(Mesh&, std::vector<glm::mat4>& _modelMatrices);
+            //static void UpdateInstance(Mesh&, uint _id, glm::mat4 _modelMatrix);
+            //static void UpdateInstances(Mesh&, std::vector<glm::mat4>& _modelMatrices);
             static bool SupportsInstancing();
             static btCollisionShape* BuildCollision(Mesh*, CollisionType::Type);
         };

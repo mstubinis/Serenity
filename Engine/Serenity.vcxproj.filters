@@ -439,5 +439,8 @@
     <ClInclude Include="Engine\src\core\engine\mesh\VertexData.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\VertexBufferObject.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,6 @@
 #include "core/Mesh.h"
 #include "core/engine/mesh/VertexData.h"
+#include "core/engine/mesh/VertexBufferObject.h"
 #include "core/engine/Engine_Resources.h"
 #include "core/engine/Engine_Renderer.h"
 #include "core/engine/Engine_Math.h"
@@ -385,7 +386,10 @@ namespace Engine{
 
 class Mesh::impl final{
     public:
-        vector<GLuint> m_buffers;
+        VertexBufferObject    m_BufferVertex;
+        ElementBufferObject   m_BufferIndices;
+
+
         Engine::epriv::CollisionFactory* m_CollisionFactory;
 
         epriv::MeshSkeleton* m_Skeleton;
@@ -910,7 +914,7 @@ class Mesh::impl final{
             m_radius = Math::Max(m_radiusBox);
         }
         void _modifyPoints(vector<glm::vec3>& modifiedPts){
-            glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
+            m_BufferVertex.bind();
             if(m_Skeleton){
                 auto& skeleton = *m_Skeleton;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
@@ -921,17 +925,17 @@ class Mesh::impl final{
                     temp.push_back(vert);
                 }
                 for(uint i = 0; i < modifiedPts.size(); ++i){ temp[i].position = modifiedPts[i]; }
-                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0]);
+                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated), &temp[0]);
                 vector_clear(temp);
             }else{
                 for(uint i = 0; i < modifiedPts.size(); ++i){
                     m_Vertices[i].position = modifiedPts[i];
                 }
-                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0]);
+                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexData), &m_Vertices[0]);
             }
         }
         void _modifyUVs(vector<glm::vec2>& modifiedUVs){
-            glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
+            m_BufferVertex.bind();
             if(m_Skeleton){
                 auto& skeleton = *m_Skeleton;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
@@ -942,15 +946,15 @@ class Mesh::impl final{
                     temp.push_back(vert);
                 }
                 for(uint i = 0; i < modifiedUVs.size(); ++i){ temp[i].uv = modifiedUVs[i]; }
-                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0]);
+                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated), &temp[0]);
                 vector_clear(temp);
             }else{
                 for (uint i = 0; i < modifiedUVs.size(); ++i) { m_Vertices[i].uv = modifiedUVs[i]; }
-                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0]);
+                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexData), &m_Vertices[0]);
             }
         }
         void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
-            glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
+            m_BufferVertex.bind();
             if(m_Skeleton){
                 auto& skeleton = *m_Skeleton;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
@@ -962,23 +966,22 @@ class Mesh::impl final{
                 }
                 for(uint i = 0; i < modifiedPts.size(); ++i){ temp[i].position = modifiedPts[i]; }
                 for(uint i = 0; i < modifiedUVs.size(); ++i){ temp[i].uv = modifiedUVs[i]; }
-                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0]);
+                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated), &temp[0]);
                 vector_clear(temp);
             }else{
                 for(uint i = 0; i < modifiedPts.size(); ++i){ m_Vertices[i].position = modifiedPts[i]; }
                 for(uint i = 0; i < modifiedUVs.size(); ++i){ m_Vertices[i].uv = modifiedUVs[i]; }
-                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0]);
+                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexData), &m_Vertices[0]);
             }
         }
         void _bindMeshDataToGPU(){
-            glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
-
+            m_BufferVertex.bind();
             if (m_Skeleton) {
                 VertexData::VertexDataAnimated.bind();
             }else{
                 VertexData::VertexDataBasic.bind();
             }
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers[1]);
+            m_BufferIndices.bind();
             //instances
             /*
             if (m_buffers.size() >= 3) {
@@ -1007,11 +1010,10 @@ class Mesh::impl final{
             cout << "(Mesh) ";
         }
         void _unload_GPU(Mesh& super){
-            for(uint i = 0; i < m_buffers.size(); ++i){
-                glDeleteBuffers(1,&m_buffers[i]);
-            }
+            m_BufferIndices.destroy();
+            m_BufferVertex.destroy();
             Renderer::deleteVAO(m_VAO);
-            vector_clear(m_buffers);
+
         }
         void _load_CPU(Mesh& super){
             if(m_File != ""){
@@ -1021,14 +1023,8 @@ class Mesh::impl final{
             m_CollisionFactory = new Engine::epriv::CollisionFactory(super,m_Vertices,m_Indices);
         }
         void _load_GPU(Mesh& super){
-            if(m_buffers.size() > 0){
-                _unload_GPU(super);
-            }
-
             //vertex data
-            m_buffers.push_back(0);
-            glGenBuffers(1, &m_buffers[0]);
-            glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
+            m_BufferVertex.bind();
             if(m_Skeleton){
                 auto& skeleton = *m_Skeleton;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
@@ -1038,15 +1034,13 @@ class Mesh::impl final{
                     vert.boneWeights = skeleton.m_BoneWeights[i];
                     temp.push_back(vert);
                 }
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
+                m_BufferVertex.bufferData(m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated), &temp[0], BufferDataType::Dynamic);
             }else{
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
+                m_BufferVertex.bufferData(m_Vertices.size() * sizeof(epriv::MeshVertexData), &m_Vertices[0], BufferDataType::Dynamic);
             }
             //index data
-            m_buffers.push_back(0);
-            glGenBuffers(1, &m_buffers[1]);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers[1]);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
+            m_BufferIndices.bind();
+            m_BufferIndices.bufferData(m_Indices.size() * sizeof(ushort), &m_Indices[0],BufferDataType::Static);
             /*
             if(InternalMeshPublicInterface::SupportsInstancing()){
                 //instancing data
@@ -1616,6 +1610,7 @@ void epriv::InternalMeshPublicInterface::UnloadCPU( Mesh& _mesh){
 void epriv::InternalMeshPublicInterface::UnloadGPU( Mesh& _mesh){
     _mesh.m_i->_unload_GPU(_mesh);
 }
+/*
 void epriv::InternalMeshPublicInterface::UpdateInstance( Mesh& _mesh,uint _id, glm::mat4 _modelMatrix){
     auto& i = *_mesh.m_i;
     glBindBuffer(GL_ARRAY_BUFFER, i.m_buffers[2]);
@@ -1630,6 +1625,7 @@ void epriv::InternalMeshPublicInterface::UpdateInstances( Mesh& _mesh,vector<glm
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * i.m_InstanceCount, &_modelMatrices[0]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+*/
 bool epriv::InternalMeshPublicInterface::SupportsInstancing(){
     if(epriv::RenderManager::OPENGL_VERSION >= 31 || 
     epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_draw_instanced) || 
