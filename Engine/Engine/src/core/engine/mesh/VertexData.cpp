@@ -1,9 +1,9 @@
 #include "VertexData.h"
 #include <glm/glm.hpp>
 
-VertexData VertexData::VertexDataBasic = [&]() {
+VertexDataFormat VertexDataFormat::VertexDataBasic = [&]() {
     unsigned int _stride = sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(GLuint) + sizeof(GLuint) + sizeof(GLuint);
-    VertexData data;
+    VertexDataFormat data;
     data.add(3, GL_FLOAT, false, _stride, 0); //positions
     data.add(2, GL_FLOAT, false, _stride, 12); //uvs
     data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true, _stride, 20); //normals
@@ -11,9 +11,9 @@ VertexData VertexData::VertexDataBasic = [&]() {
     data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true, _stride, 28); //tangents
     return data;
 }();
-VertexData VertexData::VertexDataAnimated = [&]() {
+VertexDataFormat VertexDataFormat::VertexDataAnimated = [&]() {
     unsigned int _stride = sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(GLuint) + sizeof(GLuint) + sizeof(GLuint) + sizeof(glm::vec4) + sizeof(glm::vec4);
-    VertexData data;
+    VertexDataFormat data;
     data.add(3, GL_FLOAT, false, _stride, 0); //positions
     data.add(2, GL_FLOAT, false, _stride, 12); //uvs
     data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true, _stride, 20); //normals

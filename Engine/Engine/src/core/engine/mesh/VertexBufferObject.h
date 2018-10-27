@@ -12,21 +12,25 @@ struct BufferDataType {enum Type {
 _TOTAL};};
 struct BufferObject {
     GLuint buffer;
-    BufferObject() :buffer(0) { glGenBuffers(1, &buffer); }
+    BufferObject() :buffer(0) { if (!buffer) { glGenBuffers(1, &buffer); } }
 
     BufferObject(const BufferObject& other) = delete;
     BufferObject& operator=(const BufferObject& other) = delete;
     BufferObject(BufferObject&& other) noexcept = delete;
     BufferObject& operator=(BufferObject&& other) noexcept = delete;
 
-    ~BufferObject() { destroy(); }
+    virtual ~BufferObject() { destroy(); }
 
     void destroy() { if (buffer) { glDeleteBuffers(1, &buffer); buffer = 0; } }
     inline operator GLuint() const { return buffer; }
+
+    virtual void bind() { }
+    virtual void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { }
+    virtual void bufferSubData(size_t _size, const void* _data) { }
 };
 struct VertexBufferObject : public BufferObject{
     VertexBufferObject() = default;
-
+    ~VertexBufferObject() = default;
     VertexBufferObject(const VertexBufferObject& other) = delete;
     VertexBufferObject& operator=(const VertexBufferObject& other) = delete;
     VertexBufferObject(VertexBufferObject&& other) noexcept = delete;
@@ -38,7 +42,7 @@ struct VertexBufferObject : public BufferObject{
 };
 struct ElementBufferObject : public BufferObject {
     ElementBufferObject() = default;
-
+    ~ElementBufferObject() = default;
     ElementBufferObject(const ElementBufferObject& other) = delete;
     ElementBufferObject& operator=(const ElementBufferObject& other) = delete;
     ElementBufferObject(ElementBufferObject&& other) noexcept = delete;
