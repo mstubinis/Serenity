@@ -108,47 +108,39 @@ struct VertexData {
         size_t size = 0;
 
         if (format.interleavingType == VertexAttributeLayout::Interleaved) {
-            // |PosUvNormBiNormTang|PosUvNormBiNormTang|PosUvNormBiNormTang|
             size = format.attributes[0].stride * dataSizes[0];
             buffer = (char*)malloc(size);
             for (size_t i = 0; i < dataSizes[0]; ++i) {
                 for (size_t j = 0; j < data.size(); ++j) {
                     const auto& sizeofT = format.attributes[j].typeSize;
-                    const auto& dataSize = dataSizes[j];
-                    char* _data = (char*)data[j];
-                    memcpy(&buffer[accumulator], &_data[i * sizeofT], sizeofT);
+                    memcpy(&buffer[accumulator], &((char*)data[j])[i * sizeofT], sizeofT);
                     accumulator += sizeofT;
                 }
             }
-            _vBuffer.bufferData(size, (void*)buffer, BufferDataType::Dynamic);
+            _vBuffer.bufferData(size, buffer, BufferDataType::Dynamic);
         }else{
-            // |PosPosPos|UvUvUv|NormNormNorm|BinormBinormBinorm|TangTangTang|
             if (attributeIndex == -1) {
-                for (size_t i = 0; i < data.size(); ++i) {
+                for (size_t i = 0; i < data.size(); ++i)
                     size += format.attributes[i].typeSize * dataSizes[i];
-                }
                 buffer = (char*)malloc(size);
                 for (size_t i = 0; i < data.size(); ++i) {
                     auto blockSize = dataSizes[i] * format.attributes[i].typeSize;
-                    char* _data = (char*)data[i];
-                    memcpy(&buffer[accumulator], &_data[0], blockSize);
+                    memcpy(&buffer[accumulator], &((char*)data[i])[0], blockSize);
                     accumulator += blockSize;
                 }
-                _vBuffer.bufferData(size, (void*)buffer, BufferDataType::Dynamic);
+                _vBuffer.bufferData(size, buffer, BufferDataType::Dynamic);
             }else{
                 size += format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex];
                 buffer = (char*)malloc(size);
                 for (size_t i = 0; i < data.size(); ++i) {
-                    auto blockSize = dataSizes[i] * format.attributes[i].typeSize;
                     if (i != attributeIndex) {
-                        accumulator += blockSize;
+                        accumulator += dataSizes[i] * format.attributes[i].typeSize;
                     }else{
-                        char* _data = (char*)data[i];
-                        memcpy(&buffer[0], &_data[0], size);
+                        memcpy(&buffer[0], &((char*)data[i])[0], size);
                         break;
                     }
                 }
-                _vBuffer.bufferSubData(size, accumulator, (void*)buffer);
+                _vBuffer.bufferSubData(size, accumulator, buffer);
             }
         }
         free(buffer);

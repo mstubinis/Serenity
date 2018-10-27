@@ -29,26 +29,18 @@ struct BufferObject {
     virtual void bufferSubData(size_t _size, const void* _data) { }
     virtual void bufferSubData(size_t _size, size_t _startingIndex, const void* _data) { }
 };
-struct VertexBufferObject : public BufferObject{
+struct VertexBufferObject final : public BufferObject{
     VertexBufferObject() = default;
     ~VertexBufferObject() = default;
-    VertexBufferObject(const VertexBufferObject& other) = delete;
-    VertexBufferObject& operator=(const VertexBufferObject& other) = delete;
-    VertexBufferObject(VertexBufferObject&& other) noexcept = delete;
-    VertexBufferObject& operator=(VertexBufferObject&& other) noexcept = delete;
 
     void bind() override;
     void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
     void bufferSubData(size_t _size, const void* _data) override;
     void bufferSubData(size_t _size, size_t _startingIndex, const void* _data) override;
 };
-struct ElementBufferObject : public BufferObject {
+struct ElementBufferObject final : public BufferObject {
     ElementBufferObject() = default;
     ~ElementBufferObject() = default;
-    ElementBufferObject(const ElementBufferObject& other) = delete;
-    ElementBufferObject& operator=(const ElementBufferObject& other) = delete;
-    ElementBufferObject(ElementBufferObject&& other) noexcept = delete;
-    ElementBufferObject& operator=(ElementBufferObject&& other) noexcept = delete;
 
     void bind() override;
     void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
