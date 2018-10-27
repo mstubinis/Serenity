@@ -12,8 +12,7 @@ struct BufferDataType {enum Type {
 _TOTAL};};
 struct BufferObject {
     GLuint buffer;
-    BufferObject() :buffer(0) { if (!buffer) { glGenBuffers(1, &buffer); } }
-
+    BufferObject() :buffer(0) { }
     BufferObject(const BufferObject& other) = delete;
     BufferObject& operator=(const BufferObject& other) = delete;
     BufferObject(BufferObject&& other) noexcept = delete;
@@ -21,12 +20,14 @@ struct BufferObject {
 
     virtual ~BufferObject() { destroy(); }
 
-    void destroy() { if (buffer) { glDeleteBuffers(1, &buffer); buffer = 0; } }
+    inline void generate() { if (!buffer) { glGenBuffers(1, &buffer); } }
+    inline void destroy() { if (buffer) { glDeleteBuffers(1, &buffer); buffer = 0; } }
     inline operator GLuint() const { return buffer; }
 
-    virtual void bind() { }
-    virtual void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { }
-    virtual void bufferSubData(size_t _size, const void* _data) { }
+    inline virtual void bind() { }
+    inline virtual void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { }
+    inline virtual void bufferSubData(size_t _size, const void* _data) { }
+    inline virtual void bufferSubData(size_t _size, size_t _startingIndex, const void* _data) { }
 };
 struct VertexBufferObject : public BufferObject{
     VertexBufferObject() = default;
@@ -36,9 +37,12 @@ struct VertexBufferObject : public BufferObject{
     VertexBufferObject(VertexBufferObject&& other) noexcept = delete;
     VertexBufferObject& operator=(VertexBufferObject&& other) noexcept = delete;
 
-    void bind() { glBindBuffer(GL_ARRAY_BUFFER, buffer); }
-    void bufferData(size_t _size,const void* _data, BufferDataType::Type _drawType) { glBufferData(GL_ARRAY_BUFFER, _size, _data, _drawType); }
-    void bufferSubData(size_t _size, const void* _data) { glBufferSubData(GL_ARRAY_BUFFER, 0, _size, _data); }
+    inline void bind() override { glBindBuffer(GL_ARRAY_BUFFER, buffer); }
+    inline void bufferData(size_t _size,const void* _data, BufferDataType::Type _drawType) override {
+        glBufferData(GL_ARRAY_BUFFER, _size, _data, _drawType); 
+    }
+    inline void bufferSubData(size_t _size, const void* _data) override { glBufferSubData(GL_ARRAY_BUFFER, 0, _size, _data); }
+    inline void bufferSubData(size_t _size, size_t _startingIndex, const void* _data) override { glBufferSubData(GL_ARRAY_BUFFER, _startingIndex, _size, _data); }
 };
 struct ElementBufferObject : public BufferObject {
     ElementBufferObject() = default;
@@ -48,9 +52,12 @@ struct ElementBufferObject : public BufferObject {
     ElementBufferObject(ElementBufferObject&& other) noexcept = delete;
     ElementBufferObject& operator=(ElementBufferObject&& other) noexcept = delete;
 
-    void bind() { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer); }
-    void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { glBufferData(GL_ELEMENT_ARRAY_BUFFER, _size, _data, _drawType); }
-    void bufferSubData(size_t _size, const void* _data) { glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, _size, _data); }
+    inline void bind() override { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer); }
+    inline void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) override {
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _size, _data, _drawType); 
+    }
+    inline void bufferSubData(size_t _size, const void* _data) override { glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, _size, _data); }
+    inline void bufferSubData(size_t _size, size_t _startingIndex, const void* _data) override { glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, _startingIndex, _size, _data); }
 };
 
 #endif

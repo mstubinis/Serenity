@@ -1,8 +1,6 @@
 #include "core/Mesh.h"
 #include "core/engine/mesh/VertexData.h"
-#include "core/engine/mesh/VertexBufferObject.h"
 #include "core/engine/Engine_Resources.h"
-#include "core/engine/Engine_Renderer.h"
 #include "core/engine/Engine_Math.h"
 #include "core/MeshInstance.h"
 
@@ -76,28 +74,6 @@ namespace Engine{
                        //= 1024,
                        //= 2048,
                        //= 4096,
-        };
-        struct MeshVertexData{
-            glm::vec3 position;
-            //float uv;
-            glm::vec2 uv;
-            GLuint normal, binormal, tangent;
-            MeshVertexData(){ }
-            MeshVertexData(const MeshVertexData& c){
-                position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent;
-            }
-            ~MeshVertexData(){ }
-        };
-        struct MeshVertexDataAnimated final: public MeshVertexData{
-            glm::vec4 boneIDs, boneWeights;
-            MeshVertexDataAnimated():MeshVertexData(){ }
-            MeshVertexDataAnimated(const MeshVertexData& c){
-                position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent;
-            }
-            MeshVertexDataAnimated(const MeshVertexDataAnimated& c){
-                position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent; boneIDs=c.boneIDs; boneWeights=c.boneWeights;
-            }
-            ~MeshVertexDataAnimated(){ }
         };
         class MeshLoader final {
             friend class ::Mesh;
@@ -290,11 +266,12 @@ namespace Engine{
         class CollisionFactory final{
             friend class ::Mesh;
             private:
-                void _initConvexData(vector<MeshVertexData>& _vertices) {
+                void _initConvexData(VertexData& data) {
+                    auto& positions = data.getData<glm::vec3>(0);
                     if (!m_ConvexHullData) {
                         m_ConvesHullShape = new btConvexHullShape();
-                        for (auto& vertex : _vertices) {
-                            m_ConvesHullShape->addPoint(btVector3(vertex.position.x, vertex.position.y, vertex.position.z));
+                        for (auto& pos : positions) {
+                            m_ConvesHullShape->addPoint(btVector3(pos.x, pos.y, pos.z));
                         }
                         m_ConvexHullData = new btShapeHull(m_ConvesHullShape);
                         m_ConvexHullData->buildHull(m_ConvesHullShape->getMargin());
@@ -308,11 +285,12 @@ namespace Engine{
                         m_ConvesHullShape->recalcLocalAabb();
                     }
                 }
-                void _initTriangleData(vector<MeshVertexData>& _vertices, vector<ushort>& _indices) {
+                void _initTriangleData(VertexData& data) {
                     if (!m_TriangleStaticData) {
+                        auto& positions = data.getData<glm::vec3>(0);
                         vector<glm::vec3> triangles;
-                        for (auto& indice : _indices) {
-                            triangles.push_back(_vertices[indice].position);
+                        for (auto& indice : data.indices) {
+                            triangles.push_back(positions[indice]);
                         }
                         m_TriangleStaticData = new btTriangleMesh();
                         uint count = 0;
@@ -340,13 +318,13 @@ namespace Engine{
                 btConvexHullShape* m_ConvesHullShape;
                 btTriangleMesh* m_TriangleStaticData;
                 btBvhTriangleMeshShape* m_TriangleStaticShape;
-                CollisionFactory(Mesh& _mesh, vector<MeshVertexData>& _vertices, vector<ushort>& _indices):m_Mesh(_mesh){
+                CollisionFactory(Mesh& _mesh, VertexData& data):m_Mesh(_mesh){
                     m_ConvexHullData = nullptr;
                     m_ConvesHullShape = nullptr;
                     m_TriangleStaticData = nullptr;
                     m_TriangleStaticShape = nullptr;
-                    _initConvexData(_vertices);
-                    _initTriangleData(_vertices,_indices);
+                    _initConvexData(data);
+                    _initTriangleData(data);
                 }
                 ~CollisionFactory() {
                     SAFE_DELETE(m_ConvexHullData);
@@ -386,12 +364,7 @@ namespace Engine{
 
 class Mesh::impl final{
     public:
-        VertexBufferObject    m_BufferVertex;
-        ElementBufferObject   m_BufferIndices;
-
         VertexData*           m_VertexData;
-
-
         Engine::epriv::CollisionFactory* m_CollisionFactory;
 
         epriv::MeshSkeleton* m_Skeleton;
@@ -400,16 +373,11 @@ class Mesh::impl final{
         glm::vec3 m_radiusBox;
         float m_radius;
         float m_threshold;
-
-        vector<epriv::MeshVertexData> m_Vertices;
-        vector<ushort> m_Indices;
         vector<glm::mat4> m_InstanceMatrices;
         uint m_InstanceCount;
-        GLuint m_VAO;
 
         void _initGlobal(float threshold){
             m_InstanceCount = 0;
-            m_VAO = 0;
             m_File = "";
             m_Skeleton = nullptr;
             m_VertexData = nullptr;
@@ -717,11 +685,6 @@ class Mesh::impl final{
             if(data.binormals.size() == 0)   data.binormals.resize(data.points.size());
             if(data.tangents.size() == 0)    data.tangents.resize(data.points.size());
 
-
-            
-            //new mesh system
-            /*
-            vector<ushort> _indices;
             if (m_Skeleton) {
                 m_VertexData = new VertexData(VertexDataFormat::VertexDataAnimated);
             }else{
@@ -734,14 +697,14 @@ class Mesh::impl final{
                 for (size_t i = 0; i < data.normals.size(); ++i) normals[0].push_back(Math::pack3NormalsInto32Int(data.normals[i]));
                 for (size_t i = 0; i < data.binormals.size(); ++i) normals[1].push_back(Math::pack3NormalsInto32Int(data.binormals[i]));
                 for (size_t i = 0; i < data.tangents.size(); ++i) normals[2].push_back(Math::pack3NormalsInto32Int(data.tangents[i]));
-                for (auto& pt : data.points) {
-                    vertexData.setData(0, &data.points[0], data.points.size());
-                    vertexData.setData(1, &data.uvs[0], data.uvs.size());
-                    vertexData.setData(2, &(normals[0])[0], normals[0].size());
-                    vertexData.setData(3, &(normals[1])[0], normals[1].size());
-                    vertexData.setData(4, &(normals[2])[0], normals[2].size());
-                }
-            }else {
+                vertexData.setData(0, data.points);
+                vertexData.setData(1, data.uvs);
+                vertexData.setData(2, normals[0]);
+                vertexData.setData(3, normals[1]);
+                vertexData.setData(4, normals[2]);
+                vertexData.setDataIndices(data.indices);
+            }else{
+                vector<ushort> _indices;
                 vector<glm::vec3> temp_pos; temp_pos.reserve(data.points.size());
                 vector<glm::vec2> temp_uvs; temp_uvs.reserve(data.uvs.size());
                 vector<glm::vec3> temp_normals; temp_normals.reserve(data.normals.size());
@@ -755,110 +718,36 @@ class Mesh::impl final{
                         //average out TBN. But it cancels out normal mapping on some flat surfaces
                         //temp_binormals[index] += data.binormals[i];
                         //temp_tangents[index] += data.tangents[i];
-                    }else {
+                    }else{
                         temp_pos.emplace_back(data.points[i]);
                         temp_uvs.emplace_back(data.uvs[i]);
                         temp_normals.emplace_back(data.normals[i]);
                         temp_binormals.emplace_back(data.binormals[i]);
                         temp_tangents.emplace_back(data.tangents[i]);
-                        _indices.emplace_back((ushort)m_Vertices.size() - 1);
+                        _indices.emplace_back((ushort)temp_pos.size() - 1);
                     }
                 }
                 normals[0].reserve(temp_normals.size()); normals[1].reserve(temp_binormals.size()); normals[2].reserve(temp_tangents.size());
                 for (size_t i = 0; i < temp_normals.size(); ++i) normals[0].push_back(Math::pack3NormalsInto32Int(temp_normals[i]));
                 for (size_t i = 0; i < temp_binormals.size(); ++i) normals[1].push_back(Math::pack3NormalsInto32Int(temp_binormals[i]));
                 for (size_t i = 0; i < temp_tangents.size(); ++i) normals[2].push_back(Math::pack3NormalsInto32Int(temp_tangents[i]));
-                for (uint i = 0; i < temp_pos.size(); ++i) {
-                    vertexData.setData(0, &temp_pos[0], temp_pos.size());
-                    vertexData.setData(1, &temp_uvs[0], temp_uvs.size());
-                    vertexData.setData(2, &(normals[0])[0], normals[0].size());
-                    vertexData.setData(3, &(normals[1])[0], normals[1].size());
-                    vertexData.setData(4, &(normals[2])[0], normals[2].size());
-                }
+                vertexData.setData(0, temp_pos);
+                vertexData.setData(1, temp_uvs);
+                vertexData.setData(2, normals[0]);
+                vertexData.setData(3, normals[1]);
+                vertexData.setData(4, normals[2]);
+                vertexData.setDataIndices(_indices);
             }
             if (m_Skeleton) {
                 vector<vector<glm::vec4>> boneStuff; boneStuff.resize(2);
-                boneStuff[0].reserve(_skeleton.m_BoneIDs.size()); boneStuff[1].reserve(_skeleton.m_BoneIDs.size());
                 auto& _skeleton = *m_Skeleton;
+                boneStuff[0].reserve(_skeleton.m_BoneIDs.size()); boneStuff[1].reserve(_skeleton.m_BoneIDs.size());   
                 for (uint i = 0; i < _skeleton.m_BoneIDs.size(); ++i) {
                     boneStuff[0].push_back(_skeleton.m_BoneIDs[i]);
                     boneStuff[1].push_back(_skeleton.m_BoneWeights[i]);
                 }
-                vertexData.setData(5, &(boneStuff[0])[0], boneStuff[0].size());
-                vertexData.setData(6, &(boneStuff[1])[0], boneStuff[1].size());
-            }
-            */
-
-
-
-
-            if (m_threshold == 0.0f) {
-                uint c = 0;
-                for (auto& pt : data.points) {
-                    if (m_Skeleton) {
-                        epriv::MeshVertexDataAnimated vert;
-                        vert.position = pt;
-                        //vert.uv = Math::pack2FloatsInto1Float(data.uvs[c]);
-                        vert.uv = data.uvs[c];
-                        vert.normal = Math::pack3NormalsInto32Int(data.normals[c]);
-                        if (c <= data.binormals.size() - 1)
-                            vert.binormal = Math::pack3NormalsInto32Int(data.binormals[c]);
-                        if (c <= data.tangents.size() - 1)
-                            vert.tangent = Math::pack3NormalsInto32Int(data.tangents[c]);
-                        m_Vertices.emplace_back(vert);
-                    }else {
-                        epriv::MeshVertexData vert;
-                        vert.position = pt;
-                        //vert.uv = Math::pack2FloatsInto1Float(data.uvs[c]);
-                        vert.uv = data.uvs[c];
-                        vert.normal = Math::pack3NormalsInto32Int(data.normals[c]);
-                        vert.binormal = Math::pack3NormalsInto32Int(data.binormals[c]);
-                        vert.tangent = Math::pack3NormalsInto32Int(data.tangents[c]);
-                        m_Vertices.emplace_back(vert);
-                    }
-                    ++c;
-                }
-                m_Indices = data.indices;
-                return;
-            }
-            vector<glm::vec3> temp_pos; temp_pos.reserve(data.points.size());
-            vector<glm::vec2> temp_uvs; temp_uvs.reserve(data.uvs.size());
-            vector<glm::vec3> temp_normals; temp_normals.reserve(data.normals.size());
-            vector<glm::vec3> temp_binormals; temp_binormals.reserve(data.binormals.size());
-            vector<glm::vec3> temp_tangents; temp_tangents.reserve(data.tangents.size());
-            for (uint i = 0; i < data.points.size(); ++i) {
-                ushort index;
-                bool found = epriv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, m_threshold);
-                if (found) {
-                    m_Indices.emplace_back(index);
-                    //average out TBN. But it cancels out normal mapping on some flat surfaces
-                    //temp_binormals[index] += data.binormals[i];
-                    //temp_tangents[index] += data.tangents[i];
-                }else {
-                    if (m_Skeleton) {
-                        epriv::MeshVertexDataAnimated vert;
-                        vert.position = data.points[i];
-                        m_Vertices.emplace_back(vert);
-                    }else {
-                        epriv::MeshVertexData vert;
-                        vert.position = data.points[i];
-                        m_Vertices.emplace_back(vert);
-                    }
-                    temp_pos.emplace_back(data.points[i]);
-                    temp_uvs.emplace_back(data.uvs[i]);
-                    temp_normals.emplace_back(data.normals[i]);
-                    temp_binormals.emplace_back(data.binormals[i]);
-                    temp_tangents.emplace_back(data.tangents[i]);
-                    m_Indices.emplace_back((ushort)m_Vertices.size() - 1);
-                }
-            }
-            for (uint i = 0; i < m_Vertices.size(); ++i) {
-                auto& vert = m_Vertices[i];
-                //vert.uv = Math::pack2FloatsInto1Float(temp_uvs[i]);
-                vert.uv = temp_uvs[i];
-                vert.normal = Math::pack3NormalsInto32Int(temp_normals[i]);
-                vert.binormal = Math::pack3NormalsInto32Int(temp_binormals[i]);
-                vert.tangent = Math::pack3NormalsInto32Int(temp_tangents[i]);
+                vertexData.setData(5, boneStuff[0]);
+                vertexData.setData(6, boneStuff[1]);
             }
         }
         void _loadFromFile(Mesh& super, string& file, float threshold) {
@@ -869,7 +758,7 @@ class Mesh::impl final{
                 _readFromObjCompressed(file, d);
                 _finalizeData(d, threshold);
             }else if (extension == ".objcc") {
-                _readFromObjCompressed1(file, d);
+                _readFromObjCompressed1(file);
             }else{
                 if (extension == ".obj")
                     _writeToObjCompressed1(); 
@@ -962,20 +851,15 @@ class Mesh::impl final{
         }
         void _loadFromOBJMemory(float threshold,unsigned char _flags,string input){
             epriv::ImportedMeshData d;
-
-            vector<uint> positionIndices;
-            vector<uint> uvIndices;
-            vector<uint> normalIndices;
-
-            istringstream stream;
-            stream.str(input);
+            vector<vector<uint>> indices; indices.resize(3);
+            istringstream stream; stream.str(input);
 
             //first read in all data
             for(string line; getline(stream, line, '\n');){
-                _loadObjDataFromLine(line,d,positionIndices,uvIndices,normalIndices,_flags);
+                _loadObjDataFromLine(line, d, indices[0], indices[1], indices[2], _flags);
             }
             if(_flags && epriv::LOAD_FACES){
-                _loadDataIntoTriangles(d,positionIndices,uvIndices,normalIndices,_flags);
+                _loadDataIntoTriangles(d, indices[0], indices[1], indices[2], _flags);
             }
             if(_flags && epriv::LOAD_TBN && d.normals.size() > 0){
                 epriv::MeshLoader::CalculateTBNAssimp(d);
@@ -984,114 +868,31 @@ class Mesh::impl final{
         }
         void _calculateMeshRadius(Mesh& super){
             float maxX = 0; float maxY = 0; float maxZ = 0;
-            for(auto vertex:m_Vertices){
-                float x = abs(vertex.position.x); float y = abs(vertex.position.y); float z = abs(vertex.position.z);
+            auto& data = m_VertexData->getData<glm::vec3>(0);
+            for(auto& _vertex : data){
+                float x = abs(_vertex.x); float y = abs(_vertex.y); float z = abs(_vertex.z);
                 if(x > maxX) maxX = x; if(y > maxY) maxY = y; if(z > maxZ) maxZ = z;
             }
             m_radiusBox = glm::vec3(maxX,maxY,maxZ);
             m_radius = Math::Max(m_radiusBox);
         }
         void _modifyPoints(vector<glm::vec3>& modifiedPts){
-            m_BufferVertex.bind();
-            if(m_Skeleton){
-                auto& skeleton = *m_Skeleton;
-                vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
-                for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices[i];
-                    vert.boneIDs = skeleton.m_BoneIDs[i];
-                    vert.boneWeights = skeleton.m_BoneWeights[i];
-                    temp.push_back(vert);
-                }
-                for(uint i = 0; i < modifiedPts.size(); ++i){ temp[i].position = modifiedPts[i]; }
-                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated), &temp[0]);
-                vector_clear(temp);
-            }else{
-                for(uint i = 0; i < modifiedPts.size(); ++i){
-                    m_Vertices[i].position = modifiedPts[i];
-                }
-                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexData), &m_Vertices[0]);
-            }
+            m_VertexData->setData(0, modifiedPts,true);
         }
         void _modifyUVs(vector<glm::vec2>& modifiedUVs){
-            m_BufferVertex.bind();
-            if(m_Skeleton){
-                auto& skeleton = *m_Skeleton;
-                vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
-                for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices[i];
-                    vert.boneIDs = skeleton.m_BoneIDs[i];
-                    vert.boneWeights = skeleton.m_BoneWeights[i];
-                    temp.push_back(vert);
-                }
-                for(uint i = 0; i < modifiedUVs.size(); ++i){ temp[i].uv = modifiedUVs[i]; }
-                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated), &temp[0]);
-                vector_clear(temp);
-            }else{
-                for (uint i = 0; i < modifiedUVs.size(); ++i) { m_Vertices[i].uv = modifiedUVs[i]; }
-                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexData), &m_Vertices[0]);
-            }
+            m_VertexData->setData(1, modifiedUVs,true);
         }
         void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
-            m_BufferVertex.bind();
-            if(m_Skeleton){
-                auto& skeleton = *m_Skeleton;
-                vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
-                for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices[i];
-                    vert.boneIDs = skeleton.m_BoneIDs[i];
-                    vert.boneWeights = skeleton.m_BoneWeights[i];
-                    temp.push_back(vert);
-                }
-                for(uint i = 0; i < modifiedPts.size(); ++i){ temp[i].position = modifiedPts[i]; }
-                for(uint i = 0; i < modifiedUVs.size(); ++i){ temp[i].uv = modifiedUVs[i]; }
-                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated), &temp[0]);
-                vector_clear(temp);
-            }else{
-                for(uint i = 0; i < modifiedPts.size(); ++i){ m_Vertices[i].position = modifiedPts[i]; }
-                for(uint i = 0; i < modifiedUVs.size(); ++i){ m_Vertices[i].uv = modifiedUVs[i]; }
-                m_BufferVertex.bufferSubData(m_Vertices.size() * sizeof(epriv::MeshVertexData), &m_Vertices[0]);
-            }
+            m_VertexData->setData(0, modifiedPts,true);
+            m_VertexData->setData(1, modifiedUVs,true);
         }
-        void _bindMeshDataToGPU(){
-            m_BufferVertex.bind();
-            m_BufferIndices.bind();
-            if (m_Skeleton) {
-                VertexDataFormat::VertexDataAnimated.bind();
-            }else{
-                VertexDataFormat::VertexDataBasic.bind();
-            }
-            //instances
-            /*
-            if (m_buffers.size() >= 3) {
-                glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
-                uint attributeIndex = VertexData::VertexDataAnimated.attributes.size();
-                for (uint j = 0; j < 4; ++j) {
-                    glEnableVertexAttribArray(attributeIndex + j);
-                    glVertexAttribPointer(attributeIndex + j, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(j * sizeof(glm::vec4)));
-                    if (epriv::RenderManager::OPENGL_VERSION >= 33) { glVertexAttribDivisor(attributeIndex + j, 1); }
-                }
-            }
-            */
-        }
-        void _buildVAO(){
-            Renderer::deleteVAO(m_VAO);
-            if (epriv::RenderManager::OPENGL_VERSION >= 30) {
-                Renderer::genAndBindVAO(m_VAO);
-                _bindMeshDataToGPU();
-                Renderer::bindVAO(0);
-            }
-        }
-        void _unload_CPU(Mesh& super){
-            vector_clear(m_Vertices);
+        void _unload_CPU(){
             SAFE_DELETE(m_Skeleton);
-            SAFE_DELETE(m_CollisionFactory);
-            SAFE_DELETE(m_VertexData);
+            SAFE_DELETE(m_CollisionFactory);   
             cout << "(Mesh) ";
         }
-        void _unload_GPU(Mesh& super){
-            m_BufferIndices.destroy();
-            m_BufferVertex.destroy();
-            Renderer::deleteVAO(m_VAO);
+        void _unload_GPU(){
+            SAFE_DELETE(m_VertexData);
 
         }
         void _load_CPU(Mesh& super){
@@ -1099,55 +900,10 @@ class Mesh::impl final{
                 _loadFromFile(super,m_File,m_threshold);
             }
             _calculateMeshRadius(super);
-            m_CollisionFactory = new Engine::epriv::CollisionFactory(super,m_Vertices,m_Indices);
+            m_CollisionFactory = new Engine::epriv::CollisionFactory(super,*m_VertexData);
         }
-        void _load_GPU(Mesh& super){
-
-
-            //if (m_Skeleton) {
-            //    m_VertexData = new VertexData(VertexDataFormat::VertexDataAnimated);
-            //}else{
-            //    m_VertexData = new VertexData(VertexDataFormat::VertexDataBasic);
-            //}
-
-
-            //m_VertexData->setDataIndices(&m_Indices[0], m_Indices.size());
-
-            
-
-            //index data
-            m_BufferIndices.bind();
-            m_BufferIndices.bufferData(m_Indices.size() * sizeof(ushort), &m_Indices[0], BufferDataType::Static);
-
-            //vertex data
-            m_BufferVertex.bind();
-            if(m_Skeleton){
-                auto& skeleton = *m_Skeleton;
-                vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
-                for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices[i];
-                    vert.boneIDs = skeleton.m_BoneIDs[i];
-                    vert.boneWeights = skeleton.m_BoneWeights[i];
-                    temp.push_back(vert);
-                }
-                m_BufferVertex.bufferData(m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated), &temp[0], BufferDataType::Dynamic);
-            }else{
-                m_BufferVertex.bufferData(m_Vertices.size() * sizeof(epriv::MeshVertexData), &m_Vertices[0], BufferDataType::Dynamic);
-            }
-            /*
-            if(InternalMeshPublicInterface::SupportsInstancing()){
-                //instancing data
-                m_buffers.push_back(0);
-                vector<glm::mat4> defaultMatrices;
-                glm::mat4 _identity = glm::mat4(1.0f);
-                defaultMatrices.resize(NUM_MAX_INSTANCES,_identity);
-                glGenBuffers(1, &m_buffers[2]);
-                glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
-                glBufferData(GL_ARRAY_BUFFER, NUM_MAX_INSTANCES * sizeof(glm::mat4), &defaultMatrices[0], GL_DYNAMIC_DRAW);           
-            }
-            */
-            //support vao's
-            _buildVAO();
+        void _load_GPU(){
+            m_VertexData->finalize();
             cout << "(Mesh) ";
         }
         //slow loading, but smaller file size than .objcc
@@ -1172,8 +928,7 @@ class Mesh::impl final{
             data.file_uvs.reserve(sizes[1]);
             data.file_normals.reserve(sizes[2]);
 
-            vector<vector<uint>> _indices;
-            _indices.reserve(3); for (uint i = 0; i < 3; ++i) _indices.emplace_back();
+            vector<vector<uint>> _indices; _indices.resize(3);
             _indices[0].reserve(sizes[3]);
             _indices[1].reserve(sizes[4]);
             _indices[2].reserve(sizes[5]);
@@ -1240,10 +995,7 @@ class Mesh::impl final{
         //slow loading, but smaller file size than .objcc
         void _writeToObjCompressed() {
             epriv::ImportedMeshData d;
-
-            vector<vector<uint>> _indices;
-            _indices.resize(3);
-
+            vector<vector<uint>> _indices; _indices.resize(3);
             ifstream input(m_File);
 
             //first read in all data
@@ -1253,8 +1005,7 @@ class Mesh::impl final{
             //header:
             string f = m_File;
             string ext = boost::filesystem::extension(m_File);
-            f = f.substr(0, f.size() - ext.size());
-            f += ".objc";
+            f = f.substr(0, f.size() - ext.size()); f += ".objc";
             ofstream stream(f,ios::binary);
 
             //header
@@ -1265,32 +1016,26 @@ class Mesh::impl final{
             for (uint i = 0; i < _indices.size(); ++i) {
                 sizes[3+i] = _indices[i].size();
             }
-
             for (uint i = 0; i < 6; ++i) {
                 writeUint32tBigEndian(sizes[i], stream);
             }
             for (auto& pos : d.file_points) {
                 uint16_t out[3];
-                float16(&out[0], pos.x);
-                float16(&out[1], pos.y);
-                float16(&out[2], pos.z);
+                float16(&out[0], pos.x); float16(&out[1], pos.y); float16(&out[2], pos.z);
                 for (uint i = 0; i < 3; ++i) {
                     writeUint16tBigEndian(out[i], stream);
                 }
             }
             for (auto& uv : d.file_uvs) {
                 uint16_t out[2];
-                float16(&out[0], uv.x);
-                float16(&out[1], uv.y);
+                float16(&out[0], uv.x); float16(&out[1], uv.y);
                 for (uint i = 0; i < 2; ++i) {
                     writeUint16tBigEndian(out[i], stream);
                 }
             }
             for (auto& norm : d.file_normals) {
                 uint16_t out[3];
-                float16(&out[0], norm.x);
-                float16(&out[1], norm.y);
-                float16(&out[2], norm.z);
+                float16(&out[0], norm.x); float16(&out[1], norm.y); float16(&out[2], norm.z);
                 for (uint i = 0; i < 3; ++i) {
                     writeUint16tBigEndian(out[i], stream);
                 }
@@ -1305,7 +1050,7 @@ class Mesh::impl final{
             stream.close();
         }  
         //very fast loading, might be slightly larger than .objc
-        void _readFromObjCompressed1(string& filename, epriv::ImportedMeshData& data) {
+        void _readFromObjCompressed1(string& filename) {
             boost::iostreams::mapped_file_source stream(filename.c_str());
             //TODO: try possible optimizations
 
@@ -1320,53 +1065,63 @@ class Mesh::impl final{
                 sizes[i] |= (uint32_t)_data[blockStart + 3];
                 blockStart += 4;
             }
-            m_Vertices.reserve(sizes[0]);
-            m_Indices.reserve(sizes[1]);
 
             if (sizes[2] == 1) {
-                //skeleton
-                for (uint i = 0; i < sizes[0]; ++i) {
-                    epriv::MeshVertexDataAnimated _vertex;
+                m_VertexData = new VertexData(VertexDataFormat::VertexDataAnimated);
+            }else{
+                m_VertexData = new VertexData(VertexDataFormat::VertexDataBasic);
+            }
 
-                    //positions
-                    float outPos[3];
-                    uint16_t inPos[3];
-                    for (uint j = 0; j < 3; ++j) {
-                        inPos[j]  = (uint32_t)_data[blockStart    ] << 8;
-                        inPos[j] |= (uint32_t)_data[blockStart + 1];
-                        blockStart += 2;
-                    }
-                    float32(&outPos[0], inPos[0]); float32(&outPos[1], inPos[1]); float32(&outPos[2], inPos[2]);
-                    _vertex.position = glm::vec3(outPos[0], outPos[1], outPos[2]);
-                    //uvs
-                    float outUV[2];
-                    uint16_t inUV[2];
-                    for (uint j = 0; j < 2; ++j) {
-                        inUV[j]  = (uint32_t)_data[blockStart    ] << 8;
-                        inUV[j] |= (uint32_t)_data[blockStart + 1];
-                        blockStart += 2;
-                    }
-                    float32(&outUV[0], inUV[0]);
-                    float32(&outUV[1], inUV[1]);
-                    _vertex.uv = glm::vec2(outUV[0], outUV[1]);
-                    //normals (remember they are GLuints right now)
-                    uint32_t inn[3];
-                    for (uint i = 0; i < 3; ++i) {
-                        inn[i]  = (uint32_t)_data[blockStart    ] << 24;
-                        inn[i] |= (uint32_t)_data[blockStart + 1] << 16;
-                        inn[i] |= (uint32_t)_data[blockStart + 2] << 8;
-                        inn[i] |= (uint32_t)_data[blockStart + 3];
-                        blockStart += 4;
-                    }
-                    _vertex.normal = inn[0];
-                    _vertex.binormal = inn[1];
-                    _vertex.tangent = inn[2];
+            auto& data = *m_VertexData;
+            data.indices.reserve(sizes[1]);
+            vector<glm::vec3> temp_pos; temp_pos.reserve(sizes[0]);
+            vector<glm::vec2> temp_uvs; temp_uvs.reserve(sizes[0]);
+            vector<GLuint> temp_norm; temp_norm.reserve(sizes[0]);
+            vector<GLuint> temp_binorm; temp_binorm.reserve(sizes[0]);
+            vector<GLuint> temp_tang; temp_tang.reserve(sizes[0]);
+            vector<glm::vec4> temp_bID; temp_bID.reserve(sizes[0]);
+            vector<glm::vec4> temp_bW; temp_bW.reserve(sizes[0]);
 
+            for (uint i = 0; i < sizes[0]; ++i) {
+                //positions
+                float outPos[3];
+                uint16_t inPos[3];
+                for (uint j = 0; j < 3; ++j) {
+                    inPos[j] = (uint32_t)_data[blockStart] << 8;
+                    inPos[j] |= (uint32_t)_data[blockStart + 1];
+                    blockStart += 2;
+                }
+                float32(&outPos[0], inPos[0]); float32(&outPos[1], inPos[1]); float32(&outPos[2], inPos[2]);
+                temp_pos.emplace_back(outPos[0], outPos[1], outPos[2]);
+                //uvs
+                float outUV[2];
+                uint16_t inUV[2];
+                for (uint j = 0; j < 2; ++j) {
+                    inUV[j] = (uint32_t)_data[blockStart] << 8;
+                    inUV[j] |= (uint32_t)_data[blockStart + 1];
+                    blockStart += 2;
+                }
+                float32(&outUV[0], inUV[0]);
+                float32(&outUV[1], inUV[1]);
+                temp_uvs.emplace_back(outUV[0], outUV[1]);
+                //normals (remember they are GLuints right now)
+                uint32_t inn[3];
+                for (uint i = 0; i < 3; ++i) {
+                    inn[i] = (uint32_t)_data[blockStart] << 24;
+                    inn[i] |= (uint32_t)_data[blockStart + 1] << 16;
+                    inn[i] |= (uint32_t)_data[blockStart + 2] << 8;
+                    inn[i] |= (uint32_t)_data[blockStart + 3];
+                    blockStart += 4;
+                }
+                temp_norm.emplace_back(inn[0]);
+                temp_binorm.emplace_back(inn[1]);
+                temp_tang.emplace_back(inn[2]);
+                if (sizes[2] == 1) { //skeleton is present
                     //boneID's
                     float outBI[4];
                     uint16_t inbI[4];
                     for (uint j = 0; j < 4; ++j) {
-                        inbI[j]  = (uint32_t)_data[blockStart    ] << 8;
+                        inbI[j] = (uint32_t)_data[blockStart] << 8;
                         inbI[j] |= (uint32_t)_data[blockStart + 1];
                         blockStart += 2;
                     }
@@ -1374,12 +1129,12 @@ class Mesh::impl final{
                     float32(&outBI[1], inbI[1]);
                     float32(&outBI[2], inbI[2]);
                     float32(&outBI[3], inbI[3]);
-                    _vertex.boneIDs = glm::vec4(outBI[0], outBI[1], outBI[2], outBI[3]);
+                    temp_bID.emplace_back(outBI[0], outBI[1], outBI[2], outBI[3]);
                     //boneWeight's
                     float outBW[4];
                     uint16_t inBW[4];
                     for (uint j = 0; j < 4; ++j) {
-                        inBW[j]  = (uint32_t)_data[blockStart    ] << 8;
+                        inBW[j] = (uint32_t)_data[blockStart] << 8;
                         inBW[j] |= (uint32_t)_data[blockStart + 1];
                         blockStart += 2;
                     }
@@ -1387,49 +1142,7 @@ class Mesh::impl final{
                     float32(&outBW[1], inBW[1]);
                     float32(&outBW[2], inBW[2]);
                     float32(&outBW[3], inBW[3]);
-                    _vertex.boneWeights = glm::vec4(outBW[0], outBW[1], outBW[2], outBW[3]);
-
-                    m_Vertices.push_back(_vertex);
-                }
-            }else {
-                for (uint i = 0; i < sizes[0]; ++i) {
-                    epriv::MeshVertexData _vertex;
-
-                    //positions
-                    float outPos[3];
-                    uint16_t inPos[3];
-                    for (uint j = 0; j < 3; ++j) {
-                        inPos[j]  = (uint32_t)_data[blockStart    ] << 8;
-                        inPos[j] |= (uint32_t)_data[blockStart + 1];
-                        blockStart += 2;
-                    }
-                    float32(&outPos[0], inPos[0]); float32(&outPos[1], inPos[1]); float32(&outPos[2], inPos[2]);
-                    _vertex.position = glm::vec3(outPos[0], outPos[1], outPos[2]);
-                    //uvs
-                    float outUV[2];
-                    uint16_t inUV[2];
-                    for (uint j = 0; j < 2; ++j) {
-                        inUV[j]  = (uint32_t)_data[blockStart    ] << 8;
-                        inUV[j] |= (uint32_t)_data[blockStart + 1];
-                        blockStart += 2;
-                    }
-                    float32(&outUV[0], inUV[0]);
-                    float32(&outUV[1], inUV[1]);
-                    _vertex.uv = glm::vec2(outUV[0], outUV[1]);
-                    //normals (remember they are GLuints right now)
-                    uint32_t inn[3];
-                    for (uint i = 0; i < 3; ++i) {
-                        inn[i]  = (uint32_t)_data[blockStart    ] << 24;
-                        inn[i] |= (uint32_t)_data[blockStart + 1] << 16;
-                        inn[i] |= (uint32_t)_data[blockStart + 2] << 8;
-                        inn[i] |= (uint32_t)_data[blockStart + 3];
-                        blockStart += 4;
-                    }
-                    _vertex.normal = inn[0];
-                    _vertex.binormal = inn[1];
-                    _vertex.tangent = inn[2];
-
-                    m_Vertices.emplace_back(_vertex);
+                    temp_bW.emplace_back(outBW[0], outBW[1], outBW[2], outBW[3]);
                 }
             }
             //indices
@@ -1438,9 +1151,20 @@ class Mesh::impl final{
                 inindices  = (uint32_t)_data[blockStart    ] << 8;
                 inindices |= (uint32_t)_data[blockStart + 1];
                 blockStart += 2;
-                m_Indices.emplace_back((uint16_t)inindices);
+                data.indices.emplace_back((uint16_t)inindices);
             }
+            data.setData(0, temp_pos);
+            data.setData(1, temp_uvs);
+            data.setData(2, temp_norm);
+            data.setData(3, temp_binorm);
+            data.setData(4, temp_tang);
+            if (temp_bID.size() > 0) {
+                data.setData(5, temp_bID);
+                data.setData(6, temp_bW);
+            }
+            data.setDataIndices(data.indices);
         }
+
         //very fast loading, might be slightly larger than .objc
         void _writeToObjCompressed1() {
             string f = m_File;
@@ -1448,9 +1172,8 @@ class Mesh::impl final{
             f = (f.substr(0, f.size() - ext.size())) + ".objcc";
             ofstream stream(f, ios::binary);
 
-
-
             epriv::ImportedMeshData d;
+            auto& data = *m_VertexData;
 
             vector<vector<uint>> _indices;
             _indices.resize(3);
@@ -1468,75 +1191,92 @@ class Mesh::impl final{
 
             //header - should only be 3 entries, one for m_Vertices , one for m_Indices, and one to tell if skeleton or not
             uint32_t sizes[3];
-            sizes[0] = m_Vertices.size();
-            sizes[1] = m_Indices.size();
+            sizes[0] = data.dataSizes[0];
+            sizes[1] = data.indices.size();
             sizes[2] = (m_Skeleton) ? 1 : 0;
 
             for (uint i = 0; i < 3; ++i) {
                 writeUint32tBigEndian(sizes[i], stream);
             }
+            auto& positions = data.getData<glm::vec3>(0);
+            auto& uvs = data.getData<glm::vec2>(0);
+            auto& normals = data.getData<GLuint>(0);
+            auto& binormals = data.getData<GLuint>(0);
+            auto& tangents = data.getData<GLuint>(0);
+
             if (m_Skeleton) {
-                for (auto& _vertexAnimated : m_Vertices) {
-                    const epriv::MeshVertexDataAnimated& _vertex = (epriv::MeshVertexDataAnimated)_vertexAnimated;
+                auto& boneIDs = data.getData<glm::vec4>(0);
+                auto& boneWeights = data.getData<glm::vec4>(0);
+                for (size_t j = 0; j < sizes[0]; ++j) {
+                    const auto& position = positions[j];
+                    const auto& uv = uvs[j];
+                    const auto& normal = normals[j];
+                    const auto& binormal = binormals[j];
+                    const auto& tangent = tangents[j];
+                    const auto& boneID = boneIDs[j];
+                    const auto& boneWeight = boneWeights[j];
 
                     //positions
                     uint16_t outp[3];
-                    float16(&outp[0], _vertex.position.x);  float16(&outp[1], _vertex.position.y);  float16(&outp[2], _vertex.position.z);
+                    float16(&outp[0], position.x);  float16(&outp[1], position.y);  float16(&outp[2], position.z);
                     for (uint i = 0; i < 3; ++i) {
                         writeUint16tBigEndian(outp[i], stream);
                     }
                     //uvs
                     uint16_t outu[2];
-                    float16(&outu[0], _vertex.uv.x);  float16(&outu[1], _vertex.uv.y);
+                    float16(&outu[0], uv.x);  float16(&outu[1], uv.y);
                     for (uint i = 0; i < 2; ++i) {
                         writeUint16tBigEndian(outu[i], stream);
                     }
                     //normals (remember they are GLuints right now)
                     uint32_t outn[3];
-                    outn[0] = _vertex.normal;  outn[1] = _vertex.binormal;  outn[2] = _vertex.tangent;
+                    outn[0] = normal;  outn[1] = binormal;  outn[2] = tangent;
                     for (uint i = 0; i < 3; ++i) {
                         writeUint32tBigEndian(outn[i], stream);
                     }
                     //boneID's
                     uint16_t outbI[4];
-                    float16(&outbI[0], _vertex.boneIDs.x);   float16(&outbI[1], _vertex.boneIDs.y);
-                    float16(&outbI[2], _vertex.boneIDs.z);   float16(&outbI[3], _vertex.boneIDs.w);
+                    float16(&outbI[0], boneID.x);  float16(&outbI[1], boneID.y); float16(&outbI[2], boneID.z);  float16(&outbI[3], boneID.w);
                     for (uint i = 0; i < 4; ++i) {
                         writeUint16tBigEndian(outbI[i], stream);
                     }
                     //boneWeight's
                     uint16_t outbW[4];
-                    float16(&outbW[0], _vertex.boneWeights.x);   float16(&outbW[1], _vertex.boneWeights.y);
-                    float16(&outbW[2], _vertex.boneWeights.z);   float16(&outbW[3], _vertex.boneWeights.w);
+                    float16(&outbW[0], boneWeight.x);  float16(&outbW[1], boneWeight.y); float16(&outbW[2], boneWeight.z);  float16(&outbW[3], boneWeight.w);
                     for (uint i = 0; i < 4; ++i) {
                         writeUint16tBigEndian(outbW[i], stream);
                     }
                 }
             }else{
-                for (auto& _vertex : m_Vertices) {
+                for (size_t j = 0; j < sizes[0]; ++j) {
+                    const auto& position = positions[j];
+                    const auto& uv = uvs[j];
+                    const auto& normal = normals[j];
+                    const auto& binormal = binormals[j];
+                    const auto& tangent = tangents[j];
                     //positions
                     uint16_t outp[3];
-                    float16(&outp[0], _vertex.position.x);  float16(&outp[1], _vertex.position.y);  float16(&outp[2], _vertex.position.z);
+                    float16(&outp[0], position.x);  float16(&outp[1], position.y);  float16(&outp[2], position.z);
                     for (uint i = 0; i < 3; ++i) {
                         writeUint16tBigEndian(outp[i], stream);
                     }
                     //uvs
                     uint16_t outu[2];
-                    float16(&outu[0], _vertex.uv.x);  float16(&outu[1], _vertex.uv.y);
+                    float16(&outu[0], uv.x);  float16(&outu[1], uv.y);
                     for (uint i = 0; i < 2; ++i) {
                         writeUint16tBigEndian(outu[i], stream);
                     }
                     //normals (remember they are GLuints right now)
                     uint32_t outn[3];
-                    outn[0] = _vertex.normal;  outn[1] = _vertex.binormal;  outn[2] = _vertex.tangent;
+                    outn[0] = normal;  outn[1] = binormal;  outn[2] = tangent;
                     for (uint i = 0; i < 3; ++i) {
                         writeUint32tBigEndian(outn[i], stream);
                     }
                 }
             }
             //indices
-            for (uint i = 0; i < m_Indices.size(); ++i) {
-                uint16_t _ind = m_Indices[i];
+            for (uint i = 0; i < sizes[1]; ++i) {
+                uint16_t _ind = data.indices[i];
                 writeUint16tBigEndian(_ind, stream);
             }
             stream.close();
@@ -1547,30 +1287,11 @@ namespace Engine {
     namespace epriv {
         struct DefaultMeshBindFunctor final{void operator()(BindableResource* r) const {
             auto& m = *((Mesh*)r)->m_i;
-            if (m.m_VAO) {
-                Renderer::bindVAO(m.m_VAO);
-            }else{
-                m._bindMeshDataToGPU();
-            }
+            m.m_VertexData->bind();
         }};
         struct DefaultMeshUnbindFunctor final {void operator()(BindableResource* r) const {
             auto& m = *((Mesh*)r)->m_i;
-            if (m.m_VAO) {
-                Renderer::bindVAO(0);
-            }else{
-                if (m.m_Skeleton) {
-                    VertexDataFormat::VertexDataAnimated.unbind();
-                }else {
-                    VertexDataFormat::VertexDataBasic.unbind();
-                }
-                //instances
-                /*
-                if (m.m_buffers.size() >= 3) {
-                    uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
-                    for (uint j = 0; j < 4; ++j) { glDisableVertexAttribArray(attributeIndex + j); }
-                }
-                */
-            }
+            m.m_VertexData->unbind();
         }};
     };
 };
@@ -1693,15 +1414,15 @@ void epriv::InternalMeshPublicInterface::LoadCPU( Mesh& _mesh){
     _mesh.m_i->_load_CPU(_mesh);
 }
 void epriv::InternalMeshPublicInterface::LoadGPU( Mesh& _mesh){
-    _mesh.m_i->_load_GPU(_mesh);
+    _mesh.m_i->_load_GPU();
     _mesh.EngineResource::load();
 }
 void epriv::InternalMeshPublicInterface::UnloadCPU( Mesh& _mesh){
-    _mesh.m_i->_unload_CPU(_mesh);
+    _mesh.m_i->_unload_CPU();
     _mesh.EngineResource::unload();
 }
 void epriv::InternalMeshPublicInterface::UnloadGPU( Mesh& _mesh){
-    _mesh.m_i->_unload_GPU(_mesh);
+    _mesh.m_i->_unload_GPU();
 }
 /*
 void epriv::InternalMeshPublicInterface::UpdateInstance( Mesh& _mesh,uint _id, glm::mat4 _modelMatrix){
@@ -1779,7 +1500,7 @@ const glm::vec3& Mesh::getRadiusBox() const { return m_i->m_radiusBox; }
 const float Mesh::getRadius() const { return m_i->m_radius; }
 void Mesh::render(bool instancing,GLuint mode){
     auto& i = *m_i;
-    const uint& indicesSize = i.m_Indices.size();
+    const uint& indicesSize = i.m_VertexData->indices.size();
     if(instancing && epriv::InternalMeshPublicInterface::SupportsInstancing()){
         const uint& instancesCount = i.m_InstanceCount;
         if(instancesCount == 0) return;
@@ -1806,16 +1527,15 @@ void Mesh::load(){
         auto& _this = *this;
         auto& i = *m_i;
         i._load_CPU(_this);
-        i._load_GPU(_this);
+        i._load_GPU();
         EngineResource::load();
     }
 }
 void Mesh::unload(){
-    if(isLoaded() /*&& useCount() == 0*/){
-        auto& _this = *this;
+    if(isLoaded()){
         auto& i = *m_i;
-        i._unload_GPU(_this);
-        i._unload_CPU(_this);
+        i._unload_GPU();
+        i._unload_CPU();
         EngineResource::unload();
     }
 }
@@ -1825,6 +1545,6 @@ void Mesh::modifyPointsAndUVs(vector<glm::vec3>& modifiedPts, vector<glm::vec2>&
 void Mesh::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
         auto& i = *m_i;
-        i._buildVAO();
+        i.m_VertexData->finalize();
     }
 }
