@@ -236,7 +236,10 @@
     <ClCompile Include="Engine\src\core\Mesh.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\mesh\VertexData.cpp">
+    <ClCompile Include="Engine\src\core\engine\mesh\VertexDataFormat.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\VertexBufferObject.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
@@ -440,6 +443,9 @@
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\mesh\VertexBufferObject.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\VertexDataFormat.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
   </ItemGroup>

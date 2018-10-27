@@ -2,40 +2,12 @@
 #ifndef ENGINE_VERTEX_DATA_H_INCLUDE_GUARD
 #define ENGINE_VERTEX_DATA_H_INCLUDE_GUARD
 
-#include <vector>
-#include <core/engine/mesh/VertexAttribute.h>
 #include <core/engine/mesh/VertexBufferObject.h>
-#include <GL/glew.h>
-#include <GL/GL.h>
+#include <core/engine/mesh/VertexDataFormat.h>
 #include "core/engine/Engine_Renderer.h"
 #include <memory>
 
 typedef unsigned short ushort;
-
-struct VertexDataFormat {
-    std::vector<VertexAttributeInfo>  attributes;
-    VertexDataFormat() = default;
-    ~VertexDataFormat() = default;
-    VertexDataFormat(const VertexDataFormat& other) = delete;
-    VertexDataFormat& operator=(const VertexDataFormat& other) = delete;
-    VertexDataFormat(VertexDataFormat&& other) noexcept = default;
-    VertexDataFormat& operator=(VertexDataFormat&& other) noexcept = default;
-
-    inline void add(int _size, int _type, bool _normalized, int _stride, size_t _offset, size_t _typeSize) {
-        attributes.emplace_back(_size, _type, _normalized, _stride, _offset, _typeSize);
-    }
-    inline void bind() {
-        for (size_t i = 0; i < attributes.size(); ++i) {
-            const auto& attribute = attributes[i];
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i, attribute.size, attribute.type, attribute.normalized, attribute.stride, (void*)attribute.offset);
-        }
-    }
-    inline void unbind() { for (size_t i = 0; i < attributes.size(); ++i) { glDisableVertexAttribArray(i); } }
-
-    static VertexDataFormat   VertexDataBasic;
-    static VertexDataFormat   VertexDataAnimated;
-};
 
 struct VertexData {
     VertexDataFormat&                              format;
@@ -68,7 +40,12 @@ struct VertexData {
         data[attributeIndex] = malloc(totalSize);
         memcpy(data[attributeIndex], _data.data(), totalSize);
         if (addToGPU) {
-            sendDataToGPU();
+            if (format.interleavingType == VertexAttributeLayout::Interleaved) {
+                sendDataToGPU();
+            }else{
+                sendDataToGPU(attributeIndex);
+                //sendDataToGPU();
+            }
         }
     }
     void setDataIndices(std::vector<ushort>& _data, bool addToGPU = false) {
@@ -89,7 +66,7 @@ struct VertexData {
             //build the vao itself
             Engine::Renderer::genAndBindVAO(vao);
             sendDataToGPU();
-            format.bind();
+            format.bind(*this);
             Engine::Renderer::bindVAO(0);
         }else{
             sendDataToGPU();
@@ -111,7 +88,7 @@ struct VertexData {
             Engine::Renderer::bindVAO(vao);
         }else{
             for (auto& buffer : buffers) buffer->bind();
-            format.bind();
+            format.bind(*this);
         }
     }
     inline void unbind() {
@@ -121,28 +98,65 @@ struct VertexData {
             format.unbind();
         }
     }
-    void sendDataToGPU() {
+    void sendDataToGPU(int attributeIndex = -1) {
         auto& _vBuffer = *buffers[0];
         _vBuffer.generate(); _vBuffer.bind();
 
-        auto vertexSize = format.attributes[0].stride;
-        char* buffer = (char*)malloc(vertexSize * dataSizes[0]);
+
+        char* buffer;
         size_t accumulator = 0;
-        for (size_t i = 0; i < dataSizes[0]; ++i) {
-            for (size_t j = 0; j < data.size(); ++j) {
-                const auto& sizeofT = format.attributes[j].typeSize;
-                const auto& dataSize = dataSizes[j];
-                char* _data = (char*)data[j];
-                memcpy(&buffer[accumulator], &_data[i * sizeofT], sizeofT);
-                accumulator += sizeofT;
+        size_t size = 0;
+
+        if (format.interleavingType == VertexAttributeLayout::Interleaved) {
+            // |PosUvNormBiNormTang|PosUvNormBiNormTang|PosUvNormBiNormTang|
+            size = format.attributes[0].stride * dataSizes[0];
+            buffer = (char*)malloc(size);
+            for (size_t i = 0; i < dataSizes[0]; ++i) {
+                for (size_t j = 0; j < data.size(); ++j) {
+                    const auto& sizeofT = format.attributes[j].typeSize;
+                    const auto& dataSize = dataSizes[j];
+                    char* _data = (char*)data[j];
+                    memcpy(&buffer[accumulator], &_data[i * sizeofT], sizeofT);
+                    accumulator += sizeofT;
+                }
+            }
+            _vBuffer.bufferData(size, (void*)buffer, BufferDataType::Dynamic);
+        }else{
+            // |PosPosPos|UvUvUv|NormNormNorm|BinormBinormBinorm|TangTangTang|
+            if (attributeIndex == -1) {
+                for (size_t i = 0; i < data.size(); ++i) {
+                    size += format.attributes[i].typeSize * dataSizes[i];
+                }
+                buffer = (char*)malloc(size);
+                for (size_t i = 0; i < data.size(); ++i) {
+                    auto blockSize = dataSizes[i] * format.attributes[i].typeSize;
+                    char* _data = (char*)data[i];
+                    memcpy(&buffer[accumulator], &_data[0], blockSize);
+                    accumulator += blockSize;
+                }
+                _vBuffer.bufferData(size, (void*)buffer, BufferDataType::Dynamic);
+            }else{
+                size += format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex];
+                buffer = (char*)malloc(size);
+                for (size_t i = 0; i < data.size(); ++i) {
+                    auto blockSize = dataSizes[i] * format.attributes[i].typeSize;
+                    if (i != attributeIndex) {
+                        accumulator += blockSize;
+                    }else{
+                        char* _data = (char*)data[i];
+                        memcpy(&buffer[0], &_data[0], size);
+                        break;
+                    }
+                }
+                _vBuffer.bufferSubData(size, accumulator, (void*)buffer);
             }
         }
-        _vBuffer.bufferData(vertexSize * dataSizes[0], (void*)buffer, BufferDataType::Dynamic);
         free(buffer);
-
-        auto& _iBuffer = *buffers[1];
-        _iBuffer.generate();  _iBuffer.bind();
-        _iBuffer.bufferData(indices.size() * sizeof(ushort), indices.data(), BufferDataType::Static);
+        if (attributeIndex == -1) {
+            auto& _iBuffer = *buffers[1];
+            _iBuffer.generate();  _iBuffer.bind();
+            _iBuffer.bufferData(indices.size() * sizeof(ushort), indices.data(), BufferDataType::Static);
+        }
     }
 
     VertexData(const VertexData& other) = delete;
