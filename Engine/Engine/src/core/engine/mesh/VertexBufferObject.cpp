@@ -8,8 +8,16 @@ void BufferObject::destroy() { if (buffer) { glDeleteBuffers(1, &buffer); buffer
 
 
 
-void VertexBufferObject::bind() { glBindBuffer(GL_ARRAY_BUFFER, buffer); }
-void VertexBufferObject::bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { glBufferData(GL_ARRAY_BUFFER, _size, _data, _drawType); }
+void VertexBufferObject::bind() { 
+    glBindBuffer(GL_ARRAY_BUFFER, buffer); 
+}
+void VertexBufferObject::bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { 
+    glBufferData(GL_ARRAY_BUFFER, _size, _data, _drawType); 
+}
+void VertexBufferObject::bufferDataOrphan(size_t _size, const void* _data, BufferDataType::Type _drawType) {
+    glBufferData(GL_ARRAY_BUFFER, _size, 0, _drawType);
+    glBufferData(GL_ARRAY_BUFFER, _size, _data, _drawType);
+}
 void VertexBufferObject::bufferSubData(size_t _size, const void* _data) { 
     glBufferSubData(GL_ARRAY_BUFFER, 0, _size, _data); 
 }
@@ -18,8 +26,16 @@ void VertexBufferObject::bufferSubData(size_t _size, size_t _startingIndex, cons
 }
 
 
-void ElementBufferObject::bind() { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer); }
-void ElementBufferObject::bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { glBufferData(GL_ELEMENT_ARRAY_BUFFER, _size, _data, _drawType); }
+void ElementBufferObject::bind() { 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer); 
+}
+void ElementBufferObject::bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { 
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _size, _data, _drawType); 
+}
+void ElementBufferObject::bufferDataOrphan(size_t _size, const void* _data, BufferDataType::Type _drawType) {
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _size, 0, _drawType);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _size, _data, _drawType);
+}
 void ElementBufferObject::bufferSubData(size_t _size, const void* _data) {
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, _size, _data); 
 }

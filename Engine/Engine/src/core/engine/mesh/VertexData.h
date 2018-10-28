@@ -17,6 +17,12 @@ struct VertexData {
     GLuint                                         vao;
     std::vector<std::unique_ptr<BufferObject>>     buffers;
 
+    VertexData() = delete;
+    VertexData(const VertexData& other) = delete;
+    VertexData& operator=(const VertexData& other) = delete;
+    VertexData(VertexData&& other) noexcept = default;
+    VertexData& operator=(VertexData&& other) noexcept = default;
+
     VertexData(const VertexDataFormat& _format) :format(const_cast<VertexDataFormat&>(_format)), vao(0) {
         data.reserve(_format.attributes.size());
         for (size_t i = 0; i < data.capacity(); ++i) { data.emplace_back(nullptr); }
@@ -25,6 +31,14 @@ struct VertexData {
 
         buffers.push_back(std::make_unique<VertexBufferObject>());
     }
+    ~VertexData() {
+        Engine::Renderer::deleteVAO(vao);
+        for (size_t i = 0; i < data.size(); ++i) { free(data[i]); }
+        vector_clear(data);
+        vector_clear(dataSizes);
+        vector_clear(indices);
+    }
+
     template<typename T> const std::vector<T> getData(size_t attributeIndex) {
         const T* _data = (T*)data[attributeIndex];
         std::vector<T> ret(_data, _data + dataSizes[attributeIndex]);
@@ -59,7 +73,6 @@ struct VertexData {
             _buffer.bufferData(indices.size() * sizeof(ushort), indices.data(), BufferDataType::Static);
         }
     }
-
     void finalize() {   
         Engine::Renderer::deleteVAO(vao);
         if (Engine::epriv::RenderManager::OPENGL_VERSION >= 30) {
@@ -72,17 +85,6 @@ struct VertexData {
             sendDataToGPU();
         }
     }
-
-    ~VertexData() {
-        Engine::Renderer::deleteVAO(vao);
-        for (size_t i = 0; i < data.size(); ++i) {
-            free(data[i]);
-        }
-        vector_clear(data);
-        vector_clear(dataSizes);
-        vector_clear(indices);
-    }
-
     inline void bind() {
         if (vao) {
             Engine::Renderer::bindVAO(vao);
@@ -150,14 +152,6 @@ struct VertexData {
             _iBuffer.bufferData(indices.size() * sizeof(ushort), indices.data(), BufferDataType::Static);
         }
     }
-
-    VertexData(const VertexData& other) = delete;
-    VertexData& operator=(const VertexData& other) = delete;
-    VertexData(VertexData&& other) noexcept = default;
-    VertexData& operator=(VertexData&& other) noexcept = default;
 };
-
-
-
 
 #endif
