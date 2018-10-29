@@ -38,8 +38,8 @@ class epriv::TimeManager::impl{
         void _beginQuery(){
             glBeginQuery(GL_TIME_ELAPSED,queryID);
         }
-        void _endQuery(string& tag){
-            string _s = tag + ": %f ms\n";
+        void _endQuery(const char* tag){
+            string _s = string(tag) + ": %f ms\n";
             glEndQuery(GL_TIME_ELAPSED);
             glGetQueryObjectuiv(queryID, GL_QUERY_RESULT,&queryObject);          
             printf(_s.c_str(),queryObject / 1000000.0);
@@ -58,7 +58,7 @@ void epriv::TimeManager::calculate(){
     }
 }
 void epriv::TimeManager::beginGLQuery(){ m_i->_beginQuery(); }
-void epriv::TimeManager::endGLQuery(string& tag){ m_i->_endQuery(tag); }
+void epriv::TimeManager::endGLQuery(const char* tag){ m_i->_endQuery(tag); }
 void epriv::TimeManager::stop_clock(){ m_i->clock.restart(); }
 
 void epriv::TimeManager::calculate_logic() { m_i->logicTime = m_i->clock.restart().asMicroseconds(); }

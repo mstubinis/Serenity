@@ -18,7 +18,7 @@ namespace Engine{
 
                 void calculate();
                 void beginGLQuery();
-                void endGLQuery(std::string& tag);
+                void endGLQuery(const char* tag);
                 void stop_clock();
 
                 void calculate_logic();

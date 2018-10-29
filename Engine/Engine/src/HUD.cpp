@@ -120,12 +120,10 @@ void HUD::render(){
 
     #pragma region DrawDebugStuff
 
-    string stuff = "true";
-    if (!Renderer::Settings::General::enabled1())
-        stuff = "false";
+    string stuff = "true"; if (!Renderer::Settings::General::enabled1()) stuff = "false";
 
-    font->renderText(Engine::Data::reportTime(),
-                    glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
+    font->renderText(Engine::Data::reportTime() + "\nenabled1: " + stuff,
+        glm::vec2(10, Resources::getWindowSize().y - 10), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1), 0, glm::vec2(0.8f, 0.8f), 0.1f);
 
     #pragma endregion
 }

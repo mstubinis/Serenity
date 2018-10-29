@@ -44,7 +44,7 @@ struct VertexData {
         std::vector<T> ret(_data, _data + dataSizes[attributeIndex]);
         return ret;
     }
-    template<typename T> void setData(size_t attributeIndex, std::vector<T>& _data, bool addToGPU = false) {
+    template<typename T> void setData(size_t attributeIndex, std::vector<T>& _data, bool addToGPU = false,bool orphan = false) {
         if (buffers.size() == 0)
             buffers.push_back(std::make_unique<VertexBufferObject>());
         auto& _buffer = *buffers[0];
@@ -55,10 +55,9 @@ struct VertexData {
         memcpy(data[attributeIndex], _data.data(), totalSize);
         if (addToGPU) {
             if (format.interleavingType == VertexAttributeLayout::Interleaved) {
-                sendDataToGPU();
+                sendDataToGPU(orphan);
             }else{
-                sendDataToGPU(attributeIndex);
-                //sendDataToGPU();
+                sendDataToGPU(orphan,attributeIndex);
             }
         }
     }
@@ -78,11 +77,11 @@ struct VertexData {
         if (Engine::epriv::RenderManager::OPENGL_VERSION >= 30) {
             //build the vao itself
             Engine::Renderer::genAndBindVAO(vao);
-            sendDataToGPU();
+            sendDataToGPU(false);
             format.bind(*this);
             Engine::Renderer::bindVAO(0);
         }else{
-            sendDataToGPU();
+            sendDataToGPU(false);
         }
     }
     inline void bind() {
@@ -100,7 +99,7 @@ struct VertexData {
             format.unbind();
         }
     }
-    void sendDataToGPU(int attributeIndex = -1) {
+    void sendDataToGPU(bool orphan,int attributeIndex = -1) {
         auto& _vBuffer = *buffers[0];
         _vBuffer.generate(); _vBuffer.bind();
 
@@ -119,7 +118,8 @@ struct VertexData {
                     accumulator += sizeofT;
                 }
             }
-            _vBuffer.bufferData(size, buffer, BufferDataType::Dynamic);
+            if(!orphan) _vBuffer.bufferData(size, buffer, BufferDataType::Dynamic);
+            else        _vBuffer.bufferDataOrphan(size, buffer);
         }else{
             if (attributeIndex == -1) {
                 for (size_t i = 0; i < data.size(); ++i)
@@ -130,7 +130,8 @@ struct VertexData {
                     memcpy(&buffer[accumulator], &((char*)data[i])[0], blockSize);
                     accumulator += blockSize;
                 }
-                _vBuffer.bufferData(size, buffer, BufferDataType::Dynamic);
+                if (!orphan) _vBuffer.bufferData(size, buffer, BufferDataType::Dynamic);
+                else         _vBuffer.bufferDataOrphan(size, buffer);
             }else{
                 size += format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex];
                 buffer = (char*)malloc(size);
@@ -142,7 +143,8 @@ struct VertexData {
                         break;
                     }
                 }
-                _vBuffer.bufferSubData(size, accumulator, buffer);
+                if (!orphan) _vBuffer.bufferSubData(size, accumulator, buffer);
+                else         _vBuffer.bufferDataOrphan(size, accumulator, buffer);
             }
         }
         free(buffer);

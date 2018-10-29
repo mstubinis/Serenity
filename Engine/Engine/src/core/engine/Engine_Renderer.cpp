@@ -1631,18 +1631,21 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
             glm::mat4 m = m_IdentityMat4;
             float y_offset = 0.0f;
-            float x = 0.0f;  
+            float x = 0.0f;
             Mesh& mesh = *(Mesh::FontPlane);
+            mesh.bind();
+            sendUniformMatrix4("VP", m_2DProjectionMatrix);
+            sendUniform1("DiffuseTextureEnabled", 1);
             for(auto& item:m_FontsToBeRendered){
                 Font& font = *item.font;
+                auto& newLineHeight = font.getGlyphData('X').height;
                 sendTexture("DiffuseTexture",font.getGlyphTexture(),0);
-                sendUniform1("DiffuseTextureEnabled",1);
                 sendUniform4("Object_Color",item.col);
                 y_offset = 0;
-                x = item.pos.x;        
+                x = item.pos.x;
                 for(auto& c:item.text){
                     if(c == '\n'){
-                        y_offset += (font.getGlyphData('X').height + 6) * item.scl.y;
+                        y_offset += (newLineHeight + 6) * item.scl.y;
                         x = item.pos.x;
                     }else{
                         FontGlyph& chr = font.getGlyphData(c);
@@ -1651,11 +1654,9 @@ class epriv::RenderManager::impl final{
                         m = glm::rotate(m, item.rot,glm::vec3(0,0,1));
                         m = glm::scale(m, glm::vec3(item.scl.x,item.scl.y,1));
 
-                        sendUniformMatrix4("VP",m_2DProjectionMatrix);
                         sendUniformMatrix4("Model",m);
 
                         mesh.modifyPointsAndUVs(chr.pts,chr.uvs);
-                        mesh.bind();
                         mesh.render(false);
 
                         x += chr.xadvance * item.scl.x;

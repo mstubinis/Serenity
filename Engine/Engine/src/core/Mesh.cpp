@@ -877,14 +877,14 @@ class Mesh::impl final{
             m_radius = Math::Max(m_radiusBox);
         }
         void _modifyPoints(vector<glm::vec3>& modifiedPts){
-            m_VertexData->setData(0, modifiedPts,true);
+            m_VertexData->setData(0, modifiedPts, true, false);
         }
         void _modifyUVs(vector<glm::vec2>& modifiedUVs){
-            m_VertexData->setData(1, modifiedUVs,true);
+            m_VertexData->setData(1, modifiedUVs, true, false);
         }
         void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
-            m_VertexData->setData(0, modifiedPts,true);
-            m_VertexData->setData(1, modifiedUVs,true);
+            m_VertexData->setData(0, modifiedPts, true, false);
+            m_VertexData->setData(1, modifiedUVs, true, false);
         }
         void _unload_CPU(){
             SAFE_DELETE(m_Skeleton);
