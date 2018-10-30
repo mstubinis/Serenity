@@ -1705,6 +1705,7 @@ class epriv::RenderManager::impl final{
                             float startingX = x + chr.xoffset;
                             float startingY = -int(chr.height + chr.yoffset) - y;
 
+                            //the problem lies with points, not uvs or indices
                             pts.emplace_back(startingX + chr.pts[0].x, startingY + chr.pts[0].y, z);
                             pts.emplace_back(startingX + chr.pts[1].x, startingY + chr.pts[1].y, z);
                             pts.emplace_back(startingX + chr.pts[2].x, startingY + chr.pts[2].y, z);
