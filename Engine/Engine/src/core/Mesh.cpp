@@ -430,69 +430,31 @@ class Mesh::impl final{
             }
             _initGlobalTwo(super,d,threshold);
         }
-        void _init(Mesh& super,string& name,float x, float y,float width, float height,float threshold){//plane with offset uvs
-            epriv::ImportedMeshData d;
-            _initGlobal(threshold);
-
-            d.points.emplace_back(0,0,0);
-            d.points.emplace_back(width,height,0);
-            d.points.emplace_back(0,height,0);
-
-            d.points.emplace_back(width,0,0);
-            d.points.emplace_back(width,height,0);
-            d.points.emplace_back(0,0,0);
-
-            float uv_topLeft_x = float(x / 256.0f);
-            float uv_topLeft_y = float(y / 256.0f);
-
-            float uv_bottomLeft_x = float(x / 256.0f);
-            float uv_bottomLeft_y = float(y / 256.0f) + float(height / 256.0f);
-
-            float uv_bottomRight_x = float(x / 256.0f) + float(width / 256.0f);
-            float uv_bottomRight_y = float(y / 256.0f) + float(height / 256.0f);
-
-            float uv_topRight_x = float(x / 256.0f) + float(width / 256.0f);
-            float uv_topRight_y = float(y / 256.0f);
-
-            d.uvs.emplace_back(uv_bottomLeft_x,uv_bottomLeft_y);
-            d.uvs.emplace_back(uv_topRight_x,uv_topRight_y);
-            d.uvs.emplace_back(uv_topLeft_x,uv_topLeft_y);
-
-            d.uvs.emplace_back(uv_bottomRight_x,uv_bottomRight_y);
-            d.uvs.emplace_back(uv_topRight_x,uv_topRight_y);
-            d.uvs.emplace_back(uv_bottomLeft_x,uv_bottomLeft_y);
-
-            d.normals.resize(6,glm::vec3(1));  d.binormals.resize(6,glm::vec3(1));  d.tangents.resize(6,glm::vec3(1));
-            _initGlobalTwo(super,d,threshold);
-        }
         void _init(Mesh& super,string& name,float width, float height,float threshold){//plane
             epriv::ImportedMeshData d;
             _initGlobal(threshold);
+
             d.points.emplace_back(-width/2.0f,-height/2.0f,0);
             d.points.emplace_back(width/2.0f,height/2.0f,0);
             d.points.emplace_back(-width/2.0f,height/2.0f,0);
-
             d.points.emplace_back(width/2.0f,-height/2.0f,0);
+
             d.points.emplace_back(width/2.0f,height/2.0f,0);
             d.points.emplace_back(-width/2.0f,-height/2.0f,0);
 
-            float uv_topLeft_x = 0.0f;
-            float uv_topLeft_y = 0.0f;
+            float uv_topLeft_x = 0.0f; float uv_topLeft_y = 0.0f;
 
-            float uv_bottomLeft_x = 0.0f;
-            float uv_bottomLeft_y = 0.0f + float(height);
+            float uv_bottomLeft_x = 0.0f; float uv_bottomLeft_y = 0.0f + float(height);
 
-            float uv_bottomRight_x = 0.0f + float(width);
-            float uv_bottomRight_y = 0.0f + float(height);
+            float uv_bottomRight_x = 0.0f + float(width); float uv_bottomRight_y = 0.0f + float(height);
 
-            float uv_topRight_x = 0.0f + float(width);
-            float uv_topRight_y = 0.0f;
+            float uv_topRight_x = 0.0f + float(width); float uv_topRight_y = 0.0f;
 
             d.uvs.emplace_back(uv_bottomLeft_x,uv_bottomLeft_y);
             d.uvs.emplace_back(uv_topRight_x,uv_topRight_y);
             d.uvs.emplace_back(uv_topLeft_x,uv_topLeft_y);
-
             d.uvs.emplace_back(uv_bottomRight_x,uv_bottomRight_y);
+
             d.uvs.emplace_back(uv_topRight_x,uv_topRight_y);
             d.uvs.emplace_back(uv_bottomLeft_x,uv_bottomLeft_y);
 
@@ -885,6 +847,9 @@ class Mesh::impl final{
         void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
             m_VertexData->setData(0, modifiedPts, true, false);
             m_VertexData->setData(1, modifiedUVs, true, false);
+        }
+        void _modifyIndices(vector<ushort>& modifiedIndices) {
+            m_VertexData->setDataIndices(modifiedIndices, true);
         }
         void _unload_CPU(){
             SAFE_DELETE(m_Skeleton);
@@ -1470,12 +1435,6 @@ Mesh::Mesh(string name,unordered_map<string,float>& grid,uint width,uint length,
     setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
     setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
 }
-Mesh::Mesh(string name,float x, float y,float width, float height,float threshold):BindableResource(name),m_i(new impl){
-    m_i->_init(*this,name,x,y,width,height,threshold);
-    registerEvent(EventType::WindowFullscreenChanged);
-    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
-}
 Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(*this,name,width,height,threshold);
     registerEvent(EventType::WindowFullscreenChanged);
@@ -1498,7 +1457,7 @@ unordered_map<string, epriv::AnimationData>& Mesh::animationData(){ return m_i->
 
 const glm::vec3& Mesh::getRadiusBox() const { return m_i->m_radiusBox; }
 const float Mesh::getRadius() const { return m_i->m_radius; }
-void Mesh::render(bool instancing,GLuint mode){
+void Mesh::render(bool instancing, MeshDrawMode::Mode mode){
     auto& i = *m_i;
     const uint& indicesSize = i.m_VertexData->indices.size();
     if(instancing && epriv::InternalMeshPublicInterface::SupportsInstancing()){
@@ -1542,6 +1501,7 @@ void Mesh::unload(){
 void Mesh::modifyPoints(vector<glm::vec3>& modifiedPts){ m_i->_modifyPoints(modifiedPts); }
 void Mesh::modifyUVs(vector<glm::vec2>& modifiedUVs){ m_i->_modifyUVs(modifiedUVs); }
 void Mesh::modifyPointsAndUVs(vector<glm::vec3>& modifiedPts, vector<glm::vec2>& modifiedUVs){ m_i->_modifyPointsAndUVs(modifiedPts,modifiedUVs); }
+void Mesh::modifyIndices(vector<ushort>& modifiedIndices) { m_i->_modifyIndices(modifiedIndices); }
 void Mesh::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
         auto& i = *m_i;

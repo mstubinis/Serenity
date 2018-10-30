@@ -45,10 +45,13 @@ Font::Font(string filename):EngineResource(filename){
             const float& textureHeight = (float)m_FontTexture->height();
             const float& textureWidth = (float)m_FontTexture->width();
 
-            _f.uvs.emplace_back(float(_f.x / textureWidth), float(_f.y / textureHeight) + float(_f.height / textureHeight));
-            _f.uvs.emplace_back(float(_f.x / textureWidth) + float(_f.width / textureWidth), float(_f.y / textureHeight));
-            _f.uvs.emplace_back(float(_f.x / textureWidth), float(_f.y / textureHeight));
-            _f.uvs.emplace_back(float(_f.x / textureWidth) + float(_f.width / textureWidth), float(_f.y / textureHeight) + float(_f.height / textureHeight));
+            float _uvW1 = (float)_f.x / textureWidth;    float _uvW2 = _uvW1 + ((float)_f.width / textureWidth);
+            float _uvH1 = (float)_f.y / textureHeight;   float _uvH2 = _uvH1 + ((float)_f.height / textureHeight);
+
+            _f.uvs.emplace_back(_uvW1, _uvH2);
+            _f.uvs.emplace_back(_uvW2, _uvH1);
+            _f.uvs.emplace_back(_uvW1, _uvH1);
+            _f.uvs.emplace_back(_uvW2, _uvH2);
 
             m_FontGlyphs.emplace(_f.id, std::move(_f));
         }

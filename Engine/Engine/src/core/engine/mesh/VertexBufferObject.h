@@ -30,6 +30,7 @@ struct BufferObject {
 
     virtual void bind() { }
     virtual void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { }
+    virtual void bufferData(size_t _size, const void* _data) { }
     virtual void bufferDataOrphan(size_t _size, const void* _data) { }
     virtual void bufferDataOrphan(size_t _size, size_t _startingIndex, const void* _data) { }
     virtual void bufferSubData(size_t _size, const void* _data) { }
@@ -41,6 +42,7 @@ struct VertexBufferObject final : public BufferObject{
 
     void bind() override;
     void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
+    void bufferData(size_t _size, const void* _data) override;
     void bufferDataOrphan(size_t _size, const void* _data) override;
     void bufferDataOrphan(size_t _size, size_t _startingIndex, const void* _data) override;
     void bufferSubData(size_t _size, const void* _data) override;
@@ -52,6 +54,7 @@ struct ElementBufferObject final : public BufferObject {
 
     void bind() override;
     void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
+    void bufferData(size_t _size, const void* _data) override;
     void bufferDataOrphan(size_t _size, const void* _data) override;
     void bufferDataOrphan(size_t _size, size_t _startingIndex, const void* _data) override;
     void bufferSubData(size_t _size, const void* _data) override;

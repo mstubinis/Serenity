@@ -28,6 +28,16 @@ const uint NUM_MAX_INSTANCES = 65536;
 class MeshInstance;
 class Mesh;
 
+struct MeshDrawMode {enum Mode {
+    Triangles = GL_TRIANGLES,
+    Quads = GL_QUADS,
+    Points = GL_POINTS,
+    Lines = GL_LINES,
+    TriangleStrip = GL_TRIANGLE_STRIP,
+    TriangleFan = GL_TRIANGLE_FAN,
+    QuadStrip = GL_QUAD_STRIP,
+};};
+
 namespace Engine{
     namespace epriv{
         class MeshLoader;
@@ -157,7 +167,6 @@ class Mesh final: public BindableResource, public EventObserver{
 
         Mesh(std::string name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
         Mesh(std::string name,float width, float height,float threshhold);
-        Mesh(std::string name,float x, float y, float width, float height,float threshhold);
         Mesh(std::string fileOrData, bool notMemory = true,float threshhold = 0.0005f,bool loadNow = true);
         ~Mesh();
 
@@ -173,8 +182,9 @@ class Mesh final: public BindableResource, public EventObserver{
         void modifyPoints(std::vector<glm::vec3>& modifiedPoints);
         void modifyUVs(std::vector<glm::vec2>& modifiedUVs);
         void modifyPointsAndUVs(std::vector<glm::vec3>& modifiedPoints, std::vector<glm::vec2>& modifiedUVs);
+        void modifyIndices(std::vector<ushort>& modifiedIndices);
 
-        void render(bool instancing = true,GLuint mode = GL_TRIANGLES);
+        void render(bool instancing = true, MeshDrawMode::Mode = MeshDrawMode::Triangles);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
 };
 #endif

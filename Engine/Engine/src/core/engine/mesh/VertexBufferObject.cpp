@@ -14,6 +14,10 @@ void VertexBufferObject::bufferData(size_t _size, const void* _data, BufferDataT
     drawType = _drawType;
     glBufferData(GL_ARRAY_BUFFER, _size, _data, _drawType); 
 }
+void VertexBufferObject::bufferData(size_t _size, const void* _data) {
+    if (drawType == BufferDataType::Unassigned) return;
+    glBufferData(GL_ARRAY_BUFFER, _size, _data, drawType);
+}
 void VertexBufferObject::bufferDataOrphan(size_t _size, const void* _data) {
     glBufferData(GL_ARRAY_BUFFER, _size, nullptr, drawType);
     glBufferSubData(GL_ARRAY_BUFFER, 0, _size, _data);
@@ -36,6 +40,10 @@ void ElementBufferObject::bind() {
 void ElementBufferObject::bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { 
     drawType = _drawType;
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, _size, _data, _drawType); 
+}
+void ElementBufferObject::bufferData(size_t _size, const void* _data) {
+    if (drawType == BufferDataType::Unassigned) return;
+    glBufferData(GL_ARRAY_BUFFER, _size, _data, drawType);
 }
 void ElementBufferObject::bufferDataOrphan(size_t _size, const void* _data) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, _size, 0, drawType);

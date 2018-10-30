@@ -123,9 +123,6 @@ Handle Resources::addFont(string filename){
 Handle Resources::addMesh(string f, bool b,float threshhold){
     return resourceManager->m_Resources->add(new Mesh(f,b,threshhold),ResourceType::Mesh);
 }
-Handle Resources::addMesh(string n,float x,float y,float w,float h,float threshhold){
-    return resourceManager->m_Resources->add(new Mesh(n,x,y,w,h,threshhold),ResourceType::Mesh);
-}
 Handle Resources::addMesh(string n,float w,float h,float threshhold){
     return resourceManager->m_Resources->add(new Mesh(n,w,h,threshhold),ResourceType::Mesh);
 }
