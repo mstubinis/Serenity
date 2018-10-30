@@ -383,7 +383,8 @@ class Mesh::impl final{
             m_VertexData = nullptr;
             m_threshold = threshold;
         }
-        void _initGlobalTwo(Mesh& super,epriv::ImportedMeshData& data,float threshold){
+        void _initGlobalTwo(Mesh& super,epriv::ImportedMeshData& data,float threshold, VertexData* vertData = nullptr){
+            m_VertexData = vertData;
             _finalizeData(data,threshold);
             super.load();
         }
@@ -443,11 +444,8 @@ class Mesh::impl final{
             d.points.emplace_back(-width/2.0f,-height/2.0f,0);
 
             float uv_topLeft_x = 0.0f; float uv_topLeft_y = 0.0f;
-
             float uv_bottomLeft_x = 0.0f; float uv_bottomLeft_y = 0.0f + float(height);
-
             float uv_bottomRight_x = 0.0f + float(width); float uv_bottomRight_y = 0.0f + float(height);
-
             float uv_topRight_x = 0.0f + float(width); float uv_topRight_y = 0.0f;
 
             d.uvs.emplace_back(uv_bottomLeft_x,uv_bottomLeft_y);
@@ -459,14 +457,14 @@ class Mesh::impl final{
             d.uvs.emplace_back(uv_bottomLeft_x,uv_bottomLeft_y);
 
             d.normals.resize(6,glm::vec3(1));  d.binormals.resize(6,glm::vec3(1));  d.tangents.resize(6,glm::vec3(1));
-            _initGlobalTwo(super,d,threshold);
+            _initGlobalTwo(super,d,threshold, new VertexData(VertexDataFormat::VertexData2DNoLighting));
         }
         void _init(Mesh& super,string& fileOrData,bool notMemory,float threshold,bool loadNow){//from file / data
             _initGlobal(threshold);
             if(notMemory){
                 m_File = fileOrData;
             }else{
-                _loadFromOBJMemory(threshold, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN,fileOrData);
+                _loadFromOBJMemory(threshold, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN, fileOrData);
             }
             if(loadNow)
                 super.load();
@@ -647,11 +645,14 @@ class Mesh::impl final{
             if(data.binormals.size() == 0)   data.binormals.resize(data.points.size());
             if(data.tangents.size() == 0)    data.tangents.resize(data.points.size());
 
-            if (m_Skeleton) {
-                m_VertexData = new VertexData(VertexDataFormat::VertexDataAnimated);
-            }else{
-                m_VertexData = new VertexData(VertexDataFormat::VertexDataBasic);
+            if (!m_VertexData) {
+                if (m_Skeleton) {
+                    m_VertexData = new VertexData(VertexDataFormat::VertexDataAnimated);
+                }else{
+                    m_VertexData = new VertexData(VertexDataFormat::VertexDataBasic);
+                }
             }
+
             auto& vertexData = *m_VertexData;
             vector<vector<GLuint>> normals; normals.resize(3);
             if (m_threshold == 0.0f) { 
@@ -826,7 +827,7 @@ class Mesh::impl final{
             if(_flags && epriv::LOAD_TBN && d.normals.size() > 0){
                 epriv::MeshLoader::CalculateTBNAssimp(d);
             }
-            _finalizeData(d,threshold);
+            _finalizeData(d, threshold);
         }
         void _calculateMeshRadius(Mesh& super){
             float maxX = 0; float maxY = 0; float maxZ = 0;
@@ -839,14 +840,14 @@ class Mesh::impl final{
             m_radius = Math::Max(m_radiusBox);
         }
         void _modifyPoints(vector<glm::vec3>& modifiedPts){
-            m_VertexData->setData(0, modifiedPts, true, false);
+            m_VertexData->setData(0, modifiedPts, true, true);
         }
         void _modifyUVs(vector<glm::vec2>& modifiedUVs){
-            m_VertexData->setData(1, modifiedUVs, true, false);
+            m_VertexData->setData(1, modifiedUVs, true, true);
         }
         void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
-            m_VertexData->setData(0, modifiedPts, true, false);
-            m_VertexData->setData(1, modifiedUVs, true, false);
+            m_VertexData->setData(0, modifiedPts, true, true);
+            m_VertexData->setData(1, modifiedUVs, true, true);
         }
         void _modifyIndices(vector<ushort>& modifiedIndices) {
             m_VertexData->setDataIndices(modifiedIndices, true);

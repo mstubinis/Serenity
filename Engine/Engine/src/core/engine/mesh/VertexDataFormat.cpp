@@ -1,7 +1,7 @@
 #include "core/engine/mesh/VertexData.h"
 #include <glm/glm.hpp>
 #include <GL/glew.h>
-#include <GL/GL.h>
+#include <SFML/OpenGL.hpp>
 
 VertexDataFormat::VertexDataFormat() {
     interleavingType = VertexAttributeLayout::Interleaved;
@@ -29,7 +29,14 @@ void VertexDataFormat::bind(VertexData& vertData) {
 void VertexDataFormat::unbind() { for (size_t i = 0; i < attributes.size(); ++i) { glDisableVertexAttribArray(i); } }
 
 
-
+VertexDataFormat VertexDataFormat::VertexData2DNoLighting = [&]() {
+    VertexDataFormat data;
+    size_t _stride = sizeof(glm::vec3) + sizeof(glm::vec2);
+    data.interleavingType = VertexAttributeLayout::Interleaved;
+    data.add(3, GL_FLOAT, false, _stride, 0, sizeof(glm::vec3)); //positions
+    data.add(2, GL_FLOAT, false, _stride, 12, sizeof(glm::vec2)); //uvs
+    return data;
+}();
 VertexDataFormat VertexDataFormat::VertexDataBasic = [&]() {
     VertexDataFormat data;
     size_t _stride = sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(GLuint) + sizeof(GLuint) + sizeof(GLuint);

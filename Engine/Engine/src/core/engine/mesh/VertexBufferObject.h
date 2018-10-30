@@ -3,7 +3,7 @@
 #define ENGINE_VERTEX_BUFFER_OBJECT_H_INCLUDE_GUARD
 
 #include <GL/glew.h>
-#include <GL/GL.h>
+#include <SFML/OpenGL.hpp>
 
 struct BufferDataType {enum Type {
     Unassigned,
@@ -31,6 +31,8 @@ struct BufferObject {
     virtual void bind() { }
     virtual void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { }
     virtual void bufferData(size_t _size, const void* _data) { }
+    virtual void bufferDataMap(size_t _size, const void* _data, BufferDataType::Type _drawType) { }
+    virtual void bufferDataMap(size_t _size, const void* _data) { }
     virtual void bufferDataOrphan(size_t _size, const void* _data) { }
     virtual void bufferDataOrphan(size_t _size, size_t _startingIndex, const void* _data) { }
     virtual void bufferSubData(size_t _size, const void* _data) { }
@@ -43,6 +45,8 @@ struct VertexBufferObject final : public BufferObject{
     void bind() override;
     void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
     void bufferData(size_t _size, const void* _data) override;
+    void bufferDataMap(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
+    void bufferDataMap(size_t _size, const void* _data) override;
     void bufferDataOrphan(size_t _size, const void* _data) override;
     void bufferDataOrphan(size_t _size, size_t _startingIndex, const void* _data) override;
     void bufferSubData(size_t _size, const void* _data) override;
@@ -55,6 +59,8 @@ struct ElementBufferObject final : public BufferObject {
     void bind() override;
     void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
     void bufferData(size_t _size, const void* _data) override;
+    void bufferDataMap(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
+    void bufferDataMap(size_t _size, const void* _data) override;
     void bufferDataOrphan(size_t _size, const void* _data) override;
     void bufferDataOrphan(size_t _size, size_t _startingIndex, const void* _data) override;
     void bufferSubData(size_t _size, const void* _data) override;

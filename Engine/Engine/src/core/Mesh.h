@@ -20,8 +20,6 @@
 
 typedef unsigned short ushort;
 
-namespace sf{ class Image; };
-
 const uint NUM_BONES_PER_VERTEX = 4;
 const uint NUM_MAX_INSTANCES = 65536;
 
@@ -153,11 +151,11 @@ namespace Engine{
     };
 };
 class Mesh final: public BindableResource, public EventObserver{
+    friend struct Engine::epriv::InternalMeshPublicInterface;
     friend struct Engine::epriv::DefaultMeshBindFunctor;
     friend struct Engine::epriv::DefaultMeshUnbindFunctor;
     friend class  Engine::epriv::AnimationData;
     friend class  Engine::epriv::MeshSkeleton;
-    friend struct Engine::epriv::InternalMeshPublicInterface;
     friend class  Engine::epriv::MeshLoader;
     friend class  Engine::epriv::CollisionFactory;
     private:

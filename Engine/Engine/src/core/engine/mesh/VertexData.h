@@ -45,8 +45,8 @@ struct VertexData {
         return ret;
     }
     template<typename T> void setData(size_t attributeIndex, std::vector<T>& _data, bool addToGPU = false,bool orphan = false) {
-        if (buffers.size() == 0)
-            buffers.push_back(std::make_unique<VertexBufferObject>());
+        if (attributeIndex >= data.size()) return;
+        
         auto& _buffer = *buffers[0];
         dataSizes[attributeIndex] = _data.size();
         free(data[attributeIndex]);
@@ -69,7 +69,7 @@ struct VertexData {
         if (addToGPU) {
             _buffer.generate();
             _buffer.bind();
-            _buffer.bufferData(indices.size() * sizeof(ushort), indices.data(), BufferDataType::Static);
+            _buffer.bufferData(indices.size() * sizeof(ushort), indices.data(), BufferDataType::Dynamic);
         }
     }
     void finalize() {   
@@ -151,7 +151,7 @@ struct VertexData {
         if (attributeIndex == -1) {
             auto& _iBuffer = *buffers[1];
             _iBuffer.generate();  _iBuffer.bind();
-            _iBuffer.bufferData(indices.size() * sizeof(ushort), indices.data(), BufferDataType::Static);
+            _iBuffer.bufferData(indices.size() * sizeof(ushort), indices.data(), BufferDataType::Dynamic);
         }
     }
 };

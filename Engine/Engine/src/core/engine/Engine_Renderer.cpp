@@ -1293,34 +1293,8 @@ class epriv::RenderManager::impl final{
             epriv::InternalMeshes::RodLightBounds = new Mesh(rodLightData,false,0.0005f);
             epriv::InternalMeshes::SpotLightBounds = new Mesh(spotLightData,false,0.0005f);
 
-            Mesh::FontPlane = new Mesh("FontPlane",1.0f,1.0f,0.0005f);
-            vector<glm::vec3> pts; pts.reserve(1024 * 4);//4 points per char
-            vector<glm::vec2> uvs; uvs.reserve(1024 * 4);//4 uvs per char
-            vector<ushort>    ind; ind.reserve(1024 * 6);//6 ind per char
-
-            for (size_t i = 0; i < 1024; ++i) {
-                pts.emplace_back(-0.5f, -0.5f, 0);
-                pts.emplace_back(0.5f, 0.5f, 0);
-                pts.emplace_back(-0.5f, 0.5f, 0);
-                pts.emplace_back(0.5f, -0.5f, 0);
-            }
-            for (size_t i = 0; i < 1024; ++i) {
-                uvs.emplace_back(0.0f, 1.0f);
-                uvs.emplace_back(1.0f, 0.0f);
-                uvs.emplace_back(0.0f, 0.0f);
-                uvs.emplace_back(1.0f, 1.0f);
-            }
-            for (size_t i = 0; i < 1024; ++i) {
-                ind.emplace_back((i * 4) + 0);
-                ind.emplace_back((i * 4) + 1);
-                ind.emplace_back((i * 4) + 2);
-                ind.emplace_back((i * 4) + 3);
-                ind.emplace_back((i * 4) + 1);
-                ind.emplace_back((i * 4) + 0);
-            }
-            Mesh::FontPlane->FontPlane->modifyPointsAndUVs(pts,uvs);
-
-            Mesh::Plane = new Mesh("Plane",1.0f,1.0f,0.0005f);
+            Mesh::Plane = new Mesh("Plane", 1.0f, 1.0f, 0.0005f);
+            Mesh::FontPlane = new Mesh("FontPlane",1.0f,1.0f,0.0005f);        
             Mesh::Cube = new Mesh(cubeMesh,false,0.0005f);
 
             brdfCook = new Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
@@ -1627,92 +1601,98 @@ class epriv::RenderManager::impl final{
             }
         }
         void _renderTextures(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
-            Mesh::Plane->bind();
-            glm::mat4 m = m_IdentityMat4;
-            for(auto& item:m_TexturesToBeRendered){
-                if(item.texture){
-                    sendTexture("DiffuseTexture",*item.texture,0);
-                    sendUniform1("DiffuseTextureEnabled",1);
-                }else{
-                    sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
-                    sendUniform1("DiffuseTextureEnabled",0);
+            if (m_TexturesToBeRendered.size() > 0) {
+                //TODO: Optimize this like in the _renderText() function
+                m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
+                auto& mesh = *Mesh::Plane;
+                mesh.bind();
+                glm::mat4 m = m_IdentityMat4;
+                sendUniformMatrix4("VP", m_2DProjectionMatrix);
+                for (auto& item : m_TexturesToBeRendered) {
+                    if (item.texture) {
+                        sendTexture("DiffuseTexture", *item.texture, 0);
+                        sendUniform1("DiffuseTextureEnabled", 1);
+                    }else{
+                        sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
+                        sendUniform1("DiffuseTextureEnabled", 0);
+                    }
+                    sendUniform4("Object_Color", item.col);
+
+                    m = m_IdentityMat4;
+                    m = glm::translate(m, glm::vec3(item.pos.x, item.pos.y, -0.001f - item.depth));
+                    m = glm::rotate(m, item.rot, glm::vec3(0.0f, 0.0f, 1.0f));
+                    if (item.texture)
+                        m = glm::scale(m, glm::vec3(item.texture->width(), item.texture->height(), 1.0f));
+                    m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1.0f));
+
+                    sendUniformMatrix4("Model", m);
+                    mesh.render(false);
                 }
-                sendUniform4("Object_Color",item.col);
-
-                m = m_IdentityMat4;
-                m = glm::translate(m, glm::vec3(item.pos.x,item.pos.y,-0.001f - item.depth));
-                m = glm::rotate(m, item.rot,glm::vec3(0.0f,0.0f,1.0f));
-                if(item.texture)
-                    m = glm::scale(m, glm::vec3(item.texture->width(),item.texture->height(),1.0f));
-                m = glm::scale(m, glm::vec3(item.scl.x,item.scl.y,1.0f));
-
-                sendUniformMatrix4("VP",m_2DProjectionMatrix);
-                sendUniformMatrix4("Model",m);
-
-                Mesh::Plane->render(false);
             }
         }
         void _renderText(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
-            glm::mat4 m = m_IdentityMat4;
-            float y = 0.0f;
-            float x = 0.0f;
-            float z = 0.0f;
-            Mesh& mesh = *(Mesh::FontPlane);
-            mesh.bind();
-            sendUniformMatrix4("VP", m_2DProjectionMatrix);
-            sendUniform1("DiffuseTextureEnabled", 1);
+            if (m_FontsToBeRendered.size() > 0) {
+                m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
+                glm::mat4 m = m_IdentityMat4;
+                float x, y, z;
+                x = y = z = 0.0f;
+                Mesh& mesh = *(Mesh::FontPlane);
+                mesh.bind();
+                sendUniformMatrix4("VP", m_2DProjectionMatrix);
+                sendUniform1("DiffuseTextureEnabled", 1);
 
-            for (auto& item : m_FontsToBeRendered) {
-                vector<glm::vec3> pts; pts.reserve(1024 * 4);//4 points per char
-                vector<glm::vec2> uvs; uvs.reserve(1024 * 4);//4 uvs per char
-                vector<ushort>    ind; ind.reserve(1024 * 6);//6 ind per char
+                for (auto& item : m_FontsToBeRendered) {
+                    vector<glm::vec3> pts; pts.reserve(2048 * 4);//4 points per char, max 1024 characters per frame
+                    vector<glm::vec2> uvs; uvs.reserve(2048 * 4);//4 uvs per char
+                    vector<ushort>    ind; ind.reserve(2048 * 6);//6 ind per char
 
-                Font& font = *item.font;
-                auto& newLineGlyph = font.getGlyphData('X');
-                sendTexture("DiffuseTexture", font.getGlyphTexture(), 0);
-                sendUniform4("Object_Color", item.col);
-                y = 0.0f;
-                x = 0.0f;
-                z = -0.001f - item.depth;
-                uint count = 0;
-                for (auto& c : item.text) {
-                    uint accum = count * 4;
+                    Font& font = *item.font;
+                    auto& newLineGlyph = font.getGlyphData('X');
+                    sendTexture("DiffuseTexture", font.getGlyphTexture(), 0);
+                    sendUniform4("Object_Color", item.col);
+                    y = 0.0f;
+                    x = 0.0f;
+                    z = -0.001f - item.depth;
+                    uint i = 0;
+                    for (auto& c : item.text) {
+                        uint accum = i * 4;
 
-                    ind.emplace_back(accum + 0); ind.emplace_back(accum + 1); ind.emplace_back(accum + 2);
-                    ind.emplace_back(accum + 3); ind.emplace_back(accum + 1); ind.emplace_back(accum + 0);
+                        ind.emplace_back(accum + 0); ind.emplace_back(accum + 1); ind.emplace_back(accum + 2);
+                        ind.emplace_back(accum + 3); ind.emplace_back(accum + 1); ind.emplace_back(accum + 0);
 
-                    if (c == '\n') {
-                        y += newLineGlyph.height + 8;
-                        x = 0.0f;
-                    }else{
-                        FontGlyph& chr = font.getGlyphData(c);
+                        if (c == '\n') {
+                            y += newLineGlyph.height + 7;
+                            x = 0.0f;
+                        }else{
+                            FontGlyph& chr = font.getGlyphData(c);
 
-                        float startingX = x + chr.xoffset;
-                        float startingY = -int(chr.height + chr.yoffset) - y;
+                            float startingX = x + chr.xoffset;
+                            float startingY = -int(chr.height + chr.yoffset) - y;
 
-                        pts.emplace_back(startingX + chr.pts[0].x, startingY + chr.pts[0].y, z);
-                        pts.emplace_back(startingX + chr.pts[1].x, startingY + chr.pts[1].y, z);
-                        pts.emplace_back(startingX + chr.pts[2].x, startingY + chr.pts[2].y, z);
-                        pts.emplace_back(startingX + chr.pts[3].x, startingY + chr.pts[3].y, z);
+                            pts.emplace_back(startingX + chr.pts[0].x, startingY + chr.pts[0].y, z);
+                            pts.emplace_back(startingX + chr.pts[1].x, startingY + chr.pts[1].y, z);
+                            pts.emplace_back(startingX + chr.pts[2].x, startingY + chr.pts[2].y, z);
+                            pts.emplace_back(startingX + chr.pts[3].x, startingY + chr.pts[3].y, z);
 
-                        uvs.emplace_back(chr.uvs[0].x, chr.uvs[0].y); uvs.emplace_back(chr.uvs[1].x, chr.uvs[1].y);
-                        uvs.emplace_back(chr.uvs[2].x, chr.uvs[2].y); uvs.emplace_back(chr.uvs[3].x, chr.uvs[3].y);
+                            uvs.emplace_back(chr.uvs[0].x, chr.uvs[0].y);
+                            uvs.emplace_back(chr.uvs[1].x, chr.uvs[1].y);
+                            uvs.emplace_back(chr.uvs[2].x, chr.uvs[2].y);
+                            uvs.emplace_back(chr.uvs[3].x, chr.uvs[3].y);
 
-                        x += chr.xadvance;
+                            x += chr.xadvance;
+                        }
+                        ++i;
                     }
-                    ++count;
-                }
-                m = m_IdentityMat4;
-                m = glm::translate(m, glm::vec3(item.pos.x, item.pos.y , 0));
-                m = glm::rotate(m, item.rot, glm::vec3(0, 0, 1)); 
-                m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1));
-                sendUniformMatrix4("Model", m); 
+                    m = m_IdentityMat4;
+                    m = glm::translate(m, glm::vec3(item.pos.x, item.pos.y, 0));
+                    m = glm::rotate(m, item.rot, glm::vec3(0, 0, 1));
+                    m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1));
+                    sendUniformMatrix4("Model", m);
 
-                mesh.modifyPointsAndUVs(pts, uvs);
-                mesh.modifyIndices(ind);
-                mesh.render(false);
+                    mesh.modifyPointsAndUVs(pts, uvs);
+                    mesh.modifyIndices(ind);
+                    mesh.render(false);
+                }
             }
         }
         void _passGeometry(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, Entity* ignore){
@@ -2316,8 +2296,8 @@ class epriv::RenderManager::impl final{
                     Settings::clear(false,true,false); //clear depth only
                     GLEnable(GLState::ALPHA_TEST);
                     glAlphaFunc(GL_GREATER, 0.1f);
-                    _renderTextures(gbuffer,camera,fboWidth,fboHeight);
                     _renderText(gbuffer,camera,fboWidth,fboHeight);
+                    _renderTextures(gbuffer, camera, fboWidth, fboHeight);
                     GLDisable(GLState::ALPHA_TEST);
                 }		
                 vector_clear(m_FontsToBeRendered);
