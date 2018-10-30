@@ -21,14 +21,14 @@ class  Camera;
 struct Entity;
 class  Scene;
 
-struct DepthFunc{enum Func{
+struct DepthFunc{enum Func{ 
     Never = GL_NEVER,
     Less = GL_LESS,
     Equal = GL_EQUAL,
     LEqual = GL_LEQUAL,
     Greater = GL_GREATER,
     NotEqual = GL_NOTEQUAL,
-    GEqual = GL_EQUAL,
+    GEqual = GL_GEQUAL,
     Always = GL_ALWAYS,
 };};
 struct SMAAQualityLevel{enum Level{

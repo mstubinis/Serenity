@@ -1,7 +1,7 @@
 #include "core/engine/mesh/VertexData.h"
 #include <glm/glm.hpp>
 #include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include <GL/GL.h>
 
 VertexDataFormat::VertexDataFormat() {
     interleavingType = VertexAttributeLayout::Interleaved;
