@@ -846,14 +846,14 @@ class Mesh::impl final{
             m_radius = Math::Max(m_radiusBox);
         }
         void _modifyPoints(vector<glm::vec3>& modifiedPts){
-            m_VertexData->setData(0, modifiedPts, true, false);
+            m_VertexData->setData(0, modifiedPts, true, true);
         }
         void _modifyUVs(vector<glm::vec2>& modifiedUVs){
-            m_VertexData->setData(1, modifiedUVs, true, false);
+            m_VertexData->setData(1, modifiedUVs, true, true);
         }
         void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
-            m_VertexData->setData(0, modifiedPts, true, false);
-            m_VertexData->setData(1, modifiedUVs, true, false);
+            m_VertexData->setData(0, modifiedPts, true, true);
+            m_VertexData->setData(1, modifiedUVs, true, true);
         }
         void _modifyIndices(vector<ushort>& modifiedIndices) {
             m_VertexData->setDataIndices(modifiedIndices, true);
@@ -1467,14 +1467,15 @@ const float Mesh::getRadius() const { return m_i->m_radius; }
 void Mesh::render(bool instancing, MeshDrawMode::Mode mode){
     auto& i = *m_i;
     const uint& indicesSize = i.m_VertexData->indices.size();
-    if(instancing && epriv::InternalMeshPublicInterface::SupportsInstancing()){
+    if (indicesSize == 0) return;
+    if (instancing && epriv::InternalMeshPublicInterface::SupportsInstancing()) {
         const uint& instancesCount = i.m_InstanceCount;
-        if(instancesCount == 0) return;
-        if(epriv::RenderManager::OPENGL_VERSION >= 31){
-               glDrawElementsInstanced(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        }else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_draw_instanced)){
+        if (instancesCount == 0) return;
+        if (epriv::RenderManager::OPENGL_VERSION >= 31) {
+            glDrawElementsInstanced(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
+        } else if (epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_draw_instanced)) {
             glDrawElementsInstancedEXT(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        }else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_draw_instanced)){
+        } else if (epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_draw_instanced)) {
             glDrawElementsInstancedARB(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
         }
     }else{

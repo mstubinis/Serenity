@@ -85,6 +85,7 @@ struct VertexData {
             Engine::Renderer::bindVAO(0);
         }else{
             sendDataToGPU(false);
+            format.bind(*this);
         }
     }
     inline void bind() {

@@ -1601,30 +1601,29 @@ class epriv::RenderManager::impl final{
             }
         }
         void _renderTextures(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
-            Mesh::Plane->bind();
-            glm::mat4 m = m_IdentityMat4;
-            for(auto& item:m_TexturesToBeRendered){
-                if(item.texture){
-                    sendTexture("DiffuseTexture",*item.texture,0);
-                    sendUniform1("DiffuseTextureEnabled",1);
-                }else{
-                    sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
-                    sendUniform1("DiffuseTextureEnabled",0);
+            if (m_TexturesToBeRendered.size() > 0) {
+                m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
+                auto& mesh = *Mesh::Plane;
+                mesh.bind();
+                glm::mat4 m = m_IdentityMat4;
+                sendUniformMatrix4("VP", m_2DProjectionMatrix);
+                for (auto& item : m_TexturesToBeRendered) {
+                    sendUniform4("Object_Color", item.col);
+                    m = m_IdentityMat4;
+                    m = glm::translate(m, glm::vec3(item.pos.x, item.pos.y, -0.001f - item.depth));
+                    m = glm::rotate(m, item.rot, glm::vec3(0.0f, 0.0f, 1.0f));
+                    if (item.texture) {
+                        m = glm::scale(m, glm::vec3(item.texture->width(), item.texture->height(), 1.0f));
+                        sendTexture("DiffuseTexture", *item.texture, 0);
+                        sendUniform1("DiffuseTextureEnabled", 1);
+                    }else{
+                        sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
+                        sendUniform1("DiffuseTextureEnabled", 0);
+                    }
+                    m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1.0f));  
+                    sendUniformMatrix4("Model", m);
+                    mesh.render(false);
                 }
-                sendUniform4("Object_Color",item.col);
-
-                m = m_IdentityMat4;
-                m = glm::translate(m, glm::vec3(item.pos.x,item.pos.y,-0.001f - item.depth));
-                m = glm::rotate(m, item.rot,glm::vec3(0.0f,0.0f,1.0f));
-                if(item.texture)
-                    m = glm::scale(m, glm::vec3(item.texture->width(),item.texture->height(),1.0f));
-                m = glm::scale(m, glm::vec3(item.scl.x,item.scl.y,1.0f));
-
-                sendUniformMatrix4("VP",m_2DProjectionMatrix);
-                sendUniformMatrix4("Model",m);
-
-                Mesh::Plane->render(false);
             }
         }
         void _renderText(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
@@ -1687,6 +1686,13 @@ class epriv::RenderManager::impl final{
                     x = 0.0f;
                     z = -0.001f - item.depth;
                     uint i = 0;
+
+                    m = m_IdentityMat4;
+                    m = glm::translate(m, glm::vec3(item.pos.x, item.pos.y, 0));
+                    m = glm::rotate(m, item.rot, glm::vec3(0, 0, 1));
+                    m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1));
+                    sendUniformMatrix4("Model", m);
+
                     for (auto& c : item.text) {
                         uint accum = i * 4;
                         ind.emplace_back(accum + 0); ind.emplace_back(accum + 1); ind.emplace_back(accum + 2);
@@ -1712,39 +1718,10 @@ class epriv::RenderManager::impl final{
                         }
                         ++i;
                     }
-                    m = m_IdentityMat4;
-                    m = glm::translate(m, glm::vec3(item.pos.x, item.pos.y, 0));
-                    m = glm::rotate(m, item.rot, glm::vec3(0, 0, 1));
-                    m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1));
-                    sendUniformMatrix4("Model", m);
                     mesh.modifyPointsAndUVs(pts, uvs);
                     mesh.modifyIndices(ind);
                     mesh.render(false);
                 }
-                /*
-                vector<glm::vec3> pts; pts.reserve(4);
-                vector<glm::vec2> uvs; uvs.reserve(4);
-                vector<ushort>    ind; ind.reserve(6);
-                pts.emplace_back(-0.5f, -0.5f, 0);
-                pts.emplace_back(0.5f, 0.5f, 0);
-                pts.emplace_back(-0.5f, 0.5f, 0);
-                pts.emplace_back(0.5f, -0.5f, 0);
-
-                uvs.emplace_back(0.0f, 1.0f);
-                uvs.emplace_back(1.0f, 0.0f);
-                uvs.emplace_back(0.0f, 0.0f);
-                uvs.emplace_back(1.0f, 1.0f);
-
-                ind.emplace_back(0);
-                ind.emplace_back(1);
-                ind.emplace_back(2);
-                ind.emplace_back(3);
-                ind.emplace_back(1);
-                ind.emplace_back(0);
-
-                mesh.modifyPointsAndUVs(pts, uvs);
-                mesh.modifyIndices(ind);
-                */
             }
         }
         void _passGeometry(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, Entity* ignore){
