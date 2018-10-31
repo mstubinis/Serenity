@@ -1,5 +1,4 @@
 #include "core/Mesh.h"
-#include "core/engine/mesh/VertexData.h"
 #include "core/engine/Engine_Resources.h"
 #include "core/engine/Engine_Math.h"
 #include "core/MeshInstance.h"
@@ -462,8 +461,7 @@ class Mesh::impl final{
             d.uvs.emplace_back(uv_topRight_x, uv_topRight_y);
             d.uvs.emplace_back(uv_bottomLeft_x, uv_bottomLeft_y);
 
-            d.normals.resize(6, glm::vec3(1));  d.binormals.resize(6, glm::vec3(1));  d.tangents.resize(6, glm::vec3(1));
-            _initGlobalTwo(super, d, threshold, new VertexData(VertexDataFormat::VertexData2DNoLighting));
+            _initGlobalTwo(super, d, threshold, new VertexData(VertexDataFormat::VertexDataNoLighting));
         }
         void _init(Mesh& super,string& fileOrData,bool notMemory,float threshold,bool loadNow){//from file / data
             _initGlobal(threshold);
@@ -646,11 +644,10 @@ class Mesh::impl final{
         void _finalizeData(epriv::ImportedMeshData& data,float threshold){
             m_threshold = threshold;
 
-            if(data.uvs.size() == 0)         data.uvs.resize(data.points.size());
-            if(data.normals.size() == 0)     data.normals.resize(data.points.size());
-            if(data.binormals.size() == 0)   data.binormals.resize(data.points.size());
-            if(data.tangents.size() == 0)    data.tangents.resize(data.points.size());
-
+            if (data.uvs.size() == 0)         data.uvs.resize(data.points.size());
+            if (data.normals.size() == 0)     data.normals.resize(data.points.size());
+            if (data.binormals.size() == 0)   data.binormals.resize(data.points.size());
+            if (data.tangents.size() == 0)    data.tangents.resize(data.points.size());
             if (!m_VertexData) {
                 if (m_Skeleton) {
                     m_VertexData = new VertexData(VertexDataFormat::VertexDataAnimated);
@@ -845,19 +842,7 @@ class Mesh::impl final{
             m_radiusBox = glm::vec3(maxX,maxY,maxZ);
             m_radius = Math::Max(m_radiusBox);
         }
-        void _modifyPoints(vector<glm::vec3>& modifiedPts){
-            m_VertexData->setData(0, modifiedPts, true, true);
-        }
-        void _modifyUVs(vector<glm::vec2>& modifiedUVs){
-            m_VertexData->setData(1, modifiedUVs, true, true);
-        }
-        void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
-            m_VertexData->setData(0, modifiedPts, true, true);
-            m_VertexData->setData(1, modifiedUVs, true, true);
-        }
-        void _modifyIndices(vector<ushort>& modifiedIndices) {
-            m_VertexData->setDataIndices(modifiedIndices, true);
-        }
+        
         void _unload_CPU(){
             SAFE_DELETE(m_Skeleton);
             SAFE_DELETE(m_CollisionFactory);   
@@ -1462,6 +1447,8 @@ Mesh::~Mesh(){
 
 unordered_map<string, epriv::AnimationData>& Mesh::animationData(){ return m_i->m_Skeleton->m_AnimationData; }
 
+const VertexData& Mesh::getVertexStructure() const { return *m_i->m_VertexData; }
+
 const glm::vec3& Mesh::getRadiusBox() const { return m_i->m_radiusBox; }
 const float Mesh::getRadius() const { return m_i->m_radius; }
 void Mesh::render(bool instancing, MeshDrawMode::Mode mode){
@@ -1506,10 +1493,6 @@ void Mesh::unload(){
         EngineResource::unload();
     }
 }
-void Mesh::modifyPoints(vector<glm::vec3>& modifiedPts){ m_i->_modifyPoints(modifiedPts); }
-void Mesh::modifyUVs(vector<glm::vec2>& modifiedUVs){ m_i->_modifyUVs(modifiedUVs); }
-void Mesh::modifyPointsAndUVs(vector<glm::vec3>& modifiedPts, vector<glm::vec2>& modifiedUVs){ m_i->_modifyPointsAndUVs(modifiedPts,modifiedUVs); }
-void Mesh::modifyIndices(vector<ushort>& modifiedIndices) { m_i->_modifyIndices(modifiedIndices); }
 void Mesh::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
         auto& i = *m_i;

@@ -1601,6 +1601,7 @@ class epriv::RenderManager::impl final{
             }
         }
         void _renderTextures(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
+            //TODO: optimize by batching the quads into 1 draw call, like in _renderText()
             if (m_TexturesToBeRendered.size() > 0) {
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
                 auto& mesh = *Mesh::Plane;
@@ -1627,44 +1628,6 @@ class epriv::RenderManager::impl final{
             }
         }
         void _renderText(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
-            /*
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
-            glm::mat4 m = m_IdentityMat4;
-            float y_offset = 0.0f;
-            float x = 0.0f;
-            Mesh& mesh = *(Mesh::FontPlane);
-            mesh.bind();
-            sendUniformMatrix4("VP", m_2DProjectionMatrix);
-            sendUniform1("DiffuseTextureEnabled", 1);
-            for(auto& item:m_FontsToBeRendered){
-                Font& font = *item.font;
-                auto& newLineHeight = font.getGlyphData('X').height;
-                sendTexture("DiffuseTexture",font.getGlyphTexture(),0);
-                sendUniform4("Object_Color",item.col);
-                y_offset = 0;
-                x = item.pos.x;
-                for(auto& c:item.text){
-                    if(c == '\n'){
-                        y_offset += (newLineHeight + 6) * item.scl.y;
-                        x = item.pos.x;
-                    }else{
-                        FontGlyph& chr = font.getGlyphData(c);
-                        m = m_IdentityMat4;
-                        m = glm::translate(m, glm::vec3(x + chr.xoffset ,item.pos.y - (chr.height + chr.yoffset) - y_offset,-0.001f - item.depth));
-                        m = glm::rotate(m, item.rot,glm::vec3(0,0,1));
-                        m = glm::scale(m, glm::vec3(item.scl.x,item.scl.y,1));
-
-                        sendUniformMatrix4("Model",m);
-
-                        mesh.modifyPointsAndUVs(chr.pts,chr.uvs);
-                        mesh.render(false);
-
-                        x += chr.xadvance * item.scl.x;
-                    }
-                }
-            }
-            */
-
             if (m_FontsToBeRendered.size() > 0) {
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
                 glm::mat4 m = m_IdentityMat4;
@@ -1719,7 +1682,8 @@ class epriv::RenderManager::impl final{
                         }
                         ++i;
                     }
-                    mesh.modifyPointsAndUVs(pts, uvs);
+                    mesh.modify(0, pts);
+                    mesh.modify(1, uvs);
                     mesh.modifyIndices(ind);
                     mesh.render(false);
                 }

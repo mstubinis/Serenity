@@ -29,7 +29,7 @@ void VertexDataFormat::bind(VertexData& vertData) {
 void VertexDataFormat::unbind() { for (size_t i = 0; i < attributes.size(); ++i) { glDisableVertexAttribArray(i); } }
 
 
-VertexDataFormat VertexDataFormat::VertexData2DNoLighting = [&]() {
+VertexDataFormat VertexDataFormat::VertexDataNoLighting = [&]() {
     VertexDataFormat data;
     size_t _stride = sizeof(glm::vec3) + sizeof(glm::vec2);
     data.interleavingType = VertexAttributeLayout::Interleaved;

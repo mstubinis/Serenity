@@ -24,6 +24,19 @@
 using namespace Engine;
 using namespace std;
 
+float PlanetaryRenderSpace(float& outerRadius,float& _distanceReal) {
+    //2.718281828459045235360287471352 = euler's number
+    //TODO: make very large objects SLOWLY decrease their _factor... glm::pow(outerRadius, 0.71f) * 215.0f is probably what needs to be tweaked...
+    float _factor = 1.0f - glm::smoothstep(0.0f, glm::pow(outerRadius, 0.71f) * 215.0f, _distanceReal);
+    _factor = glm::clamp(_factor, 0.01f, 0.99f);
+    _factor *= glm::log2(_factor + 1.0);
+    _factor *= glm::exp(_factor) * _factor;
+    _factor = glm::clamp(_factor, 0.0005f, 1.0f);
+
+    return _factor;
+}
+
+
 struct PlanetLogicFunctor final {void operator()(ComponentLogic& _component, const float& dt) const {
     Planet& planet = *(Planet*)_component.getUserPointer();
     if (planet.m_RotationInfo) {
@@ -41,6 +54,7 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     
     float atmosphereHeight = obj.getAtmosphereHeight();
+
 
     auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
 
@@ -69,11 +83,9 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
 
     glm::mat4 model = m_Body->modelMatrix();
 
-    //TODO: add this to stars and further tweak the _factor, and find out how to fix this in the game camera's orbit feature
-    //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
-    float _distanceReal = glm::abs(glm::distance(camPosR,pos));
-    float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
-    //2.718281828459045235360287471352 = euler's number
+    //TODO: experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
+    float _distanceReal = glm::abs(glm::distance(camPosR, pos));
+    float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
     float _distance = _factor * _distanceReal;
     glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
     float _newScale = innerRadius * _factor;
@@ -113,25 +125,26 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     glm::vec3 pos = m_Body->position();
-    glm::vec3 camPos = c->getPosition();
+    glm::vec3 camPosR = c->getPosition();
     glm::quat orientation = m_Body->rotation();
 
     Renderer::sendUniform4Safe("Object_Color",i.color());
     Renderer::sendUniform3Safe("Gods_Rays_Color",i.godRaysColor());
     Renderer::sendUniform1Safe("AnimationPlaying",0);
     glm::mat4 model = i.model();
+    float outerRadius = obj.getRadius();
 
 
-    //TODO: add this to stars and further tweak the _factor, and find out how to fix this in the game camera's orbit feature
+    //TODO: 
     //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
-    float _distanceReal = glm::abs(glm::distance(camPos,pos));
-    float _factor = (1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f)) * 0.01f;
+    float _distanceReal = glm::abs(glm::distance(camPosR, pos));
+    float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
     //2.718281828459045235360287471352 = euler's number
     float _distance = _factor * _distanceReal;
-    glm::vec3 _newPosition = glm::normalize(camPos - pos) * _distance;
+    glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
     float _newScale = obj.getRadius() * _factor;
     model = glm::mat4(1.0f);
-    model = glm::translate(model,camPos - _newPosition);
+    model = glm::translate(model,camPosR - _newPosition);
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
 
@@ -173,10 +186,11 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
 
     glm::mat4 model = m_Body->modelMatrix();
 
-    //TODO: add this to stars and further tweak the _factor, and find out how to fix this in the game camera's orbit feature
-    //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
-    float _distanceReal = glm::abs(glm::distance(camPosR,pos));
-    float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
+    //TODO: experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
+    float _distanceReal = glm::abs(glm::distance(camPosR, pos));
+    float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
+
+    std::cout << obj.m_Entity.getComponent<ComponentName>()->name() << ": " << _factor << std::endl;
     //2.718281828459045235360287471352 = euler's number
     float _distance = _factor * _distanceReal;
     glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
@@ -260,8 +274,8 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 
     
     //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
-    //float _distanceReal = glm::abs(glm::distance(camPosR,pos));
-    //float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
+    //float _distanceReal = glm::abs(glm::distance(camPosR, pos));
+    //float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
     //2.718281828459045235360287471352 = euler's number
     //float _distance = _factor * _distanceReal;
     //glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
@@ -309,6 +323,8 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
     auto* m_Body = m_Entity.addComponent<ComponentBody>();
     m_Body->setScale(scl, scl, scl);
     m_Body->setPosition(pos);
+
+    m_Entity.addComponent<ComponentName>(name);
 
     m_AtmosphereHeight = atmosphere;
     if(type != PlanetType::Star){

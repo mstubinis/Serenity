@@ -25,7 +25,7 @@ struct VertexDataFormat {
     void bind(VertexData& vertData);
     void unbind();
 
-    static VertexDataFormat   VertexData2DNoLighting;
+    static VertexDataFormat   VertexDataNoLighting;
     static VertexDataFormat   VertexDataBasic;
     static VertexDataFormat   VertexDataAnimated;
 };

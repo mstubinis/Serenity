@@ -8,6 +8,7 @@
 #include "core/engine/BindableResource.h"
 #include "core/engine/Engine_EventObject.h"
 #include "core/engine/Engine_Physics.h"
+#include "core/engine/mesh/VertexData.h"
 
 #include <map>
 #include <unordered_map>
@@ -23,8 +24,8 @@ typedef unsigned short ushort;
 const uint NUM_BONES_PER_VERTEX = 4;
 const uint NUM_MAX_INSTANCES = 65536;
 
-class MeshInstance;
-class Mesh;
+class  MeshInstance;
+class  Mesh;
 
 struct MeshDrawMode {enum Mode {
     Triangles = GL_TRIANGLES,
@@ -171,16 +172,19 @@ class Mesh final: public BindableResource, public EventObserver{
         std::unordered_map<std::string, Engine::epriv::AnimationData>& animationData();
         const glm::vec3& getRadiusBox() const;
         const float getRadius() const;
+        const VertexData& getVertexStructure() const;
 
         void onEvent(const Event& e);
 
         void load();
         void unload();
 
-        void modifyPoints(std::vector<glm::vec3>& modifiedPoints);
-        void modifyUVs(std::vector<glm::vec2>& modifiedUVs);
-        void modifyPointsAndUVs(std::vector<glm::vec3>& modifiedPoints, std::vector<glm::vec2>& modifiedUVs);
-        void modifyIndices(std::vector<ushort>& modifiedIndices);
+        template<typename T> void modify(uint attributeIndex, std::vector<T>& modifications) {
+            const_cast<VertexData&>(getVertexStructure()).setData<T>(attributeIndex, modifications,true,true);
+        }
+        void modifyIndices(std::vector<ushort>& modifiedIndices) {
+            const_cast<VertexData&>(getVertexStructure()).setDataIndices(modifiedIndices, true);
+        }
 
         void render(bool instancing = true, MeshDrawMode::Mode = MeshDrawMode::Triangles);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
