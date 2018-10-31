@@ -54,7 +54,7 @@ class Engine_Window::impl final{
         const sf::ContextSettings _createOpenGLWindow(const char* name,uint width,uint height,uint _majorVersion = 3, uint _minorVersion = 3,uint _glslVersion = 120){
             sf::ContextSettings settings;
             settings.depthBits = 24;
-            settings.stencilBits = 8;
+            settings.stencilBits = 0;
             settings.antialiasingLevel = 0;
             settings.majorVersion = _majorVersion;
             settings.minorVersion = _minorVersion;
@@ -62,7 +62,7 @@ class Engine_Window::impl final{
             #ifdef _DEBUG
                 settings.attributeFlags = settings.Debug;
             #else
-                settings.attributeFlags = settings.Default;
+                settings.attributeFlags = settings.Core;
             #endif
 
             m_VideoMode.width = width;

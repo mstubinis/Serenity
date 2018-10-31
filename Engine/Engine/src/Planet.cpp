@@ -26,13 +26,11 @@ using namespace std;
 
 float PlanetaryRenderSpace(float& outerRadius,float& _distanceReal) {
     //2.718281828459045235360287471352 = euler's number
-    //TODO: make very large objects SLOWLY decrease their _factor... glm::pow(outerRadius, 0.71f) * 215.0f is probably what needs to be tweaked...
-    float _factor = 1.0f - glm::smoothstep(0.0f, glm::pow(outerRadius, 0.71f) * 215.0f, _distanceReal);
+    float _factor = 1.0f - glm::smoothstep(0.0f, glm::pow(outerRadius, 0.67f) * 215.0f, _distanceReal);
     _factor = glm::clamp(_factor, 0.01f, 0.99f);
     _factor *= glm::log2(_factor + 1.0);
     _factor *= glm::exp(_factor) * _factor;
-    _factor = glm::clamp(_factor, 0.0005f, 1.0f);
-
+    _factor = glm::clamp(_factor, 0.0005f + (outerRadius * 0.0000000016f), 1.0f);
     return _factor;
 }
 
@@ -135,11 +133,9 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     float outerRadius = obj.getRadius();
 
 
-    //TODO: 
-    //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
+    //TODO: experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
     float _distanceReal = glm::abs(glm::distance(camPosR, pos));
     float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
-    //2.718281828459045235360287471352 = euler's number
     float _distance = _factor * _distanceReal;
     glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
     float _newScale = obj.getRadius() * _factor;
@@ -189,9 +185,7 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     //TODO: experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
     float _distanceReal = glm::abs(glm::distance(camPosR, pos));
     float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
-
-    std::cout << obj.m_Entity.getComponent<ComponentName>()->name() << ": " << _factor << std::endl;
-    //2.718281828459045235360287471352 = euler's number
+    //std::cout << obj.m_Entity.getComponent<ComponentName>()->name() << ": " << _factor << std::endl;
     float _distance = _factor * _distanceReal;
     glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
     float _newScale = scl.x * _factor;
@@ -276,7 +270,6 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
     //float _distanceReal = glm::abs(glm::distance(camPosR, pos));
     //float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
-    //2.718281828459045235360287471352 = euler's number
     //float _distance = _factor * _distanceReal;
     //glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
     //float _newScale = scl.x * _factor;
