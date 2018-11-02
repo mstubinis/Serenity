@@ -123,7 +123,7 @@ struct VertexData {
                 }
             }
             if(!orphan) _vBuffer.bufferData(size, buffer, BufferDataType::Dynamic);
-            else        _vBuffer.bufferDataOrphan(size, buffer);
+            else        _vBuffer.bufferDataOrphan(buffer);
         }else{
             if (attributeIndex == -1) {
                 for (size_t i = 0; i < data.size(); ++i)
@@ -135,7 +135,7 @@ struct VertexData {
                     accumulator += blockSize;
                 }
                 if (!orphan) _vBuffer.bufferData(size, buffer, BufferDataType::Dynamic);
-                else         _vBuffer.bufferDataOrphan(size, buffer);
+                else         _vBuffer.bufferDataOrphan(buffer);
             }else{
                 size += format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex];
                 buffer = (char*)malloc(size);
@@ -147,8 +147,8 @@ struct VertexData {
                         break;
                     }
                 }
-                if (!orphan) _vBuffer.bufferSubData(size, accumulator, buffer);
-                else         _vBuffer.bufferDataOrphan(size, accumulator, buffer);
+                _vBuffer.bufferSubData(size, accumulator, buffer);
+                //else         _vBuffer.bufferDataOrphan(accumulator, buffer);
             }
         }
         free(buffer);

@@ -231,10 +231,10 @@ class epriv::RenderManager::impl final{
         float godRays_decay;
         float godRays_density;
         float godRays_weight;
-        int godRays_samples;
         float godRays_fovDegrees;
         float godRays_alphaFalloff;
         Entity* godRays_Object;
+        int godRays_samples;
         #pragma endregion
 
         #pragma region SSAOInfo
@@ -262,21 +262,13 @@ class epriv::RenderManager::impl final{
 
         #pragma region GeneralInfo
 
+        epriv::GLStateMachineDataCustom glSM;
+
         bool enabled1;
 
         float gamma;
         Texture* brdfCook;
-        ShaderP* current_shader_program;
-        Material* current_bound_material;
         unsigned char cull_face_status;
-        GLuint current_bound_vao;
-        GLuint current_bound_read_fbo;
-        GLuint current_bound_draw_fbo;
-        GLuint current_bound_rbo;
-        GLuint current_bound_texture_1D;
-        GLuint current_bound_texture_2D;
-        GLuint current_bound_texture_3D;
-        GLuint current_bound_texture_cube_map;
         GLboolean color_mask_r;
         GLboolean color_mask_g;
         GLboolean color_mask_b;
@@ -400,17 +392,7 @@ class epriv::RenderManager::impl final{
 
             gamma = 2.2f;
             brdfCook = nullptr;
-            current_shader_program = nullptr;
-            current_bound_material = nullptr;
             cull_face_status = 0; /* 0 = back | 1 = front | 2 = front and back */
-            current_bound_vao = 0;
-            current_bound_read_fbo = 0;
-            current_bound_draw_fbo = 0;
-            current_bound_rbo = 0;
-            current_bound_texture_1D = 0;
-            current_bound_texture_2D = 0;
-            current_bound_texture_3D = 0;
-            current_bound_texture_cube_map = 0;
             color_mask_r = GL_TRUE;
             color_mask_g = GL_TRUE;
             color_mask_b = GL_TRUE;
@@ -1491,8 +1473,8 @@ class epriv::RenderManager::impl final{
             delete fbo;
         }
         void _generateBRDFLUTCookTorrance(uint brdfSize){
-            uint& prevReadBuffer = current_bound_read_fbo;
-            uint& prevDrawBuffer = current_bound_draw_fbo;
+            uint& prevReadBuffer = glSM.current_bound_read_fbo;
+            uint& prevDrawBuffer = glSM.current_bound_draw_fbo;
 
             FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO",brdfSize,brdfSize); //try without a depth format
             fbo->bind();
@@ -1583,21 +1565,21 @@ class epriv::RenderManager::impl final{
             gl_viewport_data = glm::uvec4(x,y,w,h);
         }
         void _bindReadFBO(uint& f){
-            if(current_bound_read_fbo != f){
+            if(glSM.current_bound_read_fbo != f){
                 glBindFramebuffer(GL_READ_FRAMEBUFFER, f);
-                current_bound_read_fbo = f;
+                glSM.current_bound_read_fbo = f;
             }
         }
         void _bindDrawFBO(uint& f){
-            if(current_bound_draw_fbo != f){
+            if(glSM.current_bound_draw_fbo != f){
                 glBindFramebuffer(GL_DRAW_FRAMEBUFFER, f);
-                current_bound_draw_fbo = f;
+                glSM.current_bound_draw_fbo = f;
             }
         }
         void _bindRBO(uint& r){
-            if(current_bound_rbo != r){
+            if(glSM.current_bound_rbo != r){
                 glBindRenderbuffer(GL_RENDERBUFFER, r);
-                current_bound_rbo = r;
+                glSM.current_bound_rbo = r;
             }
         }
         void _renderTextures(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
@@ -2128,14 +2110,11 @@ class epriv::RenderManager::impl final{
                 //}
                 #pragma endregion
             }
-
             _passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
-
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
 
             #pragma region GodRays
-
             gbuffer.start(GBufferType::GodRays, "RGB", false);
             Settings::clear(true,false,false); //this is needed, clear color should be (0,0,0,0)
             
@@ -2153,7 +2132,6 @@ class epriv::RenderManager::impl final{
                     _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), 1.0f - alpha);
                 }
             }
-            
             #pragma endregion
 
             #pragma region SSAO
@@ -2207,6 +2185,7 @@ class epriv::RenderManager::impl final{
 
             #pragma region Bloom
             //TODO: possible optimization: use stencil buffer to reject completely black pixels during blur passes
+
             if (bloom) {
                 gbuffer.start(GBufferType::Bloom, "RGB", false);
                 _passBloom(gbuffer, camera, fboWidth, fboHeight, GBufferType::Lighting);
@@ -2315,7 +2294,7 @@ void epriv::RenderManager::_renderTexture(Texture* texture,glm::vec2& pos,glm::v
     m_i->m_TexturesToBeRendered.emplace_back(texture,pos,color,scl,angle,depth);
 }
 void epriv::RenderManager::_bindShaderProgram(ShaderP* p){
-    auto& currentShaderPgrm = m_i->current_shader_program;
+    auto& currentShaderPgrm = m_i->glSM.current_bound_shader_program;
     if(currentShaderPgrm != p){
         glUseProgram(p->program());
         currentShaderPgrm = p;
@@ -2323,7 +2302,7 @@ void epriv::RenderManager::_bindShaderProgram(ShaderP* p){
     }
 }
 void epriv::RenderManager::_unbindShaderProgram() {
-    auto& currentShaderPgrm = m_i->current_shader_program;
+    auto& currentShaderPgrm = m_i->glSM.current_bound_shader_program;
     if (currentShaderPgrm) {
         currentShaderPgrm->BindableResource::unbind();
         currentShaderPgrm = nullptr;
@@ -2331,14 +2310,14 @@ void epriv::RenderManager::_unbindShaderProgram() {
     }
 }
 void epriv::RenderManager::_bindMaterial(Material* m){
-    auto& currentMaterial = m_i->current_bound_material;
+    auto& currentMaterial = m_i->glSM.current_bound_material;
     if(currentMaterial != m){
         currentMaterial = m;
         currentMaterial->BindableResource::bind();
     }
 }
 void epriv::RenderManager::_unbindMaterial(){
-    auto& currentMaterial = m_i->current_bound_material;
+    auto& currentMaterial = m_i->glSM.current_bound_material;
     if(currentMaterial){
         currentMaterial->BindableResource::unbind();
         currentMaterial = nullptr;
@@ -2359,7 +2338,6 @@ epriv::RenderPipeline::~RenderPipeline() {
 float dist(Camera& lhs, const glm::vec3& rhs) {
     return glm::distance(lhs.getPosition(), rhs);
 }
-
 void epriv::RenderPipeline::sort(Camera& c) {
     /*
     for (auto& materialNode : materialNodes) {
@@ -2382,24 +2360,26 @@ void epriv::RenderPipeline::render() {
     shaderProgram.bind();
     for (auto& materialNode : materialNodes) {
         if (materialNode->meshNodes.size() > 0) {
-            materialNode->material->bind();
+            auto& _material = *materialNode->material;
+            _material.bind();
             for (auto& meshNode : materialNode->meshNodes) {
                 if (meshNode->instanceNodes.size() > 0) {
-                    meshNode->mesh->bind();
+                    auto& _mesh = *meshNode->mesh;
+                    _mesh.bind();
                     for (auto& instanceNode : meshNode->instanceNodes) {
-                        auto& meshInstance = *instanceNode->instance;
-                        if (meshInstance.passedRenderCheck()) {
-                            meshInstance.bind();
-                            meshNode->mesh->render(false);
-                            meshInstance.unbind();
+                        auto& _meshInstance = *instanceNode->instance;
+                        if (_meshInstance.passedRenderCheck()) {
+                            _meshInstance.bind();
+                            _mesh.render(false);
+                            _meshInstance.unbind();
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material
-                    if (renderManager->current_shader_program != &shaderProgram) {
+                    if (renderManager->glSM.current_bound_shader_program != &shaderProgram) {
                         shaderProgram.bind();
-                        materialNode->material->bind();
+                        _material.bind();
                     }
-                    meshNode->mesh->unbind();
+                    _mesh.unbind();
                 }
             }
         }
@@ -2494,24 +2474,24 @@ void Renderer::Settings::Lighting::enable(bool b){ renderManager->lighting = b; 
 void Renderer::Settings::Lighting::disable(){ renderManager->lighting = false; }
 float Renderer::Settings::Lighting::getGIContributionGlobal(){ return renderManager->lighting_gi_contribution_global; }
 void Renderer::Settings::Lighting::setGIContributionGlobal(float gi){ 
-    auto mgr = *renderManager;
+    auto& mgr = *renderManager;
     mgr.lighting_gi_contribution_global = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
 float Renderer::Settings::Lighting::getGIContributionDiffuse(){ return renderManager->lighting_gi_contribution_diffuse; }
 void Renderer::Settings::Lighting::setGIContributionDiffuse(float gi){ 
-    auto mgr = *renderManager;
+    auto& mgr = *renderManager;
     mgr.lighting_gi_contribution_diffuse = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
 float Renderer::Settings::Lighting::getGIContributionSpecular(){ return renderManager->lighting_gi_contribution_specular; }
 void Renderer::Settings::Lighting::setGIContributionSpecular(float gi){
-    auto mgr = *renderManager;
+    auto& mgr = *renderManager;
     mgr.lighting_gi_contribution_specular = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
 void Renderer::Settings::Lighting::setGIContribution(float g, float d, float s){
-    auto mgr = *renderManager;
+    auto& mgr = *renderManager;
     mgr.lighting_gi_contribution_global = glm::clamp(g,0.001f,0.999f);
     mgr.lighting_gi_contribution_diffuse = glm::clamp(d,0.001f,0.999f);
     mgr.lighting_gi_contribution_specular = glm::clamp(s,0.001f,0.999f);
@@ -2558,29 +2538,29 @@ void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
     auto& i = *renderManager;
     switch(_textureType){
         case GL_TEXTURE_1D:{
-            if(i.current_bound_texture_1D != _textureObject){
-                i.current_bound_texture_1D = _textureObject;
+            if(i.glSM.current_bound_texture_1D != _textureObject){
+                i.glSM.current_bound_texture_1D = _textureObject;
                 glBindTexture(_textureType,_textureObject);
             }
             break;
         }
         case GL_TEXTURE_2D:{
-            if(i.current_bound_texture_2D != _textureObject){
-                i.current_bound_texture_2D = _textureObject;
+            if(i.glSM.current_bound_texture_2D != _textureObject){
+                i.glSM.current_bound_texture_2D = _textureObject;
                 glBindTexture(_textureType,_textureObject);
             }
             break;
         }
         case GL_TEXTURE_3D:{
-            if(i.current_bound_texture_3D != _textureObject){
-                i.current_bound_texture_3D = _textureObject;
+            if(i.glSM.current_bound_texture_3D != _textureObject){
+                i.glSM.current_bound_texture_3D = _textureObject;
                 glBindTexture(_textureType,_textureObject);
             }
             break;
         }
         case GL_TEXTURE_CUBE_MAP:{
-            if(i.current_bound_texture_cube_map != _textureObject){
-                i.current_bound_texture_cube_map = _textureObject;
+            if(i.glSM.current_bound_texture_cube_map != _textureObject){
+                i.glSM.current_bound_texture_cube_map = _textureObject;
                 glBindTexture(_textureType,_textureObject);
             }
             break;
@@ -2589,9 +2569,9 @@ void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
 }
 void Renderer::bindVAO(const GLuint _vaoObject){
     auto& i = *renderManager;
-    if(i.current_bound_vao != _vaoObject){
+    if(i.glSM.current_bound_vao != _vaoObject){
         glBindVertexArray(_vaoObject);
-        i.current_bound_vao = _vaoObject;
+        i.glSM.current_bound_vao = _vaoObject;
     }
 }
 void Renderer::deleteVAO(GLuint& _vaoObject) {
@@ -2642,8 +2622,8 @@ void Renderer::renderText(const string& text,Font& font, const glm::vec2& pos, c
 void Renderer::renderFullscreenQuad(uint w, uint h, uint startX, uint startY){ renderManager->_renderFullscreenQuad(w,h,startX,startY); }
 void Renderer::renderFullscreenTriangle(uint w,uint h, uint startX, uint startY){ renderManager->_renderFullscreenTriangle(w,h,startX,startY); }
 inline const GLint Renderer::getUniformLoc(const char* location){
-    auto& m = renderManager->current_shader_program->uniforms(); if(!m.count(location)) return -1; return m.at(location);
+    auto& m = renderManager->glSM.current_bound_shader_program->uniforms(); if(!m.count(location)) return -1; return m.at(location);
 }
 inline const GLint& Renderer::getUniformLocUnsafe(const char* location){
-    return renderManager->current_shader_program->uniforms().at(location); 
+    return renderManager->glSM.current_bound_shader_program->uniforms().at(location);
 }

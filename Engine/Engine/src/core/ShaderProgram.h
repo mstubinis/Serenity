@@ -101,9 +101,13 @@ class ShaderP final: public BindableResource, public EventObserver{
         ShaderP(std::string name, Shader& vertexShader, Shader& fragmentShader);
         virtual ~ShaderP();
 
-        ShaderP& operator=(const ShaderP&) = delete;
-        ShaderP(const ShaderP&) = default;
-        ShaderP(ShaderP&&) noexcept = default;
+        ShaderP(const ShaderP& other) = default;
+        ShaderP& operator=(const ShaderP& other) = delete;
+        ShaderP(ShaderP&& other) noexcept = default;
+        ShaderP& operator=(ShaderP&& other) noexcept = default;
+
+
+        inline operator GLuint() const { return m_ShaderProgram; }
 
         void onEvent(const Event& e);
 
@@ -114,6 +118,7 @@ class ShaderP final: public BindableResource, public EventObserver{
         void unbind();
 
         GLuint program();
+
         const std::unordered_map<std::string,GLint>& uniforms() const;
 };
 #endif

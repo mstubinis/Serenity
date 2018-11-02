@@ -180,7 +180,7 @@ class Mesh final: public BindableResource, public EventObserver{
         void unload();
 
         template<typename T> void modify(uint attributeIndex, std::vector<T>& modifications) {
-            const_cast<VertexData&>(getVertexStructure()).setData<T>(attributeIndex, modifications,true,true);
+            const_cast<VertexData&>(getVertexStructure()).setData<T>(attributeIndex, modifications,true,false);
         }
         void modifyIndices(std::vector<ushort>& modifiedIndices) {
             const_cast<VertexData&>(getVertexStructure()).setDataIndices(modifiedIndices, true);

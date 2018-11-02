@@ -68,6 +68,7 @@ void Game::update(const float& dt){
         Renderer::Settings::General::enable1(!Renderer::Settings::General::enabled1()); 
         //Renderer::Settings::Bloom::enable(!Renderer::Settings::Bloom::enabled());
     }
+    if (Engine::isKeyDownOnce(KeyboardKey::F12)) { Renderer::Settings::GodRays::enable(!Renderer::Settings::GodRays::enabled()); }
     Material& m = *Resources::getMaterial(ResourceManifest::DefiantMaterial);
     if (Engine::isKeyDown(KeyboardKey::N)) { m.setMetalness(m.metalness() - 0.02f); }
     if (Engine::isKeyDown(KeyboardKey::M)) { m.setMetalness(m.metalness() + 0.02f); }

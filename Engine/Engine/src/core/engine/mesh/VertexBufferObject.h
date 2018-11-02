@@ -14,7 +14,7 @@ _TOTAL};};
 struct BufferObject {
     GLuint buffer;
     BufferDataType::Type drawType;
-
+    size_t capacity;
 
     BufferObject();
     BufferObject(const BufferObject& other) = delete;
@@ -30,9 +30,7 @@ struct BufferObject {
 
     virtual void bind() { }
     virtual void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { }
-    virtual void bufferDataOrphan(size_t _size, const void* _data) { }
-    virtual void bufferDataOrphan(size_t _size, size_t _startingIndex, const void* _data) { }
-    virtual void bufferSubData(size_t _size, const void* _data) { }
+    virtual void bufferDataOrphan(const void* _data) { }
     virtual void bufferSubData(size_t _size, size_t _startingIndex, const void* _data) { }
 };
 struct VertexBufferObject final : public BufferObject{
@@ -41,9 +39,7 @@ struct VertexBufferObject final : public BufferObject{
 
     void bind() override;
     void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
-    void bufferDataOrphan(size_t _size, const void* _data) override;
-    void bufferDataOrphan(size_t _size, size_t _startingIndex, const void* _data) override;
-    void bufferSubData(size_t _size, const void* _data) override;
+    void bufferDataOrphan(const void* _data) override;
     void bufferSubData(size_t _size, size_t _startingIndex, const void* _data) override;
 };
 struct ElementBufferObject final : public BufferObject {
@@ -52,9 +48,7 @@ struct ElementBufferObject final : public BufferObject {
 
     void bind() override;
     void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
-    void bufferDataOrphan(size_t _size, const void* _data) override;
-    void bufferDataOrphan(size_t _size, size_t _startingIndex, const void* _data) override;
-    void bufferSubData(size_t _size, const void* _data) override;
+    void bufferDataOrphan(const void* _data) override;
     void bufferSubData(size_t _size, size_t _startingIndex, const void* _data) override;
 };
 
