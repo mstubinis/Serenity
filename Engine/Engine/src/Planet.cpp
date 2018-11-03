@@ -28,7 +28,7 @@ float PlanetaryRenderSpace(float& outerRadius,float& _distanceReal) {
     //2.718281828459045235360287471352 = euler's number
     float _factor = 1.0f - glm::smoothstep(0.0f, glm::pow(outerRadius, 0.67f) * 215.0f, _distanceReal);
     _factor = glm::clamp(_factor, 0.01f, 0.99f);
-    _factor *= glm::log2(_factor + 1.0);
+    _factor *= glm::log2(_factor + 1.0f);
     _factor *= glm::exp(_factor) * _factor;
     _factor = glm::clamp(_factor, 0.0005f + (outerRadius * 0.0000000016f), 1.0f);
     return _factor;

@@ -72,7 +72,7 @@ struct VertexData {
         if (addToGPU) {
             _buffer.generate();
             _buffer.bind();
-            _buffer.bufferData(indices.size() * sizeof(ushort), indices.data(), BufferDataType::Static);
+            _buffer.setData(indices.size() * sizeof(ushort), indices.data(), BufferDataDrawType::Static);
         }
     }
     void finalize() {   
@@ -122,8 +122,8 @@ struct VertexData {
                     accumulator += sizeofT;
                 }
             }
-            if(!orphan) _vBuffer.bufferData(size, buffer, BufferDataType::Dynamic);
-            else        _vBuffer.bufferDataOrphan(buffer);
+            if(!orphan) _vBuffer.setData(size, buffer, BufferDataDrawType::Dynamic);
+            else        _vBuffer.setDataOrphan(buffer);
         }else{
             if (attributeIndex == -1) {
                 for (size_t i = 0; i < data.size(); ++i)
@@ -134,8 +134,8 @@ struct VertexData {
                     memcpy(&buffer[accumulator], &((char*)data[i])[0], blockSize);
                     accumulator += blockSize;
                 }
-                if (!orphan) _vBuffer.bufferData(size, buffer, BufferDataType::Dynamic);
-                else         _vBuffer.bufferDataOrphan(buffer);
+                if (!orphan) _vBuffer.setData(size, buffer, BufferDataDrawType::Dynamic);
+                else         _vBuffer.setDataOrphan(buffer);
             }else{
                 size += format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex];
                 buffer = (char*)malloc(size);
@@ -147,15 +147,14 @@ struct VertexData {
                         break;
                     }
                 }
-                _vBuffer.bufferSubData(size, accumulator, buffer);
-                //else         _vBuffer.bufferDataOrphan(accumulator, buffer);
+                _vBuffer.setData(size, accumulator, buffer);
             }
         }
         free(buffer);
         if (attributeIndex == -1) {
             auto& _iBuffer = *buffers[1];
             _iBuffer.generate();  _iBuffer.bind();
-            _iBuffer.bufferData(indices.size() * sizeof(ushort), indices.data(), BufferDataType::Static);
+            _iBuffer.setData(indices, BufferDataDrawType::Static);
         }
     }
 };

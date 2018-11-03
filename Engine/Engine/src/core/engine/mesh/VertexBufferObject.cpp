@@ -1,5 +1,6 @@
 #include <core/engine/mesh/VertexBufferObject.h>
 
+using namespace std;
 
 //tips for better usage
 /*
@@ -20,47 +21,47 @@ look up proper usage of glMapBuffer and glMapBufferRange
 */
 
 
-
-
-
-BufferObject::BufferObject() :buffer(0), capacity(0){ drawType = BufferDataType::Unassigned; }
-void BufferObject::generate() { if (!buffer) { glGenBuffers(1, &buffer); } }
-void BufferObject::destroy() { if (buffer) { glDeleteBuffers(1, &buffer); buffer = 0; } }
-
-
-
-void VertexBufferObject::bind() { 
-    glBindBuffer(GL_ARRAY_BUFFER, buffer); 
+BufferObject::BufferObject() :buffer(0), capacity(0) { 
+    drawType = BufferDataDrawType::Unassigned; 
 }
-void VertexBufferObject::bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { 
+void BufferObject::generate() { 
+    if (!buffer) { 
+        glGenBuffers(1, &buffer); 
+    } 
+}
+void BufferObject::destroy() { 
+    if (buffer) { 
+        glDeleteBuffers(1, &buffer); 
+        buffer = 0; 
+    } 
+}
+void BufferObject::bind() {
+    glBindBuffer(type, buffer);
+}
+void BufferObject::setData(size_t _size, const void* _data, BufferDataDrawType::Type _drawType) {
     drawType = _drawType;
     capacity = _size;
-    glBufferData(GL_ARRAY_BUFFER, _size, _data, _drawType); 
+    glBufferData(type, _size, _data, drawType);
 }
-void VertexBufferObject::bufferDataOrphan(const void* _data) {
+void BufferObject::setDataOrphan(const void* _data) {
     if (capacity == 0) return;
-    glBufferData(GL_ARRAY_BUFFER, capacity, nullptr, drawType);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, capacity, _data);
+    glBufferData(type, capacity, nullptr, drawType);
+    glBufferSubData(type, 0, capacity, _data);
 }
-void VertexBufferObject::bufferSubData(size_t _size, size_t _startingIndex, const void* _data) { 
-    glBufferSubData(GL_ARRAY_BUFFER, _startingIndex, _size, _data); 
+void BufferObject::setData(size_t _size, size_t _startingIndex, const void* _data) {
+    if (drawType == BufferDataDrawType::Unassigned) return;
+    glBufferSubData(type, _startingIndex, _size, _data);
 }
+void BufferObject::setData(vector<char>& _data, BufferDataDrawType::Type _drawType) { setData(_data.size() * sizeof(char), _data.data(), _drawType); }
+void BufferObject::setData(size_t _startingIndex, vector<char>& _data) { setData(_data.size() * sizeof(char), _startingIndex, _data.data()); }
+void BufferObject::setDataOrphan(vector<char>& _data) { if (_data.size() * sizeof(char) != capacity) return; setDataOrphan(_data.data()); }
 
 
 
 
-void ElementBufferObject::bind() { 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer); 
+VertexBufferObject::VertexBufferObject() {
+    type = BufferDataType::VertexArray;
 }
-void ElementBufferObject::bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { 
-    drawType = _drawType;
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _size, _data, _drawType); 
-}
-void ElementBufferObject::bufferDataOrphan(const void* _data) {
-    if (capacity == 0) return;
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, capacity, 0, drawType);
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, capacity, _data);
-}
-void ElementBufferObject::bufferSubData(size_t _size, size_t _startingIndex, const void* _data) {
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, _startingIndex, _size, _data); 
+ElementBufferObject::ElementBufferObject() {
+    type = BufferDataType::ElementArray;
 }

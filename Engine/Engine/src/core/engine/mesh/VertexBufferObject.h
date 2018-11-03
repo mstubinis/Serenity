@@ -4,8 +4,18 @@
 
 #include <GL/glew.h>
 #include <GL/GL.h>
-
-struct BufferDataType {enum Type {
+#include <vector>
+/*
+//1 2 4 8 16 32 64 128 256 512 1024 2048 4096
+struct BufferFlags final {enum Flag {
+    Orphan = 1, 
+};};
+*/
+struct BufferDataType final {enum Type {
+    VertexArray = GL_ARRAY_BUFFER,
+    ElementArray = GL_ELEMENT_ARRAY_BUFFER,
+};};
+struct BufferDataDrawType final{enum Type {
     Unassigned,
     Static = GL_STATIC_DRAW,
     Dynamic = GL_DYNAMIC_DRAW,
@@ -13,7 +23,8 @@ struct BufferDataType {enum Type {
 _TOTAL};};
 struct BufferObject {
     GLuint buffer;
-    BufferDataType::Type drawType;
+    BufferDataDrawType::Type drawType;
+    BufferDataType::Type type;
     size_t capacity;
 
     BufferObject();
@@ -28,28 +39,41 @@ struct BufferObject {
     void destroy();
     inline operator GLuint() const { return buffer; }
 
-    virtual void bind() { }
-    virtual void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) { }
-    virtual void bufferDataOrphan(const void* _data) { }
-    virtual void bufferSubData(size_t _size, size_t _startingIndex, const void* _data) { }
+    void bind();
+    void setData(size_t _size, const void* _data, BufferDataDrawType::Type _drawType);
+    void setData(size_t _size, size_t _startingIndex, const void* _data);
+    void setDataOrphan(const void* _data);
+
+    void setData(std::vector<char>& _data, BufferDataDrawType::Type _drawType);
+    void setData(size_t _startingIndex, std::vector<char>& _data);
+    void setDataOrphan(std::vector<char>& _data);
+
+
+    template<typename T> void setData(std::vector<T>& _data, BufferDataDrawType::Type _drawType) {
+        drawType = _drawType;
+        size_t _size = _data.size() * sizeof(T);
+        capacity = _size;
+        glBufferData(type, _size, _data.data(), drawType);
+    }
+    template<typename T> void setData(size_t _startingIndex, std::vector<T>& _data) {
+        if (drawType == BufferDataDrawType::Unassigned) return;
+        glBufferSubData(type, _startingIndex, _data.size() * sizeof(T), _data.data());
+    }
+    template<typename T> void setDataOrphan(std::vector<T>& _data) {
+        if (capacity == 0) return;
+        glBufferData(type, capacity, nullptr, drawType);
+        glBufferSubData(type, 0, capacity, _data.data());
+    }
 };
 struct VertexBufferObject final : public BufferObject{
-    VertexBufferObject() = default;
+    VertexBufferObject();
     ~VertexBufferObject() = default;
 
-    void bind() override;
-    void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
-    void bufferDataOrphan(const void* _data) override;
-    void bufferSubData(size_t _size, size_t _startingIndex, const void* _data) override;
 };
 struct ElementBufferObject final : public BufferObject {
-    ElementBufferObject() = default;
+    ElementBufferObject();
     ~ElementBufferObject() = default;
 
-    void bind() override;
-    void bufferData(size_t _size, const void* _data, BufferDataType::Type _drawType) override;
-    void bufferDataOrphan(const void* _data) override;
-    void bufferSubData(size_t _size, size_t _startingIndex, const void* _data) override;
 };
 
 #endif

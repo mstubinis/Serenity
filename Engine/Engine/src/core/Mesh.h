@@ -179,11 +179,13 @@ class Mesh final: public BindableResource, public EventObserver{
         void load();
         void unload();
 
-        template<typename T> void modify(uint attributeIndex, std::vector<T>& modifications) {
-            const_cast<VertexData&>(getVertexStructure()).setData<T>(attributeIndex, modifications,true,false);
+        template<typename T> void modifyVertices(uint attributeIndex, std::vector<T>& modifications) {
+            auto& data = const_cast<VertexData&>(getVertexStructure());
+            data.setData<T>(attributeIndex, modifications,true,false);
         }
         void modifyIndices(std::vector<ushort>& modifiedIndices) {
-            const_cast<VertexData&>(getVertexStructure()).setDataIndices(modifiedIndices, true);
+            auto& data = const_cast<VertexData&>(getVertexStructure());
+            data.setDataIndices(modifiedIndices, true);
         }
 
         void render(bool instancing = true, MeshDrawMode::Mode = MeshDrawMode::Triangles);

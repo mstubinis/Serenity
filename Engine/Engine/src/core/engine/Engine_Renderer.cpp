@@ -1620,7 +1620,7 @@ class epriv::RenderManager::impl final{
                 sendUniformMatrix4("VP", m_2DProjectionMatrix);
                 sendUniform1("DiffuseTextureEnabled", 1);
                 for (auto& item : m_FontsToBeRendered) {
-                    vector<glm::vec3> pts; pts.reserve(2048 * 4);//4 points per char, max 1024 characters per frame
+                    vector<glm::vec3> pts; pts.reserve(2048 * 4);//4 points per char, max 2048 characters per frame
                     vector<glm::vec2> uvs; uvs.reserve(2048 * 4);//4 uvs per char
                     vector<ushort>    ind; ind.reserve(2048 * 6);//6 ind per char
                     Font& font = *item.font;
@@ -1664,8 +1664,8 @@ class epriv::RenderManager::impl final{
                         }
                         ++i;
                     }
-                    mesh.modify(0, pts);
-                    mesh.modify(1, uvs);
+                    mesh.modifyVertices(0, pts);
+                    mesh.modifyVertices(1, uvs);
                     mesh.modifyIndices(ind);
                     mesh.render(false);
                 }
