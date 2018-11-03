@@ -341,9 +341,9 @@ class epriv::RenderManager::impl final{
             bloom = true;
             bloom_blur_radius = 1.24f;
             bloom_blur_strength = 0.62f;
-            bloom_scale = 1.48f;
-            bloom_threshold = 0.52f;
-            bloom_exposure = 1.15f;
+            bloom_scale = 0.27f;
+            bloom_threshold = 0.55f;
+            bloom_exposure = 1.6f;
             #pragma endregion
 
             #pragma region LightingInfo

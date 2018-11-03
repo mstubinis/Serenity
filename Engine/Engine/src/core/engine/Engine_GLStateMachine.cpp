@@ -8,8 +8,9 @@ namespace B = ::boost;
 typedef unsigned int uint;
 
 void epriv::GLStateMachineDataCustom::init() {
-    current_bound_vbo = 0;
-    current_bound_ebo = 0;
+    current_bound_buffer_vbo = 0;
+    current_bound_buffer_ebo = 0;
+
     current_bound_vao = 0;
     current_bound_read_fbo = 0;
     current_bound_draw_fbo = 0;

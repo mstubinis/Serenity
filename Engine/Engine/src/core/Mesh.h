@@ -36,6 +36,10 @@ struct MeshDrawMode {enum Mode {
     TriangleFan = GL_TRIANGLE_FAN,
     QuadStrip = GL_QUAD_STRIP,
 };};
+struct MeshModifyFlags {enum Flag {
+    Default = 0,
+    Orphan = 1,
+};};
 
 namespace Engine{
     namespace epriv{
@@ -179,13 +183,21 @@ class Mesh final: public BindableResource, public EventObserver{
         void load();
         void unload();
 
-        template<typename T> void modifyVertices(uint attributeIndex, std::vector<T>& modifications) {
+        template<typename T> void modifyVertices(uint attributeIndex, std::vector<T>& modifications, MeshModifyFlags::Flag _flags = MeshModifyFlags::Default) {
             auto& data = const_cast<VertexData&>(getVertexStructure());
-            data.setData<T>(attributeIndex, modifications,true,false);
+
+            if (_flags & MeshModifyFlags::Orphan)
+                data.setData<T>(attributeIndex, modifications, true, true);
+            else
+                data.setData<T>(attributeIndex, modifications, true, false);
         }
-        void modifyIndices(std::vector<ushort>& modifiedIndices) {
+        void modifyIndices(std::vector<ushort>& modifiedIndices, MeshModifyFlags::Flag _flags = MeshModifyFlags::Default) {
             auto& data = const_cast<VertexData&>(getVertexStructure());
-            data.setDataIndices(modifiedIndices, true);
+
+            if(_flags & MeshModifyFlags::Orphan)
+                data.setDataIndices(modifiedIndices, true, true);
+            else
+                data.setDataIndices(modifiedIndices, true, false);
         }
 
         void render(bool instancing = true, MeshDrawMode::Mode = MeshDrawMode::Triangles);

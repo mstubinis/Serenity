@@ -3,14 +3,9 @@
 #define ENGINE_VERTEX_BUFFER_OBJECT_H_INCLUDE_GUARD
 
 #include <GL/glew.h>
-#include <GL/GL.h>
+#include <SFML/OpenGL.hpp>
 #include <vector>
-/*
-//1 2 4 8 16 32 64 128 256 512 1024 2048 4096
-struct BufferFlags final {enum Flag {
-    Orphan = 1, 
-};};
-*/
+
 struct BufferDataType final {enum Type {
     VertexArray = GL_ARRAY_BUFFER,
     ElementArray = GL_ELEMENT_ARRAY_BUFFER,

@@ -2,6 +2,7 @@
 #include "core/engine/Engine_ThreadManager.h"
 #include "core/engine/Engine_Resources.h"
 #include "core/Material.h"
+#include "core/Texture.h"
 
 using namespace Engine;
 
@@ -113,11 +114,15 @@ void ResourceManifest::init(){
     
     CapsuleA = Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.dds");
     ((Material*)CapsuleA.get())->setShadeless(true);
+    ((Material*)CapsuleA.get())->getComponent(MaterialComponentType::Diffuse)->texture()->setAnisotropicFiltering(2.0f);
     CapsuleB = Resources::addMaterial("Capsule_B","data/Textures/Effects/capsule_b.dds");
     ((Material*)CapsuleB.get())->setShadeless(true);
+    ((Material*)CapsuleB.get())->getComponent(MaterialComponentType::Diffuse)->texture()->setAnisotropicFiltering(2.0f);
     CapsuleC = Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.dds");
     ((Material*)CapsuleC.get())->setShadeless(true);
     ((Material*)CapsuleC.get())->setGlow(1.0f);
+    ((Material*)CapsuleC.get())->getComponent(MaterialComponentType::Diffuse)->texture()->setAnisotropicFiltering(2.0f);
     CapsuleD = Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.dds");
-    ((Material*)CapsuleD.get())->setShadeless(true);    
+    ((Material*)CapsuleD.get())->setShadeless(true);  
+    ((Material*)CapsuleD.get())->getComponent(MaterialComponentType::Diffuse)->texture()->setAnisotropicFiltering(2.0f);
 }

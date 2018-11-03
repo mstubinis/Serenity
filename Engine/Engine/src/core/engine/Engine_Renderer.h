@@ -20,6 +20,7 @@ class  Font;
 class  Camera;
 struct Entity;
 class  Scene;
+struct BufferObject;
 
 struct DepthFunc{enum Func{ 
     Never = GL_NEVER,
@@ -177,7 +178,6 @@ namespace Engine{
                 float getNullDistance();
                 float getBlendDistance();
             };
-
             namespace SMAA{
                 void setThreshold(float f);
                 void setSearchSteps(uint s);

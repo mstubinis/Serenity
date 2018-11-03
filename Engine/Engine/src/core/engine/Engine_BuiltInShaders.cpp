@@ -1496,7 +1496,9 @@ epriv::EShaders::bloom_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::bloom_frag +=
     "void main(){\n"
     "    vec3 sceneColor = texture2D(SceneTexture,texcoords).rgb;\n"
+    //                                               exposure
     "    sceneColor = vec3(1.0) - exp(-sceneColor * Data.z);\n"
+    //                                                         threshold       scale
     "    gl_FragColor.rgb = max(ConstantZeroVec3,sceneColor - vec3(Data.y)) * Data.x;\n"
     "}";
 #pragma endregion

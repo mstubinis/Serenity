@@ -1,25 +1,7 @@
+#include <core/engine/Engine_Renderer.h>
 #include <core/engine/mesh/VertexBufferObject.h>
 
 using namespace std;
-
-//tips for better usage
-/*
-
-glBufferData *MUST* be called first for any buffer allocation to actually allocate a region of GPU memory. From there you can orphan / subData / map / etc
-
-glBufferSubData works on a small portion of the total allocation
-glBufferSubData can work from a starting index
-
-calling glBufferData a second time after the initial call should be used in only these situations:
-    - called with NULL as data, and using the same allocation size to orphan a buffer
-    - called to change the size of the allocation
-
-use glBufferSubData to change portions of the data.
-
-look up proper usage of glMapBuffer and glMapBufferRange
-
-*/
-
 
 BufferObject::BufferObject() :buffer(0), capacity(0) { 
     drawType = BufferDataDrawType::Unassigned; 
@@ -40,8 +22,12 @@ void BufferObject::bind() {
 }
 void BufferObject::setData(size_t _size, const void* _data, BufferDataDrawType::Type _drawType) {
     drawType = _drawType;
-    capacity = _size;
-    glBufferData(type, _size, _data, drawType);
+    if (_size > capacity) {
+        capacity = _size;
+        glBufferData(type, _size, _data, drawType);
+    }else{
+        glBufferSubData(type, 0, _size, _data);
+    }
 }
 void BufferObject::setDataOrphan(const void* _data) {
     if (capacity == 0) return;

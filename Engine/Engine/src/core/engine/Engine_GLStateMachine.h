@@ -16,21 +16,21 @@ class ShaderP;
 namespace Engine {
     namespace epriv {
         struct GLStateMachineDataCustom final {
-            GLuint    current_bound_vbo;
-            GLuint    current_bound_ebo;
-            GLuint    current_bound_vao;
+            GLuint              current_bound_buffer_vbo;
+            GLuint              current_bound_buffer_ebo;
+            GLuint              current_bound_vao;
 
-            GLuint    current_bound_read_fbo;
-            GLuint    current_bound_draw_fbo;
-            GLuint    current_bound_rbo;
-            GLuint    current_bound_texture_1D;
-            GLuint    current_bound_texture_2D;
-            GLuint    current_bound_texture_3D;
-            GLuint    current_bound_texture_cube_map;
+            GLuint              current_bound_read_fbo;
+            GLuint              current_bound_draw_fbo;
+            GLuint              current_bound_rbo;
+            GLuint              current_bound_texture_1D;
+            GLuint              current_bound_texture_2D;
+            GLuint              current_bound_texture_3D;
+            GLuint              current_bound_texture_cube_map;
 
-            ShaderP*  current_bound_shader_program;
-            Material* current_bound_material;
-            Mesh*     current_bound_mesh;
+            ShaderP*            current_bound_shader_program;
+            Material*           current_bound_material;
+            Mesh*               current_bound_mesh;
 
             GLStateMachineDataCustom();
             ~GLStateMachineDataCustom();
