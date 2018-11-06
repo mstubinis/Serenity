@@ -380,7 +380,7 @@ float Planet::getGroundRadius(){
     auto& model = *m_Entity.getComponent<ComponentModel>();
     return model.radius(); 
 }
-float Planet::getRadius() { 
+float Planet::getRadius() {
     auto& model = *m_Entity.getComponent<ComponentModel>();
     return model.radius() + (model.radius() * m_AtmosphereHeight);
 }
