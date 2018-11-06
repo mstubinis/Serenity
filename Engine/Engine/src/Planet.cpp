@@ -341,7 +341,8 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
     if(m_AtmosphereHeight > 0){
         uint index = m_Model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial,(ShaderP*)ResourceManifest::skyFromSpace.get(),RenderStage::GeometryTransparent);
         MeshInstance& skyMesh = m_Model->getModel(index);
-        float aScale = 1.0f + m_AtmosphereHeight;
+        float aScale = model.getScale().x;
+        aScale = aScale + (aScale * m_AtmosphereHeight);
         skyMesh.setCustomBindFunctor(AtmosphericScatteringSkyMeshInstanceBindFunctor());
         skyMesh.setCustomUnbindFunctor(AtmosphericScatteringSkyMeshInstanceUnbindFunctor());
         skyMesh.setScale(aScale,aScale,aScale);
@@ -373,13 +374,16 @@ void Planet::setRotation(RotationInfo* r){
     m_Entity.getComponent<ComponentBody>()->rotate(glm::radians(-r->tilt),0.0f,0.0f);
 }
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
-glm::vec2 Planet::getGravityInfo(){ return glm::vec2(getRadius()*5,getRadius()*7); }
+glm::vec2 Planet::getGravityInfo(){ return glm::vec2(getRadius() * 5,getRadius() * 7); }
 OrbitInfo* Planet::getOrbitInfo() const { return m_OrbitInfo; }
 float Planet::getGroundRadius(){ 
     auto& model = *m_Entity.getComponent<ComponentModel>();
-    return model.radius() - (model.radius() * m_AtmosphereHeight); 
+    return model.radius(); 
 }
-float Planet::getRadius() { return m_Entity.getComponent<ComponentModel>()->radius(); }
+float Planet::getRadius() { 
+    auto& model = *m_Entity.getComponent<ComponentModel>();
+    return model.radius() + (model.radius() * m_AtmosphereHeight);
+}
 float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
 
 Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name, SolarSystem* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){

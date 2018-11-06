@@ -26,12 +26,14 @@ float epriv::ComponentModelFunctions::CalculateRadius(ComponentModel& super) {
     }
     super._radius = maxLength;
     super._radiusBox = boundingBox;
+    //mesh vertex radius
     auto* body = super.owner.getComponent<ComponentBody>();
     if (body) {
         float _bodyScale = Engine::Math::Max(body->getScale());
         super._radius *= _bodyScale;
         super._radiusBox *= _bodyScale;
     }
+    //now modified by the body scale
     return super._radius;
 };
 
