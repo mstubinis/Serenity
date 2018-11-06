@@ -1648,8 +1648,12 @@ class epriv::RenderManager::impl final{
                             float startingX = x + chr.xoffset;
                             float startingY = -int(chr.height + chr.yoffset) - y;
 
-                            ind.emplace_back(accum + 0); ind.emplace_back(accum + 1); ind.emplace_back(accum + 2);
-                            ind.emplace_back(accum + 3); ind.emplace_back(accum + 1); ind.emplace_back(accum + 0);
+                            ind.emplace_back(accum + 0);
+                            ind.emplace_back(accum + 1);
+                            ind.emplace_back(accum + 2);
+                            ind.emplace_back(accum + 3);
+                            ind.emplace_back(accum + 1);
+                            ind.emplace_back(accum + 0);
 
                             pts.emplace_back(startingX + chr.pts[0].x, startingY + chr.pts[0].y, z);
                             pts.emplace_back(startingX + chr.pts[1].x, startingY + chr.pts[1].y, z);

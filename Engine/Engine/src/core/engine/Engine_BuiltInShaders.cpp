@@ -1379,10 +1379,9 @@ epriv::EShaders::deferred_frag +=
     "	 float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(metalness,smoothness);\n"
     "    vec4 GodRays = (InDiffuse * vec4(Gods_Rays_Color,1.0)) * 0.5;\n"
     "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
-    "    float GodRaysBA = Pack2NibblesInto8BitChannel(GodRays.b,GodRays.a);\n"
     "    gl_FragData[0] = OutDiffuse;\n"
     "    gl_FragData[1] = vec4(OutNormals,OutMatIDAndAO,OutPackedMetalnessAndSmoothness);\n"
-    "    gl_FragData[2] = vec4(OutGlow,OutSpecular,GodRaysRG,GodRaysBA);\n"
+    "    gl_FragData[2] = vec4(OutGlow,OutSpecular,GodRaysRG,GodRays.b);\n"
     "}";
 #pragma endregion
 
@@ -1614,10 +1613,9 @@ epriv::EShaders::godRays_frag +=
     "    vec3 totalColor = vec3(0.0);\n"
     "    for(int i = 0; i < samples; ++i){\n"
     "        uv -= deltaUV / 2.0;\n"
-    "        vec4 sample = texture2D(firstPass,uv).rgba;\n"
+    "        vec4 sample = texture2D(firstPass,uv);\n"
     "        vec2 rg = Unpack2NibblesFrom8BitChannel(sample.b);\n"
-    "        vec2 ba = Unpack2NibblesFrom8BitChannel(sample.a);\n"
-    "        vec3 realSample = vec3(rg.r,rg.g,ba.r);\n"
+    "        vec3 realSample = vec3(rg.r,rg.g,sample.a);\n"
     "        realSample *= illuminationDecay * RaysInfo.w;\n"
     "        totalColor += realSample;\n"
     "        illuminationDecay *= RaysInfo.y;\n" 

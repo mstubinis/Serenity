@@ -130,6 +130,5 @@ void main(){
     gl_FragData[1] = vec4(OutNormals,0.0,OutPackedMetalnessSmoothness); //0.0 = matID + ao, which is never used
     vec4 GodRays = vec4(Gods_Rays_Color,1.0);
     float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);
-    float GodRaysBA = Pack2NibblesInto8BitChannel(GodRays.b,GodRays.a);
-    gl_FragData[2] = vec4(OutGlow,OutSpecular,GodRaysRG,GodRaysBA);
+    gl_FragData[2] = vec4(OutGlow,OutSpecular,GodRaysRG,GodRays.b);
 }

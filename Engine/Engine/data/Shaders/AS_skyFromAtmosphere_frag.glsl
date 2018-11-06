@@ -78,7 +78,5 @@ void main(){
     GodRays = clamp(GodRays, 0.01, 0.99);
     GodRays.rgb = max(GodRays.rgb, vec3(0.125, 0.116, 0.25)) * 0.7;
     float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);
-    float GodRaysBA = Pack2NibblesInto8BitChannel(GodRays.b,GodRays.a);
-
-    gl_FragData[2] = vec4(0.0,0.0,GodRaysRG,GodRaysBA);
+    gl_FragData[2] = vec4(0.0,0.0,GodRaysRG,GodRays.b);
 }

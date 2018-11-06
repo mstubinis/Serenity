@@ -63,8 +63,7 @@ void main(){
 
     vec4 GodRays = vec4(ConstantZeroVec3,1.0);
     float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);
-    float GodRaysBA = Pack2NibblesInto8BitChannel(GodRays.b,GodRays.a);
     gl_FragData[0] = vec4(HDR.xyz,nightmult);
     gl_FragData[1] = vec4(ConstantOneVec2,0.0,1.0); //out normals, out matIDandAO, out packed metalness and smoothness
-    gl_FragData[2] = vec4(0.0,0.0,GodRaysRG,GodRaysBA);
+    gl_FragData[2] = vec4(0.0,0.0,GodRaysRG,GodRays.b);
 }
