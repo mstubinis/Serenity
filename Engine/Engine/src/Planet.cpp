@@ -268,6 +268,8 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     glm::vec3 scl = m_Body.getScale();
     //glm::vec3 scl = glm::vec3(outerRadius);
     float fScale = 1.0f / (outerRadius - innerRadius);
+    float fScaleOverDepth = fScale / fScaledepth;
+    float fDepth = glm::exp(fScaleOverDepth * (innerRadius - camHeight));
     float exposure = 2.0f;
     float g = -0.98f;
     glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.65f,4.0f),1.0f/glm::pow(0.57f,4.0f),1.0f/glm::pow(0.475f,4.0f));
@@ -303,13 +305,14 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     Renderer::Settings::cullFace(GL_FRONT);
     Renderer::GLEnable(GLState::BLEND);
 
+
     Renderer::sendUniformMatrix4Safe("Model", model);
     Renderer::sendUniform1("nSamples", numberSamples);
     Renderer::sendUniform4("VertDataMisc1", camPos.x, camPos.y, camPos.z, lightDir.x);
-    Renderer::sendUniform4("VertDataMisc2", camHeight, camHeight2, 0.0f, lightDir.y);
+    Renderer::sendUniform4("VertDataMisc2", camHeight, camHeight2, fDepth, lightDir.y);
     Renderer::sendUniform4("VertDataMisc3", v3InvWaveLength.x, v3InvWaveLength.y, v3InvWaveLength.z, lightDir.z);
-    Renderer::sendUniform4("VertDataScale", fScale, fScaledepth, fScale / fScaledepth, float(numberSamples));
-    Renderer::sendUniform4("VertDataRadius", outerRadius, outerRadius*outerRadius, innerRadius, innerRadius*innerRadius);
+    Renderer::sendUniform4("VertDataScale", fScale, fScaledepth, fScaleOverDepth, float(numberSamples));
+    Renderer::sendUniform4("VertDataRadius", outerRadius, outerRadius * outerRadius, innerRadius, innerRadius * innerRadius);
     Renderer::sendUniform4("VertDatafK", Kr * ESun, Km * ESun, Kr * 12.56637061435916f, Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
     Renderer::sendUniform4("FragDataGravity", g, g * g, exposure, 0.0f);
 }};

@@ -14,11 +14,11 @@ uniform mat4 Model;
 uniform int nSamples;
 
 uniform vec4 VertDataMisc1;         //xyz = camPos,                              w = lightDir.x
-uniform vec4 VertDataMisc2;         //x = camHeight, y = camHeight2, z = UNUSED, w = lightDir.y
+uniform vec4 VertDataMisc2;         //x = camHeight, y = camHeight2, z = fDepth, w = lightDir.y
 uniform vec4 VertDataMisc3;         //xyz = v3InvWaveLength,                     w = lightDir.z
-uniform vec4 VertDataScale;         //fScale,fScaledepth,fScaleOverScaleDepth,fSamples
+uniform vec4 VertDataScale;         //fScale, fScaledepth, fScaleOverScaleDepth, fSamples
 uniform vec4 VertDataRadius;        //out, out2, inn, inn2
-uniform vec4 VertDatafK;            //fKrESun,fKmESun,fKr4PI,fKm4PI
+uniform vec4 VertDatafK;            //fKrESun, fKmESun, fKr4PI, fKm4PI
 
 varying vec3 c0;
 varying vec3 c1;
@@ -49,12 +49,11 @@ void main(){
 
     vec3 v3Start = VertDataMisc1.xyz;
     float fHeight = length(v3Start);
-    float fDepth = exp(VertDataScale.z * (VertDataRadius.z - VertDataMisc2.x));
     float fStartAngle = dot(v3Ray, v3Start) / fHeight;
-    float fStartOffset = fDepth*scale(fStartAngle);
+    float fStartAngleScale = scale(fStartAngle);
+    float fStartOffset = VertDataMisc2.z * fStartAngleScale;
 
-    float fStartDepth = exp(VertDataScale.z * (VertDataRadius.z - VertDataMisc2.x));
-    Depth = clamp(fStartDepth*scale(fStartAngle),0.0,1.0);
+    Depth = clamp(VertDataMisc2.z * fStartAngleScale,0.0,1.0);
 
     float fSampleLength = fFar / VertDataScale.w;
     float fScaledLength = fSampleLength * VertDataScale.x;
