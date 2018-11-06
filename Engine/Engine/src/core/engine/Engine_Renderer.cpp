@@ -1470,7 +1470,7 @@ class epriv::RenderManager::impl final{
             }
             Resources::getWindow().display(); //prevent opengl & windows timeout
             fbo->unbind();
-            delete fbo;
+            SAFE_DELETE(fbo);
         }
         void _generateBRDFLUTCookTorrance(uint brdfSize){
             uint& prevReadBuffer = glSM.current_bound_read_fbo;
@@ -1494,7 +1494,7 @@ class epriv::RenderManager::impl final{
             //m_InternalShaderPrograms[EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance]->unbind();
             Renderer::colorMask(true, true, true, true);
 
-            delete fbo;
+            SAFE_DELETE(fbo);
             bindReadFBO(prevReadBuffer);
             bindDrawFBO(prevDrawBuffer);
         }
@@ -1639,18 +1639,18 @@ class epriv::RenderManager::impl final{
                     sendUniformMatrix4("Model", m);
 
                     for (auto& c : item.text) {
-                        uint accum = i * 4;
-                        ind.emplace_back(accum + 0); ind.emplace_back(accum + 1); ind.emplace_back(accum + 2);
-                        ind.emplace_back(accum + 3); ind.emplace_back(accum + 1); ind.emplace_back(accum + 0);
                         if (c == '\n') {
                             y += newLineGlyph.height + 7;
                             x = 0.0f;
                         }else{
+                            uint accum = i * 4;
                             FontGlyph& chr = font.getGlyphData(c);
                             float startingX = x + chr.xoffset;
                             float startingY = -int(chr.height + chr.yoffset) - y;
 
-                            //the problem lies with points, not uvs or indices
+                            ind.emplace_back(accum + 0); ind.emplace_back(accum + 1); ind.emplace_back(accum + 2);
+                            ind.emplace_back(accum + 3); ind.emplace_back(accum + 1); ind.emplace_back(accum + 0);
+
                             pts.emplace_back(startingX + chr.pts[0].x, startingY + chr.pts[0].y, z);
                             pts.emplace_back(startingX + chr.pts[1].x, startingY + chr.pts[1].y, z);
                             pts.emplace_back(startingX + chr.pts[2].x, startingY + chr.pts[2].y, z);
@@ -1661,8 +1661,8 @@ class epriv::RenderManager::impl final{
                             uvs.emplace_back(chr.uvs[2].x, chr.uvs[2].y);
                             uvs.emplace_back(chr.uvs[3].x, chr.uvs[3].y);
                             x += chr.xadvance;
+                            ++i;
                         }
-                        ++i;
                     }
                     mesh.modifyVertices(0, pts);
                     mesh.modifyVertices(1, uvs);
@@ -1676,9 +1676,6 @@ class epriv::RenderManager::impl final{
             const glm::vec3& clear = scene.getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
-            //if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
-            //else{        gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA"); }
-
             gbuffer.start(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
 
             Settings::clear(true,true,true); // (0,0,0,0)
@@ -1703,10 +1700,7 @@ class epriv::RenderManager::impl final{
             InternalScenePublicInterface::RenderGeometryOpaque(scene,c);
 
             //skybox here
-            //gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
             _renderSkybox(scene.skybox());
-            //if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
-
 
             InternalScenePublicInterface::RenderGeometryTransparent(scene,c);
         }
@@ -1800,7 +1794,7 @@ class epriv::RenderManager::impl final{
         }
         void _passSSAO(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO]->bind();
-            float _divisor = gbuffer.getSmallFBO()->divisor();
+            const float& _divisor = gbuffer.getSmallFBO()->divisor();
             if(RenderManager::GLSL_VERSION < 140){
                 sendUniformMatrix4Safe("CameraInvViewProj",c.getViewProjectionInverse());
                 sendUniformMatrix4Safe("CameraInvProj",c.getProjectionInverse());
@@ -1823,9 +1817,9 @@ class epriv::RenderManager::impl final{
         }
         void _passBloom(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture) {
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom]->bind();
-            float _divisor = gbuffer.getSmallFBO()->divisor();
+            const float& _divisor = gbuffer.getSmallFBO()->divisor();
 
-            sendUniform4("Data", bloom_scale,bloom_threshold,bloom_exposure,0.0f);
+            sendUniform4("Data", bloom_scale, bloom_threshold, bloom_exposure, 0.0f);
             sendTexture("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
 
             uint _x = uint(float(fboWidth) * _divisor);
@@ -1859,12 +1853,12 @@ class epriv::RenderManager::impl final{
         }
         void _passGodsRays(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,glm::vec2 lightScrnPos,float alpha){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays]->bind();
-            float _divisor = gbuffer.getSmallFBO()->divisor();
-            sendUniform4("RaysInfo",godRays_exposure,godRays_decay,godRays_density,godRays_weight);
-            sendUniform2("lightPositionOnScreen",lightScrnPos.x/float(fboWidth),lightScrnPos.y/float(fboHeight));
-            sendUniform1("samples",godRays_samples);
-            sendUniform1("alpha",alpha);
-            sendTexture("firstPass",gbuffer.getTexture(GBufferType::Misc),0);
+            const float& _divisor = gbuffer.getSmallFBO()->divisor();
+            sendUniform4("RaysInfo", godRays_exposure, godRays_decay, godRays_density, godRays_weight);
+            sendUniform2("lightPositionOnScreen", lightScrnPos.x / float(fboWidth), lightScrnPos.y / float(fboHeight));
+            sendUniform1("samples", godRays_samples);
+            sendUniform1("alpha", alpha);
+            sendTexture("firstPass", gbuffer.getTexture(GBufferType::Misc), 0);
 
             uint _x = uint(float(fboWidth) * _divisor);
             uint _y = uint(float(fboHeight) * _divisor);
@@ -1895,7 +1889,7 @@ class epriv::RenderManager::impl final{
         void _passBlur(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,string type, GLuint texture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur]->bind();
 
-            float _divisor = gbuffer.getSmallFBO()->divisor();
+            const float& _divisor = gbuffer.getSmallFBO()->divisor();
             glm::vec2 hv(0.0f);
             if(type == "H"){ hv = glm::vec2(1.0f,0.0f); }
             else{            hv = glm::vec2(0.0f,1.0f); }
@@ -1914,7 +1908,7 @@ class epriv::RenderManager::impl final{
         void _passBlurSSAO(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, string type, GLuint texture) {
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlurSSAO]->bind();
 
-            float _divisor = gbuffer.getSmallFBO()->divisor();
+            const float& _divisor = gbuffer.getSmallFBO()->divisor();
             glm::vec2 hv(0.0f);
 
             if (type == "H") { hv = glm::vec2(1.0f, 0.0f); } else { hv = glm::vec2(0.0f, 1.0f); }
