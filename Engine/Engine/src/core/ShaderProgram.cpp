@@ -97,9 +97,6 @@ namespace Engine{
             if(RenderManager::GLSL_VERSION < 140){
                 Renderer::sendUniformMatrix4Safe("CameraViewProj",c.getViewProjection());
             }
-
-            if(Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1Safe("HasGodsRays",1);
-            else                                       Renderer::sendUniform1Safe("HasGodsRays",0);
         }};
         struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
         }};

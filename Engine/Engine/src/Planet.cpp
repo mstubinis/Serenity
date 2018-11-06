@@ -82,6 +82,7 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     glm::mat4 model = m_Body->modelMatrix();
 
     //TODO: experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
+    /*
     float _distanceReal = glm::abs(glm::distance(camPosR, pos));
     float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
     float _distance = _factor * _distanceReal;
@@ -91,6 +92,7 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     model = glm::translate(model,camPosR - _newPosition);
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
+    */
 
     outerRadius += (outerRadius *  0.025f);
     Renderer::sendUniform1("HasAtmosphere",0);   
@@ -132,8 +134,13 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     glm::mat4 model = i.model();
     float outerRadius = obj.getRadius();
 
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, pos);
+    model *= glm::mat4_cast(orientation);
+    model = glm::scale(model, glm::vec3(outerRadius));
 
     //TODO: experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
+    /*
     float _distanceReal = glm::abs(glm::distance(camPosR, pos));
     float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
     float _distance = _factor * _distanceReal;
@@ -143,6 +150,7 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     model = glm::translate(model,camPosR - _newPosition);
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
+    */
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     
@@ -183,9 +191,9 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     glm::mat4 model = m_Body->modelMatrix();
 
     //TODO: experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
+    /*
     float _distanceReal = glm::abs(glm::distance(camPosR, pos));
-    float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
-    //std::cout << obj.m_Entity.getComponent<ComponentName>()->name() << ": " << _factor << std::endl;
+    float _factor = PlanetaryRenderSpace(innerRadius, _distanceReal);
     float _distance = _factor * _distanceReal;
     glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
     float _newScale = scl.x * _factor;
@@ -193,6 +201,7 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     model = glm::translate(model,camPosR - _newPosition);
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
+    */
 
     if(atmosphereHeight <= 0){
         outerRadius += (outerRadius *  0.025f);
@@ -234,49 +243,53 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     MeshInstance& i = *(MeshInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
+    auto& m_Body = *obj.m_Entity.getComponent<ComponentBody>();
     float atmosphereHeight = obj.getAtmosphereHeight();
 
-    glm::vec3 pos = m_Body->position();
-    glm::quat orientation = m_Body->rotation();
+    glm::vec3 thisPos = m_Body.position();
+    glm::quat orientation = m_Body.rotation();
     glm::vec3 camPosR = c->getPosition();
-    glm::vec3 camPos = camPosR - pos;
+    glm::vec3 camPos = camPosR - thisPos;
     float camHeight = glm::length(camPos);
-    float camHeight2 = camHeight*camHeight;
+    float camHeight2 = camHeight * camHeight;
 
     int numberSamples = 1;
     
     glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetLights(*Resources::getCurrentScene())[0]->position();
-    glm::vec3 lightDir = glm::normalize(lightPos - pos);
+    glm::vec3 lightDir = glm::normalize(lightPos - thisPos);
     float Km = 0.0025f;
     float Kr = 0.0015f;
     float ESun = 20.0f;
-    glm::vec3 scl = m_Body->getScale();
+    
     
     float fScaledepth = 0.25f;
-    float innerRadius = obj.getGroundRadius();
+    float innerRadius = obj.getGroundRadius();  
     float outerRadius = obj.getRadius();
+    glm::vec3 scl = m_Body.getScale();
+    //glm::vec3 scl = glm::vec3(outerRadius);
     float fScale = 1.0f / (outerRadius - innerRadius);
     float exposure = 2.0f;
     float g = -0.98f;
     glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.65f,4.0f),1.0f/glm::pow(0.57f,4.0f),1.0f/glm::pow(0.475f,4.0f));
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model,pos);
-    model = glm::scale(model,scl);
-    model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
+    model = glm::translate(model, thisPos);
+    model = glm::scale(model, scl);
+    model = glm::scale(model, glm::vec3(1.0f + atmosphereHeight));
 
     
     //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
-    //float _distanceReal = glm::abs(glm::distance(camPosR, pos));
-    //float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
-    //float _distance = _factor * _distanceReal;
-    //glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
-    //float _newScale = scl.x * _factor;
-    //model = glm::mat4(1.0f);
-    //model = glm::translate(model,camPosR - _newPosition);
-    //model = glm::scale(model,glm::vec3(_newScale));
-    //model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
+    /*
+    float _distanceReal = glm::abs(glm::distance(camPosR, thisPos));
+    float _factor = PlanetaryRenderSpace(outerRadius, _distanceReal);
+    float _distance = _factor * _distanceReal;
+    glm::vec3 _newPosition = glm::normalize(camPosR - thisPos) * _distance;
+    float _newScale = scl.x * _factor;
+    model = glm::mat4(1.0f);
+    model = glm::translate(model,camPosR - _newPosition);
+    model = glm::scale(model,glm::vec3(_newScale));
+    model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
+    */
     
     ShaderP* program;
     //and now render the atmosphere
@@ -290,22 +303,20 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     Renderer::Settings::cullFace(GL_FRONT);
     Renderer::GLEnable(GLState::BLEND);
 
-    Renderer::sendUniformMatrix4Safe("Model",model);
-    Renderer::sendUniform1("nSamples", numberSamples);  
-    Renderer::sendUniform4("VertDataMisc1",camPos.x,camPos.y,camPos.z,lightDir.x);
-    Renderer::sendUniform4("VertDataMisc2",camHeight,camHeight2,0.0f,lightDir.y);
-    Renderer::sendUniform4("VertDataMisc3",v3InvWaveLength.x,v3InvWaveLength.y,v3InvWaveLength.z,lightDir.z);
-    Renderer::sendUniform4("VertDataScale",fScale,fScaledepth,fScale / fScaledepth,float(numberSamples));
-    Renderer::sendUniform4("VertDataRadius",outerRadius,outerRadius*outerRadius,innerRadius,innerRadius*innerRadius);
-    Renderer::sendUniform4("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
-    Renderer::sendUniform4("FragDataGravity",g,g*g,exposure,0.0f);
+    Renderer::sendUniformMatrix4Safe("Model", model);
+    Renderer::sendUniform1("nSamples", numberSamples);
+    Renderer::sendUniform4("VertDataMisc1", camPos.x, camPos.y, camPos.z, lightDir.x);
+    Renderer::sendUniform4("VertDataMisc2", camHeight, camHeight2, 0.0f, lightDir.y);
+    Renderer::sendUniform4("VertDataMisc3", v3InvWaveLength.x, v3InvWaveLength.y, v3InvWaveLength.z, lightDir.z);
+    Renderer::sendUniform4("VertDataScale", fScale, fScaledepth, fScale / fScaledepth, float(numberSamples));
+    Renderer::sendUniform4("VertDataRadius", outerRadius, outerRadius*outerRadius, innerRadius, innerRadius*innerRadius);
+    Renderer::sendUniform4("VertDatafK", Kr * ESun, Km * ESun, Kr * 12.56637061435916f, Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
+    Renderer::sendUniform4("FragDataGravity", g, g * g, exposure, 0.0f);
 }};
 
 struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
     Renderer::Settings::cullFace(GL_BACK);
     Renderer::GLDisable(GLState::BLEND);
-    //Renderer::GLEnable(GLState::DEPTH_TEST);
-    //Renderer::GLEnable(GLState::DEPTH_MASK);
 }};
 
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere, SolarSystem* scene):EntityWrapper(*scene){

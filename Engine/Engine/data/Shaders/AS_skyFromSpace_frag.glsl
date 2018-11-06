@@ -10,8 +10,6 @@ varying vec3 v3LightPosition;
 varying float Depth;
 varying vec3 WorldPosition;
 
-uniform int HasGodsRays;
-
 const vec4 ConstantZeroVec4 = vec4(0.0,0.0,0.0,0.0);
 const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);
 const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);
@@ -19,6 +17,20 @@ const vec2 ConstantOneVec2 = vec2(1.0,1.0);
 const vec2 ConstantZeroVec2 = vec2(0.0,0.0);
 const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);
 
+float Pack2NibblesInto8BitChannel(float x,float y){
+    float _x = clamp(x,0.01,0.99);
+    float _y = clamp(y,0.01,0.99);
+    float lowEnd = round(_x * 15.01501501501502);
+    float highEnd = (round(_y * 15.01501501501502)) * 16.0;
+    return (highEnd + lowEnd) * 0.003921568627451;
+}
+vec2 Unpack2NibblesFrom8BitChannel(float data){
+    float _data = data * 255.0;
+    float _exact = _data * 0.0625;
+    float highEnd = round(_exact);
+    float lowEnd = _data - (_exact * 16.0);
+    return vec2(lowEnd * 0.0666,highEnd * 0.0666);
+}
 float Pack2FloatIntoFloat16(float x,float y){
     x = clamp(x,0.0001,0.9999);
     y = clamp(y,0.0001,0.9999);
@@ -49,12 +61,10 @@ void main(){
     vec4 HDR = 1.0 - exp(f4Color * -FragDataGravity.z);
     float nightmult = clamp(max(HDR.x, max(HDR.y, HDR.z))*1.5,0.0,1.0);
 
-    //gl_FragColor = vec4(HDR.xyz,nightmult);
-    
+    vec4 GodRays = vec4(ConstantZeroVec3,1.0);
+    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);
+    float GodRaysBA = Pack2NibblesInto8BitChannel(GodRays.b,GodRays.a);
     gl_FragData[0] = vec4(HDR.xyz,nightmult);
-    gl_FragData[1] = vec4(ConstantOneVec2,0.0,1.0); //out normals, out ao, out packed metalness and smoothness
-    gl_FragData[2].rg = ConstantZeroVec2;
-    if(HasGodsRays == 1){
-        gl_FragData[3] = vec4(ConstantZeroVec3,1.0);
-    }
+    gl_FragData[1] = vec4(ConstantOneVec2,0.0,1.0); //out normals, out matIDandAO, out packed metalness and smoothness
+    gl_FragData[2] = vec4(0.0,0.0,GodRaysRG,GodRaysBA);
 }

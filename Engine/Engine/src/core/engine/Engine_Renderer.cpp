@@ -1676,8 +1676,10 @@ class epriv::RenderManager::impl final{
             const glm::vec3& clear = scene.getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
-            if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
-            else{        gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA"); }
+            //if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
+            //else{        gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA"); }
+
+            gbuffer.start(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
 
             Settings::clear(true,true,true); // (0,0,0,0)
             
@@ -1687,7 +1689,7 @@ class epriv::RenderManager::impl final{
             glClearBufferfv(GL_COLOR,0,colors);
             if(godRays){
                 const float _godraysclearcolor[4] = { godRays_clearColor.r, godRays_clearColor.g, godRays_clearColor.b, godRays_clearColor.a };
-                glClearBufferfv(GL_COLOR,3, _godraysclearcolor);
+                glClearBufferfv(GL_COLOR,2, _godraysclearcolor);
             }
 
             GLEnable(GLState::DEPTH_TEST);
@@ -1701,9 +1703,9 @@ class epriv::RenderManager::impl final{
             InternalScenePublicInterface::RenderGeometryOpaque(scene,c);
 
             //skybox here
-            gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
+            //gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
             _renderSkybox(scene.skybox());
-            if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
+            //if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
 
 
             InternalScenePublicInterface::RenderGeometryTransparent(scene,c);
@@ -1862,7 +1864,7 @@ class epriv::RenderManager::impl final{
             sendUniform2("lightPositionOnScreen",lightScrnPos.x/float(fboWidth),lightScrnPos.y/float(fboHeight));
             sendUniform1("samples",godRays_samples);
             sendUniform1("alpha",alpha);
-            sendTexture("firstPass",gbuffer.getTexture(GBufferType::Lighting),0);
+            sendTexture("firstPass",gbuffer.getTexture(GBufferType::Misc),0);
 
             uint _x = uint(float(fboWidth) * _divisor);
             uint _y = uint(float(fboHeight) * _divisor);

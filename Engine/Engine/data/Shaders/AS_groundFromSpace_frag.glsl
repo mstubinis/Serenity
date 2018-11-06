@@ -24,8 +24,6 @@ uniform vec4 ThirdConditionals;          //x = refraction  y = heightmap  z = UN
 
 uniform vec4 FragDataMisc1;              //xyz = lightPos  w = exposure
 
-uniform int HasGodsRays;
-
 uniform vec4 Object_Color;
 uniform vec3 Gods_Rays_Color;
 
@@ -130,8 +128,8 @@ void main(){
     }
     gl_FragData[0] = OutDiffuse;          
     gl_FragData[1] = vec4(OutNormals,0.0,OutPackedMetalnessSmoothness); //0.0 = matID + ao, which is never used
-    gl_FragData[2].rg = vec2(OutGlow,OutSpecular);
-    if(HasGodsRays == 1){
-        gl_FragData[3] = vec4(Gods_Rays_Color,1.0);
-    }
+    vec4 GodRays = vec4(Gods_Rays_Color,1.0);
+    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);
+    float GodRaysBA = Pack2NibblesInto8BitChannel(GodRays.b,GodRays.a);
+    gl_FragData[2] = vec4(OutGlow,OutSpecular,GodRaysRG,GodRaysBA);
 }

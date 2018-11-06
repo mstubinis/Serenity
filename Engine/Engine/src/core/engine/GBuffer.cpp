@@ -18,7 +18,7 @@ vector<boost::tuple<ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePi
     m[epriv::GBufferType::Misc]     = boost::make_tuple(ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_2);
     m[epriv::GBufferType::Lighting] = boost::make_tuple(ImageInternalFormat::RGB16F,   ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_3);
     m[epriv::GBufferType::Bloom]    = boost::make_tuple(ImageInternalFormat::RGBA4,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);
-    m[epriv::GBufferType::GodRays]  = boost::make_tuple(ImageInternalFormat::RGBA4,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_1);
+    m[epriv::GBufferType::GodRays]  = boost::make_tuple(ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_1);
     m[epriv::GBufferType::Depth]    = boost::make_tuple(ImageInternalFormat::Depth24Stencil8,  ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8,  FramebufferAttatchment::DepthAndStencil);
 
     return m;

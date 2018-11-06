@@ -13,8 +13,6 @@ varying float cameraHeight;
 varying float planetRadius;
 varying vec3 WorldPosition;
 
-uniform int HasGodsRays;
-
 const vec4 ConstantZeroVec4 = vec4(0.0,0.0,0.0,0.0);
 const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);
 const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);
@@ -22,6 +20,20 @@ const vec2 ConstantOneVec2 = vec2(1.0,1.0);
 const vec2 ConstantZeroVec2 = vec2(0.0,0.0);
 const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);
 
+float Pack2NibblesInto8BitChannel(float x,float y){
+    float _x = clamp(x,0.01,0.99);
+    float _y = clamp(y,0.01,0.99);
+    float lowEnd = round(_x * 15.01501501501502);
+    float highEnd = (round(_y * 15.01501501501502)) * 16.0;
+    return (highEnd + lowEnd) * 0.003921568627451;
+}
+vec2 Unpack2NibblesFrom8BitChannel(float data){
+    float _data = data * 255.0;
+    float _exact = _data * 0.0625;
+    float highEnd = round(_exact);
+    float lowEnd = _data - (_exact * 16.0);
+    return vec2(lowEnd * 0.0666,highEnd * 0.0666);
+}
 float Pack2FloatIntoFloat16(float x,float y){
     x = clamp(x,0.0001,0.9999);
     y = clamp(y,0.0001,0.9999);
@@ -58,17 +70,15 @@ void main(){
 
     vec4 OutDiffuse;
     OutDiffuse.rgb = vec3(clamp(vec4(HDR.xyz, nightmult), 0.01, 0.99));
-    //gl_FragColor = vec4(OutDiffuse.rgb,clamp(alpha * (OutDiffuse.rgb * 5.5), 0.01, 0.99));
-
-    //TODO: fix the code below after (if / when) this is moved back to the geometry pass
-    
     gl_FragData[0] = vec4(OutDiffuse.rgb,clamp(alpha * (OutDiffuse.rgb * 5.5), 0.01, 0.99));
     gl_FragData[1] = vec4(ConstantOneVec2,0.0,1.0); //out normals, out ao, out packed metalness and smoothness
-    gl_FragData[2].rg = ConstantZeroVec2; //outglow, outspecular
-    if(HasGodsRays == 1){
-        gl_FragData[3] = clamp(vec4(HDR.xyz,nightmult), 0.01, 0.99);
-        gl_FragData[3] = pow(gl_FragData[3], vec4(11.0));
-        gl_FragData[3] = clamp(gl_FragData[3], 0.01, 0.99);
-        gl_FragData[3].rgb = max(gl_FragData[3].rgb, vec3(0.125, 0.116, 0.25)) * 0.7;
-    }    
+
+    vec4 GodRays = clamp(vec4(HDR.xyz,nightmult), 0.01, 0.99);
+    GodRays = pow(GodRays, vec4(11.0));
+    GodRays = clamp(GodRays, 0.01, 0.99);
+    GodRays.rgb = max(GodRays.rgb, vec3(0.125, 0.116, 0.25)) * 0.7;
+    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);
+    float GodRaysBA = Pack2NibblesInto8BitChannel(GodRays.b,GodRays.a);
+
+    gl_FragData[2] = vec4(0.0,0.0,GodRaysRG,GodRaysBA);
 }

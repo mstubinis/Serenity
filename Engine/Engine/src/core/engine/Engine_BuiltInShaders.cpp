@@ -1270,7 +1270,6 @@ epriv::EShaders::deferred_frag =
     "uniform float       RefractiveIndex;\n"
     "\n"
     "uniform int Shadeless;\n"
-    "uniform int HasGodsRays;\n"
     "\n"
     "uniform vec4 FirstConditionals;\n" //x = diffuse  y = normals    z = glow w = specular
     "uniform vec4 SecondConditionals;\n" //x = ao y = metal z = smoothness w = reflection
@@ -1378,12 +1377,12 @@ epriv::EShaders::deferred_frag +=
     "        OutNormals = ConstantOneVec2; \n"
     "    }\n"
     "	 float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(metalness,smoothness);\n"
+    "    vec4 GodRays = (InDiffuse * vec4(Gods_Rays_Color,1.0)) * 0.5;\n"
+    "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
+    "    float GodRaysBA = Pack2NibblesInto8BitChannel(GodRays.b,GodRays.a);\n"
     "    gl_FragData[0] = OutDiffuse;\n"
     "    gl_FragData[1] = vec4(OutNormals,OutMatIDAndAO,OutPackedMetalnessAndSmoothness);\n"
-    "    gl_FragData[2].rg = vec2(OutGlow,OutSpecular);\n"
-    "    if(HasGodsRays == 1){\n"
-    "        gl_FragData[3] = (InDiffuse * vec4(Gods_Rays_Color,1.0)) * 0.5;\n"
-    "    }\n"
+    "    gl_FragData[2] = vec4(OutGlow,OutSpecular,GodRaysRG,GodRaysBA);\n"
     "}";
 #pragma endregion
 
@@ -1411,7 +1410,7 @@ epriv::EShaders::deferred_frag_skybox =
     "void main(){\n"
     "    gl_FragData[0] = textureCube(Texture, UV);\n"
     "    gl_FragData[1].rg = vec2(1.0);\n"
-    "    gl_FragData[2].rb = vec2(0.0);\n"
+    "    gl_FragData[2] = vec4(0.0);\n"
     "}";
 #pragma endregion
 
@@ -1424,7 +1423,7 @@ epriv::EShaders::deferred_frag_skybox_fake =
     "void main(){\n"
     "    gl_FragData[0].rgba = Color;\n"
     "    gl_FragData[1].rg = vec2(1.0);\n"
-    "    gl_FragData[2].rb = vec2(0.0);\n"
+    "    gl_FragData[2] = vec4(0.0);\n"
     "}";
 #pragma endregion
 
@@ -1597,7 +1596,8 @@ epriv::EShaders::ssao_blur_frag =
 #pragma endregion
 
 #pragma region GodRays
-epriv::EShaders::godRays_frag =
+epriv::EShaders::godRays_frag = epriv::EShaders::float_into_2_floats;
+epriv::EShaders::godRays_frag +=
     "uniform vec4 RaysInfo;\n"//exposure | decay | density | weight
     "\n"
     "uniform vec2 lightPositionOnScreen;\n"
@@ -1612,12 +1612,15 @@ epriv::EShaders::godRays_frag =
     "    deltaUV *= 1.0 /  float(samples) * RaysInfo.z;\n"
     "    float illuminationDecay = 1.0;\n"
     "    vec3 totalColor = vec3(0.0);\n"
-    "    for(int i=0; i < samples; ++i){\n"
+    "    for(int i = 0; i < samples; ++i){\n"
     "        uv -= deltaUV / 2.0;\n"
-    "        vec3 sample = texture2D(firstPass,uv).rgb;\n"
-    "        sample *= illuminationDecay * RaysInfo.w;\n"
-    "        totalColor += sample;\n"
-    "        illuminationDecay *= RaysInfo.y;\n"
+    "        vec4 sample = texture2D(firstPass,uv).rgba;\n"
+    "        vec2 rg = Unpack2NibblesFrom8BitChannel(sample.b);\n"
+    "        vec2 ba = Unpack2NibblesFrom8BitChannel(sample.a);\n"
+    "        vec3 realSample = vec3(rg.r,rg.g,ba.r);\n"
+    "        realSample *= illuminationDecay * RaysInfo.w;\n"
+    "        totalColor += realSample;\n"
+    "        illuminationDecay *= RaysInfo.y;\n" 
     "    }\n"
     "    gl_FragColor.rgb = (totalColor * alpha) * RaysInfo.x;\n"
     "}";
