@@ -41,10 +41,10 @@ class SunLight: public EntityWrapper{
         float getSpecularIntensity();    void setSpecularIntensity(float s);
 
         glm::vec3 position();
-        void setColor(float, float, float, float);    void setColor(glm::vec4);
-        void setColor(float, float, float);           void setColor(glm::vec3);
-        void setPosition(float, float, float);        void setPosition(glm::vec3);
-        void activate(bool = true);                   void deactivate();
+        void setColor(float, float, float, float = 1.0f);    void setColor(glm::vec4);
+                                                             void setColor(glm::vec3);
+        void setPosition(float, float, float);               void setPosition(glm::vec3);
+        void activate(bool = true);                          void deactivate();
         bool isActive();
         uint type();
 };

@@ -35,12 +35,19 @@ struct BufferObject {
     inline operator GLuint() const { return buffer; }
 
     void bind();
+
     void setData(size_t _size, const void* _data, BufferDataDrawType::Type _drawType);
     void setData(size_t _size, size_t _startingIndex, const void* _data);
     void setDataOrphan(const void* _data);
 
     void setData(std::vector<char>& _data, BufferDataDrawType::Type _drawType);
     void setData(size_t _startingIndex, std::vector<char>& _data);
+    /*
+    void addData(size_t _size, const void* _data, BufferDataDrawType::Type _drawType);
+    void addData(std::vector<char>& _data, BufferDataDrawType::Type _drawType);
+    void addData(size_t _size, const void* _data);
+    void addData(std::vector<char>& _data);
+    */
     void setDataOrphan(std::vector<char>& _data);
 
 

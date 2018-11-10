@@ -1317,7 +1317,7 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::STENCIL_TEST);
             glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
-            //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very wierd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
+            //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very odd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
             GLEnable(GLState::DEPTH_CLAMP);
 
             genAndBindTexture(GL_TEXTURE_2D,SMAA_AreaTexture);
@@ -1443,7 +1443,7 @@ class epriv::RenderManager::impl final{
                 Skybox::bindMesh();
             }
             Resources::getWindow().display(); //prevent opengl & windows timeout
-            //m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude]->unbind();
+
 
             //now gen EnvPrefilterMap for specular IBL
             size = preEnvFilterSize;
@@ -1490,8 +1490,6 @@ class epriv::RenderManager::impl final{
             Settings::clear(true,true,false);
             Renderer::colorMask(true,true,false,false);
             _renderFullscreenTriangle(brdfSize,brdfSize,0,0);
-            //cout << "----  BRDF LUT (Cook Torrance) completed ----" << endl;
-            //m_InternalShaderPrograms[EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance]->unbind();
             Renderer::colorMask(true, true, true, true);
 
             SAFE_DELETE(fbo);
@@ -1638,13 +1636,13 @@ class epriv::RenderManager::impl final{
                     m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1));
                     sendUniformMatrix4("Model", m);
 
-                    for (auto& c : item.text) {
-                        if (c == '\n') {
+                    for (auto& character : item.text) {
+                        if (character == '\n') {
                             y += newLineGlyph.height + 7;
                             x = 0.0f;
                         }else{
                             uint accum = i * 4;
-                            FontGlyph& chr = font.getGlyphData(c);
+                            FontGlyph& chr = font.getGlyphData(character);
                             float startingX = x + chr.xoffset;
                             float startingY = -int(chr.height + chr.yoffset) - y;
 
@@ -2541,6 +2539,7 @@ void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
             if(i.glSM.current_bound_texture_1D != _textureObject){
                 i.glSM.current_bound_texture_1D = _textureObject;
                 glBindTexture(_textureType,_textureObject);
+                return;
             }
             break;
         }
@@ -2548,6 +2547,7 @@ void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
             if(i.glSM.current_bound_texture_2D != _textureObject){
                 i.glSM.current_bound_texture_2D = _textureObject;
                 glBindTexture(_textureType,_textureObject);
+                return;
             }
             break;
         }
@@ -2555,6 +2555,7 @@ void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
             if(i.glSM.current_bound_texture_3D != _textureObject){
                 i.glSM.current_bound_texture_3D = _textureObject;
                 glBindTexture(_textureType,_textureObject);
+                return;
             }
             break;
         }
@@ -2562,6 +2563,7 @@ void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
             if(i.glSM.current_bound_texture_cube_map != _textureObject){
                 i.glSM.current_bound_texture_cube_map = _textureObject;
                 glBindTexture(_textureType,_textureObject);
+                return;
             }
             break;
         }

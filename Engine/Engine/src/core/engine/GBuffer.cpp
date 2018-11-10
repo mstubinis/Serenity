@@ -37,18 +37,18 @@ class epriv::GBuffer::impl final{
 
             m_Buffers.resize(GBufferType::_TOTAL);
 
-            m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height,1.0f,2);
-            _constructTextureBuffer(m_FBO,GBufferType::Diffuse,   m_Width,m_Height);
-            _constructTextureBuffer(m_FBO,GBufferType::Normal,    m_Width,m_Height);
-            _constructTextureBuffer(m_FBO,GBufferType::Misc,      m_Width,m_Height);
-            _constructTextureBuffer(m_FBO,GBufferType::Lighting,  m_Width,m_Height);
-            _constructTextureBuffer(m_FBO,GBufferType::Depth,     m_Width,m_Height);
+            m_FBO = new FramebufferObject("GBuffer_FBO",          m_Width, m_Height, 1.0f, 2);
+            _constructTextureBuffer(m_FBO, GBufferType::Diffuse,   m_Width, m_Height);
+            _constructTextureBuffer(m_FBO, GBufferType::Normal,    m_Width, m_Height);
+            _constructTextureBuffer(m_FBO, GBufferType::Misc,      m_Width, m_Height);
+            _constructTextureBuffer(m_FBO, GBufferType::Lighting,  m_Width, m_Height);
+            _constructTextureBuffer(m_FBO, GBufferType::Depth,     m_Width, m_Height);
 
             if(!m_FBO->check()) return false;
 
-            m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height,0.5f,2);
-            _constructTextureBuffer(m_SmallFBO,GBufferType::Bloom,   m_Width,m_Height);
-            _constructTextureBuffer(m_SmallFBO,GBufferType::GodRays, m_Width,m_Height);
+            m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",  m_Width, m_Height, 0.5f, 2);
+            _constructTextureBuffer(m_SmallFBO, GBufferType::Bloom,   m_Width, m_Height);
+            _constructTextureBuffer(m_SmallFBO, GBufferType::GodRays, m_Width, m_Height);
             
             if(!m_SmallFBO->check()) return false;
 

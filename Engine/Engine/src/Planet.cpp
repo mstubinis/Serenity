@@ -376,24 +376,18 @@ void Planet::setRotation(RotationInfo* r){
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
 glm::vec2 Planet::getGravityInfo(){ return glm::vec2(getRadius() * 5,getRadius() * 7); }
 OrbitInfo* Planet::getOrbitInfo() const { return m_OrbitInfo; }
-float Planet::getGroundRadius(){ 
-    auto& model = *m_Entity.getComponent<ComponentModel>();
-    return model.radius(); 
-}
-float Planet::getRadius() {
-    auto& model = *m_Entity.getComponent<ComponentModel>();
-    return model.radius() + (model.radius() * m_AtmosphereHeight);
-}
+float Planet::getGroundRadius(){ auto& model = *m_Entity.getComponent<ComponentModel>(); return model.radius(); }
+float Planet::getRadius() { auto& model = *m_Entity.getComponent<ComponentModel>(); return model.radius() + (model.radius() * m_AtmosphereHeight); }
 float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
 
 Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name, SolarSystem* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
-    m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
+    m_Light->setColor(lightColor);
 
     auto& model = (*m_Entity.getComponent<ComponentModel>()).getModel();
 
-    model.setColor(starColor.x,starColor.y,starColor.z,1.0f);
-    model.setGodRaysColor(starColor.x,starColor.y,starColor.z);
+    model.setColor(starColor);
+    model.setGodRaysColor(lightColor);
     model.setShaderProgram(nullptr);
     model.setCustomBindFunctor(StarMeshInstanceBindFunctor());
 

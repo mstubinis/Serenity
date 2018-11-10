@@ -69,25 +69,25 @@ void Game::update(const float& dt){
         Renderer::Settings::Bloom::enable(!Renderer::Settings::Bloom::enabled());
     }
     if (Engine::isKeyDownOnce(KeyboardKey::F12)) { Renderer::Settings::GodRays::enable(!Renderer::Settings::GodRays::enabled()); }
-    
+    /*
     Material& m = *Resources::getMaterial(ResourceManifest::DefiantMaterial);
     if (Engine::isKeyDown(KeyboardKey::N)) { m.setMetalness(m.metalness() - 0.02f); }
     if (Engine::isKeyDown(KeyboardKey::M)) { m.setMetalness(m.metalness() + 0.02f); }
     if (Engine::isKeyDown(KeyboardKey::V)) { m.setSmoothness(m.smoothness() - 0.02f); }
     if (Engine::isKeyDown(KeyboardKey::B)) { m.setSmoothness(m.smoothness() + 0.02f); }
-    
-    /*
-    if (Engine::isKeyDown(KeyboardKey::N)) { Renderer::Settings::Bloom::setThreshold(Renderer::Settings::Bloom::getThreshold() - 0.01f); }
-    if (Engine::isKeyDown(KeyboardKey::M)) { Renderer::Settings::Bloom::setThreshold(Renderer::Settings::Bloom::getThreshold() + 0.01f); }
-    if (Engine::isKeyDown(KeyboardKey::V)) { Renderer::Settings::Bloom::setExposure(Renderer::Settings::Bloom::getExposure() - 0.01f); }
-    if (Engine::isKeyDown(KeyboardKey::B)) { Renderer::Settings::Bloom::setExposure(Renderer::Settings::Bloom::getExposure() + 0.01f); }
-    if (Engine::isKeyDown(KeyboardKey::X)) { Renderer::Settings::Bloom::setScale(Renderer::Settings::Bloom::getScale() - 0.01f); }
-    if (Engine::isKeyDown(KeyboardKey::C)) { Renderer::Settings::Bloom::setScale(Renderer::Settings::Bloom::getScale() + 0.01f); }
-    if (Engine::isKeyDown(KeyboardKey::U)) { Renderer::Settings::Bloom::setBlurRadius(Renderer::Settings::Bloom::getBlurRadius() - 0.01f); }
-    if (Engine::isKeyDown(KeyboardKey::I)) { Renderer::Settings::Bloom::setBlurRadius(Renderer::Settings::Bloom::getBlurRadius() + 0.01f); }
-    if (Engine::isKeyDown(KeyboardKey::O)) { Renderer::Settings::Bloom::setBlurStrength(Renderer::Settings::Bloom::getBlurStrength() - 0.01f); }
-    if (Engine::isKeyDown(KeyboardKey::P)) { Renderer::Settings::Bloom::setBlurStrength(Renderer::Settings::Bloom::getBlurStrength() + 0.01f); }
     */
+    
+    if (Engine::isKeyDown(KeyboardKey::N)) { Renderer::Settings::GodRays::setDecay(Renderer::Settings::GodRays::getDecay() - 0.01f); }
+    if (Engine::isKeyDown(KeyboardKey::M)) { Renderer::Settings::GodRays::setDecay(Renderer::Settings::GodRays::getDecay() + 0.01f); }
+    if (Engine::isKeyDown(KeyboardKey::V)) { Renderer::Settings::GodRays::setExposure(Renderer::Settings::GodRays::getExposure() - 0.01f); }
+    if (Engine::isKeyDown(KeyboardKey::B)) { Renderer::Settings::GodRays::setExposure(Renderer::Settings::GodRays::getExposure() + 0.01f); }
+    if (Engine::isKeyDown(KeyboardKey::X)) { Renderer::Settings::GodRays::setDensity(Renderer::Settings::GodRays::getDensity() - 0.01f); }
+    if (Engine::isKeyDown(KeyboardKey::C)) { Renderer::Settings::GodRays::setDensity(Renderer::Settings::GodRays::getDensity() + 0.01f); }
+    if (Engine::isKeyDown(KeyboardKey::U)) { Renderer::Settings::GodRays::setWeight(Renderer::Settings::GodRays::getWeight() - 0.01f); }
+    if (Engine::isKeyDown(KeyboardKey::I)) { Renderer::Settings::GodRays::setWeight(Renderer::Settings::GodRays::getWeight() + 0.01f); }
+    if (Engine::isKeyDownOnce(KeyboardKey::O)) { Renderer::Settings::GodRays::setSamples(Renderer::Settings::GodRays::getSamples() - 1); }
+    if (Engine::isKeyDownOnce(KeyboardKey::P)) { Renderer::Settings::GodRays::setSamples(Renderer::Settings::GodRays::getSamples() + 1); }
+    
     m_HUD->update(dt);
 }
 void Game::render(){
