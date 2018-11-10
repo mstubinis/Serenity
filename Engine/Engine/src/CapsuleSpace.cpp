@@ -61,7 +61,7 @@ CapsuleEnd::~CapsuleEnd(){
 }
 CapsuleStar::CapsuleStar(float size,glm::vec3 pos, SolarSystem* scene,bool makeLight) :EntityWrapper(*scene) {
     ComponentModel* model = m_Entity.addComponent<ComponentModel>(Mesh::Plane, ResourceManifest::StarFlareMaterial);
-    model->getModel().setColor(255,235,206,255);
+    model->getModel().setColor(1.0f,0.92156f,0.8078f,1.0f);
     
     auto* m_Body = m_Entity.addComponent<ComponentBody>();
     m_Body->setPosition(pos);
@@ -123,8 +123,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     this->getActiveCamera()->setNear(0.1f);
     this->getActiveCamera()->setFar(70000000.0f);
 
-    PointLight* l = new PointLight(glm::vec3(0,1.7f,0),this);
-    l->setColor(1.0f * 1.3f,0.784f * 1.3f,0.843f * 1.3f);
+    PointLight* l = new PointLight(glm::vec3(0, 1.7f, 0), this);
+    l->setColor(1.0f * 1.3f, 0.784f * 1.3f, 0.843f * 1.3f);
     l->setSpecularIntensity(0.0f);
     l->setAttenuation(LightRange::_32);
     m_Objects.push_back(l);
