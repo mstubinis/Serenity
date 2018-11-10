@@ -65,8 +65,8 @@ void Game::update(const float& dt){
     if (Engine::isKeyDownOnce(KeyboardKey::F9)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
     if (Engine::isKeyDownOnce(KeyboardKey::F10)) { Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
     if (Engine::isKeyDownOnce(KeyboardKey::F11)) { 
-        //Renderer::Settings::General::enable1(!Renderer::Settings::General::enabled1()); 
-        Renderer::Settings::Bloom::enable(!Renderer::Settings::Bloom::enabled());
+        Renderer::Settings::General::enable1(!Renderer::Settings::General::enabled1()); 
+        //Renderer::Settings::Bloom::enable(!Renderer::Settings::Bloom::enabled());
     }
     if (Engine::isKeyDownOnce(KeyboardKey::F12)) { Renderer::Settings::GodRays::enable(!Renderer::Settings::GodRays::enabled()); }
     /*

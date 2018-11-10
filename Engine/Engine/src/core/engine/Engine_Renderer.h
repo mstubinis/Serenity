@@ -220,6 +220,7 @@ namespace Engine{
                 bool enabled();
                 void enable(bool b);      void disable();
                 float getExposure();      void setExposure(float e);
+                float getFactor();        void setFactor(float f);
                 float getDecay();         void setDecay(float d);
                 float getDensity();       void setDensity(float d);
                 float getWeight();        void setWeight(float w);

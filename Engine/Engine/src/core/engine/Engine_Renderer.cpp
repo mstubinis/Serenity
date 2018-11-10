@@ -80,6 +80,7 @@ namespace Engine{
             GodRaysFrag,
             FinalFrag,
             LightingFrag,
+            LightingFragOptimized,
             LightingGIFrag,
             CubemapConvoludeFrag,
             CubemapPrefilterEnvFrag,
@@ -114,6 +115,7 @@ namespace Engine{
             DeferredSkyboxFake,
             CopyDepth,
             DeferredLighting,
+            DeferredLightingOptimized,
             DeferredLightingGI,
             CubemapConvolude,
             CubemapPrefilterEnv,
@@ -228,6 +230,7 @@ class epriv::RenderManager::impl final{
         bool godRays;
         glm::vec4 godRays_clearColor;
         float godRays_exposure;
+        float godRays_factor;
         float godRays_decay;
         float godRays_density;
         float godRays_weight;
@@ -358,6 +361,7 @@ class epriv::RenderManager::impl final{
             godRays = true;
             godRays_clearColor = glm::vec4(0.030f, 0.023f, 0.032f, 1.0f);
             godRays_exposure = 0.15f;
+            godRays_factor = 1.0f;
             godRays_decay = 0.96815f;
             godRays_density = 0.926f;
             godRays_weight = 0.58767f;
@@ -476,6 +480,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaders.emplace_back(EShaders::godRays_frag,ShaderType::Fragment,false);
             m_InternalShaders.emplace_back(EShaders::final_frag,ShaderType::Fragment,false);
             m_InternalShaders.emplace_back(EShaders::lighting_frag,ShaderType::Fragment,false);
+            m_InternalShaders.emplace_back(EShaders::lighting_frag_optimized, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::lighting_frag_gi,ShaderType::Fragment,false);
             m_InternalShaders.emplace_back(EShaders::cubemap_convolude_frag,ShaderType::Fragment,false);
             m_InternalShaders.emplace_back(EShaders::cubemap_prefilter_envmap_frag,ShaderType::Fragment,false);
@@ -509,6 +514,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake] = new ShaderP("Deferred_Skybox_Fake",m_InternalShaders[EngineInternalShaders::VertexSkybox],m_InternalShaders[EngineInternalShaders::DeferredFragSkyboxFake]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth] = new ShaderP("Copy_Depth",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::CopyDepthFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting] = new ShaderP("Deferred_Light",m_InternalShaders[EngineInternalShaders::LightingVertex],m_InternalShaders[EngineInternalShaders::LightingFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingOptimized] = new ShaderP("Deferred_Light_Optimized", m_InternalShaders[EngineInternalShaders::LightingVertex], m_InternalShaders[EngineInternalShaders::LightingFragOptimized]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingGI] = new ShaderP("Deferred_Light_GI",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::LightingGIFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude] = new ShaderP("Cubemap_Convolude",m_InternalShaders[EngineInternalShaders::VertexSkybox],m_InternalShaders[EngineInternalShaders::CubemapConvoludeFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapPrefilterEnv] = new ShaderP("Cubemap_Prefilter_Env",m_InternalShaders[EngineInternalShaders::VertexSkybox],m_InternalShaders[EngineInternalShaders::CubemapPrefilterEnvFrag]);
@@ -1727,7 +1733,10 @@ class epriv::RenderManager::impl final{
         }
         void _passLighting(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,bool mainRenderFunc){
             Scene& s = *Resources::getCurrentScene(); 
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting]->bind();
+            //if(enabled1)
+                m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting]->bind();
+            //else
+                //m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingOptimized]->bind();
             
             if(RenderManager::GLSL_VERSION < 140){
                 sendUniformMatrix4Safe("CameraView",c.getView());
@@ -1869,7 +1878,7 @@ class epriv::RenderManager::impl final{
         void _passHDR(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR]->bind();
 
-            sendUniform4Safe("HDRInfo",hdr_exposure,float(int(hdr)), godRays_exposure,float(int(hdr_algorithm)));
+            sendUniform4Safe("HDRInfo",hdr_exposure,float(int(hdr)), godRays_factor,float(int(hdr_algorithm)));
             sendUniform2Safe("Has",int(godRays), int(lighting));
 
             sendTextureSafe("lightingBuffer",gbuffer.getTexture(GBufferType::Lighting),0);
@@ -2166,6 +2175,7 @@ class epriv::RenderManager::impl final{
                 gbuffer.start(GBufferType::Lighting,"RGB");
                 Settings::clear(true,false,false);//this is needed for godrays 0,0,0,0
                 _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
+                
             }
 
             GLDisable(GLState::BLEND);
@@ -2274,6 +2284,7 @@ class epriv::RenderManager::impl final{
                 vector_clear(m_FontsToBeRendered);
                 vector_clear(m_TexturesToBeRendered);
             }
+            
             #pragma endregion
         }
 };
@@ -2453,6 +2464,7 @@ bool Renderer::Settings::GodRays::enabled(){ return renderManager->godRays; }
 void Renderer::Settings::GodRays::enable(bool b = true){ renderManager->godRays = b; }
 void Renderer::Settings::GodRays::disable(){ renderManager->godRays = false; }
 float Renderer::Settings::GodRays::getExposure(){ return renderManager->godRays_exposure; }
+float Renderer::Settings::GodRays::getFactor() { return renderManager->godRays_factor; }
 float Renderer::Settings::GodRays::getDecay(){ return renderManager->godRays_decay; }
 float Renderer::Settings::GodRays::getDensity(){ return renderManager->godRays_density; }
 float Renderer::Settings::GodRays::getWeight(){ return renderManager->godRays_weight; }
@@ -2460,6 +2472,7 @@ uint Renderer::Settings::GodRays::getSamples(){ return renderManager->godRays_sa
 float Renderer::Settings::GodRays::getFOVDegrees(){ return renderManager->godRays_fovDegrees; }
 float Renderer::Settings::GodRays::getAlphaFalloff(){ return renderManager->godRays_alphaFalloff; }
 void Renderer::Settings::GodRays::setExposure(float e){ renderManager->godRays_exposure = e; }
+void Renderer::Settings::GodRays::setFactor(float f) { renderManager->godRays_factor = f; }
 void Renderer::Settings::GodRays::setDecay(float d){ renderManager->godRays_decay = d; }
 void Renderer::Settings::GodRays::setDensity(float d){ renderManager->godRays_density = d; }
 void Renderer::Settings::GodRays::setWeight(float w){ renderManager->godRays_weight = w; }

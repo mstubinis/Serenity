@@ -62,6 +62,7 @@ string epriv::EShaders::ssao_blur_frag;
 string epriv::EShaders::greyscale_frag;
 string epriv::EShaders::final_frag;
 string epriv::EShaders::lighting_frag;
+string epriv::EShaders::lighting_frag_optimized;
 string epriv::EShaders::lighting_frag_gi;
 #pragma endregion
 
@@ -268,8 +269,7 @@ epriv::EShaders::lighting_vert =
 #pragma endregion
 
 #pragma region BulletPhysicsVertex
-epriv::EShaders::bullet_physics_vert = 
-    "\n"
+epriv::EShaders::bullet_physics_vert =
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec3 color;\n"
     "\n"
@@ -281,23 +281,19 @@ epriv::EShaders::bullet_physics_vert =
     "void main(){\n"
     "	gl_Position = VP * Model * vec4(position, 1.0f);\n"
     "	OutColor = color;\n"
-    "}\n"
-    "\n";
+    "}";
 #pragma endregion
 
 #pragma region BulletPhysicsFragment
 epriv::EShaders::bullet_physcis_frag =
-    "\n"
     "in vec3 OutColor;\n"
     "void main(){\n"
-    "	gl_FragColor = vec4(OutColor,1.0);\n" 
-    "}\n"
-    "\n";
+    "	gl_FragColor = vec4(OutColor,1.0);\n"
+    "}";
 #pragma endregion
 
 #pragma region VertexBasic
 epriv::EShaders::vertex_basic = 
-    "\n"
     "USE_LOG_DEPTH_VERTEX\n"
     "\n"
     "layout (location = 0) in vec3 position;\n"
@@ -338,10 +334,10 @@ epriv::EShaders::vertex_basic +=
     "        BoneTransform += gBones[int(BoneIDs.z)] * Weights.z;\n"
     "        BoneTransform += gBones[int(BoneIDs.w)] * Weights.w;\n"
     "    }\n"
-    "    vec4 PosTrans =       BoneTransform * vec4(position, 1.0);\n"
-    "    vec3 NormalTrans =   (BoneTransform * vec4(normal.zyx, 0.0)).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "    vec3 BinormalTrans = (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "    vec3 TangentTrans =  (BoneTransform * vec4(tangent.zyx, 0.0)).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec4 PosTrans      =   BoneTransform * vec4(position, 1.0);\n"
+    "    vec3 NormalTrans   =  (BoneTransform * vec4(normal.zyx, 0.0)).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 BinormalTrans =  (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 TangentTrans  =  (BoneTransform * vec4(tangent.zyx, 0.0)).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
     "\n"
     "           Normals = (NormalMatrix * NormalTrans);\n"
     "    vec3 Binormals = (NormalMatrix * BinormalTrans);\n"
@@ -357,13 +353,11 @@ epriv::EShaders::vertex_basic +=
     "\n"
     //"    //UV = UnpackFloat32Into2Floats(uv);\n"
     "    UV = uv;\n"
-    "\n"
     "}";
 #pragma endregion
 
 #pragma region VertexHUD
 epriv::EShaders::vertex_hud =
-    "\n"
     "layout (location = 0) in vec3 position;\n"
     //"layout (location = 1) in float uv;\n"
     "layout (location = 1) in vec2 uv;\n"
@@ -657,8 +651,7 @@ epriv::EShaders::fullscreen_quad_vertex =
     "\n"
     "void main(){\n"
     "    vec3 vert = position;\n"
-    "    vert.x *= screenSizeDivideBy2.x;\n"
-    "    vert.y *= screenSizeDivideBy2.y;\n"
+    "    vert.xy *= screenSizeDivideBy2;\n"
     "    texcoords = uv;\n"
     "    gl_Position = VP * Model * vec4(vert,1.0);\n"
     "}";
@@ -1509,7 +1502,7 @@ epriv::EShaders::hdr_frag =
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gGodsRaysMap;\n"
     "varying vec2 texcoords;\n"
-    "uniform vec4 HDRInfo;\n"// exposure | HasHDR | godRaysExposure | HDRAlgorithm
+    "uniform vec4 HDRInfo;\n"// exposure | HasHDR | godRays_Factor | HDRAlgorithm
     "uniform ivec2 Has;\n" //HasGodRays | HasLighting
     "\n"
     "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){ return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f); }\n";
@@ -1520,7 +1513,7 @@ epriv::EShaders::hdr_frag +=
     "    vec3 lighting = texture2D(lightingBuffer, texcoords).rgb;\n"
     "    vec3 normals = DecodeOctahedron(texture2D(gNormalMap,texcoords).rg);\n"
     "\n"
-    "    if(distance(normals,ConstantOneVec3) < 0.01 || Has.y == 0){\n" //if normals are damn near 1.0,1.0,1.0 or no lighting
+    "    if(Has.y == 0 || distance(normals,ConstantOneVec3) < 0.01){\n" //if normals are damn near 1.0,1.0,1.0 or no lighting
     "        lighting = diffuse;\n"
     "    }\n"
     "    if(HDRInfo.y == 1.0){\n"//HasHDR
@@ -1538,10 +1531,11 @@ epriv::EShaders::hdr_frag +=
     "            lighting *= white;\n"
     "        }\n"
     "    }\n"
-    "    if(Has.x == 1){\n"
+    //"    if(Has.x == 1){\n"
     "        vec3 rays = texture2D(gGodsRaysMap,texcoords).rgb;\n"
-    "        lighting = (lighting * 1.1) + (rays * HDRInfo.z);\n"
-    "    }\n"
+    //"        lighting = (lighting * 1.1) + (rays * HDRInfo.z);\n"
+    "        lighting += (rays * HDRInfo.z);\n"
+    //"    }\n"
     "    gl_FragColor = vec4(lighting, 1.0);\n"
     "}";
 #pragma endregion
@@ -1726,17 +1720,17 @@ epriv::EShaders::lighting_frag +=
     "}\n"
     "float CalculateAttenuation(float Dist,float LightRadius){\n"
     "    float attenuation = 0.0;\n"
-    //"   if(LightDataE.z == 0.0){\n" //constant
-    //"       attenuation = 1.0 / max(1.0 , LightDataB.z);\n"
-    //"   }else if(LightDataE.z == 1.0){\n" //distance
-    //"       attenuation = 1.0 / max(1.0 , Dist);\n"
-    //"   }else if(LightDataE.z == 2.0){\n" //distance squared
-    //"       attenuation = 1.0 / max(1.0 , Dist * Dist);\n"
-    //"   }else if(LightDataE.z == 3.0){\n" //constant linear exponent
+    "   if(LightDataE.z == 0.0){\n" //constant
+    "       attenuation = 1.0 / max(1.0 , LightDataB.z);\n"
+    "   }else if(LightDataE.z == 1.0){\n" //distance
+    "       attenuation = 1.0 / max(1.0 , Dist);\n"
+    "   }else if(LightDataE.z == 2.0){\n" //distance squared
+    "       attenuation = 1.0 / max(1.0 , Dist * Dist);\n"
+    "   }else if(LightDataE.z == 3.0){\n" //constant linear exponent
     "       attenuation = 1.0 / max(1.0 , LightDataB.z + (LightDataB.w * Dist) + (LightDataC.x * Dist * Dist));\n"
-    //"   }else if(LightDataE.z == 4.0){\n" //distance radius squared
-    //"       attenuation = 1.0 / max(1.0 ,pow((Dist / LightRadius) + 1.0,2.0));\n"
-    //"   }\n"
+    "   }else if(LightDataE.z == 4.0){\n" //distance radius squared
+    "       attenuation = 1.0 / max(1.0 ,pow((Dist / LightRadius) + 1.0,2.0));\n"
+    "   }\n"
     "   return attenuation;\n"
     "}\n"
     "float DiffuseOrenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN,float _alpha,vec3 _PxlNormal){\n"
@@ -1931,12 +1925,273 @@ epriv::EShaders::lighting_frag +=
     "    }\n"
     "    gl_FragData[0].rgb = lightCalculation;\n"
     "}";
+#pragma endregion
 
+#pragma region LightingFragOptimized
+epriv::EShaders::lighting_frag_optimized =
+    "#define MATERIAL_COUNT_LIMIT 255\n"
+    "\n"
+    "uniform vec4 LightDataA;\n" //x = ambient, y = diffuse, z = specular, w = LightDirection.x
+    "uniform vec4 LightDataB;\n" //x = LightDirection.y, y = LightDirection.z, z = const, w = linear
+    "uniform vec4 LightDataC;\n" //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
+    "uniform vec4 LightDataD;\n" //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
+    "uniform vec4 LightDataE;\n" //x = cutoff, y = outerCutoff, z = AttenuationModel, w = UNUSED
+    "\n"
+    "uniform sampler2D gDiffuseMap;\n"
+    "uniform sampler2D gNormalMap;\n"
+    "uniform sampler2D gMiscMap;\n"
+    "uniform sampler2D gDepthMap;\n"
+    "uniform sampler2D gSSAOMap;\n"
+    "\n"
+    "uniform vec4 ScreenData;\n" //x = UNUSED, y = screenGamma, z = winSize.x, w = winSize.y
+    "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
+    "\n"
+    "varying vec2 texcoords;\n"
+    "\n";
+epriv::EShaders::lighting_frag_optimized += epriv::EShaders::normals_octahedron_compression_functions;
+epriv::EShaders::lighting_frag_optimized += epriv::EShaders::float_into_2_floats;
+epriv::EShaders::lighting_frag_optimized +=
+    "float azimuth(vec3 vector){\n"
+    "    return atan(vector.y / vector.x);\n" //might also be x / y and not y / x
+    "}\n"
+    "float polar(vec3 vector){\n"
+    "    return acos(vector.z / length(vector));\n"
+    "}\n"
+    "float BeckmannDist(float cos2a, float _alpha){\n"
+    "    float b = (1.0 - cos2a) / (cos2a * _alpha);\n"
+    "    return (exp(-b)) / (KPI * _alpha * cos2a * cos2a);\n"
+    "}\n"
+    "float GGXDist(float NdotHSquared, float alphaSquared){\n"
+    "    float denom = (NdotHSquared * (alphaSquared - 1.0) + 1.0);\n"
+    "    denom = KPI * denom * denom;\n"
+    "    return alphaSquared / denom;\n"
+    "}\n"
+    "float GeometrySchlickGGX(float NdotV, float a){\n"
+    "    float k = a * 0.125;\n"
+    "    float denom = NdotV * (1.0 - k) + k;\n"
+    "    return NdotV / denom;\n"
+    "}\n"
+    "vec3 SchlickFrensel(float theta, vec3 _F0){\n"
+    "    vec3 ret = _F0 + (ConstantOneVec3 - _F0) * pow(1.0 - theta,5.0);\n"
+    "    return ret;\n"
+    "}\n"
+    "float CalculateAttenuation(float Dist,float LightRadius){\n"
+    "    float attenuation = 0.0;\n"
+    "   if(LightDataE.z == 0.0){\n" //constant
+    "       attenuation = 1.0 / max(1.0 , LightDataB.z);\n"
+    "   }else if(LightDataE.z == 1.0){\n" //distance
+    "       attenuation = 1.0 / max(1.0 , Dist);\n"
+    "   }else if(LightDataE.z == 2.0){\n" //distance squared
+    "       attenuation = 1.0 / max(1.0 , Dist * Dist);\n"
+    "   }else if(LightDataE.z == 3.0){\n" //constant linear exponent
+    "       attenuation = 1.0 / max(1.0 , LightDataB.z + (LightDataB.w * Dist) + (LightDataC.x * Dist * Dist));\n"
+    "   }else if(LightDataE.z == 4.0){\n" //distance radius squared
+    "       attenuation = 1.0 / max(1.0 ,pow((Dist / LightRadius) + 1.0,2.0));\n"
+    "   }\n"
+    "   return attenuation;\n"
+    "}\n"
+    "float DiffuseOrenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN,float _alpha,vec3 _PxlNormal){\n"
+    "    float A = 1.0 - 0.5 * _alpha / (_alpha + 0.33);\n"
+    "    float B = 0.45 * _alpha / (_alpha + 0.09);\n"
+    "    float cosAzimuthSinPolarTanPolar = (dot(_LightDir, _ViewDir) - _VdotN * _NdotL) / max(_VdotN, _NdotL);\n"
+    "    return (A + B * max(0.0, cosAzimuthSinPolarTanPolar));\n"
+    "}\n"
+
+    "vec3 DiffuseAshikhminShirley(float _smoothness,vec3 _MaterialAlbedoTexture,float _NdotL,float _VdotN){\n"
+    "    vec3 ret;\n"
+    "    float s = clamp(_smoothness,0.01,0.76);\n" //this lighting model has to have some form of roughness in it to look good. cant be 1.0
+    "    vec3 A = (28.0 * _MaterialAlbedoTexture) / vec3(23.0 * KPI);\n"
+    "    float B = 1.0 - s;\n"
+    "    float C = (1.0 - pow((1.0 - (_NdotL * 0.5)),5.0));\n"
+    "    float D = (1.0 - pow((1.0 - (_VdotN * 0.5)),5.0));\n"
+    "    ret = A * B * C * D;\n"
+    "    ret *= KPI;\n" //i know this isnt proper, but the diffuse component is *way* too dark otherwise...
+    "    return ret;\n"
+    "}\n"
+    
+    "vec3 SpecularBlinnPhong(float _smoothness,float _NdotH){\n"
+    "    float gloss = exp2(10.0 * _smoothness + 1.0);\n"
+    "    float kS = (8.0 + gloss ) / (8.0 * KPI);\n"
+    "    return vec3(kS * pow(_NdotH, gloss));\n"
+    "}\n"
+
+    "vec3 SpecularPhong(float _smoothness,vec3 _LightDir,vec3 _PxlNormal,vec3 _ViewDir){\n"
+    "    float gloss = exp2(10.0 * _smoothness + 1.0);\n"
+    "    float kS = (2.0 + gloss ) / (2.0 * KPI);\n"
+    "    vec3 Reflect = reflect(-_LightDir, _PxlNormal);\n"
+    "    float VdotR = max(0.0, dot(_ViewDir,Reflect));\n"
+    "    return vec3(kS * pow(VdotR, gloss));\n"
+    "}\n"
+
+    "vec3 SpecularGGX(inout vec3 _Frensel,vec3 _LightDir,vec3 _Half,float _alpha,float _NdotH,vec3 _F0,float _NdotL){\n"
+    "    float LdotH = max(0.0, dot(_LightDir,_Half));\n"
+    "    float alphaSqr = _alpha * _alpha;\n"
+    "    float denom = _NdotH * _NdotH * (alphaSqr - 1.0) + 1.0;\n"
+    "    float NDF = alphaSqr / (KPI * denom * denom);\n"
+    "    _Frensel = SchlickFrensel(LdotH,_F0);\n"
+    "    float k = _alpha * 0.5;\n"
+    "    float k2 = k * k;\n"
+    "    float invk2 = 1.0 - k2;\n"
+    "    float G = 1.0 / (LdotH * LdotH * invk2 + k2);\n"
+    "    return _NdotL * NDF * _Frensel * G;\n"
+    "}\n"
+
+    "vec3 SpecularCookTorrance(inout vec3 _Frensel,vec3 _F0,float _VdotH,float _NdotH,float _alpha,float _VdotN,float _roughness,float _NdotL){\n"
+    "    _Frensel = SchlickFrensel(_VdotH,_F0);\n"
+    "    float NDF = GGXDist(_NdotH * _NdotH, _alpha * _alpha);\n"
+    "    float roughnessPlusOne = _roughness + 1.0;\n"
+    "    float a = roughnessPlusOne * roughnessPlusOne;\n"
+    "    float G = GeometrySchlickGGX(_VdotN,a) * GeometrySchlickGGX(_NdotL,a);\n"
+    "    vec3 Top = NDF * _Frensel * G;\n"
+    "    float Bottom = max(4.0 * _VdotN * _NdotL,0.0);\n"
+    "    return Top / (Bottom + 0.001);\n"
+    "}\n"
+
+    "vec3 SpecularGaussian(float _NdotH,float _smoothness){\n"
+    "    float b = acos(_NdotH);\n" //this might also be cos. find out
+    "    float fin = b / _smoothness;\n"
+    "    return vec3(exp(-fin*fin));\n"
+    "}\n"
+
+    "vec3 SpecularAshikhminShirley(vec3 _PxlNormal,vec3 _Half,float _NdotH,vec3 _LightDir,float _NdotL,float _VdotN){\n"
+    "    const float Nu = 1000.0;\n"//make these controllable uniforms
+    "    const float Nv = 1000.0;\n"//make these controllable uniforms
+    "    vec3 epsilon = vec3(1.0,0.0,0.0);\n"
+    "    vec3 tangent = normalize(cross(_PxlNormal,epsilon));\n"
+    "    vec3 bitangent = normalize(cross(_PxlNormal,tangent));\n"
+    "    float hdotT = dot(_Half,tangent);\n"
+    "    float hDotB = dot(_Half,bitangent);\n"
+    "    float A = sqrt( (Nu + 1.0) * (Nv + 1.0) );\n"
+    "    float B = pow(_NdotH,((Nu * hdotT * hdotT + Nv * hDotB * hDotB) / (1.0 - (_NdotH * _NdotH)) ));\n"
+    "    float HdotL = max(0.0, dot(_Half, _LightDir));\n"
+    "    float C = 8.0 * KPI * HdotL * max(_NdotL,_VdotN);\n"
+    "    return vec3((A * B) / C);\n"
+    "}\n"
+
+    "vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){\n"
+    "    float Glow = texture2D(gMiscMap,uv).r;\n"
+    "    float SpecularStrength = texture2D(gMiscMap,uv).g;\n"
+    "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
+    "    vec3 LightDiffuseColor  = LightDataD.xyz;\n"
+    "    vec3 LightSpecularColor = LightDataD.xyz * SpecularStrength;\n"
+    "    vec3 TotalLight         = ConstantZeroVec3;\n"
+    "    vec3 SpecularFactor     = ConstantZeroVec3;\n"
+    "\n"
+    "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
+    "    highp int matID = int(floor(matIDandAO));\n"
+    "    float ssaoValue = 1.0 - texture2D(gSSAOMap,uv).a;\n"
+    "    float ao = (fract(matIDandAO)+0.0001) * ssaoValue;\n"//the 0.0001 makes up for the clamp in material class
+    "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n"
+    "    float metalness = stuff.x;\n"
+    "    float smoothness = stuff.y;\n"
+    "\n"
+    "    vec3 MaterialF0 = Unpack3FloatsInto1FloatUnsigned(materials[matID].r);\n"
+    "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
+    "    vec3 Frensel = F0;\n"
+    //"\n"
+    //"    float roughness = 1.0 - smoothness;\n"
+    //"    float alpha = roughness * roughness;\n"
+    //"\n"
+    "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
+    "    vec3 Half = normalize(LightDir + ViewDir);\n"
+    "    float NdotL = clamp(dot(PxlNormal, LightDir),0.0,1.0);\n"
+    "    float NdotH = clamp(dot(PxlNormal, Half),0.0,1.0);\n"
+    //"    float VdotN = clamp(dot(ViewDir,PxlNormal),0.0,1.0);\n"
+    //"    float VdotH = clamp(dot(ViewDir,Half),0.0,1.0);\n"
+    //"\n"
+    //"    float MaterialTypeDiffuse = materials[matID].a;\n"
+    //"    float MaterialTypeSpecular = materials[matID].b;\n"
+    //"\n"
+    //"    if(MaterialTypeDiffuse == 1.0){\n"
+    //"        LightDiffuseColor *= DiffuseOrenNayar(ViewDir,LightDir,NdotL,VdotN,alpha,PxlNormal);\n"
+    //"    }else if(MaterialTypeDiffuse == 2.0){\n"
+    //"        LightDiffuseColor *= DiffuseAshikhminShirley(smoothness,MaterialAlbedoTexture,NdotL,VdotN);\n"
+    //"    }else if(MaterialTypeDiffuse == 3.0){\n"//this is minneart
+    //"        LightDiffuseColor *= pow(VdotN*NdotL,smoothness);\n"
+    //"    }\n"
+    //"\n"
+    //"    if(MaterialTypeSpecular == 1.0){\n"
+    "        SpecularFactor = SpecularBlinnPhong(smoothness,NdotH);\n"
+    //"    }else if(MaterialTypeSpecular == 2.0){\n"
+    //"        SpecularFactor = SpecularPhong(smoothness,LightDir,PxlNormal,ViewDir);\n"
+    //"    }else if(MaterialTypeSpecular == 3.0){\n"
+    //"        SpecularFactor = SpecularGGX(Frensel,LightDir,Half,alpha,NdotH,F0,NdotL);\n"
+    //"    }else if(MaterialTypeSpecular == 4.0){\n"
+    //"        SpecularFactor = SpecularCookTorrance(Frensel,F0,VdotH,NdotH,alpha,VdotN,roughness,NdotL);\n"
+    //"    }else if(MaterialTypeSpecular == 5.0){\n"
+    //"        SpecularFactor = SpecularGaussian(NdotH,smoothness);\n"
+    //"    }else if(MaterialTypeSpecular == 6.0){\n"
+    //"        SpecularFactor = vec3(BeckmannDist(NdotH,alpha));\n"
+    //"    }else if(MaterialTypeSpecular == 7.0){\n"
+    //"        SpecularFactor = SpecularAshikhminShirley(PxlNormal,Half,NdotH,LightDir,NdotL,VdotN);\n"
+    //"    }\n"
+    "    LightDiffuseColor *= LightDataA.y;\n"
+    "    LightSpecularColor *= (SpecularFactor * LightDataA.z);\n"
+    "\n"
+    "    vec3 componentDiffuse = ConstantOneVec3 - Frensel;\n"
+    "    componentDiffuse *= 1.0 - metalness;\n"
+    "\n"
+    "    TotalLight = (componentDiffuse * ao) * MaterialAlbedoTexture;\n"
+    "    TotalLight /= KPI;\n"
+    "    TotalLight += LightSpecularColor;\n"
+    "    TotalLight *= LightDiffuseColor * NdotL;\n"
+    "\n"
+    "    return max(vec3(Glow) * MaterialAlbedoTexture,TotalLight);\n"
+    "}\n"
+    "vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
+    "    vec3 RawDirection = LightPos - PxlWorldPos;\n"
+    "    float Dist = length(RawDirection);\n"
+    "    vec3 LightDir = RawDirection / Dist;\n"
+    "    vec3 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);\n"
+    "    float attenuation = CalculateAttenuation(Dist,1.0);\n"
+    "    return c * attenuation;\n"
+    "}\n"
+    "vec3 CalcSpotLight(vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
+    "    vec3 LightDir = normalize(LightPos - PxlWorldPos);\n"
+    "    vec3 c = CalcPointLight(LightPos, PxlWorldPos, PxlNormal, uv);\n"
+    "    float cosAngle = dot(LightDir, -SpotLightDir);\n"
+    "    float spotEffect = smoothstep(LightDataE.y, LightDataE.x, cosAngle);\n"
+    "    return c * spotEffect;\n"
+    "}\n"
+    "vec3 CalcRodLight(vec3 A, vec3 B,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
+    "    vec3 BMinusA = B - A;\n"
+    "    vec3 CMinusA = PxlWorldPos - A;\n"
+    "    float Dist = length(BMinusA);\n"
+    "    vec3 _Normal = BMinusA / Dist;\n"
+    "    float t = clamp(dot(CMinusA, _Normal / Dist),0.0,1.0);\n" //recheck this: normalize(BMinusA) / length(BMinusA)
+    "    vec3 LightPos = A + t * BMinusA;\n"
+    "    vec3 c = CalcPointLight(LightPos, PxlWorldPos, PxlNormal, uv);\n"
+    "    return c;\n"
+    "}\n"
+    "void main(){\n"                      //windowX      //windowY
+    "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
+    "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
+    "    vec3 PxlPosition = GetWorldPosition(uv,CameraNear,CameraFar);\n"
+    "\n"
+    "    vec3 lightCalculation = ConstantZeroVec3;\n"
+    "    vec3 LightPosition = vec3(LightDataC.yzw);\n"
+    "    vec3 LightDirection = normalize(vec3(LightDataA.w,LightDataB.x,LightDataB.y));\n"
+    "\n"
+    "    if(LightDataD.w == 0.0){\n"
+    "        lightCalculation = CalcLightInternal(normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);\n"
+    "    }else if(LightDataD.w == 1.0){\n"
+    "        lightCalculation = CalcPointLight(LightPosition,PxlPosition,PxlNormal,uv);\n"
+    "    }else if(LightDataD.w == 2.0){\n"
+    "        lightCalculation = CalcLightInternal(LightDirection,PxlPosition,PxlNormal,uv);\n"
+    "    }else if(LightDataD.w == 3.0){\n"
+    "        lightCalculation = CalcSpotLight(LightDirection,LightPosition,PxlPosition,PxlNormal,uv);\n"
+    "    }else if(LightDataD.w == 4.0){\n"
+    "        lightCalculation = CalcRodLight(vec3(LightDataA.w,LightDataB.xy),LightDataC.yzw,PxlPosition,PxlNormal,uv);\n"
+    "    }\n"
+    "    gl_FragData[0].rgb = lightCalculation;\n"
+    "}";
 #pragma endregion
 
 #pragma region LightingFragGI
 epriv::EShaders::lighting_frag_gi =
     "#define MATERIAL_COUNT_LIMIT 255\n"
+    "\n"
+    "const float MAX_REFLECTION_LOD = 5.0;\n"
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gNormalMap;\n"
@@ -1961,13 +2216,7 @@ epriv::EShaders::lighting_frag_gi +=
     "void main(){\n"
     //"  //vec2 uv = texcoords;\n" //this cannot be used for non fullscreen quad meshes
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
-    "\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    //   this code helps performance, but we have the stencil test for that
-    //"    if(distance(PxlNormal,ConstantOneVec3) < 0.01){\n"
-    //"        return;\n"
-    //"        discard;\n"
-    //"    }\n"
     "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
     "    vec3 PxlWorldPos = GetWorldPosition(uv,CameraNear,CameraFar);\n"
     "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
@@ -1989,7 +2238,6 @@ epriv::EShaders::lighting_frag_gi +=
     "    vec3 GIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
     "    vec3 GIDiffuse = irradianceColor * MaterialAlbedoTexture * kD * GIContribution.x;\n"
     "\n"
-    "    const float MAX_REFLECTION_LOD = 5.0;\n"
     "    vec3 prefilteredColor = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
     "    vec2 brdf  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
     "    vec3 GISpecular = prefilteredColor * (kS * brdf.x + brdf.y) * GIContribution.y;\n"
