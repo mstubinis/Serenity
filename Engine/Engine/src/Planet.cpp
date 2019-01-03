@@ -160,8 +160,6 @@ struct StarMeshInstanceUnbindFunctor {void operator()(EngineResource* r) const {
     Renderer::GLDisable(GLState::BLEND);
 }};
 
-
-
 struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
@@ -323,30 +321,30 @@ struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineR
 }};
 
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere, SolarSystem* scene):EntityWrapper(*scene){
-    auto* m_Model = m_Entity.addComponent<ComponentModel>(ResourceManifest::PlanetMesh,mat,ResourceManifest::groundFromSpace);
-    auto& model = m_Model->getModel();
-    model.setUserPointer(this);
+    m_Entity.addComponent<ComponentName>(name);
+
+    auto* model = m_Entity.addComponent<ComponentModel>(ResourceManifest::PlanetMesh, mat, ResourceManifest::groundFromSpace);
+    auto& instance = model->getModel();
+    instance.setUserPointer(this);
 
     auto* m_Body = m_Entity.addComponent<ComponentBody>();
     m_Body->setScale(scl, scl, scl);
     m_Body->setPosition(pos);
 
-    m_Entity.addComponent<ComponentName>(name);
-
     m_AtmosphereHeight = atmosphere;
     if(type != PlanetType::Star){
-        model.setCustomBindFunctor(AtmosphericScatteringGroundMeshInstanceBindFunctor());
-        model.setCustomUnbindFunctor(AtmosphericScatteringGroundMeshInstanceUnbindFunctor());
+        instance.setCustomBindFunctor(AtmosphericScatteringGroundMeshInstanceBindFunctor());
+        instance.setCustomUnbindFunctor(AtmosphericScatteringGroundMeshInstanceUnbindFunctor());
     }
     if(m_AtmosphereHeight > 0){
-        uint index = m_Model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial,(ShaderP*)ResourceManifest::skyFromSpace.get(),RenderStage::GeometryTransparent);
-        MeshInstance& skyMesh = m_Model->getModel(index);
-        float aScale = model.getScale().x;
+        uint index = model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial,(ShaderP*)ResourceManifest::skyFromSpace.get(),RenderStage::GeometryTransparent);
+        MeshInstance& skyInstance = model->getModel(index);
+        float aScale = instance.getScale().x;
         aScale = aScale + (aScale * m_AtmosphereHeight);
-        skyMesh.setCustomBindFunctor(AtmosphericScatteringSkyMeshInstanceBindFunctor());
-        skyMesh.setCustomUnbindFunctor(AtmosphericScatteringSkyMeshInstanceUnbindFunctor());
-        skyMesh.setScale(aScale,aScale,aScale);
-        skyMesh.setUserPointer(this);
+        skyInstance.setCustomBindFunctor(AtmosphericScatteringSkyMeshInstanceBindFunctor());
+        skyInstance.setCustomUnbindFunctor(AtmosphericScatteringSkyMeshInstanceUnbindFunctor());
+        skyInstance.setScale(aScale,aScale,aScale);
+        skyInstance.setUserPointer(this);
     }
 
     m_Type = type;
@@ -384,14 +382,15 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor);
 
-    auto& model = (*m_Entity.getComponent<ComponentModel>()).getModel();
-
-    model.setColor(starColor);
-    model.setGodRaysColor(lightColor);
-    model.setShaderProgram(nullptr);
-    model.setCustomBindFunctor(StarMeshInstanceBindFunctor());
-    model.setCustomUnbindFunctor(StarMeshInstanceUnbindFunctor());
-    model.setUserPointer(this);
+    auto* model = m_Entity.getComponent<ComponentModel>();
+    if (model) {
+        auto& instance = model->getModel();
+        instance.setColor(starColor);
+        instance.setGodRaysColor(lightColor);
+        instance.setCustomBindFunctor(StarMeshInstanceBindFunctor());
+        instance.setCustomUnbindFunctor(StarMeshInstanceUnbindFunctor());
+        instance.setShaderProgram(nullptr,*model);
+    }
     //addChild(m_Light);
     m_Light->setPosition(pos);
     scene->m_Objects.push_back(m_Light);

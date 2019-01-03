@@ -191,15 +191,22 @@ ShaderP* MeshInstance::shaderProgram() { return m_ShaderProgram; }
 Mesh* MeshInstance::mesh(){ return m_Mesh; }
 Material* MeshInstance::material(){ return m_Material; }
 RenderStage::Stage MeshInstance::stage() { return m_Stage; }
-void MeshInstance::setShaderProgram(const Handle& shaderPHandle) { setShaderProgram(((ShaderP*)shaderPHandle.get())); }
-void MeshInstance::setShaderProgram(ShaderP* shaderProgram) { 
+void MeshInstance::setShaderProgram(const Handle& shaderPHandle, ComponentModel& model) { setShaderProgram(((ShaderP*)shaderPHandle.get()), model); }
+void MeshInstance::setShaderProgram(ShaderP* shaderProgram, ComponentModel& model) {
     if (!shaderProgram) { shaderProgram = epriv::InternalShaderPrograms::Deferred; }
     m_ShaderProgram = shaderProgram;
+    model.setModel(m_Mesh, m_Material, 0, m_ShaderProgram, m_Stage);
 }
-void MeshInstance::setMesh(const Handle& meshHandle){ setMesh(((Mesh*)meshHandle.get())); }
-void MeshInstance::setMesh(Mesh* m){ m_Mesh = m; }
-void MeshInstance::setMaterial(const Handle& materialHandle){ setMaterial(((Material*)materialHandle.get())); }
-void MeshInstance::setMaterial(Material* m){ m_Material = m; }
+void MeshInstance::setMesh(const Handle& meshHandle, ComponentModel& model){ setMesh(((Mesh*)meshHandle.get()), model); }
+void MeshInstance::setMesh(Mesh* m, ComponentModel& model){
+    m_Mesh = m; 
+    model.setModel(m_Mesh, m_Material, 0, m_ShaderProgram, m_Stage);
+}
+void MeshInstance::setMaterial(const Handle& materialHandle, ComponentModel& model){ setMaterial(((Material*)materialHandle.get()), model); }
+void MeshInstance::setMaterial(Material* m, ComponentModel& model){
+    m_Material = m;
+    model.setModel(m_Mesh, m_Material, 0, m_ShaderProgram, m_Stage);
+}
 void MeshInstance::setOrientation(glm::quat o){ m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 
     if(abs(x) > 0.001f) m_Orientation =                 (glm::angleAxis(-x, glm::vec3(1,0,0)));
@@ -211,4 +218,18 @@ void MeshInstance::playAnimation(const string& animName,float start,float end,ui
     epriv::MeshInstanceAnimation* anim = nullptr;
     anim = new epriv::MeshInstanceAnimation(*mesh(),animName, start, end, reqLoops);
     m_AnimationQueue.push_back(anim);
+}
+
+
+void epriv::InternalMeshInstancePublicInterface::SetMesh(MeshInstance& instance, Mesh* mesh) {
+    instance.m_Mesh = mesh;
+}
+void epriv::InternalMeshInstancePublicInterface::SetMaterial(MeshInstance& instance, Material* material) {
+    instance.m_Material = material;
+}
+void epriv::InternalMeshInstancePublicInterface::SetShaderProgram(MeshInstance& instance, ShaderP* program) {
+    instance.m_ShaderProgram = program;
+}
+void epriv::InternalMeshInstancePublicInterface::SetStage(MeshInstance& instance, unsigned int stage) {
+    instance.m_Stage = (RenderStage::Stage)stage;
 }

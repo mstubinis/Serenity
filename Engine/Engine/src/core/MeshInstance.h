@@ -15,16 +15,19 @@ class  ShaderP;
 class  Material;
 class  Mesh;
 class  MeshInstance;
+class  ComponentModel;
 namespace Engine{
     namespace epriv{
         struct DefaultMeshInstanceBindFunctor { void operator()(EngineResource* r) const; };
         struct DefaultMeshInstanceUnbindFunctor { void operator()(EngineResource* r) const; };
         struct MeshInstanceAnimation;
+        struct InternalMeshInstancePublicInterface;
     };
 };
 class MeshInstance final: public BindableResource{
     friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
     friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
+    friend struct Engine::epriv::InternalMeshInstancePublicInterface;
     private:
         void* m_UserPointer;
         std::vector<Engine::epriv::MeshInstanceAnimation*> m_AnimationQueue;
@@ -85,9 +88,14 @@ class MeshInstance final: public BindableResource{
         void setGodRaysColor(float r,float g,float b);
         void setGodRaysColor(glm::vec3 color);
 
-        void setShaderProgram(const Handle& shaderPHandle);    void setShaderProgram(ShaderP*);
-        void setMesh(const Handle& meshHandle);                void setMesh(Mesh*);
-        void setMaterial(const Handle& materialHandle);        void setMaterial(Material*);
+        void setShaderProgram(const Handle& shaderPHandle, ComponentModel&);
+        void setShaderProgram(ShaderP*, ComponentModel&);
+
+        void setMesh(const Handle& meshHandle, ComponentModel&);
+        void setMesh(Mesh*, ComponentModel&);
+
+        void setMaterial(const Handle& materialHandle, ComponentModel&);
+        void setMaterial(Material*, ComponentModel&);
 
         void setPosition(float x,float y,float z);             void setPosition(glm::vec3);
         void setOrientation(glm::quat);                        void setOrientation(float x,float y,float z);
@@ -97,4 +105,17 @@ class MeshInstance final: public BindableResource{
         void rotate(float pitch,float yaw,float roll);         void rotate(glm::vec3);
         void scale(float x,float y,float z);                   void scale(glm::vec3);
 };
+
+
+namespace Engine {
+    namespace epriv {
+        struct InternalMeshInstancePublicInterface {
+            static void SetMesh(MeshInstance&, Mesh*);
+            static void SetMaterial(MeshInstance&, Material*);
+            static void SetShaderProgram(MeshInstance&, ShaderP*);
+            static void SetStage(MeshInstance&, unsigned int);
+        };
+    };
+};
+
 #endif

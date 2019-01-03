@@ -75,11 +75,10 @@ float ComponentModel::radius() { return _radius; }
 glm::vec3 ComponentModel::boundingBox() { return _radiusBox; }
 uint ComponentModel::addModel(Handle& mesh, Handle& mat, ShaderP* shaderProgram, RenderStage::Stage _stage) { return ComponentModel::addModel((Mesh*)mesh.get(), (Material*)mat.get(), shaderProgram, _stage); }
 uint ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* shaderProgram, RenderStage::Stage _stage) {
-    //models.emplace_back(owner, mesh, material, shaderProgram);
     models.push_back(new MeshInstance(owner, mesh, material, shaderProgram));
     auto& instance = *models[models.size() - 1];
     auto& _scene = owner.scene();
-    instance.setStage(_stage);
+    epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
     ComponentModelFunctions::CalculateRadius(*this);
     return models.size() - 1;
@@ -89,10 +88,12 @@ void ComponentModel::setModel(Mesh* mesh, Material* material, uint index, Shader
     auto& instance = *models[index];
     auto& _scene = owner.scene();
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
-    instance.setShaderProgram(shaderProgram);
-    instance.setMesh(mesh);
-    instance.setMaterial(material);
-    instance.setStage(_stage);
+
+    epriv::InternalMeshInstancePublicInterface::SetShaderProgram(instance, shaderProgram);
+    epriv::InternalMeshInstancePublicInterface::SetMesh(instance, mesh);
+    epriv::InternalMeshInstancePublicInterface::SetMaterial(instance, material);
+    epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
+
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
     ComponentModelFunctions::CalculateRadius(*this);
 }
@@ -100,8 +101,10 @@ void ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint index, R
     auto& instance = *models[index];
     auto& _scene = owner.scene();
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
-    instance.setShaderProgram(shaderProgram);
-    instance.setStage(_stage);
+
+    epriv::InternalMeshInstancePublicInterface::SetShaderProgram(instance, shaderProgram);
+    epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
+
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
     ComponentModelFunctions::CalculateRadius(*this);
 }
@@ -109,9 +112,12 @@ void ComponentModel::setModelShaderProgram(Handle& shaderPHandle, uint index, Re
 void ComponentModel::setModelMesh(Mesh* mesh, uint index, RenderStage::Stage _stage) {
     auto& instance = *models[index];
     auto& _scene = owner.scene();
+
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
-    instance.setMesh(mesh);
-    instance.setStage(_stage);
+
+    epriv::InternalMeshInstancePublicInterface::SetMesh(instance, mesh);
+    epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
+
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
     ComponentModelFunctions::CalculateRadius(*this);
 }
@@ -120,8 +126,10 @@ void ComponentModel::setModelMaterial(Material* material, uint index, RenderStag
     auto& instance = *models[index];
     auto& _scene = owner.scene();
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
-    instance.setMaterial(material);
-    instance.setStage(_stage);
+
+    epriv::InternalMeshInstancePublicInterface::SetMaterial(instance, material);
+    epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
+
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
 }
 void ComponentModel::setModelMaterial(Handle& mat, uint index, RenderStage::Stage _stage) { ComponentModel::setModelMaterial((Material*)mat.get(), index, _stage); }
