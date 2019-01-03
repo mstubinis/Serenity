@@ -2,7 +2,7 @@
 #ifndef ENGINE_ENGINE_H
 #define ENGINE_ENGINE_H
 
-#include "core/engine/Engine_Time.h"
+#include "core/engine/Engine_Debugging.h"
 #include "core/engine/Engine_EventDispatcher.h"
 #include "core/engine/Engine_ThreadManager.h"
 #include "core/engine/Engine_Resources.h"
@@ -22,7 +22,7 @@ namespace Engine{
             EventDispatcher       m_EventDispatcher;
             PhysicsManager        m_PhysicsManager;
             ResourceManager       m_ResourceManager;
-            TimeManager           m_TimeManager;
+            DebugManager          m_DebugManager;
             SoundManager          m_SoundManager;
             RenderManager         m_RenderManager;
             ThreadManager         m_ThreadManager;

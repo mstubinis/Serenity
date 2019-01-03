@@ -33,6 +33,7 @@
     <ClCompile Include="Engine\src\core\engine\BindableResource.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_BuiltInShaders.cpp" />
+    <ClCompile Include="Engine\src\core\engine\Engine_Debugging.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_EventDispatcher.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_EventObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_Events.cpp" />
@@ -47,7 +48,6 @@
     <ClCompile Include="Engine\src\core\engine\Engine_Resources.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_Sounds.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_ThreadManager.cpp" />
-    <ClCompile Include="Engine\src\core\engine\Engine_Time.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp" />
     <ClCompile Include="Engine\src\core\engine\FramebufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\GBuffer.cpp" />
@@ -90,6 +90,7 @@
     <ClInclude Include="Engine\src\core\engine\Engine.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_BuiltInResources.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_BuiltInShaders.h" />
+    <ClInclude Include="Engine\src\core\engine\Engine_Debugging.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_EventDispatcher.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_EventEnums.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_EventObject.h" />
@@ -106,7 +107,6 @@
     <ClInclude Include="Engine\src\core\engine\Engine_Resources.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Sounds.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_ThreadManager.h" />
-    <ClInclude Include="Engine\src\core\engine\Engine_Time.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Utils.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Window.h" />
     <ClInclude Include="Engine\src\core\engine\FramebufferObject.h" />

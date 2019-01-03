@@ -143,9 +143,6 @@
     <ClCompile Include="Engine\src\core\engine\Engine_ThreadManager.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_Time.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
@@ -242,6 +239,9 @@
     <ClCompile Include="Engine\src\core\engine\mesh\VertexBufferObject.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\Engine_Debugging.cpp">
+      <Filter>Source Files\Engine\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -326,9 +326,6 @@
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_ThreadManager.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_Time.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_Utils.h">
@@ -447,6 +444,9 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\mesh\VertexDataFormat.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\Engine_Debugging.h">
+      <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 #include "core/engine/Engine.h"
-#include "core/engine/Engine_Time.h"
+#include "core/engine/Engine_Debugging.h"
 #include "core/engine/Engine_Renderer.h"
 #include "core/engine/Engine_Window.h"
 #include "core/engine/Engine_FullscreenItems.h"
@@ -2136,7 +2136,7 @@ class epriv::RenderManager::impl final{
                     float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRays_fovDegrees;
                     alpha = glm::pow(alpha, godRays_alphaFalloff);
                     alpha = glm::clamp(alpha, 0.01f, 0.99f);
-                    _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), 1.0f - alpha);
+                    _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), 1.0f - alpha);  
                 }
             }
             #pragma endregion

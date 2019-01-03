@@ -55,9 +55,9 @@ epriv::ResourceManager::~ResourceManager(){ m_i->_destruct(); }
 void epriv::ResourceManager::_init(const char* n,uint w,uint h){ m_i->_postInit(n,w,h); }
 
 string Engine::Data::reportTime(){
-    return epriv::Core::m_Engine->m_TimeManager.reportTime();
+    return epriv::Core::m_Engine->m_DebugManager.reportTime();
 }
-const double Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager.dt(); }
+const double Engine::Resources::dt(){ return epriv::Core::m_Engine->m_DebugManager.dt(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_CurrentScene; }
 
 vector<Scene*>& epriv::ResourceManager::scenes() {return m_i->m_Scenes;}

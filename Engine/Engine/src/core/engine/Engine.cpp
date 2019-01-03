@@ -25,7 +25,7 @@ epriv::Core::Core(const char* name,uint w,uint h):
 m_EventManager(name,w,h),
 m_EventDispatcher(name,w,h),
 m_ResourceManager(name,w,h),
-m_TimeManager(name,w,h),
+m_DebugManager(name,w,h),
 m_SoundManager(name,w,h),
 m_RenderManager(name,w,h),
 m_PhysicsManager(name,w,h),
@@ -53,7 +53,7 @@ void Engine::init(const char* name,uint w,uint h){
     auto& engine = *epriv::Core::m_Engine;
 
     engine.m_ResourceManager._init(name,w,h);
-    engine.m_TimeManager._init(name,w,h);
+    engine.m_DebugManager._init(name,w,h);
     engine.m_RenderManager._init(name,w,h);
     engine.m_PhysicsManager._init(name,w,h,engine.m_ThreadManager.cores());
 
@@ -72,7 +72,7 @@ void RESET_EVENTS(){
     epriv::Core::m_Engine->m_EventManager.onResetEvents();
 }
 void updatePhysics(const float& dt) {
-    epriv::Core::m_Engine->m_TimeManager.stop_clock();
+    epriv::Core::m_Engine->m_DebugManager.stop_clock();
     //It's important that timeStep is always less than maxSubSteps * fixedTimeStep, otherwise you are losing time. dt < maxSubSteps * fixedTimeStep
     float minStep = 0.0166666f; // == 0.0166666 at 1 fps
     uint maxSubSteps = 0;
@@ -80,11 +80,11 @@ void updatePhysics(const float& dt) {
         ++maxSubSteps; if (dt < (maxSubSteps * minStep)) break;
     }
     epriv::Core::m_Engine->m_PhysicsManager._update(dt, maxSubSteps, minStep);
-    epriv::Core::m_Engine->m_TimeManager.calculate_physics();
+    epriv::Core::m_Engine->m_DebugManager.calculate_physics();
 }
 void updateLogic(const float& dt){
     // update logic   //////////////////////////////////////////
-    epriv::Core::m_Engine->m_TimeManager.stop_clock();
+    epriv::Core::m_Engine->m_DebugManager.stop_clock();
     Game::onPreUpdate(dt);
     Game::update(dt);
 
@@ -101,7 +101,7 @@ void updateLogic(const float& dt){
     epriv::Core::m_Engine->m_ThreadManager._update(dt);
     Game::onPostUpdate(dt);
 
-    epriv::Core::m_Engine->m_TimeManager.calculate_logic();
+    epriv::Core::m_Engine->m_DebugManager.calculate_logic();
 
     RESET_EVENTS();
 
@@ -109,9 +109,9 @@ void updateLogic(const float& dt){
 }
 void updateSounds(const float& dt){
     // update sounds ///////////////////////////////////////////
-    epriv::Core::m_Engine->m_TimeManager.stop_clock();
+    epriv::Core::m_Engine->m_DebugManager.stop_clock();
     epriv::Core::m_Engine->m_SoundManager._update(dt);
-    epriv::Core::m_Engine->m_TimeManager.calculate_sounds();
+    epriv::Core::m_Engine->m_DebugManager.calculate_sounds();
     ////////////////////////////////////////////////////////////
 }
 void update(const float& dt){
@@ -121,16 +121,16 @@ void update(const float& dt){
 
 void render(){
     //render
-    epriv::Core::m_Engine->m_TimeManager.stop_clock();
+    epriv::Core::m_Engine->m_DebugManager.stop_clock();
     Game::render();
     glm::uvec2 winSize = Resources::getWindowSize();
     epriv::Core::m_Engine->m_RenderManager._render(*Resources::getCurrentScene()->getActiveCamera(),winSize.x,winSize.y);
-    epriv::Core::m_Engine->m_TimeManager.calculate_render();
+    epriv::Core::m_Engine->m_DebugManager.calculate_render();
 
     //display
-    epriv::Core::m_Engine->m_TimeManager.stop_clock();
+    epriv::Core::m_Engine->m_DebugManager.stop_clock();
     Resources::getWindow().display();
-    epriv::Core::m_Engine->m_TimeManager.calculate_display();	
+    epriv::Core::m_Engine->m_DebugManager.calculate_display();
 }
 void EVENT_RESIZE(uint w, uint h,bool saveSize){
     epriv::Core::m_Engine->m_RenderManager._resize(w,h);
@@ -322,11 +322,11 @@ void handleEvents(){
 
 void Engine::run(){
     while(!epriv::Core::m_Engine->m_Destroyed /*&& Resources::getWindow().isOpen()*/){
-        float dt = (float)epriv::Core::m_Engine->m_TimeManager.dt();
+        float dt = (float)epriv::Core::m_Engine->m_DebugManager.dt();
         handleEvents();
         update(dt);
         render();
-        epriv::Core::m_Engine->m_TimeManager.calculate();
+        epriv::Core::m_Engine->m_DebugManager.calculate();
     }
     //destruct the engine here
     Game::cleanup();

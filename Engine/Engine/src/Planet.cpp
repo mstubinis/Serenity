@@ -158,6 +158,12 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     Renderer::sendUniformMatrix3Safe("NormalMatrix",normalMatrix);
 }};
 
+struct StarMeshInstanceUnbindFunctor {void operator()(EngineResource* r) const {
+
+}};
+
+
+
 struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
@@ -305,7 +311,6 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     Renderer::Settings::cullFace(GL_FRONT);
     Renderer::GLEnable(GLState::BLEND);
 
-
     Renderer::sendUniformMatrix4Safe("Model", model);
     Renderer::sendUniform1("nSamples", numberSamples);
     Renderer::sendUniform4("VertDataMisc1", camPos.x, camPos.y, camPos.z, lightDir.x);
@@ -390,7 +395,7 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
     model.setGodRaysColor(lightColor);
     model.setShaderProgram(nullptr);
     model.setCustomBindFunctor(StarMeshInstanceBindFunctor());
-
+    model.setCustomUnbindFunctor(StarMeshInstanceUnbindFunctor());
     //addChild(m_Light);
     m_Light->setPosition(pos);
     scene->m_Objects.push_back(m_Light);

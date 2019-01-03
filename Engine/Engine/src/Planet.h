@@ -16,6 +16,7 @@ struct AtmosphericScatteringGroundMeshInstanceUnbindFunctor;
 struct AtmosphericScatteringSkyMeshInstanceBindFunctor;
 struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
 struct StarMeshInstanceBindFunctor;
+struct StarMeshInstanceUnbindFunctor;
 
 struct PlanetType{ enum Type {
     Rocky,Ice,GasGiant,IceGiant,Moon,Star,Asteroid,
@@ -60,6 +61,7 @@ class Planet:public EntityWrapper {
     friend struct ::AtmosphericScatteringSkyMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
     friend struct ::StarMeshInstanceBindFunctor;
+    friend struct ::StarMeshInstanceUnbindFunctor;
     protected:
         std::vector<Ring*>  m_Rings;
         PlanetType::Type    m_Type;

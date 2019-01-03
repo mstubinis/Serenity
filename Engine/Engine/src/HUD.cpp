@@ -127,7 +127,8 @@ void HUD::render(){
         "\nGodRays Density: " + to_string(Renderer::Settings::GodRays::getDensity()) +
         "\nGodRays Exposure: " + to_string(Renderer::Settings::GodRays::getExposure()) +
         "\nGodRays Weight: " + to_string(Renderer::Settings::GodRays::getWeight()) +
-        "\nGodRays Samples: " + to_string(Renderer::Settings::GodRays::getSamples()),
+        "\nGodRays Samples: " + to_string(Renderer::Settings::GodRays::getSamples()) +
+        epriv::Core::m_Engine->m_DebugManager.reportDebug(),
         glm::vec2(10, Resources::getWindowSize().y - 10), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1), 0, glm::vec2(0.8f, 0.8f), 0.1f);
 
     #pragma endregion
