@@ -109,11 +109,11 @@ void MeshInstance::_init(Mesh* mesh, Material* mat, Entity& parent, ShaderP* pro
 
     m_Mesh = mesh;
 
-    m_Color = glm::vec4(1.0f);
-    m_GodRaysColor = glm::vec3(0.0f);
-    m_Position = glm::vec3(0.0f);
+    m_Color = glm::vec4(1.0f,1.0f,1.0f,1.0f);
+    m_GodRaysColor = glm::vec3(0.0f,0.0f,0.0f);
+    m_Position = glm::vec3(0.0f,0.0f,0.0f);
     m_Orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-    m_Scale = glm::vec3(1.0f);
+    m_Scale = glm::vec3(1.0f,1.0f,1.0f);
     _updateModelMatrix();
 }
 void MeshInstance::_updateModelMatrix() {
@@ -162,7 +162,7 @@ bool MeshInstance::passedRenderCheck(){ return m_PassedRenderCheck; }
 void MeshInstance::setPassedRenderCheck(bool b) { m_PassedRenderCheck = b; }
 void MeshInstance::setColor(float r, float g, float b, float a) { m_Color = glm::vec4(r, g, b, a); }
 void MeshInstance::setColor(glm::vec4 color){ MeshInstance::setColor(color.r,color.g,color.b,color.a); }
-void MeshInstance::setColor(glm::vec3 color) { MeshInstance::setColor(color.r, color.g, color.b); }
+void MeshInstance::setColor(glm::vec3 color) { MeshInstance::setColor(color.r, color.g, color.b, 1.0f); }
 void MeshInstance::setGodRaysColor(float r, float g, float b) { m_GodRaysColor.r = r; m_GodRaysColor.g = g; m_GodRaysColor.b = b; }
 void MeshInstance::setGodRaysColor(glm::vec3 color){ MeshInstance::setGodRaysColor(color.r,color.g,color.b); }
 void MeshInstance::setPosition(float x, float y, float z){ m_Position = glm::vec3(x, y, z); _updateModelMatrix(); }

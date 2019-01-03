@@ -47,13 +47,9 @@ struct PlanetLogicFunctor final {void operator()(ComponentLogic& _component, con
 
 struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
-    Planet& obj = *(Planet*)i.getUserPointer();
-    
+    Planet& obj = *(Planet*)i.getUserPointer(); 
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    
     float atmosphereHeight = obj.getAtmosphereHeight();
-
-
     auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
 
     glm::vec3 pos = m_Body->position();
@@ -128,6 +124,8 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     glm::vec3 camPosR = c->getPosition();
     glm::quat orientation = m_Body->rotation();
 
+    Renderer::GLEnable(GLState::BLEND); //for godrays
+
     Renderer::sendUniform4Safe("Object_Color",i.color());
     Renderer::sendUniform3Safe("Gods_Rays_Color",i.godRaysColor());
     Renderer::sendUniform1Safe("AnimationPlaying",0);
@@ -159,7 +157,7 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
 }};
 
 struct StarMeshInstanceUnbindFunctor {void operator()(EngineResource* r) const {
-
+    Renderer::GLDisable(GLState::BLEND);
 }};
 
 
@@ -267,12 +265,10 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     float Kr = 0.0015f;
     float ESun = 20.0f;
     
-    
     float fScaledepth = 0.25f;
     float innerRadius = obj.getGroundRadius();  
     float outerRadius = obj.getRadius();
     glm::vec3 scl = m_Body.getScale();
-    //glm::vec3 scl = glm::vec3(outerRadius);
     float fScale = 1.0f / (outerRadius - innerRadius);
     float fScaleOverDepth = fScale / fScaledepth;
     float fDepth = glm::exp(fScaleOverDepth * (innerRadius - camHeight));
@@ -285,7 +281,6 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     model = glm::scale(model, scl);
     model = glm::scale(model, glm::vec3(1.0f + atmosphereHeight));
 
-    
     //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
     /*
     float _distanceReal = glm::abs(glm::distance(camPosR, thisPos));
@@ -309,7 +304,7 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     program->bind();
 
     Renderer::Settings::cullFace(GL_FRONT);
-    Renderer::GLEnable(GLState::BLEND);
+    Renderer::GLEnable(GLState::BLEND);  //for godrays and other stuff
 
     Renderer::sendUniformMatrix4Safe("Model", model);
     Renderer::sendUniform1("nSamples", numberSamples);
@@ -396,6 +391,7 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
     model.setShaderProgram(nullptr);
     model.setCustomBindFunctor(StarMeshInstanceBindFunctor());
     model.setCustomUnbindFunctor(StarMeshInstanceUnbindFunctor());
+    model.setUserPointer(this);
     //addChild(m_Light);
     m_Light->setPosition(pos);
     scene->m_Objects.push_back(m_Light);

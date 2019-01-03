@@ -1370,7 +1370,7 @@ epriv::EShaders::deferred_frag +=
     "        OutNormals = ConstantOneVec2; \n"
     "    }\n"
     "	 float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(metalness,smoothness);\n"
-    "    vec4 GodRays = (InDiffuse * vec4(Gods_Rays_Color,1.0)) * 0.5;\n"
+    "    vec4 GodRays = (InDiffuse * vec4(Gods_Rays_Color,1.0));\n"
     "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
     "    gl_FragData[0] = OutDiffuse;\n"
     "    gl_FragData[1] = vec4(OutNormals,OutMatIDAndAO,OutPackedMetalnessAndSmoothness);\n"
