@@ -365,7 +365,7 @@ class epriv::RenderManager::impl final{
             godRays_decay = 0.96815f;
             godRays_density = 0.926f;
             godRays_weight = 0.58767f;
-            godRays_samples = 50;
+            godRays_samples = 26;
             godRays_fovDegrees = 75.0f;
             godRays_alphaFalloff = 2.0f;
             godRays_Object = nullptr;

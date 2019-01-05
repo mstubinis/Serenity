@@ -194,18 +194,15 @@ RenderStage::Stage MeshInstance::stage() { return m_Stage; }
 void MeshInstance::setShaderProgram(const Handle& shaderPHandle, ComponentModel& model) { setShaderProgram(((ShaderP*)shaderPHandle.get()), model); }
 void MeshInstance::setShaderProgram(ShaderP* shaderProgram, ComponentModel& model) {
     if (!shaderProgram) { shaderProgram = epriv::InternalShaderPrograms::Deferred; }
-    m_ShaderProgram = shaderProgram;
-    model.setModel(m_Mesh, m_Material, 0, m_ShaderProgram, m_Stage);
+    model.setModel(m_Mesh, m_Material, 0, shaderProgram, m_Stage);
 }
 void MeshInstance::setMesh(const Handle& meshHandle, ComponentModel& model){ setMesh(((Mesh*)meshHandle.get()), model); }
-void MeshInstance::setMesh(Mesh* m, ComponentModel& model){
-    m_Mesh = m; 
-    model.setModel(m_Mesh, m_Material, 0, m_ShaderProgram, m_Stage);
+void MeshInstance::setMesh(Mesh* mesh, ComponentModel& model){
+    model.setModel(mesh, m_Material, 0, m_ShaderProgram, m_Stage);
 }
 void MeshInstance::setMaterial(const Handle& materialHandle, ComponentModel& model){ setMaterial(((Material*)materialHandle.get()), model); }
-void MeshInstance::setMaterial(Material* m, ComponentModel& model){
-    m_Material = m;
-    model.setModel(m_Mesh, m_Material, 0, m_ShaderProgram, m_Stage);
+void MeshInstance::setMaterial(Material* material, ComponentModel& model){
+    model.setModel(m_Mesh, material, 0, m_ShaderProgram, m_Stage);
 }
 void MeshInstance::setOrientation(glm::quat o){ m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 
