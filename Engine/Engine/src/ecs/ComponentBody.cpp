@@ -461,7 +461,7 @@ glm::vec3 ComponentBody::position() { //theres prob a better way to do this
     glm::mat4& _matrix = data.n->modelMatrix;
     return glm::vec3(_matrix[3][0], _matrix[3][1], _matrix[3][2]);
 }
-glm::vec3 ComponentBody::getScreenCoordinates() { return Math::getScreenCoordinates(position(), false); }
+glm::vec3 ComponentBody::getScreenCoordinates(bool clampToEdge) { return Math::getScreenCoordinates(position(), clampToEdge); }
 glm::vec3 ComponentBody::getScale() {
     if (_physics) {
         auto& physicsData = *data.p;

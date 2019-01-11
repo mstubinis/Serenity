@@ -147,33 +147,68 @@ vector<glm::vec4> Math::tiledFrustrum(Camera* camera,uint x,uint y){
     */
 }
 
-glm::vec3 Math::getScreenCoordinates(glm::vec3 objPos,bool clampToEdge){
-    glm::vec2 winSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
-    glm::vec4 viewport = glm::vec4(0,0,winSize.x,winSize.y);
-    Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    glm::vec3 screen = glm::project(objPos,c->getView(),c->getProjection(),viewport);
+glm::vec3 Math::getScreenCoordinates(glm::vec3 objPos,Camera& camera, bool clampToEdge) {
+    auto winSizeInt = Resources::getWindowSize();
+    glm::vec2 winSize = glm::vec2(winSizeInt.x, winSizeInt.y);
+    glm::vec4 viewport = glm::vec4(0, 0, winSize.x, winSize.y);
+    glm::vec3 screen = glm::project(objPos, camera.getView(), camera.getProjection(), viewport);
     //check if point is behind
-    float dot = glm::dot(c->getViewVector(),objPos - c->getPosition());
+    float dot = glm::dot(camera.getViewVector(), objPos - camera.getPosition());
     float resX = screen.x;
     float resY = screen.y;
     uint inBounds = 1;
-    if(clampToEdge){
-        if(screen.x < 0.0f){ resX = 0.0f; inBounds = 0; }
-        else if(screen.x > winSize.x){ resX = winSize.x; inBounds = 0; }
-        if(resY < 0.0f){ resY = 0.0f; inBounds = 0; }
-        else if(resY > winSize.y){ resY = winSize.y; inBounds = 0; }
+    if (clampToEdge) {
+        if (screen.x < 0.0f) { 
+            resX = 0.0f; 
+            inBounds = 0; 
+        }
+        else if (screen.x > winSize.x) { 
+            resX = winSize.x; 
+            inBounds = 0; 
+        }
+        if (resY < 0.0f) { 
+            resY = 0.0f; 
+            inBounds = 0; 
+        }
+        else if (resY > winSize.y) { 
+            resY = winSize.y; 
+            inBounds = 0; 
+        }
     }
-    if(dot < 0.0f){
-        return glm::vec3(resX,resY,inBounds);
+    if (dot < 0.0f) {
+        return glm::vec3(resX, resY, inBounds);
     }
     inBounds = 0;
-    float fX = winSize.x - screen.x;
-    float fY = winSize.y - screen.y;
-    if(fX < winSize.x/2){ if(clampToEdge) fX = 0.0f; else fX = -9999999.0f; }
-    else if(fX > winSize.x/2){ if(clampToEdge) fX = winSize.x; else fX = -9999999.0f; }
-    if(fY < winSize.y/2){ if(clampToEdge) fY = 0.0f; else fY = -9999999.0f; }
-    else if(fY > winSize.y/2){ if(clampToEdge) fY = winSize.y; else fY = -9999999.0f; }
-    return glm::vec3(fX,fY,inBounds);
+    resX = winSize.x - screen.x;
+    resY = winSize.y - screen.y;
+    if (resX < winSize.x / 2) {
+        if (clampToEdge) 
+            resX = 0.0f;
+        else resX =
+            -9999999.0f; 
+    }
+    else if (resX > winSize.x / 2) {
+        if (clampToEdge) 
+            resX = winSize.x;
+        else 
+            resX = -9999999.0f;
+    }
+    if (resY < winSize.y / 2) {
+        if (clampToEdge) 
+            resY = 0.0f;
+        else 
+            resY = -9999999.0f;
+    }
+    else if (resY > winSize.y / 2) {
+        if (clampToEdge) 
+            resY = winSize.y;
+        else 
+            resY = -9999999.0f;
+    }
+    return glm::vec3(resX, resY, inBounds);
+}
+glm::vec3 Math::getScreenCoordinates(glm::vec3 objPos,bool clampToEdge){
+    return Math::getScreenCoordinates(objPos,*Resources::getCurrentScene()->getActiveCamera(),clampToEdge);
 }
 float Math::Max(glm::vec2 v){ return glm::max(v.x,v.y); }
 float Math::Max(glm::vec3 v){ return glm::max(v.x,glm::max(v.y,v.z)); }

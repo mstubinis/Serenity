@@ -149,6 +149,7 @@ namespace Engine{
         glm::mat3 assimpToGLMMat3(aiMatrix3x3);
 
         glm::vec3 getScreenCoordinates(glm::vec3 _3Dposition, bool clampToEdge = true);
+        glm::vec3 getScreenCoordinates(glm::vec3 _3Dposition,Camera&, bool clampToEdge = true);
 
         glm::vec3 midpoint(glm::vec3&,glm::vec3&);
 

@@ -55,6 +55,9 @@ void epriv::DebugManager::_init(const char* name, uint w, uint h) { m_i->_postIn
 void epriv::DebugManager::addDebugLine(const char* message) {
     m_i->text_queue.emplace_back(message);
 }
+void epriv::DebugManager::addDebugLine(std::string& message) {
+    m_i->text_queue.emplace_back(message);
+}
 
 void epriv::DebugManager::calculate() {
     auto& i = *m_i.get();

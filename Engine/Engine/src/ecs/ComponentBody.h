@@ -94,7 +94,7 @@ class ComponentBody : public ComponentBaseClass {
                                                                     inline void setScale(float s);
 
         float mass();
-        glm::vec3 getScreenCoordinates();
+        glm::vec3 getScreenCoordinates(bool clampToEdge = false);
         glm::quat rotation();
         glm::vec3 getScale();
         glm::vec3 position();

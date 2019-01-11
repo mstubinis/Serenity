@@ -17,7 +17,7 @@ namespace Engine {
                 void _init(const char* name, uint w, uint h);
 
                 void addDebugLine(const char* message);
-
+                void addDebugLine(std::string& message);
 
                 void calculate();
                 void beginGLQuery();
