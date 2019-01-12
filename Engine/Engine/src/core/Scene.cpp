@@ -155,10 +155,13 @@ class Scene::impl final {
                 }
                 if (meshNode) {
                     removeFromVector(meshNode->instanceNodes, instanceNode);
+                    SAFE_DELETE(instanceNode);
                     if (meshNode->instanceNodes.size() == 0) {
                         removeFromVector(materialNode->meshNodes, meshNode);
+                        SAFE_DELETE(meshNode);
                         if (materialNode->meshNodes.size() == 0) {
                             removeFromVector(_pipeline->materialNodes, materialNode);
+                            SAFE_DELETE(materialNode);
                         }
                     }
                 }

@@ -378,7 +378,7 @@ float Planet::getGroundRadius(){ auto& model = *m_Entity.getComponent<ComponentM
 float Planet::getRadius() { auto& model = *m_Entity.getComponent<ComponentModel>(); return model.radius() + (model.radius() * m_AtmosphereHeight); }
 float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
 
-Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name, SolarSystem* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
+Star::Star(glm::vec3 starColor,glm::vec3 lightColor, glm::vec3 godRaysColor,glm::vec3 pos,float scl,string name, SolarSystem* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor);
 
@@ -386,7 +386,7 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
     if (model) {
         auto& instance = model->getModel();
         instance.setColor(starColor);
-        instance.setGodRaysColor(lightColor);
+        instance.setGodRaysColor(godRaysColor);
         instance.setCustomBindFunctor(StarMeshInstanceBindFunctor());
         instance.setCustomUnbindFunctor(StarMeshInstanceUnbindFunctor());
         instance.setShaderProgram(nullptr,*model);

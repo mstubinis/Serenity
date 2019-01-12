@@ -33,7 +33,9 @@ struct VertexData {
     }
     ~VertexData() {
         Engine::Renderer::deleteVAO(vao);
-        for (size_t i = 0; i < data.size(); ++i) { free(data[i]); }
+        for (size_t i = 0; i < data.size(); ++i) { 
+            free(data[i]); 
+        }
         vector_clear(data);
         vector_clear(dataSizes);
         vector_clear(indices);
@@ -55,7 +57,7 @@ struct VertexData {
         free(data[attributeIndex]);
         auto totalSize = _data.size() * sizeof(T);
         data[attributeIndex] = (char*)malloc(totalSize);
-        memcpy(data[attributeIndex], _data.data(), totalSize);
+        memmove(data[attributeIndex], _data.data(), totalSize);
         if (addToGPU) {
             if (format.interleavingType == VertexAttributeLayout::Interleaved) {
                 sendDataToGPU(orphan,-1);
@@ -89,12 +91,20 @@ struct VertexData {
         }
     }
     inline void bind() {
-        if (vao) {Engine::Renderer::bindVAO(vao);
-        }else{ for (auto& buffer : buffers) buffer->bind(); format.bind(*this); }
+        if (vao) {
+            Engine::Renderer::bindVAO(vao);
+        }else{ 
+            for (auto& buffer : buffers) 
+                buffer->bind(); 
+            format.bind(*this); 
+        }
     }
     inline void unbind() {
-        if (vao) { Engine::Renderer::bindVAO(0);
-        }else{     format.unbind(); }
+        if (vao) { 
+            Engine::Renderer::bindVAO(0);
+        }else{     
+            format.unbind(); 
+        }
     }
     void sendDataToGPU(bool orphan,int attributeIndex = -1) {
         auto& _vBuffer = *buffers[0];
@@ -110,7 +120,7 @@ struct VertexData {
             for (size_t i = 0; i < dataSizes[0]; ++i) {
                 for (size_t j = 0; j < data.size(); ++j) {
                     const auto& sizeofT = format.attributes[j].typeSize;
-                    memcpy(&buffer[accumulator], &(data[j])[i * sizeofT], sizeofT);
+                    memmove(&buffer[accumulator], &(data[j])[i * sizeofT], sizeofT);
                     accumulator += sizeofT;
                 }
             }
@@ -122,7 +132,7 @@ struct VertexData {
                 buffer = (char*)malloc(size);
                 for (size_t i = 0; i < data.size(); ++i) {
                     auto blockSize = dataSizes[i] * format.attributes[i].typeSize;
-                    memcpy(&buffer[accumulator], &(data[i])[0], blockSize);
+                    memmove(&buffer[accumulator], &(data[i])[0], blockSize);
                     accumulator += blockSize;
                 }
 
@@ -134,7 +144,7 @@ struct VertexData {
                     if (i != attributeIndex) {
                         accumulator += dataSizes[i] * format.attributes[i].typeSize;
                     }else{
-                        memcpy(&buffer[0], &(data[i])[0], size);
+                        memmove(&buffer[0], &(data[i])[0], size);
                         break;
                     }
                 }

@@ -1,7 +1,5 @@
 #include "core/Skybox.h"
 #include "core/engine/Engine.h"
-//#include "core/engine/Engine_Resources.h"
-//#include "core/engine/Engine_Renderer.h"
 #include "core/Texture.h"
 #include "core/Scene.h"
 
@@ -131,7 +129,6 @@ void Skybox::bindMesh(){
     if(m_VAO){
         Renderer::bindVAO(m_VAO);
         glDrawArrays(GL_TRIANGLES, 0, m_Vertices.size());
-        //Renderer::bindVAO(0);
     }else{
         Engine::epriv::SkyboxImplInterface::bindDataToGPU();
         glDrawArrays(GL_TRIANGLES, 0, m_Vertices.size());

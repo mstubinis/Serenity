@@ -77,7 +77,6 @@ namespace Engine{
             }
         };
         class RenderPipeline final{
-            //friend struct Engine::epriv::InternalScenePublicInterface;
             friend class ::Scene;
             private:
                 ShaderP& shaderProgram;
@@ -89,8 +88,6 @@ namespace Engine{
                 void sort(Camera& c);
                 void render();
         };
-
-
         class RenderManager final{
             public:
                 class impl;

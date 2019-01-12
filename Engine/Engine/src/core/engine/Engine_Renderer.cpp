@@ -447,6 +447,11 @@ class epriv::RenderManager::impl final{
             OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_tessellation_shader]      = _checkOpenGLExtension("GL_ARB_tessellation_shader");
             #pragma endregion
 
+            //dummy vao
+            GLuint dummyVAO;
+            Engine::Renderer::genAndBindVAO(dummyVAO);
+
+
             epriv::EShaders::init();
 
             #pragma region EngineInternalShaderUBOs

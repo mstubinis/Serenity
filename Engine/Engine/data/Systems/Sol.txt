@@ -4,7 +4,7 @@ data/Textures/Skyboxes/SolarSystem/Skybox.dds
 125
 giDiffuse=1.0 giSpecular=1.0 giGlobal=1.0
 
-S name=Sun radius=695800 r=1 g=1 b=0 r1=1.55 g1=1.55 b1=1.3 position=0
+S name=Sun radius=695800 r=1 g=1 b=0 r1=1.55 g1=1.55 b1=1.3 r2=1 g2=1 b2=0 position=0
 
 P name=Mercury parent=Sun radius=2440 r=1 g=1 b=1 position=57910000 type=Rock atmosphereHeight=0 texture=Mercury.dds eccentricity=0.20563 period=87.969 majorAxis=57909050 tilt=0.03 days=58.646 inclination=3.38
 

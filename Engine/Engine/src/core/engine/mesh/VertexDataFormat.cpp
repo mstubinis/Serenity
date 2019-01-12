@@ -26,7 +26,11 @@ void VertexDataFormat::bind(VertexData& vertData) {
         }
     }
 }
-void VertexDataFormat::unbind() { for (size_t i = 0; i < attributes.size(); ++i) { glDisableVertexAttribArray(i); } }
+void VertexDataFormat::unbind() { 
+    for (size_t i = 0; i < attributes.size(); ++i) { 
+        glDisableVertexAttribArray(i); 
+    } 
+}
 
 
 VertexDataFormat VertexDataFormat::VertexDataNoLighting = [&]() {
