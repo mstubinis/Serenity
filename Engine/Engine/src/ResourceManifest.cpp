@@ -70,7 +70,7 @@ void ResourceManifest::init(){
     DefiantMesh = Resources::addMeshAsync("data/Models/defiant.objcc"); //220 metres long (0.22 km)
     StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.objcc"); //6950 meters in height (6.95 km)
     RingMesh = Resources::addMeshAsync("data/Models/ring.objcc");
-    DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.objcc");
+    DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.objcc"); 
     LeviathanMesh = Resources::addMeshAsync("data/Models/leviathan.objcc");
     
     AkiraMesh = Resources::addMeshAsync("data/Models/akira.objcc");

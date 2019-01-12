@@ -157,9 +157,7 @@ void HUD::render(){
 
     #pragma region DrawDebugStuff
 
-    string stuff = "true"; if (!Renderer::Settings::General::enabled1()) stuff = "false";
-
-    font->renderText(Engine::Data::reportTime() + "\nenabled1: " + stuff +
+    font->renderText(Engine::Data::reportTime() + 
         "\nGodRays Decay: " + to_string(Renderer::Settings::GodRays::getDecay()) +
         "\nGodRays Density: " + to_string(Renderer::Settings::GodRays::getDensity()) +
         "\nGodRays Exposure: " + to_string(Renderer::Settings::GodRays::getExposure()) +

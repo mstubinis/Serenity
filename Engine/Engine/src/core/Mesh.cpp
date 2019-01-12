@@ -727,7 +727,7 @@ class Mesh::impl final{
                 _readFromObjCompressed1(file);
             }else{
                 if (extension == ".obj")
-                    _writeToObjCompressed1(); 
+                    _writeToObjCompressed1();
                 _loadInternal(super, d, m_File);
                 _finalizeData(d, threshold);
             }
@@ -1130,7 +1130,6 @@ class Mesh::impl final{
             ofstream stream(f, ios::binary);
 
             epriv::ImportedMeshData d;
-            auto& data = *m_VertexData;
 
             vector<vector<uint>> _indices;
             _indices.resize(3);
@@ -1148,6 +1147,7 @@ class Mesh::impl final{
 
             //header - should only be 3 entries, one for m_Vertices , one for m_Indices, and one to tell if skeleton or not
             uint32_t sizes[3];
+            auto& data = *m_VertexData;
             sizes[0] = data.dataSizes[0];
             sizes[1] = data.indices.size();
             sizes[2] = (m_Skeleton) ? 1 : 0;
@@ -1156,14 +1156,14 @@ class Mesh::impl final{
                 writeUint32tBigEndian(sizes[i], stream);
             }
             auto& positions = data.getData<glm::vec3>(0);
-            auto& uvs = data.getData<glm::vec2>(0);
-            auto& normals = data.getData<GLuint>(0);
-            auto& binormals = data.getData<GLuint>(0);
-            auto& tangents = data.getData<GLuint>(0);
+            auto& uvs = data.getData<glm::vec2>(1);
+            auto& normals = data.getData<GLuint>(2);
+            auto& binormals = data.getData<GLuint>(3);
+            auto& tangents = data.getData<GLuint>(4);
 
             if (m_Skeleton) {
-                auto& boneIDs = data.getData<glm::vec4>(0);
-                auto& boneWeights = data.getData<glm::vec4>(0);
+                auto& boneIDs = data.getData<glm::vec4>(5);
+                auto& boneWeights = data.getData<glm::vec4>(6);
                 for (size_t j = 0; j < sizes[0]; ++j) {
                     const auto& position = positions[j];
                     const auto& uv = uvs[j];
@@ -1213,19 +1213,24 @@ class Mesh::impl final{
                     const auto& tangent = tangents[j];
                     //positions
                     uint16_t outp[3];
-                    float16(&outp[0], position.x);  float16(&outp[1], position.y);  float16(&outp[2], position.z);
+                    float16(&outp[0], position.x);
+                    float16(&outp[1], position.y);
+                    float16(&outp[2], position.z);
                     for (uint i = 0; i < 3; ++i) {
                         writeUint16tBigEndian(outp[i], stream);
                     }
                     //uvs
                     uint16_t outu[2];
-                    float16(&outu[0], uv.x);  float16(&outu[1], uv.y);
+                    float16(&outu[0], uv.x);
+                    float16(&outu[1], uv.y);
                     for (uint i = 0; i < 2; ++i) {
                         writeUint16tBigEndian(outu[i], stream);
                     }
                     //normals (remember they are GLuints right now)
                     uint32_t outn[3];
-                    outn[0] = normal;  outn[1] = binormal;  outn[2] = tangent;
+                    outn[0] = normal;
+                    outn[1] = binormal;
+                    outn[2] = tangent;
                     for (uint i = 0; i < 3; ++i) {
                         writeUint32tBigEndian(outn[i], stream);
                     }
