@@ -21,18 +21,15 @@ const vec2 ConstantZeroVec2 = vec2(0.0,0.0);
 const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);
 
 float Pack2NibblesInto8BitChannel(float x,float y){
-    float _x = clamp(x,0.01,0.99);
-    float _y = clamp(y,0.01,0.99);
-    float lowEnd = round(_x * 15.01501501501502);
-    float highEnd = (round(_y * 15.01501501501502)) * 16.0;
-    return (highEnd + lowEnd) * 0.003921568627451;
+    float lowEnd = round(x / 0.0666);
+    float highEnd = round(y / 0.0666) * 16.0;
+    return (highEnd + lowEnd) / 255.0;
 }
 vec2 Unpack2NibblesFrom8BitChannel(float data){
-    float _data = data * 255.0;
-    float _exact = _data * 0.0625;
-    float highEnd = round(_exact);
-    float lowEnd = _data - (_exact * 16.0);
-    return vec2(lowEnd * 0.0666,highEnd * 0.0666);
+    float d = data * 255.0;
+    float y = fract(d / 16.0);
+    float x = (d - (y * 16.0));
+    return vec2(y, x / 255.0);
 }
 float Pack2FloatIntoFloat16(float x,float y){
     x = clamp(x,0.0001,0.9999);

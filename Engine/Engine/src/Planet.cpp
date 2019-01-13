@@ -127,7 +127,7 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     Renderer::GLEnable(GLState::BLEND); //for godrays
 
     Renderer::sendUniform4Safe("Object_Color",i.color());
-    Renderer::sendUniform3Safe("Gods_Rays_Color",i.godRaysColor());
+    Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
     Renderer::sendUniform1Safe("AnimationPlaying",0);
     glm::mat4 model = i.model();
     float outerRadius = obj.getRadius();
