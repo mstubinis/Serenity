@@ -144,20 +144,8 @@ epriv::EShaders::conditional_functions =
     "\n";
 
 epriv::EShaders::float_into_2_floats =
-    //designed to work with floats from 0 to 1, packing them into an 8 bit component of a render target
-    "float Pack2NibblesInto8BitChannel(float x,float y){\n"
-    "    float xF = round(x / 0.0666);\n"
-    "    float yF = round(y / 0.0666) * 16.0;\n"
-    "    return (xF + yF) / 255.0;\n" 
-    "}\n"
-    "vec2 Unpack2NibblesFrom8BitChannel(float data){\n"
-    "    float d = data * 255.0;\n"
-    "    float y = fract(d / 16.0);\n" 
-    "    float x = (d - (y * 16.0));\n"
-    "    return vec2(y, x / 255.0);\n"
-    "}\n"
     //designed to work with uniform floats coming from the cpu
-    "vec3 Unpack3FloatsInto1FloatUnsigned(float v){\n"
+    "vec3 Unpack3FloatsInto1FloatUnsigned(float v){\n" 
     "    vec3 ret;\n"
     "    ret.r = mod(v,          1.0);\n"
     "    ret.g = mod(v * 256.0,  1.0);\n"

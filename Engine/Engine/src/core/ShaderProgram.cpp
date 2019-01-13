@@ -230,6 +230,32 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
             insertStringAtLine(_d, normalMap, 1);
         }
     }
+    //check for compression functions
+
+    //designed to work with floats from 0 to 1, packing them into an 8 bit component of a render target
+    if (sfind(_d, "Pack2NibblesInto8BitChannel(")) {
+        if (!sfind(_d, "float Pack2NibblesInto8BitChannel(")) {
+            string pnibble = "\n"
+                "float Pack2NibblesInto8BitChannel(float x,float y){\n"
+                "    float xF = round(x / 0.0666);\n"
+                "    float yF = round(y / 0.0666) * 16.0;\n"
+                "    return (xF + yF) / 255.0;\n"
+                "}\n";
+            insertStringAtLine(_d, pnibble, 1);
+        }
+    }
+    if (sfind(_d, "Unpack2NibblesFrom8BitChannel(")) {
+        if (!sfind(_d, "vec2 Unpack2NibblesFrom8BitChannel(")) {
+            string unibble = "\n"
+                "vec2 Unpack2NibblesFrom8BitChannel(float data){\n"
+                "    float d = data * 255.0;\n"
+                "    float y = fract(d / 16.0);\n"
+                "    float x = (d - (y * 16.0));\n"
+                "    return vec2(y, x / 255.0);\n"
+                "}\n";
+            insertStringAtLine(_d, unibble, 1);
+        }
+    }
     //check for painters algorithm
     if (sfind(_d, "PaintersAlgorithm(")) {
         if (!sfind(_d, "vec4 PaintersAlgorithm(")) {
@@ -335,8 +361,7 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
                 #endif
             }
         }
-    }
-    else {
+    }else{
         if (sfind(_d, "GetWorldPosition(") || sfind(_d, "GetViewPosition(")) {
             if (!sfind(_d, "vec3 GetWorldPosition(")) {
                 if (sfind(_d, "USE_LOG_DEPTH_FRAG_WORLD_POSITION") && !sfind(_d, "//USE_LOG_DEPTH_FRAG_WORLD_POSITION") && shader.type() == ShaderType::Fragment) {

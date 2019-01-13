@@ -20,33 +20,6 @@ const vec2 ConstantOneVec2 = vec2(1.0,1.0);
 const vec2 ConstantZeroVec2 = vec2(0.0,0.0);
 const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);
 
-float Pack2NibblesInto8BitChannel(float x,float y){
-    float lowEnd = round(x / 0.0666);
-    float highEnd = round(y / 0.0666) * 16.0;
-    return (highEnd + lowEnd) / 255.0;
-}
-vec2 Unpack2NibblesFrom8BitChannel(float data){
-    float d = data * 255.0;
-    float y = fract(d / 16.0);
-    float x = (d - (y * 16.0));
-    return vec2(y, x / 255.0);
-}
-float Pack2FloatIntoFloat16(float x,float y){
-    x = clamp(x,0.0001,0.9999);
-    y = clamp(y,0.0001,0.9999);
-    float _x = (x + 1.0) * 0.5;
-    float _y = (y + 1.0) * 0.5;
-    return floor(_x * 100.0) + _y;
-}
-vec2 sign_not_zero(vec2 v) {
-    return vec2(v.x >= 0 ? 1.0 : -1.0,v.y >= 0 ? 1.0 : -1.0);
-}
-vec2 EncodeOctahedron(vec3 v) {
-    if(  all(greaterThan(v,ConstantAlmostOneVec3))  )
-        return ConstantOneVec2;
-    v.xy /= dot(abs(v), ConstantOneVec3);
-    return mix(v.xy, (1.0 - abs(v.yx)) * sign_not_zero(v.xy), step(v.z, 0.0));
-}
 void main(){
     float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);
     float fCos2 = fCos * fCos;
