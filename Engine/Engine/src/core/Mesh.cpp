@@ -87,8 +87,7 @@ namespace Engine{
                     return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold && std::abs(v1.z - v2.z) < threshold) ? true : false;
                 }
                 static inline bool IsSpecialFloat(float& f) {
-                    if (boostm::isnan(f)) return true;
-                    if (boostm::isinf(f)) return true;
+                    if (boostm::isnan(f) || boostm::isinf(f)) return true;
                     return false;
                 }
                 static inline bool IsSpecialFloat(glm::vec2& v) {

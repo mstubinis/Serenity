@@ -2131,15 +2131,19 @@ class epriv::RenderManager::impl final{
             
             if (godRays && godRays_Object) {
                 auto& body = *godRays_Object->getComponent<ComponentBody>();
-                glm::vec3 oPos = body.position();       
+                glm::vec3 oPos = body.position();
                 glm::vec3 camPos = camera.getPosition();
                 glm::vec3 camVec = camera.getViewVector();
                 bool infront = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRays_fovDegrees));
                 if (infront) {
                     glm::vec3 sp = Math::getScreenCoordinates(oPos, false);
                     float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRays_fovDegrees;
+                    
                     alpha = glm::pow(alpha, godRays_alphaFalloff);
                     alpha = glm::clamp(alpha, 0.01f, 0.99f);
+                    if (boost::math::isnan(alpha) || boost::math::isinf(alpha)) { //yes this is needed...
+                        alpha = 0.01f;
+                    }
                     _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), 1.0f - alpha);  
                 }
             }
