@@ -419,7 +419,6 @@ class epriv::RenderManager::impl final{
         }      
         void _postInit(const char* name,uint& width,uint& height){
             glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS,&UniformBufferObject::MAX_UBO_BINDINGS);
-
             #pragma region OpenGLExtensions
 
             //prints all the extensions the gpu supports
@@ -1651,7 +1650,7 @@ class epriv::RenderManager::impl final{
                         if (character == '\n') {
                             y += newLineGlyph.height + 7;
                             x = 0.0f;
-                        }else{
+                        }else if(character != '\0'){
                             uint accum = i * 4;
                             FontGlyph& chr = font.getGlyphData(character);
                             float startingX = x + chr.xoffset;

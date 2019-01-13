@@ -7,6 +7,9 @@
 #include "core/engine/Engine_Renderer.h"
 #include <memory>
 
+//TODO: remove " + 1 " for malloc size calls, it is(was?) an attempt to remove a crash... still have to confirm the crash is gone...
+
+
 typedef unsigned short ushort;
 
 struct VertexData {
@@ -55,7 +58,7 @@ struct VertexData {
         auto& _buffer = *buffers[0];
         dataSizes[attributeIndex] = _data.size();
         free(data[attributeIndex]);
-        auto totalSize = _data.size() * sizeof(T);
+        auto totalSize = (_data.size() * sizeof(T)) + 1;
         data[attributeIndex] = (char*)malloc(totalSize);
         memmove(data[attributeIndex], _data.data(), totalSize);
         if (addToGPU) {
@@ -115,7 +118,7 @@ struct VertexData {
         size_t size = 0;
 
         if (format.interleavingType == VertexAttributeLayout::Interleaved) {
-            size = format.attributes[0].stride * dataSizes[0];
+            size = (format.attributes[0].stride * dataSizes[0]) + 1;
             buffer = (char*)malloc(size);
             for (size_t i = 0; i < dataSizes[0]; ++i) {
                 for (size_t j = 0; j < data.size(); ++j) {
@@ -129,6 +132,7 @@ struct VertexData {
             if (attributeIndex == -1) {
                 for (size_t i = 0; i < data.size(); ++i)
                     size += format.attributes[i].typeSize * dataSizes[i];
+                size += 1;
                 buffer = (char*)malloc(size);
                 for (size_t i = 0; i < data.size(); ++i) {
                     auto blockSize = dataSizes[i] * format.attributes[i].typeSize;
@@ -138,7 +142,7 @@ struct VertexData {
 
                 !orphan ? _vBuffer.setData(size, buffer, BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(buffer);
             }else{
-                size += format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex];
+                size += (format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex]) + 1;
                 buffer = (char*)malloc(size);
                 for (size_t i = 0; i < data.size(); ++i) {
                     if (i != attributeIndex) {
