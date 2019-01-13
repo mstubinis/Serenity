@@ -27,8 +27,42 @@ void epriv::GLStateMachineDataCustom::init() {
 epriv::GLStateMachineDataCustom::GLStateMachineDataCustom() { init(); }
 epriv::GLStateMachineDataCustom::~GLStateMachineDataCustom() { init(); }
 
-
-
+void gl_enable_blend() {
+    Renderer::GLEnable(GLState::BLEND_0);
+    Renderer::GLEnable(GLState::BLEND_1);
+    Renderer::GLEnable(GLState::BLEND_2);
+    Renderer::GLEnable(GLState::BLEND_3);
+    Renderer::GLEnable(GLState::BLEND_4);
+    Renderer::GLEnable(GLState::BLEND_5);
+    Renderer::GLEnable(GLState::BLEND_6);
+    Renderer::GLEnable(GLState::BLEND_7);
+    Renderer::GLEnable(GLState::BLEND_8);
+    Renderer::GLEnable(GLState::BLEND_9);
+    Renderer::GLEnable(GLState::BLEND_10);
+    Renderer::GLEnable(GLState::BLEND_11);
+    Renderer::GLEnable(GLState::BLEND_12);
+    Renderer::GLEnable(GLState::BLEND_13);
+    Renderer::GLEnable(GLState::BLEND_14);
+    Renderer::GLEnable(GLState::BLEND_15);
+}
+void gl_disable_blend() {
+    Renderer::GLDisable(GLState::BLEND_0);
+    Renderer::GLDisable(GLState::BLEND_1);
+    Renderer::GLDisable(GLState::BLEND_2);
+    Renderer::GLDisable(GLState::BLEND_3);
+    Renderer::GLDisable(GLState::BLEND_4);
+    Renderer::GLDisable(GLState::BLEND_5);
+    Renderer::GLDisable(GLState::BLEND_6);
+    Renderer::GLDisable(GLState::BLEND_7);
+    Renderer::GLDisable(GLState::BLEND_8);
+    Renderer::GLDisable(GLState::BLEND_9);
+    Renderer::GLDisable(GLState::BLEND_10);
+    Renderer::GLDisable(GLState::BLEND_11);
+    Renderer::GLDisable(GLState::BLEND_12);
+    Renderer::GLDisable(GLState::BLEND_13);
+    Renderer::GLDisable(GLState::BLEND_14);
+    Renderer::GLDisable(GLState::BLEND_15);
+}
 inline void gl_enable_0(const uint& _enum) { glEnablei(_enum, 0); }
 inline void gl_enable_1(const uint& _enum) { glEnablei(_enum, 1); }
 inline void gl_enable_2(const uint& _enum) { glEnablei(_enum, 2); }
@@ -83,7 +117,7 @@ vector<epriv::GLStateData> GLState::SM = [](){
     _add(m,GLState::DITHER, epriv::GLStateData(false,B::bind<void>(glEnable,GL_DITHER),B::bind<void>(glDisable,GL_DITHER)));
     _add(m,GLState::SCISSOR_TEST, epriv::GLStateData(false,B::bind<void>(glEnable,GL_SCISSOR_TEST),B::bind<void>(glDisable,GL_SCISSOR_TEST)));
 
-    _add(m, GLState::BLEND, epriv::GLStateData(false, B::bind<void>(glEnable, GL_BLEND), B::bind<void>(glDisable, GL_BLEND)));
+    _add(m, GLState::BLEND, epriv::GLStateData(false, B::bind<void>(gl_enable_blend), B::bind<void>(gl_disable_blend)));
     _add(m, GLState::BLEND_0, epriv::GLStateData(false, B::bind<void>(gl_enable_0, GL_BLEND), B::bind<void>(gl_disable_0, GL_BLEND)));
     _add(m, GLState::BLEND_1, epriv::GLStateData(false, B::bind<void>(gl_enable_1, GL_BLEND), B::bind<void>(gl_disable_1, GL_BLEND)));
     _add(m, GLState::BLEND_2, epriv::GLStateData(false, B::bind<void>(gl_enable_2, GL_BLEND), B::bind<void>(gl_disable_2, GL_BLEND)));

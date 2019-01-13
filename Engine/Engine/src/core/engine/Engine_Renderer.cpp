@@ -1693,7 +1693,8 @@ class epriv::RenderManager::impl final{
             Settings::clear(true,true,true); // (0,0,0,0)
             
             Renderer::setDepthFunc(DepthFunc::LEqual);
-            glDisable(GL_BLEND); //disable blending on all mrts (using default api to force)
+            //glDisable(GL_BLEND); //disable blending on all mrts (using default api to force)
+            GLDisable(GLState::BLEND_0);
 
             glClearBufferfv(GL_COLOR,0,colors);
             if(godRays){
@@ -1705,7 +1706,8 @@ class epriv::RenderManager::impl final{
             GLEnable(GLState::DEPTH_MASK);
 
             //this is needed for sure
-            glEnablei(GL_BLEND, 0);
+            //glEnablei(GL_BLEND, 0);
+            GLEnable(GLState::BLEND_0);
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);      
 
             //RENDER NORMAL OBJECTS HERE
@@ -2155,11 +2157,11 @@ class epriv::RenderManager::impl final{
             gbuffer.start(GBufferType::Bloom, GBufferType::GodRays, "A", false);
             Settings::clear(true, false, false); //0,0,0,0
             if (ssao) {
-                GLEnable(GLState::BLEND);//yes this is absolutely needed
+                GLEnable(GLState::BLEND_0);//yes this is absolutely needed
                 gbuffer.start(GBufferType::Bloom, "A", false);
                 _passSSAO(gbuffer, camera, fboWidth, fboHeight);
                 if (ssao_do_blur) {
-                    GLDisable(GLState::BLEND); //yes this is absolutely needed
+                    GLDisable(GLState::BLEND_0); //yes this is absolutely needed
                     for (uint i = 0; i < ssao_blur_num_passes; ++i) {
                         gbuffer.start(GBufferType::GodRays, "A", false);
                         _passBlurSSAO(gbuffer, camera, fboWidth, fboHeight, "H", GBufferType::Bloom);
@@ -2170,11 +2172,11 @@ class epriv::RenderManager::impl final{
             }
             #pragma endregion
 
-            GLDisable(GLState::BLEND);
+            GLDisable(GLState::BLEND_0);
 
             _passStencil(gbuffer,camera,fboWidth,fboHeight); //confirmed, stencil rejection does help
 
-            GLEnable(GLState::BLEND);
+            GLEnable(GLState::BLEND_0);
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_ONE, GL_ONE);
 
@@ -2185,7 +2187,7 @@ class epriv::RenderManager::impl final{
                 _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
             }
 
-            GLDisable(GLState::BLEND);
+            GLDisable(GLState::BLEND_0);
             GLDisable(GLState::STENCIL_TEST);
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
@@ -2246,7 +2248,7 @@ class epriv::RenderManager::impl final{
             //_passCopyDepth(gbuffer,camera,fboWidth,fboHeight);
 
             #pragma region RenderPhysics
-            GLEnable(GLState::BLEND);
+            GLEnable(GLState::BLEND_0);
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             if(mainRenderFunc){
