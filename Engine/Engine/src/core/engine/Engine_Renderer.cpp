@@ -360,9 +360,9 @@ class epriv::RenderManager::impl final{
             #pragma region GodRaysInfo
             godRays = true;
             godRays_clearColor = glm::vec4(0.030f, 0.023f, 0.032f, 1.0f);
-            godRays_exposure = 0.15f;
+            godRays_exposure = 0.03f;
             godRays_factor = 1.0f;
-            godRays_decay = 0.96815f;
+            godRays_decay = 0.97f;
             godRays_density = 1.5f;
             godRays_weight = 0.567f;
             godRays_samples = 80;
@@ -1706,7 +1706,7 @@ class epriv::RenderManager::impl final{
             GLEnable(GLState::DEPTH_MASK);
 
             //this is needed for sure
-            glEnablei(GL_BLEND,0);
+            Renderer::GLEnable(GLState::BLEND_0);
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);      
 
             //RENDER NORMAL OBJECTS HERE

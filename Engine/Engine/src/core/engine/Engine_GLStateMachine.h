@@ -41,7 +41,6 @@ namespace Engine {
             GLStateMachineDataCustom(GLStateMachineDataCustom&& other) noexcept = delete;
             GLStateMachineDataCustom& operator=(GLStateMachineDataCustom&& other) noexcept = delete;
         };
-
         struct GLStateData final {
             bool enabled;
             boost_func enableFunc, disableFunc;
@@ -65,7 +64,25 @@ struct GLState final {
         DEPTH_CLAMP,
         STENCIL_TEST,
         TEXTURE_CUBE_MAP_SEAMLESS,
+
         BLEND,
+        BLEND_0,
+        BLEND_1,
+        BLEND_2,
+        BLEND_3,
+        BLEND_4,
+        BLEND_5,
+        BLEND_6,
+        BLEND_7,
+        BLEND_8,
+        BLEND_9,
+        BLEND_10,
+        BLEND_11,
+        BLEND_12,
+        BLEND_13,
+        BLEND_14,
+        BLEND_15,
+
         DEPTH_MASK, DITHER,
         SCISSOR_TEST,
         _TOTAL

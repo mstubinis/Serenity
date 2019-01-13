@@ -34,7 +34,6 @@ float PlanetaryRenderSpace(float& outerRadius,float& _distanceReal) {
     return _factor;
 }
 
-
 struct PlanetLogicFunctor final {void operator()(ComponentLogic& _component, const float& dt) const {
     Planet& planet = *(Planet*)_component.getUserPointer();
     if (planet.m_RotationInfo) {
@@ -124,7 +123,7 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     glm::vec3 camPosR = c->getPosition();
     glm::quat orientation = m_Body->rotation();
 
-    Renderer::GLEnable(GLState::BLEND); //for godrays
+    Renderer::GLEnable(GLState::BLEND_0); //for godrays
 
     Renderer::sendUniform4Safe("Object_Color",i.color());
     Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
@@ -157,7 +156,7 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
 }};
 
 struct StarMeshInstanceUnbindFunctor {void operator()(EngineResource* r) const {
-    Renderer::GLDisable(GLState::BLEND);
+    Renderer::GLDisable(GLState::BLEND_0);
 }};
 
 struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
@@ -302,7 +301,8 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     program->bind();
 
     Renderer::Settings::cullFace(GL_FRONT);
-    Renderer::GLEnable(GLState::BLEND);  //for godrays and other stuff
+
+    Renderer::GLEnable(GLState::BLEND_0);  //for godrays and other stuff
 
     Renderer::sendUniformMatrix4Safe("Model", model);
     Renderer::sendUniform1("nSamples", numberSamples);
@@ -317,7 +317,7 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 
 struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
     Renderer::Settings::cullFace(GL_BACK);
-    Renderer::GLDisable(GLState::BLEND);
+    Renderer::GLDisable(GLState::BLEND_0);
 }};
 
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere, SolarSystem* scene):EntityWrapper(*scene){
