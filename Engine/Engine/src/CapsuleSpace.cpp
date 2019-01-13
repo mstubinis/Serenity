@@ -44,8 +44,6 @@ struct CapsuleStarLogicFunctor final {void operator()(ComponentLogic& _component
     m_Body.setRotation(Resources::getCurrentScene()->getActiveCamera()->getOrientation());
 }};
 
-
-
 CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, SolarSystem* scene):EntityWrapper(*scene){
     ComponentModel* model = m_Entity.addComponent<ComponentModel>(Mesh::Plane, ResourceManifest::CapsuleD);
     model->getModel().setColor(color.x,color.y,color.z,1.0f);

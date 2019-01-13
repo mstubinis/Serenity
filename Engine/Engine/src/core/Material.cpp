@@ -255,13 +255,12 @@ class Material::impl final{
 namespace Engine{
     namespace epriv{
         struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
-            Material::impl& material = *((Material*)r)->m_i;
+            auto& material = *((Material*)r)->m_i;
             glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
             for(uint i = 0; i < MaterialComponentType::_TOTAL; ++i){
                 if(material.m_Components[i]){
                     MaterialComponent& component = *material.m_Components[i];
                     if(component.texture() && component.texture()->address() != 0){
-                        //enable
                         if     (i == 0) { first.x = 1.0f; }
                         else if(i == 1) { first.y = component.texture()->compressed() ? 0.5f : 1.0f; }
                         else if(i == 2) { first.z = 1.0f; }
@@ -280,8 +279,8 @@ namespace Engine{
                     }
                 }
             }
-            sendUniform1Safe("Shadeless",int(material.m_Shadeless));
-            sendUniform4Safe("Material_F0AndID",glm::vec4(material.m_F0Color,float(material.m_ID)));
+            sendUniform1Safe("Shadeless",(int)material.m_Shadeless);
+            sendUniform4Safe("Material_F0AndID",glm::vec4(material.m_F0Color,(float)material.m_ID));
             sendUniform4Safe("MaterialBasePropertiesOne",material.m_BaseGlow,material.m_BaseAO,material.m_BaseMetalness,material.m_BaseSmoothness);
             sendUniform4Safe("FirstConditionals", first);
             sendUniform4Safe("SecondConditionals",second);
@@ -307,7 +306,7 @@ MaterialComponent::MaterialComponent(uint type,Texture* t){
 MaterialComponent::~MaterialComponent(){
 }
 void MaterialComponent::bind(){
-    vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    auto& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     for(uint i = 0; i < slots.size(); ++i){
         sendTextureSafe(textureTypeName.c_str(),*m_Texture,slots[i]);

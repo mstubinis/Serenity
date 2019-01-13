@@ -12,28 +12,28 @@ using namespace Engine::epriv;
 using namespace std;
 
 
-void epriv::ComponentCameraFunctions::RebuildProjectionMatrix(ComponentCamera& cam) {
+void epriv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& cam) {
     if (cam._type == ComponentCamera::Type::Perspective) {
         cam._projectionMatrix = glm::perspective(cam._angle, cam._aspectRatio, cam._nearPlane, cam._farPlane);
     }else{
         cam._projectionMatrix = glm::ortho(cam._left, cam._right, cam._bottom, cam._top, cam._nearPlane, cam._farPlane);
     }
 }
-glm::mat4 epriv::ComponentCameraFunctions::GetViewNoTranslation(Camera& c) {
+glm::mat4 epriv::ComponentCamera_Functions::GetViewNoTranslation(Camera& c) {
     return c.m_Entity.getComponent<ComponentCamera>()->_viewMatrixNoTranslation;
 }
-glm::mat4 epriv::ComponentCameraFunctions::GetViewInverseNoTranslation(Camera& c) {
+glm::mat4 epriv::ComponentCamera_Functions::GetViewInverseNoTranslation(Camera& c) {
     return glm::inverse(c.m_Entity.getComponent<ComponentCamera>()->_viewMatrixNoTranslation);
 }
-glm::mat4 epriv::ComponentCameraFunctions::GetViewProjectionNoTranslation(Camera& c) {
+glm::mat4 epriv::ComponentCamera_Functions::GetViewProjectionNoTranslation(Camera& c) {
     auto& component = *c.m_Entity.getComponent<ComponentCamera>();
     return component._projectionMatrix * component._viewMatrixNoTranslation;
 }
-glm::mat4 epriv::ComponentCameraFunctions::GetViewProjectionInverseNoTranslation(Camera& c) {
+glm::mat4 epriv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(Camera& c) {
     auto& component = *c.m_Entity.getComponent<ComponentCamera>();
     return glm::inverse(component._projectionMatrix * component._viewMatrixNoTranslation);
 }
-glm::vec3 epriv::ComponentCameraFunctions::GetViewVectorNoTranslation(Camera& c) {
+glm::vec3 epriv::ComponentCamera_Functions::GetViewVectorNoTranslation(Camera& c) {
     auto& matrix = c.m_Entity.getComponent<ComponentCamera>()->_viewMatrixNoTranslation;
     return glm::vec3(matrix[0][2], matrix[1][2], matrix[2][2]);
 }
@@ -60,7 +60,7 @@ void ComponentCamera::resize(uint width, uint height) {
     if (_type == Type::Perspective) {
         _aspectRatio = width / (float)height;
     }
-    epriv::ComponentCameraFunctions::RebuildProjectionMatrix(*this);
+    epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
 uint ComponentCamera::pointIntersectTest(glm::vec3& position) {
     for (int i = 0; i < 6; ++i) {
@@ -96,16 +96,16 @@ float ComponentCamera::getAngle() { return _angle; }
 float ComponentCamera::getAspect() { return _aspectRatio; }
 float ComponentCamera::getNear() { return _nearPlane; }
 float ComponentCamera::getFar() { return _farPlane; }
-void ComponentCamera::setAngle(float a) { _angle = a; epriv::ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setAspect(float a) { _aspectRatio = a; epriv::ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setNear(float n) { _nearPlane = n; epriv::ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setFar(float f) { _farPlane = f; epriv::ComponentCameraFunctions::RebuildProjectionMatrix(*this); }
+void ComponentCamera::setAngle(float a) { _angle = a; epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); }
+void ComponentCamera::setAspect(float a) { _aspectRatio = a; epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); }
+void ComponentCamera::setNear(float n) { _nearPlane = n; epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); }
+void ComponentCamera::setFar(float f) { _farPlane = f; epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); }
 
 #pragma endregion
 
 #pragma region System
 
-struct epriv::ComponentCameraUpdateFunction final {
+struct epriv::ComponentCamera_UpdateFunction final {
     static void _defaultUpdate(vector<uint>& _vec, vector<ComponentCamera>& _components,const float& dt) {
         for (uint j = 0; j < _vec.size(); ++j) {
             ComponentCamera& b = _components[_vec[j]];
@@ -123,25 +123,30 @@ struct epriv::ComponentCameraUpdateFunction final {
         epriv::threading::waitForAll();
     }
 };
-struct epriv::ComponentCameraComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
+struct epriv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
 
 }};
-struct epriv::ComponentCameraEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
+struct epriv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
 
 }};
-struct epriv::ComponentCameraSceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct epriv::ComponentCamera_SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 
 }};
-struct epriv::ComponentCameraSceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct epriv::ComponentCamera_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 
 }};
 
-ComponentCameraSystem::ComponentCameraSystem() {
-    setUpdateFunction(epriv::ComponentCameraUpdateFunction());
-    setOnComponentAddedToEntityFunction(epriv::ComponentCameraComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(epriv::ComponentCameraEntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(epriv::ComponentCameraSceneEnteredFunction());
-    setOnSceneLeftFunction(epriv::ComponentCameraSceneLeftFunction());
+ComponentCamera_System::ComponentCamera_System() {
+    setUpdateFunction(
+        ComponentCamera_UpdateFunction());
+    setOnComponentAddedToEntityFunction(
+        ComponentCamera_ComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(
+        ComponentCamera_EntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(
+        ComponentCamera_SceneEnteredFunction());
+    setOnSceneLeftFunction(
+        ComponentCamera_SceneLeftFunction());
 }
 
 #pragma endregion

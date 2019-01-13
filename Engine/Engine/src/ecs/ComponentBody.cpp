@@ -351,7 +351,7 @@ void ComponentBody::scale(float x,float y,float z) {
     }
     auto* models = owner.getComponent<ComponentModel>();
     if (models) {
-        epriv::ComponentModelFunctions::CalculateRadius(*models);
+        epriv::ComponentModel_Functions::CalculateRadius(*models);
     }
 }
 void ComponentBody::setPosition(glm::vec3 newPosition) { ComponentBody::setPosition(newPosition.x, newPosition.y, newPosition.z); }
@@ -447,7 +447,7 @@ void ComponentBody::setScale(float x, float y, float z) {
     }
     auto* models = owner.getComponent<ComponentModel>();
     if (models) {
-        epriv::ComponentModelFunctions::CalculateRadius(*models);
+        epriv::ComponentModel_Functions::CalculateRadius(*models);
     }
 }
 btRigidBody& ComponentBody::getBody(){ return *data.p->rigidBody; }
@@ -658,7 +658,7 @@ void ComponentBody::setMass(float mass) {
 
 #pragma region System
 
-struct epriv::ComponentBodyUpdateFunction final {
+struct epriv::ComponentBody_UpdateFunction final {
     static void _defaultUpdate(vector<uint>& _vec, vector<ComponentBody>& _components) {
         for (uint j = 0; j < _vec.size(); ++j) {
             ComponentBody& b = _components[_vec[j]];
@@ -684,10 +684,10 @@ struct epriv::ComponentBodyUpdateFunction final {
         epriv::threading::waitForAll();
     }
 };
-struct epriv::ComponentBodyComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
+struct epriv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
 
 }};
-struct epriv::ComponentBodyEntityAddedToSceneFunction final {void operator()(void* _componentPool,Entity& _entity, Scene& _scene) const {
+struct epriv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* _componentPool,Entity& _entity, Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
     auto* component = pool.getComponent(_entity);
     if (component) {
@@ -698,21 +698,34 @@ struct epriv::ComponentBodyEntityAddedToSceneFunction final {void operator()(voi
         }
     }
 }};
-struct epriv::ComponentBodySceneEnteredFunction final {void operator()(void* _componentPool,Scene& _scene) const {
+struct epriv::ComponentBody_SceneEnteredFunction final {void operator()(void* _componentPool,Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
-    for (auto& component : pool.pool()) { if (component._physics) { Physics::addRigidBody(component.data.p->rigidBody); } }
+    for (auto& component : pool.pool()) { 
+        if (component._physics) { 
+            Physics::addRigidBody(component.data.p->rigidBody); 
+        } 
+    }
 }};
-struct epriv::ComponentBodySceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct epriv::ComponentBody_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
-    for (auto& component : pool.pool()) { if (component._physics) { Physics::removeRigidBody(component.data.p->rigidBody); } }
+    for (auto& component : pool.pool()) { 
+        if (component._physics) { 
+            Physics::removeRigidBody(component.data.p->rigidBody); 
+        } 
+    }
 }};
     
-ComponentBodySystem::ComponentBodySystem() {
-    setUpdateFunction(epriv::ComponentBodyUpdateFunction());
-    setOnComponentAddedToEntityFunction(epriv::ComponentBodyComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(epriv::ComponentBodyEntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(epriv::ComponentBodySceneEnteredFunction());
-    setOnSceneLeftFunction(epriv::ComponentBodySceneLeftFunction());
+ComponentBody_System::ComponentBody_System() {
+    setUpdateFunction(
+        ComponentBody_UpdateFunction());
+    setOnComponentAddedToEntityFunction(
+        ComponentBody_ComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(
+        ComponentBody_EntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(
+        ComponentBody_SceneEnteredFunction());
+    setOnSceneLeftFunction(
+        ComponentBody_SceneLeftFunction());
 }
 
 #pragma endregion

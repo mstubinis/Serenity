@@ -12,27 +12,27 @@
 class ComponentLogic2;
 namespace Engine {
     namespace epriv {
-        struct ComponentLogic2UpdateFunction;
-        struct ComponentLogic2EntityAddedToSceneFunction;
-        struct ComponentLogic2ComponentAddedToEntityFunction;
-        struct ComponentLogic2SceneEnteredFunction;
-        struct ComponentLogic2SceneLeftFunction;
-        struct ComponentLogic2EmptyFunctor final { void operator()(ComponentLogic2& _component, const float& dt) const {} };
+        struct ComponentLogic2_UpdateFunction;
+        struct ComponentLogic2_EntityAddedToSceneFunction;
+        struct ComponentLogic2_ComponentAddedToEntityFunction;
+        struct ComponentLogic2_SceneEnteredFunction;
+        struct ComponentLogic2_SceneLeftFunction;
+        struct ComponentLogic2_EmptyFunctor final { void operator()(ComponentLogic2& _component, const float& dt) const {} };
     };
 };
 
 class ComponentLogic2 : public ComponentBaseClass {
-    friend struct Engine::epriv::ComponentLogic2UpdateFunction;
-    friend struct Engine::epriv::ComponentLogic2ComponentAddedToEntityFunction;
-    friend struct Engine::epriv::ComponentLogic2EntityAddedToSceneFunction;
-    friend struct Engine::epriv::ComponentLogic2SceneEnteredFunction;
-    friend struct Engine::epriv::ComponentLogic2SceneLeftFunction;
+    friend struct Engine::epriv::ComponentLogic2_UpdateFunction;
+    friend struct Engine::epriv::ComponentLogic2_ComponentAddedToEntityFunction;
+    friend struct Engine::epriv::ComponentLogic2_EntityAddedToSceneFunction;
+    friend struct Engine::epriv::ComponentLogic2_SceneEnteredFunction;
+    friend struct Engine::epriv::ComponentLogic2_SceneLeftFunction;
 
     private:
         void*                               _userPtr;
         boost::function<void(const float&)> _functor;
     public:
-        ComponentLogic2(Entity& _e) : ComponentBaseClass(_e) { _userPtr = nullptr; setFunctor(Engine::epriv::ComponentLogic2EmptyFunctor()); }
+        ComponentLogic2(Entity& _e) : ComponentBaseClass(_e) { _userPtr = nullptr; setFunctor(Engine::epriv::ComponentLogic2_EmptyFunctor()); }
         template<typename T> ComponentLogic2(Entity& _e, const T& functor) : ComponentBaseClass(_e) { _userPtr = nullptr; setFunctor(functor); }
         template<typename T,typename V> ComponentLogic2(Entity& _e, const T& functor, V* userPointer) : ComponentBaseClass(_e) { _userPtr = userPointer; setFunctor(functor); }
 
@@ -49,10 +49,10 @@ class ComponentLogic2 : public ComponentBaseClass {
         void* getUserPointer() { return _userPtr; }
 };
 
-class ComponentLogic2System : public Engine::epriv::ECSSystemCI {
+class ComponentLogic2_System : public Engine::epriv::ECSSystemCI {
     public:
-        ComponentLogic2System();
-        ~ComponentLogic2System() = default;
+        ComponentLogic2_System();
+        ~ComponentLogic2_System() = default;
 };
 
 #endif

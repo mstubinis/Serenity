@@ -46,13 +46,20 @@ class Scene::impl final {
             m_ID = InternalScenePublicInterface::NumScenes;
             
 
-            m_ECS.assignSystem<ComponentLogic>(ComponentLogicSystem());
-            m_ECS.assignSystem<ComponentBody>(ComponentBodySystem());
-            m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1System());
-            m_ECS.assignSystem<ComponentCamera>(ComponentCameraSystem());
-            m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2System());
-            m_ECS.assignSystem<ComponentModel>(ComponentModelSystem());
-            m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3System());
+            m_ECS.assignSystem<ComponentLogic>(
+                ComponentLogic_System());
+            m_ECS.assignSystem<ComponentBody>(
+                ComponentBody_System());
+            m_ECS.assignSystem<ComponentLogic1>(
+                ComponentLogic1_System());
+            m_ECS.assignSystem<ComponentCamera>(
+                ComponentCamera_System());
+            m_ECS.assignSystem<ComponentLogic2>(
+                ComponentLogic2_System());
+            m_ECS.assignSystem<ComponentModel>(
+                ComponentModel_System());
+            m_ECS.assignSystem<ComponentLogic3>(
+                ComponentLogic3_System());
        
         }
         void _destruct() {

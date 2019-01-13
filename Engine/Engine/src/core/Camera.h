@@ -15,7 +15,7 @@ struct CameraType{enum Type {
 
 class Camera: public EntityWrapper{
     friend class  ::LightProbe;
-    friend struct ::Engine::epriv::ComponentCameraFunctions;
+    friend struct ::Engine::epriv::ComponentCamera_Functions;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

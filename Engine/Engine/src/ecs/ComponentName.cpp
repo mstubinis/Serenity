@@ -4,7 +4,6 @@ using namespace Engine;
 using namespace std;
 
 #pragma region Component
-
 ComponentName::ComponentName(Entity& _entity) : ComponentBaseClass(_entity){
     _data = "";
 }
@@ -19,12 +18,8 @@ ComponentName::~ComponentName() {
 }
 const string& ComponentName::name() { return _data; }
 const uint ComponentName::size() { return _data.size(); }
-
 #pragma endregion
 
-
 #pragma region System
-
-
 
 #pragma endregion

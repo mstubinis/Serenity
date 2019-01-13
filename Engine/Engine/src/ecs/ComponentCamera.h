@@ -15,13 +15,13 @@ class ComponentCamera;
 
 namespace Engine {
     namespace epriv {
-        struct ComponentCameraUpdateFunction;
-        struct ComponentCameraEntityAddedToSceneFunction;
-        struct ComponentCameraComponentAddedToEntityFunction;
-        struct ComponentCameraSceneEnteredFunction;
-        struct ComponentCameraSceneLeftFunction;
+        struct ComponentCamera_UpdateFunction;
+        struct ComponentCamera_EntityAddedToSceneFunction;
+        struct ComponentCamera_ComponentAddedToEntityFunction;
+        struct ComponentCamera_SceneEnteredFunction;
+        struct ComponentCamera_SceneLeftFunction;
 
-        struct ComponentCameraFunctions final {
+        struct ComponentCamera_Functions final {
             static void      RebuildProjectionMatrix(ComponentCamera& cam);
             static glm::mat4 GetViewNoTranslation(Camera& c);
             static glm::mat4 GetViewInverseNoTranslation(Camera& c);
@@ -33,12 +33,12 @@ namespace Engine {
 };
 
 class ComponentCamera : public ComponentBaseClass {
-    friend struct Engine::epriv::ComponentCameraUpdateFunction;
-    friend struct Engine::epriv::ComponentCameraEntityAddedToSceneFunction;
-    friend struct Engine::epriv::ComponentCameraComponentAddedToEntityFunction;
-    friend struct Engine::epriv::ComponentCameraSceneEnteredFunction;
-    friend struct Engine::epriv::ComponentCameraSceneLeftFunction;
-    friend struct Engine::epriv::ComponentCameraFunctions;
+    friend struct Engine::epriv::ComponentCamera_UpdateFunction;
+    friend struct Engine::epriv::ComponentCamera_EntityAddedToSceneFunction;
+    friend struct Engine::epriv::ComponentCamera_ComponentAddedToEntityFunction;
+    friend struct Engine::epriv::ComponentCamera_SceneEnteredFunction;
+    friend struct Engine::epriv::ComponentCamera_SceneLeftFunction;
+    friend struct Engine::epriv::ComponentCamera_Functions;
     friend class  ::Camera;
     friend class  ::ComponentModel;
     private:
@@ -82,10 +82,10 @@ class ComponentCamera : public ComponentBaseClass {
         uint sphereIntersectTest(glm::vec3& objectPosition, float objectRadius);
 };
 
-class ComponentCameraSystem : public Engine::epriv::ECSSystemCI {
+class ComponentCamera_System : public Engine::epriv::ECSSystemCI {
     public:
-        ComponentCameraSystem();
-        ~ComponentCameraSystem() = default;
+        ComponentCamera_System();
+        ~ComponentCamera_System() = default;
 };
 
 #endif

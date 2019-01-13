@@ -12,7 +12,7 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-float epriv::ComponentModelFunctions::CalculateRadius(ComponentModel& super) {
+float epriv::ComponentModel_Functions::CalculateRadius(ComponentModel& super) {
     float maxLength = 0;
     glm::vec3 boundingBox = glm::vec3(0.0f);
     for (uint i = 0; i < super.models.size(); ++i) {
@@ -80,7 +80,7 @@ uint ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* shaderPro
     auto& _scene = owner.scene();
     epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
-    ComponentModelFunctions::CalculateRadius(*this);
+    ComponentModel_Functions::CalculateRadius(*this);
     return models.size() - 1;
 }
 void ComponentModel::setModel(Handle& mesh, Handle& mat, uint index, ShaderP* shaderProgram, RenderStage::Stage _stage) { ComponentModel::setModel((Mesh*)mesh.get(), (Material*)mat.get(), index, shaderProgram, _stage); }
@@ -95,7 +95,7 @@ void ComponentModel::setModel(Mesh* mesh, Material* material, uint index, Shader
     epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
 
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
-    ComponentModelFunctions::CalculateRadius(*this);
+    ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint index, RenderStage::Stage _stage) {
     auto& instance = *models[index];
@@ -106,7 +106,7 @@ void ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint index, R
     epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
 
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
-    ComponentModelFunctions::CalculateRadius(*this);
+    ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelShaderProgram(Handle& shaderPHandle, uint index, RenderStage::Stage _stage) { ComponentModel::setModelShaderProgram((ShaderP*)shaderPHandle.get(), index, _stage); }
 void ComponentModel::setModelMesh(Mesh* mesh, uint index, RenderStage::Stage _stage) {
@@ -119,7 +119,7 @@ void ComponentModel::setModelMesh(Mesh* mesh, uint index, RenderStage::Stage _st
     epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
 
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
-    ComponentModelFunctions::CalculateRadius(*this);
+    ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelMesh(Handle& mesh, uint index, RenderStage::Stage _stage) { ComponentModel::setModelMesh((Mesh*)mesh.get(), index, _stage); }
 void ComponentModel::setModelMaterial(Material* material, uint index, RenderStage::Stage _stage) {
@@ -142,7 +142,7 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera& camera) {
 
 #pragma region System
 
-struct epriv::ComponentModelUpdateFunction final {
+struct epriv::ComponentModel_UpdateFunction final {
     static void _defaultUpdate(vector<uint>& vec, vector<ComponentModel>& _components,Camera* _camera) {
         for (uint j = 0; j < vec.size(); ++j) {
             ComponentModel& m = _components[vec[j]];
@@ -182,7 +182,7 @@ struct epriv::ComponentModelUpdateFunction final {
         epriv::threading::waitForAll();
     }
 };
-struct epriv::ComponentModelComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
+struct epriv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
     /*
     auto& component = *(ComponentModel*)_component;
     ComponentModelFunctions::CalculateRadius(component);
@@ -192,7 +192,7 @@ struct epriv::ComponentModelComponentAddedToEntityFunction final {void operator(
     }
     */
 }};
-struct epriv::ComponentModelEntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {   
+struct epriv::ComponentModel_EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {   
     auto& pool = *(ECSComponentPool<Entity, ComponentModel>*)_componentPool;
     auto* component = pool.getComponent(_entity);
     if (component) {
@@ -203,20 +203,25 @@ struct epriv::ComponentModelEntityAddedToSceneFunction final {void operator()(vo
         }
     }
 }};
-struct epriv::ComponentModelSceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct epriv::ComponentModel_SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 
 }};
-struct epriv::ComponentModelSceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct epriv::ComponentModel_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 
 }};
 
 
-ComponentModelSystem::ComponentModelSystem() {
-    setUpdateFunction(epriv::ComponentModelUpdateFunction());
-    setOnComponentAddedToEntityFunction(epriv::ComponentModelComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(epriv::ComponentModelEntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(epriv::ComponentModelSceneEnteredFunction());
-    setOnSceneLeftFunction(epriv::ComponentModelSceneLeftFunction());
+ComponentModel_System::ComponentModel_System() {
+    setUpdateFunction(
+        ComponentModel_UpdateFunction());
+    setOnComponentAddedToEntityFunction(
+        ComponentModel_ComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(
+        ComponentModel_EntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(
+        ComponentModel_SceneEnteredFunction());
+    setOnSceneLeftFunction(
+        ComponentModel_SceneLeftFunction());
 }
 
 #pragma endregion

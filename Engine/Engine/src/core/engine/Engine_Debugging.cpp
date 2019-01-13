@@ -25,6 +25,7 @@ class epriv::DebugManager::impl {
 
         void _init(const char* name, uint& w, uint& h) {
             clock = sf::Clock();
+            output = "";
             logicTime = physicsTime = renderTime = soundTime = displayTime = 0;
 
             deltaTime = 0;
@@ -42,10 +43,10 @@ class epriv::DebugManager::impl {
             glBeginQuery(GL_TIME_ELAPSED, queryID);
         }
         void _endQuery(const char* tag) {
-            string _s = string(tag) + ": %f ms\n";
+            string msg = string(tag) + ": %f ms\n";
             glEndQuery(GL_TIME_ELAPSED);
             glGetQueryObjectuiv(queryID, GL_QUERY_RESULT, &queryObject);
-            printf(_s.c_str(), queryObject / 1000000.0);
+            printf(msg.c_str(), queryObject / 1000000.0);
         }
 };
 epriv::DebugManager::DebugManager(const char* name, uint w, uint h) :m_i(new impl) { m_i->_init(name, w, h); }
@@ -55,7 +56,7 @@ void epriv::DebugManager::_init(const char* name, uint w, uint h) { m_i->_postIn
 void epriv::DebugManager::addDebugLine(const char* message) {
     m_i->text_queue.emplace_back(message);
 }
-void epriv::DebugManager::addDebugLine(std::string& message) {
+void epriv::DebugManager::addDebugLine(string& message) {
     m_i->text_queue.emplace_back(message);
 }
 
@@ -87,10 +88,10 @@ const double epriv::DebugManager::displayTime() const { return (double)((double)
 
 string& epriv::DebugManager::reportTime() { return reportTime(m_i->decimals); }
 string& epriv::DebugManager::reportTime(uint decimals) {
-    auto& i = *m_i.get();
+    auto& i = *m_i;
     i.decimals = decimals;
     if ((i.output_frame >= i.output_frame_delay - 1) || i.output_frame_delay == 0) {
-        uint fps = uint(1.0 / ((double)i.deltaTime / m_i->divisor));
+        uint fps = uint(1.0 / ((double)i.deltaTime / i.divisor));
         stringstream st1, st2, st3, st4, st5, st6;
         st1 << std::fixed << std::setprecision(decimals) << logicTime() * 1000.0;
         st2 << std::fixed << std::setprecision(decimals) << physicsTime() * 1000.0;
@@ -100,17 +101,18 @@ string& epriv::DebugManager::reportTime(uint decimals) {
         st6 << std::fixed << std::setprecision(decimals) << displayTime() * 1000.0;
         string s1 = st1.str(); string s2 = st2.str(); string s3 = st3.str(); string s4 = st4.str(); string s5 = st5.str(); string s6 = st6.str();
 
-        m_i->output = "Update Time:  " + s1 + " ms" + "\nPhysics Time: " + s2 + " ms" + "\nSounds Time:  " + s5 + " ms" +
+        i.output = "Update Time:  " + s1 + " ms" + "\nPhysics Time: " + s2 + " ms" + "\nSounds Time:  " + s5 + " ms" +
             "\nRender Time:  " + s3 + " ms" + "\nDisplay Time: " + s6 + " ms" + "\nDelta Time:   " + s4 + " ms" +
             "\nFPS: " + to_string(fps);
     }
-    return m_i->output;
+    return i.output;
 }
 string epriv::DebugManager::reportDebug() {
     string out = "\n";
-    for (auto str : m_i->text_queue) {
+    auto& i = *m_i;
+    for (auto& str : i.text_queue) {
         out += str + "\n";
     }
-    m_i->text_queue.clear();
+    i.text_queue.clear();
     return out;
 }

@@ -1,6 +1,7 @@
 #include "ComponentLogic2.h"
 
 using namespace Engine;
+using namespace Engine::epriv;
 using namespace std;
 
 #pragma region Component
@@ -41,7 +42,7 @@ void ComponentLogic2::call(const float& dt) { _functor(dt); }
 
 #pragma region System
 
-struct epriv::ComponentLogic2UpdateFunction final {void operator()(void* _componentPool, const float& dt) const {
+struct epriv::ComponentLogic2_UpdateFunction final {void operator()(void* _componentPool, const float& dt) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentLogic2>*)_componentPool;
     auto& components = pool.pool();
     for (uint i = 0; i < components.size(); ++i) {
@@ -49,25 +50,30 @@ struct epriv::ComponentLogic2UpdateFunction final {void operator()(void* _compon
         component.call(dt);
     }
 }};
-struct epriv::ComponentLogic2ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
+struct epriv::ComponentLogic2_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
 
 }};
-struct epriv::ComponentLogic2EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
+struct epriv::ComponentLogic2_EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
 
 }};
-struct epriv::ComponentLogic2SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct epriv::ComponentLogic2_SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 
 }};
-struct epriv::ComponentLogic2SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct epriv::ComponentLogic2_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 
 }};
 
-ComponentLogic2System::ComponentLogic2System() {
-    setUpdateFunction(epriv::ComponentLogic2UpdateFunction());
-    setOnComponentAddedToEntityFunction(epriv::ComponentLogic2ComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(epriv::ComponentLogic2EntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(epriv::ComponentLogic2SceneEnteredFunction());
-    setOnSceneLeftFunction(epriv::ComponentLogic2SceneLeftFunction());
+ComponentLogic2_System::ComponentLogic2_System() {
+    setUpdateFunction(
+        ComponentLogic2_UpdateFunction());
+    setOnComponentAddedToEntityFunction(
+        ComponentLogic2_ComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(
+        ComponentLogic2_EntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(
+        ComponentLogic2_SceneEnteredFunction());
+    setOnSceneLeftFunction(
+        ComponentLogic2_SceneLeftFunction());
 }
 
 #pragma endregion

@@ -18,24 +18,24 @@ class ComponentCamera;
 
 namespace Engine {
     namespace epriv {
-        struct ComponentModelUpdateFunction;
-        struct ComponentModelEntityAddedToSceneFunction;
-        struct ComponentModelComponentAddedToEntityFunction;
-        struct ComponentModelSceneEnteredFunction;
-        struct ComponentModelSceneLeftFunction;
-        struct ComponentModelFunctions final {
+        struct ComponentModel_UpdateFunction;
+        struct ComponentModel_EntityAddedToSceneFunction;
+        struct ComponentModel_ComponentAddedToEntityFunction;
+        struct ComponentModel_SceneEnteredFunction;
+        struct ComponentModel_SceneLeftFunction;
+        struct ComponentModel_Functions final {
             static float CalculateRadius(ComponentModel& super);
         };
     };
 };
 
 class ComponentModel : public ComponentBaseClass {
-    friend struct Engine::epriv::ComponentModelUpdateFunction;
-    friend struct Engine::epriv::ComponentModelEntityAddedToSceneFunction;
-    friend struct Engine::epriv::ComponentModelComponentAddedToEntityFunction;
-    friend struct Engine::epriv::ComponentModelSceneEnteredFunction;
-    friend struct Engine::epriv::ComponentModelSceneLeftFunction;
-    friend struct Engine::epriv::ComponentModelFunctions;
+    friend struct Engine::epriv::ComponentModel_UpdateFunction;
+    friend struct Engine::epriv::ComponentModel_EntityAddedToSceneFunction;
+    friend struct Engine::epriv::ComponentModel_ComponentAddedToEntityFunction;
+    friend struct Engine::epriv::ComponentModel_SceneEnteredFunction;
+    friend struct Engine::epriv::ComponentModel_SceneLeftFunction;
+    friend struct Engine::epriv::ComponentModel_Functions;
     friend class  ::ComponentCamera;
     private:
         std::vector<MeshInstance*> models;
@@ -89,10 +89,10 @@ class ComponentModel : public ComponentBaseClass {
         template<class T> void setCustomUnbindFunctor(const T& functor, uint index = 0) { models[index]->setCustomUnbindFunctor(functor); }
 };
 
-class ComponentModelSystem : public Engine::epriv::ECSSystemCI {
+class ComponentModel_System : public Engine::epriv::ECSSystemCI {
     public:
-        ComponentModelSystem();
-        ~ComponentModelSystem() = default;
+        ComponentModel_System();
+        ~ComponentModel_System() = default;
 };
 
 #endif

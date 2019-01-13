@@ -1628,9 +1628,9 @@ class epriv::RenderManager::impl final{
                 sendUniformMatrix4("VP", m_2DProjectionMatrix);
                 sendUniform1("DiffuseTextureEnabled", 1);
                 for (auto& item : m_FontsToBeRendered) {
-                    vector<glm::vec3> pts; pts.reserve(2048 * 4);//4 points per char, max 2048 characters per frame
-                    vector<glm::vec2> uvs; uvs.reserve(2048 * 4);//4 uvs per char
-                    vector<ushort>    ind; ind.reserve(2048 * 6);//6 ind per char
+                    vector<glm::vec3> pts; pts.reserve(1024 * 4);//4 points per char, max 1024 characters per frame
+                    vector<glm::vec2> uvs; uvs.reserve(1024 * 4);//4 uvs per char
+                    vector<ushort>    ind; ind.reserve(1024 * 6);//6 ind per char
                     Font& font = *item.font;
                     auto& newLineGlyph = font.getGlyphData('X');
                     sendTexture("DiffuseTexture", font.getGlyphTexture(), 0);
@@ -1693,7 +1693,7 @@ class epriv::RenderManager::impl final{
             Settings::clear(true,true,true); // (0,0,0,0)
             
             Renderer::setDepthFunc(DepthFunc::LEqual);
-            GLDisable(GLState::BLEND);//disable blending on all mrts
+            glDisable(GL_BLEND); //disable blending on all mrts (using default api to force)
 
             glClearBufferfv(GL_COLOR,0,colors);
             if(godRays){
@@ -1705,7 +1705,7 @@ class epriv::RenderManager::impl final{
             GLEnable(GLState::DEPTH_MASK);
 
             //this is needed for sure
-            Renderer::GLEnable(GLState::BLEND_0);
+            glEnablei(GL_BLEND, 0);
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);      
 
             //RENDER NORMAL OBJECTS HERE
@@ -2070,7 +2070,7 @@ class epriv::RenderManager::impl final{
             
             Scene& s = *Resources::getCurrentScene();
             //restore default state, might have to increase this as we use more textures
-            for(uint i = 0; i < 9; ++i){ 
+            for(uint i = 0; i < 9; ++i){
                 glActiveTexture(GL_TEXTURE0 + i);
                 glBindTexture(GL_TEXTURE_2D,0);
                 glBindTexture(GL_TEXTURE_CUBE_MAP,0);
@@ -2094,14 +2094,14 @@ class epriv::RenderManager::impl final{
                     
                     //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders by the camera's real simulation position
                     //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
-                    m_UBOCameraData.View = ComponentCameraFunctions::GetViewNoTranslation(camera);
+                    m_UBOCameraData.View = ComponentCamera_Functions::GetViewNoTranslation(camera);
                     m_UBOCameraData.Proj = camera.getProjection();
-                    m_UBOCameraData.ViewProj = ComponentCameraFunctions::GetViewProjectionNoTranslation(camera);
+                    m_UBOCameraData.ViewProj = ComponentCamera_Functions::GetViewProjectionNoTranslation(camera);
                     m_UBOCameraData.InvProj = camera.getProjectionInverse();
-                    m_UBOCameraData.InvView = ComponentCameraFunctions::GetViewInverseNoTranslation(camera);
-                    m_UBOCameraData.InvViewProj = ComponentCameraFunctions::GetViewProjectionInverseNoTranslation(camera);
+                    m_UBOCameraData.InvView = ComponentCamera_Functions::GetViewInverseNoTranslation(camera);
+                    m_UBOCameraData.InvViewProj = ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(camera);
                     m_UBOCameraData.Info1 = glm::vec4(0.001f,0.001f,0.001f, camera.getNear());
-                    m_UBOCameraData.Info2 = glm::vec4(ComponentCameraFunctions::GetViewVectorNoTranslation(camera), camera.getFar());
+                    m_UBOCameraData.Info2 = glm::vec4(ComponentCamera_Functions::GetViewVectorNoTranslation(camera), camera.getFar());
                     m_UBOCameraData.Info3 = glm::vec4(camera.getPosition(), 0.0f);
                     
                     UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);           
@@ -2129,7 +2129,7 @@ class epriv::RenderManager::impl final{
             gbuffer.start(GBufferType::GodRays, "RGB", false);
             Settings::clear(true,false,false); //this is needed, clear color should be (0,0,0,0)
             
-            if (godRays && godRays_Object) {
+            if (godRays && godRays_Object){
                 auto& body = *godRays_Object->getComponent<ComponentBody>();
                 glm::vec3 oPos = body.position();
                 glm::vec3 camPos = camera.getPosition();
@@ -2157,7 +2157,7 @@ class epriv::RenderManager::impl final{
             if (ssao) {
                 GLEnable(GLState::BLEND);//yes this is absolutely needed
                 gbuffer.start(GBufferType::Bloom, "A", false);
-                _passSSAO(gbuffer, camera, fboWidth, fboHeight);      
+                _passSSAO(gbuffer, camera, fboWidth, fboHeight);
                 if (ssao_do_blur) {
                     GLDisable(GLState::BLEND); //yes this is absolutely needed
                     for (uint i = 0; i < ssao_blur_num_passes; ++i) {
@@ -2166,8 +2166,8 @@ class epriv::RenderManager::impl final{
                         gbuffer.start(GBufferType::Bloom, "A", false);
                         _passBlurSSAO(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays);
                     }
-                }         
-            }   
+                }    
+            }
             #pragma endregion
 
             GLDisable(GLState::BLEND);
@@ -2183,7 +2183,6 @@ class epriv::RenderManager::impl final{
                 gbuffer.start(GBufferType::Lighting,"RGB");
                 Settings::clear(true,false,false);//this is needed for godrays 0,0,0,0
                 _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
-                
             }
 
             GLDisable(GLState::BLEND);

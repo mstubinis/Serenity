@@ -19,20 +19,20 @@ class ComponentModel;
 
 namespace Engine {
     namespace epriv {
-        struct ComponentBodyUpdateFunction;
-        struct ComponentBodyEntityAddedToSceneFunction;
-        struct ComponentBodyComponentAddedToEntityFunction;
-        struct ComponentBodySceneEnteredFunction;
-        struct ComponentBodySceneLeftFunction;
+        struct ComponentBody_UpdateFunction;
+        struct ComponentBody_EntityAddedToSceneFunction;
+        struct ComponentBody_ComponentAddedToEntityFunction;
+        struct ComponentBody_SceneEnteredFunction;
+        struct ComponentBody_SceneLeftFunction;
     };
 };
 
 class ComponentBody : public ComponentBaseClass {
-    friend struct Engine::epriv::ComponentBodyUpdateFunction;
-    friend struct Engine::epriv::ComponentBodyComponentAddedToEntityFunction;
-    friend struct Engine::epriv::ComponentBodyEntityAddedToSceneFunction;
-    friend struct Engine::epriv::ComponentBodySceneEnteredFunction;
-    friend struct Engine::epriv::ComponentBodySceneLeftFunction;
+    friend struct Engine::epriv::ComponentBody_UpdateFunction;
+    friend struct Engine::epriv::ComponentBody_ComponentAddedToEntityFunction;
+    friend struct Engine::epriv::ComponentBody_EntityAddedToSceneFunction;
+    friend struct Engine::epriv::ComponentBody_SceneEnteredFunction;
+    friend struct Engine::epriv::ComponentBody_SceneLeftFunction;
     friend class  ::ComponentModel;
     private:
         struct PhysicsData {
@@ -124,10 +124,10 @@ class ComponentBody : public ComponentBaseClass {
         void applyTorqueImpulse(float x, float y, float z, bool local = true);    void applyTorqueImpulse(glm::vec3 torqueImpulse, bool local = true);
 };
 
-class ComponentBodySystem : public Engine::epriv::ECSSystemCI {
+class ComponentBody_System : public Engine::epriv::ECSSystemCI {
     public:
-        ComponentBodySystem();
-        ~ComponentBodySystem() = default;
+        ComponentBody_System();
+        ~ComponentBody_System() = default;
 };
 
 #endif
