@@ -1693,8 +1693,7 @@ class epriv::RenderManager::impl final{
             Settings::clear(true,true,true); // (0,0,0,0)
             
             Renderer::setDepthFunc(DepthFunc::LEqual);
-            //glDisable(GL_BLEND); //disable blending on all mrts (using default api to force)
-            GLDisable(GLState::BLEND_0);
+            //GLDisable(GLState::BLEND_0);
 
             glClearBufferfv(GL_COLOR,0,colors);
             if(godRays){
@@ -1706,7 +1705,6 @@ class epriv::RenderManager::impl final{
             GLEnable(GLState::DEPTH_MASK);
 
             //this is needed for sure
-            //glEnablei(GL_BLEND, 0);
             GLEnable(GLState::BLEND_0);
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);      
 
@@ -1722,7 +1720,7 @@ class epriv::RenderManager::impl final{
             Scene& scene = *Resources::getCurrentScene();
 
             gbuffer.start(GBufferType::Diffuse);
-
+            
             //RENDER NORMAL OBJECTS HERE
             InternalScenePublicInterface::RenderForwardOpaque(scene,c);
 
@@ -2128,6 +2126,7 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_MASK);
 
             #pragma region GodRays
+            Renderer::GLDisable(GLState::BLEND_0);
             gbuffer.start(GBufferType::GodRays, "RGB", false);
             Settings::clear(true,false,false); //this is needed, clear color should be (0,0,0,0)
             
