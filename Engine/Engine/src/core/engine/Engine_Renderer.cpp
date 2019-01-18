@@ -25,9 +25,11 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <boost/lexical_cast.hpp>
+#include <SFML/Graphics.hpp>
 #include <random>
 
 #include <iostream>
+
 
 using namespace Engine;
 using namespace Engine::Renderer;
@@ -1288,6 +1290,12 @@ class epriv::RenderManager::impl final{
             Mesh::FontPlane = new Mesh("FontPlane",1.0f,1.0f,0.0005f);
             Mesh::Plane = new Mesh("Plane",1.0f,1.0f,0.0005f);
             Mesh::Cube = new Mesh(cubeMesh,false,0.0005f);
+
+            sf::Image sfImageWhite; sfImageWhite.create(2, 2, sf::Color::White);
+            sf::Image sfImageBlack; sfImageBlack.create(2, 2, sf::Color::Black);
+            Texture::White = new Texture(sfImageWhite, "WhiteTexturePlaceholder", false, ImageInternalFormat::RGB8);
+            Texture::Black = new Texture(sfImageBlack, "BlackTexturePlaceholder", false, ImageInternalFormat::RGB8);
+
 
             brdfCook = new Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
             brdfCook->setWrapping(TextureWrap::ClampToEdge);	

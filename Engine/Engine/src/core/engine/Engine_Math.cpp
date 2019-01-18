@@ -15,6 +15,17 @@ using namespace std;
 
 typedef unsigned char uchar;
 
+glm::vec2 Math::rotate2DPoint(glm::vec2 point, float angle, glm::vec2 origin) {
+    float s = glm::sin(angle);
+    float c = glm::cos(angle);
+    glm::v2 ret;
+    ret.x = c * (point.x - origin.x) - s * (point.y - origin.y) + origin.x;
+    ret.y = s * (point.x - origin.x) + c * (point.y - origin.y) + origin.x;
+    return ret;
+}
+
+
+
 void Math::extractViewFrustumPlanesHartmannGribbs(glm::mat4 inViewProjection,glm::vec4* outPlanes){
     glm::vec4 rows[4];
     for(ushort i = 0; i < 4; ++i)

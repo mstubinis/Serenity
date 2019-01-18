@@ -1331,7 +1331,7 @@ epriv::EShaders::deferred_frag +=
     "    if(FirstConditionals.x > 0.5){\n"
     "        OutDiffuse *= InDiffuse;\n"
     "    }else{\n"
-    "        OutDiffuse *= vec4(Material_F0AndID.xyz,1.0);\n"
+    "        OutDiffuse *= vec4(Material_F0AndID.rgb,1.0);\n"
     "    }\n"
     "    if(FirstConditionals.y > 0.9){\n"
     "        InNormals = CalcBumpedNormal(uv,NormalTexture);\n"

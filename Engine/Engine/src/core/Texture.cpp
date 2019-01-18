@@ -21,6 +21,9 @@ using namespace Engine::epriv;
 using namespace Engine::epriv::textures;
 using namespace std;
 
+Texture* Texture::White = nullptr;
+Texture* Texture::Black = nullptr;
+
 #define FOURCC(a,b,c,d)((uint32_t) (((d)<<24) | ((c)<<16) | ((b)<<8) | (a)))
 string fourcc(uint32_t e){char c[5]={'\0'};c[0]=e>>0 & 0xFF;c[1]=e>>8 & 0xFF;c[2]=e>>16 & 0xFF;c[3]=e>>24 & 0xFF;return c;}
 

@@ -138,6 +138,9 @@ namespace Engine{
 
         std::vector<glm::vec4> tiledFrustrum(Camera* camera,uint x,uint y);
 
+
+        glm::vec2 rotate2DPoint(glm::vec2 point, float angle, glm::vec2 origin = glm::vec2(0.0f, 0.0f));
+
         glm::quat btToGLMQuat(btQuaternion q);
         btQuaternion glmToBTQuat(glm::quat q);
 

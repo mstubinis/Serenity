@@ -61,6 +61,9 @@ namespace Engine{
 class Texture: public EngineResource{
     friend struct Engine::epriv::TextureLoader;
     friend struct Engine::epriv::InternalTexturePublicInterface;
+
+    public:
+        static Texture *White, *Black; //loaded in renderer
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
