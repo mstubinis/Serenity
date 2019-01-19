@@ -77,7 +77,7 @@ class MaterialComponent{
         MaterialComponent(uint type,Texture*);
         virtual ~MaterialComponent();
 
-        virtual void bind();
+        virtual void bind(glm::vec4&);
         virtual void unbind();
 
         Texture* texture() const { return m_Texture; }
@@ -91,7 +91,7 @@ class MaterialComponentReflection: public MaterialComponent{
         MaterialComponentReflection(uint type,Texture* cubemap,Texture* map,float mixFactor);
         ~MaterialComponentReflection();
 
-        virtual void bind();
+        virtual void bind(glm::vec4&);
         void unbind();
         void setMixFactor(float);
 
@@ -105,7 +105,7 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
         MaterialComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio);
         ~MaterialComponentRefraction();
 
-        void bind();
+        void bind(glm::vec4&);
 
         void setRefractionIndex(float);
         const float refractionIndex() const { return m_RefractionIndex; }
@@ -117,7 +117,7 @@ class MaterialComponentParallaxOcclusion: public MaterialComponent{
         MaterialComponentParallaxOcclusion(Texture* map,float heightScale);
         ~MaterialComponentParallaxOcclusion();
 
-        void bind();
+        void bind(glm::vec4&);
         void unbind();
         void setHeightScale(float);
 

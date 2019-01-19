@@ -1243,12 +1243,9 @@ epriv::EShaders::deferred_frag =
     "\n"
     "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
     "\n"
-    //make these the fourth conditionals?
-    "uniform float       CubemapMixFactor;\n"
-    "uniform float       ParallaxHeightScale;\n"
-    "uniform float       RefractiveIndex;\n"
-    "\n"
     "uniform int Shadeless;\n"
+    "\n"
+    "uniform vec4 MaterialDataA;\n" //x = cubemapMix y = refractionIndex z = parallaxScale w = UNUSED
     "\n"
     "uniform vec4 FirstConditionals;\n" //x = diffuse  y = normals    z = glow w = specular
     "uniform vec4 SecondConditionals;\n" //x = ao y = metal z = smoothness w = reflection
@@ -1272,24 +1269,24 @@ epriv::EShaders::deferred_frag +=
     "vec4 Reflection(vec2 _uv,vec4 d, vec3 cpos, vec3 n, vec3 wpos){\n"
     "    vec4 r = vec4(0.0);\n"
     "    r = textureCube(ReflectionTexture,reflect(n,normalize(cpos - wpos))) * texture2D(ReflectionTextureMap,_uv).r;\n"
-    "    r.a *= CubemapMixFactor;\n"
+    "    r.a *= MaterialDataA.x;\n"
     "    r = PaintersAlgorithm(r,d);\n"
     "    return r;\n"
     "}\n"
     "vec4 Refraction(vec2 _uv,vec4 d, vec3 cpos, vec3 n, vec3 wpos){\n"
     "    vec4 r = vec4(0.0);\n"
-    "    r = textureCube(RefractionTexture,refract(n,normalize(cpos - wpos),1.0 / RefractiveIndex)) * texture2D(RefractionTextureMap,_uv).r;\n"
-    "    r.a *= CubemapMixFactor;\n"
+    "    r = textureCube(RefractionTexture,refract(n,normalize(cpos - wpos),1.0 / MaterialDataA.y)) * texture2D(RefractionTextureMap,_uv).r;\n"
+    "    r.a *= MaterialDataA.x;\n"
     "    r = PaintersAlgorithm(r,d);\n"
     "    return r;\n"
     "}\n"
     "vec2 ParallaxMap(vec3 _ViewDir){\n"
-    "    float minLayers = min(5.0,(5.0 * ParallaxHeightScale)+1.0);\n"
-    "    float maxLayers = min(30.0,(30.0 * ParallaxHeightScale)+1.0);\n"
+    "    float minLayers = min(5.0,(5.0 * MaterialDataA.z)+1.0);\n"
+    "    float maxLayers = min(30.0,(30.0 * MaterialDataA.z)+1.0);\n"
     "    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), _ViewDir)));\n"
     "    float layerDepth = 1.0 / numLayers;\n"// calculate the size of each layer 
     "    float currentLayerDepth = 0.0;\n"// depth of current layer  
-    "    vec2 P = _ViewDir.xy * ParallaxHeightScale;\n"// the amount to shift the texture coordinates per layer (from vector P)
+    "    vec2 P = _ViewDir.xy * MaterialDataA.z;\n"// the amount to shift the texture coordinates per layer (from vector P)
     "    vec2 deltaUV = P / numLayers;\n"
     "    vec2  currentUV = UV;\n"
     "    float currentDepth = texture2D(HeightmapTexture, currentUV).r;\n"
