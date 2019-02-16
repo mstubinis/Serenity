@@ -25,7 +25,7 @@ class Scene: public EngineResource, public EventObserver{
     friend class  Engine::epriv::RenderPipeline;
     friend struct Engine::epriv::InternalScenePublicInterface;
     private:
-        class impl; std::unique_ptr<impl> m_i;
+        struct impl; std::unique_ptr<impl> m_i;
     public:
         Scene(std::string name);
         virtual ~Scene();
@@ -37,11 +37,6 @@ class Scene: public EngineResource, public EventObserver{
         Entity getEntity(Engine::epriv::EntityPOD&);
         void removeEntity(uint entityID);
         void removeEntity(Entity& entity);
-        //bool hasEntity(uint entityID);
-        //bool hasEntity(Entity& entity);
-
-        //bool OLD_hasEntity(OLD_Entity&);
-        //bool OLD_hasEntity(uint entityID);
 
         virtual void update(const float& dt);
 
@@ -53,7 +48,6 @@ class Scene: public EngineResource, public EventObserver{
         SkyboxEmpty* skybox() const;
         void setSkybox(SkyboxEmpty*);
         void centerSceneToObject(Entity&);
-        //void centerSceneToObject(uint entityID);
         void setActiveCamera(Camera&);
 };
 namespace Engine {
@@ -70,11 +64,9 @@ namespace Engine {
             static void AddMeshInstanceToPipeline(Scene&, MeshInstance&, RenderStage::Stage);
             static void RemoveMeshInstanceFromPipeline(Scene&, MeshInstance&, RenderStage::Stage);
             static ECS<Entity>& GetECS(Scene&);
-
             static uint NumScenes;
         };
     };
 };
-
 
 #endif

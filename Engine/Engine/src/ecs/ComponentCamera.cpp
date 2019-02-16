@@ -112,7 +112,7 @@ struct epriv::ComponentCamera_UpdateFunction final {
             Math::extractViewFrustumPlanesHartmannGribbs(b._projectionMatrix * b._viewMatrix, b._planes);//update view frustrum 
         }
     }
-    void operator()(void* _componentPool, const float& dt) const {
+    void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
         auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)_componentPool;
         auto& components = pool.pool();
 

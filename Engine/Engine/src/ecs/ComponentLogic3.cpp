@@ -42,7 +42,7 @@ void ComponentLogic3::call(const float& dt) { _functor(dt); }
 
 #pragma region System
 
-struct epriv::ComponentLogic3_UpdateFunction final {void operator()(void* _componentPool, const float& dt) const {
+struct epriv::ComponentLogic3_UpdateFunction final {void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentLogic3>*)_componentPool;
     auto& components = pool.pool();
     for (uint i = 0; i < components.size(); ++i) {

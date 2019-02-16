@@ -77,20 +77,20 @@ void HUD::render(){
     
     auto& target = player->getTarget();
     if(!target.null()){
-        auto* body = target.getComponent<ComponentBody>();
-        auto* model = target.getComponent<ComponentModel>();
-        glm::vec3 pos = body->getScreenCoordinates(true);
-        float scl = glm::max(0.5f,model->radius()*23.0f / Resources::getCurrentScene()->getActiveCamera()->getDistance(target));
-
-        if(pos.z == 1){
+        auto& body = *target.getComponent<ComponentBody>();
+        glm::vec3 pos = body.getScreenCoordinates(true);
+        if(pos.z == 1){ //infront 
+            auto boxPos = body.getScreenBoxCoordinates(true);
             Material& crosshair = *(Material*)ResourceManifest::CrosshairMaterial.get();
-            crosshair.getComponent(MaterialComponentType::Diffuse)->texture()->render(
-                glm::vec2(pos.x,pos.y),
-                glm::vec4(m_Color.x,m_Color.y,m_Color.z,1.0f),
-                0,
-                glm::vec2(scl,scl),
-                0.1f
-            );
+
+            auto& crosshairTexture = *crosshair.getComponent(MaterialComponentType::Diffuse)->texture();
+            const glm::vec4& color = glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f);
+
+            crosshairTexture.render(boxPos.topLeft, color, 0.0f);
+            crosshairTexture.render(boxPos.topRight, color, glm::radians(270.0f));
+            crosshairTexture.render(boxPos.bottomLeft, color, glm::radians(90.0f));
+            crosshairTexture.render(boxPos.bottomRight, color, glm::radians(180.0f));
+
             //unsigned long long distanceInKm = (target.getDistanceLL(player) / 10);
             string stringRepresentation = "";
             //if(distanceInKm > 0){
@@ -101,12 +101,11 @@ void HUD::render(){
                 //stringRepresentation = to_string(uint(distanceInm)) + " m";
             //}
             //font->renderText(/*target.name() + */"\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
-        }else{
-            scl = 1;
+        }else{ //behind
             float angle = 0;
-
             Material& crosshairArrow = *(Material*)ResourceManifest::CrosshairArrowMaterial.get();
-            uint textureSizeOffset = (crosshairArrow.getComponent(MaterialComponentType::Diffuse)->texture()->width() / 2) + 4;
+            auto& crosshairArrowTexture = *crosshairArrow.getComponent(MaterialComponentType::Diffuse)->texture();
+            uint textureSizeOffset = (crosshairArrowTexture.width() / 2) + 4;
             if (pos.y > 2 && pos.y < winSize.y - 2) { //if y is within window bounds
                 if (pos.x < 2) {
                     angle = 45;
@@ -141,15 +140,8 @@ void HUD::render(){
                 }else { //top normal
                     angle = -45;
                 }
-            }
-            
-            crosshairArrow.getComponent(MaterialComponentType::Diffuse)->texture()->render(
-                glm::vec2(pos.x, pos.y),
-                glm::vec4(m_Color.x,m_Color.y,m_Color.z,1.0f),
-                glm::radians(angle),
-                glm::vec2(scl,scl),
-                0.1f
-            );
+            } 
+            crosshairArrowTexture.render(glm::vec2(pos.x, pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1.0f),glm::radians(angle));
         }
     }
     

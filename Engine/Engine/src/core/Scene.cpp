@@ -22,78 +22,119 @@ using namespace std;
 
 uint InternalScenePublicInterface::NumScenes = 0;
 
-class Scene::impl final {
-    public:
-        SkyboxEmpty* m_Skybox;
-        Camera* m_ActiveCamera;
-        vector<uint> m_Entities;
-        vector<SunLight*> m_Lights;
-        glm::vec3 m_BackgroundColor;
-        uint m_ID;
-        vector<vector<RenderPipeline*>> m_Pipelines;
+struct Scene::impl final {
+    SkyboxEmpty*                      m_Skybox;
+    Camera*                           m_ActiveCamera;
+    vector<uint>                      m_Entities;
+    vector<SunLight*>                 m_Lights;
+    glm::vec3                         m_BackgroundColor;
+    uint                              m_ID;
+    vector<vector<RenderPipeline*>>   m_Pipelines;
 
-
-        ECS<Entity> m_ECS;
-
-        void _init(Scene& super,string& _name) {
-            m_Pipelines.resize(RenderStage::_TOTAL);
-            m_Skybox = nullptr;
-            m_ActiveCamera = nullptr;
-            m_BackgroundColor = glm::vec3(0.0f);
-            super.setName(_name);
-            Core::m_Engine->m_ResourceManager._addScene(super);
-            ++InternalScenePublicInterface::NumScenes;
-            m_ID = InternalScenePublicInterface::NumScenes;
+    ECS<Entity>                       m_ECS;
+    void _init(Scene& super,string& _name) {
+        m_Pipelines.resize(RenderStage::_TOTAL);
+        m_Skybox = nullptr;
+        m_ActiveCamera = nullptr;
+        m_BackgroundColor = glm::vec3(0.0f);
+        super.setName(_name);
+        Core::m_Engine->m_ResourceManager._addScene(super);
+        ++InternalScenePublicInterface::NumScenes;
+        m_ID = InternalScenePublicInterface::NumScenes;
             
 
-            m_ECS.assignSystem<ComponentLogic>(
-                ComponentLogic_System());
-            m_ECS.assignSystem<ComponentBody>(
-                ComponentBody_System());
-            m_ECS.assignSystem<ComponentLogic1>(
-                ComponentLogic1_System());
-            m_ECS.assignSystem<ComponentCamera>(
-                ComponentCamera_System());
-            m_ECS.assignSystem<ComponentLogic2>(
-                ComponentLogic2_System());
-            m_ECS.assignSystem<ComponentModel>(
-                ComponentModel_System());
-            m_ECS.assignSystem<ComponentLogic3>(
-                ComponentLogic3_System());
+        m_ECS.assignSystem<ComponentLogic>(
+            ComponentLogic_System());
+        m_ECS.assignSystem<ComponentBody>(
+            ComponentBody_System());
+        m_ECS.assignSystem<ComponentLogic1>(
+            ComponentLogic1_System());
+        m_ECS.assignSystem<ComponentCamera>(
+            ComponentCamera_System());
+        m_ECS.assignSystem<ComponentLogic2>(
+            ComponentLogic2_System());
+        m_ECS.assignSystem<ComponentModel>(
+            ComponentModel_System());
+        m_ECS.assignSystem<ComponentLogic3>(
+            ComponentLogic3_System());
        
+    }
+    void _destruct() {
+        SAFE_DELETE(m_Skybox);
+        for(auto& vec: m_Pipelines)
+            SAFE_DELETE_VECTOR(vec);
+    }
+    void _centerToObject(Scene& super,Entity& center) {
+        //TODO: handle parent->child relationship
+        ComponentBody& centerBody = *center.getComponent<ComponentBody>();
+        for (auto& data : epriv::InternalScenePublicInterface::GetEntities(super)) {
+            Entity e = super.getEntity(data);
+            if (e != center) {
+                auto* eBody = e.getComponent<ComponentBody>();
+                if (eBody) {
+                    auto& _eBody = *eBody;
+                    _eBody.setPosition(_eBody.position() - centerBody.position());
+                }
+            }
         }
-        void _destruct() {
-            SAFE_DELETE(m_Skybox);
-            for(auto& vec: m_Pipelines)
-                SAFE_DELETE_VECTOR(vec);
+        centerBody.setPosition(0.0f);
+    }
+    void _addMeshInstanceToPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, RenderStage::Stage _stage) {
+        epriv::RenderPipeline* _pipeline = nullptr;
+        for (auto& pipeline : _pipelinesList) {
+            if (&pipeline->shaderProgram == _meshInstance.shaderProgram()) {
+                _pipeline = pipeline;
+                break;
+            }
         }
-        void _centerToObject(Scene& super,Entity& center) {
-            //TODO: handle parent->child relationship
-            ComponentBody& centerBody = *center.getComponent<ComponentBody>();
-            for (auto& data : epriv::InternalScenePublicInterface::GetEntities(super)) {
-                Entity e = super.getEntity(data);
-                if (e != center) {
-                    auto* eBody = e.getComponent<ComponentBody>();
-                    if (eBody) {
-                        auto& _eBody = *eBody;
-                        _eBody.setPosition(_eBody.position() - centerBody.position());
+        if (!_pipeline) {
+            _pipeline = new epriv::RenderPipeline(*_meshInstance.shaderProgram());
+            _scene.m_i->m_Pipelines[_stage].push_back(_pipeline);
+        }
+        //material node check
+        MaterialNode* materialNode = nullptr;
+        MeshNode* meshNode = nullptr;
+        InstanceNode* instanceNode = nullptr;
+        for (auto& itr : _pipeline->materialNodes) {
+            if (itr->material == _meshInstance.material()) {
+                materialNode = itr;
+                //mesh node check
+                for (auto& itr1 : materialNode->meshNodes) {
+                    if (itr1->mesh == _meshInstance.mesh()) {
+                        meshNode = itr1;
+                        //instance check
+                        for (auto& itr2 : meshNode->instanceNodes) {
+                            if (itr2->instance == &_meshInstance) {
+                                instanceNode = itr2;
+                                break;
+                            }
+                        }
                     }
                 }
             }
-            centerBody.setPosition(0.0f);
         }
-        void _addMeshInstanceToPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, RenderStage::Stage _stage) {
-            epriv::RenderPipeline* _pipeline = nullptr;
-            for (auto& pipeline : _pipelinesList) {
-                if (&pipeline->shaderProgram == _meshInstance.shaderProgram()) {
-                    _pipeline = pipeline;
-                    break;
-                }
+        if (!materialNode) {
+            materialNode = new MaterialNode(*_meshInstance.material());
+            _pipeline->materialNodes.emplace_back(materialNode);
+        }
+        if (!meshNode) {
+            meshNode = new MeshNode(*_meshInstance.mesh());
+            materialNode->meshNodes.emplace_back(meshNode);
+        }
+        if (!instanceNode) {
+            instanceNode = new InstanceNode(_meshInstance);
+            meshNode->instanceNodes.emplace_back(instanceNode);
+        }
+    }
+    void _removeMeshInstanceFromPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, RenderStage::Stage _stage) {
+        RenderPipeline* _pipeline = nullptr;
+        for (auto& pipeline : _pipelinesList) {
+            if (&pipeline->shaderProgram == _meshInstance.shaderProgram()) {
+                _pipeline = pipeline;
+                break;
             }
-            if (!_pipeline) {
-                _pipeline = new epriv::RenderPipeline(*_meshInstance.shaderProgram());
-                _scene.m_i->m_Pipelines[_stage].push_back(_pipeline);
-            }
+        }
+        if (_pipeline) {
             //material node check
             MaterialNode* materialNode = nullptr;
             MeshNode* meshNode = nullptr;
@@ -116,64 +157,20 @@ class Scene::impl final {
                     }
                 }
             }
-            if (!materialNode) {
-                materialNode = new MaterialNode(*_meshInstance.material());
-                _pipeline->materialNodes.emplace_back(materialNode);
-            }
-            if (!meshNode) {
-                meshNode = new MeshNode(*_meshInstance.mesh());
-                materialNode->meshNodes.emplace_back(meshNode);
-            }
-            if (!instanceNode) {
-                instanceNode = new InstanceNode(_meshInstance);
-                meshNode->instanceNodes.emplace_back(instanceNode);
-            }
-        }
-        void _removeMeshInstanceFromPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, RenderStage::Stage _stage) {
-            RenderPipeline* _pipeline = nullptr;
-            for (auto& pipeline : _pipelinesList) {
-                if (&pipeline->shaderProgram == _meshInstance.shaderProgram()) {
-                    _pipeline = pipeline;
-                    break;
-                }
-            }
-            if (_pipeline) {
-                //material node check
-                MaterialNode* materialNode = nullptr;
-                MeshNode* meshNode = nullptr;
-                InstanceNode* instanceNode = nullptr;
-                for (auto& itr : _pipeline->materialNodes) {
-                    if (itr->material == _meshInstance.material()) {
-                        materialNode = itr;
-                        //mesh node check
-                        for (auto& itr1 : materialNode->meshNodes) {
-                            if (itr1->mesh == _meshInstance.mesh()) {
-                                meshNode = itr1;
-                                //instance check
-                                for (auto& itr2 : meshNode->instanceNodes) {
-                                    if (itr2->instance == &_meshInstance) {
-                                        instanceNode = itr2;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (meshNode) {
-                    removeFromVector(meshNode->instanceNodes, instanceNode);
-                    SAFE_DELETE(instanceNode);
-                    if (meshNode->instanceNodes.size() == 0) {
-                        removeFromVector(materialNode->meshNodes, meshNode);
-                        SAFE_DELETE(meshNode);
-                        if (materialNode->meshNodes.size() == 0) {
-                            removeFromVector(_pipeline->materialNodes, materialNode);
-                            SAFE_DELETE(materialNode);
-                        }
+            if (meshNode) {
+                removeFromVector(meshNode->instanceNodes, instanceNode);
+                SAFE_DELETE(instanceNode);
+                if (meshNode->instanceNodes.size() == 0) {
+                    removeFromVector(materialNode->meshNodes, meshNode);
+                    SAFE_DELETE(meshNode);
+                    if (materialNode->meshNodes.size() == 0) {
+                        removeFromVector(_pipeline->materialNodes, materialNode);
+                        SAFE_DELETE(materialNode);
                     }
                 }
             }
         }
+    }
 };
 vector<Engine::epriv::EntityPOD>& InternalScenePublicInterface::GetEntities(Scene& _scene) {
     return _scene.m_i->m_ECS.entityPool._pool;

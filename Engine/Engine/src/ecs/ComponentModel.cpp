@@ -170,8 +170,8 @@ struct epriv::ComponentModel_UpdateFunction final {
             }
         }
     }
-    void operator()(void* _componentPool, const float& dt) const {
-        auto* camera = Resources::getCurrentScene()->getActiveCamera();
+    void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
+        auto* camera = _scene.getActiveCamera();
         auto& pool = *(ECSComponentPool<Entity, ComponentModel>*)_componentPool;
         auto& components = pool.pool();
         auto split = epriv::threading::splitVectorIndices(components);

@@ -59,7 +59,9 @@ void epriv::DebugManager::addDebugLine(const char* message) {
 void epriv::DebugManager::addDebugLine(string& message) {
     m_i->text_queue.emplace_back(message);
 }
-
+void epriv::DebugManager::addDebugLine(string message) {
+    m_i->text_queue.emplace_back(message);
+}
 void epriv::DebugManager::calculate() {
     auto& i = *m_i.get();
     i.deltaTime = i.logicTime + i.physicsTime + i.renderTime + i.displayTime + i.soundTime;

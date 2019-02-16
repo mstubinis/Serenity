@@ -12,17 +12,17 @@ struct Entity;
 class Scene;
 namespace Engine {
     namespace epriv {
-        struct FunctorUpdateEmpty final { void operator()(void* _cPool, const float& dt) const { } };
+        struct FunctorUpdateEmpty final { void operator()(void* _cPool, const float& dt, Scene&) const { } };
         struct FunctorComponentEmpty final { void operator()(void* _component, Entity&) const { } };
         struct FunctorEntityEmpty final { void operator()(void* _cPool, Entity&, Scene&) const { } };
         struct FunctorSceneEmpty final { void operator()(void* _cPool, Scene&) const { } };
 
         template<typename ...> class ECSSystem;
 
-        typedef boost::function<void(void*, const float&)>      func_update;
-        typedef boost::function<void(void*, Entity&, Scene&)>   func_entity;
-        typedef boost::function<void(void*, Entity&)>           func_component;
-        typedef boost::function<void(void*, Scene&)>            func_scene;
+        typedef boost::function<void(void*, const float&, Scene&)>  func_update;
+        typedef boost::function<void(void*, Entity&, Scene&)>       func_entity;
+        typedef boost::function<void(void*, Entity&)>               func_component;
+        typedef boost::function<void(void*, Scene&)>                func_scene;
 
         template<typename T> struct FunctorHolder {
             T functor;
@@ -79,7 +79,7 @@ namespace Engine {
                 ECSSystem() = default;
                 virtual ~ECSSystem() = default;
 
-                virtual void update(const float& dt) {}
+                virtual void update(const float& dt, Scene&) {}
                 virtual void onComponentAddedToEntity(void*, TEntity&) {}
                 virtual void onEntityAddedToScene(TEntity&, Scene&) {}
                 virtual void onSceneLeft(Scene&) {}
@@ -91,19 +91,19 @@ namespace Engine {
             private:
                 CPoolType& componentPool;
 
-                void _SUF(const FunctorUpdate& _functor) { super::_SUF = boost::bind(_functor.functor, _1, _2); }
-                void _CAE(const FunctorComponent& _functor) { super::_CAE = boost::bind(_functor.functor, _1, _2); }
-                void _EAS(const FunctorEntity& _functor) { super::_EAS = boost::bind(_functor.functor, _1, _2, _3); }
-                void _SEF(const FunctorScene& _functor) { super::_SEF = boost::bind(_functor.functor, _1, _2); }
-                void _SLF(const FunctorScene& _functor) { super::_SLF = boost::bind(_functor.functor, _1, _2); }
+                void Bind_SUF(const FunctorUpdate& _functor) { super::_SUF = boost::bind(_functor.functor, _1, _2, _3); }
+                void Bind_CAE(const FunctorComponent& _functor) { super::_CAE = boost::bind(_functor.functor, _1, _2); }
+                void Bind_EAS(const FunctorEntity& _functor) { super::_EAS = boost::bind(_functor.functor, _1, _2, _3); }
+                void Bind_SEF(const FunctorScene& _functor) { super::_SEF = boost::bind(_functor.functor, _1, _2); }
+                void Bind_SLF(const FunctorScene& _functor) { super::_SLF = boost::bind(_functor.functor, _1, _2); }
             public:
                 ECSSystem() = default;
                 ECSSystem(const ECSSystemCI& _systemCI, ECS<TEntity>& _ecs):componentPool(_ecs.template getPool<TComponent>()){
-                    _SUF(_systemCI.updateFunction);
-                    _CAE(_systemCI.onComponentAddedToEntityFunction);
-                    _EAS(_systemCI.onEntityAddedToSceneFunction);
-                    _SEF(_systemCI.onSceneEnteredFunction);
-                    _SLF(_systemCI.onSceneLeftFunction);
+                    Bind_SUF(_systemCI.updateFunction);
+                    Bind_CAE(_systemCI.onComponentAddedToEntityFunction);
+                    Bind_EAS(_systemCI.onEntityAddedToSceneFunction);
+                    Bind_SEF(_systemCI.onSceneEnteredFunction);
+                    Bind_SLF(_systemCI.onSceneLeftFunction);
                 }
                 ~ECSSystem() = default;
 
@@ -112,7 +112,7 @@ namespace Engine {
                 ECSSystem(ECSSystem&& other) noexcept = delete;
                 ECSSystem& operator=(ECSSystem&& other) noexcept = delete;
 
-                void update(const float& dt) { super::_SUF(&componentPool,dt); }
+                void update(const float& dt, Scene& _scene) { super::_SUF(&componentPool, dt, _scene); }
                 void onComponentAddedToEntity(void* _component, TEntity& _entity) { super::_CAE(_component, _entity); }
                 void onEntityAddedToScene(TEntity& _entity, Scene& _scene) { super::_EAS(&componentPool, _entity, _scene); }
                 void onSceneEntered(Scene& _scene) { super::_SEF(&componentPool, _scene); }

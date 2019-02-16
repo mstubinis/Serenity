@@ -61,8 +61,8 @@ namespace Engine {
                         camera.resize(w, h);
                     }
                 }
-                void update(const float& dt) { 
-                    for (uint i = 0; i < systems.size(); ++i) { auto& system = *systems[i]; system.update(dt); }
+                void update(const float& dt, Scene& _Scene) {
+                    for (uint i = 0; i < systems.size(); ++i) { auto& system = *systems[i]; system.update(dt, _Scene); }
                 }
                 void onComponentAddedToEntity(void* _component, TEntity& _entity, const uint& type_slot) {
                     auto& system = *systems[type_slot]; system.onComponentAddedToEntity(_component, _entity);

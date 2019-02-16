@@ -18,6 +18,7 @@ namespace Engine {
 
                 void addDebugLine(const char* message);
                 void addDebugLine(std::string& message);
+                void addDebugLine(std::string message);
 
                 void calculate();
                 void beginGLQuery();

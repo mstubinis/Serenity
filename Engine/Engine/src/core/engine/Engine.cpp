@@ -94,7 +94,7 @@ void updateLogic(const float& dt){
     auto& _ecs = epriv::InternalScenePublicInterface::GetECS(scene);
     _ecs.preUpdate(scene, dt);
     scene.update(dt);
-    _ecs.update(dt);
+    _ecs.update(dt, scene);
     _ecs.postUpdate(scene,dt);
 
 

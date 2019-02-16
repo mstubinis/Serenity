@@ -172,16 +172,14 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3 objPos,Camera& camera, bool clamp
         if (screen.x < 0.0f) { 
             resX = 0.0f; 
             inBounds = 0; 
-        }
-        else if (screen.x > winSize.x) { 
+        }else if (screen.x > winSize.x) { 
             resX = winSize.x; 
             inBounds = 0; 
         }
         if (resY < 0.0f) { 
             resY = 0.0f; 
             inBounds = 0; 
-        }
-        else if (resY > winSize.y) { 
+        }else if (resY > winSize.y) { 
             resY = winSize.y; 
             inBounds = 0; 
         }
@@ -192,29 +190,17 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3 objPos,Camera& camera, bool clamp
     inBounds = 0;
     resX = winSize.x - screen.x;
     resY = winSize.y - screen.y;
-    if (resX < winSize.x / 2) {
-        if (clampToEdge) 
+    if (clampToEdge) {
+        if (resX < winSize.x / 2) {
             resX = 0.0f;
-        else resX =
-            -9999999.0f; 
-    }
-    else if (resX > winSize.x / 2) {
-        if (clampToEdge) 
+        }else if (resX > winSize.x / 2) {
             resX = winSize.x;
-        else 
-            resX = -9999999.0f;
-    }
-    if (resY < winSize.y / 2) {
-        if (clampToEdge) 
+        }
+        if (resY < winSize.y / 2) {
             resY = 0.0f;
-        else 
-            resY = -9999999.0f;
-    }
-    else if (resY > winSize.y / 2) {
-        if (clampToEdge) 
+        }else if (resY > winSize.y / 2) {
             resY = winSize.y;
-        else 
-            resY = -9999999.0f;
+        }
     }
     return glm::vec3(resX, resY, inBounds);
 }

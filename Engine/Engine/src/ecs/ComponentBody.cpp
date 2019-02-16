@@ -4,6 +4,7 @@
 #include "core/engine/Engine_ThreadManager.h"
 #include "core/MeshInstance.h"
 #include "core/Mesh.h"
+#include "core/Camera.h"
 
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
@@ -15,6 +16,8 @@
 using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
+
+#pragma region DataStructures
 
 #pragma region PhysicsData
 
@@ -462,6 +465,34 @@ glm::vec3 ComponentBody::position() { //theres prob a better way to do this
     return glm::vec3(_matrix[3][0], _matrix[3][1], _matrix[3][2]);
 }
 glm::vec3 ComponentBody::getScreenCoordinates(bool clampToEdge) { return Math::getScreenCoordinates(position(), clampToEdge); }
+
+
+ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(bool clampToEdge,float minOffset) {
+    const auto& worldPos    = position();
+    float radius            = 0;
+    ComponentModel* model   = owner.getComponent<ComponentModel>();
+    if (model) {
+        radius = model->radius();
+    }
+    auto& cam               = *Resources::getCurrentScene()->getActiveCamera();
+    glm::vec3 camvectest    = cam.up();
+    const auto& center2DRes = Math::getScreenCoordinates(worldPos, clampToEdge);
+    const auto& testRes     = Math::getScreenCoordinates(worldPos + (camvectest * (radius + 0.0001f)), clampToEdge);
+    glm::vec2 center2D      = glm::vec2(center2DRes.x, center2DRes.y);
+    glm::vec2 test          = glm::vec2(testRes.x, testRes.y);
+
+    auto radius2D = glm::max(minOffset, glm::distance(test, center2D));
+
+    ScreenBoxCoordinates ret;
+    ret.topLeft     = glm::vec2(center2D.x - radius2D, center2D.y + radius2D);
+    ret.topRight    = glm::vec2(center2D.x + radius2D, center2D.y + radius2D);
+    ret.bottomLeft  = glm::vec2(center2D.x - radius2D, center2D.y - radius2D);
+    ret.bottomRight = glm::vec2(center2D.x + radius2D, center2D.y - radius2D);
+    ret.inBounds    = center2DRes.z;
+    return ret;
+}
+
+
 glm::vec3 ComponentBody::getScale() {
     if (_physics) {
         auto& physicsData = *data.p;
@@ -670,10 +701,11 @@ struct epriv::ComponentBody_UpdateFunction final {
                 //TODO: implement parent->child relations
                 //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
                 n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
+                //Engine::Math::recalculateForwardRightUp(n.rotation, b._forward, b._right, b._up); //double check if this is needed
             }
         }
     }
-    void operator()(void* _componentPool, const float& dt) const {
+    void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
         auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
         auto& components = pool.pool();
 
