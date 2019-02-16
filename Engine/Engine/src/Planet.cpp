@@ -37,7 +37,7 @@ float PlanetaryRenderSpace(float& outerRadius,float& _distanceReal) {
 struct PlanetLogicFunctor final {void operator()(ComponentLogic& _component, const float& dt) const {
     Planet& planet = *(Planet*)_component.getUserPointer();
     if (planet.m_RotationInfo) {
-        planet.m_Entity.getComponent<ComponentBody>()->rotate(0.0f, glm::radians(planet.m_RotationInfo->speed * dt), 0.0f);
+        //planet.m_Entity.getComponent<ComponentBody>()->rotate(0.0f, glm::radians(planet.m_RotationInfo->speed * dt), 0.0f);
     }
     if (planet.m_OrbitInfo) {
         //planet.m_OrbitInfo->setOrbitalPosition(((1.0f/(planet.m_OrbitInfo->info.y*86400.0f))*dt)*6.283188f,this);

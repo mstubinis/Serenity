@@ -365,8 +365,12 @@ glm::vec3 Math::getColumnVector(btRigidBody& b, uint column){
 glm::vec3 Math::getForward(btRigidBody& b){ return Math::getColumnVector(b,2); }
 glm::vec3 Math::getRight(btRigidBody& b){ return Math::getColumnVector(b,0); }
 glm::vec3 Math::getUp(btRigidBody& b){ return Math::getColumnVector(b,1); }
-void Math::recalculateForwardRightUp(glm::quat& o,glm::vec3& f,glm::vec3& r,glm::vec3& u){ f = Math::getForward(o); r = Math::getRight(o); u = Math::getUp(o); }
-void Math::recalculateForwardRightUp(btRigidBody& b,glm::vec3& f,glm::vec3& r,glm::vec3& u){f = Math::getForward(b); r = Math::getRight(b); u = Math::getUp(b);}
+void Math::recalculateForwardRightUp(glm::quat& o,glm::vec3& f,glm::vec3& r,glm::vec3& u){
+    f = Math::getForward(o); r = Math::getRight(o); u = Math::getUp(o);
+}
+void Math::recalculateForwardRightUp(btRigidBody& b,glm::vec3& f,glm::vec3& r,glm::vec3& u){
+    f = Math::getForward(b); r = Math::getRight(b); u = Math::getUp(b);
+}
 float Math::getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees){
     // forced protection against NaN if a and b happen to be equal
     a.x += 0.0000001f;

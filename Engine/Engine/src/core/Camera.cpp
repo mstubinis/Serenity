@@ -46,9 +46,9 @@ const glm::mat4 Camera::getViewInverse(){ return m_Entity.getComponent<Component
 const glm::mat4 Camera::getProjectionInverse(){ return m_Entity.getComponent<ComponentCamera>()->getProjectionInverse(); }
 const glm::mat4 Camera::getViewProjection(){ return m_Entity.getComponent<ComponentCamera>()->getViewProjection(); }
 const glm::vec3 Camera::getViewVector(){ return m_Entity.getComponent<ComponentCamera>()->getViewVector(); }
-const glm::vec3 Camera::forward(){ return m_Entity.getComponent<ComponentBody>()->forward(); }
-const glm::vec3 Camera::right(){ return m_Entity.getComponent<ComponentBody>()->right(); }
-const glm::vec3 Camera::up(){ return m_Entity.getComponent<ComponentBody>()->up(); }
+const glm::vec3 Camera::forward(){ return m_Entity.getComponent<ComponentCamera>()->forward(); }
+const glm::vec3 Camera::right(){ return m_Entity.getComponent<ComponentCamera>()->right(); }
+const glm::vec3 Camera::up(){ return m_Entity.getComponent<ComponentCamera>()->up(); }
 float Camera::getDistance(Entity& e){
     auto& b = *e.getComponent<ComponentBody>();
     return glm::distance(b.position(),getPosition());

@@ -23,8 +23,8 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
         case CameraState::Follow: {
             auto& targetEntity = camera.m_Target; epriv::EntitySerialization _st(targetEntity);
 
-            auto& targetBody = *(targetEntity.getComponent<ComponentBody>(_st));
-            auto& targetModel = *(targetEntity.getComponent<ComponentModel>(_st));
+            auto& targetBody = *targetEntity.getComponent<ComponentBody>(_st);
+            auto& targetModel = *targetEntity.getComponent<ComponentModel>(_st);
             float targetRadius = targetModel.radius();
 
             camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
@@ -42,9 +42,9 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             auto& targetEntity = camera.m_Target; epriv::EntitySerialization _st(targetEntity);
             auto& playerEntity = camera.m_Player; epriv::EntitySerialization _sp(playerEntity);
 
-            auto& target = *(targetEntity.getComponent<ComponentBody>(_st));
-            auto& player = *(playerEntity.getComponent<ComponentBody>(_sp));
-            auto& playerModel = *(playerEntity.getComponent<ComponentModel>(_sp));
+            auto& target = *targetEntity.getComponent<ComponentBody>(_st);
+            auto& player = *playerEntity.getComponent<ComponentBody>(_sp);
+            auto& playerModel = *playerEntity.getComponent<ComponentModel>(_sp);
 
             camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
             if (camera.m_OrbitRadius < 0)     camera.m_OrbitRadius = 0;
@@ -65,8 +65,8 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
         case CameraState::Orbit: {
             auto& targetEntity = camera.m_Target; epriv::EntitySerialization _st(targetEntity);
 
-            auto& targetBody = *(targetEntity.getComponent<ComponentBody>(_st));
-            auto& targetModel = *(targetEntity.getComponent<ComponentModel>(_st));
+            auto& targetBody = *targetEntity.getComponent<ComponentBody>(_st);
+            auto& targetModel = *targetEntity.getComponent<ComponentModel>(_st);
 
 
             camera.m_OrbitRadius += Engine::getMouseWheelDelta() * 0.01f;

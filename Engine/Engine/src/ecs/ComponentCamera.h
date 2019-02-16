@@ -73,6 +73,10 @@ class ComponentCamera : public ComponentBaseClass {
         glm::mat4 getViewProjectionInverse();
         glm::vec3 getViewVector();
 
+        glm::vec3 forward();
+        glm::vec3 right();
+        glm::vec3 up();
+
         float getAngle();    void setAngle(float);
         float getAspect();   void setAspect(float);
         float getNear();     void setNear(float);

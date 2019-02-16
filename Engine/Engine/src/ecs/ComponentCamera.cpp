@@ -85,6 +85,18 @@ void ComponentCamera::lookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up) {
     _viewMatrix = glm::lookAt(_eye, center, _up);
     _viewMatrixNoTranslation = glm::lookAt(glm::vec3(0.0f), center - _eye, _up);
 }
+
+glm::vec3 ComponentCamera::forward() {
+    return (getViewVector()); //normalize later?
+}
+glm::vec3 ComponentCamera::right() {
+    return (glm::cross(forward(), up())); //normalize later?
+}
+glm::vec3 ComponentCamera::up() {
+    return (_up); //normalize later?
+}
+
+
 glm::mat4 ComponentCamera::getProjection() { return _projectionMatrix; }
 glm::mat4 ComponentCamera::getProjectionInverse() { return glm::inverse(_projectionMatrix); }
 glm::mat4 ComponentCamera::getView() { return _viewMatrix; }

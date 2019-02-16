@@ -468,27 +468,36 @@ glm::vec3 ComponentBody::getScreenCoordinates(bool clampToEdge) { return Math::g
 
 
 ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(bool clampToEdge,float minOffset) {
+    ScreenBoxCoordinates ret;
     const auto& worldPos    = position();
-    float radius            = 0;
+    float radius            = 0.0001f;
     ComponentModel* model   = owner.getComponent<ComponentModel>();
+    const auto& center2DRes = Math::getScreenCoordinates(worldPos, clampToEdge);
+    glm::vec2 center2D      = glm::vec2(center2DRes.x, center2DRes.y);
     if (model) {
         radius = model->radius();
+    }else{
+        ret.topLeft         = center2D;
+        ret.topRight        = center2D;
+        ret.bottomLeft      = center2D;
+        ret.bottomRight     = center2D;
+        ret.inBounds        = center2DRes.z;
+        return ret;
     }
     auto& cam               = *Resources::getCurrentScene()->getActiveCamera();
-    glm::vec3 camvectest    = cam.up();
-    const auto& center2DRes = Math::getScreenCoordinates(worldPos, clampToEdge);
-    const auto& testRes     = Math::getScreenCoordinates(worldPos + (camvectest * (radius + 0.0001f)), clampToEdge);
-    glm::vec2 center2D      = glm::vec2(center2DRes.x, center2DRes.y);
+    glm::vec3 camvectest    = cam.up();   
+    const auto& testRes     = Math::getScreenCoordinates(worldPos + (camvectest * radius), clampToEdge); 
     glm::vec2 test          = glm::vec2(testRes.x, testRes.y);
-
-    auto radius2D = glm::max(minOffset, glm::distance(test, center2D));
-
-    ScreenBoxCoordinates ret;
-    ret.topLeft     = glm::vec2(center2D.x - radius2D, center2D.y + radius2D);
-    ret.topRight    = glm::vec2(center2D.x + radius2D, center2D.y + radius2D);
-    ret.bottomLeft  = glm::vec2(center2D.x - radius2D, center2D.y - radius2D);
-    ret.bottomRight = glm::vec2(center2D.x + radius2D, center2D.y - radius2D);
-    ret.inBounds    = center2DRes.z;
+    auto radius2D           = glm::max(minOffset, glm::distance(test, center2D));
+    const float& yPlus      = center2D.y + radius2D;
+    const float& yNeg       = center2D.y - radius2D;
+    const float& xPlus      = center2D.x + radius2D;
+    const float& xNeg       = center2D.x - radius2D;
+    ret.topLeft             = glm::vec2(xNeg,  yPlus);
+    ret.topRight            = glm::vec2(xPlus, yPlus);
+    ret.bottomLeft          = glm::vec2(xNeg,  yNeg);
+    ret.bottomRight         = glm::vec2(xPlus, yNeg);
+    ret.inBounds            = center2DRes.z;
     return ret;
 }
 
