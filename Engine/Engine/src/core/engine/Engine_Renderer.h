@@ -14,12 +14,12 @@ typedef std::uint32_t uint;
 class  Mesh;
 class  Material;
 class  MeshInstance;
+class  Scene;
 class  ShaderP;
+class  Camera;
 class  Texture;
 class  Font;
-class  Camera;
 struct Entity;
-class  Scene;
 struct BufferObject;
 
 struct DepthFunc{enum Func{ 
@@ -58,12 +58,12 @@ namespace Engine{
     namespace epriv{
         struct InstanceNode {
             MeshInstance* instance;
-            InstanceNode(MeshInstance& i):instance(&i) {}
+            InstanceNode(MeshInstance& i) :instance(&i) {}
         };
         struct MeshNode {
             Mesh* mesh;
             std::vector<InstanceNode*> instanceNodes;
-            MeshNode(Mesh& m):mesh(&m){}
+            MeshNode(Mesh& m) :mesh(&m) {}
             ~MeshNode() {
                 SAFE_DELETE_VECTOR(instanceNodes);
             }
@@ -72,11 +72,11 @@ namespace Engine{
             Material* material;
             std::vector<MeshNode*> meshNodes;
             MaterialNode(Material& m) :material(&m) {}
-            ~MaterialNode(){
+            ~MaterialNode() {
                 SAFE_DELETE_VECTOR(meshNodes);
             }
         };
-        class RenderPipeline final{
+        class RenderPipeline final {
             friend class ::Scene;
             private:
                 ShaderP& shaderProgram;

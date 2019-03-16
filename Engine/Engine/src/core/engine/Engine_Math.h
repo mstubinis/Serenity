@@ -138,6 +138,8 @@ namespace Engine{
 
         std::vector<glm::vec4> tiledFrustrum(Camera* camera,uint x,uint y);
 
+        void Float32From16(float*    __restrict out, const uint16_t in);
+        void Float16From32(uint16_t* __restrict out, const float    in);
 
         glm::vec2 rotate2DPoint(glm::vec2 point, float angle, glm::vec2 origin = glm::vec2(0.0f, 0.0f));
 

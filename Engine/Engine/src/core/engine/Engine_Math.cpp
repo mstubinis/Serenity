@@ -15,6 +15,36 @@ using namespace std;
 
 typedef unsigned char uchar;
 
+
+void Math::Float32From16(float*    __restrict out, const uint16_t in) {
+    uint32_t t1, t2, t3;
+    t1 = in & 0x7fff;                       // Non-sign bits
+    t2 = in & 0x8000;                       // Sign bit
+    t3 = in & 0x7c00;                       // Exponent
+    t1 <<= 13;                              // Align mantissa on MSB
+    t2 <<= 16;                              // Shift sign bit into position
+    t1 += 0x38000000;                       // Adjust bias
+    t1 = (t3 == 0 ? 0 : t1);                // Denormals-as-zero
+    t1 |= t2;                               // Re-insert sign bit
+    *((uint32_t*)out) = t1;
+}
+void Math::Float16From32(uint16_t* __restrict out, const float    in) {
+    uint32_t inu = *((uint32_t*)&in);
+    uint32_t t1, t2, t3;
+    t1 = inu & 0x7fffffff;                 // Non-sign bits
+    t2 = inu & 0x80000000;                 // Sign bit
+    t3 = inu & 0x7f800000;                 // Exponent
+    t1 >>= 13;                             // Align mantissa on MSB
+    t2 >>= 16;                             // Shift sign bit into position
+    t1 -= 0x1c000;                         // Adjust bias
+    t1 = (t3 < 0x38800000) ? 0 : t1;
+    t1 = (t3 > 0x47000000) ? 0x7bff : t1;
+    t1 = (t3 == 0 ? 0 : t1);               // Denormals-as-zero
+    t1 |= t2;                              // Re-insert sign bit
+    *((uint16_t*)out) = t1;
+}
+
+
 glm::vec2 Math::rotate2DPoint(glm::vec2 point, float angle, glm::vec2 origin) {
     float s = glm::sin(angle);
     float c = glm::cos(angle);

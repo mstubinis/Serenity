@@ -62,16 +62,23 @@ namespace Engine {
                     }
                 }
                 void update(const float& dt, Scene& _Scene) {
-                    for (uint i = 0; i < systems.size(); ++i) { auto& system = *systems[i]; system.update(dt, _Scene); }
+                    for (uint i = 0; i < systems.size(); ++i) { 
+                        auto& system = *systems[i]; system.update(dt, _Scene); 
+                    }
                 }
                 void onComponentAddedToEntity(void* _component, TEntity& _entity, const uint& type_slot) {
-                    auto& system = *systems[type_slot]; system.onComponentAddedToEntity(_component, _entity);
+                    auto& system = *systems[type_slot];
+                    system.onComponentAddedToEntity(_component, _entity);
                 }
                 void onSceneEntered(Scene& _Scene) { 
-                    for (uint i = 0; i < systems.size(); ++i) { auto& system = *systems[i]; system.onSceneEntered(_Scene); }
+                    for (uint i = 0; i < systems.size(); ++i) { 
+                        auto& system = *systems[i]; system.onSceneEntered(_Scene); 
+                    }
                 }
                 void onSceneLeft(Scene& _Scene) { 
-                    for (uint i = 0; i < systems.size(); ++i) { auto& system = *systems[i]; system.onSceneLeft(_Scene); }
+                    for (uint i = 0; i < systems.size(); ++i) { 
+                        auto& system = *systems[i]; system.onSceneLeft(_Scene); 
+                    }
                 }
                 void preUpdate(Scene& _scene, const float& dt) {
                     if (justAddedEntities.size() > 0) {

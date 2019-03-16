@@ -42,14 +42,7 @@ struct BufferObject {
 
     void setData(std::vector<char>& _data, BufferDataDrawType::Type _drawType);
     void setData(size_t _startingIndex, std::vector<char>& _data);
-    /*
-    void addData(size_t _size, const void* _data, BufferDataDrawType::Type _drawType);
-    void addData(std::vector<char>& _data, BufferDataDrawType::Type _drawType);
-    void addData(size_t _size, const void* _data);
-    void addData(std::vector<char>& _data);
-    */
     void setDataOrphan(std::vector<char>& _data);
-
 
     template<typename T> void setData(std::vector<T>& _data, BufferDataDrawType::Type _drawType) {
         drawType = _drawType;
@@ -69,13 +62,11 @@ struct BufferObject {
 };
 struct VertexBufferObject final : public BufferObject{
     VertexBufferObject();
-    ~VertexBufferObject() = default;
-
+    ~VertexBufferObject()  = default;
 };
 struct ElementBufferObject final : public BufferObject {
     ElementBufferObject();
     ~ElementBufferObject() = default;
-
 };
 
 #endif

@@ -10,15 +10,14 @@ struct VertexAttributeInfo final{
     int      stride;
     size_t   offset;
 
-    VertexAttributeInfo() = delete;
     VertexAttributeInfo(int _size, int _type, bool _normalized, int _stride, size_t _offset, size_t _typeSize) {
         size = _size; type = _type; normalized = _normalized; stride = _stride; offset = _offset; typeSize = _typeSize;
     }
-    ~VertexAttributeInfo() = default;
-    VertexAttributeInfo(const VertexAttributeInfo& other) = delete;
-    VertexAttributeInfo& operator=(const VertexAttributeInfo& other) = delete;
-    VertexAttributeInfo(VertexAttributeInfo&& other) noexcept = default;
+    VertexAttributeInfo()                                                = delete;
+    ~VertexAttributeInfo()                                               = default;
+    VertexAttributeInfo(const VertexAttributeInfo& other)                = delete;
+    VertexAttributeInfo& operator=(const VertexAttributeInfo& other)     = delete;
+    VertexAttributeInfo(VertexAttributeInfo&& other) noexcept            = default;
     VertexAttributeInfo& operator=(VertexAttributeInfo&& other) noexcept = default;
 };
-
 #endif

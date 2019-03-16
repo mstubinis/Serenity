@@ -26,36 +26,8 @@ using namespace Engine;
 namespace boostm = boost::math;
 
 Mesh* Mesh::FontPlane = nullptr;
-Mesh* Mesh::Plane = nullptr;
-Mesh* Mesh::Cube = nullptr;
-
-void float32(float* __restrict out, const uint16_t in) {
-    uint32_t t1,t2,t3;
-    t1 = in & 0x7fff;                       // Non-sign bits
-    t2 = in & 0x8000;                       // Sign bit
-    t3 = in & 0x7c00;                       // Exponent
-    t1 <<= 13;                              // Align mantissa on MSB
-    t2 <<= 16;                              // Shift sign bit into position
-    t1 += 0x38000000;                       // Adjust bias
-    t1 = (t3 == 0 ? 0 : t1);                // Denormals-as-zero
-    t1 |= t2;                               // Re-insert sign bit
-    *((uint32_t*)out) = t1;
-};
-void float16(uint16_t* __restrict out, const float in) {
-    uint32_t inu = *((uint32_t*)&in);
-    uint32_t t1,t2,t3;
-    t1 = inu & 0x7fffffff;                 // Non-sign bits
-    t2 = inu & 0x80000000;                 // Sign bit
-    t3 = inu & 0x7f800000;                 // Exponent
-    t1 >>= 13;                             // Align mantissa on MSB
-    t2 >>= 16;                             // Shift sign bit into position
-    t1 -= 0x1c000;                         // Adjust bias
-    t1 = (t3 < 0x38800000) ? 0 : t1;
-    t1 = (t3 > 0x47000000) ? 0x7bff : t1;
-    t1 = (t3 == 0 ? 0 : t1);               // Denormals-as-zero
-    t1 |= t2;                              // Re-insert sign bit
-    *((uint16_t*)out) = t1;
-};
+Mesh* Mesh::Plane     = nullptr;
+Mesh* Mesh::Cube      = nullptr;
 
 namespace Engine{
     namespace epriv{
@@ -899,9 +871,9 @@ class Mesh::impl final{
                     in[j] |= (uint32_t)_data[_count + 1];
                     ++count;
                 }
-                float32(&out[0], in[0]);
-                float32(&out[1], in[1]);
-                float32(&out[2], in[2]);
+                Math::Float32From16(&out[0], in[0]);
+                Math::Float32From16(&out[1], in[1]);
+                Math::Float32From16(&out[2], in[2]);
                 data.file_points.emplace_back(out[0], out[1], out[2]);
             }
             //uvs
@@ -914,8 +886,8 @@ class Mesh::impl final{
                     in[j] |= (uint32_t)_data[_count + 1];
                     ++count;
                 }
-                float32(&out[0], in[0]);
-                float32(&out[1], in[1]);
+                Math::Float32From16(&out[0], in[0]);
+                Math::Float32From16(&out[1], in[1]);
                 data.file_uvs.emplace_back(out[0], out[1]);
             }
             //normals
@@ -928,9 +900,9 @@ class Mesh::impl final{
                     in[j] |= (uint32_t)_data[_count + 1];
                     ++count;
                 }
-                float32(&out[0], in[0]);
-                float32(&out[1], in[1]);
-                float32(&out[2], in[2]);
+                Math::Float32From16(&out[0], in[0]);
+                Math::Float32From16(&out[1], in[1]);
+                Math::Float32From16(&out[2], in[2]);
                 data.file_normals.emplace_back(out[0], out[1], out[2]);
             }
             //indices
@@ -977,21 +949,21 @@ class Mesh::impl final{
             }
             for (auto& pos : d.file_points) {
                 uint16_t out[3];
-                float16(&out[0], pos.x); float16(&out[1], pos.y); float16(&out[2], pos.z);
+                Math::Float16From32(&out[0], pos.x); Math::Float16From32(&out[1], pos.y); Math::Float16From32(&out[2], pos.z);
                 for (uint i = 0; i < 3; ++i) {
                     writeUint16tBigEndian(out[i], stream);
                 }
             }
             for (auto& uv : d.file_uvs) {
                 uint16_t out[2];
-                float16(&out[0], uv.x); float16(&out[1], uv.y);
+                Math::Float16From32(&out[0], uv.x); Math::Float16From32(&out[1], uv.y);
                 for (uint i = 0; i < 2; ++i) {
                     writeUint16tBigEndian(out[i], stream);
                 }
             }
             for (auto& norm : d.file_normals) {
                 uint16_t out[3];
-                float16(&out[0], norm.x); float16(&out[1], norm.y); float16(&out[2], norm.z);
+                Math::Float16From32(&out[0], norm.x); Math::Float16From32(&out[1], norm.y); Math::Float16From32(&out[2], norm.z);
                 for (uint i = 0; i < 3; ++i) {
                     writeUint16tBigEndian(out[i], stream);
                 }
@@ -1047,7 +1019,9 @@ class Mesh::impl final{
                     inPos[j] |= (uint32_t)_data[blockStart + 1];
                     blockStart += 2;
                 }
-                float32(&outPos[0], inPos[0]); float32(&outPos[1], inPos[1]); float32(&outPos[2], inPos[2]);
+                Math::Float32From16(&outPos[0], inPos[0]);
+                Math::Float32From16(&outPos[1], inPos[1]);
+                Math::Float32From16(&outPos[2], inPos[2]);
                 temp_pos.emplace_back(outPos[0], outPos[1], outPos[2]);
                 //uvs
                 float outUV[2];
@@ -1057,8 +1031,8 @@ class Mesh::impl final{
                     inUV[j] |= (uint32_t)_data[blockStart + 1];
                     blockStart += 2;
                 }
-                float32(&outUV[0], inUV[0]);
-                float32(&outUV[1], inUV[1]);
+                Math::Float32From16(&outUV[0], inUV[0]);
+                Math::Float32From16(&outUV[1], inUV[1]);
                 temp_uvs.emplace_back(outUV[0], outUV[1]);
                 //normals (remember they are GLuints right now)
                 uint32_t inn[3];
@@ -1081,10 +1055,10 @@ class Mesh::impl final{
                         inbI[j] |= (uint32_t)_data[blockStart + 1];
                         blockStart += 2;
                     }
-                    float32(&outBI[0], inbI[0]);
-                    float32(&outBI[1], inbI[1]);
-                    float32(&outBI[2], inbI[2]);
-                    float32(&outBI[3], inbI[3]);
+                    Math::Float32From16(&outBI[0], inbI[0]);
+                    Math::Float32From16(&outBI[1], inbI[1]);
+                    Math::Float32From16(&outBI[2], inbI[2]);
+                    Math::Float32From16(&outBI[3], inbI[3]);
                     temp_bID.emplace_back(outBI[0], outBI[1], outBI[2], outBI[3]);
                     //boneWeight's
                     float outBW[4];
@@ -1094,10 +1068,10 @@ class Mesh::impl final{
                         inBW[j] |= (uint32_t)_data[blockStart + 1];
                         blockStart += 2;
                     }
-                    float32(&outBW[0], inBW[0]);
-                    float32(&outBW[1], inBW[1]);
-                    float32(&outBW[2], inBW[2]);
-                    float32(&outBW[3], inBW[3]);
+                    Math::Float32From16(&outBW[0], inBW[0]);
+                    Math::Float32From16(&outBW[1], inBW[1]);
+                    Math::Float32From16(&outBW[2], inBW[2]);
+                    Math::Float32From16(&outBW[3], inBW[3]);
                     temp_bW.emplace_back(outBW[0], outBW[1], outBW[2], outBW[3]);
                 }
             }
@@ -1174,13 +1148,13 @@ class Mesh::impl final{
 
                     //positions
                     uint16_t outp[3];
-                    float16(&outp[0], position.x);  float16(&outp[1], position.y);  float16(&outp[2], position.z);
+                    Math::Float16From32(&outp[0], position.x);  Math::Float16From32(&outp[1], position.y);  Math::Float16From32(&outp[2], position.z);
                     for (uint i = 0; i < 3; ++i) {
                         writeUint16tBigEndian(outp[i], stream);
                     }
                     //uvs
                     uint16_t outu[2];
-                    float16(&outu[0], uv.x);  float16(&outu[1], uv.y);
+                    Math::Float16From32(&outu[0], uv.x);  Math::Float16From32(&outu[1], uv.y);
                     for (uint i = 0; i < 2; ++i) {
                         writeUint16tBigEndian(outu[i], stream);
                     }
@@ -1192,13 +1166,13 @@ class Mesh::impl final{
                     }
                     //boneID's
                     uint16_t outbI[4];
-                    float16(&outbI[0], boneID.x);  float16(&outbI[1], boneID.y); float16(&outbI[2], boneID.z);  float16(&outbI[3], boneID.w);
+                    Math::Float16From32(&outbI[0], boneID.x);  Math::Float16From32(&outbI[1], boneID.y); Math::Float16From32(&outbI[2], boneID.z);  Math::Float16From32(&outbI[3], boneID.w);
                     for (uint i = 0; i < 4; ++i) {
                         writeUint16tBigEndian(outbI[i], stream);
                     }
                     //boneWeight's
                     uint16_t outbW[4];
-                    float16(&outbW[0], boneWeight.x);  float16(&outbW[1], boneWeight.y); float16(&outbW[2], boneWeight.z);  float16(&outbW[3], boneWeight.w);
+                    Math::Float16From32(&outbW[0], boneWeight.x);  Math::Float16From32(&outbW[1], boneWeight.y); Math::Float16From32(&outbW[2], boneWeight.z);  Math::Float16From32(&outbW[3], boneWeight.w);
                     for (uint i = 0; i < 4; ++i) {
                         writeUint16tBigEndian(outbW[i], stream);
                     }
@@ -1212,16 +1186,16 @@ class Mesh::impl final{
                     const auto& tangent = tangents[j];
                     //positions
                     uint16_t outp[3];
-                    float16(&outp[0], position.x);
-                    float16(&outp[1], position.y);
-                    float16(&outp[2], position.z);
+                    Math::Float16From32(&outp[0], position.x);
+                    Math::Float16From32(&outp[1], position.y);
+                    Math::Float16From32(&outp[2], position.z);
                     for (uint i = 0; i < 3; ++i) {
                         writeUint16tBigEndian(outp[i], stream);
                     }
                     //uvs
                     uint16_t outu[2];
-                    float16(&outu[0], uv.x);
-                    float16(&outu[1], uv.y);
+                    Math::Float16From32(&outu[0], uv.x);
+                    Math::Float16From32(&outu[1], uv.y);
                     for (uint i = 0; i < 2; ++i) {
                         writeUint16tBigEndian(outu[i], stream);
                     }

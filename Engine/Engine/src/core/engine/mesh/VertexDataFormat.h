@@ -15,19 +15,17 @@ struct VertexDataFormat {
     VertexAttributeLayout::Type         interleavingType;
 
     VertexDataFormat();
-    ~VertexDataFormat() = default;
-    VertexDataFormat(const VertexDataFormat& other) = delete;
-    VertexDataFormat& operator=(const VertexDataFormat& other) = delete;
-    VertexDataFormat(VertexDataFormat&& other) noexcept = default;
+    ~VertexDataFormat()                                            = default;
+    VertexDataFormat(const VertexDataFormat& other)                = delete;
+    VertexDataFormat& operator=(const VertexDataFormat& other)     = delete;
+    VertexDataFormat(VertexDataFormat&& other) noexcept            = default;
     VertexDataFormat& operator=(VertexDataFormat&& other) noexcept = default;
 
-    void add(int _size, int _type, bool _normalized, int _stride, size_t _offset, size_t _typeSize);
+    void add(int size,int type,bool normalized,int stride,size_t offset,size_t typeSize);
     void bind(VertexData& vertData);
     void unbind();
 
-    static VertexDataFormat   VertexDataNoLighting;
-    static VertexDataFormat   VertexDataBasic;
-    static VertexDataFormat   VertexDataAnimated;
+    static VertexDataFormat   VertexDataPositionsOnly, VertexDataNoLighting, VertexDataBasic, VertexDataAnimated;
 };
 
 #endif

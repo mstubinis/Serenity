@@ -30,7 +30,6 @@
 
 #include <iostream>
 
-
 using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
@@ -164,6 +163,7 @@ namespace Engine{
         };
     };
 };
+
 
 class epriv::RenderManager::impl final{
     public:
@@ -451,7 +451,6 @@ class epriv::RenderManager::impl final{
             //dummy vao
             GLuint dummyVAO;
             Engine::Renderer::genAndBindVAO(dummyVAO);
-
 
             epriv::EShaders::init();
 
@@ -2304,6 +2303,65 @@ class epriv::RenderManager::impl final{
             #pragma endregion
         }
 };
+
+
+epriv::RenderPipeline::RenderPipeline(ShaderP& _shaderProgram) :shaderProgram(_shaderProgram) {
+}
+epriv::RenderPipeline::~RenderPipeline() {
+    SAFE_DELETE_VECTOR(materialNodes);
+}
+
+float dist(Camera& lhs, const glm::vec3& rhs) {
+    return glm::distance(lhs.getPosition(), rhs);
+}
+void epriv::RenderPipeline::sort(Camera& c) {
+    for (auto& materialNode : materialNodes) {
+        for (auto& meshNode : materialNode->meshNodes) {
+            auto& vect = meshNode->instanceNodes;
+            std::sort(
+                vect.begin(), vect.end(),
+                [&c](InstanceNode* lhs, InstanceNode* rhs) {
+                const glm::vec3& lhsPos = lhs->instance->parent().getComponent<ComponentBody>()->position();
+                const glm::vec3& rhsPos = rhs->instance->parent().getComponent<ComponentBody>()->position();
+                return dist(c, lhsPos) < dist(c, rhsPos);
+            }
+            );
+        }
+    }
+}
+
+void epriv::RenderPipeline::render() {
+    shaderProgram.bind();
+    for (auto& materialNode : materialNodes) {
+        if (materialNode->meshNodes.size() > 0) {
+            auto& _material = *materialNode->material;
+            _material.bind();
+            for (auto& meshNode : materialNode->meshNodes) {
+                if (meshNode->instanceNodes.size() > 0) {
+                    auto& _mesh = *meshNode->mesh;
+                    _mesh.bind();
+                    for (auto& instanceNode : meshNode->instanceNodes) {
+                        auto& _meshInstance = *instanceNode->instance;
+                        if (_meshInstance.passedRenderCheck()) {
+                            _meshInstance.bind();
+                            _mesh.render(false);
+                            _meshInstance.unbind();
+                        }
+                    }
+                    //protect against any custom changes by restoring to the regular shader and material
+                    if (renderManager->glSM.current_bound_shader_program != &shaderProgram) {
+                        shaderProgram.bind();
+                        _material.bind();
+                    }
+                    _mesh.unbind();
+                }
+            }
+        }
+    }
+}
+
+
+
 epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); renderManager = m_i.get(); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
@@ -2350,65 +2408,6 @@ void epriv::RenderManager::_unbindMaterial(){
 }
 void epriv::RenderManager::_genPBREnvMapData(Texture& texture, uint size1, uint size2){
     m_i->_generatePBREnvMapData(texture,size1,size2);
-}
-
-
-
-epriv::RenderPipeline::RenderPipeline(ShaderP& _shaderProgram):shaderProgram(_shaderProgram){
-}
-epriv::RenderPipeline::~RenderPipeline() {
-    SAFE_DELETE_VECTOR(materialNodes);
-}
-
-float dist(Camera& lhs, const glm::vec3& rhs) {
-    return glm::distance(lhs.getPosition(), rhs);
-}
-void epriv::RenderPipeline::sort(Camera& c) {
-    /*
-    for (auto& materialNode : materialNodes) {
-        for (auto& meshNode : materialNode->meshNodes) {
-            auto& vect = meshNode->instanceNodes;
-            std::sort(
-                vect.begin(), vect.end(),
-                [&c](InstanceNode* lhs,InstanceNode* rhs) { 
-                    const glm::vec3& lhsPos = lhs->instance->parent()->getComponent<ComponentBody>()->position();
-                    const glm::vec3& rhsPos = rhs->instance->parent()->getComponent<ComponentBody>()->position();
-                    return dist(c, lhsPos) < dist(c, rhsPos);
-                }
-            );
-        }
-    }
-    */
-}
-
-void epriv::RenderPipeline::render() {
-    shaderProgram.bind();
-    for (auto& materialNode : materialNodes) {
-        if (materialNode->meshNodes.size() > 0) {
-            auto& _material = *materialNode->material;
-            _material.bind();
-            for (auto& meshNode : materialNode->meshNodes) {
-                if (meshNode->instanceNodes.size() > 0) {
-                    auto& _mesh = *meshNode->mesh;
-                    _mesh.bind();
-                    for (auto& instanceNode : meshNode->instanceNodes) {
-                        auto& _meshInstance = *instanceNode->instance;
-                        if (_meshInstance.passedRenderCheck()) {
-                            _meshInstance.bind();
-                            _mesh.render(false);
-                            _meshInstance.unbind();
-                        }
-                    }
-                    //protect against any custom changes by restoring to the regular shader and material
-                    if (renderManager->glSM.current_bound_shader_program != &shaderProgram) {
-                        shaderProgram.bind();
-                        _material.bind();
-                    }
-                    _mesh.unbind();
-                }
-            }
-        }
-    }
 }
 
 void Renderer::Settings::General::enable1(bool b) { renderManager->enabled1 = b; }

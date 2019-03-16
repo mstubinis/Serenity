@@ -7,8 +7,6 @@
 #include "core/engine/Engine_Renderer.h"
 #include <memory>
 
-//TODO: remove " + 1 " for malloc size calls, it is(was?) an attempt to remove a crash... still have to confirm the crash is gone...
-
 
 typedef unsigned short ushort;
 
@@ -31,7 +29,6 @@ struct VertexData {
         for (size_t i = 0; i < data.capacity(); ++i) { data.emplace_back(nullptr); }
         dataSizes.reserve(_format.attributes.size());
         for (size_t i = 0; i < dataSizes.capacity(); ++i) { dataSizes.emplace_back(0); }
-
         buffers.push_back(std::make_unique<VertexBufferObject>());
     }
     ~VertexData() {
@@ -43,7 +40,6 @@ struct VertexData {
         vector_clear(dataSizes);
         vector_clear(indices);
     }
-
     template<typename T> const std::vector<T> getData(size_t attributeIndex) {
         const T* _data = (T*)data[attributeIndex];
         std::vector<T> ret(_data, _data + dataSizes[attributeIndex]);
@@ -52,9 +48,7 @@ struct VertexData {
     template<typename T> void setData(size_t attributeIndex, std::vector<T>& _data, bool addToGPU = false,bool orphan = false) {
         if (buffers.size() == 0)
             buffers.push_back(std::make_unique<VertexBufferObject>());
-
         if (attributeIndex >= data.size()) return;
-
         auto& _buffer = *buffers[0];
         dataSizes[attributeIndex] = _data.size();
         free(data[attributeIndex]);
@@ -116,9 +110,8 @@ struct VertexData {
         char* buffer;
         size_t accumulator = 0;
         size_t size = 0;
-
         if (format.interleavingType == VertexAttributeLayout::Interleaved) {
-            size = (format.attributes[0].stride * dataSizes[0]) + 1;
+            size = (format.attributes[0].stride * dataSizes[0]);
             buffer = (char*)malloc(size);
             for (size_t i = 0; i < dataSizes[0]; ++i) {
                 for (size_t j = 0; j < data.size(); ++j) {
@@ -132,7 +125,6 @@ struct VertexData {
             if (attributeIndex == -1) {
                 for (size_t i = 0; i < data.size(); ++i)
                     size += format.attributes[i].typeSize * dataSizes[i];
-                size += 1;
                 buffer = (char*)malloc(size);
                 for (size_t i = 0; i < data.size(); ++i) {
                     auto blockSize = dataSizes[i] * format.attributes[i].typeSize;
@@ -142,7 +134,7 @@ struct VertexData {
 
                 !orphan ? _vBuffer.setData(size, buffer, BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(buffer);
             }else{
-                size += (format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex]) + 1;
+                size += (format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex]);
                 buffer = (char*)malloc(size);
                 for (size_t i = 0; i < data.size(); ++i) {
                     if (i != attributeIndex) {

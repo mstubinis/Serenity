@@ -3,7 +3,7 @@
 
 using namespace std;
 
-BufferObject::BufferObject() :buffer(0), capacity(0) { 
+BufferObject::BufferObject():buffer(0),capacity(0) { 
     drawType = BufferDataDrawType::Unassigned; 
 }
 void BufferObject::generate() { 
@@ -13,8 +13,7 @@ void BufferObject::generate() {
 }
 void BufferObject::destroy() { 
     if (buffer) { 
-        glDeleteBuffers(1, &buffer); 
-        buffer = 0; 
+        glDeleteBuffers(1, &buffer); buffer = 0; 
     } 
 }
 void BufferObject::bind() {
@@ -29,10 +28,10 @@ void BufferObject::setData(size_t _size, const void* _data, BufferDataDrawType::
         glBufferSubData(type, 0, _size, _data);
     }
 }
-void BufferObject::setDataOrphan(const void* _data) {
+void BufferObject::setDataOrphan(const void* data) {
     if (capacity == 0) return;
-    glBufferData(type, capacity, nullptr, drawType);
-    glBufferSubData(type, 0, capacity, _data);
+    glBufferData   (type, capacity, nullptr,  drawType);
+    glBufferSubData(type, 0,        capacity, data);
 }
 void BufferObject::setData(size_t _size, size_t _startingIndex, const void* _data) {
     if (drawType == BufferDataDrawType::Unassigned) return;
@@ -41,8 +40,6 @@ void BufferObject::setData(size_t _size, size_t _startingIndex, const void* _dat
 void BufferObject::setData(vector<char>& _data, BufferDataDrawType::Type _drawType) { setData(_data.size() * sizeof(char), _data.data(), _drawType); }
 void BufferObject::setData(size_t _startingIndex, vector<char>& _data) { setData(_data.size() * sizeof(char), _startingIndex, _data.data()); }
 void BufferObject::setDataOrphan(vector<char>& _data) { if (_data.size() * sizeof(char) != capacity) return; setDataOrphan(_data.data()); }
-
-
 
 
 VertexBufferObject::VertexBufferObject() {

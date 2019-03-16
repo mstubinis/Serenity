@@ -58,6 +58,12 @@
     <Filter Include="Source Files\Engine\Core\Mesh">
       <UniqueIdentifier>{bff1fa72-d8ff-4da2-9cc0-fbf10be17520}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer">
+      <UniqueIdentifier>{3e889c77-515b-4c81-8382-4554fec471cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer">
+      <UniqueIdentifier>{0efad51b-6f86-4536-a697-e8bfe4d90cab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Engine\data\Shaders\AS_groundFromSpace_frag.glsl">
@@ -126,9 +132,6 @@
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_Physics.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_Renderer.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_ResourceBasic.cpp">
@@ -242,6 +245,9 @@
     <ClCompile Include="Engine\src\core\engine\Engine_Debugging.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\Engine_Renderer.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -311,9 +317,6 @@
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_Physics.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_Renderer.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_ResourceBasic.h">
@@ -447,6 +450,9 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_Debugging.h">
       <Filter>Header Files\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\Engine_Renderer.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

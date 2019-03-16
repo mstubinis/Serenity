@@ -43,20 +43,13 @@ struct Scene::impl final {
         m_ID = InternalScenePublicInterface::NumScenes;
             
 
-        m_ECS.assignSystem<ComponentLogic>(
-            ComponentLogic_System());
-        m_ECS.assignSystem<ComponentBody>(
-            ComponentBody_System());
-        m_ECS.assignSystem<ComponentLogic1>(
-            ComponentLogic1_System());
-        m_ECS.assignSystem<ComponentCamera>(
-            ComponentCamera_System());
-        m_ECS.assignSystem<ComponentLogic2>(
-            ComponentLogic2_System());
-        m_ECS.assignSystem<ComponentModel>(
-            ComponentModel_System());
-        m_ECS.assignSystem<ComponentLogic3>(
-            ComponentLogic3_System());
+        m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System());
+        m_ECS.assignSystem<ComponentBody>  (ComponentBody_System());
+        m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System());
+        m_ECS.assignSystem<ComponentCamera>(ComponentCamera_System());
+        m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System());
+        m_ECS.assignSystem<ComponentModel> (ComponentModel_System());
+        m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System());
        
     }
     void _destruct() {
@@ -81,6 +74,7 @@ struct Scene::impl final {
     }
     void _addMeshInstanceToPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, RenderStage::Stage _stage) {
         epriv::RenderPipeline* _pipeline = nullptr;
+        
         for (auto& pipeline : _pipelinesList) {
             if (&pipeline->shaderProgram == _meshInstance.shaderProgram()) {
                 _pipeline = pipeline;
