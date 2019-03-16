@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_DEBUGGING_CLASS_H
-#define ENGINE_DEBUGGING_CLASS_H
+#ifndef ENGINE_DEBUGGING_CLASS_INCLUDE_GUARD
+#define ENGINE_DEBUGGING_CLASS_INCLUDE_GUARD
 
 #include "core/engine/Engine_Utils.h"
 #include "core/engine/Engine_Resources.h"
@@ -9,7 +9,20 @@ namespace Engine {
     namespace epriv {
         class DebugManager {
             private:
-                class impl; std::unique_ptr<impl> m_i;
+                sf::Clock clock;
+                sf::Int64 m_logicTime, m_physicsTime, m_renderTime, m_soundTime, m_displayTime;
+                sf::Int64 m_deltaTime;
+                double divisor;
+                uint output_frame_delay, output_frame;
+                uint decimals;
+                std::string output;
+
+                //opengl timers
+                uint queryID;
+                GLuint queryObject;
+
+                //general text debugging
+                std::vector<std::string> text_queue;
             public:
                 DebugManager(const char* name, uint w, uint h);
                 ~DebugManager();
