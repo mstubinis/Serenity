@@ -70,6 +70,12 @@
     <Filter Include="Source Files\Engine\Core\Events">
       <UniqueIdentifier>{04128a29-0212-46bd-9b22-a8780346f799}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Textures">
+      <UniqueIdentifier>{364114db-6380-4e1d-8f22-0b8e4cd444b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Textures">
+      <UniqueIdentifier>{8adcffc1-757d-45c7-ad34-0210af7b51f7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Engine\data\Shaders\AS_groundFromSpace_frag.glsl">
@@ -173,13 +179,7 @@
     <ClCompile Include="Engine\src\core\Skybox.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\Texture.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\BindableResource.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\FramebufferObject.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\CapsuleSpace.cpp">
@@ -227,9 +227,6 @@
     <ClCompile Include="Engine\src\ecs\ComponentLogic3.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\Mesh.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\mesh\VertexDataFormat.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
@@ -256,6 +253,15 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\events\Engine_Events.cpp">
       <Filter>Source Files\Engine\Core\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\FramebufferObject.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp">
+      <Filter>Source Files\Engine\Core\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -334,9 +340,6 @@
     <ClInclude Include="Engine\src\core\engine\Engine_Window.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\SMAA_LUT.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\Camera.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
@@ -362,9 +365,6 @@
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\Skybox.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\Texture.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\CapsuleSpace.h">
@@ -394,12 +394,6 @@
     <ClInclude Include="Engine\src\core\engine\BindableResource.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\FramebufferObject.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\GLImageConstants.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\ecs\SparseSet.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
@@ -426,9 +420,6 @@
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\Components.h">
       <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\Mesh.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\mesh\VertexAttribute.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
@@ -465,6 +456,24 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\events\Engine_Events.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\SMAA_LUT.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\FramebufferObject.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\GLImageConstants.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\textures\Texture.h">
+      <Filter>Header Files\Engine\Core\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\textures\DDS.h">
+      <Filter>Header Files\Engine\Core\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

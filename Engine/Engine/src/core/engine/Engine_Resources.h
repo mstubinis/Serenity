@@ -3,7 +3,7 @@
 #define ENGINE_ENGINE_RESOURCES_H
 
 #include "core/engine/Engine_Physics.h"
-#include "core/engine/GLImageConstants.h"
+#include "core/engine/renderer/GLImageConstants.h"
 #include "core/ShaderProgram.h"
 
 typedef std::uint32_t uint;

@@ -1,4 +1,4 @@
-#include "core/Mesh.h"
+#include "core/engine/mesh/Mesh.h"
 #include "core/engine/Engine_Resources.h"
 #include "core/engine/Engine_Math.h"
 #include "core/MeshInstance.h"

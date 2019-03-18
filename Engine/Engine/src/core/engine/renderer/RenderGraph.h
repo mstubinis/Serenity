@@ -43,6 +43,7 @@ namespace Engine {
                 ~RenderPipeline();
 
                 void sort(Camera& c);
+                void sort_cheap(Camera& c);
                 void render();
         };
     };

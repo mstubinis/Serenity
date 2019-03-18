@@ -4,7 +4,7 @@
 #include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/Engine_Math.h"
 #include "core/Camera.h"
-#include "core/Mesh.h"
+#include "core/engine/mesh/Mesh.h"
 #include "core/MeshInstance.h"
 #include "core/Scene.h"
 

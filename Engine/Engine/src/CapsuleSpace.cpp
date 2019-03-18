@@ -6,9 +6,9 @@
 #include "core/Light.h"
 #include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/Engine_GLStateMachine.h"
-#include "core/Texture.h"
+#include "core/engine/textures/Texture.h"
 #include "GameSkybox.h"
-#include "core/Mesh.h"
+#include "core/engine/mesh/Mesh.h"
 #include "core/MeshInstance.h"
 
 #include "ResourceManifest.h"

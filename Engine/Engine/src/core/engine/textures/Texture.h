@@ -4,7 +4,7 @@
 
 #include "core/engine/Engine_ResourceBasic.h"
 #include <glm/fwd.hpp>
-#include "core/engine/GLImageConstants.h"
+#include "core/engine/renderer/GLImageConstants.h"
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <memory>

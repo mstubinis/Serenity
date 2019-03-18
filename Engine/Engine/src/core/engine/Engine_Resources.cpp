@@ -8,7 +8,7 @@
 #include "core/MeshInstance.h"
 #include "core/Material.h"
 #include "core/Camera.h"
-#include "core/Texture.h"
+#include "core/engine/textures/Texture.h"
 #include "core/Font.h"
 #include "core/Scene.h"
 

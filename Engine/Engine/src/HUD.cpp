@@ -5,7 +5,7 @@
 #include "core/engine/Engine_Window.h"
 #include "core/engine/Engine_Math.h"
 #include "core/Font.h"
-#include "core/Texture.h"
+#include "core/engine/textures/Texture.h"
 #include "core/Scene.h"
 #include "core/Camera.h"
 #include "core/Material.h"

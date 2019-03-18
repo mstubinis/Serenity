@@ -5,10 +5,10 @@
 #include "core/engine/Engine_Math.h"
 #include "core/engine/Engine_GLStateMachine.h"
 #include "core/Camera.h"
-#include "core/Mesh.h"
+#include "core/engine/mesh/Mesh.h"
 #include "core/Scene.h"
-#include "core/Texture.h"
-#include "core/engine/FramebufferObject.h"
+#include "core/engine/textures/Texture.h"
+#include "core/engine/renderer/FramebufferObject.h"
 #include "core/engine/Engine_Window.h"
 #include "core/Scene.h"
 

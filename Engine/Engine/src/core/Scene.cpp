@@ -173,6 +173,7 @@ vector<SunLight*>& InternalScenePublicInterface::GetLights(Scene& _scene) { retu
 
 void InternalScenePublicInterface::RenderGeometryOpaque(Scene& _scene,Camera& _camera) {
     for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 
+        //pipeline->sort(_camera);
         pipeline->render(); 
     } 
 }
@@ -183,7 +184,8 @@ void InternalScenePublicInterface::RenderGeometryTransparent(Scene& _scene, Came
     } 
 }
 void InternalScenePublicInterface::RenderForwardOpaque(Scene& _scene, Camera& _camera) {
-    for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) { 
+    for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) {
+        //pipeline->sort(_camera);
         pipeline->render(); 
     }
 }

@@ -6,7 +6,7 @@
 #include "core/engine/Engine_Math.h"
 #include "core/MeshInstance.h"
 #include "core/Camera.h"
-#include "core/Mesh.h"
+#include "core/engine/mesh/Mesh.h"
 
 using namespace Engine;
 using namespace Engine::epriv;

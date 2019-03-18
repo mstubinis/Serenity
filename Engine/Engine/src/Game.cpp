@@ -8,8 +8,8 @@
 #include "GameCamera.h"
 #include "CapsuleSpace.h"
 #include "core/Material.h"
-#include "core/Mesh.h"
-#include "core/Texture.h"
+#include "core/engine/mesh/Mesh.h"
+#include "core/engine/textures/Texture.h"
 #include "core/Light.h"
 
 #include <unordered_map>

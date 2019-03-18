@@ -5,12 +5,12 @@
 #include "core/engine/Engine_Math.h"
 #include "core/Light.h"
 #include "core/ShaderProgram.h"
-#include "core/Mesh.h"
+#include "core/engine/mesh/Mesh.h"
 #include "core/MeshInstance.h"
 #include "core/Material.h"
 #include "core/Camera.h"
 #include "core/Scene.h"
-#include "core/Texture.h"
+#include "core/engine/textures/Texture.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>

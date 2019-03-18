@@ -2,7 +2,7 @@
 #include "core/engine/Engine_ThreadManager.h"
 #include "core/engine/Engine_Resources.h"
 #include "core/Material.h"
-#include "core/Texture.h"
+#include "core/engine/textures/Texture.h"
 
 using namespace Engine;
 

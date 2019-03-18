@@ -1,6 +1,6 @@
 #include "core/engine/renderer/RenderGraph.h"
 #include "core/ShaderProgram.h"
-#include "core/Mesh.h"
+#include "core/engine/mesh/Mesh.h"
 #include "core/Material.h"
 #include "core/MeshInstance.h"
 #include "core/Camera.h"
@@ -16,8 +16,24 @@ epriv::RenderPipeline::~RenderPipeline() {
     SAFE_DELETE_VECTOR(materialNodes);
 }
 
-float dist(Camera& lhs, const glm::vec3& rhs) {
-    return glm::distance(lhs.getPosition(), rhs);
+float dist(const glm::vec3& lhs, const glm::vec3& rhs) {
+    return glm::distance(lhs, rhs);
+}
+void epriv::RenderPipeline::sort_cheap(Camera& c) {
+    for (auto& materialNode : materialNodes) {
+        for (auto& meshNode : materialNode->meshNodes) {
+            auto& vect = meshNode->instanceNodes;
+            std::sort(
+                vect.begin(), vect.end(),
+                [&c](InstanceNode* lhs, InstanceNode* rhs) {
+                    const glm::vec3& lhsPos = lhs->instance->parent().getComponent<ComponentBody>()->position();
+                    const glm::vec3& rhsPos = rhs->instance->parent().getComponent<ComponentBody>()->position();
+                    const glm::vec3& camPos = c.getPosition();
+                    return dist(camPos, lhsPos) < dist(camPos, rhsPos);
+                }
+            );
+        }
+    }
 }
 void epriv::RenderPipeline::sort(Camera& c) {
     for (auto& materialNode : materialNodes) {
@@ -26,10 +42,21 @@ void epriv::RenderPipeline::sort(Camera& c) {
             std::sort(
                 vect.begin(), vect.end(),
                 [&c](InstanceNode* lhs, InstanceNode* rhs) {
-                const glm::vec3& lhsPos = lhs->instance->parent().getComponent<ComponentBody>()->position();
-                const glm::vec3& rhsPos = rhs->instance->parent().getComponent<ComponentBody>()->position();
-                return dist(c, lhsPos) < dist(c, rhsPos);
-            }
+                    const glm::vec3& lhsPos = lhs->instance->parent().getComponent<ComponentBody>()->position();
+                    const glm::vec3& rhsPos = rhs->instance->parent().getComponent<ComponentBody>()->position();
+                    const glm::vec3& camPos = c.getPosition();
+
+                    const glm::vec3& leftDir = glm::normalize(lhsPos - camPos);
+                    const glm::vec3& rightDir = glm::normalize(rhsPos - camPos);
+
+                    const float& lhsRad = lhs->instance->parent().getComponent<ComponentModel>()->radius();
+                    const float& rhsRad = rhs->instance->parent().getComponent<ComponentModel>()->radius();
+
+                    const glm::vec3& leftPos = lhsPos - (leftDir * lhsRad);
+                    const glm::vec3& rightPos = rhsPos - (rightDir * rhsRad);
+
+                    return dist(camPos, leftPos) < dist(camPos, rightPos);
+                }
             );
         }
     }

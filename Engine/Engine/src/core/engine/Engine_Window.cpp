@@ -3,7 +3,7 @@
 #include "core/engine/Engine_Resources.h"
 #include "core/engine/events/Engine_EventDispatcher.h"
 #include "core/engine/renderer/Engine_Renderer.h"
-#include "core/Texture.h"
+#include "core/engine/textures/Texture.h"
 #include "core/Scene.h"
 #include "ecs/ECS.h"
 #include "ecs/ComponentCamera.h"
