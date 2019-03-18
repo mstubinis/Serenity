@@ -48,6 +48,11 @@
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventDispatcher.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_Events.cpp" />
+    <ClCompile Include="Engine\src\core\engine\lights\DirectionalLight.cpp" />
+    <ClCompile Include="Engine\src\core\engine\lights\PointLight.cpp" />
+    <ClCompile Include="Engine\src\core\engine\lights\RodLight.cpp" />
+    <ClCompile Include="Engine\src\core\engine\lights\SpotLight.cpp" />
+    <ClCompile Include="Engine\src\core\engine\lights\SunLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexBufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexDataFormat.cpp" />
@@ -57,7 +62,6 @@
     <ClCompile Include="Engine\src\core\engine\renderer\RenderGraph.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp" />
     <ClCompile Include="Engine\src\core\Font.cpp" />
-    <ClCompile Include="Engine\src\core\Light.cpp" />
     <ClCompile Include="Engine\src\core\Material.cpp" />
     <ClCompile Include="Engine\src\core\MeshInstance.cpp" />
     <ClCompile Include="Engine\src\core\Scene.cpp" />
@@ -109,6 +113,13 @@
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventEnums.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventObject.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_Events.h" />
+    <ClInclude Include="Engine\src\core\engine\lights\DirectionalLight.h" />
+    <ClInclude Include="Engine\src\core\engine\lights\Light.h" />
+    <ClInclude Include="Engine\src\core\engine\lights\LightIncludes.h" />
+    <ClInclude Include="Engine\src\core\engine\lights\PointLight.h" />
+    <ClInclude Include="Engine\src\core\engine\lights\RodLight.h" />
+    <ClInclude Include="Engine\src\core\engine\lights\SpotLight.h" />
+    <ClInclude Include="Engine\src\core\engine\lights\SunLight.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexAttribute.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexBufferObject.h" />
@@ -123,7 +134,6 @@
     <ClInclude Include="Engine\src\core\engine\textures\DDS.h" />
     <ClInclude Include="Engine\src\core\engine\textures\Texture.h" />
     <ClInclude Include="Engine\src\core\Font.h" />
-    <ClInclude Include="Engine\src\core\Light.h" />
     <ClInclude Include="Engine\src\core\Material.h" />
     <ClInclude Include="Engine\src\core\MeshInstance.h" />
     <ClInclude Include="Engine\src\core\Scene.h" />

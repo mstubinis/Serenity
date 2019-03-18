@@ -76,6 +76,12 @@
     <Filter Include="Source Files\Engine\Core\Textures">
       <UniqueIdentifier>{8adcffc1-757d-45c7-ad34-0210af7b51f7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Lights">
+      <UniqueIdentifier>{4525d351-162f-4e32-be9c-ea95db7b7876}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Lights">
+      <UniqueIdentifier>{84e14886-9402-4978-98ce-dc664cf7cf4d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Engine\data\Shaders\AS_groundFromSpace_frag.glsl">
@@ -159,9 +165,6 @@
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\Font.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\Light.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\Material.cpp">
@@ -263,6 +266,21 @@
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\lights\SunLight.cpp">
+      <Filter>Source Files\Engine\Core\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\lights\DirectionalLight.cpp">
+      <Filter>Source Files\Engine\Core\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\lights\PointLight.cpp">
+      <Filter>Source Files\Engine\Core\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\lights\SpotLight.cpp">
+      <Filter>Source Files\Engine\Core\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\lights\RodLight.cpp">
+      <Filter>Source Files\Engine\Core\Lights</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -347,9 +365,6 @@
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\Font.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\Light.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\Material.h">
@@ -474,6 +489,27 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lights\Light.h">
+      <Filter>Header Files\Engine\Core\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lights\SunLight.h">
+      <Filter>Header Files\Engine\Core\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lights\DirectionalLight.h">
+      <Filter>Header Files\Engine\Core\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lights\PointLight.h">
+      <Filter>Header Files\Engine\Core\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lights\SpotLight.h">
+      <Filter>Header Files\Engine\Core\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lights\RodLight.h">
+      <Filter>Header Files\Engine\Core\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lights\LightIncludes.h">
+      <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

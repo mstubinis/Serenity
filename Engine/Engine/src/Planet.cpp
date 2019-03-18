@@ -3,7 +3,7 @@
 #include "core/engine/Engine.h"
 #include "core/engine/Engine_GLStateMachine.h"
 #include "core/engine/Engine_Math.h"
-#include "core/Light.h"
+#include "core/engine/lights/Light.h"
 #include "core/ShaderProgram.h"
 #include "core/engine/mesh/Mesh.h"
 #include "core/MeshInstance.h"

@@ -4,7 +4,7 @@
 #include "core/engine/Engine_BuiltInResources.h"
 #include "ecs/ECS.h"
 #include "core/Skybox.h"
-#include "core/Mesh.h"
+#include "core/engine/mesh/Mesh.h"
 #include "core/MeshInstance.h"
 #include "core/Material.h"
 #include "core/Camera.h"

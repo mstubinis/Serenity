@@ -3,7 +3,7 @@
 #include "core/Material.h"
 #include "Ship.h"
 #include "GameCamera.h"
-#include "core/Light.h"
+#include "core/engine/lights/Light.h"
 #include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/Engine_GLStateMachine.h"
 #include "core/engine/textures/Texture.h"

@@ -10,7 +10,7 @@
 #include "core/engine/renderer/FramebufferObject.h"
 #include "core/engine/renderer/SMAA_LUT.h"
 #include "core/Camera.h"
-#include "core/Light.h"
+#include "core/engine/lights/Light.h"
 #include "core/Font.h"
 #include "core/Scene.h"
 #include "core/engine/textures/Texture.h"

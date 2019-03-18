@@ -10,7 +10,7 @@
 #include "core/Material.h"
 #include "core/engine/mesh/Mesh.h"
 #include "core/engine/textures/Texture.h"
-#include "core/Light.h"
+#include "core/engine/lights/Light.h"
 
 #include <unordered_map>
 #include <iostream>

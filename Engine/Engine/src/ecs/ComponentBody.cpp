@@ -3,7 +3,7 @@
 #include "core/engine/Engine_Math.h"
 #include "core/engine/Engine_ThreadManager.h"
 #include "core/MeshInstance.h"
-#include "core/Mesh.h"
+#include "core/engine/mesh/Mesh.h"
 #include "core/Camera.h"
 
 #include <bullet/btBulletCollisionCommon.h>
@@ -16,8 +16,6 @@
 using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
-
-#pragma region DataStructures
 
 #pragma region PhysicsData
 
