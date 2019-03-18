@@ -4,7 +4,8 @@
 
 #include <string>
 #include <glm/vec2.hpp>
-#include "core/engine/Engine_EventEnums.h"
+#include "core/engine/events/Engine_EventDispatcher.h"
+#include "core/engine/events/Engine_EventEnums.h"
 #include "core/engine/Engine_Utils.h"
 #include <unordered_map>
 
@@ -19,6 +20,7 @@ namespace Engine{
                 float m_Delta;
                 glm::vec2 m_Position, m_Position_Previous, m_Difference;
                 uint m_currentKey, m_previousKey, m_currentButton, m_previousButton;
+                EventDispatcher m_EventDispatcher;
                 void setMousePositionInternal(float x, float y, bool resetDifference, bool resetPrevious);
 
  

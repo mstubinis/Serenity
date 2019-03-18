@@ -5,7 +5,7 @@
 #include "ecs/ComponentBaseClass.h"
 #include "ecs/ECSSystem.h"
 
-#include "core/engine/Engine_EventObject.h"
+#include "core/engine/events/Engine_EventObject.h"
 
 struct Handle;
 class ShaderP;

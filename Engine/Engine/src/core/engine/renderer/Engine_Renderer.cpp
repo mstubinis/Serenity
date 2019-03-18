@@ -1,13 +1,12 @@
 #include "core/engine/Engine.h"
 #include "core/engine/Engine_Debugging.h"
-#include "core/engine/Engine_Renderer.h"
+#include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/Engine_Window.h"
 #include "core/engine/Engine_FullscreenItems.h"
 #include "core/engine/Engine_BuiltInShaders.h"
 #include "core/engine/Engine_BuiltInResources.h"
 #include "core/engine/Engine_Math.h"
-#include "core/engine/Engine_GLStateMachine.h"
-#include "core/engine/GBuffer.h"
+#include "core/engine/renderer/GBuffer.h"
 #include "core/engine/FramebufferObject.h"
 #include "core/engine/SMAA_LUT.h"
 #include "core/Camera.h"
@@ -41,7 +40,8 @@ Mesh* epriv::InternalMeshes::SpotLightBounds = nullptr;
 ShaderP* epriv::InternalShaderPrograms::Deferred = nullptr;
 ShaderP* epriv::InternalShaderPrograms::Forward = nullptr;
 
-epriv::RenderManager::impl* renderManager;
+epriv::RenderManager* renderManager;
+epriv::RenderManager::impl* renderManagerImpl;
 
 uint epriv::RenderManager::GLSL_VERSION;
 uint epriv::RenderManager::OPENGL_VERSION;
@@ -266,8 +266,6 @@ class epriv::RenderManager::impl final{
         #pragma endregion
 
         #pragma region GeneralInfo
-
-        epriv::GLStateMachineDataCustom glSM;
 
         bool enabled1;
 
@@ -1490,8 +1488,8 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(fbo);
         }
         void _generateBRDFLUTCookTorrance(uint brdfSize){
-            uint& prevReadBuffer = glSM.current_bound_read_fbo;
-            uint& prevDrawBuffer = glSM.current_bound_draw_fbo;
+            uint& prevReadBuffer = renderManager->glSM.current_bound_read_fbo;
+            uint& prevDrawBuffer = renderManager->glSM.current_bound_draw_fbo;
 
             FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO",brdfSize,brdfSize); //try without a depth format
             fbo->bind();
@@ -1580,21 +1578,21 @@ class epriv::RenderManager::impl final{
             gl_viewport_data = glm::uvec4(x,y,w,h);
         }
         void _bindReadFBO(uint& f){
-            if(glSM.current_bound_read_fbo != f){
+            if(renderManager->glSM.current_bound_read_fbo != f){
                 glBindFramebuffer(GL_READ_FRAMEBUFFER, f);
-                glSM.current_bound_read_fbo = f;
+                renderManager->glSM.current_bound_read_fbo = f;
             }
         }
         void _bindDrawFBO(uint& f){
-            if(glSM.current_bound_draw_fbo != f){
+            if(renderManager->glSM.current_bound_draw_fbo != f){
                 glBindFramebuffer(GL_DRAW_FRAMEBUFFER, f);
-                glSM.current_bound_draw_fbo = f;
+                renderManager->glSM.current_bound_draw_fbo = f;
             }
         }
         void _bindRBO(uint& r){
-            if(glSM.current_bound_rbo != r){
+            if(renderManager->glSM.current_bound_rbo != r){
                 glBindRenderbuffer(GL_RENDERBUFFER, r);
-                glSM.current_bound_rbo = r;
+                renderManager->glSM.current_bound_rbo = r;
             }
         }
         void _renderTextures(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
@@ -2305,64 +2303,11 @@ class epriv::RenderManager::impl final{
 };
 
 
-epriv::RenderPipeline::RenderPipeline(ShaderP& _shaderProgram) :shaderProgram(_shaderProgram) {
+epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ 
+    m_i->_init(name,w,h); 
+    renderManagerImpl = m_i.get();
+    renderManager = this;
 }
-epriv::RenderPipeline::~RenderPipeline() {
-    SAFE_DELETE_VECTOR(materialNodes);
-}
-
-float dist(Camera& lhs, const glm::vec3& rhs) {
-    return glm::distance(lhs.getPosition(), rhs);
-}
-void epriv::RenderPipeline::sort(Camera& c) {
-    for (auto& materialNode : materialNodes) {
-        for (auto& meshNode : materialNode->meshNodes) {
-            auto& vect = meshNode->instanceNodes;
-            std::sort(
-                vect.begin(), vect.end(),
-                [&c](InstanceNode* lhs, InstanceNode* rhs) {
-                const glm::vec3& lhsPos = lhs->instance->parent().getComponent<ComponentBody>()->position();
-                const glm::vec3& rhsPos = rhs->instance->parent().getComponent<ComponentBody>()->position();
-                return dist(c, lhsPos) < dist(c, rhsPos);
-            }
-            );
-        }
-    }
-}
-
-void epriv::RenderPipeline::render() {
-    shaderProgram.bind();
-    for (auto& materialNode : materialNodes) {
-        if (materialNode->meshNodes.size() > 0) {
-            auto& _material = *materialNode->material;
-            _material.bind();
-            for (auto& meshNode : materialNode->meshNodes) {
-                if (meshNode->instanceNodes.size() > 0) {
-                    auto& _mesh = *meshNode->mesh;
-                    _mesh.bind();
-                    for (auto& instanceNode : meshNode->instanceNodes) {
-                        auto& _meshInstance = *instanceNode->instance;
-                        if (_meshInstance.passedRenderCheck()) {
-                            _meshInstance.bind();
-                            _mesh.render(false);
-                            _meshInstance.unbind();
-                        }
-                    }
-                    //protect against any custom changes by restoring to the regular shader and material
-                    if (renderManager->glSM.current_bound_shader_program != &shaderProgram) {
-                        shaderProgram.bind();
-                        _material.bind();
-                    }
-                    _mesh.unbind();
-                }
-            }
-        }
-    }
-}
-
-
-
-epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); renderManager = m_i.get(); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::RenderManager::_render(Camera& c, const uint fboW, const uint fboH,bool HUD, Entity* ignore,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){m_i->_render(*m_i->m_GBuffer,c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo);}
@@ -2377,7 +2322,7 @@ void epriv::RenderManager::_renderTexture(Texture* texture,glm::vec2& pos,glm::v
     m_i->m_TexturesToBeRendered.emplace_back(texture,pos,color,scl,angle,depth);
 }
 void epriv::RenderManager::_bindShaderProgram(ShaderP* p){
-    auto& currentShaderPgrm = m_i->glSM.current_bound_shader_program;
+    auto& currentShaderPgrm = glSM.current_bound_shader_program;
     if(currentShaderPgrm != p){
         glUseProgram(p->program());
         currentShaderPgrm = p;
@@ -2385,7 +2330,7 @@ void epriv::RenderManager::_bindShaderProgram(ShaderP* p){
     }
 }
 void epriv::RenderManager::_unbindShaderProgram() {
-    auto& currentShaderPgrm = m_i->glSM.current_bound_shader_program;
+    auto& currentShaderPgrm = glSM.current_bound_shader_program;
     if (currentShaderPgrm) {
         currentShaderPgrm->BindableResource::unbind();
         currentShaderPgrm = nullptr;
@@ -2393,14 +2338,14 @@ void epriv::RenderManager::_unbindShaderProgram() {
     }
 }
 void epriv::RenderManager::_bindMaterial(Material* m){
-    auto& currentMaterial = m_i->glSM.current_bound_material;
+    auto& currentMaterial = glSM.current_bound_material;
     if(currentMaterial != m){
         currentMaterial = m;
         currentMaterial->BindableResource::bind();
     }
 }
 void epriv::RenderManager::_unbindMaterial(){
-    auto& currentMaterial = m_i->glSM.current_bound_material;
+    auto& currentMaterial = glSM.current_bound_material;
     if(currentMaterial){
         currentMaterial->BindableResource::unbind();
         currentMaterial = nullptr;
@@ -2410,140 +2355,140 @@ void epriv::RenderManager::_genPBREnvMapData(Texture& texture, uint size1, uint 
     m_i->_generatePBREnvMapData(texture,size1,size2);
 }
 
-void Renderer::Settings::General::enable1(bool b) { renderManager->enabled1 = b; }
-void Renderer::Settings::General::disable1() { renderManager->enabled1 = false; }
-bool Renderer::Settings::General::enabled1() { return renderManager->enabled1; }
+void Renderer::Settings::General::enable1(bool b) { renderManagerImpl->enabled1 = b; }
+void Renderer::Settings::General::disable1() { renderManagerImpl->enabled1 = false; }
+bool Renderer::Settings::General::enabled1() { return renderManagerImpl->enabled1; }
 
 
-void Renderer::Settings::DepthOfField::enable(bool b) { renderManager->dof = b; }
-void Renderer::Settings::DepthOfField::disable() { renderManager->dof = false; }
-bool Renderer::Settings::DepthOfField::enabled() { return renderManager->dof; }
-float Renderer::Settings::DepthOfField::getFocus() { return renderManager->dof_focus; }
-void Renderer::Settings::DepthOfField::setFocus(float f) { renderManager->dof_focus = glm::max(0.0f, f); }
-float Renderer::Settings::DepthOfField::getBias() { return renderManager->dof_bias; }
-void Renderer::Settings::DepthOfField::setBias(float b) { renderManager->dof_bias = b; }
-float Renderer::Settings::DepthOfField::getBlurRadius() { return renderManager->dof_blur_radius; }
-void Renderer::Settings::DepthOfField::setBlurRadius(float r) { renderManager->dof_blur_radius = glm::max(0.0f, r); }
-bool Renderer::Settings::Fog::enabled(){ return renderManager->fog; }
-void Renderer::Settings::Fog::enable(bool b){ renderManager->fog = b; }
-void Renderer::Settings::Fog::disable(){ renderManager->fog = false; }
+void Renderer::Settings::DepthOfField::enable(bool b) { renderManagerImpl->dof = b; }
+void Renderer::Settings::DepthOfField::disable() { renderManagerImpl->dof = false; }
+bool Renderer::Settings::DepthOfField::enabled() { return renderManagerImpl->dof; }
+float Renderer::Settings::DepthOfField::getFocus() { return renderManagerImpl->dof_focus; }
+void Renderer::Settings::DepthOfField::setFocus(float f) { renderManagerImpl->dof_focus = glm::max(0.0f, f); }
+float Renderer::Settings::DepthOfField::getBias() { return renderManagerImpl->dof_bias; }
+void Renderer::Settings::DepthOfField::setBias(float b) { renderManagerImpl->dof_bias = b; }
+float Renderer::Settings::DepthOfField::getBlurRadius() { return renderManagerImpl->dof_blur_radius; }
+void Renderer::Settings::DepthOfField::setBlurRadius(float r) { renderManagerImpl->dof_blur_radius = glm::max(0.0f, r); }
+bool Renderer::Settings::Fog::enabled(){ return renderManagerImpl->fog; }
+void Renderer::Settings::Fog::enable(bool b){ renderManagerImpl->fog = b; }
+void Renderer::Settings::Fog::disable(){ renderManagerImpl->fog = false; }
 void Renderer::Settings::Fog::setColor(glm::vec4& color){ Renderer::Settings::Fog::setColor(color.r,color.g,color.b,color.a); }
-void Renderer::Settings::Fog::setColor(float r,float g,float b,float a){ Math::setColor(renderManager->fog_color,r,g,b,a); }
-void Renderer::Settings::Fog::setNullDistance(float d){ renderManager->fog_distNull = d; }
-void Renderer::Settings::Fog::setBlendDistance(float d){ renderManager->fog_distBlend = d; }
-float Renderer::Settings::Fog::getNullDistance(){ return renderManager->fog_distNull; }
-float Renderer::Settings::Fog::getBlendDistance(){ return renderManager->fog_distBlend; }
-void Renderer::Settings::FXAA::setReduceMin(float r){ renderManager->FXAA_REDUCE_MIN = glm::max(0.0f,r); }
-void Renderer::Settings::FXAA::setReduceMul(float r){ renderManager->FXAA_REDUCE_MUL = glm::max(0.0f,r); }
-void Renderer::Settings::FXAA::setSpanMax(float r){ renderManager->FXAA_SPAN_MAX = glm::max(0.0f,r); }
-float Renderer::Settings::FXAA::getReduceMin(){ return renderManager->FXAA_REDUCE_MIN; }
-float Renderer::Settings::FXAA::getReduceMul(){ return renderManager->FXAA_REDUCE_MUL; }
-float Renderer::Settings::FXAA::getSpanMax(){ return renderManager->FXAA_SPAN_MAX; }
-bool Renderer::Settings::HDR::enabled(){ return renderManager->hdr; }
-void Renderer::Settings::HDR::enable(bool b){ renderManager->hdr = b; }
-void Renderer::Settings::HDR::disable(){ renderManager->hdr = false; }
-float Renderer::Settings::HDR::getExposure(){ return renderManager->hdr_exposure; }
-void Renderer::Settings::HDR::setExposure(float e){ renderManager->hdr_exposure = e; }
-void Renderer::Settings::HDR::setAlgorithm(HDRAlgorithm::Algorithm a){ renderManager->hdr_algorithm = a; }
-float Renderer::Settings::Bloom::getThreshold() { return renderManager->bloom_threshold; }
-void Renderer::Settings::Bloom::setThreshold(float t) { renderManager->bloom_threshold = t; }
-float Renderer::Settings::Bloom::getExposure() { return renderManager->bloom_exposure; }
-void Renderer::Settings::Bloom::setExposure(float e) { renderManager->bloom_exposure = e; }
-bool Renderer::Settings::Bloom::enabled() { return renderManager->bloom; }
-uint Renderer::Settings::Bloom::getNumPasses() { return renderManager->bloom_num_passes; }
-void Renderer::Settings::Bloom::setNumPasses(uint p) { renderManager->bloom_num_passes = p; }
-void Renderer::Settings::Bloom::enable(bool b){ renderManager->bloom = b; }
-void Renderer::Settings::Bloom::disable(){ renderManager->bloom = false; }
-float Renderer::Settings::Bloom::getBlurRadius(){ return renderManager->bloom_blur_radius; }
-float Renderer::Settings::Bloom::getBlurStrength(){ return renderManager->bloom_blur_strength; }
-void Renderer::Settings::Bloom::setBlurRadius(float r){ renderManager->bloom_blur_radius = glm::max(0.0f,r); }
-void Renderer::Settings::Bloom::setBlurStrength(float r){ renderManager->bloom_blur_strength = glm::max(0.0f,r); }
-float Renderer::Settings::Bloom::getScale(){ return renderManager->bloom_scale; }
-void Renderer::Settings::Bloom::setScale(float s){ renderManager->bloom_scale = glm::max(0.0f,s); }
-void Renderer::Settings::SMAA::setThreshold(float f){ renderManager->SMAA_THRESHOLD = f; }
-void Renderer::Settings::SMAA::setSearchSteps(uint s){ renderManager->SMAA_MAX_SEARCH_STEPS = s; }
-void Renderer::Settings::SMAA::disableCornerDetection(){ renderManager->SMAA_CORNER_ROUNDING = 0; }
-void Renderer::Settings::SMAA::enableCornerDetection(uint c){ renderManager->SMAA_CORNER_ROUNDING = c; }
-void Renderer::Settings::SMAA::disableDiagonalDetection(){ renderManager->SMAA_MAX_SEARCH_STEPS_DIAG = 0; }
-void Renderer::Settings::SMAA::enableDiagonalDetection(uint d){ renderManager->SMAA_MAX_SEARCH_STEPS_DIAG = d; }
-void Renderer::Settings::SMAA::setPredicationThreshold(float f){ renderManager->SMAA_PREDICATION_THRESHOLD = f; }
-void Renderer::Settings::SMAA::setPredicationScale(float f){ renderManager->SMAA_PREDICATION_SCALE = f; }
-void Renderer::Settings::SMAA::setPredicationStrength(float s){ renderManager->SMAA_PREDICATION_STRENGTH = s; }
-void Renderer::Settings::SMAA::setReprojectionScale(float s){ renderManager->SMAA_REPROJECTION_WEIGHT_SCALE = s; }
-void Renderer::Settings::SMAA::enablePredication(bool b){ renderManager->SMAA_PREDICATION = b; }
-void Renderer::Settings::SMAA::disablePredication(){ renderManager->SMAA_PREDICATION = false; }
-void Renderer::Settings::SMAA::enableReprojection(bool b){ renderManager->SMAA_REPROJECTION = b; }
-void Renderer::Settings::SMAA::disableReprojection(){ renderManager->SMAA_REPROJECTION = false; }
-void Renderer::Settings::SMAA::setQuality(SMAAQualityLevel::Level level){ renderManager->_setSMAAQuality(level); }
-bool Renderer::Settings::GodRays::enabled(){ return renderManager->godRays; }
-void Renderer::Settings::GodRays::enable(bool b = true){ renderManager->godRays = b; }
-void Renderer::Settings::GodRays::disable(){ renderManager->godRays = false; }
-float Renderer::Settings::GodRays::getExposure(){ return renderManager->godRays_exposure; }
-float Renderer::Settings::GodRays::getFactor() { return renderManager->godRays_factor; }
-float Renderer::Settings::GodRays::getDecay(){ return renderManager->godRays_decay; }
-float Renderer::Settings::GodRays::getDensity(){ return renderManager->godRays_density; }
-float Renderer::Settings::GodRays::getWeight(){ return renderManager->godRays_weight; }
-uint Renderer::Settings::GodRays::getSamples(){ return renderManager->godRays_samples; }
-float Renderer::Settings::GodRays::getFOVDegrees(){ return renderManager->godRays_fovDegrees; }
-float Renderer::Settings::GodRays::getAlphaFalloff(){ return renderManager->godRays_alphaFalloff; }
-void Renderer::Settings::GodRays::setExposure(float e){ renderManager->godRays_exposure = e; }
-void Renderer::Settings::GodRays::setFactor(float f) { renderManager->godRays_factor = f; }
-void Renderer::Settings::GodRays::setDecay(float d){ renderManager->godRays_decay = d; }
-void Renderer::Settings::GodRays::setDensity(float d){ renderManager->godRays_density = d; }
-void Renderer::Settings::GodRays::setWeight(float w){ renderManager->godRays_weight = w; }
-void Renderer::Settings::GodRays::setSamples(uint s){ renderManager->godRays_samples = glm::max((uint)0,s); }
-void Renderer::Settings::GodRays::setFOVDegrees(float d){ renderManager->godRays_fovDegrees = d; }
-void Renderer::Settings::GodRays::setAlphaFalloff(float a){ renderManager->godRays_alphaFalloff = a; }
-void Renderer::Settings::GodRays::setObject(Entity* entity){ renderManager->godRays_Object = entity; }
-Entity* Renderer::Settings::GodRays::getObject(){ return renderManager->godRays_Object; }
-void Renderer::Settings::Lighting::enable(bool b){ renderManager->lighting = b; }
-void Renderer::Settings::Lighting::disable(){ renderManager->lighting = false; }
-float Renderer::Settings::Lighting::getGIContributionGlobal(){ return renderManager->lighting_gi_contribution_global; }
+void Renderer::Settings::Fog::setColor(float r,float g,float b,float a){ Math::setColor(renderManagerImpl->fog_color,r,g,b,a); }
+void Renderer::Settings::Fog::setNullDistance(float d){ renderManagerImpl->fog_distNull = d; }
+void Renderer::Settings::Fog::setBlendDistance(float d){ renderManagerImpl->fog_distBlend = d; }
+float Renderer::Settings::Fog::getNullDistance(){ return renderManagerImpl->fog_distNull; }
+float Renderer::Settings::Fog::getBlendDistance(){ return renderManagerImpl->fog_distBlend; }
+void Renderer::Settings::FXAA::setReduceMin(float r){ renderManagerImpl->FXAA_REDUCE_MIN = glm::max(0.0f,r); }
+void Renderer::Settings::FXAA::setReduceMul(float r){ renderManagerImpl->FXAA_REDUCE_MUL = glm::max(0.0f,r); }
+void Renderer::Settings::FXAA::setSpanMax(float r){ renderManagerImpl->FXAA_SPAN_MAX = glm::max(0.0f,r); }
+float Renderer::Settings::FXAA::getReduceMin(){ return renderManagerImpl->FXAA_REDUCE_MIN; }
+float Renderer::Settings::FXAA::getReduceMul(){ return renderManagerImpl->FXAA_REDUCE_MUL; }
+float Renderer::Settings::FXAA::getSpanMax(){ return renderManagerImpl->FXAA_SPAN_MAX; }
+bool Renderer::Settings::HDR::enabled(){ return renderManagerImpl->hdr; }
+void Renderer::Settings::HDR::enable(bool b){ renderManagerImpl->hdr = b; }
+void Renderer::Settings::HDR::disable(){ renderManagerImpl->hdr = false; }
+float Renderer::Settings::HDR::getExposure(){ return renderManagerImpl->hdr_exposure; }
+void Renderer::Settings::HDR::setExposure(float e){ renderManagerImpl->hdr_exposure = e; }
+void Renderer::Settings::HDR::setAlgorithm(HDRAlgorithm::Algorithm a){ renderManagerImpl->hdr_algorithm = a; }
+float Renderer::Settings::Bloom::getThreshold() { return renderManagerImpl->bloom_threshold; }
+void Renderer::Settings::Bloom::setThreshold(float t) { renderManagerImpl->bloom_threshold = t; }
+float Renderer::Settings::Bloom::getExposure() { return renderManagerImpl->bloom_exposure; }
+void Renderer::Settings::Bloom::setExposure(float e) { renderManagerImpl->bloom_exposure = e; }
+bool Renderer::Settings::Bloom::enabled() { return renderManagerImpl->bloom; }
+uint Renderer::Settings::Bloom::getNumPasses() { return renderManagerImpl->bloom_num_passes; }
+void Renderer::Settings::Bloom::setNumPasses(uint p) { renderManagerImpl->bloom_num_passes = p; }
+void Renderer::Settings::Bloom::enable(bool b){ renderManagerImpl->bloom = b; }
+void Renderer::Settings::Bloom::disable(){ renderManagerImpl->bloom = false; }
+float Renderer::Settings::Bloom::getBlurRadius(){ return renderManagerImpl->bloom_blur_radius; }
+float Renderer::Settings::Bloom::getBlurStrength(){ return renderManagerImpl->bloom_blur_strength; }
+void Renderer::Settings::Bloom::setBlurRadius(float r){ renderManagerImpl->bloom_blur_radius = glm::max(0.0f,r); }
+void Renderer::Settings::Bloom::setBlurStrength(float r){ renderManagerImpl->bloom_blur_strength = glm::max(0.0f,r); }
+float Renderer::Settings::Bloom::getScale(){ return renderManagerImpl->bloom_scale; }
+void Renderer::Settings::Bloom::setScale(float s){ renderManagerImpl->bloom_scale = glm::max(0.0f,s); }
+void Renderer::Settings::SMAA::setThreshold(float f){ renderManagerImpl->SMAA_THRESHOLD = f; }
+void Renderer::Settings::SMAA::setSearchSteps(uint s){ renderManagerImpl->SMAA_MAX_SEARCH_STEPS = s; }
+void Renderer::Settings::SMAA::disableCornerDetection(){ renderManagerImpl->SMAA_CORNER_ROUNDING = 0; }
+void Renderer::Settings::SMAA::enableCornerDetection(uint c){ renderManagerImpl->SMAA_CORNER_ROUNDING = c; }
+void Renderer::Settings::SMAA::disableDiagonalDetection(){ renderManagerImpl->SMAA_MAX_SEARCH_STEPS_DIAG = 0; }
+void Renderer::Settings::SMAA::enableDiagonalDetection(uint d){ renderManagerImpl->SMAA_MAX_SEARCH_STEPS_DIAG = d; }
+void Renderer::Settings::SMAA::setPredicationThreshold(float f){ renderManagerImpl->SMAA_PREDICATION_THRESHOLD = f; }
+void Renderer::Settings::SMAA::setPredicationScale(float f){ renderManagerImpl->SMAA_PREDICATION_SCALE = f; }
+void Renderer::Settings::SMAA::setPredicationStrength(float s){ renderManagerImpl->SMAA_PREDICATION_STRENGTH = s; }
+void Renderer::Settings::SMAA::setReprojectionScale(float s){ renderManagerImpl->SMAA_REPROJECTION_WEIGHT_SCALE = s; }
+void Renderer::Settings::SMAA::enablePredication(bool b){ renderManagerImpl->SMAA_PREDICATION = b; }
+void Renderer::Settings::SMAA::disablePredication(){ renderManagerImpl->SMAA_PREDICATION = false; }
+void Renderer::Settings::SMAA::enableReprojection(bool b){ renderManagerImpl->SMAA_REPROJECTION = b; }
+void Renderer::Settings::SMAA::disableReprojection(){ renderManagerImpl->SMAA_REPROJECTION = false; }
+void Renderer::Settings::SMAA::setQuality(SMAAQualityLevel::Level level){ renderManagerImpl->_setSMAAQuality(level); }
+bool Renderer::Settings::GodRays::enabled(){ return renderManagerImpl->godRays; }
+void Renderer::Settings::GodRays::enable(bool b = true){ renderManagerImpl->godRays = b; }
+void Renderer::Settings::GodRays::disable(){ renderManagerImpl->godRays = false; }
+float Renderer::Settings::GodRays::getExposure(){ return renderManagerImpl->godRays_exposure; }
+float Renderer::Settings::GodRays::getFactor() { return renderManagerImpl->godRays_factor; }
+float Renderer::Settings::GodRays::getDecay(){ return renderManagerImpl->godRays_decay; }
+float Renderer::Settings::GodRays::getDensity(){ return renderManagerImpl->godRays_density; }
+float Renderer::Settings::GodRays::getWeight(){ return renderManagerImpl->godRays_weight; }
+uint Renderer::Settings::GodRays::getSamples(){ return renderManagerImpl->godRays_samples; }
+float Renderer::Settings::GodRays::getFOVDegrees(){ return renderManagerImpl->godRays_fovDegrees; }
+float Renderer::Settings::GodRays::getAlphaFalloff(){ return renderManagerImpl->godRays_alphaFalloff; }
+void Renderer::Settings::GodRays::setExposure(float e){ renderManagerImpl->godRays_exposure = e; }
+void Renderer::Settings::GodRays::setFactor(float f) { renderManagerImpl->godRays_factor = f; }
+void Renderer::Settings::GodRays::setDecay(float d){ renderManagerImpl->godRays_decay = d; }
+void Renderer::Settings::GodRays::setDensity(float d){ renderManagerImpl->godRays_density = d; }
+void Renderer::Settings::GodRays::setWeight(float w){ renderManagerImpl->godRays_weight = w; }
+void Renderer::Settings::GodRays::setSamples(uint s){ renderManagerImpl->godRays_samples = glm::max((uint)0,s); }
+void Renderer::Settings::GodRays::setFOVDegrees(float d){ renderManagerImpl->godRays_fovDegrees = d; }
+void Renderer::Settings::GodRays::setAlphaFalloff(float a){ renderManagerImpl->godRays_alphaFalloff = a; }
+void Renderer::Settings::GodRays::setObject(Entity* entity){ renderManagerImpl->godRays_Object = entity; }
+Entity* Renderer::Settings::GodRays::getObject(){ return renderManagerImpl->godRays_Object; }
+void Renderer::Settings::Lighting::enable(bool b){ renderManagerImpl->lighting = b; }
+void Renderer::Settings::Lighting::disable(){ renderManagerImpl->lighting = false; }
+float Renderer::Settings::Lighting::getGIContributionGlobal(){ return renderManagerImpl->lighting_gi_contribution_global; }
 void Renderer::Settings::Lighting::setGIContributionGlobal(float gi){ 
-    auto& mgr = *renderManager;
+    auto& mgr = *renderManagerImpl;
     mgr.lighting_gi_contribution_global = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
-float Renderer::Settings::Lighting::getGIContributionDiffuse(){ return renderManager->lighting_gi_contribution_diffuse; }
+float Renderer::Settings::Lighting::getGIContributionDiffuse(){ return renderManagerImpl->lighting_gi_contribution_diffuse; }
 void Renderer::Settings::Lighting::setGIContributionDiffuse(float gi){ 
-    auto& mgr = *renderManager;
+    auto& mgr = *renderManagerImpl;
     mgr.lighting_gi_contribution_diffuse = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
-float Renderer::Settings::Lighting::getGIContributionSpecular(){ return renderManager->lighting_gi_contribution_specular; }
+float Renderer::Settings::Lighting::getGIContributionSpecular(){ return renderManagerImpl->lighting_gi_contribution_specular; }
 void Renderer::Settings::Lighting::setGIContributionSpecular(float gi){
-    auto& mgr = *renderManager;
+    auto& mgr = *renderManagerImpl;
     mgr.lighting_gi_contribution_specular = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
 void Renderer::Settings::Lighting::setGIContribution(float g, float d, float s){
-    auto& mgr = *renderManager;
+    auto& mgr = *renderManagerImpl;
     mgr.lighting_gi_contribution_global = glm::clamp(g,0.001f,0.999f);
     mgr.lighting_gi_contribution_diffuse = glm::clamp(d,0.001f,0.999f);
     mgr.lighting_gi_contribution_specular = glm::clamp(s,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
-bool Renderer::Settings::SSAO::enabled(){ return renderManager->ssao;  }
-void Renderer::Settings::SSAO::enable(bool b){ renderManager->ssao = b;  }
-void Renderer::Settings::SSAO::disable(){ renderManager->ssao = false;  }
-void Renderer::Settings::SSAO::enableBlur(bool b){ renderManager->ssao_do_blur = b;  }
-void Renderer::Settings::SSAO::disableBlur(){ renderManager->ssao_do_blur = false;  }
-float Renderer::Settings::SSAO::getBlurRadius() { return renderManager->ssao_blur_radius; }
-void Renderer::Settings::SSAO::setBlurRadius(float r) { renderManager->ssao_blur_radius = glm::max(0.0f, r); }
-float Renderer::Settings::SSAO::getBlurStrength(){ return renderManager->ssao_blur_strength; }
-float Renderer::Settings::SSAO::getIntensity(){ return renderManager->ssao_intensity; }
-float Renderer::Settings::SSAO::getRadius(){ return renderManager->ssao_radius; }
-float Renderer::Settings::SSAO::getScale(){ return renderManager->ssao_scale; }
-float Renderer::Settings::SSAO::getBias(){ return renderManager->ssao_bias; }
-uint Renderer::Settings::SSAO::getSamples(){ return renderManager->ssao_samples; }
-void Renderer::Settings::SSAO::setBlurStrength(float s){ renderManager->ssao_blur_strength = glm::max(0.0f,s); }
-void Renderer::Settings::SSAO::setIntensity(float i){ renderManager->ssao_intensity = glm::max(0.0f,i); }
-void Renderer::Settings::SSAO::setRadius(float r){ renderManager->ssao_radius = glm::max(0.0f,r); }
-void Renderer::Settings::SSAO::setScale(float s){ renderManager->ssao_scale = glm::max(0.0f,s); }
-void Renderer::Settings::SSAO::setBias(float b){ renderManager->ssao_bias = b; }
-void Renderer::Settings::SSAO::setSamples(uint s){ renderManager->ssao_samples = glm::max((uint)0, s); }
-void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){ renderManager->_setAntiAliasingAlgorithm(algorithm); }
-void Renderer::Settings::cullFace(uint s){ renderManager->_cullFace(s); }
+bool Renderer::Settings::SSAO::enabled(){ return renderManagerImpl->ssao;  }
+void Renderer::Settings::SSAO::enable(bool b){ renderManagerImpl->ssao = b;  }
+void Renderer::Settings::SSAO::disable(){ renderManagerImpl->ssao = false;  }
+void Renderer::Settings::SSAO::enableBlur(bool b){ renderManagerImpl->ssao_do_blur = b;  }
+void Renderer::Settings::SSAO::disableBlur(){ renderManagerImpl->ssao_do_blur = false;  }
+float Renderer::Settings::SSAO::getBlurRadius() { return renderManagerImpl->ssao_blur_radius; }
+void Renderer::Settings::SSAO::setBlurRadius(float r) { renderManagerImpl->ssao_blur_radius = glm::max(0.0f, r); }
+float Renderer::Settings::SSAO::getBlurStrength(){ return renderManagerImpl->ssao_blur_strength; }
+float Renderer::Settings::SSAO::getIntensity(){ return renderManagerImpl->ssao_intensity; }
+float Renderer::Settings::SSAO::getRadius(){ return renderManagerImpl->ssao_radius; }
+float Renderer::Settings::SSAO::getScale(){ return renderManagerImpl->ssao_scale; }
+float Renderer::Settings::SSAO::getBias(){ return renderManagerImpl->ssao_bias; }
+uint Renderer::Settings::SSAO::getSamples(){ return renderManagerImpl->ssao_samples; }
+void Renderer::Settings::SSAO::setBlurStrength(float s){ renderManagerImpl->ssao_blur_strength = glm::max(0.0f,s); }
+void Renderer::Settings::SSAO::setIntensity(float i){ renderManagerImpl->ssao_intensity = glm::max(0.0f,i); }
+void Renderer::Settings::SSAO::setRadius(float r){ renderManagerImpl->ssao_radius = glm::max(0.0f,r); }
+void Renderer::Settings::SSAO::setScale(float s){ renderManagerImpl->ssao_scale = glm::max(0.0f,s); }
+void Renderer::Settings::SSAO::setBias(float b){ renderManagerImpl->ssao_bias = b; }
+void Renderer::Settings::SSAO::setSamples(uint s){ renderManagerImpl->ssao_samples = glm::max((uint)0, s); }
+void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){ renderManagerImpl->_setAntiAliasingAlgorithm(algorithm); }
+void Renderer::Settings::cullFace(uint s){ renderManagerImpl->_cullFace(s); }
 void Renderer::Settings::clear(bool color, bool depth, bool stencil){
     if(!color && !depth && !stencil) return;
     GLuint clearBit = 0x00000000;
@@ -2552,14 +2497,14 @@ void Renderer::Settings::clear(bool color, bool depth, bool stencil){
     if(stencil) clearBit |= GL_STENCIL_BUFFER_BIT;
     glClear(clearBit);
 }
-void Renderer::Settings::enableDrawPhysicsInfo(bool b){ renderManager->draw_physics_debug = b; }
-void Renderer::Settings::disableDrawPhysicsInfo(){ renderManager->draw_physics_debug = false; }
-void Renderer::Settings::setGamma(float g){ renderManager->gamma = g; }
-float Renderer::Settings::getGamma(){ return renderManager->gamma; }
-void Renderer::setDepthFunc(DepthFunc::Func func){ renderManager->_setDepthFunc(func); }
-void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManager->_setViewport(x,y,w,h); }
-void Renderer::colorMask(bool r, bool g, bool b, bool a) { renderManager->_colorMask(r,g,b,a); }
-void Renderer::clearColor(float r, float g, float b, float a) { renderManager->_clearColor(r, g, b, a); }
+void Renderer::Settings::enableDrawPhysicsInfo(bool b){ renderManagerImpl->draw_physics_debug = b; }
+void Renderer::Settings::disableDrawPhysicsInfo(){ renderManagerImpl->draw_physics_debug = false; }
+void Renderer::Settings::setGamma(float g){ renderManagerImpl->gamma = g; }
+float Renderer::Settings::getGamma(){ return renderManagerImpl->gamma; }
+void Renderer::setDepthFunc(DepthFunc::Func func){ renderManagerImpl->_setDepthFunc(func); }
+void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManagerImpl->_setViewport(x,y,w,h); }
+void Renderer::colorMask(bool r, bool g, bool b, bool a) { renderManagerImpl->_colorMask(r,g,b,a); }
+void Renderer::clearColor(float r, float g, float b, float a) { renderManagerImpl->_clearColor(r, g, b, a); }
 void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
     auto& i = *renderManager;
     switch(_textureType){
@@ -2630,18 +2575,18 @@ void Renderer::sendTextureSafe(const char* location,const GLuint textureAddress,
     bindTexture(targetType,textureAddress);
     sendUniform1Safe(location,slot);
 }
-void Renderer::bindReadFBO(GLuint fbo){ renderManager->_bindReadFBO(fbo); }
+void Renderer::bindReadFBO(GLuint fbo){ renderManagerImpl->_bindReadFBO(fbo); }
 void Renderer::bindFBO(epriv::FramebufferObject& fbo){ Renderer::bindFBO(fbo.address()); }
 void Renderer::bindRBO(epriv::RenderbufferObject& rbo){ Renderer::bindRBO(rbo.address()); }
-void Renderer::bindDrawFBO(GLuint fbo){ renderManager->_bindDrawFBO(fbo); }
+void Renderer::bindDrawFBO(GLuint fbo){ renderManagerImpl->_bindDrawFBO(fbo); }
 void Renderer::bindFBO(GLuint fbo){Renderer::bindReadFBO(fbo);Renderer::bindDrawFBO(fbo);}
-void Renderer::bindRBO(GLuint rbo){ renderManager->_bindRBO(rbo); }
+void Renderer::bindRBO(GLuint rbo){ renderManagerImpl->_bindRBO(rbo); }
 void Renderer::unbindFBO(){ Renderer::bindFBO(GLuint(0)); }
 void Renderer::unbindRBO(){ Renderer::bindRBO(GLuint(0)); }
 void Renderer::unbindReadFBO(){ Renderer::bindReadFBO(0); }
 void Renderer::unbindDrawFBO(){ Renderer::bindDrawFBO(0); }
 void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth){
-    renderManager->m_TexturesToBeRendered.emplace_back(nullptr,pos,col,glm::vec2(w,h),angle,depth);
+    renderManagerImpl->m_TexturesToBeRendered.emplace_back(nullptr,pos,col,glm::vec2(w,h),angle,depth);
 }
 void Renderer::renderTexture(Texture& texture, const glm::vec2& pos, const glm::vec4& col,float angle, const glm::vec2& scl, float depth){
     texture.render(pos,col,angle,scl,depth);
@@ -2649,8 +2594,8 @@ void Renderer::renderTexture(Texture& texture, const glm::vec2& pos, const glm::
 void Renderer::renderText(const string& text,Font& font, const glm::vec2& pos, const glm::vec4& color, float angle, const glm::vec2& scl, float depth){
     font.renderText(text,pos,color,angle,scl,depth);
 }
-void Renderer::renderFullscreenQuad(uint w, uint h, uint startX, uint startY){ renderManager->_renderFullscreenQuad(w,h,startX,startY); }
-void Renderer::renderFullscreenTriangle(uint w,uint h, uint startX, uint startY){ renderManager->_renderFullscreenTriangle(w,h,startX,startY); }
+void Renderer::renderFullscreenQuad(uint w, uint h, uint startX, uint startY){ renderManagerImpl->_renderFullscreenQuad(w,h,startX,startY); }
+void Renderer::renderFullscreenTriangle(uint w,uint h, uint startX, uint startY){ renderManagerImpl->_renderFullscreenTriangle(w,h,startX,startY); }
 inline const GLint Renderer::getUniformLoc(const char* location){
     auto& m = renderManager->glSM.current_bound_shader_program->uniforms(); if(!m.count(location)) return -1; return m.at(location);
 }

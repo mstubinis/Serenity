@@ -2,21 +2,14 @@
 #ifndef ENGINE_ENGINE_RENDERER_H
 #define ENGINE_ENGINE_RENDERER_H
 
-#include "core/engine/Engine_Utils.h"
+#include "core/engine/renderer/RenderGraph.h"
+#include "core/engine/Engine_GLStateMachine.h"
 
 #include <glm/gtc/type_ptr.hpp>
-#include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
 #include <SFML/Window.hpp>
 
 typedef std::uint32_t uint;
 
-class  Mesh;
-class  Material;
-class  MeshInstance;
-class  Scene;
-class  ShaderP;
-class  Camera;
 class  Texture;
 class  Font;
 struct Entity;
@@ -48,48 +41,15 @@ namespace Engine {
         class FramebufferObject;
         class RenderbufferObject;
         class RenderManager;
-        struct MaterialNode;
-        struct MeshNode;
-        struct InstanceNode;
     };
 };
 
 namespace Engine{
     namespace epriv{
-        struct InstanceNode {
-            MeshInstance* instance;
-            InstanceNode(MeshInstance& i) :instance(&i) {}
-        };
-        struct MeshNode {
-            Mesh* mesh;
-            std::vector<InstanceNode*> instanceNodes;
-            MeshNode(Mesh& m) :mesh(&m) {}
-            ~MeshNode() {
-                SAFE_DELETE_VECTOR(instanceNodes);
-            }
-        };
-        struct MaterialNode {
-            Material* material;
-            std::vector<MeshNode*> meshNodes;
-            MaterialNode(Material& m) :material(&m) {}
-            ~MaterialNode() {
-                SAFE_DELETE_VECTOR(meshNodes);
-            }
-        };
-        class RenderPipeline final {
-            friend class ::Scene;
-            private:
-                ShaderP& shaderProgram;
-                std::vector<MaterialNode*> materialNodes;
-            public:
-                RenderPipeline(ShaderP&);
-                ~RenderPipeline();
-
-                void sort(Camera& c);
-                void render();
-        };
         class RenderManager final{
             public:
+                epriv::GLStateMachineDataCustom glSM;
+
                 class impl;
                 std::unique_ptr<impl> m_i;
 
@@ -142,14 +102,16 @@ namespace Engine{
     namespace Renderer{
         namespace Settings{
 
-            void setGamma(float g);  float getGamma();
+            void setGamma(float g);
+            float getGamma();
 
             void clear(bool color = true, bool depth = true, bool stencil = true);
             void cullFace(uint state);
 
             void setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm);
 
-            void enableDrawPhysicsInfo(bool b = true);   void disableDrawPhysicsInfo();
+            void enableDrawPhysicsInfo(bool b = true);
+            void disableDrawPhysicsInfo();
 
             namespace General {
                 void enable1(bool b = true);
@@ -160,9 +122,12 @@ namespace Engine{
                 void enable(bool b = true);
                 void disable();
                 bool enabled();
-                float getFocus(); void setFocus(float);
-                float getBias(); void setBias(float);
-                float getBlurRadius(); void setBlurRadius(float);
+                float getFocus();
+                void setFocus(float);
+                float getBias();
+                void setBias(float);
+                float getBlurRadius();
+                void setBlurRadius(float);
             }
             namespace Fog{
                 void enable(bool b = true);
@@ -193,57 +158,91 @@ namespace Engine{
                 void disableReprojection();
             };
             namespace FXAA{
-                void setReduceMin(float r);   float getReduceMin();
-                void setReduceMul(float r);   float getReduceMul();
-                void setSpanMax(float r);     float getSpanMax();
+                void setReduceMin(float r);
+                float getReduceMin();
+                void setReduceMul(float r);
+                float getReduceMul();
+                void setSpanMax(float r);
+                float getSpanMax();
             };
             namespace HDR{
                 bool enabled();
-                void enable(bool b = true);   void disable();
-                float getExposure();          void setExposure(float e);
+                void enable(bool b = true);
+                void disable();
+                float getExposure();
+                void setExposure(float e);
                 void setAlgorithm(HDRAlgorithm::Algorithm a);
             };
             namespace Bloom{
-                uint getNumPasses();          void setNumPasses(uint);
-                void enable(bool b = true);   void disable();
+                uint getNumPasses();
+                void setNumPasses(uint);
+                void enable(bool b = true);
+                void disable();
                 bool enabled();
-                float getThreshold();         void setThreshold(float t);
-                float getExposure();          void setExposure(float e);
-                float getBlurRadius();        void setBlurRadius(float r);
-                float getBlurStrength();      void setBlurStrength(float r);
-                float getScale();             void setScale(float s);
+                float getThreshold();
+                void setThreshold(float t);
+                float getExposure();
+                void setExposure(float e);
+                float getBlurRadius();
+                void setBlurRadius(float r);
+                float getBlurStrength();
+                void setBlurStrength(float r);
+                float getScale();
+                void setScale(float s);
             };
             namespace GodRays{
                 bool enabled();
-                void enable(bool b);      void disable();
-                float getExposure();      void setExposure(float e);
-                float getFactor();        void setFactor(float f);
-                float getDecay();         void setDecay(float d);
-                float getDensity();       void setDensity(float d);
-                float getWeight();        void setWeight(float w);
-                uint getSamples();        void setSamples(uint s);
-                float getFOVDegrees();    void setFOVDegrees(float d);
-                float getAlphaFalloff();  void setAlphaFalloff(float a);
+                void enable(bool b);
+                void disable();
+                float getExposure();
+                void setExposure(float e);
+                float getFactor();
+                void setFactor(float f);
+                float getDecay();
+                void setDecay(float d);
+                float getDensity();
+                void setDensity(float d);
+                float getWeight();
+                void setWeight(float w);
+                uint getSamples();
+                void setSamples(uint s);
+                float getFOVDegrees();
+                void setFOVDegrees(float d);
+                float getAlphaFalloff();
+                void setAlphaFalloff(float a);
                 void setObject(Entity*);
                 Entity* getObject();
             };
             namespace SSAO{
                 bool enabled();
-                void enable(bool b = true);       void disable();
-                void enableBlur(bool b = true);   void disableBlur();
-                float getBlurRadius();            void setBlurRadius(float r);
-                float getBlurStrength();          void setBlurStrength(float s);
-                float getIntensity();             void setIntensity(float i);
-                float getRadius();                void setRadius(float r);
-                float getScale();                 void setScale(float s);
-                float getBias();                  void setBias(float b);
-                uint getSamples();                void setSamples(uint s);
+                void enable(bool b = true);
+                void disable();
+                void enableBlur(bool b = true);
+                void disableBlur();
+                float getBlurRadius();
+                void setBlurRadius(float r);
+                float getBlurStrength();
+                void setBlurStrength(float s);
+                float getIntensity();
+                void setIntensity(float i);
+                float getRadius();
+                void setRadius(float r);
+                float getScale();
+                void setScale(float s);
+                float getBias();
+                void setBias(float b);
+                uint getSamples();
+                void setSamples(uint s);
             };
             namespace Lighting{
-                void enable(bool b = true);            void disable();
-                float getGIContributionGlobal();       void setGIContributionGlobal(float giGlobal);
-                float getGIContributionDiffuse();      void setGIContributionDiffuse(float giDiffuse);
-                float getGIContributionSpecular();     void setGIContributionSpecular(float giSpecular);
+                void enable(bool b = true);
+                void disable();
+                float getGIContributionGlobal();
+                void setGIContributionGlobal(float giGlobal);
+                float getGIContributionDiffuse();
+                void setGIContributionDiffuse(float giDiffuse);
+                float getGIContributionSpecular();
+                void setGIContributionSpecular(float giSpecular);
                 void setGIContribution(float global, float diffuse, float specular);
             };
         };
@@ -280,6 +279,11 @@ namespace Engine{
         void unbindReadFBO();
         void unbindDrawFBO();
         
+        void renderTexture(Texture&, const glm::vec2& pos, const glm::vec4& col, float angle, const glm::vec2& scl, float depth);
+        void renderText(const std::string& text, Font&, const glm::vec2& pos, const glm::vec4& color, float angle, const glm::vec2& scl, float depth);
+        void renderRectangle(const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth);
+
+        #pragma region UniformSending
         //Uniform 1
         inline void sendUniform1(const char* l,double x){ glUniform1d(getUniformLocUnsafe(l),x); }
         inline void sendUniform1(const char* l,int x){ glUniform1i(getUniformLocUnsafe(l),x); }
@@ -455,10 +459,7 @@ namespace Engine{
         inline void sendUniformMatrix4vForce(const char* l, const std::vector<glm::mat4>& m,uint count){ std::vector<float> d; d.reserve(m.size() * 16);for(auto& ma:m){ auto* m = glm::value_ptr(ma);for(uint i = 0; i < 16; ++i){d.push_back(m[i]);}}glUniformMatrix4fv(getUniformLoc(l),count,0,&d[0]); }
         inline void sendUniformMatrix4Force(const char* l, const glm::dmat4& m){ glUniformMatrix4dv(getUniformLoc(l),1,0,glm::value_ptr(m)); }
         inline void sendUniformMatrix4vForce(const char* l, const std::vector<glm::dmat4>& m,uint count){ std::vector<double> d; d.reserve(m.size() * 16);for(auto& ma:m){ auto* m = glm::value_ptr(ma);for(uint i = 0; i < 16; ++i){d.push_back(m[i]);}}glUniformMatrix4dv(getUniformLoc(l),count,0,&d[0]); }
-
-        void renderTexture(Texture&, const glm::vec2& pos, const glm::vec4& col,float angle, const glm::vec2& scl, float depth);
-        void renderText(const std::string& text,Font&, const glm::vec2& pos, const glm::vec4& color, float angle, const glm::vec2& scl, float depth);
-        void renderRectangle(const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth);
+        #pragma endregion
     };
 };
 #endif

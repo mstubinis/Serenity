@@ -7,7 +7,7 @@
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include "core/engine/BindableResource.h"
-#include "core/engine/Engine_EventObject.h"
+#include "core/engine/events/Engine_EventObject.h"
 #include <ecs/Entity.h>
 
 struct Handle;

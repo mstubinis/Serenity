@@ -3,12 +3,11 @@
 #define ENGINE_ENGINE_H
 
 #include "core/engine/Engine_Debugging.h"
-#include "core/engine/Engine_EventDispatcher.h"
 #include "core/engine/Engine_ThreadManager.h"
 #include "core/engine/Engine_Resources.h"
-#include "core/engine/Engine_Renderer.h"
+#include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/Engine_Sounds.h"
-#include "core/engine/Engine_Events.h"
+#include "core/engine/events/Engine_Events.h"
 #include "core/engine/Engine_Noise.h"
 #include "core/engine/Engine_Window.h"
 
@@ -19,7 +18,6 @@ namespace Engine{
             static Core*          m_Engine;
 
             EventManager          m_EventManager;
-            EventDispatcher       m_EventDispatcher;
             PhysicsManager        m_PhysicsManager;
             ResourceManager       m_ResourceManager;
             DebugManager          m_DebugManager;

@@ -1,8 +1,8 @@
 #include "core/engine/Engine.h"
 #include "core/engine/Engine_Window.h"
 #include "core/engine/Engine_Resources.h"
-#include "core/engine/Engine_EventDispatcher.h"
-#include "core/engine/Engine_Renderer.h"
+#include "core/engine/events/Engine_EventDispatcher.h"
+#include "core/engine/renderer/Engine_Renderer.h"
 #include "core/Texture.h"
 #include "core/Scene.h"
 #include "ecs/ECS.h"
@@ -105,7 +105,7 @@ class Engine_Window::impl final{
             //event dispatch
             epriv::EventWindowFullscreenChanged e; e.isFullscreen = fullscreen;
             Event ev; ev.eventWindowFullscreenChanged = e; ev.type = EventType::WindowFullscreenChanged;
-            epriv::Core::m_Engine->m_EventDispatcher._dispatchEvent(ev);
+            epriv::Core::m_Engine->m_EventManager.m_EventDispatcher._dispatchEvent(ev);
 
             glm::uvec2 winSize = Engine::getWindowSize();
 

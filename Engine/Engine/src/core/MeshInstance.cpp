@@ -1,6 +1,6 @@
 #include "core/MeshInstance.h"
 #include "core/engine/Engine_Resources.h"
-#include "core/engine/Engine_Renderer.h"
+#include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/Engine_BuiltInResources.h"
 #include "core/engine/Engine_Math.h"
 #include "core/Mesh.h"

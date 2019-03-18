@@ -1,10 +1,10 @@
-#include "core/engine/Engine_EventDispatcher.h"
+#include "core/engine/events/Engine_EventDispatcher.h"
 #include <vector>
 
 using namespace Engine;
 using namespace std;
 
-epriv::EventDispatcher::EventDispatcher(const char* name,uint w,uint h){ 
+epriv::EventDispatcher::EventDispatcher(){ 
     m_Observers.resize(EventType::_TOTAL);
 }
 epriv::EventDispatcher::~EventDispatcher(){ 

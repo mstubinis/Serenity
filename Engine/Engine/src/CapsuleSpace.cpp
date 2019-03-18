@@ -4,7 +4,7 @@
 #include "Ship.h"
 #include "GameCamera.h"
 #include "core/Light.h"
-#include "core/engine/Engine_Renderer.h"
+#include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/Engine_GLStateMachine.h"
 #include "core/Texture.h"
 #include "GameSkybox.h"

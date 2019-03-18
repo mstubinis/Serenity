@@ -1,5 +1,5 @@
-#include "core/engine/GBuffer.h"
-#include "core/engine/Engine_Renderer.h"
+#include "core/engine/renderer/GBuffer.h"
+#include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/FramebufferObject.h"
 #include "core/Texture.h"
 

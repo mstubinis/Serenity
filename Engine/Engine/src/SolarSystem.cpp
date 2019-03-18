@@ -1,7 +1,7 @@
 #include "SolarSystem.h"
 
-#include "core/engine/Engine_Events.h"
-#include "core/engine/Engine_Renderer.h"
+#include "core/engine/events/Engine_Events.h"
+#include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/Engine_Resources.h"
 #include "core/Light.h"
 #include "core/MeshInstance.h"
@@ -31,7 +31,7 @@ using namespace std;
 
 
 SolarSystem::SolarSystem(string n, string file):Scene(n){
-    GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.35f,7000000000.0f,this);
+    GameCamera* playerCamera = new GameCamera(0.35f,7000000000.0f,this);
     setActiveCamera(*playerCamera);
     m_Objects.push_back(playerCamera);
     giGlobal = giSpecular = giDiffuse = 1.0f;

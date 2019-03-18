@@ -1,7 +1,7 @@
 #include "GameCamera.h"
-#include "core/engine/Engine_Events.h"
+#include "core/engine/events/Engine_Events.h"
 #include "core/engine/Engine_Resources.h"
-#include "core/engine/Engine_Renderer.h"
+#include "core/engine/renderer/Engine_Renderer.h"
 #include "core/Scene.h"
 
 #include <glm/gtx/transform.hpp>
@@ -101,6 +101,17 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 
 #pragma region GameCamera
 
+
+GameCamera::GameCamera(float n, float f, Scene* scene):Camera(60, Resources::getWindowSize().x / (float)Resources::getWindowSize().y, n, f, scene) {
+    m_State = CameraState::Freeform;
+    m_Target = Entity::_null;
+    m_Player = Entity::_null;
+    m_OrbitRadius = 0;
+    m_CameraMouseFactor = glm::vec2(0.0f);
+    auto& m_Logic = *m_Entity.getComponent<ComponentLogic2>();
+    m_Logic.setUserPointer(this);
+    m_Logic.setFunctor(GameCameraLogicFunctor());
+}
 GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a,r,n,f,scene){
     m_State = CameraState::Freeform;
     m_Target = Entity::_null;

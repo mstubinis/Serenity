@@ -3,7 +3,7 @@
 #define ENGINE_EVENT_DISPATCHER_H
 
 #include <vector>
-#include "core/engine/Engine_EventObject.h"
+#include "core/engine/events/Engine_EventObject.h"
 
 namespace Engine{
     namespace epriv{
@@ -11,7 +11,7 @@ namespace Engine{
             private:
                 std::vector<std::vector<EventObserver*>> m_Observers;
             public:
-                EventDispatcher(const char* name,uint w,uint h);
+                EventDispatcher();
                 ~EventDispatcher();
 
                 void _registerObject(EventObserver*,EventType::Type);

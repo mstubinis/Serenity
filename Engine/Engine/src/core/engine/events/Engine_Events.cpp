@@ -1,4 +1,4 @@
-#include "core/engine/Engine_Events.h"
+#include "core/engine/events/Engine_Events.h"
 #include "core/engine/Engine_Resources.h"
 #include "core/engine/Engine_Window.h"
 
@@ -7,7 +7,7 @@ using namespace std;
 
 epriv::EventManager* epriv::EventManager::m_EventManager = nullptr;
 
-epriv::EventManager::EventManager(const char* name,uint w,uint h){
+epriv::EventManager::EventManager(const char* name,uint w,uint h):m_EventDispatcher(){
     m_Delta = 0;
     m_Position = m_Position_Previous = m_Difference = glm::vec2(0.0f);
 

@@ -6,7 +6,7 @@
 #include <SFML/OpenGL.hpp>
 
 #include "core/engine/BindableResource.h"
-#include "core/engine/Engine_EventObject.h"
+#include "core/engine/events/Engine_EventObject.h"
 #include "core/engine/Engine_Physics.h"
 #include "core/engine/mesh/VertexData.h"
 

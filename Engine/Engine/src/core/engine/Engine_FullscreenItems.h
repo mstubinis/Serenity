@@ -3,8 +3,8 @@
 #define ENGINE_FULLSCREEN_ITEMS_H
 
 #include <vector>
-#include "core/engine/Engine_EventObject.h"
-#include "core/engine/Engine_Renderer.h"
+#include "core/engine/events/Engine_EventObject.h"
+#include "core/engine/renderer/Engine_Renderer.h"
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 

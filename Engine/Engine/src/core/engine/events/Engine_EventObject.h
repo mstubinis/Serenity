@@ -2,7 +2,7 @@
 #ifndef ENGINE_EVENT_OBJECT_H
 #define ENGINE_EVENT_OBJECT_H
 
-#include "core/engine/Engine_EventEnums.h"
+#include "core/engine/events/Engine_EventEnums.h"
 #include "core/engine/Engine_Utils.h"
 
 class Scene;
@@ -87,6 +87,6 @@ struct EventObserver{
 
     void registerEvent(const EventType::Type& type);
     void unregisterEvent(const EventType::Type& type);
-    virtual void onEvent(const Event& e);
+    virtual void onEvent(const Event& e) {}
 };
 #endif

@@ -4,7 +4,7 @@
 
 #include <core/engine/mesh/VertexBufferObject.h>
 #include <core/engine/mesh/VertexDataFormat.h>
-#include "core/engine/Engine_Renderer.h"
+#include "core/engine/renderer/Engine_Renderer.h"
 #include <memory>
 
 
