@@ -2,8 +2,7 @@
 #ifndef ENGINE_MESH_H
 #define ENGINE_MESH_H
 
-#include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include <core/engine/mesh/MeshIncludes.h>
 
 #include "core/engine/BindableResource.h"
 #include "core/engine/events/Engine_EventObject.h"
@@ -12,34 +11,13 @@
 
 #include <map>
 #include <unordered_map>
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
 
 #include <assimp/scene.h>
 
 typedef unsigned short ushort;
 
-const uint NUM_BONES_PER_VERTEX = 4;
-const uint NUM_MAX_INSTANCES = 65536;
-
 class  MeshInstance;
 class  Mesh;
-
-struct MeshDrawMode {enum Mode {
-    Triangles = GL_TRIANGLES,
-    Quads = GL_QUADS,
-    Points = GL_POINTS,
-    Lines = GL_LINES,
-    TriangleStrip = GL_TRIANGLE_STRIP,
-    TriangleFan = GL_TRIANGLE_FAN,
-    QuadStrip = GL_QUAD_STRIP,
-};};
-struct MeshModifyFlags {enum Flag {
-    Default = 0,
-    Orphan = 1,
-};};
 
 namespace Engine{
     namespace epriv{
@@ -48,101 +26,8 @@ namespace Engine{
         class CollisionFactory;
         struct DefaultMeshBindFunctor;
         struct DefaultMeshUnbindFunctor;
-        struct Vertex final{
-            glm::vec3 position;
-            glm::vec2 uv;
-            glm::vec3 normal;
-            glm::vec3 binormal;
-            glm::vec3 tangent;
-            void clear(){ position = normal = binormal = tangent = glm::vec3(0.0f); uv = glm::vec2(0.0f); }
-        };
-        struct Triangle final{
-            Vertex v1;
-            Vertex v2;
-            Vertex v3;
-            Triangle(){}
-            Triangle(Vertex& _v1, Vertex& _v2, Vertex& _v3){ v1 = _v1; v2 = _v2; v3 = _v3; }
-            ~Triangle(){}
-        };
-        struct VertexBoneData final{
-            float IDs[NUM_BONES_PER_VERTEX];
-            float Weights[NUM_BONES_PER_VERTEX];
-            VertexBoneData() {
-                for (uint i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
-                    IDs[i] = 0.0f; Weights[i] = 0.0f;
-                }
-            }
-            void AddBoneData(uint BoneID, float Weight){
-                for (uint i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
-                    if (Weights[i] == 0.0f) {
-                        IDs[i] = float(BoneID);
-                        Weights[i] = Weight;
-                        return;
-                    } 
-                }
-            }
-        };
-        struct ImportedMeshData final{
-            std::map<uint,VertexBoneData> m_Bones;
-
-            std::vector<glm::vec3> file_points;
-            std::vector<glm::vec2> file_uvs;
-            std::vector<glm::vec3> file_normals;
-            std::vector<Triangle>  file_triangles;
-
-            std::vector<glm::vec3> points;
-            std::vector<glm::vec2> uvs;
-            std::vector<glm::vec3> normals;
-            std::vector<glm::vec3> binormals;
-            std::vector<glm::vec3> tangents;
-            std::vector<ushort> indices;
-            void clear(){
-                vector_clear(file_points); vector_clear(file_uvs); vector_clear(file_normals); vector_clear(file_triangles);
-                vector_clear(points); vector_clear(uvs); vector_clear(normals); vector_clear(binormals); vector_clear(tangents); vector_clear(indices);
-            }
-            ImportedMeshData(){ }
-            ~ImportedMeshData(){ clear(); }
-        };
-        struct Vector3Key final {
-            glm::vec3 value;
-            double time;
-            Vector3Key(double _time, glm::vec3 _value) { value = _value; time = _time; }
-        };
-        struct QuatKey final {
-            aiQuaternion value;
-            double time;
-            QuatKey(double _time, aiQuaternion _value) { value = _value; time = _time; }
-        };
-        struct AnimationChannel final {
-            std::vector<Vector3Key> PositionKeys;
-            std::vector<QuatKey>    RotationKeys;
-            std::vector<Vector3Key> ScalingKeys;
-        };
         struct BoneNode;
-        class AnimationData final{
-            friend class ::Mesh;
-            private:
-                Mesh* m_Mesh;
-                double m_TicksPerSecond;
-                double m_DurationInTicks;
-                std::unordered_map<std::string, AnimationChannel> m_KeyframeData;
-
-                void ReadNodeHeirarchy(const std::string& animationName, float time, const BoneNode* node, glm::mat4& ParentTransform, std::vector<glm::mat4>& Transforms);
-                void BoneTransform(const std::string& animationName, float TimeInSeconds, std::vector<glm::mat4>& Transforms);
-                void CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const AnimationChannel& node);
-                void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const AnimationChannel& node);
-                void CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const AnimationChannel& node);
-                uint FindPosition(float AnimationTime, const AnimationChannel& node);
-                uint FindRotation(float AnimationTime, const AnimationChannel& node);
-                uint FindScaling(float AnimationTime, const AnimationChannel& node);
-            public:
-                AnimationData(const Mesh&, const aiAnimation&);
-                const AnimationData& operator=(const AnimationData&) = delete;// non copyable
-                AnimationData(const AnimationData&) = delete;                 // non construction-copyable
-                AnimationData(AnimationData&&) = default;
-                ~AnimationData();
-                float duration();
-        };
+        class AnimationData;
         struct InternalMeshPublicInterface final {
             static void LoadCPU(Mesh&);
             static void LoadGPU(Mesh&);

@@ -4,6 +4,7 @@
 #include "core/engine/Engine_BuiltInResources.h"
 #include "core/engine/Engine_Math.h"
 #include "core/engine/mesh/Mesh.h"
+#include "core/engine/mesh/Skeleton.h"
 #include "core/Material.h"
 #include "core/Camera.h"
 #include "core/Scene.h"

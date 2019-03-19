@@ -53,7 +53,9 @@
     <ClCompile Include="Engine\src\core\engine\lights\RodLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\SpotLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\SunLight.cpp" />
+    <ClCompile Include="Engine\src\core\engine\mesh\ImportedMeshData.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
+    <ClCompile Include="Engine\src\core\engine\mesh\Skeleton.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexBufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexDataFormat.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\Engine_Renderer.cpp" />
@@ -120,7 +122,10 @@
     <ClInclude Include="Engine\src\core\engine\lights\RodLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\SpotLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\SunLight.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\ImportedMeshData.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\MeshIncludes.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\Skeleton.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexAttribute.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexBufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexData.h" />

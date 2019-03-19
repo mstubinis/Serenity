@@ -281,6 +281,12 @@
     <ClCompile Include="Engine\src\core\engine\lights\RodLight.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\Skeleton.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\ImportedMeshData.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -510,6 +516,15 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\lights\LightIncludes.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\Skeleton.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\ImportedMeshData.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\MeshIncludes.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
