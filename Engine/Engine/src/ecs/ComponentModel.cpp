@@ -78,7 +78,7 @@ uint ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* shaderPro
     models.push_back(new MeshInstance(owner, mesh, material, shaderProgram));
     auto& instance = *models[models.size() - 1];
     auto& _scene = owner.scene();
-    epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
+    instance.m_Stage = _stage;
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
     ComponentModel_Functions::CalculateRadius(*this);
     return models.size() - 1;
@@ -89,10 +89,10 @@ void ComponentModel::setModel(Mesh* mesh, Material* material, uint index, Shader
     auto& _scene = owner.scene();
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
 
-    epriv::InternalMeshInstancePublicInterface::SetShaderProgram(instance, shaderProgram);
-    epriv::InternalMeshInstancePublicInterface::SetMesh(instance, mesh);
-    epriv::InternalMeshInstancePublicInterface::SetMaterial(instance, material);
-    epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
+    instance.m_ShaderProgram = shaderProgram;
+    instance.m_Mesh = mesh;
+    instance.m_Material = material;
+    instance.m_Stage = _stage;
 
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
     ComponentModel_Functions::CalculateRadius(*this);
@@ -102,8 +102,8 @@ void ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint index, R
     auto& _scene = owner.scene();
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
 
-    epriv::InternalMeshInstancePublicInterface::SetShaderProgram(instance, shaderProgram);
-    epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
+    instance.m_ShaderProgram = shaderProgram;
+    instance.m_Stage = _stage;
 
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
     ComponentModel_Functions::CalculateRadius(*this);
@@ -115,8 +115,8 @@ void ComponentModel::setModelMesh(Mesh* mesh, uint index, RenderStage::Stage _st
 
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
 
-    epriv::InternalMeshInstancePublicInterface::SetMesh(instance, mesh);
-    epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
+    instance.m_Mesh = mesh;
+    instance.m_Stage = _stage;
 
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
     ComponentModel_Functions::CalculateRadius(*this);
@@ -127,8 +127,8 @@ void ComponentModel::setModelMaterial(Material* material, uint index, RenderStag
     auto& _scene = owner.scene();
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
 
-    epriv::InternalMeshInstancePublicInterface::SetMaterial(instance, material);
-    epriv::InternalMeshInstancePublicInterface::SetStage(instance, _stage);
+    instance.m_Material = material;
+    instance.m_Stage = _stage;
 
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
 }

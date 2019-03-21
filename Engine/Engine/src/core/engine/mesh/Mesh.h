@@ -21,13 +21,13 @@ class  Mesh;
 
 namespace Engine{
     namespace epriv{
-        class MeshLoader;
-        class MeshSkeleton;
-        class CollisionFactory;
+        class  MeshLoader;
+        class  MeshSkeleton;
+        class  MeshCollisionFactory;
         struct DefaultMeshBindFunctor;
         struct DefaultMeshUnbindFunctor;
         struct BoneNode;
-        class AnimationData;
+        class  AnimationData;
         struct InternalMeshPublicInterface final {
             static void LoadCPU(Mesh&);
             static void LoadGPU(Mesh&);
@@ -41,13 +41,13 @@ namespace Engine{
     };
 };
 class Mesh final: public BindableResource, public EventObserver{
-    friend struct Engine::epriv::InternalMeshPublicInterface;
-    friend struct Engine::epriv::DefaultMeshBindFunctor;
-    friend struct Engine::epriv::DefaultMeshUnbindFunctor;
-    friend class  Engine::epriv::AnimationData;
-    friend class  Engine::epriv::MeshSkeleton;
-    friend class  Engine::epriv::MeshLoader;
-    friend class  Engine::epriv::CollisionFactory;
+    friend struct ::Engine::epriv::InternalMeshPublicInterface;
+    friend struct ::Engine::epriv::DefaultMeshBindFunctor;
+    friend struct ::Engine::epriv::DefaultMeshUnbindFunctor;
+    friend class  ::Engine::epriv::AnimationData;
+    friend class  ::Engine::epriv::MeshSkeleton;
+    friend class  ::Engine::epriv::MeshLoader;
+    friend class  ::Engine::epriv::MeshCollisionFactory;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

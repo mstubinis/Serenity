@@ -1,7 +1,5 @@
-#include "core/engine/mesh/Skeleton.h"
-
-#include <core/engine/mesh/ImportedMeshData.h>
-
+#include <core/engine/mesh/Skeleton.h>
+#include <core/engine/mesh/MeshImportedData.h>
 #include <core/engine/Engine_Math.h>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -138,7 +136,7 @@ epriv::MeshSkeleton::MeshSkeleton() {
     m_RootNode = nullptr;
     clear();
 }
-epriv::MeshSkeleton::MeshSkeleton(const ImportedMeshData& data) {
+epriv::MeshSkeleton::MeshSkeleton(const MeshImportedData& data) {
     m_RootNode = nullptr;
     fill(data);
 }
@@ -147,7 +145,7 @@ epriv::MeshSkeleton::~MeshSkeleton() {
     cleanup();
 }
 
-void epriv::MeshSkeleton::fill(const ImportedMeshData& data) {
+void epriv::MeshSkeleton::fill(const MeshImportedData& data) {
     for (auto& _b : data.m_Bones) {
         const VertexBoneData& b = _b.second;
         m_BoneIDs.push_back(glm::vec4(b.IDs[0], b.IDs[1], b.IDs[2], b.IDs[3]));

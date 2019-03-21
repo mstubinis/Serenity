@@ -44,14 +44,15 @@ class Engine_Window::impl final{
             SAFE_DELETE(m_SFMLWindow);
         }
         void _restoreStateMachine(){
+            auto& sfmlWindow = *m_SFMLWindow;
             if(m_FramerateLimit > 0)
-                m_SFMLWindow->setFramerateLimit(m_FramerateLimit);
-            m_SFMLWindow->setMouseCursorVisible(m_MouseCursorVisible);
-            m_SFMLWindow->setActive(m_Active);
-            m_SFMLWindow->setVerticalSyncEnabled(m_Vsync);
-            m_SFMLWindow->setMouseCursorGrabbed(m_MouseCursorGrabbed);
+                sfmlWindow.setFramerateLimit(m_FramerateLimit);
+            sfmlWindow.setMouseCursorVisible(m_MouseCursorVisible);
+            sfmlWindow.setActive(m_Active);
+            sfmlWindow.setVerticalSyncEnabled(m_Vsync);
+            sfmlWindow.setMouseCursorGrabbed(m_MouseCursorGrabbed);
         }
-        const sf::ContextSettings _createOpenGLWindow(const char* name,uint width,uint height,uint _majorVersion = 3, uint _minorVersion = 3,uint _glslVersion = 120){
+        const sf::ContextSettings _createOpenGLWindow(const char* name,uint width,uint height,uint _majorVersion, uint _minorVersion,uint _glslVersion){
             sf::ContextSettings settings;
             settings.depthBits = 24;
             settings.stencilBits = 0;
@@ -128,7 +129,7 @@ class Engine_Window::impl final{
             if(m_Style == style) return;
             m_Style = style;
             m_SFMLWindow->close();
-            _createOpenGLWindow(m_WindowName,m_Width,m_Height);
+            _createOpenGLWindow(m_WindowName,m_Width,m_Height,3,3,330);
         }
         void _setSize(uint w, uint h){
             m_Width = w; m_Height = h;

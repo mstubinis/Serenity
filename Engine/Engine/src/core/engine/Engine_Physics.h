@@ -15,7 +15,7 @@ class  Mesh;
 class  ComponentModel;
 namespace Engine{
     namespace epriv{
-        struct ImportedMeshData;
+        struct MeshImportedData;
         class GLDebugDrawer;
     };
 };

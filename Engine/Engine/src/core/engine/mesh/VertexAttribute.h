@@ -2,6 +2,7 @@
 #ifndef ENGINE_VERTEX_ATTRIBUTE_H_INCLUDE_GUARD
 #define ENGINE_VERTEX_ATTRIBUTE_H_INCLUDE_GUARD
 
+//information about individual attributes (example: position, uv, normals, etc)
 struct VertexAttributeInfo final{
     int      size;
     int      type;

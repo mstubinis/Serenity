@@ -7,8 +7,7 @@
 
 namespace Engine{
     namespace epriv{
-        template<typename R>
-        struct HandleEntry final{
+        template<typename R> struct HandleEntry final{
             uint nextFreeIndex : 12; //
             uint version : 15;       // 29 bits
             uint active : 1;         //  total
@@ -28,8 +27,7 @@ namespace Engine{
             }
         };
         #pragma region ObjectPool
-        template<typename T>
-        class ObjectPool final{
+        template<typename T> class ObjectPool final{
             private:
                 uint              MAX_ENTRIES;
                 uint              m_activeEntryCount;
@@ -58,7 +56,7 @@ namespace Engine{
                         if(m_Pool[i].resource){ c = i; }
                     }
                     return c;
-                }
+                } 
                 void reset(){
                     m_activeEntryCount = 0;
                     m_firstFreeEntry = 1;

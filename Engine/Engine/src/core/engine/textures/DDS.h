@@ -6,8 +6,6 @@
 
 typedef unsigned char uchar;
 
-class  Texture;
-
 namespace Engine {
     namespace epriv {
         namespace textures {
@@ -155,13 +153,13 @@ namespace Engine {
             static const uint FourCC_ATI1 = 0x31495441;
             static const uint FourCC_ATI2 = 0x32495441;
             static const uint FourCC_RXGB = 0x42475852;
-            static const uint FourCC_$ = 0x00000024;
-            static const uint FourCC_o = 0x0000006f;
-            static const uint FourCC_p = 0x00000070;
-            static const uint FourCC_q = 0x00000071;
-            static const uint FourCC_r = 0x00000072;
-            static const uint FourCC_s = 0x00000073;
-            static const uint FourCC_t = 0x00000074;
+            static const uint FourCC_$    = 0x00000024;
+            static const uint FourCC_o    = 0x0000006f;
+            static const uint FourCC_p    = 0x00000070;
+            static const uint FourCC_q    = 0x00000071;
+            static const uint FourCC_r    = 0x00000072;
+            static const uint FourCC_s    = 0x00000073;
+            static const uint FourCC_t    = 0x00000074;
             static const uint FourCC_BC4U = 0x55344342;
             static const uint FourCC_BC4S = 0x53344342;
             static const uint FourCC_BC5U = 0x55354342;

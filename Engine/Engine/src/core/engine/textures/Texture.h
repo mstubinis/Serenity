@@ -1,41 +1,21 @@
 #pragma once
-#ifndef ENGINE_TEXTURE_H
-#define ENGINE_TEXTURE_H
+#ifndef ENGINE_TEXTURE_INCLUDE_GUARD
+#define ENGINE_TEXTURE_INCLUDE_GUARD
 
+#include <core/engine/textures/TextureIncludes.h>
 #include "core/engine/Engine_ResourceBasic.h"
-#include <glm/fwd.hpp>
 #include "core/engine/renderer/GLImageConstants.h"
+
+#include <glm/fwd.hpp>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <memory>
 
-typedef std::uint32_t     uint;
-typedef unsigned char     uchar;
-typedef unsigned short    ushort;
-
-class Texture;
-struct TextureWrap{enum Wrap{
-    Repeat,RepeatMirrored,ClampToEdge,ClampToBorder,
-_TOTAL};};
-struct TextureFilter{enum Filter{
-    Linear,Nearest,Nearest_Mipmap_Nearest,Nearest_Mipmap_Linear,Linear_Mipmap_Nearest,Linear_Mipmap_Linear,
-_TOTAL};};
-struct TextureType{enum Type{
-    Texture1D,Texture2D,Texture3D,CubeMap,RenderTarget,
-_TOTAL};};
-
-namespace sf{ class Image; }
 namespace Engine{
     namespace epriv{
-        namespace textures{
-            struct ImageMipmap;
-            struct ImageLoadedStructure;
-        };
-        class FramebufferObject;
         struct TextureLoader final{
             friend class ::Texture;
 
-            static void LoadDDSFile(Texture& texture, std::string filename,epriv::textures::ImageLoadedStructure& image);
+            static void LoadDDSFile(Texture& texture, std::string filename,epriv::ImageLoadedStructure& image);
 
             static void LoadTexture2DIntoOpenGL(Texture& texture);
             static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
@@ -78,8 +58,7 @@ class Texture: public EngineResource{
         virtual ~Texture();
 
         uchar* pixels();
-        GLuint& address();
-        GLuint& address(uint);
+        GLuint& address(uint = 0);
         GLuint type();
         uint width();
         uint height();

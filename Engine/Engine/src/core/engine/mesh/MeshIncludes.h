@@ -3,10 +3,8 @@
 #define ENGINE_MESH_INCLUDES_INCLUDE_GUARD
 
 #include <core/engine/Engine_Utils.h>
-
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-
 #include <glm/glm.hpp>
 
 const uint NUM_BONES_PER_VERTEX   = 4;

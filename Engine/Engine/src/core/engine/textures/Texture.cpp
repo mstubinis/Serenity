@@ -22,78 +22,6 @@ using namespace std;
 Texture* Texture::White = nullptr;
 Texture* Texture::Black = nullptr;
 
-
-struct textures::ImageMipmap final{
-    uint width, height, compressedSize, level;
-    vector<uchar> pixels;
-    ImageMipmap(){
-        level = width = height = compressedSize = 0;
-    }
-    ~ImageMipmap(){
-        vector_clear(pixels);
-    }
-};
-
-struct textures::ImageLoadedStructure final{
-    ImageInternalFormat::Format      internalFormat;
-    ImagePixelFormat::Format         pixelFormat;
-    ImagePixelType::Type             pixelType;
-    vector<textures::ImageMipmap>    mipmaps;
-    string                           filename;
-    ImageLoadedStructure(){
-        ImageMipmap baseImage;
-        filename = "";
-        baseImage.compressedSize = 0;
-        mipmaps.push_back(baseImage);
-    }
-    ~ImageLoadedStructure(){
-        vector_clear(mipmaps);
-    }
-    void load(uint _width,uint _height,ImagePixelType::Type _pixelType,ImagePixelFormat::Format _pixelFormat,ImageInternalFormat::Format _internalFormat){
-        ImageMipmap* baseImage = nullptr;
-        if(mipmaps.size() > 0){
-            baseImage = &(mipmaps[0]);
-        }else{
-            baseImage = new ImageMipmap();
-        }
-        filename = "";
-        pixelFormat = _pixelFormat;
-        pixelType = _pixelType;
-        internalFormat = _internalFormat;
-        baseImage->width = _width;
-        baseImage->height = _height;
-        baseImage->compressedSize = 0;
-        if(mipmaps.size() == 0){
-            mipmaps.push_back(ImageMipmap(*baseImage));
-            delete baseImage;
-        }
-    }
-    void load(const sf::Image& i,string _filename = ""){
-        ImageMipmap* baseImage = nullptr;
-        if(mipmaps.size() > 0){
-            baseImage = &(mipmaps[0]);
-        }else{
-            baseImage = new ImageMipmap();
-        }
-        filename = _filename;
-        baseImage->width = i.getSize().x;
-        baseImage->height = i.getSize().y;
-        baseImage->pixels.assign(i.getPixelsPtr(),i.getPixelsPtr() + baseImage->width * baseImage->height * 4);
-        baseImage->compressedSize = 0;
-        if(mipmaps.size() == 0){
-            mipmaps.push_back(ImageMipmap(*baseImage));
-            delete baseImage;
-        }
-    }
-    ImageLoadedStructure(uint _w,uint _h,ImagePixelType::Type _pxlType,ImagePixelFormat::Format _pxlFormat,ImageInternalFormat::Format _internFormat){ 
-        load(_w,_h,_pxlType,_pxlFormat,_internFormat); 
-    }
-    ImageLoadedStructure(const sf::Image& i,string _filename = ""){ 
-        load(i,_filename); 
-    }
-};
-
-
 class Texture::impl final{
     friend struct epriv::TextureLoader;
     friend class ::Texture;
@@ -806,7 +734,6 @@ bool Texture::compressed(){
     if(m_i->m_ImagesDatas[0]->mipmaps[0].compressedSize > 0) return true; return false;
 }
 uchar* Texture::pixels(){ TextureLoader::WithdrawPixelsFromOpenGLMemory(*this); return &(m_i->m_ImagesDatas[0]->mipmaps[0].pixels)[0]; }
-GLuint& Texture::address(){ return m_i->m_TextureAddress[0]; }
 GLuint& Texture::address(uint index){ return m_i->m_TextureAddress[index]; }
 uint Texture::numAddresses(){ return m_i->m_TextureAddress.size(); }
 GLuint Texture::type(){ return m_i->m_Type; }

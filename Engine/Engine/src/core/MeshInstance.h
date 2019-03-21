@@ -21,26 +21,26 @@ namespace Engine{
         struct DefaultMeshInstanceBindFunctor { void operator()(EngineResource* r) const; };
         struct DefaultMeshInstanceUnbindFunctor { void operator()(EngineResource* r) const; };
         struct MeshInstanceAnimation;
-        struct InternalMeshInstancePublicInterface;
     };
 };
 class MeshInstance final: public BindableResource{
-    friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
-    friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
-    friend struct Engine::epriv::InternalMeshInstancePublicInterface;
+    friend struct ::Engine::epriv::DefaultMeshInstanceBindFunctor;
+    friend struct ::Engine::epriv::DefaultMeshInstanceUnbindFunctor;
+    friend class  ::ComponentModel;
     private:
-        void* m_UserPointer;
-        std::vector<Engine::epriv::MeshInstanceAnimation*> m_AnimationQueue;
-        Entity m_Parent;
-        ShaderP* m_ShaderProgram;
-        Mesh* m_Mesh;
-        Material* m_Material;
-        RenderStage::Stage m_Stage;
-        glm::vec3 m_Position, m_Scale, m_GodRaysColor;
-        glm::quat m_Orientation;
-        glm::mat4 m_Model;
-        glm::vec4 m_Color;
-        bool m_PassedRenderCheck, m_Visible;
+        void*                                                m_UserPointer;
+        std::vector<Engine::epriv::MeshInstanceAnimation*>   m_AnimationQueue;
+        Entity                                               m_Parent;
+        ShaderP*                                             m_ShaderProgram;
+        Mesh*                                                m_Mesh;
+        Material*                                            m_Material;
+        RenderStage::Stage                                   m_Stage;
+        glm::vec3                                            m_Position, m_Scale, m_GodRaysColor;
+        glm::quat                                            m_Orientation;
+        glm::mat4                                            m_Model;
+        glm::vec4                                            m_Color;
+        bool                                                 m_PassedRenderCheck;
+        bool                                                 m_Visible;
 
         void _init(Mesh* mesh, Material* mat, Entity& parent, ShaderP* program);
         void _updateModelMatrix();
@@ -104,18 +104,6 @@ class MeshInstance final: public BindableResource{
         void translate(float x,float y,float z);               void translate(glm::vec3);
         void rotate(float pitch,float yaw,float roll);         void rotate(glm::vec3);
         void scale(float x,float y,float z);                   void scale(glm::vec3);
-};
-
-
-namespace Engine {
-    namespace epriv {
-        struct InternalMeshInstancePublicInterface {
-            static void SetMesh(MeshInstance&, Mesh*);
-            static void SetMaterial(MeshInstance&, Material*);
-            static void SetShaderProgram(MeshInstance&, ShaderP*);
-            static void SetStage(MeshInstance&, unsigned int);
-        };
-    };
 };
 
 #endif

@@ -284,7 +284,16 @@
     <ClCompile Include="Engine\src\core\engine\mesh\Skeleton.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\mesh\ImportedMeshData.cpp">
+    <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp">
+      <Filter>Source Files\Engine\Core\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\VertexData.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\MeshLoading.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\MeshImportedData.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
@@ -520,10 +529,16 @@
     <ClInclude Include="Engine\src\core\engine\mesh\Skeleton.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\mesh\ImportedMeshData.h">
+    <ClInclude Include="Engine\src\core\engine\mesh\MeshIncludes.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\mesh\MeshIncludes.h">
+    <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h">
+      <Filter>Header Files\Engine\Core\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\MeshLoading.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\MeshImportedData.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
   </ItemGroup>

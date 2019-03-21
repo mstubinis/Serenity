@@ -6,10 +6,13 @@
 #include <core/engine/mesh/VertexAttribute.h>
 
 struct VertexAttributeLayout final {enum Type {
-    Interleaved,
-    NonInterleaved,
+    Interleaved,    // | pos uv norm | pos uv norm | pos uv norm    | ... etc ... 
+    NonInterleaved, // | pos pos pos | uv  uv  uv  | norm norm norm | ... etc ... 
 };};
 struct VertexData;
+
+
+//information about a vertex structure ( a list of all its attributes and the way the attributes are weaved into memory)
 struct VertexDataFormat {
     std::vector<VertexAttributeInfo>    attributes;
     VertexAttributeLayout::Type         interleavingType;
@@ -22,7 +25,7 @@ struct VertexDataFormat {
     VertexDataFormat& operator=(VertexDataFormat&& other) noexcept = default;
 
     void add(int size,int type,bool normalized,int stride,size_t offset,size_t typeSize);
-    void bind(VertexData& vertData);
+    void bind(const VertexData& vertData);
     void unbind();
 
     static VertexDataFormat   VertexDataPositionsOnly, VertexDataNoLighting, VertexDataBasic, VertexDataAnimated;

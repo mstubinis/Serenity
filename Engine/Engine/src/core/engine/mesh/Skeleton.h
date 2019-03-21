@@ -13,7 +13,7 @@ namespace Engine {
     namespace epriv {
         struct DefaultMeshBindFunctor;
         struct DefaultMeshUnbindFunctor;
-        struct ImportedMeshData;
+        struct MeshImportedData;
         class  AnimationData;
         struct BoneInfo final {
             glm::mat4   BoneOffset;
@@ -29,12 +29,11 @@ namespace Engine {
             std::vector<BoneNode*> Children;
             glm::mat4 Transform;
             BoneNode() {
-                Name = "";
-                Parent = nullptr;
+                Name      = "";
+                Parent    = nullptr;
                 Transform = glm::mat4(1.0f);
             }
         };
-
         class MeshSkeleton final {
             friend class  Mesh;
             friend class  Engine::epriv::AnimationData;
@@ -48,17 +47,16 @@ namespace Engine {
                 std::unordered_map<std::string, uint>           m_BoneMapping; // maps a bone name to its index
                 std::unordered_map<std::string, AnimationData>  m_AnimationData;
                 glm::mat4                                       m_GlobalInverseTransform;
-                void fill(const ImportedMeshData& data);
+                void fill(const MeshImportedData& data);
                 void populateCleanupMap(BoneNode* node, std::unordered_map<std::string, BoneNode*>& _map);
                 void cleanup();
                 void clear();
             public:
                 MeshSkeleton();
-                MeshSkeleton(const ImportedMeshData& data);
+                MeshSkeleton(const MeshImportedData& data);
                 ~MeshSkeleton();
                 uint numBones() { return m_NumBones; }
         };
-
         struct Vector3Key final {
             glm::vec3 value;
             double time;
@@ -99,8 +97,6 @@ namespace Engine {
                 ~AnimationData();
                 float duration();
         };
-
-
     };
 };
 

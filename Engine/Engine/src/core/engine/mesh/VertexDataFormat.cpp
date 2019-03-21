@@ -9,7 +9,7 @@ VertexDataFormat::VertexDataFormat() {
 void VertexDataFormat::add(int _size, int _type, bool _normalized, int _stride, size_t _offset, size_t _typeSize) {
     attributes.emplace_back(_size, _type, _normalized, _stride, _offset, _typeSize);
 }
-void VertexDataFormat::bind(VertexData& vertData) {
+void VertexDataFormat::bind(const VertexData& vertData) {
     if (interleavingType == VertexAttributeLayout::Interleaved) {
         for (size_t i = 0; i < attributes.size(); ++i) {
             const auto& attribute = attributes[i];

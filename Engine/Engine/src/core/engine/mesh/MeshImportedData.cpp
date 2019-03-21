@@ -1,16 +1,12 @@
-#include "core/engine/mesh/ImportedMeshData.h"
-
+#include <core/engine/mesh/MeshImportedData.h>
 #include <core/engine/Engine_Utils.h>
 
 using namespace Engine;
 using namespace std;
 
-epriv::ImportedMeshData::ImportedMeshData() {
+epriv::MeshImportedData::MeshImportedData() {
 }
-epriv::ImportedMeshData::~ImportedMeshData() {
-    clear(); 
-}
-void epriv::ImportedMeshData::clear() {
+epriv::MeshImportedData::~MeshImportedData() {
     vector_clear(file_points);
     vector_clear(file_uvs);
     vector_clear(file_normals);
@@ -21,4 +17,5 @@ void epriv::ImportedMeshData::clear() {
     vector_clear(binormals);
     vector_clear(tangents);
     vector_clear(indices);
+    m_Bones.clear();
 }

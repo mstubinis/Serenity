@@ -217,17 +217,3 @@ void MeshInstance::playAnimation(const string& animName,float start,float end,ui
     anim = new epriv::MeshInstanceAnimation(*mesh(),animName, start, end, reqLoops);
     m_AnimationQueue.push_back(anim);
 }
-
-
-void epriv::InternalMeshInstancePublicInterface::SetMesh(MeshInstance& instance, Mesh* mesh) {
-    instance.m_Mesh = mesh;
-}
-void epriv::InternalMeshInstancePublicInterface::SetMaterial(MeshInstance& instance, Material* material) {
-    instance.m_Material = material;
-}
-void epriv::InternalMeshInstancePublicInterface::SetShaderProgram(MeshInstance& instance, ShaderP* program) {
-    instance.m_ShaderProgram = program;
-}
-void epriv::InternalMeshInstancePublicInterface::SetStage(MeshInstance& instance, unsigned int stage) {
-    instance.m_Stage = (RenderStage::Stage)stage;
-}
