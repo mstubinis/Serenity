@@ -47,6 +47,7 @@ class Mesh::impl final{
             m_File = "";
             m_Skeleton = nullptr;
             m_VertexData = nullptr;
+            m_CollisionFactory = nullptr;
             m_threshold = threshold;
         }
         void _initGlobalTwo(Mesh& super,epriv::MeshImportedData& data,float threshold, VertexData* vertData = nullptr){
