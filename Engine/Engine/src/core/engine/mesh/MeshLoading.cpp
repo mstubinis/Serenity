@@ -10,11 +10,191 @@
 #include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
 
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <glm/glm.hpp>
+
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 
 using namespace Engine;
 using namespace std;
 namespace boostm = boost::math;
+
+void epriv::MeshLoader::LoadInternal(epriv::MeshSkeleton* skeleton, epriv::MeshImportedData& data, const string& file) {
+    Assimp::Importer importer;
+    const aiScene* AssimpScene = importer.ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    if (!AssimpScene || AssimpScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !AssimpScene->mRootNode) {
+        return;
+    }
+    //animation stuff
+    aiMatrix4x4 m = AssimpScene->mRootNode->mTransformation; // node->mTransformation?
+    m.Inverse();
+    unordered_map<string, epriv::BoneNode*> map;
+    if (AssimpScene->mAnimations && AssimpScene->mNumAnimations > 0 && !skeleton) {
+        skeleton = new epriv::MeshSkeleton();
+        skeleton->m_GlobalInverseTransform = Math::assimpToGLMMat4(m);
+    }
+    epriv::MeshLoader::LoadProcessNode(skeleton, data, *AssimpScene, *AssimpScene->mRootNode, *AssimpScene->mRootNode, map);
+    if (skeleton) {
+        skeleton->fill(data);
+    }
+}
+
+void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, unordered_map<string, epriv::BoneNode*>& _map) {
+    if (!_map.count(node.mName.data)) {
+        epriv::BoneNode* bone_node = new epriv::BoneNode();
+        bone_node->Name = node.mName.data;
+        bone_node->Transform = Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(node.mTransformation));
+        _map.emplace(node.mName.data, bone_node);
+    }
+    for (uint y = 0; y < node.mNumChildren; ++y) {
+        epriv::MeshLoader::LoadPopulateGlobalNodes(*node.mChildren[y], _map);
+    }
+}
+
+void epriv::MeshLoader::LoadProcessNode(epriv::MeshSkeleton* _skeleton, epriv::MeshImportedData& data, const aiScene& scene, const aiNode& node, const aiNode& root, unordered_map<string, epriv::BoneNode*>& _map) {
+    //yes this is needed
+    if (_skeleton && &node == &root) {
+        epriv::MeshLoader::LoadPopulateGlobalNodes(root, _map);
+    }
+    for (uint i = 0; i < node.mNumMeshes; ++i) {
+        aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
+        #pragma region vertices
+        for (uint i = 0; i < aimesh.mNumVertices; ++i) {
+            //pos
+            data.points.emplace_back(aimesh.mVertices[i].x, aimesh.mVertices[i].y, aimesh.mVertices[i].z);
+            //uv
+            if (aimesh.mTextureCoords[0]) {
+                //this is to prevent uv compression from beign f-ed up at the poles.
+                //if(aimesh.mTextureCoords[0][i].y <= 0.0001f){ aimesh.mTextureCoords[0][i].y = 0.001f; }
+                //if(aimesh.mTextureCoords[0][i].y >= 0.9999f){ aimesh.mTextureCoords[0][i].y = 0.999f; }
+                data.uvs.emplace_back(aimesh.mTextureCoords[0][i].x, aimesh.mTextureCoords[0][i].y);
+            }
+            else {
+                data.uvs.emplace_back(0.0f, 0.0f);
+            }
+            if (aimesh.mNormals) {
+                data.normals.emplace_back(aimesh.mNormals[i].x, aimesh.mNormals[i].y, aimesh.mNormals[i].z);
+            }
+            if (aimesh.mTangents) {
+                //data.tangents.emplace_back(aimesh.mTangents[i].x,aimesh.mTangents[i].y,aimesh.mTangents[i].z);
+            }
+            if (aimesh.mBitangents) {
+                //data.binormals.emplace_back(aimesh.mBitangents[i].x,aimesh.mBitangents[i].y,aimesh.mBitangents[i].z);
+            }
+        }
+        #pragma endregion
+        // Process indices
+        #pragma region indices
+        for (uint i = 0; i < aimesh.mNumFaces; ++i) {
+            aiFace& face = aimesh.mFaces[i];
+
+            uint& index0 = face.mIndices[0];
+            uint& index1 = face.mIndices[1];
+            uint& index2 = face.mIndices[2];
+
+            data.indices.push_back(index0);
+            data.indices.push_back(index1);
+            data.indices.push_back(index2);
+
+            epriv::Vertex v1, v2, v3;
+
+            v1.position = data.points[index0];
+            v2.position = data.points[index1];
+            v3.position = data.points[index2];
+            if (data.uvs.size() > 0) {
+                v1.uv = data.uvs[index0];
+                v2.uv = data.uvs[index1];
+                v3.uv = data.uvs[index2];
+            }
+            if (data.normals.size() > 0) {
+                v1.normal = data.normals[index0];
+                v2.normal = data.normals[index1];
+                v3.normal = data.normals[index2];
+            }
+            data.file_triangles.emplace_back(v1, v2, v3);
+
+        }
+        #pragma endregion
+        //bones
+        #pragma region Skeleton
+        if (aimesh.mNumBones > 0) {
+            auto& skeleton = *_skeleton;
+            #pragma region IndividualBones
+            //build bone information
+            for (uint k = 0; k < aimesh.mNumBones; ++k) {
+                auto* boneNode = _map.at(aimesh.mBones[k]->mName.data);
+                auto& assimpBone = *aimesh.mBones[k];
+                uint BoneIndex(0);
+                if (!skeleton.m_BoneMapping.count(boneNode->Name)) {
+                    BoneIndex = skeleton.m_NumBones;
+                    ++skeleton.m_NumBones;
+                    skeleton.m_BoneInfo.emplace_back();
+                }
+                else {
+                    BoneIndex = skeleton.m_BoneMapping.at(boneNode->Name);
+                }
+                skeleton.m_BoneMapping.emplace(boneNode->Name, BoneIndex);
+                skeleton.m_BoneInfo[BoneIndex].BoneOffset = Math::assimpToGLMMat4(assimpBone.mOffsetMatrix);
+                for (uint j = 0; j < assimpBone.mNumWeights; ++j) {
+                    uint VertexID = assimpBone.mWeights[j].mVertexId;
+                    float Weight = assimpBone.mWeights[j].mWeight;
+                    epriv::VertexBoneData d;
+                    d.AddBoneData(BoneIndex, Weight);
+                    data.m_Bones.emplace(VertexID, d);
+                }
+            }
+            //build skeleton parent child relationship
+            for (auto& node : _map) {
+                const auto& assimpNode = root.FindNode(node.first.c_str());
+                auto iter = assimpNode;
+                while (iter != 0 && iter->mParent != 0) {
+                    if (_map.count(iter->mParent->mName.data)) {
+                        node.second->Parent = _map.at(iter->mParent->mName.data);
+                        node.second->Parent->Children.push_back(node.second);
+                        break; //might need to double check this
+                    }
+                    iter = iter->mParent;
+                }
+            }
+            //and finalize the root node
+            if (!skeleton.m_RootNode) {
+                for (auto& node : _map) {
+                    if (!node.second->Parent) {
+                        skeleton.m_RootNode = node.second;
+                        break;
+                    }
+                }
+            }
+            #pragma endregion
+
+            #pragma region Animations
+            if (scene.mAnimations && scene.mNumAnimations > 0) {
+                for (uint j = 0; j < scene.mNumAnimations; ++j) {
+                    const aiAnimation& anim = *scene.mAnimations[j];
+                    string key(anim.mName.C_Str());
+                    if (key == "") {
+                        key = "Animation " + to_string(skeleton.m_AnimationData.size());
+                    }
+                    if (!skeleton.m_AnimationData.count(key)) {
+                        skeleton.m_AnimationData.emplace(
+                            std::piecewise_construct,
+                            std::forward_as_tuple(key),
+                            std::forward_as_tuple(skeleton, anim)
+                        );
+                    }
+                }
+            }
+            #pragma endregion
+        }
+        #pragma endregion
+        epriv::MeshLoader::CalculateTBNAssimp(data);
+    }
+    for (uint i = 0; i < node.mNumChildren; ++i) {
+        epriv::MeshLoader::LoadProcessNode(_skeleton, data, scene, *node.mChildren[i], *scene.mRootNode, _map);
+    }
+}
+
+
 
 bool epriv::MeshLoader::IsNear(float& v1, float& v2, float& threshold) {
     return std::abs(v1 - v2) < threshold;

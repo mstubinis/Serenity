@@ -15,6 +15,7 @@ namespace Engine {
         struct DefaultMeshUnbindFunctor;
         struct MeshImportedData;
         class  AnimationData;
+        class  MeshLoader;
         struct BoneInfo final {
             glm::mat4   BoneOffset;
             glm::mat4   FinalTransform;
@@ -35,10 +36,11 @@ namespace Engine {
             }
         };
         class MeshSkeleton final {
-            friend class  Mesh;
-            friend class  Engine::epriv::AnimationData;
-            friend struct Engine::epriv::DefaultMeshBindFunctor;
-            friend struct Engine::epriv::DefaultMeshUnbindFunctor;
+            friend class  ::Mesh;
+            friend class  ::Engine::epriv::MeshLoader;
+            friend class  ::Engine::epriv::AnimationData;
+            friend struct ::Engine::epriv::DefaultMeshBindFunctor;
+            friend struct ::Engine::epriv::DefaultMeshUnbindFunctor;
             private:
                 BoneNode*                                       m_RootNode;
                 uint                                            m_NumBones;

@@ -3,9 +3,8 @@
 #define ENGINE_MESH_LOADING_INCLUDE_GUARD
 
 #include <core/engine/Engine_Utils.h>
-#include <glm/fwd.hpp>
+#include <core/engine/mesh/Skeleton.h>
 
-class  Mesh;
 struct VertexData;
 class  btShapeHull;
 class  btConvexHullShape;
@@ -17,12 +16,19 @@ class  btUniformScalingShape;
 class  btScaledBvhTriangleMeshShape;
 class  btGImpactMeshShape;
 
+struct aiScene;
+struct aiNode;
+
 namespace Engine {
     namespace epriv {
-        struct MeshImportedData;
         class MeshLoader final {
             friend class ::Mesh;
+            //friend class ::Engine::epriv::MeshSkeleton;
             public:
+                static void LoadInternal(epriv::MeshSkeleton* skeleton, epriv::MeshImportedData& data, const std::string& file);
+                static void LoadProcessNode(epriv::MeshSkeleton* skeleton, epriv::MeshImportedData& data, const aiScene& scene, const aiNode& node, const aiNode& root, std::unordered_map<std::string, epriv::BoneNode*>& _map);
+                static void LoadPopulateGlobalNodes(const aiNode& node, std::unordered_map<std::string, epriv::BoneNode*>& _map);
+
                 static bool IsNear(float& v1, float& v2, float& threshold);
                 static bool IsNear(glm::vec2& v1, glm::vec2& v2, float& threshold);
                 static bool IsNear(glm::vec3& v1, glm::vec3& v2, float& threshold);
