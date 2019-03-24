@@ -162,10 +162,10 @@ bool MeshInstance::visible() { return m_Visible; }
 bool MeshInstance::passedRenderCheck(){ return m_PassedRenderCheck; }
 void MeshInstance::setPassedRenderCheck(bool b) { m_PassedRenderCheck = b; }
 void MeshInstance::setColor(float r, float g, float b, float a) { m_Color = glm::vec4(r, g, b, a); }
-void MeshInstance::setColor(glm::vec4 color){ MeshInstance::setColor(color.r,color.g,color.b,color.a); }
-void MeshInstance::setColor(glm::vec3 color) { MeshInstance::setColor(color.r, color.g, color.b, 1.0f); }
+void MeshInstance::setColor(glm::vec4& color){ MeshInstance::setColor(color.r,color.g,color.b,color.a); }
+void MeshInstance::setColor(glm::vec3& color) { MeshInstance::setColor(color.r, color.g, color.b, 1.0f); }
 void MeshInstance::setGodRaysColor(float r, float g, float b) { m_GodRaysColor.r = r; m_GodRaysColor.g = g; m_GodRaysColor.b = b; }
-void MeshInstance::setGodRaysColor(glm::vec3 color){ MeshInstance::setGodRaysColor(color.r,color.g,color.b); }
+void MeshInstance::setGodRaysColor(glm::vec3& color){ MeshInstance::setGodRaysColor(color.r,color.g,color.b); }
 void MeshInstance::setPosition(float x, float y, float z){ m_Position = glm::vec3(x, y, z); _updateModelMatrix(); }
 void MeshInstance::setScale(float x,float y,float z){ m_Scale = glm::vec3(x, y, z); _updateModelMatrix(); }
 void MeshInstance::translate(float x, float y, float z){ m_Position += glm::vec3(x, y, z); _updateModelMatrix(); }
@@ -177,11 +177,11 @@ void MeshInstance::rotate(float x, float y, float z){
     _updateModelMatrix();
 }
 void MeshInstance::scale(float x,float y,float z){ m_Scale += glm::vec3(x, y, z); _updateModelMatrix(); }
-void MeshInstance::setPosition(glm::vec3 v){ setPosition(v.x,v.y,v.z); }
-void MeshInstance::setScale(glm::vec3 v){ setScale(v.x,v.y,v.z); }
-void MeshInstance::translate(glm::vec3 v){ translate(v.x,v.y,v.z); }
-void MeshInstance::rotate(glm::vec3 v){ rotate(v.x,v.y,v.z); }
-void MeshInstance::scale(glm::vec3 v){ scale(v.x,v.y,v.z); }
+void MeshInstance::setPosition(glm::vec3& v){ setPosition(v.x,v.y,v.z); }
+void MeshInstance::setScale(glm::vec3& v){ setScale(v.x,v.y,v.z); }
+void MeshInstance::translate(glm::vec3& v){ translate(v.x,v.y,v.z); }
+void MeshInstance::rotate(glm::vec3& v){ rotate(v.x,v.y,v.z); }
+void MeshInstance::scale(glm::vec3& v){ scale(v.x,v.y,v.z); }
 glm::vec4& MeshInstance::color(){ return m_Color; }
 glm::vec3& MeshInstance::godRaysColor(){ return m_GodRaysColor; }
 glm::mat4& MeshInstance::model(){ return m_Model; }
@@ -205,7 +205,7 @@ void MeshInstance::setMaterial(const Handle& materialHandle, ComponentModel& mod
 void MeshInstance::setMaterial(Material* material, ComponentModel& model){
     model.setModel(m_Mesh, material, 0, m_ShaderProgram, m_Stage);
 }
-void MeshInstance::setOrientation(glm::quat o){ m_Orientation = o; }
+void MeshInstance::setOrientation(glm::quat& o){ m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 
     if(abs(x) > 0.001f) m_Orientation =                 (glm::angleAxis(-x, glm::vec3(1,0,0)));
     if(abs(y) > 0.001f) m_Orientation = m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));

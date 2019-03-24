@@ -657,33 +657,36 @@ class Mesh::impl final{
             for (uint i = 0; i < 3; ++i) {
                 writeUint32tBigEndian(sizes[i], stream);
             }
-            auto& positions = data.getData<glm::vec3>(0);
-            auto& uvs = data.getData<glm::vec2>(1);
-            auto& normals = data.getData<GLuint>(2);
-            auto& binormals = data.getData<GLuint>(3);
-            auto& tangents = data.getData<GLuint>(4);
+            const auto& positions = data.getData<glm::vec3>(0);
+            const auto& uvs       = data.getData<glm::vec2>(1);
+            const auto& normals   = data.getData<GLuint>(2);
+            const auto& binormals = data.getData<GLuint>(3);
+            const auto& tangents  = data.getData<GLuint>(4);
 
             if (m_Skeleton) {
-                auto& boneIDs = data.getData<glm::vec4>(5);
-                auto& boneWeights = data.getData<glm::vec4>(6);
+                const auto& boneIDs     = data.getData<glm::vec4>(5);
+                const auto& boneWeights = data.getData<glm::vec4>(6);
                 for (size_t j = 0; j < sizes[0]; ++j) {
-                    const auto& position = positions[j];
-                    const auto& uv = uvs[j];
-                    const auto& normal = normals[j];
-                    const auto& binormal = binormals[j];
-                    const auto& tangent = tangents[j];
-                    const auto& boneID = boneIDs[j];
+                    const auto& position   = positions[j];
+                    const auto& uv         = uvs[j];
+                    const auto& normal     = normals[j];
+                    const auto& binormal   = binormals[j];
+                    const auto& tangent    = tangents[j];
+                    const auto& boneID     = boneIDs[j];
                     const auto& boneWeight = boneWeights[j];
 
                     //positions
                     uint16_t outp[3];
-                    Math::Float16From32(&outp[0], position.x);  Math::Float16From32(&outp[1], position.y);  Math::Float16From32(&outp[2], position.z);
+                    Math::Float16From32(&outp[0], position.x);
+                    Math::Float16From32(&outp[1], position.y);
+                    Math::Float16From32(&outp[2], position.z);
                     for (uint i = 0; i < 3; ++i) {
                         writeUint16tBigEndian(outp[i], stream);
                     }
                     //uvs
                     uint16_t outu[2];
-                    Math::Float16From32(&outu[0], uv.x);  Math::Float16From32(&outu[1], uv.y);
+                    Math::Float16From32(&outu[0], uv.x);
+                    Math::Float16From32(&outu[1], uv.y);
                     for (uint i = 0; i < 2; ++i) {
                         writeUint16tBigEndian(outu[i], stream);
                     }
@@ -695,13 +698,19 @@ class Mesh::impl final{
                     }
                     //boneID's
                     uint16_t outbI[4];
-                    Math::Float16From32(&outbI[0], boneID.x);  Math::Float16From32(&outbI[1], boneID.y); Math::Float16From32(&outbI[2], boneID.z);  Math::Float16From32(&outbI[3], boneID.w);
+                    Math::Float16From32(&outbI[0], boneID.x);
+                    Math::Float16From32(&outbI[1], boneID.y);
+                    Math::Float16From32(&outbI[2], boneID.z); 
+                    Math::Float16From32(&outbI[3], boneID.w);
                     for (uint i = 0; i < 4; ++i) {
                         writeUint16tBigEndian(outbI[i], stream);
                     }
                     //boneWeight's
                     uint16_t outbW[4];
-                    Math::Float16From32(&outbW[0], boneWeight.x);  Math::Float16From32(&outbW[1], boneWeight.y); Math::Float16From32(&outbW[2], boneWeight.z);  Math::Float16From32(&outbW[3], boneWeight.w);
+                    Math::Float16From32(&outbW[0], boneWeight.x);
+                    Math::Float16From32(&outbW[1], boneWeight.y);
+                    Math::Float16From32(&outbW[2], boneWeight.z);
+                    Math::Float16From32(&outbW[3], boneWeight.w);
                     for (uint i = 0; i < 4; ++i) {
                         writeUint16tBigEndian(outbW[i], stream);
                     }
@@ -709,10 +718,10 @@ class Mesh::impl final{
             }else{
                 for (size_t j = 0; j < sizes[0]; ++j) {
                     const auto& position = positions[j];
-                    const auto& uv = uvs[j];
-                    const auto& normal = normals[j];
+                    const auto& uv       = uvs[j];
+                    const auto& normal   = normals[j];
                     const auto& binormal = binormals[j];
-                    const auto& tangent = tangents[j];
+                    const auto& tangent  = tangents[j];
                     //positions
                     uint16_t outp[3];
                     Math::Float16From32(&outp[0], position.x);
@@ -750,11 +759,11 @@ class Mesh::impl final{
 namespace Engine {
     namespace epriv {
         struct DefaultMeshBindFunctor final{void operator()(BindableResource* r) const {
-            auto& m = *((Mesh*)r)->m_i;
+            const auto& m = *((Mesh*)r)->m_i;
             m.m_VertexData->bind();
         }};
         struct DefaultMeshUnbindFunctor final {void operator()(BindableResource* r) const {
-            auto& m = *((Mesh*)r)->m_i;
+            const auto& m = *((Mesh*)r)->m_i;
             m.m_VertexData->unbind();
         }};
     };
@@ -890,7 +899,7 @@ void Mesh::unload(){
 }
 void Mesh::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
-        auto& i = *m_i;
+        const auto& i = *m_i;
         i.m_VertexData->finalize();
     }
 }

@@ -25,8 +25,8 @@ struct CapsuleStarLogicFunctor final {void operator()(ComponentLogic& _component
     CapsuleStar& star = *(CapsuleStar*)_component.getUserPointer();
 
     auto& m_Body = *star.m_Entity.getComponent<ComponentBody>();
-
-    glm::vec3 pos = m_Body.position();
+    auto& activeCamera = *Resources::getCurrentScene()->getActiveCamera();
+    const auto& pos = m_Body.position();
     m_Body.translate(0, 0, (45 * 50) * dt, false);
     if (pos.z >= 200 * 225) {
         float x = float(((rand() % 200) - 100) / 100.0f) * 3.7f; if (x > 0) x += 1.5f; if (x < 0) x -= 1.5f;
@@ -34,14 +34,15 @@ struct CapsuleStarLogicFunctor final {void operator()(ComponentLogic& _component
         m_Body.setPosition(x * 50, y * 50, -200 * 225);
     }
     if (star.m_Light) {
-        star.m_Light->setPosition(pos * 0.015f);
-        if (glm::distance(star.m_Light->position(), Resources::getCurrentScene()->getActiveCamera()->getPosition()) > star.m_Light->getCullingRadius() * 75.0f) {
-            star.m_Light->deactivate();
+        auto& light = *star.m_Light;
+        light.setPosition(pos * 0.015f);
+        if (glm::distance(light.position(), activeCamera.getPosition()) > light.getCullingRadius() * 75.0f) {
+            light.deactivate();
         }else{
-            star.m_Light->activate();
+            light.activate();
         }
     }
-    m_Body.setRotation(Resources::getCurrentScene()->getActiveCamera()->getOrientation());
+    m_Body.setRotation(activeCamera.getOrientation());
 }};
 
 CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, SolarSystem* scene):EntityWrapper(*scene){
@@ -208,10 +209,10 @@ void CapsuleSpace::update(const float& dt){
     backBody.rotate(0,0,4.0f*dt);
     frontBody.rotate(0,0,-4.0f*dt);
 
-    glm::vec3 aPos = tunnelABody.position();
-    glm::vec3 bPos = tunnelBBody.position();
-    glm::vec3 rPosA = ribbonABody.position();
-    glm::vec3 rPosB = ribbonBBody.position();
+    const auto& aPos = tunnelABody.position();
+    const auto& bPos = tunnelBBody.position();
+    const auto& rPosA = ribbonABody.position();
+    const auto& rPosB = ribbonBBody.position();
 
     if(aPos.z >= 12.112 * aRadius || aPos.z <= -12.112 * aRadius){
         tunnelABody.setPosition(0,0,0);
@@ -232,14 +233,17 @@ void CapsuleSpace::update(const float& dt){
     ComponentModel& model = *playerEntity.getComponent<ComponentModel>(_s);
     body.setPosition(0,0,0);
 
-    float x = glm::sin(m_Timer * 2.4f) * 0.07f;
-    float y = glm::cos(m_Timer * 2.4f) * 0.05f;
+    const auto& sine = glm::sin(m_Timer * 2.4f);
+    const auto& cose = glm::cos(m_Timer * 2.4f);
 
-    float roll  = glm::sin(m_Timer * 2.4f) * 5.0f;
-    float pitch = glm::sin(m_Timer * 2.4f) * 3.7f;
+    float x = sine * 0.07f;
+    float y = cose * 0.05f;
 
-    model.getModel().setPosition(glm::vec3(x * 1.2f, -y ,0));
-    model.getModel().setOrientation(  glm::radians(pitch), 0 , glm::radians(roll)  );
+    float roll  = glm::radians(sine * 5.0f);
+    float pitch = glm::radians(sine * 3.7f);
+
+    model.getModel().setPosition(x * 1.2f, -y ,0);
+    model.getModel().setOrientation(pitch, 0, roll);
 
     //double check this (this is the light probe)
     //getPlayer()->getChildren()[0]->setPosition(glm::vec3(x*1.2f,-y,0));

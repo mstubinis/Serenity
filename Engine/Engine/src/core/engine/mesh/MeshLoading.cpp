@@ -19,7 +19,7 @@ using namespace Engine;
 using namespace std;
 namespace boostm = boost::math;
 
-void epriv::MeshLoader::LoadInternal(epriv::MeshSkeleton* skeleton, epriv::MeshImportedData& data, const string& file) {
+void epriv::MeshLoader::LoadInternal(MeshSkeleton* skeleton, MeshImportedData& data, const string& file) {
     Assimp::Importer importer;
     const aiScene* AssimpScene = importer.ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
     if (!AssimpScene || AssimpScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !AssimpScene->mRootNode) {
@@ -28,75 +28,87 @@ void epriv::MeshLoader::LoadInternal(epriv::MeshSkeleton* skeleton, epriv::MeshI
     //animation stuff
     aiMatrix4x4 m = AssimpScene->mRootNode->mTransformation; // node->mTransformation?
     m.Inverse();
-    unordered_map<string, epriv::BoneNode*> map;
+    unordered_map<string, BoneNode*> map;
     if (AssimpScene->mAnimations && AssimpScene->mNumAnimations > 0 && !skeleton) {
-        skeleton = new epriv::MeshSkeleton();
+        skeleton = new MeshSkeleton();
         skeleton->m_GlobalInverseTransform = Math::assimpToGLMMat4(m);
     }
-    epriv::MeshLoader::LoadProcessNode(skeleton, data, *AssimpScene, *AssimpScene->mRootNode, *AssimpScene->mRootNode, map);
+    MeshLoader::LoadProcessNode(skeleton, data, *AssimpScene, *AssimpScene->mRootNode, *AssimpScene->mRootNode, map);
     if (skeleton) {
         skeleton->fill(data);
     }
 }
 
-void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, unordered_map<string, epriv::BoneNode*>& _map) {
+void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, unordered_map<string, BoneNode*>& _map) {
     if (!_map.count(node.mName.data)) {
-        epriv::BoneNode* bone_node = new epriv::BoneNode();
+        BoneNode* bone_node = new BoneNode();
         bone_node->Name = node.mName.data;
         bone_node->Transform = Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(node.mTransformation));
         _map.emplace(node.mName.data, bone_node);
     }
-    for (uint y = 0; y < node.mNumChildren; ++y) {
-        epriv::MeshLoader::LoadPopulateGlobalNodes(*node.mChildren[y], _map);
+    for (uint i = 0; i < node.mNumChildren; ++i) {
+        MeshLoader::LoadPopulateGlobalNodes(*node.mChildren[i], _map);
     }
 }
 
-void epriv::MeshLoader::LoadProcessNode(epriv::MeshSkeleton* _skeleton, epriv::MeshImportedData& data, const aiScene& scene, const aiNode& node, const aiNode& root, unordered_map<string, epriv::BoneNode*>& _map) {
+void epriv::MeshLoader::LoadProcessNode(MeshSkeleton* _skeleton, MeshImportedData& data, const aiScene& scene, const aiNode& node, const aiNode& root, unordered_map<string, BoneNode*>& _map) {
     //yes this is needed
     if (_skeleton && &node == &root) {
-        epriv::MeshLoader::LoadPopulateGlobalNodes(root, _map);
+        MeshLoader::LoadPopulateGlobalNodes(root, _map);
     }
     for (uint i = 0; i < node.mNumMeshes; ++i) {
-        aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
+        const aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
         #pragma region vertices
-        for (uint i = 0; i < aimesh.mNumVertices; ++i) {
+
+        data.points.reserve(aimesh.mNumVertices);
+        if (aimesh.mTextureCoords[0]) { data.uvs.reserve(aimesh.mNumVertices); }
+        if (aimesh.mNormals) {          data.normals.reserve(aimesh.mNumVertices); }
+        if (aimesh.mTangents) {         data.tangents.reserve(aimesh.mNumVertices); }
+        if (aimesh.mBitangents) {       data.binormals.reserve(aimesh.mNumVertices); }
+        for (uint j = 0; j < aimesh.mNumVertices; ++j) {
             //pos
-            data.points.emplace_back(aimesh.mVertices[i].x, aimesh.mVertices[i].y, aimesh.mVertices[i].z);
+            auto& pos = aimesh.mVertices[j];
+            data.points.emplace_back(pos.x, pos.y, pos.z);
             //uv
             if (aimesh.mTextureCoords[0]) {
                 //this is to prevent uv compression from beign f-ed up at the poles.
-                //if(aimesh.mTextureCoords[0][i].y <= 0.0001f){ aimesh.mTextureCoords[0][i].y = 0.001f; }
-                //if(aimesh.mTextureCoords[0][i].y >= 0.9999f){ aimesh.mTextureCoords[0][i].y = 0.999f; }
-                data.uvs.emplace_back(aimesh.mTextureCoords[0][i].x, aimesh.mTextureCoords[0][i].y);
-            }
-            else {
+                auto& uv = aimesh.mTextureCoords[0][j];
+                //if(uv.y <= 0.0001f){ uv.y = 0.001f; }
+                //if(uv.y >= 0.9999f){ uv.y = 0.999f; }
+                data.uvs.emplace_back(uv.x, uv.y);
+            }else{
                 data.uvs.emplace_back(0.0f, 0.0f);
             }
             if (aimesh.mNormals) {
-                data.normals.emplace_back(aimesh.mNormals[i].x, aimesh.mNormals[i].y, aimesh.mNormals[i].z);
+                auto& norm = aimesh.mNormals[j];
+                data.normals.emplace_back(norm.x, norm.y, norm.z);
             }
             if (aimesh.mTangents) {
-                //data.tangents.emplace_back(aimesh.mTangents[i].x,aimesh.mTangents[i].y,aimesh.mTangents[i].z);
+                auto& tang = aimesh.mTangents[j];
+                //data.tangents.emplace_back(tang.x,tang.y,tang.z);
             }
             if (aimesh.mBitangents) {
-                //data.binormals.emplace_back(aimesh.mBitangents[i].x,aimesh.mBitangents[i].y,aimesh.mBitangents[i].z);
+                auto& binorm = aimesh.mBitangents[j];
+                //data.binormals.emplace_back(binorm.x,binorm.y,binorm.z);
             }
         }
         #pragma endregion
         // Process indices
         #pragma region indices
-        for (uint i = 0; i < aimesh.mNumFaces; ++i) {
-            aiFace& face = aimesh.mFaces[i];
+        data.indices.reserve(aimesh.mNumFaces * 3);
+        data.file_triangles.reserve(aimesh.mNumFaces);
+        for (uint j = 0; j < aimesh.mNumFaces; ++j) {
+            const auto& face = aimesh.mFaces[j];
 
-            uint& index0 = face.mIndices[0];
-            uint& index1 = face.mIndices[1];
-            uint& index2 = face.mIndices[2];
+            const auto& index0 = face.mIndices[0];
+            const auto& index1 = face.mIndices[1];
+            const auto& index2 = face.mIndices[2];
 
-            data.indices.push_back(index0);
-            data.indices.push_back(index1);
-            data.indices.push_back(index2);
+            data.indices.emplace_back(index0);
+            data.indices.emplace_back(index1);
+            data.indices.emplace_back(index2);
 
-            epriv::Vertex v1, v2, v3;
+            Vertex v1, v2, v3;
 
             v1.position = data.points[index0];
             v2.position = data.points[index1];
@@ -122,18 +134,17 @@ void epriv::MeshLoader::LoadProcessNode(epriv::MeshSkeleton* _skeleton, epriv::M
             #pragma region IndividualBones
             //build bone information
             for (uint k = 0; k < aimesh.mNumBones; ++k) {
-                auto* boneNode = _map.at(aimesh.mBones[k]->mName.data);
+                auto& boneNode = *(_map.at(aimesh.mBones[k]->mName.data));
                 auto& assimpBone = *aimesh.mBones[k];
                 uint BoneIndex(0);
-                if (!skeleton.m_BoneMapping.count(boneNode->Name)) {
+                if (!skeleton.m_BoneMapping.count(boneNode.Name)) {
                     BoneIndex = skeleton.m_NumBones;
                     ++skeleton.m_NumBones;
                     skeleton.m_BoneInfo.emplace_back();
+                }else{
+                    BoneIndex = skeleton.m_BoneMapping.at(boneNode.Name);
                 }
-                else {
-                    BoneIndex = skeleton.m_BoneMapping.at(boneNode->Name);
-                }
-                skeleton.m_BoneMapping.emplace(boneNode->Name, BoneIndex);
+                skeleton.m_BoneMapping.emplace(boneNode.Name, BoneIndex);
                 skeleton.m_BoneInfo[BoneIndex].BoneOffset = Math::assimpToGLMMat4(assimpBone.mOffsetMatrix);
                 for (uint j = 0; j < assimpBone.mNumWeights; ++j) {
                     uint VertexID = assimpBone.mWeights[j].mVertexId;
@@ -169,8 +180,8 @@ void epriv::MeshLoader::LoadProcessNode(epriv::MeshSkeleton* _skeleton, epriv::M
 
             #pragma region Animations
             if (scene.mAnimations && scene.mNumAnimations > 0) {
-                for (uint j = 0; j < scene.mNumAnimations; ++j) {
-                    const aiAnimation& anim = *scene.mAnimations[j];
+                for (uint k = 0; k < scene.mNumAnimations; ++k) {
+                    const aiAnimation& anim = *scene.mAnimations[k];
                     string key(anim.mName.C_Str());
                     if (key == "") {
                         key = "Animation " + to_string(skeleton.m_AnimationData.size());
@@ -187,22 +198,22 @@ void epriv::MeshLoader::LoadProcessNode(epriv::MeshSkeleton* _skeleton, epriv::M
             #pragma endregion
         }
         #pragma endregion
-        epriv::MeshLoader::CalculateTBNAssimp(data);
+        MeshLoader::CalculateTBNAssimp(data);
     }
     for (uint i = 0; i < node.mNumChildren; ++i) {
-        epriv::MeshLoader::LoadProcessNode(_skeleton, data, scene, *node.mChildren[i], *scene.mRootNode, _map);
+        MeshLoader::LoadProcessNode(_skeleton, data, scene, *node.mChildren[i], *scene.mRootNode, _map);
     }
 }
 
 
 
-bool epriv::MeshLoader::IsNear(float& v1, float& v2, float& threshold) {
+bool epriv::MeshLoader::IsNear(float& v1, float& v2, const float& threshold) {
     return std::abs(v1 - v2) < threshold;
 }
-bool epriv::MeshLoader::IsNear(glm::vec2& v1, glm::vec2& v2, float& threshold) {
+bool epriv::MeshLoader::IsNear(glm::vec2& v1, glm::vec2& v2, const float& threshold) {
     return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold) ? true : false;
 }
-bool epriv::MeshLoader::IsNear(glm::vec3& v1, glm::vec3& v2, float& threshold) {
+bool epriv::MeshLoader::IsNear(glm::vec3& v1, glm::vec3& v2, const float& threshold) {
     return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold && std::abs(v1.z - v2.z) < threshold) ? true : false;
 }
 bool epriv::MeshLoader::IsSpecialFloat(float& f) {
@@ -219,7 +230,7 @@ bool epriv::MeshLoader::IsSpecialFloat(glm::vec3& v) {
     if (boostm::isinf(v.x) || boostm::isinf(v.y) || boostm::isinf(v.z)) return true;
     return false;
 }
-bool epriv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts, vector<glm::vec2>& uvs, vector<glm::vec3>& norms, unsigned short& result, float& threshold) {
+bool epriv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts, vector<glm::vec2>& uvs, vector<glm::vec3>& norms, unsigned short& result, const float& threshold) {
     for (uint t = 0; t < pts.size(); ++t) {
         if (IsNear(in_pos, pts[t], threshold) && IsNear(in_uv, uvs[t], threshold) && IsNear(in_norm, norms[t], threshold)) {
             result = t;
@@ -231,8 +242,13 @@ bool epriv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_u
 void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
     if (data.normals.size() == 0) return;
     uint dataSize(data.points.size());
+
+    data.tangents.reserve(data.normals.size());
+    data.binormals.reserve(data.normals.size());
     for (uint i = 0; i < dataSize; i += 3) {
-        uint p0(i + 0); uint p1(i + 1); uint p2(i + 2);
+        uint p0(i + 0);
+        uint p1(i + 1);
+        uint p2(i + 2);
 
         glm::vec3 dataP0, dataP1, dataP2;
         glm::vec2 uvP0, uvP1, uvP2;
@@ -290,10 +306,10 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
             glm::vec3 normal;
             if (b == 0)      p = p0;
             else if (b == 1) p = p1;
-            else          p = p2;
+            else             p = p2;
 
             if (data.normals.size() > p) normal = data.normals[p];
-            else                        normal = glm::vec3(0.0f);
+            else                         normal = glm::vec3(0.0f);
 
             // project tangent and bitangent into the plane formed by the vertex' normal
             glm::vec3 localTangent(tangent - normal * (tangent   * normal));
@@ -314,9 +330,9 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
     }
     for (uint i = 0; i < data.points.size(); ++i) {
         //hmm.. should b and t be swapped here?
-        glm::vec3& n = data.normals[i];
-        glm::vec3& b = data.tangents[i];
-        glm::vec3& t = data.binormals[i];
+        auto& n = data.normals[i];
+        auto& b = data.tangents[i];
+        auto& t = data.binormals[i];
         t = glm::normalize(t - n * glm::dot(n, t)); // Gram-Schmidt orthogonalize
     }
 };
@@ -324,9 +340,9 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
 
 
 epriv::MeshCollisionFactory::MeshCollisionFactory(Mesh& _mesh, VertexData& data) :m_Mesh(_mesh) {
-    m_ConvexHullData = nullptr;
-    m_ConvesHullShape = nullptr;
-    m_TriangleStaticData = nullptr;
+    m_ConvexHullData      = nullptr;
+    m_ConvesHullShape     = nullptr;
+    m_TriangleStaticData  = nullptr;
     m_TriangleStaticShape = nullptr;
     _initConvexData(data);
     _initTriangleData(data);
@@ -338,7 +354,7 @@ epriv::MeshCollisionFactory::~MeshCollisionFactory(){
     SAFE_DELETE(m_TriangleStaticShape);
 }
 void epriv::MeshCollisionFactory::_initConvexData(VertexData& data) {
-    auto& positions = data.getData<glm::vec3>(0);
+    const auto& positions = data.getData<glm::vec3>(0);
     if (!m_ConvexHullData) {
         m_ConvesHullShape = new btConvexHullShape();
         for (auto& pos : positions) {
@@ -358,8 +374,9 @@ void epriv::MeshCollisionFactory::_initConvexData(VertexData& data) {
 }
 void epriv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
     if (!m_TriangleStaticData) {
-        auto& positions = data.getData<glm::vec3>(0);
+        const auto& positions = data.getData<glm::vec3>(0);
         vector<glm::vec3> triangles;
+        triangles.reserve(data.indices.size());
         for (auto& indice : data.indices) {
             triangles.push_back(positions[indice]);
         }
@@ -370,9 +387,9 @@ void epriv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
             tri.push_back(position);
             ++count;
             if (count == 3) {
-                btVector3 v1 = Math::btVectorFromGLM(tri[0]);
-                btVector3 v2 = Math::btVectorFromGLM(tri[1]);
-                btVector3 v3 = Math::btVectorFromGLM(tri[2]);
+                const btVector3 v1 = Math::btVectorFromGLM(tri[0]);
+                const btVector3 v2 = Math::btVectorFromGLM(tri[1]);
+                const btVector3 v3 = Math::btVectorFromGLM(tri[2]);
                 m_TriangleStaticData->addTriangle(v1, v2, v3, true);
                 vector_clear(tri);
                 count = 0;
