@@ -141,6 +141,9 @@ namespace Engine{
         void Float32From16(float*    __restrict out, const uint16_t in);
         void Float16From32(uint16_t* __restrict out, const float    in);
 
+        void Float32From16(float*    out, const uint16_t* in, const uint arraySize);
+        void Float16From32(uint16_t* out, const float*    in, const uint arraySize);
+
         glm::vec2 rotate2DPoint(glm::vec2 point, float angle, glm::vec2 origin = glm::vec2(0.0f, 0.0f));
 
         glm::quat btToGLMQuat(btQuaternion q);

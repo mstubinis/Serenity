@@ -70,7 +70,6 @@ class Mesh final: public BindableResource, public EventObserver{
 
         template<typename T> void modifyVertices(uint attributeIndex, std::vector<T>& modifications, MeshModifyFlags::Flag _flags = MeshModifyFlags::Default) {
             auto& data = const_cast<VertexData&>(getVertexStructure());
-
             if (_flags & MeshModifyFlags::Orphan)
                 data.setData<T>(attributeIndex, modifications, true, true);
             else
@@ -78,13 +77,11 @@ class Mesh final: public BindableResource, public EventObserver{
         }
         void modifyIndices(std::vector<ushort>& modifiedIndices, MeshModifyFlags::Flag _flags = MeshModifyFlags::Default) {
             auto& data = const_cast<VertexData&>(getVertexStructure());
-
             if(_flags & MeshModifyFlags::Orphan)
                 data.setDataIndices(modifiedIndices, true, true);
             else
                 data.setDataIndices(modifiedIndices, true, false);
         }
-
         void render(bool instancing = true, MeshDrawMode::Mode = MeshDrawMode::Triangles);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
 };

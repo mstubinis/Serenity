@@ -44,6 +44,18 @@ void Math::Float16From32(uint16_t* __restrict out, const float    in) {
     *((uint16_t*)out) = t1;
 }
 
+void Math::Float32From16(float*    out, const uint16_t* in, const uint arraySize) {
+    for (unsigned i = 0; i < arraySize; ++i) {
+        Math::Float32From16(&(out[i]), in[i]);
+    }
+}
+void Math::Float16From32(uint16_t* out, const float*    in, const uint arraySize) {
+    for (uint i = 0; i < arraySize; ++i) {
+        Math::Float16From32(&(out[i]), in[i]);
+    }
+}
+
+
 
 glm::vec2 Math::rotate2DPoint(glm::vec2 point, float angle, glm::vec2 origin) {
     float s = glm::sin(angle);

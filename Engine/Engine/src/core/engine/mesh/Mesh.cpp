@@ -342,14 +342,21 @@ class Mesh::impl final{
             }
             _finalizeData(d,threshold);
         }
-        void _calculateMeshRadius(Mesh& super){
-            float maxX = 0; float maxY = 0; float maxZ = 0;
-            auto& data = m_VertexData->getData<glm::vec3>(0);
+        void _calculateMeshRadius(VertexData& vertexData){
+            glm::vec3 max = glm::vec3(0.0f);
+            const auto& data = vertexData.getData<glm::vec3>(0);
             for(auto& _vertex : data){
-                float x = abs(_vertex.x); float y = abs(_vertex.y); float z = abs(_vertex.z);
-                if(x > maxX) maxX = x; if(y > maxY) maxY = y; if(z > maxZ) maxZ = z;
+                float x = abs(_vertex.x);
+                float y = abs(_vertex.y);
+                float z = abs(_vertex.z);
+                if(x > max.x) 
+                    max.x = x; 
+                if(y > max.y) 
+                    max.y = y; 
+                if(z > max.z) 
+                    max.z = z;
             }
-            m_radiusBox = glm::vec3(maxX,maxY,maxZ);
+            m_radiusBox = max;
             m_radius = Math::Max(m_radiusBox);
         }
         
@@ -366,7 +373,7 @@ class Mesh::impl final{
             if(m_File != ""){
                 _loadFromFile(super,m_File,m_threshold);
             }
-            _calculateMeshRadius(super);
+            _calculateMeshRadius(*m_VertexData);
             m_CollisionFactory = new epriv::MeshCollisionFactory(super,*m_VertexData);
         }
         void _load_GPU(){
