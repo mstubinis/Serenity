@@ -1,15 +1,15 @@
-#include "core/MeshInstance.h"
-#include "core/engine/Engine_Resources.h"
-#include "core/engine/renderer/Engine_Renderer.h"
-#include "core/engine/Engine_BuiltInResources.h"
-#include "core/engine/Engine_Math.h"
-#include "core/engine/mesh/Mesh.h"
-#include "core/engine/mesh/Skeleton.h"
-#include "core/Material.h"
-#include "core/Camera.h"
-#include "core/Scene.h"
-#include "core/ShaderProgram.h"
-#include "ecs/Components.h"
+#include <core/MeshInstance.h>
+#include <core/engine/Engine_Resources.h>
+#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/Engine_BuiltInResources.h>
+#include <core/engine/Engine_Math.h>
+#include <core/engine/mesh/Mesh.h>
+#include <core/engine/mesh/Skeleton.h>
+#include <core/Material.h>
+#include <core/Camera.h>
+#include <core/Scene.h>
+#include <core/ShaderProgram.h>
+#include <ecs/Components.h>
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>

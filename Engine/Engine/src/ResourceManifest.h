@@ -40,8 +40,7 @@ struct ResourceManifest{
     static Handle GoldMaterial;
 
     static Handle CapsuleTunnelMesh;
-    static Handle CapsuleRibbonAMesh;
-    static Handle CapsuleRibbonBMesh;
+    static Handle CapsuleRibbonMesh;
     static Handle CapsuleA;
     static Handle CapsuleB;
     static Handle CapsuleC;

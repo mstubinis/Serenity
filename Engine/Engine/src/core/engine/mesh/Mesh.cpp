@@ -3,9 +3,9 @@
 #include <core/engine/mesh/MeshImportedData.h>
 #include <core/engine/mesh/Skeleton.h>
 
-#include "core/engine/Engine_Resources.h"
-#include "core/engine/Engine_Math.h"
-#include "core/MeshInstance.h"
+#include <core/engine/Engine_Resources.h>
+#include <core/engine/Engine_Math.h>
+#include <core/MeshInstance.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -157,12 +157,18 @@ class Mesh::impl final{
             }
 
             auto& vertexData = *m_VertexData;
-            vector<vector<GLuint>> normals; normals.resize(3);
+            vector<vector<GLuint>> normals;
+            normals.resize(3);
             if (m_threshold == 0.0f) { 
-                normals[0].reserve(data.normals.size()); normals[1].reserve(data.binormals.size()); normals[2].reserve(data.tangents.size());
-                for (size_t i = 0; i < data.normals.size(); ++i) normals[0].push_back(Math::pack3NormalsInto32Int(data.normals[i]));
-                for (size_t i = 0; i < data.binormals.size(); ++i) normals[1].push_back(Math::pack3NormalsInto32Int(data.binormals[i]));
-                for (size_t i = 0; i < data.tangents.size(); ++i) normals[2].push_back(Math::pack3NormalsInto32Int(data.tangents[i]));
+                normals[0].reserve(data.normals.size());
+                normals[1].reserve(data.binormals.size());
+                normals[2].reserve(data.tangents.size());
+                for (size_t i = 0; i < data.normals.size(); ++i) 
+                    normals[0].push_back(Math::pack3NormalsInto32Int(data.normals[i]));
+                for (size_t i = 0; i < data.binormals.size(); ++i) 
+                    normals[1].push_back(Math::pack3NormalsInto32Int(data.binormals[i]));
+                for (size_t i = 0; i < data.tangents.size(); ++i) 
+                    normals[2].push_back(Math::pack3NormalsInto32Int(data.tangents[i]));
                 vertexData.setData(0, data.points);
                 vertexData.setData(1, data.uvs);
                 vertexData.setData(2, normals[0]);
@@ -193,10 +199,15 @@ class Mesh::impl final{
                         _indices.emplace_back((ushort)temp_pos.size() - 1);
                     }
                 }
-                normals[0].reserve(temp_normals.size()); normals[1].reserve(temp_binormals.size()); normals[2].reserve(temp_tangents.size());
-                for (size_t i = 0; i < temp_normals.size(); ++i) normals[0].push_back(Math::pack3NormalsInto32Int(temp_normals[i]));
-                for (size_t i = 0; i < temp_binormals.size(); ++i) normals[1].push_back(Math::pack3NormalsInto32Int(temp_binormals[i]));
-                for (size_t i = 0; i < temp_tangents.size(); ++i) normals[2].push_back(Math::pack3NormalsInto32Int(temp_tangents[i]));
+                normals[0].reserve(temp_normals.size());
+                normals[1].reserve(temp_binormals.size());
+                normals[2].reserve(temp_tangents.size());
+                for (size_t i = 0; i < temp_normals.size(); ++i) 
+                    normals[0].push_back(Math::pack3NormalsInto32Int(temp_normals[i]));
+                for (size_t i = 0; i < temp_binormals.size(); ++i) 
+                    normals[1].push_back(Math::pack3NormalsInto32Int(temp_binormals[i]));
+                for (size_t i = 0; i < temp_tangents.size(); ++i) 
+                    normals[2].push_back(Math::pack3NormalsInto32Int(temp_tangents[i]));
                 vertexData.setData(0, temp_pos);
                 vertexData.setData(1, temp_uvs);
                 vertexData.setData(2, normals[0]);
@@ -205,9 +216,11 @@ class Mesh::impl final{
                 vertexData.setDataIndices(_indices);
             }
             if (m_Skeleton) {
-                vector<vector<glm::vec4>> boneStuff; boneStuff.resize(2);
+                vector<vector<glm::vec4>> boneStuff;
+                boneStuff.resize(2);
                 auto& _skeleton = *m_Skeleton;
-                boneStuff[0].reserve(_skeleton.m_BoneIDs.size()); boneStuff[1].reserve(_skeleton.m_BoneIDs.size());   
+                boneStuff[0].reserve(_skeleton.m_BoneIDs.size());
+                boneStuff[1].reserve(_skeleton.m_BoneIDs.size());   
                 for (uint i = 0; i < _skeleton.m_BoneIDs.size(); ++i) {
                     boneStuff[0].push_back(_skeleton.m_BoneIDs[i]);
                     boneStuff[1].push_back(_skeleton.m_BoneWeights[i]);
@@ -220,16 +233,13 @@ class Mesh::impl final{
             string extension = boost::filesystem::extension(file);
             epriv::MeshImportedData d;
 
-            if (extension == ".objc") {
-                _readFromObjCompressed(file, d);
-                _finalizeData(d, threshold);
-            }else if (extension == ".objcc") {
-                _readFromObjCompressed1(file);
+            if (extension == ".objcc") {
+                m_VertexData = epriv::MeshLoader::LoadFrom_OBJCC(file);
             }else{
-                if (extension == ".obj")
-                    _writeToObjCompressed1();
                 epriv::MeshLoader::LoadInternal(m_Skeleton, d, m_File);
                 _finalizeData(d, threshold);
+                //if (extension == ".obj")
+                    //epriv::MeshLoader::SaveTo_OBJCC(*m_VertexData, "data/Models/ribbon.objcc");
             }
         }
         void _loadDataIntoTriangles(epriv::MeshImportedData& data,vector<uint>& _pi,vector<uint>& _ui,vector<uint>& _ni,unsigned char _flags){
@@ -363,397 +373,7 @@ class Mesh::impl final{
             m_VertexData->finalize();
             cout << "(Mesh) ";
         }
-        //slow loading, but smaller file size than .objcc
-        void _readFromObjCompressed(string& filename, epriv::MeshImportedData& data) {
-            boost::iostreams::mapped_file_source stream(filename.c_str());
-            //TODO: try possible optimizations
-
-            uint count1 = 0;
-            uint count = 12;
-            const uint8_t* _data = (uint8_t*)stream.data();
-
-            uint32_t sizes[6];
-            for (uint i = 0; i < 6; ++i) {
-                const uint& _count = count1 * 4;
-                sizes[i]  = (uint32_t)_data[_count    ] << 24;
-                sizes[i] |= (uint32_t)_data[_count + 1] << 16;
-                sizes[i] |= (uint32_t)_data[_count + 2] << 8;
-                sizes[i] |= (uint32_t)_data[_count + 3];
-                ++count1;
-            }
-            data.file_points.reserve(sizes[0]);
-            data.file_uvs.reserve(sizes[1]);
-            data.file_normals.reserve(sizes[2]);
-
-            vector<vector<uint>> _indices; _indices.resize(3);
-            _indices[0].reserve(sizes[3]);
-            _indices[1].reserve(sizes[4]);
-            _indices[2].reserve(sizes[5]);
-
-            //positions
-            for (uint i = 0; i < sizes[0]; ++i) {
-                float out[3];
-                uint16_t in[3];
-                for (uint j = 0; j < 3; ++j) {
-                    const uint& _count = count * 2;
-                    in[j]  = (uint32_t)_data[_count    ] << 8;
-                    in[j] |= (uint32_t)_data[_count + 1];
-                    ++count;
-                }
-                Math::Float32From16(&out[0], in[0]);
-                Math::Float32From16(&out[1], in[1]);
-                Math::Float32From16(&out[2], in[2]);
-                data.file_points.emplace_back(out[0], out[1], out[2]);
-            }
-            //uvs
-            for (uint i = 0; i < sizes[1]; ++i) {
-                float out[2];
-                uint16_t in[2];
-                for (uint j = 0; j < 2; ++j) {
-                    const uint& _count = count * 2;
-                    in[j]  = (uint32_t)_data[_count    ] << 8;
-                    in[j] |= (uint32_t)_data[_count + 1];
-                    ++count;
-                }
-                Math::Float32From16(&out[0], in[0]);
-                Math::Float32From16(&out[1], in[1]);
-                data.file_uvs.emplace_back(out[0], out[1]);
-            }
-            //normals
-            for (uint i = 0; i < sizes[2]; ++i) {
-                float out[3];
-                uint16_t in[3];
-                for (uint j = 0; j < 3; ++j) {
-                    const uint& _count = count * 2;
-                    in[j]  = (uint32_t)_data[_count    ] << 8;
-                    in[j] |= (uint32_t)_data[_count + 1];
-                    ++count;
-                }
-                Math::Float32From16(&out[0], in[0]);
-                Math::Float32From16(&out[1], in[1]);
-                Math::Float32From16(&out[2], in[2]);
-                data.file_normals.emplace_back(out[0], out[1], out[2]);
-            }
-            //indices
-            for (uint i = 0; i < _indices.size(); ++i) {
-                for (uint j = 0; j < sizes[3+i]; ++j) {
-                    uint16_t c;
-                    const uint& _count = count * 2;
-                    c  = (uint32_t)_data[_count     ] << 8;
-                    c |= (uint32_t)_data[_count + 1];
-                    _indices[i].emplace_back(c);
-                    ++count;
-                }
-            }
-            stream.close();
-            _loadDataIntoTriangles(data, _indices[0], _indices[1], _indices[2], epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
-            epriv::MeshLoader::CalculateTBNAssimp(data);
-        }
-        //slow loading, but smaller file size than .objcc
-        void _writeToObjCompressed() {
-            epriv::MeshImportedData d;
-            vector<vector<uint>> _indices; _indices.resize(3);
-            ifstream input(m_File);
-
-            //first read in all data
-            for (string line; getline(input, line, '\n');) {
-                _loadObjDataFromLine(line, d, _indices[0], _indices[1], _indices[2], epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
-            }
-            //header:
-            string f = m_File;
-            string ext = boost::filesystem::extension(m_File);
-            f = f.substr(0, f.size() - ext.size()); f += ".objc";
-            ofstream stream(f,ios::binary);
-
-            //header
-            uint32_t sizes[6];
-            sizes[0] = d.file_points.size();
-            sizes[1] = d.file_uvs.size();
-            sizes[2] = d.file_normals.size();
-            for (uint i = 0; i < _indices.size(); ++i) {
-                sizes[3+i] = _indices[i].size();
-            }
-            for (uint i = 0; i < 6; ++i) {
-                writeUint32tBigEndian(sizes[i], stream);
-            }
-            for (auto& pos : d.file_points) {
-                uint16_t out[3];
-                Math::Float16From32(&out[0], pos.x); Math::Float16From32(&out[1], pos.y); Math::Float16From32(&out[2], pos.z);
-                for (uint i = 0; i < 3; ++i) {
-                    writeUint16tBigEndian(out[i], stream);
-                }
-            }
-            for (auto& uv : d.file_uvs) {
-                uint16_t out[2];
-                Math::Float16From32(&out[0], uv.x); Math::Float16From32(&out[1], uv.y);
-                for (uint i = 0; i < 2; ++i) {
-                    writeUint16tBigEndian(out[i], stream);
-                }
-            }
-            for (auto& norm : d.file_normals) {
-                uint16_t out[3];
-                Math::Float16From32(&out[0], norm.x); Math::Float16From32(&out[1], norm.y); Math::Float16From32(&out[2], norm.z);
-                for (uint i = 0; i < 3; ++i) {
-                    writeUint16tBigEndian(out[i], stream);
-                }
-            }
-            //indices
-            for (uint i = 0; i < _indices.size(); ++i) {
-                for (auto& ind : _indices[i]) {
-                    uint16_t _ind = (uint16_t)ind;
-                    writeUint16tBigEndian(_ind, stream);
-                }
-            }
-            stream.close();
-        }  
-        //very fast loading, might be slightly larger than .objc
-        void _readFromObjCompressed1(string& filename) {
-            boost::iostreams::mapped_file_source stream(filename.c_str());
-            //TODO: try possible optimizations
-
-            uint blockStart = 0;
-            const uint8_t* _data = (uint8_t*)stream.data();
-
-            uint32_t sizes[3];
-            for (uint i = 0; i < 3; ++i) {
-                sizes[i]  = (uint32_t)_data[blockStart    ] << 24;
-                sizes[i] |= (uint32_t)_data[blockStart + 1] << 16;
-                sizes[i] |= (uint32_t)_data[blockStart + 2] << 8;
-                sizes[i] |= (uint32_t)_data[blockStart + 3];
-                blockStart += 4;
-            }
-
-            if (sizes[2] == 1) {
-                m_VertexData = new VertexData(VertexDataFormat::VertexDataAnimated);
-            }else{
-                m_VertexData = new VertexData(VertexDataFormat::VertexDataBasic);
-            }
-
-            auto& data = *m_VertexData;
-            data.indices.reserve(sizes[1]);
-            vector<glm::vec3> temp_pos; temp_pos.reserve(sizes[0]);
-            vector<glm::vec2> temp_uvs; temp_uvs.reserve(sizes[0]);
-            vector<GLuint> temp_norm; temp_norm.reserve(sizes[0]);
-            vector<GLuint> temp_binorm; temp_binorm.reserve(sizes[0]);
-            vector<GLuint> temp_tang; temp_tang.reserve(sizes[0]);
-            vector<glm::vec4> temp_bID; temp_bID.reserve(sizes[0]);
-            vector<glm::vec4> temp_bW; temp_bW.reserve(sizes[0]);
-
-            for (uint i = 0; i < sizes[0]; ++i) {
-                //positions
-                float outPos[3];
-                uint16_t inPos[3];
-                for (uint j = 0; j < 3; ++j) {
-                    inPos[j] = (uint32_t)_data[blockStart] << 8;
-                    inPos[j] |= (uint32_t)_data[blockStart + 1];
-                    blockStart += 2;
-                }
-                Math::Float32From16(&outPos[0], inPos[0]);
-                Math::Float32From16(&outPos[1], inPos[1]);
-                Math::Float32From16(&outPos[2], inPos[2]);
-                temp_pos.emplace_back(outPos[0], outPos[1], outPos[2]);
-                //uvs
-                float outUV[2];
-                uint16_t inUV[2];
-                for (uint j = 0; j < 2; ++j) {
-                    inUV[j] = (uint32_t)_data[blockStart] << 8;
-                    inUV[j] |= (uint32_t)_data[blockStart + 1];
-                    blockStart += 2;
-                }
-                Math::Float32From16(&outUV[0], inUV[0]);
-                Math::Float32From16(&outUV[1], inUV[1]);
-                temp_uvs.emplace_back(outUV[0], outUV[1]);
-                //normals (remember they are GLuints right now)
-                uint32_t inn[3];
-                for (uint i = 0; i < 3; ++i) {
-                    inn[i] = (uint32_t)_data[blockStart] << 24;
-                    inn[i] |= (uint32_t)_data[blockStart + 1] << 16;
-                    inn[i] |= (uint32_t)_data[blockStart + 2] << 8;
-                    inn[i] |= (uint32_t)_data[blockStart + 3];
-                    blockStart += 4;
-                }
-                temp_norm.emplace_back(inn[0]);
-                temp_binorm.emplace_back(inn[1]);
-                temp_tang.emplace_back(inn[2]);
-                if (sizes[2] == 1) { //skeleton is present
-                    //boneID's
-                    float outBI[4];
-                    uint16_t inbI[4];
-                    for (uint j = 0; j < 4; ++j) {
-                        inbI[j] = (uint32_t)_data[blockStart] << 8;
-                        inbI[j] |= (uint32_t)_data[blockStart + 1];
-                        blockStart += 2;
-                    }
-                    Math::Float32From16(&outBI[0], inbI[0]);
-                    Math::Float32From16(&outBI[1], inbI[1]);
-                    Math::Float32From16(&outBI[2], inbI[2]);
-                    Math::Float32From16(&outBI[3], inbI[3]);
-                    temp_bID.emplace_back(outBI[0], outBI[1], outBI[2], outBI[3]);
-                    //boneWeight's
-                    float outBW[4];
-                    uint16_t inBW[4];
-                    for (uint j = 0; j < 4; ++j) {
-                        inBW[j] = (uint32_t)_data[blockStart] << 8;
-                        inBW[j] |= (uint32_t)_data[blockStart + 1];
-                        blockStart += 2;
-                    }
-                    Math::Float32From16(&outBW[0], inBW[0]);
-                    Math::Float32From16(&outBW[1], inBW[1]);
-                    Math::Float32From16(&outBW[2], inBW[2]);
-                    Math::Float32From16(&outBW[3], inBW[3]);
-                    temp_bW.emplace_back(outBW[0], outBW[1], outBW[2], outBW[3]);
-                }
-            }
-            //indices
-            for (uint i = 0; i < sizes[1]; ++i) {
-                uint16_t inindices;
-                inindices  = (uint32_t)_data[blockStart    ] << 8;
-                inindices |= (uint32_t)_data[blockStart + 1];
-                blockStart += 2;
-                data.indices.emplace_back((uint16_t)inindices);
-            }
-            data.setData(0, temp_pos);
-            data.setData(1, temp_uvs);
-            data.setData(2, temp_norm);
-            data.setData(3, temp_binorm);
-            data.setData(4, temp_tang);
-            if (temp_bID.size() > 0) {
-                data.setData(5, temp_bID);
-                data.setData(6, temp_bW);
-            }
-            data.setDataIndices(data.indices);
-        }
-
-        //very fast loading, might be slightly larger than .objc
-        void _writeToObjCompressed1() {
-            string f = m_File;
-            string ext = boost::filesystem::extension(m_File);
-            f = (f.substr(0, f.size() - ext.size())) + ".objcc";
-            ofstream stream(f, ios::binary);
-
-            epriv::MeshImportedData d;
-
-            vector<vector<uint>> _indices;
-            _indices.resize(3);
-
-            ifstream input(m_File);
-
-            //first read in all data
-            for (string line; getline(input, line, '\n');) {
-                _loadObjDataFromLine(line, d, _indices[0], _indices[1], _indices[2], epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
-            }
-            //then finalize
-            _loadDataIntoTriangles(d, _indices[0], _indices[1], _indices[2], epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
-            epriv::MeshLoader::CalculateTBNAssimp(d);
-            _finalizeData(d, 0.0005f);
-
-            //header - should only be 3 entries, one for m_Vertices , one for m_Indices, and one to tell if skeleton or not
-            uint32_t sizes[3];
-            auto& data = *m_VertexData;
-            sizes[0] = data.dataSizes[0];
-            sizes[1] = data.indices.size();
-            sizes[2] = (m_Skeleton) ? 1 : 0;
-
-            for (uint i = 0; i < 3; ++i) {
-                writeUint32tBigEndian(sizes[i], stream);
-            }
-            const auto& positions = data.getData<glm::vec3>(0);
-            const auto& uvs       = data.getData<glm::vec2>(1);
-            const auto& normals   = data.getData<GLuint>(2);
-            const auto& binormals = data.getData<GLuint>(3);
-            const auto& tangents  = data.getData<GLuint>(4);
-
-            if (m_Skeleton) {
-                const auto& boneIDs     = data.getData<glm::vec4>(5);
-                const auto& boneWeights = data.getData<glm::vec4>(6);
-                for (size_t j = 0; j < sizes[0]; ++j) {
-                    const auto& position   = positions[j];
-                    const auto& uv         = uvs[j];
-                    const auto& normal     = normals[j];
-                    const auto& binormal   = binormals[j];
-                    const auto& tangent    = tangents[j];
-                    const auto& boneID     = boneIDs[j];
-                    const auto& boneWeight = boneWeights[j];
-
-                    //positions
-                    uint16_t outp[3];
-                    Math::Float16From32(&outp[0], position.x);
-                    Math::Float16From32(&outp[1], position.y);
-                    Math::Float16From32(&outp[2], position.z);
-                    for (uint i = 0; i < 3; ++i) {
-                        writeUint16tBigEndian(outp[i], stream);
-                    }
-                    //uvs
-                    uint16_t outu[2];
-                    Math::Float16From32(&outu[0], uv.x);
-                    Math::Float16From32(&outu[1], uv.y);
-                    for (uint i = 0; i < 2; ++i) {
-                        writeUint16tBigEndian(outu[i], stream);
-                    }
-                    //normals (remember they are GLuints right now)
-                    uint32_t outn[3];
-                    outn[0] = normal;  outn[1] = binormal;  outn[2] = tangent;
-                    for (uint i = 0; i < 3; ++i) {
-                        writeUint32tBigEndian(outn[i], stream);
-                    }
-                    //boneID's
-                    uint16_t outbI[4];
-                    Math::Float16From32(&outbI[0], boneID.x);
-                    Math::Float16From32(&outbI[1], boneID.y);
-                    Math::Float16From32(&outbI[2], boneID.z); 
-                    Math::Float16From32(&outbI[3], boneID.w);
-                    for (uint i = 0; i < 4; ++i) {
-                        writeUint16tBigEndian(outbI[i], stream);
-                    }
-                    //boneWeight's
-                    uint16_t outbW[4];
-                    Math::Float16From32(&outbW[0], boneWeight.x);
-                    Math::Float16From32(&outbW[1], boneWeight.y);
-                    Math::Float16From32(&outbW[2], boneWeight.z);
-                    Math::Float16From32(&outbW[3], boneWeight.w);
-                    for (uint i = 0; i < 4; ++i) {
-                        writeUint16tBigEndian(outbW[i], stream);
-                    }
-                }
-            }else{
-                for (size_t j = 0; j < sizes[0]; ++j) {
-                    const auto& position = positions[j];
-                    const auto& uv       = uvs[j];
-                    const auto& normal   = normals[j];
-                    const auto& binormal = binormals[j];
-                    const auto& tangent  = tangents[j];
-                    //positions
-                    uint16_t outp[3];
-                    Math::Float16From32(&outp[0], position.x);
-                    Math::Float16From32(&outp[1], position.y);
-                    Math::Float16From32(&outp[2], position.z);
-                    for (uint i = 0; i < 3; ++i) {
-                        writeUint16tBigEndian(outp[i], stream);
-                    }
-                    //uvs
-                    uint16_t outu[2];
-                    Math::Float16From32(&outu[0], uv.x);
-                    Math::Float16From32(&outu[1], uv.y);
-                    for (uint i = 0; i < 2; ++i) {
-                        writeUint16tBigEndian(outu[i], stream);
-                    }
-                    //normals (remember they are GLuints right now)
-                    uint32_t outn[3];
-                    outn[0] = normal;
-                    outn[1] = binormal;
-                    outn[2] = tangent;
-                    for (uint i = 0; i < 3; ++i) {
-                        writeUint32tBigEndian(outn[i], stream);
-                    }
-                }
-            }
-            //indices
-            for (uint i = 0; i < sizes[1]; ++i) {
-                uint16_t _ind = data.indices[i];
-                writeUint16tBigEndian(_ind, stream);
-            }
-            stream.close();
-        }
+     
 };
 
 namespace Engine {

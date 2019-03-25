@@ -57,8 +57,7 @@ class CapsuleSpace final: public SolarSystem{
         float m_Timer;
         CapsuleTunnel* m_TunnelA;
         CapsuleTunnel* m_TunnelB;
-        CapsuleRibbon* m_RibbonA;
-        CapsuleRibbon* m_RibbonB;
+        CapsuleRibbon* m_Ribbon;
         CapsuleEnd* m_FrontEnd;
         CapsuleEnd* m_BackEnd;
         std::vector<CapsuleStar*> m_CapsuleStars;

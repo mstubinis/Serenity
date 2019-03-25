@@ -29,6 +29,11 @@ namespace Engine {
                 static void LoadProcessNode(epriv::MeshSkeleton* skeleton, epriv::MeshImportedData& data, const aiScene& scene, const aiNode& node, const aiNode& root, std::unordered_map<std::string, epriv::BoneNode*>& _map);
                 static void LoadPopulateGlobalNodes(const aiNode& node, std::unordered_map<std::string, epriv::BoneNode*>& _map);
 
+
+                static VertexData* LoadFrom_OBJCC(std::string& filename);
+                static void SaveTo_OBJCC(VertexData& data, std::string filename);
+
+
                 static bool IsNear(float& v1, float& v2, const float& threshold);
                 static bool IsNear(glm::vec2& v1, glm::vec2& v2, const float& threshold);
                 static bool IsNear(glm::vec3& v1, glm::vec3& v2, const float& threshold);

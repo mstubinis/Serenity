@@ -41,8 +41,7 @@ Handle ResourceManifest::StarFlareMaterial;
 Handle ResourceManifest::GoldMaterial;
 
 Handle ResourceManifest::CapsuleTunnelMesh;
-Handle ResourceManifest::CapsuleRibbonAMesh;
-Handle ResourceManifest::CapsuleRibbonBMesh;
+Handle ResourceManifest::CapsuleRibbonMesh;
 Handle ResourceManifest::CapsuleA;
 Handle ResourceManifest::CapsuleB;
 Handle ResourceManifest::CapsuleC;
@@ -81,8 +80,7 @@ void ResourceManifest::init(){
     OberthMesh = Resources::addMeshAsync("data/Models/oberth.objcc");
     
     CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.objcc");
-    CapsuleRibbonAMesh = Resources::addMeshAsync("data/Models/capsuleRA.objc");
-    CapsuleRibbonBMesh = Resources::addMeshAsync("data/Models/capsuleRB.objc");
+    CapsuleRibbonMesh = Resources::addMeshAsync("data/Models/capsuleRibbon.objcc");
 
     Engine::epriv::threading::waitForAll();
 
