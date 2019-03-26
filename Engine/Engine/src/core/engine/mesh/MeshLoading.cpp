@@ -295,9 +295,9 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
         // tangent points in the direction where to positive X axis of the texture coord's would point in model space
         // bitangent's points along the positive Y axis of the texture coord's, respectively
         glm::vec3 tangent, bitangent;
-        tangent.x = (w.x * sy - v.x * ty) * dirCorrection;
-        tangent.y = (w.y * sy - v.y * ty) * dirCorrection;
-        tangent.z = (w.z * sy - v.z * ty) * dirCorrection;
+        tangent.x   = (w.x * sy - v.x * ty) * dirCorrection;
+        tangent.y   = (w.y * sy - v.y * ty) * dirCorrection;
+        tangent.z   = (w.z * sy - v.z * ty) * dirCorrection;
         bitangent.x = (w.x * sx - v.x * tx) * dirCorrection;
         bitangent.y = (w.y * sx - v.y * tx) * dirCorrection;
         bitangent.z = (w.z * sx - v.z * tx) * dirCorrection;
@@ -316,14 +316,14 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
             // project tangent and bitangent into the plane formed by the vertex' normal
             glm::vec3 localTangent(tangent - normal * (tangent   * normal));
             glm::vec3 localBitangent(bitangent - normal * (bitangent * normal));
-            localTangent = glm::normalize(localTangent);
+            localTangent   = glm::normalize(localTangent);
             localBitangent = glm::normalize(localBitangent);
 
             // reconstruct tangent/bitangent according to normal and bitangent/tangent when it's infinite or NaN.
-            bool invalid_tangent = IsSpecialFloat(localTangent);
+            bool invalid_tangent   = IsSpecialFloat(localTangent);
             bool invalid_bitangent = IsSpecialFloat(localBitangent);
             if (invalid_tangent != invalid_bitangent) {
-                if (invalid_tangent) localTangent = glm::normalize(glm::cross(normal, localBitangent));
+                if (invalid_tangent) localTangent   = glm::normalize(glm::cross(normal, localBitangent));
                 else                 localBitangent = glm::normalize(glm::cross(localTangent, normal));
             }
             data.tangents.push_back(localTangent);

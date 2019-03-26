@@ -43,17 +43,12 @@ class Mesh::impl final{
         vector<glm::mat4>            m_InstanceMatrices;
         uint                         m_InstanceCount;
         void _initGlobal(float threshold){
-            m_InstanceCount = 0;
-            m_File = "";
-            m_Skeleton = nullptr;
-            m_VertexData = nullptr;
+            m_InstanceCount    = 0;
+            m_File             = "";
+            m_Skeleton         = nullptr;
+            m_VertexData       = nullptr;
             m_CollisionFactory = nullptr;
-            m_threshold = threshold;
-        }
-        void _initGlobalTwo(Mesh& super,epriv::MeshImportedData& data,float threshold, VertexData* vertData = nullptr){
-            m_VertexData = vertData;
-            _finalizeData(data,threshold);
-            super.load();
+            m_threshold        = threshold;
         }
         void _init(Mesh& super,string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold){//grid
             epriv::MeshImportedData d;
@@ -96,7 +91,9 @@ class Mesh::impl final{
                     epriv::MeshLoader::CalculateTBNAssimp(d);
                 }
             }
-            _initGlobalTwo(super,d,threshold);
+            m_VertexData = nullptr;
+            _finalizeData(d, threshold);
+            super.load();
         }     
         void _init(Mesh& super,string& name,float width, float height,float threshold){//plane
             epriv::MeshImportedData d;
@@ -129,7 +126,9 @@ class Mesh::impl final{
             d.uvs.emplace_back(uv_topRight_x, uv_topRight_y);
             d.uvs.emplace_back(uv_bottomLeft_x, uv_bottomLeft_y);
 
-            _initGlobalTwo(super, d, threshold, new VertexData(VertexDataFormat::VertexDataNoLighting));
+            m_VertexData = new VertexData(VertexDataFormat::VertexDataNoLighting);
+            _finalizeData(d, threshold);
+            super.load();
         }
         void _init(Mesh& super,string& fileOrData,bool notMemory,float threshold,bool loadNow){//from file / data
             _initGlobal(threshold);
