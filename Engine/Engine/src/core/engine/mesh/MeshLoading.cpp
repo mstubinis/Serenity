@@ -4,11 +4,6 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/Engine_Math.h>
 
-#include <bullet/btBulletDynamicsCommon.h>
-#include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
-#include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
-
 #include <boost/math/special_functions/fpclassify.hpp>
 
 #include <assimp/scene.h>
@@ -44,7 +39,7 @@ void epriv::MeshLoader::LoadInternal(MeshSkeleton* skeleton, MeshImportedData& d
     }
 }
 
-void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, unordered_map<string, BoneNode*>& _map) {
+void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& _map) {
     if (!_map.count(node.mName.data)) {
         BoneNode* bone_node = new BoneNode();
         bone_node->Name = node.mName.data;
@@ -56,7 +51,7 @@ void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, unordered_ma
     }
 }
 
-void epriv::MeshLoader::LoadProcessNode(MeshSkeleton* _skeleton, MeshImportedData& data, const aiScene& scene, const aiNode& node, const aiNode& root, unordered_map<string, BoneNode*>& _map) {
+void epriv::MeshLoader::LoadProcessNode(MeshSkeleton* _skeleton, MeshImportedData& data, const aiScene& scene, const aiNode& node, const aiNode& root, BoneNodeMap& _map) {
     //yes this is needed
     if (_skeleton && &node == &root) {
         MeshLoader::LoadPopulateGlobalNodes(root, _map);
@@ -246,42 +241,42 @@ bool epriv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_u
 }
 void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
     if (data.normals.size() == 0) return;
-    uint dataSize(data.points.size());
+    uint pointsSize(data.points.size());
 
     data.tangents.reserve(data.normals.size());
     data.binormals.reserve(data.normals.size());
-    for (uint i = 0; i < dataSize; i += 3) {
+    for (uint i = 0; i < pointsSize; i += 3) {
         uint p0(i + 0);
         uint p1(i + 1);
         uint p2(i + 2);
 
-        glm::vec3 dataP0, dataP1, dataP2;
-        glm::vec2 uvP0, uvP1, uvP2;
+        glm::vec3 point1, point2, point3;
+        glm::vec2 uv1, uv2, uv3;
 
         uint uvSize(data.uvs.size());
 
-        if (dataSize > p0) dataP0 = data.points[p0];
-        else              dataP0 = glm::vec3(0.0f);
-        if (dataSize > p1) dataP1 = data.points[p1];
-        else              dataP1 = glm::vec3(0.0f);
-        if (dataSize > p2) dataP2 = data.points[p2];
-        else              dataP2 = glm::vec3(0.0f);
+        if (pointsSize > p0) point1 = data.points[p0];
+        else                 point1 = glm::vec3(0.0f);
+        if (pointsSize > p1) point2 = data.points[p1];
+        else                 point2 = glm::vec3(0.0f);
+        if (pointsSize > p2) point3 = data.points[p2];
+        else                 point3 = glm::vec3(0.0f);
 
-        if (uvSize > p0)   uvP0 = data.uvs[p0];
-        else              uvP0 = glm::vec2(0.0f);
-        if (uvSize > p1)   uvP1 = data.uvs[p1];
-        else              uvP1 = glm::vec2(0.0f);
-        if (uvSize > p2)   uvP2 = data.uvs[p2];
-        else              uvP2 = glm::vec2(0.0f);
+        if (uvSize > p0)     uv1   = data.uvs[p0];
+        else                 uv1   = glm::vec2(0.0f);
+        if (uvSize > p1)     uv2   = data.uvs[p1];
+        else                 uv2   = glm::vec2(0.0f);
+        if (uvSize > p2)     uv3   = data.uvs[p2];
+        else                 uv3   = glm::vec2(0.0f);
 
-        glm::vec3 v(dataP1 - dataP0);
-        glm::vec3 w(dataP2 - dataP0);
+        glm::vec3 v(point2 - point1);
+        glm::vec3 w(point3 - point1);
 
         // texture offset p1->p2 and p1->p3
-        float sx(uvP1.x - uvP0.x);
-        float sy(uvP1.y - uvP0.y);
-        float tx(uvP2.x - uvP0.x);
-        float ty(uvP2.y - uvP0.y);
+        float sx(uv2.x - uv1.x);
+        float sy(uv2.y - uv1.y);
+        float tx(uv3.x - uv1.x);
+        float ty(uv3.y - uv1.y);
         float dirCorrection = 1.0;
 
         if ((tx * sy - ty * sx) < 0.0f) dirCorrection = -1.0f; //this is important for normals and mirrored mesh geometry using identical uv's
@@ -361,13 +356,13 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
     }
     auto& data = *returnData;
     data.indices.reserve(sizes[1]);
-    vector<glm::vec3> temp_pos; temp_pos.reserve(sizes[0]);
-    vector<glm::vec2> temp_uvs; temp_uvs.reserve(sizes[0]);
-    vector<GLuint> temp_norm; temp_norm.reserve(sizes[0]);
-    vector<GLuint> temp_binorm; temp_binorm.reserve(sizes[0]);
-    vector<GLuint> temp_tang; temp_tang.reserve(sizes[0]);
-    vector<glm::vec4> temp_bID; temp_bID.reserve(sizes[0]);
-    vector<glm::vec4> temp_bW; temp_bW.reserve(sizes[0]);
+    vector<glm::vec3> temp_pos;     temp_pos.reserve(sizes[0]);
+    vector<glm::vec2> temp_uvs;     temp_uvs.reserve(sizes[0]);
+    vector<GLuint>    temp_norm;    temp_norm.reserve(sizes[0]);
+    vector<GLuint>    temp_binorm;  temp_binorm.reserve(sizes[0]);
+    vector<GLuint>    temp_tang;    temp_tang.reserve(sizes[0]);
+    vector<glm::vec4> temp_bID;     temp_bID.reserve(sizes[0]);
+    vector<glm::vec4> temp_bW;      temp_bW.reserve(sizes[0]);
 
     for (uint i = 0; i < sizes[0]; ++i) {
         //positions
@@ -469,8 +464,8 @@ void epriv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
     const auto& normals     = data.getData<GLuint>(2);
     const auto& binormals   = data.getData<GLuint>(3);
     const auto& tangents    = data.getData<GLuint>(4);
-    std::vector<glm::vec4>    boneIDs;
-    std::vector<glm::vec4>    boneWeights;
+    vector<glm::vec4>         boneIDs;
+    vector<glm::vec4>         boneWeights;
 
     if (sizes[2] == 1) { //animation data is present
         boneIDs     = data.getData<glm::vec4>(5);
@@ -540,91 +535,4 @@ void epriv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
         writeUint16tBigEndian(_ind, stream);
     }
     stream.close();
-}
-
-
-epriv::MeshCollisionFactory::MeshCollisionFactory(Mesh& _mesh, VertexData& data) :m_Mesh(_mesh) {
-    m_ConvexHullData      = nullptr;
-    m_ConvesHullShape     = nullptr;
-    m_TriangleStaticData  = nullptr;
-    m_TriangleStaticShape = nullptr;
-    _initConvexData(data);
-    _initTriangleData(data);
-}
-epriv::MeshCollisionFactory::~MeshCollisionFactory(){
-    SAFE_DELETE(m_ConvexHullData);
-    SAFE_DELETE(m_ConvesHullShape);
-    SAFE_DELETE(m_TriangleStaticData);
-    SAFE_DELETE(m_TriangleStaticShape);
-}
-void epriv::MeshCollisionFactory::_initConvexData(VertexData& data) {
-    const auto& positions = data.getData<glm::vec3>(0);
-    if (!m_ConvexHullData) {
-        m_ConvesHullShape = new btConvexHullShape();
-        for (auto& pos : positions) {
-            m_ConvesHullShape->addPoint(btVector3(pos.x, pos.y, pos.z));
-        }
-        m_ConvexHullData = new btShapeHull(m_ConvesHullShape);
-        m_ConvexHullData->buildHull(m_ConvesHullShape->getMargin());
-        SAFE_DELETE(m_ConvesHullShape);
-        const btVector3* ptsArray = m_ConvexHullData->getVertexPointer();
-        m_ConvesHullShape = new btConvexHullShape();
-        for (int i = 0; i < m_ConvexHullData->numVertices(); ++i) {
-            m_ConvesHullShape->addPoint(ptsArray[i]);
-        }
-        m_ConvesHullShape->setMargin(0.001f);
-        m_ConvesHullShape->recalcLocalAabb();
-    }
-}
-void epriv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
-    if (!m_TriangleStaticData) {
-        const auto& positions = data.getData<glm::vec3>(0);
-        vector<glm::vec3> triangles;
-        triangles.reserve(data.indices.size());
-        for (auto& indice : data.indices) {
-            triangles.push_back(positions[indice]);
-        }
-        m_TriangleStaticData = new btTriangleMesh();
-        uint count = 0;
-        vector<glm::vec3> tri;
-        for (auto& position : triangles) {
-            tri.push_back(position);
-            ++count;
-            if (count == 3) {
-                const btVector3& v1 = Math::btVectorFromGLM(tri[0]);
-                const btVector3& v2 = Math::btVectorFromGLM(tri[1]);
-                const btVector3& v3 = Math::btVectorFromGLM(tri[2]);
-                m_TriangleStaticData->addTriangle(v1, v2, v3, true);
-                vector_clear(tri);
-                count = 0;
-            }
-        }
-        m_TriangleStaticShape = new btBvhTriangleMeshShape(m_TriangleStaticData, true);
-        m_TriangleStaticShape->setMargin(0.001f);
-        m_TriangleStaticShape->recalcLocalAabb();
-    }
-}
-btSphereShape* epriv::MeshCollisionFactory::buildSphereShape() {
-    btSphereShape* sphere = new btSphereShape(m_Mesh.getRadius());
-    sphere->setMargin(0.001f);
-    return sphere;
-}
-btBoxShape* epriv::MeshCollisionFactory::buildBoxShape() {
-    btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_Mesh.getRadiusBox()));
-    box->setMargin(0.001f);
-    return box;
-}
-btUniformScalingShape* epriv::MeshCollisionFactory::buildConvexHull() {
-    btUniformScalingShape* shape = new btUniformScalingShape(m_ConvesHullShape, 1.0f);
-    return shape;
-}
-btScaledBvhTriangleMeshShape* epriv::MeshCollisionFactory::buildTriangleShape() {
-    btScaledBvhTriangleMeshShape* shape = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape, btVector3(1.0f, 1.0f, 1.0f));
-    return shape;
-}
-btGImpactMeshShape* epriv::MeshCollisionFactory::buildTriangleShapeGImpact() {
-    btGImpactMeshShape* shape = new btGImpactMeshShape(m_TriangleStaticData);
-    shape->setMargin(0.001f);
-    shape->updateBound();
-    return shape;
 }

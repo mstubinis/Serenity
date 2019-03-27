@@ -2,7 +2,7 @@
 #ifndef ENGINE_BINDABLE_RESOURCE_H
 #define ENGINE_BINDABLE_RESOURCE_H
 
-#include "core/engine/Engine_ResourceBasic.h"
+#include "core/engine/resources/Engine_ResourceBasic.h"
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 

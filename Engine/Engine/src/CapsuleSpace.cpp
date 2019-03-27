@@ -1,5 +1,5 @@
 #include "CapsuleSpace.h"
-#include "core/engine/Engine_Resources.h"
+#include "core/engine/resources/Engine_Resources.h"
 #include "core/Material.h"
 #include "Ship.h"
 #include "GameCamera.h"

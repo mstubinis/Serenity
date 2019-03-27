@@ -3,7 +3,7 @@
 #define ENGINE_DEBUGGING_CLASS_INCLUDE_GUARD
 
 #include "core/engine/Engine_Utils.h"
-#include "core/engine/Engine_Resources.h"
+#include "core/engine/resources/Engine_Resources.h"
 
 namespace Engine {
     namespace epriv {

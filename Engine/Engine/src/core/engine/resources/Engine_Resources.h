@@ -5,51 +5,32 @@
 #include "core/engine/Engine_Physics.h"
 #include "core/engine/renderer/GLImageConstants.h"
 #include "core/ShaderProgram.h"
+#include "core/engine/Engine_ObjectPool.h"
 
 typedef std::uint32_t uint;
 
-class Engine_Window;
-class Scene;
-class Font;
-class Texture;
-class Camera;
-class Mesh;
-class Material;
-class SunLight;
-class SoundData;
-
-struct ResourceType final {enum Type {
-    Empty, //do NOT move this specific enum
-    Texture,
-    Mesh,
-    Material,
-    Sound,
-    Object,
-    Font,
-    Camera,
-    Shader,
-    ShaderProgram,
-    SoundData,
-    Scene,
-_TOTAL};};
-
-struct Handle final {
-    uint index : 12;
-    uint version : 15;
-    uint type : 5;
-    explicit Handle() { index = 0; version = 0; type = 0; }
-    explicit Handle(uint _index, uint _version, uint _type) { index = _index; version = _version; type = _type; }
-    inline operator uint() const { return type << 27 | version << 12 | index; }
-    inline const bool null() const { return (type == ResourceType::Empty) ? true : false; }
-    const EngineResource* get() const;
-    inline const EngineResource* operator ->() const { return get(); }
-};
+struct Handle;
+class  EngineResource;
+class  Engine_Window;
+class  Scene;
+class  Font;
+class  Texture;
+class  Camera;
+class  Mesh;
+class  Material;
+class  SunLight;
+class  SoundData;
 
 namespace Engine{
     namespace epriv{
         class ResourceManager final{
             public:
-                class impl; std::unique_ptr<impl> m_i;
+                //http://gamesfromwithin.com/managing-data-relationships
+                ObjectPool<EngineResource>*                    m_Resources;
+                Engine_Window*                                 m_Window;
+                Scene*                                         m_CurrentScene;
+                bool                                           m_DynamicMemory;
+                std::vector<Scene*>                            m_Scenes;
 
                 ResourceManager(const char* name,uint width,uint height);
                 ~ResourceManager();

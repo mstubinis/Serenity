@@ -1,6 +1,6 @@
 #include "core/engine/Engine.h"
 #include "core/engine/Engine_Window.h"
-#include "core/engine/Engine_Resources.h"
+#include "core/engine/resources/Engine_Resources.h"
 #include "core/engine/events/Engine_EventDispatcher.h"
 #include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/textures/Texture.h"

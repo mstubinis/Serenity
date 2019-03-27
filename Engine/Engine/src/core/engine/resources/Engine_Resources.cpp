@@ -1,7 +1,6 @@
 #include <boost/make_shared.hpp>
 #include "core/engine/Engine.h"
-#include "core/engine/Engine_ObjectPool.h"
-#include "core/engine/Engine_BuiltInResources.h"
+#include "core/engine/resources/Engine_BuiltInResources.h"
 #include "ecs/ECS.h"
 #include "core/Skybox.h"
 #include "core/engine/mesh/Mesh.h"
@@ -12,47 +11,30 @@
 #include "core/Font.h"
 #include "core/Scene.h"
 
+#include <core/engine/resources/Handle.h>
+
 #include <iostream>
 
 using namespace Engine;
 using namespace std;
 
-epriv::ResourceManager::impl* resourceManager;
+epriv::ResourceManager* resourceManager;
 
-class epriv::ResourceManager::impl final{
-    public:
-        //http://gamesfromwithin.com/managing-data-relationships
-        ObjectPool<EngineResource>*                    m_Resources;
-        Engine_Window*                                 m_Window;
-        Scene*                                         m_CurrentScene;
-        bool                                           m_DynamicMemory;
-        vector<Scene*>                                 m_Scenes;
-        void _init(const char* name,const uint& width,const uint& height){
-            m_CurrentScene = nullptr;
-            m_Window = nullptr;
-            m_DynamicMemory = false;
-            m_Resources = new ObjectPool<EngineResource>(32768);
-        }
-        void _postInit(const char* name,uint width,uint height){
-            m_Window = new Engine_Window(name,width,height);
-        }
-        void _destruct(){
-            SAFE_DELETE(m_Resources);
-            SAFE_DELETE(m_Window);
-            SAFE_DELETE_VECTOR(m_Scenes);
-        }
-};
-const EngineResource* Handle::get() const {
-    if (null()) return nullptr;
-    return resourceManager->m_Resources->getAsFast<EngineResource>(index);
+epriv::ResourceManager::ResourceManager(const char* name,uint width,uint height){
+    m_CurrentScene  = nullptr;
+    m_Window        = nullptr;
+    m_DynamicMemory = false;
+    m_Resources     = new ObjectPool<EngineResource>(32768);
+    resourceManager = this;
 }
-
-epriv::ResourceManager::ResourceManager(const char* name,uint width,uint height):m_i(new impl){
-    m_i->_init(name,width,height);
-    resourceManager = m_i.get();
+epriv::ResourceManager::~ResourceManager(){ 
+    SAFE_DELETE(m_Resources);
+    SAFE_DELETE(m_Window);
+    SAFE_DELETE_VECTOR(m_Scenes);
 }
-epriv::ResourceManager::~ResourceManager(){ m_i->_destruct(); }
-void epriv::ResourceManager::_init(const char* n,uint w,uint h){ m_i->_postInit(n,w,h); }
+void epriv::ResourceManager::_init(const char* n,uint w,uint h){ 
+    m_Window = new Engine_Window(n, w, h);
+}
 
 string Engine::Data::reportTime(){
     return epriv::Core::m_Engine->m_DebugManager.reportTime();
@@ -60,30 +42,37 @@ string Engine::Data::reportTime(){
 const double Engine::Resources::dt(){ return epriv::Core::m_Engine->m_DebugManager.dt(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_CurrentScene; }
 
-vector<Scene*>& epriv::ResourceManager::scenes() {return m_i->m_Scenes;}
+vector<Scene*>& epriv::ResourceManager::scenes() {
+    return m_Scenes;
+}
 
 bool epriv::ResourceManager::_hasScene(string n){ 
-    for (auto& scene : m_i->m_Scenes) {
+    for (auto& scene : m_Scenes) {
         if (scene->name() == n)
             return true;
     }
     return false;
 }
 Texture* epriv::ResourceManager::_hasTexture(string n){
-    auto& resourcePool = *(m_i->m_Resources);
+    auto& resourcePool = *(m_Resources);
     for(uint i = 0; i < resourcePool.maxEntries(); ++i){
         EngineResource* r = resourcePool.getAsFast<EngineResource>(i+1);
-        if(r){ Texture* t = dynamic_cast<Texture*>(r); if(t && t->name() == n){ return t; } }
+        if(r){ 
+            Texture* t = dynamic_cast<Texture*>(r); 
+            if(t && t->name() == n){ 
+                return t; 
+            } 
+        }
     }
     return 0;
 }
 Scene& epriv::ResourceManager::_getSceneByID(uint id) {
-    return *(m_i->m_Scenes[id-1]);
+    return *(m_Scenes[id-1]);
 }
 void epriv::ResourceManager::_addScene(Scene& s){
-    m_i->m_Scenes.push_back(&s);
+    m_Scenes.push_back(&s);
 }
-uint epriv::ResourceManager::_numScenes(){return m_i->m_Scenes.size();}
+uint epriv::ResourceManager::_numScenes(){return m_Scenes.size();}
 
 void Resources::Settings::enableDynamicMemory(bool b){ resourceManager->m_DynamicMemory = b; }
 void Resources::Settings::disableDynamicMemory(){ resourceManager->m_DynamicMemory = false; }
@@ -93,8 +82,9 @@ glm::uvec2 Resources::getWindowSize(){ return resourceManager->m_Window->getSize
 
 Scene* Resources::getScene(string n){ 
     for (auto& scene : resourceManager->m_Scenes) {
-        if (scene->name() == n)
+        if (scene->name() == n) {
             return scene;
+        }
     }
     return nullptr;
 }
@@ -185,7 +175,7 @@ void Resources::setCurrentScene(Scene* newScene){
     }
     if(oldScene != newScene){
         cout << "---- Scene Change started (" << oldScene->name() << ") to (" << newScene->name() << ") ----" << endl;
-        if(epriv::Core::m_Engine->m_ResourceManager.m_i->m_DynamicMemory){
+        if(epriv::Core::m_Engine->m_ResourceManager.m_DynamicMemory){
             //mark game object resources to minus use count
         }
         epriv::InternalScenePublicInterface::GetECS(*oldScene).onSceneLeft(*oldScene);

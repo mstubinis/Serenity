@@ -4,7 +4,7 @@
 
 #include "core/engine/Engine_Debugging.h"
 #include "core/engine/Engine_ThreadManager.h"
-#include "core/engine/Engine_Resources.h"
+#include "core/engine/resources/Engine_Resources.h"
 #include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/Engine_Sounds.h"
 #include "core/engine/events/Engine_Events.h"

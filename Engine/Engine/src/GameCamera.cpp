@@ -1,6 +1,6 @@
 #include "GameCamera.h"
 #include "core/engine/events/Engine_Events.h"
-#include "core/engine/Engine_Resources.h"
+#include "core/engine/resources/Engine_Resources.h"
 #include "core/engine/renderer/Engine_Renderer.h"
 #include "core/Scene.h"
 

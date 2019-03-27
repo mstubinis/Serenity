@@ -2,8 +2,9 @@
 #include <core/engine/mesh/MeshLoading.h>
 #include <core/engine/mesh/MeshImportedData.h>
 #include <core/engine/mesh/Skeleton.h>
+#include <core/engine/mesh/MeshCollisionFactory.h>
 
-#include <core/engine/Engine_Resources.h>
+#include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/Engine_Math.h>
 #include <core/MeshInstance.h>
 
@@ -361,7 +362,7 @@ class Mesh::impl final{
         
         void _unload_CPU(){
             SAFE_DELETE(m_Skeleton);
-            SAFE_DELETE(m_CollisionFactory);   
+            SAFE_DELETE(m_CollisionFactory);
             cout << "(Mesh) ";
         }
         void _unload_GPU(){

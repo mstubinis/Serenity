@@ -5,7 +5,7 @@
 #include <glm/fwd.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
-#include "core/engine/Engine_Resources.h"
+#include "core/engine/resources/Engine_Resources.h"
 
 class  Font;
 class  Ship;

@@ -32,7 +32,6 @@
     <ClCompile Include="Engine\src\core\Constraint.cpp" />
     <ClCompile Include="Engine\src\core\engine\BindableResource.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine.cpp" />
-    <ClCompile Include="Engine\src\core\engine\Engine_BuiltInShaders.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_Debugging.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_FullscreenItems.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_GLStateMachine.cpp" />
@@ -40,8 +39,6 @@
     <ClCompile Include="Engine\src\core\engine\Engine_Networking.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_Noise.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_Physics.cpp" />
-    <ClCompile Include="Engine\src\core\engine\Engine_ResourceBasic.cpp" />
-    <ClCompile Include="Engine\src\core\engine\Engine_Resources.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_Sounds.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_ThreadManager.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp" />
@@ -53,9 +50,12 @@
     <ClCompile Include="Engine\src\core\engine\lights\RodLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\SpotLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\SunLight.cpp" />
+    <ClCompile Include="Engine\src\core\engine\mesh\MeshCollisionFactory.cpp" />
+    <ClCompile Include="Engine\src\core\engine\mesh\MeshImpl.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshImportedData.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshLoading.cpp" />
+    <ClCompile Include="Engine\src\core\engine\mesh\MeshRequest.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Skeleton.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexBufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexData.cpp" />
@@ -64,6 +64,10 @@
     <ClCompile Include="Engine\src\core\engine\renderer\FramebufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\GBuffer.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\RenderGraph.cpp" />
+    <ClCompile Include="Engine\src\core\engine\resources\Engine_BuiltInShaders.cpp" />
+    <ClCompile Include="Engine\src\core\engine\resources\Engine_ResourceBasic.cpp" />
+    <ClCompile Include="Engine\src\core\engine\resources\Engine_Resources.cpp" />
+    <ClCompile Include="Engine\src\core\engine\resources\Handle.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />
     <ClCompile Include="Engine\src\core\Font.cpp" />
@@ -98,8 +102,6 @@
     <ClInclude Include="Engine\src\core\Constraint.h" />
     <ClInclude Include="Engine\src\core\engine\BindableResource.h" />
     <ClInclude Include="Engine\src\core\engine\Engine.h" />
-    <ClInclude Include="Engine\src\core\engine\Engine_BuiltInResources.h" />
-    <ClInclude Include="Engine\src\core\engine\Engine_BuiltInShaders.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Debugging.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_FullscreenItems.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_GLStateMachine.h" />
@@ -108,8 +110,6 @@
     <ClInclude Include="Engine\src\core\engine\Engine_Noise.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_ObjectPool.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Physics.h" />
-    <ClInclude Include="Engine\src\core\engine\Engine_ResourceBasic.h" />
-    <ClInclude Include="Engine\src\core\engine\Engine_Resources.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Sounds.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_ThreadManager.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Utils.h" />
@@ -125,10 +125,13 @@
     <ClInclude Include="Engine\src\core\engine\lights\RodLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\SpotLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\SunLight.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\MeshCollisionFactory.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\MeshImpl.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshImportedData.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshLoading.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\MeshRequest.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Skeleton.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexAttribute.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexBufferObject.h" />
@@ -140,6 +143,11 @@
     <ClInclude Include="Engine\src\core\engine\renderer\GLImageConstants.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\RenderGraph.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\SMAA_LUT.h" />
+    <ClInclude Include="Engine\src\core\engine\resources\Engine_BuiltInResources.h" />
+    <ClInclude Include="Engine\src\core\engine\resources\Engine_BuiltInShaders.h" />
+    <ClInclude Include="Engine\src\core\engine\resources\Engine_ResourceBasic.h" />
+    <ClInclude Include="Engine\src\core\engine\resources\Engine_Resources.h" />
+    <ClInclude Include="Engine\src\core\engine\resources\Handle.h" />
     <ClInclude Include="Engine\src\core\engine\textures\DDS.h" />
     <ClInclude Include="Engine\src\core\engine\textures\Texture.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h" />

@@ -82,6 +82,12 @@
     <Filter Include="Header Files\Engine\Core\Lights">
       <UniqueIdentifier>{84e14886-9402-4978-98ce-dc664cf7cf4d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Resources">
+      <UniqueIdentifier>{22744d0e-fc64-41ba-bd5f-c9caefc1f892}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Resources">
+      <UniqueIdentifier>{70ddb5e4-89b8-4c28-b0e7-830d8458e566}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Engine\data\Shaders\AS_groundFromSpace_frag.glsl">
@@ -122,9 +128,6 @@
     <ClCompile Include="Engine\src\core\engine\Engine.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_BuiltInShaders.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_FullscreenItems.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
@@ -141,12 +144,6 @@
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_Physics.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_ResourceBasic.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_Resources.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_Sounds.cpp">
@@ -296,6 +293,27 @@
     <ClCompile Include="Engine\src\core\engine\mesh\MeshImportedData.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\MeshImpl.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\MeshCollisionFactory.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\resources\Handle.cpp">
+      <Filter>Source Files\Engine\Core\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\resources\Engine_BuiltInShaders.cpp">
+      <Filter>Source Files\Engine\Core\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\resources\Engine_ResourceBasic.cpp">
+      <Filter>Source Files\Engine\Core\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\resources\Engine_Resources.cpp">
+      <Filter>Source Files\Engine\Core\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\MeshRequest.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -328,12 +346,6 @@
     <ClInclude Include="Engine\src\core\engine\Engine.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_BuiltInResources.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_BuiltInShaders.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_FullscreenItems.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
@@ -353,12 +365,6 @@
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_Physics.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_ResourceBasic.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_Resources.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_Sounds.h">
@@ -540,6 +546,30 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\mesh\MeshImportedData.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\MeshImpl.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\MeshCollisionFactory.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\MeshRequest.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\resources\Handle.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\resources\Engine_BuiltInResources.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\resources\Engine_BuiltInShaders.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\resources\Engine_ResourceBasic.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\resources\Engine_Resources.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

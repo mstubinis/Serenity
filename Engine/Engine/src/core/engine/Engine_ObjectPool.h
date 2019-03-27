@@ -2,8 +2,9 @@
 #ifndef ENGINE_OBJECT_POOL_H
 #define ENGINE_OBJECT_POOL_H
 
-#include "core/engine/Engine_Resources.h"
-#include "core/engine/Engine_Utils.h"
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/resources/Handle.h>
+#include <core/engine/Engine_Utils.h>
 
 namespace Engine{
     namespace epriv{

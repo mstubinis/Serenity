@@ -3,7 +3,7 @@
 #define ENGINE_TEXTURE_INCLUDE_GUARD
 
 #include <core/engine/textures/TextureIncludes.h>
-#include "core/engine/Engine_ResourceBasic.h"
+#include "core/engine/resources/Engine_ResourceBasic.h"
 #include "core/engine/renderer/GLImageConstants.h"
 
 #include <glm/fwd.hpp>

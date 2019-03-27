@@ -2,7 +2,7 @@
 #ifndef ENGINE_SCENE_H
 #define ENGINE_SCENE_H
 
-#include "core/engine/Engine_ResourceBasic.h"
+#include "core/engine/resources/Engine_ResourceBasic.h"
 #include "core/engine/events/Engine_EventObject.h"
 #include <unordered_map>
 #include <glm/vec3.hpp>
