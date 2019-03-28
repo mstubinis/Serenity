@@ -130,25 +130,9 @@ MeshInstance::MeshInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderP* p
     setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
     setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
 }
-MeshInstance::MeshInstance(Entity& parent, Handle mesh, Handle mat, ShaderP* program){
-    Mesh* _mesh = (Mesh*)mesh.get();
-    Material* _mat = (Material*)mat.get();
-    _init(_mesh, _mat, parent, program);
-    setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
-}
-MeshInstance::MeshInstance(Entity& parent, Mesh* mesh, Handle mat, ShaderP* program){
-    Material* _mat = (Material*)mat.get();
-    _init(mesh, _mat, parent, program);
-    setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
-}
-MeshInstance::MeshInstance(Entity& parent, Handle mesh, Material* mat, ShaderP* program){
-    Mesh* _mesh = (Mesh*)mesh.get();
-    _init(_mesh, mat, parent, program);
-    setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
-}
+MeshInstance::MeshInstance(Entity& parent, Handle mesh, Handle mat, ShaderP* program):MeshInstance(parent,(Mesh*)mesh.get(), (Material*)mat.get(),program){}
+MeshInstance::MeshInstance(Entity& parent, Mesh* mesh, Handle mat, ShaderP* program):MeshInstance(parent, mesh, (Material*)mat.get(), program){}
+MeshInstance::MeshInstance(Entity& parent, Handle mesh, Material* mat, ShaderP* program):MeshInstance(parent, (Mesh*)mesh.get(), mat, program) {}
 
 
 

@@ -6,7 +6,6 @@
 #include "core/engine/lights/Light.h"
 #include "core/MeshInstance.h"
 
-
 #include "ResourceManifest.h"
 #include "Planet.h"
 #include "GameCamera.h"
@@ -28,8 +27,10 @@
 
 using namespace Engine;
 using namespace std;
-
-
+/*
+A geostationary orbit, often referred to as a geosynchronous equatorial orbit[1](GEO),
+is a circular geosynchronous orbit 35,786 km (22,236 mi) above Earth's equator and following the direction of Earth's rotation
+*/
 SolarSystem::SolarSystem(string n, string file):Scene(n){
     GameCamera* playerCamera = new GameCamera(0.35f,7000000000.0f,this);
     setActiveCamera(*playerCamera);
