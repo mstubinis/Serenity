@@ -465,12 +465,12 @@ glm::vec3 ComponentBody::position() { //theres prob a better way to do this
 glm::vec3 ComponentBody::getScreenCoordinates(bool clampToEdge) { return Math::getScreenCoordinates(position(), clampToEdge); }
 
 
-ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(bool clampToEdge,float minOffset) {
+ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(float minOffset) {
     ScreenBoxCoordinates ret;
     const auto& worldPos    = position();
     float radius            = 0.0001f;
     ComponentModel* model   = owner.getComponent<ComponentModel>();
-    const auto& center2DRes = Math::getScreenCoordinates(worldPos, clampToEdge);
+    const auto& center2DRes = Math::getScreenCoordinates(worldPos, false);
     glm::vec2 center2D      = glm::vec2(center2DRes.x, center2DRes.y);
     if (model) {
         radius = model->radius();
@@ -484,7 +484,7 @@ ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(bool clampToEdge,flo
     }
     auto& cam               = *Resources::getCurrentScene()->getActiveCamera();
     glm::vec3 camvectest    = cam.up();   
-    const auto& testRes     = Math::getScreenCoordinates(worldPos + (camvectest * radius), clampToEdge); 
+    const auto& testRes     = Math::getScreenCoordinates(worldPos + (camvectest * radius), false); 
     glm::vec2 test          = glm::vec2(testRes.x, testRes.y);
     auto radius2D           = glm::max(minOffset, glm::distance(test, center2D));
     const float& yPlus      = center2D.y + radius2D;

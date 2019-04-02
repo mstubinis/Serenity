@@ -1,8 +1,6 @@
 #include "core/ShaderProgram.h"
 #include "core/engine/Engine.h"
 #include "core/Camera.h"
-//#include "core/engine/Engine_Resources.h"
-//#include "core/engine/Engine_Renderer.h"
 #include "core/Scene.h"
 
 #include <boost/filesystem.hpp>
@@ -34,30 +32,26 @@ void insertStringRightAfterLineContent(string& src, const string& newContent,con
     istringstream str(src);string l; vector<string> lines; bool a = false;
     while(getline(str,l)){lines.push_back(l+"\n");if(sfind(l,lineContent) && !a){lines.push_back(newContent+"\n"); a=true;}}src="";for(auto& ln:lines){src+=ln;}
 }
-//this needs some work.
+//this needs some work...?
 string getLogDepthFunctions(){
     string res =  "\n"
         "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float gBufferDepth = texture2D(gDepthMap, _uv).r;\n"
-        "    float depth_value = log(gBufferDepth + 1.0) / log(_far + 1.0);\n"
-        "    float log_depth = pow(_far + 1.0, depth_value) - 1.0;\n"
+        "    float depth = texture2D(gDepthMap, _uv).r;\n"
+        "    float position_w = pow(2.0, depth * log2(_far + 1.0)) - 1.0;\n"
         "    float a = _far / (_far - _near);\n"
         "    float b = _far * _near / (_near - _far);\n"
-        "    float linearDepth = (a + b / log_depth);\n"
-        "	 vec4 space = vec4(_uv, linearDepth, 1.0) * 2.0 - 1.0;\n"
-        "	 space = CameraInvViewProj * space;\n"
-        "	 return space.xyz / space.w;\n"
+        "    float linear = a + b / position_w;\n"
+        "    vec4 wpos = CameraInvViewProj * (vec4(_uv, linear, 1.0) * 2.0 - 1.0);\n"
+        "    return wpos.xyz / wpos.w;\n"
         "}\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float gBufferDepth = texture2D(gDepthMap, _uv).r;\n"
-        "    float depth_value = log(gBufferDepth + 1.0) / log(_far + 1.0);\n"
-        "    float log_depth = pow(_far + 1.0, depth_value) - 1.0;\n"
+        "    float depth = texture2D(gDepthMap, _uv).r;\n"
+        "    float position_w = pow(2.0, depth * log2(_far + 1.0)) - 1.0;\n"
         "    float a = _far / (_far - _near);\n"
         "    float b = _far * _near / (_near - _far);\n"
-        "    float linearDepth = (a + b / log_depth);\n"
-        "	 vec4 space = vec4(_uv, linearDepth, 1.0) * 2.0 - 1.0;\n"
-        "	 space = CameraInvProj * space;\n"
-        "	 return space.xyz / space.w;\n"
+        "    float linear = a + b / position_w;\n"
+        "    vec4 wpos = CameraInvProj * (vec4(_uv, linear, 1.0) * 2.0 - 1.0);\n"
+        "    return wpos.xyz / wpos.w;\n"
         "}\n";
     return res;
 }
@@ -184,30 +178,6 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
     _types.emplace_back("uint");   _types.emplace_back("uvec2");  _types.emplace_back("uvec3");
     _types.emplace_back("uvec4");  _types.emplace_back("umat3");  _types.emplace_back("umat4");
 
-    //check for instancing
-    /*
-    //TODO: clean this up a little
-    if(InternalMeshPublicInterface::SupportsInstancing()){
-        if(sfind(_d,"attribute vec4 Weights;") && shader->type() == ShaderType::Vertex){
-            if(!sfind(_d,"attribute mat4 instanceMatrix;")){
-                insertStringRightAfterLineContent(_d,"attribute mat4 instanceMatrix;","attribute vec4 Weights;");
-                boost::replace_all(_d,"uniform mat4 Model;","");
-                boost::replace_all(_d,"Model","instanceMatrix");
-                boost::replace_all(_d,"uniform mat3 NormalMatrix;","");
-                insertStringRightAfterLineContent(_d,"    mat3 NormalMatrix = transpose(inverse(mat3(instanceMatrix)));","void main(){");
-            }
-        }
-        if(sfind(_d,"layout (location = 6) in vec4 Weights") && shader->type() == ShaderType::Vertex){
-            if(!sfind(_d,"layout (location = 7) in mat4 instanceMatrix;")){
-                insertStringRightAfterLineContent(_d,"layout (location = 7) in mat4 instanceMatrix;","layout (location = 6) in vec4 Weights");
-                boost::replace_all(_d,"uniform mat4 Model;","");
-                boost::replace_all(_d,"Model","instanceMatrix");
-                boost::replace_all(_d,"uniform mat3 NormalMatrix;","");
-                insertStringRightAfterLineContent(_d,"    mat3 NormalMatrix = transpose(inverse(mat3(instanceMatrix)));","void main(){");
-            }
-        }
-    }
-    */
     //check for normal map texture extraction
     //refer to mesh.cpp dirCorrection comment about using an uncompressed normal map and not reconstructing z
     if (sfind(_d, "CalcBumpedNormal(") || sfind(_d, "CalcBumpedNormalCompressed(")) {
@@ -215,7 +185,7 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
             if (sfind(_d, "varying mat3 TBN;")) {
                 boost::replace_all(_d, "varying mat3 TBN;", "");
             }
-            string normalMap =
+            string normal_map =
                 "varying mat3 TBN;\n"
                 "vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated\n"
                 "    vec3 _t = (texture2D(_inTexture, _uv).xyz) * 2.0 - 1.0;\n"
@@ -227,7 +197,7 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
                 "    vec3 normal = vec3(_t.xy, _z);\n"//recalc z in the shader
                 "    return normalize(TBN * normal);\n"
                 "}\n";
-            insertStringAtLine(_d, normalMap, 1);
+            insertStringAtLine(_d, normal_map, 1);
         }
     }
     //check for compression functions
@@ -235,45 +205,56 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
     //designed to work with floats from 0 to 1, packing them into an 8 bit component of a render target
     if (sfind(_d, "Pack2NibblesInto8BitChannel(")) {
         if (!sfind(_d, "float Pack2NibblesInto8BitChannel(")) {
-            string pnibble = "\n"
+            string pack_nibble = "\n"
                 "float Pack2NibblesInto8BitChannel(float x,float y){\n"
                 "    float xF = round(x / 0.0666);\n"
                 "    float yF = round(y / 0.0666) * 16.0;\n"
                 "    return (xF + yF) / 255.0;\n"
                 "}\n";
-            insertStringAtLine(_d, pnibble, 1);
+            insertStringAtLine(_d, pack_nibble, 1);
         }
     }
     if (sfind(_d, "Unpack2NibblesFrom8BitChannel(")) {
         if (!sfind(_d, "vec2 Unpack2NibblesFrom8BitChannel(")) {
-            string unibble = "\n"
+            string unpack_nibble = "\n"
                 "vec2 Unpack2NibblesFrom8BitChannel(float data){\n"
                 "    float d = data * 255.0;\n"
                 "    float y = fract(d / 16.0);\n"
                 "    float x = (d - (y * 16.0));\n"
                 "    return vec2(y, x / 255.0);\n"
                 "}\n";
-            insertStringAtLine(_d, unibble, 1);
+            insertStringAtLine(_d, unpack_nibble, 1);
         }
     }
     //check for painters algorithm
     if (sfind(_d, "PaintersAlgorithm(")) {
         if (!sfind(_d, "vec4 PaintersAlgorithm(")) {
             string painters = "\n"
-                "vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){//generated\n"
-                "    float paintA = paint.a;\n"
+                "vec4 PaintersAlgorithm(vec4 paintbrush, vec4 canvas){//generated\n"
+                "    float paintA = paintbrush.a;\n"
                 "    float canvasA = canvas.a;\n"
-                "    float Alpha = paintA + canvasA * (1.0 - paint.a);\n"
-                "    vec3 r = (paint.rgb * paintA + canvas.rgb * canvasA * (1.0 - paintA)) / Alpha;\n"
+                "    float Alpha = paintA + canvasA * (1.0 - paintA);\n"
+                "    vec3 r = (paintbrush.rgb * paintA + canvas.rgb * canvasA * (1.0 - paintA)) / Alpha;\n"
                 "    return vec4(r,Alpha);\n"
                 "}\n";
             insertStringAtLine(_d, painters, 1);
         }
     }
     //see if we need a UBO for the camera
-    if (sfind(_d, "CameraView") || sfind(_d, "CameraProj") || sfind(_d, "CameraViewProj") || sfind(_d, "CameraInvView") || sfind(_d, "CameraInvProj") ||
-        sfind(_d, "CameraInvViewProj") || sfind(_d, "CameraPosition") || sfind(_d, "CameraNear") || sfind(_d, "CameraFar") || sfind(_d, "CameraInfo1") ||
-        sfind(_d, "CameraInfo2") || sfind(_d, "CameraViewVector") || sfind(_d, "CameraRealPosition") || sfind(_d, "CameraInfo3")) {
+    if (sfind(_d, "CameraView") || 
+    sfind(_d, "CameraProj") || 
+    sfind(_d, "CameraViewProj") || 
+    sfind(_d, "CameraPosition") ||
+    sfind(_d, "CameraInvView") || 
+    sfind(_d, "CameraInvProj") ||
+    sfind(_d, "CameraInvViewProj") || 
+    sfind(_d, "CameraNear") || 
+    sfind(_d, "CameraFar") || 
+    sfind(_d, "CameraInfo1") ||
+    sfind(_d, "CameraInfo2") || 
+    sfind(_d, "CameraViewVector") || 
+    sfind(_d, "CameraRealPosition") || 
+    sfind(_d, "CameraInfo3")) {
         string uboCameraString;
         if (versionNumber >= 140) { //UBO
             if (!sfind(_d, "layout (std140) uniform Camera //generated")) {
@@ -338,6 +319,28 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
         insertStringAtEndOfMainFunc(_d, log_vertex_code);
         #endif
     }
+
+    //check for view space normals from world (not sure if this is proper)
+    if (sfind(_d, "GetViewNormalsFromWorld(")) {
+        if (!sfind(_d, "vec4 GetViewNormalsFromWorld(")) {
+            string viewNormals = "\n"
+                "vec3 GetViewNormalsFromWorld(vec3 worldNormals,mat4 camView){//generated\n"
+                "    return (camView * vec4(worldNormals,0.0)).xyz;\n"
+                "}\n";
+            insertStringAtLine(_d, viewNormals, 1);
+        }
+    }
+    //check for world space normals from view (this works perfectly)
+    if (sfind(_d, "GetWorldNormalsFromView(")) {
+        if (!sfind(_d, "vec4 GetWorldNormalsFromView(")) {
+            string viewNormals = "\n"
+                "vec3 GetWorldNormalsFromView(vec3 viewNormals,mat4 camView){//generated\n"
+                "    return (transpose(camView) * vec4(viewNormals,0.0)).xyz;\n"
+                "}\n";
+            insertStringAtLine(_d, viewNormals, 1);
+        }
+    }
+
     //check for log depth - fragment
     if (sfind(_d, "USE_LOG_DEPTH_FRAGMENT") && !sfind(_d, "//USE_LOG_DEPTH_FRAGMENT") && shader.type() == ShaderType::Fragment) {
         boost::replace_all(_d, "USE_LOG_DEPTH_FRAGMENT", "");
@@ -355,9 +358,9 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
         if (sfind(_d, "GetWorldPosition(") || sfind(_d, "GetViewPosition(")) {
             if (!sfind(_d, "vec3 GetWorldPosition(")) {
                 #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                insertStringRightAfterLineContent(_d, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
+                    insertStringRightAfterLineContent(_d, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
                 #else
-                insertStringRightAfterLineContent(_d, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
+                    insertStringRightAfterLineContent(_d, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
                 #endif
             }
         }
@@ -368,9 +371,9 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
                     //log
                     boost::replace_all(_d, "USE_LOG_DEPTH_FRAG_WORLD_POSITION", "");
                     #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                    insertStringRightAfterLineContent(_d, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
+                        insertStringRightAfterLineContent(_d, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
                     #else
-                    insertStringRightAfterLineContent(_d, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
+                        insertStringRightAfterLineContent(_d, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
                     #endif
                 }else{
                     //normal
@@ -423,7 +426,7 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
             if (sfind(_d, fragDataStr)) {
                 const string outFragData = "FRAG_COL_" + to_string(i);
                 if (versionNumber >= 130 && versionNumber < 330) {
-                    insertStringAtLine(_d, "out vec4 " + outFragData + ";//130", 1);
+                    insertStringAtLine(_d, "out vec4 " + outFragData + ";", 1);
                 }else if (versionNumber >= 330) {
                     insertStringAtLine(_d, "layout (location = " + to_string(i) + ") out vec4 " + outFragData + ";", 1);
                 }
@@ -470,7 +473,10 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
     if (versionNumber >= 330) {
         if (shader.type() == ShaderType::Vertex) {
             //attribute to layout (location = X) in
-            istringstream str(_d); string line; uint count = 0; uint aCount = 0;
+            istringstream str(_d);
+            string line;
+            uint count = 0;
+            uint aCount = 0;
             while (getline(str, line)) {
                 if (sfind(line, "attribute")) {
                     for (auto& type : _types) {

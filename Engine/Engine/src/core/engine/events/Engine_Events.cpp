@@ -1,5 +1,5 @@
 #include "core/engine/events/Engine_Events.h"
-#include "core/engine/Engine_Resources.h"
+#include "core/engine/resources/Engine_Resources.h"
 #include "core/engine/Engine_Window.h"
 
 using namespace Engine;

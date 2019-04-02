@@ -40,6 +40,8 @@ flat varying float HasAtmo;
 const vec4 ConstantZeroVec4 = vec4(0.0,0.0,0.0,0.0);
 const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);
 const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);
+const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);
+const vec2 ConstantZeroVec2 = vec2(0.0,0.0);
 const vec2 ConstantOneVec2 = vec2(1.0,1.0);
 
 float Pack2NibblesInto8BitChannel(float x,float y){

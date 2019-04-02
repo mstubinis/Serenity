@@ -80,7 +80,7 @@ void HUD::render(){
         auto& body = *target.getComponent<ComponentBody>();
         glm::vec3 pos = body.getScreenCoordinates(true);
         if(pos.z == 1){ //infront 
-            auto boxPos = body.getScreenBoxCoordinates(true);
+            auto boxPos = body.getScreenBoxCoordinates(false);
             Material& crosshair = *(Material*)ResourceManifest::CrosshairMaterial.get();
 
             auto& crosshairTexture = *crosshair.getComponent(MaterialComponentType::Diffuse)->texture();
@@ -150,11 +150,10 @@ void HUD::render(){
     #pragma region DrawDebugStuff
 
     font->renderText(Engine::Data::reportTime() + 
-        "\nGodRays Decay: " + to_string(Renderer::Settings::GodRays::getDecay()) +
-        "\nGodRays Density: " + to_string(Renderer::Settings::GodRays::getDensity()) +
-        "\nGodRays Exposure: " + to_string(Renderer::Settings::GodRays::getExposure()) +
-        "\nGodRays Weight: " + to_string(Renderer::Settings::GodRays::getWeight()) +
-        "\nGodRays Samples: " + to_string(Renderer::Settings::GodRays::getSamples()) +
+        "\nSSAO Radius: " + to_string(Renderer::Settings::SSAO::getRadius()) +
+        "\nSSAO Bias: " + to_string(Renderer::Settings::SSAO::getBias()) +
+        "\nSSAO Scale: " + to_string(Renderer::Settings::SSAO::getScale()) +
+        "\nSSAO Intensity: " + to_string(Renderer::Settings::SSAO::getIntensity()) +
         epriv::Core::m_Engine->m_DebugManager.reportDebug(),
         glm::vec2(10, Resources::getWindowSize().y - 10), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1), 0, glm::vec2(0.8f, 0.8f), 0.1f);
 

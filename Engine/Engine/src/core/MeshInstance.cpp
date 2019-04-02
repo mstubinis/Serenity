@@ -48,7 +48,8 @@ namespace Engine {
 
 void epriv::DefaultMeshInstanceBindFunctor::operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
-    glm::vec3 camPos = Resources::getCurrentScene()->getActiveCamera()->getPosition();
+    Camera& cam = *Resources::getCurrentScene()->getActiveCamera();
+    glm::vec3 camPos = cam.getPosition();
     Entity& parent = i.m_Parent;
     auto& body = *(parent.getComponent<ComponentBody>());
     glm::mat4 parentModel = body.modelMatrix();
@@ -88,7 +89,12 @@ void epriv::DefaultMeshInstanceBindFunctor::operator()(EngineResource* r) const 
     }
     glm::mat4 model = parentModel * i.m_Model; //might need to reverse this order.
 
+    //world space normals
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+
+    //view space normals
+    //glm::mat4 view = cam.getView();
+    //glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(view * model)));
      
     Renderer::sendUniformMatrix4Safe("Model",model);
     Renderer::sendUniformMatrix3Safe("NormalMatrix",normalMatrix);

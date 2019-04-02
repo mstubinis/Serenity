@@ -373,15 +373,15 @@ class epriv::RenderManager::impl final{
 
             #pragma region SSAOInfo
             ssao = true;
-            ssao_samples = 3;
+            ssao_samples = 8;
             ssao_do_blur = true;
             ssao_blur_num_passes = 2;
             ssao_blur_radius = 0.66f;
             ssao_blur_strength = 0.48f;
             ssao_scale = 1.0f;
-            ssao_intensity = 2.63f;
-            ssao_bias = 0.36f;
-            ssao_radius = 0.14f;
+            ssao_intensity = 2.1f;
+            ssao_bias = 0.005f;
+            ssao_radius = 0.135f;
             #pragma endregion
 
             #pragma region HDRInfo
@@ -2173,6 +2173,8 @@ class epriv::RenderManager::impl final{
                         _passBlurSSAO(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays);
                     }
                 }    
+            }else{
+
             }
             #pragma endregion
 

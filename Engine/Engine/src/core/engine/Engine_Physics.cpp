@@ -1,6 +1,6 @@
 #define BT_THREADSAFE 1
 #include "core/engine/Engine_Physics.h"
-#include "core/engine/Engine_Resources.h"
+#include "core/engine/resources/Engine_Resources.h"
 #include "core/engine/renderer/Engine_Renderer.h"
 #include "core/engine/Engine_Math.h"
 #include "core/Camera.h"

@@ -16,7 +16,7 @@ epriv::DebugManager::DebugManager(const char* name, uint w, uint h){
 
     output_frame_delay = 4;
     output_frame = 0;
-    decimals = 8;
+    decimals = 4;
 }
 epriv::DebugManager::~DebugManager() {
 }

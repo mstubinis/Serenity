@@ -309,10 +309,10 @@ epriv::EShaders::vertex_basic =
 epriv::EShaders::vertex_basic += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::vertex_basic +=
 "void main(){\n"
-    "    mat4 ModelClone = Model;\n"
-    "    ModelClone[3][0] -= CameraRealPosition.x;\n"
-    "    ModelClone[3][1] -= CameraRealPosition.y;\n"
-    "    ModelClone[3][2] -= CameraRealPosition.z;\n"
+    "    mat4 ModelMatrix = Model;\n"
+    "    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
+    "    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
+    "    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
     "    mat4 BoneTransform = mat4(1.0);\n"
     "    if(AnimationPlaying == 1.0){\n"
     "        BoneTransform  = gBones[int(BoneIDs.x)] * Weights.x;\n"
@@ -320,18 +320,20 @@ epriv::EShaders::vertex_basic +=
     "        BoneTransform += gBones[int(BoneIDs.z)] * Weights.z;\n"
     "        BoneTransform += gBones[int(BoneIDs.w)] * Weights.w;\n"
     "    }\n"
-    "    vec4 PosTrans      =   BoneTransform * vec4(position, 1.0);\n"
-    "    vec3 NormalTrans   =  (BoneTransform * vec4(normal.zyx, 0.0)).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec4 PosTrans      =   BoneTransform * vec4(position,     1.0);\n"
+    "    vec3 NormalTrans   =  (BoneTransform * vec4(normal.zyx,   0.0)).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
     "    vec3 BinormalTrans =  (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "    vec3 TangentTrans  =  (BoneTransform * vec4(tangent.zyx, 0.0)).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 TangentTrans  =  (BoneTransform * vec4(tangent.zyx,  0.0)).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
     "\n"
-    "           Normals = (NormalMatrix * NormalTrans);\n"
-    "    vec3 Binormals = (NormalMatrix * BinormalTrans);\n"
-    "    vec3  Tangents = (NormalMatrix * TangentTrans);\n"
-    "    TBN = (mat3(Tangents,Binormals,Normals));\n"
+    "           Normals = NormalMatrix * NormalTrans;\n"
+    "    vec3 Binormals = NormalMatrix * BinormalTrans;\n"
+    "    vec3  Tangents = NormalMatrix * TangentTrans;\n"
+    "    TBN = mat3(Tangents,Binormals,Normals);\n"
     "\n"
-    "    gl_Position = CameraViewProj * ModelClone * PosTrans;\n"
-    "    WorldPosition = (ModelClone * PosTrans).xyz;\n"
+    "    vec4 worldPos = (ModelMatrix * PosTrans);\n"
+    "\n"
+    "    gl_Position = CameraViewProj * worldPos;\n"
+    "    WorldPosition = worldPos.xyz;\n"
     "\n"
     "    CamPosition = CameraPosition;\n"
     "    TangentCameraPos = TBN * CameraPosition;\n"
@@ -1383,9 +1385,9 @@ epriv::EShaders::deferred_frag_skybox =
     "varying vec3 UV;\n"
     "varying vec3 WorldPosition;\n"
     "void main(){\n"
-    "    gl_FragData[0] = textureCube(Texture, UV);\n"
+    "    gl_FragData[0]    = textureCube(Texture, UV);\n"
     "    gl_FragData[1].rg = vec2(1.0);\n"
-    "    gl_FragData[2] = vec4(0.0);\n"
+    "    gl_FragData[2]    = vec4(0.0);\n"
     "}";
 #pragma endregion
 
@@ -1397,8 +1399,8 @@ epriv::EShaders::deferred_frag_skybox_fake =
     "varying vec3 WorldPosition;\n"
     "void main(){\n"
     "    gl_FragData[0].rgba = Color;\n"
-    "    gl_FragData[1].rg = vec2(1.0);\n"
-    "    gl_FragData[2] = vec4(0.0);\n"
+    "    gl_FragData[1].rg   = vec2(1.0);\n"
+    "    gl_FragData[2]      = vec4(0.0);\n"
     "}";
 #pragma endregion
 
@@ -1432,15 +1434,18 @@ epriv::EShaders::ssao_frag += epriv::EShaders::normals_octahedron_compression_fu
 epriv::EShaders::ssao_frag +=
     "float occlude(vec2 offsetUV, vec3 origin, vec3 normal){\n"
     "    vec3 PositionOffset = GetWorldPosition(offsetUV,CameraNear,CameraFar) - origin;\n"
-    "    float Len = length(PositionOffset);\n"
-    "    vec3 vec = PositionOffset / Len;\n"
-    "    return max(0.0, dot(normal,vec) - SSAOInfo.z) * (1.0 / (1.0 + (Len * SSAOInfo.w))) * SSAOInfo.y;\n"
+    "    float Length = length(PositionOffset);\n"
+    "    vec3 VectorNormalized = PositionOffset / Length;\n"
+    "    float Distance = Length * SSAOInfo.w;\n"
+    "    float attenuation = 1.0 / (1.0 + D);\n"
+    "    float angleMath = max(0.0, dot(normal,VectorNormalized) - SSAOInfo.z);\n"
+    "    return angleMath * attenuation * SSAOInfo.y;\n"
     "}\n"
     "void main(){\n"
     "    vec3 WorldPos = GetWorldPosition(texcoords,CameraNear,CameraFar);\n"
     "    vec3 Normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
     "    vec2 RandVector = normalize(texture2D(gRandomMap, ScreenSize * texcoords / SSAOInfoA.w).xy) * 2.0 - 1.0;\n"
-    "    float Distance = distance(WorldPos, CameraPosition) + 0.0001;\n"//cuz we dont like divide by zeros ;)
+    "    float Distance = distance(WorldPos, CameraPosition);\n"
     "    float Radius = max(0.05,SSAOInfo.x / Distance);\n"
     "    float o = 0.0;\n"
     "    for (int i = 0; i < SSAOInfoA.z; ++i) {\n"
@@ -1452,8 +1457,7 @@ epriv::EShaders::ssao_frag +=
     "       o += occlude(texcoords + coord2,          WorldPos, Normal);\n"
     "    }\n"
     "    o /= SSAOInfoA.z * 4.0;\n"
-    "    o = clamp(o,0.01,0.99);\n"
-    "    o = mix(0.0,o,(o >= 0.99 ? 0.0 : 1.0 ));\n"//this gets rid of the dark annoying edges around models. in a very hacky way...
+    "    o = mix(0.0,o,(o >= 0.99 ? 0.0 : 1.0 ));\n"//this gets rid of the dark annoying edges around models. in a VERY hacky way...
     "    gl_FragColor.a = o;\n"
     "}";
 #pragma endregion

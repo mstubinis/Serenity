@@ -1,5 +1,5 @@
 #include "core/engine/Engine_Math.h"
-#include "core/engine/Engine_Resources.h"
+#include "core/engine/resources/Engine_Resources.h"
 #include "core/Camera.h"
 #include "core/Scene.h"
 

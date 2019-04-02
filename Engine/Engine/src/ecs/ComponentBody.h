@@ -105,7 +105,7 @@ class ComponentBody : public ComponentBaseClass {
         glm::vec3 getScreenCoordinates(bool clampToEdge = false);
 
 
-        ScreenBoxCoordinates getScreenBoxCoordinates(bool clampToEdge = false, float minOffset = 10.0f);
+        ScreenBoxCoordinates getScreenBoxCoordinates(float minOffset = 10.0f);
 
         glm::quat rotation();
         glm::vec3 getScale();
