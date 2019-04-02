@@ -1427,8 +1427,10 @@ epriv::EShaders::ssao_frag =
     "uniform vec4  SSAOInfo;\n"  //   x = radius     y = intensity    z = bias        w = scale
     "uniform ivec4 SSAOInfoA;\n"//    x = UNUSED     y = UNUSED       z = Samples     w = NoiseTextureSize
     "\n"
-    //"uniform vec3 poisson[32];\n"
-    "const vec2 poisson[4] = vec2[](vec2(1.0, 0.0), vec2(-1.0, 0.0),vec2(0.0, 1.0),vec2(0.0, -1.0));\n"
+    "const vec2 poisson[16] = vec2[](vec2(1.0, 0.0), vec2(-1.0, 0.0),vec2(0.0, 1.0),vec2(0.0, -1.0),\n"
+    "                               vec2(-0.707, 0.707), vec2(0.707, -0.707),vec2(-0.707, -0.707),vec2(0.707, 0.707),\n"
+    "                               vec2(-0.375, 0.927), vec2(0.375, -0.927), vec2(-0.375, -0.927), vec2(0.375, 0.927),\n"
+    "                               vec2(-0.927, 0.375), vec2(0.927, -0.375), vec2(-0.927, -0.375), vec2(0.927, 0.375));\n"
     "\n"
     "varying vec2 texcoords;\n";
 epriv::EShaders::ssao_frag += epriv::EShaders::normals_octahedron_compression_functions;
@@ -1446,12 +1448,12 @@ epriv::EShaders::ssao_frag +=
     "    vec3 Pos = GetViewPosition(texcoords,CameraNear,CameraFar);\n"
     "    vec3 Normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
     "    Normal = GetViewNormalsFromWorld(Normal,CameraView);\n"
-    "    vec2 RandVector = normalize(texture2D(gRandomMap, ScreenSize * texcoords / SSAOInfoA.w).xy) * 2.0 - 1.0;\n"
-    //"    float Radius = SSAOInfo.x;\n"
+    "    vec2 RandVector = normalize(texture2D(gRandomMap, ScreenSize * texcoords / SSAOInfoA.w).xy);\n"
     "    float Radius = SSAOInfo.x / max(Pos.z,100.0);\n"
+    //"    float Radius = SSAOInfo.x / Pos.z;\n"
     "    float o = 0.0;\n"
     "    for (int i = 0; i < SSAOInfoA.z; ++i) {\n"
-    "       vec2 coord1 = reflect(poisson[i].xy, RandVector) * Radius;\n"
+    "       vec2 coord1 = reflect(poisson[i].xy * vec2(SSAOInfoA.w), RandVector) * Radius;\n"
     "       vec2 coord2 = vec2(coord1.x * 0.707 - coord1.y * 0.707, coord1.x * 0.707 + coord1.y * 0.707);\n"
     "       o += occlude(texcoords + (coord1 * 0.25), Pos, Normal);\n"
     "       o += occlude(texcoords + (coord2 * 0.50), Pos, Normal);\n"

@@ -244,7 +244,7 @@ class epriv::RenderManager::impl final{
 
         #pragma region SSAOInfo
         static const int SSAO_KERNEL_COUNT = 32;
-        static const int SSAO_NORMALMAP_SIZE = 4;
+        static const int SSAO_NORMALMAP_SIZE = 16;
         bool ssao;
         bool ssao_do_blur;
         int ssao_samples;
@@ -373,15 +373,15 @@ class epriv::RenderManager::impl final{
 
             #pragma region SSAOInfo
             ssao = true;
-            ssao_samples = 4;
+            ssao_samples = 8;
             ssao_do_blur = true;
             ssao_blur_num_passes = 2;
             ssao_blur_radius = 0.66f;
             ssao_blur_strength = 0.48f;
             ssao_scale = 1.0f;
-            ssao_intensity = 1.9f;
-            ssao_bias = 0.15f;
-            ssao_radius = 0.22f;
+            ssao_intensity = 1.8f;
+            ssao_bias = 0.048f;
+            ssao_radius = 0.175f;
             #pragma endregion
 
             #pragma region HDRInfo
@@ -1317,7 +1317,7 @@ class epriv::RenderManager::impl final{
             }
             vector<glm::vec3> ssaoNoise;
             for(uint i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i){
-                ssaoNoise.emplace_back(rand(gen)*2.0-1.0, rand(gen)*2.0-1.0,0.0f);
+                ssaoNoise.emplace_back(rand(gen)*2.0-1.0, rand(gen)*2.0-1.0, 0.0f);
             }
             genAndBindTexture(GL_TEXTURE_2D,ssao_noise_texture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE,SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
@@ -1826,8 +1826,6 @@ class epriv::RenderManager::impl final{
             sendUniform2("ScreenSize", (float)_x, (float)_y);
             sendUniform4("SSAOInfo",ssao_radius,ssao_intensity,ssao_bias,ssao_scale);
             sendUniform4("SSAOInfoA",0,0,ssao_samples,SSAO_NORMALMAP_SIZE);//change to 4f eventually?
-
-            //sendUniform3v("poisson[0]",ssao_Kernels,SSAO_KERNEL_COUNT);
 
             sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
             sendTexture("gRandomMap",ssao_noise_texture,1,GL_TEXTURE_2D);
