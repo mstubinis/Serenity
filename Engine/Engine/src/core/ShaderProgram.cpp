@@ -67,10 +67,9 @@ string getNormalDepthFunctions(){
         "	 return space.xyz / space.w;\n"
         "}\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n"
-        "	 vec4 space = vec4(_uv * 2.0 - 1.0, depth, 1.0);\n"
-        "	 space = CameraInvProj * space;\n"
-        "	 return space.xyz / space.w;\n"
+        "    float depth = texture2D(gDepthMap, _uv).x;\n"
+        "    vec4 space = CameraInvProj * (vec4(_uv, depth, 1.0) * 2.0 - 1.0);\n"
+        "    return space.xyz / space.w;\n"
         "}\n";
     return res;
 }

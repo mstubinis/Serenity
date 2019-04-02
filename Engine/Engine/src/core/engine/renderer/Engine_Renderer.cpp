@@ -373,15 +373,15 @@ class epriv::RenderManager::impl final{
 
             #pragma region SSAOInfo
             ssao = true;
-            ssao_samples = 8;
+            ssao_samples = 4;
             ssao_do_blur = true;
             ssao_blur_num_passes = 2;
             ssao_blur_radius = 0.66f;
             ssao_blur_strength = 0.48f;
             ssao_scale = 1.0f;
-            ssao_intensity = 2.1f;
-            ssao_bias = 0.005f;
-            ssao_radius = 0.135f;
+            ssao_intensity = 1.9f;
+            ssao_bias = 0.15f;
+            ssao_radius = 0.22f;
             #pragma endregion
 
             #pragma region HDRInfo
@@ -1827,7 +1827,7 @@ class epriv::RenderManager::impl final{
             sendUniform4("SSAOInfo",ssao_radius,ssao_intensity,ssao_bias,ssao_scale);
             sendUniform4("SSAOInfoA",0,0,ssao_samples,SSAO_NORMALMAP_SIZE);//change to 4f eventually?
 
-            sendUniform3v("poisson[0]",ssao_Kernels,SSAO_KERNEL_COUNT);
+            //sendUniform3v("poisson[0]",ssao_Kernels,SSAO_KERNEL_COUNT);
 
             sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
             sendTexture("gRandomMap",ssao_noise_texture,1,GL_TEXTURE_2D);

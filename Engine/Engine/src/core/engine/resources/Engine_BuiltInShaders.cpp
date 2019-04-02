@@ -1427,37 +1427,38 @@ epriv::EShaders::ssao_frag =
     "uniform vec4  SSAOInfo;\n"  //   x = radius     y = intensity    z = bias        w = scale
     "uniform ivec4 SSAOInfoA;\n"//    x = UNUSED     y = UNUSED       z = Samples     w = NoiseTextureSize
     "\n"
-    "uniform vec3 poisson[32];\n"
+    //"uniform vec3 poisson[32];\n"
+    "const vec2 poisson[4] = vec2[](vec2(1.0, 0.0), vec2(-1.0, 0.0),vec2(0.0, 1.0),vec2(0.0, -1.0));\n"
     "\n"
     "varying vec2 texcoords;\n";
 epriv::EShaders::ssao_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::ssao_frag +=
     "float occlude(vec2 offsetUV, vec3 origin, vec3 normal){\n"
-    "    vec3 PositionOffset = GetWorldPosition(offsetUV,CameraNear,CameraFar) - origin;\n"
+    "    vec3 PositionOffset = GetViewPosition(offsetUV,CameraNear,CameraFar) - origin;\n"
     "    float Length = length(PositionOffset);\n"
     "    vec3 VectorNormalized = PositionOffset / Length;\n"
-    "    float Distance = Length * SSAOInfo.w;\n"
-    "    float attenuation = 1.0 / (1.0 + D);\n"
+    "    float Dist = Length * SSAOInfo.w;\n"
+    "    float attenuation = 1.0 / (1.0 + Dist);\n"
     "    float angleMath = max(0.0, dot(normal,VectorNormalized) - SSAOInfo.z);\n"
     "    return angleMath * attenuation * SSAOInfo.y;\n"
     "}\n"
     "void main(){\n"
-    "    vec3 WorldPos = GetWorldPosition(texcoords,CameraNear,CameraFar);\n"
+    "    vec3 Pos = GetViewPosition(texcoords,CameraNear,CameraFar);\n"
     "    vec3 Normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
+    "    Normal = GetViewNormalsFromWorld(Normal,CameraView);\n"
     "    vec2 RandVector = normalize(texture2D(gRandomMap, ScreenSize * texcoords / SSAOInfoA.w).xy) * 2.0 - 1.0;\n"
-    "    float Distance = distance(WorldPos, CameraPosition);\n"
-    "    float Radius = max(0.05,SSAOInfo.x / Distance);\n"
+    //"    float Radius = SSAOInfo.x;\n"
+    "    float Radius = SSAOInfo.x / max(Pos.z,100.0);\n"
     "    float o = 0.0;\n"
     "    for (int i = 0; i < SSAOInfoA.z; ++i) {\n"
     "       vec2 coord1 = reflect(poisson[i].xy, RandVector) * Radius;\n"
     "       vec2 coord2 = vec2(coord1.x * 0.707 - coord1.y * 0.707, coord1.x * 0.707 + coord1.y * 0.707);\n"
-    "       o += occlude(texcoords + (coord1 * 0.25), WorldPos, Normal);\n"
-    "       o += occlude(texcoords + (coord2 * 0.50), WorldPos, Normal);\n"
-    "       o += occlude(texcoords + (coord1 * 0.75), WorldPos, Normal);\n"
-    "       o += occlude(texcoords + coord2,          WorldPos, Normal);\n"
+    "       o += occlude(texcoords + (coord1 * 0.25), Pos, Normal);\n"
+    "       o += occlude(texcoords + (coord2 * 0.50), Pos, Normal);\n"
+    "       o += occlude(texcoords + (coord1 * 0.75), Pos, Normal);\n"
+    "       o += occlude(texcoords + coord2,          Pos, Normal);\n"
     "    }\n"
     "    o /= SSAOInfoA.z * 4.0;\n"
-    "    o = mix(0.0,o,(o >= 0.99 ? 0.0 : 1.0 ));\n"//this gets rid of the dark annoying edges around models. in a VERY hacky way...
     "    gl_FragColor.a = o;\n"
     "}";
 #pragma endregion
@@ -1651,6 +1652,7 @@ epriv::EShaders::final_frag +=
     "        vec4 fc = FogColor * clamp(omega,0.0,1.0);\n"
     "        gl_FragColor = PaintersAlgorithm(fc,gl_FragColor);\n"
     "    }\n"
+    //"    gl_FragColor = (gl_FragColor * 0.0001) + vec4(1.0 - texture2D(gBloomMap,texcoords).a);\n"
     "\n"
     "}";
 
