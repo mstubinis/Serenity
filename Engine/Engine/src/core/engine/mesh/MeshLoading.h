@@ -4,9 +4,9 @@
 
 #include <core/engine/Engine_Utils.h>
 #include <core/engine/mesh/Skeleton.h>
+#include <core/engine/mesh/MeshRequest.h>
 
 struct VertexData;
-
 struct aiScene;
 struct aiNode;
 
@@ -30,10 +30,14 @@ namespace Engine {
             //= 4096,
         };
         class MeshLoader final {
-            friend class ::Mesh;
+            friend class  ::Mesh;
+            friend struct ::MeshRequest;
+            friend class  ::Engine::epriv::MeshSkeleton;
+            friend class  ::Engine::epriv::MeshImpl;
             public:
                 static void        LoadInternal(MeshSkeleton* skeleton, MeshImportedData& data, const std::string& file);
-                static void        LoadProcessNode(MeshSkeleton* skeleton, MeshImportedData& data, const aiScene& scene, const aiNode& node, const aiNode& root, BoneNodeMap& _map);
+                static void        LoadProcessNode(MeshSkeleton* skeleton, MeshImportedData& data, const aiScene& scene, const aiNode& node, BoneNodeMap& _map);
+                static void        LoadProcessNode(std::vector<MeshRequestPart>&, const aiScene& scene, const aiNode& node, BoneNodeMap& _map);
                 static void        LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& _map);
 
                 static VertexData* LoadFrom_OBJCC(std::string& filename);

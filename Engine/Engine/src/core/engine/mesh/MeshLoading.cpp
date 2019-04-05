@@ -33,7 +33,7 @@ void epriv::MeshLoader::LoadInternal(MeshSkeleton* skeleton, MeshImportedData& d
         skeleton = new MeshSkeleton();
         skeleton->m_GlobalInverseTransform = Math::assimpToGLMMat4(m);
     }
-    MeshLoader::LoadProcessNode(skeleton, data, *AssimpScene, *AssimpScene->mRootNode, *AssimpScene->mRootNode, map);
+    MeshLoader::LoadProcessNode(skeleton, data, *AssimpScene, *AssimpScene->mRootNode, map);
     if (skeleton) {
         skeleton->fill(data);
     }
@@ -51,8 +51,9 @@ void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap&
     }
 }
 
-void epriv::MeshLoader::LoadProcessNode(MeshSkeleton* _skeleton, MeshImportedData& data, const aiScene& scene, const aiNode& node, const aiNode& root, BoneNodeMap& _map) {
-    //yes this is needed
+void epriv::MeshLoader::LoadProcessNode(MeshSkeleton* _skeleton, MeshImportedData& data, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
+    auto& root = *(scene.mRootNode);
+
     if (_skeleton && &node == &root) {
         MeshLoader::LoadPopulateGlobalNodes(root, _map);
     }
@@ -201,9 +202,178 @@ void epriv::MeshLoader::LoadProcessNode(MeshSkeleton* _skeleton, MeshImportedDat
         MeshLoader::CalculateTBNAssimp(data);
     }
     for (uint i = 0; i < node.mNumChildren; ++i) {
-        MeshLoader::LoadProcessNode(_skeleton, data, scene, *node.mChildren[i], *scene.mRootNode, _map);
+        MeshLoader::LoadProcessNode(_skeleton, data, scene, *node.mChildren[i], _map);
     }
 }
+
+void epriv::MeshLoader::LoadProcessNode(std::vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
+    auto& root = *(scene.mRootNode);
+
+    for (uint i = 0; i < node.mNumMeshes; ++i) {
+        const aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
+
+
+        MeshRequestPart part = MeshRequestPart();
+
+        epriv::MeshImportedData data;
+
+        #pragma region vertices
+        if (aimesh.mVertices) { data.points.reserve(aimesh.mNumVertices); }
+        if (aimesh.mTextureCoords[0]) { data.uvs.reserve(aimesh.mNumVertices); }
+        if (aimesh.mNormals) { data.normals.reserve(aimesh.mNumVertices); }
+        if (aimesh.mBitangents) { data.binormals.reserve(aimesh.mNumVertices); }
+        if (aimesh.mTangents) { data.tangents.reserve(aimesh.mNumVertices); }
+        for (uint j = 0; j < aimesh.mNumVertices; ++j) {
+            //pos
+            auto& pos = aimesh.mVertices[j];
+            data.points.emplace_back(pos.x, pos.y, pos.z);
+            //uv
+            if (aimesh.mTextureCoords[0]) {
+                //this is to prevent uv compression from beign f-ed up at the poles.
+                auto& uv = aimesh.mTextureCoords[0][j];
+                //if(uv.y <= 0.0001f){ uv.y = 0.001f; }
+                //if(uv.y >= 0.9999f){ uv.y = 0.999f; }
+                data.uvs.emplace_back(uv.x, uv.y);
+            }else{
+                data.uvs.emplace_back(0.0f, 0.0f);
+            }
+            if (aimesh.mNormals) {
+                auto& norm = aimesh.mNormals[j];
+                data.normals.emplace_back(norm.x, norm.y, norm.z);
+            }
+            if (aimesh.mTangents) {
+                auto& tang = aimesh.mTangents[j];
+                //data.tangents.emplace_back(tang.x,tang.y,tang.z);
+            }
+            if (aimesh.mBitangents) {
+                auto& binorm = aimesh.mBitangents[j];
+                //data.binormals.emplace_back(binorm.x,binorm.y,binorm.z);
+            }
+        }
+        #pragma endregion
+
+        #pragma region indices
+        data.indices.reserve(aimesh.mNumFaces * 3);
+        data.file_triangles.reserve(aimesh.mNumFaces);
+        for (uint j = 0; j < aimesh.mNumFaces; ++j) {
+            const auto& face = aimesh.mFaces[j];
+
+            const auto& index0 = face.mIndices[0];
+            const auto& index1 = face.mIndices[1];
+            const auto& index2 = face.mIndices[2];
+
+            data.indices.emplace_back(index0);
+            data.indices.emplace_back(index1);
+            data.indices.emplace_back(index2);
+
+            Vertex v1, v2, v3;
+
+            v1.position = data.points[index0];
+            v2.position = data.points[index1];
+            v3.position = data.points[index2];
+            if (data.uvs.size() > 0) {
+                v1.uv = data.uvs[index0];
+                v2.uv = data.uvs[index1];
+                v3.uv = data.uvs[index2];
+            }
+            if (data.normals.size() > 0) {
+                v1.normal = data.normals[index0];
+                v2.normal = data.normals[index1];
+                v3.normal = data.normals[index2];
+            }
+            data.file_triangles.emplace_back(v1, v2, v3);
+
+        }
+        #pragma endregion
+
+        #pragma region Skeleton
+        if (aimesh.mNumBones > 0) {
+            part.impl->m_Skeleton = new epriv::MeshSkeleton();
+            auto& skeleton = *part.impl->m_Skeleton;
+
+            #pragma region IndividualBones
+            //build bone information
+            for (uint k = 0; k < aimesh.mNumBones; ++k) {
+                auto& boneNode = *(_map.at(aimesh.mBones[k]->mName.data));
+                auto& assimpBone = *aimesh.mBones[k];
+                uint BoneIndex(0);
+                if (!skeleton.m_BoneMapping.count(boneNode.Name)) {
+                    BoneIndex = skeleton.m_NumBones;
+                    ++skeleton.m_NumBones;
+                    skeleton.m_BoneInfo.emplace_back();
+                }else{
+                    BoneIndex = skeleton.m_BoneMapping.at(boneNode.Name);
+                }
+                skeleton.m_BoneMapping.emplace(boneNode.Name, BoneIndex);
+                skeleton.m_BoneInfo[BoneIndex].BoneOffset = Math::assimpToGLMMat4(assimpBone.mOffsetMatrix);
+                for (uint j = 0; j < assimpBone.mNumWeights; ++j) {
+                    uint VertexID = assimpBone.mWeights[j].mVertexId;
+                    float Weight = assimpBone.mWeights[j].mWeight;
+                    epriv::VertexBoneData d;
+                    d.AddBoneData(BoneIndex, Weight);
+                    data.m_Bones.emplace(VertexID, d);
+                }
+            }
+            //build skeleton parent child relationship
+            for (auto& node : _map) {
+                const auto& assimpNode = root.FindNode(node.first.c_str());
+                auto iter = assimpNode;
+                while (iter != 0 && iter->mParent != 0) {
+                    if (_map.count(iter->mParent->mName.data)) {
+                        node.second->Parent = _map.at(iter->mParent->mName.data);
+                        node.second->Parent->Children.push_back(node.second);
+                        break; //might need to double check this
+                    }
+                    iter = iter->mParent;
+                }
+            }
+            //and finalize the root node
+            if (!skeleton.m_RootNode) {
+                for (auto& node : _map) {
+                    if (!node.second->Parent) {
+                        skeleton.m_RootNode = node.second;
+                        break;
+                    }
+                }
+            }
+            #pragma endregion
+
+            #pragma region Animations
+            if (scene.mAnimations && scene.mNumAnimations > 0) {
+                for (uint k = 0; k < scene.mNumAnimations; ++k) {
+                    const aiAnimation& anim = *scene.mAnimations[k];
+                    string key(anim.mName.C_Str());
+                    if (key == "") {
+                        key = "Animation " + to_string(skeleton.m_AnimationData.size());
+                    }
+                    if (!skeleton.m_AnimationData.count(key)) {
+                        skeleton.m_AnimationData.emplace(std::piecewise_construct,std::forward_as_tuple(key),std::forward_as_tuple(skeleton, anim));
+                    }
+                }
+            }
+            #pragma endregion
+
+            //TODO: remove "fill" function from MeshSkeleton
+            for (auto& _b : data.m_Bones) {
+                const VertexBoneData& b = _b.second;
+                skeleton.m_BoneIDs.push_back(glm::vec4(b.IDs[0], b.IDs[1], b.IDs[2], b.IDs[3]));
+                skeleton.m_BoneWeights.push_back(glm::vec4(b.Weights[0], b.Weights[1], b.Weights[2], b.Weights[3]));
+            }
+        }
+        #pragma endregion
+        MeshLoader::CalculateTBNAssimp(data);
+
+
+        part.name = aimesh.mName.C_Str();
+        //TODO: add more here
+        
+        _parts.push_back(part);
+    }
+    for (uint i = 0; i < node.mNumChildren; ++i) {
+        MeshLoader::LoadProcessNode(_parts, scene, *node.mChildren[i], _map);
+    }
+}
+
 
 
 

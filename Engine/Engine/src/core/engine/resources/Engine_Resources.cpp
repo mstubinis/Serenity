@@ -11,6 +11,8 @@
 #include "core/Font.h"
 #include "core/Scene.h"
 
+#include <core/engine/mesh/MeshRequest.h>
+
 #include <core/engine/resources/Handle.h>
 
 #include <iostream>
@@ -127,6 +129,20 @@ Handle Resources::addMeshAsync(string f, bool b,float threshhold){
     epriv::threading::addJobWithPostCallback(job,cbk);
     return resourceManager->m_Resources->add(mesh, ResourceType::Mesh);
 }
+
+
+
+
+std::vector<Handle> Resources::loadMesh(string fileOrData, float threshhold) {
+    MeshRequest request = MeshRequest(fileOrData, threshhold);
+    request.request();
+}
+std::vector<Handle> Resources::loadMeshAsync(string fileOrData, float threshhold) {
+    MeshRequest request = MeshRequest(fileOrData, threshhold);
+}
+
+
+
 
 
 Handle epriv::ResourceManager::_addTexture(Texture* t){ return resourceManager->m_Resources->add(t,ResourceType::Texture); }

@@ -1449,6 +1449,7 @@ epriv::EShaders::ssao_frag +=
     "    vec3 Normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
     "    Normal = GetViewNormalsFromWorld(Normal,CameraView);\n"
     "    vec2 RandVector = normalize(texture2D(gRandomMap, ScreenSize * texcoords / SSAOInfoA.w).xy);\n"
+    //"    float CamZ = distance(Pos,CameraPosition);\n"
     "    float Radius = SSAOInfo.x / max(Pos.z,100.0);\n"
     //"    float Radius = SSAOInfo.x / Pos.z;\n"
     "    float o = 0.0;\n"
