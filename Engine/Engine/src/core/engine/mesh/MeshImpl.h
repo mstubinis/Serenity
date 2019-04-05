@@ -13,6 +13,7 @@ namespace Engine {
         class  MeshCollisionFactory;
         class  MeshLoader;
         class MeshImpl {
+            friend class  ::Mesh;
             friend struct ::MeshRequest;
             friend class  ::Engine::epriv::MeshLoader;
             private:
@@ -29,6 +30,10 @@ namespace Engine {
 
                 void load_cpu();
                 void load_gpu();
+
+                void finalize_vertex_data(MeshImportedData& data);
+                void triangulate_component_indices(MeshImportedData& data, std::vector<uint>& point_indices, std::vector<uint>& uv_indices, std::vector<uint>& normal_indices, unsigned char flags);
+                void calculate_radius(VertexData& vertexData);
 
             public:
                 MeshImpl();

@@ -23,23 +23,32 @@ MeshRequest::MeshRequest(const string& _filenameOrData, float _threshold) {
 MeshRequest::~MeshRequest() {
 
 }
-void MeshRequest::request() {
-    if (fileOrData != "") {
+
+
+void _request(MeshRequest& meshRequest,bool async) {
+    if (meshRequest.fileOrData != "") {
         //first determine if the file is data or a file path
-        if (boost::filesystem::exists(fileOrData)) {
+        if (boost::filesystem::exists(meshRequest.fileOrData)) {
+            const string& extension = boost::filesystem::extension(meshRequest.fileOrData);
             Assimp::Importer importer;
-            const aiScene* scene = importer.ReadFile(fileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+            const aiScene* scene = importer.ReadFile(meshRequest.fileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
             if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
                 return;
             }
             unordered_map<string, epriv::BoneNode*> map;
-            epriv::MeshLoader::LoadPopulateGlobalNodes(*scene->mRootNode,map);
+            epriv::MeshLoader::LoadPopulateGlobalNodes(*scene->mRootNode, map);
 
-            vector<MeshRequestPart> impls;
-            epriv::MeshLoader::LoadProcessNode(impls, *scene, *scene->mRootNode, map);
-
+            epriv::MeshLoader::LoadProcessNode(meshRequest.parts, *scene, *scene->mRootNode, map);
         }else{
             //we got either an invalid file or memory data
         }
     }
+}
+
+
+void MeshRequest::request() {
+    _request(*this, false);
+}
+void MeshRequest::requestAsync() {
+    _request(*this, true);
 }

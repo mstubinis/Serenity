@@ -35,6 +35,7 @@ struct MeshRequest final {
     ~MeshRequest();
 
     void request();
+    void requestAsync();
 };
 
 

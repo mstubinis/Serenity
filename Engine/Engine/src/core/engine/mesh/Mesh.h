@@ -2,12 +2,14 @@
 #ifndef ENGINE_MESH_H
 #define ENGINE_MESH_H
 
+#include <core/engine/mesh/VertexData.h>
 #include <core/engine/mesh/MeshIncludes.h>
+#include <core/engine/mesh/MeshImpl.h>
 
 #include "core/engine/BindableResource.h"
 #include "core/engine/events/Engine_EventObject.h"
 #include "core/engine/Engine_Physics.h"
-#include "core/engine/mesh/VertexData.h"
+
 
 #include <map>
 #include <unordered_map>
@@ -48,6 +50,7 @@ class Mesh final: public BindableResource, public EventObserver{
     friend class  ::Engine::epriv::MeshSkeleton;
     friend class  ::Engine::epriv::MeshLoader;
     friend class  ::Engine::epriv::MeshCollisionFactory;
+    friend class  ::Engine::epriv::MeshImpl;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

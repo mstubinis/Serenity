@@ -230,7 +230,7 @@ class Mesh::impl final{
             }
         }
         void _loadFromFile(Mesh& super, string& file, float threshold) {
-            string extension = boost::filesystem::extension(file);
+            const string& extension = boost::filesystem::extension(file);
             epriv::MeshImportedData d;
 
             if (extension == ".objcc") {
@@ -246,9 +246,9 @@ class Mesh::impl final{
             uint count = 0;
             epriv::Triangle triangle;
             for(uint i=0; i < _pi.size(); ++i ){
-                glm::vec3 pos(glm::vec3(0.0f,0.0f,0.0f));
-                glm::vec2 uv(glm::vec2(0.0f,0.0f));
-                glm::vec3 norm(glm::vec3(1.0f,1.0f,1.0f));
+                glm::vec3 pos(0.0f);
+                glm::vec2 uv(0.0f);
+                glm::vec3 norm(1.0f);
                 if(_flags && epriv::LOAD_POINTS && data.file_points.size() > 0){  
                     pos = data.file_points[_pi[i]-1];
                     data.points.push_back(pos);
@@ -263,18 +263,16 @@ class Mesh::impl final{
                 }
                 //data.indices.emplace_back((ushort)count);
                 ++count;
-                if(count == 1){
-                    triangle.v1.position = pos;
-                    triangle.v1.uv = uv;
-                    triangle.v1.normal = norm;
-                }else if(count == 2){
-                    triangle.v2.position = pos;
-                    triangle.v2.uv = uv;
-                    triangle.v2.normal = norm;
-                }else if(count >= 3){
-                    triangle.v3.position = pos;
-                    triangle.v3.uv = uv;
-                    triangle.v3.normal = norm;
+                epriv::Vertex* _vertex = &triangle.v1;
+                if(count == 2){
+                    _vertex = &triangle.v2;
+                }else if(count == 3){
+                    _vertex = &triangle.v3;
+                }
+                _vertex->position = pos;
+                _vertex->uv       = uv;
+                _vertex->normal   = norm;
+                if (count == 3) {
                     data.file_triangles.push_back(triangle);
                     count = 0;
                 }

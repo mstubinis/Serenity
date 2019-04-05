@@ -133,12 +133,23 @@ Handle Resources::addMeshAsync(string f, bool b,float threshhold){
 
 
 
-std::vector<Handle> Resources::loadMesh(string fileOrData, float threshhold) {
+vector<Handle> Resources::loadMesh(string fileOrData, float threshhold) {
     MeshRequest request = MeshRequest(fileOrData, threshhold);
     request.request();
+    vector<Handle> handles;
+    for (auto& part : request.parts) {
+        handles.push_back(part.handle);
+    }
+    return handles;
 }
-std::vector<Handle> Resources::loadMeshAsync(string fileOrData, float threshhold) {
+vector<Handle> Resources::loadMeshAsync(string fileOrData, float threshhold) {
     MeshRequest request = MeshRequest(fileOrData, threshhold);
+    request.requestAsync();
+    vector<Handle> handles;
+    for (auto& part : request.parts) {
+        handles.push_back(part.handle);
+    }
+    return handles;
 }
 
 
