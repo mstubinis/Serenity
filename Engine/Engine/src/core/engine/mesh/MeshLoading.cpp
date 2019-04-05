@@ -97,7 +97,6 @@ void epriv::MeshLoader::LoadProcessNode(MeshSkeleton* _skeleton, MeshImportedDat
         // Process indices
         #pragma region indices
         data.indices.reserve(aimesh.mNumFaces * 3);
-        data.file_triangles.reserve(aimesh.mNumFaces);
         for (uint j = 0; j < aimesh.mNumFaces; ++j) {
             const auto& face = aimesh.mFaces[j];
 
@@ -108,24 +107,6 @@ void epriv::MeshLoader::LoadProcessNode(MeshSkeleton* _skeleton, MeshImportedDat
             data.indices.emplace_back(index0);
             data.indices.emplace_back(index1);
             data.indices.emplace_back(index2);
-
-            Vertex v1, v2, v3;
-
-            v1.position = data.points[index0];
-            v2.position = data.points[index1];
-            v3.position = data.points[index2];
-            if (data.uvs.size() > 0) {
-                v1.uv = data.uvs[index0];
-                v2.uv = data.uvs[index1];
-                v3.uv = data.uvs[index2];
-            }
-            if (data.normals.size() > 0) {
-                v1.normal = data.normals[index0];
-                v2.normal = data.normals[index1];
-                v3.normal = data.normals[index2];
-            }
-            data.file_triangles.emplace_back(v1, v2, v3);
-
         }
         #pragma endregion
         //bones
@@ -254,7 +235,6 @@ void epriv::MeshLoader::LoadProcessNode(std::vector<MeshRequestPart>& _parts, co
 
         #pragma region indices
         data.indices.reserve(aimesh.mNumFaces * 3);
-        data.file_triangles.reserve(aimesh.mNumFaces);
         for (uint j = 0; j < aimesh.mNumFaces; ++j) {
             const auto& face = aimesh.mFaces[j];
 
@@ -265,24 +245,6 @@ void epriv::MeshLoader::LoadProcessNode(std::vector<MeshRequestPart>& _parts, co
             data.indices.emplace_back(index0);
             data.indices.emplace_back(index1);
             data.indices.emplace_back(index2);
-
-            Vertex v1, v2, v3;
-
-            v1.position = data.points[index0];
-            v2.position = data.points[index1];
-            v3.position = data.points[index2];
-            if (data.uvs.size() > 0) {
-                v1.uv = data.uvs[index0];
-                v2.uv = data.uvs[index1];
-                v3.uv = data.uvs[index2];
-            }
-            if (data.normals.size() > 0) {
-                v1.normal = data.normals[index0];
-                v2.normal = data.normals[index1];
-                v3.normal = data.normals[index2];
-            }
-            data.file_triangles.emplace_back(v1, v2, v3);
-
         }
         #pragma endregion
 

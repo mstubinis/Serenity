@@ -40,17 +40,6 @@ namespace Engine {
                 uv = glm::vec2(0.0f); 
             }
         };
-        struct Triangle final {
-            Vertex v1;
-            Vertex v2;
-            Vertex v3;
-            Triangle() {}
-            Triangle(Vertex& _v1, Vertex& _v2, Vertex& _v3) { 
-                v1 = _v1; v2 = _v2; v3 = _v3; 
-            }
-            ~Triangle(){}
-        };
-
 
         struct VertexBoneData final {
             float     IDs[NUM_BONES_PER_VERTEX];

@@ -35,8 +35,6 @@ namespace Engine{
             static void LoadGPU(Mesh&);
             static void UnloadCPU(Mesh&);
             static void UnloadGPU(Mesh&);
-            //static void UpdateInstance(Mesh&, uint _id, glm::mat4 _modelMatrix);
-            //static void UpdateInstances(Mesh&, std::vector<glm::mat4>& _modelMatrices);
             static bool SupportsInstancing();
             static btCollisionShape* BuildCollision(Mesh*, CollisionType::Type);
         };
@@ -56,9 +54,8 @@ class Mesh final: public BindableResource, public EventObserver{
     public:
         static Mesh *FontPlane, *Plane, *Cube; //loaded in renderer
 
-        Mesh(std::string name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
-        Mesh(std::string name,float width, float height,float threshhold);
-        Mesh(std::string fileOrData, bool notMemory = true,float threshhold = 0.0005f,bool loadNow = true);
+        Mesh(std::string name,float width, float height,float threshhold); //plane
+        Mesh(std::string fileOrData, bool notMemory = true,float threshhold = 0.0005f,bool loadNow = true); //file or data
         ~Mesh();
 
         std::unordered_map<std::string, Engine::epriv::AnimationData>& animationData();

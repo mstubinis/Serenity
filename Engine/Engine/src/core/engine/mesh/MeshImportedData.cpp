@@ -10,7 +10,6 @@ epriv::MeshImportedData::~MeshImportedData() {
     vector_clear(file_points);
     vector_clear(file_uvs);
     vector_clear(file_normals);
-    vector_clear(file_triangles);
     vector_clear(points);
     vector_clear(uvs);
     vector_clear(normals);

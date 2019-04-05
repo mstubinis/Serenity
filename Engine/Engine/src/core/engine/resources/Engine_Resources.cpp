@@ -118,9 +118,6 @@ Handle Resources::addMesh(string f, bool b,float threshhold){
 Handle Resources::addMesh(string n,float w,float h,float threshhold){
     return resourceManager->m_Resources->add(new Mesh(n,w,h,threshhold),ResourceType::Mesh);
 }
-Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint l,float threshhold){
-    return resourceManager->m_Resources->add(new Mesh(n,g,w,l,threshhold),ResourceType::Mesh);
-}
 Handle Resources::addMeshAsync(string f, bool b,float threshhold){
     Mesh* mesh = new Mesh(f,b,threshhold,false);
     auto ref = std::ref(*mesh);

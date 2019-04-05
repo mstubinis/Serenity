@@ -50,82 +50,32 @@ class Mesh::impl final{
             m_VertexData       = nullptr;
             m_CollisionFactory = nullptr;
             m_threshold        = threshold;
-        }
-        void _init(Mesh& super,string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold){//grid
-            epriv::MeshImportedData d;
-            _initGlobal(threshold);  
-            for(uint i = 0; i < width-1; ++i){
-                for(uint j = 0; j < length-1; ++j){
-                    string key1(to_string(i) + "," + to_string(j));
-                    string key2(to_string(i + 1) + "," + to_string(j));
-                    string key3(to_string(i) + "," + to_string(j + 1));
-                    string key4(to_string(i + 1) + "," + to_string(j + 1));
-
-                    epriv::Vertex v1,v2,v3,v4;
-                    v1.position = glm::vec3(i - width / 2.0f, grid[key1], j - length / 2.0f);
-                    v2.position = glm::vec3((i + 1) - width / 2.0f, grid[key2], j - length / 2.0f);
-                    v3.position = glm::vec3(i - width / 2.0f, grid[key3], (j + 1) - length / 2.0f);
-                    v4.position = glm::vec3((i + 1) - width / 2.0f, grid[key4], (j + 1) - length / 2.0f);
-
-                    glm::vec3 a(v4.position - v1.position);
-                    glm::vec3 b(v2.position - v3.position);
-                    glm::vec3 normal(glm::normalize(glm::cross(a,b)));
-
-                    v1.normal = normal;
-                    v2.normal = normal;
-                    v3.normal = normal;
-                    v4.normal = normal;
-
-                    v1.uv = glm::vec2(float(i) / float(width), float(j) / float(length));
-                    v2.uv = glm::vec2(float(i + 1) / float(width), float(j) / float(length));
-                    v3.uv = glm::vec2(float(i) / float(width), float(j + 1) / float(length));
-                    v4.uv = glm::vec2(float(i + 1) / float(width), float(j + 1) / float(length));
-
-                    d.points.push_back(v3.position); d.uvs.push_back(v3.uv); d.normals.push_back(v3.normal);
-                    d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
-                    d.points.push_back(v1.position); d.uvs.push_back(v1.uv); d.normals.push_back(v1.normal);
-
-                    d.points.push_back(v3.position); d.uvs.push_back(v3.uv); d.normals.push_back(v3.normal);
-                    d.points.push_back(v4.position); d.uvs.push_back(v4.uv); d.normals.push_back(v4.normal);
-                    d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
-
-                    epriv::MeshLoader::CalculateTBNAssimp(d);
-                }
-            }
-            m_VertexData = nullptr;
-            _finalizeData(d, threshold);
-            super.load();
-        }     
+        }    
         void _init(Mesh& super,string& name,float width, float height,float threshold){//plane
             epriv::MeshImportedData d;
             _initGlobal(threshold);
-            d.points.emplace_back(-width / 2.0f, -height / 2.0f, 0);
-            d.points.emplace_back(width / 2.0f, height / 2.0f, 0);
-            d.points.emplace_back(-width / 2.0f, height / 2.0f, 0);
 
-            d.points.emplace_back(width / 2.0f, -height / 2.0f, 0);
-            d.points.emplace_back(width / 2.0f, height / 2.0f, 0);
-            d.points.emplace_back(-width / 2.0f, -height / 2.0f, 0);
+            vector<epriv::Vertex> quad; quad.resize(4);
+            quad[0].uv = glm::vec2(0.0f, 0.0f);
+            quad[1].uv = glm::vec2(width, 0.0f);
+            quad[2].uv = glm::vec2(width, height);
+            quad[3].uv = glm::vec2(0.0f, height);
 
-            float uv_topLeft_x = 0.0f;
-            float uv_topLeft_y = 0.0f;
+            quad[0].position = glm::vec3(-width / 2.0f,  -height / 2.0f,   0.0f);
+            quad[1].position = glm::vec3( width / 2.0f,  -height / 2.0f,   0.0f);
+            quad[2].position = glm::vec3( width / 2.0f,   height / 2.0f,   0.0f);
+            quad[3].position = glm::vec3(-width / 2.0f,   height / 2.0f,   0.0f);
 
-            float uv_bottomLeft_x = 0.0f;
-            float uv_bottomLeft_y = 0.0f + float(height);
-
-            float uv_bottomRight_x = 0.0f + float(width);
-            float uv_bottomRight_y = 0.0f + float(height);
-
-            float uv_topRight_x = 0.0f + float(width);
-            float uv_topRight_y = 0.0f;
-
-            d.uvs.emplace_back(uv_bottomLeft_x, uv_bottomLeft_y);
-            d.uvs.emplace_back(uv_topRight_x, uv_topRight_y);
-            d.uvs.emplace_back(uv_topLeft_x, uv_topLeft_y);
-
-            d.uvs.emplace_back(uv_bottomRight_x, uv_bottomRight_y);
-            d.uvs.emplace_back(uv_topRight_x, uv_topRight_y);
-            d.uvs.emplace_back(uv_bottomLeft_x, uv_bottomLeft_y);
+            //triangle 1 (0, 1, 2)
+            for (uint i = 0; i < 3; ++i) {
+                d.points.emplace_back(quad[i].position);
+                d.uvs.   emplace_back(quad[i].uv);
+            }
+            //triangle 2 (2, 3, 0)
+            for (uint i = 0; i < 3; ++i) {
+                d.points.emplace_back(quad[ (i + 2) % 4 ].position);
+                d.uvs.   emplace_back(quad[ (i + 2) % 4 ].uv);
+            }
 
             m_VertexData = new VertexData(VertexDataFormat::VertexDataNoLighting);
             _finalizeData(d, threshold);
@@ -243,9 +193,7 @@ class Mesh::impl final{
             }
         }
         void _loadDataIntoTriangles(epriv::MeshImportedData& data,vector<uint>& _pi,vector<uint>& _ui,vector<uint>& _ni,unsigned char _flags){
-            uint count = 0;
-            epriv::Triangle triangle;
-            for(uint i=0; i < _pi.size(); ++i ){
+            for(uint i=0; i < _pi.size(); ++i){
                 glm::vec3 pos(0.0f);
                 glm::vec2 uv(0.0f);
                 glm::vec3 norm(1.0f);
@@ -260,21 +208,6 @@ class Mesh::impl final{
                 if(_flags && epriv::LOAD_NORMALS && data.file_normals.size() > 0){ 
                     norm = data.file_normals[_ni[i]-1];
                     data.normals.push_back(norm);
-                }
-                //data.indices.emplace_back((ushort)count);
-                ++count;
-                epriv::Vertex* _vertex = &triangle.v1;
-                if(count == 2){
-                    _vertex = &triangle.v2;
-                }else if(count == 3){
-                    _vertex = &triangle.v3;
-                }
-                _vertex->position = pos;
-                _vertex->uv       = uv;
-                _vertex->normal   = norm;
-                if (count == 3) {
-                    data.file_triangles.push_back(triangle);
-                    count = 0;
                 }
             }
         }
@@ -410,22 +343,7 @@ void epriv::InternalMeshPublicInterface::UnloadCPU( Mesh& _mesh){
 void epriv::InternalMeshPublicInterface::UnloadGPU( Mesh& _mesh){
     _mesh.m_i->_unload_GPU();
 }
-/*
-void epriv::InternalMeshPublicInterface::UpdateInstance( Mesh& _mesh,uint _id, glm::mat4 _modelMatrix){
-    auto& i = *_mesh.m_i;
-    glBindBuffer(GL_ARRAY_BUFFER, i.m_buffers[2]);
-    glBufferSubData(GL_ARRAY_BUFFER, _id * sizeof(glm::mat4), sizeof(glm::mat4), &_modelMatrix);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-void epriv::InternalMeshPublicInterface::UpdateInstances( Mesh& _mesh,vector<glm::mat4>& _modelMatrices){
-    auto& i = *_mesh.m_i;
-    i.m_InstanceCount = _modelMatrices.size();
-    if(_modelMatrices.size() == 0) return;
-    glBindBuffer(GL_ARRAY_BUFFER, i.m_buffers[2]);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * i.m_InstanceCount, &_modelMatrices[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-*/
+
 bool epriv::InternalMeshPublicInterface::SupportsInstancing(){
     if(epriv::RenderManager::OPENGL_VERSION >= 31 || 
     epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_draw_instanced) || 
@@ -450,12 +368,6 @@ btCollisionShape* epriv::InternalMeshPublicInterface::BuildCollision(Mesh* _mesh
 }
 
 
-Mesh::Mesh(string name,unordered_map<string,float>& grid,uint width,uint length,float threshold):BindableResource(name),m_i(new impl){
-    m_i->_init(*this,name,grid,width,length,threshold);
-    registerEvent(EventType::WindowFullscreenChanged);
-    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
-}
 Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(*this,name,width,height,threshold);
     registerEvent(EventType::WindowFullscreenChanged);

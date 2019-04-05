@@ -69,8 +69,6 @@ void epriv::MeshImpl::calculate_radius(VertexData& vertexData) {
 
 
 void epriv::MeshImpl::triangulate_component_indices(epriv::MeshImportedData& data, vector<uint>& point_indices, vector<uint>& uv_indices, vector<uint>& normal_indices, unsigned char _flags) {
-    uint count = 0;
-    epriv::Triangle triangle;
     for (uint i = 0; i < point_indices.size(); ++i) {
         glm::vec3 pos(0.0f);
         glm::vec2 uv(0.0f);
@@ -86,21 +84,6 @@ void epriv::MeshImpl::triangulate_component_indices(epriv::MeshImportedData& dat
         if (_flags && epriv::LOAD_NORMALS && data.file_normals.size() > 0) {
             norm = data.file_normals[normal_indices[i] - 1];
             data.normals.push_back(norm);
-        }
-        //data.indices.emplace_back((ushort)count);
-        ++count;
-        epriv::Vertex* _vertex = &triangle.v1;
-        if (count == 2) {
-            _vertex = &triangle.v2;
-        }else if (count == 3) {
-            _vertex = &triangle.v3;
-        }
-        _vertex->position = pos;
-        _vertex->uv       = uv;
-        _vertex->normal   = norm;
-        if (count == 3) {
-            data.file_triangles.push_back(triangle);
-            count = 0;
         }
     }
 }

@@ -78,14 +78,11 @@ namespace Engine{
 
         Handle addFont(std::string filename);
 
-
         std::vector<Handle> loadMesh(std::string fileOrData,  float threshhold = 0.0005f);
         std::vector<Handle> loadMeshAsync(std::string fileOrData,  float threshhold = 0.0005f);
 
-
         Handle addMesh(std::string file, bool fromFile = true,float threshhold = 0.0005f);
         Handle addMesh(std::string name, float w, float h,float threshhold = 0.0005f);
-        Handle addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length,float threshhold = 0.0005f);
         Handle addMeshAsync(std::string file,bool fromFile = true,float threshhold = 0.0005f);
 
         Handle addTexture(std::string file,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8,bool mipmaps = false);
