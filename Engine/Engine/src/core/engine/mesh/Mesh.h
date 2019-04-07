@@ -50,10 +50,27 @@ class Mesh final: public BindableResource, public EventObserver{
     friend class  ::Engine::epriv::MeshCollisionFactory;
     friend class  ::Engine::epriv::MeshImpl;
     private:
-        class impl; std::unique_ptr<impl> m_i;
+        VertexData*                            m_VertexData;
+        Engine::epriv::MeshCollisionFactory*   m_CollisionFactory;
+        Engine::epriv::MeshSkeleton*           m_Skeleton;
+        std::string                            m_File;
+        glm::vec3                              m_radiusBox;
+        float                                  m_radius;
+        float                                  m_threshold;
+
+        void unload_cpu();
+        void unload_gpu();
+
+        void load_cpu();
+        void load_gpu();
+
+        void finalize_vertex_data(Engine::epriv::MeshImportedData& data);
+        void triangulate_component_indices(Engine::epriv::MeshImportedData& data, std::vector<uint>& point_indices, std::vector<uint>& uv_indices, std::vector<uint>& normal_indices, unsigned char flags);
+        void calculate_radius(VertexData& vertexData);
     public:
         static Mesh *FontPlane, *Plane, *Cube; //loaded in renderer
 
+        Mesh(Engine::epriv::MeshImportedData&, const std::string& name, float threshhold = 0.0005f);
         Mesh(std::string name,float width, float height,float threshhold); //plane
         Mesh(std::string fileOrData, bool notMemory = true,float threshhold = 0.0005f,bool loadNow = true); //file or data
         ~Mesh();

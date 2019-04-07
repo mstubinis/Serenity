@@ -187,7 +187,7 @@ void epriv::MeshLoader::LoadProcessNode(MeshSkeleton* _skeleton, MeshImportedDat
     }
 }
 
-void epriv::MeshLoader::LoadProcessNode(std::vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
+void epriv::MeshLoader::LoadProcessNode(vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
     auto& root = *(scene.mRootNode);
 
     for (uint i = 0; i < node.mNumMeshes; ++i) {
@@ -250,8 +250,8 @@ void epriv::MeshLoader::LoadProcessNode(std::vector<MeshRequestPart>& _parts, co
 
         #pragma region Skeleton
         if (aimesh.mNumBones > 0) {
-            part.impl->m_Skeleton = new epriv::MeshSkeleton();
-            auto& skeleton = *part.impl->m_Skeleton;
+            part.mesh->m_Skeleton = new epriv::MeshSkeleton();
+            auto& skeleton = *part.mesh->m_Skeleton;
 
             #pragma region IndividualBones
             //build bone information
@@ -325,8 +325,10 @@ void epriv::MeshLoader::LoadProcessNode(std::vector<MeshRequestPart>& _parts, co
         #pragma endregion
         MeshLoader::CalculateTBNAssimp(data);
 
-
         part.name = aimesh.mName.C_Str();
+
+        Mesh* mesh = new Mesh(data, part.name);
+        part.mesh = mesh;
         //TODO: add more here
         
         _parts.push_back(part);
@@ -336,6 +338,94 @@ void epriv::MeshLoader::LoadProcessNode(std::vector<MeshRequestPart>& _parts, co
     }
 }
 
+
+void epriv::MeshLoader::FinalizeData(Mesh& mesh,epriv::MeshImportedData& data, float threshold) {
+    mesh.m_threshold = threshold;
+
+    if (data.uvs.size() == 0)         data.uvs.resize(data.points.size());
+    if (data.normals.size() == 0)     data.normals.resize(data.points.size());
+    if (data.binormals.size() == 0)   data.binormals.resize(data.points.size());
+    if (data.tangents.size() == 0)    data.tangents.resize(data.points.size());
+    if (!mesh.m_VertexData) {
+        if (mesh.m_Skeleton) {
+            mesh.m_VertexData = new VertexData(VertexDataFormat::VertexDataAnimated);
+        }else{
+            mesh.m_VertexData = new VertexData(VertexDataFormat::VertexDataBasic);
+        }
+    }
+    auto& vertexData = *mesh.m_VertexData;
+    vector<vector<GLuint>> normals;
+    normals.resize(3);
+    if (mesh.m_threshold == 0.0f) {
+        normals[0].reserve(data.normals.size());
+        normals[1].reserve(data.binormals.size());
+        normals[2].reserve(data.tangents.size());
+        for (size_t i = 0; i < data.normals.size(); ++i)
+            normals[0].push_back(Math::pack3NormalsInto32Int(data.normals[i]));
+        for (size_t i = 0; i < data.binormals.size(); ++i)
+            normals[1].push_back(Math::pack3NormalsInto32Int(data.binormals[i]));
+        for (size_t i = 0; i < data.tangents.size(); ++i)
+            normals[2].push_back(Math::pack3NormalsInto32Int(data.tangents[i]));
+        vertexData.setData(0, data.points);
+        vertexData.setData(1, data.uvs);
+        vertexData.setData(2, normals[0]);
+        vertexData.setData(3, normals[1]);
+        vertexData.setData(4, normals[2]);
+        vertexData.setDataIndices(data.indices);
+    }else{
+        vector<ushort> _indices;
+        vector<glm::vec3> temp_pos; temp_pos.reserve(data.points.size());
+        vector<glm::vec2> temp_uvs; temp_uvs.reserve(data.uvs.size());
+        vector<glm::vec3> temp_normals; temp_normals.reserve(data.normals.size());
+        vector<glm::vec3> temp_binormals; temp_binormals.reserve(data.binormals.size());
+        vector<glm::vec3> temp_tangents; temp_tangents.reserve(data.tangents.size());
+        for (uint i = 0; i < data.points.size(); ++i) {
+            ushort index;
+            bool found = epriv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_threshold);
+            if (found) {
+                _indices.emplace_back(index);
+                //average out TBN. But it cancels out normal mapping on some flat surfaces
+                //temp_binormals[index] += data.binormals[i];
+                //temp_tangents[index] += data.tangents[i];
+            }else{
+                temp_pos.emplace_back(data.points[i]);
+                temp_uvs.emplace_back(data.uvs[i]);
+                temp_normals.emplace_back(data.normals[i]);
+                temp_binormals.emplace_back(data.binormals[i]);
+                temp_tangents.emplace_back(data.tangents[i]);
+                _indices.emplace_back((ushort)temp_pos.size() - 1);
+            }
+        }
+        normals[0].reserve(temp_normals.size());
+        normals[1].reserve(temp_binormals.size());
+        normals[2].reserve(temp_tangents.size());
+        for (size_t i = 0; i < temp_normals.size(); ++i)
+            normals[0].push_back(Math::pack3NormalsInto32Int(temp_normals[i]));
+        for (size_t i = 0; i < temp_binormals.size(); ++i)
+            normals[1].push_back(Math::pack3NormalsInto32Int(temp_binormals[i]));
+        for (size_t i = 0; i < temp_tangents.size(); ++i)
+            normals[2].push_back(Math::pack3NormalsInto32Int(temp_tangents[i]));
+        vertexData.setData(0, temp_pos);
+        vertexData.setData(1, temp_uvs);
+        vertexData.setData(2, normals[0]);
+        vertexData.setData(3, normals[1]);
+        vertexData.setData(4, normals[2]);
+        vertexData.setDataIndices(_indices);
+    }
+    if (mesh.m_Skeleton) {
+        vector<vector<glm::vec4>> boneStuff;
+        boneStuff.resize(2);
+        auto& _skeleton = *mesh.m_Skeleton;
+        boneStuff[0].reserve(_skeleton.m_BoneIDs.size());
+        boneStuff[1].reserve(_skeleton.m_BoneIDs.size());
+        for (uint i = 0; i < _skeleton.m_BoneIDs.size(); ++i) {
+            boneStuff[0].push_back(_skeleton.m_BoneIDs[i]);
+            boneStuff[1].push_back(_skeleton.m_BoneWeights[i]);
+        }
+        vertexData.setData(5, boneStuff[0]);
+        vertexData.setData(6, boneStuff[1]);
+    }
+}
 
 
 

@@ -39,6 +39,7 @@ namespace Engine {
                 static void        LoadProcessNode(MeshSkeleton* skeleton, MeshImportedData& data, const aiScene& scene, const aiNode& node, BoneNodeMap& _map);
                 static void        LoadProcessNode(std::vector<MeshRequestPart>&, const aiScene& scene, const aiNode& node, BoneNodeMap& _map);
                 static void        LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& _map);
+                static void        FinalizeData(Mesh& mesh,MeshImportedData& data, float threshold);
 
                 static VertexData* LoadFrom_OBJCC(std::string& filename);
                 static void        SaveTo_OBJCC(VertexData& data, std::string filename);

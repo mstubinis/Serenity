@@ -9,17 +9,17 @@
 
 
 struct MeshRequestPart final {
-    Engine::epriv::MeshImpl*  impl;
+    Mesh*                     mesh;
     Handle                    handle;
     std::string               name;
 
     MeshRequestPart() {
-        impl = new Engine::epriv::MeshImpl();
+        mesh = nullptr;
         name = "";
         handle = Handle();
     }
     ~MeshRequestPart() {
-        impl = nullptr;
+        mesh = nullptr;
         name = "";
         handle = Handle();
     }

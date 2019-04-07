@@ -11,11 +11,13 @@ struct MeshRequest;
 namespace Engine {
     namespace epriv {
         class  MeshCollisionFactory;
+        class  MeshCollisionFactory;
         class  MeshLoader;
         class MeshImpl {
             friend class  ::Mesh;
             friend struct ::MeshRequest;
             friend class  ::Engine::epriv::MeshLoader;
+            friend class  ::Engine::epriv::MeshCollisionFactory;
             private:
                 VertexData*                    m_VertexData;
                 epriv::MeshCollisionFactory*   m_CollisionFactory;
