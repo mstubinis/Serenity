@@ -84,6 +84,11 @@ void ResourceManifest::init(){
 
     Engine::epriv::threading::waitForAll();
 
+    //PlanetMesh = Resources::loadMeshAsync("data/Models/planet.objcc").at(0);
+    //StarbaseMesh = Resources::loadMeshAsync("data/Models/starbase.objcc").at(0); //6950 meters in height (6.95 km)
+    //DefiantMesh = Resources::loadMeshAsync("data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)
+    //Engine::epriv::threading::waitForAll();
+
     StarbaseMaterial = Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
     StarMaterial = Resources::addMaterial("Star","data/Textures/Planets/Sun.dds","","","");
     ((Material*)StarMaterial.get())->setShadeless(true);

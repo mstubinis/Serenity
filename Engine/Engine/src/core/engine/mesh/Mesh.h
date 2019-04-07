@@ -69,7 +69,7 @@ class Mesh final: public BindableResource, public EventObserver{
         static Mesh *FontPlane, *Plane, *Cube; //loaded in renderer
 
         Mesh(Engine::epriv::MeshImportedData&, const std::string& name, float threshold = 0.0005f);
-        Mesh(VertexData*, const std::string& name, float threshold = 0.0005f);
+        Mesh(VertexData*, const std::string& name, bool async = false, float threshold = 0.0005f);
         Mesh(std::string name,float width, float height,float threshold); //plane
         Mesh(std::string fileOrData, bool notMemory = true,float threshold = 0.0005f,bool loadNow = true); //file or data
         ~Mesh();

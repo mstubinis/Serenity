@@ -86,10 +86,10 @@ void HUD::render(){
             auto& crosshairTexture = *crosshair.getComponent(MaterialComponentType::Diffuse)->texture();
             const glm::vec4& color = glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f);
 
-            crosshairTexture.render(boxPos.topLeft, color, 0.0f);
-            crosshairTexture.render(boxPos.topRight, color, glm::radians(270.0f));
-            crosshairTexture.render(boxPos.bottomLeft, color, glm::radians(90.0f));
-            crosshairTexture.render(boxPos.bottomRight, color, glm::radians(180.0f));
+            crosshairTexture.render(boxPos.topLeft, color, glm::radians(270.0f));
+            crosshairTexture.render(boxPos.topRight, color, glm::radians(180.0f));
+            crosshairTexture.render(boxPos.bottomLeft, color, 0.0f);
+            crosshairTexture.render(boxPos.bottomRight, color, glm::radians(90.0f));
 
             //unsigned long long distanceInKm = (target.getDistanceLL(player) / 10);
             string stringRepresentation = "";

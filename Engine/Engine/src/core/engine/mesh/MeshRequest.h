@@ -29,6 +29,7 @@ struct MeshRequest final {
     float                          threshold;
     std::string                    fileOrData;
     std::vector<MeshRequestPart>   parts;
+    bool                           async;
 
     MeshRequest();
     MeshRequest(const std::string& _filenameOrData,float _threshold);

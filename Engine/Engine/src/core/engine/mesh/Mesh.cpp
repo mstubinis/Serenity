@@ -249,18 +249,19 @@ void Mesh::finalize_vertex_data(epriv::MeshImportedData& data) {
 
 
 
-Mesh::Mesh(VertexData* data, const std::string& name, float threshold):BindableResource(name) {
+Mesh::Mesh(VertexData* data, const std::string& name, bool async, float threshold):BindableResource(name) {
     m_File = "";
     m_Skeleton = nullptr;
     m_VertexData = data;
     m_CollisionFactory = nullptr;
     m_threshold = threshold;
 
-    calculate_radius(*m_VertexData);
-    m_CollisionFactory = new epriv::MeshCollisionFactory(*this, *m_VertexData);
-
-    load_gpu();
-    EngineResource::load();
+    if (!async) {
+        calculate_radius(*m_VertexData);
+        m_CollisionFactory = new epriv::MeshCollisionFactory(*this, *m_VertexData);
+        load_gpu();
+        EngineResource::load();
+    }
 
     registerEvent(EventType::WindowFullscreenChanged);
     setCustomBindFunctor(epriv::DefaultMeshBindFunctor());

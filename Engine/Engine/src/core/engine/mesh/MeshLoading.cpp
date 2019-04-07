@@ -19,6 +19,7 @@ using namespace Engine;
 using namespace std;
 namespace boostm = boost::math;
 
+
 void epriv::MeshLoader::LoadInternal(MeshSkeleton* skeleton, MeshImportedData& data, const string& file) {
     Assimp::Importer importer;
     const aiScene* AssimpScene = importer.ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);

@@ -16,10 +16,12 @@ using namespace std;
 
 MeshRequest::MeshRequest() {
     fileOrData = "";
+    async = false;
     threshold  = 0.0005f;
 }
 MeshRequest::MeshRequest(const string& _filenameOrData, float _threshold) {
     fileOrData = _filenameOrData;
+    async = false;
     threshold  = _threshold;
 }
 MeshRequest::~MeshRequest() {
@@ -32,16 +34,16 @@ void _request(MeshRequest& meshRequest,bool async) {
         //first determine if the file is data or a file path
         if (boost::filesystem::exists(meshRequest.fileOrData)) {
             const string& extension = boost::filesystem::extension(meshRequest.fileOrData);
-            Assimp::Importer importer;
-
             if (extension != ".objcc") {
+                Assimp::Importer importer;
                 const aiScene* scene = importer.ReadFile(meshRequest.fileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-                if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+                const auto& root = *scene->mRootNode;
+                if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !&root) {
                     return;
                 }
                 unordered_map<string, epriv::BoneNode*> map;
-                epriv::MeshLoader::LoadPopulateGlobalNodes(*scene->mRootNode, map);
-                epriv::MeshLoader::LoadProcessNode(meshRequest.parts, *scene, *scene->mRootNode, map);
+                epriv::MeshLoader::LoadPopulateGlobalNodes(root, map);
+                epriv::MeshLoader::LoadProcessNode(meshRequest.parts, *scene, root, map);
                 for (auto& part : meshRequest.parts) {
                     if (part.mesh) {
                         part.handle = epriv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
@@ -51,9 +53,17 @@ void _request(MeshRequest& meshRequest,bool async) {
                 VertexData* vertexData = epriv::MeshLoader::LoadFrom_OBJCC(meshRequest.fileOrData);
                 MeshRequestPart part;
                 part.name = meshRequest.fileOrData;
-                part.mesh = new Mesh(vertexData, part.name);
+                part.mesh = new Mesh(vertexData, part.name, async);
                 part.handle = epriv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
                 meshRequest.parts.push_back(part);
+            }
+            if (async) {
+                for (const auto& part : meshRequest.parts) {
+                    const auto& reference = std::ref(*part.mesh);
+                    const auto& job = boost::bind(&epriv::InternalMeshPublicInterface::LoadCPU, reference);
+                    const auto& cbk = boost::bind(&epriv::InternalMeshPublicInterface::LoadGPU, reference);
+                    epriv::threading::addJobWithPostCallback(job, cbk);
+                }
             }
         }else{
             //we got either an invalid file or memory data
@@ -66,5 +76,6 @@ void MeshRequest::request() {
     _request(*this, false);
 }
 void MeshRequest::requestAsync() {
+    async = true;
     _request(*this, true);
 }
