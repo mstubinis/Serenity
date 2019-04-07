@@ -4,7 +4,6 @@
 
 #include <core/engine/mesh/VertexData.h>
 #include <core/engine/mesh/MeshIncludes.h>
-#include <core/engine/mesh/MeshImpl.h>
 
 #include "core/engine/BindableResource.h"
 #include "core/engine/events/Engine_EventObject.h"
@@ -48,7 +47,6 @@ class Mesh final: public BindableResource, public EventObserver{
     friend class  ::Engine::epriv::MeshSkeleton;
     friend class  ::Engine::epriv::MeshLoader;
     friend class  ::Engine::epriv::MeshCollisionFactory;
-    friend class  ::Engine::epriv::MeshImpl;
     private:
         VertexData*                            m_VertexData;
         Engine::epriv::MeshCollisionFactory*   m_CollisionFactory;
@@ -70,9 +68,10 @@ class Mesh final: public BindableResource, public EventObserver{
     public:
         static Mesh *FontPlane, *Plane, *Cube; //loaded in renderer
 
-        Mesh(Engine::epriv::MeshImportedData&, const std::string& name, float threshhold = 0.0005f);
-        Mesh(std::string name,float width, float height,float threshhold); //plane
-        Mesh(std::string fileOrData, bool notMemory = true,float threshhold = 0.0005f,bool loadNow = true); //file or data
+        Mesh(Engine::epriv::MeshImportedData&, const std::string& name, float threshold = 0.0005f);
+        Mesh(VertexData*, const std::string& name, float threshold = 0.0005f);
+        Mesh(std::string name,float width, float height,float threshold); //plane
+        Mesh(std::string fileOrData, bool notMemory = true,float threshold = 0.0005f,bool loadNow = true); //file or data
         ~Mesh();
 
         std::unordered_map<std::string, Engine::epriv::AnimationData>& animationData();

@@ -51,7 +51,6 @@
     <ClCompile Include="Engine\src\core\engine\lights\SpotLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\SunLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshCollisionFactory.cpp" />
-    <ClCompile Include="Engine\src\core\engine\mesh\MeshImpl.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshImportedData.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshLoading.cpp" />
@@ -126,7 +125,6 @@
     <ClInclude Include="Engine\src\core\engine\lights\SpotLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\SunLight.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshCollisionFactory.h" />
-    <ClInclude Include="Engine\src\core\engine\mesh\MeshImpl.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshImportedData.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshIncludes.h" />

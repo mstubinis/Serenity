@@ -5,13 +5,13 @@
 #include <vector>
 #include <string>
 #include <core/engine/resources/Handle.h>
-#include <core/engine/mesh/MeshImpl.h>
+#include <core/engine/mesh/Mesh.h>
 
 
 struct MeshRequestPart final {
-    Mesh*                     mesh;
-    Handle                    handle;
-    std::string               name;
+    Mesh*        mesh;
+    Handle       handle;
+    std::string  name;
 
     MeshRequestPart() {
         mesh = nullptr;

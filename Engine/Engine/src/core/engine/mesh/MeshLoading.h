@@ -33,7 +33,6 @@ namespace Engine {
             friend class  ::Mesh;
             friend struct ::MeshRequest;
             friend class  ::Engine::epriv::MeshSkeleton;
-            friend class  ::Engine::epriv::MeshImpl;
             public:
                 static void        LoadInternal(MeshSkeleton* skeleton, MeshImportedData& data, const std::string& file);
                 static void        LoadProcessNode(MeshSkeleton* skeleton, MeshImportedData& data, const aiScene& scene, const aiNode& node, BoneNodeMap& _map);

@@ -1,7 +1,9 @@
 #include <core/engine/mesh/MeshRequest.h>
 #include <core/engine/mesh/Skeleton.h>
-#include <core/engine/mesh/MeshImpl.h>
 #include <core/engine/mesh/MeshLoading.h>
+
+#include <core/engine/Engine.h>
+#include <core/engine/resources/Engine_Resources.h>
 
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
@@ -31,14 +33,28 @@ void _request(MeshRequest& meshRequest,bool async) {
         if (boost::filesystem::exists(meshRequest.fileOrData)) {
             const string& extension = boost::filesystem::extension(meshRequest.fileOrData);
             Assimp::Importer importer;
-            const aiScene* scene = importer.ReadFile(meshRequest.fileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-            if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-                return;
-            }
-            unordered_map<string, epriv::BoneNode*> map;
-            epriv::MeshLoader::LoadPopulateGlobalNodes(*scene->mRootNode, map);
 
-            epriv::MeshLoader::LoadProcessNode(meshRequest.parts, *scene, *scene->mRootNode, map);
+            if (extension != ".objcc") {
+                const aiScene* scene = importer.ReadFile(meshRequest.fileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+                if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+                    return;
+                }
+                unordered_map<string, epriv::BoneNode*> map;
+                epriv::MeshLoader::LoadPopulateGlobalNodes(*scene->mRootNode, map);
+                epriv::MeshLoader::LoadProcessNode(meshRequest.parts, *scene, *scene->mRootNode, map);
+                for (auto& part : meshRequest.parts) {
+                    if (part.mesh) {
+                        part.handle = epriv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
+                    }
+                }
+            }else{
+                VertexData* vertexData = epriv::MeshLoader::LoadFrom_OBJCC(meshRequest.fileOrData);
+                MeshRequestPart part;
+                part.name = meshRequest.fileOrData;
+                part.mesh = new Mesh(vertexData, part.name);
+                part.handle = epriv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
+                meshRequest.parts.push_back(part);
+            }
         }else{
             //we got either an invalid file or memory data
         }

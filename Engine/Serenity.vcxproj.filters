@@ -293,9 +293,6 @@
     <ClCompile Include="Engine\src\core\engine\mesh\MeshImportedData.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\mesh\MeshImpl.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\mesh\MeshCollisionFactory.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
@@ -545,9 +542,6 @@
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\mesh\MeshImportedData.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\mesh\MeshImpl.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\mesh\MeshCollisionFactory.h">

@@ -193,10 +193,8 @@ void epriv::MeshLoader::LoadProcessNode(vector<MeshRequestPart>& _parts, const a
     for (uint i = 0; i < node.mNumMeshes; ++i) {
         const aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
 
-
-        MeshRequestPart part = MeshRequestPart();
-
-        epriv::MeshImportedData data;
+        MeshRequestPart part;
+        MeshImportedData data;
 
         #pragma region vertices
         if (aimesh.mVertices) { data.points.reserve(aimesh.mNumVertices); }
@@ -250,7 +248,7 @@ void epriv::MeshLoader::LoadProcessNode(vector<MeshRequestPart>& _parts, const a
 
         #pragma region Skeleton
         if (aimesh.mNumBones > 0) {
-            part.mesh->m_Skeleton = new epriv::MeshSkeleton();
+            part.mesh->m_Skeleton = new MeshSkeleton();
             auto& skeleton = *part.mesh->m_Skeleton;
 
             #pragma region IndividualBones
@@ -324,12 +322,9 @@ void epriv::MeshLoader::LoadProcessNode(vector<MeshRequestPart>& _parts, const a
         }
         #pragma endregion
         MeshLoader::CalculateTBNAssimp(data);
-
-        part.name = aimesh.mName.C_Str();
-
+        part.name = string(scene.mRootNode->mName.C_Str()) + string(aimesh.mName.C_Str());
         Mesh* mesh = new Mesh(data, part.name);
         part.mesh = mesh;
-        //TODO: add more here
         
         _parts.push_back(part);
     }
