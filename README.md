@@ -1,5 +1,5 @@
 # Serenity
-A game engine focused on producing stunning visual effects and supporting custom user made shaders.
+A game engine focused on producing stunning visual effects and supporting custom user made rendering and logic code.
 
 Note
 ----
@@ -25,6 +25,6 @@ Installing & Building - Visual Studio
   - Expand the Linker. Select General.
   - Modify the Additional Library Directories to include your directory to the boost libraries.
 
-6. All other dependencies are included in the dependencies folder and properly linked to the visual studio project. The other dependencies are SFML, GLEW, Bullet, Assimp, and GLM.
+6. All other dependencies are included in the dependencies folder and properly linked to the visual studio project. The other dependencies are SFML, GLEW, Bullet Physics, Assimp, and GLM.
 
 7. Build. In Visual Studio, hit Ctrl-F5. Debug builds will be in the Debug folder, Release builds will be in the Release folder.
