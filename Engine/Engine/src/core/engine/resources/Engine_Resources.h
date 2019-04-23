@@ -81,10 +81,6 @@ namespace Engine{
         std::vector<Handle> loadMesh(std::string fileOrData,  float threshhold = 0.0005f);
         std::vector<Handle> loadMeshAsync(std::string fileOrData,  float threshhold = 0.0005f);
 
-        Handle addMesh(std::string file, bool fromFile = true,float threshhold = 0.0005f);
-        Handle addMesh(std::string name, float w, float h,float threshhold = 0.0005f);
-        Handle addMeshAsync(std::string file,bool fromFile = true,float threshhold = 0.0005f);
-
         Handle addTexture(std::string file,ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,bool mipmaps = false);
 
         Handle addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "");

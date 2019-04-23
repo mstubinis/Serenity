@@ -26,10 +26,15 @@ struct Scene::impl final {
     SkyboxEmpty*                      m_Skybox;
     Camera*                           m_ActiveCamera;
     vector<uint>                      m_Entities;
-    vector<SunLight*>                 m_Lights;
     glm::vec3                         m_BackgroundColor;
     uint                              m_ID;
     vector<vector<RenderPipeline*>>   m_Pipelines;
+
+    vector<SunLight*>                 m_SunLights;
+    vector<DirectionalLight*>         m_DirectionalLights;
+    vector<PointLight*>               m_PointLights;
+    vector<SpotLight*>                m_SpotLights;
+    vector<RodLight*>                 m_RodLights;
 
     ECS<Entity>                       m_ECS;
     void _init(Scene& super,string& _name) {
@@ -169,7 +174,13 @@ struct Scene::impl final {
 vector<Engine::epriv::EntityPOD>& InternalScenePublicInterface::GetEntities(Scene& _scene) {
     return _scene.m_i->m_ECS.entityPool._pool;
 }
-vector<SunLight*>& InternalScenePublicInterface::GetLights(Scene& _scene) { return _scene.m_i->m_Lights; }
+
+vector<SunLight*>& InternalScenePublicInterface::GetSunLights(Scene& _scene) { return _scene.m_i->m_SunLights; }
+vector<DirectionalLight*>& InternalScenePublicInterface::GetDirectionalLights(Scene& _scene) { return _scene.m_i->m_DirectionalLights; }
+vector<PointLight*>& InternalScenePublicInterface::GetPointLights(Scene& _scene) { return _scene.m_i->m_PointLights; }
+vector<SpotLight*>& InternalScenePublicInterface::GetSpotLights(Scene& _scene) { return _scene.m_i->m_SpotLights; }
+vector<RodLight*>& InternalScenePublicInterface::GetRodLights(Scene& _scene) { return _scene.m_i->m_RodLights; }
+
 
 void InternalScenePublicInterface::RenderGeometryOpaque(Scene& _scene,Camera& _camera) {
     for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 

@@ -16,6 +16,7 @@ class HUD final{
         glm::vec3 m_Color;
         Handle m_Font;
         glm::vec2 m_WarpIndicatorSize;
+        bool m_Active;
     public:
         HUD();
         ~HUD();

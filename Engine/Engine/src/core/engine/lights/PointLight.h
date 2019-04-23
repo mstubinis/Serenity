@@ -5,6 +5,7 @@
 #include "core/engine/lights/SunLight.h"
 
 class PointLight : public SunLight {
+    friend class ::Engine::epriv::RenderManager;
     protected:
         float                    m_C;
         float                    m_L;
@@ -14,6 +15,7 @@ class PointLight : public SunLight {
         virtual float            calculateCullingRadius();
     public:
         PointLight(glm::vec3 = glm::vec3(0.0f), Scene* = nullptr);
+        PointLight(LightType::Type, glm::vec3 = glm::vec3(0.0f), Scene* = nullptr);
         virtual ~PointLight();
 
         void setConstant(float constant);
@@ -27,8 +29,6 @@ class PointLight : public SunLight {
         float getConstant();
         float getLinear();
         float getExponent();
-
-        virtual void lighten();
 };
 
 #endif

@@ -5,6 +5,7 @@
 #include "core/engine/lights/PointLight.h"
 
 class SpotLight : public PointLight {
+    friend class ::Engine::epriv::RenderManager;
     private:
         float   m_Cutoff;
         float   m_OuterCutoff;
@@ -12,7 +13,6 @@ class SpotLight : public PointLight {
         SpotLight(glm::vec3 = glm::vec3(0.0f), glm::vec3 = glm::vec3(0.0f, 0.0f, -1.0f), float = 11.0f, float = 13.0f, Scene* = nullptr);
         virtual ~SpotLight();
 
-        void lighten();
         void setCutoff(float);
         void setCutoffOuter(float);
 };

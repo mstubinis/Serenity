@@ -63,7 +63,7 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     glm::mat4 rot = glm::mat4(1.0f);
     rot *= glm::mat4_cast(orientation);
     
-    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetLights(*Resources::getCurrentScene())[0]->position();
+    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetSunLights(*Resources::getCurrentScene())[0]->position();
     glm::vec3 lightDir = glm::normalize(lightPos - pos);
     float Km = 0.0025f;
     float Kr = 0.0015f;
@@ -175,7 +175,7 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     glm::mat4 rot = glm::mat4(1.0f);
     rot *= glm::mat4_cast(orientation);
     
-    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetLights(*Resources::getCurrentScene())[0]->position();
+    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetSunLights(*Resources::getCurrentScene())[0]->position();
     glm::vec3 lightDir = glm::normalize(lightPos - pos);
     float Km = 0.0025f;
     float Kr = 0.0015f;
@@ -253,7 +253,7 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 
     int numberSamples = 1;
     
-    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetLights(*Resources::getCurrentScene())[0]->position();
+    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetSunLights(*Resources::getCurrentScene())[0]->position();
     glm::vec3 lightDir = glm::normalize(lightPos - thisPos);
     float Km = 0.0025f;
     float Kr = 0.0015f;

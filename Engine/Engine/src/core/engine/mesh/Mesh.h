@@ -29,6 +29,7 @@ namespace Engine{
         struct DefaultMeshUnbindFunctor;
         struct BoneNode;
         class  AnimationData;
+        struct InternalMeshRequestPublicInterface;
         struct InternalMeshPublicInterface final {
             static void LoadCPU(Mesh&);
             static void LoadGPU(Mesh&);
@@ -39,8 +40,10 @@ namespace Engine{
         };
     };
 };
+
 class Mesh final: public BindableResource, public EventObserver{
     friend struct ::Engine::epriv::InternalMeshPublicInterface;
+    friend struct ::Engine::epriv::InternalMeshRequestPublicInterface;
     friend struct ::Engine::epriv::DefaultMeshBindFunctor;
     friend struct ::Engine::epriv::DefaultMeshUnbindFunctor;
     friend class  ::Engine::epriv::AnimationData;
@@ -56,6 +59,8 @@ class Mesh final: public BindableResource, public EventObserver{
         float                                  m_radius;
         float                                  m_threshold;
 
+        void init_blank();
+
         void unload_cpu();
         void unload_gpu();
 
@@ -63,15 +68,15 @@ class Mesh final: public BindableResource, public EventObserver{
         void load_gpu();
 
         void finalize_vertex_data(Engine::epriv::MeshImportedData& data);
-        void triangulate_component_indices(Engine::epriv::MeshImportedData& data, std::vector<uint>& point_indices, std::vector<uint>& uv_indices, std::vector<uint>& normal_indices, unsigned char flags);
-        void calculate_radius(VertexData& vertexData);
+        void triangulate_component_indices(Engine::epriv::MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags);
+        void calculate_radius();
     public:
         static Mesh *FontPlane, *Plane, *Cube; //loaded in renderer
 
-        Mesh(Engine::epriv::MeshImportedData&, const std::string& name, float threshold = 0.0005f);
-        Mesh(VertexData*, const std::string& name, bool async = false, float threshold = 0.0005f);
+        Mesh();
+        Mesh(VertexData*, const std::string& name, float threshold = 0.0005f);
         Mesh(std::string name,float width, float height,float threshold); //plane
-        Mesh(std::string fileOrData, bool notMemory = true,float threshold = 0.0005f,bool loadNow = true); //file or data
+        Mesh(std::string fileOrData, float threshold = 0.0005f); //file or data
         ~Mesh();
 
         std::unordered_map<std::string, Engine::epriv::AnimationData>& animationData();

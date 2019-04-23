@@ -1903,15 +1903,15 @@ epriv::EShaders::lighting_frag +=
     "    vec3 LightPosition = vec3(LightDataC.yzw);\n"
     "    vec3 LightDirection = normalize(vec3(LightDataA.w,LightDataB.x,LightDataB.y));\n"
     "\n"
-    "    if(LightDataD.w == 0.0){\n"
+    "    if(LightDataD.w == 0.0){\n"       //sun
     "        lightCalculation = CalcLightInternal(normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 1.0){\n"
+    "    }else if(LightDataD.w == 1.0){\n" //point
     "        lightCalculation = CalcPointLight(LightPosition,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 2.0){\n"
+    "    }else if(LightDataD.w == 2.0){\n" //directional
     "        lightCalculation = CalcLightInternal(LightDirection,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 3.0){\n"
+    "    }else if(LightDataD.w == 3.0){\n" //spot
     "        lightCalculation = CalcSpotLight(LightDirection,LightPosition,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 4.0){\n"
+    "    }else if(LightDataD.w == 4.0){\n" //rod
     "        lightCalculation = CalcRodLight(vec3(LightDataA.w,LightDataB.xy),LightDataC.yzw,PxlPosition,PxlNormal,uv);\n"
     "    }\n"
     "    gl_FragData[0].rgb = lightCalculation;\n"

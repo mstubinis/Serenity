@@ -5,11 +5,10 @@
 #include "core/engine/lights/SunLight.h"
 
 class DirectionalLight : public SunLight {
+    friend class ::Engine::epriv::RenderManager;
     public:
         DirectionalLight(glm::vec3 = glm::vec3(0.0f, 0.0f, -1.0f), Scene* = nullptr);
         virtual ~DirectionalLight();
-
-        virtual void lighten();
 };
 
 #endif

@@ -25,6 +25,7 @@ HUD::HUD(){
     Engine::Math::setColor(m_Color,255,255,0);
     m_TargetIterator = 0;
     m_WarpIndicatorSize = glm::vec2(30,115);
+    m_Active = true;
 }
 HUD::~HUD(){
 }
@@ -34,6 +35,12 @@ void HUD::setColor(glm::vec3 c){ m_Color = c; }
 
 uint _count = 0;
 void HUD::update(const float& dt){
+
+    if (Engine::isKeyDownOnce(KeyboardKey::LeftAlt, KeyboardKey::Z)) {
+        m_Active = !m_Active;
+    }
+
+
     if(Engine::isKeyDownOnce(KeyboardKey::Comma)){
         SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
         const unordered_map<string,Planet*>& planets = scene->getPlanets();
@@ -63,6 +70,8 @@ void HUD::update(const float& dt){
     }
 }
 void HUD::render(){
+    if (!m_Active) return;
+
     //render hud stuff
     SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
     Ship* player = scene->getPlayer();
@@ -108,37 +117,37 @@ void HUD::render(){
             uint textureSizeOffset = (crosshairArrowTexture.width() / 2) + 4;
             if (pos.y > 2 && pos.y < winSize.y - 2) { //if y is within window bounds
                 if (pos.x < 2) {
-                    angle = 45;
+                    angle = -45;
                     pos.x += textureSizeOffset;
                 }else {
-                    angle = 225;
+                    angle = 135;
                     pos.x -= textureSizeOffset;
                 }
             }else if(pos.y <= 1){ //if y is below the window bounds
                 pos.y += textureSizeOffset;
                 if (pos.x <= 1) { //bottom left corner
-                    angle = 90;
+                    angle = 0;
                     pos.x += textureSizeOffset - 4;
                     pos.y -= 4;
                 }else if (pos.x > winSize.x - 2) { //bottom right corner
-                    angle = 180;
+                    angle = 90;
                     pos.x -= textureSizeOffset - 4;
                     pos.y -= 4;
                 }else { //bottom normal
-                    angle = 135;
+                    angle = 45;
                 }
             }else{ //if y is above the window bounds
                 pos.y -= textureSizeOffset;
                 if (pos.x < 2) { //top left corner
-                    angle = 0;
+                    angle = -90;
                     pos.x += textureSizeOffset - 4;
                     pos.y += 4;
                 }else if (pos.x > winSize.x - 2) { //top right corner
-                    angle = -90;
+                    angle = 180;
                     pos.x -= textureSizeOffset - 4;
                     pos.y += 4;
                 }else { //top normal
-                    angle = -45;
+                    angle = -135;
                 }
             } 
             crosshairArrowTexture.render(glm::vec2(pos.x, pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1.0f),glm::radians(angle));

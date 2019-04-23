@@ -71,6 +71,14 @@ const bool Engine::isKeyDownOnce(KeyboardKey::Key key){
     auto& mgr = *epriv::EventManager::m_EventManager;
     return (res && mgr.m_currentKey == key && (mgr.m_currentKey != mgr.m_previousKey)) ? true : false;
 }
+
+const bool Engine::isKeyDownOnce(KeyboardKey::Key first, KeyboardKey::Key second) {
+    bool resFirst = Engine::isKeyDown(first);
+    bool resSecond = Engine::isKeyDown(second);
+    auto& mgr = *epriv::EventManager::m_EventManager;
+    return ( resFirst && resSecond && mgr.m_currentKey == second && (mgr.m_currentKey != mgr.m_previousKey)) ? true : false;
+}
+
 const bool Engine::isKeyUp(KeyboardKey::Key key){ return !Engine::isKeyDown(key); }
 const bool Engine::isMouseButtonDown(MouseButton::Button button){
     return (!epriv::EventManager::m_EventManager->m_MouseStatus[button]) ? false : true;

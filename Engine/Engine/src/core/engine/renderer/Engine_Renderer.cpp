@@ -1280,13 +1280,13 @@ class epriv::RenderManager::impl final{
                 "f 12 10 16";
             #pragma endregion
 
-            epriv::InternalMeshes::PointLightBounds = new Mesh(pointLightMesh,false,0.0005f);
-            epriv::InternalMeshes::RodLightBounds = new Mesh(rodLightData,false,0.0005f);
-            epriv::InternalMeshes::SpotLightBounds = new Mesh(spotLightData,false,0.0005f);
+            epriv::InternalMeshes::PointLightBounds = new Mesh(pointLightMesh,0.0005f);
+            epriv::InternalMeshes::RodLightBounds = new Mesh(rodLightData,0.0005f);
+            epriv::InternalMeshes::SpotLightBounds = new Mesh(spotLightData,0.0005f);
 
             Mesh::FontPlane = new Mesh("FontPlane",1.0f,1.0f,0.0005f);
             Mesh::Plane = new Mesh("Plane",1.0f,1.0f,0.0005f);
-            Mesh::Cube = new Mesh(cubeMesh,false,0.0005f);
+            Mesh::Cube = new Mesh(cubeMesh,0.0005f);
 
             sf::Image sfImageWhite; sfImageWhite.create(2, 2, sf::Color::White);
             sf::Image sfImageBlack; sfImageBlack.create(2, 2, sf::Color::Black);
@@ -1360,6 +1360,9 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(Mesh::FontPlane);
             SAFE_DELETE(Mesh::Plane);
             SAFE_DELETE(Mesh::Cube);
+
+            SAFE_DELETE(Texture::White);
+            SAFE_DELETE(Texture::Black);
 
             SAFE_DELETE(epriv::InternalShaderPrograms::Deferred);
             SAFE_DELETE(epriv::InternalShaderPrograms::Forward);
@@ -1688,6 +1691,144 @@ class epriv::RenderManager::impl final{
                 }
             }
         }
+        void _renderSunLight(SunLight& s) {
+            if (!s.isActive()) return;
+            auto& body = *s.m_Entity.getComponent<ComponentBody>();
+            glm::vec3 pos = body.position();
+            Renderer::sendUniform4("LightDataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, 0.0f);
+            Renderer::sendUniform4("LightDataC", 0.0f, pos.x, pos.y, pos.z);
+            Renderer::sendUniform4("LightDataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, float(s.m_Type));
+            Renderer::sendUniform1Safe("Type", 0.0f);
+
+            Renderer::renderFullscreenTriangle();
+        }
+        void _renderPointLight(PointLight& p) {
+            if (!p.isActive()) return;
+            Camera& c = *Resources::getCurrentScene()->getActiveCamera();
+            auto& body = *p.m_Entity.getComponent<ComponentBody>();
+            glm::vec3 pos = body.position();
+            if ((!c.sphereIntersectTest(pos, p.m_CullingRadius)) || (c.getDistance(pos) > 1100.0f * p.m_CullingRadius)) //1100.0f is the visibility threshold
+                return;
+            Renderer::sendUniform4("LightDataA", p.m_AmbientIntensity, p.m_DiffuseIntensity, p.m_SpecularIntensity, 0.0f);
+            Renderer::sendUniform4("LightDataB", 0.0f, 0.0f, p.m_C, p.m_L);
+            Renderer::sendUniform4("LightDataC", p.m_E, pos.x, pos.y, pos.z);
+            Renderer::sendUniform4("LightDataD", p.m_Color.x, p.m_Color.y, p.m_Color.z, float(p.m_Type));
+            Renderer::sendUniform4Safe("LightDataE", 0.0f, 0.0f, float(p.m_AttenuationModel), 0.0f);
+            Renderer::sendUniform1Safe("Type", 1.0f);
+
+            glm::vec3 camPos = c.getPosition();
+            glm::mat4 model = body.modelMatrix();
+            glm::mat4 vp = c.getViewProjection();
+
+            Renderer::sendUniformMatrix4("Model", model);
+            Renderer::sendUniformMatrix4("VP", vp);
+
+            Renderer::GLEnable(GLState::DEPTH_TEST);
+            if (glm::distance(c.getPosition(), pos) <= p.m_CullingRadius) { //inside the light volume
+                Renderer::Settings::cullFace(GL_FRONT);
+                Renderer::setDepthFunc(DepthFunc::GEqual);
+            }
+            auto& pointLightMesh = *epriv::InternalMeshes::PointLightBounds;
+
+            pointLightMesh.bind();
+            pointLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
+            pointLightMesh.unbind();
+            Renderer::Settings::cullFace(GL_BACK);
+            Renderer::setDepthFunc(DepthFunc::LEqual);
+            Renderer::GLDisable(GLState::DEPTH_TEST);
+        }
+        void _renderDirectionalLight(DirectionalLight& d) {
+            if (!d.isActive()) return;
+            auto& body = *d.m_Entity.getComponent<ComponentBody>();
+            glm::vec3 _forward = body.forward();
+            Renderer::sendUniform4("LightDataA", d.m_AmbientIntensity, d.m_DiffuseIntensity, d.m_SpecularIntensity, _forward.x);
+            Renderer::sendUniform4("LightDataB", _forward.y, _forward.z, 0.0f, 0.0f);
+            Renderer::sendUniform4("LightDataD", d.m_Color.x, d.m_Color.y, d.m_Color.z, float(d.m_Type));
+            Renderer::sendUniform1Safe("Type", 0.0f);
+            Renderer::renderFullscreenTriangle();
+        }
+        void _renderSpotLight(SpotLight& s) {
+            if (!s.isActive()) return;
+            Camera& c = *Resources::getCurrentScene()->getActiveCamera();
+            auto& body = *s.m_Entity.getComponent<ComponentBody>();
+            glm::vec3 pos = body.position();
+            glm::vec3 _forward = body.forward();
+            if (!c.sphereIntersectTest(pos, s.m_CullingRadius) || (c.getDistance(pos) > 1100.0f * s.m_CullingRadius))
+                return;
+            Renderer::sendUniform4("LightDataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, _forward.x);
+            Renderer::sendUniform4("LightDataB", _forward.y, _forward.z, s.m_C, s.m_L);
+            Renderer::sendUniform4("LightDataC", s.m_E, pos.x, pos.y, pos.z);
+            Renderer::sendUniform4("LightDataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, float(s.m_Type));
+            Renderer::sendUniform4Safe("LightDataE", s.m_Cutoff, s.m_OuterCutoff, float(s.m_AttenuationModel), 0.0f);
+            Renderer::sendUniform2Safe("VertexShaderData", s.m_OuterCutoff, s.m_CullingRadius);
+            Renderer::sendUniform1Safe("Type", 2.0f);
+
+            glm::vec3 camPos = c.getPosition();
+            glm::mat4 model = body.modelMatrix();
+            glm::mat4 vp = c.getViewProjection();
+
+            Renderer::sendUniformMatrix4("Model", model);
+            Renderer::sendUniformMatrix4("VP", vp);
+
+            Renderer::GLEnable(GLState::DEPTH_TEST);
+            if (glm::distance(c.getPosition(), pos) <= s.m_CullingRadius) { //inside the light volume                                                 
+                Renderer::Settings::cullFace(GL_FRONT);
+                Renderer::setDepthFunc(DepthFunc::GEqual);
+            }
+            auto& spotLightMesh = *epriv::InternalMeshes::SpotLightBounds;
+
+            spotLightMesh.bind();
+            spotLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
+            spotLightMesh.unbind();
+            Renderer::Settings::cullFace(GL_BACK);
+            Renderer::setDepthFunc(DepthFunc::LEqual);
+
+            Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
+            Renderer::GLDisable(GLState::DEPTH_TEST);
+        }
+        void _renderRodLight(RodLight& r) {
+            if (!r.isActive()) return;
+            Camera& c = *Resources::getCurrentScene()->getActiveCamera();
+            auto& body = *r.m_Entity.getComponent<ComponentBody>();
+            glm::vec3 pos = body.position();
+            float cullingDistance = r.m_RodLength + (r.m_CullingRadius * 2.0f);
+            if (!c.sphereIntersectTest(pos, cullingDistance) || (c.getDistance(pos) > 1100.0f * cullingDistance))
+                return;
+            float half = r.m_RodLength / 2.0f;
+            glm::vec3 firstEndPt = pos + (body.forward() * half);
+            glm::vec3 secndEndPt = pos - (body.forward() * half);
+            Renderer::sendUniform4("LightDataA", r.m_AmbientIntensity, r.m_DiffuseIntensity, r.m_SpecularIntensity, firstEndPt.x);
+            Renderer::sendUniform4("LightDataB", firstEndPt.y, firstEndPt.z, r.m_C, r.m_L);
+            Renderer::sendUniform4("LightDataC", r.m_E, secndEndPt.x, secndEndPt.y, secndEndPt.z);
+            Renderer::sendUniform4("LightDataD", r.m_Color.x, r.m_Color.y, r.m_Color.z, float(r.m_Type));
+            Renderer::sendUniform4Safe("LightDataE", r.m_RodLength, 0.0f, float(r.m_AttenuationModel), 0.0f);
+            Renderer::sendUniform1Safe("Type", 1.0f);
+
+            glm::vec3 camPos = c.getPosition();
+            glm::mat4 model = body.modelMatrix();
+            glm::mat4 vp = c.getViewProjection();
+
+            Renderer::sendUniformMatrix4("Model", model);
+            Renderer::sendUniformMatrix4("VP", vp);
+
+            Renderer::GLEnable(GLState::DEPTH_TEST);
+            if (glm::distance(c.getPosition(), pos) <= cullingDistance) {
+                Renderer::Settings::cullFace(GL_FRONT);
+                Renderer::setDepthFunc(DepthFunc::GEqual);
+            }
+            auto& rodLightMesh = *epriv::InternalMeshes::RodLightBounds;
+
+            rodLightMesh.bind();
+            rodLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
+            rodLightMesh.unbind();
+            Renderer::Settings::cullFace(GL_BACK);
+            Renderer::setDepthFunc(DepthFunc::LEqual);
+            Renderer::GLDisable(GLState::DEPTH_TEST);
+
+            Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
+        }
+
+
         void _passGeometry(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, Entity* ignore){
             Scene& scene = *Resources::getCurrentScene();
             const glm::vec3& clear = scene.getBackgroundColor();
@@ -1767,9 +1908,25 @@ class epriv::RenderManager::impl final{
             sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
             sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 4);
 
-            for (auto& light: epriv::InternalScenePublicInterface::GetLights(s)){
-                light->lighten();
+            for (const auto& light: InternalScenePublicInterface::GetPointLights(s)){
+                _renderPointLight(*light);
             }
+            for (const auto& light : InternalScenePublicInterface::GetSpotLights(s)) {
+                _renderSpotLight(*light);
+            }
+            for (const auto& light : InternalScenePublicInterface::GetRodLights(s)) {
+                _renderRodLight(*light);
+            }
+            for (const auto& light : InternalScenePublicInterface::GetSunLights(s)) {
+                _renderSunLight(*light);
+            }
+            for (const auto& light : InternalScenePublicInterface::GetDirectionalLights(s)) {
+                _renderDirectionalLight(*light);
+            }
+
+
+
+
             if(mainRenderFunc){
                 //do GI here. (only doing GI during the main render pass, not during light probes
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingGI]->bind();
@@ -2185,7 +2342,7 @@ class epriv::RenderManager::impl final{
             glBlendFunc(GL_ONE, GL_ONE);
 
             //this needs to be cleaned up
-            if(lighting && epriv::InternalScenePublicInterface::GetLights(s).size() > 0){
+            if(lighting){
                 gbuffer.start(GBufferType::Lighting,"RGB");
                 Settings::clear(true,false,false);//this is needed for godrays 0,0,0,0
                 _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
@@ -2594,8 +2751,22 @@ void Renderer::renderTexture(Texture& texture, const glm::vec2& pos, const glm::
 void Renderer::renderText(const string& text,Font& font, const glm::vec2& pos, const glm::vec4& color, float angle, const glm::vec2& scl, float depth){
     font.renderText(text,pos,color,angle,scl,depth);
 }
-void Renderer::renderFullscreenQuad(uint w, uint h, uint startX, uint startY){ renderManagerImpl->_renderFullscreenQuad(w,h,startX,startY); }
-void Renderer::renderFullscreenTriangle(uint w,uint h, uint startX, uint startY){ renderManagerImpl->_renderFullscreenTriangle(w,h,startX,startY); }
+void Renderer::renderFullscreenQuad(uint w, uint h, uint startX, uint startY){ 
+    renderManagerImpl->_renderFullscreenQuad(w,h,startX,startY); 
+}
+void Renderer::renderFullscreenTriangle(uint w,uint h, uint startX, uint startY){ 
+    renderManagerImpl->_renderFullscreenTriangle(w,h,startX,startY); 
+}
+
+void Renderer::renderFullscreenQuad() {
+    const auto& size = Resources::getWindowSize();
+    renderManagerImpl->_renderFullscreenQuad(size.x, size.y, 0, 0);
+}
+void Renderer::renderFullscreenTriangle() {
+    const auto& size = Resources::getWindowSize();
+    renderManagerImpl->_renderFullscreenTriangle(size.x, size.y, 0, 0);
+}
+
 inline const GLint Renderer::getUniformLoc(const char* location){
     auto& m = renderManager->glSM.current_bound_shader_program->uniforms(); if(!m.count(location)) return -1; return m.at(location);
 }

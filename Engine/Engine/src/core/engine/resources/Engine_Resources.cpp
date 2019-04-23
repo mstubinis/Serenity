@@ -108,26 +108,9 @@ Material* Resources::getMaterial(Handle& h){ Material* p; resourceManager->m_Res
 void Resources::getShaderProgram(Handle& h,ShaderP*& p){ resourceManager->m_Resources->getAs(h,p); }
 ShaderP* Resources::getShaderProgram(Handle& h){ ShaderP* p; resourceManager->m_Resources->getAs(h,p); return p; }
 
-
 Handle Resources::addFont(string filename){
     return resourceManager->m_Resources->add(new Font(filename),ResourceType::Font);
 }
-Handle Resources::addMesh(string f, bool b,float threshhold){
-    return resourceManager->m_Resources->add(new Mesh(f,b,threshhold),ResourceType::Mesh);
-}
-Handle Resources::addMesh(string n,float w,float h,float threshhold){
-    return resourceManager->m_Resources->add(new Mesh(n,w,h,threshhold),ResourceType::Mesh);
-}
-Handle Resources::addMeshAsync(string f, bool b,float threshhold){
-    Mesh* mesh = new Mesh(f,b,threshhold,false);
-    auto ref = std::ref(*mesh);
-    auto job = boost::bind(&epriv::InternalMeshPublicInterface::LoadCPU, ref);
-    auto cbk = boost::bind(&epriv::InternalMeshPublicInterface::LoadGPU, ref);
-    epriv::threading::addJobWithPostCallback(job,cbk);
-    return resourceManager->m_Resources->add(mesh, ResourceType::Mesh);
-}
-
-
 
 
 vector<Handle> Resources::loadMesh(string fileOrData, float threshhold) {
@@ -140,10 +123,10 @@ vector<Handle> Resources::loadMesh(string fileOrData, float threshhold) {
     return handles;
 }
 vector<Handle> Resources::loadMeshAsync(string fileOrData, float threshhold) {
-    MeshRequest request = MeshRequest(fileOrData, threshhold);
-    request.requestAsync();
+    MeshRequest* request = new MeshRequest(fileOrData, threshhold); //to extend the lifetime to the threads
+    request->requestAsync();
     vector<Handle> handles;
-    for (auto& part : request.parts) {
+    for (auto& part : request->parts) {
         handles.push_back(part.handle);
     }
     return handles;

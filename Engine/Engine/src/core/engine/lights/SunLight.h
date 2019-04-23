@@ -5,7 +5,14 @@
 #include "core/Camera.h"
 #include "core/engine/lights/LightIncludes.h"
 
+namespace Engine {
+    namespace epriv {
+        class RenderManager;
+    };
+};
+
 class SunLight : public EntityWrapper {
+    friend class ::Engine::epriv::RenderManager;
     protected:
         bool               m_Active;
         glm::vec4          m_Color;
@@ -17,7 +24,6 @@ class SunLight : public EntityWrapper {
         SunLight(glm::vec3 = glm::vec3(0.0f), LightType::Type = LightType::Sun, Scene* = nullptr);
         virtual ~SunLight();
 
-        virtual void lighten();
         float getAmbientIntensity();     void setAmbientIntensity(float a);
         float getDiffuseIntensity();     void setDiffuseIntensity(float d);
         float getSpecularIntensity();    void setSpecularIntensity(float s);

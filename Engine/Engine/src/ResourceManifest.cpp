@@ -63,31 +63,26 @@ void ResourceManifest::init(){
     Handle groundFromSpaceFrag = Resources::addShader("data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag);
 
-    TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",true,0.0f);
+    TestMesh = Resources::loadMeshAsync("data/Models/1911.fbx",0.0f).at(0);
 
-    PlanetMesh = Resources::addMeshAsync("data/Models/planet.objcc");
-    DefiantMesh = Resources::addMeshAsync("data/Models/defiant.objcc"); //220 metres long (0.22 km)
-    StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.objcc"); //6950 meters in height (6.95 km)
-    RingMesh = Resources::addMeshAsync("data/Models/ring.objcc");
-    DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.objcc"); 
-    LeviathanMesh = Resources::addMeshAsync("data/Models/leviathan.objcc");
+    PlanetMesh = Resources::loadMeshAsync("data/Models/planet.objcc").at(0);
+    DefiantMesh = Resources::loadMeshAsync("data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)
+    StarbaseMesh = Resources::loadMeshAsync("data/Models/starbase.objcc").at(0); //6950 meters in height (6.95 km)
+    RingMesh = Resources::loadMeshAsync("data/Models/ring.objcc").at(0);
+    DreadnaughtMesh = Resources::loadMeshAsync("data/Models/dreadnaught.objcc").at(0);
+    LeviathanMesh = Resources::loadMeshAsync("data/Models/leviathan.objcc").at(0);
     
-    AkiraMesh = Resources::addMeshAsync("data/Models/akira.objcc");
-    MirandaMesh = Resources::addMeshAsync("data/Models/miranda.objcc");
-    IntrepidMesh = Resources::addMeshAsync("data/Models/intrepid.objcc");
-    NorwayMesh = Resources::addMeshAsync("data/Models/norway.objcc");
-    VenerexMesh = Resources::addMeshAsync("data/Models/venerex.objcc");
-    OberthMesh = Resources::addMeshAsync("data/Models/oberth.objcc");
+    AkiraMesh = Resources::loadMeshAsync("data/Models/akira.objcc").at(0);
+    MirandaMesh = Resources::loadMeshAsync("data/Models/miranda.objcc").at(0);
+    IntrepidMesh = Resources::loadMeshAsync("data/Models/intrepid.objcc").at(0);
+    NorwayMesh = Resources::loadMeshAsync("data/Models/norway.objcc").at(0);
+    VenerexMesh = Resources::loadMeshAsync("data/Models/venerex.objcc").at(0);
+    OberthMesh = Resources::loadMeshAsync("data/Models/oberth.objcc").at(0);
     
-    CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.objcc");
-    CapsuleRibbonMesh = Resources::addMeshAsync("data/Models/capsuleRibbon.objcc");
+    CapsuleTunnelMesh = Resources::loadMeshAsync("data/Models/capsuleTunnel.objcc").at(0);
+    CapsuleRibbonMesh = Resources::loadMeshAsync("data/Models/capsuleRibbon.objcc").at(0);
 
     Engine::epriv::threading::waitForAll();
-
-    //PlanetMesh = Resources::loadMeshAsync("data/Models/planet.objcc").at(0);
-    //StarbaseMesh = Resources::loadMeshAsync("data/Models/starbase.objcc").at(0); //6950 meters in height (6.95 km)
-    //DefiantMesh = Resources::loadMeshAsync("data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)
-    //Engine::epriv::threading::waitForAll();
 
     StarbaseMaterial = Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
     StarMaterial = Resources::addMaterial("Star","data/Textures/Planets/Sun.dds","","","");

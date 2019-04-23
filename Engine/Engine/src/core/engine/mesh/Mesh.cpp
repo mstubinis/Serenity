@@ -35,17 +35,13 @@ Mesh* Mesh::Cube      = nullptr;
 namespace Engine {
     namespace epriv {
         struct DefaultMeshBindFunctor final{void operator()(BindableResource* r) const {
-            const auto& m = *(Mesh*)r;
-            m.m_VertexData->bind();
+            const auto& m = *(Mesh*)r; m.m_VertexData->bind();
         }};
         struct DefaultMeshUnbindFunctor final {void operator()(BindableResource* r) const {
-            const auto& m = *(Mesh*)r;
-            m.m_VertexData->unbind();
+            const auto& m = *(Mesh*)r; m.m_VertexData->unbind();
         }};
     };
 };
-
-
 
 void epriv::InternalMeshPublicInterface::LoadCPU( Mesh& _mesh){
     _mesh.load_cpu();
@@ -86,21 +82,17 @@ btCollisionShape* epriv::InternalMeshPublicInterface::BuildCollision(Mesh* _mesh
 }
 
 
-
-
-
-void Mesh::calculate_radius(VertexData& vertexData) {
-    glm::vec3 max = glm::vec3(0.0f);
-    const auto& data = vertexData.getData<glm::vec3>(0);
+void Mesh::calculate_radius() {
+    m_radiusBox = glm::vec3(0.0f);
+    const auto& data = (*m_VertexData).getData<glm::vec3>(0);
     for (auto& _vertex : data) {
         const float x = abs(_vertex.x);
         const float y = abs(_vertex.y);
         const float z = abs(_vertex.z);
-        if (x > max.x)  max.x = x;
-        if (y > max.y)  max.y = y;
-        if (z > max.z)  max.z = z;
+        if (x > m_radiusBox.x)  m_radiusBox.x = x;
+        if (y > m_radiusBox.y)  m_radiusBox.y = y;
+        if (z > m_radiusBox.z)  m_radiusBox.z = z;
     }
-    m_radiusBox = max;
     m_radius = Math::Max(m_radiusBox);
 }
 
@@ -114,41 +106,43 @@ void Mesh::unload_gpu() {
 }
 
 void Mesh::load_cpu() {
+    /*
     if (m_File != "") {
         const string& extension = boost::filesystem::extension(m_File);
         epriv::MeshImportedData d;
 
         if (extension == ".objcc") {
             m_VertexData = epriv::MeshLoader::LoadFrom_OBJCC(m_File);
+            calculate_radius();
         }else{
-            epriv::MeshLoader::LoadInternal(m_Skeleton, d, m_File);
-            epriv::MeshLoader::FinalizeData(*this, d, m_threshold);
+            //epriv::MeshLoader::LoadInternal(m_Skeleton, d, m_File);
+            //epriv::MeshLoader::FinalizeData(*this, d, m_threshold);
             //if (extension == ".obj")
                 //epriv::MeshLoader::SaveTo_OBJCC(*m_VertexData, "data/Models/ribbon.objcc");
         }
     }
-    calculate_radius(*m_VertexData);
-    m_CollisionFactory = new epriv::MeshCollisionFactory(*this, *m_VertexData);
+    m_CollisionFactory = new epriv::MeshCollisionFactory(*this);
+    */
 }
 void Mesh::load_gpu() {
     m_VertexData->finalize(); //transfer vertex data to gpu
     cout << "(Mesh) ";
 }
-void Mesh::triangulate_component_indices(epriv::MeshImportedData& data, vector<uint>& point_indices, vector<uint>& uv_indices, vector<uint>& normal_indices, unsigned char _flags) {
-    for (uint i = 0; i < point_indices.size(); ++i) {
+void Mesh::triangulate_component_indices(epriv::MeshImportedData& data, vector<vector<uint>>& indices, unsigned char _flags) {
+    for (uint i = 0; i < indices[0].size(); ++i) {
         glm::vec3 pos(0.0f);
         glm::vec2 uv(0.0f);
         glm::vec3 norm(1.0f);
         if (_flags && epriv::LOAD_POINTS && data.file_points.size() > 0) {
-            pos = data.file_points[point_indices[i] - 1];
+            pos = data.file_points[indices[0][i] - 1];
             data.points.push_back(pos);
         }
         if (_flags && epriv::LOAD_UVS && data.file_uvs.size() > 0) {
-            uv = data.file_uvs[uv_indices[i] - 1];
+            uv = data.file_uvs[indices[1][i] - 1];
             data.uvs.push_back(uv);
         }
         if (_flags && epriv::LOAD_NORMALS && data.file_normals.size() > 0) {
-            norm = data.file_normals[normal_indices[i] - 1];
+            norm = data.file_normals[indices[2][i] - 1];
             data.normals.push_back(norm);
         }
     }
@@ -171,7 +165,7 @@ void Mesh::finalize_vertex_data(epriv::MeshImportedData& data) {
     vector<vector<GLuint>> normals;
     normals.resize(3);
     if (m_threshold == 0.0f) {
-#pragma region No Threshold
+        #pragma region No Threshold
         normals[0].reserve(data.normals.size());
         normals[1].reserve(data.binormals.size());
         normals[2].reserve(data.tangents.size());
@@ -187,10 +181,9 @@ void Mesh::finalize_vertex_data(epriv::MeshImportedData& data) {
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
         vertexData.setDataIndices(data.indices);
-#pragma endregion
-    }
-    else {
-#pragma region Some Threshold
+        #pragma endregion
+    }else{
+        #pragma region Some Threshold
         vector<ushort> _indices;
         vector<glm::vec3> temp_pos; temp_pos.reserve(data.points.size());
         vector<glm::vec2> temp_uvs; temp_uvs.reserve(data.uvs.size());
@@ -230,7 +223,7 @@ void Mesh::finalize_vertex_data(epriv::MeshImportedData& data) {
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
         vertexData.setDataIndices(_indices);
-#pragma endregion
+        #pragma endregion
     }
     if (m_Skeleton) {
         vector<vector<glm::vec4>> boneStuff;
@@ -248,54 +241,31 @@ void Mesh::finalize_vertex_data(epriv::MeshImportedData& data) {
 }
 
 
+void Mesh::init_blank() {
+    m_File             = "";
+    m_Skeleton         = nullptr;
+    m_VertexData       = nullptr;
+    m_CollisionFactory = nullptr;
+    m_threshold        = 0.0005f;
 
-Mesh::Mesh(VertexData* data, const std::string& name, bool async, float threshold):BindableResource(name) {
-    m_File = "";
-    m_Skeleton = nullptr;
+    registerEvent(EventType::WindowFullscreenChanged);
+    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
+}
+
+Mesh::Mesh() {
+    init_blank();
+}
+Mesh::Mesh(VertexData* data, const string& name, float threshold):BindableResource(name) {
+    init_blank();
     m_VertexData = data;
-    m_CollisionFactory = nullptr;
     m_threshold = threshold;
-
-    if (!async) {
-        calculate_radius(*m_VertexData);
-        m_CollisionFactory = new epriv::MeshCollisionFactory(*this, *m_VertexData);
-        load_gpu();
-        EngineResource::load();
-    }
-
-    registerEvent(EventType::WindowFullscreenChanged);
-    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
-
 }
-Mesh::Mesh(epriv::MeshImportedData& data,const string& name, float threshold):BindableResource(name){
-    m_File = "";
-    m_Skeleton = nullptr;
-    m_VertexData = nullptr;
-    m_CollisionFactory = nullptr;
-    m_threshold = threshold;
-
-    epriv::MeshLoader::FinalizeData(*this, data, threshold);
-    calculate_radius(*m_VertexData);
-    m_CollisionFactory = new epriv::MeshCollisionFactory(*this, *m_VertexData);
-
-    load_gpu();
-    EngineResource::load();
-
-    registerEvent(EventType::WindowFullscreenChanged);
-    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
-}
-
 Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name){
-    m_File = "";
-    m_Skeleton = nullptr;
-    m_VertexData = nullptr;
-    m_CollisionFactory = nullptr;
+    init_blank();
     m_threshold = threshold;
 
-
-    epriv::MeshImportedData d;
+    epriv::MeshImportedData data;
 
     vector<epriv::Vertex> quad; quad.resize(4);
     quad[0].uv = glm::vec2(0.0f, 0.0f);
@@ -308,121 +278,86 @@ Mesh::Mesh(string name,float width, float height,float threshold):BindableResour
     quad[2].position = glm::vec3(width / 2.0f, height / 2.0f, 0.0f);
     quad[3].position = glm::vec3(-width / 2.0f, height / 2.0f, 0.0f);
 
-    //triangle 1 (0, 1, 2)
-    for (uint i = 0; i < 3; ++i) {
-        d.points.emplace_back(quad[i].position);
-        d.uvs.emplace_back(quad[i].uv);
+    for (uint i = 0; i < 3; ++i) {   //triangle 1 (0, 1, 2)
+        data.points.emplace_back(quad[i].position);
+        data.uvs.emplace_back(quad[i].uv);
     }
-    //triangle 2 (2, 3, 0)
-    for (uint i = 0; i < 3; ++i) {
-        d.points.emplace_back(quad[(i + 2) % 4].position);
-        d.uvs.emplace_back(quad[(i + 2) % 4].uv);
+    for (uint i = 0; i < 3; ++i) {   //triangle 2 (2, 3, 0)
+        data.points.emplace_back(quad[(i + 2) % 4].position);
+        data.uvs.emplace_back(quad[(i + 2) % 4].uv);
     }
     m_VertexData = new VertexData(VertexDataFormat::VertexDataNoLighting);
-    epriv::MeshLoader::FinalizeData(*this, d, threshold);
+    epriv::MeshLoader::FinalizeData(*this, data, threshold);
 
     load();
-
-    registerEvent(EventType::WindowFullscreenChanged);
-    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
 }
-Mesh::Mesh(string fileOrData,bool notMemory,float threshold,bool loadNow):BindableResource(fileOrData){
-    if (!notMemory) setName("CustomMesh");
-
-    m_File = "";
-    m_Skeleton = nullptr;
-    m_VertexData = nullptr;
-    m_CollisionFactory = nullptr;
+Mesh::Mesh(string fileOrData,float threshold):BindableResource(""){
+    init_blank();
     m_threshold = threshold;
 
+    setName("Custom Mesh");
+    unsigned char _flags = epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN;
 
-    if (notMemory) {
-        m_File = fileOrData;
-    }else{
-        unsigned char _flags = epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN;
+    epriv::MeshImportedData data;
+    vector<vector<uint>> indices; indices.resize(3);
+    istringstream stream; stream.str(fileOrData);
 
-        epriv::MeshImportedData d;
-        vector<vector<uint>> indices; indices.resize(3);
-        istringstream stream; stream.str(fileOrData);
-
-        //first read in all data
-        for (string line; getline(stream, line, '\n');) {
-            if (line[0] == 'o') {
+    //first read in all data
+    for (string line; getline(stream, line, '\n');) {
+        if (line[0] == 'o') {
+        }
+        else if (line[0] == 'v' && line[1] == ' ') {
+            if (_flags && epriv::LOAD_POINTS) {
+                glm::vec3 p;
+                sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &p.x, &p.y, &p.z);
+                data.file_points.push_back(p);
             }
-            else if (line[0] == 'v' && line[1] == ' ') {
-                if (_flags && epriv::LOAD_POINTS) {
-                    glm::vec3 p;
-                    sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &p.x, &p.y, &p.z);
-                    d.file_points.push_back(p);
+        }else if (line[0] == 'v' && line[1] == 't') {
+            if (_flags && epriv::LOAD_UVS) {
+                glm::vec2 uv;
+                sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
+                uv.y = 1.0f - uv.y;
+                data.file_uvs.push_back(uv);
+            }
+        }else if (line[0] == 'v' && line[1] == 'n') {
+            if (_flags && epriv::LOAD_NORMALS) {
+                glm::vec3 n;
+                sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &n.x, &n.y, &n.z);
+                data.file_normals.push_back(n);
+            }
+        }else if (line[0] == 'f' && line[1] == ' ') {
+            if (_flags && epriv::LOAD_FACES) {
+                glm::uvec3 f1, f2, f3, f4 = glm::uvec3(1);
+                int matches = sscanf(line.substr(2, line.size()).c_str(), "%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f1.x, &f1.y, &f1.z, &f2.x, &f2.y, &f2.z, &f3.x, &f3.y, &f3.z, &f4.x, &f4.y, &f4.z);
+                if (matches < 3) {
+                    matches = sscanf(line.substr(2, line.size()).c_str(), "%d %d %d %d", &f1.x, &f2.x, &f3.x, &f4.x);
                 }
-            }else if (line[0] == 'v' && line[1] == 't') {
-                if (_flags && epriv::LOAD_UVS) {
-                    glm::vec2 uv;
-                    sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
-                    uv.y = 1.0f - uv.y;
-                    d.file_uvs.push_back(uv);
-                }
-            }else if (line[0] == 'v' && line[1] == 'n') {
-                if (_flags && epriv::LOAD_NORMALS) {
-                    glm::vec3 n;
-                    sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &n.x, &n.y, &n.z);
-                    d.file_normals.push_back(n);
-                }
-            }else if (line[0] == 'f' && line[1] == ' ') {
-                if (_flags && epriv::LOAD_FACES) {
-                    glm::uvec3 f1, f2, f3, f4 = glm::uvec3(1);
-                    int matches = sscanf(line.substr(2, line.size()).c_str(), "%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f1.x, &f1.y, &f1.z, &f2.x, &f2.y, &f2.z, &f3.x, &f3.y, &f3.z, &f4.x, &f4.y, &f4.z);
-                    if (matches < 3) {
-                        matches = sscanf(line.substr(2, line.size()).c_str(), "%d %d %d %d", &f1.x, &f2.x, &f3.x, &f4.x);
-                    }
-                    f1 = glm::max(f1, glm::uvec3(1)); f2 = glm::max(f2, glm::uvec3(1)); f3 = glm::max(f3, glm::uvec3(1)); f4 = glm::max(f4, glm::uvec3(1));
-                    if (matches == 3 || matches == 6 || matches == 9) { //triangle
-                        indices[0].push_back(f1.x); indices[0].push_back(f2.x); indices[0].push_back(f3.x);
-                        indices[1].push_back(f1.y); indices[1].push_back(f2.y); indices[1].push_back(f3.y);
-                        indices[2].push_back(f1.z); indices[2].push_back(f2.z); indices[2].push_back(f3.z);
-                    }else if (matches == 4 || matches == 8 || matches == 12) {//quad
-                        indices[0].push_back(f1.x); indices[0].push_back(f2.x); indices[0].push_back(f3.x);
-                        indices[1].push_back(f1.y); indices[1].push_back(f2.y); indices[1].push_back(f3.y);
-                        indices[2].push_back(f1.z); indices[2].push_back(f2.z); indices[2].push_back(f3.z);
+                f1 = glm::max(f1, glm::uvec3(1)); f2 = glm::max(f2, glm::uvec3(1)); f3 = glm::max(f3, glm::uvec3(1)); f4 = glm::max(f4, glm::uvec3(1));
+                if (matches == 3 || matches == 6 || matches == 9) { //triangle
+                    indices[0].push_back(f1.x); indices[0].push_back(f2.x); indices[0].push_back(f3.x);
+                    indices[1].push_back(f1.y); indices[1].push_back(f2.y); indices[1].push_back(f3.y);
+                    indices[2].push_back(f1.z); indices[2].push_back(f2.z); indices[2].push_back(f3.z);
+                }else if (matches == 4 || matches == 8 || matches == 12) {//quad
+                    indices[0].push_back(f1.x); indices[0].push_back(f2.x); indices[0].push_back(f3.x);
+                    indices[1].push_back(f1.y); indices[1].push_back(f2.y); indices[1].push_back(f3.y);
+                    indices[2].push_back(f1.z); indices[2].push_back(f2.z); indices[2].push_back(f3.z);
 
-                        indices[0].push_back(f1.x); indices[0].push_back(f3.x); indices[0].push_back(f4.x);
-                        indices[1].push_back(f1.y); indices[1].push_back(f3.y); indices[1].push_back(f4.y);
-                        indices[2].push_back(f1.z); indices[2].push_back(f3.z); indices[2].push_back(f4.z);
-                    }
+                    indices[0].push_back(f1.x); indices[0].push_back(f3.x); indices[0].push_back(f4.x);
+                    indices[1].push_back(f1.y); indices[1].push_back(f3.y); indices[1].push_back(f4.y);
+                    indices[2].push_back(f1.z); indices[2].push_back(f3.z); indices[2].push_back(f4.z);
                 }
             }
         }
-        if (_flags && epriv::LOAD_FACES) {
-            for (uint i = 0; i < indices[0].size(); ++i) {
-                glm::vec3 pos(0.0f);
-                glm::vec2 uv(0.0f);
-                glm::vec3 norm(1.0f);
-                if (_flags && epriv::LOAD_POINTS && d.file_points.size() > 0) {
-                    pos = d.file_points[indices[0][i] - 1];
-                    d.points.push_back(pos);
-                }
-                if (_flags && epriv::LOAD_UVS && d.file_uvs.size() > 0) {
-                    uv = d.file_uvs[indices[1][i] - 1];
-                    d.uvs.push_back(uv);
-                }
-                if (_flags && epriv::LOAD_NORMALS && d.file_normals.size() > 0) {
-                    norm = d.file_normals[indices[2][i] - 1];
-                    d.normals.push_back(norm);
-                }
-            }
-        }
-        if (_flags && epriv::LOAD_TBN && d.normals.size() > 0) {
-            epriv::MeshLoader::CalculateTBNAssimp(d);
-        }
-        epriv::MeshLoader::FinalizeData(*this, d, threshold);
     }
-    if (loadNow)
-        load();
+    if (_flags && epriv::LOAD_FACES) {
+        triangulate_component_indices(data, indices, _flags);
+    }
+    if (_flags && epriv::LOAD_TBN) {
+        epriv::MeshLoader::CalculateTBNAssimp(data);
+    }
+    epriv::MeshLoader::FinalizeData(*this, data, threshold);
 
-    registerEvent(EventType::WindowFullscreenChanged);
-    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
+    load();
 }
 Mesh::~Mesh(){
     unregisterEvent(EventType::WindowFullscreenChanged);

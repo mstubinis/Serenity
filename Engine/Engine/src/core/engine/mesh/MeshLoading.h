@@ -34,9 +34,11 @@ namespace Engine {
             friend struct ::MeshRequest;
             friend class  ::Engine::epriv::MeshSkeleton;
             public:
-                static void        LoadInternal(MeshSkeleton* skeleton, MeshImportedData& data, const std::string& file);
-                static void        LoadProcessNode(MeshSkeleton* skeleton, MeshImportedData& data, const aiScene& scene, const aiNode& node, BoneNodeMap& _map);
-                static void        LoadProcessNode(std::vector<MeshRequestPart>&, const aiScene& scene, const aiNode& node, BoneNodeMap& _map);
+
+
+                static void        LoadProcessNodeNames(const std::string& file,std::vector<MeshRequestPart>&, const aiScene& scene, const aiNode& node, BoneNodeMap& _map);
+                static void        LoadProcessNodeData(std::vector<MeshRequestPart>&, const aiScene& scene, const aiNode& node, BoneNodeMap& _map, uint& count);
+
                 static void        LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& _map);
                 static void        FinalizeData(Mesh& mesh,MeshImportedData& data, float threshold);
 
@@ -46,9 +48,9 @@ namespace Engine {
                 static bool        IsNear(float& v1, float& v2, const float& threshold);
                 static bool        IsNear(glm::vec2& v1, glm::vec2& v2, const float& threshold);
                 static bool        IsNear(glm::vec3& v1, glm::vec3& v2, const float& threshold);
-                static bool        IsSpecialFloat(float& _float);
-                static bool        IsSpecialFloat(glm::vec2& _vector);
-                static bool        IsSpecialFloat(glm::vec3& _vector);
+                static bool        IsSpecialFloat(const float& _float);
+                static bool        IsSpecialFloat(const glm::vec2& _vector);
+                static bool        IsSpecialFloat(const glm::vec3& _vector);
                 static bool        GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, unsigned short& result, const float& threshold);
                 static void        CalculateTBNAssimp(MeshImportedData& data);
         };

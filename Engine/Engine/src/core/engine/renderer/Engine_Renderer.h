@@ -249,6 +249,9 @@ namespace Engine{
         void renderFullscreenQuad(uint width, uint height, uint startX = 0, uint startY = 0);
         void renderFullscreenTriangle(uint width,uint height, uint startX = 0, uint startY = 0);
 
+        void renderFullscreenQuad();
+        void renderFullscreenTriangle();
+
         inline const GLint getUniformLoc(const char* location);
         inline const GLint& getUniformLocUnsafe(const char* location);
 

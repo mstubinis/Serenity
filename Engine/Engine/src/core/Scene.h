@@ -8,7 +8,13 @@
 #include <glm/vec3.hpp>
 
 class Camera;
+
 class SunLight;
+class DirectionalLight;
+class PointLight;
+class SpotLight;
+class RodLight;
+
 class SkyboxEmpty;
 class MeshInstance;
 struct Entity;
@@ -56,7 +62,13 @@ namespace Engine {
             friend class ::Scene;
             friend class Engine::epriv::RenderPipeline;
             static std::vector<EntityPOD>& GetEntities(Scene&);
-            static std::vector<SunLight*>& GetLights(Scene&);
+
+            static std::vector<SunLight*>&         GetSunLights(Scene&);
+            static std::vector<DirectionalLight*>& GetDirectionalLights(Scene&);
+            static std::vector<PointLight*>&       GetPointLights(Scene&);
+            static std::vector<SpotLight*>&        GetSpotLights(Scene&);
+            static std::vector<RodLight*>&         GetRodLights(Scene&);
+
             static void RenderGeometryOpaque(Scene&, Camera&);
             static void RenderGeometryTransparent(Scene&, Camera&);
             static void RenderForwardOpaque(Scene&, Camera&);

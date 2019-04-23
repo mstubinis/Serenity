@@ -40,6 +40,9 @@ namespace Engine{
     const bool isKeyDownOnce(KeyboardKey::Key);
     const bool isKeyUp(KeyboardKey::Key);
 
+    const bool isKeyDownOnce(KeyboardKey::Key first, KeyboardKey::Key second);
+
+
     //mouse functions
     const bool isMouseButtonDown(MouseButton::Button);
     const bool isMouseButtonDownOnce(MouseButton::Button);

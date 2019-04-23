@@ -29,7 +29,7 @@ namespace Engine {
                 void  _initConvexData(VertexData& data);
                 void  _initTriangleData(VertexData& data);
             public:
-                MeshCollisionFactory(Mesh& _mesh, VertexData& data);
+                MeshCollisionFactory(Mesh& _mesh);
                 ~MeshCollisionFactory();
 
                 btSphereShape*                 buildSphereShape();

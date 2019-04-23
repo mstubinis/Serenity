@@ -1,8 +1,12 @@
 #include <core/engine/mesh/MeshLoading.h>
 #include <core/engine/mesh/MeshImportedData.h>
+#include <core/engine/mesh/MeshCollisionFactory.h>
 #include <core/engine/mesh/VertexData.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/Engine_Math.h>
+
+#include <core/engine/Engine.h>
+#include <core/engine/resources/Engine_Resources.h>
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -19,27 +23,6 @@ using namespace Engine;
 using namespace std;
 namespace boostm = boost::math;
 
-
-void epriv::MeshLoader::LoadInternal(MeshSkeleton* skeleton, MeshImportedData& data, const string& file) {
-    Assimp::Importer importer;
-    const aiScene* AssimpScene = importer.ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-    if (!AssimpScene || AssimpScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !AssimpScene->mRootNode) {
-        return;
-    }
-    //animation stuff
-    aiMatrix4x4 m = AssimpScene->mRootNode->mTransformation; // node->mTransformation?
-    m.Inverse();
-    unordered_map<string, BoneNode*> map;
-    if (AssimpScene->mAnimations && AssimpScene->mNumAnimations > 0 && !skeleton) {
-        skeleton = new MeshSkeleton();
-        skeleton->m_GlobalInverseTransform = Math::assimpToGLMMat4(m);
-    }
-    MeshLoader::LoadProcessNode(skeleton, data, *AssimpScene, *AssimpScene->mRootNode, map);
-    if (skeleton) {
-        skeleton->fill(data);
-    }
-}
-
 void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& _map) {
     if (!_map.count(node.mName.data)) {
         BoneNode* bone_node = new BoneNode();
@@ -52,149 +35,30 @@ void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap&
     }
 }
 
-void epriv::MeshLoader::LoadProcessNode(MeshSkeleton* _skeleton, MeshImportedData& data, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
+void epriv::MeshLoader::LoadProcessNodeNames(const string& file,vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
+    //just find names and meshes
     auto& root = *(scene.mRootNode);
-
-    if (_skeleton && &node == &root) {
-        MeshLoader::LoadPopulateGlobalNodes(root, _map);
-    }
-    for (uint i = 0; i < node.mNumMeshes; ++i) {
-        const aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
-        #pragma region vertices
-
-        data.points.reserve(aimesh.mNumVertices);
-        if (aimesh.mTextureCoords[0]) { data.uvs.reserve(aimesh.mNumVertices); }
-        if (aimesh.mNormals) {          data.normals.reserve(aimesh.mNumVertices); }
-        if (aimesh.mTangents) {         data.tangents.reserve(aimesh.mNumVertices); }
-        if (aimesh.mBitangents) {       data.binormals.reserve(aimesh.mNumVertices); }
-        for (uint j = 0; j < aimesh.mNumVertices; ++j) {
-            //pos
-            auto& pos = aimesh.mVertices[j];
-            data.points.emplace_back(pos.x, pos.y, pos.z);
-            //uv
-            if (aimesh.mTextureCoords[0]) {
-                //this is to prevent uv compression from beign f-ed up at the poles.
-                auto& uv = aimesh.mTextureCoords[0][j];
-                //if(uv.y <= 0.0001f){ uv.y = 0.001f; }
-                //if(uv.y >= 0.9999f){ uv.y = 0.999f; }
-                data.uvs.emplace_back(uv.x, uv.y);
-            }else{
-                data.uvs.emplace_back(0.0f, 0.0f);
-            }
-            if (aimesh.mNormals) {
-                auto& norm = aimesh.mNormals[j];
-                data.normals.emplace_back(norm.x, norm.y, norm.z);
-            }
-            if (aimesh.mTangents) {
-                auto& tang = aimesh.mTangents[j];
-                //data.tangents.emplace_back(tang.x,tang.y,tang.z);
-            }
-            if (aimesh.mBitangents) {
-                auto& binorm = aimesh.mBitangents[j];
-                //data.binormals.emplace_back(binorm.x,binorm.y,binorm.z);
-            }
-        }
-        #pragma endregion
-        // Process indices
-        #pragma region indices
-        data.indices.reserve(aimesh.mNumFaces * 3);
-        for (uint j = 0; j < aimesh.mNumFaces; ++j) {
-            const auto& face = aimesh.mFaces[j];
-
-            const auto& index0 = face.mIndices[0];
-            const auto& index1 = face.mIndices[1];
-            const auto& index2 = face.mIndices[2];
-
-            data.indices.emplace_back(index0);
-            data.indices.emplace_back(index1);
-            data.indices.emplace_back(index2);
-        }
-        #pragma endregion
-        //bones
-        #pragma region Skeleton
-        if (aimesh.mNumBones > 0) {
-            auto& skeleton = *_skeleton;
-            #pragma region IndividualBones
-            //build bone information
-            for (uint k = 0; k < aimesh.mNumBones; ++k) {
-                auto& boneNode = *(_map.at(aimesh.mBones[k]->mName.data));
-                auto& assimpBone = *aimesh.mBones[k];
-                uint BoneIndex(0);
-                if (!skeleton.m_BoneMapping.count(boneNode.Name)) {
-                    BoneIndex = skeleton.m_NumBones;
-                    ++skeleton.m_NumBones;
-                    skeleton.m_BoneInfo.emplace_back();
-                }else{
-                    BoneIndex = skeleton.m_BoneMapping.at(boneNode.Name);
-                }
-                skeleton.m_BoneMapping.emplace(boneNode.Name, BoneIndex);
-                skeleton.m_BoneInfo[BoneIndex].BoneOffset = Math::assimpToGLMMat4(assimpBone.mOffsetMatrix);
-                for (uint j = 0; j < assimpBone.mNumWeights; ++j) {
-                    uint VertexID = assimpBone.mWeights[j].mVertexId;
-                    float Weight = assimpBone.mWeights[j].mWeight;
-                    epriv::VertexBoneData d;
-                    d.AddBoneData(BoneIndex, Weight);
-                    data.m_Bones.emplace(VertexID, d);
-                }
-            }
-            //build skeleton parent child relationship
-            for (auto& node : _map) {
-                const auto& assimpNode = root.FindNode(node.first.c_str());
-                auto iter = assimpNode;
-                while (iter != 0 && iter->mParent != 0) {
-                    if (_map.count(iter->mParent->mName.data)) {
-                        node.second->Parent = _map.at(iter->mParent->mName.data);
-                        node.second->Parent->Children.push_back(node.second);
-                        break; //might need to double check this
-                    }
-                    iter = iter->mParent;
-                }
-            }
-            //and finalize the root node
-            if (!skeleton.m_RootNode) {
-                for (auto& node : _map) {
-                    if (!node.second->Parent) {
-                        skeleton.m_RootNode = node.second;
-                        break;
-                    }
-                }
-            }
-            #pragma endregion
-
-            #pragma region Animations
-            if (scene.mAnimations && scene.mNumAnimations > 0) {
-                for (uint k = 0; k < scene.mNumAnimations; ++k) {
-                    const aiAnimation& anim = *scene.mAnimations[k];
-                    string key(anim.mName.C_Str());
-                    if (key == "") {
-                        key = "Animation " + to_string(skeleton.m_AnimationData.size());
-                    }
-                    if (!skeleton.m_AnimationData.count(key)) {
-                        skeleton.m_AnimationData.emplace(
-                            std::piecewise_construct,
-                            std::forward_as_tuple(key),
-                            std::forward_as_tuple(skeleton, anim)
-                        );
-                    }
-                }
-            }
-            #pragma endregion
-        }
-        #pragma endregion
-        MeshLoader::CalculateTBNAssimp(data);
-    }
-    for (uint i = 0; i < node.mNumChildren; ++i) {
-        MeshLoader::LoadProcessNode(_skeleton, data, scene, *node.mChildren[i], _map);
-    }
-}
-
-void epriv::MeshLoader::LoadProcessNode(vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
-    auto& root = *(scene.mRootNode);
-
     for (uint i = 0; i < node.mNumMeshes; ++i) {
         const aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
 
         MeshRequestPart part;
+        part.mesh = new Mesh();
+        part.name = file + " - " + /*string(scene.mRootNode->mName.C_Str()) +*/ string(aimesh.mName.C_Str());
+        part.mesh->setName(part.name);
+        part.handle = epriv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
+        _parts.push_back(part);
+    }
+    for (uint i = 0; i < node.mNumChildren; ++i) {
+        MeshLoader::LoadProcessNodeNames(file, _parts, scene, *node.mChildren[i], _map);
+    }
+}
+void epriv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map,uint& count) {
+    auto& root = *(scene.mRootNode);
+
+    for (uint i = 0; i < node.mNumMeshes; ++i) {
+        const aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
+
+        MeshRequestPart part = _parts.at(count);
         MeshImportedData data;
 
         #pragma region vertices
@@ -262,7 +126,8 @@ void epriv::MeshLoader::LoadProcessNode(vector<MeshRequestPart>& _parts, const a
                     BoneIndex = skeleton.m_NumBones;
                     ++skeleton.m_NumBones;
                     skeleton.m_BoneInfo.emplace_back();
-                }else{
+                }
+                else {
                     BoneIndex = skeleton.m_BoneMapping.at(boneNode.Name);
                 }
                 skeleton.m_BoneMapping.emplace(boneNode.Name, BoneIndex);
@@ -308,7 +173,7 @@ void epriv::MeshLoader::LoadProcessNode(vector<MeshRequestPart>& _parts, const a
                         key = "Animation " + to_string(skeleton.m_AnimationData.size());
                     }
                     if (!skeleton.m_AnimationData.count(key)) {
-                        skeleton.m_AnimationData.emplace(std::piecewise_construct,std::forward_as_tuple(key),std::forward_as_tuple(skeleton, anim));
+                        skeleton.m_AnimationData.emplace(std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(skeleton, anim));
                     }
                 }
             }
@@ -323,17 +188,14 @@ void epriv::MeshLoader::LoadProcessNode(vector<MeshRequestPart>& _parts, const a
         }
         #pragma endregion
         MeshLoader::CalculateTBNAssimp(data);
-        part.name = string(scene.mRootNode->mName.C_Str()) + string(aimesh.mName.C_Str());
-        Mesh* mesh = new Mesh(data, part.name);
-        part.mesh = mesh;
-        
-        _parts.push_back(part);
+        MeshLoader::FinalizeData(*part.mesh, data, 0.0005f);
+
+        ++count;
     }
     for (uint i = 0; i < node.mNumChildren; ++i) {
-        MeshLoader::LoadProcessNode(_parts, scene, *node.mChildren[i], _map);
+        MeshLoader::LoadProcessNodeData(_parts, scene, *node.mChildren[i], _map, count);
     }
 }
-
 
 void epriv::MeshLoader::FinalizeData(Mesh& mesh,epriv::MeshImportedData& data, float threshold) {
     mesh.m_threshold = threshold;
@@ -421,9 +283,10 @@ void epriv::MeshLoader::FinalizeData(Mesh& mesh,epriv::MeshImportedData& data, f
         vertexData.setData(5, boneStuff[0]);
         vertexData.setData(6, boneStuff[1]);
     }
+    mesh.calculate_radius();
+    SAFE_DELETE(mesh.m_CollisionFactory);
+    mesh.m_CollisionFactory = new epriv::MeshCollisionFactory(mesh);
 }
-
-
 
 bool epriv::MeshLoader::IsNear(float& v1, float& v2, const float& threshold) {
     return std::abs(v1 - v2) < threshold;
@@ -434,16 +297,16 @@ bool epriv::MeshLoader::IsNear(glm::vec2& v1, glm::vec2& v2, const float& thresh
 bool epriv::MeshLoader::IsNear(glm::vec3& v1, glm::vec3& v2, const float& threshold) {
     return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold && std::abs(v1.z - v2.z) < threshold) ? true : false;
 }
-bool epriv::MeshLoader::IsSpecialFloat(float& f) {
+bool epriv::MeshLoader::IsSpecialFloat(const float& f) {
     if (boostm::isnan(f) || boostm::isinf(f)) return true;
     return false;
 }
-bool epriv::MeshLoader::IsSpecialFloat(glm::vec2& v) {
+bool epriv::MeshLoader::IsSpecialFloat(const glm::vec2& v) {
     if (boostm::isnan(v.x) || boostm::isnan(v.y)) return true;
     if (boostm::isinf(v.x) || boostm::isinf(v.y)) return true;
     return false;
 }
-bool epriv::MeshLoader::IsSpecialFloat(glm::vec3& v) {
+bool epriv::MeshLoader::IsSpecialFloat(const glm::vec3& v) {
     if (boostm::isnan(v.x) || boostm::isnan(v.y) || boostm::isnan(v.z)) return true;
     if (boostm::isinf(v.x) || boostm::isinf(v.y) || boostm::isinf(v.z)) return true;
     return false;
