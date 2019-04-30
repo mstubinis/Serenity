@@ -52,6 +52,7 @@ void epriv::InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest
                 }else{
                     epriv::InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
                     epriv::InternalMeshRequestPublicInterface::LoadGPU(meshRequest);
+                    epriv::MeshLoader::SaveTo_OBJCC(*meshRequest.parts.at(0).mesh->m_VertexData, meshRequest.fileOrData + "cc");
                 }
             }else{
                 //some wierd error happened
@@ -108,5 +109,6 @@ void epriv::InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest
             part.mesh->EngineResource::load();
         }
     }
-    delete(&meshRequest); //yes its ugly, but its needed. see Resources::loadMeshAsync()
+    if(meshRequest.async)
+        delete(&meshRequest); //yes its ugly, but its needed. see Resources::loadMeshAsync()
 }

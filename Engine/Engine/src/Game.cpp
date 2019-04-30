@@ -48,6 +48,9 @@ void Game::initLogic(){
     m_HUD = new HUD();
 }
 void Game::update(const float& dt){
+    if (Engine::isKeyDownOnce(KeyboardKey::Space)) {
+        Engine::pause(!Engine::paused());
+    }
     if (Engine::isKeyDown(KeyboardKey::Escape)) {
         Engine::stop();
     }
@@ -70,14 +73,14 @@ void Game::update(const float& dt){
     }
     if (Engine::isKeyDownOnce(KeyboardKey::F12)) { Renderer::Settings::GodRays::enable(!Renderer::Settings::GodRays::enabled()); }
 
-    if (Engine::isKeyDown(KeyboardKey::N)) { Renderer::Settings::SSAO::setBias(Renderer::Settings::SSAO::getBias() - 0.002f); }
-    if (Engine::isKeyDown(KeyboardKey::M)) { Renderer::Settings::SSAO::setBias(Renderer::Settings::SSAO::getBias() + 0.002f); }
-    if (Engine::isKeyDown(KeyboardKey::V)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() - 0.005f); }
-    if (Engine::isKeyDown(KeyboardKey::B)) { Renderer::Settings::SSAO::setRadius(Renderer::Settings::SSAO::getRadius() + 0.005f); }
-    if (Engine::isKeyDown(KeyboardKey::O)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() - 0.005f); }
-    if (Engine::isKeyDown(KeyboardKey::P)) { Renderer::Settings::SSAO::setScale(Renderer::Settings::SSAO::getScale() + 0.005f); }
-    if (Engine::isKeyDown(KeyboardKey::U)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() - 0.02f); }
-    if (Engine::isKeyDown(KeyboardKey::I)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() + 0.02f); }
+    if (Engine::isKeyDown(KeyboardKey::N)) { Renderer::Settings::Lighting::setGIContributionDiffuse(Renderer::Settings::Lighting::getGIContributionDiffuse() - 0.002f); }
+    if (Engine::isKeyDown(KeyboardKey::M)) { Renderer::Settings::Lighting::setGIContributionDiffuse(Renderer::Settings::Lighting::getGIContributionDiffuse() + 0.002f); }
+    if (Engine::isKeyDown(KeyboardKey::V)) { Renderer::Settings::Lighting::setGIContributionSpecular(Renderer::Settings::Lighting::getGIContributionSpecular() - 0.002f); }
+    if (Engine::isKeyDown(KeyboardKey::B)) { Renderer::Settings::Lighting::setGIContributionSpecular(Renderer::Settings::Lighting::getGIContributionSpecular() + 0.002f); }
+    if (Engine::isKeyDown(KeyboardKey::O)) { Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() - 0.002f); }
+    if (Engine::isKeyDown(KeyboardKey::P)) { Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() + 0.002f); }
+    //if (Engine::isKeyDown(KeyboardKey::U)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() - 0.02f); }
+    //if (Engine::isKeyDown(KeyboardKey::I)) { Renderer::Settings::SSAO::setIntensity(Renderer::Settings::SSAO::getIntensity() + 0.02f); }
 
     m_HUD->update(dt);
 }

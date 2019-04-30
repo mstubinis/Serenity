@@ -22,6 +22,7 @@ struct ResourceManifest{
     static Handle VenerexMesh;
     static Handle OberthMesh;
     static Handle LeviathanMesh;
+    static Handle NovaMesh;
 
     static Handle StarbaseMaterial;
     static Handle StarMaterial;
@@ -33,6 +34,7 @@ struct ResourceManifest{
     static Handle IntrepidMaterial;
     static Handle NorwayMaterial;
     static Handle VenerexMaterial;
+    static Handle NovaMaterial;
     static Handle OberthMaterial;
     static Handle CrosshairMaterial;
     static Handle CrosshairArrowMaterial;
@@ -40,7 +42,8 @@ struct ResourceManifest{
     static Handle GoldMaterial;
 
     static Handle CapsuleTunnelMesh;
-    static Handle CapsuleRibbonMesh;
+    static Handle CapsuleRibbonMeshA;
+    static Handle CapsuleRibbonMeshB;
     static Handle CapsuleA;
     static Handle CapsuleB;
     static Handle CapsuleC;

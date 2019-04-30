@@ -131,7 +131,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 
     m_TunnelA = new CapsuleTunnel(5000,ResourceManifest::CapsuleA,this);
     m_TunnelB = new CapsuleTunnel(5000,ResourceManifest::CapsuleB,this);
-    m_Ribbon = new CapsuleRibbon(5000,ResourceManifest::CapsuleRibbonMesh,ResourceManifest::CapsuleC,this);
+    m_RibbonA = new CapsuleRibbon(5000,ResourceManifest::CapsuleRibbonMeshA,ResourceManifest::CapsuleC,this);
+    m_RibbonB = new CapsuleRibbon(5000, ResourceManifest::CapsuleRibbonMeshB, ResourceManifest::CapsuleC, this);
 
     m_FrontEnd = new CapsuleEnd(2250,glm::vec3(0,0,-25000),glm::vec3(1),this);
     m_BackEnd = new CapsuleEnd(1700,glm::vec3(0,0,25000),glm::vec3(0),this);
@@ -139,7 +140,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     auto& backBody = *(m_BackEnd->m_Entity.getComponent<ComponentBody>());
     auto& tunnelBBody = *(m_TunnelB->m_Entity.getComponent<ComponentBody>());
     auto& tunnelABody = *(m_TunnelA->m_Entity.getComponent<ComponentBody>());
-    auto& ribbonBody = *(m_Ribbon->m_Entity.getComponent<ComponentBody>());
+    auto& ribbonBodyA = *(m_RibbonA->m_Entity.getComponent<ComponentBody>());
+    auto& ribbonBodyB = *(m_RibbonB->m_Entity.getComponent<ComponentBody>());
 
     backBody.rotate(0.0f,glm::radians(180.0f),0.0f);
 
@@ -149,7 +151,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     tunnelABody.setPosition(0,0,0);
     tunnelBBody.setPosition(0,0,0);
 
-    ribbonBody.setPosition(0,300,0);
+    ribbonBodyA.setPosition(0, 300, 0);
+    ribbonBodyB.setPosition(0, 300, 0);
 
     float step = -10.0f;
     for(uint i = 0; i < 300; ++i){
@@ -189,12 +192,13 @@ void CapsuleSpace::update(const float& dt){
     auto& backBody = *(m_BackEnd->m_Entity.getComponent<ComponentBody>());
     auto& tunnelBBody = *(m_TunnelB->m_Entity.getComponent<ComponentBody>());
     auto& tunnelABody = *(m_TunnelA->m_Entity.getComponent<ComponentBody>());
-    auto& ribbonBody = *(m_Ribbon->m_Entity.getComponent<ComponentBody>());
+    auto& ribbonBodyA = *(m_RibbonA->m_Entity.getComponent<ComponentBody>());
+    auto& ribbonBodyB = *(m_RibbonB->m_Entity.getComponent<ComponentBody>());
 
-
-    tunnelABody.translate(0,0,(25 * aRadius) * dt,false);
-    tunnelBBody.translate(0,0,(8 * bRadius) * dt,false);
-    ribbonBody.translate(0,0,(7 * aRadius) * dt,false);
+    tunnelABody.translate(0, 0, (25 * aRadius) * dt, false);
+    tunnelBBody.translate(0, 0, (8 * bRadius) * dt, false);
+    ribbonBodyA.translate(0, 0, (7 * aRadius) * dt, false);
+    ribbonBodyB.translate(0, 0, (7 * aRadius) * dt, false);
 
     float tunnelARotRand = float(rand() % 3) + 2;
     float tunnelBRotRand = float(rand() % 2) + 2;
@@ -206,16 +210,20 @@ void CapsuleSpace::update(const float& dt){
 
     const auto& aPos = tunnelABody.position();
     const auto& bPos = tunnelBBody.position();
-    const auto& rPos = ribbonBody.position();
+    const auto& rPosA = ribbonBodyA.position();
+    const auto& rPosB = ribbonBodyB.position();
 
-    if(aPos.z >= 12.112 * aRadius || aPos.z <= -12.112 * aRadius){
-        tunnelABody.setPosition(0,0,0);
+    if (aPos.z >= 12.112 * aRadius || aPos.z <= -12.112 * aRadius) {
+        tunnelABody.setPosition(0, 0, 0);
     }
-    if(bPos.z >= 12.112 * bRadius || bPos.z <= -12.112 * bRadius){
-        tunnelBBody.setPosition(0,0,0);
+    if (bPos.z >= 12.112 * bRadius || bPos.z <= -12.112 * bRadius) {
+        tunnelBBody.setPosition(0, 0, 0);
     }
-    if(rPos.z >= 20 * aRadius || rPos.z <= -20 * aRadius){
-        ribbonBody.setPosition(0,300,0);
+    if (rPosA.z >= 20 * aRadius || rPosA.z <= -20 * aRadius) {
+        ribbonBodyA.setPosition(0, 300, 0);
+    }
+    if (rPosB.z >= 20 * aRadius || rPosB.z <= -20 * aRadius) {
+        ribbonBodyB.setPosition(0, 300, 0);
     }
     auto& playerEntity = getPlayer()->entity();
     epriv::EntitySerialization _s(playerEntity);

@@ -123,7 +123,7 @@ vector<Handle> Resources::loadMesh(string fileOrData, float threshhold) {
     return handles;
 }
 vector<Handle> Resources::loadMeshAsync(string fileOrData, float threshhold) {
-    MeshRequest* request = new MeshRequest(fileOrData, threshhold); //to extend the lifetime to the threads
+    MeshRequest* request = new MeshRequest(fileOrData, threshhold); //to extend the lifetime to the threads, we manually delete later
     request->requestAsync();
     vector<Handle> handles;
     for (auto& part : request->parts) {

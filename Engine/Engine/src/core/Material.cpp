@@ -203,6 +203,7 @@ class Material::impl final{
             if(m_Components[type] || !texture)
                 return;
             m_Components[type] = new MaterialComponent(type,texture);
+            texture->setAnisotropicFiltering(2.0f);
         }
         void _addComponentDiffuse(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Diffuse); }
         void _addComponentNormal(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Normal); }

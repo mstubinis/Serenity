@@ -23,6 +23,7 @@ Handle ResourceManifest::DreadnaughtMesh;
 Handle ResourceManifest::VenerexMesh;
 Handle ResourceManifest::OberthMesh;
 Handle ResourceManifest::LeviathanMesh;
+Handle ResourceManifest::NovaMesh;
 
 Handle ResourceManifest::StarbaseMaterial;
 Handle ResourceManifest::StarMaterial;
@@ -39,9 +40,11 @@ Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
 Handle ResourceManifest::StarFlareMaterial;
 Handle ResourceManifest::GoldMaterial;
+Handle ResourceManifest::NovaMaterial;
 
 Handle ResourceManifest::CapsuleTunnelMesh;
-Handle ResourceManifest::CapsuleRibbonMesh;
+Handle ResourceManifest::CapsuleRibbonMeshA;
+Handle ResourceManifest::CapsuleRibbonMeshB;
 Handle ResourceManifest::CapsuleA;
 Handle ResourceManifest::CapsuleB;
 Handle ResourceManifest::CapsuleC;
@@ -62,7 +65,7 @@ void ResourceManifest::init(){
     Handle groundFromSpaceVert = Resources::addShader("data/Shaders/AS_groundFromSpace_vert.glsl",ShaderType::Vertex);
     Handle groundFromSpaceFrag = Resources::addShader("data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag);
-
+ 
     TestMesh = Resources::loadMeshAsync("data/Models/1911.fbx",0.0f).at(0);
 
     PlanetMesh = Resources::loadMeshAsync("data/Models/planet.objcc").at(0);
@@ -71,6 +74,7 @@ void ResourceManifest::init(){
     RingMesh = Resources::loadMeshAsync("data/Models/ring.objcc").at(0);
     DreadnaughtMesh = Resources::loadMeshAsync("data/Models/dreadnaught.objcc").at(0);
     LeviathanMesh = Resources::loadMeshAsync("data/Models/leviathan.objcc").at(0);
+    NovaMesh = Resources::loadMeshAsync("data/Models/nova.objcc").at(0);
     
     AkiraMesh = Resources::loadMeshAsync("data/Models/akira.objcc").at(0);
     MirandaMesh = Resources::loadMeshAsync("data/Models/miranda.objcc").at(0);
@@ -78,11 +82,13 @@ void ResourceManifest::init(){
     NorwayMesh = Resources::loadMeshAsync("data/Models/norway.objcc").at(0);
     VenerexMesh = Resources::loadMeshAsync("data/Models/venerex.objcc").at(0);
     OberthMesh = Resources::loadMeshAsync("data/Models/oberth.objcc").at(0);
-    
+
     CapsuleTunnelMesh = Resources::loadMeshAsync("data/Models/capsuleTunnel.objcc").at(0);
-    CapsuleRibbonMesh = Resources::loadMeshAsync("data/Models/capsuleRibbon.objcc").at(0);
+    CapsuleRibbonMeshA = Resources::loadMeshAsync("data/Models/ribbon1.objcc").at(0);
+    CapsuleRibbonMeshB = Resources::loadMeshAsync("data/Models/ribbon2.objcc").at(0);
 
     Engine::epriv::threading::waitForAll();
+
 
     StarbaseMaterial = Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
     StarMaterial = Resources::addMaterial("Star","data/Textures/Planets/Sun.dds","","","");
@@ -92,13 +98,14 @@ void ResourceManifest::init(){
     EarthSkyMaterial = Resources::addMaterial("EarthSky","data/Textures/Planets/Earth.dds","","","");
 
     DreadnaughtMaterial = Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.dds","data/Textures/dreadnaught_Normal.dds","data/Textures/dreadnaught_Glow.dds");
-    DefiantMaterial = Resources::addMaterial("Defiant","data/Textures/defiantShark.dds","data/Textures/defiant_Normal.dds","data/Textures/defiant_Glow.dds");
+    DefiantMaterial = Resources::addMaterial("Defiant","data/Textures/defiant.dds","data/Textures/defiant_Normal.dds","data/Textures/defiant_Glow.dds");
     AkiraMaterial = Resources::addMaterial("Akira","data/Textures/akira.dds","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
     MirandaMaterial = Resources::addMaterial("Miranda","data/Textures/miranda.dds","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
     IntrepidMaterial = Resources::addMaterial("Intrepid","data/Textures/intrepid.dds","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
     NorwayMaterial = Resources::addMaterial("Norway","data/Textures/norway.dds","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
     VenerexMaterial = Resources::addMaterial("Venerex","data/Textures/venerex.dds","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
     OberthMaterial = Resources::addMaterial("Oberth","data/Textures/oberth.dds","data/Textures/oberth_Normal.png","data/Textures/oberth_Glow.png");
+    NovaMaterial = Resources::addMaterial("Nova", "data/Textures/nova.dds", "data/Textures/nova_Normal.dds", "data/Textures/nova_Glow.dds");
 
     CrosshairMaterial = Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.dds","","","");
     CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.dds","","","");

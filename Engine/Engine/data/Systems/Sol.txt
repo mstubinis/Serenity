@@ -1,6 +1,6 @@
 #NOTE radius is in KM. Position is in KM (distance from sun, use sin/cos to place them). Orbit speed is in days
 Sol
-data/Textures/Skyboxes/SolarSystem/Skybox.dds
+data/Textures/Skyboxes/Skybox4/Skybox.dds
 125
 giDiffuse=1.0 giSpecular=1.0 giGlobal=1.0
 
