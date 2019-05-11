@@ -1,36 +1,64 @@
-# Directories
-Debug/
-Release/
-Engine/.vs/
-.vs/
+#OS junk files
+[Tt]humbs.db
+*.DS_Store
 
-# VS Stuff
-*.sdf
-*.VC
-*.ipch
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-
-# Precompiled Headers
-*.gch
+#Visual Studio files
+*.[Oo]bj
+*.user
+*.aps
 *.pch
+*.vspscc
+*.vssscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.[Cc]ache
+*.ilk
+*.log
+*.sbr
+*.sdf
+*.opensdf
+*.unsuccessfulbuild
+ipch/
+obj/
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+Ankh.NoLoad
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
+#MonoDevelop
+*.pidb
+*.userprefs
 
-# Fortran module files
-*.mod
+#Tooling
+_ReSharper*/
+*.resharper
+[Tt]est[Rr]esult*
+*.sass-cache
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
+#Project files
+[Bb]uild/
+[Bb]uilds/
 
-# Executables
-*.exe
-*.out
-*.app
+#Subversion files
+.svn
+
+# Office Temp Files
+~$*
+
+#NuGet
+packages/
+
+#ncrunch
+*ncrunch*
+*crunch*.local.xml
+
+# visual studio database projects
+*.dbmdl
+
+#Test files
+*.testsettings

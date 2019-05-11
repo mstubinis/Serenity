@@ -5,21 +5,23 @@ A game engine focused on producing stunning visual effects and supporting custom
 Installing & Building - Visual Studio
 -------------------------------------
 
-The project uses several library dependencies. The current solution file is designed to be used in Visual Studio 2017 with the libraries being built statically and not dynamically, on a Windows OS. The dependencies are: 
-> * Assimp
-> * Bullet Physics
-> * SFML
-> * freeglut
-> * GLEW
-> * glm
-> * Boost (filesystem, iostreams, systems)
+1. Clone this repository
 
-Most of these libs are already included in the dependencies folder. The project will point to use them, but if you have them already you can point to your own. Boost is not included (for obvious reasons), you will have to have that installed yourself. For more information on how to build boost, visit [The getting started guide](https://www.boost.org/doc/libs/1_70_0/more/getting_started/windows.html)
+2. Download [Boost](http://www.boost.org/users/history/version_1_64_0.html). I personally put it into `C:/boost/`
 
-The solution contains 3 projects: the engine itself, which will be built into Serenity.lib, and 2 sample applications that will be built into .exe's.
+3. Modify the include directory for boost. In Visual Studio, Project > Serenity Properties...
+  - Make sure Configuration is set to **All Configurations**.
+  - Expand the C/C++ Tab. Select General.
+  - Modify the Additional Include Directories to include your directory to boost.
 
-In order for the exe's to run, the `SerenityLib/Engine/data` folder will have to be copied over to `SerenityLib/Builds` folder, which will be generated upon compiling the solution.
+4. Build the boost libraries. The project uses boost's filesystem, iostreams, and system library. For more information on how to build boost, visit [The getting started guide](http://www.boost.org/doc/libs/1_64_0/more/getting_started/windows.html)
+  - The project expects the /MT Static version of the library to be built. `./b2 link=static runtime-link=static variant=debug,release threading=single,multi`. Your version of Visual Studio will determine what toolset version you will use. Example: VS 2012 requires `toolset=msvc-11.0` added to the ./b2 build command.
 
-A wiki like section to give an overview of the engine's API is planned in the future.
+5. Modify the linker to include the boost library directories. Normally they are built in your directory of boost under the stage/lib folder. Example: `C:/boost/stage/lib`. In Visual Studio, Project > Serenity Properties...
+  - Make sure Configuration is set to **All Configurations**.
+  - Expand the Linker. Select General.
+  - Modify the Additional Library Directories to include your directory to the boost libraries.
 
-The engine code itself will be getting a major refactor within the near future, aimed to clean up the code base and prepare it for client use.
+6. All other dependencies are included in the dependencies folder and properly linked to the visual studio project. The other dependencies are SFML, GLEW, Bullet Physics, Assimp, and GLM.
+
+7. Build. In Visual Studio, hit Ctrl-F5. Debug builds will be in the Debug folder, Release builds will be in the Release folder.
