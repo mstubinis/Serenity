@@ -1,6 +1,16 @@
 # Serenity
 A game engine focused on producing stunning visual effects and supporting custom user made rendering and logic code.
 
+Features
+-------------------------------------
+> * Physically based rendering using deferred rendering
+> * Several post-processing effects (Depth of Field, HDR, SSAO, Bloom, Fog, God Rays
+> * Entity-Component based game logic
+> * Custom logic and rendering code via functors
+> * Bullet Physics world
+> * Multi-threading using boost::asio worker pool and functor based jobs
+> * Resource loading (3d meshes, textures, sounds, fonts
+> * Optimized render calls using Render Graphs
 
 Installing & Building - Visual Studio
 -------------------------------------
