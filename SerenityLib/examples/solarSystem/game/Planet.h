@@ -2,7 +2,7 @@
 #ifndef GAME_PLANET_H
 #define GAME_PLANET_H
 
-#include "ecs/Components.h"
+#include <ecs/Components.h>
 
 class SunLight;
 class Ring;

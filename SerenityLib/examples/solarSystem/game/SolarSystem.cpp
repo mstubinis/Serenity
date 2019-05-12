@@ -1,16 +1,15 @@
 #include "SolarSystem.h"
-
-#include "core/engine/events/Engine_Events.h"
-#include "core/engine/renderer/Engine_Renderer.h"
-#include "core/engine/resources/Engine_Resources.h"
-#include "core/engine/lights/Light.h"
-#include "core/MeshInstance.h"
-
 #include "ResourceManifest.h"
 #include "Planet.h"
 #include "GameCamera.h"
 #include "Ship.h"
 #include "GameSkybox.h"
+
+#include <core/engine/events/Engine_Events.h>
+#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/lights/Light.h>
+#include <core/MeshInstance.h>
 
 #include <algorithm>
 #include <sstream>

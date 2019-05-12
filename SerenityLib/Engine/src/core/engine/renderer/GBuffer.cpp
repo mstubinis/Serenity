@@ -1,7 +1,7 @@
-#include "core/engine/renderer/GBuffer.h"
-#include "core/engine/renderer/Engine_Renderer.h"
-#include "core/engine/renderer/FramebufferObject.h"
-#include "core/engine/textures/Texture.h"
+#include <core/engine/renderer/GBuffer.h>
+#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/FramebufferObject.h>
+#include <core/engine/textures/Texture.h>
 
 #include <boost/tuple/tuple.hpp>
 

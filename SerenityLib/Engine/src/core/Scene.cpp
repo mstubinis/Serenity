@@ -1,20 +1,13 @@
-#include "core/engine/lights/Light.h"
-#include "core/engine/resources/Engine_Resources.h"
-#include "core/engine/renderer/Engine_Renderer.h"
-#include "core/engine/Engine_Math.h"
-#include "core/MeshInstance.h"
-#include "core/Camera.h"
-#include "core/Skybox.h"
+#include <core/engine/lights/Light.h>
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/Engine_Math.h>
+#include <core/MeshInstance.h>
+#include <core/Camera.h>
+#include <core/Skybox.h>
 
-#include "ecs/Entity.h"
-#include "ecs/ComponentBody.h"
-#include "ecs/ComponentName.h"
-#include "ecs/ComponentModel.h"
-#include "ecs/ComponentLogic.h"
-#include "ecs/ComponentLogic1.h"
-#include "ecs/ComponentLogic2.h"
-#include "ecs/ComponentLogic3.h"
-#include "ecs/ComponentCamera.h"
+#include <ecs/Entity.h>
+#include <ecs/Components.h>
 
 using namespace Engine;
 using namespace Engine::epriv;

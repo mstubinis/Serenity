@@ -1,8 +1,9 @@
 #include "ResourceManifest.h"
-#include "core/engine/Engine_ThreadManager.h"
-#include "core/engine/resources/Engine_Resources.h"
-#include "core/Material.h"
-#include "core/engine/textures/Texture.h"
+
+#include <core/engine/Engine_ThreadManager.h>
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/Material.h>
+#include <core/engine/textures/Texture.h>
 
 using namespace Engine;
 

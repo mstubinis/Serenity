@@ -1,7 +1,7 @@
-#include "core/Skybox.h"
-#include "core/engine/Engine.h"
-#include "core/engine/textures/Texture.h"
-#include "core/Scene.h"
+#include <core/Skybox.h>
+#include <core/engine/Engine.h>
+#include <core/engine/textures/Texture.h>
+#include <core/Scene.h>
 
 using namespace Engine;
 using namespace std;

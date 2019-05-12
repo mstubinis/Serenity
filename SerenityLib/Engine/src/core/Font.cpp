@@ -1,6 +1,7 @@
-#include "core/Font.h"
-#include "core/engine/Engine.h"
-#include "core/engine/textures/Texture.h"
+#include <core/Font.h>
+#include <core/engine/Engine.h>
+#include <core/engine/textures/Texture.h>
+
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
 

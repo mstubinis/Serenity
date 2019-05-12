@@ -2,10 +2,10 @@
 #ifndef ENGINE_ENGINE_RESOURCES_H
 #define ENGINE_ENGINE_RESOURCES_H
 
-#include "core/engine/Engine_Physics.h"
-#include "core/engine/renderer/GLImageConstants.h"
-#include "core/ShaderProgram.h"
-#include "core/engine/Engine_ObjectPool.h"
+#include <core/engine/Engine_Physics.h>
+#include <core/engine/renderer/GLImageConstants.h>
+#include <core/ShaderProgram.h>
+#include <core/engine/Engine_ObjectPool.h>
 
 typedef std::uint32_t uint;
 

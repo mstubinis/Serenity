@@ -1,20 +1,20 @@
-#include "core/engine/Engine.h"
-#include "core/engine/Engine_Window.h"
-#include "core/engine/Engine_Networking.h"
 #include "HUD.h"
 #include "Ship.h"
 #include "GameCamera.h"
 #include "CapsuleSpace.h"
-#include "core/Material.h"
-#include "core/engine/mesh/Mesh.h"
-#include "core/engine/textures/Texture.h"
-#include "core/engine/lights/Light.h"
+#include "ResourceManifest.h"
+
+#include <core/engine/Engine.h>
+#include <core/engine/Engine_Window.h>
+#include <core/engine/Engine_Networking.h>
+#include <core/Material.h>
+#include <core/engine/mesh/Mesh.h>
+#include <core/engine/textures/Texture.h>
+#include <core/engine/lights/Light.h>
 
 #include <unordered_map>
 #include <iostream>
 #include <glm/vec2.hpp>
-
-#include "ResourceManifest.h"
 
 using namespace Engine;
 

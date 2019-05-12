@@ -1,4 +1,4 @@
-#include "ecs/ECSRegistry.h"
+#include <ecs/ECSRegistry.h>
 
 using namespace Engine::epriv;
 

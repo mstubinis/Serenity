@@ -1,4 +1,4 @@
-#include "core/engine/lights/SunLight.h"
+#include <core/engine/lights/SunLight.h>
 
 using namespace Engine;
 using namespace std;

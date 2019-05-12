@@ -2,7 +2,7 @@
 #ifndef GAME_GAME_SKYBOX_H
 #define GAME_GAME_SKYBOX_H
 
-#include "core/Skybox.h"
+#include <core/Skybox.h>
 #include <memory>
 
 class GameSkybox: public Skybox{

@@ -1,6 +1,6 @@
-#include "core/engine/events/Engine_Events.h"
-#include "core/engine/resources/Engine_Resources.h"
-#include "core/engine/Engine_Window.h"
+#include <core/engine/events/Engine_Events.h>
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/Engine_Window.h>
 
 using namespace Engine;
 using namespace std;
@@ -57,8 +57,6 @@ void epriv::EventManager::onEventMouseWheelMoved(int& delta){
 void epriv::EventManager::onResetEvents(const float& dt){ 
     m_previousKey = KeyboardKey::Unknown;
     m_currentKey = KeyboardKey::Unknown;
-    //for (auto iterator : m_KeyStatus) { iterator.second = false; }
-    //for (auto iterator : m_MouseStatus) { iterator.second = false; }
 
     float boost = ((1.0f / dt)) * 0.003f;
     float step = (1.0f - dt);

@@ -1,9 +1,9 @@
-#include "core/engine/Engine.h"
-#include "core/engine/textures/Texture.h"
-#include "core/engine/textures/DDS.h"
-#include "core/engine/Engine_Window.h"
-#include "core/engine/Engine_Math.h"
-#include "core/engine/renderer/FramebufferObject.h"
+#include <core/engine/Engine.h>
+#include <core/engine/textures/Texture.h>
+#include <core/engine/textures/DDS.h>
+#include <core/engine/Engine_Window.h>
+#include <core/engine/Engine_Math.h>
+#include <core/engine/renderer/FramebufferObject.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string.hpp>

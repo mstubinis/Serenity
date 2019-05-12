@@ -1,12 +1,13 @@
-#include "core/engine/Engine.h"
-#include "core/engine/Engine_Window.h"
-#include "core/engine/resources/Engine_Resources.h"
-#include "core/engine/events/Engine_EventDispatcher.h"
-#include "core/engine/renderer/Engine_Renderer.h"
-#include "core/engine/textures/Texture.h"
-#include "core/Scene.h"
-#include "ecs/ECS.h"
-#include "ecs/ComponentCamera.h"
+#include <core/engine/Engine.h>
+#include <core/engine/Engine_Window.h>
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/events/Engine_EventDispatcher.h>
+#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/textures/Texture.h>
+#include <core/Scene.h>
+
+#include <ecs/ECS.h>
+#include <ecs/ComponentCamera.h>
 
 #include <iostream>
 
@@ -104,9 +105,12 @@ class Engine_Window::impl final{
             epriv::Core::m_Engine->m_RenderManager._onFullscreen(m_SFMLWindow,m_VideoMode,m_WindowName,m_Style,m_SFContextSettings);
 
             //event dispatch
-            epriv::EventWindowFullscreenChanged e; e.isFullscreen = fullscreen;
-            Event ev; ev.eventWindowFullscreenChanged = e; ev.type = EventType::WindowFullscreenChanged;
-            epriv::Core::m_Engine->m_EventManager.m_EventDispatcher._dispatchEvent(ev);
+            epriv::EventWindowFullscreenChanged e;
+            e.isFullscreen = fullscreen;
+            Event ev;
+            ev.eventWindowFullscreenChanged = e;
+            ev.type = EventType::WindowFullscreenChanged;
+            epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 
             glm::uvec2 winSize = Engine::getWindowSize();
 

@@ -1,15 +1,15 @@
 #define BT_THREADSAFE 1
-#include "core/engine/Engine_Physics.h"
-#include "core/engine/resources/Engine_Resources.h"
-#include "core/engine/renderer/Engine_Renderer.h"
-#include "core/engine/Engine_Math.h"
-#include "core/Camera.h"
-#include "core/engine/mesh/Mesh.h"
-#include "core/MeshInstance.h"
-#include "core/Scene.h"
+#include <core/engine/Engine_Physics.h>
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/Engine_Math.h>
+#include <core/Camera.h>
+#include <core/engine/mesh/Mesh.h>
+#include <core/MeshInstance.h>
+#include <core/Scene.h>
 
-//new ecs
-#include "ecs/ComponentModel.h"
+// ecs
+#include <ecs/ComponentModel.h>
 
 #include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
 #include <bullet/btBulletDynamicsCommon.h>

@@ -1,7 +1,7 @@
-#include "core/engine/Engine_Math.h"
-#include "core/engine/resources/Engine_Resources.h"
-#include "core/Camera.h"
-#include "core/Scene.h"
+#include <core/engine/Engine_Math.h>
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/Camera.h>
+#include <core/Scene.h>
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>

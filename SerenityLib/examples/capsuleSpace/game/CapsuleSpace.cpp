@@ -1,17 +1,17 @@
 #include "CapsuleSpace.h"
-#include "core/engine/resources/Engine_Resources.h"
-#include "core/Material.h"
+#include "ResourceManifest.h"
 #include "Ship.h"
 #include "GameCamera.h"
-#include "core/engine/lights/Light.h"
-#include "core/engine/renderer/Engine_Renderer.h"
-#include "core/engine/Engine_GLStateMachine.h"
-#include "core/engine/textures/Texture.h"
 #include "GameSkybox.h"
-#include "core/engine/mesh/Mesh.h"
-#include "core/MeshInstance.h"
 
-#include "ResourceManifest.h"
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/Material.h>
+#include <core/engine/lights/Light.h>
+#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/Engine_GLStateMachine.h>
+#include <core/engine/textures/Texture.h>
+#include <core/engine/mesh/Mesh.h>
+#include <core/MeshInstance.h>
 
 #include <boost/lexical_cast.hpp>
 

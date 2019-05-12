@@ -1,4 +1,4 @@
-#include "core/engine/lights/DirectionalLight.h"
+#include <core/engine/lights/DirectionalLight.h>
 
 using namespace Engine;
 using namespace std;

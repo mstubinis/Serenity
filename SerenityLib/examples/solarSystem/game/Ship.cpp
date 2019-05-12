@@ -1,9 +1,10 @@
 #include "Ship.h"
-#include "core/engine/Engine.h"
-#include "core/engine/lights/Light.h"
 #include "GameCamera.h"
 #include "SolarSystem.h"
 #include "ResourceManifest.h"
+
+#include <core/engine/Engine.h>
+#include <core/engine/lights/Light.h>
 
 #include <ecs/ComponentName.h>
 

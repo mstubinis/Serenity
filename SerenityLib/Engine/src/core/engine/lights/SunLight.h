@@ -2,8 +2,8 @@
 #ifndef ENGINE_LIGHT_SUN_INCLUDE_GUARD
 #define ENGINE_LIGHT_SUN_INCLUDE_GUARD
 
-#include "core/Camera.h"
-#include "core/engine/lights/LightIncludes.h"
+#include <core/Camera.h>
+#include <core/engine/lights/LightIncludes.h>
 
 namespace Engine {
     namespace epriv {
@@ -21,7 +21,11 @@ class SunLight : public EntityWrapper {
         float              m_DiffuseIntensity;
         float              m_SpecularIntensity;
     public:
-        SunLight(glm::vec3 = glm::vec3(0.0f), LightType::Type = LightType::Sun, Scene* = nullptr);
+        SunLight(
+            glm::vec3 position = glm::vec3(0.0f),
+            LightType::Type = LightType::Sun,
+            Scene* = nullptr
+        );
         virtual ~SunLight();
 
         float getAmbientIntensity();     void setAmbientIntensity(float a);

@@ -1,17 +1,17 @@
 #include "HUD.h"
-#include "core/engine/resources/Engine_Resources.h"
-#include "core/engine/events/Engine_Events.h"
-#include "core/engine/renderer/Engine_Renderer.h"
-#include "core/engine/Engine_Window.h"
-#include "core/engine/Engine_Math.h"
-#include "core/Font.h"
-#include "core/engine/textures/Texture.h"
-#include "core/Scene.h"
-#include "core/Camera.h"
-#include "core/Material.h"
 #include "Ship.h"
-
 #include "ResourceManifest.h"
+
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/events/Engine_Events.h>
+#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/Engine_Window.h>
+#include <core/engine/Engine_Math.h>
+#include <core/Font.h>
+#include <core/engine/textures/Texture.h>
+#include <core/Scene.h>
+#include <core/Camera.h>
+#include <core/Material.h>
 
 #include <glm/vec4.hpp>
 

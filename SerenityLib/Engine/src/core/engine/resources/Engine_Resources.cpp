@@ -172,9 +172,13 @@ Handle Resources::addSoundData(string file,string n,bool music){
 void Resources::setCurrentScene(Scene* newScene){
     Scene* oldScene = resourceManager->m_CurrentScene;
 
-    epriv::EventSceneChanged e; e.oldScene = oldScene; e.newScene = newScene;
-    Event ev; ev.eventSceneChanged = e; ev.type = EventType::SceneChanged;
-    epriv::Core::m_Engine->m_EventManager.m_EventDispatcher._dispatchEvent(EventType::SceneChanged,ev);
+    epriv::EventSceneChanged e;
+    e.oldScene = oldScene;
+    e.newScene = newScene;
+    Event ev;
+    ev.eventSceneChanged = e;
+    ev.type = EventType::SceneChanged;
+    epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
     
     if(!oldScene){
         cout << "---- Initial scene set to: " << newScene->name() << endl;

@@ -2,7 +2,7 @@
 #ifndef GAME_SHIP_H
 #define GAME_SHIP_H
 
-#include "ecs/Components.h"
+#include <ecs/Components.h>
 
 class GameCamera;
 class Ship;

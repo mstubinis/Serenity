@@ -1,4 +1,4 @@
-#include "core/Constraint.h"
+#include <core/Constraint.h>
 
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>

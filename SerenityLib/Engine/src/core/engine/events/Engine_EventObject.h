@@ -2,8 +2,8 @@
 #ifndef ENGINE_EVENT_OBJECT_H
 #define ENGINE_EVENT_OBJECT_H
 
-#include "core/engine/events/Engine_EventEnums.h"
-#include "core/engine/Engine_Utils.h"
+#include <core/engine/events/Engine_EventEnums.h>
+#include <core/engine/Engine_Utils.h>
 
 class Scene;
 

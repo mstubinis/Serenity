@@ -2,8 +2,8 @@
 #ifndef ENGINE_FRAMEBUFFER_OBJECT_H
 #define ENGINE_FRAMEBUFFER_OBJECT_H
 
-#include "core/engine/BindableResource.h"
-#include "core/engine/renderer/GLImageConstants.h"
+#include <core/engine/BindableResource.h>
+#include <core/engine/renderer/GLImageConstants.h>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <unordered_map>

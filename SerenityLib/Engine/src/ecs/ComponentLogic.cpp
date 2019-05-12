@@ -1,4 +1,4 @@
-#include "ComponentLogic.h"
+#include <ecs/ComponentLogic.h>
 
 using namespace Engine;
 using namespace Engine::epriv;

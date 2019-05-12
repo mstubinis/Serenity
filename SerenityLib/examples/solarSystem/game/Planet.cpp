@@ -1,23 +1,23 @@
 ﻿#include "Planet.h"
 #include "SolarSystem.h"
-#include "core/engine/Engine.h"
-#include "core/engine/Engine_GLStateMachine.h"
-#include "core/engine/Engine_Math.h"
-#include "core/engine/lights/Light.h"
-#include "core/ShaderProgram.h"
-#include "core/engine/mesh/Mesh.h"
-#include "core/MeshInstance.h"
-#include "core/Material.h"
-#include "core/Camera.h"
-#include "core/Scene.h"
-#include "core/engine/textures/Texture.h"
+#include "ResourceManifest.h"
+
+#include <core/engine/Engine.h>
+#include <core/engine/Engine_GLStateMachine.h>
+#include <core/engine/Engine_Math.h>
+#include <core/engine/lights/Light.h>
+#include <core/ShaderProgram.h>
+#include <core/engine/mesh/Mesh.h>
+#include <core/MeshInstance.h>
+#include <core/Material.h>
+#include <core/Camera.h>
+#include <core/Scene.h>
+#include <core/engine/textures/Texture.h>
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <SFML/Graphics.hpp>
-
-#include "ResourceManifest.h"
 
 #include <iostream>
 

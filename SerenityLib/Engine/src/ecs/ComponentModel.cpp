@@ -1,12 +1,12 @@
-#include "ecs/ComponentModel.h"
-#include "ecs/ComponentBody.h"
-#include "ecs/ComponentCamera.h"
+#include <ecs/ComponentModel.h>
+#include <ecs/ComponentBody.h>
+#include <ecs/ComponentCamera.h>
 
-#include "core/engine/resources/Engine_Resources.h"
-#include "core/engine/Engine_Math.h"
-#include "core/MeshInstance.h"
-#include "core/Camera.h"
-#include "core/engine/mesh/Mesh.h"
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/Engine_Math.h>
+#include <core/MeshInstance.h>
+#include <core/Camera.h>
+#include <core/engine/mesh/Mesh.h>
 
 using namespace Engine;
 using namespace Engine::epriv;

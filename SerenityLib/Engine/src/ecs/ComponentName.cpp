@@ -1,4 +1,4 @@
-#include "ComponentName.h"
+#include <ecs/ComponentName.h>
 
 using namespace Engine;
 using namespace std;

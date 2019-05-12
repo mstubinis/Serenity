@@ -2,7 +2,7 @@
 #ifndef GAME_SOLARSYSTEM_H
 #define GAME_SOLARSYSTEM_H
 
-#include "core/Scene.h"
+#include <core/Scene.h>
 
 class Star;
 class Ship;
