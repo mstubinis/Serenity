@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 
 
 #endif
-    Engine::init("Engine", 1024, 768);
+    Engine::init("Solar System", 1024, 768);
     Engine::run();
 
 #ifdef _WIN32

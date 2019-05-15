@@ -39,7 +39,7 @@ struct VertexData final{
         free(data[attributeIndex]);
         auto totalSize = (_data.size() * sizeof(T)) + 1;
         data[attributeIndex] = (char*)malloc(totalSize);
-        memmove(data[attributeIndex], _data.data(), totalSize);
+        std::memmove(data[attributeIndex], _data.data(), totalSize);
         if (addToGPU) {
             if (format.interleavingType == VertexAttributeLayout::Interleaved) {
                 sendDataToGPU(orphan,-1);

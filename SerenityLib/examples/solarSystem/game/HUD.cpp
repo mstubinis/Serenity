@@ -35,7 +35,7 @@ void HUD::update(const float& dt) {
     }
     SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
     if (Engine::isKeyDownOnce(KeyboardKey::Comma)) {
-        const unordered_map<string, Planet*>& planets = scene->getPlanets();
+        const auto& planets = scene->getPlanets();
         uint a = 0;
         for (auto& p : planets) {
             if (a == _count) {
@@ -47,7 +47,7 @@ void HUD::update(const float& dt) {
         ++_count;
         if (_count > scene->getPlanets().size() - 1) { _count = 0; }
     }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
-        const unordered_map<string, Planet*>& planets = scene->getPlanets();
+        const auto& planets = scene->getPlanets();
         uint a = 0;
         for (auto& p : planets) {
             if (a == _count) {

@@ -4,7 +4,7 @@
 
 #include <string>
 #include <memory>
-#include "core/engine/events/Engine_EventObject.h"
+#include <core/engine/events/Engine_EventObject.h>
 
 typedef unsigned int     GLuint;
 typedef std::uint32_t    uint;

@@ -225,9 +225,9 @@ void CapsuleSpace::update(const float& dt){
         ribbonBodyB.setPosition(0, 300, 0);
     }
     auto& playerEntity = getPlayer()->entity();
-    epriv::EntitySerialization _s(playerEntity);
-    ComponentBody& body = *playerEntity.getComponent<ComponentBody>(_s);
-    ComponentModel& model = *playerEntity.getComponent<ComponentModel>(_s);
+    EntityDataRequest dataRequest(playerEntity);
+    ComponentBody& body = *playerEntity.getComponent<ComponentBody>(dataRequest);
+    ComponentModel& model = *playerEntity.getComponent<ComponentModel>(dataRequest);
     body.setPosition(0,0,0);
 
     const auto& sine = glm::sin(m_Timer * 2.4f);

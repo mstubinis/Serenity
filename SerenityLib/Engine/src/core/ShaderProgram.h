@@ -2,8 +2,8 @@
 #ifndef ENGINE_SHADERPROGRAM_H
 #define ENGINE_SHADERPROGRAM_H
 
-#include "core/engine/BindableResource.h"
-#include "core/engine/events/Engine_EventObject.h"
+#include <core/engine/BindableResource.h>
+#include <core/engine/events/Engine_EventObject.h>
 #include <unordered_map>
 
 #include <GL/glew.h>

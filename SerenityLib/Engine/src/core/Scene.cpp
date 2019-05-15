@@ -18,7 +18,6 @@ uint InternalScenePublicInterface::NumScenes = 0;
 struct Scene::impl final {
     SkyboxEmpty*                      m_Skybox;
     Camera*                           m_ActiveCamera;
-    vector<uint>                      m_Entities;
     glm::vec3                         m_BackgroundColor;
     uint                              m_ID;
     vector<vector<RenderPipeline*>>   m_Pipelines;
@@ -29,7 +28,10 @@ struct Scene::impl final {
     vector<SpotLight*>                m_SpotLights;
     vector<RodLight*>                 m_RodLights;
 
+    vector<uint>                      m_Entities;
+
     ECS<Entity>                       m_ECS;
+
     void _init(Scene& super,string& _name) {
         m_Pipelines.resize(RenderStage::_TOTAL);
         m_Skybox = nullptr;
@@ -167,12 +169,21 @@ struct Scene::impl final {
 vector<Engine::epriv::EntityPOD>& InternalScenePublicInterface::GetEntities(Scene& _scene) {
     return _scene.m_i->m_ECS.entityPool._pool;
 }
-
-vector<SunLight*>& InternalScenePublicInterface::GetSunLights(Scene& _scene) { return _scene.m_i->m_SunLights; }
-vector<DirectionalLight*>& InternalScenePublicInterface::GetDirectionalLights(Scene& _scene) { return _scene.m_i->m_DirectionalLights; }
-vector<PointLight*>& InternalScenePublicInterface::GetPointLights(Scene& _scene) { return _scene.m_i->m_PointLights; }
-vector<SpotLight*>& InternalScenePublicInterface::GetSpotLights(Scene& _scene) { return _scene.m_i->m_SpotLights; }
-vector<RodLight*>& InternalScenePublicInterface::GetRodLights(Scene& _scene) { return _scene.m_i->m_RodLights; }
+vector<SunLight*>& InternalScenePublicInterface::GetSunLights(Scene& _scene) { 
+    return _scene.m_i->m_SunLights; 
+}
+vector<DirectionalLight*>& InternalScenePublicInterface::GetDirectionalLights(Scene& _scene) { 
+    return _scene.m_i->m_DirectionalLights; 
+}
+vector<PointLight*>& InternalScenePublicInterface::GetPointLights(Scene& _scene) { 
+    return _scene.m_i->m_PointLights; 
+}
+vector<SpotLight*>& InternalScenePublicInterface::GetSpotLights(Scene& _scene) { 
+    return _scene.m_i->m_SpotLights; 
+}
+vector<RodLight*>& InternalScenePublicInterface::GetRodLights(Scene& _scene) { 
+    return _scene.m_i->m_RodLights; 
+}
 
 
 void InternalScenePublicInterface::RenderGeometryOpaque(Scene& _scene,Camera& _camera) {
@@ -216,22 +227,45 @@ Scene::Scene(string name):m_i(new impl){
 }
 uint Scene::id() { return m_i->m_ID; }
 
-//new ecs
-Entity Scene::createEntity() { return m_i->m_ECS.createEntity(*this); }
-Entity Scene::getEntity(Engine::epriv::EntityPOD& data) { return Entity(data.ID, data.sceneID, data.versionID); }
-void Scene::removeEntity(uint entityData) { m_i->m_ECS.removeEntity(entityData); }
-void Scene::removeEntity(Entity& entity) { epriv::EntitySerialization _s(entity); m_i->m_ECS.removeEntity(_s.ID); }
 
-Camera* Scene::getActiveCamera(){ return m_i->m_ActiveCamera; }
-void Scene::setActiveCamera(Camera& c){ m_i->m_ActiveCamera = &c; }
-void Scene::centerSceneToObject(Entity& center){ return m_i->_centerToObject(*this, center); }
+Entity Scene::createEntity() { 
+    return m_i->m_ECS.createEntity(*this); 
+}
+Entity Scene::getEntity(Engine::epriv::EntityPOD& data) { 
+    return Entity(data.ID, data.sceneID, data.versionID); 
+}
+void Scene::removeEntity(uint entityData) { 
+    m_i->m_ECS.removeEntity(entityData); 
+}
+void Scene::removeEntity(Entity& entity) { 
+    EntityDataRequest dataRequest(entity);
+    m_i->m_ECS.removeEntity(dataRequest.ID);
+}
+
+Camera* Scene::getActiveCamera(){ 
+    return m_i->m_ActiveCamera; 
+}
+void Scene::setActiveCamera(Camera& c){ 
+    m_i->m_ActiveCamera = &c; 
+}
+void Scene::centerSceneToObject(Entity& center){ 
+    return m_i->_centerToObject(*this, center); 
+}
 Scene::~Scene(){
     unregisterEvent(EventType::SceneChanged);
     m_i->_destruct();
 }
 void Scene::update(const float& dt){
 }
-glm::vec3 Scene::getBackgroundColor(){ return m_i->m_BackgroundColor; }
-SkyboxEmpty* Scene::skybox() const { return m_i->m_Skybox; }
-void Scene::setSkybox(SkyboxEmpty* s){ m_i->m_Skybox = s; }
-void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_i->m_BackgroundColor,r,g,b); }
+glm::vec3 Scene::getBackgroundColor(){ 
+    return m_i->m_BackgroundColor; 
+}
+SkyboxEmpty* Scene::skybox() const { 
+    return m_i->m_Skybox; 
+}
+void Scene::setSkybox(SkyboxEmpty* s){ 
+    m_i->m_Skybox = s; 
+}
+void Scene::setBackgroundColor(float r, float g, float b){ 
+    Math::setColor(m_i->m_BackgroundColor,r,g,b); 
+}

@@ -3,7 +3,7 @@
 #define ENGINE_ECS_COMPONENT_POOL_H
 
 #include <ecs/SparseSet.h>
-#include <ecs/EntitySerialization.h>
+#include <ecs/EntityDataRequest.h>
 
 namespace Engine {
     namespace epriv {
@@ -22,21 +22,29 @@ namespace Engine {
                 ~ECSComponentPool() = default;
 
                 template<typename... ARGS> inline TComponent* addComponent(TEntity& _entity, ARGS&&... _args) {
-                    EntitySerialization _s(_entity);
-                    return super::_add(_s.ID, const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
+                    EntityDataRequest dataRequest(_entity);
+                    return super::_add(dataRequest.ID, const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
                 }
                 inline bool removeComponent(TEntity& _entity) {
-                    EntitySerialization _s(_entity);
-                    return super::_remove(_s.ID);
+                    EntityDataRequest dataRequest(_entity);
+                    return super::_remove(dataRequest.ID);
                 }
-                inline bool removeComponent(const EntitySerialization& _s) { return super::_remove(_s.ID); }
-                inline bool removeComponent(uint& _index) { return super::_remove(_index); }
+                inline bool removeComponent(const EntityDataRequest& dataRequest) {
+                    return super::_remove(dataRequest.ID);
+                }
+                inline bool removeComponent(uint& _index) { 
+                    return super::_remove(_index); 
+                }
                 inline TComponent* getComponent(TEntity& _entity) {
-                    EntitySerialization _s(_entity);
-                    return super::_get(_s.ID);
+                    EntityDataRequest dataRequest(_entity);
+                    return super::_get(dataRequest.ID);
                 }
-                inline TComponent* getComponent(const EntitySerialization& _s) { return super::_get(_s.ID); }
-                inline TComponent* getComponent(const uint& _index) { return super::_get(_index); }
+                inline TComponent* getComponent(const EntityDataRequest& dataRequest) {
+                    return super::_get(dataRequest.ID);
+                }
+                inline TComponent* getComponent(const uint& _index) { 
+                    return super::_get(_index); 
+                }
         };
     };
 };

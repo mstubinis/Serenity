@@ -15,9 +15,6 @@ epriv::ImageMipmap::~ImageMipmap() {
 }
 
 
-
-
-
 epriv::ImageLoadedStructure::ImageLoadedStructure() {
     ImageMipmap baseImage;
     filename = "";
@@ -40,16 +37,16 @@ void epriv::ImageLoadedStructure::load(uint _width, uint _height, ImagePixelType
     }else{
         baseImage = new ImageMipmap();
     }
-    filename = "";
-    pixelFormat = _pixelFormat;
-    pixelType = _pixelType;
-    internalFormat = _internalFormat;
-    baseImage->width = _width;
-    baseImage->height = _height;
+    filename                  = "";
+    pixelFormat               = _pixelFormat;
+    pixelType                 = _pixelType;
+    internalFormat            = _internalFormat;
+    baseImage->width          = _width;
+    baseImage->height         = _height;
     baseImage->compressedSize = 0;
     if (mipmaps.size() == 0) {
         mipmaps.push_back(ImageMipmap(*baseImage));
-        delete baseImage;
+        SAFE_DELETE(baseImage);
     }
 }
 void epriv::ImageLoadedStructure::load(const sf::Image& i, string _filename) {
@@ -66,6 +63,6 @@ void epriv::ImageLoadedStructure::load(const sf::Image& i, string _filename) {
     baseImage->pixels.assign(i.getPixelsPtr(), i.getPixelsPtr() + baseImage->width * baseImage->height * 4);
     if (mipmaps.size() == 0) {
         mipmaps.push_back(ImageMipmap(*baseImage));
-        delete baseImage;
+        SAFE_DELETE(baseImage);
     }
 }

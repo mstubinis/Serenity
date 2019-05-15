@@ -16,16 +16,17 @@ using namespace std;
 struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _component, const float& dt) const {
     GameCamera& camera = *((GameCamera*)_component.getUserPointer());
     auto& entity = camera.m_Entity;
-    epriv::EntitySerialization _s(entity);
-    auto& thisCamera = *entity.getComponent<ComponentCamera>(_s);
-    auto& thisBody   = *entity.getComponent<ComponentBody>(_s);
+    EntityDataRequest dataRequest(entity);
+    auto& thisCamera = *entity.getComponent<ComponentCamera>(dataRequest);
+    auto& thisBody   = *entity.getComponent<ComponentBody>(dataRequest);
 
     switch (camera.m_State) {
         case CameraState::Follow: {
-            auto& targetEntity = camera.m_Target; epriv::EntitySerialization _st(targetEntity);
+            auto& targetEntity = camera.m_Target;
+            EntityDataRequest dataRequest1(targetEntity);
 
-            auto& targetBody = *targetEntity.getComponent<ComponentBody>(_st);
-            auto& targetModel = *targetEntity.getComponent<ComponentModel>(_st);
+            auto& targetBody = *targetEntity.getComponent<ComponentBody>(dataRequest1);
+            auto& targetModel = *targetEntity.getComponent<ComponentModel>(dataRequest1);
             float targetRadius = targetModel.radius();
 
             camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
@@ -40,12 +41,14 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             break;
         }
         case CameraState::FollowTarget: {
-            auto& targetEntity = camera.m_Target; epriv::EntitySerialization _st(targetEntity);
-            auto& playerEntity = camera.m_Player; epriv::EntitySerialization _sp(playerEntity);
+            auto& targetEntity = camera.m_Target;
+            auto& playerEntity = camera.m_Player;
+            EntityDataRequest dataRequest1(targetEntity);
+            EntityDataRequest dataRequest2(playerEntity);
 
-            auto& target = *targetEntity.getComponent<ComponentBody>(_st);
-            auto& player = *playerEntity.getComponent<ComponentBody>(_sp);
-            auto& playerModel = *playerEntity.getComponent<ComponentModel>(_sp);
+            auto& target = *targetEntity.getComponent<ComponentBody>(dataRequest1);
+            auto& player = *playerEntity.getComponent<ComponentBody>(dataRequest2);
+            auto& playerModel = *playerEntity.getComponent<ComponentModel>(dataRequest2);
 
             camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
             if (camera.m_OrbitRadius < 0)     camera.m_OrbitRadius = 0;
@@ -64,10 +67,11 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             break;
         }
         case CameraState::Orbit: {
-            auto& targetEntity = camera.m_Target; epriv::EntitySerialization _st(targetEntity);
+            auto& targetEntity = camera.m_Target; 
+            EntityDataRequest dataRequest1(targetEntity);
 
-            auto& targetBody = *targetEntity.getComponent<ComponentBody>(_st);
-            auto& targetModel = *targetEntity.getComponent<ComponentModel>(_st);
+            auto& targetBody = *targetEntity.getComponent<ComponentBody>(dataRequest1);
+            auto& targetModel = *targetEntity.getComponent<ComponentModel>(dataRequest1);
 
 
             camera.m_OrbitRadius += Engine::getMouseWheelDelta() * 0.01f;

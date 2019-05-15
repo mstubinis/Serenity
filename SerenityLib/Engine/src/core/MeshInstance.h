@@ -6,8 +6,8 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "core/engine/BindableResource.h"
-#include "core/engine/events/Engine_EventObject.h"
+#include <core/engine/BindableResource.h>
+#include <core/engine/events/Engine_EventObject.h>
 #include <ecs/Entity.h>
 
 struct Handle;

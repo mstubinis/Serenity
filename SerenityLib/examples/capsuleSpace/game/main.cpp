@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
         ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
     }
 #endif
-    Engine::init("Engine", 1024, 768);
+    Engine::init("Capsule Space", 1024, 768);
     Engine::run();
 
 #ifdef _WIN32

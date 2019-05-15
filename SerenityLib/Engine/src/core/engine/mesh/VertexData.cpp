@@ -74,7 +74,7 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
         for (size_t i = 0; i < dataSizes[0]; ++i) {
             for (size_t j = 0; j < data.size(); ++j) {
                 const auto& sizeofT = format.attributes[j].typeSize;
-                memmove(&buffer[accumulator], &(data[j])[i * sizeofT], sizeofT);
+                std::memmove(&buffer[accumulator], &(data[j])[i * sizeofT], sizeofT);
                 accumulator += sizeofT;
             }
         }
@@ -86,7 +86,7 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
             buffer = (char*)malloc(size);
             for (size_t i = 0; i < data.size(); ++i) {
                 auto blockSize = dataSizes[i] * format.attributes[i].typeSize;
-                memmove(&buffer[accumulator], &(data[i])[0], blockSize);
+                std::memmove(&buffer[accumulator], &(data[i])[0], blockSize);
                 accumulator += blockSize;
             }
             !orphan ? _vBuffer.setData(size, buffer, BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(buffer);
@@ -96,9 +96,8 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
             for (size_t i = 0; i < data.size(); ++i) {
                 if (i != attributeIndex) {
                     accumulator += dataSizes[i] * format.attributes[i].typeSize;
-                }
-                else {
-                    memmove(&buffer[0], &(data[i])[0], size);
+                }else{
+                    std::memmove(&buffer[0], &(data[i])[0], size);
                     break;
                 }
             }

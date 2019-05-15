@@ -144,10 +144,7 @@ void EVENT_RESIZE(uint w, uint h,bool saveSize){
         epriv::InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(w, h);
     }
 
-    epriv::EventWindowResized e;
-    e.width = w;
-    e.height = h;
-
+    epriv::EventWindowResized e(w,h);
     Event ev;
     ev.eventWindowResized = e;
     ev.type = EventType::WindowResized;
@@ -178,8 +175,7 @@ void EVENT_GAINED_FOCUS(){
 void EVENT_TEXT_ENTERED(uint& unicode){ 
     Game::onTextEntered(unicode); 
 
-    epriv::EventTextEntered e;
-    e.unicode = unicode;
+    epriv::EventTextEntered e(unicode);
 
     Event ev;
     ev.eventTextEntered = e;
@@ -196,6 +192,7 @@ void EVENT_KEY_PRESSED(uint key){
     if(Engine::isKeyDown(KeyboardKey::LeftAlt) || Engine::isKeyDown(KeyboardKey::RightAlt))          e.alt = true;
     if(Engine::isKeyDown(KeyboardKey::LeftShift) || Engine::isKeyDown(KeyboardKey::RightShift))      e.shift = true;
     if(Engine::isKeyDown(KeyboardKey::LeftSystem) || Engine::isKeyDown(KeyboardKey::RightSystem))    e.system = true;
+
     Event ev;
     ev.eventKeyboard = e;
     ev.type = EventType::KeyPressed;
@@ -220,8 +217,7 @@ void EVENT_MOUSE_WHEEL_MOVED(int& delta){
     epriv::Core::m_Engine->m_EventManager.onEventMouseWheelMoved(delta);
     Game::onMouseWheelMoved(delta);
 
-    epriv::EventMouseWheel e;
-    e.delta = delta;
+    epriv::EventMouseWheel e(delta);
     Event ev;
     ev.eventMouseWheel = e;
     ev.type = EventType::MouseWheelMoved;
@@ -232,10 +228,7 @@ void EVENT_MOUSE_BUTTON_PRESSED(uint mouseButton){
     Game::onMouseButtonPressed(mouseButton);
 
     const glm::uvec2 mpos = Engine::getMousePosition();
-    epriv::EventMouseButton e;
-    e.button = (MouseButton::Button)mouseButton;
-    e.x = (float)mpos.x;
-    e.y = (float)mpos.y;
+    epriv::EventMouseButton e((MouseButton::Button)mouseButton, (float)mpos.x, (float)mpos.y);
     Event ev;
     ev.eventMouseButton = e;
     ev.type = EventType::MouseButtonPressed;
@@ -246,10 +239,7 @@ void EVENT_MOUSE_BUTTON_RELEASED(uint mouseButton){
     Game::onMouseButtonReleased(mouseButton);
 
     const glm::uvec2 mpos = Engine::getMousePosition();
-    epriv::EventMouseButton e;
-    e.button = (MouseButton::Button)mouseButton;
-    e.x = (float)mpos.x;
-    e.y = (float)mpos.y;
+    epriv::EventMouseButton e((MouseButton::Button)mouseButton, (float)mpos.x, (float)mpos.y);
     Event ev;
     ev.eventMouseButton = e;
     ev.type = EventType::MouseButtonReleased;
@@ -263,9 +253,7 @@ void EVENT_MOUSE_MOVED(int mouseX, int mouseY){
     }
     Game::onMouseMoved(mX,mY);
 
-    epriv::EventMouseMove e;
-    e.x = mX;
-    e.y = mY;
+    epriv::EventMouseMove e(mX,mY);
     Event ev;
     ev.eventMouseMoved = e;
     ev.type = EventType::MouseMoved;
@@ -275,9 +263,7 @@ void EVENT_MOUSE_ENTERED(){
     Game::onMouseEntered(); 
 
     const glm::uvec2 mpos = Engine::getMousePosition();
-    epriv::EventMouseMove e;
-    e.x = (float)mpos.x;
-    e.y = (float)mpos.y;
+    epriv::EventMouseMove e((float)mpos.x, (float)mpos.y);
     Event ev;
     ev.eventMouseMoved = e;
     ev.type = EventType::MouseEnteredWindow;
@@ -287,9 +273,7 @@ void EVENT_MOUSE_LEFT(){
     Game::onMouseLeft(); 
 
     const glm::uvec2 mpos = Engine::getMousePosition();
-    epriv::EventMouseMove e;
-    e.x = (float)mpos.x;
-    e.y = (float)mpos.y;
+    epriv::EventMouseMove e((float)mpos.x, (float)mpos.y);
     Event ev;
     ev.eventMouseMoved = e;
     ev.type = EventType::MouseLeftWindow;
@@ -298,9 +282,7 @@ void EVENT_MOUSE_LEFT(){
 void EVENT_JOYSTICK_BUTTON_PRESSED(uint& button, uint& id){ 
     Game::onJoystickButtonPressed();
 
-    epriv::EventJoystickButton e;
-    e.button = button;
-    e.joystickID = id;
+    epriv::EventJoystickButton e(id,button);
     Event ev;
     ev.eventJoystickButton = e;
     ev.type = EventType::JoystickButtonPressed;
@@ -309,9 +291,7 @@ void EVENT_JOYSTICK_BUTTON_PRESSED(uint& button, uint& id){
 void EVENT_JOYSTICK_BUTTON_RELEASED(uint& button, uint& id){ 
     Game::onJoystickButtonReleased();
 
-    epriv::EventJoystickButton e;
-    e.button = button;
-    e.joystickID = id;
+    epriv::EventJoystickButton e(id,button);
     Event ev;
     ev.eventJoystickButton = e;
     ev.type = EventType::JoystickButtonReleased;
@@ -320,10 +300,7 @@ void EVENT_JOYSTICK_BUTTON_RELEASED(uint& button, uint& id){
 void EVENT_JOYSTICK_MOVED(uint& id,float& position,uint axis){
     Game::onJoystickMoved();
 
-    epriv::EventJoystickMoved e;
-    e.axis = (JoystickAxis::Axis)axis;
-    e.joystickID = id;
-    e.position = position;
+    epriv::EventJoystickMoved e(id, (JoystickAxis::Axis)axis,position);
     Event ev;
     ev.eventJoystickMoved = e;
     ev.type = EventType::JoystickMoved;
@@ -332,8 +309,7 @@ void EVENT_JOYSTICK_MOVED(uint& id,float& position,uint axis){
 void EVENT_JOYSTICK_CONNECTED(uint& id){ 
     Game::onJoystickConnected(); 
 
-    epriv::EventJoystickConnection e;
-    e.joystickID = id;
+    epriv::EventJoystickConnection e(id);
     Event ev;
     ev.eventJoystickConnection = e;
     ev.type = EventType::JoystickConnected;
@@ -342,8 +318,7 @@ void EVENT_JOYSTICK_CONNECTED(uint& id){
 void EVENT_JOYSTICK_DISCONNECTED(uint& id){ 
     Game::onJoystickDisconnected(); 
 
-    epriv::EventJoystickConnection e;
-    e.joystickID = id;
+    epriv::EventJoystickConnection e(id);
     Event ev;
     ev.eventJoystickConnection = e;
     ev.type = EventType::JoystickDisconnected;

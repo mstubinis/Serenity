@@ -2,7 +2,7 @@
 #ifndef ENGINE_MATERIAL_H
 #define ENGINE_MATERIAL_H
 
-#include "core/engine/BindableResource.h"
+#include <core/engine/BindableResource.h>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <glm/vec4.hpp>

@@ -42,20 +42,21 @@ void epriv::RenderPipeline::sort(Camera& c) {
             std::sort(
                 vect.begin(), vect.end(),
                 [&c](InstanceNode* lhs, InstanceNode* rhs) {
-                    const epriv::EntitySerialization& _s1(lhs->instance->parent());
-                    const epriv::EntitySerialization& _s2(rhs->instance->parent());
+                    auto& lhsParent = lhs->instance->parent();
+                    auto& rhsParent = rhs->instance->parent();
+                    const EntityDataRequest& _dataReq1(lhsParent);
+                    const EntityDataRequest& _dataReq2(rhsParent);
 
-                    const glm::vec3& lhsPos = lhs->instance->parent().getComponent<ComponentBody>(_s1)->position();
-                    const glm::vec3& rhsPos = rhs->instance->parent().getComponent<ComponentBody>(_s2)->position();
-                    const glm::vec3& camPos = c.getPosition();
+                    const glm::vec3& lhsPos = lhsParent.getComponent<ComponentBody>(_dataReq1)->position();
+                    const glm::vec3& rhsPos = rhsParent.getComponent<ComponentBody>(_dataReq2)->position();
+                    const float& lhsRad     = lhsParent.getComponent<ComponentModel>(_dataReq1)->radius();
+                    const float& rhsRad     = rhsParent.getComponent<ComponentModel>(_dataReq2)->radius();
 
-                    const glm::vec3& leftDir = glm::normalize(lhsPos - camPos);
+                    const glm::vec3& camPos   = c.getPosition();
+                    const glm::vec3& leftDir  = glm::normalize(lhsPos - camPos);
                     const glm::vec3& rightDir = glm::normalize(rhsPos - camPos);
 
-                    const float& lhsRad = lhs->instance->parent().getComponent<ComponentModel>(_s1)->radius();
-                    const float& rhsRad = rhs->instance->parent().getComponent<ComponentModel>(_s2)->radius();
-
-                    const glm::vec3& leftPos = lhsPos - (leftDir * lhsRad);
+                    const glm::vec3& leftPos  = lhsPos - (leftDir * lhsRad);
                     const glm::vec3& rightPos = rhsPos - (rightDir * rhsRad);
 
                     return dist(camPos, leftPos) < dist(camPos, rightPos);

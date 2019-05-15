@@ -20,10 +20,16 @@ namespace Engine {
             public:
                 std::vector<uint>& sparse() { return _sparse; }
 
-                SparseSet() { _maxLast = 0; }
-                virtual ~SparseSet() { _maxLast = 0; _sparse.clear(); }
-
-                virtual bool _remove(const uint& _IDObject) { return false; }
+                SparseSet() { 
+                    _maxLast = 0; 
+                }
+                virtual ~SparseSet() { 
+                    _maxLast = 0;
+                    _sparse.clear(); 
+                }
+                virtual bool _remove(const uint& _IDObject) { 
+                    return false; 
+                }
         };
         template <typename TID, typename TItem> class SparseSet<TID, TItem> : public SparseSet<TID> {
             using super = SparseSet<TID>;
@@ -54,14 +60,22 @@ namespace Engine {
                 inline bool _remove(const uint& _IDObject) {
                     //TODO: find a way to optimize the search for the maxLast entity...
                     uint removedEntityIndex = _IDObject - 1;
-                    if (removedEntityIndex >= super::_sparse.size()) {     //needed for scene.removeEntity(), as it iterates over all systems and some might not have the entity in them
+                    if (removedEntityIndex >= super::_sparse.size()) { //needed for scene.removeEntity(), as it iterates over all systems and some might not have the entity in them
                         return false;
                     }
                     uint removedComponentID = super::_sparse[removedEntityIndex];
                     if (removedComponentID == 0)
                         return false;
                     super::_sparse[removedEntityIndex] = 0;
-                    if (removedEntityIndex >= super::_maxLast) { super::_maxLast = 0; for (uint i = super::_sparse.size(); i-- > 0;) { if (super::_sparse[i] > 0) { super::_maxLast = i; break; } } }
+                    if (removedEntityIndex >= super::_maxLast) { 
+                        super::_maxLast = 0;
+                        for (uint i = super::_sparse.size(); i-- > 0;) { 
+                            if (super::_sparse[i] > 0) { 
+                                super::_maxLast = i; 
+                                break; 
+                            } 
+                        } 
+                    }
                     if (_dense.size() > 1) {
                         using std::swap;
                         swap(_dense[removedComponentID - 1], _dense[_dense.size() - 1]);
@@ -72,9 +86,9 @@ namespace Engine {
                 }
                 inline TItem* _get(const uint& _IDObject) {
                     uint sparseIndex = _IDObject - 1;
-                    if (super::_sparse.size() == 0)           return nullptr;
-                    if (sparseIndex >= super::_sparse.size()) return nullptr;
-                    if (super::_sparse[sparseIndex] == 0)     return nullptr;
+                    const auto& sparseSize = super::_sparse.size();
+                    if (sparseSize == 0 || super::_sparse[sparseIndex] == 0 || sparseIndex >= sparseSize)
+                        return nullptr;
                     return &(_dense[super::_sparse[sparseIndex] - 1]);
                 }
         };

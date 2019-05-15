@@ -132,9 +132,6 @@
     <ClInclude Include="Engine\src\ecs\Entity.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\ecs\EntitySerialization.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\ecs\SparseSet.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
@@ -312,6 +309,9 @@
     <ClInclude Include="Engine\src\core\Skybox.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\ecs\EntityDataRequest.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -339,9 +339,6 @@
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\ECSRegistry.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\ecs\EntitySerialization.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\Entity.cpp">
@@ -487,6 +484,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp">
       <Filter>Source Files\Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\ecs\EntityDataRequest.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

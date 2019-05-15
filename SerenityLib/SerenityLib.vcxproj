@@ -126,6 +126,7 @@
     <Lib>
       <AdditionalDependencies>assimp-d.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;Bullet2FileLoader_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -146,6 +147,7 @@
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>assimp-d.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;Bullet2FileLoader_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -178,6 +180,7 @@
     <Lib>
       <AdditionalDependencies>assimp.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;Bullet2FileLoader.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -202,6 +205,7 @@
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>assimp.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;Bullet2FileLoader.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -279,7 +283,7 @@
     <ClInclude Include="Engine\src\ecs\ECSRegistry.h" />
     <ClInclude Include="Engine\src\ecs\ECSSystem.h" />
     <ClInclude Include="Engine\src\ecs\Entity.h" />
-    <ClInclude Include="Engine\src\ecs\EntitySerialization.h" />
+    <ClInclude Include="Engine\src\ecs\EntityDataRequest.h" />
     <ClInclude Include="Engine\src\ecs\SparseSet.h" />
   </ItemGroup>
   <ItemGroup>
@@ -340,7 +344,7 @@
     <ClCompile Include="Engine\src\ecs\ComponentName.cpp" />
     <ClCompile Include="Engine\src\ecs\ECSRegistry.cpp" />
     <ClCompile Include="Engine\src\ecs\Entity.cpp" />
-    <ClCompile Include="Engine\src\ecs\EntitySerialization.cpp" />
+    <ClCompile Include="Engine\src\ecs\EntityDataRequest.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

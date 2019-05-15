@@ -3,7 +3,7 @@
 #define ENGINE_ECS_ENTITY_POOL_H
 
 #include <ecs/SparseSet.h>
-#include <ecs/EntitySerialization.h>
+#include <ecs/EntityDataRequest.h>
 #include <core/Scene.h>
 
 namespace Engine {
@@ -35,15 +35,18 @@ namespace Engine {
                     return TEntity(element.ID, element.sceneID, element.versionID);
                 }
                 EntityPOD* getEntity(const uint& _entityData) {
-                    if (_entityData == 0) return nullptr;
-                    EntitySerialization _s(_entityData);
-                    const uint& index = _s.ID - 1;
-                    if (index < _pool.size() && _pool[index].versionID == _s.versionID) {
+                    if (_entityData == 0) 
+                        return nullptr;
+                    EntityDataRequest dataRequest(_entityData);
+                    const uint& index = dataRequest.ID - 1;
+                    if (index < _pool.size() && _pool[index].versionID == dataRequest.versionID) {
                         return &_pool[index];
                     }
                     return nullptr;
                 }
-                EntityPOD* getEntity(TEntity& _entity) { return getEntity(_entity.data); }
+                EntityPOD* getEntity(TEntity& _entity) { 
+                    return getEntity(_entity.data); 
+                }
             };
     };
 };

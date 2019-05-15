@@ -172,9 +172,7 @@ Handle Resources::addSoundData(string file,string n,bool music){
 void Resources::setCurrentScene(Scene* newScene){
     Scene* oldScene = resourceManager->m_CurrentScene;
 
-    epriv::EventSceneChanged e;
-    e.oldScene = oldScene;
-    e.newScene = newScene;
+    epriv::EventSceneChanged e(oldScene, newScene);
     Event ev;
     ev.eventSceneChanged = e;
     ev.type = EventType::SceneChanged;

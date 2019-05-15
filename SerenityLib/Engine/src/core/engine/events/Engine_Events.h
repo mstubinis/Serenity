@@ -9,7 +9,6 @@
 #include <core/engine/Engine_Utils.h>
 #include <unordered_map>
 
-
 namespace Engine{
     namespace epriv{
         class EventManager final{
