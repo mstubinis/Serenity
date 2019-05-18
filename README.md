@@ -9,7 +9,7 @@ Features
 > * Custom logic and rendering code via functors
 > * Bullet Physics world
 > * Multi-threading using boost::asio worker pool and functor based jobs
-> * Resource loading (3d meshes, textures, sounds, fonts
+> * Resource loading (3d meshes, textures, sounds, fonts)
 > * Optimized render calls using Render Graphs
 
 Installing & Building - Visual Studio
