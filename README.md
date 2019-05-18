@@ -4,7 +4,7 @@ A game engine focused on producing stunning visual effects and supporting custom
 Features
 -------------------------------------
 > * Physically based rendering using deferred rendering
-> * Several post-processing effects (Depth of Field, HDR, SSAO, Bloom, Fog, God Rays, FXAA / SMAA based Anti-aliasing
+> * Several post-processing effects (Depth of Field, HDR, SSAO, Bloom, Fog, God Rays, FXAA / SMAA based Anti-aliasing)
 > * Entity-Component based game logic
 > * Custom logic and rendering code via functors
 > * Bullet Physics world
