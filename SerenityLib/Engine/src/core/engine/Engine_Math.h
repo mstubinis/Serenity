@@ -133,114 +133,114 @@ namespace glm{
 };
 
 namespace Engine{
-    namespace Math{
-        void extractViewFrustumPlanesHartmannGribbs(glm::mat4 inViewProjection,glm::vec4* outPlanes);
+namespace Math{
+    void extractViewFrustumPlanesHartmannGribbs(glm::mat4 inViewProjection,glm::vec4* outPlanes);
 
-        std::vector<glm::vec4> tiledFrustrum(Camera* camera,uint x,uint y);
+    std::vector<glm::vec4> tiledFrustrum(Camera* camera,uint x,uint y);
 
-        void Float32From16(float*    __restrict out, const uint16_t in);
-        void Float16From32(uint16_t* __restrict out, const float    in);
+    void Float32From16(float*    __restrict out, const uint16_t in);
+    void Float16From32(uint16_t* __restrict out, const float    in);
 
-        void Float32From16(float*    out, const uint16_t* in, const uint arraySize);
-        void Float16From32(uint16_t* out, const float*    in, const uint arraySize);
+    void Float32From16(float*    out, const uint16_t* in, const uint arraySize);
+    void Float16From32(uint16_t* out, const float*    in, const uint arraySize);
 
-        glm::vec2 rotate2DPoint(glm::vec2 point, float angle, glm::vec2 origin = glm::vec2(0.0f, 0.0f));
+    glm::vec2 rotate2DPoint(glm::vec2 point, float angle, glm::vec2 origin = glm::vec2(0.0f, 0.0f));
 
-        glm::quat btToGLMQuat(btQuaternion q);
-        btQuaternion glmToBTQuat(glm::quat q);
+    glm::quat btToGLMQuat(btQuaternion q);
+    btQuaternion glmToBTQuat(glm::quat q);
 
-        glm::vec3 btVectorToGLM(btVector3);
-        btVector3 btVectorFromGLM(glm::vec3);
+    glm::vec3 btVectorToGLM(btVector3);
+    btVector3 btVectorFromGLM(glm::vec3);
 
-        glm::vec3 assimpToGLMVec3(aiVector3D);
-        glm::mat4 assimpToGLMMat4(aiMatrix4x4);
-        glm::mat3 assimpToGLMMat3(aiMatrix3x3);
+    glm::vec3 assimpToGLMVec3(aiVector3D);
+    glm::mat4 assimpToGLMMat4(aiMatrix4x4);
+    glm::mat3 assimpToGLMMat3(aiMatrix3x3);
 
-        glm::vec3 getScreenCoordinates(glm::vec3 _3Dposition, bool clampToEdge = true);
-        glm::vec3 getScreenCoordinates(glm::vec3 _3Dposition,Camera&, bool clampToEdge = true);
+    glm::vec3 getScreenCoordinates(glm::vec3 _3Dposition, bool clampToEdge = true);
+    glm::vec3 getScreenCoordinates(glm::vec3 _3Dposition,Camera&, bool clampToEdge = true);
 
-        glm::vec3 midpoint(glm::vec3&,glm::vec3&);
+    glm::vec3 midpoint(glm::vec3&,glm::vec3&);
 
-        glm::vec3 direction(glm::vec3& eye,glm::vec3& target);
+    glm::vec3 direction(glm::vec3& eye,glm::vec3& target);
 
 
-        void lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up);
+    void lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up);
 
-        void translate(btRigidBody&,btVector3&,bool local);
+    void translate(btRigidBody&,btVector3&,bool local);
 
-        uchar pack2NibblesIntoChar(float x, float y);
-        glm::vec2 unpack2NibblesFromChar(uchar);
-        float pack2NibblesIntoCharBasic(float x, float y);
-        glm::vec2 unpack2NibblesFromCharBasic(float);
+    uchar pack2NibblesIntoChar(float x, float y);
+    glm::vec2 unpack2NibblesFromChar(uchar);
+    float pack2NibblesIntoCharBasic(float x, float y);
+    glm::vec2 unpack2NibblesFromCharBasic(float);
 
-        GLuint pack3NormalsInto32Int(float& x, float& y, float& z);
-        GLuint pack3NormalsInto32Int(glm::vec3&);
+    GLuint pack3NormalsInto32Int(float& x, float& y, float& z);
+    GLuint pack3NormalsInto32Int(glm::vec3&);
 
-        float pack3FloatsInto1Float(float,float,float);
-        float pack3FloatsInto1Float(glm::vec3&);
-        glm::vec3 unpack3FloatsInto1Float(float i);
+    float pack3FloatsInto1Float(float,float,float);
+    float pack3FloatsInto1Float(glm::vec3&);
+    glm::vec3 unpack3FloatsInto1Float(float i);
 
-        float pack3FloatsInto1FloatUnsigned(float,float,float);
-        float pack3FloatsInto1FloatUnsigned(glm::vec3&);
-        glm::vec3 unpack3FloatsInto1FloatUnsigned(float i);
+    float pack3FloatsInto1FloatUnsigned(float,float,float);
+    float pack3FloatsInto1FloatUnsigned(glm::vec3&);
+    glm::vec3 unpack3FloatsInto1FloatUnsigned(float i);
         
-        float pack2FloatsInto1Float(float,float);
-        float pack2FloatsInto1Float(glm::vec2&);
-        glm::vec2 unpack2FloatsInto1Float(float i);
+    float pack2FloatsInto1Float(float,float);
+    float pack2FloatsInto1Float(glm::vec2&);
+    glm::vec2 unpack2FloatsInto1Float(float i);
 
-        float remainder(float,float);
+    float remainder(float,float);
 
-        void removeMatrixPosition(glm::mat4&);
+    void removeMatrixPosition(glm::mat4&);
 
-        void recalculateForwardRightUp(glm::quat&,glm::vec3&,glm::vec3&,glm::vec3&);
-        void recalculateForwardRightUp(btRigidBody&,glm::vec3&,glm::vec3&,glm::vec3&);
+    void recalculateForwardRightUp(glm::quat&,glm::vec3&,glm::vec3&,glm::vec3&);
+    void recalculateForwardRightUp(btRigidBody&,glm::vec3&,glm::vec3&,glm::vec3&);
 
-        glm::vec3 getForward(glm::quat& q);
-        glm::vec3 getRight(glm::quat& q);
-        glm::vec3 getUp(glm::quat& q);
-        glm::vec3 getColumnVector(btRigidBody& b, uint column);
-        glm::vec3 getForward(btRigidBody& b);
-        glm::vec3 getRight(btRigidBody& b);
-        glm::vec3 getUp(btRigidBody& b);
+    glm::vec3 getForward(glm::quat& q);
+    glm::vec3 getRight(glm::quat& q);
+    glm::vec3 getUp(glm::quat& q);
+    glm::vec3 getColumnVector(btRigidBody& b, uint column);
+    glm::vec3 getForward(btRigidBody& b);
+    glm::vec3 getRight(btRigidBody& b);
+    glm::vec3 getUp(btRigidBody& b);
 
-        float getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees = true);
-        void alignTo(glm::quat& o, glm::vec3& direction,float speed=0);
+    float getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees = true);
+    void alignTo(glm::quat& o, glm::vec3& direction,float speed=0);
 
-        void setColor(glm::vec3& color,float r,float g,float b);
-        void setColor(glm::vec4& color,float r,float g,float b,float a);
+    void setColor(glm::vec3& color,float r,float g,float b);
+    void setColor(glm::vec4& color,float r,float g,float b,float a);
 
-        bool isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians);
-        bool isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians,const float fovDistance);
+    bool isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians);
+    bool isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians,const float fovDistance);
 
-        float toRadians(float degrees);
-        float toDegrees(float radians);
-        float toRadians(double degrees);
-        float toDegrees(double radians);
+    float toRadians(float degrees);
+    float toDegrees(float radians);
+    float toRadians(double degrees);
+    float toDegrees(double radians);
 
-        float Max(glm::vec2);
-        float Max(glm::vec3);
-        float Max(glm::vec4);
+    float Max(glm::vec2);
+    float Max(glm::vec3);
+    float Max(glm::vec4);
 
-        float Max(float,float);
-        float Max(float,float,float);
-        float Max(float,float,float,float);
+    float Max(float,float);
+    float Max(float,float,float);
+    float Max(float,float,float,float);
 
-        uint Max(uint,uint);
-        uint Max(uint,uint,uint);
-        uint Max(uint,uint,uint,uint);
+    uint Max(uint,uint);
+    uint Max(uint,uint,uint);
+    uint Max(uint,uint,uint,uint);
 
-        float fade(float t);
-        double fade(double t);
+    float fade(float t);
+    double fade(double t);
 
-        float lerp(float t, float a, float b);
-        double lerp(double t, double a, double b);
+    float lerp(float t, float a, float b);
+    double lerp(double t, double a, double b);
 
-        float grad(int hash, float x, float y, float z);
-        double grad(int hash, double x, double y, double z);
+    float grad(int hash, float x, float y, float z);
+    double grad(int hash, double x, double y, double z);
 
-        glm::vec4 PaintersAlgorithm(glm::vec4& paintColor, glm::vec4& canvasColor);
+    glm::vec4 PaintersAlgorithm(glm::vec4& paintColor, glm::vec4& canvasColor);
 
-        bool rayIntersectSphere(glm::vec3 position, float radius, glm::vec3 A, glm::vec3 rayVector);
-    };
+    bool rayIntersectSphere(glm::vec3 position, float radius, glm::vec3 A, glm::vec3 rayVector);
+};
 };
 #endif

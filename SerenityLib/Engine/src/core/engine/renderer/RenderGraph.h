@@ -12,40 +12,40 @@ class  Camera;
 class  Scene;
 
 namespace Engine {
-    namespace epriv {
-        struct InstanceNode {
-            MeshInstance* instance;
-            InstanceNode(MeshInstance& i) :instance(&i) {}
-        };
-        struct MeshNode {
-            Mesh* mesh;
-            std::vector<InstanceNode*> instanceNodes;
-            MeshNode(Mesh& m) :mesh(&m) {}
-            ~MeshNode() {
-                SAFE_DELETE_VECTOR(instanceNodes);
-            }
-        };
-        struct MaterialNode {
-            Material* material;
-            std::vector<MeshNode*> meshNodes;
-            MaterialNode(Material& m) :material(&m) {}
-            ~MaterialNode() {
-                SAFE_DELETE_VECTOR(meshNodes);
-            }
-        };
-        class RenderPipeline final {
-            friend class ::Scene;
-            private:
-                ShaderP& shaderProgram;
-                std::vector<MaterialNode*> materialNodes;
-            public:
-                RenderPipeline(ShaderP&);
-                ~RenderPipeline();
-
-                void sort(Camera& c);
-                void sort_cheap(Camera& c);
-                void render();
-        };
+namespace epriv {
+    struct InstanceNode {
+        MeshInstance* instance;
+        InstanceNode(MeshInstance& i) :instance(&i) {}
     };
+    struct MeshNode {
+        Mesh* mesh;
+        std::vector<InstanceNode*> instanceNodes;
+        MeshNode(Mesh& m) :mesh(&m) {}
+        ~MeshNode() {
+            SAFE_DELETE_VECTOR(instanceNodes);
+        }
+    };
+    struct MaterialNode {
+        Material* material;
+        std::vector<MeshNode*> meshNodes;
+        MaterialNode(Material& m) :material(&m) {}
+        ~MaterialNode() {
+            SAFE_DELETE_VECTOR(meshNodes);
+        }
+    };
+    class RenderPipeline final {
+        friend class ::Scene;
+        private:
+            ShaderP& shaderProgram;
+            std::vector<MaterialNode*> materialNodes;
+        public:
+            RenderPipeline(ShaderP&);
+            ~RenderPipeline();
+
+            void sort(Camera& c);
+            void sort_cheap(Camera& c);
+            void render();
+    };
+};
 };
 #endif

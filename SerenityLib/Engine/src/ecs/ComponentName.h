@@ -2,9 +2,7 @@
 #ifndef ENGINE_ECS_COMPONENT_NAME_H_INCLUDE_GUARD
 #define ENGINE_ECS_COMPONENT_NAME_H_INCLUDE_GUARD
 
-#include <core/engine/Engine_Physics.h>
 #include <ecs/ComponentBaseClass.h>
-#include <ecs/ECSSystem.h>
 
 class ComponentName : public ComponentBaseClass {
     private:
@@ -24,5 +22,4 @@ class ComponentName : public ComponentBaseClass {
 
         ~ComponentName();
 };
-
 #endif

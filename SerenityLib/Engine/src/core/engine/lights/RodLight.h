@@ -20,5 +20,4 @@ class RodLight : public PointLight {
         float rodLength();
         void setRodLength(float);
 };
-
 #endif

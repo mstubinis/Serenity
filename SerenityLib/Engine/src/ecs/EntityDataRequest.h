@@ -29,22 +29,22 @@ struct EntityDataRequest final {
 };
 
 namespace Engine {
-    namespace epriv {
-        struct EntityPOD final {
-            uint        ID : 21;
-            uint   sceneID : 7;
-            uint versionID : 4;
+namespace epriv {
+    struct EntityPOD final {
+        uint        ID : 21;
+        uint   sceneID : 7;
+        uint versionID : 4;
 
-            EntityPOD() = delete;
-            EntityPOD(uint _id, Scene& _scene);
-            EntityPOD(uint _id, uint _sceneID);
-            EntityPOD(const EntityPOD& _other) = delete;
-            EntityPOD& operator=(const EntityPOD& _other) = delete;
-            EntityPOD(EntityPOD&& _other) noexcept;
-            EntityPOD& operator=(EntityPOD&& _other) noexcept;
-            ~EntityPOD() = default;
-        };
+        EntityPOD() = delete;
+        EntityPOD(uint _id, Scene& _scene);
+        EntityPOD(uint _id, uint _sceneID);
+        EntityPOD(const EntityPOD& _other) = delete;
+        EntityPOD& operator=(const EntityPOD& _other) = delete;
+        EntityPOD(EntityPOD&& _other) noexcept;
+        EntityPOD& operator=(EntityPOD&& _other) noexcept;
+        ~EntityPOD() = default;
     };
+};
 };
 
 #endif

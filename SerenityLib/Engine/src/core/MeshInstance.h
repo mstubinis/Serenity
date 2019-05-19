@@ -37,7 +37,7 @@ class MeshInstance final: public BindableResource{
         RenderStage::Stage                                   m_Stage;
         glm::vec3                                            m_Position, m_Scale, m_GodRaysColor;
         glm::quat                                            m_Orientation;
-        glm::mat4                                            m_Model;
+        glm::mat4                                            m_ModelMatrix;
         glm::vec4                                            m_Color;
         bool                                                 m_PassedRenderCheck;
         bool                                                 m_Visible;
@@ -65,7 +65,7 @@ class MeshInstance final: public BindableResource{
         Entity& parent() { return m_Parent; }
         glm::vec4& color();
         glm::vec3& godRaysColor();
-        glm::mat4& model();
+        glm::mat4& modelMatrix();
         glm::vec3& position();
         glm::quat& orientation();
         glm::vec3& getScale();

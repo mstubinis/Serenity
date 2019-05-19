@@ -14,9 +14,9 @@ class SoundEffect;
 class SoundMusic;
 class SoundQueue;
 namespace Engine{
-    namespace epriv{
-        class SoundManager;
-    };
+namespace epriv{
+    class SoundManager;
+};
 };
 
 struct SoundStatus final{enum Status{
@@ -130,21 +130,21 @@ class SoundQueue final{
 };
 
 namespace Engine{
-    namespace epriv{
-        class SoundManager final{
-            friend class ::SoundBaseClass;
-            public:
-                class impl; std::unique_ptr<impl> m_i;
+namespace epriv{
+    class SoundManager final{
+        friend class ::SoundBaseClass;
+        public:
+            class impl; std::unique_ptr<impl> m_i;
 
-                SoundManager(const char* name,uint w,uint h);
-                ~SoundManager();
+            SoundManager(const char* name,uint w,uint h);
+            ~SoundManager();
 
-                void _update(const float& dt);
-        };
+            void _update(const float& dt);
     };
-    namespace Sound{
-        void playEffect(Handle&,uint loops = 1);
-        void playMusic(Handle&,uint loops = 1);
-    };
+};
+namespace Sound{
+    void playEffect(Handle&,uint loops = 1);
+    void playMusic(Handle&,uint loops = 1);
+};
 };
 #endif

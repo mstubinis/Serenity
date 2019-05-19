@@ -10,30 +10,30 @@
 #include <unordered_map>
 
 namespace Engine{
-    namespace epriv{
-        class EventManager final{
-            public:
-                static EventManager* m_EventManager;
+namespace epriv{
+    class EventManager final{
+        public:
+            static EventManager* m_EventManager;
 
-                std::unordered_map<uint, bool> m_KeyStatus, m_MouseStatus;
-                float m_Delta;
-                glm::vec2 m_Position, m_Position_Previous, m_Difference;
-                uint m_currentKey, m_previousKey, m_currentButton, m_previousButton;
-                EventDispatcher m_EventDispatcher;
-                void setMousePositionInternal(float x, float y, bool resetDifference, bool resetPrevious);
+            std::unordered_map<uint, bool> m_KeyStatus, m_MouseStatus;
+            float m_Delta;
+            glm::vec2 m_Position, m_Position_Previous, m_Difference;
+            uint m_currentKey, m_previousKey, m_currentButton, m_previousButton;
+            EventDispatcher m_EventDispatcher;
+            void setMousePositionInternal(float x, float y, bool resetDifference, bool resetPrevious);
 
  
-                EventManager(const char* name, uint w, uint h);
-                ~EventManager();
+            EventManager(const char* name, uint w, uint h);
+            ~EventManager();
 
-                void onEventKeyPressed(uint& key);
-                void onEventKeyReleased(uint& key);
-                void onEventMouseButtonPressed(uint& mouseButton);
-                void onEventMouseButtonReleased(uint& mouseButton);
-                void onEventMouseWheelMoved(int& delta);
-                void onResetEvents(const float& dt);
-        };
+            void onEventKeyPressed(uint& key);
+            void onEventKeyReleased(uint& key);
+            void onEventMouseButtonPressed(uint& mouseButton);
+            void onEventMouseButtonReleased(uint& mouseButton);
+            void onEventMouseWheelMoved(int& delta);
+            void onResetEvents(const float& dt);
     };
+};
     //keyboard functions
     const bool isKeyDown(KeyboardKey::Key);
     const bool isKeyDownOnce(KeyboardKey::Key);

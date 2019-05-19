@@ -126,13 +126,13 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     Renderer::sendUniform4Safe("Object_Color",i.color());
     Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
     Renderer::sendUniform1Safe("AnimationPlaying",0);
-    glm::mat4 model = i.model();
+    glm::mat4 modelMatrix = i.modelMatrix();
     float outerRadius = obj.getRadius();
 
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, pos);
-    model *= glm::mat4_cast(orientation);
-    model = glm::scale(model, glm::vec3(outerRadius));
+    modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, pos);
+    modelMatrix *= glm::mat4_cast(orientation);
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(outerRadius));
 
     //TODO: experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
     /*
@@ -141,15 +141,15 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     float _distance = _factor * _distanceReal;
     glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
     float _newScale = obj.getRadius() * _factor;
-    model = glm::mat4(1.0f);
-    model = glm::translate(model,camPosR - _newPosition);
-    model *= glm::mat4_cast(orientation);
-    model = glm::scale(model,glm::vec3(_newScale));
+    modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix,camPosR - _newPosition);
+    modelMatrix *= glm::mat4_cast(orientation);
+    modelMatrix = glm::scale(modelMatrix,glm::vec3(_newScale));
     */
 
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
     
-    Renderer::sendUniformMatrix4Safe("Model",model);
+    Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix",normalMatrix);
 }};
 

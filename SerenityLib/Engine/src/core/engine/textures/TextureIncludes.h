@@ -39,33 +39,33 @@ namespace sf {
     class Image; 
 }
 namespace Engine {
-    namespace epriv {
-        class  FramebufferObject;
-        struct ImageMipmap final {
-            uint width;
-            uint height;
-            uint compressedSize;
-            uint level;
-            std::vector<uchar> pixels;
-            ImageMipmap();
-            ~ImageMipmap();
-        };
-        struct ImageLoadedStructure final {
-            ImageInternalFormat::Format           internalFormat;
-            ImagePixelFormat::Format              pixelFormat;
-            ImagePixelType::Type                  pixelType;
-            std::vector<epriv::ImageMipmap>       mipmaps;
-            std::string                           filename;
-
-            ImageLoadedStructure();
-            ImageLoadedStructure(uint _w, uint _h, ImagePixelType::Type _pxlType, ImagePixelFormat::Format _pxlFormat, ImageInternalFormat::Format _internFormat);
-            ImageLoadedStructure(const sf::Image& i, std::string _filename = "");
-            ~ImageLoadedStructure();
-
-            void load(uint _width, uint _height, ImagePixelType::Type _pixelType, ImagePixelFormat::Format _pixelFormat, ImageInternalFormat::Format _internalFormat);
-            void load(const sf::Image& i, std::string _filename = "");
-        };
+namespace epriv {
+    class  FramebufferObject;
+    struct ImageMipmap final {
+        uint width;
+        uint height;
+        uint compressedSize;
+        uint level;
+        std::vector<uchar> pixels;
+        ImageMipmap();
+        ~ImageMipmap();
     };
+    struct ImageLoadedStructure final {
+        ImageInternalFormat::Format           internalFormat;
+        ImagePixelFormat::Format              pixelFormat;
+        ImagePixelType::Type                  pixelType;
+        std::vector<epriv::ImageMipmap>       mipmaps;
+        std::string                           filename;
+
+        ImageLoadedStructure();
+        ImageLoadedStructure(uint _w, uint _h, ImagePixelType::Type _pxlType, ImagePixelFormat::Format _pxlFormat, ImageInternalFormat::Format _internFormat);
+        ImageLoadedStructure(const sf::Image& i, std::string _filename = "");
+        ~ImageLoadedStructure();
+
+        void load(uint _width, uint _height, ImagePixelType::Type _pixelType, ImagePixelFormat::Format _pixelFormat, ImageInternalFormat::Format _internalFormat);
+        void load(const sf::Image& i, std::string _filename = "");
+    };
+};
 };
 
 

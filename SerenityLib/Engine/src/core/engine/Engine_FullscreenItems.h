@@ -11,44 +11,44 @@
 typedef unsigned short ushort;
 
 namespace Engine{
-    namespace epriv{
-        struct MeshVertexDataFullscreen final {
-            glm::vec3 position;
-            glm::vec2 uv;
-        };
-
-        class FullscreenTriangle final: public EventObserver{
-            private:
-                std::vector<ushort> m_Indices;
-                std::vector<MeshVertexDataFullscreen> m_Vertices;
-                std::vector<GLuint> m_Buffers;
-                GLuint m_VAO;
-
-                void bindToGPU();
-                void buildVAO();
-            public:
-                FullscreenTriangle();
-                ~FullscreenTriangle();
-
-                void render();
-                void onEvent(const Event& e);
-        };
-        class FullscreenQuad final: public EventObserver{
-            private:
-                std::vector<ushort> m_Indices;
-                std::vector<MeshVertexDataFullscreen> m_Vertices;
-                std::vector<GLuint> m_Buffers;
-                GLuint m_VAO;
-
-                void bindToGPU();
-                void buildVAO();
-            public:
-                FullscreenQuad();
-                ~FullscreenQuad();
-
-                void render();
-                void onEvent(const Event& e);
-        };
+namespace epriv{
+    struct MeshVertexDataFullscreen final {
+        glm::vec3 position;
+        glm::vec2 uv;
     };
+
+    class FullscreenTriangle final: public EventObserver{
+        private:
+            std::vector<ushort> m_Indices;
+            std::vector<MeshVertexDataFullscreen> m_Vertices;
+            std::vector<GLuint> m_Buffers;
+            GLuint m_VAO;
+
+            void bindToGPU();
+            void buildVAO();
+        public:
+            FullscreenTriangle();
+            ~FullscreenTriangle();
+
+            void render();
+            void onEvent(const Event& e);
+    };
+    class FullscreenQuad final: public EventObserver{
+        private:
+            std::vector<ushort> m_Indices;
+            std::vector<MeshVertexDataFullscreen> m_Vertices;
+            std::vector<GLuint> m_Buffers;
+            GLuint m_VAO;
+
+            void bindToGPU();
+            void buildVAO();
+        public:
+            FullscreenQuad();
+            ~FullscreenQuad();
+
+            void render();
+            void onEvent(const Event& e);
+    };
+};
 };
 #endif

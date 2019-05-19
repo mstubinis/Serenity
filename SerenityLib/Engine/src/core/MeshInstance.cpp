@@ -87,16 +87,16 @@ void epriv::DefaultMeshInstanceBindFunctor::operator()(EngineResource* r) const 
     }else{
         Renderer::sendUniform1Safe("AnimationPlaying",0);
     }
-    glm::mat4 model = parentModel * i.m_Model; //might need to reverse this order.
+    glm::mat4 modelMatrix = parentModel * i.m_ModelMatrix; //might need to reverse this order.
 
     //world space normals
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
 
     //view space normals
     //glm::mat4 view = cam.getView();
     //glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(view * model)));
      
-    Renderer::sendUniformMatrix4Safe("Model",model);
+    Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix",normalMatrix);
 };
 void epriv::DefaultMeshInstanceUnbindFunctor::operator()(EngineResource* r) const {
@@ -124,11 +124,11 @@ void MeshInstance::_init(Mesh* mesh, Material* mat, Entity& parent, ShaderP* pro
     _updateModelMatrix();
 }
 void MeshInstance::_updateModelMatrix() {
-    m_Model = glm::mat4(1.0f);
+    m_ModelMatrix = glm::mat4(1.0f);
     glm::mat4 translationMatrix = glm::translate(m_Position);
     glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
     glm::mat4 scaleMatrix = glm::scale(m_Scale);
-    m_Model = translationMatrix * rotationMatrix * scaleMatrix * m_Model;
+    m_ModelMatrix = translationMatrix * rotationMatrix * scaleMatrix * m_ModelMatrix;
 }
 
 MeshInstance::MeshInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderP* program){
@@ -136,9 +136,12 @@ MeshInstance::MeshInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderP* p
     setCustomBindFunctor(epriv::DefaultMeshInstanceBindFunctor());
     setCustomUnbindFunctor(epriv::DefaultMeshInstanceUnbindFunctor());
 }
-MeshInstance::MeshInstance(Entity& parent, Handle mesh, Handle mat, ShaderP* program):MeshInstance(parent,(Mesh*)mesh.get(), (Material*)mat.get(),program){}
-MeshInstance::MeshInstance(Entity& parent, Mesh* mesh, Handle mat, ShaderP* program):MeshInstance(parent, mesh, (Material*)mat.get(), program){}
-MeshInstance::MeshInstance(Entity& parent, Handle mesh, Material* mat, ShaderP* program):MeshInstance(parent, (Mesh*)mesh.get(), mat, program) {}
+MeshInstance::MeshInstance(Entity& parent, Handle mesh, Handle mat, ShaderP* program):MeshInstance(parent,(Mesh*)mesh.get(), (Material*)mat.get(),program){
+}
+MeshInstance::MeshInstance(Entity& parent, Mesh* mesh, Handle mat, ShaderP* program):MeshInstance(parent, mesh, (Material*)mat.get(), program){
+}
+MeshInstance::MeshInstance(Entity& parent, Handle mesh, Material* mat, ShaderP* program):MeshInstance(parent, (Mesh*)mesh.get(), mat, program) {
+}
 
 
 
@@ -160,46 +163,95 @@ void MeshInstance::setPosition(float x, float y, float z){ m_Position = glm::vec
 void MeshInstance::setScale(float x,float y,float z){ m_Scale = glm::vec3(x, y, z); _updateModelMatrix(); }
 void MeshInstance::translate(float x, float y, float z){ m_Position += glm::vec3(x, y, z); _updateModelMatrix(); }
 void MeshInstance::rotate(float x, float y, float z){ 
-    float threshold = 0;
-    if (abs(x) > threshold) m_Orientation = m_Orientation * (glm::angleAxis(-x, glm::vec3(1, 0, 0)));   //pitch
-    if (abs(y) > threshold) m_Orientation = m_Orientation * (glm::angleAxis(-y, glm::vec3(0, 1, 0)));   //yaw
-    if (abs(z) > threshold) m_Orientation = m_Orientation * (glm::angleAxis(z, glm::vec3(0, 0, 1)));   //roll
+    float threshold = 0.001f;
+    if (abs(x) > threshold) 
+        m_Orientation = m_Orientation * (glm::angleAxis(-x, glm::vec3(1, 0, 0)));   //pitch
+    if (abs(y) > threshold) 
+        m_Orientation = m_Orientation * (glm::angleAxis(-y, glm::vec3(0, 1, 0)));   //yaw
+    if (abs(z) > threshold) 
+        m_Orientation = m_Orientation * (glm::angleAxis(z, glm::vec3(0, 0, 1)));   //roll
     _updateModelMatrix();
 }
-void MeshInstance::scale(float x,float y,float z){ m_Scale += glm::vec3(x, y, z); _updateModelMatrix(); }
-void MeshInstance::setPosition(glm::vec3& v){ setPosition(v.x,v.y,v.z); }
-void MeshInstance::setScale(glm::vec3& v){ setScale(v.x,v.y,v.z); }
-void MeshInstance::translate(glm::vec3& v){ translate(v.x,v.y,v.z); }
-void MeshInstance::rotate(glm::vec3& v){ rotate(v.x,v.y,v.z); }
-void MeshInstance::scale(glm::vec3& v){ scale(v.x,v.y,v.z); }
-glm::vec4& MeshInstance::color(){ return m_Color; }
-glm::vec3& MeshInstance::godRaysColor(){ return m_GodRaysColor; }
-glm::mat4& MeshInstance::model(){ return m_Model; }
-glm::vec3& MeshInstance::getScale(){ return m_Scale; }
-glm::vec3& MeshInstance::position(){ return m_Position; }
-glm::quat& MeshInstance::orientation(){ return m_Orientation; }
-ShaderP* MeshInstance::shaderProgram() { return m_ShaderProgram; }
-Mesh* MeshInstance::mesh(){ return m_Mesh; }
-Material* MeshInstance::material(){ return m_Material; }
-RenderStage::Stage MeshInstance::stage() { return m_Stage; }
-void MeshInstance::setShaderProgram(const Handle& shaderPHandle, ComponentModel& model) { setShaderProgram(((ShaderP*)shaderPHandle.get()), model); }
+void MeshInstance::scale(float x,float y,float z){ 
+    m_Scale += glm::vec3(x, y, z); 
+    _updateModelMatrix(); 
+}
+void MeshInstance::setPosition(glm::vec3& v){ 
+    setPosition(v.x,v.y,v.z); 
+}
+void MeshInstance::setScale(glm::vec3& v){ 
+    setScale(v.x,v.y,v.z); 
+}
+void MeshInstance::translate(glm::vec3& v){ 
+    translate(v.x,v.y,v.z); 
+}
+void MeshInstance::rotate(glm::vec3& v){ 
+    rotate(v.x,v.y,v.z); 
+}
+void MeshInstance::scale(glm::vec3& v){ 
+    scale(v.x,v.y,v.z); 
+}
+glm::vec4& MeshInstance::color(){ 
+    return m_Color; 
+}
+glm::vec3& MeshInstance::godRaysColor(){ 
+    return m_GodRaysColor; 
+}
+glm::mat4& MeshInstance::modelMatrix(){ 
+    return m_ModelMatrix; 
+}
+glm::vec3& MeshInstance::getScale(){ 
+    return m_Scale; 
+}
+glm::vec3& MeshInstance::position(){ 
+    return m_Position; 
+}
+glm::quat& MeshInstance::orientation(){ 
+    return m_Orientation; 
+}
+ShaderP* MeshInstance::shaderProgram() { 
+    return m_ShaderProgram; 
+}
+Mesh* MeshInstance::mesh(){ 
+    return m_Mesh; 
+}
+Material* MeshInstance::material(){ 
+    return m_Material; 
+}
+RenderStage::Stage MeshInstance::stage() { 
+    return m_Stage; 
+}
+void MeshInstance::setShaderProgram(const Handle& shaderPHandle, ComponentModel& model) { 
+    setShaderProgram(((ShaderP*)shaderPHandle.get()), model); 
+}
 void MeshInstance::setShaderProgram(ShaderP* shaderProgram, ComponentModel& model) {
-    if (!shaderProgram) { shaderProgram = epriv::InternalShaderPrograms::Deferred; }
+    if (!shaderProgram) { 
+        shaderProgram = epriv::InternalShaderPrograms::Deferred; 
+    }
     model.setModel(m_Mesh, m_Material, 0, shaderProgram, m_Stage);
 }
-void MeshInstance::setMesh(const Handle& meshHandle, ComponentModel& model){ setMesh(((Mesh*)meshHandle.get()), model); }
+void MeshInstance::setMesh(const Handle& meshHandle, ComponentModel& model){ 
+    setMesh(((Mesh*)meshHandle.get()), model); 
+}
 void MeshInstance::setMesh(Mesh* mesh, ComponentModel& model){
     model.setModel(mesh, m_Material, 0, m_ShaderProgram, m_Stage);
 }
-void MeshInstance::setMaterial(const Handle& materialHandle, ComponentModel& model){ setMaterial(((Material*)materialHandle.get()), model); }
+void MeshInstance::setMaterial(const Handle& materialHandle, ComponentModel& model){ 
+    setMaterial(((Material*)materialHandle.get()), model); 
+}
 void MeshInstance::setMaterial(Material* material, ComponentModel& model){
     model.setModel(m_Mesh, material, 0, m_ShaderProgram, m_Stage);
 }
-void MeshInstance::setOrientation(glm::quat& o){ m_Orientation = o; }
+void MeshInstance::setOrientation(glm::quat& o){ 
+    m_Orientation = o; 
+}
 void MeshInstance::setOrientation(float x,float y,float z){ 
-    if(abs(x) > 0.001f) m_Orientation =                 (glm::angleAxis(-x, glm::vec3(1,0,0)));
-    if(abs(y) > 0.001f) m_Orientation = m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));
-    if(abs(z) > 0.001f) m_Orientation = m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));
+    if(abs(x) > 0.001f) 
+        m_Orientation =                 (glm::angleAxis(-x, glm::vec3(1,0,0)));
+    if(abs(y) > 0.001f) 
+        m_Orientation = m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));
+    if(abs(z) > 0.001f) 
+        m_Orientation = m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));
     _updateModelMatrix();
 }
 void MeshInstance::playAnimation(const string& animName,float start,float end,uint reqLoops){

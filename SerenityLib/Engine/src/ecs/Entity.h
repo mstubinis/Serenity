@@ -85,15 +85,15 @@ class EntityWrapper {
 };
 
 namespace Engine {
-    namespace epriv {
-        struct InternalEntityPublicInterface final {
-            static ECS<Entity>& GetECS(Entity& _entity) {
-                EntityDataRequest dataRequest(_entity);
-                Scene& s = epriv::Core::m_Engine->m_ResourceManager._getSceneByID(dataRequest.sceneID);
-                return Engine::epriv::InternalScenePublicInterface::GetECS(s);
-            }
-        };
+namespace epriv {
+    struct InternalEntityPublicInterface final {
+        static ECS<Entity>& GetECS(Entity& _entity) {
+            EntityDataRequest dataRequest(_entity);
+            Scene& s = epriv::Core::m_Engine->m_ResourceManager._getSceneByID(dataRequest.sceneID);
+            return Engine::epriv::InternalScenePublicInterface::GetECS(s);
+        }
     };
+};
 };
 
 #endif

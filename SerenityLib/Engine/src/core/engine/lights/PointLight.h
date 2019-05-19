@@ -37,5 +37,4 @@ class PointLight : public SunLight {
         float getLinear();
         float getExponent();
 };
-
 #endif

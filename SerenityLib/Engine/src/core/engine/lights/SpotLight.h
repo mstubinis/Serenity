@@ -22,5 +22,4 @@ class SpotLight : public PointLight {
         void setCutoff(float);
         void setCutoffOuter(float);
 };
-
 #endif

@@ -13,15 +13,15 @@
 #include <assimp/postprocess.h>
 
 namespace Engine {
-    namespace epriv {
-        struct AssimpSceneImport final {
-            Assimp::Importer importer;
-            aiScene*         scene;
-            aiNode*          root;
+namespace epriv {
+    struct AssimpSceneImport final {
+        Assimp::Importer importer;
+        aiScene*         scene;
+        aiNode*          root;
 
-            AssimpSceneImport() { scene = 0; root = 0; }
-        };
+        AssimpSceneImport() { scene = 0; root = 0; }
     };
+};
 };
 struct MeshRequestPart final {
     Mesh*        mesh;
@@ -60,15 +60,15 @@ struct MeshRequest final {
 
 
 namespace Engine {
-    namespace epriv {
-        struct InternalMeshRequestPublicInterface final {
-            friend class  ::Mesh;
-            static void Request(MeshRequest&);
-            static bool Populate(MeshRequest&);
-            static void LoadGPU(MeshRequest&);
-            static void LoadCPU(MeshRequest&);
-        };
+namespace epriv {
+    struct InternalMeshRequestPublicInterface final {
+        friend class  ::Mesh;
+        static void Request(MeshRequest&);
+        static bool Populate(MeshRequest&);
+        static void LoadGPU(MeshRequest&);
+        static void LoadCPU(MeshRequest&);
     };
+};
 };
 
 

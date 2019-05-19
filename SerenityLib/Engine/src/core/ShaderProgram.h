@@ -71,14 +71,14 @@ class Shader final: public EngineResource{
 };
 
 namespace Engine {
-    namespace epriv {
-        struct InternalShaderProgramPublicInterface final {
-            static void LoadCPU(ShaderP&);
-            static void LoadGPU(ShaderP&);
-            static void UnloadCPU(ShaderP&);
-            static void UnloadGPU(ShaderP&);
-        };
+namespace epriv {
+    struct InternalShaderProgramPublicInterface final {
+        static void LoadCPU(ShaderP&);
+        static void LoadGPU(ShaderP&);
+        static void UnloadCPU(ShaderP&);
+        static void UnloadGPU(ShaderP&);
     };
+};
 };
 class ShaderP final: public BindableResource, public EventObserver{
     friend class ::UniformBufferObject;

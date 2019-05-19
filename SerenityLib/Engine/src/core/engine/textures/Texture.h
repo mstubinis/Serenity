@@ -11,31 +11,31 @@
 #include <SFML/OpenGL.hpp>
 
 namespace Engine{
-    namespace epriv{
-        struct TextureLoader final{
-            friend class ::Texture;
+namespace epriv{
+    struct TextureLoader final{
+        friend class ::Texture;
 
-            static void LoadDDSFile(Texture& texture, std::string filename,epriv::ImageLoadedStructure& image);
+        static void LoadDDSFile(Texture& texture, std::string filename,epriv::ImageLoadedStructure& image);
 
-            static void LoadTexture2DIntoOpenGL(Texture& texture);
-            static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
-            static void LoadTextureCubemapIntoOpenGL(Texture& texture);
+        static void LoadTexture2DIntoOpenGL(Texture& texture);
+        static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
+        static void LoadTextureCubemapIntoOpenGL(Texture& texture);
 
-            static void EnumWrapToGL(uint& gl, TextureWrap::Wrap& wrap);
-            static void EnumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min);
-            static bool IsCompressedType(ImageInternalFormat::Format);
+        static void EnumWrapToGL(uint& gl, TextureWrap::Wrap& wrap);
+        static void EnumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min);
+        static bool IsCompressedType(ImageInternalFormat::Format);
 
-            static void GenerateMipmapsOpenGL(Texture& texture);
-            static void WithdrawPixelsFromOpenGLMemory(Texture& texture,uint imageIndex = 0,uint mipmapLevel = 0);
-            static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat,ImageInternalFormat::Format& inInternalFormat);
-        };
-        struct InternalTexturePublicInterface final {
-            static void LoadCPU(Texture&);
-            static void LoadGPU(Texture&);
-            static void UnloadCPU(Texture&);
-            static void UnloadGPU(Texture&);
-        };
+        static void GenerateMipmapsOpenGL(Texture& texture);
+        static void WithdrawPixelsFromOpenGLMemory(Texture& texture,uint imageIndex = 0,uint mipmapLevel = 0);
+        static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat,ImageInternalFormat::Format& inInternalFormat);
     };
+    struct InternalTexturePublicInterface final {
+        static void LoadCPU(Texture&);
+        static void LoadGPU(Texture&);
+        static void UnloadCPU(Texture&);
+        static void UnloadGPU(Texture&);
+    };
+};
 };
 
 class Texture: public EngineResource{

@@ -6,9 +6,9 @@
 #include <core/engine/lights/LightIncludes.h>
 
 namespace Engine {
-    namespace epriv {
-        class RenderManager;
-    };
+namespace epriv {
+    class RenderManager;
+};
 };
 
 class SunLight : public EntityWrapper {
@@ -40,5 +40,4 @@ class SunLight : public EntityWrapper {
         bool isActive();
         uint type();
 };
-
 #endif

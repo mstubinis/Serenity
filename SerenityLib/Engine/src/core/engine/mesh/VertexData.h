@@ -25,6 +25,7 @@ struct VertexData final{
 
     VertexData(const VertexDataFormat& _format);
     ~VertexData();
+
     template<typename T> const std::vector<T> getData(size_t attributeIndex) {
         const T* _data = (T*)data[attributeIndex];
         std::vector<T> ret(_data, _data + dataSizes[attributeIndex]);

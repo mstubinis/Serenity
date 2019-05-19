@@ -17,16 +17,16 @@ class ComponentModel;
 class ComponentCamera;
 
 namespace Engine {
-    namespace epriv {
-        struct ComponentModel_UpdateFunction;
-        struct ComponentModel_EntityAddedToSceneFunction;
-        struct ComponentModel_ComponentAddedToEntityFunction;
-        struct ComponentModel_SceneEnteredFunction;
-        struct ComponentModel_SceneLeftFunction;
-        struct ComponentModel_Functions final {
-            static float CalculateRadius(ComponentModel& super);
-        };
+namespace epriv {
+    struct ComponentModel_UpdateFunction;
+    struct ComponentModel_EntityAddedToSceneFunction;
+    struct ComponentModel_ComponentAddedToEntityFunction;
+    struct ComponentModel_SceneEnteredFunction;
+    struct ComponentModel_SceneLeftFunction;
+    struct ComponentModel_Functions final {
+        static float CalculateRadius(ComponentModel& super);
     };
+};
 };
 
 class ComponentModel : public ComponentBaseClass {
@@ -38,9 +38,9 @@ class ComponentModel : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentModel_Functions;
     friend class  ::ComponentCamera;
     private:
-        std::vector<MeshInstance*> models;
-        float _radius;
-        glm::vec3 _radiusBox;
+        std::vector<MeshInstance*> _meshInstances;
+        float                      _radius;
+        glm::vec3                  _radiusBox;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentModel(Entity&, Handle& meshHandle, Handle& materialHandle, ShaderP* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
@@ -85,8 +85,12 @@ class ComponentModel : public ComponentBaseClass {
 
         bool rayIntersectSphere(ComponentCamera& camera);
 
-        template<class T> void setCustomBindFunctor(const T& functor, uint index = 0) { models[index]->setCustomBindFunctor(functor); }
-        template<class T> void setCustomUnbindFunctor(const T& functor, uint index = 0) { models[index]->setCustomUnbindFunctor(functor); }
+        template<class T> void setCustomBindFunctor(const T& functor, uint index = 0) { 
+            _meshInstances[index]->setCustomBindFunctor(functor);
+        }
+        template<class T> void setCustomUnbindFunctor(const T& functor, uint index = 0) { 
+            _meshInstances[index]->setCustomUnbindFunctor(functor);
+        }
 };
 
 class ComponentModel_System : public Engine::epriv::ECSSystemCI {

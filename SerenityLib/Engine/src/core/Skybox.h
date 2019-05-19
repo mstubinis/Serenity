@@ -14,9 +14,9 @@ class Texture;
 class Mesh;
 
 namespace Engine {
-    namespace epriv {
-        class SkyboxImplInterface;
-    };
+namespace epriv {
+    class SkyboxImplInterface;
+};
 };
 
 class ISkybox{public:

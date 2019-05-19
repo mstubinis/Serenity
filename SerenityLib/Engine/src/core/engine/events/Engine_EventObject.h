@@ -8,7 +8,7 @@
 class Scene;
 
 
-//TODO: split this into its own header file
+//TODO: split this into its own header file?
 struct RenderStage {enum Stage {
     GeometryOpaque,
     GeometryTransparent,
@@ -16,7 +16,6 @@ struct RenderStage {enum Stage {
     ForwardTransparent,
 _TOTAL};};
 //
-
 
 struct EventType final{enum Type{
     WindowResized,
@@ -45,85 +44,85 @@ struct EventType final{enum Type{
 _TOTAL};};
 
 namespace Engine{
-    namespace epriv{
-        struct EventWindowResized final{ 
-            uint width,height; 
-            EventWindowResized() = default;
-            EventWindowResized(const uint& _width, const uint& _height) {
-                width = _width; height = _height;
-            }
-        };
-        struct EventWindowFullscreenChanged final{ 
-            bool isFullscreen; 
-            EventWindowFullscreenChanged() = default;
-            EventWindowFullscreenChanged(const bool& _isFullscreen) {
-                isFullscreen = _isFullscreen;
-            }
-        };
-        struct EventKeyboard final{ 
-            KeyboardKey::Key key; bool alt, control, shift, system;
-            EventKeyboard() = default;
-            EventKeyboard(const KeyboardKey::Key& _key, const bool& _alt, const bool& _control, const bool& _shift, const bool& _system) {
-                key = _key; alt = _alt; control = _control; shift = _shift; system = _system;
-            }
-        };
-        struct EventTextEntered final{ 
-            std::uint32_t unicode;
-            EventTextEntered() = default;
-            EventTextEntered(const std::uint32_t& _unicode) {
-                unicode = _unicode;
-            }
-        };
-        struct EventMouseButton final{ 
-            MouseButton::Button button; float x, y; 
-            EventMouseButton() = default;
-            EventMouseButton(const MouseButton::Button& _button, const float& _x, const float& _y) {
-                button = _button; x = _x; y = _y;
-            }
-        };
-        struct EventMouseMove final{ 
-            float x,y;
-            EventMouseMove() = default;
-            EventMouseMove(const float& _x, const float& _y) {
-                x = _x; y = _y;
-            }
-        };
-        struct EventMouseWheel final{ 
-            int delta; 
-            EventMouseWheel() = default;
-            EventMouseWheel(const int& _delta) {
-                delta = _delta;
-            }
-        };
-        struct EventJoystickMoved final{ 
-            uint joystickID; JoystickAxis::Axis axis; float position;
-            EventJoystickMoved() = default;
-            EventJoystickMoved(const uint& _joystickID, const JoystickAxis::Axis& _axis, const float& _position) {
-                joystickID = _joystickID; axis = _axis; position = _position;
-            }
-        };
-        struct EventJoystickButton final{ 
-            uint joystickID; uint button; 
-            EventJoystickButton() = default;
-            EventJoystickButton(const uint& _joystickID, const uint& _button) {
-                joystickID = _joystickID; button = _button;
-            }
-        };
-        struct EventJoystickConnection final{ 
-            uint joystickID; 
-            EventJoystickConnection() = default;
-            EventJoystickConnection(const uint& _joystickID) {
-                joystickID = _joystickID;
-            }
-        };
-        struct EventSceneChanged final{ 
-            Scene *oldScene, *newScene; 
-            EventSceneChanged() = default;
-            EventSceneChanged(Scene* _old, Scene* _new) {
-                oldScene = _old; newScene = _new;
-            }
-        };
+namespace epriv{
+    struct EventWindowResized final{ 
+        uint width,height; 
+        EventWindowResized() = default;
+        EventWindowResized(const uint& _width, const uint& _height) {
+            width = _width; height = _height;
+        }
     };
+    struct EventWindowFullscreenChanged final{ 
+        bool isFullscreen; 
+        EventWindowFullscreenChanged() = default;
+        EventWindowFullscreenChanged(const bool& _isFullscreen) {
+            isFullscreen = _isFullscreen;
+        }
+    };
+    struct EventKeyboard final{ 
+        KeyboardKey::Key key; bool alt, control, shift, system;
+        EventKeyboard() = default;
+        EventKeyboard(const KeyboardKey::Key& _key, const bool& _alt, const bool& _control, const bool& _shift, const bool& _system) {
+            key = _key; alt = _alt; control = _control; shift = _shift; system = _system;
+        }
+    };
+    struct EventTextEntered final{ 
+        std::uint32_t unicode;
+        EventTextEntered() = default;
+        EventTextEntered(const std::uint32_t& _unicode) {
+            unicode = _unicode;
+        }
+    };
+    struct EventMouseButton final{ 
+        MouseButton::Button button; float x, y; 
+        EventMouseButton() = default;
+        EventMouseButton(const MouseButton::Button& _button, const float& _x, const float& _y) {
+            button = _button; x = _x; y = _y;
+        }
+    };
+    struct EventMouseMove final{ 
+        float x,y;
+        EventMouseMove() = default;
+        EventMouseMove(const float& _x, const float& _y) {
+            x = _x; y = _y;
+        }
+    };
+    struct EventMouseWheel final{ 
+        int delta; 
+        EventMouseWheel() = default;
+        EventMouseWheel(const int& _delta) {
+            delta = _delta;
+        }
+    };
+    struct EventJoystickMoved final{ 
+        uint joystickID; JoystickAxis::Axis axis; float position;
+        EventJoystickMoved() = default;
+        EventJoystickMoved(const uint& _joystickID, const JoystickAxis::Axis& _axis, const float& _position) {
+            joystickID = _joystickID; axis = _axis; position = _position;
+        }
+    };
+    struct EventJoystickButton final{ 
+        uint joystickID; uint button; 
+        EventJoystickButton() = default;
+        EventJoystickButton(const uint& _joystickID, const uint& _button) {
+            joystickID = _joystickID; button = _button;
+        }
+    };
+    struct EventJoystickConnection final{ 
+        uint joystickID; 
+        EventJoystickConnection() = default;
+        EventJoystickConnection(const uint& _joystickID) {
+            joystickID = _joystickID;
+        }
+    };
+    struct EventSceneChanged final{ 
+        Scene *oldScene, *newScene; 
+        EventSceneChanged() = default;
+        EventSceneChanged(Scene* _old, Scene* _new) {
+            oldScene = _old; newScene = _new;
+        }
+    };
+};
 };
 struct Event final{
     EventType::Type type;

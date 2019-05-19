@@ -14,22 +14,22 @@ class ComponentModel;
 class ComponentCamera;
 
 namespace Engine {
-    namespace epriv {
-        struct ComponentCamera_UpdateFunction;
-        struct ComponentCamera_EntityAddedToSceneFunction;
-        struct ComponentCamera_ComponentAddedToEntityFunction;
-        struct ComponentCamera_SceneEnteredFunction;
-        struct ComponentCamera_SceneLeftFunction;
+namespace epriv {
+    struct ComponentCamera_UpdateFunction;
+    struct ComponentCamera_EntityAddedToSceneFunction;
+    struct ComponentCamera_ComponentAddedToEntityFunction;
+    struct ComponentCamera_SceneEnteredFunction;
+    struct ComponentCamera_SceneLeftFunction;
 
-        struct ComponentCamera_Functions final {
-            static void      RebuildProjectionMatrix(ComponentCamera& cam);
-            static glm::mat4 GetViewNoTranslation(Camera& c);
-            static glm::mat4 GetViewInverseNoTranslation(Camera& c);
-            static glm::mat4 GetViewProjectionNoTranslation(Camera& c);
-            static glm::mat4 GetViewProjectionInverseNoTranslation(Camera& c);
-            static glm::vec3 GetViewVectorNoTranslation(Camera& c);
-        };
+    struct ComponentCamera_Functions final {
+        static void      RebuildProjectionMatrix(ComponentCamera& cam);
+        static glm::mat4 GetViewNoTranslation(Camera& c);
+        static glm::mat4 GetViewInverseNoTranslation(Camera& c);
+        static glm::mat4 GetViewProjectionNoTranslation(Camera& c);
+        static glm::mat4 GetViewProjectionInverseNoTranslation(Camera& c);
+        static glm::vec3 GetViewVectorNoTranslation(Camera& c);
     };
+};
 };
 
 class ComponentCamera : public ComponentBaseClass {

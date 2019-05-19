@@ -20,24 +20,24 @@ class  MeshInstance;
 class  Mesh;
 
 namespace Engine{
-    namespace epriv{
-        class  MeshLoader;
-        class  MeshSkeleton;
-        class  MeshCollisionFactory;
-        struct DefaultMeshBindFunctor;
-        struct DefaultMeshUnbindFunctor;
-        struct BoneNode;
-        class  AnimationData;
-        struct InternalMeshRequestPublicInterface;
-        struct InternalMeshPublicInterface final {
-            static void LoadCPU(Mesh&);
-            static void LoadGPU(Mesh&);
-            static void UnloadCPU(Mesh&);
-            static void UnloadGPU(Mesh&);
-            static bool SupportsInstancing();
-            static btCollisionShape* BuildCollision(Mesh*, CollisionType::Type);
-        };
+namespace epriv{
+    class  MeshLoader;
+    class  MeshSkeleton;
+    class  MeshCollisionFactory;
+    struct DefaultMeshBindFunctor;
+    struct DefaultMeshUnbindFunctor;
+    struct BoneNode;
+    class  AnimationData;
+    struct InternalMeshRequestPublicInterface;
+    struct InternalMeshPublicInterface final {
+        static void LoadCPU(Mesh&);
+        static void LoadGPU(Mesh&);
+        static void UnloadCPU(Mesh&);
+        static void UnloadGPU(Mesh&);
+        static bool SupportsInstancing();
+        static btCollisionShape* BuildCollision(Mesh*, CollisionType::Type);
     };
+};
 };
 
 class Mesh final: public BindableResource, public EventObserver{

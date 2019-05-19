@@ -125,10 +125,10 @@ class MaterialComponentParallaxOcclusion: public MaterialComponent{
 };
 
 namespace Engine{
-    namespace epriv{
-        struct DefaultMaterialBindFunctor;
-        struct DefaultMaterialUnbindFunctor;
-    };
+namespace epriv{
+    struct DefaultMaterialBindFunctor;
+    struct DefaultMaterialUnbindFunctor;
+};
 };
 
 class Material final: public BindableResource{

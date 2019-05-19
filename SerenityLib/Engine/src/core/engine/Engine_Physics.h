@@ -14,10 +14,10 @@ class  btCollisionObject;
 class  Mesh;
 class  ComponentModel;
 namespace Engine{
-    namespace epriv{
-        struct MeshImportedData;
-        class GLDebugDrawer;
-    };
+namespace epriv{
+    struct MeshImportedData;
+    class GLDebugDrawer;
+};
 };
 struct CollisionType{enum Type{
     None,
@@ -57,36 +57,36 @@ class Collision final{
 };
 
 namespace Engine{
-    namespace epriv{
-        class PhysicsManager final{
-            public:
-                class impl; std::unique_ptr<impl> m_i;
+namespace epriv{
+    class PhysicsManager final{
+        public:
+            class impl; std::unique_ptr<impl> m_i;
 
-                PhysicsManager(const char* name,uint w,uint h);
-                ~PhysicsManager();
+            PhysicsManager(const char* name,uint w,uint h);
+            ~PhysicsManager();
 
-                void _init(const char* name,uint w,uint h,uint numCores);
+            void _init(const char* name,uint w,uint h,uint numCores);
 
-                void _update(float dt,int maxSteps = 1,float = 0.0166666f);
-                void _render();
-        };
+            void _update(float dt,int maxSteps = 1,float = 0.0166666f);
+            void _render();
     };
-    namespace Physics{
-        // vector[0] = end point, vector[1] = hit normal
-        std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,btRigidBody* ignoredObject = nullptr);
-        std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,std::vector<btRigidBody*>& ignoredObjects);
+};
+namespace Physics{
+    // vector[0] = end point, vector[1] = hit normal
+    std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,btRigidBody* ignoredObject = nullptr);
+    std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,std::vector<btRigidBody*>& ignoredObjects);
 
-        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr);
-        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,std::vector<Entity>& ignoredObjects);
+    std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr);
+    std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,std::vector<Entity>& ignoredObjects);
 
-        void setGravity(float,float,float); 
-        void setGravity(glm::vec3&);
-        void pause(bool=true);
-        void unpause();
-        void addRigidBody(btRigidBody*, short group, short mask);
-        void addRigidBody(btRigidBody*);
-        void removeRigidBody(btRigidBody*);
-        void updateRigidBody(btRigidBody*);
-    };
+    void setGravity(float,float,float); 
+    void setGravity(glm::vec3&);
+    void pause(bool=true);
+    void unpause();
+    void addRigidBody(btRigidBody*, short group, short mask);
+    void addRigidBody(btRigidBody*);
+    void removeRigidBody(btRigidBody*);
+    void updateRigidBody(btRigidBody*);
+};
 };
 #endif

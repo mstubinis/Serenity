@@ -25,42 +25,42 @@ struct MeshModifyFlags {enum Flag {
 };};
 
 namespace Engine {
-    namespace epriv {
+namespace epriv {
 
-        struct Vertex final {
-            glm::vec3               position;
-            glm::vec2               uv;
-            glm::vec3               normal;
-            glm::vec3               binormal;
-            glm::vec3               tangent;
-            Vertex() { clear(); }
-            ~Vertex() {}
-            void clear() { 
-                position = normal = binormal = tangent = glm::vec3(0.0f);
-                uv = glm::vec2(0.0f); 
-            }
-        };
-
-        struct VertexBoneData final {
-            float     IDs[NUM_BONES_PER_VERTEX];
-            float Weights[NUM_BONES_PER_VERTEX];
-            VertexBoneData() {
-                for (uint i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
-                    IDs[i]     = 0.0f;
-                    Weights[i] = 0.0f;
-                }
-            }
-            void AddBoneData(uint BoneID, float Weight) {
-                for (uint i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
-                    if (Weights[i] == 0.0f) {
-                        IDs[i] = float(BoneID);
-                        Weights[i] = Weight;
-                        return;
-                    }
-                }
-            }
-        };
+    struct Vertex final {
+        glm::vec3               position;
+        glm::vec2               uv;
+        glm::vec3               normal;
+        glm::vec3               binormal;
+        glm::vec3               tangent;
+        Vertex() { clear(); }
+        ~Vertex() {}
+        void clear() { 
+            position = normal = binormal = tangent = glm::vec3(0.0f);
+            uv = glm::vec2(0.0f); 
+        }
     };
+
+    struct VertexBoneData final {
+        float     IDs[NUM_BONES_PER_VERTEX];
+        float Weights[NUM_BONES_PER_VERTEX];
+        VertexBoneData() {
+            for (uint i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
+                IDs[i]     = 0.0f;
+                Weights[i] = 0.0f;
+            }
+        }
+        void AddBoneData(uint BoneID, float Weight) {
+            for (uint i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
+                if (Weights[i] == 0.0f) {
+                    IDs[i] = float(BoneID);
+                    Weights[i] = Weight;
+                    return;
+                }
+            }
+        }
+    };
+};
 };
 
 

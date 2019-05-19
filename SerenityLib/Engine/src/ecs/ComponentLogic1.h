@@ -11,14 +11,14 @@
 
 class ComponentLogic1;
 namespace Engine {
-    namespace epriv {
-        struct ComponentLogic1_UpdateFunction;
-        struct ComponentLogic1_EntityAddedToSceneFunction;
-        struct ComponentLogic1_ComponentAddedToEntityFunction;
-        struct ComponentLogic1_SceneEnteredFunction;
-        struct ComponentLogic1_SceneLeftFunction;
-        struct ComponentLogic1_EmptyFunctor final { void operator()(ComponentLogic1& _component, const float& dt) const {} };
-    };
+namespace epriv {
+    struct ComponentLogic1_UpdateFunction;
+    struct ComponentLogic1_EntityAddedToSceneFunction;
+    struct ComponentLogic1_ComponentAddedToEntityFunction;
+    struct ComponentLogic1_SceneEnteredFunction;
+    struct ComponentLogic1_SceneLeftFunction;
+    struct ComponentLogic1_EmptyFunctor final { void operator()(ComponentLogic1& _component, const float& dt) const {} };
+};
 };
 
 class ComponentLogic1 : public ComponentBaseClass {
