@@ -251,6 +251,8 @@
     <ClInclude Include="Engine\src\core\engine\renderer\FramebufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\GBuffer.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\GLImageConstants.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Bloom.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\postprocess\DepthOfField.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\HDR.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\SSAO.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\RenderGraph.h" />
@@ -324,6 +326,8 @@
     <ClCompile Include="Engine\src\core\engine\renderer\Engine_Renderer.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\FramebufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\GBuffer.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Bloom.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\postprocess\DepthOfField.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\HDR.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\SSAO.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\RenderGraph.cpp" />

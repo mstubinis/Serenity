@@ -327,6 +327,12 @@
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\HDR.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\postprocess\DepthOfField.h">
+      <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Bloom.h">
+      <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -510,6 +516,12 @@
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\HDR.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\postprocess\DepthOfField.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Bloom.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
   </ItemGroup>

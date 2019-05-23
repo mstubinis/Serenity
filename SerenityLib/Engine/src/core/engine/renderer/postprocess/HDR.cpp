@@ -16,14 +16,6 @@ epriv::Postprocess_HDR::Postprocess_HDR() {
     algorithm = HDRAlgorithm::Uncharted;
 }
 epriv::Postprocess_HDR::~Postprocess_HDR() {
-    cleanup();
-}
-
-void epriv::Postprocess_HDR::init() {
-
-}
-void epriv::Postprocess_HDR::cleanup() {
-
 }
 void epriv::Postprocess_HDR::pass(ShaderP& program,GBuffer& gbuffer,const unsigned int&fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor) {
     program.bind();

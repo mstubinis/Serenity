@@ -167,15 +167,6 @@ namespace Engine{
 
 class epriv::RenderManager::impl final{
     public:
-
-        #pragma region DepthOfFieldInfo
-        float dof_bias;
-        float dof_focus;
-        float dof_blur_radius;
-        float dof_aspect_ratio;
-        bool dof;
-        #pragma endregion
-
         #pragma region FogInfo
         bool fog;
         float fog_distNull;
@@ -208,16 +199,6 @@ class epriv::RenderManager::impl final{
         int SMAA_AREATEX_MAX_DISTANCE_DIAG;
         glm::vec2 SMAA_AREATEX_PIXEL_SIZE;
         float SMAA_AREATEX_SUBTEX_SIZE;
-        #pragma endregion
-
-        #pragma region BloomInfo
-        uint bloom_num_passes;
-        bool bloom;
-        float bloom_blur_radius;
-        float bloom_blur_strength;
-        float bloom_scale;
-        float bloom_threshold;
-        float bloom_exposure;
         #pragma endregion
 
         #pragma region LightingInfo
@@ -283,13 +264,6 @@ class epriv::RenderManager::impl final{
         #pragma endregion
 
         void _init(const char* name,uint& w,uint& h){
-            #pragma region DepthOfFieldInfo
-            dof_bias = 0.6f;
-            dof_focus = 2.0f;
-            dof_blur_radius = 3.0f;
-            dof = false;
-            #pragma endregion
-
             #pragma region FogInfo
             fog = false;
             fog_distNull = 5.0f;
@@ -320,16 +294,6 @@ class epriv::RenderManager::impl final{
             SMAA_AREATEX_MAX_DISTANCE_DIAG = 20;
             SMAA_AREATEX_PIXEL_SIZE = glm::vec2(glm::vec2(1.0f) / glm::vec2(160.0f, 560.0f));
             SMAA_AREATEX_SUBTEX_SIZE = 0.14285714285f; //(1 / 7)
-            #pragma endregion
-
-            #pragma region BloomInfo
-            bloom_num_passes = 3;
-            bloom = true;
-            bloom_blur_radius = 1.24f;
-            bloom_blur_strength = 0.62f;
-            bloom_scale = 0.27f;
-            bloom_threshold = 0.55f;
-            bloom_exposure = 1.6f;
             #pragma endregion
 
             #pragma region LightingInfo
@@ -1272,35 +1236,6 @@ class epriv::RenderManager::impl final{
 
             epriv::Postprocess_SSAO::SSAO.init();
 
-            /*
-
-            uniform_real_distribution<float> rand(0.0f,1.0f);
-            default_random_engine gen;
-            for(uint i = 0; i < SSAO_KERNEL_COUNT; ++i){
-                glm::vec3 sample(rand(gen)*2.0f - 1.0f, rand(gen)*2.0f - 1.0f, rand(gen));
-                sample = glm::normalize(sample);
-                sample *= rand(gen);
-                float scale = float(i) / float(SSAO_KERNEL_COUNT);
-                float a = 0.1f;
-                float b = 1.0f;
-                float f = scale * scale;
-                scale = a + f * (b - a);
-                sample *= scale;
-                ssao_Kernels[i] = sample;
-            }
-            vector<glm::vec3> ssaoNoise;
-            for(uint i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i){
-                ssaoNoise.emplace_back(rand(gen)*2.0-1.0, rand(gen)*2.0-1.0, 0.0f);
-            }
-            genAndBindTexture(GL_TEXTURE_2D,ssao_noise_texture);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE,SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
-
-            */
-
             GLEnable(GLState::DEPTH_TEST);
             Renderer::setDepthFunc(DepthFunc::LEqual);
             glClearDepth(1.0f);
@@ -1948,18 +1883,6 @@ class epriv::RenderManager::impl final{
             }
             GLDisable(GLState::STENCIL_TEST);
         }
-
-        void _passBloom(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture) {
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom]->bind();
-            const float& _divisor = gbuffer.getSmallFBO()->divisor();
-
-            sendUniform4("Data", bloom_scale, bloom_threshold, bloom_exposure, 0.0f);
-            sendTexture("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
-
-            uint _x = uint(float(fboWidth) * _divisor);
-            uint _y = uint(float(fboHeight) * _divisor);
-            _renderFullscreenTriangle(_x, _y, 0, 0);
-        }
         void _passStencil(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::StencilPass]->bind();
@@ -1999,16 +1922,6 @@ class epriv::RenderManager::impl final{
             _renderFullscreenTriangle(_x,_y,0,0);
         }
 
-        void _passDOF(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture) {
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF]->bind();
-
-            sendUniform4Safe("Data",dof_blur_radius,dof_bias,dof_focus, fboWidth / (float)fboHeight);
-    
-            sendTextureSafe("inTexture", gbuffer.getTexture(sceneTexture), 0);
-            sendTextureSafe("textureDepth", gbuffer.getTexture(GBufferType::Depth), 1);
-
-            _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
-        }
         void _passBlur(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,string type, GLuint texture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur]->bind();
 
@@ -2019,9 +1932,14 @@ class epriv::RenderManager::impl final{
 
             glm::ivec2 Res(fboWidth, fboHeight);
 
-            sendUniform4("strengthModifier", bloom_blur_strength, bloom_blur_strength, bloom_blur_strength,epriv::Postprocess_SSAO::SSAO.m_ssao_blur_strength);
+            sendUniform4("strengthModifier", 
+                epriv::Postprocessing_Bloom::Bloom.blur_strength,
+                epriv::Postprocessing_Bloom::Bloom.blur_strength,
+                epriv::Postprocessing_Bloom::Bloom.blur_strength,
+                epriv::Postprocess_SSAO::SSAO.m_ssao_blur_strength
+            );
             sendUniform2("Resolution", Res);
-            sendUniform4("DataA",bloom_blur_radius,0.0f,hv.x,hv.y);
+            sendUniform4("DataA", epriv::Postprocessing_Bloom::Bloom.blur_radius,0.0f,hv.x,hv.y);
             sendTexture("image",gbuffer.getTexture(texture),0);
 
             uint _x = uint(float(fboWidth) * _divisor);
@@ -2121,7 +2039,7 @@ class epriv::RenderManager::impl final{
         void _passFinal(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal]->bind();
 
-            sendUniform1Safe("HasBloom",int(bloom));
+            sendUniform1Safe("HasBloom",int(epriv::Postprocessing_Bloom::Bloom.bloom));
             sendUniform1Safe("HasFog",int(fog));
 
             if(fog){
@@ -2302,10 +2220,11 @@ class epriv::RenderManager::impl final{
             
             #pragma region Bloom
             //TODO: possible optimization: use stencil buffer to reject completely black pixels during blur passes
-            if (bloom) {
+            if (epriv::Postprocessing_Bloom::Bloom.bloom) {
                 gbuffer.start(GBufferType::Bloom, "RGB", false);
-                _passBloom(gbuffer, camera, fboWidth, fboHeight, GBufferType::Lighting);
-                for (uint i = 0; i < bloom_num_passes; ++i) {
+                ShaderP& bloomShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom];
+                epriv::Postprocessing_Bloom::Bloom.pass(bloomShader, gbuffer, fboWidth, fboHeight, GBufferType::Lighting);
+                for (uint i = 0; i < epriv::Postprocessing_Bloom::Bloom.num_passes; ++i) {
                     gbuffer.start(GBufferType::GodRays, "RGB", false);
                     _passBlur(gbuffer, camera, fboWidth, fboHeight, "H", GBufferType::Bloom);
                     gbuffer.start(GBufferType::Bloom, "RGB", false);
@@ -2317,9 +2236,10 @@ class epriv::RenderManager::impl final{
             GBufferType::Type sceneTexture = GBufferType::Misc;
             GBufferType::Type outTexture = GBufferType::Lighting;
             #pragma region DOF
-            if (dof) {
+            if (epriv::Postprocess_DepthOfField::DOF.dof) {
+                ShaderP& dofShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF];
                 gbuffer.start(outTexture);
-                _passDOF(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
+                epriv::Postprocess_DepthOfField::DOF.pass(dofShader,gbuffer, fboWidth, fboHeight, sceneTexture);
                 sceneTexture = GBufferType::Lighting;
                 outTexture = GBufferType::Misc;
             }
@@ -2451,16 +2371,6 @@ void Renderer::Settings::General::enable1(bool b) { renderManagerImpl->enabled1 
 void Renderer::Settings::General::disable1() { renderManagerImpl->enabled1 = false; }
 bool Renderer::Settings::General::enabled1() { return renderManagerImpl->enabled1; }
 
-
-void Renderer::Settings::DepthOfField::enable(bool b) { renderManagerImpl->dof = b; }
-void Renderer::Settings::DepthOfField::disable() { renderManagerImpl->dof = false; }
-bool Renderer::Settings::DepthOfField::enabled() { return renderManagerImpl->dof; }
-float Renderer::Settings::DepthOfField::getFocus() { return renderManagerImpl->dof_focus; }
-void Renderer::Settings::DepthOfField::setFocus(float f) { renderManagerImpl->dof_focus = glm::max(0.0f, f); }
-float Renderer::Settings::DepthOfField::getBias() { return renderManagerImpl->dof_bias; }
-void Renderer::Settings::DepthOfField::setBias(float b) { renderManagerImpl->dof_bias = b; }
-float Renderer::Settings::DepthOfField::getBlurRadius() { return renderManagerImpl->dof_blur_radius; }
-void Renderer::Settings::DepthOfField::setBlurRadius(float r) { renderManagerImpl->dof_blur_radius = glm::max(0.0f, r); }
 bool Renderer::Settings::Fog::enabled(){ return renderManagerImpl->fog; }
 void Renderer::Settings::Fog::enable(bool b){ renderManagerImpl->fog = b; }
 void Renderer::Settings::Fog::disable(){ renderManagerImpl->fog = false; }
@@ -2476,21 +2386,6 @@ void Renderer::Settings::FXAA::setSpanMax(float r){ renderManagerImpl->FXAA_SPAN
 float Renderer::Settings::FXAA::getReduceMin(){ return renderManagerImpl->FXAA_REDUCE_MIN; }
 float Renderer::Settings::FXAA::getReduceMul(){ return renderManagerImpl->FXAA_REDUCE_MUL; }
 float Renderer::Settings::FXAA::getSpanMax(){ return renderManagerImpl->FXAA_SPAN_MAX; }
-float Renderer::Settings::Bloom::getThreshold() { return renderManagerImpl->bloom_threshold; }
-void Renderer::Settings::Bloom::setThreshold(float t) { renderManagerImpl->bloom_threshold = t; }
-float Renderer::Settings::Bloom::getExposure() { return renderManagerImpl->bloom_exposure; }
-void Renderer::Settings::Bloom::setExposure(float e) { renderManagerImpl->bloom_exposure = e; }
-bool Renderer::Settings::Bloom::enabled() { return renderManagerImpl->bloom; }
-uint Renderer::Settings::Bloom::getNumPasses() { return renderManagerImpl->bloom_num_passes; }
-void Renderer::Settings::Bloom::setNumPasses(uint p) { renderManagerImpl->bloom_num_passes = p; }
-void Renderer::Settings::Bloom::enable(bool b){ renderManagerImpl->bloom = b; }
-void Renderer::Settings::Bloom::disable(){ renderManagerImpl->bloom = false; }
-float Renderer::Settings::Bloom::getBlurRadius(){ return renderManagerImpl->bloom_blur_radius; }
-float Renderer::Settings::Bloom::getBlurStrength(){ return renderManagerImpl->bloom_blur_strength; }
-void Renderer::Settings::Bloom::setBlurRadius(float r){ renderManagerImpl->bloom_blur_radius = glm::max(0.0f,r); }
-void Renderer::Settings::Bloom::setBlurStrength(float r){ renderManagerImpl->bloom_blur_strength = glm::max(0.0f,r); }
-float Renderer::Settings::Bloom::getScale(){ return renderManagerImpl->bloom_scale; }
-void Renderer::Settings::Bloom::setScale(float s){ renderManagerImpl->bloom_scale = glm::max(0.0f,s); }
 void Renderer::Settings::SMAA::setThreshold(float f){ renderManagerImpl->SMAA_THRESHOLD = f; }
 void Renderer::Settings::SMAA::setSearchSteps(uint s){ renderManagerImpl->SMAA_MAX_SEARCH_STEPS = s; }
 void Renderer::Settings::SMAA::disableCornerDetection(){ renderManagerImpl->SMAA_CORNER_ROUNDING = 0; }

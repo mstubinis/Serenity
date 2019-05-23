@@ -17,12 +17,8 @@ namespace epriv {
             float                     exposure;
             HDRAlgorithm::Algorithm   algorithm;
 
-
             Postprocess_HDR();
             ~Postprocess_HDR();
-
-            void init();
-            void cleanup();
 
             void pass(
                 ShaderP&,

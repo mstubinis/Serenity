@@ -7,6 +7,8 @@
 
 #include <core/engine/renderer/postprocess/SSAO.h>
 #include <core/engine/renderer/postprocess/HDR.h>
+#include <core/engine/renderer/postprocess/DepthOfField.h>
+#include <core/engine/renderer/postprocess/Bloom.h>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <SFML/Window.hpp>
@@ -112,17 +114,6 @@ namespace Renderer{
             void disable1();
             bool enabled1();
         };
-        namespace DepthOfField {
-            void enable(bool b = true);
-            void disable();
-            bool enabled();
-            float getFocus();
-            void setFocus(float);
-            float getBias();
-            void setBias(float);
-            float getBlurRadius();
-            void setBlurRadius(float);
-        }
         namespace Fog{
             void enable(bool b = true);
             void disable();
@@ -158,23 +149,6 @@ namespace Renderer{
             float getReduceMul();
             void setSpanMax(float r);
             float getSpanMax();
-        };
-        namespace Bloom{
-            uint getNumPasses();
-            void setNumPasses(uint);
-            void enable(bool b = true);
-            void disable();
-            bool enabled();
-            float getThreshold();
-            void setThreshold(float t);
-            float getExposure();
-            void setExposure(float e);
-            float getBlurRadius();
-            void setBlurRadius(float r);
-            float getBlurStrength();
-            void setBlurStrength(float r);
-            float getScale();
-            void setScale(float s);
         };
         namespace GodRays{
             bool enabled();
