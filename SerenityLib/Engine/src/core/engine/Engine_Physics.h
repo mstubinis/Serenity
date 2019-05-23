@@ -32,8 +32,8 @@ _TOTAL,};};
 class Collision final{
     private:
         CollisionType::Type   m_Type;
-        btCollisionShape*     m_Shape;
         btVector3             m_Inertia;
+        btCollisionShape*     m_Shape;
 
         void _init(std::vector<Mesh*>& meshes, float mass);
         void _baseInit(CollisionType::Type _type, float& mass);

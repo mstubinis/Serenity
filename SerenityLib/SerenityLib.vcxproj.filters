@@ -82,6 +82,12 @@
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{324ed3f3-19a7-463b-9f5d-86e387d6ad66}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\postprocess">
+      <UniqueIdentifier>{a91900ce-11fc-40bc-bd7e-a9303c756b57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\postprocess">
+      <UniqueIdentifier>{01cc0dd0-e7a0-4866-a894-ff324d492e20}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -315,6 +321,9 @@
     <ClInclude Include="Engine\src\core\Terrain.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\postprocess\SSAO.h">
+      <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -493,6 +502,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\Terrain.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\postprocess\SSAO.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -276,11 +276,12 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
 
 
 Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,SolarSystem* scene):EntityWrapper(*scene){
-    auto* modelComponent = m_Entity.addComponent<ComponentModel>(mesh, mat);
     auto& rigidBodyComponent = *m_Entity.addComponent<ComponentBody>(_type);
+    auto& modelComponent     = *m_Entity.addComponent<ComponentModel>(mesh, mat);
+    
     m_Entity.addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
-    glm::vec3 boundingBox = modelComponent->boundingBox();
+    glm::vec3 boundingBox = modelComponent.boundingBox();
     float volume = boundingBox.x * boundingBox.y * boundingBox.z;
 
 	rigidBodyComponent.setMass(  ( volume * 0.004f ) + 1.0f  );

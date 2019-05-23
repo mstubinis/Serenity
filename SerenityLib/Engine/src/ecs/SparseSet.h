@@ -86,8 +86,8 @@ namespace epriv {
             }
             inline TItem* _get(const uint& _IDObject) {
                 const uint& sparseIndex = _IDObject - 1;
-                const uint& sparseSize = super::_sparse.size();
-                if (sparseSize == 0 || super::_sparse[sparseIndex] == 0 || sparseIndex >= sparseSize)
+                const uint& sparseSize  = super::_sparse.size();
+                if (sparseSize == 0 || sparseIndex >= sparseSize || super::_sparse[sparseIndex] == 0)
                     return nullptr;
                 return &(_dense[super::_sparse[sparseIndex] - 1]);
             }

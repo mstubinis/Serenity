@@ -318,14 +318,13 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
     m_Entity.addComponent<ComponentName>(name);
 
     ComponentBody& body = *m_Entity.addComponent<ComponentBody>();
-    body.setScale(scl, scl, scl);
     body.setPosition(pos);
-
     ComponentModel& model = *m_Entity.addComponent<ComponentModel>(
         ResourceManifest::PlanetMesh, 
         mat, 
         ResourceManifest::groundFromSpace
     );
+    body.setScale(scl, scl, scl);
     auto& instance = model.getModel();
     instance.setUserPointer(this);
 
