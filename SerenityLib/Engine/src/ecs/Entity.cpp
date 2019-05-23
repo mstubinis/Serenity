@@ -9,11 +9,12 @@ Scene& Entity::scene() {
     EntityDataRequest dataRequest(*this);
     return epriv::Core::m_Engine->m_ResourceManager._getSceneByID(dataRequest.sceneID);
 }
-void Entity::move(Scene& _scene) {
+void Entity::move(const Scene& _scene) {
+    auto& scene = const_cast<Scene&>(_scene);
     EntityDataRequest dataRequest(*this);
-    if (_scene.id() == dataRequest.sceneID)
+    if (scene.id() == dataRequest.sceneID)
         return;
-    process(dataRequest.ID, _scene.id(), dataRequest.versionID);
+    process(dataRequest.ID, scene.id(), dataRequest.versionID);
 }
 void Entity::destroy() {
     Scene& s = scene();

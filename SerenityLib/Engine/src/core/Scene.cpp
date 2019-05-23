@@ -50,7 +50,7 @@ struct Scene::impl final {
         m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System());
         m_ECS.assignSystem<ComponentModel> (ComponentModel_System());
         m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System());
-       
+        m_ECS.assignSystem<ComponentName>  (ComponentName_System());
     }
     void _destruct() {
         SAFE_DELETE(m_Skybox);

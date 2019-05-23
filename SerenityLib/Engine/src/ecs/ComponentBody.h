@@ -126,10 +126,12 @@ class ComponentBody : public ComponentBaseClass {
         btRigidBody& getBody();
 
         void setCollision(CollisionType::Type, float mass);
+        void setCollision(Collision*);
         void setDamping(float linear, float angular);
 
         void setDynamic(bool dynamic);
         void setMass(float mass);
+        void setGravity(const float& x, const float& y, const float& z);
 
         void clearLinearForces();
         void clearAngularForces();

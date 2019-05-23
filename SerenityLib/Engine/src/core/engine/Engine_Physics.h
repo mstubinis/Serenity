@@ -11,6 +11,7 @@ struct Entity;
 class  btCollisionShape;
 class  btRigidBody;
 class  btCollisionObject;
+class  btHeightfieldTerrainShape;
 class  Mesh;
 class  ComponentModel;
 namespace Engine{
@@ -40,6 +41,7 @@ class Collision final{
         Collision();
         Collision(std::vector<Mesh*>& meshes, float mass = 0);
         Collision(ComponentModel&, float mass = 0);
+        Collision(btHeightfieldTerrainShape&, CollisionType::Type, float mass = 0);
         Collision(CollisionType::Type, Mesh* mesh, float mass = 0);
 
         Collision(const Collision& other);

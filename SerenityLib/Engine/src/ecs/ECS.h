@@ -15,20 +15,21 @@ namespace epriv {
     template<typename TEntity> class ECS{
         friend struct Engine::epriv::InternalScenePublicInterface;
         private:
-            ECSEntityPool<TEntity>                                    entityPool;
-            std::vector<TEntity>                                      justAddedEntities;
-            std::vector<uint>                                         destroyedEntities;
-            std::vector<SparseSet<TEntity>*>                          componentPools;
-            std::vector<ECSSystem<TEntity>*>                          systems;
+            ECSEntityPool<TEntity>              entityPool;
+            std::vector<TEntity>                justAddedEntities;
+            std::vector<uint>                   destroyedEntities;
+            std::vector<SparseSet<TEntity>*>    componentPools;
+            std::vector<ECSSystem<TEntity>*>    systems;
 
             //builds a component pool and system for the component type if it is not built already.
-            template<typename TComponent> void buildPool(uint type_slot) {
+            template<typename TComponent> void buildPool(const uint& type_slot) {
                 using CSystemType = ECSSystem<TEntity, TComponent>;
                 using CPoolType   = ECSComponentPool<TEntity, TComponent>;
                 if (type_slot >= componentPools.size()) {
                     componentPools.resize(type_slot + 1, nullptr);
                 }
-                if (componentPools[type_slot]) return;
+                if (componentPools[type_slot]) 
+                    return;
                 if (type_slot >= systems.size()) {
                     systems.resize(type_slot + 1, nullptr);
                 }
@@ -53,48 +54,48 @@ namespace epriv {
 
 
             //"event handlers"
-            template<typename T> void onResize(uint& w, uint& h) {
-                using CPoolType = ECSComponentPool<TEntity, T>;
-                uint type_slot  = ECSRegistry::type_slot<T>();
-                std::vector<T>& components = (*(CPoolType*)componentPools[type_slot]).pool();
+            template<typename T> void onResize(const uint& w, const uint& h) {
+                using CPoolType       = ECSComponentPool<TEntity, T>;
+                const uint& type_slot = ECSRegistry::type_slot<T>();
+                auto& components = (*(CPoolType*)componentPools[type_slot]).pool();
                 for (auto& camera : components) {
                     camera.resize(w, h);
                 }
             }
-            void update(const float& dt, Scene& _Scene) {
+            void update(const float& dt, Scene& scene) {
                 for (uint i = 0; i < systems.size(); ++i) { 
                     auto& system = *systems[i];
-                    system.update(dt, _Scene); 
+                    system.update(dt, scene); 
                 }
             }
-            void onComponentAddedToEntity(void* _component, TEntity& _entity, const uint& type_slot) {
+            void onComponentAddedToEntity(void* component, TEntity& entity, const uint& type_slot) {
                 auto& system = *systems[type_slot];
-                system.onComponentAddedToEntity(_component, _entity);
+                system.onComponentAddedToEntity(component, entity);
             }
-            void onSceneEntered(Scene& _Scene) { 
+            void onSceneEntered(Scene& scene) { 
                 for (uint i = 0; i < systems.size(); ++i) { 
                     auto& system = *systems[i];
-                    system.onSceneEntered(_Scene); 
+                    system.onSceneEntered(scene); 
                 }
             }
-            void onSceneLeft(Scene& _Scene) { 
+            void onSceneLeft(Scene& scene) { 
                 for (uint i = 0; i < systems.size(); ++i) { 
                     auto& system = *systems[i];
-                    system.onSceneLeft(_Scene); 
+                    system.onSceneLeft(scene); 
                 }
             }
-            void preUpdate(Scene& _scene, const float& dt) {
+            void preUpdate(Scene& scene, const float& dt) {
                 if (justAddedEntities.size() > 0) {
                     for (uint i = 0; i < systems.size(); ++i) {
                         auto& system = *systems[i];
                         for (auto& _entity : justAddedEntities) {
-                            system.onEntityAddedToScene(_entity, _scene);
+                            system.onEntityAddedToScene(_entity, scene);
                         }
                     }
                     vector_clear(justAddedEntities);
                 }
             }
-            void postUpdate(Scene& _scene,const float& dt) {
+            void postUpdate(Scene& scene,const float& dt) {
                 if (destroyedEntities.size() > 0) {
                     for (uint i = 0; i < componentPools.size(); ++i) {
                         auto& pool = *componentPools[i];
@@ -110,14 +111,14 @@ namespace epriv {
             }
 
             template<typename TComponent> ECSComponentPool<TEntity, TComponent>& getPool() {
-                using CPoolType = ECSComponentPool<TEntity, TComponent>;
-                uint type_slot  = ECSRegistry::type_slot<TComponent>();
+                using CPoolType       = ECSComponentPool<TEntity, TComponent>;
+                const uint& type_slot = ECSRegistry::type_slot<TComponent>();
                 return *(CPoolType*)componentPools[type_slot];
             }
-            template<typename TComponent> void assignSystem(const ECSSystemCI& _systemCI) {
-                uint type_slot    = ECSRegistry::type_slot<TComponent>();
-                using CPoolType   = ECSComponentPool<TEntity, TComponent>;
-                using CSystemType = ECSSystem<TEntity, TComponent>;
+            template<typename TComponent> void assignSystem(const ECSSystemCI& systemCI) {
+                const uint& type_slot = ECSRegistry::type_slot<TComponent>();
+                using CPoolType       = ECSComponentPool<TEntity, TComponent>;
+                using CSystemType     = ECSSystem<TEntity, TComponent>;
                 if (type_slot >= componentPools.size()) {
                     componentPools.resize(type_slot + 1, nullptr);
                 }
@@ -130,54 +131,50 @@ namespace epriv {
                 if (systems[type_slot]) {
                     SAFE_DELETE(systems[type_slot]);
                 }
-                systems[type_slot] = new CSystemType(_systemCI, *this);
+                systems[type_slot] = new CSystemType(systemCI, *this);
             }
 
-            TEntity createEntity(Scene& _scene) { 
-                TEntity res = entityPool.addEntity(_scene);
+            TEntity createEntity(Scene& scene) { 
+                TEntity res = entityPool.addEntity(scene);
                 justAddedEntities.push_back(res);
                 return res;
             }
-            void removeEntity(const uint& _index) { 
-                destroyedEntities.push_back(_index); 
+            void removeEntity(const uint& entityID) {
+                destroyedEntities.push_back(entityID);
             }
-            void removeEntity(TEntity& _entity) { 
-                EntityDataRequest dataRequest(_entity);
+            void removeEntity(TEntity& entity) { 
+                EntityDataRequest dataRequest(entity);
                 destroyedEntities.push_back(dataRequest.ID);
             }
-            epriv::EntityPOD* getEntity(const uint& _entityID) { 
-                return entityPool.getEntity(_entityID); 
+            epriv::EntityPOD* getEntity(const uint& entityID) { 
+                return entityPool.getEntity(entityID); 
             }
-            template<typename TComponent, typename... ARGS> TComponent* addComponent(TEntity& _entity, ARGS&&... _args) {
+            template<typename TComponent, typename... ARGS> TComponent* addComponent(TEntity& entity, ARGS&&... args) {
                 using CPoolType = ECSComponentPool<TEntity, TComponent>;
-                uint type_slot = ECSRegistry::type_slot<TComponent>();
-                buildPool<TComponent>(type_slot);
+                const uint& type_slot = ECSRegistry::type_slot<TComponent>();
+                //buildPool<TComponent>(type_slot);
                 auto& cPool = *(CPoolType*)componentPools[type_slot];
-                TComponent* res = cPool.addComponent(_entity, std::forward<ARGS>(_args)...);
+                TComponent* res = cPool.addComponent(entity, std::forward<ARGS>(args)...);
                 if (res) {
-                    uint type_slot = ECSRegistry::type_slot(res);
-                    onComponentAddedToEntity(res, _entity, type_slot);
+                    onComponentAddedToEntity(res, entity, type_slot);
                 }
                 return res;
             }
-            template<typename TComponent> bool removeComponent(TEntity& _entity) {
+            template<typename TComponent> bool removeComponent(TEntity& entity) {
                 using CPoolType = ECSComponentPool<TEntity, TComponent>;
-                uint type_slot  = ECSRegistry::type_slot<TComponent>();
-                buildPool<TComponent>(type_slot);
+                const uint& type_slot  = ECSRegistry::type_slot<TComponent>();
                 auto& cPool = *(CPoolType*)componentPools[type_slot];
-                return cPool.removeComponent(_entity);
+                return cPool.removeComponent(entity);
             }
-            template<typename TComponent> TComponent* getComponent(TEntity& _entity) {
+            template<typename TComponent> TComponent* getComponent(TEntity& entity) {
                 using CPoolType = ECSComponentPool<TEntity, TComponent>;
-                uint type_slot  = ECSRegistry::type_slot<TComponent>();
-                buildPool<TComponent>(type_slot);
+                const uint& type_slot  = ECSRegistry::type_slot<TComponent>();
                 auto& cPool = *(CPoolType*)componentPools[type_slot];
-                return cPool.getComponent(_entity);
+                return cPool.getComponent(entity);
             }
             template<typename TComponent> TComponent* getComponent(const EntityDataRequest& dataRequest) {
                 using CPoolType = ECSComponentPool<TEntity, TComponent>;
-                uint type_slot  = ECSRegistry::type_slot<TComponent>();
-                buildPool<TComponent>(type_slot);
+                const uint& type_slot  = ECSRegistry::type_slot<TComponent>();
                 auto& cPool = *(CPoolType*)componentPools[type_slot];
                 return cPool.getComponent(dataRequest);
             }

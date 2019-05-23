@@ -278,6 +278,22 @@ void ComponentBody::setCollision(CollisionType::Type _type, float _mass) {
         //Physics::addRigidBody(&rigidBody);
     }
 }
+void ComponentBody::setCollision(Collision* _collision) {
+    auto& physicsData = *data.p;
+    SAFE_DELETE(physicsData.collision);
+    physicsData.collision = _collision;
+    Collision& collision_ = *physicsData.collision;
+    collision_.getShape()->setUserPointer(this);
+    if (physicsData.rigidBody) {
+        auto& rigidBody = *physicsData.rigidBody;
+        //Physics::removeRigidBody(&rigidBody);
+        rigidBody.setCollisionShape(collision_.getShape());
+        rigidBody.setMassProps(physicsData.mass, collision_.getInertia());
+        rigidBody.updateInertiaTensor();
+        //Physics::addRigidBody(&rigidBody);
+    }
+}
+
 void ComponentBody::translate(glm::vec3 translation, bool local) { ComponentBody::translate(translation.x, translation.y, translation.z, local); }
 void ComponentBody::translate(float t, bool local) { ComponentBody::translate(t, t, t, local); }
 void ComponentBody::translate(float x, float y, float z, bool local) {
@@ -394,6 +410,12 @@ void ComponentBody::setPosition(float x, float y, float z) {
         _matrix[3][0] = x;
         _matrix[3][1] = y;
         _matrix[3][2] = z;
+    }
+}
+void ComponentBody::setGravity(const float& x, const float& y, const float& z) {
+    if (_physics) {
+        auto& physicsData = *data.p;
+        physicsData.rigidBody->setGravity(btVector3(x, y, z));
     }
 }
 void ComponentBody::setRotation(glm::quat newRotation) { ComponentBody::setRotation(newRotation.x, newRotation.y, newRotation.z, newRotation.w); }

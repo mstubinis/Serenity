@@ -16,6 +16,7 @@
 
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
+#include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -256,6 +257,57 @@ void Mesh::init_blank() {
 Mesh::Mesh() {
     init_blank();
 }
+
+Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, float threshold) {
+    init_blank();
+    m_threshold = threshold;
+    epriv::MeshImportedData data;
+    const uint& width = heightfield.getHeightStickWidth();
+    const uint& length = heightfield.getHeightStickLength();
+    for (uint i = 0; i < width - 1; i++) {
+        for (uint j = 0; j < length - 1; j++) {
+            btVector3 vert1, vert2, vert3, vert4;
+            heightfield.getVertex1(i, j, vert1);
+            heightfield.getVertex1(i + 1, j, vert2);
+            heightfield.getVertex1(i, j + 1, vert3);
+            heightfield.getVertex1(i + 1, j + 1, vert4);
+
+            epriv::Vertex v1, v2, v3, v4;
+            v1.position = glm::vec3(vert1.x(), vert1.y(), vert1.z());
+            v2.position = glm::vec3(vert2.x(), vert2.y(), vert2.z());
+            v3.position = glm::vec3(vert3.x(), vert3.y(), vert3.z());
+            v4.position = glm::vec3(vert4.x(), vert4.y(), vert4.z());
+
+            glm::vec3 a = v4.position - v1.position;
+            glm::vec3 b = v2.position - v3.position;
+            glm::vec3 normal = glm::normalize(glm::cross(a, b));
+
+            v1.normal = normal;
+            v2.normal = normal;
+            v3.normal = normal;
+            v4.normal = normal;
+
+            v1.uv = glm::vec2(float(i) / float(width), float(j) / float(length));
+            v2.uv = glm::vec2(float(i + 1) / float(width), float(j) / float(length));
+            v3.uv = glm::vec2(float(i) / float(width), float(j + 1) / float(length));
+            v4.uv = glm::vec2(float(i + 1) / float(width), float(j + 1) / float(length));
+
+            data.points.push_back(v3.position); data.uvs.push_back(v3.uv); data.normals.push_back(v3.normal);
+            data.points.push_back(v2.position); data.uvs.push_back(v2.uv); data.normals.push_back(v2.normal);
+            data.points.push_back(v1.position); data.uvs.push_back(v1.uv); data.normals.push_back(v1.normal);
+
+            data.points.push_back(v3.position); data.uvs.push_back(v3.uv); data.normals.push_back(v3.normal);
+            data.points.push_back(v4.position); data.uvs.push_back(v4.uv); data.normals.push_back(v4.normal);
+            data.points.push_back(v2.position); data.uvs.push_back(v2.uv); data.normals.push_back(v2.normal);
+        }
+    }
+    epriv::MeshLoader::CalculateTBNAssimp(data);
+    epriv::MeshLoader::FinalizeData(*this, data, threshold);
+
+    load();
+}
+
+
 Mesh::Mesh(VertexData* data, const string& name, float threshold):BindableResource(name) {
     init_blank();
     m_VertexData = data;

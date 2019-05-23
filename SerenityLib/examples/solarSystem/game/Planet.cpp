@@ -317,13 +317,17 @@ struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineR
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere, SolarSystem* scene):EntityWrapper(*scene){
     m_Entity.addComponent<ComponentName>(name);
 
-    auto* model = m_Entity.addComponent<ComponentModel>(ResourceManifest::PlanetMesh, mat, ResourceManifest::groundFromSpace);
-    auto& instance = model->getModel();
-    instance.setUserPointer(this);
+    ComponentBody& body = *m_Entity.addComponent<ComponentBody>();
+    body.setScale(scl, scl, scl);
+    body.setPosition(pos);
 
-    auto* m_Body = m_Entity.addComponent<ComponentBody>();
-    m_Body->setScale(scl, scl, scl);
-    m_Body->setPosition(pos);
+    ComponentModel& model = *m_Entity.addComponent<ComponentModel>(
+        ResourceManifest::PlanetMesh, 
+        mat, 
+        ResourceManifest::groundFromSpace
+    );
+    auto& instance = model.getModel();
+    instance.setUserPointer(this);
 
     m_AtmosphereHeight = atmosphere;
     if(type != PlanetType::Star){
@@ -331,8 +335,13 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
         instance.setCustomUnbindFunctor(AtmosphericScatteringGroundMeshInstanceUnbindFunctor());
     }
     if(m_AtmosphereHeight > 0){
-        uint index = model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial,(ShaderP*)ResourceManifest::skyFromSpace.get(),RenderStage::GeometryTransparent);
-        MeshInstance& skyInstance = model->getModel(index);
+        const uint& index = model.addModel(
+            ResourceManifest::PlanetMesh,
+            ResourceManifest::EarthSkyMaterial,
+            (ShaderP*)ResourceManifest::skyFromSpace.get(),
+            RenderStage::GeometryTransparent
+        );
+        MeshInstance& skyInstance = model.getModel(index);
         float aScale = instance.getScale().x;
         aScale = aScale + (aScale * m_AtmosphereHeight);
         skyInstance.setCustomBindFunctor(AtmosphericScatteringSkyMeshInstanceBindFunctor());

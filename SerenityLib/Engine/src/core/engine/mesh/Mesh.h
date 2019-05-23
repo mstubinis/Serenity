@@ -18,6 +18,7 @@ typedef unsigned short ushort;
 
 class  MeshInstance;
 class  Mesh;
+class  btHeightfieldTerrainShape;
 
 namespace Engine{
 namespace epriv{
@@ -73,6 +74,7 @@ class Mesh final: public BindableResource, public EventObserver{
         static Mesh *FontPlane, *Plane, *Cube; //loaded in renderer
 
         Mesh();
+        Mesh(const std::string& name, const btHeightfieldTerrainShape& heightfield, float threshold);
         Mesh(VertexData*, const std::string& name, float threshold = 0.0005f);
         Mesh(std::string name,float width, float height,float threshold); //plane
         Mesh(std::string fileOrData, float threshold = 0.0005f); //file or data

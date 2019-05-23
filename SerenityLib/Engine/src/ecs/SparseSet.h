@@ -47,7 +47,7 @@ namespace epriv {
             virtual ~SparseSet() = default;
 
             template<typename... ARGS> inline TItem* _add(const uint& _IDObject, ARGS&&... _args) {
-                uint sparseIndex = _IDObject - 1;
+                const uint& sparseIndex = _IDObject - 1;
                 if (sparseIndex >= super::_sparse.size())
                     super::_sparse.resize(sparseIndex + 1, 0);
                 if (super::_sparse[sparseIndex] != 0)
@@ -59,11 +59,11 @@ namespace epriv {
             }
             inline bool _remove(const uint& _IDObject) {
                 //TODO: find a way to optimize the search for the maxLast entity...
-                uint removedEntityIndex = _IDObject - 1;
+                const uint& removedEntityIndex = _IDObject - 1;
                 if (removedEntityIndex >= super::_sparse.size()) { //needed for scene.removeEntity(), as it iterates over all systems and some might not have the entity in them
                     return false;
                 }
-                uint removedComponentID = super::_sparse[removedEntityIndex];
+                const uint& removedComponentID = super::_sparse[removedEntityIndex];
                 if (removedComponentID == 0)
                     return false;
                 super::_sparse[removedEntityIndex] = 0;
@@ -85,8 +85,8 @@ namespace epriv {
                 return true;
             }
             inline TItem* _get(const uint& _IDObject) {
-                uint sparseIndex = _IDObject - 1;
-                const auto& sparseSize = super::_sparse.size();
+                const uint& sparseIndex = _IDObject - 1;
+                const uint& sparseSize = super::_sparse.size();
                 if (sparseSize == 0 || super::_sparse[sparseIndex] == 0 || sparseIndex >= sparseSize)
                     return nullptr;
                 return &(_dense[super::_sparse[sparseIndex] - 1]);

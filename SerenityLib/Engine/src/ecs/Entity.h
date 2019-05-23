@@ -62,7 +62,7 @@ struct Entity{
         auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(*this);
         return _ecs.getComponent<TComponent>(dataRequest);
     }
-    void move(Scene& destination);
+    void move(const Scene& destination);
     static Entity _null;
 };
 
@@ -79,7 +79,7 @@ class EntityWrapper {
         inline void destroy() { 
             m_Entity.destroy(); 
         }
-        Entity entity() { 
+        inline Entity entity() {
             return m_Entity; 
         }
 };

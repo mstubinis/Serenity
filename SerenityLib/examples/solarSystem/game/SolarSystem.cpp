@@ -24,6 +24,9 @@
 #include <ecs/Components.h>
 #include <core/MeshInstance.h>
 
+#include "core/Terrain.h"
+#include <SFML/Graphics.hpp>
+
 using namespace Engine;
 using namespace std;
 
@@ -232,6 +235,9 @@ void SolarSystem::_loadFromFile(string filename){
     for(auto& rings:planetRings){
         new Ring(rings.second,m_Planets.at(rings.first));
     }
+    //sf::Image heightmap;
+    //heightmap.loadFromFile("../data/Textures/moon_terrain.jpg");
+    //Terrain* t = new Terrain("terrainname", heightmap, ResourceManifest::DefiantMaterial, this);
 
     centerSceneToObject(player->entity());
 

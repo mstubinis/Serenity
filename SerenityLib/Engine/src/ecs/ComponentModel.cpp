@@ -31,43 +31,41 @@ float epriv::ComponentModel_Functions::CalculateRadius(ComponentModel& super) {
     }
     super._radius = maxLength;
     super._radiusBox = boundingBox;
-    //mesh vertex radius
-    auto* body = super.owner.getComponent<ComponentBody>();
+    ComponentBody* body = super.owner.getComponent<ComponentBody>();
     if (body) {
         float _bodyScale = Engine::Math::Max(body->getScale());
-        super._radius *= _bodyScale;
+        super._radius    *= _bodyScale;
         super._radiusBox *= _bodyScale;
     }
-    //now modified by the body scale
-    return super._radius;
+    return super._radius; //now modified by the body scale
 };
 
 
 #pragma region Component
 
 ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Handle& mat, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e){
-    if (!mesh.null()) addModel(mesh, mat, _prog, _stage);
+    addModel(mesh, mat, _prog, _stage);
 }
 ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Handle& mat,  ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
-    if (mesh) addModel(mesh, (Material*)mat.get(), _prog, _stage);
+    addModel(mesh, (Material*)mat.get(), _prog, _stage);
 }
 ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Material* mat,  ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
-    if (!mesh.null()) addModel((Mesh*)mesh.get(), mat, _prog, _stage);
+    addModel((Mesh*)mesh.get(), mat, _prog, _stage);
 }
 ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Material* mat, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
-    if (mesh) addModel(mesh, mat, _prog, _stage);
+    addModel(mesh, mat, _prog, _stage);
 }
 ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Handle& mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
-    if (!mesh.null()) addModel(mesh, mat, (ShaderP*)_prog.get(), _stage);
+    addModel(mesh, mat, (ShaderP*)_prog.get(), _stage);
 }
 ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Handle& mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
-    if (mesh) addModel(mesh, (Material*)mat.get(), (ShaderP*)_prog.get(), _stage);
+    addModel(mesh, (Material*)mat.get(), (ShaderP*)_prog.get(), _stage);
 }
 ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Material* mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
-    if (!mesh.null()) addModel((Mesh*)mesh.get(), mat, (ShaderP*)_prog.get(), _stage);
+    addModel((Mesh*)mesh.get(), mat, (ShaderP*)_prog.get(), _stage);
 }
 ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Material* mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
-    if (mesh) addModel(mesh, mat, (ShaderP*)_prog.get(), _stage);
+    addModel(mesh, mat, (ShaderP*)_prog.get(), _stage);
 }
 ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(_meshInstances);
@@ -113,20 +111,20 @@ void ComponentModel::setModel(Mesh* mesh, Material* material, uint index, Shader
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
 
     instance.m_ShaderProgram = shaderProgram;
-    instance.m_Mesh = mesh;
-    instance.m_Material = material;
-    instance.m_Stage = _stage;
+    instance.m_Mesh          = mesh;
+    instance.m_Material      = material;
+    instance.m_Stage         = _stage;
 
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
     ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, uint index, RenderStage::Stage _stage) {
     auto& instance = *_meshInstances[index];
-    auto& _scene = owner.scene();
+    auto& _scene   = owner.scene();
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
 
     instance.m_ShaderProgram = shaderProgram;
-    instance.m_Stage = _stage;
+    instance.m_Stage         = _stage;
 
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
     ComponentModel_Functions::CalculateRadius(*this);
@@ -136,11 +134,11 @@ void ComponentModel::setModelShaderProgram(Handle& shaderPHandle, uint index, Re
 }
 void ComponentModel::setModelMesh(Mesh* mesh, uint index, RenderStage::Stage _stage) {
     auto& instance = *_meshInstances[index];
-    auto& _scene = owner.scene();
+    auto& _scene   = owner.scene();
 
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
 
-    instance.m_Mesh = mesh;
+    instance.m_Mesh  = mesh;
     instance.m_Stage = _stage;
 
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
@@ -151,11 +149,11 @@ void ComponentModel::setModelMesh(Handle& mesh, uint index, RenderStage::Stage _
 }
 void ComponentModel::setModelMaterial(Material* material, uint index, RenderStage::Stage _stage) {
     auto& instance = *_meshInstances[index];
-    auto& _scene = owner.scene();
+    auto& _scene   = owner.scene();
     epriv::InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(_scene, instance, instance.stage());
 
     instance.m_Material = material;
-    instance.m_Stage = _stage;
+    instance.m_Stage    = _stage;
 
     epriv::InternalScenePublicInterface::AddMeshInstanceToPipeline(_scene, instance, _stage);
 }

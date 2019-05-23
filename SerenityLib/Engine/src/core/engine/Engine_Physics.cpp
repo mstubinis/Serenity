@@ -12,6 +12,7 @@
 #include <ecs/ComponentModel.h>
 
 #include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
+#include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/LinearMath/btIDebugDraw.h>
@@ -833,6 +834,10 @@ Collision::Collision(vector<Mesh*>& _meshes, float _mass){
     //construtor
     _init(_meshes, _mass);
     _baseInit(CollisionType::Compound, _mass);
+}
+Collision::Collision(btHeightfieldTerrainShape& heightField, CollisionType::Type _type, float _mass) {
+    _baseInit(_type, _mass);
+    m_Shape = &heightField;
 }
 Collision::Collision(ComponentModel& _modelComponent, float _mass){
     //construtor

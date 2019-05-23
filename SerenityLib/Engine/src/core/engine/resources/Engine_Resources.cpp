@@ -87,7 +87,7 @@ void Resources::Settings::disableDynamicMemory(){ resourceManager->m_DynamicMemo
 Engine_Window& Resources::getWindow(){ return *resourceManager->m_Window; }
 glm::uvec2 Resources::getWindowSize(){ return resourceManager->m_Window->getSize(); }
 
-Scene* Resources::getScene(string n){ 
+Scene* Resources::getScene(const string& n){ 
     for (auto& scene : resourceManager->m_Scenes) {
         if (scene->name() == n) {
             return scene;
@@ -113,7 +113,7 @@ Material* Resources::getMaterial(Handle& h){ Material* p; resourceManager->m_Res
 void Resources::getShaderProgram(Handle& h,ShaderP*& p){ resourceManager->m_Resources->getAs(h,p); }
 ShaderP* Resources::getShaderProgram(Handle& h){ ShaderP* p; resourceManager->m_Resources->getAs(h,p); return p; }
 
-Handle Resources::addFont(string filename){
+Handle Resources::addFont(const string& filename){
     return resourceManager->m_Resources->add(new Font(filename),ResourceType::Font);
 }
 
@@ -198,4 +198,4 @@ void Resources::setCurrentScene(Scene* newScene){
         cout << "-------- Scene Change ended --------" << endl;
     }
 }
-void Resources::setCurrentScene(string s){ Resources::setCurrentScene(Resources::getScene(s)); }
+void Resources::setCurrentScene(const string& s){ Resources::setCurrentScene(Resources::getScene(s)); }

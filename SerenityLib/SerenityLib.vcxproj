@@ -267,6 +267,7 @@
     <ClInclude Include="Engine\src\core\Scene.h" />
     <ClInclude Include="Engine\src\core\ShaderProgram.h" />
     <ClInclude Include="Engine\src\core\Skybox.h" />
+    <ClInclude Include="Engine\src\core\Terrain.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBody.h" />
     <ClInclude Include="Engine\src\ecs\ComponentCamera.h" />
@@ -334,6 +335,7 @@
     <ClCompile Include="Engine\src\core\Scene.cpp" />
     <ClCompile Include="Engine\src\core\ShaderProgram.cpp" />
     <ClCompile Include="Engine\src\core\Skybox.cpp" />
+    <ClCompile Include="Engine\src\core\Terrain.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentCamera.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentLogic.cpp" />
