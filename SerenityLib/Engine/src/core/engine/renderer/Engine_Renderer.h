@@ -5,6 +5,9 @@
 #include <core/engine/renderer/RenderGraph.h>
 #include <core/engine/Engine_GLStateMachine.h>
 
+#include <core/engine/renderer/postprocess/SSAO.h>
+#include <core/engine/renderer/postprocess/HDR.h>
+
 #include <glm/gtc/type_ptr.hpp>
 #include <SFML/Window.hpp>
 
@@ -27,9 +30,6 @@ struct DepthFunc{enum Func{
 };};
 struct SMAAQualityLevel{enum Level{
     Low,Medium,High,Ultra,
-};};
-struct HDRAlgorithm{enum Algorithm{
-    Reinhard,Filmic,Exposure,Uncharted,
 };};
 struct AntiAliasingAlgorithm{enum Algorithm{
     None,FXAA,SMAA,
@@ -159,14 +159,6 @@ namespace Renderer{
             void setSpanMax(float r);
             float getSpanMax();
         };
-        namespace HDR{
-            bool enabled();
-            void enable(bool b = true);
-            void disable();
-            float getExposure();
-            void setExposure(float e);
-            void setAlgorithm(HDRAlgorithm::Algorithm a);
-        };
         namespace Bloom{
             uint getNumPasses();
             void setNumPasses(uint);
@@ -206,27 +198,6 @@ namespace Renderer{
             void setAlphaFalloff(float a);
             void setObject(Entity*);
             Entity* getObject();
-        };
-        namespace SSAO{
-            bool enabled();
-            void enable(bool b = true);
-            void disable();
-            void enableBlur(bool b = true);
-            void disableBlur();
-            float getBlurRadius();
-            void setBlurRadius(float r);
-            float getBlurStrength();
-            void setBlurStrength(float s);
-            float getIntensity();
-            void setIntensity(float i);
-            float getRadius();
-            void setRadius(float r);
-            float getScale();
-            void setScale(float s);
-            float getBias();
-            void setBias(float b);
-            uint getSamples();
-            void setSamples(uint s);
         };
         namespace Lighting{
             void enable(bool b = true);

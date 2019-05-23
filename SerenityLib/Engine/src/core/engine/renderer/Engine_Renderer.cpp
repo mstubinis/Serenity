@@ -242,29 +242,6 @@ class epriv::RenderManager::impl final{
         int godRays_samples;
         #pragma endregion
 
-        #pragma region SSAOInfo
-        static const int SSAO_KERNEL_COUNT = 32;
-        static const int SSAO_NORMALMAP_SIZE = 16;
-        bool ssao;
-        bool ssao_do_blur;
-        int ssao_samples;
-        uint ssao_blur_num_passes;
-        float ssao_blur_radius;
-        float ssao_blur_strength;
-        float ssao_scale;
-        float ssao_intensity;
-        float ssao_bias;
-        float ssao_radius;
-        glm::vec3 ssao_Kernels[SSAO_KERNEL_COUNT];
-        GLuint ssao_noise_texture;
-        #pragma endregion
-
-        #pragma region HDRInfo
-        bool hdr;
-        float hdr_exposure;
-        HDRAlgorithm::Algorithm hdr_algorithm;
-        #pragma endregion
-
         #pragma region GeneralInfo
 
         bool enabled1;
@@ -375,25 +352,6 @@ class epriv::RenderManager::impl final{
             godRays_fovDegrees = 75.0f;
             godRays_alphaFalloff = 2.0f;
             godRays_Object = nullptr;
-            #pragma endregion
-
-            #pragma region SSAOInfo
-            ssao = true;
-            ssao_samples = 8;
-            ssao_do_blur = true;
-            ssao_blur_num_passes = 2;
-            ssao_blur_radius = 0.66f;
-            ssao_blur_strength = 0.48f;
-            ssao_scale = 1.0f;
-            ssao_intensity = 1.8f;
-            ssao_bias = 0.048f;
-            ssao_radius = 0.175f;
-            #pragma endregion
-
-            #pragma region HDRInfo
-            hdr = true;
-            hdr_exposure = 3.0f;
-            hdr_algorithm = HDRAlgorithm::Uncharted;
             #pragma endregion
 
             #pragma region GeneralInfo
@@ -1312,6 +1270,10 @@ class epriv::RenderManager::impl final{
             m_FullscreenQuad = new FullscreenQuad();
             m_FullscreenTriangle = new FullscreenTriangle();
 
+            epriv::Postprocess_SSAO::SSAO.init();
+
+            /*
+
             uniform_real_distribution<float> rand(0.0f,1.0f);
             default_random_engine gen;
             for(uint i = 0; i < SSAO_KERNEL_COUNT; ++i){
@@ -1336,6 +1298,9 @@ class epriv::RenderManager::impl final{
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
+
+            */
+
             GLEnable(GLState::DEPTH_TEST);
             Renderer::setDepthFunc(DepthFunc::LEqual);
             glClearDepth(1.0f);
@@ -1380,7 +1345,7 @@ class epriv::RenderManager::impl final{
 
             SAFE_DELETE_VECTOR(m_InternalShaderPrograms);
 
-            glDeleteTextures(1,&ssao_noise_texture);
+            //TODO: add cleanup() from ssao here?
             glDeleteTextures(1,&SMAA_SearchTexture);
             glDeleteTextures(1,&SMAA_AreaTexture);
         }
@@ -1983,27 +1948,7 @@ class epriv::RenderManager::impl final{
             }
             GLDisable(GLState::STENCIL_TEST);
         }
-        void _passSSAO(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO]->bind();
-            const float& _divisor = gbuffer.getSmallFBO()->divisor();
-            if(RenderManager::GLSL_VERSION < 140){
-                sendUniformMatrix4Safe("CameraInvViewProj",c.getViewProjectionInverse());
-                sendUniformMatrix4Safe("CameraInvProj",c.getProjectionInverse());
-                sendUniform4Safe("CameraInfo1",glm::vec4(c.getPosition(),c.getNear()));
-                sendUniform4Safe("CameraInfo2",glm::vec4(c.getViewVector(),c.getFar()));
-            } 
-            uint _x = uint(float(fboWidth) * _divisor);
-            uint _y = uint(float(fboHeight) * _divisor);
-            sendUniform2("ScreenSize", (float)_x, (float)_y);
-            sendUniform4("SSAOInfo",ssao_radius,ssao_intensity,ssao_bias,ssao_scale);
-            sendUniform4("SSAOInfoA",0,0,ssao_samples,SSAO_NORMALMAP_SIZE);//change to 4f eventually?
 
-            sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
-            sendTexture("gRandomMap",ssao_noise_texture,1,GL_TEXTURE_2D);
-            sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
-
-            _renderFullscreenTriangle(_x,_y,0,0);
-        }
         void _passBloom(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture) {
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom]->bind();
             const float& _divisor = gbuffer.getSmallFBO()->divisor();
@@ -2053,18 +1998,7 @@ class epriv::RenderManager::impl final{
             uint _y = uint(float(fboHeight) * _divisor);
             _renderFullscreenTriangle(_x,_y,0,0);
         }
-        void _passHDR(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR]->bind();
 
-            sendUniform4Safe("HDRInfo",hdr_exposure,float(hdr), godRays_factor,float(hdr_algorithm));
-            sendUniform2Safe("Has",int(godRays), int(lighting));
-
-            sendTextureSafe("lightingBuffer",gbuffer.getTexture(GBufferType::Lighting),0);
-            sendTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),1);
-            sendTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),2);
-            sendTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),3);
-            _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
-        }
         void _passDOF(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture) {
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF]->bind();
 
@@ -2085,7 +2019,7 @@ class epriv::RenderManager::impl final{
 
             glm::ivec2 Res(fboWidth, fboHeight);
 
-            sendUniform4("strengthModifier", bloom_blur_strength, bloom_blur_strength, bloom_blur_strength,ssao_blur_strength);
+            sendUniform4("strengthModifier", bloom_blur_strength, bloom_blur_strength, bloom_blur_strength,epriv::Postprocess_SSAO::SSAO.m_ssao_blur_strength);
             sendUniform2("Resolution", Res);
             sendUniform4("DataA",bloom_blur_radius,0.0f,hv.x,hv.y);
             sendTexture("image",gbuffer.getTexture(texture),0);
@@ -2094,25 +2028,7 @@ class epriv::RenderManager::impl final{
             uint _y = uint(float(fboHeight) * _divisor);
             _renderFullscreenTriangle(_x,_y,0,0);
         }
-        void _passBlurSSAO(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, string type, GLuint texture) {
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlurSSAO]->bind();
-
-            const float& _divisor = gbuffer.getSmallFBO()->divisor();
-            glm::vec2 hv(0.0f);
-
-            if (type == "H") { hv = glm::vec2(1.0f, 0.0f); } else { hv = glm::vec2(0.0f, 1.0f); }
-
-            glm::ivec2 Res(fboWidth, fboHeight);
-
-            sendUniform1("strengthModifier", ssao_blur_strength);
-            sendUniform2("Resolution", Res);
-            sendUniform4("Data", ssao_blur_radius, 0.0f, hv.x, hv.y);
-            sendTexture("image", gbuffer.getTexture(texture), 0);
-
-            uint _x = uint(float(fboWidth) * _divisor);
-            uint _y = uint(float(fboHeight) * _divisor);
-            _renderFullscreenTriangle(_x, _y, 0, 0);
-        }
+        
         void _passFXAA(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA]->bind();
 
@@ -2332,17 +2248,22 @@ class epriv::RenderManager::impl final{
 
             gbuffer.start(GBufferType::Bloom, GBufferType::GodRays, "A", false);
             Settings::clear(true, false, false); //0,0,0,0
-            if (ssao) {
+
+
+
+            if (epriv::Postprocess_SSAO::SSAO.m_ssao) {
                 GLEnable(GLState::BLEND_0);//yes this is absolutely needed
                 gbuffer.start(GBufferType::Bloom, "A", false);
-                _passSSAO(gbuffer, camera, fboWidth, fboHeight);
-                if (ssao_do_blur) {
+                auto& ssaoShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO];
+                epriv::Postprocess_SSAO::SSAO.passSSAO(ssaoShader, gbuffer, fboWidth, fboHeight, camera);
+                if (epriv::Postprocess_SSAO::SSAO.m_ssao_do_blur) {
                     GLDisable(GLState::BLEND_0); //yes this is absolutely needed
-                    for (uint i = 0; i < ssao_blur_num_passes; ++i) {
+                    auto& ssaoBlurShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlurSSAO];
+                    for (uint i = 0; i < epriv::Postprocess_SSAO::SSAO.m_ssao_blur_num_passes; ++i) {
                         gbuffer.start(GBufferType::GodRays, "A", false);
-                        _passBlurSSAO(gbuffer, camera, fboWidth, fboHeight, "H", GBufferType::Bloom);
+                        epriv::Postprocess_SSAO::SSAO.passBlur(ssaoBlurShader, gbuffer, fboWidth, fboHeight, "H", GBufferType::Bloom);
                         gbuffer.start(GBufferType::Bloom, "A", false);
-                        _passBlurSSAO(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays);
+                        epriv::Postprocess_SSAO::SSAO.passBlur(ssaoBlurShader, gbuffer, fboWidth, fboHeight, "V", GBufferType::GodRays);
                     }
                 }    
             }else{
@@ -2375,7 +2296,8 @@ class epriv::RenderManager::impl final{
             
             #pragma region HDR and GodRays addition
             gbuffer.start(GBufferType::Misc);
-            _passHDR(gbuffer,camera,fboWidth,fboHeight);
+            ShaderP& hdrShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR];
+            epriv::Postprocess_HDR::HDR.pass(hdrShader, gbuffer, fboWidth, fboHeight, godRays, lighting, godRays_factor);
             #pragma endregion
             
             #pragma region Bloom
@@ -2554,12 +2476,6 @@ void Renderer::Settings::FXAA::setSpanMax(float r){ renderManagerImpl->FXAA_SPAN
 float Renderer::Settings::FXAA::getReduceMin(){ return renderManagerImpl->FXAA_REDUCE_MIN; }
 float Renderer::Settings::FXAA::getReduceMul(){ return renderManagerImpl->FXAA_REDUCE_MUL; }
 float Renderer::Settings::FXAA::getSpanMax(){ return renderManagerImpl->FXAA_SPAN_MAX; }
-bool Renderer::Settings::HDR::enabled(){ return renderManagerImpl->hdr; }
-void Renderer::Settings::HDR::enable(bool b){ renderManagerImpl->hdr = b; }
-void Renderer::Settings::HDR::disable(){ renderManagerImpl->hdr = false; }
-float Renderer::Settings::HDR::getExposure(){ return renderManagerImpl->hdr_exposure; }
-void Renderer::Settings::HDR::setExposure(float e){ renderManagerImpl->hdr_exposure = e; }
-void Renderer::Settings::HDR::setAlgorithm(HDRAlgorithm::Algorithm a){ renderManagerImpl->hdr_algorithm = a; }
 float Renderer::Settings::Bloom::getThreshold() { return renderManagerImpl->bloom_threshold; }
 void Renderer::Settings::Bloom::setThreshold(float t) { renderManagerImpl->bloom_threshold = t; }
 float Renderer::Settings::Bloom::getExposure() { return renderManagerImpl->bloom_exposure; }
@@ -2638,25 +2554,7 @@ void Renderer::Settings::Lighting::setGIContribution(float g, float d, float s){
     mgr.lighting_gi_contribution_specular = glm::clamp(s,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
-bool Renderer::Settings::SSAO::enabled(){ return renderManagerImpl->ssao;  }
-void Renderer::Settings::SSAO::enable(bool b){ renderManagerImpl->ssao = b;  }
-void Renderer::Settings::SSAO::disable(){ renderManagerImpl->ssao = false;  }
-void Renderer::Settings::SSAO::enableBlur(bool b){ renderManagerImpl->ssao_do_blur = b;  }
-void Renderer::Settings::SSAO::disableBlur(){ renderManagerImpl->ssao_do_blur = false;  }
-float Renderer::Settings::SSAO::getBlurRadius() { return renderManagerImpl->ssao_blur_radius; }
-void Renderer::Settings::SSAO::setBlurRadius(float r) { renderManagerImpl->ssao_blur_radius = glm::max(0.0f, r); }
-float Renderer::Settings::SSAO::getBlurStrength(){ return renderManagerImpl->ssao_blur_strength; }
-float Renderer::Settings::SSAO::getIntensity(){ return renderManagerImpl->ssao_intensity; }
-float Renderer::Settings::SSAO::getRadius(){ return renderManagerImpl->ssao_radius; }
-float Renderer::Settings::SSAO::getScale(){ return renderManagerImpl->ssao_scale; }
-float Renderer::Settings::SSAO::getBias(){ return renderManagerImpl->ssao_bias; }
-uint Renderer::Settings::SSAO::getSamples(){ return renderManagerImpl->ssao_samples; }
-void Renderer::Settings::SSAO::setBlurStrength(float s){ renderManagerImpl->ssao_blur_strength = glm::max(0.0f,s); }
-void Renderer::Settings::SSAO::setIntensity(float i){ renderManagerImpl->ssao_intensity = glm::max(0.0f,i); }
-void Renderer::Settings::SSAO::setRadius(float r){ renderManagerImpl->ssao_radius = glm::max(0.0f,r); }
-void Renderer::Settings::SSAO::setScale(float s){ renderManagerImpl->ssao_scale = glm::max(0.0f,s); }
-void Renderer::Settings::SSAO::setBias(float b){ renderManagerImpl->ssao_bias = b; }
-void Renderer::Settings::SSAO::setSamples(uint s){ renderManagerImpl->ssao_samples = glm::max((uint)0, s); }
+
 void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){ renderManagerImpl->_setAntiAliasingAlgorithm(algorithm); }
 void Renderer::Settings::cullFace(uint s){ renderManagerImpl->_cullFace(s); }
 void Renderer::Settings::clear(bool color, bool depth, bool stencil){

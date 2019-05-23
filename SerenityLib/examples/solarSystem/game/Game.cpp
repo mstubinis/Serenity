@@ -53,8 +53,8 @@ void Game::update(const float& dt){
     if (Engine::isKeyDownOnce(KeyboardKey::F7)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
     if (Engine::isKeyDownOnce(KeyboardKey::F8)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
     if (Engine::isKeyDownOnce(KeyboardKey::F9)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
-    if (Engine::isKeyDownOnce(KeyboardKey::F10)) { Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
-    if (Engine::isKeyDownOnce(KeyboardKey::F11)) { Renderer::Settings::HDR::enable(!Renderer::Settings::HDR::enabled()); }
+    if (Engine::isKeyDownOnce(KeyboardKey::F10)) { Renderer::ssao::enable(!Renderer::ssao::enabled()); }
+    if (Engine::isKeyDownOnce(KeyboardKey::F11)) { Renderer::hdr::enable(!Renderer::hdr::enabled()); }
     if (Engine::isKeyDownOnce(KeyboardKey::F12)) { Renderer::Settings::GodRays::enable(!Renderer::Settings::GodRays::enabled()); }
 
     m_HUD->update(dt);

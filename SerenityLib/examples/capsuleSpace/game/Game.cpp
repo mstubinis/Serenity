@@ -37,7 +37,7 @@ void Game::initLogic(){
     Resources::setCurrentScene("CapsuleSpace");
     m_HUD = new HUD();
     
-    Renderer::Settings::HDR::disable();
+    Renderer::hdr::disable();
     Renderer::Settings::GodRays::disable();
 }
 void Game::update(const float& dt){
@@ -53,7 +53,7 @@ void Game::update(const float& dt){
     if (Engine::isKeyDownOnce(KeyboardKey::F7)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
     if (Engine::isKeyDownOnce(KeyboardKey::F8)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
     if (Engine::isKeyDownOnce(KeyboardKey::F9)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
-    if (Engine::isKeyDownOnce(KeyboardKey::F10)) { Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
+    if (Engine::isKeyDownOnce(KeyboardKey::F10)) { Renderer::ssao::enable(!Renderer::ssao::enabled()); }
 
     m_HUD->update(dt);
 }

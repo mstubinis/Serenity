@@ -2,43 +2,61 @@
 #ifndef ENGINE_RENDERER_POSTPROCESS_SSAO_H_INCLUDE_GUARD
 #define ENGINE_RENDERER_POSTPROCESS_SSAO_H_INCLUDE_GUARD
 
-class  ShaderP;
-class  GBuffer;
+
 class  Camera;
+class  ShaderP;
 
 #include <glm/vec3.hpp>
+#include <string>
 
 namespace Engine {
 namespace epriv {
-    class Postprocess_SSAO final {
+    class  GBuffer;
+    class  Postprocess_SSAO final {
         public:
-            static const int SSAO_KERNEL_COUNT = 32;
+            static const int SSAO_KERNEL_COUNT   = 32;
             static const int SSAO_NORMALMAP_SIZE = 16;
 
-            bool m_ssao;
-            bool m_ssao_do_blur;
-            unsigned int m_ssao_samples;
-            unsigned int m_ssao_blur_num_passes;
-            float m_ssao_blur_radius;
-            float m_ssao_blur_strength;
-            float m_ssao_scale;
-            float m_ssao_intensity;
-            float m_ssao_bias;
-            float m_ssao_radius;
-            glm::vec3 m_ssao_Kernels[SSAO_KERNEL_COUNT];
-            GLuint m_ssao_noise_texture;
-
+            bool           m_ssao;
+            bool           m_ssao_do_blur;
+            unsigned int   m_ssao_samples;
+            unsigned int   m_ssao_blur_num_passes;
+            unsigned int   m_ssao_noise_texture; //GLuint?
+            float          m_ssao_blur_radius;
+            float          m_ssao_blur_strength;
+            float          m_ssao_scale;
+            float          m_ssao_intensity;
+            float          m_ssao_bias;
+            float          m_ssao_radius;
+            glm::vec3      m_ssao_Kernels[SSAO_KERNEL_COUNT];
+            
             Postprocess_SSAO();
             ~Postprocess_SSAO();
 
-            static Postprocess_SSAO SSAO;
+            void init();
+            void cleanup();
 
-            void pass(ShaderP&, GBuffer&, const uint& fboWidth, const uint& fboHeight, Camera&);
-            void passBlur(ShaderP&, GBuffer&, const uint& fboWidth, const uint& fboHeight, string type, const GLuint& texture);
+            void passSSAO(
+                ShaderP&,
+                GBuffer&,
+                const unsigned int& fboWidth,
+                const unsigned int& fboHeight,
+                Camera&
+            );
+            void passBlur(
+                ShaderP&,
+                GBuffer&,
+                const unsigned int& fboWidth,
+                const unsigned int& fboHeight,
+                const std::string& type,
+                const unsigned int& texture
+            );
+
+            static Postprocess_SSAO SSAO;
     };
 };
 
-namespace renderer {
+namespace Renderer {
 namespace ssao {
     bool enabled();
     void enable(bool b = true);

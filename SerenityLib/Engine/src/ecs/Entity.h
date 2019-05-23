@@ -9,9 +9,9 @@
 
 typedef std::uint32_t uint;
 
-const uint MAX_ENTITIES = 2097152;
-const uint MAX_SCENES = 128;
-const uint MAX_VERSIONS = 16;
+const uint MAX_ENTITIES  = 2097152;
+const uint MAX_SCENES    = 128;
+const uint MAX_VERSIONS  = 16;
 
 struct Entity{   
     uint data;
