@@ -88,6 +88,12 @@
     <Filter Include="Source Files\Engine\Core\Renderer\postprocess">
       <UniqueIdentifier>{01cc0dd0-e7a0-4866-a894-ff324d492e20}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\LUA">
+      <UniqueIdentifier>{767678bb-19c4-4851-a4cd-c0b39cacd1de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\LUA">
+      <UniqueIdentifier>{8e33b90a-fad4-424f-93e0-ec19bfacf2c5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -333,6 +339,12 @@
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Bloom.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lua\LuaEngine.h">
+      <Filter>Header Files\Engine\Core\LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lua\LuaScript.h">
+      <Filter>Header Files\Engine\Core\LUA</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -523,6 +535,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Bloom.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\lua\LuaEngine.cpp">
+      <Filter>Source Files\Engine\Core\LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\lua\LuaScript.cpp">
+      <Filter>Source Files\Engine\Core\LUA</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

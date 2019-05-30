@@ -111,7 +111,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLEW_STATIC;SFML_STATIC;ENGINE_PRECISION_VERY_HIGH;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\include\;C:\dev\boostLibrary\;$(SolutionDir)dependencies\include\bullet;$(SolutionDir)Engine\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\include\;C:\dev\boostLibrary\;$(SolutionDir)dependencies\include\bullet;$(SolutionDir)Engine\src;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -124,8 +124,8 @@
       <Message>Copying binary (Debug) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>assimp-d.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;Bullet2FileLoader_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>lua.lib;assimp-d.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;Bullet2FileLoader_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Visual Leak Detector\lib\Win32;$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;C:\dev\lua\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -138,15 +138,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Engine\src;$(SolutionDir)dependencies\include\bullet;C:\dev\boostLibrary\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\lua\src;$(SolutionDir)Engine\src;$(SolutionDir)dependencies\include\bullet;C:\dev\boostLibrary\;$(SolutionDir)dependencies\include\;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-d.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;Bullet2FileLoader_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Visual Leak Detector\lib\Win64;$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;C:\dev\lua\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>lua.lib;assimp-d.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;Bullet2FileLoader_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -160,7 +160,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\include\;C:\dev\boostLibrary\;$(SolutionDir)dependencies\include\bullet;$(SolutionDir)Engine\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\include\;C:\dev\boostLibrary;$(SolutionDir)dependencies\include\bullet;$(SolutionDir)Engine\src;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -178,8 +178,8 @@
       <Message>Copying Binary (Release) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>assimp.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;Bullet2FileLoader.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>lua.lib;assimp.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;Bullet2FileLoader.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Visual Leak Detector\lib\Win32;$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;C:\dev\lua\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -194,7 +194,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Engine\src;$(SolutionDir)dependencies\include\bullet;C:\dev\boostLibrary\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\lua\src;$(SolutionDir)Engine\src;$(SolutionDir)dependencies\include\bullet;C:\dev\boostLibrary\;$(SolutionDir)dependencies\include\;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -203,7 +203,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Visual Leak Detector\lib\Win64;$(SolutionDir)dependencies\lib;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib\SFML;C:\dev\boostLibrary\stage\lib;$(SolutionDir)dependencies\lib\assimp;C:\dev\lua\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>assimp.lib;zlibstatic.lib;winmm.lib;glew32s.lib;freeglut.lib;openal32.lib;flac.lib;ogg.lib;freetype.lib;ws2_32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;Bullet2FileLoader.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -236,6 +236,8 @@
     <ClInclude Include="Engine\src\core\engine\lights\RodLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\SpotLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\SunLight.h" />
+    <ClInclude Include="Engine\src\core\engine\lua\LuaEngine.h" />
+    <ClInclude Include="Engine\src\core\engine\lua\LuaScript.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshCollisionFactory.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshImportedData.h" />
@@ -314,6 +316,8 @@
     <ClCompile Include="Engine\src\core\engine\lights\RodLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\SpotLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\SunLight.cpp" />
+    <ClCompile Include="Engine\src\core\engine\lua\LuaEngine.cpp" />
+    <ClCompile Include="Engine\src\core\engine\lua\LuaScript.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshCollisionFactory.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshImportedData.cpp" />

@@ -26,12 +26,12 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < argc; i++) {
         string key = string(argv[i]);
         string lowerKey = "";
-        for (string::size_type i = 0; i < key.length(); ++i)
-            lowerKey += std::tolower(key[i], loc);
+        for (unsigned int j = 0; j < key.length(); ++j)
+            lowerKey += std::tolower(key[j], loc);
         args.emplace(lowerKey, true);
     }
     if (!args.count("console")) {
-        ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
+        //ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
     }
 
 

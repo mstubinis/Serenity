@@ -5,13 +5,17 @@
 #include "GameCamera.h"
 #include "ResourceManifest.h"
 
+#include <core/Material.h>
+
 #include <core/engine/Engine.h>
 #include <core/engine/Engine_Window.h>
 #include <core/engine/Engine_Networking.h>
-#include <core/Material.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/lights/Light.h>
+
+#include <core/engine/lua/LuaScript.h>
+
 
 #include <unordered_map>
 #include <iostream>
@@ -39,6 +43,29 @@ void Game::initLogic(){
     Resources::setCurrentScene("Sol");
 
     m_HUD = new HUD();
+
+
+    LuaScript script("../data/Scripts/test.lua");
+    float posX = script.get<float>("player.position.x");
+    float posY = script.get<float>("player.position.y");
+    int hp = script.get<int>("player.HP");
+    
+    std::cout << "Position X = " << posX << ", Y = " << posY << std::endl;
+    std::cout << "HP:" << hp << std::endl;
+
+
+    // getting arrays
+    std::vector<int> v = script.getIntVector("array");
+    std::cout << "Contents of array:";
+    for (auto& val : v) {
+        std::cout << val << std::endl;
+    }
+    // get table keys
+    std::vector<std::string> tblValues = script.getTableKeys("animations");
+    std::cout << "Table Values:" << std::endl;
+    for (auto& val : tblValues) {
+        std::cout << val << std::endl;
+    }
 }
 void Game::update(const float& dt){
     if (Engine::isKeyDownOnce(KeyboardKey::Space)) {
@@ -50,13 +77,24 @@ void Game::update(const float& dt){
     if (Engine::isKeyDownOnce(KeyboardKey::F6)) {
         Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen());
     }
-    if (Engine::isKeyDownOnce(KeyboardKey::F7)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
-    if (Engine::isKeyDownOnce(KeyboardKey::F8)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
-    if (Engine::isKeyDownOnce(KeyboardKey::F9)) { Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
-    if (Engine::isKeyDownOnce(KeyboardKey::F10)) { Renderer::ssao::enable(!Renderer::ssao::enabled()); }
-    if (Engine::isKeyDownOnce(KeyboardKey::F11)) { Renderer::hdr::enable(!Renderer::hdr::enabled()); }
-    if (Engine::isKeyDownOnce(KeyboardKey::F12)) { Renderer::Settings::GodRays::enable(!Renderer::Settings::GodRays::enabled()); }
-
+    if (Engine::isKeyDownOnce(KeyboardKey::F7)) { 
+        Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); 
+    }
+    if (Engine::isKeyDownOnce(KeyboardKey::F8)) { 
+        Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); 
+    }
+    if (Engine::isKeyDownOnce(KeyboardKey::F9)) { 
+        Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); 
+    }
+    if (Engine::isKeyDownOnce(KeyboardKey::F10)) { 
+        Renderer::ssao::enable(!Renderer::ssao::enabled()); 
+    }
+    if (Engine::isKeyDownOnce(KeyboardKey::F11)) { 
+        Renderer::hdr::enable(!Renderer::hdr::enabled()); 
+    }
+    if (Engine::isKeyDownOnce(KeyboardKey::F12)) { 
+        Renderer::Settings::GodRays::enable(!Renderer::Settings::GodRays::enabled()); 
+    }
     m_HUD->update(dt);
 }
 void Game::render(){
