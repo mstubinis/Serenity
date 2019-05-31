@@ -9,6 +9,8 @@
 #include <core/engine/renderer/postprocess/HDR.h>
 #include <core/engine/renderer/postprocess/DepthOfField.h>
 #include <core/engine/renderer/postprocess/Bloom.h>
+#include <core/engine/renderer/postprocess/FXAA.h>
+#include <core/engine/renderer/postprocess/GodRays.h>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <SFML/Window.hpp>
@@ -141,37 +143,6 @@ namespace Renderer{
             void disablePredication();
             void enableReprojection(bool b = true);
             void disableReprojection();
-        };
-        namespace FXAA{
-            void setReduceMin(float r);
-            float getReduceMin();
-            void setReduceMul(float r);
-            float getReduceMul();
-            void setSpanMax(float r);
-            float getSpanMax();
-        };
-        namespace GodRays{
-            bool enabled();
-            void enable(bool b);
-            void disable();
-            float getExposure();
-            void setExposure(float e);
-            float getFactor();
-            void setFactor(float f);
-            float getDecay();
-            void setDecay(float d);
-            float getDensity();
-            void setDensity(float d);
-            float getWeight();
-            void setWeight(float w);
-            uint getSamples();
-            void setSamples(uint s);
-            float getFOVDegrees();
-            void setFOVDegrees(float d);
-            float getAlphaFalloff();
-            void setAlphaFalloff(float a);
-            void setObject(Entity*);
-            Entity* getObject();
         };
         namespace Lighting{
             void enable(bool b = true);

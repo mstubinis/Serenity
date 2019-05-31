@@ -345,6 +345,12 @@
     <ClInclude Include="Engine\src\core\engine\lua\LuaScript.h">
       <Filter>Header Files\Engine\Core\LUA</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\postprocess\FXAA.h">
+      <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\postprocess\GodRays.h">
+      <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -541,6 +547,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\lua\LuaScript.cpp">
       <Filter>Source Files\Engine\Core\LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\postprocess\FXAA.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\postprocess\GodRays.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

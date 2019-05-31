@@ -9,9 +9,9 @@
 using namespace Engine;
 using namespace std;
 
-epriv::Postprocessing_Bloom epriv::Postprocessing_Bloom::Bloom;
+epriv::Postprocess_Bloom epriv::Postprocess_Bloom::Bloom;
 
-epriv::Postprocessing_Bloom::Postprocessing_Bloom() {
+epriv::Postprocess_Bloom::Postprocess_Bloom() {
     num_passes    = 3;
     bloom         = true;
     blur_radius   = 1.24f;
@@ -20,9 +20,9 @@ epriv::Postprocessing_Bloom::Postprocessing_Bloom() {
     threshold     = 0.55f;
     exposure      = 1.6f;
 }
-epriv::Postprocessing_Bloom::~Postprocessing_Bloom() {
+epriv::Postprocess_Bloom::~Postprocess_Bloom() {
 }
-void epriv::Postprocessing_Bloom::pass(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
+void epriv::Postprocess_Bloom::pass(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
     program.bind();
     const float& divisor = gbuffer.getSmallFBO()->divisor();
 
@@ -36,47 +36,47 @@ void epriv::Postprocessing_Bloom::pass(ShaderP& program, GBuffer& gbuffer, const
 
 
 float Renderer::bloom::getThreshold() { 
-    return epriv::Postprocessing_Bloom::Bloom.threshold;
+    return epriv::Postprocess_Bloom::Bloom.threshold;
 }
 void Renderer::bloom::setThreshold(float t) {
-    epriv::Postprocessing_Bloom::Bloom.threshold = t;
+    epriv::Postprocess_Bloom::Bloom.threshold = t;
 }
 float Renderer::bloom::getExposure() {
-    return epriv::Postprocessing_Bloom::Bloom.exposure;
+    return epriv::Postprocess_Bloom::Bloom.exposure;
 }
 void Renderer::bloom::setExposure(float e) {
-    epriv::Postprocessing_Bloom::Bloom.exposure = e;
+    epriv::Postprocess_Bloom::Bloom.exposure = e;
 }
 bool Renderer::bloom::enabled() {
-    return epriv::Postprocessing_Bloom::Bloom.bloom;
+    return epriv::Postprocess_Bloom::Bloom.bloom;
 }
 unsigned int Renderer::bloom::getNumPasses() {
-    return epriv::Postprocessing_Bloom::Bloom.num_passes;
+    return epriv::Postprocess_Bloom::Bloom.num_passes;
 }
 void Renderer::bloom::setNumPasses(unsigned int p) {
-    epriv::Postprocessing_Bloom::Bloom.num_passes = p;
+    epriv::Postprocess_Bloom::Bloom.num_passes = p;
 }
 void Renderer::bloom::enable(bool b) {
-    epriv::Postprocessing_Bloom::Bloom.bloom = b;
+    epriv::Postprocess_Bloom::Bloom.bloom = b;
 }
 void Renderer::bloom::disable() {
-    epriv::Postprocessing_Bloom::Bloom.bloom = false;
+    epriv::Postprocess_Bloom::Bloom.bloom = false;
 }
 float Renderer::bloom::getBlurRadius() {
-    return epriv::Postprocessing_Bloom::Bloom.blur_radius;
+    return epriv::Postprocess_Bloom::Bloom.blur_radius;
 }
 float Renderer::bloom::getBlurStrength() {
-    return epriv::Postprocessing_Bloom::Bloom.blur_strength;
+    return epriv::Postprocess_Bloom::Bloom.blur_strength;
 }
 void Renderer::bloom::setBlurRadius(float r) {
-    epriv::Postprocessing_Bloom::Bloom.blur_radius = glm::max(0.0f, r);
+    epriv::Postprocess_Bloom::Bloom.blur_radius = glm::max(0.0f, r);
 }
 void Renderer::bloom::setBlurStrength(float r) {
-    epriv::Postprocessing_Bloom::Bloom.blur_strength = glm::max(0.0f, r);
+    epriv::Postprocess_Bloom::Bloom.blur_strength = glm::max(0.0f, r);
 }
 float Renderer::bloom::getScale() {
-    return epriv::Postprocessing_Bloom::Bloom.scale;
+    return epriv::Postprocess_Bloom::Bloom.scale;
 }
 void Renderer::bloom::setScale(float s) {
-    epriv::Postprocessing_Bloom::Bloom.scale = glm::max(0.0f, s);
+    epriv::Postprocess_Bloom::Bloom.scale = glm::max(0.0f, s);
 }

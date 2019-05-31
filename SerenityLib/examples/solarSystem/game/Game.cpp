@@ -93,7 +93,7 @@ void Game::update(const float& dt){
         Renderer::hdr::enable(!Renderer::hdr::enabled()); 
     }
     if (Engine::isKeyDownOnce(KeyboardKey::F12)) { 
-        Renderer::Settings::GodRays::enable(!Renderer::Settings::GodRays::enabled()); 
+        Renderer::godRays::enable(!Renderer::godRays::enabled());
     }
     m_HUD->update(dt);
 }

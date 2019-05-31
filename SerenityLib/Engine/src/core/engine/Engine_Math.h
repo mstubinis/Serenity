@@ -9,6 +9,7 @@
 #include <assimp/Importer.hpp>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
+#include <SFML/Graphics/Color.hpp>
 
 class btVector3;
 class btRigidBody;
@@ -238,7 +239,8 @@ namespace Math{
     float grad(int hash, float x, float y, float z);
     double grad(int hash, double x, double y, double z);
 
-    glm::vec4 PaintersAlgorithm(glm::vec4& paintColor, glm::vec4& canvasColor);
+    glm::vec4 PaintersAlgorithm(const glm::vec4& paintColor, const glm::vec4& canvasColor);
+    sf::Color PaintersAlgorithm(const sf::Color& paintColor, const sf::Color& canvasColor);
 
     bool rayIntersectSphere(glm::vec3 position, float radius, glm::vec3 A, glm::vec3 rayVector);
 };

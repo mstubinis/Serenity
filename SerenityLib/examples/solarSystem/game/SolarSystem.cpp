@@ -211,7 +211,7 @@ void SolarSystem::_loadFromFile(string filename){
                         float parentX = m_Planets.at(PARENT)->getPosition().x;
                         float parentZ = m_Planets.at(PARENT)->getPosition().z;
                         xPos += parentX;
-                        zPos += parentZ; 
+                        zPos += parentZ;
                     }
                     setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f), CollisionType::ConvexHull,this));
                     GameCamera* playerCamera = (GameCamera*)getActiveCamera();

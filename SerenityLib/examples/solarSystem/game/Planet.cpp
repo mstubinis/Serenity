@@ -396,8 +396,8 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor, glm::vec3 godRaysColor,glm:
     //addChild(m_Light);
     m_Light->setPosition(pos);
     scene->m_Objects.push_back(m_Light);
-    if(!Renderer::Settings::GodRays::getObject()){
-        Renderer::Settings::GodRays::setObject(&m_Entity);
+    if(!Renderer::godRays::getSun()){
+        Renderer::godRays::setSun(&m_Entity);
     }
 }
 Star::~Star(){
@@ -409,7 +409,12 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
 
     auto& model = *m_Parent->m_Entity.getComponent<ComponentModel>();
 
-    uint index = model.addModel(ResourceManifest::RingMesh,m_MaterialHandle,(ShaderP*)ResourceManifest::groundFromSpace.get(), RenderStage::GeometryTransparent);
+    const uint& index = model.addModel(
+        ResourceManifest::RingMesh,
+        m_MaterialHandle,
+        (ShaderP*)ResourceManifest::groundFromSpace.get(), 
+        RenderStage::GeometryTransparent
+    );
     MeshInstance& ringMesh = model.getModel(index);
     ringMesh.setCustomBindFunctor(PlanetaryRingMeshInstanceBindFunctor());
     float aScale = 1.0f;
@@ -421,44 +426,36 @@ Ring::~Ring(){
 void Ring::_makeRingImage(vector<RingInfo>& rings){
     sf::Image ringImage;
     ringImage.create(1024, 2, sf::Color(0,0,0,0));
-    uint count = 0;
+    const auto& ringImageX = ringImage.getSize().x;
+    const auto& ringImageY = ringImage.getSize().y;
     for(auto& ringInfo: rings){
-        glm::vec4 pC = glm::vec4((float)ringInfo.color.r, (float)ringInfo.color.g, (float)ringInfo.color.b, 255.0f) / 255.0f;
-        uint alphaChangeRange = ringInfo.size - ringInfo.alphaBreakpoint;
-        uint newI = 0;
+        sf::Color paint_color(ringInfo.color.r, ringInfo.color.g, ringInfo.color.b);
+
+        uint alphaChange = ringInfo.size - ringInfo.alphaBreakpoint;
+        uint alpha_i = 0;
         for(uint i = 0; i < ringInfo.size; ++i){
             if (i > ringInfo.alphaBreakpoint) {
-                pC.a = float(alphaChangeRange - newI) / (float)alphaChangeRange;
-                ++newI;
-            }else{
-                pC.a = 1;
-            } 
-
-            int xBack = ringInfo.position - i;
-            int xFront = ringInfo.position + i;
-            if (xBack > 0 && xFront < (int)ringImage.getSize().x) {
-                sf::Color fFront, fBack;
-                sf::Color bgFrontPixel = ringImage.getPixel(xFront, 0);
-                sf::Color bgBackPixel = ringImage.getPixel(xBack, 0);
-                glm::vec4 bgColorFront = glm::vec4(bgFrontPixel.r, bgFrontPixel.g, bgFrontPixel.b, bgFrontPixel.a) / 255.0f;
-                glm::vec4 bgColorBack = glm::vec4(bgBackPixel.r, bgBackPixel.g, bgBackPixel.b, bgBackPixel.a) / 255.0f;
-                glm::vec4 _fcf = Engine::Math::PaintersAlgorithm(pC, bgColorFront);
-                glm::vec4 _fcb = Engine::Math::PaintersAlgorithm(pC, bgColorBack); 
+                paint_color.a = (sf::Uint8)((float(alphaChange - alpha_i) / (float)alphaChange) * 255.0f);
+                ++alpha_i;
+            }
+            int xBack  =  ringInfo.position - i;
+            int xFront =  ringInfo.position + i;
+            if (xBack > 0 && xFront < (int)ringImageX) {
+                const sf::Color& canvas_color_front = ringImage.getPixel(xFront, 0);
+                const sf::Color& canvas_color_back = ringImage.getPixel(xBack,  0);
+                sf::Color finalColorFront = Engine::Math::PaintersAlgorithm(paint_color, canvas_color_front);
+                sf::Color finalColorBack = Engine::Math::PaintersAlgorithm(paint_color, canvas_color_back);
                 if (ringInfo.color.r < 0 || ringInfo.color.g < 0 || ringInfo.color.b < 0) {
-                    //transparent color, removing the BG color 
-                    _fcf = glm::vec4(bgColorFront.r, bgColorFront.g, bgColorFront.b, 1.0f - pC.a);
-                    _fcb = glm::vec4(bgColorBack.r, bgColorBack.g, bgColorBack.b, 1.0f - pC.a);
+                    //transparent color, removing the canvas color 
+                    finalColorFront = sf::Color(canvas_color_front.r, canvas_color_front.g, canvas_color_front.b, 255 - paint_color.a);
+                    finalColorBack  = sf::Color(canvas_color_back.r, canvas_color_back.g, canvas_color_back.b, 255 - paint_color.a);
                 }
-                fFront = sf::Color(sf::Uint8(_fcf.r * 255.0f), sf::Uint8(_fcf.g * 255.0f), sf::Uint8(_fcf.b * 255.0f), sf::Uint8(_fcf.a * 255.0f));
-                fBack = sf::Color(sf::Uint8(_fcb.r * 255.0f), sf::Uint8(_fcb.g * 255.0f), sf::Uint8(_fcb.b * 255.0f), sf::Uint8(_fcb.a * 255.0f));
-
-                for (uint s = 0; s < ringImage.getSize().y; ++s) { 
-                    ringImage.setPixel(xFront, s, fFront);
-                    ringImage.setPixel(xBack, s, fBack);
+                for (uint s = 0; s < ringImageY; ++s) {
+                    ringImage.setPixel(xFront, s, finalColorFront);
+                    ringImage.setPixel(xBack,  s, finalColorBack);
                 }
             }
         }
-        ++count;
     }
     Texture* diffuse = new Texture(ringImage,"RingDiffuse",false,ImageInternalFormat::SRGB8_ALPHA8);
     diffuse->setAnisotropicFiltering(2.0f);

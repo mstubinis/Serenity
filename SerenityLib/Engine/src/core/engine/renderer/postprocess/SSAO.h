@@ -21,7 +21,7 @@ namespace epriv {
             bool           m_ssao_do_blur;
             unsigned int   m_ssao_samples;
             unsigned int   m_ssao_blur_num_passes;
-            unsigned int   m_ssao_noise_texture; //GLuint?
+            unsigned int   m_ssao_noise_texture;
             float          m_ssao_blur_radius;
             float          m_ssao_blur_strength;
             float          m_ssao_scale;

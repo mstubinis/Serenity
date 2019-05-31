@@ -6,7 +6,7 @@ class  ShaderP;
 namespace Engine {
 namespace epriv {
     class  GBuffer;
-    class  Postprocessing_Bloom final {
+    class  Postprocess_Bloom final {
         public:
             unsigned int num_passes;
             bool         bloom;
@@ -16,18 +16,12 @@ namespace epriv {
             float        threshold;
             float        exposure;
 
-            Postprocessing_Bloom();
-            ~Postprocessing_Bloom();
+            Postprocess_Bloom();
+            ~Postprocess_Bloom();
 
-            void pass(
-                ShaderP& program,
-                GBuffer& gbuffer,
-                const unsigned int& fboWidth,
-                const unsigned int& fboHeight,
-                const unsigned int& sceneTextureEnum
-            );
+            void pass(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
 
-            static Postprocessing_Bloom Bloom;
+            static Postprocess_Bloom Bloom;
     };
 };
 namespace Renderer {

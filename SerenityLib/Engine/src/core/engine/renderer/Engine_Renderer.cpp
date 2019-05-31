@@ -174,12 +174,6 @@ class epriv::RenderManager::impl final{
         glm::vec4 fog_color;
         #pragma endregion
 
-        #pragma region FXAAInfo
-        float FXAA_REDUCE_MIN;
-        float FXAA_REDUCE_MUL;
-        float FXAA_SPAN_MAX;
-        #pragma endregion
-
         #pragma region SMAAInfo
         GLuint SMAA_AreaTexture;
         GLuint SMAA_SearchTexture;
@@ -207,20 +201,6 @@ class epriv::RenderManager::impl final{
         float lighting_gi_contribution_specular;
         float lighting_gi_contribution_global;
         float lighting_gi_pack;
-        #pragma endregion
-
-        #pragma region GodRaysInfo
-        bool godRays;
-        glm::vec4 godRays_clearColor;
-        float godRays_exposure;
-        float godRays_factor;
-        float godRays_decay;
-        float godRays_density;
-        float godRays_weight;
-        float godRays_fovDegrees;
-        float godRays_alphaFalloff;
-        Entity* godRays_Object;
-        int godRays_samples;
         #pragma endregion
 
         #pragma region GeneralInfo
@@ -271,12 +251,6 @@ class epriv::RenderManager::impl final{
             fog_color = glm::vec4(1.0f,1.0f,1.0f,0.95f);
             #pragma endregion
 
-            #pragma region FXAAInfo
-            FXAA_REDUCE_MIN = 0.0078125f; // (1 / 128)
-            FXAA_REDUCE_MUL = 0.125f;     // (1 / 8)
-            FXAA_SPAN_MAX = 8.0f;
-            #pragma endregion
-
             #pragma region SMAAInfo
             SMAA_THRESHOLD = 0.05f;
             SMAA_MAX_SEARCH_STEPS = 32;
@@ -302,20 +276,6 @@ class epriv::RenderManager::impl final{
             lighting_gi_contribution_specular = 1.0f;
             lighting_gi_contribution_global = 1.0f;
             lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(lighting_gi_contribution_diffuse,lighting_gi_contribution_specular,lighting_gi_contribution_global);
-            #pragma endregion
-
-            #pragma region GodRaysInfo
-            godRays = true;
-            godRays_clearColor = glm::vec4(0.030f, 0.023f, 0.032f, 1.0f);
-            godRays_exposure = 0.03f;
-            godRays_factor = 1.0f;
-            godRays_decay = 0.97f;
-            godRays_density = 1.5f;
-            godRays_weight = 0.567f;
-            godRays_samples = 80;
-            godRays_fovDegrees = 75.0f;
-            godRays_alphaFalloff = 2.0f;
-            godRays_Object = nullptr;
             #pragma endregion
 
             #pragma region GeneralInfo
@@ -1753,8 +1713,14 @@ class epriv::RenderManager::impl final{
             //GLDisable(GLState::BLEND_0);
 
             glClearBufferfv(GL_COLOR,0,colors);
-            if(godRays){
-                const float _godraysclearcolor[4] = { godRays_clearColor.r, godRays_clearColor.g, godRays_clearColor.b, godRays_clearColor.a };
+            auto& godRaysPlatform = epriv::Postprocess_GodRays::GodRays;
+            if(godRaysPlatform.godRays){
+                const float _godraysclearcolor[4] = { 
+                    godRaysPlatform.clearColor.r, 
+                    godRaysPlatform.clearColor.g, 
+                    godRaysPlatform.clearColor.b, 
+                    godRaysPlatform.clearColor.a 
+                };
                 glClearBufferfv(GL_COLOR,2, _godraysclearcolor);
             }
 
@@ -1908,19 +1874,6 @@ class epriv::RenderManager::impl final{
 
             Renderer::colorMask(true, true, true, true);
         }
-        void _passGodsRays(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,glm::vec2 lightScrnPos,float alpha){
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays]->bind();
-            const float& _divisor = gbuffer.getSmallFBO()->divisor();
-            sendUniform4("RaysInfo", godRays_exposure, godRays_decay, godRays_density, godRays_weight);
-            sendUniform2("lightPositionOnScreen", lightScrnPos.x / float(fboWidth), lightScrnPos.y / float(fboHeight));
-            sendUniform1("samples", godRays_samples);
-            sendUniform1("alpha", alpha);
-            sendTexture("firstPass", gbuffer.getTexture(GBufferType::Misc), 0);
-
-            uint _x = uint(float(fboWidth) * _divisor);
-            uint _y = uint(float(fboHeight) * _divisor);
-            _renderFullscreenTriangle(_x,_y,0,0);
-        }
 
         void _passBlur(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,string type, GLuint texture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur]->bind();
@@ -1933,32 +1886,18 @@ class epriv::RenderManager::impl final{
             glm::ivec2 Res(fboWidth, fboHeight);
 
             sendUniform4("strengthModifier", 
-                epriv::Postprocessing_Bloom::Bloom.blur_strength,
-                epriv::Postprocessing_Bloom::Bloom.blur_strength,
-                epriv::Postprocessing_Bloom::Bloom.blur_strength,
+                epriv::Postprocess_Bloom::Bloom.blur_strength,
+                epriv::Postprocess_Bloom::Bloom.blur_strength,
+                epriv::Postprocess_Bloom::Bloom.blur_strength,
                 epriv::Postprocess_SSAO::SSAO.m_ssao_blur_strength
             );
             sendUniform2("Resolution", Res);
-            sendUniform4("DataA", epriv::Postprocessing_Bloom::Bloom.blur_radius,0.0f,hv.x,hv.y);
+            sendUniform4("DataA", epriv::Postprocess_Bloom::Bloom.blur_radius,0.0f,hv.x,hv.y);
             sendTexture("image",gbuffer.getTexture(texture),0);
 
             uint _x = uint(float(fboWidth) * _divisor);
             uint _y = uint(float(fboHeight) * _divisor);
             _renderFullscreenTriangle(_x,_y,0,0);
-        }
-        
-        void _passFXAA(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture){
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA]->bind();
-
-            sendUniform1("FXAA_REDUCE_MIN",FXAA_REDUCE_MIN);
-            sendUniform1("FXAA_REDUCE_MUL",FXAA_REDUCE_MUL);
-            sendUniform1("FXAA_SPAN_MAX",FXAA_SPAN_MAX);
-
-            sendUniform2("invRes",1.0f / float(fboWidth),1.0f / float(fboHeight));
-            sendTexture("inTexture",gbuffer.getTexture(sceneTexture),0);
-            sendTextureSafe("edgeTexture",gbuffer.getTexture(GBufferType::Misc),1);
-            sendTexture("depthTexture",gbuffer.getTexture(GBufferType::Depth),2);
-            _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
         }
         void _passSMAA(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,GBufferType::Type sceneTexture,GBufferType::Type outTexture){
             float _fboWidth = float(fboWidth);
@@ -2039,7 +1978,7 @@ class epriv::RenderManager::impl final{
         void _passFinal(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal]->bind();
 
-            sendUniform1Safe("HasBloom",int(epriv::Postprocessing_Bloom::Bloom.bloom));
+            sendUniform1Safe("HasBloom",int(epriv::Postprocess_Bloom::Bloom.bloom));
             sendUniform1Safe("HasFog",int(fog));
 
             if(fog){
@@ -2137,23 +2076,25 @@ class epriv::RenderManager::impl final{
             Renderer::GLDisable(GLState::BLEND_0);
             gbuffer.start(GBufferType::GodRays, "RGB", false);
             Settings::clear(true,false,false); //this is needed, clear color should be (0,0,0,0)
-
-            if (godRays && godRays_Object){
-                auto& body = *godRays_Object->getComponent<ComponentBody>();
+            auto& godRaysPlatform = epriv::Postprocess_GodRays::GodRays;
+            if (godRaysPlatform.godRays && godRaysPlatform.sun){
+                auto& body = *godRaysPlatform.sun->getComponent<ComponentBody>();
                 glm::vec3 oPos = body.position();
                 glm::vec3 camPos = camera.getPosition();
                 glm::vec3 camVec = camera.getViewVector();
-                bool infront = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRays_fovDegrees));
+                bool infront = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRaysPlatform.fovDegrees));
                 if (infront) {
                     glm::vec3 sp = Math::getScreenCoordinates(oPos, false);
-                    float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRays_fovDegrees;
+                    float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRaysPlatform.fovDegrees;
                     
-                    alpha = glm::pow(alpha, godRays_alphaFalloff);
+                    alpha = glm::pow(alpha, godRaysPlatform.alphaFalloff);
                     alpha = glm::clamp(alpha, 0.01f, 0.99f);
                     if (boost::math::isnan(alpha) || boost::math::isinf(alpha)) { //yes this is needed...
                         alpha = 0.01f;
                     }
-                    _passGodsRays(gbuffer, camera, fboWidth, fboHeight, glm::vec2(sp.x, sp.y), 1.0f - alpha);  
+                    alpha = 1.0f - alpha;
+                    auto& godRaysShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays];
+                    godRaysPlatform.pass(godRaysShader, gbuffer, fboWidth, fboHeight, glm::vec2(sp.x, sp.y),alpha); 
                 }
             }
 
@@ -2215,16 +2156,16 @@ class epriv::RenderManager::impl final{
             #pragma region HDR and GodRays addition
             gbuffer.start(GBufferType::Misc);
             ShaderP& hdrShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR];
-            epriv::Postprocess_HDR::HDR.pass(hdrShader, gbuffer, fboWidth, fboHeight, godRays, lighting, godRays_factor);
+            epriv::Postprocess_HDR::HDR.pass(hdrShader, gbuffer, fboWidth, fboHeight, godRaysPlatform.godRays, lighting, godRaysPlatform.factor);
             #pragma endregion
             
             #pragma region Bloom
             //TODO: possible optimization: use stencil buffer to reject completely black pixels during blur passes
-            if (epriv::Postprocessing_Bloom::Bloom.bloom) {
+            if (epriv::Postprocess_Bloom::Bloom.bloom) {
                 gbuffer.start(GBufferType::Bloom, "RGB", false);
                 ShaderP& bloomShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom];
-                epriv::Postprocessing_Bloom::Bloom.pass(bloomShader, gbuffer, fboWidth, fboHeight, GBufferType::Lighting);
-                for (uint i = 0; i < epriv::Postprocessing_Bloom::Bloom.num_passes; ++i) {
+                epriv::Postprocess_Bloom::Bloom.pass(bloomShader, gbuffer, fboWidth, fboHeight, GBufferType::Lighting);
+                for (uint i = 0; i < epriv::Postprocess_Bloom::Bloom.num_passes; ++i) {
                     gbuffer.start(GBufferType::GodRays, "RGB", false);
                     _passBlur(gbuffer, camera, fboWidth, fboHeight, "H", GBufferType::Bloom);
                     gbuffer.start(GBufferType::Bloom, "RGB", false);
@@ -2254,7 +2195,8 @@ class epriv::RenderManager::impl final{
                 _passFinal(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
                 sceneTexture = outTexture;
                 gbuffer.stop(fbo, rbo);
-                _passFXAA(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
+                auto& fxaaShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA];
+                epriv::Postprocess_FXAA::FXAA.pass(fxaaShader, gbuffer, fboWidth, fboHeight, sceneTexture);
             }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::SMAA){
                 gbuffer.start(outTexture);
                 _passFinal(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
@@ -2380,12 +2322,6 @@ void Renderer::Settings::Fog::setNullDistance(float d){ renderManagerImpl->fog_d
 void Renderer::Settings::Fog::setBlendDistance(float d){ renderManagerImpl->fog_distBlend = d; }
 float Renderer::Settings::Fog::getNullDistance(){ return renderManagerImpl->fog_distNull; }
 float Renderer::Settings::Fog::getBlendDistance(){ return renderManagerImpl->fog_distBlend; }
-void Renderer::Settings::FXAA::setReduceMin(float r){ renderManagerImpl->FXAA_REDUCE_MIN = glm::max(0.0f,r); }
-void Renderer::Settings::FXAA::setReduceMul(float r){ renderManagerImpl->FXAA_REDUCE_MUL = glm::max(0.0f,r); }
-void Renderer::Settings::FXAA::setSpanMax(float r){ renderManagerImpl->FXAA_SPAN_MAX = glm::max(0.0f,r); }
-float Renderer::Settings::FXAA::getReduceMin(){ return renderManagerImpl->FXAA_REDUCE_MIN; }
-float Renderer::Settings::FXAA::getReduceMul(){ return renderManagerImpl->FXAA_REDUCE_MUL; }
-float Renderer::Settings::FXAA::getSpanMax(){ return renderManagerImpl->FXAA_SPAN_MAX; }
 void Renderer::Settings::SMAA::setThreshold(float f){ renderManagerImpl->SMAA_THRESHOLD = f; }
 void Renderer::Settings::SMAA::setSearchSteps(uint s){ renderManagerImpl->SMAA_MAX_SEARCH_STEPS = s; }
 void Renderer::Settings::SMAA::disableCornerDetection(){ renderManagerImpl->SMAA_CORNER_ROUNDING = 0; }
@@ -2401,27 +2337,6 @@ void Renderer::Settings::SMAA::disablePredication(){ renderManagerImpl->SMAA_PRE
 void Renderer::Settings::SMAA::enableReprojection(bool b){ renderManagerImpl->SMAA_REPROJECTION = b; }
 void Renderer::Settings::SMAA::disableReprojection(){ renderManagerImpl->SMAA_REPROJECTION = false; }
 void Renderer::Settings::SMAA::setQuality(SMAAQualityLevel::Level level){ renderManagerImpl->_setSMAAQuality(level); }
-bool Renderer::Settings::GodRays::enabled(){ return renderManagerImpl->godRays; }
-void Renderer::Settings::GodRays::enable(bool b = true){ renderManagerImpl->godRays = b; }
-void Renderer::Settings::GodRays::disable(){ renderManagerImpl->godRays = false; }
-float Renderer::Settings::GodRays::getExposure(){ return renderManagerImpl->godRays_exposure; }
-float Renderer::Settings::GodRays::getFactor() { return renderManagerImpl->godRays_factor; }
-float Renderer::Settings::GodRays::getDecay(){ return renderManagerImpl->godRays_decay; }
-float Renderer::Settings::GodRays::getDensity(){ return renderManagerImpl->godRays_density; }
-float Renderer::Settings::GodRays::getWeight(){ return renderManagerImpl->godRays_weight; }
-uint Renderer::Settings::GodRays::getSamples(){ return renderManagerImpl->godRays_samples; }
-float Renderer::Settings::GodRays::getFOVDegrees(){ return renderManagerImpl->godRays_fovDegrees; }
-float Renderer::Settings::GodRays::getAlphaFalloff(){ return renderManagerImpl->godRays_alphaFalloff; }
-void Renderer::Settings::GodRays::setExposure(float e){ renderManagerImpl->godRays_exposure = e; }
-void Renderer::Settings::GodRays::setFactor(float f) { renderManagerImpl->godRays_factor = f; }
-void Renderer::Settings::GodRays::setDecay(float d){ renderManagerImpl->godRays_decay = d; }
-void Renderer::Settings::GodRays::setDensity(float d){ renderManagerImpl->godRays_density = d; }
-void Renderer::Settings::GodRays::setWeight(float w){ renderManagerImpl->godRays_weight = w; }
-void Renderer::Settings::GodRays::setSamples(uint s){ renderManagerImpl->godRays_samples = glm::max((uint)0,s); }
-void Renderer::Settings::GodRays::setFOVDegrees(float d){ renderManagerImpl->godRays_fovDegrees = d; }
-void Renderer::Settings::GodRays::setAlphaFalloff(float a){ renderManagerImpl->godRays_alphaFalloff = a; }
-void Renderer::Settings::GodRays::setObject(Entity* entity){ renderManagerImpl->godRays_Object = entity; }
-Entity* Renderer::Settings::GodRays::getObject(){ return renderManagerImpl->godRays_Object; }
 void Renderer::Settings::Lighting::enable(bool b){ renderManagerImpl->lighting = b; }
 void Renderer::Settings::Lighting::disable(){ renderManagerImpl->lighting = false; }
 float Renderer::Settings::Lighting::getGIContributionGlobal(){ return renderManagerImpl->lighting_gi_contribution_global; }

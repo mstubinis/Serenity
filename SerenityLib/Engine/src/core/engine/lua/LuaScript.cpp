@@ -93,8 +93,6 @@ int sum(int x, int y) {
 */
 
 
-
-
 vector<int> LuaScript::getIntVector(const string& name) {
     vector<int> v;
     lua_getglobal(LUA, name.c_str());
@@ -137,9 +135,6 @@ vector<string> LuaScript::getStringVector(const string& name) {
     clean();
     return v;
 }
-
-
-
 vector<string> LuaScript::getTableKeys(const string& name) {
     luaL_loadstring(LUA, getKeysCode.c_str()); // execute code
     lua_pcall(LUA, 0, 0, 0);

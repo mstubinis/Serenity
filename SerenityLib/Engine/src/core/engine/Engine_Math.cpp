@@ -465,11 +465,23 @@ double Math::grad(int hash, double x, double y, double z){
     double u = h<8 ? x : y,v = h<4 ? y : h==12||h==14 ? x : z;
     return ((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v);
 }
-glm::vec4 Math::PaintersAlgorithm(glm::vec4& p, glm::vec4& c){
+glm::vec4 Math::PaintersAlgorithm(const glm::vec4& p, const glm::vec4& c){
     glm::vec4 ret(0.0f);
-    float a = p.a + c.a * (1.0f-p.a);
+    const float& a = p.a + c.a * (1.0f-p.a);
     ret = ((p*p.a + c*c.a * (1.0f-p.a)) / a);
     ret.a = a;
+    return ret;
+}
+sf::Color Math::PaintersAlgorithm(const sf::Color& paint_color, const sf::Color& canvas_color) {
+    const sf::Uint8& zero = (unsigned short)0;
+    const sf::Uint8& high = (unsigned short)255;
+    const sf::Uint8& alpha = paint_color.a + canvas_color.a * (high - paint_color.a);
+
+    sf::Color ret = sf::Color(zero, zero, zero, zero);
+    ret.r = ((paint_color.r * paint_color.a + canvas_color.r * canvas_color.a * (high - paint_color.a)) / alpha);
+    ret.g = ((paint_color.g * paint_color.a + canvas_color.g * canvas_color.a * (high - paint_color.a)) / alpha);
+    ret.b = ((paint_color.b * paint_color.a + canvas_color.b * canvas_color.a * (high - paint_color.a)) / alpha);
+    ret.a = alpha;
     return ret;
 }
 bool Math::rayIntersectSphere(glm::vec3 C, float r,glm::vec3 A, glm::vec3 rayVector){
