@@ -34,7 +34,7 @@ class ShipSystem{
 
         const bool isOnline() const { if(m_Health > 0 && m_Power > 0) return true; return false; }
 
-        virtual void update(const float& dt);
+        virtual void update(const double& dt);
 };
 class ShipSystemReactor final: public ShipSystem{
     private:
@@ -44,56 +44,56 @@ class ShipSystemReactor final: public ShipSystem{
         ShipSystemReactor(Ship*, float maxPower, float currentPower = -1);
         ~ShipSystemReactor();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemMainThrusters final: public ShipSystem{
     public:
         ShipSystemMainThrusters(Ship*);
         ~ShipSystemMainThrusters();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemPitchThrusters final: public ShipSystem{
     public:
         ShipSystemPitchThrusters(Ship*);
         ~ShipSystemPitchThrusters();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemYawThrusters final: public ShipSystem{
     public:
         ShipSystemYawThrusters(Ship*);
         ~ShipSystemYawThrusters();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemRollThrusters final: public ShipSystem{
     public:
         ShipSystemRollThrusters(Ship*);
         ~ShipSystemRollThrusters();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemShields final: public ShipSystem{
     public:
         ShipSystemShields(Ship*);
         ~ShipSystemShields();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemWarpDrive final: public ShipSystem{
     public:
         ShipSystemWarpDrive(Ship*);
         ~ShipSystemWarpDrive();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemSensors final: public ShipSystem{
     public:
         ShipSystemSensors(Ship*);
         ~ShipSystemSensors();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 
 class Ship: public EntityWrapper {

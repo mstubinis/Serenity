@@ -255,7 +255,7 @@ Scene::~Scene(){
     unregisterEvent(EventType::SceneChanged);
     m_i->_destruct();
 }
-void Scene::update(const float& dt){
+void Scene::update(const double& dt){
 }
 glm::vec3 Scene::getBackgroundColor(){ 
     return m_i->m_BackgroundColor; 

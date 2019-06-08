@@ -42,18 +42,32 @@ glm::vec3 epriv::ComponentCamera_Functions::GetViewVectorNoTranslation(Camera& c
 #pragma region Component
 
 ComponentCamera::ComponentCamera(Entity& _e,float angle, float aspectRatio, float nearPlane, float farPlane) : ComponentBaseClass(_e) {
-    _eye = glm::vec3(0.0f); _up = glm::vec3(0.0f, 1.0f, 0.0f);
-    _angle = glm::radians(angle); _aspectRatio = aspectRatio; _nearPlane = nearPlane; _farPlane = farPlane;
-    _projectionMatrix = glm::perspective(_angle, _aspectRatio, _nearPlane, _farPlane);
-    _viewMatrix = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    _type = Type::Perspective;
+    _eye                     = glm::vec3(0.0f);
+	_up                      = glm::vec3(0.0f, 1.0f, 0.0f);
+    _angle                   = glm::radians(angle);
+	_aspectRatio             = aspectRatio;
+	_nearPlane               = nearPlane;
+	_farPlane                = farPlane;
+	_bottom                  = 0.0f;
+	_top                     = 0.0f;
+    _projectionMatrix        = glm::perspective(_angle, _aspectRatio, _nearPlane, _farPlane);
+    _viewMatrix              = glm::lookAt(_eye, glm::vec3(0.0f, 0.0f, -1.0f), _up);
+	_viewMatrixNoTranslation = _viewMatrix;
+    _type                    = Type::Perspective;
 }
 ComponentCamera::ComponentCamera(Entity& _e,float left, float right, float bottom, float top, float nearPlane, float farPlane) : ComponentBaseClass(_e) {
-    _eye = glm::vec3(0.0f); _up = glm::vec3(0.0f, 1.0f, 0.0f);
-    _left = left; _right = right; _bottom = bottom; _top = top; _nearPlane = nearPlane; _farPlane = farPlane;
-    _projectionMatrix = glm::ortho(_left, _right, _bottom, _top, _nearPlane, _farPlane);
-    _viewMatrix = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    _type = Type::Orthographic;
+    _eye                     = glm::vec3(0.0f);
+	_up                      = glm::vec3(0.0f, 1.0f, 0.0f);
+    _left                    = left;
+	_right                   = right;
+	_bottom                  = bottom;
+	_top                     = top;
+	_nearPlane               = nearPlane;
+	_farPlane                = farPlane;
+    _projectionMatrix        = glm::ortho(_left, _right, _bottom, _top, _nearPlane, _farPlane);
+    _viewMatrix              = glm::lookAt(_eye, glm::vec3(0.0f, 0.0f, -1.0f), _up);
+	_viewMatrixNoTranslation = _viewMatrix;
+    _type                    = Type::Orthographic;
 }
 ComponentCamera::~ComponentCamera() {}
 void ComponentCamera::resize(uint width, uint height) {
@@ -118,13 +132,13 @@ void ComponentCamera::setFar(float f) { _farPlane = f; epriv::ComponentCamera_Fu
 #pragma region System
 
 struct epriv::ComponentCamera_UpdateFunction final {
-    static void _defaultUpdate(vector<uint>& _vec, vector<ComponentCamera>& _components,const float& dt) {
+    static void _defaultUpdate(vector<uint>& _vec, vector<ComponentCamera>& _components, const double& dt) {
         for (uint j = 0; j < _vec.size(); ++j) {
             ComponentCamera& b = _components[_vec[j]];
             Math::extractViewFrustumPlanesHartmannGribbs(b._projectionMatrix * b._viewMatrix, b._planes);//update view frustrum 
         }
     }
-    void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
+    void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
         auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)_componentPool;
         auto& components = pool.pool();
 
@@ -139,7 +153,6 @@ struct epriv::ComponentCamera_ComponentAddedToEntityFunction final {void operato
 
 }};
 struct epriv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
-
 }};
 struct epriv::ComponentCamera_SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 

@@ -29,7 +29,7 @@ namespace epriv{
             ThreadManager(const char* name,uint w, uint h);
             ~ThreadManager();
 
-            void _update(const float& dt);
+            void _update(const double& dt);
 
             const uint cores() const;
     };

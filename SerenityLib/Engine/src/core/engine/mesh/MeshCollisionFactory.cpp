@@ -4,10 +4,10 @@
 #include <core/engine/Engine_Math.h>
 #include <core/engine/mesh/Mesh.h>
 
-#include <bullet/btBulletDynamicsCommon.h>
-#include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
-#include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
+#include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <BulletCollision/CollisionShapes/btShapeHull.h>
+#include <BulletCollision/Gimpact/btGImpactShape.h>
 
 #include <glm/glm.hpp>
 

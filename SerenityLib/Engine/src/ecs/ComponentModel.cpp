@@ -197,7 +197,7 @@ struct epriv::ComponentModel_UpdateFunction final {
             }
         }
     }
-    void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
+    void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
         auto* camera = _scene.getActiveCamera();
         auto& pool = *(ECSComponentPool<Entity, ComponentModel>*)_componentPool;
         auto& components = pool.pool();

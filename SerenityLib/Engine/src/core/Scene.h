@@ -44,7 +44,7 @@ class Scene: public EngineResource, public EventObserver{
         void removeEntity(uint entityID);
         void removeEntity(Entity& entity);
 
-        virtual void update(const float& dt);
+        virtual void update(const double& dt);
 
         Camera* getActiveCamera();
 

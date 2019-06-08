@@ -20,7 +20,7 @@ class GameCamera: public Camera{
         float m_OrbitRadius;
         Entity m_Target;
         Entity m_Player;
-        glm::vec2 m_CameraMouseFactor;
+        glm::dvec2 m_CameraMouseFactor;
 
         GameCamera(float clipStart, float clipEnd, Scene* = nullptr);                                                  // Perspective camera Constructor
         GameCamera(float angle, float aspectRatio, float clipStart, float clipEnd,Scene* = nullptr);                   // Perspective camera Constructor

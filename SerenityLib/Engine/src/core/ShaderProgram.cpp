@@ -547,7 +547,9 @@ void ShaderP::_load_GPU(ShaderP& super) {
         glGetShaderiv(vid, GL_COMPILE_STATUS, &res);
         glGetShaderiv(vid, GL_INFO_LOG_LENGTH, &ll);
         vector<char>ve(ll);
-        glGetShaderInfoLog(vid, ll, NULL, &ve[0]);
+		if (ve.size() > 0) {
+			glGetShaderInfoLog(vid, ll, NULL, &ve[0]);
+		}
         if (res == GL_FALSE) {
             if (m_VertexShader.fromFile()) { 
                 cout << "VertexShader Log (" + m_VertexShader.m_FileName + "): " << endl; 
@@ -564,7 +566,9 @@ void ShaderP::_load_GPU(ShaderP& super) {
         glGetShaderiv(fid, GL_COMPILE_STATUS, &res);
         glGetShaderiv(fid, GL_INFO_LOG_LENGTH, &ll);
         vector<char>fe(ll);
-        glGetShaderInfoLog(fid, ll, NULL, &fe[0]);
+		if (fe.size() > 0) {
+			glGetShaderInfoLog(fid, ll, NULL, &fe[0]);
+		}
         if (res == GL_FALSE) {
             if (m_FragmentShader.fromFile()) { 
                 cout << "FragmentShader Log (" + m_FragmentShader.m_FileName + "): " << endl; 

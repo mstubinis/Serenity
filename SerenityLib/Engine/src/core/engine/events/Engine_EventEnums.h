@@ -3,8 +3,7 @@
 #define ENGINE_EVENT_ENUMS_H
 
 #include <SFML/System.hpp>
-
-typedef std::uint32_t uint;
+#include <core/engine/Engine_Utils.h>
 
 struct KeyboardKey final{enum Key{
     Unknown = -1,

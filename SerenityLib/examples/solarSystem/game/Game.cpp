@@ -38,13 +38,13 @@ void Game::initLogic(){
     window.keepMouseInWindow(true);
     window.setMouseCursorVisible(false);
     window.setKeyRepeatEnabled(false);
+	window.setFramerateLimit(60);
     SolarSystem* sol = new SolarSystem("Sol", ResourceManifest::BasePath + "data/Systems/Sol.txt");
 
     Resources::setCurrentScene("Sol");
 
     m_HUD = new HUD();
-
-
+	/*
     LuaScript script("../data/Scripts/test.lua");
     float posX = script.get<float>("player.position.x");
     float posY = script.get<float>("player.position.y");
@@ -66,8 +66,9 @@ void Game::initLogic(){
     for (auto& val : tblValues) {
         std::cout << val << std::endl;
     }
+	*/
 }
-void Game::update(const float& dt){
+void Game::update(const double& dt){
     if (Engine::isKeyDownOnce(KeyboardKey::Space)) {
         Engine::pause(!Engine::paused());
     }
@@ -143,9 +144,9 @@ void Game::onMouseLeft(){
     Engine::getWindow().keepMouseInWindow(false);
     //Engine::getWindow().setMouseCursorVisible(true);
 }
-void Game::onPreUpdate(float dt){
+void Game::onPreUpdate(const double& dt){
 }
-void Game::onPostUpdate(float dt){
+void Game::onPostUpdate(const double& dt){
     auto& window = Resources::getWindow();
     const auto& size = window.getSize();
     const glm::vec2 halfRes = glm::vec2(size.x / 2, size.y / 2);

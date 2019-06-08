@@ -5,9 +5,9 @@
 #include <string>
 #include <memory>
 #include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/Engine_Utils.h>
 
 typedef unsigned int     GLuint;
-typedef std::uint32_t    uint;
 
 class Scene;
 class Texture;

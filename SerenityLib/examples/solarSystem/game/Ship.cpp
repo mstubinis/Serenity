@@ -22,7 +22,7 @@ ShipSystem::~ShipSystem(){
     m_Health = 0.0f;
     m_Power = 0.0f;
 }
-void ShipSystem::update(const float& dt){
+void ShipSystem::update(const double& dt){
     // handle power transfers...?
 }
 #pragma endregion
@@ -39,7 +39,7 @@ ShipSystemReactor::ShipSystemReactor(Ship* _ship, float maxPower, float currentP
 ShipSystemReactor::~ShipSystemReactor(){
 
 }
-void ShipSystemReactor::update(const float& dt){
+void ShipSystemReactor::update(const double& dt){
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -51,7 +51,7 @@ ShipSystemShields::ShipSystemShields(Ship* _ship):ShipSystem(ShipSystemType::Shi
 ShipSystemShields::~ShipSystemShields(){
 
 }
-void ShipSystemShields::update(const float& dt){
+void ShipSystemShields::update(const double& dt){
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -63,21 +63,18 @@ ShipSystemMainThrusters::ShipSystemMainThrusters(Ship* _ship):ShipSystem(ShipSys
 ShipSystemMainThrusters::~ShipSystemMainThrusters(){
 
 }
-void ShipSystemMainThrusters::update(const float& dt){
+void ShipSystemMainThrusters::update(const double& dt){
     if(isOnline()){
-        auto& body = *m_Ship->entity().getComponent<ComponentBody>();
-        glm::vec3 velocity = body.getLinearVelocity();
-        // apply dampening
-        body.setLinearVelocity(velocity * 0.9991f,false);
+        auto& rigidbody = *m_Ship->entity().getComponent<ComponentBody>();
         if(m_Ship->IsPlayer()){
             if(!m_Ship->IsWarping()){
-                float amount = (  (body.mass() * 0.4f)  +  1.3f  );
-                if(Engine::isKeyDown(KeyboardKey::W)){ body.applyForce(0,0,-amount); }
-                if(Engine::isKeyDown(KeyboardKey::S)){ body.applyForce(0,0, amount); }
-                if(Engine::isKeyDown(KeyboardKey::A)){ body.applyForce(-amount,0,0); }
-                if(Engine::isKeyDown(KeyboardKey::D)){ body.applyForce( amount,0,0); }
-                if(Engine::isKeyDown(KeyboardKey::F)){ body.applyForce(0,-amount,0); }
-                if(Engine::isKeyDown(KeyboardKey::R)){ body.applyForce(0, amount,0); }
+                const float& amount = (  (rigidbody.mass() * 0.4f)  +  1.3f  );
+                if(Engine::isKeyDown(KeyboardKey::W)){ rigidbody.applyForce(0,0,-amount); }
+                if(Engine::isKeyDown(KeyboardKey::S)){ rigidbody.applyForce(0,0, amount); }
+                if(Engine::isKeyDown(KeyboardKey::A)){ rigidbody.applyForce(-amount,0,0); }
+                if(Engine::isKeyDown(KeyboardKey::D)){ rigidbody.applyForce( amount,0,0); }
+                if(Engine::isKeyDown(KeyboardKey::F)){ rigidbody.applyForce(0,-amount,0); }
+                if(Engine::isKeyDown(KeyboardKey::R)){ rigidbody.applyForce(0, amount,0); }
             }
         }
     }
@@ -92,19 +89,19 @@ ShipSystemPitchThrusters::ShipSystemPitchThrusters(Ship* _ship):ShipSystem(ShipS
 ShipSystemPitchThrusters::~ShipSystemPitchThrusters(){
 
 }
-void ShipSystemPitchThrusters::update(const float& dt){
+void ShipSystemPitchThrusters::update(const double& dt){
     if(isOnline()){
-        auto& body = *m_Ship->entity().getComponent<ComponentBody>();
-        glm::vec3 velocity = body.getAngularVelocity();
-        velocity.x *= 0.9970f;
-        // apply dampening
-        body.setAngularVelocity(velocity,false);
-        if(m_Ship->IsPlayer()){
-            if(m_Ship->getPlayerCamera()->getState() != CameraState::Orbit){
-                float mouseAmount = Engine::getMouseDifference().y * dt;
-                float massFactor = 1.0f / (body.mass() * 3.0f);
-                float amount = mouseAmount * massFactor;
-                body.applyTorque(-amount,0,0);
+		auto& ship = *m_Ship;
+        auto& rigidbody = *ship.entity().getComponent<ComponentBody>();
+        if(ship.IsPlayer()){
+            if(ship.getPlayerCamera()->getState() != CameraState::Orbit){
+				const auto& diff = -Engine::getMouseDifference().y;
+				ship.m_MouseFactor.y += diff * 0.00065;
+				const float& massFactor = 1.0f / (rigidbody.mass() * 3.0f);
+				const float& amount = ship.m_MouseFactor.y * massFactor;
+				rigidbody.applyTorque(amount, 0, 0);
+				const double& step = (1.0 - dt);
+				ship.m_MouseFactor.y *= (step * step);
             }
         }
     }
@@ -119,19 +116,19 @@ ShipSystemYawThrusters::ShipSystemYawThrusters(Ship* _ship):ShipSystem(ShipSyste
 ShipSystemYawThrusters::~ShipSystemYawThrusters(){
 
 }
-void ShipSystemYawThrusters::update(const float& dt){
+void ShipSystemYawThrusters::update(const double& dt){
     if(isOnline()){
-        auto& body = *m_Ship->entity().getComponent<ComponentBody>();
-        glm::vec3 velocity = body.getAngularVelocity();
-        velocity.y *= 0.9970f;
-        // apply dampening
-        body.setAngularVelocity(velocity,false);
-        if(m_Ship->IsPlayer()){
-            if(m_Ship->getPlayerCamera()->getState() != CameraState::Orbit){
-                float mouseAmount = Engine::getMouseDifference().x * dt;
-                float massFactor = 1.0f / (body.mass() * 3.0f);
-                float amount = mouseAmount * massFactor;
-                body.applyTorque(0,-amount,0);
+		auto& ship = *m_Ship;
+        auto& rigidbody = *ship.entity().getComponent<ComponentBody>();
+        if(ship.IsPlayer()){
+            if(ship.getPlayerCamera()->getState() != CameraState::Orbit){
+				const auto& diff = -Engine::getMouseDifference().x;
+				ship.m_MouseFactor.x += diff * 0.00065;
+				const float& massFactor = 1.0f / (rigidbody.mass() * 3.0f);
+				const float& amount = ship.m_MouseFactor.x * massFactor;
+				rigidbody.applyTorque(0, amount, 0);
+				const double& step = (1.0 - dt);
+				ship.m_MouseFactor.x *= (step * step);
             }
         }
     }
@@ -146,20 +143,16 @@ ShipSystemRollThrusters::ShipSystemRollThrusters(Ship* _ship):ShipSystem(ShipSys
 ShipSystemRollThrusters::~ShipSystemRollThrusters(){
 
 }
-void ShipSystemRollThrusters::update(const float& dt){
+void ShipSystemRollThrusters::update(const double& dt){
     if(isOnline()){
-        auto& body = *m_Ship->entity().getComponent<ComponentBody>();
-        glm::vec3 velocity = body.getAngularVelocity();
-        velocity.z *= 0.9970f;
-        // apply dampening
-        body.setAngularVelocity(velocity,false);
+        auto& rigidbody = *m_Ship->entity().getComponent<ComponentBody>();
         if(m_Ship->IsPlayer()){
-            float amount = 1.0f / body.mass();
+            float amount = 1.0f / rigidbody.mass();
             if(Engine::isKeyDown(KeyboardKey::Q)){
-                body.applyTorque(0,0,amount);
+				rigidbody.applyTorque(0,0,amount);
             }
             if(Engine::isKeyDown(KeyboardKey::E)){
-                body.applyTorque(0,0,-amount);
+				rigidbody.applyTorque(0,0,-amount);
             }
         }
     }
@@ -174,7 +167,7 @@ ShipSystemWarpDrive::ShipSystemWarpDrive(Ship* _ship):ShipSystem(ShipSystemType:
 ShipSystemWarpDrive::~ShipSystemWarpDrive(){
 
 }
-void ShipSystemWarpDrive::update(const float& dt){
+void ShipSystemWarpDrive::update(const double& dt){
     if(isOnline()){	
         if(!Engine::paused()){	
             if(m_Ship->IsPlayer()){
@@ -202,13 +195,13 @@ ShipSystemSensors::ShipSystemSensors(Ship* _ship):ShipSystem(ShipSystemType::Sen
 ShipSystemSensors::~ShipSystemSensors(){
 
 }
-void ShipSystemSensors::update(const float& dt){
+void ShipSystemSensors::update(const double& dt){
 
     ShipSystem::update(dt);
 }
 #pragma endregion
 
-struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const float& dt) const {
+struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
     Ship& ship = *(Ship*)_component.getUserPointer();
     Scene& currentScene = *Resources::getCurrentScene();
 
@@ -227,7 +220,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                     //TODO: parent->child relationship
                     if (e != ship.m_Entity && !cam) {
                         auto& ebody = *e.getComponent<ComponentBody>(dataRequest);
-                        ebody.setPosition(ebody.position() + (s * dt));
+                        ebody.setPosition(ebody.position() + (s * (float)dt));
                     }
                 }
             }
@@ -260,7 +253,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                 camera.followTarget(ship.m_Target, ship.m_Entity);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F4)) {
-            //freeform
+			camera.m_State = CameraState::Freeform;
         }
         #pragma endregion
 
@@ -287,13 +280,14 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
 	rigidBodyComponent.setMass(  ( volume * 0.004f ) + 1.0f  );
 	rigidBodyComponent.setPosition(pos);
 	rigidBodyComponent.setScale(scl);
-	rigidBodyComponent.setDamping(0, 0);//we dont want default dampening, we want the ship systems to manually control that
+	rigidBodyComponent.setDamping(0.4f, 0.5f);
 
 	m_WarpFactor = 0;
 	m_IsPlayer = player;
 	m_IsWarping = false;
 	m_Target = Entity::_null;
 	m_PlayerCamera = nullptr;
+	m_MouseFactor = glm::dvec2(0.0);
 
 	if (player) {
 		m_PlayerCamera = (GameCamera*)(scene->getActiveCamera());

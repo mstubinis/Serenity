@@ -6,9 +6,13 @@ using namespace std;
 
 VertexData::VertexData(const VertexDataFormat& _format) :format(const_cast<VertexDataFormat&>(_format)), vao(0) {
     data.reserve(_format.attributes.size());
-    for (size_t i = 0; i < data.capacity(); ++i) { data.emplace_back(nullptr); }
+    for (size_t i = 0; i < data.capacity(); ++i) { 
+		data.emplace_back(nullptr); 
+	}
     dataSizes.reserve(_format.attributes.size());
-    for (size_t i = 0; i < dataSizes.capacity(); ++i) { dataSizes.emplace_back(0); }
+    for (size_t i = 0; i < dataSizes.capacity(); ++i) { 
+		dataSizes.emplace_back(0); 
+	}
     buffers.push_back(std::make_unique<VertexBufferObject>());
 }
 VertexData::~VertexData() {
@@ -85,7 +89,7 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
                 size += format.attributes[i].typeSize * dataSizes[i];
             buffer = (char*)malloc(size);
             for (size_t i = 0; i < data.size(); ++i) {
-                auto blockSize = dataSizes[i] * format.attributes[i].typeSize;
+                const auto& blockSize = dataSizes[i] * format.attributes[i].typeSize;
                 std::memmove(&buffer[accumulator], &(data[i])[0], blockSize);
                 accumulator += blockSize;
             }

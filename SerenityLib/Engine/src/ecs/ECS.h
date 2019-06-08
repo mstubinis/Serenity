@@ -62,7 +62,7 @@ namespace epriv {
                     camera.resize(w, h);
                 }
             }
-            void update(const float& dt, Scene& scene) {
+            void update(const double& dt, Scene& scene) {
                 for (uint i = 0; i < systems.size(); ++i) { 
                     auto& system = *systems[i];
                     system.update(dt, scene); 
@@ -84,18 +84,19 @@ namespace epriv {
                     system.onSceneLeft(scene); 
                 }
             }
-            void preUpdate(Scene& scene, const float& dt) {
+            void preUpdate(Scene& scene, const double& dt) {
                 if (justAddedEntities.size() > 0) {
                     for (uint i = 0; i < systems.size(); ++i) {
                         auto& system = *systems[i];
-                        for (auto& _entity : justAddedEntities) {
-                            system.onEntityAddedToScene(_entity, scene);
+						for (uint j = 0; j < justAddedEntities.size(); ++j) {
+                            system.onEntityAddedToScene(justAddedEntities[j], scene);
                         }
                     }
                     vector_clear(justAddedEntities);
                 }
+				
             }
-            void postUpdate(Scene& scene,const float& dt) {
+            void postUpdate(Scene& scene, const double& dt) {
                 if (destroyedEntities.size() > 0) {
                     for (uint i = 0; i < componentPools.size(); ++i) {
                         auto& pool = *componentPools[i];

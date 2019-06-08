@@ -32,15 +32,16 @@ void Game::initLogic(){
     window.keepMouseInWindow(true);
     window.setMouseCursorVisible(false);
     window.setKeyRepeatEnabled(false);
+	window.setFramerateLimit(60);
 
     CapsuleSpace* cap = new CapsuleSpace();
     Resources::setCurrentScene("CapsuleSpace");
     m_HUD = new HUD();
     
     Renderer::hdr::disable();
-    Renderer::Settings::GodRays::disable();
+    Renderer::godRays::disable();
 }
-void Game::update(const float& dt){
+void Game::update(const double& dt){
     if (Engine::isKeyDownOnce(KeyboardKey::Space)) {
         Engine::pause(!Engine::paused());
     }
@@ -103,9 +104,9 @@ void Game::onMouseLeft(){
     Engine::getWindow().keepMouseInWindow(false);
     //Engine::getWindow().setMouseCursorVisible(true);
 }
-void Game::onPreUpdate(float dt){
+void Game::onPreUpdate(const double& dt){
 }
-void Game::onPostUpdate(float dt){
+void Game::onPostUpdate(const double& dt){
     auto& window = Resources::getWindow();
     const auto& size = window.getSize();
     const glm::vec2 halfRes = glm::vec2(size.x / 2, size.y / 2);

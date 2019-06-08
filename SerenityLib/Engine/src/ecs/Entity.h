@@ -7,7 +7,6 @@
 #include <ecs/ECS.h>
 #include <ecs/EntityDataRequest.h>
 
-typedef std::uint32_t uint;
 
 const uint MAX_ENTITIES  = 2097152;
 const uint MAX_SCENES    = 128;

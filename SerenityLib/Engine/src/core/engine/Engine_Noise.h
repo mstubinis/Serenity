@@ -5,8 +5,6 @@
 #include <memory>
 #include <core/engine/Engine_Utils.h>
 
-typedef std::uint32_t   uint;
-
 namespace Engine{
 namespace epriv{
     class NoiseManager final{

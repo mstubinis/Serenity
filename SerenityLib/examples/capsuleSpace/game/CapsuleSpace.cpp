@@ -18,10 +18,10 @@
 using namespace Engine;
 using namespace std;
 
-struct CapsuleEndLogicFunctor final {void operator()(ComponentLogic& _component, const float& dt) const {
+struct CapsuleEndLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
     //CapsuleEnd& end = *(CapsuleEnd*)_component.getUserPointer();
 }};
-struct CapsuleStarLogicFunctor final {void operator()(ComponentLogic& _component, const float& dt) const {
+struct CapsuleStarLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
     CapsuleStar& star = *(CapsuleStar*)_component.getUserPointer();
     auto& m_Body = *star.m_Entity.getComponent<ComponentBody>();
     auto& activeCamera = *Resources::getCurrentScene()->getActiveCamera();
@@ -179,7 +179,7 @@ CapsuleSpace::CapsuleSpace():Scene("CapsuleSpace"){
 CapsuleSpace::~CapsuleSpace(){
     SAFE_DELETE_VECTOR(m_Objects);
 }
-void CapsuleSpace::update(const float& dt){
+void CapsuleSpace::update(const double& dt){
     if (Engine::paused()) return;
 
     m_Timer += dt;

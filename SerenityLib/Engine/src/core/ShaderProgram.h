@@ -4,6 +4,7 @@
 
 #include <core/engine/BindableResource.h>
 #include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/Engine_Utils.h>
 #include <unordered_map>
 
 #include <GL/glew.h>
@@ -13,7 +14,6 @@ struct Handle;
 class Shader;
 class ShaderP;
 class UniformBufferObject;
-typedef std::uint32_t   uint;
 
 struct ShaderType{enum Type{
     Vertex,                // GL_VERTEX_SHADER

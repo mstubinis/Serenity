@@ -13,7 +13,7 @@ using namespace Engine;
 using namespace std;
 
 
-struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _component, const float& dt) const {
+struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _component, const double& dt) const {
     GameCamera& camera = *((GameCamera*)_component.getUserPointer());
     auto& entity = camera.m_Entity;
     EntityDataRequest dataRequest(entity);
@@ -30,8 +30,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             float targetRadius = targetModel.radius();
 
             camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
-            if (camera.m_OrbitRadius < 0)     camera.m_OrbitRadius = 0;
-            else if (camera.m_OrbitRadius > 3) camera.m_OrbitRadius = 3;
+			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 3.0f);
 
             glm::vec3 pos = targetBody.position() + ((targetBody.forward() * glm::length(targetRadius) * 1.7f) + targetBody.up() * glm::length(targetRadius) * 0.3f) * (1.0f + camera.m_OrbitRadius);
 
@@ -51,8 +50,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             auto& playerModel = *playerEntity.getComponent<ComponentModel>(dataRequest2);
 
             camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
-            if (camera.m_OrbitRadius < 0)     camera.m_OrbitRadius = 0;
-            else if (camera.m_OrbitRadius > 3) camera.m_OrbitRadius = 3;
+			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 3.0f);
 
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, player.position() -
@@ -73,27 +71,24 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             auto& targetBody = *targetEntity.getComponent<ComponentBody>(dataRequest1);
             auto& targetModel = *targetEntity.getComponent<ComponentModel>(dataRequest1);
 
-            float boost = ((1.0f / dt)) * 0.0003f;
+			camera.m_OrbitRadius += Engine::getMouseWheelDelta() * dt * 0.92f;
+			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 70.0f);
 
-            camera.m_OrbitRadius += Engine::getMouseWheelDelta() * dt * 0.92f;
-            if (camera.m_OrbitRadius < 0)      camera.m_OrbitRadius = 0;
-            else if (camera.m_OrbitRadius > 70) camera.m_OrbitRadius = 70;
+			const auto& diff = -Engine::getMouseDifference();
+			camera.m_CameraMouseFactor += glm::dvec2(diff.y * (dt * 0.1), diff.x * (dt * 0.1));
 
-            
-            camera.m_CameraMouseFactor += glm::vec2(-Engine::getMouseDifference().y * dt * boost, -Engine::getMouseDifference().x * dt * boost);
+			thisBody.rotate(camera.m_CameraMouseFactor.x, camera.m_CameraMouseFactor.y, 0);
+			const double& step = (1.0 - dt);
+			camera.m_CameraMouseFactor *= (step * 0.997);
 
-            thisBody.rotate(camera.m_CameraMouseFactor.x, camera.m_CameraMouseFactor.y, 0);
-            float step = (1.0f - dt);
-            camera.m_CameraMouseFactor *= (step * step * step);
-
-            glm::vec3 pos = (glm::vec3(0, 0, 1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0, 0, 1) * glm::length(targetModel.radius() * (1.0f + camera.m_OrbitRadius)));
+            const glm::vec3& pos = (glm::vec3(0, 0, 1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0, 0, 1) * glm::length(targetModel.radius() * (1.0f + camera.m_OrbitRadius)));
 
             glm::mat4 cameraModel = glm::mat4(1.0f);
             cameraModel = glm::translate(cameraModel, targetBody.position());
             cameraModel *= glm::mat4_cast(thisBody.rotation());
             cameraModel = glm::translate(cameraModel, pos);
 
-            glm::vec3 eye(cameraModel[3][0], cameraModel[3][1], cameraModel[3][2]);
+            const glm::vec3 eye(cameraModel[3][0], cameraModel[3][1], cameraModel[3][2]);
             thisBody.setPosition(eye);
 
             thisCamera.lookAt(eye, targetBody.position(), thisBody.up());
@@ -117,7 +112,7 @@ GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a
     m_Target = Entity::_null;
     m_Player = Entity::_null;
     m_OrbitRadius = 0;
-    m_CameraMouseFactor = glm::vec2(0.0f);
+    m_CameraMouseFactor = glm::dvec2(0.0);
     auto& m_Logic = *m_Entity.getComponent<ComponentLogic2>();
     m_Logic.setUserPointer(this);
     m_Logic.setFunctor(GameCameraLogicFunctor());
@@ -127,7 +122,7 @@ GameCamera::GameCamera(float l, float r, float b, float t, float n, float f, Sce
     m_Target = Entity::_null;
     m_Player = Entity::_null;
     m_OrbitRadius = 0;
-    m_CameraMouseFactor = glm::vec2(0.0f);
+    m_CameraMouseFactor = glm::dvec2(0.0);
     auto& m_Logic = *m_Entity.getComponent<ComponentLogic2>();
     m_Logic.setUserPointer(this);
     m_Logic.setFunctor(GameCameraLogicFunctor());
@@ -179,7 +174,7 @@ void GameCamera::orbit(Entity& target){
     m_Target = target;
     m_Player = target;
     m_State = CameraState::Orbit;
-    m_CameraMouseFactor = glm::vec2(0.0f);
+    m_CameraMouseFactor = glm::dvec2(0.0);
 }
 void GameCamera::setTarget(Entity& target) { 
     m_Target = target; 

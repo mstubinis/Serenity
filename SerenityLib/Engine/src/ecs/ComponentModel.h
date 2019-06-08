@@ -6,15 +6,15 @@
 #include <ecs/ECSSystem.h>
 
 #include <core/engine/events/Engine_EventObject.h>
+#include <core/MeshInstance.h>
 
 struct Handle;
-class ShaderP;
-class Mesh;
-class Material;
-class MeshInstance;
+class  ShaderP;
+class  Mesh;
+class  Material;
 
-class ComponentModel;
-class ComponentCamera;
+class  ComponentModel;
+class  ComponentCamera;
 
 namespace Engine {
 namespace epriv {
@@ -85,10 +85,10 @@ class ComponentModel : public ComponentBaseClass {
 
         bool rayIntersectSphere(ComponentCamera& camera);
 
-        template<class T> void setCustomBindFunctor(const T& functor, uint index = 0) { 
+        template<class T> void setCustomBindFunctor(const T& functor, const uint& index = 0) { 
             _meshInstances[index]->setCustomBindFunctor(functor);
         }
-        template<class T> void setCustomUnbindFunctor(const T& functor, uint index = 0) { 
+        template<class T> void setCustomUnbindFunctor(const T& functor, const uint& index = 0) {
             _meshInstances[index]->setCustomUnbindFunctor(functor);
         }
 };

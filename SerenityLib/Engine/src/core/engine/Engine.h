@@ -11,7 +11,6 @@
 #include <core/engine/Engine_Noise.h>
 #include <core/engine/Engine_Window.h>
 
-typedef std::uint32_t uint;
 namespace Engine{
 namespace epriv{
     struct Core final{
@@ -50,7 +49,7 @@ void setFullScreen(bool b);
 namespace Game{
     void initResources();
     void initLogic();
-    void update(const float& dt);
+    void update(const double& dt);
     void render();
     void cleanup();
 
@@ -68,8 +67,8 @@ namespace Game{
     void onMouseMoved(float mouseX,float mouseY);
     void onMouseEntered();
     void onMouseLeft();
-    void onPreUpdate(float dt);
-    void onPostUpdate(float dt);
+    void onPreUpdate(const double& dt);
+    void onPostUpdate(const double& dt);
     void onJoystickButtonPressed();
     void onJoystickButtonReleased();
     void onJoystickMoved();

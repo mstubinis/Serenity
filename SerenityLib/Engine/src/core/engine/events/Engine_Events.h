@@ -16,7 +16,7 @@ namespace epriv{
             static EventManager* m_EventManager;
 
             std::unordered_map<uint, bool> m_KeyStatus, m_MouseStatus;
-            float m_Delta;
+            double m_Delta;
             glm::vec2 m_Position, m_Position_Previous, m_Difference;
             uint m_currentKey, m_previousKey, m_currentButton, m_previousButton;
             EventDispatcher m_EventDispatcher;
@@ -31,7 +31,7 @@ namespace epriv{
             void onEventMouseButtonPressed(uint& mouseButton);
             void onEventMouseButtonReleased(uint& mouseButton);
             void onEventMouseWheelMoved(int& delta);
-            void onResetEvents(const float& dt);
+            void onResetEvents(const double& dt);
     };
 };
     //keyboard functions
@@ -49,7 +49,7 @@ namespace epriv{
     const glm::vec2& getMouseDifference();
     const glm::vec2& getMousePositionPrevious();
     const glm::vec2& getMousePosition();
-    const float getMouseWheelDelta();
+    const double getMouseWheelDelta();
 
     void setMousePosition(float x, float y, bool resetDifference = false, bool resetPreviousPosition = false);
     void setMousePosition(uint x, uint y, bool resetDifference = false, bool resetPreviousPosition = false);

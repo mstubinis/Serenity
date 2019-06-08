@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <core/engine/Engine_Utils.h>
-#include <Bullet/LinearMath/btVector3.h>
+#include <LinearMath/btVector3.h>
 
 struct Entity;
 class  btCollisionShape;
@@ -69,7 +69,7 @@ namespace epriv{
 
             void _init(const char* name,uint w,uint h,uint numCores);
 
-            void _update(float dt,int maxSteps = 1,float = 0.0166666f);
+            void _update(const double& dt,int maxSteps = 1,float = 0.0166666f);
             void _render();
     };
 };

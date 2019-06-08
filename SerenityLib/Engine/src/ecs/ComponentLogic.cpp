@@ -38,25 +38,23 @@ ComponentLogic& ComponentLogic::operator=(ComponentLogic&& other) noexcept{
 }
 
 
-void ComponentLogic::call(const float& dt) { _functor(dt); }
+void ComponentLogic::call(const double& dt) { _functor(dt); }
 
 #pragma endregion
 
 #pragma region System
 
-struct epriv::ComponentLogic_UpdateFunction final { void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
+struct epriv::ComponentLogic_UpdateFunction final { void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentLogic>*)_componentPool;
     auto& components = pool.pool();
-    for (uint i = 0; i < components.size(); ++i) {
-        auto& component = components[i];
-        component.call(dt);
-    }
+	for (auto& component : components) {
+		component.call(dt);
+	}
 }};
 struct epriv::ComponentLogic_ComponentAddedToEntityFunction final { void operator()(void* _component, Entity& _entity) const {
 
 }};
 struct epriv::ComponentLogic_EntityAddedToSceneFunction final { void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
-
 }};
 struct epriv::ComponentLogic_SceneEnteredFunction final { void operator()(void* _componentPool, Scene& _scene) const {
 

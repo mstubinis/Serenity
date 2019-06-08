@@ -10,7 +10,7 @@
 #include <windowsx.h>
 #endif
 #ifdef _DEBUG
-#include <vld.h> //memory leak printing
+//#include <vld.h> //memory leak printing
 #endif
 
 using namespace std;
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     unordered_map<string, bool> args;
     locale loc;
     for (int i = 0; i < argc; i++) {
-        string key = string(argv[i]);
+        const string& key = string(argv[i]);
         string lowerKey = "";
         for (unsigned int j = 0; j < key.length(); ++j)
             lowerKey += std::tolower(key[j], loc);
@@ -38,7 +38,9 @@ int main(int argc, char* argv[]) {
     Engine::run();
 
 #ifdef _WIN32
-    FreeConsole();
+	if (GetConsoleWindow() != NULL) {
+		//FreeConsole(); //erroring out for some reason
+	}
 #endif
     return 0;
 }

@@ -19,7 +19,7 @@ class HUD final{
         HUD();
         ~HUD();
 
-        void update(const float& dt);
+        void update(const double& dt);
         void render();
 };
 #endif

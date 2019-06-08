@@ -7,7 +7,6 @@
 #include <SFML/Window.hpp>
 #include <core/engine/Engine_Utils.h>
 
-typedef std::uint32_t uint;
 
 class Engine_Window final{
     private:

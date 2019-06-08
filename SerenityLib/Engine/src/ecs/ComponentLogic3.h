@@ -17,7 +17,7 @@ namespace epriv {
     struct ComponentLogic3_ComponentAddedToEntityFunction;
     struct ComponentLogic3_SceneEnteredFunction;
     struct ComponentLogic3_SceneLeftFunction;
-    struct ComponentLogic3_EmptyFunctor final { void operator()(ComponentLogic3& _component, const float& dt) const {} };
+    struct ComponentLogic3_EmptyFunctor final { void operator()(ComponentLogic3& _component, const double& dt) const {} };
 };
 };
 
@@ -44,7 +44,7 @@ class ComponentLogic3 : public ComponentBaseClass {
 
         template<typename T> void setFunctor(const T& functor) { _functor = boost::bind<void>(functor, *this, _1); }
         template<typename T> void setUserPointer(T* ptr) { _userPtr = ptr; }
-        void call(const float& dt);
+        void call(const double& dt);
         void* getUserPointer() { return _userPtr; }
 };
 

@@ -4,6 +4,7 @@
 
 #include <glm/fwd.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <core/engine/Engine_Utils.h>
 
 #include <vector>
 #include <assimp/Importer.hpp>
@@ -15,7 +16,6 @@ class btVector3;
 class btRigidBody;
 class btQuaternion;
 class Camera;
-typedef std::uint32_t   uint;
 typedef unsigned short  ushort;
 typedef unsigned char   uchar;
 namespace glm{

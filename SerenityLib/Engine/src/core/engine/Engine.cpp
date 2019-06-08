@@ -55,29 +55,29 @@ void Engine::init(const char* name,uint w,uint h){
         if (!Resources::getCurrentScene()) { Resources::setCurrentScene("Default"); }
     }
 }
-void RESET_EVENTS(const float& dt){
+void RESET_EVENTS(const double& dt){
     epriv::Core::m_Engine->m_EventManager.onResetEvents(dt);
 }
-void updatePhysics(const float& dt) {
+void updatePhysics(const double& dt) {
     auto& debugMgr = epriv::Core::m_Engine->m_DebugManager;
-
     debugMgr.stop_clock();
     //It's important that timeStep is always less than maxSubSteps * fixedTimeStep, otherwise you are losing time. dt < maxSubSteps * fixedTimeStep
-    float minStep = 0.0166666f; // == 0.0166666 at 1 fps
+    double minStep = 0.016666666666666666; // == 0.016666666666666666 at 1 fps
     uint maxSubSteps = 0;
     while (true) {
-        ++maxSubSteps; if (dt < (maxSubSteps * minStep)) break;
+        ++maxSubSteps;
+		if (dt < ((double)maxSubSteps * minStep)) 
+			break;
     }
     epriv::Core::m_Engine->m_PhysicsManager._update(dt, maxSubSteps, minStep);
     debugMgr.calculate_physics();
 }
-void updateLogic(const float& dt){
+void updateLogic(const double& dt){
     auto& debugMgr = epriv::Core::m_Engine->m_DebugManager;
     // update logic   //////////////////////////////////////////
     debugMgr.stop_clock();
     Game::onPreUpdate(dt);
     Game::update(dt);
-
     updatePhysics(dt);
     //update current scene
     Scene& scene = *Resources::getCurrentScene();
@@ -97,7 +97,7 @@ void updateLogic(const float& dt){
 
     ////////////////////////////////////////////////////////////
 }
-void updateSounds(const float& dt){
+void updateSounds(const double& dt){
     // update sounds ///////////////////////////////////////////
     auto& debugMgr = epriv::Core::m_Engine->m_DebugManager;
     debugMgr.stop_clock();
@@ -105,7 +105,7 @@ void updateSounds(const float& dt){
     debugMgr.calculate_sounds();
     ////////////////////////////////////////////////////////////
 }
-void update(const float& dt){
+void update(const double& dt){
     updateLogic(dt);
     updateSounds(dt);
 }
@@ -362,7 +362,7 @@ void handleEvents(){
 void Engine::run(){
     while(!epriv::Core::m_Engine->m_Destroyed /*&& Resources::getWindow().isOpen()*/){
         auto& debugMgr = epriv::Core::m_Engine->m_DebugManager;
-        float dt = (float)debugMgr.dt();
+        double dt = debugMgr.dt();
         handleEvents();
         update(dt);
         render();

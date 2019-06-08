@@ -36,17 +36,16 @@ ComponentLogic1& ComponentLogic1::operator=(ComponentLogic1&& other) noexcept {
     return *this;
 }
 
-void ComponentLogic1::call(const float& dt) { _functor(dt); }
+void ComponentLogic1::call(const double& dt) { _functor(dt); }
 
 #pragma endregion
 
 #pragma region System
 
-struct epriv::ComponentLogic1_UpdateFunction final {void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
+struct epriv::ComponentLogic1_UpdateFunction final {void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentLogic1>*)_componentPool;
     auto& components = pool.pool();
-    for (uint i = 0; i < components.size(); ++i) {
-        auto& component = components[i];
+    for (auto& component: components) {
         component.call(dt);
     }
 }};
@@ -54,7 +53,6 @@ struct epriv::ComponentLogic1_ComponentAddedToEntityFunction final {void operato
 
 }};
 struct epriv::ComponentLogic1_EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
-
 }};
 struct epriv::ComponentLogic1_SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 

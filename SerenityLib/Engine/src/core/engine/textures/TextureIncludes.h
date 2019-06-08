@@ -3,9 +3,10 @@
 #define ENGINE_TEXTURE_INCLUDES_INCLUDE_GUARD
 
 #include <memory>
+#include <string>
 #include <core/engine/renderer/GLImageConstants.h>
+#include <core/engine/Engine_Utils.h>
 
-typedef std::uint32_t     uint;
 typedef unsigned char     uchar;
 typedef unsigned short    ushort;
 

@@ -3,8 +3,8 @@
 #define ENGINE_ECS_ENTITY_SERIALIZATION_H_INCLUDE_GUARD
 
 #include <cstdint>
+#include <core/engine/Engine_Utils.h>
 
-typedef std::uint32_t uint;
 
 struct Entity;
 class Scene;

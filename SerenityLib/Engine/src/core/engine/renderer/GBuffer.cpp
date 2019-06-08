@@ -94,7 +94,7 @@ class epriv::GBuffer::impl final{
             channels.find("R") != string::npos ? r = true : r = false;
             channels.find("G") != string::npos ? g = true : g = false;
             channels.find("B") != string::npos ? b = true : b = false;
-            channels.find("A") != string::npos ? a = true : a = false;     
+            channels.find("A") != string::npos ? a = true : a = false;
             glDrawBuffers(size, types);
             Renderer::colorMask(r, g, b, a);
         }

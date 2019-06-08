@@ -3,11 +3,12 @@
 #define GAME_SHIP_H
 
 #include <ecs/Components.h>
+#include <glm/vec2.hpp>
+#include <core/engine/Engine_Utils.h>
 
 class GameCamera;
 class Ship;
 class SolarSystem;
-typedef std::uint32_t   uint;
 
 struct ShipLogicFunctor;
 
@@ -23,9 +24,10 @@ struct ShipSystemType {enum Type {
 _TOTAL}; };
 
 class ShipSystem{
+	friend class ::Ship;
     protected:
         Ship* m_Ship;
-        uint m_Type;
+        uint  m_Type;
         float m_Health;
         float m_Power;
     public:
@@ -34,9 +36,10 @@ class ShipSystem{
 
         const bool isOnline() const { if(m_Health > 0 && m_Power > 0) return true; return false; }
 
-        virtual void update(const float& dt);
+        virtual void update(const double& dt);
 };
 class ShipSystemReactor final: public ShipSystem{
+	friend class ::Ship;
     private:
         float m_TotalPowerMax;
         float m_TotalPower;
@@ -44,67 +47,79 @@ class ShipSystemReactor final: public ShipSystem{
         ShipSystemReactor(Ship*, float maxPower, float currentPower = -1);
         ~ShipSystemReactor();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemMainThrusters final: public ShipSystem{
+	friend class ::Ship;
     public:
         ShipSystemMainThrusters(Ship*);
         ~ShipSystemMainThrusters();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemPitchThrusters final: public ShipSystem{
+	friend class ::Ship;
     public:
         ShipSystemPitchThrusters(Ship*);
         ~ShipSystemPitchThrusters();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemYawThrusters final: public ShipSystem{
+	friend class ::Ship;
     public:
         ShipSystemYawThrusters(Ship*);
         ~ShipSystemYawThrusters();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemRollThrusters final: public ShipSystem{
+	friend class ::Ship;
     public:
         ShipSystemRollThrusters(Ship*);
         ~ShipSystemRollThrusters();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemShields final: public ShipSystem{
+	friend class ::Ship;
     public:
         ShipSystemShields(Ship*);
         ~ShipSystemShields();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemWarpDrive final: public ShipSystem{
+	friend class ::Ship;
     public:
         ShipSystemWarpDrive(Ship*);
         ~ShipSystemWarpDrive();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 class ShipSystemSensors final: public ShipSystem{
+	friend class ::Ship;
     public:
         ShipSystemSensors(Ship*);
         ~ShipSystemSensors();
 
-        void update(const float& dt);
+        void update(const double& dt);
 };
 
 class Ship: public EntityWrapper {
     friend struct ::ShipLogicFunctor;
+	friend  class ::ShipSystemYawThrusters;
+	friend  class ::ShipSystemPitchThrusters;
+	friend  class ::ShipSystemRollThrusters;
+	friend  class ::ShipSystem;
     protected:
         std::unordered_map<uint,ShipSystem*> m_ShipSystems;
-        bool m_IsPlayer;
-        GameCamera* m_PlayerCamera;
-        bool m_IsWarping;
-        float m_WarpFactor;
-        Entity m_Target;
+        bool                                 m_IsPlayer;
+        GameCamera*                          m_PlayerCamera;
+		glm::dvec2                           m_MouseFactor;
+        bool                                 m_IsWarping;
+        float                                m_WarpFactor;
+        Entity                               m_Target;
     public:
         Ship(
             Handle& meshHandle,       //Mesh

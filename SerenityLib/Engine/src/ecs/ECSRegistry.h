@@ -5,8 +5,8 @@
 #include <cstdint>
 #include <boost/type_index.hpp>
 #include <boost/unordered_map.hpp>
+#include <core/engine/Engine_Utils.h>
 
-typedef std::uint32_t                    uint;
 typedef boost::typeindex::type_index     boost_type_index;
 
 template <typename T> const boost_type_index type_ID() { return boost_type_index(boost::typeindex::type_id<T>()); }

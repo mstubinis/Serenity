@@ -23,7 +23,7 @@ const uint ComponentName::size() { return _data.size(); }
 
 #pragma region System
 
-struct epriv::ComponentName_UpdateFunction final {void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
+struct epriv::ComponentName_UpdateFunction final {void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
 }};
 struct epriv::ComponentName_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
 }};
@@ -35,7 +35,6 @@ struct epriv::ComponentName_SceneLeftFunction final {void operator()(void* _comp
 }};
 
 ComponentName_System::ComponentName_System() {
-    /*
     setUpdateFunction(
         ComponentName_UpdateFunction());
     setOnComponentAddedToEntityFunction(
@@ -46,7 +45,6 @@ ComponentName_System::ComponentName_System() {
         ComponentName_SceneEnteredFunction());
     setOnSceneLeftFunction(
         ComponentName_SceneLeftFunction());
-    */
 }
 
 

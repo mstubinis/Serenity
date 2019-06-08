@@ -6,8 +6,8 @@
 #include <vector>
 #include <algorithm> //std::swap (until C++11)
 #include <utility>   //std::swap (since C++11)
+#include <core/engine/Engine_Utils.h>
 
-typedef std::uint32_t uint;
 
 namespace Engine {
 namespace epriv {

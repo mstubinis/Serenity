@@ -7,8 +7,6 @@
 #include <glm/vec3.hpp>
 #include <memory>
 
-typedef std::uint32_t uint;
-
 class SoundBaseClass;
 class SoundEffect;
 class SoundMusic;
@@ -47,7 +45,7 @@ class SoundBaseClass{
         virtual ~SoundBaseClass();
 
         SoundStatus::Status status();
-        virtual void update(const float& dt);
+        virtual void update(const double& dt);
         virtual void play(uint loop);
         virtual void play();
         virtual void pause();
@@ -73,7 +71,7 @@ class SoundEffect: public SoundBaseClass{
         SoundEffect(SoundData*,uint loops = 1,bool = false);
         ~SoundEffect();
 
-        void update(const float& dt);
+        void update(const double& dt);
         void play(uint loop);
         void play();
         void pause();
@@ -97,7 +95,7 @@ class SoundMusic: public SoundBaseClass{
         SoundMusic(Handle&,uint loops = 1,bool = false);
         ~SoundMusic();
 
-        void update(const float& dt);
+        void update(const double& dt);
         void play(uint loop);
         void play();
         void pause();
@@ -124,7 +122,7 @@ class SoundQueue final{
         void enqueueEffect(Handle&,uint loops = 1);
         void enqueueMusic(Handle&,uint loops = 1);
         void dequeue();
-        void update(const float& dt);
+        void update(const double& dt);
         void clear();
         bool empty();
 };
@@ -139,7 +137,7 @@ namespace epriv{
             SoundManager(const char* name,uint w,uint h);
             ~SoundManager();
 
-            void _update(const float& dt);
+            void _update(const double& dt);
     };
 };
 namespace Sound{

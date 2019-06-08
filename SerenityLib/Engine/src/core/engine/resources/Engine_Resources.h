@@ -6,8 +6,7 @@
 #include <core/engine/renderer/GLImageConstants.h>
 #include <core/ShaderProgram.h>
 #include <core/engine/Engine_ObjectPool.h>
-
-typedef std::uint32_t uint;
+#include <core/engine/Engine_Utils.h>
 
 struct Handle;
 class  EngineResource;

@@ -26,6 +26,9 @@ class Engine_Window::impl final{
         bool m_Active;
         bool m_Vsync;
         bool m_MouseCursorGrabbed;
+		int majorVersion;
+		int minorVersion;
+		int glslVersion;
         sf::ContextSettings m_SFContextSettings;
         void _init(const char* name,uint width,uint height){
             m_FramerateLimit = 0;
@@ -36,7 +39,10 @@ class Engine_Window::impl final{
             m_Height = height;
             m_SFMLWindow = new sf::Window();
             _setActive(true);
-            m_SFContextSettings = _createOpenGLWindow(name,width,height,3,3,330);
+			majorVersion = 4;
+			minorVersion = 5;
+			glslVersion = 450;
+            m_SFContextSettings = _createOpenGLWindow(name,width,height, majorVersion, minorVersion, glslVersion);
 
             std::cout << "Using OpenGL: " << m_SFContextSettings.majorVersion << "." << m_SFContextSettings.minorVersion << ", with depth bits: " << m_SFContextSettings.depthBits << " and stencil bits: " << m_SFContextSettings.stencilBits << std::endl;
         }
@@ -133,7 +139,7 @@ class Engine_Window::impl final{
             if(m_Style == style) return;
             m_Style = style;
             m_SFMLWindow->close();
-            _createOpenGLWindow(m_WindowName,m_Width,m_Height,3,3,330);
+            _createOpenGLWindow(m_WindowName,m_Width,m_Height, majorVersion, minorVersion, glslVersion);
         }
         void _setSize(uint w, uint h){
             m_Width = w; m_Height = h;

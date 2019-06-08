@@ -2,11 +2,31 @@
 #ifndef ENGINE_UTILS_H
 #define ENGINE_UTILS_H
 
+#if _WIN32 || _WIN64
+#if _WIN64
+#define ENVIRONMENT64
+#else
+#define ENVIRONMENT32
+#endif
+#endif
+
+#if __GNUC__
+#if __x86_64__ || __ppc64__
+#define ENVIRONMENT64
+#else
+#define ENVIRONMENT32
+#endif
+#endif
+
 #include <vector>
 #include <cstdint>
 #include <boost/lexical_cast.hpp>
 
+#ifdef ENVIRONMENT64
+typedef std::uint32_t   uint; //TODO: try to make it std::uint64_t
+#else
 typedef std::uint32_t   uint;
+#endif
 
 template <typename Stream> void readUint32tBigEndian(uint32_t& out,Stream& stream) {
     uint8_t buf[4];

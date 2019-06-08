@@ -27,8 +27,8 @@ HUD::~HUD(){
 }
 
 uint _count = 0;
-void HUD::update(const float& dt){
-    if (Engine::isKeyDownOnce(KeyboardKey::LeftAlt, KeyboardKey::Z)) {
+void HUD::update(const double& dt){
+    if (Engine::isKeyDownOnce(KeyboardKey::LeftAlt, KeyboardKey::X) || Engine::isKeyDownOnce(KeyboardKey::RightAlt, KeyboardKey::X)) {
         m_Active = !m_Active;
     }
 }

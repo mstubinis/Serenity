@@ -13,7 +13,7 @@
 
 #include <algorithm>
 #include <sstream>
-#include <Bullet/btBulletCollisionCommon.h>
+#include <btBulletCollisionCommon.h>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -244,7 +244,7 @@ void SolarSystem::_loadFromFile(string filename){
     //LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
     //player->addChild(lightP);
 }
-void SolarSystem::update(const float& dt){
+void SolarSystem::update(const double& dt){
     Scene::update(dt);
 }
 void SolarSystem::onEvent(const Event& e){

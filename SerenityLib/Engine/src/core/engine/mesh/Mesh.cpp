@@ -14,9 +14,9 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 
-#include <bullet/btBulletDynamicsCommon.h>
-#include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
-#include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <btBulletDynamicsCommon.h>
+#include <BulletCollision/Gimpact/btGImpactShape.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -262,6 +262,10 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
     init_blank();
     m_threshold = threshold;
     epriv::MeshImportedData data;
+
+	//TODO: fix this up
+
+	/*
     const uint& width = heightfield.getHeightStickWidth();
     const uint& length = heightfield.getHeightStickLength();
     for (uint i = 0; i < width - 1; i++) {
@@ -303,7 +307,7 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
     }
     epriv::MeshLoader::CalculateTBNAssimp(data);
     epriv::MeshLoader::FinalizeData(*this, data, threshold);
-
+	*/
     load();
 }
 

@@ -48,12 +48,18 @@ class ComponentCamera : public ComponentBaseClass {
         glm::mat4 _viewMatrix, _viewMatrixNoTranslation, _projectionMatrix;
         glm::vec4 _planes[6];
         float _nearPlane, _farPlane, _bottom, _top;
-        union { float _angle;        float _left; };
-        union { float _aspectRatio;  float _right; };
+        union { 
+			float _angle;
+			float _left; 
+		};
+        union { 
+			float _aspectRatio;
+			float _right; 
+		};
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentCamera(Entity&, float angle, float aspectRatio, float nearPlane, float farPlane);
-        ComponentCamera(Entity&, float left, float right, float bottom, float top, float nearPlane, float farPlane);
+        ComponentCamera(Entity& entity, float angle, float aspectRatio, float nearPlane, float farPlane);
+		ComponentCamera(Entity& entity, float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
         ComponentCamera(const ComponentCamera& other) = default;
         ComponentCamera& operator=(const ComponentCamera& other) = default;

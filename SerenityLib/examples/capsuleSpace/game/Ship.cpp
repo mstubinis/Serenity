@@ -22,7 +22,7 @@ ShipSystem::~ShipSystem(){
     m_Health = 0.0f;
     m_Power = 0.0f;
 }
-void ShipSystem::update(const float& dt){
+void ShipSystem::update(const double& dt){
     // handle power transfers...?
 }
 #pragma endregion
@@ -39,7 +39,7 @@ ShipSystemReactor::ShipSystemReactor(Ship* _ship, float maxPower, float currentP
 ShipSystemReactor::~ShipSystemReactor(){
 
 }
-void ShipSystemReactor::update(const float& dt){
+void ShipSystemReactor::update(const double& dt){
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -51,7 +51,7 @@ ShipSystemShields::ShipSystemShields(Ship* _ship):ShipSystem(ShipSystemType::Shi
 ShipSystemShields::~ShipSystemShields(){
 
 }
-void ShipSystemShields::update(const float& dt){
+void ShipSystemShields::update(const double& dt){
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -63,7 +63,7 @@ ShipSystemMainThrusters::ShipSystemMainThrusters(Ship* _ship):ShipSystem(ShipSys
 ShipSystemMainThrusters::~ShipSystemMainThrusters(){
 
 }
-void ShipSystemMainThrusters::update(const float& dt){
+void ShipSystemMainThrusters::update(const double& dt){
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -75,7 +75,7 @@ ShipSystemPitchThrusters::ShipSystemPitchThrusters(Ship* _ship):ShipSystem(ShipS
 ShipSystemPitchThrusters::~ShipSystemPitchThrusters(){
 
 }
-void ShipSystemPitchThrusters::update(const float& dt){
+void ShipSystemPitchThrusters::update(const double& dt){
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -87,7 +87,7 @@ ShipSystemYawThrusters::ShipSystemYawThrusters(Ship* _ship):ShipSystem(ShipSyste
 ShipSystemYawThrusters::~ShipSystemYawThrusters(){
 
 }
-void ShipSystemYawThrusters::update(const float& dt){
+void ShipSystemYawThrusters::update(const double& dt){
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -99,7 +99,7 @@ ShipSystemRollThrusters::ShipSystemRollThrusters(Ship* _ship):ShipSystem(ShipSys
 ShipSystemRollThrusters::~ShipSystemRollThrusters(){
 
 }
-void ShipSystemRollThrusters::update(const float& dt){
+void ShipSystemRollThrusters::update(const double& dt){
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -111,7 +111,7 @@ ShipSystemWarpDrive::ShipSystemWarpDrive(Ship* _ship):ShipSystem(ShipSystemType:
 ShipSystemWarpDrive::~ShipSystemWarpDrive(){
 
 }
-void ShipSystemWarpDrive::update(const float& dt){
+void ShipSystemWarpDrive::update(const double& dt){
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -123,13 +123,13 @@ ShipSystemSensors::ShipSystemSensors(Ship* _ship):ShipSystem(ShipSystemType::Sen
 ShipSystemSensors::~ShipSystemSensors(){
 
 }
-void ShipSystemSensors::update(const float& dt){
+void ShipSystemSensors::update(const double& dt){
 
     ShipSystem::update(dt);
 }
 #pragma endregion
 
-struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const float& dt) const {
+struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
     Ship& ship = *(Ship*)_component.getUserPointer();
     Scene& currentScene = *Resources::getCurrentScene();
 

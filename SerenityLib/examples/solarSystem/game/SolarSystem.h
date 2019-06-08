@@ -27,7 +27,7 @@ class SolarSystem: public Scene{
         virtual ~SolarSystem();
 
         virtual void onEvent(const Event& e);
-        virtual void update(const float& dt);
+        virtual void update(const double& dt);
 
         Ship* getPlayer(){ return player; }
         void setPlayer(Ship* p){ player = p; }

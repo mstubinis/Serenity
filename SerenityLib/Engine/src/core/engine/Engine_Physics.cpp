@@ -11,20 +11,20 @@
 // ecs
 #include <ecs/ComponentModel.h>
 
-#include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
-#include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <bullet/btBulletDynamicsCommon.h>
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/LinearMath/btIDebugDraw.h>
-#include <bullet/BulletCollision/Gimpact/btCompoundFromGimpact.h>
-#include <bullet/BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
-#include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
+#include <BulletCollision/CollisionShapes/btShapeHull.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+#include <LinearMath/btIDebugDraw.h>
+#include <BulletCollision/Gimpact/btCompoundFromGimpact.h>
+#include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
+#include <BulletCollision/Gimpact/btGImpactShape.h>
 
 //Multi-threading
-#include "core/engine/Engine_ThreadManager.h"
-#include <bullet/BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h>
-#include <bullet/BulletDynamics/Dynamics/btSimulationIslandManagerMt.h>
-#include <bullet/BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h>
+#include <core/engine/Engine_ThreadManager.h>
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h>
+#include <BulletDynamics/Dynamics/btSimulationIslandManagerMt.h>
+#include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -35,25 +35,28 @@
 ////////////////////////////////////////////
 
 //bullet rendering fixes (see the custom world class below)
-#include <bullet/BulletCollision/CollisionShapes/btConvexPolyhedron.h>
+#include <BulletCollision/CollisionShapes/btConvexPolyhedron.h>
 class DebugDrawcallback : public btTriangleCallback, public btInternalTriangleIndexCallback {
-    btIDebugDraw* m_debugDrawer;  btVector3	m_color;  btTransform m_worldTrans;
-public:
-    DebugDrawcallback(btIDebugDraw*	debugDrawer, const btTransform& worldTrans, const btVector3& color) {
-        m_debugDrawer = debugDrawer; m_color = color; m_worldTrans = worldTrans;
-    }
-    virtual void internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex) { processTriangle(triangle, partId, triangleIndex); }
-    virtual void processTriangle(btVector3* triangle, int partId, int triangleIndex) {
-        (void)partId; (void)triangleIndex;
-        btVector3 wv0, wv1, wv2;
-        wv0 = m_worldTrans * triangle[0]; wv1 = m_worldTrans * triangle[1]; wv2 = m_worldTrans * triangle[2];
-        btVector3 center = (wv0 + wv1 + wv2)*btScalar(1. / 3.);
-        if (m_debugDrawer->getDebugMode() & btIDebugDraw::DBG_DrawNormals) {
-            btVector3 normal = (wv1 - wv0).cross(wv2 - wv0); normal.normalize();
-            btVector3 normalColor(1, 1, 0); m_debugDrawer->drawLine(center, center + normal, normalColor);
+    private:
+        btIDebugDraw* m_debugDrawer;
+        btVector3	  m_color;
+        btTransform   m_worldTrans;
+    public:
+        DebugDrawcallback(btIDebugDraw*	debugDrawer, const btTransform& worldTrans, const btVector3& color) {
+            m_debugDrawer = debugDrawer; m_color = color; m_worldTrans = worldTrans;
         }
-        m_debugDrawer->drawLine(wv0, wv1, m_color); m_debugDrawer->drawLine(wv1, wv2, m_color); m_debugDrawer->drawLine(wv2, wv0, m_color);
-    }
+        virtual void internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex) { processTriangle(triangle, partId, triangleIndex); }
+        virtual void processTriangle(btVector3* triangle, int partId, int triangleIndex) {
+            (void)partId; (void)triangleIndex;
+            btVector3 wv0, wv1, wv2;
+            wv0 = m_worldTrans * triangle[0]; wv1 = m_worldTrans * triangle[1]; wv2 = m_worldTrans * triangle[2];
+            btVector3 center = (wv0 + wv1 + wv2)*btScalar(1. / 3.);
+            if (m_debugDrawer->getDebugMode() & btIDebugDraw::DBG_DrawNormals) {
+                btVector3 normal = (wv1 - wv0).cross(wv2 - wv0); normal.normalize();
+                btVector3 normalColor(1, 1, 0); m_debugDrawer->drawLine(center, center + normal, normalColor);
+            }
+            m_debugDrawer->drawLine(wv0, wv1, m_color); m_debugDrawer->drawLine(wv1, wv2, m_color); m_debugDrawer->drawLine(wv2, wv0, m_color);
+        }
 };
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -660,7 +663,7 @@ class epriv::PhysicsManager::impl final{
             _destructWorldObjectsOnly();
             SAFE_DELETE(data);
         }
-        void _update(float& dt, int& maxSteps, float& other){
+        void _update(const double& dt, int& maxSteps, float& other){
             if(m_Paused) return;
             data->world->stepSimulation(dt,maxSteps,other);
             uint numManifolds = data->dispatcher->getNumManifolds();
@@ -738,7 +741,7 @@ epriv::PhysicsManager::impl* physicsManager;
 epriv::PhysicsManager::PhysicsManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); physicsManager = m_i.get(); }
 epriv::PhysicsManager::~PhysicsManager(){ m_i->_destruct(); }
 void epriv::PhysicsManager::_init(const char* name,uint w,uint h,uint numCores){ m_i->_postInit(name,w,h,numCores); }
-void epriv::PhysicsManager::_update(float dt,int maxsteps,float other){ m_i->_update(dt,maxsteps,other); }
+void epriv::PhysicsManager::_update(const double& dt,int maxsteps,float other){ m_i->_update(dt,maxsteps,other); }
 void epriv::PhysicsManager::_render(){ m_i->_render(); }
 
 void Physics::pause(bool b){ physicsManager->m_Paused = b; }

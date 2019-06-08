@@ -54,12 +54,11 @@ void epriv::EventManager::onEventMouseButtonReleased(uint& mouseButton){
 void epriv::EventManager::onEventMouseWheelMoved(int& delta){ 
     m_Delta += (delta * 10);
 }
-void epriv::EventManager::onResetEvents(const float& dt){ 
+void epriv::EventManager::onResetEvents(const double& dt){
     m_previousKey = KeyboardKey::Unknown;
     m_currentKey = KeyboardKey::Unknown;
 
-    float boost = ((1.0f / dt)) * 0.003f;
-    float step = (1.0f - dt);
+    double step = (1.0 - dt);
     m_Delta *= step * step * step;
 
     m_Difference.x = 0.0f;
@@ -93,7 +92,7 @@ const bool Engine::isMouseButtonDownOnce(MouseButton::Button button){
 const glm::vec2& Engine::getMouseDifference(){ return epriv::EventManager::m_EventManager->m_Difference; }
 const glm::vec2& Engine::getMousePositionPrevious(){ return epriv::EventManager::m_EventManager->m_Position_Previous; }
 const glm::vec2& Engine::getMousePosition(){ return epriv::EventManager::m_EventManager->m_Position; }
-const float Engine::getMouseWheelDelta(){ return epriv::EventManager::m_EventManager->m_Delta; }
+const double Engine::getMouseWheelDelta(){ return epriv::EventManager::m_EventManager->m_Delta; }
 void Engine::setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),Resources::getWindow().getSFMLHandle());
     epriv::EventManager::m_EventManager->setMousePositionInternal(x,y,resetDifference,resetPreviousPosition);

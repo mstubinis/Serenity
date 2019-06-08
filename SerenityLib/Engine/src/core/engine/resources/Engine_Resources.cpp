@@ -34,8 +34,8 @@ epriv::ResourceManager::~ResourceManager(){
     SAFE_DELETE(m_Window);
     SAFE_DELETE_VECTOR(m_Scenes);
 }
-void epriv::ResourceManager::_init(const char* n,uint w,uint h){ 
-    m_Window = new Engine_Window(n, w, h);
+void epriv::ResourceManager::_init(const char* name,uint width,uint height){ 
+    m_Window = new Engine_Window(name, width, height);
 }
 
 string Engine::Data::reportTime(){
@@ -119,7 +119,7 @@ Handle Resources::addFont(const string& filename){
 
 
 vector<Handle> Resources::loadMesh(string fileOrData, float threshhold) {
-    MeshRequest request = MeshRequest(fileOrData, threshhold);
+    MeshRequest request(fileOrData, threshhold);
     request.request();
     vector<Handle> handles;
     for (auto& part : request.parts) {

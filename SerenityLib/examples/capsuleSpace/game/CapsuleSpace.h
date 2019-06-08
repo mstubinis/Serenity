@@ -69,7 +69,7 @@ class CapsuleSpace final: public Scene {
 
         CapsuleSpace();
         virtual ~CapsuleSpace();
-        void update(const float& dt);
+        void update(const double& dt);
 
         Ship* getPlayer() { return player; }
         void setPlayer(Ship* p) { player = p; }

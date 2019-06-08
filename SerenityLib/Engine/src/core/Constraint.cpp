@@ -1,7 +1,7 @@
 #include <core/Constraint.h>
 
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 Constraint::Constraint(btRigidBody* a, btRigidBody* b){
     m_RigidBodyA = a;

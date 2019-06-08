@@ -8,7 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
 
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 using namespace Engine;
 using namespace std;
@@ -60,7 +60,7 @@ void Math::Float16From32(uint16_t* out, const float*    in, const uint arraySize
 glm::vec2 Math::rotate2DPoint(glm::vec2 point, float angle, glm::vec2 origin) {
     float s = glm::sin(angle);
     float c = glm::cos(angle);
-    glm::v2 ret;
+    glm::vec2 ret;
     ret.x = c * (point.x - origin.x) - s * (point.y - origin.y) + origin.x;
     ret.y = s * (point.x - origin.x) + c * (point.y - origin.y) + origin.x;
     return ret;
@@ -345,22 +345,22 @@ void Math::translate(btRigidBody& body,btVector3& vec,bool local){
     }
 }
 void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up){
-    glm::vec3 forward = eye - target;
-    glm::vec3 vector = glm::normalize(forward);
-    glm::vec3 vector2 = glm::normalize(glm::cross(vector,up));
-    glm::vec3 vector3 = glm::cross(vector,vector2);
-    float m00 = vector2.x;
-    float m01 = vector2.y;
-    float m02 = vector2.z;
-    float m10 = vector3.x;
-    float m11 = vector3.y;
-    float m12 = vector3.z;
-    float m20 = vector.x;
-    float m21 = vector.y;
-    float m22 = vector.z;
-    float num8 = (m00 + m11) + m22;
+    const glm::vec3 forward = eye - target;
+	const glm::vec3 vector  = glm::normalize(forward);
+	const glm::vec3 vector2 = glm::normalize(glm::cross(vector,up));
+	const glm::vec3 vector3 = glm::cross(vector,vector2);
+	const float m00 = vector2.x;
+	const float m01 = vector2.y;
+	const float m02 = vector2.z;
+	const float m10 = vector3.x;
+	const float m11 = vector3.y;
+	const float m12 = vector3.z;
+	const float m20 = vector.x;
+	const float m21 = vector.y;
+	const float m22 = vector.z;
+	const float num8 = (m00 + m11) + m22;
     if (num8 > 0.0f){
-        float num = glm::sqrt(num8 + 1.0f);
+		float num = glm::sqrt(num8 + 1.0f);
         o.w = num * 0.5f;
         num = 0.5f / num;
         o.x = (m12 - m21) * num;
@@ -369,8 +369,8 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
         return;
     }
     if ((m00 >= m11) && (m00 >= m22)){
-        float num7 = glm::sqrt(((1.0f + m00) - m11) - m22);
-        float num4 = 0.5f / num7;
+		const float num7 = glm::sqrt(((1.0f + m00) - m11) - m22);
+		const float num4 = 0.5f / num7;
         o.x = 0.5f * num7;
         o.y = (m01 + m10) * num4;
         o.z = (m02 + m20) * num4;
@@ -378,16 +378,16 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
         return;
     }
     if (m11 > m22){
-        float num6 = glm::sqrt(((1.0f + m11) - m00) - m22);
-        float num3 = 0.5f / num6;
+		const float num6 = glm::sqrt(((1.0f + m11) - m00) - m22);
+		const float num3 = 0.5f / num6;
         o.x = (m10 + m01) * num3;
         o.y = 0.5f * num6;
         o.z = (m21 + m12) * num3;
         o.w = (m20 - m02) * num3;
         return;
     }
-    float num5 = glm::sqrt(((1.0f + m22) - m00) - m11);
-    float num2 = 0.5f / num5;
+	const float num5 = glm::sqrt(((1.0f + m22) - m00) - m11);
+	const float num2 = 0.5f / num5;
     o.x = (m20 + m02) * num2;
     o.y = (m21 + m12) * num2;
     o.z = 0.5f * num5;
@@ -420,7 +420,7 @@ float Math::getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees){
     if(degrees) angle *= 57.2958f;
     return angle;
 }
-void Math::alignTo(glm::quat& o,glm::vec3& direction,float speed){
+void Math::alignTo(glm::quat& o, glm::vec3& direction,float speed){
     glm::quat original(o);
     direction = glm::normalize(direction);
     glm::vec3 xaxis = glm::normalize(glm::cross(glm::vec3(0.0f,1.0f,0.0f), direction));
@@ -465,11 +465,11 @@ double Math::grad(int hash, double x, double y, double z){
     double u = h<8 ? x : y,v = h<4 ? y : h==12||h==14 ? x : z;
     return ((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v);
 }
-glm::vec4 Math::PaintersAlgorithm(const glm::vec4& p, const glm::vec4& c){
+glm::vec4 Math::PaintersAlgorithm(const glm::vec4& paint_color, const glm::vec4& canvas_color){
     glm::vec4 ret(0.0f);
-    const float& a = p.a + c.a * (1.0f-p.a);
-    ret = ((p*p.a + c*c.a * (1.0f-p.a)) / a);
-    ret.a = a;
+    const float& alpha = paint_color.a + canvas_color.a * (1.0f - paint_color.a);
+    ret   = ((paint_color * paint_color.a + canvas_color * canvas_color.a * (1.0f - paint_color.a)) / alpha);
+    ret.a = alpha;
     return ret;
 }
 sf::Color Math::PaintersAlgorithm(const sf::Color& paint_color, const sf::Color& canvas_color) {

@@ -21,8 +21,9 @@ epriv::DebugManager::DebugManager(const char* name, uint w, uint h){
 }
 epriv::DebugManager::~DebugManager() {
 }
-void epriv::DebugManager::_init(const char* name, uint w, uint h) { 
-    glGenQueries(1, &queryID);
+void epriv::DebugManager::_init(const char* name, uint w, uint h) {
+	GLuint cast = static_cast<GLuint>(queryID);
+    glGenQueries(1, &cast);
     glQueryCounter(queryID, GL_TIMESTAMP);// dummy query to prevent OpenGL errors from popping out 
 }
 
@@ -37,7 +38,7 @@ void epriv::DebugManager::addDebugLine(string message) {
 }
 void epriv::DebugManager::calculate() {
     m_deltaTime = (m_logicTime + m_physicsTime + m_renderTime + m_displayTime + m_soundTime);
-    m_totalTime += (double)(dt());
+    m_totalTime += dt();
     ++output_frame;
     if (output_frame >= output_frame_delay) {
         output_frame = 0;

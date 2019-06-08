@@ -15,7 +15,7 @@ namespace epriv {
     template<typename ...> class ECSSystem;
 
     struct FunctorUpdateEmpty final { 
-        void operator()(void* _cPool, const float& dt, Scene&) const { } };
+        void operator()(void* _cPool, const double& dt, Scene&) const { } };
     struct FunctorComponentEmpty final { 
         void operator()(void* _compt, Entity&) const { } };
     struct FunctorEntityEmpty final { 
@@ -23,10 +23,10 @@ namespace epriv {
     struct FunctorSceneEmpty final { 
         void operator()(void* _cPool, Scene&) const { } };
 
-    typedef boost::function<void(void*, const float&, Scene&)>  func_update;
-    typedef boost::function<void(void*, Entity&, Scene&)>       func_entity;
-    typedef boost::function<void(void*, Entity&)>               func_component;
-    typedef boost::function<void(void*, Scene&)>                func_scene;
+    typedef boost::function<void(void*, const double&, Scene&)>  func_update;
+    typedef boost::function<void(void*, Entity&, Scene&)>        func_entity;
+    typedef boost::function<void(void*, Entity&)>                func_component;
+    typedef boost::function<void(void*, Scene&)>                 func_scene;
 
     template<class T> struct FunctorHolder {
         T functor;
@@ -83,7 +83,7 @@ namespace epriv {
             ECSSystem() = default;
             virtual ~ECSSystem() = default;
 
-            virtual void update(const float& dt, Scene&) {}
+            virtual void update(const double& dt, Scene&) {}
             virtual void onComponentAddedToEntity(void*, TEntity&) {}
             virtual void onEntityAddedToScene(TEntity&, Scene&) {}
             virtual void onSceneLeft(Scene&) {}
@@ -122,7 +122,7 @@ namespace epriv {
             ECSSystem(ECSSystem&& other) noexcept = delete;
             ECSSystem& operator=(ECSSystem&& other) noexcept = delete;
 
-            void update(const float& dt, Scene& _scene) { 
+            void update(const double& dt, Scene& _scene) { 
                 super::_SUF(&componentPool, dt, _scene); }
             void onComponentAddedToEntity(void* _component, TEntity& _entity) { 
                 super::_CAE(_component, _entity); }

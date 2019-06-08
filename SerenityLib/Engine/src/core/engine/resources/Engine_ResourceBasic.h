@@ -4,8 +4,7 @@
 
 #include <string>
 #include <cstdint>
-
-typedef std::uint32_t   uint;
+#include <core/engine/Engine_Utils.h>
 
 class EngineResource{
     private:

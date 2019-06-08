@@ -4,6 +4,7 @@
 
 #include <core/engine/renderer/RenderGraph.h>
 #include <core/engine/Engine_GLStateMachine.h>
+#include <core/engine/Engine_Utils.h>
 
 #include <core/engine/renderer/postprocess/SSAO.h>
 #include <core/engine/renderer/postprocess/HDR.h>
@@ -14,8 +15,6 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include <SFML/Window.hpp>
-
-typedef std::uint32_t uint;
 
 class  Texture;
 class  Font;
