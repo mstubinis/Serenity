@@ -144,7 +144,7 @@ namespace epriv {
                 destroyedEntities.push_back(entityID);
             }
             void removeEntity(TEntity& entity) { 
-                EntityDataRequest dataRequest(entity);
+                const EntityDataRequest dataRequest(entity);
                 destroyedEntities.push_back(dataRequest.ID);
             }
             epriv::EntityPOD* getEntity(const uint& entityID) { 

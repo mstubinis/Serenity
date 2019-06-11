@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <core/engine/Engine_Utils.h>
 
-
 struct Entity;
 class Scene;
 
@@ -14,8 +13,8 @@ struct EntityDataRequest final {
     uint   sceneID : 7;
     uint versionID : 4;
     inline void serialize(const uint& _entityData) {
-        ID = (_entityData & 0x003FFFFF) >> 0;
-        sceneID = (_entityData & 0x1FE00000) >> 21;
+        ID        = (_entityData & 0x003FFFFF) >> 0;
+        sceneID   = (_entityData & 0x1FE00000) >> 21;
         versionID = (_entityData & 4026531840) >> 28;
     }
     EntityDataRequest() = delete;
@@ -36,8 +35,8 @@ namespace epriv {
         uint versionID : 4;
 
         EntityPOD() = delete;
-        EntityPOD(uint _id, Scene& _scene);
-        EntityPOD(uint _id, uint _sceneID);
+        EntityPOD(const uint& _id, Scene& _scene);
+        EntityPOD(const uint& _id, const uint& _sceneID);
         EntityPOD(const EntityPOD& _other) = delete;
         EntityPOD& operator=(const EntityPOD& _other) = delete;
         EntityPOD(EntityPOD&& _other) noexcept;

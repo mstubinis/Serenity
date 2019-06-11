@@ -9,10 +9,16 @@ class Ship;
 class Planet;
 class GameObject;
 class EntityWrapper;
+class GameSkybox;
 
 class SolarSystem: public Scene{
     private:
         std::unordered_map<std::string,Planet*> m_Planets;
+
+		GameSkybox* box1;
+		GameSkybox* box2;
+		GameSkybox* box3;
+		GameSkybox* box4;
 
         Ship* player;
         float giGlobal;

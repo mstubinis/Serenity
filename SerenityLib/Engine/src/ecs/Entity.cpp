@@ -11,7 +11,7 @@ Scene& Entity::scene() {
 }
 void Entity::move(const Scene& _scene) {
     auto& scene = const_cast<Scene&>(_scene);
-    EntityDataRequest dataRequest(*this);
+	const EntityDataRequest dataRequest(*this);
     if (scene.id() == dataRequest.sceneID)
         return;
     process(dataRequest.ID, scene.id(), dataRequest.versionID);

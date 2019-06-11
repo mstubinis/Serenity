@@ -96,6 +96,24 @@ void Game::update(const double& dt){
     if (Engine::isKeyDownOnce(KeyboardKey::F12)) { 
         Renderer::godRays::enable(!Renderer::godRays::enabled());
     }
+
+	Scene& scene = *Resources::getCurrentScene();
+	Material& defMat = *((Material*)(ResourceManifest::DefiantMaterial.get()));
+	if (Engine::isKeyDown(KeyboardKey::V)) {
+		defMat.setSmoothness(defMat.smoothness() - 0.01f);
+	}else if (Engine::isKeyDown(KeyboardKey::B)) {
+		defMat.setSmoothness(defMat.smoothness() + 0.01f);
+	}
+	if (Engine::isKeyDown(KeyboardKey::N)) {
+		defMat.setMetalness(defMat.metalness() - 0.01f);
+	}else if (Engine::isKeyDown(KeyboardKey::M)) {
+		defMat.setMetalness(defMat.metalness() + 0.01f);
+	}
+	if (Engine::isKeyDown(KeyboardKey::O)) {
+		Renderer::godRays::enable(!Renderer::godRays::enabled());
+	}else if (Engine::isKeyDown(KeyboardKey::P)) {
+		Renderer::godRays::enable(!Renderer::godRays::enabled());
+	}
     m_HUD->update(dt);
 }
 void Game::render(){

@@ -14,6 +14,16 @@ struct ResourceManifest{
     static Handle DefiantMesh;
     static Handle RingMesh;
 
+
+	/*extras*/
+	static Handle NovaMesh;
+	static Handle VenerexMesh;
+	static Handle IntrepidMesh;
+	static Handle NovaMaterial;
+	static Handle VenerexMaterial;
+	static Handle IntrepidMaterial;
+
+
     static Handle StarMaterial;
     static Handle EarthSkyMaterial;
     static Handle DefiantMaterial;

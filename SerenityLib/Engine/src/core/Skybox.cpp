@@ -14,9 +14,6 @@ SkyboxEmpty::SkyboxEmpty(Scene* scene){
     if(!scene){
         scene = Resources::getCurrentScene();
     }
-    if(!scene->skybox()){
-        scene->setSkybox(this);
-    }
 }
 SkyboxEmpty::~SkyboxEmpty(){
 

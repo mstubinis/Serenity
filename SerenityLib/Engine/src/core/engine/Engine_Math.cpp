@@ -466,21 +466,18 @@ double Math::grad(int hash, double x, double y, double z){
     return ((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v);
 }
 glm::vec4 Math::PaintersAlgorithm(const glm::vec4& paint_color, const glm::vec4& canvas_color){
+	const float& alpha = paint_color.a + canvas_color.a * (1.0f - paint_color.a);
     glm::vec4 ret(0.0f);
-    const float& alpha = paint_color.a + canvas_color.a * (1.0f - paint_color.a);
     ret   = ((paint_color * paint_color.a + canvas_color * canvas_color.a * (1.0f - paint_color.a)) / alpha);
     ret.a = alpha;
     return ret;
 }
 sf::Color Math::PaintersAlgorithm(const sf::Color& paint_color, const sf::Color& canvas_color) {
-    const sf::Uint8& zero = (unsigned short)0;
-    const sf::Uint8& high = (unsigned short)255;
-    const sf::Uint8& alpha = paint_color.a + canvas_color.a * (high - paint_color.a);
-
-    sf::Color ret = sf::Color(zero, zero, zero, zero);
-    ret.r = ((paint_color.r * paint_color.a + canvas_color.r * canvas_color.a * (high - paint_color.a)) / alpha);
-    ret.g = ((paint_color.g * paint_color.a + canvas_color.g * canvas_color.a * (high - paint_color.a)) / alpha);
-    ret.b = ((paint_color.b * paint_color.a + canvas_color.b * canvas_color.a * (high - paint_color.a)) / alpha);
+    const sf::Uint8& alpha = paint_color.a + canvas_color.a * (255 - paint_color.a);
+    sf::Color ret = sf::Color(0, 0, 0, 0);
+    ret.r = ((paint_color.r * paint_color.a + canvas_color.r * canvas_color.a * (255 - paint_color.a)) / alpha);
+    ret.g = ((paint_color.g * paint_color.a + canvas_color.g * canvas_color.a * (255 - paint_color.a)) / alpha);
+    ret.b = ((paint_color.b * paint_color.a + canvas_color.b * canvas_color.a * (255 - paint_color.a)) / alpha);
     ret.a = alpha;
     return ret;
 }

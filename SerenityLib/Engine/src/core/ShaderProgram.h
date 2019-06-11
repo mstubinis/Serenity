@@ -6,6 +6,7 @@
 #include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/Engine_Utils.h>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
@@ -85,12 +86,13 @@ class ShaderP final: public BindableResource, public EventObserver{
     friend class ::Shader;
     friend struct Engine::epriv::InternalShaderProgramPublicInterface;
     private:
-        GLuint m_ShaderProgram;
+        GLuint                                 m_ShaderProgram;
         std::unordered_map<std::string, GLint> m_UniformLocations;
-        std::unordered_map<GLuint, bool> m_AttachedUBOs;
-        Shader& m_VertexShader;
-        Shader& m_FragmentShader;
-        bool m_LoadedCPU, m_LoadedGPU;
+        std::unordered_set<GLuint>             m_AttachedUBOs;
+        Shader&                                m_VertexShader;
+        Shader&                                m_FragmentShader;
+		bool                                   m_LoadedCPU;
+		bool                                   m_LoadedGPU;
 
         void _convertCode(std::string& vCode, std::string& fCode, ShaderP&);
         void _convertCode(std::string&, Shader&, ShaderP&);

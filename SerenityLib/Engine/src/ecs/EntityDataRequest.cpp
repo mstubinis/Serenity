@@ -28,12 +28,12 @@ EntityDataRequest& EntityDataRequest::operator=(EntityDataRequest&& other) noexc
 }
 
 
-epriv::EntityPOD::EntityPOD(uint _id, Scene& _scene) { 
+epriv::EntityPOD::EntityPOD(const uint& _id, Scene& _scene) {
     ID = _id;
     sceneID = _scene.id();
     versionID = 0; 
 }
-epriv::EntityPOD::EntityPOD(uint _id, uint _sceneID) { 
+epriv::EntityPOD::EntityPOD(const uint& _id, const uint& _sceneID) {
     ID = _id;
     sceneID = _sceneID;
     versionID = 0; 

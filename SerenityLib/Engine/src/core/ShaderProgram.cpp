@@ -435,15 +435,15 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
     }
     if (versionNumber >= 110) {
         if (shader.type() == ShaderType::Vertex) {
-            boost::replace_all(_d, "flat", "");
-            boost::replace_all(_d, "highp ", "");
+            boost::replace_all(_d, "flat",     "");
+            boost::replace_all(_d, "highp ",   "");
             boost::replace_all(_d, "mediump ", "");
-            boost::replace_all(_d, "lowp ", "");
+            boost::replace_all(_d, "lowp ",    "");
         }else if (shader.type() == ShaderType::Fragment) {
-            boost::replace_all(_d, "flat", "");
-            boost::replace_all(_d, "highp ", "");
+            boost::replace_all(_d, "flat",     "");
+            boost::replace_all(_d, "highp ",   "");
             boost::replace_all(_d, "mediump ", "");
-            boost::replace_all(_d, "lowp ", "");
+            boost::replace_all(_d, "lowp ",    "");
         }
     }
     if (versionNumber >= 130) {
@@ -458,10 +458,10 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
     if (versionNumber >= 140) {
         if (shader.type() == ShaderType::Vertex) {
         }else if (shader.type() == ShaderType::Fragment) {
-            boost::replace_all(_d, "textureCube(", "texture(");
-            boost::replace_all(_d, "textureCubeLod(", "textureLod(");
-            boost::replace_all(_d, "texture2DLod(", "textureLod(");
-            boost::replace_all(_d, "texture2D(", "texture(");
+            boost::replace_all(_d, "textureCube(",     "texture(");
+            boost::replace_all(_d, "textureCubeLod(",  "textureLod(");
+            boost::replace_all(_d, "texture2DLod(",    "textureLod(");
+            boost::replace_all(_d, "texture2D(",       "texture(");
         }
     }
     if (versionNumber >= 150) {
@@ -731,7 +731,7 @@ void UniformBufferObject::attachToShader(ShaderP& _shaderProgram){
     if (epriv::RenderManager::GLSL_VERSION < 140 || _shaderProgram.m_AttachedUBOs.count(m_UBOObject)) return;
     uint programBlockIndex = glGetUniformBlockIndex(program, m_NameInShader);
     glUniformBlockBinding(program, programBlockIndex, m_GlobalBindingPointNumber);
-    _shaderProgram.m_AttachedUBOs.emplace(m_UBOObject, true);
+    _shaderProgram.m_AttachedUBOs.emplace(m_UBOObject);
 }
 GLuint UniformBufferObject::address(){ return m_UBOObject; }
 void UniformBufferObject::onEvent(const Event& e){

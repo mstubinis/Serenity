@@ -115,7 +115,7 @@ class Ring final{
     private:
         Handle m_MaterialHandle;
         Planet* m_Parent;
-        void _makeRingImage(std::vector<RingInfo>&);
+        void _makeRingImage(const std::vector<RingInfo>&);
     public:
         Ring(std::vector<RingInfo>&,Planet*);
         ~Ring();

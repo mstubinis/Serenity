@@ -41,7 +41,7 @@ class Engine_Window::impl final{
             _setActive(true);
 			majorVersion = 4;
 			minorVersion = 5;
-			glslVersion = 450;
+			glslVersion = 330;
             m_SFContextSettings = _createOpenGLWindow(name,width,height, majorVersion, minorVersion, glslVersion);
 
             std::cout << "Using OpenGL: " << m_SFContextSettings.majorVersion << "." << m_SFContextSettings.minorVersion << ", with depth bits: " << m_SFContextSettings.depthBits << " and stencil bits: " << m_SFContextSettings.stencilBits << std::endl;

@@ -423,32 +423,39 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
 }
 Ring::~Ring(){
 }
-void Ring::_makeRingImage(vector<RingInfo>& rings){
+void Ring::_makeRingImage(const vector<RingInfo>& rings){
     sf::Image ringImage;
     ringImage.create(1024, 2, sf::Color(0,0,0,0));
     const auto& ringImageX = ringImage.getSize().x;
     const auto& ringImageY = ringImage.getSize().y;
     for(auto& ringInfo: rings){
-        sf::Color paint_color(ringInfo.color.r, ringInfo.color.g, ringInfo.color.b);
+        sf::Color paint_color(
+			static_cast<sf::Uint8>(ringInfo.color.r),
+			static_cast<sf::Uint8>(ringInfo.color.g),
+			static_cast<sf::Uint8>(ringInfo.color.b),
+			255
+		);
 
         uint alphaChange = ringInfo.size - ringInfo.alphaBreakpoint;
         uint alpha_i = 0;
         for(uint i = 0; i < ringInfo.size; ++i){
             if (i > ringInfo.alphaBreakpoint) {
-                paint_color.a = (sf::Uint8)((float(alphaChange - alpha_i) / (float)alphaChange) * 255.0f);
+                paint_color.a = static_cast<sf::Uint8>(((static_cast<float>(alphaChange - alpha_i) / static_cast<float>(alphaChange))) * 255.0f);
                 ++alpha_i;
-            }
+			}else{
+				paint_color.a = 255;
+			}
             int xBack  =  ringInfo.position - i;
             int xFront =  ringInfo.position + i;
-            if (xBack > 0 && xFront < (int)ringImageX) {
+            if (xBack > 0 && xFront < static_cast<int>(ringImageX)) {
                 const sf::Color& canvas_color_front = ringImage.getPixel(xFront, 0);
                 const sf::Color& canvas_color_back = ringImage.getPixel(xBack,  0);
-                sf::Color finalColorFront = Engine::Math::PaintersAlgorithm(paint_color, canvas_color_front);
-                sf::Color finalColorBack = Engine::Math::PaintersAlgorithm(paint_color, canvas_color_back);
-                if (ringInfo.color.r < 0 || ringInfo.color.g < 0 || ringInfo.color.b < 0) {
+                sf::Color finalColorFront = Math::PaintersAlgorithm(paint_color, canvas_color_front);
+                sf::Color finalColorBack  = Math::PaintersAlgorithm(paint_color, canvas_color_back);
+                if (ringInfo.color.r < 0 && ringInfo.color.g < 0 && ringInfo.color.b < 0) {
                     //transparent color, removing the canvas color 
                     finalColorFront = sf::Color(canvas_color_front.r, canvas_color_front.g, canvas_color_front.b, 255 - paint_color.a);
-                    finalColorBack  = sf::Color(canvas_color_back.r, canvas_color_back.g, canvas_color_back.b, 255 - paint_color.a);
+                    finalColorBack  = sf::Color(canvas_color_back.r,  canvas_color_back.g,  canvas_color_back.b,  255 - paint_color.a);
                 }
                 for (uint s = 0; s < ringImageY; ++s) {
                     ringImage.setPixel(xFront, s, finalColorFront);
@@ -475,7 +482,7 @@ OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float 
 }
 glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet* thisPlanet){
     glm::vec3 offset = glm::vec3(0.0f);
-    glm::vec3 currentPos = thisPlanet->getPosition();
+    const glm::vec3& currentPos = thisPlanet->getPosition();
     if(parent){
         glm::vec3 parentPos = parent->getPosition();
         float newX = parentPos.x - glm::cos(angle) * info.w;
@@ -486,7 +493,7 @@ glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet* thisPlanet){
 }
 void OrbitInfo::setOrbitalPosition(float a,Planet* planet){
     angle += a;
-    glm::vec3 nextPos = getOrbitalPosition(angle,planet);
+    const glm::vec3& nextPos = getOrbitalPosition(angle,planet);
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::rotate(modelMatrix,inclination,glm::vec3(0,1,0));
     modelMatrix = glm::translate(modelMatrix,nextPos);
