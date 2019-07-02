@@ -12,7 +12,6 @@ namespace epriv {
             float bias;
             float focus;
             float blur_radius;
-            float aspect_ratio;
             bool  dof;
 
             Postprocess_DepthOfField();
@@ -25,15 +24,15 @@ namespace epriv {
 };
 namespace Renderer {
 namespace depthOfField {
-    void enable(bool b = true);
+    void enable(const bool b = true);
     void disable();
     bool enabled();
     float getFocus();
-    void setFocus(float);
+    void setFocus(const float);
     float getBias();
-    void setBias(float);
+    void setBias(const float);
     float getBlurRadius();
-    void setBlurRadius(float);
+    void setBlurRadius(const float);
 };
 };
 };

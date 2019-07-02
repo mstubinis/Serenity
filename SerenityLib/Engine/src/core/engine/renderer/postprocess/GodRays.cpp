@@ -29,13 +29,13 @@ void epriv::Postprocess_GodRays::pass(ShaderP& program, GBuffer& gbuffer, const 
     program.bind();
     const float& _divisor = gbuffer.getSmallFBO()->divisor();
     Renderer::sendUniform4("RaysInfo", exposure, decay, density, weight);
-    Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / float(fboWidth), lightScrnPos.y / float(fboHeight));
+    Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / static_cast<float>(fboWidth), lightScrnPos.y / static_cast<float>(fboHeight));
     Renderer::sendUniform1("samples", samples);
     Renderer::sendUniform1("alpha", alpha);
     Renderer::sendTexture("firstPass", gbuffer.getTexture(GBufferType::Misc), 0);
 
-    const unsigned int& x = static_cast<unsigned int>(float(fboWidth) * _divisor);
-    const unsigned int& y = static_cast<unsigned int>(float(fboHeight) * _divisor);
+    const unsigned int& x = static_cast<unsigned int>(static_cast<float>(fboWidth) * _divisor);
+    const unsigned int& y = static_cast<unsigned int>(static_cast<float>(fboHeight) * _divisor);
     Renderer::renderFullscreenTriangle(x, y);
 }
 
@@ -44,7 +44,7 @@ void epriv::Postprocess_GodRays::pass(ShaderP& program, GBuffer& gbuffer, const 
 bool Renderer::godRays::enabled() { 
     return epriv::Postprocess_GodRays::GodRays.godRays;
 }
-void Renderer::godRays::enable(bool b = true) { 
+void Renderer::godRays::enable(const bool b) {
     epriv::Postprocess_GodRays::GodRays.godRays = b;
 }
 void Renderer::godRays::disable() { 
@@ -74,28 +74,28 @@ float Renderer::godRays::getFOVDegrees() {
 float Renderer::godRays::getAlphaFalloff() { 
     return epriv::Postprocess_GodRays::GodRays.alphaFalloff;
 }
-void Renderer::godRays::setExposure(float e) { 
+void Renderer::godRays::setExposure(const float e) {
     epriv::Postprocess_GodRays::GodRays.exposure = e;
 }
-void Renderer::godRays::setFactor(float f) { 
+void Renderer::godRays::setFactor(const float f) {
     epriv::Postprocess_GodRays::GodRays.factor = f;
 }
-void Renderer::godRays::setDecay(float d) { 
+void Renderer::godRays::setDecay(const float d) {
     epriv::Postprocess_GodRays::GodRays.decay = d;
 }
-void Renderer::godRays::setDensity(float d) { 
+void Renderer::godRays::setDensity(const float d) {
     epriv::Postprocess_GodRays::GodRays.density = d;
 }
-void Renderer::godRays::setWeight(float w) { 
+void Renderer::godRays::setWeight(const float w) {
     epriv::Postprocess_GodRays::GodRays.weight = w;
 }
-void Renderer::godRays::setSamples(unsigned int s) {
+void Renderer::godRays::setSamples(const unsigned int s) {
     epriv::Postprocess_GodRays::GodRays.samples = glm::max((unsigned int)0, s);
 }
-void Renderer::godRays::setFOVDegrees(float d) { 
+void Renderer::godRays::setFOVDegrees(const float d) {
     epriv::Postprocess_GodRays::GodRays.fovDegrees = d;
 }
-void Renderer::godRays::setAlphaFalloff(float a) { 
+void Renderer::godRays::setAlphaFalloff(const float a) {
     epriv::Postprocess_GodRays::GodRays.alphaFalloff = a;
 }
 void Renderer::godRays::setSun(Entity* entity) { 

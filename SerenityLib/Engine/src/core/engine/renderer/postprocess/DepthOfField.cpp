@@ -9,16 +9,16 @@ using namespace std;
 epriv::Postprocess_DepthOfField epriv::Postprocess_DepthOfField::DOF;
 
 epriv::Postprocess_DepthOfField::Postprocess_DepthOfField() {
-    bias        = 0.6f;
-    focus       = 2.0f;
-    blur_radius = 3.0f;
-    dof         = false;
+    bias         = 0.6f;
+    focus        = 2.0f;
+    blur_radius  = 3.0f;
+    dof          = false;
 }
 epriv::Postprocess_DepthOfField::~Postprocess_DepthOfField() {
 }
 void epriv::Postprocess_DepthOfField::pass(ShaderP& program,GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
     program.bind();
-    Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, fboWidth / (float)fboHeight);
+    Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, fboWidth / static_cast<float>(fboHeight));
 
     Renderer::sendTextureSafe("inTexture", gbuffer.getTexture(sceneTexture), 0);
     Renderer::sendTextureSafe("textureDepth", gbuffer.getTexture(GBufferType::Depth), 1);
@@ -27,7 +27,7 @@ void epriv::Postprocess_DepthOfField::pass(ShaderP& program,GBuffer& gbuffer, co
 }
 
 
-void Engine::Renderer::depthOfField::enable(bool b) {
+void Engine::Renderer::depthOfField::enable(const bool b) {
     epriv::Postprocess_DepthOfField::DOF.dof = b;
 }
 void Engine::Renderer::depthOfField::disable() {
@@ -39,18 +39,18 @@ bool Engine::Renderer::depthOfField::enabled() {
 float Engine::Renderer::depthOfField::getFocus() {
     return epriv::Postprocess_DepthOfField::DOF.focus;
 }
-void Engine::Renderer::depthOfField::setFocus(float f) {
+void Engine::Renderer::depthOfField::setFocus(const float f) {
     epriv::Postprocess_DepthOfField::DOF.focus = glm::max(0.0f, f);
 }
 float Engine::Renderer::depthOfField::getBias() {
     return epriv::Postprocess_DepthOfField::DOF.bias;
 }
-void Engine::Renderer::depthOfField::setBias(float b) {
+void Engine::Renderer::depthOfField::setBias(const float b) {
     epriv::Postprocess_DepthOfField::DOF.bias = b;
 }
 float Engine::Renderer::depthOfField::getBlurRadius() {
     return epriv::Postprocess_DepthOfField::DOF.blur_radius;
 }
-void Engine::Renderer::depthOfField::setBlurRadius(float r) {
+void Engine::Renderer::depthOfField::setBlurRadius(const float r) {
     epriv::Postprocess_DepthOfField::DOF.blur_radius = glm::max(0.0f, r);
 }

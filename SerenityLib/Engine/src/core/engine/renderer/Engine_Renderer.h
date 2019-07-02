@@ -13,6 +13,7 @@
 #include <core/engine/renderer/postprocess/FXAA.h>
 #include <core/engine/renderer/postprocess/SMAA.h>
 #include <core/engine/renderer/postprocess/GodRays.h>
+#include <core/engine/renderer/postprocess/Fog.h>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <SFML/Window.hpp>
@@ -23,14 +24,14 @@ struct Entity;
 struct BufferObject;
 
 struct DepthFunc{enum Func{ 
-    Never = GL_NEVER,
-    Less = GL_LESS,
-    Equal = GL_EQUAL,
-    LEqual = GL_LEQUAL,
-    Greater = GL_GREATER,
+    Never    = GL_NEVER,
+    Less     = GL_LESS,
+    Equal    = GL_EQUAL,
+    LEqual   = GL_LEQUAL,
+    Greater  = GL_GREATER,
     NotEqual = GL_NOTEQUAL,
-    GEqual = GL_GEQUAL,
-    Always = GL_ALWAYS,
+    GEqual   = GL_GEQUAL,
+    Always   = GL_ALWAYS,
 };};
 struct AntiAliasingAlgorithm{enum Algorithm{
     None,FXAA,SMAA,
@@ -112,17 +113,6 @@ namespace Renderer{
             void enable1(bool b = true);
             void disable1();
             bool enabled1();
-        };
-        namespace Fog{
-            void enable(bool b = true);
-            void disable();
-            bool enabled();
-            void setColor(glm::vec4& color);
-            void setColor(float r,float g,float b,float a);
-            void setNullDistance(float d);
-            void setBlendDistance(float d);
-            float getNullDistance();
-            float getBlendDistance();
         };
         namespace Lighting{
             void enable(bool b = true);

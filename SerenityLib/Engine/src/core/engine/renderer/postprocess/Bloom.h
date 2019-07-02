@@ -27,20 +27,20 @@ namespace epriv {
 namespace Renderer {
 namespace bloom {
     unsigned int getNumPasses();
-    void setNumPasses(unsigned int);
-    void enable(bool b = true);
+    void setNumPasses(const unsigned int);
+    void enable(const bool b = true);
     void disable();
     bool enabled();
     float getThreshold();
-    void setThreshold(float t);
+    void setThreshold(const float t);
     float getExposure();
-    void setExposure(float e);
+    void setExposure(const float e);
     float getBlurRadius();
-    void setBlurRadius(float r);
+    void setBlurRadius(const float r);
     float getBlurStrength();
-    void setBlurStrength(float r);
+    void setBlurStrength(const float r);
     float getScale();
-    void setScale(float s);
+    void setScale(const float s);
 };
 };
 };

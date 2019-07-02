@@ -268,6 +268,7 @@
     <ClInclude Include="Engine\src\core\engine\renderer\GLImageConstants.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Bloom.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\DepthOfField.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Fog.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\FXAA.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\GodRays.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\HDR.h" />
@@ -348,6 +349,7 @@
     <ClCompile Include="Engine\src\core\engine\renderer\GBuffer.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Bloom.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\DepthOfField.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Fog.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\FXAA.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\GodRays.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\HDR.cpp" />

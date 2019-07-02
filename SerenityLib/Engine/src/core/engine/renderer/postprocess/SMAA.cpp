@@ -66,7 +66,7 @@ void epriv::Postprocess_SMAA::passEdge(ShaderP& program, GBuffer& gbuffer, const
     Renderer::sendUniform4Safe("SMAAInfo1Floats", THRESHOLD, DEPTH_THRESHOLD, LOCAL_CONTRAST_ADAPTATION_FACTOR, PREDICATION_THRESHOLD);
     Renderer::sendUniform2Safe("SMAAInfo1FloatsA", PREDICATION_SCALE, PREDICATION_STRENGTH);
 
-    Renderer::sendUniform1Safe("SMAA_PREDICATION", int(PREDICATION));
+    Renderer::sendUniform1Safe("SMAA_PREDICATION", static_cast<int>(PREDICATION));
 
     Renderer::sendTexture("textureMap", gbuffer.getTexture(sceneTexture), 0);
     Renderer::sendTextureSafe("texturePredication", gbuffer.getTexture(GBufferType::Diffuse), 1);
@@ -91,7 +91,7 @@ void epriv::Postprocess_SMAA::passBlend(ShaderP& program, GBuffer& gbuffer, cons
     Renderer::sendUniform1Safe("SMAA_MAX_SEARCH_STEPS", MAX_SEARCH_STEPS);
 
     Renderer::sendUniform4Safe("SMAAInfo2Ints", MAX_SEARCH_STEPS_DIAG, AREATEX_MAX_DISTANCE, AREATEX_MAX_DISTANCE_DIAG, CORNER_ROUNDING);
-    Renderer::sendUniform4Safe("SMAAInfo2Floats", AREATEX_PIXEL_SIZE.x, AREATEX_PIXEL_SIZE.y, AREATEX_SUBTEX_SIZE, (float(CORNER_ROUNDING) / 100.0f));
+    Renderer::sendUniform4Safe("SMAAInfo2Floats", AREATEX_PIXEL_SIZE.x, AREATEX_PIXEL_SIZE.y, AREATEX_SUBTEX_SIZE, (static_cast<float>(CORNER_ROUNDING) / 100.0f));
 
     Renderer::renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
 
@@ -120,49 +120,49 @@ void epriv::Postprocess_SMAA::passFinal(ShaderP& program, GBuffer& gbuffer, cons
 
 
 
-void Renderer::smaa::setThreshold(float f) {
+void Renderer::smaa::setThreshold(const float f) {
     epriv::Postprocess_SMAA::SMAA.THRESHOLD = f;
 }
-void Renderer::smaa::setSearchSteps(unsigned int s) {
+void Renderer::smaa::setSearchSteps(const unsigned int s) {
     epriv::Postprocess_SMAA::SMAA.MAX_SEARCH_STEPS = s;
 }
 void Renderer::smaa::disableCornerDetection() {
     epriv::Postprocess_SMAA::SMAA.CORNER_ROUNDING = 0;
 }
-void Renderer::smaa::enableCornerDetection(unsigned int c) {
+void Renderer::smaa::enableCornerDetection(const unsigned int c) {
     epriv::Postprocess_SMAA::SMAA.CORNER_ROUNDING = c;
 }
 void Renderer::smaa::disableDiagonalDetection() {
     epriv::Postprocess_SMAA::SMAA.MAX_SEARCH_STEPS_DIAG = 0;
 }
-void Renderer::smaa::enableDiagonalDetection(unsigned int d) {
+void Renderer::smaa::enableDiagonalDetection(const unsigned int d) {
     epriv::Postprocess_SMAA::SMAA.MAX_SEARCH_STEPS_DIAG = d;
 }
-void Renderer::smaa::setPredicationThreshold(float f) {
+void Renderer::smaa::setPredicationThreshold(const float f) {
     epriv::Postprocess_SMAA::SMAA.PREDICATION_THRESHOLD = f;
 }
-void Renderer::smaa::setPredicationScale(float f) {
+void Renderer::smaa::setPredicationScale(const float f) {
     epriv::Postprocess_SMAA::SMAA.PREDICATION_SCALE = f;
 }
-void Renderer::smaa::setPredicationStrength(float s) {
+void Renderer::smaa::setPredicationStrength(const float s) {
     epriv::Postprocess_SMAA::SMAA.PREDICATION_STRENGTH = s;
 }
-void Renderer::smaa::setReprojectionScale(float s) {
+void Renderer::smaa::setReprojectionScale(const float s) {
     epriv::Postprocess_SMAA::SMAA.REPROJECTION_WEIGHT_SCALE = s;
 }
-void Renderer::smaa::enablePredication(bool b) {
+void Renderer::smaa::enablePredication(const bool b) {
     epriv::Postprocess_SMAA::SMAA.PREDICATION = b;
 }
 void Renderer::smaa::disablePredication() {
     epriv::Postprocess_SMAA::SMAA.PREDICATION = false;
 }
-void Renderer::smaa::enableReprojection(bool b) {
+void Renderer::smaa::enableReprojection(const bool b) {
     epriv::Postprocess_SMAA::SMAA.REPROJECTION = b;
 }
 void Renderer::smaa::disableReprojection() {
     epriv::Postprocess_SMAA::SMAA.REPROJECTION = false;
 }
-void Renderer::smaa::setQuality(SMAAQualityLevel::Level level) {
+void Renderer::smaa::setQuality(const SMAAQualityLevel::Level level) {
     if (level == SMAAQualityLevel::Low) {
         epriv::Postprocess_SMAA::SMAA.THRESHOLD             = 0.15f;
         epriv::Postprocess_SMAA::SMAA.MAX_SEARCH_STEPS      = 4;

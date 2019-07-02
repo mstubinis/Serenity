@@ -50,20 +50,20 @@ namespace epriv {
 };
 namespace Renderer {
 namespace smaa {
-    void setThreshold(float f);
-    void setSearchSteps(unsigned int s);
+    void setThreshold(const float threshold);
+    void setSearchSteps(const unsigned int steps);
     void disableCornerDetection();
-    void enableCornerDetection(unsigned int c = 25);
+    void enableCornerDetection(const unsigned int detection = 25);
     void disableDiagonalDetection();
-    void enableDiagonalDetection(unsigned int d = 8);
-    void setQuality(SMAAQualityLevel::Level l);
-    void setPredicationThreshold(float f);
-    void setPredicationScale(float f);
-    void setPredicationStrength(float s);
-    void setReprojectionScale(float s);
-    void enablePredication(bool b = true);
+    void enableDiagonalDetection(const unsigned int detection = 8);
+    void setQuality(const SMAAQualityLevel::Level level);
+    void setPredicationThreshold(const float threshold);
+    void setPredicationScale(const float scale);
+    void setPredicationStrength(const float strength);
+    void setReprojectionScale(const float scale);
+    void enablePredication(const bool b = true);
     void disablePredication();
-    void enableReprojection(bool b = true);
+    void enableReprojection(const bool b = true);
     void disableReprojection();
 };
 };

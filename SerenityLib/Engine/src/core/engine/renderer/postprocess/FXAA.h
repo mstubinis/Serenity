@@ -22,11 +22,11 @@ namespace epriv {
 };
 namespace Renderer {
 namespace fxaa {
-    void setReduceMin(float r);
+    void setReduceMin(const float r);
     float getReduceMin();
-    void setReduceMul(float r);
+    void setReduceMul(const float r);
     float getReduceMul();
-    void setSpanMax(float r);
+    void setSpanMax(const float r);
     float getSpanMax();
 };
 };

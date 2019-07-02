@@ -29,8 +29,8 @@ void epriv::Postprocess_Bloom::pass(ShaderP& program, GBuffer& gbuffer, const un
     Renderer::sendUniform4("Data", scale, threshold, exposure, 0.0f);
     Renderer::sendTexture("SceneTexture", gbuffer.getTexture(sceneTextureEnum), 0);
 
-    unsigned int x = unsigned int(float(fboWidth) * divisor);
-    unsigned int y = unsigned int(float(fboHeight) * divisor);
+    const unsigned int& x = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
+    const unsigned int& y = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
     Renderer::renderFullscreenTriangle(x, y);
 }
 
@@ -38,13 +38,13 @@ void epriv::Postprocess_Bloom::pass(ShaderP& program, GBuffer& gbuffer, const un
 float Renderer::bloom::getThreshold() { 
     return epriv::Postprocess_Bloom::Bloom.threshold;
 }
-void Renderer::bloom::setThreshold(float t) {
+void Renderer::bloom::setThreshold(const float t) {
     epriv::Postprocess_Bloom::Bloom.threshold = t;
 }
 float Renderer::bloom::getExposure() {
     return epriv::Postprocess_Bloom::Bloom.exposure;
 }
-void Renderer::bloom::setExposure(float e) {
+void Renderer::bloom::setExposure(const float e) {
     epriv::Postprocess_Bloom::Bloom.exposure = e;
 }
 bool Renderer::bloom::enabled() {
@@ -53,10 +53,10 @@ bool Renderer::bloom::enabled() {
 unsigned int Renderer::bloom::getNumPasses() {
     return epriv::Postprocess_Bloom::Bloom.num_passes;
 }
-void Renderer::bloom::setNumPasses(unsigned int p) {
+void Renderer::bloom::setNumPasses(const unsigned int p) {
     epriv::Postprocess_Bloom::Bloom.num_passes = p;
 }
-void Renderer::bloom::enable(bool b) {
+void Renderer::bloom::enable(const bool b) {
     epriv::Postprocess_Bloom::Bloom.bloom = b;
 }
 void Renderer::bloom::disable() {
@@ -68,15 +68,15 @@ float Renderer::bloom::getBlurRadius() {
 float Renderer::bloom::getBlurStrength() {
     return epriv::Postprocess_Bloom::Bloom.blur_strength;
 }
-void Renderer::bloom::setBlurRadius(float r) {
+void Renderer::bloom::setBlurRadius(const float r) {
     epriv::Postprocess_Bloom::Bloom.blur_radius = glm::max(0.0f, r);
 }
-void Renderer::bloom::setBlurStrength(float r) {
+void Renderer::bloom::setBlurStrength(const float r) {
     epriv::Postprocess_Bloom::Bloom.blur_strength = glm::max(0.0f, r);
 }
 float Renderer::bloom::getScale() {
     return epriv::Postprocess_Bloom::Bloom.scale;
 }
-void Renderer::bloom::setScale(float s) {
+void Renderer::bloom::setScale(const float s) {
     epriv::Postprocess_Bloom::Bloom.scale = glm::max(0.0f, s);
 }

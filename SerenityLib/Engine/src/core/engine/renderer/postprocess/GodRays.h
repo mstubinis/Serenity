@@ -27,14 +27,7 @@ namespace epriv {
             Postprocess_GodRays();
             ~Postprocess_GodRays();
 
-            void pass(
-                ShaderP&,
-                GBuffer&,
-                const unsigned int& fboWidth,
-                const unsigned int& fboHeight,
-                const glm::vec2& lightScrnPos,
-                const float& alpha
-            );
+            void pass(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha);
 
             static Postprocess_GodRays GodRays;
     };
@@ -42,24 +35,24 @@ namespace epriv {
 namespace Renderer {
 namespace godRays {
     bool enabled();
-    void enable(bool b);
+    void enable(const bool b);
     void disable();
     float getExposure();
-    void setExposure(float e);
+    void setExposure(const float e);
     float getFactor();
-    void setFactor(float f);
+    void setFactor(const float f);
     float getDecay();
-    void setDecay(float d);
+    void setDecay(const float d);
     float getDensity();
-    void setDensity(float d);
+    void setDensity(const float d);
     float getWeight();
-    void setWeight(float w);
+    void setWeight(const float w);
     unsigned int getSamples();
-    void setSamples(unsigned int s);
+    void setSamples(const unsigned int s);
     float getFOVDegrees();
-    void setFOVDegrees(float d);
+    void setFOVDegrees(const float d);
     float getAlphaFalloff();
-    void setAlphaFalloff(float a);
+    void setAlphaFalloff(const float a);
     void setSun(Entity*);
     Entity* getSun();
 };

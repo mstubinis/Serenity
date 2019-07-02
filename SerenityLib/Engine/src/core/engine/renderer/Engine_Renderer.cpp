@@ -166,15 +166,8 @@ namespace Engine{
 
 class epriv::RenderManager::impl final{
     public:
-        #pragma region FogInfo
-        bool fog;
-        float fog_distNull;
-        float fog_distBlend;
-        glm::vec4 fog_color;
-        #pragma endregion
-
         #pragma region LightingInfo
-        bool lighting;
+        bool  lighting;
         float lighting_gi_contribution_diffuse;
         float lighting_gi_contribution_specular;
         float lighting_gi_contribution_global;
@@ -222,13 +215,6 @@ class epriv::RenderManager::impl final{
         #pragma endregion
 
         void _init(const char* name,uint& w,uint& h){
-            #pragma region FogInfo
-            fog = false;
-            fog_distNull = 5.0f;
-            fog_distBlend = 65.0f;
-            fog_color = glm::vec4(1.0f,1.0f,1.0f,0.95f);
-            #pragma endregion
-
             #pragma region LightingInfo
             lighting = true;
             lighting_gi_contribution_diffuse = 1.0f;
@@ -1839,12 +1825,12 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal]->bind();
 
             sendUniform1Safe("HasBloom",int(epriv::Postprocess_Bloom::Bloom.bloom));
-            sendUniform1Safe("HasFog",int(fog));
+            sendUniform1Safe("HasFog",int(epriv::Postprocess_Fog::Fog.fog));
 
-            if(fog){
-                sendUniform1Safe("FogDistNull",fog_distNull);
-                sendUniform1Safe("FogDistBlend",fog_distBlend);
-                sendUniform4Safe("FogColor",fog_color);
+            if(epriv::Postprocess_Fog::Fog.fog){
+                sendUniform1Safe("FogDistNull", epriv::Postprocess_Fog::Fog.distNull);
+                sendUniform1Safe("FogDistBlend", epriv::Postprocess_Fog::Fog.distBlend);
+                sendUniform4Safe("FogColor", epriv::Postprocess_Fog::Fog.color);
                 sendTextureSafe("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
             }
             sendTextureSafe("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
@@ -2187,15 +2173,6 @@ void Renderer::Settings::General::enable1(bool b) { renderManagerImpl->enabled1 
 void Renderer::Settings::General::disable1() { renderManagerImpl->enabled1 = false; }
 bool Renderer::Settings::General::enabled1() { return renderManagerImpl->enabled1; }
 
-bool Renderer::Settings::Fog::enabled(){ return renderManagerImpl->fog; }
-void Renderer::Settings::Fog::enable(bool b){ renderManagerImpl->fog = b; }
-void Renderer::Settings::Fog::disable(){ renderManagerImpl->fog = false; }
-void Renderer::Settings::Fog::setColor(glm::vec4& color){ Renderer::Settings::Fog::setColor(color.r,color.g,color.b,color.a); }
-void Renderer::Settings::Fog::setColor(float r,float g,float b,float a){ Math::setColor(renderManagerImpl->fog_color,r,g,b,a); }
-void Renderer::Settings::Fog::setNullDistance(float d){ renderManagerImpl->fog_distNull = d; }
-void Renderer::Settings::Fog::setBlendDistance(float d){ renderManagerImpl->fog_distBlend = d; }
-float Renderer::Settings::Fog::getNullDistance(){ return renderManagerImpl->fog_distNull; }
-float Renderer::Settings::Fog::getBlendDistance(){ return renderManagerImpl->fog_distBlend; }
 void Renderer::Settings::Lighting::enable(bool b){ renderManagerImpl->lighting = b; }
 void Renderer::Settings::Lighting::disable(){ renderManagerImpl->lighting = false; }
 float Renderer::Settings::Lighting::getGIContributionGlobal(){ return renderManagerImpl->lighting_gi_contribution_global; }

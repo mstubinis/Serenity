@@ -23,7 +23,7 @@ void epriv::Postprocess_FXAA::pass(ShaderP& program, GBuffer& gbuffer, const uns
     Renderer::sendUniform1("FXAA_REDUCE_MUL", reduce_mul);
     Renderer::sendUniform1("FXAA_SPAN_MAX", span_max);
 
-    Renderer::sendUniform2("invRes", 1.0f / float(fboWidth), 1.0f / float(fboHeight));
+    Renderer::sendUniform2("invRes", 1.0f / static_cast<float>(fboWidth), 1.0f / static_cast<float>(fboHeight));
     Renderer::sendTexture("inTexture", gbuffer.getTexture(sceneTextureEnum), 0);
     Renderer::sendTextureSafe("edgeTexture", gbuffer.getTexture(GBufferType::Misc), 1);
     Renderer::sendTexture("depthTexture", gbuffer.getTexture(GBufferType::Depth), 2);
@@ -31,13 +31,13 @@ void epriv::Postprocess_FXAA::pass(ShaderP& program, GBuffer& gbuffer, const uns
 }
 
 
-void Renderer::fxaa::setReduceMin(float r) { 
+void Renderer::fxaa::setReduceMin(const float r) {
     epriv::Postprocess_FXAA::FXAA.reduce_min = glm::max(0.0f, r);
 }
-void Renderer::fxaa::setReduceMul(float r) { 
+void Renderer::fxaa::setReduceMul(const float r) {
     epriv::Postprocess_FXAA::FXAA.reduce_mul = glm::max(0.0f, r);
 }
-void Renderer::fxaa::setSpanMax(float r) { 
+void Renderer::fxaa::setSpanMax(const float r) {
     epriv::Postprocess_FXAA::FXAA.span_max = glm::max(0.0f, r);
 }
 float Renderer::fxaa::getReduceMin() { 

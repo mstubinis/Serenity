@@ -20,8 +20,8 @@ epriv::Postprocess_HDR::~Postprocess_HDR() {
 void epriv::Postprocess_HDR::pass(ShaderP& program,GBuffer& gbuffer,const unsigned int&fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor) {
     program.bind();
 
-    Renderer::sendUniform4Safe("HDRInfo", exposure, float(hdr), godRaysFactor, float(algorithm));
-    Renderer::sendUniform2Safe("Has", int(godRays), int(lighting));
+    Renderer::sendUniform4Safe("HDRInfo", exposure, static_cast<float>(hdr), godRaysFactor, static_cast<float>(algorithm));
+    Renderer::sendUniform2Safe("Has", static_cast<int>(godRays), static_cast<int>(lighting));
 
     Renderer::sendTextureSafe("lightingBuffer", gbuffer.getTexture(GBufferType::Lighting), 0);
     Renderer::sendTextureSafe("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 1);
@@ -34,7 +34,7 @@ void epriv::Postprocess_HDR::pass(ShaderP& program,GBuffer& gbuffer,const unsign
 bool Engine::Renderer::hdr::enabled() {
     return epriv::Postprocess_HDR::HDR.hdr;
 }
-void Engine::Renderer::hdr::enable(bool b) {
+void Engine::Renderer::hdr::enable(const bool b) {
     epriv::Postprocess_HDR::HDR.hdr = b;
 }
 void Engine::Renderer::hdr::disable() {
@@ -43,9 +43,9 @@ void Engine::Renderer::hdr::disable() {
 float Engine::Renderer::hdr::getExposure() {
     return epriv::Postprocess_HDR::HDR.exposure;
 }
-void Engine::Renderer::hdr::setExposure(float e) {
+void Engine::Renderer::hdr::setExposure(const float e) {
     epriv::Postprocess_HDR::HDR.exposure = e;
 }
-void Engine::Renderer::hdr::setAlgorithm(HDRAlgorithm::Algorithm a) {
+void Engine::Renderer::hdr::setAlgorithm(const HDRAlgorithm::Algorithm a) {
     epriv::Postprocess_HDR::HDR.algorithm = a;
 }

@@ -354,6 +354,9 @@
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\SMAA.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Fog.h">
+      <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -558,6 +561,9 @@
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\SMAA.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Fog.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
   </ItemGroup>

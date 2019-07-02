@@ -28,11 +28,11 @@ namespace epriv {
 namespace Renderer {
 namespace hdr {
     bool enabled();
-    void enable(bool b = true);
+    void enable(const bool b = true);
     void disable();
     float getExposure();
-    void setExposure(float e);
-    void setAlgorithm(HDRAlgorithm::Algorithm a);
+    void setExposure(const float e);
+    void setAlgorithm(const HDRAlgorithm::Algorithm a);
 };
 };
 };
