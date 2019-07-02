@@ -34,7 +34,7 @@ Handle ResourceManifest::StarFlareMaterial;
 std::string ResourceManifest::BasePath;
 
 void ResourceManifest::init(){
-    BasePath = "../";
+    BasePath = "";
 
     Handle skyFromSpaceVert = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
     Handle skyFromSpaceFrag = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
@@ -54,18 +54,18 @@ void ResourceManifest::init(){
 
 
 	/*extras*/
-	NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc").at(0);
-	VenerexMesh = Resources::loadMeshAsync(BasePath + "data/Models/venerex.objcc").at(0);
-	IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.objcc").at(0);
+	//NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc").at(0);
+	//VenerexMesh = Resources::loadMeshAsync(BasePath + "data/Models/venerex.objcc").at(0);
+	//IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.objcc").at(0);
 
 
 
     Engine::epriv::threading::waitForAll();
 
 	/*extras*/
-	NovaMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/nova.dds", BasePath + "data/Textures/nova_Normal.dds", BasePath + "data/Textures/nova_Glow.dds");
-	VenerexMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
-	IntrepidMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/intrepid.dds", BasePath + "data/Textures/intrepid_Normal.png", BasePath + "data/Textures/intrepid_Glow.png");
+	//NovaMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/nova.dds", BasePath + "data/Textures/nova_Normal.dds", BasePath + "data/Textures/nova_Glow.dds");
+	//VenerexMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
+	//IntrepidMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/intrepid.dds", BasePath + "data/Textures/intrepid_Normal.png", BasePath + "data/Textures/intrepid_Glow.png");
 
     StarMaterial = Resources::addMaterial("Star", BasePath + "data/Textures/Planets/Sun.dds","","","");
     ((Material*)StarMaterial.get())->setShadeless(true);

@@ -23,17 +23,17 @@ class ComponentName : public ComponentBaseClass {
     private:
         std::string _data;
     public:
-        ComponentName(Entity&);
-        ComponentName(Entity&, std::string&);
-        ComponentName(Entity&, const char*);
+        ComponentName(const Entity&);
+        ComponentName(const Entity&, const std::string& name);
+        ComponentName(const Entity&, const char* name);
 
         ComponentName(const ComponentName& other) = default;
         ComponentName& operator=(const ComponentName& other) = default;
         ComponentName(ComponentName&& other) noexcept = default;
         ComponentName& operator=(ComponentName&& other) noexcept = default;
 
-        const std::string& name();
-        const uint size();
+        const std::string& name() const;
+        const uint size() const;
 
         ~ComponentName();
 };

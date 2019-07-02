@@ -17,8 +17,8 @@ namespace epriv {
             ECSEntityPool() = default;
             ~ECSEntityPool() = default;
 
-            void destroyFlaggedEntity(uint& i) {
-                const uint& index = i - 1;
+            void destroyFlaggedEntity(const uint& _index) {
+                const uint& index = _index - 1;
                 ++_pool[index].versionID;
                 _freelist.emplace_back(index);
             }
@@ -44,7 +44,7 @@ namespace epriv {
                 }
                 return nullptr;
             }
-            EntityPOD* getEntity(TEntity& _entity) { 
+            EntityPOD* getEntity(const TEntity& _entity) {
                 return getEntity(_entity.data); 
             }
         };

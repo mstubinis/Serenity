@@ -12,166 +12,206 @@ using namespace Engine::epriv;
 using namespace std;
 
 
-void epriv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& cam) {
-    if (cam._type == ComponentCamera::Type::Perspective) {
-        cam._projectionMatrix = glm::perspective(cam._angle, cam._aspectRatio, cam._nearPlane, cam._farPlane);
+void epriv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& p_ComponentCamera) {
+    if (p_ComponentCamera.m_Type == ComponentCamera::Type::Perspective) {
+		p_ComponentCamera.m_ProjectionMatrix = glm::perspective(
+			p_ComponentCamera.m_Angle,
+			p_ComponentCamera.m_AspectRatio,
+			p_ComponentCamera.m_NearPlane,
+			p_ComponentCamera.m_FarPlane
+		);
     }else{
-        cam._projectionMatrix = glm::ortho(cam._left, cam._right, cam._bottom, cam._top, cam._nearPlane, cam._farPlane);
+		p_ComponentCamera.m_ProjectionMatrix = glm::ortho(
+			p_ComponentCamera.m_Left,
+			p_ComponentCamera.m_Right,
+			p_ComponentCamera.m_Bottom,
+			p_ComponentCamera.m_Top,
+			p_ComponentCamera.m_NearPlane,
+			p_ComponentCamera.m_FarPlane
+		);
     }
 }
-glm::mat4 epriv::ComponentCamera_Functions::GetViewNoTranslation(Camera& c) {
-    return c.m_Entity.getComponent<ComponentCamera>()->_viewMatrixNoTranslation;
+const glm::mat4 epriv::ComponentCamera_Functions::GetViewNoTranslation(Camera& p_Camera) {
+    return p_Camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
 }
-glm::mat4 epriv::ComponentCamera_Functions::GetViewInverseNoTranslation(Camera& c) {
-    return glm::inverse(c.m_Entity.getComponent<ComponentCamera>()->_viewMatrixNoTranslation);
+const glm::mat4 epriv::ComponentCamera_Functions::GetViewInverseNoTranslation(Camera& p_Camera) {
+    return glm::inverse(p_Camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation);
 }
-glm::mat4 epriv::ComponentCamera_Functions::GetViewProjectionNoTranslation(Camera& c) {
-    auto& component = *c.m_Entity.getComponent<ComponentCamera>();
-    return component._projectionMatrix * component._viewMatrixNoTranslation;
+const glm::mat4 epriv::ComponentCamera_Functions::GetViewProjectionNoTranslation(Camera& p_Camera) {
+    auto& componentCamera = *p_Camera.m_Entity.getComponent<ComponentCamera>();
+    return componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation;
 }
-glm::mat4 epriv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(Camera& c) {
-    auto& component = *c.m_Entity.getComponent<ComponentCamera>();
-    return glm::inverse(component._projectionMatrix * component._viewMatrixNoTranslation);
+const glm::mat4 epriv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(Camera& p_Camera) {
+    auto& componentCamera = *p_Camera.m_Entity.getComponent<ComponentCamera>();
+    return glm::inverse(componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation);
 }
-glm::vec3 epriv::ComponentCamera_Functions::GetViewVectorNoTranslation(Camera& c) {
-    auto& matrix = c.m_Entity.getComponent<ComponentCamera>()->_viewMatrixNoTranslation;
-    return glm::vec3(matrix[0][2], matrix[1][2], matrix[2][2]);
+const glm::vec3 epriv::ComponentCamera_Functions::GetViewVectorNoTranslation(Camera& p_Camera) {
+    auto& viewMatrixNoTranslation = p_Camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
+    return glm::vec3(viewMatrixNoTranslation[0][2], viewMatrixNoTranslation[1][2], viewMatrixNoTranslation[2][2]);
 }
 
 
 #pragma region Component
 
-ComponentCamera::ComponentCamera(Entity& _e,float angle, float aspectRatio, float nearPlane, float farPlane) : ComponentBaseClass(_e) {
-    _eye                     = glm::vec3(0.0f);
-	_up                      = glm::vec3(0.0f, 1.0f, 0.0f);
-    _angle                   = glm::radians(angle);
-	_aspectRatio             = aspectRatio;
-	_nearPlane               = nearPlane;
-	_farPlane                = farPlane;
-	_bottom                  = 0.0f;
-	_top                     = 0.0f;
-    _projectionMatrix        = glm::perspective(_angle, _aspectRatio, _nearPlane, _farPlane);
-    _viewMatrix              = glm::lookAt(_eye, glm::vec3(0.0f, 0.0f, -1.0f), _up);
-	_viewMatrixNoTranslation = _viewMatrix;
-    _type                    = Type::Perspective;
+ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_AngleDegrees, const float p_AspectRatio, const float p_NearPlane, const float p_FarPlane) : ComponentBaseClass(p_Entity) {
+    m_Eye                     = glm::vec3(0.0f);
+	m_Up                      = glm::vec3(0.0f, 1.0f, 0.0f);
+    m_Angle                   = glm::radians(p_AngleDegrees);
+	m_AspectRatio             = p_AspectRatio;
+	m_NearPlane               = p_NearPlane;
+	m_FarPlane                = p_FarPlane;
+	m_Bottom                  = 0.0f;
+	m_Top                     = 0.0f;
+    m_ProjectionMatrix        = glm::perspective(m_Angle, m_AspectRatio, m_NearPlane, m_FarPlane);
+    m_ViewMatrix              = glm::lookAt(m_Eye, glm::vec3(0.0f, 0.0f, -1.0f), m_Up);
+	m_ViewMatrixNoTranslation = m_ViewMatrix;
+    m_Type                    = Type::Perspective;
 }
-ComponentCamera::ComponentCamera(Entity& _e,float left, float right, float bottom, float top, float nearPlane, float farPlane) : ComponentBaseClass(_e) {
-    _eye                     = glm::vec3(0.0f);
-	_up                      = glm::vec3(0.0f, 1.0f, 0.0f);
-    _left                    = left;
-	_right                   = right;
-	_bottom                  = bottom;
-	_top                     = top;
-	_nearPlane               = nearPlane;
-	_farPlane                = farPlane;
-    _projectionMatrix        = glm::ortho(_left, _right, _bottom, _top, _nearPlane, _farPlane);
-    _viewMatrix              = glm::lookAt(_eye, glm::vec3(0.0f, 0.0f, -1.0f), _up);
-	_viewMatrixNoTranslation = _viewMatrix;
-    _type                    = Type::Orthographic;
+ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_Left, const float p_Right, const float p_Bottom, const float p_Top, const float p_NearPlane, const float p_FarPlane) : ComponentBaseClass(p_Entity) {
+    m_Eye                     = glm::vec3(0.0f);
+	m_Up                      = glm::vec3(0.0f, 1.0f, 0.0f);
+    m_Left                    = p_Left;
+	m_Right                   = p_Right;
+	m_Bottom                  = p_Bottom;
+	m_Top                     = p_Top;
+	m_NearPlane               = p_NearPlane;
+	m_FarPlane                = p_FarPlane;
+    m_ProjectionMatrix        = glm::ortho(m_Left, m_Right, m_Bottom, m_Top, m_NearPlane, m_FarPlane);
+    m_ViewMatrix              = glm::lookAt(m_Eye, glm::vec3(0.0f, 0.0f, -1.0f), m_Up);
+	m_ViewMatrixNoTranslation = m_ViewMatrix;
+    m_Type                    = Type::Orthographic;
 }
 ComponentCamera::~ComponentCamera() {}
-void ComponentCamera::resize(uint width, uint height) {
-    if (_type == Type::Perspective) {
-        _aspectRatio = width / (float)height;
+void ComponentCamera::resize(const uint p_Width, const uint p_Height) {
+    if (m_Type == Type::Perspective) {
+        m_AspectRatio = p_Width / static_cast<float>(p_Height);
     }
     epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
-uint ComponentCamera::pointIntersectTest(glm::vec3& position) {
+const uint ComponentCamera::pointIntersectTest(const glm::vec3& p_Position) const {
     for (int i = 0; i < 6; ++i) {
-        float d = _planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w;
+        float d = m_FrustumPlanes[i].x * p_Position.x + m_FrustumPlanes[i].y * p_Position.y + m_FrustumPlanes[i].z * p_Position.z + m_FrustumPlanes[i].w;
         if (d > 0.0f) return 0; //outside
     }
     return 1;//inside
 }
-uint ComponentCamera::sphereIntersectTest(glm::vec3& position, float radius) {
+const uint ComponentCamera::sphereIntersectTest(const glm::vec3& p_Position, const float& p_Radius) const {
     uint res = 1; //inside the viewing frustum
-    if (radius <= 0.0f) return 0;
+    if (p_Radius <= 0.0f)
+		return 0;
     for (int i = 0; i < 6; ++i) {
-        float d = _planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w;
-        if (d > radius * 2.0f) return 0; //outside the viewing frustrum
-        else if (d > 0.0f) res = 2; //intersecting the viewing plane
+        float d = m_FrustumPlanes[i].x * p_Position.x + m_FrustumPlanes[i].y * p_Position.y + m_FrustumPlanes[i].z * p_Position.z + m_FrustumPlanes[i].w;
+        if (d > p_Radius * 2.0f)
+			return 0; //outside the viewing frustrum
+        else if (d > 0.0f) 
+			res = 2; //intersecting the viewing plane
     }
     return res;
 }
-void ComponentCamera::lookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up) {
-    _eye = eye;
-    _up = up;
-    _viewMatrix = glm::lookAt(_eye, center, _up);
-    _viewMatrixNoTranslation = glm::lookAt(glm::vec3(0.0f), center - _eye, _up);
+void ComponentCamera::lookAt(const glm::vec3& p_Eye, const glm::vec3& p_Center, const glm::vec3& p_Up) {
+    m_Eye                     = p_Eye;
+    m_Up                      = p_Up;
+    m_ViewMatrix              = glm::lookAt(m_Eye, p_Center, m_Up);
+    m_ViewMatrixNoTranslation = glm::lookAt(glm::vec3(0.0f), p_Center - m_Eye, m_Up);
 }
 
-glm::vec3 ComponentCamera::forward() {
+const glm::vec3 ComponentCamera::forward() const {
     return (getViewVector()); //normalize later?
 }
-glm::vec3 ComponentCamera::right() {
+const glm::vec3 ComponentCamera::right() const {
     return (glm::cross(forward(), up())); //normalize later?
 }
-glm::vec3 ComponentCamera::up() {
-    return (_up); //normalize later?
+const glm::vec3 ComponentCamera::up() const {
+    return (m_Up); //normalize later?
 }
 
 
-glm::mat4 ComponentCamera::getProjection() { return _projectionMatrix; }
-glm::mat4 ComponentCamera::getProjectionInverse() { return glm::inverse(_projectionMatrix); }
-glm::mat4 ComponentCamera::getView() { return _viewMatrix; }
-glm::mat4 ComponentCamera::getViewInverse() { return glm::inverse(_viewMatrix); }
-glm::mat4 ComponentCamera::getViewProjection() { return _projectionMatrix * _viewMatrix; }
-glm::mat4 ComponentCamera::getViewProjectionInverse() { return glm::inverse(_projectionMatrix * _viewMatrix); }
-glm::vec3 ComponentCamera::getViewVector() { return glm::vec3(_viewMatrix[0][2], _viewMatrix[1][2], _viewMatrix[2][2]); }
-float ComponentCamera::getAngle() { return _angle; }
-float ComponentCamera::getAspect() { return _aspectRatio; }
-float ComponentCamera::getNear() { return _nearPlane; }
-float ComponentCamera::getFar() { return _farPlane; }
-void ComponentCamera::setAngle(float a) { _angle = a; epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setAspect(float a) { _aspectRatio = a; epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setNear(float n) { _nearPlane = n; epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); }
-void ComponentCamera::setFar(float f) { _farPlane = f; epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); }
+const glm::mat4 ComponentCamera::getProjection() const {
+	return m_ProjectionMatrix; 
+}
+const glm::mat4 ComponentCamera::getProjectionInverse() const {
+	return glm::inverse(m_ProjectionMatrix); 
+}
+const glm::mat4 ComponentCamera::getView() const {
+	return m_ViewMatrix; 
+}
+const glm::mat4 ComponentCamera::getViewInverse() const {
+	return glm::inverse(m_ViewMatrix); 
+}
+const glm::mat4 ComponentCamera::getViewProjection() const {
+	return m_ProjectionMatrix * m_ViewMatrix; 
+}
+const glm::mat4 ComponentCamera::getViewProjectionInverse() const {
+	return glm::inverse(m_ProjectionMatrix * m_ViewMatrix); 
+}
+const glm::vec3 ComponentCamera::getViewVector() const {
+	return glm::vec3(m_ViewMatrix[0][2], m_ViewMatrix[1][2], m_ViewMatrix[2][2]);
+}
+const float ComponentCamera::getAngle() const {
+	return m_Angle; 
+}
+const float ComponentCamera::getAspect() const {
+	return m_AspectRatio; 
+}
+const float ComponentCamera::getNear() const {
+	return m_NearPlane; 
+}
+const float ComponentCamera::getFar() const {
+	return m_FarPlane; 
+}
+void ComponentCamera::setAngle(const float p_Angle) { 
+	m_Angle = p_Angle;
+	epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+}
+void ComponentCamera::setAspect(const float p_AspectRatio) {
+	m_AspectRatio = p_AspectRatio;
+	epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+}
+void ComponentCamera::setNear(const float p_NearPlane) { 
+	m_NearPlane = p_NearPlane;
+	epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+}
+void ComponentCamera::setFar(const float p_FarPlane) { 
+	m_FarPlane = p_FarPlane;
+	epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+}
 
 #pragma endregion
 
 #pragma region System
 
 struct epriv::ComponentCamera_UpdateFunction final {
-    static void _defaultUpdate(vector<uint>& _vec, vector<ComponentCamera>& _components, const double& dt) {
-        for (uint j = 0; j < _vec.size(); ++j) {
-            ComponentCamera& b = _components[_vec[j]];
-            Math::extractViewFrustumPlanesHartmannGribbs(b._projectionMatrix * b._viewMatrix, b._planes);//update view frustrum 
+    static void _defaultUpdate(const vector<uint>& p_Vector, vector<ComponentCamera>& p_ComponentCameras, const double& dt) {
+        for (uint j = 0; j < p_Vector.size(); ++j) {
+            ComponentCamera& b = p_ComponentCameras[p_Vector[j]];
+            Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update view frustrum 
         }
     }
-    void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
-        auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)_componentPool;
-        auto& components = pool.pool();
-
-        auto split = epriv::threading::splitVectorIndices(components);
+    void operator()(void* p_ComponentPool, const double& p_Dt, Scene& p_Scene) const {
+		auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)p_ComponentPool;
+		auto& components = pool.pool();
+		auto split = epriv::threading::splitVectorIndices(components);
         for (auto& vec : split) {
-            epriv::threading::addJobRef(_defaultUpdate, vec, components, dt);
+            epriv::threading::addJobRef(_defaultUpdate, vec, components, p_Dt);
         }
         epriv::threading::waitForAll();
     }
 };
-struct epriv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
-
+struct epriv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* p_ComponentCamera, Entity& p_Entity) const {
 }};
-struct epriv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
+struct epriv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* p_ComponentPool, Entity& p_Entity, Scene& p_Scene) const {
 }};
-struct epriv::ComponentCamera_SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
-
+struct epriv::ComponentCamera_SceneEnteredFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
 }};
-struct epriv::ComponentCamera_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
-
+struct epriv::ComponentCamera_SceneLeftFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
 }};
 
 ComponentCamera_System::ComponentCamera_System() {
-    setUpdateFunction(
-        ComponentCamera_UpdateFunction());
-    setOnComponentAddedToEntityFunction(
-        ComponentCamera_ComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(
-        ComponentCamera_EntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(
-        ComponentCamera_SceneEnteredFunction());
-    setOnSceneLeftFunction(
-        ComponentCamera_SceneLeftFunction());
+    setUpdateFunction(ComponentCamera_UpdateFunction());
+    setOnComponentAddedToEntityFunction(ComponentCamera_ComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(ComponentCamera_EntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(ComponentCamera_SceneEnteredFunction());
+    setOnSceneLeftFunction(ComponentCamera_SceneLeftFunction());
 }
 
 #pragma endregion

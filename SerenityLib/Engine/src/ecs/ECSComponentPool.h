@@ -21,21 +21,21 @@ namespace epriv {
 
             ~ECSComponentPool() = default;
 
-            template<typename... ARGS> inline TComponent* addComponent(TEntity& _entity, ARGS&&... _args) {
+            template<typename... ARGS> inline TComponent* addComponent(const TEntity& _entity, ARGS&&... _args) {
 				const EntityDataRequest dataRequest(_entity);
                 return super::_add(dataRequest.ID, const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
             }
-            inline bool removeComponent(TEntity& _entity) {
+            inline bool removeComponent(const TEntity& _entity) {
 				const EntityDataRequest dataRequest(_entity);
                 return super::_remove(dataRequest.ID);
             }
             inline bool removeComponent(const EntityDataRequest& dataRequest) {
                 return super::_remove(dataRequest.ID);
             }
-            inline bool removeComponent(uint& _index) { 
+            inline bool removeComponent(const uint& _index) {
                 return super::_remove(_index); 
             }
-            inline TComponent* getComponent(TEntity& _entity) {
+            inline TComponent* getComponent(const TEntity& _entity) {
 				const EntityDataRequest dataRequest(_entity);
                 return super::_get(dataRequest.ID);
             }

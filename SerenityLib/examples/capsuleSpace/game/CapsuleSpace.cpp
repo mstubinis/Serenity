@@ -162,10 +162,12 @@ CapsuleSpace::CapsuleSpace():Scene("CapsuleSpace"){
 
         glm::vec3 pos = glm::vec3(x,y,step) * glm::vec3(50);
 
-        bool spawnLight = false;
-        if(i % 2 == 0){
-            spawnLight = true;
-        }
+		bool spawnLight = true;
+
+        //bool spawnLight = false;
+        //if(i % 2 == 0){
+        //    spawnLight = true;
+        //}
         m_CapsuleStars.push_back(new CapsuleStar(50,pos,this,spawnLight));
         step -= 6.0f;
     }

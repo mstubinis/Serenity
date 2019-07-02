@@ -9,8 +9,12 @@
 
 typedef boost::typeindex::type_index     boost_type_index;
 
-template <typename T> const boost_type_index type_ID() { return boost_type_index(boost::typeindex::type_id<T>()); }
-template <typename T> const boost_type_index type_ID(T* t) { return boost_type_index(boost::typeindex::type_id_runtime(*t)); }
+template <typename T> const boost_type_index type_ID() { 
+	return boost_type_index(boost::typeindex::type_id<T>()); 
+}
+template <typename T> const boost_type_index type_ID(T* t) { 
+	return boost_type_index(boost::typeindex::type_id_runtime(*t)); 
+}
 
 namespace Engine {
 namespace epriv {
@@ -25,7 +29,7 @@ namespace epriv {
                 slotMap.clear(); 
             }
             template <typename T> static const uint type_slot() {
-                const auto&  type = type_ID<T>();
+                const auto& type = type_ID<T>();
                 if (!slotMap.count(type)) { 
                     slotMap.emplace(type, lastIndex); 
                     ++lastIndex; 
@@ -40,6 +44,14 @@ namespace epriv {
                 }
                 return slotMap.at(type);
             }
+			template <typename T> static const uint type_slot_fast() {
+				const auto& type = type_ID<T>();
+				return slotMap.at(type);
+			}
+			template <typename T> static const uint type_slot_fast(T* t) {
+				const auto& type = type_ID(t);
+				return slotMap.at(type);
+			}
         };
 };
 };

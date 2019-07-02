@@ -28,41 +28,34 @@ HUD::HUD() {
 HUD::~HUD() {
 }
 
-uint _count = 0;
+int _count = 0;
 void HUD::update(const double& dt) {
     if (Engine::isKeyDownOnce(KeyboardKey::LeftAlt, KeyboardKey::X) || Engine::isKeyDownOnce(KeyboardKey::RightAlt, KeyboardKey::X)) {
         m_Active = !m_Active;
     }
     SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
+	const auto& planets = scene->getPlanets();
+	std::vector<Planet*> planetVector;
+	planetVector.reserve(planets.size());
+
+	for (auto& p : planets) {
+		planetVector.push_back(p.second);
+	}
     if (Engine::isKeyDownOnce(KeyboardKey::Comma)) {
-        const auto& planets = scene->getPlanets();
-        uint a = 0;
-        for (auto& p : planets) {
-            if (a == _count) {
-                scene->getPlayer()->setTarget(p.second->entity().getComponent<ComponentName>()->name());
-                break;
-            }
-            ++a;
-        }
+        scene->getPlayer()->setTarget(planetVector[_count]->entity().getComponent<ComponentName>()->name());
         ++_count;
-        if (_count > scene->getPlanets().size() - 1) { _count = 0; }
-    }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
-        const auto& planets = scene->getPlanets();
-        uint a = 0;
-        for (auto& p : planets) {
-            if (a == _count) {
-                scene->getPlayer()->setTarget(p.second->entity().getComponent<ComponentName>()->name());
-                break;
-            }
-            ++a;
-        }
+        if (_count > scene->getPlanets().size() - 1) { 
+			_count = 0; 
+		}
+    }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) { 
+		scene->getPlayer()->setTarget(planetVector[_count]->entity().getComponent<ComponentName>()->name());
         --_count;
-        if (_count <= 0) { _count = scene->getPlanets().size() - 1; }
+        if (_count <= 0) { 
+			_count = scene->getPlanets().size() - 1; 
+		}
     }
 }
 void HUD::render() {
-    if (!m_Active) return;
-
     //render hud stuff
     SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
     Ship* player = scene->getPlayer();
@@ -145,6 +138,8 @@ void HUD::render() {
     }
 
 #pragma endregion
+
+	if (!m_Active) return;
 
 #pragma region DrawDebugStuff
     font->renderText(Engine::Data::reportTime() +

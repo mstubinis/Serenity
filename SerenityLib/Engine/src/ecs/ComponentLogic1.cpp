@@ -62,16 +62,11 @@ struct epriv::ComponentLogic1_SceneLeftFunction final {void operator()(void* _co
 }};
 
 ComponentLogic1_System::ComponentLogic1_System() {
-    setUpdateFunction(
-        ComponentLogic1_UpdateFunction());
-    setOnComponentAddedToEntityFunction(
-        ComponentLogic1_ComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(
-        ComponentLogic1_EntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(
-        ComponentLogic1_SceneEnteredFunction());
-    setOnSceneLeftFunction(
-        ComponentLogic1_SceneLeftFunction());
+    setUpdateFunction(ComponentLogic1_UpdateFunction());
+    setOnComponentAddedToEntityFunction(ComponentLogic1_ComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(ComponentLogic1_EntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(ComponentLogic1_SceneEnteredFunction());
+    setOnSceneLeftFunction(ComponentLogic1_SceneLeftFunction());
 }
 
 #pragma endregion

@@ -6,7 +6,7 @@ using namespace std;
 Entity Entity::_null = Entity(0,0,0);
 
 Scene& Entity::scene() {
-    EntityDataRequest dataRequest(*this);
+	const EntityDataRequest dataRequest(*this);
     return epriv::Core::m_Engine->m_ResourceManager._getSceneByID(dataRequest.sceneID);
 }
 void Entity::move(const Scene& _scene) {

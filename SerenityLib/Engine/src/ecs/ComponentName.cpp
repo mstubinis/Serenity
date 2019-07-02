@@ -5,20 +5,20 @@ using namespace Engine::epriv;
 using namespace std;
 
 #pragma region Component
-ComponentName::ComponentName(Entity& _entity) : ComponentBaseClass(_entity){
+ComponentName::ComponentName(const Entity& _entity) : ComponentBaseClass(_entity){
     _data = "";
 }
-ComponentName::ComponentName(Entity& _entity, string& _name) : ComponentBaseClass(_entity) {
+ComponentName::ComponentName(const Entity& _entity, const string& _name) : ComponentBaseClass(_entity) {
     _data = _name;
 }
-ComponentName::ComponentName(Entity& _entity, const char* _name) : ComponentBaseClass(_entity) {
+ComponentName::ComponentName(const Entity& _entity, const char* _name) : ComponentBaseClass(_entity) {
     _data = _name;
 }
 ComponentName::~ComponentName() {
     _data = "";
 }
-const string& ComponentName::name() { return _data; }
-const uint ComponentName::size() { return _data.size(); }
+const string& ComponentName::name() const { return _data; }
+const uint ComponentName::size() const { return _data.size(); }
 #pragma endregion
 
 #pragma region System
@@ -35,16 +35,11 @@ struct epriv::ComponentName_SceneLeftFunction final {void operator()(void* _comp
 }};
 
 ComponentName_System::ComponentName_System() {
-    setUpdateFunction(
-        ComponentName_UpdateFunction());
-    setOnComponentAddedToEntityFunction(
-        ComponentName_ComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(
-        ComponentName_EntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(
-        ComponentName_SceneEnteredFunction());
-    setOnSceneLeftFunction(
-        ComponentName_SceneLeftFunction());
+    setUpdateFunction(ComponentName_UpdateFunction());
+    setOnComponentAddedToEntityFunction(ComponentName_ComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(ComponentName_EntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(ComponentName_SceneEnteredFunction());
+    setOnSceneLeftFunction(ComponentName_SceneLeftFunction());
 }
 
 

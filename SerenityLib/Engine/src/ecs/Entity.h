@@ -17,7 +17,7 @@ struct Entity{
     inline Entity() { 
         data = 0; 
     }
-    inline Entity(uint _id, uint _sceneID, uint _versionID) { 
+    inline Entity(const uint _id, const uint _sceneID, const uint _versionID) {
         process(_id, _sceneID, _versionID); 
     }
     ~Entity() {

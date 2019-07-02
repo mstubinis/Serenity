@@ -59,9 +59,9 @@ void SolarSystem::_loadFromFile(string filename){
             }else if(count == 3){//this line has the system's skybox's number of flares
 				box1 = new GameSkybox(skyboxDirectory, boost::lexical_cast<uint>(line), this);
 				setSkybox(box1);
-				box2 = new GameSkybox(ResourceManifest::BasePath + "data/Textures/Skyboxes/Skybox0/Skybox.dds", boost::lexical_cast<uint>(line), this);
-				box3 = new GameSkybox(ResourceManifest::BasePath + "data/Textures/Skyboxes/Skybox1/Skybox.dds", boost::lexical_cast<uint>(line), this);
-				box4 = new GameSkybox(ResourceManifest::BasePath + "data/Textures/Skyboxes/Skybox2/Skybox.dds", boost::lexical_cast<uint>(line), this);
+				//box2 = new GameSkybox(ResourceManifest::BasePath + "data/Textures/Skyboxes/Skybox0/Skybox.dds", boost::lexical_cast<uint>(line), this);
+				//box3 = new GameSkybox(ResourceManifest::BasePath + "data/Textures/Skyboxes/Skybox1/Skybox.dds", boost::lexical_cast<uint>(line), this);
+				//box4 = new GameSkybox(ResourceManifest::BasePath + "data/Textures/Skyboxes/Skybox2/Skybox.dds", boost::lexical_cast<uint>(line), this);
 				
             }else if(count == 4){//this line has the system's GI contribution
                 string token;
@@ -218,7 +218,7 @@ void SolarSystem::_loadFromFile(string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    setPlayer(new Ship(ResourceManifest::NovaMesh,ResourceManifest::NovaMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f), CollisionType::ConvexHull,this));
+                    setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f), CollisionType::ConvexHull,this));
                     GameCamera* playerCamera = (GameCamera*)getActiveCamera();
                     playerCamera->follow(getPlayer()->entity());
                 }else if(line[0] == 'R'){//Rings
@@ -254,16 +254,16 @@ void SolarSystem::_loadFromFile(string filename){
 }
 void SolarSystem::update(const double& dt){
 	if (Engine::isKeyDownOnce(KeyboardKey::K)) {
-		setSkybox(box1);
+		//setSkybox(box1);
 	}
 	if (Engine::isKeyDownOnce(KeyboardKey::J)) {
-		setSkybox(box2);
+		//setSkybox(box2);
 	}
 	if (Engine::isKeyDownOnce(KeyboardKey::H)) {
-		setSkybox(box3);
+		//setSkybox(box3);
 	}
 	if (Engine::isKeyDownOnce(KeyboardKey::G)) {
-		setSkybox(box4);
+		//setSkybox(box4);
 	}
     Scene::update(dt);
 }

@@ -31,9 +31,18 @@ class ComponentLogic3 : public ComponentBaseClass {
         void*                               _userPtr;
         boost::function<void(const float&)> _functor;
     public:
-        ComponentLogic3(Entity& _e) : ComponentBaseClass(_e) { _userPtr = nullptr; setFunctor(Engine::epriv::ComponentLogic3_EmptyFunctor()); }
-        template<typename T> ComponentLogic3(Entity& _e, const T& functor) : ComponentBaseClass(_e) { _userPtr = nullptr; setFunctor(functor); }
-        template<typename T,typename V> ComponentLogic3(Entity& _e, const T& functor, V* userPointer) : ComponentBaseClass(_e) { _userPtr = userPointer; setFunctor(functor); }
+        ComponentLogic3(const Entity& _e) : ComponentBaseClass(_e) { 
+			_userPtr = nullptr;
+			setFunctor(Engine::epriv::ComponentLogic3_EmptyFunctor()); 
+		}
+        template<typename T> ComponentLogic3(const Entity& _e, const T& functor) : ComponentBaseClass(_e) { 
+			_userPtr = nullptr;
+			setFunctor(functor); 
+		}
+        template<typename T,typename V> ComponentLogic3(const Entity& _e, const T& functor, V* userPointer) : ComponentBaseClass(_e) { 
+			_userPtr = userPointer;
+			setFunctor(functor); 
+		}
 
         ComponentLogic3(const ComponentLogic3& other);
         ComponentLogic3& operator=(const ComponentLogic3& other);

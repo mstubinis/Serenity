@@ -97,15 +97,20 @@ namespace epriv {
             CPoolType& componentPool;
 
             void Bind_SUF(const FunctorUpdate& _f) { 
-                super::_SUF = boost::bind(_f.functor, _1, _2, _3); }
+                super::_SUF = boost::bind(_f.functor, _1, _2, _3); 
+			}
             void Bind_CAE(const FunctorComponent& _f) {
-                super::_CAE = boost::bind(_f.functor, _1, _2); }
+                super::_CAE = boost::bind(_f.functor, _1, _2);
+			}
             void Bind_EAS(const FunctorEntity& _f) {
-                super::_EAS = boost::bind(_f.functor, _1, _2, _3); }
+                super::_EAS = boost::bind(_f.functor, _1, _2, _3); 
+			}
             void Bind_SEF(const FunctorScene& _f) {
-                super::_SEF = boost::bind(_f.functor, _1, _2); }
+                super::_SEF = boost::bind(_f.functor, _1, _2); 
+			}
             void Bind_SLF(const FunctorScene& _f) {
-                super::_SLF = boost::bind(_f.functor, _1, _2); }
+                super::_SLF = boost::bind(_f.functor, _1, _2); 
+			}
         public:
             ECSSystem() = default;
             ECSSystem(const ECSSystemCI& _systemCI, ECS<TEntity>& _ecs):componentPool(_ecs.template getPool<TComponent>()){
@@ -123,15 +128,20 @@ namespace epriv {
             ECSSystem& operator=(ECSSystem&& other) noexcept = delete;
 
             void update(const double& dt, Scene& _scene) { 
-                super::_SUF(&componentPool, dt, _scene); }
+                super::_SUF(&componentPool, dt, _scene); 
+			}
             void onComponentAddedToEntity(void* _component, TEntity& _entity) { 
-                super::_CAE(_component, _entity); }
+                super::_CAE(_component, _entity); 
+			}
             void onEntityAddedToScene(TEntity& _entity, Scene& _scene) { 
-                super::_EAS(&componentPool, _entity, _scene); }
+                super::_EAS(&componentPool, _entity, _scene); 
+			}
             void onSceneEntered(Scene& _scene) { 
-                super::_SEF(&componentPool, _scene); }
+                super::_SEF(&componentPool, _scene); 
+			}
             void onSceneLeft(Scene& _scene) { 
-                super::_SLF(&componentPool, _scene); }
+                super::_SLF(&componentPool, _scene); 
+			}
     };
 };
 };

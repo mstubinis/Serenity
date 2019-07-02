@@ -36,7 +36,7 @@ namespace epriv {
         private:
             std::vector<TItem> _dense;
         public:
-            std::vector<TItem>& pool() { return _dense; }
+			std::vector<TItem>& pool() { return _dense; }
 
             SparseSet() = default;
             SparseSet(const SparseSet& other) noexcept = delete;

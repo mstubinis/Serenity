@@ -27,46 +27,46 @@ ComponentBody::PhysicsData::PhysicsData(){
     rigidBody = nullptr;
     collision = nullptr;
 }
-ComponentBody::PhysicsData::PhysicsData(const ComponentBody::PhysicsData& other){
+ComponentBody::PhysicsData::PhysicsData(const ComponentBody::PhysicsData& p_Other){
     //copy constructor
-    mass = other.mass;
-    motionState = other.motionState;
-    rigidBody = other.rigidBody;
+    mass = p_Other.mass;
+    motionState = p_Other.motionState;
+    rigidBody = p_Other.rigidBody;
 
-    if (other.collision) collision = new Collision(*other.collision);
-    else                 collision = nullptr;
+    if (p_Other.collision) collision = new Collision(*p_Other.collision);
+    else                   collision = nullptr;
 
-    if (other.rigidBody) rigidBody = new btRigidBody(*other.rigidBody);
-    else                 rigidBody = nullptr;
+    if (p_Other.rigidBody) rigidBody = new btRigidBody(*p_Other.rigidBody);
+    else                   rigidBody = nullptr;
 }
-ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(const ComponentBody::PhysicsData& other) {
+ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(const ComponentBody::PhysicsData& p_Other) {
     //copy assignment
-    if (&other == this)
+    if (&p_Other == this)
         return *this;
-    ComponentBody::PhysicsData tmp(other); // re-use copy-constructor
-    *this = std::move(tmp);                // re-use move-assignment
+    ComponentBody::PhysicsData tmp(p_Other); // re-use copy-constructor
+    *this = std::move(tmp);                  // re-use move-assignment
     return *this;
 }
-ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& other) noexcept {
+ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& p_Other) noexcept {
     //move constructor
     using std::swap;
-    swap(mass, other.mass);
-    swap(motionState, other.motionState);
+    swap(mass, p_Other.mass);
+    swap(motionState, p_Other.motionState);
 
-    if (other.collision) swap(collision, other.collision);
-    else                 collision = nullptr;
-    if (other.rigidBody) swap(rigidBody, other.rigidBody);
-    else                 rigidBody = nullptr;
+    if (p_Other.collision) swap(collision, p_Other.collision);
+    else                   collision = nullptr;
+    if (p_Other.rigidBody) swap(rigidBody, p_Other.rigidBody);
+    else                   rigidBody = nullptr;
 }
-ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody::PhysicsData&& other) noexcept {
+ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody::PhysicsData&& p_Other) noexcept {
     //move assignment
     using std::swap;
-    swap(mass, other.mass);
-    swap(motionState, other.motionState);
-    if (other.collision) swap(collision, other.collision);
-    else                 collision = nullptr;
-    if (other.rigidBody) swap(rigidBody, other.rigidBody);
-    else                 rigidBody = nullptr;
+    swap(mass, p_Other.mass);
+    swap(motionState, p_Other.motionState);
+    if (p_Other.collision) swap(collision, p_Other.collision);
+    else                   collision = nullptr;
+    if (p_Other.rigidBody) swap(rigidBody, p_Other.rigidBody);
+    else                   rigidBody = nullptr;
     return *this;
 }
 ComponentBody::PhysicsData::~PhysicsData() {
@@ -86,18 +86,18 @@ ComponentBody::NormalData::NormalData(){
     rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     modelMatrix = glm::mat4(1.0f);
 }
-ComponentBody::NormalData::NormalData(const ComponentBody::NormalData& other) {
+ComponentBody::NormalData::NormalData(const ComponentBody::NormalData& p_Other) {
     //copy constructor
-    position = other.position;
-    rotation = other.rotation;
-    scale = other.scale;
-    modelMatrix = other.modelMatrix;
+    position = p_Other.position;
+    rotation = p_Other.rotation;
+    scale = p_Other.scale;
+    modelMatrix = p_Other.modelMatrix;
 }
-ComponentBody::NormalData& ComponentBody::NormalData::operator=(const ComponentBody::NormalData& other) {
+ComponentBody::NormalData& ComponentBody::NormalData::operator=(const ComponentBody::NormalData& p_Other) {
     //copy assignment
-    if (&other == this)
+    if (&p_Other == this)
         return *this;
-    ComponentBody::NormalData tmp(other); // re-use copy-constructor
+    ComponentBody::NormalData tmp(p_Other); // re-use copy-constructor
     *this = std::move(tmp);               // re-use move-assignment
     return *this;
 }
@@ -109,13 +109,13 @@ ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcep
     swap(scale, other.scale);
     swap(modelMatrix, other.modelMatrix);
 }
-ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::NormalData&& other) noexcept {
+ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::NormalData&& p_Other) noexcept {
     //move assignment
     using std::swap;
-    swap(position, other.position);
-    swap(rotation, other.rotation);
-    swap(scale, other.scale);
-    swap(modelMatrix, other.modelMatrix);
+    swap(position, p_Other.position);
+    swap(rotation, p_Other.rotation);
+    swap(scale, p_Other.scale);
+    swap(modelMatrix, p_Other.modelMatrix);
     return *this;
 }
 ComponentBody::NormalData::~NormalData() {
@@ -127,48 +127,50 @@ ComponentBody::NormalData::~NormalData() {
 
 #pragma region Component
 
-ComponentBody::ComponentBody(Entity& _e) : ComponentBaseClass(_e) {
+ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Entity) {
     data.p = nullptr;
-    _physics = 0;
+    m_Physics = 0;
     data.n = new NormalData();
     auto& normalData = *data.n;
     normalData.position = glm::vec3(0.0f,0.0f,0.0f);
     normalData.scale = glm::vec3(1.0f,1.0f,1.0f);
     normalData.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     normalData.modelMatrix = glm::mat4(1.0f);
-    Math::recalculateForwardRightUp(normalData.rotation, _forward, _right, _up);
+    Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
 }
-ComponentBody::ComponentBody(Entity& _e,CollisionType::Type _collisionType) : ComponentBaseClass(_e) {
+ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p_CollisionType) : ComponentBaseClass(p_Entity) {
     data.n = nullptr;
-    _physics = 1;
+    m_Physics = 1;
     data.p = new PhysicsData();
     auto& physicsData = *data.p;
-    _forward = glm::vec3(0.0f, 0.0f, -1.0f);  _right = glm::vec3(1.0f, 0.0f, 0.0f);  _up = glm::vec3(0.0f, 1.0f, 0.0f);
+    m_Forward = glm::vec3(0.0f, 0.0f, -1.0f);
+	m_Right = glm::vec3(1.0f, 0.0f, 0.0f);
+	m_Up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     physicsData.motionState = btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1)));
-    float _mass = 1.0f;
-    physicsData.mass = _mass;
+    float mass = 1.0f;
+    physicsData.mass = mass;
 
-    setCollision(_collisionType, _mass);
+    setCollision(p_CollisionType, mass);
 
-    setMass(_mass);
-    Collision& collision_ = *physicsData.collision;
-    btCollisionShape* _shape = collision_.getShape();
-    const btVector3& _inertia = collision_.getInertia();
+    setMass(mass);
+    Collision& collision = *physicsData.collision;
+    btCollisionShape* shape = collision.getShape();
+    const btVector3& inertia = collision.getInertia();
 
-    btRigidBody::btRigidBodyConstructionInfo CI(_mass, &physicsData.motionState, _shape, _inertia);
+    btRigidBody::btRigidBodyConstructionInfo CI(mass, &physicsData.motionState, shape, inertia);
     physicsData.rigidBody = new btRigidBody(CI);
     auto& rigidBody = *physicsData.rigidBody;
     rigidBody.setSleepingThresholds(0.015f, 0.015f);
     rigidBody.setFriction(0.3f);
     rigidBody.setDamping(0.1f, 0.4f);//air friction 
-    rigidBody.setMassProps(_mass, _inertia);
+    rigidBody.setMassProps(mass, inertia);
     rigidBody.updateInertiaTensor();
     rigidBody.setUserPointer(this);
 }
 ComponentBody::~ComponentBody() {
     //destructor
-    if (_physics) {
+    if (m_Physics) {
         if(data.p)
             Physics::removeRigidBody(data.p->rigidBody);
         SAFE_DELETE(data.p);
@@ -177,98 +179,96 @@ ComponentBody::~ComponentBody() {
     }
 }
 
-ComponentBody::ComponentBody(const ComponentBody& other) {
+ComponentBody::ComponentBody(const ComponentBody& p_Other) {
     //copy constructor
     //Might need more testing here...
-	_physics = other._physics;
-    _forward = other._forward;
-    _right = other._right;
-    _up = other._up;
-    owner.data = other.owner.data;
-    if (other._physics) {
-        if (other.data.p) data.p = new PhysicsData(*other.data.p);
-        else              data.p = nullptr;
+	m_Physics = p_Other.m_Physics;
+    m_Forward = p_Other.m_Forward;
+    m_Right = p_Other.m_Right;
+    m_Up = p_Other.m_Up;
+    owner.data = p_Other.owner.data;
+    if (p_Other.m_Physics) {
+        if (p_Other.data.p) data.p = new PhysicsData(*p_Other.data.p);
+        else                data.p = nullptr;
     }
     else {
-        if (other.data.n) data.n = new NormalData(*other.data.n);
-        else              data.n = nullptr;
+        if (p_Other.data.n) data.n = new NormalData(*p_Other.data.n);
+        else                data.n = nullptr;
     }
 }
-ComponentBody& ComponentBody::operator=(const ComponentBody& other) {
+ComponentBody& ComponentBody::operator=(const ComponentBody& p_Other) {
     //copy assignment
     //Might need more testing here...
-    ComponentBody tmp(other); // re-use copy-constructor
+    ComponentBody tmp(p_Other); // re-use copy-constructor
     *this = std::move(tmp);   // re-use move-assignment
     return *this;
 }
-ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
+ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
     //move constructor
-    //this seems OK
     using std::swap;
-    _physics = other._physics;
-    swap(_forward, other._forward);
-    swap(_right, other._right);
-    swap(_up, other._up);
-    swap(owner.data, other.owner.data);
-    if (other._physics) {
-        swap(data.p, other.data.p);
-        other.data.p = nullptr;
+    m_Physics = p_Other.m_Physics;
+    swap(m_Forward, p_Other.m_Forward);
+    swap(m_Right, p_Other.m_Right);
+    swap(m_Up, p_Other.m_Up);
+    swap(owner.data, p_Other.owner.data);
+    if (p_Other.m_Physics) {
+        swap(data.p, p_Other.data.p);
+		p_Other.data.p = nullptr;
     }else {
-        swap(data.n, other.data.n);
-        other.data.n = nullptr;
+        swap(data.n, p_Other.data.n);
+		p_Other.data.n = nullptr;
     }
 }
-ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
+ComponentBody& ComponentBody::operator=(ComponentBody&& p_Other) noexcept {
     //move assignment
-    //this seems OK
     using std::swap;
-    _physics = other._physics;
-    swap(_forward, other._forward);
-    swap(_right, other._right);
-    swap(_up, other._up);
-    swap(owner.data, other.owner.data);
-    if (other._physics) {
-        swap(data.p, other.data.p);
+	m_Physics = p_Other.m_Physics;
+    swap(m_Forward, p_Other.m_Forward);
+    swap(m_Right, p_Other.m_Right);
+    swap(m_Up, p_Other.m_Up);
+    swap(owner.data, p_Other.owner.data);
+    if (p_Other.m_Physics) {
+        swap(data.p, p_Other.data.p);
     }else{
-        swap(data.n, other.data.n);
+        swap(data.n, p_Other.data.n);
     }
     return *this;
 }
 
-float ComponentBody::getDistance(Entity& other) {
-    const glm::vec3& pos = other.getComponent<ComponentBody>()->position();
-    return glm::distance(this->position(), pos);
+float ComponentBody::getDistance(const Entity& p_Other) {
+    const glm::vec3& other_position = const_cast<Entity&>(p_Other).getComponent<ComponentBody>()->position();
+    return glm::distance(position(), other_position);
 }
-unsigned long long ComponentBody::getDistanceLL(Entity& other) {
-    const glm::vec3& pos = other.getComponent<ComponentBody>()->position();
-    return (unsigned long long)glm::distance(this->position(), pos);
+unsigned long long ComponentBody::getDistanceLL(const Entity& p_Other) {
+    const glm::vec3& other_position = const_cast<Entity&>(p_Other).getComponent<ComponentBody>()->position();
+    return (unsigned long long)glm::distance(position(), other_position);
 }
-void ComponentBody::alignTo(glm::vec3& direction, float speed) {
-    if (_physics) {
+void ComponentBody::alignTo(const glm::vec3& p_Direction, const float p_Speed) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         //recheck this
         btTransform tr;
         rigidBody.getMotionState()->getWorldTransform(tr);
         //Math::alignTo(Math::btToGLMQuat(tr.getRotation()),direction,speed);
-        Math::recalculateForwardRightUp(rigidBody, _forward, _right, _up);
+        Math::recalculateForwardRightUp(rigidBody, m_Forward, m_Right, m_Up);
     }else{
         auto& normalData = *data.n;
-        Math::alignTo(normalData.rotation, direction, speed);
-        Math::recalculateForwardRightUp(normalData.rotation, _forward, _right, _up);
+        Math::alignTo(normalData.rotation, p_Direction, p_Speed);
+        Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
     }
 }
-void ComponentBody::setCollision(CollisionType::Type _type, float _mass) {
+void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, const float p_Mass) {
     auto& physicsData = *data.p;
     //SAFE_DELETE(physicsData.collision);
     ComponentModel* modelComponent = owner.getComponent<ComponentModel>();
     if (modelComponent) {
-        if (_type == CollisionType::Compound) {      
-            physicsData.collision = new Collision(*modelComponent, _mass);
+        if (p_CollisionType == CollisionType::Compound) {
+            physicsData.collision = new Collision(*modelComponent, p_Mass);
         }else{
-            physicsData.collision = new Collision(_type, modelComponent->getModel().mesh(), _mass);
+            physicsData.collision = new Collision(p_CollisionType, modelComponent->getModel().mesh(), p_Mass);
         }
     }else{
-        physicsData.collision = new Collision(_type, nullptr, _mass);
+        physicsData.collision = new Collision(p_CollisionType, nullptr, p_Mass);
     }
     Collision& collision_ = *physicsData.collision;
     collision_.getShape()->setUserPointer(this);
@@ -281,86 +281,91 @@ void ComponentBody::setCollision(CollisionType::Type _type, float _mass) {
         //Physics::addRigidBody(&rigidBody);
     }
 }
-void ComponentBody::setCollision(Collision* _collision) {
+void ComponentBody::setCollision(Collision* p_Collision) {
     auto& physicsData = *data.p;
     SAFE_DELETE(physicsData.collision);
-    physicsData.collision = _collision;
-    Collision& collision_ = *physicsData.collision;
-    collision_.getShape()->setUserPointer(this);
+    physicsData.collision = p_Collision;
+    Collision& collision = *physicsData.collision;
+    collision.getShape()->setUserPointer(this);
     if (physicsData.rigidBody) {
         auto& rigidBody = *physicsData.rigidBody;
         //Physics::removeRigidBody(&rigidBody);
-        rigidBody.setCollisionShape(collision_.getShape());
-        rigidBody.setMassProps(physicsData.mass, collision_.getInertia());
+        rigidBody.setCollisionShape(collision.getShape());
+        rigidBody.setMassProps(physicsData.mass, collision.getInertia());
         rigidBody.updateInertiaTensor();
         //Physics::addRigidBody(&rigidBody);
     }
 }
 
-void ComponentBody::translate(const glm::vec3& translation, bool local) { 
-	ComponentBody::translate(translation.x, translation.y, translation.z, local); 
+void ComponentBody::translate(const glm::vec3& p_Translation, const bool p_Local) {
+	ComponentBody::translate(p_Translation.x, p_Translation.y, p_Translation.z, p_Local);
 }
-void ComponentBody::translate(float t, bool local) { 
-	ComponentBody::translate(t, t, t, local); 
+void ComponentBody::translate(const float p_Translation, const bool p_Local) {
+	ComponentBody::translate(p_Translation, p_Translation, p_Translation, p_Local);
 }
-void ComponentBody::translate(float x, float y, float z, bool local) {
-    if (_physics) {
+void ComponentBody::translate(const float p_X, const float p_Y, const float p_Z, const bool p_Local) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         rigidBody.activate();
-        btVector3 v(x, y, z);
-        Math::translate(rigidBody, v, local);
+        btVector3 v(p_X, p_Y, p_Z);
+        Math::translate(rigidBody, v, p_Local);
         ComponentBody::setPosition(position() + Engine::Math::btVectorToGLM(v));
     }else{
         auto& normalData = *data.n;
-        glm::vec3& _position = normalData.position;
-        _position.x += x; _position.y += y; _position.z += z;
-        glm::vec3 offset(x, y, z);
-        if (local) {
+        glm::vec3& position_ = normalData.position;
+		position_.x += p_X;
+		position_.y += p_Y;
+		position_.z += p_Z;
+        glm::vec3 offset(p_X, p_Y, p_Z);
+        if (p_Local) {
             offset = normalData.rotation * offset;
         }
-        setPosition(_position + offset);
+		ComponentBody::setPosition(position_ + offset);
     }
 }
-void ComponentBody::rotate(const glm::vec3& rotation, bool local) { 
-	ComponentBody::rotate(rotation.x, rotation.y, rotation.z, local); 
+void ComponentBody::rotate(const glm::vec3& p_Rotation, const bool p_Local) {
+	ComponentBody::rotate(p_Rotation.x, p_Rotation.y, p_Rotation.z, p_Local);
 }
-void ComponentBody::rotate(float pitch, float yaw, float roll, bool local) {
-    if (_physics) {
+void ComponentBody::rotate(const double p_Pitch, const double p_Yaw, const double p_Roll, const bool p_Local) {
+	ComponentBody::rotate(static_cast<float>(p_Pitch), static_cast<float>(p_Yaw), static_cast<float>(p_Roll), p_Local);
+}
+void ComponentBody::rotate(const float p_Pitch, const float p_Yaw, const float p_Roll, const bool p_Local) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         btQuaternion quat = rigidBody.getWorldTransform().getRotation().normalize();
         glm::quat glmquat(quat.w(), quat.x(), quat.y(), quat.z());
 
-        if (abs(pitch) >= ROTATION_THRESHOLD) glmquat = glmquat * (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));
-        if (abs(yaw) >= ROTATION_THRESHOLD)   glmquat = glmquat * (glm::angleAxis(-yaw,   glm::vec3(0, 1, 0)));
-        if (abs(roll) >= ROTATION_THRESHOLD)  glmquat = glmquat * (glm::angleAxis(roll,   glm::vec3(0, 0, 1)));
+        if (abs(p_Pitch) >= ROTATION_THRESHOLD) glmquat = glmquat * (glm::angleAxis(-p_Pitch, glm::vec3(1, 0, 0)));
+        if (abs(p_Yaw) >= ROTATION_THRESHOLD)   glmquat = glmquat * (glm::angleAxis(-p_Yaw,   glm::vec3(0, 1, 0)));
+        if (abs(p_Roll) >= ROTATION_THRESHOLD)  glmquat = glmquat * (glm::angleAxis(p_Roll,   glm::vec3(0, 0, 1)));
 
         quat = btQuaternion(glmquat.x, glmquat.y, glmquat.z, glmquat.w);
         rigidBody.getWorldTransform().setRotation(quat);
-        Math::recalculateForwardRightUp(rigidBody, _forward, _right, _up);
+        Math::recalculateForwardRightUp(rigidBody, m_Forward, m_Right, m_Up);
     }else{
         auto& normalData = *data.n;
         glm::quat& glmquat = normalData.rotation;
-        if (abs(pitch) >= ROTATION_THRESHOLD) glmquat = glmquat * (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));
-        if (abs(yaw) >= ROTATION_THRESHOLD)   glmquat = glmquat * (glm::angleAxis(-yaw,   glm::vec3(0, 1, 0)));
-        if (abs(roll) >= ROTATION_THRESHOLD)  glmquat = glmquat * (glm::angleAxis(roll,   glm::vec3(0, 0, 1)));
-        Math::recalculateForwardRightUp(glmquat, _forward, _right, _up);
+        if (abs(p_Pitch) >= ROTATION_THRESHOLD) glmquat = glmquat * (glm::angleAxis(-p_Pitch, glm::vec3(1, 0, 0)));
+        if (abs(p_Yaw) >= ROTATION_THRESHOLD)   glmquat = glmquat * (glm::angleAxis(-p_Yaw,   glm::vec3(0, 1, 0)));
+        if (abs(p_Roll) >= ROTATION_THRESHOLD)  glmquat = glmquat * (glm::angleAxis(p_Roll,   glm::vec3(0, 0, 1)));
+        Math::recalculateForwardRightUp(glmquat, m_Forward, m_Right, m_Up);
     }
 }
-void ComponentBody::scale(const glm::vec3& amount) { 
-	ComponentBody::scale(amount.x, amount.y, amount.z); 
+void ComponentBody::scale(const glm::vec3& p_ScaleAmount) { 
+	ComponentBody::scale(p_ScaleAmount.x, p_ScaleAmount.y, p_ScaleAmount.z);
 }
-void ComponentBody::scale(float s) { 
-	ComponentBody::scale(s,s,s); 
+void ComponentBody::scale(const float p_ScaleAmount) {
+	ComponentBody::scale(p_ScaleAmount, p_ScaleAmount, p_ScaleAmount);
 }
-void ComponentBody::scale(float x,float y,float z) { 
-    if (_physics) {
-        const auto& newScale = btVector3(x, y, z);
-        auto& physicsData = *data.p;
+void ComponentBody::scale(const float p_X, const float p_Y, const float p_Z) {
+    if (m_Physics) {
+        const auto& newScale = btVector3(p_X, p_Y, p_Z);
+        const auto& physicsData = *data.p;
         Collision& collision_ = *physicsData.collision;
         if (collision_.getShape() && collision_.getType() == CollisionType::Compound) {
             btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collision_.getShape());
             if (compoundShapeCast) {
-                int numChildren = compoundShapeCast->getNumChildShapes();
+                const int numChildren = compoundShapeCast->getNumChildShapes();
                 if (numChildren > 0) {
                     for (int i = 0; i < numChildren; ++i) {
                         btCollisionShape* shape = compoundShapeCast->getChildShape(i);
@@ -383,35 +388,36 @@ void ComponentBody::scale(float x,float y,float z) {
         }
     }else {
         auto& normalData = *data.n;
-        glm::vec3& _scale = normalData.scale;
-        _scale.x += x; _scale.y += y; _scale.z += z;
+        glm::vec3& scale_ = normalData.scale;
+		scale_.x += p_X;
+		scale_.y += p_Y;
+		scale_.z += p_Z;
     }
     auto* models = owner.getComponent<ComponentModel>();
     if (models) {
         epriv::ComponentModel_Functions::CalculateRadius(*models);
     }
 }
-void ComponentBody::setPosition(const glm::vec3& newPosition) {
-	ComponentBody::setPosition(newPosition.x, newPosition.y, newPosition.z); 
+void ComponentBody::setPosition(const glm::vec3& p_NewPosition) {
+	ComponentBody::setPosition(p_NewPosition.x, p_NewPosition.y, p_NewPosition.z);
 }
-void ComponentBody::setPosition(float p) { 
-	ComponentBody::setPosition(p, p, p); 
+void ComponentBody::setPosition(const float p_NewPosition) {
+	ComponentBody::setPosition(p_NewPosition, p_NewPosition, p_NewPosition);
 }
-void ComponentBody::setPosition(float x, float y, float z) {
-    if (_physics) {
+void ComponentBody::setPosition(const float p_X, const float p_Y, const float p_Z) {
+    if (m_Physics) {
         auto& physicsData = *data.p;
         btTransform tr;
-        tr.setOrigin(btVector3(x, y, z));
-
+        tr.setOrigin(btVector3(p_X, p_Y, p_Z));
         tr.setRotation(physicsData.rigidBody->getOrientation());
-        Collision& collision_ = *physicsData.collision;
-        if (collision_.getType() == CollisionType::TriangleShapeStatic) {
+        Collision& collision = *physicsData.collision;
+        if (collision.getType() == CollisionType::TriangleShapeStatic) {
             Physics::removeRigidBody(physicsData.rigidBody);
             SAFE_DELETE(physicsData.rigidBody);
         }
         physicsData.motionState.setWorldTransform(tr);
-        if (collision_.getType() == CollisionType::TriangleShapeStatic) {
-            btRigidBody::btRigidBodyConstructionInfo ci(physicsData.mass, &physicsData.motionState, collision_.getShape(), collision_.getInertia());
+        if (collision.getType() == CollisionType::TriangleShapeStatic) {
+            btRigidBody::btRigidBodyConstructionInfo ci(physicsData.mass, &physicsData.motionState, collision.getShape(), collision.getInertia());
             physicsData.rigidBody = new btRigidBody(ci);
             physicsData.rigidBody->setUserPointer(this);
             Physics::addRigidBody(physicsData.rigidBody);
@@ -421,73 +427,72 @@ void ComponentBody::setPosition(float x, float y, float z) {
         physicsData.rigidBody->setCenterOfMassTransform(tr);
     }else{
         auto& normalData = *data.n;
-        glm::vec3& _position = normalData.position;
-        glm::mat4& _matrix = normalData.modelMatrix;
-        _position.x = x; _position.y = y; _position.z = z;
-        _matrix[3][0] = x;
-        _matrix[3][1] = y;
-        _matrix[3][2] = z;
+        glm::vec3& position_ = normalData.position;
+        glm::mat4& modelMatrix_ = normalData.modelMatrix;
+		position_.x = p_X;
+		position_.y = p_Y;
+		position_.z = p_Z;
+		modelMatrix_[3][0] = p_X;
+		modelMatrix_[3][1] = p_Y;
+		modelMatrix_[3][2] = p_Z;
     }
 }
-void ComponentBody::setGravity(const float& x, const float& y, const float& z) {
-    if (_physics) {
+void ComponentBody::setGravity(const float& p_X, const float& p_Y, const float& p_Z) {
+    if (m_Physics) {
         auto& physicsData = *data.p;
-        physicsData.rigidBody->setGravity(btVector3(x, y, z));
+        physicsData.rigidBody->setGravity(btVector3(p_X, p_Y, p_Z));
     }
 }
-void ComponentBody::setRotation(const glm::quat& newRotation) {
-	ComponentBody::setRotation(newRotation.x, newRotation.y, newRotation.z, newRotation.w); 
+void ComponentBody::setRotation(const glm::quat& p_NewRotation) {
+	ComponentBody::setRotation(p_NewRotation.x, p_NewRotation.y, p_NewRotation.z, p_NewRotation.w);
 }
-void ComponentBody::setRotation(float x, float y, float z, float w) {
-    if (_physics) {
+void ComponentBody::setRotation(const float p_X, const float p_Y, const float p_Z, const float p_W) {
+    if (m_Physics) {
         auto& physicsData = *data.p;
-        btQuaternion quat(x, y, z, w);
+        btQuaternion quat(p_X, p_Y, p_Z, p_W);
         quat = quat.normalize();
         auto& rigidBody = *physicsData.rigidBody;
         btTransform tr; tr.setOrigin(rigidBody.getWorldTransform().getOrigin());
         tr.setRotation(quat);
-
         rigidBody.setWorldTransform(tr);
         rigidBody.setCenterOfMassTransform(tr);
         physicsData.motionState.setWorldTransform(tr);
-
-        Math::recalculateForwardRightUp(rigidBody, _forward, _right, _up);
-
+        Math::recalculateForwardRightUp(rigidBody, m_Forward, m_Right, m_Up);
         clearAngularForces();
     }else{
         auto& normalData = *data.n;
-        glm::quat newRotation(w, x, y, z);
+        glm::quat newRotation(p_W, p_X, p_Y, p_Z);
         newRotation = glm::normalize(newRotation);
-        glm::quat& _rotation = normalData.rotation;
-        _rotation = newRotation;
-        Math::recalculateForwardRightUp(_rotation, _forward, _right, _up);
+        glm::quat& rotation_ = normalData.rotation;
+		rotation_ = newRotation;
+        Math::recalculateForwardRightUp(rotation_, m_Forward, m_Right, m_Up);
     }
 }
-void ComponentBody::setScale(const glm::vec3& newScale) {
-	ComponentBody::setScale(newScale.x, newScale.y, newScale.z); 
+void ComponentBody::setScale(const glm::vec3& p_NewScale) {
+	ComponentBody::setScale(p_NewScale.x, p_NewScale.y, p_NewScale.z);
 }
-void ComponentBody::setScale(float s) { 
-	ComponentBody::setScale(s, s, s); 
+void ComponentBody::setScale(const float p_NewScale) {
+	ComponentBody::setScale(p_NewScale, p_NewScale, p_NewScale);
 }
-void ComponentBody::setScale(float x, float y, float z) {
-    if (_physics) {
-        auto& physicsData = *data.p;
+void ComponentBody::setScale(const float p_X, const float p_Y, const float p_Z) {
+    if (m_Physics) {
+        const auto& physicsData = *data.p;
         Collision& collision_ = *physicsData.collision;
         if (collision_.getShape() && collision_.getType() == CollisionType::Compound) {
             btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collision_.getShape());
             if (compoundShapeCast) {
-                int numChildren = compoundShapeCast->getNumChildShapes();
+                const int numChildren = compoundShapeCast->getNumChildShapes();
                 if (numChildren > 0) {
                     for (int i = 0; i < numChildren; ++i) {
                         btCollisionShape* shape = compoundShapeCast->getChildShape(i);
                         btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
                         if (convexHullCast) {
-                            convexHullCast->setLocalScaling(btVector3(x, y, z));
+                            convexHullCast->setLocalScaling(btVector3(p_X, p_Y, p_Z));
                             continue;
                         }
                         btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
                         if (triHullCast) {
-                            triHullCast->setLocalScaling(btVector3(x, y, z));
+                            triHullCast->setLocalScaling(btVector3(p_X, p_Y, p_Z));
                         }
                     }
                 }
@@ -495,30 +500,31 @@ void ComponentBody::setScale(float x, float y, float z) {
         }
     }else{
         auto& normalData = *data.n;
-        glm::vec3& _scale = normalData.scale;
-        _scale.x = x; _scale.y = y; _scale.z = z;
+        glm::vec3& scale = normalData.scale;
+        scale.x = p_X;
+		scale.y = p_Y;
+		scale.z = p_Z;
     }
     auto* models = owner.getComponent<ComponentModel>();
     if (models) {
         epriv::ComponentModel_Functions::CalculateRadius(*models);
     }
 }
-btRigidBody& ComponentBody::getBody(){ return *data.p->rigidBody; }
-glm::vec3 ComponentBody::position() { //theres prob a better way to do this
-    if (_physics) {
-        glm::mat4 _matrix(1.0f);
+const glm::vec3 ComponentBody::position() const { //theres prob a better way to do this
+    if (m_Physics) {
+        glm::mat4 modelMatrix_(1.0f);
         btTransform tr;
 		data.p->rigidBody->getMotionState()->getWorldTransform(tr);
-        tr.getOpenGLMatrix(glm::value_ptr(_matrix));
-        return glm::vec3(_matrix[3][0], _matrix[3][1], _matrix[3][2]);
+        tr.getOpenGLMatrix(glm::value_ptr(modelMatrix_));
+        return glm::vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
     }
-    glm::mat4& _matrix = data.n->modelMatrix;
-    return glm::vec3(_matrix[3][0], _matrix[3][1], _matrix[3][2]);
+    glm::mat4& modelMatrix_ = data.n->modelMatrix;
+    return glm::vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
 }
-glm::vec3 ComponentBody::getScreenCoordinates(bool clampToEdge) { 
-	return Math::getScreenCoordinates(position(), clampToEdge); 
+glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) {
+	return Math::getScreenCoordinates(position(), p_ClampToEdge);
 }
-ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(float minOffset) {
+ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_MinOffset) {
     ScreenBoxCoordinates ret;
     const auto& worldPos    = position();
     float radius            = 0.0001f;
@@ -538,8 +544,8 @@ ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(float minOffset) {
     auto& cam                    = *Resources::getCurrentScene()->getActiveCamera();
     const glm::vec3& camvectest  = cam.up();   
     const auto& testRes          = Math::getScreenCoordinates(worldPos + (camvectest * radius), false); 
-    glm::vec2 test               = glm::vec2(testRes.x, testRes.y);
-    auto radius2D                = glm::max(minOffset, glm::distance(test, center2D));
+    const glm::vec2 test         = glm::vec2(testRes.x, testRes.y);
+    const auto radius2D          = glm::max(p_MinOffset, glm::distance(test, center2D));
     const float& yPlus           = center2D.y + radius2D;
     const float& yNeg            = center2D.y - radius2D;
     const float& xPlus           = center2D.x + radius2D;
@@ -551,16 +557,14 @@ ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(float minOffset) {
     ret.inBounds                 = center2DRes.z;
     return ret;
 }
-
-
-glm::vec3 ComponentBody::getScale() {
-    if (_physics) {
-        auto& physicsData = *data.p;
+const glm::vec3 ComponentBody::getScale() const {
+    if (m_Physics) {
+        const auto& physicsData = *data.p;
         Collision& collision_ = *physicsData.collision;
         if (collision_.getShape() && collision_.getType() == CollisionType::Compound) {
             btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collision_.getShape());
             if (compoundShapeCast) {
-                int numChildren = compoundShapeCast->getNumChildShapes();
+                const int& numChildren = compoundShapeCast->getNumChildShapes();
                 if (numChildren > 0) {
                     for (int i = 0; i < numChildren; ++i) {
                         btCollisionShape* shape = compoundShapeCast->getChildShape(i);
@@ -580,38 +584,58 @@ glm::vec3 ComponentBody::getScale() {
     }
     return data.n->scale;
 }
-glm::quat ComponentBody::rotation() {
-    if (_physics) {
-        return Engine::Math::btToGLMQuat(data.p->rigidBody->getWorldTransform().getRotation());
+const glm::quat ComponentBody::rotation() const {
+    if (m_Physics) {
+		const auto& quat = data.p->rigidBody->getWorldTransform().getRotation();
+        return Engine::Math::btToGLMQuat(quat);
     }
     return data.n->rotation;
 }
-glm::vec3 ComponentBody::forward() { return _forward; }
-glm::vec3 ComponentBody::right() { return _right; }
-glm::vec3 ComponentBody::up() { return _up; }
-glm::vec3 ComponentBody::getLinearVelocity() { const btVector3& v = data.p->rigidBody->getLinearVelocity(); return Engine::Math::btVectorToGLM(v); }
-glm::vec3 ComponentBody::getAngularVelocity() { const btVector3& v = data.p->rigidBody->getAngularVelocity(); return Engine::Math::btVectorToGLM(v); }
-float ComponentBody::mass() { return data.p->mass; }
-glm::mat4 ComponentBody::modelMatrix() { //theres prob a better way to do this
-    if (_physics) {
+const glm::vec3 ComponentBody::forward() const {
+	return m_Forward; 
+}
+const glm::vec3 ComponentBody::right() const {
+	return m_Right; 
+}
+const glm::vec3 ComponentBody::up() const {
+	return m_Up; 
+}
+const glm::vec3 ComponentBody::getLinearVelocity() const  {
+	const btVector3& v = data.p->rigidBody->getLinearVelocity();
+	return Engine::Math::btVectorToGLM(v); 
+}
+const glm::vec3 ComponentBody::getAngularVelocity() const  {
+	const btVector3& v = data.p->rigidBody->getAngularVelocity();
+	return Engine::Math::btVectorToGLM(v); 
+}
+const float ComponentBody::mass() const {
+	return data.p->mass; 
+}
+const glm::mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do this
+    if (m_Physics) {
         auto& physicsData = *data.p;
-        glm::mat4 m(1.0f);
+        glm::mat4 modelMatrix_(1.0f);
         btTransform tr; physicsData.rigidBody->getMotionState()->getWorldTransform(tr);
-        tr.getOpenGLMatrix(glm::value_ptr(m));
+        tr.getOpenGLMatrix(glm::value_ptr(modelMatrix_));
         Collision& collision_ = *physicsData.collision;
         if (collision_.getShape()) {
-            m = glm::scale(m, getScale());
+			modelMatrix_ = glm::scale(modelMatrix_, getScale());
         }
-        return m;
+        return modelMatrix_;
     }
     return data.n->modelMatrix;
 }
-void ComponentBody::setDamping(float linear, float angular) { data.p->rigidBody->setDamping(linear, angular); }
-void ComponentBody::setDynamic(bool dynamic) {
-    if (_physics) {
+const btRigidBody& ComponentBody::getBody() const {
+	return *data.p->rigidBody;
+}
+void ComponentBody::setDamping(const float p_LinearFactor, const float p_AngularFactor) {
+	data.p->rigidBody->setDamping(p_LinearFactor, p_AngularFactor);
+}
+void ComponentBody::setDynamic(const bool p_Dynamic) {
+    if (m_Physics) {
         auto& physicsData = *data.p;
         auto& rigidBody = *physicsData.rigidBody;
-        if (dynamic) {
+        if (p_Dynamic) {
             Physics::removeRigidBody(&rigidBody);
             rigidBody.setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
             Physics::addRigidBody(&rigidBody);
@@ -625,96 +649,114 @@ void ComponentBody::setDynamic(bool dynamic) {
         }
     }
 }
-void ComponentBody::setLinearVelocity(float x, float y, float z, bool local) {
-    if (_physics) {
+void ComponentBody::setLinearVelocity(const float p_X, const float p_Y, const float p_Z, const bool p_Local) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         rigidBody.activate();
-        btVector3 v(x, y, z);
-        Math::translate(rigidBody, v, local);
+        btVector3 v(p_X, p_Y, p_Z);
+        Math::translate(rigidBody, v, p_Local);
         rigidBody.setLinearVelocity(v);
     }
 }
-void ComponentBody::setLinearVelocity(const glm::vec3& velocity, bool local) { 
-	ComponentBody::setLinearVelocity(velocity.x, velocity.y, velocity.z, local); 
+void ComponentBody::setLinearVelocity(const double p_X, const double p_Y, const double p_Z, const bool p_Local) {
+	ComponentBody::setLinearVelocity(static_cast<float>(p_X), static_cast<float>(p_Y), static_cast<float>(p_Z), p_Local);
 }
-void ComponentBody::setAngularVelocity(float x, float y, float z, bool local) {
-    if (_physics) {
-        auto& rigidBody = *data.p->rigidBody;
-        rigidBody.activate();
-        btVector3 v(x, y, z);
-        Math::translate(rigidBody, v, local);
-        rigidBody.setAngularVelocity(v);
+void ComponentBody::setLinearVelocity(const glm::vec3& p_Velocity, const bool p_Local) {
+	ComponentBody::setLinearVelocity(p_Velocity.x, p_Velocity.y, p_Velocity.z, p_Local);
+}
+void ComponentBody::setAngularVelocity(const float p_X, const float p_Y, const float p_Z, const bool p_Local) {
+    if (m_Physics) {
+		auto& rigidBody = *data.p->rigidBody;
+		rigidBody.activate();
+		btVector3 v(p_X, p_Y, p_Z);
+		Math::translate(rigidBody, v, p_Local);
+		rigidBody.setAngularVelocity(v);
     }
 }
-void ComponentBody::setAngularVelocity(const glm::vec3& velocity, bool local) { 
-	ComponentBody::setAngularVelocity(velocity.x, velocity.y, velocity.z, local); 
+void ComponentBody::setAngularVelocity(const double p_X, const double p_Y, const double p_Z, const bool p_Local) {
+	ComponentBody::setAngularVelocity(static_cast<float>(p_X), static_cast<float>(p_Y), static_cast<float>(p_Z), p_Local);
 }
-void ComponentBody::applyForce(float x, float y, float z, bool local) {
-    if (_physics) {
+void ComponentBody::setAngularVelocity(const glm::vec3& p_Velocity, const bool p_Local) {
+	ComponentBody::setAngularVelocity(p_Velocity.x, p_Velocity.y, p_Velocity.z, p_Local);
+}
+void ComponentBody::applyForce(const float p_X, const float p_Y, const float p_Z, const bool p_Local) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         rigidBody.activate();
-        btVector3 v(x, y, z);
-        Math::translate(rigidBody, v, local);
+        btVector3 v(p_X, p_Y, p_Z);
+        Math::translate(rigidBody, v, p_Local);
         rigidBody.applyCentralForce(v);
     }
 }
-void ComponentBody::applyForce(const glm::vec3& force, glm::vec3 origin, bool local) {
-    if (_physics) {
+void ComponentBody::applyForce(const double p_X, const double p_Y, const double p_Z, const bool p_Local) {
+	ComponentBody::applyForce(static_cast<float>(p_X), static_cast<float>(p_Y), static_cast<float>(p_Z), p_Local);
+}
+void ComponentBody::applyForce(const glm::vec3& p_Force, const glm::vec3& p_Origin, const bool p_Local) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         rigidBody.activate();
-        btVector3 v(force.x, force.y, force.z);
-        Math::translate(rigidBody, v, local);
-        rigidBody.applyForce(v, btVector3(origin.x, origin.y, origin.z));
+        btVector3 v(p_Force.x, p_Force.y, p_Force.z);
+        Math::translate(rigidBody, v, p_Local);
+        rigidBody.applyForce(v, btVector3(p_Origin.x, p_Origin.y, p_Origin.z));
     }
 }
-void ComponentBody::applyImpulse(float x, float y, float z, bool local) {
-    if (_physics) {
+void ComponentBody::applyImpulse(const float p_X, const float p_Y, const float p_Z, const bool p_Local) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         rigidBody.activate();
-        btVector3 v(x, y, z);
-        Math::translate(rigidBody, v, local);
+        btVector3 v(p_X, p_Y, p_Z);
+        Math::translate(rigidBody, v, p_Local);
         rigidBody.applyCentralImpulse(v);
     }
 }
-void ComponentBody::applyImpulse(const glm::vec3& impulse, glm::vec3 origin, bool local) {
-    if (_physics) {
+void ComponentBody::applyImpulse(const double p_X, const double p_Y, const double p_Z, const bool p_Local) {
+	ComponentBody::applyImpulse(static_cast<float>(p_X), static_cast<float>(p_Y), static_cast<float>(p_Z), p_Local);
+}
+void ComponentBody::applyImpulse(const glm::vec3& p_Impulse, const glm::vec3& p_Origin, const bool p_Local) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         rigidBody.activate();
-        btVector3 v(impulse.x, impulse.y, impulse.z);
-        Math::translate(rigidBody, v, local);
-        rigidBody.applyImpulse(v, btVector3(origin.x, origin.y, origin.z));
+        btVector3 v(p_Impulse.x, p_Impulse.y, p_Impulse.z);
+        Math::translate(rigidBody, v, p_Local);
+        rigidBody.applyImpulse(v, btVector3(p_Origin.x, p_Origin.y, p_Origin.z));
     }
 }
-void ComponentBody::applyTorque(float x, float y, float z, bool local) {
-    if (_physics) {
+void ComponentBody::applyTorque(const float p_X, const float p_Y, const float p_Z, const bool p_Local) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         rigidBody.activate();
-        btVector3 t(x, y, z);
-        if (local) {
+        btVector3 t(p_X, p_Y, p_Z);
+        if (p_Local) {
             t = rigidBody.getInvInertiaTensorWorld().inverse() * (rigidBody.getWorldTransform().getBasis() * t);
         }
         rigidBody.applyTorque(t);
     }
 }
-void ComponentBody::applyTorque(const glm::vec3& torque, bool local) { 
-	ComponentBody::applyTorque(torque.x, torque.y, torque.z, local); 
+void ComponentBody::applyTorque(const double p_X, const double p_Y, const double p_Z, const bool p_Local) {
+	ComponentBody::applyTorque(static_cast<float>(p_X), static_cast<float>(p_Y), static_cast<float>(p_Z), p_Local);
 }
-void ComponentBody::applyTorqueImpulse(float x, float y, float z, bool local) {
-    if (_physics) {
+void ComponentBody::applyTorque(const glm::vec3& p_Torque, const bool p_Local) {
+	ComponentBody::applyTorque(p_Torque.x, p_Torque.y, p_Torque.z, p_Local);
+}
+void ComponentBody::applyTorqueImpulse(const float p_X, const float p_Y, const float p_Z, const bool p_Local) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         rigidBody.activate();
-        btVector3 t(x, y, z);
-        if (local) {
+        btVector3 t(p_X, p_Y, p_Z);
+        if (p_Local) {
             t = rigidBody.getInvInertiaTensorWorld().inverse() * (rigidBody.getWorldTransform().getBasis() * t);
         }
         rigidBody.applyTorqueImpulse(t);
     }
 }
-void ComponentBody::applyTorqueImpulse(const glm::vec3& torqueImpulse, bool local) { 
-	ComponentBody::applyTorqueImpulse(torqueImpulse.x, torqueImpulse.y, torqueImpulse.z, local); 
+void ComponentBody::applyTorqueImpulse(const double p_X, const double p_Y, const double p_Z, const bool p_Local) {
+	ComponentBody::applyTorqueImpulse(static_cast<float>(p_X), static_cast<float>(p_Y), static_cast<float>(p_Z), p_Local);
+}
+void ComponentBody::applyTorqueImpulse(const glm::vec3& p_TorqueImpulse, const bool p_Local) {
+	ComponentBody::applyTorqueImpulse(p_TorqueImpulse.x, p_TorqueImpulse.y, p_TorqueImpulse.z, p_Local);
 }
 void ComponentBody::clearLinearForces() {
-    if (_physics) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         rigidBody.setActivationState(0);
         rigidBody.activate();
@@ -722,7 +764,7 @@ void ComponentBody::clearLinearForces() {
     }
 }
 void ComponentBody::clearAngularForces() {
-    if (_physics) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         rigidBody.setActivationState(0);
         rigidBody.activate();
@@ -730,7 +772,7 @@ void ComponentBody::clearAngularForces() {
     }
 }
 void ComponentBody::clearAllForces() {
-    if (_physics) {
+    if (m_Physics) {
         auto& rigidBody = *data.p->rigidBody;
         btVector3 v(0, 0, 0);
         rigidBody.setActivationState(0);
@@ -739,15 +781,15 @@ void ComponentBody::clearAllForces() {
         rigidBody.setAngularVelocity(v);
     }
 }
-void ComponentBody::setMass(float mass) {
-    if (_physics) {
+void ComponentBody::setMass(const float p_Mass) {
+    if (m_Physics) {
         auto& physicsData = *data.p;
-        physicsData.mass = mass;
-        Collision& collision_ = *physicsData.collision;
-        if (collision_.getShape()) {
-            collision_.setMass(physicsData.mass);
+        physicsData.mass = p_Mass;
+        Collision& collision = *physicsData.collision;
+        if (collision.getShape()) {
+            collision.setMass(physicsData.mass);
             if (physicsData.rigidBody) {
-                physicsData.rigidBody->setMassProps(physicsData.mass, collision_.getInertia());
+                physicsData.rigidBody->setMassProps(physicsData.mass, collision.getInertia());
             }
         }
     }
@@ -758,12 +800,12 @@ void ComponentBody::setMass(float mass) {
 #pragma region System
 
 struct epriv::ComponentBody_UpdateFunction final {
-    static void _defaultUpdate(const vector<uint>& _vec, vector<ComponentBody>& _components) {
-        for (uint j = 0; j < _vec.size(); ++j) {
-            ComponentBody& b = _components[_vec[j]];
-            if (b._physics) {
+    static void _defaultUpdate(const vector<uint>& p_Vector, vector<ComponentBody>& p_Components) {
+        for (uint j = 0; j < p_Vector.size(); ++j) {
+            ComponentBody& b = p_Components[p_Vector[j]];
+            if (b.m_Physics) {
                 auto& rigidBody = *b.data.p->rigidBody;
-                Engine::Math::recalculateForwardRightUp(rigidBody, b._forward, b._right, b._up);
+                Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
             }else{
                 auto& n = *b.data.n;
                 //TODO: implement parent->child relations
@@ -773,8 +815,8 @@ struct epriv::ComponentBody_UpdateFunction final {
             }
         }
     }
-    void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
-        auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
+    void operator()(void* p_ComponentPool, const double& p_Dt, Scene& p_Scene) const {
+        auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
         auto& components = pool.pool();
         auto split = epriv::threading::splitVectorIndices(components);
         for (auto& vec : split) {
@@ -783,48 +825,42 @@ struct epriv::ComponentBody_UpdateFunction final {
         epriv::threading::waitForAll();
     }
 };
-struct epriv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
-
+struct epriv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* p_Component, Entity& p_Entity) const {
 }};
-struct epriv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* _componentPool,Entity& _entity, Scene& _scene) const {
-    auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)_componentPool;
-    auto* component = pool.getComponent(_entity);
+struct epriv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* p_ComponentPool,Entity& p_Entity, Scene& p_Scene) const {
+    auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
+    auto* component = pool.getComponent(p_Entity);
     if (component) {
         auto& _component = *component;
-        if (_component._physics) {
-            auto& pData = *_component.data.p;
-            _component.setCollision((CollisionType::Type)pData.collision->getType(), pData.mass);
+        if (_component.m_Physics) {
+            auto& physicsData = *_component.data.p;
+            _component.setCollision(static_cast<CollisionType::Type>(physicsData.collision->getType()), physicsData.mass);
         }
     }
 }};
-struct epriv::ComponentBody_SceneEnteredFunction final {void operator()(void* _componentPool,Scene& _scene) const {
-    auto& pool = (*(ECSComponentPool<Entity, ComponentBody>*)_componentPool).pool();
+struct epriv::ComponentBody_SceneEnteredFunction final {void operator()(void* p_ComponentPool,Scene& p_Scene) const {
+	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).pool();
     for (auto& component : pool) { 
-        if (component._physics) { 
+        if (component.m_Physics) {
             Physics::addRigidBody(component.data.p->rigidBody); 
         } 
     }
 }};
-struct epriv::ComponentBody_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
-	auto& pool = (*(ECSComponentPool<Entity, ComponentBody>*)_componentPool).pool();
+struct epriv::ComponentBody_SceneLeftFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
+	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).pool();
     for (auto& component : pool) { 
-        if (component._physics) { 
+        if (component.m_Physics) {
             Physics::removeRigidBody(component.data.p->rigidBody); 
         } 
     }
 }};
     
 ComponentBody_System::ComponentBody_System() {
-    setUpdateFunction(
-        ComponentBody_UpdateFunction());
-    setOnComponentAddedToEntityFunction(
-        ComponentBody_ComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(
-        ComponentBody_EntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(
-        ComponentBody_SceneEnteredFunction());
-    setOnSceneLeftFunction(
-        ComponentBody_SceneLeftFunction());
+    setUpdateFunction(ComponentBody_UpdateFunction());
+    setOnComponentAddedToEntityFunction(ComponentBody_ComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(ComponentBody_EntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(ComponentBody_SceneEnteredFunction());
+    setOnSceneLeftFunction(ComponentBody_SceneLeftFunction());
 }
 
 #pragma endregion

@@ -32,7 +32,7 @@ void Game::initLogic(){
     window.keepMouseInWindow(true);
     window.setMouseCursorVisible(false);
     window.setKeyRepeatEnabled(false);
-	window.setFramerateLimit(60);
+	//window.setFramerateLimit(60);
 
     CapsuleSpace* cap = new CapsuleSpace();
     Resources::setCurrentScene("CapsuleSpace");

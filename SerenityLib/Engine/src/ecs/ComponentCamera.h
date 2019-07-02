@@ -22,12 +22,12 @@ namespace epriv {
     struct ComponentCamera_SceneLeftFunction;
 
     struct ComponentCamera_Functions final {
-        static void      RebuildProjectionMatrix(ComponentCamera& cam);
-        static glm::mat4 GetViewNoTranslation(Camera& c);
-        static glm::mat4 GetViewInverseNoTranslation(Camera& c);
-        static glm::mat4 GetViewProjectionNoTranslation(Camera& c);
-        static glm::mat4 GetViewProjectionInverseNoTranslation(Camera& c);
-        static glm::vec3 GetViewVectorNoTranslation(Camera& c);
+        static void            RebuildProjectionMatrix(ComponentCamera& componentCamera);
+        static const glm::mat4 GetViewNoTranslation(Camera& camera);
+        static const glm::mat4 GetViewInverseNoTranslation(Camera& camera);
+        static const glm::mat4 GetViewProjectionNoTranslation(Camera& camera);
+        static const glm::mat4 GetViewProjectionInverseNoTranslation(Camera& camera);
+        static const glm::vec3 GetViewVectorNoTranslation(Camera& camera);
     };
 };
 };
@@ -42,24 +42,27 @@ class ComponentCamera : public ComponentBaseClass {
     friend class  ::Camera;
     friend class  ::ComponentModel;
     private:
-        enum Type { Perspective, Orthographic, };
-        Type _type;
-        glm::vec3 _eye, _up;
-        glm::mat4 _viewMatrix, _viewMatrixNoTranslation, _projectionMatrix;
-        glm::vec4 _planes[6];
-        float _nearPlane, _farPlane, _bottom, _top;
+        enum Type { 
+			Perspective,
+			Orthographic, 
+		};
+        Type m_Type;
+        glm::vec3 m_Eye, m_Up;
+        glm::mat4 m_ViewMatrix, m_ViewMatrixNoTranslation, m_ProjectionMatrix;
+        glm::vec4 m_FrustumPlanes[6];
+        float m_NearPlane, m_FarPlane, m_Bottom, m_Top;
         union { 
-			float _angle;
-			float _left; 
+			float m_Angle;
+			float m_Left; 
 		};
         union { 
-			float _aspectRatio;
-			float _right; 
+			float m_AspectRatio;
+			float m_Right; 
 		};
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentCamera(Entity& entity, float angle, float aspectRatio, float nearPlane, float farPlane);
-		ComponentCamera(Entity& entity, float left, float right, float bottom, float top, float nearPlane, float farPlane);
+        ComponentCamera(const Entity& entity, const float angle, const float aspectRatio, const float nearPlane, const float farPlane);
+		ComponentCamera(const Entity& entity, const float left, const float right, const float bottom, const float top, const float nearPlane, const float farPlane);
 
         ComponentCamera(const ComponentCamera& other) = default;
         ComponentCamera& operator=(const ComponentCamera& other) = default;
@@ -68,28 +71,28 @@ class ComponentCamera : public ComponentBaseClass {
 
         ~ComponentCamera();
 
-        void resize(uint width, uint height);
-        void lookAt(glm::vec3 eye, glm::vec3 forward, glm::vec3 up);
+        void resize(const uint width, const uint height);
+        void lookAt(const glm::vec3& eye, const glm::vec3& forward, const glm::vec3& up);
 
-        glm::mat4 getProjection();
-        glm::mat4 getProjectionInverse();
-        glm::mat4 getView();
-        glm::mat4 getViewInverse();
-        glm::mat4 getViewProjection();
-        glm::mat4 getViewProjectionInverse();
-        glm::vec3 getViewVector();
+		const float getAngle() const;    void setAngle(const float angle);
+		const float getAspect() const;   void setAspect(const float aspectRatio);
+		const float getNear() const;     void setNear(const float near);
+		const float getFar() const;      void setFar(const float far);
 
-        glm::vec3 forward();
-        glm::vec3 right();
-        glm::vec3 up();
+		const glm::mat4 getProjection() const;
+		const glm::mat4 getProjectionInverse() const;
+		const glm::mat4 getView() const;
+		const glm::mat4 getViewInverse() const;
+		const glm::mat4 getViewProjection() const;
+		const glm::mat4 getViewProjectionInverse() const;
+		const glm::vec3 getViewVector() const;
 
-        float getAngle();    void setAngle(float);
-        float getAspect();   void setAspect(float);
-        float getNear();     void setNear(float);
-        float getFar();      void setFar(float);
+		const glm::vec3 forward() const;
+		const glm::vec3 right() const;
+		const glm::vec3 up() const;
 
-        uint pointIntersectTest(glm::vec3& objectPosition);
-        uint sphereIntersectTest(glm::vec3& objectPosition, float objectRadius);
+		const uint pointIntersectTest(const glm::vec3& objectPosition) const;
+		const uint sphereIntersectTest(const glm::vec3& objectPosition, const float& objectRadius) const;
 };
 
 class ComponentCamera_System : public Engine::epriv::ECSSystemCI {

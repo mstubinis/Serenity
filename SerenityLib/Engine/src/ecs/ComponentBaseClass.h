@@ -4,18 +4,19 @@
 
 #include <ecs/Entity.h>
 
-struct ComponentBaseClass{
-    Entity owner;
+class ComponentBaseClass{
+	protected:
+		Entity owner;
+	public:
+		inline ComponentBaseClass() { owner = Entity::_null; }
+		inline ComponentBaseClass(const Entity& p_Owner) { owner.data = p_Owner.data; }
 
-    inline ComponentBaseClass() { owner = Entity::_null; }
-    inline ComponentBaseClass(Entity& owner_) { owner.data = owner_.data; }
+		ComponentBaseClass& operator=(const ComponentBaseClass& p_Other) = default;
+		ComponentBaseClass(const ComponentBaseClass& p_Other) = default;
+		ComponentBaseClass(ComponentBaseClass&& p_Other) noexcept = default;
+		ComponentBaseClass& operator=(ComponentBaseClass&& p_Other) noexcept = default;
 
-    ComponentBaseClass& operator=(const ComponentBaseClass& other) = default;
-    ComponentBaseClass(const ComponentBaseClass& other) = default;
-    ComponentBaseClass(ComponentBaseClass&& other) noexcept = default;
-    ComponentBaseClass& operator=(ComponentBaseClass&& other) noexcept = default;
-
-    virtual ~ComponentBaseClass() = default;
+		virtual ~ComponentBaseClass() = default;
 };
 
 #endif

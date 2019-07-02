@@ -43,28 +43,28 @@ float epriv::ComponentModel_Functions::CalculateRadius(ComponentModel& super) {
 
 #pragma region Component
 
-ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Handle& mat, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e){
+ComponentModel::ComponentModel(const Entity& _e, Handle& mesh, Handle& mat, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e){
     addModel(mesh, mat, _prog, _stage);
 }
-ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Handle& mat,  ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(const Entity& _e, Mesh* mesh, Handle& mat,  ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     addModel(mesh, (Material*)mat.get(), _prog, _stage);
 }
-ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Material* mat,  ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(const Entity& _e, Handle& mesh, Material* mat,  ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     addModel((Mesh*)mesh.get(), mat, _prog, _stage);
 }
-ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Material* mat, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(const Entity& _e, Mesh* mesh, Material* mat, ShaderP* _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     addModel(mesh, mat, _prog, _stage);
 }
-ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Handle& mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(const Entity& _e, Handle& mesh, Handle& mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     addModel(mesh, mat, (ShaderP*)_prog.get(), _stage);
 }
-ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Handle& mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(const Entity& _e, Mesh* mesh, Handle& mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     addModel(mesh, (Material*)mat.get(), (ShaderP*)_prog.get(), _stage);
 }
-ComponentModel::ComponentModel(Entity& _e, Handle& mesh, Material* mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(const Entity& _e, Handle& mesh, Material* mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     addModel((Mesh*)mesh.get(), mat, (ShaderP*)_prog.get(), _stage);
 }
-ComponentModel::ComponentModel(Entity& _e, Mesh* mesh, Material* mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
+ComponentModel::ComponentModel(const Entity& _e, Mesh* mesh, Material* mat, Handle& _prog, RenderStage::Stage _stage) : ComponentBaseClass(_e) {
     addModel(mesh, mat, (ShaderP*)_prog.get(), _stage);
 }
 ComponentModel::~ComponentModel() {
@@ -162,7 +162,7 @@ void ComponentModel::setModelMaterial(Handle& mat, uint index, RenderStage::Stag
 }
 bool ComponentModel::rayIntersectSphere(ComponentCamera& camera) {
     auto& body = *owner.getComponent<ComponentBody>();
-    return Math::rayIntersectSphere(body.position(), _radius, camera._eye, camera.getViewVector());
+    return Math::rayIntersectSphere(body.position(), _radius, camera.m_Eye, camera.getViewVector());
 }
 
 #pragma endregion
@@ -231,16 +231,11 @@ struct epriv::ComponentModel_SceneLeftFunction final {void operator()(void* _com
 
 
 ComponentModel_System::ComponentModel_System() {
-    setUpdateFunction(
-        ComponentModel_UpdateFunction());
-    setOnComponentAddedToEntityFunction(
-        ComponentModel_ComponentAddedToEntityFunction());
-    setOnEntityAddedToSceneFunction(
-        ComponentModel_EntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(
-        ComponentModel_SceneEnteredFunction());
-    setOnSceneLeftFunction(
-        ComponentModel_SceneLeftFunction());
+    setUpdateFunction(ComponentModel_UpdateFunction());
+    setOnComponentAddedToEntityFunction(ComponentModel_ComponentAddedToEntityFunction());
+    setOnEntityAddedToSceneFunction(ComponentModel_EntityAddedToSceneFunction());
+    setOnSceneEnteredFunction(ComponentModel_SceneEnteredFunction());
+    setOnSceneLeftFunction(ComponentModel_SceneLeftFunction());
 }
 
 #pragma endregion

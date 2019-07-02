@@ -790,7 +790,8 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e, Entit
     if (ignored) {
         ComponentBody* body = ignored->getComponent<ComponentBody>();
         if (body) {
-            return Physics::rayCast(_s, _e, &body->getBody());
+			const auto& rigid = body->getBody();
+            return Physics::rayCast(_s, _e, &const_cast<btRigidBody&>(rigid));
         }
     }
     return Physics::rayCast(_s,_e,nullptr);
@@ -802,10 +803,11 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
     for(auto& o:ignored){
         ComponentBody* body = o.getComponent<ComponentBody>();
         if(body){
-            objs.push_back(&body->getBody());
+			const auto& rigid = body->getBody();
+            objs.push_back(&const_cast<btRigidBody&>(rigid));
         }
     }
-    return Engine::Physics::rayCast(_s,_e,objs);
+    return Physics::rayCast(_s,_e,objs);
 }
 
 

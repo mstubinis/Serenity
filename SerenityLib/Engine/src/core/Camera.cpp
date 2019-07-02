@@ -32,10 +32,10 @@ Camera::~Camera(){
 }
 const glm::vec3 Camera::getPosition(){ return m_Entity.getComponent<ComponentBody>()->position(); }
 glm::quat Camera::getOrientation(){ return glm::conjugate(glm::quat_cast(m_Entity.getComponent<ComponentCamera>()->getView())); }
-const float Camera::getAngle(){ return m_Entity.getComponent<ComponentCamera>()->_angle; }
-const float Camera::getAspect(){ return m_Entity.getComponent<ComponentCamera>()->_aspectRatio; }
-const float Camera::getNear(){ return m_Entity.getComponent<ComponentCamera>()->_nearPlane; }
-const float Camera::getFar(){ return m_Entity.getComponent<ComponentCamera>()->_farPlane; }
+const float Camera::getAngle(){ return m_Entity.getComponent<ComponentCamera>()->m_Angle; }
+const float Camera::getAspect(){ return m_Entity.getComponent<ComponentCamera>()->m_AspectRatio; }
+const float Camera::getNear(){ return m_Entity.getComponent<ComponentCamera>()->m_NearPlane; }
+const float Camera::getFar(){ return m_Entity.getComponent<ComponentCamera>()->m_FarPlane; }
 void Camera::setAngle(float _Angle){ m_Entity.getComponent<ComponentCamera>()->setAngle(_Angle); }
 void Camera::setAspect(float _Aspect){ m_Entity.getComponent<ComponentCamera>()->setAspect(_Aspect); }
 void Camera::setNear(float _near){ m_Entity.getComponent<ComponentCamera>()->setNear(_near); }
