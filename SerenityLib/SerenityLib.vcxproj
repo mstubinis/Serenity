@@ -271,6 +271,7 @@
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\FXAA.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\GodRays.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\HDR.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\postprocess\SMAA.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\SSAO.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\RenderGraph.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\SMAA_LUT.h" />
@@ -350,6 +351,7 @@
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\FXAA.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\GodRays.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\HDR.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\postprocess\SMAA.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\SSAO.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\RenderGraph.cpp" />
     <ClCompile Include="Engine\src\core\engine\resources\Engine_BuiltInShaders.cpp" />

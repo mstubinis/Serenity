@@ -11,6 +11,7 @@
 #include <core/engine/renderer/postprocess/DepthOfField.h>
 #include <core/engine/renderer/postprocess/Bloom.h>
 #include <core/engine/renderer/postprocess/FXAA.h>
+#include <core/engine/renderer/postprocess/SMAA.h>
 #include <core/engine/renderer/postprocess/GodRays.h>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -30,9 +31,6 @@ struct DepthFunc{enum Func{
     NotEqual = GL_NOTEQUAL,
     GEqual = GL_GEQUAL,
     Always = GL_ALWAYS,
-};};
-struct SMAAQualityLevel{enum Level{
-    Low,Medium,High,Ultra,
 };};
 struct AntiAliasingAlgorithm{enum Algorithm{
     None,FXAA,SMAA,
@@ -125,23 +123,6 @@ namespace Renderer{
             void setBlendDistance(float d);
             float getNullDistance();
             float getBlendDistance();
-        };
-        namespace SMAA{
-            void setThreshold(float f);
-            void setSearchSteps(uint s);
-            void disableCornerDetection();
-            void enableCornerDetection(uint c = 25);
-            void disableDiagonalDetection();
-            void enableDiagonalDetection(uint d = 8);
-            void setQuality(SMAAQualityLevel::Level l);
-            void setPredicationThreshold(float f);
-            void setPredicationScale(float f);
-            void setPredicationStrength(float s);
-            void setReprojectionScale(float s);
-            void enablePredication(bool b = true);
-            void disablePredication();
-            void enableReprojection(bool b = true);
-            void disableReprojection();
         };
         namespace Lighting{
             void enable(bool b = true);

@@ -18,13 +18,7 @@ namespace epriv {
             Postprocess_DepthOfField();
             ~Postprocess_DepthOfField();
 
-            void pass(
-                ShaderP&,
-                GBuffer&,
-                const unsigned int& fboWidth,
-                const unsigned int& fboHeight,
-                const unsigned int& sceneTextureEnum
-            );
+            void pass(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
 
             static Postprocess_DepthOfField DOF;
     };

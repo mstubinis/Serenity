@@ -20,15 +20,7 @@ namespace epriv {
             Postprocess_HDR();
             ~Postprocess_HDR();
 
-            void pass(
-                ShaderP&,
-                GBuffer&,
-                const unsigned int& fboWidth,
-                const unsigned int& fboHeight,
-                const bool& godRays,
-                const bool& lighting,
-                const float& godRaysFactor
-            );
+            void pass(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor);
 
             static Postprocess_HDR HDR;
     };

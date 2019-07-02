@@ -27,7 +27,7 @@ epriv::Postprocess_SSAO::Postprocess_SSAO() {
     m_ssao_radius = 0.175f;
 }
 epriv::Postprocess_SSAO::~Postprocess_SSAO() {
-    cleanup();
+    glDeleteTextures(1, &m_ssao_noise_texture);
 }
 void epriv::Postprocess_SSAO::init() {
     uniform_real_distribution<float> rand(0.0f, 1.0f);
@@ -54,9 +54,6 @@ void epriv::Postprocess_SSAO::init() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-}
-void epriv::Postprocess_SSAO::cleanup() {
-    glDeleteTextures(1, &m_ssao_noise_texture);
 }
 
 

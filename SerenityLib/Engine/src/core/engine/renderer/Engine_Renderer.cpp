@@ -8,7 +8,6 @@
 #include <core/engine/Engine_Math.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
-#include <core/engine/renderer/SMAA_LUT.h>
 #include <core/Camera.h>
 #include <core/engine/lights/Light.h>
 #include <core/Font.h>
@@ -174,27 +173,6 @@ class epriv::RenderManager::impl final{
         glm::vec4 fog_color;
         #pragma endregion
 
-        #pragma region SMAAInfo
-        GLuint SMAA_AreaTexture;
-        GLuint SMAA_SearchTexture;
-        float SMAA_THRESHOLD;
-        int SMAA_MAX_SEARCH_STEPS;
-        int SMAA_MAX_SEARCH_STEPS_DIAG;
-        int SMAA_CORNER_ROUNDING;
-        float SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR;
-        float SMAA_DEPTH_THRESHOLD;
-        bool SMAA_PREDICATION;
-        float SMAA_PREDICATION_THRESHOLD;
-        float SMAA_PREDICATION_SCALE;
-        float SMAA_PREDICATION_STRENGTH;
-        bool SMAA_REPROJECTION;
-        float SMAA_REPROJECTION_WEIGHT_SCALE;
-        int SMAA_AREATEX_MAX_DISTANCE;
-        int SMAA_AREATEX_MAX_DISTANCE_DIAG;
-        glm::vec2 SMAA_AREATEX_PIXEL_SIZE;
-        float SMAA_AREATEX_SUBTEX_SIZE;
-        #pragma endregion
-
         #pragma region LightingInfo
         bool lighting;
         float lighting_gi_contribution_diffuse;
@@ -249,25 +227,6 @@ class epriv::RenderManager::impl final{
             fog_distNull = 5.0f;
             fog_distBlend = 65.0f;
             fog_color = glm::vec4(1.0f,1.0f,1.0f,0.95f);
-            #pragma endregion
-
-            #pragma region SMAAInfo
-            SMAA_THRESHOLD = 0.05f;
-            SMAA_MAX_SEARCH_STEPS = 32;
-            SMAA_MAX_SEARCH_STEPS_DIAG = 16;
-            SMAA_CORNER_ROUNDING = 25;
-            SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR = 2.0f;
-            SMAA_DEPTH_THRESHOLD = (0.1f * SMAA_THRESHOLD);
-            SMAA_PREDICATION = false;
-            SMAA_PREDICATION_THRESHOLD = 0.01f;
-            SMAA_PREDICATION_SCALE = 2.0f;
-            SMAA_PREDICATION_STRENGTH = 0.4f;
-            SMAA_REPROJECTION = false;
-            SMAA_REPROJECTION_WEIGHT_SCALE = 30.0f;
-            SMAA_AREATEX_MAX_DISTANCE = 16;
-            SMAA_AREATEX_MAX_DISTANCE_DIAG = 20;
-            SMAA_AREATEX_PIXEL_SIZE = glm::vec2(glm::vec2(1.0f) / glm::vec2(160.0f, 560.0f));
-            SMAA_AREATEX_SUBTEX_SIZE = 0.14285714285f; //(1 / 7)
             #pragma endregion
 
             #pragma region LightingInfo
@@ -1206,15 +1165,9 @@ class epriv::RenderManager::impl final{
             //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very odd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
             GLEnable(GLState::DEPTH_CLAMP);
 
-            genAndBindTexture(GL_TEXTURE_2D,SMAA_AreaTexture);
-            Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
-            Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
-            glTexImage2D(GL_TEXTURE_2D,0,GL_RG8,160,560,0,GL_RG,GL_UNSIGNED_BYTE,areaTexBytes);
 
-            genAndBindTexture(GL_TEXTURE_2D,SMAA_SearchTexture);
-            Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
-            Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
-            glTexImage2D(GL_TEXTURE_2D,0,GL_R8,64,16,0,GL_RED,GL_UNSIGNED_BYTE,searchTexBytes);
+
+            epriv::Postprocess_SMAA::SMAA.init();
 
             _generateBRDFLUTCookTorrance(512);
         }
@@ -1240,9 +1193,7 @@ class epriv::RenderManager::impl final{
 
             SAFE_DELETE_VECTOR(m_InternalShaderPrograms);
 
-            //TODO: add cleanup() from ssao here?
-            glDeleteTextures(1,&SMAA_SearchTexture);
-            glDeleteTextures(1,&SMAA_AreaTexture);
+            //TODO: add cleanup() from ssao / smaa here?
         }
         bool _checkOpenGLExtension(const char* e){ if(glewIsExtensionSupported(e)!=0) return true;return 0!=glewIsSupported(e); }
         void _renderSkybox(SkyboxEmpty* skybox){
@@ -1383,21 +1334,6 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(fbo);
             bindReadFBO(prevReadBuffer);
             bindDrawFBO(prevDrawBuffer);
-        }
-        void _setSMAAQuality(SMAAQualityLevel::Level& l){
-            if(l == SMAAQualityLevel::Low){
-                SMAA_THRESHOLD = 0.15f;           SMAA_MAX_SEARCH_STEPS = 4;
-                SMAA_MAX_SEARCH_STEPS_DIAG = 0;   SMAA_CORNER_ROUNDING = 0;
-            }else if(l == SMAAQualityLevel::Medium){
-                SMAA_THRESHOLD = 0.1f;            SMAA_MAX_SEARCH_STEPS = 8;
-                SMAA_MAX_SEARCH_STEPS_DIAG = 0;   SMAA_CORNER_ROUNDING = 0;
-            }else if(l == SMAAQualityLevel::High){
-                SMAA_THRESHOLD = 0.1f;            SMAA_MAX_SEARCH_STEPS = 16;
-                SMAA_MAX_SEARCH_STEPS_DIAG = 8;   SMAA_CORNER_ROUNDING = 25;
-            }else if(l == SMAAQualityLevel::Ultra){
-                SMAA_THRESHOLD = 0.05f;           SMAA_MAX_SEARCH_STEPS = 32;
-                SMAA_MAX_SEARCH_STEPS_DIAG = 16;  SMAA_CORNER_ROUNDING = 25;
-            }
         }
         void _setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm& algorithm){
             if(aa_algorithm != algorithm){ 
@@ -1899,82 +1835,6 @@ class epriv::RenderManager::impl final{
             uint _y = uint(float(fboHeight) * _divisor);
             _renderFullscreenTriangle(_x,_y,0,0);
         }
-        void _passSMAA(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,GBufferType::Type sceneTexture,GBufferType::Type outTexture){
-            float _fboWidth = float(fboWidth);
-            float _fboHeight = float(fboHeight);
-            glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / _fboWidth, 1.0f / _fboHeight, _fboWidth, _fboHeight);
-
-            #pragma region PassEdge
-            gbuffer.start(outTexture);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA1]->bind();
-
-            Settings::clear(true,false,true);//color, stencil is completely filled with 0's
-
-            glStencilMask(0xFFFFFFFF);
-            glStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
-            glStencilOp(GL_KEEP, GL_INCR, GL_INCR);
-            GLEnable(GLState::STENCIL_TEST);
-
-            sendUniform4("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
-
-            sendUniform4Safe("SMAAInfo1Floats",SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD,SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR,SMAA_PREDICATION_THRESHOLD);
-            sendUniform2Safe("SMAAInfo1FloatsA",SMAA_PREDICATION_SCALE,SMAA_PREDICATION_STRENGTH);
-
-            sendUniform1Safe("SMAA_PREDICATION",int(SMAA_PREDICATION));
-
-            sendTexture("textureMap",gbuffer.getTexture(sceneTexture),0);
-            sendTextureSafe("texturePredication",gbuffer.getTexture(GBufferType::Diffuse),1);
-
-            _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
-
-            glStencilMask(0xFFFFFFFF);
-            glStencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
-            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
-
-            #pragma endregion
-    
-            #pragma region PassBlend
-            gbuffer.start(GBufferType::Normal);
-            Settings::clear(true,false,false); //clear color only
-
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA2]->bind();
-            sendUniform4("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
-
-            sendTexture("edge_tex",gbuffer.getTexture(outTexture),0);
-            sendTexture("area_tex",SMAA_AreaTexture,1,GL_TEXTURE_2D);
-            sendTexture("search_tex",SMAA_SearchTexture,2,GL_TEXTURE_2D);
-
-            sendUniform1Safe("SMAA_MAX_SEARCH_STEPS",SMAA_MAX_SEARCH_STEPS);
-
-            sendUniform4Safe("SMAAInfo2Ints",SMAA_MAX_SEARCH_STEPS_DIAG,SMAA_AREATEX_MAX_DISTANCE,SMAA_AREATEX_MAX_DISTANCE_DIAG,SMAA_CORNER_ROUNDING);
-            sendUniform4Safe("SMAAInfo2Floats",SMAA_AREATEX_PIXEL_SIZE.x,SMAA_AREATEX_PIXEL_SIZE.y,SMAA_AREATEX_SUBTEX_SIZE,(float(SMAA_CORNER_ROUNDING) / 100.0f));
-
-            _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
-            #pragma endregion
-
-            GLDisable(GLState::STENCIL_TEST);
-
-            #pragma region PassNeighbor
-            //gbuffer.start(GBufferType::Misc);
-            gbuffer.stop();
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3]->bind();
-            sendUniform4("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
-            sendTextureSafe("textureMap",gbuffer.getTexture(sceneTexture),0); //need original final image from first smaa pass
-            sendTextureSafe("blend_tex",gbuffer.getTexture(GBufferType::Normal),1);
-
-            _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
-            #pragma endregion
-
-            #pragma region PassFinalCustom
-            /*
-            //this pass is optional. lets skip it for now
-            //gbuffer.start(GBufferType::Lighting);
-            gbuffer.stop();
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4]->bind();
-            renderFullscreenTriangle(fboWidth,fboHeight,0,0);
-            */  
-            #pragma endregion
-        }
         void _passFinal(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal]->bind();
 
@@ -2203,7 +2063,21 @@ class epriv::RenderManager::impl final{
                 auto copy = sceneTexture;
                 sceneTexture = outTexture;
                 outTexture = copy;
-                _passSMAA(gbuffer, camera, fboWidth, fboHeight, sceneTexture, outTexture);
+
+                const float& _fboWidth  = float(fboWidth);
+                const float& _fboHeight = float(fboHeight);
+                const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / _fboWidth, 1.0f / _fboHeight, _fboWidth, _fboHeight);
+
+                ShaderP& edgeProgram     = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA1];
+                ShaderP& blendProgram    = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA2];
+                ShaderP& neighborProgram = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3];
+                ShaderP& finalProgram    = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4];
+
+                epriv::Postprocess_SMAA::SMAA.passEdge(edgeProgram, gbuffer, SMAA_PIXEL_SIZE, fboWidth, fboHeight, sceneTexture, outTexture);
+                epriv::Postprocess_SMAA::SMAA.passBlend(blendProgram, gbuffer, SMAA_PIXEL_SIZE, fboWidth, fboHeight, outTexture);
+                Renderer::GLDisable(GLState::STENCIL_TEST);
+                epriv::Postprocess_SMAA::SMAA.passNeighbor(neighborProgram, gbuffer, SMAA_PIXEL_SIZE, fboWidth, fboHeight, sceneTexture);
+                epriv::Postprocess_SMAA::SMAA.passFinal(finalProgram, gbuffer, fboWidth, fboHeight);//unused
             }
             
             #pragma endregion
@@ -2322,21 +2196,6 @@ void Renderer::Settings::Fog::setNullDistance(float d){ renderManagerImpl->fog_d
 void Renderer::Settings::Fog::setBlendDistance(float d){ renderManagerImpl->fog_distBlend = d; }
 float Renderer::Settings::Fog::getNullDistance(){ return renderManagerImpl->fog_distNull; }
 float Renderer::Settings::Fog::getBlendDistance(){ return renderManagerImpl->fog_distBlend; }
-void Renderer::Settings::SMAA::setThreshold(float f){ renderManagerImpl->SMAA_THRESHOLD = f; }
-void Renderer::Settings::SMAA::setSearchSteps(uint s){ renderManagerImpl->SMAA_MAX_SEARCH_STEPS = s; }
-void Renderer::Settings::SMAA::disableCornerDetection(){ renderManagerImpl->SMAA_CORNER_ROUNDING = 0; }
-void Renderer::Settings::SMAA::enableCornerDetection(uint c){ renderManagerImpl->SMAA_CORNER_ROUNDING = c; }
-void Renderer::Settings::SMAA::disableDiagonalDetection(){ renderManagerImpl->SMAA_MAX_SEARCH_STEPS_DIAG = 0; }
-void Renderer::Settings::SMAA::enableDiagonalDetection(uint d){ renderManagerImpl->SMAA_MAX_SEARCH_STEPS_DIAG = d; }
-void Renderer::Settings::SMAA::setPredicationThreshold(float f){ renderManagerImpl->SMAA_PREDICATION_THRESHOLD = f; }
-void Renderer::Settings::SMAA::setPredicationScale(float f){ renderManagerImpl->SMAA_PREDICATION_SCALE = f; }
-void Renderer::Settings::SMAA::setPredicationStrength(float s){ renderManagerImpl->SMAA_PREDICATION_STRENGTH = s; }
-void Renderer::Settings::SMAA::setReprojectionScale(float s){ renderManagerImpl->SMAA_REPROJECTION_WEIGHT_SCALE = s; }
-void Renderer::Settings::SMAA::enablePredication(bool b){ renderManagerImpl->SMAA_PREDICATION = b; }
-void Renderer::Settings::SMAA::disablePredication(){ renderManagerImpl->SMAA_PREDICATION = false; }
-void Renderer::Settings::SMAA::enableReprojection(bool b){ renderManagerImpl->SMAA_REPROJECTION = b; }
-void Renderer::Settings::SMAA::disableReprojection(){ renderManagerImpl->SMAA_REPROJECTION = false; }
-void Renderer::Settings::SMAA::setQuality(SMAAQualityLevel::Level level){ renderManagerImpl->_setSMAAQuality(level); }
 void Renderer::Settings::Lighting::enable(bool b){ renderManagerImpl->lighting = b; }
 void Renderer::Settings::Lighting::disable(){ renderManagerImpl->lighting = false; }
 float Renderer::Settings::Lighting::getGIContributionGlobal(){ return renderManagerImpl->lighting_gi_contribution_global; }

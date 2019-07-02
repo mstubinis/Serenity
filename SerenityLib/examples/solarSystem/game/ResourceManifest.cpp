@@ -34,7 +34,7 @@ Handle ResourceManifest::StarFlareMaterial;
 std::string ResourceManifest::BasePath;
 
 void ResourceManifest::init(){
-    BasePath = "";
+    BasePath = "../";
 
     Handle skyFromSpaceVert = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
     Handle skyFromSpaceFrag = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);

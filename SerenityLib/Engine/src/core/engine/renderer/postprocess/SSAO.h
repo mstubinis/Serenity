@@ -34,23 +34,9 @@ namespace epriv {
             ~Postprocess_SSAO();
 
             void init();
-            void cleanup();
 
-            void passSSAO(
-                ShaderP&,
-                GBuffer&,
-                const unsigned int& fboWidth,
-                const unsigned int& fboHeight,
-                Camera&
-            );
-            void passBlur(
-                ShaderP&,
-                GBuffer&,
-                const unsigned int& fboWidth,
-                const unsigned int& fboHeight,
-                const std::string& type,
-                const unsigned int& texture
-            );
+            void passSSAO(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,Camera&);
+            void passBlur(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const std::string& type,const unsigned int& texture);
 
             static Postprocess_SSAO SSAO;
     };

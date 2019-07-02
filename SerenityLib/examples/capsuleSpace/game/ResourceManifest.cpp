@@ -26,7 +26,7 @@ std::string ResourceManifest::BasePath;
 
 void ResourceManifest::init(){
 
-    BasePath = "";
+    BasePath = "../";
 
     DreadnaughtMesh = Resources::loadMeshAsync(BasePath + "data/Models/dreadnaught.objcc").at(0);
  
