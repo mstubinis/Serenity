@@ -147,8 +147,7 @@ Inherit from this struct to expose your class to events and event dispatching, s
     virtual void onEvent(const Event& e)               -  execute this function when the parameter event occurs
 */
 struct EventObserver{
-    EventObserver();
-    virtual ~EventObserver();
+    virtual ~EventObserver(){}
 
     void registerEvent(const EventType::Type& type);
     void unregisterEvent(const EventType::Type& type);

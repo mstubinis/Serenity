@@ -4,7 +4,7 @@
 #include "ResourceManifest.h"
 
 #include <core/engine/Engine.h>
-#include <core/engine/lights/Light.h>
+#include <core/engine/lights/Lights.h>
 
 #include <ecs/ComponentName.h>
 

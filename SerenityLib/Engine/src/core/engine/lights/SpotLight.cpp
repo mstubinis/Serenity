@@ -6,7 +6,7 @@
 using namespace Engine;
 using namespace std;
 
-SpotLight::SpotLight(glm::vec3 pos, glm::vec3 direction, float cutoff, float outerCutoff, Scene* scene) : PointLight(LightType::Spot, pos, scene) {
+SpotLight::SpotLight(const glm::vec3 pos, const glm::vec3 direction, const float cutoff, const float outerCutoff, Scene* scene) : PointLight(LightType::Spot, pos, scene) {
     auto& body = *m_Entity.getComponent<ComponentBody>();
     body.alignTo(direction, 0);
     setCutoff(cutoff);
@@ -17,9 +17,16 @@ SpotLight::SpotLight(glm::vec3 pos, glm::vec3 direction, float cutoff, float out
 }
 SpotLight::~SpotLight() {
 }
-void SpotLight::setCutoff(float cutoff) {
+void SpotLight::setCutoff(const float cutoff) {
     m_Cutoff = glm::cos(glm::radians(cutoff));
 }
-void SpotLight::setCutoffOuter(float outerCutoff) {
+void SpotLight::setCutoffOuter(const float outerCutoff) {
     m_OuterCutoff = glm::cos(glm::radians(outerCutoff));
+}
+
+const float SpotLight::getCutoff() const {
+    return m_Cutoff;
+}
+const float SpotLight::getCutoffOuter() const {
+    return m_OuterCutoff;
 }

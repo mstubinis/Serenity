@@ -243,7 +243,7 @@
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventObject.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_Events.h" />
     <ClInclude Include="Engine\src\core\engine\lights\DirectionalLight.h" />
-    <ClInclude Include="Engine\src\core\engine\lights\Light.h" />
+    <ClInclude Include="Engine\src\core\engine\lights\Lights.h" />
     <ClInclude Include="Engine\src\core\engine\lights\LightIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\lights\PointLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\RodLight.h" />

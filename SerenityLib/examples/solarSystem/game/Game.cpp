@@ -12,7 +12,7 @@
 #include <core/engine/Engine_Networking.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/textures/Texture.h>
-#include <core/engine/lights/Light.h>
+#include <core/engine/lights/Lights.h>
 
 #include <core/engine/lua/LuaScript.h>
 
@@ -121,7 +121,7 @@ void Game::render(){
 }
 
 #pragma region EventHandlers
-void Game::onResize(uint width,uint height){
+void Game::onResize(const uint& width, const uint& height){
 }
 void Game::onClose(){
 }
@@ -134,24 +134,24 @@ void Game::onGainedFocus(){
     //Engine::getWindow().setMouseCursorVisible(false);
     auto& window = Resources::getWindow();
     const auto& size = window.getSize();
-    const glm::vec2 halfRes = glm::vec2(size.x / 2, size.y / 2);
-    sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x), int(halfRes.y)), window.getSFMLHandle());
+    const glm::vec2 halfRes(size.x / 2, size.y / 2);
+    sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(halfRes.x), static_cast<int>(halfRes.y)), window.getSFMLHandle());
 
     Engine::setMousePosition(halfRes, true);
 }
-void Game::onTextEntered(uint unicode){
+void Game::onTextEntered(const uint& unicode){
 }
-void Game::onKeyPressed(uint key){
+void Game::onKeyPressed(const uint& key){
 }
-void Game::onKeyReleased(uint key){
+void Game::onKeyReleased(const uint& key){
 }
-void Game::onMouseWheelMoved(int delta){
+void Game::onMouseWheelMoved(const int& delta){
 }
-void Game::onMouseButtonPressed(uint button){
+void Game::onMouseButtonPressed(const uint& button){
 }
-void Game::onMouseButtonReleased(uint button){
+void Game::onMouseButtonReleased(const uint& button){
 }
-void Game::onMouseMoved(float mouseX,float mouseY){
+void Game::onMouseMoved(const float& mouseX, const float& mouseY){
 }
 void Game::onMouseEntered(){
     Engine::getWindow().requestFocus();
@@ -167,12 +167,12 @@ void Game::onPreUpdate(const double& dt){
 void Game::onPostUpdate(const double& dt){
     auto& window = Resources::getWindow();
     const auto& size = window.getSize();
-    const glm::vec2 halfRes = glm::vec2(size.x / 2, size.y / 2);
+    const glm::vec2 halfRes(size.x / 2, size.y / 2);
     if (window.hasFocus()) {
         glm::vec2 mousePos = Engine::getMousePosition();
         float mouseDistFromCenter = glm::distance(mousePos, halfRes);
         if (mouseDistFromCenter > 1.0f) {
-            sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x), int(halfRes.y)), window.getSFMLHandle());
+            sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(halfRes.x), static_cast<int>(halfRes.y)), window.getSFMLHandle());
             Engine::setMousePosition(halfRes, false, true);
         }
     }

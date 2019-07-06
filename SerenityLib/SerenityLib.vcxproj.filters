@@ -162,9 +162,6 @@
     <ClInclude Include="Engine\src\core\engine\lights\DirectionalLight.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\lights\Light.h">
-      <Filter>Header Files\Engine\Core\Lights</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\lights\LightIncludes.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
@@ -356,6 +353,9 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Fog.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lights\Lights.h">
+      <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

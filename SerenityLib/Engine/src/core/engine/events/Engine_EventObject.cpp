@@ -5,8 +5,6 @@
 using namespace Engine;
 using namespace std;
 
-EventObserver::EventObserver(){}
-EventObserver::~EventObserver(){}
 void EventObserver::registerEvent(const EventType::Type& type) {
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.registerObject(this, type);
 }

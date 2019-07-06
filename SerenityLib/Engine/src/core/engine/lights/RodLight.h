@@ -11,13 +11,13 @@ class RodLight : public PointLight {
         float calculateCullingRadius();
     public:
         RodLight(
-            glm::vec3 position = glm::vec3(0.0f),
-            float rodLength = 2.0f,
-            Scene* = nullptr
+            const glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+            const float rodLength    = 2.0f,
+            Scene* scene             = nullptr
         );
         virtual ~RodLight();
 
-        float rodLength();
-        void setRodLength(float);
+        const float rodLength() const;
+        void setRodLength(const float rodLength);
 };
 #endif

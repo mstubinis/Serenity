@@ -9,7 +9,7 @@ using namespace Engine;
 
 epriv::Core* epriv::Core::m_Engine = nullptr;
 
-epriv::Core::Core(const char* name,uint w,uint h):
+epriv::Core::Core(const char* name, const uint& w, const uint& h):
 m_EventManager(name,w,h),
 m_ResourceManager(name,w,h),
 m_DebugManager(name,w,h),
@@ -25,8 +25,10 @@ epriv::Core::~Core(){
 
 }
 
-bool Engine::paused(){ return epriv::Core::m_Engine->m_Paused; }
-void Engine::pause(bool b){
+bool Engine::paused(){ 
+    return epriv::Core::m_Engine->m_Paused; 
+}
+void Engine::pause(const bool& b){
     Engine::Physics::pause(b);
     epriv::Core::m_Engine->m_Paused = b;
 }
@@ -35,7 +37,7 @@ void Engine::unpause(){
     epriv::Core::m_Engine->m_Paused = false;
 }
 
-void Engine::init(const char* name,uint w,uint h){
+void Engine::init(const char* name, const uint& w, const uint& h){
     epriv::Core::m_Engine = new epriv::Core(name,w,h);
     auto& engine = *epriv::Core::m_Engine;
 
@@ -133,7 +135,7 @@ void render(){
     Resources::getWindow().display();
     debugMgr.calculate_display();
 }
-void EVENT_RESIZE(uint w, uint h,bool saveSize){
+void EVENT_RESIZE(const uint& w, const uint& h, const bool& saveSize){
     epriv::Core::m_Engine->m_RenderManager._resize(w,h);
 
     if(saveSize) Engine::Resources::getWindow().setSize(w,h);
@@ -172,7 +174,7 @@ void EVENT_GAINED_FOCUS(){
     ev.type = EventType::WindowGainedFocus;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_TEXT_ENTERED(uint& unicode){ 
+void EVENT_TEXT_ENTERED(const uint& unicode){
     Game::onTextEntered(unicode); 
 
     epriv::EventTextEntered e(unicode);
@@ -182,7 +184,7 @@ void EVENT_TEXT_ENTERED(uint& unicode){
     ev.type = EventType::TextEntered;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_KEY_PRESSED(uint key){
+void EVENT_KEY_PRESSED(const uint& key){
     epriv::Core::m_Engine->m_EventManager.onEventKeyPressed(key);
     Game::onKeyPressed(key);
 
@@ -198,7 +200,7 @@ void EVENT_KEY_PRESSED(uint key){
     ev.type = EventType::KeyPressed;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_KEY_RELEASED(uint key){
+void EVENT_KEY_RELEASED(const uint& key){
     epriv::Core::m_Engine->m_EventManager.onEventKeyReleased(key);
     Game::onKeyReleased(key);
 
@@ -213,7 +215,7 @@ void EVENT_KEY_RELEASED(uint key){
     ev.type = EventType::KeyReleased;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_MOUSE_WHEEL_MOVED(int& delta){
+void EVENT_MOUSE_WHEEL_MOVED(const int& delta){
     epriv::Core::m_Engine->m_EventManager.onEventMouseWheelMoved(delta);
     Game::onMouseWheelMoved(delta);
 
@@ -223,7 +225,7 @@ void EVENT_MOUSE_WHEEL_MOVED(int& delta){
     ev.type = EventType::MouseWheelMoved;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_MOUSE_BUTTON_PRESSED(uint mouseButton){
+void EVENT_MOUSE_BUTTON_PRESSED(const uint& mouseButton){
     epriv::Core::m_Engine->m_EventManager.onEventMouseButtonPressed(mouseButton);
     Game::onMouseButtonPressed(mouseButton);
 
@@ -234,7 +236,7 @@ void EVENT_MOUSE_BUTTON_PRESSED(uint mouseButton){
     ev.type = EventType::MouseButtonPressed;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_MOUSE_BUTTON_RELEASED(uint mouseButton){
+void EVENT_MOUSE_BUTTON_RELEASED(const uint& mouseButton){
     epriv::Core::m_Engine->m_EventManager.onEventMouseButtonReleased(mouseButton);
     Game::onMouseButtonReleased(mouseButton);
 
@@ -245,9 +247,9 @@ void EVENT_MOUSE_BUTTON_RELEASED(uint mouseButton){
     ev.type = EventType::MouseButtonReleased;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_MOUSE_MOVED(int mouseX, int mouseY){
-    float mX = (float)mouseX;
-    float mY = (float)mouseY;
+void EVENT_MOUSE_MOVED(const int& mouseX, const int& mouseY){
+    const float& mX = static_cast<float>(mouseX);
+    const float& mY = static_cast<float>(mouseY);
     if(Resources::getWindow().hasFocus()){
         epriv::Core::m_Engine->m_EventManager.setMousePositionInternal(mX,mY,false,false);
     }
@@ -263,7 +265,10 @@ void EVENT_MOUSE_ENTERED(){
     Game::onMouseEntered(); 
 
     const glm::uvec2 mpos = Engine::getMousePosition();
-    epriv::EventMouseMove e((float)mpos.x, (float)mpos.y);
+    epriv::EventMouseMove e(
+        static_cast<float>(mpos.x),
+        static_cast<float>(mpos.y)
+    );
     Event ev;
     ev.eventMouseMoved = e;
     ev.type = EventType::MouseEnteredWindow;
@@ -273,13 +278,16 @@ void EVENT_MOUSE_LEFT(){
     Game::onMouseLeft(); 
 
     const glm::uvec2 mpos = Engine::getMousePosition();
-    epriv::EventMouseMove e((float)mpos.x, (float)mpos.y);
+    epriv::EventMouseMove e(
+        static_cast<float>(mpos.x),
+        static_cast<float>(mpos.y)
+    );
     Event ev;
     ev.eventMouseMoved = e;
     ev.type = EventType::MouseLeftWindow;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_JOYSTICK_BUTTON_PRESSED(uint& button, uint& id){ 
+void EVENT_JOYSTICK_BUTTON_PRESSED(const uint& button, const uint& id){
     Game::onJoystickButtonPressed();
 
     epriv::EventJoystickButton e(id,button);
@@ -288,7 +296,7 @@ void EVENT_JOYSTICK_BUTTON_PRESSED(uint& button, uint& id){
     ev.type = EventType::JoystickButtonPressed;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_JOYSTICK_BUTTON_RELEASED(uint& button, uint& id){ 
+void EVENT_JOYSTICK_BUTTON_RELEASED(const uint& button, const uint& id){
     Game::onJoystickButtonReleased();
 
     epriv::EventJoystickButton e(id,button);
@@ -297,7 +305,7 @@ void EVENT_JOYSTICK_BUTTON_RELEASED(uint& button, uint& id){
     ev.type = EventType::JoystickButtonReleased;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_JOYSTICK_MOVED(uint& id,float& position,uint axis){
+void EVENT_JOYSTICK_MOVED(const uint& id, const float& position, const uint axis){
     Game::onJoystickMoved();
 
     epriv::EventJoystickMoved e(id, (JoystickAxis::Axis)axis,position);
@@ -306,7 +314,7 @@ void EVENT_JOYSTICK_MOVED(uint& id,float& position,uint axis){
     ev.type = EventType::JoystickMoved;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_JOYSTICK_CONNECTED(uint& id){ 
+void EVENT_JOYSTICK_CONNECTED(const uint& id){
     Game::onJoystickConnected(); 
 
     epriv::EventJoystickConnection e(id);
@@ -315,7 +323,7 @@ void EVENT_JOYSTICK_CONNECTED(uint& id){
     ev.type = EventType::JoystickConnected;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EVENT_JOYSTICK_DISCONNECTED(uint& id){ 
+void EVENT_JOYSTICK_DISCONNECTED(const uint& id){
     Game::onJoystickDisconnected(); 
 
     epriv::EventJoystickConnection e(id);
@@ -325,14 +333,30 @@ void EVENT_JOYSTICK_DISCONNECTED(uint& id){
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
 
-const float Engine::getFPS(){ return (float)(1.0 / Resources::dt()); }
-Engine_Window& Engine::getWindow(){ return Engine::Resources::getWindow(); }
-const glm::uvec2 Engine::getWindowSize(){ return Engine::Resources::getWindowSize(); }
-void Engine::setWindowIcon(const Texture& texture){ Resources::getWindow().setIcon(texture); }
-void Engine::showMouseCursor(){ Resources::getWindow().setMouseCursorVisible(true); }
-void Engine::hideMouseCursor(){ Resources::getWindow().setMouseCursorVisible(false); }
-void Engine::stop(){ epriv::Core::m_Engine->m_Destroyed = true; }
-void Engine::setFullScreen(bool b){ Engine::Resources::getWindow().setFullScreen(b); }
+const float Engine::getFPS(){ 
+    return static_cast<float>(1.0 / Resources::dt()); 
+}
+Engine_Window& Engine::getWindow(){ 
+    return Engine::Resources::getWindow(); 
+}
+const glm::uvec2 Engine::getWindowSize(){ 
+    return Engine::Resources::getWindowSize(); 
+}
+void Engine::setWindowIcon(const Texture& texture){ 
+    Resources::getWindow().setIcon(texture); 
+}
+void Engine::showMouseCursor(){ 
+    Resources::getWindow().setMouseCursorVisible(true); 
+}
+void Engine::hideMouseCursor(){ 
+    Resources::getWindow().setMouseCursorVisible(false); 
+}
+void Engine::stop(){ 
+    epriv::Core::m_Engine->m_Destroyed = true; 
+}
+void Engine::setFullScreen(const bool& b){ 
+    Engine::Resources::getWindow().setFullScreen(b); 
+}
 
 void handleEvents(){
     sf::Event e;

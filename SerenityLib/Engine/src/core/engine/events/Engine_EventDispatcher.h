@@ -2,7 +2,6 @@
 #ifndef ENGINE_EVENT_DISPATCHER_H
 #define ENGINE_EVENT_DISPATCHER_H
 
-#include <vector>
 #include <core/engine/events/Engine_EventObject.h>
 
 namespace Engine{
@@ -14,9 +13,8 @@ namespace epriv{
             EventDispatcher();
             ~EventDispatcher();
 
-            void registerObject(EventObserver*,EventType::Type);
-            void unregisterObject(EventObserver*,EventType::Type);
-            void dispatchEvent(EventType::Type,const Event& e);
+            void registerObject(EventObserver*, const EventType::Type);
+            void unregisterObject(EventObserver*, const EventType::Type);
             void dispatchEvent(const Event& e);
     };
 };

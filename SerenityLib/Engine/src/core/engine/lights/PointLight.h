@@ -15,26 +15,26 @@ class PointLight : public SunLight {
         virtual float            calculateCullingRadius();
     public:
         PointLight(
-            glm::vec3 position = glm::vec3(0.0f),
-            Scene* = nullptr
+            const glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+            Scene* scene             = nullptr
         );
         PointLight(
-            LightType::Type,
-            glm::vec3 position = glm::vec3(0.0f),
-            Scene* = nullptr
+            const LightType::Type type,
+            const glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+            Scene* scene             = nullptr
         );
         virtual ~PointLight();
 
-        void setConstant(float constant);
-        void setLinear(float linear);
-        void setExponent(float exponent);
-        void setAttenuation(float constant, float linear, float exponent);
-        void setAttenuation(LightRange::Range);
-        void setAttenuationModel(LightAttenuation::Model);
+        void setConstant(const float constant);
+        void setLinear(const float linear);
+        void setExponent(const float exponent);
+        void setAttenuation(const float constant, const float linear, const float exponent);
+        void setAttenuation(const LightRange::Range range);
+        void setAttenuationModel(const LightAttenuation::Model model);
 
-        float getCullingRadius();
-        float getConstant();
-        float getLinear();
-        float getExponent();
+        const float getCullingRadius() const;
+        const float getConstant() const;
+        const float getLinear() const;
+        const float getExponent() const;
 };
 #endif

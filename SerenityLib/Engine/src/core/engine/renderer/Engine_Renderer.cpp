@@ -9,7 +9,7 @@
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
 #include <core/Camera.h>
-#include <core/engine/lights/Light.h>
+#include <core/engine/lights/Lights.h>
 #include <core/Font.h>
 #include <core/Scene.h>
 #include <core/engine/textures/Texture.h>
@@ -2329,7 +2329,7 @@ void Renderer::renderFullscreenTriangle() {
 }
 
 inline const GLint Renderer::getUniformLoc(const char* location){
-    auto& m = renderManager->glSM.current_bound_shader_program->uniforms(); if(!m.count(location)) return -1; return m.at(location);
+    const auto& m = renderManager->glSM.current_bound_shader_program->uniforms(); if(!m.count(location)) return -1; return m.at(location);
 }
 inline const GLint& Renderer::getUniformLocUnsafe(const char* location){
     return renderManager->glSM.current_bound_shader_program->uniforms().at(location);

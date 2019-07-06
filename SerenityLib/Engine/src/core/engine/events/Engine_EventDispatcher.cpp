@@ -1,5 +1,4 @@
 #include <core/engine/events/Engine_EventDispatcher.h>
-#include <vector>
 
 using namespace Engine;
 using namespace std;
@@ -13,7 +12,7 @@ epriv::EventDispatcher::~EventDispatcher(){
     }
     vector_clear(m_Observers);
 }
-void epriv::EventDispatcher::registerObject(EventObserver* obj,EventType::Type type){ 
+void epriv::EventDispatcher::registerObject(EventObserver* obj, const EventType::Type type){
     auto& v = m_Observers[type];
     for (auto& o : v) { 
         if (o == obj) { 
@@ -22,15 +21,9 @@ void epriv::EventDispatcher::registerObject(EventObserver* obj,EventType::Type t
     }
     v.push_back(obj);
 }
-void epriv::EventDispatcher::unregisterObject(EventObserver* obj,EventType::Type type){ 
+void epriv::EventDispatcher::unregisterObject(EventObserver* obj, const EventType::Type type){
     auto& v = m_Observers[type];
     removeFromVector(v, obj);
-}
-void epriv::EventDispatcher::dispatchEvent(EventType::Type type,const Event& e){ 
-    const auto& v = m_Observers[type];
-    for (auto& obj : v) {
-        obj->onEvent(e);
-    }
 }
 void epriv::EventDispatcher::dispatchEvent(const Event& e){ 
     const auto& v = m_Observers[e.type];

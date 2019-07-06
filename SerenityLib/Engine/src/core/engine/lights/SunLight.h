@@ -22,22 +22,30 @@ class SunLight : public EntityWrapper {
         float              m_SpecularIntensity;
     public:
         SunLight(
-            glm::vec3 position = glm::vec3(0.0f),
-            LightType::Type = LightType::Sun,
-            Scene* = nullptr
+            const glm::vec3 position   = glm::vec3(0.0f, 0.0f, 0.0f),
+            const LightType::Type type = LightType::Sun,
+            Scene* scene               = nullptr
         );
         virtual ~SunLight();
 
-        float getAmbientIntensity();     void setAmbientIntensity(float a);
-        float getDiffuseIntensity();     void setDiffuseIntensity(float d);
-        float getSpecularIntensity();    void setSpecularIntensity(float s);
+        const glm::vec3 position();
+        const bool isActive() const;
+        const uint type() const;
 
-        glm::vec3 position();
-        void setColor(float, float, float, float = 1.0f);    void setColor(glm::vec4);
-        void setColor(glm::vec3);
-        void setPosition(float, float, float);               void setPosition(glm::vec3);
-        void activate(bool = true);                          void deactivate();
-        bool isActive();
-        uint type();
+        const float getAmbientIntensity() const;
+        const float getDiffuseIntensity() const;
+        const float getSpecularIntensity() const;
+
+        void setAmbientIntensity(const float a);  
+        void setDiffuseIntensity(const float d);  
+        void setSpecularIntensity(const float s);
+
+        void setColor(const float r, const float g, const float b, const float a = 1.0f);    
+        void setColor(const glm::vec4& color);
+        void setColor(const glm::vec3& color);
+        void setPosition(const float x, const float y, const float z);                       
+        void setPosition(const glm::vec3&);
+        void activate(const bool active = true);                          
+        void deactivate();
 };
 #endif
