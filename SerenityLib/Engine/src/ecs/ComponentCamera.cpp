@@ -1,7 +1,7 @@
 #include <ecs/ComponentCamera.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/Engine_Math.h>
-#include <core/engine/Engine_ThreadManager.h>
+#include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/Camera.h>
 
 #include <glm/glm.hpp>

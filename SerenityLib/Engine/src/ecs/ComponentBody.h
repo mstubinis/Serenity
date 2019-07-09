@@ -2,7 +2,7 @@
 #ifndef ENGINE_ECS_COMPONENT_BODY_H
 #define ENGINE_ECS_COMPONENT_BODY_H
 
-#include <core/engine/Engine_Physics.h>
+#include <core/engine/physics/Engine_Physics.h>
 #include <ecs/ComponentBaseClass.h>
 #include <ecs/ECSSystem.h>
 

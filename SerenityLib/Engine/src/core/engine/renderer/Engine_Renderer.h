@@ -3,7 +3,7 @@
 #define ENGINE_ENGINE_RENDERER_H
 
 #include <core/engine/renderer/RenderGraph.h>
-#include <core/engine/Engine_GLStateMachine.h>
+#include <core/engine/renderer/GLStateMachine.h>
 #include <core/engine/Engine_Utils.h>
 
 #include <core/engine/renderer/postprocess/SSAO.h>

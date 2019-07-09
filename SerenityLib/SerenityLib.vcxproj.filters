@@ -94,6 +94,30 @@
     <Filter Include="Source Files\Engine\Core\LUA">
       <UniqueIdentifier>{8e33b90a-fad4-424f-93e0-ec19bfacf2c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Networking">
+      <UniqueIdentifier>{d3abcddd-38e7-4cf0-9038-a627061d0eff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Networking">
+      <UniqueIdentifier>{98f5d07f-e3e3-4fbf-b145-7d1a39265167}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Sounds">
+      <UniqueIdentifier>{96c46fe8-ddf2-4662-8dfc-377be43d0fbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Sounds">
+      <UniqueIdentifier>{75ca1937-a399-409c-81e9-ffc6120904d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Physics">
+      <UniqueIdentifier>{16085c8a-c8b9-4b1e-9bbc-7a13745eb286}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Physics">
+      <UniqueIdentifier>{965c354b-208b-44d8-bb8c-c9983dca639c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Threading">
+      <UniqueIdentifier>{f46f5919-c68b-4965-9849-61d89e70ab8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Threading">
+      <UniqueIdentifier>{ee3979f0-7b9e-4557-b850-670c4748fd68}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -261,31 +285,13 @@
     <ClInclude Include="Engine\src\core\engine\Engine_Debugging.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_FullscreenItems.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_GLStateMachine.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_Math.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_Networking.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_Noise.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_ObjectPool.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_Physics.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_Sounds.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_ThreadManager.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_Utils.h">
@@ -356,6 +362,36 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\lights\Lights.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\threading\Engine_ThreadManager.h">
+      <Filter>Header Files\Engine\Core\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\sounds\Engine_Sounds.h">
+      <Filter>Header Files\Engine\Core\Sounds</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\physics\Engine_Physics.h">
+      <Filter>Header Files\Engine\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\FullscreenItems.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\GLStateMachine.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\networking\SocketInterface.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\networking\SocketTCP.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\networking\SocketUDP.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\networking\ListenerTCP.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\networking\Networking.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -503,28 +539,10 @@
     <ClCompile Include="Engine\src\core\engine\Engine_Debugging.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_FullscreenItems.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_GLStateMachine.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_Math.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_Networking.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_Noise.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_Physics.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_Sounds.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_ThreadManager.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp">
@@ -565,6 +583,30 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Fog.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp">
+      <Filter>Source Files\Engine\Core\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\sounds\Engine_Sounds.cpp">
+      <Filter>Source Files\Engine\Core\Sounds</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\physics\Engine_Physics.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\FullscreenItems.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\GLStateMachine.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\networking\SocketTCP.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\networking\SocketUDP.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\networking\ListenerTCP.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -2,7 +2,6 @@
 #ifndef ENGINE_ECS_COMPONENT_LOGIC_1_H
 #define ENGINE_ECS_COMPONENT_LOGIC_1_H
 
-#include <core/engine/Engine_Physics.h>
 #include <ecs/ComponentBaseClass.h>
 #include <ecs/ECSSystem.h>
 

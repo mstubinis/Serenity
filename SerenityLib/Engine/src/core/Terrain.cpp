@@ -2,7 +2,7 @@
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/Engine_Physics.h>
+#include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/mesh/MeshRequest.h>
 

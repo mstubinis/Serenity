@@ -6,9 +6,9 @@
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/Material.h>
-#include <core/engine/lights/Light.h>
+#include <core/engine/lights/Lights.h>
 #include <core/engine/renderer/Engine_Renderer.h>
-#include <core/engine/Engine_GLStateMachine.h>
+#include <core/engine/renderer/GLStateMachine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/MeshInstance.h>
@@ -29,10 +29,18 @@ struct CapsuleStarLogicFunctor final {void operator()(ComponentLogic& _component
     if (Engine::paused()) return;
 
     const auto& pos = m_Body.position();
-    m_Body.translate(0, 0, (45 * 50) * dt, false);
+    m_Body.translate(0, 0, (45 * 50) * static_cast<float>(dt), false);
     if (pos.z >= 200 * 225) {
-        float x = float(((rand() % 200) - 100) / 100.0f) * 3.7f; if (x > 0) x += 1.5f; if (x < 0) x -= 1.5f;
-        float y = float(((rand() % 200) - 100) / 100.0f) * 3.7f; if (y > 0) y += 1.5f; if (y < 0) y -= 1.5f;
+        float x = float(((rand() % 200) - 100) / 100.0f) * 3.7f; 
+        if (x > 0) 
+            x += 1.5f; 
+        if (x < 0) 
+            x -= 1.5f;
+        float y = float(((rand() % 200) - 100) / 100.0f) * 3.7f; 
+        if (y > 0) 
+            y += 1.5f; 
+        if (y < 0) 
+            y -= 1.5f;
         m_Body.setPosition(x * 50, y * 50, -200 * 225);
     }
     if (star.m_Light) {
@@ -157,8 +165,16 @@ CapsuleSpace::CapsuleSpace():Scene("CapsuleSpace"){
 
     float step = -10.0f;
     for(uint i = 0; i < 300; ++i){
-        float x = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
-        float y = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
+        float x = float(((rand() % 200) - 100)/100.0f) * 3.7f; 
+        if(x > 0) 
+            x += 1.5f; 
+        if(x < 0) 
+            x -= 1.5f;
+        float y = float(((rand() % 200) - 100)/100.0f) * 3.7f; 
+        if(y > 0) 
+            y += 1.5f; 
+        if(y < 0) 
+            y -= 1.5f;
 
         glm::vec3 pos = glm::vec3(x,y,step) * glm::vec3(50);
 
@@ -184,30 +200,31 @@ CapsuleSpace::~CapsuleSpace(){
 void CapsuleSpace::update(const double& dt){
     if (Engine::paused()) return;
 
-    m_Timer += dt;
+    const float dt_float = static_cast<float>(dt);
+    m_Timer += dt_float;
 
     float aRadius = m_TunnelA->getTunnelRadius();
     float bRadius = m_TunnelB->getTunnelRadius();
 
-    auto& frontBody = *(m_FrontEnd->m_Entity.getComponent<ComponentBody>());
-    auto& backBody = *(m_BackEnd->m_Entity.getComponent<ComponentBody>());
+    auto& frontBody   = *(m_FrontEnd->m_Entity.getComponent<ComponentBody>());
+    auto& backBody    = *(m_BackEnd->m_Entity.getComponent<ComponentBody>());
     auto& tunnelBBody = *(m_TunnelB->m_Entity.getComponent<ComponentBody>());
     auto& tunnelABody = *(m_TunnelA->m_Entity.getComponent<ComponentBody>());
     auto& ribbonBodyA = *(m_RibbonA->m_Entity.getComponent<ComponentBody>());
     auto& ribbonBodyB = *(m_RibbonB->m_Entity.getComponent<ComponentBody>());
 
-    tunnelABody.translate(0, 0, (25 * aRadius) * dt, false);
-    tunnelBBody.translate(0, 0, (8 * bRadius) * dt, false);
-    ribbonBodyA.translate(0, 0, (7 * aRadius) * dt, false);
-    ribbonBodyB.translate(0, 0, (7 * aRadius) * dt, false);
+    tunnelABody.translate(0, 0, (25 * aRadius) * dt_float, false);
+    tunnelBBody.translate(0, 0, (8 * bRadius) * dt_float, false);
+    ribbonBodyA.translate(0, 0, (7 * aRadius) * dt_float, false);
+    ribbonBodyB.translate(0, 0, (7 * aRadius) * dt_float, false);
 
     float tunnelARotRand = float(rand() % 3) + 2;
     float tunnelBRotRand = float(rand() % 2) + 2;
 
-    tunnelABody.rotate(0,0,glm::radians(tunnelARotRand*15.0f)*dt);
-    tunnelBBody.rotate(0,0,-glm::radians(tunnelBRotRand*15.0f)*dt);
-    backBody.rotate(0,0,4.0f*dt);
-    frontBody.rotate(0,0,-4.0f*dt);
+    tunnelABody.rotate(0, 0, glm::radians(tunnelARotRand * 15.0f) * dt);
+    tunnelBBody.rotate(0, 0, -glm::radians(tunnelBRotRand * 15.0f) * dt);
+    backBody.rotate(0, 0, 4.0f * dt);
+    frontBody.rotate(0, 0, -4.0f * dt);
 
     const auto& aPos = tunnelABody.position();
     const auto& bPos = tunnelBBody.position();

@@ -1,7 +1,7 @@
 #include <ecs/ComponentBody.h>
 #include <ecs/ComponentModel.h>
 #include <core/engine/Engine_Math.h>
-#include <core/engine/Engine_ThreadManager.h>
+#include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/MeshInstance.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/Camera.h>
@@ -23,15 +23,15 @@ const float ROTATION_THRESHOLD = 0.00001f;
 
 ComponentBody::PhysicsData::PhysicsData(){ 
     //constructor
-    mass = 0;
+    mass      = 0;
     rigidBody = nullptr;
     collision = nullptr;
 }
 ComponentBody::PhysicsData::PhysicsData(const ComponentBody::PhysicsData& p_Other){
     //copy constructor
-    mass = p_Other.mass;
+    mass        = p_Other.mass;
     motionState = p_Other.motionState;
-    rigidBody = p_Other.rigidBody;
+    rigidBody   = p_Other.rigidBody;
 
     if (p_Other.collision) collision = new Collision(*p_Other.collision);
     else                   collision = nullptr;
@@ -81,9 +81,9 @@ ComponentBody::PhysicsData::~PhysicsData() {
 
 ComponentBody::NormalData::NormalData(){
     //constructor
-    scale = glm::vec3(1.0f, 1.0f, 1.0f);
-    position = glm::vec3(0.0f, 0.0f, 0.0f);
-    rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+    scale       = glm::vec3(1.0f, 1.0f, 1.0f);
+    position    = glm::vec3(0.0f, 0.0f, 0.0f);
+    rotation    = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     modelMatrix = glm::mat4(1.0f);
 }
 ComponentBody::NormalData::NormalData(const ComponentBody::NormalData& p_Other) {
@@ -128,34 +128,34 @@ ComponentBody::NormalData::~NormalData() {
 #pragma region Component
 
 ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Entity) {
-    data.p = nullptr;
-    m_Physics = 0;
-    data.n = new NormalData();
-    auto& normalData = *data.n;
-    normalData.position = glm::vec3(0.0f,0.0f,0.0f);
-    normalData.scale = glm::vec3(1.0f,1.0f,1.0f);
-    normalData.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-    normalData.modelMatrix = glm::mat4(1.0f);
+    m_Physics                 = false;
+    data.p                    = nullptr;
+    data.n                    = new NormalData();
+    auto& normalData          = *data.n;
+    normalData.position       = glm::vec3(0.0f,0.0f,0.0f);
+    normalData.scale          = glm::vec3(1.0f,1.0f,1.0f);
+    normalData.rotation       = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+    normalData.modelMatrix    = glm::mat4(1.0f);
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
 }
 ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p_CollisionType) : ComponentBaseClass(p_Entity) {
-    data.n = nullptr;
-    m_Physics = 1;
-    data.p = new PhysicsData();
-    auto& physicsData = *data.p;
-    m_Forward = glm::vec3(0.0f, 0.0f, -1.0f);
-	m_Right = glm::vec3(1.0f, 0.0f, 0.0f);
-	m_Up = glm::vec3(0.0f, 1.0f, 0.0f);
+    m_Physics               = true;
+    data.n                  = nullptr;
+    data.p                  = new PhysicsData();
+    auto& physicsData       = *data.p;
+    m_Forward               = glm::vec3(0.0f, 0.0f, -1.0f);
+	m_Right                 = glm::vec3(1.0f, 0.0f, 0.0f);
+	m_Up                    = glm::vec3(0.0f, 1.0f, 0.0f);
 
     physicsData.motionState = btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1)));
-    float mass = 1.0f;
-    physicsData.mass = mass;
+    float mass              = 1.0f;
+    physicsData.mass        = mass;
 
     setCollision(p_CollisionType, mass);
 
     setMass(mass);
-    Collision& collision = *physicsData.collision;
-    btCollisionShape* shape = collision.getShape();
+    Collision& collision     = *physicsData.collision;
+    btCollisionShape* shape  = collision.getShape();
     const btVector3& inertia = collision.getInertia();
 
     btRigidBody::btRigidBodyConstructionInfo CI(mass, &physicsData.motionState, shape, inertia);
@@ -182,10 +182,10 @@ ComponentBody::~ComponentBody() {
 ComponentBody::ComponentBody(const ComponentBody& p_Other) {
     //copy constructor
     //Might need more testing here...
-	m_Physics = p_Other.m_Physics;
-    m_Forward = p_Other.m_Forward;
-    m_Right = p_Other.m_Right;
-    m_Up = p_Other.m_Up;
+	m_Physics  = p_Other.m_Physics;
+    m_Forward  = p_Other.m_Forward;
+    m_Right    = p_Other.m_Right;
+    m_Up       = p_Other.m_Up;
     owner.data = p_Other.owner.data;
     if (p_Other.m_Physics) {
         if (p_Other.data.p) data.p = new PhysicsData(*p_Other.data.p);

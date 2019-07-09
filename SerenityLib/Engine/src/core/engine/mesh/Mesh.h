@@ -7,7 +7,7 @@
 
 #include <core/engine/BindableResource.h>
 #include <core/engine/events/Engine_EventObject.h>
-#include <core/engine/Engine_Physics.h>
+#include <core/engine/physics/Engine_Physics.h>
 
 #include <map>
 #include <unordered_map>

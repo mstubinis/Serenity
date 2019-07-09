@@ -3,7 +3,7 @@
 #include "ResourceManifest.h"
 
 #include <core/engine/Engine.h>
-#include <core/engine/Engine_GLStateMachine.h>
+#include <core/engine/renderer/GLStateMachine.h>
 #include <core/engine/Engine_Math.h>
 #include <core/engine/lights/Lights.h>
 #include <core/ShaderProgram.h>

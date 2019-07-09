@@ -9,7 +9,7 @@
 
 #include <core/engine/Engine.h>
 #include <core/engine/Engine_Window.h>
-#include <core/engine/Engine_Networking.h>
+#include <core/engine/networking/Networking.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/lights/Lights.h>
