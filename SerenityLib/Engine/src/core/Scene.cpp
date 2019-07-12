@@ -16,6 +16,10 @@ using namespace std;
 uint InternalScenePublicInterface::NumScenes = 0;
 
 struct Scene::impl final {
+    float                             m_GI_Global;
+    float                             m_GI_Diffuse;
+    float                             m_GI_Specular;
+
     SkyboxEmpty*                      m_Skybox;
     Camera*                           m_ActiveCamera;
     glm::vec3                         m_BackgroundColor;
@@ -33,6 +37,9 @@ struct Scene::impl final {
     ECS<Entity>                       m_ECS;
 
     void _init(Scene& super,string& _name) {
+        m_GI_Global = 1.0f;
+        m_GI_Diffuse = 1.0f;
+        m_GI_Specular = 1.0f;
         m_Pipelines.resize(RenderStage::_TOTAL);
         m_Skybox = nullptr;
         m_ActiveCamera = nullptr;
@@ -268,4 +275,17 @@ void Scene::setSkybox(SkyboxEmpty* s){
 }
 void Scene::setBackgroundColor(float r, float g, float b){ 
     Math::setColor(m_i->m_BackgroundColor,r,g,b); 
+}
+void Scene::setGlobalIllumination(float global, float diffuse, float specular) {
+    auto& i = *m_i;
+    i.m_GI_Global = global;
+    i.m_GI_Diffuse = diffuse;
+    i.m_GI_Specular = specular;
+    Renderer::Settings::Lighting::setGIContribution(i.m_GI_Global, i.m_GI_Diffuse, i.m_GI_Specular);
+}
+void Scene::onEvent(const Event& e) {
+    if (e.type == EventType::SceneChanged && e.eventSceneChanged.newScene == this) {
+        auto& i = *m_i;
+        Renderer::Settings::Lighting::setGIContribution(i.m_GI_Global, i.m_GI_Diffuse, i.m_GI_Specular);
+    }
 }

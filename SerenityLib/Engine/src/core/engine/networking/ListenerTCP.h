@@ -12,22 +12,24 @@ namespace Engine {
         class SocketTCP;
         class ListenerTCP : public ISocket {
             private:
-                sf::TcpListener m_Listener;
-                std::string     m_IP;
-                ushort          m_Port;
+                sf::TcpListener  m_Listener;
+                std::string      m_IP;
+                ushort           m_Port;
             public:
                 ListenerTCP(const uint port, const std::string& ip = "");
                 ~ListenerTCP();
 
-                const sf::TcpListener& socket();
-                const std::string ip();
-                const ushort localPort();
                 void setBlocking(bool);
                 const bool isBlocking();
+                const sf::TcpListener& socket();
+                const ushort localPort();
+
+                const std::string& ip();
                 void close();
-                void accept(SocketTCP&);
-                void accept(SocketTCP*);
-                void listen();
+                const sf::Socket::Status accept(SocketTCP&);
+                const sf::Socket::Status accept(sf::TcpSocket&);
+
+                const sf::Socket::Status listen();
         };
     };
 };

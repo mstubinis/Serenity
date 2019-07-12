@@ -5,6 +5,11 @@
 #include "GameCamera.h"
 #include "ResourceManifest.h"
 
+#include "Server.h"
+#include "Client.h"
+#include "Packet.h"
+#include <core/engine/Engine_Math.h>
+
 #include <core/Material.h>
 
 #include <core/engine/Engine.h>
@@ -24,11 +29,20 @@
 using namespace Engine;
 
 HUD* m_HUD;
+Server* m_Server;
+Client* m_Client;
+
 void Game::cleanup(){
     SAFE_DELETE(m_HUD);
+    SAFE_DELETE(m_Client);
+    SAFE_DELETE(m_Server);
 }
 
 void Game::initResources(){
+    m_HUD    = nullptr;
+    m_Server = nullptr;
+    m_Client = nullptr;
+
     ResourceManifest::init();
     const std::string& iconPath = ResourceManifest::BasePath + "data/Textures/icon.png";
     Resources::getWindow().setIcon(iconPath);
@@ -44,6 +58,11 @@ void Game::initLogic(){
     Resources::setCurrentScene("Sol");
 
     m_HUD = new HUD();
+
+
+    m_Server = new Server(55000);
+    m_Server->startup();
+
 	/*
     LuaScript script("../data/Scripts/test.lua");
     float posX = script.get<float>("player.position.x");
@@ -70,7 +89,37 @@ void Game::initLogic(){
 }
 void Game::update(const double& dt){
     if (Engine::isKeyDownOnce(KeyboardKey::Space)) {
-        Engine::pause(!Engine::paused());
+        //Engine::pause(!Engine::paused());
+
+
+        if (!m_Client) {
+            m_Client = new Client(55000, "127.0.0.1");
+        }
+        if (!m_Client->connected()) {
+            m_Client->connect();
+        }else{
+            Packet packet;
+
+            packet.PacketType = PacketType::ClientSendInfo;
+
+            Engine::Math::Float16From32(&packet.x, 10.0f);
+            Engine::Math::Float16From32(&packet.y, 20.0f);
+            Engine::Math::Float16From32(&packet.z, 30.0f);
+
+            Engine::Math::Float16From32(&packet.x1, 40.0f);
+            Engine::Math::Float16From32(&packet.y1, 50.0f);
+            Engine::Math::Float16From32(&packet.z1, 60.0f);
+
+            Engine::Math::Float16From32(&packet.x2, 70.0f);
+            Engine::Math::Float16From32(&packet.y2, 80.0f);
+            Engine::Math::Float16From32(&packet.z2, 90.0f);
+
+            Engine::Math::Float16From32(&packet.x3, 100.0f);
+            Engine::Math::Float16From32(&packet.y3, 110.0f);
+            Engine::Math::Float16From32(&packet.z3, 120.0f);
+
+            m_Client->send(packet);
+        }
     }
     if (Engine::isKeyDown(KeyboardKey::Escape)) {
         Engine::stop();
@@ -98,7 +147,7 @@ void Game::update(const double& dt){
     }
 
 	Scene& scene = *Resources::getCurrentScene();
-	Material& defMat = *((Material*)(ResourceManifest::DefiantMaterial.get()));
+	Material& defMat = *((Material*)(ResourceManifest::DefiantSharkMaterial.get()));
 	if (Engine::isKeyDown(KeyboardKey::V)) {
 		defMat.setSmoothness(defMat.smoothness() - 0.01f);
 	}else if (Engine::isKeyDown(KeyboardKey::B)) {
@@ -114,7 +163,17 @@ void Game::update(const double& dt){
 	}else if (Engine::isKeyDown(KeyboardKey::P)) {
 		Renderer::godRays::enable(!Renderer::godRays::enabled());
 	}
+
+
+    if (Engine::isKeyDown(KeyboardKey::U)) {
+        Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() - 0.01f);
+    }else if (Engine::isKeyDown(KeyboardKey::I)) {
+        Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() + 0.01f);
+    }
+
     m_HUD->update(dt);
+    epriv::ClientInternalPublicInterface::update(m_Client);
+    epriv::ServerInternalPublicInterface::update(m_Server);
 }
 void Game::render(){
     m_HUD->render();

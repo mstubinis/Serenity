@@ -21,12 +21,13 @@ namespace Engine {
                 const sf::UdpSocket& socket();
                 const ushort localPort();
 
-                void bind(const std::string& _ip = "");
+                const sf::Socket::Status bind(const std::string& _ip = "");
                 void unbind();
-                void send(sf::Packet& packet, const std::string& _ip = "");
-                void send(const void* data, size_t size, const std::string& _ip = "");
-                void receive(sf::Packet& packet, const std::string& _ip = "");
-                void receive(void* data, size_t size, size_t& received, const std::string& _ip = "");
+
+                const sf::Socket::Status send(sf::Packet& packet, const std::string& _ip = "");
+                const sf::Socket::Status send(const void* data, size_t size, const std::string& _ip = "");
+                const sf::Socket::Status receive(sf::Packet& packet, const std::string& _ip = "");
+                const sf::Socket::Status receive(void* data, size_t size, size_t& received, const std::string& _ip = "");
         };
     };
 };

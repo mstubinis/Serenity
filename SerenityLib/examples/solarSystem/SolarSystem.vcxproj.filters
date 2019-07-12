@@ -45,6 +45,15 @@
     <ClInclude Include="game\SolarSystem.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
+    <ClInclude Include="game\Server.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\Client.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\Packet.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -72,6 +81,12 @@
       <Filter>Source Files\Game</Filter>
     </ClCompile>
     <ClCompile Include="game\SolarSystem.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\Server.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\Client.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
   </ItemGroup>

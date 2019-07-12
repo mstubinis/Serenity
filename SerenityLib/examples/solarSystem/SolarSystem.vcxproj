@@ -190,15 +190,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="game\Client.h" />
     <ClInclude Include="game\GameCamera.h" />
     <ClInclude Include="game\GameSkybox.h" />
     <ClInclude Include="game\HUD.h" />
+    <ClInclude Include="game\Packet.h" />
     <ClInclude Include="game\Planet.h" />
     <ClInclude Include="game\ResourceManifest.h" />
+    <ClInclude Include="game\Server.h" />
     <ClInclude Include="game\Ship.h" />
     <ClInclude Include="game\SolarSystem.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="game\Client.cpp" />
     <ClCompile Include="game\Game.cpp" />
     <ClCompile Include="game\GameCamera.cpp" />
     <ClCompile Include="game\GameSkybox.cpp" />
@@ -206,6 +210,7 @@
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\Planet.cpp" />
     <ClCompile Include="game\ResourceManifest.cpp" />
+    <ClCompile Include="game\Server.cpp" />
     <ClCompile Include="game\Ship.cpp" />
     <ClCompile Include="game\SolarSystem.cpp" />
   </ItemGroup>

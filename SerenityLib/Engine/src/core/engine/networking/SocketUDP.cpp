@@ -22,8 +22,7 @@ void Networking::SocketUDP::setBlocking(bool b) {
 const bool Networking::SocketUDP::isBlocking() { 
     return m_Socket.isBlocking(); 
 }
-void Networking::SocketUDP::bind(const string& _ip) {
-
+const sf::Socket::Status Networking::SocketUDP::bind(const string& _ip) {
     unbind();
     sf::Socket::Status status;
     if (_ip == "") { 
@@ -32,33 +31,39 @@ void Networking::SocketUDP::bind(const string& _ip) {
         status = m_Socket.bind(m_Port, _ip);
     }
     //do whatever with status here
+
+    return status;
 }
 void Networking::SocketUDP::unbind() { 
     m_Socket.unbind();
 }
-void Networking::SocketUDP::send(sf::Packet& _packet, const string& _ip) {
-    const sf::Socket::Status status = m_Socket.send(_packet, _ip, m_Port);
-    if (status != sf::Socket::Done) {
+const sf::Socket::Status Networking::SocketUDP::send(sf::Packet& _packet, const string& _ip) {
+    const auto& status = m_Socket.send(_packet, _ip, m_Port);
+    if (status != sf::Socket::Status::Done) {
         //error
     }
+    return status;
 }
-void Networking::SocketUDP::send(const void* _data, size_t _size, const string& _ip) {
-    const sf::Socket::Status status = m_Socket.send(_data, _size, _ip, m_Port);
-    if (status != sf::Socket::Done) {
+const sf::Socket::Status Networking::SocketUDP::send(const void* _data, size_t _size, const string& _ip) {
+    const auto& status = m_Socket.send(_data, _size, _ip, m_Port);
+    if (status != sf::Socket::Status::Done) {
         //error
     }
+    return status;
 }
-void Networking::SocketUDP::receive(sf::Packet& _packet, const string& _ip) {
+const sf::Socket::Status Networking::SocketUDP::receive(sf::Packet& _packet, const string& _ip) {
     sf::IpAddress ip(_ip);
-    const sf::Socket::Status status = m_Socket.receive(_packet, ip, m_Port);
-    if (status != sf::Socket::Done) {
+    const auto& status = m_Socket.receive(_packet, ip, m_Port);
+    if (status != sf::Socket::Status::Done) {
         //error
     }
+    return status;
 }
-void Networking::SocketUDP::receive(void* _data, size_t _size, size_t& _received, const string& _ip) {
+const sf::Socket::Status Networking::SocketUDP::receive(void* _data, size_t _size, size_t& _received, const string& _ip) {
     sf::IpAddress ip(_ip); 
-    const sf::Socket::Status status = m_Socket.receive(_data, _size, _received, ip, m_Port);
-    if (status != sf::Socket::Done) {
+    const auto& status = m_Socket.receive(_data, _size, _received, ip, m_Port);
+    if (status != sf::Socket::Status::Done) {
         //error
     }
+    return status;
 }

@@ -11,12 +11,13 @@ namespace Engine {
     namespace Networking {
         class SocketTCP: public ISocket {
             private:
-                sf::TcpSocket  m_Socket;
-                std::string    m_IP;
-                ushort         m_Port;
-                ushort         m_Timeout;
+                sf::TcpSocket*  m_Socket;
+                std::string     m_IP;
+                ushort          m_Port;
+                bool            m_Connected;
             public: 
-                SocketTCP(const uint port, const std::string& ip = "", uint timeout = 0);
+                SocketTCP(const ushort port, const std::string& ip = ""); //client side socket
+                SocketTCP(sf::TcpSocket*); //server side client socket
                 ~SocketTCP();
 
                 void setBlocking(const bool);
@@ -26,14 +27,17 @@ namespace Engine {
 
                 const std::string ip();
                 const ushort remotePort();
+                const bool& connected() const;
     
-                void connect();
+                const sf::Socket::Status connect(const ushort& timeout = 0);
                 void disconnect();
-                void send(sf::Packet& packet);
-                void send(const void* data, size_t size);
-                void send(const void* data, size_t size, size_t& sent);
-                void receive(sf::Packet& packet);
-                void receive(void* data, size_t size, size_t& received);
+
+                const sf::Socket::Status send(sf::Packet& packet);
+                const sf::Socket::Status send(const void* data, size_t size);
+                const sf::Socket::Status send(const void* data, size_t size, size_t& sent);
+
+                const sf::Socket::Status receive(sf::Packet& packet);
+                const sf::Socket::Status receive(void* data, size_t size, size_t& received);
         };
     };
 };

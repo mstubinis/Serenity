@@ -30,23 +30,26 @@
 using namespace Engine;
 using namespace std;
 
-SolarSystem::SolarSystem(string n, string file):Scene(n){
+SolarSystem::SolarSystem(const string& n, const string& file):Scene(n){
     GameCamera* playerCamera = new GameCamera(0.35f,7000000000.0f,this);
     setActiveCamera(*playerCamera);
     m_Objects.push_back(playerCamera);
-    giGlobal = giSpecular = giDiffuse = 1.0f;
     if(file != "NULL")
-        SolarSystem::_loadFromFile(file);
+        SolarSystem::loadFromFile(file);
 }
 SolarSystem::~SolarSystem(){
     SAFE_DELETE_VECTOR(m_Objects);
 }
-void SolarSystem::_loadFromFile(string filename){
+void SolarSystem::loadFromFile(const string& filename){
     uint count = 0;
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
     unordered_map<string,vector<RingInfo>> planetRings;
 
     unordered_map<string,Handle> loadedMaterials;
+
+    float gi_diffuse  = 1.0f;
+    float gi_specular = 1.0f;
+    float gi_global   = 1.0f;
 
     string skyboxDirectory;
     for(string line; getline(str, line, '\n');){
@@ -57,11 +60,8 @@ void SolarSystem::_loadFromFile(string filename){
             }else if(count == 2){//this line has the system's skybox
                 skyboxDirectory = ResourceManifest::BasePath + line;
             }else if(count == 3){//this line has the system's skybox's number of flares
-				box1 = new GameSkybox(skyboxDirectory, boost::lexical_cast<uint>(line), this);
-				setSkybox(box1);
-				//box2 = new GameSkybox(ResourceManifest::BasePath + "data/Textures/Skyboxes/Skybox0/Skybox.dds", boost::lexical_cast<uint>(line), this);
-				//box3 = new GameSkybox(ResourceManifest::BasePath + "data/Textures/Skyboxes/Skybox1/Skybox.dds", boost::lexical_cast<uint>(line), this);
-				//box4 = new GameSkybox(ResourceManifest::BasePath + "data/Textures/Skyboxes/Skybox2/Skybox.dds", boost::lexical_cast<uint>(line), this);
+                GameSkybox* box = new GameSkybox(skyboxDirectory, boost::lexical_cast<uint>(line), this);
+				setSkybox(box);
 				
             }else if(count == 4){//this line has the system's GI contribution
                 string token;
@@ -70,9 +70,9 @@ void SolarSystem::_loadFromFile(string filename){
                     size_t pos = token.find("=");
                     string key = token.substr(0, pos);
                     string value = token.substr(pos + 1,string::npos);
-                         if(key == "giDiffuse")   giDiffuse = stof(value);
-                    else if(key == "giSpecular")  giSpecular = stof(value);
-                    else if(key == "giGlobal")    giGlobal = stof(value);
+                         if(key == "giDiffuse")   gi_diffuse = stof(value);
+                    else if(key == "giSpecular")  gi_specular = stof(value);
+                    else if(key == "giGlobal")    gi_global = stof(value);
                 }
             }
             if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
@@ -218,7 +218,7 @@ void SolarSystem::_loadFromFile(string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f), CollisionType::ConvexHull,this));
+                    setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantSharkMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f), CollisionType::ConvexHull,this));
                     GameCamera* playerCamera = (GameCamera*)getActiveCamera();
                     playerCamera->follow(getPlayer()->entity());
                 }else if(line[0] == 'R'){//Rings
@@ -235,10 +235,6 @@ void SolarSystem::_loadFromFile(string filename){
         }
         ++count;
     }
-
-	
-
-
     //add planetary rings
     for(auto& rings:planetRings){
         new Ring(rings.second,m_Planets.at(rings.first));
@@ -251,24 +247,9 @@ void SolarSystem::_loadFromFile(string filename){
 
     //LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
     //player->addChild(lightP);
+
+    setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
 }
 void SolarSystem::update(const double& dt){
-	if (Engine::isKeyDownOnce(KeyboardKey::K)) {
-		//setSkybox(box1);
-	}
-	if (Engine::isKeyDownOnce(KeyboardKey::J)) {
-		//setSkybox(box2);
-	}
-	if (Engine::isKeyDownOnce(KeyboardKey::H)) {
-		//setSkybox(box3);
-	}
-	if (Engine::isKeyDownOnce(KeyboardKey::G)) {
-		//setSkybox(box4);
-	}
     Scene::update(dt);
-}
-void SolarSystem::onEvent(const Event& e){
-    if(e.type == EventType::SceneChanged && e.eventSceneChanged.newScene == this){
-        Renderer::Settings::Lighting::setGIContribution(giGlobal,giDiffuse,giSpecular);
-    }
 }

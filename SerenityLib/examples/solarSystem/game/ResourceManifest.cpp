@@ -19,9 +19,13 @@ Handle ResourceManifest::RingMesh;
 Handle ResourceManifest::NovaMesh;
 Handle ResourceManifest::VenerexMesh;
 Handle ResourceManifest::IntrepidMesh;
+Handle ResourceManifest::ExcelsiorMesh;
+
 Handle ResourceManifest::NovaMaterial;
 Handle ResourceManifest::VenerexMaterial;
 Handle ResourceManifest::IntrepidMaterial;
+Handle ResourceManifest::ExcelsiorMaterial;
+Handle ResourceManifest::DefiantSharkMaterial;
 
 
 Handle ResourceManifest::StarMaterial;
@@ -48,6 +52,7 @@ void ResourceManifest::init(){
     Handle groundFromSpaceFrag = Resources::addShader(BasePath + "data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag);
  
+
     PlanetMesh = Resources::loadMeshAsync(BasePath + "data/Models/planet.objcc").at(0);
     DefiantMesh = Resources::loadMeshAsync(BasePath + "data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc").at(0);
@@ -57,15 +62,18 @@ void ResourceManifest::init(){
 	//NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc").at(0);
 	//VenerexMesh = Resources::loadMeshAsync(BasePath + "data/Models/venerex.objcc").at(0);
 	//IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.objcc").at(0);
-
+    //ExcelsiorMesh = Resources::loadMeshAsync(BasePath + "data/Models/excelsior.objcc").at(0);
 
 
     Engine::epriv::threading::waitForAll();
 
 	/*extras*/
 	//NovaMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/nova.dds", BasePath + "data/Textures/nova_Normal.dds", BasePath + "data/Textures/nova_Glow.dds");
-	//VenerexMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
-	//IntrepidMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/intrepid.dds", BasePath + "data/Textures/intrepid_Normal.png", BasePath + "data/Textures/intrepid_Glow.png");
+	//VenerexMaterial = Resources::addMaterial("Venerex", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
+	//IntrepidMaterial = Resources::addMaterial("Intrepid", BasePath + "data/Textures/intrepid.dds", BasePath + "data/Textures/intrepid_Normal.png", BasePath + "data/Textures/intrepid_Glow.png");
+    //ExcelsiorMaterial = Resources::addMaterial("Excelsior", BasePath + "data/Textures/excelsior.dds", BasePath + "data/Textures/excelsior_Normal.dds", BasePath + "data/Textures/excelsior_Glow.dds", BasePath + "data/Textures/excelsior_Specular.dds");
+    DefiantSharkMaterial = Resources::addMaterial("DefiantShark", BasePath + "data/Textures/defiantShark.dds", BasePath + "data/Textures/defiant_Normal.dds", BasePath + "data/Textures/defiant_Glow.dds");
+
 
     StarMaterial = Resources::addMaterial("Star", BasePath + "data/Textures/Planets/Sun.dds","","","");
     ((Material*)StarMaterial.get())->setShadeless(true);
