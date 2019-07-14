@@ -15,12 +15,12 @@ EventManager::EventManager(const char* name, const uint w, const uint h):m_Event
     m_currentKey = m_previousKey = KeyboardKey::Unknown;
     m_currentButton = m_previousButton = MouseButton::Unknown;
 
-    EventManager::m_EventManager = this;
+    m_EventManager = this;
 }
 EventManager::~EventManager(){
     m_KeyStatus.clear();
     m_MouseStatus.clear();
-    EventManager::m_EventManager = nullptr;
+    m_EventManager = nullptr;
 }
 
 void EventManager::setMousePositionInternal(const float x, const float y, const bool resetDifference, const bool resetPrevious) {
@@ -105,56 +105,18 @@ const double Engine::getMouseWheelDelta(){
     return EventManager::m_EventManager->m_Delta; 
 }
 void Engine::setMousePosition(const float x, const float y, const bool resetDifference, const bool resetPreviousPosition){
-    sf::Mouse::setPosition(
-        sf::Vector2i(
-            static_cast<int>(x),
-            static_cast<int>(y)
-        ),
-        Resources::getWindow().getSFMLHandle()
-    );
-    EventManager::m_EventManager->setMousePositionInternal(
-        x,
-        y,
-        resetDifference,
-        resetPreviousPosition
-    );
+    sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(x), static_cast<int>(y)), Resources::getWindow().getSFMLHandle());
+    EventManager::m_EventManager->setMousePositionInternal(x, y, resetDifference, resetPreviousPosition);
 }
 void Engine::setMousePosition(const uint x, const uint y, const bool resetDifference, const bool resetPreviousPosition){
-    sf::Mouse::setPosition(
-        sf::Vector2i(x,y),
-        Resources::getWindow().getSFMLHandle()
-    );
-    EventManager::m_EventManager->setMousePositionInternal(
-        static_cast<float>(x),
-        static_cast<float>(y),
-        resetDifference,
-        resetPreviousPosition
-    );
+    sf::Mouse::setPosition(sf::Vector2i(x, y), Resources::getWindow().getSFMLHandle());
+    EventManager::m_EventManager->setMousePositionInternal(static_cast<float>(x), static_cast<float>(y), resetDifference, resetPreviousPosition);
 }
 void Engine::setMousePosition(const glm::vec2& pos, const bool resetDifference, const bool resetPreviousPosition){
-    sf::Mouse::setPosition(
-        sf::Vector2i(
-            static_cast<int>(pos.x),
-            static_cast<int>(pos.y)
-        ),
-        Resources::getWindow().getSFMLHandle()
-    );
-    EventManager::m_EventManager->setMousePositionInternal(
-        pos.x,
-        pos.y,
-        resetDifference,
-        resetPreviousPosition
-    );
+    sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(pos.x), static_cast<int>(pos.y)), Resources::getWindow().getSFMLHandle());
+    EventManager::m_EventManager->setMousePositionInternal(pos.x, pos.y, resetDifference, resetPreviousPosition);
 }
 void Engine::setMousePosition(const glm::uvec2& pos, const bool resetDifference, const bool resetPreviousPosition){
-    sf::Mouse::setPosition(
-        sf::Vector2i(pos.x,pos.y),
-        Resources::getWindow().getSFMLHandle()
-    );
-    EventManager::m_EventManager->setMousePositionInternal(
-        static_cast<float>(pos.x),
-        static_cast<float>(pos.y),
-        resetDifference,
-        resetPreviousPosition
-    );
+    sf::Mouse::setPosition(sf::Vector2i(pos.x, pos.y), Resources::getWindow().getSFMLHandle());
+    EventManager::m_EventManager->setMousePositionInternal(static_cast<float>(pos.x), static_cast<float>(pos.y), resetDifference, resetPreviousPosition);
 }

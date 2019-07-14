@@ -22,6 +22,12 @@
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{8c5614cf-653a-4519-861a-eac0be93d768}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\GUI">
+      <UniqueIdentifier>{66ab070d-eff2-4fe0-88c6-e2112ea2e08d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI">
+      <UniqueIdentifier>{7c90a2c4-9f65-4d39-83f4-3b192acbc9d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -52,6 +58,12 @@
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="game\Packet.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\Core.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\GameState.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
   </ItemGroup>
@@ -87,6 +99,12 @@
       <Filter>Source Files\Game</Filter>
     </ClCompile>
     <ClCompile Include="game\Client.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\Packet.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\Core.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
   </ItemGroup>

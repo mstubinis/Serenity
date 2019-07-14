@@ -20,7 +20,7 @@
 using namespace Engine;
 using namespace std;
 
-HUD::HUD() {
+HUD::HUD(GameState::State& _state, GameState::State& _previous):m_GameState(_state),m_GameStatePrevious(_previous){
     m_Font = Resources::addFont(ResourceManifest::BasePath + "data/Fonts/consolas.fnt");
     Engine::Math::setColor(m_Color, 255, 255, 0);
     m_Active = true;
@@ -28,11 +28,77 @@ HUD::HUD() {
 HUD::~HUD() {
 }
 
+
+
+void HUD::update_game(const double& dt) {
+
+}
+void HUD::update_main_menu(const double& dt) {
+
+}
+void HUD::update_host_server_map_and_ship(const double& dt) {
+
+}
+void HUD::update_host_server_port_and_name(const double& dt) {
+
+}
+void HUD::update_join_server_port_and_name_and_ip(const double& dt) {
+
+}
+void HUD::update_join_server_server_info(const double& dt) {
+
+}
+
+void HUD::render_game() {
+
+}
+void HUD::render_main_menu() {
+
+}
+void HUD::render_host_server_map_and_ship() {
+
+}
+void HUD::render_host_server_port_and_name() {
+
+}
+void HUD::render_join_server_port_and_name_and_ip() {
+
+}
+void HUD::render_join_server_server_info() {
+
+}
+
+
+
+
+
+
+
+
 int _count = 0;
 void HUD::update(const double& dt) {
     if (Engine::isKeyDownOnce(KeyboardKey::LeftAlt, KeyboardKey::X) || Engine::isKeyDownOnce(KeyboardKey::RightAlt, KeyboardKey::X)) {
         m_Active = !m_Active;
     }
+    switch (m_GameState) {
+        case GameState::Main_Menu: {
+            update_main_menu(dt); break;
+        }case GameState::Host_Server_Map_And_Ship: {
+            update_host_server_map_and_ship(dt); break;
+        }case GameState::Host_Server_Port_And_Name: {
+            update_host_server_port_and_name(dt); break;
+        }case GameState::Join_Server_Port_And_Name_And_IP: {
+            update_join_server_port_and_name_and_ip(dt); break;
+        }case GameState::Join_Server_Server_Info: {
+            update_join_server_server_info(dt); break;
+        }case GameState::Game: {
+            update_game(dt); break;
+        }default: {
+            break;
+        }
+    }
+
+
     SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
 	const auto& planets = scene->getPlanets();
 	std::vector<Planet*> planetVector;
@@ -56,6 +122,24 @@ void HUD::update(const double& dt) {
     }
 }
 void HUD::render() {
+    switch (m_GameState) {
+        case GameState::Main_Menu: {
+            render_main_menu(); break;
+        }case GameState::Host_Server_Map_And_Ship: {
+            render_host_server_map_and_ship(); break;
+        }case GameState::Host_Server_Port_And_Name: {
+            render_host_server_port_and_name(); break;
+        }case GameState::Join_Server_Port_And_Name_And_IP: {
+            render_join_server_port_and_name_and_ip(); break;
+        }case GameState::Join_Server_Server_Info: {
+            render_join_server_server_info(); break;
+        }case GameState::Game: {
+            render_game(); break;
+        }default: {
+            break;
+        }
+    }
+
     //render hud stuff
     SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
     Ship* player = scene->getPlayer();

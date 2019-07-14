@@ -5,7 +5,6 @@
 #include <core/engine/networking/SocketTCP.h>
 
 struct Packet;
-
 class Client;
 namespace Engine {
     namespace epriv {
@@ -14,24 +13,23 @@ namespace Engine {
         };
     };
 };
-
-
 class Client{
     friend struct Engine::epriv::ClientInternalPublicInterface;
     private:
         Engine::Networking::SocketTCP* m_client;
     public:
         Client(sf::TcpSocket*);
-        Client(const ushort& port, const std::string& ipAddress = "");
+        Client(const ushort& port, const std::string& ipAddress);
         ~Client();
 
-        const bool connected() const;
+        void changeConnectionDestination(const ushort& port, const std::string& ipAddress);
 
         void connect();
         void connect(const ushort& timeout);
-
         void disconnect();
+        void onReceive();
 
+        const bool connected() const;
         const sf::Socket::Status send(Packet& packet);
         const sf::Socket::Status send(sf::Packet& packet);
         const sf::Socket::Status send(const void* data, size_t size);
@@ -40,8 +38,5 @@ class Client{
         const sf::Socket::Status receive(sf::Packet& packet);
         const sf::Socket::Status receive(void* data, size_t size, size_t& received);
 
-        void onReceive();
 };
-
-
 #endif

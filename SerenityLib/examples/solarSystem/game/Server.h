@@ -8,10 +8,12 @@
 
 #include "Client.h"
 
+
 #include <unordered_map>
 //#include <thread>
 
-class Server;
+struct Packet;
+class  Server;
 namespace Engine {
     namespace epriv {
         struct ServerInternalPublicInterface {

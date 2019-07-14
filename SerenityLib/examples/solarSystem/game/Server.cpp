@@ -1,8 +1,9 @@
 #include "Server.h"
 #include "Packet.h"
 
+#include "SolarSystem.h"
+#include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/Engine_Utils.h>
-
 #include <core/engine/Engine_Math.h>
 
 #include <iostream>
@@ -45,7 +46,7 @@ void Server::shutdown() {
         //alert all the clients that the server is shutting down
         for (auto& client : m_clients) {
             Packet p;
-            p.PacketType = PacketType::ServerShutdown;
+            p.PacketType = PacketType::Server_Shutdown;
             client.second->send(p);
         }
         //then close the clients
@@ -72,62 +73,26 @@ void Server::onReceive() {
         auto& client = *itr.second;
         sf::Packet sf_packet;
         const auto& status = client.receive(sf_packet);
-        if (status != sf::Socket::Done){
-            // error...
-        }
-        Packet p;
+        if (status == sf::Socket::Done){
+            Packet* pp = Packet::getPacket(sf_packet);
+            auto& p = *pp;
+            if (pp && p.validate(sf_packet)) {
+                // Data extracted successfully...
+                std::cout << "Server: ";
+                p.print();
+
+                if (p.PacketType == PacketType::Client_To_Server_Ship_Physics_Update) {
+                    if (p.data != "") {
+                        SolarSystem& scene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+                        PacketPhysicsUpdate physics_update(*scene.getShips().at(p.data));
 
 
-
-        if (sf_packet >> p.PacketType >> p.x >> p.y >> p.z >> p.x1 >> p.y1 >> p.z1 >> p.x2 >> p.y2 >> p.z2 >> p.x3 >> p.y3 >> p.z3) {
-            // Data extracted successfully...
-
-            float x, y, z, x1, y1, z1, x2, y2, z2, x3, y3, z3;
-            Engine::Math::Float32From16(&x, p.x);
-            Engine::Math::Float32From16(&y, p.y);
-            Engine::Math::Float32From16(&z, p.z);
-
-            Engine::Math::Float32From16(&x1, p.x1);
-            Engine::Math::Float32From16(&y1, p.y1);
-            Engine::Math::Float32From16(&z1, p.z1);
-
-            Engine::Math::Float32From16(&x2, p.x2);
-            Engine::Math::Float32From16(&y2, p.y2);
-            Engine::Math::Float32From16(&z2, p.z2);
-
-            Engine::Math::Float32From16(&x3, p.x3);
-            Engine::Math::Float32From16(&y3, p.y3);
-            Engine::Math::Float32From16(&z3, p.z3);
-
-            std::cout << "Server: "
-                << static_cast<int>(p.PacketType)
-                << ", "
-                << x
-                << ", "
-                << y
-                << ", "
-                << z
-                << ", "
-                << x1
-                << ", "
-                << y1
-                << ", "
-                << z1
-                << ", "
-                << x2
-                << ", "
-                << y2
-                << ", "
-                << z2
-                << ", "
-                << x3
-                << ", "
-                << y3
-                << ", "
-                << z3
-            << std::endl;
-
-            send_to_client(client, p);
+                        physics_update.PacketType = PacketType::Server_To_Client_Ship_Physics_Update;
+                        client.send(physics_update);
+                    }
+                }
+            }
+            SAFE_DELETE(pp);
         }
     }
 }
@@ -145,7 +110,6 @@ const sf::Socket::Status Server::send_to_client(Client& c, const void* data, siz
 const sf::Socket::Status Server::send_to_client(Client& c, const void* data, size_t size, size_t& sent) {
     return c.send(data, size, sent);
 }
-
 
 const void Server::send_to_all_but_client(Client& c, Packet& packet) {
     for (auto& cl : m_clients) {
@@ -176,7 +140,6 @@ const void Server::send_to_all_but_client(Client& c, const void* data, size_t si
     }
 }
 
-
 const void Server::send_to_all(Packet& packet) {
     for (auto& cl : m_clients) {
         cl.second->send(packet);
@@ -205,20 +168,26 @@ void epriv::ServerInternalPublicInterface::update(Server* _server) {
     if (!_server) return;
     auto& server = *_server;
     //while (server.isActive()) {
-        sf::TcpSocket* client = new sf::TcpSocket();
-        const auto& status = server.m_listener->accept(*client);
+        sf::TcpSocket* sf_client = new sf::TcpSocket();
+        const auto& status = server.m_listener->accept(*sf_client);
         if (status == sf::Socket::Status::Done) {
-            const auto& client_ip      = client->getRemoteAddress().toString();
-            const auto& client_port    = client->getRemotePort();
+            const auto& client_ip      = sf_client->getRemoteAddress().toString();
+            const auto& client_port    = sf_client->getRemotePort();
             const auto& client_address = client_ip + " " + to_string(client_port);
             if (!server.m_clients.count(client_address)) {
-                Client* serverClient = new Client(client);
-                client->setBlocking(false);
-                server.m_clients.emplace(client_address, serverClient);
+                sf_client->setBlocking(false);
+                Client* client = new Client(sf_client);
+                server.m_clients.emplace(client_address, client);
                 std::cout << "New client: " << client_address << std::endl;
+
+                Packet p;
+                p.PacketType = PacketType::Server_To_Client_Accept_Connection;
+                p.data = "Client_Accepted";
+
+                client->send(p);
             }
         }else{
-            SAFE_DELETE(client);
+            SAFE_DELETE(sf_client);
         }
         server.onReceive();
     //}

@@ -249,6 +249,8 @@ void SolarSystem::loadFromFile(const string& filename){
     //player->addChild(lightP);
 
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
+
+    new Ship(ResourceManifest::DefiantMesh, ResourceManifest::DefiantSharkMaterial, false, "test", glm::vec3(-4, 0, 4), glm::vec3(1.0f), CollisionType::ConvexHull, this);
 }
 void SolarSystem::update(const double& dt){
     Scene::update(dt);

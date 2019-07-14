@@ -211,16 +211,16 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         if (!Engine::paused()) {
             if (ship.m_IsWarping && ship.m_WarpFactor > 0) {
                 auto& body = *ship.m_Entity.getComponent<ComponentBody>();
-                float speed = (ship.m_WarpFactor * 1.0f / 0.46f) * 2.0f;
-                glm::vec3 s = (body.forward() * glm::pow(speed, 15.0f)) / body.mass();
+                const float& speed = (ship.m_WarpFactor * 1.0f / 0.46f) * 2.0f;
+                const glm::vec3& s = (body.forward() * glm::pow(speed, 15.0f)) / glm::log2(body.mass() + 5.0f);
                 for (auto& pod : epriv::InternalScenePublicInterface::GetEntities(currentScene)) {
                     Entity e = currentScene.getEntity(pod);
-                    EntityDataRequest dataRequest(e);
+                    const EntityDataRequest dataRequest(e);
                     auto* cam = e.getComponent<ComponentCamera>(dataRequest);
                     //TODO: parent->child relationship
                     if (e != ship.m_Entity && !cam) {
                         auto& ebody = *e.getComponent<ComponentBody>(dataRequest);
-                        ebody.setPosition(ebody.position() + (s * (float)dt));
+                        ebody.setPosition(ebody.position() + (s * static_cast<float>(dt)));
                     }
                 }
             }
@@ -271,7 +271,8 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
 Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,SolarSystem* scene):EntityWrapper(*scene){
     auto& rigidBodyComponent = *m_Entity.addComponent<ComponentBody>(_type);
     auto& modelComponent     = *m_Entity.addComponent<ComponentModel>(mesh, mat);
-    
+    auto& nameComponent      = *m_Entity.addComponent<ComponentName>(name);
+
     m_Entity.addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
     glm::vec3 boundingBox = modelComponent.boundingBox();
@@ -305,6 +306,7 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
         m_ShipSystems.emplace(i, system);
 	}
     scene->m_Objects.push_back(this);
+    scene->getShips().emplace(name, this);
 }
 Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);

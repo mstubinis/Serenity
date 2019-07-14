@@ -26,7 +26,7 @@ void Math::Float32From16(float*     out, const uint16_t in) {
     t1 += 0x38000000;                       // Adjust bias
     t1 = (t3 == 0 ? 0 : t1);                // Denormals-as-zero
     t1 |= t2;                               // Re-insert sign bit
-    *((uint32_t*)out) = t1;
+    *(uint32_t*)out = t1;
 }
 void Math::Float16From32(uint16_t*  out, const float    in) {
     uint32_t inu = *((uint32_t*)&in);
@@ -41,7 +41,7 @@ void Math::Float16From32(uint16_t*  out, const float    in) {
     t1 = (t3 > 0x47000000) ? 0x7bff : t1;
     t1 = (t3 == 0 ? 0 : t1);               // Denormals-as-zero
     t1 |= t2;                              // Re-insert sign bit
-    *((uint16_t*)out) = t1;
+    *(uint16_t*)out = t1;
 }
 
 void Math::Float32From16(float*    out, const uint16_t* in, const uint arraySize) {

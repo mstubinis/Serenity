@@ -20,6 +20,7 @@ struct ResourceManifest{
 	static Handle VenerexMesh;
 	static Handle IntrepidMesh;
     static Handle ExcelsiorMesh;
+    static Handle LeviathanMesh;
 
 	static Handle NovaMaterial;
 	static Handle VenerexMaterial;

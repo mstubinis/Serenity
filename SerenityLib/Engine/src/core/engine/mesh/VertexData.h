@@ -26,21 +26,22 @@ struct VertexData final{
     VertexData(const VertexDataFormat& _format);
     ~VertexData();
 
-    template<typename T> const std::vector<T> getData(size_t attributeIndex) {
+    template<typename T> const std::vector<T> getData(const size_t& attributeIndex) {
         const T* _data = (T*)data[attributeIndex];
-        std::vector<T> ret(_data, _data + dataSizes[attributeIndex]);
+        const std::vector<T> ret(_data, _data + dataSizes[attributeIndex]);
         return ret;
     }
-    template<typename T> void setData(size_t attributeIndex, std::vector<T>& _data, bool addToGPU = false,bool orphan = false) {
+    template<typename T> void setData(const size_t& attributeIndex, const std::vector<T>& _data, const bool addToGPU = false, const bool orphan = false) {
         if (buffers.size() == 0)
             buffers.push_back(std::make_unique<VertexBufferObject>());
-        if (attributeIndex >= data.size()) return;
-        auto& _buffer = *buffers[0];
+        assert(attributeIndex < data.size());
         dataSizes[attributeIndex] = _data.size();
-        free(data[attributeIndex]);
-        auto totalSize = (_data.size() * sizeof(T)) + 1;
-        data[attributeIndex] = (char*)malloc(totalSize);
-        std::memmove(data[attributeIndex], _data.data(), totalSize);
+        auto& attributeVector = data[attributeIndex];
+        free(attributeVector);
+        const auto& totalSize = (_data.size() * sizeof(T)) + 1;
+        attributeVector = (char*)malloc(totalSize);
+        //                dst            source
+        std::memmove(attributeVector, _data.data(), totalSize);
         if (addToGPU) {
             if (format.interleavingType == VertexAttributeLayout::Interleaved) {
                 sendDataToGPU(orphan,-1);
@@ -49,12 +50,12 @@ struct VertexData final{
             }
         }
     }
-    void setDataIndices(std::vector<ushort>& _data, bool addToGPU = false, bool orphan = false);
+    void setDataIndices(std::vector<ushort>& _data, const bool addToGPU = false, const bool orphan = false);
 
     void finalize();
     void bind();
     void unbind();
-    void sendDataToGPU(bool orphan, int attributeIndex = -1);
+    void sendDataToGPU(const bool orphan, const int attributeIndex = -1);
 };
 
 #endif

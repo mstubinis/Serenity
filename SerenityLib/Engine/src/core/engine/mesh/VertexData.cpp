@@ -54,7 +54,7 @@ void VertexData::unbind() {
         format.unbind();
     }
 }
-void VertexData::setDataIndices(vector<ushort>& _data, bool addToGPU, bool orphan) {
+void VertexData::setDataIndices(vector<ushort>& _data, const bool addToGPU, const bool orphan) {
     if (buffers.size() == 1)
         buffers.push_back(std::make_unique<ElementBufferObject>());
     auto& _buffer = *buffers[1];
@@ -65,11 +65,13 @@ void VertexData::setDataIndices(vector<ushort>& _data, bool addToGPU, bool orpha
         !orphan ? _buffer.setData(indices, BufferDataDrawType::Static) : _buffer.setDataOrphan(indices);
     }
 }
-void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
+void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
+    //Interleaved format makes use of attributeIndex = -1
+
     auto& _vBuffer = *buffers[0];
     _vBuffer.generate(); _vBuffer.bind();
 
-    char* buffer;
+    char* buffer = nullptr;
     size_t accumulator = 0;
     size_t size = 0;
     if (format.interleavingType == VertexAttributeLayout::Interleaved) {
@@ -78,6 +80,7 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
         for (size_t i = 0; i < dataSizes[0]; ++i) {
             for (size_t j = 0; j < data.size(); ++j) {
                 const auto& sizeofT = format.attributes[j].typeSize;
+                //                dst                      source
                 std::memmove(&buffer[accumulator], &(data[j])[i * sizeofT], sizeofT);
                 accumulator += sizeofT;
             }
@@ -90,6 +93,7 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
             buffer = (char*)malloc(size);
             for (size_t i = 0; i < data.size(); ++i) {
                 const auto& blockSize = dataSizes[i] * format.attributes[i].typeSize;
+                //                   dst               source
                 std::memmove(&buffer[accumulator], &(data[i])[0], blockSize);
                 accumulator += blockSize;
             }
@@ -101,6 +105,7 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
                 if (i != attributeIndex) {
                     accumulator += dataSizes[i] * format.attributes[i].typeSize;
                 }else{
+                    //              dst          source
                     std::memmove(&buffer[0], &(data[i])[0], size);
                     break;
                 }

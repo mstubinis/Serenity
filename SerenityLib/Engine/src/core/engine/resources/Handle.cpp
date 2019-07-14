@@ -9,12 +9,12 @@ Handle::Handle() {
     version = 0; 
     type    = 0; 
 }
-Handle::Handle(uint _index, uint _version, uint _type) { 
+Handle::Handle(uint32_t _index, uint32_t _version, uint32_t _type) {
     index   = _index; 
     version = _version; 
     type    = _type; 
 }
-Handle::operator uint() const { 
+Handle::operator uint32_t() const {
     return type << 27 | version << 12 | index; 
 }
 const bool Handle::null() const { 

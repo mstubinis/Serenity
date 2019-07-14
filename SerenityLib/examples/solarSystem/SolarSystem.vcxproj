@@ -191,8 +191,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="game\Client.h" />
+    <ClInclude Include="game\Core.h" />
     <ClInclude Include="game\GameCamera.h" />
     <ClInclude Include="game\GameSkybox.h" />
+    <ClInclude Include="game\GameState.h" />
     <ClInclude Include="game\HUD.h" />
     <ClInclude Include="game\Packet.h" />
     <ClInclude Include="game\Planet.h" />
@@ -203,11 +205,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\Client.cpp" />
+    <ClCompile Include="game\Core.cpp" />
     <ClCompile Include="game\Game.cpp" />
     <ClCompile Include="game\GameCamera.cpp" />
     <ClCompile Include="game\GameSkybox.cpp" />
     <ClCompile Include="game\HUD.cpp" />
     <ClCompile Include="game\main.cpp" />
+    <ClCompile Include="game\Packet.cpp" />
     <ClCompile Include="game\Planet.cpp" />
     <ClCompile Include="game\ResourceManifest.cpp" />
     <ClCompile Include="game\Server.cpp" />

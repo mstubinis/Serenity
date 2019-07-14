@@ -11,7 +11,6 @@ struct VertexAttributeLayout final {enum Type {
 };};
 struct VertexData;
 
-
 //information about a vertex structure ( a list of all its attributes and the way the attributes are weaved into memory)
 struct VertexDataFormat {
     std::vector<VertexAttributeInfo>    attributes;
