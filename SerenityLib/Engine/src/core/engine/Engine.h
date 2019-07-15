@@ -11,6 +11,31 @@
 #include <core/engine/Engine_Noise.h>
 #include <core/engine/Engine_Window.h>
 
+
+struct EngineOptions final {
+    AntiAliasingAlgorithm::Algorithm aa_algorithm;
+    bool                             ssao_enabled;
+    bool                             hdr_enabled;
+    bool                             fullscreen;
+    bool                             god_rays_enabled;
+    bool                             fog_enabled;
+    unsigned int                     width;
+    unsigned int                     height;
+    const char*                      window_title;
+    EngineOptions(){
+        window_title     = "Engine";
+        width            = 800;
+        height           = 600;
+        ssao_enabled     = true;
+        hdr_enabled      = true;
+        god_rays_enabled = true;
+        fullscreen       = false;
+        fog_enabled      = false;
+        aa_algorithm     = AntiAliasingAlgorithm::FXAA;
+    }
+};
+
+
 namespace Engine{
     namespace epriv{
         struct Core final{
@@ -27,11 +52,11 @@ namespace Engine{
 
             bool                  m_Paused, m_Destroyed;
 
-            Core(const char* name, const uint& width, const uint& height);
+            Core(const EngineOptions&);
             ~Core();
         };
     };
-    void init(const char* name, const uint& width = 0, const uint& height = 0);
+    void init(const EngineOptions&);
     void pause(const bool& pause = true);
     bool paused();
     void unpause();

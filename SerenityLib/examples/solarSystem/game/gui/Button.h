@@ -3,15 +3,17 @@
 #define GAME_BUTTON_H
 
 #include "Widget.h"
-#include <core/engine/fonts/Font.h>
 #include <string>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
+class Font;
 class Button : public Widget {
     protected:
         Font*                     m_Font;
         std::string               m_Text;
+        glm::vec2                 m_TextScale;
+        glm::vec4                 m_TextColor;
         boost::function<void()>   m_FunctorOnClick;
     public:
         Button(Font& font, const float& x, const float& y, const float& width, const float& height);
@@ -22,9 +24,18 @@ class Button : public Widget {
 
         template<class T> void setOnClickFunctor(const T& functor) { m_FunctorOnClick = boost::bind<void>(functor, *this); }
 
+        const float getTextHeight() const;
+        const float getTextWidth() const;
+
+        void setTextScale(const glm::vec2& scale);
+        void setTextScale(const float& x, const float& y);
+        const glm::vec2& getTextScale() const;
+
         void setFont(Font& font);
-        void setText(const char* text);
-        void setText(const std::string& text);
+        void setTextColor(const float& r, const float& g, const float& b, const float& a);
+        void setTextColor(const glm::vec4& color);
+        virtual void setText(const char* text);
+        virtual void setText(const std::string& text);
 
         void update(const double& dt);
         void render();

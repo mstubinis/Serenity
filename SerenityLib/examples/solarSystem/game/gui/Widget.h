@@ -30,6 +30,9 @@ class Widget : public IWidget {
         void* getUserPointer() const;
         void setUserPointer(void*);
 
+        void setPosition(const float& x, const float& y);
+        void setPosition(const glm::vec2& position);
+
         void setColor(const float& r, const float& g, const float& b, const float& a);
         void setColor(const glm::vec4& color);
         void show();

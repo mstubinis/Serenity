@@ -29,6 +29,7 @@
 
 using namespace Engine;
 using namespace std;
+namespace boost_io = boost::iostreams;
 
 SolarSystem::SolarSystem(const string& n, const string& file):Scene(n){
     GameCamera* playerCamera = new GameCamera(0.35f,7000000000.0f,this);
@@ -40,42 +41,42 @@ SolarSystem::SolarSystem(const string& n, const string& file):Scene(n){
 SolarSystem::~SolarSystem(){
     SAFE_DELETE_VECTOR(m_Objects);
 }
-void SolarSystem::loadFromFile(const string& filename){
-    uint count = 0;
-    boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
-    unordered_map<string,vector<RingInfo>> planetRings;
 
-    unordered_map<string,Handle> loadedMaterials;
+void SolarSystem::loadFromFile(const string& filename) {
+    uint                                             count = 0;
+    boost_io::stream<boost_io::mapped_file_source>   str(filename);
+    unordered_map<string, vector<RingInfo>>          planetRings;
+    unordered_map<string, Handle>                    loadedMaterials;
 
     float gi_diffuse  = 1.0f;
     float gi_specular = 1.0f;
     float gi_global   = 1.0f;
 
     string skyboxDirectory;
-    for(string line; getline(str, line, '\n');){
-        line.erase( remove(line.begin(), line.end(), '\r'), line.end() ); //remove \r from the line
-        if(line[0] != '#'){//ignore commented lines
-            if(count == 1){//this line has the system's name
+    for (string line; getline(str, line, '\n');) {
+        line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
+        if (line[0] != '#') {//ignore commented lines
+            if (count == 1) {//this line has the system's name
                 setName(line);
-            }else if(count == 2){//this line has the system's skybox
+            }else if (count == 2) {//this line has the system's skybox
                 skyboxDirectory = ResourceManifest::BasePath + line;
-            }else if(count == 3){//this line has the system's skybox's number of flares
+            }else if (count == 3) {//this line has the system's skybox's number of flares
                 GameSkybox* box = new GameSkybox(skyboxDirectory, boost::lexical_cast<uint>(line), this);
-				setSkybox(box);
-				
-            }else if(count == 4){//this line has the system's GI contribution
+                setSkybox(box);
+
+            }else if (count == 4) {//this line has the system's GI contribution
                 string token;
                 istringstream stream(line);
-                while(getline(stream, token, ' ')) {
+                while (getline(stream, token, ' ')) {
                     size_t pos = token.find("=");
                     string key = token.substr(0, pos);
-                    string value = token.substr(pos + 1,string::npos);
-                         if(key == "giDiffuse")   gi_diffuse = stof(value);
-                    else if(key == "giSpecular")  gi_specular = stof(value);
-                    else if(key == "giGlobal")    gi_global = stof(value);
+                    string value = token.substr(pos + 1, string::npos);
+                    if      (key == "giDiffuse")   gi_diffuse = stof(value);
+                    else if (key == "giSpecular")  gi_specular = stof(value);
+                    else if (key == "giGlobal")    gi_global = stof(value);
                 }
             }
-            if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
+            if ((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' ') {//we got something to work with
                 Planet* planetoid = nullptr;
 
                 string token;
@@ -85,9 +86,8 @@ void SolarSystem::loadFromFile(const string& filename){
                 string LAGRANGE_TYPE;
                 string LAGRANGE_PLANET_1, LAGRANGE_PLANET_2;
                 string PARENT = "";
-                float R,G,B,   R1,G1,B1,   R2,G2,B2;
-                float ATMOSPHERE_HEIGHT;
-                string LIGHTCOLOR;
+                float R, G, B, R1, G1, B1, R2, G2, B2;
+                float ATMOSPHERE_HEIGHT = 0.0f;
                 string TYPE;
                 string TEXTURE = ResourceManifest::BasePath + "data/Textures/Planets/";
                 string MATERIAL_NAME = "";
@@ -102,156 +102,161 @@ void SolarSystem::loadFromFile(const string& filename){
 
                 unsigned long long RADIUS = 0;
                 unsigned long long POSITION = 0;
+
+                long long X = 0;
+                long long Y = 0;
+                long long Z = 0;
+                float     A = 0;
+
                 uint BREAK = 0;
 
-                while(getline(stream, token, ' ')) {
+                while (getline(stream, token, ' ')) {
                     size_t pos = token.find("=");
 
                     string key = token.substr(0, pos);
-                    string value = token.substr(pos + 1,string::npos);
+                    string value = token.substr(pos + 1, string::npos);
 
-                    if(key == "name"){                  
+                    if (key == "name") {
                         NAME = value;
-                        replace(NAME.begin(),NAME.end(),'_',' ');
+                        replace(NAME.begin(), NAME.end(), '_', ' ');
                     }
-                    else if(key == "lp1")              LAGRANGE_PLANET_1 = value;
-                    else if(key == "lp2")              LAGRANGE_PLANET_2 = value;
-                    else if(key == "lType")            LAGRANGE_TYPE = value;
-                    else if(key == "radius")           RADIUS = stoull(value)*10;
-                    else if(key == "r")                R = stof(value);
-                    else if(key == "g")                G = stof(value);
-                    else if(key == "b")                B = stof(value);
-                    else if(key == "r1")               R1 = stof(value);
-                    else if(key == "g1")               G1 = stof(value);
-                    else if(key == "b1")               B1 = stof(value);
-                    else if(key == "r2")               R2 = stof(value);
-                    else if(key == "g2")               G2 = stof(value);
-                    else if(key == "b2")               B2 = stof(value);
-                    else if(key == "position")         POSITION = stoull(value)*10; 
-                    else if(key == "parent")           PARENT = value;
-                    else if(key == "type")             TYPE = value;
-                    else if(key == "atmosphereHeight") ATMOSPHERE_HEIGHT = stof(value);
-                    else if(key == "break")            BREAK = stoi(value);
-                    else if(key == "eccentricity")     ORBIT_ECCENTRICITY = stof(value);
-                    else if(key == "period")           ORBIT_PERIOD = stof(value);
-                    else if(key == "majorAxis")        ORBIT_MAJOR_AXIS = stoll(value)*10;
-                    else if(key == "days")             ROTATIONAL_PERIOD = stof(value);
-                    else if(key == "tilt")             ROTATIONAL_TILT = stof(value);
-                    else if(key == "inclination")      INCLINATION = stof(value);
-                    else if(key == "material"){        MATERIAL_NAME = value; TEXTURE = ""; } //todo: implement this somehow
-                    else if(key == "texture"){    
+                    else if (key == "lp1")              LAGRANGE_PLANET_1 = value;
+                    else if (key == "lp2")              LAGRANGE_PLANET_2 = value;
+                    else if (key == "lType")            LAGRANGE_TYPE = value;
+                    else if (key == "radius")           RADIUS = stoull(value) * 10;
+                    else if (key == "r")                R = stof(value);
+                    else if (key == "g")                G = stof(value);
+                    else if (key == "b")                B = stof(value);
+                    else if (key == "r1")               R1 = stof(value);
+                    else if (key == "g1")               G1 = stof(value);
+                    else if (key == "b1")               B1 = stof(value);
+                    else if (key == "r2")               R2 = stof(value);
+                    else if (key == "g2")               G2 = stof(value);
+                    else if (key == "b2")               B2 = stof(value);
+                    else if (key == "position")         POSITION = stoull(value) * 10;
+
+                    else if (key == "x")                X = stoull(value);
+                    else if (key == "y")                Y = stoull(value);
+                    else if (key == "z")                Z = stoull(value);
+                    else if (key == "a")                A = stoull(value);
+
+                    else if (key == "parent")           PARENT = value;
+                    else if (key == "type")             TYPE = value;
+                    else if (key == "atmosphereHeight") ATMOSPHERE_HEIGHT = stof(value);
+                    else if (key == "break")            BREAK = stoi(value);
+                    else if (key == "eccentricity")     ORBIT_ECCENTRICITY = stof(value);
+                    else if (key == "period")           ORBIT_PERIOD = stof(value);
+                    else if (key == "majorAxis")        ORBIT_MAJOR_AXIS = stoll(value) * 10;
+                    else if (key == "days")             ROTATIONAL_PERIOD = stof(value);
+                    else if (key == "tilt")             ROTATIONAL_TILT = stof(value);
+                    else if (key == "inclination")      INCLINATION = stof(value);
+                    else if (key == "material") { MATERIAL_NAME = value; TEXTURE = ""; } //todo: implement this somehow
+                    else if (key == "texture") {
                         TEXTURE += value;
-                        MATERIAL_NAME = value.substr(0,value.size()-4);
+                        auto ext = boost::filesystem::extension(value);
+                        MATERIAL_NAME = value.substr(0, value.size() - ext.size());
                     }
 
                 }
-                float randAngle = float(rand() % 3600);
-                randAngle /= 10.0f;
-                randAngle *= 3.14159f / 180.0f;
-                float xPos = glm::cos(randAngle) * float(POSITION);
-                float zPos = glm::sin(randAngle) * float(POSITION);
-
-                if(MATERIAL_NAME != ""){
+                float x = static_cast<float>(X);
+                float y = static_cast<float>(Y);
+                float z = static_cast<float>(Z);
+                if (MATERIAL_NAME != "") {
                     string extention = boost::filesystem::extension(TEXTURE);
-                    string normalFile = (TEXTURE.substr(0,TEXTURE.size()-extention.size())) + "_Normal" + extention;
-                    string glowFile = (TEXTURE.substr(0,TEXTURE.size()-extention.size())) + "_Glow" + extention;
-                    if(!boost::filesystem::exists(normalFile)){
+                    string normalFile = (TEXTURE.substr(0, TEXTURE.size() - extention.size())) + "_Normal" + extention;
+                    string glowFile = (TEXTURE.substr(0, TEXTURE.size() - extention.size())) + "_Glow" + extention;
+                    if (!boost::filesystem::exists(normalFile)) {
                         normalFile = "";
                     }
-                    if(!boost::filesystem::exists(glowFile)){
+                    if (!boost::filesystem::exists(glowFile)) {
                         glowFile = "";
                     }
-                    if(!loadedMaterials.count(MATERIAL_NAME)){
+                    if (!loadedMaterials.count(MATERIAL_NAME)) {
                         Handle handle = Resources::addMaterial(MATERIAL_NAME, TEXTURE, normalFile, glowFile, "");
-                        loadedMaterials.emplace(MATERIAL_NAME,handle);
+                        loadedMaterials.emplace(MATERIAL_NAME, handle);
                     }
                 }
-                
-                if(line[0] == 'S'){//Sun
-                    Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::vec3(R2,G2,B2),glm::vec3(0),(float)RADIUS,NAME,this);
-                    if(PARENT != ""){
-                        star->setPosition(m_Planets.at(PARENT)->getPosition()+glm::vec3(xPos,0,zPos));
+                if (line[0] == 'S') {//Star
+                    Star* star = new Star(glm::vec3(R, G, B), glm::vec3(R1, G1, B1), glm::vec3(R2, G2, B2), glm::vec3(0), static_cast<float>(RADIUS), NAME, this);
+                    if (PARENT != "") {
+                        star->setPosition(m_Planets.at(PARENT)->getPosition() + glm::vec3(x, y, z));
                     }
-                    m_Planets.emplace(NAME,star);
-                }else if(line[0] == 'P'){//Planet
+                    m_Planets.emplace(NAME, star);
+                }else if (line[0] == 'P') {//Planet
                     PlanetType::Type PLANET_TYPE;
-                         if(TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
-                    else if(TYPE == "Ice")      PLANET_TYPE = PlanetType::Ice;
-                    else if(TYPE == "GasGiant") PLANET_TYPE = PlanetType::GasGiant;
-                    else if(TYPE == "IceGiant") PLANET_TYPE = PlanetType::IceGiant;
-                    else if(TYPE == "Asteroid") PLANET_TYPE = PlanetType::Asteroid;
-                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME),PLANET_TYPE,glm::vec3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
-                    if(PARENT != ""){
+                    if      (TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
+                    else if (TYPE == "Ice")      PLANET_TYPE = PlanetType::Ice;
+                    else if (TYPE == "GasGiant") PLANET_TYPE = PlanetType::GasGiant;
+                    else if (TYPE == "IceGiant") PLANET_TYPE = PlanetType::IceGiant;
+                    else if (TYPE == "Asteroid") PLANET_TYPE = PlanetType::Asteroid;
+                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME), PLANET_TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
+                    if (PARENT != "") {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
-                        if(ORBIT_PERIOD != -1.0f){
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,*parent,INCLINATION));
+                        if (ORBIT_PERIOD != -1.0f) {
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, (float)ORBIT_MAJOR_AXIS, A, *parent, INCLINATION));
                         }
-                        if(ROTATIONAL_TILT != -1.0f){
-                            planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
+                        if (ROTATIONAL_TILT != -1.0f) {
+                            planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
                         }
                     }
-                    m_Planets.emplace(NAME,planetoid);
-                }else if(line[0] == 'M'){//Moon
+                    m_Planets.emplace(NAME, planetoid);
+                }else if (line[0] == 'M') {//Moon
                     PlanetType::Type PLANET_TYPE;
-                         if(TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
-                    else if(TYPE == "Ice")      PLANET_TYPE = PlanetType::Ice;
-                    else if(TYPE == "GasGiant") PLANET_TYPE = PlanetType::GasGiant;
-                    else if(TYPE == "IceGiant") PLANET_TYPE = PlanetType::IceGiant;
-                    else if(TYPE == "Asteroid") PLANET_TYPE = PlanetType::Asteroid;
-                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME),PLANET_TYPE,glm::vec3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
-                    if(PARENT != ""){
+                    if      (TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
+                    else if (TYPE == "Ice")      PLANET_TYPE = PlanetType::Ice;
+                    else if (TYPE == "GasGiant") PLANET_TYPE = PlanetType::GasGiant;
+                    else if (TYPE == "IceGiant") PLANET_TYPE = PlanetType::IceGiant;
+                    else if (TYPE == "Asteroid") PLANET_TYPE = PlanetType::Asteroid;
+                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME), PLANET_TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
+                    if (PARENT != "") {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
-                        if(ORBIT_PERIOD != -1.0f){
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,*parent,INCLINATION));
+                        if (ORBIT_PERIOD != -1.0f) {
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, (float)ORBIT_MAJOR_AXIS, A, *parent, INCLINATION));
                         }
-                        if(ROTATIONAL_TILT != -1.0f){
-                            planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
+                        if (ROTATIONAL_TILT != -1.0f) {
+                            planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
                         }
                     }
-                    m_Planets.emplace(NAME,planetoid);                   
-                }else if(line[0] == '*'){//Player ship
-                    if(PARENT != ""){
-                        float parentX = m_Planets.at(PARENT)->getPosition().x;
-                        float parentZ = m_Planets.at(PARENT)->getPosition().z;
-                        xPos += parentX;
-                        zPos += parentZ;
+                    m_Planets.emplace(NAME, planetoid);
+                }else if (line[0] == '*') {//Player ship
+                    Ship* playerShip = new Ship(ResourceManifest::DefiantMesh, ResourceManifest::DefiantSharkMaterial, true, NAME, glm::vec3(x, y, z), glm::vec3(1.0f), CollisionType::ConvexHull, this);
+                    if (PARENT != "") {
+                        Planet* parent = m_Planets.at(PARENT);
+                        auto& cbody = *playerShip->entity().getComponent<ComponentBody>();
+                        cbody.setPosition(cbody.position() + parent->getPosition());
                     }
-                    setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantSharkMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1.0f), CollisionType::ConvexHull,this));
+                    setPlayer(playerShip);
                     GameCamera* playerCamera = (GameCamera*)getActiveCamera();
                     playerCamera->follow(getPlayer()->entity());
-                }else if(line[0] == 'R'){//Rings
-                    if(PARENT != ""){
-                        if(!planetRings.count(PARENT)){
+                }else if (line[0] == 'R') {//Rings
+                    if (PARENT != "") {
+                        if (!planetRings.count(PARENT)) {
                             vector<RingInfo> rings;
-                            planetRings.emplace(PARENT,rings);
+                            planetRings.emplace(PARENT, rings);
                         }
-                        planetRings.at(PARENT).push_back(RingInfo((uint)POSITION/10,(uint)RADIUS/10,glm::ivec3(R,G,B),BREAK));
+                        planetRings.at(PARENT).push_back(RingInfo(static_cast<uint>(POSITION) / 10, static_cast<uint>(RADIUS) / 10, glm::ivec3(R, G, B), BREAK));
                     }
-                }else if(line[0] == 'L'){//Lagrange Point               
+                }else if (line[0] == 'L') {//Lagrange Point               
                 }
             }
         }
         ++count;
     }
     //add planetary rings
-    for(auto& rings:planetRings){
-        new Ring(rings.second,m_Planets.at(rings.first));
+    for (auto& rings : planetRings) {
+        new Ring(rings.second, m_Planets.at(rings.first));
     }
-    //sf::Image heightmap;
-    //heightmap.loadFromFile("../data/Textures/moon_terrain.jpg");
-    //Terrain* t = new Terrain("terrainname", heightmap, ResourceManifest::DefiantMaterial, this);
-
     centerSceneToObject(player->entity());
-
-    //LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
-    //player->addChild(lightP);
 
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
 
     new Ship(ResourceManifest::DefiantMesh, ResourceManifest::DefiantSharkMaterial, false, "test", glm::vec3(-4, 0, 4), glm::vec3(1.0f), CollisionType::ConvexHull, this);
 }
+
+
+
 void SolarSystem::update(const double& dt){
     Scene::update(dt);
 }

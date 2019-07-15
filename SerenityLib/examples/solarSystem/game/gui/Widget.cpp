@@ -8,7 +8,7 @@ using namespace Engine;
 
 Widget::Widget(const glm::vec2& position, const float& width, const float& height) {
     m_Alignment = WidgetAlignment::Center;
-    m_Position = position;
+    setPosition(position);
     m_Width = width;
     m_Height = height;
     m_MouseIsOver = false;
@@ -16,8 +16,7 @@ Widget::Widget(const glm::vec2& position, const float& width, const float& heigh
 }
 Widget::Widget(const float& x, const float& y, const float& width, const float& height) {
     m_Alignment = WidgetAlignment::Center;
-    m_Position.x = x;
-    m_Position.y = y;
+    setPosition(x,y);
     m_Width = width;
     m_Height = height;
     m_MouseIsOver = false;
@@ -42,6 +41,14 @@ const float& Widget::height() const {
 
 const bool Widget::isMouseOver() const {
     return m_MouseIsOver;
+}
+
+void Widget::setPosition(const float& x, const float& y) {
+    m_Position.x = x;
+    m_Position.y = y;
+}
+void Widget::setPosition(const glm::vec2& position) {
+    m_Position = position;
 }
 
 void Widget::setColor(const float& r, const float& g, const float& b, const float& a) {

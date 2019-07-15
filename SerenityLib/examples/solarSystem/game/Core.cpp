@@ -19,7 +19,6 @@ Core::Core() {
     m_Client            = nullptr;
     m_Initalized        = false;
     m_GameState         = GameState::Main_Menu;
-    m_GameStatePrevious = GameState::Main_Menu;
 
     ResourceManifest::init();
     const std::string& iconPath = ResourceManifest::BasePath + "data/Textures/icon.png";
@@ -28,34 +27,61 @@ Core::Core() {
 Core::~Core() {
 
 }
+void Core::startServer(const unsigned short& port) {
+    shutdownServer();
+    m_Server = new Server(port);
+    m_Server->startup();
+}
+void Core::shutdownServer() {
+    if (m_Server) {
+        m_Server->shutdown();
+        SAFE_DELETE(m_Server);
+    }
+}
+
+void Core::startClient(const unsigned short& port, const string& ip) {
+    m_Client = new Client(port, ip);
+    m_Client->connect();
+}
+void Core::shutdownClient() {
+    if (m_Client) {
+        m_Client->disconnect();
+        SAFE_DELETE(m_Client);
+    }
+}
+
+void Core::enterMap(const string& mapFile) {
+    SolarSystem* map = new SolarSystem(mapFile, ResourceManifest::BasePath + "data/Systems/" + mapFile + ".txt");
+    Resources::setCurrentScene(map);
+
+    auto& window = Resources::getWindow();
+    window.keepMouseInWindow(true);
+    window.setMouseCursorVisible(false);
+
+    Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA);
+    Renderer::smaa::setQuality(SMAAQualityLevel::Ultra);
+}
+void Core::onResize(const uint& width, const uint& height) {
+    m_HUD->onResize(width, height);
+}
 void Core::init() {
     if (m_Initalized) return;
 
     auto& window = Resources::getWindow();
-
-    //window.keepMouseInWindow(true);
-    //window.setMouseCursorVisible(false);
-
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(60);
-
-    //SolarSystem* sol = new SolarSystem("Sol", ResourceManifest::BasePath + "data/Systems/Sol.txt");
-    //Resources::setCurrentScene("Sol");
 
     Scene* s = new Scene("Menu");
     Resources::setCurrentScene(s);
     
-    m_HUD    = new HUD(m_GameState, m_GameStatePrevious);
-    m_Server = new Server(55000);
-    m_Client = new Client(55000, "127.0.0.1");
-    m_Server->startup();
-
+    m_HUD    = new HUD(m_GameState, *this);
     m_Initalized = true;
 }
 void Core::update(const double& dt) {
     if (Engine::isKeyDown(KeyboardKey::Escape)) {
         Engine::stop();
     }
+
 
     /*
     if (Engine::isKeyDownOnce(KeyboardKey::Space)) {

@@ -27,15 +27,20 @@ void Game::render(){
 
 #pragma region EventHandlers
 void Game::onResize(const uint& width, const uint& height){
+    if(m_Core)
+        m_Core->onResize(width, height);
 }
 void Game::onClose(){
 }
 void Game::onLostFocus(){
 }
 void Game::onGainedFocus(){
-    //const auto& size = Resources::getWindow().getSize();
-    //const glm::vec2 halfRes(size.x / 2, size.y / 2);
-    //Engine::setMousePosition(halfRes, true);
+
+    if (m_Core && m_Core->gameState() == GameState::Game) {
+        const auto& size = Resources::getWindow().getSize();
+        const glm::vec2 halfRes(size.x / 2, size.y / 2);
+        Engine::setMousePosition(halfRes, true);
+    }
 }
 void Game::onTextEntered(const uint& unicode){
 }
@@ -52,27 +57,31 @@ void Game::onMouseButtonReleased(const uint& button){
 void Game::onMouseMoved(const float& mouseX, const float& mouseY){
 }
 void Game::onMouseEntered(){
-    //Engine::getWindow().requestFocus();
-    //Engine::getWindow().keepMouseInWindow(true);
+    if (m_Core && m_Core->gameState() == GameState::Game) {
+        Engine::getWindow().requestFocus();
+        Engine::getWindow().keepMouseInWindow(true);
+    }
 }
 void Game::onMouseLeft(){
-    //Engine::getWindow().keepMouseInWindow(false);
+    if (m_Core && m_Core->gameState() == GameState::Game) {
+        Engine::getWindow().keepMouseInWindow(false);
+    }
 }
 void Game::onPreUpdate(const double& dt){
 }
 void Game::onPostUpdate(const double& dt){
-    /*
-    auto& window = Resources::getWindow();
-    const auto& size = window.getSize();
-    const glm::vec2 halfRes(size.x / 2, size.y / 2);
-    if (window.hasFocus()) {
-        const glm::vec2& mousePos = Engine::getMousePosition();
-        const float& mouseDistFromCenter = glm::distance(mousePos, halfRes);
-        if (mouseDistFromCenter > 1.0f) {
-            Engine::setMousePosition(halfRes, false, true);
+    if (m_Core->gameState() == GameState::Game) {
+        auto& window = Resources::getWindow();
+        const auto& size = window.getSize();
+        const glm::vec2 halfRes(size.x / 2, size.y / 2);
+        if (window.hasFocus()) {
+            const glm::vec2& mousePos = Engine::getMousePosition();
+            const float& mouseDistFromCenter = glm::distance(mousePos, halfRes);
+            if (mouseDistFromCenter > 1.0f) {
+                Engine::setMousePosition(halfRes, false, true);
+            }
         }
     }
-    */
 }
 void Game::onJoystickButtonPressed(){
 }

@@ -12,20 +12,33 @@
 class  Font;
 class  Ship;
 class  Button;
+class  Core;
 struct Entity;
+
+struct ButtonHost_OnClick;
+struct ButtonJoin_OnClick;
+struct ButtonBack_OnClick;
+struct ButtonNext_OnClick;
+
 class HUD final{
+    friend struct ButtonHost_OnClick;
+    friend struct ButtonJoin_OnClick;
+    friend struct ButtonBack_OnClick;
+    friend struct ButtonNext_OnClick;
     private:
         glm::vec3            m_Color;
         Handle               m_FontHandle;
         Font*                m_Font;
         bool                 m_Active;
         GameState::State&    m_GameState;
-        GameState::State&    m_GameStatePrevious;
+        Core&                m_Core;
 
 
         Button*              m_ButtonHost;
         Button*              m_ButtonJoin;
 
+        Button*              m_Back;
+        Button*              m_Next;
 
         void update_game(const double& dt);
         void update_main_menu(const double& dt);
@@ -42,8 +55,10 @@ class HUD final{
         void render_join_server_server_info();
 
     public:
-        HUD(GameState::State& current, GameState::State& previous);
+        HUD(GameState::State& current, Core& core);
         ~HUD();
+
+        void onResize(const uint& width, const uint& height);
 
         void update(const double& dt);
         void render();

@@ -308,8 +308,8 @@ glm::vec2 Math::unpack2NibblesFromCharBasic(const float _packedData) {
     return glm::vec2(highEnd, static_cast<float>(lowEnd / 255.0));
 }
 float Math::pack2FloatsInto1Float(const float x, const float y){
-    int _x = (x + 1.0f) * 0.5f;
-	int _y = (y + 1.0f) * 0.5f;
+    int _x = static_cast<int>((x + 1.0f) * 0.5f);
+	int _y = static_cast<int>((y + 1.0f) * 0.5f);
     return glm::floor(_x * 1000.0f) + _y; 
 }
 float Math::pack2FloatsInto1Float(const glm::vec2& v){

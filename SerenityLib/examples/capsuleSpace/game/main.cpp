@@ -34,7 +34,15 @@ int main(int argc, char* argv[]) {
         ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
     }
 #endif
-    Engine::init("Capsule Space", 1024, 768);
+
+    EngineOptions options;
+    options.window_title = "Capsule Space";
+    options.width = 1024;
+    options.height = 768;
+    options.fullscreen = true;
+    options.aa_algorithm = AntiAliasingAlgorithm::SMAA;
+
+    Engine::init(options);
     Engine::run();
 
 #ifdef _WIN32

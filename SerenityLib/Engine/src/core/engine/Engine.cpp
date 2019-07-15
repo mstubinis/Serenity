@@ -11,18 +11,19 @@ using namespace Engine;
 
 epriv::Core* epriv::Core::m_Engine = nullptr;
 
-epriv::Core::Core(const char* name, const uint& w, const uint& h):
-m_EventManager(name,w,h),
-m_ResourceManager(name,w,h),
-m_DebugManager(name,w,h),
-m_SoundManager(name,w,h),
-m_RenderManager(name,w,h),
-m_PhysicsManager(name,w,h),
-m_ThreadManager(name,w,h),
-m_NoiseManager(name,w,h)
+epriv::Core::Core(const EngineOptions& options) :
+m_EventManager(options.window_title, options.width, options.height),
+m_ResourceManager(options.window_title, options.width, options.height),
+m_DebugManager(options.window_title, options.width, options.height),
+m_SoundManager(options.window_title, options.width, options.height),
+m_RenderManager(options.window_title, options.width, options.height),
+m_PhysicsManager(options.window_title, options.width, options.height),
+m_ThreadManager(options.window_title, options.width, options.height),
+m_NoiseManager(options.window_title, options.width, options.height)
 {
-    m_Paused = m_Destroyed = false;
+    m_Destroyed = m_Paused = false;
 }
+
 epriv::Core::~Core(){
 
 }
@@ -39,17 +40,22 @@ void Engine::unpause(){
     epriv::Core::m_Engine->m_Paused = false;
 }
 
-void Engine::init(const char* name, const uint& w, const uint& h){
-    epriv::Core::m_Engine = new epriv::Core(name,w,h);
+void Engine::init(const EngineOptions& options) {
+    epriv::Core::m_Engine = new epriv::Core(options);
     auto& engine = *epriv::Core::m_Engine;
 
-    engine.m_ResourceManager._init(name, w, h);
-    engine.m_DebugManager._init(name, w, h);
-    engine.m_RenderManager._init(name, w, h);
-    engine.m_PhysicsManager._init(name, w, h, engine.m_ThreadManager.cores());
+    engine.m_ResourceManager._init(options.window_title, options.width, options.height);
+
+    auto& window = Resources::getWindow();
+    window.setSize(options.width, options.height);
+    window.setFullScreen(options.fullscreen);
+
+    engine.m_DebugManager._init(options.window_title, options.width, options.height);
+    engine.m_RenderManager._init(options.window_title, options.width, options.height);
+    engine.m_PhysicsManager._init(options.window_title, options.width, options.height, engine.m_ThreadManager.cores());
 
     //init the game here
-    Engine::setMousePosition(w / 2, h / 2);
+    Engine::setMousePosition(options.width / 2, options.height / 2);
     Game::initResources();
     epriv::threading::waitForAll();
     Game::initLogic();
@@ -61,10 +67,17 @@ void Engine::init(const char* name, const uint& w, const uint& h){
     }
     Scene& currentScene = *Resources::getCurrentScene();
     if (!currentScene.getActiveCamera()) {
-        Camera* defaultCamera = new Camera(60, w / static_cast<float>(h), 0.01f, 1000.0f, &currentScene);
+        Camera* defaultCamera = new Camera(60, options.width / static_cast<float>(options.height), 0.01f, 1000.0f, &currentScene);
         currentScene.setActiveCamera(*defaultCamera);
     }
+
+    Renderer::ssao::enable(options.ssao_enabled);
+    Renderer::godRays::enable(options.god_rays_enabled);
+    Renderer::hdr::enable(options.hdr_enabled);
+    Renderer::fog::enable(options.fog_enabled);
+    Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
+
 void RESET_EVENTS(const double& dt){
     epriv::Core::m_Engine->m_EventManager.onResetEvents(dt);
 }

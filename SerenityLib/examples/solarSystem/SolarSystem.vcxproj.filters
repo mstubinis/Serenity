@@ -78,6 +78,9 @@
     <ClInclude Include="game\gui\Button.h">
       <Filter>Header Files\Game\GUI</Filter>
     </ClInclude>
+    <ClInclude Include="game\gui\TextBox.h">
+      <Filter>Header Files\Game\GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -123,6 +126,9 @@
       <Filter>Source Files\Game\GUI</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\Button.cpp">
+      <Filter>Source Files\Game\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\TextBox.cpp">
       <Filter>Source Files\Game\GUI</Filter>
     </ClCompile>
   </ItemGroup>
