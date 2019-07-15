@@ -66,6 +66,18 @@
     <ClInclude Include="game\GameState.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
+    <ClInclude Include="game\gui\WidgetInterface.h">
+      <Filter>Header Files\Game\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\Widget.h">
+      <Filter>Header Files\Game\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\WidgetIncludes.h">
+      <Filter>Header Files\Game\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\Button.h">
+      <Filter>Header Files\Game\GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -106,6 +118,12 @@
     </ClCompile>
     <ClCompile Include="game\Core.cpp">
       <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\Widget.cpp">
+      <Filter>Source Files\Game\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\Button.cpp">
+      <Filter>Source Files\Game\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

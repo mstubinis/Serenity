@@ -12,7 +12,7 @@ EventManager::EventManager(const char* name, const uint w, const uint h):m_Event
     m_Delta = 0;
     m_Position = m_Position_Previous = m_Difference = glm::vec2(0.0f);
 
-    m_currentKey = m_previousKey = KeyboardKey::Unknown;
+    m_currentKey    = m_previousKey    = KeyboardKey::Unknown;
     m_currentButton = m_previousButton = MouseButton::Unknown;
 
     m_EventManager = this;
@@ -24,12 +24,13 @@ EventManager::~EventManager(){
 }
 
 void EventManager::setMousePositionInternal(const float x, const float y, const bool resetDifference, const bool resetPrevious) {
-    glm::vec2 newPos(x, y);
+    const glm::vec2 newPos = glm::vec2(x, Resources::getWindowSize().y - y); //opengl flipping y axis
     resetPrevious ? m_Position_Previous = newPos : m_Position_Previous = m_Position;
     m_Position = newPos;
     m_Difference += (m_Position - m_Position_Previous);
-    if (resetDifference) 
+    if (resetDifference) {
         m_Difference = glm::vec2(0.0f);
+    }
 }
 
 void EventManager::onEventKeyPressed(const uint& key){
@@ -56,10 +57,12 @@ void EventManager::onEventMouseWheelMoved(const int& delta){
     m_Delta += (static_cast<double>(delta) * 10.0);
 }
 void EventManager::onResetEvents(const double& dt){
-    m_previousKey = KeyboardKey::Unknown;
-    m_currentKey = KeyboardKey::Unknown;
+    m_previousKey    = KeyboardKey::Unknown;
+    m_currentKey     = KeyboardKey::Unknown;
+    m_previousButton = MouseButton::Unknown;
+    m_currentButton  = MouseButton::Unknown;
 
-    double step = (1.0 - dt);
+    const double step = (1.0 - dt);
     m_Delta *= step * step * step;
 
     m_Difference.x = 0.0f;
@@ -69,14 +72,14 @@ const bool Engine::isKeyDown(const KeyboardKey::Key key){
     return (!EventManager::m_EventManager->m_KeyStatus[key]) ? false : true;
 }
 const bool Engine::isKeyDownOnce(const KeyboardKey::Key key){
-    bool res = Engine::isKeyDown(key);
+    const bool res = Engine::isKeyDown(key);
     auto& mgr = *EventManager::m_EventManager;
     return (res && mgr.m_currentKey == key && (mgr.m_currentKey != mgr.m_previousKey)) ? true : false;
 }
 
 const bool Engine::isKeyDownOnce(const KeyboardKey::Key first, const KeyboardKey::Key second) {
-    bool resFirst = Engine::isKeyDown(first);
-    bool resSecond = Engine::isKeyDown(second);
+    const bool& resFirst = Engine::isKeyDown(first);
+    const bool& resSecond = Engine::isKeyDown(second);
     auto& mgr = *EventManager::m_EventManager;
     return ( resFirst && resSecond && mgr.m_currentKey == second && (mgr.m_currentKey != mgr.m_previousKey)) ? true : false;
 }
@@ -88,7 +91,7 @@ const bool Engine::isMouseButtonDown(const MouseButton::Button button){
     return (!EventManager::m_EventManager->m_MouseStatus[button]) ? false : true;
 }
 const bool Engine::isMouseButtonDownOnce(const MouseButton::Button button){
-    bool res = Engine::isMouseButtonDown(button);
+    const bool res = Engine::isMouseButtonDown(button);
     auto& mgr = *EventManager::m_EventManager;
     return (res && mgr.m_currentButton == button && (mgr.m_currentButton != mgr.m_previousButton)) ? true : false;
 }

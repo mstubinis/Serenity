@@ -5,6 +5,8 @@
 #include <ecs/ECS.h>
 #include <ecs/ComponentCamera.h>
 
+#include <core/Camera.h>
+
 using namespace Engine;
 
 epriv::Core* epriv::Core::m_Engine = nullptr;
@@ -41,20 +43,26 @@ void Engine::init(const char* name, const uint& w, const uint& h){
     epriv::Core::m_Engine = new epriv::Core(name,w,h);
     auto& engine = *epriv::Core::m_Engine;
 
-    engine.m_ResourceManager._init(name,w,h);
-    engine.m_DebugManager._init(name,w,h);
-    engine.m_RenderManager._init(name,w,h);
-    engine.m_PhysicsManager._init(name,w,h,engine.m_ThreadManager.cores());
+    engine.m_ResourceManager._init(name, w, h);
+    engine.m_DebugManager._init(name, w, h);
+    engine.m_RenderManager._init(name, w, h);
+    engine.m_PhysicsManager._init(name, w, h, engine.m_ThreadManager.cores());
 
     //init the game here
-    Engine::setMousePosition(w/2,h/2);
+    Engine::setMousePosition(w / 2, h / 2);
     Game::initResources();
     epriv::threading::waitForAll();
     Game::initLogic();
+
     //the scene is the root of all games. create the default scene if 1 does not exist already
     if (engine.m_ResourceManager._numScenes() == 0) {
-        new Scene("Default");
-        if (!Resources::getCurrentScene()) { Resources::setCurrentScene("Default"); }
+        Scene* defaultScene = new Scene("Default");
+        Resources::setCurrentScene(defaultScene);
+    }
+    Scene& currentScene = *Resources::getCurrentScene();
+    if (!currentScene.getActiveCamera()) {
+        Camera* defaultCamera = new Camera(60, w / static_cast<float>(h), 0.01f, 1000.0f, &currentScene);
+        currentScene.setActiveCamera(*defaultCamera);
     }
 }
 void RESET_EVENTS(const double& dt){

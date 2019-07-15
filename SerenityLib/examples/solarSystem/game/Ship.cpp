@@ -95,7 +95,7 @@ void ShipSystemPitchThrusters::update(const double& dt){
         auto& rigidbody = *ship.entity().getComponent<ComponentBody>();
         if(ship.IsPlayer()){
             if(ship.getPlayerCamera()->getState() != CameraState::Orbit){
-				const auto& diff = -Engine::getMouseDifference().y;
+				const auto& diff = Engine::getMouseDifference().y;
 				ship.m_MouseFactor.y += diff * 0.00065;
 				const float& massFactor = 1.0f / (rigidbody.mass() * 3.0f);
 				const float& amount = ship.m_MouseFactor.y * massFactor;

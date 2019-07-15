@@ -15,6 +15,8 @@
 #include <core/engine/renderer/postprocess/GodRays.h>
 #include <core/engine/renderer/postprocess/Fog.h>
 
+#include <core/engine/fonts/FontIncludes.h>
+
 #include <glm/gtc/type_ptr.hpp>
 #include <SFML/Window.hpp>
 
@@ -67,7 +69,7 @@ namespace epriv{
             );
             void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
             void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
-            void _renderText(Font*,std::string& text,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth);
+            void _renderText(Font&,const std::string& text, const glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth, const TextAlignment::Type);
             void _renderTexture(Texture*,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth);
             void _bindShaderProgram(ShaderP*);
             void _unbindShaderProgram();
@@ -152,9 +154,9 @@ namespace Renderer{
     void colorMask(bool r, bool g, bool b, bool a);
     void clearColor(float r, float g, float b, float a);
 
-    void sendTexture(const char* location,Texture& texture,const int slot);
+    void sendTexture(const char* location,const Texture& texture,const int slot);
     void sendTexture(const char* location,const GLuint textureAddress,const int slot,const GLuint glTextureType);
-    void sendTextureSafe(const char* location,Texture& texture,const int slot);
+    void sendTextureSafe(const char* location, const Texture& texture,const int slot);
     void sendTextureSafe(const char* location,const GLuint textureAddress,const int slot,const GLuint glTextureType);
 
     void unbindFBO();
@@ -163,7 +165,7 @@ namespace Renderer{
     void unbindDrawFBO();
         
     void renderTexture(Texture&, const glm::vec2& pos, const glm::vec4& col, float angle, const glm::vec2& scl, float depth);
-    void renderText(const std::string& text, Font&, const glm::vec2& pos, const glm::vec4& color, float angle, const glm::vec2& scl, float depth);
+    void renderText(const std::string& text, Font&, const glm::vec2& pos, const glm::vec4& color, float angle, const glm::vec2& scl, float depth, const TextAlignment::Type = TextAlignment::Left);
     void renderRectangle(const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth);
 
     #pragma region UniformSending

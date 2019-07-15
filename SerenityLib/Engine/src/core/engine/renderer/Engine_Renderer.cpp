@@ -10,7 +10,7 @@
 #include <core/engine/renderer/FramebufferObject.h>
 #include <core/Camera.h>
 #include <core/engine/lights/Lights.h>
-#include <core/Font.h>
+#include <core/engine/fonts/Font.h>
 #include <core/Scene.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/mesh/Mesh.h>
@@ -133,19 +133,21 @@ namespace Engine{
             glm::vec2 pos, scl;
             glm::vec4 col;
             float rot, depth;
-            TextureRenderInfo(Texture* _texture, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
-                texture = _texture; pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
+            TextureRenderInfo(Texture* _texture, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth):texture(_texture){
+                pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
             }
         };
         struct FontRenderInfo final{
-            Font* font;
+            Font& font;
             glm::vec2 pos, scl;
             glm::vec4 col;
             float rot, depth;
             std::string text;
-            FontRenderInfo(Font* _font, string _text, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
-                font = _font; pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
+            TextAlignment::Type alignType;
+            FontRenderInfo(Font& _font, string _text, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth, const TextAlignment::Type _alignType):font(_font){
+                pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
                 text = _text;
+                alignType = _alignType;
             }
         };
         struct UBOCamera final{
@@ -1417,6 +1419,151 @@ class epriv::RenderManager::impl final{
                 }
             }
         }
+
+        void _renderTextLeft(FontRenderInfo& item, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
+            uint i = 0;
+            for (auto& character : item.text) {
+                if (character == '\n') {
+                    y += newLineGlyphHeight + 7;
+                    x = 0.0f;
+                }else if (character != '\0') {
+                    const uint& accum = i * 4;
+                    ++i;
+                    const FontGlyph& chr   = item.font.getGlyphData(character);
+                    const float& startingY = -int(chr.height + chr.yoffset) - y;
+
+                    text_ind.emplace_back(accum + 0);
+                    text_ind.emplace_back(accum + 1);
+                    text_ind.emplace_back(accum + 2);
+                    text_ind.emplace_back(accum + 3);
+                    text_ind.emplace_back(accum + 1);
+                    text_ind.emplace_back(accum + 0);
+
+                    const float& startingX = x + chr.xoffset;
+                    x += chr.xadvance;
+
+                    text_pts.emplace_back(startingX + chr.pts[0].x, startingY + chr.pts[0].y, z);
+                    text_pts.emplace_back(startingX + chr.pts[1].x, startingY + chr.pts[1].y, z);
+                    text_pts.emplace_back(startingX + chr.pts[2].x, startingY + chr.pts[2].y, z);
+                    text_pts.emplace_back(startingX + chr.pts[3].x, startingY + chr.pts[3].y, z);
+
+                    text_uvs.emplace_back(chr.uvs[0].x, chr.uvs[0].y);
+                    text_uvs.emplace_back(chr.uvs[1].x, chr.uvs[1].y);
+                    text_uvs.emplace_back(chr.uvs[2].x, chr.uvs[2].y);
+                    text_uvs.emplace_back(chr.uvs[3].x, chr.uvs[3].y);
+                }
+            }
+        }
+        void _renderTextRight(FontRenderInfo& item, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
+            vector<string> lines;
+            string line_accumulator = "";
+            for (auto& character : item.text) {
+                if (character == '\n') {
+                    lines.push_back(line_accumulator);
+                    line_accumulator = "";
+                    continue;
+                }else if (character != '\0') {
+                    line_accumulator += character;
+                }
+            }
+            if (lines.size() == 0)
+                lines.push_back(line_accumulator);
+
+            uint i = 0;
+            for (auto& line : lines) {
+                for (int j = line.size(); j >= 0; --j) {
+                    const auto& character = line[j];
+                    if (character != '\0') {   
+                        const uint& accum = i * 4;
+                        ++i;
+                        const FontGlyph& chr   = item.font.getGlyphData(character);
+                        const float& startingY = -int(chr.height + chr.yoffset) - y;
+
+                        text_ind.emplace_back(accum + 0);
+                        text_ind.emplace_back(accum + 1);
+                        text_ind.emplace_back(accum + 2);
+                        text_ind.emplace_back(accum + 3);
+                        text_ind.emplace_back(accum + 1);
+                        text_ind.emplace_back(accum + 0);
+
+                        const float& startingX = x - chr.xoffset;
+                        x -= chr.xadvance;
+
+                        text_pts.emplace_back(startingX + chr.pts[0].x, startingY + chr.pts[0].y, z);
+                        text_pts.emplace_back(startingX + chr.pts[1].x, startingY + chr.pts[1].y, z);
+                        text_pts.emplace_back(startingX + chr.pts[2].x, startingY + chr.pts[2].y, z);
+                        text_pts.emplace_back(startingX + chr.pts[3].x, startingY + chr.pts[3].y, z);
+
+                        text_uvs.emplace_back(chr.uvs[0].x, chr.uvs[0].y);
+                        text_uvs.emplace_back(chr.uvs[1].x, chr.uvs[1].y);
+                        text_uvs.emplace_back(chr.uvs[2].x, chr.uvs[2].y);
+                        text_uvs.emplace_back(chr.uvs[3].x, chr.uvs[3].y);
+                    }
+                }
+                y += newLineGlyphHeight + 7;
+                x = 0.0f;
+            }
+        }
+        void _renderTextMiddle(FontRenderInfo& item, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
+            vector<string> lines;
+            vector<unsigned short> lines_sizes;
+            string line_accumulator = "";
+            for (auto& character : item.text) {
+                if (character == '\n') {
+                    lines.push_back(line_accumulator);
+                    lines_sizes.push_back(x);
+                    line_accumulator = "";
+                    x = 0.0f;
+                    continue;
+                }else if (character != '\0') {
+                    const FontGlyph& chr = item.font.getGlyphData(character);
+                    line_accumulator += character;
+                    x += chr.xadvance;
+                }
+            }
+            if (lines.size() == 0) {
+                lines.push_back(line_accumulator);
+                lines_sizes.push_back(x);
+            }
+
+            x = 0.0f;
+            uint i = 0;
+            for (uint l = 0; l < lines.size(); ++l) {
+                const auto& line      = lines[l];
+                const auto& line_size = lines_sizes[l] / 2;
+                for (auto& character : line) {
+                    if (character != '\0') {
+                        const uint& accum = i * 4;
+                        ++i;
+                        const FontGlyph& chr   = item.font.getGlyphData(character);
+                        const float& startingY = -int(chr.height + chr.yoffset) - y;
+
+                        text_ind.emplace_back(accum + 0);
+                        text_ind.emplace_back(accum + 1);
+                        text_ind.emplace_back(accum + 2);
+                        text_ind.emplace_back(accum + 3);
+                        text_ind.emplace_back(accum + 1);
+                        text_ind.emplace_back(accum + 0);
+
+                        const float& startingX = x + chr.xoffset;
+                        x += chr.xadvance;
+
+                        text_pts.emplace_back(startingX + chr.pts[0].x - line_size, startingY + chr.pts[0].y, z);
+                        text_pts.emplace_back(startingX + chr.pts[1].x - line_size, startingY + chr.pts[1].y, z);
+                        text_pts.emplace_back(startingX + chr.pts[2].x - line_size, startingY + chr.pts[2].y, z);
+                        text_pts.emplace_back(startingX + chr.pts[3].x - line_size, startingY + chr.pts[3].y, z);
+
+                        text_uvs.emplace_back(chr.uvs[0].x, chr.uvs[0].y);
+                        text_uvs.emplace_back(chr.uvs[1].x, chr.uvs[1].y);
+                        text_uvs.emplace_back(chr.uvs[2].x, chr.uvs[2].y);
+                        text_uvs.emplace_back(chr.uvs[3].x, chr.uvs[3].y);
+                    }
+                }
+                y += newLineGlyphHeight + 7;
+                x = 0.0f;
+            }
+        }
+
         void _renderText(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
             if (m_FontsToBeRendered.size() > 0) {
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
@@ -1427,57 +1574,35 @@ class epriv::RenderManager::impl final{
                 mesh.bind();
                 sendUniformMatrix4("VP", m_2DProjectionMatrix);
                 sendUniform1("DiffuseTextureEnabled", 1);
+
+                const glm::vec3& rotationAxis = glm::vec3(0, 0, 1);
+
                 for (auto& item : m_FontsToBeRendered) {
                     text_pts.clear();
                     text_uvs.clear();
                     text_ind.clear();
 
-
-                    Font& font = *item.font;
-                    auto& newLineGlyph = font.getGlyphData('X');
-                    auto& texture = font.getGlyphTexture();
+                    const Font& font = item.font;
+                    const auto& newLineGlyphHeight = font.getGlyphData('X').height;
+                    const auto& texture = font.getGlyphTexture();
                     sendTexture("DiffuseTexture", texture, 0);
                     sendUniform4("Object_Color", item.col);
                     y = 0.0f;
                     x = 0.0f;
                     z = -0.001f - item.depth;
-                    uint i = 0;
-
+                    
                     m = m_IdentityMat4;
                     m = glm::translate(m, glm::vec3(item.pos.x, item.pos.y, 0));
-                    m = glm::rotate(m, item.rot, glm::vec3(0, 0, 1));
+                    m = glm::rotate(m, item.rot, rotationAxis);
                     m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1));
                     sendUniformMatrix4("Model", m);
 
-                    for (auto& character : item.text) {
-                        if (character == '\n') {
-                            y += newLineGlyph.height + 7;
-                            x = 0.0f;
-                        }else if(character != '\0'){
-                            uint accum = i * 4;
-                            FontGlyph& chr = font.getGlyphData(character);
-                            float startingX = x + chr.xoffset;
-                            float startingY = -int(chr.height + chr.yoffset) - y;
-
-                            text_ind.emplace_back(accum + 0);
-                            text_ind.emplace_back(accum + 1);
-                            text_ind.emplace_back(accum + 2);
-                            text_ind.emplace_back(accum + 3);
-                            text_ind.emplace_back(accum + 1);
-                            text_ind.emplace_back(accum + 0);
-
-                            text_pts.emplace_back(startingX + chr.pts[0].x, startingY + chr.pts[0].y, z);
-                            text_pts.emplace_back(startingX + chr.pts[1].x, startingY + chr.pts[1].y, z);
-                            text_pts.emplace_back(startingX + chr.pts[2].x, startingY + chr.pts[2].y, z);
-                            text_pts.emplace_back(startingX + chr.pts[3].x, startingY + chr.pts[3].y, z);
-
-                            text_uvs.emplace_back(chr.uvs[0].x, chr.uvs[0].y);
-                            text_uvs.emplace_back(chr.uvs[1].x, chr.uvs[1].y);
-                            text_uvs.emplace_back(chr.uvs[2].x, chr.uvs[2].y);
-                            text_uvs.emplace_back(chr.uvs[3].x, chr.uvs[3].y);
-                            x += chr.xadvance;
-                            ++i;
-                        }
+                    if (item.alignType == TextAlignment::Left) {
+                        _renderTextLeft(item, newLineGlyphHeight, x, y, z);
+                    }else if (item.alignType == TextAlignment::Right) {
+                        _renderTextRight(item, newLineGlyphHeight, x, y, z);
+                    }else if (item.alignType == TextAlignment::Center) {
+                        _renderTextMiddle(item, newLineGlyphHeight, x, y, z);
                     }
                     mesh.modifyVertices(0, text_pts);
                     mesh.modifyVertices(1, text_uvs);
@@ -1492,7 +1617,7 @@ class epriv::RenderManager::impl final{
             glm::vec3 pos = body.position();
             Renderer::sendUniform4("LightDataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, 0.0f);
             Renderer::sendUniform4("LightDataC", 0.0f, pos.x, pos.y, pos.z);
-            Renderer::sendUniform4("LightDataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, float(s.m_Type));
+            Renderer::sendUniform4("LightDataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, static_cast<float>(s.m_Type));
             Renderer::sendUniform1Safe("Type", 0.0f);
 
             Renderer::renderFullscreenTriangle();
@@ -1507,8 +1632,8 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform4("LightDataA", p.m_AmbientIntensity, p.m_DiffuseIntensity, p.m_SpecularIntensity, 0.0f);
             Renderer::sendUniform4("LightDataB", 0.0f, 0.0f, p.m_C, p.m_L);
             Renderer::sendUniform4("LightDataC", p.m_E, pos.x, pos.y, pos.z);
-            Renderer::sendUniform4("LightDataD", p.m_Color.x, p.m_Color.y, p.m_Color.z, float(p.m_Type));
-            Renderer::sendUniform4Safe("LightDataE", 0.0f, 0.0f, float(p.m_AttenuationModel), 0.0f);
+            Renderer::sendUniform4("LightDataD", p.m_Color.x, p.m_Color.y, p.m_Color.z, static_cast<float>(p.m_Type));
+            Renderer::sendUniform4Safe("LightDataE", 0.0f, 0.0f, static_cast<float>(p.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
             glm::vec3 camPos = c.getPosition();
@@ -1538,7 +1663,7 @@ class epriv::RenderManager::impl final{
             glm::vec3 _forward = body.forward();
             Renderer::sendUniform4("LightDataA", d.m_AmbientIntensity, d.m_DiffuseIntensity, d.m_SpecularIntensity, _forward.x);
             Renderer::sendUniform4("LightDataB", _forward.y, _forward.z, 0.0f, 0.0f);
-            Renderer::sendUniform4("LightDataD", d.m_Color.x, d.m_Color.y, d.m_Color.z, float(d.m_Type));
+            Renderer::sendUniform4("LightDataD", d.m_Color.x, d.m_Color.y, d.m_Color.z, static_cast<float>(d.m_Type));
             Renderer::sendUniform1Safe("Type", 0.0f);
             Renderer::renderFullscreenTriangle();
         }
@@ -1553,8 +1678,8 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform4("LightDataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, _forward.x);
             Renderer::sendUniform4("LightDataB", _forward.y, _forward.z, s.m_C, s.m_L);
             Renderer::sendUniform4("LightDataC", s.m_E, pos.x, pos.y, pos.z);
-            Renderer::sendUniform4("LightDataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, float(s.m_Type));
-            Renderer::sendUniform4Safe("LightDataE", s.m_Cutoff, s.m_OuterCutoff, float(s.m_AttenuationModel), 0.0f);
+            Renderer::sendUniform4("LightDataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, static_cast<float>(s.m_Type));
+            Renderer::sendUniform4Safe("LightDataE", s.m_Cutoff, s.m_OuterCutoff, static_cast<float>(s.m_AttenuationModel), 0.0f);
             Renderer::sendUniform2Safe("VertexShaderData", s.m_OuterCutoff, s.m_CullingRadius);
             Renderer::sendUniform1Safe("Type", 2.0f);
 
@@ -1595,8 +1720,8 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform4("LightDataA", r.m_AmbientIntensity, r.m_DiffuseIntensity, r.m_SpecularIntensity, firstEndPt.x);
             Renderer::sendUniform4("LightDataB", firstEndPt.y, firstEndPt.z, r.m_C, r.m_L);
             Renderer::sendUniform4("LightDataC", r.m_E, secndEndPt.x, secndEndPt.y, secndEndPt.z);
-            Renderer::sendUniform4("LightDataD", r.m_Color.x, r.m_Color.y, r.m_Color.z, float(r.m_Type));
-            Renderer::sendUniform4Safe("LightDataE", r.m_RodLength, 0.0f, float(r.m_AttenuationModel), 0.0f);
+            Renderer::sendUniform4("LightDataD", r.m_Color.x, r.m_Color.y, r.m_Color.z, static_cast<float>(r.m_Type));
+            Renderer::sendUniform4Safe("LightDataE", r.m_RodLength, 0.0f, static_cast<float>(r.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
             glm::vec3 camPos = c.getPosition();
@@ -2129,8 +2254,8 @@ void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
 void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ m_i->m_GBuffer->resize(w,h); }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
 void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h,uint _glslVersion,uint _openglVersion){ m_i->_onOpenGLContextCreation(w,h,_glslVersion,_openglVersion); }
-void epriv::RenderManager::_renderText(Font* font,string& text,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth){
-    m_i->m_FontsToBeRendered.emplace_back(font,text,pos,color,scl,angle,depth);
+void epriv::RenderManager::_renderText(Font& font,const string& text, const glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth,const TextAlignment::Type alignType){
+    m_i->m_FontsToBeRendered.emplace_back(font, text, pos, color, scl, angle, depth, alignType);
 }
 void epriv::RenderManager::_renderTexture(Texture* texture,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth){
     m_i->m_TexturesToBeRendered.emplace_back(texture,pos,color,scl,angle,depth);
@@ -2277,16 +2402,16 @@ void Renderer::genAndBindVAO(GLuint& _vaoObject){
     glGenVertexArrays(1, &_vaoObject);
     bindVAO(_vaoObject);
 }
-void Renderer::sendTexture(const char* location,Texture& texture,const int slot){
-    Renderer::sendTexture(location,texture.address(),slot,texture.type());
+void Renderer::sendTexture(const char* location, const Texture& texture,const int slot){
+    Renderer::sendTexture(location, texture.address(), slot, texture.type());
 }
 void Renderer::sendTexture(const char* location,const GLuint textureAddress,const int slot,const GLuint targetType){
     glActiveTexture(GL_TEXTURE0 + slot);
     bindTexture(targetType,textureAddress);
     sendUniform1(location,slot);
 }
-void Renderer::sendTextureSafe(const char* location,Texture& texture,const int slot){
-    Renderer::sendTextureSafe(location,texture.address(),slot,texture.type());
+void Renderer::sendTextureSafe(const char* location, const Texture& texture,const int slot){
+    Renderer::sendTextureSafe(location, texture.address(), slot, texture.type());
 }
 void Renderer::sendTextureSafe(const char* location,const GLuint textureAddress,const int slot,const GLuint targetType){
     glActiveTexture(GL_TEXTURE0 + slot);
@@ -2306,11 +2431,11 @@ void Renderer::unbindDrawFBO(){ Renderer::bindDrawFBO(0); }
 void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth){
     renderManagerImpl->m_TexturesToBeRendered.emplace_back(nullptr,pos,col,glm::vec2(w,h),angle,depth);
 }
-void Renderer::renderTexture(Texture& texture, const glm::vec2& pos, const glm::vec4& col,float angle, const glm::vec2& scl, float depth){
-    texture.render(pos,col,angle,scl,depth);
+void Renderer::renderTexture(Texture& texture, const glm::vec2& pos, const glm::vec4& color,float angle, const glm::vec2& scl, float depth){
+    renderManagerImpl->m_TexturesToBeRendered.emplace_back(&texture, pos, color, scl, angle, depth);
 }
-void Renderer::renderText(const string& text,Font& font, const glm::vec2& pos, const glm::vec4& color, float angle, const glm::vec2& scl, float depth){
-    font.renderText(text,pos,color,angle,scl,depth);
+void Renderer::renderText(const string& text, Font& font, const glm::vec2& pos, const glm::vec4& color, float angle, const glm::vec2& scl, float depth, const TextAlignment::Type alignType) {
+    renderManagerImpl->m_FontsToBeRendered.emplace_back(font, text, pos, color, scl, angle, depth, alignType);
 }
 void Renderer::renderFullscreenQuad(uint w, uint h, uint startX, uint startY){ 
     renderManagerImpl->_renderFullscreenQuad(w,h,startX,startY); 

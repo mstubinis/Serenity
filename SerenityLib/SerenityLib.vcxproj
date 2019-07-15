@@ -236,6 +236,8 @@
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventEnums.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventObject.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_Events.h" />
+    <ClInclude Include="Engine\src\core\engine\fonts\Font.h" />
+    <ClInclude Include="Engine\src\core\engine\fonts\FontIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\lights\DirectionalLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\Lights.h" />
     <ClInclude Include="Engine\src\core\engine\lights\LightIncludes.h" />
@@ -288,7 +290,6 @@
     <ClInclude Include="Engine\src\core\engine\textures\Texture.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\threading\Engine_ThreadManager.h" />
-    <ClInclude Include="Engine\src\core\Font.h" />
     <ClInclude Include="Engine\src\core\Material.h" />
     <ClInclude Include="Engine\src\core\MeshInstance.h" />
     <ClInclude Include="Engine\src\core\Scene.h" />
@@ -326,6 +327,7 @@
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventDispatcher.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_Events.cpp" />
+    <ClCompile Include="Engine\src\core\engine\fonts\Font.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\DirectionalLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\PointLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\RodLight.cpp" />
@@ -368,7 +370,6 @@
     <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp" />
-    <ClCompile Include="Engine\src\core\Font.cpp" />
     <ClCompile Include="Engine\src\core\Material.cpp" />
     <ClCompile Include="Engine\src\core\MeshInstance.cpp" />
     <ClCompile Include="Engine\src\core\Scene.cpp" />

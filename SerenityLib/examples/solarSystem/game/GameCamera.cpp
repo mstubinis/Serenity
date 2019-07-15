@@ -74,8 +74,8 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 			camera.m_OrbitRadius += Engine::getMouseWheelDelta() * dt * 0.92f;
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 70.0f);
 
-			const auto& diff = -Engine::getMouseDifference();
-			camera.m_CameraMouseFactor += glm::dvec2(diff.y * (dt * 0.1), diff.x * (dt * 0.1));
+			const auto& diff = Engine::getMouseDifference();
+			camera.m_CameraMouseFactor += glm::dvec2(diff.y * (dt * 0.1), -diff.x * (dt * 0.1));
 
 			thisBody.rotate(camera.m_CameraMouseFactor.x, camera.m_CameraMouseFactor.y, 0);
 			const double& step = (1.0 - dt);

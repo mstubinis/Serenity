@@ -118,6 +118,12 @@
     <Filter Include="Source Files\Engine\Core\Threading">
       <UniqueIdentifier>{ee3979f0-7b9e-4557-b850-670c4748fd68}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Fonts">
+      <UniqueIdentifier>{53017ab2-2812-457c-b4c5-b50ccf64eadb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Fonts">
+      <UniqueIdentifier>{77f3db76-b623-487a-a2b7-9024dd3cbf3e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -306,9 +312,6 @@
     <ClInclude Include="Engine\src\core\Constraint.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\Font.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\Material.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
@@ -392,6 +395,12 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\networking\Networking.h">
       <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\fonts\Font.h">
+      <Filter>Header Files\Engine\Core\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\fonts\FontIncludes.h">
+      <Filter>Header Files\Engine\Core\Fonts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -512,9 +521,6 @@
     <ClCompile Include="Engine\src\core\Constraint.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\Font.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\Material.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
@@ -607,6 +613,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\networking\ListenerTCP.cpp">
       <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\fonts\Font.cpp">
+      <Filter>Source Files\Engine\Core\Fonts</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

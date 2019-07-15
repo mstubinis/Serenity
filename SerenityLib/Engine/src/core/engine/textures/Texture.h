@@ -21,13 +21,13 @@ namespace epriv{
         static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
         static void LoadTextureCubemapIntoOpenGL(Texture& texture);
 
-        static void EnumWrapToGL(uint& gl, TextureWrap::Wrap& wrap);
-        static void EnumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min);
-        static bool IsCompressedType(ImageInternalFormat::Format);
+        static void EnumWrapToGL(uint& gl, const TextureWrap::Wrap& wrap);
+        static void EnumFilterToGL(uint& gl, const TextureFilter::Filter& filter, const bool& min);
+        static const bool IsCompressedType(const ImageInternalFormat::Format&);
 
         static void GenerateMipmapsOpenGL(Texture& texture);
-        static void WithdrawPixelsFromOpenGLMemory(Texture& texture,uint imageIndex = 0,uint mipmapLevel = 0);
-        static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat,ImageInternalFormat::Format& inInternalFormat);
+        static void WithdrawPixelsFromOpenGLMemory(Texture& texture, const uint& imageIndex = 0, const uint& mipmapLevel = 0);
+        static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat, const ImageInternalFormat::Format& inInternalFormat);
     };
     struct InternalTexturePublicInterface final {
         static void LoadCPU(Texture&);
@@ -57,20 +57,20 @@ class Texture: public EngineResource{
         Texture(std::string files[],std::string name = "Cubemap",bool genMipmaps = false,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
         virtual ~Texture();
 
-        uchar* pixels();
-        GLuint& address(uint = 0);
-        GLuint type();
-        uint width();
-        uint height();
-        uint numAddresses();
-        bool mipmapped();
-        bool compressed();
-        void setAnisotropicFiltering(float aniso);
+        const uchar* pixels();
+        const GLuint& address(const uint& index = 0) const;
+        const GLuint type() const;
+        const uint width() const;
+        const uint height() const;
+        const uint numAddresses() const;
+        const bool mipmapped() const;
+        const bool compressed() const;
+        void setAnisotropicFiltering(const float& anisotropicFiltering);
         void resize(Engine::epriv::FramebufferObject&,uint width,uint height);
 
-        ImageInternalFormat::Format internalFormat();
-        ImagePixelFormat::Format pixelFormat();
-        ImagePixelType::Type pixelType();
+        const ImageInternalFormat::Format internalFormat() const;
+        const ImagePixelFormat::Format pixelFormat() const;
+        const ImagePixelType::Type pixelType() const;
 
         virtual void load();
         virtual void unload();

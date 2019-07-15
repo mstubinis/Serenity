@@ -31,13 +31,11 @@ void Game::onResize(const uint& width, const uint& height){
 void Game::onClose(){
 }
 void Game::onLostFocus(){
-    //Engine::getWindow().setMouseCursorVisible(true);
 }
 void Game::onGainedFocus(){
-    //Engine::getWindow().setMouseCursorVisible(false);
-    const auto& size = Resources::getWindow().getSize();
-    const glm::vec2 halfRes(size.x / 2, size.y / 2);
-    Engine::setMousePosition(halfRes, true);
+    //const auto& size = Resources::getWindow().getSize();
+    //const glm::vec2 halfRes(size.x / 2, size.y / 2);
+    //Engine::setMousePosition(halfRes, true);
 }
 void Game::onTextEntered(const uint& unicode){
 }
@@ -54,27 +52,27 @@ void Game::onMouseButtonReleased(const uint& button){
 void Game::onMouseMoved(const float& mouseX, const float& mouseY){
 }
 void Game::onMouseEntered(){
-    Engine::getWindow().requestFocus();
-    Engine::getWindow().keepMouseInWindow(true);
-    //Engine::getWindow().setMouseCursorVisible(true);
+    //Engine::getWindow().requestFocus();
+    //Engine::getWindow().keepMouseInWindow(true);
 }
 void Game::onMouseLeft(){
-    Engine::getWindow().keepMouseInWindow(false);
-    //Engine::getWindow().setMouseCursorVisible(true);
+    //Engine::getWindow().keepMouseInWindow(false);
 }
 void Game::onPreUpdate(const double& dt){
 }
 void Game::onPostUpdate(const double& dt){
+    /*
     auto& window = Resources::getWindow();
     const auto& size = window.getSize();
     const glm::vec2 halfRes(size.x / 2, size.y / 2);
     if (window.hasFocus()) {
-        const glm::vec2 mousePos = Engine::getMousePosition();
-        const float mouseDistFromCenter = glm::distance(mousePos, halfRes);
+        const glm::vec2& mousePos = Engine::getMousePosition();
+        const float& mouseDistFromCenter = glm::distance(mousePos, halfRes);
         if (mouseDistFromCenter > 1.0f) {
             Engine::setMousePosition(halfRes, false, true);
         }
     }
+    */
 }
 void Game::onJoystickButtonPressed(){
 }

@@ -9,7 +9,7 @@
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/Engine_Window.h>
 #include <core/engine/Engine_Math.h>
-#include <core/Font.h>
+#include <core/engine/fonts/Font.h>
 #include <core/engine/textures/Texture.h>
 #include <core/Scene.h>
 #include <core/Camera.h>
@@ -17,13 +17,40 @@
 
 #include <glm/vec4.hpp>
 
+#include "gui/Button.h"
+
 using namespace Engine;
 using namespace std;
 
+
+struct ButtonHost_OnClick { void operator()(Button& button) const {
+    HUD& hud = *static_cast<HUD*>(button.getUserPointer());
+}};
+struct ButtonJoin_OnClick {void operator()(Button& button) const {
+    HUD& hud = *static_cast<HUD*>(button.getUserPointer());
+}};
+
 HUD::HUD(GameState::State& _state, GameState::State& _previous):m_GameState(_state),m_GameStatePrevious(_previous){
-    m_Font = Resources::addFont(ResourceManifest::BasePath + "data/Fonts/consolas.fnt");
+    m_FontHandle = Resources::addFont(ResourceManifest::BasePath + "data/Fonts/consolas.fnt");
+    m_Font = Resources::getFont(m_FontHandle);
     Engine::Math::setColor(m_Color, 255, 255, 0);
     m_Active = true;
+
+    const auto& windowDimensions = Resources::getWindowSize();
+
+    m_ButtonHost = new Button(*m_Font, glm::vec2(windowDimensions.x / 2, windowDimensions.y / 2), 150, 50);
+    m_ButtonHost->setText("Host");
+    m_ButtonHost->setColor(1, 1, 1, 1);
+    m_ButtonJoin = new Button(*m_Font, glm::vec2(windowDimensions.x / 2, (windowDimensions.y / 2) - 125), 150, 50);
+    m_ButtonJoin->setText("Join");
+    m_ButtonJoin->setColor(1, 1, 1, 1);
+
+    m_ButtonHost->setUserPointer(this);
+    m_ButtonJoin->setUserPointer(this);
+
+
+    m_ButtonHost->setOnClickFunctor(ButtonHost_OnClick());
+    m_ButtonJoin->setOnClickFunctor(ButtonJoin_OnClick());
 }
 HUD::~HUD() {
 }
@@ -34,7 +61,8 @@ void HUD::update_game(const double& dt) {
 
 }
 void HUD::update_main_menu(const double& dt) {
-
+    m_ButtonHost->update(dt);
+    m_ButtonJoin->update(dt);
 }
 void HUD::update_host_server_map_and_ship(const double& dt) {
 
@@ -53,7 +81,8 @@ void HUD::render_game() {
 
 }
 void HUD::render_main_menu() {
-
+    m_ButtonHost->render();
+    m_ButtonJoin->render();
 }
 void HUD::render_host_server_map_and_ship() {
 
@@ -98,7 +127,7 @@ void HUD::update(const double& dt) {
         }
     }
 
-
+    /*
     SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
 	const auto& planets = scene->getPlanets();
 	std::vector<Planet*> planetVector;
@@ -120,6 +149,7 @@ void HUD::update(const double& dt) {
 			_count = scene->getPlanets().size() - 1; 
 		}
     }
+    */
 }
 void HUD::render() {
     switch (m_GameState) {
@@ -139,13 +169,11 @@ void HUD::render() {
             break;
         }
     }
-
+    /*
     //render hud stuff
     SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
     Ship* player = scene->getPlayer();
     glm::vec2 winSize = glm::vec2(Resources::getWindowSize().x, Resources::getWindowSize().y);
-
-    Font* font = Resources::getFont(m_Font);
 
 #pragma region renderCrossHairAndOtherInfo
 
@@ -226,9 +254,11 @@ void HUD::render() {
 	if (!m_Active) return;
 
 #pragma region DrawDebugStuff
-    font->renderText(Engine::Data::reportTime() +
+    m_Font->renderText(Engine::Data::reportTime() +
         epriv::Core::m_Engine->m_DebugManager.reportDebug(),
         glm::vec2(10, Resources::getWindowSize().y - 10), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1), 0, glm::vec2(0.8f, 0.8f), 0.1f);
 
 #pragma endregion
+
+    */
 }

@@ -11,14 +11,20 @@
 
 class  Font;
 class  Ship;
+class  Button;
 struct Entity;
 class HUD final{
     private:
         glm::vec3            m_Color;
-        Handle               m_Font;
+        Handle               m_FontHandle;
+        Font*                m_Font;
         bool                 m_Active;
         GameState::State&    m_GameState;
         GameState::State&    m_GameStatePrevious;
+
+
+        Button*              m_ButtonHost;
+        Button*              m_ButtonJoin;
 
 
         void update_game(const double& dt);

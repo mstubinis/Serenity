@@ -34,7 +34,8 @@ struct VertexData final{
     template<typename T> void setData(const size_t& attributeIndex, const std::vector<T>& _data, const bool addToGPU = false, const bool orphan = false) {
         if (buffers.size() == 0)
             buffers.push_back(std::make_unique<VertexBufferObject>());
-        assert(attributeIndex < data.size());
+        if (attributeIndex >= data.size())
+            return;
         dataSizes[attributeIndex] = _data.size();
         auto& attributeVector = data[attributeIndex];
         free(attributeVector);

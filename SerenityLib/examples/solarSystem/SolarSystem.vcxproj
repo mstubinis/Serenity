@@ -195,6 +195,10 @@
     <ClInclude Include="game\GameCamera.h" />
     <ClInclude Include="game\GameSkybox.h" />
     <ClInclude Include="game\GameState.h" />
+    <ClInclude Include="game\gui\Button.h" />
+    <ClInclude Include="game\gui\Widget.h" />
+    <ClInclude Include="game\gui\WidgetIncludes.h" />
+    <ClInclude Include="game\gui\WidgetInterface.h" />
     <ClInclude Include="game\HUD.h" />
     <ClInclude Include="game\Packet.h" />
     <ClInclude Include="game\Planet.h" />
@@ -209,6 +213,8 @@
     <ClCompile Include="game\Game.cpp" />
     <ClCompile Include="game\GameCamera.cpp" />
     <ClCompile Include="game\GameSkybox.cpp" />
+    <ClCompile Include="game\gui\Button.cpp" />
+    <ClCompile Include="game\gui\Widget.cpp" />
     <ClCompile Include="game\HUD.cpp" />
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\Packet.cpp" />

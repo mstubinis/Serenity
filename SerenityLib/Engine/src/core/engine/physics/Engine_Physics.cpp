@@ -137,9 +137,11 @@ namespace Engine{
                     buildVAO();
                 }
                 void drawAccumulatedLines() {
-                    glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LineVertex) * vertices.size(), &vertices[0]);
-                    renderLines();
+                    if (vertices.size() > 0) {
+                        glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+                        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LineVertex) * vertices.size(), &vertices[0]);
+                        renderLines();
+                    }
                 }
                 void onEvent(const Event& e) {
                     if (e.type == EventType::WindowFullscreenChanged) {

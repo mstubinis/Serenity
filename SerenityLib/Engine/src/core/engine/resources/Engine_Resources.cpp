@@ -7,7 +7,7 @@
 #include <core/Material.h>
 #include <core/Camera.h>
 #include <core/engine/textures/Texture.h>
-#include <core/Font.h>
+#include <core/engine/fonts/Font.h>
 #include <core/Scene.h>
 
 #include <core/engine/mesh/MeshRequest.h>

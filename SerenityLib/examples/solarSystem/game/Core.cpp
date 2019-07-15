@@ -32,14 +32,18 @@ void Core::init() {
     if (m_Initalized) return;
 
     auto& window = Resources::getWindow();
-    window.keepMouseInWindow(true);
-    window.setMouseCursorVisible(false);
+
+    //window.keepMouseInWindow(true);
+    //window.setMouseCursorVisible(false);
+
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(60);
-    SolarSystem* sol = new SolarSystem("Sol", ResourceManifest::BasePath + "data/Systems/Sol.txt");
 
-    Resources::setCurrentScene("Sol");
+    //SolarSystem* sol = new SolarSystem("Sol", ResourceManifest::BasePath + "data/Systems/Sol.txt");
+    //Resources::setCurrentScene("Sol");
 
+    Scene* s = new Scene("Menu");
+    Resources::setCurrentScene(s);
     
     m_HUD    = new HUD(m_GameState, m_GameStatePrevious);
     m_Server = new Server(55000);
@@ -49,6 +53,11 @@ void Core::init() {
     m_Initalized = true;
 }
 void Core::update(const double& dt) {
+    if (Engine::isKeyDown(KeyboardKey::Escape)) {
+        Engine::stop();
+    }
+
+    /*
     if (Engine::isKeyDownOnce(KeyboardKey::Space)) {
         //Engine::pause(!Engine::paused());
         m_GameState = GameState::Game;
@@ -60,9 +69,6 @@ void Core::update(const double& dt) {
             p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
             m_Client->send(p);
         }
-    }
-    if (Engine::isKeyDown(KeyboardKey::Escape)) {
-        Engine::stop();
     }
     if (Engine::isKeyDownOnce(KeyboardKey::F6)) {
         Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen());
@@ -89,7 +95,10 @@ void Core::update(const double& dt) {
         Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() - 0.01f);
     }else if (Engine::isKeyDown(KeyboardKey::I)) {
         Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() + 0.01f);
-    }
+    }  
+    */
+
+
 
     m_HUD->update(dt);
     epriv::ClientInternalPublicInterface::update(m_Client);
