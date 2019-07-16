@@ -46,10 +46,14 @@ namespace Engine{
     //keyboard functions
     const bool isKeyDown(const KeyboardKey::Key);
     const bool isKeyDownOnce(const KeyboardKey::Key);
+    const bool isKeyDownOnce();
     const bool isKeyUp(const KeyboardKey::Key);
 
     const bool isKeyDownOnce(const KeyboardKey::Key first, const KeyboardKey::Key second);
 
+    const KeyboardKey::Key getPressedKey();
+    const MouseButton::Button getPressedButton();
+    const std::string& mapKey(const KeyboardKey::Key& key);
 
     //mouse functions
     const bool isMouseButtonDown(const MouseButton::Button);
@@ -58,7 +62,7 @@ namespace Engine{
     const glm::vec2& getMouseDifference();
     const glm::vec2& getMousePositionPrevious();
     const glm::vec2& getMousePosition();
-    const double getMouseWheelDelta();
+    const double     getMouseWheelDelta();
 
     void setMousePosition(const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
     void setMousePosition(const uint x, const uint y, const bool resetDifference = false, const bool resetPreviousPosition = false);

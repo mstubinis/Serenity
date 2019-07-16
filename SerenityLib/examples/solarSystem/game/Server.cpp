@@ -1,10 +1,14 @@
 #include "Server.h"
 #include "Packet.h"
+#include "Core.h"
 
 #include "SolarSystem.h"
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/Engine_Utils.h>
 #include <core/engine/Engine_Math.h>
+
+#include <core/engine/Engine.h>
+#include <core/engine/Engine_Debugging.h>
 
 #include <iostream>
 
@@ -14,10 +18,10 @@ using namespace Engine;
 using namespace Engine::Networking;
 
 
-Server::Server(const unsigned int& port) {
+Server::Server(Core& core, const unsigned int& port):m_Core(core) {
     m_port         = port;
     m_active       = false;
-    m_listener     = new ListenerTCP(m_port, "127.0.0.1");
+    m_listener     = new ListenerTCP(m_port/*, "127.0.0.1"*/);
     //m_thread       = nullptr;
 }
 Server::~Server() {
@@ -29,7 +33,7 @@ const bool Server::startup() {
         const sf::Socket::Status status = m_listener->listen();
         if (status == sf::Socket::Status::Done) {
             m_active = true;
-            std::cout << "Server has started on ip: " << m_listener->ip() << ", and port: " << m_listener->localPort() << std::endl;
+            cout << epriv::Core::m_Engine->m_DebugManager.timestamp() + ": " << "Server has started on port: " << m_listener->localPort() << endl;
 
             m_listener->setBlocking(false);
 
@@ -47,7 +51,7 @@ void Server::shutdown() {
         for (auto& client : m_clients) {
             Packet p;
             p.PacketType = PacketType::Server_Shutdown;
-            client.second->send(p);
+            const auto status = client.second->send(p);
         }
         //then close the clients
         for (auto& client : m_clients) {
@@ -59,8 +63,6 @@ void Server::shutdown() {
         //m_listener->close();
         SAFE_DELETE(m_listener);
         m_active = false;
-
-        std::cout << "Server has been shutdown" << std::endl;
     }
 }
 const bool& Server::isActive() const {
@@ -75,12 +77,10 @@ void Server::onReceive() {
         const auto& status = client.receive(sf_packet);
         if (status == sf::Socket::Done){
             Packet* pp = Packet::getPacket(sf_packet);
-            auto& p = *pp;
-            if (pp && p.validate(sf_packet)) {
+            auto& pIn = *pp;
+            if (pp && pIn.validate(sf_packet)) {
                 // Data extracted successfully...
-                std::cout << "Server: ";
-                p.print();
-
+                /*
                 if (p.PacketType == PacketType::Client_To_Server_Ship_Physics_Update) {
                     if (p.data != "") {
                         SolarSystem& scene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
@@ -91,12 +91,45 @@ void Server::onReceive() {
                         client.send(physics_update);
                     }
                 }
+                */
+                switch (pIn.PacketType) {
+                    case PacketType::Client_To_Server_Request_Connection: {
+                        const bool valid = isValidName(pIn.data);
+                        Packet pOut;
+                        if (valid) {
+                            client.m_username = pIn.data;
+                            client.m_Validated = true;
+                            pOut.PacketType = PacketType::Server_To_Client_Accept_Connection;
+                            cout << epriv::Core::m_Engine->m_DebugManager.timestamp() + ": " << "Server: Approving: " + pIn.data + "'s connection" << endl;
+                        }else{
+                            pOut.PacketType = PacketType::Server_To_Client_Reject_Connection;
+                            cout << epriv::Core::m_Engine->m_DebugManager.timestamp() + ": " << "Server: Rejecting: " + pIn.data + "'s connection" << endl;
+                        }
+                        send_to_client(client, pOut);
+                        break;
+                    }case PacketType::Client_To_Server_Request_Disconnection: {
+                        cout << epriv::Core::m_Engine->m_DebugManager.timestamp() + ": " << "Server: Removing " + client.m_username + " from the server" << endl;
+                        const auto& client_ip      = client.m_TcpSocket->ip();
+                        const auto& client_port    = client.m_TcpSocket->remotePort();
+                        const auto& client_address = client_ip + " " + to_string(client_port);
+                        client.disconnect();  
+                        m_ClientsToBeDisconnected.push(client_address);
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
             }
             SAFE_DELETE(pp);
         }
     }
+    //remove disconnected clients
+    while (m_ClientsToBeDisconnected.size() > 0) {
+        m_clients.erase(m_ClientsToBeDisconnected.front());
+        m_ClientsToBeDisconnected.pop();
+    }
 }
-
 
 const sf::Socket::Status Server::send_to_client(Client& c, Packet& packet) {
     return c.send(packet);
@@ -110,7 +143,6 @@ const sf::Socket::Status Server::send_to_client(Client& c, const void* data, siz
 const sf::Socket::Status Server::send_to_client(Client& c, const void* data, size_t size, size_t& sent) {
     return c.send(data, size, sent);
 }
-
 const void Server::send_to_all_but_client(Client& c, Packet& packet) {
     for (auto& cl : m_clients) {
         if (cl.second != &c) {
@@ -139,7 +171,6 @@ const void Server::send_to_all_but_client(Client& c, const void* data, size_t si
         }
     }
 }
-
 const void Server::send_to_all(Packet& packet) {
     for (auto& cl : m_clients) {
         cl.second->send(packet);
@@ -160,7 +191,16 @@ const void Server::send_to_all(const void* data, size_t size, size_t& sent) {
         cl.second->send(data, size, sent);
     }
 }
-
+const bool Server::isValidName(const string& name) const {
+    if (name == "")
+        return false;
+    for (auto& client : m_clients) {
+        if (client.second->m_username == name) {
+            return false;
+        }
+    }
+    return true;
+}
 
 
 
@@ -176,15 +216,10 @@ void epriv::ServerInternalPublicInterface::update(Server* _server) {
             const auto& client_address = client_ip + " " + to_string(client_port);
             if (!server.m_clients.count(client_address)) {
                 sf_client->setBlocking(false);
-                Client* client = new Client(sf_client);
+                Client* client = new Client(server.m_Core, sf_client);
                 server.m_clients.emplace(client_address, client);
-                std::cout << "New client: " << client_address << std::endl;
 
-                Packet p;
-                p.PacketType = PacketType::Server_To_Client_Accept_Connection;
-                p.data = "Client_Accepted";
-
-                client->send(p);
+                cout << epriv::Core::m_Engine->m_DebugManager.timestamp() + ": " << "Server: New client in dictionary: " << client_address << endl;
             }
         }else{
             SAFE_DELETE(sf_client);

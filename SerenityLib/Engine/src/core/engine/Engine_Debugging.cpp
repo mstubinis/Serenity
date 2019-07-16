@@ -3,6 +3,9 @@
 #include <iomanip>
 #include <sstream>
 
+#include <chrono>
+#include <ctime>
+
 using namespace Engine;
 using namespace std;
 
@@ -69,6 +72,11 @@ const double epriv::DebugManager::soundsTime() const { return (double)((double)m
 const double epriv::DebugManager::displayTime() const { return (double)((double)m_displayTime / divisor); }
 const double epriv::DebugManager::totalTime() const{ return m_totalTime; }
 
+string epriv::DebugManager::timestamp() {
+    const auto end = std::chrono::system_clock::now();
+    const std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+    return std::ctime(&end_time);
+}
 string& epriv::DebugManager::reportTime() { return reportTime(decimals); }
 string& epriv::DebugManager::reportTime(uint _decimals) {
     decimals = _decimals;

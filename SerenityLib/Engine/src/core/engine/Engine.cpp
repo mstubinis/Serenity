@@ -90,8 +90,8 @@ void updatePhysics(const double& dt) {
     uint maxSubSteps = 0;
     while (true) {
         ++maxSubSteps;
-		if (dt < static_cast<double>(maxSubSteps * PHYSICS_MIN_STEP))
-			break;
+        if (dt < static_cast<double>(maxSubSteps * PHYSICS_MIN_STEP))
+            break;
     }
     epriv::Core::m_Engine->m_PhysicsManager._update(dt, maxSubSteps, PHYSICS_MIN_STEP);
     debugMgr.calculate_physics();

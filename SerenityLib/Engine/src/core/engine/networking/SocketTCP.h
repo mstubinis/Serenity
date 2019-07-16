@@ -14,7 +14,6 @@ namespace Engine {
                 sf::TcpSocket*  m_Socket;
                 std::string     m_IP;
                 ushort          m_Port;
-                bool            m_Connected;
             public: 
                 SocketTCP(const ushort port, const std::string& ip = ""); //client side socket
                 SocketTCP(sf::TcpSocket*); //server side client socket
@@ -27,7 +26,6 @@ namespace Engine {
 
                 const std::string ip();
                 const ushort remotePort();
-                const bool& connected() const;
     
                 const sf::Socket::Status connect(const ushort& timeout = 0);
                 void disconnect();

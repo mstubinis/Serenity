@@ -23,6 +23,8 @@
 #include <ecs/Entity.h>
 #include <ecs/Components.h>
 #include <core/MeshInstance.h>
+#include <core/engine/mesh/Mesh.h>
+#include <core/Material.h>
 
 #include "core/Terrain.h"
 #include <SFML/Graphics.hpp>
@@ -32,16 +34,45 @@ using namespace std;
 namespace boost_io = boost::iostreams;
 
 SolarSystem::SolarSystem(const string& n, const string& file):Scene(n){
+    m_Player      = nullptr;
+    m_AnchorPoint = nullptr;
     GameCamera* playerCamera = new GameCamera(0.35f,7000000000.0f,this);
     setActiveCamera(*playerCamera);
     m_Objects.push_back(playerCamera);
+    m_Filename = file;
     if(file != "NULL")
         SolarSystem::loadFromFile(file);
+
+    m_AnchorPoint = new EntityWrapper(*this);
+    auto& anchor_body = *m_AnchorPoint->entity().addComponent<ComponentBody>();
+    anchor_body.setScale(0.1f);
+    auto& anchor_model = *m_AnchorPoint->entity().addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
+    anchor_model.hide();
 }
 SolarSystem::~SolarSystem(){
     SAFE_DELETE_VECTOR(m_Objects);
 }
-
+vector<string> SolarSystem::allowedShips() {
+    vector<string> result;
+    uint                                             count = 0;
+    boost_io::stream<boost_io::mapped_file_source>   str(m_Filename);
+    for (string line; getline(str, line, '\n');) {
+        line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
+        if (line[0] != '#') {//ignore commented lines
+            if (count == 5) {//this line has the allowed ships
+                stringstream ss(line);
+                while (ss.good()) {
+                    string substr;
+                    getline(ss, substr, ',');
+                    result.push_back(substr);
+                }
+                return result;
+            }
+        }
+        ++count;
+    }
+    return result;
+}
 void SolarSystem::loadFromFile(const string& filename) {
     uint                                             count = 0;
     boost_io::stream<boost_io::mapped_file_source>   str(filename);
@@ -75,6 +106,15 @@ void SolarSystem::loadFromFile(const string& filename) {
                     else if (key == "giSpecular")  gi_specular = stof(value);
                     else if (key == "giGlobal")    gi_global = stof(value);
                 }
+            }else if (count == 5) {//this line has the allowed ships
+                stringstream ss(line);
+                vector<string> result;
+                while (ss.good()){
+                    string substr;
+                    getline(ss, substr, ',');
+                    result.push_back(substr);
+                }
+
             }
             if ((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' ') {//we got something to work with
                 Planet* planetoid = nullptr;
@@ -221,15 +261,14 @@ void SolarSystem::loadFromFile(const string& filename) {
                     }
                     m_Planets.emplace(NAME, planetoid);
                 }else if (line[0] == '*') {//Player ship
-                    Ship* playerShip = new Ship(ResourceManifest::DefiantMesh, ResourceManifest::DefiantSharkMaterial, true, NAME, glm::vec3(x, y, z), glm::vec3(1.0f), CollisionType::ConvexHull, this);
+                    m_Player = new Ship(ResourceManifest::DefiantMesh, ResourceManifest::DefiantMaterial, true, NAME, glm::vec3(x, y, z), glm::vec3(1.0f), CollisionType::ConvexHull, this);
                     if (PARENT != "") {
                         Planet* parent = m_Planets.at(PARENT);
-                        auto& cbody = *playerShip->entity().getComponent<ComponentBody>();
+                        auto& cbody = *m_Player->entity().getComponent<ComponentBody>();
                         cbody.setPosition(cbody.position() + parent->getPosition());
                     }
-                    setPlayer(playerShip);
                     GameCamera* playerCamera = (GameCamera*)getActiveCamera();
-                    playerCamera->follow(getPlayer()->entity());
+                    playerCamera->follow(m_Player->entity());
                 }else if (line[0] == 'R') {//Rings
                     if (PARENT != "") {
                         if (!planetRings.count(PARENT)) {
@@ -248,11 +287,11 @@ void SolarSystem::loadFromFile(const string& filename) {
     for (auto& rings : planetRings) {
         new Ring(rings.second, m_Planets.at(rings.first));
     }
-    centerSceneToObject(player->entity());
+    centerSceneToObject(m_Player->entity());
 
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
 
-    new Ship(ResourceManifest::DefiantMesh, ResourceManifest::DefiantSharkMaterial, false, "test", glm::vec3(-4, 0, 4), glm::vec3(1.0f), CollisionType::ConvexHull, this);
+    //new Ship(ResourceManifest::DefiantMesh, ResourceManifest::DefiantMaterial, false, "test", glm::vec3(-4, 0, 4), glm::vec3(1.0f), CollisionType::ConvexHull, this);
 }
 
 

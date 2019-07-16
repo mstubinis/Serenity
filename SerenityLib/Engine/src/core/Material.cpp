@@ -15,6 +15,7 @@ using namespace Engine::Renderer;
 using namespace std;
 
 vector<glm::vec4> Material::m_MaterialProperities;
+Material* Material::Checkers = nullptr;
 
 namespace Engine{
     namespace epriv{

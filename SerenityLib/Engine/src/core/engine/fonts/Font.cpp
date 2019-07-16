@@ -64,7 +64,7 @@ Font::~Font(){
 }
 
 
-const float& Font::getTextWidth(const string& text) const {
+const float Font::getTextWidth(const string& text) const {
     float ret = 0;
     for (auto& character : text) {
         if (character != '\0') {
@@ -74,31 +74,9 @@ const float& Font::getTextWidth(const string& text) const {
     }
     return ret;
 }
-const float& Font::getTextWidth(const char* text) const {
-    float ret = 0;
-    for (uint i = 0; i < sizeof(text) / sizeof(text[0]); ++i) {
-        const auto& character = text[i];
-        if (character != '\0') {
-            const auto& glyph = getGlyphData(character);
-            ret += glyph.width;
-            ret += glyph.xadvance;
-        }
-    }
-    return ret;
-}
-const float& Font::getTextHeight(const string& text) const {
+const float Font::getTextHeight(const string& text) const {
     float lineCount = 1;
     for (auto& character : text) {
-        if (character == '\n') {
-            ++lineCount;
-        }
-    }
-    return lineCount * getGlyphData('X').height;
-}
-const float& Font::getTextHeight(const char* text) const {
-    float lineCount = 1;
-    for (uint i = 0; i < sizeof(text) / sizeof(text[0]); ++i) {
-        const auto& character = text[i];
         if (character == '\n') {
             ++lineCount;
         }
@@ -111,6 +89,6 @@ const Texture& Font::getGlyphTexture() const {
 const FontGlyph& Font::getGlyphData(const uchar& character) const {
     return m_FontGlyphs.at(character);
 }
-void Font::renderText(const string& text, const glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth, const TextAlignment::Type alignType){
-    epriv::Core::m_Engine->m_RenderManager._renderText(*this, text, pos, color, scl, angle, depth, alignType);
+void Font::renderText(const string& t, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const TextAlignment::Type& al){
+    Renderer::renderText(t, *this, p, c, a, s, d, al);
 }

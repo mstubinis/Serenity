@@ -304,18 +304,18 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
     if (sfind(_d, "USE_LOG_DEPTH_VERTEX") && !sfind(_d, "//USE_LOG_DEPTH_VERTEX") && shader.type() == ShaderType::Vertex) {
         boost::replace_all(_d, "USE_LOG_DEPTH_VERTEX", "");
         #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-        string log_vertex_code = "\n"
-            "uniform float fcoeff;\n"
-            "flat varying float FC;\n"
-            "varying float logz_f;\n"
-            "\n";
-        insertStringAtLine(_d, log_vertex_code, 1);
-        log_vertex_code = "\n"
-            "logz_f = 1.0 + gl_Position.w;\n"
-            "gl_Position.z = (log2(max(0.000001, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n" //this line is optional i think... since gl_FragDepth may be written manually
-            "FC = fcoeff;\n"
-            "\n";
-        insertStringAtEndOfMainFunc(_d, log_vertex_code);
+            string log_vertex_code = "\n"
+                "uniform float fcoeff;\n"
+                "flat varying float FC;\n"
+                "varying float logz_f;\n"
+                "\n";
+            insertStringAtLine(_d, log_vertex_code, 1);
+            log_vertex_code = "\n"
+                "logz_f = 1.0 + gl_Position.w;\n"
+                "gl_Position.z = (log2(max(0.000001, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n" //this line is optional i think... since gl_FragDepth may be written manually
+                "FC = fcoeff;\n"
+                "\n";
+            insertStringAtEndOfMainFunc(_d, log_vertex_code);
         #endif
     }
 
@@ -344,15 +344,15 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
     if (sfind(_d, "USE_LOG_DEPTH_FRAGMENT") && !sfind(_d, "//USE_LOG_DEPTH_FRAGMENT") && shader.type() == ShaderType::Fragment) {
         boost::replace_all(_d, "USE_LOG_DEPTH_FRAGMENT", "");
         #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-        string log_frag_code = "\n"
-            "flat varying float FC;\n"
-            "varying float logz_f;\n"
-            "\n";
-        insertStringAtLine(_d, log_frag_code, 1);
-        log_frag_code = "\n"
-            "gl_FragDepth = log2(logz_f) * FC;\n"
-            "\n";
-        insertStringAtEndOfMainFunc(_d, log_frag_code);
+            string log_frag_code = "\n"
+                "flat varying float FC;\n"
+                "varying float logz_f;\n"
+                "\n";
+            insertStringAtLine(_d, log_frag_code, 1);
+            log_frag_code = "\n"
+                "gl_FragDepth = log2(logz_f) * FC;\n"
+                "\n";
+            insertStringAtEndOfMainFunc(_d, log_frag_code);
         #endif
         if (sfind(_d, "GetWorldPosition(") || sfind(_d, "GetViewPosition(")) {
             if (!sfind(_d, "vec3 GetWorldPosition(")) {

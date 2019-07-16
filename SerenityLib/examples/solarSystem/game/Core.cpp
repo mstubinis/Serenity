@@ -21,16 +21,19 @@ Core::Core() {
     m_GameState         = GameState::Main_Menu;
 
     ResourceManifest::init();
-    const std::string& iconPath = ResourceManifest::BasePath + "data/Textures/icon.png";
-    Resources::getWindow().setIcon(iconPath);
+    //const std::string& iconPath = ResourceManifest::BasePath + "data/Textures/icon.png";
+    //Resources::getWindow().setIcon(iconPath);
 }
 Core::~Core() {
-
+    shutdownClient();
+    shutdownServer();
+    SAFE_DELETE(m_HUD);
 }
 void Core::startServer(const unsigned short& port) {
-    shutdownServer();
-    m_Server = new Server(port);
-    m_Server->startup();
+    if (!m_Server) {
+        m_Server = new Server(*this, port);
+        m_Server->startup();
+    }
 }
 void Core::shutdownServer() {
     if (m_Server) {
@@ -39,27 +42,66 @@ void Core::shutdownServer() {
     }
 }
 
-void Core::startClient(const unsigned short& port, const string& ip) {
-    m_Client = new Client(port, ip);
-    m_Client->connect();
+bool Core::startClient(const unsigned short& port, const std::string& name, const string& ip) {
+    const auto& lamb = [&]() {
+        Packet p;
+        p.PacketType = PacketType::Client_To_Server_Request_Connection;
+        p.data = name;
+        const auto& status = m_Client->send(p);
+        if (status == sf::Socket::Status::Done) {
+            std::cout << "Client: requesting connection to the server..." << std::endl;
+            return true;
+        }else{
+            m_HUD->setErrorText("Connection timed out");
+        }
+        return false;
+    };
+    if (!m_Client) {
+        m_Client = new Client(*this, port, ip);
+    }
+
+    const auto fetchedIP   = m_Client->m_TcpSocket->ip();
+    const auto fetchedPort = m_Client->m_TcpSocket->localPort();
+
+    if (fetchedIP != ip && fetchedPort != port) {
+        m_Client->changeConnectionDestination(port, ip);
+        bool am_i_connected = m_Client->connect(6);
+        return lamb();
+    }
+    if (!m_Client->connected()) {
+        m_Client->changeConnectionDestination(port, ip);
+        bool am_i_connected = m_Client->connect(6);
+        return lamb();
+    }
+    if (!m_Client->m_Validated) {
+        return lamb();
+    }
+    return false;
 }
 void Core::shutdownClient() {
     if (m_Client) {
+        if (m_Client->connected()) {
+            Packet p;
+            p.PacketType = PacketType::Client_To_Server_Request_Disconnection;
+            const auto status = m_Client->send(p);
+            if (status == sf::Socket::Status::Done) {
+                std::cout << "Told the server i am quitting" << std::endl;
+            }else {
+                std::cout << "Error: could not tell the server i am quitting" << std::endl;
+            }
+        }
         m_Client->disconnect();
         SAFE_DELETE(m_Client);
     }
 }
-
 void Core::enterMap(const string& mapFile) {
     SolarSystem* map = new SolarSystem(mapFile, ResourceManifest::BasePath + "data/Systems/" + mapFile + ".txt");
+    auto ships = map->allowedShips();
     Resources::setCurrentScene(map);
 
     auto& window = Resources::getWindow();
     window.keepMouseInWindow(true);
     window.setMouseCursorVisible(false);
-
-    Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA);
-    Renderer::smaa::setQuality(SMAAQualityLevel::Ultra);
 }
 void Core::onResize(const uint& width, const uint& height) {
     m_HUD->onResize(width, height);
@@ -96,32 +138,6 @@ void Core::update(const double& dt) {
             m_Client->send(p);
         }
     }
-    if (Engine::isKeyDownOnce(KeyboardKey::F6)) {
-        Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen());
-    }
-    if (Engine::isKeyDownOnce(KeyboardKey::F7)) {
-        Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None);
-    }
-    if (Engine::isKeyDownOnce(KeyboardKey::F8)) {
-        Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA);
-    }
-    if (Engine::isKeyDownOnce(KeyboardKey::F9)) {
-        Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA);
-    }
-    if (Engine::isKeyDownOnce(KeyboardKey::F10)) {
-        Renderer::ssao::enable(!Renderer::ssao::enabled());
-    }
-    if (Engine::isKeyDownOnce(KeyboardKey::F11)) {
-        Renderer::hdr::enable(!Renderer::hdr::enabled());
-    }
-    if (Engine::isKeyDownOnce(KeyboardKey::F12)) {
-        Renderer::godRays::enable(!Renderer::godRays::enabled());
-    }
-    if (Engine::isKeyDown(KeyboardKey::U)) {
-        Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() - 0.01f);
-    }else if (Engine::isKeyDown(KeyboardKey::I)) {
-        Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() + 0.01f);
-    }  
     */
 
 

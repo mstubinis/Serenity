@@ -43,7 +43,7 @@ class Texture: public EngineResource{
     friend struct Engine::epriv::InternalTexturePublicInterface;
 
     public:
-        static Texture *White, *Black; //loaded in renderer
+        static Texture *White, *Black, *Checkers; //loaded in renderer
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -93,7 +93,13 @@ class Texture: public EngineResource{
         static void setMaxFilter(GLuint type,TextureFilter::Filter);
         static void setFilter(GLuint type,TextureFilter::Filter);
 
-        void render(glm::vec2 pos, glm::vec4 color,float angle = 0.0f, glm::vec2 scl = glm::vec2(1.0f,1.0f), float depth = 0.1f);
+        void render(
+            const glm::vec2& pos,
+            const glm::vec4& color,
+            const float& angle = 0.0f,
+            const glm::vec2& scl = glm::vec2(1.0f),
+            const float& depth = 0.1f
+        );
 
         void genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize);
 };

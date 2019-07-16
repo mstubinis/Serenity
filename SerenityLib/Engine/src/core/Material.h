@@ -9,11 +9,11 @@
 #include <glm/vec3.hpp>
 #include <unordered_map>
 
-class Texture;
-class ShaderP;
-class Mesh;
+class  Texture;
+class  ShaderP;
+class  Mesh;
 
-struct MaterialComponentType{enum Type{
+struct MaterialComponentType final{enum Type{
     Diffuse,
     Normal,
     Glow,
@@ -25,7 +25,7 @@ struct MaterialComponentType{enum Type{
     Refraction,
     ParallaxOcclusion,
 _TOTAL};};
-struct MaterialPhysics{enum Physics{
+struct MaterialPhysics final {enum Physics{
     Water,
     Plastic_Or_Glass_Low,
     Plastic_High,
@@ -53,14 +53,14 @@ struct MaterialPhysics{enum Physics{
     Platinum,
     Nickel,
 _TOTAL};};
-struct DiffuseModel{enum Model{
+struct DiffuseModel final {enum Model{
     None,
     Lambert,
     Oren_Nayar,
     Ashikhmin_Shirley,
     Minnaert,
 _TOTAL};};
-struct SpecularModel{enum Model{
+struct SpecularModel final {enum Model{
     None,
     Blinn_Phong,
     Phong,
@@ -137,6 +137,7 @@ class Material final: public BindableResource{
     friend struct Engine::epriv::DefaultMaterialUnbindFunctor;
     public:
         static std::vector<glm::vec4> m_MaterialProperities;
+        static Material* Checkers; //loaded in renderer
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

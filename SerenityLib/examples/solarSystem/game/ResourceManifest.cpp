@@ -36,11 +36,15 @@ Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
 Handle ResourceManifest::StarFlareMaterial;
 
+std::unordered_map<std::string, boost::tuple<Handle, Handle>> ResourceManifest::Ships;
+
 std::string ResourceManifest::BasePath;
+
+
 
 void ResourceManifest::init(){
     BasePath = "../";
-
+    /*
     Handle skyFromSpaceVert = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
     Handle skyFromSpaceFrag = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
     skyFromSpace = Resources::addShaderProgram("AS_SkyFromSpace",skyFromSpaceVert,skyFromSpaceFrag);
@@ -59,34 +63,37 @@ void ResourceManifest::init(){
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc").at(0);
 
 
-	/*extras*/
-	//NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc").at(0);
+	//extras
+	NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc").at(0);
 	//VenerexMesh = Resources::loadMeshAsync(BasePath + "data/Models/venerex.objcc").at(0);
 	//IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.objcc").at(0);
-    //ExcelsiorMesh = Resources::loadMeshAsync(BasePath + "data/Models/excelsior.objcc").at(0);
+    ExcelsiorMesh = Resources::loadMeshAsync(BasePath + "data/Models/excelsior.objcc").at(0);
     //LeviathanMesh = Resources::loadMeshAsync(BasePath + "data/Models/leviathan.objcc").at(0);
 
 
     Engine::epriv::threading::waitForAll();
 
-	/*extras*/
-	//NovaMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/nova.dds", BasePath + "data/Textures/nova_Normal.dds", BasePath + "data/Textures/nova_Glow.dds");
+    DefiantMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/defiant.dds", BasePath + "data/Textures/defiant_Normal.dds", BasePath + "data/Textures/defiant_Glow.dds");
+
+
+	//extras
+	NovaMaterial = Resources::addMaterial("Nova", BasePath + "data/Textures/nova.dds", BasePath + "data/Textures/nova_Normal.dds", BasePath + "data/Textures/nova_Glow.dds");
 	//VenerexMaterial = Resources::addMaterial("Venerex", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
 	//IntrepidMaterial = Resources::addMaterial("Intrepid", BasePath + "data/Textures/intrepid.dds", BasePath + "data/Textures/intrepid_Normal.png", BasePath + "data/Textures/intrepid_Glow.png");
-    //ExcelsiorMaterial = Resources::addMaterial("Excelsior", BasePath + "data/Textures/excelsior.dds", BasePath + "data/Textures/excelsior_Normal.dds", BasePath + "data/Textures/excelsior_Glow.dds", BasePath + "data/Textures/excelsior_Specular.dds");
-    DefiantSharkMaterial = Resources::addMaterial("DefiantShark", BasePath + "data/Textures/defiantShark.dds", BasePath + "data/Textures/defiant_Normal.dds", BasePath + "data/Textures/defiant_Glow.dds");
+    ExcelsiorMaterial = Resources::addMaterial("Excelsior", BasePath + "data/Textures/excelsior.dds", BasePath + "data/Textures/excelsior_Normal.dds", BasePath + "data/Textures/excelsior_Glow.dds", BasePath + "data/Textures/excelsior_Specular.dds");
+    //DefiantSharkMaterial = Resources::addMaterial("DefiantShark", BasePath + "data/Textures/defiantShark.dds", BasePath + "data/Textures/defiant_Normal.dds", BasePath + "data/Textures/defiant_Glow.dds");
 
 
-    StarMaterial = Resources::addMaterial("Star", BasePath + "data/Textures/Planets/Sun.dds","","","");
+    StarMaterial = Resources::addMaterial("Star", BasePath + "data/Textures/Planets/Sun.dds");
     ((Material*)StarMaterial.get())->setShadeless(true);
     ((Material*)StarMaterial.get())->setGlow(0.21f);
 
-    EarthSkyMaterial = Resources::addMaterial("EarthSky", BasePath + "data/Textures/Planets/Earth.dds","","","");
+    EarthSkyMaterial = Resources::addMaterial("EarthSky", BasePath + "data/Textures/Planets/Earth.dds");
 
-    DefiantMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/defiant.dds", BasePath + "data/Textures/defiant_Normal.dds", BasePath + "data/Textures/defiant_Glow.dds");
+    
 
-    CrosshairMaterial = Resources::addMaterial("Crosshair", BasePath + "data/Textures/HUD/Crosshair.dds","","","");
-    CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow", BasePath + "data/Textures/HUD/CrosshairArrow.dds","","","");
+    CrosshairMaterial = Resources::addMaterial("Crosshair", BasePath + "data/Textures/HUD/Crosshair.dds");
+    CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow", BasePath + "data/Textures/HUD/CrosshairArrow.dds");
 
     auto& crosshairDiffuse = *(((Material*)CrosshairMaterial.get())->getComponent(MaterialComponentType::Diffuse)->texture());
     auto& crosshairArrowDiffuse = *(((Material*)CrosshairArrowMaterial.get())->getComponent(MaterialComponentType::Diffuse)->texture());
@@ -96,4 +103,11 @@ void ResourceManifest::init(){
 
     StarFlareMaterial = Resources::addMaterial("SunFlare", BasePath + "data/Textures/Skyboxes/StarFlare.dds");
     Resources::getMaterial(StarFlareMaterial)->setShadeless(true);
+
+
+
+    ResourceManifest::Ships["Defiant"]     = boost::tuple<Handle, Handle>(DefiantMesh,     DefiantMaterial);
+    ResourceManifest::Ships["Nova"]        = boost::tuple<Handle, Handle>(NovaMesh,        NovaMaterial);
+    ResourceManifest::Ships["Excelsior"]   = boost::tuple<Handle, Handle>(ExcelsiorMesh,   ExcelsiorMaterial);
+    */
 }

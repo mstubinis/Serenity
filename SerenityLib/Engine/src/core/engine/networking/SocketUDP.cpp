@@ -38,32 +38,16 @@ void Networking::SocketUDP::unbind() {
     m_Socket.unbind();
 }
 const sf::Socket::Status Networking::SocketUDP::send(sf::Packet& _packet, const string& _ip) {
-    const auto& status = m_Socket.send(_packet, _ip, m_Port);
-    if (status != sf::Socket::Status::Done) {
-        //error
-    }
-    return status;
+    return m_Socket.send(_packet, _ip, m_Port);
 }
 const sf::Socket::Status Networking::SocketUDP::send(const void* _data, size_t _size, const string& _ip) {
-    const auto& status = m_Socket.send(_data, _size, _ip, m_Port);
-    if (status != sf::Socket::Status::Done) {
-        //error
-    }
-    return status;
+    return m_Socket.send(_data, _size, _ip, m_Port);
 }
 const sf::Socket::Status Networking::SocketUDP::receive(sf::Packet& _packet, const string& _ip) {
     sf::IpAddress ip(_ip);
-    const auto& status = m_Socket.receive(_packet, ip, m_Port);
-    if (status != sf::Socket::Status::Done) {
-        //error
-    }
-    return status;
+    return m_Socket.receive(_packet, ip, m_Port);
 }
 const sf::Socket::Status Networking::SocketUDP::receive(void* _data, size_t _size, size_t& _received, const string& _ip) {
     sf::IpAddress ip(_ip); 
-    const auto& status = m_Socket.receive(_data, _size, _received, ip, m_Port);
-    if (status != sf::Socket::Status::Done) {
-        //error
-    }
-    return status;
+    return m_Socket.receive(_data, _size, _received, ip, m_Port);
 }

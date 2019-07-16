@@ -135,12 +135,12 @@ void Math::removeMatrixPosition(glm::mat4& matrix){
 	matrix[3][2] = 0;
 }
 
-bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians){
+bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point,const float fovRadians){
     const glm::vec3& diff = glm::normalize(point - conePos);
     float t = glm::dot(coneVector,diff);
     return ( t >= glm::cos( fovRadians ) );
 }
-bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians,const float maxDistance){
+bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point,const float fovRadians,const float maxDistance){
 	const glm::vec3& diff = glm::normalize(point - conePos);
 	const float t = glm::dot(coneVector,diff);
 	const float length = glm::length(point-conePos);

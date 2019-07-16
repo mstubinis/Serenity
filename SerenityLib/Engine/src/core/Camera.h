@@ -8,7 +8,7 @@ class Scene;
 class LightProbe;
 class Camera;
 
-struct CameraType{enum Type {
+struct CameraType final{enum Type {
     Perspective, 
     Orthographic,
 };};
@@ -16,28 +16,26 @@ struct CameraType{enum Type {
 class Camera: public EntityWrapper{
     friend class  ::LightProbe;
     friend struct ::Engine::epriv::ComponentCamera_Functions;
-    private:
-        class impl; std::unique_ptr<impl> m_i;
     public:
-        Camera(float angle,float aspectRatio,float nearPlane,float farPlane,Scene* = nullptr);
-        Camera(float left,float right,float bottom,float top,float nearPlane,float farPlane,Scene* = nullptr);
+        Camera(const float angle, const float aspectRatio, const float nearPlane, const float farPlane,Scene* = nullptr);
+        Camera(const float left, const float right, const float bottom, const float top, const float nearPlane, const float farPlane,Scene* = nullptr);
         virtual ~Camera();
 
         const glm::vec3 getPosition();
         const glm::vec3 forward();
         const glm::vec3 right();
         const glm::vec3 up();
-        glm::quat getOrientation();
+        const glm::quat getOrientation();
 
-        float getDistance(Entity&);
-        float getDistance(glm::vec3&);
-        float getDistanceSquared(Entity&);
-        float getDistanceSquared(glm::vec3&);
+        const float getDistance(Entity&);
+        const float getDistance(const glm::vec3&);
+        const float getDistanceSquared(Entity&);
+        const float getDistanceSquared(const glm::vec3&);
 
-        const float getAngle();    void setAngle(float);
-        const float getAspect();   void setAspect(float);
-        const float getNear();     void setNear(float);
-        const float getFar();      void setFar(float);
+        const float& getAngle();    void setAngle(const float angle);
+        const float& getAspect();   void setAspect(const float aspectRatio);
+        const float& getNear();     void setNear(const float nearPlane);
+        const float& getFar();      void setFar(const float farPlane);
 
         const glm::mat4 getProjection();
         const glm::mat4 getProjectionInverse();
@@ -48,9 +46,9 @@ class Camera: public EntityWrapper{
         const glm::mat4 getViewProjection();
         const glm::mat4 getViewProjectionInverse();
 
-        uint sphereIntersectTest(glm::vec3& pos,float radius);
-        uint pointIntersectTest(glm::vec3& pos);
+        const uint sphereIntersectTest(const glm::vec3& pos, const float radius);
+        const uint pointIntersectTest(const glm::vec3& pos);
 
-        bool rayIntersectSphere(Entity&);
+        const bool rayIntersectSphere(Entity&);
 };
 #endif

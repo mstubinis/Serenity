@@ -8,6 +8,121 @@ using namespace std;
 
 EventManager* EventManager::m_EventManager = nullptr;
 
+vector<std::string> KEY_MAP = []() {
+    vector<std::string> m; m.resize(KeyboardKey::_TOTAL);
+    m[KeyboardKey::A] = 'A';
+    m[KeyboardKey::B] = 'B';
+    m[KeyboardKey::C] = 'C';
+    m[KeyboardKey::D] = 'D';
+    m[KeyboardKey::E] = 'E';
+    m[KeyboardKey::F] = 'F';
+    m[KeyboardKey::G] = 'G';
+    m[KeyboardKey::H] = 'H';
+    m[KeyboardKey::I] = 'I';
+    m[KeyboardKey::J] = 'J';
+    m[KeyboardKey::K] = 'K';
+    m[KeyboardKey::L] = 'L';
+    m[KeyboardKey::M] = 'M';
+    m[KeyboardKey::N] = 'N';
+    m[KeyboardKey::O] = 'O';
+    m[KeyboardKey::P] = 'P';
+    m[KeyboardKey::Q] = 'Q';
+    m[KeyboardKey::R] = 'R';
+    m[KeyboardKey::S] = 'S';
+    m[KeyboardKey::T] = 'T';
+    m[KeyboardKey::U] = 'U';
+    m[KeyboardKey::V] = 'V';
+    m[KeyboardKey::W] = 'W';
+    m[KeyboardKey::X] = 'X';
+    m[KeyboardKey::Y] = 'Y';
+    m[KeyboardKey::Z] = 'Z';
+
+    m[KeyboardKey::Num0] = '0';
+    m[KeyboardKey::Num1] = '1';
+    m[KeyboardKey::Num2] = '2';
+    m[KeyboardKey::Num3] = '3';
+    m[KeyboardKey::Num4] = '4';
+    m[KeyboardKey::Num5] = '5';
+    m[KeyboardKey::Num6] = '6';
+    m[KeyboardKey::Num7] = '7';
+    m[KeyboardKey::Num8] = '8';
+    m[KeyboardKey::Num9] = '9';
+
+    m[KeyboardKey::Numpad0] = '0';
+    m[KeyboardKey::Numpad1] = '1';
+    m[KeyboardKey::Numpad2] = '2';
+    m[KeyboardKey::Numpad3] = '3';
+    m[KeyboardKey::Numpad4] = '4';
+    m[KeyboardKey::Numpad5] = '5';
+    m[KeyboardKey::Numpad6] = '6';
+    m[KeyboardKey::Numpad7] = '7';
+    m[KeyboardKey::Numpad8] = '8';
+    m[KeyboardKey::Numpad9] = '9';
+
+    m[KeyboardKey::LeftBracket] = '{';
+    m[KeyboardKey::RightBracket] = '}';
+    m[KeyboardKey::SemiColon] = ';';
+    m[KeyboardKey::Comma] = ',';
+    m[KeyboardKey::Period] = '.';
+
+    m[KeyboardKey::Add] = '+';
+    m[KeyboardKey::Subtract] = '-';
+    m[KeyboardKey::Multiply] = '*';
+    m[KeyboardKey::Divide] = '/';
+
+    m[KeyboardKey::BackSlash] = '\\';
+    m[KeyboardKey::Slash] = '/';
+    m[KeyboardKey::Tilde] = '~';
+    m[KeyboardKey::Quote] = '"';
+    m[KeyboardKey::Equal] = '=';
+    m[KeyboardKey::Dash] = '-';
+
+    m[KeyboardKey::LeftArrow] = '<';
+    m[KeyboardKey::RightArrow] = '>';
+    m[KeyboardKey::UpArrow] = '^';
+    m[KeyboardKey::DownArrow] = 'v';
+    m[KeyboardKey::Space] = ' ';
+    m[KeyboardKey::Return] = '\n';
+
+    m[KeyboardKey::Escape] = "";
+    m[KeyboardKey::LeftControl] = "";
+    m[KeyboardKey::LeftShift] = "";
+    m[KeyboardKey::LeftAlt] = "";
+    m[KeyboardKey::LeftSystem] = "";
+    m[KeyboardKey::RightControl] = "";
+    m[KeyboardKey::RightShift] = "";
+    m[KeyboardKey::RightAlt] = "";
+    m[KeyboardKey::RightSystem] = "";
+    m[KeyboardKey::Menu] = "";
+    m[KeyboardKey::BackSpace] = "";
+    m[KeyboardKey::Tab] = "";
+    m[KeyboardKey::PageUp] = "";
+    m[KeyboardKey::PageDown] = "";
+    m[KeyboardKey::End] = "";
+    m[KeyboardKey::Home] = "";
+    m[KeyboardKey::Insert] = "";
+    m[KeyboardKey::Delete] = "";
+    m[KeyboardKey::F1] = "";
+    m[KeyboardKey::F2] = "";
+    m[KeyboardKey::F3] = "";
+    m[KeyboardKey::F4] = "";
+    m[KeyboardKey::F5] = "";
+    m[KeyboardKey::F6] = "";
+    m[KeyboardKey::F7] = "";
+    m[KeyboardKey::F8] = "";
+    m[KeyboardKey::F9] = "";
+    m[KeyboardKey::F10] = "";
+    m[KeyboardKey::F11] = "";
+    m[KeyboardKey::F12] = "";
+    m[KeyboardKey::F13] = "";
+    m[KeyboardKey::F14] = "";
+    m[KeyboardKey::F15] = "";
+    m[KeyboardKey::Pause] = "";
+ 
+    return m;
+}();
+
+
 EventManager::EventManager(const char* name, const uint w, const uint h):m_EventDispatcher(){
     m_Delta = 0;
     m_Position = m_Position_Previous = m_Difference = glm::vec2(0.0f);
@@ -68,9 +183,25 @@ void EventManager::onResetEvents(const double& dt){
     m_Difference.x = 0.0f;
     m_Difference.y = 0.0f;
 }
+const KeyboardKey::Key Engine::getPressedKey() {
+    return static_cast<KeyboardKey::Key>(EventManager::m_EventManager->m_currentKey);
+}
+const MouseButton::Button Engine::getPressedButton() {
+    return static_cast<MouseButton::Button>(EventManager::m_EventManager->m_currentButton);
+}
+const std::string& Engine::mapKey(const KeyboardKey::Key& key) {
+    return KEY_MAP[key];
+}
+
 const bool Engine::isKeyDown(const KeyboardKey::Key key){
     return (!EventManager::m_EventManager->m_KeyStatus[key]) ? false : true;
 }
+const bool Engine::isKeyDownOnce() {
+    auto& mgr = *EventManager::m_EventManager;
+    return (mgr.m_currentKey != mgr.m_previousKey) ? true : false;
+}
+
+
 const bool Engine::isKeyDownOnce(const KeyboardKey::Key key){
     const bool res = Engine::isKeyDown(key);
     auto& mgr = *EventManager::m_EventManager;

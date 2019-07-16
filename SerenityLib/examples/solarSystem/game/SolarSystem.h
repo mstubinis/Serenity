@@ -15,8 +15,9 @@ class SolarSystem: public Scene{
     private:
         std::unordered_map<std::string, Planet*> m_Planets;
         std::unordered_map<std::string, Ship*>   m_Ships;
-
-        Ship* player;
+        std::string                              m_Filename;
+        Ship*                                    m_Player;
+        EntityWrapper*                           m_AnchorPoint; //using this to sync warp displaced positions in multiplayer
 
         void loadFromFile(const std::string& file);
     public:
@@ -27,8 +28,10 @@ class SolarSystem: public Scene{
 
         virtual void update(const double& dt);
 
-        Ship* getPlayer(){ return player; }
-        void setPlayer(Ship* p){ player = p; }
+        Ship* getPlayer() { return m_Player; }
+        void setPlayer(Ship* p){ m_Player = p; }
+
+        std::vector<std::string> allowedShips();
 
         std::unordered_map<std::string, Planet*>& getPlanets() { return m_Planets; }
         std::unordered_map<std::string, Ship*>& getShips() { return m_Ships; }

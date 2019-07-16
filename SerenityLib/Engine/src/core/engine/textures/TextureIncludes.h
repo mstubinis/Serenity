@@ -10,14 +10,14 @@
 typedef unsigned char     uchar;
 typedef unsigned short    ushort;
 
-struct TextureWrap {enum Wrap {
+struct TextureWrap final {enum Wrap {
     Repeat, 
     RepeatMirrored, 
     ClampToEdge, 
     ClampToBorder,
     _TOTAL
 };};
-struct TextureFilter {enum Filter {
+struct TextureFilter final {enum Filter {
     Linear,
     Nearest,
     Nearest_Mipmap_Nearest,
@@ -26,7 +26,7 @@ struct TextureFilter {enum Filter {
     Linear_Mipmap_Linear,
     _TOTAL
 };};
-struct TextureType {enum Type {
+struct TextureType final {enum Type {
     Texture1D,
     Texture2D,
     Texture3D,

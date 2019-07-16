@@ -10,10 +10,12 @@
 
 
 #include <unordered_map>
+#include <queue>
 //#include <thread>
 
 struct Packet;
 class  Server;
+class  Core;
 namespace Engine {
     namespace epriv {
         struct ServerInternalPublicInterface {
@@ -27,16 +29,20 @@ class Server {
     private:
         //std::thread*                            m_thread;
         std::unordered_map<std::string, Client*>  m_clients;
+        std::queue<std::string>                   m_ClientsToBeDisconnected;
         Engine::Networking::ListenerTCP*          m_listener;
         unsigned int                              m_port;
         bool                                      m_active;
+        Core&                                     m_Core;
     public:
-        Server(const unsigned int& port);
+        Server(Core&, const unsigned int& port);
         ~Server();
 
         const bool startup();
         void shutdown();
         const bool& isActive() const;
+
+        const bool isValidName(const std::string& name) const;
 
         const sf::Socket::Status send_to_client(Client&, Packet& packet);
         const sf::Socket::Status send_to_client(Client&, sf::Packet& packet);

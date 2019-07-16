@@ -9,16 +9,25 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
     char* data = (char*)(sfPacket.getData());
     unsigned int packetType = static_cast<unsigned int>(data[0]);
     Packet* p = nullptr;
-    if (      packetType == PacketType::Server_To_Client_Accept_Connection) {
-        p = new Packet();
-    }else if (packetType == PacketType::Server_Shutdown) {
-        p = new Packet();
-    }else if (packetType == PacketType::Client_To_Server_Ship_Physics_Update){
-        p = new PacketPhysicsUpdate();
-    }else if (packetType == PacketType::Server_To_Client_Ship_Physics_Update) {
-        p = new PacketPhysicsUpdate();
-    }else {
-        return nullptr;
+
+    switch (packetType) {
+        case PacketType::Server_To_Client_Accept_Connection: {
+            p = new Packet(); break;
+        }case PacketType::Server_To_Client_Reject_Connection: {
+            p = new Packet(); break;
+        }case PacketType::Client_To_Server_Request_Connection: {
+            p = new Packet(); break;
+        }case PacketType::Client_To_Server_Request_Disconnection: {
+            p = new Packet(); break;
+        }case PacketType::Server_Shutdown: {
+            p = new Packet(); break;
+        }case PacketType::Client_To_Server_Ship_Physics_Update: {
+            p = new PacketPhysicsUpdate(); break;
+        }case PacketType::Server_To_Client_Ship_Physics_Update: {
+            p = new PacketPhysicsUpdate(); break;
+        }default: {
+            break;
+        }
     }
     return p;
 }

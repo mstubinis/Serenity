@@ -19,8 +19,9 @@ using namespace Engine::epriv;
 using namespace Engine::epriv::textures;
 using namespace std;
 
-Texture* Texture::White = nullptr;
-Texture* Texture::Black = nullptr;
+Texture* Texture::White    = nullptr;
+Texture* Texture::Black    = nullptr;
+Texture* Texture::Checkers = nullptr;
 
 class Texture::impl final{
     friend struct epriv::TextureLoader;
@@ -165,10 +166,10 @@ class Texture::impl final{
                 cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
                 return;
             }
-            float _divisor = fbo.divisor();
+            const float _divisor = fbo.divisor();
             Renderer::bindTexture(m_Type, m_TextureAddress[0]);
-            uint _w(uint(float(w) * _divisor));
-            uint _h(uint(float(h) * _divisor));
+            const uint _w = static_cast<uint>(static_cast<float>(w) * _divisor);
+            const uint _h = static_cast<uint>(static_cast<float>(h) * _divisor);
             auto& imageData = *m_ImagesDatas[0];
             imageData.mipmaps[0].width = _w;
             imageData.mipmaps[0].height = _h;
@@ -177,9 +178,28 @@ class Texture::impl final{
         void _importIntoOpenGL(ImageMipmap& mipmap,GLuint _OpenGLType){
             auto& imageData = *m_ImagesDatas[0];
             if(TextureLoader::IsCompressedType(imageData.internalFormat) && mipmap.compressedSize != 0)
-                glCompressedTexImage2D(_OpenGLType,mipmap.level,imageData.internalFormat,mipmap.width,mipmap.height,0,mipmap.compressedSize,&(mipmap.pixels)[0]);
+                glCompressedTexImage2D(
+                    _OpenGLType,
+                    mipmap.level,
+                    imageData.internalFormat,
+                    mipmap.width,
+                    mipmap.height,
+                    0,
+                    mipmap.compressedSize,
+                    &mipmap.pixels[0]
+                );
             else
-                glTexImage2D(_OpenGLType,mipmap.level,imageData.internalFormat,mipmap.width,mipmap.height,0,imageData.pixelFormat,imageData.pixelType,&(mipmap.pixels)[0]);
+                glTexImage2D(
+                    _OpenGLType,
+                    mipmap.level,
+                    imageData.internalFormat,
+                    mipmap.width,
+                    mipmap.height,
+                    0,
+                    imageData.pixelFormat,
+                    imageData.pixelType,
+                    &mipmap.pixels[0]
+                );
         }
 };
 
@@ -607,10 +627,10 @@ Texture::~Texture(){
     unload();
     SAFE_DELETE_VECTOR(m_i->m_ImagesDatas);
 }
-void Texture::render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
+void Texture::render(const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d){
     if(m_i->m_TextureType == TextureType::CubeMap) 
         return;
-    Core::m_Engine->m_RenderManager._renderTexture(this,pos,color,scl,angle,depth);
+    Renderer::renderTexture(*this, p, c, a, s, d);
 }
 void Texture::setXWrapping(TextureWrap::Wrap w){ 
     Texture::setXWrapping(m_i->m_Type,w); 

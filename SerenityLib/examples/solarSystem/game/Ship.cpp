@@ -260,11 +260,15 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         if (Engine::isKeyDownOnce(KeyboardKey::T) && currentScene.name() != "CapsuleSpace") {
             Entity scan = camera.getObjectInCenterRay(ship.m_Entity);
             if (!scan.null()) {
-                ship.setTarget(scan);
+                auto* componentName = scan.getComponent<ComponentName>();
+                if (componentName) {
+                    ship.setTarget(scan);
+                }
             }
         }
     }
-    for (auto& shipSystem : ship.m_ShipSystems) shipSystem.second->update(dt);
+    for (auto& shipSystem : ship.m_ShipSystems) 
+        shipSystem.second->update(dt);
 }};
 
 

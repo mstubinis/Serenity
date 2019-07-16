@@ -1,5 +1,8 @@
 #include "Client.h"
 #include "Packet.h"
+#include "Core.h"
+#include "HUD.h"
+#include "gui/Button.h"
 
 #include "SolarSystem.h"
 #include "Ship.h"
@@ -12,87 +15,112 @@
 using namespace std;
 using namespace Engine;
 
-Client::Client(sf::TcpSocket* socket) {
-    m_client = new Networking::SocketTCP(socket);
-    m_client->setBlocking(false);
+Client::Client(Core& core, sf::TcpSocket* socket) : m_Core(core){
+    m_TcpSocket = new Networking::SocketTCP(socket);
+    m_TcpSocket->setBlocking(false);
+    m_username = "";
+    m_Validated = false;
+    m_Connected = false;
 }
-Client::Client(const ushort& port, const string& ipAddress) {
-    m_client = new Networking::SocketTCP(port, ipAddress);
+Client::Client(Core& core, const ushort& port, const string& ipAddress) : m_Core(core) {
+    m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
+    m_TcpSocket->setBlocking(false);
+    m_username = "";
+    m_Validated = false;
+    m_Connected = false;
 }
 Client::~Client() {
-    SAFE_DELETE(m_client);
-}
-void Client::connect(const ushort& timeout) {
-    if (m_client && !m_client->connected()) {
-        const auto& status = m_client->connect(timeout);
-        if (status == sf::Socket::Status::Done) {
-            std::cout << "Client Connected!" << std::endl;
-            m_client->setBlocking(false);
-        }
-    }
+    SAFE_DELETE(m_TcpSocket);
+    m_Connected = false;
 }
 void Client::changeConnectionDestination(const ushort& port, const string& ipAddress) {
     disconnect();
-    SAFE_DELETE(m_client);
-    m_client = new Networking::SocketTCP(port, ipAddress);
+    SAFE_DELETE(m_TcpSocket);
+    m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
+    m_TcpSocket->setBlocking(false);
 }
-void Client::connect() { connect(0); }
-void Client::disconnect() {
-    if (m_client) {
-        m_client->disconnect();
+bool Client::connect(const ushort& timeout) {
+    const auto status = m_TcpSocket->connect(timeout);
+    if (status != sf::Socket::Status::Error && status != sf::Socket::Status::Disconnected) {
+        m_Connected = true;
+    }else{
+        m_Connected = false;
     }
+    return m_Connected;
+}
+void Client::disconnect() {
+    m_TcpSocket->disconnect();
+    m_Connected = false;
 }
 const bool Client::connected() const {
-    if (!m_client) 
-        return false;
-    return m_client->connected();
+    return m_Connected;
 }
 const sf::Socket::Status Client::send(Packet& packet) {
-    if (!m_client) return sf::Socket::Status::Error;
     sf::Packet sf_packet;
     packet.build(sf_packet);
-    return m_client->send(sf_packet);
+    const auto status = m_TcpSocket->send(sf_packet);
+    if (status == sf::Socket::Status::Error || status == sf::Socket::Status::Disconnected) {
+        m_Connected = false;
+    }
+    return status;
 }
 const sf::Socket::Status Client::send(sf::Packet& packet) {
-    if (!m_client) return sf::Socket::Status::Error;
-    return m_client->send(packet);
+    const auto status = m_TcpSocket->send(packet);
+    if (status == sf::Socket::Status::Error || status == sf::Socket::Status::Disconnected) {
+        m_Connected = false;
+    }
+    return status;
 }
 const sf::Socket::Status Client::send(const void* data, size_t size) {
-    if (!m_client) return sf::Socket::Status::Error;
-    return m_client->send(data, size);
+    const auto status = m_TcpSocket->send(data, size);
+    if (status == sf::Socket::Status::Error || status == sf::Socket::Status::Disconnected) {
+        m_Connected = false;
+    }
+    return status;
 }
 const sf::Socket::Status Client::send(const void* data, size_t size, size_t& sent) {
-    if (!m_client) return sf::Socket::Status::Error;
-    return m_client->send(data, size, sent);
+    const auto status = m_TcpSocket->send(data, size, sent);
+    if (status == sf::Socket::Status::Error || status == sf::Socket::Status::Disconnected) {
+        m_Connected = false;
+    }
+    return status;
 }
 const sf::Socket::Status Client::receive(sf::Packet& packet) {
-    if (!m_client) return sf::Socket::Status::Error;
-    return m_client->receive(packet);
+    const auto status = m_TcpSocket->receive(packet);
+    if (status == sf::Socket::Status::Error || status == sf::Socket::Status::Disconnected) {
+        m_Connected = false;
+    }
+    return status;
 }
 const sf::Socket::Status Client::receive(void* data, size_t size, size_t& received) {
-    if (!m_client) return sf::Socket::Status::Error;
-    return m_client->receive(data,size,received);
+    const auto status = m_TcpSocket->receive(data,size,received);
+    if (status == sf::Socket::Status::Error || status == sf::Socket::Status::Disconnected) {
+        m_Connected = false;
+    }
+    return status;
 }
 
 
 void epriv::ClientInternalPublicInterface::update(Client* _client) {
-    if (!_client) return;
-    auto& client = *_client;
-    //while (client.connected()) {
-        client.onReceive();
-    //}
+    if (!_client) 
+        return;
+    _client->onReceive();
 }
 void Client::onReceive() {
     sf::Packet sf_packet;
     const auto& status = receive(sf_packet);
+
+    if (status == sf::Socket::Disconnected) {
+        m_TcpSocket->connect();
+        return;
+    }
+
     if (status == sf::Socket::Status::Done) {
         Packet* pp = Packet::getPacket(sf_packet);
         auto& p = *pp;
         if (pp && p.validate(sf_packet)) {
             // Data extracted successfully...
-            std::cout << "Client: ";
-            p.print();
-
+            /*
             if (p.PacketType == PacketType::Server_To_Client_Ship_Physics_Update) {
                 if (p.data != "") {
                     SolarSystem& scene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
@@ -135,6 +163,41 @@ void Client::onReceive() {
                     Math::Float32From16(&lz, phy.lz);
 
                     body.setLinearVelocity(lx, ly, lz, false);
+                }
+            }
+            */
+
+            switch (p.PacketType) {
+                case PacketType::Server_To_Client_Accept_Connection: {
+                    std::cout << "Client: Server_To_Client_Accept_Connection: Received" << std::endl;
+                    m_Validated = true;
+                    if (m_Core.m_GameState != GameState::Host_Server_Lobby_And_Ship && m_Core.m_GameState == GameState::Host_Server_Port_And_Name_And_Map) {
+                        m_Core.m_GameState = GameState::Host_Server_Lobby_And_Ship;
+                        m_Core.m_HUD->m_Next->setText("Enter Game");
+                    }
+                    else if (m_Core.m_GameState != GameState::Join_Server_Server_Lobby && m_Core.m_GameState == GameState::Join_Server_Port_And_Name_And_IP) {
+                        m_Core.m_GameState = GameState::Join_Server_Server_Lobby;
+                        m_Core.m_HUD->m_Next->setText("Enter Game");
+                    }
+                    break;
+                }
+                case PacketType::Server_To_Client_Reject_Connection: {
+                    m_Validated = false;
+                    std::cout << "Client: Server_To_Client_Reject_Connection: Received" << std::endl;
+                    m_Core.m_HUD->setErrorText("Someone has already chosen that name");
+                    break;
+                }
+                case PacketType::Server_Shutdown: {
+                    m_Validated = false;
+                    std::cout << "Client: Server_Shutdown: Received" << std::endl;
+                    m_Core.shutdownClient();
+                    m_Core.m_HUD->setErrorText("Disconnected from server",600);
+                    m_Core.m_GameState = GameState::Main_Menu;
+                    m_Core.m_HUD->m_Next->setText("Next");
+                    break;
+                }
+                default: {
+                    break;
                 }
             }
         }

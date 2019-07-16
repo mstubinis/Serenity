@@ -3,6 +3,9 @@
 #include "Planet.h"
 #include "Ship.h"
 #include "Core.h"
+#include "Server.h"
+#include "Client.h"
+#include "Packet.h"
 #include "ResourceManifest.h"
 
 #include <core/engine/resources/Engine_Resources.h>
@@ -19,76 +22,120 @@
 #include <glm/vec4.hpp>
 
 #include "gui/Button.h"
+#include "gui/TextBox.h"
+
+#include <regex>
 
 using namespace Engine;
 using namespace std;
 
 
-struct ButtonHost_OnClick { void operator()(Button& button) const {
-    HUD& hud = *static_cast<HUD*>(button.getUserPointer());
-    hud.m_GameState = GameState::Host_Server_Port_And_Name;
+struct ButtonHost_OnClick { void operator()(Button* button) const {
+    HUD& hud = *static_cast<HUD*>(button->getUserPointer());
+    hud.m_GameState = GameState::Host_Server_Port_And_Name_And_Map;
+    hud.setErrorText("", 0.2f);
 }};
-struct ButtonJoin_OnClick {void operator()(Button& button) const {
-    HUD& hud = *static_cast<HUD*>(button.getUserPointer());
+struct ButtonJoin_OnClick {void operator()(Button* button) const {
+    HUD& hud = *static_cast<HUD*>(button->getUserPointer());
     hud.m_GameState = GameState::Join_Server_Port_And_Name_And_IP;
+    hud.setErrorText("", 0.2f);
 }};
 
 
-struct ButtonBack_OnClick {void operator()(Button& button) const {
-    HUD& hud = *static_cast<HUD*>(button.getUserPointer());
+struct ButtonBack_OnClick {void operator()(Button* button) const {
+    HUD& hud = *static_cast<HUD*>(button->getUserPointer());
     switch (hud.m_GameState) {
-        case GameState::Host_Server_Port_And_Name:{
+        case GameState::Host_Server_Port_And_Name_And_Map:{
             hud.m_GameState = GameState::Main_Menu;
             hud.m_Next->setText("Next");
-            break;
-        }case GameState::Host_Server_Map_And_Ship: {
+
+            //force server to disconnect client
             hud.m_Core.shutdownClient();
             hud.m_Core.shutdownServer();
-            hud.m_GameState = GameState::Host_Server_Port_And_Name;
+
+            break;
+        }case GameState::Host_Server_Lobby_And_Ship: {
+
+            //force server to disconnect client
+            hud.m_Core.shutdownClient();
+            hud.m_Core.shutdownServer();
+
+            hud.m_GameState = GameState::Host_Server_Port_And_Name_And_Map;
             hud.m_Next->setText("Next");
             break;
         }case GameState::Join_Server_Port_And_Name_And_IP: {
             hud.m_GameState = GameState::Main_Menu;
             hud.m_Next->setText("Next");
+            hud.m_ErrorText = "";
             break;
-        }case GameState::Join_Server_Server_Info: {
+        }case GameState::Join_Server_Server_Lobby: {
+            //force server to disconnect client
+            hud.m_Core.shutdownClient();
+
             hud.m_GameState = GameState::Join_Server_Port_And_Name_And_IP;
+
             hud.m_Next->setText("Next");
             break;
         }default: {
             hud.m_GameState = GameState::Main_Menu;
             hud.m_Next->setText("Next");
+            hud.m_ErrorText = "";
             break;
         }
     }
 }};
-struct ButtonNext_OnClick {void operator()(Button& button) const {
-    HUD& hud = *static_cast<HUD*>(button.getUserPointer());
+struct ButtonNext_OnClick {void operator()(Button* button) const {
+    HUD& hud = *static_cast<HUD*>(button->getUserPointer());
     switch (hud.m_GameState) {
-        case GameState::Host_Server_Port_And_Name: {   
-            hud.m_GameState = GameState::Host_Server_Map_And_Ship;
-
-            hud.m_Core.startServer(55000);
-            hud.m_Core.startClient(55000);
-
-            hud.m_Next->setText("Enter Game");
+        case GameState::Host_Server_Port_And_Name_And_Map: {
+            const string& username   = hud.m_UserName->text();
+            const string& portstring = hud.m_ServerPort->text();
+            if (portstring != "" && username != "") {
+                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) {
+                    const int port = stoi(portstring);
+                    hud.m_Core.startServer(port);
+                    bool am_i_connected = hud.m_Core.startClient(port, username, "127.0.01"); //the client will request validation at this stage
+                    if (!am_i_connected) {
+                        hud.setErrorText("Connection to your own server failed", 7.0f);
+                    }
+                }else{
+                    hud.setErrorText("Server port must contain numbers only");
+                }
+            }else{
+                hud.setErrorText("Do not leave any fields blank");
+            }
             break;
-        }case GameState::Host_Server_Map_And_Ship: {
+        }case GameState::Host_Server_Lobby_And_Ship: {
             hud.m_GameState = GameState::Game;
             hud.m_Core.enterMap("Sol");
             hud.m_Next->setText("Next");
             break;
         }case GameState::Join_Server_Port_And_Name_And_IP: {
-            hud.m_GameState = GameState::Join_Server_Server_Info;
-            hud.m_Next->setText("Enter Game");
+            const string& username   = hud.m_UserName->text();
+            const string& portstring = hud.m_ServerPort->text();
+            const string& ip         = hud.m_ServerIp->text();
+            if (portstring != "" && ip != "" && username != "") {
+                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) {
+                    bool am_i_connected = hud.m_Core.startClient(stoi(portstring), username, ip); //the client will request validation at this stage
+                    if (!am_i_connected) {
+                        hud.setErrorText("Connection to the server failed",7.0f);
+                    }
+                }else{
+                    hud.setErrorText("Server port must contain numbers only");
+                }
+            }else{
+                hud.setErrorText("Do not leave any fields blank");
+            }
             break;
-        }case GameState::Join_Server_Server_Info: { 
+        }case GameState::Join_Server_Server_Lobby: { 
             hud.m_GameState = GameState::Game;
+            hud.m_Core.enterMap("Sol");
             hud.m_Next->setText("Next");
             break;
         }default: {
             hud.m_GameState = GameState::Main_Menu;
             hud.m_Next->setText("Next");
+            hud.m_ErrorText = "";
             break;
         }
     }
@@ -100,6 +147,8 @@ HUD::HUD(GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
     m_Font = Resources::getFont(m_FontHandle);
     Engine::Math::setColor(m_Color, 255, 255, 0);
     m_Active = true;
+    m_MessageText = m_ErrorText = "";
+    m_ErrorTimer = 0.0f;
 
     const auto& windowDimensions = Resources::getWindowSize();
 
@@ -132,10 +181,35 @@ HUD::HUD(GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
 
     m_Back->setOnClickFunctor(ButtonBack_OnClick());
     m_Next->setOnClickFunctor(ButtonNext_OnClick());
+
+
+    m_ServerIp = new TextBox("Server IP",*m_Font, 40, windowDimensions.x / 2, (windowDimensions.y / 2) - 60 - 170);
+    m_ServerIp->setColor(0.5f, 0.5f, 0.5f, 1);
+    m_ServerIp->setTextColor(1, 1, 0, 1);
+    m_UserName = new TextBox("Your Name",*m_Font, 20, windowDimensions.x / 2, (windowDimensions.y / 2) + 60 - 170);
+    m_UserName->setColor(0.5f, 0.5f, 0.5f, 1);
+    m_UserName->setTextColor(1, 1, 0, 1);
+    m_ServerPort = new TextBox("Server Port",*m_Font, 7, windowDimensions.x / 2, (windowDimensions.y / 2) - 170);
+    m_ServerPort->setColor(0.5f, 0.5f, 0.5f, 1);
+    m_ServerPort->setTextColor(1, 1, 0, 1);
+    m_ServerPort->setText("55000");
 }
 HUD::~HUD() {
+    SAFE_DELETE(m_ButtonHost);
+    SAFE_DELETE(m_ButtonJoin);
+    SAFE_DELETE(m_Back);
+    SAFE_DELETE(m_Next);
+    SAFE_DELETE(m_ServerIp);
+    SAFE_DELETE(m_UserName);
+    SAFE_DELETE(m_ServerPort);
 }
-
+void HUD::setErrorText(const std::string& error, const float errorTime) {
+    m_ErrorText = error;
+    m_ErrorTimer = errorTime;
+}
+const std::string& HUD::getErrorText() const {
+    return m_ErrorText;
+}
 
 void HUD::onResize(const uint& width, const uint& height) {
     m_ButtonHost->setPosition(width / 2, height / 2);
@@ -143,6 +217,10 @@ void HUD::onResize(const uint& width, const uint& height) {
 
     m_Back->setPosition(100, 50);
     m_Next->setPosition(width - 100, 50);
+
+    m_ServerIp->setPosition(width / 2, (height / 2) - 60 - 170);
+    m_ServerPort->setPosition(width / 2, (height / 2) - 170);
+    m_UserName->setPosition(width / 2, (height / 2) + 60 - 170);
 }
 
 int _count = 0;
@@ -177,19 +255,26 @@ void HUD::update_main_menu(const double& dt) {
     m_ButtonHost->update(dt);
     m_ButtonJoin->update(dt);
 }
-void HUD::update_host_server_map_and_ship(const double& dt) {
+void HUD::update_host_server_lobby_and_ship(const double& dt) {
     m_Back->update(dt);
     m_Next->update(dt);
 }
-void HUD::update_host_server_port_and_name(const double& dt) {
+void HUD::update_host_server_port_and_name_and_map(const double& dt) {
     m_Back->update(dt);
     m_Next->update(dt);
+
+    m_ServerPort->update(dt);
+    m_UserName->update(dt);
 }
 void HUD::update_join_server_port_and_name_and_ip(const double& dt) {
     m_Back->update(dt);
     m_Next->update(dt);
+
+    m_ServerIp->update(dt);
+    m_ServerPort->update(dt);
+    m_UserName->update(dt);
 }
-void HUD::update_join_server_server_info(const double& dt) {
+void HUD::update_join_server_server_lobby(const double& dt) {
     m_Back->update(dt);
     m_Next->update(dt);
 }
@@ -290,19 +375,26 @@ void HUD::render_main_menu() {
     m_ButtonHost->render();
     m_ButtonJoin->render();
 }
-void HUD::render_host_server_map_and_ship() {
+void HUD::render_host_server_lobby_and_ship() {
     m_Back->render();
     m_Next->render();
 }
-void HUD::render_host_server_port_and_name() {
+void HUD::render_host_server_port_and_name_and_map() {
     m_Back->render();
     m_Next->render();
+
+    m_ServerPort->render();
+    m_UserName->render();
 }
 void HUD::render_join_server_port_and_name_and_ip() {
     m_Back->render();
     m_Next->render();
+
+    m_ServerIp->render();
+    m_ServerPort->render();
+    m_UserName->render();
 }
-void HUD::render_join_server_server_info() {
+void HUD::render_join_server_server_lobby() {
     m_Back->render();
     m_Next->render();
 }
@@ -311,18 +403,25 @@ void HUD::update(const double& dt) {
     switch (m_GameState) {
         case GameState::Main_Menu: {
             update_main_menu(dt); break;
-        }case GameState::Host_Server_Map_And_Ship: {
-            update_host_server_map_and_ship(dt); break;
-        }case GameState::Host_Server_Port_And_Name: {
-            update_host_server_port_and_name(dt); break;
+        }case GameState::Host_Server_Lobby_And_Ship: {
+            update_host_server_lobby_and_ship(dt); break;
+        }case GameState::Host_Server_Port_And_Name_And_Map: {
+            update_host_server_port_and_name_and_map(dt); break;
         }case GameState::Join_Server_Port_And_Name_And_IP: {
             update_join_server_port_and_name_and_ip(dt); break;
-        }case GameState::Join_Server_Server_Info: {
-            update_join_server_server_info(dt); break;
+        }case GameState::Join_Server_Server_Lobby: {
+            update_join_server_server_lobby(dt); break;
         }case GameState::Game: {
             update_game(dt); break;
         }default: {
             break;
+        }
+    }
+    if (m_ErrorTimer > 0) {
+        m_ErrorTimer -= static_cast<float>(dt);
+        if (m_ErrorTimer < 0) {
+            m_ErrorText = "";
+            m_ErrorTimer = 0.0f;
         }
     }
 }
@@ -330,18 +429,21 @@ void HUD::render() {
     switch (m_GameState) {
         case GameState::Main_Menu: {
             render_main_menu(); break;
-        }case GameState::Host_Server_Map_And_Ship: {
-            render_host_server_map_and_ship(); break;
-        }case GameState::Host_Server_Port_And_Name: {
-            render_host_server_port_and_name(); break;
+        }case GameState::Host_Server_Lobby_And_Ship: {
+            render_host_server_lobby_and_ship(); break;
+        }case GameState::Host_Server_Port_And_Name_And_Map: {
+            render_host_server_port_and_name_and_map(); break;
         }case GameState::Join_Server_Port_And_Name_And_IP: {
             render_join_server_port_and_name_and_ip(); break;
-        }case GameState::Join_Server_Server_Info: {
-            render_join_server_server_info(); break;
+        }case GameState::Join_Server_Server_Lobby: {
+            render_join_server_server_lobby(); break;
         }case GameState::Game: {
             render_game(); break;
         }default: {
             break;
         }
+    }
+    if (m_ErrorText != "") {
+        m_Font->renderText(m_ErrorText, glm::vec2(Resources::getWindowSize().x / 2, 65), glm::vec4(1, 0, 0, 1), 0, glm::vec2(1.0f), 0.1f, TextAlignment::Center);
     }
 }

@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     options.window_title = "Solar System";
     options.width        = 1024;
     options.height       = 768;
-    options.fullscreen   = true;
+    options.fullscreen   = false;
     options.aa_algorithm = AntiAliasingAlgorithm::SMAA;
 
     Engine::init(options);

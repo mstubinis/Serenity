@@ -3,8 +3,10 @@
 #define GAME_RESOURCE_MANIFEST_H
 
 #include <string>
+#include <boost/tuple/tuple.hpp>
+#include <core/engine/resources/Handle.h>
+#include <unordered_map>
 
-struct Handle;
 struct ResourceManifest{
     static Handle skyFromSpace;
     static Handle skyFromAtmosphere;
@@ -37,6 +39,8 @@ struct ResourceManifest{
     static Handle StarFlareMaterial;
 
     static std::string BasePath;
+
+    static std::unordered_map<std::string, boost::tuple<Handle, Handle>> Ships;
 
     static void init();
 };

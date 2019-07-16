@@ -3,6 +3,7 @@
 #define GAME_BUTTON_H
 
 #include "Widget.h"
+#include <core/engine/fonts/FontIncludes.h>
 #include <string>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -15,6 +16,7 @@ class Button : public Widget {
         glm::vec2                 m_TextScale;
         glm::vec4                 m_TextColor;
         boost::function<void()>   m_FunctorOnClick;
+        TextAlignment::Type       m_TextAlignment;
     public:
         Button(Font& font, const float& x, const float& y, const float& width, const float& height);
         Button(Font& font, const glm::vec2& position, const float& width, const float& height);
@@ -22,13 +24,13 @@ class Button : public Widget {
 
         const std::string& text() const;
 
-        template<class T> void setOnClickFunctor(const T& functor) { m_FunctorOnClick = boost::bind<void>(functor, *this); }
+        template<class T> void setOnClickFunctor(const T& functor) { m_FunctorOnClick = boost::bind<void>(functor, this); }
 
         const float getTextHeight() const;
         const float getTextWidth() const;
 
-        void setTextScale(const glm::vec2& scale);
-        void setTextScale(const float& x, const float& y);
+        virtual void setTextScale(const glm::vec2& scale);
+        virtual void setTextScale(const float& x, const float& y);
         const glm::vec2& getTextScale() const;
 
         void setFont(Font& font);
@@ -37,8 +39,8 @@ class Button : public Widget {
         virtual void setText(const char* text);
         virtual void setText(const std::string& text);
 
-        void update(const double& dt);
-        void render();
+        virtual void update(const double& dt);
+        virtual void render();
 };
 
 #endif

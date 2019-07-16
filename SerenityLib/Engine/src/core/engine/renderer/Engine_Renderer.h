@@ -69,8 +69,6 @@ namespace epriv{
             );
             void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
             void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
-            void _renderText(Font&,const std::string& text, const glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth, const TextAlignment::Type);
-            void _renderTexture(Texture*,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth);
             void _bindShaderProgram(ShaderP*);
             void _unbindShaderProgram();
             void _bindMaterial(Material*);
@@ -111,11 +109,6 @@ namespace Renderer{
         void enableDrawPhysicsInfo(bool b = true);
         void disableDrawPhysicsInfo();
 
-        namespace General {
-            void enable1(bool b = true);
-            void disable1();
-            bool enabled1();
-        };
         namespace Lighting{
             void enable(bool b = true);
             void disable();
@@ -128,8 +121,8 @@ namespace Renderer{
             void setGIContribution(float global, float diffuse, float specular);
         };
     };
-    void renderFullscreenQuad(uint width, uint height, uint startX = 0, uint startY = 0);
-    void renderFullscreenTriangle(uint width,uint height, uint startX = 0, uint startY = 0);
+    void renderFullscreenQuad(const uint width, const uint height, const uint startX = 0, const uint startY = 0);
+    void renderFullscreenTriangle(const uint width, const uint height, const uint startX = 0, const uint startY = 0);
 
     void renderFullscreenQuad();
     void renderFullscreenTriangle();
@@ -164,9 +157,10 @@ namespace Renderer{
     void unbindReadFBO();
     void unbindDrawFBO();
         
-    void renderTexture(Texture&, const glm::vec2& pos, const glm::vec4& col, float angle, const glm::vec2& scl, float depth);
-    void renderText(const std::string& text, Font&, const glm::vec2& pos, const glm::vec4& color, float angle, const glm::vec2& scl, float depth, const TextAlignment::Type = TextAlignment::Left);
+    void renderTexture(const Texture&, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth);
+    void renderText(const std::string& text, const Font&, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const TextAlignment::Type& = TextAlignment::Left);
     void renderRectangle(const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth);
+    void renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth);
 
     #pragma region UniformSending
     //Uniform 1

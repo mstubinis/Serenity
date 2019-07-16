@@ -9,7 +9,7 @@ using namespace Engine;
 
 namespace Engine {
     namespace epriv {
-        struct emptyFunctor { template<class T> void operator()(T& r) const {} };
+        struct emptyFunctor { template<class T> void operator()(T* r) const {} };
     };
 };
 
@@ -21,6 +21,7 @@ Button::Button(Font& font, const float& x, const float& y, const float& width, c
 
     m_Height = getTextHeight() + 20;
     m_Width = getTextWidth() + 20;
+    m_TextAlignment = TextAlignment::Center;
 }
 Button::Button(Font& font, const glm::vec2& position, const float& width, const float& height) : Widget(position, width, height) {
     setFont(font);
@@ -30,6 +31,7 @@ Button::Button(Font& font, const glm::vec2& position, const float& width, const 
 
     m_Height = getTextHeight() + 20;
     m_Width = getTextWidth() + 20;
+    m_TextAlignment = TextAlignment::Center;
 }
 Button::~Button() {
 
@@ -124,7 +126,14 @@ void Button::render() {
     }  
     const auto newPos = glm::vec2(m_Position.x + xOffset, m_Position.y + yOffset);
     Renderer::renderRectangle(newPos, m_Color, m_Width, m_Height, 0, 0.01f);
+    //Renderer::renderBorder(2,newPos, m_TextColor, m_Width, m_Height, 0, 0.008f);
 
-    const auto newPosTxt = glm::vec2(m_Position.x, m_Position.y + getTextHeight());
-    m_Font->renderText(m_Text, newPosTxt, m_TextColor,0, m_TextScale, 0.008f,TextAlignment::Center);
+    glm::vec2 newPosTxt; 
+    if(m_TextAlignment == TextAlignment::Left)
+        newPosTxt = glm::vec2(m_Position.x - m_Width / 2, m_Position.y + getTextHeight());
+    else if (m_TextAlignment == TextAlignment::Center)
+        newPosTxt = glm::vec2(m_Position.x, m_Position.y + getTextHeight());
+    else if (m_TextAlignment == TextAlignment::Right)
+        newPosTxt = glm::vec2(m_Position.x + m_Width / 2, m_Position.y + getTextHeight());
+    m_Font->renderText(m_Text, newPosTxt, m_TextColor,0, m_TextScale, 0.008f, m_TextAlignment);
 }

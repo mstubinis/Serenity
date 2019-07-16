@@ -25,6 +25,7 @@
 #include <boost/lexical_cast.hpp>
 #include <SFML/Graphics.hpp>
 #include <random>
+#include <queue>
 
 #include <iostream>
 
@@ -129,25 +130,27 @@ namespace Engine{
         _TOTAL};};
 
         struct TextureRenderInfo final{
-            Texture* texture;
-            glm::vec2 pos, scl;
-            glm::vec4 col;
-            float rot, depth;
-            TextureRenderInfo(Texture* _texture, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth):texture(_texture){
-                pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
+            const Texture*   texture;
+            const glm::vec2  pos;
+            const glm::vec2  scl;
+            const glm::vec4  col;
+            const float      rot;
+            const float      depth;
+            TextureRenderInfo(const Texture* _texture, const glm::vec2& _pos, const glm::vec4& _col, const glm::vec2& _scl, const float& _rot, const float& _depth)
+                :texture(_texture),pos(_pos),col(_col),scl(_scl),rot(_rot),depth(_depth){
             }
         };
         struct FontRenderInfo final{
-            Font& font;
-            glm::vec2 pos, scl;
-            glm::vec4 col;
-            float rot, depth;
-            std::string text;
-            TextAlignment::Type alignType;
-            FontRenderInfo(Font& _font, string _text, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth, const TextAlignment::Type _alignType):font(_font){
-                pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
-                text = _text;
-                alignType = _alignType;
+            const Font&                font;
+            const glm::vec2            pos;
+            const glm::vec2            scl;
+            const glm::vec4            col;
+            const float                rot;
+            const float                depth;
+            const std::string          text;
+            const TextAlignment::Type  alignType;
+            FontRenderInfo(const Font& _font, const string& _text, const glm::vec2& _pos, const glm::vec4& _col, const glm::vec2& _scl, const float& _rot, const float& _depth, const TextAlignment::Type& _alignType)
+                :font(_font),pos(_pos),col(_col),scl(_scl),rot(_rot),depth(_depth),text(_text),alignType(_alignType){
             }
         };
         struct UBOCamera final{
@@ -178,8 +181,6 @@ class epriv::RenderManager::impl final{
 
         #pragma region GeneralInfo
 
-        bool enabled1;
-
         float gamma;
         Texture* brdfCook;
         Texture* blackCubemap;
@@ -196,8 +197,8 @@ class epriv::RenderManager::impl final{
 
         GBuffer* m_GBuffer;
         glm::mat4 m_2DProjectionMatrix;
-        vector<FontRenderInfo> m_FontsToBeRendered;
-        vector<TextureRenderInfo> m_TexturesToBeRendered;
+        queue<FontRenderInfo> m_FontsToBeRendered;
+        queue<TextureRenderInfo> m_TexturesToBeRendered;
         vector<glm::vec3> text_pts;
         vector<glm::vec2> text_uvs;
         vector<ushort>    text_ind;
@@ -226,8 +227,6 @@ class epriv::RenderManager::impl final{
             #pragma endregion
 
             #pragma region GeneralInfo
-
-            enabled1 = true;
 
             text_pts.reserve(4096 * 4);//4 points per char
             text_uvs.reserve(4096 * 4);//4 uvs per char
@@ -258,34 +257,34 @@ class epriv::RenderManager::impl final{
             m_IdentityMat3 = glm::mat3(1.0f);
             #pragma endregion
         }      
-        void _postInit(const char* name,uint& width,uint& height){
-            glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS,&UniformBufferObject::MAX_UBO_BINDINGS);
-            #pragma region OpenGLExtensions
+        void _postInit(const char* name, uint& width, uint& height) {
+            glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &UniformBufferObject::MAX_UBO_BINDINGS);
+#pragma region OpenGLExtensions
 
             //prints all the extensions the gpu supports
             /*
-            GLint n=0; glGetIntegerv(GL_NUM_EXTENSIONS, &n); 
-            for (GLint i=0; i<n; i++) { 
+            GLint n=0; glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+            for (GLint i=0; i<n; i++) {
             const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
-            printf("Ext %d: %s\n", i, extension); 
+            printf("Ext %d: %s\n", i, extension);
             }
             */
 
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_Ansiotropic_Filtering]    = _checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_Ansiotropic_Filtering]    = _checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_draw_instanced]           = _checkOpenGLExtension("GL_EXT_draw_instanced");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_draw_instanced]           = _checkOpenGLExtension("GL_ARB_draw_instanced");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_separate_shader_objects]  = _checkOpenGLExtension("GL_EXT_separate_shader_objects");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_separate_shader_objects]  = _checkOpenGLExtension("GL_ARB_separate_shader_objects");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_Ansiotropic_Filtering] = _checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_Ansiotropic_Filtering] = _checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_draw_instanced] = _checkOpenGLExtension("GL_EXT_draw_instanced");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_draw_instanced] = _checkOpenGLExtension("GL_ARB_draw_instanced");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_separate_shader_objects] = _checkOpenGLExtension("GL_EXT_separate_shader_objects");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_separate_shader_objects] = _checkOpenGLExtension("GL_ARB_separate_shader_objects");
             OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_explicit_attrib_location] = _checkOpenGLExtension("GL_EXT_explicit_attrib_location");
             OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_explicit_attrib_location] = _checkOpenGLExtension("GL_ARB_explicit_attrib_location");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_geometry_shader_4]        = _checkOpenGLExtension("GL_EXT_geometry_shader4");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_geometry_shader_4]        = _checkOpenGLExtension("GL_ARB_geometry_shader4");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_compute_shader]           = _checkOpenGLExtension("GL_EXT_compute_shader");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_compute_shader]           = _checkOpenGLExtension("GL_ARB_compute_shader");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_tessellation_shader]      = _checkOpenGLExtension("GL_EXT_tessellation_shader");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_tessellation_shader]      = _checkOpenGLExtension("GL_ARB_tessellation_shader");
-            #pragma endregion
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_geometry_shader_4] = _checkOpenGLExtension("GL_EXT_geometry_shader4");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_geometry_shader_4] = _checkOpenGLExtension("GL_ARB_geometry_shader4");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_compute_shader] = _checkOpenGLExtension("GL_EXT_compute_shader");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_compute_shader] = _checkOpenGLExtension("GL_ARB_compute_shader");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_tessellation_shader] = _checkOpenGLExtension("GL_EXT_tessellation_shader");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_tessellation_shader] = _checkOpenGLExtension("GL_ARB_tessellation_shader");
+#pragma endregion
 
             //dummy vao
             GLuint dummyVAO;
@@ -293,87 +292,87 @@ class epriv::RenderManager::impl final{
 
             epriv::EShaders::init();
 
-            #pragma region EngineInternalShaderUBOs
-            UniformBufferObject::UBO_CAMERA = new UniformBufferObject("Camera",sizeof(epriv::UBOCamera));
+#pragma region EngineInternalShaderUBOs
+            UniformBufferObject::UBO_CAMERA = new UniformBufferObject("Camera", sizeof(epriv::UBOCamera));
             UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
-            #pragma endregion
+#pragma endregion
 
-            #pragma region EngineInternalShadersAndPrograms
+#pragma region EngineInternalShadersAndPrograms
             m_InternalShaderPrograms.resize(EngineInternalShaderPrograms::_TOTAL, nullptr);
 
-            m_InternalShaders.emplace_back(EShaders::fullscreen_quad_vertex,ShaderType::Vertex,false);
-            m_InternalShaders.emplace_back(EShaders::fxaa_frag,ShaderType::Fragment,false);
+            m_InternalShaders.emplace_back(EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+            m_InternalShaders.emplace_back(EShaders::fxaa_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::bullet_physics_vert, ShaderType::Vertex, false);
             m_InternalShaders.emplace_back(EShaders::bullet_physcis_frag, ShaderType::Fragment, false);
-            m_InternalShaders.emplace_back(EShaders::vertex_basic,ShaderType::Vertex,false);
-            m_InternalShaders.emplace_back(EShaders::vertex_hud,ShaderType::Vertex,false);
-            m_InternalShaders.emplace_back(EShaders::vertex_skybox,ShaderType::Vertex,false);
+            m_InternalShaders.emplace_back(EShaders::vertex_basic, ShaderType::Vertex, false);
+            m_InternalShaders.emplace_back(EShaders::vertex_hud, ShaderType::Vertex, false);
+            m_InternalShaders.emplace_back(EShaders::vertex_skybox, ShaderType::Vertex, false);
             m_InternalShaders.emplace_back(EShaders::lighting_vert, ShaderType::Vertex, false);
-            m_InternalShaders.emplace_back(EShaders::forward_frag,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::deferred_frag,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::deferred_frag_hud,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::deferred_frag_skybox,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::deferred_frag_skybox_fake,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::copy_depth_frag,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::ssao_frag,ShaderType::Fragment,false);
+            m_InternalShaders.emplace_back(EShaders::forward_frag, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::deferred_frag, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::deferred_frag_hud, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::deferred_frag_skybox, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::deferred_frag_skybox_fake, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::copy_depth_frag, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::ssao_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::bloom_frag, ShaderType::Fragment, false);
-            m_InternalShaders.emplace_back(EShaders::hdr_frag,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::blur_frag,ShaderType::Fragment,false);
+            m_InternalShaders.emplace_back(EShaders::hdr_frag, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::blur_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::depth_of_field, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::ssao_blur_frag, ShaderType::Fragment, false);
-            m_InternalShaders.emplace_back(EShaders::godRays_frag,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::final_frag,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::lighting_frag,ShaderType::Fragment,false);
+            m_InternalShaders.emplace_back(EShaders::godRays_frag, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::final_frag, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::lighting_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::lighting_frag_optimized, ShaderType::Fragment, false);
-            m_InternalShaders.emplace_back(EShaders::lighting_frag_gi,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::cubemap_convolude_frag,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::cubemap_prefilter_envmap_frag,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::brdf_precompute,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::greyscale_frag,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::stencil_passover,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::smaa_vertex_1,ShaderType::Vertex,false);
-            m_InternalShaders.emplace_back(EShaders::smaa_vertex_2,ShaderType::Vertex,false);
-            m_InternalShaders.emplace_back(EShaders::smaa_vertex_3,ShaderType::Vertex,false);
-            m_InternalShaders.emplace_back(EShaders::smaa_vertex_4,ShaderType::Vertex,false);
-            m_InternalShaders.emplace_back(EShaders::smaa_frag_1,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::smaa_frag_2,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::smaa_frag_3,ShaderType::Fragment,false);
-            m_InternalShaders.emplace_back(EShaders::smaa_frag_4,ShaderType::Fragment,false);
+            m_InternalShaders.emplace_back(EShaders::lighting_frag_gi, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::cubemap_convolude_frag, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::cubemap_prefilter_envmap_frag, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::brdf_precompute, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::greyscale_frag, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::stencil_passover, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::smaa_vertex_1, ShaderType::Vertex, false);
+            m_InternalShaders.emplace_back(EShaders::smaa_vertex_2, ShaderType::Vertex, false);
+            m_InternalShaders.emplace_back(EShaders::smaa_vertex_3, ShaderType::Vertex, false);
+            m_InternalShaders.emplace_back(EShaders::smaa_vertex_4, ShaderType::Vertex, false);
+            m_InternalShaders.emplace_back(EShaders::smaa_frag_1, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::smaa_frag_2, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::smaa_frag_3, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::smaa_frag_4, ShaderType::Fragment, false);
 
-            InternalShaderPrograms::Deferred = new ShaderP("Deferred",m_InternalShaders[EngineInternalShaders::VertexBasic],m_InternalShaders[EngineInternalShaders::DeferredFrag]);
-            InternalShaderPrograms::Forward = new ShaderP("Forward",m_InternalShaders[EngineInternalShaders::VertexBasic],m_InternalShaders[EngineInternalShaders::ForwardFrag]);
+            InternalShaderPrograms::Deferred = new ShaderP("Deferred", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::DeferredFrag]);
+            InternalShaderPrograms::Forward = new ShaderP("Forward", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::ForwardFrag]);
 
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics] = new ShaderP("Bullet_Physics",m_InternalShaders[EngineInternalShaders::BulletPhysicsVertex],m_InternalShaders[EngineInternalShaders::BulletPhysicsFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD] = new ShaderP("Deferred_HUD",m_InternalShaders[EngineInternalShaders::VertexHUD],m_InternalShaders[EngineInternalShaders::DeferredFragHUD]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays] = new ShaderP("Deferred_GodsRays",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::GodRaysFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur] = new ShaderP("Deferred_Blur",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::BlurFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics] = new ShaderP("Bullet_Physics", m_InternalShaders[EngineInternalShaders::BulletPhysicsVertex], m_InternalShaders[EngineInternalShaders::BulletPhysicsFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD] = new ShaderP("Deferred_HUD", m_InternalShaders[EngineInternalShaders::VertexHUD], m_InternalShaders[EngineInternalShaders::DeferredFragHUD]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays] = new ShaderP("Deferred_GodsRays", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::GodRaysFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur] = new ShaderP("Deferred_Blur", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BlurFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlurSSAO] = new ShaderP("Deferred_Blur_SSAO", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::SSAOBlurFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR] = new ShaderP("Deferred_HDR",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::HDRFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO] = new ShaderP("Deferred_SSAO",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::SSAOFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR] = new ShaderP("Deferred_HDR", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::HDRFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO] = new ShaderP("Deferred_SSAO", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::SSAOFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF] = new ShaderP("Deferred_DOF", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::DOFFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom] = new ShaderP("Deferred_Bloom", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BloomFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal] = new ShaderP("Deferred_Final",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::FinalFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA] = new ShaderP("Deferred_FXAA",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::FXAAFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox] = new ShaderP("Deferred_Skybox",m_InternalShaders[EngineInternalShaders::VertexSkybox],m_InternalShaders[EngineInternalShaders::DeferredFragSkybox]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake] = new ShaderP("Deferred_Skybox_Fake",m_InternalShaders[EngineInternalShaders::VertexSkybox],m_InternalShaders[EngineInternalShaders::DeferredFragSkyboxFake]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth] = new ShaderP("Copy_Depth",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::CopyDepthFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting] = new ShaderP("Deferred_Light",m_InternalShaders[EngineInternalShaders::LightingVertex],m_InternalShaders[EngineInternalShaders::LightingFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal] = new ShaderP("Deferred_Final", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::FinalFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA] = new ShaderP("Deferred_FXAA", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::FXAAFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox] = new ShaderP("Deferred_Skybox", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::DeferredFragSkybox]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake] = new ShaderP("Deferred_Skybox_Fake", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::DeferredFragSkyboxFake]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth] = new ShaderP("Copy_Depth", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::CopyDepthFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting] = new ShaderP("Deferred_Light", m_InternalShaders[EngineInternalShaders::LightingVertex], m_InternalShaders[EngineInternalShaders::LightingFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingOptimized] = new ShaderP("Deferred_Light_Optimized", m_InternalShaders[EngineInternalShaders::LightingVertex], m_InternalShaders[EngineInternalShaders::LightingFragOptimized]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingGI] = new ShaderP("Deferred_Light_GI",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::LightingGIFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude] = new ShaderP("Cubemap_Convolude",m_InternalShaders[EngineInternalShaders::VertexSkybox],m_InternalShaders[EngineInternalShaders::CubemapConvoludeFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapPrefilterEnv] = new ShaderP("Cubemap_Prefilter_Env",m_InternalShaders[EngineInternalShaders::VertexSkybox],m_InternalShaders[EngineInternalShaders::CubemapPrefilterEnvFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance] = new ShaderP("BRDF_Precompute_CookTorrance",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::BRDFPrecomputeFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::Grayscale] = new ShaderP("Greyscale_Frag",m_InternalShaders[EngineInternalShaders::FullscreenVertex],m_InternalShaders[EngineInternalShaders::GrayscaleFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::StencilPass] = new ShaderP("Stencil_Pass",m_InternalShaders[EngineInternalShaders::LightingVertex],m_InternalShaders[EngineInternalShaders::StencilPassFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA1] = new ShaderP("Deferred_SMAA_1",m_InternalShaders[EngineInternalShaders::SMAAVertex1],m_InternalShaders[EngineInternalShaders::SMAAFrag1]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA2] = new ShaderP("Deferred_SMAA_2",m_InternalShaders[EngineInternalShaders::SMAAVertex2],m_InternalShaders[EngineInternalShaders::SMAAFrag2]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3] = new ShaderP("Deferred_SMAA_3",m_InternalShaders[EngineInternalShaders::SMAAVertex3],m_InternalShaders[EngineInternalShaders::SMAAFrag3]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4] = new ShaderP("Deferred_SMAA_4",m_InternalShaders[EngineInternalShaders::SMAAVertex4],m_InternalShaders[EngineInternalShaders::SMAAFrag4]);
-            
-            #pragma endregion
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingGI] = new ShaderP("Deferred_Light_GI", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::LightingGIFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude] = new ShaderP("Cubemap_Convolude", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::CubemapConvoludeFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapPrefilterEnv] = new ShaderP("Cubemap_Prefilter_Env", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::CubemapPrefilterEnvFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance] = new ShaderP("BRDF_Precompute_CookTorrance", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BRDFPrecomputeFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::Grayscale] = new ShaderP("Greyscale_Frag", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::GrayscaleFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::StencilPass] = new ShaderP("Stencil_Pass", m_InternalShaders[EngineInternalShaders::LightingVertex], m_InternalShaders[EngineInternalShaders::StencilPassFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA1] = new ShaderP("Deferred_SMAA_1", m_InternalShaders[EngineInternalShaders::SMAAVertex1], m_InternalShaders[EngineInternalShaders::SMAAFrag1]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA2] = new ShaderP("Deferred_SMAA_2", m_InternalShaders[EngineInternalShaders::SMAAVertex2], m_InternalShaders[EngineInternalShaders::SMAAFrag2]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3] = new ShaderP("Deferred_SMAA_3", m_InternalShaders[EngineInternalShaders::SMAAVertex3], m_InternalShaders[EngineInternalShaders::SMAAFrag3]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4] = new ShaderP("Deferred_SMAA_4", m_InternalShaders[EngineInternalShaders::SMAAVertex4], m_InternalShaders[EngineInternalShaders::SMAAFrag4]);
 
-            #pragma region MeshData
-            string cubeMesh =  
+#pragma endregion
+
+#pragma region MeshData
+            string cubeMesh =
                 "v 1.0 -1.0 -1.0\n"
                 "v 1.0 -1.0 1.0\n"
                 "v -1.0 -1.0 1.0\n"
@@ -421,7 +420,7 @@ class epriv::RenderManager::impl final{
                 "f 3/12/5 7/19/5 8/13/5\n"
                 "f 1/14/6 4/20/6 8/15/6";
 
-            string pointLightMesh = 
+            string pointLightMesh =
                 "v 0.000000 -1.000000 0.000000\n"
                 "v 0.723607 -0.447220 0.525725\n"
                 "v -0.276388 -0.447220 0.850649\n"
@@ -905,7 +904,7 @@ class epriv::RenderManager::impl final{
                 "f 162 18 19\n"
                 "f 18 2 19";
 
-            string spotLightData = 
+            string spotLightData =
                 "v 0.000000 1.000000 -1.000000\n"
                 "v 0.222521 0.974928 -1.000000\n"
                 "v 0.433884 0.900969 -1.000000\n"
@@ -990,7 +989,7 @@ class epriv::RenderManager::impl final{
                 "f 6 11 12\n"
                 "f 8 10 11";
 
-            string rodLightData = 
+            string rodLightData =
                 "v -0.000000 1.000000 -1.000000\n"
                 "v -0.000000 1.000000 1.000000\n"
                 "v 0.284630 0.959493 -1.000000\n"
@@ -1119,20 +1118,40 @@ class epriv::RenderManager::impl final{
                 "f 8 6 20\n"
                 "f 8 18 16\n"
                 "f 12 10 16";
-            #pragma endregion
+#pragma endregion
 
-            epriv::InternalMeshes::PointLightBounds = new Mesh(pointLightMesh,0.0005f);
-            epriv::InternalMeshes::RodLightBounds = new Mesh(rodLightData,0.0005f);
-            epriv::InternalMeshes::SpotLightBounds = new Mesh(spotLightData,0.0005f);
+            epriv::InternalMeshes::PointLightBounds = new Mesh(pointLightMesh, 0.0005f);
+            epriv::InternalMeshes::RodLightBounds = new Mesh(rodLightData, 0.0005f);
+            epriv::InternalMeshes::SpotLightBounds = new Mesh(spotLightData, 0.0005f);
 
-            Mesh::FontPlane = new Mesh("FontPlane",1.0f,1.0f,0.0005f);
-            Mesh::Plane = new Mesh("Plane",1.0f,1.0f,0.0005f);
-            Mesh::Cube = new Mesh(cubeMesh,0.0005f);
+            Mesh::FontPlane = new Mesh("FontPlane", 1.0f, 1.0f, 0.0005f);
+            Mesh::Plane = new Mesh("Plane", 1.0f, 1.0f, 0.0005f);
+            Mesh::Cube = new Mesh(cubeMesh, 0.0005f);
 
-            sf::Image sfImageWhite; sfImageWhite.create(2, 2, sf::Color::White);
-            sf::Image sfImageBlack; sfImageBlack.create(2, 2, sf::Color::Black);
-            Texture::White = new Texture(sfImageWhite, "WhiteTexturePlaceholder", false, ImageInternalFormat::RGB8);
-            Texture::Black = new Texture(sfImageBlack, "BlackTexturePlaceholder", false, ImageInternalFormat::RGB8);
+            sf::Image sfImageWhite;
+            sfImageWhite.create(2, 2, sf::Color::White);
+            sf::Image sfImageBlack;
+            sfImageBlack.create(2, 2, sf::Color::Black);
+
+            sf::Image sfImageCheckers;
+            sfImageCheckers.create(8, 8, sf::Color::White);
+
+            uint count = 0;
+            for (int i = 0; i < sfImageCheckers.getSize().x; ++i) {
+                for (int j = 0; j < sfImageCheckers.getSize().y; ++j) {
+                    if ((count % 2 == 0 && i % 2 == 0) || (count % 2 != 0 && i % 2 == 1)) {
+                        sfImageCheckers.setPixel(i, j, sf::Color::Red);
+                    }
+                    ++count;
+                }
+            }
+            Texture::White    = new Texture(sfImageWhite,    "WhiteTexturePlaceholder",    false, ImageInternalFormat::RGBA8);
+            Texture::Black    = new Texture(sfImageBlack,    "BlackTexturePlaceholder",    false, ImageInternalFormat::RGBA8);
+            Texture::Checkers = new Texture(sfImageCheckers, "CheckersTexturePlaceholder", false, ImageInternalFormat::RGBA8);
+            Texture::Checkers->setFilter(TextureFilter::Nearest);
+            Material::Checkers = new Material("MaterialDefaultCheckers", Texture::Checkers);
+            Material::Checkers->setSpecularModel(SpecularModel::None);
+            Material::Checkers->setSmoothness(0.0f);
 
             brdfCook = new Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
             brdfCook->setWrapping(TextureWrap::ClampToEdge);	
@@ -1175,6 +1194,8 @@ class epriv::RenderManager::impl final{
 
             SAFE_DELETE(Texture::White);
             SAFE_DELETE(Texture::Black);
+            SAFE_DELETE(Texture::Checkers);
+            SAFE_DELETE(Material::Checkers);
 
             SAFE_DELETE(epriv::InternalShaderPrograms::Deferred);
             SAFE_DELETE(epriv::InternalShaderPrograms::Forward);
@@ -1400,7 +1421,8 @@ class epriv::RenderManager::impl final{
                 mesh.bind();
                 glm::mat4 m = m_IdentityMat4;
                 sendUniformMatrix4("VP", m_2DProjectionMatrix);
-                for (auto& item : m_TexturesToBeRendered) {
+                while (m_TexturesToBeRendered.size() > 0) {
+                    auto& item = m_TexturesToBeRendered.front();
                     sendUniform4("Object_Color", item.col);
                     m = m_IdentityMat4;
                     m = glm::translate(m, glm::vec3(item.pos.x, item.pos.y, -0.001f - item.depth));
@@ -1409,13 +1431,15 @@ class epriv::RenderManager::impl final{
                         m = glm::scale(m, glm::vec3(item.texture->width(), item.texture->height(), 1.0f));
                         sendTexture("DiffuseTexture", *item.texture, 0);
                         sendUniform1("DiffuseTextureEnabled", 1);
-                    }else{
+                    }
+                    else {
                         sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
                         sendUniform1("DiffuseTextureEnabled", 0);
                     }
-                    m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1.0f));  
+                    m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1.0f));
                     sendUniformMatrix4("Model", m);
                     mesh.render(false);
+                    m_TexturesToBeRendered.pop();
                 }
             }
         }
@@ -1577,7 +1601,8 @@ class epriv::RenderManager::impl final{
 
                 const glm::vec3& rotationAxis = glm::vec3(0, 0, 1);
 
-                for (auto& item : m_FontsToBeRendered) {
+                while (m_FontsToBeRendered.size() > 0) {
+                    auto& item = m_FontsToBeRendered.front();
                     text_pts.clear();
                     text_uvs.clear();
                     text_ind.clear();
@@ -1590,7 +1615,7 @@ class epriv::RenderManager::impl final{
                     y = 0.0f;
                     x = 0.0f;
                     z = -0.001f - item.depth;
-                    
+
                     m = m_IdentityMat4;
                     m = glm::translate(m, glm::vec3(item.pos.x, item.pos.y, 0));
                     m = glm::rotate(m, item.rot, rotationAxis);
@@ -1599,15 +1624,18 @@ class epriv::RenderManager::impl final{
 
                     if (item.alignType == TextAlignment::Left) {
                         _renderTextLeft(item, newLineGlyphHeight, x, y, z);
-                    }else if (item.alignType == TextAlignment::Right) {
+                    }
+                    else if (item.alignType == TextAlignment::Right) {
                         _renderTextRight(item, newLineGlyphHeight, x, y, z);
-                    }else if (item.alignType == TextAlignment::Center) {
+                    }
+                    else if (item.alignType == TextAlignment::Center) {
                         _renderTextMiddle(item, newLineGlyphHeight, x, y, z);
                     }
                     mesh.modifyVertices(0, text_pts);
                     mesh.modifyVertices(1, text_uvs);
                     mesh.modifyIndices(text_ind);
                     mesh.render(false);
+                    m_FontsToBeRendered.pop();
                 }
             }
         }
@@ -1710,13 +1738,13 @@ class epriv::RenderManager::impl final{
             if (!r.isActive()) return;
             Camera& c = *Resources::getCurrentScene()->getActiveCamera();
             auto& body = *r.m_Entity.getComponent<ComponentBody>();
-            glm::vec3 pos = body.position();
+            const glm::vec3& pos = body.position();
             float cullingDistance = r.m_RodLength + (r.m_CullingRadius * 2.0f);
             if (!c.sphereIntersectTest(pos, cullingDistance) || (c.getDistance(pos) > 1100.0f * cullingDistance))
                 return;
-            float half = r.m_RodLength / 2.0f;
-            glm::vec3 firstEndPt = pos + (body.forward() * half);
-            glm::vec3 secndEndPt = pos - (body.forward() * half);
+            const float half = r.m_RodLength / 2.0f;
+            const glm::vec3& firstEndPt = pos + (body.forward() * half);
+            const glm::vec3& secndEndPt = pos - (body.forward() * half);
             Renderer::sendUniform4("LightDataA", r.m_AmbientIntensity, r.m_DiffuseIntensity, r.m_SpecularIntensity, firstEndPt.x);
             Renderer::sendUniform4("LightDataB", firstEndPt.y, firstEndPt.z, r.m_C, r.m_L);
             Renderer::sendUniform4("LightDataC", r.m_E, secndEndPt.x, secndEndPt.y, secndEndPt.z);
@@ -1813,26 +1841,28 @@ class epriv::RenderManager::impl final{
                 //m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingOptimized]->bind();
             
             if(RenderManager::GLSL_VERSION < 140){
-                sendUniformMatrix4Safe("CameraView",c.getView());
-                sendUniformMatrix4Safe("CameraProj",c.getProjection());
+                sendUniformMatrix4Safe("CameraView", c.getView());
+                sendUniformMatrix4Safe("CameraProj", c.getProjection());
                 //sendUniformMatrix4Safe("CameraViewProj",c.getViewProjection()); //moved to shader binding function
-                sendUniformMatrix4Safe("CameraInvView",c.getViewInverse());
-                sendUniformMatrix4Safe("CameraInvProj",c.getProjectionInverse());
-                sendUniformMatrix4Safe("CameraInvViewProj",c.getViewProjectionInverse());
-                sendUniform4Safe("CameraInfo1",glm::vec4(c.getPosition(),c.getNear()));
-                sendUniform4Safe("CameraInfo2",glm::vec4(c.getViewVector(),c.getFar()));
+                sendUniformMatrix4Safe("CameraInvView", c.getViewInverse());
+                sendUniformMatrix4Safe("CameraInvProj", c.getProjectionInverse());
+                sendUniformMatrix4Safe("CameraInvViewProj", c.getViewProjectionInverse());
+                sendUniform4Safe("CameraInfo1", glm::vec4(c.getPosition(), c.getNear()));
+                sendUniform4Safe("CameraInfo2", glm::vec4(c.getViewVector(), c.getFar()));
             }
-            
-            sendUniform4v("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
-            sendUniform4("ScreenData",0.0f,gamma,(float)fboWidth,(float)fboHeight);
+            const auto& fbo_width = static_cast<float>(fboWidth);
+            const auto& fbo_height = static_cast<float>(fboHeight);
 
-            sendTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
-            sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
-            sendTexture("gMiscMap",gbuffer.getTexture(GBufferType::Misc),2);
-            sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
+            sendUniform4v("materials[0]", Material::m_MaterialProperities, Material::m_MaterialProperities.size());
+            sendUniform4("ScreenData", 0.0f, gamma, fbo_width, fbo_height);
+
+            sendTexture("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
+            sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 1);
+            sendTexture("gMiscMap", gbuffer.getTexture(GBufferType::Misc), 2);
+            sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 3);
             sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 4);
 
-            for (const auto& light: InternalScenePublicInterface::GetPointLights(s)){
+            for (const auto& light : InternalScenePublicInterface::GetPointLights(s)) {
                 _renderPointLight(*light);
             }
             for (const auto& light : InternalScenePublicInterface::GetSpotLights(s)) {
@@ -1855,18 +1885,18 @@ class epriv::RenderManager::impl final{
                 //do GI here. (only doing GI during the main render pass, not during light probes
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingGI]->bind();
                 if(RenderManager::GLSL_VERSION < 140){
-                    sendUniformMatrix4Safe("CameraInvView",c.getViewInverse());
-                    sendUniformMatrix4Safe("CameraInvProj",c.getProjectionInverse());
-                    sendUniformMatrix4Safe("CameraInvViewProj",c.getViewProjectionInverse());
-                    sendUniform4Safe("CameraInfo1",glm::vec4(c.getPosition(),c.getNear()));
-                    sendUniform4Safe("CameraInfo2",glm::vec4(c.getViewVector(),c.getFar()));
+                    sendUniformMatrix4Safe("CameraInvView", c.getViewInverse());
+                    sendUniformMatrix4Safe("CameraInvProj", c.getProjectionInverse());
+                    sendUniformMatrix4Safe("CameraInvViewProj", c.getViewProjectionInverse());
+                    sendUniform4Safe("CameraInfo1", glm::vec4(c.getPosition(), c.getNear()));
+                    sendUniform4Safe("CameraInfo2", glm::vec4(c.getViewVector(), c.getFar()));
                 }
                 
-                sendUniform4v("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
-                sendUniform4("ScreenData",lighting_gi_pack,gamma,(float)fboWidth,(float)fboHeight);
-                sendTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
-                sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
-                sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
+                sendUniform4v("materials[0]", Material::m_MaterialProperities, Material::m_MaterialProperities.size());
+                sendUniform4("ScreenData", lighting_gi_pack, gamma, fbo_width, fbo_height);
+                sendTexture("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
+                sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 1);
+                sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 2);
                 sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 3);
 
                 SkyboxEmpty* skybox = s.skybox();
@@ -1883,16 +1913,16 @@ class epriv::RenderManager::impl final{
                     */
                 //}else{
                     if(skybox && skybox->texture()->numAddresses() >= 3){
-                        sendTextureSafe("irradianceMap",skybox->texture()->address(1),4,GL_TEXTURE_CUBE_MAP);
-                        sendTextureSafe("prefilterMap",skybox->texture()->address(2),5,GL_TEXTURE_CUBE_MAP);
-                        sendTextureSafe("brdfLUT",*brdfCook,6);
+                        sendTextureSafe("irradianceMap", skybox->texture()->address(1), 4, GL_TEXTURE_CUBE_MAP);
+                        sendTextureSafe("prefilterMap", skybox->texture()->address(2), 5, GL_TEXTURE_CUBE_MAP);
+                        sendTextureSafe("brdfLUT", *brdfCook, 6);
                     }else{
                         sendTextureSafe("irradianceMap", Texture::Black->address(0), 4, GL_TEXTURE_2D);
                         sendTextureSafe("prefilterMap", Texture::Black->address(0), 5, GL_TEXTURE_2D);
                         sendTextureSafe("brdfLUT", *brdfCook, 6);
                     }
                 //}
-                _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
+                _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
             }
             GLDisable(GLState::STENCIL_TEST);
         }
@@ -1900,7 +1930,6 @@ class epriv::RenderManager::impl final{
             Renderer::colorMask(false, false, false, false);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::StencilPass]->bind();
 
-            Scene& s = *Resources::getCurrentScene();
             gbuffer.getMainFBO()->bind();
 
             GLEnable(GLState::STENCIL_TEST);
@@ -1925,12 +1954,12 @@ class epriv::RenderManager::impl final{
         void _passBlur(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,string type, GLuint texture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur]->bind();
 
-            const float& _divisor = gbuffer.getSmallFBO()->divisor();
+            const float& divisor = gbuffer.getSmallFBO()->divisor();
             glm::vec2 hv(0.0f);
             if(type == "H"){ hv = glm::vec2(1.0f,0.0f); }
             else{            hv = glm::vec2(0.0f,1.0f); }
 
-            glm::ivec2 Res(fboWidth, fboHeight);
+            const glm::ivec2 Res(fboWidth, fboHeight);
 
             sendUniform4("strengthModifier", 
                 epriv::Postprocess_Bloom::Bloom.blur_strength,
@@ -1942,15 +1971,15 @@ class epriv::RenderManager::impl final{
             sendUniform4("DataA", epriv::Postprocess_Bloom::Bloom.blur_radius,0.0f,hv.x,hv.y);
             sendTexture("image",gbuffer.getTexture(texture),0);
 
-            uint _x = uint(float(fboWidth) * _divisor);
-            uint _y = uint(float(fboHeight) * _divisor);
+            const uint _x = static_cast<uint>(static_cast<float>(fboWidth) * divisor);
+            const uint _y = static_cast<uint>(static_cast<float>(fboHeight) * divisor);
             _renderFullscreenTriangle(_x,_y,0,0);
         }
         void _passFinal(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal]->bind();
 
-            sendUniform1Safe("HasBloom",int(epriv::Postprocess_Bloom::Bloom.bloom));
-            sendUniform1Safe("HasFog",int(epriv::Postprocess_Fog::Fog.fog));
+            sendUniform1Safe("HasBloom", static_cast<int>(epriv::Postprocess_Bloom::Bloom.bloom));
+            sendUniform1Safe("HasFog", static_cast<int>(epriv::Postprocess_Fog::Fog.fog));
 
             if(epriv::Postprocess_Fog::Fog.fog){
                 sendUniform1Safe("FogDistNull", epriv::Postprocess_Fog::Fog.distNull);
@@ -1963,9 +1992,9 @@ class epriv::RenderManager::impl final{
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
         }
         void _renderFullscreenQuad(const uint& width, const uint& height,uint startX,uint startY){
-            float w2 = float(width) * 0.5f;
-            float h2 = float(height) * 0.5f;
-            glm::mat4 p = glm::ortho(-w2, w2, -h2, h2);
+            const float w2 = static_cast<float>(width) * 0.5f;
+            const float h2 = static_cast<float>(height) * 0.5f;
+            const glm::mat4 p = glm::ortho(-w2, w2, -h2, h2);
             sendUniformMatrix4("Model", m_IdentityMat4);
             sendUniformMatrix4("VP", p);
             sendUniform2Safe("screenSizeDivideBy2", w2, h2);
@@ -1973,9 +2002,9 @@ class epriv::RenderManager::impl final{
             m_FullscreenQuad->render();
         }
         void _renderFullscreenTriangle(const uint& width, const uint& height,uint startX,uint startY){
-            float w2 = float(width) * 0.5f;
-            float h2 = float(height) * 0.5f;
-            glm::mat4 p = glm::ortho(-w2, w2, -h2, h2);
+            const float w2 = static_cast<float>(width) * 0.5f;
+            const float h2 = static_cast<float>(height) * 0.5f;
+            const glm::mat4 p = glm::ortho(-w2, w2, -h2, h2);
             sendUniformMatrix4("Model", m_IdentityMat4);
             sendUniformMatrix4("VP", p);
             sendUniform2Safe("screenSizeDivideBy2", w2, h2);
@@ -2050,12 +2079,12 @@ class epriv::RenderManager::impl final{
             auto& godRaysPlatform = epriv::Postprocess_GodRays::GodRays;
             if (godRaysPlatform.godRays && godRaysPlatform.sun){
                 auto& body = *godRaysPlatform.sun->getComponent<ComponentBody>();
-                glm::vec3 oPos = body.position();
-                glm::vec3 camPos = camera.getPosition();
-                glm::vec3 camVec = camera.getViewVector();
-                bool infront = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRaysPlatform.fovDegrees));
+                const glm::vec3& oPos = body.position();
+                const glm::vec3& camPos = camera.getPosition();
+                const glm::vec3& camVec = camera.getViewVector();
+                const bool infront = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRaysPlatform.fovDegrees));
                 if (infront) {
-                    glm::vec3 sp = Math::getScreenCoordinates(oPos, false);
+                    const glm::vec3& sp = Math::getScreenCoordinates(oPos, false);
                     float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRaysPlatform.fovDegrees;
                     
                     alpha = glm::pow(alpha, godRaysPlatform.alphaFalloff);
@@ -2126,7 +2155,7 @@ class epriv::RenderManager::impl final{
             
             #pragma region HDR and GodRays addition
             gbuffer.start(GBufferType::Misc);
-            ShaderP& hdrShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR];
+            auto& hdrShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR];
             epriv::Postprocess_HDR::HDR.pass(hdrShader, gbuffer, fboWidth, fboHeight, godRaysPlatform.godRays, lighting, godRaysPlatform.factor);
             #pragma endregion
             
@@ -2134,7 +2163,7 @@ class epriv::RenderManager::impl final{
             //TODO: possible optimization: use stencil buffer to reject completely black pixels during blur passes
             if (epriv::Postprocess_Bloom::Bloom.bloom) {
                 gbuffer.start(GBufferType::Bloom, "RGB", false);
-                ShaderP& bloomShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom];
+                auto& bloomShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom];
                 epriv::Postprocess_Bloom::Bloom.pass(bloomShader, gbuffer, fboWidth, fboHeight, GBufferType::Lighting);
                 for (uint i = 0; i < epriv::Postprocess_Bloom::Bloom.num_passes; ++i) {
                     gbuffer.start(GBufferType::GodRays, "RGB", false);
@@ -2149,7 +2178,7 @@ class epriv::RenderManager::impl final{
             GBufferType::Type outTexture = GBufferType::Lighting;
             #pragma region DOF
             if (epriv::Postprocess_DepthOfField::DOF.dof) {
-                ShaderP& dofShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF];
+                auto& dofShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF];
                 gbuffer.start(outTexture);
                 epriv::Postprocess_DepthOfField::DOF.pass(dofShader,gbuffer, fboWidth, fboHeight, sceneTexture);
                 sceneTexture = GBufferType::Lighting;
@@ -2175,14 +2204,14 @@ class epriv::RenderManager::impl final{
                 sceneTexture = outTexture;
                 outTexture = copy;
 
-                const float& _fboWidth  = float(fboWidth);
-                const float& _fboHeight = float(fboHeight);
+                const float& _fboWidth  = static_cast<float>(fboWidth);
+                const float& _fboHeight = static_cast<float>(fboHeight);
                 const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / _fboWidth, 1.0f / _fboHeight, _fboWidth, _fboHeight);
 
-                ShaderP& edgeProgram     = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA1];
-                ShaderP& blendProgram    = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA2];
-                ShaderP& neighborProgram = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3];
-                ShaderP& finalProgram    = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4];
+                auto& edgeProgram     = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA1];
+                auto& blendProgram    = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA2];
+                auto& neighborProgram = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3];
+                auto& finalProgram    = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4];
 
                 epriv::Postprocess_SMAA::SMAA.passEdge(edgeProgram, gbuffer, SMAA_PIXEL_SIZE, fboWidth, fboHeight, sceneTexture, outTexture);
                 epriv::Postprocess_SMAA::SMAA.passBlend(blendProgram, gbuffer, SMAA_PIXEL_SIZE, fboWidth, fboHeight, outTexture);
@@ -2231,11 +2260,18 @@ class epriv::RenderManager::impl final{
             if(mainRenderFunc){
                 if(HUD){
                     Settings::clear(false,true,false); //clear depth only
-                    _renderTextures(gbuffer,camera,fboWidth,fboHeight);
-                    _renderText(gbuffer,camera,fboWidth,fboHeight);
-                }		
-                vector_clear(m_FontsToBeRendered);
-                vector_clear(m_TexturesToBeRendered);
+
+
+                    /*TODO: Add collection of render functors to render gui elements?
+                    would make handling render calls that depend on order of operation easier, like the glScissor effect for a scroll box
+                    */
+                    _renderTextures(gbuffer, camera, fboWidth, fboHeight);
+                    _renderText(gbuffer, camera, fboWidth, fboHeight);
+
+
+                }
+                //vector_clear(m_FontsToBeRendered);
+                //vector_clear(m_TexturesToBeRendered);
             }
             #pragma endregion
         }
@@ -2248,18 +2284,25 @@ epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl
     renderManager = this;
 }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
-void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
-void epriv::RenderManager::_render(Camera& c, const uint fboW, const uint fboH,bool HUD, Entity* ignore,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){m_i->_render(*m_i->m_GBuffer,c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo);}
-void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
-void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ m_i->m_GBuffer->resize(w,h); }
-void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
-void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h,uint _glslVersion,uint _openglVersion){ m_i->_onOpenGLContextCreation(w,h,_glslVersion,_openglVersion); }
-void epriv::RenderManager::_renderText(Font& font,const string& text, const glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth,const TextAlignment::Type alignType){
-    m_i->m_FontsToBeRendered.emplace_back(font, text, pos, color, scl, angle, depth, alignType);
+void epriv::RenderManager::_init(const char* name,uint w,uint h){ 
+    m_i->_postInit(name,w,h); 
 }
-void epriv::RenderManager::_renderTexture(Texture* texture,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth){
-    m_i->m_TexturesToBeRendered.emplace_back(texture,pos,color,scl,angle,depth);
+void epriv::RenderManager::_render(Camera& c, const uint fboW, const uint fboH,bool HUD, Entity* ignore,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
+    m_i->_render(*m_i->m_GBuffer,c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo);
 }
+void epriv::RenderManager::_resize(uint w,uint h){ 
+    m_i->_resize(w,h); 
+}
+void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ 
+    m_i->m_GBuffer->resize(w,h); 
+}
+void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ 
+    m_i->_onFullscreen(w,m,n,s,set); 
+}
+void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h,uint _glslVersion,uint _openglVersion){ 
+    m_i->_onOpenGLContextCreation(w,h,_glslVersion,_openglVersion); 
+}
+
 void epriv::RenderManager::_bindShaderProgram(ShaderP* p){
     auto& currentShaderPgrm = glSM.current_bound_shader_program;
     if(currentShaderPgrm != p){
@@ -2294,25 +2337,31 @@ void epriv::RenderManager::_genPBREnvMapData(Texture& texture, uint size1, uint 
     m_i->_generatePBREnvMapData(texture,size1,size2);
 }
 
-void Renderer::Settings::General::enable1(bool b) { renderManagerImpl->enabled1 = b; }
-void Renderer::Settings::General::disable1() { renderManagerImpl->enabled1 = false; }
-bool Renderer::Settings::General::enabled1() { return renderManagerImpl->enabled1; }
-
-void Renderer::Settings::Lighting::enable(bool b){ renderManagerImpl->lighting = b; }
-void Renderer::Settings::Lighting::disable(){ renderManagerImpl->lighting = false; }
-float Renderer::Settings::Lighting::getGIContributionGlobal(){ return renderManagerImpl->lighting_gi_contribution_global; }
+void Renderer::Settings::Lighting::enable(bool b){ 
+    renderManagerImpl->lighting = b; 
+}
+void Renderer::Settings::Lighting::disable(){ 
+    renderManagerImpl->lighting = false; 
+}
+float Renderer::Settings::Lighting::getGIContributionGlobal(){ 
+    return renderManagerImpl->lighting_gi_contribution_global; 
+}
 void Renderer::Settings::Lighting::setGIContributionGlobal(float gi){ 
     auto& mgr = *renderManagerImpl;
     mgr.lighting_gi_contribution_global = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
-float Renderer::Settings::Lighting::getGIContributionDiffuse(){ return renderManagerImpl->lighting_gi_contribution_diffuse; }
+float Renderer::Settings::Lighting::getGIContributionDiffuse(){ 
+    return renderManagerImpl->lighting_gi_contribution_diffuse;
+}
 void Renderer::Settings::Lighting::setGIContributionDiffuse(float gi){ 
     auto& mgr = *renderManagerImpl;
     mgr.lighting_gi_contribution_diffuse = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
-float Renderer::Settings::Lighting::getGIContributionSpecular(){ return renderManagerImpl->lighting_gi_contribution_specular; }
+float Renderer::Settings::Lighting::getGIContributionSpecular(){ 
+    return renderManagerImpl->lighting_gi_contribution_specular; 
+}
 void Renderer::Settings::Lighting::setGIContributionSpecular(float gi){
     auto& mgr = *renderManagerImpl;
     mgr.lighting_gi_contribution_specular = glm::clamp(gi,0.001f,0.999f);
@@ -2326,8 +2375,12 @@ void Renderer::Settings::Lighting::setGIContribution(float g, float d, float s){
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
 
-void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){ renderManagerImpl->_setAntiAliasingAlgorithm(algorithm); }
-void Renderer::Settings::cullFace(uint s){ renderManagerImpl->_cullFace(s); }
+void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){ 
+    renderManagerImpl->_setAntiAliasingAlgorithm(algorithm); 
+}
+void Renderer::Settings::cullFace(uint s){ 
+    renderManagerImpl->_cullFace(s); 
+}
 void Renderer::Settings::clear(bool color, bool depth, bool stencil){
     if(!color && !depth && !stencil) return;
     GLuint clearBit = 0x00000000;
@@ -2336,14 +2389,30 @@ void Renderer::Settings::clear(bool color, bool depth, bool stencil){
     if(stencil) clearBit |= GL_STENCIL_BUFFER_BIT;
     glClear(clearBit);
 }
-void Renderer::Settings::enableDrawPhysicsInfo(bool b){ renderManagerImpl->draw_physics_debug = b; }
-void Renderer::Settings::disableDrawPhysicsInfo(){ renderManagerImpl->draw_physics_debug = false; }
-void Renderer::Settings::setGamma(float g){ renderManagerImpl->gamma = g; }
-float Renderer::Settings::getGamma(){ return renderManagerImpl->gamma; }
-void Renderer::setDepthFunc(DepthFunc::Func func){ renderManagerImpl->_setDepthFunc(func); }
-void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManagerImpl->_setViewport(x,y,w,h); }
-void Renderer::colorMask(bool r, bool g, bool b, bool a) { renderManagerImpl->_colorMask(r,g,b,a); }
-void Renderer::clearColor(float r, float g, float b, float a) { renderManagerImpl->_clearColor(r, g, b, a); }
+void Renderer::Settings::enableDrawPhysicsInfo(bool b){ 
+    renderManagerImpl->draw_physics_debug = b; 
+}
+void Renderer::Settings::disableDrawPhysicsInfo(){ 
+    renderManagerImpl->draw_physics_debug = false; 
+}
+void Renderer::Settings::setGamma(float g){ 
+    renderManagerImpl->gamma = g; 
+}
+float Renderer::Settings::getGamma(){ 
+    return renderManagerImpl->gamma; 
+}
+void Renderer::setDepthFunc(DepthFunc::Func func){ 
+    renderManagerImpl->_setDepthFunc(func); 
+}
+void Renderer::setViewport(uint x,uint y,uint w,uint h){ 
+    renderManagerImpl->_setViewport(x,y,w,h); 
+}
+void Renderer::colorMask(bool r, bool g, bool b, bool a) { 
+    renderManagerImpl->_colorMask(r,g,b,a); 
+}
+void Renderer::clearColor(float r, float g, float b, float a) { 
+    renderManagerImpl->_clearColor(r, g, b, a); 
+}
 void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
     auto& i = *renderManager;
     switch(_textureType){
@@ -2429,18 +2498,29 @@ void Renderer::unbindRBO(){ Renderer::bindRBO(GLuint(0)); }
 void Renderer::unbindReadFBO(){ Renderer::bindReadFBO(0); }
 void Renderer::unbindDrawFBO(){ Renderer::bindDrawFBO(0); }
 void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth){
-    renderManagerImpl->m_TexturesToBeRendered.emplace_back(nullptr,pos,col,glm::vec2(w,h),angle,depth);
+    renderManagerImpl->m_TexturesToBeRendered.emplace(nullptr,pos,col,glm::vec2(w,h),angle,depth);
 }
-void Renderer::renderTexture(Texture& texture, const glm::vec2& pos, const glm::vec4& color,float angle, const glm::vec2& scl, float depth){
-    renderManagerImpl->m_TexturesToBeRendered.emplace_back(&texture, pos, color, scl, angle, depth);
+void Renderer::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d){
+    renderManagerImpl->m_TexturesToBeRendered.emplace(&tex, p, c, s, a, d);
 }
-void Renderer::renderText(const string& text, Font& font, const glm::vec2& pos, const glm::vec4& color, float angle, const glm::vec2& scl, float depth, const TextAlignment::Type alignType) {
-    renderManagerImpl->m_FontsToBeRendered.emplace_back(font, text, pos, color, scl, angle, depth, alignType);
+void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const TextAlignment::Type& al) {
+    renderManagerImpl->m_FontsToBeRendered.emplace(fnt, t, p, c, s, a, d, al);
 }
-void Renderer::renderFullscreenQuad(uint w, uint h, uint startX, uint startY){ 
+
+void Renderer::renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth) {
+    auto& i = *renderManagerImpl;
+    i.m_TexturesToBeRendered.emplace(nullptr, pos - glm::vec2(w/2 - borderSize, 0), col, glm::vec2(borderSize, h  - borderSize), angle, depth);
+    i.m_TexturesToBeRendered.emplace(nullptr, pos + glm::vec2(w/2 - borderSize, 0), col, glm::vec2(borderSize, h  - borderSize), angle, depth);
+    i.m_TexturesToBeRendered.emplace(nullptr, pos - glm::vec2(0, h/2 - borderSize), col, glm::vec2(w  - borderSize, borderSize), angle, depth);
+    i.m_TexturesToBeRendered.emplace(nullptr, pos + glm::vec2(0, h/2 - borderSize), col, glm::vec2(w  - borderSize, borderSize), angle, depth);
+}
+
+
+
+void Renderer::renderFullscreenQuad(const uint w, const uint h, const uint startX, const uint startY){
     renderManagerImpl->_renderFullscreenQuad(w,h,startX,startY); 
 }
-void Renderer::renderFullscreenTriangle(uint w,uint h, uint startX, uint startY){ 
+void Renderer::renderFullscreenTriangle(const uint w, const uint h, const uint startX, const uint startY){
     renderManagerImpl->_renderFullscreenTriangle(w,h,startX,startY); 
 }
 

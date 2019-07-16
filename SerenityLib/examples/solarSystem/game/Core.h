@@ -10,6 +10,9 @@ class HUD;
 class Server;
 class Client;
 class Core final {
+    friend class HUD;
+    friend class Client;
+    friend class Server;
     private:
         HUD*                m_HUD;
         Server*             m_Server;
@@ -20,7 +23,7 @@ class Core final {
         Core();
         ~Core();
 
-        void startClient(const unsigned short& port, const std::string& ip = "127.0.0.1");
+        bool startClient(const unsigned short& port, const std::string& name, const std::string& ip = "127.0.0.1");
         void shutdownClient();
 
         void startServer(const unsigned short& port);

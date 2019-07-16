@@ -13,10 +13,9 @@ namespace Engine {
         class ListenerTCP : public ISocket {
             private:
                 sf::TcpListener  m_Listener;
-                std::string      m_IP;
                 ushort           m_Port;
             public:
-                ListenerTCP(const uint port, const std::string& ip = "");
+                ListenerTCP(const uint port);
                 ~ListenerTCP();
 
                 void setBlocking(bool);
@@ -24,7 +23,6 @@ namespace Engine {
                 const sf::TcpListener& socket();
                 const ushort localPort();
 
-                const std::string& ip();
                 void close();
                 const sf::Socket::Status accept(SocketTCP&);
                 const sf::Socket::Status accept(sf::TcpSocket&);

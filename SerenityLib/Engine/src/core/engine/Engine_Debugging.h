@@ -53,6 +53,7 @@ namespace epriv {
             const double displayTime() const;
             const double totalTime() const;
 
+            std::string timestamp();
             std::string& reportTime();
             std::string& reportTime(uint decimals);
             std::string reportDebug();
