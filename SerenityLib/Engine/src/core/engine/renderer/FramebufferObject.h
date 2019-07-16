@@ -19,71 +19,82 @@ namespace epriv{
     struct FramebufferObjectDefaultUnbindFunctor;
         
     class FramebufferObjectAttatchment{
-        friend class ::Engine::epriv::FramebufferObject;
+        friend class  Engine::epriv::FramebufferObject;
         private:
-            class impl; std::unique_ptr<impl> m_i;
+            GLuint                     m_InternalFormat;
+            GLuint                     m_GL_Attatchment;
+            const FramebufferObject&   m_FBO;
         public:
-            FramebufferObjectAttatchment(FramebufferObject&,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
-            FramebufferObjectAttatchment(FramebufferObject&,FramebufferAttatchment::Attatchment,Texture*);
+            FramebufferObjectAttatchment(const FramebufferObject&, const FramebufferAttatchment::Attatchment&, const ImageInternalFormat::Format&);
+            FramebufferObjectAttatchment(const FramebufferObject&, const FramebufferAttatchment::Attatchment&, const Texture&);
             virtual ~FramebufferObjectAttatchment();
 
-            uint width();
-            uint height();
+            const uint width() const;
+            const uint height() const;
             GLuint internalFormat();
             uint attatchment();
-            virtual void resize(FramebufferObject&,uint width,uint height);
-            virtual GLuint address();
+            virtual void resize(FramebufferObject&, const uint& width, const uint& height);
+            virtual const GLuint& address() const;
             virtual void bind();
             virtual void unbind();
     };
     class FramebufferTexture final: public FramebufferObjectAttatchment{
-        friend class ::Engine::epriv::FramebufferObject;
+        friend class  Engine::epriv::FramebufferObject;
         private:
-            class impl; std::unique_ptr<impl> m_i;
+            Texture*       m_Texture;
+            GLuint         m_PixelFormat;
+            GLuint         m_PixelType;
         public:
-            FramebufferTexture(FramebufferObject&,FramebufferAttatchment::Attatchment,Texture*);
+            FramebufferTexture(const FramebufferObject&,const FramebufferAttatchment::Attatchment&,const Texture&);
             virtual ~FramebufferTexture();
 
-            void resize(FramebufferObject&,uint width,uint height);
-            GLuint address();
-            Texture* texture();
+            void resize(FramebufferObject&, const uint& width, const uint& height);
+            const GLuint& address() const;
+            Texture& texture();
             void bind();
             void unbind();
     };
     class RenderbufferObject final: public FramebufferObjectAttatchment{
-        friend class ::Engine::epriv::FramebufferObject;
+        friend class  Engine::epriv::FramebufferObject;
         private:
-            class impl; std::unique_ptr<impl> m_i;
+            GLuint m_RBO;
+            uint   m_Width;
+            uint   m_Height;
         public:
             RenderbufferObject(FramebufferObject&,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
             virtual ~RenderbufferObject();
 
-            void resize(FramebufferObject&,uint width,uint height);
-            GLuint address();
+            void resize(FramebufferObject&, const uint& width, const uint& height);
+            const GLuint& address() const;
             void bind();
             void unbind();
     };
     class FramebufferObject final: public BindableResource{
-        friend class ::Engine::epriv::FramebufferTexture;
-        friend class ::Engine::epriv::RenderbufferObject;
-        friend struct ::Engine::epriv::FramebufferObjectDefaultBindFunctor;
-        friend struct ::Engine::epriv::FramebufferObjectDefaultUnbindFunctor;
+        friend class  Engine::epriv::FramebufferTexture;
+        friend class  Engine::epriv::RenderbufferObject;
+        friend struct Engine::epriv::FramebufferObjectDefaultBindFunctor;
+        friend struct Engine::epriv::FramebufferObjectDefaultUnbindFunctor;
         private:
-            class impl; std::unique_ptr<impl> m_i;
+            uint                                                    m_CurrentFBOIndex;
+            uint                                                    m_FramebufferWidth;
+            uint                                                    m_FramebufferHeight;
+            float                                                   m_Divisor;
+            std::vector<GLuint>                                     m_FBO;
+            std::unordered_map<uint, FramebufferObjectAttatchment*> m_Attatchments;
         public:
             FramebufferObject(std::string name,uint width,uint height,float divisor = 1.0f,uint swapBufferCount = 1);
             FramebufferObject(std::string name,uint width,uint height,ImageInternalFormat::Format,float divisor = 1.0f, uint swapBufferCount = 1);
             virtual ~FramebufferObject();
 
-            void resize(uint width,uint height);
-            FramebufferTexture* attatchTexture(Texture*,FramebufferAttatchment::Attatchment);
-            RenderbufferObject* attatchRenderBuffer(RenderbufferObject*);
-            uint width();
-            uint height();
+            void resize(const uint& width, const uint& height);
+            FramebufferTexture* attatchTexture(Texture*, const FramebufferAttatchment::Attatchment&);
+            RenderbufferObject* attatchRenderBuffer(RenderbufferObject&);
+            const uint width() const;
+            const uint height() const;
             std::unordered_map<uint,FramebufferObjectAttatchment*>& attatchments();
             const GLuint& address() const;
-            bool check();
-            float divisor();
+            const bool check();
+            const float divisor() const;
     };
 };
 };

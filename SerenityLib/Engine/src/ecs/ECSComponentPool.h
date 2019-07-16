@@ -7,25 +7,22 @@
 
 namespace Engine {
 namespace epriv {
-
     template<typename ...> class ECSComponentPool;
-
-    template <typename TEntity,typename TComponent> class ECSComponentPool<TEntity,TComponent> : public SparseSet<TEntity, TComponent>{
-        using super  = SparseSet<TEntity, TComponent>;
+    template <typename E,typename T> class ECSComponentPool<E,T> : public SparseSet<E, T>{
+        using super = SparseSet<E, T>;
         public:
-            ECSComponentPool() = default;
-            ECSComponentPool(const ECSComponentPool& other) noexcept = delete;
+            ECSComponentPool()                                                  = default;
+            ECSComponentPool(const ECSComponentPool& other) noexcept            = delete;
             ECSComponentPool& operator=(const ECSComponentPool& other) noexcept = delete;
-            ECSComponentPool(ECSComponentPool&& other) noexcept = delete;
-            ECSComponentPool& operator=(ECSComponentPool&& other) noexcept = delete;
+            ECSComponentPool(ECSComponentPool&& other) noexcept                 = delete;
+            ECSComponentPool& operator=(ECSComponentPool&& other) noexcept      = delete;
+            ~ECSComponentPool()                                                 = default;
 
-            ~ECSComponentPool() = default;
-
-            template<typename... ARGS> inline TComponent* addComponent(const TEntity& _entity, ARGS&&... _args) {
+            template<typename... ARGS> inline T* addComponent(const E& _entity, ARGS&&... _args) {
 				const EntityDataRequest dataRequest(_entity);
-                return super::_add(dataRequest.ID, const_cast<TEntity&>(_entity), std::forward<ARGS>(_args)...);
+                return super::_add(dataRequest.ID, const_cast<E&>(_entity), std::forward<ARGS>(_args)...);
             }
-            inline bool removeComponent(const TEntity& _entity) {
+            inline bool removeComponent(const E& _entity) {
 				const EntityDataRequest dataRequest(_entity);
                 return super::_remove(dataRequest.ID);
             }
@@ -35,14 +32,14 @@ namespace epriv {
             inline bool removeComponent(const uint& _index) {
                 return super::_remove(_index); 
             }
-            inline TComponent* getComponent(const TEntity& _entity) {
+            inline T* getComponent(const E& _entity) {
 				const EntityDataRequest dataRequest(_entity);
                 return super::_get(dataRequest.ID);
             }
-            inline TComponent* getComponent(const EntityDataRequest& dataRequest) {
+            inline T* getComponent(const EntityDataRequest& dataRequest) {
                 return super::_get(dataRequest.ID);
             }
-            inline TComponent* getComponent(const uint& _index) { 
+            inline T* getComponent(const uint& _index) { 
                 return super::_get(_index); 
             }
     };

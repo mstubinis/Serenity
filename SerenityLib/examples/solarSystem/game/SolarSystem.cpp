@@ -45,7 +45,7 @@ SolarSystem::SolarSystem(const string& n, const string& file):Scene(n){
 
     m_AnchorPoint = new EntityWrapper(*this);
     auto& anchor_body = *m_AnchorPoint->entity().addComponent<ComponentBody>();
-    anchor_body.setScale(0.1f);
+    anchor_body.setScale(0.005f);
     auto& anchor_model = *m_AnchorPoint->entity().addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
     anchor_model.hide();
 }

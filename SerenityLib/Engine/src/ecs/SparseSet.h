@@ -31,22 +31,21 @@ namespace epriv {
                 return false; 
             }
     };
-    template <typename TID, typename TItem> class SparseSet<TID, TItem> : public SparseSet<TID> {
+    template <typename TID, typename T> class SparseSet<TID, T> : public SparseSet<TID> {
         using super = SparseSet<TID>;
         private:
-            std::vector<TItem> _dense;
+            std::vector<T> _dense;
         public:
-			std::vector<TItem>& pool() { return _dense; }
+			std::vector<T>& pool() { return _dense; }
 
-            SparseSet() = default;
-            SparseSet(const SparseSet& other) noexcept = delete;
+            SparseSet()                                           = default;
+            SparseSet(const SparseSet& other) noexcept            = delete;
             SparseSet& operator=(const SparseSet& other) noexcept = delete;
-            SparseSet(SparseSet&& other) noexcept = delete;
-            SparseSet& operator=(SparseSet&& other) noexcept = delete;
+            SparseSet(SparseSet&& other) noexcept                 = delete;
+            SparseSet& operator=(SparseSet&& other) noexcept      = delete;
+            virtual ~SparseSet()                                  = default;
 
-            virtual ~SparseSet() = default;
-
-            template<typename... ARGS> inline TItem* _add(const uint& _IDObject, ARGS&&... _args) {
+            template<typename... ARGS> inline T* _add(const uint& _IDObject, ARGS&&... _args) {
                 const uint& sparseIndex = _IDObject - 1;
                 if (sparseIndex >= super::_sparse.size())
                     super::_sparse.resize(sparseIndex + 1, 0);
@@ -84,7 +83,7 @@ namespace epriv {
                 _dense.pop_back();
                 return true;
             }
-            inline TItem* _get(const uint& _IDObject) {
+            inline T* _get(const uint& _IDObject) {
                 const uint& sparseIndex = _IDObject - 1;
                 const uint& sparseSize  = super::_sparse.size();
                 if (sparseSize == 0 || sparseIndex >= sparseSize || super::_sparse[sparseIndex] == 0)

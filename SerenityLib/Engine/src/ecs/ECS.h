@@ -47,9 +47,9 @@ namespace epriv {
                 SAFE_DELETE_VECTOR(systems);
                 SAFE_DELETE_VECTOR(componentPools);
             }
-            ECS(const ECS&) = delete;                      // non construction-copyable
-            ECS& operator=(const ECS&) = delete;           // non copyable
-            ECS(ECS&& other) noexcept = delete;            // non construction-moveable
+            ECS(const ECS&)                      = delete; // non construction-copyable
+            ECS& operator=(const ECS&)           = delete; // non copyable
+            ECS(ECS&& other) noexcept            = delete; // non construction-moveable
             ECS& operator=(ECS&& other) noexcept = delete; // non moveable
 
 
@@ -57,7 +57,7 @@ namespace epriv {
             template<typename T> void onResize(const uint& w, const uint& h) {
                 using CPoolType       = ECSComponentPool<TEntity, T>;
                 const uint& type_slot = ECSRegistry::type_slot_fast<T>();
-                auto& components = (*(CPoolType*)componentPools[type_slot]).pool();
+                auto& components = (*static_cast<CPoolType*>(componentPools[type_slot])).pool();
                 for (auto& camera : components) {
                     camera.resize(w, h);
                 }
@@ -114,7 +114,7 @@ namespace epriv {
             template<typename TComponent> ECSComponentPool<TEntity, TComponent>& getPool() {
                 using CPoolType       = ECSComponentPool<TEntity, TComponent>;
                 const uint& type_slot = ECSRegistry::type_slot_fast<TComponent>();
-                return *(CPoolType*)componentPools[type_slot];
+                return *static_cast<CPoolType*>(componentPools[type_slot]);
             }
             template<typename TComponent> void assignSystem(const ECSSystemCI& systemCI) {
                 const uint& type_slot = ECSRegistry::type_slot<TComponent>();
@@ -153,8 +153,7 @@ namespace epriv {
             template<typename TComponent, typename... ARGS> TComponent* addComponent(TEntity& entity, ARGS&&... args) {
                 using CPoolType = ECSComponentPool<TEntity, TComponent>;
                 const uint& type_slot = ECSRegistry::type_slot_fast<TComponent>();
-                //buildPool<TComponent>(type_slot);
-                auto& cPool = *(CPoolType*)componentPools[type_slot];
+                auto& cPool = *static_cast<CPoolType*>(componentPools[type_slot]);
                 TComponent* res = cPool.addComponent(entity, std::forward<ARGS>(args)...);
                 if (res) {
                     onComponentAddedToEntity(res, entity, type_slot);
@@ -164,19 +163,19 @@ namespace epriv {
             template<typename TComponent> bool removeComponent(TEntity& entity) {
                 using CPoolType = ECSComponentPool<TEntity, TComponent>;
                 const uint& type_slot  = ECSRegistry::type_slot_fast<TComponent>();
-                auto& cPool = *(CPoolType*)componentPools[type_slot];
+                auto& cPool = *static_cast<CPoolType*>(componentPools[type_slot]);
                 return cPool.removeComponent(entity);
             }
             template<typename TComponent> TComponent* getComponent(TEntity& entity) {
                 using CPoolType = ECSComponentPool<TEntity, TComponent>;
                 const uint& type_slot  = ECSRegistry::type_slot_fast<TComponent>();
-                auto& cPool = *(CPoolType*)componentPools[type_slot];
+                auto& cPool = *static_cast<CPoolType*>(componentPools[type_slot]);
                 return cPool.getComponent(entity);
             }
             template<typename TComponent> TComponent* getComponent(const EntityDataRequest& dataRequest) {
                 using CPoolType = ECSComponentPool<TEntity, TComponent>;
                 const uint& type_slot  = ECSRegistry::type_slot_fast<TComponent>();
-                auto& cPool = *(CPoolType*)componentPools[type_slot];
+                auto& cPool = *static_cast<CPoolType*>(componentPools[type_slot]);
                 return cPool.getComponent(dataRequest);
             }
     };

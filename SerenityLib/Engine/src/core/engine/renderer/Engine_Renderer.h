@@ -61,7 +61,6 @@ namespace epriv{
 
             void _init(const char* name,uint w,uint h);
             void _resize(uint width, uint height);
-            void _resizeGbuffer(uint width,uint height);
 
             void _render(
                 Camera&, const uint fboWidth, const uint fboHeight,bool HUD=true,
@@ -98,31 +97,31 @@ namespace epriv{
 namespace Renderer{
     namespace Settings{
 
-        void setGamma(float g);
+        void setGamma(const float g);
         float getGamma();
 
-        void clear(bool color = true, bool depth = true, bool stencil = true);
+        void clear(const bool color = true, const bool depth = true, const bool stencil = true);
         void cullFace(uint state);
 
-        void setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm);
+        void setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm&);
 
-        void enableDrawPhysicsInfo(bool b = true);
+        void enableDrawPhysicsInfo(const bool b = true);
         void disableDrawPhysicsInfo();
 
         namespace Lighting{
             void enable(bool b = true);
             void disable();
             float getGIContributionGlobal();
-            void setGIContributionGlobal(float giGlobal);
+            void setGIContributionGlobal(const float giGlobal);
             float getGIContributionDiffuse();
-            void setGIContributionDiffuse(float giDiffuse);
+            void setGIContributionDiffuse(const float giDiffuse);
             float getGIContributionSpecular();
-            void setGIContributionSpecular(float giSpecular);
-            void setGIContribution(float global, float diffuse, float specular);
+            void setGIContributionSpecular(const float giSpecular);
+            void setGIContribution(const float global, const float diffuse, const float specular);
         };
     };
-    void renderFullscreenQuad(const uint width, const uint height, const uint startX = 0, const uint startY = 0);
-    void renderFullscreenTriangle(const uint width, const uint height, const uint startX = 0, const uint startY = 0);
+    void renderFullscreenQuad(const uint& width, const uint& height, const uint& startX = 0, const uint& startY = 0);
+    void renderFullscreenTriangle(const uint& width, const uint& height, const uint& startX = 0, const uint& startY = 0);
 
     void renderFullscreenQuad();
     void renderFullscreenTriangle();
@@ -130,27 +129,27 @@ namespace Renderer{
     inline const GLint getUniformLoc(const char* location);
     inline const GLint& getUniformLocUnsafe(const char* location);
 
-    void setDepthFunc(DepthFunc::Func);
-    void setViewport(uint x, uint y, uint width, uint height);
-    void bindFBO(GLuint fbo);
+    void setDepthFunc(const DepthFunc::Func&);
+    void setViewport(const uint& x, const uint& y, const uint& width, const uint& height);
+    void bindFBO(const GLuint fbo);
     void bindFBO(epriv::FramebufferObject& rbo);
-    void bindRBO(GLuint rbo);
+    void bindRBO(const GLuint rbo);
     void bindRBO(epriv::RenderbufferObject& rbo);
-    void bindReadFBO(GLuint fbo);
-    void bindDrawFBO(GLuint fbo);
+    void bindReadFBO(const GLuint fbo);
+    void bindDrawFBO(const GLuint fbo);
 
-    void bindTexture(GLuint _textureType,GLuint _textureObject);
+    void bindTexture(const GLuint _textureType, const GLuint _textureObject);
     void bindVAO(const GLuint _vaoObject);
-    void genAndBindTexture(GLuint _textureType,GLuint& _textureObject);
+    void genAndBindTexture(const GLuint _textureType,GLuint& _textureObject);
     void genAndBindVAO(GLuint& _vaoObject);
     void deleteVAO(GLuint& _vaoObject);
-    void colorMask(bool r, bool g, bool b, bool a);
-    void clearColor(float r, float g, float b, float a);
+    void colorMask(const bool& r, const bool& g, const bool& b, const bool& a);
+    void clearColor(const float& r, const float& g, const float& b, const float& a);
 
-    void sendTexture(const char* location,const Texture& texture,const int slot);
-    void sendTexture(const char* location,const GLuint textureAddress,const int slot,const GLuint glTextureType);
-    void sendTextureSafe(const char* location, const Texture& texture,const int slot);
-    void sendTextureSafe(const char* location,const GLuint textureAddress,const int slot,const GLuint glTextureType);
+    void sendTexture(const char* location,const Texture& texture,const int& slot);
+    void sendTexture(const char* location,const GLuint textureAddress,const int& slot,const GLuint& glTextureType);
+    void sendTextureSafe(const char* location, const Texture& texture,const int& slot);
+    void sendTextureSafe(const char* location,const GLuint textureAddress,const int& slot,const GLuint& glTextureType);
 
     void unbindFBO();
     void unbindRBO();
@@ -159,8 +158,11 @@ namespace Renderer{
         
     void renderTexture(const Texture&, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth);
     void renderText(const std::string& text, const Font&, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const TextAlignment::Type& = TextAlignment::Left);
-    void renderRectangle(const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth);
-    void renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth);
+    void renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float& w, const float& h, const float& angle, const float& depth);
+    void renderBorder(const float& borderSize, const glm::vec2& position, const glm::vec4& color, const float& width, const float& height, const float& angle, const float& depth);
+
+    void scissor(const int& x, const int& y, const uint& width, const uint& height);
+    void scissorDisable();
 
     #pragma region UniformSending
     //Uniform 1

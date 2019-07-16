@@ -161,7 +161,7 @@ class Texture::impl final{
             }  
             m_Mipmapped = false;
         }
-        void _resize(epriv::FramebufferObject& fbo,uint w, uint h){
+        void _resize(epriv::FramebufferObject& fbo,const uint& w, const uint& h){
             if(m_TextureType != TextureType::RenderTarget){
                 cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
                 return;
@@ -175,38 +175,19 @@ class Texture::impl final{
             imageData.mipmaps[0].height = _h;
             glTexImage2D(m_Type,0,imageData.internalFormat,_w,_h,0,imageData.pixelFormat,imageData.pixelType,NULL);
         }
-        void _importIntoOpenGL(ImageMipmap& mipmap,GLuint _OpenGLType){
+        void _importIntoOpenGL(const ImageMipmap& mipmap,const GLuint& openGLType){
             auto& imageData = *m_ImagesDatas[0];
             if(TextureLoader::IsCompressedType(imageData.internalFormat) && mipmap.compressedSize != 0)
-                glCompressedTexImage2D(
-                    _OpenGLType,
-                    mipmap.level,
-                    imageData.internalFormat,
-                    mipmap.width,
-                    mipmap.height,
-                    0,
-                    mipmap.compressedSize,
-                    &mipmap.pixels[0]
-                );
+                glCompressedTexImage2D(openGLType,mipmap.level,imageData.internalFormat,mipmap.width,mipmap.height,0,mipmap.compressedSize,&mipmap.pixels[0]);
             else
-                glTexImage2D(
-                    _OpenGLType,
-                    mipmap.level,
-                    imageData.internalFormat,
-                    mipmap.width,
-                    mipmap.height,
-                    0,
-                    imageData.pixelFormat,
-                    imageData.pixelType,
-                    &mipmap.pixels[0]
-                );
+                glTexImage2D(openGLType,mipmap.level,imageData.internalFormat,mipmap.width,mipmap.height,0,imageData.pixelFormat,imageData.pixelType,&mipmap.pixels[0]);
         }
 };
 
-void epriv::TextureLoader::LoadDDSFile(Texture& _texture,string _filename,ImageLoadedStructure& image){
-    auto& i = *_texture.m_i;
+void epriv::TextureLoader::LoadDDSFile(Texture& texture, const string& filename,ImageLoadedStructure& image){
+    auto& i = *texture.m_i;
 
-    ifstream stream(_filename.c_str(), ios::binary);
+    ifstream stream(filename.c_str(), ios::binary);
     if (!stream) return;
 
     uchar header_buffer[128];
@@ -426,8 +407,8 @@ void epriv::TextureLoader::LoadTextureCubemapIntoOpenGL(Texture& _texture){
     _texture.setWrapping(TextureWrap::ClampToEdge);
 
 }
-void epriv::TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture& _texture, const uint& imageIndex, const uint& mipmapLevel){
-    const auto& i = *_texture.m_i;
+void epriv::TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture& texture, const uint& imageIndex, const uint& mipmapLevel){
+    const auto& i = *texture.m_i;
     auto& image = *i.m_ImagesDatas[imageIndex];
     auto& pxls = image.mipmaps[mipmapLevel].pixels;
     if(pxls.size() != 0) 
@@ -438,105 +419,105 @@ void epriv::TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture& _texture, con
     Renderer::bindTexture(i.m_Type,i.m_TextureAddress[0]);
     glGetTexImage(i.m_Type,0,image.pixelFormat,image.pixelType,&pxls[0]);
 }
-void epriv::TextureLoader::ChoosePixelFormat(ImagePixelFormat::Format& _out, const ImageInternalFormat::Format& _in){
-    switch(_in){
-        case ImageInternalFormat::COMPRESSED_RED:{ _out = ImagePixelFormat::RED;break; }
-        case ImageInternalFormat::COMPRESSED_RED_RGTC1:{ _out = ImagePixelFormat::RED;break; }//recheck this
-        case ImageInternalFormat::COMPRESSED_RG:{ _out = ImagePixelFormat::RG;break; }
-        case ImageInternalFormat::COMPRESSED_RGB:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::COMPRESSED_RGBA:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT1_EXT:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT3_EXT:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::COMPRESSED_RGB_S3TC_DXT1_EXT:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::COMPRESSED_RG_RGTC2:{ _out = ImagePixelFormat::RG;break; }//recheck this
-        case ImageInternalFormat::COMPRESSED_SIGNED_RED_RGTC1:{ _out = ImagePixelFormat::RED;break; }//recheck this
-        case ImageInternalFormat::COMPRESSED_SIGNED_RG_RGTC2:{ _out = ImagePixelFormat::RG;break; }//recheck this
-        case ImageInternalFormat::COMPRESSED_SRGB:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::Depth16:{ _out = ImagePixelFormat::DEPTH_COMPONENT;break; }
-        case ImageInternalFormat::Depth24:{ _out = ImagePixelFormat::DEPTH_COMPONENT;break; }
-        case ImageInternalFormat::Depth32:{ _out = ImagePixelFormat::DEPTH_COMPONENT;break; }
-        case ImageInternalFormat::Depth32F:{ _out = ImagePixelFormat::DEPTH_COMPONENT;break; }
-        case ImageInternalFormat::Depth24Stencil8:{ _out = ImagePixelFormat::DEPTH_STENCIL;break; }
-        case ImageInternalFormat::Depth32FStencil8:{ _out = ImagePixelFormat::DEPTH_STENCIL;break; }
-        case ImageInternalFormat::DEPTH_COMPONENT:{ _out = ImagePixelFormat::DEPTH_COMPONENT;break; }
-        case ImageInternalFormat::DEPTH_STENCIL:{ _out = ImagePixelFormat::DEPTH_STENCIL;break; }
-        case ImageInternalFormat::R11F_G11F_B10F:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::R16:{ _out = ImagePixelFormat::RED;break; }
-        case ImageInternalFormat::R16F:{ _out = ImagePixelFormat::RED;break; }
-        case ImageInternalFormat::R16I:{ _out = ImagePixelFormat::RED_INTEGER;break; }
-        case ImageInternalFormat::R16UI:{ _out = ImagePixelFormat::RED_INTEGER;break; }
-        case ImageInternalFormat::R16_SNORM:{ _out = ImagePixelFormat::RED;break; }
-        case ImageInternalFormat::R32F:{ _out = ImagePixelFormat::RED;break; }
-        case ImageInternalFormat::R32I:{ _out = ImagePixelFormat::RED_INTEGER;break; }
-        case ImageInternalFormat::R32UI:{ _out = ImagePixelFormat::RED_INTEGER;break; }
-        case ImageInternalFormat::R3_G3_B2:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::R8:{ _out = ImagePixelFormat::RED;break; }
-        case ImageInternalFormat::R8I:{ _out = ImagePixelFormat::RED_INTEGER;break; }
-        case ImageInternalFormat::R8UI:{ _out = ImagePixelFormat::RED_INTEGER;break; }
-        case ImageInternalFormat::R8_SNORM:{ _out = ImagePixelFormat::RED;break; }
-        case ImageInternalFormat::RED:{ _out = ImagePixelFormat::RED;break; }
-        case ImageInternalFormat::RG:{ _out = ImagePixelFormat::RG;break; }
-        case ImageInternalFormat::RG16:{ _out = ImagePixelFormat::RG;break; }
-        case ImageInternalFormat::RG16F:{ _out = ImagePixelFormat::RG;break; }
-        case ImageInternalFormat::RG16I:{ _out = ImagePixelFormat::RG_INTEGER;break; }
-        case ImageInternalFormat::RG16UI:{ _out = ImagePixelFormat::RG_INTEGER;break; }
-        case ImageInternalFormat::RG16_SNORM:{ _out = ImagePixelFormat::RG;break; }
-        case ImageInternalFormat::RG32F:{ _out = ImagePixelFormat::RG;break; }
-        case ImageInternalFormat::RG32I:{ _out = ImagePixelFormat::RG_INTEGER;break; }
-        case ImageInternalFormat::RG32UI:{ _out = ImagePixelFormat::RG_INTEGER;break; }
-        case ImageInternalFormat::RG8:{ _out = ImagePixelFormat::RG;break; }
-        case ImageInternalFormat::RG8I:{ _out = ImagePixelFormat::RG_INTEGER;break; }
-        case ImageInternalFormat::RG8UI:{ _out = ImagePixelFormat::RG_INTEGER;break; }
-        case ImageInternalFormat::RG8_SNORM:{ _out = ImagePixelFormat::RG;break; }
-        case ImageInternalFormat::RGB:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::RGB10:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::RGB10_A2:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::RGB12:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::RGB16F:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::RGB16I:{ _out = ImagePixelFormat::RGB_INTEGER;break; }
-        case ImageInternalFormat::RGB16UI:{ _out = ImagePixelFormat::RGB_INTEGER;break; }
-        case ImageInternalFormat::RGB16_SNORM:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::RGB32F:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::RGB32I:{ _out = ImagePixelFormat::RGB_INTEGER;break; }
-        case ImageInternalFormat::RGB32UI:{ _out = ImagePixelFormat::RGB_INTEGER;break; }
-        case ImageInternalFormat::RGB4:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::RGB5:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::RGB5_A1:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::RGB8:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::RGB8I:{ _out = ImagePixelFormat::RGB_INTEGER;break; }
-        case ImageInternalFormat::RGB8UI:{ _out = ImagePixelFormat::RGB_INTEGER;break; }
-        case ImageInternalFormat::RGB8_SNORM:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::RGB9_E5:{ _out = ImagePixelFormat::RGB;break; }//recheck this
-        case ImageInternalFormat::RGBA:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::RGBA12:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::RGBA16:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::RGBA16F:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::RGBA16I:{ _out = ImagePixelFormat::RGBA_INTEGER;break; }
-        case ImageInternalFormat::RGBA16UI:{ _out = ImagePixelFormat::RGBA_INTEGER;break; }
-        case ImageInternalFormat::RGBA2:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::RGBA32F:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::RGBA32I:{ _out = ImagePixelFormat::RGBA_INTEGER;break; }
-        case ImageInternalFormat::RGBA32UI:{ _out = ImagePixelFormat::RGBA_INTEGER;break; }
-        case ImageInternalFormat::RGBA4:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::RGBA8:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::RGBA8I:{ _out = ImagePixelFormat::RGBA_INTEGER;break; }
-        case ImageInternalFormat::RGBA8UI:{ _out = ImagePixelFormat::RGBA_INTEGER;break; }
-        case ImageInternalFormat::RGBA8_SNORM:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::SRGB8:{ _out = ImagePixelFormat::RGB;break; }
-        case ImageInternalFormat::SRGB8_ALPHA8:{ _out = ImagePixelFormat::RGBA;break; }
-        case ImageInternalFormat::StencilIndex8:{ _out = ImagePixelFormat::STENCIL_INDEX;break; }
-        case ImageInternalFormat::STENCIL_INDEX:{ _out = ImagePixelFormat::STENCIL_INDEX;break; }
-        default:{ _out = ImagePixelFormat::RGBA;break; }
+void epriv::TextureLoader::ChoosePixelFormat(ImagePixelFormat::Format& out, const ImageInternalFormat::Format& in){
+    switch(in){
+        case ImageInternalFormat::COMPRESSED_RED:{ out = ImagePixelFormat::RED;break; }
+        case ImageInternalFormat::COMPRESSED_RED_RGTC1:{ out = ImagePixelFormat::RED;break; }//recheck this
+        case ImageInternalFormat::COMPRESSED_RG:{ out = ImagePixelFormat::RG;break; }
+        case ImageInternalFormat::COMPRESSED_RGB:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::COMPRESSED_RGBA:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT1_EXT:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT3_EXT:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::COMPRESSED_RGB_S3TC_DXT1_EXT:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::COMPRESSED_RG_RGTC2:{ out = ImagePixelFormat::RG;break; }//recheck this
+        case ImageInternalFormat::COMPRESSED_SIGNED_RED_RGTC1:{ out = ImagePixelFormat::RED;break; }//recheck this
+        case ImageInternalFormat::COMPRESSED_SIGNED_RG_RGTC2:{ out = ImagePixelFormat::RG;break; }//recheck this
+        case ImageInternalFormat::COMPRESSED_SRGB:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::Depth16:{ out = ImagePixelFormat::DEPTH_COMPONENT;break; }
+        case ImageInternalFormat::Depth24:{ out = ImagePixelFormat::DEPTH_COMPONENT;break; }
+        case ImageInternalFormat::Depth32:{ out = ImagePixelFormat::DEPTH_COMPONENT;break; }
+        case ImageInternalFormat::Depth32F:{ out = ImagePixelFormat::DEPTH_COMPONENT;break; }
+        case ImageInternalFormat::Depth24Stencil8:{ out = ImagePixelFormat::DEPTH_STENCIL;break; }
+        case ImageInternalFormat::Depth32FStencil8:{ out = ImagePixelFormat::DEPTH_STENCIL;break; }
+        case ImageInternalFormat::DEPTH_COMPONENT:{ out = ImagePixelFormat::DEPTH_COMPONENT;break; }
+        case ImageInternalFormat::DEPTH_STENCIL:{ out = ImagePixelFormat::DEPTH_STENCIL;break; }
+        case ImageInternalFormat::R11F_G11F_B10F:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::R16:{ out = ImagePixelFormat::RED;break; }
+        case ImageInternalFormat::R16F:{ out = ImagePixelFormat::RED;break; }
+        case ImageInternalFormat::R16I:{ out = ImagePixelFormat::RED_INTEGER;break; }
+        case ImageInternalFormat::R16UI:{ out = ImagePixelFormat::RED_INTEGER;break; }
+        case ImageInternalFormat::R16_SNORM:{ out = ImagePixelFormat::RED;break; }
+        case ImageInternalFormat::R32F:{ out = ImagePixelFormat::RED;break; }
+        case ImageInternalFormat::R32I:{ out = ImagePixelFormat::RED_INTEGER;break; }
+        case ImageInternalFormat::R32UI:{ out = ImagePixelFormat::RED_INTEGER;break; }
+        case ImageInternalFormat::R3_G3_B2:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::R8:{ out = ImagePixelFormat::RED;break; }
+        case ImageInternalFormat::R8I:{ out = ImagePixelFormat::RED_INTEGER;break; }
+        case ImageInternalFormat::R8UI:{ out = ImagePixelFormat::RED_INTEGER;break; }
+        case ImageInternalFormat::R8_SNORM:{ out = ImagePixelFormat::RED;break; }
+        case ImageInternalFormat::RED:{ out = ImagePixelFormat::RED;break; }
+        case ImageInternalFormat::RG:{ out = ImagePixelFormat::RG;break; }
+        case ImageInternalFormat::RG16:{ out = ImagePixelFormat::RG;break; }
+        case ImageInternalFormat::RG16F:{ out = ImagePixelFormat::RG;break; }
+        case ImageInternalFormat::RG16I:{ out = ImagePixelFormat::RG_INTEGER;break; }
+        case ImageInternalFormat::RG16UI:{ out = ImagePixelFormat::RG_INTEGER;break; }
+        case ImageInternalFormat::RG16_SNORM:{ out = ImagePixelFormat::RG;break; }
+        case ImageInternalFormat::RG32F:{ out = ImagePixelFormat::RG;break; }
+        case ImageInternalFormat::RG32I:{ out = ImagePixelFormat::RG_INTEGER;break; }
+        case ImageInternalFormat::RG32UI:{ out = ImagePixelFormat::RG_INTEGER;break; }
+        case ImageInternalFormat::RG8:{ out = ImagePixelFormat::RG;break; }
+        case ImageInternalFormat::RG8I:{ out = ImagePixelFormat::RG_INTEGER;break; }
+        case ImageInternalFormat::RG8UI:{ out = ImagePixelFormat::RG_INTEGER;break; }
+        case ImageInternalFormat::RG8_SNORM:{ out = ImagePixelFormat::RG;break; }
+        case ImageInternalFormat::RGB:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::RGB10:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::RGB10_A2:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::RGB12:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::RGB16F:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::RGB16I:{ out = ImagePixelFormat::RGB_INTEGER;break; }
+        case ImageInternalFormat::RGB16UI:{ out = ImagePixelFormat::RGB_INTEGER;break; }
+        case ImageInternalFormat::RGB16_SNORM:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::RGB32F:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::RGB32I:{ out = ImagePixelFormat::RGB_INTEGER;break; }
+        case ImageInternalFormat::RGB32UI:{ out = ImagePixelFormat::RGB_INTEGER;break; }
+        case ImageInternalFormat::RGB4:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::RGB5:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::RGB5_A1:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::RGB8:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::RGB8I:{ out = ImagePixelFormat::RGB_INTEGER;break; }
+        case ImageInternalFormat::RGB8UI:{ out = ImagePixelFormat::RGB_INTEGER;break; }
+        case ImageInternalFormat::RGB8_SNORM:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::RGB9_E5:{ out = ImagePixelFormat::RGB;break; }//recheck this
+        case ImageInternalFormat::RGBA:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::RGBA12:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::RGBA16:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::RGBA16F:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::RGBA16I:{ out = ImagePixelFormat::RGBA_INTEGER;break; }
+        case ImageInternalFormat::RGBA16UI:{ out = ImagePixelFormat::RGBA_INTEGER;break; }
+        case ImageInternalFormat::RGBA2:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::RGBA32F:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::RGBA32I:{ out = ImagePixelFormat::RGBA_INTEGER;break; }
+        case ImageInternalFormat::RGBA32UI:{ out = ImagePixelFormat::RGBA_INTEGER;break; }
+        case ImageInternalFormat::RGBA4:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::RGBA8:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::RGBA8I:{ out = ImagePixelFormat::RGBA_INTEGER;break; }
+        case ImageInternalFormat::RGBA8UI:{ out = ImagePixelFormat::RGBA_INTEGER;break; }
+        case ImageInternalFormat::RGBA8_SNORM:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::SRGB8:{ out = ImagePixelFormat::RGB;break; }
+        case ImageInternalFormat::SRGB8_ALPHA8:{ out = ImagePixelFormat::RGBA;break; }
+        case ImageInternalFormat::StencilIndex8:{ out = ImagePixelFormat::STENCIL_INDEX;break; }
+        case ImageInternalFormat::STENCIL_INDEX:{ out = ImagePixelFormat::STENCIL_INDEX;break; }
+        default:{ out = ImagePixelFormat::RGBA;break; }
     }
 }
-const bool epriv::TextureLoader::IsCompressedType(const ImageInternalFormat::Format& _format) {
-    switch(_format){
+const bool epriv::TextureLoader::IsCompressedType(const ImageInternalFormat::Format& format) {
+    switch(format){
         case ImageInternalFormat::COMPRESSED_RED:{ return true; break; }
         case ImageInternalFormat::COMPRESSED_RED_RGTC1:{ return true; break; }
         case ImageInternalFormat::COMPRESSED_RG:{ return true; break; }
@@ -559,8 +540,8 @@ const bool epriv::TextureLoader::IsCompressedType(const ImageInternalFormat::For
     }
     return false;
 }
-void epriv::TextureLoader::GenerateMipmapsOpenGL(Texture& _texture){
-    auto& i = *_texture.m_i;
+void epriv::TextureLoader::GenerateMipmapsOpenGL(Texture& texture){
+    auto& i = *texture.m_i;
     if(i.m_Mipmapped) 
         return;
     //const auto& image = *i.m_ImagesDatas[0];
@@ -586,14 +567,14 @@ void epriv::TextureLoader::EnumWrapToGL(uint& gl, const TextureWrap::Wrap& wrap)
 }
 void epriv::TextureLoader::EnumFilterToGL(uint& gl, const TextureFilter::Filter& filter, const bool& min){
     if(min){
-        if(filter == TextureFilter::Linear)                       gl = GL_LINEAR;
+        if     (filter == TextureFilter::Linear)                  gl = GL_LINEAR;
         else if(filter == TextureFilter::Nearest)                 gl = GL_NEAREST;
         else if(filter == TextureFilter::Linear_Mipmap_Linear)    gl = GL_LINEAR_MIPMAP_LINEAR;
         else if(filter == TextureFilter::Linear_Mipmap_Nearest)   gl = GL_LINEAR_MIPMAP_NEAREST;
         else if(filter == TextureFilter::Nearest_Mipmap_Linear)   gl = GL_NEAREST_MIPMAP_LINEAR;
         else if(filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST_MIPMAP_NEAREST;
     }else{
-        if(filter == TextureFilter::Linear)                       gl = GL_LINEAR;
+             if(filter == TextureFilter::Linear)                  gl = GL_LINEAR;
         else if(filter == TextureFilter::Nearest)                 gl = GL_NEAREST;
         else if(filter == TextureFilter::Linear_Mipmap_Linear)    gl = GL_LINEAR;
         else if(filter == TextureFilter::Linear_Mipmap_Nearest)   gl = GL_LINEAR;
@@ -602,172 +583,176 @@ void epriv::TextureLoader::EnumFilterToGL(uint& gl, const TextureFilter::Filter&
     }
 }
 
-Texture::Texture(uint _w, uint _h,ImagePixelType::Type _pxlType,ImagePixelFormat::Format _pxlFormat,ImageInternalFormat::Format _internal,float _divisor):m_i(new impl){
+Texture::Texture(const uint& w, const uint& h, const ImagePixelType::Type& pxlType, const ImagePixelFormat::Format& pxlFormat, const ImageInternalFormat::Format& _internal, const float& divisor):m_i(new impl){
     m_i->m_TextureType = TextureType::RenderTarget;
-    m_i->_initFramebuffer(_w,_h,_pxlType,_pxlFormat,_internal,_divisor,*this);
+    m_i->_initFramebuffer(w,h,pxlType,pxlFormat,_internal,divisor,*this);
 }
-Texture::Texture(const sf::Image& _sfImage,string _name,bool _genMipMaps,ImageInternalFormat::Format _internalFormat,GLuint _openglTextureType):m_i(new impl){
+Texture::Texture(const sf::Image& sfImage, const string& name, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType):m_i(new impl){
     m_i->m_TextureType = TextureType::Texture2D;
-    m_i->_initFromPixelsMemory(_sfImage,_name,_openglTextureType,_genMipMaps,_internalFormat,*this);
+    m_i->_initFromPixelsMemory(sfImage,name,openglTextureType,genMipMaps, _internal,*this);
 }
-Texture::Texture(string _filename,bool _genMipMaps,ImageInternalFormat::Format _internalFormat,GLuint _openglTextureType):m_i(new impl){
+Texture::Texture(const string& filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType):m_i(new impl){
     m_i->m_TextureType = TextureType::Texture2D;
-    m_i->_initFromImageFile(_filename, _openglTextureType, _genMipMaps, _internalFormat, *this);
+    m_i->_initFromImageFile(filename, openglTextureType, genMipMaps, _internal, *this);
 }
-Texture::Texture(string files[],string _name,bool _genMipMaps,ImageInternalFormat::Format _internalFormat):m_i(new impl){
+Texture::Texture(const string files[], const string& name, const bool& genMipMaps, const ImageInternalFormat::Format& _internal):m_i(new impl){
     m_i->m_TextureType = TextureType::CubeMap;
     for(uint j = 0; j < 6; ++j){ 
         ImageLoadedStructure* image = new ImageLoadedStructure();
         image->filename = files[j];
         m_i->m_ImagesDatas.push_back(image);
     }
-    m_i->_initCubemap(_name,_internalFormat,_genMipMaps,*this);
+    m_i->_initCubemap(name,_internal,genMipMaps,*this);
 }
 Texture::~Texture(){
     unload();
     SAFE_DELETE_VECTOR(m_i->m_ImagesDatas);
 }
-void Texture::render(const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d){
-    if(m_i->m_TextureType == TextureType::CubeMap) 
+void Texture::render(const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth){
+    if (m_i->m_TextureType == TextureType::CubeMap)
         return;
-    Renderer::renderTexture(*this, p, c, a, s, d);
+    Renderer::renderTexture(*this, position, color, angle, scale, depth);
 }
-void Texture::setXWrapping(TextureWrap::Wrap w){ 
-    Texture::setXWrapping(m_i->m_Type,w); 
+void Texture::setXWrapping(const TextureWrap::Wrap& wrap){
+    Texture::setXWrapping(m_i->m_Type, wrap);
 }
-void Texture::setYWrapping(TextureWrap::Wrap w){ 
-    Texture::setYWrapping(m_i->m_Type,w); 
+void Texture::setYWrapping(const TextureWrap::Wrap& wrap){
+    Texture::setYWrapping(m_i->m_Type, wrap);
 }
-void Texture::setZWrapping(TextureWrap::Wrap w){ 
-    Texture::setZWrapping(m_i->m_Type,w); 
+void Texture::setZWrapping(const TextureWrap::Wrap& wrap){
+    Texture::setZWrapping(m_i->m_Type, wrap);
 }
-void Texture::setWrapping(TextureWrap::Wrap w){ 
-    Texture::setWrapping(m_i->m_Type,w); 
+void Texture::setWrapping(const TextureWrap::Wrap& wrap){
+    Texture::setWrapping(m_i->m_Type, wrap);
 }
-void Texture::setMinFilter(TextureFilter::Filter f){ 
-    Texture::setMinFilter(m_i->m_Type,f);
-    m_i->m_MinFilter = f; 
+void Texture::setMinFilter(const TextureFilter::Filter& filter){
+    Texture::setMinFilter(m_i->m_Type, filter);
+    m_i->m_MinFilter = filter;
 }
-void Texture::setMaxFilter(TextureFilter::Filter f){ 
-    Texture::setMaxFilter(m_i->m_Type,f);
+void Texture::setMaxFilter(const TextureFilter::Filter& filter){
+    Texture::setMaxFilter(m_i->m_Type, filter);
 }
-void Texture::setFilter(TextureFilter::Filter f){ 
-    Texture::setFilter(m_i->m_Type,f);
+void Texture::setFilter(const TextureFilter::Filter& filter){
+    Texture::setFilter(m_i->m_Type, filter);
 }
-void Texture::setXWrapping(GLuint type,TextureWrap::Wrap w){ 
+void Texture::setXWrapping(const GLuint& type, const TextureWrap::Wrap& wrap){
     GLuint gl;
-    TextureLoader::EnumWrapToGL(gl,w);
+    TextureLoader::EnumWrapToGL(gl, wrap);
     glTexParameteri(type, GL_TEXTURE_WRAP_S, gl);
 }
-void Texture::setYWrapping(GLuint type,TextureWrap::Wrap w){ 
-    GLuint gl; 
-    TextureLoader::EnumWrapToGL(gl,w);
+void Texture::setYWrapping(const GLuint& type, const TextureWrap::Wrap& wrap){
+    GLuint gl;
+    TextureLoader::EnumWrapToGL(gl, wrap);
     glTexParameteri(type, GL_TEXTURE_WRAP_T, gl);
 }
-void Texture::setZWrapping(GLuint type,TextureWrap::Wrap w){
-    if(type != GL_TEXTURE_CUBE_MAP) return;
+void Texture::setZWrapping(const GLuint& type, const TextureWrap::Wrap& wrap){
+    if (type != GL_TEXTURE_CUBE_MAP)
+        return;
     GLuint gl;
-    TextureLoader::EnumWrapToGL(gl,w);
-    glTexParameteri(type,GL_TEXTURE_WRAP_R, gl);
+    TextureLoader::EnumWrapToGL(gl, wrap);
+    glTexParameteri(type, GL_TEXTURE_WRAP_R, gl);
 }
-void Texture::setWrapping(GLuint type,TextureWrap::Wrap w){
-    Texture::setXWrapping(type, w);
-    Texture::setYWrapping(type, w);
-    Texture::setZWrapping(type, w);
+void Texture::setWrapping(const GLuint& type, const TextureWrap::Wrap& wrap){
+    Texture::setXWrapping(type, wrap);
+    Texture::setYWrapping(type, wrap);
+    Texture::setZWrapping(type, wrap);
 }
-void Texture::setMinFilter(GLuint type,TextureFilter::Filter filter){ 
+void Texture::setMinFilter(const GLuint& type, const TextureFilter::Filter& filter){
     GLuint gl;
-    TextureLoader::EnumFilterToGL(gl,filter,true);
-    glTexParameteri(type,GL_TEXTURE_MIN_FILTER,gl); 
+    TextureLoader::EnumFilterToGL(gl, filter, true);
+    glTexParameteri(type, GL_TEXTURE_MIN_FILTER, gl);
 }
-void Texture::setMaxFilter(GLuint type,TextureFilter::Filter filter){ 
+void Texture::setMaxFilter(const GLuint& type, const TextureFilter::Filter& filter){
     GLuint gl;
-    TextureLoader::EnumFilterToGL(gl,filter,false);
-    glTexParameteri(type,GL_TEXTURE_MAG_FILTER,gl);  
+    TextureLoader::EnumFilterToGL(gl, filter, false);
+    glTexParameteri(type, GL_TEXTURE_MAG_FILTER, gl);
 }
-void Texture::setFilter(GLuint type,TextureFilter::Filter f){
-    Texture::setMinFilter(type,f);
-    Texture::setMaxFilter(type,f);
+void Texture::setFilter(const GLuint& type, const TextureFilter::Filter& filter){
+    Texture::setMinFilter(type, filter);
+    Texture::setMaxFilter(type, filter);
 }
 void Texture::setAnisotropicFiltering(const float& anisotropicFiltering){
     auto& i = *m_i;
-    Renderer::bindTexture(i.m_Type,i.m_TextureAddress[0]);
+    Renderer::bindTexture(i.m_Type, i.m_TextureAddress[0]);
     //need to update glew for this
 
     //if(epriv::RenderManager::OPENGL_VERSION >= 46){
     //	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, const_cast<GLfloat*>(&anisotropicFiltering));
-    //	glTexParameterf(m_i->m_Type, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering);
+    //	glTexParameterf(i.m_Type, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering);
     //}
     //else{
         /*
         if(OpenGLExtensionEnum::supported(OpenGLExtensionEnum::ARB_Ansiotropic_Filtering)){
             glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_ARB, const_cast<GLfloat*>(&anisotropicFiltering));
-            glTexParameterf(m_i->m_Type, GL_TEXTURE_MAX_ANISOTROPY_ARB, anisotropicFiltering);
+            glTexParameterf(i.m_Type, GL_TEXTURE_MAX_ANISOTROPY_ARB, anisotropicFiltering);
         }else*/ if(OpenGLExtensionEnum::supported(OpenGLExtensionEnum::EXT_Ansiotropic_Filtering)){
             glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, const_cast<GLfloat*>(&anisotropicFiltering));
-            glTexParameterf(m_i->m_Type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropicFiltering);
+            glTexParameterf(i.m_Type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropicFiltering);
         }
     //}
 }
 
-void epriv::InternalTexturePublicInterface::LoadCPU(Texture& _texture){
-    _texture.m_i->_load_CPU(_texture);
+void epriv::InternalTexturePublicInterface::LoadCPU(Texture& texture){
+    texture.m_i->_load_CPU(texture);
 }
-void epriv::InternalTexturePublicInterface::LoadGPU(Texture& _texture){
-    _texture.m_i->_load_GPU(_texture);
-    _texture.EngineResource::load();
+void epriv::InternalTexturePublicInterface::LoadGPU(Texture& texture){
+    texture.m_i->_load_GPU(texture);
+    texture.EngineResource::load();
 }
-void epriv::InternalTexturePublicInterface::UnloadCPU(Texture& _texture){
-    _texture.m_i->_unload_CPU(_texture);
-    _texture.EngineResource::unload();
+void epriv::InternalTexturePublicInterface::UnloadCPU(Texture& texture){
+    texture.m_i->_unload_CPU(texture);
+    texture.EngineResource::unload();
 }
-void epriv::InternalTexturePublicInterface::UnloadGPU(Texture& _texture){
-    _texture.m_i->_unload_GPU(_texture);      
+void epriv::InternalTexturePublicInterface::UnloadGPU(Texture& texture){
+    texture.m_i->_unload_GPU(texture);      
 }
 
 
 void Texture::load(){
     if(!isLoaded()){
+        auto& i = *m_i;
         auto& _this = *this;
-        m_i->_load_CPU(_this);
-        m_i->_load_GPU(_this);
+        i._load_CPU(_this);
+        i._load_GPU(_this);
         cout << "(Texture) ";
         EngineResource::load();
     }
 }
 void Texture::unload(){
     if(isLoaded()){
+        auto& i = *m_i;
         auto& _this = *this;
-        m_i->_unload_GPU(_this);
-        m_i->_unload_CPU(_this);
+        i._unload_GPU(_this);
+        i._unload_CPU(_this);
         cout << "(Texture) ";
         EngineResource::unload();
     }
 }
-void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
-    if(m_i->m_TextureAddress.size() == 1){
-        m_i->m_TextureAddress.push_back(0);
-        Renderer::genAndBindTexture(m_i->m_Type,m_i->m_TextureAddress[1]);
-        for (uint i = 0; i < 6; ++i){
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0,GL_RGB16F,convoludeTextureSize,convoludeTextureSize,0,GL_RGB,GL_FLOAT,NULL);
+void Texture::genPBREnvMapData(const uint& convoludeTextureSize, const uint& preEnvFilterSize){
+    auto& i = *m_i;
+    if (i.m_TextureAddress.size() == 1) {
+        i.m_TextureAddress.push_back(0);
+        Renderer::genAndBindTexture(i.m_Type, i.m_TextureAddress[1]);
+        for (uint i = 0; i < 6; ++i) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, convoludeTextureSize, convoludeTextureSize, 0, GL_RGB, GL_FLOAT, NULL);
         }
         setWrapping(TextureWrap::ClampToEdge);
         setFilter(TextureFilter::Linear);
     }
-    if(m_i->m_TextureAddress.size() == 2){
-        m_i->m_TextureAddress.push_back(0);
-        Renderer::genAndBindTexture(m_i->m_Type,m_i->m_TextureAddress[2]);
-        for (uint i = 0; i < 6; ++i){
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0,GL_RGB16F,preEnvFilterSize,preEnvFilterSize,0,GL_RGB,GL_FLOAT,NULL);
+    if (i.m_TextureAddress.size() == 2) {
+        i.m_TextureAddress.push_back(0);
+        Renderer::genAndBindTexture(i.m_Type, i.m_TextureAddress[2]);
+        for (uint i = 0; i < 6; ++i) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, preEnvFilterSize, preEnvFilterSize, 0, GL_RGB, GL_FLOAT, NULL);
         }
         setWrapping(TextureWrap::ClampToEdge);
         setMinFilter(TextureFilter::Linear_Mipmap_Linear);
         setMaxFilter(TextureFilter::Linear);
-        glGenerateMipmap(m_i->m_Type);
+        glGenerateMipmap(i.m_Type);
     }
-    Core::m_Engine->m_RenderManager._genPBREnvMapData(*this,convoludeTextureSize,preEnvFilterSize);
+    Core::m_Engine->m_RenderManager._genPBREnvMapData(*this, convoludeTextureSize, preEnvFilterSize);
 }
-void Texture::resize(epriv::FramebufferObject& fbo,uint w, uint h){ 
+void Texture::resize(epriv::FramebufferObject& fbo, const uint& w, const uint& h){
     m_i->_resize(fbo,w,h); 
 }
 const bool Texture::mipmapped() const {

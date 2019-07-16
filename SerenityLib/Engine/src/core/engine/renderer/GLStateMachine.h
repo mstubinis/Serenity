@@ -92,11 +92,31 @@ struct GLState final {
 
 namespace Engine{
 namespace Renderer{
-    inline       void GLEnable(const GLState::State s){ auto& t= GLState::SM[s];if(t.enabled)return;t.enableFunc();t.enabled=1; }
-    inline       void GLDisable(const GLState::State s){ auto& t= GLState::SM[s];if(!t.enabled)return;t.disableFunc();t.enabled=0; }
-    inline const bool GLEnabled(const GLState::State s){ auto& t= GLState::SM[s];return t.enabled; }
-    inline const bool GLDisabled(const GLState::State s){ auto& t= GLState::SM[s];return !t.enabled; }
-    inline       void RestoreGLState(){ for(auto& t: GLState::SM){ t.enabled? t.enableFunc() : t.disableFunc(); } }
+    inline       void GLEnable(const GLState::State s){ 
+        auto& t= GLState::SM[s];
+        if(t.enabled)
+            return;
+        t.enableFunc();
+        t.enabled=1; 
+    }
+    inline       void GLDisable(const GLState::State s){ 
+        auto& t= GLState::SM[s];
+        if(!t.enabled)
+            return;
+        t.disableFunc();
+        t.enabled=0; 
+    }
+    inline const bool GLEnabled(const GLState::State s){ 
+        return GLState::SM[s].enabled;
+    }
+    inline const bool GLDisabled(const GLState::State s){ 
+        return !GLState::SM[s].enabled;
+    }
+    inline       void RestoreGLState(){ 
+        for(auto& t: GLState::SM){ 
+            t.enabled? t.enableFunc() : t.disableFunc(); 
+        } 
+    }
 };
 };
 

@@ -44,7 +44,7 @@ std::string ResourceManifest::BasePath;
 
 void ResourceManifest::init(){
     BasePath = "../";
-    /*
+    
     Handle skyFromSpaceVert = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
     Handle skyFromSpaceFrag = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
     skyFromSpace = Resources::addShaderProgram("AS_SkyFromSpace",skyFromSpaceVert,skyFromSpaceFrag);
@@ -109,5 +109,5 @@ void ResourceManifest::init(){
     ResourceManifest::Ships["Defiant"]     = boost::tuple<Handle, Handle>(DefiantMesh,     DefiantMaterial);
     ResourceManifest::Ships["Nova"]        = boost::tuple<Handle, Handle>(NovaMesh,        NovaMaterial);
     ResourceManifest::Ships["Excelsior"]   = boost::tuple<Handle, Handle>(ExcelsiorMesh,   ExcelsiorMaterial);
-    */
+    
 }

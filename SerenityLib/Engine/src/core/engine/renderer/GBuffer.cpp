@@ -53,19 +53,19 @@ class epriv::GBuffer::impl final{
             if(!m_SmallFBO->check()) return false;
 
             //this should be better performance wise, but clean up this code a bit
-            Texture& depthTexture = *m_Buffers[GBufferType::Depth]->texture();
+            Texture& depthTexture = m_Buffers[GBufferType::Depth]->texture();
             Renderer::bindTexture(depthTexture.type(),depthTexture.address());
             depthTexture.setFilter(TextureFilter::Nearest);
 
-            Texture& diffuseTexture = *m_Buffers[GBufferType::Diffuse]->texture();
+            Texture& diffuseTexture = m_Buffers[GBufferType::Diffuse]->texture();
             Renderer::bindTexture(diffuseTexture.type(),diffuseTexture.address());
             diffuseTexture.setFilter(TextureFilter::Nearest);
 
-            Texture& normalTexture = *m_Buffers[GBufferType::Normal]->texture();
+            Texture& normalTexture = m_Buffers[GBufferType::Normal]->texture();
             Renderer::bindTexture(normalTexture.type(),normalTexture.address());
             normalTexture.setFilter(TextureFilter::Nearest);
 
-            Texture& godRaysTexture = *m_Buffers[GBufferType::GodRays]->texture();
+            Texture& godRaysTexture = m_Buffers[GBufferType::GodRays]->texture();
             Renderer::bindTexture(godRaysTexture.type(),godRaysTexture.address());
             godRaysTexture.setFilter(TextureFilter::Nearest);
 
@@ -78,7 +78,8 @@ class epriv::GBuffer::impl final{
         }
         void _constructTextureBuffer(FramebufferObject* fbo, const uint& t, const uint& w, const uint& h){
             auto& i = GBUFFER_TYPE_DATA[t];
-            m_Buffers[t] = fbo->attatchTexture(new Texture(w,h,i.get<2>(),i.get<1>(),i.get<0>(),fbo->divisor()),i.get<3>());
+            Texture* texture = new Texture(w, h, i.get<2>(), i.get<1>(), i.get<0>(), fbo->divisor());
+            m_Buffers[t] = fbo->attatchTexture(texture, i.get<3>());
         }
         void _destruct(){
             m_Width = m_Height = 0;
@@ -135,7 +136,7 @@ void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,string c,bool mainFBO)
 void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,c,mainFBO);}
 void epriv::GBuffer::stop(GLuint fbo, GLuint rbo){m_i->_stop(fbo,rbo);}
 const vector<epriv::FramebufferTexture*>& epriv::GBuffer::getBuffers() const{ return m_i->m_Buffers; }
-Texture& epriv::GBuffer::getTexture(uint t){ return *m_i->m_Buffers[t]->texture();}
+Texture& epriv::GBuffer::getTexture(uint t){ return m_i->m_Buffers[t]->texture();}
 epriv::FramebufferTexture& epriv::GBuffer::getBuffer(uint t){ return *m_i->m_Buffers[t]; }
 epriv::FramebufferObject* epriv::GBuffer::getMainFBO(){ return m_i->m_FBO; }
 epriv::FramebufferObject* epriv::GBuffer::getSmallFBO(){ return m_i->m_SmallFBO; }

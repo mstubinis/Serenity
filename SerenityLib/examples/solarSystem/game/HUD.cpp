@@ -280,6 +280,7 @@ void HUD::update_join_server_server_lobby(const double& dt) {
 }
 
 void HUD::render_game() {
+
     SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
     Ship* player = scene->getPlayer();
     glm::vec2 winSize = glm::vec2(Resources::getWindowSize().x, Resources::getWindowSize().y);

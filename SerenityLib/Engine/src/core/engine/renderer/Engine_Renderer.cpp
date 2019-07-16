@@ -29,6 +29,11 @@
 
 #include <iostream>
 
+#include <boost/function.hpp>
+
+typedef boost::function<void()> boost_func;
+
+
 using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
@@ -45,6 +50,8 @@ epriv::RenderManager::impl* renderManagerImpl;
 
 uint epriv::RenderManager::GLSL_VERSION;
 uint epriv::RenderManager::OPENGL_VERSION;
+
+
 //extensions
 vector<bool> epriv::RenderManager::OPENGL_EXTENSIONS = [](){
     vector<bool> v; v.resize(epriv::OpenGLExtensionEnum::_TOTAL,false);
@@ -140,6 +147,7 @@ namespace Engine{
                 :texture(_texture),pos(_pos),col(_col),scl(_scl),rot(_rot),depth(_depth){
             }
         };
+        /*
         struct FontRenderInfo final{
             const Font&                font;
             const glm::vec2            pos;
@@ -153,6 +161,7 @@ namespace Engine{
                 :font(_font),pos(_pos),col(_col),scl(_scl),rot(_rot),depth(_depth),text(_text),alignType(_alignType){
             }
         };
+        */
         struct UBOCamera final{
             glm::mat4 View;
             glm::mat4 Proj;
@@ -197,13 +206,16 @@ class epriv::RenderManager::impl final{
 
         GBuffer* m_GBuffer;
         glm::mat4 m_2DProjectionMatrix;
-        queue<FontRenderInfo> m_FontsToBeRendered;
+
+        queue<boost_func> m_2DAPICommands;
+
         queue<TextureRenderInfo> m_TexturesToBeRendered;
+
         vector<glm::vec3> text_pts;
         vector<glm::vec2> text_uvs;
         vector<ushort>    text_ind;
 
-
+        glm::vec3 m_RotationAxis2D;
         glm::mat4 m_IdentityMat4;
         glm::mat3 m_IdentityMat3;
         FullscreenQuad* m_FullscreenQuad;
@@ -217,7 +229,7 @@ class epriv::RenderManager::impl final{
         epriv::UBOCamera m_UBOCameraData;
         #pragma endregion
 
-        void _init(const char* name,uint& w,uint& h){
+        void _init(const char* name, const uint& w, const uint& h){
             #pragma region LightingInfo
             lighting = true;
             lighting_gi_contribution_diffuse = 1.0f;
@@ -255,9 +267,10 @@ class epriv::RenderManager::impl final{
             m_2DProjectionMatrix = glm::ortho(0.0f,float(w),0.0f,float(h),0.005f,1000.0f);
             m_IdentityMat4 = glm::mat4(1.0f);
             m_IdentityMat3 = glm::mat3(1.0f);
+            m_RotationAxis2D = glm::vec3(0, 0, 1);
             #pragma endregion
         }      
-        void _postInit(const char* name, uint& width, uint& height) {
+        void _postInit(const char* name, const uint& width, const uint& height) {
             glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &UniformBufferObject::MAX_UBO_BINDINGS);
 #pragma region OpenGLExtensions
 
@@ -1207,40 +1220,40 @@ class epriv::RenderManager::impl final{
         bool _checkOpenGLExtension(const char* e){ if(glewIsExtensionSupported(e)!=0) return true;return 0!=glewIsSupported(e); }
         void _renderSkybox(SkyboxEmpty* skybox){
             Scene& scene = *Resources::getCurrentScene();
-            Camera* c = scene.getActiveCamera();
-            glm::mat4 view = c->getView();
+            Camera& c = *scene.getActiveCamera();
+            glm::mat4 view = c.getView();
             Math::removeMatrixPosition(view);
             if(skybox){
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox]->bind();
-                sendUniformMatrix4("VP",c->getProjection() * view);
+                sendUniformMatrix4("VP",c.getProjection() * view);
                 sendTexture("Texture",skybox->texture()->address(0),0,GL_TEXTURE_CUBE_MAP);
                 Skybox::bindMesh();
                 skybox->draw();
             }else{//render a fake skybox.
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake]->bind();
                 glm::vec3 bgColor = scene.getBackgroundColor();
-                sendUniformMatrix4("VP",c->getProjection() * view);
+                sendUniformMatrix4("VP",c.getProjection() * view);
                 sendUniform4("Color",bgColor.r,bgColor.g,bgColor.b,1.0f);
                 Skybox::bindMesh();
             }
         }
-        void _resize(uint& w, uint& h){
-            m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,3000.0f);
-            m_GBuffer->resize(w,h);
+        void _resize(const uint& w, const uint& h){
+            m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(w), 0.0f, static_cast<float>(h), 0.005f, 3000.0f);
+            m_GBuffer->resize(w, h);
         }
-        void _onFullscreen(sf::Window* sfWindow,sf::VideoMode& videoMode,const char* winName,uint& style,sf::ContextSettings& settings){
+        void _onFullscreen(sf::Window* sfWindow, const sf::VideoMode& videoMode,const char* winName, const uint& style, const sf::ContextSettings& settings){
             SAFE_DELETE(m_GBuffer);
 
-            sfWindow->create(videoMode,winName,style,settings);
+            sfWindow->create(videoMode, winName, style, settings);
 
             //oh yea the opengl context is lost, gotta restore the state machine
             Renderer::RestoreGLState();
-  
+
             glDepthFunc(GL_LEQUAL);
             glCullFace(GL_BACK);
             glEnable(GL_CULL_FACE);
             glEnable(GL_DEPTH_CLAMP);
-            glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
             glClearDepth(1.0f);
             glClearStencil(0);
@@ -1248,7 +1261,7 @@ class epriv::RenderManager::impl final{
             const auto& winSize = Resources::getWindowSize();
             m_GBuffer = new GBuffer(winSize.x, winSize.y);
         }
-        void _onOpenGLContextCreation(uint& width,uint& height,uint& _glslVersion,uint _openglVersion){
+        void _onOpenGLContextCreation(const uint& width, const uint& height, const uint& _glslVersion, const uint& _openglVersion){
             epriv::RenderManager::GLSL_VERSION = _glslVersion;
             epriv::RenderManager::OPENGL_VERSION = _openglVersion;
             glewExperimental = GL_TRUE;
@@ -1258,7 +1271,7 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(m_GBuffer);
             m_GBuffer = new GBuffer(width,height);
         }
-        void _generatePBREnvMapData(Texture& texture,uint& convoludeTextureSize, uint& preEnvFilterSize){
+        void _generatePBREnvMapData(Texture& texture, const uint& convoludeTextureSize, const uint& preEnvFilterSize){
             uint texType = texture.type();
             if(texType != GL_TEXTURE_CUBE_MAP){
                 cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl; return;
@@ -1320,42 +1333,42 @@ class epriv::RenderManager::impl final{
             fbo->unbind();
             SAFE_DELETE(fbo);
         }
-        void _generateBRDFLUTCookTorrance(uint brdfSize){
+        void _generateBRDFLUTCookTorrance(const uint& brdfSize){
             uint& prevReadBuffer = renderManager->glSM.current_bound_read_fbo;
             uint& prevDrawBuffer = renderManager->glSM.current_bound_draw_fbo;
 
-            FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO",brdfSize,brdfSize); //try without a depth format
+            FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO", brdfSize, brdfSize); //try without a depth format
             fbo->bind();
 
             bindTexture(GL_TEXTURE_2D, brdfCook->address());
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
-            Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
-            Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,brdfCook->address(), 0);
+            Texture::setFilter(GL_TEXTURE_2D, TextureFilter::Linear);
+            Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToEdge);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfCook->address(), 0);
 
             m_InternalShaderPrograms[EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance]->bind();
-            sendUniform1("NUM_SAMPLES",256);
-            Settings::clear(true,true,false);
-            Renderer::colorMask(true,true,false,false);
-            _renderFullscreenTriangle(brdfSize,brdfSize,0,0);
+            sendUniform1("NUM_SAMPLES", 256);
+            Settings::clear(true, true, false);
+            Renderer::colorMask(true, true, false, false);
+            _renderFullscreenTriangle(brdfSize, brdfSize, 0, 0);
             Renderer::colorMask(true, true, true, true);
 
             SAFE_DELETE(fbo);
             bindReadFBO(prevReadBuffer);
             bindDrawFBO(prevDrawBuffer);
         }
-        void _setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm& algorithm){
+        void _setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm& algorithm){
             if(aa_algorithm != algorithm){ 
                 aa_algorithm = algorithm; 
             }
         }
-        void _setDepthFunc(DepthFunc::Func func){
+        void _setDepthFunc(const DepthFunc::Func& func){
             if(depth_func != func){
                 glDepthFunc(func);
                 depth_func = func;
             }
         }
-        void _clearColor(float& r, float& g, float& b, float& a) {
+        void _clearColor(const float& r, const float& g, const float& b, const float& a) {
             if (r == clear_color.r && g == clear_color.g && b == clear_color.b && a == clear_color.a)
                 return;
             clear_color.r = r;
@@ -1364,11 +1377,11 @@ class epriv::RenderManager::impl final{
             clear_color.a = a;
             glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
         }
-        void _colorMask(bool& r, bool& g, bool& b, bool& a) {
-            GLboolean _r = (GLboolean)r;
-            GLboolean _g = (GLboolean)g;
-            GLboolean _b = (GLboolean)b;
-            GLboolean _a = (GLboolean)a;
+        void _colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
+            auto _r = static_cast<GLboolean>(r);
+            auto _g = static_cast<GLboolean>(g);
+            auto _b = static_cast<GLboolean>(b);
+            auto _a = static_cast<GLboolean>(a);
             if (_r == color_mask_r && _g == color_mask_g && _b == color_mask_b && _a == color_mask_a)
                 return;
             color_mask_r = _r;
@@ -1377,7 +1390,7 @@ class epriv::RenderManager::impl final{
             color_mask_a = _a;
             glColorMask(color_mask_r, color_mask_g, color_mask_b, color_mask_a);
         }
-        void _cullFace(uint s){
+        void _cullFace(const uint& s){
             //0 = back | 1 = front | 2 = front and back
             if(s == GL_BACK && cull_face_status != 0){
                 glCullFace(GL_BACK);
@@ -1390,70 +1403,40 @@ class epriv::RenderManager::impl final{
                 cull_face_status = 2;
             }
         }
-        void _setViewport(uint& x, uint& y, uint& w, uint& h){
-            if(gl_viewport_data.x == x && gl_viewport_data.y == y && gl_viewport_data.z == w && gl_viewport_data.w == h) return;
-            glViewport(GLint(x), GLint(y), GLsizei(w), GLsizei(h));
+        void _setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
+            if(gl_viewport_data.x == x && gl_viewport_data.y == y && gl_viewport_data.z == w && gl_viewport_data.w == h) 
+                return;
+            glViewport(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(w), static_cast<GLsizei>(h));
             gl_viewport_data = glm::uvec4(x,y,w,h);
         }
-        void _bindReadFBO(uint& f){
+        void _bindReadFBO(const uint& f){
             if(renderManager->glSM.current_bound_read_fbo != f){
                 glBindFramebuffer(GL_READ_FRAMEBUFFER, f);
                 renderManager->glSM.current_bound_read_fbo = f;
             }
         }
-        void _bindDrawFBO(uint& f){
+        void _bindDrawFBO(const uint& f){
             if(renderManager->glSM.current_bound_draw_fbo != f){
                 glBindFramebuffer(GL_DRAW_FRAMEBUFFER, f);
                 renderManager->glSM.current_bound_draw_fbo = f;
             }
         }
-        void _bindRBO(uint& r){
+        void _bindRBO(const uint& r){
             if(renderManager->glSM.current_bound_rbo != r){
                 glBindRenderbuffer(GL_RENDERBUFFER, r);
                 renderManager->glSM.current_bound_rbo = r;
             }
         }
-        void _renderTextures(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
-            //TODO: optimize by batching the quads into 1 draw call, like in _renderText()
-            if (m_TexturesToBeRendered.size() > 0) {
-                m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
-                auto& mesh = *Mesh::Plane;
-                mesh.bind();
-                glm::mat4 m = m_IdentityMat4;
-                sendUniformMatrix4("VP", m_2DProjectionMatrix);
-                while (m_TexturesToBeRendered.size() > 0) {
-                    auto& item = m_TexturesToBeRendered.front();
-                    sendUniform4("Object_Color", item.col);
-                    m = m_IdentityMat4;
-                    m = glm::translate(m, glm::vec3(item.pos.x, item.pos.y, -0.001f - item.depth));
-                    m = glm::rotate(m, item.rot, glm::vec3(0.0f, 0.0f, 1.0f));
-                    if (item.texture) {
-                        m = glm::scale(m, glm::vec3(item.texture->width(), item.texture->height(), 1.0f));
-                        sendTexture("DiffuseTexture", *item.texture, 0);
-                        sendUniform1("DiffuseTextureEnabled", 1);
-                    }
-                    else {
-                        sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
-                        sendUniform1("DiffuseTextureEnabled", 0);
-                    }
-                    m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1.0f));
-                    sendUniformMatrix4("Model", m);
-                    mesh.render(false);
-                    m_TexturesToBeRendered.pop();
-                }
-            }
-        }
-
-        void _renderTextLeft(FontRenderInfo& item, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
+        void _renderTextLeft(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
             uint i = 0;
-            for (auto& character : item.text) {
+            for (auto& character : text) {
                 if (character == '\n') {
                     y += newLineGlyphHeight + 7;
                     x = 0.0f;
                 }else if (character != '\0') {
                     const uint& accum = i * 4;
                     ++i;
-                    const FontGlyph& chr   = item.font.getGlyphData(character);
+                    const FontGlyph& chr   = font.getGlyphData(character);
                     const float& startingY = -int(chr.height + chr.yoffset) - y;
 
                     text_ind.emplace_back(accum + 0);
@@ -1478,10 +1461,10 @@ class epriv::RenderManager::impl final{
                 }
             }
         }
-        void _renderTextRight(FontRenderInfo& item, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
+        void _renderTextRight(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
             vector<string> lines;
             string line_accumulator = "";
-            for (auto& character : item.text) {
+            for (auto& character : text) {
                 if (character == '\n') {
                     lines.push_back(line_accumulator);
                     line_accumulator = "";
@@ -1500,7 +1483,7 @@ class epriv::RenderManager::impl final{
                     if (character != '\0') {   
                         const uint& accum = i * 4;
                         ++i;
-                        const FontGlyph& chr   = item.font.getGlyphData(character);
+                        const FontGlyph& chr   = font.getGlyphData(character);
                         const float& startingY = -int(chr.height + chr.yoffset) - y;
 
                         text_ind.emplace_back(accum + 0);
@@ -1528,11 +1511,11 @@ class epriv::RenderManager::impl final{
                 x = 0.0f;
             }
         }
-        void _renderTextMiddle(FontRenderInfo& item, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
+        void _renderTextMiddle(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
             vector<string> lines;
             vector<unsigned short> lines_sizes;
             string line_accumulator = "";
-            for (auto& character : item.text) {
+            for (auto& character : text) {
                 if (character == '\n') {
                     lines.push_back(line_accumulator);
                     lines_sizes.push_back(x);
@@ -1540,7 +1523,7 @@ class epriv::RenderManager::impl final{
                     x = 0.0f;
                     continue;
                 }else if (character != '\0') {
-                    const FontGlyph& chr = item.font.getGlyphData(character);
+                    const FontGlyph& chr = font.getGlyphData(character);
                     line_accumulator += character;
                     x += chr.xadvance;
                 }
@@ -1559,7 +1542,7 @@ class epriv::RenderManager::impl final{
                     if (character != '\0') {
                         const uint& accum = i * 4;
                         ++i;
-                        const FontGlyph& chr   = item.font.getGlyphData(character);
+                        const FontGlyph& chr   = font.getGlyphData(character);
                         const float& startingY = -int(chr.height + chr.yoffset) - y;
 
                         text_ind.emplace_back(accum + 0);
@@ -1587,62 +1570,10 @@ class epriv::RenderManager::impl final{
                 x = 0.0f;
             }
         }
-
-        void _renderText(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
-            if (m_FontsToBeRendered.size() > 0) {
-                m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
-                glm::mat4 m = m_IdentityMat4;
-                float x, y, z;
-                x = y = z = 0.0f;
-                Mesh& mesh = *(Mesh::FontPlane);
-                mesh.bind();
-                sendUniformMatrix4("VP", m_2DProjectionMatrix);
-                sendUniform1("DiffuseTextureEnabled", 1);
-
-                const glm::vec3& rotationAxis = glm::vec3(0, 0, 1);
-
-                while (m_FontsToBeRendered.size() > 0) {
-                    auto& item = m_FontsToBeRendered.front();
-                    text_pts.clear();
-                    text_uvs.clear();
-                    text_ind.clear();
-
-                    const Font& font = item.font;
-                    const auto& newLineGlyphHeight = font.getGlyphData('X').height;
-                    const auto& texture = font.getGlyphTexture();
-                    sendTexture("DiffuseTexture", texture, 0);
-                    sendUniform4("Object_Color", item.col);
-                    y = 0.0f;
-                    x = 0.0f;
-                    z = -0.001f - item.depth;
-
-                    m = m_IdentityMat4;
-                    m = glm::translate(m, glm::vec3(item.pos.x, item.pos.y, 0));
-                    m = glm::rotate(m, item.rot, rotationAxis);
-                    m = glm::scale(m, glm::vec3(item.scl.x, item.scl.y, 1));
-                    sendUniformMatrix4("Model", m);
-
-                    if (item.alignType == TextAlignment::Left) {
-                        _renderTextLeft(item, newLineGlyphHeight, x, y, z);
-                    }
-                    else if (item.alignType == TextAlignment::Right) {
-                        _renderTextRight(item, newLineGlyphHeight, x, y, z);
-                    }
-                    else if (item.alignType == TextAlignment::Center) {
-                        _renderTextMiddle(item, newLineGlyphHeight, x, y, z);
-                    }
-                    mesh.modifyVertices(0, text_pts);
-                    mesh.modifyVertices(1, text_uvs);
-                    mesh.modifyIndices(text_ind);
-                    mesh.render(false);
-                    m_FontsToBeRendered.pop();
-                }
-            }
-        }
         void _renderSunLight(SunLight& s) {
             if (!s.isActive()) return;
             auto& body = *s.m_Entity.getComponent<ComponentBody>();
-            glm::vec3 pos = body.position();
+            const glm::vec3& pos = body.position();
             Renderer::sendUniform4("LightDataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, 0.0f);
             Renderer::sendUniform4("LightDataC", 0.0f, pos.x, pos.y, pos.z);
             Renderer::sendUniform4("LightDataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, static_cast<float>(s.m_Type));
@@ -1654,7 +1585,7 @@ class epriv::RenderManager::impl final{
             if (!p.isActive()) return;
             Camera& c = *Resources::getCurrentScene()->getActiveCamera();
             auto& body = *p.m_Entity.getComponent<ComponentBody>();
-            glm::vec3 pos = body.position();
+            const glm::vec3& pos = body.position();
             if ((!c.sphereIntersectTest(pos, p.m_CullingRadius)) || (c.getDistance(pos) > 1100.0f * p.m_CullingRadius)) //1100.0f is the visibility threshold
                 return;
             Renderer::sendUniform4("LightDataA", p.m_AmbientIntensity, p.m_DiffuseIntensity, p.m_SpecularIntensity, 0.0f);
@@ -1664,9 +1595,9 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform4Safe("LightDataE", 0.0f, 0.0f, static_cast<float>(p.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
-            glm::vec3 camPos = c.getPosition();
-            glm::mat4 model = body.modelMatrix();
-            glm::mat4 vp = c.getViewProjection();
+            //glm::vec3 camPos = c.getPosition();
+            const glm::mat4& model = body.modelMatrix();
+            const glm::mat4& vp = c.getViewProjection();
 
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", vp);
@@ -1688,7 +1619,7 @@ class epriv::RenderManager::impl final{
         void _renderDirectionalLight(DirectionalLight& d) {
             if (!d.isActive()) return;
             auto& body = *d.m_Entity.getComponent<ComponentBody>();
-            glm::vec3 _forward = body.forward();
+            const glm::vec3& _forward = body.forward();
             Renderer::sendUniform4("LightDataA", d.m_AmbientIntensity, d.m_DiffuseIntensity, d.m_SpecularIntensity, _forward.x);
             Renderer::sendUniform4("LightDataB", _forward.y, _forward.z, 0.0f, 0.0f);
             Renderer::sendUniform4("LightDataD", d.m_Color.x, d.m_Color.y, d.m_Color.z, static_cast<float>(d.m_Type));
@@ -1711,9 +1642,9 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform2Safe("VertexShaderData", s.m_OuterCutoff, s.m_CullingRadius);
             Renderer::sendUniform1Safe("Type", 2.0f);
 
-            glm::vec3 camPos = c.getPosition();
-            glm::mat4 model = body.modelMatrix();
-            glm::mat4 vp = c.getViewProjection();
+            //glm::vec3 camPos = c.getPosition();
+            const glm::mat4& model = body.modelMatrix();
+            const glm::mat4& vp = c.getViewProjection();
 
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", vp);
@@ -1752,9 +1683,9 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform4Safe("LightDataE", r.m_RodLength, 0.0f, static_cast<float>(r.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
-            glm::vec3 camPos = c.getPosition();
-            glm::mat4 model = body.modelMatrix();
-            glm::mat4 vp = c.getViewProjection();
+            //glm::vec3 camPos = c.getPosition();
+            const glm::mat4& model = body.modelMatrix();
+            const glm::mat4& vp = c.getViewProjection();
 
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", vp);
@@ -1950,7 +1881,6 @@ class epriv::RenderManager::impl final{
 
             Renderer::colorMask(true, true, true, true);
         }
-
         void _passBlur(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,string type, GLuint texture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur]->bind();
 
@@ -2259,19 +2189,21 @@ class epriv::RenderManager::impl final{
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             if(mainRenderFunc){
                 if(HUD){
+
                     Settings::clear(false,true,false); //clear depth only
+                    m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
+                    sendUniformMatrix4("VP", m_2DProjectionMatrix);
 
+                    GLEnable(GLState::SCISSOR_TEST);
 
-                    /*TODO: Add collection of render functors to render gui elements?
-                    would make handling render calls that depend on order of operation easier, like the glScissor effect for a scroll box
-                    */
-                    _renderTextures(gbuffer, camera, fboWidth, fboHeight);
-                    _renderText(gbuffer, camera, fboWidth, fboHeight);
+                    while (m_2DAPICommands.size() > 0) {
+                        const auto& command = m_2DAPICommands.front();
+                        command();
+                        m_2DAPICommands.pop();
+                    }
 
-
+                    GLDisable(GLState::SCISSOR_TEST);
                 }
-                //vector_clear(m_FontsToBeRendered);
-                //vector_clear(m_TexturesToBeRendered);
             }
             #pragma endregion
         }
@@ -2292,9 +2224,6 @@ void epriv::RenderManager::_render(Camera& c, const uint fboW, const uint fboH,b
 }
 void epriv::RenderManager::_resize(uint w,uint h){ 
     m_i->_resize(w,h); 
-}
-void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ 
-    m_i->m_GBuffer->resize(w,h); 
 }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ 
     m_i->_onFullscreen(w,m,n,s,set); 
@@ -2337,7 +2266,7 @@ void epriv::RenderManager::_genPBREnvMapData(Texture& texture, uint size1, uint 
     m_i->_generatePBREnvMapData(texture,size1,size2);
 }
 
-void Renderer::Settings::Lighting::enable(bool b){ 
+void Renderer::Settings::Lighting::enable(const bool b){
     renderManagerImpl->lighting = b; 
 }
 void Renderer::Settings::Lighting::disable(){ 
@@ -2346,7 +2275,7 @@ void Renderer::Settings::Lighting::disable(){
 float Renderer::Settings::Lighting::getGIContributionGlobal(){ 
     return renderManagerImpl->lighting_gi_contribution_global; 
 }
-void Renderer::Settings::Lighting::setGIContributionGlobal(float gi){ 
+void Renderer::Settings::Lighting::setGIContributionGlobal(const float gi){
     auto& mgr = *renderManagerImpl;
     mgr.lighting_gi_contribution_global = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
@@ -2354,7 +2283,7 @@ void Renderer::Settings::Lighting::setGIContributionGlobal(float gi){
 float Renderer::Settings::Lighting::getGIContributionDiffuse(){ 
     return renderManagerImpl->lighting_gi_contribution_diffuse;
 }
-void Renderer::Settings::Lighting::setGIContributionDiffuse(float gi){ 
+void Renderer::Settings::Lighting::setGIContributionDiffuse(const float gi){
     auto& mgr = *renderManagerImpl;
     mgr.lighting_gi_contribution_diffuse = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
@@ -2362,12 +2291,12 @@ void Renderer::Settings::Lighting::setGIContributionDiffuse(float gi){
 float Renderer::Settings::Lighting::getGIContributionSpecular(){ 
     return renderManagerImpl->lighting_gi_contribution_specular; 
 }
-void Renderer::Settings::Lighting::setGIContributionSpecular(float gi){
+void Renderer::Settings::Lighting::setGIContributionSpecular(const float gi){
     auto& mgr = *renderManagerImpl;
     mgr.lighting_gi_contribution_specular = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
-void Renderer::Settings::Lighting::setGIContribution(float g, float d, float s){
+void Renderer::Settings::Lighting::setGIContribution(const float g, const float d, const float s){
     auto& mgr = *renderManagerImpl;
     mgr.lighting_gi_contribution_global = glm::clamp(g,0.001f,0.999f);
     mgr.lighting_gi_contribution_diffuse = glm::clamp(d,0.001f,0.999f);
@@ -2375,13 +2304,13 @@ void Renderer::Settings::Lighting::setGIContribution(float g, float d, float s){
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
 
-void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){ 
+void Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm& algorithm){
     renderManagerImpl->_setAntiAliasingAlgorithm(algorithm); 
 }
 void Renderer::Settings::cullFace(uint s){ 
     renderManagerImpl->_cullFace(s); 
 }
-void Renderer::Settings::clear(bool color, bool depth, bool stencil){
+void Renderer::Settings::clear(const bool color, const bool depth, const bool stencil){
     if(!color && !depth && !stencil) return;
     GLuint clearBit = 0x00000000;
     if(color)   clearBit |= GL_COLOR_BUFFER_BIT;
@@ -2389,28 +2318,28 @@ void Renderer::Settings::clear(bool color, bool depth, bool stencil){
     if(stencil) clearBit |= GL_STENCIL_BUFFER_BIT;
     glClear(clearBit);
 }
-void Renderer::Settings::enableDrawPhysicsInfo(bool b){ 
+void Renderer::Settings::enableDrawPhysicsInfo(const bool b){
     renderManagerImpl->draw_physics_debug = b; 
 }
 void Renderer::Settings::disableDrawPhysicsInfo(){ 
     renderManagerImpl->draw_physics_debug = false; 
 }
-void Renderer::Settings::setGamma(float g){ 
+void Renderer::Settings::setGamma(const float g){
     renderManagerImpl->gamma = g; 
 }
 float Renderer::Settings::getGamma(){ 
     return renderManagerImpl->gamma; 
 }
-void Renderer::setDepthFunc(DepthFunc::Func func){ 
+void Renderer::setDepthFunc(const DepthFunc::Func& func){
     renderManagerImpl->_setDepthFunc(func); 
 }
-void Renderer::setViewport(uint x,uint y,uint w,uint h){ 
+void Renderer::setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
     renderManagerImpl->_setViewport(x,y,w,h); 
 }
-void Renderer::colorMask(bool r, bool g, bool b, bool a) { 
+void Renderer::colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
     renderManagerImpl->_colorMask(r,g,b,a); 
 }
-void Renderer::clearColor(float r, float g, float b, float a) { 
+void Renderer::clearColor(const float& r, const float& g, const float& b, const float& a) {
     renderManagerImpl->_clearColor(r, g, b, a); 
 }
 void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
@@ -2463,7 +2392,7 @@ void Renderer::deleteVAO(GLuint& _vaoObject) {
         _vaoObject = 0;
     }
 }
-void Renderer::genAndBindTexture(GLuint _textureType,GLuint& _textureObject){
+void Renderer::genAndBindTexture(const GLuint _textureType, GLuint& _textureObject){
     glGenTextures(1, &_textureObject);
     bindTexture(_textureType,_textureObject);
 }
@@ -2471,59 +2400,154 @@ void Renderer::genAndBindVAO(GLuint& _vaoObject){
     glGenVertexArrays(1, &_vaoObject);
     bindVAO(_vaoObject);
 }
-void Renderer::sendTexture(const char* location, const Texture& texture,const int slot){
+void Renderer::sendTexture(const char* location, const Texture& texture,const int& slot){
     Renderer::sendTexture(location, texture.address(), slot, texture.type());
 }
-void Renderer::sendTexture(const char* location,const GLuint textureAddress,const int slot,const GLuint targetType){
+void Renderer::sendTexture(const char* location,const GLuint textureAddress,const int& slot,const GLuint& targetType){
     glActiveTexture(GL_TEXTURE0 + slot);
     bindTexture(targetType,textureAddress);
     sendUniform1(location,slot);
 }
-void Renderer::sendTextureSafe(const char* location, const Texture& texture,const int slot){
+void Renderer::sendTextureSafe(const char* location, const Texture& texture,const int& slot){
     Renderer::sendTextureSafe(location, texture.address(), slot, texture.type());
 }
-void Renderer::sendTextureSafe(const char* location,const GLuint textureAddress,const int slot,const GLuint targetType){
+void Renderer::sendTextureSafe(const char* location,const GLuint textureAddress,const int& slot,const GLuint& targetType){
     glActiveTexture(GL_TEXTURE0 + slot);
     bindTexture(targetType,textureAddress);
     sendUniform1Safe(location,slot);
 }
-void Renderer::bindReadFBO(GLuint fbo){ renderManagerImpl->_bindReadFBO(fbo); }
+void Renderer::bindReadFBO(const GLuint fbo){ renderManagerImpl->_bindReadFBO(fbo); }
 void Renderer::bindFBO(epriv::FramebufferObject& fbo){ Renderer::bindFBO(fbo.address()); }
 void Renderer::bindRBO(epriv::RenderbufferObject& rbo){ Renderer::bindRBO(rbo.address()); }
-void Renderer::bindDrawFBO(GLuint fbo){ renderManagerImpl->_bindDrawFBO(fbo); }
-void Renderer::bindFBO(GLuint fbo){Renderer::bindReadFBO(fbo);Renderer::bindDrawFBO(fbo);}
-void Renderer::bindRBO(GLuint rbo){ renderManagerImpl->_bindRBO(rbo); }
+void Renderer::bindDrawFBO(const GLuint fbo){ renderManagerImpl->_bindDrawFBO(fbo); }
+void Renderer::bindFBO(const GLuint fbo){Renderer::bindReadFBO(fbo);Renderer::bindDrawFBO(fbo);}
+void Renderer::bindRBO(const GLuint rbo){ renderManagerImpl->_bindRBO(rbo); }
 void Renderer::unbindFBO(){ Renderer::bindFBO(GLuint(0)); }
 void Renderer::unbindRBO(){ Renderer::bindRBO(GLuint(0)); }
 void Renderer::unbindReadFBO(){ Renderer::bindReadFBO(0); }
 void Renderer::unbindDrawFBO(){ Renderer::bindDrawFBO(0); }
-void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth){
-    renderManagerImpl->m_TexturesToBeRendered.emplace(nullptr,pos,col,glm::vec2(w,h),angle,depth);
+inline const GLint Renderer::getUniformLoc(const char* location) {
+    const auto& m = renderManager->glSM.current_bound_shader_program->uniforms(); if (!m.count(location)) return -1; return m.at(location);
+}
+inline const GLint& Renderer::getUniformLocUnsafe(const char* location) {
+    return renderManager->glSM.current_bound_shader_program->uniforms().at(location);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//a collection of 2d rendering api functors
+struct RenderingAPI2D final {
+    static void Render2DText(const string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const TextAlignment::Type& alignType) { 
+        auto& impl = *renderManagerImpl;
+        impl.text_pts.clear();
+        impl.text_uvs.clear();
+        impl.text_ind.clear();
+
+        auto& mesh = *Mesh::FontPlane;
+        mesh.bind();
+        sendUniform1("DiffuseTextureEnabled", 1);
+
+        const auto& newLineGlyphHeight = font.getGlyphData('X').height;
+        const auto& texture = font.getGlyphTexture();
+        sendTexture("DiffuseTexture", texture, 0);
+        sendUniform4("Object_Color", color);
+        float y = 0.0f;
+        float x = 0.0f;
+        float z = -0.001f - depth;
+
+        glm::mat4 m = impl.m_IdentityMat4;
+        m = glm::translate(m, glm::vec3(position.x, position.y, 0));
+        m = glm::rotate(m, angle, impl.m_RotationAxis2D);
+        m = glm::scale(m, glm::vec3(scale.x, scale.y, 1));
+        sendUniformMatrix4("Model", m);
+
+        if (alignType == TextAlignment::Left) {
+            impl._renderTextLeft(text, font, newLineGlyphHeight, x, y, z);
+        }else if (alignType == TextAlignment::Right) {
+            impl._renderTextRight(text, font, newLineGlyphHeight, x, y, z);
+        }else if (alignType == TextAlignment::Center) {
+            impl._renderTextMiddle(text, font, newLineGlyphHeight, x, y, z);
+        }
+        mesh.modifyVertices(0, impl.text_pts);
+        mesh.modifyVertices(1, impl.text_uvs);
+        mesh.modifyIndices(impl.text_ind);
+        mesh.render(false);
+    }
+    static void Render2DTexture(const Texture* tex, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d) {
+        auto& impl = *renderManagerImpl;
+        auto& mesh = *Mesh::Plane;
+        mesh.bind();
+        glm::mat4 m = impl.m_IdentityMat4;
+        sendUniform4("Object_Color", c);
+        m = glm::translate(m, glm::vec3(p.x, p.y, -0.001f - d));
+        m = glm::rotate(m, a, impl.m_RotationAxis2D);
+        if (tex) {
+            m = glm::scale(m, glm::vec3(tex->width(), tex->height(), 1.0f));
+            sendTexture("DiffuseTexture", *tex, 0);
+            sendUniform1("DiffuseTextureEnabled", 1);
+        }else{
+            sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
+            sendUniform1("DiffuseTextureEnabled", 0);
+        }
+        m = glm::scale(m, glm::vec3(s.x, s.y, 1.0f));
+        sendUniformMatrix4("Model", m);
+        mesh.render(false);
+    }
+    static void GLScissor(const int& x, const int& y, const GLsizei& width, const GLsizei& height) {
+        glScissor(x, y, width, height);
+    }
+    static void GLScissorDisable() {
+        const auto& winSize = Resources::getWindowSize();
+        glScissor(0, 0, winSize.x, winSize.y);
+    }
+};
+void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float& w, const float& h, const float& angle, const float& depth){
+    boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DTexture, nullptr, pos, col, angle, glm::vec2(w, h), depth);
+    renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
 }
 void Renderer::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d){
-    renderManagerImpl->m_TexturesToBeRendered.emplace(&tex, p, c, s, a, d);
+    boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DTexture, &tex, p, c, a, s, d);
+    renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
 }
 void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const TextAlignment::Type& al) {
-    renderManagerImpl->m_FontsToBeRendered.emplace(fnt, t, p, c, s, a, d, al);
+    boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DText, t, boost::ref(fnt), p, c, a, s, d, al);
+    renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
+}
+void Renderer::renderBorder(const float& borderSize, const glm::vec2& pos, const glm::vec4& col, const float& w, const float& h, const float& angle, const float& depth) {
+    Renderer::renderRectangle(pos - glm::vec2(w/2 - borderSize, 0), col, borderSize, h  - borderSize, angle, depth);
+    Renderer::renderRectangle(pos + glm::vec2(w/2 - borderSize, 0), col, borderSize, h  - borderSize, angle, depth);
+    Renderer::renderRectangle(pos - glm::vec2(0, h/2 - borderSize), col, w  - borderSize, borderSize, angle, depth);
+    Renderer::renderRectangle(pos + glm::vec2(0, h/2 - borderSize), col, w  - borderSize, borderSize, angle, depth);
+}
+void Renderer::scissor(const int& x, const int& y, const uint& width, const uint& height) {
+    boost_func f = boost::bind<void>(&RenderingAPI2D::GLScissor, x, y, width, height);
+    renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
+}
+void Renderer::scissorDisable() {
+    boost_func f = boost::bind<void>(&RenderingAPI2D::GLScissorDisable);
+    renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
 }
 
-void Renderer::renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth) {
-    auto& i = *renderManagerImpl;
-    i.m_TexturesToBeRendered.emplace(nullptr, pos - glm::vec2(w/2 - borderSize, 0), col, glm::vec2(borderSize, h  - borderSize), angle, depth);
-    i.m_TexturesToBeRendered.emplace(nullptr, pos + glm::vec2(w/2 - borderSize, 0), col, glm::vec2(borderSize, h  - borderSize), angle, depth);
-    i.m_TexturesToBeRendered.emplace(nullptr, pos - glm::vec2(0, h/2 - borderSize), col, glm::vec2(w  - borderSize, borderSize), angle, depth);
-    i.m_TexturesToBeRendered.emplace(nullptr, pos + glm::vec2(0, h/2 - borderSize), col, glm::vec2(w  - borderSize, borderSize), angle, depth);
-}
 
-
-
-void Renderer::renderFullscreenQuad(const uint w, const uint h, const uint startX, const uint startY){
+void Renderer::renderFullscreenQuad(const uint& w, const uint& h, const uint& startX, const uint& startY){
     renderManagerImpl->_renderFullscreenQuad(w,h,startX,startY); 
 }
-void Renderer::renderFullscreenTriangle(const uint w, const uint h, const uint startX, const uint startY){
+void Renderer::renderFullscreenTriangle(const uint& w, const uint& h, const uint& startX, const uint& startY){
     renderManagerImpl->_renderFullscreenTriangle(w,h,startX,startY); 
 }
-
 void Renderer::renderFullscreenQuad() {
     const auto& size = Resources::getWindowSize();
     renderManagerImpl->_renderFullscreenQuad(size.x, size.y, 0, 0);
@@ -2531,11 +2555,4 @@ void Renderer::renderFullscreenQuad() {
 void Renderer::renderFullscreenTriangle() {
     const auto& size = Resources::getWindowSize();
     renderManagerImpl->_renderFullscreenTriangle(size.x, size.y, 0, 0);
-}
-
-inline const GLint Renderer::getUniformLoc(const char* location){
-    const auto& m = renderManager->glSM.current_bound_shader_program->uniforms(); if(!m.count(location)) return -1; return m.at(location);
-}
-inline const GLint& Renderer::getUniformLocUnsafe(const char* location){
-    return renderManager->glSM.current_bound_shader_program->uniforms().at(location);
 }
