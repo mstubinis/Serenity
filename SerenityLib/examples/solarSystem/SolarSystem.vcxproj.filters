@@ -28,6 +28,12 @@
     <Filter Include="Source Files\Game\GUI">
       <UniqueIdentifier>{7c90a2c4-9f65-4d39-83f4-3b192acbc9d3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics">
+      <UniqueIdentifier>{81080f28-8832-40dd-84d5-04dedb852889}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics">
+      <UniqueIdentifier>{a5c94478-92a8-49b2-9ab9-bc6750f0414c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -81,6 +87,18 @@
     <ClInclude Include="game\gui\TextBox.h">
       <Filter>Header Files\Game\GUI</Filter>
     </ClInclude>
+    <ClInclude Include="game\gui\ScrollBar.h">
+      <Filter>Header Files\Game\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\ScrollWindow.h">
+      <Filter>Header Files\Game\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\Text.h">
+      <Filter>Header Files\Game\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\ServerLobbyChatWindow.h">
+      <Filter>Header Files\Game\GUI\Specifics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -130,6 +148,18 @@
     </ClCompile>
     <ClCompile Include="game\gui\TextBox.cpp">
       <Filter>Source Files\Game\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\ScrollBar.cpp">
+      <Filter>Source Files\Game\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\ScrollWindow.cpp">
+      <Filter>Source Files\Game\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\Text.cpp">
+      <Filter>Source Files\Game\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\ServerLobbyChatWindow.cpp">
+      <Filter>Source Files\Game\GUI\Specifics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

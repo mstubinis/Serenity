@@ -72,6 +72,16 @@ namespace epriv{
         EventTextEntered(const std::uint32_t& _unicode) {
             unicode = _unicode;
         }
+        const std::string convert() const {
+            if (unicode == 27 || unicode == 13 || unicode == 9 || unicode == 8) { //27 = esc, 13 = enter, 9 = tab, 8 = backspace
+                return "";
+            }
+            wchar_t c = static_cast<wchar_t>(unicode);
+            std::wstring ws(&c);
+            std::string res = std::string(ws.begin(), ws.end());
+            res = res[0];
+            return res;
+        }
     };
     struct EventMouseButton final{ 
         MouseButton::Button button; float x, y; 

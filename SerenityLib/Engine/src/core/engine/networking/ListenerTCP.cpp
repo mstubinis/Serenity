@@ -7,8 +7,9 @@ using namespace Engine;
 using namespace std;
 
 
-Networking::ListenerTCP::ListenerTCP(const uint _port){
+Networking::ListenerTCP::ListenerTCP(const uint _port, const string& ip){
     m_Port = _port;
+    m_Ip = ip;
     m_Listener.setBlocking(false);
 }
 Networking::ListenerTCP::~ListenerTCP() { 
@@ -37,5 +38,11 @@ const sf::Socket::Status Networking::ListenerTCP::accept(SocketTCP& _client) {
     return m_Listener.accept(s);
 }
 const sf::Socket::Status Networking::ListenerTCP::listen() {
-    return m_Listener.listen(m_Port);
+    sf::IpAddress _ip;
+    if (m_Ip == "" || m_Ip == "0.0.0.0") {
+        _ip = sf::IpAddress::Any;
+    }else{
+        _ip = sf::IpAddress(m_Ip);
+    }
+    return m_Listener.listen(m_Port, _ip);
 }

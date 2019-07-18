@@ -13,39 +13,32 @@ namespace Engine {
     };
 };
 
-Button::Button(Font& font, const float& x, const float& y, const float& width, const float& height) :Widget(x, y, width, height) {
-    setFont(font);
-    m_Text = "Button";
-    setOnClickFunctor(epriv::emptyFunctor());
-    m_TextScale = glm::vec2(1.0f);
-
-    m_Height = getTextHeight() + 20;
-    m_Width = getTextWidth() + 20;
-    m_TextAlignment = TextAlignment::Center;
+void Button::internalSetSize() {
+    m_Height = getTextHeight() + m_Padding;
+    m_Width = getTextWidth() + m_Padding;
 }
-Button::Button(Font& font, const glm::vec2& position, const float& width, const float& height) : Widget(position, width, height) {
+Button::Button(const Font& font, const float& x, const float& y, const float& width, const float& height) : Widget(x, y, width, height) {
     setFont(font);
     m_Text = "Button";
     setOnClickFunctor(epriv::emptyFunctor());
     m_TextScale = glm::vec2(1.0f);
-
-    m_Height = getTextHeight() + 20;
-    m_Width = getTextWidth() + 20;
     m_TextAlignment = TextAlignment::Center;
+    m_Padding = 20;
+    internalSetSize();
+}
+Button::Button(const Font& font, const glm::vec2& position, const float& width, const float& height) : Button(font,position.x,position.y,width,height) {
 }
 Button::~Button() {
 
 }
 void Button::setTextScale(const glm::vec2& scale) {
     m_TextScale = scale;
-    m_Height = getTextHeight() + 20;
-    m_Width = getTextWidth() + 20;
+    internalSetSize();
 }
 void Button::setTextScale(const float& x, const float& y) {
     m_TextScale.x = x;
     m_TextScale.y = y;
-    m_Height = getTextHeight() + 20;
-    m_Width = getTextWidth() + 20;
+    internalSetSize();
 }
 const glm::vec2& Button::getTextScale() const {
     return m_TextScale;
@@ -67,18 +60,16 @@ void Button::setTextColor(const float& r, const float& g, const float& b, const 
 void Button::setTextColor(const glm::vec4& color) {
     Math::setColor(m_TextColor, color.r, color.g, color.b, color.a);
 }
-void Button::setFont(Font& font) {
-    m_Font = &font;
+void Button::setFont(const Font& font) {
+    m_Font = &const_cast<Font&>(font);
 }
 void Button::setText(const char* text) {
     m_Text = text;
-    m_Height = getTextHeight() + 20;
-    m_Width = getTextWidth() + 20;
+    internalSetSize();
 }
 void Button::setText(const std::string& text) {
     m_Text = text;
-    m_Height = getTextHeight() + 20;
-    m_Width = getTextWidth() + 20;
+    internalSetSize();
 }
 void Button::update(const double& dt) {
     Widget::update(dt);
@@ -126,7 +117,6 @@ void Button::render() {
     }  
     const auto newPos = glm::vec2(m_Position.x + xOffset, m_Position.y + yOffset);
     Renderer::renderRectangle(newPos, m_Color, m_Width, m_Height, 0, 0.01f);
-    //Renderer::renderBorder(2,newPos, m_TextColor, m_Width, m_Height, 0, 0.008f);
 
     glm::vec2 newPosTxt; 
     if(m_TextAlignment == TextAlignment::Left)

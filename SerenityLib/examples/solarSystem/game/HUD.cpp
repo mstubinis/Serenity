@@ -23,6 +23,9 @@
 
 #include "gui/Button.h"
 #include "gui/TextBox.h"
+#include "gui/ScrollWindow.h"
+#include "gui/Text.h";
+#include "gui/specifics/ServerLobbyChatWindow.h"
 
 #include <regex>
 
@@ -64,9 +67,12 @@ struct ButtonBack_OnClick {void operator()(Button* button) const {
             hud.m_Next->setText("Next");
             break;
         }case GameState::Join_Server_Port_And_Name_And_IP: {
+            //force server to disconnect client
+            hud.m_Core.shutdownClient();
+
             hud.m_GameState = GameState::Main_Menu;
             hud.m_Next->setText("Next");
-            hud.m_ErrorText = "";
+            hud.setErrorText("", 0);
             break;
         }case GameState::Join_Server_Server_Lobby: {
             //force server to disconnect client
@@ -79,7 +85,7 @@ struct ButtonBack_OnClick {void operator()(Button* button) const {
         }default: {
             hud.m_GameState = GameState::Main_Menu;
             hud.m_Next->setText("Next");
-            hud.m_ErrorText = "";
+            hud.setErrorText("", 0);
             break;
         }
     }
@@ -93,11 +99,10 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             if (portstring != "" && username != "") {
                 if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) {
                     const int port = stoi(portstring);
+                    //hud.setErrorText("", 0);
                     hud.m_Core.startServer(port);
-                    bool am_i_connected = hud.m_Core.startClient(port, username, "127.0.01"); //the client will request validation at this stage
-                    if (!am_i_connected) {
-                        hud.setErrorText("Connection to your own server failed", 7.0f);
-                    }
+                    hud.m_Core.startClient(port, username, "127.0.01"); //the client will request validation at this stage
+                    hud.m_ServerLobbyChatWindow->setUserPointer(hud.m_Core.getClient());
                 }else{
                     hud.setErrorText("Server port must contain numbers only");
                 }
@@ -116,10 +121,9 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             const string& ip         = hud.m_ServerIp->text();
             if (portstring != "" && ip != "" && username != "") {
                 if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) {
-                    bool am_i_connected = hud.m_Core.startClient(stoi(portstring), username, ip); //the client will request validation at this stage
-                    if (!am_i_connected) {
-                        hud.setErrorText("Connection to the server failed",7.0f);
-                    }
+                    //hud.setErrorText("", 0);
+                    hud.m_Core.startClient(stoi(portstring), username, ip); //the client will request validation at this stage
+                    hud.m_ServerLobbyChatWindow->setUserPointer(hud.m_Core.getClient());
                 }else{
                     hud.setErrorText("Server port must contain numbers only");
                 }
@@ -135,7 +139,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
         }default: {
             hud.m_GameState = GameState::Main_Menu;
             hud.m_Next->setText("Next");
-            hud.m_ErrorText = "";
+            hud.setErrorText("", 0);
             break;
         }
     }
@@ -147,16 +151,16 @@ HUD::HUD(GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
     m_Font = Resources::getFont(m_FontHandle);
     Engine::Math::setColor(m_Color, 255, 255, 0);
     m_Active = true;
-    m_MessageText = m_ErrorText = "";
+    m_MessageText = "";
     m_ErrorTimer = 0.0f;
 
     const auto& windowDimensions = Resources::getWindowSize();
 
-    m_ButtonHost = new Button(*m_Font, glm::vec2(windowDimensions.x / 2, windowDimensions.y / 2), 150, 50);
+    m_ButtonHost = new Button(*m_Font, glm::vec2(windowDimensions.x / 2, 275), 150, 50);
     m_ButtonHost->setText("Host");
     m_ButtonHost->setColor(0.5f, 0.5f, 0.5f, 1);
     m_ButtonHost->setTextColor(1, 1, 0, 1);
-    m_ButtonJoin = new Button(*m_Font, glm::vec2(windowDimensions.x / 2, (windowDimensions.y / 2) - 125), 150, 50);
+    m_ButtonJoin = new Button(*m_Font, glm::vec2(windowDimensions.x / 2, 155), 150, 50);
     m_ButtonJoin->setText("Join");
     m_ButtonJoin->setColor(0.5f, 0.5f, 0.5f, 1);
     m_ButtonJoin->setTextColor(1, 1, 0, 1);
@@ -183,16 +187,22 @@ HUD::HUD(GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
     m_Next->setOnClickFunctor(ButtonNext_OnClick());
 
 
-    m_ServerIp = new TextBox("Server IP",*m_Font, 40, windowDimensions.x / 2, (windowDimensions.y / 2) - 60 - 170);
+    m_ServerIp = new TextBox("Server IP",*m_Font, 40, windowDimensions.x / 2, 115);
     m_ServerIp->setColor(0.5f, 0.5f, 0.5f, 1);
     m_ServerIp->setTextColor(1, 1, 0, 1);
-    m_UserName = new TextBox("Your Name",*m_Font, 20, windowDimensions.x / 2, (windowDimensions.y / 2) + 60 - 170);
+    m_UserName = new TextBox("Your Name",*m_Font, 20, windowDimensions.x / 2, 275);
     m_UserName->setColor(0.5f, 0.5f, 0.5f, 1);
     m_UserName->setTextColor(1, 1, 0, 1);
-    m_ServerPort = new TextBox("Server Port",*m_Font, 7, windowDimensions.x / 2, (windowDimensions.y / 2) - 170);
+    m_ServerPort = new TextBox("Server Port",*m_Font, 7, windowDimensions.x / 2, 195);
     m_ServerPort->setColor(0.5f, 0.5f, 0.5f, 1);
     m_ServerPort->setTextColor(1, 1, 0, 1);
     m_ServerPort->setText("55000");
+
+    m_InfoText = new Text(Resources::getWindowSize().x / 2, 65, *m_Font);
+    m_InfoText->setTextAlignment(TextAlignment::Center);
+
+    m_ServerLobbyChatWindow = new ServerLobbyChatWindow(*m_Font, 50, 140 + 300);
+    m_ServerLobbyChatWindow->setColor(1, 1, 0, 1);
 }
 HUD::~HUD() {
     SAFE_DELETE(m_ButtonHost);
@@ -202,25 +212,41 @@ HUD::~HUD() {
     SAFE_DELETE(m_ServerIp);
     SAFE_DELETE(m_UserName);
     SAFE_DELETE(m_ServerPort);
+
+    SAFE_DELETE(m_InfoText);
+
+    SAFE_DELETE(m_ServerLobbyChatWindow);
 }
-void HUD::setErrorText(const std::string& error, const float errorTime) {
-    m_ErrorText = error;
+void HUD::setGoodText(const string& text, const float errorTime) {
+    m_InfoText->setText(text);
     m_ErrorTimer = errorTime;
+    m_InfoText->setColor(0, 1, 0, 1);
 }
-const std::string& HUD::getErrorText() const {
-    return m_ErrorText;
+void HUD::setNormalText(const string& text, const float errorTime) {
+    m_InfoText->setText(text);
+    m_ErrorTimer = errorTime;
+    m_InfoText->setColor(1, 1, 0, 1);
+}
+void HUD::setErrorText(const string& text, const float errorTime) {
+    m_InfoText->setText(text);
+    m_ErrorTimer = errorTime;
+    m_InfoText->setColor(1,0,0,1);
 }
 
 void HUD::onResize(const uint& width, const uint& height) {
-    m_ButtonHost->setPosition(width / 2, height / 2);
-    m_ButtonJoin->setPosition(width / 2, (height / 2) - 125);
+    m_ButtonHost->setPosition(width / 2, 275);
+    m_ButtonJoin->setPosition(width / 2, 155);
 
     m_Back->setPosition(100, 50);
     m_Next->setPosition(width - 100, 50);
 
-    m_ServerIp->setPosition(width / 2, (height / 2) - 60 - 170);
-    m_ServerPort->setPosition(width / 2, (height / 2) - 170);
-    m_UserName->setPosition(width / 2, (height / 2) + 60 - 170);
+    m_ServerIp->setPosition(width / 2, 115);
+    m_ServerPort->setPosition(width / 2, 275);
+    m_UserName->setPosition(width / 2, 195);
+
+    m_InfoText->setPosition(width / 2 , 65);
+
+    m_ServerLobbyChatWindow->setPosition(50, 140 + 300);
 }
 
 int _count = 0;
@@ -252,10 +278,14 @@ void HUD::update_game(const double& dt) {
     }
 }
 void HUD::update_main_menu(const double& dt) {
+    m_Font->renderText(epriv::Core::m_Engine->m_DebugManager.reportDebug(), glm::vec2(50), glm::vec4(1.0), 0);
+
     m_ButtonHost->update(dt);
     m_ButtonJoin->update(dt);
 }
 void HUD::update_host_server_lobby_and_ship(const double& dt) {
+    m_ServerLobbyChatWindow->update(dt);
+
     m_Back->update(dt);
     m_Next->update(dt);
 }
@@ -275,6 +305,8 @@ void HUD::update_join_server_port_and_name_and_ip(const double& dt) {
     m_UserName->update(dt);
 }
 void HUD::update_join_server_server_lobby(const double& dt) {
+    m_ServerLobbyChatWindow->update(dt);
+
     m_Back->update(dt);
     m_Next->update(dt);
 }
@@ -377,6 +409,8 @@ void HUD::render_main_menu() {
     m_ButtonJoin->render();
 }
 void HUD::render_host_server_lobby_and_ship() {
+    m_ServerLobbyChatWindow->render();
+
     m_Back->render();
     m_Next->render();
 }
@@ -396,10 +430,11 @@ void HUD::render_join_server_port_and_name_and_ip() {
     m_UserName->render();
 }
 void HUD::render_join_server_server_lobby() {
+    m_ServerLobbyChatWindow->render();
+
     m_Back->render();
     m_Next->render();
 }
-
 void HUD::update(const double& dt) {
     switch (m_GameState) {
         case GameState::Main_Menu: {
@@ -421,7 +456,7 @@ void HUD::update(const double& dt) {
     if (m_ErrorTimer > 0) {
         m_ErrorTimer -= static_cast<float>(dt);
         if (m_ErrorTimer < 0) {
-            m_ErrorText = "";
+            setErrorText("", 0);
             m_ErrorTimer = 0.0f;
         }
     }
@@ -444,7 +479,5 @@ void HUD::render() {
             break;
         }
     }
-    if (m_ErrorText != "") {
-        m_Font->renderText(m_ErrorText, glm::vec2(Resources::getWindowSize().x / 2, 65), glm::vec4(1, 0, 0, 1), 0, glm::vec2(1.0f), 0.1f, TextAlignment::Center);
-    }
+    m_InfoText->render();
 }

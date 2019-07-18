@@ -22,10 +22,14 @@ struct PacketType {enum Type {
     Client_To_Server_Request_Disconnection,
     Client_To_Server_Ship_Physics_Update,
 
+    Client_To_Server_Chat_Message,
+
     Server_To_Client_Send_Basic_Server_Info,
     Server_To_Client_Ship_Physics_Update,
     Server_To_Client_Accept_Connection,
     Server_To_Client_Reject_Connection,
+
+    Server_To_Client_Chat_Message,
 };};
 
 struct IPacket {
@@ -67,8 +71,6 @@ struct PacketPhysicsUpdate: public Packet {
     }
     void print() {}
 };
-
-
 struct PacketClientRequestConnectionToServer : public Packet {
     std::string  shipName;
 
@@ -88,6 +90,26 @@ struct PacketClientRequestConnectionToServer : public Packet {
     }
     bool build(sf::Packet& sfPacket) {
         return (sfPacket << PacketType << data << shipName << mshIndex << mshVersion << mshType << matIndex << matVersion << matType);
+    }
+    void print() {}
+};
+
+
+struct PacketChatMessage : public Packet {
+    std::string  name;
+    float r;
+    float g;
+    float b;
+
+    PacketChatMessage() {
+        name = "";
+        r = g = b = 1.0f;
+    }
+    bool validate(sf::Packet& sfPacket) {
+        return (sfPacket >> PacketType >> data >> name >> r >> g >> b);
+    }
+    bool build(sf::Packet& sfPacket) {
+        return (sfPacket << PacketType << data << name << r << g << b);
     }
     void print() {}
 };

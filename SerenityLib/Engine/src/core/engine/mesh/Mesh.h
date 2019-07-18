@@ -71,7 +71,7 @@ class Mesh final: public BindableResource, public EventObserver{
         void triangulate_component_indices(Engine::epriv::MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags);
         void calculate_radius();
     public:
-        static Mesh *FontPlane, *Plane, *Cube; //loaded in renderer
+        static Mesh *FontPlane, *Plane, *Cube, *Triangle; //loaded in renderer
 
         Mesh();
         Mesh(const std::string& name, const btHeightfieldTerrainShape& heightfield, float threshold);

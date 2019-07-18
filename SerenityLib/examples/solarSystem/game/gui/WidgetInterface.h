@@ -7,8 +7,8 @@
 
 class IWidget {
     public:
-        virtual const float& width() const = 0;
-        virtual const float& height() const = 0;
+        virtual const float width() const = 0;
+        virtual const float height() const = 0;
 
         virtual const bool isMouseOver() const = 0;
 

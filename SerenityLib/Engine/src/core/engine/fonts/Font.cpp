@@ -66,13 +66,24 @@ Font::~Font(){
 
 const float Font::getTextWidth(const string& text) const {
     float ret = 0;
+    float maxWidth = 0;
     for (auto& character : text) {
         if (character != '\0') {
-            const auto& glyph = getGlyphData(character);
-            ret += glyph.xadvance;
+            if (character != '\n') {
+                const auto& glyph = getGlyphData(character);
+                ret += glyph.xadvance;
+            }else{
+                if (ret > maxWidth) {
+                    maxWidth = ret;
+                    ret = 0;
+                }
+            }
         }
     }
-    return ret;
+    if (ret > maxWidth) {
+        maxWidth = ret;
+    }
+    return maxWidth;
 }
 const float Font::getTextHeight(const string& text) const {
     float lineCount = 1;
@@ -81,12 +92,15 @@ const float Font::getTextHeight(const string& text) const {
             ++lineCount;
         }
     }
-    return lineCount * getGlyphData('X').height;
+    auto chosenChar = getGlyphData('X').height + 2;
+    return lineCount * chosenChar;
 }
 const Texture& Font::getGlyphTexture() const {
     return *m_FontTexture; 
 }
 const FontGlyph& Font::getGlyphData(const uchar& character) const {
+    if (!m_FontGlyphs.count(character))
+        return m_FontGlyphs.at('?');
     return m_FontGlyphs.at(character);
 }
 void Font::renderText(const string& t, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const TextAlignment::Type& al){

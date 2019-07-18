@@ -25,6 +25,9 @@ Widget::Widget(const float& x, const float& y, const float& width, const float& 
 Widget::~Widget() {
 
 }
+const glm::vec2& Widget::position() const {
+    return m_Position;
+}
 void* Widget::getUserPointer() const {
     return m_UserPointer;
 }
@@ -32,10 +35,10 @@ void Widget::setUserPointer(void* ptr) {
     m_UserPointer = ptr;
 }
 
-const float& Widget::width() const {
+const float Widget::width() const {
     return m_Width;
 }
-const float& Widget::height() const {
+const float Widget::height() const {
     return m_Height;
 }
 

@@ -198,7 +198,6 @@ void EVENT_TEXT_ENTERED(const uint& unicode){
     Game::onTextEntered(unicode); 
 
     epriv::EventTextEntered e(unicode);
-
     Event ev;
     ev.eventTextEntered = e;
     ev.type = EventType::TextEntered;

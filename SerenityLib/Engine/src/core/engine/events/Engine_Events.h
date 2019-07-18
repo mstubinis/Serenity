@@ -24,6 +24,7 @@ namespace Engine{
 
                 uint                             m_currentKey;
                 uint                             m_previousKey;
+
                 uint                             m_currentButton;
                 uint                             m_previousButton;
 
@@ -53,7 +54,6 @@ namespace Engine{
 
     const KeyboardKey::Key getPressedKey();
     const MouseButton::Button getPressedButton();
-    const std::string& mapKey(const KeyboardKey::Key& key);
 
     //mouse functions
     const bool isMouseButtonDown(const MouseButton::Button);

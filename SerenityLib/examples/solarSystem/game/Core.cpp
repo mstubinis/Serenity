@@ -12,7 +12,6 @@
 using namespace std;
 using namespace Engine;
 
-
 Core::Core() {
     m_HUD               = nullptr;
     m_Server            = nullptr;
@@ -25,13 +24,25 @@ Core::Core() {
     //Resources::getWindow().setIcon(iconPath);
 }
 Core::~Core() {
-    shutdownClient();
-    shutdownServer();
+    if (m_Client) {
+        Packet p;
+        p.PacketType = PacketType::Client_To_Server_Request_Disconnection;
+        const auto status = m_Client->send(p);
+    }
+    SAFE_DELETE(m_Client);
+    SAFE_DELETE(m_Server);
     SAFE_DELETE(m_HUD);
 }
+Server* Core::getServer() {
+    return m_Server;
+}
+Client* Core::getClient() {
+    return m_Client;
+}
+
 void Core::startServer(const unsigned short& port) {
     if (!m_Server) {
-        m_Server = new Server(*this, port);
+        m_Server = new Server(*this, port, false);
         m_Server->startup();
     }
 }
@@ -41,57 +52,38 @@ void Core::shutdownServer() {
         SAFE_DELETE(m_Server);
     }
 }
-
-bool Core::startClient(const unsigned short& port, const std::string& name, const string& ip) {
-    const auto& lamb = [&]() {
-        Packet p;
-        p.PacketType = PacketType::Client_To_Server_Request_Connection;
-        p.data = name;
-        const auto& status = m_Client->send(p);
-        if (status == sf::Socket::Status::Done) {
-            std::cout << "Client: requesting connection to the server..." << std::endl;
-            return true;
-        }else{
-            m_HUD->setErrorText("Connection timed out");
-        }
-        return false;
-    };
+void Core::startClient(const unsigned short& port, const string& name, const string& ip) {
     if (!m_Client) {
         m_Client = new Client(*this, port, ip);
+        m_Client->m_username = name;
     }
-
-    const auto fetchedIP   = m_Client->m_TcpSocket->ip();
-    const auto fetchedPort = m_Client->m_TcpSocket->localPort();
-
-    if (fetchedIP != ip && fetchedPort != port) {
+    if (!m_Client->m_IsCurrentlyConnecting) {
         m_Client->changeConnectionDestination(port, ip);
-        bool am_i_connected = m_Client->connect(6);
-        return lamb();
+        m_Client->m_username = name;
+        auto status = m_Client->connect(10);
     }
-    if (!m_Client->connected()) {
-        m_Client->changeConnectionDestination(port, ip);
-        bool am_i_connected = m_Client->connect(6);
-        return lamb();
-    }
-    if (!m_Client->m_Validated) {
-        return lamb();
-    }
-    return false;
 }
-void Core::shutdownClient() {
+void Core::shutdownClient(const bool& serverShutdownFirst) {
     if (m_Client) {
-        if (m_Client->connected()) {
+        if (!serverShutdownFirst) {
             Packet p;
             p.PacketType = PacketType::Client_To_Server_Request_Disconnection;
             const auto status = m_Client->send(p);
-            if (status == sf::Socket::Status::Done) {
-                std::cout << "Told the server i am quitting" << std::endl;
-            }else {
-                std::cout << "Error: could not tell the server i am quitting" << std::endl;
-            }
         }
+        m_Client->m_TcpSocket->setBlocking(false);
+        m_Client->m_IsCurrentlyConnecting = false;
         m_Client->disconnect();
-        SAFE_DELETE(m_Client);
+    }
+}
+void Core::requestValidation(const string& name) {
+    Packet p;
+    p.PacketType = PacketType::Client_To_Server_Request_Connection;
+    p.data = name;
+    const auto& status = m_Client->send(p);
+    if (status == sf::Socket::Status::Done) {
+        cout << "Client: requesting validation connection to the server..." << endl;
+    }else{
+        m_HUD->setErrorText("Connection timed out");
     }
 }
 void Core::enterMap(const string& mapFile) {
@@ -123,8 +115,6 @@ void Core::update(const double& dt) {
     if (Engine::isKeyDown(KeyboardKey::Escape)) {
         Engine::stop();
     }
-
-
     /*
     if (Engine::isKeyDownOnce(KeyboardKey::Space)) {
         //Engine::pause(!Engine::paused());
@@ -139,12 +129,9 @@ void Core::update(const double& dt) {
         }
     }
     */
-
-
-
     m_HUD->update(dt);
-    epriv::ClientInternalPublicInterface::update(m_Client);
-    epriv::ServerInternalPublicInterface::update(m_Server);
+    if(m_Client) epriv::ClientInternalPublicInterface::update(m_Client);
+    if(m_Server) m_Server->update(m_Server);
 }
 void Core::render() {
     m_HUD->render();

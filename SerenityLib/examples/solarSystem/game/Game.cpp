@@ -4,9 +4,11 @@
 
 #include <unordered_map>
 #include <iostream>
+#include <cstring>
 #include <glm/vec2.hpp>
 
 using namespace Engine;
+using namespace std;
 
 Core* m_Core;
 void Game::cleanup(){

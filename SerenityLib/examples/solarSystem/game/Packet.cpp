@@ -25,6 +25,10 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketPhysicsUpdate(); break;
         }case PacketType::Server_To_Client_Ship_Physics_Update: {
             p = new PacketPhysicsUpdate(); break;
+        }case PacketType::Client_To_Server_Chat_Message: {
+            p = new PacketChatMessage(); break;
+        }case PacketType::Server_To_Client_Chat_Message:{
+            p = new PacketChatMessage(); break;
         }default: {
             break;
         }

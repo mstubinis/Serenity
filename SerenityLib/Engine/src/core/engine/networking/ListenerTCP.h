@@ -14,8 +14,9 @@ namespace Engine {
             private:
                 sf::TcpListener  m_Listener;
                 ushort           m_Port;
+                std::string      m_Ip;
             public:
-                ListenerTCP(const uint port);
+                ListenerTCP(const uint port, const std::string& ip = "");
                 ~ListenerTCP();
 
                 void setBlocking(bool);

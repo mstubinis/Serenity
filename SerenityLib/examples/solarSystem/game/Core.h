@@ -23,8 +23,13 @@ class Core final {
         Core();
         ~Core();
 
-        bool startClient(const unsigned short& port, const std::string& name, const std::string& ip = "127.0.0.1");
-        void shutdownClient();
+        Server* getServer();
+        Client* getClient();
+
+        void startClient(const unsigned short& port, const std::string& name, const std::string& ip = "127.0.0.1");
+        void shutdownClient(const bool& serverShutdownFirst = false);
+
+        void requestValidation(const std::string& name);
 
         void startServer(const unsigned short& port);
         void shutdownServer();

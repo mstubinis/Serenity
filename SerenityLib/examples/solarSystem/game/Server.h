@@ -8,39 +8,32 @@
 
 #include "Client.h"
 
-
 #include <unordered_map>
 #include <queue>
-//#include <thread>
+#include <thread>
 
 struct Packet;
 class  Server;
 class  Core;
-namespace Engine {
-    namespace epriv {
-        struct ServerInternalPublicInterface {
-            static void update(Server*);
-        };
-    };
-};
 
 class Server {
-    friend struct Engine::epriv::ServerInternalPublicInterface;
     private:
-        //std::thread*                            m_thread;
-        std::unordered_map<std::string, Client*>  m_clients;
-        std::queue<std::string>                   m_ClientsToBeDisconnected;
-        Engine::Networking::ListenerTCP*          m_listener;
-        unsigned int                              m_port;
-        bool                                      m_active;
-        Core&                                     m_Core;
+        sf::Mutex                                      m_mutex;
+        std::thread*                                   m_thread_for_listener;
+        std::thread*                                   m_thread_for_disconnecting_clients;
+        std::unordered_map<std::string, std::thread*>  m_threads_for_clients;
+        std::unordered_map<std::string, Client*>       m_clients;
+        std::queue<std::string>                        m_ClientsToBeDisconnected;
+        Engine::Networking::ListenerTCP*               m_listener;
+        unsigned int                                   m_port;
+        bool                                           m_blocking;
+        Core&                                          m_Core;
     public:
-        Server(Core&, const unsigned int& port);
+        Server(Core&, const unsigned int& port, const bool blocking = false, const std::string& ipRestriction = "");
         ~Server();
 
         const bool startup();
-        void shutdown();
-        const bool& isActive() const;
+        void shutdown(const bool destructor = false);
 
         const bool isValidName(const std::string& name) const;
 
@@ -49,17 +42,20 @@ class Server {
         const sf::Socket::Status send_to_client(Client&, const void* data, size_t size);
         const sf::Socket::Status send_to_client(Client&, const void* data, size_t size, size_t& sent);
 
-        const void send_to_all_but_client(Client&, Packet& packet);
-        const void send_to_all_but_client(Client&, sf::Packet& packet);
-        const void send_to_all_but_client(Client&, const void* data, size_t size);
-        const void send_to_all_but_client(Client&, const void* data, size_t size, size_t& sent);
+        void send_to_all_but_client(Client&, Packet& packet);
+        void send_to_all_but_client(Client&, sf::Packet& packet);
+        void send_to_all_but_client(Client&, const void* data, size_t size);
+        void send_to_all_but_client(Client&, const void* data, size_t size, size_t& sent);
 
-        const void send_to_all(Packet& packet);
-        const void send_to_all(sf::Packet& packet);
-        const void send_to_all(const void* data, size_t size);
-        const void send_to_all(const void* data, size_t size, size_t& sent);
+        void send_to_all(Packet& packet);
+        void send_to_all(sf::Packet& packet);
+        void send_to_all(const void* data, size_t size);
+        void send_to_all(const void* data, size_t size, size_t& sent);
 
-        void onReceive();
+        static void update(Server* thisServer);
+        static void updateAcceptNewClients(Server* thisServer);
+        static void updateClient(Server* thisServer, Client* client);
+        static void updateRemoveDisconnectedClients(Server* thisServer);
 };
 
 #endif

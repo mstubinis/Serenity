@@ -11,12 +11,18 @@
 
 class  Font;
 class  Ship;
-class  Button;
-class  TextBox;
 class  Core;
 struct Entity;
+
 class  Client;
 class  Server;
+
+class  Button;
+class  TextBox;
+class  Text;
+class  ScrollFrame;
+class  ServerLobbyChatWindow;
+
 
 struct ButtonHost_OnClick;
 struct ButtonJoin_OnClick;
@@ -32,26 +38,28 @@ class HUD final{
     friend class Client;
     friend class Server;
     private:
-        glm::vec3            m_Color;
-        Handle               m_FontHandle;
-        Font*                m_Font;
-        bool                 m_Active;
-        GameState::State&    m_GameState;
-        Core&                m_Core;
+        glm::vec3                      m_Color;
+        Handle                         m_FontHandle;
+        Font*                          m_Font;
+        bool                           m_Active;
+        GameState::State&              m_GameState;
+        Core&                          m_Core;
 
-        std::string          m_MessageText;
-        std::string          m_ErrorText;
-        float                m_ErrorTimer;
+        std::string                    m_MessageText;
+        float                          m_ErrorTimer;
 
-        Button*              m_ButtonHost;
-        Button*              m_ButtonJoin;
+        Button*                        m_ButtonHost;
+        Button*                        m_ButtonJoin;
 
-        Button*              m_Back;
-        Button*              m_Next;
+        Button*                        m_Back;
+        Button*                        m_Next;
 
-        TextBox*             m_ServerIp;
-        TextBox*             m_UserName;
-        TextBox*             m_ServerPort;
+        TextBox*                       m_ServerIp;
+        TextBox*                       m_UserName;
+        TextBox*                       m_ServerPort;
+        Text*                          m_InfoText;
+
+        ServerLobbyChatWindow*         m_ServerLobbyChatWindow;
 
         void update_game(const double& dt);
         void update_main_menu(const double& dt);
@@ -73,8 +81,9 @@ class HUD final{
 
         void onResize(const uint& width, const uint& height);
 
+        void setGoodText(const std::string& error, const float errorTime = 3.0f);
         void setErrorText(const std::string& error, const float errorTime = 3.0f);
-        const std::string& getErrorText() const;
+        void setNormalText(const std::string& error, const float errorTime = 3.0f);
 
         void update(const double& dt);
         void render();

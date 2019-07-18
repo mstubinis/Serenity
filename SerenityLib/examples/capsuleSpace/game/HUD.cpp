@@ -7,7 +7,7 @@
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/Engine_Window.h>
 #include <core/engine/Engine_Math.h>
-#include <core/Font.h>
+#include <core/engine/fonts/Font.h>
 #include <core/engine/textures/Texture.h>
 #include <core/Scene.h>
 #include <core/Camera.h>
