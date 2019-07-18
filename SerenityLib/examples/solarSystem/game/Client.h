@@ -25,12 +25,12 @@ class Client{
     friend class  Core;
     friend struct Engine::epriv::ClientInternalPublicInterface;
     private:
-        std::thread*                   m_InitialConnectionThread;
-        Engine::Networking::SocketTCP* m_TcpSocket;
-        std::string                    m_username;
-        Core&                          m_Core;
-        bool                           m_Validated;
-        bool                           m_IsCurrentlyConnecting;
+        std::future<sf::Socket::Status>*      m_InitialConnectionThread;
+        Engine::Networking::SocketTCP*        m_TcpSocket;
+        std::string                           m_username;
+        Core&                                 m_Core;
+        bool                                  m_Validated;
+        bool                                  m_IsCurrentlyConnecting;
     public:
         Client(Core&, sf::TcpSocket*);
         Client(Core&, const ushort& port, const std::string& ipAddress);

@@ -36,13 +36,14 @@ struct VertexData final{
             buffers.push_back(std::make_unique<VertexBufferObject>());
         if (attributeIndex >= data.size())
             return;
-        dataSizes[attributeIndex] = _data.size();
         auto& attributeVector = data[attributeIndex];
         free(attributeVector);
-        const auto& totalSize = (_data.size() * sizeof(T)) + 1;
+        const auto& sizeofT = sizeof(T);
+        const auto& totalSize = (_data.size() * sizeofT);
         attributeVector = (char*)malloc(totalSize);
         //                dst            source
         std::memmove(attributeVector, _data.data(), totalSize);
+        dataSizes[attributeIndex] = _data.size();
         if (addToGPU) {
             if (format.interleavingType == VertexAttributeLayout::Interleaved) {
                 sendDataToGPU(orphan,-1);

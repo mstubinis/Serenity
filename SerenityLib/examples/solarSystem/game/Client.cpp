@@ -32,12 +32,12 @@ Client::Client(Core& core, const ushort& port, const string& ipAddress) : m_Core
     m_IsCurrentlyConnecting = false;
 }
 Client::~Client() {
-    SAFE_DELETE_THREAD(m_InitialConnectionThread);
+    SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     SAFE_DELETE(m_TcpSocket);
 }
 void Client::changeConnectionDestination(const ushort& port, const string& ipAddress) {
     m_IsCurrentlyConnecting = false;
-    SAFE_DELETE_THREAD(m_InitialConnectionThread);
+    SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     SAFE_DELETE(m_TcpSocket);
     m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
 }
@@ -45,7 +45,7 @@ const sf::Socket::Status Client::connect(const ushort& timeout) {
     if (m_TcpSocket->isBlocking()) {
         auto conn = [&](Client* client, const ushort timeout) {
             client->m_IsCurrentlyConnecting = true;
-            m_Core.m_HUD->setNormalText("Connecting...", 99999);
+            m_Core.m_HUD->setNormalText("Connecting...", static_cast<float>(timeout) + 2.2f);
             const auto status = client->m_TcpSocket->connect(timeout);
             if (status == sf::Socket::Status::Done) {
                 m_Core.m_HUD->setGoodText("Connected!", 2);
@@ -60,8 +60,8 @@ const sf::Socket::Status Client::connect(const ushort& timeout) {
             return status;
         };
         //return conn(this, timeout);
-        SAFE_DELETE_THREAD(m_InitialConnectionThread);
-        m_InitialConnectionThread = new std::thread(conn, this, timeout);
+        SAFE_DELETE_FUTURE(m_InitialConnectionThread);
+        m_InitialConnectionThread = new std::future<sf::Socket::Status>(std::move(std::async(std::launch::async, conn, this, timeout)));
     }else{
         const auto status = m_TcpSocket->connect(timeout);
         if (status == sf::Socket::Status::Done) {

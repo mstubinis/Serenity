@@ -67,7 +67,10 @@ void VertexData::setDataIndices(vector<ushort>& _data, const bool addToGPU, cons
 }
 void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
     //Interleaved format makes use of attributeIndex = -1
-
+    /*
+    Interleaved,    // | pos uv norm | pos uv norm | pos uv norm    | ... etc ... 
+    NonInterleaved, // | pos pos pos | uv  uv  uv  | norm norm norm | ... etc ... 
+    */
     auto& _vBuffer = *buffers[0];
     _vBuffer.generate(); _vBuffer.bind();
 
@@ -78,35 +81,39 @@ void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
         size = (format.attributes[0].stride * dataSizes[0]);
         buffer = (char*)malloc(size);
         for (size_t i = 0; i < dataSizes[0]; ++i) {
-            for (size_t j = 0; j < data.size(); ++j) {
-                const auto& sizeofT = format.attributes[j].typeSize;
-                //                dst                      source
-                std::memmove(&buffer[accumulator], &(data[j])[i * sizeofT], sizeofT);
+            for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
+                const auto& sizeofT = format.attributes[attribute_index].typeSize;
+                auto destination = &buffer[accumulator];
+                auto at = i * sizeofT;
+                auto source = &(data[attribute_index])[at];
+                std::memmove(destination, source, sizeofT);
                 accumulator += sizeofT;
             }
         }
         !orphan ? _vBuffer.setData(size, buffer, BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(buffer);
     }else{
         if (attributeIndex == -1) {
-            for (size_t i = 0; i < data.size(); ++i)
-                size += format.attributes[i].typeSize * dataSizes[i];
+            for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index)
+                size += format.attributes[attribute_index].typeSize * dataSizes[attribute_index];
             buffer = (char*)malloc(size);
-            for (size_t i = 0; i < data.size(); ++i) {
-                const auto& blockSize = dataSizes[i] * format.attributes[i].typeSize;
-                //                   dst               source
-                std::memmove(&buffer[accumulator], &(data[i])[0], blockSize);
+            for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
+                const auto& blockSize = dataSizes[attribute_index] * format.attributes[attribute_index].typeSize;
+                auto destination = &buffer[accumulator];
+                auto source = &(data[attribute_index])[0];
+                std::memmove(destination, source, blockSize);
                 accumulator += blockSize;
             }
             !orphan ? _vBuffer.setData(size, buffer, BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(buffer);
         }else{
             size += (format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex]);
             buffer = (char*)malloc(size);
-            for (size_t i = 0; i < data.size(); ++i) {
-                if (i != attributeIndex) {
-                    accumulator += dataSizes[i] * format.attributes[i].typeSize;
+            for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
+                if (attribute_index != attributeIndex) {
+                    accumulator += dataSizes[attribute_index] * format.attributes[attribute_index].typeSize;
                 }else{
-                    //              dst          source
-                    std::memmove(&buffer[0], &(data[i])[0], size);
+                    auto destination = &buffer[0];
+                    auto source = &(data[attribute_index])[0];
+                    std::memmove(destination, source, size);
                     break;
                 }
             }
