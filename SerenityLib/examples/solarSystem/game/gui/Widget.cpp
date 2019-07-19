@@ -8,7 +8,7 @@
 using namespace Engine;
 
 Widget::Widget(const glm::vec2& position, const float& width, const float& height) {
-    m_Alignment = Alignment::Center;
+    m_Alignment = Alignment::TopLeft;
     setPosition(position);
     m_Width = width;
     m_Height = height;
@@ -16,7 +16,7 @@ Widget::Widget(const glm::vec2& position, const float& width, const float& heigh
     m_UserPointer = nullptr;
 }
 Widget::Widget(const float& x, const float& y, const float& width, const float& height) {
-    m_Alignment = Alignment::Center;
+    m_Alignment = Alignment::TopLeft;
     setPosition(x,y);
     m_Width = width;
     m_Height = height;

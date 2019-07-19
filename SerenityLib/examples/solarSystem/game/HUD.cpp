@@ -204,7 +204,7 @@ HUD::HUD(GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
     m_ServerLobbyChatWindow = new ServerLobbyChatWindow(*m_Font, 50, 140 + 300);
     m_ServerLobbyChatWindow->setColor(1, 1, 0, 1);
 
-    m_ServerLobbyConnectedPlayersWindow = new ServerLobbyConnectedPlayersWindow(*m_Font, 50 + m_ServerLobbyChatWindow->getWindowFrame().width() - 2, 140 + 300);
+    m_ServerLobbyConnectedPlayersWindow = new ServerLobbyConnectedPlayersWindow(*m_Font, 50 + m_ServerLobbyChatWindow->getWindowFrame().width() + 2, 140 + 300);
     m_ServerLobbyConnectedPlayersWindow->setColor(1, 1, 0, 1);
 }
 HUD::~HUD() {
@@ -251,7 +251,7 @@ void HUD::onResize(const uint& width, const uint& height) {
     m_InfoText->setPosition(width / 2 , 65);
 
     m_ServerLobbyChatWindow->setPosition(50, 140 + 300);
-    m_ServerLobbyConnectedPlayersWindow->setPosition(50 + m_ServerLobbyChatWindow->getWindowFrame().width() - 2, 140 + 300);
+    m_ServerLobbyConnectedPlayersWindow->setPosition(50 + m_ServerLobbyChatWindow->getWindowFrame().width() + 2, 140 + 300);
 }
 
 int _count = 0;

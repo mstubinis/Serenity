@@ -160,7 +160,7 @@ namespace Renderer{
     void renderTexture(const Texture&, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const Alignment::Type& = Alignment::Type::Center);
     void renderText(const std::string& text, const Font&, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const TextAlignment::Type& = TextAlignment::Left);
     void renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float& w, const float& h, const float& angle, const float& depth, const Alignment::Type& = Alignment::Type::Center);
-    void renderBorder(const float& borderSize, const glm::vec2& position, const glm::vec4& color, const float& width, const float& height, const float& angle, const float& depth);
+    void renderBorder(const float& borderSize, const glm::vec2& position, const glm::vec4& color, const float& width, const float& height, const float& angle, const float& depth, const Alignment::Type& = Alignment::Type::Center);
     void renderTriangle(const glm::vec2& position, const glm::vec4& color, const float& angle, const float& width, const float& height, const float& depth, const Alignment::Type& = Alignment::Type::Center);
 
     void scissor(const int& x, const int& y, const uint& width, const uint& height);

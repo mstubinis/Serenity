@@ -2462,6 +2462,43 @@ inline const GLint& Renderer::getUniformLocUnsafe(const char* location) {
 
 
 //a collection of 2d rendering api functors
+void AlignmentOffset(const Alignment::Type& align,float& x, float& y, const float& width, const float& height) {
+    switch (align) {
+        case Alignment::TopLeft: {
+            x += width / 2;
+            y -= height / 2;
+            break;
+        }case Alignment::TopCenter: {
+            y -= height / 2;
+            break;
+        }case Alignment::TopRight: {
+            x -= width / 2;
+            y -= height / 2;
+            break;
+        }case Alignment::Left: {
+            x += width / 2;
+            break;
+        }case Alignment::Center: {
+            break;
+        }case Alignment::Right: {
+            x -= width / 2;
+            break;
+        }case Alignment::BottomLeft: {
+            x += width / 2;
+            y += height / 2;
+            break;
+        }case Alignment::BottomCenter: {
+            y += height / 2;
+            break;
+        }case Alignment::BottomRight: {
+            x -= width / 2;
+            y += height / 2;
+            break;
+        }default: {
+            break;
+        }
+    }
+}
 struct RenderingAPI2D final {
     static void Render2DText(const string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const TextAlignment::Type& alignType) { 
         auto& impl = *renderManagerImpl;
@@ -2508,8 +2545,8 @@ struct RenderingAPI2D final {
 
         float translationX = position.x;
         float translationY = position.y;
-        float totalSizeX = scale.x;
-        float totalSizeY = scale.y;
+        float totalSizeX   = scale.x;
+        float totalSizeY   = scale.y;
         if (texture) {
             totalSizeX *= texture->width();
             totalSizeY *= texture->height();
@@ -2520,43 +2557,7 @@ struct RenderingAPI2D final {
             sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
             sendUniform1("DiffuseTextureEnabled", 0);
         }
-
-        switch (align) {
-            case Alignment::TopLeft: {
-                translationX += totalSizeX / 2;
-                translationY -= totalSizeY / 2;
-                break;
-            }case Alignment::TopCenter: {
-                translationY -= totalSizeY / 2;
-                break;
-            }case Alignment::TopRight: {
-                translationX -= totalSizeX / 2;
-                translationY -= totalSizeY / 2;
-                break;
-            }case Alignment::Left: {
-                translationX -= totalSizeX / 2;
-                break;
-            }case Alignment::Center: {
-                break;
-            }case Alignment::Right: {
-                translationX += totalSizeX / 2;
-                break;
-            }case Alignment::BottomLeft: {
-                translationX += totalSizeX / 2;
-                translationY += totalSizeY / 2;
-                break;
-            }case Alignment::BottomCenter: {
-                translationY += totalSizeY / 2;
-                break;
-            }case Alignment::BottomRight: {
-                translationX -= totalSizeX / 2;
-                translationY += totalSizeY / 2;
-                break;
-            }default: {
-                break;
-            }
-        }
-
+        AlignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
 
         m = glm::translate(m, glm::vec3(translationX, translationY, -0.001f - depth));
         m = glm::rotate(m, Math::toRadians(angle), impl.m_RotationAxis2D);
@@ -2576,41 +2577,8 @@ struct RenderingAPI2D final {
 
         float translationX = position.x;
         float translationY = position.y;
-        switch (align) {
-            case Alignment::TopLeft: {
-                translationX += width / 2;
-                translationY -= height / 2;
-                break;
-            }case Alignment::TopCenter: {
-                translationY -= height / 2;
-                break;
-            }case Alignment::TopRight: {
-                translationX -= width / 2;
-                translationY -= height / 2;
-                break;
-            }case Alignment::Left: {
-                translationX -= width / 2;
-                break;
-            }case Alignment::Center: {
-                break;
-            }case Alignment::Right: {
-                translationX += width / 2;
-                break;
-            }case Alignment::BottomLeft: {
-                translationX += width / 2;
-                translationY += height / 2;
-                break;
-            }case Alignment::BottomCenter: {
-                translationY += height / 2;
-                break;
-            }case Alignment::BottomRight: {
-                translationX -= width / 2;
-                translationY += height / 2;
-                break;
-            }default: {
-                break;
-            }
-        }
+
+        AlignmentOffset(align, translationX, translationY, width, height);
 
         glm::mat4 m = impl.m_IdentityMat4;
         m = glm::translate(m, glm::vec3(translationX, translationY, -0.001f - depth));
@@ -2640,18 +2608,24 @@ void Renderer::renderTexture(const Texture& tex, const glm::vec2& p, const glm::
     boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DTexture, &tex, p, c, a, s, d, align);
     renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
 }
-void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const TextAlignment::Type& al) {
-    boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DText, t, boost::ref(fnt), p, c, a, s, d, al);
+void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const TextAlignment::Type& align) {
+    boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DText, t, boost::ref(fnt), p, c, a, s, d, align);
     renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
 }
-void Renderer::renderBorder(const float& borderSize, const glm::vec2& pos, const glm::vec4& col, const float& w, const float& h, const float& angle, const float& depth) {
-    const float& halfBorder = borderSize / 2.0f;
+void Renderer::renderBorder(const float& borderSize, const glm::vec2& pos, const glm::vec4& col, const float& w, const float& h, const float& angle, const float& depth, const Alignment::Type& align) {
+    const float& doubleBorder = borderSize * 2.0f;
     const float& halfWidth = w / 2.0f;
     const float& halfHeight = h / 2.0f;
-    Renderer::renderRectangle(pos - glm::vec2(halfWidth - halfBorder, 0), col, borderSize, h  - borderSize, angle, depth);
-    Renderer::renderRectangle(pos + glm::vec2(halfWidth - halfBorder, 0), col, borderSize, h  - borderSize, angle, depth);
-    Renderer::renderRectangle(pos - glm::vec2(0, halfHeight - borderSize), col, w  - borderSize, borderSize, angle, depth);
-    Renderer::renderRectangle(pos + glm::vec2(0, halfHeight - borderSize), col, w  - borderSize, borderSize, angle, depth);
+
+    float translationX = pos.x;
+    float translationY = pos.y;
+    AlignmentOffset(align, translationX, translationY, w, h);
+    glm::vec2 newPos(translationX, translationY);
+
+    Renderer::renderRectangle(newPos - glm::vec2(halfWidth,0), col, borderSize, h + doubleBorder, angle, depth,Alignment::Right);
+    Renderer::renderRectangle(newPos + glm::vec2(halfWidth, 0), col, borderSize, h + doubleBorder, angle, depth,Alignment::Left);
+    Renderer::renderRectangle(newPos - glm::vec2(0, halfHeight), col, w, borderSize, angle, depth,Alignment::TopCenter);
+    Renderer::renderRectangle(newPos + glm::vec2(0, halfHeight), col, w, borderSize, angle, depth,Alignment::BottomCenter);
 }
 void Renderer::scissor(const int& x, const int& y, const uint& width, const uint& height) {
     boost_func f = boost::bind<void>(&RenderingAPI2D::GLScissor, x, y, width, height);

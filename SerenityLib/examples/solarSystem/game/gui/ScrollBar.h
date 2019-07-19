@@ -22,6 +22,7 @@ class ScrollBar final : public Widget {
         float               m_DragSnapshot;
         glm::vec4           m_ScrollBarColor;
 
+        void internalUpdateScrollbarPosition();
     public:
         ScrollBar(const float& x, const float& y, const float& w, const float& h, const ScrollBarType::Type& type = ScrollBarType::Type::Vertical);
         ~ScrollBar();

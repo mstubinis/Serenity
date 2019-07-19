@@ -10,8 +10,8 @@ using namespace Engine;
 using namespace std;
 
 ScrollFrame::ScrollFrame(const float& x, const float& y, const float& w, const float& h):Widget(x,y,w,h) {
-    m_ScrollBar = new ScrollBar(x + w, y, 20, h);
     m_BorderSize = 1;
+    m_ScrollBar = new ScrollBar(x + w + m_BorderSize, y, 20, h);
     m_ContentPadding = 10.0f;
     m_ContentHeight = 0.0f;
 }
@@ -103,8 +103,7 @@ void ScrollFrame::update(const double& dt) {
     if (m_MouseIsOver || m_ScrollBar->isMouseOver()) {
         const auto& delta = Engine::getMouseWheelDelta();
         if (delta != 0.0) {
-            m_ScrollBar->scroll(static_cast<float>(delta) * 0.3f);
-
+            m_ScrollBar->scroll(static_cast<float>(delta) * 0.2f);
         }
     }
 
@@ -112,17 +111,13 @@ void ScrollFrame::update(const double& dt) {
 void ScrollFrame::render() {
     m_ScrollBar->render();
 
-    const float& halfWidth = m_Width / 2;
-    const float& halfHeight = m_Height / 2;
-    //const float& halfBorderSize = static_cast<float>(m_BorderSize) / 2.0f;
+    Renderer::renderBorder(m_BorderSize, m_Position, m_Color, m_Width, m_Height, 0, 0.008f, m_Alignment);
 
-    Renderer::renderBorder(m_BorderSize, glm::vec2(m_Position.x + halfWidth + m_BorderSize, m_Position.y - halfHeight), m_Color, m_Width, m_Height, 0, 0.008f);
+    Renderer::scissor(m_Position.x, m_Position.y - m_Height, m_Width, m_Height);
 
-    Renderer::scissor(m_Position.x, m_Position.y - (m_Height - m_BorderSize), m_Width, m_Height - m_BorderSize - 1);
-
-    //scroll bar area background
+    //content background
     float scrollOffset = m_ScrollBar->getSliderPosition() * (m_ContentHeight / (m_Height - (m_ScrollBar->width() * 2)));
-    Renderer::renderRectangle(glm::vec2(m_Position.x + halfWidth + m_BorderSize, m_Position.y  - scrollOffset - (m_ContentHeight / 2)), glm::vec4(0.3f), m_Width, m_ContentHeight, 0, 0.009f);
+    Renderer::renderRectangle(glm::vec2(m_Position.x, m_Position.y - scrollOffset), glm::vec4(0.3f), m_Width, m_ContentHeight, 0, 0.009f, m_Alignment);
    
     for (auto& widget : m_Content) {
         widget->render();
