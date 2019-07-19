@@ -78,9 +78,6 @@
     <ClInclude Include="game\gui\Widget.h">
       <Filter>Header Files\Game\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="game\gui\WidgetIncludes.h">
-      <Filter>Header Files\Game\GUI</Filter>
-    </ClInclude>
     <ClInclude Include="game\gui\Button.h">
       <Filter>Header Files\Game\GUI</Filter>
     </ClInclude>
@@ -97,6 +94,9 @@
       <Filter>Header Files\Game\GUI</Filter>
     </ClInclude>
     <ClInclude Include="game\gui\specifics\ServerLobbyChatWindow.h">
+      <Filter>Header Files\Game\GUI\Specifics</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.h">
       <Filter>Header Files\Game\GUI\Specifics</Filter>
     </ClInclude>
   </ItemGroup>
@@ -159,6 +159,9 @@
       <Filter>Source Files\Game\GUI</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\specifics\ServerLobbyChatWindow.cpp">
+      <Filter>Source Files\Game\GUI\Specifics</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.cpp">
       <Filter>Source Files\Game\GUI\Specifics</Filter>
     </ClCompile>
   </ItemGroup>

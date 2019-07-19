@@ -5,12 +5,13 @@
 #include "gui/Button.h"
 #include "gui/Text.h"
 #include "gui/specifics/ServerLobbyChatWindow.h"
+#include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
 
 #include "SolarSystem.h"
 #include "Ship.h"
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/Engine_Utils.h>
-#include <core/engine/Engine_Math.h>
+#include <core/engine/math/Engine_Math.h>
 
 #include <iostream>
 
@@ -164,40 +165,94 @@ void Client::onReceive() {
                 }
             }
             */
-
+            HUD& hud = *m_Core.m_HUD;
             switch (p.PacketType) {
                 case PacketType::Server_To_Client_Chat_Message: {
                     PacketChatMessage& pI = *static_cast<PacketChatMessage*>(pp);
-                    HUD& hud = *m_Core.m_HUD;
                     auto message = pI.name + ": " + pI.data;
 
                     Text* text = new Text(0, 0, *hud.m_Font, message);
                     text->setColor(1, 1, 0, 1);
-                    hud.m_ServerLobbyChatWindow->addContent(message, text);
+                    text->setTextScale(0.62f, 0.62f);
+                    hud.m_ServerLobbyChatWindow->addContent(text);
                     break;
-                }case PacketType::Server_To_Client_Accept_Connection: {
-                    //std::cout << "Client: Server_To_Client_Accept_Connection: Received" << std::endl;
+                
+                }
+                case PacketType::Server_To_Client_Client_Joined_Server: {
+                    PacketChatMessage& pI = *static_cast<PacketChatMessage*>(pp);
+                    auto message = pI.name + ": Has joined the server";
+
+
+                    Text* text = new Text(0, 0, *hud.m_Font, pI.name);
+                    text->setColor(1, 1, 0, 1);
+                    text->setTextScale(0.62f, 0.62f);
+                    hud.m_ServerLobbyConnectedPlayersWindow->addContent(text);
+
+                    Text* text1 = new Text(0, 0, *hud.m_Font, message);
+                    text1->setColor(0.8f, 1, 0.2f, 1);
+                    text1->setTextScale(0.62f, 0.62f);
+                    hud.m_ServerLobbyChatWindow->addContent(text1);
+                    break;
+                }
+                case PacketType::Server_To_Client_Client_Left_Server:{
+                    PacketChatMessage& pI = *static_cast<PacketChatMessage*>(pp);
+                    auto message = pI.name + ": Has left the server";
+
+                    Text* text = new Text(0, 0, *hud.m_Font, pI.name);
+                    text->setColor(1, 1, 0, 1);
+                    text->setTextScale(0.62f, 0.62f);
+                    hud.m_ServerLobbyConnectedPlayersWindow->removeContent(pI.name);
+
+                    Text* text1 = new Text(0, 0, *hud.m_Font, message);
+                    text1->setColor(0.907f, 0.341f, 0.341f, 1.0f);
+                    text1->setTextScale(0.62f, 0.62f);
+                    hud.m_ServerLobbyChatWindow->addContent(text1);
+                    break;
+                }
+                case PacketType::Server_To_Client_Accept_Connection: {
                     m_Validated = true;
                     if (m_Core.m_GameState != GameState::Host_Server_Lobby_And_Ship && m_Core.m_GameState == GameState::Host_Server_Port_And_Name_And_Map) {
                         m_Core.m_GameState = GameState::Host_Server_Lobby_And_Ship;
-                        m_Core.m_HUD->m_Next->setText("Enter Game");
+                        hud.m_Next->setText("Enter Game");
                     }else if (m_Core.m_GameState != GameState::Join_Server_Server_Lobby && m_Core.m_GameState == GameState::Join_Server_Port_And_Name_And_IP) {
                         m_Core.m_GameState = GameState::Join_Server_Server_Lobby;
-                        m_Core.m_HUD->m_Next->setText("Enter Game");
+                        hud.m_Next->setText("Enter Game");
+                    }
+                    hud.m_ServerLobbyConnectedPlayersWindow->clear();
+                    hud.m_ServerLobbyChatWindow->clear();
+                    stringstream ss(pp->data);
+                    vector<string> result;
+                    while (ss.good()){
+                        string substr;
+                        getline(ss, substr, ',');
+                        result.push_back(substr);
+                    }
+                    if (result.size() == 0 && !pp->data.empty()) {
+                        result.push_back(pp->data);
+                    }
+                    //result is a vector of connected players
+                    for (auto& _name : result) {
+                        if (!_name.empty()) {
+                            Text* text = new Text(0, 0, *hud.m_Font, _name);
+                            text->setColor(1, 1, 0, 1);
+                            text->setTextScale(0.62f, 0.62f);
+                            hud.m_ServerLobbyConnectedPlayersWindow->addContent(text);
+                        }
                     }
                     break;
                 }case PacketType::Server_To_Client_Reject_Connection: {
                     m_Validated = false;
-                    //std::cout << "Client: Server_To_Client_Reject_Connection: Received" << std::endl;
-                    m_Core.m_HUD->setErrorText("Someone has already chosen that name");
+                    hud.setErrorText("Someone has already chosen that name");
                     break;
                 }case PacketType::Server_Shutdown: {
                     m_Validated = false;
-                    //std::cout << "Client: Server_Shutdown: Received" << std::endl;
                     m_Core.shutdownClient(true);
-                    m_Core.m_HUD->setErrorText("Disconnected from the server",600);
+                    hud.setErrorText("Disconnected from the server",600);
                     m_Core.m_GameState = GameState::Main_Menu;
-                    m_Core.m_HUD->m_Next->setText("Next");
+                    hud.m_Next->setText("Next");
+
+                    hud.m_ServerLobbyChatWindow->clear();
+                    hud.m_ServerLobbyConnectedPlayersWindow->clear();
                     break;
                 }default: {
                     break;

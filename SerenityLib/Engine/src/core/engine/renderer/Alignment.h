@@ -1,8 +1,7 @@
 #pragma once
-#ifndef GAME_WIDGET_INCLUDES_H
-#define GAME_WIDGET_INCLUDES_H
-
-struct WidgetAlignment final {enum Type {
+#ifndef ENGINE_RENDERER_ALIGNMENT_H
+#define ENGINE_RENDERER_ALIGNMENT_H
+struct Alignment final {enum Type {
     TopLeft,
     TopCenter,
     TopRight,
@@ -13,6 +12,4 @@ struct WidgetAlignment final {enum Type {
     BottomCenter,
     BottomRight,
 };};
-
-
 #endif

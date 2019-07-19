@@ -17,6 +17,8 @@ class TextBox : public Button, public EventObserver {
         unsigned short            m_MaxCharacters;
         std::string               m_Label;
         boost::function<void()>   m_OnEnter;
+
+        void internalUpdateSize();
     public:
         TextBox(const std::string& label, const Font& font, const unsigned short& maxCharacters, const float& x, const float& y);
         TextBox(const std::string& label, const Font& font, const unsigned short& maxCharacters, const glm::vec2& position);

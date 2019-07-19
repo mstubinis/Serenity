@@ -158,7 +158,8 @@ void render(){
 void EVENT_RESIZE(const uint& w, const uint& h, const bool& saveSize){
     epriv::Core::m_Engine->m_RenderManager._resize(w,h);
 
-    if(saveSize) Engine::Resources::getWindow().setSize(w,h);
+    if(saveSize) 
+        Resources::getWindow().setSize(w,h);
     Game::onResize(w,h);
     //resize cameras here
 

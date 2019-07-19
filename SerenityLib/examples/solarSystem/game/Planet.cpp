@@ -4,7 +4,7 @@
 
 #include <core/engine/Engine.h>
 #include <core/engine/renderer/GLStateMachine.h>
-#include <core/engine/Engine_Math.h>
+#include <core/engine/math/Engine_Math.h>
 #include <core/engine/lights/Lights.h>
 #include <core/ShaderProgram.h>
 #include <core/engine/mesh/Mesh.h>

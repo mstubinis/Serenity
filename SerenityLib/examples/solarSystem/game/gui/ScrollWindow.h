@@ -4,6 +4,7 @@
 
 #include "Widget.h"
 #include <unordered_map>
+#include <vector>
 
 class ScrollBar;
 class Font;
@@ -14,20 +15,22 @@ class ScrollFrame: public Widget {
         float                                     m_BorderSize;
         float                                     m_ContentPadding;
         float                                     m_ContentHeight;
-        std::unordered_map<std::string, Widget*>  m_Content;
-
-        void internalAddContent();
-
+        std::vector<Widget*>                      m_Content;
     public:
         ScrollFrame(const float& x, const float& y, const float& w, const float& h);
         ~ScrollFrame();
 
         const float contentHeight() const;
 
-        void addContent(const std::string& key, Widget* widget);
-        void removeContent(const std::string& key);
+        void addContent(Widget* widget);
 
         void setBorderSize(const float);
+
+        void internalAddContent();
+        std::vector<Widget*>& content();
+
+        const float width() const;
+        const float height() const;
 
         void setColor(const float& r, const float& g, const float& b, const float& a);
         void setColor(const glm::vec4& color);

@@ -23,8 +23,7 @@ TextBox::TextBox(const string& label, const Font& font, const unsigned short& ma
     m_Label = label;
     m_MaxCharacters = maxCharacters;
 
-    m_Width = (font.getTextWidth("X") * maxCharacters) + 20;
-    m_Height = font.getTextHeight("X") + 20;
+    internalUpdateSize();
 
     setOnClickFunctor(OnClick());
     setOnEnterFunctor(OnEnter());
@@ -38,16 +37,21 @@ TextBox::TextBox(const string& label, const Font& font, const unsigned short& ma
     m_Label = label;
     m_MaxCharacters = maxCharacters;
 
-    m_Width = (font.getTextWidth("X") * maxCharacters) + 20;
-    m_Height = font.getTextHeight("X") + 20;
+    internalUpdateSize();
 
     setOnClickFunctor(OnClick());
     setOnEnterFunctor(OnEnter());
     m_TextAlignment = TextAlignment::Left;
     registerEvent(EventType::TextEntered);
 }
+
 TextBox::~TextBox() {
     unregisterEvent(EventType::TextEntered);
+}
+
+void TextBox::internalUpdateSize() {
+    m_Width = ((m_Font->getTextWidth("X") * m_MaxCharacters) + 20) * m_TextScale.x;
+    m_Height = (m_Font->getTextHeight("X") + 20) * m_TextScale.y;
 }
 
 const string& TextBox::getLabel() const {
@@ -62,9 +66,13 @@ void TextBox::setLabel(const std::string& label) {
 void TextBox::setTextScale(const float& x, const float& y) {
     m_TextScale.x = x;
     m_TextScale.y = y;
+
+    internalUpdateSize();
 }
 void TextBox::setTextScale(const glm::vec2& scale) {
     m_TextScale = scale;
+
+    internalUpdateSize();
 }
 void TextBox::setText(const string& text) {
     if (text.size() > m_MaxCharacters)
@@ -119,14 +127,14 @@ void TextBox::render() {
     Button::render();
 
     const auto finalLabelString = m_Label + ": ";
-    const auto lineWidth = m_Font->getTextWidth(finalLabelString) * m_TextScale.x;
     const auto lineHeight = m_Font->getTextHeight(finalLabelString) * m_TextScale.y;
-    const auto& pos = glm::vec2(m_Position.x - (m_Width/2) - lineWidth - 4, m_Position.y + lineHeight);
 
-    m_Font->renderText(finalLabelString, pos, m_TextColor, 0, glm::vec2(m_TextScale), 0.008f);
+    const auto& pos = glm::vec2(m_Position.x - (m_Width/2)  - 4, m_Position.y + lineHeight);
+
+    m_Font->renderText(finalLabelString, pos, m_TextColor, 0, glm::vec2(m_TextScale), 0.008f, TextAlignment::Right);
 
     if (m_Active && m_Timer <= 0.5f) {
-        const glm::vec2 blinkerPos = glm::vec2(m_Position.x - (m_Width / 2) + getTextWidth() + 7, m_Position.y);
+        const glm::vec2 blinkerPos = glm::vec2(m_Position.x - (m_Width / 2) + getTextWidth() + 4, m_Position.y);
         Renderer::renderRectangle(blinkerPos, glm::vec4(1.0f), 3, lineHeight + 8, 0, 0.004f);
     }
 }

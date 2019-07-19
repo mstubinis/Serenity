@@ -20,12 +20,17 @@ class ScrollBar final : public Widget {
         float               m_ScrollBarCurrentPosition;
         float               m_ScrollBarStartAnchor;
         float               m_DragSnapshot;
+        glm::vec4           m_ScrollBarColor;
 
     public:
         ScrollBar(const float& x, const float& y, const float& w, const float& h, const ScrollBarType::Type& type = ScrollBarType::Type::Vertical);
         ~ScrollBar();
 
         void setBorderSize(const float);
+
+        void scroll(const float amount);
+
+        void setScrollBarColor(const glm::vec4& color);
 
         void setSliderSize(const float percent);
         void setType(const ScrollBarType::Type&);

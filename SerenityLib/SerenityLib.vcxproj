@@ -227,8 +227,6 @@
     <ClInclude Include="Engine\src\core\engine\BindableResource.h" />
     <ClInclude Include="Engine\src\core\engine\Engine.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Debugging.h" />
-    <ClInclude Include="Engine\src\core\engine\Engine_Math.h" />
-    <ClInclude Include="Engine\src\core\engine\Engine_Noise.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_ObjectPool.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Utils.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Window.h" />
@@ -247,6 +245,8 @@
     <ClInclude Include="Engine\src\core\engine\lights\SunLight.h" />
     <ClInclude Include="Engine\src\core\engine\lua\LuaEngine.h" />
     <ClInclude Include="Engine\src\core\engine\lua\LuaScript.h" />
+    <ClInclude Include="Engine\src\core\engine\math\Engine_Math.h" />
+    <ClInclude Include="Engine\src\core\engine\math\SimplexNoise.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshCollisionFactory.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshImportedData.h" />
@@ -264,6 +264,7 @@
     <ClInclude Include="Engine\src\core\engine\networking\SocketTCP.h" />
     <ClInclude Include="Engine\src\core\engine\networking\SocketUDP.h" />
     <ClInclude Include="Engine\src\core\engine\physics\Engine_Physics.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\Alignment.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\Engine_Renderer.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\FramebufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\FullscreenItems.h" />
@@ -321,8 +322,6 @@
     <ClCompile Include="Engine\src\core\engine\BindableResource.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_Debugging.cpp" />
-    <ClCompile Include="Engine\src\core\engine\Engine_Math.cpp" />
-    <ClCompile Include="Engine\src\core\engine\Engine_Noise.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventDispatcher.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventObject.cpp" />
@@ -335,6 +334,8 @@
     <ClCompile Include="Engine\src\core\engine\lights\SunLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lua\LuaEngine.cpp" />
     <ClCompile Include="Engine\src\core\engine\lua\LuaScript.cpp" />
+    <ClCompile Include="Engine\src\core\engine\math\Engine_Math.cpp" />
+    <ClCompile Include="Engine\src\core\engine\math\SimplexNoise.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshCollisionFactory.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshImportedData.cpp" />

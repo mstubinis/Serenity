@@ -14,7 +14,10 @@ class Widget : public IWidget {
         glm::vec4                         m_Color;
         bool                              m_Hidden;
         bool                              m_MouseIsOver;
-        WidgetAlignment::Type             m_Alignment;
+        Alignment::Type                   m_Alignment;
+
+        const glm::vec2 positionFromAlignment();
+        const glm::vec2 positionFromAlignment(const float& width, const float& height, const Alignment::Type& alignment);
     public:
         Widget(const glm::vec2& position, const float& width, const float& height);
         Widget(const float& x, const float& y, const float& width, const float& height);
@@ -27,7 +30,7 @@ class Widget : public IWidget {
 
         const glm::vec2& position() const;
 
-        void setAlignment(const WidgetAlignment::Type& alignment);
+        void setAlignment(const Alignment::Type& alignment);
 
         void* getUserPointer() const;
         void setUserPointer(void*);

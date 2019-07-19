@@ -22,6 +22,7 @@ class  TextBox;
 class  Text;
 class  ScrollFrame;
 class  ServerLobbyChatWindow;
+class  ServerLobbyConnectedPlayersWindow;
 
 
 struct ButtonHost_OnClick;
@@ -59,7 +60,8 @@ class HUD final{
         TextBox*                       m_ServerPort;
         Text*                          m_InfoText;
 
-        ServerLobbyChatWindow*         m_ServerLobbyChatWindow;
+        ServerLobbyChatWindow*              m_ServerLobbyChatWindow;
+        ServerLobbyConnectedPlayersWindow*  m_ServerLobbyConnectedPlayersWindow;
 
         void update_game(const double& dt);
         void update_main_menu(const double& dt);

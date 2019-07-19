@@ -10,10 +10,10 @@ namespace Engine {
     namespace Networking {
         class ISocket {
             public:
-                virtual void setBlocking(const bool) = 0;
-                virtual const bool isBlocking() = 0;
-                virtual const sf::Socket& socket() = 0;
-                virtual const ushort localPort() = 0;
+                virtual void                setBlocking(const bool blocking) = 0;
+                virtual const bool          isBlocking() = 0;
+                virtual const sf::Socket&   socket() = 0;
+                virtual const ushort        localPort() = 0;
         };
     };
 };

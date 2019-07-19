@@ -84,7 +84,7 @@ void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
             for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
                 const auto& sizeofT = format.attributes[attribute_index].typeSize;
                 auto destination = &buffer[accumulator];
-                auto at = i * sizeofT;
+                const auto& at = i * sizeofT;
                 auto source = &(data[attribute_index])[at];
                 std::memmove(destination, source, sizeofT);
                 accumulator += sizeofT;

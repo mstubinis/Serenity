@@ -8,7 +8,7 @@
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/sounds/Engine_Sounds.h>
 #include <core/engine/events/Engine_Events.h>
-#include <core/engine/Engine_Noise.h>
+#include <core/engine/math/SimplexNoise.h>
 #include <core/engine/Engine_Window.h>
 
 

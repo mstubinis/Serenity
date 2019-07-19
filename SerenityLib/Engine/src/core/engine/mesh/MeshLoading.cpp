@@ -3,7 +3,7 @@
 #include <core/engine/mesh/MeshCollisionFactory.h>
 #include <core/engine/mesh/VertexData.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/engine/Engine_Math.h>
+#include <core/engine/math/Engine_Math.h>
 
 #include <core/engine/Engine.h>
 #include <core/engine/resources/Engine_Resources.h>

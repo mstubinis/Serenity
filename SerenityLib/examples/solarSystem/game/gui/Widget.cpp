@@ -1,13 +1,14 @@
 #include "Widget.h"
 
-#include <core/engine/Engine_Math.h>
+#include <core/engine/math/Engine_Math.h>
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/renderer/Engine_Renderer.h>
 
 using namespace Engine;
 
 Widget::Widget(const glm::vec2& position, const float& width, const float& height) {
-    m_Alignment = WidgetAlignment::Center;
+    m_Alignment = Alignment::Center;
     setPosition(position);
     m_Width = width;
     m_Height = height;
@@ -15,7 +16,7 @@ Widget::Widget(const glm::vec2& position, const float& width, const float& heigh
     m_UserPointer = nullptr;
 }
 Widget::Widget(const float& x, const float& y, const float& width, const float& height) {
-    m_Alignment = WidgetAlignment::Center;
+    m_Alignment = Alignment::Center;
     setPosition(x,y);
     m_Width = width;
     m_Height = height;
@@ -60,7 +61,7 @@ void Widget::setColor(const float& r, const float& g, const float& b, const floa
 void Widget::setColor(const glm::vec4& color) {
     Engine::Math::setColor(m_Color, color.r, color.g, color.b, color.a);
 }
-void Widget::setAlignment(const WidgetAlignment::Type& alignment) {
+void Widget::setAlignment(const Alignment::Type& alignment) {
     m_Alignment = alignment;
 }
 void Widget::show() {
@@ -71,52 +72,61 @@ void Widget::hide() {
 }
 
 void Widget::update(const double& dt) {
+    const auto& mouse = Engine::getMousePosition();
+
+    auto pos = Widget::positionFromAlignment();
+    if (mouse.x < pos.x || mouse.x > pos.x + m_Width || mouse.y < pos.y || mouse.y > pos.y + m_Height)
+        m_MouseIsOver = false;
+    else
+        m_MouseIsOver = true;
+}
+
+const glm::vec2 Widget::positionFromAlignment(const float& width, const float& height,const Alignment::Type& alignment) {
     float xOffset, yOffset;
     xOffset = yOffset = 0;
-    switch (m_Alignment) {
-        case WidgetAlignment::TopLeft: {
+    switch (alignment) {
+        case Alignment::TopLeft: {
+            yOffset -= height;
             break;
-        }case WidgetAlignment::TopCenter: {
-            xOffset -= m_Width / 2;
+        }case Alignment::TopCenter: {
+            xOffset -= width / 2;
+            yOffset -= height;
             break;
-        }case WidgetAlignment::TopRight: {
-            xOffset -= m_Width;
+        }case Alignment::TopRight: {
+            xOffset -= width;
+            yOffset -= height;
             break;
-        }case WidgetAlignment::Left: {
-            yOffset -= m_Height / 2;
+        }case Alignment::Left: {
+            xOffset -= width;
+            yOffset -= height / 2;
             break;
-        }case WidgetAlignment::Center: {
-            xOffset -= m_Width / 2;
-            yOffset -= m_Height / 2;
+        }case Alignment::Center: {
+            xOffset -= width / 2;
+            yOffset -= height / 2;
             break;
-        }case WidgetAlignment::Right: {
-            xOffset -= m_Width;
-            yOffset -= m_Height / 2;
+        }case Alignment::Right: {
+            yOffset -= height / 2;
             break;
-        }case WidgetAlignment::BottomLeft: {
-            yOffset -= m_Height;
+        }case Alignment::BottomLeft: {
             break;
-        }case WidgetAlignment::BottomCenter: {
-            xOffset -= m_Width / 2;
-            yOffset -= m_Height;
+        }case Alignment::BottomCenter: {
+            xOffset -= width / 2;
             break;
-        }case WidgetAlignment::BottomRight: {
-            xOffset -= m_Width;
-            yOffset -= m_Height;
+        }case Alignment::BottomRight: {
+            xOffset -= width;
             break;
         }default: {
             break;
         }
     }
-    const auto& mouse = Engine::getMousePosition();
     const float& x = m_Position.x + xOffset;
     const float& y = m_Position.y + yOffset;
-
-    if (mouse.x < x || mouse.x > x + m_Width || mouse.y < y || mouse.y > y + m_Height)
-        m_MouseIsOver = false;
-    else
-        m_MouseIsOver = true;
+    return glm::vec2(x, y);
 }
-void Widget::render() {
 
+const glm::vec2 Widget::positionFromAlignment() {
+    return positionFromAlignment(m_Width, m_Height, m_Alignment);
+}
+
+void Widget::render() {
 }

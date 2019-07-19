@@ -12,7 +12,7 @@
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/Engine_Window.h>
-#include <core/engine/Engine_Math.h>
+#include <core/engine/math/Engine_Math.h>
 #include <core/engine/fonts/Font.h>
 #include <core/engine/textures/Texture.h>
 #include <core/Scene.h>
@@ -26,6 +26,7 @@
 #include "gui/ScrollWindow.h"
 #include "gui/Text.h";
 #include "gui/specifics/ServerLobbyChatWindow.h"
+#include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
 
 #include <regex>
 
@@ -96,8 +97,8 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
         case GameState::Host_Server_Port_And_Name_And_Map: {
             const string& username   = hud.m_UserName->text();
             const string& portstring = hud.m_ServerPort->text();
-            if (portstring != "" && username != "") {
-                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) {
+            if (!portstring.empty() && !username.empty()) {
+                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))   && username.find_first_not_of(' ') != std::string::npos) {
                     const int port = stoi(portstring);
                     //hud.setErrorText("", 0);
                     hud.m_Core.startServer(port);
@@ -119,9 +120,8 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             const string& username   = hud.m_UserName->text();
             const string& portstring = hud.m_ServerPort->text();
             const string& ip         = hud.m_ServerIp->text();
-            if (portstring != "" && ip != "" && username != "") {
-                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) {
-                    //hud.setErrorText("", 0);
+            if (!portstring.empty() && ip != "" && !username.empty()) {
+                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))  && username.find_first_not_of(' ') != std::string::npos) {
                     hud.m_Core.startClient(stoi(portstring), username, ip); //the client will request validation at this stage
                     hud.m_ServerLobbyChatWindow->setUserPointer(hud.m_Core.getClient());
                 }else{
@@ -203,6 +203,9 @@ HUD::HUD(GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
 
     m_ServerLobbyChatWindow = new ServerLobbyChatWindow(*m_Font, 50, 140 + 300);
     m_ServerLobbyChatWindow->setColor(1, 1, 0, 1);
+
+    m_ServerLobbyConnectedPlayersWindow = new ServerLobbyConnectedPlayersWindow(*m_Font, 50 + m_ServerLobbyChatWindow->getWindowFrame().width() - 2, 140 + 300);
+    m_ServerLobbyConnectedPlayersWindow->setColor(1, 1, 0, 1);
 }
 HUD::~HUD() {
     SAFE_DELETE(m_ButtonHost);
@@ -215,6 +218,7 @@ HUD::~HUD() {
 
     SAFE_DELETE(m_InfoText);
 
+    SAFE_DELETE(m_ServerLobbyConnectedPlayersWindow);
     SAFE_DELETE(m_ServerLobbyChatWindow);
 }
 void HUD::setGoodText(const string& text, const float errorTime) {
@@ -247,6 +251,7 @@ void HUD::onResize(const uint& width, const uint& height) {
     m_InfoText->setPosition(width / 2 , 65);
 
     m_ServerLobbyChatWindow->setPosition(50, 140 + 300);
+    m_ServerLobbyConnectedPlayersWindow->setPosition(50 + m_ServerLobbyChatWindow->getWindowFrame().width() - 2, 140 + 300);
 }
 
 int _count = 0;
@@ -285,6 +290,7 @@ void HUD::update_main_menu(const double& dt) {
 }
 void HUD::update_host_server_lobby_and_ship(const double& dt) {
     m_ServerLobbyChatWindow->update(dt);
+    m_ServerLobbyConnectedPlayersWindow->update(dt);
 
     m_Back->update(dt);
     m_Next->update(dt);
@@ -306,6 +312,7 @@ void HUD::update_join_server_port_and_name_and_ip(const double& dt) {
 }
 void HUD::update_join_server_server_lobby(const double& dt) {
     m_ServerLobbyChatWindow->update(dt);
+    m_ServerLobbyConnectedPlayersWindow->update(dt);
 
     m_Back->update(dt);
     m_Next->update(dt);
@@ -330,10 +337,10 @@ void HUD::render_game() {
             auto& crosshairTexture = *crosshair.getComponent(MaterialComponentType::Diffuse)->texture();
             const glm::vec4& color = glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f);
 
-            crosshairTexture.render(boxPos.topLeft, color, glm::radians(270.0f));
-            crosshairTexture.render(boxPos.topRight, color, glm::radians(180.0f));
+            crosshairTexture.render(boxPos.topLeft, color, 270.0f);
+            crosshairTexture.render(boxPos.topRight, color, 180.0f);
             crosshairTexture.render(boxPos.bottomLeft, color, 0.0f);
-            crosshairTexture.render(boxPos.bottomRight, color, glm::radians(90.0f));
+            crosshairTexture.render(boxPos.bottomRight, color, 90.0f);
 
             auto& targetBody = *target.getComponent<ComponentBody>();
             auto& targetName = target.getComponent<ComponentName>()->name();
@@ -388,7 +395,7 @@ void HUD::render_game() {
                     angle = -135;
                 }
             }
-            crosshairArrowTexture.render(glm::vec2(pos.x, pos.y), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f), glm::radians(angle));
+            crosshairArrowTexture.render(glm::vec2(pos.x, pos.y), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f), angle);
         }
     }
 
@@ -410,6 +417,7 @@ void HUD::render_main_menu() {
 }
 void HUD::render_host_server_lobby_and_ship() {
     m_ServerLobbyChatWindow->render();
+    m_ServerLobbyConnectedPlayersWindow->render();
 
     m_Back->render();
     m_Next->render();
@@ -431,6 +439,7 @@ void HUD::render_join_server_port_and_name_and_ip() {
 }
 void HUD::render_join_server_server_lobby() {
     m_ServerLobbyChatWindow->render();
+    m_ServerLobbyConnectedPlayersWindow->render();
 
     m_Back->render();
     m_Next->render();

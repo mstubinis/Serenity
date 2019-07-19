@@ -124,6 +124,12 @@
     <Filter Include="Header Files\Engine\Core\Fonts">
       <UniqueIdentifier>{77f3db76-b623-487a-a2b7-9024dd3cbf3e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Math">
+      <UniqueIdentifier>{ac9a8eaa-c9de-4563-b8c4-871ad4efe60a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Math">
+      <UniqueIdentifier>{de22efbc-6db6-4bfe-9852-0b8a923b2e50}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -291,12 +297,6 @@
     <ClInclude Include="Engine\src\core\engine\Engine_Debugging.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_Math.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_Noise.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_ObjectPool.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
@@ -401,6 +401,15 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\fonts\FontIncludes.h">
       <Filter>Header Files\Engine\Core\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\math\Engine_Math.h">
+      <Filter>Header Files\Engine\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\math\SimplexNoise.h">
+      <Filter>Header Files\Engine\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\Alignment.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -545,12 +554,6 @@
     <ClCompile Include="Engine\src\core\engine\Engine_Debugging.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_Math.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_Noise.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
@@ -616,6 +619,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\fonts\Font.cpp">
       <Filter>Source Files\Engine\Core\Fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\math\Engine_Math.cpp">
+      <Filter>Source Files\Engine\Core\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\math\SimplexNoise.cpp">
+      <Filter>Source Files\Engine\Core\Math</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

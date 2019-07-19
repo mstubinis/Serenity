@@ -1,12 +1,15 @@
 #include "Server.h"
 #include "Packet.h"
 #include "Core.h"
+#include "HUD.h"
+#include "gui/specifics/ServerLobbyChatWindow.h"
+#include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
 
 #include "SolarSystem.h"
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/Engine_Utils.h>
-#include <core/engine/Engine_Math.h>
+#include <core/engine/math/Engine_Math.h>
 
 #include <core/engine/Engine.h>
 #include <core/engine/Engine_Debugging.h>
@@ -51,11 +54,12 @@ const bool Server::startup() {
 }
 void Server::shutdown(bool destructor) {
     //alert all the clients that the server is shutting down
-    for (auto& client : m_clients) {
-        Packet p;
-        p.PacketType = PacketType::Server_Shutdown;
-        const auto status = client.second->send(p);
-    }
+    Packet p;
+    p.PacketType = PacketType::Server_Shutdown;
+    send_to_all(p);
+    m_Core.m_HUD->m_ServerLobbyChatWindow->clear();
+    m_Core.m_HUD->m_ServerLobbyConnectedPlayersWindow->clear();
+
     if (destructor) {
         SAFE_DELETE_MAP(m_clients);
         SAFE_DELETE_MAP(m_threads_for_clients);
@@ -112,9 +116,9 @@ void Server::updateAcceptNewClients(Server* thisServer) {
     thisServer->m_mutex.unlock();
 }
 void Server::updateClient(Server* thisServer, Client* _client) {
-    thisServer->m_mutex.lock();
-    sf::Packet sf_packet;
     auto& server = *thisServer;
+    server.m_mutex.lock();
+    sf::Packet sf_packet;
     auto& client = *_client;
     const auto& status = client.receive(sf_packet);
     if (status == sf::Socket::Done) {
@@ -127,7 +131,6 @@ void Server::updateClient(Server* thisServer, Client* _client) {
                 if (p.data != "") {
                     SolarSystem& scene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
                     PacketPhysicsUpdate physics_update(*scene.getShips().at(p.data));
-
 
                     physics_update.PacketType = PacketType::Server_To_Client_Ship_Physics_Update;
                     client.send(physics_update);
@@ -154,18 +157,39 @@ void Server::updateClient(Server* thisServer, Client* _client) {
                         client.m_username = pIn.data;
                         client.m_Validated = true;
                         pOut.PacketType = PacketType::Server_To_Client_Accept_Connection;
+                        pOut.data = "";
+                        for (auto& c : server.m_clients) {
+                            if(!c.second->m_username.empty() && c.second->m_username != client.m_username)
+                                pOut.data += c.second->m_username + ",";
+                        }
+                        if(!pOut.data.empty())
+                            pOut.data.pop_back();
                         cout << "Server: Approving: " + pIn.data + "'s connection" << endl;
+
+                        PacketChatMessage pOut1;
+                        pOut1.name = client.m_username;
+                        pOut1.data = "";
+                        pOut1.PacketType = PacketType::Server_To_Client_Client_Joined_Server;
+                        server.send_to_client(client, pOut);
+                        server.send_to_all(pOut1);
                     }else{
                         pOut.PacketType = PacketType::Server_To_Client_Reject_Connection;
                         cout << "Server: Rejecting: " + pIn.data + "'s connection" << endl;
+                        server.send_to_client(client, pOut);
                     }
-                    server.send_to_client(client, pOut);
                     break;
                 }case PacketType::Client_To_Server_Request_Disconnection: {
                     cout << "Server: Removing " + client.m_username + " from the server" << endl;
                     const auto& client_ip      = client.m_TcpSocket->ip();
                     const auto& client_port    = client.m_TcpSocket->remotePort();
                     const auto& client_address = client_ip + " " + to_string(client_port);
+
+                    PacketChatMessage pOut1;
+                    pOut1.name = client.m_username;
+                    pOut1.data = "";
+                    pOut1.PacketType = PacketType::Server_To_Client_Client_Left_Server;
+                    server.send_to_all(pOut1);
+
                     client.disconnect();
                     server.m_ClientsToBeDisconnected.push(client_address);
                     break;
@@ -176,7 +200,7 @@ void Server::updateClient(Server* thisServer, Client* _client) {
         }
         SAFE_DELETE(pp);
     }
-    thisServer->m_mutex.unlock();
+    server.m_mutex.unlock();
 }
 const sf::Socket::Status Server::send_to_client(Client& c, Packet& packet) {
     return c.send(packet);

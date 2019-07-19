@@ -2,7 +2,7 @@
 
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/events/Engine_Events.h>
-#include <core/engine/Engine_Math.h>
+#include <core/engine/math/Engine_Math.h>
 #include <core/engine/fonts/Font.h>
 
 using namespace Engine;
@@ -25,6 +25,7 @@ Button::Button(const Font& font, const float& x, const float& y, const float& wi
     m_TextAlignment = TextAlignment::Center;
     m_Padding = 20;
     internalSetSize();
+    m_Alignment = Alignment::Center;
 }
 Button::Button(const Font& font, const glm::vec2& position, const float& width, const float& height) : Button(font,position.x,position.y,width,height) {
 }
@@ -78,52 +79,25 @@ void Button::update(const double& dt) {
     }
 }
 void Button::render() {
-    float xOffset, yOffset;
-    xOffset = yOffset = 0;
-    switch (m_Alignment) {
-        case WidgetAlignment::TopLeft: {
-            xOffset -= m_Width / 2;
-            yOffset -= m_Height / 2;
+    glm::vec4 color = m_Color;
+    if (m_MouseIsOver)
+        color += glm::vec4(0.15f);
+    Renderer::renderRectangle(m_Position, color, m_Width, m_Height, 0, 0.01f, m_Alignment);
+    glm::vec2 newPosTxt; 
+    switch (m_TextAlignment) {
+        case TextAlignment::Left: {
+            newPosTxt = glm::vec2(m_Position.x - m_Width / 2, m_Position.y + getTextHeight());
             break;
-        }case WidgetAlignment::TopCenter: {
-            yOffset -= m_Height / 2;
+        }case TextAlignment::Center: {
+            newPosTxt = glm::vec2(m_Position.x, m_Position.y + getTextHeight());
             break;
-        }case WidgetAlignment::TopRight: {
-            xOffset += m_Width / 2;
-            yOffset -= m_Height / 2;
-            break;
-        }case WidgetAlignment::Left: {
-            xOffset -= m_Width / 2;
-            break;
-        }case WidgetAlignment::Center: {
-            break;
-        }case WidgetAlignment::Right: {
-            xOffset += m_Width / 2;
-            break;
-        }case WidgetAlignment::BottomLeft: {
-            xOffset -= m_Width / 2;
-            yOffset += m_Height / 2;
-            break;
-        }case WidgetAlignment::BottomCenter: {
-            yOffset += m_Height / 2;
-            break;
-        }case WidgetAlignment::BottomRight: {
-            xOffset += m_Width / 2;
-            yOffset += m_Height / 2;
+        }case TextAlignment::Right: {
+            newPosTxt = glm::vec2(m_Position.x + m_Width / 2, m_Position.y + getTextHeight());
             break;
         }default: {
+            newPosTxt = glm::vec2(m_Position.x, m_Position.y + getTextHeight());
             break;
         }
-    }  
-    const auto newPos = glm::vec2(m_Position.x + xOffset, m_Position.y + yOffset);
-    Renderer::renderRectangle(newPos, m_Color, m_Width, m_Height, 0, 0.01f);
-
-    glm::vec2 newPosTxt; 
-    if(m_TextAlignment == TextAlignment::Left)
-        newPosTxt = glm::vec2(m_Position.x - m_Width / 2, m_Position.y + getTextHeight());
-    else if (m_TextAlignment == TextAlignment::Center)
-        newPosTxt = glm::vec2(m_Position.x, m_Position.y + getTextHeight());
-    else if (m_TextAlignment == TextAlignment::Right)
-        newPosTxt = glm::vec2(m_Position.x + m_Width / 2, m_Position.y + getTextHeight());
-    m_Font->renderText(m_Text, newPosTxt, m_TextColor,0, m_TextScale, 0.008f, m_TextAlignment);
+    }
+    m_Font->renderText(m_Text, newPosTxt, m_TextColor, 0, m_TextScale, 0.008f, m_TextAlignment);
 }

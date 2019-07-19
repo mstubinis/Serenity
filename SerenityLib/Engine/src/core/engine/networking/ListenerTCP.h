@@ -6,7 +6,6 @@
 
 typedef std::uint32_t   uint;
 
-
 namespace Engine {
     namespace Networking {
         class SocketTCP;
@@ -19,18 +18,18 @@ namespace Engine {
                 ListenerTCP(const uint port, const std::string& ip = "");
                 ~ListenerTCP();
 
-                void setBlocking(bool);
-                const bool isBlocking();
-                const sf::TcpListener& socket();
-                const ushort localPort();
+                void                     close();
+                void                     setBlocking(const bool blocking);
 
-                void close();
-                const sf::Socket::Status accept(SocketTCP&);
-                const sf::Socket::Status accept(sf::TcpSocket&);
+                const bool               isBlocking();
+                const sf::TcpListener&   socket();
+                const ushort             localPort();
+
+                const sf::Socket::Status accept(SocketTCP& tcpSocket);
+                const sf::Socket::Status accept(sf::TcpSocket& sfmlTcpSocket);
 
                 const sf::Socket::Status listen();
         };
     };
 };
-
 #endif

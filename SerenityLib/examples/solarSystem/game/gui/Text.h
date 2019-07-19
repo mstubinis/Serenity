@@ -29,6 +29,9 @@ class Text final: public Widget {
 
         const float width() const;
         const float height() const;
+        const std::string& text() const;
+        const Font& font() const;
+        const glm::vec2& textScale() const;
 
         void update(const float& dt);
         void render();

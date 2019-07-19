@@ -31,19 +31,18 @@ struct VertexData final{
         const std::vector<T> ret(_data, _data + dataSizes[attributeIndex]);
         return ret;
     }
-    template<typename T> void setData(const size_t& attributeIndex, const std::vector<T>& _data, const bool addToGPU = false, const bool orphan = false) {
+    template<typename T> void setData(const size_t& attributeIndex, const std::vector<T>& new_data, const bool addToGPU = false, const bool orphan = false) {
         if (buffers.size() == 0)
             buffers.push_back(std::make_unique<VertexBufferObject>());
         if (attributeIndex >= data.size())
             return;
-        auto& attributeVector = data[attributeIndex];
-        free(attributeVector);
+        auto& old_data = data[attributeIndex];
+        free(old_data);
         const auto& sizeofT = sizeof(T);
-        const auto& totalSize = (_data.size() * sizeofT);
-        attributeVector = (char*)malloc(totalSize);
-        //                dst            source
-        std::memmove(attributeVector, _data.data(), totalSize);
-        dataSizes[attributeIndex] = _data.size();
+        const auto& totalSize = (new_data.size() * sizeofT);
+        old_data = (char*)malloc(totalSize);
+        std::memmove(old_data, new_data.data(), totalSize);
+        dataSizes[attributeIndex] = new_data.size();
         if (addToGPU) {
             if (format.interleavingType == VertexAttributeLayout::Interleaved) {
                 sendDataToGPU(orphan,-1);

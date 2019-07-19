@@ -199,10 +199,10 @@
     <ClInclude Include="game\gui\ScrollBar.h" />
     <ClInclude Include="game\gui\ScrollWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyChatWindow.h" />
+    <ClInclude Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.h" />
     <ClInclude Include="game\gui\Text.h" />
     <ClInclude Include="game\gui\TextBox.h" />
     <ClInclude Include="game\gui\Widget.h" />
-    <ClInclude Include="game\gui\WidgetIncludes.h" />
     <ClInclude Include="game\gui\WidgetInterface.h" />
     <ClInclude Include="game\HUD.h" />
     <ClInclude Include="game\Packet.h" />
@@ -222,6 +222,7 @@
     <ClCompile Include="game\gui\ScrollBar.cpp" />
     <ClCompile Include="game\gui\ScrollWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyChatWindow.cpp" />
+    <ClCompile Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.cpp" />
     <ClCompile Include="game\gui\Text.cpp" />
     <ClCompile Include="game\gui\TextBox.cpp" />
     <ClCompile Include="game\gui\Widget.cpp" />

@@ -48,7 +48,15 @@ const float Text::width() const {
 const float Text::height() const {
     return (m_Font->getTextHeight(m_Text) * m_TextScale.y * 1.32f); //yes, this is evil
 }
-
+const string& Text::text() const {
+    return m_Text;
+}
+const Font& Text::font() const {
+    return *m_Font;
+}
+const glm::vec2& Text::textScale() const {
+    return m_TextScale;
+}
 void Text::update(const float& dt) {
 
 }

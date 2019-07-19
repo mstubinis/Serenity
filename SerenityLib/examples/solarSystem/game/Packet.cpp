@@ -1,7 +1,7 @@
 #include "Packet.h"
 #include "Ship.h"
 
-#include <core/engine/Engine_Math.h>
+#include <core/engine/math/Engine_Math.h>
 
 using namespace Engine;
 
@@ -27,9 +27,14 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketPhysicsUpdate(); break;
         }case PacketType::Client_To_Server_Chat_Message: {
             p = new PacketChatMessage(); break;
-        }case PacketType::Server_To_Client_Chat_Message:{
+        }case PacketType::Server_To_Client_Chat_Message: {
             p = new PacketChatMessage(); break;
-        }default: {
+        }case PacketType::Server_To_Client_Client_Joined_Server: {
+            p = new PacketChatMessage(); break;
+        }case PacketType::Server_To_Client_Client_Left_Server: {
+            p = new PacketChatMessage(); break;
+        }
+        default: {
             break;
         }
     }

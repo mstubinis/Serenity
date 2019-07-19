@@ -5,7 +5,7 @@
 #include <core/engine/renderer/FullscreenItems.h>
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 #include <core/engine/resources/Engine_BuiltInResources.h>
-#include <core/engine/Engine_Math.h>
+#include <core/engine/math/Engine_Math.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
 #include <core/Camera.h>
@@ -1506,7 +1506,7 @@ class epriv::RenderManager::impl final{
                         text_ind.emplace_back(accum + 1);
                         text_ind.emplace_back(accum + 0);
 
-                        const float& startingX = x - chr.xoffset;
+                        const float& startingX = x + chr.xoffset;
                         x -= chr.xadvance;
 
                         text_pts.emplace_back(startingX + chr.pts[0].x, startingY + chr.pts[0].y, z);
@@ -1524,7 +1524,7 @@ class epriv::RenderManager::impl final{
                 x = 0.0f;
             }
         }
-        void _renderTextMiddle(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
+        void _renderTextCenter(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
             vector<string> lines;
             vector<unsigned short> lines_sizes;
             string line_accumulator = "";
@@ -2492,7 +2492,7 @@ struct RenderingAPI2D final {
         }else if (alignType == TextAlignment::Right) {
             impl._renderTextRight(text, font, newLineGlyphHeight, x, y, z);
         }else if (alignType == TextAlignment::Center) {
-            impl._renderTextMiddle(text, font, newLineGlyphHeight, x, y, z);
+            impl._renderTextCenter(text, font, newLineGlyphHeight, x, y, z);
         }
         mesh.modifyVertices(0, impl.text_pts);
         mesh.modifyVertices(1, impl.text_uvs);
@@ -2505,21 +2505,66 @@ struct RenderingAPI2D final {
         mesh.bind();
         glm::mat4 m = impl.m_IdentityMat4;
         sendUniform4("Object_Color", color);
-        m = glm::translate(m, glm::vec3(position.x, position.y, -0.001f - depth));
-        m = glm::rotate(m, Math::toRadians(angle), impl.m_RotationAxis2D);
+
+        float translationX = position.x;
+        float translationY = position.y;
+        float totalSizeX = scale.x;
+        float totalSizeY = scale.y;
         if (texture) {
-            m = glm::scale(m, glm::vec3(texture->width(), texture->height(), 1.0f));
+            totalSizeX *= texture->width();
+            totalSizeY *= texture->height();
+
             sendTexture("DiffuseTexture", *texture, 0);
             sendUniform1("DiffuseTextureEnabled", 1);
         }else{
             sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
             sendUniform1("DiffuseTextureEnabled", 0);
         }
-        m = glm::scale(m, glm::vec3(scale.x, scale.y, 1.0f));
+
+        switch (align) {
+            case Alignment::TopLeft: {
+                translationX += totalSizeX / 2;
+                translationY -= totalSizeY / 2;
+                break;
+            }case Alignment::TopCenter: {
+                translationY -= totalSizeY / 2;
+                break;
+            }case Alignment::TopRight: {
+                translationX -= totalSizeX / 2;
+                translationY -= totalSizeY / 2;
+                break;
+            }case Alignment::Left: {
+                translationX -= totalSizeX / 2;
+                break;
+            }case Alignment::Center: {
+                break;
+            }case Alignment::Right: {
+                translationX += totalSizeX / 2;
+                break;
+            }case Alignment::BottomLeft: {
+                translationX += totalSizeX / 2;
+                translationY += totalSizeY / 2;
+                break;
+            }case Alignment::BottomCenter: {
+                translationY += totalSizeY / 2;
+                break;
+            }case Alignment::BottomRight: {
+                translationX -= totalSizeX / 2;
+                translationY += totalSizeY / 2;
+                break;
+            }default: {
+                break;
+            }
+        }
+
+
+        m = glm::translate(m, glm::vec3(translationX, translationY, -0.001f - depth));
+        m = glm::rotate(m, Math::toRadians(angle), impl.m_RotationAxis2D);
+        m = glm::scale(m, glm::vec3(totalSizeX, totalSizeY, 1.0f));
         sendUniformMatrix4("Model", m);
         mesh.render(false);
     }
-    static void RenderTriangle(const glm::vec2& position, const glm::vec4& color, const float& angle, const float& width, const float& height, const float& depth) {
+    static void RenderTriangle(const glm::vec2& position, const glm::vec4& color, const float& angle, const float& width, const float& height, const float& depth, const Alignment::Type& align) {
         auto& impl = *renderManagerImpl;
 
         auto& mesh = *Mesh::Triangle;
@@ -2529,8 +2574,46 @@ struct RenderingAPI2D final {
         sendUniform1("DiffuseTextureEnabled", 0);
         sendUniform4("Object_Color", color);
 
+        float translationX = position.x;
+        float translationY = position.y;
+        switch (align) {
+            case Alignment::TopLeft: {
+                translationX += width / 2;
+                translationY -= height / 2;
+                break;
+            }case Alignment::TopCenter: {
+                translationY -= height / 2;
+                break;
+            }case Alignment::TopRight: {
+                translationX -= width / 2;
+                translationY -= height / 2;
+                break;
+            }case Alignment::Left: {
+                translationX -= width / 2;
+                break;
+            }case Alignment::Center: {
+                break;
+            }case Alignment::Right: {
+                translationX += width / 2;
+                break;
+            }case Alignment::BottomLeft: {
+                translationX += width / 2;
+                translationY += height / 2;
+                break;
+            }case Alignment::BottomCenter: {
+                translationY += height / 2;
+                break;
+            }case Alignment::BottomRight: {
+                translationX -= width / 2;
+                translationY += height / 2;
+                break;
+            }default: {
+                break;
+            }
+        }
+
         glm::mat4 m = impl.m_IdentityMat4;
-        m = glm::translate(m, glm::vec3(position.x, position.y, -0.001f - depth));
+        m = glm::translate(m, glm::vec3(translationX, translationY, -0.001f - depth));
         m = glm::rotate(m, Math::toRadians(angle), impl.m_RotationAxis2D);
         m = glm::scale(m, glm::vec3(width, height, 1));
         sendUniformMatrix4("Model", m);
@@ -2545,8 +2628,8 @@ struct RenderingAPI2D final {
         glScissor(0, 0, winSize.x, winSize.y);
     }
 };
-void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, const float& angle, const float& width, const float& height, const float& depth) {
-    boost_func f = boost::bind<void>(&RenderingAPI2D::RenderTriangle, position, color, angle, width, height, depth);
+void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, const float& angle, const float& width, const float& height, const float& depth, const Alignment::Type& align) {
+    boost_func f = boost::bind<void>(&RenderingAPI2D::RenderTriangle, position, color, angle, width, height, depth, align);
     renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
 }
 void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float& width, const float& height, const float& angle, const float& depth, const Alignment::Type& align){

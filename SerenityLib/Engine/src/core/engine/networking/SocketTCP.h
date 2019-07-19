@@ -19,23 +19,24 @@ namespace Engine {
                 SocketTCP(sf::TcpSocket*); //server side client socket
                 ~SocketTCP();
 
-                void setBlocking(const bool);
-                const bool isBlocking();
-                const sf::TcpSocket& socket();
-                const ushort localPort();
+                void                       disconnect();
 
-                const std::string ip();
-                const ushort remotePort();
+                void                       setBlocking(const bool blocking);
+                const bool                 isBlocking();
+                const sf::TcpSocket&       socket();
+                const ushort               localPort();
+
+                const std::string          ip();
+                const ushort               remotePort();
     
-                const sf::Socket::Status connect(const ushort& timeout = 0);
-                void disconnect();
+                const sf::Socket::Status   connect(const ushort& timeout = 0);
 
-                const sf::Socket::Status send(sf::Packet& packet);
-                const sf::Socket::Status send(const void* data, size_t size);
-                const sf::Socket::Status send(const void* data, size_t size, size_t& sent);
+                const sf::Socket::Status   send(sf::Packet& packet);
+                const sf::Socket::Status   send(const void* data, size_t size);
+                const sf::Socket::Status   send(const void* data, size_t size, size_t& sent);
 
-                const sf::Socket::Status receive(sf::Packet& packet);
-                const sf::Socket::Status receive(void* data, size_t size, size_t& received);
+                const sf::Socket::Status   receive(sf::Packet& packet);
+                const sf::Socket::Status   receive(void* data, size_t size, size_t& received);
         };
     };
 };
