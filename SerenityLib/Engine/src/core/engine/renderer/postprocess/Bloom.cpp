@@ -29,9 +29,9 @@ void epriv::Postprocess_Bloom::pass(ShaderP& program, GBuffer& gbuffer, const un
     Renderer::sendUniform4("Data", scale, threshold, exposure, 0.0f);
     Renderer::sendTexture("SceneTexture", gbuffer.getTexture(sceneTextureEnum), 0);
 
-    const unsigned int& x = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
-    const unsigned int& y = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
-    Renderer::renderFullscreenTriangle(x, y);
+    const unsigned int& screen_width = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
+    const unsigned int& screen_height = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
+    Renderer::renderFullscreenTriangle(screen_width, screen_height);
 }
 
 

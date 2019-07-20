@@ -17,7 +17,7 @@ epriv::Postprocess_HDR::Postprocess_HDR() {
 }
 epriv::Postprocess_HDR::~Postprocess_HDR() {
 }
-void epriv::Postprocess_HDR::pass(ShaderP& program,GBuffer& gbuffer,const unsigned int&fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor) {
+void epriv::Postprocess_HDR::pass(ShaderP& program,GBuffer& gbuffer,const unsigned int& fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor) {
     program.bind();
 
     Renderer::sendUniform4Safe("HDRInfo", exposure, static_cast<float>(hdr), godRaysFactor, static_cast<float>(algorithm));
@@ -27,6 +27,7 @@ void epriv::Postprocess_HDR::pass(ShaderP& program,GBuffer& gbuffer,const unsign
     Renderer::sendTextureSafe("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 1);
     Renderer::sendTextureSafe("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 2);
     Renderer::sendTextureSafe("gGodsRaysMap", gbuffer.getTexture(GBufferType::GodRays), 3);
+
     Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
 }
 

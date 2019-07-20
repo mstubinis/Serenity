@@ -27,16 +27,16 @@ epriv::Postprocess_GodRays::~Postprocess_GodRays() {
 }
 void epriv::Postprocess_GodRays::pass(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha) {
     program.bind();
-    const float& _divisor = gbuffer.getSmallFBO()->divisor();
+    const float& divisor = gbuffer.getSmallFBO()->divisor();
     Renderer::sendUniform4("RaysInfo", exposure, decay, density, weight);
     Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / static_cast<float>(fboWidth), lightScrnPos.y / static_cast<float>(fboHeight));
     Renderer::sendUniform1("samples", samples);
     Renderer::sendUniform1("alpha", alpha);
     Renderer::sendTexture("firstPass", gbuffer.getTexture(GBufferType::Misc), 0);
 
-    const unsigned int& x = static_cast<unsigned int>(static_cast<float>(fboWidth) * _divisor);
-    const unsigned int& y = static_cast<unsigned int>(static_cast<float>(fboHeight) * _divisor);
-    Renderer::renderFullscreenTriangle(x, y);
+    const unsigned int& screen_width = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
+    const unsigned int& screen_height = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
+    Renderer::renderFullscreenTriangle(screen_width, screen_height);
 }
 
 

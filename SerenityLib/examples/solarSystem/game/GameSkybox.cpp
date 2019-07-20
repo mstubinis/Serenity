@@ -6,11 +6,11 @@
 #include <core/engine/Engine_Window.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/Camera.h>
+#include <core/engine/scene/Camera.h>
 #include <core/engine/textures/Texture.h>
 #include <core/ShaderProgram.h>
 #include <core/Material.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Scene.h>
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>

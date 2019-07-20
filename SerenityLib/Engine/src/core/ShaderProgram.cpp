@@ -1,7 +1,7 @@
 #include <core/ShaderProgram.h>
 #include <core/engine/Engine.h>
-#include <core/Camera.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Camera.h>
+#include <core/engine/scene/Scene.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -125,7 +125,7 @@ ShaderP::ShaderP(string _name, Shader& vs, Shader& fs):m_VertexShader(vs), m_Fra
     setCustomUnbindFunctor(epriv::DefaultShaderUnbindFunctor());
     setName(_name);
 
-    string& name_ = name();
+    const string& name_ = name();
     if (vs.name() == "NULL") vs.setName(name_ + ".vert");
     if (fs.name() == "NULL") fs.setName(name_ + ".frag");
     load();

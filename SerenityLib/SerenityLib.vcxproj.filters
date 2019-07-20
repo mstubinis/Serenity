@@ -130,6 +130,12 @@
     <Filter Include="Source Files\Engine\Core\Math">
       <UniqueIdentifier>{de22efbc-6db6-4bfe-9852-0b8a923b2e50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Scene">
+      <UniqueIdentifier>{902001ce-be49-491e-b5d7-b66994095eb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Scene">
+      <UniqueIdentifier>{13deb444-5593-4bc0-ad27-7cd650977c01}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -306,9 +312,6 @@
     <ClInclude Include="Engine\src\core\engine\Engine_Window.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\Camera.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\Constraint.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
@@ -318,13 +321,7 @@
     <ClInclude Include="Engine\src\core\MeshInstance.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\Scene.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\ShaderProgram.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\Skybox.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\EntityDataRequest.h">
@@ -410,6 +407,18 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\renderer\Alignment.h">
       <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\scene\Scene.h">
+      <Filter>Header Files\Engine\Core\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\scene\Skybox.h">
+      <Filter>Header Files\Engine\Core\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\scene\Camera.h">
+      <Filter>Header Files\Engine\Core\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\scene\Viewport.h">
+      <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -524,9 +533,6 @@
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp">
       <Filter>Source Files\Engine\Core\Textures</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\Camera.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\Constraint.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
@@ -536,13 +542,7 @@
     <ClCompile Include="Engine\src\core\MeshInstance.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\Scene.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\ShaderProgram.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\Skybox.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\BindableResource.cpp">
@@ -625,6 +625,18 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\math\SimplexNoise.cpp">
       <Filter>Source Files\Engine\Core\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\scene\Scene.cpp">
+      <Filter>Source Files\Engine\Core\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\scene\Skybox.cpp">
+      <Filter>Source Files\Engine\Core\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\scene\Camera.cpp">
+      <Filter>Source Files\Engine\Core\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\scene\Viewport.cpp">
+      <Filter>Source Files\Engine\Core\Scene</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -2,7 +2,7 @@
 #ifndef GAME_CAPSULE_SPACE_H
 #define GAME_CAPSULE_SPACE_H
 
-#include <core/Scene.h>
+#include <core/engine/scene/Scene.h>
 #include <ecs/Components.h>
 
 class PointLight;

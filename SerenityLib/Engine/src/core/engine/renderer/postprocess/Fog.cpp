@@ -19,8 +19,6 @@ epriv::Postprocess_Fog::~Postprocess_Fog() {
 
 }
 
-
-
 bool Renderer::fog::enabled() { 
     return epriv::Postprocess_Fog::Fog.fog;
 }

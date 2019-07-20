@@ -4,7 +4,7 @@
 #include <core/engine/events/Engine_EventDispatcher.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/textures/Texture.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Scene.h>
 
 #include <ecs/ECS.h>
 #include <ecs/ComponentCamera.h>

@@ -8,6 +8,7 @@
 #include "ResourceManifest.h"
 
 #include <core/engine/Engine.h>
+#include <core/engine/scene/Viewport.h>
 
 using namespace std;
 using namespace Engine;
@@ -115,6 +116,8 @@ void Core::update(const double& dt) {
     if (Engine::isKeyDown(KeyboardKey::Escape)) {
         Engine::stop();
     }
+
+
     /*
     if (Engine::isKeyDownOnce(KeyboardKey::Space)) {
         //Engine::pause(!Engine::paused());

@@ -11,17 +11,16 @@
 #include <core/engine/math/SimplexNoise.h>
 #include <core/engine/Engine_Window.h>
 
-
 struct EngineOptions final {
-    AntiAliasingAlgorithm::Algorithm aa_algorithm;
-    bool                             ssao_enabled;
-    bool                             hdr_enabled;
-    bool                             fullscreen;
-    bool                             god_rays_enabled;
-    bool                             fog_enabled;
-    unsigned int                     width;
-    unsigned int                     height;
-    const char*                      window_title;
+    AntiAliasingAlgorithm::Algorithm   aa_algorithm;
+    bool                               ssao_enabled;
+    bool                               hdr_enabled;
+    bool                               fullscreen;
+    bool                               god_rays_enabled;
+    bool                               fog_enabled;
+    unsigned int                       width;
+    unsigned int                       height;
+    const char*                        window_title;
     EngineOptions(){
         window_title     = "Engine";
         width            = 800;
@@ -52,11 +51,11 @@ namespace Engine{
 
             bool                  m_Paused, m_Destroyed;
 
-            Core(const EngineOptions&);
+            Core(const EngineOptions& options);
             ~Core();
         };
     };
-    void init(const EngineOptions&);
+    void init(const EngineOptions& options);
     void pause(const bool& pause = true);
     bool paused();
     void unpause();
@@ -69,7 +68,7 @@ namespace Engine{
     void showMouseCursor();
     void hideMouseCursor();
     void stop();
-    void setFullScreen(const bool& b);
+    void setFullScreen(const bool& isFullscreen);
 };
 
 namespace Game{
@@ -84,12 +83,12 @@ namespace Game{
     void onClose();
     void onLostFocus();
     void onGainedFocus();
-    void onTextEntered(const uint&);
-    void onKeyPressed(const uint&);
-    void onKeyReleased(const uint&);
+    void onTextEntered(const uint& unicode);
+    void onKeyPressed(const uint& key);
+    void onKeyReleased(const uint& key);
     void onMouseWheelMoved(const int& delta);
-    void onMouseButtonPressed(const uint&);
-    void onMouseButtonReleased(const uint&);
+    void onMouseButtonPressed(const uint& button);
+    void onMouseButtonReleased(const uint& button);
     void onMouseMoved(const float& mouseX, const float& mouseY);
     void onMouseEntered();
     void onMouseLeft();

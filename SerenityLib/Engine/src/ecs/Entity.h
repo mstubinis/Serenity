@@ -3,7 +3,7 @@
 #define ENGINE_ECS_ENTITY_H
 
 #include <core/engine/Engine.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Scene.h>
 #include <ecs/ECS.h>
 #include <ecs/EntityDataRequest.h>
 

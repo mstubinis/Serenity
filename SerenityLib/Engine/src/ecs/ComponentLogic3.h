@@ -27,8 +27,8 @@ class ComponentLogic3 : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentLogic3_SceneEnteredFunction;
     friend struct Engine::epriv::ComponentLogic3_SceneLeftFunction;
     private:
-        void*                               _userPtr;
-        boost::function<void(const float&)> _functor;
+        void*                                _userPtr;
+        boost::function<void(const double&)> _functor;
     public:
         ComponentLogic3(const Entity& _e) : ComponentBaseClass(_e) { 
 			_userPtr = nullptr;

@@ -27,6 +27,7 @@ void epriv::Postprocess_FXAA::pass(ShaderP& program, GBuffer& gbuffer, const uns
     Renderer::sendTexture("inTexture", gbuffer.getTexture(sceneTextureEnum), 0);
     Renderer::sendTextureSafe("edgeTexture", gbuffer.getTexture(GBufferType::Misc), 1);
     Renderer::sendTexture("depthTexture", gbuffer.getTexture(GBufferType::Depth), 2);
+
     Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
 }
 

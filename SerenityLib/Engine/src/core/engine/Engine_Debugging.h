@@ -10,7 +10,7 @@ namespace epriv {
     class DebugManager {
         private:
             sf::Clock clock;
-            sf::Int64 m_logicTime, m_physicsTime, m_renderTime, m_soundTime, m_displayTime;
+            sf::Int64 m_logicTime, m_physicsTime, m_renderTime, m_soundTime;
             sf::Int64 m_deltaTime;
             double m_totalTime;
             double divisor;
@@ -43,14 +43,12 @@ namespace epriv {
             void calculate_physics();
             void calculate_sounds();
             void calculate_render();
-            void calculate_display();
 
             const double dt() const;
             const double logicTime() const;
             const double physicsTime() const;
             const double soundsTime() const;
             const double renderTime() const;
-            const double displayTime() const;
             const double totalTime() const;
 
             std::string timestamp();

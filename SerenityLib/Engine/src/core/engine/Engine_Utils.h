@@ -57,6 +57,15 @@ template <typename Stream> void writeUint16tBigEndian(uint16_t& in, Stream& stre
     stream.write((char *)buf, sizeof(buf));
 }
 
+//specifies if a specific pointer element is in a vector
+template<typename E, typename B> bool isInVector(std::vector<B*>& v, E* e) {
+    for (auto& item : v) {
+        if (item == e)
+            return true;
+    }
+    return false;
+}
+
 //removes a specific element from a vector
 template<typename E,typename B> void removeFromVector(std::vector<B*>& v,E* e){
     for(auto it=v.begin();it!=v.end();){
@@ -88,16 +97,16 @@ template <typename E> void vector_clear(E& t){
 }
 
 //converts any type to its string representation
-template <typename E> std::string to_string(E t){ 
+template <typename E> std::string to_string(const E& t){ 
     return boost::lexical_cast<std::string>(t); 
 }
 //formats a number to have commas to represent thousandth places
-template<typename T> std::string convertNumToNumWithCommas(T n){
-    std::string r=to_string(n);
-    int p=r.length()-3;
-    while(p>0){
-        r.insert(p,",");
-        p-=3;
+template<typename T> std::string convertNumToNumWithCommas(const T& n){
+    std::string r = to_string(n);
+    int p = r.length()-3;
+    while(p > 0){
+        r.insert(p, ",");
+        p -= 3;
     }
     return r;
 }

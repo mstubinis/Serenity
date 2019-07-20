@@ -20,7 +20,7 @@ namespace epriv{
 
             static std::string fullscreen_quad_vertex;
             static std::string vertex_basic;
-            static std::string vertex_hud;
+            static std::string vertex_2DAPI;
             static std::string vertex_skybox;
                 
             static std::string lighting_vert;

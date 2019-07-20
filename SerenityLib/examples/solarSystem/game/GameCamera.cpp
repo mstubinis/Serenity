@@ -3,7 +3,7 @@
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Engine_Renderer.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Scene.h>
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -104,7 +104,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 #pragma region GameCamera
 
 
-GameCamera::GameCamera(float n, float f, Scene* scene):GameCamera(60,Resources::getWindowSize().x / (float)Resources::getWindowSize().y,n,f,scene) {
+GameCamera::GameCamera(float n, float f, Scene* scene):GameCamera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y),n,f,scene) {
 
 }
 GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a,r,n,f,scene){

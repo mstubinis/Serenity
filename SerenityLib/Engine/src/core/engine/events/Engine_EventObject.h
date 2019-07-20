@@ -78,7 +78,7 @@ namespace epriv{
             }
             wchar_t c = static_cast<wchar_t>(unicode);
             std::wstring ws(&c);
-            std::string res = std::string(ws.begin(), ws.end());
+            std::string res(ws.begin(), ws.end());
             res = res[0];
             return res;
         }

@@ -29,7 +29,7 @@ string epriv::EShaders::bullet_physics_vert;
 string epriv::EShaders::bullet_physcis_frag;
 string epriv::EShaders::fullscreen_quad_vertex;
 string epriv::EShaders::vertex_basic;
-string epriv::EShaders::vertex_hud;
+string epriv::EShaders::vertex_2DAPI;
 string epriv::EShaders::vertex_skybox;
 string epriv::EShaders::lighting_vert;
 string epriv::EShaders::stencil_passover;
@@ -283,7 +283,6 @@ epriv::EShaders::vertex_basic =
     "USE_LOG_DEPTH_VERTEX\n"
     "\n"
     "layout (location = 0) in vec3 position;\n"
-    //"//layout (location = 1) in float uv;\n"
     "layout (location = 1) in vec2 uv;\n"
     "layout (location = 2) in vec4 normal;\n" //Order is ZYXW
     "layout (location = 3) in vec4 binormal;\n"//Order is ZYXW
@@ -339,24 +338,21 @@ epriv::EShaders::vertex_basic +=
     "    TangentCameraPos = TBN * CameraPosition;\n"
     "    TangentFragPos = TBN * WorldPosition;\n"
     "\n"
-    //"    //UV = UnpackFloat32Into2Floats(uv);\n"
     "    UV = uv;\n"
     "}";
 #pragma endregion
 
-#pragma region VertexHUD
-epriv::EShaders::vertex_hud =
+#pragma region Vertex2DAPI
+epriv::EShaders::vertex_2DAPI =
     "layout (location = 0) in vec3 position;\n"
-    //"layout (location = 1) in float uv;\n"
     "layout (location = 1) in vec2 uv;\n"
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
     "varying vec2 UV;\n";
-epriv::EShaders::vertex_hud += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::vertex_hud +=
+epriv::EShaders::vertex_2DAPI += epriv::EShaders::float_into_2_floats;
+epriv::EShaders::vertex_2DAPI +=
     "void main(){\n"
-    //"    UV = UnpackFloat32Into2Floats(uv);\n"
     "    UV = uv;\n"
     "    gl_Position = VP * Model * vec4(position, 1.0);\n"
     "}";

@@ -3,6 +3,7 @@
 #include <core/engine/renderer/SMAA_LUT.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/textures/Texture.h>
+#include <core/engine/scene/Viewport.h>
 #include <core/ShaderProgram.h>
 
 using namespace Engine;
@@ -51,7 +52,7 @@ void epriv::Postprocess_SMAA::init() {
 
 
 void epriv::Postprocess_SMAA::passEdge(ShaderP& program, GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture, const unsigned int& outTexture) {
-    gbuffer.start(outTexture);
+    gbuffer.bindFramebuffers(outTexture);
     program.bind();
 
     Renderer::Settings::clear(true, false, true);//color, stencil is completely filled with 0's
@@ -71,14 +72,14 @@ void epriv::Postprocess_SMAA::passEdge(ShaderP& program, GBuffer& gbuffer, const
     Renderer::sendTexture("textureMap", gbuffer.getTexture(sceneTexture), 0);
     Renderer::sendTextureSafe("texturePredication", gbuffer.getTexture(GBufferType::Diffuse), 1);
 
-    Renderer::renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
+    Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
 
     glStencilMask(0xFFFFFFFF);
     glStencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 }
 void epriv::Postprocess_SMAA::passBlend(ShaderP& program, GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& outTexture) {
-    gbuffer.start(GBufferType::Normal);
+    gbuffer.bindFramebuffers(GBufferType::Normal);
     Renderer::Settings::clear(true, false, false); //clear color only
 
     program.bind();
@@ -93,27 +94,25 @@ void epriv::Postprocess_SMAA::passBlend(ShaderP& program, GBuffer& gbuffer, cons
     Renderer::sendUniform4Safe("SMAAInfo2Ints", MAX_SEARCH_STEPS_DIAG, AREATEX_MAX_DISTANCE, AREATEX_MAX_DISTANCE_DIAG, CORNER_ROUNDING);
     Renderer::sendUniform4Safe("SMAAInfo2Floats", AREATEX_PIXEL_SIZE.x, AREATEX_PIXEL_SIZE.y, AREATEX_SUBTEX_SIZE, (static_cast<float>(CORNER_ROUNDING) / 100.0f));
 
-    Renderer::renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
+    Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
 
     Renderer::GLDisable(GLState::STENCIL_TEST);
 }
 void epriv::Postprocess_SMAA::passNeighbor(ShaderP& program, GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
-    //gbuffer.start(GBufferType::Misc);
-    gbuffer.stop();
     program.bind();
     Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
     Renderer::sendTextureSafe("textureMap", gbuffer.getTexture(sceneTexture), 0); //need original final image from first smaa pass
     Renderer::sendTextureSafe("blend_tex", gbuffer.getTexture(GBufferType::Normal), 1);
 
-    Renderer::renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
+    Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
 }
 void epriv::Postprocess_SMAA::passFinal(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight) {
     /*
     //this pass is optional. lets skip it for now
-    //gbuffer.start(GBufferType::Lighting);
+    //gbuffer.bindFramebuffers(GBufferType::Lighting);
     gbuffer.stop();
     program.bind();
-    Renderer::renderFullscreenTriangle(fboWidth,fboHeight,0,0);
+    Renderer::renderFullscreenTriangle(fboWidth,fboHeight);
     */
 }
 

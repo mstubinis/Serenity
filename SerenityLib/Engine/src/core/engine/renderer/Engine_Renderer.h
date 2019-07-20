@@ -21,6 +21,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <SFML/Window.hpp>
 
+class  Viewport;
 class  Texture;
 class  Font;
 struct Entity;
@@ -63,16 +64,14 @@ namespace epriv{
             void _init(const char* name,uint w,uint h);
             void _resize(uint width, uint height);
 
-            void _render(
-                Camera&, const uint fboWidth, const uint fboHeight,bool HUD=true,
-                Entity* ignore=nullptr,const bool mainRenderFunc=true,const GLuint display_fbo=0, const GLuint display_rbo=0
-            );
+            void _render(Viewport&, Entity* ignore = nullptr, const bool mainRenderFunc = true, const GLuint display_fbo = 0, const GLuint display_rbo = 0);
             void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
             void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
-            void _bindShaderProgram(ShaderP*);
-            void _unbindShaderProgram();
-            void _bindMaterial(Material*);
-            void _unbindMaterial();
+            bool _bindShaderProgram(ShaderP*);
+            bool _unbindShaderProgram();
+            void _clear2DAPICommands();
+            bool _bindMaterial(Material*);
+            bool _unbindMaterial();
             void _genPBREnvMapData(Texture&,uint,uint);
     };
     struct OpenGLExtensionEnum final{
@@ -131,7 +130,7 @@ namespace Renderer{
     inline const GLint& getUniformLocUnsafe(const char* location);
 
     void setDepthFunc(const DepthFunc::Func&);
-    void setViewport(const uint& x, const uint& y, const uint& width, const uint& height);
+    bool setViewport(const uint& x, const uint& y, const uint& width, const uint& height);
     void bindFBO(const GLuint fbo);
     void bindFBO(epriv::FramebufferObject& rbo);
     void bindRBO(const GLuint rbo);
@@ -139,12 +138,12 @@ namespace Renderer{
     void bindReadFBO(const GLuint fbo);
     void bindDrawFBO(const GLuint fbo);
 
-    void bindTexture(const GLuint _textureType, const GLuint _textureObject);
-    void bindVAO(const GLuint _vaoObject);
+    bool bindTexture(const GLuint _textureType, const GLuint _textureObject);
+    bool bindVAO(const GLuint _vaoObject);
     void genAndBindTexture(const GLuint _textureType,GLuint& _textureObject);
     void genAndBindVAO(GLuint& _vaoObject);
     void deleteVAO(GLuint& _vaoObject);
-    void colorMask(const bool& r, const bool& g, const bool& b, const bool& a);
+    bool colorMask(const bool& r, const bool& g, const bool& b, const bool& a);
     void clearColor(const float& r, const float& g, const float& b, const float& a);
 
     void sendTexture(const char* location,const Texture& texture,const int& slot);

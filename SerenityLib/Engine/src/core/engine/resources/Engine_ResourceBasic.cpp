@@ -5,17 +5,17 @@
 
 using namespace std;
 
-EngineResource::EngineResource(string name){
+EngineResource::EngineResource(const string& name){
     m_Name = name;
     m_IsLoaded = false;
     m_UsageCount = 0;
 }
 EngineResource::~EngineResource(){
 }
-void EngineResource::setName(string name){ 
+void EngineResource::setName(const string& name){
     m_Name = name;
 }
-string& EngineResource::name(){
+const string& EngineResource::name() const {
     return m_Name;
 }
 void EngineResource::load(){

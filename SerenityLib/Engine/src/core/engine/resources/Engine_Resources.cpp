@@ -1,14 +1,14 @@
 #include <boost/make_shared.hpp>
 #include <core/engine/Engine.h>
 #include <core/engine/resources/Engine_BuiltInResources.h>
-#include <core/Skybox.h>
+#include <core/engine/scene/Skybox.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/MeshInstance.h>
 #include <core/Material.h>
-#include <core/Camera.h>
+#include <core/engine/scene/Camera.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/fonts/Font.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Scene.h>
 
 #include <core/engine/mesh/MeshRequest.h>
 #include <core/engine/resources/Handle.h>

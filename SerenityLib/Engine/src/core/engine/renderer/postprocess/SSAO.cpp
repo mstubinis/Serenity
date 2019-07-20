@@ -3,7 +3,7 @@
 #include <core/engine/renderer/FramebufferObject.h>
 
 #include <core/ShaderProgram.h>
-#include <core/Camera.h>
+#include <core/engine/scene/Camera.h>
 
 #include <glm/vec4.hpp>
 #include <random>
@@ -59,18 +59,19 @@ void epriv::Postprocess_SSAO::init() {
 }
 
 
-void epriv::Postprocess_SSAO::passSSAO(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, Camera& c) {
+void epriv::Postprocess_SSAO::passSSAO(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, Camera& camera) {
     program.bind();
-    const float& divisor = gbuffer.getSmallFBO()->divisor();
     if (RenderManager::GLSL_VERSION < 140) {
-        Renderer::sendUniformMatrix4Safe("CameraInvViewProj", c.getViewProjectionInverse());
-        Renderer::sendUniformMatrix4Safe("CameraInvProj", c.getProjectionInverse());
-        Renderer::sendUniform4Safe("CameraInfo1", glm::vec4(c.getPosition(), c.getNear()));
-        Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(c.getViewVector(), c.getFar()));
+        Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
+        Renderer::sendUniformMatrix4Safe("CameraInvProj", camera.getProjectionInverse());
+        Renderer::sendUniform4Safe("CameraInfo1", glm::vec4(camera.getPosition(), camera.getNear()));
+        Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
     }
-    const uint& x = static_cast<uint>(static_cast<float>(fboWidth) * divisor);
-    const uint& y = static_cast<uint>(static_cast<float>(fboHeight) * divisor);
-    Renderer::sendUniform2("ScreenSize", static_cast<float>(x), static_cast<float>(y));
+    const float& divisor      = gbuffer.getSmallFBO()->divisor();
+    const uint& screen_width  = static_cast<uint>(static_cast<float>(fboWidth) * divisor);
+    const uint& screen_height = static_cast<uint>(static_cast<float>(fboHeight) * divisor);
+
+    Renderer::sendUniform2("ScreenSize", static_cast<float>(screen_width), static_cast<float>(screen_height));
     Renderer::sendUniform4("SSAOInfo", m_ssao_radius, m_ssao_intensity, m_ssao_bias, m_ssao_scale);
     Renderer::sendUniform4("SSAOInfoA", 0, 0, m_ssao_samples, SSAO_NORMALMAP_SIZE);//change to 4f eventually?
 
@@ -78,13 +79,12 @@ void epriv::Postprocess_SSAO::passSSAO(ShaderP& program, GBuffer& gbuffer, const
     Renderer::sendTexture("gRandomMap", m_ssao_noise_texture, 1, GL_TEXTURE_2D);
     Renderer::sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 2);
 
-    Renderer::renderFullscreenTriangle(x, y);
+    Renderer::renderFullscreenTriangle(screen_width, screen_height);
 }
 
 
 void epriv::Postprocess_SSAO::passBlur(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const string& type, const unsigned int& texture) {
     program.bind();
-    const float& _divisor = gbuffer.getSmallFBO()->divisor();
     glm::vec2 hv(0.0f);
     if (type == "H") { hv = glm::vec2(1.0f, 0.0f); }
     else { hv = glm::vec2(0.0f, 1.0f); }
@@ -94,8 +94,9 @@ void epriv::Postprocess_SSAO::passBlur(ShaderP& program, GBuffer& gbuffer, const
     Renderer::sendUniform4("Data", m_ssao_blur_radius, 0.0f, hv.x, hv.y);
     Renderer::sendTexture("image", gbuffer.getTexture(texture), 0);
 
-    const uint& x = static_cast<uint>(static_cast<float>(fboWidth) * _divisor);
-    const uint& y = static_cast<uint>(static_cast<float>(fboHeight) * _divisor);
+    const float& divisor = gbuffer.getSmallFBO()->divisor();
+    const uint& x        = static_cast<uint>(static_cast<float>(fboWidth) * divisor);
+    const uint& y        = static_cast<uint>(static_cast<float>(fboHeight) * divisor);
     Renderer::renderFullscreenTriangle(x, y);
 }
 

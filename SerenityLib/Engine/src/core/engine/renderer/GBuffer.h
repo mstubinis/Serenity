@@ -4,10 +4,11 @@
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <memory>
 #include <core/engine/Engine_Utils.h>
 
 class Texture;
+class Viewport;
+class Camera;
 namespace Engine{
 namespace epriv{
     class FramebufferTexture;
@@ -17,23 +18,33 @@ namespace epriv{
     _TOTAL};};
     class GBuffer final{
         private:
-            class impl; std::unique_ptr<impl> m_i;
+            FramebufferObject*                m_FBO;
+            FramebufferObject*                m_SmallFBO;
+            std::vector<FramebufferTexture*>  m_Buffers;
+            uint                              m_Width;
+            uint                              m_Height;
+
+            void internalBuildTextureBuffer(FramebufferObject* fbo, const uint& t, const uint& w, const uint& h);
+            void internalDestruct();
+            void internalStart(const uint* types, const uint& size, const std::string& channels, const bool first_fbo);
+
         public:
-            GBuffer(uint width,uint height);
+            GBuffer(const uint& width, const uint& height);
             ~GBuffer();
 
-            void resize(uint width,uint height);
+            bool resize(const uint& width, const uint& height);
 
-            void start(uint,std::string = "RGBA",bool = true);
-            void start(uint,uint,std::string = "RGBA",bool = true);
-            void start(uint,uint,uint,std::string = "RGBA",bool = true);
-            void start(uint,uint,uint,uint,std::string = "RGBA",bool = true);
-            void start(uint,uint,uint,uint,uint,std::string = "RGBA",bool = true);
-            void stop(GLuint fbo = 0,GLuint rbo = 0);
+            void bindFramebuffers(const uint, const std::string& channels = "RGBA", const bool isMainFBO = true);
+            void bindFramebuffers(const uint, const uint, const std::string& channels = "RGBA", const bool isMainFBO = true);
+            void bindFramebuffers(const uint, const uint, const uint, const std::string& channels = "RGBA", const bool isMainFBO = true);
+            void bindFramebuffers(const uint, const uint, const uint, const uint, const std::string& channels = "RGBA", const bool isMainFBO = true);
+            void bindFramebuffers(const uint, const uint, const uint, const uint, const uint, const std::string& channels = "RGBA", const bool isMainFBO = true);
+
+            void bindBackbuffer(Viewport&, const GLuint final_fbo = 0, const GLuint final_rbo = 0);
 
             const std::vector<FramebufferTexture*>& getBuffers() const;
-            FramebufferTexture& getBuffer(uint);
-            Texture& getTexture(uint);
+            FramebufferTexture& getBuffer(const uint);
+            Texture& getTexture(const uint);
 
             FramebufferObject* getMainFBO();
             FramebufferObject* getSmallFBO();

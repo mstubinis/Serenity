@@ -15,8 +15,8 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/fonts/Font.h>
 #include <core/engine/textures/Texture.h>
-#include <core/Scene.h>
-#include <core/Camera.h>
+#include <core/engine/scene/Scene.h>
+#include <core/engine/scene/Camera.h>
 #include <core/Material.h>
 
 #include <glm/vec4.hpp>

@@ -10,8 +10,8 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/MeshInstance.h>
 #include <core/Material.h>
-#include <core/Camera.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Camera.h>
+#include <core/engine/scene/Scene.h>
 #include <core/engine/textures/Texture.h>
 
 #include <glm/gtx/transform.hpp>

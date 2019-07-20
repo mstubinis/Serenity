@@ -12,7 +12,7 @@ using namespace std;
 epriv::DebugManager::DebugManager(const char* name, uint w, uint h){ 
     clock = sf::Clock();
     output = "";
-    m_logicTime = m_physicsTime = m_renderTime = m_soundTime = m_displayTime = 0;
+    m_logicTime = m_physicsTime = m_renderTime = m_soundTime = 0;
 
     m_deltaTime = 0;
     m_totalTime = 0.0;
@@ -40,7 +40,7 @@ void epriv::DebugManager::addDebugLine(string message) {
     text_queue.emplace_back(message);
 }
 void epriv::DebugManager::calculate() {
-    m_deltaTime = (m_logicTime + m_physicsTime + m_renderTime + m_displayTime + m_soundTime);
+    m_deltaTime = (m_logicTime + m_physicsTime + m_renderTime + m_soundTime);
     m_totalTime += dt();
     ++output_frame;
     if (output_frame >= output_frame_delay) {
@@ -62,14 +62,12 @@ void epriv::DebugManager::calculate_logic() { m_logicTime = clock.restart().asMi
 void epriv::DebugManager::calculate_physics() { m_physicsTime = clock.restart().asMicroseconds(); }
 void epriv::DebugManager::calculate_sounds() { m_soundTime = clock.restart().asMicroseconds(); }
 void epriv::DebugManager::calculate_render() { m_renderTime = clock.restart().asMicroseconds(); }
-void epriv::DebugManager::calculate_display() { m_displayTime = clock.restart().asMicroseconds(); }
 
 const double epriv::DebugManager::dt() const { return (double)((double)m_deltaTime / divisor); }
 const double epriv::DebugManager::logicTime() const { return (double)((double)m_logicTime / divisor); }
 const double epriv::DebugManager::physicsTime() const { return (double)((double)m_physicsTime / divisor); }
 const double epriv::DebugManager::renderTime() const { return (double)((double)m_renderTime / divisor); }
 const double epriv::DebugManager::soundsTime() const { return (double)((double)m_soundTime / divisor); }
-const double epriv::DebugManager::displayTime() const { return (double)((double)m_displayTime / divisor); }
 const double epriv::DebugManager::totalTime() const{ return m_totalTime; }
 
 string epriv::DebugManager::timestamp() {
@@ -82,17 +80,16 @@ string& epriv::DebugManager::reportTime(uint _decimals) {
     decimals = _decimals;
     if ((output_frame >= output_frame_delay - 1) || output_frame_delay == 0) {
         uint fps = uint(1.0 / ((double)m_deltaTime / divisor));
-        stringstream st1, st2, st3, st4, st5, st6;
+        stringstream st1, st2, st3, st4, st5;
         st1 << std::fixed << std::setprecision(decimals) << logicTime() * 1000.0;
         st2 << std::fixed << std::setprecision(decimals) << physicsTime() * 1000.0;
         st5 << std::fixed << std::setprecision(decimals) << soundsTime() * 1000.0;
         st3 << std::fixed << std::setprecision(decimals) << renderTime() * 1000.0;
         st4 << std::fixed << std::setprecision(decimals) << dt() * 1000.0;
-        st6 << std::fixed << std::setprecision(decimals) << displayTime() * 1000.0;
-        string s1 = st1.str(); string s2 = st2.str(); string s3 = st3.str(); string s4 = st4.str(); string s5 = st5.str(); string s6 = st6.str();
+        string s1 = st1.str(); string s2 = st2.str(); string s3 = st3.str(); string s4 = st4.str(); string s5 = st5.str();
 
         output = "Update Time:  " + s1 + " ms" + "\nPhysics Time: " + s2 + " ms" + "\nSounds Time:  " + s5 + " ms" +
-            "\nRender Time:  " + s3 + " ms" + "\nDisplay Time: " + s6 + " ms" + "\nDelta Time:   " + s4 + " ms" +
+            "\nRender Time:  " + s3 + " ms" + "\nDelta Time:   " + s4 + " ms" +
             "\nFPS: " + to_string(fps);
     }
     return output;

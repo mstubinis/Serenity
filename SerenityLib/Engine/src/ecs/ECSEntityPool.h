@@ -4,7 +4,7 @@
 
 #include <ecs/SparseSet.h>
 #include <ecs/EntityDataRequest.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Scene.h>
 
 namespace Engine {
 namespace epriv {

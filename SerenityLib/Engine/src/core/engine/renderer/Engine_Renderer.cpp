@@ -8,14 +8,15 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
-#include <core/Camera.h>
+#include <core/engine/scene/Camera.h>
 #include <core/engine/lights/Lights.h>
 #include <core/engine/fonts/Font.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Scene.h>
+#include <core/engine/scene/Viewport.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/MeshInstance.h>
-#include <core/Skybox.h>
+#include <core/engine/scene/Skybox.h>
 #include <core/Material.h>
 #include <ecs/ComponentBody.h>
 
@@ -38,12 +39,12 @@ using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
 
-Mesh* epriv::InternalMeshes::PointLightBounds = nullptr;
-Mesh* epriv::InternalMeshes::RodLightBounds = nullptr;
-Mesh* epriv::InternalMeshes::SpotLightBounds = nullptr;
+Mesh* epriv::InternalMeshes::PointLightBounds    = nullptr;
+Mesh* epriv::InternalMeshes::RodLightBounds      = nullptr;
+Mesh* epriv::InternalMeshes::SpotLightBounds     = nullptr;
 
 ShaderP* epriv::InternalShaderPrograms::Deferred = nullptr;
-ShaderP* epriv::InternalShaderPrograms::Forward = nullptr;
+ShaderP* epriv::InternalShaderPrograms::Forward  = nullptr;
 
 epriv::RenderManager* renderManager;
 epriv::RenderManager::impl* renderManagerImpl;
@@ -70,12 +71,12 @@ namespace Engine{
             BulletPhysicsVertex,
             BulletPhysicsFrag,
             VertexBasic,
-            VertexHUD,
+            Vertex2DAPI,
             VertexSkybox,
             LightingVertex,
             ForwardFrag,
             DeferredFrag,
-            DeferredFragHUD,
+            DeferredFrag2DAPI,
             DeferredFragSkybox,
             DeferredFragSkyboxFake,
             CopyDepthFrag,
@@ -109,7 +110,7 @@ namespace Engine{
             //Deferred, //using the internal resource static one instead
             //Forward, //using the internal resource static one instead
             BulletPhysics,
-            DeferredHUD,
+            Deferred2DAPI,
             DeferredGodRays,
             DeferredBlur,
             DeferredBlurSSAO,
@@ -207,9 +208,7 @@ class epriv::RenderManager::impl final{
         GBuffer* m_GBuffer;
         glm::mat4 m_2DProjectionMatrix;
 
-        queue<boost_func> m_2DAPICommands;
-
-        queue<TextureRenderInfo> m_TexturesToBeRendered;
+        vector<boost_func> m_2DAPICommands;
 
         vector<glm::vec3> text_pts;
         vector<glm::vec2> text_uvs;
@@ -283,20 +282,20 @@ class epriv::RenderManager::impl final{
             }
             */
 
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_Ansiotropic_Filtering] = _checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_Ansiotropic_Filtering] = _checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_draw_instanced] = _checkOpenGLExtension("GL_EXT_draw_instanced");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_draw_instanced] = _checkOpenGLExtension("GL_ARB_draw_instanced");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_separate_shader_objects] = _checkOpenGLExtension("GL_EXT_separate_shader_objects");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_separate_shader_objects] = _checkOpenGLExtension("GL_ARB_separate_shader_objects");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_Ansiotropic_Filtering]    = _checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_Ansiotropic_Filtering]    = _checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_draw_instanced]           = _checkOpenGLExtension("GL_EXT_draw_instanced");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_draw_instanced]           = _checkOpenGLExtension("GL_ARB_draw_instanced");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_separate_shader_objects]  = _checkOpenGLExtension("GL_EXT_separate_shader_objects");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_separate_shader_objects]  = _checkOpenGLExtension("GL_ARB_separate_shader_objects");
             OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_explicit_attrib_location] = _checkOpenGLExtension("GL_EXT_explicit_attrib_location");
             OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_explicit_attrib_location] = _checkOpenGLExtension("GL_ARB_explicit_attrib_location");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_geometry_shader_4] = _checkOpenGLExtension("GL_EXT_geometry_shader4");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_geometry_shader_4] = _checkOpenGLExtension("GL_ARB_geometry_shader4");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_compute_shader] = _checkOpenGLExtension("GL_EXT_compute_shader");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_compute_shader] = _checkOpenGLExtension("GL_ARB_compute_shader");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_tessellation_shader] = _checkOpenGLExtension("GL_EXT_tessellation_shader");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_tessellation_shader] = _checkOpenGLExtension("GL_ARB_tessellation_shader");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_geometry_shader_4]        = _checkOpenGLExtension("GL_EXT_geometry_shader4");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_geometry_shader_4]        = _checkOpenGLExtension("GL_ARB_geometry_shader4");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_compute_shader]           = _checkOpenGLExtension("GL_EXT_compute_shader");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_compute_shader]           = _checkOpenGLExtension("GL_ARB_compute_shader");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_tessellation_shader]      = _checkOpenGLExtension("GL_EXT_tessellation_shader");
+            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_tessellation_shader]      = _checkOpenGLExtension("GL_ARB_tessellation_shader");
 #pragma endregion
 
             //dummy vao
@@ -318,7 +317,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaders.emplace_back(EShaders::bullet_physics_vert, ShaderType::Vertex, false);
             m_InternalShaders.emplace_back(EShaders::bullet_physcis_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::vertex_basic, ShaderType::Vertex, false);
-            m_InternalShaders.emplace_back(EShaders::vertex_hud, ShaderType::Vertex, false);
+            m_InternalShaders.emplace_back(EShaders::vertex_2DAPI, ShaderType::Vertex, false);
             m_InternalShaders.emplace_back(EShaders::vertex_skybox, ShaderType::Vertex, false);
             m_InternalShaders.emplace_back(EShaders::lighting_vert, ShaderType::Vertex, false);
             m_InternalShaders.emplace_back(EShaders::forward_frag, ShaderType::Fragment, false);
@@ -356,7 +355,7 @@ class epriv::RenderManager::impl final{
             InternalShaderPrograms::Forward = new ShaderP("Forward", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::ForwardFrag]);
 
             m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics] = new ShaderP("Bullet_Physics", m_InternalShaders[EngineInternalShaders::BulletPhysicsVertex], m_InternalShaders[EngineInternalShaders::BulletPhysicsFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD] = new ShaderP("Deferred_HUD", m_InternalShaders[EngineInternalShaders::VertexHUD], m_InternalShaders[EngineInternalShaders::DeferredFragHUD]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI] = new ShaderP("Deferred_2DAPI", m_InternalShaders[EngineInternalShaders::Vertex2DAPI], m_InternalShaders[EngineInternalShaders::DeferredFrag2DAPI]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays] = new ShaderP("Deferred_GodsRays", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::GodRaysFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur] = new ShaderP("Deferred_Blur", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BlurFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlurSSAO] = new ShaderP("Deferred_Blur_SSAO", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::SSAOBlurFrag]);
@@ -1162,8 +1161,8 @@ class epriv::RenderManager::impl final{
             sfImageCheckers.create(8, 8, sf::Color::White);
 
             uint count = 0;
-            for (int i = 0; i < sfImageCheckers.getSize().x; ++i) {
-                for (int j = 0; j < sfImageCheckers.getSize().y; ++j) {
+            for (uint i = 0; i < sfImageCheckers.getSize().x; ++i) {
+                for (uint j = 0; j < sfImageCheckers.getSize().y; ++j) {
                     if ((count % 2 == 0 && i % 2 == 0) || (count % 2 != 0 && i % 2 == 1)) {
                         sfImageCheckers.setPixel(i, j, sf::Color::Red);
                     }
@@ -1196,7 +1195,6 @@ class epriv::RenderManager::impl final{
     
             //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very odd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
             GLEnable(GLState::DEPTH_CLAMP);
-
 
 
             epriv::Postprocess_SMAA::SMAA.init();
@@ -1390,18 +1388,19 @@ class epriv::RenderManager::impl final{
             clear_color.a = a;
             glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
         }
-        void _colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
+        bool _colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
             auto _r = static_cast<GLboolean>(r);
             auto _g = static_cast<GLboolean>(g);
             auto _b = static_cast<GLboolean>(b);
             auto _a = static_cast<GLboolean>(a);
             if (_r == color_mask_r && _g == color_mask_g && _b == color_mask_b && _a == color_mask_a)
-                return;
+                return false;
             color_mask_r = _r;
             color_mask_g = _g;
             color_mask_b = _b;
             color_mask_a = _a;
             glColorMask(color_mask_r, color_mask_g, color_mask_b, color_mask_a);
+            return true;
         }
         void _cullFace(const uint& s){
             //0 = back | 1 = front | 2 = front and back
@@ -1416,11 +1415,12 @@ class epriv::RenderManager::impl final{
                 cull_face_status = 2;
             }
         }
-        void _setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
+        bool _setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
             if(gl_viewport_data.x == x && gl_viewport_data.y == y && gl_viewport_data.z == w && gl_viewport_data.w == h) 
-                return;
+                return false;
             glViewport(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(w), static_cast<GLsizei>(h));
             gl_viewport_data = glm::uvec4(x,y,w,h);
+            return true;
         }
         void _bindReadFBO(const uint& f){
             if(renderManager->glSM.current_bound_read_fbo != f){
@@ -1719,12 +1719,12 @@ class epriv::RenderManager::impl final{
 
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
         }
-        void _passGeometry(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, Entity* ignore){
+        void _passGeometry(GBuffer& gbuffer, Camera& c){
             Scene& scene = *Resources::getCurrentScene();
             const glm::vec3& clear = scene.getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
-            gbuffer.start(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
+            gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
 
             Settings::clear(true,true,true); // (0,0,0,0)
             
@@ -1758,17 +1758,17 @@ class epriv::RenderManager::impl final{
 
             InternalScenePublicInterface::RenderGeometryTransparent(scene,c);
         }
-        void _passForwardRendering(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, Entity* ignore){
+        void _passForwardRendering(GBuffer& gbuffer, Camera& c){
             Scene& scene = *Resources::getCurrentScene();
 
-            gbuffer.start(GBufferType::Diffuse);
+            gbuffer.bindFramebuffers(GBufferType::Diffuse);
             
             //RENDER NORMAL OBJECTS HERE
             InternalScenePublicInterface::RenderForwardOpaque(scene,c);
 
             InternalScenePublicInterface::RenderForwardTransparent(scene,c);
         }
-        void _passCopyDepth(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
+        void _passCopyDepth(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth]->bind();
 
@@ -1870,7 +1870,7 @@ class epriv::RenderManager::impl final{
             }
             GLDisable(GLState::STENCIL_TEST);
         }
-        void _passStencil(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight){
+        void _passStencil(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::StencilPass]->bind();
 
@@ -1894,7 +1894,7 @@ class epriv::RenderManager::impl final{
 
             Renderer::colorMask(true, true, true, true);
         }
-        void _passBlur(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,string type, GLuint texture){
+        void _passBlur(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight,string type, GLuint texture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur]->bind();
 
             const float& divisor = gbuffer.getSmallFBO()->divisor();
@@ -1914,13 +1914,12 @@ class epriv::RenderManager::impl final{
             sendUniform4("DataA", epriv::Postprocess_Bloom::Bloom.blur_radius,0.0f,hv.x,hv.y);
             sendTexture("image",gbuffer.getTexture(texture),0);
 
-            const uint _x = static_cast<uint>(static_cast<float>(fboWidth) * divisor);
-            const uint _y = static_cast<uint>(static_cast<float>(fboHeight) * divisor);
-            _renderFullscreenTriangle(_x,_y,0,0);
+            const uint screen_width = static_cast<uint>(static_cast<float>(fboWidth) * divisor);
+            const uint screen_height = static_cast<uint>(static_cast<float>(fboHeight) * divisor);
+            _renderFullscreenTriangle(screen_width, screen_height, 0, 0);
         }
-        void _passFinal(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture){
+        void _passFinal(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal]->bind();
-
             sendUniform1Safe("HasBloom", static_cast<int>(epriv::Postprocess_Bloom::Bloom.bloom));
             sendUniform1Safe("HasFog", static_cast<int>(epriv::Postprocess_Fog::Fog.fog));
 
@@ -1941,7 +1940,6 @@ class epriv::RenderManager::impl final{
             sendUniformMatrix4("Model", m_IdentityMat4);
             sendUniformMatrix4("VP", p);
             sendUniform2Safe("screenSizeDivideBy2", w2, h2);
-            setViewport(startX, startY, width, height);
             m_FullscreenQuad->render();
         }
         void _renderFullscreenTriangle(const uint& width, const uint& height,uint startX,uint startY){
@@ -1951,73 +1949,77 @@ class epriv::RenderManager::impl final{
             sendUniformMatrix4("Model", m_IdentityMat4);
             sendUniformMatrix4("VP", p);
             sendUniform2Safe("screenSizeDivideBy2", w2, h2);
-            setViewport(startX, startY, width, height);
             m_FullscreenTriangle->render();
         }
-        void _render(GBuffer& gbuffer, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool& HUD, Entity* ignore,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
-            //TODO: find out why facing a certain direction causes around 2 - 3 ms frame spike times. determine if this is due to an object or a rendering
-            //algorithm. also find out why enabling ssao REDUCES frame ms time. use opengl timers to isolate the troubling functions.
-            
-            Scene& s = *Resources::getCurrentScene();
+        
+        void _startupRenderFrame(GBuffer& gbuffer, Viewport& viewport, Camera& camera, const glm::uvec4& dimensions) {
+            const auto& winSize = Resources::getWindowSize();
+            if (viewport.isAspectRatioSynced()) {
+                camera.setAspect(dimensions.z / static_cast<float>(dimensions.w));
+            }
+            Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+            gbuffer.resize(dimensions.z, dimensions.w);
+            Renderer::scissorDisable();
+            m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(winSize.x), 0.0f, static_cast<float>(winSize.y), 0.005f, 3000.0f);
             //this is god awful and ugly, but its needed. definately find a way to refactor this properly
             for (uint i = 0; i < 9; ++i) {
                 glActiveTexture(GL_TEXTURE0 + i);
                 glBindTexture(GL_TEXTURE_2D, 0);
                 glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
             }
+        }
+        
+        void _render(GBuffer& gbuffer, Viewport& viewport, Entity* ignore,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
+            //TODO: find out why facing a certain direction causes around 2 - 3 ms frame spike times. determine if this is due to an object or a rendering
+            //algorithm. also find out why enabling ssao REDUCES frame ms time. use opengl timers to isolate the troubling functions.
+            
+            Scene&  scene                = const_cast<Scene&>(viewport.getScene());
+            Camera& camera               = const_cast<Camera&>(viewport.getCamera());
+            const glm::uvec4& dimensions = viewport.getViewportDimensions();
+
+            _startupRenderFrame(gbuffer, viewport, camera, dimensions);
+
             if(mainRenderFunc){
                 #pragma region Camera UBO
                 if(RenderManager::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA){  
                     //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
                     /*
                     //same simulation and render space
-                    m_UBOCameraData.View = camera.getView();
-                    m_UBOCameraData.Proj = camera.getProjection();
-                    m_UBOCameraData.ViewProj = camera.getViewProjection();
-                    m_UBOCameraData.InvProj = camera.getProjectionInverse();
-                    m_UBOCameraData.InvView = camera.getViewInverse();
+                    m_UBOCameraData.View        = camera.getView();
+                    m_UBOCameraData.Proj        = camera.getProjection();
+                    m_UBOCameraData.ViewProj    = camera.getViewProjection();
+                    m_UBOCameraData.InvProj     = camera.getProjectionInverse();
+                    m_UBOCameraData.InvView     = camera.getViewInverse();
                     m_UBOCameraData.InvViewProj = camera.getViewProjectionInverse();
-                    m_UBOCameraData.Info1 = glm::vec4(camera.getPosition(),camera.getNear());
-                    m_UBOCameraData.Info2 = glm::vec4(camera.getViewVector(),camera.getFar());
-                    m_UBOCameraData.Info3 = glm::vec4(0.0f,0.0f,0.0f, 0.0f);
+                    m_UBOCameraData.Info1       = glm::vec4(camera.getPosition(),camera.getNear());
+                    m_UBOCameraData.Info2       = glm::vec4(camera.getViewVector(),camera.getFar());
+                    m_UBOCameraData.Info3       = glm::vec4(0.0f,0.0f,0.0f, 0.0f);
                     */
                     
-                    //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders by the camera's real simulation position
+                    //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders
+                    //by the camera's real simulation position
                     //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
-                    m_UBOCameraData.View = ComponentCamera_Functions::GetViewNoTranslation(camera);
-                    m_UBOCameraData.Proj = camera.getProjection();
-                    m_UBOCameraData.ViewProj = ComponentCamera_Functions::GetViewProjectionNoTranslation(camera);
-                    m_UBOCameraData.InvProj = camera.getProjectionInverse();
-                    m_UBOCameraData.InvView = ComponentCamera_Functions::GetViewInverseNoTranslation(camera);
+                    m_UBOCameraData.View        = ComponentCamera_Functions::GetViewNoTranslation(camera);
+                    m_UBOCameraData.Proj        = camera.getProjection();
+                    m_UBOCameraData.ViewProj    = ComponentCamera_Functions::GetViewProjectionNoTranslation(camera);
+                    m_UBOCameraData.InvProj     = camera.getProjectionInverse();
+                    m_UBOCameraData.InvView     = ComponentCamera_Functions::GetViewInverseNoTranslation(camera);
                     m_UBOCameraData.InvViewProj = ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(camera);
-                    m_UBOCameraData.Info1 = glm::vec4(0.001f,0.001f,0.001f, camera.getNear());
-                    m_UBOCameraData.Info2 = glm::vec4(ComponentCamera_Functions::GetViewVectorNoTranslation(camera), camera.getFar());
-                    m_UBOCameraData.Info3 = glm::vec4(camera.getPosition(), 0.0f);
+                    m_UBOCameraData.Info1       = glm::vec4(0.001f,0.001f,0.001f, camera.getNear());
+                    m_UBOCameraData.Info2       = glm::vec4(ComponentCamera_Functions::GetViewVectorNoTranslation(camera), camera.getFar());
+                    m_UBOCameraData.Info3       = glm::vec4(camera.getPosition(), 0.0f);
                     
                     UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);           
                 }
                 #pragma endregion
-                #pragma region LightProbes
-                //if(s.lightProbes().size() > 0){
-                    /*
-                    for(auto& lightProbe:s->lightProbes()){
-                        lightProbe.second->renderCubemap(
-                            m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude],
-                            m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapPrefilterEnv]
-                        );
-                    }
-                    */
-                    //m_GBuffer->resize(fboWidth,fboHeight);
-                //}
-                #pragma endregion
             }
-            _passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
+            _passGeometry(gbuffer,camera);
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
 
             #pragma region GodRays
             Renderer::GLDisable(GLState::BLEND_0);
-            gbuffer.start(GBufferType::GodRays, "RGB", false);
+            gbuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
             Settings::clear(true,false,false); //this is needed, clear color should be (0,0,0,0)
             auto& godRaysPlatform = epriv::Postprocess_GodRays::GodRays;
             if (godRaysPlatform.godRays && godRaysPlatform.sun){
@@ -2037,7 +2039,7 @@ class epriv::RenderManager::impl final{
                     }
                     alpha = 1.0f - alpha;
                     auto& godRaysShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays];
-                    godRaysPlatform.pass(godRaysShader, gbuffer, fboWidth, fboHeight, glm::vec2(sp.x, sp.y),alpha); 
+                    godRaysPlatform.pass(godRaysShader, gbuffer, dimensions.z, dimensions.w, glm::vec2(sp.x, sp.y),alpha);
                 }
             }
 
@@ -2048,24 +2050,24 @@ class epriv::RenderManager::impl final{
             //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
 
 
-            gbuffer.start(GBufferType::Bloom, GBufferType::GodRays, "A", false);
+            gbuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
             Settings::clear(true, false, false); //0,0,0,0
 
 
 
             if (epriv::Postprocess_SSAO::SSAO.m_ssao) {
                 GLEnable(GLState::BLEND_0);//yes this is absolutely needed
-                gbuffer.start(GBufferType::Bloom, "A", false);
+                gbuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
                 auto& ssaoShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO];
-                epriv::Postprocess_SSAO::SSAO.passSSAO(ssaoShader, gbuffer, fboWidth, fboHeight, camera);
+                epriv::Postprocess_SSAO::SSAO.passSSAO(ssaoShader, gbuffer, dimensions.z, dimensions.w, camera);
                 if (epriv::Postprocess_SSAO::SSAO.m_ssao_do_blur) {
                     GLDisable(GLState::BLEND_0); //yes this is absolutely needed
                     auto& ssaoBlurShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlurSSAO];
                     for (uint i = 0; i < epriv::Postprocess_SSAO::SSAO.m_ssao_blur_num_passes; ++i) {
-                        gbuffer.start(GBufferType::GodRays, "A", false);
-                        epriv::Postprocess_SSAO::SSAO.passBlur(ssaoBlurShader, gbuffer, fboWidth, fboHeight, "H", GBufferType::Bloom);
-                        gbuffer.start(GBufferType::Bloom, "A", false);
-                        epriv::Postprocess_SSAO::SSAO.passBlur(ssaoBlurShader, gbuffer, fboWidth, fboHeight, "V", GBufferType::GodRays);
+                        gbuffer.bindFramebuffers(GBufferType::GodRays, "A", false);
+                        epriv::Postprocess_SSAO::SSAO.passBlur(ssaoBlurShader, gbuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
+                        gbuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
+                        epriv::Postprocess_SSAO::SSAO.passBlur(ssaoBlurShader, gbuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
                     }
                 }    
             }else{
@@ -2075,7 +2077,7 @@ class epriv::RenderManager::impl final{
 
             GLDisable(GLState::BLEND_0);
 
-            _passStencil(gbuffer,camera,fboWidth,fboHeight); //confirmed, stencil rejection does help
+            _passStencil(gbuffer, dimensions.z, dimensions.w); //confirmed, stencil rejection does help
             
             GLEnable(GLState::BLEND_0);
             glBlendEquation(GL_FUNC_ADD);
@@ -2083,36 +2085,36 @@ class epriv::RenderManager::impl final{
             
             //this needs to be cleaned up
             if(lighting){
-                gbuffer.start(GBufferType::Lighting,"RGB");
+                gbuffer.bindFramebuffers(GBufferType::Lighting,"RGB");
                 Settings::clear(true,false,false);//this is needed for godrays 0,0,0,0
-                _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
+                _passLighting(gbuffer,camera, dimensions.z, dimensions.w,mainRenderFunc);
             }
             
             GLDisable(GLState::BLEND_0);
             GLDisable(GLState::STENCIL_TEST);
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
-            _passForwardRendering(gbuffer,camera,fboWidth,fboHeight,nullptr);
+            _passForwardRendering(gbuffer,camera);
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             
             #pragma region HDR and GodRays addition
-            gbuffer.start(GBufferType::Misc);
+            gbuffer.bindFramebuffers(GBufferType::Misc);
             auto& hdrShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR];
-            epriv::Postprocess_HDR::HDR.pass(hdrShader, gbuffer, fboWidth, fboHeight, godRaysPlatform.godRays, lighting, godRaysPlatform.factor);
+            epriv::Postprocess_HDR::HDR.pass(hdrShader, gbuffer, dimensions.z, dimensions.w, godRaysPlatform.godRays, lighting, godRaysPlatform.factor);
             #pragma endregion
             
             #pragma region Bloom
             //TODO: possible optimization: use stencil buffer to reject completely black pixels during blur passes
             if (epriv::Postprocess_Bloom::Bloom.bloom) {
-                gbuffer.start(GBufferType::Bloom, "RGB", false);
+                gbuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
                 auto& bloomShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom];
-                epriv::Postprocess_Bloom::Bloom.pass(bloomShader, gbuffer, fboWidth, fboHeight, GBufferType::Lighting);
+                epriv::Postprocess_Bloom::Bloom.pass(bloomShader, gbuffer, dimensions.z, dimensions.w, GBufferType::Lighting);
                 for (uint i = 0; i < epriv::Postprocess_Bloom::Bloom.num_passes; ++i) {
-                    gbuffer.start(GBufferType::GodRays, "RGB", false);
-                    _passBlur(gbuffer, camera, fboWidth, fboHeight, "H", GBufferType::Bloom);
-                    gbuffer.start(GBufferType::Bloom, "RGB", false);
-                    _passBlur(gbuffer, camera, fboWidth, fboHeight, "V", GBufferType::GodRays);
+                    gbuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
+                    _passBlur(gbuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
+                    gbuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
+                    _passBlur(gbuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
                 }
             }
             #pragma endregion
@@ -2122,8 +2124,8 @@ class epriv::RenderManager::impl final{
             #pragma region DOF
             if (epriv::Postprocess_DepthOfField::DOF.dof) {
                 auto& dofShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF];
-                gbuffer.start(outTexture);
-                epriv::Postprocess_DepthOfField::DOF.pass(dofShader,gbuffer, fboWidth, fboHeight, sceneTexture);
+                gbuffer.bindFramebuffers(outTexture);
+                epriv::Postprocess_DepthOfField::DOF.pass(dofShader,gbuffer, dimensions.z, dimensions.w, sceneTexture);
                 sceneTexture = GBufferType::Lighting;
                 outTexture = GBufferType::Misc;
             }
@@ -2131,24 +2133,24 @@ class epriv::RenderManager::impl final{
 
             #pragma region Finalization and AA
             if (!mainRenderFunc || aa_algorithm == AntiAliasingAlgorithm::None){
-                gbuffer.stop(fbo, rbo);
-                _passFinal(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
+                gbuffer.bindBackbuffer(viewport, fbo, rbo);
+                _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
             }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::FXAA){
-                gbuffer.start(outTexture);
-                _passFinal(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
+                gbuffer.bindFramebuffers(outTexture);
+                _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
                 sceneTexture = outTexture;
-                gbuffer.stop(fbo, rbo);
+                gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 auto& fxaaShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA];
-                epriv::Postprocess_FXAA::FXAA.pass(fxaaShader, gbuffer, fboWidth, fboHeight, sceneTexture);
+                epriv::Postprocess_FXAA::FXAA.pass(fxaaShader, gbuffer, dimensions.z, dimensions.w, sceneTexture);
             }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::SMAA){
-                gbuffer.start(outTexture);
-                _passFinal(gbuffer, camera, fboWidth, fboHeight, sceneTexture);
+                gbuffer.bindFramebuffers(outTexture);
+                _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
                 auto copy = sceneTexture;
                 sceneTexture = outTexture;
                 outTexture = copy;
 
-                const float& _fboWidth  = static_cast<float>(fboWidth);
-                const float& _fboHeight = static_cast<float>(fboHeight);
+                const float& _fboWidth  = static_cast<float>(dimensions.z);
+                const float& _fboHeight = static_cast<float>(dimensions.w);
                 const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / _fboWidth, 1.0f / _fboHeight, _fboWidth, _fboHeight);
 
                 auto& edgeProgram     = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA1];
@@ -2156,11 +2158,17 @@ class epriv::RenderManager::impl final{
                 auto& neighborProgram = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3];
                 auto& finalProgram    = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4];
 
-                epriv::Postprocess_SMAA::SMAA.passEdge(edgeProgram, gbuffer, SMAA_PIXEL_SIZE, fboWidth, fboHeight, sceneTexture, outTexture);
-                epriv::Postprocess_SMAA::SMAA.passBlend(blendProgram, gbuffer, SMAA_PIXEL_SIZE, fboWidth, fboHeight, outTexture);
-                Renderer::GLDisable(GLState::STENCIL_TEST);
-                epriv::Postprocess_SMAA::SMAA.passNeighbor(neighborProgram, gbuffer, SMAA_PIXEL_SIZE, fboWidth, fboHeight, sceneTexture);
-                epriv::Postprocess_SMAA::SMAA.passFinal(finalProgram, gbuffer, fboWidth, fboHeight);//unused
+                epriv::Postprocess_SMAA::SMAA.passEdge(edgeProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture, outTexture);
+
+                epriv::Postprocess_SMAA::SMAA.passBlend(blendProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, outTexture);
+
+                //gbuffer.bindFramebuffers(GBufferType::Misc);
+                gbuffer.bindBackbuffer(viewport, fbo, rbo);
+                epriv::Postprocess_SMAA::SMAA.passNeighbor(neighborProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture);
+
+                //gbuffer.bindFramebuffers(GBufferType::Lighting);
+                //gbuffer.bindBackbuffer(viewport, fbo, rbo);
+                //epriv::Postprocess_SMAA::SMAA.passFinal(finalProgram, gbuffer, dimensions.z, dimensions.w);//unused
             }
             
             #pragma endregion
@@ -2171,50 +2179,27 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             if(mainRenderFunc){
-                if(draw_physics_debug  &&  &camera == s.getActiveCamera()){
+                if(draw_physics_debug  &&  &camera == scene.getActiveCamera()){
                     m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics]->bind();
                     Core::m_Engine->m_PhysicsManager._render();
                 }
             }
             #pragma endregion
-
-            //to try and see what the lightprobe is outputting
-            /*
-            Renderer::unbindFBO(true,true,true);
-            Settings::clear();
-            LightProbe* pr  = (LightProbe*)(Resources::getCamera("CapsuleLightProbe"));
-            Skybox* skybox = (Skybox*)(s->getSkybox());
-            if(pr){
-                m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox]->bind();
-                glm::mat4 view = glm::mat4(glm::mat3(camera->getView()));
-                Renderer::sendUniformMatrix4f("VP",camera->getProjection() * view);
-                GLuint address = pr->getEnvMap();
-                sendTexture("Texture",address,0,GL_TEXTURE_CUBE_MAP);
-                Skybox::bindMesh();
-                //unbindTextureCubemap(0);
-                //m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox]->unbind();
-            }
-            */
-            
-            #pragma region HUD
+         
+            #pragma region 2DAPI
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             if(mainRenderFunc){
-                if(HUD){
-
+                if(viewport.isUsing2DAPI()){
                     Settings::clear(false,true,false); //clear depth only
-                    m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHUD]->bind();
+                    m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI]->bind();
                     sendUniformMatrix4("VP", m_2DProjectionMatrix);
-
                     GLEnable(GLState::SCISSOR_TEST);
 
-                    while (m_2DAPICommands.size() > 0) {
-                        const auto& command = m_2DAPICommands.front();
+                    for (auto& command : m_2DAPICommands) {
                         command();
-                        m_2DAPICommands.pop();
                     }
-
                     GLDisable(GLState::SCISSOR_TEST);
                 }
             }
@@ -2232,8 +2217,8 @@ epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ 
     m_i->_postInit(name,w,h); 
 }
-void epriv::RenderManager::_render(Camera& c, const uint fboW, const uint fboH,bool HUD, Entity* ignore,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
-    m_i->_render(*m_i->m_GBuffer,c,fboW,fboH,HUD,ignore,mainFunc,display_fbo,display_rbo);
+void epriv::RenderManager::_render(Viewport& viewport, Entity* ignore,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
+    m_i->_render(*m_i->m_GBuffer, viewport, ignore, mainFunc, display_fbo, display_rbo);
 }
 void epriv::RenderManager::_resize(uint w,uint h){ 
     m_i->_resize(w,h); 
@@ -2244,36 +2229,47 @@ void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const cha
 void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h,uint _glslVersion,uint _openglVersion){ 
     m_i->_onOpenGLContextCreation(w,h,_glslVersion,_openglVersion); 
 }
+void epriv::RenderManager::_clear2DAPICommands() {
+    vector_clear(m_i->m_2DAPICommands);
+}
 
-void epriv::RenderManager::_bindShaderProgram(ShaderP* p){
+bool epriv::RenderManager::_bindShaderProgram(ShaderP* p){
     auto& currentShaderPgrm = glSM.current_bound_shader_program;
     if(currentShaderPgrm != p){
         glUseProgram(p->program());
         currentShaderPgrm = p;
         currentShaderPgrm->BindableResource::bind();
+        return true;
     }
+    return false;
 }
-void epriv::RenderManager::_unbindShaderProgram() {
+bool epriv::RenderManager::_unbindShaderProgram() {
     auto& currentShaderPgrm = glSM.current_bound_shader_program;
     if (currentShaderPgrm) {
         currentShaderPgrm->BindableResource::unbind();
         currentShaderPgrm = nullptr;
         glUseProgram(0);
+        return true;
     }
+    return false;
 }
-void epriv::RenderManager::_bindMaterial(Material* m){
+bool epriv::RenderManager::_bindMaterial(Material* m){
     auto& currentMaterial = glSM.current_bound_material;
     if(currentMaterial != m){
         currentMaterial = m;
         currentMaterial->BindableResource::bind();
+        return true;
     }
+    return false;
 }
-void epriv::RenderManager::_unbindMaterial(){
+bool epriv::RenderManager::_unbindMaterial(){
     auto& currentMaterial = glSM.current_bound_material;
     if(currentMaterial){
         currentMaterial->BindableResource::unbind();
         currentMaterial = nullptr;
+        return true;
     }
+    return false;
 }
 void epriv::RenderManager::_genPBREnvMapData(Texture& texture, uint size1, uint size2){
     m_i->_generatePBREnvMapData(texture,size1,size2);
@@ -2346,58 +2342,58 @@ float Renderer::Settings::getGamma(){
 void Renderer::setDepthFunc(const DepthFunc::Func& func){
     renderManagerImpl->_setDepthFunc(func); 
 }
-void Renderer::setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
-    renderManagerImpl->_setViewport(x,y,w,h); 
+bool Renderer::setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
+    return renderManagerImpl->_setViewport(x,y,w,h); 
 }
-void Renderer::colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
-    renderManagerImpl->_colorMask(r,g,b,a); 
+bool Renderer::colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
+    return renderManagerImpl->_colorMask(r,g,b,a); 
 }
 void Renderer::clearColor(const float& r, const float& g, const float& b, const float& a) {
     renderManagerImpl->_clearColor(r, g, b, a); 
 }
-void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
+bool Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
     auto& i = *renderManager;
     switch(_textureType){
         case GL_TEXTURE_1D:{
             if(i.glSM.current_bound_texture_1D != _textureObject){
                 i.glSM.current_bound_texture_1D = _textureObject;
                 glBindTexture(_textureType,_textureObject);
-                return;
+                return true;
             }
             break;
-        }
-        case GL_TEXTURE_2D:{
+        }case GL_TEXTURE_2D:{
             if(i.glSM.current_bound_texture_2D != _textureObject){
                 i.glSM.current_bound_texture_2D = _textureObject;
                 glBindTexture(_textureType,_textureObject);
-                return;
+                return true;
             }
             break;
-        }
-        case GL_TEXTURE_3D:{
+        }case GL_TEXTURE_3D:{
             if(i.glSM.current_bound_texture_3D != _textureObject){
                 i.glSM.current_bound_texture_3D = _textureObject;
                 glBindTexture(_textureType,_textureObject);
-                return;
+                return true;
             }
             break;
-        }
-        case GL_TEXTURE_CUBE_MAP:{
+        }case GL_TEXTURE_CUBE_MAP:{
             if(i.glSM.current_bound_texture_cube_map != _textureObject){
                 i.glSM.current_bound_texture_cube_map = _textureObject;
                 glBindTexture(_textureType,_textureObject);
-                return;
+                return true;
             }
             break;
         }
     }
+    return false;
 }
-void Renderer::bindVAO(const GLuint _vaoObject){
+bool Renderer::bindVAO(const GLuint _vaoObject){
     auto& i = *renderManager;
     if(i.glSM.current_bound_vao != _vaoObject){
         glBindVertexArray(_vaoObject);
         i.glSM.current_bound_vao = _vaoObject;
+        return true;
     }
+    return false;
 }
 void Renderer::deleteVAO(GLuint& _vaoObject) {
     if (_vaoObject) {
@@ -2525,11 +2521,11 @@ struct RenderingAPI2D final {
         sendUniformMatrix4("Model", m);
 
         if (alignType == TextAlignment::Left) {
-            impl._renderTextLeft(text, font, newLineGlyphHeight, x, y, z);
+            impl._renderTextLeft(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
         }else if (alignType == TextAlignment::Right) {
-            impl._renderTextRight(text, font, newLineGlyphHeight, x, y, z);
+            impl._renderTextRight(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
         }else if (alignType == TextAlignment::Center) {
-            impl._renderTextCenter(text, font, newLineGlyphHeight, x, y, z);
+            impl._renderTextCenter(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
         }
         mesh.modifyVertices(0, impl.text_pts);
         mesh.modifyVertices(1, impl.text_uvs);
@@ -2598,19 +2594,19 @@ struct RenderingAPI2D final {
 };
 void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, const float& angle, const float& width, const float& height, const float& depth, const Alignment::Type& align) {
     boost_func f = boost::bind<void>(&RenderingAPI2D::RenderTriangle, position, color, angle, width, height, depth, align);
-    renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
+    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
 }
 void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float& width, const float& height, const float& angle, const float& depth, const Alignment::Type& align){
     boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DTexture, nullptr, pos, col, angle, glm::vec2(width, height), depth, align);
-    renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
+    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
 }
 void Renderer::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const Alignment::Type& align){
     boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DTexture, &tex, p, c, a, s, d, align);
-    renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
+    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
 }
 void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const TextAlignment::Type& align) {
     boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DText, t, boost::ref(fnt), p, c, a, s, d, align);
-    renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
+    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
 }
 void Renderer::renderBorder(const float& borderSize, const glm::vec2& pos, const glm::vec4& col, const float& w, const float& h, const float& angle, const float& depth, const Alignment::Type& align) {
     const float& doubleBorder = borderSize * 2.0f;
@@ -2629,11 +2625,11 @@ void Renderer::renderBorder(const float& borderSize, const glm::vec2& pos, const
 }
 void Renderer::scissor(const int& x, const int& y, const uint& width, const uint& height) {
     boost_func f = boost::bind<void>(&RenderingAPI2D::GLScissor, x, y, width, height);
-    renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
+    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
 }
 void Renderer::scissorDisable() {
     boost_func f = boost::bind<void>(&RenderingAPI2D::GLScissorDisable);
-    renderManagerImpl->m_2DAPICommands.emplace(std::move(f));
+    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
 }
 
 

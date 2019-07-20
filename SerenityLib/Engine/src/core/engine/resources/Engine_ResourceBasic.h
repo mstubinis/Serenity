@@ -12,11 +12,11 @@ class EngineResource{
         std::string m_Name;
         uint m_UsageCount;
     public:
-        EngineResource(std::string = "");
+        EngineResource(const std::string& = "");
         virtual ~EngineResource();
 
-        std::string& name();
-        void setName(std::string);
+        const std::string& name() const;
+        void setName(const std::string&);
 
         bool isLoaded();
         uint useCount();

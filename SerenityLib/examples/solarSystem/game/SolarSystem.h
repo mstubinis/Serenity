@@ -2,7 +2,8 @@
 #ifndef GAME_SOLARSYSTEM_H
 #define GAME_SOLARSYSTEM_H
 
-#include <core/Scene.h>
+#include <core/engine/scene/Scene.h>
+#include <unordered_map>
 
 class Star;
 class Ship;

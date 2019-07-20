@@ -6,8 +6,8 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/mesh/Skeleton.h>
 #include <core/Material.h>
-#include <core/Camera.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Camera.h>
+#include <core/engine/scene/Scene.h>
 #include <core/ShaderProgram.h>
 #include <ecs/Components.h>
 

@@ -2,7 +2,7 @@
 #ifndef GAME_GAME_CAMERA_H
 #define GAME_GAME_CAMERA_H
 
-#include <core/Camera.h>
+#include <core/engine/scene/Camera.h>
 
 struct GameCameraLogicFunctor;
 

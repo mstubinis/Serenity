@@ -222,7 +222,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Engine\src\core\Camera.h" />
     <ClInclude Include="Engine\src\core\Constraint.h" />
     <ClInclude Include="Engine\src\core\engine\BindableResource.h" />
     <ClInclude Include="Engine\src\core\engine\Engine.h" />
@@ -286,6 +285,10 @@
     <ClInclude Include="Engine\src\core\engine\resources\Engine_ResourceBasic.h" />
     <ClInclude Include="Engine\src\core\engine\resources\Engine_Resources.h" />
     <ClInclude Include="Engine\src\core\engine\resources\Handle.h" />
+    <ClInclude Include="Engine\src\core\engine\scene\Camera.h" />
+    <ClInclude Include="Engine\src\core\engine\scene\Scene.h" />
+    <ClInclude Include="Engine\src\core\engine\scene\Skybox.h" />
+    <ClInclude Include="Engine\src\core\engine\scene\Viewport.h" />
     <ClInclude Include="Engine\src\core\engine\sounds\Engine_Sounds.h" />
     <ClInclude Include="Engine\src\core\engine\textures\DDS.h" />
     <ClInclude Include="Engine\src\core\engine\textures\Texture.h" />
@@ -293,9 +296,7 @@
     <ClInclude Include="Engine\src\core\engine\threading\Engine_ThreadManager.h" />
     <ClInclude Include="Engine\src\core\Material.h" />
     <ClInclude Include="Engine\src\core\MeshInstance.h" />
-    <ClInclude Include="Engine\src\core\Scene.h" />
     <ClInclude Include="Engine\src\core\ShaderProgram.h" />
-    <ClInclude Include="Engine\src\core\Skybox.h" />
     <ClInclude Include="Engine\src\core\Terrain.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBody.h" />
@@ -317,7 +318,6 @@
     <ClInclude Include="Engine\src\ecs\SparseSet.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Engine\src\core\Camera.cpp" />
     <ClCompile Include="Engine\src\core\Constraint.cpp" />
     <ClCompile Include="Engine\src\core\engine\BindableResource.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine.cpp" />
@@ -367,15 +367,17 @@
     <ClCompile Include="Engine\src\core\engine\resources\Engine_ResourceBasic.cpp" />
     <ClCompile Include="Engine\src\core\engine\resources\Engine_Resources.cpp" />
     <ClCompile Include="Engine\src\core\engine\resources\Handle.cpp" />
+    <ClCompile Include="Engine\src\core\engine\scene\Camera.cpp" />
+    <ClCompile Include="Engine\src\core\engine\scene\Scene.cpp" />
+    <ClCompile Include="Engine\src\core\engine\scene\Skybox.cpp" />
+    <ClCompile Include="Engine\src\core\engine\scene\Viewport.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\Engine_Sounds.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp" />
     <ClCompile Include="Engine\src\core\Material.cpp" />
     <ClCompile Include="Engine\src\core\MeshInstance.cpp" />
-    <ClCompile Include="Engine\src\core\Scene.cpp" />
     <ClCompile Include="Engine\src\core\ShaderProgram.cpp" />
-    <ClCompile Include="Engine\src\core\Skybox.cpp" />
     <ClCompile Include="Engine\src\core\Terrain.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentCamera.cpp" />

@@ -3,10 +3,10 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/math/Engine_Math.h>
-#include <core/Camera.h>
+#include <core/engine/scene/Camera.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/MeshInstance.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Scene.h>
 
 // ecs
 #include <ecs/ComponentModel.h>
@@ -667,7 +667,7 @@ class epriv::PhysicsManager::impl final{
         }
         void _update(const double& dt, int& maxSteps, float& other){
             if(m_Paused) return;
-            data->world->stepSimulation(dt,maxSteps,other);
+            data->world->stepSimulation(static_cast<btScalar>(dt),maxSteps,other);
             uint numManifolds = data->dispatcher->getNumManifolds();
             for (uint i = 0; i < numManifolds; ++i){
                 btPersistentManifold* contactManifold =  data->dispatcher->getManifoldByIndexInternal(i);

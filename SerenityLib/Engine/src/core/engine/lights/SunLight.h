@@ -2,7 +2,7 @@
 #ifndef ENGINE_LIGHT_SUN_INCLUDE_GUARD
 #define ENGINE_LIGHT_SUN_INCLUDE_GUARD
 
-#include <core/Camera.h>
+#include <core/engine/scene/Camera.h>
 #include <core/engine/lights/LightIncludes.h>
 
 namespace Engine {

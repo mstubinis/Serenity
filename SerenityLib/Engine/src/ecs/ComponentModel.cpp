@@ -5,7 +5,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/MeshInstance.h>
-#include <core/Camera.h>
+#include <core/engine/scene/Camera.h>
 #include <core/engine/mesh/Mesh.h>
 
 using namespace Engine;

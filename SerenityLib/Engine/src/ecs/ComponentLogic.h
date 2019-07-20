@@ -28,8 +28,8 @@ class ComponentLogic : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentLogic_SceneLeftFunction;
 
     private:
-        void*                               _userPtr;
-        boost::function<void(const float&)> _functor;
+        void*                                _userPtr;
+        boost::function<void(const double&)> _functor;
     public:
         ComponentLogic(const Entity& _e) : ComponentBaseClass(_e){ 
 			_userPtr = nullptr;

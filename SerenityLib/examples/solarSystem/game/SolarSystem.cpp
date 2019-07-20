@@ -46,8 +46,6 @@ SolarSystem::SolarSystem(const string& n, const string& file):Scene(n){
     m_AnchorPoint = new EntityWrapper(*this);
     auto& anchor_body = *m_AnchorPoint->entity().addComponent<ComponentBody>();
     anchor_body.setScale(0.005f);
-    auto& anchor_model = *m_AnchorPoint->entity().addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
-    anchor_model.hide();
 }
 SolarSystem::~SolarSystem(){
     SAFE_DELETE_VECTOR(m_Objects);

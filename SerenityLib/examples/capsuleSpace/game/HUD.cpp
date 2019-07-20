@@ -6,11 +6,11 @@
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/Engine_Window.h>
-#include <core/engine/Engine_Math.h>
+#include <core/engine/math/Engine_Math.h>
 #include <core/engine/fonts/Font.h>
 #include <core/engine/textures/Texture.h>
-#include <core/Scene.h>
-#include <core/Camera.h>
+#include <core/engine/scene/Scene.h>
+#include <core/engine/scene/Camera.h>
 #include <core/Material.h>
 
 #include <glm/vec4.hpp>

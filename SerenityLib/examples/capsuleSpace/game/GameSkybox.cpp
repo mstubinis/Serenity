@@ -1,16 +1,16 @@
 #include "GameSkybox.h"
 #include "ResourceManifest.h"
 
-#include <core/engine/Engine_Math.h>
+#include <core/engine/math/Engine_Math.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/Engine_Window.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/Camera.h>
+#include <core/engine/scene/Camera.h>
 #include <core/engine/textures/Texture.h>
 #include <core/ShaderProgram.h>
 #include <core/Material.h>
-#include <core/Scene.h>
+#include <core/engine/scene/Scene.h>
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -75,9 +75,15 @@ class GameSkybox::impl final{
             */
         }
 };
-GameSkybox::GameSkybox(string name, uint numFlares, Scene* scene):Skybox(name,scene),m_i(new impl){ m_i->_init(numFlares); }
-GameSkybox::GameSkybox(string* names, uint numFlares, Scene* scene):Skybox(names,scene),m_i(new impl){ m_i->_init(numFlares); }
-GameSkybox::~GameSkybox(){ m_i->_destruct(); }
+GameSkybox::GameSkybox(string name, uint numFlares, Scene* scene):Skybox(name,scene),m_i(new impl){ 
+    m_i->_init(numFlares); 
+}
+GameSkybox::GameSkybox(string* names, uint numFlares, Scene* scene):Skybox(names,scene),m_i(new impl){ 
+    m_i->_init(numFlares); 
+}
+GameSkybox::~GameSkybox(){ 
+    m_i->_destruct(); 
+}
 void GameSkybox::update(){
     Skybox::update();
 }

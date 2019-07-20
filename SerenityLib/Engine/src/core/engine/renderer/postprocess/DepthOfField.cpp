@@ -26,7 +26,6 @@ void epriv::Postprocess_DepthOfField::pass(ShaderP& program,GBuffer& gbuffer, co
     Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
 }
 
-
 void Engine::Renderer::depthOfField::enable(const bool b) {
     epriv::Postprocess_DepthOfField::DOF.dof = b;
 }
