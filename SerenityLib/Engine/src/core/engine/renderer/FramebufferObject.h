@@ -82,8 +82,8 @@ namespace epriv{
             std::vector<GLuint>                                     m_FBO;
             std::unordered_map<uint, FramebufferObjectAttatchment*> m_Attatchments;
         public:
-            FramebufferObject(std::string name,uint width,uint height,float divisor = 1.0f,uint swapBufferCount = 1);
-            FramebufferObject(std::string name,uint width,uint height,ImageInternalFormat::Format,float divisor = 1.0f, uint swapBufferCount = 1);
+            FramebufferObject(const std::string& name, const uint& width, const uint& height, const float& divisor = 1.0f, const uint& swapBufferCount = 1);
+            FramebufferObject(const std::string& name, const uint& width, const uint& height, const ImageInternalFormat::Format&, const float& divisor = 1.0f, const uint& swapBufferCount = 1);
             virtual ~FramebufferObject();
 
             void resize(const uint& width, const uint& height);

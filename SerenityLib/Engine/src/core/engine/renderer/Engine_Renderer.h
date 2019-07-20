@@ -101,9 +101,9 @@ namespace Renderer{
         float getGamma();
 
         void clear(const bool color = true, const bool depth = true, const bool stencil = true);
-        void cullFace(uint state);
+        bool cullFace(const uint& state);
 
-        void setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm&);
+        bool setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm&);
 
         void enableDrawPhysicsInfo(const bool b = true);
         void disableDrawPhysicsInfo();
@@ -129,22 +129,22 @@ namespace Renderer{
     inline const GLint getUniformLoc(const char* location);
     inline const GLint& getUniformLocUnsafe(const char* location);
 
-    void setDepthFunc(const DepthFunc::Func&);
+    bool setDepthFunc(const DepthFunc::Func&);
     bool setViewport(const uint& x, const uint& y, const uint& width, const uint& height);
-    void bindFBO(const GLuint fbo);
+    void bindFBO(const GLuint& fbo);
     void bindFBO(epriv::FramebufferObject& rbo);
-    void bindRBO(const GLuint rbo);
-    void bindRBO(epriv::RenderbufferObject& rbo);
-    void bindReadFBO(const GLuint fbo);
-    void bindDrawFBO(const GLuint fbo);
+    bool bindRBO(const GLuint& rbo);
+    bool bindRBO(epriv::RenderbufferObject& rbo);
+    bool bindReadFBO(const GLuint& fbo);
+    bool bindDrawFBO(const GLuint& fbo);
 
     bool bindTexture(const GLuint _textureType, const GLuint _textureObject);
     bool bindVAO(const GLuint _vaoObject);
     void genAndBindTexture(const GLuint _textureType,GLuint& _textureObject);
     void genAndBindVAO(GLuint& _vaoObject);
-    void deleteVAO(GLuint& _vaoObject);
+    bool deleteVAO(GLuint& _vaoObject);
     bool colorMask(const bool& r, const bool& g, const bool& b, const bool& a);
-    void clearColor(const float& r, const float& g, const float& b, const float& a);
+    bool clearColor(const float& r, const float& g, const float& b, const float& a);
 
     void sendTexture(const char* location,const Texture& texture,const int& slot);
     void sendTexture(const char* location,const GLuint textureAddress,const int& slot,const GLuint& glTextureType);

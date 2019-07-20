@@ -14,6 +14,14 @@ class Viewport final {
         bool         m_Active;
         bool         m_Using2DAPI;
         bool         m_AspectRatioSynced;
+
+        bool         m_TransparencyMaskActive;
+        glm::vec4    m_TransparencyMaskColor;
+
+
+        bool         m_DepthMaskActive;
+        float        m_DepthMaskValue;
+
     public:
         Viewport(const Scene& scene, const Camera& camera);
 
@@ -23,6 +31,28 @@ class Viewport final {
         Viewport& operator=(Viewport&& other) noexcept = default;
 
         ~Viewport();
+
+
+
+        const float& getDepthMaskValue() const;
+        void setDepthMaskValue(const float& depth);
+
+        void deactivateDepthMask();
+        void activateDepthMask();
+        const bool isDepthMaskActive() const;
+
+
+
+
+
+        const glm::vec4& getTransparencyMaskColor() const;
+        void setTransparencyMaskColor(const float& r, const float& g, const float& b, const float& a);
+
+        void deactivateTransparencyMask();
+        void activateTransparencyMask();
+        const bool isTransparencyMaskActive() const;
+
+
 
         void setAspectRatioSynced(const bool synced);
         const bool isAspectRatioSynced() const;

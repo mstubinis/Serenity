@@ -5,7 +5,7 @@
 #include <core/engine/resources/Engine_ResourceBasic.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include <vector>
-#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 class  Camera;
 
@@ -52,8 +52,8 @@ class Scene: public EngineResource, public EventObserver{
         Camera* getActiveCamera();
         Viewport& getMainViewport();
 
-        const glm::vec3& getBackgroundColor() const;
-        void setBackgroundColor(const float r, const float g, const float b);
+        const glm::vec4& getBackgroundColor() const;
+        void setBackgroundColor(const float& r, const float& g, const float& b, const float& a);
         void setGlobalIllumination(const float global, const float diffuse, const float specular);
         virtual void onEvent(const Event& e);
 

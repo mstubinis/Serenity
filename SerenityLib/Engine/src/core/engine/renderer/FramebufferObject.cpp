@@ -123,7 +123,7 @@ namespace Engine {
 epriv::FramebufferObjectDefaultBindFunctor   DEFAULT_BIND_FUNCTOR;
 epriv::FramebufferObjectDefaultUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
-epriv::FramebufferObject::FramebufferObject(string name,uint w,uint h,float divisor,uint swapBufferCount):BindableResource(name){
+epriv::FramebufferObject::FramebufferObject(const string& name, const uint& w, const uint& h, const float& divisor, const uint& swapBufferCount):BindableResource(name){
     m_CurrentFBOIndex   = 0;
     m_Divisor           = divisor;
     m_FramebufferWidth  = static_cast<uint>(static_cast<float>(w) * m_Divisor);
@@ -134,7 +134,7 @@ epriv::FramebufferObject::FramebufferObject(string name,uint w,uint h,float divi
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-epriv::FramebufferObject::FramebufferObject(string name,uint w,uint h,ImageInternalFormat::Format depthInternalFormat,float divisor, uint swapBufferCount):FramebufferObject(name,w,h,divisor,swapBufferCount){
+epriv::FramebufferObject::FramebufferObject(const string& name, const uint& w, const uint& h, const ImageInternalFormat::Format& depthInternalFormat, const float& divisor, const uint& swapBufferCount):FramebufferObject(name,w,h,divisor,swapBufferCount){
     RenderbufferObject* rbo;
     if (depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8)
         rbo = new RenderbufferObject(*this, FramebufferAttatchment::DepthAndStencil, depthInternalFormat);

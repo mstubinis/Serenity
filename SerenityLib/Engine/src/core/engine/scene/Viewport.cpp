@@ -13,9 +13,62 @@ Viewport::Viewport(const Scene& scene, const Camera& camera):m_Scene(const_cast<
     activate();
     activate2DAPI();
     setAspectRatioSynced(true);
+
+    setTransparencyMaskColor(0, 0, 0, 0);
+    deactivateTransparencyMask();
+
+    setDepthMaskValue(1.0f);
+    deactivateDepthMask();
 }
 Viewport::~Viewport() {
 }
+
+
+
+
+
+const float& Viewport::getDepthMaskValue() const {
+    return m_DepthMaskValue;
+}
+void Viewport::setDepthMaskValue(const float& depth) {
+    m_DepthMaskValue = glm::clamp(depth, 0.0f, 1.0f);
+}
+
+void Viewport::deactivateDepthMask() {
+    m_DepthMaskActive = false;
+}
+void Viewport::activateDepthMask() {
+    m_DepthMaskActive = true;
+}
+const bool Viewport::isDepthMaskActive() const {
+    return m_DepthMaskActive;
+}
+
+
+
+
+const glm::vec4& Viewport::getTransparencyMaskColor() const {
+    return m_TransparencyMaskColor;
+}
+void Viewport::setTransparencyMaskColor(const float& r, const float& g, const float& b, const float& a) {
+    m_TransparencyMaskColor.r = r;
+    m_TransparencyMaskColor.g = g;
+    m_TransparencyMaskColor.b = b;
+    m_TransparencyMaskColor.a = a;
+}
+
+void Viewport::deactivateTransparencyMask() {
+    m_TransparencyMaskActive = false;
+}
+void Viewport::activateTransparencyMask() {
+    m_TransparencyMaskActive = true;
+}
+const bool Viewport::isTransparencyMaskActive() const {
+    return m_TransparencyMaskActive;
+}
+
+
+
 
 
 void Viewport::setAspectRatioSynced(const bool synced) {

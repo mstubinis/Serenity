@@ -61,6 +61,7 @@ string epriv::EShaders::blur_frag;
 string epriv::EShaders::ssao_blur_frag;
 string epriv::EShaders::greyscale_frag;
 string epriv::EShaders::final_frag;
+string epriv::EShaders::depth_and_transparency_frag;
 string epriv::EShaders::lighting_frag;
 string epriv::EShaders::lighting_frag_optimized;
 string epriv::EShaders::lighting_frag_gi;
@@ -598,9 +599,9 @@ epriv::EShaders::fxaa_frag =
     "   vec3 rgbB = rgbA * 0.5 + 0.25 * (texture2D(inTexture,texcoords + dir * - 0.5).xyz + texture2D(inTexture,texcoords + dir * 0.5).xyz);\n"
     "   float lumaB = dot(rgbB,luma);\n"
     "   if((lumaB < lumaMin) || (lumaB > lumaMax)){\n"
-    "       gl_FragColor = vec4(rgbA,1.0);\n"
+    "       gl_FragColor = vec4(rgbA, 1.0);\n"
     "   }else{\n"
-    "       gl_FragColor = vec4(rgbB,1.0);\n"
+    "       gl_FragColor = vec4(rgbB, 1.0);\n"
     "   }\n"
     "}";
 #pragma endregion
@@ -688,7 +689,7 @@ epriv::EShaders::depth_of_field =
     "        col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4)*aspectcorrect)     * dofblur * weight[k]);\n"
     "    }\n"
     "    gl_FragColor.rgb = col.rgb * 0.02439; \n" //0.02439 = 1.0 / 41.0
-    "    gl_FragColor.a = 1.0; \n"
+    //"    gl_FragColor.a = 1.0; \n"
     "}\n"
     "\n";
 #pragma endregion
@@ -1641,12 +1642,12 @@ epriv::EShaders::final_frag += epriv::EShaders::normals_octahedron_compression_f
 epriv::EShaders::final_frag +=
     "\n"
     "void main(){\n"
-    "    vec3 scene = texture2D(SceneTexture,texcoords).rgb;\n"
+    "    vec4 scene = texture2D(SceneTexture,texcoords);\n"
     "    if(HasBloom == 1){\n"
-    "        vec3 bloom = texture2D(gBloomMap,texcoords).rgb;\n"
+    "        vec4 bloom = texture2D(gBloomMap,texcoords);\n"
     "        scene += bloom;\n"
     "    }\n"
-    "    gl_FragColor = vec4(scene,1.0);\n"
+    "    gl_FragColor = scene;\n"
     "    if(HasFog == 1){\n"
     "        float distFrag = abs(distance(GetWorldPosition(texcoords,CameraNear,CameraFar),CameraPosition));\n"
     "        float distVoid = FogDistNull + FogDistBlend;\n"
@@ -1660,6 +1661,40 @@ epriv::EShaders::final_frag +=
     "}";
 
 #pragma endregion
+
+#pragma region DepthAndTransparency
+
+epriv::EShaders::depth_and_transparency_frag = 
+    "\n"
+    "uniform sampler2D   SceneTexture;\n"
+    "uniform sampler2D   SceneTextureDepth;\n"
+    "\n"
+    "uniform vec4        TransparencyMaskColor;\n"
+    "uniform int         TransparencyMaskActive;\n"
+    "uniform float       DepthMaskValue;\n"
+    "uniform int         DepthMaskActive;\n"
+    "\n"
+    "varying vec2        texcoords;\n"
+    "\n";
+epriv::EShaders::depth_and_transparency_frag += epriv::EShaders::float_into_2_floats;
+epriv::EShaders::depth_and_transparency_frag += epriv::EShaders::normals_octahedron_compression_functions;
+epriv::EShaders::depth_and_transparency_frag +=
+    "\n"
+    "void main(){\n"
+    "    vec4 scene = texture2D(SceneTexture,texcoords);\n"
+    "    float depth = texture2D(SceneTextureDepth,texcoords).r;"
+    //"    if(TransparencyMaskActive == 1 && scene.rgb == TransparencyMaskColor.rgb){\n"
+    //"        scene.a = 0;\n"
+    //"    }\n"
+    //"    if(DepthMaskActive == 1 && depth > 0.2){\n"
+    //"        scene.a = 0;\n"
+    //"    }\n"
+    "    gl_FragColor = scene;\n"
+    //"    gl_FragColor = vec4(depth,depth,depth,1.0);\n"
+    "\n"
+"}";
+#pragma endregion
+
 
 #pragma region LightingFrag
 epriv::EShaders::lighting_frag =

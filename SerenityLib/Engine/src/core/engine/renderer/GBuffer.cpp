@@ -27,8 +27,6 @@ vector<boost::tuple<ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePi
 
     return m;
 }();
-
-
 GBuffer::GBuffer(const uint& width, const uint& height){
     m_FBO = m_SmallFBO = nullptr;
     internalDestruct(); //just incase this method is called on resize, we want to delete any previous buffers
@@ -54,9 +52,9 @@ GBuffer::GBuffer(const uint& width, const uint& height){
     if (!m_SmallFBO->check()) return;
 
     //this should be better performance wise, but clean up this code a bit
-    auto& depthTexture = m_Buffers[GBufferType::Depth]->texture();
-    Renderer::bindTexture(depthTexture.type(), depthTexture.address());
-    depthTexture.setFilter(TextureFilter::Nearest);
+    //auto& depthTexture = m_Buffers[GBufferType::Depth]->texture();
+    //Renderer::bindTexture(depthTexture.type(), depthTexture.address());
+    //depthTexture.setFilter(TextureFilter::Nearest);
 
     auto& diffuseTexture = m_Buffers[GBufferType::Diffuse]->texture();
     Renderer::bindTexture(diffuseTexture.type(), diffuseTexture.address());

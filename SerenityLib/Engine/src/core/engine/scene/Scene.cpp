@@ -25,7 +25,7 @@ struct Scene::impl final {
     SkyboxEmpty*                      m_Skybox;
     vector<Viewport*>                 m_Viewports;
     vector<Camera*>                   m_Cameras;
-    glm::vec3                         m_BackgroundColor;
+    glm::vec4                         m_BackgroundColor;
     uint                              m_ID;
     vector<vector<RenderPipeline*>>   m_Pipelines;
 
@@ -44,7 +44,7 @@ struct Scene::impl final {
         m_GI_Diffuse      = 1.0f;
         m_GI_Specular     = 1.0f;
         m_Skybox          = nullptr;
-        m_BackgroundColor = glm::vec3(0.0f);
+        m_BackgroundColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
         m_Pipelines.resize(RenderStage::_TOTAL);
         super.setName(_name);
         Core::m_Engine->m_ResourceManager._addScene(super);
@@ -287,7 +287,7 @@ Scene::~Scene(){
 }
 void Scene::update(const double& dt){
 }
-const glm::vec3& Scene::getBackgroundColor() const{ 
+const glm::vec4& Scene::getBackgroundColor() const{ 
     return m_i->m_BackgroundColor; 
 }
 SkyboxEmpty* Scene::skybox() const { 
@@ -296,8 +296,8 @@ SkyboxEmpty* Scene::skybox() const {
 void Scene::setSkybox(SkyboxEmpty* s){ 
     m_i->m_Skybox = s; 
 }
-void Scene::setBackgroundColor(const float r, const float g, const float b){
-    Math::setColor(m_i->m_BackgroundColor, r, g, b);
+void Scene::setBackgroundColor(const float& r, const float& g, const float& b, const float& a){
+    Math::setColor(m_i->m_BackgroundColor, r, g, b, a);
 }
 void Scene::setGlobalIllumination(const float global, const float diffuse, const float specular) {
     auto& i         = *m_i;

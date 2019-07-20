@@ -88,6 +88,7 @@ namespace Engine{
             SSAOBlurFrag,
             GodRaysFrag,
             FinalFrag,
+            DepthAndTransparencyFrag,
             LightingFrag,
             LightingFragOptimized,
             LightingGIFrag,
@@ -119,6 +120,7 @@ namespace Engine{
             DeferredDOF,
             DeferredBloom,
             DeferredFinal,
+            DepthAndTransparency,
             DeferredFXAA,
             DeferredSkybox,
             DeferredSkyboxFake,
@@ -334,6 +336,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaders.emplace_back(EShaders::ssao_blur_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::godRays_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::final_frag, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::depth_and_transparency_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::lighting_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::lighting_frag_optimized, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::lighting_frag_gi, ShaderType::Fragment, false);
@@ -364,6 +367,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF] = new ShaderP("Deferred_DOF", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::DOFFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom] = new ShaderP("Deferred_Bloom", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BloomFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal] = new ShaderP("Deferred_Final", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::FinalFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DepthAndTransparency] = new ShaderP("DepthAndTransparency", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::DepthAndTransparencyFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA] = new ShaderP("Deferred_FXAA", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::FXAAFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox] = new ShaderP("Deferred_Skybox", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::DeferredFragSkybox]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake] = new ShaderP("Deferred_Skybox_Fake", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::DeferredFragSkyboxFake]);
@@ -1242,10 +1246,13 @@ class epriv::RenderManager::impl final{
                 skybox->draw();
             }else{//render a fake skybox.
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake]->bind();
-                glm::vec3 bgColor = scene.getBackgroundColor();
+                //GLEnable(GLState::BLEND);
+                //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                auto& bgColor = scene.getBackgroundColor();
                 sendUniformMatrix4("VP",c.getProjection() * view);
-                sendUniform4("Color",bgColor.r,bgColor.g,bgColor.b,1.0f);
+                sendUniform4("Color",bgColor.r,bgColor.g,bgColor.b, bgColor.a);
                 Skybox::bindMesh();
+                //GLDisable(GLState::BLEND);
             }
         }
         void _resize(const uint& w, const uint& h){
@@ -1367,78 +1374,6 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(fbo);
             bindReadFBO(prevReadBuffer);
             bindDrawFBO(prevDrawBuffer);
-        }
-        void _setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm& algorithm){
-            if(aa_algorithm != algorithm){ 
-                aa_algorithm = algorithm; 
-            }
-        }
-        void _setDepthFunc(const DepthFunc::Func& func){
-            if(depth_func != func){
-                glDepthFunc(func);
-                depth_func = func;
-            }
-        }
-        void _clearColor(const float& r, const float& g, const float& b, const float& a) {
-            if (r == clear_color.r && g == clear_color.g && b == clear_color.b && a == clear_color.a)
-                return;
-            clear_color.r = r;
-            clear_color.g = g;
-            clear_color.b = b;
-            clear_color.a = a;
-            glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
-        }
-        bool _colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
-            auto _r = static_cast<GLboolean>(r);
-            auto _g = static_cast<GLboolean>(g);
-            auto _b = static_cast<GLboolean>(b);
-            auto _a = static_cast<GLboolean>(a);
-            if (_r == color_mask_r && _g == color_mask_g && _b == color_mask_b && _a == color_mask_a)
-                return false;
-            color_mask_r = _r;
-            color_mask_g = _g;
-            color_mask_b = _b;
-            color_mask_a = _a;
-            glColorMask(color_mask_r, color_mask_g, color_mask_b, color_mask_a);
-            return true;
-        }
-        void _cullFace(const uint& s){
-            //0 = back | 1 = front | 2 = front and back
-            if(s == GL_BACK && cull_face_status != 0){
-                glCullFace(GL_BACK);
-                cull_face_status = 0;
-            }else if(s == GL_FRONT && cull_face_status != 1){
-                glCullFace(GL_FRONT);
-                cull_face_status = 1;
-            }else if(s == GL_FRONT_AND_BACK && cull_face_status != 2){
-                glCullFace(GL_FRONT_AND_BACK);
-                cull_face_status = 2;
-            }
-        }
-        bool _setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
-            if(gl_viewport_data.x == x && gl_viewport_data.y == y && gl_viewport_data.z == w && gl_viewport_data.w == h) 
-                return false;
-            glViewport(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(w), static_cast<GLsizei>(h));
-            gl_viewport_data = glm::uvec4(x,y,w,h);
-            return true;
-        }
-        void _bindReadFBO(const uint& f){
-            if(renderManager->glSM.current_bound_read_fbo != f){
-                glBindFramebuffer(GL_READ_FRAMEBUFFER, f);
-                renderManager->glSM.current_bound_read_fbo = f;
-            }
-        }
-        void _bindDrawFBO(const uint& f){
-            if(renderManager->glSM.current_bound_draw_fbo != f){
-                glBindFramebuffer(GL_DRAW_FRAMEBUFFER, f);
-                renderManager->glSM.current_bound_draw_fbo = f;
-            }
-        }
-        void _bindRBO(const uint& r){
-            if(renderManager->glSM.current_bound_rbo != r){
-                glBindRenderbuffer(GL_RENDERBUFFER, r);
-                renderManager->glSM.current_bound_rbo = r;
-            }
         }
         void _renderTextLeft(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
             uint i = 0;
@@ -1719,10 +1654,10 @@ class epriv::RenderManager::impl final{
 
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
         }
-        void _passGeometry(GBuffer& gbuffer, Camera& c){
+        void _passGeometry(GBuffer& gbuffer, Camera& camera){
             Scene& scene = *Resources::getCurrentScene();
-            const glm::vec3& clear = scene.getBackgroundColor();
-            const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
+            const glm::vec4& clear = scene.getBackgroundColor();
+            const float colors[4] = { clear.r, clear.g, clear.b, clear.a };
     
             gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
 
@@ -1731,16 +1666,16 @@ class epriv::RenderManager::impl final{
             Renderer::setDepthFunc(DepthFunc::LEqual);
             //GLDisable(GLState::BLEND_0);
 
-            glClearBufferfv(GL_COLOR,0,colors);
-            auto& godRaysPlatform = epriv::Postprocess_GodRays::GodRays;
-            if(godRaysPlatform.godRays){
-                const float _godraysclearcolor[4] = { 
-                    godRaysPlatform.clearColor.r, 
-                    godRaysPlatform.clearColor.g, 
-                    godRaysPlatform.clearColor.b, 
-                    godRaysPlatform.clearColor.a 
+            glClearBufferfv(GL_COLOR, 0, colors);
+            auto& godRays = epriv::Postprocess_GodRays::GodRays;
+            if(godRays.godRays){
+                const float godraysclearcolor[4] = { 
+                    godRays.clearColor.r,
+                    godRays.clearColor.g,
+                    godRays.clearColor.b,
+                    godRays.clearColor.a
                 };
-                glClearBufferfv(GL_COLOR,2, _godraysclearcolor);
+                glClearBufferfv(GL_COLOR, 2, godraysclearcolor);
             }
 
             GLEnable(GLState::DEPTH_TEST);
@@ -1751,33 +1686,33 @@ class epriv::RenderManager::impl final{
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);      
 
             //RENDER NORMAL OBJECTS HERE
-            InternalScenePublicInterface::RenderGeometryOpaque(scene,c);
+            InternalScenePublicInterface::RenderGeometryOpaque(scene, camera);
 
             //skybox here
             _renderSkybox(scene.skybox());
 
-            InternalScenePublicInterface::RenderGeometryTransparent(scene,c);
+            InternalScenePublicInterface::RenderGeometryTransparent(scene, camera);
         }
-        void _passForwardRendering(GBuffer& gbuffer, Camera& c){
+        void _passForwardRendering(GBuffer& gbuffer, Camera& camera){
             Scene& scene = *Resources::getCurrentScene();
 
             gbuffer.bindFramebuffers(GBufferType::Diffuse);
             
             //RENDER NORMAL OBJECTS HERE
-            InternalScenePublicInterface::RenderForwardOpaque(scene,c);
+            InternalScenePublicInterface::RenderForwardOpaque(scene, camera);
 
-            InternalScenePublicInterface::RenderForwardTransparent(scene,c);
+            InternalScenePublicInterface::RenderForwardTransparent(scene, camera);
         }
         void _passCopyDepth(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth]->bind();
 
-            sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),0);
+            sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 0);
 
-            _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
+            _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
             Renderer::colorMask(true, true, true, true);
         }
-        void _passLighting(GBuffer& gbuffer, Camera& c, const uint& fboWidth, const uint& fboHeight,bool mainRenderFunc){
+        void _passLighting(GBuffer& gbuffer, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool mainRenderFunc){
             Scene& s = *Resources::getCurrentScene(); 
             //if(enabled1)
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting]->bind();
@@ -1785,14 +1720,14 @@ class epriv::RenderManager::impl final{
                 //m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingOptimized]->bind();
             
             if(RenderManager::GLSL_VERSION < 140){
-                sendUniformMatrix4Safe("CameraView", c.getView());
-                sendUniformMatrix4Safe("CameraProj", c.getProjection());
-                //sendUniformMatrix4Safe("CameraViewProj",c.getViewProjection()); //moved to shader binding function
-                sendUniformMatrix4Safe("CameraInvView", c.getViewInverse());
-                sendUniformMatrix4Safe("CameraInvProj", c.getProjectionInverse());
-                sendUniformMatrix4Safe("CameraInvViewProj", c.getViewProjectionInverse());
-                sendUniform4Safe("CameraInfo1", glm::vec4(c.getPosition(), c.getNear()));
-                sendUniform4Safe("CameraInfo2", glm::vec4(c.getViewVector(), c.getFar()));
+                sendUniformMatrix4Safe("CameraView", camera.getView());
+                sendUniformMatrix4Safe("CameraProj", camera.getProjection());
+                //sendUniformMatrix4Safe("CameraViewProj",camera.getViewProjection()); //moved to shader binding function
+                sendUniformMatrix4Safe("CameraInvView", camera.getViewInverse());
+                sendUniformMatrix4Safe("CameraInvProj", camera.getProjectionInverse());
+                sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
+                sendUniform4Safe("CameraInfo1", glm::vec4(camera.getPosition(), camera.getNear()));
+                sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
             }
             const auto& fbo_width = static_cast<float>(fboWidth);
             const auto& fbo_height = static_cast<float>(fboHeight);
@@ -1829,11 +1764,11 @@ class epriv::RenderManager::impl final{
                 //do GI here. (only doing GI during the main render pass, not during light probes
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingGI]->bind();
                 if(RenderManager::GLSL_VERSION < 140){
-                    sendUniformMatrix4Safe("CameraInvView", c.getViewInverse());
-                    sendUniformMatrix4Safe("CameraInvProj", c.getProjectionInverse());
-                    sendUniformMatrix4Safe("CameraInvViewProj", c.getViewProjectionInverse());
-                    sendUniform4Safe("CameraInfo1", glm::vec4(c.getPosition(), c.getNear()));
-                    sendUniform4Safe("CameraInfo2", glm::vec4(c.getViewVector(), c.getFar()));
+                    sendUniformMatrix4Safe("CameraInvView", camera.getViewInverse());
+                    sendUniformMatrix4Safe("CameraInvProj", camera.getProjectionInverse());
+                    sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
+                    sendUniform4Safe("CameraInfo1", glm::vec4(camera.getPosition(), camera.getNear()));
+                    sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
                 }
                 
                 sendUniform4v("materials[0]", Material::m_MaterialProperities, Material::m_MaterialProperities.size());
@@ -1933,6 +1868,21 @@ class epriv::RenderManager::impl final{
             sendTextureSafe("gBloomMap", gbuffer.getTexture(GBufferType::Bloom), 1);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
         }
+        void _passDepthAndTransparency(GBuffer& gbuffer , const uint& fboWidth, const uint& fboHeight, Viewport& viewport, Camera& camera, GBufferType::Type sceneTexture) {
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DepthAndTransparency]->bind();
+
+            sendTextureSafe("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
+            sendTextureSafe("SceneDepthTexture", gbuffer.getTexture(GBufferType::Depth), 1);
+            //GLEnable(GLState::BLEND);
+            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            sendUniform4Safe("TransparencyMaskColor", viewport.getTransparencyMaskColor());
+            sendUniform1Safe("TransparencyMaskActive", static_cast<int>(viewport.isTransparencyMaskActive()));
+            sendUniform1Safe("DepthMaskValue", viewport.getDepthMaskValue());
+            sendUniform1Safe("DepthMaskActive", static_cast<int>(viewport.isDepthMaskActive()));
+
+            _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
+            //GLDisable(GLState::BLEND);
+        }
         void _renderFullscreenQuad(const uint& width, const uint& height,uint startX,uint startY){
             const float w2 = static_cast<float>(width) * 0.5f;
             const float h2 = static_cast<float>(height) * 0.5f;
@@ -2005,7 +1955,7 @@ class epriv::RenderManager::impl final{
                     m_UBOCameraData.InvProj     = camera.getProjectionInverse();
                     m_UBOCameraData.InvView     = ComponentCamera_Functions::GetViewInverseNoTranslation(camera);
                     m_UBOCameraData.InvViewProj = ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(camera);
-                    m_UBOCameraData.Info1       = glm::vec4(0.001f,0.001f,0.001f, camera.getNear());
+                    m_UBOCameraData.Info1       = glm::vec4(0.0001f,0.0001f,0.0001f, camera.getNear());
                     m_UBOCameraData.Info2       = glm::vec4(ComponentCamera_Functions::GetViewVectorNoTranslation(camera), camera.getFar());
                     m_UBOCameraData.Info3       = glm::vec4(camera.getPosition(), 0.0f);
                     
@@ -2070,8 +2020,6 @@ class epriv::RenderManager::impl final{
                         epriv::Postprocess_SSAO::SSAO.passBlur(ssaoBlurShader, gbuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
                     }
                 }    
-            }else{
-
             }
             #pragma endregion
 
@@ -2133,15 +2081,25 @@ class epriv::RenderManager::impl final{
 
             #pragma region Finalization and AA
             if (!mainRenderFunc || aa_algorithm == AntiAliasingAlgorithm::None){
+                //gbuffer.bindFramebuffers(outTexture);
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
+                //gbuffer.bindBackbuffer(viewport, fbo, rbo);
+                //_passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport,camera,outTexture);
             }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::FXAA){
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
-                sceneTexture = outTexture;
+                //sceneTexture = outTexture;
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
+                //gbuffer.bindFramebuffers(sceneTexture);
                 auto& fxaaShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA];
-                epriv::Postprocess_FXAA::FXAA.pass(fxaaShader, gbuffer, dimensions.z, dimensions.w, sceneTexture);
+                epriv::Postprocess_FXAA::FXAA.pass(fxaaShader, gbuffer, dimensions.z, dimensions.w, outTexture);
+
+                //gbuffer.bindBackbuffer(viewport, fbo, rbo);
+                //_passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport, camera, sceneTexture);
+
+
+
             }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::SMAA){
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
@@ -2164,15 +2122,16 @@ class epriv::RenderManager::impl final{
 
                 //gbuffer.bindFramebuffers(GBufferType::Misc);
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
+                
                 epriv::Postprocess_SMAA::SMAA.passNeighbor(neighborProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture);
 
                 //gbuffer.bindFramebuffers(GBufferType::Lighting);
                 //gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 //epriv::Postprocess_SMAA::SMAA.passFinal(finalProgram, gbuffer, dimensions.z, dimensions.w);//unused
             }
-            
+            _passCopyDepth(gbuffer, dimensions.z, dimensions.w);
             #pragma endregion
-            //_passCopyDepth(gbuffer,camera,fboWidth,fboHeight);
+            
 
             #pragma region RenderPhysics
             GLEnable(GLState::BLEND_0);
@@ -2313,11 +2272,31 @@ void Renderer::Settings::Lighting::setGIContribution(const float g, const float 
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
 
-void Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm& algorithm){
-    renderManagerImpl->_setAntiAliasingAlgorithm(algorithm); 
+bool Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm& algorithm){
+    auto& i = *renderManagerImpl;
+    if(i.aa_algorithm != algorithm){ 
+        i.aa_algorithm = algorithm; 
+        return true;
+    }
+    return false;
 }
-void Renderer::Settings::cullFace(uint s){ 
-    renderManagerImpl->_cullFace(s); 
+bool Renderer::Settings::cullFace(const uint& state){ 
+    //0 = back | 1 = front | 2 = front and back
+    auto& i = *renderManagerImpl;
+    if (state == GL_BACK && i.cull_face_status != 0) {
+        glCullFace(GL_BACK);
+        i.cull_face_status = 0;
+        return true;
+    }else if (state == GL_FRONT && i.cull_face_status != 1) {
+        glCullFace(GL_FRONT);
+        i.cull_face_status = 1;
+        return true;
+    }else if (state == GL_FRONT_AND_BACK && i.cull_face_status != 2) {
+        glCullFace(GL_FRONT_AND_BACK);
+        i.cull_face_status = 2;
+        return true;
+    }
+    return false;
 }
 void Renderer::Settings::clear(const bool color, const bool depth, const bool stencil){
     if(!color && !depth && !stencil) return;
@@ -2339,17 +2318,48 @@ void Renderer::Settings::setGamma(const float g){
 float Renderer::Settings::getGamma(){ 
     return renderManagerImpl->gamma; 
 }
-void Renderer::setDepthFunc(const DepthFunc::Func& func){
-    renderManagerImpl->_setDepthFunc(func); 
+bool Renderer::setDepthFunc(const DepthFunc::Func& func){
+    auto& i = *renderManagerImpl;
+    if (i.depth_func != func) {
+        glDepthFunc(func);
+        i.depth_func = func;
+        return true;
+    } 
+    return false;
 }
 bool Renderer::setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
-    return renderManagerImpl->_setViewport(x,y,w,h); 
+    auto& i = *renderManagerImpl;
+    if (i.gl_viewport_data.x == x && i.gl_viewport_data.y == y && i.gl_viewport_data.z == w && i.gl_viewport_data.w == h)
+        return false;
+    glViewport(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(w), static_cast<GLsizei>(h));
+    i.gl_viewport_data = glm::uvec4(x, y, w, h);
+    return true;
 }
 bool Renderer::colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
-    return renderManagerImpl->_colorMask(r,g,b,a); 
+    auto& i = *renderManagerImpl;
+    auto _r = static_cast<GLboolean>(r);
+    auto _g = static_cast<GLboolean>(g);
+    auto _b = static_cast<GLboolean>(b);
+    auto _a = static_cast<GLboolean>(a);
+    if (_r == i.color_mask_r && _g == i.color_mask_g && _b == i.color_mask_b && _a == i.color_mask_a)
+        return false;
+    i.color_mask_r = _r;
+    i.color_mask_g = _g;
+    i.color_mask_b = _b;
+    i.color_mask_a = _a;
+    glColorMask(i.color_mask_r, i.color_mask_g, i.color_mask_b, i.color_mask_a);
+    return true;
 }
-void Renderer::clearColor(const float& r, const float& g, const float& b, const float& a) {
-    renderManagerImpl->_clearColor(r, g, b, a); 
+bool Renderer::clearColor(const float& r, const float& g, const float& b, const float& a) {
+    auto& i = *renderManagerImpl;
+    if (r == i.clear_color.r && g == i.clear_color.g && b == i.clear_color.b && a == i.clear_color.a)
+        return false;
+    i.clear_color.r = r;
+    i.clear_color.g = g;
+    i.clear_color.b = b;
+    i.clear_color.a = a;
+    glClearColor(i.clear_color.r, i.clear_color.g, i.clear_color.b, i.clear_color.a);
+    return true;
 }
 bool Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
     auto& i = *renderManager;
@@ -2395,11 +2405,13 @@ bool Renderer::bindVAO(const GLuint _vaoObject){
     }
     return false;
 }
-void Renderer::deleteVAO(GLuint& _vaoObject) {
+bool Renderer::deleteVAO(GLuint& _vaoObject) {
     if (_vaoObject) {
         glDeleteVertexArrays(1,&_vaoObject);
         _vaoObject = 0;
+        return true;
     }
+    return false;
 }
 void Renderer::genAndBindTexture(const GLuint _textureType, GLuint& _textureObject){
     glGenTextures(1, &_textureObject);
@@ -2425,16 +2437,55 @@ void Renderer::sendTextureSafe(const char* location,const GLuint textureAddress,
     bindTexture(targetType,textureAddress);
     sendUniform1Safe(location,slot);
 }
-void Renderer::bindReadFBO(const GLuint fbo){ renderManagerImpl->_bindReadFBO(fbo); }
-void Renderer::bindFBO(epriv::FramebufferObject& fbo){ Renderer::bindFBO(fbo.address()); }
-void Renderer::bindRBO(epriv::RenderbufferObject& rbo){ Renderer::bindRBO(rbo.address()); }
-void Renderer::bindDrawFBO(const GLuint fbo){ renderManagerImpl->_bindDrawFBO(fbo); }
-void Renderer::bindFBO(const GLuint fbo){Renderer::bindReadFBO(fbo);Renderer::bindDrawFBO(fbo);}
-void Renderer::bindRBO(const GLuint rbo){ renderManagerImpl->_bindRBO(rbo); }
-void Renderer::unbindFBO(){ Renderer::bindFBO(GLuint(0)); }
-void Renderer::unbindRBO(){ Renderer::bindRBO(GLuint(0)); }
-void Renderer::unbindReadFBO(){ Renderer::bindReadFBO(0); }
-void Renderer::unbindDrawFBO(){ Renderer::bindDrawFBO(0); }
+bool Renderer::bindReadFBO(const GLuint& fbo){ 
+    auto& i = *renderManager;
+    if (i.glSM.current_bound_read_fbo != fbo) {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+        i.glSM.current_bound_read_fbo = fbo;
+        return true;
+    }
+    return false;
+}
+void Renderer::bindFBO(epriv::FramebufferObject& fbo){ 
+    Renderer::bindFBO(fbo.address()); 
+}
+bool Renderer::bindRBO(epriv::RenderbufferObject& rbo){
+    return Renderer::bindRBO(rbo.address()); 
+}
+bool Renderer::bindDrawFBO(const GLuint& fbo){
+    auto& i = *renderManager;
+    if (i.glSM.current_bound_draw_fbo != fbo) {
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+        i.glSM.current_bound_draw_fbo = fbo;
+        return true;
+    }
+    return false;
+}
+void Renderer::bindFBO(const GLuint& fbo){
+    Renderer::bindReadFBO(fbo);
+    Renderer::bindDrawFBO(fbo);
+}
+bool Renderer::bindRBO(const GLuint& rbo){ 
+    auto& i = *renderManager;
+    if (i.glSM.current_bound_rbo != rbo) {
+        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+        i.glSM.current_bound_rbo = rbo;
+        return true;
+    }
+    return false;
+}
+void Renderer::unbindFBO(){ 
+    Renderer::bindFBO(GLuint(0)); 
+}
+void Renderer::unbindRBO(){ 
+    Renderer::bindRBO(GLuint(0)); 
+}
+void Renderer::unbindReadFBO(){ 
+    Renderer::bindReadFBO(0); 
+}
+void Renderer::unbindDrawFBO(){ 
+    Renderer::bindDrawFBO(0); 
+}
 inline const GLint Renderer::getUniformLoc(const char* location) {
     const auto& m = renderManager->glSM.current_bound_shader_program->uniforms(); if (!m.count(location)) return -1; return m.at(location);
 }
