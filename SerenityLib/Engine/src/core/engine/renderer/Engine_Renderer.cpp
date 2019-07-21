@@ -139,32 +139,6 @@ namespace Engine{
             SMAA4,
         _TOTAL};};
 
-        struct TextureRenderInfo final{
-            const Texture*   texture;
-            const glm::vec2  pos;
-            const glm::vec2  scl;
-            const glm::vec4  col;
-            const float      rot;
-            const float      depth;
-            TextureRenderInfo(const Texture* _texture, const glm::vec2& _pos, const glm::vec4& _col, const glm::vec2& _scl, const float& _rot, const float& _depth)
-                :texture(_texture),pos(_pos),col(_col),scl(_scl),rot(_rot),depth(_depth){
-            }
-        };
-        /*
-        struct FontRenderInfo final{
-            const Font&                font;
-            const glm::vec2            pos;
-            const glm::vec2            scl;
-            const glm::vec4            col;
-            const float                rot;
-            const float                depth;
-            const std::string          text;
-            const TextAlignment::Type  alignType;
-            FontRenderInfo(const Font& _font, const string& _text, const glm::vec2& _pos, const glm::vec4& _col, const glm::vec2& _scl, const float& _rot, const float& _depth, const TextAlignment::Type& _alignType)
-                :font(_font),pos(_pos),col(_col),scl(_scl),rot(_rot),depth(_depth),text(_text),alignType(_alignType){
-            }
-        };
-        */
         struct UBOCamera final{
             glm::mat4 View;
             glm::mat4 Proj;
@@ -241,9 +215,9 @@ class epriv::RenderManager::impl final{
 
             #pragma region GeneralInfo
 
-            text_pts.reserve(4096 * 4);//4 points per char
-            text_uvs.reserve(4096 * 4);//4 uvs per char
-            text_ind.reserve(4096 * 6);//6 ind per char
+            text_pts.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 points per char, 4096 chars
+            text_uvs.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 uvs per char
+            text_ind.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6);//6 ind per char
 
 
             gamma = 2.2f;
@@ -1200,7 +1174,6 @@ class epriv::RenderManager::impl final{
             //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very odd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
             GLEnable(GLState::DEPTH_CLAMP);
 
-
             epriv::Postprocess_SMAA::SMAA.init();
 
             _generateBRDFLUTCookTorrance(512);
@@ -1543,7 +1516,6 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform4Safe("LightDataE", 0.0f, 0.0f, static_cast<float>(p.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
-            //glm::vec3 camPos = c.getPosition();
             const glm::mat4& model = body.modelMatrix();
             const glm::mat4& vp = c.getViewProjection();
 
@@ -1590,7 +1562,6 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform2Safe("VertexShaderData", s.m_OuterCutoff, s.m_CullingRadius);
             Renderer::sendUniform1Safe("Type", 2.0f);
 
-            //glm::vec3 camPos = c.getPosition();
             const glm::mat4& model = body.modelMatrix();
             const glm::mat4& vp = c.getViewProjection();
 
@@ -1631,7 +1602,6 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform4Safe("LightDataE", r.m_RodLength, 0.0f, static_cast<float>(r.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
-            //glm::vec3 camPos = c.getPosition();
             const glm::mat4& model = body.modelMatrix();
             const glm::mat4& vp = c.getViewProjection();
 
@@ -1838,15 +1808,15 @@ class epriv::RenderManager::impl final{
             else{            hv = glm::vec2(0.0f,1.0f); }
 
             const glm::ivec2 Res(fboWidth, fboHeight);
-
+            auto& bloom = epriv::Postprocess_Bloom::Bloom;
             sendUniform4("strengthModifier", 
-                epriv::Postprocess_Bloom::Bloom.blur_strength,
-                epriv::Postprocess_Bloom::Bloom.blur_strength,
-                epriv::Postprocess_Bloom::Bloom.blur_strength,
+                bloom.blur_strength,
+                bloom.blur_strength,
+                bloom.blur_strength,
                 epriv::Postprocess_SSAO::SSAO.m_ssao_blur_strength
             );
             sendUniform2("Resolution", Res);
-            sendUniform4("DataA", epriv::Postprocess_Bloom::Bloom.blur_radius,0.0f,hv.x,hv.y);
+            sendUniform4("DataA", bloom.blur_radius,0.0f,hv.x,hv.y);
             sendTexture("image",gbuffer.getTexture(texture),0);
 
             const uint screen_width = static_cast<uint>(static_cast<float>(fboWidth) * divisor);
@@ -1872,16 +1842,19 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DepthAndTransparency]->bind();
 
             sendTextureSafe("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
-            sendTextureSafe("SceneDepthTexture", gbuffer.getTexture(GBufferType::Depth), 1);
-            //GLEnable(GLState::BLEND);
-            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            sendUniform4Safe("TransparencyMaskColor", viewport.getTransparencyMaskColor());
-            sendUniform1Safe("TransparencyMaskActive", static_cast<int>(viewport.isTransparencyMaskActive()));
+            sendTextureSafe("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 1);
+
+            GLEnable(GLState::BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            //sendUniform4Safe("TransparencyMaskColor", viewport.getTransparencyMaskColor());
+            //sendUniform1Safe("TransparencyMaskActive", static_cast<int>(viewport.isTransparencyMaskActive()));
             sendUniform1Safe("DepthMaskValue", viewport.getDepthMaskValue());
             sendUniform1Safe("DepthMaskActive", static_cast<int>(viewport.isDepthMaskActive()));
 
             _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
-            //GLDisable(GLState::BLEND);
+
+            GLDisable(GLState::BLEND);
         }
         void _renderFullscreenQuad(const uint& width, const uint& height,uint startX,uint startY){
             const float w2 = static_cast<float>(width) * 0.5f;
@@ -1999,11 +1972,8 @@ class epriv::RenderManager::impl final{
             //TODO: investigate why enabling SSAO makes things FASTER
             //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
 
-
             gbuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
             Settings::clear(true, false, false); //0,0,0,0
-
-
 
             if (epriv::Postprocess_SSAO::SSAO.m_ssao) {
                 GLEnable(GLState::BLEND_0);//yes this is absolutely needed
@@ -2040,6 +2010,8 @@ class epriv::RenderManager::impl final{
             
             GLDisable(GLState::BLEND_0);
             GLDisable(GLState::STENCIL_TEST);
+
+
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
             _passForwardRendering(gbuffer,camera);
@@ -2081,31 +2053,26 @@ class epriv::RenderManager::impl final{
 
             #pragma region Finalization and AA
             if (!mainRenderFunc || aa_algorithm == AntiAliasingAlgorithm::None){
-                //gbuffer.bindFramebuffers(outTexture);
-                gbuffer.bindBackbuffer(viewport, fbo, rbo);
+                gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
-                //gbuffer.bindBackbuffer(viewport, fbo, rbo);
-                //_passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport,camera,outTexture);
+                gbuffer.bindBackbuffer(viewport, fbo, rbo);
+                _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport,camera,outTexture);
             }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::FXAA){
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
-                //sceneTexture = outTexture;
-                gbuffer.bindBackbuffer(viewport, fbo, rbo);
-                //gbuffer.bindFramebuffers(sceneTexture);
+                gbuffer.bindFramebuffers(sceneTexture);
                 auto& fxaaShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA];
                 epriv::Postprocess_FXAA::FXAA.pass(fxaaShader, gbuffer, dimensions.z, dimensions.w, outTexture);
 
-                //gbuffer.bindBackbuffer(viewport, fbo, rbo);
-                //_passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport, camera, sceneTexture);
-
-
+                gbuffer.bindBackbuffer(viewport, fbo, rbo);
+                _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport, camera, sceneTexture);
 
             }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::SMAA){
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
-                auto copy = sceneTexture;
-                sceneTexture = outTexture;
-                outTexture = copy;
+
+                std::swap(sceneTexture, outTexture);
+
 
                 const float& _fboWidth  = static_cast<float>(dimensions.z);
                 const float& _fboHeight = static_cast<float>(dimensions.w);
@@ -2120,19 +2087,19 @@ class epriv::RenderManager::impl final{
 
                 epriv::Postprocess_SMAA::SMAA.passBlend(blendProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, outTexture);
 
-                //gbuffer.bindFramebuffers(GBufferType::Misc);
-                gbuffer.bindBackbuffer(viewport, fbo, rbo);
-                
+                gbuffer.bindFramebuffers(outTexture);
                 epriv::Postprocess_SMAA::SMAA.passNeighbor(neighborProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture);
+                //gbuffer.bindFramebuffers(sceneTexture);
 
-                //gbuffer.bindFramebuffers(GBufferType::Lighting);
-                //gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 //epriv::Postprocess_SMAA::SMAA.passFinal(finalProgram, gbuffer, dimensions.z, dimensions.w);//unused
+
+                gbuffer.bindBackbuffer(viewport, fbo, rbo);
+                _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport, camera, outTexture);
             }
             _passCopyDepth(gbuffer, dimensions.z, dimensions.w);
             #pragma endregion
             
-
+            
             #pragma region RenderPhysics
             GLEnable(GLState::BLEND_0);
             GLDisable(GLState::DEPTH_TEST);
@@ -2144,6 +2111,7 @@ class epriv::RenderManager::impl final{
                 }
             }
             #pragma endregion
+            
          
             #pragma region 2DAPI
             GLEnable(GLState::DEPTH_TEST);
@@ -2163,6 +2131,8 @@ class epriv::RenderManager::impl final{
                 }
             }
             #pragma endregion
+
+            
         }
 };
 
@@ -2492,17 +2462,6 @@ inline const GLint Renderer::getUniformLoc(const char* location) {
 inline const GLint& Renderer::getUniformLocUnsafe(const char* location) {
     return renderManager->glSM.current_bound_shader_program->uniforms().at(location);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

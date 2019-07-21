@@ -169,7 +169,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;ENGINE_FORCE_NO_LOG_DEPTH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>

@@ -27,6 +27,7 @@
 
 using namespace std;
 using namespace Engine;
+using namespace Engine::epriv;
 namespace boostm = boost::math;
 
 Mesh* Mesh::FontPlane = nullptr;
@@ -37,48 +38,58 @@ Mesh* Mesh::Triangle  = nullptr;
 namespace Engine {
     namespace epriv {
         struct DefaultMeshBindFunctor final{void operator()(BindableResource* r) const {
-            const auto& m = *(Mesh*)r; m.m_VertexData->bind();
+            const auto& m = *static_cast<Mesh*>(r);
+            m.m_VertexData->bind();
         }};
         struct DefaultMeshUnbindFunctor final {void operator()(BindableResource* r) const {
-            const auto& m = *(Mesh*)r; m.m_VertexData->unbind();
+            const auto& m = *static_cast<Mesh*>(r);
+            m.m_VertexData->unbind();
         }};
     };
 };
 
-void epriv::InternalMeshPublicInterface::LoadCPU( Mesh& _mesh){
+void InternalMeshPublicInterface::LoadCPU( Mesh& _mesh){
     _mesh.load_cpu();
 }
-void epriv::InternalMeshPublicInterface::LoadGPU( Mesh& _mesh){
+void InternalMeshPublicInterface::LoadGPU( Mesh& _mesh){
     _mesh.load_gpu();
     _mesh.EngineResource::load();
 }
-void epriv::InternalMeshPublicInterface::UnloadCPU( Mesh& _mesh){
+void InternalMeshPublicInterface::UnloadCPU( Mesh& _mesh){
     _mesh.unload_cpu();
     _mesh.EngineResource::unload();
 }
-void epriv::InternalMeshPublicInterface::UnloadGPU( Mesh& _mesh){
+void InternalMeshPublicInterface::UnloadGPU( Mesh& _mesh){
     _mesh.unload_gpu();
 }
 
-bool epriv::InternalMeshPublicInterface::SupportsInstancing(){
-    if(epriv::RenderManager::OPENGL_VERSION >= 31 || 
-    epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_draw_instanced) || 
-    epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_draw_instanced)){
+bool InternalMeshPublicInterface::SupportsInstancing(){
+    if(RenderManager::OPENGL_VERSION >= 31 || 
+    OpenGLExtensionEnum::supported(OpenGLExtensionEnum::EXT_draw_instanced) || OpenGLExtensionEnum::supported(OpenGLExtensionEnum::ARB_draw_instanced)){
         return true;
     }
     return false;
 }
 
-btCollisionShape* epriv::InternalMeshPublicInterface::BuildCollision(Mesh* _mesh, CollisionType::Type _type) {
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* _mesh, const CollisionType::Type& _type) {
     if(!_mesh) return new btEmptyShape();
+    auto& factory = *_mesh->m_CollisionFactory;
     switch (_type) {
-        case CollisionType::None: { return new btEmptyShape(); }
-        case CollisionType::Box: { return _mesh->m_CollisionFactory->buildBoxShape(); }
-        case CollisionType::ConvexHull: { return _mesh->m_CollisionFactory->buildConvexHull(); }
-        case CollisionType::Sphere: { return _mesh->m_CollisionFactory->buildSphereShape(); }
-        case CollisionType::TriangleShapeStatic: { return _mesh->m_CollisionFactory->buildTriangleShape(); }
-        case CollisionType::TriangleShape: { return _mesh->m_CollisionFactory->buildTriangleShapeGImpact(); }
-        default: { return new btEmptyShape(); }
+        case CollisionType::None: { 
+            return new btEmptyShape(); 
+        }case CollisionType::Box: { 
+            return factory.buildBoxShape();
+        }case CollisionType::ConvexHull: { 
+            return factory.buildConvexHull();
+        }case CollisionType::Sphere: { 
+            return factory.buildSphereShape();
+        }case CollisionType::TriangleShapeStatic: { 
+            return factory.buildTriangleShape();
+        }case CollisionType::TriangleShape: { 
+            return factory.buildTriangleShapeGImpact();
+        }default: { 
+            return new btEmptyShape(); 
+        }
     }
     return new btEmptyShape();
 }
@@ -108,42 +119,26 @@ void Mesh::unload_gpu() {
 }
 
 void Mesh::load_cpu() {
-    /*
-    if (m_File != "") {
-        const string& extension = boost::filesystem::extension(m_File);
-        epriv::MeshImportedData d;
 
-        if (extension == ".objcc") {
-            m_VertexData = epriv::MeshLoader::LoadFrom_OBJCC(m_File);
-            calculate_radius();
-        }else{
-            //epriv::MeshLoader::LoadInternal(m_Skeleton, d, m_File);
-            //epriv::MeshLoader::FinalizeData(*this, d, m_threshold);
-            //if (extension == ".obj")
-                //epriv::MeshLoader::SaveTo_OBJCC(*m_VertexData, "data/Models/ribbon.objcc");
-        }
-    }
-    m_CollisionFactory = new epriv::MeshCollisionFactory(*this);
-    */
 }
 void Mesh::load_gpu() {
     m_VertexData->finalize(); //transfer vertex data to gpu
     cout << "(Mesh) ";
 }
-void Mesh::triangulate_component_indices(epriv::MeshImportedData& data, vector<vector<uint>>& indices, unsigned char _flags) {
+void Mesh::triangulate_component_indices(MeshImportedData& data, vector<vector<uint>>& indices, unsigned char _flags) {
     for (uint i = 0; i < indices[0].size(); ++i) {
         glm::vec3 pos(0.0f);
         glm::vec2 uv(0.0f);
         glm::vec3 norm(1.0f);
-        if (_flags && epriv::LOAD_POINTS && data.file_points.size() > 0) {
+        if (_flags && MeshLoadingFlags::Points && data.file_points.size() > 0) {
             pos = data.file_points[indices[0][i] - 1];
             data.points.push_back(pos);
         }
-        if (_flags && epriv::LOAD_UVS && data.file_uvs.size() > 0) {
+        if (_flags && MeshLoadingFlags::UVs && data.file_uvs.size() > 0) {
             uv = data.file_uvs[indices[1][i] - 1];
             data.uvs.push_back(uv);
         }
-        if (_flags && epriv::LOAD_NORMALS && data.file_normals.size() > 0) {
+        if (_flags && MeshLoadingFlags::Normals && data.file_normals.size() > 0) {
             norm = data.file_normals[indices[2][i] - 1];
             data.normals.push_back(norm);
         }
@@ -151,7 +146,7 @@ void Mesh::triangulate_component_indices(epriv::MeshImportedData& data, vector<v
 }
 
 
-void Mesh::finalize_vertex_data(epriv::MeshImportedData& data) {
+void Mesh::finalize_vertex_data(MeshImportedData& data) {
     if (data.uvs.size() == 0)         data.uvs.resize(data.points.size());
     if (data.normals.size() == 0)     data.normals.resize(data.points.size());
     if (data.binormals.size() == 0)   data.binormals.resize(data.points.size());
@@ -251,18 +246,19 @@ void Mesh::init_blank() {
     m_threshold        = 0.0005f;
 
     registerEvent(EventType::WindowFullscreenChanged);
-    setCustomBindFunctor(epriv::DefaultMeshBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMeshUnbindFunctor());
+    setCustomBindFunctor(DefaultMeshBindFunctor());
+    setCustomUnbindFunctor(DefaultMeshUnbindFunctor());
 }
 
 Mesh::Mesh() {
     init_blank();
 }
 
+//TERRAIN MESH
 Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, float threshold) {
     init_blank();
     m_threshold = threshold;
-    epriv::MeshImportedData data;
+    MeshImportedData data;
 
 	//TODO: fix this up
 
@@ -306,8 +302,8 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
             data.points.push_back(v2.position); data.uvs.push_back(v2.uv); data.normals.push_back(v2.normal);
         }
     }
-    epriv::MeshLoader::CalculateTBNAssimp(data);
-    epriv::MeshLoader::FinalizeData(*this, data, threshold);
+    MeshLoader::CalculateTBNAssimp(data);
+    MeshLoader::FinalizeData(*this, data, threshold);
 	*/
     load();
 }
@@ -322,7 +318,7 @@ Mesh::Mesh(string name,float width, float height,float threshold):BindableResour
     init_blank();
     m_threshold = threshold;
 
-    epriv::MeshImportedData data;
+    MeshImportedData data;
 
     vector<epriv::Vertex> quad; quad.resize(4);
     quad[0].uv = glm::vec2(0.0f, 0.0f);
@@ -344,7 +340,7 @@ Mesh::Mesh(string name,float width, float height,float threshold):BindableResour
         data.uvs.emplace_back(quad[(i + 2) % 4].uv);
     }
     m_VertexData = new VertexData(VertexDataFormat::VertexDataNoLighting);
-    epriv::MeshLoader::FinalizeData(*this, data, threshold);
+    MeshLoader::FinalizeData(*this, data, threshold);
 
     load();
 }
@@ -353,37 +349,38 @@ Mesh::Mesh(string fileOrData,float threshold):BindableResource(""){
     m_threshold = threshold;
 
     setName("Custom Mesh");
-    unsigned char _flags = epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN;
+    unsigned char _flags = MeshLoadingFlags::Faces | MeshLoadingFlags::UVs | MeshLoadingFlags::Normals | MeshLoadingFlags::TBN;
 
-    epriv::MeshImportedData data;
-    vector<vector<uint>> indices; indices.resize(3);
-    istringstream stream; stream.str(fileOrData);
+    MeshImportedData data;
+    vector<vector<uint>> indices;
+    indices.resize(3);
+    istringstream stream;
+    stream.str(fileOrData);
 
     //first read in all data
     for (string line; getline(stream, line, '\n');) {
         if (line[0] == 'o') {
-        }
-        else if (line[0] == 'v' && line[1] == ' ') {
-            if (_flags && epriv::LOAD_POINTS) {
+        }else if (line[0] == 'v' && line[1] == ' ') {
+            if (_flags && MeshLoadingFlags::Points) {
                 glm::vec3 p;
-                sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &p.x, &p.y, &p.z);
+                auto res = sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &p.x, &p.y, &p.z);
                 data.file_points.push_back(p);
             }
         }else if (line[0] == 'v' && line[1] == 't') {
-            if (_flags && epriv::LOAD_UVS) {
+            if (_flags && MeshLoadingFlags::UVs) {
                 glm::vec2 uv;
-                sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
+                auto res = sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
                 uv.y = 1.0f - uv.y;
                 data.file_uvs.push_back(uv);
             }
         }else if (line[0] == 'v' && line[1] == 'n') {
-            if (_flags && epriv::LOAD_NORMALS) {
+            if (_flags && MeshLoadingFlags::Normals) {
                 glm::vec3 n;
-                sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &n.x, &n.y, &n.z);
+                auto res = sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &n.x, &n.y, &n.z);
                 data.file_normals.push_back(n);
             }
         }else if (line[0] == 'f' && line[1] == ' ') {
-            if (_flags && epriv::LOAD_FACES) {
+            if (_flags && MeshLoadingFlags::Faces) {
                 glm::uvec3 f1, f2, f3, f4 = glm::uvec3(1);
                 int matches = sscanf(line.substr(2, line.size()).c_str(), "%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f1.x, &f1.y, &f1.z, &f2.x, &f2.y, &f2.z, &f3.x, &f3.y, &f3.z, &f4.x, &f4.y, &f4.z);
                 if (matches < 3) {
@@ -406,13 +403,13 @@ Mesh::Mesh(string fileOrData,float threshold):BindableResource(""){
             }
         }
     }
-    if (_flags && epriv::LOAD_FACES) {
+    if (_flags && MeshLoadingFlags::Faces) {
         triangulate_component_indices(data, indices, _flags);
     }
-    if (_flags && epriv::LOAD_TBN) {
-        epriv::MeshLoader::CalculateTBNAssimp(data);
+    if (_flags && MeshLoadingFlags::TBN) {
+        MeshLoader::CalculateTBNAssimp(data);
     }
-    epriv::MeshLoader::FinalizeData(*this, data, threshold);
+    MeshLoader::FinalizeData(*this, data, threshold);
 
     load();
 }
@@ -421,7 +418,7 @@ Mesh::~Mesh(){
     unload();
 }
 
-unordered_map<string, epriv::AnimationData>& Mesh::animationData(){ return m_Skeleton->m_AnimationData; }
+unordered_map<string, AnimationData>& Mesh::animationData(){ return m_Skeleton->m_AnimationData; }
 
 const VertexData& Mesh::getVertexStructure() const { return *m_VertexData; }
 
@@ -433,11 +430,11 @@ void Mesh::render(bool instancing, MeshDrawMode::Mode mode){
     if (instancing && epriv::InternalMeshPublicInterface::SupportsInstancing()) {
         //const uint& instancesCount = m_InstanceCount;
         //if (instancesCount == 0) return;
-        //if (epriv::RenderManager::OPENGL_VERSION >= 31) {
+        //if (RenderManager::OPENGL_VERSION >= 31) {
         //    glDrawElementsInstanced(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        //} else if (epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_draw_instanced)) {
+        //} else if (OpenGLExtensionEnum::supported(OpenGLExtensionEnum::EXT_draw_instanced)) {
         //    glDrawElementsInstancedEXT(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        //} else if (epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_draw_instanced)) {
+        //} else if (OpenGLExtensionEnum::supported(OpenGLExtensionEnum::ARB_draw_instanced)) {
         //    glDrawElementsInstancedARB(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
         //}
     }else{

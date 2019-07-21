@@ -30,7 +30,7 @@ class Engine_Window::impl final{
 		int minorVersion;
 		int glslVersion;
         sf::ContextSettings m_SFContextSettings;
-        void _init(const char* name,uint width,uint height){
+        void _init(const char* name, const uint& width, const uint& height){
             m_FramerateLimit = 0;
             m_MouseCursorVisible = true;
             m_Fullscreen = m_Vsync = m_MouseCursorGrabbed = false;
@@ -38,9 +38,8 @@ class Engine_Window::impl final{
             m_Width = width;
             m_Height = height;
             m_SFMLWindow = new sf::Window();
-            _setActive(true);
 			majorVersion = 4;
-			minorVersion = 5;
+			minorVersion = 6;
 			glslVersion = 330;
             m_SFContextSettings = _createOpenGLWindow(name,width,height, majorVersion, minorVersion, glslVersion);
 
@@ -59,13 +58,13 @@ class Engine_Window::impl final{
             sfmlWindow.setVerticalSyncEnabled(m_Vsync);
             sfmlWindow.setMouseCursorGrabbed(m_MouseCursorGrabbed);
         }
-        const sf::ContextSettings _createOpenGLWindow(const char* name,uint width,uint height,uint _majorVersion, uint _minorVersion,uint _glslVersion){
+        const sf::ContextSettings _createOpenGLWindow(const char* name, const uint& width, const uint& height, const uint& _majorVersion, const uint& _minorVersion, const uint& _glslVersion){
             sf::ContextSettings settings;
-            settings.depthBits = 24;
-            settings.stencilBits = 0;
+            settings.depthBits         = 24;
+            settings.stencilBits       = 0;
             settings.antialiasingLevel = 0;
-            settings.majorVersion = _majorVersion;
-            settings.minorVersion = _minorVersion;
+            settings.majorVersion      = _majorVersion;
+            settings.minorVersion      = _minorVersion;
 
             #ifdef _DEBUG
                 settings.attributeFlags = settings.Debug;
@@ -92,7 +91,7 @@ class Engine_Window::impl final{
 
             return m_SFMLWindow->getSettings();
         }
-        void _setFullScreen(bool fullscreen){
+        void _setFullScreen(const bool& fullscreen){
             if(m_Fullscreen == fullscreen) return;
             if(m_Style == sf::Style::Fullscreen && fullscreen) return;
             if(m_Style != sf::Style::Fullscreen && !fullscreen) return;
@@ -135,13 +134,13 @@ class Engine_Window::impl final{
             m_Fullscreen = fullscreen;
             _restoreStateMachine();
         }
-        void _setStyle(uint style){
+        void _setStyle(const uint& style){
             if(m_Style == style) return;
             m_Style = style;
             m_SFMLWindow->close();
             _createOpenGLWindow(m_WindowName,m_Width,m_Height, majorVersion, minorVersion, glslVersion);
         }
-        void _setSize(uint w, uint h){
+        void _setSize(const uint& w, const uint& h){
             m_Width = w; m_Height = h;
             m_SFMLWindow->setSize(sf::Vector2u(w,h));
         }
@@ -161,65 +160,107 @@ class Engine_Window::impl final{
         void _setIcon(Texture& texture){
             m_SFMLWindow->setIcon(texture.width(),texture.height(),texture.pixels());
         }
-        void _setMouseCursorVisible(bool& visible){
+        void _setMouseCursorVisible(const bool& visible){
             if(m_MouseCursorVisible != visible){
                 m_SFMLWindow->setMouseCursorVisible(visible);
                 m_MouseCursorVisible = visible;
             }
         }
-        void _setActive(bool active){
-            m_Active = active;
-            m_SFMLWindow->setActive(active);
-        }
-        void _setFramerateLimit(uint& limit){
+        void _setFramerateLimit(const uint& limit){
             m_SFMLWindow->setFramerateLimit(limit);
             m_FramerateLimit = limit;
         }
-        void _setVerticalSyncEnabled(bool enabled){
-            if(m_Vsync != enabled){
-                m_SFMLWindow->setVerticalSyncEnabled(enabled);
-                m_Vsync = enabled;
-            }
-        }
-        void _keepMouseInWindow(bool keep){
+        void _keepMouseInWindow(const bool& keep){
             if(m_MouseCursorGrabbed != keep){
                 m_SFMLWindow->setMouseCursorGrabbed(keep);
                 m_MouseCursorGrabbed = keep;
             }
         }
-        void _display() {
-            m_SFMLWindow->display();
-        }
 };
 
-Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new impl){
+Engine_Window::Engine_Window(const char* name, const uint& width, const uint& height):m_i(new impl){
     m_i->_init(name,width,height);
 }
 Engine_Window::~Engine_Window(){
     m_i->_destruct();
 }
-glm::uvec2 Engine_Window::getSize(){ sf::Vector2u size = m_i->m_SFMLWindow->getSize(); return glm::uvec2(size.x,size.y); }
-void Engine_Window::setIcon(const Texture& texture){m_i->_setIcon(const_cast<Texture&>(texture));}
-void Engine_Window::setIcon(const char* file){m_i->_setIcon(file);}
-void Engine_Window::setIcon(const string& file) { m_i->_setIcon(file.c_str()); }
-const char* Engine_Window::name() const {return m_i->m_WindowName;}
-void Engine_Window::setName(const char* name){m_i->_setName(name);}
-void Engine_Window::setVerticalSyncEnabled(bool enabled){ m_i->_setVerticalSyncEnabled(enabled); }
-void Engine_Window::setKeyRepeatEnabled(bool enabled){m_i->m_SFMLWindow->setKeyRepeatEnabled(enabled);}
-void Engine_Window::setMouseCursorVisible(bool visible){ m_i->_setMouseCursorVisible(visible); }
-void Engine_Window::requestFocus(){m_i->m_SFMLWindow->requestFocus();}
-void Engine_Window::close(){m_i->m_SFMLWindow->close();}
-bool Engine_Window::hasFocus(){return m_i->m_SFMLWindow->hasFocus();}
-bool Engine_Window::isOpen(){return m_i->m_SFMLWindow->isOpen();}
-bool Engine_Window::isActive(){ return m_i->m_Active; }
-bool Engine_Window::isFullscreen(){return m_i->m_Fullscreen;}
-void Engine_Window::display(){m_i->_display();}
-void Engine_Window::setActive(bool active){m_i->_setActive(active);}
-void Engine_Window::setSize(uint w, uint h){m_i->_setSize(w,h);}
-void Engine_Window::setStyle(uint style){m_i->_setStyle(style);}
-void Engine_Window::setFullScreen(bool fullscreen){ m_i->_setFullScreen(fullscreen); }
-void Engine_Window::keepMouseInWindow(bool keep){ m_i->_keepMouseInWindow(keep); }
-void Engine_Window::setFramerateLimit(uint limit){ m_i->_setFramerateLimit(limit); }
-sf::Window& Engine_Window::getSFMLHandle() const { return *m_i->m_SFMLWindow; }
-uint Engine_Window::getStyle(){ return m_i->m_Style; }
-uint Engine_Window::getFramerateLimit() const{ return m_i->m_FramerateLimit; }
+glm::uvec2 Engine_Window::getSize(){ 
+    sf::Vector2u size = m_i->m_SFMLWindow->getSize(); 
+    return glm::uvec2(size.x,size.y); 
+}
+void Engine_Window::setIcon(const Texture& texture){
+    m_i->_setIcon(const_cast<Texture&>(texture));
+}
+void Engine_Window::setIcon(const char* file){
+    m_i->_setIcon(file);
+}
+void Engine_Window::setIcon(const string& file) { 
+    m_i->_setIcon(file.c_str()); 
+}
+const char* Engine_Window::name() const {
+    return m_i->m_WindowName;
+}
+void Engine_Window::setName(const char* name){
+    m_i->_setName(name);
+}
+void Engine_Window::setVerticalSyncEnabled(const bool enabled){
+    if (m_i->m_Vsync != enabled) {
+        m_i->m_SFMLWindow->setVerticalSyncEnabled(enabled);
+        m_i->m_Vsync = enabled;
+    }
+}
+void Engine_Window::setKeyRepeatEnabled(const bool enabled){
+    m_i->m_SFMLWindow->setKeyRepeatEnabled(enabled);
+}
+void Engine_Window::setMouseCursorVisible(const bool visible){
+    m_i->_setMouseCursorVisible(visible); 
+}
+void Engine_Window::requestFocus(){
+    m_i->m_SFMLWindow->requestFocus();
+}
+void Engine_Window::close(){
+    m_i->m_SFMLWindow->close();
+}
+bool Engine_Window::hasFocus(){
+    return m_i->m_SFMLWindow->hasFocus();
+}
+bool Engine_Window::isOpen(){
+    return m_i->m_SFMLWindow->isOpen();
+}
+bool Engine_Window::isActive(){ 
+    return m_i->m_Active; 
+}
+bool Engine_Window::isFullscreen(){
+    return m_i->m_Fullscreen;
+}
+void Engine_Window::display(){
+    m_i->m_SFMLWindow->display();
+}
+void Engine_Window::setActive(const bool active){
+    m_i->m_Active = active;
+    m_i->m_SFMLWindow->setActive(active);
+}
+void Engine_Window::setSize(const uint& w, const uint& h){
+    m_i->_setSize(w,h);
+}
+void Engine_Window::setStyle(const uint& style){
+    m_i->_setStyle(style);
+}
+void Engine_Window::setFullScreen(const bool fullscreen){
+    m_i->_setFullScreen(fullscreen); 
+}
+void Engine_Window::keepMouseInWindow(const bool keep){
+    m_i->_keepMouseInWindow(keep); 
+}
+void Engine_Window::setFramerateLimit(const uint& limit){
+    m_i->_setFramerateLimit(limit); 
+}
+sf::Window& Engine_Window::getSFMLHandle() const { 
+    return *m_i->m_SFMLWindow; 
+}
+uint Engine_Window::getStyle(){ 
+    return m_i->m_Style; 
+}
+uint Engine_Window::getFramerateLimit() const{ 
+    return m_i->m_FramerateLimit; 
+}

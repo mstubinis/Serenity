@@ -8,6 +8,7 @@
 #include <boost/filesystem.hpp>
 
 using namespace Engine;
+using namespace Engine::epriv;
 using namespace std;
 
 MeshRequest::MeshRequest() {
@@ -32,26 +33,26 @@ MeshRequest::~MeshRequest() {
 }
 void MeshRequest::request() {
     async = false;
-    epriv::InternalMeshRequestPublicInterface::Request(*this);
+    InternalMeshRequestPublicInterface::Request(*this);
 }
 void MeshRequest::requestAsync() {
     async = true;
-    epriv::InternalMeshRequestPublicInterface::Request(*this);
+    InternalMeshRequestPublicInterface::Request(*this);
 }
 
-void epriv::InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
+void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
     if (meshRequest.fileOrData != "") {
         if (meshRequest.fileExists) {
-            bool valid = epriv::InternalMeshRequestPublicInterface::Populate(meshRequest);
+            bool valid = InternalMeshRequestPublicInterface::Populate(meshRequest);
             if (valid){
                 if (meshRequest.async){
                     const auto& reference = std::ref(meshRequest);
-                    const auto& job = boost::bind(&epriv::InternalMeshRequestPublicInterface::LoadCPU, reference);
-                    const auto& cbk = boost::bind(&epriv::InternalMeshRequestPublicInterface::LoadGPU, reference);
-                    epriv::threading::addJobWithPostCallback(job, cbk);
+                    const auto& job = boost::bind(&InternalMeshRequestPublicInterface::LoadCPU, reference);
+                    const auto& cbk = boost::bind(&InternalMeshRequestPublicInterface::LoadGPU, reference);
+                    threading::addJobWithPostCallback(job, cbk);
                 }else{
-                    epriv::InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
-                    epriv::InternalMeshRequestPublicInterface::LoadGPU(meshRequest);
+                    InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
+                    InternalMeshRequestPublicInterface::LoadGPU(meshRequest);
                 }
             }else{
                 //some wierd error happened
@@ -61,7 +62,7 @@ void epriv::InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest
         }
     }
 }
-bool epriv::InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
+bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
     if (meshRequest.fileExtension != ".objcc") {
         meshRequest.importer.scene = const_cast<aiScene*>(meshRequest.importer.importer.ReadFile(meshRequest.fileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace));
         meshRequest.importer.root = meshRequest.importer.scene->mRootNode;
@@ -72,36 +73,36 @@ bool epriv::InternalMeshRequestPublicInterface::Populate(MeshRequest& meshReques
         if (!&scene || scene.mFlags & AI_SCENE_FLAGS_INCOMPLETE || !&root) {
             return false;
         }
-        epriv::MeshLoader::LoadPopulateGlobalNodes(root, meshRequest.map);
-        epriv::MeshLoader::LoadProcessNodeNames(meshRequest.fileOrData,meshRequest.parts, scene, root, meshRequest.map);
+        MeshLoader::LoadPopulateGlobalNodes(root, meshRequest.map);
+        MeshLoader::LoadProcessNodeNames(meshRequest.fileOrData,meshRequest.parts, scene, root, meshRequest.map);
     }else{
         MeshRequestPart part;
         part.name = meshRequest.fileOrData;
         part.mesh = new Mesh();
         part.mesh->setName(part.name);
-        part.handle = epriv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
+        part.handle = Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
         meshRequest.parts.push_back(part);
     }
     return true;
 }
-void epriv::InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
+void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
     if (meshRequest.fileExtension != ".objcc") {
         auto& root = *meshRequest.importer.root;
         auto& scene = *meshRequest.importer.scene;
         uint count = 0;
-        epriv::MeshLoader::LoadProcessNodeData(meshRequest.parts, scene, root, meshRequest.map, count);
+        MeshLoader::LoadProcessNodeData(meshRequest.parts, scene, root, meshRequest.map, count);
     }else{
-        VertexData* vertexData = epriv::MeshLoader::LoadFrom_OBJCC(meshRequest.fileOrData);
-        auto& partMesh = *(meshRequest.parts[0].mesh);
+        VertexData* vertexData = MeshLoader::LoadFrom_OBJCC(meshRequest.fileOrData);
+        Mesh& mesh = *(meshRequest.parts[0].mesh);
         //cpu
-        partMesh.m_VertexData = vertexData;
-        partMesh.m_threshold = meshRequest.threshold;
+        mesh.m_VertexData = vertexData;
+        mesh.m_threshold = meshRequest.threshold;
 
-        partMesh.calculate_radius();
-        partMesh.m_CollisionFactory = new epriv::MeshCollisionFactory(partMesh);
+        mesh.calculate_radius();
+        mesh.m_CollisionFactory = new MeshCollisionFactory(mesh);
     }
 }
-void epriv::InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest) {
+void InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest) {
     for (auto& part : meshRequest.parts) {
         if (part.mesh) {
             part.mesh->load_gpu();

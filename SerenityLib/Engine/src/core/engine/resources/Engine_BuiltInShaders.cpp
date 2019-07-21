@@ -1649,7 +1649,7 @@ epriv::EShaders::final_frag +=
     "    }\n"
     "    gl_FragColor = scene;\n"
     "    if(HasFog == 1){\n"
-    "        float distFrag = abs(distance(GetWorldPosition(texcoords,CameraNear,CameraFar),CameraPosition));\n"
+    "        float distFrag = distance(GetWorldPosition(texcoords,CameraNear,CameraFar),CameraPosition);\n"
     "        float distVoid = FogDistNull + FogDistBlend;\n"
     "        float distBlendIn = FogDistBlend - (distVoid - distFrag);\n"
     "        float omega = smoothstep(0.0,1.0,(distBlendIn / FogDistBlend));\n"
@@ -1666,31 +1666,28 @@ epriv::EShaders::final_frag +=
 
 epriv::EShaders::depth_and_transparency_frag = 
     "\n"
-    "uniform sampler2D   SceneTexture;\n"
-    "uniform sampler2D   SceneTextureDepth;\n"
+    "uniform sampler2D SceneTexture;\n"
+    "uniform sampler2D gDepthMap;\n"
     "\n"
-    "uniform vec4        TransparencyMaskColor;\n"
-    "uniform int         TransparencyMaskActive;\n"
-    "uniform float       DepthMaskValue;\n"
-    "uniform int         DepthMaskActive;\n"
+    //"uniform vec4 TransparencyMaskColor;\n"
+    //"uniform int TransparencyMaskActive;\n"
+    "uniform float DepthMaskValue;\n"
+    "uniform int DepthMaskActive;\n"
     "\n"
-    "varying vec2        texcoords;\n"
+    "varying vec2 texcoords;\n"
     "\n";
-epriv::EShaders::depth_and_transparency_frag += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::depth_and_transparency_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::depth_and_transparency_frag +=
     "\n"
     "void main(){\n"
     "    vec4 scene = texture2D(SceneTexture,texcoords);\n"
-    "    float depth = texture2D(SceneTextureDepth,texcoords).r;"
+    "    float depth = distance(GetWorldPosition(texcoords,CameraNear,CameraFar),CameraPosition);\n"
     //"    if(TransparencyMaskActive == 1 && scene.rgb == TransparencyMaskColor.rgb){\n"
     //"        scene.a = 0;\n"
     //"    }\n"
-    //"    if(DepthMaskActive == 1 && depth > 0.2){\n"
-    //"        scene.a = 0;\n"
-    //"    }\n"
+    "    if(DepthMaskActive == 1 && depth > DepthMaskValue){\n"
+    "        scene.a = 0;\n"
+    "    }\n"
     "    gl_FragColor = scene;\n"
-    //"    gl_FragColor = vec4(depth,depth,depth,1.0);\n"
     "\n"
 "}";
 #pragma endregion

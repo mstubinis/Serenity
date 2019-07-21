@@ -18,8 +18,10 @@ namespace epriv {
         Assimp::Importer importer;
         aiScene*         scene;
         aiNode*          root;
-
-        AssimpSceneImport() { scene = 0; root = 0; }
+        AssimpSceneImport() { 
+            scene = 0;
+            root = 0; 
+        }
     };
 };
 };
@@ -29,11 +31,6 @@ struct MeshRequestPart final {
     std::string  name;
 
     MeshRequestPart() {
-        mesh = nullptr;
-        name = "";
-        handle = Handle();
-    }
-    ~MeshRequestPart() {
         mesh = nullptr;
         name = "";
         handle = Handle();
@@ -51,7 +48,7 @@ struct MeshRequest final {
     std::unordered_map<std::string, Engine::epriv::BoneNode*>   map;
 
     MeshRequest();
-    MeshRequest(const std::string& _filenameOrData,float _threshold);
+    MeshRequest(const std::string& filenameOrData, float threshold);
     ~MeshRequest();
 
     void request();

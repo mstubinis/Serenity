@@ -27,6 +27,8 @@ struct FontGlyph final{
      std::vector<glm::vec2> uvs;
 };
 class Font final: public EngineResource{
+    public:
+        static const uint MAX_CHARACTERS_RENDERED_PER_FRAME = 4096;
     private:
         Texture* m_FontTexture;
         std::unordered_map<uchar, FontGlyph> m_FontGlyphs;

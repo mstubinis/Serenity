@@ -36,7 +36,7 @@ namespace epriv{
         static void UnloadCPU(Mesh&);
         static void UnloadGPU(Mesh&);
         static bool SupportsInstancing();
-        static btCollisionShape* BuildCollision(Mesh*, CollisionType::Type);
+        static btCollisionShape* BuildCollision(Mesh*, const CollisionType::Type&);
     };
 };
 };
@@ -90,19 +90,19 @@ class Mesh final: public BindableResource, public EventObserver{
         void load();
         void unload();
 
-        template<typename T> void modifyVertices(uint attributeIndex, std::vector<T>& modifications, MeshModifyFlags::Flag _flags = MeshModifyFlags::Default) {
-            auto& data = const_cast<VertexData&>(getVertexStructure());
+        template<typename T> void modifyVertices(const uint& attributeIndex, std::vector<T>& modifications, const MeshModifyFlags::Flag& _flags = MeshModifyFlags::Default) {
+            auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
             if (_flags & MeshModifyFlags::Orphan)
-                data.setData<T>(attributeIndex, modifications, true, true);
+                vertexDataStructure.setData<T>(attributeIndex, modifications, true, true);
             else
-                data.setData<T>(attributeIndex, modifications, true, false);
+                vertexDataStructure.setData<T>(attributeIndex, modifications, true, false);
         }
-        void modifyIndices(std::vector<ushort>& modifiedIndices, MeshModifyFlags::Flag _flags = MeshModifyFlags::Default) {
-            auto& data = const_cast<VertexData&>(getVertexStructure());
+        void modifyIndices(std::vector<ushort>& modifiedIndices, const MeshModifyFlags::Flag& _flags = MeshModifyFlags::Default) {
+            auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
             if(_flags & MeshModifyFlags::Orphan)
-                data.setDataIndices(modifiedIndices, true, true);
+                vertexDataStructure.setDataIndices(modifiedIndices, true, true);
             else
-                data.setDataIndices(modifiedIndices, true, false);
+                vertexDataStructure.setDataIndices(modifiedIndices, true, false);
         }
         void render(bool instancing = true, MeshDrawMode::Mode = MeshDrawMode::Triangles);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);

@@ -12,8 +12,8 @@ epriv::Postprocess_Fog epriv::Postprocess_Fog::Fog;
 epriv::Postprocess_Fog::Postprocess_Fog() {
     fog       = false;
     distNull  = 5.0f;
-    distBlend = 65.0f;
-    color     = glm::vec4(1.0f, 1.0f, 1.0f, 0.95f);
+    distBlend = 50.0f;
+    color     = glm::vec4(1.0f, 1.0f, 1.0f, 0.97f);
 }
 epriv::Postprocess_Fog::~Postprocess_Fog() {
 

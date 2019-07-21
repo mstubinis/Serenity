@@ -15,8 +15,8 @@ class Viewport final {
         bool         m_Using2DAPI;
         bool         m_AspectRatioSynced;
 
-        bool         m_TransparencyMaskActive;
-        glm::vec4    m_TransparencyMaskColor;
+        //bool         m_TransparencyMaskActive;
+        //glm::vec4    m_TransparencyMaskColor;
 
 
         bool         m_DepthMaskActive;
@@ -44,14 +44,14 @@ class Viewport final {
 
 
 
-
+        /*
         const glm::vec4& getTransparencyMaskColor() const;
         void setTransparencyMaskColor(const float& r, const float& g, const float& b, const float& a);
 
         void deactivateTransparencyMask();
         void activateTransparencyMask();
         const bool isTransparencyMaskActive() const;
-
+        */
 
 
         void setAspectRatioSynced(const bool synced);

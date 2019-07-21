@@ -14,12 +14,12 @@ typedef std::unordered_map<std::string, Engine::epriv::BoneNode*> BoneNodeMap;
 
 namespace Engine {
 namespace epriv {
-    enum MeshLoadingLoadWhat {
-        LOAD_POINTS = 1,
-        LOAD_UVS = 2,
-        LOAD_NORMALS = 4,
-        LOAD_FACES = 8,
-        LOAD_TBN = 16,
+    struct MeshLoadingFlags final {enum Flag {
+        Points = 1,
+        UVs = 2,
+        Normals = 4,
+        Faces = 8,
+        TBN = 16,
         //= 32,
         //= 64,
         //= 128,
@@ -28,11 +28,11 @@ namespace epriv {
         //= 1024,
         //= 2048,
         //= 4096,
-    };
+    };};
     class MeshLoader final {
-        friend class  ::Mesh;
-        friend struct ::MeshRequest;
-        friend class  ::Engine::epriv::MeshSkeleton;
+        friend class  Mesh;
+        friend struct MeshRequest;
+        friend class  Engine::epriv::MeshSkeleton;
         public:
 
 

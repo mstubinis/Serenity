@@ -93,12 +93,6 @@ void Core::enterMap(const string& mapFile) {
     auto ships = map->allowedShips();
     Resources::setCurrentScene(map);
     map->setBackgroundColor(1, 0, 0, 1.0f);
-    auto v1 = map->addViewport(0, 0, 200, 200, *map->getActiveCamera());
-    auto v2 = map->addViewport(window.getSize().x - 200, 0, 200, 200, *map->getActiveCamera());
-    //v2->activateTransparencyMask();
-    v2->activateDepthMask();
-
-    Renderer::fog::enable(true);
 
     window.keepMouseInWindow(true);
     window.setMouseCursorVisible(false);
@@ -122,15 +116,6 @@ void Core::init() {
 void Core::update(const double& dt) {
     if (Engine::isKeyDown(KeyboardKey::Escape)) {
         Engine::stop();
-    }
-    if (Engine::isKeyDownOnce(KeyboardKey::N)) {
-        Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None);
-    }
-    if (Engine::isKeyDownOnce(KeyboardKey::M)) {
-        Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA);
-    }
-    if (Engine::isKeyDownOnce(KeyboardKey::B)) {
-        Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA);
     }
     /*
     if (Engine::isKeyDownOnce(KeyboardKey::Space)) {
