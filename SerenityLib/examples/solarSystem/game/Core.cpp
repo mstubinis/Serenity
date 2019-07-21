@@ -94,6 +94,8 @@ void Core::enterMap(const string& mapFile) {
     Resources::setCurrentScene(map);
     map->setBackgroundColor(1, 0, 0, 1.0f);
 
+    //Renderer::fog::enable();
+
     window.keepMouseInWindow(true);
     window.setMouseCursorVisible(false);
 }

@@ -176,7 +176,7 @@ void SolarSystem::loadFromFile(const string& filename) {
                     else if (key == "x")                X = stoull(value);
                     else if (key == "y")                Y = stoull(value);
                     else if (key == "z")                Z = stoull(value);
-                    else if (key == "a")                A = stoull(value);
+                    else if (key == "a")                A = stof(value);
 
                     else if (key == "parent")           PARENT = value;
                     else if (key == "type")             TYPE = value;

@@ -375,8 +375,11 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
                         insertStringRightAfterLineContent(_d, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
                     #endif
                 }else{
-                    //normal
-                    insertStringRightAfterLineContent(_d, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
+                    #ifndef ENGINE_FORCE_NO_LOG_DEPTH
+                        insertStringRightAfterLineContent(_d, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
+                    #else
+                        insertStringRightAfterLineContent(_d, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
+                    #endif
                 }
             }
         }
