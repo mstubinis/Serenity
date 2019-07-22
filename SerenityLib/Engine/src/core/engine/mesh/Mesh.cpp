@@ -177,7 +177,7 @@ void Mesh::finalize_vertex_data(MeshImportedData& data) {
         vertexData.setData(2, normals[0]);
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
-        vertexData.setDataIndices(data.indices);
+        vertexData.setIndices(data.indices);
         #pragma endregion
     }else{
         #pragma region Some Threshold
@@ -219,7 +219,7 @@ void Mesh::finalize_vertex_data(MeshImportedData& data) {
         vertexData.setData(2, normals[0]);
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
-        vertexData.setDataIndices(_indices);
+        vertexData.setIndices(_indices);
         #pragma endregion
     }
     if (m_Skeleton) {

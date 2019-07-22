@@ -16,6 +16,8 @@ class Camera: public EntityWrapper{
         Camera(const float left, const float right, const float bottom, const float top, const float nearPlane, const float farPlane,Scene* = nullptr);
         virtual ~Camera();
 
+        void lookAt(const glm::vec3& eye, const glm::vec3& forward, const glm::vec3& up);
+
         const glm::vec3 getPosition();
         const glm::vec3 forward();
         const glm::vec3 right();

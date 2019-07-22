@@ -23,14 +23,19 @@ class ScrollFrame: public Widget {
         const float contentHeight() const;
 
         void addContent(Widget* widget);
+        void setAlignment(const Alignment::Type& alignment);
 
         void setBorderSize(const float);
+        void setContentPadding(const float);
 
         void internalAddContent();
         std::vector<Widget*>& content();
 
         const float width() const;
         const float height() const;
+
+        void setPosition(const float& x, const float& y);
+        void setPosition(const glm::vec2& position);
 
         void setColor(const float& r, const float& g, const float& b, const float& a);
         void setColor(const glm::vec4& color);

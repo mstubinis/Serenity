@@ -2,6 +2,7 @@
 #include "Packet.h"
 #include "Core.h"
 #include "HUD.h"
+#include "ResourceManifest.h"
 #include "gui/specifics/ServerLobbyChatWindow.h"
 #include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
 
@@ -34,8 +35,9 @@ Server::~Server() {
     shutdown(true);
 }
 
-const bool Server::startup() {
+const bool Server::startup(const string& mapname) {
     auto& listener = *m_listener;
+    m_MapName = mapname;
     const sf::Socket::Status status = listener.listen();
     if (status == sf::Socket::Status::Done) {
         cout << "Server has started on port: " << listener.localPort() << endl;
@@ -170,8 +172,20 @@ void Server::updateClient(Server* thisServer, Client* _client) {
                         pOut1.name = client.m_username;
                         pOut1.data = "";
                         pOut1.PacketType = PacketType::Server_To_Client_Client_Joined_Server;
+
+
+                        PacketChatMessage pOut2;
+                        pOut2.name = server.m_MapName;
+                        SolarSystem* map = static_cast<SolarSystem*>(Resources::getScene(server.m_MapName));
+                        if (!map) {
+                            map = new SolarSystem(server.m_MapName, ResourceManifest::BasePath + "data/Systems/" + server.m_MapName + ".txt");
+                        }
+                        pOut2.data = map->allowedShipsSingleString();
+                        pOut2.PacketType = PacketType::Server_To_Client_Map_Data;
+
                         server.send_to_client(client, pOut);
                         server.send_to_all(pOut1);
+                        server.send_to_client(client, pOut2);
                     }else{
                         pOut.PacketType = PacketType::Server_To_Client_Reject_Connection;
                         cout << "Server: Rejecting: " + pIn.data + "'s connection" << endl;

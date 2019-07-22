@@ -13,6 +13,8 @@
 #include <core/engine/mesh/MeshRequest.h>
 #include <core/engine/resources/Handle.h>
 
+#include <core/engine/sounds/SoundData.h>
+
 #include <ecs/ECS.h>
 
 #include <iostream>
@@ -165,8 +167,8 @@ Handle Resources::addShaderProgram(string n, Handle& v, Handle& f){
     return resourceManager->m_Resources->add(new ShaderP(n,*vS,*fS),ResourceType::ShaderProgram);
 }
 
-Handle Resources::addSoundData(string file,string n,bool music){
-    return resourceManager->m_Resources->add(new SoundData(file,music),ResourceType::SoundData);
+Handle Resources::addSoundData(string file){
+    return resourceManager->m_Resources->add(new SoundData(file),ResourceType::SoundData);
 }
 
 void Resources::setCurrentScene(Scene* newScene){

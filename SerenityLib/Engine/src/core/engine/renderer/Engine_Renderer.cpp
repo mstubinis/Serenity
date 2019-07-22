@@ -215,11 +215,6 @@ class epriv::RenderManager::impl final{
 
             #pragma region GeneralInfo
 
-            text_pts.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 points per char, 4096 chars
-            text_uvs.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 uvs per char
-            text_ind.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6);//6 ind per char
-
-
             gamma = 2.2f;
             brdfCook = nullptr;
             blackCubemap = nullptr;
@@ -1125,10 +1120,31 @@ class epriv::RenderManager::impl final{
             epriv::InternalMeshes::RodLightBounds = new Mesh(rodLightData, 0.0005f);
             epriv::InternalMeshes::SpotLightBounds = new Mesh(spotLightData, 0.0005f);
 
-            Mesh::FontPlane = new Mesh("FontPlane", 1.0f, 1.0f, 0.0005f);
             Mesh::Plane = new Mesh("Plane", 1.0f, 1.0f, 0.0005f);
             Mesh::Cube = new Mesh(cubeMesh, 0.0005f);
             Mesh::Triangle = new Mesh(triangleMesh, 0.0005f);
+
+            Mesh::FontPlane = new Mesh("FontPlane", 1.0f, 1.0f, 0.0005f);
+            auto& fontPlane = *Mesh::FontPlane;
+
+            text_pts.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 points per char, 4096 chars
+            text_uvs.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 uvs per char
+            text_ind.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6);//6 ind per char
+
+            for (unsigned int i = 0; i < text_pts.capacity(); ++i)
+                text_pts.emplace_back(0.0f);
+            for (unsigned int i = 0; i < text_uvs.capacity(); ++i)
+                text_uvs.emplace_back(0.0f);
+            for (unsigned int i = 0; i < text_ind.capacity(); ++i)
+                text_ind.emplace_back(0);
+
+            fontPlane.modifyVertices(0, text_pts);
+            fontPlane.modifyVertices(1, text_uvs);
+            fontPlane.modifyIndices(text_ind);
+
+            text_pts.clear();
+            text_uvs.clear();
+            text_ind.clear();
 
             sf::Image sfImageWhite;
             sfImageWhite.create(2, 2, sf::Color::White);
@@ -1351,6 +1367,8 @@ class epriv::RenderManager::impl final{
         void _renderTextLeft(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
             uint i = 0;
             for (auto& character : text) {
+                //if ((text_ind.size() * 6) >= text_ind.capacity())
+                    //return;
                 if (character == '\n') {
                     y += newLineGlyphHeight + 7;
                     x = 0.0f;
@@ -1401,6 +1419,8 @@ class epriv::RenderManager::impl final{
             for (auto& line : lines) {
                 for (int j = line.size(); j >= 0; --j) {
                     const auto& character = line[j];
+                    //if ((text_ind.size() * 6) >= text_ind.capacity())
+                        //return;
                     if (character != '\0') {   
                         const uint& accum = i * 4;
                         ++i;
@@ -1460,6 +1480,8 @@ class epriv::RenderManager::impl final{
                 const auto& line      = lines[l];
                 const auto& line_size = lines_sizes[l] / 2;
                 for (auto& character : line) {
+                    //if ((text_ind.size() * 6) >= text_ind.capacity())
+                        //return;
                     if (character != '\0') {
                         const uint& accum = i * 4;
                         ++i;
@@ -1624,9 +1646,9 @@ class epriv::RenderManager::impl final{
 
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
         }
-        void _passGeometry(GBuffer& gbuffer, Camera& camera){
+        void _passGeometry(GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = *Resources::getCurrentScene();
-            const glm::vec4& clear = scene.getBackgroundColor();
+            const glm::vec4& clear = viewport.m_BackgroundColor;
             const float colors[4] = { clear.r, clear.g, clear.b, clear.a };
     
             gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
@@ -1634,7 +1656,6 @@ class epriv::RenderManager::impl final{
             Settings::clear(true,true,true); // (0,0,0,0)
             
             Renderer::setDepthFunc(DepthFunc::LEqual);
-            //GLDisable(GLState::BLEND_0);
 
             glClearBufferfv(GL_COLOR, 0, colors);
             auto& godRays = epriv::Postprocess_GodRays::GodRays;
@@ -1684,11 +1705,9 @@ class epriv::RenderManager::impl final{
         }
         void _passLighting(GBuffer& gbuffer, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool mainRenderFunc){
             Scene& s = *Resources::getCurrentScene(); 
-            //if(enabled1)
-                m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting]->bind();
-            //else
-                //m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingOptimized]->bind();
-            
+
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting]->bind();
+
             if(RenderManager::GLSL_VERSION < 140){
                 sendUniformMatrix4Safe("CameraView", camera.getView());
                 sendUniformMatrix4Safe("CameraProj", camera.getProjection());
@@ -1726,10 +1745,6 @@ class epriv::RenderManager::impl final{
             for (const auto& light : InternalScenePublicInterface::GetDirectionalLights(s)) {
                 _renderDirectionalLight(*light);
             }
-
-
-
-
             if(mainRenderFunc){
                 //do GI here. (only doing GI during the main render pass, not during light probes
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingGI]->bind();
@@ -1749,28 +1764,15 @@ class epriv::RenderManager::impl final{
                 sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 3);
 
                 SkyboxEmpty* skybox = s.skybox();
-
-                //if(s.lightProbes().size() > 0){
-                    /*
-                    for(auto& probe:s->lightProbes()){
-                        LightProbe* p = probe.second;
-                        sendTextureSafe("irradianceMap",p->getIrriadianceMap(),4,GL_TEXTURE_CUBE_MAP);
-                        sendTextureSafe("prefilterMap",p->getPrefilterMap(),5,GL_TEXTURE_CUBE_MAP);
-                        sendTextureSafe("brdfLUT",brdfCook,6);
-                        break;
-                    }
-                    */
-                //}else{
-                    if(skybox && skybox->texture()->numAddresses() >= 3){
-                        sendTextureSafe("irradianceMap", skybox->texture()->address(1), 4, GL_TEXTURE_CUBE_MAP);
-                        sendTextureSafe("prefilterMap", skybox->texture()->address(2), 5, GL_TEXTURE_CUBE_MAP);
-                        sendTextureSafe("brdfLUT", *brdfCook, 6);
-                    }else{
-                        sendTextureSafe("irradianceMap", Texture::Black->address(0), 4, GL_TEXTURE_2D);
-                        sendTextureSafe("prefilterMap", Texture::Black->address(0), 5, GL_TEXTURE_2D);
-                        sendTextureSafe("brdfLUT", *brdfCook, 6);
-                    }
-                //}
+                if(skybox && skybox->texture()->numAddresses() >= 3){
+                    sendTextureSafe("irradianceMap", skybox->texture()->address(1), 4, GL_TEXTURE_CUBE_MAP);
+                    sendTextureSafe("prefilterMap", skybox->texture()->address(2), 5, GL_TEXTURE_CUBE_MAP);
+                    sendTextureSafe("brdfLUT", *brdfCook, 6);
+                }else{
+                    sendTextureSafe("irradianceMap", Texture::Black->address(0), 4, GL_TEXTURE_2D);
+                    sendTextureSafe("prefilterMap", Texture::Black->address(0), 5, GL_TEXTURE_2D);
+                    sendTextureSafe("brdfLUT", *brdfCook, 6);
+                }
                 _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
             }
             GLDisable(GLState::STENCIL_TEST);
@@ -1936,7 +1938,7 @@ class epriv::RenderManager::impl final{
                 }
                 #pragma endregion
             }
-            _passGeometry(gbuffer,camera);
+            _passGeometry(gbuffer, viewport, camera);
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
 
@@ -1947,7 +1949,7 @@ class epriv::RenderManager::impl final{
             auto& godRaysPlatform = epriv::Postprocess_GodRays::GodRays;
             if (godRaysPlatform.godRays && godRaysPlatform.sun){
                 auto& body = *godRaysPlatform.sun->getComponent<ComponentBody>();
-                const glm::vec3& oPos = body.position();
+                const glm::vec3& oPos   = body.position();
                 const glm::vec3& camPos = camera.getPosition();
                 const glm::vec3& camVec = camera.getViewVector();
                 const bool infront = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRaysPlatform.fovDegrees));
@@ -2468,7 +2470,7 @@ inline const GLint& Renderer::getUniformLocUnsafe(const char* location) {
 
 
 //a collection of 2d rendering api functors
-void AlignmentOffset(const Alignment::Type& align,float& x, float& y, const float& width, const float& height) {
+void Renderer::alignmentOffset(const Alignment::Type& align, float& x, float& y, const float& width, const float& height) {
     switch (align) {
         case Alignment::TopLeft: {
             x += width / 2;
@@ -2505,6 +2507,8 @@ void AlignmentOffset(const Alignment::Type& align,float& x, float& y, const floa
         }
     }
 }
+
+
 struct RenderingAPI2D final {
     static void Render2DText(const string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const TextAlignment::Type& alignType) { 
         auto& impl = *renderManagerImpl;
@@ -2563,7 +2567,7 @@ struct RenderingAPI2D final {
             sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
             sendUniform1("DiffuseTextureEnabled", 0);
         }
-        AlignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
+        Renderer::alignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
 
         m = glm::translate(m, glm::vec3(translationX, translationY, -0.001f - depth));
         m = glm::rotate(m, Math::toRadians(angle), impl.m_RotationAxis2D);
@@ -2584,7 +2588,7 @@ struct RenderingAPI2D final {
         float translationX = position.x;
         float translationY = position.y;
 
-        AlignmentOffset(align, translationX, translationY, width, height);
+        Renderer::alignmentOffset(align, translationX, translationY, width, height);
 
         glm::mat4 m = impl.m_IdentityMat4;
         m = glm::translate(m, glm::vec3(translationX, translationY, -0.001f - depth));
@@ -2625,7 +2629,7 @@ void Renderer::renderBorder(const float& borderSize, const glm::vec2& pos, const
 
     float translationX = pos.x;
     float translationY = pos.y;
-    AlignmentOffset(align, translationX, translationY, w, h);
+    Renderer::alignmentOffset(align, translationX, translationY, w, h);
     glm::vec2 newPos(translationX, translationY);
 
     Renderer::renderRectangle(newPos - glm::vec2(halfWidth,0), col, borderSize, h + doubleBorder, angle, depth,Alignment::Right);

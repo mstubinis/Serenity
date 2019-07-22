@@ -10,8 +10,10 @@ VertexData::VertexData(const VertexDataFormat& _format) :format(const_cast<Verte
 		data.emplace_back(nullptr); 
 	}
     dataSizes.reserve(_format.attributes.size());
+    dataSizesCapacity.reserve(_format.attributes.size());
     for (size_t i = 0; i < dataSizes.capacity(); ++i) { 
 		dataSizes.emplace_back(0); 
+        dataSizesCapacity.emplace_back(0);
 	}
     buffers.push_back(std::make_unique<VertexBufferObject>());
 }
@@ -22,6 +24,7 @@ VertexData::~VertexData() {
     }
     vector_clear(data);
     vector_clear(dataSizes);
+    vector_clear(dataSizesCapacity);
     vector_clear(indices);
 }
 
@@ -54,11 +57,29 @@ void VertexData::unbind() {
         format.unbind();
     }
 }
-void VertexData::setDataIndices(vector<ushort>& _data, const bool addToGPU, const bool orphan) {
+
+void myMemMoveTest(char* dest, char* src, size_t n) {
+    if (n == 0)
+        return;
+    char* temp = new char[n];
+    for (unsigned int i = 0; i < n; ++i)
+        temp[i] = src[i];
+    for (unsigned int i = 0; i < n; ++i)
+        dest[i] = temp[i];
+    delete[] temp;
+}
+
+void VertexData::setIndices(vector<ushort>& _data, const bool addToGPU, const bool orphan) {
     if (buffers.size() == 1)
         buffers.push_back(std::make_unique<ElementBufferObject>());
     auto& _buffer = *buffers[1];
-    indices.swap(_data);
+    if (&_data != &indices) {
+        indices.clear();
+        indices.reserve(_data.size());
+        for (auto& indice : _data) {
+            indices.emplace_back(indice);
+        }
+    }
     if (addToGPU) {
         _buffer.generate();
         _buffer.bind();
@@ -79,14 +100,14 @@ void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
     size_t size = 0;
     if (format.interleavingType == VertexAttributeLayout::Interleaved) {
         size = (format.attributes[0].stride * dataSizes[0]);
-        buffer = (char*)malloc(size);
+        buffer = new char[size];
         for (size_t i = 0; i < dataSizes[0]; ++i) {
             for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
                 const auto& sizeofT = format.attributes[attribute_index].typeSize;
                 auto destination = &buffer[accumulator];
                 const auto& at = i * sizeofT;
                 auto source = &(data[attribute_index])[at];
-                std::memmove(destination, source, sizeofT);
+                myMemMoveTest(destination, source, sizeofT);
                 accumulator += sizeofT;
             }
         }
@@ -95,32 +116,32 @@ void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
         if (attributeIndex == -1) {
             for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index)
                 size += format.attributes[attribute_index].typeSize * dataSizes[attribute_index];
-            buffer = (char*)malloc(size);
+            buffer = new char[size];
             for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
                 const auto& blockSize = dataSizes[attribute_index] * format.attributes[attribute_index].typeSize;
                 auto destination = &buffer[accumulator];
                 auto source = &(data[attribute_index])[0];
-                std::memmove(destination, source, blockSize);
+                myMemMoveTest(destination, source, blockSize);
                 accumulator += blockSize;
             }
             !orphan ? _vBuffer.setData(size, buffer, BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(buffer);
         }else{
             size += (format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex]);
-            buffer = (char*)malloc(size);
+            buffer = new char[size];
             for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
                 if (attribute_index != attributeIndex) {
                     accumulator += dataSizes[attribute_index] * format.attributes[attribute_index].typeSize;
                 }else{
                     auto destination = &buffer[0];
                     auto source = &(data[attribute_index])[0];
-                    std::memmove(destination, source, size);
+                    myMemMoveTest(destination, source, size);
                     break;
                 }
             }
             _vBuffer.setData(size, accumulator, buffer);
         }
     }
-    free(buffer);
+    delete[] buffer;
     if (attributeIndex == -1) {
         auto& _iBuffer = *buffers[1];
         _iBuffer.generate();

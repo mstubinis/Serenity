@@ -15,7 +15,7 @@ using namespace Engine;
 using namespace std;
 
 epriv::MeshCollisionFactory::MeshCollisionFactory(Mesh& _mesh) :m_Mesh(_mesh) {
-    auto& data = *_mesh.m_VertexData;
+    auto& data            = *_mesh.m_VertexData;
     m_ConvexHullData      = nullptr;
     m_ConvesHullShape     = nullptr;
     m_TriangleStaticData  = nullptr;

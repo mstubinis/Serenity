@@ -35,6 +35,9 @@ Camera::Camera(const float left, const float right, const float bottom, const fl
 }
 Camera::~Camera(){ 
 }
+void Camera::lookAt(const glm::vec3& eye, const glm::vec3& forward, const glm::vec3& up) {
+    m_Entity.getComponent<ComponentCamera>()->lookAt(eye, forward, up);
+}
 const glm::vec3 Camera::getPosition(){ 
     return m_Entity.getComponent<ComponentBody>()->position(); 
 }

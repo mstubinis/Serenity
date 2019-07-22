@@ -50,6 +50,22 @@ SolarSystem::SolarSystem(const string& n, const string& file):Scene(n){
 SolarSystem::~SolarSystem(){
     SAFE_DELETE_VECTOR(m_Objects);
 }
+
+string SolarSystem::allowedShipsSingleString() {
+    uint                                             count = 0;
+    boost_io::stream<boost_io::mapped_file_source>   str(m_Filename);
+    for (string line; getline(str, line, '\n');) {
+        line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
+        if (line[0] != '#') {//ignore commented lines
+            if (count == 5) {//this line has the allowed ships
+                return line;
+            }
+        }
+        ++count;
+    }
+    return "";
+}
+
 vector<string> SolarSystem::allowedShips() {
     vector<string> result;
     uint                                             count = 0;

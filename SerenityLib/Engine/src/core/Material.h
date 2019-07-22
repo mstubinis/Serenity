@@ -75,137 +75,153 @@ class MaterialComponent{
         Texture* m_Texture;
         MaterialComponentType::Type m_ComponentType;
     public:
-        MaterialComponent(uint type,Texture*);
+        MaterialComponent(const uint& type,Texture*);
         virtual ~MaterialComponent();
 
         virtual void bind(glm::vec4&);
         virtual void unbind();
 
         Texture* texture() const { return m_Texture; }
-        const MaterialComponentType::Type type() const { return m_ComponentType; }
+        const MaterialComponentType::Type& type() const { return m_ComponentType; }
 };
 class MaterialComponentReflection: public MaterialComponent{
     protected:
         Texture* m_Map; //the texture that maps the reflection cubemap to the object
         float m_MixFactor;
     public:
-        MaterialComponentReflection(uint type,Texture* cubemap,Texture* map,float mixFactor);
+        MaterialComponentReflection(const uint& type,Texture* cubemap,Texture* map, const float& mixFactor);
         ~MaterialComponentReflection();
 
         virtual void bind(glm::vec4&);
         void unbind();
-        void setMixFactor(float);
+        void setMixFactor(const float&);
 
-        const float mixFactor() const { return m_MixFactor; }
+        const float& mixFactor() const { return m_MixFactor; }
         const Texture* map() const { return m_Map; }
 };
 class MaterialComponentRefraction: public MaterialComponentReflection{
     private:
         float m_RefractionIndex;
     public:
-        MaterialComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio);
+        MaterialComponentRefraction(Texture* cubemap,Texture* map, const float& mixFactor, const float& ratio);
         ~MaterialComponentRefraction();
 
         void bind(glm::vec4&);
 
-        void setRefractionIndex(float);
-        const float refractionIndex() const { return m_RefractionIndex; }
+        void setRefractionIndex(const float&);
+        const float& refractionIndex() const { return m_RefractionIndex; }
 };
 class MaterialComponentParallaxOcclusion: public MaterialComponent{
     protected:
         float m_HeightScale;
     public:
-        MaterialComponentParallaxOcclusion(Texture* map,float heightScale);
+        MaterialComponentParallaxOcclusion(Texture* map, const float& heightScale);
         ~MaterialComponentParallaxOcclusion();
 
         void bind(glm::vec4&);
         void unbind();
-        void setHeightScale(float);
+        void setHeightScale(const float&);
 
-        const float heightScale() const { return m_HeightScale; }
+        const float& heightScale() const { return m_HeightScale; }
 };
 
 namespace Engine{
-namespace epriv{
-    struct DefaultMaterialBindFunctor;
-    struct DefaultMaterialUnbindFunctor;
-};
+    namespace epriv{
+        struct DefaultMaterialBindFunctor;
+        struct DefaultMaterialUnbindFunctor;
+        class RenderManager;
+    };
 };
 
 class Material final: public BindableResource{
     friend struct Engine::epriv::DefaultMaterialBindFunctor;
     friend struct Engine::epriv::DefaultMaterialUnbindFunctor;
+    friend struct Engine::epriv::RenderManager;
     public:
-        static std::vector<glm::vec4> m_MaterialProperities;
-        static Material* Checkers; //loaded in renderer
+        static Material*                  Checkers; //loaded in renderer
     private:
-        class impl; std::unique_ptr<impl> m_i;
+        static std::vector<glm::vec4>     m_MaterialProperities;
+        std::vector<MaterialComponent*>   m_Components;
+        uint                              m_DiffuseModel;
+        uint                              m_SpecularModel;
+        bool                              m_Shadeless;
+        glm::vec3                         m_F0Color;
+        float                             m_BaseGlow;
+        float                             m_BaseAO;
+        float                             m_BaseMetalness;
+        float                             m_BaseSmoothness;
+        uint                              m_ID;
+
+        void internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture);
+        void internalUpdateGlobalMaterialPool(const bool& addToDatabase);
+        void internalInit(Texture* diffuse, Texture* normal, Texture* glow, Texture* specular);
+
     public:
-        Material(std::string name, std::string diffuse,std::string normal="",std::string glow="", std::string specular="");
-        Material(std::string name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);
+        Material(const std::string& name, const std::string& diffuse, const std::string& normal="", const std::string& glow="", const std::string& specular="");
+        Material(const std::string& name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);
         ~Material();
 
-        const MaterialComponent* getComponent(MaterialComponentType::Type) const;
+        const MaterialComponent* getComponent(const MaterialComponentType::Type& type) const;
 
         const MaterialComponentReflection* getComponentReflection() const;
         const MaterialComponentRefraction* getComponentRefraction() const;
         const MaterialComponentParallaxOcclusion* getComponentParallaxOcclusion() const;
 
         void addComponentDiffuse(Texture* texture);
-        void addComponentDiffuse(std::string textureFile);
+        void addComponentDiffuse(const std::string& textureFile);
 
         void addComponentNormal(Texture* texture);
-        void addComponentNormal(std::string textureFile);
+        void addComponentNormal(const std::string& textureFile);
 
         void addComponentGlow(Texture* texture);
-        void addComponentGlow(std::string textureFile);
+        void addComponentGlow(const std::string& textureFile);
 
         void addComponentSpecular(Texture* texture);
-        void addComponentSpecular(std::string textureFile);
+        void addComponentSpecular(const std::string& textureFile);
 
-        void addComponentAO(Texture* texture,float baseValue = 1.0f);
-        void addComponentAO(std::string textureFile,float baseValue = 1.0f);
+        void addComponentAO(Texture* texture, const float baseValue = 1.0f);
+        void addComponentAO(const std::string& textureFile, const float baseValue = 1.0f);
 
-        void addComponentMetalness(Texture* texture,float baseValue = 1.0f);
-        void addComponentMetalness(std::string textureFile,float baseValue = 1.0f);
+        void addComponentMetalness(Texture* texture, const float baseValue = 1.0f);
+        void addComponentMetalness(const std::string& textureFile, const float baseValue = 1.0f);
 
-        void addComponentSmoothness(Texture* texture,float baseValue = 1.0f);
-        void addComponentSmoothness(std::string textureFile,float baseValue = 1.0f);
+        void addComponentSmoothness(Texture* texture, const float baseValue = 1.0f);
+        void addComponentSmoothness(const std::string& textureFile, const float baseValue = 1.0f);
 
-        void addComponentReflection(Texture* cubeMap,Texture* map,float mixFactor = 1.0f);
-        void addComponentReflection(std::string cubeMapName,std::string mapFile,float mixFactor = 1.0f);
-        void addComponentReflection(std::string cubeMapTextureFiles[],std::string mapFile,float mixFactor = 1.0f);
+        void addComponentReflection(Texture* cubeMap,Texture* map, const float mixFactor = 1.0f);
+        void addComponentReflection(const std::string& cubeMapName, const std::string& mapFile, const float mixFactor = 1.0f);
+        void addComponentReflection(const std::string cubeMapTextureFiles[], const std::string& mapFile, const float mixFactor = 1.0f);
 
-        void addComponentRefraction(Texture* cubeMap,Texture* map,float refractiveIndex = 1.0f,float mixFactor = 1.0f);
-        void addComponentRefraction(std::string cubeMapName,std::string mapFile,float refractiveIndex = 1.0f, float mixFactor = 1.0f);
-        void addComponentRefraction(std::string cubeMapTextureFiles[],std::string mapFile,float refractiveIndex = 1.0f,float mixFactor = 1.0f);
+        void addComponentRefraction(Texture* cubeMap,Texture* map, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
+        void addComponentRefraction(const std::string& cubeMapName, const std::string& mapFile, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
+        void addComponentRefraction(const std::string cubeMapTextureFiles[], const std::string& mapFile, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
 
         void addComponentParallaxOcclusion(Texture* texture,float heightScale = 0.1f);
-        void addComponentParallaxOcclusion(std::string textureFile,float heightScale = 0.1f);
+        void addComponentParallaxOcclusion(const std::string& textureFile, const float heightScale = 0.1f);
 
-        const uint id() const;
+        const uint& id() const;
     
-        const bool shadeless() const;
-        const glm::vec3 f0() const;
-        const float glow() const;
-        const float smoothness() const;
-        const float metalness() const;
-        const float ao() const;
+        const bool& shadeless() const;
+        const glm::vec3& f0() const;
+        const float& glow() const;
+        const float& smoothness() const;
+        const float& metalness() const;
+        const float& ao() const;
         
-        void setF0Color(glm::vec3 c);
-        void setF0Color(float r,float g,float b);
+        void setF0Color(const glm::vec3& f0Color);
+        void setF0Color(const float& r, const float& g, const float& b);
 
-        void setMaterialPhysics(MaterialPhysics::Physics);
-        void setShadeless(bool);
-        void setGlow(float);
-        void setSmoothness(float);
-        void setAO(float);
-        void setMetalness(float);
+        void setMaterialPhysics(const MaterialPhysics::Physics& materialPhysics);
+        void setShadeless(const bool& shadeless);
+        void setGlow(const float& glow);
+        void setSmoothness(const float& smoothness);
+        void setAO(const float& ao);
+        void setMetalness(const float& metalness);
     
-        const uint specularModel() const;
-        void setSpecularModel(SpecularModel::Model m);
-        const uint diffuseModel() const;    
-        void setDiffuseModel(DiffuseModel::Model m);
+        const uint& specularModel() const;
+        void setSpecularModel(const SpecularModel::Model& specularModel);
+        const uint& diffuseModel() const;    
+        void setDiffuseModel(const DiffuseModel::Model& diffuseModel);
 
         void bind();
         void unbind();

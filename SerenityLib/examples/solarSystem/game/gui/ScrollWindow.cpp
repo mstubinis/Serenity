@@ -11,9 +11,12 @@ using namespace std;
 
 ScrollFrame::ScrollFrame(const float& x, const float& y, const float& w, const float& h):Widget(x,y,w,h) {
     m_BorderSize = 1;
+
     m_ScrollBar = new ScrollBar(x + w + m_BorderSize, y, 20, h);
-    m_ContentPadding = 10.0f;
+
+    setContentPadding(10.0f);
     m_ContentHeight = 0.0f;
+    setPosition(m_Position.x, m_Position.y);
 }
 ScrollFrame::~ScrollFrame() {
     SAFE_DELETE(m_ScrollBar);
@@ -28,6 +31,10 @@ void ScrollFrame::internalAddContent() {
     m_ContentHeight = height;
     const auto& percent = (m_Height) / m_ContentHeight;
     m_ScrollBar->setSliderSize(percent);
+}
+void ScrollFrame::setAlignment(const Alignment::Type& alignment) {
+    m_Alignment = alignment;
+    setPosition(m_Position.x, m_Position.y);
 }
 const float ScrollFrame::width() const {
     return m_Width + m_ScrollBar->width();
@@ -82,11 +89,22 @@ void ScrollFrame::addContent(Widget* widget) {
     internalAddContent();
 }
 
+void ScrollFrame::setPosition(const float& x, const float& y) {
+    m_ScrollBar->setPosition(x + m_Width + m_BorderSize, y);
+    Widget::setPosition(x, y);
+}
+void ScrollFrame::setPosition(const glm::vec2& position) {
+    m_ScrollBar->setPosition(position.x, position.y);
+    Widget::setPosition(position.x, position.y);
+}
+
 void ScrollFrame::setColor(const glm::vec4& color) {
     m_ScrollBar->setColor(color);
     Widget::setColor(color);
 }
-
+void ScrollFrame::setContentPadding(const float padding) {
+    m_ContentPadding = padding;
+}
 void ScrollFrame::update(const double& dt) {
     Widget::update(dt);
     m_ScrollBar->update(dt);
@@ -111,13 +129,13 @@ void ScrollFrame::update(const double& dt) {
 void ScrollFrame::render() {
     m_ScrollBar->render();
 
-    Renderer::renderBorder(m_BorderSize, m_Position, m_Color, m_Width, m_Height, 0, 0.008f, m_Alignment);
+    Renderer::renderBorder(m_BorderSize, m_Position, m_Color, m_Width, m_Height, 0, 0.02f, m_Alignment);
 
     Renderer::scissor(m_Position.x, m_Position.y - m_Height, m_Width, m_Height);
 
     //content background
     float scrollOffset = m_ScrollBar->getSliderPosition() * (m_ContentHeight / (m_Height - (m_ScrollBar->width() * 2)));
-    Renderer::renderRectangle(glm::vec2(m_Position.x, m_Position.y - scrollOffset), glm::vec4(0.3f), m_Width, m_ContentHeight, 0, 0.009f, m_Alignment);
+    Renderer::renderRectangle(glm::vec2(m_Position.x, m_Position.y - scrollOffset), glm::vec4(0.3f), m_Width, m_ContentHeight, 0, 0.021f, m_Alignment);
    
     for (auto& widget : m_Content) {
         widget->render();

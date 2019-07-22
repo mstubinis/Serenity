@@ -19,7 +19,7 @@ Material* Material::Checkers = nullptr;
 
 namespace Engine{
     namespace epriv{
-        class MaterialComponentTextureSlot{public: enum Slot{
+        struct MaterialComponentTextureSlot{enum Slot{
             Diffuse,
             Normal,
             Glow,
@@ -95,168 +95,10 @@ namespace Engine{
     };
 };
 
-class Material::impl final{
-    public:
-        vector<MaterialComponent*> m_Components;
-        uint m_DiffuseModel, m_SpecularModel;
-        bool m_Shadeless;
-        glm::vec3 m_F0Color;
-        float m_BaseGlow, m_BaseAO, m_BaseMetalness, m_BaseSmoothness;
-        uint m_ID;
-
-        void _init(string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Material& super) {
-            m_Components.resize(MaterialComponentType::_TOTAL, nullptr);
-
-            _addComponentDiffuse(diffuse);
-            _addComponentNormal(normal);
-            _addComponentGlow(glow);
-            _addComponentSpecular(specular);
-
-            m_SpecularModel = SpecularModel::GGX;
-            m_DiffuseModel = DiffuseModel::Lambert;
-            m_Shadeless = false;
-            m_BaseGlow = 0.0f;
-            
-            _updateGlobalMaterialPool(true);
-
-            _setSmoothness(0.9f);
-            _setAO(1.0f);
-            _setMetalness(0.0f);
-            _setF0Color(0.04f, 0.04f, 0.04f);
-
-            super.load();  
-        }
-        void _init(string& name, string& diffuseFile, string& normalFile, string& glowFile, string& specularFile, Material& super) {
-            Texture* d = 0; Texture* n = 0; Texture* g = 0; Texture* s = 0;
-            if (diffuseFile != "") {
-                d = epriv::Core::m_Engine->m_ResourceManager._hasTexture(diffuseFile);
-                if (!d) {
-                    d = new Texture(diffuseFile);
-                    epriv::Core::m_Engine->m_ResourceManager._addTexture(d);
-                }
-            }
-            if(normalFile != ""){
-                n = epriv::Core::m_Engine->m_ResourceManager._hasTexture(normalFile);
-                if(!n){
-                    n = new Texture(normalFile,false,ImageInternalFormat::RGBA8);
-                    epriv::Core::m_Engine->m_ResourceManager._addTexture(n);
-                }
-            }
-            if(glowFile != ""){
-                g = epriv::Core::m_Engine->m_ResourceManager._hasTexture(glowFile);
-                if(!g){
-                    g = new Texture(glowFile,false,ImageInternalFormat::RGBA8);
-                    epriv::Core::m_Engine->m_ResourceManager._addTexture(g);
-                }
-            }
-            if(specularFile != ""){
-                s = epriv::Core::m_Engine->m_ResourceManager._hasTexture(specularFile);
-                if(!s){
-                    s = new Texture(specularFile,false,ImageInternalFormat::RGBA8);
-                    epriv::Core::m_Engine->m_ResourceManager._addTexture(s);
-                }
-            }
-            _init(name,d,n,g,s,super);
-        }
-        void _destruct() {
-            SAFE_DELETE_VECTOR(m_Components);
-        }
-        void _load(){
-            for(auto& component:m_Components){
-                if(component){
-                    Texture& texture = *component->texture();
-                    texture.incrementUseCount();
-                    if(!texture.isLoaded() && texture.useCount() > 0){
-                        texture.load();
-                    }
-                }
-            }
-        }
-        void _unload(){
-            for(auto& component:m_Components){
-                if(component){
-                    Texture& texture = *component->texture();
-                    texture.decrementUseCount();
-                    if(texture.useCount() == 0 && texture.isLoaded()){
-                        texture.unload();
-                    }
-                }
-            }
-        }
-        void _updateGlobalMaterialPool(bool add){
-            //this data is kept around to be deferred to the lighting pass
-            glm::vec4* data = nullptr;
-            if(!add){
-                data = &Material::m_MaterialProperities[m_ID];
-            }else{
-                m_ID = Material::m_MaterialProperities.size();
-                data = new glm::vec4(0.0f);
-            }
-            data->r = Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r,m_F0Color.g,m_F0Color.b);
-            data->g = m_BaseSmoothness;
-            data->b = float(m_SpecularModel);
-            data->a = float(m_DiffuseModel);
-            if(add){
-                Material::m_MaterialProperities.push_back(std::move(*data));
-                SAFE_DELETE(data);
-            }
-        }
-        void _addComponentGeneric(Texture* texture,MaterialComponentType::Type type){
-            if(m_Components[type] || !texture)
-                return;
-            m_Components[type] = new MaterialComponent(type,texture);
-            texture->setAnisotropicFiltering(2.0f);
-        }
-        void _addComponentDiffuse(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Diffuse); }
-        void _addComponentNormal(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Normal); }
-        void _addComponentGlow(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Glow); }
-        void _addComponentSpecular(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Specular); }
-        void _addComponentAO(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::AO); }
-        void _addComponentMetalness(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Metalness); }
-        void _addComponentSmoothness(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Smoothness); }
-        void _addComponentReflection(Texture* texture,Texture* map,float& mixFactor){
-            uint type = MaterialComponentType::Reflection;
-            if(m_Components[type] || (!texture || !map))
-                return;
-            m_Components[type] = new MaterialComponentReflection(type,texture,map,mixFactor);
-        }
-        void _addComponentRefraction(Texture* texture,Texture* map,float& refractiveIndex,float& mixFactor){
-            uint type = MaterialComponentType::Refraction;
-            if(m_Components[type] || (!texture || !map))
-                return;
-            m_Components[type] = new MaterialComponentRefraction(texture,map,refractiveIndex,mixFactor);
-        }
-        void _addComponentParallaxOcclusion(Texture* texture,float& heightScale){
-            uint type = MaterialComponentType::ParallaxOcclusion;
-            if(m_Components[type] || !texture)
-                return;
-            m_Components[type] = new MaterialComponentParallaxOcclusion(texture,heightScale);
-        }
-        void _setF0Color(float r,float g,float b){
-            m_F0Color.r = glm::clamp(r,0.001f,0.999f); 
-            m_F0Color.g = glm::clamp(g,0.001f,0.999f); 
-            m_F0Color.b = glm::clamp(b,0.001f,0.999f);
-            _updateGlobalMaterialPool(false);
-        }
-        void _setMaterialProperties(float& r,float& g,float& b,float& smoothness,float& metalness){
-            _setF0Color(r,g,b);
-            _setSmoothness(smoothness);
-            _setMetalness(metalness);
-            _updateGlobalMaterialPool(false);
-        }
-        void _setShadeless(bool b){                      m_Shadeless = b;      _updateGlobalMaterialPool(false); }
-        void _setBaseGlow(float f){                      m_BaseGlow = f;       _updateGlobalMaterialPool(false); }
-        void _setSmoothness(float s){                    m_BaseSmoothness = glm::clamp(s,0.001f,0.999f); _updateGlobalMaterialPool(false); }
-        void _setSpecularModel(SpecularModel::Model& m){ m_SpecularModel = m;  _updateGlobalMaterialPool(false); }
-        void _setDiffuseModel(DiffuseModel::Model& m){   m_DiffuseModel = m;   _updateGlobalMaterialPool(false); }
-        void _setAO(float a){                            m_BaseAO = glm::clamp(a,0.001f,0.999f);         _updateGlobalMaterialPool(false); }
-        void _setMetalness(float m){                     m_BaseMetalness = glm::clamp(m,0.001f,0.999f);  _updateGlobalMaterialPool(false); }
-};
-
 namespace Engine{
     namespace epriv{
         struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
-            auto& material = *((Material*)r)->m_i;
+            auto& material = *static_cast<Material*>(r);
             glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
             glm::vec4 data(0.0f);
             for(uint i = 0; i < MaterialComponentType::_TOTAL; ++i){
@@ -279,7 +121,6 @@ namespace Engine{
                     }else{ 
                         component.unbind(); 
                     }
-                }else{
                 }
             }
             sendUniform4Safe("MaterialDataA", data);
@@ -291,7 +132,7 @@ namespace Engine{
             sendUniform4Safe("ThirdConditionals", third);   //x = refraction  y = heightmap  z = UNUSED      w = UNUSED
         }};
         struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
-            //Material& material = *(Material*)r;
+            //auto& material = *static_cast<Material*>(r);
         }};
     };
 };
@@ -300,16 +141,16 @@ namespace Engine{
 
 #pragma region MaterialComponents
 
-MaterialComponent::MaterialComponent(uint type,Texture* t){
-    m_ComponentType = (MaterialComponentType::Type)type;
-    m_Texture = t;
+MaterialComponent::MaterialComponent(const uint& type,Texture* texture){
+    m_ComponentType = static_cast<MaterialComponentType::Type>(type);
+    m_Texture       = texture;
 }
 MaterialComponent::~MaterialComponent(){
 }
 void MaterialComponent::bind(glm::vec4& data){
-    const auto& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    const auto& slots             = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     const string& textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    const auto& textureTypeNameC = textureTypeName.c_str();
+    const auto& textureTypeNameC  = textureTypeName.c_str();
     for (uint i = 0; i < slots.size(); ++i) {
         sendTextureSafe(textureTypeNameC, *m_Texture, slots[i]);
     }
@@ -320,20 +161,20 @@ void MaterialComponent::unbind(){
     //    glBindTexture(GL_TEXTURE_2D, 0);
     //}
 }
-MaterialComponentReflection::MaterialComponentReflection(uint type,Texture* cubemap,Texture* map,float mixFactor):MaterialComponent(type,cubemap){
+MaterialComponentReflection::MaterialComponentReflection(const uint& type,Texture* cubemap,Texture* map, const float& mixFactor):MaterialComponent(type,cubemap){
     setMixFactor(mixFactor);
     m_Map = map;
 }
 MaterialComponentReflection::~MaterialComponentReflection(){
     MaterialComponent::~MaterialComponent();
 }
-void MaterialComponentReflection::setMixFactor(float factor){
+void MaterialComponentReflection::setMixFactor(const float& factor){
     m_MixFactor = glm::clamp(factor,0.0f,1.0f);
 }
 void MaterialComponentReflection::bind(glm::vec4& data){
-    const auto& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    const auto& slots             = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     const string& textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    const auto& textureTypeNameC = textureTypeName.c_str();
+    const auto& textureTypeNameC  = textureTypeName.c_str();
     data.x = m_MixFactor;
     if (!m_Texture)
         sendTextureSafe(textureTypeNameC, *Resources::getCurrentScene()->skybox()->texture(), slots[0]);
@@ -346,13 +187,15 @@ void MaterialComponentReflection::unbind(){
     //unbindTexture2D(slots[0]);
     //unbindTextureCubemap(slots[1]);
 }
-MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map,float i,float mix):MaterialComponentReflection(MaterialComponentType::Refraction,cubemap,map,mix){
+MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map, const float& i, const float& mix):MaterialComponentReflection(MaterialComponentType::Refraction,cubemap,map,mix){
     m_RefractionIndex = i;
 }
 MaterialComponentRefraction::~MaterialComponentRefraction(){
     MaterialComponentReflection::~MaterialComponentReflection();
 }
-void MaterialComponentRefraction::setRefractionIndex(float _index){ m_RefractionIndex = _index; }
+void MaterialComponentRefraction::setRefractionIndex(const float& refractionIndex){
+    m_RefractionIndex = refractionIndex; 
+}
 void MaterialComponentRefraction::bind(glm::vec4& data){
     const auto& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     const string& textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
@@ -366,17 +209,17 @@ void MaterialComponentRefraction::bind(glm::vec4& data){
     sendTextureSafe((textureTypeName + "Map").c_str(), *m_Map, slots[1]);
 }
 
-MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(Texture* map,float heightScale):MaterialComponent(MaterialComponentType::ParallaxOcclusion,map){
+MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(Texture* map, const float& heightScale):MaterialComponent(MaterialComponentType::ParallaxOcclusion,map){
     setHeightScale(heightScale);
 }
 MaterialComponentParallaxOcclusion::~MaterialComponentParallaxOcclusion(){
     MaterialComponent::~MaterialComponent();
 }
-void MaterialComponentParallaxOcclusion::setHeightScale(float factor){
+void MaterialComponentParallaxOcclusion::setHeightScale(const float& factor){
     m_HeightScale = factor;
 }
 void MaterialComponentParallaxOcclusion::bind(glm::vec4& data){
-    const auto& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    const auto& slots             = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     const string& textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     data.z = m_HeightScale;
@@ -393,107 +236,184 @@ void MaterialComponentParallaxOcclusion::unbind(){
 
 #pragma region Material
 
-Material::Material(string name,string diffuse,string normal,string glow,string specular):m_i(new impl),BindableResource(name){
-    m_i->_init(name, diffuse, normal, glow, specular, *this);
-    setCustomBindFunctor(epriv::DefaultMaterialBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMaterialUnbindFunctor());
+Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular):BindableResource(name){
+    Texture* d = 0; Texture* n = 0; Texture* g = 0; Texture* s = 0;
+    if (!diffuse.empty()) {
+        d = epriv::Core::m_Engine->m_ResourceManager._hasTexture(diffuse);
+        if (!d) {
+            d = new Texture(diffuse);
+            epriv::Core::m_Engine->m_ResourceManager._addTexture(d);
+        }
+    }
+    if (!normal.empty()) {
+        n = epriv::Core::m_Engine->m_ResourceManager._hasTexture(normal);
+        if (!n) {
+            n = new Texture(normal, false, ImageInternalFormat::RGBA8);
+            epriv::Core::m_Engine->m_ResourceManager._addTexture(n);
+        }
+    }
+    if (!glow.empty()) {
+        g = epriv::Core::m_Engine->m_ResourceManager._hasTexture(glow);
+        if (!g) {
+            g = new Texture(glow, false, ImageInternalFormat::RGBA8);
+            epriv::Core::m_Engine->m_ResourceManager._addTexture(g);
+        }
+    }
+    if (!specular.empty()) {
+        s = epriv::Core::m_Engine->m_ResourceManager._hasTexture(specular);
+        if (!s) {
+            s = new Texture(specular, false, ImageInternalFormat::RGBA8);
+            epriv::Core::m_Engine->m_ResourceManager._addTexture(s);
+        }
+    }
+    internalInit(d, n, g, s);
 }
-Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular):m_i(new impl),BindableResource(name){
-    m_i->_init(name,diffuse,normal,glow,specular,*this);
-    setCustomBindFunctor(epriv::DefaultMaterialBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultMaterialUnbindFunctor());
+Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular):BindableResource(name){
+    internalInit(diffuse, normal, glow, specular);
 }
 Material::~Material(){
-    m_i->_destruct();
+    SAFE_DELETE_VECTOR(m_Components);
 }
+void Material::internalInit(Texture* diffuse, Texture* normal, Texture* glow, Texture* specular) {
+    m_Components.resize(MaterialComponentType::_TOTAL, nullptr);
+
+    internalAddComponentGeneric(MaterialComponentType::Diffuse, diffuse);
+    internalAddComponentGeneric(MaterialComponentType::Normal, normal);
+    internalAddComponentGeneric(MaterialComponentType::Glow, glow);
+    internalAddComponentGeneric(MaterialComponentType::Specular, specular);
+
+    m_SpecularModel = SpecularModel::GGX;
+    m_DiffuseModel  = DiffuseModel::Lambert;
+    m_Shadeless     = false;
+    m_BaseGlow      = 0.0f;
+
+    internalUpdateGlobalMaterialPool(true);
+
+    setSmoothness(0.9f);
+    setAO(1.0f);
+    setMetalness(0.0f);
+    setF0Color(0.04f, 0.04f, 0.04f);
+
+    load();
+    setCustomBindFunctor(epriv::DefaultMaterialBindFunctor());
+    setCustomUnbindFunctor(epriv::DefaultMaterialUnbindFunctor());
+}
+void Material::internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture) {
+    if (!m_Components[type] && texture) {
+        m_Components[type] = new MaterialComponent(type, texture);
+        texture->setAnisotropicFiltering(2.0f);
+    }
+}
+void Material::internalUpdateGlobalMaterialPool(const bool& addToDatabase) {
+    //this data is kept around to be deferred to the lighting pass
+    glm::vec4* data = nullptr;
+    if (!addToDatabase) {
+        data = &Material::m_MaterialProperities[m_ID];
+    }else{
+        m_ID = Material::m_MaterialProperities.size();
+        data = new glm::vec4(0.0f);
+    }
+    data->r = Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r, m_F0Color.g, m_F0Color.b);
+    data->g = m_BaseSmoothness;
+    data->b = float(m_SpecularModel);
+    data->a = float(m_DiffuseModel);
+    if (addToDatabase) {
+        Material::m_MaterialProperities.push_back(std::move(*data));
+        SAFE_DELETE(data);
+    }
+}
+
+
+
 void Material::addComponentDiffuse(Texture* texture){
-    m_i->_addComponentDiffuse(texture);
+    internalAddComponentGeneric(MaterialComponentType::Diffuse, texture);
 }
-void Material::addComponentDiffuse(string textureFile){
+void Material::addComponentDiffuse(const string& textureFile){
     Texture* texture = epriv::Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
     if(!texture){
         texture = new Texture(textureFile,true,ImageInternalFormat::SRGB8_ALPHA8);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
-    m_i->_addComponentDiffuse(texture);
+    addComponentDiffuse(texture);
 }
 void Material::addComponentNormal(Texture* texture){
-    m_i->_addComponentNormal(texture);
+    internalAddComponentGeneric(MaterialComponentType::Normal, texture);
 }
-void Material::addComponentNormal(string textureFile){
+void Material::addComponentNormal(const string& textureFile){
     Texture* texture = epriv::Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
     if(!texture){
         texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
-    m_i->_addComponentNormal(texture);
+    addComponentNormal(texture);
 }
 void Material::addComponentGlow(Texture* texture){
-    m_i->_addComponentGlow(texture);
+    internalAddComponentGeneric(MaterialComponentType::Glow, texture);
 }
-void Material::addComponentGlow(string textureFile){
+void Material::addComponentGlow(const string& textureFile){
     Texture* texture = epriv::Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
     if(!texture){
         texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
-    m_i->_addComponentGlow(texture);
+    addComponentGlow(texture);
 }
 void Material::addComponentSpecular(Texture* texture){
-    m_i->_addComponentSpecular(texture);
+    internalAddComponentGeneric(MaterialComponentType::Specular, texture);
 }
-void Material::addComponentSpecular(string textureFile){
+void Material::addComponentSpecular(const string& textureFile){
     Texture* texture = epriv::Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
     if(!texture){
         texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
-    m_i->_addComponentSpecular(texture);
+    addComponentSpecular(texture);
 }
 void Material::addComponentAO(Texture* texture,float baseValue){
-    m_i->_addComponentAO(texture);
+    internalAddComponentGeneric(MaterialComponentType::AO, texture);
     setAO(baseValue);
 }
-void Material::addComponentAO(string textureFile,float baseValue){
+void Material::addComponentAO(const string& textureFile,float baseValue){
     Texture* texture = epriv::Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
     if(!texture){
         texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
-    m_i->_addComponentAO(texture);
-    setAO(baseValue);
+    addComponentAO(texture);
 }
 void Material::addComponentMetalness(Texture* texture,float baseValue){
-    m_i->_addComponentMetalness(texture);
+    internalAddComponentGeneric(MaterialComponentType::Metalness, texture);
     setMetalness(baseValue);
 }
-void Material::addComponentMetalness(string textureFile,float baseValue){
+void Material::addComponentMetalness(const string& textureFile,float baseValue){
     Texture* texture = epriv::Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
     if(!texture){
         texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
-    m_i->_addComponentMetalness(texture);
-    setMetalness(baseValue);
+    addComponentMetalness(texture);
 }
 void Material::addComponentSmoothness(Texture* texture,float baseValue){
-    m_i->_addComponentSmoothness(texture);
+    internalAddComponentGeneric(MaterialComponentType::Smoothness, texture);
     setSmoothness(baseValue);
 }
-void Material::addComponentSmoothness(string textureFile,float baseValue){
+void Material::addComponentSmoothness(const string& textureFile,float baseValue){
     Texture* texture = epriv::Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
     if(!texture){
         texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
-    m_i->_addComponentSmoothness(texture);
-    setSmoothness(baseValue);
+    addComponentSmoothness(texture);
 }
 void Material::addComponentReflection(Texture* cubemap,Texture* map,float mixFactor){
-    if(cubemap == nullptr) cubemap = Resources::getCurrentScene()->skybox()->texture();
-    m_i->_addComponentReflection(cubemap,map,mixFactor);
+    if(cubemap == nullptr) 
+        cubemap = Resources::getCurrentScene()->skybox()->texture();
+    const uint& type = MaterialComponentType::Reflection;
+    if (m_Components[type] || (!cubemap || !map))
+        return;
+    m_Components[type] = new MaterialComponentReflection(type, cubemap, map, mixFactor);
 }
-void Material::addComponentReflection(string textureFiles[],string mapFile,float mixFactor){
+void Material::addComponentReflection(const string textureFiles[], const string& mapFile, float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(cubemap);
     //if(!cubemap){
@@ -505,9 +425,9 @@ void Material::addComponentReflection(string textureFiles[],string mapFile,float
         map = new Texture(mapFile);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(map);
     }
-    Material::addComponentReflection(cubemap,map,mixFactor);
+    addComponentReflection(cubemap,map,mixFactor);
 }
-void Material::addComponentReflection(string cubemapName,string mapFile,float mixFactor){
+void Material::addComponentReflection(const string& cubemapName, const string& mapFile,float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(cubemap);
     //if(!cubemap){
@@ -519,12 +439,17 @@ void Material::addComponentReflection(string cubemapName,string mapFile,float mi
         map = new Texture(mapFile);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(map);
     }
-    Material::addComponentReflection(cubemap,map,mixFactor);
+    addComponentReflection(cubemap,map,mixFactor);
 }
 void Material::addComponentRefraction(Texture* cubemap,Texture* map,float refractiveIndex,float mixFactor){
-    m_i->_addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
+    if (cubemap == nullptr)
+        cubemap = Resources::getCurrentScene()->skybox()->texture();
+    const uint& type = MaterialComponentType::Refraction;
+    if (m_Components[type] || (!cubemap || !map))
+        return;
+    m_Components[type] = new MaterialComponentRefraction(cubemap, map, refractiveIndex, mixFactor);
 }
-void Material::addComponentRefraction(string textureFiles[],string mapFile,float refractiveIndex,float mixFactor){
+void Material::addComponentRefraction(const string textureFiles[], const string& mapFile,float refractiveIndex,float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager._hasTexture(cubemap);
     //if(!cubemap){
@@ -536,9 +461,9 @@ void Material::addComponentRefraction(string textureFiles[],string mapFile,float
         map = new Texture(mapFile);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(map);
     }
-    Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
+    addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
-void Material::addComponentRefraction(string cubemapName,string mapFile,float refractiveIndex,float mixFactor){
+void Material::addComponentRefraction(const string& cubemapName, const string& mapFile,float refractiveIndex,float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager._hasTexture(cubemap);
     //if(!cubemap){
@@ -550,58 +475,138 @@ void Material::addComponentRefraction(string cubemapName,string mapFile,float re
         map = new Texture(mapFile);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(map);
     }
-    Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
+    addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
 void Material::addComponentParallaxOcclusion(Texture* texture,float heightScale){
-    m_i->_addComponentParallaxOcclusion(texture,heightScale);
+    const uint& type = MaterialComponentType::ParallaxOcclusion;
+    if (m_Components[type] || !texture)
+        return;
+    m_Components[type] = new MaterialComponentParallaxOcclusion(texture, heightScale);
 }
-void Material::addComponentParallaxOcclusion(std::string textureFile,float heightScale){
+void Material::addComponentParallaxOcclusion(const string& textureFile,float heightScale){
     Texture* texture = epriv::Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
     if(!texture){
         texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
-    m_i->_addComponentParallaxOcclusion(texture,heightScale);
+    addComponentParallaxOcclusion(texture,heightScale);
 }
-const MaterialComponent* Material::getComponent(MaterialComponentType::Type type) const { return m_i->m_Components[type]; }
-const MaterialComponentReflection* Material::getComponentReflection() const { return (MaterialComponentReflection*)(m_i->m_Components[MaterialComponentType::Reflection]); }
-const MaterialComponentRefraction* Material::getComponentRefraction() const { return (MaterialComponentRefraction*)(m_i->m_Components[MaterialComponentType::Refraction]); }
-const MaterialComponentParallaxOcclusion* Material::getComponentParallaxOcclusion() const { return (MaterialComponentParallaxOcclusion*)(m_i->m_Components[MaterialComponentType::ParallaxOcclusion]); }
-const bool Material::shadeless() const { return m_i->m_Shadeless; }
-const glm::vec3 Material::f0() const{ return m_i->m_F0Color; }
-const float Material::glow() const { return m_i->m_BaseGlow; }
-const uint Material::id() const { return m_i->m_ID; }
-const uint Material::diffuseModel() const { return m_i->m_DiffuseModel; }
-const uint Material::specularModel() const { return m_i->m_SpecularModel; }
-const float Material::ao() const { return m_i->m_BaseAO; }
-const float Material::metalness() const{ return m_i->m_BaseMetalness; }
-const float Material::smoothness() const { return m_i->m_BaseSmoothness; }
-void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
-void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
-void Material::setF0Color(glm::vec3 color){ Material::setF0Color(color.r, color.g, color.b); }
-void Material::setF0Color(float r, float g, float b){ m_i->_setF0Color(r, g, b); }
-void Material::setMaterialPhysics(MaterialPhysics::Physics c){
-    auto& t = epriv::MATERIAL_PROPERTIES[c];
-    m_i->_setMaterialProperties(t.get<0>(),t.get<1>(),t.get<2>(),t.get<3>(),t.get<4>() );
+const MaterialComponent* Material::getComponent(const MaterialComponentType::Type& type) const {
+    return m_Components[type]; 
 }
-void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
-void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(m); }
-void Material::setDiffuseModel(DiffuseModel::Model m){ m_i->_setDiffuseModel(m); }
-void Material::setAO(float a){ m_i->_setAO(a); }
-void Material::setMetalness(float m){ m_i->_setMetalness(m); }
-void Material::bind(){ epriv::Core::m_Engine->m_RenderManager._bindMaterial(this); }
-void Material::unbind(){ epriv::Core::m_Engine->m_RenderManager._unbindMaterial(); }
+const MaterialComponentReflection* Material::getComponentReflection() const { 
+    return static_cast<MaterialComponentReflection*>(m_Components[MaterialComponentType::Reflection]);
+}
+const MaterialComponentRefraction* Material::getComponentRefraction() const { 
+    return static_cast<MaterialComponentRefraction*>(m_Components[MaterialComponentType::Refraction]);
+}
+const MaterialComponentParallaxOcclusion* Material::getComponentParallaxOcclusion() const { 
+    return static_cast<MaterialComponentParallaxOcclusion*>(m_Components[MaterialComponentType::ParallaxOcclusion]); 
+}
+const bool& Material::shadeless() const { 
+    return m_Shadeless; 
+}
+const glm::vec3& Material::f0() const{ 
+    return m_F0Color; 
+}
+const float& Material::glow() const { 
+    return m_BaseGlow; 
+}
+const uint& Material::id() const { 
+    return m_ID; 
+}
+const uint& Material::diffuseModel() const { 
+    return m_DiffuseModel; 
+}
+const uint& Material::specularModel() const { 
+    return m_SpecularModel; 
+}
+const float& Material::ao() const { 
+    return m_BaseAO; 
+}
+const float& Material::metalness() const{ 
+    return m_BaseMetalness; 
+}
+const float& Material::smoothness() const { 
+    return m_BaseSmoothness; 
+}
+void Material::setShadeless(const bool& shadeless){
+    m_Shadeless = shadeless;
+    internalUpdateGlobalMaterialPool(false);
+}
+void Material::setGlow(const float& glow){
+    m_BaseGlow = glow;
+    internalUpdateGlobalMaterialPool(false);
+}
+void Material::setF0Color(const glm::vec3& color){
+    setF0Color(color.r, color.g, color.b); 
+}
+void Material::setF0Color(const float& r, const float& g, const float& b){
+    m_F0Color.r = glm::clamp(r, 0.001f, 0.999f);
+    m_F0Color.g = glm::clamp(g, 0.001f, 0.999f);
+    m_F0Color.b = glm::clamp(b, 0.001f, 0.999f);
+    internalUpdateGlobalMaterialPool(false);
+}
+void Material::setMaterialPhysics(const MaterialPhysics::Physics& materialPhysics){
+    auto& t = epriv::MATERIAL_PROPERTIES[materialPhysics];
+    setF0Color(t.get<0>(), t.get<1>(), t.get<2>());
+    setSmoothness(t.get<3>());
+    setMetalness(t.get<4>());
+    internalUpdateGlobalMaterialPool(false);
+}
+void Material::setSmoothness(const float& smoothness){
+    m_BaseSmoothness = glm::clamp(smoothness, 0.001f, 0.999f);
+    internalUpdateGlobalMaterialPool(false);
+}
+void Material::setSpecularModel(const SpecularModel::Model& specularModel){
+    m_SpecularModel = specularModel;
+    internalUpdateGlobalMaterialPool(false);
+}
+void Material::setDiffuseModel(const DiffuseModel::Model& diffuseModel){
+    m_DiffuseModel = diffuseModel;
+    internalUpdateGlobalMaterialPool(false);
+}
+void Material::setAO(const float& ao){
+    m_BaseAO = glm::clamp(ao, 0.001f, 0.999f);
+    internalUpdateGlobalMaterialPool(false);
+}
+void Material::setMetalness(const float& metalness){
+    m_BaseMetalness = glm::clamp(metalness, 0.001f, 0.999f);
+    internalUpdateGlobalMaterialPool(false);
+}
+void Material::bind(){ 
+    epriv::Core::m_Engine->m_RenderManager._bindMaterial(this); 
+}
+void Material::unbind(){ 
+    epriv::Core::m_Engine->m_RenderManager._unbindMaterial(); 
+}
 void Material::load(){
     if(!isLoaded()){
-        m_i->_load();
-        std::cout << "(Material) ";
+        for (auto& component : m_Components) {
+            if (component) {
+                Texture& texture = *component->texture();
+                texture.incrementUseCount();
+                if (!texture.isLoaded() && texture.useCount() > 0) {
+                    texture.load();
+                }
+            }
+        }
+        cout << "(Material) ";
         EngineResource::load();
     }
 }
 void Material::unload(){
     if(isLoaded() && useCount() == 0){
-        m_i->_unload();
-        std::cout << "(Material) ";
+        for (auto& component : m_Components) {
+            if (component) {
+                Texture& texture = *component->texture();
+                texture.decrementUseCount();
+                if (texture.useCount() == 0 && texture.isLoaded()) {
+                    texture.unload();
+                }
+            }
+        }
+        cout << "(Material) ";
         EngineResource::unload();
     }
 }

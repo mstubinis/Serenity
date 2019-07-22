@@ -36,6 +36,9 @@ Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
 Handle ResourceManifest::StarFlareMaterial;
 
+//music
+Handle ResourceManifest::MenuMusic;
+
 std::unordered_map<std::string, boost::tuple<Handle, Handle>> ResourceManifest::Ships;
 
 std::string ResourceManifest::BasePath;
@@ -104,6 +107,9 @@ void ResourceManifest::init(){
     StarFlareMaterial = Resources::addMaterial("SunFlare", BasePath + "data/Textures/Skyboxes/StarFlare.dds");
     Resources::getMaterial(StarFlareMaterial)->setShadeless(true);
 
+
+    //sounds
+    MenuMusic = Resources::addSoundData(BasePath + "data/Sounds/menu.ogg");
 
 
     ResourceManifest::Ships["Defiant"]     = boost::tuple<Handle, Handle>(DefiantMesh,     DefiantMaterial);

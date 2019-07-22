@@ -420,6 +420,24 @@
     <ClInclude Include="Engine\src\core\engine\scene\Viewport.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\sounds\SoundData.h">
+      <Filter>Header Files\Engine\Core\Sounds</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\sounds\SoundEffect.h">
+      <Filter>Header Files\Engine\Core\Sounds</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\sounds\SoundMusic.h">
+      <Filter>Header Files\Engine\Core\Sounds</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\sounds\Sounds.h">
+      <Filter>Header Files\Engine\Core\Sounds</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\sounds\SoundBaseClass.h">
+      <Filter>Header Files\Engine\Core\Sounds</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\sounds\SoundQueue.h">
+      <Filter>Header Files\Engine\Core\Sounds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -637,6 +655,21 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\scene\Viewport.cpp">
       <Filter>Source Files\Engine\Core\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\sounds\SoundData.cpp">
+      <Filter>Source Files\Engine\Core\Sounds</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\sounds\SoundEffect.cpp">
+      <Filter>Source Files\Engine\Core\Sounds</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\sounds\SoundMusic.cpp">
+      <Filter>Source Files\Engine\Core\Sounds</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\sounds\SoundBaseClass.cpp">
+      <Filter>Source Files\Engine\Core\Sounds</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\sounds\SoundQueue.cpp">
+      <Filter>Source Files\Engine\Core\Sounds</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

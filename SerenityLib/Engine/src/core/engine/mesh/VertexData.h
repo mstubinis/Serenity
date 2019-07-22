@@ -8,11 +8,13 @@
 
 typedef unsigned short ushort;
 
+
 //client side memory for mesh data
 struct VertexData final{
     VertexDataFormat&                              format;
     std::vector<char*>                             data;
     std::vector<size_t>                            dataSizes;
+    std::vector<size_t>                            dataSizesCapacity;
     std::vector<ushort>                            indices;
     GLuint                                         vao;
     std::vector<std::unique_ptr<BufferObject>>     buffers;
@@ -36,11 +38,15 @@ struct VertexData final{
             buffers.push_back(std::make_unique<VertexBufferObject>());
         if (attributeIndex >= data.size())
             return;
+
         auto& old_data = data[attributeIndex];
-        free(old_data);
         const auto& sizeofT = sizeof(T);
         const auto& totalSize = (new_data.size() * sizeofT);
-        old_data = (char*)malloc(totalSize);
+        if (dataSizesCapacity[attributeIndex] < new_data.size()) {
+            delete[] old_data;
+            old_data = new char[totalSize];
+            dataSizesCapacity[attributeIndex] = new_data.size();
+        }
         std::memmove(old_data, new_data.data(), totalSize);
         dataSizes[attributeIndex] = new_data.size();
         if (addToGPU) {
@@ -51,7 +57,7 @@ struct VertexData final{
             }
         }
     }
-    void setDataIndices(std::vector<ushort>& _data, const bool addToGPU = false, const bool orphan = false);
+    void setIndices(std::vector<ushort>& _data, const bool addToGPU = false, const bool orphan = false);
 
     void finalize();
     void bind();

@@ -30,6 +30,7 @@ struct PacketType {enum Type {
     Server_To_Client_Reject_Connection,
 
     Server_To_Client_Chat_Message,
+    Server_To_Client_Map_Data,
 
     Server_To_Client_Client_Joined_Server,
     Server_To_Client_Client_Left_Server,

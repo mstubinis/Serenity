@@ -33,6 +33,8 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketChatMessage(); break;
         }case PacketType::Server_To_Client_Client_Left_Server: {
             p = new PacketChatMessage(); break;
+        }case PacketType::Server_To_Client_Map_Data: {
+            p = new PacketChatMessage(); break;
         }
         default: {
             break;

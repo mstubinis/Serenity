@@ -6,7 +6,16 @@
 
 class  Scene;
 class  Camera;
+
+namespace Engine {
+    namespace epriv {
+        class RenderManager;
+    };
+};
+
 class Viewport final {
+    friend class Scene;
+    friend class Engine::epriv::RenderManager;
     private:
         Scene&       m_Scene;
         Camera*      m_Camera;
@@ -17,7 +26,7 @@ class Viewport final {
 
         //bool         m_TransparencyMaskActive;
         //glm::vec4    m_TransparencyMaskColor;
-
+        glm::vec4    m_BackgroundColor;
 
         bool         m_DepthMaskActive;
         float        m_DepthMaskValue;
@@ -41,8 +50,8 @@ class Viewport final {
         void activateDepthMask();
         const bool isDepthMaskActive() const;
 
-
-
+        const glm::vec4& getBackgroundColor() const;
+        void setBackgroundColor(const float& r, const float& g, const float& b, const float& a);
 
         /*
         const glm::vec4& getTransparencyMaskColor() const;

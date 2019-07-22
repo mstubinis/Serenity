@@ -31,6 +31,8 @@ class Button : public Widget {
 
         const float getTextHeight() const;
         const float getTextWidth() const;
+        void setTextAlignment(const TextAlignment::Type&);
+        const TextAlignment::Type& getTextAlignment() const;
 
         virtual void setTextScale(const glm::vec2& scale);
         virtual void setTextScale(const float& x, const float& y);

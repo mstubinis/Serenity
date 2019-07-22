@@ -28,11 +28,12 @@ class Server {
         unsigned int                                   m_port;
         bool                                           m_blocking;
         Core&                                          m_Core;
+        std::string                                    m_MapName;
     public:
         Server(Core&, const unsigned int& port, const bool blocking = false, const std::string& ipRestriction = "");
         ~Server();
 
-        const bool startup();
+        const bool startup(const std::string& mapname);
         void shutdown(const bool destructor = false);
 
         const bool isValidName(const std::string& name) const;

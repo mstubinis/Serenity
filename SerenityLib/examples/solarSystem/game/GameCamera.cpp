@@ -38,8 +38,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 
             thisCamera.lookAt(pos, targetBody.position() - targetBody.forward() * 50.0f, targetBody.up());
             break;
-        }
-        case CameraState::FollowTarget: {
+        }case CameraState::FollowTarget: {
             auto& targetEntity = camera.m_Target;
             auto& playerEntity = camera.m_Player;
             EntityDataRequest dataRequest1(targetEntity);
@@ -63,8 +62,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 
             thisCamera.lookAt(pos, target.position(), player.up());
             break;
-        }
-        case CameraState::Orbit: {
+        }case CameraState::Orbit: {
             auto& targetEntity = camera.m_Target;
             EntityDataRequest dataRequest1(targetEntity);
 
@@ -93,8 +91,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 
             thisCamera.lookAt(eye, targetBody.position(), thisBody.up());
             break;
-        }
-        case CameraState::Freeform: {
+        }case CameraState::Freeform: {
             thisCamera.lookAt(thisBody.position(), thisBody.position() + thisBody.forward(), thisBody.up());
             break;
         }

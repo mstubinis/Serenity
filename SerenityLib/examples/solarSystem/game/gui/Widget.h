@@ -23,20 +23,25 @@ class Widget : public IWidget {
         Widget(const float& x, const float& y, const float& width, const float& height);
         virtual ~Widget();
 
+        virtual void setWidth(const float&);
+        virtual void setHeight(const float&);
+        virtual void setSize(const float& width, const float& height);
+
         virtual const float width() const;
         virtual const float height() const;
 
         virtual const bool isMouseOver() const;
 
         const glm::vec2& position() const;
+        const glm::vec4& color() const;
 
         void setAlignment(const Alignment::Type& alignment);
 
         void* getUserPointer() const;
         void setUserPointer(void*);
 
-        void setPosition(const float& x, const float& y);
-        void setPosition(const glm::vec2& position);
+        virtual void setPosition(const float& x, const float& y);
+        virtual void setPosition(const glm::vec2& position);
 
         virtual void setColor(const float& r, const float& g, const float& b, const float& a);
         virtual void setColor(const glm::vec4& color);

@@ -38,6 +38,10 @@ struct ResourceManifest{
     static Handle CrosshairArrowMaterial;
     static Handle StarFlareMaterial;
 
+    //sounds
+    static Handle MenuMusic;
+
+
     static std::string BasePath;
 
     static std::unordered_map<std::string, boost::tuple<Handle, Handle>> Ships;

@@ -33,6 +33,9 @@ class ScrollBar final : public Widget {
 
         void setScrollBarColor(const glm::vec4& color);
 
+        void setPosition(const float& x, const float& y);
+        void setPosition(const glm::vec2& position);
+
         void setSliderSize(const float percent);
         void setType(const ScrollBarType::Type&);
         const float getSliderHeight() const;

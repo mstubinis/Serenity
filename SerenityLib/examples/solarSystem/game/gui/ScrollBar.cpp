@@ -24,6 +24,15 @@ ScrollBar::ScrollBar(const float& x, const float& y, const float& w, const float
 ScrollBar::~ScrollBar() {
 
 }
+void ScrollBar::setPosition(const float& x, const float& y) {
+    Widget::setPosition(x, y);
+    internalUpdateScrollbarPosition();
+}
+void ScrollBar::setPosition(const glm::vec2& position) {
+    Widget::setPosition(position.x, position.y);
+    internalUpdateScrollbarPosition();
+}
+
 void ScrollBar::setBorderSize(const float border) {
     m_BorderSize = border;
 }

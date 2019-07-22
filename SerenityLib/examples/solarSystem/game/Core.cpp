@@ -5,10 +5,15 @@
 #include "Client.h"
 #include "SolarSystem.h"
 #include "Packet.h"
+#include "Planet.h"
+#include "GameCamera.h"
+#include "GameSkybox.h"
 #include "ResourceManifest.h"
 
 #include <core/engine/Engine.h>
 #include <core/engine/scene/Viewport.h>
+#include <core/engine/lights/SunLight.h>
+#include <ecs/Components.h>
 
 using namespace std;
 using namespace Engine;
@@ -41,10 +46,10 @@ Client* Core::getClient() {
     return m_Client;
 }
 
-void Core::startServer(const unsigned short& port) {
+void Core::startServer(const unsigned short& port, const std::string& mapname) {
     if (!m_Server) {
         m_Server = new Server(*this, port, false);
-        m_Server->startup();
+        m_Server->startup(mapname);
     }
 }
 void Core::shutdownServer() {
@@ -89,11 +94,9 @@ void Core::requestValidation(const string& name) {
 }
 void Core::enterMap(const string& mapFile) {
     auto& window = Resources::getWindow();
-    SolarSystem* map = new SolarSystem(mapFile, ResourceManifest::BasePath + "data/Systems/" + mapFile + ".txt");
-    auto ships = map->allowedShips();
-    Resources::setCurrentScene(map);
-    map->setBackgroundColor(1, 0, 0, 1.0f);
+    Resources::setCurrentScene(mapFile);
 
+    //map->setBackgroundColor(1, 0, 0, 1.0f);
     //Renderer::fog::enable();
 
     window.keepMouseInWindow(true);
@@ -111,9 +114,25 @@ void Core::init() {
 
     Scene* s = new Scene("Menu");
     Resources::setCurrentScene(s);
+    GameSkybox* box = new GameSkybox(ResourceManifest::BasePath + "data/Textures/Skyboxes/SolarSystem/Skybox.dds", 0, s);
+    s->setSkybox(box);
+
+    Camera* shipSelectionCamera = new Camera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y),0.1f, 3000.0f, s);
+    s->setActiveCamera(*shipSelectionCamera);
+    SunLight* sunLight = new SunLight(glm::vec3(0.0f), LightType::Sun, s);
+    sunLight->setColor(1, 1, 0);
+    auto e = s->createEntity();
+    auto& body  = *e.addComponent<ComponentBody>();
+    body.setPosition(1, -1, -3);
+    auto& model = *e.addComponent<ComponentModel>(ResourceManifest::DefiantMesh, ResourceManifest::DefiantMaterial);
+    auto& name  = *e.addComponent<ComponentName>("MenuShipSelection");
+    //s->setActiveCamera(*shipSelectionCamera);
+    //shipSelectionCamera->setTarget(e);
+    //s->getActiveCamera()->lookAt(body.position() + glm::vec3(5,0,5), body.position(), s->getActiveCamera()->up());
     
-    m_HUD    = new HUD(m_GameState, *this);
+    m_HUD        = new HUD(*s,*s->getActiveCamera(), m_GameState, *this);
     m_Initalized = true;
+    m_HUD->go_to_main_menu();
 }
 void Core::update(const double& dt) {
     if (Engine::isKeyDown(KeyboardKey::Escape)) {

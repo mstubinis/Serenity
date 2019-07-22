@@ -19,14 +19,11 @@ Viewport::Viewport(const Scene& scene, const Camera& camera):m_Scene(const_cast<
 
     setDepthMaskValue(50.0f);
     deactivateDepthMask();
+
+    setBackgroundColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 Viewport::~Viewport() {
 }
-
-
-
-
-
 const float& Viewport::getDepthMaskValue() const {
     return m_DepthMaskValue;
 }
@@ -43,7 +40,15 @@ void Viewport::activateDepthMask() {
 const bool Viewport::isDepthMaskActive() const {
     return m_DepthMaskActive;
 }
-
+const glm::vec4& Viewport::getBackgroundColor() const {
+    return m_BackgroundColor;
+}
+void Viewport::setBackgroundColor(const float& r, const float& g, const float& b, const float& a) {
+    m_BackgroundColor.r = r;
+    m_BackgroundColor.g = g;
+    m_BackgroundColor.b = b;
+    m_BackgroundColor.a = a;
+}
 
 
 /*

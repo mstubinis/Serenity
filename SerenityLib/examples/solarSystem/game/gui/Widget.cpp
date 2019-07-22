@@ -26,6 +26,19 @@ Widget::Widget(const float& x, const float& y, const float& width, const float& 
 Widget::~Widget() {
 
 }
+void Widget::setWidth(const float& width) {
+    m_Width = width;
+}
+void Widget::setHeight(const float& height) {
+    m_Height = height;
+}
+void Widget::setSize(const float& width, const float& height) {
+    setWidth(width);
+    setHeight(height);
+}
+const glm::vec4& Widget::color() const {
+    return m_Color;
+}
 const glm::vec2& Widget::position() const {
     return m_Position;
 }

@@ -2,10 +2,12 @@
 #include "Packet.h"
 #include "Core.h"
 #include "HUD.h"
+#include "ResourceManifest.h"
 #include "gui/Button.h"
 #include "gui/Text.h"
 #include "gui/specifics/ServerLobbyChatWindow.h"
 #include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
+#include "gui/specifics/ServerLobbyShipSelectorWindow.h"
 
 #include "SolarSystem.h"
 #include "Ship.h"
@@ -17,6 +19,15 @@
 
 using namespace std;
 using namespace Engine;
+
+struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
+    ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(button->getUserPointer());
+    for (auto& widget : window.getWindowFrame().content()) {
+        widget->setColor(0.5f, 0.5f, 0.5f, 0.0f);
+    }
+    button->setColor(0.5f, 0.5f, 0.5f, 1.0f);
+    //window.m_CurrentChoice->setText(button->text());
+}};
 
 Client::Client(Core& core, sf::TcpSocket* socket) : m_Core(core){
     m_TcpSocket = new Networking::SocketTCP(socket);
@@ -167,6 +178,29 @@ void Client::onReceive() {
             */
             HUD& hud = *m_Core.m_HUD;
             switch (p.PacketType) {
+                case PacketType::Server_To_Client_Map_Data: {
+                    PacketChatMessage& pI = *static_cast<PacketChatMessage*>(pp);
+                    auto& mapname = pI.name;
+                    SolarSystem* map = static_cast<SolarSystem*>(Resources::getScene(mapname));
+                    if (!map) {
+                        map = new SolarSystem(mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
+                    }
+                    hud.m_ServerLobbyShipSelectorWindow->clear();
+                    auto ships = map->allowedShips();
+                    for (auto& ship : ships) {
+                        Button* button = new Button(*hud.m_Font, 0, 0, 100, 40);
+                        button->setText(ship);
+                        button->setColor(0.5f, 0.5f, 0.5f, 0.0f);
+                        button->setTextColor(1, 1, 1, 1);
+                        button->setAlignment(Alignment::TopLeft);
+                        button->setWidth(600);
+                        button->setTextAlignment(TextAlignment::Left);
+                        button->setUserPointer(hud.m_ServerLobbyShipSelectorWindow);
+                        button->setOnClickFunctor(ShipSelectorButtonOnClick());
+                        hud.m_ServerLobbyShipSelectorWindow->addContent(button);
+                    }
+                    break;
+                }
                 case PacketType::Server_To_Client_Chat_Message: {
                     PacketChatMessage& pI = *static_cast<PacketChatMessage*>(pp);
                     auto message = pI.name + ": " + pI.data;

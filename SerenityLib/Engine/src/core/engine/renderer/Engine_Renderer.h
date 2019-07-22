@@ -156,6 +156,7 @@ namespace Renderer{
     void unbindReadFBO();
     void unbindDrawFBO();
         
+    void alignmentOffset(const Alignment::Type& align, float& x, float& y, const float& width, const float& height);
     void renderTexture(const Texture&, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const Alignment::Type& = Alignment::Type::Center);
     void renderText(const std::string& text, const Font&, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const TextAlignment::Type& = TextAlignment::Left);
     void renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float& w, const float& h, const float& angle, const float& depth, const Alignment::Type& = Alignment::Type::Center);

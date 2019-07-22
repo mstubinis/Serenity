@@ -6,6 +6,7 @@
 #include <core/engine/fonts/Font.h>
 
 using namespace Engine;
+using namespace std;
 
 namespace Engine {
     namespace epriv {
@@ -19,13 +20,13 @@ void Button::internalSetSize() {
 }
 Button::Button(const Font& font, const float& x, const float& y, const float& width, const float& height) : Widget(x, y, width, height) {
     setFont(font);
-    m_Text = "Button";
+    setText("Button");
     setOnClickFunctor(epriv::emptyFunctor());
-    m_TextScale = glm::vec2(1.0f);
-    m_TextAlignment = TextAlignment::Center;
+    setTextScale(1.0f, 1.0f);
     m_Padding = 20;
+    setAlignment(Alignment::Center);
+    setTextAlignment(TextAlignment::Center);
     internalSetSize();
-    m_Alignment = Alignment::Center;
 }
 Button::Button(const Font& font, const glm::vec2& position, const float& width, const float& height) : Button(font,position.x,position.y,width,height) {
 }
@@ -41,10 +42,16 @@ void Button::setTextScale(const float& x, const float& y) {
     m_TextScale.y = y;
     internalSetSize();
 }
+void Button::setTextAlignment(const TextAlignment::Type& textAlignment) {
+    m_TextAlignment = textAlignment;
+}
+const TextAlignment::Type& Button::getTextAlignment() const {
+    return m_TextAlignment;
+}
 const glm::vec2& Button::getTextScale() const {
     return m_TextScale;
 }
-const std::string& Button::text() const {
+const string& Button::text() const {
     return m_Text;
 }
 
@@ -68,7 +75,7 @@ void Button::setText(const char* text) {
     m_Text = text;
     internalSetSize();
 }
-void Button::setText(const std::string& text) {
+void Button::setText(const string& text) {
     m_Text = text;
     internalSetSize();
 }
@@ -99,5 +106,9 @@ void Button::render() {
             break;
         }
     }
-    m_Font->renderText(m_Text, newPosTxt, m_TextColor, 0, m_TextScale, 0.008f, m_TextAlignment);
+    float fX = 0;
+    float fY = 0;
+    Renderer::alignmentOffset(m_Alignment, fX, fY, m_Width, m_Height);
+
+    m_Font->renderText(m_Text, glm::vec2(newPosTxt.x + fX, newPosTxt.y + fY), m_TextColor, 0, m_TextScale, 0.008f, m_TextAlignment);
 }

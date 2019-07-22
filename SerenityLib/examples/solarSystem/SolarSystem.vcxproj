@@ -198,8 +198,10 @@
     <ClInclude Include="game\gui\Button.h" />
     <ClInclude Include="game\gui\ScrollBar.h" />
     <ClInclude Include="game\gui\ScrollWindow.h" />
+    <ClInclude Include="game\gui\specifics\ServerHostingMapSelectorWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyChatWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.h" />
+    <ClInclude Include="game\gui\specifics\ServerLobbyShipSelectorWindow.h" />
     <ClInclude Include="game\gui\Text.h" />
     <ClInclude Include="game\gui\TextBox.h" />
     <ClInclude Include="game\gui\Widget.h" />
@@ -221,8 +223,10 @@
     <ClCompile Include="game\gui\Button.cpp" />
     <ClCompile Include="game\gui\ScrollBar.cpp" />
     <ClCompile Include="game\gui\ScrollWindow.cpp" />
+    <ClCompile Include="game\gui\specifics\ServerHostingMapSelectorWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyChatWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.cpp" />
+    <ClCompile Include="game\gui\specifics\ServerLobbyShipSelectorWindow.cpp" />
     <ClCompile Include="game\gui\Text.cpp" />
     <ClCompile Include="game\gui\TextBox.cpp" />
     <ClCompile Include="game\gui\Widget.cpp" />

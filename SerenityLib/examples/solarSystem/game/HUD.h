@@ -12,6 +12,7 @@
 class  Font;
 class  Ship;
 class  Core;
+class  SoundMusic;
 struct Entity;
 
 class  Client;
@@ -23,6 +24,8 @@ class  Text;
 class  ScrollFrame;
 class  ServerLobbyChatWindow;
 class  ServerLobbyConnectedPlayersWindow;
+class  ServerLobbyShipSelectorWindow;
+class  ServerHostingMapSelectorWindow;
 
 
 struct ButtonHost_OnClick;
@@ -60,8 +63,16 @@ class HUD final{
         TextBox*                       m_ServerPort;
         Text*                          m_InfoText;
 
+        SoundMusic*                    m_MainMenuMusic;
+
+
+        ServerHostingMapSelectorWindow*     m_ServerHostMapSelector;
+
         ServerLobbyChatWindow*              m_ServerLobbyChatWindow;
         ServerLobbyConnectedPlayersWindow*  m_ServerLobbyConnectedPlayersWindow;
+        ServerLobbyShipSelectorWindow*      m_ServerLobbyShipSelectorWindow;
+
+        void go_to_main_menu();
 
         void update_game(const double& dt);
         void update_main_menu(const double& dt);
@@ -78,7 +89,7 @@ class HUD final{
         void render_join_server_server_lobby();
 
     public:
-        HUD(GameState::State& current, Core& core);
+        HUD(Scene& scene, Camera& camera, GameState::State& current, Core& core);
         ~HUD();
 
         void onResize(const uint& width, const uint& height);

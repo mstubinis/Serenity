@@ -37,7 +37,7 @@ float PlanetaryRenderSpace(float& outerRadius,float& _distanceReal) {
 struct PlanetLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
     Planet& planet = *(Planet*)_component.getUserPointer();
     if (planet.m_RotationInfo) {
-        //planet.m_Entity.getComponent<ComponentBody>()->rotate(0.0f, glm::radians(planet.m_RotationInfo->speed * dt), 0.0f);
+        planet.m_Entity.getComponent<ComponentBody>()->rotate(0.0f, glm::radians(planet.m_RotationInfo->speed * static_cast<float>(dt)), 0.0f);
     }
     if (planet.m_OrbitInfo) {
         //planet.m_OrbitInfo->setOrbitalPosition(((1.0f/(planet.m_OrbitInfo->info.y*86400.0f))*dt)*6.283188f,this);
@@ -384,14 +384,14 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor, glm::vec3 godRaysColor,glm:
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor);
 
-    auto* model = m_Entity.getComponent<ComponentModel>();
-    if (model) {
-        auto& instance = model->getModel();
+    auto* starModel = m_Entity.getComponent<ComponentModel>();
+    if (starModel) {
+        auto& instance = starModel->getModel();
         instance.setColor(starColor);
         instance.setGodRaysColor(godRaysColor);
         instance.setCustomBindFunctor(StarMeshInstanceBindFunctor());
         instance.setCustomUnbindFunctor(StarMeshInstanceUnbindFunctor());
-        instance.setShaderProgram(nullptr,*model);
+        instance.setShaderProgram(nullptr,*starModel);
     }
     //addChild(m_Light);
     m_Light->setPosition(pos);

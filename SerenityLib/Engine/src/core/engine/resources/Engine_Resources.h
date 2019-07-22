@@ -85,7 +85,7 @@ namespace Resources{
     Handle addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr);
 
     Handle addShader(std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
-    Handle addSoundData(std::string file,std::string name = "",bool music = false);
+    Handle addSoundData(std::string file);
     Handle addShaderProgram(std::string name, Shader& vertexShader, Shader& fragmentShader);
     Handle addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader);
 };

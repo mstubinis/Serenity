@@ -33,6 +33,7 @@ class SolarSystem: public Scene{
         void setPlayer(Ship* p){ m_Player = p; }
 
         std::vector<std::string> allowedShips();
+        std::string allowedShipsSingleString();
 
         std::unordered_map<std::string, Planet*>& getPlanets() { return m_Planets; }
         std::unordered_map<std::string, Ship*>& getShips() { return m_Ships; }

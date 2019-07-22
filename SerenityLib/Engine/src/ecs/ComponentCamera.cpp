@@ -12,23 +12,11 @@ using namespace Engine::epriv;
 using namespace std;
 
 
-void epriv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& p_ComponentCamera) {
-    if (p_ComponentCamera.m_Type == ComponentCamera::Type::Perspective) {
-		p_ComponentCamera.m_ProjectionMatrix = glm::perspective(
-			p_ComponentCamera.m_Angle,
-			p_ComponentCamera.m_AspectRatio,
-			p_ComponentCamera.m_NearPlane,
-			p_ComponentCamera.m_FarPlane
-		);
+void epriv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& p_ComCamera) {
+    if (p_ComCamera.m_Type == ComponentCamera::Type::Perspective) {
+        p_ComCamera.m_ProjectionMatrix = glm::perspective(p_ComCamera.m_Angle, p_ComCamera.m_AspectRatio,p_ComCamera.m_NearPlane,p_ComCamera.m_FarPlane);
     }else{
-		p_ComponentCamera.m_ProjectionMatrix = glm::ortho(
-			p_ComponentCamera.m_Left,
-			p_ComponentCamera.m_Right,
-			p_ComponentCamera.m_Bottom,
-			p_ComponentCamera.m_Top,
-			p_ComponentCamera.m_NearPlane,
-			p_ComponentCamera.m_FarPlane
-		);
+        p_ComCamera.m_ProjectionMatrix = glm::ortho(p_ComCamera.m_Left,p_ComCamera.m_Right,p_ComCamera.m_Bottom,p_ComCamera.m_Top,p_ComCamera.m_NearPlane,p_ComCamera.m_FarPlane);
     }
 }
 const glm::mat4 epriv::ComponentCamera_Functions::GetViewNoTranslation(Camera& p_Camera) {
@@ -81,7 +69,8 @@ ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_Left, con
 	m_ViewMatrixNoTranslation = m_ViewMatrix;
     m_Type                    = Type::Orthographic;
 }
-ComponentCamera::~ComponentCamera() {}
+ComponentCamera::~ComponentCamera() {
+}
 void ComponentCamera::resize(const uint p_Width, const uint p_Height) {
     if (m_Type == Type::Perspective) {
         m_AspectRatio = p_Width / static_cast<float>(p_Height);

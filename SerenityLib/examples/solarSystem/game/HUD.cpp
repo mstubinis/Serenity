@@ -19,6 +19,7 @@
 #include <core/engine/scene/Camera.h>
 #include <core/Material.h>
 
+
 #include <glm/vec4.hpp>
 
 #include "gui/Button.h"
@@ -27,8 +28,13 @@
 #include "gui/Text.h";
 #include "gui/specifics/ServerLobbyChatWindow.h"
 #include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
+#include "gui/specifics/ServerLobbyShipSelectorWindow.h"
+#include "gui/specifics/ServerHostingMapSelectorWindow.h"
 
 #include <regex>
+
+
+#include <core/engine/sounds/SoundMusic.h>
 
 using namespace Engine;
 using namespace std;
@@ -84,9 +90,7 @@ struct ButtonBack_OnClick {void operator()(Button* button) const {
             hud.m_Next->setText("Next");
             break;
         }default: {
-            hud.m_GameState = GameState::Main_Menu;
-            hud.m_Next->setText("Next");
-            hud.setErrorText("", 0);
+            hud.go_to_main_menu();
             break;
         }
     }
@@ -97,11 +101,11 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
         case GameState::Host_Server_Port_And_Name_And_Map: {
             const string& username   = hud.m_UserName->text();
             const string& portstring = hud.m_ServerPort->text();
-            if (!portstring.empty() && !username.empty()) {
+            const string& map        = hud.m_ServerHostMapSelector->getCurrentChoice().text();
+            if (!portstring.empty() && !username.empty() && !map.empty()) {
                 if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))   && username.find_first_not_of(' ') != std::string::npos) {
                     const int port = stoi(portstring);
-                    //hud.setErrorText("", 0);
-                    hud.m_Core.startServer(port);
+                    hud.m_Core.startServer(port, map);
                     hud.m_Core.startClient(port, username, "127.0.01"); //the client will request validation at this stage
                     hud.m_ServerLobbyChatWindow->setUserPointer(hud.m_Core.getClient());
                 }else{
@@ -137,16 +141,14 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             hud.m_Next->setText("Next");
             break;
         }default: {
-            hud.m_GameState = GameState::Main_Menu;
-            hud.m_Next->setText("Next");
-            hud.setErrorText("", 0);
+            hud.go_to_main_menu();
             break;
         }
     }
 }};
 
 
-HUD::HUD(GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
+HUD::HUD(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
     m_FontHandle = Resources::addFont(ResourceManifest::BasePath + "data/Fonts/consolas.fnt");
     m_Font = Resources::getFont(m_FontHandle);
     Engine::Math::setColor(m_Color, 255, 255, 0);
@@ -201,11 +203,22 @@ HUD::HUD(GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
     m_InfoText = new Text(Resources::getWindowSize().x / 2, 65, *m_Font);
     m_InfoText->setTextAlignment(TextAlignment::Center);
 
+
+    m_ServerHostMapSelector = new ServerHostingMapSelectorWindow(*m_Font, Resources::getWindowSize().x / 2 - 300, 630);
+
+
+
     m_ServerLobbyChatWindow = new ServerLobbyChatWindow(*m_Font, 50, 140 + 300);
     m_ServerLobbyChatWindow->setColor(1, 1, 0, 1);
 
     m_ServerLobbyConnectedPlayersWindow = new ServerLobbyConnectedPlayersWindow(*m_Font, 50 + m_ServerLobbyChatWindow->getWindowFrame().width() + 2, 140 + 300);
     m_ServerLobbyConnectedPlayersWindow->setColor(1, 1, 0, 1);
+
+    m_ServerLobbyShipSelectorWindow = new ServerLobbyShipSelectorWindow(scene, camera, *m_Font, 50, windowDimensions.y - 50);
+    m_ServerLobbyShipSelectorWindow->setColor(1, 1, 0, 1);
+
+    m_MainMenuMusic = Engine::Sound::playMusic(ResourceManifest::MenuMusic);
+    m_MainMenuMusic->stop();
 }
 HUD::~HUD() {
     SAFE_DELETE(m_ButtonHost);
@@ -218,9 +231,25 @@ HUD::~HUD() {
 
     SAFE_DELETE(m_InfoText);
 
+    SAFE_DELETE(m_ServerHostMapSelector);
+
     SAFE_DELETE(m_ServerLobbyConnectedPlayersWindow);
     SAFE_DELETE(m_ServerLobbyChatWindow);
+    SAFE_DELETE(m_ServerLobbyShipSelectorWindow);
 }
+
+void HUD::go_to_main_menu() {
+    m_GameState = GameState::Main_Menu;
+    m_Next->setText("Next");
+    setErrorText("", 0);
+
+    auto _status = m_MainMenuMusic->status();
+    if (_status == SoundStatus::Fresh || _status == SoundStatus::Stopped || _status == SoundStatus::Paused) {
+        m_MainMenuMusic->play();
+    }
+}
+
+
 void HUD::setGoodText(const string& text, const float errorTime) {
     m_InfoText->setText(text);
     m_ErrorTimer = errorTime;
@@ -250,8 +279,13 @@ void HUD::onResize(const uint& width, const uint& height) {
 
     m_InfoText->setPosition(width / 2 , 65);
 
+    m_ServerHostMapSelector->setPosition(Resources::getWindowSize().x / 2 - 300, 630);
+
     m_ServerLobbyChatWindow->setPosition(50, 140 + 300);
     m_ServerLobbyConnectedPlayersWindow->setPosition(50 + m_ServerLobbyChatWindow->getWindowFrame().width() + 2, 140 + 300);
+
+    const auto& winSize = Resources::getWindowSize();
+    m_ServerLobbyShipSelectorWindow->setPosition(50, winSize.y - 50);
 }
 
 int _count = 0;
@@ -291,6 +325,7 @@ void HUD::update_main_menu(const double& dt) {
 void HUD::update_host_server_lobby_and_ship(const double& dt) {
     m_ServerLobbyChatWindow->update(dt);
     m_ServerLobbyConnectedPlayersWindow->update(dt);
+    m_ServerLobbyShipSelectorWindow->update(dt);
 
     m_Back->update(dt);
     m_Next->update(dt);
@@ -301,6 +336,7 @@ void HUD::update_host_server_port_and_name_and_map(const double& dt) {
 
     m_ServerPort->update(dt);
     m_UserName->update(dt);
+    m_ServerHostMapSelector->update(dt);
 }
 void HUD::update_join_server_port_and_name_and_ip(const double& dt) {
     m_Back->update(dt);
@@ -313,6 +349,7 @@ void HUD::update_join_server_port_and_name_and_ip(const double& dt) {
 void HUD::update_join_server_server_lobby(const double& dt) {
     m_ServerLobbyChatWindow->update(dt);
     m_ServerLobbyConnectedPlayersWindow->update(dt);
+    m_ServerLobbyShipSelectorWindow->update(dt);
 
     m_Back->update(dt);
     m_Next->update(dt);
@@ -418,6 +455,7 @@ void HUD::render_main_menu() {
 void HUD::render_host_server_lobby_and_ship() {
     m_ServerLobbyChatWindow->render();
     m_ServerLobbyConnectedPlayersWindow->render();
+    m_ServerLobbyShipSelectorWindow->render();
 
     m_Back->render();
     m_Next->render();
@@ -428,6 +466,7 @@ void HUD::render_host_server_port_and_name_and_map() {
 
     m_ServerPort->render();
     m_UserName->render();
+    m_ServerHostMapSelector->render();
 }
 void HUD::render_join_server_port_and_name_and_ip() {
     m_Back->render();
@@ -440,6 +479,7 @@ void HUD::render_join_server_port_and_name_and_ip() {
 void HUD::render_join_server_server_lobby() {
     m_ServerLobbyChatWindow->render();
     m_ServerLobbyConnectedPlayersWindow->render();
+    m_ServerLobbyShipSelectorWindow->render();
 
     m_Back->render();
     m_Next->render();

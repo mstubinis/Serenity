@@ -229,7 +229,7 @@ void epriv::MeshLoader::FinalizeData(Mesh& mesh,epriv::MeshImportedData& data, f
         vertexData.setData(2, normals[0]);
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
-        vertexData.setDataIndices(data.indices);
+        vertexData.setIndices(data.indices);
     }else{
         vector<ushort> _indices;
         vector<glm::vec3> temp_pos; temp_pos.reserve(data.points.size());
@@ -268,7 +268,7 @@ void epriv::MeshLoader::FinalizeData(Mesh& mesh,epriv::MeshImportedData& data, f
         vertexData.setData(2, normals[0]);
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
-        vertexData.setDataIndices(_indices);
+        vertexData.setIndices(_indices);
     }
     if (mesh.m_Skeleton) {
         vector<vector<glm::vec4>> boneStuff;
@@ -507,7 +507,7 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         inindices   = (uint32_t)_data[blockStart    ] << 8;
         inindices  |= (uint32_t)_data[blockStart + 1];
         blockStart += 2;
-        data.indices.emplace_back((uint16_t)inindices);
+        data.indices.push_back((uint16_t)inindices);
     }
     data.setData(0, temp_pos);
     data.setData(1, temp_uvs);
@@ -518,7 +518,7 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         data.setData(5, temp_bID);
         data.setData(6, temp_bW);
     }
-    data.setDataIndices(data.indices);
+    data.setIndices(data.indices);
     return returnData;
 }
 

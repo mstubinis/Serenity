@@ -100,9 +100,9 @@ class Mesh final: public BindableResource, public EventObserver{
         void modifyIndices(std::vector<ushort>& modifiedIndices, const MeshModifyFlags::Flag& _flags = MeshModifyFlags::Default) {
             auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
             if(_flags & MeshModifyFlags::Orphan)
-                vertexDataStructure.setDataIndices(modifiedIndices, true, true);
+                vertexDataStructure.setIndices(modifiedIndices, true, true);
             else
-                vertexDataStructure.setDataIndices(modifiedIndices, true, false);
+                vertexDataStructure.setIndices(modifiedIndices, true, false);
         }
         void render(bool instancing = true, MeshDrawMode::Mode = MeshDrawMode::Triangles);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
