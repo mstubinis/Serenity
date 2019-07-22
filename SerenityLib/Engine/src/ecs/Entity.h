@@ -76,7 +76,7 @@ class EntityWrapper {
             m_Entity = Entity::_null; 
         }
         inline void destroy() { 
-            m_Entity.destroy(); 
+            m_Entity.destroy();
         }
         inline Entity entity() {
             return m_Entity; 

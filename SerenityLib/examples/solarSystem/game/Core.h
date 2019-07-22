@@ -9,11 +9,13 @@
 class HUD;
 class Server;
 class Client;
+class EntityWrapper;
 class Core final {
     friend class HUD;
     friend class Client;
     friend class Server;
     private:
+        EntityWrapper*      m_ChosenShip;
         HUD*                m_HUD;
         Server*             m_Server;
         Client*             m_Client;
@@ -36,7 +38,7 @@ class Core final {
 
         void onResize(const uint& width, const uint& height);
 
-        void enterMap(const std::string& mapFile);
+        void enterMap(const std::string& mapFile, const std::string& playership);
 
         const GameState::State& gameState() const;
 

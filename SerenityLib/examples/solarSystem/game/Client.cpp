@@ -14,6 +14,8 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/Engine_Utils.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/scene/Viewport.h>
+#include <core/engine/scene/Camera.h>
 
 #include <iostream>
 
@@ -26,7 +28,18 @@ struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
         widget->setColor(0.5f, 0.5f, 0.5f, 0.0f);
     }
     button->setColor(0.5f, 0.5f, 0.5f, 1.0f);
-    //window.m_CurrentChoice->setText(button->text());
+
+    auto& shipname = button->text();
+    auto& handles = ResourceManifest::Ships.at(shipname);
+    window.m_ChosenShipName = shipname;
+    EntityWrapper& entity = *static_cast<EntityWrapper*>(window.getUserPointer());
+    ComponentModel& model = *entity.entity().getComponent<ComponentModel>();
+    model.setModelMesh(handles.get<0>(),0);
+    model.setModelMaterial(handles.get<1>(), 0);
+    model.show();
+
+    auto& camera = const_cast<Camera&>(window.getShipDisplay().getCamera());
+    camera.entity().getComponent<ComponentLogic2>()->call(-1.0);
 }};
 
 Client::Client(Core& core, sf::TcpSocket* socket) : m_Core(core){
@@ -188,17 +201,18 @@ void Client::onReceive() {
                     hud.m_ServerLobbyShipSelectorWindow->clear();
                     auto ships = map->allowedShips();
                     for (auto& ship : ships) {
-                        Button* button = new Button(*hud.m_Font, 0, 0, 100, 40);
-                        button->setText(ship);
-                        button->setColor(0.5f, 0.5f, 0.5f, 0.0f);
-                        button->setTextColor(1, 1, 1, 1);
-                        button->setAlignment(Alignment::TopLeft);
-                        button->setWidth(600);
-                        button->setTextAlignment(TextAlignment::Left);
-                        button->setUserPointer(hud.m_ServerLobbyShipSelectorWindow);
-                        button->setOnClickFunctor(ShipSelectorButtonOnClick());
-                        hud.m_ServerLobbyShipSelectorWindow->addContent(button);
+                        Button* shipbutton = new Button(*hud.m_Font, 0, 0, 100, 40);
+                        shipbutton->setText(ship);
+                        shipbutton->setColor(0.5f, 0.5f, 0.5f, 0.0f);
+                        shipbutton->setTextColor(1, 1, 1, 1);
+                        shipbutton->setAlignment(Alignment::TopLeft);
+                        shipbutton->setWidth(600);
+                        shipbutton->setTextAlignment(TextAlignment::Left);
+                        shipbutton->setUserPointer(hud.m_ServerLobbyShipSelectorWindow);
+                        shipbutton->setOnClickFunctor(ShipSelectorButtonOnClick());
+                        hud.m_ServerLobbyShipSelectorWindow->addContent(shipbutton);
                     }
+                    hud.m_ServerLobbyShipSelectorWindow->setShipViewportActive(true);
                     break;
                 }
                 case PacketType::Server_To_Client_Chat_Message: {

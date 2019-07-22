@@ -203,25 +203,25 @@ vector<RodLight*>& InternalScenePublicInterface::GetRodLights(Scene& _scene) {
 void InternalScenePublicInterface::RenderGeometryOpaque(Scene& _scene,Camera& _camera) {
     for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 
         //pipeline->sort(_camera);
-        pipeline->render(); 
+        pipeline->render(_camera);
     } 
 }
 void InternalScenePublicInterface::RenderGeometryTransparent(Scene& _scene, Camera& _camera) {
     for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryTransparent]) { 
         pipeline->sort(_camera);
-        pipeline->render(); 
+        pipeline->render(_camera);
     } 
 }
 void InternalScenePublicInterface::RenderForwardOpaque(Scene& _scene, Camera& _camera) {
     for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) {
         //pipeline->sort(_camera);
-        pipeline->render(); 
+        pipeline->render(_camera);
     }
 }
 void InternalScenePublicInterface::RenderForwardTransparent(Scene& _scene, Camera& _camera) {
     for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardTransparent]) { 
         pipeline->sort(_camera);
-        pipeline->render(); 
+        pipeline->render(_camera);
     }
 }
 

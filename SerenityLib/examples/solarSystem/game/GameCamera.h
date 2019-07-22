@@ -32,7 +32,7 @@ class GameCamera: public Camera{
         void orbit(Entity&);
 
         void setTarget(Entity&);
-        const Entity& getTarget() const;
+        Entity& getTarget();
         const CameraState::State getState() const;
 
         Entity getObjectInCenterRay(Entity& exclusion);

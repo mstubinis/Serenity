@@ -3,6 +3,7 @@
 #include "HUD.h"
 #include "Server.h"
 #include "Client.h"
+#include "Ship.h"
 #include "SolarSystem.h"
 #include "Packet.h"
 #include "Planet.h"
@@ -36,6 +37,7 @@ Core::~Core() {
         const auto status = m_Client->send(p);
     }
     SAFE_DELETE(m_Client);
+    SAFE_DELETE(m_ChosenShip);
     SAFE_DELETE(m_Server);
     SAFE_DELETE(m_HUD);
 }
@@ -92,9 +94,15 @@ void Core::requestValidation(const string& name) {
         m_HUD->setErrorText("Connection timed out");
     }
 }
-void Core::enterMap(const string& mapFile) {
+void Core::enterMap(const string& mapFile, const string& playership) {
     auto& window = Resources::getWindow();
     Resources::setCurrentScene(mapFile);
+
+    SolarSystem& map = *static_cast<SolarSystem*>(Resources::getScene(mapFile));
+    auto& model = *map.getPlayer()->entity().getComponent<ComponentModel>();
+    auto& handles = ResourceManifest::Ships.at(playership);
+    map.getPlayer()->setModel(handles.get<0>());
+    model.setModelMaterial(handles.get<1>(), 0);
 
     //map->setBackgroundColor(1, 0, 0, 1.0f);
     //Renderer::fog::enable();
@@ -114,23 +122,34 @@ void Core::init() {
 
     Scene* s = new Scene("Menu");
     Resources::setCurrentScene(s);
+
+
     GameSkybox* box = new GameSkybox(ResourceManifest::BasePath + "data/Textures/Skyboxes/SolarSystem/Skybox.dds", 0, s);
     s->setSkybox(box);
 
-    Camera* shipSelectionCamera = new Camera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y),0.1f, 3000.0f, s);
-    s->setActiveCamera(*shipSelectionCamera);
-    SunLight* sunLight = new SunLight(glm::vec3(0.0f), LightType::Sun, s);
-    sunLight->setColor(1, 1, 0);
-    auto e = s->createEntity();
+    Camera* main_camera = new Camera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y), 0.1f, 15000.0f, s);
+    GameCamera* ship_camera = new GameCamera(0.1f, 50.0f, s);
+    s->setActiveCamera(*main_camera);
+    s->getMainViewport().setSkyboxVisible(false);
+
+    SunLight* light = new SunLight(glm::vec3(0.0f), LightType::Sun, s);
+    light->setColor(1.55f, 1.55f, 1.3f);
+    light->setPosition(0, 100, -1000);
+    auto e1 = s->createEntity();
+    auto model1 = e1.addComponent<ComponentModel>(ResourceManifest::PlanetMesh, ResourceManifest::StarMaterial);
+
+
+
+    m_ChosenShip = new EntityWrapper(*s);
+
+    auto e = m_ChosenShip->entity();
+    ship_camera->setTarget(e);
     auto& body  = *e.addComponent<ComponentBody>();
-    body.setPosition(1, -1, -3);
+    body.setPosition(0, 0, 8500);
     auto& model = *e.addComponent<ComponentModel>(ResourceManifest::DefiantMesh, ResourceManifest::DefiantMaterial);
-    auto& name  = *e.addComponent<ComponentName>("MenuShipSelection");
-    //s->setActiveCamera(*shipSelectionCamera);
-    //shipSelectionCamera->setTarget(e);
-    //s->getActiveCamera()->lookAt(body.position() + glm::vec3(5,0,5), body.position(), s->getActiveCamera()->up());
-    
-    m_HUD        = new HUD(*s,*s->getActiveCamera(), m_GameState, *this);
+    model.hide();
+
+    m_HUD        = new HUD(*s,*ship_camera, m_GameState, *this);
     m_Initalized = true;
     m_HUD->go_to_main_menu();
 }

@@ -6,6 +6,12 @@ using namespace std;
 
 #pragma region Component
 
+ComponentLogic1::ComponentLogic1(const Entity& _e) : ComponentBaseClass(_e) {
+    _userPtr  = nullptr;
+    _userPtr1 = nullptr;
+    _userPtr2 = nullptr;
+    setFunctor(Engine::epriv::ComponentLogic1_EmptyFunctor());
+}
 ComponentLogic1::~ComponentLogic1() {
 }
 
@@ -13,6 +19,8 @@ ComponentLogic1::ComponentLogic1(const ComponentLogic1& other) {
     owner = other.owner;
     _functor = other._functor;
     _userPtr = other._userPtr;
+    _userPtr1 = other._userPtr1;
+    _userPtr2 = other._userPtr2;
 }
 ComponentLogic1& ComponentLogic1::operator=(const ComponentLogic1& other) {
     if (&other == this)
@@ -20,6 +28,8 @@ ComponentLogic1& ComponentLogic1::operator=(const ComponentLogic1& other) {
     owner = other.owner;
     _functor = other._functor;
     _userPtr = other._userPtr;
+    _userPtr1 = other._userPtr1;
+    _userPtr2 = other._userPtr2;
     return *this;
 }
 ComponentLogic1::ComponentLogic1(ComponentLogic1&& other) noexcept {
@@ -27,16 +37,39 @@ ComponentLogic1::ComponentLogic1(ComponentLogic1&& other) noexcept {
     swap(owner, other.owner);
     swap(_functor, other._functor);
     swap(_userPtr, other._userPtr);
+    swap(_userPtr1, other._userPtr1);
+    swap(_userPtr2, other._userPtr2);
 }
 ComponentLogic1& ComponentLogic1::operator=(ComponentLogic1&& other) noexcept {
     using std::swap;
     swap(owner, other.owner);
     swap(_functor, other._functor);
     swap(_userPtr, other._userPtr);
+    swap(_userPtr1, other._userPtr1);
+    swap(_userPtr2, other._userPtr2);
     return *this;
 }
-
-void ComponentLogic1::call(const double& dt) { _functor(dt); }
+void ComponentLogic1::setUserPointer(void* ptr) {
+    _userPtr = ptr;
+}
+void ComponentLogic1::setUserPointer1(void* ptr) {
+    _userPtr1 = ptr;
+}
+void ComponentLogic1::setUserPointer2(void* ptr) {
+    _userPtr2 = ptr;
+}
+void* ComponentLogic1::getUserPointer() const {
+    return _userPtr;
+}
+void* ComponentLogic1::getUserPointer1() const {
+    return _userPtr1;
+}
+void* ComponentLogic1::getUserPointer2() const {
+    return _userPtr2;
+}
+void ComponentLogic1::call(const double& dt) { 
+    _functor(dt); 
+}
 
 #pragma endregion
 

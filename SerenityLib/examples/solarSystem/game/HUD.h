@@ -73,6 +73,7 @@ class HUD final{
         ServerLobbyShipSelectorWindow*      m_ServerLobbyShipSelectorWindow;
 
         void go_to_main_menu();
+        void enter_the_game();
 
         void update_game(const double& dt);
         void update_main_menu(const double& dt);

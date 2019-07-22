@@ -6,6 +6,13 @@ using namespace std;
 
 #pragma region Component
 
+ComponentLogic::ComponentLogic(const Entity& _e) : ComponentBaseClass(_e) {
+    _userPtr  = nullptr;
+    _userPtr1 = nullptr;
+    _userPtr2 = nullptr;
+    setFunctor(Engine::epriv::ComponentLogic_EmptyFunctor());
+}
+
 ComponentLogic::~ComponentLogic(){
 
 }
@@ -14,6 +21,8 @@ ComponentLogic::ComponentLogic(const ComponentLogic& other){
     owner = other.owner;
     _functor = other._functor;
     _userPtr = other._userPtr;
+    _userPtr1 = other._userPtr1;
+    _userPtr2 = other._userPtr2;
 }
 ComponentLogic& ComponentLogic::operator=(const ComponentLogic& other){
     if (&other == this)
@@ -21,6 +30,8 @@ ComponentLogic& ComponentLogic::operator=(const ComponentLogic& other){
     owner = other.owner;
     _functor = other._functor;
     _userPtr = other._userPtr;
+    _userPtr1 = other._userPtr1;
+    _userPtr2 = other._userPtr2;
     return *this;
 }
 ComponentLogic::ComponentLogic(ComponentLogic&& other) noexcept{
@@ -28,17 +39,40 @@ ComponentLogic::ComponentLogic(ComponentLogic&& other) noexcept{
     swap(owner, other.owner);
     swap(_functor, other._functor);
     swap(_userPtr, other._userPtr);
+    swap(_userPtr1, other._userPtr1);
+    swap(_userPtr2, other._userPtr2);
 }
 ComponentLogic& ComponentLogic::operator=(ComponentLogic&& other) noexcept{
     using std::swap;
     swap(owner, other.owner);
     swap(_functor, other._functor);
     swap(_userPtr, other._userPtr);
+    swap(_userPtr1, other._userPtr1);
+    swap(_userPtr2, other._userPtr2);
     return *this;
 }
+void ComponentLogic::setUserPointer(void* ptr) {
+    _userPtr = ptr;
+}
+void ComponentLogic::setUserPointer1(void* ptr) {
+    _userPtr1 = ptr;
+}
+void ComponentLogic::setUserPointer2(void* ptr) {
+    _userPtr2 = ptr;
+}
+void* ComponentLogic::getUserPointer() const {
+    return _userPtr; 
+}
+void* ComponentLogic::getUserPointer1() const {
+    return _userPtr1; 
+}
+void* ComponentLogic::getUserPointer2() const {
+    return _userPtr2; 
+}
 
-
-void ComponentLogic::call(const double& dt) { _functor(dt); }
+void ComponentLogic::call(const double& dt) { 
+    _functor(dt); 
+}
 
 #pragma endregion
 

@@ -273,33 +273,29 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
 
 
 Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,SolarSystem* scene):EntityWrapper(*scene){
+    m_WarpFactor    = 0;
+    m_IsPlayer      = player;
+    m_IsWarping     = false;
+    m_Target        = Entity::_null;
+    m_PlayerCamera  = nullptr;
+    m_MouseFactor   = glm::dvec2(0.0);
+
     auto& rigidBodyComponent = *m_Entity.addComponent<ComponentBody>(_type);
     auto& modelComponent     = *m_Entity.addComponent<ComponentModel>(mesh, mat);
     auto& nameComponent      = *m_Entity.addComponent<ComponentName>(name);
+    auto& logicComponent     = *m_Entity.addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
-    m_Entity.addComponent<ComponentLogic>(ShipLogicFunctor(), this);
+    setModel(mesh);
 
-    glm::vec3 boundingBox = modelComponent.boundingBox();
-    float volume = boundingBox.x * boundingBox.y * boundingBox.z;
-
-	rigidBodyComponent.setMass(  ( volume * 0.004f ) + 1.0f  );
 	rigidBodyComponent.setPosition(pos);
 	rigidBodyComponent.setScale(scl);
-	rigidBodyComponent.setDamping(0.4f, 0.5f);
-
-	m_WarpFactor = 0;
-	m_IsPlayer = player;
-	m_IsWarping = false;
-	m_Target = Entity::_null;
-	m_PlayerCamera = nullptr;
-	m_MouseFactor = glm::dvec2(0.0);
 
 	if (player) {
 		m_PlayerCamera = (GameCamera*)(scene->getActiveCamera());
 	}
 	for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
 		ShipSystem* system = nullptr;
-		if (i == 0)       system = new ShipSystemReactor(this, 1000);
+		if      (i == 0)  system = new ShipSystemReactor(this, 1000);
 		else if (i == 1)  system = new ShipSystemPitchThrusters(this);
 		else if (i == 2)  system = new ShipSystemYawThrusters(this);
 		else if (i == 3)  system = new ShipSystemRollThrusters(this);
@@ -314,6 +310,17 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
 }
 Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);
+}
+void Ship::setModel(Handle& modelHandle) {
+    auto& rigidBodyComponent = *m_Entity.getComponent<ComponentBody>();
+    auto& modelComponent     = *m_Entity.getComponent<ComponentModel>();
+    modelComponent.setModelMesh(modelHandle, 0);
+
+
+    const glm::vec3& boundingBox = modelComponent.boundingBox();
+    const float& volume = boundingBox.x * boundingBox.y * boundingBox.z;
+    rigidBodyComponent.setMass((volume * 0.004f) + 1.0f);
+    rigidBodyComponent.setDamping(0.4f, 0.5f);
 }
 void Ship::translateWarp(float amount,float dt){
     float amountToAdd = amount * (1.0f / 0.5f);

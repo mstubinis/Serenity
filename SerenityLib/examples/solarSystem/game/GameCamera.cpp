@@ -176,7 +176,7 @@ void GameCamera::orbit(Entity& target){
 void GameCamera::setTarget(Entity& target) { 
     m_Target = target; 
 }
-const Entity& GameCamera::getTarget() const { 
+Entity& GameCamera::getTarget() { 
     return m_Target; 
 }
 const CameraState::State GameCamera::getState() const { 

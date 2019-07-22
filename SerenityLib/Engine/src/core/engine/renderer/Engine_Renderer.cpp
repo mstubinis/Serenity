@@ -1222,14 +1222,13 @@ class epriv::RenderManager::impl final{
             //TODO: add cleanup() from ssao / smaa here?
         }
         bool _checkOpenGLExtension(const char* e){ if(glewIsExtensionSupported(e)!=0) return true;return 0!=glewIsSupported(e); }
-        void _renderSkybox(SkyboxEmpty* skybox){
+        void _renderSkybox(SkyboxEmpty* skybox, Camera& camera){
             Scene& scene = *Resources::getCurrentScene();
-            Camera& c = *scene.getActiveCamera();
-            glm::mat4 view = c.getView();
+            glm::mat4 view = camera.getView();
             Math::removeMatrixPosition(view);
             if(skybox){
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox]->bind();
-                sendUniformMatrix4("VP",c.getProjection() * view);
+                sendUniformMatrix4("VP", camera.getProjection() * view);
                 sendTexture("Texture",skybox->texture()->address(0),0,GL_TEXTURE_CUBE_MAP);
                 Skybox::bindMesh();
                 skybox->draw();
@@ -1238,7 +1237,7 @@ class epriv::RenderManager::impl final{
                 //GLEnable(GLState::BLEND);
                 //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 auto& bgColor = scene.getBackgroundColor();
-                sendUniformMatrix4("VP",c.getProjection() * view);
+                sendUniformMatrix4("VP", camera.getProjection() * view);
                 sendUniform4("Color",bgColor.r,bgColor.g,bgColor.b, bgColor.a);
                 Skybox::bindMesh();
                 //GLDisable(GLState::BLEND);
@@ -1680,7 +1679,9 @@ class epriv::RenderManager::impl final{
             InternalScenePublicInterface::RenderGeometryOpaque(scene, camera);
 
             //skybox here
-            _renderSkybox(scene.skybox());
+            if (viewport.isSkyboxVisible()) {
+                _renderSkybox(scene.skybox(), camera);
+            }
 
             InternalScenePublicInterface::RenderGeometryTransparent(scene, camera);
         }
@@ -1894,7 +1895,7 @@ class epriv::RenderManager::impl final{
             }
         }
         
-        void _render(GBuffer& gbuffer, Viewport& viewport, Entity* ignore,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
+        void _render(GBuffer& gbuffer, Viewport& viewport,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
             //TODO: find out why facing a certain direction causes around 2 - 3 ms frame spike times. determine if this is due to an object or a rendering
             //algorithm. also find out why enabling ssao REDUCES frame ms time. use opengl timers to isolate the troubling functions.
             
@@ -2148,8 +2149,8 @@ epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ 
     m_i->_postInit(name,w,h); 
 }
-void epriv::RenderManager::_render(Viewport& viewport, Entity* ignore,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
-    m_i->_render(*m_i->m_GBuffer, viewport, ignore, mainFunc, display_fbo, display_rbo);
+void epriv::RenderManager::_render(Viewport& viewport,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
+    m_i->_render(*m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);
 }
 void epriv::RenderManager::_resize(uint w,uint h){ 
     m_i->_resize(w,h); 

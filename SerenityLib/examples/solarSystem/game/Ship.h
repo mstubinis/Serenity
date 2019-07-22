@@ -135,6 +135,8 @@ class Ship: public EntityWrapper {
 
         void onEvent(const Event&);
 
+        void setModel(Handle& handle);
+
         void translateWarp(float amount,float dt);
         void toggleWarp(){
             m_IsWarping = !m_IsWarping;

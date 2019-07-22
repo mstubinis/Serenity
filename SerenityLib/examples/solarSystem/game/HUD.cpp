@@ -56,8 +56,7 @@ struct ButtonBack_OnClick {void operator()(Button* button) const {
     HUD& hud = *static_cast<HUD*>(button->getUserPointer());
     switch (hud.m_GameState) {
         case GameState::Host_Server_Port_And_Name_And_Map:{
-            hud.m_GameState = GameState::Main_Menu;
-            hud.m_Next->setText("Next");
+            hud.go_to_main_menu();
 
             //force server to disconnect client
             hud.m_Core.shutdownClient();
@@ -70,6 +69,7 @@ struct ButtonBack_OnClick {void operator()(Button* button) const {
             hud.m_Core.shutdownClient();
             hud.m_Core.shutdownServer();
 
+            hud.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
             hud.m_GameState = GameState::Host_Server_Port_And_Name_And_Map;
             hud.m_Next->setText("Next");
             break;
@@ -77,13 +77,12 @@ struct ButtonBack_OnClick {void operator()(Button* button) const {
             //force server to disconnect client
             hud.m_Core.shutdownClient();
 
-            hud.m_GameState = GameState::Main_Menu;
-            hud.m_Next->setText("Next");
-            hud.setErrorText("", 0);
+            hud.go_to_main_menu();
             break;
         }case GameState::Join_Server_Server_Lobby: {
             //force server to disconnect client
             hud.m_Core.shutdownClient();
+            hud.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
 
             hud.m_GameState = GameState::Join_Server_Port_And_Name_And_IP;
 
@@ -116,9 +115,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             }
             break;
         }case GameState::Host_Server_Lobby_And_Ship: {
-            hud.m_GameState = GameState::Game;
-            hud.m_Core.enterMap("Sol");
-            hud.m_Next->setText("Next");
+            hud.enter_the_game();
             break;
         }case GameState::Join_Server_Port_And_Name_And_IP: {
             const string& username   = hud.m_UserName->text();
@@ -136,9 +133,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             }
             break;
         }case GameState::Join_Server_Server_Lobby: { 
-            hud.m_GameState = GameState::Game;
-            hud.m_Core.enterMap("Sol");
-            hud.m_Next->setText("Next");
+            hud.enter_the_game();
             break;
         }default: {
             hud.go_to_main_menu();
@@ -214,8 +209,9 @@ HUD::HUD(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m_G
     m_ServerLobbyConnectedPlayersWindow = new ServerLobbyConnectedPlayersWindow(*m_Font, 50 + m_ServerLobbyChatWindow->getWindowFrame().width() + 2, 140 + 300);
     m_ServerLobbyConnectedPlayersWindow->setColor(1, 1, 0, 1);
 
-    m_ServerLobbyShipSelectorWindow = new ServerLobbyShipSelectorWindow(scene, camera, *m_Font, 50, windowDimensions.y - 50);
+    m_ServerLobbyShipSelectorWindow = new ServerLobbyShipSelectorWindow(core,scene, camera, *m_Font, 50, windowDimensions.y - 50);
     m_ServerLobbyShipSelectorWindow->setColor(1, 1, 0, 1);
+    m_ServerLobbyShipSelectorWindow->setUserPointer(core.m_ChosenShip);
 
     m_MainMenuMusic = Engine::Sound::playMusic(ResourceManifest::MenuMusic);
     m_MainMenuMusic->stop();
@@ -238,8 +234,20 @@ HUD::~HUD() {
     SAFE_DELETE(m_ServerLobbyShipSelectorWindow);
 }
 
+void HUD::enter_the_game() {
+    if (!m_ServerLobbyShipSelectorWindow->m_ChosenShipName.empty()) {
+        m_GameState = GameState::Game;
+        m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
+        m_Core.enterMap("Sol", m_ServerLobbyShipSelectorWindow->m_ChosenShipName);
+        m_Next->setText("Next");
+    }else{
+        setErrorText("You must choose your ship", 5);
+    }
+}
+
 void HUD::go_to_main_menu() {
     m_GameState = GameState::Main_Menu;
+    m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
     m_Next->setText("Next");
     setErrorText("", 0);
 

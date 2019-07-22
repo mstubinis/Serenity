@@ -139,9 +139,10 @@ void render(){
     auto& debugMgr = Core::m_Engine->m_DebugManager;
     debugMgr.stop_clock();
     Game::render();
-    for (auto& viewport : InternalScenePublicInterface::GetViewports(*Resources::getCurrentScene())) {
+    auto& viewports = InternalScenePublicInterface::GetViewports(*Resources::getCurrentScene());
+    for (auto& viewport : viewports) {
         if (viewport->isActive()) {
-            Core::m_Engine->m_RenderManager._render(*viewport, nullptr, true, 0, 0);
+            Core::m_Engine->m_RenderManager._render(*viewport, true, 0, 0);
         }
     }
     Resources::getWindow().display();

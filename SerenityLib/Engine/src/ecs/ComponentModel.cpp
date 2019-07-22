@@ -171,42 +171,10 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera& camera) {
 
 struct epriv::ComponentModel_UpdateFunction final {
     static void _defaultUpdate(vector<uint>& vec, vector<ComponentModel>& _components,Camera* _camera) {
-        for (uint j = 0; j < vec.size(); ++j) {
-            ComponentModel& m = _components[vec[j]];
-            ComponentBody* b = m.owner.getComponent<ComponentBody>();
-            if (b) {
-                ComponentBody& _b = *b;
-                for (uint k = 0; k < m._meshInstances.size(); ++k) {
-                    auto& meshInstance = *m._meshInstances[k];
-                    auto pos = _b.position() + meshInstance.position();
-                    //per mesh instance radius instead?
-                    uint sphereTest = _camera->sphereIntersectTest(pos, m._radius);                //per mesh instance radius instead?
-                    auto comparison = m._radius * 1100.0f;
-                    //if (!meshInstance.visible() || sphereTest == 0 || _camera->getDistance(pos) > comparison) {
-                    if (!meshInstance.visible() || sphereTest == 0 || _camera->getDistanceSquared(pos) > comparison*comparison) { //optimization: using squared distance to remove the sqrt()
-                        meshInstance.setPassedRenderCheck(false);
-                        continue;
-                    }
-                    meshInstance.setPassedRenderCheck(true);
-                }
-            }else{
-                for (uint k = 0; k < m._meshInstances.size(); ++k) {
-                    auto& meshInstance = *m._meshInstances[k];
-                    meshInstance.setPassedRenderCheck(false);
-                }
-            }
-        }
+
     }
     void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
-        auto* camera = _scene.getActiveCamera();
-        auto& pool = *(ECSComponentPool<Entity, ComponentModel>*)_componentPool;
-        auto& components = pool.pool();
-        auto split = epriv::threading::splitVectorIndices(components);
-        //TODO: might have to pass camera as a reference to a pointer (*&)
-        for (auto& vec : split) {
-            epriv::threading::addJobRef(_defaultUpdate, vec, components, camera);
-        }
-        epriv::threading::waitForAll();
+
     }
 };
 struct epriv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {

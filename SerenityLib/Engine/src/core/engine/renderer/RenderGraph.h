@@ -44,7 +44,7 @@ namespace epriv {
 
             void sort(Camera& c);
             void sort_cheap(Camera& c);
-            void render();
+            void render(Camera& c);
     };
 };
 };

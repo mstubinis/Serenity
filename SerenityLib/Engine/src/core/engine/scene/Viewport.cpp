@@ -13,17 +13,26 @@ Viewport::Viewport(const Scene& scene, const Camera& camera):m_Scene(const_cast<
     activate();
     activate2DAPI();
     setAspectRatioSynced(true);
+    setSkyboxVisible(true);
 
     //setTransparencyMaskColor(0, 0, 0, 0);
     //deactivateTransparencyMask();
 
     setDepthMaskValue(50.0f);
-    deactivateDepthMask();
+    activateDepthMask(false);
 
     setBackgroundColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 Viewport::~Viewport() {
 }
+
+const bool& Viewport::isSkyboxVisible() const {
+    return m_SkyboxVisible;
+}
+void Viewport::setSkyboxVisible(const bool& visible) {
+    m_SkyboxVisible = visible;
+}
+
 const float& Viewport::getDepthMaskValue() const {
     return m_DepthMaskValue;
 }
@@ -31,11 +40,8 @@ void Viewport::setDepthMaskValue(const float& depth) {
     m_DepthMaskValue = depth;
 }
 
-void Viewport::deactivateDepthMask() {
-    m_DepthMaskActive = false;
-}
-void Viewport::activateDepthMask() {
-    m_DepthMaskActive = true;
+void Viewport::activateDepthMask(const bool& active) {
+    m_DepthMaskActive = active;
 }
 const bool Viewport::isDepthMaskActive() const {
     return m_DepthMaskActive;
@@ -76,7 +82,7 @@ const bool Viewport::isTransparencyMaskActive() const {
 
 
 
-void Viewport::setAspectRatioSynced(const bool synced) {
+void Viewport::setAspectRatioSynced(const bool& synced) {
     m_AspectRatioSynced = synced;
 }
 const bool Viewport::isAspectRatioSynced() const {
@@ -89,20 +95,14 @@ const Scene& Viewport::getScene() const {
 const Camera& Viewport::getCamera() const {
     return *m_Camera;
 }
-void Viewport::deactivate2DAPI() {
-    m_Using2DAPI = false;
-}
-void Viewport::activate2DAPI() {
-    m_Using2DAPI = true;
+void Viewport::activate2DAPI(const bool& active) {
+    m_Using2DAPI = active;
 }
 const bool Viewport::isUsing2DAPI() const {
     return m_Using2DAPI;
 }
-void Viewport::deactivate() {
-    m_Active = false;
-}
-void Viewport::activate() {
-    m_Active = true;
+void Viewport::activate(const bool& active) {
+    m_Active = active;
 }
 const bool Viewport::isActive() const {
     return m_Active;

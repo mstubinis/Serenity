@@ -19,29 +19,29 @@ epriv::RenderPipeline::~RenderPipeline() {
 float dist(const glm::vec3& lhs, const glm::vec3& rhs) {
     return glm::distance(lhs, rhs);
 }
-void epriv::RenderPipeline::sort_cheap(Camera& c) {
+void epriv::RenderPipeline::sort_cheap(Camera& camera) {
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
             auto& vect = meshNode->instanceNodes;
             std::sort(
                 vect.begin(), vect.end(),
-                [&c](InstanceNode* lhs, InstanceNode* rhs) {
+                [&camera](InstanceNode* lhs, InstanceNode* rhs) {
                     const glm::vec3& lhsPos = lhs->instance->parent().getComponent<ComponentBody>()->position();
                     const glm::vec3& rhsPos = rhs->instance->parent().getComponent<ComponentBody>()->position();
-                    const glm::vec3& camPos = c.getPosition();
+                    const glm::vec3& camPos = camera.getPosition();
                     return dist(camPos, lhsPos) < dist(camPos, rhsPos);
                 }
             );
         }
     }
 }
-void epriv::RenderPipeline::sort(Camera& c) {
+void epriv::RenderPipeline::sort(Camera& camera) {
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
             auto& vect = meshNode->instanceNodes;
             std::sort(
                 vect.begin(), vect.end(),
-                [&c](InstanceNode* lhs, InstanceNode* rhs) {
+                [&camera](InstanceNode* lhs, InstanceNode* rhs) {
                     auto& lhsParent = lhs->instance->parent();
                     auto& rhsParent = rhs->instance->parent();
                     const EntityDataRequest& _dataReq1(lhsParent);
@@ -52,7 +52,7 @@ void epriv::RenderPipeline::sort(Camera& c) {
                     const float& lhsRad     = lhsParent.getComponent<ComponentModel>(_dataReq1)->radius();
                     const float& rhsRad     = rhsParent.getComponent<ComponentModel>(_dataReq2)->radius();
 
-                    const glm::vec3& camPos   = c.getPosition();
+                    const glm::vec3& camPos   = camera.getPosition();
                     const glm::vec3& leftDir  = glm::normalize(lhsPos - camPos);
                     const glm::vec3& rightDir = glm::normalize(rhsPos - camPos);
 
@@ -66,7 +66,7 @@ void epriv::RenderPipeline::sort(Camera& c) {
     }
 }
 
-void epriv::RenderPipeline::render() {
+void epriv::RenderPipeline::render(Camera& camera) {
     shaderProgram.bind();
     for (auto& materialNode : materialNodes) {
         if (materialNode->meshNodes.size() > 0) {
@@ -78,6 +78,21 @@ void epriv::RenderPipeline::render() {
                     _mesh.bind();
                     for (auto& instanceNode : meshNode->instanceNodes) {
                         auto& _meshInstance = *instanceNode->instance;
+                        auto body = _meshInstance.parent().getComponent<ComponentBody>();
+                        auto& model = *_meshInstance.parent().getComponent<ComponentModel>();
+                        if (body) {
+                            const auto& radius = model.radius();
+                            auto pos = body->position() + _meshInstance.position();
+                            uint sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
+                            auto comparison = radius * 1100.0f;
+                            if (!_meshInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) { //optimization: using squared distance to remove the sqrt()
+                                _meshInstance.setPassedRenderCheck(false);
+                            }else{
+                                _meshInstance.setPassedRenderCheck(true);
+                            }
+                        }else{
+                            _meshInstance.setPassedRenderCheck(false);
+                        }
                         if (_meshInstance.passedRenderCheck()) {
                             _meshInstance.bind();
                             _mesh.render(false);

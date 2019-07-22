@@ -109,7 +109,9 @@ void MeshInstance::_init(Mesh* mesh, Material* mat, Entity& parent, ShaderP* pro
     m_Visible = true;
     m_Parent = parent;
 
-    if (!program) { program = epriv::InternalShaderPrograms::Deferred; }
+    if (!program) { 
+        program = epriv::InternalShaderPrograms::Deferred; 
+    }
     m_ShaderProgram = program;
 
     m_Material = mat;

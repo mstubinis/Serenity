@@ -29,21 +29,17 @@ class ComponentLogic : public ComponentBaseClass {
 
     private:
         void*                                _userPtr;
+        void*                                _userPtr1;
+        void*                                _userPtr2;
         boost::function<void(const double&)> _functor;
     public:
-        ComponentLogic(const Entity& _e) : ComponentBaseClass(_e){ 
-			_userPtr = nullptr;
-			setFunctor(Engine::epriv::ComponentLogic_EmptyFunctor()); 
-		}
-        template<typename T> ComponentLogic(const Entity& _e, const T& functor) : ComponentBaseClass(_e) {
-			_userPtr = nullptr;
-			setFunctor(functor); 
-		}
-        template<typename T,typename V> ComponentLogic(const Entity& _e, const T& functor, V* userPointer) : ComponentBaseClass(_e) {
-			_userPtr = userPointer;
-			setFunctor(functor); 
-		}
-
+        ComponentLogic(const Entity& _e);
+        template<typename T> ComponentLogic(const Entity& _e, const T& functor, void* ptr = 0, void* ptr1 = 0, void* ptr2 = 0) : ComponentBaseClass(_e) {
+            _userPtr  = ptr;
+            _userPtr1 = ptr1;
+            _userPtr2 = ptr2;
+            setFunctor(functor);
+        }
         ComponentLogic(const ComponentLogic& other);
         ComponentLogic& operator=(const ComponentLogic& other);
         ComponentLogic(ComponentLogic&& other) noexcept;
@@ -51,10 +47,18 @@ class ComponentLogic : public ComponentBaseClass {
 
         ~ComponentLogic();
 
-        template<typename T> void setFunctor(const T& functor) { _functor = boost::bind<void>(functor, *this, _1); }
-        template<typename T> void setUserPointer(T* ptr) { _userPtr = ptr; }
         void call(const double& dt);
-        void* getUserPointer() { return _userPtr; }
+
+        template<typename T> void setFunctor(const T& functor) { 
+            _functor = boost::bind<void>(functor, *this, _1); 
+        }
+        void setUserPointer(void* ptr);
+        void setUserPointer1(void* ptr);
+        void setUserPointer2(void* ptr);
+        
+        void* getUserPointer() const;
+        void* getUserPointer1() const;
+        void* getUserPointer2() const;
 };
 
 class ComponentLogic_System : public Engine::epriv::ECSSystemCI {

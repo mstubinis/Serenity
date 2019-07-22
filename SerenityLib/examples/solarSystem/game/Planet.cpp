@@ -315,15 +315,11 @@ struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineR
 }};
 
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere, SolarSystem* scene):EntityWrapper(*scene){
-    m_Entity.addComponent<ComponentName>(name);
+    auto& componentName = *m_Entity.addComponent<ComponentName>(name);
 
-    ComponentBody& body = *m_Entity.addComponent<ComponentBody>();
+    auto& body = *m_Entity.addComponent<ComponentBody>();
     body.setPosition(pos);
-    ComponentModel& model = *m_Entity.addComponent<ComponentModel>(
-        ResourceManifest::PlanetMesh, 
-        mat, 
-        ResourceManifest::groundFromSpace
-    );
+    auto& model = *m_Entity.addComponent<ComponentModel>(ResourceManifest::PlanetMesh, mat, ResourceManifest::groundFromSpace);
     body.setScale(scl, scl, scl);
     auto& instance = model.getModel();
     instance.setUserPointer(this);
@@ -348,12 +344,11 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
         skyInstance.setScale(aScale,aScale,aScale);
         skyInstance.setUserPointer(this);
     }
+    auto& logic = *m_Entity.addComponent<ComponentLogic>(PlanetLogicFunctor(), this);
 
     m_Type = type;
     m_OrbitInfo = nullptr;
     m_RotationInfo = nullptr;
-
-    m_Entity.addComponent<ComponentLogic>(PlanetLogicFunctor(), this);
 
     scene->m_Objects.push_back(this);
 }
@@ -362,9 +357,15 @@ Planet::~Planet(){
     SAFE_DELETE(m_OrbitInfo);
     SAFE_DELETE(m_RotationInfo);
 }
-glm::vec3 Planet::getPosition(){ return m_Entity.getComponent<ComponentBody>()->position(); }
-void Planet::setPosition(float x,float y,float z){ m_Entity.getComponent<ComponentBody>()->setPosition(x,y,z); }
-void Planet::setPosition(glm::vec3 pos){ m_Entity.getComponent<ComponentBody>()->setPosition(pos); }
+glm::vec3 Planet::getPosition(){ 
+    return m_Entity.getComponent<ComponentBody>()->position(); 
+}
+void Planet::setPosition(float x,float y,float z){ 
+    m_Entity.getComponent<ComponentBody>()->setPosition(x,y,z); 
+}
+void Planet::setPosition(glm::vec3 pos){ 
+    m_Entity.getComponent<ComponentBody>()->setPosition(pos); 
+}
 void Planet::setOrbit(OrbitInfo* o){ 
     m_OrbitInfo = o; 
     m_Entity.getComponent<ComponentLogic>()->call(0);

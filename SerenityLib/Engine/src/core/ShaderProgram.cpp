@@ -637,7 +637,9 @@ void ShaderP::_unload_GPU(ShaderP& super) {
         m_LoadedGPU = false;
     }
 }
-GLuint ShaderP::program(){ return m_ShaderProgram; }
+GLuint ShaderP::program(){ 
+    return m_ShaderProgram; 
+}
 
 void epriv::InternalShaderProgramPublicInterface::LoadCPU(ShaderP& shaderP){
     shaderP._load_CPU(shaderP);
