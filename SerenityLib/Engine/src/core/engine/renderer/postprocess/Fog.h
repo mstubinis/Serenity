@@ -25,13 +25,13 @@ namespace Renderer {
 namespace fog {
     void enable(const bool b = true);
     void disable();
-    bool enabled();
+    const bool enabled();
     void setColor(const glm::vec4& color);
     void setColor(const float r, const float g, const float b, const float a);
     void setNullDistance(const float d);
     void setBlendDistance(const float d);
-    float getNullDistance();
-    float getBlendDistance();
+    const float getNullDistance();
+    const float getBlendDistance();
 };
 };
 };

@@ -6,20 +6,23 @@
 #include <SFML/Audio.hpp>
 
 class Handle;
+class SoundQueue;
 class SoundMusic : public SoundBaseClass {
-    friend class ::Engine::epriv::SoundManager;
+    friend class Engine::epriv::SoundManager;
+    friend class SoundQueue;
     private:
         sf::Music   m_Sound;
         float       m_Duration;
+        bool        m_Active;
+
+        SoundMusic();
     public:
-        SoundMusic(Handle& handle, const uint& numLoops = 1);
         ~SoundMusic();
 
         void update(const double& dt);
-        const bool play(const uint& numLoops);
-        const bool play();
+        const bool play(const uint& numLoops = 1);
         const bool pause();
-        const bool stop();
+        const bool stop(const bool& stopAllLoops = false);
         const bool restart();
         const float& getDuration() const;
 

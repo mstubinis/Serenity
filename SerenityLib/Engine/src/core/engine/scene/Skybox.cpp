@@ -6,20 +6,9 @@
 using namespace Engine;
 using namespace std;
 
-GLuint m_Buffer = 0;
-GLuint m_VAO = 0;
+GLuint m_Buffer   = 0;
+GLuint m_VAO      = 0;
 vector<glm::vec3> m_Vertices;
-
-SkyboxEmpty::SkyboxEmpty(Scene* scene){
-    if(!scene){
-        scene = Resources::getCurrentScene();
-    }
-}
-SkyboxEmpty::~SkyboxEmpty(){
-
-} 
-void SkyboxEmpty::update(){}
-void SkyboxEmpty::draw(){}
 
 namespace Engine {
     namespace epriv {
@@ -84,41 +73,33 @@ namespace Engine {
         };
     };
 };
-class Skybox::impl final {
-    public:
-        Texture* m_Texture;
-        void _init(string* files, Scene* scene) {
-            glActiveTexture(GL_TEXTURE0);
-            string names[6] = { files[0],files[1],files[2],files[3],files[4],files[5] };
-            //instead of using files[0] generate a proper name using the directory?
-            m_Texture = new Texture(names, files[0] + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
-            m_Texture->genPBREnvMapData(32, m_Texture->width() / 4);
-            epriv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
-        }
-        void _init(string filename, Scene* scene) {
-            glActiveTexture(GL_TEXTURE0);
-            m_Texture = new Texture(filename, false, ImageInternalFormat::SRGB8_ALPHA8);
-            m_Texture->genPBREnvMapData(32, m_Texture->width() / 4);
-            epriv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
-        }
-        void _destruct() {
-        }
-};
 
-
-Skybox::Skybox(string* files,Scene* scene) :SkyboxEmpty(scene), m_i(new impl){
+Skybox::Skybox(const string* files){
+    m_Texture = nullptr;
     Engine::epriv::SkyboxImplInterface::initMesh();
-    m_i->_init(files, scene);
+
+    string names[6] = { files[0],files[1],files[2],files[3],files[4],files[5] };
+    //instead of using files[0] generate a proper name using the directory?
+    m_Texture = new Texture(names, files[0] + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
+    m_Texture->genPBREnvMapData(32, m_Texture->width() / 4);
+    epriv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
+
     registerEvent(EventType::WindowFullscreenChanged);
 }
-Skybox::Skybox(string filename,Scene* scene):SkyboxEmpty(scene), m_i(new impl){
+Skybox::Skybox(const string& filename){
+    m_Texture = nullptr;
     Engine::epriv::SkyboxImplInterface::initMesh();
-    m_i->_init(filename, scene);
+
+    m_Texture = epriv::Core::m_Engine->m_ResourceManager._hasTexture(filename);
+    if (!m_Texture) {
+        m_Texture = new Texture(filename, false, ImageInternalFormat::SRGB8_ALPHA8);
+        m_Texture->genPBREnvMapData(32, m_Texture->width() / 4);
+        epriv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
+    }
     registerEvent(EventType::WindowFullscreenChanged);
 }
 Skybox::~Skybox(){
     unregisterEvent(EventType::WindowFullscreenChanged);
-    m_i->_destruct();
 }
 
 void Skybox::bindMesh(){
@@ -137,6 +118,8 @@ void Skybox::onEvent(const Event& e) {
         Engine::epriv::SkyboxImplInterface::buildVAO();
     }
 }
-Texture* Skybox::texture() { return m_i->m_Texture; }
+Texture* Skybox::texture() { 
+    return m_Texture; 
+}
 void Skybox::update(){}
 void Skybox::draw(){}

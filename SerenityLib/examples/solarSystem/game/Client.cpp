@@ -2,14 +2,17 @@
 #include "Packet.h"
 #include "Core.h"
 #include "HUD.h"
+#include "Helper.h"
 #include "ResourceManifest.h"
 #include "gui/Button.h"
 #include "gui/Text.h"
 #include "gui/specifics/ServerLobbyChatWindow.h"
 #include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
 #include "gui/specifics/ServerLobbyShipSelectorWindow.h"
+#include "gui/specifics/ServerHostingMapSelectorWindow.h"
 
 #include "SolarSystem.h"
+#include "GameSkybox.h"
 #include "Ship.h"
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/Engine_Utils.h>
@@ -39,26 +42,30 @@ struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
     model.show();
 
     auto& camera = const_cast<Camera&>(window.getShipDisplay().getCamera());
-    camera.entity().getComponent<ComponentLogic2>()->call(-1.0);
+    camera.entity().getComponent<ComponentLogic2>()->call(-0.0001);
 }};
 
 Client::Client(Core& core, sf::TcpSocket* socket) : m_Core(core){
     m_TcpSocket = new Networking::SocketTCP(socket);
-    m_username = "";
-    m_Validated = false;
-    m_InitialConnectionThread = nullptr;
-    m_IsCurrentlyConnecting = false;
+    internalInit();
 }
 Client::Client(Core& core, const ushort& port, const string& ipAddress) : m_Core(core) {
     m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
-    m_username = "";
-    m_Validated = false;
-    m_InitialConnectionThread = nullptr;
-    m_IsCurrentlyConnecting = false;
+    internalInit();
 }
+
 Client::~Client() {
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     SAFE_DELETE(m_TcpSocket);
+}
+void Client::internalInit() {
+    m_username = "";
+    m_mapname = "";
+    m_Validated = false;
+    m_PingTime = 0.0;
+    m_Timeout = 0.0;
+    m_InitialConnectionThread = nullptr;
+    m_IsCurrentlyConnecting = false;
 }
 void Client::changeConnectionDestination(const ushort& port, const string& ipAddress) {
     m_IsCurrentlyConnecting = false;
@@ -132,7 +139,27 @@ const string& Client::username() const {
 void epriv::ClientInternalPublicInterface::update(Client* _client) {
     if (!_client) 
         return;
-    _client->onReceive();
+    auto& client = *_client;
+    const auto& dt = Resources::dt();
+    client.m_Timeout += dt;
+    if (client.m_Core.gameState() == GameState::Game) {
+        client.m_PingTime += dt;
+        if (client.m_PingTime > 0.2) {
+            //keep pinging the server, sending your ship physics info
+            auto& map = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+            auto& playerShip = *map.getPlayer();
+            PacketPhysicsUpdate p(playerShip, map);
+            p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
+            if (!p.data.empty()) {
+                p.data = client.m_username + "," + p.data;
+            }else{
+                p.data = client.m_username;
+            }
+            client.send(p);
+            client.m_PingTime = 0.0;
+        }
+    }
+    client.onReceive();
 }
 void Client::onReceive() {
     sf::Packet sf_packet;
@@ -143,61 +170,99 @@ void Client::onReceive() {
         auto& p = *pp;
         if (pp && p.validate(sf_packet)) {
             // Data extracted successfully...
-            /*
-            if (p.PacketType == PacketType::Server_To_Client_Ship_Physics_Update) {
-                if (p.data != "") {
-                    SolarSystem& scene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
-                    PacketPhysicsUpdate* physics_update = static_cast<PacketPhysicsUpdate*>(pp);
-                    auto& phy = *physics_update;
-          
-                    auto* pbody = scene.getPlayer()->entity().getComponent<ComponentBody>();
-                    auto& body = *pbody;
-                    btRigidBody& bulletBody = *const_cast<btRigidBody*>(&body.getBody());
-
-                    btTransform centerOfMass;
-                    //centerOfMass.setIdentity();
-
-                    const btVector3 pos(phy.px, phy.py, phy.pz);
-
-                    float qx, qy, qz, qw, ax, ay, az, lx, ly, lz;
-
-                    Math::Float32From16(&qx, phy.qx);
-                    Math::Float32From16(&qy, phy.qy);
-                    Math::Float32From16(&qz, phy.qz);
-                    Math::Float32From16(&qw, phy.qw);
-
-                    Math::Float32From16(&ax, phy.ax);
-                    Math::Float32From16(&ay, phy.ay);
-                    Math::Float32From16(&az, phy.az);
-
-                    const btQuaternion rot(qx, qy, qz, qw);
-
-                    centerOfMass.setOrigin(pos);
-                    centerOfMass.setRotation(rot);
-
-                    bulletBody.getMotionState()->setWorldTransform(centerOfMass);
-                    bulletBody.setCenterOfMassTransform(centerOfMass);
-                    body.clearAllForces();
-                    body.setAngularVelocity(ax, ay, az, false);
-
-
-                    Math::Float32From16(&lx, phy.lx);
-                    Math::Float32From16(&ly, phy.ly);
-                    Math::Float32From16(&lz, phy.lz);
-
-                    body.setLinearVelocity(lx, ly, lz, false);
-                }
-            }
-            */
+            m_Timeout = 0.0;
             HUD& hud = *m_Core.m_HUD;
             switch (p.PacketType) {
+                case PacketType::Server_To_Client_Ship_Physics_Update: {
+                    if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
+                        PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(pp);
+
+                        auto& map = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+
+                        auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+                        auto& playername = info[0];
+                        auto& shipclass = info[1];
+
+                        const auto& offset = map.getAnchor();
+                        const float& x = pI.px + offset.x;
+                        const float& y = pI.py + offset.y;
+                        const float& z = pI.pz + offset.z;
+
+                        Ship* ship = nullptr;
+                        if (!map.getShips().count(playername)) {
+                            auto handles = ResourceManifest::Ships[shipclass];
+                            ship = new Ship(handles.get<0>(), handles.get<1>(), shipclass, false, playername, glm::vec3(x, y, z), glm::vec3(1.0f), CollisionType::ConvexHull, &map);
+                            
+                        }else{
+                            ship = map.getShips().at(playername);
+                        }
+                        auto& body = *ship->entity().getComponent<ComponentBody>();
+                        btRigidBody& bulletBody = *const_cast<btRigidBody*>(&body.getBody());
+
+                        btTransform centerOfMass;
+                        const btVector3 pos(x, y, z);
+
+                        float qx, qy, qz, qw, ax, ay, az, lx, ly, lz;
+
+                        Math::Float32From16(&qx, pI.qx);  Math::Float32From16(&qy, pI.qy);  Math::Float32From16(&qz, pI.qz);  Math::Float32From16(&qw, pI.qw);
+
+                        Math::Float32From16(&ax, pI.ax);  Math::Float32From16(&ay, pI.ay);  Math::Float32From16(&az, pI.az);
+
+                        const btQuaternion rot(qx, qy, qz, qw);
+
+                        centerOfMass.setOrigin(pos);  centerOfMass.setRotation(rot);
+
+                        bulletBody.getMotionState()->setWorldTransform(centerOfMass);
+                        bulletBody.setCenterOfMassTransform(centerOfMass);
+                        body.clearAllForces();
+                        body.setAngularVelocity(ax, ay, az, false);
+
+                        Math::Float32From16(&lx, pI.lx);  Math::Float32From16(&ly, pI.ly);  Math::Float32From16(&lz, pI.lz);
+
+                        body.setLinearVelocity(lx, ly, lz, false);
+                    }
+                    break;
+                }
+                case PacketType::Server_To_Client_New_Client_Entered_Map: {
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
+                    
+                    auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map
+
+                    SolarSystem& map = *static_cast<SolarSystem*>(Resources::getScene(info[1]));
+                    auto& handles = ResourceManifest::Ships.at(info[0]);
+                    Ship* ship = new Ship(handles.get<0>(), handles.get<1>(), info[0], false, pI.name, glm::vec3(pI.r, pI.g, pI.b), glm::vec3(1.0f), CollisionType::ConvexHull, &map);
+
+                    break;
+                }
+                case PacketType::Server_To_Client_Approve_Map_Entry: {
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
+
+                    auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map
+
+                    hud.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
+                    m_Core.enterMap(info[1], info[0], pI.name, pI.r, pI.g, pI.b);
+                    hud.m_Next->setText("Next");
+                    hud.m_GameState = GameState::Game;
+                    break;
+                }
+                case PacketType::Server_To_Client_Reject_Map_Entry: {
+                    break;
+                }
                 case PacketType::Server_To_Client_Map_Data: {
-                    PacketChatMessage& pI = *static_cast<PacketChatMessage*>(pp);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
                     auto& mapname = pI.name;
+                    m_mapname = mapname;
                     SolarSystem* map = static_cast<SolarSystem*>(Resources::getScene(mapname));
                     if (!map) {
                         map = new SolarSystem(mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
                     }
+                    auto& menuScene = *const_cast<Scene*>(Resources::getScene("Menu"));
+                    auto* menuSkybox = menuScene.skybox();
+                    SAFE_DELETE(menuSkybox);
+                    GameSkybox* newMenuSkybox = new GameSkybox(map->skyboxFile(), 0);
+                    menuScene.setSkybox(newMenuSkybox);
+                    menuScene.setGlobalIllumination(map->getGlobalIllumination());
+
                     hud.m_ServerLobbyShipSelectorWindow->clear();
                     auto ships = map->allowedShips();
                     for (auto& ship : ships) {
@@ -216,7 +281,7 @@ void Client::onReceive() {
                     break;
                 }
                 case PacketType::Server_To_Client_Chat_Message: {
-                    PacketChatMessage& pI = *static_cast<PacketChatMessage*>(pp);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
                     auto message = pI.name + ": " + pI.data;
 
                     Text* text = new Text(0, 0, *hud.m_Font, message);
@@ -227,7 +292,7 @@ void Client::onReceive() {
                 
                 }
                 case PacketType::Server_To_Client_Client_Joined_Server: {
-                    PacketChatMessage& pI = *static_cast<PacketChatMessage*>(pp);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
                     auto message = pI.name + ": Has joined the server";
 
 
@@ -243,7 +308,7 @@ void Client::onReceive() {
                     break;
                 }
                 case PacketType::Server_To_Client_Client_Left_Server:{
-                    PacketChatMessage& pI = *static_cast<PacketChatMessage*>(pp);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
                     auto message = pI.name + ": Has left the server";
 
                     Text* text = new Text(0, 0, *hud.m_Font, pI.name);

@@ -5,7 +5,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <SFML/Audio.hpp>
 #include <glm/vec3.hpp>
-#include <queue>
+#include <stack>
 
 #include <core/engine/sounds/SoundBaseClass.h>
 
@@ -23,7 +23,14 @@ namespace Engine{
         class SoundManager final{
             friend class ::SoundBaseClass;
             public:
-                std::vector<SoundBaseClass*>   m_CurrentlyPlayingSounds;
+                static const uint MAX_SOUND_EFFECTS = 64;
+                static const uint MAX_SOUND_MUSIC   = 6;
+
+                std::vector<SoundEffect*>      m_SoundEffects;
+                std::vector<SoundMusic*>       m_SoundMusics;
+                std::stack<uint>               m_FreelistEffects;
+                std::stack<uint>               m_FreelistMusics;
+
                 std::vector<SoundQueue*>       m_SoundQueues;
 
                 SoundManager(const char* name,uint w,uint h);
@@ -31,11 +38,11 @@ namespace Engine{
 
                 void _update(const double& dt);
 
+                void _setSoundInformation(Handle&, SoundEffect& sound);
+                void _setSoundInformation(Handle&, SoundMusic& sound);
 
-                void _play(SoundBaseClass& sound, const uint& numLoops = 1);
-                void _pause(SoundBaseClass& sound);
-                void _stop(SoundBaseClass& sound);
-                void _restart(SoundBaseClass& sound);
+                SoundEffect* _getFreeEffect();
+                SoundMusic* _getFreeMusic();
 
         };
     };
@@ -43,6 +50,9 @@ namespace Engine{
         SoundQueue* createQueue(const float& delay);
         SoundEffect* playEffect(Handle&, const uint& numLoops = 1);
         SoundMusic* playMusic(Handle&, const uint& numLoops = 1);
+
+        void stop_all_music();
+        void stop_all_effect();
     };
 };
 #endif

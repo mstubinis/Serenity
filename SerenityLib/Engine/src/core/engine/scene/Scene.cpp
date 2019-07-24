@@ -17,15 +17,17 @@ using namespace std;
 
 uint InternalScenePublicInterface::NumScenes = 0;
 
-struct Scene::impl final {
-    float                             m_GI_Global;
-    float                             m_GI_Diffuse;
-    float                             m_GI_Specular;
+struct EmptyOnUpdateFunctor final {void operator()(Scene* scene, const double& dt) const {
 
-    SkyboxEmpty*                      m_Skybox;
+}};
+
+struct Scene::impl final {
+    glm::vec3                         m_GI;
+    uint                              m_ID;
+
+    Skybox*                           m_Skybox;
     vector<Viewport*>                 m_Viewports;
     vector<Camera*>                   m_Cameras;
-    uint                              m_ID;
     vector<vector<RenderPipeline*>>   m_Pipelines;
 
     vector<SunLight*>                 m_SunLights;
@@ -39,9 +41,7 @@ struct Scene::impl final {
     ECS<Entity>                       m_ECS;
 
     void _init(Scene& super, const string& _name) {
-        m_GI_Global       = 1.0f;
-        m_GI_Diffuse      = 1.0f;
-        m_GI_Specular     = 1.0f;
+        m_GI              = glm::vec3(1.0f);
         m_Skybox          = nullptr;
         
         m_Pipelines.resize(RenderStage::_TOTAL);
@@ -65,12 +65,12 @@ struct Scene::impl final {
         for(auto& pipeline: m_Pipelines)
             SAFE_DELETE_VECTOR(pipeline);
     }
-    void _centerToObject(Scene& super,Entity& center) {
+    void _centerToObject(Scene& super, const Entity& centerEntity) {
         //TODO: handle parent->child relationship
-        ComponentBody& centerBody = *center.getComponent<ComponentBody>();
+        ComponentBody& centerBody = *const_cast<Entity&>(centerEntity).getComponent<ComponentBody>();
         for (auto& data : InternalScenePublicInterface::GetEntities(super)) {
             Entity e = super.getEntity(data);
-            if (e != center) {
+            if (e != centerEntity) {
                 auto* eBody = e.getComponent<ComponentBody>();
                 if (eBody) {
                     auto& _eBody = *eBody;
@@ -80,7 +80,7 @@ struct Scene::impl final {
         }
         centerBody.setPosition(0.0f);
     }
-    void _addMeshInstanceToPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, RenderStage::Stage _stage) {
+    void _addMeshInstanceToPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, const RenderStage::Stage& _stage) {
         RenderPipeline* _pipeline = nullptr;
         
         for (auto& pipeline : _pipelinesList) {
@@ -128,7 +128,7 @@ struct Scene::impl final {
             meshNode->instanceNodes.emplace_back(instanceNode);
         }
     }
-    void _removeMeshInstanceFromPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, RenderStage::Stage _stage) {
+    void _removeMeshInstanceFromPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, const RenderStage::Stage& _stage) {
         RenderPipeline* _pipeline = nullptr;
         for (auto& pipeline : _pipelinesList) {
             if (&pipeline->shaderProgram == _meshInstance.shaderProgram()) {
@@ -174,79 +174,84 @@ struct Scene::impl final {
         }
     }
 };
-vector<Viewport*>& InternalScenePublicInterface::GetViewports(Scene& _scene) {
-    return _scene.m_i->m_Viewports;
+vector<Viewport*>& InternalScenePublicInterface::GetViewports(Scene& scene) {
+    return scene.m_i->m_Viewports;
 }
-vector<Camera*>& InternalScenePublicInterface::GetCameras(Scene& _scene) {
-    return _scene.m_i->m_Cameras;
+vector<Camera*>& InternalScenePublicInterface::GetCameras(Scene& scene) {
+    return scene.m_i->m_Cameras;
 }
-vector<Engine::epriv::EntityPOD>& InternalScenePublicInterface::GetEntities(Scene& _scene) {
-    return _scene.m_i->m_ECS.entityPool._pool;
+vector<Engine::epriv::EntityPOD>& InternalScenePublicInterface::GetEntities(Scene& scene) {
+    return scene.m_i->m_ECS.entityPool._pool;
 }
-vector<SunLight*>& InternalScenePublicInterface::GetSunLights(Scene& _scene) { 
-    return _scene.m_i->m_SunLights; 
+vector<SunLight*>& InternalScenePublicInterface::GetSunLights(Scene& scene) { 
+    return scene.m_i->m_SunLights; 
 }
-vector<DirectionalLight*>& InternalScenePublicInterface::GetDirectionalLights(Scene& _scene) { 
-    return _scene.m_i->m_DirectionalLights; 
+vector<DirectionalLight*>& InternalScenePublicInterface::GetDirectionalLights(Scene& scene) { 
+    return scene.m_i->m_DirectionalLights; 
 }
-vector<PointLight*>& InternalScenePublicInterface::GetPointLights(Scene& _scene) { 
-    return _scene.m_i->m_PointLights; 
+vector<PointLight*>& InternalScenePublicInterface::GetPointLights(Scene& scene) { 
+    return scene.m_i->m_PointLights; 
 }
-vector<SpotLight*>& InternalScenePublicInterface::GetSpotLights(Scene& _scene) { 
-    return _scene.m_i->m_SpotLights; 
+vector<SpotLight*>& InternalScenePublicInterface::GetSpotLights(Scene& scene) { 
+    return scene.m_i->m_SpotLights; 
 }
-vector<RodLight*>& InternalScenePublicInterface::GetRodLights(Scene& _scene) { 
-    return _scene.m_i->m_RodLights; 
+vector<RodLight*>& InternalScenePublicInterface::GetRodLights(Scene& scene) { 
+    return scene.m_i->m_RodLights; 
 }
 
 
-void InternalScenePublicInterface::RenderGeometryOpaque(Scene& _scene,Camera& _camera) {
-    for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 
-        //pipeline->sort(_camera);
-        pipeline->render(_camera);
+void InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene,Camera& camera) {
+    for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 
+        //pipeline->sort(camera);
+        pipeline->render(camera);
     } 
 }
-void InternalScenePublicInterface::RenderGeometryTransparent(Scene& _scene, Camera& _camera) {
-    for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::GeometryTransparent]) { 
-        pipeline->sort(_camera);
-        pipeline->render(_camera);
+void InternalScenePublicInterface::RenderGeometryTransparent(Scene& scene, Camera& camera) {
+    for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryTransparent]) { 
+        pipeline->sort(camera);
+        pipeline->render(camera);
     } 
 }
-void InternalScenePublicInterface::RenderForwardOpaque(Scene& _scene, Camera& _camera) {
-    for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) {
-        //pipeline->sort(_camera);
-        pipeline->render(_camera);
+void InternalScenePublicInterface::RenderForwardOpaque(Scene& scene, Camera& camera) {
+    for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) {
+        //pipeline->sort(camera);
+        pipeline->render(camera);
     }
 }
-void InternalScenePublicInterface::RenderForwardTransparent(Scene& _scene, Camera& _camera) {
-    for (auto& pipeline : _scene.m_i->m_Pipelines[RenderStage::ForwardTransparent]) { 
-        pipeline->sort(_camera);
-        pipeline->render(_camera);
+void InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Camera& camera) {
+    for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardTransparent]) { 
+        pipeline->sort(camera);
+        pipeline->render(camera);
     }
 }
 
-ECS<Entity>& InternalScenePublicInterface::GetECS(Scene& _scene) {
-    return _scene.m_i->m_ECS;
+ECS<Entity>& InternalScenePublicInterface::GetECS(Scene& scene) {
+    return scene.m_i->m_ECS;
 }
-void InternalScenePublicInterface::AddMeshInstanceToPipeline(Scene& _scene, MeshInstance& _meshInstance, RenderStage::Stage _stage) {
-    _scene.m_i->_addMeshInstanceToPipeline(_scene, _meshInstance, _scene.m_i->m_Pipelines[_stage], _stage);
+void InternalScenePublicInterface::AddMeshInstanceToPipeline(Scene& scene, MeshInstance& meshInstance, const RenderStage::Stage& stage) {
+    scene.m_i->_addMeshInstanceToPipeline(scene, meshInstance, scene.m_i->m_Pipelines[stage], stage);
 }
-void InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(Scene& _scene, MeshInstance& _meshInstance, RenderStage::Stage _stage){
-    _scene.m_i->_removeMeshInstanceFromPipeline(_scene, _meshInstance, _scene.m_i->m_Pipelines[_stage], _stage);
+void InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(Scene& scene, MeshInstance& meshInstance, const RenderStage::Stage& stage){
+    scene.m_i->_removeMeshInstanceFromPipeline(scene, meshInstance, scene.m_i->m_Pipelines[stage], stage);
 }
 
 Scene::Scene(const string& name):m_i(new impl){
     m_i->_init(*this, name);
     registerEvent(EventType::SceneChanged);
+    setOnUpdateFunctor(EmptyOnUpdateFunctor());
+}
+Scene::~Scene() {
+    unregisterEvent(EventType::SceneChanged);
+    m_i->_destruct();
 }
 const uint& Scene::id() const {
     return m_i->m_ID; 
 }
-Viewport* Scene::addViewport(const uint& x, const uint& y, const uint& width, const uint& height, const Camera& camera) {
+Viewport& Scene::addViewport(const uint& x, const uint& y, const uint& width, const uint& height, const Camera& camera) {
     Viewport* viewport = new Viewport(*this, camera);
     viewport->setViewportDimensions(x, y, width, height);
     m_i->m_Viewports.push_back(viewport);
-    return viewport;
+    return *viewport;
 }
 Entity Scene::createEntity() { 
     return m_i->m_ECS.createEntity(*this); 
@@ -254,8 +259,8 @@ Entity Scene::createEntity() {
 Entity Scene::getEntity(const Engine::epriv::EntityPOD& data) { 
     return Entity(data.ID, data.sceneID, data.versionID); 
 }
-void Scene::removeEntity(const uint entityData) { 
-    m_i->m_ECS.removeEntity(entityData); 
+void Scene::removeEntity(const uint& entityID) {
+    m_i->m_ECS.removeEntity(entityID);
 }
 void Scene::removeEntity(Entity& entity) { 
     EntityDataRequest dataRequest(entity);
@@ -264,7 +269,7 @@ void Scene::removeEntity(Entity& entity) {
 Viewport& Scene::getMainViewport() {
     return *m_i->m_Viewports[0];
 }
-Camera* Scene::getActiveCamera(){
+Camera* Scene::getActiveCamera() const {
     if (m_i->m_Viewports.size() == 0)
         return nullptr;
     return &(const_cast<Camera&>(m_i->m_Viewports[0]->getCamera())); 
@@ -277,37 +282,43 @@ void Scene::setActiveCamera(Camera& camera){
     }
     m_i->m_Viewports[0]->setCamera(camera);
 }
-void Scene::centerSceneToObject(Entity& center){ 
-    return m_i->_centerToObject(*this, center); 
-}
-Scene::~Scene(){
-    unregisterEvent(EventType::SceneChanged);
-    m_i->_destruct();
+void Scene::centerSceneToObject(const Entity& centerEntity){
+    return m_i->_centerToObject(*this, centerEntity);
 }
 void Scene::update(const double& dt){
+    m_OnUpdateFunctor(dt);
 }
 const glm::vec4& Scene::getBackgroundColor() const {
     return m_i->m_Viewports[0]->m_BackgroundColor;
 }
-SkyboxEmpty* Scene::skybox() const { 
-    return m_i->m_Skybox; 
-}
-void Scene::setSkybox(SkyboxEmpty* s){ 
-    m_i->m_Skybox = s; 
-}
-void Scene::setBackgroundColor(const float& r, const float& g, const float& b, const float& a){
+void Scene::setBackgroundColor(const float& r, const float& g, const float& b, const float& a) {
     Math::setColor(m_i->m_Viewports[0]->m_BackgroundColor, r, g, b, a);
 }
+void Scene::setBackgroundColor(const glm::vec4& backgroundColor) {
+    setBackgroundColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+}
+Skybox* Scene::skybox() const { 
+    return m_i->m_Skybox; 
+}
+void Scene::setSkybox(Skybox* s){ 
+    m_i->m_Skybox = s; 
+}
+const glm::vec3& Scene::getGlobalIllumination() const {
+    return m_i->m_GI;
+}
+void Scene::setGlobalIllumination(const glm::vec3& globalIllumination) {
+    setGlobalIllumination(globalIllumination.x, globalIllumination.y, globalIllumination.z);
+}
 void Scene::setGlobalIllumination(const float global, const float diffuse, const float specular) {
-    auto& i         = *m_i;
-    i.m_GI_Global   = global;
-    i.m_GI_Diffuse  = diffuse;
-    i.m_GI_Specular = specular;
-    Renderer::Settings::Lighting::setGIContribution(i.m_GI_Global, i.m_GI_Diffuse, i.m_GI_Specular);
+    auto& i  = *m_i;
+    i.m_GI.x = global;
+    i.m_GI.y = diffuse;
+    i.m_GI.z = specular;
+    Renderer::Settings::Lighting::setGIContribution(i.m_GI.x, i.m_GI.y, i.m_GI.z);
 }
 void Scene::onEvent(const Event& e) {
     if (e.type == EventType::SceneChanged && e.eventSceneChanged.newScene == this) {
         auto& i = *m_i;
-        Renderer::Settings::Lighting::setGIContribution(i.m_GI_Global, i.m_GI_Diffuse, i.m_GI_Specular);
+        Renderer::Settings::Lighting::setGIContribution(i.m_GI.x, i.m_GI.y, i.m_GI.z);
     }
 }

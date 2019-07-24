@@ -18,15 +18,15 @@ class  MeshInstance;
 class  ComponentModel;
 namespace Engine{
     namespace epriv{
-        struct DefaultMeshInstanceBindFunctor { void operator()(EngineResource* r) const; };
-        struct DefaultMeshInstanceUnbindFunctor { void operator()(EngineResource* r) const; };
+        struct DefaultMeshInstanceBindFunctor;
+        struct DefaultMeshInstanceUnbindFunctor;
         struct MeshInstanceAnimation;
     };
 };
 class MeshInstance final: public BindableResource{
-    friend struct ::Engine::epriv::DefaultMeshInstanceBindFunctor;
-    friend struct ::Engine::epriv::DefaultMeshInstanceUnbindFunctor;
-    friend class  ::ComponentModel;
+    friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
+    friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
+    friend class  ComponentModel;
     private:
         void*                                                m_UserPointer;
         std::vector<Engine::epriv::MeshInstanceAnimation*>   m_AnimationQueue;
@@ -42,8 +42,8 @@ class MeshInstance final: public BindableResource{
         bool                                                 m_PassedRenderCheck;
         bool                                                 m_Visible;
 
-        void _init(Mesh* mesh, Material* mat, Entity& parent, ShaderP* program);
-        void _updateModelMatrix();
+        void internalInit(Mesh* mesh, Material* mat, Entity& parent, ShaderP* program);
+        void internalUpdateModelMatrix();
     public:
         MeshInstance(Entity&, Mesh*, Material*, ShaderP* = 0);
         MeshInstance(Entity&, Handle mesh, Handle mat, ShaderP* = 0);
@@ -60,33 +60,34 @@ class MeshInstance final: public BindableResource{
         ShaderP* shaderProgram();
         Mesh* mesh();
         Material* material();
-        void* getUserPointer() { return m_UserPointer; }
-        template<typename T> void setUserPointer(T* t) { m_UserPointer = t; }
-        Entity& parent() { return m_Parent; }
-        glm::vec4& color();
-        glm::vec3& godRaysColor();
-        glm::mat4& modelMatrix();
-        glm::vec3& position();
-        glm::quat& orientation();
-        glm::vec3& getScale();
+        void* getUserPointer() const;
+        void setUserPointer(void* t);
+        Entity& parent();
 
-        bool visible();
-        bool passedRenderCheck();
-        void setPassedRenderCheck(bool);
+        const glm::vec4& color() const;
+        const glm::vec3& godRaysColor() const;
+        const glm::mat4& modelMatrix() const;
+        const glm::vec3& position() const;
+        const glm::quat& orientation() const;
+        const glm::vec3& getScale() const;
+
+        const bool& visible() const;
+        const bool& passedRenderCheck() const;
+        void setPassedRenderCheck(const bool&);
         void show();
         void hide();
 
-        RenderStage::Stage stage();
-        void setStage(RenderStage::Stage);
+        const RenderStage::Stage& stage() const;
+        void setStage(const RenderStage::Stage& stage);
 
-        void playAnimation(const std::string& animName,float startTime,float endTime = -1.0f, uint requestedLoops = 1);
+        void playAnimation(const std::string& animName, const float& startTime, const float& endTime = -1.0f, const uint& requestedLoops = 1);
 
-        void setColor(float, float, float, float = 1.0f);
-        void setColor(glm::vec4& color);
-        void setColor(glm::vec3& color);
+        void setColor(const float& r, const float& g, const float& b, const float& a = 1.0f);
+        void setColor(const glm::vec4& color);
+        void setColor(const glm::vec3& color);
 
-        void setGodRaysColor(float r,float g,float b);
-        void setGodRaysColor(glm::vec3& color);
+        void setGodRaysColor(const float& r, const float& g, const float& b);
+        void setGodRaysColor(const glm::vec3& color);
 
         void setShaderProgram(const Handle& shaderPHandle, ComponentModel&);
         void setShaderProgram(ShaderP*, ComponentModel&);
@@ -97,13 +98,13 @@ class MeshInstance final: public BindableResource{
         void setMaterial(const Handle& materialHandle, ComponentModel&);
         void setMaterial(Material*, ComponentModel&);
 
-        void setPosition(float x,float y,float z);             void setPosition(glm::vec3&);
-        void setOrientation(glm::quat&);                       void setOrientation(float x,float y,float z);
-        void setScale(float x,float y,float z);                void setScale(glm::vec3&);
+        void setPosition(const float& x, const float& y, const float& z);             void setPosition(const glm::vec3& position);
+        void setOrientation(const glm::quat& orientation);                            void setOrientation(const float& x, const float& y, const float& z);
+        void setScale(const float& x, const float& y, const float& z);                void setScale(const glm::vec3& scale);
 
-        void translate(float x,float y,float z);               void translate(glm::vec3&);
-        void rotate(float pitch,float yaw,float roll);         void rotate(glm::vec3&);
-        void scale(float x,float y,float z);                   void scale(glm::vec3&);
+        void translate(const float& x, const float& y, const float& z);               void translate(const glm::vec3& translation);
+        void rotate(const float& pitch, const float& yaw, const float& roll);         void rotate(const glm::vec3& rotation);
+        void scale(const float& x, const float& y, const float& z);                   void scale(const glm::vec3& scale);
 };
 
 #endif

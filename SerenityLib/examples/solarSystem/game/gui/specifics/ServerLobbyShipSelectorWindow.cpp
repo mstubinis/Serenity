@@ -37,11 +37,11 @@ struct GameCameraShipSelectorLogicFunctor final {
             EntityDataRequest dataRequest(entity);
             auto& thisCamera = *entity.getComponent<ComponentCamera>(dataRequest);
             auto& thisBody = *entity.getComponent<ComponentBody>(dataRequest);
-            if (window.m_IsCurrentlyOverShipWindow && dt >= 0.0) {
+            if ((window.m_IsCurrentlyOverShipWindow && dt >= 0.0) || window.m_IsCurrentlyDragging) {
                 camera.m_OrbitRadius += Engine::getMouseWheelDelta() * dt * 0.92f;
                 camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 1.5f);
             }
-            if (window.m_IsCurrentlyDragging || dt == -1.0) {
+            if (window.m_IsCurrentlyDragging || dt < 0.0) {
                 const auto& diff = Engine::getMouseDifference();
                 camera.m_CameraMouseFactor += glm::dvec2(-diff.y * (dt), diff.x * (dt));
                 thisBody.rotate(camera.m_CameraMouseFactor.x, camera.m_CameraMouseFactor.y, 0);
@@ -85,7 +85,7 @@ ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& s
     m_ShipWindow->setContentPadding(0.0f);
     m_ChosenShipName = "";
     
-    m_ShipDisplay = scene.addViewport(x + m_ShipWindow->width() + 3, y - m_Height, m_Height - 1, m_Height, camera);
+    m_ShipDisplay = &scene.addViewport(x + m_ShipWindow->width() + 3, y - m_Height, m_Height - 1, m_Height, camera);
     //m_ShipDisplay->setDepthMaskValue(100.0f);
     //m_ShipDisplay->activateDepthMask(true);
     m_ShipDisplay->activate2DAPI(false);

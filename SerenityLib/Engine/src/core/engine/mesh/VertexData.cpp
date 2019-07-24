@@ -58,17 +58,6 @@ void VertexData::unbind() {
     }
 }
 
-void myMemMoveTest(char* dest, char* src, size_t n) {
-    if (n == 0)
-        return;
-    char* temp = new char[n];
-    for (unsigned int i = 0; i < n; ++i)
-        temp[i] = src[i];
-    for (unsigned int i = 0; i < n; ++i)
-        dest[i] = temp[i];
-    delete[] temp;
-}
-
 void VertexData::setIndices(vector<ushort>& _data, const bool addToGPU, const bool orphan) {
     if (buffers.size() == 1)
         buffers.push_back(std::make_unique<ElementBufferObject>());
@@ -107,7 +96,7 @@ void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
                 auto destination = &buffer[accumulator];
                 const auto& at = i * sizeofT;
                 auto source = &(data[attribute_index])[at];
-                myMemMoveTest(destination, source, sizeofT);
+                std::memcpy(destination, source, sizeofT);
                 accumulator += sizeofT;
             }
         }
@@ -121,7 +110,7 @@ void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
                 const auto& blockSize = dataSizes[attribute_index] * format.attributes[attribute_index].typeSize;
                 auto destination = &buffer[accumulator];
                 auto source = &(data[attribute_index])[0];
-                myMemMoveTest(destination, source, blockSize);
+                std::memcpy(destination, source, blockSize);
                 accumulator += blockSize;
             }
             !orphan ? _vBuffer.setData(size, buffer, BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(buffer);
@@ -134,7 +123,7 @@ void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
                 }else{
                     auto destination = &buffer[0];
                     auto source = &(data[attribute_index])[0];
-                    myMemMoveTest(destination, source, size);
+                    std::memcpy(destination, source, size);
                     break;
                 }
             }

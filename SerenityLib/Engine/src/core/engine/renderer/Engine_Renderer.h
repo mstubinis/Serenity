@@ -6,7 +6,7 @@
 #include <core/engine/renderer/GLStateMachine.h>
 #include <core/engine/Engine_Utils.h>
 
-#include <core/engine/renderer/Alignment.h>
+#include <core/engine/renderer/RendererEnums.h>
 #include <core/engine/renderer/postprocess/SSAO.h>
 #include <core/engine/renderer/postprocess/HDR.h>
 #include <core/engine/renderer/postprocess/DepthOfField.h>
@@ -15,6 +15,9 @@
 #include <core/engine/renderer/postprocess/SMAA.h>
 #include <core/engine/renderer/postprocess/GodRays.h>
 #include <core/engine/renderer/postprocess/Fog.h>
+
+#include <core/engine/renderer/opengl/State.h>
+#include <core/engine/renderer/opengl/Extensions.h>
 
 #include <core/engine/fonts/FontIncludes.h>
 
@@ -27,28 +30,16 @@ class  Font;
 struct Entity;
 struct BufferObject;
 
-struct DepthFunc final {enum Func{
-    Never    = GL_NEVER,
-    Less     = GL_LESS,
-    Equal    = GL_EQUAL,
-    LEqual   = GL_LEQUAL,
-    Greater  = GL_GREATER,
-    NotEqual = GL_NOTEQUAL,
-    GEqual   = GL_GEQUAL,
-    Always   = GL_ALWAYS,
-};};
-struct AntiAliasingAlgorithm final {enum Algorithm{
-    None,FXAA,SMAA,
-};};
-
 namespace Engine{
 namespace epriv{
-    class GBuffer;
-    class FramebufferObject;
-    class RenderbufferObject;
-    class RenderManager final{
+    class  GBuffer;
+    class  FramebufferObject;
+    class  RenderbufferObject;
+    class  RenderManager final{
         public:
-            epriv::GLStateMachineDataCustom glSM;
+            OpenGLState              OpenGLStateMachine;
+            OpenGLExtensions         OpenGLExtensionsManager;
+            GLStateMachineDataCustom glSM;
 
             class impl;
             std::unique_ptr<impl> m_i;
@@ -59,51 +50,30 @@ namespace epriv{
             static uint GLSL_VERSION;
             static uint OPENGL_VERSION;
 
-            static std::vector<bool> OPENGL_EXTENSIONS;
-
             void _init(const char* name,uint w,uint h);
             void _resize(uint width, uint height);
 
             void _render(Viewport&, const bool mainRenderFunc = true, const GLuint display_fbo = 0, const GLuint display_rbo = 0);
             void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
             void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
-            bool _bindShaderProgram(ShaderP*);
-            bool _unbindShaderProgram();
+            const bool _bindShaderProgram(ShaderP*);
+            const bool _unbindShaderProgram();
             void _clear2DAPICommands();
-            bool _bindMaterial(Material*);
-            bool _unbindMaterial();
+            const bool _bindMaterial(Material*);
+            const bool _unbindMaterial();
             void _genPBREnvMapData(Texture&,uint,uint);
-    };
-    struct OpenGLExtensionEnum final{
-        enum Extension{
-            EXT_Ansiotropic_Filtering,
-            ARB_Ansiotropic_Filtering,
-            EXT_draw_instanced,
-            ARB_draw_instanced,
-            EXT_separate_shader_objects,
-            ARB_separate_shader_objects,
-            EXT_explicit_attrib_location,
-            ARB_explicit_attrib_location,
-            EXT_geometry_shader_4,
-            ARB_geometry_shader_4,
-            EXT_compute_shader,
-            ARB_compute_shader,
-            EXT_tessellation_shader,
-            ARB_tessellation_shader,
-        _TOTAL};
-        static bool supported(OpenGLExtensionEnum::Extension e){ return RenderManager::OPENGL_EXTENSIONS[e]; }
     };
 };
 namespace Renderer{
     namespace Settings{
 
         void setGamma(const float g);
-        float getGamma();
+        const float getGamma();
 
         void clear(const bool color = true, const bool depth = true, const bool stencil = true);
-        bool cullFace(const uint& state);
+        
 
-        bool setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm&);
+        const bool setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm&);
 
         void enableDrawPhysicsInfo(const bool b = true);
         void disableDrawPhysicsInfo();
@@ -111,11 +81,11 @@ namespace Renderer{
         namespace Lighting{
             void enable(bool b = true);
             void disable();
-            float getGIContributionGlobal();
+            const float getGIContributionGlobal();
             void setGIContributionGlobal(const float giGlobal);
-            float getGIContributionDiffuse();
+            const float getGIContributionDiffuse();
             void setGIContributionDiffuse(const float giDiffuse);
-            float getGIContributionSpecular();
+            const float getGIContributionSpecular();
             void setGIContributionSpecular(const float giSpecular);
             void setGIContribution(const float global, const float diffuse, const float specular);
         };
@@ -129,22 +99,29 @@ namespace Renderer{
     inline const GLint getUniformLoc(const char* location);
     inline const GLint& getUniformLocUnsafe(const char* location);
 
-    bool setDepthFunc(const DepthFunc::Func&);
-    bool setViewport(const uint& x, const uint& y, const uint& width, const uint& height);
+    const bool cullFace(const GLenum& state);
+    const bool setDepthFunc(const DepthFunc::Func&);
+    const bool setViewport(const uint& x, const uint& y, const uint& width, const uint& height);
+
+    const bool stencilMask(const GLuint& mask);
+    const bool stencilOp(const GLenum& sfail, const GLenum& dpfail, const GLenum& dppass);
+
     void bindFBO(const GLuint& fbo);
     void bindFBO(epriv::FramebufferObject& rbo);
-    bool bindRBO(const GLuint& rbo);
-    bool bindRBO(epriv::RenderbufferObject& rbo);
-    bool bindReadFBO(const GLuint& fbo);
-    bool bindDrawFBO(const GLuint& fbo);
+    const bool bindRBO(const GLuint& rbo);
+    const bool bindRBO(epriv::RenderbufferObject& rbo);
+    const bool bindReadFBO(const GLuint& fbo);
+    const bool bindDrawFBO(const GLuint& fbo);
 
-    bool bindTexture(const GLuint _textureType, const GLuint _textureObject);
-    bool bindVAO(const GLuint _vaoObject);
+
+    const bool bindTextureForModification(const GLuint _textureType, const GLuint _textureObject);
+
+    const bool bindVAO(const GLuint _vaoObject);
     void genAndBindTexture(const GLuint _textureType,GLuint& _textureObject);
     void genAndBindVAO(GLuint& _vaoObject);
-    bool deleteVAO(GLuint& _vaoObject);
-    bool colorMask(const bool& r, const bool& g, const bool& b, const bool& a);
-    bool clearColor(const float& r, const float& g, const float& b, const float& a);
+    const bool deleteVAO(GLuint& _vaoObject);
+    const bool colorMask(const bool& r, const bool& g, const bool& b, const bool& a);
+    const bool clearColor(const float& r, const float& g, const float& b, const float& a);
 
     void sendTexture(const char* location,const Texture& texture,const int& slot);
     void sendTexture(const char* location,const GLuint textureAddress,const int& slot,const GLuint& glTextureType);

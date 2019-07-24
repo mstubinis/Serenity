@@ -4,6 +4,7 @@
 #include "GameCamera.h"
 #include "Ship.h"
 #include "GameSkybox.h"
+#include "Helper.h"
 
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/renderer/Engine_Renderer.h>
@@ -40,12 +41,10 @@ SolarSystem::SolarSystem(const string& n, const string& file):Scene(n){
     setActiveCamera(*playerCamera);
     m_Objects.push_back(playerCamera);
     m_Filename = file;
+    m_SkyboxFile = "";
+    m_oldClientPos = m_oldAnchorPos = glm::vec3(0.0f);
     if(file != "NULL")
         SolarSystem::loadFromFile(file);
-
-    m_AnchorPoint = new EntityWrapper(*this);
-    auto& anchor_body = *m_AnchorPoint->entity().addComponent<ComponentBody>();
-    anchor_body.setScale(0.005f);
 }
 SolarSystem::~SolarSystem(){
     SAFE_DELETE_VECTOR(m_Objects);
@@ -65,27 +64,26 @@ string SolarSystem::allowedShipsSingleString() {
     }
     return "";
 }
-
+const string& SolarSystem::skyboxFile() const {
+    return m_SkyboxFile;
+}
 vector<string> SolarSystem::allowedShips() {
-    vector<string> result;
     uint                                             count = 0;
     boost_io::stream<boost_io::mapped_file_source>   str(m_Filename);
     for (string line; getline(str, line, '\n');) {
         line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
         if (line[0] != '#') {//ignore commented lines
             if (count == 5) {//this line has the allowed ships
-                stringstream ss(line);
-                while (ss.good()) {
-                    string substr;
-                    getline(ss, substr, ',');
-                    result.push_back(substr);
-                }
-                return result;
+                return Helper::SeparateStringByCharacter(line, ',');
             }
         }
         ++count;
     }
-    return result;
+    return vector<string>();
+}
+const glm::vec3 SolarSystem::getAnchor() {
+    auto& anchor_body = *m_AnchorPoint->entity().getComponent<ComponentBody>();
+    return anchor_body.position();
 }
 void SolarSystem::loadFromFile(const string& filename) {
     uint                                             count = 0;
@@ -97,16 +95,15 @@ void SolarSystem::loadFromFile(const string& filename) {
     float gi_specular = 1.0f;
     float gi_global   = 1.0f;
 
-    string skyboxDirectory;
     for (string line; getline(str, line, '\n');) {
         line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
         if (line[0] != '#') {//ignore commented lines
             if (count == 1) {//this line has the system's name
                 setName(line);
             }else if (count == 2) {//this line has the system's skybox
-                skyboxDirectory = ResourceManifest::BasePath + line;
+                m_SkyboxFile = ResourceManifest::BasePath + line;
             }else if (count == 3) {//this line has the system's skybox's number of flares
-                GameSkybox* box = new GameSkybox(skyboxDirectory, boost::lexical_cast<uint>(line), this);
+                GameSkybox* box = new GameSkybox(m_SkyboxFile, boost::lexical_cast<uint>(line));
                 setSkybox(box);
 
             }else if (count == 4) {//this line has the system's GI contribution
@@ -215,7 +212,7 @@ void SolarSystem::loadFromFile(const string& filename) {
                 float x = static_cast<float>(X);
                 float y = static_cast<float>(Y);
                 float z = static_cast<float>(Z);
-                if (MATERIAL_NAME != "") {
+                if (!MATERIAL_NAME.empty()) {
                     string extention = boost::filesystem::extension(TEXTURE);
                     string normalFile = (TEXTURE.substr(0, TEXTURE.size() - extention.size())) + "_Normal" + extention;
                     string glowFile = (TEXTURE.substr(0, TEXTURE.size() - extention.size())) + "_Glow" + extention;
@@ -232,7 +229,7 @@ void SolarSystem::loadFromFile(const string& filename) {
                 }
                 if (line[0] == 'S') {//Star
                     Star* star = new Star(glm::vec3(R, G, B), glm::vec3(R1, G1, B1), glm::vec3(R2, G2, B2), glm::vec3(0), static_cast<float>(RADIUS), NAME, this);
-                    if (PARENT != "") {
+                    if (!PARENT.empty()) {
                         star->setPosition(m_Planets.at(PARENT)->getPosition() + glm::vec3(x, y, z));
                     }
                     m_Planets.emplace(NAME, star);
@@ -244,7 +241,7 @@ void SolarSystem::loadFromFile(const string& filename) {
                     else if (TYPE == "IceGiant") PLANET_TYPE = PlanetType::IceGiant;
                     else if (TYPE == "Asteroid") PLANET_TYPE = PlanetType::Asteroid;
                     planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME), PLANET_TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
-                    if (PARENT != "") {
+                    if (!PARENT.empty()) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
                         if (ORBIT_PERIOD != -1.0f) {
@@ -263,7 +260,7 @@ void SolarSystem::loadFromFile(const string& filename) {
                     else if (TYPE == "IceGiant") PLANET_TYPE = PlanetType::IceGiant;
                     else if (TYPE == "Asteroid") PLANET_TYPE = PlanetType::Asteroid;
                     planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME), PLANET_TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
-                    if (PARENT != "") {
+                    if (!PARENT.empty()) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
                         if (ORBIT_PERIOD != -1.0f) {
@@ -274,17 +271,20 @@ void SolarSystem::loadFromFile(const string& filename) {
                         }
                     }
                     m_Planets.emplace(NAME, planetoid);
-                }else if (line[0] == '*') {//Player ship
-                    m_Player = new Ship(ResourceManifest::DefiantMesh, ResourceManifest::DefiantMaterial, true, NAME, glm::vec3(x, y, z), glm::vec3(1.0f), CollisionType::ConvexHull, this);
-                    if (PARENT != "") {
+                }else if (line[0] == '*') {//Anchor (Spawn) point
+
+                    m_AnchorPoint = new EntityWrapper(*this);
+                    auto& anchor_body = *m_AnchorPoint->entity().addComponent<ComponentBody>();
+                    anchor_body.setScale(0.0005f);
+                    anchor_body.setPosition(x, y, z);
+
+                    if (!PARENT.empty()) {
                         Planet* parent = m_Planets.at(PARENT);
-                        auto& cbody = *m_Player->entity().getComponent<ComponentBody>();
-                        cbody.setPosition(cbody.position() + parent->getPosition());
+                        anchor_body.setPosition(anchor_body.position() + parent->getPosition());
                     }
-                    GameCamera* playerCamera = (GameCamera*)getActiveCamera();
-                    playerCamera->follow(m_Player->entity());
+                    m_Objects.push_back(m_AnchorPoint);
                 }else if (line[0] == 'R') {//Rings
-                    if (PARENT != "") {
+                    if (!PARENT.empty()) {
                         if (!planetRings.count(PARENT)) {
                             vector<RingInfo> rings;
                             planetRings.emplace(PARENT, rings);
@@ -301,15 +301,31 @@ void SolarSystem::loadFromFile(const string& filename) {
     for (auto& rings : planetRings) {
         new Ring(rings.second, m_Planets.at(rings.first));
     }
-    centerSceneToObject(m_Player->entity());
+    centerSceneToObject(m_AnchorPoint->entity());
 
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
-
-    //new Ship(ResourceManifest::DefiantMesh, ResourceManifest::DefiantMaterial, false, "test", glm::vec3(-4, 0, 4), glm::vec3(1.0f), CollisionType::ConvexHull, this);
+}
+void SolarSystem::update(const double& dt){
+    Scene::update(dt);
 }
 
 
-
-void SolarSystem::update(const double& dt){
-    Scene::update(dt);
+const glm::vec3& SolarSystem::getOldClientPos() const {
+    return m_oldClientPos;
+}
+const glm::vec3& SolarSystem::getOldAnchorPos() const {
+    return m_oldAnchorPos;
+}
+void SolarSystem::setOldClientPos(const float& x, const float& y, const float& z) {
+    m_oldClientPos.x = x;
+    m_oldClientPos.y = y;
+    m_oldClientPos.z = z;
+}
+void SolarSystem::setOldAnchorPos(const float& x, const float& y, const float& z) {
+    m_oldAnchorPos.x = x;
+    m_oldAnchorPos.y = y;
+    m_oldAnchorPos.z = z;
+}
+void SolarSystem::setAnchor(const float& x, const float& y, const float& z) {
+    m_AnchorPoint->entity().getComponent<ComponentBody>()->setPosition(x, y, z);
 }

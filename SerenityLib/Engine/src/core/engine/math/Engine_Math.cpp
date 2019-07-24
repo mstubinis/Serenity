@@ -6,6 +6,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
 
 #include <btBulletDynamicsCommon.h>
@@ -15,6 +16,7 @@ using namespace std;
 
 typedef unsigned char uchar;
 
+const float ROTATION_THRESHOLD = 0.00001f;
 
 void Math::Float32From16(float*     out, const uint16_t in) {
     uint32_t t1, t2, t3;
@@ -54,9 +56,29 @@ void Math::Float16From32(uint16_t* out, const float*    in, const uint arraySize
         Math::Float16From32(&(out[i]), in[i]);
     }
 }
-
-
-
+void Math::setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
+    modelMatrix = glm::mat4(1.0f);
+    const glm::mat4 translationMatrix = glm::translate(position);
+    const glm::mat4 rotationMatrix = glm::mat4_cast(rotation);
+    const glm::mat4 scaleMatrix = glm::scale(scale);
+    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix * modelMatrix;
+}
+void Math::setRotation(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll) {
+    if (abs(pitch) > ROTATION_THRESHOLD)
+        orientation               = (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));   //pitch
+    if (abs(yaw) > ROTATION_THRESHOLD)
+        orientation = orientation * (glm::angleAxis(-yaw,   glm::vec3(0, 1, 0)));   //yaw
+    if (abs(roll) > ROTATION_THRESHOLD)
+        orientation = orientation * (glm::angleAxis(roll,   glm::vec3(0, 0, 1)));   //roll
+}
+void Math::rotate(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll) {
+    if (abs(pitch) > ROTATION_THRESHOLD)
+        orientation = orientation * (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));   //pitch
+    if (abs(yaw) > ROTATION_THRESHOLD)
+        orientation = orientation * (glm::angleAxis(-yaw,   glm::vec3(0, 1, 0)));   //yaw
+    if (abs(roll) > ROTATION_THRESHOLD)
+        orientation = orientation * (glm::angleAxis(roll,   glm::vec3(0, 0, 1)));   //roll
+}
 glm::vec2 Math::rotate2DPoint(const glm::vec2& point, const float angle, const glm::vec2& origin) {
     float s = glm::sin(angle);
     float c = glm::cos(angle);

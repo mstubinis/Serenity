@@ -10,6 +10,7 @@ class  Viewport;
 class  Scene;
 class  Camera;
 class  Core;
+class  Client;
 struct GameCameraShipSelectorLogicFunctor;
 struct ShipSelectorButtonOnClick;
 struct ButtonNext_OnClick;
@@ -19,6 +20,7 @@ class ServerLobbyShipSelectorWindow final {
     friend struct ShipSelectorButtonOnClick;
     friend struct ButtonNext_OnClick;
     friend class  HUD;
+    friend class  Client;
     private:
         bool         m_IsCurrentlyDragging;
         bool         m_IsCurrentlyOverShipWindow;

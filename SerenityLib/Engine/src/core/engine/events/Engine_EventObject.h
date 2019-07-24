@@ -5,27 +5,15 @@
 #include <core/engine/events/Engine_EventEnums.h>
 #include <core/engine/Engine_Utils.h>
 
-class Scene;
+class  Scene;
 
-
-//TODO: split this into its own header file?
-struct RenderStage {enum Stage {
-    GeometryOpaque,
-    GeometryTransparent,
-    ForwardOpaque,
-    ForwardTransparent,
-_TOTAL};};
-//
-
-struct EventType final{enum Type{
+struct EventType final{ enum Type {
     WindowResized,
     WindowGainedFocus,
     WindowLostFocus,
     WindowClosed,
     WindowFullscreenChanged,
-    SoundStartedPlaying,
-    SoundStoppedPlaying,
-    SoundPaused,
+    SoundStatusChanged,
     KeyPressed,
     KeyReleased,
     MouseButtonPressed,
@@ -46,10 +34,12 @@ _TOTAL};};
 namespace Engine{
 namespace epriv{
     struct EventWindowResized final{ 
-        uint width,height; 
+        uint  width;
+        uint  height; 
         EventWindowResized() = default;
         EventWindowResized(const uint& _width, const uint& _height) {
-            width = _width; height = _height;
+            width = _width;
+            height = _height;
         }
     };
     struct EventWindowFullscreenChanged final{ 
@@ -60,14 +50,19 @@ namespace epriv{
         }
     };
     struct EventKeyboard final{ 
-        KeyboardKey::Key key; bool alt, control, shift, system;
+        KeyboardKey::Key  key;
+        bool              alt, control, shift, system;
         EventKeyboard() = default;
         EventKeyboard(const KeyboardKey::Key& _key, const bool& _alt, const bool& _control, const bool& _shift, const bool& _system) {
-            key = _key; alt = _alt; control = _control; shift = _shift; system = _system;
+            key     = _key;
+            alt     = _alt;
+            control = _control;
+            shift   = _shift;
+            system  = _system;
         }
     };
     struct EventTextEntered final{ 
-        std::uint32_t unicode;
+        std::uint32_t  unicode;
         EventTextEntered() = default;
         EventTextEntered(const std::uint32_t& _unicode) {
             unicode = _unicode;
@@ -78,6 +73,7 @@ namespace epriv{
             }
             wchar_t c = static_cast<wchar_t>(unicode);
             std::wstring ws(&c);
+            std::string s;
             std::string res(ws.begin(), ws.end());
             res = res[0];
             return res;
@@ -87,14 +83,17 @@ namespace epriv{
         MouseButton::Button button; float x, y; 
         EventMouseButton() = default;
         EventMouseButton(const MouseButton::Button& _button, const float& _x, const float& _y) {
-            button = _button; x = _x; y = _y;
+            button = _button;
+            x      = _x;
+            y      = _y;
         }
     };
     struct EventMouseMove final{ 
         float x,y;
         EventMouseMove() = default;
         EventMouseMove(const float& _x, const float& _y) {
-            x = _x; y = _y;
+            x = _x;
+            y = _y;
         }
     };
     struct EventMouseWheel final{ 
@@ -105,24 +104,37 @@ namespace epriv{
         }
     };
     struct EventJoystickMoved final{ 
-        uint joystickID; JoystickAxis::Axis axis; float position;
+        uint                joystickID;
+        JoystickAxis::Axis  axis;
+        float               position;
         EventJoystickMoved() = default;
         EventJoystickMoved(const uint& _joystickID, const JoystickAxis::Axis& _axis, const float& _position) {
-            joystickID = _joystickID; axis = _axis; position = _position;
+            joystickID = _joystickID;
+            axis       = _axis;
+            position   = _position;
         }
     };
     struct EventJoystickButton final{ 
-        uint joystickID; uint button; 
+        uint  joystickID;
+        uint  button; 
         EventJoystickButton() = default;
         EventJoystickButton(const uint& _joystickID, const uint& _button) {
-            joystickID = _joystickID; button = _button;
+            joystickID = _joystickID;
+            button     = _button;
         }
     };
     struct EventJoystickConnection final{ 
-        uint joystickID; 
+        uint  joystickID; 
         EventJoystickConnection() = default;
         EventJoystickConnection(const uint& _joystickID) {
             joystickID = _joystickID;
+        }
+    };
+    struct EventSoundStatusChanged final {
+        uint  status;
+        EventSoundStatusChanged() = default;
+        EventSoundStatusChanged(const uint& _status) {
+            status = _status;
         }
     };
     struct EventSceneChanged final{ 
@@ -147,6 +159,7 @@ struct Event final{
         Engine::epriv::EventJoystickMoved              eventJoystickMoved;
         Engine::epriv::EventJoystickButton             eventJoystickButton;
         Engine::epriv::EventJoystickConnection         eventJoystickConnection;
+        Engine::epriv::EventSoundStatusChanged         eventSoundStatusChanged;
         Engine::epriv::EventSceneChanged               eventSceneChanged;
     };
 };

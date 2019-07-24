@@ -26,12 +26,12 @@ namespace Renderer {
 namespace depthOfField {
     void enable(const bool b = true);
     void disable();
-    bool enabled();
-    float getFocus();
+    const bool enabled();
+    const float getFocus();
     void setFocus(const float);
-    float getBias();
+    const float getBias();
     void setBias(const float);
-    float getBlurRadius();
+    const float getBlurRadius();
     void setBlurRadius(const float);
 };
 };

@@ -10,7 +10,7 @@ struct SoundStatus final {enum Status {
     PlayingLooped,
     Paused,
     Stopped,
-    Fresh
+    Fresh,
 };};
 
 namespace Engine {
@@ -22,17 +22,17 @@ namespace Engine {
 class SoundBaseClass {
     friend class Engine::epriv::SoundManager;
     protected:
-        SoundStatus::Status   m_Status;
-        uint                  m_Loops;
-        uint                  m_CurrentLoop;
-    public:
+        SoundStatus::Status      m_Status;
+        uint                     m_Loops;
+        uint                     m_CurrentLoop;
+
         SoundBaseClass(const uint& numLoops);
+    public:
         virtual ~SoundBaseClass();
 
         const SoundStatus::Status& status();
         virtual void update(const double& dt);
-        virtual const bool play(const uint& numLoops);
-        virtual const bool play();
+        virtual const bool play(const uint& numLoops = 1);
         virtual const bool pause();
         virtual const bool stop();
         virtual const bool restart();

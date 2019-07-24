@@ -64,8 +64,7 @@ void InternalMeshPublicInterface::UnloadGPU( Mesh& _mesh){
 }
 
 bool InternalMeshPublicInterface::SupportsInstancing(){
-    if(RenderManager::OPENGL_VERSION >= 31 || 
-    OpenGLExtensionEnum::supported(OpenGLExtensionEnum::EXT_draw_instanced) || OpenGLExtensionEnum::supported(OpenGLExtensionEnum::ARB_draw_instanced)){
+    if(RenderManager::OPENGL_VERSION >= 31 || OpenGLExtension::supported(OpenGLExtension::EXT_draw_instanced) || OpenGLExtension::supported(OpenGLExtension::ARB_draw_instanced)){
         return true;
     }
     return false;

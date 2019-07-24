@@ -11,14 +11,9 @@ void epriv::GLStateMachineDataCustom::init() {
     current_bound_buffer_vbo = 0;
     current_bound_buffer_ebo = 0;
 
-    current_bound_vao = 0;
     current_bound_read_fbo = 0;
     current_bound_draw_fbo = 0;
     current_bound_rbo = 0;
-    current_bound_texture_1D = 0;
-    current_bound_texture_2D = 0;
-    current_bound_texture_3D = 0;
-    current_bound_texture_cube_map = 0;
 
     current_bound_shader_program = nullptr;
     current_bound_material = nullptr;

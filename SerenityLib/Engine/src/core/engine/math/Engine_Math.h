@@ -52,6 +52,9 @@ namespace Math{
     void lookAtToQuat(glm::quat& o, const glm::vec3& eye, const glm::vec3& target, const glm::vec3& up);
 
     void translate(const btRigidBody&,btVector3&,bool local);
+    void rotate(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll);
+    void setRotation(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll);
+    void setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position,const glm::quat& rotation, const glm::vec3& scale);
 
     uchar pack2NibblesIntoChar(const float x, const float y);
     glm::vec2 unpack2NibblesFromChar(const uchar);

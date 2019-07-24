@@ -15,19 +15,22 @@ typedef std::unordered_map<std::string, Engine::epriv::BoneNode*> BoneNodeMap;
 namespace Engine {
 namespace epriv {
     struct MeshLoadingFlags final {enum Flag {
-        Points = 1,
-        UVs = 2,
-        Normals = 4,
-        Faces = 8,
-        TBN = 16,
-        //= 32,
-        //= 64,
-        //= 128,
-        //= 256,
-        //= 512,
-        //= 1024,
-        //= 2048,
-        //= 4096,
+        Points = 1 << 0,
+        UVs = 1 << 1,
+        Normals = 1 << 2,
+        Faces = 1 << 3,
+        TBN = 1 << 4,
+        //= 1 << 5,
+        //= 1 << 6,
+        //= 1 << 7,
+        //= 1 << 8,
+        //= 1 << 9,
+        //= 1 << 10,
+        //= 1 << 11,
+        //= 1 << 12,
+        //= 1 << 13,
+        //= 1 << 14,
+        //= 1 << 15,
     };};
     class MeshLoader final {
         friend class  Mesh;

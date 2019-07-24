@@ -45,20 +45,20 @@ namespace epriv {
             SparseSet& operator=(SparseSet&& other) noexcept      = delete;
             virtual ~SparseSet()                                  = default;
 
-            template<typename... ARGS> inline T* _add(const uint& _IDObject, ARGS&&... _args) {
-                const uint& sparseIndex = _IDObject - 1;
+            template<typename... ARGS> inline T* _add(const uint& IDObject, ARGS&&... args) {
+                const uint& sparseIndex = IDObject - 1;
                 if (sparseIndex >= super::_sparse.size())
                     super::_sparse.resize(sparseIndex + 1, 0);
                 if (super::_sparse[sparseIndex] != 0)
                     return nullptr;
-                _dense.emplace_back(std::forward<ARGS>(_args)...);
+                _dense.emplace_back(std::forward<ARGS>(args)...);
                 super::_sparse[sparseIndex] = _dense.size();
                 super::_maxLast = sparseIndex;
                 return &_dense[_dense.size() - 1];
             }
-            inline bool _remove(const uint& _IDObject) {
+            inline bool _remove(const uint& IDObject) {
                 //TODO: find a way to optimize the search for the maxLast entity...
-                const uint& removedEntityIndex = _IDObject - 1;
+                const uint& removedEntityIndex = IDObject - 1;
                 if (removedEntityIndex >= super::_sparse.size()) { //needed for scene.removeEntity(), as it iterates over all systems and some might not have the entity in them
                     return false;
                 }

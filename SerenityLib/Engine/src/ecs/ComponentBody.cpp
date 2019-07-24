@@ -17,7 +17,7 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-const float ROTATION_THRESHOLD = 0.00001f;
+//const float ROTATION_THRESHOLD = 0.00001f;
 
 #pragma region PhysicsData
 
@@ -206,7 +206,7 @@ ComponentBody& ComponentBody::operator=(const ComponentBody& p_Other) {
 ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
     //move constructor
     using std::swap;
-    m_Physics = p_Other.m_Physics;
+    swap(m_Physics,p_Other.m_Physics);
     swap(m_Forward, p_Other.m_Forward);
     swap(m_Right, p_Other.m_Right);
     swap(m_Up, p_Other.m_Up);
@@ -222,7 +222,7 @@ ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
 ComponentBody& ComponentBody::operator=(ComponentBody&& p_Other) noexcept {
     //move assignment
     using std::swap;
-	m_Physics = p_Other.m_Physics;
+    swap(m_Physics,p_Other.m_Physics);
     swap(m_Forward, p_Other.m_Forward);
     swap(m_Right, p_Other.m_Right);
     swap(m_Up, p_Other.m_Up);
@@ -274,11 +274,9 @@ void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, cons
     collision_.getShape()->setUserPointer(this);
     if (physicsData.rigidBody) {
         auto& rigidBody = *physicsData.rigidBody;
-        //Physics::removeRigidBody(&rigidBody);
         rigidBody.setCollisionShape(collision_.getShape());
         rigidBody.setMassProps(physicsData.mass, collision_.getInertia());
         rigidBody.updateInertiaTensor();
-        //Physics::addRigidBody(&rigidBody);
     }
 }
 void ComponentBody::setCollision(Collision* p_Collision) {
@@ -289,11 +287,9 @@ void ComponentBody::setCollision(Collision* p_Collision) {
     collision.getShape()->setUserPointer(this);
     if (physicsData.rigidBody) {
         auto& rigidBody = *physicsData.rigidBody;
-        //Physics::removeRigidBody(&rigidBody);
         rigidBody.setCollisionShape(collision.getShape());
         rigidBody.setMassProps(physicsData.mass, collision.getInertia());
         rigidBody.updateInertiaTensor();
-        //Physics::addRigidBody(&rigidBody);
     }
 }
 
@@ -334,21 +330,14 @@ void ComponentBody::rotate(const float p_Pitch, const float p_Yaw, const float p
         auto& rigidBody = *data.p->rigidBody;
         btQuaternion quat = rigidBody.getWorldTransform().getRotation().normalize();
         glm::quat glmquat(quat.w(), quat.x(), quat.y(), quat.z());
-
-        if (abs(p_Pitch) >= ROTATION_THRESHOLD) glmquat = glmquat * (glm::angleAxis(-p_Pitch, glm::vec3(1, 0, 0)));
-        if (abs(p_Yaw) >= ROTATION_THRESHOLD)   glmquat = glmquat * (glm::angleAxis(-p_Yaw,   glm::vec3(0, 1, 0)));
-        if (abs(p_Roll) >= ROTATION_THRESHOLD)  glmquat = glmquat * (glm::angleAxis(p_Roll,   glm::vec3(0, 0, 1)));
-
+        Math::rotate(glmquat, p_Pitch, p_Yaw, p_Roll);
         quat = btQuaternion(glmquat.x, glmquat.y, glmquat.z, glmquat.w);
         rigidBody.getWorldTransform().setRotation(quat);
         Math::recalculateForwardRightUp(rigidBody, m_Forward, m_Right, m_Up);
     }else{
         auto& normalData = *data.n;
-        glm::quat& glmquat = normalData.rotation;
-        if (abs(p_Pitch) >= ROTATION_THRESHOLD) glmquat = glmquat * (glm::angleAxis(-p_Pitch, glm::vec3(1, 0, 0)));
-        if (abs(p_Yaw) >= ROTATION_THRESHOLD)   glmquat = glmquat * (glm::angleAxis(-p_Yaw,   glm::vec3(0, 1, 0)));
-        if (abs(p_Roll) >= ROTATION_THRESHOLD)  glmquat = glmquat * (glm::angleAxis(p_Roll,   glm::vec3(0, 0, 1)));
-        Math::recalculateForwardRightUp(glmquat, m_Forward, m_Right, m_Up);
+        Math::rotate(normalData.rotation, p_Pitch, p_Yaw, p_Roll);
+        Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
     }
 }
 void ComponentBody::scale(const glm::vec3& p_ScaleAmount) { 
@@ -835,6 +824,10 @@ struct epriv::ComponentBody_EntityAddedToSceneFunction final {void operator()(vo
         if (_component.m_Physics) {
             auto& physicsData = *_component.data.p;
             _component.setCollision(static_cast<CollisionType::Type>(physicsData.collision->getType()), physicsData.mass);
+
+            auto currentScene = Resources::getCurrentScene();
+            if(currentScene && currentScene == &p_Scene)
+                Physics::addRigidBody(_component.data.p->rigidBody);
         }
     }
 }};

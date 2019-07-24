@@ -53,19 +53,19 @@ GBuffer::GBuffer(const uint& width, const uint& height){
 
     //this should be better performance wise, but clean up this code a bit
     auto& depthTexture = m_Buffers[GBufferType::Depth]->texture();
-    Renderer::bindTexture(depthTexture.type(), depthTexture.address());
+    Renderer::bindTextureForModification(depthTexture.type(), depthTexture.address());
     depthTexture.setFilter(TextureFilter::Nearest);
 
     auto& diffuseTexture = m_Buffers[GBufferType::Diffuse]->texture();
-    Renderer::bindTexture(diffuseTexture.type(), diffuseTexture.address());
+    Renderer::bindTextureForModification(diffuseTexture.type(), diffuseTexture.address());
     diffuseTexture.setFilter(TextureFilter::Nearest);
 
     auto& normalTexture = m_Buffers[GBufferType::Normal]->texture();
-    Renderer::bindTexture(normalTexture.type(), normalTexture.address());
+    Renderer::bindTextureForModification(normalTexture.type(), normalTexture.address());
     normalTexture.setFilter(TextureFilter::Nearest);
 
     auto& godRaysTexture = m_Buffers[GBufferType::GodRays]->texture();
-    Renderer::bindTexture(godRaysTexture.type(), godRaysTexture.address());
+    Renderer::bindTextureForModification(godRaysTexture.type(), godRaysTexture.address());
     godRaysTexture.setFilter(TextureFilter::Nearest);
 }
 void GBuffer::internalDestruct() {

@@ -5,6 +5,7 @@
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/scene/Scene.h>
+#include <core/engine/scene/Viewport.h>
 
 #include <ecs/ECS.h>
 #include <ecs/ComponentCamera.h>
@@ -125,6 +126,7 @@ class Engine_Window::impl final{
             Game::onResize(winSize.x,winSize.y);
             for (auto scene : epriv::Core::m_Engine->m_ResourceManager.scenes()) {
                 epriv::InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(winSize.x, winSize.y);
+                epriv::InternalScenePublicInterface::GetViewports(*scene)[0]->setViewportDimensions(0, 0, winSize.x, winSize.y);
             }
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

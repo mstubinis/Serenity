@@ -5,13 +5,13 @@
 #include <ecs/ComponentBaseClass.h>
 
 namespace Engine {
-namespace epriv {
-    struct ComponentName_UpdateFunction;
-    struct ComponentName_EntityAddedToSceneFunction;
-    struct ComponentName_ComponentAddedToEntityFunction;
-    struct ComponentName_SceneEnteredFunction;
-    struct ComponentName_SceneLeftFunction;
-};
+    namespace epriv {
+        struct ComponentName_UpdateFunction;
+        struct ComponentName_EntityAddedToSceneFunction;
+        struct ComponentName_ComponentAddedToEntityFunction;
+        struct ComponentName_SceneEnteredFunction;
+        struct ComponentName_SceneLeftFunction;
+    };
 };
 
 class ComponentName : public ComponentBaseClass {
@@ -33,7 +33,8 @@ class ComponentName : public ComponentBaseClass {
         ComponentName& operator=(ComponentName&& other) noexcept = default;
 
         const std::string& name() const;
-        const uint size() const;
+        const uint& size() const;
+        const bool& empty() const;
 
         ~ComponentName();
 };

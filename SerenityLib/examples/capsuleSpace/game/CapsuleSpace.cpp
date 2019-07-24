@@ -130,7 +130,7 @@ CapsuleSpace::CapsuleSpace():Scene("CapsuleSpace"){
 
     m_Timer = 0;
     setSkybox(nullptr);
-    setBackgroundColor(255.0f,0,0);
+    setBackgroundColor(255.0f,0.0f,0.0f,1.0f);
 
     PointLight* l = new PointLight(glm::vec3(0, 1.7f, 0), this);
     l->setColor(1.0f * 2.5f, 0.784f * 2.5f, 0.843f * 2.5f);

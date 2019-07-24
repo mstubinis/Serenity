@@ -28,9 +28,13 @@ class Client{
         std::future<sf::Socket::Status>*      m_InitialConnectionThread;
         Engine::Networking::SocketTCP*        m_TcpSocket;
         std::string                           m_username;
+        std::string                           m_mapname;
         Core&                                 m_Core;
         bool                                  m_Validated;
+        double                                m_PingTime;
+        double                                m_Timeout;
         bool                                  m_IsCurrentlyConnecting;
+        void internalInit();
     public:
         Client(Core&, sf::TcpSocket*);
         Client(Core&, const ushort& port, const std::string& ipAddress);

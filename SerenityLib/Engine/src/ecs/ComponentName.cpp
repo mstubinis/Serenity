@@ -17,8 +17,15 @@ ComponentName::ComponentName(const Entity& _entity, const char* _name) : Compone
 ComponentName::~ComponentName() {
     _data = "";
 }
-const string& ComponentName::name() const { return _data; }
-const uint ComponentName::size() const { return _data.size(); }
+const string& ComponentName::name() const { 
+    return _data; 
+}
+const uint& ComponentName::size() const { 
+    return _data.size(); 
+}
+const bool& ComponentName::empty() const {
+    return _data.empty();
+}
 #pragma endregion
 
 #pragma region System

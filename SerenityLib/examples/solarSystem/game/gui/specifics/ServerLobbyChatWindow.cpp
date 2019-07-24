@@ -18,11 +18,11 @@ struct OnEnterFunctor final {
     void operator()(TextBox* textBox) const {
         ServerLobbyChatWindow& window = *static_cast<ServerLobbyChatWindow*>(textBox->getUserPointer());
         const auto message = textBox->text();
-        if (message != "") {
+        if (!message.empty()) {
             textBox->setText("");
             auto& scrollFrame = window.getWindowFrame();
             Client& client = *static_cast<Client*>(window.getUserPointer());
-            PacketChatMessage p;
+            PacketMessage p;
             p.PacketType = PacketType::Client_To_Server_Chat_Message;
             p.data = message;
             p.name = client.username(); 

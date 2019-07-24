@@ -78,7 +78,7 @@ class EntityWrapper {
         inline void destroy() { 
             m_Entity.destroy();
         }
-        inline Entity entity() {
+        inline Entity& entity() {
             return m_Entity; 
         }
 };

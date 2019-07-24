@@ -69,12 +69,24 @@ void ShipSystemMainThrusters::update(const double& dt){
         if(m_Ship->IsPlayer()){
             if(!m_Ship->IsWarping()){
                 const float& amount = (  (rigidbody.mass() * 0.4f)  +  1.3f  );
-                if(Engine::isKeyDown(KeyboardKey::W)){ rigidbody.applyForce(0,0,-amount); }
-                if(Engine::isKeyDown(KeyboardKey::S)){ rigidbody.applyForce(0,0, amount); }
-                if(Engine::isKeyDown(KeyboardKey::A)){ rigidbody.applyForce(-amount,0,0); }
-                if(Engine::isKeyDown(KeyboardKey::D)){ rigidbody.applyForce( amount,0,0); }
-                if(Engine::isKeyDown(KeyboardKey::F)){ rigidbody.applyForce(0,-amount,0); }
-                if(Engine::isKeyDown(KeyboardKey::R)){ rigidbody.applyForce(0, amount,0); }
+                if(Engine::isKeyDown(KeyboardKey::W)){ 
+                    rigidbody.applyForce(0,0,-amount); 
+                }
+                if(Engine::isKeyDown(KeyboardKey::S)){ 
+                    rigidbody.applyForce(0,0, amount); 
+                }
+                if(Engine::isKeyDown(KeyboardKey::A)){ 
+                    rigidbody.applyForce(-amount,0,0); 
+                }
+                if(Engine::isKeyDown(KeyboardKey::D)){ 
+                    rigidbody.applyForce( amount,0,0); 
+                }
+                if(Engine::isKeyDown(KeyboardKey::F)){ 
+                    rigidbody.applyForce(0,-amount,0); 
+                }
+                if(Engine::isKeyDown(KeyboardKey::R)){ 
+                    rigidbody.applyForce(0, amount,0); 
+                }
             }
         }
     }
@@ -203,7 +215,7 @@ void ShipSystemSensors::update(const double& dt){
 
 struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
     Ship& ship = *(Ship*)_component.getUserPointer();
-    Scene& currentScene = *Resources::getCurrentScene();
+    SolarSystem& currentScene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
 
     if (ship.m_IsPlayer) {
         #pragma region PlayerFlightControls
@@ -236,11 +248,13 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                 currentScene.centerSceneToObject(ship.m_Entity);
                 camera.follow(ship.m_Entity);
             }
-        }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
+        }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) { //if you store that positional value and revert to it when you switch camera perspectives you'll avoid the whole issue
             if (cameraState == CameraState::Follow || ship.m_Target.null() || target != ship.m_Entity) {
                 currentScene.centerSceneToObject(ship.m_Entity);
                 camera.orbit(ship.m_Entity);
+                ship.restorePositionState();
             }else if (!ship.m_Target.null()) {
+                ship.savePositionState();
                 currentScene.centerSceneToObject(ship.m_Target);
                 camera.orbit(ship.m_Target);
             }
@@ -272,9 +286,10 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
 }};
 
 
-Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,SolarSystem* scene):EntityWrapper(*scene){
+Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, const string& name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,SolarSystem* scene):EntityWrapper(*scene){
     m_WarpFactor    = 0;
     m_IsPlayer      = player;
+    m_ShipClass     = shipClass;
     m_IsWarping     = false;
     m_Target        = Entity::_null;
     m_PlayerCamera  = nullptr;
@@ -291,7 +306,7 @@ Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, g
 	rigidBodyComponent.setScale(scl);
 
 	if (player) {
-		m_PlayerCamera = (GameCamera*)(scene->getActiveCamera());
+		m_PlayerCamera = static_cast<GameCamera*>(scene->getActiveCamera());
 	}
 	for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
 		ShipSystem* system = nullptr;
@@ -329,7 +344,7 @@ void Ship::translateWarp(float amount,float dt){
     }
 }
 void Ship::setTarget(const string& target) {
-    SolarSystem* s = (SolarSystem*)Resources::getCurrentScene();
+    SolarSystem* s = static_cast<SolarSystem*>(Resources::getCurrentScene());
     for (auto& entity : s->m_Objects) {
         auto* componentName = entity->entity().getComponent<ComponentName>();
         if (componentName) {
@@ -345,4 +360,18 @@ void Ship::setTarget(const Entity& target){
 }
 void Ship::onEvent(const Event& e){
 
+}
+
+void Ship::savePositionState() {
+    SolarSystem& currentScene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+    const auto& anchorPos = currentScene.getAnchor();
+    const auto& shipPos = entity().getComponent<ComponentBody>()->position();
+    currentScene.setOldAnchorPos(anchorPos.x, anchorPos.y, anchorPos.z);
+    currentScene.setOldClientPos(shipPos.x, shipPos.y, shipPos.z);
+}
+void Ship::restorePositionState() {
+    SolarSystem& currentScene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+    const auto& anchorPos = currentScene.getAnchor();
+    currentScene.setAnchor(anchorPos.x, anchorPos.y, anchorPos.z);
+    entity().getComponent<ComponentBody>()->setPosition(currentScene.getOldClientPos());
 }

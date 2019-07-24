@@ -7,21 +7,23 @@
 
 class Handle;
 class SoundData;
+class SoundQueue;
 class SoundEffect : public SoundBaseClass {
     friend class Engine::epriv::SoundManager;
+    friend class SoundQueue;
     private:
         sf::Sound   m_Sound;
         float       m_Duration;
+        bool        m_Active;
+
+        SoundEffect();
     public:
-        SoundEffect(Handle&, const uint& loops = 1);
-        SoundEffect(SoundData&, const uint& loops = 1);
         ~SoundEffect();
 
         void update(const double& dt);
-        const bool play(const uint& loop);
-        const bool play();
+        const bool play(const uint& numLoops = 1);
         const bool pause();
-        const bool stop();
+        const bool stop(const bool& stopAllLoops = false);
         const bool restart();
         const float& getDuration() const;
 

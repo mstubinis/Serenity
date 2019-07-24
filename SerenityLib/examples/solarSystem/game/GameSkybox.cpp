@@ -75,12 +75,13 @@ class GameSkybox::impl final{
             */
         }
 };
-GameSkybox::GameSkybox(string name, uint numFlares, Scene* scene):Skybox(name,scene),m_i(new impl){ 
+GameSkybox::GameSkybox(const string& name, uint numFlares):Skybox(name),m_i(new impl){
     m_i->_init(numFlares); 
 }
-GameSkybox::GameSkybox(string* names, uint numFlares, Scene* scene):Skybox(names,scene),m_i(new impl){ 
+GameSkybox::GameSkybox(const string* names, uint numFlares):Skybox(names),m_i(new impl){
     m_i->_init(numFlares); 
 }
+
 GameSkybox::~GameSkybox(){ 
     m_i->_destruct(); 
 }

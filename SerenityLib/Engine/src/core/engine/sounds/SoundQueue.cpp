@@ -16,52 +16,55 @@ SoundQueue::~SoundQueue() {
     clear();
 }
 void SoundQueue::enqueueEffect(Handle& handle, const uint& loops) {
-    auto effect = new SoundEffect(handle, loops);
-    effect->play();
-    m_Queue.push(effect);
+    auto effect = m_SoundManager._getFreeEffect();
+    if (effect) {
+        m_SoundManager._setSoundInformation(handle, *effect);
+        m_Queue.push(effect);
+    }
 }
 void SoundQueue::enqueueMusic(Handle& handle, const uint& loops) {
-    auto music = new SoundMusic(handle, loops);
-    music->play();
-    m_Queue.push(music);
+    auto music = m_SoundManager._getFreeMusic();
+    if (music) {
+        m_SoundManager._setSoundInformation(handle, *music);
+        m_Queue.push(music);
+    }
 }
 void SoundQueue::dequeue() {
     if (m_Queue.size() > 0) {
         auto item = m_Queue.front();
-        SAFE_DELETE(item);
         m_Queue.pop();
         m_IsDelayProcess = true;
     }
 }
 void SoundQueue::update(const double& dt) {
-    if (!m_Active)
-        return;
-    if (m_IsDelayProcess) {
-        m_DelayTimer += dt;
-        if (m_DelayTimer > m_DelayInSeconds) {
-            m_IsDelayProcess = false;
-            m_DelayTimer = 0;
-        }
-    }else{
-        if (m_Queue.size() > 0) {
-            auto item = m_Queue.front();
-            const SoundStatus::Status& status = item->status();
-            if (status == SoundStatus::Fresh) {
-                item->play();
-            }else if (status == SoundStatus::Playing || status == SoundStatus::PlayingLooped){
-                item->update(dt);
-            }else if (status == SoundStatus::Stopped){
-                if (item->getLoopsLeft() <= 1) {
-                    SAFE_DELETE(item); //this sound has finished, remove it from the queue and start the delay process
-                    m_Queue.pop();
-                    m_IsDelayProcess = true;
+    if (m_Active) {
+        if (m_IsDelayProcess) {
+            m_DelayTimer += dt;
+            if (m_DelayTimer > m_DelayInSeconds) {
+                m_IsDelayProcess = false;
+                m_DelayTimer = 0;
+            }
+        }else{
+            if (m_Queue.size() > 0) {
+                auto item = m_Queue.front();
+                const SoundStatus::Status& status = item->status();
+                if (status == SoundStatus::Fresh) {
+                    item->play();
+                }else if (status == SoundStatus::Playing || status == SoundStatus::PlayingLooped) {
+                    item->update(dt);
+                }else if (status == SoundStatus::Stopped) {
+                    const auto& loopsLeft = item->getLoopsLeft();
+                    if (loopsLeft <= 1) {
+                        m_Queue.pop();
+                        m_IsDelayProcess = true;
+                    }
                 }
             }
         }
     }
 }
 void SoundQueue::clear() {
-    SAFE_DELETE_QUEUE(m_Queue);
+
 }
 const bool& SoundQueue::empty() const {
     return m_Queue.empty();

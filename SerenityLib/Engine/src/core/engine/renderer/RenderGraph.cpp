@@ -8,18 +8,20 @@
 #include <glm/glm.hpp>
 
 using namespace Engine;
+using namespace Engine::epriv;
 using namespace std;
 
-epriv::RenderPipeline::RenderPipeline(ShaderP& _shaderProgram) :shaderProgram(_shaderProgram) {
+
+RenderPipeline::RenderPipeline(ShaderP& _shaderProgram) :shaderProgram(_shaderProgram) {
 }
-epriv::RenderPipeline::~RenderPipeline() {
+RenderPipeline::~RenderPipeline() {
     SAFE_DELETE_VECTOR(materialNodes);
 }
 
 float dist(const glm::vec3& lhs, const glm::vec3& rhs) {
     return glm::distance(lhs, rhs);
 }
-void epriv::RenderPipeline::sort_cheap(Camera& camera) {
+void RenderPipeline::sort_cheap(Camera& camera) {
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
             auto& vect = meshNode->instanceNodes;
@@ -35,7 +37,7 @@ void epriv::RenderPipeline::sort_cheap(Camera& camera) {
         }
     }
 }
-void epriv::RenderPipeline::sort(Camera& camera) {
+void RenderPipeline::sort(Camera& camera) {
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
             auto& vect = meshNode->instanceNodes;
@@ -66,7 +68,7 @@ void epriv::RenderPipeline::sort(Camera& camera) {
     }
 }
 
-void epriv::RenderPipeline::render(Camera& camera) {
+void RenderPipeline::render(Camera& camera) {
     shaderProgram.bind();
     for (auto& materialNode : materialNodes) {
         if (materialNode->meshNodes.size() > 0) {
@@ -100,7 +102,7 @@ void epriv::RenderPipeline::render(Camera& camera) {
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material
-                    if (epriv::Core::m_Engine->m_RenderManager.glSM.current_bound_shader_program != &shaderProgram) {
+                    if (Core::m_Engine->m_RenderManager.glSM.current_bound_shader_program != &shaderProgram) {
                         shaderProgram.bind();
                         _material.bind();
                     }

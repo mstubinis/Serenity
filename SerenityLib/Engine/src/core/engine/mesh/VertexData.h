@@ -47,7 +47,7 @@ struct VertexData final{
             old_data = new char[totalSize];
             dataSizesCapacity[attributeIndex] = new_data.size();
         }
-        std::memmove(old_data, new_data.data(), totalSize);
+        std::memcpy(old_data, new_data.data(), totalSize);
         dataSizes[attributeIndex] = new_data.size();
         if (addToGPU) {
             if (format.interleavingType == VertexAttributeLayout::Interleaved) {

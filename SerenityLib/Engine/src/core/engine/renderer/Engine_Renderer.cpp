@@ -19,6 +19,7 @@
 #include <core/engine/scene/Skybox.h>
 #include <core/Material.h>
 #include <ecs/ComponentBody.h>
+#include <core/engine/renderer/opengl/UniformBufferObject.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -51,14 +52,6 @@ epriv::RenderManager::impl* renderManagerImpl;
 
 uint epriv::RenderManager::GLSL_VERSION;
 uint epriv::RenderManager::OPENGL_VERSION;
-
-
-//extensions
-vector<bool> epriv::RenderManager::OPENGL_EXTENSIONS = [](){
-    vector<bool> v; v.resize(epriv::OpenGLExtensionEnum::_TOTAL,false);
-
-    return v;
-}();
 
 namespace Engine{
     namespace epriv{
@@ -170,15 +163,12 @@ class epriv::RenderManager::impl final{
         float gamma;
         Texture* brdfCook;
         Texture* blackCubemap;
-        unsigned char cull_face_status;
         GLboolean color_mask_r;
         GLboolean color_mask_g;
         GLboolean color_mask_b;
         GLboolean color_mask_a;
-        glm::vec4 clear_color;
         AntiAliasingAlgorithm::Algorithm aa_algorithm;
         DepthFunc::Func depth_func;
-        glm::uvec4 gl_viewport_data;
         bool draw_physics_debug;
 
         GBuffer* m_GBuffer;
@@ -186,14 +176,14 @@ class epriv::RenderManager::impl final{
 
         vector<boost_func> m_2DAPICommands;
 
-        vector<glm::vec3> text_pts;
-        vector<glm::vec2> text_uvs;
-        vector<ushort>    text_ind;
+        vector<glm::vec3>   text_pts;
+        vector<glm::vec2>   text_uvs;
+        vector<ushort>      text_ind;
 
-        glm::vec3 m_RotationAxis2D;
-        glm::mat4 m_IdentityMat4;
-        glm::mat3 m_IdentityMat3;
-        FullscreenQuad* m_FullscreenQuad;
+        glm::vec3           m_RotationAxis2D;
+        glm::mat4           m_IdentityMat4;
+        glm::mat3           m_IdentityMat3;
+        FullscreenQuad*     m_FullscreenQuad;
         FullscreenTriangle* m_FullscreenTriangle;
         #pragma endregion
 
@@ -218,15 +208,12 @@ class epriv::RenderManager::impl final{
             gamma = 2.2f;
             brdfCook = nullptr;
             blackCubemap = nullptr;
-            cull_face_status = 0; /* 0 = back | 1 = front | 2 = front and back */
             color_mask_r = GL_TRUE;
             color_mask_g = GL_TRUE;
             color_mask_b = GL_TRUE;
             color_mask_a = GL_TRUE;
-            clear_color = glm::vec4(0.0f,0.0f,0.0f,0.0f);
             aa_algorithm = AntiAliasingAlgorithm::FXAA;
             depth_func = DepthFunc::Less;
-            gl_viewport_data = glm::uvec4(0,0,0,0);
             #ifdef _DEBUG
                 draw_physics_debug = true;
             #else
@@ -244,34 +231,9 @@ class epriv::RenderManager::impl final{
             glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &UniformBufferObject::MAX_UBO_BINDINGS);
 #pragma region OpenGLExtensions
 
-            //prints all the extensions the gpu supports
-            /*
-            GLint n=0; glGetIntegerv(GL_NUM_EXTENSIONS, &n);
-            for (GLint i=0; i<n; i++) {
-            const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
-            printf("Ext %d: %s\n", i, extension);
-            }
-            */
+            renderManager->OpenGLExtensionsManager.INIT();
 
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_Ansiotropic_Filtering]    = _checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_Ansiotropic_Filtering]    = _checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_draw_instanced]           = _checkOpenGLExtension("GL_EXT_draw_instanced");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_draw_instanced]           = _checkOpenGLExtension("GL_ARB_draw_instanced");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_separate_shader_objects]  = _checkOpenGLExtension("GL_EXT_separate_shader_objects");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_separate_shader_objects]  = _checkOpenGLExtension("GL_ARB_separate_shader_objects");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_explicit_attrib_location] = _checkOpenGLExtension("GL_EXT_explicit_attrib_location");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_explicit_attrib_location] = _checkOpenGLExtension("GL_ARB_explicit_attrib_location");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_geometry_shader_4]        = _checkOpenGLExtension("GL_EXT_geometry_shader4");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_geometry_shader_4]        = _checkOpenGLExtension("GL_ARB_geometry_shader4");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_compute_shader]           = _checkOpenGLExtension("GL_EXT_compute_shader");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_compute_shader]           = _checkOpenGLExtension("GL_ARB_compute_shader");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::EXT_tessellation_shader]      = _checkOpenGLExtension("GL_EXT_tessellation_shader");
-            OPENGL_EXTENSIONS[OpenGLExtensionEnum::ARB_tessellation_shader]      = _checkOpenGLExtension("GL_ARB_tessellation_shader");
 #pragma endregion
-
-            //dummy vao
-            GLuint dummyVAO;
-            Engine::Renderer::genAndBindVAO(dummyVAO);
 
             epriv::EShaders::init();
 
@@ -1138,9 +1100,9 @@ class epriv::RenderManager::impl final{
             for (unsigned int i = 0; i < text_ind.capacity(); ++i)
                 text_ind.emplace_back(0);
 
-            fontPlane.modifyVertices(0, text_pts);
-            fontPlane.modifyVertices(1, text_uvs);
-            fontPlane.modifyIndices(text_ind);
+            fontPlane.modifyVertices(0, text_pts, MeshModifyFlags::Default);
+            fontPlane.modifyVertices(1, text_uvs, MeshModifyFlags::Default);
+            fontPlane.modifyIndices(text_ind, MeshModifyFlags::Default);
 
             text_pts.clear();
             text_uvs.clear();
@@ -1182,8 +1144,6 @@ class epriv::RenderManager::impl final{
 
             GLEnable(GLState::DEPTH_TEST);
             Renderer::setDepthFunc(DepthFunc::LEqual);
-            glClearDepth(1.0f);
-            glClearStencil(0);
             GLDisable(GLState::STENCIL_TEST);
             glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
@@ -1221,8 +1181,7 @@ class epriv::RenderManager::impl final{
 
             //TODO: add cleanup() from ssao / smaa here?
         }
-        bool _checkOpenGLExtension(const char* e){ if(glewIsExtensionSupported(e)!=0) return true;return 0!=glewIsSupported(e); }
-        void _renderSkybox(SkyboxEmpty* skybox, Camera& camera){
+        void _renderSkybox(Skybox* skybox, Camera& camera){
             Scene& scene = *Resources::getCurrentScene();
             glm::mat4 view = camera.getView();
             Math::removeMatrixPosition(view);
@@ -1254,15 +1213,12 @@ class epriv::RenderManager::impl final{
 
             //oh yea the opengl context is lost, gotta restore the state machine
             Renderer::RestoreGLState();
+            renderManager->OpenGLStateMachine.GL_RESTORE_CURRENT_STATE_MACHINE();
 
             glDepthFunc(GL_LEQUAL);
-            glCullFace(GL_BACK);
             glEnable(GL_CULL_FACE);
             glEnable(GL_DEPTH_CLAMP);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
-            glClearDepth(1.0f);
-            glClearStencil(0);
 
             const auto& winSize = Resources::getWindowSize();
             m_GBuffer = new GBuffer(winSize.x, winSize.y);
@@ -1270,10 +1226,7 @@ class epriv::RenderManager::impl final{
         void _onOpenGLContextCreation(const uint& width, const uint& height, const uint& _glslVersion, const uint& _openglVersion){
             epriv::RenderManager::GLSL_VERSION = _glslVersion;
             epriv::RenderManager::OPENGL_VERSION = _openglVersion;
-            glewExperimental = GL_TRUE;
-            glewInit(); glGetError();//stupid glew always inits an error. nothing we can do about it.
             GLEnable(GLState::CULL_FACE);
-            Settings::cullFace(GL_BACK);
             SAFE_DELETE(m_GBuffer);
             m_GBuffer = new GBuffer(width,height);
         }
@@ -1283,7 +1236,7 @@ class epriv::RenderManager::impl final{
                 cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl; return;
             }
             uint size = convoludeTextureSize;
-            bindTexture(texType, texture.address(1));
+            Renderer::bindTextureForModification(texType, texture.address(1));
             Renderer::unbindFBO();
             epriv::FramebufferObject* fbo = new epriv::FramebufferObject(texture.name() + "_fbo_envData",size,size); //try without a depth format
             fbo->bind();
@@ -1300,13 +1253,13 @@ class epriv::RenderManager::impl final{
             };
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude]->bind();
 
-            sendTexture("cubemap",texture.address(),0,texType);
-            setViewport(0,0,size,size);
+            Renderer::sendTexture("cubemap",texture.address(),0,texType);
+            Renderer::setViewport(0,0,size,size);
             for (uint i = 0; i < 6; ++i){
-                glm::mat4 vp = captureProjection * captureViews[i];
-                sendUniformMatrix4("VP",vp);
+                const glm::mat4 vp = captureProjection * captureViews[i];
+                Renderer::sendUniformMatrix4("VP",vp);
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,texture.address(1),0);
-                Settings::clear(true,true,false);
+                Renderer::Settings::clear(true,true,false);
                 Skybox::bindMesh();
             }
             Resources::getWindow().display(); //prevent opengl & windows timeout
@@ -1314,24 +1267,24 @@ class epriv::RenderManager::impl final{
 
             //now gen EnvPrefilterMap for specular IBL
             size = preEnvFilterSize;
-            bindTexture(texType, texture.address(2));
+            Renderer::bindTextureForModification(texType, texture.address(2));
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapPrefilterEnv]->bind();
-            sendTexture("cubemap",texture.address(),0,texType);
-            sendUniform1("PiFourDividedByResSquaredTimesSix",12.56637f / float((texture.width() * texture.width())*6));
-            sendUniform1("NUM_SAMPLES",32);
+            Renderer::sendTexture("cubemap",texture.address(),0,texType);
+            Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix",12.56637f / float((texture.width() * texture.width())*6));
+            Renderer::sendUniform1("NUM_SAMPLES",32);
             uint maxMipLevels = 5;
             for (uint m = 0; m < maxMipLevels; ++m){
                 uint mipSize  = uint(size * glm::pow(0.5,m)); // reisze framebuffer according to mip-level size.
                 fbo->resize(mipSize,mipSize);
                 float roughness = (float)m/(float)(maxMipLevels-1);
-                sendUniform1("roughness",roughness);
+                Renderer::sendUniform1("roughness",roughness);
                 float a = roughness * roughness;
-                sendUniform1("a2",a*a);
+                Renderer::sendUniform1("a2",a*a);
                 for (uint i = 0; i < 6; ++i){
                     glm::mat4 vp = captureProjection * captureViews[i];
-                    sendUniformMatrix4("VP", vp);
+                    Renderer::sendUniformMatrix4("VP", vp);
                     glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,texture.address(2),m);
-                    Settings::clear(true,true,false);
+                    Renderer::Settings::clear(true,true,false);
                     Skybox::bindMesh();
                 }
             }
@@ -1346,22 +1299,22 @@ class epriv::RenderManager::impl final{
             FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO", brdfSize, brdfSize); //try without a depth format
             fbo->bind();
 
-            bindTexture(GL_TEXTURE_2D, brdfCook->address());
+            Renderer::bindTextureForModification(GL_TEXTURE_2D, brdfCook->address());
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
             Texture::setFilter(GL_TEXTURE_2D, TextureFilter::Linear);
             Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToEdge);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfCook->address(), 0);
 
             m_InternalShaderPrograms[EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance]->bind();
-            sendUniform1("NUM_SAMPLES", 256);
-            Settings::clear(true, true, false);
+            Renderer::sendUniform1("NUM_SAMPLES", 256);
+            Renderer::Settings::clear(true, true, false);
             Renderer::colorMask(true, true, false, false);
-            _renderFullscreenTriangle(brdfSize, brdfSize, 0, 0);
+            Renderer::renderFullscreenTriangle(brdfSize, brdfSize);
             Renderer::colorMask(true, true, true, true);
 
             SAFE_DELETE(fbo);
-            bindReadFBO(prevReadBuffer);
-            bindDrawFBO(prevDrawBuffer);
+            Renderer::bindReadFBO(prevReadBuffer);
+            Renderer::bindDrawFBO(prevDrawBuffer);
         }
         void _renderTextLeft(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
             uint i = 0;
@@ -1545,7 +1498,7 @@ class epriv::RenderManager::impl final{
 
             Renderer::GLEnable(GLState::DEPTH_TEST);
             if (glm::distance(c.getPosition(), pos) <= p.m_CullingRadius) { //inside the light volume
-                Renderer::Settings::cullFace(GL_FRONT);
+                Renderer::cullFace(GL_FRONT);
                 Renderer::setDepthFunc(DepthFunc::GEqual);
             }
             auto& pointLightMesh = *epriv::InternalMeshes::PointLightBounds;
@@ -1553,7 +1506,7 @@ class epriv::RenderManager::impl final{
             pointLightMesh.bind();
             pointLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
             pointLightMesh.unbind();
-            Renderer::Settings::cullFace(GL_BACK);
+            Renderer::cullFace(GL_BACK);
             Renderer::setDepthFunc(DepthFunc::LEqual);
             Renderer::GLDisable(GLState::DEPTH_TEST);
         }
@@ -1591,7 +1544,7 @@ class epriv::RenderManager::impl final{
 
             Renderer::GLEnable(GLState::DEPTH_TEST);
             if (glm::distance(c.getPosition(), pos) <= s.m_CullingRadius) { //inside the light volume                                                 
-                Renderer::Settings::cullFace(GL_FRONT);
+                Renderer::cullFace(GL_FRONT);
                 Renderer::setDepthFunc(DepthFunc::GEqual);
             }
             auto& spotLightMesh = *epriv::InternalMeshes::SpotLightBounds;
@@ -1599,7 +1552,7 @@ class epriv::RenderManager::impl final{
             spotLightMesh.bind();
             spotLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
             spotLightMesh.unbind();
-            Renderer::Settings::cullFace(GL_BACK);
+            Renderer::cullFace(GL_BACK);
             Renderer::setDepthFunc(DepthFunc::LEqual);
 
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
@@ -1631,7 +1584,7 @@ class epriv::RenderManager::impl final{
 
             Renderer::GLEnable(GLState::DEPTH_TEST);
             if (glm::distance(c.getPosition(), pos) <= cullingDistance) {
-                Renderer::Settings::cullFace(GL_FRONT);
+                Renderer::cullFace(GL_FRONT);
                 Renderer::setDepthFunc(DepthFunc::GEqual);
             }
             auto& rodLightMesh = *epriv::InternalMeshes::RodLightBounds;
@@ -1639,7 +1592,7 @@ class epriv::RenderManager::impl final{
             rodLightMesh.bind();
             rodLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
             rodLightMesh.unbind();
-            Renderer::Settings::cullFace(GL_BACK);
+            Renderer::cullFace(GL_BACK);
             Renderer::setDepthFunc(DepthFunc::LEqual);
             Renderer::GLDisable(GLState::DEPTH_TEST);
 
@@ -1764,7 +1717,7 @@ class epriv::RenderManager::impl final{
                 sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 2);
                 sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 3);
 
-                SkyboxEmpty* skybox = s.skybox();
+                Skybox* skybox = s.skybox();
                 if(skybox && skybox->texture()->numAddresses() >= 3){
                     sendTextureSafe("irradianceMap", skybox->texture()->address(1), 4, GL_TEXTURE_CUBE_MAP);
                     sendTextureSafe("prefilterMap", skybox->texture()->address(2), 5, GL_TEXTURE_CUBE_MAP);
@@ -1786,19 +1739,20 @@ class epriv::RenderManager::impl final{
 
             GLEnable(GLState::STENCIL_TEST);
             Settings::clear(false,false,true); //stencil is completely filled with 0's
-            glStencilMask(0xFFFFFFFF);
+            Renderer::stencilMask(0xFFFFFFFF);
             glStencilFunc(GL_ALWAYS, 0x00000000, 0x00000000);
             
             //exclude shadeless normals
-            glStencilOp(GL_KEEP, GL_INCR_WRAP, GL_INCR_WRAP);
+            Renderer::stencilOp(GL_KEEP, GL_INCR_WRAP, GL_INCR_WRAP);
+
+
             sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
             sendUniform1("Type",0.0f);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
 
-
-            glStencilMask(0xFFFFFFFF);
+            Renderer::stencilMask(0xFFFFFFFF);
             glStencilFunc(GL_NOTEQUAL, 0x00000000, 0xFFFFFFFF);
-            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Do not change stencil
+            Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Do not change stencil
 
             Renderer::colorMask(true, true, true, true);
         }
@@ -2140,52 +2094,57 @@ class epriv::RenderManager::impl final{
 };
 
 
-epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ 
-    m_i->_init(name,w,h); 
+epriv::RenderManager::RenderManager(const char* name, uint windowWidth, uint windowHeight):m_i(new impl){ 
+    m_i->_init(name, windowWidth, windowHeight);
     renderManagerImpl = m_i.get();
     renderManager = this;
+
+    OpenGLStateMachine = OpenGLState(windowWidth, windowHeight);
 }
-epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
+epriv::RenderManager::~RenderManager(){ 
+    m_i->_destruct(); 
+}
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ 
-    m_i->_postInit(name,w,h); 
+    m_i->_postInit(name, w, h);
 }
 void epriv::RenderManager::_render(Viewport& viewport,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
     m_i->_render(*m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);
 }
 void epriv::RenderManager::_resize(uint w,uint h){ 
-    m_i->_resize(w,h); 
+    m_i->_resize(w, h);
 }
-void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ 
-    m_i->_onFullscreen(w,m,n,s,set); 
+void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){
+    m_i->_onFullscreen(w, m, n, s, set);
 }
-void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h,uint _glslVersion,uint _openglVersion){ 
-    m_i->_onOpenGLContextCreation(w,h,_glslVersion,_openglVersion); 
+void epriv::RenderManager::_onOpenGLContextCreation(uint windowWidth,uint windowHeight,uint _glslVersion,uint _openglVersion){ 
+    OpenGLStateMachine.GL_INIT_DEFAULT_STATE_MACHINE(windowWidth, windowHeight);
+    m_i->_onOpenGLContextCreation(windowWidth, windowHeight, _glslVersion, _openglVersion);
 }
 void epriv::RenderManager::_clear2DAPICommands() {
     vector_clear(m_i->m_2DAPICommands);
 }
 
-bool epriv::RenderManager::_bindShaderProgram(ShaderP* p){
+const bool epriv::RenderManager::_bindShaderProgram(ShaderP* p){
     auto& currentShaderPgrm = glSM.current_bound_shader_program;
     if(currentShaderPgrm != p){
-        glUseProgram(p->program());
+        OpenGLStateMachine.GL_glUseProgram(p->program());
         currentShaderPgrm = p;
         currentShaderPgrm->BindableResource::bind();
         return true;
     }
     return false;
 }
-bool epriv::RenderManager::_unbindShaderProgram() {
+const bool epriv::RenderManager::_unbindShaderProgram() {
     auto& currentShaderPgrm = glSM.current_bound_shader_program;
     if (currentShaderPgrm) {
         currentShaderPgrm->BindableResource::unbind();
         currentShaderPgrm = nullptr;
-        glUseProgram(0);
+        OpenGLStateMachine.GL_glUseProgram(0);
         return true;
     }
     return false;
 }
-bool epriv::RenderManager::_bindMaterial(Material* m){
+const bool epriv::RenderManager::_bindMaterial(Material* m){
     auto& currentMaterial = glSM.current_bound_material;
     if(currentMaterial != m){
         currentMaterial = m;
@@ -2194,7 +2153,7 @@ bool epriv::RenderManager::_bindMaterial(Material* m){
     }
     return false;
 }
-bool epriv::RenderManager::_unbindMaterial(){
+const bool epriv::RenderManager::_unbindMaterial(){
     auto& currentMaterial = glSM.current_bound_material;
     if(currentMaterial){
         currentMaterial->BindableResource::unbind();
@@ -2213,7 +2172,7 @@ void Renderer::Settings::Lighting::enable(const bool b){
 void Renderer::Settings::Lighting::disable(){ 
     renderManagerImpl->lighting = false; 
 }
-float Renderer::Settings::Lighting::getGIContributionGlobal(){ 
+const float Renderer::Settings::Lighting::getGIContributionGlobal(){
     return renderManagerImpl->lighting_gi_contribution_global; 
 }
 void Renderer::Settings::Lighting::setGIContributionGlobal(const float gi){
@@ -2221,7 +2180,7 @@ void Renderer::Settings::Lighting::setGIContributionGlobal(const float gi){
     mgr.lighting_gi_contribution_global = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
-float Renderer::Settings::Lighting::getGIContributionDiffuse(){ 
+const float Renderer::Settings::Lighting::getGIContributionDiffuse(){
     return renderManagerImpl->lighting_gi_contribution_diffuse;
 }
 void Renderer::Settings::Lighting::setGIContributionDiffuse(const float gi){
@@ -2229,7 +2188,7 @@ void Renderer::Settings::Lighting::setGIContributionDiffuse(const float gi){
     mgr.lighting_gi_contribution_diffuse = glm::clamp(gi,0.001f,0.999f);
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
-float Renderer::Settings::Lighting::getGIContributionSpecular(){ 
+const float Renderer::Settings::Lighting::getGIContributionSpecular(){
     return renderManagerImpl->lighting_gi_contribution_specular; 
 }
 void Renderer::Settings::Lighting::setGIContributionSpecular(const float gi){
@@ -2245,7 +2204,7 @@ void Renderer::Settings::Lighting::setGIContribution(const float g, const float 
     mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
 }
 
-bool Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm& algorithm){
+const bool Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm& algorithm){
     auto& i = *renderManagerImpl;
     if(i.aa_algorithm != algorithm){ 
         i.aa_algorithm = algorithm; 
@@ -2253,23 +2212,17 @@ bool Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::A
     }
     return false;
 }
-bool Renderer::Settings::cullFace(const uint& state){ 
-    //0 = back | 1 = front | 2 = front and back
-    auto& i = *renderManagerImpl;
-    if (state == GL_BACK && i.cull_face_status != 0) {
-        glCullFace(GL_BACK);
-        i.cull_face_status = 0;
-        return true;
-    }else if (state == GL_FRONT && i.cull_face_status != 1) {
-        glCullFace(GL_FRONT);
-        i.cull_face_status = 1;
-        return true;
-    }else if (state == GL_FRONT_AND_BACK && i.cull_face_status != 2) {
-        glCullFace(GL_FRONT_AND_BACK);
-        i.cull_face_status = 2;
-        return true;
-    }
-    return false;
+const bool Renderer::stencilOp(const GLenum& sfail, const GLenum& dpfail, const GLenum& dppass) {
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glStencilOp(sfail, dpfail, dppass);
+}
+const bool Renderer::stencilMask(const GLuint& mask) {
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glStencilMask(mask);
+}
+const bool Renderer::cullFace(const GLenum& state){
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glCullFace(state);
 }
 void Renderer::Settings::clear(const bool color, const bool depth, const bool stencil){
     if(!color && !depth && !stencil) return;
@@ -2288,10 +2241,10 @@ void Renderer::Settings::disableDrawPhysicsInfo(){
 void Renderer::Settings::setGamma(const float g){
     renderManagerImpl->gamma = g; 
 }
-float Renderer::Settings::getGamma(){ 
+const float Renderer::Settings::getGamma(){
     return renderManagerImpl->gamma; 
 }
-bool Renderer::setDepthFunc(const DepthFunc::Func& func){
+const bool Renderer::setDepthFunc(const DepthFunc::Func& func){
     auto& i = *renderManagerImpl;
     if (i.depth_func != func) {
         glDepthFunc(func);
@@ -2300,15 +2253,11 @@ bool Renderer::setDepthFunc(const DepthFunc::Func& func){
     } 
     return false;
 }
-bool Renderer::setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
-    auto& i = *renderManagerImpl;
-    if (i.gl_viewport_data.x == x && i.gl_viewport_data.y == y && i.gl_viewport_data.z == w && i.gl_viewport_data.w == h)
-        return false;
-    glViewport(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(w), static_cast<GLsizei>(h));
-    i.gl_viewport_data = glm::uvec4(x, y, w, h);
-    return true;
+const bool Renderer::setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glViewport(x, y, w, h);
 }
-bool Renderer::colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
+const bool Renderer::colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
     auto& i = *renderManagerImpl;
     auto _r = static_cast<GLboolean>(r);
     auto _g = static_cast<GLboolean>(g);
@@ -2323,94 +2272,62 @@ bool Renderer::colorMask(const bool& r, const bool& g, const bool& b, const bool
     glColorMask(i.color_mask_r, i.color_mask_g, i.color_mask_b, i.color_mask_a);
     return true;
 }
-bool Renderer::clearColor(const float& r, const float& g, const float& b, const float& a) {
-    auto& i = *renderManagerImpl;
-    if (r == i.clear_color.r && g == i.clear_color.g && b == i.clear_color.b && a == i.clear_color.a)
-        return false;
-    i.clear_color.r = r;
-    i.clear_color.g = g;
-    i.clear_color.b = b;
-    i.clear_color.a = a;
-    glClearColor(i.clear_color.r, i.clear_color.g, i.clear_color.b, i.clear_color.a);
-    return true;
-}
-bool Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
+const bool Renderer::clearColor(const float& r, const float& g, const float& b, const float& a) {
     auto& i = *renderManager;
-    switch(_textureType){
-        case GL_TEXTURE_1D:{
-            if(i.glSM.current_bound_texture_1D != _textureObject){
-                i.glSM.current_bound_texture_1D = _textureObject;
-                glBindTexture(_textureType,_textureObject);
-                return true;
-            }
-            break;
-        }case GL_TEXTURE_2D:{
-            if(i.glSM.current_bound_texture_2D != _textureObject){
-                i.glSM.current_bound_texture_2D = _textureObject;
-                glBindTexture(_textureType,_textureObject);
-                return true;
-            }
-            break;
-        }case GL_TEXTURE_3D:{
-            if(i.glSM.current_bound_texture_3D != _textureObject){
-                i.glSM.current_bound_texture_3D = _textureObject;
-                glBindTexture(_textureType,_textureObject);
-                return true;
-            }
-            break;
-        }case GL_TEXTURE_CUBE_MAP:{
-            if(i.glSM.current_bound_texture_cube_map != _textureObject){
-                i.glSM.current_bound_texture_cube_map = _textureObject;
-                glBindTexture(_textureType,_textureObject);
-                return true;
-            }
-            break;
-        }
-    }
-    return false;
+    return i.OpenGLStateMachine.GL_glClearColor(r, g, b, a);
 }
-bool Renderer::bindVAO(const GLuint _vaoObject){
+
+const bool Renderer::bindTextureForModification(const GLuint _textureType, const GLuint _textureObject) {
     auto& i = *renderManager;
-    if(i.glSM.current_bound_vao != _vaoObject){
-        glBindVertexArray(_vaoObject);
-        i.glSM.current_bound_vao = _vaoObject;
-        return true;
-    }
-    return false;
+    return i.OpenGLStateMachine.GL_glBindTextureForModification(_textureType, _textureObject);
 }
-bool Renderer::deleteVAO(GLuint& _vaoObject) {
-    if (_vaoObject) {
-        glDeleteVertexArrays(1,&_vaoObject);
-        _vaoObject = 0;
+
+const bool Renderer::bindVAO(const GLuint vaoObject){
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glBindVertexArray(vaoObject);
+}
+const bool Renderer::deleteVAO(GLuint& vaoObject) {
+    if (vaoObject) {
+        glDeleteVertexArrays(1, &vaoObject);
+        vaoObject = 0;
         return true;
     }
     return false;
 }
 void Renderer::genAndBindTexture(const GLuint _textureType, GLuint& _textureObject){
+    auto& i = *renderManager;
     glGenTextures(1, &_textureObject);
-    bindTexture(_textureType,_textureObject);
+    i.OpenGLStateMachine.GL_glBindTextureForModification(_textureType, _textureObject);
 }
 void Renderer::genAndBindVAO(GLuint& _vaoObject){
     glGenVertexArrays(1, &_vaoObject);
     bindVAO(_vaoObject);
 }
 void Renderer::sendTexture(const char* location, const Texture& texture,const int& slot){
-    Renderer::sendTexture(location, texture.address(), slot, texture.type());
+    auto& i = *renderManager;
+    i.OpenGLStateMachine.GL_glActiveTexture(slot);
+    i.OpenGLStateMachine.GL_glBindTextureForRendering(texture.type(), texture.address());
+    sendUniform1(location, slot);
 }
-void Renderer::sendTexture(const char* location,const GLuint textureAddress,const int& slot,const GLuint& targetType){
-    glActiveTexture(GL_TEXTURE0 + slot);
-    bindTexture(targetType,textureAddress);
-    sendUniform1(location,slot);
+void Renderer::sendTexture(const char* location,const GLuint textureObject,const int& slot,const GLuint& textureTarget){
+    auto& i = *renderManager;
+    i.OpenGLStateMachine.GL_glActiveTexture(slot);
+    i.OpenGLStateMachine.GL_glBindTextureForRendering(textureTarget, textureObject);
+    sendUniform1(location, slot);
 }
 void Renderer::sendTextureSafe(const char* location, const Texture& texture,const int& slot){
-    Renderer::sendTextureSafe(location, texture.address(), slot, texture.type());
+    auto& i = *renderManager;
+    i.OpenGLStateMachine.GL_glActiveTexture(slot);
+    i.OpenGLStateMachine.GL_glBindTextureForRendering(texture.type(), texture.address());
+    sendUniform1Safe(location, slot);
 }
-void Renderer::sendTextureSafe(const char* location,const GLuint textureAddress,const int& slot,const GLuint& targetType){
-    glActiveTexture(GL_TEXTURE0 + slot);
-    bindTexture(targetType,textureAddress);
-    sendUniform1Safe(location,slot);
+void Renderer::sendTextureSafe(const char* location,const GLuint textureObject,const int& slot,const GLuint& textureTarget){
+    auto& i = *renderManager;
+    i.OpenGLStateMachine.GL_glActiveTexture(slot);
+    i.OpenGLStateMachine.GL_glBindTextureForRendering(textureTarget, textureObject);
+    sendUniform1Safe(location, slot);
 }
-bool Renderer::bindReadFBO(const GLuint& fbo){ 
+const bool Renderer::bindReadFBO(const GLuint& fbo){
     auto& i = *renderManager;
     if (i.glSM.current_bound_read_fbo != fbo) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
@@ -2422,10 +2339,10 @@ bool Renderer::bindReadFBO(const GLuint& fbo){
 void Renderer::bindFBO(epriv::FramebufferObject& fbo){ 
     Renderer::bindFBO(fbo.address()); 
 }
-bool Renderer::bindRBO(epriv::RenderbufferObject& rbo){
+const bool Renderer::bindRBO(epriv::RenderbufferObject& rbo){
     return Renderer::bindRBO(rbo.address()); 
 }
-bool Renderer::bindDrawFBO(const GLuint& fbo){
+const bool Renderer::bindDrawFBO(const GLuint& fbo){
     auto& i = *renderManager;
     if (i.glSM.current_bound_draw_fbo != fbo) {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
@@ -2438,7 +2355,7 @@ void Renderer::bindFBO(const GLuint& fbo){
     Renderer::bindReadFBO(fbo);
     Renderer::bindDrawFBO(fbo);
 }
-bool Renderer::bindRBO(const GLuint& rbo){ 
+const bool Renderer::bindRBO(const GLuint& rbo){
     auto& i = *renderManager;
     if (i.glSM.current_bound_rbo != rbo) {
         glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -2542,7 +2459,7 @@ struct RenderingAPI2D final {
         }else if (alignType == TextAlignment::Center) {
             impl._renderTextCenter(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
         }
-        mesh.modifyVertices(0, impl.text_pts);
+        mesh.modifyVertices(0, impl.text_pts, MeshModifyFlags::Default); //prevent gpu upload until after all the data is collected
         mesh.modifyVertices(1, impl.text_uvs);
         mesh.modifyIndices(impl.text_ind);
         mesh.render(false);

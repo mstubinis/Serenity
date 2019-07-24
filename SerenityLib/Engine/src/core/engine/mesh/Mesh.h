@@ -90,19 +90,25 @@ class Mesh final: public BindableResource, public EventObserver{
         void load();
         void unload();
 
-        template<typename T> void modifyVertices(const uint& attributeIndex, std::vector<T>& modifications, const MeshModifyFlags::Flag& _flags = MeshModifyFlags::Default) {
+        template<typename T> void modifyVertices(const uint& attributeIndex, std::vector<T>& modifications, const uint MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
             auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
-            if (_flags & MeshModifyFlags::Orphan)
-                vertexDataStructure.setData<T>(attributeIndex, modifications, true, true);
-            else
-                vertexDataStructure.setData<T>(attributeIndex, modifications, true, false);
+            bool uploadToGPU = false;
+            bool orphan = false;
+            if (MeshModifyFlags & MeshModifyFlags::Orphan)
+                orphan = true;
+            if (MeshModifyFlags & MeshModifyFlags::UploadToGPU)
+                uploadToGPU = true;
+            vertexDataStructure.setData<T>(attributeIndex, modifications, uploadToGPU, orphan);
         }
-        void modifyIndices(std::vector<ushort>& modifiedIndices, const MeshModifyFlags::Flag& _flags = MeshModifyFlags::Default) {
+        void modifyIndices(std::vector<ushort>& modifiedIndices, const uint MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
             auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
-            if(_flags & MeshModifyFlags::Orphan)
-                vertexDataStructure.setIndices(modifiedIndices, true, true);
-            else
-                vertexDataStructure.setIndices(modifiedIndices, true, false);
+            bool uploadToGPU = false;
+            bool orphan = false;
+            if (MeshModifyFlags & MeshModifyFlags::Orphan)
+                orphan = true;
+            if (MeshModifyFlags & MeshModifyFlags::UploadToGPU)
+                uploadToGPU = true;
+            vertexDataStructure.setIndices(modifiedIndices, uploadToGPU, orphan);
         }
         void render(bool instancing = true, MeshDrawMode::Mode = MeshDrawMode::Triangles);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);

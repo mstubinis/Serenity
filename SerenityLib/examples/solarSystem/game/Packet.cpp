@@ -1,9 +1,11 @@
 #include "Packet.h"
 #include "Ship.h"
+#include "SolarSystem.h"
 
 #include <core/engine/math/Engine_Math.h>
 
 using namespace Engine;
+using namespace std;
 
 Packet* Packet::getPacket(const sf::Packet& sfPacket) {
     char* data = (char*)(sfPacket.getData());
@@ -26,20 +28,29 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
         }case PacketType::Server_To_Client_Ship_Physics_Update: {
             p = new PacketPhysicsUpdate(); break;
         }case PacketType::Client_To_Server_Chat_Message: {
-            p = new PacketChatMessage(); break;
+            p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Chat_Message: {
-            p = new PacketChatMessage(); break;
+            p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Client_Joined_Server: {
-            p = new PacketChatMessage(); break;
+            p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Client_Left_Server: {
-            p = new PacketChatMessage(); break;
+            p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Map_Data: {
-            p = new PacketChatMessage(); break;
-        }
-        default: {
+            p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Request_Map_Entry: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Approve_Map_Entry: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Reject_Map_Entry: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_New_Client_Entered_Map: {
+            p = new PacketMessage(); break;
+        }default: {
             break;
         }
     }
+    if(!p)
+        cout << "Invalid packet type in getPacket(), please see Packet.cpp" << endl;
     return p;
 }
 
@@ -48,14 +59,15 @@ PacketPhysicsUpdate::PacketPhysicsUpdate():Packet() {
     px = py = pz = qx = qy = qz = lx = ly = lz = ax = ay = az = 0;
     qw = 1.0f;
 }
-PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship) :Packet() {
+PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, SolarSystem& map) :Packet() {
     auto& ent = ship.entity();
     EntityDataRequest request(ent);
     const auto pbody = ent.getComponent<ComponentBody>(request);
     const auto pname = ent.getComponent<ComponentName>(request);
 
+    data += ship.getClass();
     if (pname) {
-        data = pname->name();
+        data += ("," + pname->name());
     }
     if (pbody) {
         auto& body = *pbody;
@@ -65,9 +77,10 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship) :Packet() {
         const auto& lv  = body.getLinearVelocity();
         const auto& av  = body.getAngularVelocity();
 
-        px = pos.x;
-        py = pos.y;
-        pz = pos.z;
+        const auto& offset = map.getAnchor();
+        px = pos.x - offset.x;
+        py = pos.y - offset.y;
+        pz = pos.z - offset.z;
 
         Math::Float16From32(&qx, rot.x);
         Math::Float16From32(&qy, rot.y);

@@ -2,13 +2,15 @@
 #ifndef GAME_SERVER_HOSTING_MAP_SELECTOR_WINDOW_H
 #define GAME_SERVER_HOSTING_MAP_SELECTOR_WINDOW_H
 
-class Font;
-class ScrollFrame;
-class Widget;
-class Text;
+class  Font;
+class  ScrollFrame;
+class  Widget;
+class  Text;
+class  Client;
 struct MapSelectorButtonOnClick;
 class ServerHostingMapSelectorWindow final {
     friend struct MapSelectorButtonOnClick;
+    friend class  Client;
     private:
         Text*        m_Label;
         Text*        m_CurrentChoice;

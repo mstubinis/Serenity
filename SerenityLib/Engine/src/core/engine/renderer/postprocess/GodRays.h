@@ -34,24 +34,24 @@ namespace epriv {
 };
 namespace Renderer {
 namespace godRays {
-    bool enabled();
+    const bool enabled();
     void enable(const bool b);
     void disable();
-    float getExposure();
+    const float getExposure();
     void setExposure(const float e);
-    float getFactor();
+    const float getFactor();
     void setFactor(const float f);
-    float getDecay();
+    const float getDecay();
     void setDecay(const float d);
-    float getDensity();
+    const float getDensity();
     void setDensity(const float d);
-    float getWeight();
+    const float getWeight();
     void setWeight(const float w);
-    unsigned int getSamples();
+    const unsigned int getSamples();
     void setSamples(const unsigned int s);
-    float getFOVDegrees();
+    const float getFOVDegrees();
     void setFOVDegrees(const float d);
-    float getAlphaFalloff();
+    const float getAlphaFalloff();
     void setAlphaFalloff(const float a);
     void setSun(Entity*);
     Entity* getSun();

@@ -297,7 +297,7 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     }
     program->bind();
 
-    Renderer::Settings::cullFace(GL_FRONT);
+    Renderer::cullFace(GL_FRONT);
 
     Renderer::sendUniformMatrix4Safe("Model", model);
     Renderer::sendUniform1("nSamples", numberSamples);
@@ -311,7 +311,7 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 }};
 
 struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
-    Renderer::Settings::cullFace(GL_BACK);
+    Renderer::cullFace(GL_BACK);
 }};
 
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere, SolarSystem* scene):EntityWrapper(*scene){

@@ -2,7 +2,6 @@
 
 using namespace std;
 
-
 SoundData::SoundData(const string& file) {
     m_Buffer = nullptr;
     m_File   = file;
@@ -12,9 +11,10 @@ SoundData::SoundData(const string& file) {
 SoundData::~SoundData() {
     SAFE_DELETE(m_Buffer);
 }
-
 void SoundData::buildBuffer() {
-    m_Buffer = new sf::SoundBuffer();
+    if (!m_Buffer) {
+        m_Buffer = new sf::SoundBuffer();
+    }
     m_Buffer->loadFromFile(m_File);
 }
 const float& SoundData::getDuration() const {

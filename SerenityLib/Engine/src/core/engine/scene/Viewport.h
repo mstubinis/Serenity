@@ -24,11 +24,7 @@ class Viewport final {
         bool         m_Using2DAPI;
         bool         m_AspectRatioSynced;
         bool         m_SkyboxVisible;
-
-        //bool         m_TransparencyMaskActive;
-        //glm::vec4    m_TransparencyMaskColor;
         glm::vec4    m_BackgroundColor;
-
         bool         m_DepthMaskActive;
         float        m_DepthMaskValue;
 
@@ -54,16 +50,6 @@ class Viewport final {
 
         const glm::vec4& getBackgroundColor() const;
         void setBackgroundColor(const float& r, const float& g, const float& b, const float& a);
-
-        /*
-        const glm::vec4& getTransparencyMaskColor() const;
-        void setTransparencyMaskColor(const float& r, const float& g, const float& b, const float& a);
-
-        void deactivateTransparencyMask();
-        void activateTransparencyMask();
-        const bool isTransparencyMaskActive() const;
-        */
-
 
         void setAspectRatioSynced(const bool& synced);
         const bool isAspectRatioSynced() const;

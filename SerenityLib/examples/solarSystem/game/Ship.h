@@ -120,14 +120,16 @@ class Ship: public EntityWrapper {
         bool                                 m_IsWarping;
         float                                m_WarpFactor;
         Entity                               m_Target;
+        std::string                          m_ShipClass;
     public:
         Ship(
-            Handle& meshHandle,       //Mesh
-            Handle& materialHandle,   //Material
-            bool = false,             //Player Ship?
-            std::string = "Ship",     //Name
-            glm::vec3 = glm::vec3(0), //Position
-            glm::vec3 = glm::vec3(1), //Scale
+            Handle& meshHandle,                   //Mesh
+            Handle& materialHandle,               //Material
+            const std::string& shipClass,
+            bool player = false,                  //Player Ship?
+            const std::string& name = "Ship",     //Name
+            glm::vec3 = glm::vec3(0),             //Position
+            glm::vec3 = glm::vec3(1),             //Scale
             CollisionType::Type = CollisionType::ConvexHull,
             SolarSystem* = nullptr
         );
@@ -142,6 +144,7 @@ class Ship: public EntityWrapper {
             m_IsWarping = !m_IsWarping;
             m_WarpFactor = 0;
         }
+        const std::string& getClass() const { return m_ShipClass; }
         GameCamera* getPlayerCamera(){ return m_PlayerCamera; }
         bool IsPlayer(){ return m_IsPlayer; }
         bool IsWarping(){ return m_IsWarping; }
@@ -150,5 +153,8 @@ class Ship: public EntityWrapper {
         Entity& entity() { return m_Entity; }
         void setTarget(const Entity&);
         void setTarget(const std::string&);
+
+        void savePositionState();
+        void restorePositionState();
 };
 #endif

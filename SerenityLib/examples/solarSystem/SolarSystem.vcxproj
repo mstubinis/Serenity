@@ -88,6 +88,7 @@
     <IntDir>$(SolutionDir)Builds\$(ProjectName)\$(Configuration)\objs\</IntDir>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x86;$(LibraryPath)</LibraryPath>
     <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x64;$(LibraryPath)</LibraryPath>
@@ -206,6 +207,7 @@
     <ClInclude Include="game\gui\TextBox.h" />
     <ClInclude Include="game\gui\Widget.h" />
     <ClInclude Include="game\gui\WidgetInterface.h" />
+    <ClInclude Include="game\Helper.h" />
     <ClInclude Include="game\HUD.h" />
     <ClInclude Include="game\Packet.h" />
     <ClInclude Include="game\Planet.h" />

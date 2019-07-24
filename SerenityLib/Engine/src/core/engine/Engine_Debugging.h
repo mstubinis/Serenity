@@ -4,6 +4,7 @@
 
 #include <core/engine/Engine_Utils.h>
 #include <core/engine/resources/Engine_Resources.h>
+#include <SFML/System.hpp>
 
 namespace Engine {
 namespace epriv {

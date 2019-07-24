@@ -5,18 +5,20 @@
 #include <core/ShaderProgram.h>
 
 using namespace Engine;
+using namespace Engine::epriv;
+using namespace std;
 
-epriv::Postprocess_FXAA epriv::Postprocess_FXAA::FXAA;
+Postprocess_FXAA Postprocess_FXAA::FXAA;
 
-epriv::Postprocess_FXAA::Postprocess_FXAA() {
+Postprocess_FXAA::Postprocess_FXAA() {
     reduce_min = 0.0078125f; // (1 / 128)
     reduce_mul = 0.125f;     // (1 / 8)
     span_max   = 8.0f;
 }
-epriv::Postprocess_FXAA::~Postprocess_FXAA() {
+Postprocess_FXAA::~Postprocess_FXAA() {
 
 }
-void epriv::Postprocess_FXAA::pass(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
+void Postprocess_FXAA::pass(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
     program.bind();
 
     Renderer::sendUniform1("FXAA_REDUCE_MIN", reduce_min);
@@ -33,20 +35,20 @@ void epriv::Postprocess_FXAA::pass(ShaderP& program, GBuffer& gbuffer, const uns
 
 
 void Renderer::fxaa::setReduceMin(const float r) {
-    epriv::Postprocess_FXAA::FXAA.reduce_min = glm::max(0.0f, r);
+    Postprocess_FXAA::FXAA.reduce_min = glm::max(0.0f, r);
 }
 void Renderer::fxaa::setReduceMul(const float r) {
-    epriv::Postprocess_FXAA::FXAA.reduce_mul = glm::max(0.0f, r);
+    Postprocess_FXAA::FXAA.reduce_mul = glm::max(0.0f, r);
 }
 void Renderer::fxaa::setSpanMax(const float r) {
-    epriv::Postprocess_FXAA::FXAA.span_max = glm::max(0.0f, r);
+    Postprocess_FXAA::FXAA.span_max = glm::max(0.0f, r);
 }
-float Renderer::fxaa::getReduceMin() { 
-    return epriv::Postprocess_FXAA::FXAA.reduce_min;
+const float Renderer::fxaa::getReduceMin() {
+    return Postprocess_FXAA::FXAA.reduce_min;
 }
-float Renderer::fxaa::getReduceMul() { 
-    return epriv::Postprocess_FXAA::FXAA.reduce_mul;
+const float Renderer::fxaa::getReduceMul() {
+    return Postprocess_FXAA::FXAA.reduce_mul;
 }
-float Renderer::fxaa::getSpanMax() { 
-    return epriv::Postprocess_FXAA::FXAA.span_max;
+const float Renderer::fxaa::getSpanMax() {
+    return Postprocess_FXAA::FXAA.span_max;
 }

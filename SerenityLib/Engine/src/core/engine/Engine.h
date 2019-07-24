@@ -49,7 +49,8 @@ namespace Engine{
             ThreadManager         m_ThreadManager;
             NoiseManager          m_NoiseManager;
 
-            bool                  m_Paused, m_Destroyed;
+            bool                  m_Paused;
+            bool                  m_Destroyed;
 
             Core(const EngineOptions& options);
             ~Core();

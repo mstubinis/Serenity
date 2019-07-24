@@ -44,24 +44,24 @@ namespace epriv {
 
 namespace Renderer {
 namespace ssao {
-    bool enabled();
+    const bool enabled();
     void enable(const bool b = true);
     void disable();
     void enableBlur(const bool b = true);
     void disableBlur();
-    float getBlurRadius();
+    const float getBlurRadius();
     void setBlurRadius(const float r);
-    float getBlurStrength();
+    const float getBlurStrength();
     void setBlurStrength(const float s);
-    float getIntensity();
+    const float getIntensity();
     void setIntensity(const float i);
-    float getRadius();
+    const float getRadius();
     void setRadius(const float r);
-    float getScale();
+    const float getScale();
     void setScale(const float s);
-    float getBias();
+    const float getBias();
     void setBias(const float b);
-    unsigned int getSamples();
+    const unsigned int getSamples();
     void setSamples(const unsigned int s);
 };
 };

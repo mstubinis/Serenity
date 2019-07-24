@@ -13,9 +13,9 @@ namespace epriv{
             EventDispatcher();
             ~EventDispatcher();
 
-            void registerObject(EventObserver*, const EventType::Type);
-            void unregisterObject(EventObserver*, const EventType::Type);
-            void dispatchEvent(const Event& e);
+            void registerObject(EventObserver*, const EventType::Type& eventType);
+            void unregisterObject(EventObserver*, const EventType::Type& eventType);
+            void dispatchEvent(const Event& _event);
     };
 };
 };

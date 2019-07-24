@@ -156,10 +156,6 @@ void MaterialComponent::bind(glm::vec4& data){
     }
 }
 void MaterialComponent::unbind(){
-    //const auto& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    //for(uint i = 0; i < slots.size(); ++i){ 
-    //    glBindTexture(GL_TEXTURE_2D, 0);
-    //}
 }
 MaterialComponentReflection::MaterialComponentReflection(const uint& type,Texture* cubemap,Texture* map, const float& mixFactor):MaterialComponent(type,cubemap){
     setMixFactor(mixFactor);
@@ -183,9 +179,6 @@ void MaterialComponentReflection::bind(glm::vec4& data){
     sendTextureSafe((textureTypeName + "Map").c_str(), *m_Map, slots[1]);
 }
 void MaterialComponentReflection::unbind(){
-    //const auto& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    //unbindTexture2D(slots[0]);
-    //unbindTextureCubemap(slots[1]);
 }
 MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map, const float& i, const float& mix):MaterialComponentReflection(MaterialComponentType::Refraction,cubemap,map,mix){
     m_RefractionIndex = i;
@@ -227,8 +220,6 @@ void MaterialComponentParallaxOcclusion::bind(glm::vec4& data){
     sendTextureSafe(textureTypeName.c_str(), *m_Texture, slots[0]);
 }
 void MaterialComponentParallaxOcclusion::unbind(){
-    //const auto& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    //glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 #pragma endregion
@@ -289,7 +280,7 @@ void Material::internalInit(Texture* diffuse, Texture* normal, Texture* glow, Te
 
     internalUpdateGlobalMaterialPool(true);
 
-    setSmoothness(0.9f);
+    setSmoothness(0.25f);
     setAO(1.0f);
     setMetalness(0.0f);
     setF0Color(0.04f, 0.04f, 0.04f);

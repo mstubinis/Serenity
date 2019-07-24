@@ -2,6 +2,7 @@
 #include <core/engine/Engine.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
+#include <core/engine/renderer/opengl/UniformBufferObject.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -33,7 +34,7 @@ void insertStringRightAfterLineContent(string& src, const string& newContent,con
     istringstream str(src);string l; vector<string> lines; bool a = false;
     while(getline(str,l)){lines.push_back(l+"\n");if(sfind(l,lineContent) && !a){lines.push_back(newContent+"\n"); a=true;}}src="";for(auto& ln:lines){src+=ln;}
 }
-//this needs some work...?
+//this needs some work...? seems to be ok for now
 string getLogDepthFunctions(){
     string res =  "\n"
         "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
@@ -75,8 +76,6 @@ string getNormalDepthFunctions(){
     return res;
 }
 
-UniformBufferObject* UniformBufferObject::UBO_CAMERA = nullptr;
-
 namespace Engine{
     namespace epriv{
         struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
@@ -96,8 +95,6 @@ namespace Engine{
         }};
     };
 };
-GLint UniformBufferObject::MAX_UBO_BINDINGS;
-uint UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT = 0;
 
 Shader::Shader(string filenameOrCode, ShaderType::Type shaderType,bool fromFile){
     m_FileName = filenameOrCode;
@@ -113,10 +110,17 @@ Shader::Shader(string filenameOrCode, ShaderType::Type shaderType,bool fromFile)
         m_Code = filenameOrCode;
     }
 }
-Shader::~Shader(){ }
-ShaderType::Type Shader::type(){ return m_Type; }
-string Shader::data(){ return m_Code; }
-bool Shader::fromFile(){ return m_FromFile; }
+Shader::~Shader(){ 
+}
+ShaderType::Type Shader::type(){ 
+    return m_Type; 
+}
+string Shader::data(){ 
+    return m_Code; 
+}
+bool Shader::fromFile(){ 
+    return m_FromFile; 
+}
 
 ShaderP::ShaderP(string _name, Shader& vs, Shader& fs):m_VertexShader(vs), m_FragmentShader(fs){
     m_LoadedGPU = m_LoadedCPU = false;
@@ -129,10 +133,8 @@ ShaderP::ShaderP(string _name, Shader& vs, Shader& fs):m_VertexShader(vs), m_Fra
     if (vs.name() == "NULL") vs.setName(name_ + ".vert");
     if (fs.name() == "NULL") fs.setName(name_ + ".frag");
     load();
-    registerEvent(EventType::WindowFullscreenChanged);
 }
 ShaderP::~ShaderP(){ 
-    unregisterEvent(EventType::WindowFullscreenChanged);
     unload(); 
 }
 void ShaderP::_convertCode(string& vCode, string& fCode, ShaderP& super) {
@@ -389,13 +391,13 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
         if (shader.type() == ShaderType::Vertex) {
             if (sfind(_d, "layout") && sfind(_d, "location") && sfind(_d, "=")) {
                 if (versionNumber > 130) {
-                    if (epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_separate_shader_objects)) {
+                    if (epriv::OpenGLExtension::supported(epriv::OpenGLExtension::EXT_separate_shader_objects)) {
                         insertStringAtLine(_d, "#extension GL_EXT_seperate_shader_objects : enable", 1);
-                    }else if (epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_separate_shader_objects)) {
+                    }else if (epriv::OpenGLExtension::supported(epriv::OpenGLExtension::ARB_separate_shader_objects)) {
                         insertStringAtLine(_d, "#extension GL_ARB_seperate_shader_objects : enable", 1);
-                    }if (epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_explicit_attrib_location)) {
+                    }if (epriv::OpenGLExtension::supported(epriv::OpenGLExtension::EXT_explicit_attrib_location)) {
                         insertStringAtLine(_d, "#extension GL_EXT_explicit_attrib_location : enable", 1);
-                    }else if (epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_explicit_attrib_location)) {
+                    }else if (epriv::OpenGLExtension::supported(epriv::OpenGLExtension::ARB_explicit_attrib_location)) {
                         insertStringAtLine(_d, "#extension GL_ARB_explicit_attrib_location : enable", 1);
                     }
                 }else{
@@ -600,7 +602,7 @@ void ShaderP::_load_GPU(ShaderP& super) {
         // Check the program
         glGetProgramiv(m_ShaderProgram, GL_LINK_STATUS, &res);
         glGetProgramiv(m_ShaderProgram, GL_INFO_LOG_LENGTH, &ll);
-        vector<char>pe(std::max(ll, int(1)));
+        vector<char>pe(std::max(ll, static_cast<int>(1)));
         glGetProgramInfoLog(m_ShaderProgram, ll, NULL, &pe[0]);
         if (res == GL_FALSE) { 
             cout << "ShaderProgram Log : " << endl; cout << &pe[0] << endl; 
@@ -614,9 +616,9 @@ void ShaderP::_load_GPU(ShaderP& super) {
             GLsizei _length; // name length
             glGetProgramiv(m_ShaderProgram, GL_ACTIVE_UNIFORMS, &_count);
             for (_i = 0; _i < _count; ++_i) {
-                glGetActiveUniform(m_ShaderProgram, (GLuint)_i, _bufSize, &_length, &_size, &_type, _name);
+                glGetActiveUniform(m_ShaderProgram, static_cast<GLuint>(_i), _bufSize, &_length, &_size, &_type, _name);
                 if (_length > 0) {
-                    string _name1((char*)_name, _length);
+                    string _name1(static_cast<char*>(_name), _length);
                     GLint _loc = glGetUniformLocation(m_ShaderProgram, _name);
                     m_UniformLocations.emplace(_name1, _loc);
                 }
@@ -637,7 +639,7 @@ void ShaderP::_unload_GPU(ShaderP& super) {
         m_LoadedGPU = false;
     }
 }
-GLuint ShaderP::program(){ 
+const GLuint& ShaderP::program() const {
     return m_ShaderProgram; 
 }
 
@@ -673,74 +675,12 @@ void ShaderP::unload(){
         EngineResource::unload();
     }
 }
-void ShaderP::bind(){ epriv::Core::m_Engine->m_RenderManager._bindShaderProgram(this); }
-void ShaderP::unbind(){ epriv::Core::m_Engine->m_RenderManager._unbindShaderProgram(); }
-const unordered_map<string,GLint>& ShaderP::uniforms() const { return m_UniformLocations; }
-void ShaderP::onEvent(const Event& e){
-    if(e.type == EventType::WindowFullscreenChanged){
-    }
+void ShaderP::bind(){ 
+    epriv::Core::m_Engine->m_RenderManager._bindShaderProgram(this); 
 }
-
-
-
-UniformBufferObject::UniformBufferObject(const char* _nameInShader,uint _sizeofStruct,int _globalBindingPointNumber){ 
-    m_NameInShader = _nameInShader;
-    if (epriv::RenderManager::GLSL_VERSION < 140) return;
-    if (_globalBindingPointNumber == -1) {
-        //automatic assignment
-        m_GlobalBindingPointNumber = (UniformBufferObject::MAX_UBO_BINDINGS - 1) - UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT;
-        ++UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT;
-        if (m_GlobalBindingPointNumber < 0) {
-            cout << "Warning: Max UBO Limit reached!" << std::endl;
-            m_GlobalBindingPointNumber = 0;
-        }
-    }else{
-        m_GlobalBindingPointNumber = _globalBindingPointNumber;
-    }
-    m_SizeOfStruct = _sizeofStruct;
-    _load_CPU();
-    _load_GPU();
-    registerEvent(EventType::WindowFullscreenChanged);
+void ShaderP::unbind(){ 
+    epriv::Core::m_Engine->m_RenderManager._unbindShaderProgram(); 
 }
-UniformBufferObject::~UniformBufferObject(){ 
-    //unregisterEvent(EventType::WindowFullscreenChanged);
-    _unload_GPU();
-    _unload_CPU();
-}
-void UniformBufferObject::_load_CPU() {
-    if (epriv::RenderManager::GLSL_VERSION < 140) return;
-    _unload_CPU();
-}
-void UniformBufferObject::_unload_CPU() {
-    if (epriv::RenderManager::GLSL_VERSION < 140) return;
-}
-void UniformBufferObject::_load_GPU() {
-    if (epriv::RenderManager::GLSL_VERSION < 140) return;
-    _unload_GPU();
-    glGenBuffers(1, &m_UBOObject);
-    glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject);//gen and bind buffer
-    glBufferData(GL_UNIFORM_BUFFER, m_SizeOfStruct, NULL, GL_DYNAMIC_DRAW); //create buffer data storage
-    glBindBufferBase(GL_UNIFORM_BUFFER, m_GlobalBindingPointNumber, m_UBOObject);//link UBO to it's global numerical index
-}
-void UniformBufferObject::_unload_GPU() {
-    if (epriv::RenderManager::GLSL_VERSION < 140) return;
-    glDeleteBuffers(1, &m_UBOObject);
-}
-void UniformBufferObject::updateData(void* _data){
-    if (epriv::RenderManager::GLSL_VERSION < 140) return;
-    glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, m_SizeOfStruct, _data);
-}
-void UniformBufferObject::attachToShader(ShaderP& _shaderProgram){ 
-    GLuint program = _shaderProgram.program();
-    if (epriv::RenderManager::GLSL_VERSION < 140 || _shaderProgram.m_AttachedUBOs.count(m_UBOObject)) return;
-    uint programBlockIndex = glGetUniformBlockIndex(program, m_NameInShader);
-    glUniformBlockBinding(program, programBlockIndex, m_GlobalBindingPointNumber);
-    _shaderProgram.m_AttachedUBOs.emplace(m_UBOObject);
-}
-GLuint UniformBufferObject::address(){ return m_UBOObject; }
-void UniformBufferObject::onEvent(const Event& e){
-    if(e.type == EventType::WindowFullscreenChanged){
-        _load_GPU();
-    }
+const unordered_map<string,GLint>& ShaderP::uniforms() const { 
+    return m_UniformLocations; 
 }

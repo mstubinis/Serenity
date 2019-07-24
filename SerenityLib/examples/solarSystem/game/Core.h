@@ -20,6 +20,7 @@ class Core final {
         Server*             m_Server;
         Client*             m_Client;
         bool                m_Initalized;
+        double              m_GameTime;
         GameState::State    m_GameState;
     public:
         Core();
@@ -38,7 +39,7 @@ class Core final {
 
         void onResize(const uint& width, const uint& height);
 
-        void enterMap(const std::string& mapFile, const std::string& playership);
+        void enterMap(const std::string& mapFile, const std::string& playership, const std::string& playername, const float& x, const float& y, const float& z);
 
         const GameState::State& gameState() const;
 

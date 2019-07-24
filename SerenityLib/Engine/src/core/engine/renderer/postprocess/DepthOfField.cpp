@@ -4,19 +4,20 @@
 #include <core/ShaderProgram.h>
 
 using namespace Engine;
+using namespace Engine::epriv;
 using namespace std;
 
-epriv::Postprocess_DepthOfField epriv::Postprocess_DepthOfField::DOF;
+Postprocess_DepthOfField Postprocess_DepthOfField::DOF;
 
-epriv::Postprocess_DepthOfField::Postprocess_DepthOfField() {
+Postprocess_DepthOfField::Postprocess_DepthOfField() {
     bias         = 0.6f;
     focus        = 2.0f;
     blur_radius  = 3.0f;
     dof          = false;
 }
-epriv::Postprocess_DepthOfField::~Postprocess_DepthOfField() {
+Postprocess_DepthOfField::~Postprocess_DepthOfField() {
 }
-void epriv::Postprocess_DepthOfField::pass(ShaderP& program,GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
+void Postprocess_DepthOfField::pass(ShaderP& program,GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
     program.bind();
     Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, fboWidth / static_cast<float>(fboHeight));
 
@@ -26,30 +27,30 @@ void epriv::Postprocess_DepthOfField::pass(ShaderP& program,GBuffer& gbuffer, co
     Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
 }
 
-void Engine::Renderer::depthOfField::enable(const bool b) {
-    epriv::Postprocess_DepthOfField::DOF.dof = b;
+void Renderer::depthOfField::enable(const bool b) {
+    Postprocess_DepthOfField::DOF.dof = b;
 }
-void Engine::Renderer::depthOfField::disable() {
-    epriv::Postprocess_DepthOfField::DOF.dof = false;
+void Renderer::depthOfField::disable() {
+    Postprocess_DepthOfField::DOF.dof = false;
 }
-bool Engine::Renderer::depthOfField::enabled() {
-    return epriv::Postprocess_DepthOfField::DOF.dof;
+const bool Renderer::depthOfField::enabled() {
+    return Postprocess_DepthOfField::DOF.dof;
 }
-float Engine::Renderer::depthOfField::getFocus() {
-    return epriv::Postprocess_DepthOfField::DOF.focus;
+const float Renderer::depthOfField::getFocus() {
+    return Postprocess_DepthOfField::DOF.focus;
 }
-void Engine::Renderer::depthOfField::setFocus(const float f) {
-    epriv::Postprocess_DepthOfField::DOF.focus = glm::max(0.0f, f);
+void Renderer::depthOfField::setFocus(const float f) {
+    Postprocess_DepthOfField::DOF.focus = glm::max(0.0f, f);
 }
-float Engine::Renderer::depthOfField::getBias() {
-    return epriv::Postprocess_DepthOfField::DOF.bias;
+const float Renderer::depthOfField::getBias() {
+    return Postprocess_DepthOfField::DOF.bias;
 }
-void Engine::Renderer::depthOfField::setBias(const float b) {
-    epriv::Postprocess_DepthOfField::DOF.bias = b;
+void Renderer::depthOfField::setBias(const float b) {
+    Postprocess_DepthOfField::DOF.bias = b;
 }
-float Engine::Renderer::depthOfField::getBlurRadius() {
-    return epriv::Postprocess_DepthOfField::DOF.blur_radius;
+const float Renderer::depthOfField::getBlurRadius() {
+    return Postprocess_DepthOfField::DOF.blur_radius;
 }
-void Engine::Renderer::depthOfField::setBlurRadius(const float r) {
-    epriv::Postprocess_DepthOfField::DOF.blur_radius = glm::max(0.0f, r);
+void Renderer::depthOfField::setBlurRadius(const float r) {
+    Postprocess_DepthOfField::DOF.blur_radius = glm::max(0.0f, r);
 }

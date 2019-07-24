@@ -2,6 +2,7 @@
 #include "Packet.h"
 #include "Core.h"
 #include "HUD.h"
+#include "Helper.h"
 #include "ResourceManifest.h"
 #include "gui/specifics/ServerLobbyChatWindow.h"
 #include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
@@ -26,7 +27,7 @@ using namespace Engine::Networking;
 
 Server::Server(Core& core, const unsigned int& port, const bool blocking, const string& ipRestriction) :m_Core(core) {
     m_port                             = port;
-    m_listener                         = new ListenerTCP(port); //TODO: use ipRestriction
+    m_listener                         = new ListenerTCP(port, ipRestriction);
     m_blocking                         = blocking;
     m_thread_for_listener              = nullptr;
     m_thread_for_disconnecting_clients = nullptr;
@@ -128,21 +129,50 @@ void Server::updateClient(Server* thisServer, Client* _client) {
         auto& pIn = *pp;
         if (pp && pIn.validate(sf_packet)) {
             // Data extracted successfully...
-            /*
-            if (p.PacketType == PacketType::Client_To_Server_Ship_Physics_Update) {
-                if (p.data != "") {
-                    SolarSystem& scene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
-                    PacketPhysicsUpdate physics_update(*scene.getShips().at(p.data));
-
-                    physics_update.PacketType = PacketType::Server_To_Client_Ship_Physics_Update;
-                    client.send(physics_update);
-                }
-            }
-            */
             switch (pIn.PacketType) {
+                case PacketType::Client_To_Server_Ship_Physics_Update: {
+                    auto& map = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+
+                    //a client has sent the server it's physics information, lets forward it to the rest of the clients
+                    PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(pp);
+                    PacketPhysicsUpdate pOut(pI);
+                    pOut.PacketType = PacketType::Server_To_Client_Ship_Physics_Update;
+                    server.send_to_all_but_client(client, pOut);
+                    break;
+                }
+                case PacketType::Client_To_Server_Request_Map_Entry: {
+
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
+                    PacketMessage pOut;
+                    PacketMessage pOut1;
+
+                    auto x = Helper::GetRandomFloatFromTo(150, 180);
+                    auto y = Helper::GetRandomFloatFromTo(150, 180);
+                    auto z = Helper::GetRandomFloatFromTo(150, 180);
+
+
+                    pOut.PacketType = PacketType::Server_To_Client_Approve_Map_Entry;
+                    pOut.name = pI.name;
+                    pOut.data = pI.data;
+                    pOut.r = x;
+                    pOut.g = y;
+                    pOut.b = z;
+                    server.send_to_client(client, pOut);
+
+                    
+                    pOut1.PacketType = PacketType::Server_To_Client_New_Client_Entered_Map;
+                    pOut1.name = pI.name;
+                    pOut1.data = pI.data;
+                    pOut1.r = x;
+                    pOut1.g = y;
+                    pOut1.b = z;
+                    server.send_to_all_but_client(client, pOut1);
+                    
+                    break;
+                }
                 case PacketType::Client_To_Server_Chat_Message: {
-                    PacketChatMessage pOut;
-                    PacketChatMessage& pI = *static_cast<PacketChatMessage*>(pp);
+                    PacketMessage pOut;
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
                     pOut.PacketType = PacketType::Server_To_Client_Chat_Message;
                     pOut.data = pI.data;
                     pOut.name = pI.name;
@@ -168,13 +198,13 @@ void Server::updateClient(Server* thisServer, Client* _client) {
                             pOut.data.pop_back();
                         cout << "Server: Approving: " + pIn.data + "'s connection" << endl;
 
-                        PacketChatMessage pOut1;
+                        PacketMessage pOut1;
                         pOut1.name = client.m_username;
                         pOut1.data = "";
                         pOut1.PacketType = PacketType::Server_To_Client_Client_Joined_Server;
 
 
-                        PacketChatMessage pOut2;
+                        PacketMessage pOut2;
                         pOut2.name = server.m_MapName;
                         SolarSystem* map = static_cast<SolarSystem*>(Resources::getScene(server.m_MapName));
                         if (!map) {
@@ -198,7 +228,7 @@ void Server::updateClient(Server* thisServer, Client* _client) {
                     const auto& client_port    = client.m_TcpSocket->remotePort();
                     const auto& client_address = client_ip + " " + to_string(client_port);
 
-                    PacketChatMessage pOut1;
+                    PacketMessage pOut1;
                     pOut1.name = client.m_username;
                     pOut1.data = "";
                     pOut1.PacketType = PacketType::Server_To_Client_Client_Left_Server;
@@ -277,7 +307,7 @@ void Server::send_to_all(const void* data, size_t size, size_t& sent) {
     }
 }
 const bool Server::isValidName(const string& name) const {
-    if (name == "")
+    if (name.empty())
         return false;
     for (auto& client : m_clients) {
         if (client.second->m_username == name) {

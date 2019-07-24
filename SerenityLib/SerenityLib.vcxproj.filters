@@ -136,6 +136,24 @@
     <Filter Include="Source Files\Engine\Core\Scene">
       <UniqueIdentifier>{13deb444-5593-4bc0-ad27-7cd650977c01}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\opengl">
+      <UniqueIdentifier>{44c97727-a71e-4566-b7a7-cc79ecdd70cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\vulkan">
+      <UniqueIdentifier>{9b494e2a-2087-43ac-8804-aac76e7f2316}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\direct3d">
+      <UniqueIdentifier>{d9f40ece-49ab-4eed-a77a-ec891f259960}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\opengl">
+      <UniqueIdentifier>{d47098bf-4eb7-4e51-a944-e32f7b762fcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\vulkan">
+      <UniqueIdentifier>{521797b8-7a7e-4226-831c-6c52c6f9ab57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\direct3d">
+      <UniqueIdentifier>{b02b2902-8a66-441a-a589-a9d971001884}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -405,9 +423,6 @@
     <ClInclude Include="Engine\src\core\engine\math\SimplexNoise.h">
       <Filter>Header Files\Engine\Core\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\renderer\Alignment.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\scene\Scene.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
@@ -437,6 +452,18 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\sounds\SoundQueue.h">
       <Filter>Header Files\Engine\Core\Sounds</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\RendererEnums.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\State.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\UniformBufferObject.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\Extensions.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -670,6 +697,15 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\sounds\SoundQueue.cpp">
       <Filter>Source Files\Engine\Core\Sounds</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\State.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\UniformBufferObject.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\Extensions.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

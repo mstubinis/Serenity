@@ -34,7 +34,7 @@
 #include <regex>
 
 
-#include <core/engine/sounds/SoundMusic.h>
+#include <core/engine/sounds/Sounds.h>
 
 using namespace Engine;
 using namespace std;
@@ -102,6 +102,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             const string& portstring = hud.m_ServerPort->text();
             const string& map        = hud.m_ServerHostMapSelector->getCurrentChoice().text();
             if (!portstring.empty() && !username.empty() && !map.empty()) {
+                //TODO: prevent special characters in usename
                 if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))   && username.find_first_not_of(' ') != std::string::npos) {
                     const int port = stoi(portstring);
                     hud.m_Core.startServer(port, map);
@@ -122,6 +123,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             const string& portstring = hud.m_ServerPort->text();
             const string& ip         = hud.m_ServerIp->text();
             if (!portstring.empty() && ip != "" && !username.empty()) {
+                //TODO: prevent special characters in usename
                 if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))  && username.find_first_not_of(' ') != std::string::npos) {
                     hud.m_Core.startClient(stoi(portstring), username, ip); //the client will request validation at this stage
                     hud.m_ServerLobbyChatWindow->setUserPointer(hud.m_Core.getClient());
@@ -235,11 +237,16 @@ HUD::~HUD() {
 }
 
 void HUD::enter_the_game() {
+    /*
+    TODO: once a client wants to enter the game, he will ping the server that he entered the map. the server will then respond with the other connected players currently
+    ingame and give the client info about their positions. the server will then very rapidly and frequently update the client with all the other connected player positions
+    */
     if (!m_ServerLobbyShipSelectorWindow->m_ChosenShipName.empty()) {
-        m_GameState = GameState::Game;
-        m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
-        m_Core.enterMap("Sol", m_ServerLobbyShipSelectorWindow->m_ChosenShipName);
-        m_Next->setText("Next");
+        PacketMessage p;
+        p.PacketType = PacketType::Client_To_Server_Request_Map_Entry;
+        p.name = m_Core.m_Client->m_username;
+        p.data = m_ServerLobbyShipSelectorWindow->m_ChosenShipName + "," + m_Core.m_Client->m_mapname;
+        m_Core.m_Client->send(p);
     }else{
         setErrorText("You must choose your ship", 5);
     }
@@ -250,11 +257,13 @@ void HUD::go_to_main_menu() {
     m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
     m_Next->setText("Next");
     setErrorText("", 0);
-
+    auto& window = Resources::getWindow();
     auto _status = m_MainMenuMusic->status();
     if (_status == SoundStatus::Fresh || _status == SoundStatus::Stopped || _status == SoundStatus::Paused) {
         m_MainMenuMusic->play();
     }
+    window.keepMouseInWindow(false);
+    window.setMouseCursorVisible(true);
 }
 
 
@@ -303,24 +312,30 @@ void HUD::update_game(const double& dt) {
     }
 
     SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
-    const auto& planets = scene->getPlanets();
-    std::vector<Planet*> planetVector;
-    planetVector.reserve(planets.size());
+    auto& player = *scene->getPlayer();
+    auto& playerName = player.entity().getComponent<ComponentName>()->name();
+    const auto& ships = scene->getShips();
+    vector<Ship*> shipsVect;
+    shipsVect.reserve(ships.size());
 
-    for (auto& p : planets) {
-        planetVector.push_back(p.second);
+    for (auto& p : ships) {
+        auto& name = p.second->entity().getComponent<ComponentName>()->name();
+        if(name != playerName)
+            shipsVect.push_back(p.second);
     }
-    if (Engine::isKeyDownOnce(KeyboardKey::Comma)) {
-        scene->getPlayer()->setTarget(planetVector[_count]->entity().getComponent<ComponentName>()->name());
-        ++_count;
-        if (_count > scene->getPlanets().size() - 1) {
-            _count = 0;
-        }
-    }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
-        scene->getPlayer()->setTarget(planetVector[_count]->entity().getComponent<ComponentName>()->name());
-        --_count;
-        if (_count <= 0) {
-            _count = scene->getPlanets().size() - 1;
+    if (shipsVect.size() > 0) {
+        if (Engine::isKeyDownOnce(KeyboardKey::Comma)) {
+            player.setTarget(shipsVect[_count]->entity().getComponent<ComponentName>()->name());
+            ++_count;
+            if (_count > shipsVect.size() - 1) {
+                _count = 0;
+            }
+        }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
+            player.setTarget(shipsVect[_count]->entity().getComponent<ComponentName>()->name());
+            --_count;
+            if (_count <= 0) {
+                _count = shipsVect.size() - 1;
+            }
         }
     }
 }

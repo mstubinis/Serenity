@@ -15,9 +15,6 @@ Viewport::Viewport(const Scene& scene, const Camera& camera):m_Scene(const_cast<
     setAspectRatioSynced(true);
     setSkyboxVisible(true);
 
-    //setTransparencyMaskColor(0, 0, 0, 0);
-    //deactivateTransparencyMask();
-
     setDepthMaskValue(50.0f);
     activateDepthMask(false);
 
@@ -55,32 +52,6 @@ void Viewport::setBackgroundColor(const float& r, const float& g, const float& b
     m_BackgroundColor.b = b;
     m_BackgroundColor.a = a;
 }
-
-
-/*
-const glm::vec4& Viewport::getTransparencyMaskColor() const {
-    return m_TransparencyMaskColor;
-}
-void Viewport::setTransparencyMaskColor(const float& r, const float& g, const float& b, const float& a) {
-    m_TransparencyMaskColor.r = r;
-    m_TransparencyMaskColor.g = g;
-    m_TransparencyMaskColor.b = b;
-    m_TransparencyMaskColor.a = a;
-}
-
-void Viewport::deactivateTransparencyMask() {
-    m_TransparencyMaskActive = false;
-}
-void Viewport::activateTransparencyMask() {
-    m_TransparencyMaskActive = true;
-}
-const bool Viewport::isTransparencyMaskActive() const {
-    return m_TransparencyMaskActive;
-}
-*/
-
-
-
 
 void Viewport::setAspectRatioSynced(const bool& synced) {
     m_AspectRatioSynced = synced;

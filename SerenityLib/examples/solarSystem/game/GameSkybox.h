@@ -9,8 +9,8 @@ class GameSkybox: public Skybox{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        GameSkybox(std::string* names,uint numSunFlares = 0,Scene* = nullptr);
-        GameSkybox(std::string name,uint numSunFlares = 0,Scene* = nullptr);
+        GameSkybox(const std::string* names,uint numSunFlares = 0);
+        GameSkybox(const std::string& name,uint numSunFlares = 0);
         virtual ~GameSkybox();
 
         void update();

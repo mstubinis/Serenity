@@ -105,6 +105,9 @@
     <ClInclude Include="game\gui\specifics\ServerHostingMapSelectorWindow.h">
       <Filter>Header Files\Game\GUI\Specifics</Filter>
     </ClInclude>
+    <ClInclude Include="game\Helper.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">

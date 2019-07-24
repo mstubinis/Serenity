@@ -33,7 +33,7 @@ class GameSkybox::impl final{
     public:
         vector<SkyboxSunFlare> sunFlares;
 
-        void _init(uint _numFlares){
+        void _init(const uint& _numFlares){
             if(_numFlares > 0){
                 for(uint i = 0; i < _numFlares; ++i){
                     SkyboxSunFlare flare;
@@ -75,10 +75,10 @@ class GameSkybox::impl final{
             */
         }
 };
-GameSkybox::GameSkybox(string name, uint numFlares, Scene* scene):Skybox(name,scene),m_i(new impl){ 
+GameSkybox::GameSkybox(const string& name, const uint& numFlares):Skybox(name),m_i(new impl){
     m_i->_init(numFlares); 
 }
-GameSkybox::GameSkybox(string* names, uint numFlares, Scene* scene):Skybox(names,scene),m_i(new impl){ 
+GameSkybox::GameSkybox(const string* names, const uint& numFlares):Skybox(names),m_i(new impl){
     m_i->_init(numFlares); 
 }
 GameSkybox::~GameSkybox(){ 

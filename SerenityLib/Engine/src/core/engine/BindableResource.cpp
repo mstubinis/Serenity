@@ -13,5 +13,9 @@ BindableResource::BindableResource(std::string name):EngineResource(name){
 }
 BindableResource::~BindableResource(){
 }
-void BindableResource::bind(){ m_CustomBindFunctor(); }
-void BindableResource::unbind(){ m_CustomUnbindFunctor(); }
+void BindableResource::bind(){ 
+    m_CustomBindFunctor(); 
+}
+void BindableResource::unbind(){ 
+    m_CustomUnbindFunctor(); 
+}

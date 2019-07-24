@@ -20,8 +20,9 @@ struct MeshDrawMode {enum Mode {
     QuadStrip       = GL_QUAD_STRIP,
 };};
 struct MeshModifyFlags {enum Flag {
-    Default = 0,
-    Orphan  = 1,
+    Default     = 1 << 0,
+    Orphan      = 1 << 1,
+    UploadToGPU = 1 << 2,
 };};
 
 namespace Engine {

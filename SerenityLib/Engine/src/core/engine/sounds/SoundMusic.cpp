@@ -2,17 +2,17 @@
 #include <core/engine/sounds/SoundData.h>
 #include <core/engine/resources/Engine_Resources.h>
 
+#include <core/engine/Engine.h>
+#include <core/engine/events/Engine_EventDispatcher.h>
+
 using namespace Engine;
+using namespace Engine::epriv;
 using namespace std;
 
 
-SoundMusic::SoundMusic(Handle& handle, const uint& numLoops) : SoundBaseClass(numLoops) {
-    SoundData& data = *Resources::getSoundData(handle);
-    bool res = m_Sound.openFromFile(data.getFilename());
-    if (res) {
-        setVolume(data.getVolume());
-    }
-    m_Duration = data.getDuration();
+SoundMusic::SoundMusic() : SoundBaseClass(1) {
+    m_Active   = false;
+    m_Duration = 0;
 }
 SoundMusic::~SoundMusic() {
 
@@ -22,53 +22,136 @@ const float& SoundMusic::getDuration() const {
 }
 void SoundMusic::update(const double& dt) {
     const auto& sfStatus = m_Sound.getStatus();
-    if (sfStatus != sf::SoundSource::Status::Stopped)
-        return;
-    if (m_Loops != 1 && m_Loops != 0) {//handle the looping logic
-        if (getLoopsLeft() >= 2) {
-            m_CurrentLoop++;
-            play(m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
-        }else{
+    if (sfStatus == sf::SoundSource::Status::Stopped) {
+        const auto& loopsLeft = getLoopsLeft();
+        if (m_Loops >= 2) {//handle the looping logic
+            if (loopsLeft >= 2) {
+                m_CurrentLoop++;
+                play(m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
+            }else{
+                stop();
+            }
+        }else if (m_Loops == 1) {//only once
             stop();
+        }else {//endless loop (sound will have to be stoped manually by the user to end an endless loop)
+            play(m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
         }
-    }else if (m_Loops == 1) {//only once
-        stop();
-    }else {//endless loop (sound will have to be stoped manually by the user to end an endless loop)
-        play(m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
     }
 }
 const bool SoundMusic::play(const uint& numLoops) {
-    if (status() == SoundStatus::Playing || status() == SoundStatus::PlayingLooped)
-        return false;
-    SoundBaseClass::play(numLoops);
+    const auto& sfStatus = m_Sound.getStatus();
+    m_Loops = numLoops;
+    switch (sfStatus) {
+        case sf::SoundSource::Status::Stopped: {//it starts
+            m_Loops != 1 ? m_Status = SoundStatus::PlayingLooped : m_Status = SoundStatus::Playing;
+            break;
+        }case sf::SoundSource::Status::Paused: {//it resumes
+            m_Loops != 1 ? m_Status = SoundStatus::PlayingLooped : m_Status = SoundStatus::Playing;
+            break;
+        }case sf::SoundSource::Status::Playing: {//it restarts
+            m_Loops != 1 ? m_Status = SoundStatus::PlayingLooped : m_Status = SoundStatus::Playing; 
+            break;
+        }default: {
+            return false;
+        }
+    }
+    m_Active = true;
     m_Sound.play();
-    return true;
-}
-const bool SoundMusic::play() {
-    if (status() == SoundStatus::Playing || status() == SoundStatus::PlayingLooped)
-        return false;
-    SoundBaseClass::play();
-    m_Sound.play();
+
+    EventSoundStatusChanged e(m_Status);
+    Event ev;
+    ev.eventSoundStatusChanged = e;
+    ev.type = EventType::SoundStatusChanged;
+    Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
 const bool SoundMusic::pause() {
-    if (status() == SoundStatus::Paused) 
-        return false;
-    SoundBaseClass::pause();
+    const auto& sfStatus = m_Sound.getStatus();
+    switch (sfStatus) {
+        case sf::SoundSource::Status::Stopped: {
+            m_Status = SoundStatus::Stopped;
+            return false;
+        }case sf::SoundSource::Status::Paused: {
+            m_Status = SoundStatus::Paused;
+            return false;
+        }case sf::SoundSource::Status::Playing: {
+            m_Status = SoundStatus::Paused;
+            break;
+        }default: {
+            return false;
+        }
+    }
     m_Sound.pause();
+
+    EventSoundStatusChanged e(m_Status);
+    Event ev;
+    ev.eventSoundStatusChanged = e;
+    ev.type = EventType::SoundStatusChanged;
+    Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
-const bool SoundMusic::stop() {
-    if (status() == SoundStatus::Stopped) 
-        return false;
-    SoundBaseClass::stop();
-    m_Sound.stop();
+const bool SoundMusic::stop(const bool& stopAllLoops) {
+    const auto& sfStatus = m_Sound.getStatus();
+    switch (sfStatus) {
+        case sf::SoundSource::Status::Stopped: {
+            if (m_Status != SoundStatus::Stopped) {
+                m_Status = SoundStatus::Stopped;
+                break;
+            }
+            return false;
+        }case sf::SoundSource::Status::Paused: {
+            m_Status = SoundStatus::Stopped;
+            break;
+        }case sf::SoundSource::Status::Playing: {
+            if (m_Sound.getPlayingOffset().asSeconds() <= 0.01f) {
+                m_Sound.stop();
+                m_Status = SoundStatus::Stopped;
+                return false;
+            }
+            m_Status = SoundStatus::Stopped;
+            break;
+        }default: {
+            return false;
+        }
+    }
+    m_Sound.stop(); //stops if playing or paused. does nothing if already stopped. also resets playing position to zero.
+    if (stopAllLoops) {
+        m_CurrentLoop = 0;
+        m_Loops = 0;
+    }
+
+
+    EventSoundStatusChanged e(m_Status);
+    Event ev;
+    ev.eventSoundStatusChanged = e;
+    ev.type = EventType::SoundStatusChanged;
+    Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
 const bool SoundMusic::restart() {
-    if (status() == SoundStatus::Stopped || status() == SoundStatus::Fresh || m_Sound.getPlayingOffset() == sf::Time::Zero)
+    const auto& sfStatus = m_Sound.getStatus();
+    switch (sfStatus) {
+        case sf::SoundSource::Status::Stopped: {
+            return false;
+        }case sf::SoundSource::Status::Paused: {
+            m_Status = SoundStatus::Paused;
+            break;
+        }case sf::SoundSource::Status::Playing: {
+            m_Status = SoundStatus::Playing;
+            break;
+        }default: {
+            return false;
+        }
+    }
+    if (status() == SoundStatus::Fresh || m_Sound.getPlayingOffset() == sf::Time::Zero)
         return false;
-    m_Sound.setPlayingOffset(sf::Time::Zero);
+    m_Sound.setPlayingOffset(sf::Time::Zero); //only if paused or playing. if stopped, has no effect
+
+    EventSoundStatusChanged e(m_Status);
+    Event ev;
+    ev.eventSoundStatusChanged = e;
+    ev.type = EventType::SoundStatusChanged;
+    Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
 

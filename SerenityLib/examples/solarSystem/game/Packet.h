@@ -12,8 +12,8 @@
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <core/engine/resources/Handle.h>
 
-class Ship;
-
+class  Ship;
+class  SolarSystem;
 struct PacketType {enum Type {
     Undefined,
     Server_Shutdown,
@@ -23,6 +23,13 @@ struct PacketType {enum Type {
     Client_To_Server_Ship_Physics_Update,
 
     Client_To_Server_Chat_Message,
+
+    Client_To_Server_Request_Map_Entry,
+
+    Server_To_Client_Approve_Map_Entry,
+    Server_To_Client_Reject_Map_Entry,
+
+    Server_To_Client_New_Client_Entered_Map,
 
     Server_To_Client_Send_Basic_Server_Info,
     Server_To_Client_Ship_Physics_Update,
@@ -66,7 +73,7 @@ struct PacketPhysicsUpdate: public Packet {
     uint16_t         lx, ly, lz;     //linear velocity
     uint16_t         ax, ay, az;     //angular velocity
     PacketPhysicsUpdate();
-    PacketPhysicsUpdate(Ship& ship);
+    PacketPhysicsUpdate(Ship& ship, SolarSystem& map);
     bool validate(sf::Packet& sfPacket) {
         return (sfPacket >> PacketType >> data >> px >> py >> pz >> qx >> qy >> qz >> qw >> lx >> ly >> lz >> ax >> ay >> az);
     }
@@ -99,13 +106,13 @@ struct PacketClientRequestConnectionToServer : public Packet {
 };
 
 
-struct PacketChatMessage : public Packet {
+struct PacketMessage : public Packet {
     std::string  name;
     float r;
     float g;
     float b;
 
-    PacketChatMessage() {
+    PacketMessage() {
         name = "";
         r = g = b = 1.0f;
     }

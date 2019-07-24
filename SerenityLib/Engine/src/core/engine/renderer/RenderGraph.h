@@ -4,48 +4,51 @@
 
 #include <core/engine/Engine_Utils.h>
 
-class  Mesh;
-class  Material;
-class  MeshInstance;
 class  ShaderP;
 class  Camera;
 class  Scene;
+class  Material;
+class  Mesh;
+class  MeshInstance;
 
 namespace Engine {
-namespace epriv {
-    struct InstanceNode {
-        MeshInstance* instance;
-        InstanceNode(MeshInstance& i) :instance(&i) {}
-    };
-    struct MeshNode {
-        Mesh* mesh;
-        std::vector<InstanceNode*> instanceNodes;
-        MeshNode(Mesh& m) :mesh(&m) {}
-        ~MeshNode() {
-            SAFE_DELETE_VECTOR(instanceNodes);
-        }
-    };
-    struct MaterialNode {
-        Material* material;
-        std::vector<MeshNode*> meshNodes;
-        MaterialNode(Material& m) :material(&m) {}
-        ~MaterialNode() {
-            SAFE_DELETE_VECTOR(meshNodes);
-        }
-    };
-    class RenderPipeline final {
-        friend class ::Scene;
-        private:
-            ShaderP& shaderProgram;
-            std::vector<MaterialNode*> materialNodes;
-        public:
-            RenderPipeline(ShaderP&);
-            ~RenderPipeline();
+    namespace epriv {
+        struct InstanceNode final {
+            MeshInstance* instance;
+            InstanceNode(const MeshInstance& meshInstance_) : instance(&const_cast<MeshInstance&>(meshInstance_)) {
+            }
+        };
+        struct MeshNode final {
+            Mesh* mesh;
+            std::vector<InstanceNode*> instanceNodes;
+            MeshNode(const Mesh& mesh_) : mesh(&const_cast<Mesh&>(mesh_)) {
+            }
+            ~MeshNode() {
+                SAFE_DELETE_VECTOR(instanceNodes);
+            }
+        };
+        struct MaterialNode final {
+            Material* material;
+            std::vector<MeshNode*> meshNodes;
+            MaterialNode(const Material& material_) : material(&const_cast<Material&>(material_)) {
+            }
+            ~MaterialNode() {
+                SAFE_DELETE_VECTOR(meshNodes);
+            }
+        };
+        class RenderPipeline final {
+            friend class ::Scene;
+            private:
+                ShaderP&                    shaderProgram;
+                std::vector<MaterialNode*>  materialNodes;
+            public:
+                RenderPipeline(ShaderP&);
+                ~RenderPipeline();
 
-            void sort(Camera& c);
-            void sort_cheap(Camera& c);
-            void render(Camera& c);
+                void sort(Camera& c);
+                void sort_cheap(Camera& c);
+                void render(Camera& c);
+        };
     };
-};
 };
 #endif

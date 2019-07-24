@@ -3,7 +3,6 @@
 #define ENGINE_SHADERPROGRAM_H
 
 #include <core/engine/BindableResource.h>
-#include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/Engine_Utils.h>
 #include <unordered_map>
 #include <unordered_set>
@@ -12,10 +11,9 @@
 #include <SFML/OpenGL.hpp>
 
 struct Handle;
-class Shader;
-class ShaderP;
-class UniformBufferObject;
-
+class  Shader;
+class  ShaderP;
+class  UniformBufferObject;
 struct ShaderType{enum Type{
     Vertex,                // GL_VERTEX_SHADER
     Fragment,              // GL_FRAGMENT_SHADER
@@ -25,39 +23,13 @@ struct ShaderType{enum Type{
     Evaluation,            // GL_TESS_EVALUATION_SHADER  (requires GL 4.0 or ARB_tessellation_shader)
 _TOTAL};};
 
-//Core since version 3.1 (GLSL 140)
-class UniformBufferObject final: public EventObserver{
-    friend class ::Shader;
-    private:
-        const char* m_NameInShader;
-        uint m_SizeOfStruct;
-        int m_GlobalBindingPointNumber;
-        GLuint m_UBOObject;
-
-        void _load_CPU(); void _unload_CPU();
-        void _load_GPU(); void _unload_GPU();
-    public:
-        static UniformBufferObject* UBO_CAMERA;
-
-        static GLint MAX_UBO_BINDINGS;
-        static uint CUSTOM_UBO_AUTOMATIC_COUNT;
-
-        UniformBufferObject(const char* nameInShader,uint sizeofStruct,int globalBindingPointIndex = -1);
-        ~UniformBufferObject();
-
-        void onEvent(const Event& e);
-        GLuint address();
-
-        void attachToShader(ShaderP& shaderProgram);
-        void updateData(void* data);
-};
-
 class Shader final: public EngineResource{
     friend class ::ShaderP;
     private:
-        ShaderType::Type m_Type;
-        bool m_FromFile;
-        std::string m_FileName, m_Code;
+        ShaderType::Type   m_Type;
+        bool               m_FromFile;
+        std::string        m_FileName;
+        std::string        m_Code;
     public:
         Shader(std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         virtual ~Shader();
@@ -81,18 +53,18 @@ namespace epriv {
     };
 };
 };
-class ShaderP final: public BindableResource, public EventObserver{
-    friend class ::UniformBufferObject;
-    friend class ::Shader;
+class ShaderP final: public BindableResource{
+    friend class UniformBufferObject;
+    friend class Shader;
     friend struct Engine::epriv::InternalShaderProgramPublicInterface;
     private:
-        GLuint                                 m_ShaderProgram;
-        std::unordered_map<std::string, GLint> m_UniformLocations;
-        std::unordered_set<GLuint>             m_AttachedUBOs;
-        Shader&                                m_VertexShader;
-        Shader&                                m_FragmentShader;
-		bool                                   m_LoadedCPU;
-		bool                                   m_LoadedGPU;
+        GLuint                                    m_ShaderProgram;
+        std::unordered_map<std::string, GLint>    m_UniformLocations;
+        std::unordered_set<GLuint>                m_AttachedUBOs;
+        Shader&                                   m_VertexShader;
+        Shader&                                   m_FragmentShader;
+		bool                                      m_LoadedCPU;
+		bool                                      m_LoadedGPU;
 
         void _convertCode(std::string& vCode, std::string& fCode, ShaderP&);
         void _convertCode(std::string&, Shader&, ShaderP&);
@@ -108,10 +80,7 @@ class ShaderP final: public BindableResource, public EventObserver{
         ShaderP(ShaderP&& other) noexcept = default;
         ShaderP& operator=(ShaderP&& other) noexcept = default;
 
-
         inline operator GLuint() const { return m_ShaderProgram; }
-
-        void onEvent(const Event& e);
 
         void load();
         void unload();
@@ -119,7 +88,7 @@ class ShaderP final: public BindableResource, public EventObserver{
         void bind();
         void unbind();
 
-        GLuint program();
+        const GLuint& program() const;
 
         const std::unordered_map<std::string,GLint>& uniforms() const;
 };

@@ -6,6 +6,8 @@
 #include <boost/asio.hpp>
 #include <boost/atomic.hpp>
 #include <boost/thread/thread.hpp>
+#include <glm/glm.hpp>
+
 
 using namespace Engine;
 using namespace std;
@@ -43,9 +45,7 @@ class epriv::ThreadManager::impl final{
         boost_asio_service::work*           m_Work;
         vector<EngineCallback>              m_Callbacks;
         void _init(const char* name, uint& w, uint& h){
-            m_Cores = boost::thread::hardware_concurrency(); 
-			if(m_Cores == 0) 
-				m_Cores = 1;
+            m_Cores = glm::max(1U, boost::thread::hardware_concurrency()); 
             m_Work = new boost_asio_service::work(m_IOService);
             for(uint i = 0; i < m_Cores; ++i){
                 m_Threads.create_thread(boost::bind(&boost_asio_service::run, &m_IOService));
@@ -57,7 +57,8 @@ class epriv::ThreadManager::impl final{
             m_Threads.join_all();
         }
         void _clearDoneCallbacks(){
-            if(m_Callbacks.size() == 0) return;
+            if(m_Callbacks.size() == 0) 
+                return;     
             for(auto it = m_Callbacks.begin(); it != m_Callbacks.end();){ 
                 EngineCallback& fut = (*it); 
                 if(fut.fut.is_ready()){
@@ -72,10 +73,19 @@ class epriv::ThreadManager::impl final{
         }
 };
 
-epriv::ThreadManager::ThreadManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h); threadManager = m_i.get(); }
-epriv::ThreadManager::~ThreadManager(){ m_i->_destruct(); }
-void epriv::ThreadManager::_update(const double& dt){ m_i->_update(dt); }
-const uint epriv::ThreadManager::cores() const{ return threadManager->m_Cores; }
+epriv::ThreadManager::ThreadManager(const char* name, uint w, uint h):m_i(new impl){ 
+    m_i->_init(name,w,h);
+    threadManager = m_i.get(); 
+}
+epriv::ThreadManager::~ThreadManager(){ 
+    m_i->_destruct(); 
+}
+void epriv::ThreadManager::_update(const double& dt){ 
+    m_i->_update(dt); 
+}
+const uint epriv::ThreadManager::cores() const{ 
+    return threadManager->m_Cores; 
+}
 void epriv::threading::finalizeJob( boost_packed_task_ptr&& task){
     auto& mgr = *threadManager;
     mgr.m_Callbacks.emplace_back( std::move(boost_shared_fut( task->get_future() )) );
