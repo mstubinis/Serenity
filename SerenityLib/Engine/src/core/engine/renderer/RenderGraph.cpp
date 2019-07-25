@@ -2,7 +2,7 @@
 #include <core/ShaderProgram.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/Material.h>
-#include <core/MeshInstance.h>
+#include <core/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 
 #include <glm/glm.hpp>
@@ -79,26 +79,26 @@ void RenderPipeline::render(Camera& camera) {
                     auto& _mesh = *meshNode->mesh;
                     _mesh.bind();
                     for (auto& instanceNode : meshNode->instanceNodes) {
-                        auto& _meshInstance = *instanceNode->instance;
-                        auto body = _meshInstance.parent().getComponent<ComponentBody>();
-                        auto& model = *_meshInstance.parent().getComponent<ComponentModel>();
+                        auto& _modelInstance = *instanceNode->instance;
+                        auto body = _modelInstance.parent().getComponent<ComponentBody>();
+                        auto& model = *_modelInstance.parent().getComponent<ComponentModel>();
                         if (body) {
                             const auto& radius = model.radius();
-                            auto pos = body->position() + _meshInstance.position();
+                            auto pos = body->position() + _modelInstance.position();
                             uint sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
                             auto comparison = radius * 1100.0f;
-                            if (!_meshInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) { //optimization: using squared distance to remove the sqrt()
-                                _meshInstance.setPassedRenderCheck(false);
+                            if (!_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) { //optimization: using squared distance to remove the sqrt()
+                                _modelInstance.setPassedRenderCheck(false);
                             }else{
-                                _meshInstance.setPassedRenderCheck(true);
+                                _modelInstance.setPassedRenderCheck(true);
                             }
                         }else{
-                            _meshInstance.setPassedRenderCheck(false);
+                            _modelInstance.setPassedRenderCheck(false);
                         }
-                        if (_meshInstance.passedRenderCheck()) {
-                            _meshInstance.bind();
+                        if (_modelInstance.passedRenderCheck()) {
+                            _modelInstance.bind();
                             _mesh.render(false);
-                            _meshInstance.unbind();
+                            _modelInstance.unbind();
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material

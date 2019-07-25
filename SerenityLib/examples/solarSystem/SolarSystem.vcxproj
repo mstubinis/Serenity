@@ -209,12 +209,13 @@
     <ClInclude Include="game\gui\WidgetInterface.h" />
     <ClInclude Include="game\Helper.h" />
     <ClInclude Include="game\HUD.h" />
+    <ClInclude Include="game\map\Map.h" />
+    <ClInclude Include="game\map\Sector.h" />
     <ClInclude Include="game\Packet.h" />
     <ClInclude Include="game\Planet.h" />
     <ClInclude Include="game\ResourceManifest.h" />
     <ClInclude Include="game\Server.h" />
     <ClInclude Include="game\Ship.h" />
-    <ClInclude Include="game\SolarSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\Client.cpp" />
@@ -234,12 +235,13 @@
     <ClCompile Include="game\gui\Widget.cpp" />
     <ClCompile Include="game\HUD.cpp" />
     <ClCompile Include="game\main.cpp" />
+    <ClCompile Include="game\map\Map.cpp" />
+    <ClCompile Include="game\map\Sector.cpp" />
     <ClCompile Include="game\Packet.cpp" />
     <ClCompile Include="game\Planet.cpp" />
     <ClCompile Include="game\ResourceManifest.cpp" />
     <ClCompile Include="game\Server.cpp" />
     <ClCompile Include="game\Ship.cpp" />
-    <ClCompile Include="game\SolarSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Engine\data\Shaders\AS_groundFromSpace_frag.glsl" />

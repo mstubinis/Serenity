@@ -100,9 +100,10 @@ namespace Renderer{
     inline const GLint& getUniformLocUnsafe(const char* location);
 
     const bool cullFace(const GLenum& state);
-    const bool setDepthFunc(const DepthFunc::Func&);
+    const bool setDepthFunc(const GLenum& func);
     const bool setViewport(const uint& x, const uint& y, const uint& width, const uint& height);
 
+    const bool stencilFunc(const GLenum& func, const GLint& ref, const GLuint& mask);
     const bool stencilMask(const GLuint& mask);
     const bool stencilOp(const GLenum& sfail, const GLenum& dpfail, const GLenum& dppass);
 

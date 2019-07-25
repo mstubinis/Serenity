@@ -1,5 +1,5 @@
 ﻿#include "Planet.h"
-#include "SolarSystem.h"
+#include "map/Map.h"
 #include "ResourceManifest.h"
 
 #include <core/engine/Engine.h>
@@ -8,7 +8,7 @@
 #include <core/engine/lights/Lights.h>
 #include <core/ShaderProgram.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/MeshInstance.h>
+#include <core/ModelInstance.h>
 #include <core/Material.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
@@ -44,8 +44,8 @@ struct PlanetLogicFunctor final {void operator()(ComponentLogic& _component, con
     }
 }};
 
-struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
-    MeshInstance& i = *(MeshInstance*)r;
+struct PlanetaryRingModelInstanceBindFunctor{void operator()(EngineResource* r) const {
+    ModelInstance& i = *(ModelInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer(); 
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     float atmosphereHeight = obj.getAtmosphereHeight();
@@ -114,8 +114,8 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     Renderer::sendUniformMatrix4Safe("Model",model);
 }};
 
-struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
-    MeshInstance& i = *(MeshInstance*)r;
+struct StarModelInstanceBindFunctor{void operator()(EngineResource* r) const {
+    ModelInstance& i = *(ModelInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
     auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
@@ -153,11 +153,11 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     Renderer::sendUniformMatrix3Safe("NormalMatrix",normalMatrix);
 }};
 
-struct StarMeshInstanceUnbindFunctor {void operator()(EngineResource* r) const {
+struct StarModelInstanceUnbindFunctor {void operator()(EngineResource* r) const {
 }};
 
-struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
-    MeshInstance& i = *(MeshInstance*)r;
+struct AtmosphericScatteringGroundModelInstanceBindFunctor{void operator()(EngineResource* r) const {
+    ModelInstance& i = *(ModelInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
@@ -234,11 +234,11 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     Renderer::sendUniformMatrix4Safe("Model",model);
 }};
 
-struct AtmosphericScatteringGroundMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
+struct AtmosphericScatteringGroundModelInstanceUnbindFunctor{void operator()(EngineResource* r) const {
 }};
 
-struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
-    MeshInstance& i = *(MeshInstance*)r;
+struct AtmosphericScatteringSkyModelInstanceBindFunctor{void operator()(EngineResource* r) const {
+    ModelInstance& i = *(ModelInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     auto& m_Body = *obj.m_Entity.getComponent<ComponentBody>();
@@ -310,11 +310,11 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     Renderer::sendUniform4("FragDataGravity", g, g * g, exposure, 0.0f);
 }};
 
-struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
+struct AtmosphericScatteringSkyModelInstanceUnbindFunctor{void operator()(EngineResource* r) const {
     Renderer::cullFace(GL_BACK);
 }};
 
-Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere, SolarSystem* scene):EntityWrapper(*scene){
+Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere, Map* scene):EntityWrapper(*scene){
     auto& componentName = *m_Entity.addComponent<ComponentName>(name);
 
     auto& body = *m_Entity.addComponent<ComponentBody>();
@@ -326,8 +326,8 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
 
     m_AtmosphereHeight = atmosphere;
     if(type != PlanetType::Star){
-        instance.setCustomBindFunctor(AtmosphericScatteringGroundMeshInstanceBindFunctor());
-        instance.setCustomUnbindFunctor(AtmosphericScatteringGroundMeshInstanceUnbindFunctor());
+        instance.setCustomBindFunctor(AtmosphericScatteringGroundModelInstanceBindFunctor());
+        instance.setCustomUnbindFunctor(AtmosphericScatteringGroundModelInstanceUnbindFunctor());
     }
     if(m_AtmosphereHeight > 0){
         const uint& index = model.addModel(
@@ -336,11 +336,11 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
             (ShaderP*)ResourceManifest::skyFromSpace.get(),
             RenderStage::GeometryTransparent
         );
-        MeshInstance& skyInstance = model.getModel(index);
+        auto& skyInstance = model.getModel(index);
         float aScale = instance.getScale().x;
         aScale = aScale + (aScale * m_AtmosphereHeight);
-        skyInstance.setCustomBindFunctor(AtmosphericScatteringSkyMeshInstanceBindFunctor());
-        skyInstance.setCustomUnbindFunctor(AtmosphericScatteringSkyMeshInstanceUnbindFunctor());
+        skyInstance.setCustomBindFunctor(AtmosphericScatteringSkyModelInstanceBindFunctor());
+        skyInstance.setCustomUnbindFunctor(AtmosphericScatteringSkyModelInstanceUnbindFunctor());
         skyInstance.setScale(aScale,aScale,aScale);
         skyInstance.setUserPointer(this);
     }
@@ -374,14 +374,26 @@ void Planet::setRotation(RotationInfo* r){
     m_RotationInfo = r;
     m_Entity.getComponent<ComponentBody>()->rotate(glm::radians(-r->tilt),0.0f,0.0f);
 }
-void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
-glm::vec2 Planet::getGravityInfo(){ return glm::vec2(getRadius() * 5,getRadius() * 7); }
-OrbitInfo* Planet::getOrbitInfo() const { return m_OrbitInfo; }
-float Planet::getGroundRadius(){ auto& model = *m_Entity.getComponent<ComponentModel>(); return model.radius(); }
-float Planet::getRadius() { auto& model = *m_Entity.getComponent<ComponentModel>(); return model.radius() + (model.radius() * m_AtmosphereHeight); }
+void Planet::addRing(Ring* ring){ 
+    m_Rings.push_back(ring); 
+}
+glm::vec2 Planet::getGravityInfo(){ 
+    return glm::vec2(getRadius() * 5,getRadius() * 7); 
+}
+OrbitInfo* Planet::getOrbitInfo() const { 
+    return m_OrbitInfo; 
+}
+float Planet::getGroundRadius(){ 
+    auto& model = *m_Entity.getComponent<ComponentModel>();
+    return model.radius(); 
+}
+float Planet::getRadius() { 
+    auto& model = *m_Entity.getComponent<ComponentModel>();
+    return model.radius() + (model.radius() * m_AtmosphereHeight); 
+}
 float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
 
-Star::Star(glm::vec3 starColor,glm::vec3 lightColor, glm::vec3 godRaysColor,glm::vec3 pos,float scl,string name, SolarSystem* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
+Star::Star(glm::vec3 starColor,glm::vec3 lightColor, glm::vec3 godRaysColor,glm::vec3 pos,float scl,string name, Map* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor);
 
@@ -390,8 +402,8 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor, glm::vec3 godRaysColor,glm:
         auto& instance = starModel->getModel();
         instance.setColor(starColor);
         instance.setGodRaysColor(godRaysColor);
-        instance.setCustomBindFunctor(StarMeshInstanceBindFunctor());
-        instance.setCustomUnbindFunctor(StarMeshInstanceUnbindFunctor());
+        instance.setCustomBindFunctor(StarModelInstanceBindFunctor());
+        instance.setCustomUnbindFunctor(StarModelInstanceUnbindFunctor());
         instance.setShaderProgram(nullptr,*starModel);
     }
     //addChild(m_Light);
@@ -416,11 +428,11 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
         (ShaderP*)ResourceManifest::groundFromSpace.get(), 
         RenderStage::GeometryTransparent
     );
-    MeshInstance& ringMesh = model.getModel(index);
-    ringMesh.setCustomBindFunctor(PlanetaryRingMeshInstanceBindFunctor());
-    float aScale = 1.0f;
-    ringMesh.setScale(aScale,aScale,aScale);
-    ringMesh.setUserPointer(parent);
+    auto& ringModel = model.getModel(index);
+    ringModel.setCustomBindFunctor(PlanetaryRingModelInstanceBindFunctor());
+    const float aScale = 1.0f;
+    ringModel.setScale(aScale,aScale,aScale);
+    ringModel.setUserPointer(parent);
 }
 Ring::~Ring(){
 }

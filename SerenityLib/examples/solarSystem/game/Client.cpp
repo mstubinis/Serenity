@@ -11,7 +11,7 @@
 #include "gui/specifics/ServerLobbyShipSelectorWindow.h"
 #include "gui/specifics/ServerHostingMapSelectorWindow.h"
 
-#include "SolarSystem.h"
+#include "map/Map.h"
 #include "GameSkybox.h"
 #include "Ship.h"
 #include <core/engine/resources/Engine_Resources.h>
@@ -146,7 +146,7 @@ void epriv::ClientInternalPublicInterface::update(Client* _client) {
         client.m_PingTime += dt;
         if (client.m_PingTime > 0.2) {
             //keep pinging the server, sending your ship physics info
-            auto& map = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+            auto& map = *static_cast<Map*>(Resources::getCurrentScene());
             auto& playerShip = *map.getPlayer();
             PacketPhysicsUpdate p(playerShip, map);
             p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
@@ -177,13 +177,14 @@ void Client::onReceive() {
                     if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
                         PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(pp);
 
-                        auto& map = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+                        auto& map = *static_cast<Map*>(Resources::getCurrentScene());
 
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
                         auto& playername = info[0];
                         auto& shipclass = info[1];
 
-                        const auto& offset = map.getAnchor();
+
+                        const auto& offset = map.getAnchors().at(info[3])->entity().getComponent<ComponentBody>()->position();
                         const float& x = pI.px + offset.x;
                         const float& y = pI.py + offset.y;
                         const float& z = pI.pz + offset.z;
@@ -228,7 +229,7 @@ void Client::onReceive() {
                     
                     auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map
 
-                    SolarSystem& map = *static_cast<SolarSystem*>(Resources::getScene(info[1]));
+                    Map& map = *static_cast<Map*>(Resources::getScene(info[1]));
                     auto& handles = ResourceManifest::Ships.at(info[0]);
                     Ship* ship = new Ship(handles.get<0>(), handles.get<1>(), info[0], false, pI.name, glm::vec3(pI.r, pI.g, pI.b), glm::vec3(1.0f), CollisionType::ConvexHull, &map);
 
@@ -252,9 +253,9 @@ void Client::onReceive() {
                     PacketMessage& pI = *static_cast<PacketMessage*>(pp);
                     auto& mapname = pI.name;
                     m_mapname = mapname;
-                    SolarSystem* map = static_cast<SolarSystem*>(Resources::getScene(mapname));
+                    Map* map = static_cast<Map*>(Resources::getScene(mapname));
                     if (!map) {
-                        map = new SolarSystem(mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
+                        map = new Map(mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
                     }
                     auto& menuScene = *const_cast<Scene*>(Resources::getScene("Menu"));
                     auto* menuSkybox = menuScene.skybox();

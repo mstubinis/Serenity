@@ -7,7 +7,7 @@
 #include "gui/specifics/ServerLobbyChatWindow.h"
 #include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
 
-#include "SolarSystem.h"
+#include "map/Map.h"
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/Engine_Utils.h>
@@ -131,7 +131,7 @@ void Server::updateClient(Server* thisServer, Client* _client) {
             // Data extracted successfully...
             switch (pIn.PacketType) {
                 case PacketType::Client_To_Server_Ship_Physics_Update: {
-                    auto& map = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+                    auto& map = *static_cast<Map*>(Resources::getCurrentScene());
 
                     //a client has sent the server it's physics information, lets forward it to the rest of the clients
                     PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(pp);
@@ -206,9 +206,9 @@ void Server::updateClient(Server* thisServer, Client* _client) {
 
                         PacketMessage pOut2;
                         pOut2.name = server.m_MapName;
-                        SolarSystem* map = static_cast<SolarSystem*>(Resources::getScene(server.m_MapName));
+                        Map* map = static_cast<Map*>(Resources::getScene(server.m_MapName));
                         if (!map) {
-                            map = new SolarSystem(server.m_MapName, ResourceManifest::BasePath + "data/Systems/" + server.m_MapName + ".txt");
+                            map = new Map(server.m_MapName, ResourceManifest::BasePath + "data/Systems/" + server.m_MapName + ".txt");
                         }
                         pOut2.data = map->allowedShipsSingleString();
                         pOut2.PacketType = PacketType::Server_To_Client_Map_Data;

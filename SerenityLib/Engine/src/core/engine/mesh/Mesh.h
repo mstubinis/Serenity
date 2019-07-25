@@ -16,29 +16,29 @@
 
 typedef unsigned short ushort;
 
-class  MeshInstance;
+//class  ModelInstance;
 class  Mesh;
 class  btHeightfieldTerrainShape;
 
 namespace Engine{
-namespace epriv{
-    class  MeshLoader;
-    class  MeshSkeleton;
-    class  MeshCollisionFactory;
-    struct DefaultMeshBindFunctor;
-    struct DefaultMeshUnbindFunctor;
-    struct BoneNode;
-    class  AnimationData;
-    struct InternalMeshRequestPublicInterface;
-    struct InternalMeshPublicInterface final {
-        static void LoadCPU(Mesh&);
-        static void LoadGPU(Mesh&);
-        static void UnloadCPU(Mesh&);
-        static void UnloadGPU(Mesh&);
-        static bool SupportsInstancing();
-        static btCollisionShape* BuildCollision(Mesh*, const CollisionType::Type&);
+    namespace epriv{
+        class  MeshLoader;
+        class  MeshSkeleton;
+        class  MeshCollisionFactory;
+        struct DefaultMeshBindFunctor;
+        struct DefaultMeshUnbindFunctor;
+        struct BoneNode;
+        class  AnimationData;
+        struct InternalMeshRequestPublicInterface;
+        struct InternalMeshPublicInterface final {
+            static void LoadCPU(Mesh&);
+            static void LoadGPU(Mesh&);
+            static void UnloadCPU(Mesh&);
+            static void UnloadGPU(Mesh&);
+            static bool SupportsInstancing();
+            static btCollisionShape* BuildCollision(Mesh*, const CollisionType::Type&);
+        };
     };
-};
 };
 
 class Mesh final: public BindableResource, public EventObserver{
@@ -76,14 +76,14 @@ class Mesh final: public BindableResource, public EventObserver{
         Mesh();
         Mesh(const std::string& name, const btHeightfieldTerrainShape& heightfield, float threshold);
         Mesh(VertexData*, const std::string& name, float threshold = 0.0005f);
-        Mesh(std::string name,float width, float height,float threshold); //plane
-        Mesh(std::string fileOrData, float threshold = 0.0005f); //file or data
+        Mesh(const std::string& name,float width, float height,float threshold); //plane
+        Mesh(const std::string& fileOrData, float threshold = 0.0005f); //file or data
         ~Mesh();
 
         std::unordered_map<std::string, Engine::epriv::AnimationData>& animationData();
         const glm::vec3& getRadiusBox() const;
         const float getRadius() const;
-        const VertexData& getVertexStructure() const;
+        const VertexData& getVertexData() const;
 
         void onEvent(const Event& e);
 

@@ -22,7 +22,7 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth,
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &int_value); //what about GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS?
     textureUnits.reserve(int_value);
     for (unsigned int i = 0; i < textureUnits.capacity(); ++i)
-        textureUnits.push_back(TextureUnit());
+        textureUnits.push_back(TextureUnitState());
 
 
     GL_RESTORE_DEFAULT_STATE_MACHINE(windowWidth, windowHeight);
@@ -34,7 +34,7 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWid
     currentTextureUnit = 0;
 
     //TODO: might need to gen and bind a dummy vao
-    //TODO: might have to glActiveTexture(GL_TEXTURE0)
+    glActiveTexture(GL_TEXTURE0); //this was said to be needed for some drivers
 
     GL_glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     GL_glClearDepth(1.0);
@@ -47,10 +47,13 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWid
     GL_glViewport(0, 0, static_cast<GLsizei>(windowWidth), static_cast<GLsizei>(windowHeight));
     GL_glCullFace(GL_BACK);
     GL_glFrontFace(GL_CCW);
+    GL_glDepthFunc(GL_LESS);
+    GL_glPixelStorei(GL_PACK_ALIGNMENT, 4);
+    GL_glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    GL_glStencilFunc(GL_ALWAYS, 0, 0xFFFFFFFF);
 }
 void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
-    //glActiveTexture(currentTextureUnit);
-
+    glActiveTexture(currentTextureUnit);
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClearDepth(clearDepth.depth);
     glClearDepthf(clearDepth.depthf);
@@ -64,10 +67,15 @@ void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
     glViewport(viewportState.x, viewportState.y, viewportState.width, viewportState.height);
     glCullFace(cullFaceState.mode);
     glFrontFace(frontFaceState.mode);
+    glDepthFunc(depthFuncState.func);
+    glPixelStorei(GL_PACK_ALIGNMENT, pixelStoreiState.pack_alignment);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, pixelStoreiState.unpack_alignment);
+    glStencilFuncSeparate(GL_FRONT, stencilFuncState.func_front, stencilFuncState.ref_front, stencilFuncState.mask_front);
+    glStencilFuncSeparate(GL_BACK, stencilFuncState.func_back, stencilFuncState.ref_back, stencilFuncState.mask_back);
 }
 const bool OpenGLState::GL_glActiveTexture(const GLenum& textureUnit) {
     //if (textureUnit == 0 || currentTextureUnit != textureUnit) {
-    //    currentTextureUnit = textureUnit;
+        //currentTextureUnit = textureUnit;
         glActiveTexture(GL_TEXTURE0 + textureUnit);
         return true;
     //}
@@ -75,11 +83,12 @@ const bool OpenGLState::GL_glActiveTexture(const GLenum& textureUnit) {
 }
 
 const bool OpenGLState::GL_glBindTextureForModification(const GLenum& textureTarget, const GLuint& textureObject) {
+    glActiveTexture(GL_TEXTURE0 + textureUnits.capacity());
     glBindTexture(textureTarget, textureObject);
     return true;
 }
 const bool OpenGLState::GL_glBindTextureForRendering(const GLenum& textureTarget, const GLuint& textureObject) {
-    TextureUnit& texUnit = textureUnits[currentTextureUnit];
+    auto& texUnit = textureUnits[currentTextureUnit];
     switch (textureTarget){
         case GL_TEXTURE_1D: {
             if (texUnit.targetTexture1D != textureObject) {
@@ -298,6 +307,92 @@ const bool OpenGLState::GL_glFrontFace(const GLenum& mode) {
     if (frontFaceState.mode != mode) {
         glFrontFace(mode);
         frontFaceState.mode = mode;
+        return true;
+    }
+    return false;
+}
+const bool OpenGLState::GL_glDepthFunc(const GLenum& func) {
+    if (depthFuncState.func != func) {
+        glDepthFunc(func);
+        depthFuncState.func = func;
+        return true;
+    }
+    return false;
+}
+const bool OpenGLState::GL_glPixelStorei(const GLenum& pname, const GLint& param) {
+    if (param != 1 && param != 2 && param != 4 && param != 8)
+        return false;
+    switch (pname) {
+        case GL_PACK_ALIGNMENT: {
+            if (pixelStoreiState.pack_alignment != param) {
+                glPixelStorei(GL_PACK_ALIGNMENT, param);
+                pixelStoreiState.pack_alignment = param;
+                return true;
+            }
+            break;
+        }case GL_UNPACK_ALIGNMENT: {
+            if (pixelStoreiState.unpack_alignment != param) {
+                glPixelStorei(GL_UNPACK_ALIGNMENT, param);
+                pixelStoreiState.unpack_alignment = param;
+                return true;
+            }
+            break;
+        }default: {
+            break;
+        }
+    }
+    return false;
+}
+const bool OpenGLState::GL_glStencilFuncSeparate(const GLenum& face, const GLenum& func, const GLint& ref, const GLuint& mask) {
+    switch (face) {
+        case GL_FRONT: {
+            if (stencilFuncState.func_front != func || stencilFuncState.ref_front != ref || stencilFuncState.mask_front != mask) {
+                glStencilFuncSeparate(face, func, ref, mask);
+                stencilFuncState.func_front = func;
+                stencilFuncState.ref_front = ref;
+                stencilFuncState.mask_front = mask;
+                return true;
+            }
+            break;
+        }
+        case GL_BACK: {
+            if (stencilFuncState.func_back != func || stencilFuncState.ref_back != ref || stencilFuncState.mask_back != mask) {
+                glStencilFuncSeparate(face, func, ref, mask);
+                stencilFuncState.func_back = func;
+                stencilFuncState.ref_back = ref;
+                stencilFuncState.mask_back = mask;
+                return true;
+            }
+            break;
+        }
+        case GL_FRONT_AND_BACK: {
+            if (stencilFuncState.func_front != func || stencilFuncState.ref_front != ref || stencilFuncState.mask_front != mask || stencilFuncState.func_back != func || stencilFuncState.ref_back != ref || stencilFuncState.mask_back != mask) {
+                glStencilFuncSeparate(face, func, ref, mask);
+                stencilFuncState.func_back = func;
+                stencilFuncState.ref_back = ref;
+                stencilFuncState.mask_back = mask;
+                stencilFuncState.func_front = func;
+                stencilFuncState.ref_front = ref;
+                stencilFuncState.mask_front = mask;
+                return true;
+            }
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    return false;
+}
+const bool OpenGLState::GL_glStencilFunc(const GLenum& func, const GLint& ref, const GLuint& mask) {
+    if (stencilFuncState.func_front != func || stencilFuncState.ref_front != ref || stencilFuncState.mask_front != mask || stencilFuncState.func_back != func || stencilFuncState.ref_back != ref || stencilFuncState.mask_back != mask) {
+        glStencilFunc(func, ref, mask);
+        stencilFuncState.func_back = func;
+        stencilFuncState.ref_back = ref;
+        stencilFuncState.mask_back = mask;
+        stencilFuncState.func_front = func;
+        stencilFuncState.ref_front = ref;
+        stencilFuncState.mask_front = mask;
         return true;
     }
     return false;

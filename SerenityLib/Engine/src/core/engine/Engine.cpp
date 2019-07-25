@@ -21,8 +21,7 @@ m_DebugManager(options.window_title, options.width, options.height),
 m_SoundManager(options.window_title, options.width, options.height),
 m_RenderManager(options.window_title, options.width, options.height),
 m_PhysicsManager(options.window_title, options.width, options.height),
-m_ThreadManager(options.window_title, options.width, options.height),
-m_NoiseManager(options.window_title, options.width, options.height)
+m_ThreadManager(options.window_title, options.width, options.height)
 {
     m_Destroyed = m_Paused = false;
 }

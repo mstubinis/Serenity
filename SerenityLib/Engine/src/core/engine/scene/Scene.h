@@ -22,7 +22,7 @@ class  RodLight;
 
 class  Viewport;
 class  Skybox;
-class  MeshInstance;
+class  ModelInstance;
 struct Entity;
 
 namespace Engine {
@@ -99,8 +99,8 @@ namespace Engine {
             static void           RenderGeometryTransparent(Scene&, Camera&);
             static void           RenderForwardOpaque(Scene&, Camera&);
             static void           RenderForwardTransparent(Scene&, Camera&);
-            static void           AddMeshInstanceToPipeline(Scene&, MeshInstance&, const RenderStage::Stage& stage);
-            static void           RemoveMeshInstanceFromPipeline(Scene&, MeshInstance&, const RenderStage::Stage& stage);
+            static void           AddModelInstanceToPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
+            static void           RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
             static ECS<Entity>&   GetECS(Scene&);
             static uint           NumScenes;
         };

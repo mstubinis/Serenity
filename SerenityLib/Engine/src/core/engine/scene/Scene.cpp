@@ -3,7 +3,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/math/Engine_Math.h>
-#include <core/MeshInstance.h>
+#include <core/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/scene/Viewport.h>
@@ -80,17 +80,17 @@ struct Scene::impl final {
         }
         centerBody.setPosition(0.0f);
     }
-    void _addMeshInstanceToPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, const RenderStage::Stage& _stage) {
+    void _addModelInstanceToPipeline(Scene& _scene, ModelInstance& _modelInstance, const vector<RenderPipeline*>& _pipelinesList, const RenderStage::Stage& _stage) {
         RenderPipeline* _pipeline = nullptr;
         
         for (auto& pipeline : _pipelinesList) {
-            if (&pipeline->shaderProgram == _meshInstance.shaderProgram()) {
+            if (&pipeline->shaderProgram == _modelInstance.shaderProgram()) {
                 _pipeline = pipeline;
                 break;
             }
         }
         if (!_pipeline) {
-            _pipeline = new RenderPipeline(*_meshInstance.shaderProgram());
+            _pipeline = new RenderPipeline(*_modelInstance.shaderProgram());
             _scene.m_i->m_Pipelines[_stage].push_back(_pipeline);
         }
         //material node check
@@ -98,15 +98,15 @@ struct Scene::impl final {
         MeshNode*     meshNode     = nullptr;
         InstanceNode* instanceNode = nullptr;
         for (auto& itr : _pipeline->materialNodes) {
-            if (itr->material == _meshInstance.material()) {
+            if (itr->material == _modelInstance.material()) {
                 materialNode = itr;
                 //mesh node check
                 for (auto& itr1 : materialNode->meshNodes) {
-                    if (itr1->mesh == _meshInstance.mesh()) {
+                    if (itr1->mesh == _modelInstance.mesh()) {
                         meshNode = itr1;
                         //instance check
                         for (auto& itr2 : meshNode->instanceNodes) {
-                            if (itr2->instance == &_meshInstance) {
+                            if (itr2->instance == &_modelInstance) {
                                 instanceNode = itr2;
                                 break;
                             }
@@ -116,22 +116,22 @@ struct Scene::impl final {
             }
         }
         if (!materialNode) {
-            materialNode = new MaterialNode(*_meshInstance.material());
+            materialNode = new MaterialNode(*_modelInstance.material());
             _pipeline->materialNodes.emplace_back(materialNode);
         }
         if (!meshNode) {
-            meshNode = new MeshNode(*_meshInstance.mesh());
+            meshNode = new MeshNode(*_modelInstance.mesh());
             materialNode->meshNodes.emplace_back(meshNode);
         }
         if (!instanceNode) {
-            instanceNode = new InstanceNode(_meshInstance);
+            instanceNode = new InstanceNode(_modelInstance);
             meshNode->instanceNodes.emplace_back(instanceNode);
         }
     }
-    void _removeMeshInstanceFromPipeline(Scene& _scene, MeshInstance& _meshInstance, const vector<RenderPipeline*>& _pipelinesList, const RenderStage::Stage& _stage) {
+    void _removeModelInstanceFromPipeline(Scene& _scene, ModelInstance& _modelInstance, const vector<RenderPipeline*>& _pipelinesList, const RenderStage::Stage& _stage) {
         RenderPipeline* _pipeline = nullptr;
         for (auto& pipeline : _pipelinesList) {
-            if (&pipeline->shaderProgram == _meshInstance.shaderProgram()) {
+            if (&pipeline->shaderProgram == _modelInstance.shaderProgram()) {
                 _pipeline = pipeline;
                 break;
             }
@@ -142,15 +142,15 @@ struct Scene::impl final {
             MeshNode*     meshNode     = nullptr;
             InstanceNode* instanceNode = nullptr;
             for (auto& itr : _pipeline->materialNodes) {
-                if (itr->material == _meshInstance.material()) {
+                if (itr->material == _modelInstance.material()) {
                     materialNode = itr;
                     //mesh node check
                     for (auto& itr1 : materialNode->meshNodes) {
-                        if (itr1->mesh == _meshInstance.mesh()) {
+                        if (itr1->mesh == _modelInstance.mesh()) {
                             meshNode = itr1;
                             //instance check
                             for (auto& itr2 : meshNode->instanceNodes) {
-                                if (itr2->instance == &_meshInstance) {
+                                if (itr2->instance == &_modelInstance) {
                                     instanceNode = itr2;
                                     break;
                                 }
@@ -228,11 +228,11 @@ void InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Camera
 ECS<Entity>& InternalScenePublicInterface::GetECS(Scene& scene) {
     return scene.m_i->m_ECS;
 }
-void InternalScenePublicInterface::AddMeshInstanceToPipeline(Scene& scene, MeshInstance& meshInstance, const RenderStage::Stage& stage) {
-    scene.m_i->_addMeshInstanceToPipeline(scene, meshInstance, scene.m_i->m_Pipelines[stage], stage);
+void InternalScenePublicInterface::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, const RenderStage::Stage& stage) {
+    scene.m_i->_addModelInstanceToPipeline(scene, modelInstance, scene.m_i->m_Pipelines[stage], stage);
 }
-void InternalScenePublicInterface::RemoveMeshInstanceFromPipeline(Scene& scene, MeshInstance& meshInstance, const RenderStage::Stage& stage){
-    scene.m_i->_removeMeshInstanceFromPipeline(scene, meshInstance, scene.m_i->m_Pipelines[stage], stage);
+void InternalScenePublicInterface::RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance& modelInstance, const RenderStage::Stage& stage){
+    scene.m_i->_removeModelInstanceFromPipeline(scene, modelInstance, scene.m_i->m_Pipelines[stage], stage);
 }
 
 Scene::Scene(const string& name):m_i(new impl){

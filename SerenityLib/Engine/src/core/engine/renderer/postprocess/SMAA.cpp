@@ -61,7 +61,7 @@ void Postprocess_SMAA::passEdge(ShaderP& program, GBuffer& gbuffer, const glm::v
     Renderer::stencilMask(0xFFFFFFFF);
 
 
-    glStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
+    Renderer::stencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
     Renderer::stencilOp(GL_KEEP, GL_INCR, GL_INCR);
     Renderer::GLEnable(GLState::STENCIL_TEST);
 
@@ -79,7 +79,7 @@ void Postprocess_SMAA::passEdge(ShaderP& program, GBuffer& gbuffer, const glm::v
 
     Renderer::stencilMask(0xFFFFFFFF);
 
-    glStencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
+    Renderer::stencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
     Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 }
 void Postprocess_SMAA::passBlend(ShaderP& program, GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& outTexture) {

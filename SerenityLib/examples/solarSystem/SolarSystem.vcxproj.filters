@@ -34,6 +34,12 @@
     <Filter Include="Source Files\Game\GUI\Specifics">
       <UniqueIdentifier>{a5c94478-92a8-49b2-9ab9-bc6750f0414c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Map">
+      <UniqueIdentifier>{05c7b727-cd23-4134-ab2c-5641550ec48c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Map">
+      <UniqueIdentifier>{bc377900-df58-45fe-935a-28893b7115ab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -52,9 +58,6 @@
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="game\Ship.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="game\SolarSystem.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="game\Server.h">
@@ -108,6 +111,12 @@
     <ClInclude Include="game\Helper.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
+    <ClInclude Include="game\map\Map.h">
+      <Filter>Header Files\Game\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="game\map\Sector.h">
+      <Filter>Header Files\Game\Map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -132,9 +141,6 @@
       <Filter>Source Files\Game</Filter>
     </ClCompile>
     <ClCompile Include="game\Ship.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="game\SolarSystem.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
     <ClCompile Include="game\Server.cpp">
@@ -178,6 +184,12 @@
     </ClCompile>
     <ClCompile Include="game\gui\specifics\ServerHostingMapSelectorWindow.cpp">
       <Filter>Source Files\Game\GUI\Specifics</Filter>
+    </ClCompile>
+    <ClCompile Include="game\map\Map.cpp">
+      <Filter>Source Files\Game\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="game\map\Sector.cpp">
+      <Filter>Source Files\Game\Map</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

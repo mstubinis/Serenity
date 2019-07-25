@@ -1,5 +1,5 @@
 #include "HUD.h"
-#include "SolarSystem.h"
+#include "map/Map.h"
 #include "Planet.h"
 #include "Ship.h"
 #include "Core.h"
@@ -103,11 +103,19 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             const string& map        = hud.m_ServerHostMapSelector->getCurrentChoice().text();
             if (!portstring.empty() && !username.empty() && !map.empty()) {
                 //TODO: prevent special characters in usename
-                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))   && username.find_first_not_of(' ') != std::string::npos) {
-                    const int port = stoi(portstring);
-                    hud.m_Core.startServer(port, map);
-                    hud.m_Core.startClient(port, username, "127.0.01"); //the client will request validation at this stage
-                    hud.m_ServerLobbyChatWindow->setUserPointer(hud.m_Core.getClient());
+                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) {
+                    if (username.find_first_not_of(' ') != std::string::npos) {
+                        if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) {
+                            const int port = stoi(portstring);
+                            hud.m_Core.startServer(port, map);
+                            hud.m_Core.startClient(port, username, "127.0.01"); //the client will request validation at this stage
+                            hud.m_ServerLobbyChatWindow->setUserPointer(hud.m_Core.getClient());
+                        }else{
+                            hud.setErrorText("The username must only contain letters");
+                        }
+                    }else{
+                        hud.setErrorText("The username must have some letters in it");
+                    }
                 }else{
                     hud.setErrorText("Server port must contain numbers only");
                 }
@@ -122,11 +130,20 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             const string& username   = hud.m_UserName->text();
             const string& portstring = hud.m_ServerPort->text();
             const string& ip         = hud.m_ServerIp->text();
-            if (!portstring.empty() && ip != "" && !username.empty()) {
+            if (!portstring.empty() && !ip.empty() && !username.empty()) {
                 //TODO: prevent special characters in usename
-                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))  && username.find_first_not_of(' ') != std::string::npos) {
-                    hud.m_Core.startClient(stoi(portstring), username, ip); //the client will request validation at this stage
-                    hud.m_ServerLobbyChatWindow->setUserPointer(hud.m_Core.getClient());
+                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) {
+                    if (username.find_first_not_of(' ') != std::string::npos) {
+                        if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) {
+                            hud.m_Core.startClient(stoi(portstring), username, ip); //the client will request validation at this stage
+                            hud.m_ServerLobbyChatWindow->setUserPointer(hud.m_Core.getClient());
+                        }else {
+                            hud.setErrorText("The username must only contain letters");
+                        }
+                    }else {
+                        hud.setErrorText("The username must have some letters in it");
+                    }
+
                 }else{
                     hud.setErrorText("Server port must contain numbers only");
                 }
@@ -305,37 +322,56 @@ void HUD::onResize(const uint& width, const uint& height) {
     m_ServerLobbyShipSelectorWindow->setPosition(50, winSize.y - 50);
 }
 
-int _count = 0;
+int _countShips = 0;
+int _countPlanets = 0;
 void HUD::update_game(const double& dt) {
     if (Engine::isKeyDownOnce(KeyboardKey::LeftAlt, KeyboardKey::X) || Engine::isKeyDownOnce(KeyboardKey::RightAlt, KeyboardKey::X)) {
         m_Active = !m_Active;
     }
 
-    SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
+    Map* scene = static_cast<Map*>(Resources::getCurrentScene());
     auto& player = *scene->getPlayer();
     auto& playerName = player.entity().getComponent<ComponentName>()->name();
-    const auto& ships = scene->getShips();
-    vector<Ship*> shipsVect;
-    shipsVect.reserve(ships.size());
 
-    for (auto& p : ships) {
-        auto& name = p.second->entity().getComponent<ComponentName>()->name();
-        if(name != playerName)
-            shipsVect.push_back(p.second);
-    }
-    if (shipsVect.size() > 0) {
-        if (Engine::isKeyDownOnce(KeyboardKey::Comma)) {
-            player.setTarget(shipsVect[_count]->entity().getComponent<ComponentName>()->name());
-            ++_count;
-            if (_count > shipsVect.size() - 1) {
-                _count = 0;
+
+
+
+
+
+
+    if (Engine::isKeyDownOnce(KeyboardKey::Comma)) {
+        const auto& ships = scene->getShips();
+        vector<Ship*> shipsVect;
+        shipsVect.reserve(ships.size());
+
+        for (auto& p : ships) {
+            auto& name = p.second->entity().getComponent<ComponentName>()->name();
+            if (name != playerName)
+                shipsVect.push_back(p.second);
+        }
+
+
+        if (shipsVect.size() > 0) {
+            player.setTarget(shipsVect[_countShips]->entity().getComponent<ComponentName>()->name());
+            ++_countShips;
+            if (_countShips > shipsVect.size() - 1) {
+                _countShips = 0;
             }
-        }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
-            player.setTarget(shipsVect[_count]->entity().getComponent<ComponentName>()->name());
-            --_count;
-            if (_count <= 0) {
-                _count = shipsVect.size() - 1;
-            }
+        }
+    }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
+        const auto& planets = scene->getPlanets();
+        vector<Planet*> planetsVect;
+        planetsVect.reserve(planets.size());
+
+        for (auto& p : planets) {
+            planetsVect.push_back(p.second);
+        }
+
+
+        player.setTarget(planetsVect[_countPlanets]->entity().getComponent<ComponentName>()->name());
+        ++_countPlanets;
+        if (_countPlanets > planetsVect.size() - 1) {
+            _countPlanets = 0;
         }
     }
 }
@@ -380,7 +416,7 @@ void HUD::update_join_server_server_lobby(const double& dt) {
 
 void HUD::render_game() {
 
-    SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
+    Map* scene = static_cast<Map*>(Resources::getCurrentScene());
     Ship* player = scene->getPlayer();
     glm::vec2 winSize = glm::vec2(Resources::getWindowSize().x, Resources::getWindowSize().y);
 

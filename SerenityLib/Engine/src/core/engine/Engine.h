@@ -47,7 +47,7 @@ namespace Engine{
             SoundManager          m_SoundManager;
             RenderManager         m_RenderManager;
             ThreadManager         m_ThreadManager;
-            NoiseManager          m_NoiseManager;
+            SimplexNoise          m_SimplexNoise;
 
             bool                  m_Paused;
             bool                  m_Destroyed;

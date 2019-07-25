@@ -6,7 +6,7 @@
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/mesh/MeshRequest.h>
 
-#include <core/MeshInstance.h>
+#include <core/ModelInstance.h>
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <btBulletDynamicsCommon.h>

@@ -1,6 +1,6 @@
 #include "Ship.h"
 #include "GameCamera.h"
-#include "SolarSystem.h"
+#include "map/Map.h"
 #include "ResourceManifest.h"
 
 #include <core/engine/Engine.h>
@@ -215,7 +215,7 @@ void ShipSystemSensors::update(const double& dt){
 
 struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
     Ship& ship = *(Ship*)_component.getUserPointer();
-    SolarSystem& currentScene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+    Map& currentScene = *static_cast<Map*>(Resources::getCurrentScene());
 
     if (ship.m_IsPlayer) {
         #pragma region PlayerFlightControls
@@ -224,7 +224,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
             if (ship.m_IsWarping && ship.m_WarpFactor > 0) {
                 auto& body = *ship.m_Entity.getComponent<ComponentBody>();
                 const float& speed = (ship.m_WarpFactor * 1.0f / 0.46f) * 2.0f;
-                const glm::vec3& s = (body.forward() * glm::pow(speed, 15.0f)) / glm::log2(body.mass() + 5.0f);
+                const glm::vec3& s = (body.forward() * glm::pow(speed, 15.0f)) / glm::log2(body.mass() + 0.5f);
                 for (auto& pod : epriv::InternalScenePublicInterface::GetEntities(currentScene)) {
                     Entity e = currentScene.getEntity(pod);
                     const EntityDataRequest dataRequest(e);
@@ -286,7 +286,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
 }};
 
 
-Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, const string& name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type,SolarSystem* scene):EntityWrapper(*scene){
+Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, const string& name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type, Map* scene):EntityWrapper(*scene){
     m_WarpFactor    = 0;
     m_IsPlayer      = player;
     m_ShipClass     = shipClass;
@@ -294,6 +294,7 @@ Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, cons
     m_Target        = Entity::_null;
     m_PlayerCamera  = nullptr;
     m_MouseFactor   = glm::dvec2(0.0);
+    m_SavedOldStateBefore = false;
 
     auto& rigidBodyComponent = *m_Entity.addComponent<ComponentBody>(_type);
     auto& modelComponent     = *m_Entity.addComponent<ComponentModel>(mesh, mat);
@@ -344,7 +345,7 @@ void Ship::translateWarp(float amount,float dt){
     }
 }
 void Ship::setTarget(const string& target) {
-    SolarSystem* s = static_cast<SolarSystem*>(Resources::getCurrentScene());
+    Map* s = static_cast<Map*>(Resources::getCurrentScene());
     for (auto& entity : s->m_Objects) {
         auto* componentName = entity->entity().getComponent<ComponentName>();
         if (componentName) {
@@ -363,15 +364,25 @@ void Ship::onEvent(const Event& e){
 }
 
 void Ship::savePositionState() {
-    SolarSystem& currentScene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
-    const auto& anchorPos = currentScene.getAnchor();
-    const auto& shipPos = entity().getComponent<ComponentBody>()->position();
-    currentScene.setOldAnchorPos(anchorPos.x, anchorPos.y, anchorPos.z);
-    currentScene.setOldClientPos(shipPos.x, shipPos.y, shipPos.z);
+    if (!m_SavedOldStateBefore) {
+        /*
+        Map& currentScene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+        const auto& anchorPos = currentScene.getAnchor();
+        const auto& shipPos = entity().getComponent<ComponentBody>()->position();
+        currentScene.setOldAnchorPos(anchorPos.x, anchorPos.y, anchorPos.z);
+        currentScene.setOldClientPos(shipPos.x, shipPos.y, shipPos.z);
+        m_SavedOldStateBefore = true;
+        */
+    }
 }
 void Ship::restorePositionState() {
-    SolarSystem& currentScene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
-    const auto& anchorPos = currentScene.getAnchor();
-    currentScene.setAnchor(anchorPos.x, anchorPos.y, anchorPos.z);
-    entity().getComponent<ComponentBody>()->setPosition(currentScene.getOldClientPos());
+    if (m_SavedOldStateBefore) {
+        /*
+        Map& currentScene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
+        const auto& anchorPos = currentScene.getOldAnchorPos();
+        currentScene.setAnchor(anchorPos.x, anchorPos.y, anchorPos.z);
+        entity().getComponent<ComponentBody>()->setPosition(currentScene.getOldClientPos());
+        m_SavedOldStateBefore = false;
+        */
+    }
 }

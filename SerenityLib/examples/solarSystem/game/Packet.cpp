@@ -1,8 +1,9 @@
 #include "Packet.h"
 #include "Ship.h"
-#include "SolarSystem.h"
+#include "map/Map.h"
 
 #include <core/engine/math/Engine_Math.h>
+#include <ecs/ComponentBody.h>
 
 using namespace Engine;
 using namespace std;
@@ -59,7 +60,7 @@ PacketPhysicsUpdate::PacketPhysicsUpdate():Packet() {
     px = py = pz = qx = qy = qz = lx = ly = lz = ax = ay = az = 0;
     qw = 1.0f;
 }
-PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, SolarSystem& map) :Packet() {
+PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map) :Packet() {
     auto& ent = ship.entity();
     EntityDataRequest request(ent);
     const auto pbody = ent.getComponent<ComponentBody>(request);
@@ -77,10 +78,17 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, SolarSystem& map) :Packet()
         const auto& lv  = body.getLinearVelocity();
         const auto& av  = body.getAngularVelocity();
 
-        const auto& offset = map.getAnchor();
-        px = pos.x - offset.x;
-        py = pos.y - offset.y;
-        pz = pos.z - offset.z;
+        px = pos.x;
+        py = pos.y;
+        pz = pos.z;
+        const auto& str = map.getClosestAnchor();
+        if (!str.empty() && map.getAnchors().count(str)) {
+            const auto& offset = map.getAnchors().at(str)->entity().getComponent<ComponentBody>()->position();
+            px -= offset.x;
+            py -= offset.y;
+            pz -= offset.z;
+            data += "," + str;
+        }
 
         Math::Float16From32(&qx, rot.x);
         Math::Float16From32(&qy, rot.y);

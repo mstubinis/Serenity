@@ -6,7 +6,7 @@
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/math/Engine_Math.h>
-#include <core/MeshInstance.h>
+#include <core/ModelInstance.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -38,29 +38,29 @@ Mesh* Mesh::Triangle  = nullptr;
 namespace Engine {
     namespace epriv {
         struct DefaultMeshBindFunctor final{void operator()(BindableResource* r) const {
-            const auto& m = *static_cast<Mesh*>(r);
-            m.m_VertexData->bind();
+            const auto& mesh = *static_cast<Mesh*>(r);
+            mesh.m_VertexData->bind();
         }};
         struct DefaultMeshUnbindFunctor final {void operator()(BindableResource* r) const {
-            const auto& m = *static_cast<Mesh*>(r);
-            m.m_VertexData->unbind();
+            const auto& mesh = *static_cast<Mesh*>(r);
+            mesh.m_VertexData->unbind();
         }};
     };
 };
 
-void InternalMeshPublicInterface::LoadCPU( Mesh& _mesh){
-    _mesh.load_cpu();
+void InternalMeshPublicInterface::LoadCPU(Mesh& mesh){
+    mesh.load_cpu();
 }
-void InternalMeshPublicInterface::LoadGPU( Mesh& _mesh){
-    _mesh.load_gpu();
-    _mesh.EngineResource::load();
+void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
+    mesh.load_gpu();
+    mesh.EngineResource::load();
 }
-void InternalMeshPublicInterface::UnloadCPU( Mesh& _mesh){
-    _mesh.unload_cpu();
-    _mesh.EngineResource::unload();
+void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh){
+    mesh.unload_cpu();
+    mesh.EngineResource::unload();
 }
-void InternalMeshPublicInterface::UnloadGPU( Mesh& _mesh){
-    _mesh.unload_gpu();
+void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh){
+    mesh.unload_gpu();
 }
 
 bool InternalMeshPublicInterface::SupportsInstancing(){
@@ -70,10 +70,11 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
     return false;
 }
 
-btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* _mesh, const CollisionType::Type& _type) {
-    if(!_mesh) return new btEmptyShape();
-    auto& factory = *_mesh->m_CollisionFactory;
-    switch (_type) {
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, const CollisionType::Type& type) {
+    if(!mesh) 
+        return new btEmptyShape();
+    auto& factory = *mesh->m_CollisionFactory;
+    switch (type) {
         case CollisionType::None: { 
             return new btEmptyShape(); 
         }case CollisionType::Box: { 
@@ -97,10 +98,10 @@ btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* _mesh, const
 void Mesh::calculate_radius() {
     m_radiusBox = glm::vec3(0.0f);
     const auto& data = (*m_VertexData).getData<glm::vec3>(0);
-    for (auto& _vertex : data) {
-        const float x = abs(_vertex.x);
-        const float y = abs(_vertex.y);
-        const float z = abs(_vertex.z);
+    for (auto& vertex : data) {
+        const float x = abs(vertex.x);
+        const float y = abs(vertex.y);
+        const float z = abs(vertex.z);
         if (x > m_radiusBox.x)  m_radiusBox.x = x;
         if (y > m_radiusBox.y)  m_radiusBox.y = y;
         if (z > m_radiusBox.z)  m_radiusBox.z = z;
@@ -194,14 +195,13 @@ void Mesh::finalize_vertex_data(MeshImportedData& data) {
                 //average out TBN. But it cancels out normal mapping on some flat surfaces
                 //temp_binormals[index] += data.binormals[i];
                 //temp_tangents[index] += data.tangents[i];
-            }
-            else {
+            }else{
                 temp_pos.emplace_back(data.points[i]);
                 temp_uvs.emplace_back(data.uvs[i]);
                 temp_normals.emplace_back(data.normals[i]);
                 temp_binormals.emplace_back(data.binormals[i]);
                 temp_tangents.emplace_back(data.tangents[i]);
-                _indices.emplace_back((ushort)temp_pos.size() - 1);
+                _indices.emplace_back(static_cast<ushort>(temp_pos.size() - 1));
             }
         }
         normals[0].reserve(temp_normals.size());
@@ -313,7 +313,7 @@ Mesh::Mesh(VertexData* data, const string& name, float threshold):BindableResour
     m_VertexData = data;
     m_threshold = threshold;
 }
-Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name){
+Mesh::Mesh(const string& name,float width, float height,float threshold):BindableResource(name){
     init_blank();
     m_threshold = threshold;
 
@@ -343,12 +343,12 @@ Mesh::Mesh(string name,float width, float height,float threshold):BindableResour
 
     load();
 }
-Mesh::Mesh(string fileOrData,float threshold):BindableResource(""){
+Mesh::Mesh(const string& fileOrData,float threshold):BindableResource(""){
     init_blank();
     m_threshold = threshold;
 
     setName("Custom Mesh");
-    unsigned char _flags = MeshLoadingFlags::Faces | MeshLoadingFlags::UVs | MeshLoadingFlags::Normals | MeshLoadingFlags::TBN;
+    unsigned char _flags = MeshLoadingFlags::Points | MeshLoadingFlags::Faces | MeshLoadingFlags::UVs | MeshLoadingFlags::Normals | MeshLoadingFlags::TBN;
 
     MeshImportedData data;
     vector<vector<uint>> indices;
@@ -417,23 +417,32 @@ Mesh::~Mesh(){
     unload();
 }
 
-unordered_map<string, AnimationData>& Mesh::animationData(){ return m_Skeleton->m_AnimationData; }
+unordered_map<string, AnimationData>& Mesh::animationData(){ 
+    return m_Skeleton->m_AnimationData; 
+}
 
-const VertexData& Mesh::getVertexStructure() const { return *m_VertexData; }
+const VertexData& Mesh::getVertexData() const { 
+    return *m_VertexData; 
+}
 
-const glm::vec3& Mesh::getRadiusBox() const { return m_radiusBox; }
-const float Mesh::getRadius() const { return m_radius; }
+const glm::vec3& Mesh::getRadiusBox() const { 
+    return m_radiusBox; 
+}
+const float Mesh::getRadius() const { 
+    return m_radius; 
+}
 void Mesh::render(bool instancing, MeshDrawMode::Mode mode){
     const uint& indicesSize = m_VertexData->indices.size();
     if (indicesSize == 0) return;
     if (instancing && epriv::InternalMeshPublicInterface::SupportsInstancing()) {
         //const uint& instancesCount = m_InstanceCount;
-        //if (instancesCount == 0) return;
+        //if (instancesCount == 0) 
+        //    return;
         //if (RenderManager::OPENGL_VERSION >= 31) {
         //    glDrawElementsInstanced(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        //} else if (OpenGLExtensionEnum::supported(OpenGLExtensionEnum::EXT_draw_instanced)) {
+        //} else if (OpenGLExtension::supported(OpenGLExtension::EXT_draw_instanced)) {
         //    glDrawElementsInstancedEXT(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        //} else if (OpenGLExtensionEnum::supported(OpenGLExtensionEnum::ARB_draw_instanced)) {
+        //} else if (OpenGLExtension::supported(OpenGLExtension::ARB_draw_instanced)) {
         //    glDrawElementsInstancedARB(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
         //}
     }else{

@@ -7,16 +7,16 @@
 class SunLight;
 class Ring;
 class Planet;
-class SolarSystem;
+class Map;
 
 struct PlanetLogicFunctor;
-struct PlanetaryRingMeshInstanceBindFunctor;
-struct AtmosphericScatteringGroundMeshInstanceBindFunctor;
-struct AtmosphericScatteringGroundMeshInstanceUnbindFunctor;
-struct AtmosphericScatteringSkyMeshInstanceBindFunctor;
-struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
-struct StarMeshInstanceBindFunctor;
-struct StarMeshInstanceUnbindFunctor;
+struct PlanetaryRingModelInstanceBindFunctor;
+struct AtmosphericScatteringGroundModelInstanceBindFunctor;
+struct AtmosphericScatteringGroundModelInstanceUnbindFunctor;
+struct AtmosphericScatteringSkyModelInstanceBindFunctor;
+struct AtmosphericScatteringSkyModelInstanceUnbindFunctor;
+struct StarModelInstanceBindFunctor;
+struct StarModelInstanceUnbindFunctor;
 
 struct PlanetType{ enum Type {
     Rocky,Ice,GasGiant,IceGiant,Moon,Star,Asteroid,
@@ -55,13 +55,13 @@ struct RingInfo final{
 class Planet:public EntityWrapper {
     friend class  ::Ring;
     friend struct ::PlanetLogicFunctor;
-    friend struct ::PlanetaryRingMeshInstanceBindFunctor;
-    friend struct ::AtmosphericScatteringGroundMeshInstanceBindFunctor;
-    friend struct ::AtmosphericScatteringGroundMeshInstanceUnbindFunctor;
-    friend struct ::AtmosphericScatteringSkyMeshInstanceBindFunctor;
-    friend struct ::AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
-    friend struct ::StarMeshInstanceBindFunctor;
-    friend struct ::StarMeshInstanceUnbindFunctor;
+    friend struct ::PlanetaryRingModelInstanceBindFunctor;
+    friend struct ::AtmosphericScatteringGroundModelInstanceBindFunctor;
+    friend struct ::AtmosphericScatteringGroundModelInstanceUnbindFunctor;
+    friend struct ::AtmosphericScatteringSkyModelInstanceBindFunctor;
+    friend struct ::AtmosphericScatteringSkyModelInstanceUnbindFunctor;
+    friend struct ::StarModelInstanceBindFunctor;
+    friend struct ::StarModelInstanceUnbindFunctor;
     protected:
         std::vector<Ring*>  m_Rings;
         PlanetType::Type    m_Type;
@@ -76,7 +76,7 @@ class Planet:public EntityWrapper {
             float = 1,                            //Radius
             std::string = "Planet",               //Name
             float = 0,                            //Atmosphere size
-            SolarSystem* = nullptr
+            Map * = nullptr
         );
         virtual ~Planet();
 
@@ -106,7 +106,7 @@ class Star: public Planet{
             glm::vec3 = glm::vec3(0.0f),             //Position
             float = 1,                               //Scale
             std::string = "Star",                    //Name
-            SolarSystem* = nullptr
+            Map * = nullptr
         );
         virtual ~Star();
 };

@@ -15,7 +15,7 @@
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/MeshInstance.h>
+#include <core/ModelInstance.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/Material.h>
 #include <ecs/ComponentBody.h>
@@ -1143,9 +1143,9 @@ class epriv::RenderManager::impl final{
             epriv::Postprocess_SSAO::SSAO.init();
 
             GLEnable(GLState::DEPTH_TEST);
-            Renderer::setDepthFunc(DepthFunc::LEqual);
+            Renderer::setDepthFunc(GL_LEQUAL);
             GLDisable(GLState::STENCIL_TEST);
-            glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
+            renderManager->OpenGLStateMachine.GL_glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //for non Power of Two textures
     
             //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very odd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
             GLEnable(GLState::DEPTH_CLAMP);
@@ -1215,10 +1215,8 @@ class epriv::RenderManager::impl final{
             Renderer::RestoreGLState();
             renderManager->OpenGLStateMachine.GL_RESTORE_CURRENT_STATE_MACHINE();
 
-            glDepthFunc(GL_LEQUAL);
             glEnable(GL_CULL_FACE);
             glEnable(GL_DEPTH_CLAMP);
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
             const auto& winSize = Resources::getWindowSize();
             m_GBuffer = new GBuffer(winSize.x, winSize.y);
@@ -1244,7 +1242,7 @@ class epriv::RenderManager::impl final{
             //make these 2 variables global in the renderer class?
             glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f),1.0f,0.1f,3000000.0f);
             glm::mat4 captureViews[] = {
-                glm::lookAt(glm::vec3(0.0f),glm::vec3( 1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
+                glm::lookAt(glm::vec3(0.0f),glm::vec3(1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
                 glm::lookAt(glm::vec3(0.0f),glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
                 glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f)),
                 glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)),
@@ -1499,7 +1497,7 @@ class epriv::RenderManager::impl final{
             Renderer::GLEnable(GLState::DEPTH_TEST);
             if (glm::distance(c.getPosition(), pos) <= p.m_CullingRadius) { //inside the light volume
                 Renderer::cullFace(GL_FRONT);
-                Renderer::setDepthFunc(DepthFunc::GEqual);
+                Renderer::setDepthFunc(GL_GEQUAL);
             }
             auto& pointLightMesh = *epriv::InternalMeshes::PointLightBounds;
 
@@ -1507,7 +1505,7 @@ class epriv::RenderManager::impl final{
             pointLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
             pointLightMesh.unbind();
             Renderer::cullFace(GL_BACK);
-            Renderer::setDepthFunc(DepthFunc::LEqual);
+            Renderer::setDepthFunc(GL_LEQUAL);
             Renderer::GLDisable(GLState::DEPTH_TEST);
         }
         void _renderDirectionalLight(DirectionalLight& d) {
@@ -1545,7 +1543,7 @@ class epriv::RenderManager::impl final{
             Renderer::GLEnable(GLState::DEPTH_TEST);
             if (glm::distance(c.getPosition(), pos) <= s.m_CullingRadius) { //inside the light volume                                                 
                 Renderer::cullFace(GL_FRONT);
-                Renderer::setDepthFunc(DepthFunc::GEqual);
+                Renderer::setDepthFunc(GL_GEQUAL);
             }
             auto& spotLightMesh = *epriv::InternalMeshes::SpotLightBounds;
 
@@ -1553,7 +1551,7 @@ class epriv::RenderManager::impl final{
             spotLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
             spotLightMesh.unbind();
             Renderer::cullFace(GL_BACK);
-            Renderer::setDepthFunc(DepthFunc::LEqual);
+            Renderer::setDepthFunc(GL_LEQUAL);
 
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
             Renderer::GLDisable(GLState::DEPTH_TEST);
@@ -1585,7 +1583,7 @@ class epriv::RenderManager::impl final{
             Renderer::GLEnable(GLState::DEPTH_TEST);
             if (glm::distance(c.getPosition(), pos) <= cullingDistance) {
                 Renderer::cullFace(GL_FRONT);
-                Renderer::setDepthFunc(DepthFunc::GEqual);
+                Renderer::setDepthFunc(GL_GEQUAL);
             }
             auto& rodLightMesh = *epriv::InternalMeshes::RodLightBounds;
 
@@ -1593,13 +1591,13 @@ class epriv::RenderManager::impl final{
             rodLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
             rodLightMesh.unbind();
             Renderer::cullFace(GL_BACK);
-            Renderer::setDepthFunc(DepthFunc::LEqual);
+            Renderer::setDepthFunc(GL_LEQUAL);
             Renderer::GLDisable(GLState::DEPTH_TEST);
 
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
         }
         void _passGeometry(GBuffer& gbuffer, Viewport& viewport, Camera& camera){
-            Scene& scene = *Resources::getCurrentScene();
+            Scene& scene = viewport.m_Scene;
             const glm::vec4& clear = viewport.m_BackgroundColor;
             const float colors[4] = { clear.r, clear.g, clear.b, clear.a };
     
@@ -1607,7 +1605,7 @@ class epriv::RenderManager::impl final{
 
             Settings::clear(true,true,true); // (0,0,0,0)
             
-            Renderer::setDepthFunc(DepthFunc::LEqual);
+            Renderer::setDepthFunc(GL_LEQUAL);
 
             glClearBufferfv(GL_COLOR, 0, colors);
             auto& godRays = epriv::Postprocess_GodRays::GodRays;
@@ -1638,8 +1636,8 @@ class epriv::RenderManager::impl final{
 
             InternalScenePublicInterface::RenderGeometryTransparent(scene, camera);
         }
-        void _passForwardRendering(GBuffer& gbuffer, Camera& camera){
-            Scene& scene = *Resources::getCurrentScene();
+        void _passForwardRendering(GBuffer& gbuffer, Viewport& viewport, Camera& camera){
+            Scene& scene = viewport.m_Scene;
 
             gbuffer.bindFramebuffers(GBufferType::Diffuse);
             
@@ -1657,8 +1655,8 @@ class epriv::RenderManager::impl final{
             _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
             Renderer::colorMask(true, true, true, true);
         }
-        void _passLighting(GBuffer& gbuffer, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool mainRenderFunc){
-            Scene& s = *Resources::getCurrentScene(); 
+        void _passLighting(GBuffer& gbuffer, Viewport& viewport, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool mainRenderFunc){
+            Scene& scene = viewport.m_Scene;
 
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting]->bind();
 
@@ -1684,19 +1682,19 @@ class epriv::RenderManager::impl final{
             sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 3);
             sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 4);
 
-            for (const auto& light : InternalScenePublicInterface::GetPointLights(s)) {
+            for (const auto& light : InternalScenePublicInterface::GetPointLights(scene)) {
                 _renderPointLight(*light);
             }
-            for (const auto& light : InternalScenePublicInterface::GetSpotLights(s)) {
+            for (const auto& light : InternalScenePublicInterface::GetSpotLights(scene)) {
                 _renderSpotLight(*light);
             }
-            for (const auto& light : InternalScenePublicInterface::GetRodLights(s)) {
+            for (const auto& light : InternalScenePublicInterface::GetRodLights(scene)) {
                 _renderRodLight(*light);
             }
-            for (const auto& light : InternalScenePublicInterface::GetSunLights(s)) {
+            for (const auto& light : InternalScenePublicInterface::GetSunLights(scene)) {
                 _renderSunLight(*light);
             }
-            for (const auto& light : InternalScenePublicInterface::GetDirectionalLights(s)) {
+            for (const auto& light : InternalScenePublicInterface::GetDirectionalLights(scene)) {
                 _renderDirectionalLight(*light);
             }
             if(mainRenderFunc){
@@ -1717,7 +1715,7 @@ class epriv::RenderManager::impl final{
                 sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 2);
                 sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 3);
 
-                Skybox* skybox = s.skybox();
+                Skybox* skybox = scene.skybox();
                 if(skybox && skybox->texture()->numAddresses() >= 3){
                     sendTextureSafe("irradianceMap", skybox->texture()->address(1), 4, GL_TEXTURE_CUBE_MAP);
                     sendTextureSafe("prefilterMap", skybox->texture()->address(2), 5, GL_TEXTURE_CUBE_MAP);
@@ -1740,8 +1738,8 @@ class epriv::RenderManager::impl final{
             GLEnable(GLState::STENCIL_TEST);
             Settings::clear(false,false,true); //stencil is completely filled with 0's
             Renderer::stencilMask(0xFFFFFFFF);
-            glStencilFunc(GL_ALWAYS, 0x00000000, 0x00000000);
-            
+
+            Renderer::stencilFunc(GL_ALWAYS, 0x00000000, 0x00000000);
             //exclude shadeless normals
             Renderer::stencilOp(GL_KEEP, GL_INCR_WRAP, GL_INCR_WRAP);
 
@@ -1751,7 +1749,9 @@ class epriv::RenderManager::impl final{
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
 
             Renderer::stencilMask(0xFFFFFFFF);
-            glStencilFunc(GL_NOTEQUAL, 0x00000000, 0xFFFFFFFF);
+
+            Renderer::stencilFunc(GL_NOTEQUAL, 0x00000000, 0xFFFFFFFF);
+
             Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Do not change stencil
 
             Renderer::colorMask(true, true, true, true);
@@ -1853,7 +1853,7 @@ class epriv::RenderManager::impl final{
             //TODO: find out why facing a certain direction causes around 2 - 3 ms frame spike times. determine if this is due to an object or a rendering
             //algorithm. also find out why enabling ssao REDUCES frame ms time. use opengl timers to isolate the troubling functions.
             
-            Scene&  scene                = const_cast<Scene&>(viewport.getScene());
+            const Scene& scene           = viewport.m_Scene;
             Camera& camera               = const_cast<Camera&>(viewport.getCamera());
             const glm::uvec4& dimensions = viewport.getViewportDimensions();
 
@@ -1962,7 +1962,7 @@ class epriv::RenderManager::impl final{
             if(lighting){
                 gbuffer.bindFramebuffers(GBufferType::Lighting,"RGB");
                 Settings::clear(true,false,false);//this is needed for godrays 0,0,0,0
-                _passLighting(gbuffer,camera, dimensions.z, dimensions.w,mainRenderFunc);
+                _passLighting(gbuffer,viewport, camera, dimensions.z, dimensions.w, mainRenderFunc);
             }
             
             GLDisable(GLState::BLEND_0);
@@ -1971,7 +1971,7 @@ class epriv::RenderManager::impl final{
 
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
-            _passForwardRendering(gbuffer,camera);
+            _passForwardRendering(gbuffer, viewport, camera);
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             
@@ -2244,18 +2244,17 @@ void Renderer::Settings::setGamma(const float g){
 const float Renderer::Settings::getGamma(){
     return renderManagerImpl->gamma; 
 }
-const bool Renderer::setDepthFunc(const DepthFunc::Func& func){
-    auto& i = *renderManagerImpl;
-    if (i.depth_func != func) {
-        glDepthFunc(func);
-        i.depth_func = func;
-        return true;
-    } 
-    return false;
+const bool Renderer::setDepthFunc(const GLenum& func){
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glDepthFunc(func);
 }
 const bool Renderer::setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
     auto& i = *renderManager;
     return i.OpenGLStateMachine.GL_glViewport(x, y, w, h);
+}
+const bool Renderer::stencilFunc(const GLenum& func, const GLint& ref, const GLuint& mask) {
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glStencilFunc(func, ref, mask);
 }
 const bool Renderer::colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
     auto& i = *renderManagerImpl;

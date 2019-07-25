@@ -2,7 +2,7 @@
 #include <ecs/ComponentModel.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
-#include <core/MeshInstance.h>
+#include <core/ModelInstance.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/scene/Camera.h>
 

@@ -6,7 +6,7 @@
 #include <ecs/ECSSystem.h>
 
 #include <core/engine/events/Engine_EventObject.h>
-#include <core/MeshInstance.h>
+#include <core/ModelInstance.h>
 
 struct Handle;
 class  ShaderP;
@@ -38,9 +38,9 @@ class ComponentModel : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentModel_Functions;
     friend class  ComponentCamera;
     private:
-        std::vector<MeshInstance*> _meshInstances;
-        float                      _radius;
-        glm::vec3                  _radiusBox;
+        std::vector<ModelInstance*> _modelInstances;
+        float                       _radius;
+        glm::vec3                   _radiusBox;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentModel(const Entity&, Handle& meshHandle, Handle& materialHandle, ShaderP* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
@@ -66,7 +66,7 @@ class ComponentModel : public ComponentBaseClass {
         void show();
         void hide();
 
-        MeshInstance& getModel(const uint& index = 0);
+        ModelInstance& getModel(const uint& index = 0);
 
         const uint addModel(Handle& meshHandle, Handle& materialHandle, ShaderP* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
         const uint addModel(Mesh*, Material*, ShaderP* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
@@ -86,10 +86,10 @@ class ComponentModel : public ComponentBaseClass {
         const bool rayIntersectSphere(const ComponentCamera& camera);
 
         template<class T> void setCustomBindFunctor(const T& functor, const uint& index = 0) { 
-            _meshInstances[index]->setCustomBindFunctor(functor);
+            _modelInstances[index]->setCustomBindFunctor(functor);
         }
         template<class T> void setCustomUnbindFunctor(const T& functor, const uint& index = 0) {
-            _meshInstances[index]->setCustomUnbindFunctor(functor);
+            _modelInstances[index]->setCustomUnbindFunctor(functor);
         }
 };
 

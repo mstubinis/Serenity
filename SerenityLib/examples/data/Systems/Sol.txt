@@ -23,6 +23,7 @@ M name=Callisto parent=Jupiter radius=2410 r=1 g=1 b=1 position=1882700 x=-16714
 M name=Io parent=Jupiter radius=1822 r=1 g=1 b=1 position=421700 x=3934265 y=0 z=1518105 a=0.368264198 atmosphereHeight=0 type=Rock texture=Io.dds eccentricity=0.0041 period=1.769137786 majorAxis=421800 tilt=0 days=1.769137786
 M name=Europa parent=Jupiter radius=1560 r=1 g=1 b=1 position=670900 x=-4938467 y=0 z=4541170 a=2.39808059 atmosphereHeight=0 type=Rock texture=Europa.dds eccentricity=0.009 period=3.551181 majorAxis=671100 tilt=0.1 days=3.551181
 M name=Ganymede parent=Jupiter radius=2634 r=1 g=1 b=1 position=1070400 x=-6663382 y=0 z=8377049 a=2.24274635 atmosphereHeight=0 type=Rock texture=Ganymede.dds eccentricity=0.0013 period=7.15455296 majorAxis=1070400 tilt=0.33 days=7.15455296
+
 #M name=Metis parent=Jupiter
 #M name=Adrastea parent=Jupiter
 #M name=Amalthea parent=Jupiter
@@ -499,7 +500,7 @@ M name=Charon parent=Pluto radius=606 r=1 g=1 b=1 position=17536 x=56222 y=0 z=1
 
 #P name=20000-Varuna parent=Sun radius=330 r=1 g=1 b=1 position=6450000000 atmosphereHeight=0 
 
-* parent=Earth position=6779 x=-52905 y=0 z=-42385
+? parent=Earth position=6779 x=-52905 y=0 z=-42385
 
 L name=Earth_Lagrange_Point_L1 lp1=Earth lp2=Moon lType=L1
 L name=Earth_Lagrange_Point_L4 lp1=Earth lp2=Moon lType=L4

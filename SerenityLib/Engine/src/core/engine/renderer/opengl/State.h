@@ -17,74 +17,74 @@ namespace Engine {
             friend class  RenderManager;
             private:
                 #pragma region TextureUnits
-                struct TextureUnit final {
+                struct TextureUnitState final {
                     GLuint targetTexture1D;
                     GLuint targetTexture2D;
                     GLuint targetTexture3D;
                     GLuint targetTextureCube;
-                    TextureUnit() {
+                    TextureUnitState() {
                         targetTexture1D   = 999999;
                         targetTexture2D   = 999999;
                         targetTexture3D   = 999999;
                         targetTextureCube = 999999;
                     }
                 };
-                std::vector<TextureUnit> textureUnits;
-                GLuint                   currentTextureUnit;
+                std::vector<TextureUnitState> textureUnits;
+                GLuint                        currentTextureUnit;
                 #pragma endregion
 
                 #pragma region ClearColor
-                struct ClearColor final {
+                struct ClearColorState final {
                     GLfloat r;
                     GLfloat g;
                     GLfloat b;
                     GLfloat a;
-                    ClearColor() {
+                    ClearColorState() {
                         r = 0.0f;
                         g = 0.0f;
                         b = 0.0f;
                         a = 0.0f;
                     }
                 };
-                ClearColor clearColor;
+                ClearColorState clearColor;
                 #pragma endregion
 
                 #pragma region ClearDepth
-                struct ClearDepth final {
+                struct ClearDepthState final {
                     GLdouble depth;
                     GLfloat  depthf;
-                    ClearDepth() {
+                    ClearDepthState() {
                         depth  = 1.0;
                         depthf = 1.0f;
                     }
                 };
-                ClearDepth clearDepth;
+                ClearDepthState clearDepth;
                 #pragma endregion
 
                 #pragma region ClearStencil
-                struct ClearStencil final {
+                struct ClearStencilState final {
                     GLint stencil;
-                    ClearStencil() {
+                    ClearStencilState() {
                         stencil = 0;
                     }
                 };
-                ClearStencil clearStencil;
+                ClearStencilState clearStencil;
                 #pragma endregion
 
                 #pragma region StencilMask
-                struct StencilMask final {
+                struct StencilMaskState final {
                     GLuint front_mask;
                     GLuint back_mask;
-                    StencilMask() {
+                    StencilMaskState() {
                         front_mask = 0xFFFFFFFF;
                         back_mask = 0xFFFFFFFF;
                     }
                 };
-                StencilMask stencilMask;
+                StencilMaskState stencilMask;
                 #pragma endregion
 
                 #pragma region StencilOp
-                struct StencilOp final {
+                struct StencilOpState final {
                     GLenum sFail_front;
                     GLenum dpFail_front;
                     GLenum dpPass_front;
@@ -93,7 +93,7 @@ namespace Engine {
                     GLenum dpFail_back;
                     GLenum dpPass_back;
 
-                    StencilOp() {
+                    StencilOpState() {
                         sFail_front  = GL_KEEP;
                         dpFail_front = GL_KEEP;
                         dpPass_front = GL_KEEP;
@@ -103,27 +103,27 @@ namespace Engine {
                         dpPass_back  = GL_KEEP;
                     }
                 };
-                StencilOp stencilOp;
+                StencilOpState stencilOp;
                 #pragma endregion
 
                 #pragma region UseProgram
-                struct UseProgram final {
+                struct UseProgramState final {
                     GLuint program;
-                    UseProgram() {
+                    UseProgramState() {
                         program = 0;
                     }
                 };
-                UseProgram useProgram;
+                UseProgramState useProgram;
                 #pragma endregion
 
                 #pragma region VAO
-                struct VertexArrayObj final {
+                struct VertexArrayObjState final {
                     GLuint vao;
-                    VertexArrayObj() {
+                    VertexArrayObjState() {
                         vao = 0;
                     }
                 };
-                VertexArrayObj vaoState;
+                VertexArrayObjState vaoState;
                 #pragma endregion
 
                 #pragma region Viewport
@@ -169,6 +169,50 @@ namespace Engine {
                 FrontFaceState frontFaceState;
                 #pragma endregion
 
+                #pragma region DepthFunc
+                struct DepthFuncState final {
+                    GLenum func;
+                    DepthFuncState() {
+                        func = GL_LESS;
+                    }
+                };
+                DepthFuncState depthFuncState;
+                #pragma endregion
+
+                #pragma region PixelStorei
+                struct PixelStoreiState final {
+                    GLenum pack_alignment;
+                    GLenum unpack_alignment;
+                    PixelStoreiState() {
+                        pack_alignment = 4;
+                        unpack_alignment = 4;
+                    }
+                };
+                PixelStoreiState pixelStoreiState;
+                #pragma endregion
+
+                #pragma region StencilFunc
+                struct StencilFuncState final {
+                    GLenum func_front;
+                    GLint  ref_front;
+                    GLuint mask_front;
+
+                    GLenum func_back;
+                    GLint  ref_back;
+                    GLuint mask_back;
+                    StencilFuncState() {
+                        func_front = GL_ALWAYS;
+                        ref_front = 0;
+                        mask_front = 0xFFFFFFFF;
+
+                        func_back = GL_ALWAYS;
+                        ref_back = 0;
+                        mask_back = 0xFFFFFFFF;
+                    }
+                };
+                StencilFuncState stencilFuncState;
+                #pragma endregion
+
                 void GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);
             public:
                 const bool GL_glActiveTexture(const GLenum& textureUnit);
@@ -187,8 +231,10 @@ namespace Engine {
                 const bool GL_glViewport(const GLint& x, const GLint& y, const GLsizei& width, const GLsizei& height);
                 const bool GL_glCullFace(const GLenum& mode);
                 const bool GL_glFrontFace(const GLenum& mode);
-
-
+                const bool GL_glDepthFunc(const GLenum& func);
+                const bool GL_glPixelStorei(const GLenum& pname, const GLint& param);
+                const bool GL_glStencilFuncSeparate(const GLenum& face, const GLenum& func, const GLint& ref, const GLuint& mask);
+                const bool GL_glStencilFunc(const GLenum& func, const GLint& ref, const GLuint& mask);
 
 
                 void GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);

@@ -304,7 +304,7 @@
     <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\threading\Engine_ThreadManager.h" />
     <ClInclude Include="Engine\src\core\Material.h" />
-    <ClInclude Include="Engine\src\core\MeshInstance.h" />
+    <ClInclude Include="Engine\src\core\ModelInstance.h" />
     <ClInclude Include="Engine\src\core\ShaderProgram.h" />
     <ClInclude Include="Engine\src\core\Terrain.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h" />
@@ -393,7 +393,7 @@
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp" />
     <ClCompile Include="Engine\src\core\Material.cpp" />
-    <ClCompile Include="Engine\src\core\MeshInstance.cpp" />
+    <ClCompile Include="Engine\src\core\ModelInstance.cpp" />
     <ClCompile Include="Engine\src\core\ShaderProgram.cpp" />
     <ClCompile Include="Engine\src\core\Terrain.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp" />

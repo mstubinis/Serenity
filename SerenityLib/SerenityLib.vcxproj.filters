@@ -336,9 +336,6 @@
     <ClInclude Include="Engine\src\core\Material.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\MeshInstance.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\ShaderProgram.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
@@ -465,6 +462,9 @@
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\Extensions.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\ModelInstance.h">
+      <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -582,9 +582,6 @@
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\Material.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\MeshInstance.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\ShaderProgram.cpp">
@@ -706,6 +703,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\Extensions.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\ModelInstance.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

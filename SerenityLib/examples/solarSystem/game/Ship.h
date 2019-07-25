@@ -8,7 +8,7 @@
 
 class GameCamera;
 class Ship;
-class SolarSystem;
+class Map;
 
 struct ShipLogicFunctor;
 
@@ -121,6 +121,7 @@ class Ship: public EntityWrapper {
         float                                m_WarpFactor;
         Entity                               m_Target;
         std::string                          m_ShipClass;
+        bool                                 m_SavedOldStateBefore;
     public:
         Ship(
             Handle& meshHandle,                   //Mesh
@@ -131,7 +132,7 @@ class Ship: public EntityWrapper {
             glm::vec3 = glm::vec3(0),             //Position
             glm::vec3 = glm::vec3(1),             //Scale
             CollisionType::Type = CollisionType::ConvexHull,
-            SolarSystem* = nullptr
+            Map* = nullptr
         );
         virtual ~Ship();
 

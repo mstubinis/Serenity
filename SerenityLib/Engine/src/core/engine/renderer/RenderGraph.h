@@ -9,13 +9,13 @@ class  Camera;
 class  Scene;
 class  Material;
 class  Mesh;
-class  MeshInstance;
+class  ModelInstance;
 
 namespace Engine {
     namespace epriv {
         struct InstanceNode final {
-            MeshInstance* instance;
-            InstanceNode(const MeshInstance& meshInstance_) : instance(&const_cast<MeshInstance&>(meshInstance_)) {
+            ModelInstance* instance;
+            InstanceNode(const ModelInstance& modelInstance) : instance(&const_cast<ModelInstance&>(modelInstance)) {
             }
         };
         struct MeshNode final {

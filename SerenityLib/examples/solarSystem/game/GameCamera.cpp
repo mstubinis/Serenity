@@ -155,21 +155,22 @@ Entity GameCamera::getObjectInCenterRay(Entity& exclusion){
     return ret;
 }
 void GameCamera::follow(Entity& target){
-    if (target.null()) return;
+    if (target.null()) 
+        return;
     m_Target = target;
-    m_Player = target;
     m_State = CameraState::Follow;
 }
 void GameCamera::followTarget(Entity& target, Entity& player){
-    if (target.null()) return;
+    if (target.null()) 
+        return;
     m_Target = target;
     m_Player = player;
     m_State = CameraState::FollowTarget;
 }
 void GameCamera::orbit(Entity& target){
-    if (target.null()) return;
+    if (target.null()) 
+        return;
     m_Target = target;
-    m_Player = target;
     m_State = CameraState::Orbit;
     m_CameraMouseFactor = glm::dvec2(0.0);
 }

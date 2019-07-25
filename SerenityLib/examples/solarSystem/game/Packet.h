@@ -13,7 +13,7 @@
 #include <core/engine/resources/Handle.h>
 
 class  Ship;
-class  SolarSystem;
+class  Map;
 struct PacketType {enum Type {
     Undefined,
     Server_Shutdown,
@@ -73,7 +73,7 @@ struct PacketPhysicsUpdate: public Packet {
     uint16_t         lx, ly, lz;     //linear velocity
     uint16_t         ax, ay, az;     //angular velocity
     PacketPhysicsUpdate();
-    PacketPhysicsUpdate(Ship& ship, SolarSystem& map);
+    PacketPhysicsUpdate(Ship& ship, Map& map);
     bool validate(sf::Packet& sfPacket) {
         return (sfPacket >> PacketType >> data >> px >> py >> pz >> qx >> qy >> qz >> qw >> lx >> ly >> lz >> ax >> ay >> az);
     }

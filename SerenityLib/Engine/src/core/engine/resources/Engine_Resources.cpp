@@ -3,7 +3,7 @@
 #include <core/engine/resources/Engine_BuiltInResources.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/MeshInstance.h>
+#include <core/ModelInstance.h>
 #include <core/Material.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/textures/Texture.h>

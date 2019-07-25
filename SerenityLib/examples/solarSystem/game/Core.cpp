@@ -4,7 +4,7 @@
 #include "Server.h"
 #include "Client.h"
 #include "Ship.h"
-#include "SolarSystem.h"
+#include "map/Map.h"
 #include "Packet.h"
 #include "Planet.h"
 #include "GameCamera.h"
@@ -103,7 +103,7 @@ void Core::enterMap(const string& mapFile, const string& playership, const strin
     auto& window = Resources::getWindow();
     Resources::setCurrentScene(mapFile);
 
-    SolarSystem& map = *static_cast<SolarSystem*>(Resources::getScene(mapFile));
+    Map& map = *static_cast<Map*>(Resources::getScene(mapFile));
 
     auto& handles = ResourceManifest::Ships.at(playership);
     Ship* playerShip = new Ship(handles.get<0>(), handles.get<1>(), playership, true, playername, glm::vec3(x, y, z), glm::vec3(1.0f), CollisionType::ConvexHull, &map);

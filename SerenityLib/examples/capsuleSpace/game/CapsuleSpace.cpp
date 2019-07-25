@@ -11,7 +11,7 @@
 #include <core/engine/renderer/GLStateMachine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/MeshInstance.h>
+#include <core/ModelInstance.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -102,7 +102,7 @@ struct RibbonBindFunctor {void operator()(EngineResource* r) const {
     Renderer::GLDisable(GLState::DEPTH_TEST);
     Renderer::GLDisable(GLState::DEPTH_MASK);
 
-    epriv::DefaultMeshInstanceBindFunctor()(r);
+    epriv::DefaultModelInstanceBindFunctor()(r);
 }};
 struct RibbonUnbindFunctor {void operator()(EngineResource* r) const {
     Renderer::GLEnable(GLState::DEPTH_TEST);
