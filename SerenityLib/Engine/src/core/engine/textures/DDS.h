@@ -2,9 +2,7 @@
 #ifndef ENGINE_TEXTURES_DDS_INCLUDE_GUARD
 #define ENGINE_TEXTURES_DDS_INCLUDE_GUARD
 
-#include <core/engine/Engine_Utils.h>
-
-typedef unsigned char uchar;
+#include <core/engine/utils/Utils.h>
 
 namespace Engine {
 namespace epriv {

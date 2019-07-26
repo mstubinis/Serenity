@@ -24,7 +24,7 @@ namespace Engine{
         class  MeshLoader;
         class  MeshSkeleton;
         class  MeshCollisionFactory;
-        class  MeshImportedData;
+        struct MeshImportedData;
         struct DefaultMeshBindFunctor;
         struct DefaultMeshUnbindFunctor;
         struct BoneNode;

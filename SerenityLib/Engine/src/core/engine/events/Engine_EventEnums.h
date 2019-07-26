@@ -3,7 +3,6 @@
 #define ENGINE_EVENT_ENUMS_H
 
 #include <SFML/System.hpp>
-#include <core/engine/Engine_Utils.h>
 
 struct KeyboardKey final{enum Key{
     Unknown = -1,

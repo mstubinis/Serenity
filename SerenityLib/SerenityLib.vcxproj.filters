@@ -154,6 +154,12 @@
     <Filter Include="Source Files\Engine\Core\Renderer\direct3d">
       <UniqueIdentifier>{b02b2902-8a66-441a-a589-a9d971001884}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Utils">
+      <UniqueIdentifier>{ce1e2cac-8c6c-4321-8ed8-b1371740e07f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Utils">
+      <UniqueIdentifier>{9aaf42ce-3977-4276-a952-6380cb19220a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -318,13 +324,7 @@
     <ClInclude Include="Engine\src\core\engine\Engine.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_Debugging.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_ObjectPool.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_Utils.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_Window.h">
@@ -470,6 +470,12 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\physics\PhysicsEnums.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h">
+      <Filter>Header Files\Engine\Core\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\utils\Utils.h">
+      <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -715,6 +721,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\physics\Collision.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\utils\Engine_Debugging.cpp">
+      <Filter>Source Files\Engine\Core\Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

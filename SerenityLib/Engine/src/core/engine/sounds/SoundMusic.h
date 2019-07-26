@@ -5,9 +5,9 @@
 #include <core/engine/sounds/SoundBaseClass.h>
 #include <SFML/Audio.hpp>
 
-class Handle;
-class SoundQueue;
-class SoundMusic : public SoundBaseClass {
+struct Handle;
+class  SoundQueue;
+class  SoundMusic : public SoundBaseClass {
     friend class Engine::epriv::SoundManager;
     friend class SoundQueue;
     private:

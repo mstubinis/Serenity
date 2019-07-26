@@ -3,7 +3,7 @@
 #define ENGINE_MATH_SIMPLEX_NOISE_H
 
 #include <memory>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>

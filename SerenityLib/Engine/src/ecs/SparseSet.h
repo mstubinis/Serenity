@@ -2,11 +2,9 @@
 #ifndef ENGINE_ECS_SPARSE_SET_H
 #define ENGINE_ECS_SPARSE_SET_H
 
-#include <cstdint>
-#include <vector>
 #include <algorithm> //std::swap (until C++11)
 #include <utility>   //std::swap (since C++11)
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 
 
 namespace Engine {

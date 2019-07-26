@@ -3,12 +3,12 @@
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/Engine.h>
-#include <core/engine/Engine_Debugging.h>
+#include <core/engine/utils/Engine_Debugging.h>
 
 using namespace Engine;
 using namespace std;
 
-ScrollBar::ScrollBar(const float& x, const float& y, const float& w, const float& h, const ScrollBarType::Type& type) :Widget(x, y, w, h) {
+ScrollBar::ScrollBar(const unsigned int& x, const unsigned int& y, const unsigned int& w, const unsigned int& h, const ScrollBarType::Type& type) :Widget(x, y, w, h) {
     m_Type                           = type;
     m_Alignment                      = Alignment::TopLeft;
     m_CurrentlyDragging              = false;
@@ -16,7 +16,7 @@ ScrollBar::ScrollBar(const float& x, const float& y, const float& w, const float
     m_ScrollBarColor                 = glm::vec4(0.6f);
 
     m_ScrollBarCurrentContentPercent = 1.0f;
-    m_ScrollBarCurrentPosition       = 0.0f;
+    m_ScrollBarCurrentPosition       = 0;
     m_DragSnapshot                   = 0.0f;
 
     internalUpdateScrollbarPosition();
@@ -24,16 +24,16 @@ ScrollBar::ScrollBar(const float& x, const float& y, const float& w, const float
 ScrollBar::~ScrollBar() {
 
 }
-void ScrollBar::setPosition(const float& x, const float& y) {
+void ScrollBar::setPosition(const unsigned int& x, const unsigned int& y) {
     Widget::setPosition(x, y);
     internalUpdateScrollbarPosition();
 }
-void ScrollBar::setPosition(const glm::vec2& position) {
+void ScrollBar::setPosition(const glm::uvec2& position) {
     Widget::setPosition(position.x, position.y);
     internalUpdateScrollbarPosition();
 }
 
-void ScrollBar::setBorderSize(const float border) {
+void ScrollBar::setBorderSize(const unsigned int border) {
     m_BorderSize = border;
 }
 
@@ -41,29 +41,31 @@ void ScrollBar::setSliderSize(const float percent) {
     m_ScrollBarCurrentContentPercent = glm::clamp(percent,0.01f,1.0f);
     internalUpdateScrollbarPosition();
 }
-const float ScrollBar::getSliderPosition() const {
+const unsigned int ScrollBar::getSliderPosition() const {
     return m_ScrollBarCurrentPosition;
 }
-const float ScrollBar::getSliderHeight() const {
-    return m_ScrollBarCurrentContentPercent * (m_Height - (m_Width * 2));
+const unsigned int ScrollBar::getSliderHeight() const {
+    auto part2 = (m_Height - (m_Width * 2u));
+    auto res = (m_ScrollBarCurrentContentPercent) * part2;
+    return static_cast<unsigned int>(res);
 }
 
 void ScrollBar::setType(const ScrollBarType::Type& type) {
     m_Type = type;
 }
-void ScrollBar::scroll(const float amount) {
+void ScrollBar::scroll(const int amount) {
     if (m_ScrollBarCurrentContentPercent < 1.0f) {
         m_ScrollBarCurrentPosition += amount;
         
-        const float& scrollHeightMax = m_Height - (m_Width * 2);
-        const float& scrollBarHeight = getSliderHeight();
-        const float& absoluteStartPoint = m_Position.y - ((scrollBarHeight / 2) + m_Width);
-        const float& bottomMark = scrollHeightMax - (scrollBarHeight);
+        const unsigned int& scrollHeightMax = m_Height - (m_Width * 2);
+        const unsigned int& scrollBarHeight = getSliderHeight();
+        const unsigned int& absoluteStartPoint = m_Position.y - ((scrollBarHeight / 2) + m_Width);
+        const int& bottomMark = scrollHeightMax - (scrollBarHeight);
 
         internalUpdateScrollbarPosition();
 
         if (m_ScrollBarStartAnchor > absoluteStartPoint) {
-            m_ScrollBarCurrentPosition = 0.0f;
+            m_ScrollBarCurrentPosition = 0;
             m_ScrollBarStartAnchor = absoluteStartPoint;
         }else if (m_ScrollBarStartAnchor < absoluteStartPoint - bottomMark) {
             m_ScrollBarCurrentPosition = -bottomMark;
@@ -75,7 +77,7 @@ void ScrollBar::setScrollBarColor(const glm::vec4& color) {
     m_ScrollBarColor = color;
 }
 void ScrollBar::internalUpdateScrollbarPosition() {
-    const float& absoluteStartPoint = m_Position.y - ((getSliderHeight() / 2) + m_Width);
+    const unsigned int& absoluteStartPoint = m_Position.y - ((getSliderHeight() / 2) + m_Width);
     m_ScrollBarStartAnchor = absoluteStartPoint + m_ScrollBarCurrentPosition;
 }
 void ScrollBar::update(const double& dt) {
@@ -83,8 +85,8 @@ void ScrollBar::update(const double& dt) {
 
     if (m_Hidden)
         return;
-    float scrollBarHeight = getSliderHeight();
-    const float& scrollBarY = m_ScrollBarStartAnchor - scrollBarHeight / 2;
+    unsigned int scrollBarHeight = getSliderHeight();
+    const unsigned int& scrollBarY = m_ScrollBarStartAnchor - scrollBarHeight / 2;
     const auto& mouse = Engine::getMousePosition();
 
     bool mouseOver = true;
@@ -102,12 +104,12 @@ void ScrollBar::update(const double& dt) {
         }
         if (mouseOverTopTriangle) {
             if (Engine::isMouseButtonDown(MouseButton::Left)) {
-                scroll(1.0f);
+                scroll(1);
             }
         }
         if (mouseOverBottomTriangle) {
             if (Engine::isMouseButtonDown(MouseButton::Left)) {
-                scroll(-1.0f);
+                scroll(-1);
             }
         }
     }
@@ -119,7 +121,7 @@ void ScrollBar::update(const double& dt) {
     }
     if (m_CurrentlyDragging && m_ScrollBarCurrentContentPercent < 1.0f) {
         if (Engine::isMouseButtonDown(MouseButton::Left)) {
-            scroll(mouse.y - m_DragSnapshot);
+            scroll(static_cast<int>(mouse.y - m_DragSnapshot));
             m_DragSnapshot = mouse.y;
         }else{
             m_CurrentlyDragging = false;
@@ -129,13 +131,13 @@ void ScrollBar::update(const double& dt) {
 }
 void ScrollBar::render() {
     const auto& mouse = Engine::getMousePosition();
-    const float& halfWidth = m_Width / 2;
+    const unsigned int& halfWidth = m_Width / 2;
 
-    const float& scrollHeightMax = m_Height - (m_Width * 2);
-    const float& scrollBarHeight = getSliderHeight();
+    const unsigned int& scrollHeightMax = m_Height - (m_Width * 2);
+    const unsigned int& scrollBarHeight = getSliderHeight();
 
-    const float& gap = m_BorderSize + 4;
-    const float& halfBorderSize = static_cast<float>(m_BorderSize) / 2.0f;
+    const unsigned int& gap = m_BorderSize + 4;
+    const unsigned int& halfBorderSize = m_BorderSize / 2;
 
     bool mouseOverTopTriangle = true;
     bool mouseOverBottomTriangle = true;
@@ -151,6 +153,7 @@ void ScrollBar::render() {
     if (mouseOver && m_ScrollBarCurrentContentPercent < 1.0f)
         color += glm::vec4(0.15f);
     Renderer::renderRectangle(glm::vec2(m_Position.x, m_ScrollBarStartAnchor), color, m_Width, scrollBarHeight, 0, 0.009f, Alignment::Left);
+
     //scroll bar area background
     Renderer::renderRectangle(glm::vec2(m_Position.x, m_Position.y - m_Width - halfBorderSize), glm::vec4(0.3f), m_Width, scrollHeightMax + 1, 0, 0.010f, m_Alignment);
 
@@ -177,7 +180,7 @@ void ScrollBar::render() {
     if (mouseOverBottomTriangle)
         colorBottom += glm::vec4(0.55f);
 
-    const float& triSize = halfWidth - 4;
+    const unsigned int& triSize = halfWidth - 4;
 
     Renderer::renderTriangle(glm::vec2(m_Position.x + halfWidth, m_Position.y - halfWidth), colorTop, 180, triSize, triSize, 0.007f,Alignment::Center);
     Renderer::renderTriangle(glm::vec2(m_Position.x + halfWidth, m_Position.y - m_Height + halfWidth), colorBottom, 0, triSize, triSize, 0.007f, Alignment::Center);

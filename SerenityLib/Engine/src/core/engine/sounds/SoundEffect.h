@@ -5,10 +5,10 @@
 #include <core/engine/sounds/SoundBaseClass.h>
 #include <SFML/Audio.hpp>
 
-class Handle;
-class SoundData;
-class SoundQueue;
-class SoundEffect : public SoundBaseClass {
+struct Handle;
+class  SoundData;
+class  SoundQueue;
+class  SoundEffect : public SoundBaseClass {
     friend class Engine::epriv::SoundManager;
     friend class SoundQueue;
     private:

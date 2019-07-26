@@ -136,7 +136,7 @@ namespace Engine{
 class Material final: public BindableResource{
     friend struct Engine::epriv::DefaultMaterialBindFunctor;
     friend struct Engine::epriv::DefaultMaterialUnbindFunctor;
-    friend struct Engine::epriv::RenderManager;
+    friend class  Engine::epriv::RenderManager;
     public:
         static Material*                  Checkers; //loaded in renderer
     private:

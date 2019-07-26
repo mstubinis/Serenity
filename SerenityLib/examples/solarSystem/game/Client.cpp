@@ -15,7 +15,7 @@
 #include "GameSkybox.h"
 #include "Ship.h"
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/scene/Camera.h>

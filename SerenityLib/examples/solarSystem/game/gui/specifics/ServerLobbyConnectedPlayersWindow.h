@@ -9,15 +9,15 @@ class ServerLobbyConnectedPlayersWindow final {
     private:
         ScrollFrame* m_ChatWindow;
         Font&        m_Font;
-        float        m_Width;
-        float        m_Height;
+        unsigned int m_Width;
+        unsigned int m_Height;
         void*        m_UserPointer;
     public:
-        ServerLobbyConnectedPlayersWindow(const Font& font, const float& x, const float& y);
+        ServerLobbyConnectedPlayersWindow(const Font& font, const unsigned int& x, const unsigned int& y);
         ~ServerLobbyConnectedPlayersWindow();
 
         void setColor(const float& r, const float& g, const float& b, const float& a);
-        void setPosition(const float& x, const float& y);
+        void setPosition(const unsigned int& x, const unsigned int& y);
 
         void setUserPointer(void*);
         void* getUserPointer();

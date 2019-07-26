@@ -7,7 +7,7 @@
 
 using namespace Engine;
 
-Widget::Widget(const glm::vec2& position, const float& width, const float& height) {
+Widget::Widget(const glm::vec2& position, const unsigned int& width, const unsigned int& height) {
     m_Alignment = Alignment::TopLeft;
     setPosition(position);
     m_Width = width;
@@ -15,7 +15,7 @@ Widget::Widget(const glm::vec2& position, const float& width, const float& heigh
     m_MouseIsOver = false;
     m_UserPointer = nullptr;
 }
-Widget::Widget(const float& x, const float& y, const float& width, const float& height) {
+Widget::Widget(const unsigned int& x, const unsigned int& y, const unsigned int& width, const unsigned int& height) {
     m_Alignment = Alignment::TopLeft;
     setPosition(x,y);
     m_Width = width;
@@ -26,20 +26,20 @@ Widget::Widget(const float& x, const float& y, const float& width, const float& 
 Widget::~Widget() {
 
 }
-void Widget::setWidth(const float& width) {
+void Widget::setWidth(const unsigned int& width) {
     m_Width = width;
 }
-void Widget::setHeight(const float& height) {
+void Widget::setHeight(const unsigned int& height) {
     m_Height = height;
 }
-void Widget::setSize(const float& width, const float& height) {
+void Widget::setSize(const unsigned int& width, const unsigned int& height) {
     setWidth(width);
     setHeight(height);
 }
 const glm::vec4& Widget::color() const {
     return m_Color;
 }
-const glm::vec2& Widget::position() const {
+const glm::uvec2& Widget::position() const {
     return m_Position;
 }
 void* Widget::getUserPointer() const {
@@ -49,10 +49,10 @@ void Widget::setUserPointer(void* ptr) {
     m_UserPointer = ptr;
 }
 
-const float Widget::width() const {
+const unsigned int Widget::width() const {
     return m_Width;
 }
-const float Widget::height() const {
+const unsigned int Widget::height() const {
     return m_Height;
 }
 
@@ -60,11 +60,11 @@ const bool Widget::isMouseOver() const {
     return m_MouseIsOver;
 }
 
-void Widget::setPosition(const float& x, const float& y) {
+void Widget::setPosition(const unsigned int& x, const unsigned int& y) {
     m_Position.x = x;
     m_Position.y = y;
 }
-void Widget::setPosition(const glm::vec2& position) {
+void Widget::setPosition(const glm::uvec2& position) {
     m_Position = position;
 }
 
@@ -94,8 +94,8 @@ void Widget::update(const double& dt) {
         m_MouseIsOver = true;
 }
 
-const glm::vec2 Widget::positionFromAlignment(const float& width, const float& height,const Alignment::Type& alignment) {
-    float xOffset, yOffset;
+const glm::uvec2 Widget::positionFromAlignment(const unsigned int& width, const unsigned int& height,const Alignment::Type& alignment) {
+    unsigned int xOffset, yOffset;
     xOffset = yOffset = 0;
     switch (alignment) {
         case Alignment::TopLeft: {
@@ -132,12 +132,12 @@ const glm::vec2 Widget::positionFromAlignment(const float& width, const float& h
             break;
         }
     }
-    const float& x = m_Position.x + xOffset;
-    const float& y = m_Position.y + yOffset;
-    return glm::vec2(x, y);
+    const unsigned int& x = m_Position.x + xOffset;
+    const unsigned int& y = m_Position.y + yOffset;
+    return glm::uvec2(x, y);
 }
 
-const glm::vec2 Widget::positionFromAlignment() {
+const glm::uvec2 Widget::positionFromAlignment() {
     return positionFromAlignment(m_Width, m_Height, m_Alignment);
 }
 

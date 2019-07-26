@@ -10,11 +10,11 @@
 #include "map/Map.h"
 
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 #include <core/engine/math/Engine_Math.h>
 
 #include <core/engine/Engine.h>
-#include <core/engine/Engine_Debugging.h>
+#include <core/engine/utils/Engine_Debugging.h>
 
 #include <iostream>
 

@@ -2,7 +2,8 @@
 #ifndef ENGINE_ENGINE_H
 #define ENGINE_ENGINE_H
 
-#include <core/engine/Engine_Debugging.h>
+#include <core/engine/utils/Utils.h>
+#include <core/engine/utils/Engine_Debugging.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Engine_Renderer.h>

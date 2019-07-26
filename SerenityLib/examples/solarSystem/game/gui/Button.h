@@ -16,21 +16,21 @@ class Button : public Widget {
         glm::vec2                 m_TextScale;
         glm::vec4                 m_TextColor;
         boost::function<void()>   m_FunctorOnClick;
-        float                     m_Padding;
+        unsigned int              m_Padding;
         TextAlignment::Type       m_TextAlignment;
 
         void internalSetSize();
     public:
-        Button(const Font& font, const float& x, const float& y, const float& width, const float& height);
-        Button(const Font& font, const glm::vec2& position, const float& width, const float& height);
+        Button(const Font& font, const unsigned int& x, const unsigned int& y, const unsigned int& width, const unsigned int& height);
+        Button(const Font& font, const glm::uvec2& position, const unsigned int& width, const unsigned int& height);
         virtual ~Button();
 
         const std::string& text() const;
 
         template<class T> void setOnClickFunctor(const T& functor) { m_FunctorOnClick = boost::bind<void>(functor, this); }
 
-        const float getTextHeight() const;
-        const float getTextWidth() const;
+        const unsigned int getTextHeight() const;
+        const unsigned int getTextWidth() const;
         void setTextAlignment(const TextAlignment::Type&);
         const TextAlignment::Type& getTextAlignment() const;
 

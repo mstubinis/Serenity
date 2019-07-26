@@ -2,7 +2,7 @@
 #ifndef ENGINE_MESH_INCLUDES_INCLUDE_GUARD
 #define ENGINE_MESH_INCLUDES_INCLUDE_GUARD
 
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <glm/glm.hpp>

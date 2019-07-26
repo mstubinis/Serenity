@@ -17,7 +17,7 @@ class Text final: public Widget {
 
         void internalUpdateSize();
     public:
-        Text(const float& x, const float& y, Font& font, const std::string& text = "");
+        Text(const unsigned int& x, const unsigned int& y, Font& font, const std::string& text = "");
         ~Text();
 
         void setFont(const Font&);
@@ -27,13 +27,13 @@ class Text final: public Widget {
         void setTextScale(const glm::vec2& scale);
         void setTextScale(const float& x, const float& y);
 
-        const float width() const;
-        const float height() const;
+        const unsigned int width() const;
+        const unsigned int height() const;
         const std::string& text() const;
         const Font& font() const;
         const glm::vec2& textScale() const;
 
-        void update(const float& dt);
+        void update(const double& dt);
         void render();
 };
 #endif

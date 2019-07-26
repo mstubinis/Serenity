@@ -4,9 +4,8 @@
 
 #include <glm/fwd.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 
-#include <vector>
 #include <assimp/Importer.hpp>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>

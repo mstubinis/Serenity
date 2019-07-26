@@ -1,5 +1,4 @@
 #include <core/engine/textures/TextureIncludes.h>
-#include <core/engine/Engine_Utils.h>
 
 #include <SFML/Graphics/Image.hpp>
 

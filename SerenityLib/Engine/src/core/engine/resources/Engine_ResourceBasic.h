@@ -2,9 +2,7 @@
 #ifndef ENGINE_RESOURCE_BASIC_H
 #define ENGINE_RESOURCE_BASIC_H
 
-#include <string>
-#include <cstdint>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 
 class EngineResource{
     private:

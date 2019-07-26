@@ -17,29 +17,29 @@ class ScrollBar final : public Widget {
         unsigned int        m_BorderSize;
 
         float               m_ScrollBarCurrentContentPercent;
-        float               m_ScrollBarCurrentPosition;
-        float               m_ScrollBarStartAnchor;
+        int                 m_ScrollBarCurrentPosition;
+        unsigned int        m_ScrollBarStartAnchor;
         float               m_DragSnapshot;
         glm::vec4           m_ScrollBarColor;
 
         void internalUpdateScrollbarPosition();
     public:
-        ScrollBar(const float& x, const float& y, const float& w, const float& h, const ScrollBarType::Type& type = ScrollBarType::Type::Vertical);
+        ScrollBar(const unsigned int& x, const unsigned int& y, const unsigned int& w, const unsigned int& h, const ScrollBarType::Type& type = ScrollBarType::Type::Vertical);
         ~ScrollBar();
 
-        void setBorderSize(const float);
+        void setBorderSize(const unsigned int borderSize);
 
-        void scroll(const float amount);
+        void scroll(const int amount);
 
         void setScrollBarColor(const glm::vec4& color);
 
-        void setPosition(const float& x, const float& y);
-        void setPosition(const glm::vec2& position);
+        void setPosition(const unsigned int& x, const unsigned int& y);
+        void setPosition(const glm::uvec2& position);
 
         void setSliderSize(const float percent);
         void setType(const ScrollBarType::Type&);
-        const float getSliderHeight() const;
-        const float getSliderPosition() const;
+        const unsigned int getSliderHeight() const;
+        const unsigned int getSliderPosition() const;
 
         void update(const double& dt);
         void render();

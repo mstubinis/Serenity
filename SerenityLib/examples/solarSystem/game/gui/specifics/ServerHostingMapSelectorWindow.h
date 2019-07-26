@@ -16,15 +16,15 @@ class ServerHostingMapSelectorWindow final {
         Text*        m_CurrentChoice;
         ScrollFrame* m_MapFileWindow;
         Font&        m_Font;
-        float        m_Width;
-        float        m_Height;
+        unsigned int m_Width;
+        unsigned int m_Height;
         void*        m_UserPointer;
     public:
-        ServerHostingMapSelectorWindow(const Font& font, const float& x, const float& y);
+        ServerHostingMapSelectorWindow(const Font& font, const unsigned int& x, const unsigned int& y);
         ~ServerHostingMapSelectorWindow();
 
         void setColor(const float& r, const float& g, const float& b, const float& a);
-        void setPosition(const float& x, const float& y);
+        void setPosition(const unsigned int& x, const unsigned int& y);
 
         void setUserPointer(void*);
         void* getUserPointer();

@@ -3,12 +3,8 @@
 #define ENGINE_TEXTURE_INCLUDES_INCLUDE_GUARD
 
 #include <memory>
-#include <string>
 #include <core/engine/renderer/GLImageConstants.h>
-#include <core/engine/Engine_Utils.h>
-
-typedef unsigned char     uchar;
-typedef unsigned short    ushort;
+#include <core/engine/utils/Utils.h>
 
 struct TextureWrap final {enum Wrap {
     Repeat, 

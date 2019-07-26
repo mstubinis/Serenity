@@ -38,7 +38,7 @@ struct GameCameraShipSelectorLogicFunctor final {
             auto& thisCamera = *entity.getComponent<ComponentCamera>(dataRequest);
             auto& thisBody = *entity.getComponent<ComponentBody>(dataRequest);
             if ((window.m_IsCurrentlyOverShipWindow && dt >= 0.0) || window.m_IsCurrentlyDragging) {
-                camera.m_OrbitRadius += Engine::getMouseWheelDelta() * dt * 0.92f;
+                camera.m_OrbitRadius += static_cast<float>(Engine::getMouseWheelDelta() * dt * 0.92);
                 camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 1.5f);
             }
             if (window.m_IsCurrentlyDragging || dt < 0.0) {
@@ -72,8 +72,8 @@ struct GameCameraShipSelectorLogicFunctor final {
 
 
 
-ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& scene, Camera& camera, const Font& font, const float& x, const float& y):m_Core(core),m_Font(const_cast<Font&>(font)) {
-    m_Width = 583;
+ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& scene, Camera& camera, const Font& font, const unsigned int& x, const unsigned int& y):m_Core(core),m_Font(const_cast<Font&>(font)) {
+    m_Width = 578;
     m_Height = 270;
     m_IsCurrentlyDragging = false;
     m_IsCurrentlyOverShipWindow = false;
@@ -82,10 +82,10 @@ ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& s
     logic.setUserPointer2(this);
     logic.setFunctor(GameCameraShipSelectorLogicFunctor());
     m_ShipWindow = new ScrollFrame(x, y, m_Width, m_Height);
-    m_ShipWindow->setContentPadding(0.0f);
+    m_ShipWindow->setContentPadding(0);
     m_ChosenShipName = "";
     
-    m_ShipDisplay = &scene.addViewport(x + m_ShipWindow->width() + 3, y - m_Height, m_Height - 1, m_Height, camera);
+    m_ShipDisplay = &scene.addViewport(x + m_ShipWindow->width() + 1, y - m_Height, m_Height - 1, m_Height, camera);
     //m_ShipDisplay->setDepthMaskValue(100.0f);
     //m_ShipDisplay->activateDepthMask(true);
     m_ShipDisplay->activate2DAPI(false);
@@ -122,9 +122,9 @@ void ServerLobbyShipSelectorWindow::setShipViewportActive(const bool& active) {
 void ServerLobbyShipSelectorWindow::setColor(const float& r, const float& g, const float& b, const float& a) {
     m_ShipWindow->setColor(r, g, b, a);
 }
-void ServerLobbyShipSelectorWindow::setPosition(const float& x, const float& y) {
+void ServerLobbyShipSelectorWindow::setPosition(const unsigned int& x, const unsigned int& y) {
     m_ShipWindow->setPosition(x, y);
-    m_ShipDisplay->setViewportDimensions(x + m_ShipWindow->width() + 3, y - m_Height, m_Height - 1, m_Height);
+    m_ShipDisplay->setViewportDimensions(x + m_ShipWindow->width() + 1, y - m_Height, m_Height - 1, m_Height);
 }
 void ServerLobbyShipSelectorWindow::setUserPointer(void* ptr) {
     m_UserPointer = ptr;
@@ -166,5 +166,5 @@ void ServerLobbyShipSelectorWindow::update(const double& dt) {
 void ServerLobbyShipSelectorWindow::render() {
     m_ShipWindow->render();
     auto& dimensions = m_ShipDisplay->getViewportDimensions();
-    Renderer::renderBorder(1, glm::vec2(dimensions.x - 1, dimensions.y), m_ShipWindow->color(), dimensions.z + 1, dimensions.w, 0, 0.01f, Alignment::BottomLeft);
+    Renderer::renderBorder(1, glm::uvec2(dimensions.x - 1, dimensions.y), m_ShipWindow->color(), dimensions.z + 3, dimensions.w, 0, 0.01f, Alignment::BottomLeft);
 }

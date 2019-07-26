@@ -2,7 +2,7 @@
 #ifndef ENGINE_RESOURCE_HANDLE_INCLUDE_GUARD
 #define ENGINE_RESOURCE_HANDLE_INCLUDE_GUARD
 
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 
 class  EngineResource;
 

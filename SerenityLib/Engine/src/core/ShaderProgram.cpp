@@ -8,6 +8,7 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <regex>
 #include <iostream>
@@ -157,7 +158,7 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
         //generate one
         string core = "";
         if (epriv::RenderManager::GLSL_VERSION >= 330) core = " core";
-        versionLine = "#version " + boost::lexical_cast<string>(epriv::RenderManager::GLSL_VERSION) + core + "\n";
+        versionLine = "#version " + to_string(epriv::RenderManager::GLSL_VERSION) + core + "\n";
         insertStringAtLine(_d, versionLine, 0);
     }
     string versionNumberString = regex_replace(versionLine, regex("([^0-9])"), "");

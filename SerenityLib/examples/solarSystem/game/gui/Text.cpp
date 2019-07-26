@@ -6,7 +6,7 @@
 using namespace Engine;
 using namespace std;
 
-Text::Text(const float& x, const float& y, Font& font, const string& text):Widget(x,y,1,1) {
+Text::Text(const unsigned int& x, const unsigned int& y, Font& font, const string& text):Widget(x,y,1,1) {
     m_Font          = &font;
     m_TextScale     = glm::vec2(1.0f);
     m_Text          = text;
@@ -42,10 +42,10 @@ void Text::setTextScale(const glm::vec2& scale) {
     internalUpdateSize();
 }
 
-const float Text::width() const {
+const unsigned int Text::width() const {
     return m_Font->getTextWidth(m_Text) * m_TextScale.x;
 }
-const float Text::height() const {
+const unsigned int Text::height() const {
     return (m_Font->getTextHeight(m_Text) * m_TextScale.y * 1.32f); //yes, this is evil
 }
 const string& Text::text() const {
@@ -57,9 +57,9 @@ const Font& Text::font() const {
 const glm::vec2& Text::textScale() const {
     return m_TextScale;
 }
-void Text::update(const float& dt) {
+void Text::update(const double& dt) {
 
 }
 void Text::render() {
-    Renderer::renderText(m_Text, *m_Font, m_Position, m_Color, 0, m_TextScale, 0.004f, m_TextAlignment);
+    Renderer::renderText(m_Text, *m_Font, glm::uvec2(m_Position.x + 5, m_Position.y), m_Color, 0, m_TextScale, 0.004f, m_TextAlignment);
 }

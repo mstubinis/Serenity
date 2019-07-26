@@ -16,7 +16,7 @@ struct OnEnter final {void operator()(TextBox* textBox) const {
 
 
 
-TextBox::TextBox(const string& label, const Font& font, const unsigned short& maxCharacters, const float& x, const float& y):Button(font,x,y,25,25) {
+TextBox::TextBox(const string& label, const Font& font, const unsigned short& maxCharacters, const unsigned int& x, const unsigned int& y):Button(font,x,y,25,25) {
     m_Text = "";
     m_Active = false;
     m_Timer = 0.0f;
@@ -30,19 +30,8 @@ TextBox::TextBox(const string& label, const Font& font, const unsigned short& ma
     m_TextAlignment = TextAlignment::Left;
     registerEvent(EventType::TextEntered);
 }
-TextBox::TextBox(const string& label, const Font& font, const unsigned short& maxCharacters, const glm::vec2& position) : Button(font,position.x, position.y, 25, 25) {
-    m_Text = "";
-    m_Active = false;
-    m_Timer = 0.0f;
-    m_Label = label;
-    m_MaxCharacters = maxCharacters;
+TextBox::TextBox(const string& label, const Font& font, const unsigned short& maxCharacters, const glm::uvec2& position) : TextBox(label, font, maxCharacters, position.x, position.y) {
 
-    internalUpdateSize();
-
-    setOnClickFunctor(OnClick());
-    setOnEnterFunctor(OnEnter());
-    m_TextAlignment = TextAlignment::Left;
-    registerEvent(EventType::TextEntered);
 }
 
 TextBox::~TextBox() {

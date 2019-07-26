@@ -4,7 +4,7 @@
 
 #include <core/engine/renderer/RenderGraph.h>
 #include <core/engine/renderer/GLStateMachine.h>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 
 #include <core/engine/renderer/RendererEnums.h>
 #include <core/engine/renderer/postprocess/SSAO.h>
@@ -138,12 +138,12 @@ namespace Renderer{
     void unbindReadFBO();
     void unbindDrawFBO();
         
-    void alignmentOffset(const Alignment::Type& align, float& x, float& y, const float& width, const float& height);
-    void renderTexture(const Texture&, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const Alignment::Type& = Alignment::Type::Center);
-    void renderText(const std::string& text, const Font&, const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const TextAlignment::Type& = TextAlignment::Left);
-    void renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float& w, const float& h, const float& angle, const float& depth, const Alignment::Type& = Alignment::Type::Center);
-    void renderBorder(const float& borderSize, const glm::vec2& position, const glm::vec4& color, const float& width, const float& height, const float& angle, const float& depth, const Alignment::Type& = Alignment::Type::Center);
-    void renderTriangle(const glm::vec2& position, const glm::vec4& color, const float& angle, const float& width, const float& height, const float& depth, const Alignment::Type& = Alignment::Type::Center);
+    void alignmentOffset(const Alignment::Type& align, uint& x, uint& y, const uint& width, const uint& height);
+    void renderTexture(const Texture&, const glm::uvec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const Alignment::Type& = Alignment::Type::Center);
+    void renderText(const std::string& text, const Font&, const glm::uvec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const TextAlignment::Type& = TextAlignment::Left);
+    void renderRectangle(const glm::uvec2& pos, const glm::vec4& col, const uint& width, const uint& height, const float& angle, const float& depth, const Alignment::Type& = Alignment::Type::Center);
+    void renderBorder(const uint& borderSize, const glm::uvec2& position, const glm::vec4& color, const uint& width, const uint& height, const float& angle, const float& depth, const Alignment::Type& = Alignment::Type::Center);
+    void renderTriangle(const glm::uvec2& position, const glm::vec4& color, const float& angle, const uint& width, const uint& height, const float& depth, const Alignment::Type& = Alignment::Type::Center);
 
     void scissor(const int& x, const int& y, const uint& width, const uint& height);
     void scissorDisable();

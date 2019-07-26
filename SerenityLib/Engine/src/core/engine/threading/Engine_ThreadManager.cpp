@@ -1,5 +1,4 @@
 #include <core/engine/threading/Engine_ThreadManager.h>
-#include <core/engine/Engine_Utils.h>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/shared_ptr.hpp>

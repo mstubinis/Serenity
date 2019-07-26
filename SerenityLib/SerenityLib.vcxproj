@@ -225,9 +225,7 @@
     <ClInclude Include="Engine\src\core\Constraint.h" />
     <ClInclude Include="Engine\src\core\engine\BindableResource.h" />
     <ClInclude Include="Engine\src\core\engine\Engine.h" />
-    <ClInclude Include="Engine\src\core\engine\Engine_Debugging.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_ObjectPool.h" />
-    <ClInclude Include="Engine\src\core\engine\Engine_Utils.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Window.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventDispatcher.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventEnums.h" />
@@ -305,6 +303,8 @@
     <ClInclude Include="Engine\src\core\engine\textures\Texture.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\threading\Engine_ThreadManager.h" />
+    <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h" />
+    <ClInclude Include="Engine\src\core\engine\utils\Utils.h" />
     <ClInclude Include="Engine\src\core\Material.h" />
     <ClInclude Include="Engine\src\core\ModelInstance.h" />
     <ClInclude Include="Engine\src\core\ShaderProgram.h" />
@@ -332,7 +332,6 @@
     <ClCompile Include="Engine\src\core\Constraint.cpp" />
     <ClCompile Include="Engine\src\core\engine\BindableResource.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine.cpp" />
-    <ClCompile Include="Engine\src\core\engine\Engine_Debugging.cpp" />
     <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventDispatcher.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventObject.cpp" />
@@ -395,6 +394,7 @@
     <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp" />
+    <ClCompile Include="Engine\src\core\engine\utils\Engine_Debugging.cpp" />
     <ClCompile Include="Engine\src\core\Material.cpp" />
     <ClCompile Include="Engine\src\core\ModelInstance.cpp" />
     <ClCompile Include="Engine\src\core\ShaderProgram.cpp" />

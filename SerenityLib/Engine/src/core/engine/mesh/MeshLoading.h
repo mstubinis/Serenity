@@ -2,7 +2,7 @@
 #ifndef ENGINE_MESH_LOADING_INCLUDE_GUARD
 #define ENGINE_MESH_LOADING_INCLUDE_GUARD
 
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 #include <core/engine/mesh/Skeleton.h>
 #include <core/engine/mesh/MeshRequest.h>
 

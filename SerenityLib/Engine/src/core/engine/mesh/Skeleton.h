@@ -3,7 +3,7 @@
 #define ENGINE_MESH_SKELETON_INCLUDE_GUARD
 
 #include <glm/glm.hpp>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 #include <unordered_map>
 #include <assimp/scene.h>
 

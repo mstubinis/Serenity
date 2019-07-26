@@ -225,7 +225,7 @@ HUD::HUD(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m_G
     m_ServerLobbyChatWindow = new ServerLobbyChatWindow(*m_Font, 50, 140 + 300);
     m_ServerLobbyChatWindow->setColor(1, 1, 0, 1);
 
-    m_ServerLobbyConnectedPlayersWindow = new ServerLobbyConnectedPlayersWindow(*m_Font, 50 + m_ServerLobbyChatWindow->getWindowFrame().width() + 2, 140 + 300);
+    m_ServerLobbyConnectedPlayersWindow = new ServerLobbyConnectedPlayersWindow(*m_Font, 50 + m_ServerLobbyChatWindow->getWindowFrame().width(), 140 + 300);
     m_ServerLobbyConnectedPlayersWindow->setColor(1, 1, 0, 1);
 
     m_ServerLobbyShipSelectorWindow = new ServerLobbyShipSelectorWindow(core,scene, camera, *m_Font, 50, windowDimensions.y - 50);
@@ -316,14 +316,14 @@ void HUD::onResize(const uint& width, const uint& height) {
     m_ServerHostMapSelector->setPosition(Resources::getWindowSize().x / 2 - 300, 630);
 
     m_ServerLobbyChatWindow->setPosition(50, 140 + 300);
-    m_ServerLobbyConnectedPlayersWindow->setPosition(50 + m_ServerLobbyChatWindow->getWindowFrame().width() + 2, 140 + 300);
+    m_ServerLobbyConnectedPlayersWindow->setPosition(50 + m_ServerLobbyChatWindow->getWindowFrame().width(), 140 + 300);
 
     const auto& winSize = Resources::getWindowSize();
     m_ServerLobbyShipSelectorWindow->setPosition(50, winSize.y - 50);
 }
 
-int _countShips = 0;
-int _countPlanets = 0;
+uint _countShips = 0;
+uint _countPlanets = 0;
 void HUD::update_game(const double& dt) {
     if (Engine::isKeyDownOnce(KeyboardKey::LeftAlt, KeyboardKey::X) || Engine::isKeyDownOnce(KeyboardKey::RightAlt, KeyboardKey::X)) {
         m_Active = !m_Active;

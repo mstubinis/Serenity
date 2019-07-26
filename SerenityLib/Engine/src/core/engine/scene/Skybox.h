@@ -2,20 +2,16 @@
 #ifndef ENGINE_SKYBOX_H
 #define ENGINE_SKYBOX_H
 
-#include <string>
 #include <core/engine/events/Engine_EventObject.h>
-#include <core/engine/Engine_Utils.h>
-
-typedef unsigned int     GLuint;
+#include <core/engine/utils/Utils.h>
 
 class Texture;
 class Mesh;
 namespace Engine {
-namespace epriv {
-    class SkyboxImplInterface;
+    namespace epriv {
+        class SkyboxImplInterface;
+    };
 };
-};
-
 class Skybox: public EventObserver{
     friend class Engine::epriv::SkyboxImplInterface;
     private:

@@ -2,10 +2,9 @@
 #ifndef ENGINE_ECS_REGISTRY_H
 #define ENGINE_ECS_REGISTRY_H
 
-#include <cstdint>
 #include <boost/type_index.hpp>
 #include <boost/unordered_map.hpp>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 
 typedef boost::typeindex::type_index     boost_type_index;
 

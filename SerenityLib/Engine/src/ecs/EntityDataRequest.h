@@ -2,8 +2,7 @@
 #ifndef ENGINE_ECS_ENTITY_SERIALIZATION_H_INCLUDE_GUARD
 #define ENGINE_ECS_ENTITY_SERIALIZATION_H_INCLUDE_GUARD
 
-#include <cstdint>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 
 struct Entity;
 class Scene;

@@ -4,7 +4,7 @@
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 
 class Texture;
 class Viewport;

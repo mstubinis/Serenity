@@ -6,7 +6,7 @@
 #include <core/engine/renderer/GLImageConstants.h>
 #include <core/ShaderProgram.h>
 #include <core/engine/Engine_ObjectPool.h>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 
 struct Handle;
 class  EngineResource;

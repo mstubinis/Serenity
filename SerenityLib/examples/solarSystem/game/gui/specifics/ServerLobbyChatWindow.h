@@ -10,15 +10,15 @@ class ServerLobbyChatWindow final {
         ScrollFrame* m_ChatWindow;
         TextBox*     m_ChatInput;
         Font&        m_Font;
-        float        m_Width;
-        float        m_Height;
+        unsigned int m_Width;
+        unsigned int m_Height;
         void*        m_UserPointer;
     public:
-        ServerLobbyChatWindow(const Font& font, const float& x, const float& y);
+        ServerLobbyChatWindow(const Font& font, const unsigned int& x, const unsigned int& y);
         ~ServerLobbyChatWindow();
 
         void setColor(const float& r, const float& g, const float& b, const float& a);
-        void setPosition(const float& x, const float& y);
+        void setPosition(const unsigned int& x, const unsigned int& y);
 
         void setUserPointer(void*);
         void* getUserPointer();

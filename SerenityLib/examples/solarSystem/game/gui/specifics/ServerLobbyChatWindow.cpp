@@ -32,7 +32,7 @@ struct OnEnterFunctor final {
 };
 
 
-ServerLobbyChatWindow::ServerLobbyChatWindow(const Font& font, const float& x, const float& y):m_Font(const_cast<Font&>(font)){
+ServerLobbyChatWindow::ServerLobbyChatWindow(const Font& font, const unsigned int& x, const unsigned int& y):m_Font(const_cast<Font&>(font)){
     m_UserPointer = nullptr;
     m_Width = 630;
     m_Height = 300;
@@ -79,7 +79,7 @@ void ServerLobbyChatWindow::setColor(const float& r, const float& g, const float
     m_ChatWindow->setColor(r,g,b,a);
     m_ChatInput->setTextColor(r,g,b,a);
 }
-void ServerLobbyChatWindow::setPosition(const float& x, const float& y) {
+void ServerLobbyChatWindow::setPosition(const unsigned int& x, const unsigned int& y) {
     m_ChatWindow->setPosition(x,y);
     m_ChatInput->setPosition(x + (m_Width / 2) + 145,y - m_Height - m_ChatInput->getTextHeight() / 2 - 15);
 }

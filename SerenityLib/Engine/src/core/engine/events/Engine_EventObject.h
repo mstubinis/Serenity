@@ -3,7 +3,7 @@
 #define ENGINE_EVENT_OBJECT_H
 
 #include <core/engine/events/Engine_EventEnums.h>
-#include <core/engine/Engine_Utils.h>
+#include <core/engine/utils/Utils.h>
 
 class  Scene;
 
@@ -73,8 +73,10 @@ namespace epriv{
             }
             wchar_t c = static_cast<wchar_t>(unicode);
             std::wstring ws(&c);
-            std::string s;
-            std::string res(ws.begin(), ws.end());
+            std::string res;
+            for (auto& c : ws) {
+                res += static_cast<char>(c);
+            }
             res = res[0];
             return res;
         }

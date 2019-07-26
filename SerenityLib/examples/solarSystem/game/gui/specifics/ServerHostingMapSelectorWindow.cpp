@@ -31,12 +31,12 @@ struct MapSelectorButtonOnClick final{ void operator()(Button* button) const {
 }};
 
 
-ServerHostingMapSelectorWindow::ServerHostingMapSelectorWindow(const Font& font, const float& x, const float& y):m_Font(const_cast<Font&>(font)){
+ServerHostingMapSelectorWindow::ServerHostingMapSelectorWindow(const Font& font, const unsigned int& x, const unsigned int& y):m_Font(const_cast<Font&>(font)){
     m_Width = 600;
     m_Height = 300;
     m_MapFileWindow = new ScrollFrame(Resources::getWindowSize().x / 2 - (m_Width / 2), 630, m_Width, m_Height);
     m_MapFileWindow->setColor(1, 1, 0, 1);
-    m_MapFileWindow->setContentPadding(0.0f);
+    m_MapFileWindow->setContentPadding(0);
     //m_ServerHostMapSelector->setAlignment(Alignment::Center);
     //get a list of maps and add em
     string path = (ResourceManifest::BasePath + "data/Systems/");
@@ -83,7 +83,7 @@ const Text& ServerHostingMapSelectorWindow::getCurrentChoice() const {
 void ServerHostingMapSelectorWindow::setColor(const float& r, const float& g, const float& b, const float& a) {
     m_MapFileWindow->setColor(r, g, b, a);
 }
-void ServerHostingMapSelectorWindow::setPosition(const float& x, const float& y) {
+void ServerHostingMapSelectorWindow::setPosition(const unsigned int& x, const unsigned int& y) {
     m_MapFileWindow->setPosition(x, y);
 
     const auto& lineHeight = m_Font.getTextHeight("X");
