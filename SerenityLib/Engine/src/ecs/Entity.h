@@ -81,6 +81,21 @@ class EntityWrapper {
         inline Entity& entity() {
             return m_Entity; 
         }
+        inline bool null() {
+            return m_Entity.null();
+        }
+        template<typename TComponent, typename... ARGS> inline TComponent* addComponent(ARGS&& ... _args) {
+            return m_Entity.addComponent<TComponent>(std::forward<ARGS>(_args)...);
+        }
+        template<typename TComponent> inline bool removeComponent() {
+            return m_Entity.removeComponent<TComponent>();
+        }
+        template<typename TComponent> inline TComponent* getComponent() {
+            return m_Entity.getComponent<TComponent>();
+        }
+        template<typename TComponent> inline TComponent* getComponent(const EntityDataRequest& dataRequest) {
+            return m_Entity.getComponent<TComponent>(dataRequest);
+        }
 };
 
 namespace Engine {

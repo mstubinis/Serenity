@@ -35,6 +35,7 @@ namespace Engine{
         _TOTAL};};
         vector<vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = [](){
             vector<vector<uint>> m; m.resize(MaterialComponentType::_TOTAL);
+
             m[MaterialComponentType::Diffuse].push_back(MaterialComponentTextureSlot::Diffuse);
             m[MaterialComponentType::Normal].push_back(MaterialComponentTextureSlot::Normal);
             m[MaterialComponentType::Glow].push_back(MaterialComponentTextureSlot::Glow);
@@ -47,8 +48,21 @@ namespace Engine{
             m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP);
             m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP_MAP);
             m[MaterialComponentType::ParallaxOcclusion].push_back(MaterialComponentTextureSlot::Heightmap);
+
             return m;
         }();
+        const GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::_TOTAL] = {
+            "DiffuseTexture",
+            "NormalTexture",
+            "GlowTexture",
+            "SpecularTexture",
+            "AOTexture",
+            "MetalnessTexture",
+            "SmoothnessTexture",
+            "ReflectionTexture",
+            "RefractionTexture",
+            "HeightmapTexture",
+        };
         vector<boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
             vector<boost::tuple<float,float,float,float,float>> m; m.resize(MaterialPhysics::_TOTAL);
             //Remember specular reflection of non metals is white!       //(F0)                         //Smoothness    //Metalness
@@ -80,18 +94,6 @@ namespace Engine{
             m[MaterialPhysics::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,                0.9f,           0.5f);
             return m;
         }();
-        const GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::_TOTAL] = {
-            "DiffuseTexture",
-            "NormalTexture",
-            "GlowTexture",
-            "SpecularTexture",
-            "AOTexture",
-            "MetalnessTexture",
-            "SmoothnessTexture",
-            "ReflectionTexture",
-            "RefractionTexture",
-            "HeightmapTexture",
-        };
     };
 };
 

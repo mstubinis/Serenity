@@ -34,8 +34,6 @@ using namespace Engine;
 using namespace std;
 namespace boost_io = boost::iostreams;
 
-//Distance Information. Proxima Centauri, the closest star to our own, is still 40,208,000,000,000 km away
-
 Map::Map(const string& n, const string& file):Scene(n){
     m_Player      = nullptr; 
     GameCamera* playerCamera = new GameCamera(0.35f,7000000000.0f,this);
@@ -317,9 +315,9 @@ void Map::loadFromFile(const string& filename) {
 //    auto& anchor_body = *m_AnchorPoints.at("Spawn")->entity().getComponent<ComponentBody>();
 //    return anchor_body.position();
 //}
-const std::string Map::getClosestAnchor() {
+const string Map::getClosestAnchor() {
     float minDist = -1.0f;
-    std::string res = m_AnchorPoints.begin()._Ptr->_Myval.first;
+    string res = m_AnchorPoints.begin()._Ptr->_Myval.first;
     for (auto anchor : m_AnchorPoints) {
         const float dist = glm::distance(m_Player->entity().getComponent<ComponentBody>()->position(), anchor.second->entity().getComponent<ComponentBody>()->position());
         if (minDist < 0 || dist < minDist) {

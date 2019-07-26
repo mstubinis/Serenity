@@ -2,7 +2,7 @@
 #ifndef ENGINE_ECS_COMPONENT_BODY_H
 #define ENGINE_ECS_COMPONENT_BODY_H
 
-#include <core/engine/physics/Engine_Physics.h>
+//#include <core/engine/physics/Engine_Physics.h>
 #include <ecs/ComponentBaseClass.h>
 #include <ecs/ECSSystem.h>
 
@@ -11,6 +11,7 @@
 
 #include <LinearMath/btDefaultMotionState.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
+#include <core/engine/physics/Collision.h>
 
 #include <iostream>
 

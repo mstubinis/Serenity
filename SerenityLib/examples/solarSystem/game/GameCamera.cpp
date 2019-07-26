@@ -110,7 +110,7 @@ GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a
     m_Player = Entity::_null;
     m_OrbitRadius = 0;
     m_CameraMouseFactor = glm::dvec2(0.0);
-    auto& m_Logic = *m_Entity.getComponent<ComponentLogic2>();
+    auto& m_Logic = *getComponent<ComponentLogic2>();
     m_Logic.setUserPointer(this);
     m_Logic.setFunctor(GameCameraLogicFunctor());
 }
@@ -120,7 +120,7 @@ GameCamera::GameCamera(float l, float r, float b, float t, float n, float f, Sce
     m_Player = Entity::_null;
     m_OrbitRadius = 0;
     m_CameraMouseFactor = glm::dvec2(0.0);
-    auto& m_Logic = *m_Entity.getComponent<ComponentLogic2>();
+    auto& m_Logic = *getComponent<ComponentLogic2>();
     m_Logic.setUserPointer(this);
     m_Logic.setFunctor(GameCameraLogicFunctor());
 }

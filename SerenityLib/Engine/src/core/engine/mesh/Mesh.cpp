@@ -5,6 +5,8 @@
 #include <core/engine/mesh/MeshCollisionFactory.h>
 
 #include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/physics/Engine_Physics.h>
+#include <core/engine/physics/Collision.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/ModelInstance.h>
 
@@ -125,7 +127,7 @@ void Mesh::load_gpu() {
     m_VertexData->finalize(); //transfer vertex data to gpu
     cout << "(Mesh) ";
 }
-void Mesh::triangulate_component_indices(MeshImportedData& data, vector<vector<uint>>& indices, unsigned char _flags) {
+void Mesh::triangulate_component_indices(Engine::epriv::MeshImportedData& data, vector<vector<uint>>& indices, unsigned char _flags) {
     for (uint i = 0; i < indices[0].size(); ++i) {
         glm::vec3 pos(0.0f);
         glm::vec2 uv(0.0f);
@@ -146,7 +148,7 @@ void Mesh::triangulate_component_indices(MeshImportedData& data, vector<vector<u
 }
 
 
-void Mesh::finalize_vertex_data(MeshImportedData& data) {
+void Mesh::finalize_vertex_data(Engine::epriv::MeshImportedData& data) {
     if (data.uvs.size() == 0)         data.uvs.resize(data.points.size());
     if (data.normals.size() == 0)     data.normals.resize(data.points.size());
     if (data.binormals.size() == 0)   data.binormals.resize(data.points.size());

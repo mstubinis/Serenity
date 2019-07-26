@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifndef ENGINE_OPENGL_STATE_MACHINE_H
 #define ENGINE_OPENGL_STATE_MACHINE_H
 
@@ -213,6 +213,91 @@ namespace Engine {
                 StencilFuncState stencilFuncState;
                 #pragma endregion
 
+                #pragma region Enable
+                struct EnabledState final {
+                    struct GLBlendState final {
+                        GLenum gl_blend; //index​ must be less than GL_MAX_DRAW_BUFFERS
+                        GLBlendState() {
+                            gl_blend = GL_FALSE;
+                        }
+                    };
+                    struct GLScissorTestState final {
+                        GLenum gl_scissor_test; //index​ must be less than GL_MAX_VIEWPORTS
+                        GLScissorTestState() {
+                            gl_scissor_test = GL_FALSE;
+                        }
+                    };
+                    std::vector<GLBlendState>       blendState;
+                    std::vector<GLScissorTestState> scissorState;
+
+                    GLenum gl_clip_distance_1;
+                    GLenum gl_clip_distance_2;
+                    GLenum gl_clip_distance_3;
+                    GLenum gl_clip_distance_4;
+                    GLenum gl_clip_distance_5;
+                    GLenum gl_color_logic_op;
+                    GLenum gl_cull_face;
+                    GLenum gl_debug_output;
+                    GLenum gl_debug_output_syncronous;
+                    GLenum gl_depth_clamp;
+                    GLenum gl_depth_test;
+                    GLenum gl_dither;
+                    GLenum gl_framebuffer_srgb;
+                    GLenum gl_line_smooth;
+                    GLenum gl_multisample;
+                    GLenum gl_polygon_offset_fill;
+                    GLenum gl_polygon_offset_line;
+                    GLenum gl_polygon_offset_point;
+                    GLenum gl_polygon_smooth;
+                    GLenum gl_primitive_restart;
+                    GLenum gl_primitive_restart_fixed_index;
+                    GLenum gl_rasterizer_discard;
+                    GLenum gl_sample_alpha_to_coverage;
+                    GLenum gl_sample_alpha_to_one;
+                    GLenum gl_sample_coverage;
+                    GLenum gl_sample_shading;
+                    GLenum gl_sample_mask;
+                    GLenum gl_stencil_test;
+                    GLenum gl_texture_cube_map_seamless;
+                    GLenum gl_program_point_size;
+
+                    EnabledState() {
+                        gl_multisample = GL_TRUE;
+                        gl_dither = GL_TRUE;
+
+                        gl_clip_distance_1 = GL_FALSE;
+                        gl_clip_distance_2 = GL_FALSE;
+                        gl_clip_distance_3 = GL_FALSE;
+                        gl_clip_distance_4 = GL_FALSE;
+                        gl_clip_distance_5 = GL_FALSE;
+                        gl_color_logic_op = GL_FALSE;
+                        gl_cull_face = GL_FALSE;
+                        gl_debug_output = GL_FALSE;
+                        gl_debug_output_syncronous = GL_FALSE;
+                        gl_depth_clamp = GL_FALSE;
+                        gl_depth_test = GL_FALSE;
+                        gl_framebuffer_srgb = GL_FALSE;
+                        gl_line_smooth = GL_FALSE;
+                        gl_polygon_offset_fill = GL_FALSE;
+                        gl_polygon_offset_line = GL_FALSE;
+                        gl_polygon_offset_point = GL_FALSE;
+                        gl_polygon_smooth = GL_FALSE;
+                        gl_primitive_restart = GL_FALSE;
+                        gl_primitive_restart_fixed_index = GL_FALSE;
+                        gl_rasterizer_discard = GL_FALSE;
+                        gl_sample_alpha_to_coverage = GL_FALSE;
+                        gl_sample_alpha_to_one = GL_FALSE;
+                        gl_sample_coverage = GL_FALSE;
+                        gl_sample_shading = GL_FALSE;
+                        gl_sample_mask = GL_FALSE;
+                        gl_stencil_test = GL_FALSE;
+                        gl_texture_cube_map_seamless = GL_FALSE;
+                        gl_program_point_size = GL_FALSE;
+                    }
+                };
+                EnabledState enabledState;
+                #pragma endregion
+
                 void GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);
             public:
                 const bool GL_glActiveTexture(const GLenum& textureUnit);
@@ -235,6 +320,12 @@ namespace Engine {
                 const bool GL_glPixelStorei(const GLenum& pname, const GLint& param);
                 const bool GL_glStencilFuncSeparate(const GLenum& face, const GLenum& func, const GLint& ref, const GLuint& mask);
                 const bool GL_glStencilFunc(const GLenum& func, const GLint& ref, const GLuint& mask);
+
+                const bool GL_glEnable(const GLenum& capability);
+                const bool GL_glDisable(const GLenum& capability);
+
+                const bool GL_glEnablei(const GLenum& capability, const GLuint& index);
+                const bool GL_glDisablei(const GLenum& capability, const GLuint& index);
 
 
                 void GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);

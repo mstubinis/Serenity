@@ -63,7 +63,7 @@ void Postprocess_SMAA::passEdge(ShaderP& program, GBuffer& gbuffer, const glm::v
 
     Renderer::stencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
     Renderer::stencilOp(GL_KEEP, GL_INCR, GL_INCR);
-    Renderer::GLEnable(GLState::STENCIL_TEST);
+    Renderer::GLEnable(GL_STENCIL_TEST);
 
     Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
 
@@ -100,7 +100,7 @@ void Postprocess_SMAA::passBlend(ShaderP& program, GBuffer& gbuffer, const glm::
 
     Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
 
-    Renderer::GLDisable(GLState::STENCIL_TEST);
+    Renderer::GLDisable(GL_STENCIL_TEST);
 }
 void Postprocess_SMAA::passNeighbor(ShaderP& program, GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
     program.bind();

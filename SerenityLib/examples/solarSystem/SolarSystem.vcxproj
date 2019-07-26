@@ -210,7 +210,6 @@
     <ClInclude Include="game\Helper.h" />
     <ClInclude Include="game\HUD.h" />
     <ClInclude Include="game\map\Map.h" />
-    <ClInclude Include="game\map\Sector.h" />
     <ClInclude Include="game\Packet.h" />
     <ClInclude Include="game\Planet.h" />
     <ClInclude Include="game\ResourceManifest.h" />
@@ -236,7 +235,6 @@
     <ClCompile Include="game\HUD.cpp" />
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\map\Map.cpp" />
-    <ClCompile Include="game\map\Sector.cpp" />
     <ClCompile Include="game\Packet.cpp" />
     <ClCompile Include="game\Planet.cpp" />
     <ClCompile Include="game\ResourceManifest.cpp" />

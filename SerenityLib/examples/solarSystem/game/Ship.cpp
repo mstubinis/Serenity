@@ -65,7 +65,7 @@ ShipSystemMainThrusters::~ShipSystemMainThrusters(){
 }
 void ShipSystemMainThrusters::update(const double& dt){
     if(isOnline()){
-        auto& rigidbody = *m_Ship->entity().getComponent<ComponentBody>();
+        auto& rigidbody = *m_Ship->getComponent<ComponentBody>();
         if(m_Ship->IsPlayer()){
             if(!m_Ship->IsWarping()){
                 const float& amount = (  (rigidbody.mass() * 0.4f)  +  1.3f  );
@@ -104,7 +104,7 @@ ShipSystemPitchThrusters::~ShipSystemPitchThrusters(){
 void ShipSystemPitchThrusters::update(const double& dt){
     if(isOnline()){
 		auto& ship = *m_Ship;
-        auto& rigidbody = *ship.entity().getComponent<ComponentBody>();
+        auto& rigidbody = *ship.getComponent<ComponentBody>();
         if(ship.IsPlayer()){
             if(ship.getPlayerCamera()->getState() != CameraState::Orbit){
 				const auto& diff = Engine::getMouseDifference().y;
@@ -131,7 +131,7 @@ ShipSystemYawThrusters::~ShipSystemYawThrusters(){
 void ShipSystemYawThrusters::update(const double& dt){
     if(isOnline()){
 		auto& ship = *m_Ship;
-        auto& rigidbody = *ship.entity().getComponent<ComponentBody>();
+        auto& rigidbody = *ship.getComponent<ComponentBody>();
         if(ship.IsPlayer()){
             if(ship.getPlayerCamera()->getState() != CameraState::Orbit){
 				const auto& diff = -Engine::getMouseDifference().x;
@@ -157,7 +157,7 @@ ShipSystemRollThrusters::~ShipSystemRollThrusters(){
 }
 void ShipSystemRollThrusters::update(const double& dt){
     if(isOnline()){
-        auto& rigidbody = *m_Ship->entity().getComponent<ComponentBody>();
+        auto& rigidbody = *m_Ship->getComponent<ComponentBody>();
         if(m_Ship->IsPlayer()){
             float amount = 1.0f / rigidbody.mass();
             if(Engine::isKeyDown(KeyboardKey::Q)){
@@ -296,10 +296,10 @@ Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, cons
     m_MouseFactor   = glm::dvec2(0.0);
     m_SavedOldStateBefore = false;
 
-    auto& rigidBodyComponent = *m_Entity.addComponent<ComponentBody>(_type);
-    auto& modelComponent     = *m_Entity.addComponent<ComponentModel>(mesh, mat);
-    auto& nameComponent      = *m_Entity.addComponent<ComponentName>(name);
-    auto& logicComponent     = *m_Entity.addComponent<ComponentLogic>(ShipLogicFunctor(), this);
+    auto& rigidBodyComponent = *addComponent<ComponentBody>(_type);
+    auto& modelComponent     = *addComponent<ComponentModel>(mesh, mat);
+    auto& nameComponent      = *addComponent<ComponentName>(name);
+    auto& logicComponent     = *addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
     setModel(mesh);
 
@@ -328,8 +328,8 @@ Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
 void Ship::setModel(Handle& modelHandle) {
-    auto& rigidBodyComponent = *m_Entity.getComponent<ComponentBody>();
-    auto& modelComponent     = *m_Entity.getComponent<ComponentModel>();
+    auto& rigidBodyComponent = *getComponent<ComponentBody>();
+    auto& modelComponent     = *getComponent<ComponentModel>();
     modelComponent.setModelMesh(modelHandle, 0);
 
 
@@ -347,7 +347,7 @@ void Ship::translateWarp(float amount,float dt){
 void Ship::setTarget(const string& target) {
     Map* s = static_cast<Map*>(Resources::getCurrentScene());
     for (auto& entity : s->m_Objects) {
-        auto* componentName = entity->entity().getComponent<ComponentName>();
+        auto* componentName = entity->getComponent<ComponentName>();
         if (componentName) {
             if (componentName->name() == target) {
                 m_Target = entity->entity();

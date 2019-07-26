@@ -7,24 +7,24 @@
 
 #include <core/engine/BindableResource.h>
 #include <core/engine/events/Engine_EventObject.h>
-#include <core/engine/physics/Engine_Physics.h>
+#include <core/engine/physics/PhysicsEnums.h>
 
-#include <map>
 #include <unordered_map>
 
 #include <assimp/scene.h>
 
 typedef unsigned short ushort;
 
-//class  ModelInstance;
 class  Mesh;
 class  btHeightfieldTerrainShape;
-
+class  btCollisionShape;
+class  Collision;
 namespace Engine{
     namespace epriv{
         class  MeshLoader;
         class  MeshSkeleton;
         class  MeshCollisionFactory;
+        class  MeshImportedData;
         struct DefaultMeshBindFunctor;
         struct DefaultMeshUnbindFunctor;
         struct BoneNode;

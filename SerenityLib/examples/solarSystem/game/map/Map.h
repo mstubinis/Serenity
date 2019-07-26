@@ -11,7 +11,6 @@ class Planet;
 class GameObject;
 class EntityWrapper;
 class GameSkybox;
-class Sector;
 
 class Map: public Scene{
     private:
@@ -21,7 +20,6 @@ class Map: public Scene{
         std::string                              m_SkyboxFile;
         Ship*                                    m_Player;
 
-        //EntityWrapper*                           m_AnchorPoint; //using this to sync warp displaced positions in multiplayer
         std::unordered_map<std::string, EntityWrapper*>   m_AnchorPoints;
 
 

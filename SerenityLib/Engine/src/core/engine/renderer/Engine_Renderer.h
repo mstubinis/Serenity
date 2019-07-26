@@ -114,6 +114,10 @@ namespace Renderer{
     const bool bindReadFBO(const GLuint& fbo);
     const bool bindDrawFBO(const GLuint& fbo);
 
+    const bool GLEnable(const GLenum& capability);
+    const bool GLDisable(const GLenum& capability);
+    const bool GLEnablei(const GLenum& capability, const GLuint& index);
+    const bool GLDisablei(const GLenum& capability, const GLuint& index);
 
     const bool bindTextureForModification(const GLuint _textureType, const GLuint _textureObject);
 

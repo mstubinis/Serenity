@@ -465,6 +465,12 @@
     <ClInclude Include="Engine\src\core\ModelInstance.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\physics\Collision.h">
+      <Filter>Header Files\Engine\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\physics\PhysicsEnums.h">
+      <Filter>Header Files\Engine\Core\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -706,6 +712,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\ModelInstance.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\physics\Collision.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -99,14 +99,14 @@ CapsuleTunnel::CapsuleTunnel(float tunnelRadius,Handle& material, CapsuleSpace* 
 CapsuleTunnel::~CapsuleTunnel(){}
 
 struct RibbonBindFunctor {void operator()(EngineResource* r) const {
-    Renderer::GLDisable(GLState::DEPTH_TEST);
-    Renderer::GLDisable(GLState::DEPTH_MASK);
+    Renderer::GLDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
 
     epriv::DefaultModelInstanceBindFunctor()(r);
 }};
 struct RibbonUnbindFunctor {void operator()(EngineResource* r) const {
-    Renderer::GLEnable(GLState::DEPTH_TEST);
-    Renderer::GLEnable(GLState::DEPTH_MASK);
+    Renderer::GLEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 }};
 
 CapsuleRibbon::CapsuleRibbon(float tunnelRadius, Handle& mesh,Handle& material, CapsuleSpace* scene) :EntityWrapper(*scene) {

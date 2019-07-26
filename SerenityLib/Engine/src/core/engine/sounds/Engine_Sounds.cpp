@@ -106,7 +106,7 @@ SoundQueue* Engine::Sound::createQueue(const float& delay) {
     return queue;
 }
 
-SoundEffect* Engine::Sound::playEffect(Handle& handle, const uint& loops){
+SoundEffect* Sound::playEffect(Handle& handle, const uint& loops){
     SoundEffect* effect = soundManager->_getFreeEffect();
     if (effect) {
         soundManager->_setSoundInformation(handle, *effect);
@@ -114,7 +114,7 @@ SoundEffect* Engine::Sound::playEffect(Handle& handle, const uint& loops){
     }
     return effect;
 }
-SoundMusic* Engine::Sound::playMusic(Handle& handle, const uint& loops){
+SoundMusic* Sound::playMusic(Handle& handle, const uint& loops){
     SoundMusic* music = soundManager->_getFreeMusic();
     if (music) {
         soundManager->_setSoundInformation(handle, *music);
@@ -122,12 +122,12 @@ SoundMusic* Engine::Sound::playMusic(Handle& handle, const uint& loops){
     }
     return music;
 }
-void Engine::Sound::stop_all_music() {
+void Sound::stop_all_music() {
     for (auto& music : soundManager->m_SoundMusics) {
         music->stop();
     }
 }
-void Engine::Sound::stop_all_effect() {
+void Sound::stop_all_effect() {
     for (auto& effect : soundManager->m_SoundEffects) {
         effect->stop();
     }

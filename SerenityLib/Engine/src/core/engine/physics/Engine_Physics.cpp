@@ -7,6 +7,7 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/ModelInstance.h>
 #include <core/engine/scene/Scene.h>
+//#include <core/engine/physics/Collision.h>
 
 // ecs
 #include <ecs/ComponentModel.h>
@@ -811,107 +812,3 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
     }
     return Physics::rayCast(_s,_e,objs);
 }
-
-
-
-void Collision::_init(const vector<Mesh*>& _meshes, const float& _mass) {
-    btCompoundShape* compound = new btCompoundShape();
-    btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
-    for (auto& mesh : _meshes) {
-        btCollisionShape* shape = epriv::InternalMeshPublicInterface::BuildCollision(mesh, CollisionType::ConvexHull);
-        compound->addChildShape(t, shape);
-    }
-    compound->setMargin(0.001f);
-    compound->recalculateLocalAabb();
-    m_Shape = compound;
-}
-void Collision::_baseInit(const CollisionType::Type _type, const float& _mass) {
-    m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
-    m_Type = _type;
-    setMass(_mass);
-}
-Collision::Collision() {
-    //construtor
-    m_Inertia = btVector3(0.0f, 0.0f, 0.0f);
-    m_Type = CollisionType::None;
-    m_Shape = nullptr;
-    setMass(0.0f);
-}
-Collision::Collision(const vector<Mesh*>& _meshes, const float& _mass){
-    //construtor
-    _init(_meshes, _mass);
-    _baseInit(CollisionType::Compound, _mass);
-}
-Collision::Collision(btHeightfieldTerrainShape& heightField, const CollisionType::Type _type, const float& _mass) {
-    _baseInit(_type, _mass);
-    m_Shape = &heightField;
-}
-Collision::Collision(ComponentModel& _modelComponent, const float& _mass){
-    //construtor
-    vector<Mesh*> meshes;
-    for (uint i = 0; i < _modelComponent.getNumModels(); ++i) {
-        meshes.push_back(_modelComponent.getModel(i).mesh());
-    }
-    _init(meshes, _mass);
-}
-Collision::Collision(const CollisionType::Type _type, Mesh* _mesh, const float& _mass){
-    //construtor
-    btCollisionShape* shape = epriv::InternalMeshPublicInterface::BuildCollision(_mesh, _type);
-    m_Shape = shape;
-    _baseInit(_type, _mass);
-}
-Collision::~Collision() {
-    //destructor
-    btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
-    if (compoundCast) {
-        int numChildShapes = compoundCast->getNumChildShapes();
-        for (int i = 0; i < numChildShapes; ++i) {
-            btCollisionShape* shape = compoundCast->getChildShape(i);
-            SAFE_DELETE(shape);
-        }
-    }
-    SAFE_DELETE(m_Shape);
-}
-Collision::Collision(const Collision& other) {
-    //copy constructor
-    m_Inertia = other.m_Inertia;
-    m_Type = other.m_Type;
-    if (other.m_Shape) m_Shape = other.m_Shape;
-    else               m_Shape = nullptr;
-}
-Collision& Collision::operator=(const Collision& other) {
-    //copy assignment
-    m_Inertia = other.m_Inertia;
-    m_Type = other.m_Type;
-    if (other.m_Shape) m_Shape = other.m_Shape;
-    else               m_Shape = nullptr;
-    return *this;
-}
-Collision::Collision(Collision&& other) noexcept {
-    //move constructor
-    using std::swap;
-    swap(m_Inertia, other.m_Inertia);
-    swap(m_Type, other.m_Type);
-    swap(m_Shape, other.m_Shape);
-    other.m_Shape = nullptr;
-}
-Collision& Collision::operator=(Collision&& other) noexcept {
-    //move assignment
-    using std::swap;
-    swap(m_Inertia, other.m_Inertia);
-    swap(m_Type, other.m_Type);
-    swap(m_Shape, other.m_Shape);
-    other.m_Shape = nullptr;
-    return *this;
-}
-
-
-void Collision::setMass(float _mass){ 
-    if (!m_Shape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) return;
-    if (m_Shape->getShapeType() != EMPTY_SHAPE_PROXYTYPE) {
-        m_Shape->calculateLocalInertia(_mass, m_Inertia);
-    }
-}
-const btVector3& Collision::getInertia() const { return m_Inertia; }
-btCollisionShape* Collision::getShape() const { return m_Shape; }
-const uint Collision::getType() const { return m_Type; }

@@ -49,7 +49,7 @@ struct PlanetaryRingModelInstanceBindFunctor{void operator()(EngineResource* r) 
     Planet& obj = *(Planet*)i.getUserPointer(); 
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     float atmosphereHeight = obj.getAtmosphereHeight();
-    auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
+    auto* m_Body = obj.getComponent<ComponentBody>();
 
     glm::vec3 pos = m_Body->position();
     glm::quat orientation = m_Body->rotation();
@@ -117,7 +117,7 @@ struct PlanetaryRingModelInstanceBindFunctor{void operator()(EngineResource* r) 
 struct StarModelInstanceBindFunctor{void operator()(EngineResource* r) const {
     ModelInstance& i = *(ModelInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
-    auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
+    auto* m_Body = obj.getComponent<ComponentBody>();
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     glm::vec3 pos = m_Body->position();
     glm::vec3 camPosR = c->getPosition();
@@ -160,7 +160,7 @@ struct AtmosphericScatteringGroundModelInstanceBindFunctor{void operator()(Engin
     ModelInstance& i = *(ModelInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    auto* m_Body = obj.m_Entity.getComponent<ComponentBody>();
+    auto* m_Body = obj.getComponent<ComponentBody>();
     float atmosphereHeight = obj.getAtmosphereHeight();
 
     glm::vec3 pos = m_Body->position();
@@ -241,7 +241,7 @@ struct AtmosphericScatteringSkyModelInstanceBindFunctor{void operator()(EngineRe
     ModelInstance& i = *(ModelInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    auto& m_Body = *obj.m_Entity.getComponent<ComponentBody>();
+    auto& m_Body = *obj.getComponent<ComponentBody>();
     float atmosphereHeight = obj.getAtmosphereHeight();
 
     glm::vec3 thisPos = m_Body.position();
@@ -317,9 +317,9 @@ struct AtmosphericScatteringSkyModelInstanceUnbindFunctor{void operator()(Engine
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere, Map* scene):EntityWrapper(*scene){
     auto& componentName = *m_Entity.addComponent<ComponentName>(name);
 
-    auto& body = *m_Entity.addComponent<ComponentBody>();
+    auto& body = *addComponent<ComponentBody>();
     body.setPosition(pos);
-    auto& model = *m_Entity.addComponent<ComponentModel>(ResourceManifest::PlanetMesh, mat, ResourceManifest::groundFromSpace);
+    auto& model = *addComponent<ComponentModel>(ResourceManifest::PlanetMesh, mat, ResourceManifest::groundFromSpace);
     body.setScale(scl, scl, scl);
     auto& instance = model.getModel();
     instance.setUserPointer(this);
@@ -344,7 +344,7 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
         skyInstance.setScale(aScale,aScale,aScale);
         skyInstance.setUserPointer(this);
     }
-    auto& logic = *m_Entity.addComponent<ComponentLogic>(PlanetLogicFunctor(), this);
+    auto& logic = *addComponent<ComponentLogic>(PlanetLogicFunctor(), this);
 
     m_Type = type;
     m_OrbitInfo = nullptr;
@@ -358,21 +358,21 @@ Planet::~Planet(){
     SAFE_DELETE(m_RotationInfo);
 }
 glm::vec3 Planet::getPosition(){ 
-    return m_Entity.getComponent<ComponentBody>()->position(); 
+    return getComponent<ComponentBody>()->position(); 
 }
 void Planet::setPosition(float x,float y,float z){ 
-    m_Entity.getComponent<ComponentBody>()->setPosition(x,y,z); 
+    getComponent<ComponentBody>()->setPosition(x,y,z); 
 }
 void Planet::setPosition(glm::vec3 pos){ 
-    m_Entity.getComponent<ComponentBody>()->setPosition(pos); 
+    getComponent<ComponentBody>()->setPosition(pos); 
 }
 void Planet::setOrbit(OrbitInfo* o){ 
     m_OrbitInfo = o; 
-    m_Entity.getComponent<ComponentLogic>()->call(0);
+    getComponent<ComponentLogic>()->call(0);
 }
 void Planet::setRotation(RotationInfo* r){ 
     m_RotationInfo = r;
-    m_Entity.getComponent<ComponentBody>()->rotate(glm::radians(-r->tilt),0.0f,0.0f);
+    getComponent<ComponentBody>()->rotate(glm::radians(-r->tilt),0.0f,0.0f);
 }
 void Planet::addRing(Ring* ring){ 
     m_Rings.push_back(ring); 
@@ -384,20 +384,22 @@ OrbitInfo* Planet::getOrbitInfo() const {
     return m_OrbitInfo; 
 }
 float Planet::getGroundRadius(){ 
-    auto& model = *m_Entity.getComponent<ComponentModel>();
+    auto& model = *getComponent<ComponentModel>();
     return model.radius(); 
 }
 float Planet::getRadius() { 
-    auto& model = *m_Entity.getComponent<ComponentModel>();
+    auto& model = *getComponent<ComponentModel>();
     return model.radius() + (model.radius() * m_AtmosphereHeight); 
 }
-float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
+float Planet::getAtmosphereHeight(){ 
+    return m_AtmosphereHeight; 
+}
 
 Star::Star(glm::vec3 starColor,glm::vec3 lightColor, glm::vec3 godRaysColor,glm::vec3 pos,float scl,string name, Map* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor);
 
-    auto* starModel = m_Entity.getComponent<ComponentModel>();
+    auto* starModel = getComponent<ComponentModel>();
     if (starModel) {
         auto& instance = starModel->getModel();
         instance.setColor(starColor);
@@ -420,7 +422,7 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     _makeRingImage(rings);
     m_Parent->addRing(this);
 
-    auto& model = *m_Parent->m_Entity.getComponent<ComponentModel>();
+    auto& model = *m_Parent->getComponent<ComponentModel>();
 
     const uint& index = model.addModel(
         ResourceManifest::RingMesh,
@@ -497,10 +499,10 @@ glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet* thisPlanet){
     glm::vec3 offset = glm::vec3(0.0f);
     const glm::vec3& currentPos = thisPlanet->getPosition();
     if(parent){
-        glm::vec3 parentPos = parent->getPosition();
-        float newX = parentPos.x - glm::cos(angle) * info.w;
-        float newZ = parentPos.z - glm::sin(angle) * info.z;
-        offset = glm::vec3(newX - currentPos.x,0.0f,newZ - currentPos.z);
+        const glm::vec3 parentPos = parent->getPosition();
+        const float newX = parentPos.x - glm::cos(angle) * info.w;
+        const float newZ = parentPos.z - glm::sin(angle) * info.z;
+        offset = glm::vec3(newX - currentPos.x, 0.0f, newZ - currentPos.z);
     }
     return (currentPos + offset);
 }

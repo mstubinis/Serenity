@@ -1142,13 +1142,12 @@ class epriv::RenderManager::impl final{
 
             epriv::Postprocess_SSAO::SSAO.init();
 
-            GLEnable(GLState::DEPTH_TEST);
+            renderManager->OpenGLStateMachine.GL_glEnable(GL_DEPTH_TEST);
             Renderer::setDepthFunc(GL_LEQUAL);
-            GLDisable(GLState::STENCIL_TEST);
+            renderManager->OpenGLStateMachine.GL_glDisable(GL_STENCIL_TEST);
             renderManager->OpenGLStateMachine.GL_glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //for non Power of Two textures
-    
-            //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very odd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
-            GLEnable(GLState::DEPTH_CLAMP);
+            //renderManager->OpenGLStateMachine.GL_glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); //very odd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
+            renderManager->OpenGLStateMachine.GL_glEnable(GL_DEPTH_CLAMP);
 
             epriv::Postprocess_SMAA::SMAA.init();
 
@@ -1193,13 +1192,10 @@ class epriv::RenderManager::impl final{
                 skybox->draw();
             }else{//render a fake skybox.
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake]->bind();
-                //GLEnable(GLState::BLEND);
-                //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 auto& bgColor = scene.getBackgroundColor();
                 sendUniformMatrix4("VP", camera.getProjection() * view);
                 sendUniform4("Color",bgColor.r,bgColor.g,bgColor.b, bgColor.a);
                 Skybox::bindMesh();
-                //GLDisable(GLState::BLEND);
             }
         }
         void _resize(const uint& w, const uint& h){
@@ -1212,11 +1208,10 @@ class epriv::RenderManager::impl final{
             sfWindow->create(videoMode, winName, style, settings);
 
             //oh yea the opengl context is lost, gotta restore the state machine
-            Renderer::RestoreGLState();
             renderManager->OpenGLStateMachine.GL_RESTORE_CURRENT_STATE_MACHINE();
 
-            glEnable(GL_CULL_FACE);
-            glEnable(GL_DEPTH_CLAMP);
+            GLEnable(GL_CULL_FACE);
+            GLEnable(GL_DEPTH_CLAMP);
 
             const auto& winSize = Resources::getWindowSize();
             m_GBuffer = new GBuffer(winSize.x, winSize.y);
@@ -1224,7 +1219,7 @@ class epriv::RenderManager::impl final{
         void _onOpenGLContextCreation(const uint& width, const uint& height, const uint& _glslVersion, const uint& _openglVersion){
             epriv::RenderManager::GLSL_VERSION = _glslVersion;
             epriv::RenderManager::OPENGL_VERSION = _openglVersion;
-            GLEnable(GLState::CULL_FACE);
+            GLEnable(GL_CULL_FACE);
             SAFE_DELETE(m_GBuffer);
             m_GBuffer = new GBuffer(width,height);
         }
@@ -1494,7 +1489,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", vp);
 
-            Renderer::GLEnable(GLState::DEPTH_TEST);
+            Renderer::GLEnable(GL_DEPTH_TEST);
             if (glm::distance(c.getPosition(), pos) <= p.m_CullingRadius) { //inside the light volume
                 Renderer::cullFace(GL_FRONT);
                 Renderer::setDepthFunc(GL_GEQUAL);
@@ -1506,7 +1501,7 @@ class epriv::RenderManager::impl final{
             pointLightMesh.unbind();
             Renderer::cullFace(GL_BACK);
             Renderer::setDepthFunc(GL_LEQUAL);
-            Renderer::GLDisable(GLState::DEPTH_TEST);
+            Renderer::GLDisable(GL_DEPTH_TEST);
         }
         void _renderDirectionalLight(DirectionalLight& d) {
             if (!d.isActive()) return;
@@ -1540,7 +1535,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", vp);
 
-            Renderer::GLEnable(GLState::DEPTH_TEST);
+            Renderer::GLEnable(GL_DEPTH_TEST);
             if (glm::distance(c.getPosition(), pos) <= s.m_CullingRadius) { //inside the light volume                                                 
                 Renderer::cullFace(GL_FRONT);
                 Renderer::setDepthFunc(GL_GEQUAL);
@@ -1554,7 +1549,7 @@ class epriv::RenderManager::impl final{
             Renderer::setDepthFunc(GL_LEQUAL);
 
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
-            Renderer::GLDisable(GLState::DEPTH_TEST);
+            Renderer::GLDisable(GL_DEPTH_TEST);
         }
         void _renderRodLight(RodLight& r) {
             if (!r.isActive()) return;
@@ -1580,7 +1575,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", vp);
 
-            Renderer::GLEnable(GLState::DEPTH_TEST);
+            Renderer::GLEnable(GL_DEPTH_TEST);
             if (glm::distance(c.getPosition(), pos) <= cullingDistance) {
                 Renderer::cullFace(GL_FRONT);
                 Renderer::setDepthFunc(GL_GEQUAL);
@@ -1592,7 +1587,7 @@ class epriv::RenderManager::impl final{
             rodLightMesh.unbind();
             Renderer::cullFace(GL_BACK);
             Renderer::setDepthFunc(GL_LEQUAL);
-            Renderer::GLDisable(GLState::DEPTH_TEST);
+            Renderer::GLDisable(GL_DEPTH_TEST);
 
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
         }
@@ -1619,11 +1614,11 @@ class epriv::RenderManager::impl final{
                 glClearBufferfv(GL_COLOR, 2, godraysclearcolor);
             }
 
-            GLEnable(GLState::DEPTH_TEST);
-            GLEnable(GLState::DEPTH_MASK);
+            GLEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_TRUE);
 
             //this is needed for sure
-            GLEnable(GLState::BLEND_0);
+            GLEnablei(GL_BLEND, 0);
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);      
 
             //RENDER NORMAL OBJECTS HERE
@@ -1710,8 +1705,8 @@ class epriv::RenderManager::impl final{
                 
                 sendUniform4v("materials[0]", Material::m_MaterialProperities, Material::m_MaterialProperities.size());
                 sendUniform4("ScreenData", lighting_gi_pack, gamma, fbo_width, fbo_height);
-                sendTexture("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
-                sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 1);
+                //sendTexture("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
+                //sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 1);
                 sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 2);
                 sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 3);
 
@@ -1727,7 +1722,7 @@ class epriv::RenderManager::impl final{
                 }
                 _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
             }
-            GLDisable(GLState::STENCIL_TEST);
+            GLDisable(GL_STENCIL_TEST);
         }
         void _passStencil(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
@@ -1735,7 +1730,7 @@ class epriv::RenderManager::impl final{
 
             gbuffer.getMainFBO()->bind();
 
-            GLEnable(GLState::STENCIL_TEST);
+            GLEnable(GL_STENCIL_TEST);
             Settings::clear(false,false,true); //stencil is completely filled with 0's
             Renderer::stencilMask(0xFFFFFFFF);
 
@@ -1801,7 +1796,7 @@ class epriv::RenderManager::impl final{
             sendTextureSafe("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
             sendTextureSafe("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 1);
 
-            GLEnable(GLState::BLEND);
+            GLEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             //sendUniform4Safe("TransparencyMaskColor", viewport.getTransparencyMaskColor());
@@ -1811,7 +1806,7 @@ class epriv::RenderManager::impl final{
 
             _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
 
-            GLDisable(GLState::BLEND);
+            GLDisable(GL_BLEND);
         }
         void _renderFullscreenQuad(const uint& width, const uint& height,uint startX,uint startY){
             const float w2 = static_cast<float>(width) * 0.5f;
@@ -1894,11 +1889,11 @@ class epriv::RenderManager::impl final{
                 #pragma endregion
             }
             _passGeometry(gbuffer, viewport, camera);
-            GLDisable(GLState::DEPTH_TEST);
-            GLDisable(GLState::DEPTH_MASK);
+            GLDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
 
             #pragma region GodRays
-            Renderer::GLDisable(GLState::BLEND_0);
+            Renderer::GLDisablei(GL_BLEND, 0);
             gbuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
             Settings::clear(true,false,false); //this is needed, clear color should be (0,0,0,0)
             auto& godRaysPlatform = epriv::Postprocess_GodRays::GodRays;
@@ -1950,11 +1945,11 @@ class epriv::RenderManager::impl final{
             }
             #pragma endregion
 
-            GLDisable(GLState::BLEND_0);
+            GLDisablei(GL_BLEND, 0);
 
             _passStencil(gbuffer, dimensions.z, dimensions.w); //confirmed, stencil rejection does help
             
-            GLEnable(GLState::BLEND_0);
+            GLEnablei(GL_BLEND, 0);
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_ONE, GL_ONE);
             
@@ -1965,15 +1960,15 @@ class epriv::RenderManager::impl final{
                 _passLighting(gbuffer,viewport, camera, dimensions.z, dimensions.w, mainRenderFunc);
             }
             
-            GLDisable(GLState::BLEND_0);
-            GLDisable(GLState::STENCIL_TEST);
+            GLDisablei(GL_BLEND, 0);
+            GLDisable(GL_STENCIL_TEST);
 
 
-            GLEnable(GLState::DEPTH_TEST);
-            GLEnable(GLState::DEPTH_MASK);
+            GLEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_TRUE);
             _passForwardRendering(gbuffer, viewport, camera);
-            GLDisable(GLState::DEPTH_TEST);
-            GLDisable(GLState::DEPTH_MASK);
+            GLDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
             
             #pragma region HDR and GodRays addition
             gbuffer.bindFramebuffers(GBufferType::Misc);
@@ -2058,9 +2053,9 @@ class epriv::RenderManager::impl final{
             
             
             #pragma region RenderPhysics
-            GLEnable(GLState::BLEND_0);
-            GLDisable(GLState::DEPTH_TEST);
-            GLDisable(GLState::DEPTH_MASK);
+            GLEnablei(GL_BLEND, 0);
+            GLDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
             if(mainRenderFunc){
                 if(draw_physics_debug  &&  &camera == scene.getActiveCamera()){
                     m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics]->bind();
@@ -2071,20 +2066,20 @@ class epriv::RenderManager::impl final{
             
          
             #pragma region 2DAPI
-            GLEnable(GLState::DEPTH_TEST);
-            GLEnable(GLState::DEPTH_MASK);
+            GLEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_TRUE);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             if(mainRenderFunc){
                 if(viewport.isUsing2DAPI()){
                     Settings::clear(false,true,false); //clear depth only
                     m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI]->bind();
                     sendUniformMatrix4("VP", m_2DProjectionMatrix);
-                    GLEnable(GLState::SCISSOR_TEST);
+                    GLEnable(GL_SCISSOR_TEST);
 
                     for (auto& command : m_2DAPICommands) {
                         command();
                     }
-                    GLDisable(GLState::SCISSOR_TEST);
+                    GLDisable(GL_SCISSOR_TEST);
                 }
             }
             #pragma endregion
@@ -2302,6 +2297,23 @@ void Renderer::genAndBindVAO(GLuint& _vaoObject){
     glGenVertexArrays(1, &_vaoObject);
     bindVAO(_vaoObject);
 }
+const bool Renderer::GLEnable(const GLenum& capability) {
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glEnable(capability);
+}
+const bool Renderer::GLDisable(const GLenum& capability) {
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glDisable(capability);
+}
+const bool Renderer::GLEnablei(const GLenum& capability, const GLuint& index) {
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glEnablei(capability, index);
+}
+const bool Renderer::GLDisablei(const GLenum& capability, const GLuint& index) {
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glDisablei(capability, index);
+}
+
 void Renderer::sendTexture(const char* location, const Texture& texture,const int& slot){
     auto& i = *renderManager;
     i.OpenGLStateMachine.GL_glActiveTexture(slot);

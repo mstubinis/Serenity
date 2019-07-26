@@ -262,7 +262,9 @@
     <ClInclude Include="Engine\src\core\engine\networking\SocketInterface.h" />
     <ClInclude Include="Engine\src\core\engine\networking\SocketTCP.h" />
     <ClInclude Include="Engine\src\core\engine\networking\SocketUDP.h" />
+    <ClInclude Include="Engine\src\core\engine\physics\Collision.h" />
     <ClInclude Include="Engine\src\core\engine\physics\Engine_Physics.h" />
+    <ClInclude Include="Engine\src\core\engine\physics\PhysicsEnums.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\Engine_Renderer.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\FramebufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\FullscreenItems.h" />
@@ -357,6 +359,7 @@
     <ClCompile Include="Engine\src\core\engine\networking\ListenerTCP.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketTCP.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketUDP.cpp" />
+    <ClCompile Include="Engine\src\core\engine\physics\Collision.cpp" />
     <ClCompile Include="Engine\src\core\engine\physics\Engine_Physics.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\Engine_Renderer.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\FramebufferObject.cpp" />
