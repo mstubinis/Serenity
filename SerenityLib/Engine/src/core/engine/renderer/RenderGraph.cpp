@@ -1,7 +1,7 @@
 #include <core/engine/renderer/RenderGraph.h>
 #include <core/ShaderProgram.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 #include <core/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 

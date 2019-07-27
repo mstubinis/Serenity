@@ -17,7 +17,7 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/ModelInstance.h>
 #include <core/engine/scene/Skybox.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 #include <ecs/ComponentBody.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
 
@@ -1404,7 +1404,7 @@ class epriv::RenderManager::impl final{
             for (auto& character : text) {
                 if (character == '\n') {
                     lines.push_back(line_accumulator);
-                    lines_sizes.push_back(x);
+                    lines_sizes.push_back(static_cast<unsigned short>(x));
                     line_accumulator = "";
                     x = 0.0f;
                     continue;
@@ -1416,7 +1416,7 @@ class epriv::RenderManager::impl final{
             }
             if (lines.size() == 0) {
                 lines.push_back(line_accumulator);
-                lines_sizes.push_back(x);
+                lines_sizes.push_back(static_cast<unsigned short>(x));
             }
 
             x = 0.0f;

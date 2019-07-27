@@ -26,7 +26,7 @@
 #include <ecs/Components.h>
 #include <core/ModelInstance.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 
 #include "core/Terrain.h"
 #include <SFML/Graphics.hpp>

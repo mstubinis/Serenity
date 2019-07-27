@@ -9,7 +9,7 @@
 #include <core/ShaderProgram.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/ModelInstance.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/textures/Texture.h>

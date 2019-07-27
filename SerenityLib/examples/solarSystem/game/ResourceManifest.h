@@ -19,12 +19,14 @@ struct ResourceManifest{
 
 	/*extras*/
 	static Handle NovaMesh;
+    static Handle MirandaMesh;
 	static Handle VenerexMesh;
 	static Handle IntrepidMesh;
     static Handle ExcelsiorMesh;
     static Handle LeviathanMesh;
 
 	static Handle NovaMaterial;
+    static Handle MirandaMaterial;
 	static Handle VenerexMaterial;
 	static Handle IntrepidMaterial;
     static Handle ExcelsiorMaterial;

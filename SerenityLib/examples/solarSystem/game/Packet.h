@@ -14,6 +14,7 @@
 
 class  Ship;
 class  Map;
+class  Anchor;
 struct PacketType {enum Type {
     Undefined,
     Server_Shutdown,
@@ -74,7 +75,7 @@ struct PacketPhysicsUpdate: public Packet {
     uint16_t         lx, ly, lz;     //linear velocity
     uint16_t         ax, ay, az;     //angular velocity
     PacketPhysicsUpdate();
-    PacketPhysicsUpdate(Ship& ship, Map& map);
+    PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* closestAnchor, const std::vector<std::string>& anchorList);
     bool validate(sf::Packet& sfPacket) {
         return (sfPacket >> PacketType >> data >> px >> py >> pz >> wx >> wy >> wz >> qx >> qy >> qz >> qw >> lx >> ly >> lz >> ax >> ay >> az);
     }

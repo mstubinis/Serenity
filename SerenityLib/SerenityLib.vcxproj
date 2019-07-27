@@ -242,6 +242,10 @@
     <ClInclude Include="Engine\src\core\engine\lights\SunLight.h" />
     <ClInclude Include="Engine\src\core\engine\lua\LuaEngine.h" />
     <ClInclude Include="Engine\src\core\engine\lua\LuaScript.h" />
+    <ClInclude Include="Engine\src\core\engine\materials\Material.h" />
+    <ClInclude Include="Engine\src\core\engine\materials\MaterialComponent.h" />
+    <ClInclude Include="Engine\src\core\engine\materials\MaterialEnums.h" />
+    <ClInclude Include="Engine\src\core\engine\materials\MaterialLayer.h" />
     <ClInclude Include="Engine\src\core\engine\math\Engine_Math.h" />
     <ClInclude Include="Engine\src\core\engine\math\SimplexNoise.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h" />
@@ -305,7 +309,6 @@
     <ClInclude Include="Engine\src\core\engine\threading\Engine_ThreadManager.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Utils.h" />
-    <ClInclude Include="Engine\src\core\Material.h" />
     <ClInclude Include="Engine\src\core\ModelInstance.h" />
     <ClInclude Include="Engine\src\core\ShaderProgram.h" />
     <ClInclude Include="Engine\src\core\Terrain.h" />
@@ -344,6 +347,9 @@
     <ClCompile Include="Engine\src\core\engine\lights\SunLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lua\LuaEngine.cpp" />
     <ClCompile Include="Engine\src\core\engine\lua\LuaScript.cpp" />
+    <ClCompile Include="Engine\src\core\engine\materials\Material.cpp" />
+    <ClCompile Include="Engine\src\core\engine\materials\MaterialComponent.cpp" />
+    <ClCompile Include="Engine\src\core\engine\materials\MaterialLayer.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\Engine_Math.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\SimplexNoise.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
@@ -395,7 +401,6 @@
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp" />
     <ClCompile Include="Engine\src\core\engine\utils\Engine_Debugging.cpp" />
-    <ClCompile Include="Engine\src\core\Material.cpp" />
     <ClCompile Include="Engine\src\core\ModelInstance.cpp" />
     <ClCompile Include="Engine\src\core\ShaderProgram.cpp" />
     <ClCompile Include="Engine\src\core\Terrain.cpp" />

@@ -58,10 +58,10 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
 
 
 PacketPhysicsUpdate::PacketPhysicsUpdate():Packet() {
-    px = py = pz = qx = qy = qz = lx = ly = lz = ax = ay = az = 0;
+    px = py = pz = qx = qy = qz = lx = ly = lz = ax = ay = az = wx = wy = wz = 0;
     qw = 1.0;
 }
-PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map) :Packet() {
+PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnchor, const vector<string>& anchorList) :Packet() {
     auto& ent = ship.entity();
     EntityDataRequest request(ent);
     const auto pbody = ent.getComponent<ComponentBody>(request);
@@ -86,12 +86,10 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map) :Packet() {
         wx = warp.x;
         wy = warp.y;
         wz = warp.z;
-        const auto& list = map.getClosestAnchor();
-        data += "," + to_string(list.size());
-        Anchor* finalAnchor = map.getRootAnchor();
-        for (auto& closest : list) {
+        
+        data += "," + to_string(anchorList.size());
+        for (auto& closest : anchorList) {
             data += "," + closest;
-            finalAnchor = finalAnchor->getChildren().at(closest);
         }
         const auto& offset = finalAnchor->getPosition();
         px -= offset.x;

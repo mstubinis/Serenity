@@ -4,7 +4,7 @@
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/ModelInstance.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/fonts/Font.h>

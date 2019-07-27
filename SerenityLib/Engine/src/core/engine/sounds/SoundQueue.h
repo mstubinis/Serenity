@@ -5,8 +5,8 @@
 #include <core/engine/utils/Utils.h>
 #include <queue>
 
-class Handle;
-class SoundBaseClass;
+struct Handle;
+class  SoundBaseClass;
 namespace Engine {
     namespace epriv {
         class SoundManager;

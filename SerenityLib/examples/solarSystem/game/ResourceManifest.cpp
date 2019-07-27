@@ -2,7 +2,7 @@
 
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 #include <core/engine/textures/Texture.h>
 
 using namespace Engine;
@@ -17,12 +17,14 @@ Handle ResourceManifest::RingMesh;
 
 /*extras*/
 Handle ResourceManifest::NovaMesh;
+Handle ResourceManifest::MirandaMesh;
 Handle ResourceManifest::VenerexMesh;
 Handle ResourceManifest::IntrepidMesh;
 Handle ResourceManifest::ExcelsiorMesh;
 Handle ResourceManifest::LeviathanMesh;
 
 Handle ResourceManifest::NovaMaterial;
+Handle ResourceManifest::MirandaMaterial;
 Handle ResourceManifest::VenerexMaterial;
 Handle ResourceManifest::IntrepidMaterial;
 Handle ResourceManifest::ExcelsiorMaterial;
@@ -68,6 +70,7 @@ void ResourceManifest::init(){
 
 	//extras
 	NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc").at(0);
+    MirandaMesh = Resources::loadMeshAsync(BasePath + "data/Models/miranda.objcc").at(0);
 	//VenerexMesh = Resources::loadMeshAsync(BasePath + "data/Models/venerex.objcc").at(0);
 	//IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.objcc").at(0);
     ExcelsiorMesh = Resources::loadMeshAsync(BasePath + "data/Models/excelsior.objcc").at(0);
@@ -81,6 +84,7 @@ void ResourceManifest::init(){
 
 	//extras
 	NovaMaterial = Resources::addMaterial("Nova", BasePath + "data/Textures/nova.dds", BasePath + "data/Textures/nova_Normal.dds", BasePath + "data/Textures/nova_Glow.dds");
+    MirandaMaterial = Resources::addMaterial("Miranda", BasePath + "data/Textures/miranda.dds", BasePath + "data/Textures/miranda_Normal.dds", BasePath + "data/Textures/miranda_Glow.dds", BasePath + "data/Textures/miranda_Specular.dds");
 	//VenerexMaterial = Resources::addMaterial("Venerex", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
 	//IntrepidMaterial = Resources::addMaterial("Intrepid", BasePath + "data/Textures/intrepid.dds", BasePath + "data/Textures/intrepid_Normal.png", BasePath + "data/Textures/intrepid_Glow.png");
     ExcelsiorMaterial = Resources::addMaterial("Excelsior", BasePath + "data/Textures/excelsior.dds", BasePath + "data/Textures/excelsior_Normal.dds", BasePath + "data/Textures/excelsior_Glow.dds", BasePath + "data/Textures/excelsior_Specular.dds");
@@ -115,4 +119,5 @@ void ResourceManifest::init(){
     ResourceManifest::Ships["Defiant"]     = boost::tuple<Handle, Handle>(DefiantMesh,     DefiantMaterial);
     ResourceManifest::Ships["Nova"]        = boost::tuple<Handle, Handle>(NovaMesh,        NovaMaterial);
     ResourceManifest::Ships["Excelsior"]   = boost::tuple<Handle, Handle>(ExcelsiorMesh,   ExcelsiorMaterial);
+    ResourceManifest::Ships["Miranda"]     = boost::tuple<Handle, Handle>(MirandaMesh,     MirandaMaterial);
 }

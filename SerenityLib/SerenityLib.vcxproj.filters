@@ -160,6 +160,12 @@
     <Filter Include="Header Files\Engine\Core\Utils">
       <UniqueIdentifier>{9aaf42ce-3977-4276-a952-6380cb19220a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Materials">
+      <UniqueIdentifier>{d1737e78-3b87-4bf1-bef5-0f202a158950}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Materials">
+      <UniqueIdentifier>{976b87db-df54-4718-a189-44530fed519b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -333,9 +339,6 @@
     <ClInclude Include="Engine\src\core\Constraint.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\Material.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\ShaderProgram.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
@@ -477,6 +480,18 @@
     <ClInclude Include="Engine\src\core\engine\utils\Utils.h">
       <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\materials\Material.h">
+      <Filter>Header Files\Engine\Core\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\materials\MaterialEnums.h">
+      <Filter>Header Files\Engine\Core\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\materials\MaterialComponent.h">
+      <Filter>Header Files\Engine\Core\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\materials\MaterialLayer.h">
+      <Filter>Header Files\Engine\Core\Materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -593,9 +608,6 @@
     <ClCompile Include="Engine\src\core\Constraint.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\Material.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\ShaderProgram.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
@@ -603,9 +615,6 @@
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_Debugging.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp">
@@ -724,6 +733,15 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\utils\Engine_Debugging.cpp">
       <Filter>Source Files\Engine\Core\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\materials\Material.cpp">
+      <Filter>Source Files\Engine\Core\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\materials\MaterialComponent.cpp">
+      <Filter>Source Files\Engine\Core\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\materials\MaterialLayer.cpp">
+      <Filter>Source Files\Engine\Core\Materials</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

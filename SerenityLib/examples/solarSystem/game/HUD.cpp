@@ -17,7 +17,7 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Camera.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 
 
 #include <glm/vec4.hpp>
@@ -25,7 +25,7 @@
 #include "gui/Button.h"
 #include "gui/TextBox.h"
 #include "gui/ScrollWindow.h"
-#include "gui/Text.h";
+#include "gui/Text.h"
 #include "gui/specifics/ServerLobbyChatWindow.h"
 #include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
 #include "gui/specifics/ServerLobbyShipSelectorWindow.h"

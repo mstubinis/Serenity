@@ -78,7 +78,7 @@ class Engine_Window::impl final{
 
             m_Style = sf::Style::Default;
             if(m_Width == 0 || m_Height == 0){
-                m_Style = sf::Style::Fullscreen;
+                m_Style = sf::Style::None;
                 m_VideoMode = sf::VideoMode::getDesktopMode();
                 m_Width = m_VideoMode.width;
                 m_Height = m_VideoMode.height;
@@ -89,17 +89,22 @@ class Engine_Window::impl final{
 
             return m_SFMLWindow.getSettings();
         }
-        void _setFullScreen(const bool& fullscreen){
-            if(m_Fullscreen == fullscreen) return;
-            if(m_Style == sf::Style::Fullscreen && fullscreen) return;
-            if(m_Style != sf::Style::Fullscreen && !fullscreen) return;
-            if(!m_SFMLWindow.hasFocus()) return;
+        void _setFullScreen(const bool& fullscreen, const bool isWindowedMode){
+            if(m_Fullscreen == fullscreen) 
+                return;
+            if((isWindowedMode && m_Style == sf::Style::None) && fullscreen)
+                return;
+            if ((!isWindowedMode && m_Style == sf::Style::Fullscreen) && fullscreen)
+                return;
+            if ((m_Style != sf::Style::Fullscreen && m_Style != sf::Style::None) && !fullscreen)
+                return;
+            if(!m_SFMLWindow.hasFocus()) 
+                return;
 
             auto validModes = sf::VideoMode::getFullscreenModes();
-            if (validModes.size() > 0) m_VideoMode = validModes[0];
-            else                       m_VideoMode = sf::VideoMode::getDesktopMode();
+            validModes.size() > 0 ? m_VideoMode = validModes[0] : m_VideoMode = sf::VideoMode::getDesktopMode();
 
-            m_Style = sf::Style::Fullscreen;
+            isWindowedMode ? m_Style = sf::Style::None : m_Style = sf::Style::Fullscreen;
             if(!fullscreen){
                 m_Style = sf::Style::Default;
                 m_VideoMode.width = m_Width;
@@ -245,8 +250,8 @@ void Engine_Window::setSize(const uint& w, const uint& h){
 void Engine_Window::setStyle(const uint& style){
     m_i->_setStyle(style);
 }
-void Engine_Window::setFullScreen(const bool fullscreen){
-    m_i->_setFullScreen(fullscreen); 
+void Engine_Window::setFullScreen(const bool fullscreen, const bool isWindowedMode){
+    m_i->_setFullScreen(fullscreen, isWindowedMode);
 }
 void Engine_Window::keepMouseInWindow(const bool keep){
     m_i->_keepMouseInWindow(keep); 

@@ -5,7 +5,7 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/mesh/Skeleton.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
 #include <core/ShaderProgram.h>

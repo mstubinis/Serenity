@@ -15,7 +15,7 @@
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/lights/SunLight.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 #include <ecs/Components.h>
 
 using namespace std;
@@ -161,6 +161,9 @@ void Core::update(const double& dt) {
     }
     if (Engine::isKeyDownOnce(KeyboardKey::F6)) {
         Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen());
+    }
+    if (Engine::isKeyDownOnce(KeyboardKey::F7)) {
+        Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen(), true);
     }
 
     m_HUD->update(dt);

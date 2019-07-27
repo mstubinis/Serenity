@@ -151,7 +151,13 @@ void epriv::ClientInternalPublicInterface::update(Client* _client) {
             //keep pinging the server, sending your ship physics info
             auto& map = *static_cast<Map*>(Resources::getCurrentScene());
             auto& playerShip = *map.getPlayer();
-            PacketPhysicsUpdate p(playerShip, map);
+
+            Anchor* finalAnchor = map.getRootAnchor();
+            const auto& list = map.getClosestAnchor();
+            for (auto& closest : list) {
+                finalAnchor = finalAnchor->getChildren().at(closest);
+            }
+            PacketPhysicsUpdate p(playerShip, map, finalAnchor, list);
             p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
             client.send(p);
             client.m_PingTime = 0.0;

@@ -55,7 +55,7 @@ class Engine_Window final{
         bool isOpen();
         bool isFullscreen();
         bool isActive();
-        void setFullScreen(const bool);
+        void setFullScreen(const bool isFullscreen, const bool isWindowedMode = false);
         void setStyle(const uint& style);
         void display();
 
