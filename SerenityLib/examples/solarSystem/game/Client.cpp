@@ -12,6 +12,7 @@
 #include "gui/specifics/ServerHostingMapSelectorWindow.h"
 
 #include "map/Map.h"
+#include "map/Anchor.h"
 #include "GameSkybox.h"
 #include "Ship.h"
 #include <core/engine/resources/Engine_Resources.h>
@@ -24,6 +25,8 @@
 
 using namespace std;
 using namespace Engine;
+
+const float PHYSICS_PACKET_TIMER_LIMIT = 0.13;
 
 struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
     ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(button->getUserPointer());
@@ -144,17 +147,12 @@ void epriv::ClientInternalPublicInterface::update(Client* _client) {
     client.m_Timeout += dt;
     if (client.m_Core.gameState() == GameState::Game) {
         client.m_PingTime += dt;
-        if (client.m_PingTime > 0.2) {
+        if (client.m_PingTime > PHYSICS_PACKET_TIMER_LIMIT) {
             //keep pinging the server, sending your ship physics info
             auto& map = *static_cast<Map*>(Resources::getCurrentScene());
             auto& playerShip = *map.getPlayer();
             PacketPhysicsUpdate p(playerShip, map);
             p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
-            if (!p.data.empty()) {
-                p.data = client.m_username + "," + p.data;
-            }else{
-                p.data = client.m_username;
-            }
             client.send(p);
             client.m_PingTime = 0.0;
         }
@@ -164,7 +162,7 @@ void epriv::ClientInternalPublicInterface::update(Client* _client) {
 void Client::onReceive() {
     sf::Packet sf_packet;
     const auto& status = receive(sf_packet);
-
+    const auto& dt = Resources::dt();
     if (status == sf::Socket::Status::Done) {
         Packet* pp = Packet::getPacket(sf_packet);
         auto& p = *pp;
@@ -180,11 +178,17 @@ void Client::onReceive() {
                         auto& map = *static_cast<Map*>(Resources::getCurrentScene());
 
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                        auto& playername = info[0];
-                        auto& shipclass = info[1];
+                        auto& playername = info[1];
+                        auto& shipclass = info[0];
 
 
-                        const auto& offset = map.getAnchors().at(info[3])->entity().getComponent<ComponentBody>()->position();
+                        const unsigned int& size = stoi(info[2]);
+                        Anchor* closest = map.getRootAnchor();
+                        for (unsigned int i = 3; i < 3 + size; ++i) {
+                            closest = closest->getChildren().at(info[i]);
+                        }
+
+                        const auto& offset = closest->getPosition();
                         const float& x = pI.px + offset.x;
                         const float& y = pI.py + offset.y;
                         const float& z = pI.pz + offset.z;
@@ -203,10 +207,14 @@ void Client::onReceive() {
                         btTransform centerOfMass;
                         const btVector3 pos(x, y, z);
 
-                        float qx, qy, qz, qw, ax, ay, az, lx, ly, lz;
+                        float qx, qy, qz, qw, ax, ay, az, lx, ly, lz, wx, wy, wz;
+
+                        wx = pI.wx;
+                        wy = pI.wy;
+                        wz = pI.wz;
 
                         Math::Float32From16(&qx, pI.qx);  Math::Float32From16(&qy, pI.qy);  Math::Float32From16(&qz, pI.qz);  Math::Float32From16(&qw, pI.qw);
-
+                        Math::Float32From16(&lx, pI.lx);  Math::Float32From16(&ly, pI.ly);  Math::Float32From16(&lz, pI.lz);
                         Math::Float32From16(&ax, pI.ax);  Math::Float32From16(&ay, pI.ay);  Math::Float32From16(&az, pI.az);
 
                         const btQuaternion rot(qx, qy, qz, qw);
@@ -218,9 +226,7 @@ void Client::onReceive() {
                         body.clearAllForces();
                         body.setAngularVelocity(ax, ay, az, false);
 
-                        Math::Float32From16(&lx, pI.lx);  Math::Float32From16(&ly, pI.ly);  Math::Float32From16(&lz, pI.lz);
-
-                        body.setLinearVelocity(lx, ly, lz, false);
+                        body.setLinearVelocity(lx - (wx * 1.33f), ly - (wy * 1.33f), lz - (wz * 1.33f), false);
                     }
                     break;
                 }

@@ -1,4 +1,5 @@
 #include "Map.h"
+#include "Anchor.h"
 #include "../ResourceManifest.h"
 #include "../Planet.h"
 #include "../GameCamera.h"
@@ -41,6 +42,7 @@ Map::Map(const string& n, const string& file):Scene(n){
     m_Objects.push_back(playerCamera);
     m_Filename = file;
     m_SkyboxFile = "";
+    m_RootAnchor = std::tuple<std::string,Anchor*>("",nullptr);
     //m_oldClientPos = m_oldAnchorPos = glm::vec3(0.0f);
     if(file != "NULL")
         Map::loadFromFile(file);
@@ -80,31 +82,40 @@ vector<string> Map::allowedShips() {
     }
     return vector<string>();
 }
-void Map::internalCreateAnchor(const string& parentName, const float& x, const float& y, const float& z) {
-    EntityWrapper* anchor = new EntityWrapper(*this);
-    auto& anchor_body = *anchor->entity().addComponent<ComponentBody>();
-    anchor_body.setScale(0.00005f);
-    anchor_body.setPosition(x, y, z);
-
-    if (!parentName.empty() && m_Planets.count(parentName)) {
-        Planet* parent = m_Planets.at(parentName);
-        anchor_body.setPosition(anchor_body.position() + parent->getPosition());
-    }
+Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const float& x, const float& y, const float& z) {
+    Anchor* anchor = new Anchor(*this, x, y, z);
     m_Objects.push_back(anchor);
-    const string key = parentName + " Anchor";
-    if (!m_AnchorPoints.count(key)) {
-        m_AnchorPoints.emplace(key, anchor);
+    const string key = thisName + " Anchor";
+    if (parentAnchor.empty()) {
+        if (std::get<0>(m_RootAnchor).empty()) {
+            m_RootAnchor = std::tuple<std::string, Anchor*>(key, anchor);
+        }
+    }else{
+        Anchor* parent = loadedAnchors.at(parentAnchor + " Anchor");
+        if (!parent->m_Children.count(key)) {
+            parent->m_Children.emplace(key, anchor);
+        }
     }
+    if (!loadedAnchors.count(key)) {
+        loadedAnchors.emplace(key, anchor);
+    }
+    return anchor;
+}
+Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const glm::vec3& position) {
+    return internalCreateAnchor(parentAnchor, thisName, loadedAnchors, position.x, position.y, position.z);
 }
 void Map::loadFromFile(const string& filename) {
     uint                                             count = 0;
     boost_io::stream<boost_io::mapped_file_source>   str(filename);
     unordered_map<string, vector<RingInfo>>          planetRings;
     unordered_map<string, Handle>                    loadedMaterials;
+    unordered_map<string, Anchor*>                   loadedAnchors;
 
     float gi_diffuse  = 1.0f;
     float gi_specular = 1.0f;
     float gi_global   = 1.0f;
+
+    internalCreateAnchor("", "Root", loadedAnchors, 0.0f, 0.0f, 0.0f);
 
     for (string line; getline(str, line, '\n');) {
         line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
@@ -148,7 +159,8 @@ void Map::loadFromFile(const string& filename) {
                 string LAGRANGE_TYPE;
                 string LAGRANGE_PLANET_1, LAGRANGE_PLANET_2;
                 string PARENT = "";
-                float R, G, B, R1, G1, B1, R2, G2, B2;
+                float R, G, B, R1, G1, B1, R2, G2, B2, qx, qy, qz;
+                qx = qy = qz = 0.0f;
                 float ATMOSPHERE_HEIGHT = 0.0f;
                 string TYPE;
                 string TEXTURE = ResourceManifest::BasePath + "data/Textures/Planets/";
@@ -200,6 +212,9 @@ void Map::loadFromFile(const string& filename) {
                     else if (key == "x")                X = stoull(value);
                     else if (key == "y")                Y = stoull(value);
                     else if (key == "z")                Z = stoull(value);
+                    else if (key == "qx")               qx = stof(value);
+                    else if (key == "qy")               qy = stof(value);
+                    else if (key == "qz")               qz = stof(value);
                     else if (key == "a")                A = stof(value);
 
                     else if (key == "parent")           PARENT = value;
@@ -244,7 +259,7 @@ void Map::loadFromFile(const string& filename) {
                         star->setPosition(m_Planets.at(PARENT)->getPosition() + star->getPosition());
                     }
                     m_Planets.emplace(NAME, star);
-                    internalCreateAnchor(NAME);
+                    internalCreateAnchor("Root", NAME, loadedAnchors, star->getPosition());
                 }else if (line[0] == 'P') {//Planet
                     PlanetType::Type PLANET_TYPE;
                     if      (TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
@@ -264,7 +279,7 @@ void Map::loadFromFile(const string& filename) {
                         }
                     }
                     m_Planets.emplace(NAME, planetoid);
-                    internalCreateAnchor(NAME);
+                    internalCreateAnchor(PARENT, NAME, loadedAnchors, planetoid->getPosition());
                 }else if (line[0] == 'M') {//Moon
                     PlanetType::Type PLANET_TYPE;
                     if      (TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
@@ -284,10 +299,10 @@ void Map::loadFromFile(const string& filename) {
                         }
                     }
                     m_Planets.emplace(NAME, planetoid);
-                    internalCreateAnchor(NAME);
+                    internalCreateAnchor(PARENT, NAME, loadedAnchors, planetoid->getPosition());
                 }else if (line[0] == '?') {//Anchor (Spawn) point
                     const auto& parentPos = m_Planets.at(PARENT)->getPosition();
-                    internalCreateAnchor("Spawn", parentPos.x + x, parentPos.y + y, parentPos.z + z);
+                    internalCreateAnchor(PARENT, "Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
                 }else if (line[0] == 'R') {//Rings
                     if (!PARENT.empty()) {
                         if (!planetRings.count(PARENT)) {
@@ -307,23 +322,38 @@ void Map::loadFromFile(const string& filename) {
         new Ring(rings.second, m_Planets.at(rings.first));
     }
 
-    centerSceneToObject(m_AnchorPoints.at("Spawn Anchor")->entity());
+    centerSceneToObject(loadedAnchors.at("Spawn Anchor")->entity());
+
+    std::get<1>(m_RootAnchor)->finalize_all();
 
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
 }
-//const glm::vec3 Map::getAnchor() {
-//    auto& anchor_body = *m_AnchorPoints.at("Spawn")->entity().getComponent<ComponentBody>();
-//    return anchor_body.position();
-//}
-const string Map::getClosestAnchor() {
+Anchor* Map::getRootAnchor() {
+    return std::get<1>(m_RootAnchor);
+}
+const vector<string> Map::getClosestAnchor(Anchor* currentAnchor) {
+    vector<string> res;
+    if (!currentAnchor) {
+        currentAnchor = std::get<1>(m_RootAnchor);
+    }
     float minDist = -1.0f;
-    string res = m_AnchorPoints.begin()._Ptr->_Myval.first;
-    for (auto anchor : m_AnchorPoints) {
-        const float dist = glm::distance(m_Player->entity().getComponent<ComponentBody>()->position(), anchor.second->entity().getComponent<ComponentBody>()->position());
-        if (minDist < 0 || dist < minDist) {
-            minDist = dist;
-            res = anchor.first;
+    while (currentAnchor->m_Children.size() > 0) {
+        string least = currentAnchor->m_Children.begin()._Ptr->_Myval.first;
+        bool hasChanged = false;
+        for (auto& child : currentAnchor->m_Children) {
+            auto childPos = child.second->getPosition();
+            auto playerPos = m_Player->getComponent<ComponentBody>()->position();
+            const float dist = glm::distance(playerPos, childPos);
+            if (minDist < 0 || dist < minDist) {
+                minDist = dist;
+                least = child.first;
+                currentAnchor = child.second;
+                hasChanged = true;
+            }
         }
+        if (!hasChanged)
+            break;
+        res.push_back(least);
     }
     return res;
 }

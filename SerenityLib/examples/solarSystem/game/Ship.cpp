@@ -188,9 +188,9 @@ void ShipSystemWarpDrive::update(const double& dt){
                 }
                 if(m_Ship->IsWarping()){
                     if(Engine::isKeyDown(KeyboardKey::W)){
-                        m_Ship->translateWarp(0.1f,dt);
+                        m_Ship->translateWarp(0.1f, dt);
                     }else if(Engine::isKeyDown(KeyboardKey::S)){
-                        m_Ship->translateWarp(-0.1f,dt);
+                        m_Ship->translateWarp(-0.1f, dt);
                     }
                 }
             }
@@ -222,17 +222,15 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
 
         if (!Engine::paused()) {
             if (ship.m_IsWarping && ship.m_WarpFactor > 0) {
-                auto& body = *ship.m_Entity.getComponent<ComponentBody>();
-                const float& speed = (ship.m_WarpFactor * 1.0f / 0.46f) * 2.0f;
-                const glm::vec3& s = (body.forward() * glm::pow(speed, 15.0f)) / glm::log2(body.mass() + 0.5f);
+                auto& speed = ship.getWarpSpeedVector3();
                 for (auto& pod : epriv::InternalScenePublicInterface::GetEntities(currentScene)) {
                     Entity e = currentScene.getEntity(pod);
                     const EntityDataRequest dataRequest(e);
                     auto* cam = e.getComponent<ComponentCamera>(dataRequest);
                     //TODO: parent->child relationship
                     if (e != ship.m_Entity && !cam) {
-                        auto& ebody = *e.getComponent<ComponentBody>(dataRequest);
-                        ebody.setPosition(ebody.position() + (s * static_cast<float>(dt)));
+                        auto& otherBody = *e.getComponent<ComponentBody>(dataRequest);
+                        otherBody.setPosition(otherBody.position() + (speed * static_cast<float>(dt)));
                     }
                 }
             }
@@ -327,6 +325,15 @@ Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, cons
 Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
+const glm::vec3& Ship::getWarpSpeedVector3() {
+    if (m_IsWarping && m_WarpFactor > 0) {
+        auto& body = *getComponent<ComponentBody>();
+        const float& speed = (m_WarpFactor * 1.0f / 0.46f) * 2.0f;
+        return (body.forward() * glm::pow(speed, 15.0f)) / glm::log2(body.mass() + 0.5f);
+    }
+    return glm::vec3(0.0f);
+}
+
 void Ship::setModel(Handle& modelHandle) {
     auto& rigidBodyComponent = *getComponent<ComponentBody>();
     auto& modelComponent     = *getComponent<ComponentModel>();

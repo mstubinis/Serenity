@@ -40,7 +40,7 @@ struct PlanetLogicFunctor final {void operator()(ComponentLogic& _component, con
         planet.m_Entity.getComponent<ComponentBody>()->rotate(0.0f, glm::radians(planet.m_RotationInfo->speed * static_cast<float>(dt)), 0.0f);
     }
     if (planet.m_OrbitInfo) {
-        //planet.m_OrbitInfo->setOrbitalPosition(((1.0f/(planet.m_OrbitInfo->info.y*86400.0f))*dt)*6.283188f,this);
+        //planet.m_OrbitInfo->setOrbitalPosition(((1.0f/(planet.m_OrbitInfo->info.y*86400.0f))*dt)*6.283188f, planet);
     }
 }};
 
@@ -448,7 +448,7 @@ void Ring::_makeRingImage(const vector<RingInfo>& rings){
 			static_cast<sf::Uint8>(ringInfo.color.r),
 			static_cast<sf::Uint8>(ringInfo.color.g),
 			static_cast<sf::Uint8>(ringInfo.color.b),
-			255
+            static_cast<sf::Uint8>(255)
 		);
 
         uint alphaChange = ringInfo.size - ringInfo.alphaBreakpoint;
@@ -458,7 +458,7 @@ void Ring::_makeRingImage(const vector<RingInfo>& rings){
                 paint_color.a = static_cast<sf::Uint8>(((static_cast<float>(alphaChange - alpha_i) / static_cast<float>(alphaChange))) * 255.0f);
                 ++alpha_i;
 			}else{
-				paint_color.a = 255;
+				paint_color.a = static_cast<sf::Uint8>(255);
 			}
             int xBack  =  ringInfo.position - i;
             int xFront =  ringInfo.position + i;
@@ -469,8 +469,8 @@ void Ring::_makeRingImage(const vector<RingInfo>& rings){
                 sf::Color finalColorBack  = Math::PaintersAlgorithm(paint_color, canvas_color_back);
                 if (ringInfo.color.r < 0 && ringInfo.color.g < 0 && ringInfo.color.b < 0) {
                     //transparent color, removing the canvas color 
-                    finalColorFront = sf::Color(canvas_color_front.r, canvas_color_front.g, canvas_color_front.b, 255 - paint_color.a);
-                    finalColorBack  = sf::Color(canvas_color_back.r,  canvas_color_back.g,  canvas_color_back.b,  255 - paint_color.a);
+                    finalColorFront = sf::Color(canvas_color_front.r, canvas_color_front.g, canvas_color_front.b, static_cast<sf::Uint8>(255) - paint_color.a);
+                    finalColorBack  = sf::Color(canvas_color_back.r,  canvas_color_back.g,  canvas_color_back.b, static_cast<sf::Uint8>(255) - paint_color.a);
                 }
                 for (uint s = 0; s < ringImageY; ++s) {
                     ringImage.setPixel(xFront, s, finalColorFront);
@@ -479,6 +479,7 @@ void Ring::_makeRingImage(const vector<RingInfo>& rings){
             }
         }
     }
+    ringImage.saveToFile("test.png");
     Texture* diffuse = new Texture(ringImage,"RingDiffuse",false,ImageInternalFormat::SRGB8_ALPHA8);
     diffuse->setAnisotropicFiltering(2.0f);
     epriv::Core::m_Engine->m_ResourceManager._addTexture(diffuse);
@@ -495,9 +496,9 @@ OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float 
     info.z = glm::sqrt(_majorRadius * _majorRadius * (1.0f - (_eccentricity * _eccentricity)));
     parent = &_parent;
 }
-glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet* thisPlanet){
+glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet& thisPlanet){
     glm::vec3 offset = glm::vec3(0.0f);
-    const glm::vec3& currentPos = thisPlanet->getPosition();
+    const glm::vec3& currentPos = thisPlanet.getPosition();
     if(parent){
         const glm::vec3 parentPos = parent->getPosition();
         const float newX = parentPos.x - glm::cos(angle) * info.w;
@@ -506,11 +507,11 @@ glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet* thisPlanet){
     }
     return (currentPos + offset);
 }
-void OrbitInfo::setOrbitalPosition(float a,Planet* planet){
+void OrbitInfo::setOrbitalPosition(float a,Planet& planet){
     angle += a;
     const glm::vec3& nextPos = getOrbitalPosition(angle,planet);
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::rotate(modelMatrix,inclination,glm::vec3(0,1,0));
     modelMatrix = glm::translate(modelMatrix,nextPos);
-    planet->setPosition(modelMatrix[3][0],modelMatrix[3][1],modelMatrix[3][2]);
+    planet.setPosition(modelMatrix[3][0],modelMatrix[3][1],modelMatrix[3][2]);
 }

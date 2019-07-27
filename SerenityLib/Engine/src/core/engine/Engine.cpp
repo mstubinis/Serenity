@@ -12,9 +12,9 @@
 using namespace Engine;
 using namespace Engine::epriv;
 
-Core* Core::m_Engine = nullptr;
+EngineCore* Core::m_Engine = nullptr;
 
-Core::Core(const EngineOptions& options) :
+EngineCore::EngineCore(const EngineOptions& options) :
 m_EventManager(options.window_title, options.width, options.height),
 m_ResourceManager(options.window_title, options.width, options.height),
 m_DebugManager(options.window_title, options.width, options.height),
@@ -23,27 +23,27 @@ m_RenderManager(options.window_title, options.width, options.height),
 m_PhysicsManager(options.window_title, options.width, options.height),
 m_ThreadManager(options.window_title, options.width, options.height)
 {
-    m_Destroyed = m_Paused = false;
+    m_Misc.m_Destroyed = m_Misc.m_Paused = false;
 }
 
-Core::~Core(){
+EngineCore::~EngineCore(){
 
 }
 
 bool Engine::paused(){ 
-    return Core::m_Engine->m_Paused; 
+    return Core::m_Engine->m_Misc.m_Paused;
 }
 void Engine::pause(const bool& b){
     Engine::Physics::pause(b);
-    Core::m_Engine->m_Paused = b;
+    Core::m_Engine->m_Misc.m_Paused = b;
 }
 void Engine::unpause(){
     Engine::Physics::unpause();
-    Core::m_Engine->m_Paused = false;
+    Core::m_Engine->m_Misc.m_Paused = false;
 }
 
 void Engine::init(const EngineOptions& options) {
-    Core::m_Engine = new Core(options);
+    Core::m_Engine = new EngineCore(options);
     auto& engine = *Core::m_Engine;
 
     engine.m_ResourceManager._init(options.window_title, options.width, options.height);
@@ -360,7 +360,7 @@ void Engine::hideMouseCursor(){
     Resources::getWindow().setMouseCursorVisible(false); 
 }
 void Engine::stop(){ 
-    Core::m_Engine->m_Destroyed = true; 
+    Core::m_Engine->m_Misc.m_Destroyed = true;
 }
 void Engine::setFullScreen(const bool& b){ 
     Engine::Resources::getWindow().setFullScreen(b); 
@@ -410,7 +410,7 @@ void handleEvents(){
 }
 
 void Engine::run(){
-    while(!Core::m_Engine->m_Destroyed /*&& Resources::getWindow().isOpen()*/){
+    while(!Core::m_Engine->m_Misc.m_Destroyed /*&& Resources::getWindow().isOpen()*/){
         auto& debugMgr = Core::m_Engine->m_DebugManager;
         double dt = debugMgr.dt();
         handleEvents();

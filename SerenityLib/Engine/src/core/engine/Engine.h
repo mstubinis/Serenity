@@ -24,8 +24,8 @@ struct EngineOptions final {
     const char*                        window_title;
     EngineOptions(){
         window_title     = "Engine";
-        width            = 800;
-        height           = 600;
+        width            = 1024;
+        height           = 768;
         ssao_enabled     = true;
         hdr_enabled      = true;
         god_rays_enabled = true;
@@ -38,8 +38,14 @@ struct EngineOptions final {
 
 namespace Engine{
     namespace epriv{
-        struct Core final{
-            static Core*          m_Engine;
+        struct EngineCore final {
+
+            struct Misc final {
+                SimplexNoise      m_SimplexNoise;
+                bool              m_Paused;
+                bool              m_Destroyed;
+            };
+            Misc                  m_Misc;
 
             EventManager          m_EventManager;
             PhysicsManager        m_PhysicsManager;
@@ -48,13 +54,13 @@ namespace Engine{
             SoundManager          m_SoundManager;
             RenderManager         m_RenderManager;
             ThreadManager         m_ThreadManager;
-            SimplexNoise          m_SimplexNoise;
 
-            bool                  m_Paused;
-            bool                  m_Destroyed;
 
-            Core(const EngineOptions& options);
-            ~Core();
+            EngineCore(const EngineOptions& options);
+            ~EngineCore();
+        };
+        struct Core final{
+            static EngineCore*          m_Engine;
         };
     };
     void init(const EngineOptions& options);

@@ -5,7 +5,7 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-SimplexNoise* noise = nullptr;
+SimplexNoise noise;
 SimplexNoise::SimplexNoise(){
     m_Constants = new double[9];
     m_Constants[0] = -0.211324865405187; //STRETCH_CONSTANT_2D
@@ -122,7 +122,7 @@ SimplexNoise::SimplexNoise(){
 
     unsigned long long zero(time(0));
     internalInitFromSeed(zero);
-    noise = this;
+    //noise = *this;
 }
 SimplexNoise::~SimplexNoise(){
     delete[] m_Constants;
@@ -1899,20 +1899,20 @@ double SimplexNoise::noiseOpenSimplex4D(const double& x, const double& y, const 
 
 
 const double Noise::noiseOpenSimplex2D(const double& x, const double& y){
-    return noise->noiseOpenSimplex2D(x,y); 
+    return noise.noiseOpenSimplex2D(x,y); 
 }
 const double Noise::noiseOpenSimplex3D(const double& x, const double& y, const double& z){
-    return noise->noiseOpenSimplex3D(x,y,z); 
+    return noise.noiseOpenSimplex3D(x,y,z); 
 }
 const double Noise::noiseOpenSimplex4D(const double& x, const double& y, const double& z, const double& w){
-    return noise->noiseOpenSimplex4D(x,y,z,w); 
+    return noise.noiseOpenSimplex4D(x,y,z,w); 
 }
 const double Noise::noiseOpenSimplex2D(const double& x, const double& y, const unsigned long long& seed){
-    return noise->noiseOpenSimplex2D(x,y,seed); 
+    return noise.noiseOpenSimplex2D(x,y,seed); 
 }
 const double Noise::noiseOpenSimplex3D(const double& x, const double& y, const double& z, const unsigned long long& seed){ 
-    return noise->noiseOpenSimplex3D(x,y,z,seed); 
+    return noise.noiseOpenSimplex3D(x,y,z,seed); 
 }
 const double Noise::noiseOpenSimplex4D(const double& x, const double& y, const double& z, const double& w, const unsigned long long& seed){ 
-    return noise->noiseOpenSimplex4D(x,y,z,w,seed); 
+    return noise.noiseOpenSimplex4D(x,y,z,w,seed); 
 }

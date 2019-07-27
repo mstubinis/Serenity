@@ -68,7 +68,8 @@ struct Scene::impl final {
     void _centerToObject(Scene& super, const Entity& centerEntity) {
         //TODO: handle parent->child relationship
         ComponentBody& centerBody = *const_cast<Entity&>(centerEntity).getComponent<ComponentBody>();
-        for (auto& data : InternalScenePublicInterface::GetEntities(super)) {
+        auto& entities = InternalScenePublicInterface::GetEntities(super);
+        for (auto& data : entities) {
             Entity e = super.getEntity(data);
             if (e != centerEntity) {
                 auto* eBody = e.getComponent<ComponentBody>();

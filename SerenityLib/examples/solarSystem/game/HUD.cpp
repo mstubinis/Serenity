@@ -277,7 +277,7 @@ void HUD::go_to_main_menu() {
     auto& window = Resources::getWindow();
     auto _status = m_MainMenuMusic->status();
     if (_status == SoundStatus::Fresh || _status == SoundStatus::Stopped || _status == SoundStatus::Paused) {
-        m_MainMenuMusic->play();
+        //m_MainMenuMusic->play();
     }
     window.keepMouseInWindow(false);
     window.setMouseCursorVisible(true);
@@ -332,12 +332,6 @@ void HUD::update_game(const double& dt) {
     Map* scene = static_cast<Map*>(Resources::getCurrentScene());
     auto& player = *scene->getPlayer();
     auto& playerName = player.entity().getComponent<ComponentName>()->name();
-
-
-
-
-
-
 
     if (Engine::isKeyDownOnce(KeyboardKey::Comma)) {
         const auto& ships = scene->getShips();

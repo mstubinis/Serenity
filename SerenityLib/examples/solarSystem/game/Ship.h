@@ -138,6 +138,9 @@ class Ship: public EntityWrapper {
 
         void onEvent(const Event&);
 
+        const glm::vec3& getWarpSpeedVector3();
+
+
         void setModel(Handle& handle);
 
         void translateWarp(float amount,float dt);

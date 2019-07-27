@@ -69,16 +69,17 @@ struct Packet: public IPacket {
 struct PacketPhysicsUpdate: public Packet {
     //256 bits (64 bytes)
     float            px, py, pz;     //position
+    float            wx, wy, wz;     //warp speed
     uint16_t         qx, qy, qz, qw; //rotation
     uint16_t         lx, ly, lz;     //linear velocity
     uint16_t         ax, ay, az;     //angular velocity
     PacketPhysicsUpdate();
     PacketPhysicsUpdate(Ship& ship, Map& map);
     bool validate(sf::Packet& sfPacket) {
-        return (sfPacket >> PacketType >> data >> px >> py >> pz >> qx >> qy >> qz >> qw >> lx >> ly >> lz >> ax >> ay >> az);
+        return (sfPacket >> PacketType >> data >> px >> py >> pz >> wx >> wy >> wz >> qx >> qy >> qz >> qw >> lx >> ly >> lz >> ax >> ay >> az);
     }
     bool build(sf::Packet& sfPacket) {
-        return (sfPacket << PacketType << data << px << py << pz << qx << qy << qz << qw << lx << ly << lz << ax << ay << az);
+        return (sfPacket << PacketType << data << px << py << pz << wx << wy << wz << qx << qy << qz << qw << lx << ly << lz << ax << ay << az);
     }
     void print() {}
 };

@@ -2,6 +2,8 @@
 #include <core/engine/Engine.h>
 #include <core/engine/lua/LuaScript.h>
 
+#include <core/engine/math/SimplexNoise.h>
+
 #include <unordered_map>
 #include <iostream>
 #include <cstring>

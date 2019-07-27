@@ -35,10 +35,10 @@ class OrbitInfo final{
         float inclination;
         float angle;
         Planet* parent;
-        OrbitInfo(float eccentricity, float days, float majorRadius,float angle,Planet& parent,float inclination = 0);
+        OrbitInfo(float eccentricity, float days, float majorRadius,float angle, Planet& parent, float inclination = 0);
         ~OrbitInfo(){}
-        void setOrbitalPosition(float angle,Planet* planet);
-        glm::vec3 getOrbitalPosition(float angle,Planet* planet);
+        void setOrbitalPosition(float angle, Planet& planet);
+        glm::vec3 getOrbitalPosition(float angle, Planet& planet);
 };
 struct RingInfo final{
     uint position;

@@ -503,13 +503,18 @@ glm::vec4 Math::PaintersAlgorithm(const glm::vec4& paint_color, const glm::vec4&
     return ret;
 }
 sf::Color Math::PaintersAlgorithm(const sf::Color& paint_color, const sf::Color& canvas_color) {
-    const sf::Uint8& alpha = paint_color.a + canvas_color.a * (255 - paint_color.a);
-    sf::Color ret(0, 0, 0, 0);
-    ret.r = ((paint_color.r * paint_color.a + canvas_color.r * canvas_color.a * (255 - paint_color.a)) / alpha);
-    ret.g = ((paint_color.g * paint_color.a + canvas_color.g * canvas_color.a * (255 - paint_color.a)) / alpha);
-    ret.b = ((paint_color.b * paint_color.a + canvas_color.b * canvas_color.a * (255 - paint_color.a)) / alpha);
+    const glm::vec4 cC = glm::vec4(static_cast<float>(canvas_color.r) / 255.0f, static_cast<float>(canvas_color.g) / 255.0f, static_cast<float>(canvas_color.b) / 255.0f, static_cast<float>(canvas_color.a) / 255.0f);
+    const glm::vec4 pC = glm::vec4(static_cast<float>(paint_color.r) / 255.0f, static_cast<float>(paint_color.g) / 255.0f, static_cast<float>(paint_color.b) / 255.0f, static_cast<float>(paint_color.a) / 255.0f);
+    const float full = 1.0f;
+    const float alpha = pC.a + cC.a * (full - pC.a);
+    glm::vec4 ret(0.0f);
+    ret = (pC * pC.a + cC * cC.a * (full - pC.a) / alpha);
     ret.a = alpha;
-    return ret;
+    const sf::Uint8 finalR = static_cast<sf::Uint8>(ret.r * 255.0f);
+    const sf::Uint8 finalG = static_cast<sf::Uint8>(ret.g * 255.0f);
+    const sf::Uint8 finalB = static_cast<sf::Uint8>(ret.b * 255.0f);
+    const sf::Uint8 finalA = static_cast<sf::Uint8>(ret.a * 255.0f);
+    return sf::Color(finalR, finalG, finalB, finalA);
 }
 bool Math::rayIntersectSphere(const glm::vec3& C, const float r, const glm::vec3& A, const glm::vec3& rayVector){
 	const glm::vec3& B = A + rayVector;

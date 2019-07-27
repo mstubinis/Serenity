@@ -4,6 +4,7 @@
 
 #include <core/engine/scene/Scene.h>
 #include <unordered_map>
+#include <tuple>
 
 class Star;
 class Ship;
@@ -11,23 +12,24 @@ class Planet;
 class GameObject;
 class EntityWrapper;
 class GameSkybox;
-
+class Anchor;
 class Map: public Scene{
     private:
-        std::unordered_map<std::string, Planet*> m_Planets;
-        std::unordered_map<std::string, Ship*>   m_Ships;
-        std::string                              m_Filename;
-        std::string                              m_SkyboxFile;
-        Ship*                                    m_Player;
+        std::unordered_map<std::string, Planet*>   m_Planets;
+        std::unordered_map<std::string, Ship*>     m_Ships;
+        std::string                                m_Filename;
+        std::string                                m_SkyboxFile;
+        Ship*                                      m_Player;
 
-        std::unordered_map<std::string, EntityWrapper*>   m_AnchorPoints;
+        std::tuple<std::string, Anchor*>           m_RootAnchor;
 
 
         glm::vec3 m_oldClientPos;
         glm::vec3 m_oldAnchorPos;
 
         void loadFromFile(const std::string& file);
-        void internalCreateAnchor(const std::string& parentName, const float& x = 0, const float& y = 0, const float& z = 0);
+        Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const float& x = 0, const float& y = 0, const float& z = 0);
+        Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const glm::vec3& position);
     public:
         std::vector<EntityWrapper*> m_Objects;
 
@@ -36,7 +38,7 @@ class Map: public Scene{
 
         virtual void update(const double& dt);
 
-        const std::string getClosestAnchor();
+        const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr);
         
 
         Ship* getPlayer() { return m_Player; }
@@ -49,7 +51,7 @@ class Map: public Scene{
 
         std::unordered_map<std::string, Planet*>& getPlanets() { return m_Planets; }
         std::unordered_map<std::string, Ship*>& getShips() { return m_Ships; }
-        std::unordered_map<std::string, EntityWrapper*>& getAnchors() { return m_AnchorPoints; }
+        Anchor* getRootAnchor();
 
         /*
         void setAnchor(const float& x, const float& y, const float& z);

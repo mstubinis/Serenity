@@ -209,6 +209,7 @@
     <ClInclude Include="game\gui\WidgetInterface.h" />
     <ClInclude Include="game\Helper.h" />
     <ClInclude Include="game\HUD.h" />
+    <ClInclude Include="game\map\Anchor.h" />
     <ClInclude Include="game\map\Map.h" />
     <ClInclude Include="game\Packet.h" />
     <ClInclude Include="game\Planet.h" />
@@ -234,6 +235,7 @@
     <ClCompile Include="game\gui\Widget.cpp" />
     <ClCompile Include="game\HUD.cpp" />
     <ClCompile Include="game\main.cpp" />
+    <ClCompile Include="game\map\Anchor.cpp" />
     <ClCompile Include="game\map\Map.cpp" />
     <ClCompile Include="game\Packet.cpp" />
     <ClCompile Include="game\Planet.cpp" />

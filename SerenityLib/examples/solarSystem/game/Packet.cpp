@@ -1,5 +1,6 @@
 #include "Packet.h"
 #include "Ship.h"
+#include "map/Anchor.h"
 #include "map/Map.h"
 
 #include <core/engine/math/Engine_Math.h>
@@ -77,18 +78,26 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map) :Packet() {
         const auto& rot = body.rotation();
         const auto& lv  = body.getLinearVelocity();
         const auto& av  = body.getAngularVelocity();
+        const auto& warp = ship.getWarpSpeedVector3();
 
         px = pos.x;
         py = pos.y;
         pz = pos.z;
-        const auto& str = map.getClosestAnchor();
-        if (!str.empty() && map.getAnchors().count(str)) {
-            const auto& offset = map.getAnchors().at(str)->entity().getComponent<ComponentBody>()->position();
-            px -= offset.x;
-            py -= offset.y;
-            pz -= offset.z;
-            data += "," + str;
+        wx = warp.x;
+        wy = warp.y;
+        wz = warp.z;
+        const auto& list = map.getClosestAnchor();
+        data += "," + to_string(list.size());
+        Anchor* finalAnchor = map.getRootAnchor();
+        for (auto& closest : list) {
+            data += "," + closest;
+            finalAnchor = finalAnchor->getChildren().at(closest);
         }
+        const auto& offset = finalAnchor->getPosition();
+        px -= offset.x;
+        py -= offset.y;
+        pz -= offset.z;
+
 
         Math::Float16From32(&qx, rot.x);
         Math::Float16From32(&qy, rot.y);

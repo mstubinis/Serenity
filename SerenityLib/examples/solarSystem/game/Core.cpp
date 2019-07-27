@@ -14,6 +14,8 @@
 #include <core/engine/Engine.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/lights/SunLight.h>
+#include <core/engine/mesh/Mesh.h>
+#include <core/Material.h>
 #include <ecs/Components.h>
 
 using namespace std;
@@ -126,7 +128,6 @@ void Core::init() {
 
     Scene* s = new Scene("Menu");
     Resources::setCurrentScene(s);
-
     Camera* main_camera = new Camera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y), 0.1f, 15000.0f, s);
     GameCamera* ship_camera = new GameCamera(0.1f, 50.0f, s);
     s->setActiveCamera(*main_camera);
@@ -134,9 +135,9 @@ void Core::init() {
 
     SunLight* light = new SunLight(glm::vec3(0.0f), LightType::Sun, s);
     light->setColor(1.55f, 1.55f, 1.3f);
-    light->setPosition(0, 300, -1000);
+    light->setPosition(0, 3000, -10000);
     auto e1 = s->createEntity();
-    auto model1 = e1.addComponent<ComponentModel>(ResourceManifest::PlanetMesh, ResourceManifest::StarMaterial);
+    auto model1 = e1.addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
 
 
 
