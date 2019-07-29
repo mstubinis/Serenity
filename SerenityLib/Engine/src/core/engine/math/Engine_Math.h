@@ -47,9 +47,6 @@ namespace Math{
 
     glm::vec3 direction(const glm::vec3& eye, const glm::vec3& target);
 
-
-    void lookAtToQuat(glm::quat& o, const glm::vec3& eye, const glm::vec3& target, const glm::vec3& up);
-
     void translate(const btRigidBody&,btVector3&,bool local);
     void rotate(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll);
     void setRotation(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll);

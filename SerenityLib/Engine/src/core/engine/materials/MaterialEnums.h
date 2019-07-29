@@ -2,6 +2,23 @@
 #ifndef ENGINE_MATERIAL_ENUMS_H
 #define ENGINE_MATERIAL_ENUMS_H
 
+#define MAX_MATERIAL_LAYERS_PER_COMPONENT 3
+#define MAX_MATERIAL_COMPONENTS 12
+
+struct MaterialLayerBlendMode final { enum Mode {
+    Default,
+    Mix,
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Screen,
+    Overlay,
+    Dissolve,
+    Dodge,
+    Burn,
+_TOTAL};};
+
 struct MaterialUVModificationType final { enum Type {
     Translation,
     Rotation,

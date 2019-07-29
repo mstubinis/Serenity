@@ -1,5 +1,9 @@
 #include <core/engine/materials/MaterialLayer.h>
 #include <core/engine/textures/Texture.h>
+#include <core/engine/renderer/Engine_Renderer.h>
+
+using namespace std;
+using namespace Engine;
 
 //TODO: implement the uv modification system
 struct SimpleUVTranslationFunctor { glm::vec2 operator()(MaterialLayer* layer, const float& translationX, const float& translationY, const float& dt) const {
@@ -22,6 +26,12 @@ Texture* MaterialLayer::getMask() const {
 }
 Texture* MaterialLayer::getCubemap() const {
     return m_Cubemap;
+}
+const glm::vec4& MaterialLayer::data1() const {
+    return m_Data1;
+}
+const glm::vec4& MaterialLayer::data2() const {
+    return m_Data2;
 }
 void MaterialLayer::addUVModificationSimpleTranslation(const float& translationX, const float& translationY) {
     //SimpleUVTranslationFunctor functor;
@@ -47,16 +57,19 @@ void MaterialLayer::setTexture(Texture* _texture) {
     if (!_texture || _texture->type() != GL_TEXTURE_2D)
         return;
     m_Texture = _texture;
+    m_Data1.y = m_Texture->compressed() ? 0.5f : 1.0f;
 }
 void MaterialLayer::setMask(Texture* _mask) {
     if (!_mask || _mask->type() != GL_TEXTURE_2D)
         return;
     m_Mask = _mask;
+    m_Data1.z = m_Texture->compressed() ? 0.5f : 1.0f;
 }
 void MaterialLayer::setCubemap(Texture* _cubemap) {
     if (!_cubemap || _cubemap->type() != GL_TEXTURE_CUBE_MAP)
         return;
     m_Cubemap = _cubemap;
+    m_Data1.w = m_Texture->compressed() ? 0.5f : 1.0f;
 }
 
 const glm::vec2& MaterialLayer::getUVModifications() const {
@@ -69,6 +82,22 @@ void MaterialLayer::update(const double& dt) {
         //m_UVModifications = command(this, m_UVModifications.x, m_UVModifications.y, dt);
     }
 }
-void MaterialLayer::sendDataToGPU() {
+void MaterialLayer::sendDataToGPU(const unsigned int& component_index, const unsigned int& layer_index) {
+    const string wholeString = "components[" + to_string(component_index) + "]" + "." + "layers[" + to_string(layer_index) + "].";
 
+    const uint start = (((component_index + 1) * layer_index) * 3);
+    const uint slot_texture = start + 0;
+    const uint slot_mask    = start + 1;
+    const uint slot_cubemap = start + 2;
+
+    Renderer::sendUniform4Safe((wholeString + "data1").c_str(), m_Data1);
+    Renderer::sendUniform4Safe((wholeString + "data2").c_str(), m_Data2);
+    Renderer::sendUniform2Safe((wholeString + "uvModifications").c_str(), m_UVModifications);
+
+    if(m_Texture)
+        Renderer::sendTextureSafe((wholeString + "texture").c_str(), *m_Texture, slot_texture);
+    if(m_Mask)
+        Renderer::sendTextureSafe((wholeString + "mask").c_str(),    *m_Mask, slot_mask);
+    if(m_Cubemap)
+        Renderer::sendTextureSafe((wholeString + "cubemap").c_str(), *m_Cubemap, slot_cubemap);
 }

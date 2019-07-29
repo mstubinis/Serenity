@@ -74,7 +74,7 @@ namespace Engine{
                         else if(i == 9) { third.y = 1.0f; }
                         else if(i == 10){ third.z = 1.0f; }
                         else if(i == 11){ third.w = 1.0f; }
-                        component.bind(data);
+                        component.bind(i);
                     }//else{ 
                         //component.unbind(); 
                     //}
@@ -136,8 +136,9 @@ Material::~Material(){
     SAFE_DELETE_VECTOR(m_Components);
 }
 void Material::internalInit(Texture* diffuse, Texture* normal, Texture* glow, Texture* specular) {
-    m_Components.resize(MaterialComponentType::_TOTAL, nullptr);
-
+    m_Components.reserve(MAX_MATERIAL_COMPONENTS);
+    for (unsigned int i = 0; i < MaterialComponentType::_TOTAL; ++i)
+        m_Components.push_back(nullptr);
     internalAddComponentGeneric(MaterialComponentType::Diffuse, diffuse);
     internalAddComponentGeneric(MaterialComponentType::Normal, normal);
     internalAddComponentGeneric(MaterialComponentType::Glow, glow);
@@ -159,11 +160,12 @@ void Material::internalInit(Texture* diffuse, Texture* normal, Texture* glow, Te
     setCustomBindFunctor(epriv::DefaultMaterialBindFunctor());
     setCustomUnbindFunctor(epriv::DefaultMaterialUnbindFunctor());
 }
-void Material::internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture) {
+MaterialComponent* Material::internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture) {
     if (!m_Components[type] && texture) {
         m_Components[type] = new MaterialComponent(type, texture);
         texture->setAnisotropicFiltering(2.0f);
     }
+    return m_Components[type];
 }
 void Material::internalUpdateGlobalMaterialPool(const bool& addToDatabase) {
     //this data is kept around to be deferred to the lighting pass
@@ -198,7 +200,7 @@ void Material::addComponentDiffuse(const string& textureFile){
     addComponentDiffuse(texture);
 }
 void Material::addComponentNormal(Texture* texture){
-    internalAddComponentGeneric(MaterialComponentType::Normal, texture);
+    MaterialComponent& component = *internalAddComponentGeneric(MaterialComponentType::Normal, texture);
 }
 void Material::addComponentNormal(const string& textureFile){
     Texture* texture = Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
@@ -266,83 +268,95 @@ void Material::addComponentSmoothness(const string& textureFile,float baseValue)
     }
     addComponentSmoothness(texture);
 }
-void Material::addComponentReflection(Texture* cubemap,Texture* map,float mixFactor){
-    if(cubemap == nullptr) 
+void Material::addComponentReflection(Texture* cubemap,Texture* mask,float mixFactor){
+    if(!cubemap) 
         cubemap = Resources::getCurrentScene()->skybox()->texture();
-    const uint& type = MaterialComponentType::Reflection;
-    if (m_Components[type] || (!cubemap || !map))
+    const auto type = MaterialComponentType::Reflection;
+    if (m_Components[type] || (!cubemap || !mask))
         return;
-    m_Components[type] = new MaterialComponentReflection(type, cubemap, map, mixFactor);
+    m_Components[type] = new MaterialComponent(type, nullptr, mask, cubemap);
+    auto& layer1 = m_Components[type]->layer(0);
+    auto& data1 = layer1.data1();
+    layer1.setData1(data1.x, 0.0f, data1.z, data1.w);
+    layer1.setData2(mixFactor, 0.0f, 0.0f, 0.0f);
 }
-void Material::addComponentReflection(const string textureFiles[], const string& mapFile, float mixFactor){
+void Material::addComponentReflection(const string textureFiles[], const string& maskFile, float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(cubemap);
     //if(!cubemap){
         cubemap = new Texture(textureFiles,"Cubemap ");
         Core::m_Engine->m_ResourceManager._addTexture(cubemap);
     //}
-    Texture* map = Core::m_Engine->m_ResourceManager._hasTexture(mapFile);
-    if(!map){
-        map = new Texture(mapFile);
-        Core::m_Engine->m_ResourceManager._addTexture(map);
+    Texture* mask = Core::m_Engine->m_ResourceManager._hasTexture(maskFile);
+    if(!mask){
+        mask = new Texture(maskFile);
+        Core::m_Engine->m_ResourceManager._addTexture(mask);
     }
-    addComponentReflection(cubemap,map,mixFactor);
+    addComponentReflection(cubemap, mask, mixFactor);
 }
-void Material::addComponentReflection(const string& cubemapName, const string& mapFile,float mixFactor){
+void Material::addComponentReflection(const string& cubemapName, const string& maskFile,float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(cubemap);
     //if(!cubemap){
         cubemap = new Texture(cubemapName);
         Core::m_Engine->m_ResourceManager._addTexture(cubemap);
     //}
-    Texture* map = Core::m_Engine->m_ResourceManager._hasTexture(mapFile);
-    if(!map){
-        map = new Texture(mapFile);
-        Core::m_Engine->m_ResourceManager._addTexture(map);
+    Texture* mask = Core::m_Engine->m_ResourceManager._hasTexture(maskFile);
+    if(!mask){
+        mask = new Texture(maskFile);
+        Core::m_Engine->m_ResourceManager._addTexture(mask);
     }
-    addComponentReflection(cubemap,map,mixFactor);
+    addComponentReflection(cubemap, mask, mixFactor);
 }
-void Material::addComponentRefraction(Texture* cubemap,Texture* map,float refractiveIndex,float mixFactor){
-    if (cubemap == nullptr)
+void Material::addComponentRefraction(Texture* cubemap,Texture* mask,float refractiveIndex,float mixFactor){
+    if (!cubemap)
         cubemap = Resources::getCurrentScene()->skybox()->texture();
-    const uint& type = MaterialComponentType::Refraction;
-    if (m_Components[type] || (!cubemap || !map))
+    const auto type = MaterialComponentType::Refraction;
+    if (m_Components[type] || (!cubemap || !mask))
         return;
-    m_Components[type] = new MaterialComponentRefraction(cubemap, map, refractiveIndex, mixFactor);
+    m_Components[type] = new MaterialComponent(type, nullptr, mask, cubemap);
+    auto& layer1 = m_Components[type]->layer(0);
+    auto& data1 = layer1.data1();
+    layer1.setData1(data1.x, 0.0f, data1.z, data1.w);
+    layer1.setData2(mixFactor, refractiveIndex, 0.0f, 0.0f);
 }
-void Material::addComponentRefraction(const string textureFiles[], const string& mapFile,float refractiveIndex,float mixFactor){
+void Material::addComponentRefraction(const string textureFiles[], const string& maskFile,float refractiveIndex,float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager._hasTexture(cubemap);
     //if(!cubemap){
         cubemap = new Texture(textureFiles,"Cubemap ");
         Core::m_Engine->m_ResourceManager._addTexture(cubemap);
     //}
-    Texture* map = Core::m_Engine->m_ResourceManager._hasTexture(mapFile);
-    if(!map){
-        map = new Texture(mapFile);
-        Core::m_Engine->m_ResourceManager._addTexture(map);
+    Texture* mask = Core::m_Engine->m_ResourceManager._hasTexture(maskFile);
+    if(!mask){
+        mask = new Texture(maskFile);
+        Core::m_Engine->m_ResourceManager._addTexture(mask);
     }
-    addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
+    addComponentRefraction(cubemap, mask, refractiveIndex, mixFactor);
 }
-void Material::addComponentRefraction(const string& cubemapName, const string& mapFile,float refractiveIndex,float mixFactor){
+void Material::addComponentRefraction(const string& cubemapName, const string& maskFile,float refractiveIndex,float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager._hasTexture(cubemap);
     //if(!cubemap){
         cubemap = new Texture(cubemapName);
         Core::m_Engine->m_ResourceManager._addTexture(cubemap);
     //}
-    Texture* map = Core::m_Engine->m_ResourceManager._hasTexture(mapFile);
-    if(!map){
-        map = new Texture(mapFile);
-        Core::m_Engine->m_ResourceManager._addTexture(map);
+    Texture* mask = Core::m_Engine->m_ResourceManager._hasTexture(maskFile);
+    if(!mask){
+        mask = new Texture(maskFile);
+        Core::m_Engine->m_ResourceManager._addTexture(mask);
     }
-    addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
+    addComponentRefraction(cubemap, mask, refractiveIndex, mixFactor);
 }
 void Material::addComponentParallaxOcclusion(Texture* texture,float heightScale){
-    const uint& type = MaterialComponentType::ParallaxOcclusion;
+    const auto type = MaterialComponentType::ParallaxOcclusion;
     if (m_Components[type] || !texture)
         return;
-    m_Components[type] = new MaterialComponentParallaxOcclusion(texture, heightScale);
+    m_Components[type] = new MaterialComponent(type, texture);
+    auto& layer1 = m_Components[type]->layer(0);
+    auto& data1 = layer1.data1();
+    layer1.setData1(data1.x, 1.0f, 0.0f, 0.0f);
+    layer1.setData2(heightScale, 0.0f, 0.0f, 0.0f);
 }
 void Material::addComponentParallaxOcclusion(const string& textureFile,float heightScale){
     Texture* texture = Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
@@ -355,17 +369,6 @@ void Material::addComponentParallaxOcclusion(const string& textureFile,float hei
 const MaterialComponent* Material::getComponent(const MaterialComponentType::Type& type) const {
     return m_Components[type]; 
 }
-/*
-const MaterialComponentReflection* Material::getComponentReflection() const { 
-    return static_cast<MaterialComponentReflection*>(m_Components[MaterialComponentType::Reflection]);
-}
-const MaterialComponentRefraction* Material::getComponentRefraction() const { 
-    return static_cast<MaterialComponentRefraction*>(m_Components[MaterialComponentType::Refraction]);
-}
-const MaterialComponentParallaxOcclusion* Material::getComponentParallaxOcclusion() const { 
-    return static_cast<MaterialComponentParallaxOcclusion*>(m_Components[MaterialComponentType::ParallaxOcclusion]); 
-}
-*/
 const bool& Material::shadeless() const { 
     return m_Shadeless; 
 }

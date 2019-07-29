@@ -370,15 +370,6 @@ void HUD::update_game(const double& dt) {
         if (_countPlanets > planetsVect.size() - 1) {
             _countPlanets = 0;
         }
-    }else if (Engine::isKeyDownOnce(KeyboardKey::M)) {
-        auto root = scene->getRootAnchor();
-        for (auto child : root->getChildren()) {
-            auto x = "Deepsp";
-            if (boost::algorithm::contains(child.first, x)) {
-                player.setTarget(child.second->entity());
-                break;
-            }
-        }
     }
 }
 void HUD::update_main_menu(const double& dt) {

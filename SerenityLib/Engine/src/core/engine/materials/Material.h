@@ -42,7 +42,7 @@ class Material final: public BindableResource{
         float                             m_BaseSmoothness;
         uint                              m_ID;
 
-        void internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture);
+        MaterialComponent* internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture);
         void internalUpdateGlobalMaterialPool(const bool& addToDatabase);
         void internalInit(Texture* diffuse, Texture* normal, Texture* glow, Texture* specular);
 
@@ -52,10 +52,6 @@ class Material final: public BindableResource{
         ~Material();
 
         const MaterialComponent* getComponent(const MaterialComponentType::Type& type) const;
-
-        //const MaterialComponentReflection* getComponentReflection() const;
-        //const MaterialComponentRefraction* getComponentRefraction() const;
-        //const MaterialComponentParallaxOcclusion* getComponentParallaxOcclusion() const;
 
         void addComponentDiffuse(Texture* texture);
         void addComponentDiffuse(const std::string& textureFile);

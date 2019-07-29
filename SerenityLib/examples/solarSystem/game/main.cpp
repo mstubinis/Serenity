@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
             args.emplace(lowerKey, true);
         }
         if (!args.count("console")) {
-            ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
+            //ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
         }
     #endif
 

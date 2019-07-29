@@ -33,9 +33,9 @@
 using namespace std;
 using namespace Engine;
 
-const float PHYSICS_PACKET_TIMER_LIMIT = 0.05f;
+const float  PHYSICS_PACKET_TIMER_LIMIT  = 0.05f;
 const double DISTANCE_CHECK  = 1000000.0 * 1000000.0;
-const double DISTANCE_CHECK2 = 100000.0 * 100000.0;
+const double DISTANCE_CHECK2 = 100000.0  * 100000.0;
 
 struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
     ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(button->getUserPointer());
@@ -307,9 +307,12 @@ void Client::onReceive() {
                     glm::mat4 modelMatrix = glm::mat4(1.0f);
                     auto position = glm::vec3(0, 0, -dist);
                     modelMatrix = glm::mat4_cast(orientation) * glm::translate(position);
-
+                    auto& playerBody = *map.getPlayer()->getComponent<ComponentBody>();
                     auto spawn = map.getSpawnAnchor()->getPosition();
-                    map.getPlayer()->getComponent<ComponentBody>()->setPosition(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
+                    playerBody.setPosition(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
+
+                    Math::alignTo(orientation, playerBody.position()-spawn);
+                    playerBody.setRotation(orientation);
 
                     PacketMessage pOut(pI);
                     pOut.PacketType = PacketType::Client_To_Server_Successfully_Entered_Map;

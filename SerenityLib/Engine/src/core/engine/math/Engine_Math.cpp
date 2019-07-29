@@ -351,54 +351,7 @@ void Math::translate(const btRigidBody& body,btVector3& vec,bool local){
         vec = vec.rotate(q.getAxis(), q.getAngle());
     }
 }
-void Math::lookAtToQuat(glm::quat& o,const glm::vec3& eye, const glm::vec3& target, const glm::vec3& _up){
-    glm::vec3 forward = eye - target;
-	forward = glm::normalize(forward);
-	const glm::vec3& right = glm::normalize(glm::cross(forward,_up));
-	const float m00 = right.x;
-	const float m01 = right.y;
-	const float m02 = right.z;
-	const float m10 = _up.x; //normalize?
-	const float m11 = _up.y; //normalize?
-	const float m12 = _up.z; //normalize?
-	const float m20 = forward.x;
-	const float m21 = forward.y;
-	const float m22 = forward.z;
-	const float num8 = (m00 + m11) + m22;
-    if (num8 > 0.0f){
-		float num = glm::sqrt(num8 + 1.0f);
-        o.w = num * 0.5f;
-        num = 0.5f / num;
-        o.x = (m12 - m21) * num;
-        o.y = (m20 - m02) * num;
-        o.z = (m01 - m10) * num;
-        return;
-    }
-    if ((m00 >= m11) && (m00 >= m22)){
-		const float num7 = glm::sqrt(((1.0f + m00) - m11) - m22);
-		const float num4 = 0.5f / num7;
-        o.x = 0.5f * num7;
-        o.y = (m01 + m10) * num4;
-        o.z = (m02 + m20) * num4;
-        o.w = (m12 - m21) * num4;
-        return;
-    }
-    if (m11 > m22){
-		const float num6 = glm::sqrt(((1.0f + m11) - m00) - m22);
-		const float num3 = 0.5f / num6;
-        o.x = (m10 + m01) * num3;
-        o.y = 0.5f * num6;
-        o.z = (m21 + m12) * num3;
-        o.w = (m20 - m02) * num3;
-        return;
-    }
-	const float num5 = glm::sqrt(((1.0f + m22) - m00) - m11);
-	const float num2 = 0.5f / num5;
-    o.x = (m20 + m02) * num2;
-    o.y = (m21 + m12) * num2;
-    o.z = 0.5f * num5;
-    o.w = (m01 - m10) * num2;
-}
+
 glm::vec3 Math::midpoint(const glm::vec3& a, const glm::vec3& b){ return glm::vec3((a.x+b.x)/2.0f,(a.y+b.y)/2.0f,(a.z+b.z)/2.0f); }
 glm::vec3 Math::direction(const glm::vec3& eye, const glm::vec3& target){ return glm::normalize(eye-target); }
 glm::vec3 Math::getForward(const glm::quat& q){return glm::normalize(q * glm::vec3(0.0f,0.0f,-1.0f));}

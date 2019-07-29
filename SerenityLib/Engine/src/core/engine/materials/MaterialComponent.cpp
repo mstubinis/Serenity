@@ -60,11 +60,15 @@ const GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Typ
 };
 
 
-MaterialComponent::MaterialComponent(const uint& type, Texture* texture) {
-    m_ComponentType = static_cast<MaterialComponentType::Type>(type);
+MaterialComponent::MaterialComponent(const MaterialComponentType::Type& type, Texture* texture, Texture* mask, Texture* cubemap) {
+    m_ComponentType = type;
     m_NumLayers = 0;
 
-    m_Layers[m_NumLayers].setTexture(texture);
+    auto& layer = m_Layers[m_NumLayers];
+    layer.setTexture(texture);
+    layer.setMask(mask);
+    layer.setCubemap(cubemap);
+
     ++m_NumLayers;
 }
 MaterialComponent::~MaterialComponent() {
@@ -72,17 +76,31 @@ MaterialComponent::~MaterialComponent() {
 Texture* MaterialComponent::texture(const uint& index) const {
     return m_Layers[index].getTexture();
 }
+Texture* MaterialComponent::mask(const uint& index) const {
+    return m_Layers[index].getMask();
+}
+Texture* MaterialComponent::cubemap(const uint& index) const {
+    return m_Layers[index].getCubemap();
+}
+MaterialLayer& MaterialComponent::layer(const uint& index) {
+    return m_Layers[index];
+}
 const MaterialComponentType::Type& MaterialComponent::type() const {
     return m_ComponentType;
 }
 
-void MaterialComponent::bind(glm::vec4& data) {
-    const auto& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+void MaterialComponent::bind(const uint& component_index) {
+    const auto& slots             = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     const string& textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    const auto& textureTypeNameC = textureTypeName.c_str();
     for (uint i = 0; i < slots.size(); ++i) {
-        Renderer::sendTextureSafe(textureTypeNameC, *m_Layers[0].getTexture(), slots[i]);
+        Renderer::sendTextureSafe(textureTypeName.c_str(), *m_Layers[0].getTexture(), slots[i]);
     }
+
+    //new material system
+    for (unsigned int i = 0; i < m_NumLayers; ++i) {
+        //m_Layers[i].sendDataToGPU(component_index, i);
+    }
+    /////////////////////
 }
 void MaterialComponent::unbind() {
 }
@@ -90,75 +108,4 @@ void MaterialComponent::update(const float& dt) {
     for (unsigned int i = 0; i < m_NumLayers; ++i) {
         m_Layers[i].update(dt);
     }
-}
-
-
-
-MaterialComponentReflection::MaterialComponentReflection(const uint& type, Texture* cubemap, Texture* map, const float& mixFactor) :MaterialComponent(type, cubemap) {
-    setMixFactor(mixFactor);
-
-    m_Layers[m_NumLayers].setCubemap(cubemap);
-    m_Layers[m_NumLayers].setMask(map);
-    m_Layers[m_NumLayers].setTexture(map);
-    ++m_NumLayers;
-}
-MaterialComponentReflection::~MaterialComponentReflection() {
-    MaterialComponent::~MaterialComponent();
-}
-void MaterialComponentReflection::setMixFactor(const float& factor) {
-    m_MixFactor = glm::clamp(factor, 0.0f, 1.0f);
-}
-void MaterialComponentReflection::bind(glm::vec4& data) {
-    const auto& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    const string& textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    const auto& textureTypeNameC = textureTypeName.c_str();
-    data.x = m_MixFactor;
-    if (!m_Layers[0].getCubemap())
-        Renderer::sendTextureSafe(textureTypeNameC, *Resources::getCurrentScene()->skybox()->texture(), slots[0]);
-    else
-        Renderer::sendTextureSafe(textureTypeNameC, *m_Layers[0].getCubemap(), slots[0]);
-    Renderer::sendTextureSafe((textureTypeName + "Map").c_str(), *m_Layers[0].getMask(), slots[1]);
-}
-void MaterialComponentReflection::unbind() {
-}
-MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap, Texture* map, const float& i, const float& mix) :MaterialComponentReflection(MaterialComponentType::Refraction, cubemap, map, mix) {
-    m_RefractionIndex = i;
-}
-MaterialComponentRefraction::~MaterialComponentRefraction() {
-    MaterialComponentReflection::~MaterialComponentReflection();
-}
-void MaterialComponentRefraction::setRefractionIndex(const float& refractionIndex) {
-    m_RefractionIndex = refractionIndex;
-}
-void MaterialComponentRefraction::bind(glm::vec4& data) {
-    const auto& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    const string& textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    const auto& textureTypeNameC = textureTypeName.c_str();
-    data.x = m_MixFactor;
-    data.y = m_RefractionIndex;
-    if (!m_Layers[0].getCubemap())
-        Renderer::sendTextureSafe(textureTypeNameC, *Resources::getCurrentScene()->skybox()->texture(), slots[0]);
-    else
-        Renderer::sendTextureSafe(textureTypeNameC, *m_Layers[0].getCubemap(), slots[0]);
-    Renderer::sendTextureSafe((textureTypeName + "Map").c_str(), *m_Layers[0].getMask(), slots[1]);
-}
-
-MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(Texture* heightmap, const float& heightScale) :MaterialComponent(MaterialComponentType::ParallaxOcclusion, heightmap) {
-    setHeightScale(heightScale);
-}
-MaterialComponentParallaxOcclusion::~MaterialComponentParallaxOcclusion() {
-    MaterialComponent::~MaterialComponent();
-}
-void MaterialComponentParallaxOcclusion::setHeightScale(const float& factor) {
-    m_HeightScale = factor;
-}
-void MaterialComponentParallaxOcclusion::bind(glm::vec4& data) {
-    const auto& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    const string& textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-
-    data.z = m_HeightScale;
-
-    Renderer::sendTextureSafe(textureTypeName.c_str(), *m_Layers[0].getTexture(), slots[0]);
-}
-void MaterialComponentParallaxOcclusion::unbind() {
 }

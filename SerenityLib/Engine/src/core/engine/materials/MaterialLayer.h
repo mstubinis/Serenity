@@ -20,7 +20,10 @@ class MaterialLayer final{
         Texture*    m_Mask;
         Texture*    m_Cubemap;
 
+        //x = blend mode? | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
         glm::vec4   m_Data1;
+
+
         glm::vec4   m_Data2; 
 
         glm::vec2   m_UVModifications;
@@ -35,6 +38,9 @@ class MaterialLayer final{
         Texture* getMask() const;
         Texture* getCubemap() const;
 
+        const glm::vec4& data1() const;
+        const glm::vec4& data2() const;
+
         void addUVModificationFunctor(const boost_uv_func& functor);
         void addUVModificationSimpleTranslation(const float& translationX, const float& translationY);
 
@@ -42,10 +48,13 @@ class MaterialLayer final{
         void setMask(Texture* mask);
         void setCubemap(Texture* cubemap);
 
+        //x = blend mode? | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
         void setData1(const float& x, const float& y, const float& z, const float& w);
+
+
         void setData2(const float& x, const float& y, const float& z, const float& w);
 
-        void sendDataToGPU();
+        void sendDataToGPU(const unsigned int& component_index, const unsigned int& layer_index);
 
         const glm::vec2& getUVModifications() const;
 
