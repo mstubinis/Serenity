@@ -6,6 +6,7 @@
 #include <glm/vec2.hpp>
 
 #include <vector>
+#include <string>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
@@ -54,7 +55,7 @@ class MaterialLayer final{
 
         void setData2(const float& x, const float& y, const float& z, const float& w);
 
-        void sendDataToGPU(const unsigned int& component_index, const unsigned int& layer_index);
+        void sendDataToGPU(const std::string& uniform_component_string, const unsigned int& component_index, const unsigned int& layer_index);
 
         const glm::vec2& getUVModifications() const;
 

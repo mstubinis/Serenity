@@ -97,9 +97,12 @@ void MaterialComponent::bind(const uint& component_index) {
     }
 
     //new material system
-    for (unsigned int i = 0; i < m_NumLayers; ++i) {
-        //m_Layers[i].sendDataToGPU(component_index, i);
-    }
+    //const string wholeString = "components[" + to_string(component_index) + "].";
+    //Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
+    //Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));
+    //for (unsigned int i = 0; i < m_NumLayers; ++i) {
+        //m_Layers[i].sendDataToGPU(wholeString, component_index, i);
+    //}
     /////////////////////
 }
 void MaterialComponent::unbind() {

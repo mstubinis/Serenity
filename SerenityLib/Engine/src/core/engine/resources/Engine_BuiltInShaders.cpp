@@ -1233,6 +1233,18 @@ epriv::EShaders::deferred_frag +=
     "#define MAX_MATERIAL_LAYERS_PER_COMPONENT " + std::to_string(MAX_MATERIAL_LAYERS_PER_COMPONENT) + "\n"
     "#define MAX_MATERIAL_COMPONENTS " + std::to_string(MAX_MATERIAL_COMPONENTS) + "\n"
     "\n"
+    "struct InData {\n"
+    "    vec4  diffuse;\n"
+    "    vec3  normals;\n"
+    "    float glow;\n"
+    "    float specular;\n"
+    "    float ao;\n"
+    "    float metalness;\n"
+    "    float smoothness;\n"
+    "    vec4  reflection;\n"
+    "    vec4  refraction;\n"
+    "    vec2  parallax;\n"
+    "};\n"
     "struct Layer {\n"
     "    vec4 data1;\n"//x = texture enabled? y = mask enabled? z = cubemap enabled?
     "    vec4 data2;\n"
@@ -1396,63 +1408,114 @@ epriv::EShaders::deferred_frag +=
     "    }\n"
     "    return outSmoothness;\n"
     "}\n"
+    /*
+    void ProcessComponent(Component inComponent, InData data, vec2 inUV) {
+        if (inComponent.componentType == 1.0) {
+            for (int i = 0; i < inComponent.numLayers; ++i) {
+                data.diffuse = CalculateDiffuse(inComponent.layers[i], data.diffuse, inUV);
+            }
+        }else if (inComponent.componentType == 2.0) {
+            for (int i = 0; i < inComponent.numLayers; ++i) {
+                data.normals = CalculateNormals(inComponent.layers[i], data.normals, inUV);
+            }
+        }else if (inComponent.componentType == 3.0) {
+            for (int i = 0; i < inComponent.numLayers; ++i) {
+                data.glow = CalculateGlow(inComponent.layers[i], data.glow, inUV);
+            }
+        }else if (inComponent.componentType == 4.0) {
+            for (int i = 0; i < inComponent.numLayers; ++i) {
+                data.specular = CalculateSpecular(inComponent.layers[i], data.specular, inUV);
+            }
+        }else if (inComponent.componentType == 5.0) {
+            for (int i = 0; i < inComponent.numLayers; ++i) {
+                data.ao = CalculateAO(inComponent.layers[i], data.ao, inUV);
+            }
+        }else if (inComponent.componentType == 6.0) {
+            for (int i = 0; i < inComponent.numLayers; ++i) {
+                data.metalness = CalculateMetalness(inComponent.layers[i], data.metalness, inUV);
+            }
+        }else if (inComponent.componentType == 7.0) {
+            for (int i = 0; i < inComponent.numLayers; ++i) {
+                data.smoothness = CalculateSmoothness(inComponent.layers[i], data.smoothness, inUV);
+            }
+        }//else if (inComponent.componentType == 8.0) {
+            //for (int i = 0; i < inComponent.numLayers; ++i) {
+                //data.diffuse = Reflection(uv, data.diffuse, CamPosition, data.normals, WorldPosition);
+            //}
+        //}else if (inComponent.componentType == 9.0) {
+            //for (int i = 0; i < inComponent.numLayers; ++i) {
+                //data.diffuse = Refraction(uv, data.diffuse, CamPosition, data.normals, WorldPosition);
+            //}
+        //}else if (inComponent.componentType == 10.0) {
+            //for (int i = 0; i < inComponent.numLayers; ++i) {
+                //vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);
+                //uv = ParallaxMap(ViewDir);
+            //}
+        }
+    }
+    */
     "void main(){\n"
     "    vec2 uv = UV;\n"
-    "    float ao = MaterialBasePropertiesOne.y;\n"
-    "    float metalness = MaterialBasePropertiesOne.z;\n"
-    "    float smoothness = MaterialBasePropertiesOne.w;\n"
-    "    vec3 InNormals = normalize(Normals);\n"
-    "    vec4 InDiffuse = texture2D(DiffuseTexture, uv);\n"
-    "    vec4 OutDiffuse = Object_Color;\n"
-    "	 float OutGlow = MaterialBasePropertiesOne.x;\n"
-    "	 float OutSpecular = 1.0;\n"
-    "	 float OutMatIDAndAO = Material_F0AndID.w + ao;\n"
+    "\n"
+    "    InData inData;\n"
+    "    inData.diffuse = Object_Color;\n"
+    "    inData.normals = normalize(Normals);\n"
+    "    inData.glow = MaterialBasePropertiesOne.x;\n"
+    "    inData.specular = 1.0;\n"
+    "    inData.ao = MaterialBasePropertiesOne.y;\n"
+    "    inData.metalness = MaterialBasePropertiesOne.z;\n"
+    "    inData.smoothness = MaterialBasePropertiesOne.w;\n"
+    "    inData.reflection = vec4(0.0, 0.0, 0.0, 0.0);\n"
+    "    inData.refraction = vec4(0.0, 0.0, 0.0, 0.0);\n"
+    "    inData.parallax = vec2(0.0,0.0);\n"
+    "\n"
+    "	 float OutMatIDAndAO = Material_F0AndID.w + inData.ao;\n"
     "    if(ThirdConditionals.y == 1.0){\n"
     "        vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);\n"
     "        uv = ParallaxMap(ViewDir);\n"
     "    }\n"
     "    if(FirstConditionals.x == 1.0){\n"
-    "        OutDiffuse *= InDiffuse;\n"
+    "        inData.diffuse *= texture2D(DiffuseTexture, uv);\n"
     "    }else{\n"
-    "        OutDiffuse *= vec4(Material_F0AndID.rgb,1.0);\n"
+    "        inData.diffuse *= vec4(Material_F0AndID.rgb,1.0);\n"
     "    }\n"
     "    if(FirstConditionals.y > 0.9){\n"
-    "        InNormals = CalcBumpedNormal(uv,NormalTexture);\n"
+    "        inData.normals = CalcBumpedNormal(uv,NormalTexture);\n"
     "    }else if(FirstConditionals.y > 0.4){\n"
-    "        InNormals = CalcBumpedNormalCompressed(uv,NormalTexture);\n"
+    "        inData.normals = CalcBumpedNormalCompressed(uv,NormalTexture);\n"
     "    }\n"
     "    if(FirstConditionals.z == 1.0){\n"
-    "        OutGlow += texture2D(GlowTexture, uv).r;\n"
+    "        inData.glow += texture2D(GlowTexture, uv).r;\n"
     "    }\n"
     "    if(FirstConditionals.w == 1.0){\n"
-    "        OutSpecular = texture2D(SpecularTexture, uv).r;\n"
+    "        inData.specular = texture2D(SpecularTexture, uv).r;\n"
     "    }\n"
     "    if(SecondConditionals.x == 1.0){\n"
-    "        ao *= texture2D(AOTexture, uv).r;\n"
+    "        inData.ao *= texture2D(AOTexture, uv).r;\n"
     "    }\n"
     "    if(SecondConditionals.y == 1.0){\n"
-    "        metalness *= texture2D(MetalnessTexture, uv).r;\n"
+    "        inData.metalness *= texture2D(MetalnessTexture, uv).r;\n"
     "    }\n"
     "    if(SecondConditionals.z == 1.0){\n"
-    "        smoothness *= texture2D(SmoothnessTexture, uv).r;\n"
+    "        inData.smoothness *= texture2D(SmoothnessTexture, uv).r;\n"
     "    }\n"
     "    if(SecondConditionals.w == 1.0){\n"
-    "        OutDiffuse = Reflection(uv,OutDiffuse,CamPosition,InNormals,WorldPosition);\n"
+    "        inData.diffuse = Reflection(uv, inData.diffuse, CamPosition, inData.normals, WorldPosition);\n"
     "    }\n"
     "    if(ThirdConditionals.x == 1.0){\n"
-    "        OutDiffuse = Refraction(uv,OutDiffuse,CamPosition,InNormals,WorldPosition);\n"
+    "        inData.diffuse = Refraction(uv, inData.diffuse, CamPosition, inData.normals, WorldPosition);\n"
     "    }\n"
-    "    vec2 OutNormals = EncodeOctahedron(InNormals);\n"
+    "    vec2 OutNormals = EncodeOctahedron(inData.normals);\n"
     "    if(Shadeless == 1){\n"
     "        OutNormals = ConstantOneVec2;\n"
-    "        OutDiffuse *= (1.0 + OutGlow);\n" // we want shadeless items to be influenced by the glow somewhat...
+    "        inData.diffuse *= (1.0 + inData.glow);\n" // we want shadeless items to be influenced by the glow somewhat...
     "    }\n"
-    "	 float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(metalness,smoothness);\n"
+    "	 float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(inData.metalness,inData.smoothness);\n"
     "    vec4 GodRays = vec4(Gods_Rays_Color,1.0);\n"
     "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
-    "    gl_FragData[0] = OutDiffuse;\n"
-    "    gl_FragData[1] = vec4(OutNormals,OutMatIDAndAO,OutPackedMetalnessAndSmoothness);\n"
-    "    gl_FragData[2] = vec4(OutGlow,OutSpecular,GodRaysRG,GodRays.b);\n"
+    "    gl_FragData[0] = inData.diffuse;\n"
+    "    gl_FragData[1] = vec4(OutNormals, OutMatIDAndAO, OutPackedMetalnessAndSmoothness);\n"
+    "    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
     "}";
 #pragma endregion
 

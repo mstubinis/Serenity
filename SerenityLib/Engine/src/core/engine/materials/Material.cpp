@@ -58,7 +58,7 @@ namespace Engine{
             glm::vec4 second(0.0f);
             glm::vec4 third(0.0f);
             glm::vec4 data(0.0f);
-            for(uint i = 0; i < MaterialComponentType::_TOTAL; ++i){
+            for(uint i = 0; i < material.m_Components.size(); ++i){
                 if(material.m_Components[i]){
                     auto& component = *material.m_Components[i];
                     if(component.texture() && component.texture()->address() != 0){
