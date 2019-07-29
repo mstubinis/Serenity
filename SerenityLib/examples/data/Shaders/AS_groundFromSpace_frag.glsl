@@ -1,28 +1,29 @@
 
 USE_LOG_DEPTH_FRAGMENT
+USE_MAX_MATERIAL_LAYERS_PER_COMPONENT
+USE_MAX_MATERIAL_COMPONENTS
 
-uniform sampler2D     DiffuseTexture;
-uniform sampler2D     NormalTexture;
-uniform sampler2D     GlowTexture;
-uniform sampler2D     SpecularTexture;
-uniform sampler2D     AOTexture;
-uniform sampler2D     MetalnessTexture;
-uniform sampler2D     SmoothnessTexture;
-uniform samplerCube   ReflectionTexture;
-uniform sampler2D     ReflectionTextureMap;
-uniform samplerCube   RefractionTexture;
-uniform sampler2D     RefractionTextureMap;
-uniform sampler2D     HeightmapTexture;
+struct InData {
+    vec4 diffuse;
+    vec2 normals;
+    vec3 glow;
+};
+struct Layer {
+    vec4 data1;
+    vec4 data2;
+    sampler2D texture;
+};
+struct Component {
+    int numLayers;
+    int componentType;
+    Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];
+};  
+uniform Component components[MAX_MATERIAL_COMPONENTS];
+uniform int numComponents;
 
-uniform vec4 MaterialBasePropertiesOne;  //x = BaseGlow    y = BaseAO     z = BaseMetalness  w = BaseSmoothness
-uniform float CubemapMixFactor;
-uniform float RefractionRatio;
+uniform vec4 MaterialBasePropertiesOne;
 
-uniform vec4 FirstConditionals;          //x = diffuse     y = normals    z = glow           w = specular
-uniform vec4 SecondConditionals;         //x = ao          y = metal      z = smoothness     w = reflection
-uniform vec4 ThirdConditionals;          //x = refraction  y = heightmap  z = UNUSED         w = UNUSED
-
-uniform vec4 FragDataMisc1;              //xyz = lightPos  w = exposure
+uniform vec4 FragDataMisc1;
 
 uniform vec4 Object_Color;
 uniform vec3 Gods_Rays_Color;
@@ -84,50 +85,36 @@ float orenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN){
      return (A + B * max(0.0, cosAzimuthSinPolarTanPolar));
 }
 void main(){
-    vec4 InDiffuse = texture2D(DiffuseTexture, UV) * Object_Color;
-    vec4 OutDiffuse = ConstantZeroVec4;
-    vec2 OutNormals = ConstantOneVec2;
-    vec3 InGlow = texture2D(GlowTexture, UV).rgb;
+    InData inData;
+    inData.diffuse = texture2D(components[0].layers[0].texture, UV) * Object_Color;
+    inData.normals = ConstantOneVec2;
+    inData.glow = texture2D(components[1].layers[0].texture, UV).rgb;
+    vec4 OutDiffuse = vec4(0.0);
     float OutGlow = 0.0;
-    float OutSpecular = 1.0;
-    float OutPackedMetalnessSmoothness = 1.0;
     if(HasAtmo > 0.99){
-        if(FirstConditionals.x > 0.5){
-            vec3 HDR = (1.0 - exp(-FragDataMisc1.w * (c0 + InDiffuse.rgb) * c1));
-            OutDiffuse.rgb = max(0.05 * InDiffuse.rgb, HDR);    
-            if(FirstConditionals.z > 0.5){
+        if(components[0].layers[0].data1.y >= 0.5){
+            vec3 HDR = (1.0 - exp(-FragDataMisc1.w * (c0 + inData.diffuse.rgb) * c1));
+            OutDiffuse.rgb = max(0.05 * inData.diffuse.rgb, HDR);    
+            if(components[1].layers[0].data1.y >= 0.5){
                 vec3 lightIntensity = max(0.05 * ConstantOneVec3,(1.0 - exp( -FragDataMisc1.w * ( (c0 + ConstantOneVec3 ) * c1) )));
-                OutDiffuse = vec4(max(OutDiffuse.rgb, (1.0 - lightIntensity) * InGlow),InDiffuse.a);
+                OutDiffuse = vec4(max(OutDiffuse.rgb, (1.0 - lightIntensity) * inData.glow), inData.diffuse.a);
             }
         }
     }else{
-        if(FirstConditionals.x > 0.5){
+        if(components[0].layers[0].data1.y >= 0.5){
             vec3 PxlNormal = normalize(Normals);
-            if(FirstConditionals.y > 0.5){
-                PxlNormal = CalcBumpedNormal(UV,NormalTexture);
-            }
             vec3 ViewDir = normalize(VCameraPositionReal - WorldPosition);
             vec3 LightDir = normalize(FragDataMisc1.xyz - WorldPosition);
             float NdotL = max(0.0,dot(PxlNormal,LightDir));
             float VdotN = max(0.0,dot(PxlNormal,ViewDir));
-            //OutDiffuse = vec4(InDiffuse.rgb * minnaert(NdotL,VdotN),InDiffuse.a);
-            OutDiffuse = vec4(max(InDiffuse.rgb * 0.038,InDiffuse.rgb * orenNayar(ViewDir,LightDir,NdotL,VdotN) * NdotL * 1.6),InDiffuse.a);
+            OutDiffuse = vec4(max(inData.diffuse.rgb * 0.038, inData.diffuse.rgb * orenNayar(ViewDir,LightDir,NdotL,VdotN) * NdotL * 1.6), inData.diffuse.a);
         }
-        OutNormals.rg = EncodeOctahedron(ConstantOneVec3);
-        OutPackedMetalnessSmoothness = Pack2FloatIntoFloat16(0.0,1.0);
-
-        if(FirstConditionals.z > 0.5){
-            OutGlow = InGlow.r + MaterialBasePropertiesOne.x;
-        }else{
-            OutGlow = MaterialBasePropertiesOne.x;
-        }
-        if(FirstConditionals.w > 0.5){
-            OutSpecular = texture2D(SpecularTexture, UV).r;
-        }
+        inData.normals = EncodeOctahedron(ConstantOneVec3);
     }
+    float OutPackedMetalnessSmoothness = Pack2FloatIntoFloat16(0.0,0.25);
     gl_FragData[0] = OutDiffuse;          
-    gl_FragData[1] = vec4(OutNormals,0.0,OutPackedMetalnessSmoothness); //0.0 = matID + ao, which is never used
-    vec4 GodRays = vec4(Gods_Rays_Color,1.0);
-    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);
-    gl_FragData[2] = vec4(OutGlow,OutSpecular,GodRaysRG,GodRays.b);
+    gl_FragData[1] = vec4(inData.normals, 0.0, OutPackedMetalnessSmoothness); //0.0 = matID + ao, which is never used
+    vec4 GodRays = vec4(Gods_Rays_Color, 1.0);
+    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r, GodRays.g);
+    gl_FragData[2] = vec4(OutGlow, 1.0, GodRaysRG, GodRays.b);
 }

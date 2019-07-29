@@ -61,21 +61,21 @@ void Math::setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position
     const glm::mat4 translationMatrix = glm::translate(position);
     const glm::mat4 rotationMatrix = glm::mat4_cast(rotation);
     const glm::mat4 scaleMatrix = glm::scale(scale);
-    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix * modelMatrix;
+    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix /*  * modelMatrix  */;
 }
 void Math::setRotation(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll) {
     if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation               = (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));   //pitch
+        orientation               = (glm::angleAxis(pitch, glm::vec3(-1, 0, 0)));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(-yaw,   glm::vec3(0, 1, 0)));   //yaw
+        orientation = orientation * (glm::angleAxis(yaw,   glm::vec3(0, -1, 0)));   //yaw
     if (abs(roll) > ROTATION_THRESHOLD)
         orientation = orientation * (glm::angleAxis(roll,   glm::vec3(0, 0, 1)));   //roll
 }
 void Math::rotate(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll) {
     if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));   //pitch
+        orientation = orientation * (glm::angleAxis(pitch, glm::vec3(-1, 0, 0)));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(-yaw,   glm::vec3(0, 1, 0)));   //yaw
+        orientation = orientation * (glm::angleAxis(yaw,   glm::vec3(0, -1, 0)));   //yaw
     if (abs(roll) > ROTATION_THRESHOLD)
         orientation = orientation * (glm::angleAxis(roll,   glm::vec3(0, 0, 1)));   //roll
 }

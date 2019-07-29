@@ -193,22 +193,22 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Engine\data\Shaders\AS_groundFromSpace_frag.glsl">
+    <None Include="..\data\Shaders\AS_groundFromSpace_frag.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="..\..\Engine\data\Shaders\AS_groundFromSpace_vert.glsl">
+    <None Include="..\data\Shaders\AS_groundFromSpace_vert.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="..\..\Engine\data\Shaders\AS_skyFromAtmosphere_frag.glsl">
+    <None Include="..\data\Shaders\AS_skyFromAtmosphere_frag.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="..\..\Engine\data\Shaders\AS_skyFromAtmosphere_vert.glsl">
+    <None Include="..\data\Shaders\AS_skyFromAtmosphere_vert.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="..\..\Engine\data\Shaders\AS_skyFromSpace_frag.glsl">
+    <None Include="..\data\Shaders\AS_skyFromSpace_frag.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="..\..\Engine\data\Shaders\AS_skyFromSpace_vert.glsl">
+    <None Include="..\data\Shaders\AS_skyFromSpace_vert.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>

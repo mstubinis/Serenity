@@ -54,39 +54,17 @@ namespace Engine{
     namespace epriv{
         struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
             auto& material = *static_cast<Material*>(r);
-            glm::vec4 first(0.0f);
-            glm::vec4 second(0.0f);
-            glm::vec4 third(0.0f);
-            glm::vec4 data(0.0f);
-            for(uint i = 0; i < material.m_Components.size(); ++i){
+            const int& numComponents = material.m_Components.size();
+            for(int i = 0; i < numComponents; ++i){
                 if(material.m_Components[i]){
                     auto& component = *material.m_Components[i];
-                    if(component.texture() && component.texture()->address() != 0){
-                        if     (i == 0) { first.x = 1.0f; }
-                        else if(i == 1) { first.y = component.texture()->compressed() ? 0.5f : 1.0f; }
-                        else if(i == 2) { first.z = 1.0f; }
-                        else if(i == 3) { first.w = 1.0f; }
-                        else if(i == 4) { second.x = 1.0f; }
-                        else if(i == 5) { second.y = 1.0f; }
-                        else if(i == 6) { second.z = 1.0f; }
-                        else if(i == 7) { second.w = 1.0f; }
-                        else if(i == 8) { third.x = 1.0f; }
-                        else if(i == 9) { third.y = 1.0f; }
-                        else if(i == 10){ third.z = 1.0f; }
-                        else if(i == 11){ third.w = 1.0f; }
-                        component.bind(i);
-                    }//else{ 
-                        //component.unbind(); 
-                    //}
+                    component.bind(i);
                 }
             }
-            Renderer::sendUniform4Safe("MaterialDataA", data);
+            Renderer::sendUniform1Safe("numComponents", numComponents);
             Renderer::sendUniform1Safe("Shadeless", static_cast<int>(material.m_Shadeless));
             Renderer::sendUniform4Safe("Material_F0AndID", material.m_F0Color.r, material.m_F0Color.g, material.m_F0Color.b, static_cast<float>(material.m_ID));
             Renderer::sendUniform4Safe("MaterialBasePropertiesOne", material.m_BaseGlow, material.m_BaseAO, material.m_BaseMetalness, material.m_BaseSmoothness);
-            Renderer::sendUniform4Safe("FirstConditionals", first);   //x = diffuse     y = normals    z = glow        w = specular
-            Renderer::sendUniform4Safe("SecondConditionals", second); //x = ao          y = metal      z = smoothness  w = reflection
-            Renderer::sendUniform4Safe("ThirdConditionals", third);   //x = refraction  y = heightmap  z = UNUSED      w = UNUSED
         }};
         struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
             //auto& material = *static_cast<Material*>(r);
@@ -137,8 +115,8 @@ Material::~Material(){
 }
 void Material::internalInit(Texture* diffuse, Texture* normal, Texture* glow, Texture* specular) {
     m_Components.reserve(MAX_MATERIAL_COMPONENTS);
-    for (unsigned int i = 0; i < MaterialComponentType::_TOTAL; ++i)
-        m_Components.push_back(nullptr);
+    //for (unsigned int i = 0; i < MaterialComponentType::_TOTAL; ++i)
+    //    m_Components.push_back(nullptr);
     internalAddComponentGeneric(MaterialComponentType::Diffuse, diffuse);
     internalAddComponentGeneric(MaterialComponentType::Normal, normal);
     internalAddComponentGeneric(MaterialComponentType::Glow, glow);
@@ -161,11 +139,13 @@ void Material::internalInit(Texture* diffuse, Texture* normal, Texture* glow, Te
     setCustomUnbindFunctor(epriv::DefaultMaterialUnbindFunctor());
 }
 MaterialComponent* Material::internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture) {
-    if (!m_Components[type] && texture) {
-        m_Components[type] = new MaterialComponent(type, texture);
+    MaterialComponent* newMaterialComponent = nullptr;
+    if (texture) {
+        newMaterialComponent = new MaterialComponent(type, texture);
         texture->setAnisotropicFiltering(2.0f);
+        m_Components.push_back(newMaterialComponent);
     }
-    return m_Components[type];
+    return newMaterialComponent;
 }
 void Material::internalUpdateGlobalMaterialPool(const bool& addToDatabase) {
     //this data is kept around to be deferred to the lighting pass
@@ -200,7 +180,7 @@ void Material::addComponentDiffuse(const string& textureFile){
     addComponentDiffuse(texture);
 }
 void Material::addComponentNormal(Texture* texture){
-    MaterialComponent& component = *internalAddComponentGeneric(MaterialComponentType::Normal, texture);
+    internalAddComponentGeneric(MaterialComponentType::Normal, texture);
 }
 void Material::addComponentNormal(const string& textureFile){
     Texture* texture = Core::m_Engine->m_ResourceManager._hasTexture(textureFile);

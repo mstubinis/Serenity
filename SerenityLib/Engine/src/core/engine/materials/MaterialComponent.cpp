@@ -12,54 +12,6 @@
 using namespace Engine;
 using namespace std;
 
-
-struct MaterialComponentTextureSlot { enum Slot {
-    Diffuse,
-    Normal,
-    Glow,
-    Specular,
-    AO,
-    Metalness,
-    Smoothness,
-    Reflection_CUBEMAP,
-    Reflection_CUBEMAP_MAP,
-    Refraction_CUBEMAP,
-    Refraction_CUBEMAP_MAP,
-    Heightmap,
-    _TOTAL
-};};
-vector<vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = []() {
-    vector<vector<uint>> m; m.resize(MaterialComponentType::_TOTAL);
-
-    m[MaterialComponentType::Diffuse].push_back(MaterialComponentTextureSlot::Diffuse);
-    m[MaterialComponentType::Normal].push_back(MaterialComponentTextureSlot::Normal);
-    m[MaterialComponentType::Glow].push_back(MaterialComponentTextureSlot::Glow);
-    m[MaterialComponentType::Specular].push_back(MaterialComponentTextureSlot::Specular);
-    m[MaterialComponentType::AO].push_back(MaterialComponentTextureSlot::AO);
-    m[MaterialComponentType::Metalness].push_back(MaterialComponentTextureSlot::Metalness);
-    m[MaterialComponentType::Smoothness].push_back(MaterialComponentTextureSlot::Smoothness);
-    m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP);
-    m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP_MAP);
-    m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP);
-    m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP_MAP);
-    m[MaterialComponentType::ParallaxOcclusion].push_back(MaterialComponentTextureSlot::Heightmap);
-
-    return m;
-}();
-const GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::_TOTAL] = {
-    "DiffuseTexture",
-    "NormalTexture",
-    "GlowTexture",
-    "SpecularTexture",
-    "AOTexture",
-    "MetalnessTexture",
-    "SmoothnessTexture",
-    "ReflectionTexture",
-    "RefractionTexture",
-    "HeightmapTexture",
-};
-
-
 MaterialComponent::MaterialComponent(const MaterialComponentType::Type& type, Texture* texture, Texture* mask, Texture* cubemap) {
     m_ComponentType = type;
     m_NumLayers = 0;
@@ -90,20 +42,12 @@ const MaterialComponentType::Type& MaterialComponent::type() const {
 }
 
 void MaterialComponent::bind(const uint& component_index) {
-    const auto& slots             = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    const string& textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    for (uint i = 0; i < slots.size(); ++i) {
-        Renderer::sendTextureSafe(textureTypeName.c_str(), *m_Layers[0].getTexture(), slots[i]);
+    const string wholeString = "components[" + to_string(component_index) + "].";
+    Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
+    Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));
+    for (unsigned int j = 0; j < m_NumLayers; ++j) {
+        m_Layers[j].sendDataToGPU(wholeString, component_index, j);
     }
-
-    //new material system
-    //const string wholeString = "components[" + to_string(component_index) + "].";
-    //Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
-    //Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));
-    //for (unsigned int i = 0; i < m_NumLayers; ++i) {
-        //m_Layers[i].sendDataToGPU(wholeString, component_index, i);
-    //}
-    /////////////////////
 }
 void MaterialComponent::unbind() {
 }

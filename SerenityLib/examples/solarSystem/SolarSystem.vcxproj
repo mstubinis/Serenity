@@ -244,17 +244,17 @@
     <ClCompile Include="game\Ship.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Engine\data\Shaders\AS_groundFromSpace_frag.glsl" />
-    <None Include="..\..\Engine\data\Shaders\AS_groundFromSpace_vert.glsl" />
-    <None Include="..\..\Engine\data\Shaders\AS_skyFromAtmosphere_frag.glsl" />
-    <None Include="..\..\Engine\data\Shaders\AS_skyFromAtmosphere_vert.glsl" />
-    <None Include="..\..\Engine\data\Shaders\AS_skyFromSpace_frag.glsl" />
-    <None Include="..\..\Engine\data\Shaders\AS_skyFromSpace_vert.glsl" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\SerenityLib.vcxproj">
       <Project>{cb117fee-0b28-4982-bb5f-1e1f95c614b8}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\data\Shaders\AS_groundFromSpace_frag.glsl" />
+    <None Include="..\data\Shaders\AS_groundFromSpace_vert.glsl" />
+    <None Include="..\data\Shaders\AS_skyFromAtmosphere_frag.glsl" />
+    <None Include="..\data\Shaders\AS_skyFromAtmosphere_vert.glsl" />
+    <None Include="..\data\Shaders\AS_skyFromSpace_frag.glsl" />
+    <None Include="..\data\Shaders\AS_skyFromSpace_vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

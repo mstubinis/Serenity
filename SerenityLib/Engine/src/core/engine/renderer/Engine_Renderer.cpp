@@ -2388,7 +2388,10 @@ void Renderer::unbindDrawFBO(){
     Renderer::bindDrawFBO(0); 
 }
 inline const GLint Renderer::getUniformLoc(const char* location) {
-    const auto& m = renderManager->glSM.current_bound_shader_program->uniforms(); if (!m.count(location)) return -1; return m.at(location);
+    const auto& m = renderManager->glSM.current_bound_shader_program->uniforms(); 
+    if (!m.count(location)) 
+        return -1; 
+    return m.at(location);
 }
 inline const GLint& Renderer::getUniformLocUnsafe(const char* location) {
     return renderManager->glSM.current_bound_shader_program->uniforms().at(location);

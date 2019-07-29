@@ -89,7 +89,7 @@ M name=Ganymede parent=Jupiter radius=2634 r=1 g=1 b=1 position=1070400 x=-66633
 #M name=S/2003-J-2 parent=Jupiter
 
 #saturn's rings are 141,000 km in radius from saturn's center. saturn itself is 58,232km in radius
-P name=Saturn parent=Sun radius=58232 r=1 g=1 b=1 position=1433000000 x=-14145669100 y=0 z=-2291063040 a=3.30216050 type=GasGiant atmosphereHeight=0 texture=Saturn.dds eccentricity=0.05555 tilt=86.73 period=10759.22 majorAxis=1429394041.1 days=0.593055555 inclination=5.51
+P name=Saturn parent=Sun radius=58232 r=1 g=1 b=1 position=1433000000 x=-14145669100 y=0 z=-2291063040 a=3.30216050 type=GasGiant atmosphereHeight=0 texture=Saturn.dds eccentricity=0.05555 tilt=0.0 period=10759.22 majorAxis=1429394041.1 days=0.593055555 inclination=5.51
 R parent=Saturn r=220 g=194 b=161 position=512 radius=492 break=482
 R parent=Saturn r=133 g=120 b=111 position=157 radius=137 break=127
 R parent=Saturn r=88 g=79 b=64 position=588 radius=240 break=230

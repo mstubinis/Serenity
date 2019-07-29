@@ -2,7 +2,6 @@
 USE_LOG_DEPTH_VERTEX
 
 layout (location = 0) in vec3 position;
-//layout (location = 1) in float uv;
 layout (location = 1) in vec2 uv;
 layout (location = 2) in vec4 normal;
 layout (location = 3) in vec4 binormal;
@@ -13,17 +12,17 @@ layout (location = 6) in vec4 Weights;
 uniform int HasAtmosphere;
 
 uniform mat4 Model;
-uniform mat4 Rot;
+uniform mat4 RotMatrix;
 
 uniform int nSamples;
 uniform int fromAtmosphere;
 
-uniform vec4 VertDataMisc1;     //xyz = camPos,             w = lightDir.x
-uniform vec4 VertDataMisc2;     //xyz = camPosReal,         w = lightDir.y
-uniform vec4 VertDataMisc3;     //xyz = v3InvWaveLength,    w = lightDir.z
-uniform vec4 VertDataScale;     //Scale,Scaledepth,ScaleOverScaleDepth,Samples
-uniform vec4 VertDataRadius;    //CameraHeight2,OuterRadius,OuterRadius2,InnerRadius
-uniform vec4 VertDatafK;        //KrESun,KmESun,Kr4PI,Km4PI
+uniform vec4 VertDataMisc1;
+uniform vec4 VertDataMisc2;
+uniform vec4 VertDataMisc3;
+uniform vec4 VertDataScale;
+uniform vec4 VertDataRadius;
+uniform vec4 VertDatafK;
 
 varying vec3 c0;
 varying vec3 c1;
@@ -76,7 +75,7 @@ void main(){
     HasAtmo = HasAtmosphere;
 
     if(HasAtmosphere == 1){
-        vec3 test = (Rot * vec4(position,1.0)).xyz;
+        vec3 test = (RotMatrix * vec4(position,1.0)).xyz;
         vec3 v3Pos = test * VertDataRadius.w;
         vec3 v3Ray = v3Pos - VertDataMisc1.xyz;
         float _far = length(v3Ray);

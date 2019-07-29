@@ -97,11 +97,11 @@ struct PlanetaryRingModelInstanceBindFunctor{void operator()(EngineResource* r) 
 
 
     Renderer::sendUniform1("fromAtmosphere", 0); 
-    Renderer::sendUniform4Safe("Object_Color",i.color());
-    Renderer::sendUniform3Safe("Gods_Rays_Color",i.godRaysColor());
+    Renderer::sendUniform4("Object_Color",i.color());
+    Renderer::sendUniform3("Gods_Rays_Color",i.godRaysColor());
     Renderer::sendUniform1("nSamples", numberSamples); 
     float exposure = 2.0f;
-    Renderer::sendUniformMatrix4("Rot",rot); 
+    Renderer::sendUniformMatrix4("RotMatrix",rot); 
 
     Renderer::sendUniform4("VertDataMisc1",camPos.x,camPos.y,camPos.z,lightDir.x);
     Renderer::sendUniform4("VertDataMisc2",camPosR.x,camPosR.y,camPosR.z,lightDir.y);
@@ -111,7 +111,7 @@ struct PlanetaryRingModelInstanceBindFunctor{void operator()(EngineResource* r) 
     Renderer::sendUniform4("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
 
     Renderer::sendUniform4("FragDataMisc1",lightPos.x,lightPos.y,lightPos.z,exposure);
-    Renderer::sendUniformMatrix4Safe("Model",model);
+    Renderer::sendUniformMatrix4("Model",model);
 }};
 
 struct StarModelInstanceBindFunctor{void operator()(EngineResource* r) const {
@@ -123,9 +123,9 @@ struct StarModelInstanceBindFunctor{void operator()(EngineResource* r) const {
     glm::vec3 camPosR = c->getPosition();
     glm::quat orientation = m_Body->rotation();
 
-    Renderer::sendUniform4Safe("Object_Color",i.color());
-    Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
-    Renderer::sendUniform1Safe("AnimationPlaying",0);
+    Renderer::sendUniform4("Object_Color",i.color());
+    Renderer::sendUniform3("Gods_Rays_Color", i.godRaysColor());
+    Renderer::sendUniform1("AnimationPlaying",0);
     glm::mat4 modelMatrix = i.modelMatrix();
     float outerRadius = obj.getRadius();
 
@@ -149,8 +149,8 @@ struct StarModelInstanceBindFunctor{void operator()(EngineResource* r) const {
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
     
-    Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
-    Renderer::sendUniformMatrix3Safe("NormalMatrix",normalMatrix);
+    Renderer::sendUniformMatrix4("Model", modelMatrix);
+    Renderer::sendUniformMatrix3("NormalMatrix",normalMatrix);
 }};
 
 struct StarModelInstanceUnbindFunctor {void operator()(EngineResource* r) const {
@@ -216,12 +216,12 @@ struct AtmosphericScatteringGroundModelInstanceBindFunctor{void operator()(Engin
     }else{
         Renderer::sendUniform1("fromAtmosphere", 0);
     }
-    Renderer::sendUniform4Safe("Object_Color",i.color());
-    Renderer::sendUniform3Safe("Gods_Rays_Color",i.godRaysColor());
+    Renderer::sendUniform4("Object_Color",i.color());
+    Renderer::sendUniform3("Gods_Rays_Color",i.godRaysColor());
 
     Renderer::sendUniform1("nSamples", numberSamples); 
     float exposure = 2.0f;
-    Renderer::sendUniformMatrix4("Rot",rot);
+    Renderer::sendUniformMatrix4("RotMatrix",rot);
 
     Renderer::sendUniform4("VertDataMisc1",camPos.x,camPos.y,camPos.z,lightDir.x);
     Renderer::sendUniform4("VertDataMisc2",camPosR.x,camPosR.y,camPosR.z,lightDir.y);
@@ -231,7 +231,7 @@ struct AtmosphericScatteringGroundModelInstanceBindFunctor{void operator()(Engin
     Renderer::sendUniform4("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
 
     Renderer::sendUniform4("FragDataMisc1",lightPos.x,lightPos.y,lightPos.z,exposure);
-    Renderer::sendUniformMatrix4Safe("Model",model);
+    Renderer::sendUniformMatrix4("Model",model);
 }};
 
 struct AtmosphericScatteringGroundModelInstanceUnbindFunctor{void operator()(EngineResource* r) const {
@@ -299,7 +299,7 @@ struct AtmosphericScatteringSkyModelInstanceBindFunctor{void operator()(EngineRe
 
     Renderer::cullFace(GL_FRONT);
 
-    Renderer::sendUniformMatrix4Safe("Model", model);
+    Renderer::sendUniformMatrix4("Model", model);
     Renderer::sendUniform1("nSamples", numberSamples);
     Renderer::sendUniform4("VertDataMisc1", camPos.x, camPos.y, camPos.z, lightDir.x);
     Renderer::sendUniform4("VertDataMisc2", camHeight, camHeight2, fDepth, lightDir.y);

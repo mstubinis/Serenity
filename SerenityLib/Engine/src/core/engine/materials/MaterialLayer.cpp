@@ -84,19 +84,22 @@ void MaterialLayer::update(const double& dt) {
 }
 void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const unsigned int& component_index, const unsigned int& layer_index) {
     const string wholeString = uniform_component_string + "layers[" + to_string(layer_index) + "].";
-    const uint start = (((component_index + 1) * layer_index) * 3);
-    const uint slot_texture = start + 0;
-    const uint slot_mask    = start + 1;
-    const uint slot_cubemap = start + 2;
+    const int start = (component_index * 9) + (layer_index * 3);
 
     Renderer::sendUniform4Safe((wholeString + "data1").c_str(), m_Data1);
     Renderer::sendUniform4Safe((wholeString + "data2").c_str(), m_Data2);
     Renderer::sendUniform2Safe((wholeString + "uvModifications").c_str(), m_UVModifications);
 
-    if(m_Texture && m_Texture->address() != 0)
+    if (m_Texture && m_Texture->address() != 0) {
+        const int slot_texture = start + 0;
         Renderer::sendTextureSafe((wholeString + "texture").c_str(), *m_Texture, slot_texture);
-    if(m_Mask && m_Mask->address() != 0)
+    }
+    if (m_Mask && m_Mask->address() != 0) {
+        const int slot_mask = start + 1;
         Renderer::sendTextureSafe((wholeString + "mask").c_str(),    *m_Mask, slot_mask);
-    if(m_Cubemap && m_Cubemap->address() != 0)
+    }
+    if (m_Cubemap && m_Cubemap->address() != 0) {
+        const int slot_cubemap = start + 2;
         Renderer::sendTextureSafe((wholeString + "cubemap").c_str(), *m_Cubemap, slot_cubemap);
+    }
 }

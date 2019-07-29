@@ -3,12 +3,14 @@
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
+#include <core/engine/materials/MaterialEnums.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/lexical_cast.hpp>
+
 
 #include <regex>
 #include <iostream>
@@ -303,6 +305,14 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
             }
         }
     }
+    //check for material limits
+    if (sfind(_d, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT") && !sfind(_d, "//USE_MAX_MATERIAL_LAYERS_PER_COMPONENT") && shader.type() == ShaderType::Fragment) {
+        boost::replace_all(_d, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT", "#define MAX_MATERIAL_LAYERS_PER_COMPONENT " + std::to_string(MAX_MATERIAL_LAYERS_PER_COMPONENT) + "\n");
+    }
+    if (sfind(_d, "USE_MAX_MATERIAL_COMPONENTS") && !sfind(_d, "//USE_MAX_MATERIAL_COMPONENTS") && shader.type() == ShaderType::Fragment) {
+        boost::replace_all(_d, "USE_MAX_MATERIAL_COMPONENTS", "#define MAX_MATERIAL_COMPONENTS " + std::to_string(MAX_MATERIAL_COMPONENTS) + "\n");
+    }
+
     //check for log depth - vertex
     if (sfind(_d, "USE_LOG_DEPTH_VERTEX") && !sfind(_d, "//USE_LOG_DEPTH_VERTEX") && shader.type() == ShaderType::Vertex) {
         boost::replace_all(_d, "USE_LOG_DEPTH_VERTEX", "");
@@ -441,11 +451,13 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
     }
     if (versionNumber >= 110) {
         if (shader.type() == ShaderType::Vertex) {
+            boost::replace_all(_d, "flat ",    "");
             boost::replace_all(_d, "flat",     "");
             boost::replace_all(_d, "highp ",   "");
             boost::replace_all(_d, "mediump ", "");
             boost::replace_all(_d, "lowp ",    "");
         }else if (shader.type() == ShaderType::Fragment) {
+            boost::replace_all(_d, "flat ",    "");
             boost::replace_all(_d, "flat",     "");
             boost::replace_all(_d, "highp ",   "");
             boost::replace_all(_d, "mediump ", "");
@@ -454,8 +466,10 @@ void ShaderP::_convertCode(string& _d, Shader& shader, ShaderP& super) {
     }
     if (versionNumber >= 130) {
         if (shader.type() == ShaderType::Vertex) {
+            boost::replace_all(_d, " varying", "out");
             boost::replace_all(_d, "varying", "out");
         }else if (shader.type() == ShaderType::Fragment) {
+            boost::replace_all(_d, " varying", "in");
             boost::replace_all(_d, "varying", "in");
             boost::replace_all(_d, "gl_FragColor", "FRAG_COL");
             insertStringAtLine(_d, "out vec4 FRAG_COL;", 1);

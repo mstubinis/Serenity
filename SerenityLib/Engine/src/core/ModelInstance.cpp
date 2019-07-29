@@ -20,9 +20,6 @@ using namespace std;
 namespace Engine {
     namespace epriv {
         struct ModelInstanceAnimation final{
-            //friend struct DefaultModelInstanceBindFunctor;
-            //friend struct DefaultModelInstanceUnbindFunctor;
-
             uint m_CurrentLoops, m_RequestedLoops;
             float m_CurrentTime, m_StartTime, m_EndTime;
             string m_AnimationName;
@@ -280,6 +277,5 @@ void ModelInstance::setMaterial(Material* material, ComponentModel& componentMod
     componentModel.setModel(m_Mesh, material, 0, m_ShaderProgram, m_Stage);
 }
 void ModelInstance::playAnimation(const string& animName, const float& start, const float& end, const uint& reqLoops){
-    //m_AnimationQueue.emplace_back(*mesh(), animName, start, end, reqLoops);
     m_AnimationQueue.push_back(new epriv::ModelInstanceAnimation(*mesh(), animName, start, end, reqLoops));
 }

@@ -1230,8 +1230,8 @@ epriv::EShaders::deferred_frag =
     "\n";
 epriv::EShaders::deferred_frag +=
     "\n"
-    "#define MAX_MATERIAL_LAYERS_PER_COMPONENT " + std::to_string(MAX_MATERIAL_LAYERS_PER_COMPONENT) + "\n"
-    "#define MAX_MATERIAL_COMPONENTS " + std::to_string(MAX_MATERIAL_COMPONENTS) + "\n"
+    "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
+    "USE_MAX_MATERIAL_COMPONENTS\n"
     "\n"
     "struct InData {\n"
     "    vec4  diffuse;\n"
@@ -1260,29 +1260,12 @@ epriv::EShaders::deferred_frag +=
     "};\n"
     "\n"
     "uniform Component   components[MAX_MATERIAL_COMPONENTS];\n"
+    "uniform int         numComponents;\n"
     "\n"
-    "uniform sampler2D   DiffuseTexture;\n"
-    "uniform sampler2D   NormalTexture;\n"
-    "uniform sampler2D   GlowTexture;\n"
-    "uniform sampler2D   SpecularTexture;\n"
-    "uniform sampler2D   AOTexture;\n"
-    "uniform sampler2D   MetalnessTexture;\n"
-    "uniform sampler2D   SmoothnessTexture;\n"
-    "uniform samplerCube ReflectionTexture;\n"
-    "uniform sampler2D   ReflectionTextureMap;\n"
-    "uniform samplerCube RefractionTexture;\n"
-    "uniform sampler2D   RefractionTextureMap;\n"
-    "uniform sampler2D   HeightmapTexture;\n"
     "\n"
     "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
     "\n"
     "uniform int Shadeless;\n"
-    "\n"
-    "uniform vec4 MaterialDataA;\n"      //x = cubemapMix y = refractionIndex z = parallaxScale w = UNUSED
-    "\n"
-    "uniform vec4 FirstConditionals;\n"  //x = diffuse  y = normals    z = glow w = specular
-    "uniform vec4 SecondConditionals;\n" //x = ao y = metal z = smoothness w = reflection
-    "uniform vec4 ThirdConditionals;\n"  //x = refraction y = heightmap z = UNUSED w = UNUSED
     "\n"
     "uniform vec4 Object_Color;\n"
     "uniform vec4 Material_F0AndID;\n"
@@ -1301,159 +1284,158 @@ epriv::EShaders::deferred_frag += epriv::EShaders::normals_octahedron_compressio
 epriv::EShaders::deferred_frag +=
     "vec4 Reflection(vec2 _uv,vec4 d, vec3 cpos, vec3 n, vec3 wpos){\n"
     "    vec4 r = vec4(0.0);\n"
-    "    r = textureCube(ReflectionTexture,reflect(n,normalize(cpos - wpos))) * texture2D(ReflectionTextureMap,_uv).r;\n"
-    "    r.a *= MaterialDataA.x;\n"
-    "    r = PaintersAlgorithm(r,d);\n"
+    //"    r = textureCube(ReflectionTexture,reflect(n,normalize(cpos - wpos))) * texture2D(ReflectionTextureMap,_uv).r;\n"
+    //"    r.a *= MaterialDataA.x;\n"
+    //"    r = PaintersAlgorithm(r,d);\n"
     "    return r;\n"
     "}\n"
     "vec4 Refraction(vec2 _uv,vec4 d, vec3 cpos, vec3 n, vec3 wpos){\n"
     "    vec4 r = vec4(0.0);\n"
-    "    r = textureCube(RefractionTexture,refract(n,normalize(cpos - wpos),1.0 / MaterialDataA.y)) * texture2D(RefractionTextureMap,_uv).r;\n"
-    "    r.a *= MaterialDataA.x;\n"
-    "    r = PaintersAlgorithm(r,d);\n"
+    //"    r = textureCube(RefractionTexture,refract(n,normalize(cpos - wpos),1.0 / MaterialDataA.y)) * texture2D(RefractionTextureMap,_uv).r;\n"
+    //"    r.a *= MaterialDataA.x;\n"
+    //"    r = PaintersAlgorithm(r,d);\n"
     "    return r;\n"
     "}\n"
     "vec2 ParallaxMap(vec3 _ViewDir){\n"
-    "    float minLayers = min(5.0,(5.0 * MaterialDataA.z)+1.0);\n"
-    "    float maxLayers = min(30.0,(30.0 * MaterialDataA.z)+1.0);\n"
-    "    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), _ViewDir)));\n"
-    "    float layerDepth = 1.0 / numLayers;\n"// calculate the size of each layer 
-    "    float currentLayerDepth = 0.0;\n"// depth of current layer  
-    "    vec2 P = _ViewDir.xy * MaterialDataA.z;\n"// the amount to shift the texture coordinates per layer (from vector P)
-    "    vec2 deltaUV = P / numLayers;\n"
-    "    vec2  currentUV = UV;\n"
-    "    float currentDepth = texture2D(HeightmapTexture, currentUV).r;\n"
-    "    while(currentLayerDepth < currentDepth){\n"	
-    "    	currentUV -= deltaUV;\n"// shift texture coordinates along direction of P
-    "    	currentDepth = texture2D(HeightmapTexture, currentUV).r;\n"
-    "    	currentLayerDepth += layerDepth;\n"
-    "    }\n"
-    "    vec2 prevUV = currentUV + deltaUV;\n" // get texture coordinates before collision (reverse operations)
-    "    float afterDepth  = currentDepth - currentLayerDepth;\n" // get depth after and before collision for linear interpolation
-    "    float beforeDepth = texture2D(HeightmapTexture, prevUV).r - currentLayerDepth + layerDepth;\n"
-    "    float weight = afterDepth / (afterDepth - beforeDepth);\n" // interpolation of texture coordinates
-    "    return prevUV * weight + currentUV * (1.0 - weight);\n"
+    //"    float minLayers = min(5.0,(5.0 * MaterialDataA.z)+1.0);\n"
+    //"    float maxLayers = min(30.0,(30.0 * MaterialDataA.z)+1.0);\n"
+    //"    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), _ViewDir)));\n"
+    //"    float layerDepth = 1.0 / numLayers;\n"// calculate the size of each layer 
+    //"    float currentLayerDepth = 0.0;\n"// depth of current layer  
+    //"    vec2 P = _ViewDir.xy * MaterialDataA.z;\n"// the amount to shift the texture coordinates per layer (from vector P)
+    //"    vec2 deltaUV = P / numLayers;\n"
+    //"    vec2  currentUV = UV;\n"
+    //"    float currentDepth = texture2D(HeightmapTexture, currentUV).r;\n"
+    //"    while(currentLayerDepth < currentDepth){\n"	
+    //"    	currentUV -= deltaUV;\n"// shift texture coordinates along direction of P
+    //"    	currentDepth = texture2D(HeightmapTexture, currentUV).r;\n"
+    //"    	currentLayerDepth += layerDepth;\n"
+    //"    }\n"
+    //"    vec2 prevUV = currentUV + deltaUV;\n" // get texture coordinates before collision (reverse operations)
+    //"    float afterDepth  = currentDepth - currentLayerDepth;\n" // get depth after and before collision for linear interpolation
+    //"    float beforeDepth = texture2D(HeightmapTexture, prevUV).r - currentLayerDepth + layerDepth;\n"
+    //"    float weight = afterDepth / (afterDepth - beforeDepth);\n" // interpolation of texture coordinates
+    //"    return prevUV * weight + currentUV * (1.0 - weight);\n"
+    "      return vec2(0.0,0.0);\n"
     "}\n"
-    "vec4 CalculateDiffuse(Layer inLayer, vec4 objectColor, vec2 inUV) {\n"
+    "vec4 CalculateDiffuse(in Layer inLayer, in vec4 objectColor, in vec2 inUV) {\n"
     "    vec4 diffuseColor = objectColor;\n"
-    "    if (inLayer.data1.x == 1.0) {\n"
+    "    if (inLayer.data1.y >= 0.4) {\n"
     "        diffuseColor *= texture2D(inLayer.texture, inUV);\n"
     "    }else{\n"
     "        diffuseColor *= vec4(Material_F0AndID.rgb, 1.0);\n"
     "    }\n"
-    "    if (inLayer.data1.y == 1.0) {\n"
+    "    if (inLayer.data1.z >= 0.4) {\n"
     "        diffuseColor *= texture2D(inLayer.mask, inUV).r;\n"
     "    }\n"
     "    return diffuseColor;\n"
     "}\n"
-    "vec3 CalculateNormals(Layer inLayer, vec3 objectNormals, vec2 inUV) {\n"
+    "vec3 CalculateNormals(in Layer inLayer, in vec3 objectNormals, in vec2 inUV) {\n"
     "    vec3 outNormals = objectNormals;\n"
-    "    if (inLayer.data1.x > 0.9) {\n"
+    "    if (inLayer.data1.y > 0.9) {\n"
     "        outNormals = CalcBumpedNormal(inUV, inLayer.texture);\n"
-    "    }else if (inLayer.data1.x > 0.4) {\n"
+    "    }else if (inLayer.data1.y > 0.4) {\n"
     "        outNormals = CalcBumpedNormalCompressed(inUV, inLayer.texture);\n"
     "    }\n"
-    "    if (inLayer.data1.y == 1.0) {\n"
+    "    if (inLayer.data1.z == 1.0) {\n"
     "        outNormals *= texture2D(inLayer.mask, inUV).r;\n"
     "    }\n"
     "    return outNormals;\n"
     "}\n"
-    "float CalculateGlow(Layer inLayer, float objectGlow, vec2 inUV) {\n"
+    "float CalculateGlow(in Layer inLayer, in float objectGlow, in vec2 inUV) {\n"
     "    float outGlow = objectGlow;\n"
-    "    if (inLayer.data1.x == 1.0) {\n"
+    "    if (inLayer.data1.y >= 0.5) {\n"
     "        outGlow += texture2D(inLayer.texture, inUV).r;\n"
     "    }\n"
-    "    if (inLayer.data1.y == 1.0) {\n"
+    "    if (inLayer.data1.z >= 0.5) {\n"
     "        outGlow *= texture2D(inLayer.mask, inUV).r;\n"
     "    }\n"
     "    return outGlow;\n"
     "}\n"
-    "float CalculateSpecular(Layer inLayer, float objectSpecular, vec2 inUV) {\n"
+    "float CalculateSpecular(in Layer inLayer, in float objectSpecular, in vec2 inUV) {\n"
     "    float outSpecular = objectSpecular;\n"
-    "    if (inLayer.data1.x == 1.0) {\n"
-    "        outSpecular += texture2D(inLayer.texture, inUV).r;\n"
+    "    if (inLayer.data1.y >= 0.5) {\n"
+    "        outSpecular *= texture2D(inLayer.texture, inUV).r;\n"
     "    }\n"
-    "    if (inLayer.data1.y == 1.0) {\n"
+    "    if (inLayer.data1.z >= 0.5) {\n"
     "        outSpecular *= texture2D(inLayer.mask, inUV).r;\n"
     "    }\n"
     "    return outSpecular;\n"
     "}\n"
-    "float CalculateAO(Layer inLayer, float objectAO, vec2 inUV) {\n"
+    "float CalculateAO(in Layer inLayer, in float objectAO, in vec2 inUV) {\n"
     "    float outAO = objectAO;\n"
-    "    if (inLayer.data1.x == 1.0) {\n"
-    "        outAO += texture2D(inLayer.texture, inUV).r;\n"
+    "    if (inLayer.data1.y >= 0.5) {\n"
+    "        outAO *= texture2D(inLayer.texture, inUV).r;\n"
     "    }\n"
-    "    if (inLayer.data1.y == 1.0) {\n"
+    "    if (inLayer.data1.z >= 0.5) {\n"
     "        outAO *= texture2D(inLayer.mask, inUV).r;\n"
     "    }\n"
     "    return outAO;\n"
     "}\n"
-    "float CalculateMetalness(Layer inLayer, float objectMetalness, vec2 inUV) {\n"
+    "float CalculateMetalness(in Layer inLayer, in float objectMetalness, in vec2 inUV) {\n"
     "    float outMetalness = objectMetalness;\n"
-    "    if (inLayer.data1.x == 1.0) {\n"
-    "        outMetalness += texture2D(inLayer.texture, inUV).r;\n"
+    "    if (inLayer.data1.y >= 0.5) {\n"
+    "        outMetalness *= texture2D(inLayer.texture, inUV).r;\n"
     "    }\n"
-    "    if (inLayer.data1.y == 1.0) {\n"
+    "    if (inLayer.data1.z >= 0.5) {\n"
     "        outMetalness *= texture2D(inLayer.mask, inUV).r;\n"
     "    }\n"
     "    return outMetalness;\n"
     "}\n"
-    "float CalculateSmoothness(Layer inLayer, float objectSmoothness, vec2 inUV) {\n"
+    "float CalculateSmoothness(in Layer inLayer, in float objectSmoothness, in vec2 inUV) {\n"
     "    float outSmoothness = objectSmoothness;\n"
-    "    if (inLayer.data1.x == 1.0) {\n"
-    "        outSmoothness += texture2D(inLayer.texture, inUV).r;\n"
+    "    if (inLayer.data1.y >= 0.5) {\n"
+    "        outSmoothness *= texture2D(inLayer.texture, inUV).r;\n"
     "    }\n"
-    "    if (inLayer.data1.y == 1.0) {\n"
+    "    if (inLayer.data1.z >= 0.5) {\n"
     "        outSmoothness *= texture2D(inLayer.mask, inUV).r;\n"
     "    }\n"
     "    return outSmoothness;\n"
     "}\n"
-    /*
-    void ProcessComponent(Component inComponent, InData data, vec2 inUV) {
-        if (inComponent.componentType == 1.0) {
-            for (int i = 0; i < inComponent.numLayers; ++i) {
-                data.diffuse = CalculateDiffuse(inComponent.layers[i], data.diffuse, inUV);
-            }
-        }else if (inComponent.componentType == 2.0) {
-            for (int i = 0; i < inComponent.numLayers; ++i) {
-                data.normals = CalculateNormals(inComponent.layers[i], data.normals, inUV);
-            }
-        }else if (inComponent.componentType == 3.0) {
-            for (int i = 0; i < inComponent.numLayers; ++i) {
-                data.glow = CalculateGlow(inComponent.layers[i], data.glow, inUV);
-            }
-        }else if (inComponent.componentType == 4.0) {
-            for (int i = 0; i < inComponent.numLayers; ++i) {
-                data.specular = CalculateSpecular(inComponent.layers[i], data.specular, inUV);
-            }
-        }else if (inComponent.componentType == 5.0) {
-            for (int i = 0; i < inComponent.numLayers; ++i) {
-                data.ao = CalculateAO(inComponent.layers[i], data.ao, inUV);
-            }
-        }else if (inComponent.componentType == 6.0) {
-            for (int i = 0; i < inComponent.numLayers; ++i) {
-                data.metalness = CalculateMetalness(inComponent.layers[i], data.metalness, inUV);
-            }
-        }else if (inComponent.componentType == 7.0) {
-            for (int i = 0; i < inComponent.numLayers; ++i) {
-                data.smoothness = CalculateSmoothness(inComponent.layers[i], data.smoothness, inUV);
-            }
-        }//else if (inComponent.componentType == 8.0) {
-            //for (int i = 0; i < inComponent.numLayers; ++i) {
-                //data.diffuse = Reflection(uv, data.diffuse, CamPosition, data.normals, WorldPosition);
-            //}
-        //}else if (inComponent.componentType == 9.0) {
-            //for (int i = 0; i < inComponent.numLayers; ++i) {
-                //data.diffuse = Refraction(uv, data.diffuse, CamPosition, data.normals, WorldPosition);
-            //}
-        //}else if (inComponent.componentType == 10.0) {
-            //for (int i = 0; i < inComponent.numLayers; ++i) {
-                //vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);
-                //uv = ParallaxMap(ViewDir);
-            //}
-        }
-    }
-    */
+    "void ProcessComponent(in Component inComponent, inout InData data, in vec2 inUV) {\n"
+    "    if (inComponent.componentType == 0) {\n"
+    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+    "            data.diffuse = CalculateDiffuse(inComponent.layers[i], data.diffuse, inUV);\n"
+    "       }\n"
+    "    }else if (inComponent.componentType == 1) {\n"
+    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+    "            data.normals = CalculateNormals(inComponent.layers[i], data.normals, inUV);\n"
+    "        }\n"
+    "    }else if (inComponent.componentType == 2) {\n"
+    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+    "            data.glow = CalculateGlow(inComponent.layers[i], data.glow, inUV);\n"
+    "        }\n"
+    "    }else if (inComponent.componentType == 3) {\n"
+    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+    "            data.specular = CalculateSpecular(inComponent.layers[i], data.specular, inUV);\n"
+    "        }\n"
+    "    }else if (inComponent.componentType == 4) {\n"
+    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+    "            data.ao = CalculateAO(inComponent.layers[i], data.ao, inUV);\n"
+    "        }\n"
+    "    }else if (inComponent.componentType == 5) {\n"
+    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+    "            data.metalness = CalculateMetalness(inComponent.layers[i], data.metalness, inUV);\n"
+    "        }\n"
+    "    }else if (inComponent.componentType == 6) {\n"
+    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+    "            data.smoothness = CalculateSmoothness(inComponent.layers[i], data.smoothness, inUV);\n"
+    "        }\n"
+    //"    }else if (inComponent.componentType == 7) {\n"
+    //"        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+    //"            data.diffuse = Reflection(uv, data.diffuse, CamPosition, data.normals, WorldPosition);\n"
+    //"        }\n"
+    //"    }else if (inComponent.componentType == 8) {\n"
+    //"        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+    //"            data.diffuse = Refraction(uv, data.diffuse, CamPosition, data.normals, WorldPosition);\n"
+    //"        }\n"
+    //"    }else if (inComponent.componentType == 9) {\n"
+    //"        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+    //"            vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);\n"
+    //"            uv = ParallaxMap(ViewDir);\n"
+    //"        }\n"
+    "    }\n"
+    "}\n"
     "void main(){\n"
     "    vec2 uv = UV;\n"
     "\n"
@@ -1469,35 +1451,14 @@ epriv::EShaders::deferred_frag +=
     "    inData.refraction = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    inData.parallax = vec2(0.0,0.0);\n"
     "\n"
-    "	 float OutMatIDAndAO = Material_F0AndID.w + inData.ao;\n"
+    "\n"
+    "    for (int j = 0; j < numComponents; ++j) {\n"
+    "        ProcessComponent(components[j], inData, uv);\n"
+    "    }\n"
+        /*
     "    if(ThirdConditionals.y == 1.0){\n"
     "        vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);\n"
     "        uv = ParallaxMap(ViewDir);\n"
-    "    }\n"
-    "    if(FirstConditionals.x == 1.0){\n"
-    "        inData.diffuse *= texture2D(DiffuseTexture, uv);\n"
-    "    }else{\n"
-    "        inData.diffuse *= vec4(Material_F0AndID.rgb,1.0);\n"
-    "    }\n"
-    "    if(FirstConditionals.y > 0.9){\n"
-    "        inData.normals = CalcBumpedNormal(uv,NormalTexture);\n"
-    "    }else if(FirstConditionals.y > 0.4){\n"
-    "        inData.normals = CalcBumpedNormalCompressed(uv,NormalTexture);\n"
-    "    }\n"
-    "    if(FirstConditionals.z == 1.0){\n"
-    "        inData.glow += texture2D(GlowTexture, uv).r;\n"
-    "    }\n"
-    "    if(FirstConditionals.w == 1.0){\n"
-    "        inData.specular = texture2D(SpecularTexture, uv).r;\n"
-    "    }\n"
-    "    if(SecondConditionals.x == 1.0){\n"
-    "        inData.ao *= texture2D(AOTexture, uv).r;\n"
-    "    }\n"
-    "    if(SecondConditionals.y == 1.0){\n"
-    "        inData.metalness *= texture2D(MetalnessTexture, uv).r;\n"
-    "    }\n"
-    "    if(SecondConditionals.z == 1.0){\n"
-    "        inData.smoothness *= texture2D(SmoothnessTexture, uv).r;\n"
     "    }\n"
     "    if(SecondConditionals.w == 1.0){\n"
     "        inData.diffuse = Reflection(uv, inData.diffuse, CamPosition, inData.normals, WorldPosition);\n"
@@ -1505,6 +1466,10 @@ epriv::EShaders::deferred_frag +=
     "    if(ThirdConditionals.x == 1.0){\n"
     "        inData.diffuse = Refraction(uv, inData.diffuse, CamPosition, inData.normals, WorldPosition);\n"
     "    }\n"
+    */
+    "\n"
+    "\n"
+    "	 float OutMatIDAndAO = Material_F0AndID.w + inData.ao;\n"
     "    vec2 OutNormals = EncodeOctahedron(inData.normals);\n"
     "    if(Shadeless == 1){\n"
     "        OutNormals = ConstantOneVec2;\n"

@@ -2,7 +2,6 @@
 USE_LOG_DEPTH_VERTEX
 
 layout (location = 0) in vec3 position;
-//layout (location = 1) in float uv;
 layout (location = 1) in vec2 uv;
 layout (location = 2) in vec4 normal;
 layout (location = 3) in vec4 binormal;
