@@ -47,6 +47,14 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_New_Client_Entered_Map: {
             p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Request_Anchor_Creation:{
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Anchor_Creation: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Anchor_Creation_Deep_Space_Initial: {
+            p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Successfully_Entered_Map:{
+            p = new PacketMessage(); break;
         }default: {
             break;
         }
@@ -68,9 +76,8 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
     const auto pname = ent.getComponent<ComponentName>(request);
 
     data += ship.getClass();
-    if (pname) {
+    if (pname)
         data += ("," + pname->name());
-    }
     if (pbody) {
         auto& body = *pbody;
 
@@ -78,24 +85,20 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
         const auto& rot = body.rotation();
         const auto& lv  = body.getLinearVelocity();
         const auto& av  = body.getAngularVelocity();
-        const auto& warp = ship.getWarpSpeedVector3();
+        const auto warp = ship.getWarpSpeedVector3();
 
-        px = pos.x;
-        py = pos.y;
-        pz = pos.z;
         wx = warp.x;
         wy = warp.y;
         wz = warp.z;
         
         data += "," + to_string(anchorList.size());
-        for (auto& closest : anchorList) {
+        for (auto& closest : anchorList)
             data += "," + closest;
-        }
-        const auto& offset = finalAnchor->getPosition();
-        px -= offset.x;
-        py -= offset.y;
-        pz -= offset.z;
+        const auto nearestAnchorPos = finalAnchor->getPosition();
 
+        px = pos.x - nearestAnchorPos.x;
+        py = pos.y - nearestAnchorPos.y;
+        pz = pos.z - nearestAnchorPos.z;
 
         Math::Float16From32(&qx, rot.x);
         Math::Float16From32(&qy, rot.y);

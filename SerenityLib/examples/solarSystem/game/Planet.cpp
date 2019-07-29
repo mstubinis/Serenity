@@ -479,7 +479,6 @@ void Ring::_makeRingImage(const vector<RingInfo>& rings){
             }
         }
     }
-    ringImage.saveToFile("test.png");
     Texture* diffuse = new Texture(ringImage,"RingDiffuse",false,ImageInternalFormat::SRGB8_ALPHA8);
     diffuse->setAnisotropicFiltering(2.0f);
     epriv::Core::m_Engine->m_ResourceManager._addTexture(diffuse);

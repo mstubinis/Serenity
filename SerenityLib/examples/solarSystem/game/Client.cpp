@@ -20,13 +20,22 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/scene/Camera.h>
+#include <glm/gtx/norm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_access.hpp>
+
+#include <boost/algorithm/algorithm.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <iostream>
 
 using namespace std;
 using namespace Engine;
 
-const float PHYSICS_PACKET_TIMER_LIMIT = 0.13;
+const float PHYSICS_PACKET_TIMER_LIMIT = 0.05f;
+const double DISTANCE_CHECK  = 1000000.0 * 1000000.0;
+const double DISTANCE_CHECK2 = 100000.0 * 100000.0;
 
 struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
     ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(button->getUserPointer());
@@ -160,6 +169,37 @@ void epriv::ClientInternalPublicInterface::update(Client* _client) {
             PacketPhysicsUpdate p(playerShip, map, finalAnchor, list);
             p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
             client.send(p);
+
+            auto playerPos = playerShip.getComponent<ComponentBody>()->position();
+            auto nearestAnchorPos = finalAnchor->getPosition();
+            double dist = static_cast<double>(glm::distance2(nearestAnchorPos, playerPos));
+            
+            if (dist > DISTANCE_CHECK) {
+                for (auto& otherShips : map.getShips()) {
+                    if (otherShips.first != playerShip.getComponent<ComponentName>()->name()) {
+                        auto otherPos = otherShips.second->getComponent<ComponentBody>()->position();
+                        double otherDist = static_cast<double>(glm::distance2(otherPos, playerPos));
+                        if (otherDist < DISTANCE_CHECK2) {
+                            glm::vec3 midpoint = Math::midpoint(otherPos, playerPos);
+
+                            PacketMessage pOut;
+                            pOut.PacketType = PacketType::Client_To_Server_Request_Anchor_Creation;
+                            pOut.r = midpoint.x - nearestAnchorPos.x;
+                            pOut.g = midpoint.y - nearestAnchorPos.y;
+                            pOut.b = midpoint.z - nearestAnchorPos.z;
+                            pOut.data = "";
+                            pOut.data += std::to_string(list.size());
+                            for (auto& closest : list) {
+                                pOut.data += "," + closest;
+                            }
+                            //we want to create an anchor at r,g,b (the midpoint between two nearby ships), we send the nearest valid anchor as a reference
+                            client.send(pOut);
+
+                            break;
+                        }
+                    }
+                }
+            }
             client.m_PingTime = 0.0;
         }
     }
@@ -177,62 +217,54 @@ void Client::onReceive() {
             m_Timeout = 0.0;
             HUD& hud = *m_Core.m_HUD;
             switch (p.PacketType) {
+                case PacketType::Server_To_Client_Anchor_Creation_Deep_Space_Initial: {
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
+                    auto& map = *static_cast<Map*>(Resources::getCurrentScene());
+                    auto& anchorPos = map.getSpawnAnchor()->getPosition();
+                    map.internalCreateDeepspaceAnchor(pI.r + anchorPos.x, pI.g + anchorPos.y, pI.b + anchorPos.z,pI.data);
+                    //std::cout << "creating " << pI.data << " Initial" << std::endl;
+                    break;
+                }
+                case PacketType::Server_To_Client_Anchor_Creation: {
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
+                    auto& map = *static_cast<Map*>(Resources::getCurrentScene());
+                    auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+
+                    const unsigned int& size = stoi(info[0]);
+                    Anchor* closest = map.getRootAnchor();
+                    for (unsigned int i = 1; i < 1 + size; ++i) {
+                        closest = closest->getChildren().at(info[i]);
+                    }
+                    auto anchorPos = closest->getPosition();
+                    const float x = pI.r + anchorPos.x;
+                    const float y = pI.g + anchorPos.y;
+                    const float z = pI.b + anchorPos.z;
+                    map.internalCreateDeepspaceAnchor(x, y, z);
+                    //std::cout << "creating deep space anchor" << std::endl;
+                    break;
+                }
                 case PacketType::Server_To_Client_Ship_Physics_Update: {
                     if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
                         PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(pp);
-
                         auto& map = *static_cast<Map*>(Resources::getCurrentScene());
 
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
                         auto& playername = info[1];
                         auto& shipclass = info[0];
 
-
-                        const unsigned int& size = stoi(info[2]);
-                        Anchor* closest = map.getRootAnchor();
-                        for (unsigned int i = 3; i < 3 + size; ++i) {
-                            closest = closest->getChildren().at(info[i]);
-                        }
-
-                        const auto& offset = closest->getPosition();
-                        const float& x = pI.px + offset.x;
-                        const float& y = pI.py + offset.y;
-                        const float& z = pI.pz + offset.z;
-
                         Ship* ship = nullptr;
                         if (!map.getShips().count(playername)) {
                             auto handles = ResourceManifest::Ships[shipclass];
-                            ship = new Ship(handles.get<0>(), handles.get<1>(), shipclass, false, playername, glm::vec3(x, y, z), glm::vec3(1.0f), CollisionType::ConvexHull, &map);
-                            
+                            auto spawnPosition = map.getSpawnAnchor()->getPosition();
+                            auto x = Helper::GetRandomFloatFromTo(-400, 400);
+                            auto y = Helper::GetRandomFloatFromTo(-400, 400);
+                            auto z = Helper::GetRandomFloatFromTo(-400, 400);
+                            auto randOffsetForSafety = glm::vec3(x, y, z);
+                            ship = new Ship(handles.get<0>(), handles.get<1>(), shipclass, false, playername, spawnPosition + randOffsetForSafety, glm::vec3(1.0f), CollisionType::ConvexHull, &map);
                         }else{
                             ship = map.getShips().at(playername);
                         }
-                        auto& body = *ship->entity().getComponent<ComponentBody>();
-                        btRigidBody& bulletBody = *const_cast<btRigidBody*>(&body.getBody());
-
-                        btTransform centerOfMass;
-                        const btVector3 pos(x, y, z);
-
-                        float qx, qy, qz, qw, ax, ay, az, lx, ly, lz, wx, wy, wz;
-
-                        wx = pI.wx;
-                        wy = pI.wy;
-                        wz = pI.wz;
-
-                        Math::Float32From16(&qx, pI.qx);  Math::Float32From16(&qy, pI.qy);  Math::Float32From16(&qz, pI.qz);  Math::Float32From16(&qw, pI.qw);
-                        Math::Float32From16(&lx, pI.lx);  Math::Float32From16(&ly, pI.ly);  Math::Float32From16(&lz, pI.lz);
-                        Math::Float32From16(&ax, pI.ax);  Math::Float32From16(&ay, pI.ay);  Math::Float32From16(&az, pI.az);
-
-                        const btQuaternion rot(qx, qy, qz, qw);
-
-                        centerOfMass.setOrigin(pos);  centerOfMass.setRotation(rot);
-
-                        bulletBody.getMotionState()->setWorldTransform(centerOfMass);
-                        bulletBody.setCenterOfMassTransform(centerOfMass);
-                        body.clearAllForces();
-                        body.setAngularVelocity(ax, ay, az, false);
-
-                        body.setLinearVelocity(lx - (wx * 1.33f), ly - (wy * 1.33f), lz - (wz * 1.33f), false);
+                        ship->updateFromPacket(pI, map, info);
                     }
                     break;
                 }
@@ -241,13 +273,19 @@ void Client::onReceive() {
                     
                     auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map
 
+                    
+
                     Map& map = *static_cast<Map*>(Resources::getScene(info[1]));
+
+                    auto spawn = map.getSpawnAnchor()->getPosition();
+
                     auto& handles = ResourceManifest::Ships.at(info[0]);
-                    Ship* ship = new Ship(handles.get<0>(), handles.get<1>(), info[0], false, pI.name, glm::vec3(pI.r, pI.g, pI.b), glm::vec3(1.0f), CollisionType::ConvexHull, &map);
+                    Ship* ship = new Ship(handles.get<0>(), handles.get<1>(), info[0], false, pI.name, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z), glm::vec3(1.0f), CollisionType::ConvexHull, &map);
 
                     break;
                 }
                 case PacketType::Server_To_Client_Approve_Map_Entry: {
+                    //ok the server let me in, let me tell the server i successfully went in
                     PacketMessage& pI = *static_cast<PacketMessage*>(pp);
 
                     auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map
@@ -255,7 +293,30 @@ void Client::onReceive() {
                     hud.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
                     m_Core.enterMap(info[1], info[0], pI.name, pI.r, pI.g, pI.b);
                     hud.m_Next->setText("Next");
-                    hud.m_GameState = GameState::Game;
+                    hud.m_GameState = GameState::Game;//ok, ive entered the map
+                    Map& map = *static_cast<Map*>(Resources::getScene(info[1]));
+
+                    auto dist = Helper::GetRandomFloatFromTo(200, 250);
+                    auto sin = Helper::GetRandomFloatFromTo(0, 2 * 3.14159f);
+                    auto cos = Helper::GetRandomFloatFromTo(0, 2 * 3.14159f);
+
+                    glm::quat orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+                    Math::rotate(orientation, sin, cos, 0.0f);
+
+
+                    glm::mat4 modelMatrix = glm::mat4(1.0f);
+                    auto position = glm::vec3(0, 0, -dist);
+                    modelMatrix = glm::mat4_cast(orientation) * glm::translate(position);
+
+                    auto spawn = map.getSpawnAnchor()->getPosition();
+                    map.getPlayer()->getComponent<ComponentBody>()->setPosition(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
+
+                    PacketMessage pOut(pI);
+                    pOut.PacketType = PacketType::Client_To_Server_Successfully_Entered_Map;
+                    pOut.r = modelMatrix[3][0] - spawn.x;
+                    pOut.g = modelMatrix[3][1] - spawn.y;
+                    pOut.b = modelMatrix[3][2] - spawn.z;
+                    send(pOut);
                     break;
                 }
                 case PacketType::Server_To_Client_Reject_Map_Entry: {

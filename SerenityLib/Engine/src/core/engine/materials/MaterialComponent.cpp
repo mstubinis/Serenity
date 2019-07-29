@@ -86,7 +86,11 @@ void MaterialComponent::bind(glm::vec4& data) {
 }
 void MaterialComponent::unbind() {
 }
-
+void MaterialComponent::update(const float& dt) {
+    for (unsigned int i = 0; i < m_NumLayers; ++i) {
+        m_Layers[i].update(dt);
+    }
+}
 
 
 

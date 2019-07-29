@@ -1,9 +1,13 @@
 #include "Ship.h"
 #include "GameCamera.h"
 #include "map/Map.h"
+#include "Packet.h"
+#include "Helper.h"
+#include "map/Anchor.h"
 #include "ResourceManifest.h"
 
 #include <core/engine/Engine.h>
+#include <core/engine/math/Engine_Math.h>
 #include <core/engine/lights/Lights.h>
 
 #include <ecs/ComponentName.h>
@@ -301,6 +305,7 @@ Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, cons
 
     setModel(mesh);
 
+    rigidBodyComponent.getBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
 	rigidBodyComponent.setPosition(pos);
 	rigidBodyComponent.setScale(scl);
 
@@ -325,7 +330,7 @@ Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, cons
 Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
-const glm::vec3& Ship::getWarpSpeedVector3() {
+const glm::vec3 Ship::getWarpSpeedVector3() {
     if (m_IsWarping && m_WarpFactor > 0) {
         auto& body = *getComponent<ComponentBody>();
         const float& speed = (m_WarpFactor * 1.0f / 0.46f) * 2.0f;
@@ -333,7 +338,44 @@ const glm::vec3& Ship::getWarpSpeedVector3() {
     }
     return glm::vec3(0.0f);
 }
+void Ship::updateFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
+    const unsigned int& size = stoi(info[2]);
+    Anchor* closest = map.getRootAnchor();
+    for (unsigned int i = 3; i < 3 + size; ++i) {
+        auto& children = closest->getChildren();
+        if (!children.count(info[i])) {
+            return;
+        }
+        closest = children.at(info[i]);
+    }
+    const auto nearestAnchorPos = closest->getPosition();
+    const float x = packet.px + nearestAnchorPos.x;
+    const float y = packet.py + nearestAnchorPos.y;
+    const float z = packet.pz + nearestAnchorPos.z;
 
+    auto& body = *getComponent<ComponentBody>();
+    btRigidBody& bulletBody = *const_cast<btRigidBody*>(&body.getBody());
+    bulletBody.activate(true);//this is needed for when objects are far apart, should probably find a way to better do this
+    btTransform centerOfMass;
+    const btVector3 pos(x, y, z);
+
+    float qx, qy, qz, qw, ax, ay, az, lx, ly, lz;
+
+    Math::Float32From16(&qx, packet.qx);  Math::Float32From16(&qy, packet.qy);  Math::Float32From16(&qz, packet.qz);  Math::Float32From16(&qw, packet.qw);
+    Math::Float32From16(&lx, packet.lx);  Math::Float32From16(&ly, packet.ly);  Math::Float32From16(&lz, packet.lz);
+    Math::Float32From16(&ax, packet.ax);  Math::Float32From16(&ay, packet.ay);  Math::Float32From16(&az, packet.az);
+
+    const btQuaternion rot(qx, qy, qz, qw);
+
+    centerOfMass.setOrigin(pos);
+    centerOfMass.setRotation(rot);
+    bulletBody.getMotionState()->setWorldTransform(centerOfMass);
+    bulletBody.setCenterOfMassTransform(centerOfMass);
+
+    body.clearAllForces();
+    body.setAngularVelocity(ax, ay, az, false);
+    body.setLinearVelocity(lx - (packet.wx * 1.333333333f), ly - (packet.wy * 1.333333333f), lz - (packet.wz * 1.333333333f), false);
+}
 void Ship::setModel(Handle& modelHandle) {
     auto& rigidBodyComponent = *getComponent<ComponentBody>();
     auto& modelComponent     = *getComponent<ComponentModel>();

@@ -2,6 +2,11 @@
 #ifndef ENGINE_MATERIAL_ENUMS_H
 #define ENGINE_MATERIAL_ENUMS_H
 
+struct MaterialUVModificationType final { enum Type {
+    Translation,
+    Rotation,
+_TOTAL};};
+
 struct MaterialComponentType final { enum Type {
     Diffuse,
     Normal,

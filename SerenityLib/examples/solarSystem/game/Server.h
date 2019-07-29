@@ -29,6 +29,7 @@ class Server {
         bool                                           m_blocking;
         Core&                                          m_Core;
         std::string                                    m_MapName;
+        double                                         m_DeepspaceAnchorTimer;
 
     public:
         Server(Core& core, const unsigned int& port, const bool blocking = false, const std::string& ipRestriction = "");

@@ -22,7 +22,7 @@ class Map: public Scene{
         Ship*                                      m_Player;
 
         std::tuple<std::string, Anchor*>           m_RootAnchor;
-
+        std::tuple<std::string, Anchor*>           m_SpawnAnchor;
 
         glm::vec3 m_oldClientPos;
         glm::vec3 m_oldAnchorPos;
@@ -31,6 +31,8 @@ class Map: public Scene{
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const float& x = 0, const float& y = 0, const float& z = 0);
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const glm::vec3& position);
     public:
+        Anchor* internalCreateDeepspaceAnchor(const float& x, const float& y, const float& z, const std::string& name = "");
+
         std::vector<EntityWrapper*> m_Objects;
 
         Map(const std::string& name, const std::string& file);
@@ -52,6 +54,7 @@ class Map: public Scene{
         std::unordered_map<std::string, Planet*>& getPlanets() { return m_Planets; }
         std::unordered_map<std::string, Ship*>& getShips() { return m_Ships; }
         Anchor* getRootAnchor();
+        Anchor* getSpawnAnchor();
 
         /*
         void setAnchor(const float& x, const float& y, const float& z);

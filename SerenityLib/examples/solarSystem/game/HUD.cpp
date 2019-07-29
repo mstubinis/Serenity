@@ -1,5 +1,6 @@
 #include "HUD.h"
 #include "map/Map.h"
+#include "map/Anchor.h"
 #include "Planet.h"
 #include "Ship.h"
 #include "Core.h"
@@ -21,6 +22,8 @@
 
 
 #include <glm/vec4.hpp>
+#include <boost/algorithm/algorithm.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "gui/Button.h"
 #include "gui/TextBox.h"
@@ -367,6 +370,15 @@ void HUD::update_game(const double& dt) {
         if (_countPlanets > planetsVect.size() - 1) {
             _countPlanets = 0;
         }
+    }else if (Engine::isKeyDownOnce(KeyboardKey::M)) {
+        auto root = scene->getRootAnchor();
+        for (auto child : root->getChildren()) {
+            auto x = "Deepsp";
+            if (boost::algorithm::contains(child.first, x)) {
+                player.setTarget(child.second->entity());
+                break;
+            }
+        }
     }
 }
 void HUD::update_main_menu(const double& dt) {
@@ -433,8 +445,11 @@ void HUD::render_game() {
             crosshairTexture.render(boxPos.bottomRight, color, 90.0f);
 
             auto& targetBody = *target.getComponent<ComponentBody>();
-            auto& targetName = target.getComponent<ComponentName>()->name();
-
+            string name = "";
+            auto targetName = target.getComponent<ComponentName>();
+            if (targetName) {
+                name = targetName->name();
+            }
             unsigned long long distanceInKm = (targetBody.getDistanceLL(player->entity()) / 10);
             string stringRepresentation = "";
             if (distanceInKm > 0) {
@@ -443,7 +458,7 @@ void HUD::render_game() {
                 float distanceInm = (targetBody.getDistance(player->entity())) * 100.0f;
                 stringRepresentation = to_string(uint(distanceInm)) + " m";
             }
-            m_Font->renderText(targetName + "\n" + stringRepresentation, glm::vec2(pos.x + 40, pos.y - 15), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1), 0, glm::vec2(0.7f, 0.7f), 0.1f);
+            m_Font->renderText(name + "\n" + stringRepresentation, glm::vec2(pos.x + 40, pos.y - 15), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1), 0, glm::vec2(0.7f, 0.7f), 0.1f);
         }
         else { //behind
             float angle = 0;

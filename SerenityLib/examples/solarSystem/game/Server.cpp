@@ -8,6 +8,7 @@
 #include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
 
 #include "map/Map.h"
+#include "map/Anchor.h"
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/utils/Utils.h>
@@ -16,12 +17,17 @@
 #include <core/engine/Engine.h>
 #include <core/engine/utils/Engine_Debugging.h>
 
+#include <boost/algorithm/algorithm.hpp>
+#include <boost/algorithm/string.hpp>
+
 #include <iostream>
 
 using namespace std;
 
 using namespace Engine;
 using namespace Engine::Networking;
+
+const double TIMER_DEEP_SPACE_ANCHOR_SPAM = 1.0;
 
 //TODO: wrap thead functions in while loops
 
@@ -31,6 +37,7 @@ Server::Server(Core& core, const unsigned int& port, const bool blocking, const 
     m_blocking                         = blocking;
     m_thread_for_listener              = nullptr;
     m_thread_for_disconnecting_clients = nullptr;
+    m_DeepspaceAnchorTimer             = 0.0f;
 }
 Server::~Server() {
     shutdown(true);
@@ -76,6 +83,8 @@ void Server::shutdown(bool destructor) {
 void Server::update(Server* thisServer) {
     if (thisServer->m_blocking)
         return; //use threads instead
+    const auto& dt = Resources::dt();
+    thisServer->m_DeepspaceAnchorTimer += dt;
     updateAcceptNewClients(thisServer); //if blocking, should be its own thread
     for (auto& itr : thisServer->m_clients) {
         auto& client = *itr.second;
@@ -130,9 +139,44 @@ void Server::updateClient(Server* thisServer, Client* _client) {
         if (pp && pIn.validate(sf_packet)) {
             // Data extracted successfully...
             switch (pIn.PacketType) {
-                case PacketType::Client_To_Server_Ship_Physics_Update: {
-                    auto& map = *static_cast<Map*>(Resources::getCurrentScene());
+                case PacketType::Client_To_Server_Successfully_Entered_Map: {
+                    //client told me he entered, lets give him his data to the other clients, and give him info about the current deep space anchors
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
+                    PacketMessage pOut1(pI);
 
+                    pOut1.PacketType = PacketType::Server_To_Client_New_Client_Entered_Map;
+                    server.send_to_all_but_client(client, pOut1);
+  
+                    auto list = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass, map
+
+                    auto& map = *static_cast<Map*>(Resources::getScene(list[1]));
+                    auto spawnPosition = map.getSpawnAnchor()->getPosition();
+                    for (auto& anchor : map.getRootAnchor()->getChildren()) {
+                        if (boost::contains(anchor.first, "Deepspace Anchor")) {
+                            auto anchorPosition = anchor.second->getPosition();
+                            PacketMessage pOut2;
+                            pOut2.PacketType = PacketType::Server_To_Client_Anchor_Creation_Deep_Space_Initial;
+                            pOut2.r = anchorPosition.x - spawnPosition.x;
+                            pOut2.g = anchorPosition.y - spawnPosition.y;
+                            pOut2.b = anchorPosition.z - spawnPosition.z;
+                            pOut2.data = anchor.first;
+                            server.send_to_client(client, pOut2);
+                        }
+                    }
+                    break;
+                }
+                case PacketType::Client_To_Server_Request_Anchor_Creation: {
+                    if (server.m_DeepspaceAnchorTimer > TIMER_DEEP_SPACE_ANCHOR_SPAM) {
+                        //just forward it
+                        PacketMessage& pI = *static_cast<PacketMessage*>(pp);
+                        PacketMessage pOut(pI);
+                        pOut.PacketType = PacketType::Server_To_Client_Anchor_Creation;
+                        server.send_to_all(pOut);
+                        server.m_DeepspaceAnchorTimer = 0.0;
+                    }
+                    break;
+                }
+                case PacketType::Client_To_Server_Ship_Physics_Update: {
                     //a client has sent the server it's physics information, lets forward it to the rest of the clients
                     PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(pp);
                     PacketPhysicsUpdate pOut(pI);
@@ -141,33 +185,11 @@ void Server::updateClient(Server* thisServer, Client* _client) {
                     break;
                 }
                 case PacketType::Client_To_Server_Request_Map_Entry: {
-
+                    //ok client, you told me you want in, lets approve you -> just bouncing
                     PacketMessage& pI = *static_cast<PacketMessage*>(pp);
-                    PacketMessage pOut;
-                    PacketMessage pOut1;
-
-                    auto x = Helper::GetRandomFloatFromTo(150, 180);
-                    auto y = Helper::GetRandomFloatFromTo(150, 180);
-                    auto z = Helper::GetRandomFloatFromTo(150, 180);
-
-
+                    PacketMessage pOut(pI);
                     pOut.PacketType = PacketType::Server_To_Client_Approve_Map_Entry;
-                    pOut.name = pI.name;
-                    pOut.data = pI.data;
-                    pOut.r = x;
-                    pOut.g = y;
-                    pOut.b = z;
                     server.send_to_client(client, pOut);
-
-                    
-                    pOut1.PacketType = PacketType::Server_To_Client_New_Client_Entered_Map;
-                    pOut1.name = pI.name;
-                    pOut1.data = pI.data;
-                    pOut1.r = x;
-                    pOut1.g = y;
-                    pOut1.b = z;
-                    server.send_to_all_but_client(client, pOut1);
-                    
                     break;
                 }
                 case PacketType::Client_To_Server_Chat_Message: {

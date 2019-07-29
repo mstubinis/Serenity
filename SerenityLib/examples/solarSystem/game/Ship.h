@@ -10,6 +10,7 @@ class GameCamera;
 class Ship;
 class Map;
 
+struct PacketPhysicsUpdate;
 struct ShipLogicFunctor;
 
 struct ShipSystemType {enum Type {
@@ -138,8 +139,9 @@ class Ship: public EntityWrapper {
 
         void onEvent(const Event&);
 
-        const glm::vec3& getWarpSpeedVector3();
+        const glm::vec3 getWarpSpeedVector3();
 
+        void updateFromPacket(const PacketPhysicsUpdate& packet, Map& map, std::vector<std::string>& info);
 
         void setModel(Handle& handle);
 

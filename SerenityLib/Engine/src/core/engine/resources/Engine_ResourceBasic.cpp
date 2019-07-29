@@ -29,7 +29,16 @@ void EngineResource::unload(){
         std::cout << ": " << m_Name << " - unloaded." << std::endl;
     }
 }
-bool EngineResource::isLoaded(){ return m_IsLoaded; }
-uint EngineResource::useCount(){ return m_UsageCount; }
-void EngineResource::incrementUseCount(){ ++m_UsageCount; }
-void EngineResource::decrementUseCount(){ if(m_UsageCount > 0) --m_UsageCount; }
+bool EngineResource::isLoaded(){ 
+    return m_IsLoaded; 
+}
+uint EngineResource::useCount(){ 
+    return m_UsageCount; 
+}
+void EngineResource::incrementUseCount(){ 
+    ++m_UsageCount; 
+}
+void EngineResource::decrementUseCount(){ 
+    if(m_UsageCount > 0) 
+        --m_UsageCount; 
+}

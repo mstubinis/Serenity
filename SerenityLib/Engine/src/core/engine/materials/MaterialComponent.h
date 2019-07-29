@@ -27,6 +27,8 @@ class MaterialComponent {
 
         Texture* texture(const uint& index = 0) const;
         const MaterialComponentType::Type& type() const;
+
+        void update(const float& dt);
 };
 
 class MaterialComponentReflection : public MaterialComponent {

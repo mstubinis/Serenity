@@ -82,6 +82,29 @@ vector<string> Map::allowedShips() {
     }
     return vector<string>();
 }
+Anchor* Map::internalCreateDeepspaceAnchor(const float& x, const float& y, const float& z, const string& name) {
+    Anchor* anchor = new Anchor(*this, x, y, z);
+    Anchor* root = std::get<1>(m_RootAnchor);
+    m_Objects.push_back(anchor);
+
+    string key;
+    if (name.empty()) {
+        key = "Deepspace Anchor 0";
+    }else{
+        key = name;
+    }
+    unsigned int count = 0;
+    while (true) {
+        if (!root->m_Children.count(key)) {
+            root->m_Children.emplace(key, anchor);
+            break;
+        }else{
+            ++count;
+            key = "Deepspace Anchor " + std::to_string(count);
+        }
+    }
+    return anchor;
+}
 Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const float& x, const float& y, const float& z) {
     Anchor* anchor = new Anchor(*this, x, y, z);
     m_Objects.push_back(anchor);
@@ -302,7 +325,8 @@ void Map::loadFromFile(const string& filename) {
                     internalCreateAnchor(PARENT, NAME, loadedAnchors, planetoid->getPosition());
                 }else if (line[0] == '?') {//Anchor (Spawn) point
                     const auto& parentPos = m_Planets.at(PARENT)->getPosition();
-                    internalCreateAnchor(PARENT, "Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
+                    auto spawnAnchor = internalCreateAnchor(PARENT, "Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
+                    m_SpawnAnchor = std::tuple<std::string, Anchor*>("Spawn Anchor", spawnAnchor);
                 }else if (line[0] == 'R') {//Rings
                     if (!PARENT.empty()) {
                         if (!planetRings.count(PARENT)) {
@@ -330,6 +354,9 @@ void Map::loadFromFile(const string& filename) {
 }
 Anchor* Map::getRootAnchor() {
     return std::get<1>(m_RootAnchor);
+}
+Anchor* Map::getSpawnAnchor() {
+    return std::get<1>(m_SpawnAnchor);
 }
 const vector<string> Map::getClosestAnchor(Anchor* currentAnchor) {
     vector<string> res;

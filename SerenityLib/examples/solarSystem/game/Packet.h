@@ -25,11 +25,15 @@ struct PacketType {enum Type {
 
     Client_To_Server_Chat_Message,
 
+    Client_To_Server_Request_Anchor_Creation,
     Client_To_Server_Request_Map_Entry,
+    Client_To_Server_Successfully_Entered_Map,
 
     Server_To_Client_Approve_Map_Entry,
     Server_To_Client_Reject_Map_Entry,
 
+    Server_To_Client_Anchor_Creation,
+    Server_To_Client_Anchor_Creation_Deep_Space_Initial,
     Server_To_Client_New_Client_Entered_Map,
 
     Server_To_Client_Send_Basic_Server_Info,
