@@ -95,10 +95,10 @@ namespace Engine {
             static std::vector<SpotLight*>&          GetSpotLights(Scene&);
             static std::vector<RodLight*>&           GetRodLights(Scene&);
 
-            static void           RenderGeometryOpaque(Scene&, Camera&);
-            static void           RenderGeometryTransparent(Scene&, Camera&);
-            static void           RenderForwardOpaque(Scene&, Camera&);
-            static void           RenderForwardTransparent(Scene&, Camera&);
+            static void           RenderGeometryOpaque(Scene&, Camera&, const double& dt);
+            static void           RenderGeometryTransparent(Scene&, Camera&, const double& dt);
+            static void           RenderForwardOpaque(Scene&, Camera&, const double& dt);
+            static void           RenderForwardTransparent(Scene&, Camera&, const double& dt);
             static void           AddModelInstanceToPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
             static void           RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
             static ECS<Entity>&   GetECS(Scene&);

@@ -1,6 +1,7 @@
 #include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/Engine.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/textures/Texture.h>
@@ -10,21 +11,50 @@
 #include <boost/tuple/tuple.hpp>
 
 using namespace Engine;
+using namespace Engine::epriv;
 using namespace std;
 
 MaterialComponent::MaterialComponent(const MaterialComponentType::Type& type, Texture* texture, Texture* mask, Texture* cubemap) {
     m_ComponentType = type;
     m_NumLayers = 0;
 
+    addLayer(texture, mask, cubemap);
+}
+MaterialComponent::~MaterialComponent() {
+}
+MaterialLayer* MaterialComponent::addLayer(const string& textureFile, const string& maskFile, const string& cubemapFile) {
+    if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT)
+        return nullptr;
+    Texture* texture, * mask, * cubemap;
+    texture = mask = cubemap = nullptr;
+    texture = Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
+    mask = Core::m_Engine->m_ResourceManager._hasTexture(maskFile);
+    cubemap = Core::m_Engine->m_ResourceManager._hasTexture(cubemapFile);
+    if (!texture) {
+        texture = new Texture(textureFile);
+        Core::m_Engine->m_ResourceManager._addTexture(texture);
+    }
+    if (!mask) {
+        mask = new Texture(maskFile, false, ImageInternalFormat::R8);
+        Core::m_Engine->m_ResourceManager._addTexture(mask);
+    }
+    if (!cubemap) {
+        cubemap = new Texture(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
+        Core::m_Engine->m_ResourceManager._addTexture(cubemap);
+    }
+    return addLayer(texture, mask, cubemap);
+}
+MaterialLayer* MaterialComponent::addLayer(Texture* texture, Texture* mask, Texture* cubemap) {
+    if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT)
+        return nullptr;
     auto& layer = m_Layers[m_NumLayers];
     layer.setTexture(texture);
     layer.setMask(mask);
     layer.setCubemap(cubemap);
-
     ++m_NumLayers;
+    return &layer;
 }
-MaterialComponent::~MaterialComponent() {
-}
+
 Texture* MaterialComponent::texture(const uint& index) const {
     return m_Layers[index].getTexture();
 }

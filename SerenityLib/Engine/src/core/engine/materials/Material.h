@@ -42,7 +42,7 @@ class Material final: public BindableResource{
         float                             m_BaseSmoothness;
         uint                              m_ID;
 
-        MaterialComponent* internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture);
+        MaterialComponent* internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
         void internalUpdateGlobalMaterialPool(const bool& addToDatabase);
         void internalInit(Texture* diffuse, Texture* normal, Texture* glow, Texture* specular);
 
@@ -51,39 +51,19 @@ class Material final: public BindableResource{
         Material(const std::string& name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);
         ~Material();
 
-        const MaterialComponent* getComponent(const MaterialComponentType::Type& type) const;
+        MaterialComponent& getComponent(const uint& index);
 
-        void addComponentDiffuse(Texture* texture);
-        void addComponentDiffuse(const std::string& textureFile);
-
-        void addComponentNormal(Texture* texture);
-        void addComponentNormal(const std::string& textureFile);
-
-        void addComponentGlow(Texture* texture);
-        void addComponentGlow(const std::string& textureFile);
-
-        void addComponentSpecular(Texture* texture);
-        void addComponentSpecular(const std::string& textureFile);
-
-        void addComponentAO(Texture* texture, const float baseValue = 1.0f);
-        void addComponentAO(const std::string& textureFile, const float baseValue = 1.0f);
-
-        void addComponentMetalness(Texture* texture, const float baseValue = 1.0f);
-        void addComponentMetalness(const std::string& textureFile, const float baseValue = 1.0f);
-
-        void addComponentSmoothness(Texture* texture, const float baseValue = 1.0f);
-        void addComponentSmoothness(const std::string& textureFile, const float baseValue = 1.0f);
-
-        void addComponentReflection(Texture* cubeMap,Texture* map, const float mixFactor = 1.0f);
-        void addComponentReflection(const std::string& cubeMapName, const std::string& mapFile, const float mixFactor = 1.0f);
-        void addComponentReflection(const std::string cubeMapTextureFiles[], const std::string& mapFile, const float mixFactor = 1.0f);
-
-        void addComponentRefraction(Texture* cubeMap,Texture* map, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
-        void addComponentRefraction(const std::string& cubeMapName, const std::string& mapFile, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
-        void addComponentRefraction(const std::string cubeMapTextureFiles[], const std::string& mapFile, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
-
-        void addComponentParallaxOcclusion(Texture* texture,float heightScale = 0.1f);
-        void addComponentParallaxOcclusion(const std::string& textureFile, const float heightScale = 0.1f);
+        MaterialComponent& addComponent(const MaterialComponentType::Type& type, const std::string& textureFile = "", const std::string& maskFile = "", const std::string& cubemapFile = "");
+        MaterialComponent& addComponentDiffuse(const std::string& textureFile);
+        MaterialComponent& addComponentNormal(const std::string& textureFile);
+        MaterialComponent& addComponentGlow(const std::string& textureFile);
+        MaterialComponent& addComponentSpecular(const std::string& textureFile);
+        MaterialComponent& addComponentAO(const std::string& textureFile, const float baseValue = 1.0f);
+        MaterialComponent& addComponentMetalness(const std::string& textureFile, const float baseValue = 1.0f);
+        MaterialComponent& addComponentSmoothness(const std::string& textureFile, const float baseValue = 1.0f);
+        MaterialComponent& addComponentReflection(const std::string& cubeMapName, const std::string& mapFile, const float mixFactor = 1.0f);
+        MaterialComponent& addComponentRefraction(const std::string& cubeMapName, const std::string& mapFile, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
+        MaterialComponent& addComponentParallaxOcclusion(const std::string& textureFile, const float heightScale = 0.1f);
 
         const uint& id() const;
     
@@ -114,5 +94,7 @@ class Material final: public BindableResource{
 
         void load();
         void unload();
+
+        void update(const double& dt);
 };
 #endif

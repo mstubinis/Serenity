@@ -79,16 +79,33 @@ void ResourceManifest::init(){
 
     Engine::epriv::threading::waitForAll();
 
-    DefiantMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/defiant.dds", BasePath + "data/Textures/defiant_Normal.dds", BasePath + "data/Textures/defiant_Glow.dds");
+    DefiantMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/defiant/defiant.dds");
+    Material& defMat = *((Material*)DefiantMaterial.get());
+    defMat.getComponent(0).layer(0).setMask(BasePath + "data/Textures/defiant/defiant_Mask.dds");
+    auto layer = defMat.getComponent(0).addLayer();
+    layer->setTexture(BasePath + "data/Textures/Effects/Buzzards.dds");
+    layer->setMask(BasePath + "data/Textures/defiant/defiant_Mask_1.dds");
+    layer->addUVModificationSimpleTranslation(0.02f, 0.02f);
+    defMat.addComponent(MaterialComponentType::Normal, BasePath + "data/Textures/defiant/defiant_Normal.dds");
+    defMat.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/defiant/defiant_Glow.dds");
+    
+    
+    
+    NovaMaterial = Resources::addMaterial("Nova", BasePath + "data/Textures/nova/nova.dds"); 
+    Material& novaMat = *((Material*)NovaMaterial.get());
+    novaMat.getComponent(0).layer(0).setMask(BasePath + "data/Textures/nova/nova_Mask.dds");
+    auto layer1 = novaMat.getComponent(0).addLayer();
+    layer1->setTexture(BasePath + "data/Textures/Effects/Buzzards.dds");
+    layer1->setMask(BasePath + "data/Textures/nova/nova_Mask_1.dds");
+    layer1->addUVModificationSimpleTranslation(0.02f, 0.02f);
+    novaMat.addComponent(MaterialComponentType::Normal, BasePath + "data/Textures/nova/nova_Normal.dds");
+    novaMat.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/nova/nova_Glow.dds");
 
-
-	//extras
-	NovaMaterial = Resources::addMaterial("Nova", BasePath + "data/Textures/nova.dds", BasePath + "data/Textures/nova_Normal.dds", BasePath + "data/Textures/nova_Glow.dds");
-    MirandaMaterial = Resources::addMaterial("Miranda", BasePath + "data/Textures/miranda.dds", BasePath + "data/Textures/miranda_Normal.dds", BasePath + "data/Textures/miranda_Glow.dds", BasePath + "data/Textures/miranda_Specular.dds");
+    MirandaMaterial = Resources::addMaterial("Miranda", BasePath + "data/Textures/miranda/miranda.dds", BasePath + "data/Textures/miranda/miranda_Normal.dds", BasePath + "data/Textures/miranda/miranda_Glow.dds", BasePath + "data/Textures/miranda/miranda_Specular.dds");
 	//VenerexMaterial = Resources::addMaterial("Venerex", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
 	//IntrepidMaterial = Resources::addMaterial("Intrepid", BasePath + "data/Textures/intrepid.dds", BasePath + "data/Textures/intrepid_Normal.png", BasePath + "data/Textures/intrepid_Glow.png");
-    ExcelsiorMaterial = Resources::addMaterial("Excelsior", BasePath + "data/Textures/excelsior.dds", BasePath + "data/Textures/excelsior_Normal.dds", BasePath + "data/Textures/excelsior_Glow.dds", BasePath + "data/Textures/excelsior_Specular.dds");
-    //DefiantSharkMaterial = Resources::addMaterial("DefiantShark", BasePath + "data/Textures/defiantShark.dds", BasePath + "data/Textures/defiant_Normal.dds", BasePath + "data/Textures/defiant_Glow.dds");
+    ExcelsiorMaterial = Resources::addMaterial("Excelsior", BasePath + "data/Textures/excelsior/excelsior.dds", BasePath + "data/Textures/excelsior/excelsior_Normal.dds", BasePath + "data/Textures/excelsior/excelsior_Glow.dds", BasePath + "data/Textures/excelsior/excelsior_Specular.dds");
+    //DefiantSharkMaterial = Resources::addMaterial("DefiantShark", BasePath + "data/Textures/defiant/defiantShark.dds", BasePath + "data/Textures/defiant/defiant_Normal.dds", BasePath + "data/Textures/defiant/defiant_Glow.dds");
 
 
     StarMaterial = Resources::addMaterial("Star", BasePath + "data/Textures/Planets/Sun.dds");
@@ -102,8 +119,8 @@ void ResourceManifest::init(){
     CrosshairMaterial = Resources::addMaterial("Crosshair", BasePath + "data/Textures/HUD/Crosshair.dds");
     CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow", BasePath + "data/Textures/HUD/CrosshairArrow.dds");
 
-    auto& crosshairDiffuse = *(((Material*)CrosshairMaterial.get())->getComponent(MaterialComponentType::Diffuse)->texture());
-    auto& crosshairArrowDiffuse = *(((Material*)CrosshairArrowMaterial.get())->getComponent(MaterialComponentType::Diffuse)->texture());
+    auto& crosshairDiffuse = *(((Material*)CrosshairMaterial.get())->getComponent(0).texture());
+    auto& crosshairArrowDiffuse = *(((Material*)CrosshairArrowMaterial.get())->getComponent(0).texture());
 
     crosshairDiffuse.setWrapping(TextureWrap::ClampToEdge);
     crosshairDiffuse.setFilter(TextureFilter::Nearest);

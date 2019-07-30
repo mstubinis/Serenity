@@ -427,7 +427,7 @@ void HUD::render_game() {
             auto boxPos = body.getScreenBoxCoordinates(8.0f);
             Material& crosshair = *(Material*)ResourceManifest::CrosshairMaterial.get();
 
-            auto& crosshairTexture = *crosshair.getComponent(MaterialComponentType::Diffuse)->texture();
+            auto& crosshairTexture = *crosshair.getComponent(0).texture();
             const glm::vec4& color = glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f);
 
             crosshairTexture.render(boxPos.topLeft, color, 270.0f);
@@ -454,7 +454,7 @@ void HUD::render_game() {
         else { //behind
             float angle = 0;
             Material& crosshairArrow = *(Material*)ResourceManifest::CrosshairArrowMaterial.get();
-            auto& crosshairArrowTexture = *crosshairArrow.getComponent(MaterialComponentType::Diffuse)->texture();
+            auto& crosshairArrowTexture = *crosshairArrow.getComponent(0).texture();
             uint textureSizeOffset = (crosshairArrowTexture.width() / 2) + 4;
             if (pos.y > 2 && pos.y < winSize.y - 2) { //if y is within window bounds
                 if (pos.x < 2) {

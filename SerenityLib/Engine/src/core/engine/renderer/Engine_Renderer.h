@@ -53,7 +53,7 @@ namespace epriv{
             void _init(const char* name,uint w,uint h);
             void _resize(uint width, uint height);
 
-            void _render(Viewport&, const bool mainRenderFunc = true, const GLuint display_fbo = 0, const GLuint display_rbo = 0);
+            void _render(const double& dt, Viewport&, const bool mainRenderFunc = true, const GLuint display_fbo = 0, const GLuint display_rbo = 0);
             void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
             void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
             const bool _bindShaderProgram(ShaderP*);

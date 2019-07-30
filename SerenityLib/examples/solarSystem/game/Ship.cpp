@@ -10,6 +10,8 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/lights/Lights.h>
 
+#include <core/engine/utils/Engine_Debugging.h>
+
 #include <ecs/ComponentName.h>
 
 using namespace Engine;
@@ -71,26 +73,36 @@ void ShipSystemMainThrusters::update(const double& dt){
     if(isOnline()){
         auto& rigidbody = *m_Ship->getComponent<ComponentBody>();
         if(m_Ship->IsPlayer()){
+            bool ismoving = false;
             if(!m_Ship->IsWarping()){
-                const float& amount = (  (rigidbody.mass() * 0.4f)  +  1.3f  );
+                const float& amount =  1.3f / ((rigidbody.mass()* 0.15f) + 1.0f);  
                 if(Engine::isKeyDown(KeyboardKey::W)){ 
-                    rigidbody.applyForce(0,0,-amount); 
+                    rigidbody.applyForce(0,0,-amount);
+                    ismoving = true;
                 }
                 if(Engine::isKeyDown(KeyboardKey::S)){ 
                     rigidbody.applyForce(0,0, amount); 
+                    ismoving = true;
                 }
                 if(Engine::isKeyDown(KeyboardKey::A)){ 
                     rigidbody.applyForce(-amount,0,0); 
+                    ismoving = true;
                 }
                 if(Engine::isKeyDown(KeyboardKey::D)){ 
-                    rigidbody.applyForce( amount,0,0); 
+                    rigidbody.applyForce( amount,0,0);
+                    ismoving = true;
                 }
                 if(Engine::isKeyDown(KeyboardKey::F)){ 
                     rigidbody.applyForce(0,-amount,0); 
+                    ismoving = true;
                 }
                 if(Engine::isKeyDown(KeyboardKey::R)){ 
                     rigidbody.applyForce(0, amount,0); 
+                    ismoving = true;
                 }
+            }
+            if (!ismoving) {
+                rigidbody.setLinearVelocity(rigidbody.getLinearVelocity() * 0.9972f);
             }
         }
     }
@@ -113,7 +125,7 @@ void ShipSystemPitchThrusters::update(const double& dt){
             if(ship.getPlayerCamera()->getState() != CameraState::Orbit){
 				const auto& diff = Engine::getMouseDifference().y;
 				ship.m_MouseFactor.y += diff * 0.00065;
-				const float& massFactor = 1.0f / (rigidbody.mass() * 3.0f);
+				const float& massFactor = 1.0f / (rigidbody.mass() * 5.0f);
 				const float& amount = ship.m_MouseFactor.y * massFactor;
 				rigidbody.applyTorque(amount, 0, 0);
 				const double& step = (1.0 - dt);
@@ -140,7 +152,7 @@ void ShipSystemYawThrusters::update(const double& dt){
             if(ship.getPlayerCamera()->getState() != CameraState::Orbit){
 				const auto& diff = -Engine::getMouseDifference().x;
 				ship.m_MouseFactor.x += diff * 0.00065;
-				const float& massFactor = 1.0f / (rigidbody.mass() * 3.0f);
+				const float& massFactor = 1.0f / (rigidbody.mass() * 5.0f);
 				const float& amount = ship.m_MouseFactor.x * massFactor;
 				rigidbody.applyTorque(0, amount, 0);
 				const double& step = (1.0 - dt);
@@ -192,9 +204,9 @@ void ShipSystemWarpDrive::update(const double& dt){
                 }
                 if(m_Ship->IsWarping()){
                     if(Engine::isKeyDown(KeyboardKey::W)){
-                        m_Ship->translateWarp(0.1f, dt);
+                        m_Ship->translateWarp(0.1, dt);
                     }else if(Engine::isKeyDown(KeyboardKey::S)){
-                        m_Ship->translateWarp(-0.1f, dt);
+                        m_Ship->translateWarp(-0.1, dt);
                     }
                 }
             }
@@ -218,7 +230,7 @@ void ShipSystemSensors::update(const double& dt){
 #pragma endregion
 
 struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
-    Ship& ship = *(Ship*)_component.getUserPointer();
+    Ship& ship = *static_cast<Ship*>(_component.getUserPointer());
     Map& currentScene = *static_cast<Map*>(Resources::getCurrentScene());
 
     if (ship.m_IsPlayer) {
@@ -273,7 +285,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         }
         #pragma endregion
 
-        if (Engine::isKeyDownOnce(KeyboardKey::T) && currentScene.name() != "CapsuleSpace") {
+        if (Engine::isKeyDownOnce(KeyboardKey::T) && currentScene.name() != "Menu") {
             Entity scan = camera.getObjectInCenterRay(ship.m_Entity);
             if (!scan.null()) {
                 auto* componentName = scan.getComponent<ComponentName>();
@@ -305,6 +317,7 @@ Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, cons
 
     setModel(mesh);
 
+    const_cast<btRigidBody&>(rigidBodyComponent.getBody()).setDamping(0.0f, 0.2f);
     rigidBodyComponent.getBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
 	rigidBodyComponent.setPosition(pos);
 	rigidBodyComponent.setScale(scl);
@@ -384,13 +397,12 @@ void Ship::setModel(Handle& modelHandle) {
 
     const glm::vec3& boundingBox = modelComponent.boundingBox();
     const float& volume = boundingBox.x * boundingBox.y * boundingBox.z;
-    rigidBodyComponent.setMass((volume * 0.004f) + 1.0f);
-    rigidBodyComponent.setDamping(0.4f, 0.5f);
+    rigidBodyComponent.setMass((volume * 0.4f) + 1.0f);
 }
-void Ship::translateWarp(float amount,float dt){
-    float amountToAdd = amount * (1.0f / 0.5f);
-    if((amount > 0 && m_WarpFactor + amount < 1.07f) || (amount < 0.0f && m_WarpFactor > 0.0f)){
-        m_WarpFactor += amountToAdd * dt;
+void Ship::translateWarp(const double& amount, const double& dt){
+    double amountToAdd = amount * (1.0 / 0.5);
+    if((amount > 0.0 && m_WarpFactor + amount < 1.07) || (amount < 0.0 && m_WarpFactor > 0.0f)){
+        m_WarpFactor += static_cast<float>(amountToAdd * dt);
     }
 }
 void Ship::setTarget(const string& target) {

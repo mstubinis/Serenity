@@ -190,8 +190,7 @@ ComponentBody::ComponentBody(const ComponentBody& p_Other) {
     if (p_Other.m_Physics) {
         if (p_Other.data.p) data.p = new PhysicsData(*p_Other.data.p);
         else                data.p = nullptr;
-    }
-    else {
+    }else{
         if (p_Other.data.n) data.n = new NormalData(*p_Other.data.n);
         else                data.n = nullptr;
     }
@@ -214,7 +213,7 @@ ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
     if (p_Other.m_Physics) {
         swap(data.p, p_Other.data.p);
 		p_Other.data.p = nullptr;
-    }else {
+    }else{
         swap(data.n, p_Other.data.n);
 		p_Other.data.n = nullptr;
     }

@@ -47,7 +47,7 @@ namespace Engine {
 
                 void sort(Camera& c);
                 void sort_cheap(Camera& c);
-                void render(Camera& c);
+                void render(Camera& c, const double& dt);
         };
     };
 };

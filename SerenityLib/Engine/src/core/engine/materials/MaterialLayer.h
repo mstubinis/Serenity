@@ -9,13 +9,17 @@
 #include <string>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <core/engine/materials/MaterialEnums.h>
 
 class MaterialLayer;
 
-typedef boost::function<glm::vec2(MaterialLayer* layer, const float& x, const float& y, const float& dt)> boost_uv_func;
+typedef boost::function<void(const float& dt)> boost_uv_func;
 
-class Texture;
+
+class  Texture;
+struct SimpleUVTranslationFunctor;
 class MaterialLayer final{
+    friend struct SimpleUVTranslationFunctor;
     private:
         Texture*    m_Texture;
         Texture*    m_Mask;
@@ -41,18 +45,20 @@ class MaterialLayer final{
 
         const glm::vec4& data1() const;
         const glm::vec4& data2() const;
+        const MaterialLayerBlendMode::Mode blendMode() const;
 
         void addUVModificationFunctor(const boost_uv_func& functor);
         void addUVModificationSimpleTranslation(const float& translationX, const float& translationY);
 
+        void setBlendMode(const MaterialLayerBlendMode::Mode& mode);
         void setTexture(Texture* texture);
         void setMask(Texture* mask);
         void setCubemap(Texture* cubemap);
+        void setTexture(const std::string& textureFile);
+        void setMask(const std::string& maskFile);
+        void setCubemap(const std::string& cubemapFile);
 
-        //x = blend mode? | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
         void setData1(const float& x, const float& y, const float& z, const float& w);
-
-
         void setData2(const float& x, const float& y, const float& z, const float& w);
 
         void sendDataToGPU(const std::string& uniform_component_string, const unsigned int& component_index, const unsigned int& layer_index);

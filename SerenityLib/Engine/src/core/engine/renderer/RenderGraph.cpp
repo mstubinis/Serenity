@@ -68,11 +68,12 @@ void RenderPipeline::sort(Camera& camera) {
     }
 }
 
-void RenderPipeline::render(Camera& camera) {
+void RenderPipeline::render(Camera& camera, const double& dt) {
     shaderProgram.bind();
     for (auto& materialNode : materialNodes) {
         if (materialNode->meshNodes.size() > 0) {
             auto& _material = *materialNode->material;
+            _material.update(dt);
             _material.bind();
             for (auto& meshNode : materialNode->meshNodes) {
                 if (meshNode->instanceNodes.size() > 0) {

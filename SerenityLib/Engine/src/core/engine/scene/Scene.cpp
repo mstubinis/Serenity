@@ -201,28 +201,28 @@ vector<RodLight*>& InternalScenePublicInterface::GetRodLights(Scene& scene) {
 }
 
 
-void InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene,Camera& camera) {
+void InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene, Camera& camera, const double& dt) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 
         //pipeline->sort(camera);
-        pipeline->render(camera);
+        pipeline->render(camera, dt);
     } 
 }
-void InternalScenePublicInterface::RenderGeometryTransparent(Scene& scene, Camera& camera) {
+void InternalScenePublicInterface::RenderGeometryTransparent(Scene& scene, Camera& camera, const double& dt) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryTransparent]) { 
         pipeline->sort(camera);
-        pipeline->render(camera);
+        pipeline->render(camera, dt);
     } 
 }
-void InternalScenePublicInterface::RenderForwardOpaque(Scene& scene, Camera& camera) {
+void InternalScenePublicInterface::RenderForwardOpaque(Scene& scene, Camera& camera, const double& dt) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) {
         //pipeline->sort(camera);
-        pipeline->render(camera);
+        pipeline->render(camera, dt);
     }
 }
-void InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Camera& camera) {
+void InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Camera& camera, const double& dt) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardTransparent]) { 
         pipeline->sort(camera);
-        pipeline->render(camera);
+        pipeline->render(camera, dt);
     }
 }
 

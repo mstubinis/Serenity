@@ -1591,7 +1591,7 @@ class epriv::RenderManager::impl final{
 
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
         }
-        void _passGeometry(GBuffer& gbuffer, Viewport& viewport, Camera& camera){
+        void _passGeometry(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
             const glm::vec4& clear = viewport.m_BackgroundColor;
             const float colors[4] = { clear.r, clear.g, clear.b, clear.a };
@@ -1622,24 +1622,24 @@ class epriv::RenderManager::impl final{
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);      
 
             //RENDER NORMAL OBJECTS HERE
-            InternalScenePublicInterface::RenderGeometryOpaque(scene, camera);
+            InternalScenePublicInterface::RenderGeometryOpaque(scene, camera, dt);
 
             //skybox here
             if (viewport.isSkyboxVisible()) {
                 _renderSkybox(scene.skybox(), camera);
             }
 
-            InternalScenePublicInterface::RenderGeometryTransparent(scene, camera);
+            InternalScenePublicInterface::RenderGeometryTransparent(scene, camera, dt);
         }
-        void _passForwardRendering(GBuffer& gbuffer, Viewport& viewport, Camera& camera){
+        void _passForwardRendering(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
 
             gbuffer.bindFramebuffers(GBufferType::Diffuse);
             
             //RENDER NORMAL OBJECTS HERE
-            InternalScenePublicInterface::RenderForwardOpaque(scene, camera);
+            InternalScenePublicInterface::RenderForwardOpaque(scene, camera, dt);
 
-            InternalScenePublicInterface::RenderForwardTransparent(scene, camera);
+            InternalScenePublicInterface::RenderForwardTransparent(scene, camera, dt);
         }
         void _passCopyDepth(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
@@ -1844,7 +1844,7 @@ class epriv::RenderManager::impl final{
             }
         }
         
-        void _render(GBuffer& gbuffer, Viewport& viewport,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
+        void _render(const double& dt, GBuffer& gbuffer, Viewport& viewport,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
             //TODO: find out why facing a certain direction causes around 2 - 3 ms frame spike times. determine if this is due to an object or a rendering
             //algorithm. also find out why enabling ssao REDUCES frame ms time. use opengl timers to isolate the troubling functions.
             
@@ -1888,7 +1888,7 @@ class epriv::RenderManager::impl final{
                 }
                 #pragma endregion
             }
-            _passGeometry(gbuffer, viewport, camera);
+            _passGeometry(dt, gbuffer, viewport, camera);
             GLDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
 
@@ -1966,7 +1966,7 @@ class epriv::RenderManager::impl final{
 
             GLEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
-            _passForwardRendering(gbuffer, viewport, camera);
+            _passForwardRendering(dt, gbuffer, viewport, camera);
             GLDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
             
@@ -2102,8 +2102,8 @@ epriv::RenderManager::~RenderManager(){
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ 
     m_i->_postInit(name, w, h);
 }
-void epriv::RenderManager::_render(Viewport& viewport,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
-    m_i->_render(*m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);
+void epriv::RenderManager::_render(const double& dt, Viewport& viewport,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
+    m_i->_render(dt, *m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);
 }
 void epriv::RenderManager::_resize(uint w,uint h){ 
     m_i->_resize(w, h);

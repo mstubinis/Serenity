@@ -145,7 +145,7 @@ class Ship: public EntityWrapper {
 
         void setModel(Handle& handle);
 
-        void translateWarp(float amount,float dt);
+        void translateWarp(const double& amount, const double& dt);
         void toggleWarp(){
             m_IsWarping = !m_IsWarping;
             m_WarpFactor = 0;

@@ -134,14 +134,14 @@ void update(const double& dt){
     updateSounds(dt);
 }
 
-void render(){
+void render(const double& dt){
     auto& debugMgr = Core::m_Engine->m_DebugManager;
     debugMgr.stop_clock();
     Game::render();
     auto& viewports = InternalScenePublicInterface::GetViewports(*Resources::getCurrentScene());
     for (auto& viewport : viewports) {
         if (viewport->isActive()) {
-            Core::m_Engine->m_RenderManager._render(*viewport, true, 0, 0);
+            Core::m_Engine->m_RenderManager._render(dt, *viewport, true, 0, 0);
         }
     }
     Resources::getWindow().display();
@@ -415,7 +415,7 @@ void Engine::run(){
         double dt = debugMgr.dt();
         handleEvents();
         update(dt);
-        render();
+        render(dt);
         debugMgr.calculate();
     }
     Game::cleanup();
