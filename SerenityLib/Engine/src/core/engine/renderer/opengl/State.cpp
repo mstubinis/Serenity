@@ -49,6 +49,7 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWid
     glActiveTexture(GL_TEXTURE0); //this was said to be needed for some drivers
 
     GL_glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    GL_glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     GL_glClearDepth(1.0);
     GL_glClearDepthf(1.0f);
     GL_glClearStencil(0);
@@ -102,10 +103,15 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWid
     GL_glDisable(GL_STENCIL_TEST);
     GL_glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     GL_glDisable(GL_PROGRAM_POINT_SIZE);
+
+    GL_glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    GL_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    GL_glBindRenderbuffer(0);
 }
 void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
     glActiveTexture(currentTextureUnit);
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+    glColorMask(colorMaskState.r, colorMaskState.g, colorMaskState.b, colorMaskState.a);
     glClearDepth(clearDepth.depth);
     glClearDepthf(clearDepth.depthf);
     glClearStencil(clearStencil.stencil);
@@ -163,6 +169,10 @@ void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
     enabledState.gl_stencil_test == GL_TRUE ? glEnable(GL_STENCIL_TEST) : glDisable(GL_STENCIL_TEST);
     enabledState.gl_texture_cube_map_seamless == GL_TRUE ? glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS) : glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     enabledState.gl_program_point_size == GL_TRUE ? glEnable(GL_PROGRAM_POINT_SIZE) : glDisable(GL_PROGRAM_POINT_SIZE);
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferState.framebuffer_read);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferState.framebuffer_draw);
+    glBindRenderbuffer(GL_RENDERBUFFER, framebufferState.renderbuffer);
 }
 const bool OpenGLState::GL_glActiveTexture(const GLenum& textureUnit) {
     currentTextureUnit = textureUnit;
@@ -220,6 +230,16 @@ const bool OpenGLState::GL_glClearColor(const GLfloat& r, const GLfloat& g, cons
     clearColor.g = _g;
     clearColor.b = _b;
     clearColor.a = _a;
+    return true;
+}
+const bool OpenGLState::GL_glColorMask(const GLboolean& r, const GLboolean& g, const GLboolean& b, const GLboolean& a) {
+    if (r == colorMaskState.r && g == colorMaskState.g && b == colorMaskState.b && a == colorMaskState.a)
+        return false;
+    glColorMask(r, g, b, a);
+    colorMaskState.r = r;
+    colorMaskState.g = g;
+    colorMaskState.b = b;
+    colorMaskState.a = a;
     return true;
 }
 const bool OpenGLState::GL_glClearDepth(const GLdouble& depth) {
@@ -1007,6 +1027,50 @@ const bool OpenGLState::GL_glDisablei(const GLenum& capability, const GLuint& in
         }default: {
             break;
         }
+    }
+    return false;
+}
+const bool OpenGLState::GL_glBindFramebuffer(const GLenum& target, const GLuint& framebuffer) {
+    switch (target) {
+        case GL_READ_FRAMEBUFFER: {
+            if (framebufferState.framebuffer_read != framebuffer) {
+                glBindFramebuffer(target, framebuffer);
+                framebufferState.framebuffer_read = framebuffer;
+                return true;
+            }
+            break;
+        }case GL_DRAW_FRAMEBUFFER: {
+            if (framebufferState.framebuffer_draw != framebuffer) {
+                glBindFramebuffer(target, framebuffer);
+                framebufferState.framebuffer_draw = framebuffer;
+                return true;
+            }
+            break;
+        }case GL_FRAMEBUFFER: {
+            bool success = false;
+            if (framebufferState.framebuffer_read != framebuffer) {
+                glBindFramebuffer(target, framebuffer);
+                framebufferState.framebuffer_read = framebuffer;
+                success = true;
+            }
+            if (framebufferState.framebuffer_draw != framebuffer) {
+                glBindFramebuffer(target, framebuffer);
+                framebufferState.framebuffer_draw = framebuffer;
+                success = true;
+            }
+            if (success) {
+                return true;
+            }
+            break;
+        }
+    }
+    return false;
+}
+const bool OpenGLState::GL_glBindRenderbuffer(const GLuint& renderBuffer) {
+    if (framebufferState.renderbuffer != renderBuffer) {
+        glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
+        framebufferState.renderbuffer = renderBuffer;
+        return true;
     }
     return false;
 }

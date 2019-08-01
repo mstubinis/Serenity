@@ -2,7 +2,7 @@
 #include <core/engine/renderer/Engine_Renderer.h>
 
 #include <core/engine/renderer/GBuffer.h>
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 
 using namespace Engine;
 using namespace Engine::epriv;
@@ -18,7 +18,7 @@ Postprocess_FXAA::Postprocess_FXAA() {
 Postprocess_FXAA::~Postprocess_FXAA() {
 
 }
-void Postprocess_FXAA::pass(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
+void Postprocess_FXAA::pass(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
     program.bind();
 
     Renderer::sendUniform1("FXAA_REDUCE_MIN", reduce_min);

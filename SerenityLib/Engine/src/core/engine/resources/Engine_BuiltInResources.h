@@ -3,7 +3,7 @@
 #define ENGINE_BUILT_IN_RESOURCES_H
 
 class Mesh;
-class ShaderP;
+class ShaderProgram;
 namespace Engine{
 namespace epriv{
     struct InternalMeshes{
@@ -12,8 +12,8 @@ namespace epriv{
         static Mesh* SpotLightBounds;
     };
     struct InternalShaderPrograms{
-        static ShaderP* Deferred;
-        static ShaderP* Forward;
+        static ShaderProgram* Deferred;
+        static ShaderProgram* Forward;
     };
 };
 };

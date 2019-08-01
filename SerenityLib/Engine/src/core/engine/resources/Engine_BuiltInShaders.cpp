@@ -1281,29 +1281,92 @@ epriv::EShaders::deferred_frag +=
 epriv::EShaders::deferred_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::deferred_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::deferred_frag +=
-    "vec4 DoBlend(in vec4 canvas, in vec4 paint, in float blendType) {\n"//TODO: complete this
-    "    if (blendType == 0.0) {\n"//default
-    //"        return PaintersAlgorithm(paint, canvas);\n"
+//https://docs.gimp.org/2.4/en/gimp-concepts-layer-modes.html
+    "vec4 DoBlend(in vec4 paint, in vec4 canvas, in Layer inLayer) {\n"//TODO: complete this
+    "    if (inLayer.data1.x       == 0.0) {\n"//default
+    "        return PaintersAlgorithm(paint, canvas);\n"
+    "    }else if (inLayer.data1.x == 1.0) {\n"//mix
+    "        vec4 ret = mix(paint, canvas, 0.5);\n"
+    "        return ret;\n"
+    "    }else if (inLayer.data1.x == 2.0) {\n"//add
     "        return canvas + paint;\n"
-    "    }else if (blendType == 1.0) {\n"//mix
-    "        return mix(canvas,paint,0.5);\n"
-    "    }else if (blendType == 2.0) {\n"//add
-    "        return canvas + paint;\n"
-    "    }else if (blendType == 3.0) {\n"//subtract
-    "        return canvas - paint;\n"
-    "    }else if (blendType == 4.0) {\n"//mul
+    "    }else if (inLayer.data1.x == 3.0) {\n"//subtract
+    "        return max(vec4(0.00001), canvas - paint);\n"
+    "    }else if (inLayer.data1.x == 4.0) {\n"//Multiply mode multiplies the pixel values of the upper layer with those of the layer below it and then divides the result by 255
     "        return canvas * paint;\n"
-    "    }else if (blendType == 5.0) {\n"//divide
-    "        return canvas / paint;\n"
-    "    }else if (blendType == 6.0) {\n"//screen
+    "    }else if (inLayer.data1.x == 5.0) {\n"//divide
+    "        vec4 a = RangeTo255(canvas);\n"
+    "        vec4 b = RangeTo255(paint);\n"
+    "        a *= 256.0;\n"
+    "        a /= (paint + 0.0039215686);\n" //0.0039215686 is 1 / 255, to avoid divide by zero
+    "        return max(vec4(0.00001), RangeTo1(a));\n"
+    "    }else if (inLayer.data1.x == 6.0) {\n"//screen
+    "        vec4 a = RangeTo255(canvas);\n"
+    "        vec4 b = RangeTo255(paint);\n"
+    "        a = InvertColor255(a);\n"
+    "        b = InvertColor255(b);\n"
+    "        vec4 c = a * b;\n"
+    "        c /= 255.0;\n"
+    "        return RangeTo1(InvertColor255(c));\n"
+    "    }else if (inLayer.data1.x == 7.0) {\n"//Overlay - double check this
+    "        vec4 a = RangeTo255(canvas);\n"
+    "        vec4 aCopy = a;\n"
+    "        vec4 aCopy1 = a;\n"
+    "        vec4 b = RangeTo255(paint);\n"
+    "        a = InvertColor255(a);\n"
+    "        a *= (b * 2.0);\n"
+    "        aCopy += a;\n"
+    "        aCopy /= 255.0;\n"
+    "        aCopy *= aCopy1;\n"
+    "        aCopy /= 255.0;\n"
+    "        return RangeTo1(aCopy);\n"
+    "    }else if (inLayer.data1.x == 8.0) {\n"//TODO: dissolve (Dissolve mode dissolves the upper layer into the layer beneath it by drawing a random pattern of pixels in areas of partial transparency)
     "        return canvas + paint;\n"
-    "    }else if (blendType == 7.0) {\n"//overlay
+    "    }else if (inLayer.data1.x == 9.0) {\n"//dodge
+    "        vec4 a = RangeTo255(canvas);\n"
+    "        vec4 b = RangeTo255(paint);\n"
+    "        a *= 256.0;\n"
+    "        a /= InvertColor255(b);\n"
+    "        a = RangeTo1(a);\n"
+    "        return a;\n"
+    "    }else if (inLayer.data1.x == 10.0) {\n"//burn
+    "        vec4 a = RangeTo255(canvas);\n"
+    "        vec4 b = RangeTo255(paint);\n"
+    "        a = InvertColor255(a);\n"
+    "        a *= 256.0;\n"
+    "        a /= (b + vec4(1.0));\n"
+    "        a = InvertColor255(a);\n"
+    "        a = RangeTo1(a);\n"
+    "        return a;\n"
+    "    }else if (inLayer.data1.x == 11.0) {\n" //TODO: Hard light mode is rather complicated because the equation consists of two parts, one for darker colors and one for brighter colors. If the pixel color of the upper layer is greater than 128, the layers are combined according to the first formula shown below. Otherwise, the pixel values of the upper and lower layers are multiplied together and multiplied by two, then divided by 256
     "        return canvas + paint;\n"
-    "    }else if (blendType == 8.0) {\n"//dissolve
+    "    }else if (inLayer.data1.x == 12.0) {\n" //TODO: soft light
     "        return canvas + paint;\n"
-    "    }else if (blendType == 9.0) {\n"//dodge
+    "    }else if (inLayer.data1.x == 13.0) {\n" //GrainExtract
+    "        return (canvas - paint) + vec4(0.5);\n"
+    "    }else if (inLayer.data1.x == 14.0) {\n" //GrainMerge
+    "        return (canvas + paint) - vec4(0.5);\n"
+    "    }else if (inLayer.data1.x == 15.0) {\n" //TODO: Difference mode subtracts the pixel value of the upper layer from that of the lower layer and then takes the absolute value of the result.
+    "        return abs(canvas - paint);\n"
+    "    }else if (inLayer.data1.x == 16.0) {\n" //Darkene
+    "        float r = min(canvas.r, paint.r);\n"
+    "        float g = min(canvas.g, paint.g);\n"
+    "        float b = min(canvas.b, paint.b);\n"
+    "        float a = min(canvas.a, paint.a);\n"
+    "        return vec4(r, g, b, a);\n"
+    "    }else if (inLayer.data1.x == 17.0) {\n" //Lighten
+    "        float r = max(canvas.r, paint.r);\n"
+    "        float g = max(canvas.g, paint.g);\n"
+    "        float b = max(canvas.b, paint.b);\n"
+    "        float a = max(canvas.a, paint.a);\n"
+    "        return vec4(r, g, b, a);\n"
+    "    }else if (inLayer.data1.x == 18.0) {\n" //TODO: Hue mode uses the hue of the upper layer and the saturation and value of the lower layer to form the resulting image. However, if the saturation of the upper layer is zero, the hue is taken from the lower layer, too.
     "        return canvas + paint;\n"
-    "    }else if (blendType == 10.0) {\n"//burn
+    "    }else if (inLayer.data1.x == 18.0) {\n" //TODO: Saturation mode uses the saturation of the upper layer and the hue and value of the lower layer to form the resulting image.
+    "        return canvas + paint;\n"
+    "    }else if (inLayer.data1.x == 18.0) {\n" //TODO: Color mode uses the hue and saturation of the upper layer and the value of the lower layer to form the resulting image.
+    "        return canvas + paint;\n"
+    "    }else if (inLayer.data1.x == 18.0) {\n" //TODO: Value mode uses the value of the upper layer and the saturation and hue of the lower layer to form the resulting image
     "        return canvas + paint;\n"
     "    }\n"
     "}\n"
@@ -1345,17 +1408,17 @@ epriv::EShaders::deferred_frag +=
     "    float weight = afterDepth / (afterDepth - beforeDepth);\n" // interpolation of texture coordinates
     "    return prevUV * weight + currentUV * (1.0 - weight);\n"
     "}\n"
-    "vec4 CalculateDiffuse(in Layer inLayer, in vec4 oldDiffuse, in vec4 objectColor, in vec2 inUVs) {\n"
-    "    vec4 diffuseColor = objectColor;\n"
-    "    if (inLayer.data1.y >= 0.4) {\n"
-    "        diffuseColor *= texture2D(inLayer.texture, inUVs + inLayer.uvModifications);\n"
+    "vec4 CalculateDiffuse(in Layer inLayer, in vec4 canvas, in vec4 objectColor, in vec2 inUVs) {\n"
+    "    vec4 paint = objectColor;\n"
+    "    if (inLayer.data1.y >= 0.5) {\n"
+    "        paint *= texture2D(inLayer.texture, inUVs + inLayer.uvModifications);\n"
     "    }else{\n"
-    "        diffuseColor *= vec4(Material_F0AndID.rgb, 1.0);\n"
+    "        paint *= vec4(Material_F0AndID.rgb, 1.0);\n"
     "    }\n"
-    "    if (inLayer.data1.z >= 0.4) {\n"
-    "        diffuseColor *= texture2D(inLayer.mask, inUVs).r;\n"
+    "    if (inLayer.data1.z >= 0.5) {\n"
+    "        paint *= texture2D(inLayer.mask, inUVs).r;\n"
     "    }\n"
-    "    return DoBlend(oldDiffuse, diffuseColor, inLayer.data1.x);\n"
+    "    return DoBlend(paint, canvas, inLayer);\n"
     "}\n"
     "vec3 CalculateNormals(in Layer inLayer, in vec3 objectNormals, in vec2 inUVs) {\n"
     "    vec3 outNormals = objectNormals;\n"
@@ -1364,7 +1427,7 @@ epriv::EShaders::deferred_frag +=
     "    }else if (inLayer.data1.y > 0.4) {\n"
     "        outNormals = CalcBumpedNormalCompressed(inUVs + inLayer.uvModifications, inLayer.texture);\n"
     "    }\n"
-    "    if (inLayer.data1.z == 1.0) {\n"
+    "    if (inLayer.data1.z >= 0.5) {\n"
     "        outNormals *= texture2D(inLayer.mask, inUVs).r;\n"
     "    }\n"
     "    return outNormals;\n"
@@ -1466,7 +1529,7 @@ epriv::EShaders::deferred_frag +=
     "void main(){\n"
     "    InData inData;\n"
     "    inData.uv = UV;\n"
-    "    inData.diffuse = vec4(0.0);\n"
+    "    inData.diffuse = vec4(0.0,0.0,0.0,0.0001);\n" //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
     "    inData.objectColor = Object_Color;\n"
     "    inData.normals = normalize(Normals);\n"
     "    inData.glow = MaterialBasePropertiesOne.x;\n"

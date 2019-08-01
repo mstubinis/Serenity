@@ -2,7 +2,7 @@
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
 
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/scene/Camera.h>
 
 #include <glm/vec4.hpp>
@@ -58,7 +58,7 @@ void Postprocess_SSAO::init() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
-void Postprocess_SSAO::passSSAO(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, Camera& camera) {
+void Postprocess_SSAO::passSSAO(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, Camera& camera) {
     program.bind();
     if (RenderManager::GLSL_VERSION < 140) {
         Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
@@ -80,7 +80,7 @@ void Postprocess_SSAO::passSSAO(ShaderP& program, GBuffer& gbuffer, const unsign
 
     Renderer::renderFullscreenTriangle(screen_width, screen_height);
 }
-void Postprocess_SSAO::passBlur(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const string& type, const unsigned int& texture) {
+void Postprocess_SSAO::passBlur(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const string& type, const unsigned int& texture) {
     program.bind();
     glm::vec2 hv(0.0f);
     if (type == "H") { hv = glm::vec2(1.0f, 0.0f); }

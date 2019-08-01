@@ -2,7 +2,7 @@
 #include <core/engine/renderer/Engine_Renderer.h>
 
 #include <core/engine/renderer/GBuffer.h>
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/math/Engine_Math.h>
 
 using namespace Engine;

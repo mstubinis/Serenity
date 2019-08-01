@@ -2,7 +2,7 @@
 #include <core/engine/Engine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/math/Engine_Math.h>
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Skybox.h>
 

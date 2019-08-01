@@ -2,7 +2,7 @@
 #ifndef ENGINE_RENDERER_POSTPROCESS_BLOOM_H_INCLUDE_GUARD
 #define ENGINE_RENDERER_POSTPROCESS_BLOOM_H_INCLUDE_GUARD
 
-class  ShaderP;
+class  ShaderProgram;
 namespace Engine {
 namespace epriv {
     class  GBuffer;
@@ -19,7 +19,7 @@ namespace epriv {
             Postprocess_Bloom();
             ~Postprocess_Bloom();
 
-            void pass(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
+            void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
 
             static Postprocess_Bloom Bloom;
     };

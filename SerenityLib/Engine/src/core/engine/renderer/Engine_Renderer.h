@@ -3,7 +3,7 @@
 #define ENGINE_ENGINE_RENDERER_H
 
 #include <core/engine/renderer/RenderGraph.h>
-#include <core/engine/renderer/GLStateMachine.h>
+#include <core/engine/renderer/RendererState.h>
 #include <core/engine/utils/Utils.h>
 
 #include <core/engine/renderer/RendererEnums.h>
@@ -37,9 +37,9 @@ namespace epriv{
     class  RenderbufferObject;
     class  RenderManager final{
         public:
+            RendererState            RendererState;
             OpenGLState              OpenGLStateMachine;
             OpenGLExtensions         OpenGLExtensionsManager;
-            GLStateMachineDataCustom glSM;
 
             class impl;
             std::unique_ptr<impl> m_i;
@@ -56,7 +56,7 @@ namespace epriv{
             void _render(const double& dt, Viewport&, const bool mainRenderFunc = true, const GLuint display_fbo = 0, const GLuint display_rbo = 0);
             void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
             void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
-            const bool _bindShaderProgram(ShaderP*);
+            const bool _bindShaderProgram(ShaderProgram*);
             const bool _unbindShaderProgram();
             void _clear2DAPICommands();
             const bool _bindMaterial(Material*);
@@ -114,6 +114,11 @@ namespace Renderer{
     const bool bindReadFBO(const GLuint& fbo);
     const bool bindDrawFBO(const GLuint& fbo);
 
+    void unbindFBO();
+    void unbindRBO();
+    void unbindReadFBO();
+    void unbindDrawFBO();
+
     const bool GLEnable(const GLenum& capability);
     const bool GLDisable(const GLenum& capability);
     const bool GLEnablei(const GLenum& capability, const GLuint& index);
@@ -132,12 +137,7 @@ namespace Renderer{
     void sendTexture(const char* location,const GLuint textureAddress,const int& slot,const GLuint& glTextureType);
     void sendTextureSafe(const char* location, const Texture& texture,const int& slot);
     void sendTextureSafe(const char* location,const GLuint textureAddress,const int& slot,const GLuint& glTextureType);
-
-    void unbindFBO();
-    void unbindRBO();
-    void unbindReadFBO();
-    void unbindDrawFBO();
-        
+    
     void alignmentOffset(const Alignment::Type& align, uint& x, uint& y, const uint& width, const uint& height);
     void renderTexture(const Texture&, const glm::uvec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const Alignment::Type& = Alignment::Type::Center);
     void renderText(const std::string& text, const Font&, const glm::uvec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const TextAlignment::Type& = TextAlignment::Left);

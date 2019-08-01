@@ -2,7 +2,7 @@
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 
 
 using namespace Engine;
@@ -27,7 +27,7 @@ Postprocess_GodRays::Postprocess_GodRays() {
 Postprocess_GodRays::~Postprocess_GodRays() {
 
 }
-void Postprocess_GodRays::pass(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha) {
+void Postprocess_GodRays::pass(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha) {
     program.bind();
     const float& divisor = gbuffer.getSmallFBO()->divisor();
     Renderer::sendUniform4("RaysInfo", exposure, decay, density, weight);

@@ -10,7 +10,7 @@ struct SMAAQualityLevel {enum Level {
     Low, Medium, High, Ultra,
 };};
 
-class  ShaderP;
+class  ShaderProgram;
 namespace Engine {
 namespace epriv {
     class  GBuffer;
@@ -40,10 +40,10 @@ namespace epriv {
 
             void init();
 
-            void passEdge(ShaderP&, GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture, const unsigned int& outTexture);
-            void passBlend(ShaderP&, GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& outTexture);
-            void passNeighbor(ShaderP&, GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture);
-            void passFinal(ShaderP&, GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight); //currently unused
+            void passEdge(ShaderProgram&, GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture, const unsigned int& outTexture);
+            void passBlend(ShaderProgram&, GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& outTexture);
+            void passNeighbor(ShaderProgram&, GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture);
+            void passFinal(ShaderProgram&, GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight); //currently unused
 
             static Postprocess_SMAA SMAA;
     };

@@ -102,7 +102,7 @@ void ShipSystemMainThrusters::update(const double& dt){
                 }
             }
             if (!ismoving) {
-                rigidbody.setLinearVelocity(rigidbody.getLinearVelocity() * 0.9972f);
+                //rigidbody.setLinearVelocity(rigidbody.getLinearVelocity() * 0.9972f);
             }
         }
     }
@@ -317,7 +317,7 @@ Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, cons
 
     setModel(mesh);
 
-    const_cast<btRigidBody&>(rigidBodyComponent.getBody()).setDamping(0.0f, 0.2f);
+    const_cast<btRigidBody&>(rigidBodyComponent.getBody()).setDamping(0.00001f, 0.2f);
     rigidBodyComponent.getBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
 	rigidBodyComponent.setPosition(pos);
 	rigidBodyComponent.setScale(scl);

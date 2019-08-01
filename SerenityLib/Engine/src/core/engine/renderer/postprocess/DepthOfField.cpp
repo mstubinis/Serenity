@@ -1,7 +1,7 @@
 #include <core/engine/renderer/postprocess/DepthOfField.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/renderer/GBuffer.h>
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 
 using namespace Engine;
 using namespace Engine::epriv;
@@ -17,7 +17,7 @@ Postprocess_DepthOfField::Postprocess_DepthOfField() {
 }
 Postprocess_DepthOfField::~Postprocess_DepthOfField() {
 }
-void Postprocess_DepthOfField::pass(ShaderP& program,GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
+void Postprocess_DepthOfField::pass(ShaderProgram& program,GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
     program.bind();
     Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, fboWidth / static_cast<float>(fboHeight));
 

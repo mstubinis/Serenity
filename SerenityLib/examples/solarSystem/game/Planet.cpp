@@ -3,10 +3,9 @@
 #include "ResourceManifest.h"
 
 #include <core/engine/Engine.h>
-#include <core/engine/renderer/GLStateMachine.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/lights/Lights.h>
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/ModelInstance.h>
 #include <core/engine/materials/Material.h>
@@ -288,7 +287,7 @@ struct AtmosphericScatteringSkyModelInstanceBindFunctor{void operator()(EngineRe
     model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
     */
     
-    ShaderP* program;
+    ShaderProgram* program;
     //and now render the atmosphere
     if(camHeight > outerRadius){
         program = Resources::getShaderProgram(ResourceManifest::skyFromSpace); 
@@ -333,7 +332,7 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
         const uint& index = model.addModel(
             ResourceManifest::PlanetMesh,
             ResourceManifest::EarthSkyMaterial,
-            (ShaderP*)ResourceManifest::skyFromSpace.get(),
+            (ShaderProgram*)ResourceManifest::skyFromSpace.get(),
             RenderStage::GeometryTransparent
         );
         auto& skyInstance = model.getModel(index);
@@ -427,7 +426,7 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     const uint& index = model.addModel(
         ResourceManifest::RingMesh,
         m_MaterialHandle,
-        (ShaderP*)ResourceManifest::groundFromSpace.get(), 
+        (ShaderProgram*)ResourceManifest::groundFromSpace.get(), 
         RenderStage::GeometryTransparent
     );
     auto& ringModel = model.getModel(index);

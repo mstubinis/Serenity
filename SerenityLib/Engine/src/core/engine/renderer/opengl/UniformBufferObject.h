@@ -9,7 +9,7 @@
 
 //Core since version 3.1 (GLSL 140)
 class  Shader;
-class  ShaderP;
+class  ShaderProgram;
 class UniformBufferObject final : public EventObserver {
     friend class Shader;
     private:
@@ -34,7 +34,7 @@ class UniformBufferObject final : public EventObserver {
         void onEvent(const Event& e);
         const GLuint& address() const;
 
-        void attachToShader(const ShaderP& shaderProgram);
+        void attachToShader(const ShaderProgram& shaderProgram);
         void updateData(void* data);
 };
 

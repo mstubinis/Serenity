@@ -4,7 +4,7 @@
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/scene/Viewport.h>
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 
 using namespace Engine;
 using namespace Engine::epriv;
@@ -52,7 +52,7 @@ void Postprocess_SMAA::init() {
 
 
 
-void Postprocess_SMAA::passEdge(ShaderP& program, GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture, const unsigned int& outTexture) {
+void Postprocess_SMAA::passEdge(ShaderProgram& program, GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture, const unsigned int& outTexture) {
     gbuffer.bindFramebuffers(outTexture);
     program.bind();
 
@@ -82,7 +82,7 @@ void Postprocess_SMAA::passEdge(ShaderP& program, GBuffer& gbuffer, const glm::v
     Renderer::stencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
     Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 }
-void Postprocess_SMAA::passBlend(ShaderP& program, GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& outTexture) {
+void Postprocess_SMAA::passBlend(ShaderProgram& program, GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& outTexture) {
     gbuffer.bindFramebuffers(GBufferType::Normal);
     Renderer::Settings::clear(true, false, false); //clear color only
 
@@ -102,7 +102,7 @@ void Postprocess_SMAA::passBlend(ShaderP& program, GBuffer& gbuffer, const glm::
 
     Renderer::GLDisable(GL_STENCIL_TEST);
 }
-void Postprocess_SMAA::passNeighbor(ShaderP& program, GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
+void Postprocess_SMAA::passNeighbor(ShaderProgram& program, GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
     program.bind();
     Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
     Renderer::sendTextureSafe("textureMap", gbuffer.getTexture(sceneTexture), 0); //need original final image from first smaa pass
@@ -110,7 +110,7 @@ void Postprocess_SMAA::passNeighbor(ShaderP& program, GBuffer& gbuffer, const gl
 
     Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
 }
-void Postprocess_SMAA::passFinal(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight) {
+void Postprocess_SMAA::passFinal(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight) {
     /*
     //this pass is optional. lets skip it for now
     //gbuffer.bindFramebuffers(GBufferType::Lighting);

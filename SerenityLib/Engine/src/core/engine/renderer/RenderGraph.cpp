@@ -1,5 +1,5 @@
 #include <core/engine/renderer/RenderGraph.h>
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/materials/Material.h>
 #include <core/ModelInstance.h>
@@ -12,7 +12,7 @@ using namespace Engine::epriv;
 using namespace std;
 
 
-RenderPipeline::RenderPipeline(ShaderP& _shaderProgram) :shaderProgram(_shaderProgram) {
+RenderPipeline::RenderPipeline(ShaderProgram& _shaderProgram) :shaderProgram(_shaderProgram) {
 }
 RenderPipeline::~RenderPipeline() {
     SAFE_DELETE_VECTOR(materialNodes);
@@ -103,7 +103,7 @@ void RenderPipeline::render(Camera& camera, const double& dt) {
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material
-                    if (Core::m_Engine->m_RenderManager.glSM.current_bound_shader_program != &shaderProgram) {
+                    if (Core::m_Engine->m_RenderManager.RendererState.current_bound_shader_program != &shaderProgram) {
                         shaderProgram.bind();
                         _material.bind();
                     }

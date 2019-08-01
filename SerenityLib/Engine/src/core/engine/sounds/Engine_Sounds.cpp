@@ -4,7 +4,6 @@
 
 #include <core/engine/sounds/SoundData.h>
 #include <core/engine/sounds/SoundEffect.h>
-#include <core/engine/sounds/SoundMusic.h>
 #include <core/engine/sounds/SoundQueue.h>
 
 using namespace Engine;
@@ -15,21 +14,15 @@ epriv::SoundManager* soundManager;
 
 epriv::SoundManager::SoundManager(const char* name,uint w,uint h){ 
     soundManager = this;
-    m_SoundEffects.reserve(SoundManager::MAX_SOUND_EFFECTS);
-    m_SoundMusics.reserve(SoundManager::MAX_SOUND_MUSIC);
     for (unsigned int i = 0; i < SoundManager::MAX_SOUND_EFFECTS; ++i) {
-        m_SoundEffects.push_back(new SoundEffect());
         m_FreelistEffects.push(i);
     }
     for (unsigned int i = 0; i < SoundManager::MAX_SOUND_MUSIC; ++i) {
-        m_SoundMusics.push_back(new SoundMusic());
         m_FreelistMusics.push(i);
     }
 }
 epriv::SoundManager::~SoundManager(){ 
     SAFE_DELETE_VECTOR(m_SoundQueues);
-    SAFE_DELETE_VECTOR(m_SoundEffects);
-    SAFE_DELETE_VECTOR(m_SoundMusics);
 }
 void epriv::SoundManager::_setSoundInformation(Handle& handle, SoundEffect& sound) {
     SoundData& data = *Engine::Resources::getSoundData(handle);
@@ -61,8 +54,8 @@ void epriv::SoundManager::_update(const double& dt){
             ++it1;
         }
     }
-    for (unsigned int i = 0; i < m_SoundEffects.size(); ++i) {
-        auto& effect = *m_SoundEffects[i];
+    for (unsigned int i = 0; i < SoundManager::MAX_SOUND_EFFECTS; ++i) {
+        auto& effect = m_SoundEffects[i];
         if (effect.m_Active) {
             effect.update(dt);
             if (effect.status() == SoundStatus::Stopped) {
@@ -71,8 +64,8 @@ void epriv::SoundManager::_update(const double& dt){
             }
         }
     }
-    for (unsigned int i = 0; i < m_SoundMusics.size(); ++i) {
-        auto& music = *m_SoundMusics[i];
+    for (unsigned int i = 0; i < SoundManager::MAX_SOUND_MUSIC; ++i) {
+        auto& music = m_SoundMusics[i];
         if (music.m_Active) {
             music.update(dt);
             if (music.status() == SoundStatus::Stopped) {
@@ -87,7 +80,7 @@ SoundEffect* epriv::SoundManager::_getFreeEffect() {
     if (m_FreelistEffects.size() > 0) {
         auto& index = m_FreelistEffects.top();
         m_FreelistEffects.pop();
-        return m_SoundEffects[index];
+        return &m_SoundEffects[index];
     }
     return nullptr;
 }
@@ -95,7 +88,7 @@ SoundMusic* epriv::SoundManager::_getFreeMusic() {
     if (m_FreelistMusics.size() > 0) {
         auto& index = m_FreelistMusics.top();
         m_FreelistMusics.pop();
-        return m_SoundMusics[index];
+        return &m_SoundMusics[index];
     }
     return nullptr;
 }
@@ -124,11 +117,11 @@ SoundMusic* Sound::playMusic(Handle& handle, const uint& loops){
 }
 void Sound::stop_all_music() {
     for (auto& music : soundManager->m_SoundMusics) {
-        music->stop();
+        music.stop();
     }
 }
 void Sound::stop_all_effect() {
     for (auto& effect : soundManager->m_SoundEffects) {
-        effect->stop();
+        effect.stop();
     }
 }

@@ -2,7 +2,7 @@
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 
 using namespace Engine;
 using namespace Engine::epriv;
@@ -18,7 +18,7 @@ Postprocess_HDR::Postprocess_HDR() {
 }
 Postprocess_HDR::~Postprocess_HDR() {
 }
-void Postprocess_HDR::pass(ShaderP& program,GBuffer& gbuffer,const unsigned int& fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor) {
+void Postprocess_HDR::pass(ShaderProgram& program,GBuffer& gbuffer,const unsigned int& fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor) {
     program.bind();
 
     Renderer::sendUniform4Safe("HDRInfo", exposure, static_cast<float>(hdr), godRaysFactor, static_cast<float>(algorithm));

@@ -18,6 +18,9 @@ class  SoundEffect : public SoundBaseClass {
 
         SoundEffect();
     public:
+        SoundEffect& operator=(const SoundEffect&) = delete;
+        SoundEffect(const SoundEffect&) = default;
+        SoundEffect(SoundEffect&&) noexcept = default;
         ~SoundEffect();
 
         void update(const double& dt);

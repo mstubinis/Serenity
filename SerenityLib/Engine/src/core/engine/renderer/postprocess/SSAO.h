@@ -4,7 +4,7 @@
 
 
 class  Camera;
-class  ShaderP;
+class  ShaderProgram;
 
 #include <glm/vec3.hpp>
 #include <string>
@@ -35,8 +35,8 @@ namespace epriv {
 
             void init();
 
-            void passSSAO(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,Camera&);
-            void passBlur(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const std::string& type,const unsigned int& texture);
+            void passSSAO(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,Camera&);
+            void passBlur(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const std::string& type,const unsigned int& texture);
 
             static Postprocess_SSAO SSAO;
     };

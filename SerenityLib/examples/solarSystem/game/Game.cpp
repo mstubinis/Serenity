@@ -3,6 +3,7 @@
 #include <core/engine/lua/LuaScript.h>
 
 #include <core/engine/math/SimplexNoise.h>
+#include <core/engine/math/Engine_Math.h>
 
 #include <unordered_map>
 #include <iostream>
@@ -31,15 +32,15 @@ void Game::render(){
 
 #pragma region EventHandlers
 void Game::onResize(const uint& width, const uint& height){
-    if(m_Core)
+    if (m_Core) {
         m_Core->onResize(width, height);
+    }
 }
 void Game::onClose(){
 }
 void Game::onLostFocus(){
 }
 void Game::onGainedFocus(){
-
     if (m_Core && m_Core->gameState() == GameState::Game) {
         const auto& size = Resources::getWindow().getSize();
         const glm::vec2 halfRes(size.x / 2, size.y / 2);

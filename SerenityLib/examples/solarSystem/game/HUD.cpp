@@ -280,7 +280,7 @@ void HUD::go_to_main_menu() {
     auto& window = Resources::getWindow();
     auto _status = m_MainMenuMusic->status();
     if (_status == SoundStatus::Fresh || _status == SoundStatus::Stopped || _status == SoundStatus::Paused) {
-        //m_MainMenuMusic->play();
+        m_MainMenuMusic->play();
     }
     window.keepMouseInWindow(false);
     window.setMouseCursorVisible(true);

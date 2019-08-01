@@ -1,6 +1,6 @@
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
 #include <core/engine/renderer/Engine_Renderer.h>
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 
 #include <iostream>
 
@@ -66,13 +66,13 @@ void UniformBufferObject::updateData(void* _data) {
     glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, m_SizeOfStruct, _data);
 }
-void UniformBufferObject::attachToShader(const ShaderP& shaderProgram) {
+void UniformBufferObject::attachToShader(const ShaderProgram& shaderProgram) {
     const GLuint& program = shaderProgram.m_ShaderProgram;
     if (RenderManager::GLSL_VERSION < 140 || shaderProgram.m_AttachedUBOs.count(m_UBOObject))
         return;
     const uint& programBlockIndex = glGetUniformBlockIndex(program, m_NameInShader);
     glUniformBlockBinding(program, programBlockIndex, m_GlobalBindingPointNumber);
-    const_cast<ShaderP&>(shaderProgram).m_AttachedUBOs.emplace(m_UBOObject);
+    const_cast<ShaderProgram&>(shaderProgram).m_AttachedUBOs.emplace(m_UBOObject);
 }
 const GLuint& UniformBufferObject::address() const {
     return m_UBOObject;

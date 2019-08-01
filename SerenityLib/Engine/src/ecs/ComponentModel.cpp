@@ -43,29 +43,29 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& super) {
 
 #pragma region Component
 
-ComponentModel::ComponentModel(const Entity& entity, Handle& mesh, Handle& material, ShaderP* shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity){
+ComponentModel::ComponentModel(const Entity& entity, Handle& mesh, Handle& material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity){
     addModel(mesh, material, shaderProgram, stage);
 }
-ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Handle& material,  ShaderP* shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity) {
+ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Handle& material,  ShaderProgram* shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity) {
     addModel(mesh, (Material*)material.get(), shaderProgram, stage);
 }
-ComponentModel::ComponentModel(const Entity& entity, Handle& mesh, Material* material,  ShaderP* shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity) {
+ComponentModel::ComponentModel(const Entity& entity, Handle& mesh, Material* material,  ShaderProgram* shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity) {
     addModel((Mesh*)mesh.get(), material, shaderProgram, stage);
 }
-ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Material* material, ShaderP* shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity) {
+ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity) {
     addModel(mesh, material, shaderProgram, stage);
 }
 ComponentModel::ComponentModel(const Entity& entity, Handle& mesh, Handle& material, Handle& shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity) {
-    addModel(mesh, material, (ShaderP*)shaderProgram.get(), stage);
+    addModel(mesh, material, (ShaderProgram*)shaderProgram.get(), stage);
 }
 ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Handle& material, Handle& shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity) {
-    addModel(mesh, (Material*)material.get(), (ShaderP*)shaderProgram.get(), stage);
+    addModel(mesh, (Material*)material.get(), (ShaderProgram*)shaderProgram.get(), stage);
 }
 ComponentModel::ComponentModel(const Entity& entity, Handle& mesh, Material* material, Handle& shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity) {
-    addModel((Mesh*)mesh.get(), material, (ShaderP*)shaderProgram.get(), stage);
+    addModel((Mesh*)mesh.get(), material, (ShaderProgram*)shaderProgram.get(), stage);
 }
 ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Material* material, Handle& shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity) {
-    addModel(mesh, material, (ShaderP*)shaderProgram.get(), stage);
+    addModel(mesh, material, (ShaderProgram*)shaderProgram.get(), stage);
 }
 ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(_modelInstances);
@@ -90,10 +90,10 @@ const float& ComponentModel::radius() const {
 const glm::vec3& ComponentModel::boundingBox() const {
     return _radiusBox; 
 }
-const uint ComponentModel::addModel(Handle& mesh, Handle& material, ShaderP* shaderProgram, const RenderStage::Stage& stage) {
+const uint ComponentModel::addModel(Handle& mesh, Handle& material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
     return ComponentModel::addModel((Mesh*)mesh.get(), (Material*)material.get(), shaderProgram, stage);
 }
-const uint ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* shaderProgram, const RenderStage::Stage& stage) {
+const uint ComponentModel::addModel(Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
     _modelInstances.push_back(new ModelInstance(owner, mesh, material, shaderProgram));
     auto& instance = *_modelInstances[_modelInstances.size() - 1];
     auto& _scene = owner.scene();
@@ -102,10 +102,10 @@ const uint ComponentModel::addModel(Mesh* mesh, Material* material, ShaderP* sha
     ComponentModel_Functions::CalculateRadius(*this);
     return _modelInstances.size() - 1;
 }
-void ComponentModel::setModel(Handle& mesh, Handle& material, const uint& index, ShaderP* shaderProgram, const RenderStage::Stage& stage) {
+void ComponentModel::setModel(Handle& mesh, Handle& material, const uint& index, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
     ComponentModel::setModel((Mesh*)mesh.get(), (Material*)material.get(), index, shaderProgram, stage);
 }
-void ComponentModel::setModel(Mesh* mesh, Material* material, const uint& index, ShaderP* shaderProgram, const RenderStage::Stage& stage) {
+void ComponentModel::setModel(Mesh* mesh, Material* material, const uint& index, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
     auto& instance = *_modelInstances[index];
     auto& _scene = owner.scene();
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(_scene, instance, instance.stage());
@@ -118,7 +118,7 @@ void ComponentModel::setModel(Mesh* mesh, Material* material, const uint& index,
     InternalScenePublicInterface::AddModelInstanceToPipeline(_scene, instance, stage);
     ComponentModel_Functions::CalculateRadius(*this);
 }
-void ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, const uint& index, const RenderStage::Stage& stage) {
+void ComponentModel::setModelShaderProgram(ShaderProgram* shaderProgram, const uint& index, const RenderStage::Stage& stage) {
     auto& instance = *_modelInstances[index];
     auto& scene   = owner.scene();
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, instance, instance.stage());
@@ -130,7 +130,7 @@ void ComponentModel::setModelShaderProgram(ShaderP* shaderProgram, const uint& i
     ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelShaderProgram(Handle& shaderPHandle, const uint& index, const RenderStage::Stage& stage) {
-    ComponentModel::setModelShaderProgram((ShaderP*)shaderPHandle.get(), index, stage); 
+    ComponentModel::setModelShaderProgram((ShaderProgram*)shaderPHandle.get(), index, stage); 
 }
 void ComponentModel::setModelMesh(Mesh* mesh, const uint& index, const RenderStage::Stage& stage) {
     auto& instance = *_modelInstances[index];

@@ -44,8 +44,8 @@ Mesh* epriv::InternalMeshes::PointLightBounds    = nullptr;
 Mesh* epriv::InternalMeshes::RodLightBounds      = nullptr;
 Mesh* epriv::InternalMeshes::SpotLightBounds     = nullptr;
 
-ShaderP* epriv::InternalShaderPrograms::Deferred = nullptr;
-ShaderP* epriv::InternalShaderPrograms::Forward  = nullptr;
+ShaderProgram* epriv::InternalShaderPrograms::Deferred = nullptr;
+ShaderProgram* epriv::InternalShaderPrograms::Forward  = nullptr;
 
 epriv::RenderManager* renderManager;
 epriv::RenderManager::impl* renderManagerImpl;
@@ -56,7 +56,7 @@ uint epriv::RenderManager::OPENGL_VERSION;
 namespace Engine{
     namespace epriv{
 
-        struct srtKeyShaderP final{inline bool operator() ( ShaderP* _1,  ShaderP* _2){return (_1->name() < _2->name());}};
+        struct srtKeyShaderProgram final{inline bool operator() ( ShaderProgram* _1,  ShaderProgram* _2){return (_1->name() < _2->name());}};
 
         struct EngineInternalShaders final{enum Shader{
             FullscreenVertex,
@@ -163,10 +163,6 @@ class epriv::RenderManager::impl final{
         float gamma;
         Texture* brdfCook;
         Texture* blackCubemap;
-        GLboolean color_mask_r;
-        GLboolean color_mask_g;
-        GLboolean color_mask_b;
-        GLboolean color_mask_a;
         AntiAliasingAlgorithm::Algorithm aa_algorithm;
         DepthFunc::Func depth_func;
         bool draw_physics_debug;
@@ -189,7 +185,7 @@ class epriv::RenderManager::impl final{
 
         #pragma region EngineInternalShadersAndPrograms
         vector<Shader> m_InternalShaders;
-        vector<ShaderP*> m_InternalShaderPrograms;
+        vector<ShaderProgram*> m_InternalShaderPrograms;
 
         epriv::UBOCamera m_UBOCameraData;
         #pragma endregion
@@ -208,10 +204,6 @@ class epriv::RenderManager::impl final{
             gamma = 2.2f;
             brdfCook = nullptr;
             blackCubemap = nullptr;
-            color_mask_r = GL_TRUE;
-            color_mask_g = GL_TRUE;
-            color_mask_b = GL_TRUE;
-            color_mask_a = GL_TRUE;
             aa_algorithm = AntiAliasingAlgorithm::FXAA;
             depth_func = DepthFunc::Less;
             #ifdef _DEBUG
@@ -285,36 +277,36 @@ class epriv::RenderManager::impl final{
             m_InternalShaders.emplace_back(EShaders::smaa_frag_3, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::smaa_frag_4, ShaderType::Fragment, false);
 
-            InternalShaderPrograms::Deferred = new ShaderP("Deferred", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::DeferredFrag]);
-            InternalShaderPrograms::Forward = new ShaderP("Forward", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::ForwardFrag]);
+            InternalShaderPrograms::Deferred = new ShaderProgram("Deferred", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::DeferredFrag]);
+            InternalShaderPrograms::Forward = new ShaderProgram("Forward", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::ForwardFrag]);
 
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics] = new ShaderP("Bullet_Physics", m_InternalShaders[EngineInternalShaders::BulletPhysicsVertex], m_InternalShaders[EngineInternalShaders::BulletPhysicsFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI] = new ShaderP("Deferred_2DAPI", m_InternalShaders[EngineInternalShaders::Vertex2DAPI], m_InternalShaders[EngineInternalShaders::DeferredFrag2DAPI]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays] = new ShaderP("Deferred_GodsRays", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::GodRaysFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur] = new ShaderP("Deferred_Blur", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BlurFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlurSSAO] = new ShaderP("Deferred_Blur_SSAO", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::SSAOBlurFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR] = new ShaderP("Deferred_HDR", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::HDRFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO] = new ShaderP("Deferred_SSAO", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::SSAOFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF] = new ShaderP("Deferred_DOF", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::DOFFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom] = new ShaderP("Deferred_Bloom", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BloomFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal] = new ShaderP("Deferred_Final", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::FinalFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DepthAndTransparency] = new ShaderP("DepthAndTransparency", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::DepthAndTransparencyFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA] = new ShaderP("Deferred_FXAA", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::FXAAFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox] = new ShaderP("Deferred_Skybox", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::DeferredFragSkybox]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake] = new ShaderP("Deferred_Skybox_Fake", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::DeferredFragSkyboxFake]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth] = new ShaderP("Copy_Depth", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::CopyDepthFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting] = new ShaderP("Deferred_Light", m_InternalShaders[EngineInternalShaders::LightingVertex], m_InternalShaders[EngineInternalShaders::LightingFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingOptimized] = new ShaderP("Deferred_Light_Optimized", m_InternalShaders[EngineInternalShaders::LightingVertex], m_InternalShaders[EngineInternalShaders::LightingFragOptimized]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingGI] = new ShaderP("Deferred_Light_GI", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::LightingGIFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude] = new ShaderP("Cubemap_Convolude", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::CubemapConvoludeFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapPrefilterEnv] = new ShaderP("Cubemap_Prefilter_Env", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::CubemapPrefilterEnvFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance] = new ShaderP("BRDF_Precompute_CookTorrance", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BRDFPrecomputeFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::Grayscale] = new ShaderP("Greyscale_Frag", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::GrayscaleFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::StencilPass] = new ShaderP("Stencil_Pass", m_InternalShaders[EngineInternalShaders::LightingVertex], m_InternalShaders[EngineInternalShaders::StencilPassFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA1] = new ShaderP("Deferred_SMAA_1", m_InternalShaders[EngineInternalShaders::SMAAVertex1], m_InternalShaders[EngineInternalShaders::SMAAFrag1]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA2] = new ShaderP("Deferred_SMAA_2", m_InternalShaders[EngineInternalShaders::SMAAVertex2], m_InternalShaders[EngineInternalShaders::SMAAFrag2]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3] = new ShaderP("Deferred_SMAA_3", m_InternalShaders[EngineInternalShaders::SMAAVertex3], m_InternalShaders[EngineInternalShaders::SMAAFrag3]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4] = new ShaderP("Deferred_SMAA_4", m_InternalShaders[EngineInternalShaders::SMAAVertex4], m_InternalShaders[EngineInternalShaders::SMAAFrag4]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics] = new ShaderProgram("Bullet_Physics", m_InternalShaders[EngineInternalShaders::BulletPhysicsVertex], m_InternalShaders[EngineInternalShaders::BulletPhysicsFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI] = new ShaderProgram("Deferred_2DAPI", m_InternalShaders[EngineInternalShaders::Vertex2DAPI], m_InternalShaders[EngineInternalShaders::DeferredFrag2DAPI]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays] = new ShaderProgram("Deferred_GodsRays", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::GodRaysFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur] = new ShaderProgram("Deferred_Blur", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BlurFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlurSSAO] = new ShaderProgram("Deferred_Blur_SSAO", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::SSAOBlurFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR] = new ShaderProgram("Deferred_HDR", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::HDRFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO] = new ShaderProgram("Deferred_SSAO", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::SSAOFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF] = new ShaderProgram("Deferred_DOF", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::DOFFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom] = new ShaderProgram("Deferred_Bloom", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BloomFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal] = new ShaderProgram("Deferred_Final", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::FinalFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DepthAndTransparency] = new ShaderProgram("DepthAndTransparency", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::DepthAndTransparencyFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA] = new ShaderProgram("Deferred_FXAA", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::FXAAFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox] = new ShaderProgram("Deferred_Skybox", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::DeferredFragSkybox]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake] = new ShaderProgram("Deferred_Skybox_Fake", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::DeferredFragSkyboxFake]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth] = new ShaderProgram("Copy_Depth", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::CopyDepthFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting] = new ShaderProgram("Deferred_Light", m_InternalShaders[EngineInternalShaders::LightingVertex], m_InternalShaders[EngineInternalShaders::LightingFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingOptimized] = new ShaderProgram("Deferred_Light_Optimized", m_InternalShaders[EngineInternalShaders::LightingVertex], m_InternalShaders[EngineInternalShaders::LightingFragOptimized]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingGI] = new ShaderProgram("Deferred_Light_GI", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::LightingGIFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude] = new ShaderProgram("Cubemap_Convolude", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::CubemapConvoludeFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapPrefilterEnv] = new ShaderProgram("Cubemap_Prefilter_Env", m_InternalShaders[EngineInternalShaders::VertexSkybox], m_InternalShaders[EngineInternalShaders::CubemapPrefilterEnvFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance] = new ShaderProgram("BRDF_Precompute_CookTorrance", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BRDFPrecomputeFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::Grayscale] = new ShaderProgram("Greyscale_Frag", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::GrayscaleFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::StencilPass] = new ShaderProgram("Stencil_Pass", m_InternalShaders[EngineInternalShaders::LightingVertex], m_InternalShaders[EngineInternalShaders::StencilPassFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA1] = new ShaderProgram("Deferred_SMAA_1", m_InternalShaders[EngineInternalShaders::SMAAVertex1], m_InternalShaders[EngineInternalShaders::SMAAFrag1]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA2] = new ShaderProgram("Deferred_SMAA_2", m_InternalShaders[EngineInternalShaders::SMAAVertex2], m_InternalShaders[EngineInternalShaders::SMAAFrag2]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3] = new ShaderProgram("Deferred_SMAA_3", m_InternalShaders[EngineInternalShaders::SMAAVertex3], m_InternalShaders[EngineInternalShaders::SMAAFrag3]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4] = new ShaderProgram("Deferred_SMAA_4", m_InternalShaders[EngineInternalShaders::SMAAVertex4], m_InternalShaders[EngineInternalShaders::SMAAFrag4]);
 
 #pragma endregion
 
@@ -1286,8 +1278,8 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(fbo);
         }
         void _generateBRDFLUTCookTorrance(const uint& brdfSize){
-            uint& prevReadBuffer = renderManager->glSM.current_bound_read_fbo;
-            uint& prevDrawBuffer = renderManager->glSM.current_bound_draw_fbo;
+            //uint& prevReadBuffer = renderManager->glSM.current_bound_read_fbo;
+            //uint& prevDrawBuffer = renderManager->glSM.current_bound_draw_fbo;
 
             FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO", brdfSize, brdfSize); //try without a depth format
             fbo->bind();
@@ -1306,8 +1298,8 @@ class epriv::RenderManager::impl final{
             Renderer::colorMask(true, true, true, true);
 
             SAFE_DELETE(fbo);
-            Renderer::bindReadFBO(prevReadBuffer);
-            Renderer::bindDrawFBO(prevDrawBuffer);
+            //Renderer::bindReadFBO(prevReadBuffer);
+            //Renderer::bindDrawFBO(prevDrawBuffer);
         }
         void _renderTextLeft(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
             uint i = 0;
@@ -1705,8 +1697,8 @@ class epriv::RenderManager::impl final{
                 
                 sendUniform4v("materials[0]", Material::m_MaterialProperities, Material::m_MaterialProperities.size());
                 sendUniform4("ScreenData", lighting_gi_pack, gamma, fbo_width, fbo_height);
-                //sendTexture("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
-                //sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 1);
+                sendTexture("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
+                sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 1);
                 sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 2);
                 sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 3);
 
@@ -2119,8 +2111,8 @@ void epriv::RenderManager::_clear2DAPICommands() {
     vector_clear(m_i->m_2DAPICommands);
 }
 
-const bool epriv::RenderManager::_bindShaderProgram(ShaderP* p){
-    auto& currentShaderPgrm = glSM.current_bound_shader_program;
+const bool epriv::RenderManager::_bindShaderProgram(ShaderProgram* p){
+    auto& currentShaderPgrm = RendererState.current_bound_shader_program;
     if(currentShaderPgrm != p){
         OpenGLStateMachine.GL_glUseProgram(p->program());
         currentShaderPgrm = p;
@@ -2130,7 +2122,7 @@ const bool epriv::RenderManager::_bindShaderProgram(ShaderP* p){
     return false;
 }
 const bool epriv::RenderManager::_unbindShaderProgram() {
-    auto& currentShaderPgrm = glSM.current_bound_shader_program;
+    auto& currentShaderPgrm = RendererState.current_bound_shader_program;
     if (currentShaderPgrm) {
         currentShaderPgrm->BindableResource::unbind();
         currentShaderPgrm = nullptr;
@@ -2140,7 +2132,7 @@ const bool epriv::RenderManager::_unbindShaderProgram() {
     return false;
 }
 const bool epriv::RenderManager::_bindMaterial(Material* m){
-    auto& currentMaterial = glSM.current_bound_material;
+    auto& currentMaterial = RendererState.current_bound_material;
     if(currentMaterial != m){
         currentMaterial = m;
         currentMaterial->BindableResource::bind();
@@ -2149,7 +2141,7 @@ const bool epriv::RenderManager::_bindMaterial(Material* m){
     return false;
 }
 const bool epriv::RenderManager::_unbindMaterial(){
-    auto& currentMaterial = glSM.current_bound_material;
+    auto& currentMaterial = RendererState.current_bound_material;
     if(currentMaterial){
         currentMaterial->BindableResource::unbind();
         currentMaterial = nullptr;
@@ -2252,19 +2244,8 @@ const bool Renderer::stencilFunc(const GLenum& func, const GLint& ref, const GLu
     return i.OpenGLStateMachine.GL_glStencilFunc(func, ref, mask);
 }
 const bool Renderer::colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
-    auto& i = *renderManagerImpl;
-    auto _r = static_cast<GLboolean>(r);
-    auto _g = static_cast<GLboolean>(g);
-    auto _b = static_cast<GLboolean>(b);
-    auto _a = static_cast<GLboolean>(a);
-    if (_r == i.color_mask_r && _g == i.color_mask_g && _b == i.color_mask_b && _a == i.color_mask_a)
-        return false;
-    i.color_mask_r = _r;
-    i.color_mask_g = _g;
-    i.color_mask_b = _b;
-    i.color_mask_a = _a;
-    glColorMask(i.color_mask_r, i.color_mask_g, i.color_mask_b, i.color_mask_a);
-    return true;
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glColorMask(r, g, b, a);
 }
 const bool Renderer::clearColor(const float& r, const float& g, const float& b, const float& a) {
     auto& i = *renderManager;
@@ -2340,12 +2321,11 @@ void Renderer::sendTextureSafe(const char* location,const GLuint textureObject,c
 }
 const bool Renderer::bindReadFBO(const GLuint& fbo){
     auto& i = *renderManager;
-    if (i.glSM.current_bound_read_fbo != fbo) {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-        i.glSM.current_bound_read_fbo = fbo;
-        return true;
-    }
-    return false;
+    return i.OpenGLStateMachine.GL_glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+}
+const bool Renderer::bindDrawFBO(const GLuint& fbo) {
+    auto& i = *renderManager;
+    return i.OpenGLStateMachine.GL_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 }
 void Renderer::bindFBO(epriv::FramebufferObject& fbo){ 
     Renderer::bindFBO(fbo.address()); 
@@ -2353,27 +2333,13 @@ void Renderer::bindFBO(epriv::FramebufferObject& fbo){
 const bool Renderer::bindRBO(epriv::RenderbufferObject& rbo){
     return Renderer::bindRBO(rbo.address()); 
 }
-const bool Renderer::bindDrawFBO(const GLuint& fbo){
-    auto& i = *renderManager;
-    if (i.glSM.current_bound_draw_fbo != fbo) {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-        i.glSM.current_bound_draw_fbo = fbo;
-        return true;
-    }
-    return false;
-}
 void Renderer::bindFBO(const GLuint& fbo){
     Renderer::bindReadFBO(fbo);
     Renderer::bindDrawFBO(fbo);
 }
 const bool Renderer::bindRBO(const GLuint& rbo){
     auto& i = *renderManager;
-    if (i.glSM.current_bound_rbo != rbo) {
-        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-        i.glSM.current_bound_rbo = rbo;
-        return true;
-    }
-    return false;
+    return i.OpenGLStateMachine.GL_glBindRenderbuffer(rbo);
 }
 void Renderer::unbindFBO(){ 
     Renderer::bindFBO(GLuint(0)); 
@@ -2388,13 +2354,13 @@ void Renderer::unbindDrawFBO(){
     Renderer::bindDrawFBO(0); 
 }
 inline const GLint Renderer::getUniformLoc(const char* location) {
-    const auto& m = renderManager->glSM.current_bound_shader_program->uniforms(); 
+    const auto& m = renderManager->RendererState.current_bound_shader_program->uniforms();
     if (!m.count(location)) 
         return -1; 
     return m.at(location);
 }
 inline const GLint& Renderer::getUniformLocUnsafe(const char* location) {
-    return renderManager->glSM.current_bound_shader_program->uniforms().at(location);
+    return renderManager->RendererState.current_bound_shader_program->uniforms().at(location);
 }
 
 

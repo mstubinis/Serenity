@@ -166,6 +166,24 @@
     <Filter Include="Source Files\Engine\Core\Materials">
       <UniqueIdentifier>{976b87db-df54-4718-a189-44530fed519b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\opengl\glsl">
+      <UniqueIdentifier>{3200d464-62a1-472a-8ee9-23b95a5cf0de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\direct3d\hlsl">
+      <UniqueIdentifier>{0b75d2a7-2599-4576-a73b-f9d9e5bcfd09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\opengl\glsl">
+      <UniqueIdentifier>{374636fc-1eb3-4e57-8014-384f9a2a11d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\direct3d\hlsl">
+      <UniqueIdentifier>{615d3e26-61d4-4286-9ccf-9b064a77d168}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Shaders">
+      <UniqueIdentifier>{1bfdbb98-556c-493a-83fe-72342f065af6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Shaders">
+      <UniqueIdentifier>{9ce0f80b-4d37-44a3-864a-230877c0e19b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -339,9 +357,6 @@
     <ClInclude Include="Engine\src\core\Constraint.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\ShaderProgram.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\ecs\EntityDataRequest.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
@@ -391,9 +406,6 @@
       <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\renderer\FullscreenItems.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\renderer\GLStateMachine.h">
       <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\networking\SocketInterface.h">
@@ -491,6 +503,24 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\materials\MaterialLayer.h">
       <Filter>Header Files\Engine\Core\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\RendererState.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\Common.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\shaders\ShaderProgram.h">
+      <Filter>Header Files\Engine\Core\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\shaders\ShaderHelper.h">
+      <Filter>Header Files\Engine\Core\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\shaders\Shader.h">
+      <Filter>Header Files\Engine\Core\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\shaders\ShaderIncludes.h">
+      <Filter>Header Files\Engine\Core\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -608,9 +638,6 @@
     <ClCompile Include="Engine\src\core\Constraint.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\ShaderProgram.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\BindableResource.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
@@ -666,9 +693,6 @@
       <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\FullscreenItems.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\renderer\GLStateMachine.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\networking\SocketTCP.cpp">
@@ -742,6 +766,18 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\materials\MaterialLayer.cpp">
       <Filter>Source Files\Engine\Core\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\Common.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\shaders\ShaderProgram.cpp">
+      <Filter>Source Files\Engine\Core\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\shaders\ShaderHelper.cpp">
+      <Filter>Source Files\Engine\Core\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\shaders\Shader.cpp">
+      <Filter>Source Files\Engine\Core\Shaders</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

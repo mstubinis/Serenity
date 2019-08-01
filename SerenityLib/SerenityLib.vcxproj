@@ -272,8 +272,8 @@
     <ClInclude Include="Engine\src\core\engine\renderer\FullscreenItems.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\GBuffer.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\GLImageConstants.h" />
-    <ClInclude Include="Engine\src\core\engine\renderer\GLStateMachine.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\Extensions.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\Common.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\State.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\UniformBufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Bloom.h" />
@@ -285,6 +285,7 @@
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\SMAA.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\SSAO.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\RendererEnums.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\RendererState.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\RenderGraph.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\SMAA_LUT.h" />
     <ClInclude Include="Engine\src\core\engine\resources\Engine_BuiltInResources.h" />
@@ -296,6 +297,10 @@
     <ClInclude Include="Engine\src\core\engine\scene\Scene.h" />
     <ClInclude Include="Engine\src\core\engine\scene\Skybox.h" />
     <ClInclude Include="Engine\src\core\engine\scene\Viewport.h" />
+    <ClInclude Include="Engine\src\core\engine\shaders\Shader.h" />
+    <ClInclude Include="Engine\src\core\engine\shaders\ShaderHelper.h" />
+    <ClInclude Include="Engine\src\core\engine\shaders\ShaderIncludes.h" />
+    <ClInclude Include="Engine\src\core\engine\shaders\ShaderProgram.h" />
     <ClInclude Include="Engine\src\core\engine\sounds\Engine_Sounds.h" />
     <ClInclude Include="Engine\src\core\engine\sounds\SoundBaseClass.h" />
     <ClInclude Include="Engine\src\core\engine\sounds\SoundData.h" />
@@ -310,7 +315,6 @@
     <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Utils.h" />
     <ClInclude Include="Engine\src\core\ModelInstance.h" />
-    <ClInclude Include="Engine\src\core\ShaderProgram.h" />
     <ClInclude Include="Engine\src\core\Terrain.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBody.h" />
@@ -370,8 +374,8 @@
     <ClCompile Include="Engine\src\core\engine\renderer\FramebufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\FullscreenItems.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\GBuffer.cpp" />
-    <ClCompile Include="Engine\src\core\engine\renderer\GLStateMachine.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\Extensions.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\Common.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\State.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\UniformBufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Bloom.cpp" />
@@ -391,6 +395,9 @@
     <ClCompile Include="Engine\src\core\engine\scene\Scene.cpp" />
     <ClCompile Include="Engine\src\core\engine\scene\Skybox.cpp" />
     <ClCompile Include="Engine\src\core\engine\scene\Viewport.cpp" />
+    <ClCompile Include="Engine\src\core\engine\shaders\Shader.cpp" />
+    <ClCompile Include="Engine\src\core\engine\shaders\ShaderHelper.cpp" />
+    <ClCompile Include="Engine\src\core\engine\shaders\ShaderProgram.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\Engine_Sounds.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundBaseClass.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundData.cpp" />
@@ -402,7 +409,6 @@
     <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp" />
     <ClCompile Include="Engine\src\core\engine\utils\Engine_Debugging.cpp" />
     <ClCompile Include="Engine\src\core\ModelInstance.cpp" />
-    <ClCompile Include="Engine\src\core\ShaderProgram.cpp" />
     <ClCompile Include="Engine\src\core\Terrain.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentCamera.cpp" />

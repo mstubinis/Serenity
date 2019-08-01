@@ -17,6 +17,17 @@ struct MaterialLayerBlendMode final { enum Mode {
     Dissolve,
     Dodge,
     Burn,
+    HardLight,
+    SoftLight,
+    GrainExtract,
+    GrainMerge,
+    Difference,
+    Darken,
+    Lighten,
+    Hue,
+    Saturation,
+    Color,
+    Value,
 _TOTAL};};
 
 struct MaterialUVModificationType final { enum Type {

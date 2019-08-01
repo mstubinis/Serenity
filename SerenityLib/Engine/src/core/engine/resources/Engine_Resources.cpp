@@ -24,7 +24,7 @@ using namespace std;
 
 epriv::ResourceManager* resourceManager;
 
-epriv::ResourceManager::ResourceManager(const char* name,uint width,uint height){
+epriv::ResourceManager::ResourceManager(const char* name, const uint& width, const uint& height){
     m_CurrentScene  = nullptr;
     m_Window        = nullptr;
     m_DynamicMemory = false;
@@ -36,7 +36,7 @@ epriv::ResourceManager::~ResourceManager(){
     SAFE_DELETE(m_Window);
     SAFE_DELETE_VECTOR(m_Scenes);
 }
-void epriv::ResourceManager::_init(const char* name,uint width,uint height){ 
+void epriv::ResourceManager::_init(const char* name, const uint& width, const uint& height){
     m_Window = new Engine_Window(name, width, height);
 }
 
@@ -50,14 +50,14 @@ vector<Scene*>& epriv::ResourceManager::scenes() {
     return m_Scenes;
 }
 
-bool epriv::ResourceManager::_hasScene(string n){ 
+bool epriv::ResourceManager::_hasScene(const string& n){
     for (auto& scene : m_Scenes) {
         if (scene->name() == n)
             return true;
     }
     return false;
 }
-Texture* epriv::ResourceManager::_hasTexture(string n){
+Texture* epriv::ResourceManager::_hasTexture(const string& n){
     auto& resourcePool = *(m_Resources);
     for(uint i = 0; i < resourcePool.maxEntries(); ++i){
         EngineResource* r = resourcePool.getAsFast<EngineResource>(i+1);
@@ -73,7 +73,7 @@ Texture* epriv::ResourceManager::_hasTexture(string n){
 Handle epriv::ResourceManager::_addTexture(Texture* t) {
     return resourceManager->m_Resources->add(t, ResourceType::Texture);
 }
-Scene& epriv::ResourceManager::_getSceneByID(uint id) {
+Scene& epriv::ResourceManager::_getSceneByID(const uint& id) {
     return *(m_Scenes[id-1]);
 }
 void epriv::ResourceManager::_addScene(Scene& s){
@@ -83,7 +83,7 @@ uint epriv::ResourceManager::_numScenes(){
     return m_Scenes.size();
 }
 
-void Resources::Settings::enableDynamicMemory(bool b){ resourceManager->m_DynamicMemory = b; }
+void Resources::Settings::enableDynamicMemory(const bool b){ resourceManager->m_DynamicMemory = b; }
 void Resources::Settings::disableDynamicMemory(){ resourceManager->m_DynamicMemory = false; }
 
 Engine_Window& Resources::getWindow(){ return *resourceManager->m_Window; }
@@ -112,15 +112,15 @@ void Resources::getMesh(Handle& h,Mesh*& p){ resourceManager->m_Resources->getAs
 Mesh* Resources::getMesh(Handle& h){ Mesh* p; resourceManager->m_Resources->getAs(h,p); return p; }
 void Resources::getMaterial(Handle& h,Material*& p){ resourceManager->m_Resources->getAs(h,p); }
 Material* Resources::getMaterial(Handle& h){ Material* p; resourceManager->m_Resources->getAs(h,p); return p; }
-void Resources::getShaderProgram(Handle& h,ShaderP*& p){ resourceManager->m_Resources->getAs(h,p); }
-ShaderP* Resources::getShaderProgram(Handle& h){ ShaderP* p; resourceManager->m_Resources->getAs(h,p); return p; }
+void Resources::getShaderProgram(Handle& h,ShaderProgram*& p){ resourceManager->m_Resources->getAs(h,p); }
+ShaderProgram* Resources::getShaderProgram(Handle& h){ ShaderProgram* p; resourceManager->m_Resources->getAs(h,p); return p; }
 
 Handle Resources::addFont(const string& filename){
     return resourceManager->m_Resources->add(new Font(filename),ResourceType::Font);
 }
 
 
-vector<Handle> Resources::loadMesh(string fileOrData, float threshhold) {
+vector<Handle> Resources::loadMesh(const string& fileOrData, const float& threshhold) {
     MeshRequest request(fileOrData, threshhold);
     request.request();
     vector<Handle> handles;
@@ -129,7 +129,7 @@ vector<Handle> Resources::loadMesh(string fileOrData, float threshhold) {
     }
     return handles;
 }
-vector<Handle> Resources::loadMeshAsync(string fileOrData, float threshhold) {
+vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float& threshhold) {
     MeshRequest* request = new MeshRequest(fileOrData, threshhold); //to extend the lifetime to the threads, we manually delete later
     request->requestAsync();
     vector<Handle> handles;
@@ -141,33 +141,33 @@ vector<Handle> Resources::loadMeshAsync(string fileOrData, float threshhold) {
 
 
 
-Handle Resources::addTexture(string file,ImageInternalFormat::Format internFormat,bool mipmaps){
+Handle Resources::addTexture(const string& file, const ImageInternalFormat::Format& internFormat, const bool& mipmaps){
     return resourceManager->m_Resources->add(new Texture(file,mipmaps,internFormat),ResourceType::Texture);
 }
 
-Handle Resources::addMaterial(string name, string diffuse, string normal,string glow, string specular){
+Handle Resources::addMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular){
     Material* material = new Material(name,diffuse,normal,glow,specular);
     return resourceManager->m_Resources->add(material,ResourceType::Material);
 }
-Handle Resources::addMaterial(string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular){
+Handle Resources::addMaterial(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular){
     Material* material = new Material(name,diffuse,normal,glow,specular);
     return resourceManager->m_Resources->add(material,ResourceType::Material);
 }
 
-Handle Resources::addShader(string fileOrData, ShaderType::Type type, bool fromFile){
+Handle Resources::addShader(const string& fileOrData, const ShaderType::Type& type, const bool& fromFile){
     return resourceManager->m_Resources->add(new Shader(fileOrData,type,fromFile),ResourceType::Shader);
 }
 
-Handle Resources::addShaderProgram(string n, Shader& v, Shader& f){
-    return resourceManager->m_Resources->add(new ShaderP(n,v,f),ResourceType::ShaderProgram);
+Handle Resources::addShaderProgram(const string& n, Shader& v, Shader& f){
+    return resourceManager->m_Resources->add(new ShaderProgram(n,v,f),ResourceType::ShaderProgram);
 }
-Handle Resources::addShaderProgram(string n, Handle& v, Handle& f){
+Handle Resources::addShaderProgram(const string& n, Handle& v, Handle& f){
     Shader* vS = resourceManager->m_Resources->getAsFast<Shader>(v);
     Shader* fS = resourceManager->m_Resources->getAsFast<Shader>(f);
-    return resourceManager->m_Resources->add(new ShaderP(n,*vS,*fS),ResourceType::ShaderProgram);
+    return resourceManager->m_Resources->add(new ShaderProgram(n,*vS,*fS),ResourceType::ShaderProgram);
 }
 
-Handle Resources::addSoundData(string file){
+Handle Resources::addSoundData(const string& file){
     return resourceManager->m_Resources->add(new SoundData(file),ResourceType::SoundData);
 }
 

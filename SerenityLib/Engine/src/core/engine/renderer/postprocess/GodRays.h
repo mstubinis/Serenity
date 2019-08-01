@@ -5,7 +5,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 
-class  ShaderP;
+class  ShaderProgram;
 struct Entity;
 namespace Engine {
 namespace epriv {
@@ -27,7 +27,7 @@ namespace epriv {
             Postprocess_GodRays();
             ~Postprocess_GodRays();
 
-            void pass(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha);
+            void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha);
 
             static Postprocess_GodRays GodRays;
     };

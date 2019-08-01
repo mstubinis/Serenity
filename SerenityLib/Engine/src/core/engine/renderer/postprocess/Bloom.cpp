@@ -2,7 +2,7 @@
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 
 #include <glm/common.hpp>
 
@@ -23,7 +23,7 @@ Postprocess_Bloom::Postprocess_Bloom() {
 }
 Postprocess_Bloom::~Postprocess_Bloom() {
 }
-void Postprocess_Bloom::pass(ShaderP& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
+void Postprocess_Bloom::pass(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
     program.bind();
     const float& divisor = gbuffer.getSmallFBO()->divisor();
 

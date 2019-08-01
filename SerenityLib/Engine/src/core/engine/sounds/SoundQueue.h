@@ -17,7 +17,8 @@ class SoundQueue final {
     friend class Engine::epriv::SoundManager;
     private:
         Engine::epriv::SoundManager&   m_SoundManager;
-        std::queue<SoundBaseClass*>    m_Queue;
+        SoundBaseClass*                m_Current;
+        std::queue<Handle>             m_Queue;
         float                          m_DelayInSeconds;
         float                          m_DelayTimer;
         bool                           m_IsDelayProcess;
@@ -26,13 +27,14 @@ class SoundQueue final {
         SoundQueue(Engine::epriv::SoundManager& manager, const float& delay = 0.5f);
         ~SoundQueue();
 
-        void enqueueEffect(Handle&, const uint& loops = 1);
-        void enqueueMusic(Handle&, const uint& loops = 1);
+        void enqueueEffect(Handle, const uint& loops = 1); //need a clone handle due to type conversion for determining effect or music
+        void enqueueMusic(Handle, const uint& loops = 1); //need a clone handle due to type conversion for determining effect or music
         void dequeue();
         void update(const double& dt);
         void clear();
-        const bool& empty() const;
+        const bool empty() const;
         const bool& active() const;
+        const uint size() const;
 
         void activate();
         void deactivate();

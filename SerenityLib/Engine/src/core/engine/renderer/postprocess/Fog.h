@@ -4,7 +4,7 @@
 
 #include <glm/vec4.hpp>
 
-class  ShaderP;
+class  ShaderProgram;
 namespace Engine {
 namespace epriv {
     class  GBuffer;

@@ -8,7 +8,7 @@
 #include <core/engine/materials/Material.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
-#include <core/ShaderProgram.h>
+#include <core/engine/shaders/ShaderProgram.h>
 #include <ecs/Components.h>
 
 #include <glm/gtx/transform.hpp>
@@ -102,22 +102,22 @@ namespace Engine {
     };
 };
 
-ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderP* program) {
+ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderProgram* program) {
     internalInit(mesh, mat, parent, program);
     setCustomBindFunctor(epriv::DefaultModelInstanceBindFunctor());
     setCustomUnbindFunctor(epriv::DefaultModelInstanceUnbindFunctor());
 }
-ModelInstance::ModelInstance(Entity& parent, Handle mesh, Handle mat, ShaderP* program) :ModelInstance(parent, (Mesh*)mesh.get(), (Material*)mat.get(), program) {
+ModelInstance::ModelInstance(Entity& parent, Handle mesh, Handle mat, ShaderProgram* program) :ModelInstance(parent, (Mesh*)mesh.get(), (Material*)mat.get(), program) {
 }
-ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Handle mat, ShaderP* program) : ModelInstance(parent, mesh, (Material*)mat.get(), program) {
+ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, mesh, (Material*)mat.get(), program) {
 }
-ModelInstance::ModelInstance(Entity& parent, Handle mesh, Material* mat, ShaderP* program) : ModelInstance(parent, (Mesh*)mesh.get(), mat, program) {
+ModelInstance::ModelInstance(Entity& parent, Handle mesh, Material* mat, ShaderProgram* program) : ModelInstance(parent, (Mesh*)mesh.get(), mat, program) {
 }
 ModelInstance::~ModelInstance() {
     SAFE_DELETE_VECTOR(m_AnimationQueue);
 }
 
-void ModelInstance::internalInit(Mesh* mesh, Material* mat, Entity& parent, ShaderP* program) {
+void ModelInstance::internalInit(Mesh* mesh, Material* mat, Entity& parent, ShaderProgram* program) {
     if (!program) {
         program = epriv::InternalShaderPrograms::Deferred;
     }
@@ -243,7 +243,7 @@ const glm::vec3& ModelInstance::position() const {
 const glm::quat& ModelInstance::orientation() const {
     return m_Orientation; 
 }
-ShaderP* ModelInstance::shaderProgram() {
+ShaderProgram* ModelInstance::shaderProgram() {
     return m_ShaderProgram; 
 }
 Mesh* ModelInstance::mesh() {
@@ -256,9 +256,9 @@ const RenderStage::Stage& ModelInstance::stage() const {
     return m_Stage; 
 }
 void ModelInstance::setShaderProgram(const Handle& shaderPHandle, ComponentModel& componentModel) {
-    setShaderProgram(((ShaderP*)shaderPHandle.get()), componentModel);
+    setShaderProgram(((ShaderProgram*)shaderPHandle.get()), componentModel);
 }
-void ModelInstance::setShaderProgram(ShaderP* shaderProgram, ComponentModel& componentModel) {
+void ModelInstance::setShaderProgram(ShaderProgram* shaderProgram, ComponentModel& componentModel) {
     if (!shaderProgram) { 
         shaderProgram = epriv::InternalShaderPrograms::Deferred; 
     }

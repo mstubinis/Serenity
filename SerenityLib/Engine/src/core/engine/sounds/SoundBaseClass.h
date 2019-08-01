@@ -28,6 +28,9 @@ class SoundBaseClass {
 
         SoundBaseClass(const uint& numLoops);
     public:
+        SoundBaseClass& operator=(const SoundBaseClass&) = delete;
+        SoundBaseClass(const SoundBaseClass&) = default;
+        SoundBaseClass(SoundBaseClass&&) noexcept = default;
         virtual ~SoundBaseClass();
 
         const SoundStatus::Status& status();

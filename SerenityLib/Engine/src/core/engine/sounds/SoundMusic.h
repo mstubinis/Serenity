@@ -17,6 +17,9 @@ class  SoundMusic : public SoundBaseClass {
 
         SoundMusic();
     public:
+        SoundMusic& operator=(const SoundMusic&) = delete;
+        SoundMusic(const SoundMusic&) = default;
+        SoundMusic(SoundMusic&&) noexcept = default;
         ~SoundMusic();
 
         void update(const double& dt);

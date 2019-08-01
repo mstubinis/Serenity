@@ -4,7 +4,7 @@
 
 #include <core/engine/utils/Utils.h>
 
-class  ShaderP;
+class  ShaderProgram;
 class  Camera;
 class  Scene;
 class  Material;
@@ -39,10 +39,10 @@ namespace Engine {
         class RenderPipeline final {
             friend class ::Scene;
             private:
-                ShaderP&                    shaderProgram;
+                ShaderProgram&                    shaderProgram;
                 std::vector<MaterialNode*>  materialNodes;
             public:
-                RenderPipeline(ShaderP&);
+                RenderPipeline(ShaderProgram&);
                 ~RenderPipeline();
 
                 void sort(Camera& c);

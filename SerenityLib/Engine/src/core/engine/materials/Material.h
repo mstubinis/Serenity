@@ -12,7 +12,7 @@
 #include <core/engine/materials/MaterialEnums.h>
 #include <core/engine/materials/MaterialComponent.h>
 
-class  ShaderP;
+class  ShaderProgram;
 class  Mesh;
 
 namespace Engine{

@@ -11,7 +11,7 @@
 #include <ecs/Entity.h>
 
 struct Handle;
-class  ShaderP;
+class  ShaderProgram;
 class  Material;
 class  Mesh;
 class  ComponentModel;
@@ -30,7 +30,7 @@ class ModelInstance final: public BindableResource{
         void*                                                m_UserPointer;
         std::vector<Engine::epriv::ModelInstanceAnimation*>  m_AnimationQueue;
         Entity                                               m_Parent;
-        ShaderP*                                             m_ShaderProgram;
+        ShaderProgram*                                             m_ShaderProgram;
         Mesh*                                                m_Mesh;
         Material*                                            m_Material;
         RenderStage::Stage                                   m_Stage;
@@ -41,13 +41,13 @@ class ModelInstance final: public BindableResource{
         bool                                                 m_PassedRenderCheck;
         bool                                                 m_Visible;
 
-        void internalInit(Mesh* mesh, Material* mat, Entity& parent, ShaderP* program);
+        void internalInit(Mesh* mesh, Material* mat, Entity& parent, ShaderProgram* program);
         void internalUpdateModelMatrix();
     public:
-        ModelInstance(Entity&, Mesh*, Material*, ShaderP* = 0);
-        ModelInstance(Entity&, Handle mesh, Handle mat, ShaderP* = 0);
-        ModelInstance(Entity&, Mesh*, Handle mat, ShaderP* = 0);
-        ModelInstance(Entity&, Handle mesh, Material*, ShaderP* = 0);
+        ModelInstance(Entity&, Mesh*, Material*, ShaderProgram* = 0);
+        ModelInstance(Entity&, Handle mesh, Handle mat, ShaderProgram* = 0);
+        ModelInstance(Entity&, Mesh*, Handle mat, ShaderProgram* = 0);
+        ModelInstance(Entity&, Handle mesh, Material*, ShaderProgram* = 0);
 
         ModelInstance(const ModelInstance& other)                = default;
         ModelInstance& operator=(const ModelInstance& other)     = default;
@@ -56,7 +56,7 @@ class ModelInstance final: public BindableResource{
 
         ~ModelInstance();
 
-        ShaderP* shaderProgram();
+        ShaderProgram* shaderProgram();
         Mesh* mesh();
         Material* material();
         void* getUserPointer() const;
@@ -89,7 +89,7 @@ class ModelInstance final: public BindableResource{
         void setGodRaysColor(const glm::vec3& color);
 
         void setShaderProgram(const Handle& shaderPHandle, ComponentModel&);
-        void setShaderProgram(ShaderP*, ComponentModel&);
+        void setShaderProgram(ShaderProgram*, ComponentModel&);
 
         void setMesh(const Handle& meshHandle, ComponentModel&);
         void setMesh(Mesh*, ComponentModel&);

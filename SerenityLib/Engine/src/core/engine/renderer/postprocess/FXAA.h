@@ -2,7 +2,7 @@
 #ifndef ENGINE_RENDERER_POSTPROCESS_FXAA_H_INCLUDE_GUARD
 #define ENGINE_RENDERER_POSTPROCESS_FXAA_H_INCLUDE_GUARD
 
-class  ShaderP;
+class  ShaderProgram;
 namespace Engine {
 namespace epriv {
     class  GBuffer;
@@ -15,7 +15,7 @@ namespace epriv {
             Postprocess_FXAA();
             ~Postprocess_FXAA();
 
-            void pass(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
+            void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
 
             static Postprocess_FXAA FXAA;
     };

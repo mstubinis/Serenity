@@ -8,9 +8,9 @@
 #include <stack>
 
 #include <core/engine/sounds/SoundBaseClass.h>
+#include <core/engine/sounds/SoundMusic.h>
+#include <core/engine/sounds/SoundEffect.h>
 
-class SoundEffect;
-class SoundMusic;
 class SoundQueue;
 class SoundData;
 namespace Engine{
@@ -26,8 +26,8 @@ namespace Engine{
                 static const uint MAX_SOUND_EFFECTS = 64;
                 static const uint MAX_SOUND_MUSIC   = 6;
 
-                std::vector<SoundEffect*>      m_SoundEffects;
-                std::vector<SoundMusic*>       m_SoundMusics;
+                SoundEffect                    m_SoundEffects[MAX_SOUND_EFFECTS];
+                SoundMusic                     m_SoundMusics[MAX_SOUND_MUSIC];
                 std::stack<uint>               m_FreelistEffects;
                 std::stack<uint>               m_FreelistMusics;
 

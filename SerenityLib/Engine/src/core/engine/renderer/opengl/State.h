@@ -49,6 +49,22 @@ namespace Engine {
                 ClearColorState clearColor;
                 #pragma endregion
 
+                #pragma region ColorMask
+                struct ColorMaskState final {
+                    GLboolean r;
+                    GLboolean g;
+                    GLboolean b;
+                    GLboolean a;
+                    ColorMaskState() {
+                        r = GL_TRUE;
+                        g = GL_TRUE;
+                        b = GL_TRUE;
+                        a = GL_TRUE;
+                    }
+                };
+                ColorMaskState colorMaskState;
+                #pragma endregion
+
                 #pragma region ClearDepth
                 struct ClearDepthState final {
                     GLdouble depth;
@@ -298,12 +314,27 @@ namespace Engine {
                 EnabledState enabledState;
                 #pragma endregion
 
+                #pragma region Framebuffer
+                struct FramebufferState final {
+                    GLuint framebuffer_read;
+                    GLuint framebuffer_draw;
+                    GLuint renderbuffer;
+                    FramebufferState() {
+                        framebuffer_read = 0;
+                        framebuffer_draw = 0;
+                        renderbuffer = 0;
+                    }
+                };
+                FramebufferState framebufferState;
+                #pragma endregion
+
                 void GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);
             public:
                 const bool GL_glActiveTexture(const GLenum& textureUnit);
                 const bool GL_glBindTextureForModification(const GLenum& textureTarget, const GLuint& textureObject);
                 const bool GL_glBindTextureForRendering(const GLenum& textureTarget, const GLuint& textureObject);
                 const bool GL_glClearColor(const GLfloat& r, const GLfloat& g, const GLfloat& b, const GLfloat& a);
+                const bool GL_glColorMask(const GLboolean& r, const GLboolean& g, const GLboolean& b, const GLboolean& a);
                 const bool GL_glClearDepth(const GLdouble& depth);
                 const bool GL_glClearDepthf(const GLfloat& depth_float);
                 const bool GL_glClearStencil(const GLint& stencil);
@@ -327,6 +358,8 @@ namespace Engine {
                 const bool GL_glEnablei(const GLenum& capability, const GLuint& index);
                 const bool GL_glDisablei(const GLenum& capability, const GLuint& index);
 
+                const bool GL_glBindFramebuffer(const GLenum& target, const GLuint& framebuffer);
+                const bool GL_glBindRenderbuffer(const GLuint& renderBuffer);
 
                 void GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);
                 void GL_RESTORE_CURRENT_STATE_MACHINE();

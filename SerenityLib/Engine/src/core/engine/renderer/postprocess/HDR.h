@@ -2,7 +2,7 @@
 #ifndef ENGINE_RENDERER_POSTPROCESS_HDR_H_INCLUDE_GUARD
 #define ENGINE_RENDERER_POSTPROCESS_HDR_H_INCLUDE_GUARD
 
-class  ShaderP;
+class  ShaderProgram;
 
 struct HDRAlgorithm {enum Algorithm {
     Reinhard, Filmic, Exposure, Uncharted,
@@ -20,7 +20,7 @@ namespace epriv {
             Postprocess_HDR();
             ~Postprocess_HDR();
 
-            void pass(ShaderP&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor);
+            void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor);
 
             static Postprocess_HDR HDR;
     };
