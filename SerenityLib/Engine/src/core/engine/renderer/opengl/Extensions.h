@@ -9,7 +9,7 @@ namespace Engine {
         class OpenGLExtensions final {
             private:
                 const bool checkOpenGLExtension(const char* e);
-                void printAllAvailableExtensions();
+                void       printAllAvailableExtensions();
             public:
                 static std::vector<bool> OPENGL_EXTENSIONS;
 

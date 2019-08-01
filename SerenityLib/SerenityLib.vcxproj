@@ -274,6 +274,7 @@
     <ClInclude Include="Engine\src\core\engine\renderer\GLImageConstants.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\Extensions.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\Common.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\VersionConversion.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\State.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\UniformBufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Bloom.h" />
@@ -376,6 +377,7 @@
     <ClCompile Include="Engine\src\core\engine\renderer\GBuffer.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\Extensions.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\Common.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\VersionConversion.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\State.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\UniformBufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Bloom.cpp" />

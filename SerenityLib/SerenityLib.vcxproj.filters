@@ -522,6 +522,9 @@
     <ClInclude Include="Engine\src\core\engine\shaders\ShaderIncludes.h">
       <Filter>Header Files\Engine\Core\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\VersionConversion.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -778,6 +781,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\shaders\Shader.cpp">
       <Filter>Source Files\Engine\Core\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\VersionConversion.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

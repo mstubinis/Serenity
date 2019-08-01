@@ -12,6 +12,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <core/engine/renderer/opengl/glsl/Common.h>
+#include <core/engine/renderer/opengl/glsl/VersionConversion.h>
 #include <core/engine/shaders/ShaderHelper.h>
 #include <core/engine/shaders/Shader.h>
 
@@ -90,8 +91,8 @@ namespace Engine{
 ShaderProgram::ShaderProgram(string _name, Shader& vs, Shader& fs):m_VertexShader(vs), m_FragmentShader(fs){
     m_LoadedGPU = m_LoadedCPU = false;
 
-    setCustomBindFunctor(epriv::DefaultShaderBindFunctor());
-    setCustomUnbindFunctor(epriv::DefaultShaderUnbindFunctor());
+    setCustomBindFunctor(DefaultShaderBindFunctor());
+    setCustomUnbindFunctor(DefaultShaderUnbindFunctor());
     setName(_name);
 
     const string& name_ = name();
@@ -115,107 +116,24 @@ void ShaderProgram::_convertCode(string& _d, Shader& shader) {
     string versionLine;
     if (ShaderHelper::sfind(_d, "#version ")) {
         //use the found one
-        while (true) {
-            getline(str, versionLine); if (ShaderHelper::sfind(versionLine, "#version ")) { break; }
+        while (getline(str, versionLine)) {
+            if (ShaderHelper::sfind(versionLine, "#version ")) { 
+                break; 
+            }
         }
     }else{
         //generate one
         string core = "";
-        if (epriv::RenderManager::GLSL_VERSION >= 330) core = " core";
-        versionLine = "#version " + to_string(epriv::RenderManager::GLSL_VERSION) + core + "\n";
+        if (RenderManager::GLSL_VERSION >= 330) 
+            core = " core";
+        versionLine = "#version " + to_string(RenderManager::GLSL_VERSION) + core + "\n";
         ShaderHelper::insertStringAtLine(_d, versionLine, 0);
     }
-    string versionNumberString = regex_replace(versionLine, regex("([^0-9])"), "");
-    uint versionNumber = boost::lexical_cast<uint>(versionNumberString);
-
-    vector<string> _types;
-    _types.emplace_back("float");  _types.emplace_back("vec2");   _types.emplace_back("vec3");
-    _types.emplace_back("vec4");   _types.emplace_back("mat3");   _types.emplace_back("mat4");
-
-    _types.emplace_back("double"); _types.emplace_back("dvec2");  _types.emplace_back("dvec3");
-    _types.emplace_back("dvec4");  _types.emplace_back("dmat3");  _types.emplace_back("dmat4");
-
-    _types.emplace_back("int");    _types.emplace_back("ivec2");  _types.emplace_back("ivec3");
-    _types.emplace_back("ivec4");  _types.emplace_back("imat3");  _types.emplace_back("imat4");
-
-    _types.emplace_back("bool");   _types.emplace_back("bvec2");  _types.emplace_back("bvec3");
-    _types.emplace_back("bvec4");  _types.emplace_back("bmat3");  _types.emplace_back("bmat4");
-
-    _types.emplace_back("uint");   _types.emplace_back("uvec2");  _types.emplace_back("uvec3");
-    _types.emplace_back("uvec4");  _types.emplace_back("umat3");  _types.emplace_back("umat4");
+    const uint versionNumber = boost::lexical_cast<uint>(regex_replace(versionLine, regex("([^0-9])"), ""));
 
     //common code
-    epriv::opengl::glsl::Common::convert(_d);
+    opengl::glsl::Common::convert(_d, versionNumber);
 
-
-    //see if we need a UBO for the camera
-    if (ShaderHelper::sfind(_d, "CameraView") ||
-    ShaderHelper::sfind(_d, "CameraProj") ||
-    ShaderHelper::sfind(_d, "CameraViewProj") ||
-    ShaderHelper::sfind(_d, "CameraPosition") ||
-    ShaderHelper::sfind(_d, "CameraInvView") ||
-    ShaderHelper::sfind(_d, "CameraInvProj") ||
-    ShaderHelper::sfind(_d, "CameraInvViewProj") ||
-    ShaderHelper::sfind(_d, "CameraNear") ||
-    ShaderHelper::sfind(_d, "CameraFar") ||
-    ShaderHelper::sfind(_d, "CameraInfo1") ||
-    ShaderHelper::sfind(_d, "CameraInfo2") ||
-    ShaderHelper::sfind(_d, "CameraViewVector") ||
-    ShaderHelper::sfind(_d, "CameraRealPosition") ||
-    ShaderHelper::sfind(_d, "CameraInfo3")) {
-        string uboCameraString;
-        if (versionNumber >= 140) { //UBO
-            if (!ShaderHelper::sfind(_d, "layout (std140) uniform Camera //generated")) {
-                uboCameraString = "\n"
-                    "layout (std140) uniform Camera //generated\n"
-                    "{\n"
-                    "    mat4 CameraView;\n"
-                    "    mat4 CameraProj;\n"
-                    "    mat4 CameraViewProj;\n"
-                    "    mat4 CameraInvView;\n"
-                    "    mat4 CameraInvProj;\n"
-                    "    mat4 CameraInvViewProj;\n"
-                    "    vec4 CameraInfo1;\n"
-                    "    vec4 CameraInfo2;\n"
-                    "    vec4 CameraInfo3;\n"
-                    "};\n"
-                    "vec3 CameraPosition = CameraInfo1.xyz;\n"
-                    "vec3 CameraViewVector = CameraInfo2.xyz;\n"
-                    "vec3 CameraRealPosition = CameraInfo3.xyz;\n"
-                    "float CameraNear = CameraInfo1.w;\n"
-                    "float CameraFar = CameraInfo2.w;\n"
-                    "\n";
-                ShaderHelper::insertStringAtLine(_d, uboCameraString, 1);
-            }
-        }else{ //no UBO's, just add a uniform struct
-            if (!ShaderHelper::sfind(_d, "uniform mat4 CameraView;//generated")) {
-                uboCameraString = "\n"
-                    "uniform mat4 CameraView;//generated;\n"
-                    "uniform mat4 CameraProj;\n"
-                    "uniform mat4 CameraViewProj;\n"
-                    "uniform mat4 CameraInvView;\n"
-                    "uniform mat4 CameraInvProj;\n"
-                    "uniform mat4 CameraInvViewProj;\n"
-                    "uniform vec4 CameraInfo1;\n"
-                    "uniform vec4 CameraInfo2;\n"
-                    "uniform vec4 CameraInfo3;\n"
-                    "vec3 CameraPosition = CameraInfo1.xyz;\n"
-                    "vec3 CameraViewVector = CameraInfo2.xyz;\n"
-                    "vec3 CameraRealPosition = CameraInfo3.xyz;\n"
-                    "float CameraNear = CameraInfo1.w;\n"
-                    "float CameraFar = CameraInfo2.w;\n"
-                    "\n";
-                ShaderHelper::insertStringAtLine(_d, uboCameraString, 1);
-            }
-        }
-    }
-    //check for material limits
-    if (ShaderHelper::sfind(_d, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT") && !ShaderHelper::sfind(_d, "//USE_MAX_MATERIAL_LAYERS_PER_COMPONENT") && shader.type() == ShaderType::Fragment) {
-        boost::replace_all(_d, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT", "#define MAX_MATERIAL_LAYERS_PER_COMPONENT " + std::to_string(MAX_MATERIAL_LAYERS_PER_COMPONENT) + "\n");
-    }
-    if (ShaderHelper::sfind(_d, "USE_MAX_MATERIAL_COMPONENTS") && !ShaderHelper::sfind(_d, "//USE_MAX_MATERIAL_COMPONENTS") && shader.type() == ShaderType::Fragment) {
-        boost::replace_all(_d, "USE_MAX_MATERIAL_COMPONENTS", "#define MAX_MATERIAL_COMPONENTS " + std::to_string(MAX_MATERIAL_COMPONENTS) + "\n");
-    }
 
     //check for log depth - vertex
     if (ShaderHelper::sfind(_d, "USE_LOG_DEPTH_VERTEX") && !ShaderHelper::sfind(_d, "//USE_LOG_DEPTH_VERTEX") && shader.type() == ShaderType::Vertex) {
@@ -301,127 +219,7 @@ void ShaderProgram::_convertCode(string& _d, Shader& shader) {
             }
         }
     }
-    //deal with layout (location = X) in
-    if (versionNumber < 330) {
-        if (shader.type() == ShaderType::Vertex) {
-            if (ShaderHelper::sfind(_d, "layout") && ShaderHelper::sfind(_d, "location") && ShaderHelper::sfind(_d, "=")) {
-                if (versionNumber > 130) {
-                    if (epriv::OpenGLExtension::supported(epriv::OpenGLExtension::EXT_separate_shader_objects)) {
-                        ShaderHelper::insertStringAtLine(_d, "#extension GL_EXT_seperate_shader_objects : enable", 1);
-                    }else if (epriv::OpenGLExtension::supported(epriv::OpenGLExtension::ARB_separate_shader_objects)) {
-                        ShaderHelper::insertStringAtLine(_d, "#extension GL_ARB_seperate_shader_objects : enable", 1);
-                    }if (epriv::OpenGLExtension::supported(epriv::OpenGLExtension::EXT_explicit_attrib_location)) {
-                        ShaderHelper::insertStringAtLine(_d, "#extension GL_EXT_explicit_attrib_location : enable", 1);
-                    }else if (epriv::OpenGLExtension::supported(epriv::OpenGLExtension::ARB_explicit_attrib_location)) {
-                        ShaderHelper::insertStringAtLine(_d, "#extension GL_ARB_explicit_attrib_location : enable", 1);
-                    }
-                }else{
-                    //replace with attribute
-                    istringstream str(_d); string line; uint count = 0;
-                    while (getline(str, line)) {
-                        if (ShaderHelper::sfind(line, "layout") && ShaderHelper::sfind(line, "location") && ShaderHelper::sfind(line, "=")) {
-                            for (auto& type : _types) {
-                                size_t found = line.find(type);
-                                size_t firstFound = line.find("layout");
-                                if (firstFound != string::npos && found != string::npos) {
-                                    string _part1 = line.substr(0, firstFound);
-                                    line.erase(0, found);
-                                    line = _part1 + "attribute " + line;
-                                    ShaderHelper::insertStringAtAndReplaceLine(_d, line, count);
-                                    break;
-                                }
-                            }
-                        }
-                        ++count;
-                    }
-                }
-            }
-        }
-    }
-    //deal with MRT binding points
-    if (versionNumber >= 130) {
-        for (uint i = 0; i < 100; ++i) {
-            const string fragDataStr = "gl_FragData[" + to_string(i) + "]";
-            if (ShaderHelper::sfind(_d, fragDataStr)) {
-                const string outFragData = "FRAG_COL_" + to_string(i);
-                if (versionNumber >= 130 && versionNumber < 330) {
-                    ShaderHelper::insertStringAtLine(_d, "out vec4 " + outFragData + ";", 1);
-                }else if (versionNumber >= 330) {
-                    ShaderHelper::insertStringAtLine(_d, "layout (location = " + to_string(i) + ") out vec4 " + outFragData + ";", 1);
-                }
-                boost::replace_all(_d, fragDataStr, outFragData);
-            }
-        }
-    }
-    if (versionNumber >= 110) {
-        if (shader.type() == ShaderType::Vertex) {
-            boost::replace_all(_d, "flat ",    "");
-            boost::replace_all(_d, "flat",     "");
-            boost::replace_all(_d, "highp ",   "");
-            boost::replace_all(_d, "mediump ", "");
-            boost::replace_all(_d, "lowp ",    "");
-        }else if (shader.type() == ShaderType::Fragment) {
-            boost::replace_all(_d, "flat ",    "");
-            boost::replace_all(_d, "flat",     "");
-            boost::replace_all(_d, "highp ",   "");
-            boost::replace_all(_d, "mediump ", "");
-            boost::replace_all(_d, "lowp ",    "");
-        }
-    }
-    if (versionNumber >= 130) {
-        if (shader.type() == ShaderType::Vertex) {
-            boost::replace_all(_d, " varying", "out");
-            boost::replace_all(_d, "varying", "out");
-        }else if (shader.type() == ShaderType::Fragment) {
-            boost::replace_all(_d, " varying", "in");
-            boost::replace_all(_d, "varying", "in");
-            boost::replace_all(_d, "gl_FragColor", "FRAG_COL");
-            ShaderHelper::insertStringAtLine(_d, "out vec4 FRAG_COL;", 1);
-        }
-    }
-    if (versionNumber >= 140) {
-        if (shader.type() == ShaderType::Vertex) {
-        }else if (shader.type() == ShaderType::Fragment) {
-            boost::replace_all(_d, "textureCube(",     "texture(");
-            boost::replace_all(_d, "textureCubeLod(",  "textureLod(");
-            boost::replace_all(_d, "texture2DLod(",    "textureLod(");
-            boost::replace_all(_d, "texture2D(",       "texture(");
-        }
-    }
-    if (versionNumber >= 150) {
-        if (shader.type() == ShaderType::Vertex) {
-        }else if (shader.type() == ShaderType::Fragment) {
-        }
-    }
-    if (versionNumber >= 330) {
-        if (shader.type() == ShaderType::Vertex) {
-            //attribute to layout (location = X) in
-            istringstream str(_d);
-            string line;
-            uint count = 0;
-            uint aCount = 0;
-            while (getline(str, line)) {
-                if (ShaderHelper::sfind(line, "attribute")) {
-                    for (auto& type : _types) {
-                        size_t found = line.find(type);
-                        size_t firstFound = line.find("attribute");
-                        if (firstFound != string::npos && found != string::npos) {
-                            string _part1 = line.substr(0, firstFound);
-                            line.erase(0, found);
-                            line = _part1 + "layout (location = " + to_string(aCount) + ") in " + line;
-                            ShaderHelper::insertStringAtAndReplaceLine(_d, line, count);
-                            if (!ShaderHelper::sfind(_part1, "//") && !ShaderHelper::sfind(_part1, "/*") && !ShaderHelper::sfind(_part1, "///")) { //do we need to test for triple slashes?
-                                ++aCount;
-                            }
-                            break;
-                        }
-                    }
-                }
-                ++count;
-            }
-        }else if (shader.type() == ShaderType::Fragment) {
-        }
-    }
+    opengl::glsl::VersionConversion::convert(_d, versionNumber, shader.type());
 }
 void ShaderProgram::_load_CPU() {
     _unload_CPU();

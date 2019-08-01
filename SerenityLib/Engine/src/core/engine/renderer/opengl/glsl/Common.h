@@ -10,7 +10,7 @@ namespace Engine {
             namespace glsl {
                 class Common final {
                     public:
-                        static void convert(std::string& code);
+                        static void convert(std::string& code, const unsigned int& versionNumber);
                 };
             };
         };
