@@ -122,4 +122,3 @@ Texture* Skybox::texture() {
     return m_Texture; 
 }
 void Skybox::update(){}
-void Skybox::draw(){}

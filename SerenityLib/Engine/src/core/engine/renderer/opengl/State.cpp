@@ -27,8 +27,11 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth,
 
     glGetIntegerv(GL_MAX_DRAW_BUFFERS, &int_value);
     enabledState.blendState.reserve(int_value);
+    blendEquationState.reserve(int_value);
     for (unsigned int i = 0; i < enabledState.blendState.capacity(); ++i)
         enabledState.blendState.push_back(EnabledState::GLBlendState());
+    for (unsigned int i = 0; i < blendEquationState.capacity(); ++i)
+        blendEquationState.push_back(BlendEquationState());
 
 
     glGetIntegerv(GL_MAX_VIEWPORTS, &int_value);
@@ -107,6 +110,9 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWid
     GL_glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     GL_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     GL_glBindRenderbuffer(0);
+
+    for (unsigned int i = 0; i < blendEquationState.capacity(); ++i)
+        GL_glBlendEquationi(i, GL_FUNC_ADD);
 }
 void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
     glActiveTexture(currentTextureUnit);
@@ -173,6 +179,9 @@ void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferState.framebuffer_read);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferState.framebuffer_draw);
     glBindRenderbuffer(GL_RENDERBUFFER, framebufferState.renderbuffer);
+
+    for (unsigned int i = 0; i < blendEquationState.capacity(); ++i)
+        glBlendEquationi(i, blendEquationState[i].mode);
 }
 const bool OpenGLState::GL_glActiveTexture(const GLenum& textureUnit) {
     currentTextureUnit = textureUnit;
@@ -1073,4 +1082,24 @@ const bool OpenGLState::GL_glBindRenderbuffer(const GLuint& renderBuffer) {
         return true;
     }
     return false;
+}
+const bool OpenGLState::GL_glBlendEquation(const GLenum& mode) {
+    unsigned int buf = 0;
+    for (auto& state : blendEquationState) {
+        if (state.mode != mode) {
+            glBlendEquationi(buf, mode);
+            state.mode = mode;
+        }
+        ++buf;
+    }
+    return true;
+}
+const bool OpenGLState::GL_glBlendEquationi(const GLuint& buf, const GLenum& mode) {
+    auto& state = blendEquationState[buf];
+    if (state.mode != mode) {
+        glBlendEquationi(buf, mode);
+        state.mode = mode;
+        return true;
+    }
+    return false;   
 }

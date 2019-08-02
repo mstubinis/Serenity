@@ -6,6 +6,7 @@
 #include <core/engine/scene/Camera.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtx/norm.hpp>
 
 using namespace Engine;
 using namespace Engine::epriv;
@@ -19,7 +20,7 @@ RenderPipeline::~RenderPipeline() {
 }
 
 float dist(const glm::vec3& lhs, const glm::vec3& rhs) {
-    return glm::distance(lhs, rhs);
+    return glm::distance2(lhs, rhs); //distance2 for optimization - removing sqrt
 }
 void RenderPipeline::sort_cheap(Camera& camera) {
     for (auto& materialNode : materialNodes) {
@@ -68,8 +69,8 @@ void RenderPipeline::sort(Camera& camera) {
     }
 }
 
-void RenderPipeline::render(Camera& camera, const double& dt) {
-    shaderProgram.bind();
+void RenderPipeline::render(Camera& camera, const double& dt, const bool useDefaultShaders) {
+    if(useDefaultShaders) shaderProgram.bind();
     for (auto& materialNode : materialNodes) {
         if (materialNode->meshNodes.size() > 0) {
             auto& _material = *materialNode->material;
@@ -103,9 +104,11 @@ void RenderPipeline::render(Camera& camera, const double& dt) {
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material
-                    if (Core::m_Engine->m_RenderManager.RendererState.current_bound_shader_program != &shaderProgram) {
-                        shaderProgram.bind();
-                        _material.bind();
+                    if (useDefaultShaders) {
+                        if (Core::m_Engine->m_RenderManager.RendererState.current_bound_shader_program != &shaderProgram) {
+                            shaderProgram.bind();
+                            _material.bind();
+                        }
                     }
                     _mesh.unbind();
                 }

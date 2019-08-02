@@ -89,6 +89,5 @@ void GameSkybox::update(){
     Skybox::update();
 }
 void GameSkybox::draw(){
-    Skybox::draw();
     m_i->_draw();
 }

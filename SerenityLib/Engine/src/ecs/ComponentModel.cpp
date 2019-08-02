@@ -132,6 +132,15 @@ void ComponentModel::setModelShaderProgram(ShaderProgram* shaderProgram, const u
 void ComponentModel::setModelShaderProgram(Handle& shaderPHandle, const uint& index, const RenderStage::Stage& stage) {
     ComponentModel::setModelShaderProgram((ShaderProgram*)shaderPHandle.get(), index, stage); 
 }
+void ComponentModel::setStage(const RenderStage::Stage& stage, const uint& index) {
+    auto& instance = *_modelInstances[index];
+    auto& scene = owner.scene();
+    InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, instance, instance.stage());
+
+    instance.m_Stage = stage;
+
+    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, instance, stage);
+}
 void ComponentModel::setModelMesh(Mesh* mesh, const uint& index, const RenderStage::Stage& stage) {
     auto& instance = *_modelInstances[index];
     auto& scene   = owner.scene();

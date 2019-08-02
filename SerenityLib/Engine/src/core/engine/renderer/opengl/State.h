@@ -328,6 +328,16 @@ namespace Engine {
                 FramebufferState framebufferState;
                 #pragma endregion
 
+                #pragma region BlendEquation
+                struct BlendEquationState final {
+                    GLenum mode;
+                    BlendEquationState(){
+                        mode = GL_FUNC_ADD;
+                    }
+                };
+                std::vector<BlendEquationState> blendEquationState;
+                #pragma endregion
+
                 void GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);
             public:
                 const bool GL_glActiveTexture(const GLenum& textureUnit);
@@ -360,6 +370,9 @@ namespace Engine {
 
                 const bool GL_glBindFramebuffer(const GLenum& target, const GLuint& framebuffer);
                 const bool GL_glBindRenderbuffer(const GLuint& renderBuffer);
+
+                const bool GL_glBlendEquation(const GLenum& mode);
+                const bool GL_glBlendEquationi(const GLuint& buf, const GLenum& mode);
 
                 void GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);
                 void GL_RESTORE_CURRENT_STATE_MACHINE();

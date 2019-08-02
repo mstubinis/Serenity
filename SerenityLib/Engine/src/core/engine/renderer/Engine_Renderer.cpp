@@ -44,9 +44,6 @@ Mesh* epriv::InternalMeshes::PointLightBounds    = nullptr;
 Mesh* epriv::InternalMeshes::RodLightBounds      = nullptr;
 Mesh* epriv::InternalMeshes::SpotLightBounds     = nullptr;
 
-ShaderProgram* epriv::InternalShaderPrograms::Deferred = nullptr;
-ShaderProgram* epriv::InternalShaderPrograms::Forward  = nullptr;
-
 epriv::RenderManager* renderManager;
 epriv::RenderManager::impl* renderManagerImpl;
 
@@ -69,6 +66,7 @@ namespace Engine{
             LightingVertex,
             ForwardFrag,
             DeferredFrag,
+            ZPrepassFrag,
             DeferredFrag2DAPI,
             DeferredFragSkybox,
             DeferredFragSkyboxFake,
@@ -104,6 +102,7 @@ namespace Engine{
             //Deferred, //using the internal resource static one instead
             //Forward, //using the internal resource static one instead
             BulletPhysics,
+            ZPrepass,
             Deferred2DAPI,
             DeferredGodRays,
             DeferredBlur,
@@ -247,6 +246,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaders.emplace_back(EShaders::lighting_vert, ShaderType::Vertex, false);
             m_InternalShaders.emplace_back(EShaders::forward_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::deferred_frag, ShaderType::Fragment, false);
+            m_InternalShaders.emplace_back(EShaders::zprepass_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::deferred_frag_hud, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::deferred_frag_skybox, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::deferred_frag_skybox_fake, ShaderType::Fragment, false);
@@ -277,10 +277,11 @@ class epriv::RenderManager::impl final{
             m_InternalShaders.emplace_back(EShaders::smaa_frag_3, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::smaa_frag_4, ShaderType::Fragment, false);
 
-            InternalShaderPrograms::Deferred = new ShaderProgram("Deferred", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::DeferredFrag]);
-            InternalShaderPrograms::Forward = new ShaderProgram("Forward", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::ForwardFrag]);
+            ShaderProgram::Deferred = new ShaderProgram("Deferred", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::DeferredFrag]);
+            ShaderProgram::Forward = new ShaderProgram("Forward", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::ForwardFrag]);
 
             m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics] = new ShaderProgram("Bullet_Physics", m_InternalShaders[EngineInternalShaders::BulletPhysicsVertex], m_InternalShaders[EngineInternalShaders::BulletPhysicsFrag]);
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::ZPrepass] = new ShaderProgram("ZPrepass", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::ZPrepassFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI] = new ShaderProgram("Deferred_2DAPI", m_InternalShaders[EngineInternalShaders::Vertex2DAPI], m_InternalShaders[EngineInternalShaders::DeferredFrag2DAPI]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays] = new ShaderProgram("Deferred_GodsRays", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::GodRaysFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur] = new ShaderProgram("Deferred_Blur", m_InternalShaders[EngineInternalShaders::FullscreenVertex], m_InternalShaders[EngineInternalShaders::BlurFrag]);
@@ -1165,30 +1166,30 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(Texture::Checkers);
             SAFE_DELETE(Material::Checkers);
 
-            SAFE_DELETE(epriv::InternalShaderPrograms::Deferred);
-            SAFE_DELETE(epriv::InternalShaderPrograms::Forward);
+            SAFE_DELETE(ShaderProgram::Deferred);
+            SAFE_DELETE(ShaderProgram::Forward);
 
             SAFE_DELETE_VECTOR(m_InternalShaderPrograms);
 
             //TODO: add cleanup() from ssao / smaa here?
         }
-        void _renderSkybox(Skybox* skybox, Camera& camera){
-            Scene& scene = *Resources::getCurrentScene();
+        void _renderSkybox(Skybox* skybox, Scene& scene, Viewport& viewport, Camera& camera){
             glm::mat4 view = camera.getView();
             Math::removeMatrixPosition(view);
             if(skybox){
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox]->bind();
                 sendUniformMatrix4("VP", camera.getProjection() * view);
-                sendTexture("Texture",skybox->texture()->address(0),0,GL_TEXTURE_CUBE_MAP);
+                sendTexture("Texture", skybox->texture()->address(0),0, GL_TEXTURE_CUBE_MAP);
                 Skybox::bindMesh();
-                skybox->draw();
             }else{//render a fake skybox.
                 m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake]->bind();
                 auto& bgColor = scene.getBackgroundColor();
                 sendUniformMatrix4("VP", camera.getProjection() * view);
-                sendUniform4("Color",bgColor.r,bgColor.g,bgColor.b, bgColor.a);
+                sendUniform4("Color", bgColor.r, bgColor.g, bgColor.b, bgColor.a);
                 Skybox::bindMesh();
             }
+            sendTexture("Texture", 0, 0, GL_TEXTURE_CUBE_MAP); //this is needed to render stuff in geometry transparent using the normal deferred shader. i do not know why just yet...
+            //could also change sendTexture("Texture", skybox->texture()->address(0),0, GL_TEXTURE_CUBE_MAP); above to use a different slot...
         }
         void _resize(const uint& w, const uint& h){
             m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(w), 0.0f, static_cast<float>(h), 0.005f, 3000.0f);
@@ -1618,9 +1619,8 @@ class epriv::RenderManager::impl final{
 
             //skybox here
             if (viewport.isSkyboxVisible()) {
-                _renderSkybox(scene.skybox(), camera);
+                _renderSkybox(scene.skybox(), scene, viewport, camera);
             }
-
             InternalScenePublicInterface::RenderGeometryTransparent(scene, camera, dt);
         }
         void _passForwardRendering(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
@@ -1628,11 +1628,23 @@ class epriv::RenderManager::impl final{
 
             gbuffer.bindFramebuffers(GBufferType::Diffuse);
             
-            //RENDER NORMAL OBJECTS HERE
             InternalScenePublicInterface::RenderForwardOpaque(scene, camera, dt);
 
+            //this is it, this is the best i can think of for a cloaking device, modify the alpha of a model and this produces decent results.
+            //TODO: figure out why its blending even with an alpha of 1.0
+            GLEnablei(GL_BLEND, 0);
+            glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE, GL_SRC_ALPHA, GL_ONE);
+            //glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE); //this works too
+            glBlendEquation(GL_ADD);
+            //glDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
+
             InternalScenePublicInterface::RenderForwardTransparent(scene, camera, dt);
+
+            GLDisablei(GL_BLEND, 0); //this is needed for smaa at least
+            glBlendEquation(GL_FUNC_ADD);
         }
+
         void _passCopyDepth(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth]->bind();
@@ -1881,6 +1893,7 @@ class epriv::RenderManager::impl final{
                 #pragma endregion
             }
             _passGeometry(dt, gbuffer, viewport, camera);
+    
             GLDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
 
@@ -1959,6 +1972,7 @@ class epriv::RenderManager::impl final{
             GLEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
             _passForwardRendering(dt, gbuffer, viewport, camera);
+
             GLDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
             

@@ -525,6 +525,12 @@
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\VersionConversion.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\Materials.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\Lighting.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -783,6 +789,12 @@
       <Filter>Source Files\Engine\Core\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\VersionConversion.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\Materials.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\Lighting.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClCompile>
   </ItemGroup>

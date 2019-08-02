@@ -31,6 +31,8 @@ class ShaderProgram final: public BindableResource{
     friend class UniformBufferObject;
     friend class Shader;
     friend struct Engine::epriv::InternalShaderProgramPublicInterface;
+    public:
+        static ShaderProgram                      *Deferred, *Forward; //loaded in renderer
     private:
         GLuint                                    m_ShaderProgram;
         std::unordered_map<std::string, GLint>    m_UniformLocations;

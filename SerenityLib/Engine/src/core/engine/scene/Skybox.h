@@ -22,7 +22,6 @@ class Skybox: public EventObserver{
         virtual ~Skybox();
 
         virtual void update();
-        virtual void draw();
 
         Texture* texture();
 

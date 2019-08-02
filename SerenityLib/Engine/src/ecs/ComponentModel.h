@@ -71,6 +71,8 @@ class ComponentModel : public ComponentBaseClass {
         const uint addModel(Handle& meshHandle, Handle& materialHandle, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
         const uint addModel(Mesh*, Material*, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
 
+        void setStage(const RenderStage::Stage& stage, const uint& index = 0);
+
         void setModel(Handle& meshHandle, Handle& materialHandle, const uint& index, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
         void setModel(Mesh*, Material*, const uint& index, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
 

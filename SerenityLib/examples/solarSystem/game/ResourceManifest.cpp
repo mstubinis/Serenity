@@ -81,7 +81,6 @@ void ResourceManifest::init(){
 
     DefiantMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/defiant/defiant.dds");
     Material& defMat = *((Material*)DefiantMaterial.get());
-    defMat.getComponent(0).layer(0).setMask(BasePath + "data/Textures/defiant/defiant_Mask.dds");
     auto layer = defMat.getComponent(0).addLayer();
     layer->setTexture(BasePath + "data/Textures/Effects/Buzzards.dds");
     layer->setMask(BasePath + "data/Textures/defiant/defiant_Mask_1.dds");
@@ -93,7 +92,6 @@ void ResourceManifest::init(){
     
     NovaMaterial = Resources::addMaterial("Nova", BasePath + "data/Textures/nova/nova.dds"); 
     Material& novaMat = *((Material*)NovaMaterial.get());
-    novaMat.getComponent(0).layer(0).setMask(BasePath + "data/Textures/nova/nova_Mask.dds");
     auto layer1 = novaMat.getComponent(0).addLayer();
     layer1->setTexture(BasePath + "data/Textures/Effects/Buzzards.dds");
     layer1->setMask(BasePath + "data/Textures/nova/nova_Mask_1.dds");

@@ -104,7 +104,6 @@ void GBuffer::internalStart(const uint* types, const uint& size, const string& c
     glDrawBuffers(size, types);
     Renderer::colorMask(r, g, b, a);
 }
-
 void GBuffer::bindFramebuffers(const uint t1, const string& c, const bool mainFBO){
     uint t[1] = { m_Buffers[t1]->attatchment() };
     internalStart(t, 1, c, mainFBO);

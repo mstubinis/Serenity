@@ -15,6 +15,44 @@ using namespace std;
 
 void opengl::glsl::Common::convert(string& code, const unsigned int& versionNumber) {
 
+#pragma region constants
+    if (ShaderHelper::sfind(code, "ConstantOneVec3")) {
+        if (!ShaderHelper::sfind(code, "const vec3 ConstantOneVec3")) {
+            ShaderHelper::insertStringAtLine(code, "const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);\n", 1);
+        }
+    }
+    if (ShaderHelper::sfind(code, "ConstantOneVec2")) {
+        if (!ShaderHelper::sfind(code, "const vec2 ConstantOneVec2")) {
+            ShaderHelper::insertStringAtLine(code, "const vec2 ConstantOneVec2 = vec2(1.0,1.0);\n", 1);
+        }
+    }
+    if (ShaderHelper::sfind(code, "ConstantAlmostOneVec3")) {
+        if (!ShaderHelper::sfind(code, "const vec3 ConstantAlmostOneVec3")) {
+            ShaderHelper::insertStringAtLine(code, "const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);\n", 1);
+        }
+    }
+    if (ShaderHelper::sfind(code, "ConstantAlmostOneVec2")) {
+        if (!ShaderHelper::sfind(code, "const vec2 ConstantAlmostOneVec2")) {
+            ShaderHelper::insertStringAtLine(code, "const vec2 ConstantAlmostOneVec2 = vec2(0.9999,0.9999);\n", 1);
+        }
+    }
+    if (ShaderHelper::sfind(code, "ConstantZeroVec3")) {
+        if (!ShaderHelper::sfind(code, "const vec3 ConstantZeroVec3")) {
+            ShaderHelper::insertStringAtLine(code, "const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n", 1);
+        }
+    }
+    if (ShaderHelper::sfind(code, "ConstantZeroVec2")) {
+        if (!ShaderHelper::sfind(code, "const vec2 ConstantZeroVec2")) {
+            ShaderHelper::insertStringAtLine(code, "const vec2 ConstantZeroVec2 = vec2(0.0,0.0);\n", 1);
+        }
+    }
+    if (ShaderHelper::sfind(code, "KPI")) {
+        if (!ShaderHelper::sfind(code, "const float KPI")) {
+            ShaderHelper::insertStringAtLine(code, "const float KPI = 3.1415926535898;\n", 1);
+        }
+    }
+#pragma endregion
+
 #pragma region normal map
     if (ShaderHelper::sfind(code, "CalcBumpedNormal(") || ShaderHelper::sfind(code, "CalcBumpedNormalCompressed(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcBumpedNormal(")) {

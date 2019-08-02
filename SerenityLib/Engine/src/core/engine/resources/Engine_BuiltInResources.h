@@ -11,10 +11,6 @@ namespace epriv{
         static Mesh* RodLightBounds;
         static Mesh* SpotLightBounds;
     };
-    struct InternalShaderPrograms{
-        static ShaderProgram* Deferred;
-        static ShaderProgram* Forward;
-    };
 };
 };
 

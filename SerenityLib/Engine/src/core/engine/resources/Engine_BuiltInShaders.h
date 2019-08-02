@@ -13,7 +13,6 @@ namespace epriv{
             static std::string bullet_physics_vert;
             static std::string bullet_physcis_frag;
 
-            static std::string constants;
             static std::string conditional_functions;
             static std::string float_into_2_floats;
             static std::string normals_octahedron_compression_functions;
@@ -42,6 +41,7 @@ namespace epriv{
 
             static std::string forward_frag;
             static std::string deferred_frag;
+            static std::string zprepass_frag;
             static std::string deferred_frag_hud;
             static std::string deferred_frag_skybox;
             static std::string deferred_frag_skybox_fake;

@@ -119,7 +119,7 @@ ModelInstance::~ModelInstance() {
 
 void ModelInstance::internalInit(Mesh* mesh, Material* mat, Entity& parent, ShaderProgram* program) {
     if (!program) {
-        program = epriv::InternalShaderPrograms::Deferred;
+        program = ShaderProgram::Deferred;
     }
     m_UserPointer       = nullptr;
     m_Stage             = RenderStage::GeometryOpaque;
@@ -260,7 +260,7 @@ void ModelInstance::setShaderProgram(const Handle& shaderPHandle, ComponentModel
 }
 void ModelInstance::setShaderProgram(ShaderProgram* shaderProgram, ComponentModel& componentModel) {
     if (!shaderProgram) { 
-        shaderProgram = epriv::InternalShaderPrograms::Deferred; 
+        shaderProgram = ShaderProgram::Deferred;
     }
     componentModel.setModel(m_Mesh, m_Material, 0, shaderProgram, m_Stage);
 }

@@ -9,6 +9,7 @@ namespace Engine {
         class ShaderHelper final {
             public:
                 static const bool sfind(const std::string& whole, const std::string& part);
+                static void insertStringRightBeforeLineContent(std::string& src, const std::string& newContent, const std::string& lineContent);
                 static void insertStringAtLine(std::string& src, const std::string& newcontent, const unsigned int line);
                 static void insertStringAtAndReplaceLine(std::string& src, const std::string& newcontent, const unsigned int line);
                 static void insertStringAtEndOfMainFunc(std::string& src, const std::string& content);

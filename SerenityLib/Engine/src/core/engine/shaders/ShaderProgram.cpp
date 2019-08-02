@@ -1,4 +1,6 @@
 #include <core/engine/shaders/ShaderProgram.h>
+#include <core/engine/shaders/ShaderHelper.h>
+#include <core/engine/shaders/Shader.h>
 #include <core/engine/Engine.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
@@ -13,8 +15,8 @@
 
 #include <core/engine/renderer/opengl/glsl/Common.h>
 #include <core/engine/renderer/opengl/glsl/VersionConversion.h>
-#include <core/engine/shaders/ShaderHelper.h>
-#include <core/engine/shaders/Shader.h>
+#include <core/engine/renderer/opengl/glsl/Materials.h>
+#include <core/engine/renderer/opengl/glsl/Lighting.h>
 
 
 #include <regex>
@@ -25,6 +27,10 @@ using namespace Engine::epriv;
 using namespace std;
 
 typedef boost::iostreams::stream<boost::iostreams::mapped_file_source> boost_stream_mapped_file;
+
+
+ShaderProgram* ShaderProgram::Deferred = nullptr;
+ShaderProgram* ShaderProgram::Forward = nullptr;
 
 //this needs some work...? seems to be ok for now
 string getLogDepthFunctions(){
@@ -132,6 +138,8 @@ void ShaderProgram::_convertCode(string& _d, Shader& shader) {
     const uint versionNumber = boost::lexical_cast<uint>(regex_replace(versionLine, regex("([^0-9])"), ""));
 
     //common code
+    opengl::glsl::Materials::convert(_d, versionNumber, shader.type());
+    opengl::glsl::Lighting::convert(_d, versionNumber, shader.type());
     opengl::glsl::Common::convert(_d, versionNumber);
 
 

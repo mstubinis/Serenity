@@ -22,7 +22,6 @@ GLSL Version    OpenGL Version
 */
 
 #pragma region Declarations
-string epriv::EShaders::constants;
 string epriv::EShaders::conditional_functions;
 string epriv::EShaders::float_into_2_floats;
 string epriv::EShaders::normals_octahedron_compression_functions;
@@ -47,6 +46,7 @@ string epriv::EShaders::smaa_frag_4;
 string epriv::EShaders::fxaa_frag;
 string epriv::EShaders::forward_frag;
 string epriv::EShaders::deferred_frag;
+string epriv::EShaders::zprepass_frag;
 string epriv::EShaders::deferred_frag_hud;
 string epriv::EShaders::deferred_frag_skybox;
 string epriv::EShaders::deferred_frag_skybox_fake;
@@ -69,21 +69,6 @@ string epriv::EShaders::lighting_frag_gi;
 #pragma endregion
 
 void epriv::EShaders::init(){
-
-#pragma region Constants
-epriv::EShaders::constants = 
-    "const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);\n"
-    "const vec2 ConstantOneVec2 = vec2(1.0,1.0);\n"
-    "\n"
-    "const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);\n"
-    "const vec2 ConstantAlmostOneVec2 = vec2(0.9999,0.9999);\n"
-    "\n"
-    "const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n"
-    "const vec2 ConstantZeroVec2 = vec2(0.0,0.0);\n"
-    "\n"
-    "const float KPI = 3.1415926535898;\n"
-    "\n";
-#pragma endregion
 
 #pragma region Functions
 
@@ -197,7 +182,7 @@ epriv::EShaders::float_into_2_floats =
     "}\n"
     */
     "\n";
-epriv::EShaders::normals_octahedron_compression_functions = epriv::EShaders::constants +
+epriv::EShaders::normals_octahedron_compression_functions = 
     "vec2 SignNotZero(vec2 v) {\n"
     "    return vec2(v.x >= 0 ? 1.0 : -1.0, v.y >= 0 ? 1.0 : -1.0);\n"
     "}\n"
@@ -1219,7 +1204,72 @@ epriv::EShaders::smaa_frag_4 = epriv::EShaders::smaa_common +
 #pragma region ForwardFrag
 epriv::EShaders::forward_frag =
     "\n"
+    "USE_LOG_DEPTH_FRAGMENT\n"
+    "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
+    "USE_MAX_MATERIAL_COMPONENTS\n"
+    "\n"
+    "struct InData {\n"
+    "    vec2  uv;\n"
+    "    vec4  diffuse;\n"
+    "    vec4  objectColor;\n"
+    "    vec3  normals;\n"
+    "    float glow;\n"
+    "    float specular;\n"
+    "    float ao;\n"
+    "    float metalness;\n"
+    "    float smoothness;\n"
+    "};\n"
+    "struct Layer {\n"
+    "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
+    "    vec4 data2;\n"
+    "    sampler2D texture;\n"
+    "    sampler2D mask;\n"
+    "    samplerCube cubemap;\n"
+    "    vec2 uvModifications;\n"
+    "};\n"
+    "struct Component {\n"
+    "    int numLayers;\n"
+    "    int componentType;\n"
+    "    Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];\n"
+    "};\n"
+    "\n"
+    "uniform Component   components[MAX_MATERIAL_COMPONENTS];\n"
+    "uniform int         numComponents;\n"
+    "\n"
+    "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
+    "\n"
+    "uniform int Shadeless;\n"
+    "\n"
+    "uniform vec4 Object_Color;\n"
+    "uniform vec4 Material_F0AndID;\n"
+    "uniform vec3 Gods_Rays_Color;\n"
+    "\n"
+    "varying vec3 WorldPosition;\n"
+    "varying vec2 UV;\n"
+    "varying vec3 Normals;\n"
+    "varying mat3 TBN;\n"
+    "flat varying vec3 CamPosition;\n"
+    "varying vec3 TangentCameraPos;\n"
+    "varying vec3 TangentFragPos;\n"
+    "\n"
     "void main(){\n"
+    "    InData inData;\n"
+    "    inData.uv = UV;\n"
+    "    inData.diffuse = vec4(0.0,0.0,0.0,0.0001);\n" //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
+    "    inData.objectColor = Object_Color;\n"
+    "    inData.normals = normalize(Normals);\n"
+    "    inData.glow = MaterialBasePropertiesOne.x;\n"
+    "    inData.specular = 1.0;\n"
+    "    inData.ao = MaterialBasePropertiesOne.y;\n"
+    "    inData.metalness = MaterialBasePropertiesOne.z;\n"
+    "    inData.smoothness = MaterialBasePropertiesOne.w;\n"
+    "\n"
+    "    for (int j = 0; j < numComponents; ++j) {\n"
+    "        ProcessComponent(components[j], inData);\n"
+    "    }\n"
+    "    inData.diffuse.a = 0.1;\n" //using this to test cloaking atm
+    "    gl_FragData[0] = inData.diffuse;\n"
+    "\n"
     "}";
 #pragma endregion
 
@@ -1227,9 +1277,6 @@ epriv::EShaders::forward_frag =
 epriv::EShaders::deferred_frag =
     "\n"
     "USE_LOG_DEPTH_FRAGMENT\n"
-    "\n";
-epriv::EShaders::deferred_frag +=
-    "\n"
     "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
     "USE_MAX_MATERIAL_COMPONENTS\n"
     "\n"
@@ -1281,251 +1328,6 @@ epriv::EShaders::deferred_frag +=
 epriv::EShaders::deferred_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::deferred_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::deferred_frag +=
-//https://docs.gimp.org/2.4/en/gimp-concepts-layer-modes.html
-    "vec4 DoBlend(in vec4 paint, in vec4 canvas, in Layer inLayer) {\n"//TODO: complete this
-    "    if (inLayer.data1.x       == 0.0) {\n"//default
-    "        return PaintersAlgorithm(paint, canvas);\n"
-    "    }else if (inLayer.data1.x == 1.0) {\n"//mix
-    "        vec4 ret = mix(paint, canvas, 0.5);\n"
-    "        return ret;\n"
-    "    }else if (inLayer.data1.x == 2.0) {\n"//add
-    "        return canvas + paint;\n"
-    "    }else if (inLayer.data1.x == 3.0) {\n"//subtract
-    "        return max(vec4(0.00001), canvas - paint);\n"
-    "    }else if (inLayer.data1.x == 4.0) {\n"//Multiply mode multiplies the pixel values of the upper layer with those of the layer below it and then divides the result by 255
-    "        return canvas * paint;\n"
-    "    }else if (inLayer.data1.x == 5.0) {\n"//divide
-    "        vec4 a = RangeTo255(canvas);\n"
-    "        vec4 b = RangeTo255(paint);\n"
-    "        a *= 256.0;\n"
-    "        a /= (paint + 0.0039215686);\n" //0.0039215686 is 1 / 255, to avoid divide by zero
-    "        return max(vec4(0.00001), RangeTo1(a));\n"
-    "    }else if (inLayer.data1.x == 6.0) {\n"//screen
-    "        vec4 a = RangeTo255(canvas);\n"
-    "        vec4 b = RangeTo255(paint);\n"
-    "        a = InvertColor255(a);\n"
-    "        b = InvertColor255(b);\n"
-    "        vec4 c = a * b;\n"
-    "        c /= 255.0;\n"
-    "        return RangeTo1(InvertColor255(c));\n"
-    "    }else if (inLayer.data1.x == 7.0) {\n"//Overlay - double check this
-    "        vec4 a = RangeTo255(canvas);\n"
-    "        vec4 aCopy = a;\n"
-    "        vec4 aCopy1 = a;\n"
-    "        vec4 b = RangeTo255(paint);\n"
-    "        a = InvertColor255(a);\n"
-    "        a *= (b * 2.0);\n"
-    "        aCopy += a;\n"
-    "        aCopy /= 255.0;\n"
-    "        aCopy *= aCopy1;\n"
-    "        aCopy /= 255.0;\n"
-    "        return RangeTo1(aCopy);\n"
-    "    }else if (inLayer.data1.x == 8.0) {\n"//TODO: dissolve (Dissolve mode dissolves the upper layer into the layer beneath it by drawing a random pattern of pixels in areas of partial transparency)
-    "        return canvas + paint;\n"
-    "    }else if (inLayer.data1.x == 9.0) {\n"//dodge
-    "        vec4 a = RangeTo255(canvas);\n"
-    "        vec4 b = RangeTo255(paint);\n"
-    "        a *= 256.0;\n"
-    "        a /= InvertColor255(b);\n"
-    "        a = RangeTo1(a);\n"
-    "        return a;\n"
-    "    }else if (inLayer.data1.x == 10.0) {\n"//burn
-    "        vec4 a = RangeTo255(canvas);\n"
-    "        vec4 b = RangeTo255(paint);\n"
-    "        a = InvertColor255(a);\n"
-    "        a *= 256.0;\n"
-    "        a /= (b + vec4(1.0));\n"
-    "        a = InvertColor255(a);\n"
-    "        a = RangeTo1(a);\n"
-    "        return a;\n"
-    "    }else if (inLayer.data1.x == 11.0) {\n" //TODO: Hard light mode is rather complicated because the equation consists of two parts, one for darker colors and one for brighter colors. If the pixel color of the upper layer is greater than 128, the layers are combined according to the first formula shown below. Otherwise, the pixel values of the upper and lower layers are multiplied together and multiplied by two, then divided by 256
-    "        return canvas + paint;\n"
-    "    }else if (inLayer.data1.x == 12.0) {\n" //TODO: soft light
-    "        return canvas + paint;\n"
-    "    }else if (inLayer.data1.x == 13.0) {\n" //GrainExtract
-    "        return (canvas - paint) + vec4(0.5);\n"
-    "    }else if (inLayer.data1.x == 14.0) {\n" //GrainMerge
-    "        return (canvas + paint) - vec4(0.5);\n"
-    "    }else if (inLayer.data1.x == 15.0) {\n" //TODO: Difference mode subtracts the pixel value of the upper layer from that of the lower layer and then takes the absolute value of the result.
-    "        return abs(canvas - paint);\n"
-    "    }else if (inLayer.data1.x == 16.0) {\n" //Darkene
-    "        float r = min(canvas.r, paint.r);\n"
-    "        float g = min(canvas.g, paint.g);\n"
-    "        float b = min(canvas.b, paint.b);\n"
-    "        float a = min(canvas.a, paint.a);\n"
-    "        return vec4(r, g, b, a);\n"
-    "    }else if (inLayer.data1.x == 17.0) {\n" //Lighten
-    "        float r = max(canvas.r, paint.r);\n"
-    "        float g = max(canvas.g, paint.g);\n"
-    "        float b = max(canvas.b, paint.b);\n"
-    "        float a = max(canvas.a, paint.a);\n"
-    "        return vec4(r, g, b, a);\n"
-    "    }else if (inLayer.data1.x == 18.0) {\n" //TODO: Hue mode uses the hue of the upper layer and the saturation and value of the lower layer to form the resulting image. However, if the saturation of the upper layer is zero, the hue is taken from the lower layer, too.
-    "        return canvas + paint;\n"
-    "    }else if (inLayer.data1.x == 18.0) {\n" //TODO: Saturation mode uses the saturation of the upper layer and the hue and value of the lower layer to form the resulting image.
-    "        return canvas + paint;\n"
-    "    }else if (inLayer.data1.x == 18.0) {\n" //TODO: Color mode uses the hue and saturation of the upper layer and the value of the lower layer to form the resulting image.
-    "        return canvas + paint;\n"
-    "    }else if (inLayer.data1.x == 18.0) {\n" //TODO: Value mode uses the value of the upper layer and the saturation and hue of the lower layer to form the resulting image
-    "        return canvas + paint;\n"
-    "    }\n"
-    "}\n"
-    "vec4 Reflection(in Layer inLayer, in vec2 inUVs,in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition){\n"
-    //"    inUVs += inLayer.uvModifications;\n"
-    "    vec4 r = vec4(0.0);\n"
-    "    r = textureCube(inLayer.cubemap,reflect(inNormals,normalize(inCameraPosition - inWorldPosition))) * texture2D(inLayer.mask,inUVs).r;\n"
-    "    r.a *= inLayer.data2.x;\n"
-    "    r = PaintersAlgorithm(r,inDiffuse);\n"
-    "    return r;\n"
-    "}\n"
-    "vec4 Refraction(in Layer inLayer, in vec2 inUVs,in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition){\n"
-    //"    inUVs += inLayer.uvModifications;\n"
-    "    vec4 r = vec4(0.0);\n"
-    "    r = textureCube(inLayer.cubemap,refract(inNormals,normalize(inCameraPosition - inWorldPosition),1.0 / inLayer.data2.y)) * texture2D(inLayer.mask,inUVs).r;\n"
-    "    r.a *= inLayer.data2.x;\n"
-    "    r = PaintersAlgorithm(r,inDiffuse);\n"
-    "    return r;\n"
-    "}\n"
-    "vec2 ParallaxMap(in Layer inLayer, vec3 _ViewDir, in vec2 inUVs){\n"
-    //"    inUVs += inLayer.uvModifications;\n"
-    "    float minLayers = min(5.0,(5.0 * inLayer.data2.x) + 1.0);\n"
-    "    float maxLayers = min(30.0,(30.0 * inLayer.data2.x) + 1.0);\n"
-    "    float num_Layers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), _ViewDir)));\n"
-    "    float layerDepth = 1.0 / num_Layers;\n"// calculate the size of each layer 
-    "    float currentLayerDepth = 0.0;\n"// depth of current layer  
-    "    vec2 P = _ViewDir.xy * inLayer.data2.x;\n"// the amount to shift the texture coordinates per layer (from vector P)
-    "    vec2 deltaUV = P / num_Layers;\n"
-    "    vec2  currentUV = inUVs;\n"
-    "    float currentDepth = texture2D(inLayer.texture, currentUV).r;\n"
-    "    while(currentLayerDepth < currentDepth){\n"	
-    "    	currentUV -= deltaUV;\n"// shift texture coordinates along direction of P
-    "    	currentDepth = texture2D(inLayer.texture, currentUV).r;\n"
-    "    	currentLayerDepth += layerDepth;\n"
-    "    }\n"
-    "    vec2 prevUV = currentUV + deltaUV;\n" // get texture coordinates before collision (reverse operations)
-    "    float afterDepth  = currentDepth - currentLayerDepth;\n" // get depth after and before collision for linear interpolation
-    "    float beforeDepth = texture2D(inLayer.texture, prevUV).r - currentLayerDepth + layerDepth;\n"
-    "    float weight = afterDepth / (afterDepth - beforeDepth);\n" // interpolation of texture coordinates
-    "    return prevUV * weight + currentUV * (1.0 - weight);\n"
-    "}\n"
-    "vec4 CalculateDiffuse(in Layer inLayer, in vec4 canvas, in vec4 objectColor, in vec2 inUVs) {\n"
-    "    vec4 paint = objectColor;\n"
-    "    if (inLayer.data1.y >= 0.5) {\n"
-    "        paint *= texture2D(inLayer.texture, inUVs + inLayer.uvModifications);\n"
-    "    }else{\n"
-    "        paint *= vec4(Material_F0AndID.rgb, 1.0);\n"
-    "    }\n"
-    "    if (inLayer.data1.z >= 0.5) {\n"
-    "        paint *= texture2D(inLayer.mask, inUVs).r;\n"
-    "    }\n"
-    "    return DoBlend(paint, canvas, inLayer);\n"
-    "}\n"
-    "vec3 CalculateNormals(in Layer inLayer, in vec3 objectNormals, in vec2 inUVs) {\n"
-    "    vec3 outNormals = objectNormals;\n"
-    "    if (inLayer.data1.y > 0.9) {\n"
-    "        outNormals = CalcBumpedNormal(inUVs + inLayer.uvModifications, inLayer.texture);\n"
-    "    }else if (inLayer.data1.y > 0.4) {\n"
-    "        outNormals = CalcBumpedNormalCompressed(inUVs + inLayer.uvModifications, inLayer.texture);\n"
-    "    }\n"
-    "    if (inLayer.data1.z >= 0.5) {\n"
-    "        outNormals *= texture2D(inLayer.mask, inUVs).r;\n"
-    "    }\n"
-    "    return outNormals;\n"
-    "}\n"
-    "float CalculateGlow(in Layer inLayer, in float objectGlow, in vec2 inUVs) {\n"
-    "    float outGlow = objectGlow;\n"
-    "    if (inLayer.data1.y >= 0.5) {\n"
-    "        outGlow += texture2D(inLayer.texture, inUVs + inLayer.uvModifications).r;\n"
-    "    }\n"
-    "    if (inLayer.data1.z >= 0.5) {\n"
-    "        outGlow *= texture2D(inLayer.mask, inUVs).r;\n"
-    "    }\n"
-    "    return outGlow;\n"
-    "}\n"
-    "float CalculateSpecular(in Layer inLayer, in float objectSpecular, in vec2 inUVs) {\n"
-    "    float outSpecular = objectSpecular;\n"
-    "    if (inLayer.data1.y >= 0.5) {\n"
-    "        outSpecular *= texture2D(inLayer.texture, inUVs + inLayer.uvModifications).r;\n"
-    "    }\n"
-    "    if (inLayer.data1.z >= 0.5) {\n"
-    "        outSpecular *= texture2D(inLayer.mask, inUVs).r;\n"
-    "    }\n"
-    "    return outSpecular;\n"
-    "}\n"
-    "float CalculateAO(in Layer inLayer, in float objectAO, in vec2 inUVs) {\n"
-    "    float outAO = objectAO;\n"
-    "    if (inLayer.data1.y >= 0.5) {\n"
-    "        outAO *= texture2D(inLayer.texture, inUVs + inLayer.uvModifications).r;\n"
-    "    }\n"
-    "    if (inLayer.data1.z >= 0.5) {\n"
-    "        outAO *= texture2D(inLayer.mask, inUVs).r;\n"
-    "    }\n"
-    "    return outAO;\n"
-    "}\n"
-    "float CalculateMetalness(in Layer inLayer, in float objectMetalness, in vec2 inUVs) {\n"
-    "    float outMetalness = objectMetalness;\n"
-    "    if (inLayer.data1.y >= 0.5) {\n"
-    "        outMetalness *= texture2D(inLayer.texture, inUVs + inLayer.uvModifications).r;\n"
-    "    }\n"
-    "    if (inLayer.data1.z >= 0.5) {\n"
-    "        outMetalness *= texture2D(inLayer.mask, inUVs).r;\n"
-    "    }\n"
-    "    return outMetalness;\n"
-    "}\n"
-    "float CalculateSmoothness(in Layer inLayer, in float objectSmoothness, in vec2 inUVs) {\n"
-    "    float outSmoothness = objectSmoothness;\n"
-    "    if (inLayer.data1.y >= 0.5) {\n"
-    "        outSmoothness *= texture2D(inLayer.texture, inUVs + inLayer.uvModifications).r;\n"
-    "    }\n"
-    "    if (inLayer.data1.z >= 0.5) {\n"
-    "        outSmoothness *= texture2D(inLayer.mask, inUVs).r;\n"
-    "    }\n"
-    "    return outSmoothness;\n"
-    "}\n"
-    "void ProcessComponent(in Component inComponent, inout InData data) {\n"
-    "    if (inComponent.componentType == 0) {\n"
-    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
-    "            data.diffuse = CalculateDiffuse(inComponent.layers[i], data.diffuse, data.objectColor, data.uv);\n"
-    "       }\n"
-    "    }else if (inComponent.componentType == 1) {\n"
-    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
-    "            data.normals = CalculateNormals(inComponent.layers[i], data.normals, data.uv);\n"
-    "        }\n"
-    "    }else if (inComponent.componentType == 2) {\n"
-    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
-    "            data.glow = CalculateGlow(inComponent.layers[i], data.glow, data.uv);\n"
-    "        }\n"
-    "    }else if (inComponent.componentType == 3) {\n"
-    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
-    "            data.specular = CalculateSpecular(inComponent.layers[i], data.specular, data.uv);\n"
-    "        }\n"
-    "    }else if (inComponent.componentType == 4) {\n"
-    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
-    "            data.ao = CalculateAO(inComponent.layers[i], data.ao, data.uv);\n"
-    "        }\n"
-    "    }else if (inComponent.componentType == 5) {\n"
-    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
-    "            data.metalness = CalculateMetalness(inComponent.layers[i], data.metalness, data.uv);\n"
-    "        }\n"
-    "    }else if (inComponent.componentType == 6) {\n"
-    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
-    "            data.smoothness = CalculateSmoothness(inComponent.layers[i], data.smoothness, data.uv);\n"
-    "        }\n"
-    "    }else if (inComponent.componentType == 7) {\n"
-    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
-    "            data.diffuse = Reflection(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, WorldPosition);\n"
-    "        }\n"
-    "    }else if (inComponent.componentType == 8) {\n"
-    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
-    "            data.diffuse = Refraction(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, WorldPosition);\n"
-    "        }\n"
-    "    }else if (inComponent.componentType == 9) {\n"
-    "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
-    "            vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);\n"
-    "            data.uv = ParallaxMap(inComponent.layers[i], ViewDir, data.uv);\n"
-    "        }\n"
-    "    }\n"
-    "}\n"
     "void main(){\n"
     "    InData inData;\n"
     "    inData.uv = UV;\n"
@@ -1555,6 +1357,13 @@ epriv::EShaders::deferred_frag +=
     "    gl_FragData[1] = vec4(OutNormals, OutMatIDAndAO, OutPackedMetalnessAndSmoothness);\n"
     "    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
     "}";
+#pragma endregion
+
+#pragma region ZPrepassFrag
+epriv::EShaders::zprepass_frag =
+    "void main(){\n"
+    "}";
+
 #pragma endregion
 
 #pragma region DeferredFragHUD
@@ -1913,30 +1722,6 @@ epriv::EShaders::lighting_frag =
 epriv::EShaders::lighting_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::lighting_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::lighting_frag +=
-    "float azimuth(vec3 vector){\n"
-    "    return atan(vector.y / vector.x);\n" //might also be x / y and not y / x
-    "}\n"
-    "float polar(vec3 vector){\n"
-    "    return acos(vector.z / length(vector));\n"
-    "}\n"
-    "float BeckmannDist(float cos2a, float _alpha){\n"
-    "    float b = (1.0 - cos2a) / (cos2a * _alpha);\n"
-    "    return (exp(-b)) / (KPI * _alpha * cos2a * cos2a);\n"
-    "}\n"
-    "float GGXDist(float NdotHSquared, float alphaSquared){\n"
-    "    float denom = (NdotHSquared * (alphaSquared - 1.0) + 1.0);\n"
-    "    denom = KPI * denom * denom;\n"
-    "    return alphaSquared / denom;\n"
-    "}\n"
-    "float GeometrySchlickGGX(float NdotV, float a){\n"
-    "    float k = a * 0.125;\n"
-    "    float denom = NdotV * (1.0 - k) + k;\n"
-    "    return NdotV / denom;\n"
-    "}\n"
-    "vec3 SchlickFrensel(float theta, vec3 _F0){\n"
-    "    vec3 ret = _F0 + (ConstantOneVec3 - _F0) * pow(1.0 - theta,5.0);\n"
-    "    return ret;\n"
-    "}\n"
     "float CalculateAttenuation(float Dist,float LightRadius){\n"
     "    float attenuation = 0.0;\n"
     "   if(LightDataE.z == 0.0){\n"       //constant
@@ -1951,35 +1736,6 @@ epriv::EShaders::lighting_frag +=
     "       attenuation = 1.0 / max(1.0 ,pow((Dist / LightRadius) + 1.0,2.0));\n"
     "   }\n"
     "   return attenuation;\n"
-    "}\n"
-    "float DiffuseOrenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN,float _alpha,vec3 _PxlNormal){\n"
-    "    float A = 1.0 - 0.5 * _alpha / (_alpha + 0.33);\n"
-    "    float B = 0.45 * _alpha / (_alpha + 0.09);\n"
-    "    float cosAzimuthSinPolarTanPolar = (dot(_LightDir, _ViewDir) - _VdotN * _NdotL) / max(_VdotN, _NdotL);\n"
-    "    return (A + B * max(0.0, cosAzimuthSinPolarTanPolar));\n"
-    "}\n"
-    "vec3 DiffuseAshikhminShirley(float _smoothness,vec3 _MaterialAlbedoTexture,float _NdotL,float _VdotN){\n"
-    "    vec3 ret;\n"
-    "    float s = clamp(_smoothness,0.01,0.76);\n" //this lighting model has to have some form of roughness in it to look good. cant be 1.0
-    "    vec3 A = (28.0 * _MaterialAlbedoTexture) / vec3(23.0 * KPI);\n"
-    "    float B = 1.0 - s;\n"
-    "    float C = (1.0 - pow((1.0 - (_NdotL * 0.5)),5.0));\n"
-    "    float D = (1.0 - pow((1.0 - (_VdotN * 0.5)),5.0));\n"
-    "    ret = A * B * C * D;\n"
-    "    ret *= KPI;\n" //i know this isnt proper, but the diffuse component is *way* too dark otherwise...
-    "    return ret;\n"
-    "}\n"
-    "vec3 SpecularBlinnPhong(float _smoothness,float _NdotH){\n"
-    "    float gloss = exp2(10.0 * _smoothness + 1.0);\n"
-    "    float kS = (8.0 + gloss ) / (8.0 * KPI);\n"
-    "    return vec3(kS * pow(_NdotH, gloss));\n"
-    "}\n"
-    "vec3 SpecularPhong(float _smoothness,vec3 _LightDir,vec3 _PxlNormal,vec3 _ViewDir){\n"
-    "    float gloss = exp2(10.0 * _smoothness + 1.0);\n"
-    "    float kS = (2.0 + gloss ) / (2.0 * KPI);\n"
-    "    vec3 Reflect = reflect(-_LightDir, _PxlNormal);\n"
-    "    float VdotR = max(0.0, dot(_ViewDir,Reflect));\n"
-    "    return vec3(kS * pow(VdotR, gloss));\n"
     "}\n"
     "vec3 SpecularGGX(inout vec3 _Frensel,vec3 _LightDir,vec3 _Half,float _alpha,float _NdotH,vec3 _F0,float _NdotL){\n"
     "    float LdotH = max(0.0, dot(_LightDir,_Half));\n"
@@ -2002,11 +1758,6 @@ epriv::EShaders::lighting_frag +=
     "    vec3 Top = NDF * _Frensel * G;\n"
     "    float Bottom = max(4.0 * _VdotN * _NdotL,0.0);\n"
     "    return Top / (Bottom + 0.001);\n"
-    "}\n"
-    "vec3 SpecularGaussian(float _NdotH,float _smoothness){\n"
-    "    float b = acos(_NdotH);\n" //this might also be cos. find out
-    "    float fin = b / _smoothness;\n"
-    "    return vec3(exp(-fin*fin));\n"
     "}\n"
     "vec3 SpecularAshikhminShirley(vec3 _PxlNormal,vec3 _Half,float _NdotH,vec3 _LightDir,float _NdotL,float _VdotN){\n"
     "    const float Nu = 1000.0;\n"//make these controllable uniforms
@@ -2057,7 +1808,7 @@ epriv::EShaders::lighting_frag +=
     "    float MaterialTypeSpecular = materials[matID].b;\n"
     "\n"
     "    if(MaterialTypeDiffuse == 1.0){\n"
-    "        LightDiffuseColor *= DiffuseOrenNayar(ViewDir,LightDir,NdotL,VdotN,alpha,PxlNormal);\n"
+    "        LightDiffuseColor *= DiffuseOrenNayar(ViewDir,LightDir,NdotL,VdotN,alpha);\n"
     "    }else if(MaterialTypeDiffuse == 2.0){\n"
     "        LightDiffuseColor *= DiffuseAshikhminShirley(smoothness,MaterialAlbedoTexture,NdotL,VdotN);\n"
     "    }else if(MaterialTypeDiffuse == 3.0){\n"//this is minneart
@@ -2170,30 +1921,6 @@ epriv::EShaders::lighting_frag_optimized =
 epriv::EShaders::lighting_frag_optimized += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::lighting_frag_optimized += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::lighting_frag_optimized +=
-    "float azimuth(vec3 vector){\n"
-    "    return atan(vector.y / vector.x);\n" //might also be x / y and not y / x
-    "}\n"
-    "float polar(vec3 vector){\n"
-    "    return acos(vector.z / length(vector));\n"
-    "}\n"
-    "float BeckmannDist(float cos2a, float _alpha){\n"
-    "    float b = (1.0 - cos2a) / (cos2a * _alpha);\n"
-    "    return (exp(-b)) / (KPI * _alpha * cos2a * cos2a);\n"
-    "}\n"
-    "float GGXDist(float NdotHSquared, float alphaSquared){\n"
-    "    float denom = (NdotHSquared * (alphaSquared - 1.0) + 1.0);\n"
-    "    denom = KPI * denom * denom;\n"
-    "    return alphaSquared / denom;\n"
-    "}\n"
-    "float GeometrySchlickGGX(float NdotV, float a){\n"
-    "    float k = a * 0.125;\n"
-    "    float denom = NdotV * (1.0 - k) + k;\n"
-    "    return NdotV / denom;\n"
-    "}\n"
-    "vec3 SchlickFrensel(float theta, vec3 _F0){\n"
-    "    vec3 ret = _F0 + (ConstantOneVec3 - _F0) * pow(1.0 - theta,5.0);\n"
-    "    return ret;\n"
-    "}\n"
     "float CalculateAttenuation(float Dist,float LightRadius){\n"
     "    float attenuation = 0.0;\n"
     "   if(LightDataE.z == 0.0){\n" //constant
@@ -2209,39 +1936,6 @@ epriv::EShaders::lighting_frag_optimized +=
     "   }\n"
     "   return attenuation;\n"
     "}\n"
-    "float DiffuseOrenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN,float _alpha,vec3 _PxlNormal){\n"
-    "    float A = 1.0 - 0.5 * _alpha / (_alpha + 0.33);\n"
-    "    float B = 0.45 * _alpha / (_alpha + 0.09);\n"
-    "    float cosAzimuthSinPolarTanPolar = (dot(_LightDir, _ViewDir) - _VdotN * _NdotL) / max(_VdotN, _NdotL);\n"
-    "    return (A + B * max(0.0, cosAzimuthSinPolarTanPolar));\n"
-    "}\n"
-
-    "vec3 DiffuseAshikhminShirley(float _smoothness,vec3 _MaterialAlbedoTexture,float _NdotL,float _VdotN){\n"
-    "    vec3 ret;\n"
-    "    float s = clamp(_smoothness,0.01,0.76);\n" //this lighting model has to have some form of roughness in it to look good. cant be 1.0
-    "    vec3 A = (28.0 * _MaterialAlbedoTexture) / vec3(23.0 * KPI);\n"
-    "    float B = 1.0 - s;\n"
-    "    float C = (1.0 - pow((1.0 - (_NdotL * 0.5)),5.0));\n"
-    "    float D = (1.0 - pow((1.0 - (_VdotN * 0.5)),5.0));\n"
-    "    ret = A * B * C * D;\n"
-    "    ret *= KPI;\n" //i know this isnt proper, but the diffuse component is *way* too dark otherwise...
-    "    return ret;\n"
-    "}\n"
-    
-    "vec3 SpecularBlinnPhong(float _smoothness,float _NdotH){\n"
-    "    float gloss = exp2(10.0 * _smoothness + 1.0);\n"
-    "    float kS = (8.0 + gloss ) / (8.0 * KPI);\n"
-    "    return vec3(kS * pow(_NdotH, gloss));\n"
-    "}\n"
-
-    "vec3 SpecularPhong(float _smoothness,vec3 _LightDir,vec3 _PxlNormal,vec3 _ViewDir){\n"
-    "    float gloss = exp2(10.0 * _smoothness + 1.0);\n"
-    "    float kS = (2.0 + gloss ) / (2.0 * KPI);\n"
-    "    vec3 Reflect = reflect(-_LightDir, _PxlNormal);\n"
-    "    float VdotR = max(0.0, dot(_ViewDir,Reflect));\n"
-    "    return vec3(kS * pow(VdotR, gloss));\n"
-    "}\n"
-
     "vec3 SpecularGGX(inout vec3 _Frensel,vec3 _LightDir,vec3 _Half,float _alpha,float _NdotH,vec3 _F0,float _NdotL){\n"
     "    float LdotH = max(0.0, dot(_LightDir,_Half));\n"
     "    float alphaSqr = _alpha * _alpha;\n"
@@ -2265,13 +1959,6 @@ epriv::EShaders::lighting_frag_optimized +=
     "    float Bottom = max(4.0 * _VdotN * _NdotL,0.0);\n"
     "    return Top / (Bottom + 0.001);\n"
     "}\n"
-
-    "vec3 SpecularGaussian(float _NdotH,float _smoothness){\n"
-    "    float b = acos(_NdotH);\n" //this might also be cos. find out
-    "    float fin = b / _smoothness;\n"
-    "    return vec3(exp(-fin*fin));\n"
-    "}\n"
-
     "vec3 SpecularAshikhminShirley(vec3 _PxlNormal,vec3 _Half,float _NdotH,vec3 _LightDir,float _NdotL,float _VdotN){\n"
     "    const float Nu = 1000.0;\n"//make these controllable uniforms
     "    const float Nv = 1000.0;\n"//make these controllable uniforms
@@ -2322,7 +2009,7 @@ epriv::EShaders::lighting_frag_optimized +=
     //"    float MaterialTypeSpecular = materials[matID].b;\n"
     //"\n"
     //"    if(MaterialTypeDiffuse == 1.0){\n"
-    //"        LightDiffuseColor *= DiffuseOrenNayar(ViewDir,LightDir,NdotL,VdotN,alpha,PxlNormal);\n"
+    //"        LightDiffuseColor *= DiffuseOrenNayar(ViewDir,LightDir,NdotL,VdotN,alpha);\n"
     //"    }else if(MaterialTypeDiffuse == 2.0){\n"
     //"        LightDiffuseColor *= DiffuseAshikhminShirley(smoothness,MaterialAlbedoTexture,NdotL,VdotN);\n"
     //"    }else if(MaterialTypeDiffuse == 3.0){\n"//this is minneart
