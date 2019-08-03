@@ -67,7 +67,6 @@ namespace Engine {
                 }
                 Renderer::sendUniform1Safe("AnimationPlaying", 1);
                 Renderer::sendUniformMatrix4vSafe("gBones[0]", transforms, transforms.size());
-
                 //cleanup the animation queue
                 for (auto it = animationQueue.cbegin(); it != animationQueue.cend();) {
                     ModelInstanceAnimation* anim = (*it);
@@ -78,8 +77,7 @@ namespace Engine {
                     }
                     else { ++it; }
                 }
-            }
-            else {
+            }else{
                 Renderer::sendUniform1Safe("AnimationPlaying", 0);
             }
             glm::mat4 modelMatrix = parentModel * i.m_ModelMatrix; //might need to reverse this order.

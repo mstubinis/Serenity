@@ -1630,7 +1630,7 @@ class epriv::RenderManager::impl final{
             //this is it, this is the best i can think of for a cloaking device, modify the alpha of a model and this produces decent results.
             //TODO: figure out why its blending even with an alpha of 1.0
 
-            gbuffer.bindFramebuffers(GBufferType::Diffuse);
+            gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Misc, "RGBA");
             //Settings::clear(true, false, false);
 
             GLEnablei(GL_BLEND, 0);
@@ -2129,11 +2129,11 @@ void epriv::RenderManager::_clear2DAPICommands() {
     vector_clear(m_i->m_2DAPICommands);
 }
 
-const bool epriv::RenderManager::_bindShaderProgram(ShaderProgram* p){
+const bool epriv::RenderManager::_bindShaderProgram(ShaderProgram* program){
     auto& currentShaderPgrm = RendererState.current_bound_shader_program;
-    if(currentShaderPgrm != p){
-        OpenGLStateMachine.GL_glUseProgram(p->program());
-        currentShaderPgrm = p;
+    if(currentShaderPgrm != program){
+        OpenGLStateMachine.GL_glUseProgram(program->program());
+        currentShaderPgrm = program;
         currentShaderPgrm->BindableResource::bind();
         return true;
     }
@@ -2149,10 +2149,10 @@ const bool epriv::RenderManager::_unbindShaderProgram() {
     }
     return false;
 }
-const bool epriv::RenderManager::_bindMaterial(Material* m){
+const bool epriv::RenderManager::_bindMaterial(Material* material){
     auto& currentMaterial = RendererState.current_bound_material;
-    if(currentMaterial != m){
-        currentMaterial = m;
+    if(currentMaterial != material){
+        currentMaterial = material;
         currentMaterial->BindableResource::bind();
         return true;
     }

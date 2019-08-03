@@ -136,10 +136,6 @@ void Core::init() {
     SunLight* light = new SunLight(glm::vec3(0.0f), LightType::Sun, s);
     light->setColor(1.55f, 1.55f, 1.3f);
     light->setPosition(0, 3000, -10000);
-    auto e1 = s->createEntity();
-    auto model1 = e1.addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
-
-
 
     m_ChosenShip = new EntityWrapper(*s);
 
@@ -147,7 +143,7 @@ void Core::init() {
     ship_camera->setTarget(e);
     auto& body  = *e.addComponent<ComponentBody>();
     body.setPosition(0, 0, 8500);
-    auto& model = *e.addComponent<ComponentModel>(ResourceManifest::DefiantMesh, ResourceManifest::DefiantMaterial);
+    auto& model = *e.addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
     model.hide();
 
     m_HUD        = new HUD(*s,*ship_camera, m_GameState, *this);

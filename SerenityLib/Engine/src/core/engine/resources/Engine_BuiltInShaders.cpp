@@ -1268,7 +1268,10 @@ epriv::EShaders::forward_frag =
     "        ProcessComponent(components[j], inData);\n"
     "    }\n"
     "    inData.diffuse.a = 1.0;\n" //using this to test cloaking atm
+    "    vec4 GodRays = vec4(Gods_Rays_Color,1.0);\n"
+    "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
     "    gl_FragData[0] = inData.diffuse;\n"
+    "    gl_FragData[1] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
     "\n"
     "}";
 #pragma endregion

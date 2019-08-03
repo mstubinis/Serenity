@@ -113,6 +113,7 @@ void RenderPipeline::render(Camera& camera, const double& dt, const bool useDefa
                     _mesh.unbind();
                 }
             }
+            _material.unbind();
         }
     }
 }
