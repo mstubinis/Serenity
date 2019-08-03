@@ -1267,7 +1267,7 @@ epriv::EShaders::forward_frag =
     "    for (int j = 0; j < numComponents; ++j) {\n"
     "        ProcessComponent(components[j], inData);\n"
     "    }\n"
-    "    inData.diffuse.a = 0.1;\n" //using this to test cloaking atm
+    "    inData.diffuse.a = 1.0;\n" //using this to test cloaking atm
     "    gl_FragData[0] = inData.diffuse;\n"
     "\n"
     "}";

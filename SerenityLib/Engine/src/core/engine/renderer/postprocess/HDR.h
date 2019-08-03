@@ -11,18 +11,18 @@ struct HDRAlgorithm {enum Algorithm {
 namespace Engine {
 namespace epriv {
     class  GBuffer;
-    class  Postprocess_HDR final {
+    class  HDR final {
         public:
-            bool                      hdr;
+            bool                      hdr_active;
             float                     exposure;
             HDRAlgorithm::Algorithm   algorithm;
 
-            Postprocess_HDR();
-            ~Postprocess_HDR();
+            HDR();
+            ~HDR();
 
             void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor);
 
-            static Postprocess_HDR HDR;
+            static HDR hdr;
     };
 };
 namespace Renderer {

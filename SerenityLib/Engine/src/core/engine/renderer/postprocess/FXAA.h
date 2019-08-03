@@ -6,18 +6,18 @@ class  ShaderProgram;
 namespace Engine {
 namespace epriv {
     class  GBuffer;
-    class  Postprocess_FXAA final {
+    class  FXAA final {
         public:
             float reduce_min;
             float reduce_mul;
             float span_max;
 
-            Postprocess_FXAA();
-            ~Postprocess_FXAA();
+            FXAA();
+            ~FXAA();
 
             void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
 
-            static Postprocess_FXAA FXAA;
+            static FXAA fxaa;
     };
 };
 namespace Renderer {

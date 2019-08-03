@@ -8,17 +8,17 @@ class  ShaderProgram;
 namespace Engine {
 namespace epriv {
     class  GBuffer;
-    class  Postprocess_Fog final {
+    class  Fog final {
         public:
-            bool        fog;
+            bool        fog_active;
             float       distNull;
             float       distBlend;
             glm::vec4   color;
 
-            Postprocess_Fog();
-            ~Postprocess_Fog();
+            Fog();
+            ~Fog();
 
-            static Postprocess_Fog Fog;
+            static Fog fog;
         };
 };
 namespace Renderer {

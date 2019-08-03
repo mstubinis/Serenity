@@ -6,22 +6,22 @@ class  ShaderProgram;
 namespace Engine {
 namespace epriv {
     class  GBuffer;
-    class  Postprocess_Bloom final {
+    class  Bloom final {
         public:
             unsigned int num_passes;
-            bool         bloom;
+            bool         bloom_active;
             float        blur_radius;
             float        blur_strength;
             float        scale;
             float        threshold;
             float        exposure;
 
-            Postprocess_Bloom();
-            ~Postprocess_Bloom();
+            Bloom();
+            ~Bloom();
 
             void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
 
-            static Postprocess_Bloom Bloom;
+            static Bloom bloom;
     };
 };
 namespace Renderer {

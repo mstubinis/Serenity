@@ -14,7 +14,7 @@ class  ShaderProgram;
 namespace Engine {
 namespace epriv {
     class  GBuffer;
-    class  Postprocess_SMAA final {
+    class  SMAA final {
         public:
             unsigned int  AreaTexture;
             unsigned int  SearchTexture;
@@ -35,8 +35,8 @@ namespace epriv {
             glm::vec2     AREATEX_PIXEL_SIZE;
             float         AREATEX_SUBTEX_SIZE;
 
-            Postprocess_SMAA();
-            ~Postprocess_SMAA();
+            SMAA();
+            ~SMAA();
 
             void init();
 
@@ -45,7 +45,7 @@ namespace epriv {
             void passNeighbor(ShaderProgram&, GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture);
             void passFinal(ShaderProgram&, GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight); //currently unused
 
-            static Postprocess_SMAA SMAA;
+            static SMAA smaa;
     };
 };
 namespace Renderer {

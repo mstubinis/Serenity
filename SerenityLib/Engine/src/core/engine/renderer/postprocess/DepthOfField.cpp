@@ -7,17 +7,17 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-Postprocess_DepthOfField Postprocess_DepthOfField::DOF;
+DepthOfField DepthOfField::DOF;
 
-Postprocess_DepthOfField::Postprocess_DepthOfField() {
+DepthOfField::DepthOfField() {
     bias         = 0.6f;
     focus        = 2.0f;
     blur_radius  = 3.0f;
     dof          = false;
 }
-Postprocess_DepthOfField::~Postprocess_DepthOfField() {
+DepthOfField::~DepthOfField() {
 }
-void Postprocess_DepthOfField::pass(ShaderProgram& program,GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
+void DepthOfField::pass(ShaderProgram& program,GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
     program.bind();
     Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, fboWidth / static_cast<float>(fboHeight));
 
@@ -28,29 +28,29 @@ void Postprocess_DepthOfField::pass(ShaderProgram& program,GBuffer& gbuffer, con
 }
 
 void Renderer::depthOfField::enable(const bool b) {
-    Postprocess_DepthOfField::DOF.dof = b;
+    DepthOfField::DOF.dof = b;
 }
 void Renderer::depthOfField::disable() {
-    Postprocess_DepthOfField::DOF.dof = false;
+    DepthOfField::DOF.dof = false;
 }
 const bool Renderer::depthOfField::enabled() {
-    return Postprocess_DepthOfField::DOF.dof;
+    return DepthOfField::DOF.dof;
 }
 const float Renderer::depthOfField::getFocus() {
-    return Postprocess_DepthOfField::DOF.focus;
+    return DepthOfField::DOF.focus;
 }
 void Renderer::depthOfField::setFocus(const float f) {
-    Postprocess_DepthOfField::DOF.focus = glm::max(0.0f, f);
+    DepthOfField::DOF.focus = glm::max(0.0f, f);
 }
 const float Renderer::depthOfField::getBias() {
-    return Postprocess_DepthOfField::DOF.bias;
+    return DepthOfField::DOF.bias;
 }
 void Renderer::depthOfField::setBias(const float b) {
-    Postprocess_DepthOfField::DOF.bias = b;
+    DepthOfField::DOF.bias = b;
 }
 const float Renderer::depthOfField::getBlurRadius() {
-    return Postprocess_DepthOfField::DOF.blur_radius;
+    return DepthOfField::DOF.blur_radius;
 }
 void Renderer::depthOfField::setBlurRadius(const float r) {
-    Postprocess_DepthOfField::DOF.blur_radius = glm::max(0.0f, r);
+    DepthOfField::DOF.blur_radius = glm::max(0.0f, r);
 }

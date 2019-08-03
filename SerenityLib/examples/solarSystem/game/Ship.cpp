@@ -299,12 +299,12 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         shipSystem.second->update(dt);
 
 
-    /*
+    
     if (ship.IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
         auto model = ship.getComponent<ComponentModel>();
         model->setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparent);
     }
-    */
+    
 }};
 
 

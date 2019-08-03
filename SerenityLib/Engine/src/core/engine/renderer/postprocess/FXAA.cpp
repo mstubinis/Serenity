@@ -8,17 +8,16 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-Postprocess_FXAA Postprocess_FXAA::FXAA;
+FXAA FXAA::fxaa;
 
-Postprocess_FXAA::Postprocess_FXAA() {
+FXAA::FXAA() {
     reduce_min = 0.0078125f; // (1 / 128)
     reduce_mul = 0.125f;     // (1 / 8)
     span_max   = 8.0f;
 }
-Postprocess_FXAA::~Postprocess_FXAA() {
-
+FXAA::~FXAA() {
 }
-void Postprocess_FXAA::pass(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
+void FXAA::pass(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
     program.bind();
 
     Renderer::sendUniform1("FXAA_REDUCE_MIN", reduce_min);
@@ -32,23 +31,21 @@ void Postprocess_FXAA::pass(ShaderProgram& program, GBuffer& gbuffer, const unsi
 
     Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
 }
-
-
 void Renderer::fxaa::setReduceMin(const float r) {
-    Postprocess_FXAA::FXAA.reduce_min = glm::max(0.0f, r);
+    FXAA::fxaa.reduce_min = glm::max(0.0f, r);
 }
 void Renderer::fxaa::setReduceMul(const float r) {
-    Postprocess_FXAA::FXAA.reduce_mul = glm::max(0.0f, r);
+    FXAA::fxaa.reduce_mul = glm::max(0.0f, r);
 }
 void Renderer::fxaa::setSpanMax(const float r) {
-    Postprocess_FXAA::FXAA.span_max = glm::max(0.0f, r);
+    FXAA::fxaa.span_max = glm::max(0.0f, r);
 }
 const float Renderer::fxaa::getReduceMin() {
-    return Postprocess_FXAA::FXAA.reduce_min;
+    return FXAA::fxaa.reduce_min;
 }
 const float Renderer::fxaa::getReduceMul() {
-    return Postprocess_FXAA::FXAA.reduce_mul;
+    return FXAA::fxaa.reduce_mul;
 }
 const float Renderer::fxaa::getSpanMax() {
-    return Postprocess_FXAA::FXAA.span_max;
+    return FXAA::fxaa.span_max;
 }

@@ -10,9 +10,9 @@ struct Entity;
 namespace Engine {
 namespace epriv {
     class  GBuffer;
-    class  Postprocess_GodRays final {
+    class  GodRays final {
         public:
-            bool        godRays;
+            bool        godRays_active;
             glm::vec4   clearColor;
             float       exposure;
             float       factor;
@@ -24,12 +24,12 @@ namespace epriv {
             Entity*     sun;
             int         samples;
 
-            Postprocess_GodRays();
-            ~Postprocess_GodRays();
+            GodRays();
+            ~GodRays();
 
             void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha);
 
-            static Postprocess_GodRays GodRays;
+            static GodRays godRays;
     };
 };
 namespace Renderer {

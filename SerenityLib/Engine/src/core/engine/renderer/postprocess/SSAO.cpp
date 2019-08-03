@@ -12,10 +12,9 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
+SSAO SSAO::ssao;
 
-Postprocess_SSAO Postprocess_SSAO::SSAO;
-
-Postprocess_SSAO::Postprocess_SSAO() {
+SSAO::SSAO() {
     m_ssao                 = true;
     m_ssao_do_blur         = true;
     m_ssao_samples         = 8;
@@ -28,10 +27,10 @@ Postprocess_SSAO::Postprocess_SSAO() {
     m_ssao_radius          = 0.175f;
     m_ssao_noise_texture   = 0;
 }
-Postprocess_SSAO::~Postprocess_SSAO() {
+SSAO::~SSAO() {
     glDeleteTextures(1, &m_ssao_noise_texture);
 }
-void Postprocess_SSAO::init() {
+void SSAO::init() {
     uniform_real_distribution<float> rand(0.0f, 1.0f);
     default_random_engine gen;
     for (uint i = 0; i < SSAO_KERNEL_COUNT; ++i) {
@@ -58,7 +57,7 @@ void Postprocess_SSAO::init() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
-void Postprocess_SSAO::passSSAO(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, Camera& camera) {
+void SSAO::passSSAO(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, Camera& camera) {
     program.bind();
     if (RenderManager::GLSL_VERSION < 140) {
         Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
@@ -80,7 +79,7 @@ void Postprocess_SSAO::passSSAO(ShaderProgram& program, GBuffer& gbuffer, const 
 
     Renderer::renderFullscreenTriangle(screen_width, screen_height);
 }
-void Postprocess_SSAO::passBlur(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const string& type, const unsigned int& texture) {
+void SSAO::passBlur(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const string& type, const unsigned int& texture) {
     program.bind();
     glm::vec2 hv(0.0f);
     if (type == "H") { hv = glm::vec2(1.0f, 0.0f); }
@@ -96,61 +95,60 @@ void Postprocess_SSAO::passBlur(ShaderProgram& program, GBuffer& gbuffer, const 
     const uint& y        = static_cast<uint>(static_cast<float>(fboHeight) * divisor);
     Renderer::renderFullscreenTriangle(x, y);
 }
-
 const bool Renderer::ssao::enabled() {
-    return Postprocess_SSAO::SSAO.m_ssao;
+    return SSAO::ssao.m_ssao;
 }
 void Renderer::ssao::enable(const bool b) {
-    Postprocess_SSAO::SSAO.m_ssao = b;
+    SSAO::ssao.m_ssao = b;
 }
 void Renderer::ssao::disable() {
-    Postprocess_SSAO::SSAO.m_ssao = false;
+    SSAO::ssao.m_ssao = false;
 }
 void Renderer::ssao::enableBlur(const bool b) {
-    Postprocess_SSAO::SSAO.m_ssao_do_blur = b;
+    SSAO::ssao.m_ssao_do_blur = b;
 }
 void Renderer::ssao::disableBlur() {
-    Postprocess_SSAO::SSAO.m_ssao_do_blur = false;
+    SSAO::ssao.m_ssao_do_blur = false;
 }
 const float Renderer::ssao::getBlurRadius() {
-    return Postprocess_SSAO::SSAO.m_ssao_blur_radius;
+    return SSAO::ssao.m_ssao_blur_radius;
 }
 void Renderer::ssao::setBlurRadius(const float r) {
-    Postprocess_SSAO::SSAO.m_ssao_blur_radius = glm::max(0.0f, r);
+    SSAO::ssao.m_ssao_blur_radius = glm::max(0.0f, r);
 }
 const float Renderer::ssao::getBlurStrength() {
-    return Postprocess_SSAO::SSAO.m_ssao_blur_strength;
+    return SSAO::ssao.m_ssao_blur_strength;
 }
 void Renderer::ssao::setBlurStrength(const float s) {
-    Postprocess_SSAO::SSAO.m_ssao_blur_strength = glm::max(0.0f, s);
+    SSAO::ssao.m_ssao_blur_strength = glm::max(0.0f, s);
 }
 const float Renderer::ssao::getIntensity() {
-    return Postprocess_SSAO::SSAO.m_ssao_intensity;
+    return SSAO::ssao.m_ssao_intensity;
 }
 void Renderer::ssao::setIntensity(const float i) {
-    Postprocess_SSAO::SSAO.m_ssao_intensity = glm::max(0.0f, i);
+    SSAO::ssao.m_ssao_intensity = glm::max(0.0f, i);
 }
 const float Renderer::ssao::getRadius() {
-    return Postprocess_SSAO::SSAO.m_ssao_radius;
+    return SSAO::ssao.m_ssao_radius;
 }
 void Renderer::ssao::setRadius(const float r) {
-    Postprocess_SSAO::SSAO.m_ssao_radius = glm::max(0.0f, r);
+    SSAO::ssao.m_ssao_radius = glm::max(0.0f, r);
 }
 const float Renderer::ssao::getScale() {
-    return Postprocess_SSAO::SSAO.m_ssao_scale;
+    return SSAO::ssao.m_ssao_scale;
 }
 void Renderer::ssao::setScale(const float s) {
-    Postprocess_SSAO::SSAO.m_ssao_scale = glm::max(0.0f, s);
+    SSAO::ssao.m_ssao_scale = glm::max(0.0f, s);
 }
 const float Renderer::ssao::getBias() {
-    return Postprocess_SSAO::SSAO.m_ssao_bias;
+    return SSAO::ssao.m_ssao_bias;
 }
 void Renderer::ssao::setBias(const float b) {
-    Postprocess_SSAO::SSAO.m_ssao_bias = b;
+    SSAO::ssao.m_ssao_bias = b;
 }
 const unsigned int Renderer::ssao::getSamples() {
-    return Postprocess_SSAO::SSAO.m_ssao_samples;
+    return SSAO::ssao.m_ssao_samples;
 }
 void Renderer::ssao::setSamples(const unsigned int s) {
-    Postprocess_SSAO::SSAO.m_ssao_samples = glm::max((uint)0, s);
+    SSAO::ssao.m_ssao_samples = glm::max((uint)0, s);
 }

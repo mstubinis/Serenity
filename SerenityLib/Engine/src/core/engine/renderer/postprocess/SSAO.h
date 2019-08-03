@@ -12,7 +12,7 @@ class  ShaderProgram;
 namespace Engine {
 namespace epriv {
     class  GBuffer;
-    class  Postprocess_SSAO final {
+    class  SSAO final {
         public:
             static const int SSAO_KERNEL_COUNT   = 32;
             static const int SSAO_NORMALMAP_SIZE = 16;
@@ -30,15 +30,15 @@ namespace epriv {
             float          m_ssao_radius;
             glm::vec3      m_ssao_Kernels[SSAO_KERNEL_COUNT];
             
-            Postprocess_SSAO();
-            ~Postprocess_SSAO();
+            SSAO();
+            ~SSAO();
 
             void init();
 
             void passSSAO(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,Camera&);
             void passBlur(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const std::string& type,const unsigned int& texture);
 
-            static Postprocess_SSAO SSAO;
+            static SSAO ssao;
     };
 };
 

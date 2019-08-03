@@ -1133,7 +1133,7 @@ class epriv::RenderManager::impl final{
             m_FullscreenQuad = new FullscreenQuad();
             m_FullscreenTriangle = new FullscreenTriangle();
 
-            epriv::Postprocess_SSAO::SSAO.init();
+            SSAO::ssao.init();
 
             renderManager->OpenGLStateMachine.GL_glEnable(GL_DEPTH_TEST);
             Renderer::setDepthFunc(GL_LEQUAL);
@@ -1142,7 +1142,7 @@ class epriv::RenderManager::impl final{
             //renderManager->OpenGLStateMachine.GL_glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); //very odd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
             renderManager->OpenGLStateMachine.GL_glEnable(GL_DEPTH_CLAMP);
 
-            epriv::Postprocess_SMAA::SMAA.init();
+            SMAA::smaa.init();
 
             _generateBRDFLUTCookTorrance(512);
         }
@@ -1596,8 +1596,8 @@ class epriv::RenderManager::impl final{
             Renderer::setDepthFunc(GL_LEQUAL);
 
             glClearBufferfv(GL_COLOR, 0, colors);
-            auto& godRays = epriv::Postprocess_GodRays::GodRays;
-            if(godRays.godRays){
+            auto& godRays = GodRays::godRays;
+            if(godRays.godRays_active){
                 const float godraysclearcolor[4] = { 
                     godRays.clearColor.r,
                     godRays.clearColor.g,
@@ -1612,7 +1612,7 @@ class epriv::RenderManager::impl final{
 
             //this is needed for sure
             GLEnablei(GL_BLEND, 0);
-            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);      
+            glBlendFuncSeparatei(0, GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA ,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             //RENDER NORMAL OBJECTS HERE
             InternalScenePublicInterface::RenderGeometryOpaque(scene, camera, dt);
@@ -1625,13 +1625,14 @@ class epriv::RenderManager::impl final{
         }
         void _passForwardRendering(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
-
-            gbuffer.bindFramebuffers(GBufferType::Diffuse);
-            
             InternalScenePublicInterface::RenderForwardOpaque(scene, camera, dt);
 
             //this is it, this is the best i can think of for a cloaking device, modify the alpha of a model and this produces decent results.
             //TODO: figure out why its blending even with an alpha of 1.0
+
+            gbuffer.bindFramebuffers(GBufferType::Diffuse);
+            //Settings::clear(true, false, false);
+
             GLEnablei(GL_BLEND, 0);
             glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE, GL_SRC_ALPHA, GL_ONE);
             //glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE); //this works too
@@ -1643,6 +1644,7 @@ class epriv::RenderManager::impl final{
 
             GLDisablei(GL_BLEND, 0); //this is needed for smaa at least
             glBlendEquation(GL_FUNC_ADD);
+            glDepthMask(GL_TRUE);
         }
 
         void _passCopyDepth(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
@@ -1726,7 +1728,6 @@ class epriv::RenderManager::impl final{
                 }
                 _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
             }
-            GLDisable(GL_STENCIL_TEST);
         }
         void _passStencil(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
@@ -1764,12 +1765,12 @@ class epriv::RenderManager::impl final{
             else{            hv = glm::vec2(0.0f,1.0f); }
 
             const glm::ivec2 Res(fboWidth, fboHeight);
-            auto& bloom = epriv::Postprocess_Bloom::Bloom;
+            auto& bloom = Bloom::bloom;
             sendUniform4("strengthModifier", 
                 bloom.blur_strength,
                 bloom.blur_strength,
                 bloom.blur_strength,
-                epriv::Postprocess_SSAO::SSAO.m_ssao_blur_strength
+                SSAO::ssao.m_ssao_blur_strength
             );
             sendUniform2("Resolution", Res);
             sendUniform4("DataA", bloom.blur_radius,0.0f,hv.x,hv.y);
@@ -1781,13 +1782,13 @@ class epriv::RenderManager::impl final{
         }
         void _passFinal(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight, GBufferType::Type sceneTexture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal]->bind();
-            sendUniform1Safe("HasBloom", static_cast<int>(epriv::Postprocess_Bloom::Bloom.bloom));
-            sendUniform1Safe("HasFog", static_cast<int>(epriv::Postprocess_Fog::Fog.fog));
+            sendUniform1Safe("HasBloom", static_cast<int>(Bloom::bloom.bloom_active));
+            sendUniform1Safe("HasFog", static_cast<int>(Fog::fog.fog_active));
 
-            if(epriv::Postprocess_Fog::Fog.fog){
-                sendUniform1Safe("FogDistNull", epriv::Postprocess_Fog::Fog.distNull);
-                sendUniform1Safe("FogDistBlend", epriv::Postprocess_Fog::Fog.distBlend);
-                sendUniform4Safe("FogColor", epriv::Postprocess_Fog::Fog.color);
+            if(Fog::fog.fog_active){
+                sendUniform1Safe("FogDistNull", Fog::fog.distNull);
+                sendUniform1Safe("FogDistBlend", Fog::fog.distBlend);
+                sendUniform4Safe("FogColor", Fog::fog.color);
                 sendTextureSafe("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
             }
             sendTextureSafe("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
@@ -1818,7 +1819,7 @@ class epriv::RenderManager::impl final{
             const glm::mat4 p = glm::ortho(-w2, w2, -h2, h2);
             sendUniformMatrix4("Model", m_IdentityMat4);
             sendUniformMatrix4("VP", p);
-            sendUniform2Safe("screenSizeDivideBy2", w2, h2);
+            sendUniform2("screenSizeDivideBy2", w2, h2);
             m_FullscreenQuad->render();
         }
         void _renderFullscreenTriangle(const uint& width, const uint& height,uint startX,uint startY){
@@ -1827,7 +1828,7 @@ class epriv::RenderManager::impl final{
             const glm::mat4 p = glm::ortho(-w2, w2, -h2, h2);
             sendUniformMatrix4("Model", m_IdentityMat4);
             sendUniformMatrix4("VP", p);
-            sendUniform2Safe("screenSizeDivideBy2", w2, h2);
+            sendUniform2("screenSizeDivideBy2", w2, h2);
             m_FullscreenTriangle->render();
         }
         
@@ -1849,9 +1850,6 @@ class epriv::RenderManager::impl final{
         }
         
         void _render(const double& dt, GBuffer& gbuffer, Viewport& viewport,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
-            //TODO: find out why facing a certain direction causes around 2 - 3 ms frame spike times. determine if this is due to an object or a rendering
-            //algorithm. also find out why enabling ssao REDUCES frame ms time. use opengl timers to isolate the troubling functions.
-            
             const Scene& scene           = viewport.m_Scene;
             Camera& camera               = const_cast<Camera&>(viewport.getCamera());
             const glm::uvec4& dimensions = viewport.getViewportDimensions();
@@ -1897,57 +1895,30 @@ class epriv::RenderManager::impl final{
             GLDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
 
-            #pragma region GodRays
-            Renderer::GLDisablei(GL_BLEND, 0);
-            gbuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
-            Settings::clear(true,false,false); //this is needed, clear color should be (0,0,0,0)
-            auto& godRaysPlatform = epriv::Postprocess_GodRays::GodRays;
-            if (godRaysPlatform.godRays && godRaysPlatform.sun){
-                auto& body = *godRaysPlatform.sun->getComponent<ComponentBody>();
-                const glm::vec3& oPos   = body.position();
-                const glm::vec3& camPos = camera.getPosition();
-                const glm::vec3& camVec = camera.getViewVector();
-                const bool infront = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRaysPlatform.fovDegrees));
-                if (infront) {
-                    const glm::vec3& sp = Math::getScreenCoordinates(oPos, false);
-                    float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRaysPlatform.fovDegrees;
-                    
-                    alpha = glm::pow(alpha, godRaysPlatform.alphaFalloff);
-                    alpha = glm::clamp(alpha, 0.01f, 0.99f);
-                    if (boost::math::isnan(alpha) || boost::math::isinf(alpha)) { //yes this is needed...
-                        alpha = 0.01f;
-                    }
-                    alpha = 1.0f - alpha;
-                    auto& godRaysShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays];
-                    godRaysPlatform.pass(godRaysShader, gbuffer, dimensions.z, dimensions.w, glm::vec2(sp.x, sp.y),alpha);
-                }
-            }
 
-            #pragma endregion
+            Renderer::GLDisablei(GL_BLEND, 0);
 
             #pragma region SSAO
-            //TODO: investigate why enabling SSAO makes things FASTER
             //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
-
             gbuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
-            Settings::clear(true, false, false); //0,0,0,0
-
-            if (epriv::Postprocess_SSAO::SSAO.m_ssao) {
-                GLEnablei(GL_BLEND, 0);//yes this is absolutely needed
+            Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
+            if (SSAO::ssao.m_ssao) {
+                //GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
                 gbuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
                 auto& ssaoShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO];
-                epriv::Postprocess_SSAO::SSAO.passSSAO(ssaoShader, gbuffer, dimensions.z, dimensions.w, camera);
-                if (epriv::Postprocess_SSAO::SSAO.m_ssao_do_blur) {
+                SSAO::ssao.passSSAO(ssaoShader, gbuffer, dimensions.z, dimensions.w, camera);
+                if (SSAO::ssao.m_ssao_do_blur) {
                     GLDisablei(GL_BLEND, 0); //yes this is absolutely needed
                     auto& ssaoBlurShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlurSSAO];
-                    for (uint i = 0; i < epriv::Postprocess_SSAO::SSAO.m_ssao_blur_num_passes; ++i) {
+                    for (uint i = 0; i < SSAO::ssao.m_ssao_blur_num_passes; ++i) {
                         gbuffer.bindFramebuffers(GBufferType::GodRays, "A", false);
-                        epriv::Postprocess_SSAO::SSAO.passBlur(ssaoBlurShader, gbuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
+                        SSAO::ssao.passBlur(ssaoBlurShader, gbuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
                         gbuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
-                        epriv::Postprocess_SSAO::SSAO.passBlur(ssaoBlurShader, gbuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
+                        SSAO::ssao.passBlur(ssaoBlurShader, gbuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
                     }
-                }    
+                }   
             }
+            
             #pragma endregion
 
             GLDisablei(GL_BLEND, 0);
@@ -1956,12 +1927,13 @@ class epriv::RenderManager::impl final{
             
             GLEnablei(GL_BLEND, 0);
             glBlendEquation(GL_FUNC_ADD);
-            glBlendFunc(GL_ONE, GL_ONE);
+            //glBlendFunc(GL_ONE, GL_ONE);
+            glBlendFuncSeparatei(0, GL_ONE, GL_ONE, GL_ONE, GL_ONE);
             
             //this needs to be cleaned up
+            gbuffer.bindFramebuffers(GBufferType::Lighting, "RGB");
+            Settings::clear(true, false, false);//lighting rgb channels cleared to black
             if(lighting){
-                gbuffer.bindFramebuffers(GBufferType::Lighting,"RGB");
-                Settings::clear(true,false,false);//this is needed for godrays 0,0,0,0
                 _passLighting(gbuffer,viewport, camera, dimensions.z, dimensions.w, mainRenderFunc);
             }
             
@@ -1976,19 +1948,51 @@ class epriv::RenderManager::impl final{
             GLDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
             
+
+
+            #pragma region GodRays
+            gbuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
+            Settings::clear(true, false, false); //godrays rgb channels cleared to black
+            auto& godRaysPlatform = GodRays::godRays;
+
+            if (godRaysPlatform.godRays_active && godRaysPlatform.sun) {
+                auto& body = *godRaysPlatform.sun->getComponent<ComponentBody>();
+                const glm::vec3& oPos = body.position();
+                const glm::vec3& camPos = camera.getPosition();
+                const glm::vec3& camVec = camera.getViewVector();
+                const bool infront = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRaysPlatform.fovDegrees));
+                if (infront) {
+                    const glm::vec3& sp = Math::getScreenCoordinates(oPos, false);
+                    float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRaysPlatform.fovDegrees;
+
+                    alpha = glm::pow(alpha, godRaysPlatform.alphaFalloff);
+                    alpha = glm::clamp(alpha, 0.01f, 0.99f);
+                    if (boost::math::isnan(alpha) || boost::math::isinf(alpha)) { //yes this is needed...
+                        alpha = 0.01f;
+                    }
+                    alpha = 1.0f - alpha;
+                    auto& godRaysShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays];
+                    godRaysPlatform.pass(godRaysShader, gbuffer, dimensions.z, dimensions.w, glm::vec2(sp.x, sp.y), alpha);
+                }
+            }
+            #pragma endregion
+
+
+
+
             #pragma region HDR and GodRays addition
             gbuffer.bindFramebuffers(GBufferType::Misc);
             auto& hdrShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR];
-            epriv::Postprocess_HDR::HDR.pass(hdrShader, gbuffer, dimensions.z, dimensions.w, godRaysPlatform.godRays, lighting, godRaysPlatform.factor);
+            HDR::hdr.pass(hdrShader, gbuffer, dimensions.z, dimensions.w, godRaysPlatform.godRays_active, lighting, godRaysPlatform.factor);
             #pragma endregion
             
             #pragma region Bloom
             //TODO: possible optimization: use stencil buffer to reject completely black pixels during blur passes
-            if (epriv::Postprocess_Bloom::Bloom.bloom) {
+            if (Bloom::bloom.bloom_active) {
                 gbuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
                 auto& bloomShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom];
-                epriv::Postprocess_Bloom::Bloom.pass(bloomShader, gbuffer, dimensions.z, dimensions.w, GBufferType::Lighting);
-                for (uint i = 0; i < epriv::Postprocess_Bloom::Bloom.num_passes; ++i) {
+                Bloom::bloom.pass(bloomShader, gbuffer, dimensions.z, dimensions.w, GBufferType::Lighting);
+                for (uint i = 0; i < Bloom::bloom.num_passes; ++i) {
                     gbuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
                     _passBlur(gbuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
                     gbuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
@@ -2000,10 +2004,10 @@ class epriv::RenderManager::impl final{
             GBufferType::Type sceneTexture = GBufferType::Misc;
             GBufferType::Type outTexture = GBufferType::Lighting;
             #pragma region DOF
-            if (epriv::Postprocess_DepthOfField::DOF.dof) {
+            if (DepthOfField::DOF.dof) {
                 auto& dofShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF];
                 gbuffer.bindFramebuffers(outTexture);
-                epriv::Postprocess_DepthOfField::DOF.pass(dofShader,gbuffer, dimensions.z, dimensions.w, sceneTexture);
+                DepthOfField::DOF.pass(dofShader,gbuffer, dimensions.z, dimensions.w, sceneTexture);
                 sceneTexture = GBufferType::Lighting;
                 outTexture = GBufferType::Misc;
             }
@@ -2020,7 +2024,7 @@ class epriv::RenderManager::impl final{
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
                 gbuffer.bindFramebuffers(sceneTexture);
                 auto& fxaaShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA];
-                epriv::Postprocess_FXAA::FXAA.pass(fxaaShader, gbuffer, dimensions.z, dimensions.w, outTexture);
+                FXAA::fxaa.pass(fxaaShader, gbuffer, dimensions.z, dimensions.w, outTexture);
 
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport, camera, sceneTexture);
@@ -2041,15 +2045,15 @@ class epriv::RenderManager::impl final{
                 auto& neighborProgram = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3];
                 auto& finalProgram    = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4];
 
-                epriv::Postprocess_SMAA::SMAA.passEdge(edgeProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture, outTexture);
+                SMAA::smaa.passEdge(edgeProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture, outTexture);
 
-                epriv::Postprocess_SMAA::SMAA.passBlend(blendProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, outTexture);
+                SMAA::smaa.passBlend(blendProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, outTexture);
 
                 gbuffer.bindFramebuffers(outTexture);
-                epriv::Postprocess_SMAA::SMAA.passNeighbor(neighborProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture);
+                SMAA::smaa.passNeighbor(neighborProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture);
                 //gbuffer.bindFramebuffers(sceneTexture);
 
-                //epriv::Postprocess_SMAA::SMAA.passFinal(finalProgram, gbuffer, dimensions.z, dimensions.w);//unused
+                //SMAA::smaa.passFinal(finalProgram, gbuffer, dimensions.z, dimensions.w);//unused
 
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport, camera, outTexture);
@@ -2060,10 +2064,10 @@ class epriv::RenderManager::impl final{
             
             #pragma region RenderPhysics
             GLEnablei(GL_BLEND, 0);
-            GLDisable(GL_DEPTH_TEST);
-            glDepthMask(GL_FALSE);
             if(mainRenderFunc){
                 if(draw_physics_debug  &&  &camera == scene.getActiveCamera()){
+                    GLDisable(GL_DEPTH_TEST);
+                    glDepthMask(GL_FALSE);
                     m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics]->bind();
                     Core::m_Engine->m_PhysicsManager._render();
                 }
@@ -2074,7 +2078,7 @@ class epriv::RenderManager::impl final{
             #pragma region 2DAPI
             GLEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             if(mainRenderFunc){
                 if(viewport.isUsing2DAPI()){
                     Settings::clear(false,true,false); //clear depth only

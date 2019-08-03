@@ -7,19 +7,19 @@ class  ShaderProgram;
 namespace Engine {
 namespace epriv {
     class  GBuffer;
-    class  Postprocess_DepthOfField final {
+    class  DepthOfField final {
         public:
             float bias;
             float focus;
             float blur_radius;
             bool  dof;
 
-            Postprocess_DepthOfField();
-            ~Postprocess_DepthOfField();
+            DepthOfField();
+            ~DepthOfField();
 
             void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
 
-            static Postprocess_DepthOfField DOF;
+            static DepthOfField DOF;
     };
 };
 namespace Renderer {
