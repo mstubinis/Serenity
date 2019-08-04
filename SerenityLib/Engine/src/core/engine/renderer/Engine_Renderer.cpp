@@ -2118,7 +2118,7 @@ void epriv::RenderManager::_render(const double& dt, Viewport& viewport,const bo
 void epriv::RenderManager::_resize(uint w,uint h){ 
     m_i->_resize(w, h);
 }
-void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){
+void epriv::RenderManager::_onFullscreen(sf::Window* w,const sf::VideoMode& m,const char* n, const uint& s, const sf::ContextSettings& set){
     m_i->_onFullscreen(w, m, n, s, set);
 }
 void epriv::RenderManager::_onOpenGLContextCreation(uint windowWidth,uint windowHeight,uint _glslVersion,uint _openglVersion){ 

@@ -23,6 +23,7 @@ struct ResourceManifest{
 	static Handle VenerexMesh;
 	static Handle IntrepidMesh;
     static Handle ExcelsiorMesh;
+    static Handle ConstitutionMesh;
     static Handle LeviathanMesh;
 
 	static Handle NovaMaterial;
@@ -30,6 +31,7 @@ struct ResourceManifest{
 	static Handle VenerexMaterial;
 	static Handle IntrepidMaterial;
     static Handle ExcelsiorMaterial;
+    static Handle ConstitutionMaterial;
     static Handle DefiantSharkMaterial;
 
 

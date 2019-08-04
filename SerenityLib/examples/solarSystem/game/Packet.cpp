@@ -66,8 +66,9 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
 
 
 PacketPhysicsUpdate::PacketPhysicsUpdate():Packet() {
-    px = py = pz = qx = qy = qz = lx = ly = lz = ax = ay = az = wx = wy = wz = 0;
-    qw = 1.0;
+    qx = qy = qz = lx = ly = lz = ax = ay = az = 0;
+    px = py = pz = wx = wy = wz = 0.0f;
+    qw = 1;
 }
 PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnchor, const vector<string>& anchorList) :Packet() {
     auto& ent = ship.entity();

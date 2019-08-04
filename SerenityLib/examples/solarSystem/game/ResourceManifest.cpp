@@ -21,6 +21,7 @@ Handle ResourceManifest::MirandaMesh;
 Handle ResourceManifest::VenerexMesh;
 Handle ResourceManifest::IntrepidMesh;
 Handle ResourceManifest::ExcelsiorMesh;
+Handle ResourceManifest::ConstitutionMesh;
 Handle ResourceManifest::LeviathanMesh;
 
 Handle ResourceManifest::NovaMaterial;
@@ -28,6 +29,7 @@ Handle ResourceManifest::MirandaMaterial;
 Handle ResourceManifest::VenerexMaterial;
 Handle ResourceManifest::IntrepidMaterial;
 Handle ResourceManifest::ExcelsiorMaterial;
+Handle ResourceManifest::ConstitutionMaterial;
 Handle ResourceManifest::DefiantSharkMaterial;
 
 
@@ -74,6 +76,7 @@ void ResourceManifest::init(){
 	//VenerexMesh = Resources::loadMeshAsync(BasePath + "data/Models/venerex.objcc").at(0);
 	//IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.objcc").at(0);
     ExcelsiorMesh = Resources::loadMeshAsync(BasePath + "data/Models/excelsior.objcc").at(0);
+    ConstitutionMesh = Resources::loadMeshAsync(BasePath + "data/Models/constitution.objcc").at(0);
     //LeviathanMesh = Resources::loadMeshAsync(BasePath + "data/Models/leviathan.objcc").at(0);
 
 
@@ -103,6 +106,7 @@ void ResourceManifest::init(){
 	//VenerexMaterial = Resources::addMaterial("Venerex", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
 	//IntrepidMaterial = Resources::addMaterial("Intrepid", BasePath + "data/Textures/intrepid.dds", BasePath + "data/Textures/intrepid_Normal.png", BasePath + "data/Textures/intrepid_Glow.png");
     ExcelsiorMaterial = Resources::addMaterial("Excelsior", BasePath + "data/Textures/excelsior/excelsior.dds", BasePath + "data/Textures/excelsior/excelsior_Normal.dds", BasePath + "data/Textures/excelsior/excelsior_Glow.dds", BasePath + "data/Textures/excelsior/excelsior_Specular.dds");
+    ConstitutionMaterial = Resources::addMaterial("Constitution", BasePath + "data/Textures/constitution/constitution.dds", BasePath + "data/Textures/constitution/constitution_Normal.dds", BasePath + "data/Textures/constitution/constitution_Glow.dds", BasePath + "data/Textures/constitution/constitution_Specular.dds");
     //DefiantSharkMaterial = Resources::addMaterial("DefiantShark", BasePath + "data/Textures/defiant/defiantShark.dds", BasePath + "data/Textures/defiant/defiant_Normal.dds", BasePath + "data/Textures/defiant/defiant_Glow.dds");
 
 
@@ -131,8 +135,9 @@ void ResourceManifest::init(){
     MenuMusic = Resources::addSoundData(BasePath + "data/Sounds/menu.ogg");
 
 
-    ResourceManifest::Ships["Defiant"]     = boost::tuple<Handle, Handle>(DefiantMesh,     DefiantMaterial);
-    ResourceManifest::Ships["Nova"]        = boost::tuple<Handle, Handle>(NovaMesh,        NovaMaterial);
-    ResourceManifest::Ships["Excelsior"]   = boost::tuple<Handle, Handle>(ExcelsiorMesh,   ExcelsiorMaterial);
-    ResourceManifest::Ships["Miranda"]     = boost::tuple<Handle, Handle>(MirandaMesh,     MirandaMaterial);
+    ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle>(DefiantMesh,      DefiantMaterial);
+    ResourceManifest::Ships["Nova"]         = boost::tuple<Handle, Handle>(NovaMesh,         NovaMaterial);
+    ResourceManifest::Ships["Excelsior"]    = boost::tuple<Handle, Handle>(ExcelsiorMesh,    ExcelsiorMaterial);
+    ResourceManifest::Ships["Miranda"]      = boost::tuple<Handle, Handle>(MirandaMesh,      MirandaMaterial);
+    ResourceManifest::Ships["Constitution"] = boost::tuple<Handle, Handle>(ConstitutionMesh, ConstitutionMaterial);
 }
