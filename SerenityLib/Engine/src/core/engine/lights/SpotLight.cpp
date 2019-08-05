@@ -12,8 +12,9 @@ SpotLight::SpotLight(const glm::vec3 pos, const glm::vec3 direction, const float
     setCutoff(cutoff);
     setCutoffOuter(outerCutoff);
 
-    if (m_Type == LightType::Spot)
+    if (m_Type == LightType::Spot) {
         epriv::InternalScenePublicInterface::GetSpotLights(*scene).push_back(this);
+    }
 }
 SpotLight::~SpotLight() {
 }

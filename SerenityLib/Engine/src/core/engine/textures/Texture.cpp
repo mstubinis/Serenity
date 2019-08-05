@@ -22,6 +22,7 @@ using namespace std;
 Texture* Texture::White    = nullptr;
 Texture* Texture::Black    = nullptr;
 Texture* Texture::Checkers = nullptr;
+Texture* Texture::BRDF     = nullptr;
 
 class Texture::impl final{
     friend struct epriv::TextureLoader;

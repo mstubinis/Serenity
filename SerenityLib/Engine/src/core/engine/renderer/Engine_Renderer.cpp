@@ -160,8 +160,6 @@ class epriv::RenderManager::impl final{
         #pragma region GeneralInfo
 
         float gamma;
-        Texture* brdfCook;
-        Texture* blackCubemap;
         AntiAliasingAlgorithm::Algorithm aa_algorithm;
         DepthFunc::Func depth_func;
         bool draw_physics_debug;
@@ -201,8 +199,6 @@ class epriv::RenderManager::impl final{
             #pragma region GeneralInfo
 
             gamma = 2.2f;
-            brdfCook = nullptr;
-            blackCubemap = nullptr;
             aa_algorithm = AntiAliasingAlgorithm::FXAA;
             depth_func = DepthFunc::Less;
             #ifdef _DEBUG
@@ -1126,9 +1122,8 @@ class epriv::RenderManager::impl final{
             Material::Checkers->setSpecularModel(SpecularModel::None);
             Material::Checkers->setSmoothness(0.0f);
 
-            brdfCook = new Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
-            brdfCook->setWrapping(TextureWrap::ClampToEdge);	
-            epriv::Core::m_Engine->m_ResourceManager._addTexture(brdfCook);
+            Texture::BRDF = new Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
+            Texture::BRDF->setWrapping(TextureWrap::ClampToEdge);
 
             m_FullscreenQuad = new FullscreenQuad();
             m_FullscreenTriangle = new FullscreenTriangle();
@@ -1164,7 +1159,9 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(Texture::White);
             SAFE_DELETE(Texture::Black);
             SAFE_DELETE(Texture::Checkers);
+            SAFE_DELETE(Texture::BRDF);
             SAFE_DELETE(Material::Checkers);
+
 
             SAFE_DELETE(ShaderProgram::Deferred);
             SAFE_DELETE(ShaderProgram::Forward);
@@ -1285,11 +1282,11 @@ class epriv::RenderManager::impl final{
             FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO", brdfSize, brdfSize); //try without a depth format
             fbo->bind();
 
-            Renderer::bindTextureForModification(GL_TEXTURE_2D, brdfCook->address());
+            Renderer::bindTextureForModification(GL_TEXTURE_2D, Texture::BRDF->address());
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
             Texture::setFilter(GL_TEXTURE_2D, TextureFilter::Linear);
             Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToEdge);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfCook->address(), 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture::BRDF->address(), 0);
 
             m_InternalShaderPrograms[EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance]->bind();
             Renderer::sendUniform1("NUM_SAMPLES", 256);
@@ -1455,9 +1452,9 @@ class epriv::RenderManager::impl final{
             if (!s.isActive()) return;
             auto& body = *s.m_Entity.getComponent<ComponentBody>();
             const glm::vec3& pos = body.position();
-            Renderer::sendUniform4("LightDataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, 0.0f);
-            Renderer::sendUniform4("LightDataC", 0.0f, pos.x, pos.y, pos.z);
-            Renderer::sendUniform4("LightDataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, static_cast<float>(s.m_Type));
+            Renderer::sendUniform4("light.DataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, 0.0f);
+            Renderer::sendUniform4("light.DataC", 0.0f, pos.x, pos.y, pos.z);
+            Renderer::sendUniform4("light.DataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, static_cast<float>(s.m_Type));
             Renderer::sendUniform1Safe("Type", 0.0f);
 
             Renderer::renderFullscreenTriangle();
@@ -1469,11 +1466,11 @@ class epriv::RenderManager::impl final{
             const glm::vec3& pos = body.position();
             if ((!c.sphereIntersectTest(pos, p.m_CullingRadius)) || (c.getDistance(pos) > 1100.0f * p.m_CullingRadius)) //1100.0f is the visibility threshold
                 return;
-            Renderer::sendUniform4("LightDataA", p.m_AmbientIntensity, p.m_DiffuseIntensity, p.m_SpecularIntensity, 0.0f);
-            Renderer::sendUniform4("LightDataB", 0.0f, 0.0f, p.m_C, p.m_L);
-            Renderer::sendUniform4("LightDataC", p.m_E, pos.x, pos.y, pos.z);
-            Renderer::sendUniform4("LightDataD", p.m_Color.x, p.m_Color.y, p.m_Color.z, static_cast<float>(p.m_Type));
-            Renderer::sendUniform4Safe("LightDataE", 0.0f, 0.0f, static_cast<float>(p.m_AttenuationModel), 0.0f);
+            Renderer::sendUniform4("light.DataA", p.m_AmbientIntensity, p.m_DiffuseIntensity, p.m_SpecularIntensity, 0.0f);
+            Renderer::sendUniform4("light.DataB", 0.0f, 0.0f, p.m_C, p.m_L);
+            Renderer::sendUniform4("light.DataC", p.m_E, pos.x, pos.y, pos.z);
+            Renderer::sendUniform4("light.DataD", p.m_Color.x, p.m_Color.y, p.m_Color.z, static_cast<float>(p.m_Type));
+            Renderer::sendUniform4Safe("light.DataE", 0.0f, 0.0f, static_cast<float>(p.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
             const glm::mat4& model = body.modelMatrix();
@@ -1500,9 +1497,9 @@ class epriv::RenderManager::impl final{
             if (!d.isActive()) return;
             auto& body = *d.m_Entity.getComponent<ComponentBody>();
             const glm::vec3& _forward = body.forward();
-            Renderer::sendUniform4("LightDataA", d.m_AmbientIntensity, d.m_DiffuseIntensity, d.m_SpecularIntensity, _forward.x);
-            Renderer::sendUniform4("LightDataB", _forward.y, _forward.z, 0.0f, 0.0f);
-            Renderer::sendUniform4("LightDataD", d.m_Color.x, d.m_Color.y, d.m_Color.z, static_cast<float>(d.m_Type));
+            Renderer::sendUniform4("light.DataA", d.m_AmbientIntensity, d.m_DiffuseIntensity, d.m_SpecularIntensity, _forward.x);
+            Renderer::sendUniform4("light.DataB", _forward.y, _forward.z, 0.0f, 0.0f);
+            Renderer::sendUniform4("light.DataD", d.m_Color.x, d.m_Color.y, d.m_Color.z, static_cast<float>(d.m_Type));
             Renderer::sendUniform1Safe("Type", 0.0f);
             Renderer::renderFullscreenTriangle();
         }
@@ -1514,11 +1511,11 @@ class epriv::RenderManager::impl final{
             glm::vec3 _forward = body.forward();
             if (!c.sphereIntersectTest(pos, s.m_CullingRadius) || (c.getDistance(pos) > 1100.0f * s.m_CullingRadius))
                 return;
-            Renderer::sendUniform4("LightDataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, _forward.x);
-            Renderer::sendUniform4("LightDataB", _forward.y, _forward.z, s.m_C, s.m_L);
-            Renderer::sendUniform4("LightDataC", s.m_E, pos.x, pos.y, pos.z);
-            Renderer::sendUniform4("LightDataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, static_cast<float>(s.m_Type));
-            Renderer::sendUniform4Safe("LightDataE", s.m_Cutoff, s.m_OuterCutoff, static_cast<float>(s.m_AttenuationModel), 0.0f);
+            Renderer::sendUniform4("light.DataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, _forward.x);
+            Renderer::sendUniform4("light.DataB", _forward.y, _forward.z, s.m_C, s.m_L);
+            Renderer::sendUniform4("light.DataC", s.m_E, pos.x, pos.y, pos.z);
+            Renderer::sendUniform4("light.DataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, static_cast<float>(s.m_Type));
+            Renderer::sendUniform4Safe("light.DataE", s.m_Cutoff, s.m_OuterCutoff, static_cast<float>(s.m_AttenuationModel), 0.0f);
             Renderer::sendUniform2Safe("VertexShaderData", s.m_OuterCutoff, s.m_CullingRadius);
             Renderer::sendUniform1Safe("Type", 2.0f);
 
@@ -1555,11 +1552,11 @@ class epriv::RenderManager::impl final{
             const float half = r.m_RodLength / 2.0f;
             const glm::vec3& firstEndPt = pos + (body.forward() * half);
             const glm::vec3& secndEndPt = pos - (body.forward() * half);
-            Renderer::sendUniform4("LightDataA", r.m_AmbientIntensity, r.m_DiffuseIntensity, r.m_SpecularIntensity, firstEndPt.x);
-            Renderer::sendUniform4("LightDataB", firstEndPt.y, firstEndPt.z, r.m_C, r.m_L);
-            Renderer::sendUniform4("LightDataC", r.m_E, secndEndPt.x, secndEndPt.y, secndEndPt.z);
-            Renderer::sendUniform4("LightDataD", r.m_Color.x, r.m_Color.y, r.m_Color.z, static_cast<float>(r.m_Type));
-            Renderer::sendUniform4Safe("LightDataE", r.m_RodLength, 0.0f, static_cast<float>(r.m_AttenuationModel), 0.0f);
+            Renderer::sendUniform4("light.DataA", r.m_AmbientIntensity, r.m_DiffuseIntensity, r.m_SpecularIntensity, firstEndPt.x);
+            Renderer::sendUniform4("light.DataB", firstEndPt.y, firstEndPt.z, r.m_C, r.m_L);
+            Renderer::sendUniform4("light.DataC", r.m_E, secndEndPt.x, secndEndPt.y, secndEndPt.z);
+            Renderer::sendUniform4("light.DataD", r.m_Color.x, r.m_Color.y, r.m_Color.z, static_cast<float>(r.m_Type));
+            Renderer::sendUniform4Safe("light.DataE", r.m_RodLength, 0.0f, static_cast<float>(r.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
             const glm::mat4& model = body.modelMatrix();
@@ -1616,12 +1613,12 @@ class epriv::RenderManager::impl final{
         }
         void _passForwardRendering(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
-            gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Misc, "RGBA");
+            gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Misc,GBufferType::Lighting, "RGBA");
             InternalScenePublicInterface::RenderForwardOpaque(scene, camera, dt);
 
             GLEnablei(GL_BLEND, 0);
             //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE); //this works too
+            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE); //this works too
             //glDepthMask(GL_TRUE);
 
             InternalScenePublicInterface::RenderForwardTransparent(scene, camera, dt);
@@ -1702,11 +1699,11 @@ class epriv::RenderManager::impl final{
                 if(skybox && skybox->texture()->numAddresses() >= 3){
                     sendTextureSafe("irradianceMap", skybox->texture()->address(1), 4, GL_TEXTURE_CUBE_MAP);
                     sendTextureSafe("prefilterMap", skybox->texture()->address(2), 5, GL_TEXTURE_CUBE_MAP);
-                    sendTextureSafe("brdfLUT", *brdfCook, 6);
+                    sendTextureSafe("brdfLUT", *Texture::BRDF, 6);
                 }else{
                     sendTextureSafe("irradianceMap", Texture::Black->address(0), 4, GL_TEXTURE_2D);
                     sendTextureSafe("prefilterMap", Texture::Black->address(0), 5, GL_TEXTURE_2D);
-                    sendTextureSafe("brdfLUT", *brdfCook, 6);
+                    sendTextureSafe("brdfLUT", *Texture::BRDF, 6);
                 }
                 _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
             }
@@ -1884,7 +1881,7 @@ class epriv::RenderManager::impl final{
             gbuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
             Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
             if (SSAO::ssao.m_ssao) {
-                //GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
+                GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
                 gbuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
                 auto& ssaoShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO];
                 SSAO::ssao.passSSAO(ssaoShader, gbuffer, dimensions.z, dimensions.w, camera);
@@ -1897,7 +1894,7 @@ class epriv::RenderManager::impl final{
                         gbuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
                         SSAO::ssao.passBlur(ssaoBlurShader, gbuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
                     }
-                }   
+                }  
             }
             
             #pragma endregion
@@ -1907,8 +1904,6 @@ class epriv::RenderManager::impl final{
             _passStencil(gbuffer, dimensions.z, dimensions.w); //confirmed, stencil rejection does help
             
             GLEnablei(GL_BLEND, 0);
-            glBlendEquation(GL_FUNC_ADD);
-            //glBlendFunc(GL_ONE, GL_ONE);
             glBlendFuncSeparatei(0, GL_ONE, GL_ONE, GL_ONE, GL_ONE);
             
             //this needs to be cleaned up
@@ -2107,7 +2102,9 @@ void epriv::RenderManager::_onOpenGLContextCreation(uint windowWidth,uint window
 void epriv::RenderManager::_clear2DAPICommands() {
     vector_clear(m_i->m_2DAPICommands);
 }
-
+const float epriv::RenderManager::_getGIPackedData() {
+    return m_i->lighting_gi_pack;
+}
 const bool epriv::RenderManager::_bindShaderProgram(ShaderProgram* program){
     auto& currentShaderPgrm = RendererState.current_bound_shader_program;
     if(currentShaderPgrm != program){

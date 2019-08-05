@@ -340,6 +340,8 @@ namespace Engine {
 
                 void GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);
             public:
+                const unsigned int getMaxTextureUnits() const;
+
                 const bool GL_glActiveTexture(const GLenum& textureUnit);
                 const bool GL_glBindTextureForModification(const GLenum& textureTarget, const GLuint& textureObject);
                 const bool GL_glBindTextureForRendering(const GLenum& textureTarget, const GLuint& textureObject);

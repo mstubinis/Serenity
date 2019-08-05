@@ -15,8 +15,10 @@ SunLight::SunLight(const glm::vec3 pos, const LightType::Type type, Scene* scene
     m_DiffuseIntensity  = 2.0f;
     m_SpecularIntensity = 1.0f;
 
-    if(type == LightType::Sun)
+    if (type == LightType::Sun) {
         epriv::InternalScenePublicInterface::GetSunLights(*scene).push_back(this);
+    }
+    epriv::InternalScenePublicInterface::GetLights(*scene).push_back(this);
 
     auto& body = *m_Entity.addComponent<ComponentBody>();
     body.setPosition(pos);
@@ -25,6 +27,9 @@ SunLight::~SunLight() {
 }
 const glm::vec3 SunLight::position() {
     return m_Entity.getComponent<ComponentBody>()->position(); 
+}
+const glm::vec4& SunLight::color() const {
+    return m_Color;
 }
 const bool SunLight::isActive() const {
     return m_Active;

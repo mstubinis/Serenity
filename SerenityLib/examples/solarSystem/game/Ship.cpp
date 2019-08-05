@@ -19,8 +19,7 @@ using namespace Engine;
 using namespace std;
 
 #pragma region ShipSystem
-ShipSystem::ShipSystem(uint _type, Ship* _ship){
-    m_Ship = _ship;
+ShipSystem::ShipSystem(const uint& _type, Ship& _ship):m_Ship(_ship){
     m_Health = 1.0f;
     m_Power = 1.0f;
     m_Type = _type;
@@ -35,7 +34,7 @@ void ShipSystem::update(const double& dt){
 #pragma endregion
 
 #pragma region ShipSystemReactor
-ShipSystemReactor::ShipSystemReactor(Ship* _ship, float maxPower, float currentPower):ShipSystem(ShipSystemType::Reactor,_ship){
+ShipSystemReactor::ShipSystemReactor(Ship& _ship, const float maxPower, const float currentPower):ShipSystem(ShipSystemType::Reactor,_ship){
     if( currentPower == -1){
         m_TotalPower = maxPower;
     }else{
@@ -52,7 +51,7 @@ void ShipSystemReactor::update(const double& dt){
 #pragma endregion
 
 #pragma region ShipSystemShields
-ShipSystemShields::ShipSystemShields(Ship* _ship):ShipSystem(ShipSystemType::Shields, _ship){
+ShipSystemShields::ShipSystemShields(Ship& _ship):ShipSystem(ShipSystemType::Shields, _ship){
 
 }
 ShipSystemShields::~ShipSystemShields(){
@@ -64,7 +63,7 @@ void ShipSystemShields::update(const double& dt){
 #pragma endregion
 
 #pragma region ShipSystemMainThrusters
-ShipSystemMainThrusters::ShipSystemMainThrusters(Ship* _ship):ShipSystem(ShipSystemType::ThrustersMain, _ship){
+ShipSystemMainThrusters::ShipSystemMainThrusters(Ship& _ship):ShipSystem(ShipSystemType::ThrustersMain, _ship){
 
 }
 ShipSystemMainThrusters::~ShipSystemMainThrusters(){
@@ -72,10 +71,10 @@ ShipSystemMainThrusters::~ShipSystemMainThrusters(){
 }
 void ShipSystemMainThrusters::update(const double& dt){
     if(isOnline()){
-        auto& rigidbody = *m_Ship->getComponent<ComponentBody>();
-        if(m_Ship->IsPlayer()){
+        auto& rigidbody = *m_Ship.getComponent<ComponentBody>();
+        if(m_Ship.IsPlayer()){
             bool ismoving = false;
-            if(!m_Ship->IsWarping()){
+            if(!m_Ship.IsWarping()){
                 const float& amount =  1.3f / ((rigidbody.mass()* 0.15f) + 1.0f);  
                 if(Engine::isKeyDown(KeyboardKey::W)){ 
                     rigidbody.applyForce(0,0,-amount);
@@ -112,7 +111,7 @@ void ShipSystemMainThrusters::update(const double& dt){
 #pragma endregion
 
 #pragma region ShipSystemPitchThrusters
-ShipSystemPitchThrusters::ShipSystemPitchThrusters(Ship* _ship):ShipSystem(ShipSystemType::ThrustersPitch, _ship){
+ShipSystemPitchThrusters::ShipSystemPitchThrusters(Ship& _ship):ShipSystem(ShipSystemType::ThrustersPitch, _ship){
 
 }
 ShipSystemPitchThrusters::~ShipSystemPitchThrusters(){
@@ -120,17 +119,16 @@ ShipSystemPitchThrusters::~ShipSystemPitchThrusters(){
 }
 void ShipSystemPitchThrusters::update(const double& dt){
     if(isOnline()){
-		auto& ship = *m_Ship;
-        auto& rigidbody = *ship.getComponent<ComponentBody>();
-        if(ship.IsPlayer()){
-            if(ship.getPlayerCamera()->getState() != CameraState::Orbit){
+        auto& rigidbody = *m_Ship.getComponent<ComponentBody>();
+        if(m_Ship.IsPlayer()){
+            if(m_Ship.getPlayerCamera()->getState() != CameraState::Orbit){
 				const auto& diff = Engine::getMouseDifference().y;
-				ship.m_MouseFactor.y += diff * 0.00065;
+                m_Ship.m_MouseFactor.y += diff * 0.00065;
 				const float& massFactor = 1.0f / (rigidbody.mass() * 5.0f);
-				const float& amount = ship.m_MouseFactor.y * massFactor;
+				const float& amount = m_Ship.m_MouseFactor.y * massFactor;
 				rigidbody.applyTorque(amount, 0, 0);
 				const double& step = (1.0 - dt);
-				ship.m_MouseFactor.y *= (step * step);
+                m_Ship.m_MouseFactor.y *= (step * step);
             }
         }
     }
@@ -139,7 +137,7 @@ void ShipSystemPitchThrusters::update(const double& dt){
 #pragma endregion
 
 #pragma region ShipSystemYawThrusters
-ShipSystemYawThrusters::ShipSystemYawThrusters(Ship* _ship):ShipSystem(ShipSystemType::ThrustersYaw, _ship){
+ShipSystemYawThrusters::ShipSystemYawThrusters(Ship& _ship):ShipSystem(ShipSystemType::ThrustersYaw, _ship){
 
 }
 ShipSystemYawThrusters::~ShipSystemYawThrusters(){
@@ -147,17 +145,16 @@ ShipSystemYawThrusters::~ShipSystemYawThrusters(){
 }
 void ShipSystemYawThrusters::update(const double& dt){
     if(isOnline()){
-		auto& ship = *m_Ship;
-        auto& rigidbody = *ship.getComponent<ComponentBody>();
-        if(ship.IsPlayer()){
-            if(ship.getPlayerCamera()->getState() != CameraState::Orbit){
+        auto& rigidbody = *m_Ship.getComponent<ComponentBody>();
+        if(m_Ship.IsPlayer()){
+            if(m_Ship.getPlayerCamera()->getState() != CameraState::Orbit){
 				const auto& diff = -Engine::getMouseDifference().x;
-				ship.m_MouseFactor.x += diff * 0.00065;
+                m_Ship.m_MouseFactor.x += diff * 0.00065;
 				const float& massFactor = 1.0f / (rigidbody.mass() * 5.0f);
-				const float& amount = ship.m_MouseFactor.x * massFactor;
+				const float& amount = m_Ship.m_MouseFactor.x * massFactor;
 				rigidbody.applyTorque(0, amount, 0);
 				const double& step = (1.0 - dt);
-				ship.m_MouseFactor.x *= (step * step);
+                m_Ship.m_MouseFactor.x *= (step * step);
             }
         }
     }
@@ -166,7 +163,7 @@ void ShipSystemYawThrusters::update(const double& dt){
 #pragma endregion
 
 #pragma region ShipSystemRollThrusters
-ShipSystemRollThrusters::ShipSystemRollThrusters(Ship* _ship):ShipSystem(ShipSystemType::ThrustersRoll, _ship){
+ShipSystemRollThrusters::ShipSystemRollThrusters(Ship& _ship):ShipSystem(ShipSystemType::ThrustersRoll, _ship){
 
 }
 ShipSystemRollThrusters::~ShipSystemRollThrusters(){
@@ -174,8 +171,8 @@ ShipSystemRollThrusters::~ShipSystemRollThrusters(){
 }
 void ShipSystemRollThrusters::update(const double& dt){
     if(isOnline()){
-        auto& rigidbody = *m_Ship->getComponent<ComponentBody>();
-        if(m_Ship->IsPlayer()){
+        auto& rigidbody = *m_Ship.getComponent<ComponentBody>();
+        if(m_Ship.IsPlayer()){
             float amount = 1.0f / rigidbody.mass();
             if(Engine::isKeyDown(KeyboardKey::Q)){
 				rigidbody.applyTorque(0,0,amount);
@@ -189,8 +186,90 @@ void ShipSystemRollThrusters::update(const double& dt){
 }
 #pragma endregion
 
+#pragma region ShipSystemCloakingDevice
+ShipSystemCloakingDevice::ShipSystemCloakingDevice(Ship& _ship) :ShipSystem(ShipSystemType::CloakingDevice, _ship) {
+    m_Active = false;
+    m_CloakTimer = 1.0f;
+}
+ShipSystemCloakingDevice::~ShipSystemCloakingDevice() {
+
+}
+void ShipSystemCloakingDevice::update(const double& dt) {
+    auto _fdt = static_cast<float>(dt) * 0.37f; //0.5 is to slow down the cloaking process
+    auto& model = *m_Ship.getComponent<ComponentModel>();
+    if (isOnline()) {
+        if (m_Ship.IsPlayer()) {
+            if (Engine::isKeyDownOnce(KeyboardKey::C)) {
+                if (!m_Active) {
+                    if (m_CloakTimer >= 1.0f) {
+                        auto& model = *m_Ship.getComponent<ComponentModel>();
+                        model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
+                        m_Active = true;
+                        Sound::playEffect(ResourceManifest::SoundCloakingActivated);
+                    }
+                }else{
+                    if (m_CloakTimer <= 0.0f) {
+                        m_Active = false;
+                        m_CloakTimer = 0.0f;
+                        Sound::playEffect(ResourceManifest::SoundCloakingDeactivated);
+                    }
+                }
+            }
+        } 
+        if (m_Active) {
+            if (m_Ship.IsPlayer() /* || is this ship an ally of the player*/) {
+                if (m_CloakTimer > -0.25f) {
+                    if (m_CloakTimer > 0.0f) {
+                        m_CloakTimer -= _fdt;
+                        model.getModel(0).setColor(1, 1, 1, glm::abs(m_CloakTimer));
+                    }else{
+                        m_CloakTimer -= _fdt * 0.35f;
+                        if (m_CloakTimer < -0.25f) {
+                            m_CloakTimer = -0.25f;
+                        }
+                        model.getModel(0).setColor(0.369f, 0.912f, 1, glm::abs(m_CloakTimer));
+                    }
+                }
+            }else{
+                if (m_CloakTimer > 0.0f) {
+                    m_CloakTimer -= _fdt;
+                    if (m_CloakTimer < 0.0f) {
+                        m_CloakTimer = 0.0f;
+                    }
+                    model.getModel(0).setColor(1, 1, 1, glm::abs(m_CloakTimer));
+                }
+            } 
+        }else{
+            if (m_CloakTimer < 1.0f) {
+                m_CloakTimer += _fdt;
+                if (m_CloakTimer > 1.0f) {
+                    m_CloakTimer = 1.0f;
+                    model.setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryOpaque);
+                }
+            }
+            model.getModel(0).setColor(1, 1, 1, glm::abs(m_CloakTimer));
+        }
+    }else{
+        if (m_CloakTimer <= 0.0f) {
+            m_CloakTimer = 0.0f;
+            Sound::playEffect(ResourceManifest::SoundCloakingDeactivated);
+        }
+        m_Active = false;
+        if (m_CloakTimer < 1.0f) {
+            m_CloakTimer += _fdt;
+            if (m_CloakTimer > 1.0f) {
+                m_CloakTimer = 1.0f;
+                model.setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryOpaque);
+            }
+        }
+        model.getModel(0).setColor(1, 1, 1, glm::abs(m_CloakTimer));
+    }
+    ShipSystem::update(dt);
+}
+#pragma endregion
+
 #pragma region ShipSystemWarpDrive
-ShipSystemWarpDrive::ShipSystemWarpDrive(Ship* _ship):ShipSystem(ShipSystemType::WarpDrive, _ship){
+ShipSystemWarpDrive::ShipSystemWarpDrive(Ship& _ship):ShipSystem(ShipSystemType::WarpDrive, _ship){
 
 }
 ShipSystemWarpDrive::~ShipSystemWarpDrive(){
@@ -199,15 +278,15 @@ ShipSystemWarpDrive::~ShipSystemWarpDrive(){
 void ShipSystemWarpDrive::update(const double& dt){
     if(isOnline()){	
         if(!Engine::paused()){	
-            if(m_Ship->IsPlayer()){
+            if(m_Ship.IsPlayer()){
                 if(Engine::isKeyDownOnce(KeyboardKey::L)){
-                    m_Ship->toggleWarp();
+                    m_Ship.toggleWarp();
                 }
-                if(m_Ship->IsWarping()){
+                if(m_Ship.IsWarping()){
                     if(Engine::isKeyDown(KeyboardKey::W)){
-                        m_Ship->translateWarp(0.1, dt);
+                        m_Ship.translateWarp(0.1, dt);
                     }else if(Engine::isKeyDown(KeyboardKey::S)){
-                        m_Ship->translateWarp(-0.1, dt);
+                        m_Ship.translateWarp(-0.1, dt);
                     }
                 }
             }
@@ -218,7 +297,7 @@ void ShipSystemWarpDrive::update(const double& dt){
 #pragma endregion
 
 #pragma region ShipSystemSensors
-ShipSystemSensors::ShipSystemSensors(Ship* _ship):ShipSystem(ShipSystemType::Sensors, _ship){
+ShipSystemSensors::ShipSystemSensors(Ship& _ship):ShipSystem(ShipSystemType::Sensors, _ship){
 
 }
 ShipSystemSensors::~ShipSystemSensors(){
@@ -298,15 +377,6 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
     }
     for (auto& shipSystem : ship.m_ShipSystems) 
         shipSystem.second->update(dt);
-
-
-    /*
-    if (ship.IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
-        auto model = ship.getComponent<ComponentModel>();
-        model->getModel(0).material()->setAlpha(0.05f);
-        model->setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryTransparentTrianglesSorted);
-    }
-    */
 }};
 
 
@@ -337,14 +407,15 @@ Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, cons
 	}
 	for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
 		ShipSystem* system = nullptr;
-		if      (i == 0)  system = new ShipSystemReactor(this, 1000);
-		else if (i == 1)  system = new ShipSystemPitchThrusters(this);
-		else if (i == 2)  system = new ShipSystemYawThrusters(this);
-		else if (i == 3)  system = new ShipSystemRollThrusters(this);
-		else if (i == 4)  system = new ShipSystemShields(this);
-		else if (i == 5)  system = new ShipSystemMainThrusters(this);
-		else if (i == 6)  system = new ShipSystemWarpDrive(this);
-		else if (i == 7)  system = new ShipSystemSensors(this);
+		if      (i == 0)  system = new ShipSystemReactor(*this, 1000);
+		else if (i == 1)  system = new ShipSystemPitchThrusters(*this);
+		else if (i == 2)  system = new ShipSystemYawThrusters(*this);
+		else if (i == 3)  system = new ShipSystemRollThrusters(*this);
+        else if (i == 4)  system = new ShipSystemCloakingDevice(*this);
+		else if (i == 5)  system = new ShipSystemShields(*this);
+		else if (i == 6)  system = new ShipSystemMainThrusters(*this);
+		else if (i == 7)  system = new ShipSystemWarpDrive(*this);
+		else if (i == 8)  system = new ShipSystemSensors(*this);
         m_ShipSystems.emplace(i, system);
 	}
     scene->m_Objects.push_back(this);

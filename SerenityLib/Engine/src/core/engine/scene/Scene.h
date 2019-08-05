@@ -89,6 +89,7 @@ namespace Engine {
             static std::vector<EntityPOD>&           GetEntities(Scene&);
             static std::vector<Viewport*>&           GetViewports(Scene&);
             static std::vector<Camera*>&             GetCameras(Scene&);
+            static std::vector<SunLight*>&           GetLights(Scene&);
             static std::vector<SunLight*>&           GetSunLights(Scene&);
             static std::vector<DirectionalLight*>&   GetDirectionalLights(Scene&);
             static std::vector<PointLight*>&         GetPointLights(Scene&);

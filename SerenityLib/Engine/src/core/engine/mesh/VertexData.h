@@ -4,6 +4,7 @@
 
 #include <core/engine/mesh/VertexBufferObject.h>
 #include <core/engine/mesh/VertexDataFormat.h>
+#include <core/engine/mesh/MeshIncludes.h>
 #include <memory>
 
 typedef unsigned short ushort;
@@ -16,6 +17,7 @@ struct VertexData final{
     std::vector<size_t>                            dataSizes;
     std::vector<size_t>                            dataSizesCapacity;
     std::vector<ushort>                            indices;
+    std::vector<Engine::epriv::Triangle>           triangles;
     GLuint                                         vao;
     std::vector<std::unique_ptr<BufferObject>>     buffers;
 

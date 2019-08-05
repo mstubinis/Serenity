@@ -18,6 +18,7 @@ struct ShipSystemType {enum Type {
     ThrustersPitch,
     ThrustersYaw,
     ThrustersRoll,
+    CloakingDevice,
     Shields,
     ThrustersMain,
     WarpDrive,
@@ -27,15 +28,15 @@ _TOTAL}; };
 class ShipSystem{
 	friend class ::Ship;
     protected:
-        Ship* m_Ship;
+        Ship& m_Ship;
         uint  m_Type;
         float m_Health;
         float m_Power;
     public:
-        ShipSystem(uint type,Ship*);
+        ShipSystem(const uint& type,Ship&);
         virtual ~ShipSystem();
 
-        const bool isOnline() const { if(m_Health > 0 && m_Power > 0) return true; return false; }
+        const bool isOnline() const { return (m_Health > 0 && m_Power > 0) ? true : false; }
 
         virtual void update(const double& dt);
 };
@@ -45,7 +46,7 @@ class ShipSystemReactor final: public ShipSystem{
         float m_TotalPowerMax;
         float m_TotalPower;
     public:
-        ShipSystemReactor(Ship*, float maxPower, float currentPower = -1);
+        ShipSystemReactor(Ship&, const float maxPower, const float currentPower = -1);
         ~ShipSystemReactor();
 
         void update(const double& dt);
@@ -53,7 +54,7 @@ class ShipSystemReactor final: public ShipSystem{
 class ShipSystemMainThrusters final: public ShipSystem{
 	friend class ::Ship;
     public:
-        ShipSystemMainThrusters(Ship*);
+        ShipSystemMainThrusters(Ship&);
         ~ShipSystemMainThrusters();
 
         void update(const double& dt);
@@ -61,7 +62,7 @@ class ShipSystemMainThrusters final: public ShipSystem{
 class ShipSystemPitchThrusters final: public ShipSystem{
 	friend class ::Ship;
     public:
-        ShipSystemPitchThrusters(Ship*);
+        ShipSystemPitchThrusters(Ship&);
         ~ShipSystemPitchThrusters();
 
         void update(const double& dt);
@@ -69,7 +70,7 @@ class ShipSystemPitchThrusters final: public ShipSystem{
 class ShipSystemYawThrusters final: public ShipSystem{
 	friend class ::Ship;
     public:
-        ShipSystemYawThrusters(Ship*);
+        ShipSystemYawThrusters(Ship&);
         ~ShipSystemYawThrusters();
 
         void update(const double& dt);
@@ -77,15 +78,26 @@ class ShipSystemYawThrusters final: public ShipSystem{
 class ShipSystemRollThrusters final: public ShipSystem{
 	friend class ::Ship;
     public:
-        ShipSystemRollThrusters(Ship*);
+        ShipSystemRollThrusters(Ship&);
         ~ShipSystemRollThrusters();
+
+        void update(const double& dt);
+};
+class ShipSystemCloakingDevice final : public ShipSystem {
+    friend class ::Ship;
+    private:
+        bool  m_Active;
+        float m_CloakTimer;
+    public:
+        ShipSystemCloakingDevice(Ship&);
+        ~ShipSystemCloakingDevice();
 
         void update(const double& dt);
 };
 class ShipSystemShields final: public ShipSystem{
 	friend class ::Ship;
     public:
-        ShipSystemShields(Ship*);
+        ShipSystemShields(Ship&);
         ~ShipSystemShields();
 
         void update(const double& dt);
@@ -93,7 +105,7 @@ class ShipSystemShields final: public ShipSystem{
 class ShipSystemWarpDrive final: public ShipSystem{
 	friend class ::Ship;
     public:
-        ShipSystemWarpDrive(Ship*);
+        ShipSystemWarpDrive(Ship&);
         ~ShipSystemWarpDrive();
 
         void update(const double& dt);
@@ -101,7 +113,7 @@ class ShipSystemWarpDrive final: public ShipSystem{
 class ShipSystemSensors final: public ShipSystem{
 	friend class ::Ship;
     public:
-        ShipSystemSensors(Ship*);
+        ShipSystemSensors(Ship&);
         ~ShipSystemSensors();
 
         void update(const double& dt);

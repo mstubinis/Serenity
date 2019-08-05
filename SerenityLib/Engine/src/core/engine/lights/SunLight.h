@@ -29,6 +29,7 @@ class SunLight : public EntityWrapper {
         virtual ~SunLight();
 
         const glm::vec3 position();
+        const glm::vec4& color() const;
         const bool isActive() const;
         const uint type() const;
 

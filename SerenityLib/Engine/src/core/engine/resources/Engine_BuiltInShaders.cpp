@@ -1207,6 +1207,7 @@ epriv::EShaders::forward_frag =
     "USE_LOG_DEPTH_FRAGMENT\n"
     "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
     "USE_MAX_MATERIAL_COMPONENTS\n"
+    "USE_MAX_LIGHTS_PER_PASS\n"
     "\n"
     "struct InData {\n"
     "    vec2  uv;\n"
@@ -1218,6 +1219,7 @@ epriv::EShaders::forward_frag =
     "    float ao;\n"
     "    float metalness;\n"
     "    float smoothness;\n"
+    "    vec3  materialF0;\n"
     "};\n"
     "struct Layer {\n"
     "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
@@ -1233,11 +1235,22 @@ epriv::EShaders::forward_frag =
     "    Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];\n"
     "};\n"
     "\n"
+    "struct Light{\n"
+    "    vec4 DataA;\n" //x = ambient, y = diffuse, z = specular, w = LightDirection.x
+    "    vec4 DataB;\n" //x = LightDirection.y, y = LightDirection.z, z = const, w = linear
+    "    vec4 DataC;\n" //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
+    "    vec4 DataD;\n" //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
+    "    vec4 DataE;\n" //x = cutoff, y = outerCutoff, z = AttenuationModel, w = UNUSED
+    "};\n"
+    "\n"
+    "uniform Light       light[MAX_LIGHTS_PER_PASS];\n"
+    "uniform int         numLights;\n"
+    "\n"
     "uniform Component   components[MAX_MATERIAL_COMPONENTS];\n"
     "uniform int         numComponents;\n"
     "\n"
     "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
-    "uniform vec4        MaterialBasePropertiesTwo;\n"//x = BaseAlpha, y = UNUSED, z = UNUSED, w = UNUSED
+    "uniform vec4        MaterialBasePropertiesTwo;\n"//x = BaseAlpha, y = diffuseModel, z = specularModel, w = UNUSED
     "\n"
     "uniform int Shadeless;\n"
     "\n"
@@ -1253,6 +1266,20 @@ epriv::EShaders::forward_frag =
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
     "\n"
+    "uniform samplerCube irradianceMap;\n"
+    "uniform samplerCube prefilterMap;\n"
+    "uniform sampler2D brdfLUT;\n"
+    "uniform vec4 ScreenData;\n" //x = GIContribution, y = gamma, z = winSize.x, w = winSize.y
+    "\n"
+    "const float MAX_REFLECTION_LOD = 5.0;\n"
+    "\n";
+epriv::EShaders::forward_frag += epriv::EShaders::float_into_2_floats;
+epriv::EShaders::forward_frag += epriv::EShaders::normals_octahedron_compression_functions;
+epriv::EShaders::forward_frag += 
+    "vec3 SchlickFrenselRoughness(float _theta, vec3 _F0, float _roughness){\n"
+    "    vec3 ret = _F0 + (max(vec3(1.0 - _roughness),_F0) - _F0) * pow(1.0 - _theta,5.0);\n"
+    "    return ret;\n"
+    "}\n"
     "void main(){\n"
     "    InData inData;\n"
     "    inData.uv = UV;\n"
@@ -1264,15 +1291,74 @@ epriv::EShaders::forward_frag =
     "    inData.ao = MaterialBasePropertiesOne.y;\n"
     "    inData.metalness = MaterialBasePropertiesOne.z;\n"
     "    inData.smoothness = MaterialBasePropertiesOne.w;\n"
+    "    inData.materialF0 = Material_F0AndID.rgb;\n"
     "\n"
     "    for (int j = 0; j < numComponents; ++j) {\n"
     "        ProcessComponent(components[j], inData);\n"
     "    }\n"
+    "\n"
+    "    vec2 test = EncodeOctahedron(inData.normals);\n" //yes these two lines are evil and not needed, but they sync up the results with the deferred pass...
+    "    inData.normals = DecodeOctahedron(test);\n"
+    "\n"
+    "    vec3 lightTotal = ConstantZeroVec3;\n"
+    "    vec3 lightCalculation = ConstantZeroVec3;\n"
+    "    for (int j = 0; j < numLights; ++j) {\n"
+    "        Light currentLight = light[j];\n"
+    "        vec3 lightCalculation = ConstantZeroVec3;\n"
+    "        vec3 LightPosition = vec3(currentLight.DataC.yzw);\n"
+    "        vec3 LightDirection = normalize(vec3(currentLight.DataA.w,currentLight.DataB.x,currentLight.DataB.y));\n"
+    "        if(currentLight.DataD.w == 0.0){\n"       //sun
+    "            lightCalculation = CalcLightInternalForward(currentLight, normalize(LightPosition - WorldPosition),WorldPosition,inData.normals,inData);\n"
+    "        }else if(currentLight.DataD.w == 1.0){\n" //point
+    "            lightCalculation = CalcPointLightForward(currentLight, LightPosition,WorldPosition,inData.normals,inData);\n"
+    "        }else if(currentLight.DataD.w == 2.0){\n" //directional
+    "            lightCalculation = CalcLightInternalForward(currentLight, LightDirection,WorldPosition,inData.normals,inData);\n"
+    "        }else if(currentLight.DataD.w == 3.0){\n" //spot
+    "            lightCalculation = CalcSpotLightForward(currentLight, LightDirection,LightPosition,WorldPosition,inData.normals,inData);\n"
+    "        }else if(currentLight.DataD.w == 4.0){\n" //rod
+    "            lightCalculation = CalcRodLightForward(currentLight, vec3(currentLight.DataA.w,currentLight.DataB.xy),currentLight.DataC.yzw,WorldPosition,inData.normals,inData);\n"
+    "        }\n"
+    "        lightTotal += lightCalculation;\n"
+    "    }\n"
+    "\n"
+    "\n"
+    "\n"
+    "    vec3 MaterialAlbedoTexture = inData.diffuse.rgb;\n"
+    "    vec3 ViewDir = normalize(CameraPosition - WorldPosition);\n"
+    "    vec3 R = reflect(-ViewDir, inData.normals);\n"
+    "    float VdotN = max(0.0, dot(ViewDir,inData.normals));\n"
+    //"    float ssaoValue = 1.0 - texture2D(gSSAOMap,uv).a;\n"
+    //"    float ao = (fract(matIDandAO)+0.0001) * ssaoValue;\n"
+    "    float ao = inData.ao;\n"
+    "    vec3 MaterialF0 = inData.materialF0;\n"
+    "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(inData.metalness));\n"
+    "    vec3 Frensel = F0;\n"
+    "    float roughness = 1.0 - inData.smoothness;\n"
+    "    vec3 irradianceColor = textureCube(irradianceMap, inData.normals).rgb;\n"
+    "    vec3 kS = SchlickFrenselRoughness(VdotN,Frensel,roughness);\n"
+    "    vec3 kD = ConstantOneVec3 - kS;\n"
+    "    kD *= 1.0 - inData.metalness;\n"
+    "    vec3 GIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
+    "    vec3 GIDiffuse = irradianceColor * MaterialAlbedoTexture * kD * GIContribution.x;\n"
+    "\n"
+    "    vec3 prefilteredColor = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
+    "    vec2 brdf  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
+    "    vec3 GISpecular = prefilteredColor * (kS * brdf.x + brdf.y) * GIContribution.y;\n"
+    "\n"
+    "    vec3 TotalIrradiance = (GIDiffuse + GISpecular) * ao;\n"
+    "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
+    "    lightTotal += TotalIrradiance * GIContribution.z * MaterialBasePropertiesTwo.x;\n"
+    "\n"
+    "\n"
+    "\n"
+    "\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
+    "    inData.diffuse.rgb = lightTotal;\n"
     "    vec4 GodRays = vec4(Gods_Rays_Color,1.0);\n"
     "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
     "    gl_FragData[0] = inData.diffuse;\n"
     "    gl_FragData[1] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
+    "    gl_FragData[2] = inData.diffuse;\n"
     "\n"
     "}";
 #pragma endregion
@@ -1314,7 +1400,7 @@ epriv::EShaders::deferred_frag =
     "\n"
     "\n"
     "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
-    "uniform vec4        MaterialBasePropertiesTwo;\n"//x = BaseAlpha, y = UNUSED, z = UNUSED, w = UNUSED
+    "uniform vec4        MaterialBasePropertiesTwo;\n"//x = BaseAlpha, y = diffuseModel, z = specularModel, w = UNUSED
     "\n"
     "uniform int Shadeless;\n"
     "\n"
@@ -1707,16 +1793,19 @@ epriv::EShaders::depth_and_transparency_frag +=
 "}";
 #pragma endregion
 
-
 #pragma region LightingFrag
 epriv::EShaders::lighting_frag =
     "#define MATERIAL_COUNT_LIMIT 255\n"
     "\n"
-    "uniform vec4 LightDataA;\n" //x = ambient, y = diffuse, z = specular, w = LightDirection.x
-    "uniform vec4 LightDataB;\n" //x = LightDirection.y, y = LightDirection.z, z = const, w = linear
-    "uniform vec4 LightDataC;\n" //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
-    "uniform vec4 LightDataD;\n" //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
-    "uniform vec4 LightDataE;\n" //x = cutoff, y = outerCutoff, z = AttenuationModel, w = UNUSED
+    "struct Light{\n"
+    "    vec4 DataA;\n" //x = ambient, y = diffuse, z = specular, w = LightDirection.x
+    "    vec4 DataB;\n" //x = LightDirection.y, y = LightDirection.z, z = const, w = linear
+    "    vec4 DataC;\n" //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
+    "    vec4 DataD;\n" //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
+    "    vec4 DataE;\n" //x = cutoff, y = outerCutoff, z = AttenuationModel, w = UNUSED
+    "};\n"
+    "\n"
+    "uniform Light light;\n"
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gNormalMap;\n"
@@ -1743,19 +1832,19 @@ epriv::EShaders::lighting_frag +=
     "    vec3 PxlPosition = GetWorldPosition(uv,CameraNear,CameraFar);\n"
     "\n"
     "    vec3 lightCalculation = ConstantZeroVec3;\n"
-    "    vec3 LightPosition = vec3(LightDataC.yzw);\n"
-    "    vec3 LightDirection = normalize(vec3(LightDataA.w,LightDataB.x,LightDataB.y));\n"
+    "    vec3 LightPosition = vec3(light.DataC.yzw);\n"
+    "    vec3 LightDirection = normalize(vec3(light.DataA.w,light.DataB.x,light.DataB.y));\n"
     "\n"
-    "    if(LightDataD.w == 0.0){\n"       //sun
-    "        lightCalculation = CalcLightInternal(normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 1.0){\n" //point
-    "        lightCalculation = CalcPointLight(LightPosition,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 2.0){\n" //directional
-    "        lightCalculation = CalcLightInternal(LightDirection,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 3.0){\n" //spot
-    "        lightCalculation = CalcSpotLight(LightDirection,LightPosition,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 4.0){\n" //rod
-    "        lightCalculation = CalcRodLight(vec3(LightDataA.w,LightDataB.xy),LightDataC.yzw,PxlPosition,PxlNormal,uv);\n"
+    "    if(light.DataD.w == 0.0){\n"       //sun
+    "        lightCalculation = CalcLightInternal(light, normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);\n"
+    "    }else if(light.DataD.w == 1.0){\n" //point
+    "        lightCalculation = CalcPointLight(light, LightPosition,PxlPosition,PxlNormal,uv);\n"
+    "    }else if(light.DataD.w == 2.0){\n" //directional
+    "        lightCalculation = CalcLightInternal(light, LightDirection,PxlPosition,PxlNormal,uv);\n"
+    "    }else if(light.DataD.w == 3.0){\n" //spot
+    "        lightCalculation = CalcSpotLight(light, LightDirection,LightPosition,PxlPosition,PxlNormal,uv);\n"
+    "    }else if(light.DataD.w == 4.0){\n" //rod
+    "        lightCalculation = CalcRodLight(light, vec3(light.DataA.w,light.DataB.xy),light.DataC.yzw,PxlPosition,PxlNormal,uv);\n"
     "    }\n"
     "    gl_FragData[0].rgb = lightCalculation;\n"
     "}";
@@ -1765,11 +1854,15 @@ epriv::EShaders::lighting_frag +=
 epriv::EShaders::lighting_frag_optimized =
     "#define MATERIAL_COUNT_LIMIT 255\n"
     "\n"
-    "uniform vec4 LightDataA;\n" //x = ambient, y = diffuse, z = specular, w = LightDirection.x
-    "uniform vec4 LightDataB;\n" //x = LightDirection.y, y = LightDirection.z, z = const, w = linear
-    "uniform vec4 LightDataC;\n" //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
-    "uniform vec4 LightDataD;\n" //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
-    "uniform vec4 LightDataE;\n" //x = cutoff, y = outerCutoff, z = AttenuationModel, w = UNUSED
+    "struct Light{\n"
+    "    vec4 DataA;\n" //x = ambient, y = diffuse, z = specular, w = LightDirection.x
+    "    vec4 DataB;\n" //x = LightDirection.y, y = LightDirection.z, z = const, w = linear
+    "    vec4 DataC;\n" //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
+    "    vec4 DataD;\n" //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
+    "    vec4 DataE;\n" //x = cutoff, y = outerCutoff, z = AttenuationModel, w = UNUSED
+    "};\n"
+    "\n"
+    "uniform Light light;\n"
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gNormalMap;\n"
@@ -1785,12 +1878,12 @@ epriv::EShaders::lighting_frag_optimized =
 epriv::EShaders::lighting_frag_optimized += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::lighting_frag_optimized += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::lighting_frag_optimized +=
-    "vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){\n"
+    "vec3 CalcLightInternal(in Light currentLight, vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){\n"
     "    float Glow = texture2D(gMiscMap,uv).r;\n"
     "    float SpecularStrength = texture2D(gMiscMap,uv).g;\n"
     "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
-    "    vec3 LightDiffuseColor  = LightDataD.xyz;\n"
-    "    vec3 LightSpecularColor = LightDataD.xyz * SpecularStrength;\n"
+    "    vec3 LightDiffuseColor  = currentLight.DataD.xyz;\n"
+    "    vec3 LightSpecularColor = currentLight.DataD.xyz * SpecularStrength;\n"
     "    vec3 TotalLight         = ConstantZeroVec3;\n"
     "    vec3 SpecularFactor     = ConstantZeroVec3;\n"
     "\n"
@@ -1819,11 +1912,11 @@ epriv::EShaders::lighting_frag_optimized +=
     //"    float MaterialTypeDiffuse = materials[matID].a;\n"
     //"    float MaterialTypeSpecular = materials[matID].b;\n"
     //"\n"
-    //"    if(MaterialTypeDiffuse == 1.0){\n"
+    //"    if(MaterialTypeDiffuse == 2.0){\n"
     //"        LightDiffuseColor *= DiffuseOrenNayar(ViewDir,LightDir,NdotL,VdotN,alpha);\n"
-    //"    }else if(MaterialTypeDiffuse == 2.0){\n"
+    //"    }else if(MaterialTypeDiffuse == 3.0){\n"
     //"        LightDiffuseColor *= DiffuseAshikhminShirley(smoothness,MaterialAlbedoTexture,NdotL,VdotN);\n"
-    //"    }else if(MaterialTypeDiffuse == 3.0){\n"//this is minneart
+    //"    }else if(MaterialTypeDiffuse == 4.0){\n"//this is minneart
     //"        LightDiffuseColor *= pow(VdotN*NdotL,smoothness);\n"
     //"    }\n"
     //"\n"
@@ -1842,8 +1935,8 @@ epriv::EShaders::lighting_frag_optimized +=
     //"    }else if(MaterialTypeSpecular == 7.0){\n"
     //"        SpecularFactor = SpecularAshikhminShirley(PxlNormal,Half,NdotH,LightDir,NdotL,VdotN);\n"
     //"    }\n"
-    "    LightDiffuseColor *= LightDataA.y;\n"
-    "    LightSpecularColor *= (SpecularFactor * LightDataA.z);\n"
+    "    LightDiffuseColor *= currentLight.DataA.y;\n"
+    "    LightSpecularColor *= (SpecularFactor * currentLight.DataA.z);\n"
     "\n"
     "    vec3 componentDiffuse = ConstantOneVec3 - Frensel;\n"
     "    componentDiffuse *= 1.0 - metalness;\n"
@@ -1861,19 +1954,19 @@ epriv::EShaders::lighting_frag_optimized +=
     "    vec3 PxlPosition = GetWorldPosition(uv,CameraNear,CameraFar);\n"
     "\n"
     "    vec3 lightCalculation = ConstantZeroVec3;\n"
-    "    vec3 LightPosition = vec3(LightDataC.yzw);\n"
-    "    vec3 LightDirection = normalize(vec3(LightDataA.w,LightDataB.x,LightDataB.y));\n"
+    "    vec3 LightPosition = vec3(light.DataC.yzw);\n"
+    "    vec3 LightDirection = normalize(vec3(light.DataA.w,light.DataB.x,light.DataB.y));\n"
     "\n"
-    "    if(LightDataD.w == 0.0){\n"
-    "        lightCalculation = CalcLightInternal(normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 1.0){\n"
-    "        lightCalculation = CalcPointLight(LightPosition,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 2.0){\n"
-    "        lightCalculation = CalcLightInternal(LightDirection,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 3.0){\n"
-    "        lightCalculation = CalcSpotLight(LightDirection,LightPosition,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(LightDataD.w == 4.0){\n"
-    "        lightCalculation = CalcRodLight(vec3(LightDataA.w,LightDataB.xy),LightDataC.yzw,PxlPosition,PxlNormal,uv);\n"
+    "    if(light.DataD.w == 0.0){\n"
+    "        lightCalculation = CalcLightInternal(light, normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);\n"
+    "    }else if(light.DataD.w == 1.0){\n"
+    "        lightCalculation = CalcPointLight(light, LightPosition,PxlPosition,PxlNormal,uv);\n"
+    "    }else if(light.DataD.w == 2.0){\n"
+    "        lightCalculation = CalcLightInternal(light, LightDirection,PxlPosition,PxlNormal,uv);\n"
+    "    }else if(light.DataD.w == 3.0){\n"
+    "        lightCalculation = CalcSpotLight(light, LightDirection,LightPosition,PxlPosition,PxlNormal,uv);\n"
+    "    }else if(light.DataD.w == 4.0){\n"
+    "        lightCalculation = CalcRodLight(light, vec3(light.DataA.w,light.DataB.xy),light.DataC.yzw,PxlPosition,PxlNormal,uv);\n"
     "    }\n"
     "    gl_FragData[0].rgb = lightCalculation;\n"
     "}";

@@ -478,56 +478,34 @@ void Mesh::onEvent(const Event& e) {
         m_VertexData->finalize();
     }
 }
-
+//TODO: optimize this a bit more (bubble sort?)
 void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix) {
     auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
-    auto& positions = vertexDataStructure.getData<glm::vec3>(0);
-    auto& indices = vertexDataStructure.indices;
+    const auto& indices = vertexDataStructure.indices;
+    auto& triangles = vertexDataStructure.triangles;
+    vector<ushort> newIndices;
+    newIndices.reserve(indices.size());
 
-    vector<ushort> newIndices;          newIndices.reserve(indices.size());
-    vector<epriv::Triangle> triangles;  triangles.reserve(indices.size() / 3);
-
-    unsigned int j = 0;
-    epriv::Triangle tri;
-    for (unsigned int i = 0; i < indices.size(); ++i) {
-        ++j;
-        auto& index = indices[i];
-        if (j == 1) {
-            tri.position1 = positions[index];
-            tri.index1 = index;
-        }else if (j == 2) {
-            tri.position2 = positions[index];
-            tri.index2 = index;
-        }else if (j == 3) {
-            tri.position3 = positions[index];
-            tri.index3 = index;
-            tri.midpoint = tri.position1 + tri.position2 + tri.position3;
-            tri.midpoint /= 3.0f;
-            triangles.push_back(tri);
-            j = 0;
-        }
-    }
     const glm::vec3& camPos = camera.getPosition();
-    std::sort(
-        triangles.begin(), triangles.end(),
-        [&camPos, &instance, &bodyModelMatrix](epriv::Triangle& lhs, epriv::Triangle& rhs) {
-            glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;
-            glm::mat4 model2 = instance.modelMatrix() * bodyModelMatrix;
 
-            model1 = glm::translate(model1, lhs.midpoint);
-            model2 = glm::translate(model2, rhs.midpoint);
+    const auto& sorter = [&camPos, &instance, &bodyModelMatrix](epriv::Triangle& lhs, epriv::Triangle& rhs) {
+        glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;
+        glm::mat4 model2 = model1;
 
-            auto model1Pos = glm::vec3(model1[3][0], model1[3][1], model1[3][2]);
-            auto model2Pos = glm::vec3(model2[3][0], model2[3][1], model2[3][2]);
-            
-            return glm::distance(camPos, model1Pos) < glm::distance(camPos, model2Pos);
-        }
-    );    
-    for (unsigned int i = 0; i < triangles.size(); ++i) {
+        model1 = glm::translate(model1, lhs.midpoint);
+        model2 = glm::translate(model2, rhs.midpoint);
+
+        auto model1Pos = glm::vec3(model1[3][0], model1[3][1], model1[3][2]);
+        auto model2Pos = glm::vec3(model2[3][0], model2[3][1], model2[3][2]);
+
+        return glm::distance2(camPos, model1Pos) < glm::distance2(camPos, model2Pos);
+    };
+    std::sort( triangles.begin(), triangles.end(), sorter );
+    for (uint i = 0; i < triangles.size(); ++i) {
         auto& triang = triangles[i];
         newIndices.push_back(triang.index1);
         newIndices.push_back(triang.index2);
         newIndices.push_back(triang.index3);
     }
-    Mesh::modifyIndices(newIndices,MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
+    Mesh::modifyIndices(newIndices, MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
 }

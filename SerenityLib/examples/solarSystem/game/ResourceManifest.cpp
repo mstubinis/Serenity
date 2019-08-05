@@ -40,8 +40,10 @@ Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
 Handle ResourceManifest::StarFlareMaterial;
 
-//music
+//sounds
 Handle ResourceManifest::MenuMusic;
+Handle ResourceManifest::SoundCloakingActivated;
+Handle ResourceManifest::SoundCloakingDeactivated;
 
 std::unordered_map<std::string, boost::tuple<Handle, Handle>> ResourceManifest::Ships;
 
@@ -133,6 +135,8 @@ void ResourceManifest::init(){
 
     //sounds
     MenuMusic = Resources::addSoundData(BasePath + "data/Sounds/menu.ogg");
+    SoundCloakingActivated = Resources::addSoundData(BasePath + "data/Sounds/effects/cloaking.ogg");
+    SoundCloakingDeactivated = Resources::addSoundData(BasePath + "data/Sounds/effects/decloaking.ogg");
 
 
     ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle>(DefiantMesh,      DefiantMaterial);

@@ -65,7 +65,7 @@ namespace Engine{
             Renderer::sendUniform1Safe("Shadeless", static_cast<int>(material.m_Shadeless));
             Renderer::sendUniform4Safe("Material_F0AndID", material.m_F0Color.r, material.m_F0Color.g, material.m_F0Color.b, static_cast<float>(material.m_ID));
             Renderer::sendUniform4Safe("MaterialBasePropertiesOne", material.m_BaseGlow, material.m_BaseAO, material.m_BaseMetalness, material.m_BaseSmoothness);
-            Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", material.m_BaseAlpha, 0.0f, 0.0f, 0.0f);
+            Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", material.m_BaseAlpha, static_cast<float>(material.m_DiffuseModel), static_cast<float>(material.m_SpecularModel), 0.0f);
         }};
         struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
             //auto& material = *static_cast<Material*>(r);
@@ -157,8 +157,8 @@ void Material::internalUpdateGlobalMaterialPool(const bool& addToDatabase) {
     }
     data->r = Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r, m_F0Color.g, m_F0Color.b);
     data->g = m_BaseAlpha;
-    data->b = float(m_SpecularModel);
-    data->a = float(m_DiffuseModel);
+    data->b = static_cast<float>(m_SpecularModel);
+    data->a = static_cast<float>(m_DiffuseModel);
     if (addToDatabase) {
         Material::m_MaterialProperities.push_back(std::move(*data));
         SAFE_DELETE(data);

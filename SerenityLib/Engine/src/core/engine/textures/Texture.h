@@ -43,7 +43,7 @@ class Texture: public EngineResource{
     friend struct Engine::epriv::InternalTexturePublicInterface;
 
     public:
-        static Texture *White, *Black, *Checkers; //loaded in renderer
+        static Texture *White, *Black, *Checkers, *BRDF; //loaded in renderer
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

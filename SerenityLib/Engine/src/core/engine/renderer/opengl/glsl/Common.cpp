@@ -230,5 +230,8 @@ void opengl::glsl::Common::convert(string& code, const unsigned int& versionNumb
     if (ShaderHelper::sfind(code, "USE_MAX_MATERIAL_COMPONENTS") && !ShaderHelper::sfind(code, "//USE_MAX_MATERIAL_COMPONENTS")) {
         boost::replace_all(code, "USE_MAX_MATERIAL_COMPONENTS", "#define MAX_MATERIAL_COMPONENTS " + to_string(MAX_MATERIAL_COMPONENTS) + "\n");
     }
+    if (ShaderHelper::sfind(code, "USE_MAX_LIGHTS_PER_PASS") && !ShaderHelper::sfind(code, "//USE_MAX_LIGHTS_PER_PASS")) {
+        boost::replace_all(code, "USE_MAX_LIGHTS_PER_PASS", "#define MAX_LIGHTS_PER_PASS " + to_string(MAX_MATERIAL_COMPONENTS) + "\n");
+    }
 #pragma endregion
 }

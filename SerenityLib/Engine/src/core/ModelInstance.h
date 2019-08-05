@@ -30,7 +30,7 @@ class ModelInstance final: public BindableResource{
         void*                                                m_UserPointer;
         std::vector<Engine::epriv::ModelInstanceAnimation*>  m_AnimationQueue;
         Entity                                               m_Parent;
-        ShaderProgram*                                             m_ShaderProgram;
+        ShaderProgram*                                       m_ShaderProgram;
         Mesh*                                                m_Mesh;
         Material*                                            m_Material;
         RenderStage::Stage                                   m_Stage;

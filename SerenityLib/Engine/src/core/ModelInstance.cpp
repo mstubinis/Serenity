@@ -11,6 +11,14 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <ecs/Components.h>
 
+#include <core/engine/lights/SunLight.h>
+#include <core/engine/lights/DirectionalLight.h>
+#include <core/engine/lights/PointLight.h>
+#include <core/engine/lights/SpotLight.h>
+#include <core/engine/lights/RodLight.h>
+#include <core/engine/scene/Skybox.h>
+#include <core/engine/textures/Texture.h>
+
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -41,8 +49,10 @@ namespace Engine {
         };
 
         struct DefaultModelInstanceBindFunctor {void operator()(EngineResource* r) const {
-            ModelInstance& i = *(ModelInstance*)r;
-            Camera& cam = *Resources::getCurrentScene()->getActiveCamera();
+            auto& i = *(ModelInstance*)r;
+            const auto& stage = i.stage();
+            auto& scene = *Resources::getCurrentScene();
+            Camera& cam = *scene.getActiveCamera();
             glm::vec3 camPos = cam.getPosition();
             Entity& parent = i.m_Parent;
             auto& body = *(parent.getComponent<ComponentBody>());
@@ -51,6 +61,85 @@ namespace Engine {
             auto& animationQueue = i.m_AnimationQueue;
             Renderer::sendUniform4Safe("Object_Color", i.m_Color);
             Renderer::sendUniform3Safe("Gods_Rays_Color", i.m_GodRaysColor);
+
+            if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
+                auto& lights = epriv::InternalScenePublicInterface::GetLights(scene);
+                int maxLights = glm::min(static_cast<int>(lights.size()), MAX_LIGHTS_PER_PASS);
+                Renderer::sendUniform1Safe("numLights", maxLights);
+                for (uint i = 0; i < maxLights; ++i) {
+                    auto& light = *lights[i];
+                    const auto& lightType = light.type();
+                    const auto start = "light[" + to_string(i) + "].";
+                    switch (lightType) {
+                        case LightType::Sun: {
+                            SunLight& s = static_cast<SunLight&>(light);
+                            auto& body = *s.getComponent<ComponentBody>();
+                            const glm::vec3& pos = body.position();
+                            Renderer::sendUniform4Safe((start + "DataA").c_str(), s.getAmbientIntensity(), s.getDiffuseIntensity(), s.getSpecularIntensity(), 0.0f);
+                            Renderer::sendUniform4Safe((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
+                            Renderer::sendUniform4Safe((start + "DataD").c_str(), s.color().x, s.color().y, s.color().z, static_cast<float>(lightType));
+                            break;
+                        }case LightType::Directional: {
+                            DirectionalLight& d = static_cast<DirectionalLight&>(light);
+                            auto& body = *d.getComponent<ComponentBody>();
+                            const glm::vec3& _forward = body.forward();
+                            Renderer::sendUniform4Safe((start + "DataA").c_str(), d.getAmbientIntensity(), d.getDiffuseIntensity(), d.getSpecularIntensity(), _forward.x);
+                            Renderer::sendUniform4Safe((start + "DataB").c_str(), _forward.y, _forward.z, 0.0f, 0.0f);
+                            Renderer::sendUniform4Safe((start + "DataD").c_str(), d.color().x, d.color().y, d.color().z, static_cast<float>(lightType));
+                            break;
+                        }case LightType::Point: {
+                            PointLight& p = static_cast<PointLight&>(light);
+                            auto& body = *p.getComponent<ComponentBody>();
+                            const glm::vec3& pos = body.position();
+                            Renderer::sendUniform4Safe((start + "DataA").c_str(), p.getAmbientIntensity(), p.getDiffuseIntensity(), p.getSpecularIntensity(), 0.0f);
+                            Renderer::sendUniform4Safe((start + "DataB").c_str(), 0.0f, 0.0f, p.getConstant(), p.getLinear());
+                            Renderer::sendUniform4Safe((start + "DataC").c_str(), p.getExponent(), pos.x, pos.y, pos.z);
+                            Renderer::sendUniform4Safe((start + "DataD").c_str(), p.color().x, p.color().y, p.color().z, static_cast<float>(lightType));
+                            Renderer::sendUniform4Safe((start + "DataE").c_str(), 0.0f, 0.0f, static_cast<float>(p.getAttenuationModel()), 0.0f);
+                            break;
+                        }case LightType::Spot: {
+                            SpotLight& s = static_cast<SpotLight&>(light);
+                            auto& body = *s.getComponent<ComponentBody>();
+                            const glm::vec3& pos = body.position();
+                            const glm::vec3 _forward = body.forward();
+                            Renderer::sendUniform4Safe((start + "DataA").c_str(), s.getAmbientIntensity(), s.getDiffuseIntensity(), s.getSpecularIntensity(), _forward.x);
+                            Renderer::sendUniform4Safe((start + "DataB").c_str(), _forward.y, _forward.z, s.getConstant(), s.getLinear());
+                            Renderer::sendUniform4Safe((start + "DataC").c_str(), s.getExponent(), pos.x, pos.y, pos.z);
+                            Renderer::sendUniform4Safe((start + "DataD").c_str(), s.color().x, s.color().y, s.color().z, static_cast<float>(lightType));
+                            Renderer::sendUniform4Safe((start + "DataE").c_str(), s.getCutoff(), s.getCutoffOuter(), static_cast<float>(s.getAttenuationModel()), 0.0f);
+                            break;
+                        }case LightType::Rod: {
+                            RodLight& r = static_cast<RodLight&>(light);
+                            auto& body = *r.getComponent<ComponentBody>();
+                            const glm::vec3& pos = body.position();
+                            const float cullingDistance = r.rodLength() + (r.getCullingRadius() * 2.0f);
+                            const float half = r.rodLength() / 2.0f;
+                            const glm::vec3& firstEndPt = pos + (body.forward() * half);
+                            const glm::vec3& secndEndPt = pos - (body.forward() * half);
+                            Renderer::sendUniform4Safe((start + "DataA").c_str(), r.getAmbientIntensity(), r.getDiffuseIntensity(), r.getSpecularIntensity(), firstEndPt.x);
+                            Renderer::sendUniform4Safe((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, r.getConstant(), r.getLinear());
+                            Renderer::sendUniform4Safe((start + "DataC").c_str(), r.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);
+                            Renderer::sendUniform4Safe((start + "DataD").c_str(), r.color().x, r.color().y, r.color().z, static_cast<float>(lightType));
+                            Renderer::sendUniform4Safe((start + "DataE").c_str(), r.rodLength(), 0.0f, static_cast<float>(r.getAttenuationModel()), 0.0f);
+                            break;
+                        }default: {
+                            break;
+                        }
+                    }
+                }
+                Skybox* skybox = scene.skybox();
+                Renderer::sendUniform4Safe("ScreenData", epriv::Core::m_Engine->m_RenderManager._getGIPackedData(), Renderer::Settings::getGamma(), 0.0f, 0.0f);
+                auto maxTextures = epriv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
+                if (skybox && skybox->texture()->numAddresses() >= 3) {
+                    Renderer::sendTextureSafe("irradianceMap", skybox->texture()->address(1), maxTextures - 2, GL_TEXTURE_CUBE_MAP);
+                    Renderer::sendTextureSafe("prefilterMap", skybox->texture()->address(2), maxTextures - 1, GL_TEXTURE_CUBE_MAP);
+                    Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, maxTextures);
+                }else{
+                    Renderer::sendTextureSafe("irradianceMap", Texture::Black->address(0), maxTextures - 2, GL_TEXTURE_2D);
+                    Renderer::sendTextureSafe("prefilterMap", Texture::Black->address(0), maxTextures - 1, GL_TEXTURE_2D);
+                    Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, maxTextures);
+                }
+            }
             if (animationQueue.size() > 0) {
                 vector<glm::mat4> transforms;
                 //process the animation here

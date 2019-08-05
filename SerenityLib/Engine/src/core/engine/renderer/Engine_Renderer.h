@@ -61,6 +61,7 @@ namespace epriv{
             void _clear2DAPICommands();
             const bool _bindMaterial(Material*);
             const bool _unbindMaterial();
+            const float _getGIPackedData();
             void _genPBREnvMapData(Texture&,uint,uint);
     };
 };

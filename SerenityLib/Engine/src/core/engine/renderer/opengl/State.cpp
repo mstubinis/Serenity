@@ -13,7 +13,9 @@ OpenGLState::OpenGLState(const unsigned int& windowWidth, const unsigned int& wi
 }
 OpenGLState::~OpenGLState() {
 }
-
+const unsigned int OpenGLState::getMaxTextureUnits() const {
+    return textureUnits.capacity();
+}
 void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight) {
     GLint     int_value;
     GLfloat   float_value;

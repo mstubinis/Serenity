@@ -30,6 +30,7 @@ struct Scene::impl final {
     vector<Camera*>                   m_Cameras;
     vector<vector<RenderPipeline*>>   m_Pipelines;
 
+    vector<SunLight*>                 m_Lights;
     vector<SunLight*>                 m_SunLights;
     vector<DirectionalLight*>         m_DirectionalLights;
     vector<PointLight*>               m_PointLights;
@@ -183,6 +184,9 @@ vector<Camera*>& InternalScenePublicInterface::GetCameras(Scene& scene) {
 }
 vector<Engine::epriv::EntityPOD>& InternalScenePublicInterface::GetEntities(Scene& scene) {
     return scene.m_i->m_ECS.entityPool._pool;
+}
+vector<SunLight*>& InternalScenePublicInterface::GetLights(Scene& scene) {
+    return scene.m_i->m_Lights;
 }
 vector<SunLight*>& InternalScenePublicInterface::GetSunLights(Scene& scene) { 
     return scene.m_i->m_SunLights; 

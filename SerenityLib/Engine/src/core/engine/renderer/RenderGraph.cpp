@@ -91,8 +91,9 @@ void RenderPipeline::render(Camera& camera, const double& dt, const bool useDefa
                                 _modelInstance.setPassedRenderCheck(false);
                             }else{
                                 _modelInstance.setPassedRenderCheck(true);
-                                if (sortTriangles)
+                                if (sortTriangles) {
                                     _mesh.sortTriangles(camera, _modelInstance, model);
+                                }
                             }
                         }else{
                             _modelInstance.setPassedRenderCheck(false);

@@ -35,8 +35,9 @@ PointLight::PointLight(const LightType::Type type, const glm::vec3 pos, Scene* s
     m_CullingRadius = calculateCullingRadius();
     m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
 
-    if (m_Type == LightType::Point)
+    if (m_Type == LightType::Point) {
         epriv::InternalScenePublicInterface::GetPointLights(*scene).push_back(this);
+    }
 }
 PointLight::PointLight(const glm::vec3 pos, Scene* scene):PointLight(LightType::Point, pos, scene) {
 
@@ -70,6 +71,9 @@ const float PointLight::getLinear() const {
 }
 const float PointLight::getExponent() const {
     return m_E; 
+}
+const LightAttenuation::Model& PointLight::getAttenuationModel() const {
+    return m_AttenuationModel;
 }
 void PointLight::setConstant(const float c) { 
     m_C = c; 

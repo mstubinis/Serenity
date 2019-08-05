@@ -36,5 +36,6 @@ class PointLight : public SunLight {
         const float getConstant() const;
         const float getLinear() const;
         const float getExponent() const;
+        const LightAttenuation::Model& getAttenuationModel() const;
 };
 #endif

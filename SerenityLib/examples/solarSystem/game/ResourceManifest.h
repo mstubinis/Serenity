@@ -44,6 +44,8 @@ struct ResourceManifest{
 
     //sounds
     static Handle MenuMusic;
+    static Handle SoundCloakingActivated;
+    static Handle SoundCloakingDeactivated;
 
 
     static std::string BasePath;
