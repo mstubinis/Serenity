@@ -89,6 +89,7 @@ void opengl::glsl::Lighting::convert(string& code, const unsigned int& versionNu
                 "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap, uv).a);\n"
                 "    float metalness = stuff.x;\n"
                 "    float smoothness = stuff.y;\n"
+                "    float materialAlpha = materials[matID].g;\n"
                 "\n"
                 "    vec3 MaterialF0 = Unpack3FloatsInto1FloatUnsigned(materials[matID].r);\n"
                 "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
@@ -141,7 +142,7 @@ void opengl::glsl::Lighting::convert(string& code, const unsigned int& versionNu
                 "    TotalLight += LightSpecularColor;\n"
                 "    TotalLight *= (LightDiffuseColor * NdotL);\n"
                 "\n"
-                "    return max(vec3(Glow) * MaterialAlbedoTexture,TotalLight);\n"
+                "    return max(MaterialAlbedoTexture * max(Glow, 1.0 - materialAlpha), TotalLight * materialAlpha);\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, lighting_internal, "vec3 CalcPointLight(");
         }

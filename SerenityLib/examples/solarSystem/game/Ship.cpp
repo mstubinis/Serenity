@@ -9,6 +9,7 @@
 #include <core/engine/Engine.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/lights/Lights.h>
+#include <core/engine/materials/Material.h>
 
 #include <core/engine/utils/Engine_Debugging.h>
 
@@ -299,12 +300,13 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         shipSystem.second->update(dt);
 
 
-    
+    /*
     if (ship.IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
         auto model = ship.getComponent<ComponentModel>();
-        model->setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparent);
+        model->getModel(0).material()->setAlpha(0.05f);
+        model->setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryTransparentTrianglesSorted);
     }
-    
+    */
 }};
 
 

@@ -19,9 +19,6 @@ RenderPipeline::~RenderPipeline() {
     SAFE_DELETE_VECTOR(materialNodes);
 }
 
-float dist(const glm::vec3& lhs, const glm::vec3& rhs) {
-    return glm::distance2(lhs, rhs); //distance2 for optimization - removing sqrt
-}
 void RenderPipeline::sort_cheap(Camera& camera) {
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
@@ -32,7 +29,7 @@ void RenderPipeline::sort_cheap(Camera& camera) {
                     const glm::vec3& lhsPos = lhs->instance->parent().getComponent<ComponentBody>()->position();
                     const glm::vec3& rhsPos = rhs->instance->parent().getComponent<ComponentBody>()->position();
                     const glm::vec3& camPos = camera.getPosition();
-                    return dist(camPos, lhsPos) < dist(camPos, rhsPos);
+                    return glm::distance2(camPos, lhsPos) < glm::distance2(camPos, rhsPos);
                 }
             );
         }
@@ -62,14 +59,14 @@ void RenderPipeline::sort(Camera& camera) {
                     const glm::vec3& leftPos  = lhsPos - (leftDir * lhsRad);
                     const glm::vec3& rightPos = rhsPos - (rightDir * rhsRad);
 
-                    return dist(camPos, leftPos) < dist(camPos, rightPos);
+                    return glm::distance2(camPos, leftPos) < glm::distance2(camPos, rightPos);
                 }
             );
         }
     }
 }
 
-void RenderPipeline::render(Camera& camera, const double& dt, const bool useDefaultShaders) {
+void RenderPipeline::render(Camera& camera, const double& dt, const bool useDefaultShaders, const bool sortTriangles) {
     if(useDefaultShaders) shaderProgram.bind();
     for (auto& materialNode : materialNodes) {
         if (materialNode->meshNodes.size() > 0) {
@@ -87,12 +84,15 @@ void RenderPipeline::render(Camera& camera, const double& dt, const bool useDefa
                         if (body) {
                             const auto& radius = model.radius();
                             auto pos = body->position() + _modelInstance.position();
+                            auto model = body->modelMatrix();
                             uint sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
                             auto comparison = radius * 1100.0f;
                             if (!_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) { //optimization: using squared distance to remove the sqrt()
                                 _modelInstance.setPassedRenderCheck(false);
                             }else{
                                 _modelInstance.setPassedRenderCheck(true);
+                                if (sortTriangles)
+                                    _mesh.sortTriangles(camera, _modelInstance, model);
                             }
                         }else{
                             _modelInstance.setPassedRenderCheck(false);

@@ -40,6 +40,7 @@ class Material final: public BindableResource{
         float                             m_BaseAO;
         float                             m_BaseMetalness;
         float                             m_BaseSmoothness;
+        float                             m_BaseAlpha;
         uint                              m_ID;
 
         MaterialComponent* internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
@@ -73,6 +74,7 @@ class Material final: public BindableResource{
         const float& smoothness() const;
         const float& metalness() const;
         const float& ao() const;
+        const float& alpha() const;
         
         void setF0Color(const glm::vec3& f0Color);
         void setF0Color(const float& r, const float& g, const float& b);
@@ -83,6 +85,7 @@ class Material final: public BindableResource{
         void setSmoothness(const float& smoothness);
         void setAO(const float& ao);
         void setMetalness(const float& metalness);
+        void setAlpha(const float& alpha);
     
         const uint& specularModel() const;
         void setSpecularModel(const SpecularModel::Model& specularModel);

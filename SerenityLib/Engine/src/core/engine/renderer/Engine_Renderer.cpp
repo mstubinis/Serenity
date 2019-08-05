@@ -1584,6 +1584,8 @@ class epriv::RenderManager::impl final{
 
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
         }
+        
+
         void _passGeometry(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
             const glm::vec4& clear = viewport.m_BackgroundColor;
@@ -1598,55 +1600,35 @@ class epriv::RenderManager::impl final{
             glClearBufferfv(GL_COLOR, 0, colors);
             auto& godRays = GodRays::godRays;
             if(godRays.godRays_active){
-                const float godraysclearcolor[4] = { 
-                    godRays.clearColor.r,
-                    godRays.clearColor.g,
-                    godRays.clearColor.b,
-                    godRays.clearColor.a
-                };
+                const float godraysclearcolor[4] = { godRays.clearColor.r, godRays.clearColor.g, godRays.clearColor.b, godRays.clearColor.a };
                 glClearBufferfv(GL_COLOR, 2, godraysclearcolor);
             }
-
             GLEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
 
-            //this is needed for sure
-            GLEnablei(GL_BLEND, 0);
-            glBlendFuncSeparatei(0, GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA ,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            //RENDER NORMAL OBJECTS HERE
+            GLEnablei(GL_BLEND, 0); //this is needed for sure
             InternalScenePublicInterface::RenderGeometryOpaque(scene, camera, dt);
-
-            //skybox here
             if (viewport.isSkyboxVisible()) {
                 _renderSkybox(scene.skybox(), scene, viewport, camera);
             }
             InternalScenePublicInterface::RenderGeometryTransparent(scene, camera, dt);
+            InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(scene, camera, dt, true);
         }
         void _passForwardRendering(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
+            gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Misc, "RGBA");
             InternalScenePublicInterface::RenderForwardOpaque(scene, camera, dt);
 
-            //this is it, this is the best i can think of for a cloaking device, modify the alpha of a model and this produces decent results.
-            //TODO: figure out why its blending even with an alpha of 1.0
-
-            gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Misc, "RGBA");
-            //Settings::clear(true, false, false);
-
             GLEnablei(GL_BLEND, 0);
-            glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE, GL_SRC_ALPHA, GL_ONE);
-            //glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE); //this works too
-            glBlendEquation(GL_ADD);
-            //glDisable(GL_DEPTH_TEST);
-            glDepthMask(GL_FALSE);
+            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE); //this works too
+            //glDepthMask(GL_TRUE);
 
             InternalScenePublicInterface::RenderForwardTransparent(scene, camera, dt);
-
+            InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, camera, dt, true);
             GLDisablei(GL_BLEND, 0); //this is needed for smaa at least
-            glBlendEquation(GL_FUNC_ADD);
-            glDepthMask(GL_TRUE);
+            //glDepthMask(GL_TRUE);
         }
-
         void _passCopyDepth(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth]->bind();
@@ -1891,7 +1873,6 @@ class epriv::RenderManager::impl final{
                 #pragma endregion
             }
             _passGeometry(dt, gbuffer, viewport, camera);
-    
             GLDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
 
@@ -1944,7 +1925,6 @@ class epriv::RenderManager::impl final{
             GLEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
             _passForwardRendering(dt, gbuffer, viewport, camera);
-
             GLDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
             
@@ -2012,7 +1992,7 @@ class epriv::RenderManager::impl final{
                 outTexture = GBufferType::Misc;
             }
             #pragma endregion
-
+            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             #pragma region Finalization and AA
             if (!mainRenderFunc || aa_algorithm == AntiAliasingAlgorithm::None){
                 gbuffer.bindFramebuffers(outTexture);
@@ -2078,7 +2058,6 @@ class epriv::RenderManager::impl final{
             #pragma region 2DAPI
             GLEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
-            glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             if(mainRenderFunc){
                 if(viewport.isUsing2DAPI()){
                     Settings::clear(false,true,false); //clear depth only

@@ -34,8 +34,10 @@ _TOTAL};};
 struct RenderStage { enum Stage {
     GeometryOpaque,
     GeometryTransparent,
+    GeometryTransparentTrianglesSorted,
     ForwardOpaque,
     ForwardTransparent,
+    ForwardTransparentTrianglesSorted,
 _TOTAL};};
 
 #endif

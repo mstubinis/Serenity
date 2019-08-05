@@ -1237,6 +1237,7 @@ epriv::EShaders::forward_frag =
     "uniform int         numComponents;\n"
     "\n"
     "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
+    "uniform vec4        MaterialBasePropertiesTwo;\n"//x = BaseAlpha, y = UNUSED, z = UNUSED, w = UNUSED
     "\n"
     "uniform int Shadeless;\n"
     "\n"
@@ -1267,7 +1268,7 @@ epriv::EShaders::forward_frag =
     "    for (int j = 0; j < numComponents; ++j) {\n"
     "        ProcessComponent(components[j], inData);\n"
     "    }\n"
-    "    inData.diffuse.a = 1.0;\n" //using this to test cloaking atm
+    "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
     "    vec4 GodRays = vec4(Gods_Rays_Color,1.0);\n"
     "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
     "    gl_FragData[0] = inData.diffuse;\n"
@@ -1313,6 +1314,7 @@ epriv::EShaders::deferred_frag =
     "\n"
     "\n"
     "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
+    "uniform vec4        MaterialBasePropertiesTwo;\n"//x = BaseAlpha, y = UNUSED, z = UNUSED, w = UNUSED
     "\n"
     "uniform int Shadeless;\n"
     "\n"
@@ -1356,6 +1358,7 @@ epriv::EShaders::deferred_frag +=
     "	 float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(inData.metalness,inData.smoothness);\n"
     "    vec4 GodRays = vec4(Gods_Rays_Color,1.0);\n"
     "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
+    "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n" //using this to test cloaking atm
     "    gl_FragData[0] = inData.diffuse;\n"
     "    gl_FragData[1] = vec4(OutNormals, OutMatIDAndAO, OutPackedMetalnessAndSmoothness);\n"
     "    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
@@ -1364,6 +1367,9 @@ epriv::EShaders::deferred_frag +=
 
 #pragma region ZPrepassFrag
 epriv::EShaders::zprepass_frag =
+    "USE_LOG_DEPTH_FRAGMENT\n"
+    "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
+    "USE_MAX_MATERIAL_COMPONENTS\n"
     "void main(){\n"
     "}";
 
@@ -1614,6 +1620,7 @@ epriv::EShaders::godRays_frag +=
     "        illuminationDecay *= RaysInfo.y;\n" 
     "    }\n"
     "    gl_FragColor.rgb = (totalColor * alpha) * RaysInfo.x;\n"
+    "    gl_FragColor.a = 1.0;\n"
     "}";
 #pragma endregion
 
@@ -1929,7 +1936,7 @@ epriv::EShaders::lighting_frag_gi +=
     "\n"
     "    vec3 TotalIrradiance = (GIDiffuse + GISpecular) * ao;\n"
     "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
-    "    gl_FragColor += vec4(TotalIrradiance,1.0) * vec4(vec3(GIContribution.z),1.0);\n"
+    "    gl_FragColor += (vec4(TotalIrradiance, 1.0) * vec4(vec3(GIContribution.z), 1.0)) * (materials[index].g);\n" //materials[index].g is material base alpha
     "}";
 
 #pragma endregion

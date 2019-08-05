@@ -66,7 +66,6 @@ namespace epriv{
 };
 namespace Renderer{
     namespace Settings{
-
         void setGamma(const float g);
         const float getGamma();
 

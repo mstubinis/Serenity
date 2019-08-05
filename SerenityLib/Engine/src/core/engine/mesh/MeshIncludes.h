@@ -41,7 +41,19 @@ namespace epriv {
             uv = glm::vec2(0.0f); 
         }
     };
-
+    struct Triangle final {
+        glm::vec3 position1;
+        glm::vec3 position2;
+        glm::vec3 position3;
+        glm::vec3 midpoint;
+        unsigned short index1;
+        unsigned short index2;
+        unsigned short index3;
+        Triangle() {
+            index1 = index2 = index3 = 0;
+            position1 = position2 = position3 = midpoint = glm::vec3(0.0f);
+        }
+    };
     struct VertexBoneData final {
         float     IDs[NUM_BONES_PER_VERTEX];
         float Weights[NUM_BONES_PER_VERTEX];

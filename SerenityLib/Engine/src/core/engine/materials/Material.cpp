@@ -65,6 +65,7 @@ namespace Engine{
             Renderer::sendUniform1Safe("Shadeless", static_cast<int>(material.m_Shadeless));
             Renderer::sendUniform4Safe("Material_F0AndID", material.m_F0Color.r, material.m_F0Color.g, material.m_F0Color.b, static_cast<float>(material.m_ID));
             Renderer::sendUniform4Safe("MaterialBasePropertiesOne", material.m_BaseGlow, material.m_BaseAO, material.m_BaseMetalness, material.m_BaseSmoothness);
+            Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", material.m_BaseAlpha, 0.0f, 0.0f, 0.0f);
         }};
         struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
             //auto& material = *static_cast<Material*>(r);
@@ -128,6 +129,7 @@ void Material::internalInit(Texture* diffuse, Texture* normal, Texture* glow, Te
     internalUpdateGlobalMaterialPool(true);
 
     setSmoothness(0.25f);
+    setAlpha(1.0f);
     setAO(1.0f);
     setMetalness(0.0f);
     setF0Color(0.04f, 0.04f, 0.04f);
@@ -154,7 +156,7 @@ void Material::internalUpdateGlobalMaterialPool(const bool& addToDatabase) {
         data = new glm::vec4(0.0f);
     }
     data->r = Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r, m_F0Color.g, m_F0Color.b);
-    data->g = m_BaseSmoothness;
+    data->g = m_BaseAlpha;
     data->b = float(m_SpecularModel);
     data->a = float(m_DiffuseModel);
     if (addToDatabase) {
@@ -344,6 +346,9 @@ const float& Material::metalness() const{
 const float& Material::smoothness() const { 
     return m_BaseSmoothness; 
 }
+const float& Material::alpha() const {
+    return m_BaseAlpha;
+}
 void Material::setShadeless(const bool& shadeless){
     m_Shadeless = shadeless;
     internalUpdateGlobalMaterialPool(false);
@@ -386,6 +391,10 @@ void Material::setAO(const float& ao){
 }
 void Material::setMetalness(const float& metalness){
     m_BaseMetalness = glm::clamp(metalness, 0.001f, 0.999f);
+    internalUpdateGlobalMaterialPool(false);
+}
+void Material::setAlpha(const float& alpha) {
+    m_BaseAlpha = glm::clamp(alpha, 0.0f, 1.0f);
     internalUpdateGlobalMaterialPool(false);
 }
 void Material::bind(){ 

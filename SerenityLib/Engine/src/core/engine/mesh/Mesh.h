@@ -8,6 +8,7 @@
 #include <core/engine/BindableResource.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/physics/PhysicsEnums.h>
+#include <core/ModelInstance.h>
 
 #include <unordered_map>
 
@@ -16,6 +17,7 @@
 typedef unsigned short ushort;
 
 class  Mesh;
+class  Camera;
 class  btHeightfieldTerrainShape;
 class  btCollisionShape;
 class  Collision;
@@ -110,6 +112,9 @@ class Mesh final: public BindableResource, public EventObserver{
                 uploadToGPU = true;
             vertexDataStructure.setIndices(modifiedIndices, uploadToGPU, orphan);
         }
+
+        void sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix);
+
         void render(bool instancing = true, MeshDrawMode::Mode = MeshDrawMode::Triangles);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
 };
