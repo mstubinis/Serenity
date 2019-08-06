@@ -176,6 +176,25 @@ void Server::updateClient(Server* thisServer, Client* _client) {
                     }
                     break;
                 }
+                case PacketType::Client_To_Server_Ship_Cloak_Update: {
+                    //a client has sent us it's cloaking information, forward it
+                    PacketCloakUpdate& pI = *static_cast<PacketCloakUpdate*>(pp);
+                    PacketCloakUpdate pOut(pI);
+                    pOut.PacketType = PacketType::Server_To_Client_Ship_Cloak_Update;
+
+                    auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+                    if (info.size() >= 3) {
+                        for (auto& connectedClients : server.m_clients) {
+                            if (connectedClients.second->m_username == info[2]) {
+                                server.send_to_client(*connectedClients.second, pOut);
+                                break;
+                            }
+                        }
+                    }else{
+                        server.send_to_all_but_client(client, pOut);
+                    }
+                    break;
+                }
                 case PacketType::Client_To_Server_Ship_Physics_Update: {
                     //a client has sent the server it's physics information, lets forward it to the rest of the clients
                     PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(pp);

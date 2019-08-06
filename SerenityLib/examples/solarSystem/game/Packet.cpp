@@ -53,8 +53,12 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Anchor_Creation_Deep_Space_Initial: {
             p = new PacketMessage(); break;
-        }case PacketType::Client_To_Server_Successfully_Entered_Map:{
+        }case PacketType::Client_To_Server_Successfully_Entered_Map: {
             p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Ship_Cloak_Update:{
+            p = new PacketCloakUpdate(); break;
+        }case PacketType::Server_To_Client_Ship_Cloak_Update: {
+            p = new PacketCloakUpdate(); break;
         }default: {
             break;
         }
@@ -113,5 +117,31 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
         Math::Float16From32(&ax, av.x);
         Math::Float16From32(&ay, av.y);
         Math::Float16From32(&az, av.z);
+    }
+}
+
+
+
+PacketCloakUpdate::PacketCloakUpdate() :Packet() {
+    cloakTimer = 1.0f;
+    cloakSystemOnline = false;
+    cloakActive = false;
+    justTurnedOn = false;
+    justTurnedOff = false;
+}
+PacketCloakUpdate::PacketCloakUpdate(Ship& ship) : Packet() {
+    auto& ent = ship.entity();
+    EntityDataRequest request(ent);
+    const auto pname = ent.getComponent<ComponentName>(request);
+    justTurnedOn = false;
+    justTurnedOff = false;
+    data += ship.getClass();
+    if (pname)
+        data += ("," + pname->name());
+    if (ship.getShipSystem(ShipSystemType::CloakingDevice)) {
+        ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(ship.getShipSystem(ShipSystemType::CloakingDevice));
+        cloakTimer = cloak.getCloakTimer();
+        cloakSystemOnline = cloak.isOnline();
+        cloakActive = cloak.isCloakActive();
     }
 }

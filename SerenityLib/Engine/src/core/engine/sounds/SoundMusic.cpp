@@ -162,6 +162,24 @@ const glm::vec3& SoundMusic::getPosition() {
     sf::Vector3f pos = m_Sound.getPosition();
     return glm::vec3(pos.x, pos.y, pos.z);
 }
+const uint SoundMusic::getChannelCount() {
+    return m_Sound.getChannelCount();
+}
+const float SoundMusic::getMinDistance() {
+    return m_Sound.getMinDistance();
+}
+void SoundMusic::setMinDistance(const float& minDistance) {
+    m_Sound.setMinDistance(minDistance);
+}
+const bool SoundMusic::isRelativeToListener() {
+    return m_Sound.isRelativeToListener();
+}
+void SoundMusic::setRelativeToListener(const bool relative) {
+    m_Sound.setRelativeToListener(relative);
+}
+void SoundMusic::setAttenuation(const float& attenuation) {
+    m_Sound.setAttenuation(attenuation);
+}
 void SoundMusic::setPosition(const float& x, const float& y, const float& z) {
     m_Sound.setPosition(x, y, z);
 }

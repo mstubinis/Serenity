@@ -1,6 +1,8 @@
 #include <core/engine/sounds/Engine_Sounds.h>
 #include <core/engine/Engine.h>
 #include <core/engine/events/Engine_EventDispatcher.h>
+#include <core/engine/scene/Scene.h>
+#include <core/engine/scene/Camera.h>
 
 #include <core/engine/sounds/SoundData.h>
 #include <core/engine/sounds/SoundEffect.h>
@@ -44,7 +46,20 @@ void epriv::SoundManager::_setSoundInformation(Handle& handle, SoundMusic& sound
     sound.m_Duration = data.getDuration();
 }
 
-void epriv::SoundManager::_update(const double& dt){ 
+void epriv::SoundManager::_update(const double& dt){
+    auto scene = Resources::getCurrentScene();
+    if (scene) {
+        auto camera = scene->getActiveCamera();
+        if (camera) {
+            auto& cam = *camera;
+            auto& camPos = cam.getPosition();
+            auto& camForward = cam.forward();
+            auto& camUp = cam.up();
+            sf::Listener::setPosition(camPos.x, camPos.y, camPos.z);
+            sf::Listener::setDirection(camForward.x, camForward.y, camForward.z);
+            sf::Listener::setUpVector(camUp.x, camUp.y, camUp.z);
+        }
+    }
     for (auto it1 = m_SoundQueues.begin(); it1 != m_SoundQueues.end();) {
         SoundQueue& queue = *(*it1);
         queue.update(dt);

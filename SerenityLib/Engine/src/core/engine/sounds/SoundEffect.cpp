@@ -160,6 +160,27 @@ const glm::vec3& SoundEffect::getPosition() {
     const sf::Vector3f& v = m_Sound.getPosition();
     return glm::vec3(v.x, v.y, v.z);
 }
+const uint SoundEffect::getChannelCount() {
+    auto buffer = m_Sound.getBuffer();
+    if (buffer)
+        return buffer->getChannelCount();
+    return 0;
+}
+void SoundEffect::setAttenuation(const float& attenuation) {
+    m_Sound.setAttenuation(attenuation);
+}
+const float SoundEffect::getMinDistance() {
+    return m_Sound.getMinDistance();
+}
+void SoundEffect::setMinDistance(const float& minDistance) {
+    m_Sound.setMinDistance(minDistance);
+}
+const bool SoundEffect::isRelativeToListener() {
+    return m_Sound.isRelativeToListener();
+}
+void SoundEffect::setRelativeToListener(const bool relative) {
+    m_Sound.setRelativeToListener(relative);
+}
 void SoundEffect::setPosition(const float& x, const float& y, const float& z) {
     m_Sound.setPosition(x, y, z);
 }

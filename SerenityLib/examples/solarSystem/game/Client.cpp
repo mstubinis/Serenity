@@ -243,6 +243,19 @@ void Client::onReceive() {
                     //std::cout << "creating deep space anchor" << std::endl;
                     break;
                 }
+                case PacketType::Server_To_Client_Ship_Cloak_Update: {
+                    PacketCloakUpdate& pI = *static_cast<PacketCloakUpdate*>(pp);
+                    auto& map = *static_cast<Map*>(Resources::getCurrentScene());
+                    auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+                    auto& playername = info[1];
+                    auto& shipclass = info[0];
+
+                    if (map.getShips().count(playername)) {
+                        Ship& ship = *map.getShips().at(playername);
+                        ship.updateCloakFromPacket(pI);
+                    }
+                    break;
+                }
                 case PacketType::Server_To_Client_Ship_Physics_Update: {
                     if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
                         PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(pp);
@@ -260,11 +273,11 @@ void Client::onReceive() {
                             auto y = Helper::GetRandomFloatFromTo(-400, 400);
                             auto z = Helper::GetRandomFloatFromTo(-400, 400);
                             auto randOffsetForSafety = glm::vec3(x, y, z);
-                            ship = new Ship(handles.get<0>(), handles.get<1>(), shipclass, false, playername, spawnPosition + randOffsetForSafety, glm::vec3(1.0f), CollisionType::ConvexHull, &map);
+                            ship = new Ship(*this, handles.get<0>(), handles.get<1>(), shipclass, false, playername, spawnPosition + randOffsetForSafety, glm::vec3(1.0f), CollisionType::ConvexHull, &map);
                         }else{
                             ship = map.getShips().at(playername);
                         }
-                        ship->updateFromPacket(pI, map, info);
+                        ship->updatePhysicsFromPacket(pI, map, info);
                     }
                     break;
                 }
@@ -280,8 +293,13 @@ void Client::onReceive() {
                     auto spawn = map.getSpawnAnchor()->getPosition();
 
                     auto& handles = ResourceManifest::Ships.at(info[0]);
-                    Ship* ship = new Ship(handles.get<0>(), handles.get<1>(), info[0], false, pI.name, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z), glm::vec3(1.0f), CollisionType::ConvexHull, &map);
+                    Ship* ship = new Ship(*this, handles.get<0>(), handles.get<1>(), info[0], false, pI.name, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z), glm::vec3(1.0f), CollisionType::ConvexHull, &map);
 
+                    //send the new guy our cloaking status
+                    PacketCloakUpdate pOut1(*map.getPlayer());
+                    pOut1.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
+                    pOut1.data += ("," + pI.name);
+                    send(pOut1);
                     break;
                 }
                 case PacketType::Server_To_Client_Approve_Map_Entry: {

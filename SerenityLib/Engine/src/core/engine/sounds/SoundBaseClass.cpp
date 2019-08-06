@@ -31,6 +31,24 @@ const uint& SoundBaseClass::getLoopsLeft() {
 const float SoundBaseClass::getAttenuation() {
     return 0;
 }
+const uint SoundBaseClass::getChannelCount() {
+    return 0;
+}
+void SoundBaseClass::setAttenuation(const float& attenuation) {
+
+}
+const float SoundBaseClass::getMinDistance() {
+    return 0.0f;
+}
+void SoundBaseClass::setMinDistance(const float& minDistance) {
+
+}
+const bool SoundBaseClass::isRelativeToListener() {
+    return false;
+}
+void SoundBaseClass::setRelativeToListener(const bool relative) {
+
+}
 const glm::vec3& SoundBaseClass::getPosition() {
     return glm::vec3(0.0f);
 }

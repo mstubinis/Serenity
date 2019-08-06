@@ -419,9 +419,9 @@ void HUD::render_game() {
 
 #pragma region renderCrossHairAndOtherInfo
 
-    auto& target = player->getTarget();
-    if (!target.null()) {
-        auto& body = *target.getComponent<ComponentBody>();
+    auto target = player->getTarget();
+    if (target) {
+        auto& body = *target->getComponent<ComponentBody>();
         glm::vec3 pos = body.getScreenCoordinates(true);
         if (pos.z == 1) { //infront 
             auto boxPos = body.getScreenBoxCoordinates(8.0f);
@@ -435,9 +435,9 @@ void HUD::render_game() {
             crosshairTexture.render(boxPos.bottomLeft, color, 0.0f);
             crosshairTexture.render(boxPos.bottomRight, color, 90.0f);
 
-            auto& targetBody = *target.getComponent<ComponentBody>();
+            auto& targetBody = *target->getComponent<ComponentBody>();
             string name = "";
-            auto targetName = target.getComponent<ComponentName>();
+            auto targetName = target->getComponent<ComponentName>();
             if (targetName) {
                 name = targetName->name();
             }

@@ -40,8 +40,14 @@ class SoundBaseClass {
         virtual const bool stop();
         virtual const bool restart();
         const uint& getLoopsLeft();
+        virtual const uint getChannelCount();
+        virtual const float getMinDistance();
+        virtual void setMinDistance(const float& minDistance);
+        virtual const bool isRelativeToListener();
+        virtual void setRelativeToListener(const bool relative = true);
 
         virtual const float getAttenuation();
+        virtual void setAttenuation(const float& attenuation);
         virtual const glm::vec3& getPosition();
         virtual void setPosition(const float& x, const float& y, const float& z);
         virtual void setPosition(const glm::vec3& position);

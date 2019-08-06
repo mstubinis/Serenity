@@ -70,8 +70,8 @@ ShipSystemMainThrusters::~ShipSystemMainThrusters(){
 
 }
 void ShipSystemMainThrusters::update(const double& dt){
+    auto& rigidbody = *m_Ship.getComponent<ComponentBody>();
     if(isOnline()){
-        auto& rigidbody = *m_Ship.getComponent<ComponentBody>();
         if(m_Ship.IsPlayer()){
             bool ismoving = false;
             if(!m_Ship.IsWarping()){
@@ -102,9 +102,14 @@ void ShipSystemMainThrusters::update(const double& dt){
                 }
             }
             if (!ismoving) {
-                //rigidbody.setLinearVelocity(rigidbody.getLinearVelocity() * 0.9972f);
+                auto current = rigidbody.getLinearVelocity();
+                const_cast<btRigidBody&>(rigidbody.getBody()).setDamping(0.05f, 0.2f);
+            }else{
+                const_cast<btRigidBody&>(rigidbody.getBody()).setDamping(0.0f, 0.2f);
             }
         }
+    }else{
+        const_cast<btRigidBody&>(rigidbody.getBody()).setDamping(0.0f, 0.2f);
     }
     ShipSystem::update(dt);
 }
@@ -194,40 +199,75 @@ ShipSystemCloakingDevice::ShipSystemCloakingDevice(Ship& _ship) :ShipSystem(Ship
 ShipSystemCloakingDevice::~ShipSystemCloakingDevice() {
 
 }
+const bool  ShipSystemCloakingDevice::isCloakActive() const {
+    return m_Active;
+}
+const float ShipSystemCloakingDevice::getCloakTimer() const {
+    return m_CloakTimer;
+}
+bool ShipSystemCloakingDevice::cloak(ComponentModel& model, bool sendPacket) {
+    if (m_CloakTimer >= 1.0f) {
+        model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
+        m_Active = true;
+        auto effect = Sound::playEffect(ResourceManifest::SoundCloakingActivated);
+        auto& body = *m_Ship.getComponent<ComponentBody>();
+        effect->setPosition(body.position());
+        effect->setAttenuation(0.15f);
+        if (sendPacket) {
+            PacketCloakUpdate pOut(m_Ship);
+            pOut.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
+            pOut.justTurnedOn = true;
+            m_Ship.m_Client.send(pOut);
+        }
+        return true;
+    }
+    return false;
+}
+bool ShipSystemCloakingDevice::decloak(ComponentModel& model, bool sendPacket) {
+    if (m_CloakTimer <= 0.0f) {
+        m_Active = false;
+        m_CloakTimer = 0.0f;
+        model.show();
+        auto effect = Sound::playEffect(ResourceManifest::SoundCloakingDeactivated);
+        auto& body = *m_Ship.getComponent<ComponentBody>();
+        effect->setPosition(body.position());
+        effect->setAttenuation(0.15f);
+        if (sendPacket) {
+            PacketCloakUpdate pOut(m_Ship);
+            pOut.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
+            pOut.justTurnedOff = true;
+            m_Ship.m_Client.send(pOut);
+        }
+        return true;
+    }
+    return false;
+}
 void ShipSystemCloakingDevice::update(const double& dt) {
-    auto _fdt = static_cast<float>(dt) * 0.37f; //0.5 is to slow down the cloaking process
+    auto _fdt = static_cast<float>(dt) * 0.37f;
     auto& model = *m_Ship.getComponent<ComponentModel>();
+    auto& instance = model.getModel(0);
     if (isOnline()) {
         if (m_Ship.IsPlayer()) {
             if (Engine::isKeyDownOnce(KeyboardKey::C)) {
                 if (!m_Active) {
-                    if (m_CloakTimer >= 1.0f) {
-                        auto& model = *m_Ship.getComponent<ComponentModel>();
-                        model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
-                        m_Active = true;
-                        Sound::playEffect(ResourceManifest::SoundCloakingActivated);
-                    }
+                    ShipSystemCloakingDevice::cloak(model);
                 }else{
-                    if (m_CloakTimer <= 0.0f) {
-                        m_Active = false;
-                        m_CloakTimer = 0.0f;
-                        Sound::playEffect(ResourceManifest::SoundCloakingDeactivated);
-                    }
+                    ShipSystemCloakingDevice::decloak(model);
                 }
             }
         } 
         if (m_Active) {
-            if (m_Ship.IsPlayer() /* || is this ship an ally of the player*/) {
-                if (m_CloakTimer > -0.25f) {
+            if (m_Ship.canSeeCloak()) {
+                if (m_CloakTimer > -0.2f) {
                     if (m_CloakTimer > 0.0f) {
                         m_CloakTimer -= _fdt;
-                        model.getModel(0).setColor(1, 1, 1, glm::abs(m_CloakTimer));
+                        instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
                     }else{
                         m_CloakTimer -= _fdt * 0.35f;
-                        if (m_CloakTimer < -0.25f) {
-                            m_CloakTimer = -0.25f;
+                        if (m_CloakTimer < -0.2f) {
+                            m_CloakTimer = -0.2f;
                         }
-                        model.getModel(0).setColor(0.369f, 0.912f, 1, glm::abs(m_CloakTimer));
+                        instance.setColor(0.369f, 0.912f, 1, glm::abs(m_CloakTimer));
                     }
                 }
             }else{
@@ -235,24 +275,25 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                     m_CloakTimer -= _fdt;
                     if (m_CloakTimer < 0.0f) {
                         m_CloakTimer = 0.0f;
+                        model.hide();
                     }
-                    model.getModel(0).setColor(1, 1, 1, glm::abs(m_CloakTimer));
+                    instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
                 }
             } 
         }else{
             if (m_CloakTimer < 1.0f) {
+                model.show();
                 m_CloakTimer += _fdt;
                 if (m_CloakTimer > 1.0f) {
                     m_CloakTimer = 1.0f;
                     model.setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryOpaque);
                 }
             }
-            model.getModel(0).setColor(1, 1, 1, glm::abs(m_CloakTimer));
+            instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
         }
     }else{
         if (m_CloakTimer <= 0.0f) {
-            m_CloakTimer = 0.0f;
-            Sound::playEffect(ResourceManifest::SoundCloakingDeactivated);
+            ShipSystemCloakingDevice::decloak(model);
         }
         m_Active = false;
         if (m_CloakTimer < 1.0f) {
@@ -262,7 +303,7 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                 model.setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryOpaque);
             }
         }
-        model.getModel(0).setColor(1, 1, 1, glm::abs(m_CloakTimer));
+        instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
     }
     ShipSystem::update(dt);
 }
@@ -304,7 +345,14 @@ ShipSystemSensors::~ShipSystemSensors(){
 
 }
 void ShipSystemSensors::update(const double& dt){
-
+    if (m_Ship.getTarget()) {
+        Ship* target = dynamic_cast<Ship*>(m_Ship.getTarget());
+        if (target) {
+            if (target->isFullyCloaked()) {
+                m_Ship.setTarget(nullptr);
+            }
+        }
+    }
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -343,22 +391,22 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                 camera.follow(ship.m_Entity);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) { //if you store that positional value and revert to it when you switch camera perspectives you'll avoid the whole issue
-            if (cameraState == CameraState::Follow || ship.m_Target.null() || target != ship.m_Entity) {
+            if (cameraState == CameraState::Follow || !ship.m_Target || target != ship.m_Entity) {
                 currentScene.centerSceneToObject(ship.m_Entity);
                 camera.orbit(ship.m_Entity);
                 ship.restorePositionState();
-            }else if (!ship.m_Target.null()) {
+            }else if (ship.m_Target) {
                 ship.savePositionState();
-                currentScene.centerSceneToObject(ship.m_Target);
-                camera.orbit(ship.m_Target);
+                currentScene.centerSceneToObject(ship.m_Target->entity());
+                camera.orbit(ship.m_Target->entity());
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
-            if (cameraState == CameraState::FollowTarget || (ship.m_Target.null() && cameraState != CameraState::Follow) || target != ship.m_Entity) {
+            if (cameraState == CameraState::FollowTarget || (!ship.m_Target && cameraState != CameraState::Follow) || target != ship.m_Entity) {
                 currentScene.centerSceneToObject(ship.m_Entity);
                 camera.follow(ship.m_Entity);
-            }else if (!ship.m_Target.null()) {
+            }else if (ship.m_Target) {
                 currentScene.centerSceneToObject(ship.m_Entity);
-                camera.followTarget(ship.m_Target, ship.m_Entity);
+                camera.followTarget(ship.m_Target->entity(), ship.m_Entity);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F4)) {
 			camera.m_State = CameraState::Freeform;
@@ -370,7 +418,15 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
             if (!scan.null()) {
                 auto* componentName = scan.getComponent<ComponentName>();
                 if (componentName) {
-                    ship.setTarget(scan);
+                    EntityWrapper* scannedTarget = nullptr;
+                    for (auto& obj : currentScene.m_Objects) {
+                        auto* componentName1 = obj->getComponent<ComponentName>();
+                        if (componentName1 && componentName1->name() == componentName->name()) {
+                            scannedTarget = obj;
+                            break;
+                        }
+                    }
+                    ship.setTarget(scannedTarget);
                 }
             }
         }
@@ -380,12 +436,12 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
 }};
 
 
-Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, const string& name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type, Map* scene):EntityWrapper(*scene){
+Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, bool player, const string& name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type, Map* scene):EntityWrapper(*scene),m_Client(client){
     m_WarpFactor    = 0;
     m_IsPlayer      = player;
     m_ShipClass     = shipClass;
     m_IsWarping     = false;
-    m_Target        = Entity::_null;
+    m_Target        = nullptr;
     m_PlayerCamera  = nullptr;
     m_MouseFactor   = glm::dvec2(0.0);
     m_SavedOldStateBefore = false;
@@ -397,7 +453,7 @@ Ship::Ship(Handle& mesh, Handle& mat, const string& shipClass, bool player, cons
 
     setModel(mesh);
 
-    const_cast<btRigidBody&>(rigidBodyComponent.getBody()).setDamping(0.00001f, 0.2f);
+    const_cast<btRigidBody&>(rigidBodyComponent.getBody()).setDamping(0.01f, 0.2f);
     rigidBodyComponent.getBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
 	rigidBodyComponent.setPosition(pos);
 	rigidBodyComponent.setScale(scl);
@@ -432,7 +488,7 @@ const glm::vec3 Ship::getWarpSpeedVector3() {
     }
     return glm::vec3(0.0f);
 }
-void Ship::updateFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
+void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
     const unsigned int& size = stoi(info[2]);
     Anchor* closest = map.getRootAnchor();
     for (unsigned int i = 3; i < 3 + size; ++i) {
@@ -470,6 +526,45 @@ void Ship::updateFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<
     body.setAngularVelocity(ax, ay, az, false);
     body.setLinearVelocity(lx - (packet.wx * 1.333333333f), ly - (packet.wy * 1.333333333f), lz - (packet.wz * 1.333333333f), false);
 }
+bool Ship::canSeeCloak() {
+    if (m_IsPlayer) { //TODO: or is this ship an ally of the player
+        return true;
+    }
+    return false;
+}
+void Ship::updateCloakFromPacket(const PacketCloakUpdate& packet) {
+    if (!m_ShipSystems[ShipSystemType::CloakingDevice])
+        return;
+    ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
+    cloak.m_CloakTimer = packet.cloakTimer;
+    auto& model = *getComponent<ComponentModel>();
+    auto& instance = model.getModel(0);
+    if (!canSeeCloak()) {
+        if (cloak.m_CloakTimer < 0.0) {
+            cloak.m_CloakTimer = 0.0f; 
+        }
+    }
+    cloak.m_Active = packet.cloakActive;
+
+    if (packet.justTurnedOn || packet.justTurnedOff) {
+        if (packet.justTurnedOn)
+            Ship::cloak(false);
+        if (packet.justTurnedOff)
+            Ship::decloak(false);
+    }else{
+        if (cloak.m_CloakTimer < 1.0f && cloak.m_CloakTimer >= 0.0f) {
+            model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
+            instance.setColor(1, 1, 1, glm::abs(cloak.m_CloakTimer));
+        }else if(cloak.m_CloakTimer < 0.0f){
+            model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
+            instance.setColor(0.369f, 0.912f, 1, glm::abs(cloak.m_CloakTimer));
+        }else{
+            model.setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryOpaque);
+            instance.setColor(1, 1, 1, glm::abs(cloak.m_CloakTimer));
+        }
+    }
+}
+
 void Ship::setModel(Handle& modelHandle) {
     auto& rigidBodyComponent = *getComponent<ComponentBody>();
     auto& modelComponent     = *getComponent<ComponentModel>();
@@ -486,19 +581,60 @@ void Ship::translateWarp(const double& amount, const double& dt){
         m_WarpFactor += static_cast<float>(amountToAdd * dt);
     }
 }
+bool Ship::cloak(bool sendPacket) {
+    if (m_ShipSystems[ShipSystemType::CloakingDevice]) {
+        ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
+        auto& model = *getComponent<ComponentModel>();
+        return cloak.cloak(model, sendPacket);
+    }
+    return false;
+}
+bool Ship::decloak(bool sendPacket) {
+    if (m_ShipSystems[ShipSystemType::CloakingDevice]) {
+        ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
+        auto& model = *getComponent<ComponentModel>();
+        return cloak.decloak(model, sendPacket);
+    }
+    return false;
+}
 void Ship::setTarget(const string& target) {
     Map* s = static_cast<Map*>(Resources::getCurrentScene());
     for (auto& entity : s->m_Objects) {
         auto* componentName = entity->getComponent<ComponentName>();
         if (componentName) {
             if (componentName->name() == target) {
-                m_Target = entity->entity();
+                Ship* ship = dynamic_cast<Ship*>(entity);
+                if (ship && ship->isFullyCloaked()) {
+                    return;
+                }
+                m_Target = entity;
                 return;
             }
         }
     }
 }
-void Ship::setTarget(const Entity& target){
+bool Ship::isCloaked() {
+    if (m_ShipSystems[ShipSystemType::CloakingDevice]) {
+        ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
+        return cloak.m_Active;
+    }
+    return false;
+}
+bool Ship::isFullyCloaked() {
+    if (m_ShipSystems[ShipSystemType::CloakingDevice]) {
+        ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
+        if (cloak.m_Active && cloak.m_CloakTimer <= 0.0) 
+            return true;
+        return false;
+    }
+    return false;
+}
+void Ship::setTarget(EntityWrapper* target){
+    if (!target) {
+        if (m_IsPlayer && m_PlayerCamera) {
+            m_PlayerCamera->follow(entity());
+        }
+    }
     m_Target = target;
 }
 void Ship::onEvent(const Event& e){

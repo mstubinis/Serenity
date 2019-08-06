@@ -22,6 +22,7 @@ struct PacketType {enum Type {
     Client_To_Server_Request_Connection,
     Client_To_Server_Request_Disconnection,
     Client_To_Server_Ship_Physics_Update,
+    Client_To_Server_Ship_Cloak_Update,
 
     Client_To_Server_Chat_Message,
 
@@ -38,6 +39,7 @@ struct PacketType {enum Type {
 
     Server_To_Client_Send_Basic_Server_Info,
     Server_To_Client_Ship_Physics_Update,
+    Server_To_Client_Ship_Cloak_Update,
     Server_To_Client_Accept_Connection,
     Server_To_Client_Reject_Connection,
 
@@ -85,6 +87,22 @@ struct PacketPhysicsUpdate: public Packet {
     }
     bool build(sf::Packet& sfPacket) {
         return (sfPacket << PacketType << data << px << py << pz << wx << wy << wz << qx << qy << qz << qw << lx << ly << lz << ax << ay << az);
+    }
+    void print() {}
+};
+struct PacketCloakUpdate : public Packet {
+    float cloakTimer;
+    bool cloakSystemOnline;
+    bool cloakActive;
+    bool justTurnedOn;
+    bool justTurnedOff;
+    PacketCloakUpdate();
+    PacketCloakUpdate(Ship& ship);
+    bool validate(sf::Packet& sfPacket) {
+        return (sfPacket >> PacketType >> data >> cloakTimer >> cloakSystemOnline >> cloakActive >> justTurnedOn >> justTurnedOff);
+    }
+    bool build(sf::Packet& sfPacket) {
+        return (sfPacket << PacketType << data << cloakTimer << cloakSystemOnline << cloakActive << justTurnedOn << justTurnedOff);
     }
     void print() {}
 };
