@@ -23,16 +23,12 @@
 using namespace Engine;
 using namespace std;
 
-
-
 struct GameCameraShipSelectorLogicFunctor final {
     void operator()(ComponentLogic2& _component, const double& dt) const {
         GameCamera& camera = *static_cast<GameCamera*>(_component.getUserPointer());
         auto& core = *static_cast<Core*>(_component.getUserPointer1());
         ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(_component.getUserPointer2());
         if (core.gameState() == GameState::Host_Server_Lobby_And_Ship || core.gameState() == GameState::Join_Server_Server_Lobby) {
-
-
             auto entity = camera.entity();
             EntityDataRequest dataRequest(entity);
             auto& thisCamera = *entity.getComponent<ComponentCamera>(dataRequest);
@@ -67,10 +63,6 @@ struct GameCameraShipSelectorLogicFunctor final {
         }
     }
 };
-
-
-
-
 
 ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& scene, Camera& camera, const Font& font, const unsigned int& x, const unsigned int& y):m_Core(core),m_Font(const_cast<Font&>(font)) {
     m_Width = 578;

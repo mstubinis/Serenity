@@ -14,9 +14,11 @@
 #include <boost/lexical_cast.hpp>
 
 #include <core/engine/renderer/opengl/glsl/Common.h>
+#include <core/engine/renderer/opengl/glsl/Compression.h>
 #include <core/engine/renderer/opengl/glsl/VersionConversion.h>
 #include <core/engine/renderer/opengl/glsl/Materials.h>
 #include <core/engine/renderer/opengl/glsl/Lighting.h>
+#include <core/engine/renderer/opengl/glsl/SSAOCode.h>
 
 
 #include <regex>
@@ -117,6 +119,7 @@ void ShaderProgram::_convertCode(string& vCode, string& fCode) {
 }
 void ShaderProgram::_convertCode(string& _d, Shader& shader) {
     istringstream str(_d);
+    const auto& type = shader.type();
 
     //see if we actually have a version line
     string versionLine;
@@ -138,13 +141,15 @@ void ShaderProgram::_convertCode(string& _d, Shader& shader) {
     const uint versionNumber = boost::lexical_cast<uint>(regex_replace(versionLine, regex("([^0-9])"), ""));
 
     //common code
-    opengl::glsl::Materials::convert(_d, versionNumber, shader.type());
-    opengl::glsl::Lighting::convert(_d, versionNumber, shader.type());
+    opengl::glsl::Materials::convert(_d, versionNumber, type);
+    opengl::glsl::Lighting::convert(_d, versionNumber, type);
+    opengl::glsl::SSAOCode::convert(_d, versionNumber, type);
+    opengl::glsl::Compression::convert(_d, versionNumber);
     opengl::glsl::Common::convert(_d, versionNumber);
 
 
     //check for log depth - vertex
-    if (ShaderHelper::sfind(_d, "USE_LOG_DEPTH_VERTEX") && !ShaderHelper::sfind(_d, "//USE_LOG_DEPTH_VERTEX") && shader.type() == ShaderType::Vertex) {
+    if (ShaderHelper::sfind(_d, "USE_LOG_DEPTH_VERTEX") && !ShaderHelper::sfind(_d, "//USE_LOG_DEPTH_VERTEX") && type == ShaderType::Vertex) {
         boost::replace_all(_d, "USE_LOG_DEPTH_VERTEX", "");
         #ifndef ENGINE_FORCE_NO_LOG_DEPTH
             string log_vertex_code = "\n"
@@ -184,7 +189,7 @@ void ShaderProgram::_convertCode(string& _d, Shader& shader) {
     }
 
     //check for log depth - fragment
-    if (ShaderHelper::sfind(_d, "USE_LOG_DEPTH_FRAGMENT") && !ShaderHelper::sfind(_d, "//USE_LOG_DEPTH_FRAGMENT") && shader.type() == ShaderType::Fragment) {
+    if (ShaderHelper::sfind(_d, "USE_LOG_DEPTH_FRAGMENT") && !ShaderHelper::sfind(_d, "//USE_LOG_DEPTH_FRAGMENT") && type == ShaderType::Fragment) {
         boost::replace_all(_d, "USE_LOG_DEPTH_FRAGMENT", "");
         #ifndef ENGINE_FORCE_NO_LOG_DEPTH
             string log_frag_code = "\n"
@@ -209,7 +214,7 @@ void ShaderProgram::_convertCode(string& _d, Shader& shader) {
     }else{
         if (ShaderHelper::sfind(_d, "GetWorldPosition(") || ShaderHelper::sfind(_d, "GetViewPosition(")) {
             if (!ShaderHelper::sfind(_d, "vec3 GetWorldPosition(")) {
-                if (ShaderHelper::sfind(_d, "USE_LOG_DEPTH_FRAG_WORLD_POSITION") && !ShaderHelper::sfind(_d, "//USE_LOG_DEPTH_FRAG_WORLD_POSITION") && shader.type() == ShaderType::Fragment) {
+                if (ShaderHelper::sfind(_d, "USE_LOG_DEPTH_FRAG_WORLD_POSITION") && !ShaderHelper::sfind(_d, "//USE_LOG_DEPTH_FRAG_WORLD_POSITION") && type == ShaderType::Fragment) {
                     //log
                     boost::replace_all(_d, "USE_LOG_DEPTH_FRAG_WORLD_POSITION", "");
                     #ifndef ENGINE_FORCE_NO_LOG_DEPTH
@@ -227,7 +232,7 @@ void ShaderProgram::_convertCode(string& _d, Shader& shader) {
             }
         }
     }
-    opengl::glsl::VersionConversion::convert(_d, versionNumber, shader.type());
+    opengl::glsl::VersionConversion::convert(_d, versionNumber, type);
 }
 void ShaderProgram::_load_CPU() {
     _unload_CPU();

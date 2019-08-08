@@ -2,6 +2,8 @@
 #ifndef ENGINE_RENDERER_POSTPROCESS_SSAO_H_INCLUDE_GUARD
 #define ENGINE_RENDERER_POSTPROCESS_SSAO_H_INCLUDE_GUARD
 
+#define SSAO_MAX_KERNEL_SIZE 16
+#define SSAO_NORMALMAP_SIZE 16
 
 class  Camera;
 class  ShaderProgram;
@@ -14,9 +16,6 @@ namespace epriv {
     class  GBuffer;
     class  SSAO final {
         public:
-            static const int SSAO_KERNEL_COUNT   = 32;
-            static const int SSAO_NORMALMAP_SIZE = 16;
-
             bool           m_ssao;
             bool           m_ssao_do_blur;
             unsigned int   m_ssao_samples;
@@ -28,7 +27,7 @@ namespace epriv {
             float          m_ssao_intensity;
             float          m_ssao_bias;
             float          m_ssao_radius;
-            glm::vec3      m_ssao_Kernels[SSAO_KERNEL_COUNT];
+            //glm::vec3      m_ssao_Kernels[SSAO_MAX_KERNEL_SIZE];
             
             SSAO();
             ~SSAO();

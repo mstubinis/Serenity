@@ -180,7 +180,7 @@ void Mesh::finalize_vertex_data(Engine::epriv::MeshImportedData& data) {
         vertexData.setData(2, normals[0]);
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
-        vertexData.setIndices(data.indices);
+        vertexData.setIndices(data.indices, false, false, true);
         #pragma endregion
     }else{
         #pragma region Some Threshold
@@ -221,7 +221,7 @@ void Mesh::finalize_vertex_data(Engine::epriv::MeshImportedData& data) {
         vertexData.setData(2, normals[0]);
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
-        vertexData.setIndices(_indices);
+        vertexData.setIndices(_indices, false, false, true);
         #pragma endregion
     }
     if (m_Skeleton) {
@@ -483,8 +483,6 @@ void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat
     auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
     const auto& indices = vertexDataStructure.indices;
     auto& triangles = vertexDataStructure.triangles;
-    vector<ushort> newIndices;
-    newIndices.reserve(indices.size());
 
     const glm::vec3& camPos = camera.getPosition();
 
@@ -501,11 +499,14 @@ void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat
         return glm::distance2(camPos, model1Pos) < glm::distance2(camPos, model2Pos);
     };
     std::sort( triangles.begin(), triangles.end(), sorter );
+
+    vector<ushort> newIndices;
+    newIndices.reserve(indices.size());
     for (uint i = 0; i < triangles.size(); ++i) {
-        auto& triang = triangles[i];
-        newIndices.push_back(triang.index1);
-        newIndices.push_back(triang.index2);
-        newIndices.push_back(triang.index3);
+        auto& triangle = triangles[i];
+        newIndices.push_back(triangle.index1);
+        newIndices.push_back(triangle.index2);
+        newIndices.push_back(triangle.index3);
     }
-    Mesh::modifyIndices(newIndices, MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
+    Mesh::modifyIndices(newIndices);
 }

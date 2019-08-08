@@ -59,7 +59,7 @@ void VertexData::unbind() {
     }
 }
 
-void VertexData::setIndices(vector<ushort>& _data, const bool addToGPU, const bool orphan) {
+void VertexData::setIndices(vector<ushort>& _data, const bool addToGPU, const bool orphan, const bool reCalcTriangles) {
     if (buffers.size() == 1)
         buffers.push_back(std::make_unique<ElementBufferObject>());
     auto& _buffer = *buffers[1];
@@ -70,28 +70,30 @@ void VertexData::setIndices(vector<ushort>& _data, const bool addToGPU, const bo
             indices.emplace_back(indice);
         }
     }
-    auto& positions = getData<glm::vec3>(0);
-    if (positions.size() >= 0) {
-        triangles.clear();
-        triangles.reserve(_data.size() / 3);
-        uint j = 0;
-        Engine::epriv::Triangle tri;
-        for (uint i = 0; i < indices.size(); ++i) {
-            ++j;
-            auto& index = indices[i];
-            if (j == 1) {
-                tri.position1 = positions[index];
-                tri.index1 = index;
-            }else if (j == 2) {
-                tri.position2 = positions[index];
-                tri.index2 = index;
-            }else if (j == 3) {
-                tri.position3 = positions[index];
-                tri.index3 = index;
-                tri.midpoint = tri.position1 + tri.position2 + tri.position3;
-                tri.midpoint /= 3.0f;
-                triangles.push_back(tri);
-                j = 0;
+    if (reCalcTriangles) {
+        auto& positions = getData<glm::vec3>(0);
+        if (positions.size() >= 0) {
+            triangles.clear();
+            triangles.reserve(_data.size() / 3);
+            uint j = 0;
+            Engine::epriv::Triangle tri;
+            for (uint i = 0; i < indices.size(); ++i) {
+                ++j;
+                auto& index = indices[i];
+                if (j == 1) {
+                    tri.position1 = positions[index];
+                    tri.index1 = index;
+                }else if (j == 2) {
+                    tri.position2 = positions[index];
+                    tri.index2 = index;
+                }else if (j == 3) {
+                    tri.position3 = positions[index];
+                    tri.index3 = index;
+                    tri.midpoint = tri.position1 + tri.position2 + tri.position3;
+                    tri.midpoint /= 3.0f;
+                    triangles.push_back(tri);
+                    j = 0;
+                }
             }
         }
     }

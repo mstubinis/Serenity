@@ -25,6 +25,7 @@ struct ResourceManifest{
     static Handle ExcelsiorMesh;
     static Handle ConstitutionMesh;
     static Handle LeviathanMesh;
+    static Handle ShrikeMesh;
 
 	static Handle NovaMaterial;
     static Handle MirandaMaterial;
@@ -33,6 +34,7 @@ struct ResourceManifest{
     static Handle ExcelsiorMaterial;
     static Handle ConstitutionMaterial;
     static Handle DefiantSharkMaterial;
+    static Handle ShrikeMaterial;
 
 
     static Handle StarMaterial;
@@ -50,7 +52,7 @@ struct ResourceManifest{
 
     static std::string BasePath;
 
-    static std::unordered_map<std::string, boost::tuple<Handle, Handle>> Ships;
+    static std::unordered_map<std::string, boost::tuple<Handle, Handle, float, float, float>> Ships;
 
     static void init();
 };

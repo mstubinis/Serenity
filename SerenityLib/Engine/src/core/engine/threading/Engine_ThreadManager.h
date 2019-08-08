@@ -37,9 +37,14 @@ namespace threading{
 
     //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
     template<typename T> std::vector<std::vector<T>> splitVector(const std::vector<T>& v, uint n = 0) {
-        if (n == 0) n = Core::m_Engine->m_ThreadManager.cores();
+        if (n == 0)
+            n = Core::m_Engine->m_ThreadManager.cores();
         const uint& vs = v.size();
-        std::vector<std::vector<T>> outVec;  uint length = vs / n;  uint remain = vs % n;  uint begin = 0;  uint end = 0;
+        std::vector<std::vector<T>> outVec;
+        uint length = vs / n;
+        uint remain = vs % n;
+        uint begin = 0;
+        uint end = 0;
         for (uint i = 0; i < std::min(n, vs); ++i) {
             end += (remain > 0) ? (length + !!(remain--)) : length;
             outVec.emplace_back(v.begin() + begin, v.begin() + end);
@@ -49,9 +54,14 @@ namespace threading{
     }
     //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
     template<typename T> std::vector<std::vector<uint>> splitVectorIndices(const std::vector<T>& v, uint n = 0) {
-        if (n == 0) n = Core::m_Engine->m_ThreadManager.cores();
+        if (n == 0) 
+            n = Core::m_Engine->m_ThreadManager.cores();
         const uint& vs = v.size();
-        std::vector<std::vector<uint>> outVec;  uint length = vs / n;  uint remain = vs % n;  uint begin = 0;  uint end = 0;
+        std::vector<std::vector<uint>> outVec;
+        uint length = vs / n;
+        uint remain = vs % n;
+        uint begin = 0;
+        uint end = 0;
         uint splitAmount = std::min(n, vs);
         for (uint i = 0; i < splitAmount; ++i) {
             outVec.emplace_back();
@@ -85,11 +95,11 @@ namespace threading{
         auto job = boost::make_shared<boost_packed_task>(boost::bind(_job, boost::ref(std::forward<ARGS>(_args))...));
         finalizeJob(boost::move(job), boost::move(boost::bind(_then)));
     }
-    template<typename Job,typename Then, typename... ARGS> void addJobWithPostCallback(Job& _job, Then& _then,ARGS&&... _args){
+    template<typename Job, typename Then, typename... ARGS> void addJobWithPostCallback(Job& _job, Then& _then,ARGS&&... _args){
         auto job = boost::make_shared<boost_packed_task>(boost::bind(_job, std::forward<ARGS>(_args)...));
         finalizeJob(boost::move(job), boost::move(boost::bind(_then)));
     }
-    template<typename Job,typename Then> void addJobWithPostCallback(Job& _job, Then& _then){
+    template<typename Job, typename Then> void addJobWithPostCallback(Job& _job, Then& _then){
         auto job = boost::make_shared<boost_packed_task>(boost::bind(_job));
         finalizeJob(boost::move(job), boost::move(boost::bind(_then)));
     }

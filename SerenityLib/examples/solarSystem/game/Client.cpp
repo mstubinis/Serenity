@@ -361,10 +361,15 @@ void Client::onReceive() {
                     hud.m_ServerLobbyShipSelectorWindow->clear();
                     auto ships = map->allowedShips();
                     for (auto& ship : ships) {
+                        auto& handles = ResourceManifest::Ships.at(ship);
+                        auto& r = handles.get<2>();
+                        auto& g = handles.get<3>();
+                        auto& b = handles.get<4>();
+
                         Button* shipbutton = new Button(*hud.m_Font, 0, 0, 100, 40);
                         shipbutton->setText(ship);
                         shipbutton->setColor(0.5f, 0.5f, 0.5f, 0.0f);
-                        shipbutton->setTextColor(1, 1, 1, 1);
+                        shipbutton->setTextColor(r, g, b, 1.0f);
                         shipbutton->setAlignment(Alignment::TopLeft);
                         shipbutton->setWidth(600);
                         shipbutton->setTextAlignment(TextAlignment::Left);

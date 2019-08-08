@@ -21,7 +21,7 @@ MeshRequest::MeshRequest() {
 MeshRequest::MeshRequest(const string& _filenameOrData, float _threshold):MeshRequest() {
     fileOrData = _filenameOrData;
     threshold = _threshold;
-    if (fileOrData != "") {
+    if (!fileOrData.empty()) {
         fileExtension = boost::filesystem::extension(fileOrData);
         if (boost::filesystem::exists(fileOrData)) {
             fileExists = true;
@@ -93,7 +93,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         MeshLoader::LoadProcessNodeData(meshRequest.parts, scene, root, meshRequest.map, count);
     }else{
         VertexData* vertexData = MeshLoader::LoadFrom_OBJCC(meshRequest.fileOrData);
-        Mesh& mesh = *(meshRequest.parts[0].mesh);
+        Mesh& mesh = *meshRequest.parts[0].mesh;
         //cpu
         mesh.m_VertexData = vertexData;
         mesh.m_threshold = meshRequest.threshold;

@@ -14,8 +14,6 @@ namespace epriv{
             static std::string bullet_physcis_frag;
 
             static std::string conditional_functions;
-            static std::string float_into_2_floats;
-            static std::string normals_octahedron_compression_functions;
 
             static std::string fullscreen_quad_vertex;
             static std::string vertex_basic;

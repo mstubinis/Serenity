@@ -23,8 +23,6 @@ GLSL Version    OpenGL Version
 
 #pragma region Declarations
 string epriv::EShaders::conditional_functions;
-string epriv::EShaders::float_into_2_floats;
-string epriv::EShaders::normals_octahedron_compression_functions;
 string epriv::EShaders::bullet_physics_vert;
 string epriv::EShaders::bullet_physcis_frag;
 string epriv::EShaders::fullscreen_quad_vertex;
@@ -130,76 +128,6 @@ epriv::EShaders::conditional_functions =
     "int inot(int a) { return 1 - a; }\n"
     "\n";
 
-epriv::EShaders::float_into_2_floats =
-    //designed to work with uniform floats coming from the cpu
-    "vec3 Unpack3FloatsInto1FloatUnsigned(float v){\n" 
-    "    vec3 ret;\n"
-    "    ret.r = mod(v,          1.0);\n"
-    "    ret.g = mod(v * 256.0,  1.0);\n"
-    "    ret.b = mod(v * 65536.0,1.0);\n"
-    "    return ret;\n"
-    "}\n"
-    "vec3 Unpack3FloatsInto1Float(float v){\n"
-    "    vec3 ret;\n"
-    "    ret.r = mod(v,          1.0);\n"
-    "    ret.g = mod(v * 256.0,  1.0);\n"
-    "    ret.b = mod(v * 65536.0,1.0);\n"
-    "    ret = ret * 2.0 - 1.0;\n"
-    "    return ret;\n"
-    "}\n"
-    //designed to work with gbuffer 16-bit floating point buffers
-    "float Pack2FloatIntoFloat16(float x,float y){\n"
-    "    x = clamp(x,0.0001,0.9999);\n"
-    "    y = clamp(y,0.0001,0.9999);\n"
-    "    float _x = (x + 1.0) * 0.5;\n"
-    "    float _y = (y + 1.0) * 0.5;\n"
-    "    return floor(_x * 100.0) + _y;\n"
-    "}\n"
-    "vec2 UnpackFloat16Into2Floats(float i){\n"
-    "    vec2 res;\n"
-    "    res.y = i - floor(i);\n"
-    "    res.x = (i - res.y) * 0.01;\n"
-    "    res.x = (res.x - 0.5) * 2.0;\n"
-    "    res.y = (res.y - 0.5) * 2.0;\n"
-    "    return res;\n"
-    "}\n"
-    //currently unused
-    /*
-    "float Pack2FloatIntoFloat32(float x,float y){\n"
-    "    x = clamp(x,0.0001,0.9999);\n"
-    "    y = clamp(y,0.0001,0.9999);\n"
-    "    float _x = (x + 1.0) * 0.5;\n"
-    "    float _y = (y + 1.0) * 0.5;\n"
-    "    return floor(_x * 1000.0) + _y;\n"
-    "}\n"
-    "vec2 UnpackFloat32Into2Floats(float i){\n"
-    "    vec2 res;\n"
-    "    res.y = i - floor(i);\n"
-    "    res.x = (i - res.y) * 0.001;\n"
-    "    res.x = (res.x - 0.5) * 2.0;\n"
-    "    res.y = (res.y - 0.5) * 2.0;\n"
-    "    return res;\n"
-    "}\n"
-    */
-    "\n";
-epriv::EShaders::normals_octahedron_compression_functions = 
-    "vec2 SignNotZero(vec2 v) {\n"
-    "    return vec2(v.x >= 0 ? 1.0 : -1.0, v.y >= 0 ? 1.0 : -1.0);\n"
-    "}\n"
-    "vec2 EncodeOctahedron(vec3 n) {\n"
-    "    if(   all(greaterThan(n,ConstantAlmostOneVec3))   )\n"
-    "        return ConstantOneVec2;\n" 
-    "	 n.xy /= dot(abs(n), ConstantOneVec3);\n"
-    "	 return mix(n.xy, (1.0 - abs(n.yx)) * SignNotZero(n.xy), step(n.z, 0.0));\n"
-    "}\n"
-    "vec3 DecodeOctahedron(vec2 n) {\n"
-    "    if(    all(greaterThan(n,ConstantAlmostOneVec2))    )\n"
-    "        return ConstantOneVec3;\n"
-    "	 vec3 v = vec3(n.xy, 1.0 - abs(n.x) - abs(n.y));\n"
-    "	 if (v.z < 0) v.xy = (1.0 - abs(v.yx)) * SignNotZero(v.xy);\n"
-    "	 return normalize(v);\n"
-    "}\n";
-
 #pragma endregion
 
 #pragma region LightingVertex
@@ -292,7 +220,6 @@ epriv::EShaders::vertex_basic =
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
     "\n";
-epriv::EShaders::vertex_basic += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::vertex_basic +=
 "void main(){\n"
     "    mat4 ModelMatrix = Model;\n"
@@ -336,9 +263,7 @@ epriv::EShaders::vertex_2DAPI =
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
-    "varying vec2 UV;\n";
-epriv::EShaders::vertex_2DAPI += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::vertex_2DAPI +=
+    "varying vec2 UV;\n"
     "void main(){\n"
     "    UV = uv;\n"
     "    gl_Position = VP * Model * vec4(position, 1.0);\n"
@@ -594,7 +519,7 @@ epriv::EShaders::fxaa_frag =
 
 #pragma region LightingStencilPass
 
-epriv::EShaders::stencil_passover = epriv::EShaders::normals_octahedron_compression_functions +
+epriv::EShaders::stencil_passover =
     "\n"
     "const vec3 comparison = vec3(1.0,1.0,1.0);\n"
     "uniform sampler2D gNormalMap;\n"
@@ -1272,10 +1197,7 @@ epriv::EShaders::forward_frag =
     "uniform vec4 ScreenData;\n" //x = GIContribution, y = gamma, z = winSize.x, w = winSize.y
     "\n"
     "const float MAX_REFLECTION_LOD = 5.0;\n"
-    "\n";
-epriv::EShaders::forward_frag += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::forward_frag += epriv::EShaders::normals_octahedron_compression_functions;
-epriv::EShaders::forward_frag += 
+    "\n"
     "vec3 SchlickFrenselRoughness(float _theta, vec3 _F0, float _roughness){\n"
     "    vec3 ret = _F0 + (max(vec3(1.0 - _roughness),_F0) - _F0) * pow(1.0 - _theta,5.0);\n"
     "    return ret;\n"
@@ -1321,8 +1243,7 @@ epriv::EShaders::forward_frag +=
     "        lightTotal += lightCalculation;\n"
     "    }\n"
     "\n"
-    "\n"
-    "\n"
+    //GI here
     "    vec3 MaterialAlbedoTexture = inData.diffuse.rgb;\n"
     "    vec3 ViewDir = normalize(CameraPosition - WorldPosition);\n"
     "    vec3 R = reflect(-ViewDir, inData.normals);\n"
@@ -1348,9 +1269,6 @@ epriv::EShaders::forward_frag +=
     "    vec3 TotalIrradiance = (GIDiffuse + GISpecular) * ao;\n"
     "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
     "    lightTotal += TotalIrradiance * GIContribution.z * MaterialBasePropertiesTwo.x;\n"
-    "\n"
-    "\n"
-    "\n"
     "\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
     "    inData.diffuse.rgb = lightTotal;\n"
@@ -1415,10 +1333,7 @@ epriv::EShaders::deferred_frag =
     "flat varying vec3 CamPosition;\n"
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
-    "\n";
-epriv::EShaders::deferred_frag += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::deferred_frag += epriv::EShaders::normals_octahedron_compression_functions;
-epriv::EShaders::deferred_frag +=
+    "\n"
     "void main(){\n"
     "    InData inData;\n"
     "    inData.uv = UV;\n"
@@ -1528,42 +1443,16 @@ epriv::EShaders::ssao_frag =
     "uniform vec4  SSAOInfo;\n"  //   x = radius     y = intensity    z = bias        w = scale
     "uniform ivec4 SSAOInfoA;\n"//    x = UNUSED     y = UNUSED       z = Samples     w = NoiseTextureSize
     "\n"
-    "const vec2 poisson[16] = vec2[](vec2(1.0, 0.0), vec2(-1.0, 0.0),vec2(0.0, 1.0),vec2(0.0, -1.0),\n"
-    "                               vec2(-0.707, 0.707), vec2(0.707, -0.707),vec2(-0.707, -0.707),vec2(0.707, 0.707),\n"
-    "                               vec2(-0.375, 0.927), vec2(0.375, -0.927), vec2(-0.375, -0.927), vec2(0.375, 0.927),\n"
-    "                               vec2(-0.927, 0.375), vec2(0.927, -0.375), vec2(-0.927, -0.375), vec2(0.927, 0.375));\n"
-    "\n"
-    "varying vec2 texcoords;\n";
-epriv::EShaders::ssao_frag += epriv::EShaders::normals_octahedron_compression_functions;
-epriv::EShaders::ssao_frag +=
-    "float occlude(vec2 offsetUV, vec3 origin, vec3 normal){\n"
-    "    vec3 PositionOffset = GetViewPosition(offsetUV,CameraNear,CameraFar) - origin;\n"
-    "    float Length = length(PositionOffset);\n"
-    "    vec3 VectorNormalized = PositionOffset / Length;\n"
-    "    float Dist = Length * SSAOInfo.w;\n"
-    "    float attenuation = 1.0 / (1.0 + Dist);\n"
-    "    float angleMath = max(0.0, dot(normal,VectorNormalized) - SSAOInfo.z);\n"
-    "    return angleMath * attenuation * SSAOInfo.y;\n"
-    "}\n"
+    "varying vec2 texcoords;\n"
     "void main(){\n"
-    "    vec3 Pos = GetViewPosition(texcoords,CameraNear,CameraFar);\n"
+    "    vec3 Pos = GetViewPosition(texcoords, CameraNear, CameraFar);\n"
     "    vec3 Normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
-    "    Normal = GetViewNormalsFromWorld(Normal,CameraView);\n"
+    "    Normal = GetViewNormalsFromWorld(Normal, CameraView);\n"
     "    vec2 RandVector = normalize(texture2D(gRandomMap, ScreenSize * texcoords / SSAOInfoA.w).xy);\n"
-    //"    float CamZ = distance(Pos,CameraPosition);\n"
+    //"    float CamZ = distance(Pos, CameraPosition);\n"
     "    float Radius = SSAOInfo.x / max(Pos.z,100.0);\n"
     //"    float Radius = SSAOInfo.x / Pos.z;\n"
-    "    float o = 0.0;\n"
-    "    for (int i = 0; i < SSAOInfoA.z; ++i) {\n"
-    "       vec2 coord1 = reflect(poisson[i].xy * vec2(SSAOInfoA.w), RandVector) * Radius;\n"
-    "       vec2 coord2 = vec2(coord1.x * 0.707 - coord1.y * 0.707, coord1.x * 0.707 + coord1.y * 0.707);\n"
-    "       o += occlude(texcoords + (coord1 * 0.25), Pos, Normal);\n"
-    "       o += occlude(texcoords + (coord2 * 0.50), Pos, Normal);\n"
-    "       o += occlude(texcoords + (coord1 * 0.75), Pos, Normal);\n"
-    "       o += occlude(texcoords + coord2,          Pos, Normal);\n"
-    "    }\n"
-    "    o /= SSAOInfoA.z * 4.0;\n"
-    "    gl_FragColor.a = o;\n"
+    "    gl_FragColor.a = SSAOExecute(texcoords, SSAOInfoA.z, SSAOInfoA.w, RandVector, Radius, Pos, Normal, SSAOInfo.y, SSAOInfo.z, SSAOInfo.w);\n"
     "}";
 #pragma endregion
 
@@ -1574,9 +1463,7 @@ epriv::EShaders::bloom_frag =
     "\n"
     "uniform vec4 Data;\n" //x = scale y = threshold z = exposure w = UNUSED
     "varying vec2 texcoords;\n"
-    "\n";
-epriv::EShaders::bloom_frag += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::bloom_frag +=
+    "\n"
     "void main(){\n"
     "    vec3 sceneColor = texture2D(SceneTexture,texcoords).rgb;\n"
     //                                               exposure
@@ -1597,9 +1484,7 @@ epriv::EShaders::hdr_frag =
     "uniform vec4 HDRInfo;\n"// exposure | HasHDR | godRays_Factor | HDRAlgorithm
     "uniform ivec2 Has;\n"   //HasGodRays | HasLighting
     "\n"
-    "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){ return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f); }\n";
-epriv::EShaders::hdr_frag += epriv::EShaders::normals_octahedron_compression_functions;
-epriv::EShaders::hdr_frag +=
+    "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){ return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f); }\n"
     "void main(){\n"
     "    vec3 diffuse = texture2D(gDiffuseMap,texcoords).rgb;\n"
     "    vec3 lighting = texture2D(lightingBuffer, texcoords).rgb;\n"
@@ -1680,8 +1565,7 @@ epriv::EShaders::ssao_blur_frag =
 #pragma endregion
 
 #pragma region GodRays
-epriv::EShaders::godRays_frag = epriv::EShaders::float_into_2_floats;
-epriv::EShaders::godRays_frag +=
+epriv::EShaders::godRays_frag = 
     "uniform vec4 RaysInfo;\n"//exposure | decay | density | weight
     "\n"
     "uniform vec2 lightPositionOnScreen;\n"
@@ -1737,10 +1621,6 @@ epriv::EShaders::final_frag =
     "uniform float FogDistBlend;\n"
     "\n"
     "varying vec2 texcoords;\n"
-    "\n";
-epriv::EShaders::final_frag += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::final_frag += epriv::EShaders::normals_octahedron_compression_functions;
-epriv::EShaders::final_frag +=
     "\n"
     "void main(){\n"
     "    vec4 scene = texture2D(SceneTexture,texcoords);\n"
@@ -1817,10 +1697,7 @@ epriv::EShaders::lighting_frag =
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "\n"
     "varying vec2 texcoords;\n"
-    "\n";
-epriv::EShaders::lighting_frag += epriv::EShaders::normals_octahedron_compression_functions;
-epriv::EShaders::lighting_frag += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::lighting_frag +=
+    "\n"
     "void main(){\n"                      //windowX      //windowY
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z, ScreenData.w);\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
@@ -1874,10 +1751,7 @@ epriv::EShaders::lighting_frag_optimized =
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "\n"
     "varying vec2 texcoords;\n"
-    "\n";
-epriv::EShaders::lighting_frag_optimized += epriv::EShaders::normals_octahedron_compression_functions;
-epriv::EShaders::lighting_frag_optimized += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::lighting_frag_optimized +=
+    "\n"
     "vec3 CalcLightInternal(in Light currentLight, vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){\n"
     "    float Glow = texture2D(gMiscMap,uv).r;\n"
     "    float SpecularStrength = texture2D(gMiscMap,uv).g;\n"
@@ -1990,10 +1864,7 @@ epriv::EShaders::lighting_frag_gi =
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "\n"
     "varying vec2 texcoords;\n"
-    "\n";
-epriv::EShaders::lighting_frag_gi += epriv::EShaders::normals_octahedron_compression_functions;
-epriv::EShaders::lighting_frag_gi += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::lighting_frag_gi +=
+    "\n"
     "vec3 SchlickFrenselRoughness(float theta, vec3 _F0,float roughness){\n"
     "    vec3 ret = _F0 + (max(vec3(1.0 - roughness),_F0) - _F0) * pow(1.0 - theta,5.0);\n"
     "    return ret;\n"

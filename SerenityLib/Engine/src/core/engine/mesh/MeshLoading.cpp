@@ -423,10 +423,10 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
 
     uint32_t sizes[3];
     for (uint i = 0; i < 3; ++i) {
-        sizes[i] = (uint32_t)_data[blockStart] << 24;
-        sizes[i] |= (uint32_t)_data[blockStart + 1] << 16;
-        sizes[i] |= (uint32_t)_data[blockStart + 2] << 8;
-        sizes[i] |= (uint32_t)_data[blockStart + 3];
+        sizes[i] = static_cast<uint32_t>(_data[blockStart] << 24);
+        sizes[i] |= static_cast<uint32_t>(_data[blockStart + 1] << 16);
+        sizes[i] |= static_cast<uint32_t>(_data[blockStart + 2] << 8);
+        sizes[i] |= static_cast<uint32_t>(_data[blockStart + 3]);
         blockStart += 4;
     }
     VertexData* returnData;
@@ -450,8 +450,8 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         float    outPos[3];
         uint16_t inPos[3];
         for (uint j = 0; j < 3; ++j) {
-            inPos[j]    = (uint32_t)_data[blockStart] << 8;
-            inPos[j]   |= (uint32_t)_data[blockStart + 1];
+            inPos[j]    = static_cast<uint32_t>(_data[blockStart] << 8);
+            inPos[j]   |= static_cast<uint32_t>(_data[blockStart + 1]);
             blockStart += 2;
         }
         Math::Float32From16(outPos, inPos, 3);
@@ -460,8 +460,8 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         float    outUV[2];
         uint16_t inUV[2];
         for (uint j = 0; j < 2; ++j) {
-            inUV[j]     = (uint32_t)_data[blockStart] << 8;
-            inUV[j]    |= (uint32_t)_data[blockStart + 1];
+            inUV[j]     = static_cast<uint32_t>(_data[blockStart] << 8);
+            inUV[j]    |= static_cast<uint32_t>(_data[blockStart + 1]);
             blockStart += 2;
         }
         Math::Float32From16(outUV, inUV, 2);
@@ -469,10 +469,10 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         //normals (remember they are GLuints right now)
         uint32_t inn[3];
         for (uint j = 0; j < 3; ++j) {
-            inn[j]      = (uint32_t)_data[blockStart    ] << 24;
-            inn[j]     |= (uint32_t)_data[blockStart + 1] << 16;
-            inn[j]     |= (uint32_t)_data[blockStart + 2] << 8;
-            inn[j]     |= (uint32_t)_data[blockStart + 3];
+            inn[j]      = static_cast<uint32_t>(_data[blockStart    ] << 24);
+            inn[j]     |= static_cast<uint32_t>(_data[blockStart + 1] << 16);
+            inn[j]     |= static_cast<uint32_t>(_data[blockStart + 2] << 8);
+            inn[j]     |= static_cast<uint32_t>(_data[blockStart + 3]);
             blockStart += 4;
         }
         temp_norm.emplace_back(inn[0]);
@@ -483,8 +483,8 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
             float    outBI[4];
             uint16_t inbI[4];
             for (uint k = 0; k < 4; ++k) {
-                inbI[k]     = (uint32_t)_data[blockStart] << 8;
-                inbI[k]    |= (uint32_t)_data[blockStart + 1];
+                inbI[k]     = static_cast<uint32_t>(_data[blockStart] << 8);
+                inbI[k]    |= static_cast<uint32_t>(_data[blockStart + 1]);
                 blockStart += 2;
             }
             Math::Float32From16(outBI, inbI, 4);
@@ -493,8 +493,8 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
             float    outBW[4];
             uint16_t inBW[4];
             for (uint k = 0; k < 4; ++k) {
-                inBW[k]     = (uint32_t)_data[blockStart] << 8;
-                inBW[k]    |= (uint32_t)_data[blockStart + 1];
+                inBW[k]     = static_cast<uint32_t>(_data[blockStart] << 8);
+                inBW[k]    |= static_cast<uint32_t>(_data[blockStart + 1]);
                 blockStart += 2;
             }
             Math::Float32From16(outBW, inBW, 4);
@@ -504,10 +504,10 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
     //indices
     for (uint i = 0; i < sizes[1]; ++i) {
         uint16_t      inindices;
-        inindices   = (uint32_t)_data[blockStart    ] << 8;
-        inindices  |= (uint32_t)_data[blockStart + 1];
+        inindices   = static_cast<uint16_t>(_data[blockStart    ] << 8);
+        inindices  |= static_cast<uint16_t>(_data[blockStart + 1]);
         blockStart += 2;
-        data.indices.push_back((uint16_t)inindices);
+        data.indices.push_back(static_cast<uint16_t>(inindices));
     }
     data.setData(0, temp_pos);
     data.setData(1, temp_uvs);
@@ -518,7 +518,7 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         data.setData(5, temp_bID);
         data.setData(6, temp_bW);
     }
-    data.setIndices(data.indices);
+    data.setIndices(data.indices, false, false, true);
     return returnData;
 }
 

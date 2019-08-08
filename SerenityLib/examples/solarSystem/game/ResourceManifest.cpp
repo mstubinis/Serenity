@@ -23,6 +23,7 @@ Handle ResourceManifest::IntrepidMesh;
 Handle ResourceManifest::ExcelsiorMesh;
 Handle ResourceManifest::ConstitutionMesh;
 Handle ResourceManifest::LeviathanMesh;
+Handle ResourceManifest::ShrikeMesh;
 
 Handle ResourceManifest::NovaMaterial;
 Handle ResourceManifest::MirandaMaterial;
@@ -31,6 +32,7 @@ Handle ResourceManifest::IntrepidMaterial;
 Handle ResourceManifest::ExcelsiorMaterial;
 Handle ResourceManifest::ConstitutionMaterial;
 Handle ResourceManifest::DefiantSharkMaterial;
+Handle ResourceManifest::ShrikeMaterial;
 
 
 Handle ResourceManifest::StarMaterial;
@@ -45,7 +47,7 @@ Handle ResourceManifest::MenuMusic;
 Handle ResourceManifest::SoundCloakingActivated;
 Handle ResourceManifest::SoundCloakingDeactivated;
 
-std::unordered_map<std::string, boost::tuple<Handle, Handle>> ResourceManifest::Ships;
+std::unordered_map<std::string, boost::tuple<Handle, Handle, float, float, float>> ResourceManifest::Ships;
 
 std::string ResourceManifest::BasePath;
 
@@ -80,6 +82,7 @@ void ResourceManifest::init(){
     ExcelsiorMesh = Resources::loadMeshAsync(BasePath + "data/Models/excelsior.objcc").at(0);
     ConstitutionMesh = Resources::loadMeshAsync(BasePath + "data/Models/constitution.objcc").at(0);
     //LeviathanMesh = Resources::loadMeshAsync(BasePath + "data/Models/leviathan.objcc").at(0);
+    ShrikeMesh = Resources::loadMeshAsync(BasePath + "data/Models/shrike.objcc").at(0);
 
 
     Engine::epriv::threading::waitForAll();
@@ -110,7 +113,7 @@ void ResourceManifest::init(){
     ExcelsiorMaterial = Resources::addMaterial("Excelsior", BasePath + "data/Textures/excelsior/excelsior.dds", BasePath + "data/Textures/excelsior/excelsior_Normal.dds", BasePath + "data/Textures/excelsior/excelsior_Glow.dds", BasePath + "data/Textures/excelsior/excelsior_Specular.dds");
     ConstitutionMaterial = Resources::addMaterial("Constitution", BasePath + "data/Textures/constitution/constitution.dds", BasePath + "data/Textures/constitution/constitution_Normal.dds", BasePath + "data/Textures/constitution/constitution_Glow.dds", BasePath + "data/Textures/constitution/constitution_Specular.dds");
     //DefiantSharkMaterial = Resources::addMaterial("DefiantShark", BasePath + "data/Textures/defiant/defiantShark.dds", BasePath + "data/Textures/defiant/defiant_Normal.dds", BasePath + "data/Textures/defiant/defiant_Glow.dds");
-
+    ShrikeMaterial = Resources::addMaterial("Shrike", BasePath + "data/Textures/shrike/shrike.dds", "", BasePath + "data/Textures/shrike/shrike_Glow.dds",  + "");
 
     StarMaterial = Resources::addMaterial("Star", BasePath + "data/Textures/Planets/Sun.dds");
     ((Material*)StarMaterial.get())->setShadeless(true);
@@ -139,9 +142,10 @@ void ResourceManifest::init(){
     SoundCloakingDeactivated = Resources::addSoundData(BasePath + "data/Sounds/effects/decloaking.ogg");
 
 
-    ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle>(DefiantMesh,      DefiantMaterial);
-    ResourceManifest::Ships["Nova"]         = boost::tuple<Handle, Handle>(NovaMesh,         NovaMaterial);
-    ResourceManifest::Ships["Excelsior"]    = boost::tuple<Handle, Handle>(ExcelsiorMesh,    ExcelsiorMaterial);
-    ResourceManifest::Ships["Miranda"]      = boost::tuple<Handle, Handle>(MirandaMesh,      MirandaMaterial);
-    ResourceManifest::Ships["Constitution"] = boost::tuple<Handle, Handle>(ConstitutionMesh, ConstitutionMaterial);
+    ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle, float, float, float>(DefiantMesh,      DefiantMaterial, 1, 1, 1);
+    ResourceManifest::Ships["Nova"]         = boost::tuple<Handle, Handle, float, float, float>(NovaMesh,         NovaMaterial, 1, 1, 1);
+    ResourceManifest::Ships["Excelsior"]    = boost::tuple<Handle, Handle, float, float, float>(ExcelsiorMesh,    ExcelsiorMaterial, 1, 1, 1);
+    ResourceManifest::Ships["Miranda"]      = boost::tuple<Handle, Handle, float, float, float>(MirandaMesh,      MirandaMaterial, 1, 1, 1);
+    ResourceManifest::Ships["Constitution"] = boost::tuple<Handle, Handle, float, float, float>(ConstitutionMesh, ConstitutionMaterial, 1, 1, 1);
+    ResourceManifest::Ships["Shrike"]       = boost::tuple<Handle, Handle, float, float, float>(ShrikeMesh,       ShrikeMaterial, 0.33f, 0.72f, 0.48f);
 }

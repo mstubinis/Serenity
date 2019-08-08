@@ -33,11 +33,12 @@ SSAO::~SSAO() {
 void SSAO::init() {
     uniform_real_distribution<float> rand(0.0f, 1.0f);
     default_random_engine gen;
-    for (uint i = 0; i < SSAO_KERNEL_COUNT; ++i) {
+    /*
+    for (uint i = 0; i < SSAO_MAX_KERNEL_SIZE; ++i) {
         glm::vec3 sample(rand(gen) * 2.0f - 1.0f, rand(gen) * 2.0f - 1.0f, rand(gen));
         sample = glm::normalize(sample);
         sample *= rand(gen);
-        float scale = static_cast<float>(i) / static_cast<float>(SSAO_KERNEL_COUNT);
+        float scale = static_cast<float>(i) / static_cast<float>(SSAO_MAX_KERNEL_SIZE);
         const float a = 0.1f;
         const float b = 1.0f;
         const float f = scale * scale;
@@ -45,6 +46,7 @@ void SSAO::init() {
         sample *= scale;
         m_ssao_Kernels[i] = sample;
     }
+    */
     vector<glm::vec3> ssaoNoise;
     ssaoNoise.reserve(SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE);
     for (uint i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i) {
@@ -150,5 +152,6 @@ const unsigned int Renderer::ssao::getSamples() {
     return SSAO::ssao.m_ssao_samples;
 }
 void Renderer::ssao::setSamples(const unsigned int s) {
-    SSAO::ssao.m_ssao_samples = glm::max((uint)0, s);
+    const auto samples = glm::max(0, static_cast<int>(s));
+    SSAO::ssao.m_ssao_samples = glm::clamp(samples, 0, SSAO_MAX_KERNEL_SIZE);
 }

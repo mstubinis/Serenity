@@ -59,7 +59,7 @@ struct VertexData final{
             }
         }
     }
-    void setIndices(std::vector<ushort>& _data, const bool addToGPU = false, const bool orphan = false);
+    void setIndices(std::vector<ushort>& _data, const bool addToGPU = false, const bool orphan = false, const bool reCalcTriangles = false);
 
     void finalize();
     void bind();

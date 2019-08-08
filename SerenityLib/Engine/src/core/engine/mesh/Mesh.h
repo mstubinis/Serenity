@@ -106,11 +106,14 @@ class Mesh final: public BindableResource, public EventObserver{
             auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
             bool uploadToGPU = false;
             bool orphan = false;
+            bool recalcTriangles = false;
             if (MeshModifyFlags & MeshModifyFlags::Orphan)
                 orphan = true;
             if (MeshModifyFlags & MeshModifyFlags::UploadToGPU)
                 uploadToGPU = true;
-            vertexDataStructure.setIndices(modifiedIndices, uploadToGPU, orphan);
+            if (MeshModifyFlags & MeshModifyFlags::RecalculateTriangles)
+                recalcTriangles = true;
+            vertexDataStructure.setIndices(modifiedIndices, uploadToGPU, orphan, recalcTriangles);
         }
 
         void sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix);
