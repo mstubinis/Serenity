@@ -258,16 +258,17 @@ void ComponentBody::alignTo(const glm::vec3& p_Direction, const float p_Speed) {
 }
 void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, const float p_Mass) {
     auto& physicsData = *data.p;
-    //SAFE_DELETE(physicsData.collision);
-    ComponentModel* modelComponent = owner.getComponent<ComponentModel>();
-    if (modelComponent) {
-        if (p_CollisionType == CollisionType::Compound) {
-            physicsData.collision = new Collision(*modelComponent, p_Mass);
+    if (!physicsData.collision) { //TODO: clean this up, its hacky and evil. its being used on the ComponentBody_EntityAddedToSceneFunction
+        ComponentModel* modelComponent = owner.getComponent<ComponentModel>();
+        if (modelComponent) {
+            if (p_CollisionType == CollisionType::Compound) {
+                physicsData.collision = new Collision(*modelComponent, p_Mass);
+            }else{
+                physicsData.collision = new Collision(p_CollisionType, modelComponent->getModel().mesh(), p_Mass);
+            }
         }else{
-            physicsData.collision = new Collision(p_CollisionType, modelComponent->getModel().mesh(), p_Mass);
+            physicsData.collision = new Collision(p_CollisionType, nullptr, p_Mass);
         }
-    }else{
-        physicsData.collision = new Collision(p_CollisionType, nullptr, p_Mass);
     }
     Collision& collision_ = *physicsData.collision;
     collision_.getShape()->setUserPointer(this);
@@ -350,28 +351,45 @@ void ComponentBody::scale(const float p_X, const float p_Y, const float p_Z) {
         const auto& newScale = btVector3(p_X, p_Y, p_Z);
         const auto& physicsData = *data.p;
         Collision& collision_ = *physicsData.collision;
-        if (collision_.getShape() && collision_.getType() == CollisionType::Compound) {
-            btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collision_.getShape());
-            if (compoundShapeCast) {
-                const int numChildren = compoundShapeCast->getNumChildShapes();
-                if (numChildren > 0) {
-                    for (int i = 0; i < numChildren; ++i) {
-                        btCollisionShape* shape = compoundShapeCast->getChildShape(i);
-                        btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
-                        if (convexHullCast) {
-                            auto& _convexHullCast = *convexHullCast;
-                            const auto& _scl = _convexHullCast.getLocalScaling();
-                            _convexHullCast.setLocalScaling(_scl + newScale);
-                            continue;
-                        }
-                        btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                        if (triHullCast) {
-                            auto _triHullCast = *triHullCast;
-                            const auto& _scl = _triHullCast.getLocalScaling();
-                            _triHullCast.setLocalScaling(_scl + newScale);
+        auto collisionShape = collision_.getShape();
+        if (collisionShape) {
+            if (collision_.getType() == CollisionType::Compound) {
+                btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collisionShape);
+                if (compoundShapeCast) {
+                    const int numChildren = compoundShapeCast->getNumChildShapes();
+                    if (numChildren > 0) {
+                        for (int i = 0; i < numChildren; ++i) {
+                            btCollisionShape* shape = compoundShapeCast->getChildShape(i);
+                            btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
+                            if (convexHullCast) {
+                                auto& _convexHullCast = *convexHullCast;
+                                const auto& _scl = _convexHullCast.getLocalScaling() + newScale;
+                                _convexHullCast.setLocalScaling(_scl);
+                                continue;
+                            }
+                            btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
+                            if (triHullCast) {
+                                auto _triHullCast = *triHullCast;
+                                const auto& _scl = _triHullCast.getLocalScaling() + newScale;
+                                _triHullCast.setLocalScaling(_scl);
+                            }
                         }
                     }
                 }
+            }else if (collision_.getType() == CollisionType::ConvexHull) {
+                btUniformScalingShape* convex = static_cast<btUniformScalingShape*>(collisionShape);
+                const auto& _scl = convex->getLocalScaling() + newScale;
+                convex->setLocalScaling(_scl);
+            }else if (collision_.getType() == CollisionType::TriangleShapeStatic) {
+                btScaledBvhTriangleMeshShape* tri = static_cast<btScaledBvhTriangleMeshShape*>(collisionShape);
+                const auto& _scl = tri->getLocalScaling() + newScale;
+                tri->setLocalScaling(_scl);
+            }else if (collision_.getType() == CollisionType::Sphere) {
+                btMultiSphereShape* sph = static_cast<btMultiSphereShape*>(collisionShape);
+                const auto& _scl = sph->getLocalScaling() + newScale;
+                sph->setLocalScaling(_scl);
+                sph->setImplicitShapeDimensions(_scl);
+                sph->recalcLocalAabb();
             }
         }
     }else {
@@ -464,26 +482,41 @@ void ComponentBody::setScale(const float p_NewScale) {
 }
 void ComponentBody::setScale(const float p_X, const float p_Y, const float p_Z) {
     if (m_Physics) {
+        const auto& newScale = btVector3(p_X, p_Y, p_Z);
         const auto& physicsData = *data.p;
         Collision& collision_ = *physicsData.collision;
-        if (collision_.getShape() && collision_.getType() == CollisionType::Compound) {
-            btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collision_.getShape());
-            if (compoundShapeCast) {
-                const int numChildren = compoundShapeCast->getNumChildShapes();
-                if (numChildren > 0) {
-                    for (int i = 0; i < numChildren; ++i) {
-                        btCollisionShape* shape = compoundShapeCast->getChildShape(i);
-                        btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
-                        if (convexHullCast) {
-                            convexHullCast->setLocalScaling(btVector3(p_X, p_Y, p_Z));
-                            continue;
-                        }
-                        btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                        if (triHullCast) {
-                            triHullCast->setLocalScaling(btVector3(p_X, p_Y, p_Z));
+        auto collisionShape = collision_.getShape();
+        if (collisionShape) {
+            if (collision_.getType() == CollisionType::Compound) {
+                btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collisionShape);
+                if (compoundShapeCast) {
+                    const int numChildren = compoundShapeCast->getNumChildShapes();
+                    if (numChildren > 0) {
+                        for (int i = 0; i < numChildren; ++i) {
+                            btCollisionShape* shape = compoundShapeCast->getChildShape(i);
+                            btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
+                            if (convexHullCast) {
+                                convexHullCast->setLocalScaling(newScale);
+                                continue;
+                            }
+                            btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
+                            if (triHullCast) {
+                                triHullCast->setLocalScaling(newScale);
+                            }
                         }
                     }
                 }
+            }else if (collision_.getType() == CollisionType::ConvexHull) {
+                btUniformScalingShape* convex = static_cast<btUniformScalingShape*>(collisionShape);
+                convex->setLocalScaling(newScale);
+            }else if (collision_.getType() == CollisionType::TriangleShapeStatic) {
+                btScaledBvhTriangleMeshShape* tri = static_cast<btScaledBvhTriangleMeshShape*>(collisionShape);
+                tri->setLocalScaling(newScale);
+            }else if (collision_.getType() == CollisionType::Sphere) {
+                btMultiSphereShape* sph = static_cast<btMultiSphereShape*>(collisionShape);
+                sph->setLocalScaling(newScale);
+                sph->setImplicitShapeDimensions(newScale);
+                sph->recalcLocalAabb();
             }
         }
     }else{
@@ -549,22 +582,45 @@ const glm::vec3 ComponentBody::getScale() const {
     if (m_Physics) {
         const auto& physicsData = *data.p;
         Collision& collision_ = *physicsData.collision;
-        if (collision_.getShape() && collision_.getType() == CollisionType::Compound) {
-            btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collision_.getShape());
-            if (compoundShapeCast) {
-                const int& numChildren = compoundShapeCast->getNumChildShapes();
-                if (numChildren > 0) {
-                    for (int i = 0; i < numChildren; ++i) {
-                        btCollisionShape* shape = compoundShapeCast->getChildShape(i);
-                        btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
-                        if (convexHullCast) {
-                            return Math::btVectorToGLM(const_cast<btVector3&>(convexHullCast->getLocalScaling()));
-                        }
-                        btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                        if (triHullCast) {
-                            return Math::btVectorToGLM(const_cast<btVector3&>(triHullCast->getLocalScaling()));
+        auto collisionShape = collision_.getShape();
+        if (collisionShape) {
+            if (collision_.getType() == CollisionType::Compound) {
+                btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collisionShape);
+                if (compoundShapeCast) {
+                    const int& numChildren = compoundShapeCast->getNumChildShapes();
+                    if (numChildren > 0) {
+                        for (int i = 0; i < numChildren; ++i) {
+                            btCollisionShape* shape = compoundShapeCast->getChildShape(i);
+                            btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
+                            if (convexHullCast) {
+                                const auto ret = Math::btVectorToGLM(convexHullCast->getLocalScaling());
+                                return ret;
+                            }
+                            btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
+                            if (triHullCast) {
+                                const auto ret = Math::btVectorToGLM(triHullCast->getLocalScaling());
+                                return ret;
+                            }
                         }
                     }
+                }
+            }else if (collision_.getType() == CollisionType::ConvexHull) {
+                btUniformScalingShape* convex = static_cast<btUniformScalingShape*>(collisionShape);
+                if (convex) {
+                    const auto ret = Math::btVectorToGLM(convex->getLocalScaling());
+                    return ret;
+                }
+            }else if (collision_.getType() == CollisionType::TriangleShapeStatic) {
+                btScaledBvhTriangleMeshShape* tri = static_cast<btScaledBvhTriangleMeshShape*>(collisionShape);
+                if (tri) {
+                    const auto ret = Math::btVectorToGLM(tri->getLocalScaling());
+                    return ret;
+                }
+            }else if (collision_.getType() == CollisionType::Sphere) {
+                btMultiSphereShape* sph = static_cast<btMultiSphereShape*>(collisionShape);
+                if (sph) {
+                    const auto ret = Math::btVectorToGLM(sph->getLocalScaling());
+                    return ret;
                 }
             }
         }

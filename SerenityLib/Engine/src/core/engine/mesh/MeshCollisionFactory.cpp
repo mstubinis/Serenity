@@ -20,10 +20,12 @@ epriv::MeshCollisionFactory::MeshCollisionFactory(Mesh& _mesh) :m_Mesh(_mesh) {
     m_ConvesHullShape     = nullptr;
     m_TriangleStaticData  = nullptr;
     m_TriangleStaticShape = nullptr;
+    m_Zero = new btVector3(0, 0, 0);
     _initConvexData(data);
     _initTriangleData(data);
 }
 epriv::MeshCollisionFactory::~MeshCollisionFactory() {
+    SAFE_DELETE(m_Zero);
     SAFE_DELETE(m_ConvexHullData);
     SAFE_DELETE(m_ConvesHullShape);
     SAFE_DELETE(m_TriangleStaticData);
@@ -76,9 +78,11 @@ void epriv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
         m_TriangleStaticShape->recalcLocalAabb();
     }
 }
-btSphereShape* epriv::MeshCollisionFactory::buildSphereShape() {
-    btSphereShape* sphere = new btSphereShape(m_Mesh.getRadius());
+btMultiSphereShape* epriv::MeshCollisionFactory::buildSphereShape() {
+    const auto& rad = m_Mesh.getRadius();
+    btMultiSphereShape* sphere = new btMultiSphereShape(m_Zero, &rad, 1);
     sphere->setMargin(0.001f);
+    sphere->recalcLocalAabb();
     return sphere;
 }
 btBoxShape* epriv::MeshCollisionFactory::buildBoxShape() {

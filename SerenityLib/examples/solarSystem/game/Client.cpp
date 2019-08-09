@@ -362,9 +362,9 @@ void Client::onReceive() {
                     auto ships = map->allowedShips();
                     for (auto& ship : ships) {
                         auto& handles = ResourceManifest::Ships.at(ship);
-                        auto& r = handles.get<2>();
-                        auto& g = handles.get<3>();
-                        auto& b = handles.get<4>();
+                        auto& r = handles.get<2>().r;
+                        auto& g = handles.get<2>().g;
+                        auto& b = handles.get<2>().b;
 
                         Button* shipbutton = new Button(*hud.m_Font, 0, 0, 100, 40);
                         shipbutton->setText(ship);

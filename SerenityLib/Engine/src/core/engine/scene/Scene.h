@@ -96,12 +96,13 @@ namespace Engine {
             static std::vector<SpotLight*>&          GetSpotLights(Scene&);
             static std::vector<RodLight*>&           GetRodLights(Scene&);
 
-            static void           RenderGeometryOpaque(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true, const bool sortTriangles = false);
-            static void           RenderGeometryTransparent(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true, const bool sortTriangles = false);
+            static void           RenderGeometryOpaque(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
+            static void           RenderGeometryTransparent(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
             static void           RenderGeometryTransparentTrianglesSorted(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
-            static void           RenderForwardOpaque(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true, const bool sortTriangles = false);
-            static void           RenderForwardTransparent(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true, const bool sortTriangles = false);
+            static void           RenderForwardOpaque(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
+            static void           RenderForwardTransparent(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
             static void           RenderForwardTransparentTrianglesSorted(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
+            static void           RenderForwardParticles(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
 
             static void           AddModelInstanceToPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
             static void           RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);

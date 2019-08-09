@@ -51,6 +51,41 @@ MaterialLayer* MaterialComponent::addLayer(Texture* texture, Texture* mask, Text
     layer.setTexture(texture);
     layer.setMask(mask);
     layer.setCubemap(cubemap);
+
+    switch (m_ComponentType) {
+        case MaterialComponentType::Diffuse: {
+            layer.setData2(1.0f, 1.0f, 1.0f, 1.0f);
+            break;
+        }case MaterialComponentType::Normal: {
+            layer.setData2(1.0f, 1.0f, 1.0f, 1.0f);
+            break;
+        }case MaterialComponentType::Glow: {
+            layer.setData2(0.0f, 1.0f, 1.0f, 0.0f);
+            break;
+        }case MaterialComponentType::Specular: {
+            layer.setData2(0.0f, 1.0f, 1.0f, 0.0f);
+            break;
+        }case MaterialComponentType::AO: {
+            layer.setData2(0.0f, 1.0f, 1.0f, 0.0f);
+            break;
+        }case MaterialComponentType::Metalness: {
+            layer.setData2(0.0f, 1.0f, 1.0f, 0.0f);
+            break;
+        }case MaterialComponentType::Smoothness: {
+            layer.setData2(0.0f, 1.0f, 1.0f, 0.0f);
+            break;
+        }case MaterialComponentType::Reflection: {
+            break;
+        }case MaterialComponentType::Refraction: {
+            break;
+        }case MaterialComponentType::ParallaxOcclusion: {
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+
     ++m_NumLayers;
     return &layer;
 }

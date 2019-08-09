@@ -6,6 +6,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <core/engine/resources/Handle.h>
 #include <unordered_map>
+#include <glm/vec3.hpp>
 
 struct ResourceManifest{
     static Handle skyFromSpace;
@@ -15,6 +16,7 @@ struct ResourceManifest{
     static Handle PlanetMesh;
     static Handle DefiantMesh;
     static Handle RingMesh;
+    static Handle ShieldMesh;
 
 
 	/*extras*/
@@ -43,6 +45,7 @@ struct ResourceManifest{
     static Handle CrosshairMaterial;
     static Handle CrosshairArrowMaterial;
     static Handle StarFlareMaterial;
+    static Handle ShieldMaterial;
 
     //sounds
     static Handle MenuMusic;
@@ -52,7 +55,7 @@ struct ResourceManifest{
 
     static std::string BasePath;
 
-    static std::unordered_map<std::string, boost::tuple<Handle, Handle, float, float, float>> Ships;
+    static std::unordered_map<std::string, boost::tuple<Handle, Handle, glm::vec3, glm::vec3>> Ships;
 
     static void init();
 };

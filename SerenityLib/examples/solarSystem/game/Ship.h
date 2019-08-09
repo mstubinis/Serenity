@@ -103,8 +103,10 @@ class ShipSystemCloakingDevice final : public ShipSystem {
 };
 class ShipSystemShields final: public ShipSystem{
 	friend class ::Ship;
+    private:
+        EntityWrapper m_ShieldEntity;
     public:
-        ShipSystemShields(Ship&);
+        ShipSystemShields(Ship&, Map*);
         ~ShipSystemShields();
 
         void update(const double& dt);
@@ -167,6 +169,7 @@ class Ship: public EntityWrapper {
         void onEvent(const Event&);
 
         const glm::vec3 getWarpSpeedVector3();
+        const glm::vec3 getPosition();
 
         void updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, std::vector<std::string>& info);
         void updateCloakFromPacket(const PacketCloakUpdate& packet);

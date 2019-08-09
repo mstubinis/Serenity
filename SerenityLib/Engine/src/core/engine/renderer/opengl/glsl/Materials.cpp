@@ -85,6 +85,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    if (inLayer.data1.z >= 0.5) {\n"
                 "        paint *= texture2D(inLayer.mask, inUVs).r;\n"
                 "    }\n"
+                "    paint *= inLayer.data2;\n"
                 "    return DoBlend(paint, canvas, inLayer);\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_diffuse, "void ProcessComponent(");
@@ -106,6 +107,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    if (inLayer.data1.z >= 0.5) {\n"
                 "        outNormals *= texture2D(inLayer.mask, inUVs).r;\n"
                 "    }\n"
+                "    outNormals *= inLayer.data2.xyz;\n"
+                "    outNormals *= inLayer.data2.w;\n"
                 "    return outNormals;\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_normals, "vec4 CalculateDiffuse(");
@@ -126,6 +129,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    if (inLayer.data1.z >= 0.5) {\n"
                 "        outGlow *= texture2D(inLayer.mask, inUVs).r;\n"
                 "    }\n"
+                "    outGlow = clamp(outGlow, inLayer.data2.x, inLayer.data2.y);\n"
+                "    outGlow *= inLayer.data2.z;\n"
                 "    return outGlow;\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_glow, "vec3 CalculateNormals(");
@@ -145,6 +150,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    if (inLayer.data1.z >= 0.5) {\n"
                 "        outSpecular *= texture2D(inLayer.mask, inUVs).r;\n"
                 "    }\n"
+                "    outSpecular = clamp(outSpecular, inLayer.data2.x, inLayer.data2.y);\n"
+                "    outSpecular *= inLayer.data2.z;\n"
                 "    return outSpecular;\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_spec, "float CalculateGlow(");
@@ -165,6 +172,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    if (inLayer.data1.z >= 0.5) {\n"
                 "        outAO *= texture2D(inLayer.mask, inUVs).r;\n"
                 "    }\n"
+                "    outAO = clamp(outAO, inLayer.data2.x, inLayer.data2.y);\n"
+                "    outAO *= inLayer.data2.z;\n"
                 "    return outAO;\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_ao, "float CalculateSpecular(");
@@ -185,6 +194,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    if (inLayer.data1.z >= 0.5) {\n"
                 "        outMetalness *= texture2D(inLayer.mask, inUVs).r;\n"
                 "    }\n"
+                "    outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);\n"
+                "    outMetalness *= inLayer.data2.z;\n"
                 "    return outMetalness;\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_metalness, "float CalculateAO(");
@@ -205,6 +216,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    if (inLayer.data1.z >= 0.5) {\n"
                 "        outSmoothness *= texture2D(inLayer.mask, inUVs).r;\n"
                 "    }\n"
+                "    outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);\n"
+                "    outSmoothness *= inLayer.data2.z;\n"
                 "    return outSmoothness;\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_smoothness, "float CalculateMetalness(");

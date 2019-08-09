@@ -5,6 +5,8 @@
 struct VertexData;
 class  Mesh;
 class  btShapeHull;
+class  btVector3;
+class  btMultiSphereShape;
 class  btConvexHullShape;
 class  btTriangleMesh;
 class  btBvhTriangleMeshShape;
@@ -21,6 +23,7 @@ namespace epriv {
     class MeshCollisionFactory final {
         private:
             Mesh&                          m_Mesh;
+            btVector3*                     m_Zero;
             btShapeHull*                   m_ConvexHullData;
             btConvexHullShape*             m_ConvesHullShape;
             btTriangleMesh*                m_TriangleStaticData;
@@ -32,7 +35,7 @@ namespace epriv {
             MeshCollisionFactory(Mesh& _mesh);
             ~MeshCollisionFactory();
 
-            btSphereShape*                 buildSphereShape();
+            btMultiSphereShape*            buildSphereShape();
             btBoxShape*                    buildBoxShape();
             btUniformScalingShape*         buildConvexHull();
             btScaledBvhTriangleMeshShape*  buildTriangleShape();

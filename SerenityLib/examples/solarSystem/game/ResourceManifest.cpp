@@ -14,6 +14,7 @@ Handle ResourceManifest::groundFromSpace;
 Handle ResourceManifest::PlanetMesh;
 Handle ResourceManifest::DefiantMesh;
 Handle ResourceManifest::RingMesh;
+Handle ResourceManifest::ShieldMesh;
 
 /*extras*/
 Handle ResourceManifest::NovaMesh;
@@ -41,13 +42,14 @@ Handle ResourceManifest::DefiantMaterial;
 Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
 Handle ResourceManifest::StarFlareMaterial;
+Handle ResourceManifest::ShieldMaterial;
 
 //sounds
 Handle ResourceManifest::MenuMusic;
 Handle ResourceManifest::SoundCloakingActivated;
 Handle ResourceManifest::SoundCloakingDeactivated;
 
-std::unordered_map<std::string, boost::tuple<Handle, Handle, float, float, float>> ResourceManifest::Ships;
+std::unordered_map<std::string, boost::tuple<Handle, Handle, glm::vec3, glm::vec3>> ResourceManifest::Ships;
 
 std::string ResourceManifest::BasePath;
 
@@ -72,6 +74,7 @@ void ResourceManifest::init(){
     PlanetMesh = Resources::loadMeshAsync(BasePath + "data/Models/planet.objcc").at(0);
     DefiantMesh = Resources::loadMeshAsync(BasePath + "data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc").at(0);
+    ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc").at(0);
 
 
 	//extras
@@ -115,6 +118,22 @@ void ResourceManifest::init(){
     //DefiantSharkMaterial = Resources::addMaterial("DefiantShark", BasePath + "data/Textures/defiant/defiantShark.dds", BasePath + "data/Textures/defiant/defiant_Normal.dds", BasePath + "data/Textures/defiant/defiant_Glow.dds");
     ShrikeMaterial = Resources::addMaterial("Shrike", BasePath + "data/Textures/shrike/shrike.dds", "", BasePath + "data/Textures/shrike/shrike_Glow.dds",  + "");
 
+    ShieldMaterial = Resources::addMaterial("Shields", BasePath + "data/Textures/Effects/shields_1.dds");
+    Material& shieldMat = *((Material*)ShieldMaterial.get());
+    shieldMat.setShadeless(true);
+    auto& layershield = shieldMat.getComponent(0).layer(0);
+    layershield.addUVModificationSimpleTranslation(0.8f, 0.6f);
+    layershield.setData2(1.0f, 1.0f, 1.0f, 0.4f);
+    auto layershield1 = shieldMat.getComponent(0).addLayer();
+    layershield1->setTexture(BasePath + "data/Textures/Effects/shields_2.dds");
+    layershield1->addUVModificationSimpleTranslation(-0.4f, -0.6f);
+    layershield1->setData2(1.0f, 1.0f, 1.0f, 0.9f);
+    auto layershield2 = shieldMat.getComponent(0).addLayer();
+    layershield2->setTexture(BasePath + "data/Textures/Effects/shields_3.dds");
+    layershield2->addUVModificationSimpleTranslation(0.2f, -0.35f);
+    layershield2->setData2(1.0f, 1.0f, 1.0f, 0.8f);
+
+
     StarMaterial = Resources::addMaterial("Star", BasePath + "data/Textures/Planets/Sun.dds");
     ((Material*)StarMaterial.get())->setShadeless(true);
     ((Material*)StarMaterial.get())->setGlow(0.21f);
@@ -142,10 +161,10 @@ void ResourceManifest::init(){
     SoundCloakingDeactivated = Resources::addSoundData(BasePath + "data/Sounds/effects/decloaking.ogg");
 
 
-    ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle, float, float, float>(DefiantMesh,      DefiantMaterial, 1, 1, 1);
-    ResourceManifest::Ships["Nova"]         = boost::tuple<Handle, Handle, float, float, float>(NovaMesh,         NovaMaterial, 1, 1, 1);
-    ResourceManifest::Ships["Excelsior"]    = boost::tuple<Handle, Handle, float, float, float>(ExcelsiorMesh,    ExcelsiorMaterial, 1, 1, 1);
-    ResourceManifest::Ships["Miranda"]      = boost::tuple<Handle, Handle, float, float, float>(MirandaMesh,      MirandaMaterial, 1, 1, 1);
-    ResourceManifest::Ships["Constitution"] = boost::tuple<Handle, Handle, float, float, float>(ConstitutionMesh, ConstitutionMaterial, 1, 1, 1);
-    ResourceManifest::Ships["Shrike"]       = boost::tuple<Handle, Handle, float, float, float>(ShrikeMesh,       ShrikeMaterial, 0.33f, 0.72f, 0.48f);
+    ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(DefiantMesh,      DefiantMaterial, glm::vec3(1, 1, 1), glm::vec3(0,0,1));
+    ResourceManifest::Ships["Nova"]         = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(NovaMesh,         NovaMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
+    ResourceManifest::Ships["Excelsior"]    = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ExcelsiorMesh,    ExcelsiorMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
+    ResourceManifest::Ships["Miranda"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(MirandaMesh,      MirandaMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
+    ResourceManifest::Ships["Constitution"] = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ConstitutionMesh, ConstitutionMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
+    ResourceManifest::Ships["Shrike"]       = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ShrikeMesh,       ShrikeMaterial, glm::vec3(0.33f, 0.72f, 0.48f), glm::vec3(0, 1, 0));
 }

@@ -56,12 +56,12 @@ void Math::Float16From32(uint16_t* out, const float*    in, const uint arraySize
         Math::Float16From32(&(out[i]), in[i]);
     }
 }
-void Math::setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
+void Math::setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& inScale) {
     modelMatrix = glm::mat4(1.0f);
     const glm::mat4 translationMatrix = glm::translate(position);
     const glm::mat4 rotationMatrix = glm::mat4_cast(rotation);
-    const glm::mat4 scaleMatrix = glm::scale(scale);
-    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix /*  * modelMatrix  */;
+    const glm::mat4 scaleMatrix = glm::scale(inScale);
+    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix /* * modelMatrix  */;
 }
 void Math::setRotation(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll) {
     if (abs(pitch) > ROTATION_THRESHOLD)

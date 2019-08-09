@@ -6,12 +6,15 @@
 #include "map/Anchor.h"
 #include "ResourceManifest.h"
 
+#include <core/engine/mesh/Mesh.h>
 #include <core/engine/Engine.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/lights/Lights.h>
 #include <core/engine/materials/Material.h>
 
 #include <core/engine/utils/Engine_Debugging.h>
+
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
 #include <ecs/ComponentName.h>
 
@@ -51,13 +54,44 @@ void ShipSystemReactor::update(const double& dt){
 #pragma endregion
 
 #pragma region ShipSystemShields
-ShipSystemShields::ShipSystemShields(Ship& _ship):ShipSystem(ShipSystemType::Shields, _ship){
 
+struct ShipSystemShieldsFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
+
+}};
+
+ShipSystemShields::ShipSystemShields(Ship& _ship, Map* map):ShipSystem(ShipSystemType::Shields, _ship),m_ShieldEntity(*map){
+    auto& model = *(m_ShieldEntity.addComponent<ComponentModel>(ResourceManifest::ShieldMesh, ResourceManifest::ShieldMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles)); 
+    auto& logic = *(m_ShieldEntity.addComponent<ComponentLogic>(ShipSystemShieldsFunctor()));
+    auto& body = *(m_ShieldEntity.addComponent<ComponentBody>(CollisionType::Sphere));
+    logic.setUserPointer(&m_Ship);
+    //logic.setUserPointer1(&model);
+    //logic.setUserPointer2(&instance);
+
+
+    auto& boundBox = m_Ship.getComponent<ComponentModel>()->getModel(0).mesh()->getRadiusBox();
+    //note: add collision flags -- shields should not collide with other shields or ships. but SHOULD collide with projectiles
+    auto& btBody = const_cast<btRigidBody&>(body.getBody());
+    btBody.setCollisionFlags(btBody.getCollisionFlags() | CollisionLayer::NoContactResponse);
+    btBody.setUserPointer(&m_Ship);
+    body.setScale((boundBox.x * 1.37f), (boundBox.y * 1.37f), (boundBox.z * 1.37f)); //todo: fix this for when other ships are created
+
+
+    auto& handles = ResourceManifest::Ships.at(m_Ship.getClass());
+    auto& r = handles.get<3>().r;
+    auto& g = handles.get<3>().g;
+    auto& b = handles.get<3>().b;
+    auto& instance = model.getModel(0);
+    instance.setColor(r, g, b, 0.7f);
+    //instance.setColor(r, g, b, 0.0f);
 }
 ShipSystemShields::~ShipSystemShields(){
 
 }
 void ShipSystemShields::update(const double& dt){
+    auto& shieldBody = *m_ShieldEntity.getComponent<ComponentBody>();
+    auto& shipBody = *m_Ship.getComponent<ComponentBody>();
+    shieldBody.setPosition(shipBody.position());
+    shieldBody.setRotation(shipBody.rotation());
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -436,7 +470,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
 }};
 
 
-Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, bool player, const string& name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type, Map* scene):EntityWrapper(*scene),m_Client(client){
+Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, bool player, const string& name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type, Map* map):EntityWrapper(*map),m_Client(client){
     m_WarpFactor    = 0;
     m_IsPlayer      = player;
     m_ShipClass     = shipClass;
@@ -446,8 +480,8 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
     m_MouseFactor   = glm::dvec2(0.0);
     m_SavedOldStateBefore = false;
 
-    auto& rigidBodyComponent = *addComponent<ComponentBody>(_type);
     auto& modelComponent     = *addComponent<ComponentModel>(mesh, mat);
+    auto& rigidBodyComponent = *addComponent<ComponentBody>(_type);
     auto& nameComponent      = *addComponent<ComponentName>(name);
     auto& logicComponent     = *addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
@@ -459,7 +493,7 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
 	rigidBodyComponent.setScale(scl);
 
 	if (player) {
-		m_PlayerCamera = static_cast<GameCamera*>(scene->getActiveCamera());
+		m_PlayerCamera = static_cast<GameCamera*>(map->getActiveCamera());
 	}
 	for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
 		ShipSystem* system = nullptr;
@@ -468,14 +502,14 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
 		else if (i == 2)  system = new ShipSystemYawThrusters(*this);
 		else if (i == 3)  system = new ShipSystemRollThrusters(*this);
         else if (i == 4)  system = new ShipSystemCloakingDevice(*this);
-		else if (i == 5)  system = new ShipSystemShields(*this);
+		else if (i == 5)  system = new ShipSystemShields(*this, map);
 		else if (i == 6)  system = new ShipSystemMainThrusters(*this);
 		else if (i == 7)  system = new ShipSystemWarpDrive(*this);
 		else if (i == 8)  system = new ShipSystemSensors(*this);
         m_ShipSystems.emplace(i, system);
 	}
-    scene->m_Objects.push_back(this);
-    scene->getShips().emplace(name, this);
+    map->m_Objects.push_back(this);
+    map->getShips().emplace(name, this);
 }
 Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);
@@ -487,6 +521,9 @@ const glm::vec3 Ship::getWarpSpeedVector3() {
         return (body.forward() * glm::pow(speed, 15.0f)) / glm::log2(body.mass() + 0.5f);
     }
     return glm::vec3(0.0f);
+}
+const glm::vec3 Ship::getPosition() {
+    return getComponent<ComponentBody>()->position();
 }
 void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
     const unsigned int& size = stoi(info[2]);

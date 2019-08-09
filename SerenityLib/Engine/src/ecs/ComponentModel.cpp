@@ -187,6 +187,7 @@ struct epriv::ComponentModel_UpdateFunction final {
     }
 };
 struct epriv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {
+
 }};
 struct epriv::ComponentModel_EntityAddedToSceneFunction final {void operator()(void* componentPool, Entity& entity, Scene& scene) const {   
     auto& pool = *static_cast<ECSComponentPool<Entity, ComponentModel>*>(componentPool);

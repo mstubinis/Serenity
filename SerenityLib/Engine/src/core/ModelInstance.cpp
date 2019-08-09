@@ -49,7 +49,7 @@ namespace Engine {
         };
 
         struct DefaultModelInstanceBindFunctor {void operator()(EngineResource* r) const {
-            auto& i = *(ModelInstance*)r;
+            auto& i = *static_cast<ModelInstance*>(r);
             const auto& stage = i.stage();
             auto& scene = *Resources::getCurrentScene();
             Camera& cam = *scene.getActiveCamera();
@@ -66,7 +66,7 @@ namespace Engine {
                 auto& lights = epriv::InternalScenePublicInterface::GetLights(scene);
                 int maxLights = glm::min(static_cast<int>(lights.size()), MAX_LIGHTS_PER_PASS);
                 Renderer::sendUniform1Safe("numLights", maxLights);
-                for (uint i = 0; i < maxLights; ++i) {
+                for (int i = 0; i < maxLights; ++i) {
                     auto& light = *lights[i];
                     const auto& lightType = light.type();
                     const auto start = "light[" + to_string(i) + "].";
@@ -169,7 +169,7 @@ namespace Engine {
             }else{
                 Renderer::sendUniform1Safe("AnimationPlaying", 0);
             }
-            glm::mat4 modelMatrix = parentModel * i.m_ModelMatrix; //might need to reverse this order.
+            glm::mat4 modelMatrix = parentModel * i.m_ModelMatrix;
 
             //world space normals
             glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
@@ -182,7 +182,7 @@ namespace Engine {
             Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
         }};
         struct DefaultModelInstanceUnbindFunctor {void operator()(EngineResource* r) const {
-
+            //auto& i = *static_cast<ModelInstance*>(r);
         }};
 
 

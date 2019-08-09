@@ -205,16 +205,16 @@ vector<RodLight*>& InternalScenePublicInterface::GetRodLights(Scene& scene) {
 }
 
 
-void InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders, const bool sortTriangles) {
+void InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 
         //pipeline->sort(camera);
-        pipeline->render(camera, dt, useDefaultShaders, sortTriangles);
+        pipeline->render(camera, dt, useDefaultShaders, false);
     } 
 }
-void InternalScenePublicInterface::RenderGeometryTransparent(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders, const bool sortTriangles) {
+void InternalScenePublicInterface::RenderGeometryTransparent(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryTransparent]) { 
         pipeline->sort(camera);
-        pipeline->render(camera, dt, useDefaultShaders, sortTriangles);
+        pipeline->render(camera, dt, useDefaultShaders, false);
     } 
 }
 void InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
@@ -223,16 +223,16 @@ void InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(Scen
          pipeline->render(camera, dt, useDefaultShaders, true);
      }
 }
-void InternalScenePublicInterface::RenderForwardOpaque(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders, const bool sortTriangles) {
+void InternalScenePublicInterface::RenderForwardOpaque(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) {
         //pipeline->sort(camera);
-        pipeline->render(camera, dt, useDefaultShaders, sortTriangles);
+        pipeline->render(camera, dt, useDefaultShaders, false);
     }
 }
-void InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders, const bool sortTriangles) {
+void InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardTransparent]) { 
         pipeline->sort(camera);
-        pipeline->render(camera, dt, useDefaultShaders, sortTriangles);
+        pipeline->render(camera, dt, useDefaultShaders, false);
     }
 }
 void InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
@@ -241,6 +241,13 @@ void InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(Scene
         pipeline->render(camera, dt, useDefaultShaders, true);
     }
 }
+void InternalScenePublicInterface::RenderForwardParticles(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
+    for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardParticles]) {
+        pipeline->sort(camera);
+        pipeline->render(camera, dt, useDefaultShaders, false);
+    }
+}
+
 ECS<Entity>& InternalScenePublicInterface::GetECS(Scene& scene) {
     return scene.m_i->m_ECS;
 }

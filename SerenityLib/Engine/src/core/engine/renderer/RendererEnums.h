@@ -38,6 +38,7 @@ struct RenderStage { enum Stage {
     ForwardOpaque,
     ForwardTransparent,
     ForwardTransparentTrianglesSorted,
+    ForwardParticles,
 _TOTAL};};
 
 #endif

@@ -1613,18 +1613,24 @@ class epriv::RenderManager::impl final{
         }
         void _passForwardRendering(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
-            gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Misc,GBufferType::Lighting, "RGBA");
+            gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Misc, GBufferType::Lighting, "RGBA");
             InternalScenePublicInterface::RenderForwardOpaque(scene, camera, dt);
 
-            GLEnablei(GL_BLEND, 0);
+            GLEnablei(GL_BLEND, 0); //this might need to be all buffers not just 0
             //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE); //this works too
-            //glDepthMask(GL_TRUE);
+            glBlendFuncSeparatei(0,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE); //this works too
+            //glBlendFuncSeparatei(2, GL_ONE, GL_ONE, GL_ONE, GL_ONE); //this works too
+            glDepthMask(GL_TRUE);
 
             InternalScenePublicInterface::RenderForwardTransparent(scene, camera, dt);
-            InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, camera, dt, true);
+            InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, camera, dt);
+            GLEnablei(GL_BLEND, 2); //yes this is important
+
+            glDepthMask(GL_FALSE);
+            InternalScenePublicInterface::RenderForwardParticles(scene, camera, dt);
+
             GLDisablei(GL_BLEND, 0); //this is needed for smaa at least
-            //glDepthMask(GL_TRUE);
+            GLDisablei(GL_BLEND, 2);
         }
         void _passCopyDepth(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
@@ -1772,6 +1778,7 @@ class epriv::RenderManager::impl final{
             }
             sendTextureSafe("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
             sendTextureSafe("gBloomMap", gbuffer.getTexture(GBufferType::Bloom), 1);
+            sendTextureSafe("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 2);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
         }
         void _passDepthAndTransparency(GBuffer& gbuffer , const uint& fboWidth, const uint& fboHeight, Viewport& viewport, Camera& camera, GBufferType::Type sceneTexture) {
