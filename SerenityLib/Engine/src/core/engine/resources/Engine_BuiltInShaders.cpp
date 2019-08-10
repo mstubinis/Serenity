@@ -219,9 +219,8 @@ epriv::EShaders::vertex_basic =
     "flat varying vec3 CamPosition;\n"
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
-    "\n";
-epriv::EShaders::vertex_basic +=
-"void main(){\n"
+    "\n"
+    "void main(){\n"
     "    mat4 ModelMatrix = Model;\n"
     "    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
     "    ModelMatrix[3][1] -= CameraRealPosition.y;\n"

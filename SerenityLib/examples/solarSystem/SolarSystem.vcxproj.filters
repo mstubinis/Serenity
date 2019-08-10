@@ -40,6 +40,36 @@
     <Filter Include="Source Files\Game\Map">
       <UniqueIdentifier>{bc377900-df58-45fe-935a-28893b7115ab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Ships">
+      <UniqueIdentifier>{b9c9e18b-ce93-4fbd-9f0b-20c1babc9630}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\ShipSystems">
+      <UniqueIdentifier>{71ba2db8-941a-4213-bc82-bb741ed8f432}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships">
+      <UniqueIdentifier>{7a8478e5-34a2-41e8-b172-8e573b7ffd5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\ShipSystems">
+      <UniqueIdentifier>{d9b3450d-a028-4ad7-a18e-f9436526c10c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Brel">
+      <UniqueIdentifier>{dbb9aad7-e59d-4cba-bcaf-8b16a37f39f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Defiant">
+      <UniqueIdentifier>{645e8885-2310-44e2-8c95-011819dde33d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Shrike">
+      <UniqueIdentifier>{fd803371-0171-4d60-b0c6-7657fb65ea7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Defiant">
+      <UniqueIdentifier>{399effbb-cfe0-4ac8-bec9-b6adf13601d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Brel">
+      <UniqueIdentifier>{b3034c43-ea90-4ec7-ac21-afe07c6ffeda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Shrike">
+      <UniqueIdentifier>{d3e0e06b-d1c3-4826-a2ef-6476291c0dfe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -117,6 +147,45 @@
     <ClInclude Include="game\map\Anchor.h">
       <Filter>Header Files\Game\Map</Filter>
     </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemBaseClass.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemReactor.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemMainThrusters.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemShields.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemPitchThrusters.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemYawThrusters.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemRollThrusters.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemCloakingDevice.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemWarpDrive.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemSensors.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\defiant\Defiant.h">
+      <Filter>Header Files\Game\Ships\Defiant</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\brel\Brel.h">
+      <Filter>Header Files\Game\Ships\Brel</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\shrike\Shrike.h">
+      <Filter>Header Files\Game\Ships\Shrike</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -191,6 +260,45 @@
     <ClCompile Include="game\map\Anchor.cpp">
       <Filter>Source Files\Game\Map</Filter>
     </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemBaseClass.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemReactor.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemMainThusters.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemShields.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemPitchThrusters.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemYawThrusters.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemRollThrusters.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemCloakingDevice.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemWarpDrive.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemSensors.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\defiant\Defiant.cpp">
+      <Filter>Source Files\Game\Ships\Defiant</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\brel\Brel.cpp">
+      <Filter>Source Files\Game\Ships\Brel</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shrike\Shrike.cpp">
+      <Filter>Source Files\Game\Ships\Shrike</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\data\Shaders\AS_groundFromSpace_frag.glsl">
@@ -209,6 +317,12 @@
       <Filter>Resource Files\Shaders</Filter>
     </None>
     <None Include="..\data\Shaders\AS_skyFromSpace_vert.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\data\Shaders\shields_frag.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\data\Shaders\shields_vert.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>

@@ -6,6 +6,8 @@
 #include <core/engine/math/Engine_Math.h>
 #include <ecs/ComponentBody.h>
 
+#include "ships/shipSystems/ShipSystemCloakingDevice.h"
+
 using namespace Engine;
 using namespace std;
 

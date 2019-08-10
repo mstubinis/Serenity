@@ -12,6 +12,7 @@ struct ResourceManifest{
     static Handle skyFromSpace;
     static Handle skyFromAtmosphere;
     static Handle groundFromSpace;
+    static Handle shieldsShaderProgram;
 
     static Handle PlanetMesh;
     static Handle DefiantMesh;
@@ -28,6 +29,7 @@ struct ResourceManifest{
     static Handle ConstitutionMesh;
     static Handle LeviathanMesh;
     static Handle ShrikeMesh;
+    static Handle BrelMesh;
 
 	static Handle NovaMaterial;
     static Handle MirandaMaterial;
@@ -37,6 +39,7 @@ struct ResourceManifest{
     static Handle ConstitutionMaterial;
     static Handle DefiantSharkMaterial;
     static Handle ShrikeMaterial;
+    static Handle BrelMaterial;
 
 
     static Handle StarMaterial;

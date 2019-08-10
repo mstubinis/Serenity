@@ -13,7 +13,7 @@ struct CollisionType {enum Type {
 _TOTAL,};};
 
 //pretty much a copy of bullet physics enums
-struct CollisionLayer final {enum Layer {
+struct CollisionFlag final {enum Flag {
     None = 0,
     StaticObject = 1 << 0,
     KinematicObject = 1 << 1,
@@ -28,7 +28,7 @@ struct CollisionLayer final {enum Layer {
     HasCollisionSoundTrigger = 1 << 10,
 };};
 
-struct CollisionGroup final {enum Group {
+struct CollisionFilter final {enum Filter {
     NoFilter             = 0,
     DefaultFilter   = 1 << 0,
     StaticFilter    = 1 << 1,

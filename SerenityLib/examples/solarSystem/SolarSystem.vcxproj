@@ -216,6 +216,19 @@
     <ClInclude Include="game\ResourceManifest.h" />
     <ClInclude Include="game\Server.h" />
     <ClInclude Include="game\Ship.h" />
+    <ClInclude Include="game\ships\brel\Brel.h" />
+    <ClInclude Include="game\ships\defiant\Defiant.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemBaseClass.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemCloakingDevice.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemMainThrusters.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemPitchThrusters.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemReactor.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemRollThrusters.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemSensors.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemShields.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemWarpDrive.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemYawThrusters.h" />
+    <ClInclude Include="game\ships\shrike\Shrike.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\Client.cpp" />
@@ -242,6 +255,19 @@
     <ClCompile Include="game\ResourceManifest.cpp" />
     <ClCompile Include="game\Server.cpp" />
     <ClCompile Include="game\Ship.cpp" />
+    <ClCompile Include="game\ships\brel\Brel.cpp" />
+    <ClCompile Include="game\ships\defiant\Defiant.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemBaseClass.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemCloakingDevice.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemMainThusters.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemPitchThrusters.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemReactor.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemRollThrusters.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemSensors.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemShields.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemWarpDrive.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemYawThrusters.cpp" />
+    <ClCompile Include="game\ships\shrike\Shrike.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\SerenityLib.vcxproj">
@@ -255,6 +281,8 @@
     <None Include="..\data\Shaders\AS_skyFromAtmosphere_vert.glsl" />
     <None Include="..\data\Shaders\AS_skyFromSpace_frag.glsl" />
     <None Include="..\data\Shaders\AS_skyFromSpace_vert.glsl" />
+    <None Include="..\data\Shaders\shields_frag.glsl" />
+    <None Include="..\data\Shaders\shields_vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

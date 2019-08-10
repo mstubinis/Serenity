@@ -7,126 +7,24 @@
 #include <core/engine/utils/Utils.h>
 #include "Client.h"
 
-class GameCamera;
-class Ship;
-class Map;
+#include "ships/shipSystems/ShipSystemBaseClass.h"
 
+class  GameCamera;
+class  Ship;
+class  Map;
 struct PacketPhysicsUpdate;
 struct PacketCloakUpdate;
 struct ShipLogicFunctor;
-
-struct ShipSystemType {enum Type {
-    Reactor,
-    ThrustersPitch,
-    ThrustersYaw,
-    ThrustersRoll,
-    CloakingDevice,
-    Shields,
-    ThrustersMain,
-    WarpDrive,
-    Sensors,
-_TOTAL}; };
-
-class ShipSystem{
-	friend class ::Ship;
-    protected:
-        Ship& m_Ship;
-        uint  m_Type;
-        float m_Health;
-        float m_Power;
-    public:
-        ShipSystem(const uint& type,Ship&);
-        virtual ~ShipSystem();
-
-        const bool isOnline() const { return (m_Health > 0 && m_Power > 0) ? true : false; }
-
-        virtual void update(const double& dt);
-};
-class ShipSystemReactor final: public ShipSystem{
-	friend class ::Ship;
-    private:
-        float m_TotalPowerMax;
-        float m_TotalPower;
-    public:
-        ShipSystemReactor(Ship&, const float maxPower, const float currentPower = -1);
-        ~ShipSystemReactor();
-
-        void update(const double& dt);
-};
-class ShipSystemMainThrusters final: public ShipSystem{
-	friend class ::Ship;
-    public:
-        ShipSystemMainThrusters(Ship&);
-        ~ShipSystemMainThrusters();
-
-        void update(const double& dt);
-};
-class ShipSystemPitchThrusters final: public ShipSystem{
-	friend class ::Ship;
-    public:
-        ShipSystemPitchThrusters(Ship&);
-        ~ShipSystemPitchThrusters();
-
-        void update(const double& dt);
-};
-class ShipSystemYawThrusters final: public ShipSystem{
-	friend class ::Ship;
-    public:
-        ShipSystemYawThrusters(Ship&);
-        ~ShipSystemYawThrusters();
-
-        void update(const double& dt);
-};
-class ShipSystemRollThrusters final: public ShipSystem{
-	friend class ::Ship;
-    public:
-        ShipSystemRollThrusters(Ship&);
-        ~ShipSystemRollThrusters();
-
-        void update(const double& dt);
-};
-class ShipSystemCloakingDevice final : public ShipSystem {
-    friend class ::Ship;
-    private:
-        bool  m_Active;
-        float m_CloakTimer;
-    public:
-        ShipSystemCloakingDevice(Ship&);
-        ~ShipSystemCloakingDevice();
-
-        const bool  isCloakActive() const;
-        const float getCloakTimer() const;
-
-        void update(const double& dt);
-        bool cloak(ComponentModel&, bool sendPacket = true);
-        bool decloak(ComponentModel&, bool sendPacket = true);
-};
-class ShipSystemShields final: public ShipSystem{
-	friend class ::Ship;
-    private:
-        EntityWrapper m_ShieldEntity;
-    public:
-        ShipSystemShields(Ship&, Map*);
-        ~ShipSystemShields();
-
-        void update(const double& dt);
-};
-class ShipSystemWarpDrive final: public ShipSystem{
-	friend class ::Ship;
-    public:
-        ShipSystemWarpDrive(Ship&);
-        ~ShipSystemWarpDrive();
-
-        void update(const double& dt);
-};
-class ShipSystemSensors final: public ShipSystem{
-	friend class ::Ship;
-    public:
-        ShipSystemSensors(Ship&);
-        ~ShipSystemSensors();
-
-        void update(const double& dt);
-};
+class  ShipSystemReactor;
+class  ShipSystemMainThrusters;
+class  ShipSystemYawThrusters;
+class  ShipSystemPitchThrusters;
+class  ShipSystemRollThrusters;
+class  ShipSystemCloakingDevice;
+class  ShipSystemWarpDrive;
+class  ShipSystemSensors;
+class  ShipSystemShields;
+class  ShipSystem;
 
 class Ship: public EntityWrapper {
     friend struct ::ShipLogicFunctor;
@@ -168,6 +66,7 @@ class Ship: public EntityWrapper {
 
         void onEvent(const Event&);
 
+        const std::string getName();
         const glm::vec3 getWarpSpeedVector3();
         const glm::vec3 getPosition();
 

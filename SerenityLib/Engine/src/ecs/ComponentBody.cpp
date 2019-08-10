@@ -24,6 +24,8 @@ using namespace std;
 ComponentBody::PhysicsData::PhysicsData(){ 
     //constructor
     mass      = 0;
+    group     = CollisionFilter::DefaultFilter;
+    mask      = CollisionFilter::AllFilter;
     rigidBody = nullptr;
     collision = nullptr;
 }
@@ -32,6 +34,8 @@ ComponentBody::PhysicsData::PhysicsData(const ComponentBody::PhysicsData& p_Othe
     mass        = p_Other.mass;
     motionState = p_Other.motionState;
     rigidBody   = p_Other.rigidBody;
+    group       = p_Other.group;
+    mask        = p_Other.mask;
 
     if (p_Other.collision) collision = new Collision(*p_Other.collision);
     else                   collision = nullptr;
@@ -52,6 +56,8 @@ ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& p_Other) no
     using std::swap;
     swap(mass, p_Other.mass);
     swap(motionState, p_Other.motionState);
+    swap(group, p_Other.group);
+    swap(mask, p_Other.mask);
 
     if (p_Other.collision) swap(collision, p_Other.collision);
     else                   collision = nullptr;
@@ -63,6 +69,8 @@ ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody:
     using std::swap;
     swap(mass, p_Other.mass);
     swap(motionState, p_Other.motionState);
+    swap(group, p_Other.group);
+    swap(mask, p_Other.mask);
     if (p_Other.collision) swap(collision, p_Other.collision);
     else                   collision = nullptr;
     if (p_Other.rigidBody) swap(rigidBody, p_Other.rigidBody);
@@ -279,6 +287,7 @@ void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, cons
         rigidBody.updateInertiaTensor();
     }
 }
+//double check this...
 void ComponentBody::setCollision(Collision* p_Collision) {
     auto& physicsData = *data.p;
     SAFE_DELETE(physicsData.collision);
@@ -426,7 +435,7 @@ void ComponentBody::setPosition(const float p_X, const float p_Y, const float p_
             btRigidBody::btRigidBodyConstructionInfo ci(physicsData.mass, &physicsData.motionState, collision.getShape(), collision.getInertia());
             physicsData.rigidBody = new btRigidBody(ci);
             physicsData.rigidBody->setUserPointer(this);
-            Physics::addRigidBody(physicsData.rigidBody);
+            Physics::addRigidBody(physicsData.rigidBody, physicsData.group, physicsData.mask);
         }
         physicsData.rigidBody->setMotionState(&physicsData.motionState); //is this needed?
         physicsData.rigidBody->setWorldTransform(tr);
@@ -675,6 +684,90 @@ const btRigidBody& ComponentBody::getBody() const {
 void ComponentBody::setDamping(const float p_LinearFactor, const float p_AngularFactor) {
 	data.p->rigidBody->setDamping(p_LinearFactor, p_AngularFactor);
 }
+void ComponentBody::setCollisionGroup(const short& group) {
+    if (m_Physics) {
+        auto& phyData = *data.p;
+        if (phyData.group != group) {
+            Physics::removeRigidBody(phyData.rigidBody);
+            phyData.group = group;
+            Physics::addRigidBody(phyData.rigidBody, phyData.group, phyData.mask);
+        }
+    }
+}
+void ComponentBody::setCollisionMask(const short& mask) {
+    if (m_Physics) {
+        auto& phyData = *data.p;
+        if (phyData.mask != mask) {
+            Physics::removeRigidBody(phyData.rigidBody);
+            phyData.mask = mask;
+            Physics::addRigidBody(phyData.rigidBody, phyData.group, phyData.mask);
+        }
+    }
+}
+void ComponentBody::setCollisionGroup(const CollisionFilter::Filter& group) {
+    ComponentBody::setCollisionGroup(static_cast<short>(group));
+}
+void ComponentBody::setCollisionMask(const CollisionFilter::Filter& mask) {
+    ComponentBody::setCollisionMask(static_cast<short>(mask));
+}
+void ComponentBody::addCollisionGroup(const short& group) {
+    if (m_Physics) {
+        auto& phyData = *data.p;
+        if (phyData.group != (phyData.group | group)) {
+            Physics::removeRigidBody(phyData.rigidBody);
+            phyData.group = phyData.group | group;
+            Physics::addRigidBody(phyData.rigidBody, phyData.group, phyData.mask);
+        }
+    }
+}
+void ComponentBody::addCollisionMask(const short& mask) {
+    if (m_Physics) {
+        auto& phyData = *data.p;
+        if (phyData.mask != (phyData.mask | mask)) {
+            Physics::removeRigidBody(phyData.rigidBody);
+            phyData.mask = phyData.mask | mask;
+            Physics::addRigidBody(phyData.rigidBody, phyData.group, phyData.mask);
+        }
+    }
+}
+void ComponentBody::addCollisionGroup(const CollisionFilter::Filter& group) {
+    ComponentBody::addCollisionGroup(static_cast<short>(group));
+}
+void ComponentBody::addCollisionMask(const CollisionFilter::Filter& mask) {
+    ComponentBody::addCollisionMask(static_cast<short>(mask));
+}
+void ComponentBody::setCollisionFlag(const short& flag) {
+    if (m_Physics) {
+        auto& phyData = *data.p;
+        auto& rigidBody = *phyData.rigidBody;
+        const auto& currFlags = rigidBody.getCollisionFlags();
+        if (currFlags != flag) {
+            Physics::removeRigidBody(&rigidBody);
+            rigidBody.setCollisionFlags(flag);
+            Physics::addRigidBody(&rigidBody, phyData.group, phyData.mask);
+        }
+    }
+}
+void ComponentBody::setCollisionFlag(const CollisionFlag::Flag& flag) {
+    ComponentBody::setCollisionFlag(static_cast<short>(flag));
+}
+void ComponentBody::addCollisionFlag(const short& flag) {
+    if (m_Physics) {
+        auto& phyData = *data.p;
+        auto& rigidBody = *phyData.rigidBody;
+        const auto& currFlags = rigidBody.getCollisionFlags();
+        if (currFlags != (currFlags | flag)) {
+            Physics::removeRigidBody(&rigidBody);
+            rigidBody.setCollisionFlags(currFlags | flag);
+            Physics::addRigidBody(&rigidBody, phyData.group, phyData.mask);
+        }
+    }
+}
+void ComponentBody::addCollisionFlag(const CollisionFlag::Flag& flag) {
+    ComponentBody::addCollisionFlag(static_cast<short>(flag));
+}
+
+
 void ComponentBody::setDynamic(const bool p_Dynamic) {
     if (m_Physics) {
         auto& physicsData = *data.p;
@@ -682,13 +775,13 @@ void ComponentBody::setDynamic(const bool p_Dynamic) {
         if (p_Dynamic) {
             Physics::removeRigidBody(&rigidBody);
             rigidBody.setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
-            Physics::addRigidBody(&rigidBody);
+            Physics::addRigidBody(&rigidBody, physicsData.group, physicsData.mask);
             rigidBody.activate();
         }else{
             Physics::removeRigidBody(&rigidBody);
             rigidBody.setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
             ComponentBody::clearAllForces();
-            Physics::addRigidBody(&rigidBody);
+            Physics::addRigidBody(&rigidBody, physicsData.group, physicsData.mask);
             rigidBody.activate();
         }
     }
@@ -881,8 +974,10 @@ struct epriv::ComponentBody_EntityAddedToSceneFunction final {void operator()(vo
             _component.setCollision(static_cast<CollisionType::Type>(physicsData.collision->getType()), physicsData.mass);
 
             auto currentScene = Resources::getCurrentScene();
-            if(currentScene && currentScene == &p_Scene)
-                Physics::addRigidBody(_component.data.p->rigidBody);
+            if (currentScene && currentScene == &p_Scene) {
+                auto& phyData = *_component.data.p;
+                Physics::addRigidBody(phyData.rigidBody, phyData.group, phyData.mask);
+            }
         }
     }
 }};
@@ -890,7 +985,8 @@ struct epriv::ComponentBody_SceneEnteredFunction final {void operator()(void* p_
 	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).pool();
     for (auto& component : pool) { 
         if (component.m_Physics) {
-            Physics::addRigidBody(component.data.p->rigidBody); 
+            auto& phyData = *component.data.p;
+            Physics::addRigidBody(phyData.rigidBody, phyData.group, phyData.mask);
         } 
     }
 }};
@@ -898,7 +994,8 @@ struct epriv::ComponentBody_SceneLeftFunction final {void operator()(void* p_Com
 	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).pool();
     for (auto& component : pool) { 
         if (component.m_Physics) {
-            Physics::removeRigidBody(component.data.p->rigidBody); 
+            auto& phyData = *component.data.p;
+            Physics::removeRigidBody(phyData.rigidBody);
         } 
     }
 }};

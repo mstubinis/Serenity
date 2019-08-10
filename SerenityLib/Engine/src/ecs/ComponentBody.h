@@ -49,6 +49,8 @@ class ComponentBody : public ComponentBaseClass {
             btRigidBody*         rigidBody;
             btDefaultMotionState motionState;
             float                mass;
+            ushort               group;
+            ushort               mask;
 
             PhysicsData();
             PhysicsData(const PhysicsData& other);
@@ -133,6 +135,20 @@ class ComponentBody : public ComponentBaseClass {
 
         void setCollision(const CollisionType::Type, const float mass);
         void setCollision(Collision*);
+
+        void setCollisionGroup(const short& group);
+        void setCollisionMask(const short& mask);
+        void setCollisionFlag(const short& flag);
+        void setCollisionGroup(const CollisionFilter::Filter& group);
+        void setCollisionMask(const CollisionFilter::Filter& mask);
+        void setCollisionFlag(const CollisionFlag::Flag& flag);
+        void addCollisionGroup(const short& group);
+        void addCollisionMask(const short& mask);
+        void addCollisionFlag(const short& flag);
+        void addCollisionGroup(const CollisionFilter::Filter& group);
+        void addCollisionMask(const CollisionFilter::Filter& mask);
+        void addCollisionFlag(const CollisionFlag::Flag& flag);
+
         void setDamping(const float linear, const float angular);
 
         void setDynamic(const bool dynamic);

@@ -10,6 +10,7 @@ using namespace Engine;
 Handle ResourceManifest::skyFromSpace;
 Handle ResourceManifest::skyFromAtmosphere;
 Handle ResourceManifest::groundFromSpace;
+Handle ResourceManifest::shieldsShaderProgram;
 
 Handle ResourceManifest::PlanetMesh;
 Handle ResourceManifest::DefiantMesh;
@@ -25,6 +26,7 @@ Handle ResourceManifest::ExcelsiorMesh;
 Handle ResourceManifest::ConstitutionMesh;
 Handle ResourceManifest::LeviathanMesh;
 Handle ResourceManifest::ShrikeMesh;
+Handle ResourceManifest::BrelMesh;
 
 Handle ResourceManifest::NovaMaterial;
 Handle ResourceManifest::MirandaMaterial;
@@ -34,6 +36,7 @@ Handle ResourceManifest::ExcelsiorMaterial;
 Handle ResourceManifest::ConstitutionMaterial;
 Handle ResourceManifest::DefiantSharkMaterial;
 Handle ResourceManifest::ShrikeMaterial;
+Handle ResourceManifest::BrelMaterial;
 
 
 Handle ResourceManifest::StarMaterial;
@@ -70,6 +73,10 @@ void ResourceManifest::init(){
     Handle groundFromSpaceFrag = Resources::addShader(BasePath + "data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag);
  
+
+    Handle shieldsVert = Resources::addShader(BasePath + "data/Shaders/shields_vert.glsl", ShaderType::Vertex);
+    Handle shieldsFrag = Resources::addShader(BasePath + "data/Shaders/shields_frag.glsl", ShaderType::Fragment);
+    shieldsShaderProgram = Resources::addShaderProgram("ShieldsShaderProgram", shieldsVert, shieldsFrag);
 
     PlanetMesh = Resources::loadMeshAsync(BasePath + "data/Models/planet.objcc").at(0);
     DefiantMesh = Resources::loadMeshAsync(BasePath + "data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)

@@ -34,8 +34,8 @@ using namespace std;
 using namespace Engine;
 
 const float  PHYSICS_PACKET_TIMER_LIMIT  = 0.05f;
-const double DISTANCE_CHECK  = 1000000.0 * 1000000.0;
-const double DISTANCE_CHECK2 = 100000.0  * 100000.0;
+const double DISTANCE_CHECK_NEAREST_ANCHOR  = 1000000.0 * 1000000.0;
+const double DISTANCE_CHECK_NEAREST_OTHER_PLAYER = 100000.0  * 100000.0;
 
 struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
     ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(button->getUserPointer());
@@ -170,17 +170,18 @@ void epriv::ClientInternalPublicInterface::update(Client* _client) {
             p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
             client.send(p);
 
-            auto playerPos = playerShip.getComponent<ComponentBody>()->position();
+            auto playerPos = playerShip.getPosition();
             auto nearestAnchorPos = finalAnchor->getPosition();
-            double dist = static_cast<double>(glm::distance2(nearestAnchorPos, playerPos));
+            double distFromMeToNearestAnchor = static_cast<double>(glm::distance2(nearestAnchorPos, playerPos));
             
-            if (dist > DISTANCE_CHECK) {
+            if (distFromMeToNearestAnchor > DISTANCE_CHECK_NEAREST_ANCHOR) {
                 for (auto& otherShips : map.getShips()) {
-                    if (otherShips.first != playerShip.getComponent<ComponentName>()->name()) {
-                        auto otherPos = otherShips.second->getComponent<ComponentBody>()->position();
-                        double otherDist = static_cast<double>(glm::distance2(otherPos, playerPos));
-                        if (otherDist < DISTANCE_CHECK2) {
-                            glm::vec3 midpoint = Math::midpoint(otherPos, playerPos);
+                    if (otherShips.first != playerShip.getName()) {
+                        auto otherPlayerPos = otherShips.second->getPosition();
+                        double distFromMeToOtherPlayer = static_cast<double>(glm::distance2(otherPlayerPos, playerPos));
+                        const auto calc = (distFromMeToNearestAnchor - DISTANCE_CHECK_NEAREST_ANCHOR) * 0.5f;
+                        if (distFromMeToOtherPlayer < glm::max(calc, DISTANCE_CHECK_NEAREST_OTHER_PLAYER)) {
+                            const glm::vec3 midpoint = Math::midpoint(otherPlayerPos, playerPos);
 
                             PacketMessage pOut;
                             pOut.PacketType = PacketType::Client_To_Server_Request_Anchor_Creation;
@@ -240,7 +241,7 @@ void Client::onReceive() {
                     const float y = pI.g + anchorPos.y;
                     const float z = pI.b + anchorPos.z;
                     map.internalCreateDeepspaceAnchor(x, y, z);
-                    //std::cout << "creating deep space anchor" << std::endl;
+                    std::cout << "creating deep space anchor" << std::endl;
                     break;
                 }
                 case PacketType::Server_To_Client_Ship_Cloak_Update: {

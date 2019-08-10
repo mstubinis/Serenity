@@ -21,7 +21,7 @@ class Helper {
                 result.push_back(str);
             return result;
         }
-        static float GetRandomFloatFromTo(const unsigned int& minValue, const unsigned int& maxValue) {
+        static float GetRandomFloatFromTo(const int& minValue, const int& maxValue) {
             const float result = minValue + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxValue - minValue)));
             return result;
         }
