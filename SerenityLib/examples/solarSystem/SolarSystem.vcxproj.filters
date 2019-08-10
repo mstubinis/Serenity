@@ -70,6 +70,12 @@
     <Filter Include="Header Files\Game\Ships\Shrike">
       <UniqueIdentifier>{d3e0e06b-d1c3-4826-a2ef-6476291c0dfe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Weapons">
+      <UniqueIdentifier>{031877ad-b00a-4d79-a214-36a57520f1b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Weapons">
+      <UniqueIdentifier>{d482a783-1345-44ae-bfa6-1dd9397c5485}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -186,6 +192,15 @@
     <ClInclude Include="game\ships\shrike\Shrike.h">
       <Filter>Header Files\Game\Ships\Shrike</Filter>
     </ClInclude>
+    <ClInclude Include="game\weapons\PulsePhaser.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\DisruptorCannon.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\PlasmaCannon.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -298,6 +313,15 @@
     </ClCompile>
     <ClCompile Include="game\ships\shrike\Shrike.cpp">
       <Filter>Source Files\Game\Ships\Shrike</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\PulsePhaser.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\PlasmaCannon.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\DisruptorCannon.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

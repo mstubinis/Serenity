@@ -102,16 +102,9 @@ void ShipSystemShields::update(const double& dt) {
     if (Engine::isKeyDownOnce(KeyboardKey::M)) {
         auto& boundBox = m_Ship.getComponent<ComponentModel>()->getModel(0).mesh()->getRadiusBox();
 
-        float randX = Helper::GetRandomFloatFromTo(-100, 100);
-        float randY = Helper::GetRandomFloatFromTo(-100, 100);
-        float randZ = Helper::GetRandomFloatFromTo(-100, 100);
-
-        float randRad = Helper::GetRandomFloatFromTo(-100, 100);
-
-        randX = (randX * (0.01f)) * boundBox.x;
-        randY = (randY * (0.01f)) * boundBox.y;
-        randZ = (randZ * (0.01f)) * boundBox.z;
-     
+        float randX = Helper::GetRandomFloatFromTo(-boundBox.x, boundBox.x);
+        float randY = Helper::GetRandomFloatFromTo(-boundBox.y, boundBox.y);
+        float randZ = Helper::GetRandomFloatFromTo(-boundBox.z, boundBox.z);
         receiveHit(glm::vec3(randX, randY, randZ), 0.8f, 2.4f, 100);
     }
     */

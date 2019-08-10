@@ -16,6 +16,7 @@ Handle ResourceManifest::PlanetMesh;
 Handle ResourceManifest::DefiantMesh;
 Handle ResourceManifest::RingMesh;
 Handle ResourceManifest::ShieldMesh;
+Handle ResourceManifest::CannonEffectMesh;
 
 /*extras*/
 Handle ResourceManifest::NovaMesh;
@@ -46,6 +47,10 @@ Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
 Handle ResourceManifest::StarFlareMaterial;
 Handle ResourceManifest::ShieldMaterial;
+
+Handle ResourceManifest::PulsePhaserMaterial;
+Handle ResourceManifest::PlasmaCannonMaterial;
+Handle ResourceManifest::DisruptorCannonMaterial;
 
 //sounds
 Handle ResourceManifest::MenuMusic;
@@ -82,6 +87,7 @@ void ResourceManifest::init(){
     DefiantMesh = Resources::loadMeshAsync(BasePath + "data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc").at(0);
     ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc").at(0);
+    CannonEffectMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_effect.obj").at(0);
 
 
 	//extras
@@ -96,6 +102,22 @@ void ResourceManifest::init(){
 
 
     Engine::epriv::threading::waitForAll();
+
+
+    PulsePhaserMaterial = Resources::addMaterial("PulsePhaser", BasePath + "data/Textures/Effects/pulse_phaser.dds", "","", "");
+    PlasmaCannonMaterial = Resources::addMaterial("PlasmaCannon", BasePath + "data/Textures/Effects/plasma_cannon.dds", "", "", "");
+    DisruptorCannonMaterial = Resources::addMaterial("DisruptorCannon", BasePath + "data/Textures/Effects/disruptor_cannon.dds", "", "", "");
+    Material& pulsePhaserMat = *((Material*)PulsePhaserMaterial.get());
+    Material& plasmaCannonMat = *((Material*)PlasmaCannonMaterial.get());
+    Material& disruptorCannonMat = *((Material*)DisruptorCannonMaterial.get());
+    pulsePhaserMat.setShadeless(true);
+    plasmaCannonMat.setShadeless(true);
+    disruptorCannonMat.setShadeless(true);
+    pulsePhaserMat.setGlow(0.21f);
+    plasmaCannonMat.setGlow(0.21f);
+    disruptorCannonMat.setGlow(0.21f);
+
+
 
     DefiantMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/defiant/defiant.dds");
     Material& defMat = *((Material*)DefiantMaterial.get());

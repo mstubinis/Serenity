@@ -229,6 +229,9 @@
     <ClInclude Include="game\ships\shipSystems\ShipSystemWarpDrive.h" />
     <ClInclude Include="game\ships\shipSystems\ShipSystemYawThrusters.h" />
     <ClInclude Include="game\ships\shrike\Shrike.h" />
+    <ClInclude Include="game\weapons\DisruptorCannon.h" />
+    <ClInclude Include="game\weapons\PlasmaCannon.h" />
+    <ClInclude Include="game\weapons\PulsePhaser.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\Client.cpp" />
@@ -268,6 +271,9 @@
     <ClCompile Include="game\ships\shipSystems\ShipSystemWarpDrive.cpp" />
     <ClCompile Include="game\ships\shipSystems\ShipSystemYawThrusters.cpp" />
     <ClCompile Include="game\ships\shrike\Shrike.cpp" />
+    <ClCompile Include="game\weapons\DisruptorCannon.cpp" />
+    <ClCompile Include="game\weapons\PlasmaCannon.cpp" />
+    <ClCompile Include="game\weapons\PulsePhaser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\SerenityLib.vcxproj">
