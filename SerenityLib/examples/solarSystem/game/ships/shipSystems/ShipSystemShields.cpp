@@ -98,7 +98,7 @@ void ShipSystemShields::update(const double& dt) {
     auto& shipBody = *m_Ship.getComponent<ComponentBody>();
     shieldBody.setPosition(shipBody.position());
     shieldBody.setRotation(shipBody.rotation());
-
+    /*
     if (Engine::isKeyDownOnce(KeyboardKey::M)) {
         auto& boundBox = m_Ship.getComponent<ComponentModel>()->getModel(0).mesh()->getRadiusBox();
 
@@ -114,6 +114,7 @@ void ShipSystemShields::update(const double& dt) {
      
         receiveHit(glm::vec3(randX, randY, randZ), 0.8f, 2.4f, 100);
     }
+    */
     const float fdt = static_cast<float>(dt);
     for (auto& impact : m_ImpactPoints) {
         impact.update(fdt, m_ImpactPointsFreelist);

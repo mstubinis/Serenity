@@ -1624,12 +1624,14 @@ class epriv::RenderManager::impl final{
 
             InternalScenePublicInterface::RenderForwardTransparent(scene, camera, dt);
             InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, camera, dt);
+            GLEnablei(GL_BLEND, 1); //yes this is important
             GLEnablei(GL_BLEND, 2); //yes this is important
 
             glDepthMask(GL_FALSE);
             InternalScenePublicInterface::RenderForwardParticles(scene, camera, dt);
 
             GLDisablei(GL_BLEND, 0); //this is needed for smaa at least
+            GLDisablei(GL_BLEND, 1);
             GLDisablei(GL_BLEND, 2);
         }
         void _passCopyDepth(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){

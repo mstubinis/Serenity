@@ -229,7 +229,7 @@ void epriv::MeshLoader::FinalizeData(Mesh& mesh,epriv::MeshImportedData& data, f
         vertexData.setData(2, normals[0]);
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
-        vertexData.setIndices(data.indices);
+        vertexData.setIndices(data.indices, false, false, true);
     }else{
         vector<ushort> _indices;
         vector<glm::vec3> temp_pos; temp_pos.reserve(data.points.size());
@@ -268,7 +268,7 @@ void epriv::MeshLoader::FinalizeData(Mesh& mesh,epriv::MeshImportedData& data, f
         vertexData.setData(2, normals[0]);
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
-        vertexData.setIndices(_indices);
+        vertexData.setIndices(_indices, false, false, true);
     }
     if (mesh.m_Skeleton) {
         vector<vector<glm::vec4>> boneStuff;
