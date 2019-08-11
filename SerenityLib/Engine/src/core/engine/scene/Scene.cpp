@@ -251,6 +251,14 @@ void InternalScenePublicInterface::RenderForwardParticles(Scene& scene, Camera& 
 ECS<Entity>& InternalScenePublicInterface::GetECS(Scene& scene) {
     return scene.m_i->m_ECS;
 }
+void InternalScenePublicInterface::CleanECS(Scene& scene, Entity& entity) {
+    for (auto& pipelines : scene.m_i->m_Pipelines) {
+        for (auto& pipeline : pipelines) {
+            pipeline->clean(entity);
+        }
+    }
+}
+
 void InternalScenePublicInterface::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, const RenderStage::Stage& stage) {
     scene.m_i->_addModelInstanceToPipeline(scene, modelInstance, scene.m_i->m_Pipelines[stage], stage);
 }

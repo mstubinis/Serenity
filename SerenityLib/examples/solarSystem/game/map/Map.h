@@ -13,6 +13,7 @@ class GameObject;
 class EntityWrapper;
 class GameSkybox;
 class Anchor;
+class Client;
 class Map: public Scene{
     private:
         std::unordered_map<std::string, Planet*>   m_Planets;
@@ -42,6 +43,9 @@ class Map: public Scene{
 
         const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr);
         
+
+        Ship* createShip(Client& client, const std::string& shipClass, const std::string& shipName, const bool& playerShip, const glm::vec3& position);
+
 
         Ship* getPlayer() { return m_Player; }
         void setPlayer(Ship* p){ m_Player = p; }

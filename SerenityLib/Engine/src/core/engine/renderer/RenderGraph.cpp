@@ -65,9 +65,24 @@ void RenderPipeline::sort(Camera& camera) {
         }
     }
 }
-
+void RenderPipeline::clean(Entity& inentity) {
+    for (auto& materialNode : materialNodes) {
+        for (auto& meshNode : materialNode->meshNodes) {
+            auto& instances = meshNode->instanceNodes;
+            for (auto& instanceNode : instances) {
+                auto entity = instanceNode->instance->parent();
+                if (entity == inentity) {
+                    removeFromVector(instances, instanceNode);
+                }
+            }
+        }
+    }
+}
 void RenderPipeline::render(Camera& camera, const double& dt, const bool useDefaultShaders, const bool sortTriangles) {
-    if(useDefaultShaders) shaderProgram.bind();
+
+
+    if(useDefaultShaders) 
+        shaderProgram.bind();
     for (auto& materialNode : materialNodes) {
         if (materialNode->meshNodes.size() > 0) {
             auto& _material = *materialNode->material;

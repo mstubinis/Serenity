@@ -108,7 +108,7 @@ void Core::enterMap(const string& mapFile, const string& playership, const strin
     Map& map = *static_cast<Map*>(Resources::getScene(mapFile));
 
     auto& handles = ResourceManifest::Ships.at(playership);
-    Ship* playerShip = new Ship(*m_Client,handles.get<0>(), handles.get<1>(), playership, true, playername, glm::vec3(x, y, z), glm::vec3(1.0f), CollisionType::ConvexHull, &map);
+    Ship* playerShip = map.createShip(*m_Client, playership, playername, true, glm::vec3(x, y, z));
     map.setPlayer(playerShip);
     GameCamera* playerCamera = (GameCamera*)map.getActiveCamera();
     playerCamera->follow(playerShip->entity()); 

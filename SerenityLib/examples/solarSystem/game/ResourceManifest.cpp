@@ -56,6 +56,9 @@ Handle ResourceManifest::DisruptorCannonMaterial;
 Handle ResourceManifest::MenuMusic;
 Handle ResourceManifest::SoundCloakingActivated;
 Handle ResourceManifest::SoundCloakingDeactivated;
+Handle ResourceManifest::SoundPulsePhaser;
+Handle ResourceManifest::SoundPlasmaCannon;
+Handle ResourceManifest::SoundDisruptorCannon;
 
 std::unordered_map<std::string, boost::tuple<Handle, Handle, glm::vec3, glm::vec3>> ResourceManifest::Ships;
 
@@ -113,9 +116,9 @@ void ResourceManifest::init(){
     pulsePhaserMat.setShadeless(true);
     plasmaCannonMat.setShadeless(true);
     disruptorCannonMat.setShadeless(true);
-    pulsePhaserMat.setGlow(0.21f);
-    plasmaCannonMat.setGlow(0.21f);
-    disruptorCannonMat.setGlow(0.21f);
+    pulsePhaserMat.setGlow(1.0f);
+    plasmaCannonMat.setGlow(1.0f);
+    disruptorCannonMat.setGlow(1.0f);
 
 
 
@@ -188,6 +191,10 @@ void ResourceManifest::init(){
     MenuMusic = Resources::addSoundData(BasePath + "data/Sounds/menu.ogg");
     SoundCloakingActivated = Resources::addSoundData(BasePath + "data/Sounds/effects/cloaking.ogg");
     SoundCloakingDeactivated = Resources::addSoundData(BasePath + "data/Sounds/effects/decloaking.ogg");
+    SoundPulsePhaser = Resources::addSoundData(BasePath + "data/Sounds/effects/pulse_phaser.ogg");
+    //SoundPlasmaCannon;
+    //SoundDisruptorCannon;
+
 
 
     ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(DefiantMesh,      DefiantMaterial, glm::vec3(1, 1, 1), glm::vec3(0,0,1));

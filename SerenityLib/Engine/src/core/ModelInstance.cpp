@@ -189,8 +189,8 @@ namespace Engine {
     };
 };
 
-ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderProgram* program) {
-    internalInit(mesh, mat, parent, program);
+ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderProgram* program):m_Parent(parent){
+    internalInit(mesh, mat, program);
     setCustomBindFunctor(epriv::DefaultModelInstanceBindFunctor());
     setCustomUnbindFunctor(epriv::DefaultModelInstanceUnbindFunctor());
 }
@@ -204,7 +204,7 @@ ModelInstance::~ModelInstance() {
     SAFE_DELETE_VECTOR(m_AnimationQueue);
 }
 
-void ModelInstance::internalInit(Mesh* mesh, Material* mat, Entity& parent, ShaderProgram* program) {
+void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* program) {
     if (!program) {
         program = ShaderProgram::Deferred;
     }
@@ -212,7 +212,6 @@ void ModelInstance::internalInit(Mesh* mesh, Material* mat, Entity& parent, Shad
     m_Stage             = RenderStage::GeometryOpaque;
     m_PassedRenderCheck = false;
     m_Visible           = true;
-    m_Parent            = parent;
     m_ShaderProgram     = program;
     m_Material          = mat;
     m_Mesh              = mesh;

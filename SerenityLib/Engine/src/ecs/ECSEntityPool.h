@@ -17,35 +17,35 @@ namespace epriv {
             ECSEntityPool() = default;
             ~ECSEntityPool() = default;
 
-            void destroyFlaggedEntity(const uint& _index) {
-                const uint& index = _index - 1;
+            void destroyFlaggedEntity(const uint& entityID) {
+                const uint index = entityID - 1;
                 ++_pool[index].versionID;
                 _freelist.emplace_back(index);
             }
-            E addEntity(Scene& _scene) {
+            E addEntity(Scene& scene) {
                 if (_freelist.empty()) {
                     _pool.emplace_back(0,0);
                     _freelist.emplace_back(_pool.size() - 1);
                 }
-                uint _id = _freelist.back();
+                const uint id = _freelist.back();
                 _freelist.pop_back();
-                auto& element = _pool[_id];
-                element.ID = _id + 1;
-                element.sceneID = _scene.id();
+                auto& element = _pool[id];
+                element.ID = id + 1;
+                element.sceneID = scene.id();
                 return E(element.ID, element.sceneID, element.versionID);
             }
-            EntityPOD* getEntity(const uint& _entityData) {
-                if (_entityData == 0) 
+            EntityPOD* getEntity(const uint& entityData) {
+                if (entityData == 0) 
                     return nullptr;
-                EntityDataRequest dataRequest(_entityData);
-                const uint& index = dataRequest.ID - 1;
+                EntityDataRequest dataRequest(entityData);
+                const uint index = dataRequest.ID - 1;
                 if (index < _pool.size() && _pool[index].versionID == dataRequest.versionID) {
                     return &_pool[index];
                 }
                 return nullptr;
             }
-            EntityPOD* getEntity(const E& _entity) {
-                return getEntity(_entity.data); 
+            EntityPOD* getEntity(const E& entity) {
+                return getEntity(entity.data);
             }
         };
 };

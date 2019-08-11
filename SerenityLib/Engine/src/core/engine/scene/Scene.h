@@ -107,6 +107,7 @@ namespace Engine {
             static void           AddModelInstanceToPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
             static void           RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
             static ECS<Entity>&   GetECS(Scene&);
+            static void           CleanECS(Scene&, Entity&);
             static uint           NumScenes;
         };
     };

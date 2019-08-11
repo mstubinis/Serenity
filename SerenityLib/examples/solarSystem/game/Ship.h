@@ -24,20 +24,22 @@ class  ShipSystemCloakingDevice;
 class  ShipSystemWarpDrive;
 class  ShipSystemSensors;
 class  ShipSystemShields;
+class  ShipSystemWeapons;
 class  ShipSystem;
 
 class Ship: public EntityWrapper {
-    friend struct ::ShipLogicFunctor;
-    friend  class ::ShipSystemReactor;
-    friend  class ::ShipSystemMainThrusters;
-	friend  class ::ShipSystemYawThrusters;
-	friend  class ::ShipSystemPitchThrusters;
-	friend  class ::ShipSystemRollThrusters;
-    friend  class ::ShipSystemCloakingDevice;
-    friend  class ::ShipSystemWarpDrive;
-    friend  class ::ShipSystemSensors;
-    friend  class ::ShipSystemShields;
-	friend  class ::ShipSystem;
+    friend struct ShipLogicFunctor;
+    friend  class ShipSystemReactor;
+    friend  class ShipSystemMainThrusters;
+	friend  class ShipSystemYawThrusters;
+	friend  class ShipSystemPitchThrusters;
+	friend  class ShipSystemRollThrusters;
+    friend  class ShipSystemCloakingDevice;
+    friend  class ShipSystemWarpDrive;
+    friend  class ShipSystemSensors;
+    friend  class ShipSystemShields;
+    friend  class ShipSystemWeapons;
+	friend  class ShipSystem;
     protected:
         Client&                              m_Client;
         std::unordered_map<uint,ShipSystem*> m_ShipSystems;

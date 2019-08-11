@@ -73,7 +73,7 @@ void epriv::SoundManager::_update(const double& dt){
         auto& effect = m_SoundEffects[i];
         if (effect.m_Active) {
             effect.update(dt);
-            if (effect.status() == SoundStatus::Stopped) {
+            if (effect.status() == SoundStatus::Stopped || effect.status() == SoundStatus::Fresh) {
                 m_FreelistEffects.push(i);
                 effect.m_Active = false;
             }
@@ -83,7 +83,7 @@ void epriv::SoundManager::_update(const double& dt){
         auto& music = m_SoundMusics[i];
         if (music.m_Active) {
             music.update(dt);
-            if (music.status() == SoundStatus::Stopped) {
+            if (music.status() == SoundStatus::Stopped || music.status() == SoundStatus::Fresh) {
                 m_FreelistMusics.push(i);
                 music.m_Active = false;
             }

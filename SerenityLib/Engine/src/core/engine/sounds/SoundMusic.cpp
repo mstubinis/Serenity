@@ -55,8 +55,8 @@ const bool SoundMusic::play(const uint& numLoops) {
             return false;
         }
     }
-    m_Active = true;
     m_Sound.play();
+    m_Active = true;
 
     EventSoundStatusChanged e(m_Status);
     Event ev;

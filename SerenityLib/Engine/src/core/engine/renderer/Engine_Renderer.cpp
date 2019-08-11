@@ -1617,15 +1617,15 @@ class epriv::RenderManager::impl final{
             InternalScenePublicInterface::RenderForwardOpaque(scene, camera, dt);
 
             GLEnablei(GL_BLEND, 0); //this might need to be all buffers not just 0
-            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glBlendFuncSeparatei(0,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE); //this works too
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            //glBlendFuncSeparatei(0,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE); //this works too
             //glBlendFuncSeparatei(2, GL_ONE, GL_ONE, GL_ONE, GL_ONE); //this works too
             glDepthMask(GL_TRUE);
 
-            InternalScenePublicInterface::RenderForwardTransparent(scene, camera, dt);
-            InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, camera, dt);
             GLEnablei(GL_BLEND, 1); //yes this is important
             GLEnablei(GL_BLEND, 2); //yes this is important
+            InternalScenePublicInterface::RenderForwardTransparent(scene, camera, dt);
+            InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, camera, dt);
 
             glDepthMask(GL_FALSE);
             InternalScenePublicInterface::RenderForwardParticles(scene, camera, dt);

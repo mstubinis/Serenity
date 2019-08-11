@@ -54,12 +54,12 @@ namespace epriv {
 
 
             //"event handlers"
-            template<typename T> void onResize(const uint& w, const uint& h) {
+            template<typename T> void onResize(const uint& width, const uint& height) {
                 using CPoolType       = ECSComponentPool<TEntity, T>;
                 const uint& type_slot = ECSRegistry::type_slot_fast<T>();
                 auto& components = (*static_cast<CPoolType*>(componentPools[type_slot])).pool();
                 for (auto& camera : components) {
-                    camera.resize(w, h);
+                    camera.resize(width, height);
                 }
             }
             void update(const double& dt, Scene& scene) {
@@ -98,14 +98,13 @@ namespace epriv {
             }
             void postUpdate(Scene& scene, const double& dt) {
                 if (destroyedEntities.size() > 0) {
-                    for (uint i = 0; i < componentPools.size(); ++i) {
-                        auto& pool = *componentPools[i];
-                        for (auto& _index1 : destroyedEntities) {
-                            pool._remove(_index1);
+                    for (auto& pool: componentPools) {
+                        for (auto& entityID : destroyedEntities) {
+                            pool->_remove(entityID);
                         }
                     }
-                    for (auto& _index : destroyedEntities) {
-                        entityPool.destroyFlaggedEntity(_index);
+                    for (auto& entityID : destroyedEntities) {
+                        entityPool.destroyFlaggedEntity(entityID);
                     }
                     vector_clear(destroyedEntities);
                 }

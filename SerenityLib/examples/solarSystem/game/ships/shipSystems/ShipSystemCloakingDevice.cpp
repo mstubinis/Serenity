@@ -26,9 +26,11 @@ bool ShipSystemCloakingDevice::cloak(ComponentModel& model, bool sendPacket) {
         model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
         m_Active = true;
         auto effect = Sound::playEffect(ResourceManifest::SoundCloakingActivated);
-        auto& body = *m_Ship.getComponent<ComponentBody>();
-        effect->setPosition(body.position());
-        effect->setAttenuation(0.15f);
+        if (effect) {
+            auto& body = *m_Ship.getComponent<ComponentBody>();
+            effect->setPosition(body.position());
+            effect->setAttenuation(0.15f);
+        }
         if (sendPacket) {
             PacketCloakUpdate pOut(m_Ship);
             pOut.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
@@ -45,9 +47,11 @@ bool ShipSystemCloakingDevice::decloak(ComponentModel& model, bool sendPacket) {
         m_CloakTimer = 0.0f;
         model.show();
         auto effect = Sound::playEffect(ResourceManifest::SoundCloakingDeactivated);
-        auto& body = *m_Ship.getComponent<ComponentBody>();
-        effect->setPosition(body.position());
-        effect->setAttenuation(0.15f);
+        if (effect) {
+            auto& body = *m_Ship.getComponent<ComponentBody>();
+            effect->setPosition(body.position());
+            effect->setAttenuation(0.15f);
+        }
         if (sendPacket) {
             PacketCloakUpdate pOut(m_Ship);
             pOut.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;

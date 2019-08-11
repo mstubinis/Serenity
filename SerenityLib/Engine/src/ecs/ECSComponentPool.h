@@ -18,29 +18,29 @@ namespace epriv {
             ECSComponentPool& operator=(ECSComponentPool&& other) noexcept      = delete;
             ~ECSComponentPool()                                                 = default;
 
-            template<typename... ARGS> inline T* addComponent(const E& _entity, ARGS&&... _args) {
-				const EntityDataRequest dataRequest(_entity);
-                return super::_add(dataRequest.ID, const_cast<E&>(_entity), std::forward<ARGS>(_args)...);
+            template<typename... ARGS> inline T* addComponent(const E& entity, ARGS&&... args) {
+				const EntityDataRequest dataRequest(entity);
+                return super::_add(dataRequest.ID, const_cast<E&>(entity), std::forward<ARGS>(args)...);
             }
-            inline bool removeComponent(const E& _entity) {
-				const EntityDataRequest dataRequest(_entity);
+            inline bool removeComponent(const E& entity) {
+				const EntityDataRequest dataRequest(entity);
                 return super::_remove(dataRequest.ID);
             }
             inline bool removeComponent(const EntityDataRequest& dataRequest) {
                 return super::_remove(dataRequest.ID);
             }
-            inline bool removeComponent(const uint& _index) {
-                return super::_remove(_index); 
+            inline bool removeComponent(const uint& entityID) {
+                return super::_remove(entityID);
             }
-            inline T* getComponent(const E& _entity) {
-				const EntityDataRequest dataRequest(_entity);
+            inline T* getComponent(const E& entity) {
+				const EntityDataRequest dataRequest(entity);
                 return super::_get(dataRequest.ID);
             }
             inline T* getComponent(const EntityDataRequest& dataRequest) {
                 return super::_get(dataRequest.ID);
             }
-            inline T* getComponent(const uint& _index) { 
-                return super::_get(_index); 
+            inline T* getComponent(const uint& entityID) { 
+                return super::_get(entityID);
             }
     };
 };

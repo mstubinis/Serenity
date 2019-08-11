@@ -59,6 +59,9 @@ struct ResourceManifest{
     static Handle MenuMusic;
     static Handle SoundCloakingActivated;
     static Handle SoundCloakingDeactivated;
+    static Handle SoundPulsePhaser;
+    static Handle SoundPlasmaCannon;
+    static Handle SoundDisruptorCannon;
 
 
     static std::string BasePath;

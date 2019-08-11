@@ -17,14 +17,14 @@ struct Entity{
     inline Entity() { 
         data = 0; 
     }
-    inline Entity(const uint _id, const uint _sceneID, const uint _versionID) {
-        process(_id, _sceneID, _versionID); 
+    inline Entity(const uint entityID, const uint sceneID, const uint versionID) {
+        process(entityID, sceneID, versionID);
     }
     ~Entity() {
         data = 0;
     }
-    inline void process(const uint& _id, const uint& _sceneID, const uint& _versionID) {
-        data = _versionID << 28 | _sceneID << 21 | _id; 
+    inline void process(const uint& entityID, const uint& sceneID, const uint& versionID) {
+        data = versionID << 28 | sceneID << 21 | entityID;
     }
     Entity(const Entity& other) = default;
     Entity& operator=(const Entity& other) = default;
@@ -42,24 +42,24 @@ struct Entity{
     inline bool null() { 
         return data == 0 ? true : false; 
     }
-    template<typename TComponent, typename... ARGS> inline TComponent* addComponent(ARGS&&... _args) {
+    template<typename TComponent, typename... ARGS> inline TComponent* addComponent(ARGS&&... args) {
         auto& _this = *this;
-        auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
-        return _ecs.addComponent<TComponent>(_this, std::forward<ARGS>(_args)...);
+        auto& ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
+        return ecs.addComponent<TComponent>(_this, std::forward<ARGS>(args)...);
     }
     template<typename TComponent> inline bool removeComponent() {
         auto& _this = *this;
-        auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
-        return _ecs.removeComponent<TComponent>(_this);
+        auto& ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
+        return ecs.removeComponent<TComponent>(_this);
     }
     template<typename TComponent> inline TComponent* getComponent() {
         auto& _this = *this;
-        auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
-        return _ecs.getComponent<TComponent>(_this);
+        auto& ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
+        return ecs.getComponent<TComponent>(_this);
     }
     template<typename TComponent> inline TComponent* getComponent(const EntityDataRequest& dataRequest) {
-        auto& _ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(*this);
-        return _ecs.getComponent<TComponent>(dataRequest);
+        auto& ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(*this);
+        return ecs.getComponent<TComponent>(dataRequest);
     }
     void move(const Scene& destination);
     static Entity _null;
@@ -69,8 +69,8 @@ class EntityWrapper {
     protected:
         Entity m_Entity;
     public:
-        inline EntityWrapper(Scene& _scene) { 
-            m_Entity = _scene.createEntity(); 
+        inline EntityWrapper(Scene& scene) { 
+            m_Entity = scene.createEntity(); 
         }
         virtual ~EntityWrapper() { 
             m_Entity = Entity::_null; 
@@ -84,8 +84,8 @@ class EntityWrapper {
         inline bool null() {
             return m_Entity.null();
         }
-        template<typename TComponent, typename... ARGS> inline TComponent* addComponent(ARGS&& ... _args) {
-            return m_Entity.addComponent<TComponent>(std::forward<ARGS>(_args)...);
+        template<typename TComponent, typename... ARGS> inline TComponent* addComponent(ARGS&& ... args) {
+            return m_Entity.addComponent<TComponent>(std::forward<ARGS>(args)...);
         }
         template<typename TComponent> inline bool removeComponent() {
             return m_Entity.removeComponent<TComponent>();
@@ -101,8 +101,8 @@ class EntityWrapper {
 namespace Engine {
 namespace epriv {
     struct InternalEntityPublicInterface final {
-        static ECS<Entity>& GetECS(Entity& _entity) {
-			const EntityDataRequest dataRequest(_entity);
+        static ECS<Entity>& GetECS(Entity& entity) {
+			const EntityDataRequest dataRequest(entity);
 			Scene& s = epriv::Core::m_Engine->m_ResourceManager._getSceneByID(dataRequest.sceneID);
             return Engine::epriv::InternalScenePublicInterface::GetECS(s);
         }

@@ -55,6 +55,7 @@ const bool SoundEffect::play(const uint& numLoops) {
         }
     }
     m_Sound.play();
+    m_Active = true;
 
     EventSoundStatusChanged e(m_Status);
     Event ev;

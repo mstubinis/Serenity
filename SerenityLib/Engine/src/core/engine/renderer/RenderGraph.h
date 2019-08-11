@@ -10,7 +10,7 @@ class  Scene;
 class  Material;
 class  Mesh;
 class  ModelInstance;
-
+struct Entity;
 namespace Engine {
     namespace epriv {
         struct InstanceNode final {
@@ -45,6 +45,7 @@ namespace Engine {
                 RenderPipeline(ShaderProgram&);
                 ~RenderPipeline();
 
+                void clean(Entity&);
                 void sort(Camera& c);
                 void sort_cheap(Camera& c);
                 void render(Camera& c, const double& dt, const bool useDefaultShaders = true, const bool sortTriangles = false);

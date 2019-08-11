@@ -9,8 +9,7 @@ Scene& Entity::scene() {
 	const EntityDataRequest dataRequest(*this);
     return epriv::Core::m_Engine->m_ResourceManager._getSceneByID(dataRequest.sceneID);
 }
-void Entity::move(const Scene& _scene) {
-    auto& scene = const_cast<Scene&>(_scene);
+void Entity::move(const Scene& scene) {
 	const EntityDataRequest dataRequest(*this);
     if (scene.id() == dataRequest.sceneID)
         return;
@@ -18,6 +17,7 @@ void Entity::move(const Scene& _scene) {
 }
 void Entity::destroy() {
     Scene& s = scene();
-    auto& _ecs = epriv::InternalScenePublicInterface::GetECS(s);
-    _ecs.removeEntity(*this);
+    auto& ecs = epriv::InternalScenePublicInterface::GetECS(s);
+    epriv::InternalScenePublicInterface::CleanECS(s, *this);
+    ecs.removeEntity(*this);
 }

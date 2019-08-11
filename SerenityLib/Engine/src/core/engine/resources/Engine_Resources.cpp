@@ -74,7 +74,7 @@ Handle epriv::ResourceManager::_addTexture(Texture* t) {
     return resourceManager->m_Resources->add(t, ResourceType::Texture);
 }
 Scene& epriv::ResourceManager::_getSceneByID(const uint& id) {
-    return *(m_Scenes[id-1]);
+    return *m_Scenes[id - 1];
 }
 void epriv::ResourceManager::_addScene(Scene& s){
     m_Scenes.push_back(&s);

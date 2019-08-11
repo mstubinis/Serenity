@@ -201,6 +201,12 @@
     <ClInclude Include="game\weapons\PlasmaCannon.h">
       <Filter>Header Files\Game\Weapons</Filter>
     </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemWeapons.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\Ships.h">
+      <Filter>Header Files\Game\Ships</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -322,6 +328,9 @@
     </ClCompile>
     <ClCompile Include="game\weapons\DisruptorCannon.cpp">
       <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemWeapons.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

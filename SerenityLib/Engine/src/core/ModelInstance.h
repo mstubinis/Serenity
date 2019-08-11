@@ -41,7 +41,7 @@ class ModelInstance final: public BindableResource{
         bool                                                 m_PassedRenderCheck;
         bool                                                 m_Visible;
 
-        void internalInit(Mesh* mesh, Material* mat, Entity& parent, ShaderProgram* program);
+        void internalInit(Mesh* mesh, Material* mat, ShaderProgram* program);
         void internalUpdateModelMatrix();
     public:
         ModelInstance(Entity&, Mesh*, Material*, ShaderProgram* = 0);

@@ -29,6 +29,7 @@
 #include <core/engine/materials/Material.h>
 
 #include "core/Terrain.h"
+#include "../ships/Ships.h"
 #include <SFML/Graphics.hpp>
 
 using namespace Engine;
@@ -351,6 +352,27 @@ void Map::loadFromFile(const string& filename) {
     std::get<1>(m_RootAnchor)->finalize_all();
 
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
+}
+Ship* Map::createShip(Client& client, const string& shipClass, const string& shipName, const bool& playerShip, const glm::vec3& position) {
+    auto& handles = ResourceManifest::Ships[shipClass];
+    Ship* ship = nullptr;
+
+    if(shipClass == "Defiant")
+        ship = new Defiant(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+    else if(shipClass == "Nova")
+        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+    else if(shipClass == "Shrike")
+        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+    else if(shipClass == "Brel")
+        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+    else if(shipClass == "Constitution")
+        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+    else if(shipClass == "Miranda")
+        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+    else if(shipClass == "Excelsior")
+        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+
+    return ship;
 }
 Anchor* Map::getRootAnchor() {
     return std::get<1>(m_RootAnchor);

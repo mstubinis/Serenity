@@ -27,6 +27,7 @@
 #include "ships/shipSystems/ShipSystemShields.h"
 #include "ships/shipSystems/ShipSystemWarpDrive.h"
 #include "ships/shipSystems/ShipSystemYawThrusters.h"
+#include "ships/shipSystems/ShipSystemWeapons.h"
 
 using namespace Engine;
 using namespace std;
@@ -146,6 +147,7 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
 		else if (i == 6)  system = new ShipSystemMainThrusters(*this);
 		else if (i == 7)  system = new ShipSystemWarpDrive(*this);
 		else if (i == 8)  system = new ShipSystemSensors(*this);
+        else if (i == 9)  system = new ShipSystemWeapons(*this);
         m_ShipSystems.emplace(i, system);
 	}
     map->m_Objects.push_back(this);

@@ -274,7 +274,7 @@ void Client::onReceive() {
                             auto y = Helper::GetRandomFloatFromTo(-400, 400);
                             auto z = Helper::GetRandomFloatFromTo(-400, 400);
                             auto randOffsetForSafety = glm::vec3(x, y, z);
-                            ship = new Ship(*this, handles.get<0>(), handles.get<1>(), shipclass, false, playername, spawnPosition + randOffsetForSafety, glm::vec3(1.0f), CollisionType::ConvexHull, &map);
+                            ship = map.createShip(*this, shipclass, playername, false, spawnPosition + randOffsetForSafety);
                         }else{
                             ship = map.getShips().at(playername);
                         }
@@ -294,7 +294,7 @@ void Client::onReceive() {
                     auto spawn = map.getSpawnAnchor()->getPosition();
 
                     auto& handles = ResourceManifest::Ships.at(info[0]);
-                    Ship* ship = new Ship(*this, handles.get<0>(), handles.get<1>(), info[0], false, pI.name, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z), glm::vec3(1.0f), CollisionType::ConvexHull, &map);
+                    Ship* ship = map.createShip(*this, info[0], info[1], false, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z));
 
                     //send the new guy our cloaking status
                     PacketCloakUpdate pOut1(*map.getPlayer());
