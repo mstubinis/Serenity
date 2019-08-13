@@ -7,7 +7,7 @@
 #include <core/engine/Engine.h>
 #include <core/engine/Engine_Window.h>
 #include <core/engine/networking/Networking.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/lights/Lights.h>

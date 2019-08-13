@@ -15,6 +15,7 @@ struct ShipSystemType {enum Type {
     WarpDrive,
     Sensors,
     Weapons,
+    Hull,
 _TOTAL};};
 
 class Ship;

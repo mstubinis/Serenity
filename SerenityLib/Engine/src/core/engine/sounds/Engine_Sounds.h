@@ -23,7 +23,7 @@ namespace Engine{
         class SoundManager final{
             friend class ::SoundBaseClass;
             public:
-                static const uint MAX_SOUND_EFFECTS = 64;
+                static const uint MAX_SOUND_EFFECTS = 128;
                 static const uint MAX_SOUND_MUSIC   = 6;
 
                 SoundEffect                    m_SoundEffects[MAX_SOUND_EFFECTS];

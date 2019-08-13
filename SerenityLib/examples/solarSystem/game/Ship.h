@@ -50,7 +50,6 @@ class Ship: public EntityWrapper {
         float                                m_WarpFactor;
         EntityWrapper*                       m_Target;
         std::string                          m_ShipClass;
-        bool                                 m_SavedOldStateBefore;
     public:
         Ship(
             Client& client,
@@ -71,6 +70,9 @@ class Ship: public EntityWrapper {
         const std::string getName();
         const glm::vec3 getWarpSpeedVector3();
         const glm::vec3 getPosition();
+        const glm::quat getRotation();
+        const glm::vec3 getPosition(const EntityDataRequest& dataRequest);
+        const glm::quat getRotation(const EntityDataRequest& dataRequest);
 
         void updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, std::vector<std::string>& info);
         void updateCloakFromPacket(const PacketCloakUpdate& packet);
@@ -92,13 +94,10 @@ class Ship: public EntityWrapper {
         bool IsWarping(){ return m_IsWarping; }
         bool isCloaked();
         bool isFullyCloaked();
-        ShipSystem* getShipSystem(uint type){ return m_ShipSystems[type]; }
+        ShipSystem* getShipSystem(const uint type){ return m_ShipSystems[type]; }
         EntityWrapper* getTarget() { return m_Target; }
         Entity& entity() { return m_Entity; }
         void setTarget(EntityWrapper* entityWrapper);
         void setTarget(const std::string&);
-
-        void savePositionState();
-        void restorePositionState();
 };
 #endif

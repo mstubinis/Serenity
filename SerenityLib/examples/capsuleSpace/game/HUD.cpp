@@ -11,7 +11,7 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Camera.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 
 #include <glm/vec4.hpp>
 

@@ -12,15 +12,17 @@
 using namespace Engine;
 using namespace std;
 
-void Collision::_init(const vector<Mesh*>& _meshes, const float& _mass) {
+void Collision::_init(ComponentBody* body, const vector<Mesh*>& _meshes, const float& _mass) {
     btCompoundShape* compound = new btCompoundShape();
     btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
     for (auto& mesh : _meshes) {
         btCollisionShape* shape = epriv::InternalMeshPublicInterface::BuildCollision(mesh, CollisionType::ConvexHull);
+        shape->setUserPointer(body);
         compound->addChildShape(t, shape);
     }
     compound->setMargin(0.001f);
     compound->recalculateLocalAabb();
+    compound->setUserPointer(body);
     m_Shape = compound;
 }
 void Collision::_baseInit(const CollisionType::Type _type, const float& _mass) {
@@ -35,22 +37,17 @@ Collision::Collision() {
     m_Shape = nullptr;
     setMass(0.0f);
 }
-Collision::Collision(const vector<Mesh*>& _meshes, const float& _mass) {
-    //construtor
-    _init(_meshes, _mass);
-    _baseInit(CollisionType::Compound, _mass);
-}
 Collision::Collision(btHeightfieldTerrainShape& heightField, const CollisionType::Type _type, const float& _mass) {
     _baseInit(_type, _mass);
     m_Shape = &heightField;
 }
-Collision::Collision(ComponentModel& _modelComponent, const float& _mass) {
+Collision::Collision(ComponentBody* body, ComponentModel& _modelComponent, const float& _mass) {
     //construtor
     vector<Mesh*> meshes;
     for (uint i = 0; i < _modelComponent.getNumModels(); ++i) {
         meshes.push_back(_modelComponent.getModel(i).mesh());
     }
-    _init(meshes, _mass);
+    _init(body, meshes, _mass);
 }
 Collision::Collision(const CollisionType::Type _type, Mesh* _mesh, const float& _mass) {
     //construtor
@@ -60,13 +57,17 @@ Collision::Collision(const CollisionType::Type _type, Mesh* _mesh, const float& 
 }
 Collision::~Collision() {
     //destructor
-    btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
-    if (compoundCast) {
-        int numChildShapes = compoundCast->getNumChildShapes();
-        for (int i = 0; i < numChildShapes; ++i) {
-            btCollisionShape* shape = compoundCast->getChildShape(i);
-            SAFE_DELETE(shape);
+    if (m_Shape) {
+        /*
+        btCompoundShape* compoundCast = dynamic_cast<btCompoundShape*>(m_Shape);
+        if (compoundCast) {
+            int numChildShapes = compoundCast->getNumChildShapes();
+            for (int i = 0; i < numChildShapes; ++i) {
+                btCollisionShape* shape = compoundCast->getChildShape(i);
+                SAFE_DELETE(shape);
+            }
         }
+        */
     }
     SAFE_DELETE(m_Shape);
 }

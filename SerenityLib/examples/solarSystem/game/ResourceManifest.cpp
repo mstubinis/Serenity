@@ -17,6 +17,7 @@ Handle ResourceManifest::DefiantMesh;
 Handle ResourceManifest::RingMesh;
 Handle ResourceManifest::ShieldMesh;
 Handle ResourceManifest::CannonEffectMesh;
+Handle ResourceManifest::CannonTailMesh;
 
 /*extras*/
 Handle ResourceManifest::NovaMesh;
@@ -51,6 +52,9 @@ Handle ResourceManifest::ShieldMaterial;
 Handle ResourceManifest::PulsePhaserMaterial;
 Handle ResourceManifest::PlasmaCannonMaterial;
 Handle ResourceManifest::DisruptorCannonMaterial;
+Handle ResourceManifest::PulsePhaserTailMaterial;
+Handle ResourceManifest::PlasmaCannonTailMaterial;
+Handle ResourceManifest::DisruptorCannonTailMaterial;
 
 //sounds
 Handle ResourceManifest::MenuMusic;
@@ -91,6 +95,7 @@ void ResourceManifest::init(){
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc").at(0);
     ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc").at(0);
     CannonEffectMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_effect.obj").at(0);
+    CannonTailMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_tail.obj").at(0);
 
 
 	//extras
@@ -119,6 +124,24 @@ void ResourceManifest::init(){
     pulsePhaserMat.setGlow(1.0f);
     plasmaCannonMat.setGlow(1.0f);
     disruptorCannonMat.setGlow(1.0f);
+
+    PulsePhaserTailMaterial = Resources::addMaterial("PulsePhaserTail", BasePath + "data/Textures/Effects/pulse_phaser_top.dds", "", "", "");
+    PlasmaCannonTailMaterial = Resources::addMaterial("PlasmaCannonTail", BasePath + "data/Textures/Effects/plasma_cannon_top.dds", "", "", "");
+    DisruptorCannonTailMaterial = Resources::addMaterial("DisruptorCannonTail", BasePath + "data/Textures/Effects/disruptor_cannon_top.dds", "", "", "");
+    Material& pulsePhaserTailMat = *((Material*)PulsePhaserTailMaterial.get());
+    Material& plasmaCannonTailMat = *((Material*)PlasmaCannonTailMaterial.get());
+    Material& disruptorCannonTailMat = *((Material*)DisruptorCannonTailMaterial.get());
+    pulsePhaserTailMat.setShadeless(true);
+    plasmaCannonTailMat.setShadeless(true);
+    disruptorCannonTailMat.setShadeless(true);
+    pulsePhaserTailMat.setGlow(1.0f);
+    plasmaCannonTailMat.setGlow(1.0f);
+    disruptorCannonTailMat.setGlow(1.0f);
+
+
+
+
+
 
 
 

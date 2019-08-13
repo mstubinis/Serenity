@@ -17,7 +17,7 @@ void Entity::move(const Scene& scene) {
 }
 void Entity::destroy() {
     Scene& s = scene();
+    epriv::InternalScenePublicInterface::CleanECS(s, data);
     auto& ecs = epriv::InternalScenePublicInterface::GetECS(s);
-    epriv::InternalScenePublicInterface::CleanECS(s, *this);
     ecs.removeEntity(*this);
 }

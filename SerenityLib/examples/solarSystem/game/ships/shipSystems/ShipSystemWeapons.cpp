@@ -42,7 +42,7 @@ void SecondaryWeaponTorpedo::update(const double& dt) {
 
 
 
-ShipSystemWeapons::ShipSystemWeapons(Ship& _ship) :ShipSystem(ShipSystemType::WarpDrive, _ship) {
+ShipSystemWeapons::ShipSystemWeapons(Ship& _ship) :ShipSystem(ShipSystemType::Weapons, _ship) {
 
 }
 ShipSystemWeapons::~ShipSystemWeapons() {
@@ -51,13 +51,14 @@ ShipSystemWeapons::~ShipSystemWeapons() {
    SAFE_DELETE_VECTOR(m_SecondaryWeaponsTorpedos);
 }
 void ShipSystemWeapons::update(const double& dt) {
-    if (Engine::isMouseButtonDownOnce(MouseButton::Left)) {
+    const bool isCloaked = m_Ship.isCloaked();
+    if (Engine::isMouseButtonDownOnce(MouseButton::Left) && !isCloaked) {
         for (auto& beam : m_PrimaryWeaponsBeams)
             beam->fire();
         for (auto& cannon : m_PrimaryWeaponsCannons)
             cannon->fire();
     }
-    if (Engine::isMouseButtonDownOnce(MouseButton::Right)) {
+    if (Engine::isMouseButtonDownOnce(MouseButton::Right) && !isCloaked) {
         for (auto& torpedo : m_SecondaryWeaponsTorpedos)
             torpedo->fire();
     }

@@ -7,10 +7,13 @@ using namespace Engine;
 using namespace std;
 
 SpotLight::SpotLight(const glm::vec3 pos, const glm::vec3 direction, const float cutoff, const float outerCutoff, Scene* scene) : PointLight(LightType::Spot, pos, scene) {
-    auto& body = *m_Entity.getComponent<ComponentBody>();
-    body.alignTo(direction, 0);
     setCutoff(cutoff);
     setCutoffOuter(outerCutoff);
+
+    auto body = getComponent<ComponentBody>();
+    if (body) {//evil, but needed for now... find out why...
+        body->alignTo(direction, 0);
+    }
 
     if (m_Type == LightType::Spot) {
         epriv::InternalScenePublicInterface::GetSpotLights(*scene).push_back(this);
@@ -30,4 +33,9 @@ const float SpotLight::getCutoff() const {
 }
 const float SpotLight::getCutoffOuter() const {
     return m_OuterCutoff;
+}
+void SpotLight::destroy() {
+    EntityWrapper::destroy();
+    removeFromVector(epriv::InternalScenePublicInterface::GetSpotLights(m_Entity.scene()), this);
+    removeFromVector(epriv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
 }

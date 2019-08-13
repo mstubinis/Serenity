@@ -5,10 +5,9 @@
 #include "GameSkybox.h"
 
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
 #include <core/engine/lights/Lights.h>
 #include <core/engine/renderer/Engine_Renderer.h>
-#include <core/engine/renderer/GLStateMachine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/ModelInstance.h>
@@ -102,7 +101,24 @@ struct RibbonBindFunctor {void operator()(EngineResource* r) const {
     Renderer::GLDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
 
-    epriv::DefaultModelInstanceBindFunctor()(r);
+    auto& i = *static_cast<ModelInstance*>(r);
+    auto& scene = *Resources::getCurrentScene();
+    Camera& cam = *scene.getActiveCamera();
+    glm::vec3 camPos = cam.getPosition();
+    Entity& parent = i.parent();
+    auto& body = *(parent.getComponent<ComponentBody>());
+    glm::mat4 parentModel = body.modelMatrix();
+
+    Renderer::sendUniform4Safe("Object_Color", i.color());
+    Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
+    Renderer::sendUniform1Safe("AnimationPlaying", 0);
+    glm::mat4 modelMatrix = parentModel * i.modelMatrix();
+
+    //world space normals
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+
+    Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
 struct RibbonUnbindFunctor {void operator()(EngineResource* r) const {
     Renderer::GLEnable(GL_DEPTH_TEST);

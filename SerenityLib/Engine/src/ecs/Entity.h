@@ -75,7 +75,7 @@ class EntityWrapper {
         virtual ~EntityWrapper() { 
             m_Entity = Entity::_null; 
         }
-        inline void destroy() { 
+        virtual inline void destroy() {
             m_Entity.destroy();
         }
         inline Entity& entity() {

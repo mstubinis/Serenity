@@ -9,6 +9,7 @@
 class  btCollisionShape;
 class  Mesh;
 class  ComponentModel;
+class  ComponentBody;
 class  btHeightfieldTerrainShape;
 
 class Collision final {
@@ -17,12 +18,11 @@ class Collision final {
         btVector3             m_Inertia;
         btCollisionShape* m_Shape;
 
-        void _init(const std::vector<Mesh*>& meshes, const float& mass);
+        void _init(ComponentBody* body, const std::vector<Mesh*>& meshes, const float& mass);
         void _baseInit(const CollisionType::Type _type, const float& mass);
     public:
         Collision();
-        Collision(const std::vector<Mesh*>& meshes, const float& mass = 0);
-        Collision(ComponentModel&, const float& mass = 0);
+        Collision(ComponentBody*, ComponentModel&, const float& mass = 0);
         Collision(btHeightfieldTerrainShape&, const CollisionType::Type, const float& mass = 0);
         Collision(const CollisionType::Type, Mesh* mesh, const float& mass = 0);
 

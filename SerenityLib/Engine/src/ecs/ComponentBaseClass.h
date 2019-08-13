@@ -17,6 +17,8 @@ class ComponentBaseClass{
 		ComponentBaseClass& operator=(ComponentBaseClass&& p_Other) noexcept = default;
 
 		virtual ~ComponentBaseClass() = default;
+
+        Entity& getOwner() { return owner; }
 };
 
 #endif

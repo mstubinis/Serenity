@@ -12,6 +12,8 @@ class DirectionalLight : public SunLight {
             Scene*                    = nullptr
         );
         virtual ~DirectionalLight();
+
+        inline void destroy();
 };
 
 #endif

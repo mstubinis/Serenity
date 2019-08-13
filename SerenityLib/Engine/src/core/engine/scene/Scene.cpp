@@ -119,15 +119,15 @@ struct Scene::impl final {
         }
         if (!materialNode) {
             materialNode = new MaterialNode(*_modelInstance.material());
-            _pipeline->materialNodes.emplace_back(materialNode);
+            _pipeline->materialNodes.push_back(materialNode);
         }
         if (!meshNode) {
             meshNode = new MeshNode(*_modelInstance.mesh());
-            materialNode->meshNodes.emplace_back(meshNode);
+            materialNode->meshNodes.push_back(meshNode);
         }
         if (!instanceNode) {
             instanceNode = new InstanceNode(_modelInstance);
-            meshNode->instanceNodes.emplace_back(instanceNode);
+            meshNode->instanceNodes.push_back(instanceNode);
         }
     }
     void _removeModelInstanceFromPipeline(Scene& _scene, ModelInstance& _modelInstance, const vector<RenderPipeline*>& _pipelinesList, const RenderStage::Stage& _stage) {
@@ -207,54 +207,54 @@ vector<RodLight*>& InternalScenePublicInterface::GetRodLights(Scene& scene) {
 
 void InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 
-        //pipeline->sort(camera);
-        pipeline->render(camera, dt, useDefaultShaders, false);
+        //pipeline->sort(camera, SortingMode::BackToFront);
+        pipeline->render(camera, dt, useDefaultShaders, SortingMode::None);
     } 
 }
 void InternalScenePublicInterface::RenderGeometryTransparent(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryTransparent]) { 
-        pipeline->sort(camera);
-        pipeline->render(camera, dt, useDefaultShaders, false);
+        pipeline->sort(camera, SortingMode::BackToFront);
+        pipeline->render(camera, dt, useDefaultShaders, SortingMode::None);
     } 
 }
 void InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
      for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryTransparentTrianglesSorted]) {
-         pipeline->sort(camera);
-         pipeline->render(camera, dt, useDefaultShaders, true);
+         pipeline->sort(camera, SortingMode::FrontToBack);
+         pipeline->render(camera, dt, useDefaultShaders, SortingMode::FrontToBack);
      }
 }
 void InternalScenePublicInterface::RenderForwardOpaque(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) {
-        //pipeline->sort(camera);
-        pipeline->render(camera, dt, useDefaultShaders, false);
+        //pipeline->sort(camera, SortingMode::BackToFront);
+        pipeline->render(camera, dt, useDefaultShaders, SortingMode::None);
     }
 }
 void InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardTransparent]) { 
-        pipeline->sort(camera);
-        pipeline->render(camera, dt, useDefaultShaders, false);
+        pipeline->sort(camera, SortingMode::BackToFront);
+        pipeline->render(camera, dt, useDefaultShaders, SortingMode::None);
     }
 }
 void InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardTransparentTrianglesSorted]) {
-        pipeline->sort(camera);
-        pipeline->render(camera, dt, useDefaultShaders, true);
+        pipeline->sort(camera, SortingMode::FrontToBack);
+        pipeline->render(camera, dt, useDefaultShaders, SortingMode::FrontToBack);
     }
 }
 void InternalScenePublicInterface::RenderForwardParticles(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardParticles]) {
-        pipeline->sort(camera);
-        pipeline->render(camera, dt, useDefaultShaders, false);
+        pipeline->sort(camera, SortingMode::BackToFront);
+        pipeline->render(camera, dt, useDefaultShaders, SortingMode::BackToFront);
     }
 }
 
 ECS<Entity>& InternalScenePublicInterface::GetECS(Scene& scene) {
     return scene.m_i->m_ECS;
 }
-void InternalScenePublicInterface::CleanECS(Scene& scene, Entity& entity) {
+void InternalScenePublicInterface::CleanECS(Scene& scene, const uint entityData) {
     for (auto& pipelines : scene.m_i->m_Pipelines) {
         for (auto& pipeline : pipelines) {
-            pipeline->clean(entity);
+            pipeline->clean(entityData);
         }
     }
 }

@@ -19,6 +19,8 @@ class SpotLight : public PointLight {
         );
         virtual ~SpotLight();
 
+        inline void destroy();
+
         const float getCutoff() const;
         const float getCutoffOuter() const;
 

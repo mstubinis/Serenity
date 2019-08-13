@@ -3,6 +3,7 @@
 #define ENGINE_RENDER_GRAPH_INCLUDE_GUARD
 
 #include <core/engine/utils/Utils.h>
+#include <core/engine/renderer/RendererEnums.h>
 
 class  ShaderProgram;
 class  Camera;
@@ -39,16 +40,16 @@ namespace Engine {
         class RenderPipeline final {
             friend class ::Scene;
             private:
-                ShaderProgram&                    shaderProgram;
+                ShaderProgram&              shaderProgram;
                 std::vector<MaterialNode*>  materialNodes;
             public:
                 RenderPipeline(ShaderProgram&);
                 ~RenderPipeline();
 
-                void clean(Entity&);
-                void sort(Camera& c);
-                void sort_cheap(Camera& c);
-                void render(Camera& c, const double& dt, const bool useDefaultShaders = true, const bool sortTriangles = false);
+                void clean(const uint entityData);
+                void sort(Camera& camera, const SortingMode::Mode sortingMode);
+                void sort_cheap(Camera& camera, const SortingMode::Mode sortingMode);
+                void render(Camera& camera, const double& dt, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
         };
     };
 };

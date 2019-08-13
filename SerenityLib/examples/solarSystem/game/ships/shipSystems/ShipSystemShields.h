@@ -55,13 +55,24 @@ class ShipSystemShields final : public ShipSystem {
         ShipSystemShieldsImpactPoint  m_ImpactPoints[MAX_IMPACT_POINTS];
         std::vector<uint>             m_ImpactPointsFreelist;
         EntityWrapper                 m_ShieldEntity;
+        uint                          m_HealthPointsCurrent;
+        uint                          m_HealthPointsMax;
+        //float                         m_TimeSinceLastHit;
+        //float                         m_RechargeActivation;
+        uint                          m_RechargeAmount;
+        float                         m_RechargeRate;
+        float                         m_RechargeTimer;
     public:
-        ShipSystemShields(Ship&, Map*);
+        ShipSystemShields(Ship&, Map*, const uint health);
         ~ShipSystemShields();
 
         void update(const double& dt);
 
-        void receiveHit(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const float& damage);
+        const uint getHealthCurrent() const;
+        const uint getHealthMax() const;
+        const float getHealthPercent() const; //returns percent from 0.0f to 1.0f
+
+        void receiveHit(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage);
 };
 
 #endif

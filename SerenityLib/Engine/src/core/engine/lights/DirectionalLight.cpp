@@ -12,3 +12,8 @@ DirectionalLight::DirectionalLight(const glm::vec3 dir, Scene* scene) :SunLight(
 }
 DirectionalLight::~DirectionalLight() {
 }
+void DirectionalLight::destroy() {
+    EntityWrapper::destroy();
+    removeFromVector(epriv::InternalScenePublicInterface::GetDirectionalLights(m_Entity.scene()), this);
+    removeFromVector(epriv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
+}

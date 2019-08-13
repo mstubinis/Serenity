@@ -119,13 +119,15 @@ const uint Camera::pointIntersectTest(const glm::vec3& pos) {
     return m_Entity.getComponent<ComponentCamera>()->pointIntersectTest(pos); 
 }
 const bool Camera::rayIntersectSphere(Entity& entity){
-    auto& body       = *entity.getComponent<ComponentBody>();
+    auto* body       = entity.getComponent<ComponentBody>();
     auto* model      = entity.getComponent<ComponentModel>();
     auto& thisBody   = *m_Entity.getComponent<ComponentBody>();
     auto& thisCamera = *m_Entity.getComponent<ComponentCamera>();
     float radius     = 0.0f;
     if(model) 
         radius = model->radius();
-    return Math::rayIntersectSphere(body.position(), radius, thisBody.position(), thisCamera.getViewVector());
+    if (!body)
+        return false;
+    return Math::rayIntersectSphere(body->position(), radius, thisBody.position(), thisCamera.getViewVector());
 }
 

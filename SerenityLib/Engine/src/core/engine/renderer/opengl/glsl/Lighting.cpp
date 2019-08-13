@@ -61,7 +61,7 @@ void opengl::glsl::Lighting::convert(string& code, const unsigned int& versionNu
                 "    float Dist = length(RawDirection);\n"
                 "    vec3 LightDir = RawDirection / Dist;\n"
                 "    vec3 c = CalcLightInternal(currentLight, LightDir, PxlWorldPos, PxlNormal, uv);\n"
-                "    float attenuation = CalculateAttenuation(Dist,1.0);\n"
+                "    float attenuation = CalculateAttenuation(Dist, 1.0);\n"
                 "    return c * attenuation;\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, point_light, "vec3 CalcSpotLight(");

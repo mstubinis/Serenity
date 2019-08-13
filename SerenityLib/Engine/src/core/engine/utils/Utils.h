@@ -21,6 +21,7 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <algorithm>// std::remove
 
 #ifdef ENVIRONMENT64
 typedef std::uint64_t   uint; //TODO: try to make it std::uint64_t
@@ -73,26 +74,12 @@ template<typename E, typename B> bool isInVector(std::vector<B*>& v, E* e) {
 }
 
 //removes a specific element from a vector
-template<typename E,typename B> void removeFromVector(std::vector<B*>& v,E* e){
-    for(auto it=v.begin();it!=v.end();){
-        B* c=(*it);
-        if(c==e){
-            it=v.erase(it);
-        }else{
-            ++it;
-        }
-    }
+template<typename E,typename B> void removeFromVector(std::vector<B*>& v, const E* e){
+    v.erase(std::remove(v.begin(), v.end(), e), v.end());
 }
 //removes a specific element from a vector
-template<typename E,typename B> void removeFromVector(std::vector<B>& v,E& e){
-    for(auto it=v.begin();it!=v.end();){
-        B c=(*it);
-        if(c==e){
-            it=v.erase(it);
-        }else{
-            ++it;
-        }
-    }
+template<typename E,typename B> void removeFromVector(std::vector<B>& v,const E& e){
+    v.erase(std::remove(v.begin(), v.end(), e), v.end());
 }
 
 //clears a vector, reset its size to zero, and removes the elements from memory. does NOT delete pointer elements

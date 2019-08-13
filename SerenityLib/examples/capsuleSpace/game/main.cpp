@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
         args.emplace(lowerKey, true);
     }
     if (!args.count("console")) {
-        ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
+        //ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
     }
 #endif
 
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     options.window_title = "Capsule Space";
     options.width = 1024;
     options.height = 768;
-    options.fullscreen = true;
+    options.fullscreen = false;
     options.aa_algorithm = AntiAliasingAlgorithm::SMAA;
 
     Engine::init(options);

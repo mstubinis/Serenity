@@ -142,6 +142,7 @@ epriv::EShaders::lighting_vert =
     "uniform vec2 screenSizeDivideBy2;\n"  //x = width/2, y = height/2
     "\n"
     "varying vec2 texcoords;\n"
+    "flat varying vec3 CamRealPosition;\n"
     "\n"
     "vec3 doSpotLightStuff(vec3 v){\n"
     "    float opposite = tan(VertexShaderData.x * 0.5) * VertexShaderData.y;\n" //outerCutoff might need to be in degrees?
@@ -165,6 +166,7 @@ epriv::EShaders::lighting_vert =
     "        vert.y *= screenSizeDivideBy2.y;\n"
     "    }\n"
     "    texcoords = uv;\n"
+    "    CamRealPosition = CameraRealPosition;\n"
     "    gl_Position = VP * ModelClone * vec4(vert,1.0);\n"
     "}";
 #pragma endregion
@@ -217,6 +219,7 @@ epriv::EShaders::vertex_basic =
     "varying mat3 TBN;\n"
     "\n"
     "flat varying vec3 CamPosition;\n"
+    "flat varying vec3 CamRealPosition;\n"
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
     "\n"
@@ -248,6 +251,7 @@ epriv::EShaders::vertex_basic =
     "    WorldPosition = worldPos.xyz;\n"
     "\n"
     "    CamPosition = CameraPosition;\n"
+    "    CamRealPosition = CameraRealPosition;\n"
     "    TangentCameraPos = TBN * CameraPosition;\n"
     "    TangentFragPos = TBN * WorldPosition;\n"
     "\n"
@@ -1187,6 +1191,7 @@ epriv::EShaders::forward_frag =
     "varying vec3 Normals;\n"
     "varying mat3 TBN;\n"
     "flat varying vec3 CamPosition;\n"
+    "flat varying vec3 CamRealPosition;\n"
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
     "\n"
@@ -1227,7 +1232,7 @@ epriv::EShaders::forward_frag =
     "        for (int j = 0; j < numLights; ++j) {\n"
     "           Light currentLight = light[j];\n"
     "            vec3 lightCalculation = ConstantZeroVec3;\n"
-    "            vec3 LightPosition = vec3(currentLight.DataC.yzw);\n"
+    "            vec3 LightPosition = vec3(currentLight.DataC.yzw) - CamRealPosition;\n"
     "            vec3 LightDirection = normalize(vec3(currentLight.DataA.w,currentLight.DataB.x,currentLight.DataB.y));\n"
     "            if(currentLight.DataD.w == 0.0){\n"       //sun
     "                lightCalculation = CalcLightInternalForward(currentLight, normalize(LightPosition - WorldPosition),WorldPosition,inData.normals,inData);\n"
@@ -1699,31 +1704,27 @@ epriv::EShaders::lighting_frag =
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "\n"
     "varying vec2 texcoords;\n"
+    "flat varying vec3 CamRealPosition;\n"
     "\n"
     "void main(){\n"                      //windowX      //windowY
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z, ScreenData.w);\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    //   this code helps performance, but we have the stencil test for that
-    //"    if(distance(PxlNormal,ConstantOneVec3) < 0.01){\n"
-    //"        return;\n"
-    //"        discard;\n"
-    //"    }\n"
-    "    vec3 PxlPosition = GetWorldPosition(uv,CameraNear,CameraFar);\n"
+    "    vec3 PxlPosition = GetWorldPosition(uv, CameraNear, CameraFar);\n"
     "\n"
     "    vec3 lightCalculation = ConstantZeroVec3;\n"
-    "    vec3 LightPosition = vec3(light.DataC.yzw);\n"
-    "    vec3 LightDirection = normalize(vec3(light.DataA.w,light.DataB.x,light.DataB.y));\n"
+    "    vec3 LightPosition = vec3(light.DataC.yzw) - CamRealPosition;\n"
+    "    vec3 LightDirection = normalize(vec3(light.DataA.w, light.DataB.x, light.DataB.y));\n"
     "\n"
     "    if(light.DataD.w == 0.0){\n"       //sun
-    "        lightCalculation = CalcLightInternal(light, normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);\n"
+    "        lightCalculation = CalcLightInternal(light, normalize(LightPosition - PxlPosition), PxlPosition, PxlNormal, uv);\n"
     "    }else if(light.DataD.w == 1.0){\n" //point
-    "        lightCalculation = CalcPointLight(light, LightPosition,PxlPosition,PxlNormal,uv);\n"
+    "        lightCalculation = CalcPointLight(light, LightPosition, PxlPosition, PxlNormal, uv);\n"
     "    }else if(light.DataD.w == 2.0){\n" //directional
-    "        lightCalculation = CalcLightInternal(light, LightDirection,PxlPosition,PxlNormal,uv);\n"
+    "        lightCalculation = CalcLightInternal(light, LightDirection, PxlPosition, PxlNormal, uv);\n"
     "    }else if(light.DataD.w == 3.0){\n" //spot
-    "        lightCalculation = CalcSpotLight(light, LightDirection,LightPosition,PxlPosition,PxlNormal,uv);\n"
+    "        lightCalculation = CalcSpotLight(light, LightDirection, LightPosition, PxlPosition, PxlNormal, uv);\n"
     "    }else if(light.DataD.w == 4.0){\n" //rod
-    "        lightCalculation = CalcRodLight(light, vec3(light.DataA.w,light.DataB.xy),light.DataC.yzw,PxlPosition,PxlNormal,uv);\n"
+    "        lightCalculation = CalcRodLight(light, vec3(light.DataA.w,light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, uv);\n"
     "    }\n"
     "    gl_FragData[0].rgb = lightCalculation;\n"
     "}";
@@ -1753,6 +1754,7 @@ epriv::EShaders::lighting_frag_optimized =
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "\n"
     "varying vec2 texcoords;\n"
+    "flat varying vec3 CamRealPosition;\n"
     "\n"
     "vec3 CalcLightInternal(in Light currentLight, vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){\n"
     "    float Glow = texture2D(gMiscMap,uv).r;\n"
@@ -1830,7 +1832,7 @@ epriv::EShaders::lighting_frag_optimized =
     "    vec3 PxlPosition = GetWorldPosition(uv,CameraNear,CameraFar);\n"
     "\n"
     "    vec3 lightCalculation = ConstantZeroVec3;\n"
-    "    vec3 LightPosition = vec3(light.DataC.yzw);\n"
+    "    vec3 LightPosition = vec3(light.DataC.yzw) - CamRealPosition;\n"
     "    vec3 LightDirection = normalize(vec3(light.DataA.w,light.DataB.x,light.DataB.y));\n"
     "\n"
     "    if(light.DataD.w == 0.0){\n"
@@ -1866,6 +1868,7 @@ epriv::EShaders::lighting_frag_gi =
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "\n"
     "varying vec2 texcoords;\n"
+    "flat varying vec3 CamRealPosition;\n" //add this to calculations?
     "\n"
     "vec3 SchlickFrenselRoughness(float theta, vec3 _F0,float roughness){\n"
     "    vec3 ret = _F0 + (max(vec3(1.0 - roughness),_F0) - _F0) * pow(1.0 - theta,5.0);\n"

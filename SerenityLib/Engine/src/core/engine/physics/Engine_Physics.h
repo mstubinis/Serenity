@@ -9,6 +9,7 @@
 
 struct Entity;
 class  btRigidBody;
+class  Camera;
 namespace Engine{
 namespace epriv{
     struct MeshImportedData;
@@ -28,7 +29,7 @@ namespace epriv{
             void _init(const char* name, const uint& w, const uint& h, const uint& numCores);
 
             void _update(const double& dt,int maxSteps = 1,float = 0.0166666f);
-            void _render();
+            void _render(Camera& camera);
     };
 };
 namespace Physics{

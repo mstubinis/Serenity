@@ -25,6 +25,8 @@ class PointLight : public SunLight {
         );
         virtual ~PointLight();
 
+        inline void destroy();
+
         void setConstant(const float constant);
         void setLinear(const float linear);
         void setExponent(const float exponent);

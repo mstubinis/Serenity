@@ -76,6 +76,30 @@
     <Filter Include="Header Files\Game\Weapons">
       <UniqueIdentifier>{d482a783-1345-44ae-bfa6-1dd9397c5485}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Ships\Excelsior">
+      <UniqueIdentifier>{064bb267-d768-4f88-affb-0227b1e619c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Constitution">
+      <UniqueIdentifier>{5071123b-138f-48fe-9ed3-008e0c5f494a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Miranda">
+      <UniqueIdentifier>{60cac23f-3a51-4258-b652-639c3240e6a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Nova">
+      <UniqueIdentifier>{ae40a0d0-f3dc-4541-a07d-99f8aef9e8e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Excelsior">
+      <UniqueIdentifier>{23735dca-db04-4433-88f5-14d13a7b4c45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Constitution">
+      <UniqueIdentifier>{1aab5a36-64e4-46c2-b5c4-76630830ed11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Miranda">
+      <UniqueIdentifier>{a7203985-8344-486b-a186-540d9cf8b4fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Nova">
+      <UniqueIdentifier>{ca4e54bc-c61b-4e20-bdd6-a07a96fcf463}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -207,6 +231,21 @@
     <ClInclude Include="game\ships\Ships.h">
       <Filter>Header Files\Game\Ships</Filter>
     </ClInclude>
+    <ClInclude Include="game\ships\excelsior\Excelsior.h">
+      <Filter>Header Files\Game\Ships\Excelsior</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\constitution\Constitution.h">
+      <Filter>Header Files\Game\Ships\Constitution</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\miranda\Miranda.h">
+      <Filter>Header Files\Game\Ships\Miranda</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\nova\Nova.h">
+      <Filter>Header Files\Game\Ships\Nova</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\shipSystems\ShipSystemHull.h">
+      <Filter>Header Files\Game\Ships\ShipSystems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -330,6 +369,21 @@
       <Filter>Source Files\Game\Weapons</Filter>
     </ClCompile>
     <ClCompile Include="game\ships\shipSystems\ShipSystemWeapons.cpp">
+      <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\excelsior\Excelsior.cpp">
+      <Filter>Source Files\Game\Ships\Excelsior</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\constitution\Constitution.cpp">
+      <Filter>Source Files\Game\Ships\Constitution</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\miranda\Miranda.cpp">
+      <Filter>Source Files\Game\Ships\Miranda</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\nova\Nova.cpp">
+      <Filter>Source Files\Game\Ships\Nova</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\shipSystems\ShipSystemHull.cpp">
       <Filter>Source Files\Game\Ships\ShipSystems</Filter>
     </ClCompile>
   </ItemGroup>

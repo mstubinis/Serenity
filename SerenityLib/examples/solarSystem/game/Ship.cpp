@@ -29,6 +29,8 @@
 #include "ships/shipSystems/ShipSystemYawThrusters.h"
 #include "ships/shipSystems/ShipSystemWeapons.h"
 
+#include <glm/gtx/norm.hpp>
+
 using namespace Engine;
 using namespace std;
 
@@ -48,8 +50,11 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                     auto* cam = e.getComponent<ComponentCamera>(dataRequest);
                     //TODO: parent->child relationship
                     if (e != ship.m_Entity && !cam) {
-                        auto& otherBody = *e.getComponent<ComponentBody>(dataRequest);
-                        otherBody.setPosition(otherBody.position() + (speed * static_cast<float>(dt)));
+                        auto _otherBody = e.getComponent<ComponentBody>(dataRequest);
+                        if (_otherBody) {
+                            auto& otherBody = *_otherBody;
+                            otherBody.setPosition(otherBody.position() + (speed * static_cast<float>(dt)));
+                        }
                     }
                 }
             }
@@ -65,15 +70,16 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                 currentScene.centerSceneToObject(ship.m_Entity);
                 camera.follow(ship.m_Entity);
             }
-        }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) { //if you store that positional value and revert to it when you switch camera perspectives you'll avoid the whole issue
+        }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
             if (cameraState == CameraState::Follow || !ship.m_Target || target != ship.m_Entity) {
                 currentScene.centerSceneToObject(ship.m_Entity);
                 camera.orbit(ship.m_Entity);
-                ship.restorePositionState();
             }else if (ship.m_Target) {
-                ship.savePositionState();
-                currentScene.centerSceneToObject(ship.m_Target->entity());
-                camera.orbit(ship.m_Target->entity());
+                auto dist = glm::distance2(ship.getPosition(), ship.m_Target->getComponent<ComponentBody>()->position());
+                if (dist < 10000000000.0f) { //to prevent FP issues when viewing things billions of km away
+                    currentScene.centerSceneToObject(ship.m_Target->entity());
+                    camera.orbit(ship.m_Target->entity());
+                }
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
             if (cameraState == CameraState::FollowTarget || (!ship.m_Target && cameraState != CameraState::Follow) || target != ship.m_Entity) {
@@ -107,7 +113,8 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         }
     }
     for (auto& shipSystem : ship.m_ShipSystems) 
-        shipSystem.second->update(dt);
+        if(shipSystem.second) //some ships wont have all the systems (cloaking device, etc)
+            shipSystem.second->update(dt);
 }};
 
 
@@ -119,7 +126,6 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
     m_Target        = nullptr;
     m_PlayerCamera  = nullptr;
     m_MouseFactor   = glm::dvec2(0.0);
-    m_SavedOldStateBefore = false;
 
     auto& modelComponent     = *addComponent<ComponentModel>(mesh, mat);
     auto& rigidBodyComponent = *addComponent<ComponentBody>(_type);
@@ -136,22 +142,12 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
 	if (player) {
 		m_PlayerCamera = static_cast<GameCamera*>(map->getActiveCamera());
 	}
-	for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
-		ShipSystem* system = nullptr;
-		if      (i == 0)  system = new ShipSystemReactor(*this, 1000);
-		else if (i == 1)  system = new ShipSystemPitchThrusters(*this);
-		else if (i == 2)  system = new ShipSystemYawThrusters(*this);
-		else if (i == 3)  system = new ShipSystemRollThrusters(*this);
-        else if (i == 4)  system = new ShipSystemCloakingDevice(*this);
-		else if (i == 5)  system = new ShipSystemShields(*this, map);
-		else if (i == 6)  system = new ShipSystemMainThrusters(*this);
-		else if (i == 7)  system = new ShipSystemWarpDrive(*this);
-		else if (i == 8)  system = new ShipSystemSensors(*this);
-        else if (i == 9)  system = new ShipSystemWeapons(*this);
-        m_ShipSystems.emplace(i, system);
-	}
+    rigidBodyComponent.setUserPointer1(this);
+
     map->m_Objects.push_back(this);
     map->getShips().emplace(name, this);
+
+    //derived classes need to add their own ship systems
 }
 Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);
@@ -169,6 +165,15 @@ const string Ship::getName() {
 }
 const glm::vec3 Ship::getPosition() {
     return getComponent<ComponentBody>()->position();
+}
+const glm::quat Ship::getRotation() {
+    return getComponent<ComponentBody>()->rotation();
+}
+const glm::vec3 Ship::getPosition(const EntityDataRequest& dataRequest) {
+    return getComponent<ComponentBody>(dataRequest)->position();
+}
+const glm::quat Ship::getRotation(const EntityDataRequest& dataRequest) {
+    return getComponent<ComponentBody>(dataRequest)->rotation();
 }
 void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
     const unsigned int& size = stoi(info[2]);
@@ -298,16 +303,14 @@ void Ship::setTarget(const string& target) {
 bool Ship::isCloaked() {
     if (m_ShipSystems[ShipSystemType::CloakingDevice]) {
         ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
-        return cloak.m_Active;
+        return (cloak.m_Active || cloak.getCloakTimer() < 1.0f) ? true : false;
     }
     return false;
 }
 bool Ship::isFullyCloaked() {
     if (m_ShipSystems[ShipSystemType::CloakingDevice]) {
         ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
-        if (cloak.m_Active && cloak.m_CloakTimer <= 0.0) 
-            return true;
-        return false;
+        return (cloak.m_Active && cloak.m_CloakTimer <= 0.0) ? true : false;
     }
     return false;
 }
@@ -321,28 +324,4 @@ void Ship::setTarget(EntityWrapper* target){
 }
 void Ship::onEvent(const Event& e){
 
-}
-
-void Ship::savePositionState() {
-    if (!m_SavedOldStateBefore) {
-        /*
-        Map& currentScene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
-        const auto& anchorPos = currentScene.getAnchor();
-        const auto& shipPos = entity().getComponent<ComponentBody>()->position();
-        currentScene.setOldAnchorPos(anchorPos.x, anchorPos.y, anchorPos.z);
-        currentScene.setOldClientPos(shipPos.x, shipPos.y, shipPos.z);
-        m_SavedOldStateBefore = true;
-        */
-    }
-}
-void Ship::restorePositionState() {
-    if (m_SavedOldStateBefore) {
-        /*
-        Map& currentScene = *static_cast<SolarSystem*>(Resources::getCurrentScene());
-        const auto& anchorPos = currentScene.getOldAnchorPos();
-        currentScene.setAnchor(anchorPos.x, anchorPos.y, anchorPos.z);
-        entity().getComponent<ComponentBody>()->setPosition(currentScene.getOldClientPos());
-        m_SavedOldStateBefore = false;
-        */
-    }
 }

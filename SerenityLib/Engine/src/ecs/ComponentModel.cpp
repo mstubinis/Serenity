@@ -88,19 +88,20 @@ const float& ComponentModel::radius() const {
     return _radius; 
 }
 const glm::vec3& ComponentModel::boundingBox() const {
-    return _radiusBox; 
+    return _radiusBox;
 }
-const uint ComponentModel::addModel(Handle& mesh, Handle& material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
+ModelInstance& ComponentModel::addModel(Handle& mesh, Handle& material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
     return ComponentModel::addModel((Mesh*)mesh.get(), (Material*)material.get(), shaderProgram, stage);
 }
-const uint ComponentModel::addModel(Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
-    _modelInstances.push_back(new ModelInstance(owner, mesh, material, shaderProgram));
-    auto& instance = *_modelInstances[_modelInstances.size() - 1];
+ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
+    auto modelInstance = new ModelInstance(owner, mesh, material, shaderProgram);
+    _modelInstances.push_back(modelInstance);
+    auto& instance = *modelInstance;
     auto& _scene = owner.scene();
     instance.m_Stage = stage;
     InternalScenePublicInterface::AddModelInstanceToPipeline(_scene, instance, stage);
     ComponentModel_Functions::CalculateRadius(*this);
-    return _modelInstances.size() - 1;
+    return instance;
 }
 void ComponentModel::setModel(Handle& mesh, Handle& material, const uint& index, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
     ComponentModel::setModel((Mesh*)mesh.get(), (Material*)material.get(), index, shaderProgram, stage);
@@ -189,16 +190,8 @@ struct epriv::ComponentModel_UpdateFunction final {
 struct epriv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {
 
 }};
-struct epriv::ComponentModel_EntityAddedToSceneFunction final {void operator()(void* componentPool, Entity& entity, Scene& scene) const {   
-    auto& pool = *static_cast<ECSComponentPool<Entity, ComponentModel>*>(componentPool);
-    auto* component = pool.getComponent(entity);
-    if (component) {
-        auto& _component = *component;
-        for (uint i = 0; i < _component._modelInstances.size(); ++i) {
-            auto& modelInstance = *_component._modelInstances[i];
-            InternalScenePublicInterface::AddModelInstanceToPipeline(scene, modelInstance, modelInstance.stage());
-        }
-    }
+struct epriv::ComponentModel_EntityAddedToSceneFunction final {void operator()(void* componentPool, Entity& entity, Scene& scene) const { 
+
 }};
 struct epriv::ComponentModel_SceneEnteredFunction final {void operator()(void* componentPool, Scene& scene) const {
 

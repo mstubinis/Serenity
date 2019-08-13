@@ -479,14 +479,14 @@ void Mesh::onEvent(const Event& e) {
     }
 }
 //TODO: optimize this a bit more (bubble sort?)
-void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix) {
+void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, const SortingMode::Mode& sortMode) {
     auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
     const auto& indices = vertexDataStructure.indices;
     auto& triangles = vertexDataStructure.triangles;
 
     const glm::vec3& camPos = camera.getPosition();
 
-    const auto& sorter = [&camPos, &instance, &bodyModelMatrix](epriv::Triangle& lhs, epriv::Triangle& rhs) {
+    const auto& sorter = [&camPos, &instance, &bodyModelMatrix, &sortMode](epriv::Triangle& lhs, epriv::Triangle& rhs) {
         glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;
         glm::mat4 model2 = model1;
 
@@ -496,9 +496,14 @@ void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat
         auto model1Pos = glm::vec3(model1[3][0], model1[3][1], model1[3][2]);
         auto model2Pos = glm::vec3(model2[3][0], model2[3][1], model2[3][2]);
 
-        return glm::distance2(camPos, model1Pos) < glm::distance2(camPos, model2Pos);
+        if (sortMode == SortingMode::FrontToBack)
+            return glm::distance2(camPos, model1Pos) < glm::distance2(camPos, model2Pos);
+        else if (sortMode == SortingMode::BackToFront)
+            return glm::distance2(camPos, model1Pos) > glm::distance2(camPos, model2Pos);
+        else
+            return false;
     };
-    std::sort( triangles.begin(), triangles.end(), sorter );
+    std::sort( triangles.begin(), triangles.end(), sorter);
 
     vector<ushort> newIndices;
     newIndices.reserve(indices.size());

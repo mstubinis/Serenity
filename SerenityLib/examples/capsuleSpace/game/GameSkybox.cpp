@@ -8,8 +8,8 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/textures/Texture.h>
-#include <core/ShaderProgram.h>
-#include <core/Material.h>
+#include <core/engine/shaders/ShaderProgram.h>
+#include <core/engine/materials/Material.h>
 #include <core/engine/scene/Scene.h>
 
 #include <glm/gtx/transform.hpp>
@@ -88,6 +88,5 @@ void GameSkybox::update(){
     Skybox::update();
 }
 void GameSkybox::draw(){
-    Skybox::draw();
     m_i->_draw();
 }

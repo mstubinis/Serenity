@@ -357,20 +357,20 @@ Ship* Map::createShip(Client& client, const string& shipClass, const string& shi
     auto& handles = ResourceManifest::Ships[shipClass];
     Ship* ship = nullptr;
 
-    if(shipClass == "Defiant")
+    if     (shipClass == "Defiant")
         ship = new Defiant(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
     else if(shipClass == "Nova")
-        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Nova(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
     else if(shipClass == "Shrike")
-        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Shrike(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
     else if(shipClass == "Brel")
-        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Brel(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
     else if(shipClass == "Constitution")
-        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Constitution(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
     else if(shipClass == "Miranda")
-        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Miranda(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
     else if(shipClass == "Excelsior")
-        ship = new Ship(client, handles.get<0>(), handles.get<1>(), shipClass, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Excelsior(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
 
     return ship;
 }

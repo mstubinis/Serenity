@@ -32,8 +32,8 @@ PointLight::PointLight(const LightType::Type type, const glm::vec3 pos, Scene* s
     m_C = 0.1f;
     m_L = 0.1f;
     m_E = 0.1f;
-    m_CullingRadius = calculateCullingRadius();
     m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
+    m_CullingRadius = calculateCullingRadius();
 
     if (m_Type == LightType::Point) {
         epriv::InternalScenePublicInterface::GetPointLights(*scene).push_back(this);
@@ -43,6 +43,11 @@ PointLight::PointLight(const glm::vec3 pos, Scene* scene):PointLight(LightType::
 
 }
 PointLight::~PointLight() {
+}
+void PointLight::destroy() {
+    EntityWrapper::destroy();
+    removeFromVector(epriv::InternalScenePublicInterface::GetPointLights(m_Entity.scene()), this);
+    removeFromVector(epriv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
 }
 float PointLight::calculateCullingRadius() {
     float lightMax = Math::Max(m_Color.x, m_Color.y, m_Color.z);
@@ -56,7 +61,7 @@ float PointLight::calculateCullingRadius() {
     //else if(m_AttenuationModel == LightAttenuation::Distance){
     //    radius = (lightMax * (256.0f / 5.0f));
     //}
-    auto& body = *m_Entity.getComponent<ComponentBody>();
+    auto& body = *getComponent<ComponentBody>();
     body.setScale(radius, radius, radius);
     return radius;
 }
@@ -94,7 +99,7 @@ void PointLight::setAttenuation(const float c, const float l, const float e) {
     m_CullingRadius = calculateCullingRadius(); 
 }
 void PointLight::setAttenuation(const LightRange::Range r) { 
-    auto& d = LIGHT_RANGES[uint(r)];
+    auto& d = LIGHT_RANGES[static_cast<uint>(r)];
     PointLight::setAttenuation(d.get<0>(), d.get<1>(), d.get<2>()); 
 }
 void PointLight::setAttenuationModel(const LightAttenuation::Model model) {

@@ -5,6 +5,12 @@
 #include <gl/glew.h>
 #include <SFML/OpenGL.hpp>
 
+struct SortingMode final { enum Mode {
+    None,
+    FrontToBack,
+    BackToFront,
+};};
+
 struct DepthFunc final { enum Func {
     Never = GL_NEVER,
     Less = GL_LESS,

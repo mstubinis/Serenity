@@ -20,13 +20,15 @@ SunLight::SunLight(const glm::vec3 pos, const LightType::Type type, Scene* scene
     }
     epriv::InternalScenePublicInterface::GetLights(*scene).push_back(this);
 
-    auto& body = *m_Entity.addComponent<ComponentBody>();
-    body.setPosition(pos);
+    auto body = addComponent<ComponentBody>();
+    if (body) { //evil, but needed for some reason... find out why...
+        body->setPosition(pos);
+    }
 }
 SunLight::~SunLight() {
 }
 const glm::vec3 SunLight::position() {
-    return m_Entity.getComponent<ComponentBody>()->position(); 
+    return getComponent<ComponentBody>()->position(); 
 }
 const glm::vec4& SunLight::color() const {
     return m_Color;
@@ -57,10 +59,10 @@ void SunLight::setColor(const glm::vec3& col) {
     m_Color.r = col.r; m_Color.g = col.g; m_Color.b = col.b; 
 }
 void SunLight::setPosition(const float x, const float y, const float z) { 
-    m_Entity.getComponent<ComponentBody>()->setPosition(x, y, z); 
+    getComponent<ComponentBody>()->setPosition(x, y, z); 
 }
 void SunLight::setPosition(const glm::vec3& pos) { 
-    m_Entity.getComponent<ComponentBody>()->setPosition(pos); 
+    getComponent<ComponentBody>()->setPosition(pos); 
 }
 void SunLight::setAmbientIntensity(const float a) {
     m_AmbientIntensity = a; 
@@ -76,4 +78,9 @@ void SunLight::activate(const bool b) {
 }
 void SunLight::deactivate() { 
     m_Active = false; 
+}
+void SunLight::destroy() {
+    EntityWrapper::destroy();
+    removeFromVector(epriv::InternalScenePublicInterface::GetSunLights(m_Entity.scene()), this);
+    removeFromVector(epriv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
 }

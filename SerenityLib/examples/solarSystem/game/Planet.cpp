@@ -329,13 +329,12 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
         instance.setCustomUnbindFunctor(AtmosphericScatteringGroundModelInstanceUnbindFunctor());
     }
     if(m_AtmosphereHeight > 0){
-        const uint& index = model.addModel(
+        ModelInstance& skyInstance = model.addModel(
             ResourceManifest::PlanetMesh,
             ResourceManifest::EarthSkyMaterial,
             (ShaderProgram*)ResourceManifest::skyFromSpace.get(),
             RenderStage::GeometryTransparent
         );
-        auto& skyInstance = model.getModel(index);
         float aScale = instance.getScale().x;
         aScale = aScale + (aScale * m_AtmosphereHeight);
         skyInstance.setCustomBindFunctor(AtmosphericScatteringSkyModelInstanceBindFunctor());
@@ -423,17 +422,16 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
 
     auto& model = *m_Parent->getComponent<ComponentModel>();
 
-    const uint& index = model.addModel(
+    ModelInstance& ringInstance = model.addModel(
         ResourceManifest::RingMesh,
         m_MaterialHandle,
         (ShaderProgram*)ResourceManifest::groundFromSpace.get(), 
         RenderStage::GeometryTransparent
     );
-    auto& ringModel = model.getModel(index);
-    ringModel.setCustomBindFunctor(PlanetaryRingModelInstanceBindFunctor());
+    ringInstance.setCustomBindFunctor(PlanetaryRingModelInstanceBindFunctor());
     const float aScale = 1.0f;
-    ringModel.setScale(aScale,aScale,aScale);
-    ringModel.setUserPointer(parent);
+    ringInstance.setScale(aScale,aScale,aScale);
+    ringInstance.setUserPointer(parent);
 }
 Ring::~Ring(){
 }

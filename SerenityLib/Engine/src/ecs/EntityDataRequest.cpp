@@ -10,7 +10,6 @@ EntityDataRequest::EntityDataRequest(const Entity& entity) {
     serialize(entity.data);
 }
 EntityDataRequest::EntityDataRequest(EntityDataRequest&& other) noexcept {
-    //using std::swap;
     if (&other != this) {
         ID        = other.ID;
         sceneID   = other.sceneID;
@@ -18,7 +17,6 @@ EntityDataRequest::EntityDataRequest(EntityDataRequest&& other) noexcept {
     }
 }
 EntityDataRequest& EntityDataRequest::operator=(EntityDataRequest&& other) noexcept {
-    //using std::swap;
     if (&other != this) {
         ID        = other.ID;
         sceneID   = other.sceneID;
@@ -26,8 +24,6 @@ EntityDataRequest& EntityDataRequest::operator=(EntityDataRequest&& other) noexc
     }
     return *this;
 }
-
-
 epriv::EntityPOD::EntityPOD(const uint& entityID, Scene& scene) {
     ID        = entityID;
     sceneID   = scene.id();
@@ -47,7 +43,6 @@ epriv::EntityPOD::EntityPOD(epriv::EntityPOD&& other) noexcept {
     }
 }
 epriv::EntityPOD& epriv::EntityPOD::operator=(epriv::EntityPOD&& other) noexcept {
-    //using std::swap;
     if (&other != this) {
         ID        = other.ID;
         sceneID   = other.sceneID;

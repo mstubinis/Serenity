@@ -104,17 +104,18 @@ void updateLogic(const double& dt){
     debugMgr.stop_clock();
     Game::onPreUpdate(dt);
     Game::update(dt);
-    updatePhysics(dt);
     //update current scene
     Scene& scene = *Resources::getCurrentScene();
     auto& _ecs = InternalScenePublicInterface::GetECS(scene);
     _ecs.preUpdate(scene, dt);
     scene.update(dt);
+    updatePhysics(dt);
     _ecs.update(dt, scene);
     _ecs.postUpdate(scene,dt);
 
     Core::m_Engine->m_ThreadManager._update(dt);
     Game::onPostUpdate(dt);
+
 
     debugMgr.calculate_logic();
 

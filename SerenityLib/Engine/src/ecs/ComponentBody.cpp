@@ -137,6 +137,9 @@ ComponentBody::NormalData::~NormalData() {
 
 ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Entity) {
     m_Physics                 = false;
+    m_UserPointer             = nullptr;
+    m_UserPointer1            = nullptr;
+    m_UserPointer2            = nullptr;
     data.p                    = nullptr;
     data.n                    = new NormalData();
     auto& normalData          = *data.n;
@@ -145,9 +148,13 @@ ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Enti
     normalData.rotation       = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     normalData.modelMatrix    = glm::mat4(1.0f);
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
+    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
 }
 ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p_CollisionType) : ComponentBaseClass(p_Entity) {
     m_Physics               = true;
+    m_UserPointer           = nullptr;
+    m_UserPointer1          = nullptr;
+    m_UserPointer2          = nullptr;
     data.n                  = nullptr;
     data.p                  = new PhysicsData();
     auto& physicsData       = *data.p;
@@ -174,7 +181,8 @@ ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p
     rigidBody.setDamping(0.1f, 0.4f);//air friction 
     rigidBody.setMassProps(mass, inertia);
     rigidBody.updateInertiaTensor();
-    rigidBody.setUserPointer(this);
+    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
+    setInternalPhysicsUserPointer(this);
 }
 ComponentBody::~ComponentBody() {
     //destructor
@@ -190,11 +198,15 @@ ComponentBody::~ComponentBody() {
 ComponentBody::ComponentBody(const ComponentBody& p_Other) {
     //copy constructor
     //Might need more testing here...
-	m_Physics  = p_Other.m_Physics;
-    m_Forward  = p_Other.m_Forward;
-    m_Right    = p_Other.m_Right;
-    m_Up       = p_Other.m_Up;
-    owner.data = p_Other.owner.data;
+	m_Physics          = p_Other.m_Physics;
+    m_Forward          = p_Other.m_Forward;
+    m_Right            = p_Other.m_Right;
+    m_Up               = p_Other.m_Up;
+    owner.data         = p_Other.owner.data;
+    m_CollisionFunctor = p_Other.m_CollisionFunctor;
+    m_UserPointer      = p_Other.m_UserPointer;
+    m_UserPointer1     = p_Other.m_UserPointer1;
+    m_UserPointer2     = p_Other.m_UserPointer2;
     if (p_Other.m_Physics) {
         if (p_Other.data.p) data.p = new PhysicsData(*p_Other.data.p);
         else                data.p = nullptr;
@@ -202,12 +214,14 @@ ComponentBody::ComponentBody(const ComponentBody& p_Other) {
         if (p_Other.data.n) data.n = new NormalData(*p_Other.data.n);
         else                data.n = nullptr;
     }
+    setInternalPhysicsUserPointer(this);
 }
 ComponentBody& ComponentBody::operator=(const ComponentBody& p_Other) {
     //copy assignment
     //Might need more testing here...
     ComponentBody tmp(p_Other); // re-use copy-constructor
     *this = std::move(tmp);   // re-use move-assignment
+    setInternalPhysicsUserPointer(this);
     return *this;
 }
 ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
@@ -218,6 +232,10 @@ ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
     swap(m_Right, p_Other.m_Right);
     swap(m_Up, p_Other.m_Up);
     swap(owner.data, p_Other.owner.data);
+    swap(m_CollisionFunctor, p_Other.m_CollisionFunctor);
+    swap(m_UserPointer, p_Other.m_UserPointer);
+    swap(m_UserPointer1, p_Other.m_UserPointer1);
+    swap(m_UserPointer2, p_Other.m_UserPointer2);
     if (p_Other.m_Physics) {
         swap(data.p, p_Other.data.p);
 		p_Other.data.p = nullptr;
@@ -225,6 +243,7 @@ ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
         swap(data.n, p_Other.data.n);
 		p_Other.data.n = nullptr;
     }
+    setInternalPhysicsUserPointer(this);
 }
 ComponentBody& ComponentBody::operator=(ComponentBody&& p_Other) noexcept {
     //move assignment
@@ -234,12 +253,82 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& p_Other) noexcept {
     swap(m_Right, p_Other.m_Right);
     swap(m_Up, p_Other.m_Up);
     swap(owner.data, p_Other.owner.data);
+    swap(m_CollisionFunctor, p_Other.m_CollisionFunctor);
+    swap(m_UserPointer, p_Other.m_UserPointer);
+    swap(m_UserPointer1, p_Other.m_UserPointer1);
+    swap(m_UserPointer2, p_Other.m_UserPointer2);
     if (p_Other.m_Physics) {
         swap(data.p, p_Other.data.p);
     }else{
         swap(data.n, p_Other.data.n);
     }
+    setInternalPhysicsUserPointer(this);
     return *this;
+}
+//kinda ugly
+void ComponentBody::setInternalPhysicsUserPointer(void* userPtr) {
+    if (m_Physics) {
+        auto rigid = data.p->rigidBody;
+        if (rigid) {
+            rigid->setUserPointer(userPtr);
+            auto shape = rigid->getCollisionShape();
+            if (shape) {
+                shape->setUserPointer(userPtr);
+                if (data.p->collision && data.p->collision->getType() == CollisionType::Compound) {
+                    btCompoundShape* compound = dynamic_cast<btCompoundShape*>(shape);
+                    if (compound) {
+                        const int numChildren = compound->getNumChildShapes();
+                        compound->setUserPointer(userPtr); //do we need this?
+                        if (numChildren > 0) {
+                            for (int i = 0; i < numChildren; ++i) {
+                                btCollisionShape* shape = compound->getChildShape(i);
+                                shape->setUserPointer(userPtr);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+void ComponentBody::setUserPointer(void* userPtr) {
+    m_UserPointer = userPtr;
+}
+void ComponentBody::setUserPointer1(void* userPtr) {
+    m_UserPointer1 = userPtr;
+}
+void ComponentBody::setUserPointer2(void* userPtr) {
+    m_UserPointer2 = userPtr;
+}
+void* ComponentBody::getUserPointer() {
+    return m_UserPointer;
+}
+void* ComponentBody::getUserPointer1() {
+    return m_UserPointer1;
+}
+void* ComponentBody::getUserPointer2() {
+    return m_UserPointer2;
+}
+void ComponentBody::collisionResponse(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) {
+    m_CollisionFunctor(std::ref(owner), std::ref(ownerHit), std::ref(other), std::ref(otherHit), std::ref(normal));
+}
+const ushort ComponentBody::getCollisionGroup() const {
+    if (m_Physics) {
+        return data.p->group;
+    }
+    return static_cast<ushort>(0);
+}
+const ushort ComponentBody::getCollisionMask() const {
+    if (m_Physics) {
+        return data.p->mask;
+    }
+    return static_cast<ushort>(0);
+}
+const ushort ComponentBody::getCollisionFlags() const {
+    if (m_Physics) {
+        return data.p->rigidBody->getCollisionFlags();
+    }
+    return static_cast<ushort>(0);
 }
 
 float ComponentBody::getDistance(const Entity& p_Other) {
@@ -248,7 +337,7 @@ float ComponentBody::getDistance(const Entity& p_Other) {
 }
 unsigned long long ComponentBody::getDistanceLL(const Entity& p_Other) {
     const glm::vec3& other_position = const_cast<Entity&>(p_Other).getComponent<ComponentBody>()->position();
-    return (unsigned long long)glm::distance(position(), other_position);
+    return static_cast<unsigned long long>(glm::distance(position(), other_position));
 }
 void ComponentBody::alignTo(const glm::vec3& p_Direction, const float p_Speed) {
     if (m_Physics) {
@@ -270,7 +359,7 @@ void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, cons
         ComponentModel* modelComponent = owner.getComponent<ComponentModel>();
         if (modelComponent) {
             if (p_CollisionType == CollisionType::Compound) {
-                physicsData.collision = new Collision(*modelComponent, p_Mass);
+                physicsData.collision = new Collision(this, *modelComponent, p_Mass);
             }else{
                 physicsData.collision = new Collision(p_CollisionType, modelComponent->getModel().mesh(), p_Mass);
             }
@@ -278,28 +367,32 @@ void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, cons
             physicsData.collision = new Collision(p_CollisionType, nullptr, p_Mass);
         }
     }
-    Collision& collision_ = *physicsData.collision;
-    collision_.getShape()->setUserPointer(this);
+    Collision& collision = *physicsData.collision;
+    auto& shape = *collision.getShape();
     if (physicsData.rigidBody) {
         auto& rigidBody = *physicsData.rigidBody;
-        rigidBody.setCollisionShape(collision_.getShape());
-        rigidBody.setMassProps(physicsData.mass, collision_.getInertia());
+        rigidBody.setCollisionShape(&shape);
+        rigidBody.setMassProps(physicsData.mass, collision.getInertia());
         rigidBody.updateInertiaTensor();
     }
+    setInternalPhysicsUserPointer(this);
 }
 //double check this...
 void ComponentBody::setCollision(Collision* p_Collision) {
     auto& physicsData = *data.p;
-    SAFE_DELETE(physicsData.collision);
+    if (physicsData.collision) {
+        SAFE_DELETE(physicsData.collision);
+    }
     physicsData.collision = p_Collision;
     Collision& collision = *physicsData.collision;
-    collision.getShape()->setUserPointer(this);
+    auto& shape = *collision.getShape();
     if (physicsData.rigidBody) {
         auto& rigidBody = *physicsData.rigidBody;
-        rigidBody.setCollisionShape(collision.getShape());
+        rigidBody.setCollisionShape(&shape);
         rigidBody.setMassProps(physicsData.mass, collision.getInertia());
         rigidBody.updateInertiaTensor();
     }
+    setInternalPhysicsUserPointer(this);
 }
 
 void ComponentBody::translate(const glm::vec3& p_Translation, const bool p_Local) {
@@ -966,16 +1059,16 @@ struct epriv::ComponentBody_ComponentAddedToEntityFunction final {void operator(
 }};
 struct epriv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* p_ComponentPool,Entity& p_Entity, Scene& p_Scene) const {
     auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
-    auto* component = pool.getComponent(p_Entity);
-    if (component) {
-        auto& _component = *component;
-        if (_component.m_Physics) {
-            auto& physicsData = *_component.data.p;
-            _component.setCollision(static_cast<CollisionType::Type>(physicsData.collision->getType()), physicsData.mass);
+    auto* _component = pool.getComponent(p_Entity);
+    if (_component) {
+        auto& component = *_component;
+        if (component.m_Physics) {
+            auto& physicsData = *component.data.p;
+            component.setCollision(static_cast<CollisionType::Type>(physicsData.collision->getType()), physicsData.mass);
 
             auto currentScene = Resources::getCurrentScene();
             if (currentScene && currentScene == &p_Scene) {
-                auto& phyData = *_component.data.p;
+                auto& phyData = *component.data.p;
                 Physics::addRigidBody(phyData.rigidBody, phyData.group, phyData.mask);
             }
         }

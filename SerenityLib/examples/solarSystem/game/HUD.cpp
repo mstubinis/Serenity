@@ -34,8 +34,19 @@
 #include "gui/specifics/ServerLobbyShipSelectorWindow.h"
 #include "gui/specifics/ServerHostingMapSelectorWindow.h"
 
-#include <regex>
+#include "ships/shipSystems/ShipSystemCloakingDevice.h"
+#include "ships/shipSystems/ShipSystemMainThrusters.h"
+#include "ships/shipSystems/ShipSystemPitchThrusters.h"
+#include "ships/shipSystems/ShipSystemReactor.h"
+#include "ships/shipSystems/ShipSystemRollThrusters.h"
+#include "ships/shipSystems/ShipSystemSensors.h"
+#include "ships/shipSystems/ShipSystemShields.h"
+#include "ships/shipSystems/ShipSystemWarpDrive.h"
+#include "ships/shipSystems/ShipSystemYawThrusters.h"
+#include "ships/shipSystems/ShipSystemWeapons.h"
+#include "ships/shipSystems/ShipSystemHull.h"
 
+#include <regex>
 
 #include <core/engine/sounds/Sounds.h>
 
@@ -450,6 +461,29 @@ void HUD::render_game() {
                 stringRepresentation = to_string(uint(distanceInm)) + " m";
             }
             m_Font->renderText(name + "\n" + stringRepresentation, glm::vec2(pos.x + 40, pos.y - 15), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1), 0, glm::vec2(0.7f, 0.7f), 0.1f);
+
+
+            const auto healthDisplayWidthMax = 70;
+            Ship* ship = dynamic_cast<Ship*>(target);
+            if (ship) {
+                auto* shields = static_cast<ShipSystemShields*>(ship->getShipSystem(ShipSystemType::Shields));
+                auto* _hull = static_cast<ShipSystemHull*>(ship->getShipSystem(ShipSystemType::Hull));
+                if (shields) {
+                    auto& shield = *shields;
+                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 26), glm::vec4(0.0f, 0.08f, 0.13f, 1.0f), healthDisplayWidthMax, 2, 0, 0.10f, Alignment::BottomLeft);
+                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 26), glm::vec4(0.0f, 0.674f, 1.0f, 1.0f), shield.getHealthPercent() * healthDisplayWidthMax, 2, 0, 0.09f, Alignment::BottomLeft);
+
+                }
+                if (_hull) {
+                    auto& hull = *_hull;
+                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 27), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), healthDisplayWidthMax, 2, 0, 0.10f, Alignment::TopLeft);
+                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 27), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), hull.getHealthPercent() * healthDisplayWidthMax, 2, 0, 0.09f, Alignment::TopLeft);
+                }
+            }
+
+
+
+
         }
         else { //behind
             float angle = 0;

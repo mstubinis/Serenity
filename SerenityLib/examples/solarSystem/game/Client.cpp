@@ -287,20 +287,19 @@ void Client::onReceive() {
                     
                     auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map
 
-                    
-
                     Map& map = *static_cast<Map*>(Resources::getScene(info[1]));
 
                     auto spawn = map.getSpawnAnchor()->getPosition();
+                    Ship* ship = map.createShip(*this, info[0], pI.name, false, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z));
 
-                    auto& handles = ResourceManifest::Ships.at(info[0]);
-                    Ship* ship = map.createShip(*this, info[0], info[1], false, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z));
-
-                    //send the new guy our cloaking status
-                    PacketCloakUpdate pOut1(*map.getPlayer());
-                    pOut1.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
-                    pOut1.data += ("," + pI.name);
-                    send(pOut1);
+                    //send the new guy our cloaking status -- if we are ingame!
+                    auto player = map.getPlayer();
+                    if (player) {
+                        PacketCloakUpdate pOut1(*player);
+                        pOut1.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
+                        pOut1.data += ("," + pI.name);
+                        send(pOut1);
+                    }
                     break;
                 }
                 case PacketType::Server_To_Client_Approve_Map_Entry: {

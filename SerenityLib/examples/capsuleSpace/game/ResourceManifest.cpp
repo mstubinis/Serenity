@@ -2,7 +2,9 @@
 
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/Material.h>
+#include <core/engine/materials/Material.h>
+#include <core/engine/materials/MaterialLayer.h>
+#include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/textures/Texture.h>
 
 using namespace Engine;
@@ -41,8 +43,8 @@ void ResourceManifest::init(){
     CrosshairMaterial = Resources::addMaterial("Crosshair", BasePath + "data/Textures/HUD/Crosshair.dds","","","");
     CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow", BasePath + "data/Textures/HUD/CrosshairArrow.dds","","","");
 
-    auto& crosshairDiffuse = *(((Material*)CrosshairMaterial.get())->getComponent(MaterialComponentType::Diffuse)->texture());
-    auto& crosshairArrowDiffuse = *(((Material*)CrosshairArrowMaterial.get())->getComponent(MaterialComponentType::Diffuse)->texture());
+    auto& crosshairDiffuse = *(((Material*)CrosshairMaterial.get())->getComponent(0).texture());
+    auto& crosshairArrowDiffuse = *(((Material*)CrosshairArrowMaterial.get())->getComponent(0).texture());
 
     crosshairDiffuse.setWrapping(TextureWrap::ClampToEdge);
     crosshairDiffuse.setFilter(TextureFilter::Nearest);
@@ -52,15 +54,15 @@ void ResourceManifest::init(){
 
     CapsuleA = Resources::addMaterial("Capsule_A", BasePath + "data/Textures/Effects/capsule_a.dds");
     ((Material*)CapsuleA.get())->setShadeless(true);
-    ((Material*)CapsuleA.get())->getComponent(MaterialComponentType::Diffuse)->texture()->setAnisotropicFiltering(2.0f);
+    ((Material*)CapsuleA.get())->getComponent(0).texture()->setAnisotropicFiltering(2.0f);
     CapsuleB = Resources::addMaterial("Capsule_B", BasePath + "data/Textures/Effects/capsule_b.dds");
     ((Material*)CapsuleB.get())->setShadeless(true);
-    ((Material*)CapsuleB.get())->getComponent(MaterialComponentType::Diffuse)->texture()->setAnisotropicFiltering(2.0f);
+    ((Material*)CapsuleB.get())->getComponent(0).texture()->setAnisotropicFiltering(2.0f);
     CapsuleC = Resources::addMaterial("Capsule_C", BasePath + "data/Textures/Effects/capsule_c.dds");
     ((Material*)CapsuleC.get())->setShadeless(true);
     ((Material*)CapsuleC.get())->setGlow(0.2f);
-    ((Material*)CapsuleC.get())->getComponent(MaterialComponentType::Diffuse)->texture()->setAnisotropicFiltering(2.0f);
+    ((Material*)CapsuleC.get())->getComponent(0).texture()->setAnisotropicFiltering(2.0f);
     CapsuleD = Resources::addMaterial("Capsule_D", BasePath + "data/Textures/Effects/capsule_d.dds");
     ((Material*)CapsuleD.get())->setShadeless(true);  
-    ((Material*)CapsuleD.get())->getComponent(MaterialComponentType::Diffuse)->texture()->setAnisotropicFiltering(2.0f);
+    ((Material*)CapsuleD.get())->getComponent(0).texture()->setAnisotropicFiltering(2.0f);
 }

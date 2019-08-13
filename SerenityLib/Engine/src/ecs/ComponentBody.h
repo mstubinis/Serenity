@@ -2,7 +2,6 @@
 #ifndef ENGINE_ECS_COMPONENT_BODY_H
 #define ENGINE_ECS_COMPONENT_BODY_H
 
-//#include <core/engine/physics/Engine_Physics.h>
 #include <ecs/ComponentBaseClass.h>
 #include <ecs/ECSSystem.h>
 
@@ -13,11 +12,14 @@
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <core/engine/physics/Collision.h>
 
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+
 #include <iostream>
 
 class Collision;
 class ComponentModel;
-
+class ComponentBody;
 struct ScreenBoxCoordinates {
     bool      inBounds;
     glm::vec2 topLeft;
@@ -33,6 +35,10 @@ namespace Engine {
         struct ComponentBody_ComponentAddedToEntityFunction;
         struct ComponentBody_SceneEnteredFunction;
         struct ComponentBody_SceneLeftFunction;
+        struct ComponentBody_EmptyCollisionFunctor final { 
+            void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+            } 
+        };
     };
 };
 
@@ -42,7 +48,7 @@ class ComponentBody : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentBody_EntityAddedToSceneFunction;
     friend struct Engine::epriv::ComponentBody_SceneEnteredFunction;
     friend struct Engine::epriv::ComponentBody_SceneLeftFunction;
-    friend class  ::ComponentModel;
+    friend class  ComponentModel;
     private:
         struct PhysicsData {
             Collision*           collision;
@@ -76,8 +82,14 @@ class ComponentBody : public ComponentBaseClass {
             NormalData*  n;
             PhysicsData* p;
         } data;
-        bool m_Physics;
+        bool  m_Physics;
+        void* m_UserPointer;
+        void* m_UserPointer1;
+        void* m_UserPointer2;
         glm::vec3 m_Forward, m_Right, m_Up;
+
+        boost::function<void(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal)> m_CollisionFunctor;
+
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentBody(const Entity&);
@@ -89,6 +101,23 @@ class ComponentBody : public ComponentBaseClass {
         ComponentBody& operator=(ComponentBody&& other) noexcept;
 
         ~ComponentBody();
+
+        template<typename T> void setCollisionFunctor(const T& functor) {
+            m_CollisionFunctor = boost::bind<void>(functor, _1, _2, _3, _4, _5);
+        }
+        void collisionResponse(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal);
+
+        void setInternalPhysicsUserPointer(void* userPtr);
+        void setUserPointer(void* userPtr);
+        void setUserPointer1(void* userPtr);
+        void setUserPointer2(void* userPtr);
+        void* getUserPointer();
+        void* getUserPointer1();
+        void* getUserPointer2();
+
+        const ushort getCollisionGroup() const;
+        const ushort getCollisionMask() const;
+        const ushort getCollisionFlags() const;
 
         void alignTo(const glm::vec3& direction, const float speed);
 

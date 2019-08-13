@@ -19,7 +19,7 @@ struct ResourceManifest{
     static Handle RingMesh;
     static Handle ShieldMesh;
     static Handle CannonEffectMesh;
-
+    static Handle CannonTailMesh;
 
 	/*extras*/
 	static Handle NovaMesh;
@@ -54,6 +54,10 @@ struct ResourceManifest{
     static Handle PulsePhaserMaterial;
     static Handle PlasmaCannonMaterial;
     static Handle DisruptorCannonMaterial;
+    static Handle PulsePhaserTailMaterial;
+    static Handle PlasmaCannonTailMaterial;
+    static Handle DisruptorCannonTailMaterial;
+
 
     //sounds
     static Handle MenuMusic;

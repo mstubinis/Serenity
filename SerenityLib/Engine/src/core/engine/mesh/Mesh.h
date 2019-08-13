@@ -116,7 +116,7 @@ class Mesh final: public BindableResource, public EventObserver{
             vertexDataStructure.setIndices(modifiedIndices, uploadToGPU, orphan, recalcTriangles);
         }
 
-        void sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix);
+        void sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, const SortingMode::Mode& sortMode);
 
         void render(bool instancing = true, MeshDrawMode::Mode = MeshDrawMode::Triangles);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
