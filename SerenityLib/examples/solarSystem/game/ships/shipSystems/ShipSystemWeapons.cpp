@@ -6,16 +6,34 @@
 using namespace Engine;
 using namespace std;
 
-PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc):ship(_ship) {
-    position = _position;
-    forward = _forward;
-    arc = _arc;
+PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const uint& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed):ship(_ship) {
+    position                 = _pos;
+    forward                  = _fwd;
+    arc                      = _arc;
+    damage                   = _dmg;
+    impactRadius             = _impactRad;
+    impactTime               = _impactTime;
+    numRounds = numRoundsMax = _maxCharges;
+    rechargeTimePerRound     = _rechargePerRound;
+    travelSpeed              = _travelSpeed;
+    rechargeTimer            = 0.0f;
 }
 bool PrimaryWeaponCannon::fire() {
+    if (numRounds > 0) {
+        --numRounds;
+        return true;
+    }
     return false;
 }
 void PrimaryWeaponCannon::update(const double& dt) {
-
+    if (numRounds < numRoundsMax) {
+        const float fdt = static_cast<float>(dt);
+        rechargeTimer += fdt;
+        if (rechargeTimer >= rechargeTimePerRound) {
+            ++numRounds;
+            rechargeTimer = 0.0f;
+        }
+    }
 }
 PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc) : ship(_ship) {
     position = _position;
@@ -52,13 +70,14 @@ ShipSystemWeapons::~ShipSystemWeapons() {
 }
 void ShipSystemWeapons::update(const double& dt) {
     const bool isCloaked = m_Ship.isCloaked();
-    if (Engine::isMouseButtonDownOnce(MouseButton::Left) && !isCloaked) {
+    const bool isWarping = m_Ship.IsWarping();
+    if (Engine::isMouseButtonDownOnce(MouseButton::Left) && !isCloaked && !isWarping) {
         for (auto& beam : m_PrimaryWeaponsBeams)
             beam->fire();
         for (auto& cannon : m_PrimaryWeaponsCannons)
             cannon->fire();
     }
-    if (Engine::isMouseButtonDownOnce(MouseButton::Right) && !isCloaked) {
+    if (Engine::isMouseButtonDownOnce(MouseButton::Right) && !isCloaked && !isWarping) {
         for (auto& torpedo : m_SecondaryWeaponsTorpedos)
             torpedo->fire();
     }
@@ -70,11 +89,11 @@ void ShipSystemWeapons::update(const double& dt) {
         torpedo->update(dt);
 }
 void ShipSystemWeapons::addPrimaryWeaponBeam(PrimaryWeaponBeam& beam) {
-    this->m_PrimaryWeaponsBeams.push_back(&beam);
+    m_PrimaryWeaponsBeams.push_back(&beam);
 }
 void ShipSystemWeapons::addPrimaryWeaponCannon(PrimaryWeaponCannon& cannon) {
-    this->m_PrimaryWeaponsCannons.push_back(&cannon);
+    m_PrimaryWeaponsCannons.push_back(&cannon);
 }
 void ShipSystemWeapons::addSecondaryWeaponTorpedo(SecondaryWeaponTorpedo& torpedo) {
-    this->m_SecondaryWeaponsTorpedos.push_back(&torpedo);
+    m_SecondaryWeaponsTorpedos.push_back(&torpedo);
 }

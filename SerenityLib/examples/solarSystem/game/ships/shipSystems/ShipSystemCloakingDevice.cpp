@@ -1,4 +1,5 @@
 #include "ShipSystemCloakingDevice.h"
+#include "ShipSystemShields.h"
 
 #include "../../Ship.h"
 #include "../../Packet.h"
@@ -25,6 +26,12 @@ bool ShipSystemCloakingDevice::cloak(ComponentModel& model, bool sendPacket) {
     if (m_CloakTimer >= 1.0f) {
         model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
         m_Active = true;
+
+        auto* shields = static_cast<ShipSystemShields*>(m_Ship.getShipSystem(ShipSystemType::Shields));
+        if (shields) {
+            shields->turnOffShields();
+        }
+
         auto effect = Sound::playEffect(ResourceManifest::SoundCloakingActivated);
         if (effect) {
             auto& body = *m_Ship.getComponent<ComponentBody>();
@@ -107,6 +114,11 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                 if (m_CloakTimer > 1.0f) {
                     m_CloakTimer = 1.0f;
                     model.setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryOpaque);
+
+                    auto* shields = static_cast<ShipSystemShields*>(m_Ship.getShipSystem(ShipSystemType::Shields));
+                    if (shields) {
+                        shields->turnOnShields();
+                    }
                 }
             }
             instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
@@ -121,6 +133,11 @@ void ShipSystemCloakingDevice::update(const double& dt) {
             if (m_CloakTimer > 1.0f) {
                 m_CloakTimer = 1.0f;
                 model.setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryOpaque);
+
+                auto* shields = static_cast<ShipSystemShields*>(m_Ship.getShipSystem(ShipSystemType::Shields));
+                if (shields) {
+                    shields->turnOnShields();
+                }
             }
         }
         instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));

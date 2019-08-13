@@ -57,11 +57,12 @@ class ShipSystemShields final : public ShipSystem {
         EntityWrapper                 m_ShieldEntity;
         uint                          m_HealthPointsCurrent;
         uint                          m_HealthPointsMax;
-        //float                         m_TimeSinceLastHit;
-        //float                         m_RechargeActivation;
+        //float                       m_TimeSinceLastHit;
+        //float                       m_RechargeActivation;
         uint                          m_RechargeAmount;
         float                         m_RechargeRate;
         float                         m_RechargeTimer;
+        bool                          m_ShieldsAreUp;
     public:
         ShipSystemShields(Ship&, Map*, const uint health);
         ~ShipSystemShields();
@@ -71,6 +72,9 @@ class ShipSystemShields final : public ShipSystem {
         const uint getHealthCurrent() const;
         const uint getHealthMax() const;
         const float getHealthPercent() const; //returns percent from 0.0f to 1.0f
+
+        void turnOffShields();
+        void turnOnShields();
 
         void receiveHit(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage);
 };

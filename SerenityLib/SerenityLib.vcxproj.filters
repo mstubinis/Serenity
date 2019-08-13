@@ -537,6 +537,12 @@
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\SSAOCode.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\physics\DebugDrawer.h">
+      <Filter>Header Files\Engine\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\physics\World.h">
+      <Filter>Header Files\Engine\Core\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -808,6 +814,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\SSAOCode.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\physics\DebugDrawer.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\physics\World.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

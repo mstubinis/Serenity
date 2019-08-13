@@ -38,11 +38,8 @@ class PulsePhaser final: public PrimaryWeaponCannon{
     private:
         Map& m_Map;
         std::vector<PulsePhaserProjectile*> m_ActiveProjectiles;
-        uint                                m_Damage;
-        float                               m_ImpactRadius;
-        float                               m_ImpactTime;
     public:
-        PulsePhaser(Ship&, Map&, const glm::vec3& position, const glm::vec3& forward, const float& arc);
+        PulsePhaser(Ship&, Map&, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& maxCharges = 5, const uint & damage = 100, const float& _rechargePerRound = 1.0f, const float& _impactRadius = 1.5f, const float& _impactTime = 1.8f, const float& _travelSpeed = 50.5f);
         ~PulsePhaser();
 
         bool fire();

@@ -92,6 +92,7 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map* map, const uint health) :
     for (uint i = 0; i < MAX_IMPACT_POINTS; ++i) {
         m_ImpactPointsFreelist.push_back(i);
     }
+    m_ShieldsAreUp = true;
 }
 ShipSystemShields::~ShipSystemShields() {
 
@@ -133,33 +134,49 @@ void ShipSystemShields::update(const double& dt) {
     ShipSystem::update(dt);
 }
 void ShipSystemShields::receiveHit(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage) {
-    //m_TimeSinceLastHit = 0.0f;
-    int bleed = m_HealthPointsCurrent - damage;
+    if (m_ShieldsAreUp) {
+        //m_TimeSinceLastHit = 0.0f;
+        int bleed = m_HealthPointsCurrent - damage;
 
-    if (bleed >= 0) {
-        //shields take the entire hit
-        m_HealthPointsCurrent -= damage;
+        if (bleed >= 0) {
+            //shields take the entire hit
+            m_HealthPointsCurrent -= damage;
+        }else{
+            //we have damage leaking to the hull
+            m_HealthPointsCurrent = 0;
+            uint bleedDamage = glm::abs(bleed);
+            auto* hull = static_cast<ShipSystemHull*>(m_Ship.getShipSystem(ShipSystemType::Hull));
+            if (hull) {
+                hull->receiveHit(impactLocation, impactRadius, maxTime, bleed);
+            }
+        }
+        if (m_HealthPointsCurrent > 0 && m_ImpactPointsFreelist.size() > 0) {
+            auto nextIndex = m_ImpactPointsFreelist[0];
+            auto& impactPointData = m_ImpactPoints[nextIndex];
+            impactPointData.impact(impactLocation, impactRadius, maxTime, m_ImpactPointsFreelist);
+        }
     }else{
-        //we have damage leaking to the hull
-        m_HealthPointsCurrent = 0;
-        uint bleedDamage = glm::abs(bleed);
+        //TODO: damage the hull entirely, but ideally this should never be reached, keep it at the collision level
         auto* hull = static_cast<ShipSystemHull*>(m_Ship.getShipSystem(ShipSystemType::Hull));
         if (hull) {
-            hull->receiveHit(impactLocation, impactRadius, maxTime, bleed);
+            hull->receiveHit(impactLocation, impactRadius, maxTime, damage);
         }
-    }
-    if (m_HealthPointsCurrent > 0 && m_ImpactPointsFreelist.size() > 0) {
-        auto nextIndex = m_ImpactPointsFreelist[0];
-        auto& impactPointData = m_ImpactPoints[nextIndex];
-        impactPointData.impact(impactLocation, impactRadius, maxTime, m_ImpactPointsFreelist);
     }
 }
 const uint ShipSystemShields::getHealthCurrent() const {
-    return m_HealthPointsCurrent;
+    return m_ShieldsAreUp ? m_HealthPointsCurrent : 0;
 }
 const uint ShipSystemShields::getHealthMax() const {
     return m_HealthPointsMax;
 }
 const float ShipSystemShields::getHealthPercent() const {
-    return static_cast<float>(m_HealthPointsCurrent) / static_cast<float>(m_HealthPointsMax);
+    return static_cast<float>(getHealthCurrent()) / static_cast<float>(m_HealthPointsMax);
+}
+void ShipSystemShields::turnOffShields() {
+    m_ShieldsAreUp = false;
+    //TODO: send packet indicating shields are off
+}
+void ShipSystemShields::turnOnShields() {
+    m_ShieldsAreUp = true;
+    //TODO: send packet indicating shields are on
 }

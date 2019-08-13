@@ -1,5 +1,7 @@
 #include <core/engine/sounds/SoundData.h>
 
+#include <glm/glm.hpp>
+
 using namespace std;
 
 SoundData::SoundData(const string& file) {

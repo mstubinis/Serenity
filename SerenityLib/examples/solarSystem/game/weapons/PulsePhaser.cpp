@@ -37,13 +37,13 @@ void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& 
                 auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                 auto local = otherHit - other.position();
                 if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                    shields->receiveHit(local, pulsePhaser.m_ImpactRadius, pulsePhaser.m_ImpactTime, pulsePhaser.m_Damage);
+                    shields->receiveHit(local, pulsePhaser.impactRadius, pulsePhaser.impactTime, pulsePhaser.damage);
                     pulsePhaserProjectile.destroy();
                     return;
                 }
                 if (hull && other.getUserPointer() == hull) {
                     if (hull->getHealthCurrent() > 0) {
-                        hull->receiveHit(local, pulsePhaser.m_ImpactRadius, pulsePhaser.m_ImpactTime, pulsePhaser.m_Damage);
+                        hull->receiveHit(local, pulsePhaser.impactRadius, pulsePhaser.impactTime, pulsePhaser.damage);
                     }
                     pulsePhaserProjectile.destroy();
                 }
@@ -141,8 +141,12 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
 
     body.setLinearVelocity(shipLinVel, false);
     body.setAngularVelocity(shipAngVel, false);
+    
 
-    body.applyImpulse(0.0f, 0.0f, -50.5f, true);
+    glm::vec3 offset = glm::vec3(source.travelSpeed) * source.forward;
+    offset = shipRotation * offset;
+
+    body.applyImpulse(offset.x, offset.y, offset.z, false);
 
     body.setUserPointer(this);
     body.setUserPointer1(&source.ship);
@@ -181,10 +185,8 @@ void PulsePhaserProjectile::update(const double& dt) {
     }
 }
 
-PulsePhaser::PulsePhaser(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc):PrimaryWeaponCannon(ship,position,forward,arc), m_Map(map){
-    m_Damage = 100;
-    m_ImpactRadius = 1.5f;
-    m_ImpactTime = 2.1f;
+PulsePhaser::PulsePhaser(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const uint& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed):PrimaryWeaponCannon(ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed), m_Map(map){
+
 }
 PulsePhaser::~PulsePhaser() {
 
@@ -199,20 +201,25 @@ void PulsePhaser::update(const double& dt) {
             removeFromVector(m_ActiveProjectiles, projectile);
         }
     }
+    PrimaryWeaponCannon::update(dt);
 }
 bool PulsePhaser::fire() {
-    auto* projectile = new PulsePhaserProjectile(*this, m_Map, position, forward); 
-    m_ActiveProjectiles.push_back(projectile);
-    auto sound = Engine::Sound::playEffect(ResourceManifest::SoundPulsePhaser);
+    auto res = PrimaryWeaponCannon::fire();
+    if (res) {
+        auto* projectile = new PulsePhaserProjectile(*this, m_Map, position, forward);
+        m_ActiveProjectiles.push_back(projectile);
+        auto sound = Engine::Sound::playEffect(ResourceManifest::SoundPulsePhaser);
 
 
-    auto& shipBody = *ship.getComponent<ComponentBody>();
-    auto shipMatrix = shipBody.modelMatrix();
-    shipMatrix = glm::translate(shipMatrix, position);
-    const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
-    if (sound) {
-        sound->setPosition(finalPosition);
-        sound->setAttenuation(0.15f);
+        auto& shipBody                = *ship.getComponent<ComponentBody>();
+        auto shipMatrix               = shipBody.modelMatrix();
+        shipMatrix                    = glm::translate(shipMatrix, position);
+        const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+        if (sound) {
+            sound->setPosition(finalPosition);
+            sound->setAttenuation(0.15f);
+        }
+        return true;
     }
-    return true;
+    return false;
 }

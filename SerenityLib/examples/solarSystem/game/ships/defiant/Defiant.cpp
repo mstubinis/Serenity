@@ -38,10 +38,10 @@ Defiant::Defiant(Client& client, bool player, const string& name, glm::vec3 posi
 
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
-    PulsePhaser* leftTop = new PulsePhaser(*this, *map, glm::vec3(-0.573355f, 0.07134f, 0.072925f), glm::vec3(0, 0, -1), 10.0f);
-    PulsePhaser* leftBottom = new PulsePhaser(*this, *map, glm::vec3(-0.434018f, -0.1592f, 0.163752f), glm::vec3(0, 0, -1), 10.0f);
-    PulsePhaser* rightBottom = new PulsePhaser(*this, *map, glm::vec3(0.434018f, -0.1592f, 0.163752f), glm::vec3(0, 0, -1), 10.0f);
-    PulsePhaser* rightTop = new PulsePhaser(*this, *map, glm::vec3(0.573355f, 0.07134f, 0.072925f), glm::vec3(0, 0, -1), 10.0f);
+    PulsePhaser* leftTop     = new PulsePhaser(*this, *map, glm::vec3(-0.573355f, 0.07134f, 0.072925f), glm::vec3(0, 0, -1), 10.0f, 6, 100, 0.7f);
+    PulsePhaser* leftBottom  = new PulsePhaser(*this, *map, glm::vec3(-0.434018f, -0.1592f, 0.163752f), glm::vec3(0, 0, -1), 10.0f, 6, 100, 0.7f);
+    PulsePhaser* rightBottom = new PulsePhaser(*this, *map, glm::vec3(0.434018f, -0.1592f, 0.163752f), glm::vec3(0, 0, -1), 10.0f, 6, 100, 0.7f);
+    PulsePhaser* rightTop    = new PulsePhaser(*this, *map, glm::vec3(0.573355f, 0.07134f, 0.072925f), glm::vec3(0, 0, -1), 10.0f, 6, 100, 0.7f);
 
     //front left torpedo  (-0.358887, 0.657542, 0.023574)
     //front right torpedo (0.358887, 0.657542, 0.023574)
