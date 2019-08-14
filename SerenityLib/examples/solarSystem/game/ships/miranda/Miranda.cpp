@@ -26,7 +26,7 @@ Miranda::Miranda(Client& client, bool player, const string& name, glm::vec3 posi
         else if (i == 1)  system = new ShipSystemPitchThrusters(*this);
         else if (i == 2)  system = new ShipSystemYawThrusters(*this);
         else if (i == 3)  system = new ShipSystemRollThrusters(*this);
-        else if (i == 4)  system = new ShipSystemCloakingDevice(*this);  //TODO: remove cloaking device
+        else if (i == 4)  system = nullptr; //no cloaking device
         else if (i == 5)  system = new ShipSystemShields(*this, map, 8500);
         else if (i == 6)  system = new ShipSystemMainThrusters(*this);
         else if (i == 7)  system = new ShipSystemWarpDrive(*this);

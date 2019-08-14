@@ -73,9 +73,11 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map* map, const uint health) :
     m_RechargeTimer = 0.0f;
 
     auto& boundBox = m_Ship.getComponent<ComponentModel>()->getModel(0).mesh()->getRadiusBox();
-    //note: add collision flags -- shields should not collide with other shields or ships. but SHOULD collide with projectiles
+    //note: add collision flags -- shields should not collide with other shields or ships. but SHOULD collide with projectiles / weapons
     auto& btBody = const_cast<btRigidBody&>(body.getBody());
     body.addCollisionFlag(CollisionFlag::NoContactResponse);
+    body.setCollisionGroup(CollisionFilter::_Custom_1); //group 1 are shields
+    body.setCollisionMask(CollisionFilter::_Custom_2); //group 2 are weapons
 
     btBody.setUserPointer(&m_Ship);
     body.setScale((boundBox.x * 1.37f), (boundBox.y * 1.37f), (boundBox.z * 1.37f)); //todo: fix this for when other ships are created

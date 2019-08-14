@@ -7,6 +7,7 @@ ShipSystemHull::ShipSystemHull(Ship& _ship, const uint health) :ShipSystem(ShipS
     m_RechargeAmount = 50;
     m_RechargeRate = 5.0f;
     m_RechargeTimer = 0.0f;
+    m_CollisionTimer = 10.0f;
 
     _ship.getComponent<ComponentBody>()->setUserPointer(this);
 }
@@ -23,9 +24,26 @@ void ShipSystemHull::receiveHit(const glm::vec3& impactLocation, const float& im
         m_HealthPointsCurrent = 0;
     }
 }
+void ShipSystemHull::receiveCollision(const uint damage) {
+    if (m_CollisionTimer > static_cast<float>(HULL_TO_HULL_COLLISION_DELAY)) {
+        int newHP = m_HealthPointsCurrent - damage;
+        if (newHP > 0) {
+            //hull takes entire hit
+            m_HealthPointsCurrent -= damage;
+        }else{
+            //we destroyed the ship
+            m_HealthPointsCurrent = 0;
+        }
+        m_CollisionTimer = 0.0f;
+    }
+}
 void ShipSystemHull::update(const double& dt) {
 
     const float fdt = static_cast<float>(dt);
+    if (m_CollisionTimer < 10.0f + static_cast<float>(HULL_TO_HULL_COLLISION_DELAY)) {
+        m_CollisionTimer += fdt;
+    }
+
 #pragma region Recharging
     if (m_HealthPointsCurrent < m_HealthPointsMax) { //dont need to recharge at max shields
         m_RechargeTimer += fdt;

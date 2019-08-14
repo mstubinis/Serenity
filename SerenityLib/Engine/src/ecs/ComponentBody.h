@@ -115,8 +115,8 @@ class ComponentBody : public ComponentBaseClass {
         void* getUserPointer1();
         void* getUserPointer2();
 
-        const ushort getCollisionGroup() const;
-        const ushort getCollisionMask() const;
+        const ushort getCollisionGroup() const; //get the groups this body belongs to
+        const ushort getCollisionMask() const;  //get the groups this body will register collisions with
         const ushort getCollisionFlags() const;
 
         void alignTo(const glm::vec3& direction, const float speed);
@@ -165,17 +165,17 @@ class ComponentBody : public ComponentBaseClass {
         void setCollision(const CollisionType::Type, const float mass);
         void setCollision(Collision*);
 
-        void setCollisionGroup(const short& group);
-        void setCollisionMask(const short& mask);
+        void setCollisionGroup(const short& group);  //set the groups this body belongs to
+        void setCollisionMask(const short& mask); //set the groups this body will register collisions with
         void setCollisionFlag(const short& flag);
-        void setCollisionGroup(const CollisionFilter::Filter& group);
-        void setCollisionMask(const CollisionFilter::Filter& mask);
+        void setCollisionGroup(const CollisionFilter::Filter& group);  //set the groups this body belongs to
+        void setCollisionMask(const CollisionFilter::Filter& mask); //set the groups this body will register collisions with
         void setCollisionFlag(const CollisionFlag::Flag& flag);
-        void addCollisionGroup(const short& group);
-        void addCollisionMask(const short& mask);
+        void addCollisionGroup(const short& group);  //add to the groups this body belongs to
+        void addCollisionMask(const short& mask); //add to the groups this body will register collisions with
         void addCollisionFlag(const short& flag);
-        void addCollisionGroup(const CollisionFilter::Filter& group);
-        void addCollisionMask(const CollisionFilter::Filter& mask);
+        void addCollisionGroup(const CollisionFilter::Filter& group); //add to the groups this body belongs to
+        void addCollisionMask(const CollisionFilter::Filter& mask); //add to the groups this body will register collisions with
         void addCollisionFlag(const CollisionFlag::Flag& flag);
 
         void setDamping(const float linear, const float angular);

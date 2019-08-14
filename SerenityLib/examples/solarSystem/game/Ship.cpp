@@ -28,6 +28,7 @@
 #include "ships/shipSystems/ShipSystemWarpDrive.h"
 #include "ships/shipSystems/ShipSystemYawThrusters.h"
 #include "ships/shipSystems/ShipSystemWeapons.h"
+#include "ships/shipSystems/ShipSystemHull.h"
 
 #include <glm/gtx/norm.hpp>
 
@@ -117,6 +118,53 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
             shipSystem.second->update(dt);
 }};
 
+//TODO: move to the hull system?
+struct HullCollisionFunctor final {
+    void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+        auto ownerShipVoid = owner.getUserPointer1();
+        if (ownerShipVoid) {
+            auto otherShipVoid = owner.getUserPointer1();
+            if (otherShipVoid) {
+
+                if (owner.getCollisionGroup() == CollisionFilter::_Custom_3 && other.getCollisionGroup() == CollisionFilter::_Custom_3) { //hull on hull only
+
+                    Ship* ownerShip = static_cast<Ship*>(ownerShipVoid);
+                    Ship* otherShip = static_cast<Ship*>(otherShipVoid);
+
+                    ShipSystemHull* ownerHull = static_cast<ShipSystemHull*>(ownerShip->getShipSystem(ShipSystemType::Hull));
+                    ShipSystemHull* otherHull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                    if (ownerHull && otherHull) {
+                        auto ownerMass = owner.mass() * 5000;
+                        auto otherMass = other.mass() * 5000;
+                        auto ownerVelocity = owner.getLinearVelocity();
+                        auto otherVelocity = other.getLinearVelocity();
+
+                        //damage value should be modified based on velocities going towards ships
+                        //ex case - constitution (owner) collides with excelsior (other)
+                        /*
+                        owner mass = 10,000
+                        other mass = 15,000
+                        avg = 12,500
+                        */
+                        const float startingDamage = (ownerMass + otherMass) / 2.0f;
+                        const float ownerMassRatio = ownerMass / otherMass; //0.66666
+                        const float otherMassRatio = otherMass / ownerMass; //1.5
+
+                        float ownerDamage = startingDamage * otherMassRatio;
+                        float otherDamage = startingDamage * ownerMassRatio;
+
+                        //TODO: modify based on velocity
+                        //auto ownerToOther = ownerVelocity - otherVelocity;
+                        //auto otherToOwner = otherVelocity - ownerVelocity;
+
+                        ownerHull->receiveCollision(ownerDamage);
+                        otherHull->receiveCollision(otherDamage);
+                    }
+                }
+            }
+        }
+    }
+};
 
 Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, bool player, const string& name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type, Map* map):EntityWrapper(*map),m_Client(client){
     m_WarpFactor    = 0;
@@ -128,21 +176,26 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
     m_MouseFactor   = glm::dvec2(0.0);
 
     auto& modelComponent     = *addComponent<ComponentModel>(mesh, mat);
-    auto& rigidBodyComponent = *addComponent<ComponentBody>(_type);
+    auto& body               = *addComponent<ComponentBody>(_type);
     auto& nameComponent      = *addComponent<ComponentName>(name);
     auto& logicComponent     = *addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
     setModel(mesh);
 
-    const_cast<btRigidBody&>(rigidBodyComponent.getBody()).setDamping(0.01f, 0.2f);
-    rigidBodyComponent.getBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
-	rigidBodyComponent.setPosition(pos);
-	rigidBodyComponent.setScale(scl);
+    const_cast<btRigidBody&>(body.getBody()).setDamping(0.01f, 0.2f);
+    body.getBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
+    body.setPosition(pos);
+    body.setScale(scl);
+
+    //the body is using a convex hull for ship to ship ramming force and weapon / ship to hull damage. TODO: create our own triangle mesh for weapon to hull impacts for pure precision. but watch performance here
+    body.setCollisionGroup(CollisionFilter::_Custom_3); //i belong to hull group (group 3)
+    body.setCollisionMask(CollisionFilter::_Custom_3 | CollisionFilter::_Custom_2); //i should only collide with other hulls and weapons
+    body.setCollisionFunctor(HullCollisionFunctor());
 
 	if (player) {
 		m_PlayerCamera = static_cast<GameCamera*>(map->getActiveCamera());
 	}
-    rigidBodyComponent.setUserPointer1(this);
+    body.setUserPointer1(this);
 
     map->m_Objects.push_back(this);
     map->getShips().emplace(name, this);
