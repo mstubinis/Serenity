@@ -218,10 +218,13 @@
     <ClInclude Include="game\Ship.h" />
     <ClInclude Include="game\ships\brel\Brel.h" />
     <ClInclude Include="game\ships\constitution\Constitution.h" />
+    <ClInclude Include="game\ships\cube\Cube.h" />
     <ClInclude Include="game\ships\defiant\Defiant.h" />
+    <ClInclude Include="game\ships\diamond\Diamond.h" />
     <ClInclude Include="game\ships\excelsior\Excelsior.h" />
     <ClInclude Include="game\ships\miranda\Miranda.h" />
     <ClInclude Include="game\ships\nova\Nova.h" />
+    <ClInclude Include="game\ships\probe\Probe.h" />
     <ClInclude Include="game\ships\Ships.h" />
     <ClInclude Include="game\ships\shipSystems\ShipSystemBaseClass.h" />
     <ClInclude Include="game\ships\shipSystems\ShipSystemCloakingDevice.h" />
@@ -236,6 +239,7 @@
     <ClInclude Include="game\ships\shipSystems\ShipSystemWeapons.h" />
     <ClInclude Include="game\ships\shipSystems\ShipSystemYawThrusters.h" />
     <ClInclude Include="game\ships\shrike\Shrike.h" />
+    <ClInclude Include="game\ships\sphere\Sphere.h" />
     <ClInclude Include="game\weapons\DisruptorCannon.h" />
     <ClInclude Include="game\weapons\PlasmaCannon.h" />
     <ClInclude Include="game\weapons\PulsePhaser.h" />
@@ -267,10 +271,13 @@
     <ClCompile Include="game\Ship.cpp" />
     <ClCompile Include="game\ships\brel\Brel.cpp" />
     <ClCompile Include="game\ships\constitution\Constitution.cpp" />
+    <ClCompile Include="game\ships\cube\Cube.cpp" />
     <ClCompile Include="game\ships\defiant\Defiant.cpp" />
+    <ClCompile Include="game\ships\diamond\Diamond.cpp" />
     <ClCompile Include="game\ships\excelsior\Excelsior.cpp" />
     <ClCompile Include="game\ships\miranda\Miranda.cpp" />
     <ClCompile Include="game\ships\nova\Nova.cpp" />
+    <ClCompile Include="game\ships\probe\Probe.cpp" />
     <ClCompile Include="game\ships\shipSystems\ShipSystemBaseClass.cpp" />
     <ClCompile Include="game\ships\shipSystems\ShipSystemCloakingDevice.cpp" />
     <ClCompile Include="game\ships\shipSystems\ShipSystemHull.cpp" />
@@ -284,6 +291,7 @@
     <ClCompile Include="game\ships\shipSystems\ShipSystemWeapons.cpp" />
     <ClCompile Include="game\ships\shipSystems\ShipSystemYawThrusters.cpp" />
     <ClCompile Include="game\ships\shrike\Shrike.cpp" />
+    <ClCompile Include="game\ships\sphere\Sphere.cpp" />
     <ClCompile Include="game\weapons\DisruptorCannon.cpp" />
     <ClCompile Include="game\weapons\PlasmaCannon.cpp" />
     <ClCompile Include="game\weapons\PulsePhaser.cpp" />

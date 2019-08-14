@@ -27,6 +27,10 @@ class  ShipSystemShields;
 class  ShipSystemWeapons;
 class  ShipSystem;
 
+struct PrimaryWeaponBeam;
+struct PrimaryWeaponCannon;
+struct SecondaryWeaponTorpedo;
+
 class Ship: public EntityWrapper {
     friend struct ShipLogicFunctor;
     friend  class ShipSystemReactor;
@@ -80,24 +84,26 @@ class Ship: public EntityWrapper {
         void setModel(Handle& handle);
 
         void translateWarp(const double& amount, const double& dt);
-        void toggleWarp(){
-            m_IsWarping = !m_IsWarping;
-            m_WarpFactor = 0;
-        }
+        void toggleWarp();
         bool canSeeCloak();
-        bool cloak(bool sendPacket = true);
-        bool decloak(bool sendPacket = true);
+        bool cloak(const bool sendPacket = true);
+        bool decloak(const bool sendPacket = true);
 
-        const std::string& getClass() const { return m_ShipClass; }
-        GameCamera* getPlayerCamera(){ return m_PlayerCamera; }
-        bool IsPlayer(){ return m_IsPlayer; }
-        bool IsWarping(){ return m_IsWarping; }
-        bool isCloaked();
-        bool isFullyCloaked();
-        ShipSystem* getShipSystem(const uint type){ return m_ShipSystems[type]; }
-        EntityWrapper* getTarget() { return m_Target; }
-        Entity& entity() { return m_Entity; }
-        void setTarget(EntityWrapper* entityWrapper);
-        void setTarget(const std::string&);
+        const std::string& getClass() const;
+        GameCamera* getPlayerCamera();
+        const bool IsPlayer() const;
+        const bool IsWarping() const;
+        const bool isCloaked();
+        const bool isFullyCloaked();
+        ShipSystem* getShipSystem(const uint type);
+        EntityWrapper* getTarget();
+        Entity& entity();
+        void setTarget(EntityWrapper* entityWrapper, const bool sendPacket);
+        void setTarget(const std::string&, const bool sendPacket);
+
+
+        PrimaryWeaponBeam& getPrimaryWeaponBeam(const uint index);
+        PrimaryWeaponCannon& getPrimaryWeaponCannon(const uint index);
+        SecondaryWeaponTorpedo& getSecondaryWeaponTorpedo(const uint index);
 };
 #endif

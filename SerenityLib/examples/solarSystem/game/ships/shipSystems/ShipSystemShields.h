@@ -11,6 +11,7 @@
 #define MAX_IMPACT_POINTS 60
 
 struct ShieldInstanceBindFunctor;
+struct ShieldInstanceUnbindFunctor;
 struct ShipSystemShieldsImpactPoint final {
     bool       active;
     glm::vec3  impactLocation;
@@ -50,6 +51,7 @@ struct ShipSystemShieldsImpactPoint final {
 class Map;
 class ShipSystemShields final : public ShipSystem {
     friend struct ShieldInstanceBindFunctor;
+    friend struct ShieldInstanceUnbindFunctor;
     friend class  Ship;
     private:
         ShipSystemShieldsImpactPoint  m_ImpactPoints[MAX_IMPACT_POINTS];

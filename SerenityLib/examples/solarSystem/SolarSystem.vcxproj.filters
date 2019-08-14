@@ -100,6 +100,30 @@
     <Filter Include="Source Files\Game\Ships\Nova">
       <UniqueIdentifier>{ca4e54bc-c61b-4e20-bdd6-a07a96fcf463}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Ships\Cube">
+      <UniqueIdentifier>{6cf2f2fc-a202-4303-9cc4-a10602c51c83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Cube">
+      <UniqueIdentifier>{2b188553-0110-4b28-a559-c9cb5c509e56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Sphere">
+      <UniqueIdentifier>{9b32c78d-1e68-4427-a6eb-24ebfeaeef69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Sphere">
+      <UniqueIdentifier>{2ef7162a-6b1c-4aed-aedb-c6aac2110472}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Diamond">
+      <UniqueIdentifier>{1eb623e9-5e33-450f-81ed-55a99544a063}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Diamond">
+      <UniqueIdentifier>{e53cff7b-5ecc-45af-9330-c2337bfe4fe7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Probe">
+      <UniqueIdentifier>{15aa8a63-3f93-40e4-8cac-233d6d80d55e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Probe">
+      <UniqueIdentifier>{d811d360-cb0b-4be5-b659-662b05db040f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -246,6 +270,18 @@
     <ClInclude Include="game\ships\shipSystems\ShipSystemHull.h">
       <Filter>Header Files\Game\Ships\ShipSystems</Filter>
     </ClInclude>
+    <ClInclude Include="game\ships\cube\Cube.h">
+      <Filter>Header Files\Game\Ships\Cube</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\diamond\Diamond.h">
+      <Filter>Header Files\Game\Ships\Diamond</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\probe\Probe.h">
+      <Filter>Header Files\Game\Ships\Probe</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\sphere\Sphere.h">
+      <Filter>Header Files\Game\Ships\Sphere</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -385,6 +421,18 @@
     </ClCompile>
     <ClCompile Include="game\ships\shipSystems\ShipSystemHull.cpp">
       <Filter>Source Files\Game\Ships\ShipSystems</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\sphere\Sphere.cpp">
+      <Filter>Source Files\Game\Ships\Sphere</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\probe\Probe.cpp">
+      <Filter>Source Files\Game\Ships\Probe</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\diamond\Diamond.cpp">
+      <Filter>Source Files\Game\Ships\Diamond</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\cube\Cube.cpp">
+      <Filter>Source Files\Game\Ships\Cube</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

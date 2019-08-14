@@ -23,7 +23,7 @@ using namespace std;
 
 struct PulsePhaserCollisionFunctor final { 
 void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
-    auto pulsePhaserShipVoid = owner.getUserPointer1();
+    auto pulsePhaserShipVoid    = owner.getUserPointer1();
     auto& pulsePhaserProjectile = *static_cast<PulsePhaserProjectile*>(owner.getUserPointer());
 
     auto otherPtrShip = other.getUserPointer1(); 
@@ -34,7 +34,7 @@ void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& 
             Ship*        otherShip   = static_cast<Ship*>(otherPtrShip);
             if (otherShip) {
                 auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
-                auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                auto* hull    = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                 auto local = otherHit - other.position();
                 if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
                     shields->receiveHit(local, pulsePhaser.impactRadius, pulsePhaser.impactTime, pulsePhaser.damage);
@@ -42,7 +42,7 @@ void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& 
                     return;
                 }
                 if (hull && other.getUserPointer() == hull) {
-                    if (hull->getHealthCurrent() > 0) {
+                    if (hull->getHealthCurrent() > 0 && shields->getHealthCurrent() == 0) {
                         hull->receiveHit(local, pulsePhaser.impactRadius, pulsePhaser.impactTime, pulsePhaser.damage);
                     }
                     pulsePhaserProjectile.destroy();
@@ -78,7 +78,7 @@ struct PulsePhaserTailInstanceBindFunctor {void operator()(EngineResource* r) co
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
-    auto& cam = *Resources::getCurrentScene()->getActiveCamera();
+    auto& cam = *parent.scene().getActiveCamera();
     auto camOrien = cam.getOrientation();
 
     glm::mat4 parentModel = body.modelMatrix();
@@ -112,7 +112,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
     auto& head = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::PulsePhaserTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& tail = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::PulsePhaserTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
 
-    auto& body = *entity.addComponent<ComponentBody>(CollisionType::Box);
+    auto& cannonBody = *entity.addComponent<ComponentBody>(CollisionType::Box);
     model.setCustomBindFunctor(PulsePhaserInstanceBindFunctor());
     model.setCustomUnbindFunctor(PulsePhaserInstanceUnbindFunctor());
     
@@ -129,30 +129,29 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
     Ship& s = source.ship;
     auto& shipBody = *s.getComponent<ComponentBody>();
     auto shipMatrix = shipBody.modelMatrix();
-    auto shipRotation = shipBody.rotation();
     shipMatrix = glm::translate(shipMatrix, position + glm::vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z * 1.6f));
     glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
-    body.setPosition(finalPosition);
-    body.setRotation(shipRotation);
-    body.addCollisionFlag(CollisionFlag::NoContactResponse);
-    body.setCollisionGroup(CollisionFilter::DebrisFilter);
+    cannonBody.setPosition(finalPosition);
+    cannonBody.addCollisionFlag(CollisionFlag::NoContactResponse);
+    cannonBody.setCollisionGroup(CollisionFilter::DebrisFilter);
     auto shipLinVel = shipBody.getLinearVelocity();
     auto shipAngVel = shipBody.getAngularVelocity();
 
-    body.setLinearVelocity(shipLinVel, false);
-    body.setAngularVelocity(shipAngVel, false);
+    cannonBody.setLinearVelocity(shipLinVel, false);
+    cannonBody.setAngularVelocity(shipAngVel, false);
     
+    auto offset = source.calculatePredictedVector();
+    offset *= glm::vec3(source.travelSpeed);
+    cannonBody.applyImpulse(offset.x, offset.y, offset.z, false);
+    glm::quat q;
+    Math::alignTo(q, -offset);
+    cannonBody.setRotation(q); //TODO: change rotation based on launching vector
 
-    glm::vec3 offset = glm::vec3(source.travelSpeed) * source.forward;
-    offset = shipRotation * offset;
-
-    body.applyImpulse(offset.x, offset.y, offset.z, false);
-
-    body.setUserPointer(this);
-    body.setUserPointer1(&source.ship);
-    body.setUserPointer2(&source);
-    body.setCollisionFunctor(PulsePhaserCollisionFunctor());
-    body.setInternalPhysicsUserPointer(&body);
+    cannonBody.setUserPointer(this);
+    cannonBody.setUserPointer1(&source.ship);
+    cannonBody.setUserPointer2(&source);
+    cannonBody.setCollisionFunctor(PulsePhaserCollisionFunctor());
+    cannonBody.setInternalPhysicsUserPointer(&cannonBody);
 
 
     light = new PointLight(finalPosition, &map);
@@ -174,7 +173,8 @@ void PulsePhaserProjectile::destroy() {
 }
 void PulsePhaserProjectile::update(const double& dt) {
     if (active) {
-        currentTime += dt;
+        const float fdt = static_cast<float>(dt);
+        currentTime += fdt;
         if (light) {
             auto& lightBody = *light->getComponent<ComponentBody>();
             lightBody.setPosition(entity.getComponent<ComponentBody>()->position());
@@ -206,20 +206,22 @@ void PulsePhaser::update(const double& dt) {
 bool PulsePhaser::fire() {
     auto res = PrimaryWeaponCannon::fire();
     if (res) {
-        auto* projectile = new PulsePhaserProjectile(*this, m_Map, position, forward);
-        m_ActiveProjectiles.push_back(projectile);
-        auto sound = Engine::Sound::playEffect(ResourceManifest::SoundPulsePhaser);
-
-
-        auto& shipBody                = *ship.getComponent<ComponentBody>();
-        auto shipMatrix               = shipBody.modelMatrix();
-        shipMatrix                    = glm::translate(shipMatrix, position);
-        const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
-        if (sound) {
-            sound->setPosition(finalPosition);
-            sound->setAttenuation(0.15f);
-        }
+        forceFire();
         return true;
     }
     return false;
+}
+void PulsePhaser::forceFire() {
+    auto* projectile = new PulsePhaserProjectile(*this, m_Map, position, forward);
+    m_ActiveProjectiles.push_back(projectile);
+    auto sound = Engine::Sound::playEffect(ResourceManifest::SoundPulsePhaser);
+
+    auto& shipBody = *ship.getComponent<ComponentBody>();
+    auto shipMatrix = shipBody.modelMatrix();
+    shipMatrix = glm::translate(shipMatrix, position);
+    const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+    if (sound) {
+        sound->setPosition(finalPosition);
+        sound->setAttenuation(0.15f);
+    }
 }

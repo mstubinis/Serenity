@@ -32,7 +32,6 @@ class Client{
         Core&                                 m_Core;
         bool                                  m_Validated;
         double                                m_PingTime;
-        double                                m_Timeout;
         bool                                  m_IsCurrentlyConnecting;
         void internalInit();
     public:

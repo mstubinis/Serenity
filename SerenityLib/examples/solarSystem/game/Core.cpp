@@ -34,15 +34,15 @@ Core::Core() {
     //Resources::getWindow().setIcon(iconPath);
 }
 Core::~Core() {
-    if (m_Client) {
-        Packet p;
-        p.PacketType = PacketType::Client_To_Server_Request_Disconnection;
-        const auto status = m_Client->send(p);
-    }
-    SAFE_DELETE(m_Client);
+    //if (m_Client) {
+    //    Packet p;
+    //    p.PacketType = PacketType::Client_To_Server_Request_Disconnection;
+    //    const auto status = m_Client->send(p);
+    //}
     SAFE_DELETE(m_ChosenShip);
-    SAFE_DELETE(m_Server);
     SAFE_DELETE(m_HUD);
+    SAFE_DELETE(m_Client);
+    SAFE_DELETE(m_Server);
 }
 Server* Core::getServer() {
     return m_Server;
@@ -162,9 +162,9 @@ void Core::update(const double& dt) {
         Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen(), true);
     }
 
-    m_HUD->update(dt);
     if(m_Client) epriv::ClientInternalPublicInterface::update(m_Client);
     if(m_Server) m_Server->update(m_Server);
+    m_HUD->update(dt);
 }
 void Core::render() {
     m_HUD->render();

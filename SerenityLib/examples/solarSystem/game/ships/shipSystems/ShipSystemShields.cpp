@@ -21,6 +21,8 @@ struct ShipSystemShieldsFunctor final { void operator()(ComponentLogic& _compone
 }};
 
 struct ShieldInstanceBindFunctor {void operator()(EngineResource* r) const {
+    Renderer::GLDisable(GL_CULL_FACE);
+
     auto& i = *static_cast<ModelInstance*>(r);
     auto& shields = *static_cast<ShipSystemShields*>(i.getUserPointer());
     Entity& parent = i.parent();
@@ -48,6 +50,9 @@ struct ShieldInstanceBindFunctor {void operator()(EngineResource* r) const {
         }
     }
     Renderer::sendUniform1Safe("numImpacts", count);
+}};
+struct ShieldInstanceUnbindFunctor {void operator()(EngineResource* r) const {
+    Renderer::GLEnable(GL_CULL_FACE);
 }};
 
 ShipSystemShields::ShipSystemShields(Ship& _ship, Map* map, const uint health) :ShipSystem(ShipSystemType::Shields, _ship), m_ShieldEntity(*map) {
@@ -83,6 +88,7 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map* map, const uint health) :
     auto& instance = model.getModel(0);
     instance.setColor(r, g, b, 0.7f);
     instance.setCustomBindFunctor(ShieldInstanceBindFunctor());
+    instance.setCustomUnbindFunctor(ShieldInstanceUnbindFunctor());
     instance.setUserPointer(this);
 
     for (uint i = 0; i < MAX_IMPACT_POINTS; ++i) {
@@ -103,16 +109,16 @@ void ShipSystemShields::update(const double& dt) {
     shieldBody.setPosition(shipBody.position());
     shieldBody.setRotation(shipBody.rotation());
     
-    bool shown = false;
+    //bool shown = false;
     const float fdt = static_cast<float>(dt);
     //m_TimeSinceLastHit += fdt;
     for (auto& impact : m_ImpactPoints) {
         impact.update(fdt, m_ImpactPointsFreelist);
-        if (!shown && impact.active)
-            shown = true;
+        //if (!shown && impact.active)
+            //shown = true;
     }
     auto& shieldModel = m_ShieldEntity.getComponent<ComponentModel>()->getModel();
-    !shown ? shieldModel.hide() : shieldModel.show();
+    //!shown ? shieldModel.hide() : shieldModel.show();
 
 
     //recharging here

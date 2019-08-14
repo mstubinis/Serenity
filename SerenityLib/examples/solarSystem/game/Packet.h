@@ -19,6 +19,22 @@ struct PacketType {enum Type {
     Undefined,
     Server_Shutdown,
 
+    Client_To_Server_Periodic_Ping,
+
+    Server_To_Client_Client_Left_Map,
+
+    Client_To_Server_Client_Fired_Cannons,
+    Client_To_Server_Client_Fired_Beams,
+    Client_To_Server_Client_Fired_Torpedos,
+
+    Server_To_Client_Client_Fired_Cannons,
+    Server_To_Client_Client_Fired_Beams,
+    Server_To_Client_Client_Fired_Torpedos,
+
+
+    Client_To_Server_Client_Changed_Target,
+    Server_To_Client_Client_Changed_Target,
+
     Client_To_Server_Request_Connection,
     Client_To_Server_Request_Disconnection,
     Client_To_Server_Ship_Physics_Update,
@@ -57,10 +73,10 @@ struct IPacket {
 };
 
 struct Packet: public IPacket {
-    unsigned char    PacketType; //0 - 255, up this if needed (when/if we need more types)
-    std::string      data;
+    unsigned short   PacketType;
+    std::string     data;
     Packet() {
-        PacketType = static_cast<unsigned char>(PacketType::Undefined);
+        PacketType = static_cast<unsigned short>(PacketType::Undefined);
         data = "";
     }
     virtual bool validate(sf::Packet& sfPacket){

@@ -380,6 +380,9 @@ Anchor* Map::getRootAnchor() {
 Anchor* Map::getSpawnAnchor() {
     return std::get<1>(m_SpawnAnchor);
 }
+const bool Map::hasShip(const string& shipName) const {
+    return (m_Ships.size() > 0 && m_Ships.count(shipName)) ? true : false;
+}
 const vector<string> Map::getClosestAnchor(Anchor* currentAnchor) {
     vector<string> res;
     if (!currentAnchor) {
@@ -409,25 +412,3 @@ const vector<string> Map::getClosestAnchor(Anchor* currentAnchor) {
 void Map::update(const double& dt){
     Scene::update(dt);
 }
-
-/*
-const glm::vec3& Map::getOldClientPos() const {
-    return m_oldClientPos;
-}
-const glm::vec3& Map::getOldAnchorPos() const {
-    return m_oldAnchorPos;
-}
-void Map::setOldClientPos(const float& x, const float& y, const float& z) {
-    m_oldClientPos.x = x;
-    m_oldClientPos.y = y;
-    m_oldClientPos.z = z;
-}
-void Map::setOldAnchorPos(const float& x, const float& y, const float& z) {
-    m_oldAnchorPos.x = x;
-    m_oldAnchorPos.y = y;
-    m_oldAnchorPos.z = z;
-}
-void Map::setAnchor(const float& x, const float& y, const float& z) {
-    m_AnchorPoint->entity().getComponent<ComponentBody>()->setPosition(x, y, z);
-}
-*/

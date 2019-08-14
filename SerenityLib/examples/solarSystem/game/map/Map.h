@@ -42,6 +42,7 @@ class Map: public Scene{
         virtual void update(const double& dt);
 
         const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr);
+        const bool hasShip(const std::string& shipName) const;
         
 
         Ship* createShip(Client& client, const std::string& shipClass, const std::string& shipName, const bool& playerShip, const glm::vec3& position);

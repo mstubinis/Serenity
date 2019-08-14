@@ -13,9 +13,8 @@ using namespace std;
 
 Packet* Packet::getPacket(const sf::Packet& sfPacket) {
     char* data = (char*)(sfPacket.getData());
-    unsigned int packetType = static_cast<unsigned int>(data[0]);
+    unsigned short packetType = (data[0] << 8) | data[1];
     Packet* p = nullptr;
-
     switch (packetType) {
         case PacketType::Server_To_Client_Accept_Connection: {
             p = new Packet(); break;
@@ -61,6 +60,26 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketCloakUpdate(); break;
         }case PacketType::Server_To_Client_Ship_Cloak_Update: {
             p = new PacketCloakUpdate(); break;
+        }case PacketType::Client_To_Server_Client_Changed_Target: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Client_Changed_Target: {
+            p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Client_Fired_Cannons:{
+            p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Client_Fired_Beams:{
+            p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Client_Fired_Torpedos: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Client_Fired_Cannons: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Client_Fired_Beams: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Client_Fired_Torpedos: {
+            p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Periodic_Ping: {
+            p = new Packet(); break;
+        }case PacketType::Server_To_Client_Client_Left_Map: {
+            p = new PacketMessage(); break;
         }default: {
             break;
         }

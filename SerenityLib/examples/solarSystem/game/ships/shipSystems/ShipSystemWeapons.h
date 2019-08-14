@@ -21,6 +21,8 @@ struct PrimaryWeaponCannon {
     float     travelSpeed;
     PrimaryWeaponCannon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc, const uint& _maxCharges, const uint& _damage,const float& _rechargePerRound,const float& _impactRadius,const float& _impactTime, const float& _travelSpeed);
     virtual bool fire();
+    virtual void forceFire();
+    virtual const glm::vec3 calculatePredictedVector();
     virtual void update(const double& dt);
 };
 
@@ -31,6 +33,8 @@ struct PrimaryWeaponBeam {
     float     arc;
     PrimaryWeaponBeam(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc);
     virtual bool fire();
+    virtual void forceFire();
+    virtual const glm::vec3 calculatePredictedVector();
     virtual void update(const double& dt);
 };
 
@@ -41,6 +45,8 @@ struct SecondaryWeaponTorpedo {
     float arc;
     SecondaryWeaponTorpedo(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc);
     virtual bool fire();
+    virtual void forceFire();
+    virtual const glm::vec3 calculatePredictedVector();
     virtual void update(const double& dt);
 };
 

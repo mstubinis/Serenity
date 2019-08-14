@@ -117,9 +117,9 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             const string& map        = hud.m_ServerHostMapSelector->getCurrentChoice().text();
             if (!portstring.empty() && !username.empty() && !map.empty()) {
                 //TODO: prevent special characters in usename
-                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) {
+                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) { //port must have numbers only
                     if (username.find_first_not_of(' ') != std::string::npos) {
-                        if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) {
+                        if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) { //letters only please
                             const int port = stoi(portstring);
                             hud.m_Core.startServer(port, map);
                             hud.m_Core.startClient(port, username, "127.0.01"); //the client will request validation at this stage
@@ -360,7 +360,7 @@ void HUD::update_game(const double& dt) {
 
 
         if (shipsVect.size() > 0) {
-            player.setTarget(shipsVect[_countShips]->entity().getComponent<ComponentName>()->name());
+            player.setTarget(shipsVect[_countShips]->entity().getComponent<ComponentName>()->name(), true);
             ++_countShips;
             if (_countShips > shipsVect.size() - 1) {
                 _countShips = 0;
@@ -376,7 +376,7 @@ void HUD::update_game(const double& dt) {
         }
 
 
-        player.setTarget(planetsVect[_countPlanets]->entity().getComponent<ComponentName>()->name());
+        player.setTarget(planetsVect[_countPlanets]->entity().getComponent<ComponentName>()->name(), true);
         ++_countPlanets;
         if (_countPlanets > planetsVect.size() - 1) {
             _countPlanets = 0;
@@ -480,12 +480,7 @@ void HUD::render_game() {
                     Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 27), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), hull.getHealthPercent() * healthDisplayWidthMax, 2, 0, 0.09f, Alignment::TopLeft);
                 }
             }
-
-
-
-
-        }
-        else { //behind
+        }else{ //behind
             float angle = 0;
             Material& crosshairArrow = *(Material*)ResourceManifest::CrosshairArrowMaterial.get();
             auto& crosshairArrowTexture = *crosshairArrow.getComponent(0).texture();

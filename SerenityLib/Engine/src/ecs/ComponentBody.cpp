@@ -17,8 +17,6 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-//const float ROTATION_THRESHOLD = 0.00001f;
-
 #pragma region PhysicsData
 
 ComponentBody::PhysicsData::PhysicsData(){ 
@@ -142,13 +140,13 @@ ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Enti
     m_UserPointer2            = nullptr;
     data.p                    = nullptr;
     data.n                    = new NormalData();
+    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
     auto& normalData          = *data.n;
     normalData.position       = glm::vec3(0.0f,0.0f,0.0f);
     normalData.scale          = glm::vec3(1.0f,1.0f,1.0f);
     normalData.rotation       = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     normalData.modelMatrix    = glm::mat4(1.0f);
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
-    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
 }
 ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p_CollisionType) : ComponentBaseClass(p_Entity) {
     m_Physics               = true;
@@ -157,6 +155,7 @@ ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p
     m_UserPointer2          = nullptr;
     data.n                  = nullptr;
     data.p                  = new PhysicsData();
+    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
     auto& physicsData       = *data.p;
     m_Forward               = glm::vec3(0.0f, 0.0f, -1.0f);
 	m_Right                 = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -181,7 +180,6 @@ ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p
     rigidBody.setDamping(0.1f, 0.4f);//air friction 
     rigidBody.setMassProps(mass, inertia);
     rigidBody.updateInertiaTensor();
-    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
     setInternalPhysicsUserPointer(this);
 }
 ComponentBody::~ComponentBody() {
@@ -310,7 +308,9 @@ void* ComponentBody::getUserPointer2() {
     return m_UserPointer2;
 }
 void ComponentBody::collisionResponse(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) {
-    m_CollisionFunctor(std::ref(owner), std::ref(ownerHit), std::ref(other), std::ref(otherHit), std::ref(normal));
+    if (!m_CollisionFunctor.empty()) { //hacky, but needed for some reason...
+        m_CollisionFunctor(std::ref(owner), std::ref(ownerHit), std::ref(other), std::ref(otherHit), std::ref(normal));
+    }
 }
 const ushort ComponentBody::getCollisionGroup() const {
     if (m_Physics) {
@@ -747,12 +747,18 @@ const glm::vec3 ComponentBody::up() const {
 	return m_Up; 
 }
 const glm::vec3 ComponentBody::getLinearVelocity() const  {
-	const btVector3& v = data.p->rigidBody->getLinearVelocity();
-	return Engine::Math::btVectorToGLM(v); 
+    if (m_Physics) {
+        const btVector3& v = data.p->rigidBody->getLinearVelocity();
+        return Engine::Math::btVectorToGLM(v);
+    }
+    return glm::vec3(0.0f);
 }
 const glm::vec3 ComponentBody::getAngularVelocity() const  {
-	const btVector3& v = data.p->rigidBody->getAngularVelocity();
-	return Engine::Math::btVectorToGLM(v); 
+    if (m_Physics) {
+        const btVector3& v = data.p->rigidBody->getAngularVelocity();
+        return Engine::Math::btVectorToGLM(v);
+    }
+    return glm::vec3(0.0f);
 }
 const float ComponentBody::mass() const {
 	return data.p->mass; 

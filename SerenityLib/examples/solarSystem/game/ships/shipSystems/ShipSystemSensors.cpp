@@ -12,7 +12,7 @@ void ShipSystemSensors::update(const double& dt) {
         Ship* target = dynamic_cast<Ship*>(m_Ship.getTarget());
         if (target) {
             if (target->isFullyCloaked()) {
-                m_Ship.setTarget(nullptr);
+                m_Ship.setTarget(nullptr, true);
             }
         }
     }

@@ -36,7 +36,7 @@ using namespace std;
 
 struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
     Ship& ship = *static_cast<Ship*>(_component.getUserPointer());
-    Map& currentScene = *static_cast<Map*>(Resources::getCurrentScene());
+    Map& map = static_cast<Map&>(ship.entity().scene());
 
     if (ship.m_IsPlayer) {
         #pragma region PlayerFlightControls
@@ -44,8 +44,8 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         if (!Engine::paused()) {
             if (ship.m_IsWarping && ship.m_WarpFactor > 0) {
                 auto& speed = ship.getWarpSpeedVector3();
-                for (auto& pod : epriv::InternalScenePublicInterface::GetEntities(currentScene)) {
-                    Entity e = currentScene.getEntity(pod);
+                for (auto& pod : epriv::InternalScenePublicInterface::GetEntities(map)) {
+                    Entity e = map.getEntity(pod);
                     const EntityDataRequest dataRequest(e);
                     auto* cam = e.getComponent<ComponentCamera>(dataRequest);
                     //TODO: parent->child relationship
@@ -67,26 +67,26 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         const Entity& target = camera.getTarget();
         if (Engine::isKeyDownOnce(KeyboardKey::F1)) {
             if (cameraState != CameraState::Follow || (cameraState == CameraState::Follow && target != ship.m_Entity)) {
-                currentScene.centerSceneToObject(ship.m_Entity);
+                map.centerSceneToObject(ship.m_Entity);
                 camera.follow(ship.m_Entity);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
             if (cameraState == CameraState::Follow || !ship.m_Target || target != ship.m_Entity) {
-                currentScene.centerSceneToObject(ship.m_Entity);
+                map.centerSceneToObject(ship.m_Entity);
                 camera.orbit(ship.m_Entity);
             }else if (ship.m_Target) {
                 auto dist = glm::distance2(ship.getPosition(), ship.m_Target->getComponent<ComponentBody>()->position());
                 if (dist < 10000000000.0f) { //to prevent FP issues when viewing things billions of km away
-                    currentScene.centerSceneToObject(ship.m_Target->entity());
+                    map.centerSceneToObject(ship.m_Target->entity());
                     camera.orbit(ship.m_Target->entity());
                 }
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
             if (cameraState == CameraState::FollowTarget || (!ship.m_Target && cameraState != CameraState::Follow) || target != ship.m_Entity) {
-                currentScene.centerSceneToObject(ship.m_Entity);
+                map.centerSceneToObject(ship.m_Entity);
                 camera.follow(ship.m_Entity);
             }else if (ship.m_Target) {
-                currentScene.centerSceneToObject(ship.m_Entity);
+                map.centerSceneToObject(ship.m_Entity);
                 camera.followTarget(ship.m_Target->entity(), ship.m_Entity);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F4)) {
@@ -94,20 +94,20 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         }
         #pragma endregion
 
-        if (Engine::isKeyDownOnce(KeyboardKey::T) && currentScene.name() != "Menu") {
+        if (Engine::isKeyDownOnce(KeyboardKey::T) && map.name() != "Menu") {
             Entity scan = camera.getObjectInCenterRay(ship.m_Entity);
             if (!scan.null()) {
                 auto* componentName = scan.getComponent<ComponentName>();
                 if (componentName) {
                     EntityWrapper* scannedTarget = nullptr;
-                    for (auto& obj : currentScene.m_Objects) {
+                    for (auto& obj : map.m_Objects) {
                         auto* componentName1 = obj->getComponent<ComponentName>();
                         if (componentName1 && componentName1->name() == componentName->name()) {
                             scannedTarget = obj;
                             break;
                         }
                     }
-                    ship.setTarget(scannedTarget);
+                    ship.setTarget(scannedTarget, true);
                 }
             }
         }
@@ -268,7 +268,7 @@ void Ship::translateWarp(const double& amount, const double& dt){
         m_WarpFactor += static_cast<float>(amountToAdd * dt);
     }
 }
-bool Ship::cloak(bool sendPacket) {
+bool Ship::cloak(const bool sendPacket) {
     if (m_ShipSystems[ShipSystemType::CloakingDevice]) {
         ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
         auto& model = *getComponent<ComponentModel>();
@@ -276,7 +276,7 @@ bool Ship::cloak(bool sendPacket) {
     }
     return false;
 }
-bool Ship::decloak(bool sendPacket) {
+bool Ship::decloak(const bool sendPacket) {
     if (m_ShipSystems[ShipSystemType::CloakingDevice]) {
         ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
         auto& model = *getComponent<ComponentModel>();
@@ -284,44 +284,101 @@ bool Ship::decloak(bool sendPacket) {
     }
     return false;
 }
-void Ship::setTarget(const string& target) {
-    Map* s = static_cast<Map*>(Resources::getCurrentScene());
-    for (auto& entity : s->m_Objects) {
+void Ship::toggleWarp() {
+    m_IsWarping = !m_IsWarping;
+    m_WarpFactor = 0;
+    auto& rigidBodyComponent = *getComponent<ComponentBody>();
+    rigidBodyComponent.clearLinearForces();
+}
+const string& Ship::getClass() const { 
+    return m_ShipClass; 
+}
+GameCamera* Ship::getPlayerCamera() { 
+    return m_PlayerCamera; 
+}
+const bool Ship::IsPlayer() const {
+    return m_IsPlayer; 
+}
+const bool Ship::IsWarping() const {
+    return m_IsWarping; 
+}
+Entity& Ship::entity() { 
+    return m_Entity; 
+}
+ShipSystem* Ship::getShipSystem(const uint type) { 
+    return m_ShipSystems[type]; 
+}
+EntityWrapper* Ship::getTarget() { 
+    return m_Target; 
+}
+void Ship::setTarget(const string& target, const bool sendPacket) {
+    if (target.empty()) {
+        Ship::setTarget(nullptr, sendPacket);
+    }
+    Map& map = static_cast<Map&>(entity().scene());
+    for (auto& entity : map.m_Objects) {
         auto* componentName = entity->getComponent<ComponentName>();
         if (componentName) {
             if (componentName->name() == target) {
-                Ship* ship = dynamic_cast<Ship*>(entity);
-                if (ship && ship->isFullyCloaked()) {
-                    return;
-                }
-                m_Target = entity;
-                return;
+                Ship::setTarget(entity, sendPacket);
             }
         }
     }
 }
-bool Ship::isCloaked() {
+const bool Ship::isCloaked() {
     if (m_ShipSystems[ShipSystemType::CloakingDevice]) {
         ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
         return (cloak.m_Active || cloak.getCloakTimer() < 1.0f) ? true : false;
     }
     return false;
 }
-bool Ship::isFullyCloaked() {
+const bool Ship::isFullyCloaked() {
     if (m_ShipSystems[ShipSystemType::CloakingDevice]) {
         ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
         return (cloak.m_Active && cloak.m_CloakTimer <= 0.0) ? true : false;
     }
     return false;
 }
-void Ship::setTarget(EntityWrapper* target){
+void Ship::setTarget(EntityWrapper* target, const bool sendPacket){
     if (!target) {
         if (m_IsPlayer && m_PlayerCamera) {
             m_PlayerCamera->follow(entity());
         }
     }
+    Ship* ship = dynamic_cast<Ship*>(target);
+    if (ship && ship->isFullyCloaked()) {
+        return;
+    }
+
+    if (sendPacket) {
+        PacketMessage pOut;
+        pOut.PacketType = PacketType::Client_To_Server_Client_Changed_Target;
+        pOut.name = getName();
+        if(target){
+            auto* cName = target->getComponent<ComponentName>();
+            if (cName) {
+                pOut.data = cName->name();
+            }
+        }else{
+            pOut.data = "";
+        }
+        m_Client.send(pOut);
+    }
     m_Target = target;
 }
 void Ship::onEvent(const Event& e){
 
+}
+
+PrimaryWeaponBeam& Ship::getPrimaryWeaponBeam(const uint index) {
+    auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
+    return *weapons.m_PrimaryWeaponsBeams[index];
+}
+PrimaryWeaponCannon& Ship::getPrimaryWeaponCannon(const uint index) {
+    auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
+    return *weapons.m_PrimaryWeaponsCannons[index];
+}
+SecondaryWeaponTorpedo& Ship::getSecondaryWeaponTorpedo(const uint index) {
+    auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
+    return *weapons.m_SecondaryWeaponsTorpedos[index];
 }
