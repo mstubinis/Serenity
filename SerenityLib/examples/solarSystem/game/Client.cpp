@@ -351,16 +351,17 @@ void Client::onReceive() {
 
                     auto spawn = map.getSpawnAnchor()->getPosition();
                     Ship* ship = map.createShip(*this, info[0], pI.name, false, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z));
+                    if (ship) { //if the ship was successfully added
+                        //send the new guy several of our statuses
+                        auto player = map.getPlayer();
+                        if (player) {
+                            PacketCloakUpdate pOut1(*player);
+                            pOut1.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
+                            pOut1.data += ("," + pI.name);
+                            send(pOut1);
 
-                    //send the new guy several of our statuses
-                    auto player = map.getPlayer();
-                    if (player) {
-                        PacketCloakUpdate pOut1(*player);
-                        pOut1.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
-                        pOut1.data += ("," + pI.name);
-                        send(pOut1);
-
-                        player->setTarget(player->getTarget(), true); //sends target packet info to the new guy
+                            player->setTarget(player->getTarget(), true); //sends target packet info to the new guy
+                        }
                     }
                     break;
                 }case PacketType::Server_To_Client_Approve_Map_Entry: {

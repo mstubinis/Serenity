@@ -354,6 +354,8 @@ void Map::loadFromFile(const string& filename) {
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
 }
 Ship* Map::createShip(Client& client, const string& shipClass, const string& shipName, const bool& playerShip, const glm::vec3& position) {
+    if (m_Ships.size() > 0 && m_Ships.count(shipName))
+        return nullptr;
     auto& handles = ResourceManifest::Ships[shipClass];
     Ship* ship = nullptr;
 
