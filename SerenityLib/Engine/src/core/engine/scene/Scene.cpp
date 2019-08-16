@@ -205,46 +205,46 @@ vector<RodLight*>& InternalScenePublicInterface::GetRodLights(Scene& scene) {
 }
 
 
-void InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
+void InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene, Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryOpaque]) { 
         //pipeline->sort(camera, SortingMode::BackToFront);
-        pipeline->render(camera, dt, useDefaultShaders, SortingMode::None);
+        pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::None);
     } 
 }
-void InternalScenePublicInterface::RenderGeometryTransparent(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
+void InternalScenePublicInterface::RenderGeometryTransparent(Scene& scene, Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryTransparent]) { 
         pipeline->sort(camera, SortingMode::BackToFront);
-        pipeline->render(camera, dt, useDefaultShaders, SortingMode::None);
+        pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::None);
     } 
 }
-void InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
+void InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(Scene& scene, Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders) {
      for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::GeometryTransparentTrianglesSorted]) {
          pipeline->sort(camera, SortingMode::FrontToBack);
-         pipeline->render(camera, dt, useDefaultShaders, SortingMode::FrontToBack);
+         pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::FrontToBack);
      }
 }
-void InternalScenePublicInterface::RenderForwardOpaque(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
+void InternalScenePublicInterface::RenderForwardOpaque(Scene& scene, Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardOpaque]) {
         //pipeline->sort(camera, SortingMode::BackToFront);
-        pipeline->render(camera, dt, useDefaultShaders, SortingMode::None);
+        pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::None);
     }
 }
-void InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
+void InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardTransparent]) { 
         pipeline->sort(camera, SortingMode::BackToFront);
-        pipeline->render(camera, dt, useDefaultShaders, SortingMode::None);
+        pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::None);
     }
 }
-void InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
+void InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(Scene& scene, Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardTransparentTrianglesSorted]) {
         pipeline->sort(camera, SortingMode::FrontToBack);
-        pipeline->render(camera, dt, useDefaultShaders, SortingMode::FrontToBack);
+        pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::FrontToBack);
     }
 }
-void InternalScenePublicInterface::RenderForwardParticles(Scene& scene, Camera& camera, const double& dt, const bool useDefaultShaders) {
+void InternalScenePublicInterface::RenderForwardParticles(Scene& scene, Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::ForwardParticles]) {
         pipeline->sort(camera, SortingMode::BackToFront);
-        pipeline->render(camera, dt, useDefaultShaders, SortingMode::BackToFront);
+        pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::BackToFront);
     }
 }
 
@@ -275,12 +275,16 @@ Scene::~Scene() {
     unregisterEvent(EventType::SceneChanged);
     m_i->_destruct();
 }
+const uint Scene::numViewports() const {
+    return m_i->m_Viewports.size();
+}
 const uint& Scene::id() const {
     return m_i->m_ID; 
 }
 Viewport& Scene::addViewport(const uint& x, const uint& y, const uint& width, const uint& height, const Camera& camera) {
     Viewport* viewport = new Viewport(*this, camera);
     viewport->setViewportDimensions(x, y, width, height);
+    viewport->m_ID = numViewports();
     m_i->m_Viewports.push_back(viewport);
     return *viewport;
 }

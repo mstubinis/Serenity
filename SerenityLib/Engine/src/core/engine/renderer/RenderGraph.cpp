@@ -4,6 +4,7 @@
 #include <core/engine/materials/Material.h>
 #include <core/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
+#include <core/engine/scene/Viewport.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
@@ -20,6 +21,7 @@ RenderPipeline::~RenderPipeline() {
 }
 
 void RenderPipeline::sort_cheap(Camera& camera, const SortingMode::Mode sortingMode) {
+#ifndef _DEBUG
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
             auto& vect = meshNode->instanceNodes;
@@ -43,8 +45,10 @@ void RenderPipeline::sort_cheap(Camera& camera, const SortingMode::Mode sortingM
             );
         }
     }
+#endif
 }
 void RenderPipeline::sort(Camera& camera, const SortingMode::Mode sortingMode) {
+#ifndef _DEBUG
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
             auto& vect = meshNode->instanceNodes;
@@ -83,6 +87,7 @@ void RenderPipeline::sort(Camera& camera, const SortingMode::Mode sortingMode) {
             );
         }
     }
+#endif
 }
 void RenderPipeline::clean(const uint entityData) {
     for (auto& materialNode : materialNodes) {
@@ -100,7 +105,7 @@ void RenderPipeline::clean(const uint entityData) {
         }
     }
 }
-void RenderPipeline::render(Camera& camera, const double& dt, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
+void RenderPipeline::render(Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
     if(useDefaultShaders) 
         shaderProgram.bind();
     for (auto& materialNode : materialNodes) {
@@ -122,7 +127,11 @@ void RenderPipeline::render(Camera& camera, const double& dt, const bool useDefa
                             auto model = body->modelMatrix();
                             uint sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
                             auto comparison = radius * 1100.0f;
-                            if (!_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) { //optimization: using squared distance to remove the sqrt()
+
+                            //check viewport flags here too
+                            const auto id = viewport.id();
+                            const auto flags = _modelInstance.getViewportFlags();
+                            if (!(flags & (1 << id)) || flags == 0 || !_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) { //optimization: using squared distance to remove the sqrt()
                                 _modelInstance.setPassedRenderCheck(false);
                             }else{
                                 _modelInstance.setPassedRenderCheck(true);

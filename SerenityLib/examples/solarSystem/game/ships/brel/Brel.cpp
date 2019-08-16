@@ -30,7 +30,7 @@ Brel::Brel(Client& client, bool player, const string& name, glm::vec3 position, 
         else if (i == 5)  system = new ShipSystemShields(*this, map, 7700);
         else if (i == 6)  system = new ShipSystemMainThrusters(*this);
         else if (i == 7)  system = new ShipSystemWarpDrive(*this);
-        else if (i == 8)  system = new ShipSystemSensors(*this);
+        else if (i == 8)  system = new ShipSystemSensors(*this, *map);
         else if (i == 9)  system = new ShipSystemWeapons(*this);
         else if (i == 10)  system = new ShipSystemHull(*this, 7100);
         m_ShipSystems.emplace(i, system);

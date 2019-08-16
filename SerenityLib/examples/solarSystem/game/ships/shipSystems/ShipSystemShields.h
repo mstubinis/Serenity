@@ -69,6 +69,8 @@ class ShipSystemShields final : public ShipSystem {
         ShipSystemShields(Ship&, Map*, const uint health);
         ~ShipSystemShields();
 
+        void destroy();
+
         void update(const double& dt);
 
         const uint getHealthCurrent() const;

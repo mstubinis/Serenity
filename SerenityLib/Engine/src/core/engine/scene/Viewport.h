@@ -17,17 +17,17 @@ class Viewport final {
     friend class Scene;
     friend class Engine::epriv::RenderManager;
     private:
-        Scene&       m_Scene;
-        Camera*      m_Camera;
-        glm::uvec4   m_Viewport_Dimensions;
-        bool         m_Active;
-        bool         m_Using2DAPI;
-        bool         m_AspectRatioSynced;
-        bool         m_SkyboxVisible;
-        glm::vec4    m_BackgroundColor;
-        bool         m_DepthMaskActive;
-        float        m_DepthMaskValue;
-
+        Scene&         m_Scene;
+        Camera*        m_Camera;
+        glm::uvec4     m_Viewport_Dimensions;
+        bool           m_Active;
+        bool           m_Using2DAPI;
+        bool           m_AspectRatioSynced;
+        bool           m_SkyboxVisible;
+        glm::vec4      m_BackgroundColor;
+        bool           m_DepthMaskActive;
+        float          m_DepthMaskValue;
+        unsigned int   m_ID;
     public:
         Viewport(const Scene& scene, const Camera& camera);
 
@@ -37,6 +37,8 @@ class Viewport final {
         Viewport& operator=(Viewport&& other) noexcept = default;
 
         ~Viewport();
+
+        const unsigned int& id() const;
 
         const bool& isSkyboxVisible() const;
         void setSkyboxVisible(const bool& visible = true);

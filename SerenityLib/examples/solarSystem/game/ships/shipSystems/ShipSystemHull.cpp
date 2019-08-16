@@ -24,12 +24,13 @@ void ShipSystemHull::receiveHit(const glm::vec3& impactLocation, const float& im
         m_HealthPointsCurrent = 0;
     }
 }
-void ShipSystemHull::receiveCollision(const uint damage) {
+void ShipSystemHull::receiveCollision(const glm::vec3& impactLocation, const float damage) {
     if (m_CollisionTimer > static_cast<float>(HULL_TO_HULL_COLLISION_DELAY)) {
-        int newHP = m_HealthPointsCurrent - damage;
+        auto damageInt = static_cast<int>(damage);
+        int newHP = m_HealthPointsCurrent - damageInt;
         if (newHP > 0) {
             //hull takes entire hit
-            m_HealthPointsCurrent -= damage;
+            m_HealthPointsCurrent -= damageInt;
         }else{
             //we destroyed the ship
             m_HealthPointsCurrent = 0;

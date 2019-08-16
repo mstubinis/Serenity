@@ -208,6 +208,7 @@ void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* progr
     if (!program) {
         program = ShaderProgram::Deferred;
     }
+    m_ViewportFlag      = ViewportFlag::All;
     m_UserPointer       = nullptr;
     m_Stage             = RenderStage::GeometryOpaque;
     m_PassedRenderCheck = false;
@@ -222,6 +223,21 @@ void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* progr
     m_Scale             = glm::vec3(1.0f, 1.0f, 1.0f);
 
     internalUpdateModelMatrix();
+}
+void ModelInstance::setViewportFlag(const unsigned short& flag) {
+    m_ViewportFlag = flag;
+}
+void ModelInstance::addViewportFlag(const unsigned short& flag) {
+    m_ViewportFlag = m_ViewportFlag | flag;
+}
+void ModelInstance::setViewportFlag(const ViewportFlag::Flag& flag) {
+    m_ViewportFlag = static_cast<unsigned short>(flag);
+}
+void ModelInstance::addViewportFlag(const ViewportFlag::Flag& flag) {
+    m_ViewportFlag = m_ViewportFlag | static_cast<unsigned short>(flag);
+}
+const unsigned short& ModelInstance::getViewportFlags() const {
+    return m_ViewportFlag;
 }
 void ModelInstance::internalUpdateModelMatrix() {
     Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);

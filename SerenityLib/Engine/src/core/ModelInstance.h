@@ -22,11 +22,34 @@ namespace Engine{
         struct ModelInstanceAnimation;
     };
 };
+
+
+struct ViewportFlag final { enum Flag {
+    None    = 0,
+    _1 = 1 << 0,
+    _2 = 1 << 1,
+    _3 = 1 << 2,
+    _4 = 1 << 3,
+    _5 = 1 << 4,
+    _6 = 1 << 5,
+    _7 = 1 << 6,
+    _8 = 1 << 7,
+    _9 = 1 << 8,
+    _10 = 1 << 9,
+    _11 = 1 << 10,
+    _12 = 1 << 11,
+    _13 = 1 << 13,
+    _14 = 1 << 14,
+    _15 = 1 << 15,
+    All     = -1,
+};};
+
 class ModelInstance final: public BindableResource{
     friend struct Engine::epriv::DefaultModelInstanceBindFunctor;
     friend struct Engine::epriv::DefaultModelInstanceUnbindFunctor;
     friend class  ComponentModel;
     private:
+        unsigned short                                       m_ViewportFlag; //determine what viewports this can be seen in
         void*                                                m_UserPointer;
         std::vector<Engine::epriv::ModelInstanceAnimation*>  m_AnimationQueue;
         Entity                                               m_Parent;
@@ -55,6 +78,12 @@ class ModelInstance final: public BindableResource{
         ModelInstance& operator=(ModelInstance&& other) noexcept = default;
 
         ~ModelInstance();
+
+        void setViewportFlag(const unsigned short& flag);
+        void addViewportFlag(const unsigned short& flag);
+        void setViewportFlag(const ViewportFlag::Flag& flag);
+        void addViewportFlag(const ViewportFlag::Flag& flag);
+        const unsigned short& getViewportFlags() const;
 
         ShaderProgram* shaderProgram();
         Mesh* mesh();

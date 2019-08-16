@@ -154,55 +154,60 @@ void epriv::ClientInternalPublicInterface::update(Client* _client) {
         return;
     auto& client = *_client;
     const auto& dt = Resources::dt();
-    if (client.m_Core.gameState() == GameState::Game) {
-        client.m_PingTime += dt;
-        if (client.m_PingTime > PHYSICS_PACKET_TIMER_LIMIT) {
-            //keep pinging the server, sending your ship physics info
-            auto& map = *static_cast<Map*>(Resources::getScene(client.m_mapname));
-            auto& playerShip = *map.getPlayer();
+    client.m_PingTime += dt;
 
-            Anchor* finalAnchor = map.getRootAnchor();
-            const auto& list = map.getClosestAnchor();
-            for (auto& closest : list) {
-                finalAnchor = finalAnchor->getChildren().at(closest);
-            }
-            PacketPhysicsUpdate p(playerShip, map, finalAnchor, list);
-            p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
-            client.send(p);
+    if (client.m_PingTime > 3.0f && client.m_Core.gameState() != GameState::Game) {
+        //hacky way of not d/cing outside the game
+        Packet pOut;
+        pOut.PacketType = PacketType::Client_To_Server_Periodic_Ping;
+        client.send(pOut);
+        client.m_PingTime = 0.0;
+    }else if (client.m_PingTime > PHYSICS_PACKET_TIMER_LIMIT && client.m_Core.gameState() == GameState::Game) {
+        //keep pinging the server, sending your ship physics info
+        auto& map = *static_cast<Map*>(Resources::getScene(client.m_mapname));
+        auto& playerShip = *map.getPlayer();
 
-            auto playerPos = playerShip.getPosition();
-            auto nearestAnchorPos = finalAnchor->getPosition();
-            double distFromMeToNearestAnchor = static_cast<double>(glm::distance2(nearestAnchorPos, playerPos));
+        Anchor* finalAnchor = map.getRootAnchor();
+        const auto& list = map.getClosestAnchor();
+        for (auto& closest : list) {
+            finalAnchor = finalAnchor->getChildren().at(closest);
+        }
+        PacketPhysicsUpdate p(playerShip, map, finalAnchor, list);
+        p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
+        client.send(p);
+
+        auto playerPos = playerShip.getPosition();
+        auto nearestAnchorPos = finalAnchor->getPosition();
+        double distFromMeToNearestAnchor = static_cast<double>(glm::distance2(nearestAnchorPos, playerPos));
             
-            if (distFromMeToNearestAnchor > DISTANCE_CHECK_NEAREST_ANCHOR) {
-                for (auto& otherShips : map.getShips()) {
-                    if (otherShips.first != playerShip.getName()) {
-                        auto otherPlayerPos = otherShips.second->getPosition();
-                        double distFromMeToOtherPlayer = static_cast<double>(glm::distance2(otherPlayerPos, playerPos));
-                        const auto calc = (distFromMeToNearestAnchor - DISTANCE_CHECK_NEAREST_ANCHOR) * 0.5f;
-                        if (distFromMeToOtherPlayer < glm::max(calc, DISTANCE_CHECK_NEAREST_OTHER_PLAYER)) {
-                            const glm::vec3 midpoint = Math::midpoint(otherPlayerPos, playerPos);
+        if (distFromMeToNearestAnchor > DISTANCE_CHECK_NEAREST_ANCHOR) {
+            for (auto& otherShips : map.getShips()) {
+                if (otherShips.first != playerShip.getName()) {
+                    auto otherPlayerPos = otherShips.second->getPosition();
+                    double distFromMeToOtherPlayer = static_cast<double>(glm::distance2(otherPlayerPos, playerPos));
+                    const auto calc = (distFromMeToNearestAnchor - DISTANCE_CHECK_NEAREST_ANCHOR) * 0.5f;
+                    if (distFromMeToOtherPlayer < glm::max(calc, DISTANCE_CHECK_NEAREST_OTHER_PLAYER)) {
+                        const glm::vec3 midpoint = Math::midpoint(otherPlayerPos, playerPos);
 
-                            PacketMessage pOut;
-                            pOut.PacketType = PacketType::Client_To_Server_Request_Anchor_Creation;
-                            pOut.r = midpoint.x - nearestAnchorPos.x;
-                            pOut.g = midpoint.y - nearestAnchorPos.y;
-                            pOut.b = midpoint.z - nearestAnchorPos.z;
-                            pOut.data = "";
-                            pOut.data += std::to_string(list.size());
-                            for (auto& closest : list) {
-                                pOut.data += "," + closest;
-                            }
-                            //we want to create an anchor at r,g,b (the midpoint between two nearby ships), we send the nearest valid anchor as a reference
-                            client.send(pOut);
-
-                            break;
+                        PacketMessage pOut;
+                        pOut.PacketType = PacketType::Client_To_Server_Request_Anchor_Creation;
+                        pOut.r = midpoint.x - nearestAnchorPos.x;
+                        pOut.g = midpoint.y - nearestAnchorPos.y;
+                        pOut.b = midpoint.z - nearestAnchorPos.z;
+                        pOut.data = "";
+                        pOut.data += std::to_string(list.size());
+                        for (auto& closest : list) {
+                            pOut.data += "," + closest;
                         }
+                        //we want to create an anchor at r,g,b (the midpoint between two nearby ships), we send the nearest valid anchor as a reference
+                        client.send(pOut);
+
+                        break;
                     }
                 }
             }
-            client.m_PingTime = 0.0;
         }
+        client.m_PingTime = 0.0;
     }
     client.onReceive();
 }

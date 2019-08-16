@@ -70,6 +70,7 @@ ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Material* mater
 ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(_modelInstances);
 }
+
 const uint& ComponentModel::getNumModels() const {
     return _modelInstances.size();
 }

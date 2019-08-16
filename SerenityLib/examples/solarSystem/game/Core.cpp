@@ -40,9 +40,9 @@ Core::~Core() {
     //    const auto status = m_Client->send(p);
     //}
     SAFE_DELETE(m_ChosenShip);
-    SAFE_DELETE(m_HUD);
     SAFE_DELETE(m_Client);
     SAFE_DELETE(m_Server);
+    SAFE_DELETE(m_HUD);
 }
 Server* Core::getServer() {
     return m_Server;

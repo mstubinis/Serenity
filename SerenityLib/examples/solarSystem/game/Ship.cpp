@@ -116,6 +116,12 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
     for (auto& shipSystem : ship.m_ShipSystems) 
         if(shipSystem.second) //some ships wont have all the systems (cloaking device, etc)
             shipSystem.second->update(dt);
+
+    if (ship.IsPlayer()) {
+        for (auto& shipSystem : ship.m_ShipSystems)
+            if (shipSystem.second)
+                shipSystem.second->render();
+    }
 }};
 
 //TODO: move to the hull system?
@@ -123,42 +129,30 @@ struct HullCollisionFunctor final {
     void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
         auto ownerShipVoid = owner.getUserPointer1();
         if (ownerShipVoid) {
-            auto otherShipVoid = owner.getUserPointer1();
+            auto otherShipVoid = other.getUserPointer1();
             if (otherShipVoid) {
-
                 if (owner.getCollisionGroup() == CollisionFilter::_Custom_3 && other.getCollisionGroup() == CollisionFilter::_Custom_3) { //hull on hull only
-
                     Ship* ownerShip = static_cast<Ship*>(ownerShipVoid);
                     Ship* otherShip = static_cast<Ship*>(otherShipVoid);
-
                     ShipSystemHull* ownerHull = static_cast<ShipSystemHull*>(ownerShip->getShipSystem(ShipSystemType::Hull));
                     ShipSystemHull* otherHull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    if (ownerHull && otherHull) {
-                        auto ownerMass = owner.mass() * 5000;
-                        auto otherMass = other.mass() * 5000;
-                        auto ownerVelocity = owner.getLinearVelocity();
-                        auto otherVelocity = other.getLinearVelocity();
+                    if ((ownerHull && otherHull) && (ownerShip != otherShip)) { //dunno if checking same ship is redundant
+                        const float ownerMass = owner.mass() * 3000.0f;
+                        const float otherMass = other.mass() * 3000.0f;
+                        const float massTotal = ownerMass + otherMass;
 
-                        //damage value should be modified based on velocities going towards ships
-                        //ex case - constitution (owner) collides with excelsior (other)
-                        /*
-                        owner mass = 10,000
-                        other mass = 15,000
-                        avg = 12,500
-                        */
-                        const float startingDamage = (ownerMass + otherMass) / 2.0f;
-                        const float ownerMassRatio = ownerMass / otherMass; //0.66666
-                        const float otherMassRatio = otherMass / ownerMass; //1.5
+                        glm::vec3 ownerLocal = ownerHit - owner.position();
+                        glm::vec3 otherLocal = otherHit - other.position();
 
-                        float ownerDamage = startingDamage * otherMassRatio;
-                        float otherDamage = startingDamage * ownerMassRatio;
+                        glm::vec3 ownerMomentum = ownerMass * ownerShip->getLinearVelocity();
+                        glm::vec3 otherMomentum = otherMass * otherShip->getLinearVelocity();
+                        glm::vec3 totalMomentum = ownerMomentum + otherMomentum;
 
-                        //TODO: modify based on velocity
-                        //auto ownerToOther = ownerVelocity - otherVelocity;
-                        //auto otherToOwner = otherVelocity - ownerVelocity;
+                        glm::vec3 damageTotal1 = (ownerMass / massTotal) * totalMomentum;
+                        glm::vec3 damageTotal2 = (otherMass / massTotal) * totalMomentum;
 
-                        ownerHull->receiveCollision(ownerDamage);
-                        otherHull->receiveCollision(otherDamage);
+                        ownerHull->receiveCollision(ownerLocal, glm::length(damageTotal2));
+                        otherHull->receiveCollision(otherLocal, glm::length(damageTotal1));
                     }
                 }
             }
@@ -204,6 +198,14 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
 }
 Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);
+}
+void Ship::destroy() {
+    for (auto& system : m_ShipSystems) {
+        if (system.second) {
+            system.second->destroy();
+        }
+    }
+    EntityWrapper::destroy();
 }
 const glm::vec3 Ship::getWarpSpeedVector3() {
     if (m_IsWarping && m_WarpFactor > 0) {
@@ -264,7 +266,7 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
 
     body.clearAllForces();
     body.setAngularVelocity(ax, ay, az, false);
-    body.setLinearVelocity(lx - (packet.wx * 1.333333333f), ly - (packet.wy * 1.333333333f), lz - (packet.wz * 1.333333333f), false);
+    body.setLinearVelocity(lx - (packet.wx * WARP_PHYSICS_MODIFIER), ly - (packet.wy * WARP_PHYSICS_MODIFIER), lz - (packet.wz * WARP_PHYSICS_MODIFIER), false);
 }
 bool Ship::canSeeCloak() {
     if (m_IsPlayer) { //TODO: or is this ship an ally of the player
@@ -360,6 +362,12 @@ Entity& Ship::entity() {
 }
 ShipSystem* Ship::getShipSystem(const uint type) { 
     return m_ShipSystems[type]; 
+}
+const glm::vec3 Ship::getLinearVelocity() {
+    if (m_IsWarping && m_IsPlayer) {
+        return -(getWarpSpeedVector3() * WARP_PHYSICS_MODIFIER);
+    }
+    return getComponent<ComponentBody>()->getLinearVelocity();
 }
 EntityWrapper* Ship::getTarget() { 
     return m_Target; 

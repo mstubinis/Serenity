@@ -5,7 +5,7 @@
 #include "ShipSystemBaseClass.h"
 #include <glm/vec3.hpp>
 
-#define HULL_TO_HULL_COLLISION_DELAY 0.5
+#define HULL_TO_HULL_COLLISION_DELAY 1.5
 
 class ShipSystemHull final : public ShipSystem {
     friend class Ship;
@@ -21,7 +21,7 @@ class ShipSystemHull final : public ShipSystem {
         ~ShipSystemHull();
 
         void receiveHit(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage);
-        void receiveCollision(const uint damage);
+        void receiveCollision(const glm::vec3& impactLocation, const float damage);
 
         const uint getHealthCurrent() const;
         const uint getHealthMax() const;

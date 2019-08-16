@@ -645,14 +645,15 @@ const glm::vec3 ComponentBody::position() const { //theres prob a better way to 
     return glm::vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
 }
 glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) {
-	return Math::getScreenCoordinates(position(), p_ClampToEdge);
+	return Math::getScreenCoordinates(position(), *owner.scene().getActiveCamera(), p_ClampToEdge);
 }
 ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_MinOffset) {
     ScreenBoxCoordinates ret;
     const auto& worldPos    = position();
     float radius            = 0.0001f;
     ComponentModel* model   = owner.getComponent<ComponentModel>();
-    const auto& center2DRes = Math::getScreenCoordinates(worldPos, false);
+    auto& camera = *owner.scene().getActiveCamera();
+    const auto& center2DRes = Math::getScreenCoordinates(worldPos, camera, false);
     glm::vec2 center2D      = glm::vec2(center2DRes.x, center2DRes.y);
     if (model) {
         radius = model->radius();
@@ -666,7 +667,7 @@ ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_MinOff
     }
     auto& cam                    = *Resources::getCurrentScene()->getActiveCamera();
     const glm::vec3& camvectest  = cam.up();   
-    const auto& testRes          = Math::getScreenCoordinates(worldPos + (camvectest * radius), false); 
+    const auto& testRes          = Math::getScreenCoordinates(worldPos + (camvectest * radius), camera, false);
     const glm::vec2 test         = glm::vec2(testRes.x, testRes.y);
     const auto radius2D          = glm::max(p_MinOffset, glm::distance(test, center2D));
     const float& yPlus           = center2D.y + radius2D;

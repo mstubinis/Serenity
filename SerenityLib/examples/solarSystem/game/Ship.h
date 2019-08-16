@@ -9,6 +9,8 @@
 
 #include "ships/shipSystems/ShipSystemBaseClass.h"
 
+#define WARP_PHYSICS_MODIFIER 1.333333333f
+
 class  GameCamera;
 class  Ship;
 class  Map;
@@ -71,6 +73,8 @@ class Ship: public EntityWrapper {
 
         void onEvent(const Event&);
 
+        void destroy();
+
         const std::string getName();
         const glm::vec3 getWarpSpeedVector3();
         const glm::vec3 getPosition();
@@ -82,6 +86,8 @@ class Ship: public EntityWrapper {
         void updateCloakFromPacket(const PacketCloakUpdate& packet);
 
         void setModel(Handle& handle);
+
+        const glm::vec3 getLinearVelocity();
 
         void translateWarp(const double& amount, const double& dt);
         void toggleWarp();

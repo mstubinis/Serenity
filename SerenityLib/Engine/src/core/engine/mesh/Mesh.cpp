@@ -480,6 +480,7 @@ void Mesh::onEvent(const Event& e) {
 }
 //TODO: optimize this a bit more (bubble sort?)
 void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, const SortingMode::Mode& sortMode) {
+#ifndef _DEBUG
     auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
     const auto& indices = vertexDataStructure.indices;
     auto& triangles = vertexDataStructure.triangles;
@@ -514,4 +515,5 @@ void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat
         newIndices.push_back(triangle.index3);
     }
     Mesh::modifyIndices(newIndices);
+#endif
 }

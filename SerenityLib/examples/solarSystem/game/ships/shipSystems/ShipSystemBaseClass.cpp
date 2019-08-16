@@ -15,3 +15,9 @@ const bool ShipSystem::isOnline() const {
 void ShipSystem::update(const double& dt) {
     // handle power transfers...?
 }
+void ShipSystem::render() {
+
+}
+void ShipSystem::destroy() {
+
+}

@@ -12,6 +12,7 @@ class  Material;
 class  Mesh;
 class  ModelInstance;
 struct Entity;
+class  Viewport;
 namespace Engine {
     namespace epriv {
         struct InstanceNode final {
@@ -49,7 +50,7 @@ namespace Engine {
                 void clean(const uint entityData);
                 void sort(Camera& camera, const SortingMode::Mode sortingMode);
                 void sort_cheap(Camera& camera, const SortingMode::Mode sortingMode);
-                void render(Camera& camera, const double& dt, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
+                void render(Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
         };
     };
 };

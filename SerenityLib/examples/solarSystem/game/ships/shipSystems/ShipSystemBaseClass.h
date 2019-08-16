@@ -30,9 +30,12 @@ class ShipSystem {
         ShipSystem(const uint& type, Ship&);
         virtual ~ShipSystem();
 
+        virtual void destroy();
+
         const bool isOnline() const;
 
         virtual void update(const double& dt);
+        virtual void render(); 
 };
 
 

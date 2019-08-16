@@ -51,6 +51,7 @@ class Scene: public EngineResource, public EventObserver{
         virtual ~Scene();
 
         const uint& id() const;
+        const uint numViewports() const;
 
         //ecs
         Entity createEntity();
@@ -96,13 +97,13 @@ namespace Engine {
             static std::vector<SpotLight*>&          GetSpotLights(Scene&);
             static std::vector<RodLight*>&           GetRodLights(Scene&);
 
-            static void           RenderGeometryOpaque(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
-            static void           RenderGeometryTransparent(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
-            static void           RenderGeometryTransparentTrianglesSorted(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
-            static void           RenderForwardOpaque(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
-            static void           RenderForwardTransparent(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
-            static void           RenderForwardTransparentTrianglesSorted(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
-            static void           RenderForwardParticles(Scene&, Camera&, const double& dt, const bool useDefaultShaders = true);
+            static void           RenderGeometryOpaque(Scene&, Viewport&, Camera&, const double& dt, const bool useDefaultShaders = true);
+            static void           RenderGeometryTransparent(Scene&, Viewport&, Camera&, const double& dt, const bool useDefaultShaders = true);
+            static void           RenderGeometryTransparentTrianglesSorted(Scene&, Viewport&, Camera&, const double& dt, const bool useDefaultShaders = true);
+            static void           RenderForwardOpaque(Scene&, Viewport&, Camera&, const double& dt, const bool useDefaultShaders = true);
+            static void           RenderForwardTransparent(Scene&, Viewport&, Camera&, const double& dt, const bool useDefaultShaders = true);
+            static void           RenderForwardTransparentTrianglesSorted(Scene&, Viewport&, Camera&, const double& dt, const bool useDefaultShaders = true);
+            static void           RenderForwardParticles(Scene&, Viewport&, Camera&, const double& dt, const bool useDefaultShaders = true);
 
             static void           AddModelInstanceToPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
             static void           RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);

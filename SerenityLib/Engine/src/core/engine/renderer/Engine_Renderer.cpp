@@ -1596,17 +1596,17 @@ class epriv::RenderManager::impl final{
             glDepthMask(GL_TRUE);
 
             GLEnablei(GL_BLEND, 0); //this is needed for sure
-            InternalScenePublicInterface::RenderGeometryOpaque(scene, camera, dt);
+            InternalScenePublicInterface::RenderGeometryOpaque(scene, viewport, camera, dt);
             if (viewport.isSkyboxVisible()) {
                 _renderSkybox(scene.skybox(), scene, viewport, camera);
             }
-            InternalScenePublicInterface::RenderGeometryTransparent(scene, camera, dt);
-            InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(scene, camera, dt, true);
+            InternalScenePublicInterface::RenderGeometryTransparent(scene, viewport, camera, dt);
+            InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(scene, viewport, camera, dt, true);
         }
         void _passForwardRendering(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
             gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Misc, GBufferType::Lighting, "RGBA");
-            InternalScenePublicInterface::RenderForwardOpaque(scene, camera, dt);
+            InternalScenePublicInterface::RenderForwardOpaque(scene, viewport, camera, dt);
 
             GLEnablei(GL_BLEND, 0); //this might need to be all buffers not just 0
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1616,11 +1616,11 @@ class epriv::RenderManager::impl final{
 
             GLEnablei(GL_BLEND, 1); //yes this is important
             GLEnablei(GL_BLEND, 2); //yes this is important
-            InternalScenePublicInterface::RenderForwardTransparent(scene, camera, dt);
-            InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, camera, dt);
+            InternalScenePublicInterface::RenderForwardTransparent(scene, viewport, camera, dt);
+            InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, viewport, camera, dt);
 
             glDepthMask(GL_FALSE);
-            InternalScenePublicInterface::RenderForwardParticles(scene, camera, dt);
+            InternalScenePublicInterface::RenderForwardParticles(scene, viewport, camera, dt);
 
             GLDisablei(GL_BLEND, 0); //this is needed for smaa at least
             GLDisablei(GL_BLEND, 1);
@@ -1943,7 +1943,7 @@ class epriv::RenderManager::impl final{
                 const glm::vec3& camVec = camera.getViewVector();
                 const bool infront = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRaysPlatform.fovDegrees));
                 if (infront) {
-                    const glm::vec3& sp = Math::getScreenCoordinates(oPos, false);
+                    const glm::vec3& sp = Math::getScreenCoordinates(oPos, camera, false);
                     float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRaysPlatform.fovDegrees;
 
                     alpha = glm::pow(alpha, godRaysPlatform.alphaFalloff);
