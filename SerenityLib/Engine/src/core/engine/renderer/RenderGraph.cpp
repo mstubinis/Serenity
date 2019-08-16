@@ -121,23 +121,25 @@ void RenderPipeline::render(Viewport& viewport, Camera& camera, const double& dt
                         auto& _modelInstance = *instanceNode->instance;
                         auto body = _modelInstance.parent().getComponent<ComponentBody>();
                         auto& model = *_modelInstance.parent().getComponent<ComponentModel>();
-                        if (body) {
-                            const auto& radius = model.radius();
-                            auto pos = body->position() + _modelInstance.position();
-                            auto model = body->modelMatrix();
-                            uint sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
-                            auto comparison = radius * 1100.0f;
 
-                            //check viewport flags here too
-                            const auto id = viewport.id();
-                            const auto flags = _modelInstance.getViewportFlags();
-                            if (!(flags & (1 << id)) || flags == 0 || !_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) { //optimization: using squared distance to remove the sqrt()
-                                _modelInstance.setPassedRenderCheck(false);
-                            }else{
-                                _modelInstance.setPassedRenderCheck(true);
-                                if (sortingMode != SortingMode::None) {
-                                    _mesh.sortTriangles(camera, _modelInstance, model, sortingMode);
+                        if (epriv::InternalModelInstancePublicInterface::IsViewportValid(_modelInstance, viewport)) {
+                            if (body) {
+                                const auto& radius = model.radius();
+                                auto pos = body->position() + _modelInstance.position();
+                                auto model = body->modelMatrix();
+                                uint sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
+                                auto comparison = radius * 1100.0f;
+
+                                if (!_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) { //optimization: using squared distance to remove the sqrt()
+                                    _modelInstance.setPassedRenderCheck(false);
+                                }else{
+                                    _modelInstance.setPassedRenderCheck(true);
+                                    if (sortingMode != SortingMode::None) {
+                                        _mesh.sortTriangles(camera, _modelInstance, model, sortingMode);
+                                    }
                                 }
+                            }else{
+                                _modelInstance.setPassedRenderCheck(false);
                             }
                         }else{
                             _modelInstance.setPassedRenderCheck(false);

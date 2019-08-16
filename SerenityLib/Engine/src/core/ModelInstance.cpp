@@ -8,6 +8,7 @@
 #include <core/engine/materials/Material.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
+#include <core/engine/scene/Viewport.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <ecs/Components.h>
 
@@ -380,4 +381,12 @@ void ModelInstance::setMaterial(Material* material, ComponentModel& componentMod
 }
 void ModelInstance::playAnimation(const string& animName, const float& start, const float& end, const uint& reqLoops){
     m_AnimationQueue.push_back(new epriv::ModelInstanceAnimation(*mesh(), animName, start, end, reqLoops));
+}
+
+
+
+
+const bool epriv::InternalModelInstancePublicInterface::IsViewportValid(ModelInstance& modelInstance, Viewport& viewport) {
+    const auto flags = modelInstance.getViewportFlags();
+    return (!((flags & (1 << viewport.id())) || flags == 0)) ? false : true;
 }

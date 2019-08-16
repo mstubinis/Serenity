@@ -15,11 +15,17 @@ class  ShaderProgram;
 class  Material;
 class  Mesh;
 class  ComponentModel;
+class  Viewport;
+class  ModelInstance;
 namespace Engine{
     namespace epriv{
         struct DefaultModelInstanceBindFunctor;
         struct DefaultModelInstanceUnbindFunctor;
         struct ModelInstanceAnimation;
+
+        struct InternalModelInstancePublicInterface final {
+            static const bool IsViewportValid(ModelInstance&, Viewport&);
+        };
     };
 };
 
