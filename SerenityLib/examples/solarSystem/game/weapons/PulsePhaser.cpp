@@ -129,7 +129,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
     Ship& s = source.ship;
     auto& shipBody = *s.getComponent<ComponentBody>();
     auto shipMatrix = shipBody.modelMatrix();
-    shipMatrix = glm::translate(shipMatrix, position + glm::vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z * 1.6f));
+    shipMatrix = glm::translate(shipMatrix, position + glm::vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
     glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
     cannonBody.setPosition(finalPosition);
     cannonBody.addCollisionFlag(CollisionFlag::NoContactResponse);

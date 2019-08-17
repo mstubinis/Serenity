@@ -1,7 +1,7 @@
 #include "Shrike.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
-#include "../../weapons/PulsePhaser.h"
+#include "../../weapons/PlasmaCannon.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"
@@ -36,6 +36,16 @@ Shrike::Shrike(Client& client, bool player, const string& name, glm::vec3 positi
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
+
+    PlasmaCannon* leftTop = new PlasmaCannon(*this, *map, glm::vec3(-0.934207f, 0.02951f, -0.224055f), glm::vec3(0.009f, 0, -1), 10.0f, 6, 100, 0.7f);
+    PlasmaCannon* leftBottom = new PlasmaCannon(*this, *map, glm::vec3(-0.308448f, 0.032778f, -0.819245f), glm::vec3(0.0008f, 0, -1), 10.0f, 6, 100, 0.7f);
+    PlasmaCannon* rightBottom = new PlasmaCannon(*this, *map, glm::vec3(0.308448f, 0.032778f, -0.819245f), glm::vec3(-0.0008f, 0, -1), 10.0f, 6, 100, 0.7f);
+    PlasmaCannon* rightTop = new PlasmaCannon(*this, *map, glm::vec3(0.934207f, 0.02951f, -0.224055f), glm::vec3(-0.009f, 0, -1), 10.0f, 6, 100, 0.7f);
+
+    weapons.addPrimaryWeaponCannon(*leftTop);
+    weapons.addPrimaryWeaponCannon(*leftBottom);
+    weapons.addPrimaryWeaponCannon(*rightBottom);
+    weapons.addPrimaryWeaponCannon(*rightTop);
 
 }
 Shrike::~Shrike() {

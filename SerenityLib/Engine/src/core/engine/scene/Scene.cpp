@@ -284,7 +284,7 @@ const uint& Scene::id() const {
 Viewport& Scene::addViewport(const uint& x, const uint& y, const uint& width, const uint& height, const Camera& camera) {
     Viewport* viewport = new Viewport(*this, camera);
     viewport->setViewportDimensions(x, y, width, height);
-    viewport->m_ID = numViewports();
+    viewport->m_ID = static_cast<unsigned short>(numViewports());
     m_i->m_Viewports.push_back(viewport);
     return *viewport;
 }

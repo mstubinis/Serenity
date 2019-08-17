@@ -23,8 +23,11 @@ Viewport::Viewport(const Scene& scene, const Camera& camera):m_Scene(const_cast<
 Viewport::~Viewport() {
 }
 
-const unsigned int& Viewport::id() const {
+const unsigned short& Viewport::id() const {
     return m_ID;
+}
+void Viewport::setID(const unsigned short& id) {
+    m_ID = id;
 }
 const bool& Viewport::isSkyboxVisible() const {
     return m_SkyboxVisible;

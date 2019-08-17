@@ -4,6 +4,7 @@
 
 #include <core/engine/math/SimplexNoise.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/ModelInstance.h>
 
 #include <unordered_map>
 #include <iostream>

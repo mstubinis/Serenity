@@ -16,6 +16,7 @@ class  Ship;
 class  Map;
 struct PacketPhysicsUpdate;
 struct PacketCloakUpdate;
+struct PacketHealthUpdate;
 struct ShipLogicFunctor;
 class  ShipSystemReactor;
 class  ShipSystemMainThrusters;
@@ -84,6 +85,7 @@ class Ship: public EntityWrapper {
 
         void updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, std::vector<std::string>& info);
         void updateCloakFromPacket(const PacketCloakUpdate& packet);
+        void updateHealthFromPacket(const PacketHealthUpdate& packet);
 
         void setModel(Handle& handle);
 
@@ -106,6 +108,10 @@ class Ship: public EntityWrapper {
         Entity& entity();
         void setTarget(EntityWrapper* entityWrapper, const bool sendPacket);
         void setTarget(const std::string&, const bool sendPacket);
+
+        const glm::vec3& forward();
+        const glm::vec3& right();
+        const glm::vec3& up();
 
 
         PrimaryWeaponBeam& getPrimaryWeaponBeam(const uint index);

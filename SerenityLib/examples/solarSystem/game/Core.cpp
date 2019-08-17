@@ -146,6 +146,8 @@ void Core::init() {
     auto& model = *e.addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
     model.hide();
 
+    ModelInstance::setDefaultViewportFlag(ViewportFlag::_1);
+
     m_HUD        = new HUD(*s,*ship_camera, m_GameState, *this);
     m_Initalized = true;
     m_HUD->go_to_main_menu();

@@ -304,6 +304,18 @@ void Client::onReceive() {
                     map.internalCreateDeepspaceAnchor(x, y, z);
                     //std::cout << "creating deep space anchor" << std::endl;
                     break;
+                }case PacketType::Server_To_Client_Ship_Health_Update:{
+                    PacketHealthUpdate& pI = *static_cast<PacketHealthUpdate*>(basePacket);
+                    auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
+                    auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+                    auto& playername = info[1];
+                    auto& shipclass = info[0];
+                    auto& ships = map.getShips();
+                    if (map.hasShip(playername)) {
+                        Ship& ship = *ships.at(playername);
+                        ship.updateHealthFromPacket(pI);
+                    }
+                    break;
                 }case PacketType::Server_To_Client_Ship_Cloak_Update: {
                     PacketCloakUpdate& pI = *static_cast<PacketCloakUpdate*>(basePacket);
                     auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
@@ -355,12 +367,20 @@ void Client::onReceive() {
                         //send the new guy several of our statuses
                         auto player = map.getPlayer();
                         if (player) {
+                            //cloak status
                             PacketCloakUpdate pOut1(*player);
                             pOut1.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
                             pOut1.data += ("," + pI.name);
                             send(pOut1);
 
+                            //target status
                             player->setTarget(player->getTarget(), true); //sends target packet info to the new guy
+
+                            //health status
+                            PacketHealthUpdate pOut2(*player);
+                            pOut2.PacketType = PacketType::Client_To_Server_Ship_Health_Update;
+                            pOut1.data += ("," + pI.name);
+                            send(pOut2);
                         }
                     }
                     break;

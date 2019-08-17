@@ -50,7 +50,8 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                     const EntityDataRequest dataRequest(e);
                     auto* cam = e.getComponent<ComponentCamera>(dataRequest);
                     //TODO: parent->child relationship
-                    if (e != ship.m_Entity && !cam) {
+                    auto* sensors = static_cast<ShipSystemSensors*>(ship.getShipSystem(ShipSystemType::Sensors));
+                    if (e != ship.m_Entity && !cam && (sensors && e != sensors->radarRingEntity() && e != sensors->radarCameraEntity())) {
                         auto _otherBody = e.getComponent<ComponentBody>(dataRequest);
                         if (_otherBody) {
                             auto& otherBody = *_otherBody;
@@ -118,9 +119,11 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
             shipSystem.second->update(dt);
 
     if (ship.IsPlayer()) {
-        for (auto& shipSystem : ship.m_ShipSystems)
-            if (shipSystem.second)
+        for (auto& shipSystem : ship.m_ShipSystems) {
+            if (shipSystem.second) {
                 shipSystem.second->render();
+            }
+        }
     }
 }};
 
@@ -306,7 +309,23 @@ void Ship::updateCloakFromPacket(const PacketCloakUpdate& packet) {
         }
     }
 }
-
+void Ship::updateHealthFromPacket(const PacketHealthUpdate& packet) {
+    auto* shields = static_cast<ShipSystemShields*>(m_ShipSystems[ShipSystemType::Shields]);
+    auto* hull = static_cast<ShipSystemHull*>(m_ShipSystems[ShipSystemType::Hull]);
+    if (shields) {
+        shields->m_HealthPointsCurrent = packet.currentShieldsHealth;
+        if (packet.flags & PacketHealthUpdate::PacketHealthFlags::ShieldsActive) {
+        }
+        if (packet.flags & PacketHealthUpdate::PacketHealthFlags::ShieldsInstalled) {
+        }
+        if (packet.flags & PacketHealthUpdate::PacketHealthFlags::ShieldsTurnedOn) {
+            shields->m_ShieldsAreUp = packet.flags;
+        }
+    }
+    if (hull) {
+        hull->m_HealthPointsCurrent = packet.currentHullHealth;
+    }
+}
 void Ship::setModel(Handle& modelHandle) {
     auto& rigidBodyComponent = *getComponent<ComponentBody>();
     auto& modelComponent     = *getComponent<ComponentModel>();
@@ -385,6 +404,15 @@ void Ship::setTarget(const string& target, const bool sendPacket) {
             }
         }
     }
+}
+const glm::vec3& Ship::forward() {
+    return getComponent<ComponentBody>()->forward();
+}
+const glm::vec3& Ship::right() {
+    return getComponent<ComponentBody>()->right();
+}
+const glm::vec3& Ship::up() {
+    return getComponent<ComponentBody>()->up();
 }
 const bool Ship::isCloaked() {
     if (m_ShipSystems[ShipSystemType::CloakingDevice]) {

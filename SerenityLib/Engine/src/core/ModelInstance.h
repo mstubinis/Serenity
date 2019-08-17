@@ -55,6 +55,7 @@ class ModelInstance final: public BindableResource{
     friend struct Engine::epriv::DefaultModelInstanceUnbindFunctor;
     friend class  ComponentModel;
     private:
+        static unsigned short                                m_ViewportFlagDefault;
         unsigned short                                       m_ViewportFlag; //determine what viewports this can be seen in
         void*                                                m_UserPointer;
         std::vector<Engine::epriv::ModelInstanceAnimation*>  m_AnimationQueue;
@@ -84,6 +85,9 @@ class ModelInstance final: public BindableResource{
         ModelInstance& operator=(ModelInstance&& other) noexcept = default;
 
         ~ModelInstance();
+
+        static void setDefaultViewportFlag(const unsigned short& flag);
+        static void setDefaultViewportFlag(const ViewportFlag::Flag& flag);
 
         void setViewportFlag(const unsigned short& flag);
         void addViewportFlag(const unsigned short& flag);

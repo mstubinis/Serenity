@@ -7,13 +7,25 @@
 #include <ecs/ComponentBody.h>
 
 #include "ships/shipSystems/ShipSystemCloakingDevice.h"
+#include "ships/shipSystems/ShipSystemMainThrusters.h"
+#include "ships/shipSystems/ShipSystemPitchThrusters.h"
+#include "ships/shipSystems/ShipSystemReactor.h"
+#include "ships/shipSystems/ShipSystemRollThrusters.h"
+#include "ships/shipSystems/ShipSystemSensors.h"
+#include "ships/shipSystems/ShipSystemShields.h"
+#include "ships/shipSystems/ShipSystemWarpDrive.h"
+#include "ships/shipSystems/ShipSystemYawThrusters.h"
+#include "ships/shipSystems/ShipSystemWeapons.h"
+#include "ships/shipSystems/ShipSystemHull.h"
 
 using namespace Engine;
 using namespace std;
 
 Packet* Packet::getPacket(const sf::Packet& sfPacket) {
-    char* data = (char*)(sfPacket.getData());
-    unsigned short packetType = (data[0] << 8) | data[1];
+    sf::Packet hardCopy = sf::Packet(sfPacket);
+    Packet pp;
+    pp.validate(hardCopy);
+    unsigned int packetType = pp.PacketType;
     Packet* p = nullptr;
     switch (packetType) {
         case PacketType::Server_To_Client_Accept_Connection: {
@@ -80,6 +92,10 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new Packet(); break;
         }case PacketType::Server_To_Client_Client_Left_Map: {
             p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Ship_Health_Update: {
+            p = new PacketHealthUpdate(); break;
+        }case PacketType::Server_To_Client_Ship_Health_Update: {
+            p = new PacketHealthUpdate(); break;
         }default: {
             break;
         }
@@ -88,7 +104,34 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
         cout << "Invalid packet type in getPacket(), please see Packet.cpp" << endl;
     return p;
 }
-
+PacketHealthUpdate::PacketHealthUpdate() :Packet() {
+    currentHullHealth = 0;
+    currentShieldsHealth = 0;
+    flags = PacketHealthFlags::None;
+}
+PacketHealthUpdate::PacketHealthUpdate(Ship& ship) : Packet() {
+    auto* shields = static_cast<ShipSystemShields*>(ship.getShipSystem(ShipSystemType::Shields));
+    auto* hull = static_cast<ShipSystemHull*>(ship.getShipSystem(ShipSystemType::Hull));
+    flags = PacketHealthFlags::None;
+    if (shields) {
+        auto& shield = *shields;
+        currentShieldsHealth = shield.getHealthCurrent();
+        flags = flags | PacketHealthFlags::ShieldsInstalled;
+        if (shield.shieldsAreUp()) {
+            flags = flags | PacketHealthFlags::ShieldsTurnedOn;
+        }
+        if (shield.isOnline()) {
+            flags = flags | PacketHealthFlags::ShieldsActive;
+        }
+    }
+    if (hull) {
+        currentHullHealth = hull->getHealthCurrent();
+    }
+    const auto pname = ship.getComponent<ComponentName>();
+    data += ship.getClass();
+    if (pname)
+        data += ("," + pname->name());
+}
 
 PacketPhysicsUpdate::PacketPhysicsUpdate():Packet() {
     qx = qy = qz = lx = ly = lz = ax = ay = az = 0;
@@ -151,6 +194,10 @@ PacketCloakUpdate::PacketCloakUpdate() :Packet() {
     justTurnedOff = false;
 }
 PacketCloakUpdate::PacketCloakUpdate(Ship& ship) : Packet() {
+    cloakTimer = 1.0f;
+    cloakSystemOnline = false;
+    cloakActive = false;
+
     auto& ent = ship.entity();
     EntityDataRequest request(ent);
     const auto pname = ent.getComponent<ComponentName>(request);

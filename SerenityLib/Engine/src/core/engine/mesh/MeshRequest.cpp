@@ -91,6 +91,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         auto& scene = *meshRequest.importer.scene;
         uint count = 0;
         MeshLoader::LoadProcessNodeData(meshRequest.parts, scene, root, meshRequest.map, count);
+        //MeshLoader::SaveTo_OBJCC(*const_cast<VertexData*>(meshRequest.parts[0].mesh->m_VertexData), meshRequest.fileOrData + ".objcc");
     }else{
         VertexData* vertexData = MeshLoader::LoadFrom_OBJCC(meshRequest.fileOrData);
         Mesh& mesh = *meshRequest.parts[0].mesh;

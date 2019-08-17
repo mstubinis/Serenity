@@ -26,6 +26,8 @@
 using namespace Engine;
 using namespace std;
 
+unsigned short ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
+
 namespace Engine {
     namespace epriv {
         struct ModelInstanceAnimation final{
@@ -205,11 +207,18 @@ ModelInstance::~ModelInstance() {
     SAFE_DELETE_VECTOR(m_AnimationQueue);
 }
 
+void ModelInstance::setDefaultViewportFlag(const unsigned short& flag) {
+    ModelInstance::m_ViewportFlagDefault = flag;
+}
+void ModelInstance::setDefaultViewportFlag(const ViewportFlag::Flag& flag) {
+    ModelInstance::m_ViewportFlagDefault = static_cast<unsigned short>(flag);
+}
+
 void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* program) {
     if (!program) {
         program = ShaderProgram::Deferred;
     }
-    m_ViewportFlag      = ViewportFlag::All;
+    m_ViewportFlag      = ModelInstance::m_ViewportFlagDefault;
     m_UserPointer       = nullptr;
     m_Stage             = RenderStage::GeometryOpaque;
     m_PassedRenderCheck = false;

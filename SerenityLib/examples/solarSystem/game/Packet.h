@@ -15,9 +15,12 @@
 class  Ship;
 class  Map;
 class  Anchor;
-struct PacketType {enum Type {
+struct PacketType {enum Type: unsigned int {
     Undefined,
     Server_Shutdown,
+
+    Client_To_Server_Ship_Health_Update,
+    Server_To_Client_Ship_Health_Update,
 
     Client_To_Server_Periodic_Ping,
 
@@ -73,10 +76,10 @@ struct IPacket {
 };
 
 struct Packet: public IPacket {
-    unsigned short   PacketType;
+    unsigned int   PacketType;
     std::string     data;
     Packet() {
-        PacketType = static_cast<unsigned short>(PacketType::Undefined);
+        PacketType = static_cast<unsigned int>(PacketType::Undefined);
         data = "";
     }
     virtual bool validate(sf::Packet& sfPacket){
@@ -88,7 +91,28 @@ struct Packet: public IPacket {
     virtual void print() {}
     static Packet* getPacket(const sf::Packet& sfPacket);
 };
+struct PacketHealthUpdate : public Packet {
+    struct PacketHealthFlags final { enum Flag {
+        None = 0,
+        ShieldsInstalled = 1 << 0,
+        ShieldsActive = 1 << 1,
+        ShieldsTurnedOn = 1 << 2,
+        All = -1,
+    };};
+    unsigned int currentHullHealth;
+    unsigned int currentShieldsHealth;
+    unsigned int flags;
 
+    PacketHealthUpdate();
+    PacketHealthUpdate(Ship& ship);
+    bool validate(sf::Packet& sfPacket) {
+        return (sfPacket >> PacketType >> data >> currentHullHealth >> currentShieldsHealth >> flags);
+    }
+    bool build(sf::Packet& sfPacket) {
+        return (sfPacket << PacketType << data << currentHullHealth << currentShieldsHealth << flags);
+    }
+    void print() {}
+};
 struct PacketPhysicsUpdate: public Packet {
     //256 bits (64 bytes)
     float            px, py, pz;     //position

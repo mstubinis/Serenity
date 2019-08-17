@@ -218,7 +218,7 @@ void Server::updateClient(Server* thisServer, ServerClient* _client) {
             client.disconnect();
             return;
         }
-        const auto& status = client.receive(sf_packet);
+        const auto status = client.receive(sf_packet);
         if (status == sf::Socket::Done) {
             Packet* pp = Packet::getPacket(sf_packet);
             auto& pIn = *pp;
@@ -292,6 +292,13 @@ void Server::updateClient(Server* thisServer, ServerClient* _client) {
                             server.send_to_all(pOut);
                             server.m_DeepspaceAnchorTimer = 0.0;
                         }
+                        break;
+                    }case PacketType::Client_To_Server_Ship_Health_Update:{
+                        //just forward it
+                        PacketHealthUpdate& pI = *static_cast<PacketHealthUpdate*>(pp);
+                        PacketHealthUpdate pOut(pI);
+                        pOut.PacketType = PacketType::Server_To_Client_Ship_Health_Update;
+                        server.send_to_all_but_client(client, pOut);
                         break;
                     }case PacketType::Client_To_Server_Ship_Cloak_Update: {
                         //a client has sent us it's cloaking information, forward it

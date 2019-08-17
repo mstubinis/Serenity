@@ -23,22 +23,16 @@ PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship,const glm::vec3& _pos,const
 const glm::vec3 PrimaryWeaponCannon::calculatePredictedVector() {
     auto& shipBody = *ship.getComponent<ComponentBody>();
     auto shipRotation = shipBody.rotation();
-    const auto cannonForward = glm::normalize(shipRotation * forward);
+    auto cannonForward = glm::normalize(shipRotation * forward);
     auto shipPosition = shipBody.position();
     auto target = ship.getTarget();
     if (target) {
-        auto& targetBody          = *target->getComponent<ComponentBody>();
-        const auto targetPosition = targetBody.position();
-        const auto vecToTarget    = shipPosition - targetPosition;
-        const auto vecToForward   = shipPosition - (cannonForward * 100000000.0f);
-        const auto angleToTarget  = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
+        auto& targetBody           = *target->getComponent<ComponentBody>();
+        const auto& targetPosition = targetBody.position();
+        const auto vecToTarget     = shipPosition - targetPosition;
+        const auto vecToForward    = shipPosition - (cannonForward * 100000000.0f);
+        const auto angleToTarget   = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
         if (angleToTarget <= arc) {
-            /*
-            traveltime      = distance_to_target / bullet_velocity
-            predicted_speed = car.speed + traveltime * car.acceleration
-            average_speed   = ( car.speed + predicted_speed ) / 2.0
-            predicted_pos   = car.pos + (average_speed * traveltime)
-            */
             const auto targetLinearVelocity = targetBody.getLinearVelocity();
             const auto distanceToTarget = glm::distance(targetPosition, shipPosition);
             const auto travelTime = distanceToTarget / travelSpeed;
@@ -50,7 +44,7 @@ const glm::vec3 PrimaryWeaponCannon::calculatePredictedVector() {
             const auto myVelocity = shipBody.getLinearVelocity();
             predictedPos -= (myVelocity / 2.0f);
 
-            return -glm::normalize(shipPosition - predictedPos);
+            return -glm::normalize((shipPosition + (shipRotation * position)) - predictedPos);
         }
     }
     //not predicted firing

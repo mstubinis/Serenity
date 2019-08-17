@@ -28,7 +28,7 @@ class Material final: public BindableResource{
     friend struct Engine::epriv::DefaultMaterialUnbindFunctor;
     friend class  Engine::epriv::RenderManager;
     public:
-        static Material*                  Checkers; //loaded in renderer
+        static Material                  *Checkers, *WhiteShadeless; //loaded in renderer
     private:
         static std::vector<glm::vec4>     m_MaterialProperities;
         std::vector<MaterialComponent*>   m_Components;

@@ -18,6 +18,7 @@ struct ResourceManifest{
     static Handle DefiantMesh;
     static Handle RingMesh;
     static Handle ShieldMesh;
+    static Handle RadarDiscMesh;
     static Handle CannonEffectMesh;
     static Handle CannonTailMesh;
 

@@ -16,6 +16,7 @@ Handle ResourceManifest::PlanetMesh;
 Handle ResourceManifest::DefiantMesh;
 Handle ResourceManifest::RingMesh;
 Handle ResourceManifest::ShieldMesh;
+Handle ResourceManifest::RadarDiscMesh;
 Handle ResourceManifest::CannonEffectMesh;
 Handle ResourceManifest::CannonTailMesh;
 
@@ -97,6 +98,7 @@ void ResourceManifest::init(){
     DefiantMesh = Resources::loadMeshAsync(BasePath + "data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc").at(0);
     ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc").at(0);
+    RadarDiscMesh = Resources::loadMeshAsync(BasePath + "data/Models/radar_disc.obj").at(0);
     CannonEffectMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_effect.obj").at(0);
     CannonTailMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_tail.obj").at(0);
 
@@ -150,7 +152,7 @@ void ResourceManifest::init(){
 
     DefiantMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/defiant/defiant.dds");
     Material& defMat = *((Material*)DefiantMaterial.get());
-    auto layer = defMat.getComponent(0).addLayer();
+    auto* layer = defMat.getComponent(0).addLayer();
     layer->setTexture(BasePath + "data/Textures/Effects/Buzzards.dds");
     layer->setMask(BasePath + "data/Textures/defiant/defiant_Mask_1.dds");
     layer->addUVModificationSimpleTranslation(0.02f, 0.02f);
@@ -161,7 +163,7 @@ void ResourceManifest::init(){
     
     NovaMaterial = Resources::addMaterial("Nova", BasePath + "data/Textures/nova/nova.dds"); 
     Material& novaMat = *((Material*)NovaMaterial.get());
-    auto layer1 = novaMat.getComponent(0).addLayer();
+    auto* layer1 = novaMat.getComponent(0).addLayer();
     layer1->setTexture(BasePath + "data/Textures/Effects/Buzzards.dds");
     layer1->setMask(BasePath + "data/Textures/nova/nova_Mask_1.dds");
     layer1->addUVModificationSimpleTranslation(0.02f, 0.02f);
@@ -179,17 +181,23 @@ void ResourceManifest::init(){
     ShieldMaterial = Resources::addMaterial("Shields", BasePath + "data/Textures/Effects/shields_1.dds");
     Material& shieldMat = *((Material*)ShieldMaterial.get());
     shieldMat.setShadeless(true);
+
     auto& layershield = shieldMat.getComponent(0).layer(0);
     layershield.addUVModificationSimpleTranslation(0.8f, 0.6f);
-    layershield.setData2(1.0f, 1.0f, 1.0f, 0.4f);
-    auto layershield1 = shieldMat.getComponent(0).addLayer();
-    layershield1->setTexture(BasePath + "data/Textures/Effects/shields_2.dds");
-    layershield1->addUVModificationSimpleTranslation(-0.4f, -0.6f);
-    layershield1->setData2(1.0f, 1.0f, 1.0f, 0.9f);
-    auto layershield2 = shieldMat.getComponent(0).addLayer();
-    layershield2->setTexture(BasePath + "data/Textures/Effects/shields_3.dds");
-    layershield2->addUVModificationSimpleTranslation(0.2f, -0.35f);
-    layershield2->setData2(1.0f, 1.0f, 1.0f, 0.8f);
+    layershield.setData2(1.0f, 1.0f, 1.0f, 0.5f);
+
+    auto* layershield1 = shieldMat.getComponent(0).addLayer();
+    layershield1->setTexture(BasePath + "data/Textures/Effects/shields_1.dds");
+    layershield1->addUVModificationSimpleTranslation(-0.8f, -0.6f);
+    layershield1->setData2(1.0f, 1.0f, 1.0f, 0.5f);
+    auto* layershield2 = shieldMat.getComponent(0).addLayer();
+    layershield2->setTexture(BasePath + "data/Textures/Effects/shields_2.dds");
+    layershield2->addUVModificationSimpleTranslation(-0.4f, -0.6f);
+    layershield2->setData2(1.0f, 1.0f, 1.0f, 0.4f);
+    auto* layershield3 = shieldMat.getComponent(0).addLayer();
+    layershield3->setTexture(BasePath + "data/Textures/Effects/shields_3.dds");
+    layershield3->addUVModificationSimpleTranslation(0.2f, -0.35f);
+    layershield3->setData2(1.0f, 1.0f, 1.0f, 0.4f);
 
 
     StarMaterial = Resources::addMaterial("Star", BasePath + "data/Textures/Planets/Sun.dds");
@@ -222,7 +230,7 @@ void ResourceManifest::init(){
     SoundCloakingActivated = Resources::addSoundData(BasePath + "data/Sounds/effects/cloaking.ogg");
     SoundCloakingDeactivated = Resources::addSoundData(BasePath + "data/Sounds/effects/decloaking.ogg");
     SoundPulsePhaser = Resources::addSoundData(BasePath + "data/Sounds/effects/pulse_phaser.ogg");
-    //SoundPlasmaCannon;
+    SoundPlasmaCannon = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_cannon.ogg");
     //SoundDisruptorCannon;
 
 

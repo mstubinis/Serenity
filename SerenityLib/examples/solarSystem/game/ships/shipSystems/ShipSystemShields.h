@@ -76,6 +76,7 @@ class ShipSystemShields final : public ShipSystem {
         const uint getHealthCurrent() const;
         const uint getHealthMax() const;
         const float getHealthPercent() const; //returns percent from 0.0f to 1.0f
+        const bool shieldsAreUp() const;
 
         void turnOffShields();
         void turnOnShields();

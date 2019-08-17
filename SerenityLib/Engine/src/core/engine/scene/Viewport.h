@@ -27,7 +27,7 @@ class Viewport final {
         glm::vec4      m_BackgroundColor;
         bool           m_DepthMaskActive;
         float          m_DepthMaskValue;
-        unsigned int   m_ID;
+        unsigned short m_ID;
     public:
         Viewport(const Scene& scene, const Camera& camera);
 
@@ -38,7 +38,8 @@ class Viewport final {
 
         ~Viewport();
 
-        const unsigned int& id() const;
+        const unsigned short& id() const;
+        void setID(const unsigned short& id);
 
         const bool& isSkyboxVisible() const;
         void setSkyboxVisible(const bool& visible = true);

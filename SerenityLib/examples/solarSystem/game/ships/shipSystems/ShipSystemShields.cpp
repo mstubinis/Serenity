@@ -188,3 +188,6 @@ void ShipSystemShields::turnOnShields() {
     m_ShieldsAreUp = true;
     //TODO: send packet indicating shields are on
 }
+const bool ShipSystemShields::shieldsAreUp() const {
+    return m_ShieldsAreUp;
+}

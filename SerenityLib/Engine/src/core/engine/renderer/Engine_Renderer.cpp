@@ -209,7 +209,7 @@ class epriv::RenderManager::impl final{
             #endif
 
             m_GBuffer = nullptr;
-            m_2DProjectionMatrix = glm::ortho(0.0f,float(w),0.0f,float(h),0.005f,1000.0f);
+            m_2DProjectionMatrix = glm::ortho(0.0f,static_cast<float>(w),0.0f, static_cast<float>(h),0.0005f,1000.0f);
             m_IdentityMat4 = glm::mat4(1.0f);
             m_IdentityMat3 = glm::mat3(1.0f);
             m_RotationAxis2D = glm::vec3(0, 0, 1);
@@ -1123,6 +1123,12 @@ class epriv::RenderManager::impl final{
             Material::Checkers->setSpecularModel(SpecularModel::None);
             Material::Checkers->setSmoothness(0.0f);
 
+
+            Material::WhiteShadeless = new Material("MaterialDefaultWhiteShadeless", Texture::White);
+            Material::WhiteShadeless->setSpecularModel(SpecularModel::None);
+            Material::WhiteShadeless->setSmoothness(0.0f);
+            Material::WhiteShadeless->setShadeless(true);
+
             Texture::BRDF = new Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
             Texture::BRDF->setWrapping(TextureWrap::ClampToEdge);
 
@@ -1162,7 +1168,7 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(Texture::Checkers);
             SAFE_DELETE(Texture::BRDF);
             SAFE_DELETE(Material::Checkers);
-
+            SAFE_DELETE(Material::WhiteShadeless);
 
             SAFE_DELETE(ShaderProgram::Deferred);
             SAFE_DELETE(ShaderProgram::Forward);
