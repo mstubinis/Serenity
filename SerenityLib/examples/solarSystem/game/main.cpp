@@ -48,8 +48,8 @@ int main(int argc, char* argv[]) {
     options.fullscreen   = false;
     options.aa_algorithm = AntiAliasingAlgorithm::SMAA;
 
-    Engine::init(options);
-    Engine::run();
+    Engine::epriv::Core::m_Engine->init(options);
+    Engine::epriv::Core::m_Engine->run();
 
 
     #ifdef _WIN32

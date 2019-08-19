@@ -12,6 +12,8 @@
 #include <core/engine/math/SimplexNoise.h>
 #include <core/engine/Engine_Window.h>
 
+#define PHYSICS_MIN_STEP 0.016666666666666666f
+
 struct EngineOptions final {
     AntiAliasingAlgorithm::Algorithm   aa_algorithm;
     bool                               ssao_enabled;
@@ -38,36 +40,64 @@ struct EngineOptions final {
 
 namespace Engine{
     namespace epriv{
-        struct EngineCore final {
+        class EngineCore final {
+            private:
+                void on_event_close();
+                void on_event_lost_focus();
+                void on_event_gained_focus();
+                void on_event_text_entered(const uint& unicode);
+                void on_event_key_pressed(const uint& key);
+                void on_event_key_released(const uint& key);
+                void on_event_mouse_wheel_moved(const int& delta);
+                void on_event_mouse_button_pressed(const uint& mouseButton);
+                void on_event_mouse_button_released(const uint& mouseButton);
+                void on_event_mouse_moved(const int& mouseX, const int& mouseY);
+                void on_event_mouse_entered();
+                void on_event_mouse_left();
+                void on_event_joystick_button_pressed(const uint& button, const uint& id);
+                void on_event_joystick_button_released(const uint& button, const uint& id);
+                void on_event_joystick_moved(const uint& id, const float& position, const uint axis);
+                void on_event_joystick_connected(const uint& id);
+                void on_event_joystick_disconnected(const uint& id);
 
-            struct Misc final {
-                SimplexNoise      m_SimplexNoise;
-                bool              m_Paused;
-                bool              m_Destroyed;
-            };
-            Misc                  m_Misc;
+                void update_logic(const double& dt);
+                void update_sounds(const double& dt);
+                void update_physics(const double& dt);
+                void update(const double& dt);
+                void render(const double& dt);
 
-            EventManager          m_EventManager;
-            PhysicsManager        m_PhysicsManager;
-            ResourceManager       m_ResourceManager;
-            DebugManager          m_DebugManager;
-            SoundManager          m_SoundManager;
-            RenderManager         m_RenderManager;
-            ThreadManager         m_ThreadManager;
+            public:
+                struct Misc final {
+                    SimplexNoise      m_SimplexNoise;
+                    bool              m_Paused;
+                    bool              m_Destroyed;
+                };
+                Misc                  m_Misc;
+
+                EventManager          m_EventManager;
+                PhysicsManager        m_PhysicsManager;
+                ResourceManager       m_ResourceManager;
+                DebugManager          m_DebugManager;
+                SoundManager          m_SoundManager;
+                RenderManager         m_RenderManager;
+                ThreadManager         m_ThreadManager;
 
 
-            EngineCore(const EngineOptions& options);
-            ~EngineCore();
+                EngineCore(const EngineOptions& options);
+                ~EngineCore();
+
+                static void init(const EngineOptions& options);
+                void run();
+                void on_event_resize(const uint& w, const uint& h, const bool& saveSize);
+                void handle_events();
         };
         struct Core final{
             static EngineCore*          m_Engine;
         };
     };
-    void init(const EngineOptions& options);
     void pause(const bool& pause = true);
     bool paused();
     void unpause();
-    void run();
 
     const float getFPS();
     Engine_Window& getWindow();

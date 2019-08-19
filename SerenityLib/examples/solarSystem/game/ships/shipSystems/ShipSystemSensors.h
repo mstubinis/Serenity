@@ -4,6 +4,7 @@
 
 #include "ShipSystemBaseClass.h"
 #include <ecs/Entity.h>
+#include <core/engine/scene/Viewport.h>
 
 class Map;
 class Camera;
@@ -15,6 +16,7 @@ class ShipSystemSensors final : public ShipSystem {
         Entity      m_RadarRingEntity;
         float       m_RadarRange;
         glm::vec4   m_Viewport;
+        Viewport*   m_ViewportObject;
     public:
         ShipSystemSensors(Ship&, Map&, const float& range = 100.0f); //10km
         ~ShipSystemSensors();
@@ -22,6 +24,7 @@ class ShipSystemSensors final : public ShipSystem {
         const Entity& radarRingEntity() const;
         const Entity& radarCameraEntity() const;
 
+        void onResize(const uint& width, const uint& height);
         void update(const double& dt);
         void render();
 };

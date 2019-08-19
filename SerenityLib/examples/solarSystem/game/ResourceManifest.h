@@ -20,6 +20,7 @@ struct ResourceManifest{
     static Handle ShieldMesh;
     static Handle RadarDiscMesh;
     static Handle CannonEffectMesh;
+    static Handle CannonEffectOutlineMesh;
     static Handle CannonTailMesh;
 
 	/*extras*/
@@ -55,13 +56,8 @@ struct ResourceManifest{
     static Handle StarFlareMaterial;
     static Handle ShieldMaterial;
     
-    static Handle PulsePhaserMaterial;
-    static Handle PlasmaCannonMaterial;
-    static Handle DisruptorCannonMaterial;
-    static Handle PulsePhaserTailMaterial;
-    static Handle PlasmaCannonTailMaterial;
-    static Handle DisruptorCannonTailMaterial;
-
+    static Handle CannonOutlineMaterial;
+    static Handle CannonTailMaterial;
 
     //sounds
     static Handle MenuMusic;

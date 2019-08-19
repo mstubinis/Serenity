@@ -34,6 +34,7 @@ class ShipSystem {
 
         const bool isOnline() const;
 
+        virtual void onResize(const uint& width, const uint& height);
         virtual void update(const double& dt);
         virtual void render(); 
 };

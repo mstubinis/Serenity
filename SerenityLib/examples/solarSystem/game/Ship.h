@@ -5,6 +5,7 @@
 #include <ecs/Components.h>
 #include <glm/vec2.hpp>
 #include <core/engine/utils/Utils.h>
+#include <core/engine/events/Engine_EventObject.h>
 #include "Client.h"
 
 #include "ships/shipSystems/ShipSystemBaseClass.h"
@@ -34,7 +35,7 @@ struct PrimaryWeaponBeam;
 struct PrimaryWeaponCannon;
 struct SecondaryWeaponTorpedo;
 
-class Ship: public EntityWrapper {
+class Ship: public EntityWrapper, public EventObserver {
     friend struct ShipLogicFunctor;
     friend  class ShipSystemReactor;
     friend  class ShipSystemMainThrusters;

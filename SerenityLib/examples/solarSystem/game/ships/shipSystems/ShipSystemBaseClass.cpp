@@ -15,6 +15,9 @@ const bool ShipSystem::isOnline() const {
 void ShipSystem::update(const double& dt) {
     // handle power transfers...?
 }
+void ShipSystem::onResize(const uint& width, const uint& height) {
+
+}
 void ShipSystem::render() {
 
 }

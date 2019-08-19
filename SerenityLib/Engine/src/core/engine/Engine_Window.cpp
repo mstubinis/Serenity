@@ -112,6 +112,17 @@ class Engine_Window::impl final{
             }
             epriv::Core::m_Engine->m_RenderManager._onFullscreen(&m_SFMLWindow,m_VideoMode,m_WindowName,m_Style,m_SFContextSettings);
 
+            glm::uvec2 winSize = Engine::getWindowSize();
+
+            //i wish this would trigger the event resize method automatically...
+            epriv::Core::m_Engine->on_event_resize(winSize.x, winSize.y, false);
+
+            //for some reason the mouse is shown even if it was hidden at first
+            m_SFMLWindow.setMouseCursorVisible(m_MouseCursorVisible);
+            m_SFContextSettings = m_SFMLWindow.getSettings();
+            m_Fullscreen = fullscreen;
+            _restoreStateMachine();
+
             //event dispatch
             epriv::EventWindowFullscreenChanged e;
             e.isFullscreen = fullscreen;
@@ -119,24 +130,6 @@ class Engine_Window::impl final{
             ev.eventWindowFullscreenChanged = e;
             ev.type = EventType::WindowFullscreenChanged;
             epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
-
-            glm::uvec2 winSize = Engine::getWindowSize();
-
-            //basically this block of code is a copy of EVENT_RESIZE, i wish this would trigger the event resize method...
-            epriv::Core::m_Engine->m_RenderManager._resize(winSize.x,winSize.y);
-            //resize cameras here
-            Game::onResize(winSize.x,winSize.y);
-            for (auto scene : epriv::Core::m_Engine->m_ResourceManager.scenes()) {
-                epriv::InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(winSize.x, winSize.y);
-                epriv::InternalScenePublicInterface::GetViewports(*scene)[0]->setViewportDimensions(0, 0, winSize.x, winSize.y);
-            }
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            //for some reason the mouse is shown even if it was hidden at first
-            m_SFMLWindow.setMouseCursorVisible(m_MouseCursorVisible);
-            m_SFContextSettings = m_SFMLWindow.getSettings();
-            m_Fullscreen = fullscreen;
-            _restoreStateMachine();
         }
         void _setStyle(const uint& style){
             if(m_Style == style) return;

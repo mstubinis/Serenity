@@ -11,12 +11,11 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Camera.h>
-#include <core/engine/scene/Viewport.h>
 
 using namespace Engine;
 using namespace std;
 
-ShipSystemSensors::ShipSystemSensors(Ship& _ship, Map& map, const float& range) :ShipSystem(ShipSystemType::Sensors, _ship),m_Map(map) {
+ShipSystemSensors::ShipSystemSensors(Ship& _ship, Map& map, const float& range) :ShipSystem(ShipSystemType::Sensors, _ship),m_Map(map){
     auto& radarMat = *(Material*)ResourceManifest::RaderMaterial.get();
     const auto& radarTexture = *radarMat.getComponent(0).texture();
     const auto& winSize = Resources::getWindowSize();
@@ -28,12 +27,12 @@ ShipSystemSensors::ShipSystemSensors(Ship& _ship, Map& map, const float& range) 
     m_Camera = new Camera(60.0f, static_cast<float>(winSize.x) / static_cast<float>(winSize.y), 0.005f, 1000.0f, &m_Map);
 
 
-    auto& viewport = m_Map.addViewport(halfWinWidth - halfTextureWidth, 0, radarTexture.width(), radarTexture.height(), *m_Camera);
-    viewport.activate();
-    viewport.activate2DAPI(false);
-    //viewport.setSkyboxVisible(false);
-    viewport.activateDepthMask();
-    viewport.setDepthMaskValue(15);
+    m_ViewportObject = &m_Map.addViewport(halfWinWidth - halfTextureWidth, 0, radarTexture.width(), radarTexture.height(), *m_Camera);
+    m_ViewportObject->activate();
+    m_ViewportObject->activate2DAPI(false);
+    //m_ViewportObject->setSkyboxVisible(false);
+    m_ViewportObject->activateDepthMask();
+    m_ViewportObject->setDepthMaskValue(15);
 
     m_RadarRingEntity = map.createEntity();
     m_RadarRingEntity.addComponent<ComponentBody>();
@@ -55,6 +54,15 @@ const Entity& ShipSystemSensors::radarRingEntity() const {
 }
 const Entity& ShipSystemSensors::radarCameraEntity() const {
     return m_Camera->entity();
+}
+void ShipSystemSensors::onResize(const uint& width, const uint& height) {
+    auto& radarMat = *(Material*)ResourceManifest::RaderMaterial.get();
+    const auto& radarTexture = *radarMat.getComponent(0).texture();
+
+    const auto halfWinWidth = width / 2.0f;
+    const auto halfTextureWidth = radarTexture.width() / 2.0f;
+
+    m_ViewportObject->setViewportDimensions(halfWinWidth - halfTextureWidth, 0, radarTexture.width(), radarTexture.height());
 }
 void ShipSystemSensors::update(const double& dt) {
     if (m_Ship.getTarget()) {

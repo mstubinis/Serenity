@@ -7,7 +7,6 @@
 #include <SFML/Window.hpp>
 #include <core/engine/utils/Utils.h>
 
-
 class Engine_Window final{
     private:
         class impl; std::unique_ptr<impl> m_i;

@@ -114,10 +114,11 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
             }
         }
     }
-    for (auto& shipSystem : ship.m_ShipSystems) 
-        if(shipSystem.second) //some ships wont have all the systems (cloaking device, etc)
+    for (auto& shipSystem : ship.m_ShipSystems) {
+        if (shipSystem.second) { //some ships wont have all the systems (cloaking device, etc)
             shipSystem.second->update(dt);
-
+        }
+    }
     if (ship.IsPlayer()) {
         for (auto& shipSystem : ship.m_ShipSystems) {
             if (shipSystem.second) {
@@ -133,13 +134,13 @@ struct HullCollisionFunctor final {
         auto ownerShipVoid = owner.getUserPointer1();
         if (ownerShipVoid) {
             auto otherShipVoid = other.getUserPointer1();
-            if (otherShipVoid) {
+            if (otherShipVoid && ownerShipVoid != otherShipVoid) { //redundant?
                 if (owner.getCollisionGroup() == CollisionFilter::_Custom_3 && other.getCollisionGroup() == CollisionFilter::_Custom_3) { //hull on hull only
                     Ship* ownerShip = static_cast<Ship*>(ownerShipVoid);
                     Ship* otherShip = static_cast<Ship*>(otherShipVoid);
                     ShipSystemHull* ownerHull = static_cast<ShipSystemHull*>(ownerShip->getShipSystem(ShipSystemType::Hull));
                     ShipSystemHull* otherHull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    if ((ownerHull && otherHull) && (ownerShip != otherShip)) { //dunno if checking same ship is redundant
+                    if (ownerHull && otherHull) {
                         const float ownerMass = owner.mass() * 3000.0f;
                         const float otherMass = other.mass() * 3000.0f;
                         const float massTotal = ownerMass + otherMass;
@@ -196,6 +197,8 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
 
     map->m_Objects.push_back(this);
     map->getShips().emplace(name, this);
+
+    registerEvent(EventType::WindowResized);
 
     //derived classes need to add their own ship systems
 }
@@ -456,7 +459,13 @@ void Ship::setTarget(EntityWrapper* target, const bool sendPacket){
     m_Target = target;
 }
 void Ship::onEvent(const Event& e){
-
+    if (e.type == EventType::WindowResized) {
+        for (auto& system : m_ShipSystems) {
+            if (system.second) {
+                system.second->onResize(e.eventWindowResized.width, e.eventWindowResized.height);
+            }
+        }
+    }
 }
 
 PrimaryWeaponBeam& Ship::getPrimaryWeaponBeam(const uint index) {

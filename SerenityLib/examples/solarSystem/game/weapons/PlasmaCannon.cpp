@@ -13,6 +13,7 @@
 #include <core/engine/lights/Lights.h>
 
 #include <core/engine/Engine.h>
+#include <core/engine/materials/Material.h>
 
 #include <ecs/Components.h>
 #include "../ships/shipSystems/ShipSystemShields.h"
@@ -108,18 +109,23 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
     currentTime = 0.0f;
     maxTime = 2.5f;
 
-    auto& model = *entity.addComponent<ComponentModel>(ResourceManifest::CannonEffectMesh, ResourceManifest::PlasmaCannonMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& head = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::PlasmaCannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& tail = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::PlasmaCannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& model = *entity.addComponent<ComponentModel>(ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& outline = model.addModel(ResourceManifest::CannonEffectOutlineMesh, ResourceManifest::CannonOutlineMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& head = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& tail = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
 
     auto& cannonBody = *entity.addComponent<ComponentBody>(CollisionType::Box);
     model.setCustomBindFunctor(PlasmaCannonInstanceBindFunctor());
     model.setCustomUnbindFunctor(PlasmaCannonInstanceUnbindFunctor());
+    model.getModel(0).setColor(0.82f, 1.00f, 0.8f, 1.0f);
+    outline.setColor(0.29f, 1.0f, 0.47f, 1.0f);
+    head.setColor(0.29f, 1.0f, 0.47f, 1.0f);
+    tail.setColor(0.29f, 1.0f, 0.47f, 1.0f);
 
     head.setPosition(0.0f, 0.0f, -0.41996f);
-    head.setScale(0.12f, 0.12f, 0.12f);
+    head.setScale(0.142f, 0.142f, 0.142f);
     tail.setPosition(0.0f, 0.0f, 0.41371f);
-    tail.setScale(0.08f, 0.08f, 0.08f);
+    tail.setScale(0.102f, 0.102f, 0.102f);
     head.setCustomBindFunctor(PlasmaCannonTailInstanceBindFunctor());
     head.setCustomUnbindFunctor(PlasmaCannonTailInstanceUnbindFunctor());
     tail.setCustomBindFunctor(PlasmaCannonTailInstanceBindFunctor());

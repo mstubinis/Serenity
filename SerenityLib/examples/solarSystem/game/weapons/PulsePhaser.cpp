@@ -13,6 +13,7 @@
 #include <core/engine/lights/Lights.h>
 
 #include <core/engine/Engine.h>
+#include <core/engine/materials/Material.h>
 
 #include <ecs/Components.h>
 #include "../ships/shipSystems/ShipSystemShields.h"
@@ -108,18 +109,23 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
     currentTime = 0.0f;
     maxTime = 2.5f;
 
-    auto& model = *entity.addComponent<ComponentModel>(ResourceManifest::CannonEffectMesh,ResourceManifest::PulsePhaserMaterial,ShaderProgram::Forward,RenderStage::ForwardParticles);
-    auto& head = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::PulsePhaserTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& tail = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::PulsePhaserTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& model = *entity.addComponent<ComponentModel>(ResourceManifest::CannonEffectMesh, Material::WhiteShadeless,ShaderProgram::Forward,RenderStage::ForwardParticles);
+    auto& outline = model.addModel(ResourceManifest::CannonEffectOutlineMesh, ResourceManifest::CannonOutlineMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& head = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& tail = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
 
     auto& cannonBody = *entity.addComponent<ComponentBody>(CollisionType::Box);
     model.setCustomBindFunctor(PulsePhaserInstanceBindFunctor());
     model.setCustomUnbindFunctor(PulsePhaserInstanceUnbindFunctor());
-    
+    model.getModel(0).setColor(1.0f, 0.77f, 0.0f, 1.0f);
+    outline.setColor(1.0f, 0.43f, 0.0f, 1.0f);
+    head.setColor(1.0f, 0.43f, 0.0f, 1.0f);
+    tail.setColor(1.0f, 0.43f, 0.0f, 1.0f);
+
     head.setPosition(0.0f, 0.0f, -0.41996f);
-    head.setScale(0.12f, 0.12f, 0.12f);
+    head.setScale(0.142f, 0.142f, 0.142f);
     tail.setPosition(0.0f, 0.0f, 0.41371f);
-    tail.setScale(0.08f, 0.08f, 0.08f);
+    tail.setScale(0.102f, 0.102f, 0.102f);
     head.setCustomBindFunctor(PulsePhaserTailInstanceBindFunctor());
     head.setCustomUnbindFunctor(PulsePhaserTailInstanceUnbindFunctor());
     tail.setCustomBindFunctor(PulsePhaserTailInstanceBindFunctor());
