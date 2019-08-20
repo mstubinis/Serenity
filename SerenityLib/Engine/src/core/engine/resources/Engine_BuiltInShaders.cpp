@@ -1249,15 +1249,14 @@ epriv::EShaders::forward_frag =
     "        }\n"
     "\n"
     //GI here
-    "        vec3 MaterialAlbedoTexture = inData.diffuse.rgb;\n"
+        
     "        vec3 ViewDir = normalize(CameraPosition - WorldPosition);\n"
     "        vec3 R = reflect(-ViewDir, inData.normals);\n"
     "        float VdotN = max(0.0, dot(ViewDir,inData.normals));\n"
     //"      float ssaoValue = 1.0 - texture2D(gSSAOMap,uv).a;\n"
     //"      float ao = (fract(matIDandAO)+0.0001) * ssaoValue;\n"
     "        float ao = inData.ao;\n"
-    "        vec3 MaterialF0 = inData.materialF0;\n"
-    "        vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(inData.metalness));\n"
+    "        vec3 F0 = mix(inData.materialF0, inData.diffuse.rgb, vec3(inData.metalness));\n"
     "        vec3 Frensel = F0;\n"
     "        float roughness = 1.0 - inData.smoothness;\n"
     "        vec3 irradianceColor = textureCube(irradianceMap, inData.normals).rgb;\n"
@@ -1265,7 +1264,7 @@ epriv::EShaders::forward_frag =
     "        vec3 kD = ConstantOneVec3 - kS;\n"
     "        kD *= 1.0 - inData.metalness;\n"
     "        vec3 GIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
-    "        vec3 GIDiffuse = irradianceColor * MaterialAlbedoTexture * kD * GIContribution.x;\n"
+    "        vec3 GIDiffuse = irradianceColor * inData.diffuse.rgb * kD * GIContribution.x;\n"
     "\n"
     "        vec3 prefilteredColor = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
     "        vec2 brdf  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
@@ -1274,6 +1273,7 @@ epriv::EShaders::forward_frag =
     "        vec3 TotalIrradiance = (GIDiffuse + GISpecular) * ao;\n"
     "        TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
     "        lightTotal += TotalIrradiance * GIContribution.z * MaterialBasePropertiesTwo.x;\n"
+
     "        inData.diffuse.rgb = lightTotal;\n"
     "    }\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"

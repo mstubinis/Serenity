@@ -94,6 +94,7 @@ class HUD final{
         ~HUD();
 
         void onResize(const uint& width, const uint& height);
+        const bool isActive() const;
 
         void setGoodText(const std::string& error, const float errorTime = 3.0f);
         void setErrorText(const std::string& error, const float errorTime = 3.0f);

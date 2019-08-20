@@ -124,7 +124,7 @@ void MaterialLayer::update(const double& dt) {
         command(fDT);
     }
 }
-void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const unsigned int& component_index, const unsigned int& layer_index) {
+void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const unsigned int& component_index, const unsigned int& layer_index, unsigned int& textureUnit) {
     const string wholeString = uniform_component_string + "layers[" + to_string(layer_index) + "].";
     const int start = (component_index * (MAX_MATERIAL_LAYERS_PER_COMPONENT * 3)) + (layer_index * 3);
 
@@ -133,12 +133,15 @@ void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const 
     Renderer::sendUniform2Safe((wholeString + "uvModifications").c_str(), m_UVModifications);
 
     if (m_Texture && m_Texture->address() != 0) {
-        Renderer::sendTextureSafe((wholeString + "texture").c_str(), *m_Texture, start + 0);
+        Renderer::sendTextureSafe((wholeString + "texture").c_str(), *m_Texture, textureUnit);
+        ++textureUnit;
     }
     if (m_Mask && m_Mask->address() != 0) {
-        Renderer::sendTextureSafe((wholeString + "mask").c_str(),    *m_Mask,    start + 1);
+        Renderer::sendTextureSafe((wholeString + "mask").c_str(),    *m_Mask,    textureUnit);
+        ++textureUnit;
     }
     if (m_Cubemap && m_Cubemap->address() != 0) {
-        Renderer::sendTextureSafe((wholeString + "cubemap").c_str(), *m_Cubemap, start + 2);
+        Renderer::sendTextureSafe((wholeString + "cubemap").c_str(), *m_Cubemap, textureUnit);
+        ++textureUnit;
     }
 }

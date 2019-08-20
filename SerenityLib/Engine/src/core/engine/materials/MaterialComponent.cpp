@@ -106,12 +106,12 @@ const MaterialComponentType::Type& MaterialComponent::type() const {
     return m_ComponentType;
 }
 
-void MaterialComponent::bind(const uint& component_index) {
+void MaterialComponent::bind(const uint& component_index, uint& textureUnit) {
     const string wholeString = "components[" + to_string(component_index) + "].";
     Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
     Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));
-    for (unsigned int j = 0; j < m_NumLayers; ++j) {
-        m_Layers[j].sendDataToGPU(wholeString, component_index, j);
+    for (uint layerIndex = 0; layerIndex < m_NumLayers; ++layerIndex) {
+        m_Layers[layerIndex].sendDataToGPU(wholeString, component_index, layerIndex, textureUnit);
     }
 }
 void MaterialComponent::unbind() {

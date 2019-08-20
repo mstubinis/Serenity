@@ -11,11 +11,9 @@
 #include <boost/bind.hpp>
 #include <core/engine/materials/MaterialEnums.h>
 
-class MaterialLayer;
-
 typedef boost::function<void(const float& dt)> boost_uv_func;
 
-
+class  MaterialLayer;
 class  Texture;
 struct SimpleUVTranslationFunctor;
 class MaterialLayer final{
@@ -61,7 +59,7 @@ class MaterialLayer final{
         void setData1(const float& x, const float& y, const float& z, const float& w);
         void setData2(const float& x, const float& y, const float& z, const float& w);
 
-        void sendDataToGPU(const std::string& uniform_component_string, const unsigned int& component_index, const unsigned int& layer_index);
+        void sendDataToGPU(const std::string& uniform_component_string, const unsigned int& component_index, const unsigned int& layer_index, unsigned int& textureUnit);
 
         const glm::vec2& getUVModifications() const;
 

@@ -16,7 +16,7 @@ class MaterialComponent {
         MaterialComponent(const MaterialComponentType::Type& type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
         virtual ~MaterialComponent();
 
-        virtual void bind(const uint& component_index);
+        virtual void bind(const uint& component_index, uint& textureUnit);
         virtual void unbind();
 
         MaterialLayer* addLayer(const std::string& textureFile, const std::string& maskFile = "", const std::string& cubemapFile = "");

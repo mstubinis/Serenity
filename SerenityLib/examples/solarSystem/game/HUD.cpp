@@ -266,7 +266,9 @@ HUD::~HUD() {
     SAFE_DELETE(m_ServerLobbyChatWindow);
     SAFE_DELETE(m_ServerLobbyShipSelectorWindow);
 }
-
+const bool HUD::isActive() const {
+    return m_Active;
+}
 void HUD::enter_the_game() {
     /*
     TODO: once a client wants to enter the game, he will ping the server that he entered the map. the server will then respond with the other connected players currently

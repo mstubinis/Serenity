@@ -55,10 +55,11 @@ namespace Engine{
         struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
             auto& material = *static_cast<Material*>(r);
             const int& numComponents = material.m_Components.size();
+            uint textureUnit = 0;
             for(int i = 0; i < numComponents; ++i){
                 if(material.m_Components[i]){
                     auto& component = *material.m_Components[i];
-                    component.bind(i);
+                    component.bind(i, textureUnit);
                 }
             }
             Renderer::sendUniform1Safe("numComponents", numComponents);
@@ -233,7 +234,8 @@ MaterialComponent& Material::addComponentAO(const string& textureFile,float base
     auto& component = *internalAddComponentGeneric(MaterialComponentType::AO, texture);
     auto& layer = component.layer(0);
     auto& _data2 = layer.data2();
-    layer.setData2(baseValue, _data2.y, _data2.z, _data2.w);
+    layer.setData2(0.0f, 1.0f, 1.0f, _data2.w);
+    setAO(baseValue);
     return component;
 }
 MaterialComponent& Material::addComponentMetalness(const string& textureFile,float baseValue){
@@ -245,7 +247,8 @@ MaterialComponent& Material::addComponentMetalness(const string& textureFile,flo
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Metalness, texture);
     auto& layer = component.layer(0);
     auto& _data2 = layer.data2();
-    layer.setData2(baseValue, _data2.y, _data2.z, _data2.w);
+    layer.setData2(0.01f, 0.99f, 1.0f, _data2.w);
+    setMetalness(baseValue);
     return component;
 }
 MaterialComponent& Material::addComponentSmoothness(const string& textureFile,float baseValue){
@@ -257,7 +260,8 @@ MaterialComponent& Material::addComponentSmoothness(const string& textureFile,fl
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Smoothness, texture);
     auto& layer = component.layer(0);
     auto& _data2 = layer.data2();
-    layer.setData2(baseValue, _data2.y, _data2.z, _data2.w);
+    layer.setData2(0.01f, 0.99f, 1.0f, _data2.w);
+    setSmoothness(baseValue);
     return component;
 }
 MaterialComponent& Material::addComponentReflection(const string& cubemapName, const string& maskFile,float mixFactor){

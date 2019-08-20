@@ -12,6 +12,7 @@ class  Client;
 class  Server;
 class  HUD;
 class  Core;
+class  ShipSystemSensors;
 namespace Engine {
     namespace epriv {
         struct ClientInternalPublicInterface {
@@ -23,6 +24,7 @@ class Client{
     friend class  Server;
     friend class  HUD;
     friend class  Core;
+    friend class  ShipSystemSensors;
     friend struct Engine::epriv::ClientInternalPublicInterface;
     private:
         std::future<sf::Socket::Status>*      m_InitialConnectionThread;

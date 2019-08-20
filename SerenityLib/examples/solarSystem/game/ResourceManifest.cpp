@@ -151,7 +151,10 @@ void ResourceManifest::init(){
     ExcelsiorMaterial = Resources::addMaterial("Excelsior", BasePath + "data/Textures/excelsior/excelsior.dds", BasePath + "data/Textures/excelsior/excelsior_Normal.dds", BasePath + "data/Textures/excelsior/excelsior_Glow.dds", BasePath + "data/Textures/excelsior/excelsior_Specular.dds");
     ConstitutionMaterial = Resources::addMaterial("Constitution", BasePath + "data/Textures/constitution/constitution.dds", BasePath + "data/Textures/constitution/constitution_Normal.dds", BasePath + "data/Textures/constitution/constitution_Glow.dds", BasePath + "data/Textures/constitution/constitution_Specular.dds");
     //DefiantSharkMaterial = Resources::addMaterial("DefiantShark", BasePath + "data/Textures/defiant/defiantShark.dds", BasePath + "data/Textures/defiant/defiant_Normal.dds", BasePath + "data/Textures/defiant/defiant_Glow.dds");
-    ShrikeMaterial = Resources::addMaterial("Shrike", BasePath + "data/Textures/shrike/shrike.dds", "", BasePath + "data/Textures/shrike/shrike_Glow.dds",  + "");
+    ShrikeMaterial = Resources::addMaterial("Shrike", BasePath + "data/Textures/shrike/shrike.dds", BasePath + "data/Textures/shrike/shrike_Normal.dds", BasePath + "data/Textures/shrike/shrike_Glow.dds", BasePath + "data/Textures/shrike/shrike_Specular.dds");
+    Material& shrikeMat = *((Material*)ShrikeMaterial.get());
+    shrikeMat.addComponentMetalness(BasePath + "data/Textures/shrike/shrike_Metalness.dds", 1.0f);
+    shrikeMat.addComponentSmoothness(BasePath + "data/Textures/shrike/shrike_Smoothness.dds", 1.0f);
 
     ShieldMaterial = Resources::addMaterial("Shields", BasePath + "data/Textures/Effects/shields_1.dds");
     Material& shieldMat = *((Material*)ShieldMaterial.get());

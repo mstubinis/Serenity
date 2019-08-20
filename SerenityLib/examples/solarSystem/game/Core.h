@@ -10,10 +10,12 @@ class HUD;
 class Server;
 class Client;
 class EntityWrapper;
+class ShipSystemSensors;
 class Core final {
     friend class HUD;
     friend class Client;
     friend class Server;
+    friend class ShipSystemSensors;
     private:
         EntityWrapper*      m_ChosenShip;
         HUD*                m_HUD;

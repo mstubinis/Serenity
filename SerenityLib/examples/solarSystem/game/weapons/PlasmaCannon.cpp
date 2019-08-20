@@ -164,7 +164,7 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
 
     light = new PointLight(finalPosition, &map);
     light->setColor(0.64f, 1.0f, 0.75f, 1.0f);
-    light->setAttenuation(LightRange::_7);
+    light->setAttenuation(LightRange::_13);
 }
 PlasmaCannonProjectile::~PlasmaCannonProjectile() {
 

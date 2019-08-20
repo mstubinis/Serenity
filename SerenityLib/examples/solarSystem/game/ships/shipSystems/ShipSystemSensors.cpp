@@ -4,6 +4,8 @@
 #include "../../ResourceManifest.h"
 #include "../../map/Map.h"
 #include "../../Helper.h"
+#include "../../Core.h"
+#include "../../HUD.h"
 
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialComponent.h>
@@ -36,7 +38,7 @@ ShipSystemSensors::ShipSystemSensors(Ship& _ship, Map& map, const float& range) 
 
     m_RadarRingEntity = map.createEntity();
     m_RadarRingEntity.addComponent<ComponentBody>();
-    auto& radarModel = *m_RadarRingEntity.addComponent<ComponentModel>(ResourceManifest::RadarDiscMesh,Material::WhiteShadeless,ShaderProgram::Forward,RenderStage::ForwardTransparent);
+    auto& radarModel = *m_RadarRingEntity.addComponent<ComponentModel>(ResourceManifest::RadarDiscMesh,Material::WhiteShadeless,ShaderProgram::Deferred,RenderStage::GeometryTransparent);
     radarModel.getModel().setColor(1, 1, 0, 1);
     radarModel.getModel().setViewportFlag(ViewportFlag::_2);
 
@@ -83,11 +85,22 @@ void ShipSystemSensors::update(const double& dt) {
     m_Camera->lookAt(camPos, camPos - extendedForward, m_Ship.up());
 
     auto& radarBody = *m_RadarRingEntity.getComponent<ComponentBody>();
+    auto& radarModel = *m_RadarRingEntity.getComponent<ComponentModel>();
     radarBody.setPosition(camPos - (shipForward * glm::vec3(2.05f)));
 
     ShipSystem::update(dt);
+
+    if (!m_Ship.m_Client.m_Core.m_HUD->isActive()) {
+        radarModel.hide();
+    }else{
+        radarModel.show();
+    }
 }
 void ShipSystemSensors::render() {
+    if (!m_Ship.m_Client.m_Core.m_HUD->isActive()) {
+        return;
+    }
+
     const auto& winSize = Resources::getWindowSize();
 
     auto& radarMat = *(Material*)ResourceManifest::RaderMaterial.get();

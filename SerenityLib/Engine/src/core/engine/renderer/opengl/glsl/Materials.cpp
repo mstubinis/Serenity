@@ -196,7 +196,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    }\n"
                 "    outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outMetalness *= inLayer.data2.z;\n"
-                "    return outMetalness;\n"
+                "    return clamp(outMetalness,0.01,0.99);\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_metalness, "float CalculateAO(");
         }
@@ -218,7 +218,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    }\n"
                 "    outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outSmoothness *= inLayer.data2.z;\n"
-                "    return outSmoothness;\n"
+                "    return clamp(outSmoothness,0.01,0.99);\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_smoothness, "float CalculateMetalness(");
         }

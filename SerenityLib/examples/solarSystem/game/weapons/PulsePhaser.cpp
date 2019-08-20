@@ -164,7 +164,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
 
     light = new PointLight(finalPosition, &map);
     light->setColor(1.0f, 0.62f, 0.0f, 1.0f);
-    light->setAttenuation(LightRange::_7);
+    light->setAttenuation(LightRange::_13);
 }
 PulsePhaserProjectile::~PulsePhaserProjectile() {
 
