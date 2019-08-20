@@ -95,10 +95,10 @@ void ResourceManifest::init(){
     DefiantMesh = Resources::loadMeshAsync(BasePath + "data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc").at(0);
     ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc").at(0);
-    RadarDiscMesh = Resources::loadMeshAsync(BasePath + "data/Models/radar_disc.obj").at(0);
-    CannonEffectMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_bolt.obj").at(0);
-    CannonTailMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_tail.obj").at(0);
-    CannonEffectOutlineMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_outline.obj").at(0);
+    RadarDiscMesh = Resources::loadMeshAsync(BasePath + "data/Models/radar_disc.objcc").at(0);
+    CannonEffectMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_bolt.objcc").at(0);
+    CannonTailMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_tail.objcc").at(0);
+    CannonEffectOutlineMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_outline.objcc").at(0);
 
 
 	//extras
