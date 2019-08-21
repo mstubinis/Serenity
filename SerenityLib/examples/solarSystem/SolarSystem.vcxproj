@@ -222,6 +222,7 @@
     <ClInclude Include="game\ships\defiant\Defiant.h" />
     <ClInclude Include="game\ships\diamond\Diamond.h" />
     <ClInclude Include="game\ships\excelsior\Excelsior.h" />
+    <ClInclude Include="game\ships\leviathan\Leviathan.h" />
     <ClInclude Include="game\ships\miranda\Miranda.h" />
     <ClInclude Include="game\ships\nova\Nova.h" />
     <ClInclude Include="game\ships\probe\Probe.h" />
@@ -275,6 +276,7 @@
     <ClCompile Include="game\ships\defiant\Defiant.cpp" />
     <ClCompile Include="game\ships\diamond\Diamond.cpp" />
     <ClCompile Include="game\ships\excelsior\Excelsior.cpp" />
+    <ClCompile Include="game\ships\leviathan\Leviathan.cpp" />
     <ClCompile Include="game\ships\miranda\Miranda.cpp" />
     <ClCompile Include="game\ships\nova\Nova.cpp" />
     <ClCompile Include="game\ships\probe\Probe.cpp" />

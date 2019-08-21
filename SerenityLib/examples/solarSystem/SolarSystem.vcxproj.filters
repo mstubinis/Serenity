@@ -124,6 +124,12 @@
     <Filter Include="Source Files\Game\Ships\Probe">
       <UniqueIdentifier>{d811d360-cb0b-4be5-b659-662b05db040f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Ships\Leviathan">
+      <UniqueIdentifier>{b72998bd-a7d6-4418-b314-62446d069814}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Leviathan">
+      <UniqueIdentifier>{86d54eca-335d-4278-8b3d-501cd7e6f2b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -282,6 +288,9 @@
     <ClInclude Include="game\ships\sphere\Sphere.h">
       <Filter>Header Files\Game\Ships\Sphere</Filter>
     </ClInclude>
+    <ClInclude Include="game\ships\leviathan\Leviathan.h">
+      <Filter>Header Files\Game\Ships\Leviathan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -433,6 +442,9 @@
     </ClCompile>
     <ClCompile Include="game\ships\cube\Cube.cpp">
       <Filter>Source Files\Game\Ships\Cube</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\leviathan\Leviathan.cpp">
+      <Filter>Source Files\Game\Ships\Leviathan</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

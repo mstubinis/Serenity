@@ -92,16 +92,18 @@ btBoxShape* epriv::MeshCollisionFactory::buildBoxShape() {
     return box;
 }
 btUniformScalingShape* epriv::MeshCollisionFactory::buildConvexHull() {
-    btUniformScalingShape* shape = new btUniformScalingShape(m_ConvesHullShape, 1.0f);
-    return shape;
+    btUniformScalingShape* uniformScalingShape = new btUniformScalingShape(m_ConvesHullShape, 1.0f);
+    uniformScalingShape->setMargin(0.001f);
+    return uniformScalingShape;
 }
 btScaledBvhTriangleMeshShape* epriv::MeshCollisionFactory::buildTriangleShape() {
-    btScaledBvhTriangleMeshShape* shape = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape, btVector3(1.0f, 1.0f, 1.0f));
-    return shape;
+    btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape, btVector3(1.0f, 1.0f, 1.0f));
+    return scaledBVH;
 }
 btGImpactMeshShape* epriv::MeshCollisionFactory::buildTriangleShapeGImpact() {
-    btGImpactMeshShape* shape = new btGImpactMeshShape(m_TriangleStaticData);
-    shape->setMargin(0.001f);
-    shape->updateBound();
-    return shape;
+    btGImpactMeshShape* gImpact = new btGImpactMeshShape(m_TriangleStaticData);
+    gImpact->setMargin(0.001f);
+    gImpact->updateBound();
+    gImpact->postUpdate();
+    return gImpact;
 }

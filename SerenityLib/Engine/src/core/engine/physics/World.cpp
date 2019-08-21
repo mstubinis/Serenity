@@ -1,5 +1,6 @@
 #include <core/engine/physics/World.h>
 #include <core/engine/physics/DebugDrawer.h>
+#include <core/engine/math/Engine_Math.h>
 
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
@@ -55,7 +56,8 @@ void epriv::PhyiscsDynamicWorld::debugDrawObject(const btTransform& worldTransfo
                 childTransform.setIdentity();
                 for (int i = multiSphereShape->getSphereCount() - 1; i >= 0; i--) {
                     childTransform.setOrigin(multiSphereShape->getSpherePosition(i));
-                    getDebugDrawer()->drawSphere(multiSphereShape->getSphereRadius(i) * m_scale, worldTransform * childTransform, color);
+                    btVector3 dimensions = multiSphereShape->getImplicitShapeDimensions();
+                    getDebugDrawer()->drawCapsule(dimensions.y(), dimensions.z(), 2, worldTransform * childTransform, color);
                 }
                 break;
             }case CAPSULE_SHAPE_PROXYTYPE: {

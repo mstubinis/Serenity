@@ -11,6 +11,8 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <BulletCollision/Gimpact/btGImpactShape.h>
+
 #include <iostream>
 
 using namespace Engine;
@@ -492,6 +494,12 @@ void ComponentBody::scale(const float p_X, const float p_Y, const float p_Z) {
                 sph->setLocalScaling(_scl);
                 sph->setImplicitShapeDimensions(_scl);
                 sph->recalcLocalAabb();
+            }else if (collision_.getType() == CollisionType::TriangleShape) {
+                btGImpactMeshShape* gImpact = static_cast<btGImpactMeshShape*>(collisionShape);
+                const auto& _scl = gImpact->getLocalScaling() + newScale;
+                gImpact->setLocalScaling(_scl);
+                gImpact->updateBound();
+                gImpact->postUpdate();
             }
         }
     }else {
@@ -619,6 +627,11 @@ void ComponentBody::setScale(const float p_X, const float p_Y, const float p_Z) 
                 sph->setLocalScaling(newScale);
                 sph->setImplicitShapeDimensions(newScale);
                 sph->recalcLocalAabb();
+            }else if (collision_.getType() == CollisionType::TriangleShape) {
+                btGImpactMeshShape* gImpact = static_cast<btGImpactMeshShape*>(collisionShape);
+                gImpact->setLocalScaling(newScale);
+                gImpact->updateBound();
+                gImpact->postUpdate();
             }
         }
     }else{
@@ -723,6 +736,12 @@ const glm::vec3 ComponentBody::getScale() const {
                 btMultiSphereShape* sph = static_cast<btMultiSphereShape*>(collisionShape);
                 if (sph) {
                     const auto ret = Math::btVectorToGLM(sph->getLocalScaling());
+                    return ret;
+                }
+            }else if (collision_.getType() == CollisionType::TriangleShape) {
+                btGImpactMeshShape* gImpact = static_cast<btGImpactMeshShape*>(collisionShape);
+                if (gImpact) {
+                    const auto ret = Math::btVectorToGLM(gImpact->getLocalScaling());
                     return ret;
                 }
             }

@@ -254,7 +254,9 @@ void epriv::GLDebugDrawer::drawSpherePatch(const btVector3& center, const btVect
                 }
             }
         }
-        pT = pvA; pvA = pvB; pvB = pT;
+        pT = pvA;
+        pvA = pvB;
+        pvB = pT;
     }
 }
 void epriv::GLDebugDrawer::drawTransform(const btTransform& transform, btScalar orthoLen) {

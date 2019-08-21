@@ -219,4 +219,5 @@ void ResourceManifest::init(){
     ResourceManifest::Ships["Miranda"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(MirandaMesh,      MirandaMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
     ResourceManifest::Ships["Constitution"] = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ConstitutionMesh, ConstitutionMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
     ResourceManifest::Ships["Shrike"]       = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ShrikeMesh,       ShrikeMaterial, glm::vec3(0.33f, 0.72f, 0.48f), glm::vec3(0, 1, 0));
+    ResourceManifest::Ships["Leviathan"]    = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(LeviathanMesh,    DefiantMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
 }

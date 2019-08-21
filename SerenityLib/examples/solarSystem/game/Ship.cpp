@@ -135,7 +135,7 @@ struct HullCollisionFunctor final {
         if (ownerShipVoid) {
             auto otherShipVoid = other.getUserPointer1();
             if (otherShipVoid && ownerShipVoid != otherShipVoid) { //redundant?
-                if (owner.getCollisionGroup() == CollisionFilter::_Custom_3 && other.getCollisionGroup() == CollisionFilter::_Custom_3) { //hull on hull only
+                if (owner.getCollisionGroup() == CollisionFilter::_Custom_4 && other.getCollisionGroup() == CollisionFilter::_Custom_4) { //hull on hull only
                     Ship* ownerShip = static_cast<Ship*>(ownerShipVoid);
                     Ship* otherShip = static_cast<Ship*>(otherShipVoid);
                     ShipSystemHull* ownerHull = static_cast<ShipSystemHull*>(ownerShip->getShipSystem(ShipSystemType::Hull));
@@ -185,9 +185,9 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
     body.setPosition(pos);
     body.setScale(scl);
 
-    //the body is using a convex hull for ship to ship ramming force and weapon / ship to hull damage. TODO: create our own triangle mesh for weapon to hull impacts for pure precision. but watch performance here
-    body.setCollisionGroup(CollisionFilter::_Custom_3); //i belong to hull group (group 3)
-    body.setCollisionMask(CollisionFilter::_Custom_3 | CollisionFilter::_Custom_2); //i should only collide with other hulls and weapons
+    //the body is using a convex hull for ship to ship ramming
+    body.setCollisionGroup(CollisionFilter::_Custom_4); //i belong to ramming hull group (group 4)
+    body.setCollisionMask(CollisionFilter::_Custom_4); //i should only collide with other ramming hulls only
     body.setCollisionFunctor(HullCollisionFunctor());
 
 	if (player) {

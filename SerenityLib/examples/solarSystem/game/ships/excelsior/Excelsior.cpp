@@ -32,7 +32,7 @@ Excelsior::Excelsior(Client& client, bool player, const string& name, glm::vec3 
         else if (i == 7)  system = new ShipSystemWarpDrive(*this);
         else if (i == 8)  system = new ShipSystemSensors(*this, *map);
         else if (i == 9)  system = new ShipSystemWeapons(*this);
-        else if (i == 10)  system = new ShipSystemHull(*this, 13000);
+        else if (i == 10)  system = new ShipSystemHull(*this, *map, 13000);
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));

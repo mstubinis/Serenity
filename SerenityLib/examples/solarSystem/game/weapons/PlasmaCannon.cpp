@@ -23,35 +23,35 @@ using namespace Engine;
 using namespace std;
 
 struct PlasmaCannonCollisionFunctor final {
-    void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
-        auto pulsePhaserShipVoid = owner.getUserPointer1();
-        auto& pulsePhaserProjectile = *static_cast<PlasmaCannonProjectile*>(owner.getUserPointer());
+void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+    auto plasmaCannonShipVoid = owner.getUserPointer1();
+    auto& plasmaCannonProjectile = *static_cast<PlasmaCannonProjectile*>(owner.getUserPointer());
 
-        auto otherPtrShip = other.getUserPointer1();
-        if (otherPtrShip && pulsePhaserShipVoid) {
-            if (otherPtrShip != pulsePhaserShipVoid) {//dont hit ourselves!
-                Ship* sourceShip = static_cast<Ship*>(pulsePhaserShipVoid);
+    auto otherPtrShip = other.getUserPointer1();
+    if (otherPtrShip && plasmaCannonShipVoid) {
+        if (otherPtrShip != plasmaCannonShipVoid) {//dont hit ourselves!
+            Ship* otherShip = static_cast<Ship*>(otherPtrShip);
+            if (otherShip && plasmaCannonProjectile.active) {
+                Ship* sourceShip = static_cast<Ship*>(plasmaCannonShipVoid);
                 PlasmaCannon& plasmaCannon = *static_cast<PlasmaCannon*>(owner.getUserPointer2());
-                Ship* otherShip = static_cast<Ship*>(otherPtrShip);
-                if (otherShip) {
-                    auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
-                    auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - other.position();
-                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                        shields->receiveHit(local, plasmaCannon.impactRadius, plasmaCannon.impactTime, plasmaCannon.damage);
-                        pulsePhaserProjectile.destroy();
-                        return;
+                auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
+                auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                auto local = otherHit - other.position();
+                if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
+                    shields->receiveHit(local, plasmaCannon.impactRadius, plasmaCannon.impactTime, plasmaCannon.damage);
+                    plasmaCannonProjectile.destroy();
+                    return;
+                }
+                if (hull && other.getUserPointer() == hull) {
+                    if (hull->getHealthCurrent() > 0 /*&& shields->getHealthCurrent() == 0*/) {
+                        hull->receiveHit(local, plasmaCannon.impactRadius, plasmaCannon.impactTime, plasmaCannon.damage);
                     }
-                    if (hull && other.getUserPointer() == hull) {
-                        if (hull->getHealthCurrent() > 0 && shields->getHealthCurrent() == 0) {
-                            hull->receiveHit(local, plasmaCannon.impactRadius, plasmaCannon.impactTime, plasmaCannon.damage);
-                        }
-                        pulsePhaserProjectile.destroy();
-                    }
+                    plasmaCannonProjectile.destroy();
                 }
             }
         }
     }
+}
 };
 
 struct PlasmaCannonInstanceBindFunctor {void operator()(EngineResource* r) const {

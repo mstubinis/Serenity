@@ -373,6 +373,8 @@ Ship* Map::createShip(Client& client, const string& shipClass, const string& shi
         ship = new Miranda(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
     else if(shipClass == "Excelsior")
         ship = new Excelsior(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+    else if (shipClass == "Leviathan")
+        ship = new Leviathan(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
 
     return ship;
 }

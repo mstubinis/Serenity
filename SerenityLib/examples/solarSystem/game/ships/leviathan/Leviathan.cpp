@@ -1,4 +1,4 @@
-#include "Nova.h"
+#include "Leviathan.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
 #include "../../weapons/PulsePhaser.h"
@@ -17,27 +17,27 @@
 
 using namespace std;
 
-Nova::Nova(Client& client, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType, Map* map)
-:Ship(client, ResourceManifest::NovaMesh, ResourceManifest::NovaMaterial, "Nova", player, name, position, scale, collisionType, map) {
+Leviathan::Leviathan(Client& client, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType, Map* map)
+:Ship(client, ResourceManifest::LeviathanMesh, ResourceManifest::DefiantMaterial, "Leviathan", player, name, position, scale, collisionType, map) {
 
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
-        if (i == 0)  system = new ShipSystemReactor(*this, 1000);
+        if (i == 0)  system = new ShipSystemReactor(*this, 5000);
         else if (i == 1)  system = new ShipSystemPitchThrusters(*this);
         else if (i == 2)  system = new ShipSystemYawThrusters(*this);
         else if (i == 3)  system = new ShipSystemRollThrusters(*this);
         else if (i == 4)  system = nullptr; //no cloaking device
-        else if (i == 5)  system = new ShipSystemShields(*this, map, 10500);
+        else if (i == 5)  system = new ShipSystemShields(*this, map, 750000);
         else if (i == 6)  system = new ShipSystemMainThrusters(*this);
         else if (i == 7)  system = new ShipSystemWarpDrive(*this);
         else if (i == 8)  system = new ShipSystemSensors(*this, *map);
         else if (i == 9)  system = new ShipSystemWeapons(*this);
-        else if (i == 10)  system = new ShipSystemHull(*this, *map, 8500);
+        else if (i == 10)  system = new ShipSystemHull(*this, *map, 500000);
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
 }
-Nova::~Nova() {
+Leviathan::~Leviathan() {
 
 }

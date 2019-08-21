@@ -30,10 +30,10 @@ void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& 
     auto otherPtrShip = other.getUserPointer1(); 
     if (otherPtrShip && pulsePhaserShipVoid) {
         if (otherPtrShip != pulsePhaserShipVoid) {//dont hit ourselves!
-            Ship*        sourceShip  = static_cast<Ship*>(pulsePhaserShipVoid);
-            PulsePhaser& pulsePhaser = *static_cast<PulsePhaser*>(owner.getUserPointer2());
             Ship*        otherShip   = static_cast<Ship*>(otherPtrShip);
-            if (otherShip) {
+            if (otherShip && pulsePhaserProjectile.active) {
+                Ship* sourceShip = static_cast<Ship*>(pulsePhaserShipVoid);
+                PulsePhaser& pulsePhaser = *static_cast<PulsePhaser*>(owner.getUserPointer2());
                 auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                 auto* hull    = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                 auto local = otherHit - other.position();
@@ -43,7 +43,7 @@ void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& 
                     return;
                 }
                 if (hull && other.getUserPointer() == hull) {
-                    if (hull->getHealthCurrent() > 0 && shields->getHealthCurrent() == 0) {
+                    if (hull->getHealthCurrent() > 0 /*&& shields->getHealthCurrent() == 0*/) {
                         hull->receiveHit(local, pulsePhaser.impactRadius, pulsePhaser.impactTime, pulsePhaser.damage);
                     }
                     pulsePhaserProjectile.destroy();

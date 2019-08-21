@@ -1,7 +1,10 @@
 #include "ShipSystemHull.h"
 #include "../../Ship.h"
+#include "../../map/Map.h"
 
-ShipSystemHull::ShipSystemHull(Ship& _ship, const uint health) :ShipSystem(ShipSystemType::Hull, _ship) {
+#include <ecs/Components.h>
+
+ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const uint health) :ShipSystem(ShipSystemType::Hull, _ship), m_HullEntity(map){
     m_HealthPointsCurrent = m_HealthPointsMax = health;
 
     m_RechargeAmount = 50;
@@ -9,7 +12,15 @@ ShipSystemHull::ShipSystemHull(Ship& _ship, const uint health) :ShipSystem(ShipS
     m_RechargeTimer = 0.0f;
     m_CollisionTimer = 10.0f;
 
-    _ship.getComponent<ComponentBody>()->setUserPointer(this);
+    auto& hullBody = *m_HullEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic);
+    auto col = new Collision(CollisionType::TriangleShapeStatic, _ship.getComponent<ComponentModel>()->getModel().mesh(), _ship.getComponent<ComponentBody>()->mass());
+    hullBody.setCollision(col);
+    hullBody.addCollisionFlag(CollisionFlag::NoContactResponse);
+    hullBody.setCollisionGroup(CollisionFilter::_Custom_3); //group 3 are hull
+    hullBody.setCollisionMask(CollisionFilter::_Custom_2); //group 2 are weapons
+
+    hullBody.setUserPointer(this);
+    hullBody.setUserPointer1(&_ship);
 }
 ShipSystemHull::~ShipSystemHull() {
 
@@ -39,6 +50,11 @@ void ShipSystemHull::receiveCollision(const glm::vec3& impactLocation, const flo
     }
 }
 void ShipSystemHull::update(const double& dt) {
+    auto& hullBody = *m_HullEntity.getComponent<ComponentBody>();
+    auto& shipBody = *m_Ship.getComponent<ComponentBody>();
+    hullBody.setPosition(shipBody.position());
+    hullBody.setRotation(shipBody.rotation());
+
 
     const float fdt = static_cast<float>(dt);
     if (m_CollisionTimer < 10.0f + static_cast<float>(HULL_TO_HULL_COLLISION_DELAY)) {

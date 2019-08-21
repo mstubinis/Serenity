@@ -58,7 +58,13 @@ struct ShieldInstanceUnbindFunctor {void operator()(EngineResource* r) const {
 ShipSystemShields::ShipSystemShields(Ship& _ship, Map* map, const uint health) :ShipSystem(ShipSystemType::Shields, _ship), m_ShieldEntity(*map) {
     auto& model = *(m_ShieldEntity.addComponent<ComponentModel>(ResourceManifest::ShieldMesh, ResourceManifest::ShieldMaterial, ResourceManifest::shieldsShaderProgram, RenderStage::ForwardParticles));
     auto& logic = *(m_ShieldEntity.addComponent<ComponentLogic>(ShipSystemShieldsFunctor()));
-    auto& shieldBody = *(m_ShieldEntity.addComponent<ComponentBody>(CollisionType::Sphere));
+
+    //TODO: convex hull is NOT independently scaled despite bullet docs saying otherwise
+    /*
+    also, gImpact is not scaled in its current implementation...
+    also, multi-sphere shape does not have enough polygons, or is not accurate enough
+    */
+    auto& shieldBody = *(m_ShieldEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic));
     logic.setUserPointer(&m_Ship);
     //logic.setUserPointer1(&model);
     //logic.setUserPointer2(&instance);
