@@ -57,6 +57,8 @@ namespace Engine{
         struct srtKeyShaderProgram final{inline bool operator() ( ShaderProgram* _1,  ShaderProgram* _2){return (_1->name() < _2->name());}};
 
         struct EngineInternalShaders final{enum Shader{
+            DecalVertex,
+            DecalFrag,
             FullscreenVertex,
             FXAAFrag,
             BulletPhysicsVertex,
@@ -102,6 +104,7 @@ namespace Engine{
         struct EngineInternalShaderPrograms final{enum Program{
             //Deferred, //using the internal resource static one instead
             //Forward, //using the internal resource static one instead
+            Decal,
             BulletPhysics,
             ZPrepass,
             Deferred2DAPI,
@@ -233,6 +236,8 @@ class epriv::RenderManager::impl final{
 #pragma region EngineInternalShadersAndPrograms
             m_InternalShaderPrograms.resize(EngineInternalShaderPrograms::_TOTAL, nullptr);
 
+            m_InternalShaders.emplace_back(EShaders::decal_vertex, ShaderType::Vertex, false);
+            m_InternalShaders.emplace_back(EShaders::decal_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
             m_InternalShaders.emplace_back(EShaders::fxaa_frag, ShaderType::Fragment, false);
             m_InternalShaders.emplace_back(EShaders::bullet_physics_vert, ShaderType::Vertex, false);
@@ -277,6 +282,7 @@ class epriv::RenderManager::impl final{
             ShaderProgram::Deferred = new ShaderProgram("Deferred", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::DeferredFrag]);
             ShaderProgram::Forward = new ShaderProgram("Forward", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::ForwardFrag]);
 
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::Decal] = new ShaderProgram("Decal", m_InternalShaders[EngineInternalShaders::DecalVertex], m_InternalShaders[EngineInternalShaders::DecalFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics] = new ShaderProgram("Bullet_Physics", m_InternalShaders[EngineInternalShaders::BulletPhysicsVertex], m_InternalShaders[EngineInternalShaders::BulletPhysicsFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::ZPrepass] = new ShaderProgram("ZPrepass", m_InternalShaders[EngineInternalShaders::VertexBasic], m_InternalShaders[EngineInternalShaders::ZPrepassFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI] = new ShaderProgram("Deferred_2DAPI", m_InternalShaders[EngineInternalShaders::Vertex2DAPI], m_InternalShaders[EngineInternalShaders::DeferredFrag2DAPI]);
@@ -1622,6 +1628,7 @@ class epriv::RenderManager::impl final{
 
             GLEnablei(GL_BLEND, 1); //yes this is important
             GLEnablei(GL_BLEND, 2); //yes this is important
+            GLEnablei(GL_BLEND, 3); //yes this is important
             InternalScenePublicInterface::RenderForwardTransparent(scene, viewport, camera, dt);
             InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, viewport, camera, dt);
 
@@ -1631,6 +1638,10 @@ class epriv::RenderManager::impl final{
             GLDisablei(GL_BLEND, 0); //this is needed for smaa at least
             GLDisablei(GL_BLEND, 1);
             GLDisablei(GL_BLEND, 2);
+            GLDisablei(GL_BLEND, 3);
+        }
+        void _passDecals(GBuffer& gbuffer, Viewport& viewport, Camera& camera) {
+
         }
         void _passCopyDepth(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);

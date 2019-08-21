@@ -23,6 +23,8 @@ GLSL Version    OpenGL Version
 
 #pragma region Declarations
 string epriv::EShaders::conditional_functions;
+string epriv::EShaders::decal_vertex;
+string epriv::EShaders::decal_frag;
 string epriv::EShaders::bullet_physics_vert;
 string epriv::EShaders::bullet_physcis_frag;
 string epriv::EShaders::fullscreen_quad_vertex;
@@ -189,6 +191,62 @@ epriv::EShaders::bullet_physics_vert =
 
 #pragma region BulletPhysicsFragment
 epriv::EShaders::bullet_physcis_frag =
+    "in vec3 OutColor;\n"
+    "void main(){\n"
+    "	gl_FragColor = vec4(OutColor,1.0);\n"
+    "}";
+#pragma endregion
+
+#pragma region DecalVertex
+epriv::EShaders::decal_vertex =  
+"USE_LOG_DEPTH_VERTEX\n"
+"\n"
+"layout (location = 0) in vec3 position;\n"
+"layout (location = 1) in vec2 uv;\n"
+"layout (location = 2) in vec4 normal;\n" //Order is ZYXW
+"layout (location = 3) in vec4 binormal;\n"//Order is ZYXW
+"layout (location = 4) in vec4 tangent;\n"//Order is ZYXW
+"\n"
+"uniform mat4 Model;\n"
+"uniform mat3 NormalMatrix;\n"
+"\n"
+"varying vec2 UV;\n"
+"\n"
+"varying vec3 Normals;\n"
+"varying vec3 WorldPosition;\n"
+"varying mat3 TBN;\n"
+"\n"
+"flat varying vec3 CamPosition;\n"
+"flat varying vec3 CamRealPosition;\n"
+"varying vec3 TangentCameraPos;\n"
+"varying vec3 TangentFragPos;\n"
+"\n"
+"void main(){\n"
+"    mat4 ModelMatrix = Model;\n"
+"    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
+"    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
+"    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
+"           Normals = NormalMatrix * vec4(normal.zyx,   0.0).xyz;\n"
+"    vec3 Binormals = NormalMatrix * vec4(binormal.zyx, 0.0).xyz;\n"
+"    vec3  Tangents = NormalMatrix * vec4(tangent.zyx,  0.0).xyz;\n"
+"    TBN = mat3(Tangents,Binormals,Normals);\n"
+"\n"
+"    vec4 worldPos = (ModelMatrix * vec4(position, 1.0));\n"
+"\n"
+"    gl_Position = CameraViewProj * worldPos;\n"
+"    WorldPosition = worldPos.xyz;\n"
+"\n"
+"    CamPosition = CameraPosition;\n"
+"    CamRealPosition = CameraRealPosition;\n"
+"    TangentCameraPos = TBN * CameraPosition;\n"
+"    TangentFragPos = TBN * WorldPosition;\n"
+"\n"
+"    UV = uv;\n"
+"}";
+#pragma endregion
+
+#pragma region DecalFrag
+epriv::EShaders::decal_frag =
     "in vec3 OutColor;\n"
     "void main(){\n"
     "	gl_FragColor = vec4(OutColor,1.0);\n"

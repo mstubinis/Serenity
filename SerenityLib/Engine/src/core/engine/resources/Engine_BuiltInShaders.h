@@ -10,6 +10,9 @@ namespace epriv{
         public:
             static void init();
 
+            static std::string decal_vertex;
+            static std::string decal_frag;
+
             static std::string bullet_physics_vert;
             static std::string bullet_physcis_frag;
 
