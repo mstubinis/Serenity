@@ -1611,7 +1611,7 @@ class epriv::RenderManager::impl final{
         }
         void _passForwardRendering(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
-            gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Misc, GBufferType::Lighting, "RGBA");
+            gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting, "RGBA");
             InternalScenePublicInterface::RenderForwardOpaque(scene, viewport, camera, dt);
 
             GLEnablei(GL_BLEND, 0); //this might need to be all buffers not just 0

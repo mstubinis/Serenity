@@ -1223,8 +1223,8 @@ epriv::EShaders::forward_frag =
     "        ProcessComponent(components[j], inData);\n"
     "    }\n"
     "\n"
-    "    vec2 test = EncodeOctahedron(inData.normals);\n" //yes these two lines are evil and not needed, but they sync up the results with the deferred pass...
-    "    inData.normals = DecodeOctahedron(test);\n"
+    "    vec2 encodedNormals = EncodeOctahedron(inData.normals);\n" //yes these two lines are evil and not needed, but they sync up the results with the deferred pass...
+    "    inData.normals = DecodeOctahedron(encodedNormals);\n"
     "\n"
     "    vec3 lightTotal = ConstantZeroVec3;\n"
     "    if(Shadeless != 1){\n"
@@ -1280,8 +1280,9 @@ epriv::EShaders::forward_frag =
     "    vec4 GodRays = vec4(Gods_Rays_Color,1.0);\n"
     "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
     "    gl_FragData[0] = inData.diffuse;\n"
-    "    gl_FragData[1] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
-    "    gl_FragData[2] = inData.diffuse;\n"
+    "    gl_FragData[1] = vec4(encodedNormals, 0.0, 0.0);\n" //old: OutMatIDAndAO, OutPackedMetalnessAndSmoothness. keeping normals around for possible decals later
+    "    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
+    "    gl_FragData[3] = inData.diffuse;\n"
     "\n"
     "}";
 #pragma endregion

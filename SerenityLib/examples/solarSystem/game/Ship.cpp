@@ -203,6 +203,7 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
     //derived classes need to add their own ship systems
 }
 Ship::~Ship(){
+    unregisterEvent(EventType::WindowResized);
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
 void Ship::destroy() {
