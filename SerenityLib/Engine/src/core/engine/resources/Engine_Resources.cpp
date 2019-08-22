@@ -142,29 +142,33 @@ vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float& t
 
 
 Handle Resources::addTexture(const string& file, const ImageInternalFormat::Format& internFormat, const bool& mipmaps){
-    return resourceManager->m_Resources->add(new Texture(file,mipmaps,internFormat),ResourceType::Texture);
+    Texture* texture = new Texture(file, mipmaps, internFormat);
+    return resourceManager->m_Resources->add(texture, ResourceType::Texture);
 }
 
 Handle Resources::addMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular){
     Material* material = new Material(name,diffuse,normal,glow,specular);
-    return resourceManager->m_Resources->add(material,ResourceType::Material);
+    return resourceManager->m_Resources->add(material, ResourceType::Material);
 }
 Handle Resources::addMaterial(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular){
     Material* material = new Material(name,diffuse,normal,glow,specular);
-    return resourceManager->m_Resources->add(material,ResourceType::Material);
+    return resourceManager->m_Resources->add(material, ResourceType::Material);
 }
 
 Handle Resources::addShader(const string& fileOrData, const ShaderType::Type& type, const bool& fromFile){
-    return resourceManager->m_Resources->add(new Shader(fileOrData,type,fromFile),ResourceType::Shader);
+    Shader* shader = new Shader(fileOrData, type, fromFile);
+    return resourceManager->m_Resources->add(shader, ResourceType::Shader);
 }
 
 Handle Resources::addShaderProgram(const string& n, Shader& v, Shader& f){
-    return resourceManager->m_Resources->add(new ShaderProgram(n,v,f),ResourceType::ShaderProgram);
+    ShaderProgram* program = new ShaderProgram(n, v, f);
+    return resourceManager->m_Resources->add(program, ResourceType::ShaderProgram);
 }
 Handle Resources::addShaderProgram(const string& n, Handle& v, Handle& f){
-    Shader* vS = resourceManager->m_Resources->getAsFast<Shader>(v);
-    Shader* fS = resourceManager->m_Resources->getAsFast<Shader>(f);
-    return resourceManager->m_Resources->add(new ShaderProgram(n,*vS,*fS),ResourceType::ShaderProgram);
+    Shader* vertexShader = resourceManager->m_Resources->getAsFast<Shader>(v);
+    Shader* fragmentShader = resourceManager->m_Resources->getAsFast<Shader>(f);
+    ShaderProgram* program = new ShaderProgram(n, *vertexShader, *fragmentShader);
+    return resourceManager->m_Resources->add(program, ResourceType::ShaderProgram);
 }
 
 Handle Resources::addSoundData(const string& file){

@@ -1,80 +1,19 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/ShaderHelper.h>
 #include <core/engine/shaders/Shader.h>
-#include <core/engine/Engine.h>
+
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
-#include <core/engine/materials/MaterialEnums.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/lexical_cast.hpp>
-
-#include <core/engine/renderer/opengl/glsl/Common.h>
-#include <core/engine/renderer/opengl/glsl/Compression.h>
-#include <core/engine/renderer/opengl/glsl/VersionConversion.h>
-#include <core/engine/renderer/opengl/glsl/Materials.h>
-#include <core/engine/renderer/opengl/glsl/Lighting.h>
-#include <core/engine/renderer/opengl/glsl/SSAOCode.h>
-
-
-#include <regex>
 #include <iostream>
 
 using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-typedef boost::iostreams::stream<boost::iostreams::mapped_file_source> boost_stream_mapped_file;
-
-
 ShaderProgram* ShaderProgram::Deferred = nullptr;
-ShaderProgram* ShaderProgram::Forward = nullptr;
-
-//this needs some work...? seems to be ok for now
-string getLogDepthFunctions(){
-    string res =  "\n"
-        "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r;\n"
-        "    float position_w = pow(2.0, depth * log2(_far + 1.0)) - 1.0;\n"
-        "    float a = _far / (_far - _near);\n"
-        "    float b = _far * _near / (_near - _far);\n"
-        "    float linear = a + b / position_w;\n"
-        "    vec4 wpos = CameraInvViewProj * (vec4(_uv, linear, 1.0) * 2.0 - 1.0);\n"
-        "    return wpos.xyz / wpos.w;\n"
-        "}\n"
-        "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r;\n"
-        "    float position_w = pow(2.0, depth * log2(_far + 1.0)) - 1.0;\n"
-        "    float a = _far / (_far - _near);\n"
-        "    float b = _far * _near / (_near - _far);\n"
-        "    float linear = a + b / position_w;\n"
-        "    vec4 wpos = CameraInvProj * (vec4(_uv, linear, 1.0) * 2.0 - 1.0);\n"
-        "    return wpos.xyz / wpos.w;\n"
-        "}\n";
-    return res;
-}
-
-
-//this is working great right now, do not modify
-string getNormalDepthFunctions(){
-    string res = "\n"
-        "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n"
-        "	 vec4 space = vec4(_uv * 2.0 - 1.0, depth, 1.0);\n"
-        "	 space = CameraInvViewProj * space;\n"
-        "	 return space.xyz / space.w;\n"
-        "}\n"
-        "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).x;\n"
-        "    vec4 space = CameraInvProj * (vec4(_uv, depth, 1.0) * 2.0 - 1.0);\n"
-        "    return space.xyz / space.w;\n"
-        "}\n";
-    return res;
-}
+ShaderProgram* ShaderProgram::Forward  = nullptr;
 
 namespace Engine{
     namespace epriv{
@@ -111,152 +50,10 @@ ShaderProgram::ShaderProgram(string _name, Shader& vs, Shader& fs):m_VertexShade
 ShaderProgram::~ShaderProgram(){ 
     unload(); 
 }
-void ShaderProgram::_convertCode(string& vCode, string& fCode) {
-    _convertCode(vCode, m_VertexShader);
-    _convertCode(fCode, m_FragmentShader);
-    m_VertexShader.m_Code = vCode;
-    m_FragmentShader.m_Code = fCode;
-}
-void ShaderProgram::_convertCode(string& _d, Shader& shader) {
-    istringstream str(_d);
-    const auto& type = shader.type();
 
-    //see if we actually have a version line
-    string versionLine;
-    if (ShaderHelper::sfind(_d, "#version ")) {
-        //use the found one
-        while (getline(str, versionLine)) {
-            if (ShaderHelper::sfind(versionLine, "#version ")) { 
-                break; 
-            }
-        }
-    }else{
-        //generate one
-        string core = "";
-        if (RenderManager::GLSL_VERSION >= 330) 
-            core = " core";
-        versionLine = "#version " + to_string(RenderManager::GLSL_VERSION) + core + "\n";
-        ShaderHelper::insertStringAtLine(_d, versionLine, 0);
-    }
-    const uint versionNumber = boost::lexical_cast<uint>(regex_replace(versionLine, regex("([^0-9])"), ""));
-
-    //common code
-    opengl::glsl::Materials::convert(_d, versionNumber, type);
-    opengl::glsl::Lighting::convert(_d, versionNumber, type);
-    opengl::glsl::SSAOCode::convert(_d, versionNumber, type);
-    opengl::glsl::Compression::convert(_d, versionNumber);
-    opengl::glsl::Common::convert(_d, versionNumber);
-
-
-    //check for log depth - vertex
-    if (ShaderHelper::sfind(_d, "USE_LOG_DEPTH_VERTEX") && !ShaderHelper::sfind(_d, "//USE_LOG_DEPTH_VERTEX") && type == ShaderType::Vertex) {
-        boost::replace_all(_d, "USE_LOG_DEPTH_VERTEX", "");
-        #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-            string log_vertex_code = "\n"
-                "uniform float fcoeff;\n"
-                "flat varying float FC;\n"
-                "varying float logz_f;\n"
-                "\n";
-            ShaderHelper::insertStringAtLine(_d, log_vertex_code, 1);
-            log_vertex_code = "\n"
-                "logz_f = 1.0 + gl_Position.w;\n"
-                "gl_Position.z = (log2(max(0.000001, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n" //this line is optional i think... since gl_FragDepth may be written manually
-                "FC = fcoeff;\n"
-                "\n";
-            ShaderHelper::insertStringAtEndOfMainFunc(_d, log_vertex_code);
-        #endif
-    }
-
-    //check for view space normals from world (not sure if this is proper)
-    if (ShaderHelper::sfind(_d, "GetViewNormalsFromWorld(")) {
-        if (!ShaderHelper::sfind(_d, "vec4 GetViewNormalsFromWorld(")) {
-            string viewNormals = "\n"
-                "vec3 GetViewNormalsFromWorld(vec3 worldNormals,mat4 camView){//generated\n"
-                "    return (camView * vec4(worldNormals,0.0)).xyz;\n"
-                "}\n";
-            ShaderHelper::insertStringAtLine(_d, viewNormals, 1);
-        }
-    }
-    //check for world space normals from view (this works perfectly)
-    if (ShaderHelper::sfind(_d, "GetWorldNormalsFromView(")) {
-        if (!ShaderHelper::sfind(_d, "vec4 GetWorldNormalsFromView(")) {
-            string viewNormals = "\n"
-                "vec3 GetWorldNormalsFromView(vec3 viewNormals,mat4 camView){//generated\n"
-                "    return (transpose(camView) * vec4(viewNormals,0.0)).xyz;\n"
-                "}\n";
-            ShaderHelper::insertStringAtLine(_d, viewNormals, 1);
-        }
-    }
-
-    //check for log depth - fragment
-    if (ShaderHelper::sfind(_d, "USE_LOG_DEPTH_FRAGMENT") && !ShaderHelper::sfind(_d, "//USE_LOG_DEPTH_FRAGMENT") && type == ShaderType::Fragment) {
-        boost::replace_all(_d, "USE_LOG_DEPTH_FRAGMENT", "");
-        #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-            string log_frag_code = "\n"
-                "flat varying float FC;\n"
-                "varying float logz_f;\n"
-                "\n";
-            ShaderHelper::insertStringAtLine(_d, log_frag_code, 1);
-            log_frag_code = "\n"
-                "gl_FragDepth = log2(logz_f) * FC;\n"
-                "\n";
-            ShaderHelper::insertStringAtEndOfMainFunc(_d, log_frag_code);
-        #endif
-        if (ShaderHelper::sfind(_d, "GetWorldPosition(") || ShaderHelper::sfind(_d, "GetViewPosition(")) {
-            if (!ShaderHelper::sfind(_d, "vec3 GetWorldPosition(")) {
-                #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                ShaderHelper::insertStringRightAfterLineContent(_d, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
-                #else
-                ShaderHelper::insertStringRightAfterLineContent(_d, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
-                #endif
-            }
-        }
-    }else{
-        if (ShaderHelper::sfind(_d, "GetWorldPosition(") || ShaderHelper::sfind(_d, "GetViewPosition(")) {
-            if (!ShaderHelper::sfind(_d, "vec3 GetWorldPosition(")) {
-                if (ShaderHelper::sfind(_d, "USE_LOG_DEPTH_FRAG_WORLD_POSITION") && !ShaderHelper::sfind(_d, "//USE_LOG_DEPTH_FRAG_WORLD_POSITION") && type == ShaderType::Fragment) {
-                    //log
-                    boost::replace_all(_d, "USE_LOG_DEPTH_FRAG_WORLD_POSITION", "");
-                    #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                    ShaderHelper::insertStringRightAfterLineContent(_d, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
-                    #else
-                    ShaderHelper::insertStringRightAfterLineContent(_d, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
-                    #endif
-                }else{
-                    #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                    ShaderHelper::insertStringRightAfterLineContent(_d, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
-                    #else
-                    ShaderHelper::insertStringRightAfterLineContent(_d, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
-                    #endif
-                }
-            }
-        }
-    }
-    opengl::glsl::VersionConversion::convert(_d, versionNumber, type);
-}
 void ShaderProgram::_load_CPU() {
     _unload_CPU();
     if (!m_LoadedCPU) {
-        string VertexCode, FragmentCode = "";
-        //load initial code
-        if (m_VertexShader.fromFile()) {
-            boost_stream_mapped_file str(m_VertexShader.m_FileName);
-            for (string line; getline(str, line, '\n');) { 
-                VertexCode += "\n" + line; 
-            }
-        }else { 
-            VertexCode = m_VertexShader.data(); 
-        }
-        if (m_FragmentShader.fromFile()) {
-            boost_stream_mapped_file str(m_FragmentShader.m_FileName);
-            for (string line; getline(str, line, '\n');) { 
-                FragmentCode += "\n" + line; 
-            }
-        }else { 
-            FragmentCode = m_FragmentShader.data(); 
-        }
-        //convert the code
-        _convertCode(VertexCode, FragmentCode);
         m_LoadedCPU = true;
     }
 }

@@ -42,9 +42,6 @@ class ShaderProgram final: public BindableResource{
 		bool                                      m_LoadedCPU;
 		bool                                      m_LoadedGPU;
 
-        void _convertCode(std::string& vCode, std::string& fCode);
-        void _convertCode(std::string&, Shader&);
-
         void _load_CPU(); void _unload_CPU();
         void _load_GPU(); void _unload_GPU();
     public:

@@ -13,6 +13,8 @@ class Shader final : public EngineResource {
         bool               m_FromFile;
         std::string        m_FileName;
         std::string        m_Code;
+
+        void convertCode();
     public:
         Shader(const std::string& shaderFileOrData, const ShaderType::Type& shaderType, const bool& fromFile = true);
         virtual ~Shader();
