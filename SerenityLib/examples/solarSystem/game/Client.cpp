@@ -35,7 +35,7 @@
 using namespace std;
 using namespace Engine;
 
-const float  PHYSICS_PACKET_TIMER_LIMIT  = 0.02f;
+const float  PHYSICS_PACKET_TIMER_LIMIT  = 0.25f;
 const double DISTANCE_CHECK_NEAREST_ANCHOR  = 1000000.0 * 1000000.0;
 const double DISTANCE_CHECK_NEAREST_OTHER_PLAYER = 100000.0  * 100000.0;
 
