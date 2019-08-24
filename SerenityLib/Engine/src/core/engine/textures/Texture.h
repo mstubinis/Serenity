@@ -93,14 +93,7 @@ class Texture: public EngineResource{
         static void setMaxFilter(const GLuint& type, const TextureFilter::Filter&);
         static void setFilter(const GLuint& type, const TextureFilter::Filter&);
 
-        void render(
-            const glm::vec2& pos,
-            const glm::vec4& color,
-            const float& angle = 0.0f,
-            const glm::vec2& scale = glm::vec2(1.0f),
-            const float& depth = 0.1f
-        );
-
+        void render(const glm::vec2& pos, const glm::vec4& color, const float& angle = 0.0f, const glm::vec2& scale = glm::vec2(1.0f), const float& depth = 0.1f);
         void genPBREnvMapData(const uint& convoludeTextureSize, const uint& preEnvFilterSize);
 };
 #endif

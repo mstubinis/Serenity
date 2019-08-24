@@ -15,6 +15,7 @@
 class  GameCamera;
 class  Ship;
 class  Map;
+class  Decal;
 struct PacketPhysicsUpdate;
 struct PacketCloakUpdate;
 struct PacketHealthUpdate;
@@ -29,6 +30,7 @@ class  ShipSystemWarpDrive;
 class  ShipSystemSensors;
 class  ShipSystemShields;
 class  ShipSystemWeapons;
+class  ShipSystemHull;
 class  ShipSystem;
 
 struct PrimaryWeaponBeam;
@@ -47,6 +49,7 @@ class Ship: public EntityWrapper, public EventObserver {
     friend  class ShipSystemSensors;
     friend  class ShipSystemShields;
     friend  class ShipSystemWeapons;
+    friend  class ShipSystemHull;
 	friend  class ShipSystem;
     protected:
         Client&                              m_Client;
@@ -58,18 +61,19 @@ class Ship: public EntityWrapper, public EventObserver {
         float                                m_WarpFactor;
         EntityWrapper*                       m_Target;
         std::string                          m_ShipClass;
+        std::vector<Decal*>                  m_DamageDecals;
     public:
         Ship(
             Client& client,
             Handle& meshHandle,                   //Mesh
             Handle& materialHandle,               //Material
             const std::string& shipClass,
+            Map& map,
             bool player = false,                  //Player Ship?
             const std::string& name = "Ship",     //Name
             glm::vec3 = glm::vec3(0),             //Position
             glm::vec3 = glm::vec3(1),             //Scale
-            CollisionType::Type = CollisionType::ConvexHull,
-            Map* = nullptr
+            CollisionType::Type = CollisionType::ConvexHull
         );
         virtual ~Ship();
 
@@ -87,6 +91,8 @@ class Ship: public EntityWrapper, public EventObserver {
         void updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, std::vector<std::string>& info);
         void updateCloakFromPacket(const PacketCloakUpdate& packet);
         void updateHealthFromPacket(const PacketHealthUpdate& packet);
+
+        void updateDamageDecalsCloak(const float& alpha);
 
         void setModel(Handle& handle);
 

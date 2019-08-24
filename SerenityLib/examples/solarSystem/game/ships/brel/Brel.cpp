@@ -17,8 +17,8 @@
 
 using namespace std;
 
-Brel::Brel(Client& client, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType, Map* map)
-:Ship(client, ResourceManifest::BrelMesh, ResourceManifest::BrelMaterial, "Brel", player, name, position, scale, collisionType, map) {
+Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+:Ship(client, ResourceManifest::BrelMesh, ResourceManifest::BrelMaterial, "Brel", map,player, name, position, scale, collisionType) {
 
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
@@ -30,9 +30,9 @@ Brel::Brel(Client& client, bool player, const string& name, glm::vec3 position, 
         else if (i == 5)  system = new ShipSystemShields(*this, map, 7700);
         else if (i == 6)  system = new ShipSystemMainThrusters(*this);
         else if (i == 7)  system = new ShipSystemWarpDrive(*this);
-        else if (i == 8)  system = new ShipSystemSensors(*this, *map);
+        else if (i == 8)  system = new ShipSystemSensors(*this, map);
         else if (i == 9)  system = new ShipSystemWeapons(*this);
-        else if (i == 10)  system = new ShipSystemHull(*this, *map, 7100);
+        else if (i == 10)  system = new ShipSystemHull(*this, map, 7100);
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));

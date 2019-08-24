@@ -27,6 +27,7 @@
 class  Viewport;
 class  Texture;
 class  Font;
+class  Decal;
 struct Entity;
 struct BufferObject;
 
@@ -62,6 +63,7 @@ namespace epriv{
             const bool _bindMaterial(Material*);
             const bool _unbindMaterial();
             const float _getGIPackedData();
+            GBuffer& getGbuffer();
             void _genPBREnvMapData(Texture&,uint,uint);
     };
 };

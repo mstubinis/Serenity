@@ -11,6 +11,7 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/lights/Lights.h>
 #include <core/engine/materials/Material.h>
+#include <core/engine/renderer/Decal.h>
 
 #include <core/engine/utils/Engine_Debugging.h>
 
@@ -31,6 +32,7 @@
 #include "ships/shipSystems/ShipSystemHull.h"
 
 #include <glm/gtx/norm.hpp>
+
 
 using namespace Engine;
 using namespace std;
@@ -126,6 +128,17 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
             }
         }
     }
+    for (auto& decal : ship.m_DamageDecals) {
+        if (decal) {//TODO: probably redundant check here
+            const auto shipRotation = ship.getRotation();
+            decal->setPosition(ship.getPosition() + (shipRotation * decal->initialPosition()));
+            decal->setRotation(shipRotation * decal->initialRotation());
+            decal->update(dt);
+            if (!decal->active()) {
+                removeFromVector(ship.m_DamageDecals, decal); //might be dangerous
+            }
+        }
+    }
 }};
 
 //TODO: move to the hull system?
@@ -155,8 +168,11 @@ struct HullCollisionFunctor final {
                         glm::vec3 damageTotal1 = (ownerMass / massTotal) * totalMomentum;
                         glm::vec3 damageTotal2 = (otherMass / massTotal) * totalMomentum;
 
-                        ownerHull->receiveCollision(ownerLocal, glm::length(damageTotal2));
-                        otherHull->receiveCollision(otherLocal, glm::length(damageTotal1));
+                        const float damageRadiusOwner = 4.0f;
+                        const float damageRadiusOther = 4.0f;
+
+                        ownerHull->receiveCollision(normal, ownerLocal, damageRadiusOwner, glm::length(damageTotal2));
+                        otherHull->receiveCollision(normal, otherLocal, damageRadiusOther, glm::length(damageTotal1));
                     }
                 }
             }
@@ -164,7 +180,7 @@ struct HullCollisionFunctor final {
     }
 };
 
-Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, bool player, const string& name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type, Map* map):EntityWrapper(*map),m_Client(client){
+Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, Map& map, bool player, const string& name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type):EntityWrapper(map),m_Client(client){
     m_WarpFactor    = 0;
     m_IsPlayer      = player;
     m_ShipClass     = shipClass;
@@ -191,12 +207,12 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
     body.setCollisionFunctor(HullCollisionFunctor());
 
 	if (player) {
-		m_PlayerCamera = static_cast<GameCamera*>(map->getActiveCamera());
+		m_PlayerCamera = static_cast<GameCamera*>(map.getActiveCamera());
 	}
     body.setUserPointer1(this);
 
-    map->m_Objects.push_back(this);
-    map->getShips().emplace(name, this);
+    map.m_Objects.push_back(this);
+    map.getShips().emplace(name, this);
 
     registerEvent(EventType::WindowResized);
 
@@ -204,6 +220,7 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, b
 }
 Ship::~Ship(){
     unregisterEvent(EventType::WindowResized);
+    SAFE_DELETE_VECTOR(m_DamageDecals);
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
 void Ship::destroy() {
@@ -281,6 +298,16 @@ bool Ship::canSeeCloak() {
     }
     return false;
 }
+void Ship::updateDamageDecalsCloak(const float& alpha) {
+    for (auto& decal : m_DamageDecals) {
+        if (decal && decal->active()) {
+            auto& model = *decal->getComponent<ComponentModel>();
+            auto& modelOne = model.getModel(0);
+            auto& color = modelOne.color();
+            modelOne.setColor(color.r, color.g, color.b, alpha);
+        }
+    }
+}
 void Ship::updateCloakFromPacket(const PacketCloakUpdate& packet) {
     if (!m_ShipSystems[ShipSystemType::CloakingDevice])
         return;
@@ -304,12 +331,15 @@ void Ship::updateCloakFromPacket(const PacketCloakUpdate& packet) {
         if (cloak.m_CloakTimer < 1.0f && cloak.m_CloakTimer >= 0.0f) {
             model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
             instance.setColor(1, 1, 1, glm::abs(cloak.m_CloakTimer));
+            updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
         }else if(cloak.m_CloakTimer < 0.0f){
             model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
             instance.setColor(0.369f, 0.912f, 1, glm::abs(cloak.m_CloakTimer));
+            updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
         }else{
             model.setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryOpaque);
             instance.setColor(1, 1, 1, glm::abs(cloak.m_CloakTimer));
+            updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
         }
     }
 }

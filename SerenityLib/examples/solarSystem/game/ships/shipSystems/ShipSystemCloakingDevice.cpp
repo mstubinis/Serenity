@@ -89,12 +89,14 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                     if (m_CloakTimer > 0.0f) {
                         m_CloakTimer -= _fdt;
                         instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+                        m_Ship.updateDamageDecalsCloak(glm::abs(m_CloakTimer));
                     }else{
                         m_CloakTimer -= _fdt * 0.35f;
                         if (m_CloakTimer < -0.2f) {
                             m_CloakTimer = -0.2f;
                         }
                         instance.setColor(0.369f, 0.912f, 1, glm::abs(m_CloakTimer));
+                        m_Ship.updateDamageDecalsCloak(glm::abs(m_CloakTimer));
                     }
                 }
             }else{
@@ -105,6 +107,7 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                         model.hide();
                     }
                     instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+                    m_Ship.updateDamageDecalsCloak(glm::abs(m_CloakTimer));
                 }
             }
         }else{
@@ -122,6 +125,7 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                 }
             }
             instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+            m_Ship.updateDamageDecalsCloak(glm::abs(m_CloakTimer));
         }
     }else{
         if (m_CloakTimer <= 0.0f) {
@@ -141,6 +145,7 @@ void ShipSystemCloakingDevice::update(const double& dt) {
             }
         }
         instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+        m_Ship.updateDamageDecalsCloak(glm::abs(m_CloakTimer));
     }
     ShipSystem::update(dt);
 }

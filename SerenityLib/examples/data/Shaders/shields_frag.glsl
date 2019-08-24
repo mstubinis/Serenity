@@ -1,6 +1,4 @@
 
-//our shields shader -- uses the basis of the forward frag shader with shadeless lighting, and using impact points
-
 USE_LOG_DEPTH_FRAGMENT
 USE_MAX_MATERIAL_LAYERS_PER_COMPONENT
 USE_MAX_MATERIAL_COMPONENTS
@@ -17,6 +15,7 @@ struct InData {
     float metalness;
     float smoothness;
     vec3  materialF0;
+    vec3  worldPosition;
 };
 struct Layer {
     vec4 data1;
@@ -48,7 +47,6 @@ uniform int Shadeless;
 
 uniform vec4 Object_Color;
 uniform vec4 Material_F0AndID;
-uniform vec3 Gods_Rays_Color;
 
 varying vec3 WorldPosition;
 varying vec2 UV;
@@ -77,6 +75,9 @@ void main(){
     }
     inData.diffuse.a *= MaterialBasePropertiesTwo.x;
 
+    vec2 encodedNormals = EncodeOctahedron(inData.normals); //yes these two lines are evil and not needed, but they sync up the results with the deferred pass...
+    inData.normals = DecodeOctahedron(encodedNormals);
+
     float totalAlpha = 0.0;
     for (int j = 0; j < numImpacts; ++j) {
         float dist = distance(impacts[j].Position - CamRealPosition, WorldPosition);
@@ -86,9 +87,8 @@ void main(){
         totalAlpha += alpha;
     }
     inData.diffuse.a *= clamp(totalAlpha, 0.0, 1.0);
-    vec4 GodRays = vec4(Gods_Rays_Color,1.0);
-    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);
     gl_FragData[0] = inData.diffuse;
-    gl_FragData[1] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);
-    gl_FragData[2] = inData.diffuse;
+    gl_FragData[1] = vec4(encodedNormals, 0.0, 0.0);
+    gl_FragData[2] = vec4(inData.glow, inData.specular, 0.0, 0.0);
+    gl_FragData[3] = inData.diffuse;
 }

@@ -13,6 +13,7 @@ class ShipSystemHull final : public ShipSystem {
     friend class Ship;
     private:
         EntityWrapper   m_HullEntity;
+        Map&            m_Map;
         uint            m_HealthPointsCurrent;
         uint            m_HealthPointsMax;
         uint            m_RechargeAmount;
@@ -23,8 +24,8 @@ class ShipSystemHull final : public ShipSystem {
         ShipSystemHull(Ship&, Map&, const uint health);
         ~ShipSystemHull();
 
-        void receiveHit(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage);
-        void receiveCollision(const glm::vec3& impactLocation, const float damage);
+        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage);
+        void receiveCollision(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float damage);
 
         const uint getHealthCurrent() const;
         const uint getHealthMax() const;

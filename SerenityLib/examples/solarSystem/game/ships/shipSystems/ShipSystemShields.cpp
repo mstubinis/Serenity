@@ -30,20 +30,17 @@ struct ShieldInstanceBindFunctor {void operator()(EngineResource* r) const {
     glm::mat4 parentModel = body.modelMatrix();
 
     Renderer::sendUniform4Safe("Object_Color", i.color());
-    Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
-
-    Renderer::sendUniform1Safe("AnimationPlaying", 0);
-
     glm::mat4 modelMatrix = parentModel * i.modelMatrix();
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
 
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
     int count = 0;
+    const auto finalModelPosition = glm::vec3(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
     for (uint i = 0; i < MAX_IMPACT_POINTS; ++i) {
         auto& impact = shields.m_ImpactPoints[i];
         if (impact.active) {
-            glm::vec3 worldPosition = glm::vec3(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]) + impact.impactLocation;
+            glm::vec3 worldPosition = finalModelPosition + impact.impactLocation;
             Renderer::sendUniform3Safe(("impacts[" + to_string(count) + "].Position").c_str(), worldPosition);
             Renderer::sendUniform3Safe(("impacts[" + to_string(count) + "].Data").c_str(), impact.impactRadius, impact.currentTime, impact.maxTime);
             ++count;
@@ -55,21 +52,18 @@ struct ShieldInstanceUnbindFunctor {void operator()(EngineResource* r) const {
     Renderer::GLEnable(GL_CULL_FACE);
 }};
 
-ShipSystemShields::ShipSystemShields(Ship& _ship, Map* map, const uint health) :ShipSystem(ShipSystemType::Shields, _ship), m_ShieldEntity(*map) {
+ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const uint health) :ShipSystem(ShipSystemType::Shields, _ship), m_ShieldEntity(map) {
     auto& model = *(m_ShieldEntity.addComponent<ComponentModel>(ResourceManifest::ShieldMesh, ResourceManifest::ShieldMaterial, ResourceManifest::shieldsShaderProgram, RenderStage::ForwardParticles));
     auto& logic = *(m_ShieldEntity.addComponent<ComponentLogic>(ShipSystemShieldsFunctor()));
 
-    //TODO: convex hull is NOT independently scaled despite bullet docs saying otherwise
-    /*
-    also, gImpact is not scaled in its current implementation...
-    also, multi-sphere shape does not have enough polygons, or is not accurate enough
-    */
+    //TODO: optimize collision hull if possible
     auto& shieldBody = *(m_ShieldEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic));
     logic.setUserPointer(&m_Ship);
-    //logic.setUserPointer1(&model);
-    //logic.setUserPointer2(&instance);
     shieldBody.setUserPointer(this);
     shieldBody.setUserPointer1(&_ship);
+    Mesh* shieldColMesh = (Mesh*)ResourceManifest::ShieldColMesh.get();
+    Collision* c = new Collision(CollisionType::TriangleShapeStatic, shieldColMesh, shieldBody.mass());
+    shieldBody.setCollision(c);
 
     m_HealthPointsMax = m_HealthPointsCurrent = health;
     //m_TimeSinceLastHit = 10.0f;
@@ -79,7 +73,6 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map* map, const uint health) :
     m_RechargeTimer = 0.0f;
 
     auto& boundBox = m_Ship.getComponent<ComponentModel>()->getModel(0).mesh()->getRadiusBox();
-    //note: add collision flags -- shields should not collide with other shields or ships. but SHOULD collide with projectiles / weapons
     auto& btBody = const_cast<btRigidBody&>(shieldBody.getBody());
     shieldBody.addCollisionFlag(CollisionFlag::NoContactResponse);
     shieldBody.setCollisionGroup(CollisionFilter::_Custom_1); //group 1 are shields
@@ -153,7 +146,7 @@ void ShipSystemShields::update(const double& dt) {
 
     ShipSystem::update(dt);
 }
-void ShipSystemShields::receiveHit(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage) {
+void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const uint damage) {
     if (m_ShieldsAreUp) {
         //m_TimeSinceLastHit = 0.0f;
         int bleed = m_HealthPointsCurrent - damage;
@@ -162,18 +155,20 @@ void ShipSystemShields::receiveHit(const glm::vec3& impactLocation, const float&
             //shields take the entire hit
             m_HealthPointsCurrent -= damage;
         }else{
-            //we have damage leaking to the hull
             m_HealthPointsCurrent = 0;
+            //uncomment below to apply bleed damage after shields drop
+            /*
             uint bleedDamage = glm::abs(bleed);
             auto* hull = static_cast<ShipSystemHull*>(m_Ship.getShipSystem(ShipSystemType::Hull));
             if (hull) {
-                hull->receiveHit(impactLocation, impactRadius, maxTime, bleed);
+                hull->receiveHit(impactNormal, impactLocationLocal, impactRadius, maxTime, bleed);
             }
+            */
         }
         if (m_HealthPointsCurrent > 0 && m_ImpactPointsFreelist.size() > 0) {
             auto nextIndex = m_ImpactPointsFreelist[0];
             auto& impactPointData = m_ImpactPoints[nextIndex];
-            impactPointData.impact(impactLocation, impactRadius, maxTime, m_ImpactPointsFreelist);
+            impactPointData.impact(impactLocationLocal, impactRadius, maxTime, m_ImpactPointsFreelist);
         }
     }
 }

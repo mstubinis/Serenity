@@ -10,12 +10,12 @@ class Leviathan final : public Ship {
     public:
         Leviathan(
             Client& client,
+            Map& map,
             bool player = false,                  //Player Ship?
             const std::string& name = "Leviathan Class Ship",     //Name
             glm::vec3 = glm::vec3(0),             //Position
             glm::vec3 = glm::vec3(1),             //Scale
-            CollisionType::Type = CollisionType::ConvexHull,
-            Map* = nullptr
+            CollisionType::Type = CollisionType::ConvexHull
         );
         ~Leviathan();
 };

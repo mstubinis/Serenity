@@ -6,15 +6,24 @@
 #include <core/engine/shaders/ShaderIncludes.h>
 
 class ShaderProgram;
+class Shader;
+namespace Engine {
+    namespace epriv {
+        struct InternalShaderProgramPublicInterface;
+        struct InternalShaderPublicInterface final {
+            static void ConvertCode(Shader&);
+        };
+    };
+};
 class Shader final : public EngineResource {
-    friend class ShaderProgram;
+    friend class  ShaderProgram;
+    friend struct Engine::epriv::InternalShaderPublicInterface;
+    friend struct Engine::epriv::InternalShaderProgramPublicInterface;
     private:
         ShaderType::Type   m_Type;
         bool               m_FromFile;
         std::string        m_FileName;
         std::string        m_Code;
-
-        void convertCode();
     public:
         Shader(const std::string& shaderFileOrData, const ShaderType::Type& shaderType, const bool& fromFile = true);
         virtual ~Shader();

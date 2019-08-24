@@ -38,14 +38,12 @@ void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& 
                 auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                 auto local = otherHit - other.position();
                 if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                    shields->receiveHit(local, plasmaCannon.impactRadius, plasmaCannon.impactTime, plasmaCannon.damage);
+                    shields->receiveHit(normal, local, plasmaCannon.impactRadius, plasmaCannon.impactTime, plasmaCannon.damage);
                     plasmaCannonProjectile.destroy();
                     return;
                 }
                 if (hull && other.getUserPointer() == hull) {
-                    if (hull->getHealthCurrent() > 0 /*&& shields->getHealthCurrent() == 0*/) {
-                        hull->receiveHit(local, plasmaCannon.impactRadius, plasmaCannon.impactTime, plasmaCannon.damage);
-                    }
+                    hull->receiveHit(normal, local, plasmaCannon.impactRadius, plasmaCannon.impactTime, plasmaCannon.damage);
                     plasmaCannonProjectile.destroy();
                 }
             }
@@ -164,7 +162,7 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
 
     light = new PointLight(finalPosition, &map);
     light->setColor(0.64f, 1.0f, 0.75f, 1.0f);
-    light->setAttenuation(LightRange::_13);
+    light->setAttenuation(LightRange::_20);
 }
 PlasmaCannonProjectile::~PlasmaCannonProjectile() {
 
@@ -222,12 +220,13 @@ bool PlasmaCannon::fire() {
 void PlasmaCannon::forceFire() {
     auto* projectile = new PlasmaCannonProjectile(*this, m_Map, position, forward);
     m_ActiveProjectiles.push_back(projectile);
-    auto sound = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaCannon);
 
     auto& shipBody = *ship.getComponent<ComponentBody>();
     auto shipMatrix = shipBody.modelMatrix();
     shipMatrix = glm::translate(shipMatrix, position);
     const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+
+    auto* sound = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaCannon);
     if (sound) {
         sound->setPosition(finalPosition);
         sound->setAttenuation(0.15f);

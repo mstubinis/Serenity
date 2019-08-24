@@ -16,6 +16,7 @@ Handle ResourceManifest::PlanetMesh;
 Handle ResourceManifest::DefiantMesh;
 Handle ResourceManifest::RingMesh;
 Handle ResourceManifest::ShieldMesh;
+Handle ResourceManifest::ShieldColMesh;
 Handle ResourceManifest::RadarDiscMesh;
 Handle ResourceManifest::CannonEffectMesh;
 Handle ResourceManifest::CannonEffectOutlineMesh;
@@ -42,6 +43,9 @@ Handle ResourceManifest::DefiantSharkMaterial;
 Handle ResourceManifest::ShrikeMaterial;
 Handle ResourceManifest::BrelMaterial;
 
+//hull damage
+Handle ResourceManifest::HullDamageOutline1Material;
+Handle ResourceManifest::HullDamageMaterial1;
 
 Handle ResourceManifest::StarMaterial;
 Handle ResourceManifest::EarthSkyMaterial;
@@ -95,6 +99,7 @@ void ResourceManifest::init(){
     DefiantMesh = Resources::loadMeshAsync(BasePath + "data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc").at(0);
     ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc").at(0);
+    ShieldColMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields_Col.obj").at(0);
     RadarDiscMesh = Resources::loadMeshAsync(BasePath + "data/Models/radar_disc.objcc").at(0);
     CannonEffectMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_bolt.objcc").at(0);
     CannonTailMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_tail.objcc").at(0);
@@ -164,18 +169,32 @@ void ResourceManifest::init(){
     layershield.addUVModificationSimpleTranslation(0.8f, 0.6f);
     layershield.setData2(1.0f, 1.0f, 1.0f, 0.5f);
 
-    auto* layershield1 = shieldMat.getComponent(0).addLayer();
-    layershield1->setTexture(BasePath + "data/Textures/Effects/shields_1.dds");
-    layershield1->addUVModificationSimpleTranslation(-0.8f, -0.6f);
-    layershield1->setData2(1.0f, 1.0f, 1.0f, 0.5f);
-    auto* layershield2 = shieldMat.getComponent(0).addLayer();
-    layershield2->setTexture(BasePath + "data/Textures/Effects/shields_2.dds");
-    layershield2->addUVModificationSimpleTranslation(-0.4f, -0.6f);
-    layershield2->setData2(1.0f, 1.0f, 1.0f, 0.4f);
-    auto* layershield3 = shieldMat.getComponent(0).addLayer();
-    layershield3->setTexture(BasePath + "data/Textures/Effects/shields_3.dds");
-    layershield3->addUVModificationSimpleTranslation(0.2f, -0.35f);
-    layershield3->setData2(1.0f, 1.0f, 1.0f, 0.4f);
+    auto& layershield1 = *shieldMat.getComponent(0).addLayer();
+    layershield1.setTexture(BasePath + "data/Textures/Effects/shields_1.dds");
+    layershield1.addUVModificationSimpleTranslation(-0.8f, -0.6f);
+    layershield1.setData2(1.0f, 1.0f, 1.0f, 0.5f);
+    auto& layershield2 = *shieldMat.getComponent(0).addLayer();
+    layershield2.setTexture(BasePath + "data/Textures/Effects/shields_2.dds");
+    layershield2.addUVModificationSimpleTranslation(-0.4f, -0.6f);
+    layershield2.setData2(1.0f, 1.0f, 1.0f, 0.4f);
+    auto& layershield3 = *shieldMat.getComponent(0).addLayer();
+    layershield3.setTexture(BasePath + "data/Textures/Effects/shields_3.dds");
+    layershield3.addUVModificationSimpleTranslation(0.2f, -0.35f);
+    layershield3.setData2(1.0f, 1.0f, 1.0f, 0.4f);
+
+
+
+
+    HullDamageMaterial1 = Resources::addMaterial("HullDamage1", BasePath + "data/Textures/Effects/hull_dmg_outline_1.dds");
+    Material& hullDamage1Material = *((Material*)HullDamageMaterial1.get());
+    auto& hull1Layer1 = *hullDamage1Material.getComponent(0).addLayer();
+    hull1Layer1.setTexture(BasePath + "data/Textures/Effects/hull_dmg.dds");
+    hull1Layer1.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_1.dds");
+    auto& hull1Layer2 = *hullDamage1Material.getComponent(0).addLayer();
+    hull1Layer2.setTexture(BasePath + "data/Textures/Effects/hull_dmg.dds");
+    hull1Layer2.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_1_a.dds");
+    hull1Layer2.addUVModificationSimpleTranslation(0.1f, 0.1f);
+    hullDamage1Material.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/Effects/hull_dmg_mask_1.dds");
 
 
     StarMaterial = Resources::addMaterial("Star", BasePath + "data/Textures/Planets/Sun.dds");

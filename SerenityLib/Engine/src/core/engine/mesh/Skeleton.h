@@ -11,12 +11,12 @@ class  Mesh;
 
 namespace Engine {
 namespace epriv {
+    struct InternalMeshPublicInterface;
     struct DefaultMeshBindFunctor;
     struct DefaultMeshUnbindFunctor;
     struct MeshImportedData;
     class  AnimationData;
     class  MeshLoader;
-    class  MeshImpl;
     struct BoneInfo final {
         glm::mat4   BoneOffset;
         glm::mat4   FinalTransform;
@@ -37,12 +37,12 @@ namespace epriv {
         }
     };
     class MeshSkeleton final {
-        friend class  ::Mesh;
-        friend class  ::Engine::epriv::MeshImpl;
-        friend class  ::Engine::epriv::MeshLoader;
-        friend class  ::Engine::epriv::AnimationData;
-        friend struct ::Engine::epriv::DefaultMeshBindFunctor;
-        friend struct ::Engine::epriv::DefaultMeshUnbindFunctor;
+        friend class  Mesh;
+        friend class  Engine::epriv::MeshLoader;
+        friend class  Engine::epriv::AnimationData;
+        friend struct Engine::epriv::DefaultMeshBindFunctor;
+        friend struct Engine::epriv::DefaultMeshUnbindFunctor;
+        friend struct Engine::epriv::InternalMeshPublicInterface;
         private:
             BoneNode*                                       m_RootNode;
             uint                                            m_NumBones;
@@ -51,13 +51,13 @@ namespace epriv {
             std::unordered_map<std::string, uint>           m_BoneMapping; // maps a bone name to its index
             std::unordered_map<std::string, AnimationData>  m_AnimationData;
             glm::mat4                                       m_GlobalInverseTransform;
-            void fill(const MeshImportedData& data);
+            void fill(const Engine::epriv::MeshImportedData& data);
             void populateCleanupMap(BoneNode* node, std::unordered_map<std::string, BoneNode*>& _map);
             void cleanup();
             void clear();
         public:
             MeshSkeleton();
-            MeshSkeleton(const MeshImportedData& data);
+            MeshSkeleton(const Engine::epriv::MeshImportedData& data);
             ~MeshSkeleton();
             uint numBones() { return m_NumBones; }
     };

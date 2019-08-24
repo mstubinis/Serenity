@@ -78,7 +78,7 @@ Shader::Shader(const string& filenameOrCode, const ShaderType::Type& shaderType,
         m_FileName = "";
         m_Code = filenameOrCode;
     }
-    convertCode();
+    InternalShaderPublicInterface::ConvertCode(*this);
 }
 Shader::~Shader() {
 }
@@ -91,21 +91,22 @@ const string& Shader::data() const {
 const bool& Shader::fromFile() const {
     return m_FromFile;
 }
-void Shader::convertCode() {
+
+
+void InternalShaderPublicInterface::ConvertCode(Shader& shader) {
     //load initial code
-    string code = "";
-    if (m_FromFile) {
-        boost_stream_mapped_file str(m_FileName);
+    if (shader.m_FromFile) {
+        string code = "";
+        boost_stream_mapped_file str(shader.m_FileName);
         for (string line; getline(str, line, '\n');) {
             code += "\n" + line;
         }
-        m_Code = code;
+        shader.m_Code = code;
     }
-
     //see if we actually have a version line
     string versionLine;
-    istringstream str(m_Code);
-    if (ShaderHelper::sfind(m_Code, "#version ")) {
+    istringstream str(shader.m_Code);
+    if (ShaderHelper::sfind(shader.m_Code, "#version ")) {
         //use the found one
         while (getline(str, versionLine)) {
             if (ShaderHelper::sfind(versionLine, "#version ")) {
@@ -118,101 +119,100 @@ void Shader::convertCode() {
         if (RenderManager::GLSL_VERSION >= 330)
             core = " core";
         versionLine = "#version " + to_string(RenderManager::GLSL_VERSION) + core + "\n";
-        ShaderHelper::insertStringAtLine(m_Code, versionLine, 0);
+        ShaderHelper::insertStringAtLine(shader.m_Code, versionLine, 0);
     }
     const uint versionNumber = boost::lexical_cast<uint>(regex_replace(versionLine, regex("([^0-9])"), ""));
 
     //common code
-    opengl::glsl::Materials::convert(m_Code, versionNumber, m_Type);
-    opengl::glsl::Lighting::convert(m_Code, versionNumber, m_Type);
-    opengl::glsl::SSAOCode::convert(m_Code, versionNumber, m_Type);
-    opengl::glsl::Compression::convert(m_Code, versionNumber);
-    opengl::glsl::Common::convert(m_Code, versionNumber);
-
+    opengl::glsl::Materials::convert(shader.m_Code, versionNumber, shader.m_Type);
+    opengl::glsl::Lighting::convert(shader.m_Code, versionNumber, shader.m_Type);
+    opengl::glsl::SSAOCode::convert(shader.m_Code, versionNumber, shader.m_Type);
+    opengl::glsl::Compression::convert(shader.m_Code, versionNumber);
+    opengl::glsl::Common::convert(shader.m_Code, versionNumber);
 
     //check for log depth - vertex
-    if (ShaderHelper::sfind(m_Code, "USE_LOG_DEPTH_VERTEX") && !ShaderHelper::sfind(m_Code, "//USE_LOG_DEPTH_VERTEX") && m_Type == ShaderType::Vertex) {
-        boost::replace_all(m_Code, "USE_LOG_DEPTH_VERTEX", "");
-#ifndef ENGINE_FORCE_NO_LOG_DEPTH
-        string log_vertex_code = "\n"
-            "uniform float fcoeff;\n"
-            "flat varying float FC;\n"
-            "varying float logz_f;\n"
-            "\n";
-        ShaderHelper::insertStringAtLine(m_Code, log_vertex_code, 1);
-        log_vertex_code = "\n"
-            "logz_f = 1.0 + gl_Position.w;\n"
-            "gl_Position.z = (log2(max(0.000001, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n" //this line is optional i think... since gl_FragDepth may be written manually
-            "FC = fcoeff;\n"
-            "\n";
-        ShaderHelper::insertStringAtEndOfMainFunc(m_Code, log_vertex_code);
-#endif
+    if (ShaderHelper::sfind(shader.m_Code, "USE_LOG_DEPTH_VERTEX") && !ShaderHelper::sfind(shader.m_Code, "//USE_LOG_DEPTH_VERTEX") && shader.m_Type == ShaderType::Vertex) {
+        boost::replace_all(shader.m_Code, "USE_LOG_DEPTH_VERTEX", "");
+            #ifndef ENGINE_FORCE_NO_LOG_DEPTH
+                string log_vertex_code = "\n"
+                    "uniform float fcoeff;\n"
+                    "flat varying float FC;\n"
+                    "varying float logz_f;\n"
+                    "\n";
+                ShaderHelper::insertStringAtLine(shader.m_Code, log_vertex_code, 1);
+                log_vertex_code = "\n"
+                    "logz_f = 1.0 + gl_Position.w;\n"
+                    "gl_Position.z = (log2(max(0.000001, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n" //this line is optional i think... since gl_FragDepth may be written manually
+                    "FC = fcoeff;\n"
+                    "\n";
+                ShaderHelper::insertStringAtEndOfMainFunc(shader.m_Code, log_vertex_code);
+            #endif
     }
 
     //check for view space normals from world (not sure if this is proper)
-    if (ShaderHelper::sfind(m_Code, "GetViewNormalsFromWorld(")) {
-        if (!ShaderHelper::sfind(m_Code, "vec4 GetViewNormalsFromWorld(")) {
+    if (ShaderHelper::sfind(shader.m_Code, "GetViewNormalsFromWorld(")) {
+        if (!ShaderHelper::sfind(shader.m_Code, "vec4 GetViewNormalsFromWorld(")) {
             string viewNormals = "\n"
                 "vec3 GetViewNormalsFromWorld(vec3 worldNormals,mat4 camView){//generated\n"
                 "    return (camView * vec4(worldNormals,0.0)).xyz;\n"
                 "}\n";
-            ShaderHelper::insertStringAtLine(m_Code, viewNormals, 1);
+            ShaderHelper::insertStringAtLine(shader.m_Code, viewNormals, 1);
         }
     }
     //check for world space normals from view (this works perfectly)
-    if (ShaderHelper::sfind(m_Code, "GetWorldNormalsFromView(")) {
-        if (!ShaderHelper::sfind(m_Code, "vec4 GetWorldNormalsFromView(")) {
+    if (ShaderHelper::sfind(shader.m_Code, "GetWorldNormalsFromView(")) {
+        if (!ShaderHelper::sfind(shader.m_Code, "vec4 GetWorldNormalsFromView(")) {
             string viewNormals = "\n"
                 "vec3 GetWorldNormalsFromView(vec3 viewNormals,mat4 camView){//generated\n"
                 "    return (transpose(camView) * vec4(viewNormals,0.0)).xyz;\n"
                 "}\n";
-            ShaderHelper::insertStringAtLine(m_Code, viewNormals, 1);
+            ShaderHelper::insertStringAtLine(shader.m_Code, viewNormals, 1);
         }
     }
 
     //check for log depth - fragment
-    if (ShaderHelper::sfind(m_Code, "USE_LOG_DEPTH_FRAGMENT") && !ShaderHelper::sfind(m_Code, "//USE_LOG_DEPTH_FRAGMENT") && m_Type == ShaderType::Fragment) {
-        boost::replace_all(m_Code, "USE_LOG_DEPTH_FRAGMENT", "");
-#ifndef ENGINE_FORCE_NO_LOG_DEPTH
-        string log_frag_code = "\n"
-            "flat varying float FC;\n"
-            "varying float logz_f;\n"
-            "\n";
-        ShaderHelper::insertStringAtLine(m_Code, log_frag_code, 1);
-        log_frag_code = "\n"
-            "gl_FragDepth = log2(logz_f) * FC;\n"
-            "\n";
-        ShaderHelper::insertStringAtEndOfMainFunc(m_Code, log_frag_code);
-#endif
-        if (ShaderHelper::sfind(m_Code, "GetWorldPosition(") || ShaderHelper::sfind(m_Code, "GetViewPosition(")) {
-            if (!ShaderHelper::sfind(m_Code, "vec3 GetWorldPosition(")) {
-#ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                ShaderHelper::insertStringRightAfterLineContent(m_Code, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
-#else
-                ShaderHelper::insertStringRightAfterLineContent(m_Code, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
-#endif
+    if (ShaderHelper::sfind(shader.m_Code, "USE_LOG_DEPTH_FRAGMENT") && !ShaderHelper::sfind(shader.m_Code, "//USE_LOG_DEPTH_FRAGMENT") && shader.m_Type == ShaderType::Fragment) {
+        boost::replace_all(shader.m_Code, "USE_LOG_DEPTH_FRAGMENT", "");
+            #ifndef ENGINE_FORCE_NO_LOG_DEPTH
+                string log_frag_code = "\n"
+                    "flat varying float FC;\n"
+                    "varying float logz_f;\n"
+                    "\n";
+                ShaderHelper::insertStringAtLine(shader.m_Code, log_frag_code, 1);
+                log_frag_code = "\n"
+                    "gl_FragDepth = log2(logz_f) * FC;\n"
+                    "\n";
+                ShaderHelper::insertStringAtEndOfMainFunc(shader.m_Code, log_frag_code);
+            #endif
+        if (ShaderHelper::sfind(shader.m_Code, "GetWorldPosition(") || ShaderHelper::sfind(shader.m_Code, "GetViewPosition(")) {
+            if (!ShaderHelper::sfind(shader.m_Code, "vec3 GetWorldPosition(")) {
+                #ifndef ENGINE_FORCE_NO_LOG_DEPTH
+                    ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
+                #else
+                    ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
+                #endif
             }
         }
-    }else{
-        if (ShaderHelper::sfind(m_Code, "GetWorldPosition(") || ShaderHelper::sfind(m_Code, "GetViewPosition(")) {
-            if (!ShaderHelper::sfind(m_Code, "vec3 GetWorldPosition(")) {
-                if (ShaderHelper::sfind(m_Code, "USE_LOG_DEPTH_FRAG_WORLD_POSITION") && !ShaderHelper::sfind(m_Code, "//USE_LOG_DEPTH_FRAG_WORLD_POSITION") && m_Type == ShaderType::Fragment) {
+    }else {
+        if (ShaderHelper::sfind(shader.m_Code, "GetWorldPosition(") || ShaderHelper::sfind(shader.m_Code, "GetViewPosition(")) {
+            if (!ShaderHelper::sfind(shader.m_Code, "vec3 GetWorldPosition(")) {
+                if (ShaderHelper::sfind(shader.m_Code, "USE_LOG_DEPTH_FRAG_WORLD_POSITION") && !ShaderHelper::sfind(shader.m_Code, "//USE_LOG_DEPTH_FRAG_WORLD_POSITION") && shader.m_Type == ShaderType::Fragment) {
                     //log
-                    boost::replace_all(m_Code, "USE_LOG_DEPTH_FRAG_WORLD_POSITION", "");
-#ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                    ShaderHelper::insertStringRightAfterLineContent(m_Code, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
-#else
-                    ShaderHelper::insertStringRightAfterLineContent(m_Code, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
-#endif
+                    boost::replace_all(shader.m_Code, "USE_LOG_DEPTH_FRAG_WORLD_POSITION", "");
+                        #ifndef ENGINE_FORCE_NO_LOG_DEPTH
+                            ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
+                        #else
+                            ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
+                        #endif
                 }else{
-#ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                    ShaderHelper::insertStringRightAfterLineContent(m_Code, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
-#else
-                    ShaderHelper::insertStringRightAfterLineContent(m_Code, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
-#endif
+                    #ifndef ENGINE_FORCE_NO_LOG_DEPTH
+                        ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
+                    #else
+                        ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
+                    #endif
                 }
             }
-        }
-    }
-    opengl::glsl::VersionConversion::convert(m_Code, versionNumber, m_Type);
+                }
+            }
+    opengl::glsl::VersionConversion::convert(shader.m_Code, versionNumber, shader.m_Type);
 }

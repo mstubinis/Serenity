@@ -12,6 +12,10 @@ using namespace Engine::epriv;
 struct SimpleUVTranslationFunctor { void operator()(const float& dt, MaterialLayer& layer, const float& translationX, const float& translationY) const {
     auto& currentUVs = layer.getUVModifications();
     layer.m_UVModifications = currentUVs + glm::vec2(translationX * dt, translationY * dt);
+    if (layer.m_UVModifications.x >= 5.0f)
+        layer.m_UVModifications.x = 0.0f;
+    if (layer.m_UVModifications.y > 5.0f)
+        layer.m_UVModifications.y = 0.0f;
 } };
 
 MaterialLayer::MaterialLayer() {

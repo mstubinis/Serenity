@@ -65,6 +65,7 @@ void ShipSystemSensors::onResize(const uint& width, const uint& height) {
     const auto halfTextureWidth = radarTexture.width() / 2.0f;
 
     m_ViewportObject->setViewportDimensions(halfWinWidth - halfTextureWidth, 0, radarTexture.width(), radarTexture.height());
+    m_Viewport = glm::vec4(halfWinWidth - halfTextureWidth, 0, radarTexture.width(), radarTexture.height());
 }
 void ShipSystemSensors::update(const double& dt) {
     if (m_Ship.getTarget()) {

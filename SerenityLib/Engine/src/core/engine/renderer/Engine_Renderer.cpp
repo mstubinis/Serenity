@@ -20,6 +20,7 @@
 #include <core/engine/materials/Material.h>
 #include <ecs/ComponentBody.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
+#include <core/engine/renderer/Decal.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
@@ -99,12 +100,8 @@ namespace Engine{
             SMAAFrag2,
             SMAAFrag3,
             SMAAFrag4,
-
         _TOTAL};};
         struct EngineInternalShaderPrograms final{enum Program{
-            //Deferred, //using the internal resource static one instead
-            //Forward, //using the internal resource static one instead
-            Decal,
             BulletPhysics,
             ZPrepass,
             Deferred2DAPI,
@@ -292,8 +289,8 @@ class epriv::RenderManager::impl final{
 
             ShaderProgram::Deferred = new ShaderProgram("Deferred", *m_InternalShaders[EngineInternalShaders::VertexBasic], *m_InternalShaders[EngineInternalShaders::DeferredFrag]);
             ShaderProgram::Forward = new ShaderProgram("Forward", *m_InternalShaders[EngineInternalShaders::VertexBasic], *m_InternalShaders[EngineInternalShaders::ForwardFrag]);
+            ShaderProgram::Decal = new ShaderProgram("Decal", *m_InternalShaders[EngineInternalShaders::DecalVertex], *m_InternalShaders[EngineInternalShaders::DecalFrag]);
 
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::Decal] = new ShaderProgram("Decal", *m_InternalShaders[EngineInternalShaders::DecalVertex], *m_InternalShaders[EngineInternalShaders::DecalFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics] = new ShaderProgram("Bullet_Physics", *m_InternalShaders[EngineInternalShaders::BulletPhysicsVertex], *m_InternalShaders[EngineInternalShaders::BulletPhysicsFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::ZPrepass] = new ShaderProgram("ZPrepass", *m_InternalShaders[EngineInternalShaders::VertexBasic], *m_InternalShaders[EngineInternalShaders::ZPrepassFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI] = new ShaderProgram("Deferred_2DAPI", *m_InternalShaders[EngineInternalShaders::Vertex2DAPI], *m_InternalShaders[EngineInternalShaders::DeferredFrag2DAPI]);
@@ -1189,6 +1186,7 @@ class epriv::RenderManager::impl final{
 
             SAFE_DELETE(ShaderProgram::Deferred);
             SAFE_DELETE(ShaderProgram::Forward);
+            SAFE_DELETE(ShaderProgram::Decal);
 
             SAFE_DELETE_VECTOR(m_InternalShaderPrograms);
             SAFE_DELETE_VECTOR(m_InternalShaders);
@@ -1633,26 +1631,21 @@ class epriv::RenderManager::impl final{
 
             GLEnablei(GL_BLEND, 0); //this might need to be all buffers not just 0
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            //glBlendFuncSeparatei(0,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE); //this works too
-            //glBlendFuncSeparatei(2, GL_ONE, GL_ONE, GL_ONE, GL_ONE); //this works too
-            glDepthMask(GL_TRUE);
-
+            
             GLEnablei(GL_BLEND, 1); //yes this is important
             GLEnablei(GL_BLEND, 2); //yes this is important
             GLEnablei(GL_BLEND, 3); //yes this is important
+
+            glDepthMask(GL_TRUE);
             InternalScenePublicInterface::RenderForwardTransparent(scene, viewport, camera, dt);
             InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, viewport, camera, dt);
-
             glDepthMask(GL_FALSE);
+            InternalScenePublicInterface::RenderDecals(scene, viewport, camera, dt);
             InternalScenePublicInterface::RenderForwardParticles(scene, viewport, camera, dt);
-
             GLDisablei(GL_BLEND, 0); //this is needed for smaa at least
             GLDisablei(GL_BLEND, 1);
             GLDisablei(GL_BLEND, 2);
             GLDisablei(GL_BLEND, 3);
-        }
-        void _passDecals(GBuffer& gbuffer, Viewport& viewport, Camera& camera) {
-
         }
         void _passCopyDepth(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight){
             Renderer::colorMask(false, false, false, false);
@@ -1955,8 +1948,6 @@ class epriv::RenderManager::impl final{
             glDepthMask(GL_TRUE);
             _passForwardRendering(dt, gbuffer, viewport, camera);
             GLDisable(GL_DEPTH_TEST);
-            glDepthMask(GL_FALSE);
-            
 
 
             #pragma region GodRays
@@ -2135,6 +2126,9 @@ void epriv::RenderManager::_onOpenGLContextCreation(uint windowWidth,uint window
 }
 void epriv::RenderManager::_clear2DAPICommands() {
     vector_clear(m_i->m_2DAPICommands);
+}
+epriv::GBuffer& epriv::RenderManager::getGbuffer() {
+    return *m_i->m_GBuffer;
 }
 const float epriv::RenderManager::_getGIPackedData() {
     return m_i->lighting_gi_pack;

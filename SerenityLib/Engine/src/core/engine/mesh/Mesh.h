@@ -33,12 +33,17 @@ namespace Engine{
         class  AnimationData;
         struct InternalMeshRequestPublicInterface;
         struct InternalMeshPublicInterface final {
+            static void InitBlankMesh(Mesh&);
             static void LoadCPU(Mesh&);
             static void LoadGPU(Mesh&);
             static void UnloadCPU(Mesh&);
             static void UnloadGPU(Mesh&);
             static bool SupportsInstancing();
             static btCollisionShape* BuildCollision(Mesh*, const CollisionType::Type&);
+
+            static void FinalizeVertexData(Mesh&, MeshImportedData& data);
+            static void TriangulateComponentIndices(Mesh&, MeshImportedData& data, std::vector<std::vector<uint>>& indices, const unsigned char flags);
+            static void CalculateRadius(Mesh&);
         };
     };
 };
@@ -60,18 +65,6 @@ class Mesh final: public BindableResource, public EventObserver{
         glm::vec3                              m_radiusBox;
         float                                  m_radius;
         float                                  m_threshold;
-
-        void init_blank();
-
-        void unload_cpu();
-        void unload_gpu();
-
-        void load_cpu();
-        void load_gpu();
-
-        void finalize_vertex_data(Engine::epriv::MeshImportedData& data);
-        void triangulate_component_indices(Engine::epriv::MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags);
-        void calculate_radius();
     public:
         static Mesh *FontPlane, *Plane, *Cube, *Triangle; //loaded in renderer
 

@@ -66,7 +66,7 @@ class ShipSystemShields final : public ShipSystem {
         float                         m_RechargeTimer;
         bool                          m_ShieldsAreUp;
     public:
-        ShipSystemShields(Ship&, Map*, const uint health);
+        ShipSystemShields(Ship&, Map&, const uint health);
         ~ShipSystemShields();
 
         void destroy();
@@ -81,7 +81,7 @@ class ShipSystemShields final : public ShipSystem {
         void turnOffShields();
         void turnOnShields();
 
-        void receiveHit(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage);
+        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage);
 };
 
 #endif

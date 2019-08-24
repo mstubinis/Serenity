@@ -247,6 +247,12 @@ void InternalScenePublicInterface::RenderForwardParticles(Scene& scene, Viewport
         pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::BackToFront);
     }
 }
+void InternalScenePublicInterface::RenderDecals(Scene& scene, Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders) {
+    for (auto& pipeline : scene.m_i->m_Pipelines[RenderStage::Decals]) {
+        pipeline->sort(camera, SortingMode::None);
+        pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::None);
+    }
+}
 
 ECS<Entity>& InternalScenePublicInterface::GetECS(Scene& scene) {
     return scene.m_i->m_ECS;

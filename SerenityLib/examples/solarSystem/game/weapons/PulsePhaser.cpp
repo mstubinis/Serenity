@@ -19,6 +19,8 @@
 #include "../ships/shipSystems/ShipSystemShields.h"
 #include "../ships/shipSystems/ShipSystemHull.h"
 
+#include <core/engine/renderer/Decal.h>
+
 using namespace Engine;
 using namespace std;
 
@@ -38,14 +40,12 @@ void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& 
                 auto* hull    = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                 auto local = otherHit - other.position();
                 if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                    shields->receiveHit(local, pulsePhaser.impactRadius, pulsePhaser.impactTime, pulsePhaser.damage);
+                    shields->receiveHit(normal, local, pulsePhaser.impactRadius, pulsePhaser.impactTime, pulsePhaser.damage);
                     pulsePhaserProjectile.destroy();
                     return;
                 }
                 if (hull && other.getUserPointer() == hull) {
-                    if (hull->getHealthCurrent() > 0 /*&& shields->getHealthCurrent() == 0*/) {
-                        hull->receiveHit(local, pulsePhaser.impactRadius, pulsePhaser.impactTime, pulsePhaser.damage);
-                    }
+                    hull->receiveHit(normal, local, pulsePhaser.impactRadius, pulsePhaser.impactTime, pulsePhaser.damage);
                     pulsePhaserProjectile.destroy();
                 }
             }
@@ -164,7 +164,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
 
     light = new PointLight(finalPosition, &map);
     light->setColor(1.0f, 0.62f, 0.0f, 1.0f);
-    light->setAttenuation(LightRange::_13);
+    light->setAttenuation(LightRange::_20);
 }
 PulsePhaserProjectile::~PulsePhaserProjectile() {
 
@@ -222,12 +222,12 @@ bool PulsePhaser::fire() {
 void PulsePhaser::forceFire() {
     auto* projectile = new PulsePhaserProjectile(*this, m_Map, position, forward);
     m_ActiveProjectiles.push_back(projectile);
-    auto sound = Engine::Sound::playEffect(ResourceManifest::SoundPulsePhaser);
-
     auto& shipBody = *ship.getComponent<ComponentBody>();
     auto shipMatrix = shipBody.modelMatrix();
     shipMatrix = glm::translate(shipMatrix, position);
     const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+
+    auto* sound = Engine::Sound::playEffect(ResourceManifest::SoundPulsePhaser);
     if (sound) {
         sound->setPosition(finalPosition);
         sound->setAttenuation(0.15f);

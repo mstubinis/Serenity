@@ -269,6 +269,7 @@
     <ClInclude Include="Engine\src\core\engine\physics\Engine_Physics.h" />
     <ClInclude Include="Engine\src\core\engine\physics\PhysicsEnums.h" />
     <ClInclude Include="Engine\src\core\engine\physics\World.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\Decal.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\Engine_Renderer.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\FramebufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\FullscreenItems.h" />
@@ -379,6 +380,7 @@
     <ClCompile Include="Engine\src\core\engine\physics\DebugDrawer.cpp" />
     <ClCompile Include="Engine\src\core\engine\physics\Engine_Physics.cpp" />
     <ClCompile Include="Engine\src\core\engine\physics\World.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\Decal.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\Engine_Renderer.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\FramebufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\FullscreenItems.cpp" />

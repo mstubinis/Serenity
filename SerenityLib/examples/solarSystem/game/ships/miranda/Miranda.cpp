@@ -17,8 +17,8 @@
 
 using namespace std;
 
-Miranda::Miranda(Client& client, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType, Map* map)
-:Ship(client, ResourceManifest::MirandaMesh, ResourceManifest::MirandaMaterial, "Miranda", player, name, position, scale, collisionType, map) {
+Miranda::Miranda(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+:Ship(client, ResourceManifest::MirandaMesh, ResourceManifest::MirandaMaterial, "Miranda", map, player, name, position, scale, collisionType) {
 
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
@@ -30,9 +30,9 @@ Miranda::Miranda(Client& client, bool player, const string& name, glm::vec3 posi
         else if (i == 5)  system = new ShipSystemShields(*this, map, 8500);
         else if (i == 6)  system = new ShipSystemMainThrusters(*this);
         else if (i == 7)  system = new ShipSystemWarpDrive(*this);
-        else if (i == 8)  system = new ShipSystemSensors(*this, *map);
+        else if (i == 8)  system = new ShipSystemSensors(*this, map);
         else if (i == 9)  system = new ShipSystemWeapons(*this);
-        else if (i == 10)  system = new ShipSystemHull(*this, *map, 8000);
+        else if (i == 10)  system = new ShipSystemHull(*this, map, 8000);
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));

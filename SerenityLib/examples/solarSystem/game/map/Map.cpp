@@ -360,21 +360,21 @@ Ship* Map::createShip(Client& client, const string& shipClass, const string& shi
     Ship* ship = nullptr;
 
     if     (shipClass == "Defiant")
-        ship = new Defiant(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Defiant(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Nova")
-        ship = new Nova(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Nova(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Shrike")
-        ship = new Shrike(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Shrike(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Brel")
-        ship = new Brel(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Brel(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Constitution")
-        ship = new Constitution(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Constitution(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Miranda")
-        ship = new Miranda(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Miranda(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Excelsior")
-        ship = new Excelsior(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Excelsior(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Leviathan")
-        ship = new Leviathan(client, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull, this);
+        ship = new Leviathan(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
 
     return ship;
 }

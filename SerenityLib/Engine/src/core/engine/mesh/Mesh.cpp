@@ -52,18 +52,32 @@ namespace Engine {
 };
 
 void InternalMeshPublicInterface::LoadCPU(Mesh& mesh){
-    mesh.load_cpu();
+
 }
 void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
-    mesh.load_gpu();
+    mesh.m_VertexData->finalize(); //transfer vertex data to gpu
+    cout << "(Mesh) ";
     mesh.EngineResource::load();
 }
 void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh){
-    mesh.unload_cpu();
+    SAFE_DELETE(mesh.m_Skeleton);
+    SAFE_DELETE(mesh.m_CollisionFactory);
+    cout << "(Mesh) ";
     mesh.EngineResource::unload();
 }
 void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh){
-    mesh.unload_gpu();
+    SAFE_DELETE(mesh.m_VertexData);
+}
+void InternalMeshPublicInterface::InitBlankMesh(Mesh& mesh) {
+    mesh.m_File             = "";
+    mesh.m_Skeleton         = nullptr;
+    mesh.m_VertexData       = nullptr;
+    mesh.m_CollisionFactory = nullptr;
+    mesh.m_threshold        = 0.0005f;
+
+    mesh.registerEvent(EventType::WindowFullscreenChanged);
+    mesh.setCustomBindFunctor(DefaultMeshBindFunctor());
+    mesh.setCustomUnbindFunctor(DefaultMeshUnbindFunctor());
 }
 
 bool InternalMeshPublicInterface::SupportsInstancing(){
@@ -96,76 +110,23 @@ btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, const 
     }
     return new btEmptyShape();
 }
-
-
-void Mesh::calculate_radius() {
-    m_radiusBox = glm::vec3(0.0f);
-    const auto& data = (*m_VertexData).getData<glm::vec3>(0);
-    for (auto& vertex : data) {
-        const float x = abs(vertex.x);
-        const float y = abs(vertex.y);
-        const float z = abs(vertex.z);
-        if (x > m_radiusBox.x)  m_radiusBox.x = x;
-        if (y > m_radiusBox.y)  m_radiusBox.y = y;
-        if (z > m_radiusBox.z)  m_radiusBox.z = z;
-    }
-    m_radius = Math::Max(m_radiusBox);
-}
-
-void Mesh::unload_cpu() {
-    SAFE_DELETE(m_Skeleton);
-    SAFE_DELETE(m_CollisionFactory);
-    cout << "(Mesh) ";
-}
-void Mesh::unload_gpu() {
-    SAFE_DELETE(m_VertexData);
-}
-
-void Mesh::load_cpu() {
-
-}
-void Mesh::load_gpu() {
-    m_VertexData->finalize(); //transfer vertex data to gpu
-    cout << "(Mesh) ";
-}
-void Mesh::triangulate_component_indices(Engine::epriv::MeshImportedData& data, vector<vector<uint>>& indices, unsigned char _flags) {
-    for (uint i = 0; i < indices[0].size(); ++i) {
-        glm::vec3 pos(0.0f);
-        glm::vec2 uv(0.0f);
-        glm::vec3 norm(1.0f);
-        if (_flags && MeshLoadingFlags::Points && data.file_points.size() > 0) {
-            pos = data.file_points[indices[0][i] - 1];
-            data.points.push_back(pos);
-        }
-        if (_flags && MeshLoadingFlags::UVs && data.file_uvs.size() > 0) {
-            uv = data.file_uvs[indices[1][i] - 1];
-            data.uvs.push_back(uv);
-        }
-        if (_flags && MeshLoadingFlags::Normals && data.file_normals.size() > 0) {
-            norm = data.file_normals[indices[2][i] - 1];
-            data.normals.push_back(norm);
-        }
-    }
-}
-
-
-void Mesh::finalize_vertex_data(Engine::epriv::MeshImportedData& data) {
+void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedData& data) {
     if (data.uvs.size() == 0)         data.uvs.resize(data.points.size());
     if (data.normals.size() == 0)     data.normals.resize(data.points.size());
     if (data.binormals.size() == 0)   data.binormals.resize(data.points.size());
     if (data.tangents.size() == 0)    data.tangents.resize(data.points.size());
-    if (!m_VertexData) {
-        if (m_Skeleton) {
-            m_VertexData = new VertexData(VertexDataFormat::VertexDataAnimated);
+    if (!mesh.m_VertexData) {
+        if (mesh.m_Skeleton) {
+            mesh.m_VertexData = new VertexData(VertexDataFormat::VertexDataAnimated);
         }else{
-            m_VertexData = new VertexData(VertexDataFormat::VertexDataBasic);
+            mesh.m_VertexData = new VertexData(VertexDataFormat::VertexDataBasic);
         }
     }
-    auto& vertexData = *m_VertexData;
+    auto& vertexData = *mesh.m_VertexData;
     vector<vector<GLuint>> normals;
     normals.resize(3);
-    if (m_threshold == 0.0f) {
-        #pragma region No Threshold
+    if (mesh.m_threshold == 0.0f) {
+#pragma region No Threshold
         normals[0].reserve(data.normals.size());
         normals[1].reserve(data.binormals.size());
         normals[2].reserve(data.tangents.size());
@@ -181,9 +142,9 @@ void Mesh::finalize_vertex_data(Engine::epriv::MeshImportedData& data) {
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
         vertexData.setIndices(data.indices, false, false, true);
-        #pragma endregion
+#pragma endregion
     }else{
-        #pragma region Some Threshold
+#pragma region Some Threshold
         vector<ushort> _indices;
         vector<glm::vec3> temp_pos; temp_pos.reserve(data.points.size());
         vector<glm::vec2> temp_uvs; temp_uvs.reserve(data.uvs.size());
@@ -192,7 +153,7 @@ void Mesh::finalize_vertex_data(Engine::epriv::MeshImportedData& data) {
         vector<glm::vec3> temp_tangents; temp_tangents.reserve(data.tangents.size());
         for (uint i = 0; i < data.points.size(); ++i) {
             ushort index;
-            bool found = epriv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, m_threshold);
+            bool found = epriv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_threshold);
             if (found) {
                 _indices.emplace_back(index);
                 //average out TBN. But it cancels out normal mapping on some flat surfaces
@@ -222,12 +183,12 @@ void Mesh::finalize_vertex_data(Engine::epriv::MeshImportedData& data) {
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
         vertexData.setIndices(_indices, false, false, true);
-        #pragma endregion
+#pragma endregion
     }
-    if (m_Skeleton) {
+    if (mesh.m_Skeleton) {
         vector<vector<glm::vec4>> boneStuff;
         boneStuff.resize(2);
-        auto& _skeleton = *m_Skeleton;
+        auto& _skeleton = *mesh.m_Skeleton;
         boneStuff[0].reserve(_skeleton.m_BoneIDs.size());
         boneStuff[1].reserve(_skeleton.m_BoneIDs.size());
         for (uint i = 0; i < _skeleton.m_BoneIDs.size(); ++i) {
@@ -238,27 +199,47 @@ void Mesh::finalize_vertex_data(Engine::epriv::MeshImportedData& data) {
         vertexData.setData(6, boneStuff[1]);
     }
 }
-
-
-void Mesh::init_blank() {
-    m_File             = "";
-    m_Skeleton         = nullptr;
-    m_VertexData       = nullptr;
-    m_CollisionFactory = nullptr;
-    m_threshold        = 0.0005f;
-
-    registerEvent(EventType::WindowFullscreenChanged);
-    setCustomBindFunctor(DefaultMeshBindFunctor());
-    setCustomUnbindFunctor(DefaultMeshUnbindFunctor());
+void InternalMeshPublicInterface::TriangulateComponentIndices(Mesh& mesh, MeshImportedData& data, std::vector<std::vector<uint>>& indices, const unsigned char flags) {
+    for (uint i = 0; i < indices[0].size(); ++i) {
+        glm::vec3 pos(0.0f);
+        glm::vec2 uv(0.0f);
+        glm::vec3 norm(1.0f);
+        if (flags && MeshLoadingFlags::Points && data.file_points.size() > 0) {
+            pos = data.file_points[indices[0][i] - 1];
+            data.points.push_back(pos);
+        }
+        if (flags && MeshLoadingFlags::UVs && data.file_uvs.size() > 0) {
+            uv = data.file_uvs[indices[1][i] - 1];
+            data.uvs.push_back(uv);
+        }
+        if (flags && MeshLoadingFlags::Normals && data.file_normals.size() > 0) {
+            norm = data.file_normals[indices[2][i] - 1];
+            data.normals.push_back(norm);
+        }
+    }
+}
+void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
+    mesh.m_radiusBox = glm::vec3(0.0f);
+    const auto& data = (*mesh.m_VertexData).getData<glm::vec3>(0);
+    for (auto& vertex : data) {
+        const float x = abs(vertex.x);
+        const float y = abs(vertex.y);
+        const float z = abs(vertex.z);
+        if (x > mesh.m_radiusBox.x)  mesh.m_radiusBox.x = x;
+        if (y > mesh.m_radiusBox.y)  mesh.m_radiusBox.y = y;
+        if (z > mesh.m_radiusBox.z)  mesh.m_radiusBox.z = z;
+    }
+    mesh.m_radius = Math::Max(mesh.m_radiusBox);
 }
 
+
 Mesh::Mesh() {
-    init_blank();
+    InternalMeshPublicInterface::InitBlankMesh(*this);
 }
 
 //TERRAIN MESH
 Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, float threshold) {
-    init_blank();
+    InternalMeshPublicInterface::InitBlankMesh(*this);
     m_threshold = threshold;
     MeshImportedData data;
 
@@ -312,12 +293,12 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
 
 
 Mesh::Mesh(VertexData* data, const string& name, float threshold):BindableResource(name) {
-    init_blank();
+    InternalMeshPublicInterface::InitBlankMesh(*this);
     m_VertexData = data;
     m_threshold = threshold;
 }
 Mesh::Mesh(const string& name,float width, float height,float threshold):BindableResource(name){
-    init_blank();
+    InternalMeshPublicInterface::InitBlankMesh(*this);
     m_threshold = threshold;
 
     MeshImportedData data;
@@ -347,7 +328,7 @@ Mesh::Mesh(const string& name,float width, float height,float threshold):Bindabl
     load();
 }
 Mesh::Mesh(const string& fileOrData,float threshold):BindableResource(""){
-    init_blank();
+    InternalMeshPublicInterface::InitBlankMesh(*this);
     m_threshold = threshold;
 
     setName("Custom Mesh");
@@ -406,7 +387,7 @@ Mesh::Mesh(const string& fileOrData,float threshold):BindableResource(""){
         }
     }
     if (_flags && MeshLoadingFlags::Faces) {
-        triangulate_component_indices(data, indices, _flags);
+        InternalMeshPublicInterface::TriangulateComponentIndices(*this, data, indices, _flags);
     }
     if (_flags && MeshLoadingFlags::TBN) {
         MeshLoader::CalculateTBNAssimp(data);
@@ -461,15 +442,17 @@ void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationNa
 }
 void Mesh::load(){
     if(!isLoaded()){
-        load_cpu();
-        load_gpu();
+        auto& _this = *this;
+        InternalMeshPublicInterface::LoadCPU(_this);
+        InternalMeshPublicInterface::LoadGPU(_this);
         EngineResource::load();
     }
 }
 void Mesh::unload(){
     if(isLoaded()){
-        unload_gpu();
-        unload_cpu();
+        auto& _this = *this;
+        InternalMeshPublicInterface::UnloadGPU(_this);
+        InternalMeshPublicInterface::UnloadCPU(_this);
         EngineResource::unload();
     }
 }

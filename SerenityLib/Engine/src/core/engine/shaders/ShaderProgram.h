@@ -28,11 +28,11 @@ namespace epriv {
 };
 };
 class ShaderProgram final: public BindableResource{
-    friend class UniformBufferObject;
-    friend class Shader;
+    friend class  UniformBufferObject;
+    friend class  Shader;
     friend struct Engine::epriv::InternalShaderProgramPublicInterface;
     public:
-        static ShaderProgram                      *Deferred, *Forward; //loaded in renderer
+        static ShaderProgram                      *Deferred, *Forward, *Decal; //loaded in renderer
     private:
         GLuint                                    m_ShaderProgram;
         std::unordered_map<std::string, GLint>    m_UniformLocations;
@@ -41,9 +41,6 @@ class ShaderProgram final: public BindableResource{
         Shader&                                   m_FragmentShader;
 		bool                                      m_LoadedCPU;
 		bool                                      m_LoadedGPU;
-
-        void _load_CPU(); void _unload_CPU();
-        void _load_GPU(); void _unload_GPU();
     public:
         ShaderProgram(std::string name, Shader& vertexShader, Shader& fragmentShader);
         virtual ~ShaderProgram();

@@ -15,7 +15,7 @@ using namespace Engine::epriv;
 using namespace std;
 
 vector<glm::vec4> Material::m_MaterialProperities;
-Material* Material::Checkers = nullptr;
+Material* Material::Checkers       = nullptr;
 Material* Material::WhiteShadeless = nullptr;
 
 vector<boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
@@ -122,13 +122,12 @@ void Material::internalInit(Texture* diffuse, Texture* normal, Texture* glow, Te
     if(glow)      internalAddComponentGeneric(MaterialComponentType::Glow, glow);
     if(specular)  internalAddComponentGeneric(MaterialComponentType::Specular, specular);
 
-    m_SpecularModel = SpecularModel::GGX;
-    m_DiffuseModel  = DiffuseModel::Lambert;
-    m_Shadeless     = false;
-    m_BaseGlow      = 0.0f;
-
     internalUpdateGlobalMaterialPool(true);
 
+    setDiffuseModel(DiffuseModel::Lambert);
+    setSpecularModel(SpecularModel::GGX);
+    setShadeless(false);
+    setGlow(0.0f);
     setSmoothness(0.25f);
     setAlpha(1.0f);
     setAO(1.0f);
@@ -365,9 +364,9 @@ void Material::setF0Color(const glm::vec3& color){
     setF0Color(color.r, color.g, color.b); 
 }
 void Material::setF0Color(const float& r, const float& g, const float& b){
-    m_F0Color.r = glm::clamp(r, 0.001f, 0.999f);
-    m_F0Color.g = glm::clamp(g, 0.001f, 0.999f);
-    m_F0Color.b = glm::clamp(b, 0.001f, 0.999f);
+    m_F0Color.r = glm::clamp(r, 0.01f, 0.99f);
+    m_F0Color.g = glm::clamp(g, 0.01f, 0.99f);
+    m_F0Color.b = glm::clamp(b, 0.01f, 0.99f);
     internalUpdateGlobalMaterialPool(false);
 }
 void Material::setMaterialPhysics(const MaterialPhysics::Physics& materialPhysics){
@@ -409,6 +408,7 @@ void Material::unbind(){
 }
 void Material::load(){
     if(!isLoaded()){
+        /*
         for (auto& component : m_Components) {
             if (component) {
                 Texture& texture = *component->texture();
@@ -418,12 +418,14 @@ void Material::load(){
                 }
             }
         }
+        */
         cout << "(Material) ";
         EngineResource::load();
     }
 }
 void Material::unload(){
-    if(isLoaded() && useCount() == 0){
+    if(isLoaded() /* && useCount() == 0 */){
+        /*
         for (auto& component : m_Components) {
             if (component) {
                 Texture& texture = *component->texture();
@@ -433,12 +435,13 @@ void Material::unload(){
                 }
             }
         }
+        */
         cout << "(Material) ";
         EngineResource::unload();
     }
 }
 void Material::update(const double& dt) {
-    for (unsigned int i = 0; i < m_Components.size(); ++i) {
+    for (uint i = 0; i < m_Components.size(); ++i) {
         MaterialComponent* component = m_Components[i];
         if (!component)
             break; //this assumes there will never be a null component before defined components. be careful here

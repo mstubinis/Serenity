@@ -210,14 +210,13 @@ epriv::EShaders::decal_vertex =
 "uniform mat4 Model;\n"
 "uniform mat3 NormalMatrix;\n"
 "\n"
-"varying vec2 UV;\n"
-"\n"
 "varying vec3 Normals;\n"
-"varying vec3 WorldPosition;\n"
 "varying mat3 TBN;\n"
-"\n"
+"flat varying mat4 WorldMatrix;\n"
 "flat varying vec3 CamPosition;\n"
 "flat varying vec3 CamRealPosition;\n"
+"varying vec4 VertexPositionsClipSpace;\n"
+"varying vec4 VertexPositionsViewSpace;\n"
 "varying vec3 TangentCameraPos;\n"
 "varying vec3 TangentFragPos;\n"
 "\n"
@@ -226,30 +225,146 @@ epriv::EShaders::decal_vertex =
 "    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
 "    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
 "    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
-"           Normals = NormalMatrix * vec4(normal.zyx,   0.0).xyz;\n"
-"    vec3 Binormals = NormalMatrix * vec4(binormal.zyx, 0.0).xyz;\n"
-"    vec3  Tangents = NormalMatrix * vec4(tangent.zyx,  0.0).xyz;\n"
-"    TBN = mat3(Tangents,Binormals,Normals);\n"
-"\n"
+"    WorldMatrix = ModelMatrix;\n"
+
 "    vec4 worldPos = (ModelMatrix * vec4(position, 1.0));\n"
-"\n"
 "    gl_Position = CameraViewProj * worldPos;\n"
-"    WorldPosition = worldPos.xyz;\n"
+"    VertexPositionsViewSpace = CameraView * worldPos;\n"
+"    VertexPositionsClipSpace = gl_Position;\n"
+
+"    vec3 NormalTrans   =  vec4(normal.zyx,   0.0).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
+"    vec3 BinormalTrans =  vec4(binormal.zyx, 0.0).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
+"    vec3 TangentTrans  =  vec4(tangent.zyx,  0.0).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
 "\n"
+"           Normals = NormalMatrix * NormalTrans;\n"
+"    vec3 Binormals = NormalMatrix * BinormalTrans;\n"
+"    vec3  Tangents = NormalMatrix * TangentTrans;\n"
+"    TBN = mat3(Tangents,Binormals,Normals);\n"
 "    CamPosition = CameraPosition;\n"
 "    CamRealPosition = CameraRealPosition;\n"
 "    TangentCameraPos = TBN * CameraPosition;\n"
-"    TangentFragPos = TBN * WorldPosition;\n"
-"\n"
-"    UV = uv;\n"
+"    TangentFragPos = TBN * worldPos.xyz;\n"
 "}";
 #pragma endregion
 
 #pragma region DecalFrag
 epriv::EShaders::decal_frag =
-    "in vec3 OutColor;\n"
+    "USE_LOG_DEPTH_FRAGMENT\n"
+    "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
+    "USE_MAX_MATERIAL_COMPONENTS\n"
+    "\n"
+    "struct InData {\n"
+    "    vec2  uv;\n"
+    "    vec4  diffuse;\n"
+    "    vec4  objectColor;\n"
+    "    vec3  normals;\n"
+    "    float glow;\n"
+    "    float specular;\n"
+    "    float ao;\n"
+    "    float metalness;\n"
+    "    float smoothness;\n"
+    "    vec3  worldPosition;\n"
+    "};\n"
+    "struct Layer {\n"
+    "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
+    "    vec4 data2;\n"
+    "    sampler2D texture;\n"
+    "    sampler2D mask;\n"
+    "    samplerCube cubemap;\n"
+    "    vec2 uvModifications;\n"
+    "};\n"
+    "struct Component {\n"
+    "    int numLayers;\n"
+    "    int componentType;\n"
+    "    Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];\n"
+    "};\n"
+    "uniform Component   components[MAX_MATERIAL_COMPONENTS];\n"
+    "uniform int         numComponents;\n"
+    "\n"
+    "\n"
+    "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
+    "uniform vec4        MaterialBasePropertiesTwo;\n"//x = BaseAlpha, y = diffuseModel, z = specularModel, w = UNUSED
+    "\n"
+    "uniform int Shadeless;\n"
+    "\n"
+    "uniform vec4 Object_Color;\n"
+    "uniform vec4 Material_F0AndID;\n"
+    "uniform vec3 Gods_Rays_Color;\n"
+    "uniform sampler2D gDepthMap;\n"
+    "\n"
+    "varying vec3 Normals;\n"
+    "varying mat3 TBN;\n"
+    "flat varying mat4 WorldMatrix;\n"
+    "flat varying vec3 CamPosition;\n"
+    "flat varying vec3 CamRealPosition;\n"
+    "varying vec3 TangentCameraPos;\n"
+    "varying vec3 TangentFragPos;\n"
+    "varying vec4 VertexPositionsClipSpace;\n"
+    "varying vec4 VertexPositionsViewSpace;\n"
+    "uniform vec4 Resolution;\n"
+    "uniform mat4 InvWorld;\n"
     "void main(){\n"
-    "	gl_FragColor = vec4(OutColor,1.0);\n"
+    "    vec2 screenPos = gl_FragCoord.xy / vec2(Resolution.x, Resolution.y); \n"
+    "    vec3 WorldPosition = GetWorldPosition(screenPos, CameraNear, CameraFar);\n"
+    "    vec4 objectPosition = inverse(WorldMatrix) * vec4(WorldPosition, 1.0);\n"
+    "    float x = 0.5 - abs(objectPosition.x);\n"
+    "    float y = 0.5 - abs(objectPosition.y);\n"
+    "    float z = 0.5 - abs(objectPosition.z);\n"
+    "    if ( x < 0.0 || y < 0.0 || z < 0.0 || length(WorldPosition) > 500.0) {\n" //hacky way of eliminating against skybox
+    "        discard;\n"
+    "    }\n"
+    "    vec2 uvs = objectPosition.xz + 0.5;\n"
+    //normal mapping...
+    /*
+vec3 ddxWp = ddx(worldPosition);
+vec3 ddyWp = ddy(worldPosition);
+vec3 normal = normalize(cross(ddyWp, ddxWp));
+
+//Normalizing things is cool
+vec3 binormal = normalize(ddxWp);
+vec3 tangent = normalize(ddyWp);
+
+//Create a matrix transforming from tangent space to view space
+mat3 tangentToView;
+tangentToView[0] = CameraView * pixelTangent;
+tangentToView[1] = CameraView * pixelBinormal;
+tangentToView[2] = CameraView * pixelNormal;
+
+//Transform normal from tangent space into view space
+normal = tangentToView * normal;
+
+
+    */
+
+    "    InData inData;\n"
+    "    inData.uv = uvs;\n"
+    "    inData.diffuse = vec4(0.0,0.0,0.0,0.0001);\n" //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
+    "    inData.objectColor = Object_Color;\n"
+    "    inData.normals = normalize(Normals);\n"
+    "    inData.glow = MaterialBasePropertiesOne.x;\n"
+    "    inData.specular = 1.0;\n"
+    "    inData.ao = MaterialBasePropertiesOne.y;\n"
+    "    inData.metalness = MaterialBasePropertiesOne.z;\n"
+    "    inData.smoothness = MaterialBasePropertiesOne.w;\n"
+    "    inData.worldPosition = WorldPosition;\n"
+    "\n"
+    "    for (int j = 0; j < numComponents; ++j) {\n"
+    "        ProcessComponent(components[j], inData);\n"
+    "    }\n"
+    "    vec2 encodedNormals = EncodeOctahedron(inData.normals);\n" //yes these two lines are evil and not needed, but they sync up the results with the deferred pass...
+    "    inData.normals = DecodeOctahedron(encodedNormals);\n"
+    "    if(Shadeless == 1){\n"
+    "        encodedNormals = ConstantOneVec2;\n"
+    "        inData.diffuse *= (1.0 + inData.glow);\n" // we want shadeless items to be influenced by the glow somewhat...
+    "    }\n"
+    "    vec4 GodRays = vec4(Gods_Rays_Color,1.0);\n"
+    "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
+    "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
+    
+    "    gl_FragData[0] = inData.diffuse;\n"
+    "    gl_FragData[1] = vec4(encodedNormals, 0.0, 0.0);\n"
+    "    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
+    "    gl_FragData[3] = inData.diffuse;\n"
     "}";
 #pragma endregion
 
@@ -1206,6 +1321,7 @@ epriv::EShaders::forward_frag =
     "    float metalness;\n"
     "    float smoothness;\n"
     "    vec3  materialF0;\n"
+    "    vec3  worldPosition;\n"
     "};\n"
     "struct Layer {\n"
     "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
@@ -1276,6 +1392,7 @@ epriv::EShaders::forward_frag =
     "    inData.metalness = MaterialBasePropertiesOne.z;\n"
     "    inData.smoothness = MaterialBasePropertiesOne.w;\n"
     "    inData.materialF0 = Material_F0AndID.rgb;\n"
+    "    inData.worldPosition = WorldPosition;\n"
     "\n"
     "    for (int j = 0; j < numComponents; ++j) {\n"
     "        ProcessComponent(components[j], inData);\n"
@@ -1362,6 +1479,7 @@ epriv::EShaders::deferred_frag =
     "    float ao;\n"
     "    float metalness;\n"
     "    float smoothness;\n"
+    "    vec3  worldPosition;\n"
     "};\n"
     "struct Layer {\n"
     "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
@@ -1409,6 +1527,7 @@ epriv::EShaders::deferred_frag =
     "    inData.ao = MaterialBasePropertiesOne.y;\n"
     "    inData.metalness = MaterialBasePropertiesOne.z;\n"
     "    inData.smoothness = MaterialBasePropertiesOne.w;\n"
+    "    inData.worldPosition = WorldPosition;\n"
     "\n"
     "    for (int j = 0; j < numComponents; ++j) {\n"
     "        ProcessComponent(components[j], inData);\n"
@@ -1423,7 +1542,7 @@ epriv::EShaders::deferred_frag =
     "	 float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(inData.metalness,inData.smoothness);\n"
     "    vec4 GodRays = vec4(Gods_Rays_Color,1.0);\n"
     "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
-    "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n" //using this to test cloaking atm
+    "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
     "    gl_FragData[0] = inData.diffuse;\n"
     "    gl_FragData[1] = vec4(OutNormals, OutMatIDAndAO, OutPackedMetalnessAndSmoothness);\n"
     "    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
