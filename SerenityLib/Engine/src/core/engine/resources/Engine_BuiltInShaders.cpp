@@ -198,6 +198,7 @@ epriv::EShaders::bullet_physcis_frag =
 #pragma endregion
 
 #pragma region DecalVertex
+//TODO: get rid of the useless info here
 epriv::EShaders::decal_vertex =  
 "USE_LOG_DEPTH_VERTEX\n"
 "\n"
@@ -248,6 +249,7 @@ epriv::EShaders::decal_vertex =
 #pragma endregion
 
 #pragma region DecalFrag
+//TODO: get rid of the useless info here
 epriv::EShaders::decal_frag =
     "USE_LOG_DEPTH_FRAGMENT\n"
     "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
@@ -302,22 +304,21 @@ epriv::EShaders::decal_frag =
     "varying vec4 VertexPositionsClipSpace;\n"
     "varying vec4 VertexPositionsViewSpace;\n"
     "uniform vec4 Resolution;\n"
-    "uniform mat4 InvWorld;\n"
     "void main(){\n"
     "    vec2 screenPos = gl_FragCoord.xy / vec2(Resolution.x, Resolution.y); \n"
     "    vec3 WorldPosition = GetWorldPosition(screenPos, CameraNear, CameraFar);\n"
-    "    vec4 objectPosition = inverse(WorldMatrix) * vec4(WorldPosition, 1.0);\n"
-    "    float x = 0.5 - abs(objectPosition.x);\n"
-    "    float y = 0.5 - abs(objectPosition.y);\n"
-    "    float z = 0.5 - abs(objectPosition.z);\n"
+    "    vec4 ObjectPosition = inverse(WorldMatrix) * vec4(WorldPosition, 1.0);\n"
+    "    float x = 1.0 - abs(ObjectPosition.x);\n"
+    "    float y = 1.0 - abs(ObjectPosition.y);\n"
+    "    float z = 1.0 - abs(ObjectPosition.z);\n"
     "    if ( x < 0.0 || y < 0.0 || z < 0.0 || length(WorldPosition) > 500.0) {\n" //hacky way of eliminating against skybox
     "        discard;\n"
     "    }\n"
-    "    vec2 uvs = objectPosition.xz + 0.5;\n"
+    "    vec2 uvs = (ObjectPosition.xz + 1.0) * 0.5;\n"
     //normal mapping...
     /*
-vec3 ddxWp = ddx(worldPosition);
-vec3 ddyWp = ddy(worldPosition);
+vec3 ddxWp = ddx(WorldPosition);
+vec3 ddyWp = ddy(WorldPosition);
 vec3 normal = normalize(cross(ddyWp, ddxWp));
 
 //Normalizing things is cool
@@ -326,16 +327,13 @@ vec3 tangent = normalize(ddyWp);
 
 //Create a matrix transforming from tangent space to view space
 mat3 tangentToView;
-tangentToView[0] = CameraView * pixelTangent;
-tangentToView[1] = CameraView * pixelBinormal;
-tangentToView[2] = CameraView * pixelNormal;
+tangentToView[0] = CameraView * tangent;
+tangentToView[1] = CameraView * binormal;
+tangentToView[2] = CameraView * normal;
 
 //Transform normal from tangent space into view space
 normal = tangentToView * normal;
-
-
     */
-
     "    InData inData;\n"
     "    inData.uv = uvs;\n"
     "    inData.diffuse = vec4(0.0,0.0,0.0,0.0001);\n" //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
@@ -360,7 +358,7 @@ normal = tangentToView * normal;
     "    vec4 GodRays = vec4(Gods_Rays_Color,1.0);\n"
     "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
-    
+    "\n"
     "    gl_FragData[0] = inData.diffuse;\n"
     "    gl_FragData[1] = vec4(encodedNormals, 0.0, 0.0);\n"
     "    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"

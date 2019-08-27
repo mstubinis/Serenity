@@ -59,9 +59,9 @@ class Ship: public EntityWrapper, public EventObserver {
 		glm::dvec2                           m_MouseFactor;
         bool                                 m_IsWarping;
         float                                m_WarpFactor;
-        EntityWrapper*                       m_Target;
         std::string                          m_ShipClass;
         std::vector<Decal*>                  m_DamageDecals;
+        glm::vec3                            m_AimPositionDefault;
     public:
         Ship(
             Client& client,
@@ -71,9 +71,10 @@ class Ship: public EntityWrapper, public EventObserver {
             Map& map,
             bool player = false,                  //Player Ship?
             const std::string& name = "Ship",     //Name
-            glm::vec3 = glm::vec3(0),             //Position
-            glm::vec3 = glm::vec3(1),             //Scale
-            CollisionType::Type = CollisionType::ConvexHull
+            const glm::vec3 = glm::vec3(0),             //Position
+            const glm::vec3 = glm::vec3(1),             //Scale
+            CollisionType::Type = CollisionType::ConvexHull,
+            const glm::vec3 aimPosDefault = glm::vec3(0.0f)
         );
         virtual ~Ship();
 
@@ -84,6 +85,7 @@ class Ship: public EntityWrapper, public EventObserver {
         const std::string getName();
         const glm::vec3 getWarpSpeedVector3();
         const glm::vec3 getPosition();
+        const glm::vec3 getAimPositionDefault();
         const glm::quat getRotation();
         const glm::vec3 getPosition(const EntityDataRequest& dataRequest);
         const glm::quat getRotation(const EntityDataRequest& dataRequest);
@@ -110,9 +112,9 @@ class Ship: public EntityWrapper, public EventObserver {
         const bool IsWarping() const;
         const bool isCloaked();
         const bool isFullyCloaked();
-        ShipSystem* getShipSystem(const uint type);
-        EntityWrapper* getTarget();
         Entity& entity();
+        ShipSystem* getShipSystem(const uint type);
+        EntityWrapper* getTarget();      
         void setTarget(EntityWrapper* entityWrapper, const bool sendPacket);
         void setTarget(const std::string&, const bool sendPacket);
 

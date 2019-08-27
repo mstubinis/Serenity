@@ -1,7 +1,7 @@
 #include "Brel.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
-#include "../../weapons/PulsePhaser.h"
+#include "../../weapons/DisruptorCannon.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"
@@ -18,7 +18,9 @@
 using namespace std;
 
 Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, ResourceManifest::BrelMesh, ResourceManifest::BrelMaterial, "Brel", map,player, name, position, scale, collisionType) {
+:Ship(client, ResourceManifest::BrelMesh, ResourceManifest::BrelMaterial, "Brel", map,player, name, position, scale, collisionType, glm::vec3(0.0f, 0.311455f, 0.397761f)) {
+
+    //blender 3d to game 3d: switch y and z, then negate z
 
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
@@ -37,6 +39,16 @@ Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
+    //blender 3d to game 3d: switch y and z, then negate z
+    auto* leftTop = new DisruptorCannon(*this, map, glm::vec3(-1.01261f, -0.315514f, -0.550506f), glm::vec3(0.01f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f);
+    auto* leftBottom = new DisruptorCannon(*this, map, glm::vec3(-1.01515f, -0.338814f, -0.544875f), glm::vec3(0.01f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f);
+    auto* rightBottom = new DisruptorCannon(*this, map, glm::vec3(1.01515f, -0.338814f, -0.544875f), glm::vec3(-0.01f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f);
+    auto* rightTop = new DisruptorCannon(*this, map, glm::vec3(1.01261f, -0.315514f, -0.550506f), glm::vec3(-0.01f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f);
+
+    weapons.addPrimaryWeaponCannon(*leftTop);
+    weapons.addPrimaryWeaponCannon(*leftBottom);
+    weapons.addPrimaryWeaponCannon(*rightBottom);
+    weapons.addPrimaryWeaponCannon(*rightTop);
 }
 Brel::~Brel() {
 

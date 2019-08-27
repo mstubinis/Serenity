@@ -191,7 +191,7 @@ void PlasmaCannonProjectile::update(const double& dt) {
     }
 }
 
-PlasmaCannon::PlasmaCannon(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const uint& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed) :PrimaryWeaponCannon(ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed), m_Map(map) {
+PlasmaCannon::PlasmaCannon(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const uint& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume) :PrimaryWeaponCannon(ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume), m_Map(map) {
 
 }
 PlasmaCannon::~PlasmaCannon() {
@@ -228,7 +228,8 @@ void PlasmaCannon::forceFire() {
 
     auto* sound = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaCannon);
     if (sound) {
+        sound->setVolume(volume);
         sound->setPosition(finalPosition);
-        sound->setAttenuation(0.15f);
+        sound->setAttenuation(0.1f);
     }
 }

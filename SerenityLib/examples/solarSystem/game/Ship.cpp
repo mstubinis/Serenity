@@ -43,7 +43,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
 
     if (ship.m_IsPlayer) {
         #pragma region PlayerFlightControls
-
+        auto* mytarget = ship.getTarget();
         if (!Engine::paused()) {
             if (ship.m_IsWarping && ship.m_WarpFactor > 0) {
                 auto& speed = ship.getWarpSpeedVector3();
@@ -75,23 +75,23 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                 camera.follow(ship.m_Entity);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
-            if (cameraState == CameraState::Follow || !ship.m_Target || target != ship.m_Entity) {
+            if (cameraState == CameraState::Follow || !mytarget || target != ship.m_Entity) {
                 map.centerSceneToObject(ship.m_Entity);
                 camera.orbit(ship.m_Entity);
-            }else if (ship.m_Target) {
-                auto dist = glm::distance2(ship.getPosition(), ship.m_Target->getComponent<ComponentBody>()->position());
+            }else if (mytarget) {
+                auto dist = glm::distance2(ship.getPosition(), mytarget->getComponent<ComponentBody>()->position());
                 if (dist < 10000000000.0f) { //to prevent FP issues when viewing things billions of km away
-                    map.centerSceneToObject(ship.m_Target->entity());
-                    camera.orbit(ship.m_Target->entity());
+                    map.centerSceneToObject(mytarget->entity());
+                    camera.orbit(mytarget->entity());
                 }
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
-            if (cameraState == CameraState::FollowTarget || (!ship.m_Target && cameraState != CameraState::Follow) || target != ship.m_Entity) {
+            if (cameraState == CameraState::FollowTarget || (!mytarget && cameraState != CameraState::Follow) || target != ship.m_Entity) {
                 map.centerSceneToObject(ship.m_Entity);
                 camera.follow(ship.m_Entity);
-            }else if (ship.m_Target) {
+            }else if (mytarget) {
                 map.centerSceneToObject(ship.m_Entity);
-                camera.followTarget(ship.m_Target->entity(), ship.m_Entity);
+                camera.followTarget(mytarget->entity(), ship.m_Entity);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F4)) {
 			camera.m_State = CameraState::Freeform;
@@ -129,14 +129,14 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         }
     }
     for (auto& decal : ship.m_DamageDecals) {
-        if (decal) {//TODO: probably redundant check here
-            const auto shipRotation = ship.getRotation();
-            decal->setPosition(ship.getPosition() + (shipRotation * decal->initialPosition()));
-            decal->setRotation(shipRotation * decal->initialRotation());
-            decal->update(dt);
-            if (!decal->active()) {
-                removeFromVector(ship.m_DamageDecals, decal); //might be dangerous
-            }
+        auto& _decal = *decal;
+        auto& shipBody = *ship.getComponent<ComponentBody>();
+        const auto shipRotation = shipBody.rotation();
+        _decal.setPosition(shipBody.position() + (shipRotation * _decal.initialPosition()));
+        _decal.setRotation(shipRotation * _decal.initialRotation());
+        _decal.update(dt);
+        if (!_decal.active()) {
+            removeFromVector(ship.m_DamageDecals, decal); //might be dangerous
         }
     }
 }};
@@ -180,17 +180,17 @@ struct HullCollisionFunctor final {
     }
 };
 
-Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, Map& map, bool player, const string& name, glm::vec3 pos, glm::vec3 scl, CollisionType::Type _type):EntityWrapper(map),m_Client(client){
-    m_WarpFactor    = 0;
-    m_IsPlayer      = player;
-    m_ShipClass     = shipClass;
-    m_IsWarping     = false;
-    m_Target        = nullptr;
-    m_PlayerCamera  = nullptr;
-    m_MouseFactor   = glm::dvec2(0.0);
+Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, Map& map, bool player, const string& name, const glm::vec3 pos, const glm::vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault):EntityWrapper(map),m_Client(client){
+    m_WarpFactor         = 0;
+    m_IsPlayer           = player;
+    m_ShipClass          = shipClass;
+    m_IsWarping          = false;
+    m_PlayerCamera       = nullptr;
+    m_MouseFactor        = glm::dvec2(0.0);
+    m_AimPositionDefault = aimPosDefault;
 
     auto& modelComponent     = *addComponent<ComponentModel>(mesh, mat);
-    auto& body               = *addComponent<ComponentBody>(_type);
+    auto& body               = *addComponent<ComponentBody>(collisionType);
     auto& nameComponent      = *addComponent<ComponentName>(name);
     auto& logicComponent     = *addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
@@ -223,6 +223,13 @@ Ship::~Ship(){
     SAFE_DELETE_VECTOR(m_DamageDecals);
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
+const glm::vec3 Ship::getAimPositionDefault() {
+    if (m_AimPositionDefault.x == 0.0f && m_AimPositionDefault.y == 0.0f && m_AimPositionDefault.z == 0.0f) {
+        return getPosition();
+    }
+    auto& body = *getComponent<ComponentBody>();
+    return body.position() + (body.rotation() * m_AimPositionDefault);
+}
 void Ship::destroy() {
     for (auto& system : m_ShipSystems) {
         if (system.second) {
@@ -230,6 +237,7 @@ void Ship::destroy() {
         }
     }
     EntityWrapper::destroy();
+    SAFE_DELETE_VECTOR(m_DamageDecals);
 }
 const glm::vec3 Ship::getWarpSpeedVector3() {
     if (m_IsWarping && m_WarpFactor > 0) {
@@ -423,21 +431,20 @@ const glm::vec3 Ship::getLinearVelocity() {
     return getComponent<ComponentBody>()->getLinearVelocity();
 }
 EntityWrapper* Ship::getTarget() { 
-    return m_Target; 
+    auto* sensors = static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]);
+    if(sensors)
+        return sensors->m_Target;
+    return nullptr;
 }
 void Ship::setTarget(const string& target, const bool sendPacket) {
-    if (target.empty()) {
-        Ship::setTarget(nullptr, sendPacket);
-    }
-    Map& map = static_cast<Map&>(entity().scene());
-    for (auto& entity : map.m_Objects) {
-        auto* componentName = entity->getComponent<ComponentName>();
-        if (componentName) {
-            if (componentName->name() == target) {
-                Ship::setTarget(entity, sendPacket);
-            }
-        }
-    }
+    auto* sensors = static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]);
+    if (sensors)
+        sensors->setTarget(target, sendPacket);
+}
+void Ship::setTarget(EntityWrapper* target, const bool sendPacket) {
+    auto* sensors = static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]);
+    if (sensors)
+        sensors->setTarget(target, sendPacket);
 }
 const glm::vec3& Ship::forward() {
     return getComponent<ComponentBody>()->forward();
@@ -461,33 +468,6 @@ const bool Ship::isFullyCloaked() {
         return (cloak.m_Active && cloak.m_CloakTimer <= 0.0) ? true : false;
     }
     return false;
-}
-void Ship::setTarget(EntityWrapper* target, const bool sendPacket){
-    if (!target) {
-        if (m_IsPlayer && m_PlayerCamera) {
-            m_PlayerCamera->follow(entity());
-        }
-    }
-    Ship* ship = dynamic_cast<Ship*>(target);
-    if (ship && ship->isFullyCloaked()) {
-        return;
-    }
-
-    if (sendPacket) {
-        PacketMessage pOut;
-        pOut.PacketType = PacketType::Client_To_Server_Client_Changed_Target;
-        pOut.name = getName();
-        if(target){
-            auto* cName = target->getComponent<ComponentName>();
-            if (cName) {
-                pOut.data = cName->name();
-            }
-        }else{
-            pOut.data = "";
-        }
-        m_Client.send(pOut);
-    }
-    m_Target = target;
 }
 void Ship::onEvent(const Event& e){
     if (e.type == EventType::WindowResized) {

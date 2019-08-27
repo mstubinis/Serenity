@@ -19,7 +19,8 @@ struct PrimaryWeaponCannon {
     float     rechargeTimePerRound;
     float     rechargeTimer;
     float     travelSpeed;
-    PrimaryWeaponCannon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc, const uint& _maxCharges, const uint& _damage,const float& _rechargePerRound,const float& _impactRadius,const float& _impactTime, const float& _travelSpeed);
+    float     volume;
+    PrimaryWeaponCannon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc, const uint& _maxCharges, const uint& _damage,const float& _rechargePerRound,const float& _impactRadius,const float& _impactTime, const float& _travelSpeed, const float& volume);
     virtual bool fire();
     virtual void forceFire();
     virtual const glm::vec3 calculatePredictedVector();

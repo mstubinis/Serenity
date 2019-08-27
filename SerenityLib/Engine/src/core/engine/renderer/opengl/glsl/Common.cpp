@@ -81,8 +81,8 @@ void opengl::glsl::Common::convert(string& code, const unsigned int& versionNumb
         if (!ShaderHelper::sfind(code, "float Pack2NibblesInto8BitChannel(")) {
             const string pack_nibble =
                 "float Pack2NibblesInto8BitChannel(float x,float y){\n"
-                "    float xF = round(x / 0.0666);\n"
-                "    float yF = round(y / 0.0666) * 16.0;\n"
+                "    float xF = round(x / 0.0666666666666666);\n"
+                "    float yF = round(y / 0.0666666666666666) * 16.0;\n"
                 "    return (xF + yF) / 255.0;\n"
                 "}\n";
             ShaderHelper::insertStringAtLine(code, pack_nibble, 1);

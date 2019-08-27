@@ -46,6 +46,11 @@ Handle ResourceManifest::BrelMaterial;
 //hull damage
 Handle ResourceManifest::HullDamageOutline1Material;
 Handle ResourceManifest::HullDamageMaterial1;
+Handle ResourceManifest::HullDamageOutline2Material;
+Handle ResourceManifest::HullDamageMaterial2;
+Handle ResourceManifest::HullDamageOutline3Material;
+Handle ResourceManifest::HullDamageMaterial3;
+
 
 Handle ResourceManifest::StarMaterial;
 Handle ResourceManifest::EarthSkyMaterial;
@@ -99,7 +104,7 @@ void ResourceManifest::init(){
     DefiantMesh = Resources::loadMeshAsync(BasePath + "data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc").at(0);
     ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc").at(0);
-    ShieldColMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields_Col.obj").at(0);
+    ShieldColMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields_Col.objcc").at(0);
     RadarDiscMesh = Resources::loadMeshAsync(BasePath + "data/Models/radar_disc.objcc").at(0);
     CannonEffectMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_bolt.objcc").at(0);
     CannonTailMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_tail.objcc").at(0);
@@ -115,7 +120,7 @@ void ResourceManifest::init(){
     ConstitutionMesh = Resources::loadMeshAsync(BasePath + "data/Models/constitution.objcc").at(0);
     //LeviathanMesh = Resources::loadMeshAsync(BasePath + "data/Models/leviathan.objcc").at(0);
     ShrikeMesh = Resources::loadMeshAsync(BasePath + "data/Models/shrike.objcc").at(0);
-
+    BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.obj").at(0);
 
     Engine::epriv::threading::waitForAll();
 
@@ -161,6 +166,8 @@ void ResourceManifest::init(){
     shrikeMat.addComponentMetalness(BasePath + "data/Textures/shrike/shrike_Metalness.dds", 1.0f);
     shrikeMat.addComponentSmoothness(BasePath + "data/Textures/shrike/shrike_Smoothness.dds", 1.0f);
 
+    BrelMaterial = Resources::addMaterial("Brel", BasePath + "data/Textures/constitution/constitution.dds");
+
     ShieldMaterial = Resources::addMaterial("Shields", BasePath + "data/Textures/Effects/shields_1.dds");
     Material& shieldMat = *((Material*)ShieldMaterial.get());
     shieldMat.setShadeless(true);
@@ -183,12 +190,10 @@ void ResourceManifest::init(){
     layershield3.setData2(1.0f, 1.0f, 1.0f, 0.4f);
 
 
-
-
-    HullDamageMaterial1 = Resources::addMaterial("HullDamage1", BasePath + "data/Textures/Effects/hull_dmg_outline_1.dds");
+    HullDamageOutline1Material = Resources::addMaterial("HullDamage1Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_1.dds");
+    HullDamageMaterial1 = Resources::addMaterial("HullDamage1", BasePath + "data/Textures/Effects/hull_dmg.dds");
     Material& hullDamage1Material = *((Material*)HullDamageMaterial1.get());
-    auto& hull1Layer1 = *hullDamage1Material.getComponent(0).addLayer();
-    hull1Layer1.setTexture(BasePath + "data/Textures/Effects/hull_dmg.dds");
+    auto& hull1Layer1 = hullDamage1Material.getComponent(0).layer(0);
     hull1Layer1.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_1.dds");
     auto& hull1Layer2 = *hullDamage1Material.getComponent(0).addLayer();
     hull1Layer2.setTexture(BasePath + "data/Textures/Effects/hull_dmg.dds");
@@ -197,13 +202,37 @@ void ResourceManifest::init(){
     hullDamage1Material.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/Effects/hull_dmg_mask_1.dds");
 
 
+    HullDamageOutline2Material = Resources::addMaterial("HullDamage2Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_2.dds");
+    HullDamageMaterial2 = Resources::addMaterial("HullDamage2", BasePath + "data/Textures/Effects/hull_dmg.dds");
+    Material& hullDamage1Material2 = *((Material*)HullDamageMaterial2.get());
+    auto& hull1Layer12 = hullDamage1Material2.getComponent(0).layer(0);
+    hull1Layer12.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_2.dds");
+    auto& hull1Layer22 = *hullDamage1Material2.getComponent(0).addLayer();
+    hull1Layer22.setTexture(BasePath + "data/Textures/Effects/hull_dmg.dds");
+    hull1Layer22.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_2_a.dds");
+    hull1Layer22.addUVModificationSimpleTranslation(0.1f, 0.1f);
+    hullDamage1Material2.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/Effects/hull_dmg_mask_2.dds");
+
+
+
+    HullDamageOutline3Material = Resources::addMaterial("HullDamage3Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_3.dds");
+    HullDamageMaterial3 = Resources::addMaterial("HullDamage3", BasePath + "data/Textures/Effects/hull_dmg.dds");
+    Material& hullDamage1Material3 = *((Material*)HullDamageMaterial3.get());
+    auto& hull1Layer13 = hullDamage1Material3.getComponent(0).layer(0);
+    hull1Layer13.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_3.dds");
+    auto& hull1Layer23 = *hullDamage1Material3.getComponent(0).addLayer();
+    hull1Layer23.setTexture(BasePath + "data/Textures/Effects/hull_dmg.dds");
+    hull1Layer23.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_3_a.dds");
+    hull1Layer23.addUVModificationSimpleTranslation(0.1f, 0.1f);
+    hullDamage1Material3.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/Effects/hull_dmg_mask_3.dds");
+
+
+
     StarMaterial = Resources::addMaterial("Star", BasePath + "data/Textures/Planets/Sun.dds");
     ((Material*)StarMaterial.get())->setShadeless(true);
     ((Material*)StarMaterial.get())->setGlow(0.21f);
 
     EarthSkyMaterial = Resources::addMaterial("EarthSky", BasePath + "data/Textures/Planets/Earth.dds");
-
-    
 
     CrosshairMaterial = Resources::addMaterial("Crosshair", BasePath + "data/Textures/HUD/Crosshair.dds");
     CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow", BasePath + "data/Textures/HUD/CrosshairArrow.dds");
@@ -230,13 +259,20 @@ void ResourceManifest::init(){
     SoundPlasmaCannon = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_cannon.ogg");
     SoundDisruptorCannon = Resources::addSoundData(BasePath + "data/Sounds/effects/disruptor_cannon.ogg");
 
+    const auto klingon = glm::vec3(0.72f, 0.11f, 0.11f);
+    const auto romulan = glm::vec3(0.33f, 0.72f, 0.48f);
+    const auto fed = glm::vec3(1, 1, 1);
 
+    const auto blue = glm::vec3(0, 0, 1);
+    const auto green = glm::vec3(0, 1, 0);
+    const auto red = glm::vec3(1, 0, 0);
 
-    ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(DefiantMesh,      DefiantMaterial, glm::vec3(1, 1, 1), glm::vec3(0,0,1));
-    ResourceManifest::Ships["Nova"]         = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(NovaMesh,         NovaMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
-    ResourceManifest::Ships["Excelsior"]    = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ExcelsiorMesh,    ExcelsiorMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
-    ResourceManifest::Ships["Miranda"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(MirandaMesh,      MirandaMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
-    ResourceManifest::Ships["Constitution"] = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ConstitutionMesh, ConstitutionMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
-    ResourceManifest::Ships["Shrike"]       = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ShrikeMesh,       ShrikeMaterial, glm::vec3(0.33f, 0.72f, 0.48f), glm::vec3(0, 1, 0));
-    ResourceManifest::Ships["Leviathan"]    = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(LeviathanMesh,    DefiantMaterial, glm::vec3(1, 1, 1), glm::vec3(0, 0, 1));
+    ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(DefiantMesh,      DefiantMaterial, fed, blue);
+    ResourceManifest::Ships["Nova"]         = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(NovaMesh,         NovaMaterial, fed, blue);
+    ResourceManifest::Ships["Excelsior"]    = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ExcelsiorMesh,    ExcelsiorMaterial, fed, blue);
+    ResourceManifest::Ships["Miranda"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(MirandaMesh,      MirandaMaterial, fed, blue);
+    ResourceManifest::Ships["Constitution"] = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ConstitutionMesh, ConstitutionMaterial, fed, blue);
+    ResourceManifest::Ships["Shrike"]       = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ShrikeMesh,       ShrikeMaterial, romulan, green);
+    ResourceManifest::Ships["Leviathan"]    = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(LeviathanMesh,    DefiantMaterial, fed, blue);
+    ResourceManifest::Ships["Brel"]         = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(BrelMesh,         BrelMaterial, klingon, red);
 }

@@ -44,7 +44,6 @@ Map::Map(const string& n, const string& file):Scene(n){
     m_Filename = file;
     m_SkyboxFile = "";
     m_RootAnchor = std::tuple<std::string,Anchor*>("",nullptr);
-    //m_oldClientPos = m_oldAnchorPos = glm::vec3(0.0f);
     if(file != "NULL")
         Map::loadFromFile(file);
 }
@@ -151,7 +150,6 @@ void Map::loadFromFile(const string& filename) {
             }else if (count == 3) {//this line has the system's skybox's number of flares
                 GameSkybox* box = new GameSkybox(m_SkyboxFile, boost::lexical_cast<uint>(line));
                 setSkybox(box);
-
             }else if (count == 4) {//this line has the system's GI contribution
                 string token;
                 istringstream stream(line);

@@ -88,7 +88,7 @@ void Client::changeConnectionDestination(const ushort& port, const string& ipAdd
 }
 const sf::Socket::Status Client::connect(const ushort& timeout) {
     if (m_TcpSocket->isBlocking()) {
-        auto conn = [&](Client* client, const ushort timeout) {
+        auto lambda = [&](Client* client, const ushort timeout) {
             client->m_IsCurrentlyConnecting = true;
             m_Core.m_HUD->setNormalText("Connecting...", static_cast<float>(timeout) + 2.2f);
             const auto status = client->m_TcpSocket->connect(timeout);
@@ -104,9 +104,8 @@ const sf::Socket::Status Client::connect(const ushort& timeout) {
             client->m_IsCurrentlyConnecting = false;
             return status;
         };
-        //return conn(this, timeout);
         SAFE_DELETE_FUTURE(m_InitialConnectionThread);
-        m_InitialConnectionThread = new std::future<sf::Socket::Status>(std::move(std::async(std::launch::async, conn, this, timeout)));
+        m_InitialConnectionThread = new std::future<sf::Socket::Status>(std::move(std::async(std::launch::async, lambda, this, timeout)));
     }else{
         const auto status = m_TcpSocket->connect(timeout);
         if (status == sf::Socket::Status::Done) {
@@ -149,14 +148,13 @@ const string& Client::username() const {
     return m_username;
 }
 
-void epriv::ClientInternalPublicInterface::update(Client* _client) {
+void Client::update(Client* _client, const double& dt) {
     if (!_client) 
         return;
     auto& client = *_client;
-    const auto& dt = Resources::dt();
     client.m_PingTime += dt;
 
-    if (client.m_PingTime > 3.0f && client.m_Core.gameState() != GameState::Game) {
+    if (client.m_PingTime > 3.0 && client.m_Core.gameState() != GameState::Game) {
         //hacky way of not d/cing outside the game
         Packet pOut;
         pOut.PacketType = PacketType::Client_To_Server_Periodic_Ping;

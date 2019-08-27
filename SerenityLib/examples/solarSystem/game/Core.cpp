@@ -34,11 +34,6 @@ Core::Core() {
     //Resources::getWindow().setIcon(iconPath);
 }
 Core::~Core() {
-    //if (m_Client) {
-    //    Packet p;
-    //    p.PacketType = PacketType::Client_To_Server_Request_Disconnection;
-    //    const auto status = m_Client->send(p);
-    //}
     SAFE_DELETE(m_ChosenShip);
     SAFE_DELETE(m_Client);
     SAFE_DELETE(m_Server);
@@ -51,9 +46,9 @@ Client* Core::getClient() {
     return m_Client;
 }
 
-void Core::startServer(const unsigned short& port, const std::string& mapname) {
+void Core::startServer(const unsigned short& port, const string& mapname) {
     if (!m_Server) {
-        m_Server = new Server(*this, port, false);
+        m_Server = new Server(*this, port, true);
         m_Server->startup(mapname);
     }
 }
@@ -164,8 +159,8 @@ void Core::update(const double& dt) {
         Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen(), true);
     }
 
-    if(m_Client) epriv::ClientInternalPublicInterface::update(m_Client);
-    if(m_Server) m_Server->update(m_Server);
+    if(m_Client) m_Client->update(m_Client, dt);
+    if(m_Server) m_Server->update(m_Server, dt);
     m_HUD->update(dt);
 }
 void Core::render() {

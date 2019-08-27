@@ -123,7 +123,7 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     auto& cannonBody = *entity.addComponent<ComponentBody>(CollisionType::Box);
     model.setCustomBindFunctor(DisruptorCannonInstanceBindFunctor());
     model.setCustomUnbindFunctor(DisruptorCannonInstanceUnbindFunctor());
-    model.getModel(0).setColor(0.5f, 1.0f, 0.02f, 1.0f);
+    model.getModel(0).setColor(0.62f, 1.00f, 0.6f, 1.0f);
     outline.setColor(0.31f, 0.9f, 0.28f, 1.0f);
     head.setColor(0.31f, 0.9f, 0.28f, 1.0f);
     tail.setColor(0.31f, 0.9f, 0.28f, 1.0f);
@@ -199,7 +199,7 @@ void DisruptorCannonProjectile::update(const double& dt) {
     }
 }
 
-DisruptorCannon::DisruptorCannon(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const uint& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed) :PrimaryWeaponCannon(ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed), m_Map(map) {
+DisruptorCannon::DisruptorCannon(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const uint& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume) :PrimaryWeaponCannon(ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume), m_Map(map) {
 
 }
 DisruptorCannon::~DisruptorCannon() {
@@ -236,7 +236,8 @@ void DisruptorCannon::forceFire() {
 
     auto* sound = Engine::Sound::playEffect(ResourceManifest::SoundDisruptorCannon);
     if (sound) {
+        sound->setVolume(volume);
         sound->setPosition(finalPosition);
-        sound->setAttenuation(0.15f);
+        sound->setAttenuation(0.1f);
     }
 }

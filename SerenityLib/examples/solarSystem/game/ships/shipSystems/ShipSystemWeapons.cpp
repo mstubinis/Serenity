@@ -8,7 +8,7 @@
 using namespace Engine;
 using namespace std;
 
-PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const uint& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed):ship(_ship) {
+PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const uint& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume):ship(_ship) {
     position                 = _pos;
     forward                  = _fwd;
     arc                      = _arc;
@@ -18,6 +18,7 @@ PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship,const glm::vec3& _pos,const
     numRounds = numRoundsMax = _maxCharges;
     rechargeTimePerRound     = _rechargePerRound;
     travelSpeed              = _travelSpeed;
+    volume                   = _volume;
     rechargeTimer            = 0.0f;
 }
 const glm::vec3 PrimaryWeaponCannon::calculatePredictedVector() {
@@ -28,7 +29,13 @@ const glm::vec3 PrimaryWeaponCannon::calculatePredictedVector() {
     auto target = ship.getTarget();
     if (target) {
         auto& targetBody           = *target->getComponent<ComponentBody>();
-        const auto& targetPosition = targetBody.position();
+        auto* targetIsShip = dynamic_cast<Ship*>(target);
+        glm::vec3 targetPosition;
+        if (targetIsShip) {
+            targetPosition = targetIsShip->getAimPositionDefault();
+        }else{
+            targetPosition = targetBody.position();
+        }
         const auto vecToTarget     = shipPosition - targetPosition;
         const auto vecToForward    = shipPosition - (cannonForward * 100000000.0f);
         const auto angleToTarget   = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);

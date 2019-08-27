@@ -39,7 +39,20 @@ class PlasmaCannon final : public PrimaryWeaponCannon {
         Map& m_Map;
         std::vector<PlasmaCannonProjectile*> m_ActiveProjectiles;
     public:
-        PlasmaCannon(Ship&, Map&, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& maxCharges = 5, const uint & damage = 100, const float& _rechargePerRound = 1.0f, const float& _impactRadius = 2.5f, const float& _impactTime = 1.8f, const float& _travelSpeed = 50.5f);
+        PlasmaCannon(
+            Ship&,
+            Map&,
+            const glm::vec3& position,
+            const glm::vec3& forward,
+            const float& arc,
+            const uint& maxCharges = 5,
+            const uint & damage = 100,
+            const float& _rechargePerRound = 1.0f,
+            const float& _impactRadius = 2.5f,
+            const float& _impactTime = 1.8f,
+            const float& _travelSpeed = 50.5f,
+            const float& _volume = 100.0f
+        );
         ~PlasmaCannon();
 
         bool fire();

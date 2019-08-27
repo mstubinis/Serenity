@@ -2,13 +2,14 @@
 #ifndef GAME_SERVER_H
 #define GAME_SERVER_H
 
-
 #include <core/engine/networking/ListenerTCP.h>
 #include <core/engine/networking/SocketTCP.h>
 
 #include <unordered_map>
 #include <queue>
 #include <thread>
+#include <atomic>
+#include <future>
 
 struct Packet;
 class  Server;
@@ -20,17 +21,20 @@ class  Core;
 class ServerClient final {
     friend class Server;
     private:
+        std::future<bool>*               m_Thread;
         Engine::Networking::SocketTCP*   m_TcpSocket;
         std::string                      m_username;
         Core&                            m_Core;
+        Server&                          m_Server;
         bool                             m_Validated;
-        float                            m_Timeout;
-        float                            m_RecoveryTime;
+        bool                             m_Active;
+        double                           m_Timeout;
+        double                           m_RecoveryTime;
 
-        void internalInit();
+        void internalInit(const bool blocking);
     public:
-        ServerClient(Core&, sf::TcpSocket*);
-        ServerClient(Core&, const ushort& port, const std::string& ipAddress);
+        ServerClient(Server&, Core&, sf::TcpSocket*, const bool blocking = false);
+        ServerClient(Server&, Core&, const ushort& port, const std::string& ipAddress, const bool blocking = false);
         ~ServerClient();
 
         void disconnect();
@@ -48,19 +52,20 @@ class ServerClient final {
 
 
 class Server {
+    friend class ServerClient;
     private:
         sf::Mutex                                      m_mutex;
-        std::thread*                                   m_thread_for_listener;
-        std::thread*                                   m_thread_for_disconnecting_clients;
-        std::unordered_map<std::string, std::thread*>  m_threads_for_clients;
         std::unordered_map<std::string, ServerClient*> m_clients;
         std::queue<std::string>                        m_ClientsToBeDisconnected;
         Engine::Networking::ListenerTCP*               m_listener;
         unsigned int                                   m_port;
         bool                                           m_blocking;
+        std::atomic<unsigned int>                      m_Active;
         Core&                                          m_Core;
         std::string                                    m_MapName;
         double                                         m_DeepspaceAnchorTimer;
+
+        void updateClientsGameLoop(const double& dt);
 
     public:
         Server(Core& core, const unsigned int& port, const bool blocking = false, const std::string& ipRestriction = "");
@@ -86,10 +91,10 @@ class Server {
         void send_to_all(const void* data, size_t size);
         void send_to_all(const void* data, size_t size, size_t& sent);
 
-        static void update(Server* thisServer);
-        static void updateAcceptNewClients(Server* thisServer);
-        static void updateClient(Server* thisServer, ServerClient* client);
-        static void updateRemoveDisconnectedClients(Server* thisServer);
+        static void update(Server* thisServer, const double& dt);
+        static void updateAcceptNewClients(Server& thisServer);
+        static void updateClient(ServerClient& thisClient);
+        static void updateRemoveDisconnectedClients(Server& thisServer);
 };
 
 #endif

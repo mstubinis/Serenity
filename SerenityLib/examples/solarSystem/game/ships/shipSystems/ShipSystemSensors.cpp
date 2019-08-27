@@ -6,6 +6,8 @@
 #include "../../Helper.h"
 #include "../../Core.h"
 #include "../../HUD.h"
+#include "../../GameCamera.h"
+#include "../../Packet.h"
 
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialComponent.h>
@@ -43,6 +45,7 @@ ShipSystemSensors::ShipSystemSensors(Ship& _ship, Map& map, const float& range) 
     radarModel.getModel().setViewportFlag(ViewportFlag::_2);
 
     m_RadarRange = range;
+    m_Target = nullptr;
 
     const auto& radarTextureWidth = radarTexture.width();
     const auto& radarTextureHalfWidth = static_cast<float>(radarTexture.height()) / 2.0f;
@@ -66,6 +69,49 @@ void ShipSystemSensors::onResize(const uint& width, const uint& height) {
 
     m_ViewportObject->setViewportDimensions(halfWinWidth - halfTextureWidth, 0, radarTexture.width(), radarTexture.height());
     m_Viewport = glm::vec4(halfWinWidth - halfTextureWidth, 0, radarTexture.width(), radarTexture.height());
+}
+EntityWrapper* ShipSystemSensors::getTarget() {
+    return m_Target;
+}
+void ShipSystemSensors::setTarget(EntityWrapper* target, const bool sendPacket) {
+    if (!target) {
+        if (m_Ship.m_IsPlayer && m_Ship.m_PlayerCamera) {
+            m_Ship.m_PlayerCamera->follow(m_Ship.entity());
+        }
+    }
+    Ship* ship = dynamic_cast<Ship*>(target);
+    if (ship && ship->isFullyCloaked()) {
+        return;
+    }
+    if (sendPacket) {
+        PacketMessage pOut;
+        pOut.PacketType = PacketType::Client_To_Server_Client_Changed_Target;
+        pOut.name = m_Ship.getName();
+        if (target) {
+            auto* cName = target->getComponent<ComponentName>();
+            if (cName) {
+                pOut.data = cName->name();
+            }
+        }else{
+            pOut.data = "";
+        }
+        m_Ship.m_Client.send(pOut);
+    }
+    m_Target = target;
+}
+void ShipSystemSensors::setTarget(const string& target, const bool sendPacket) {
+    if (target.empty()) {
+        m_Ship.setTarget(nullptr, sendPacket);
+    }
+    Map& map = static_cast<Map&>(m_Ship.entity().scene());
+    for (auto& entity : map.m_Objects) {
+        auto* componentName = entity->getComponent<ComponentName>();
+        if (componentName) {
+            if (componentName->name() == target) {
+                m_Ship.setTarget(entity, sendPacket);
+            }
+        }
+    }
 }
 void ShipSystemSensors::update(const double& dt) {
     if (m_Ship.getTarget()) {

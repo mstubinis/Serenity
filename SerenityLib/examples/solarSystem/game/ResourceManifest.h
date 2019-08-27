@@ -48,7 +48,10 @@ struct ResourceManifest{
     //hull damage
     static Handle HullDamageOutline1Material;
     static Handle HullDamageMaterial1;
-
+    static Handle HullDamageOutline2Material;
+    static Handle HullDamageMaterial2;
+    static Handle HullDamageOutline3Material;
+    static Handle HullDamageMaterial3;
 
     static Handle StarMaterial;
     static Handle EarthSkyMaterial;

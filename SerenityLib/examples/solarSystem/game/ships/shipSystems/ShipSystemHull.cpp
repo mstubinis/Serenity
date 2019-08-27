@@ -2,11 +2,14 @@
 #include "../../Ship.h"
 #include "../../map/Map.h"
 #include "../../ResourceManifest.h"
+#include "../../Helper.h"
 
 #include <core/engine/renderer/Decal.h>
 
 #include <ecs/Components.h>
+#include <glm/gtx/norm.hpp>
 
+using namespace std;
 
 ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const uint health) :ShipSystem(ShipSystemType::Hull, _ship), m_HullEntity(map), m_Map(map){
     m_HealthPointsCurrent = m_HealthPointsMax = health;
@@ -29,6 +32,60 @@ ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const uint health) :ShipSy
 ShipSystemHull::~ShipSystemHull() {
 
 }
+void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const bool forceHullFire) {
+    auto& decalList = m_Ship.m_DamageDecals;
+    Decal* d = nullptr;
+    Decal* d1 = nullptr;
+
+    const auto rand = Helper::GetRandomFloatFromTo(0.0f, 1.0f);
+    Material* hullDamageOutline = nullptr;
+    Material* hullDamage = nullptr;
+    if (rand > 0.0f && rand <= 0.33333f) {
+        hullDamageOutline = (Material*)ResourceManifest::HullDamageOutline1Material.get();
+        hullDamage = (Material*)ResourceManifest::HullDamageMaterial1.get();
+    }else if (rand > 0.333333f && rand <= 0.666666f){
+        hullDamageOutline = (Material*)ResourceManifest::HullDamageOutline2Material.get();
+        hullDamage = (Material*)ResourceManifest::HullDamageMaterial2.get();
+    }else{
+        hullDamageOutline = (Material*)ResourceManifest::HullDamageOutline3Material.get();
+        hullDamage = (Material*)ResourceManifest::HullDamageMaterial3.get();
+    }
+
+    const auto impactLocation = impactLocationLocal * m_Ship.getRotation();
+    const auto impactR = impactRadius * 0.16f;
+
+    if (forceHullFire) {
+        d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
+        decalList.push_back(d);
+        d1 = new Decal(*hullDamage, impactLocation, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
+        decalList.push_back(d1);
+        return;
+    }
+
+    if (decalList.size() == 0) {
+        d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
+        decalList.push_back(d);
+        return;
+    }else{
+        //get list of nearby impact points
+        vector<Decal*> nearbys;
+        for (auto& dec : decalList) {
+            auto dist = glm::distance2(dec->initialPosition(), impactLocation);
+            if (dist < (impactR * impactR) * 0.4f) {
+                nearbys.push_back(dec);
+            }
+        }
+        if (nearbys.size() >= 8)
+            return; //forget it, no need to have so many
+
+        d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
+        if (nearbys.size() >= 4) {
+            d1 = new Decal(*hullDamage, impactLocation, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
+        }
+    }
+    if (d)  decalList.push_back(d);
+    if (d1) decalList.push_back(d1);
+}
 void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const uint damage) {
     int newHP = m_HealthPointsCurrent - damage;
     if (newHP > 0) {
@@ -38,11 +95,7 @@ void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& 
         //we destroyed the ship
         m_HealthPointsCurrent = 0;
     }
-
-    //add damage decal
-    auto& hullDamage1 = *(Material*)ResourceManifest::HullDamageMaterial1.get();
-    Decal* d = new Decal(hullDamage1, impactLocationLocal * m_Ship.getRotation(), impactNormal, impactRadius * 0.4f, m_Map, 120);
-    m_Ship.m_DamageDecals.push_back(d);
+    applyDamageDecal(impactNormal, impactLocationLocal, impactRadius);
 }
 void ShipSystemHull::receiveCollision(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float damage) {
     if (m_CollisionTimer > static_cast<float>(HULL_TO_HULL_COLLISION_DELAY)) {
@@ -56,12 +109,7 @@ void ShipSystemHull::receiveCollision(const glm::vec3& impactNormal, const glm::
             m_HealthPointsCurrent = 0;
         }
         m_CollisionTimer = 0.0f;
-
-
-        //add damage decal
-        auto& hullDamage1 = *(Material*)ResourceManifest::HullDamageMaterial1.get();
-        Decal* d = new Decal(hullDamage1, impactLocationLocal * m_Ship.getRotation(), impactNormal, impactRadius * 0.4f, m_Map, 120);
-        m_Ship.m_DamageDecals.push_back(d);
+        applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, true);
     }
 }
 void ShipSystemHull::update(const double& dt) {
@@ -69,7 +117,6 @@ void ShipSystemHull::update(const double& dt) {
     auto& shipBody = *m_Ship.getComponent<ComponentBody>();
     hullBody.setPosition(shipBody.position());
     hullBody.setRotation(shipBody.rotation());
-
 
     const float fdt = static_cast<float>(dt);
     if (m_CollisionTimer < 10.0f + static_cast<float>(HULL_TO_HULL_COLLISION_DELAY)) {

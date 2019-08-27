@@ -236,20 +236,20 @@ bool epriv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_u
     return false;
 }
 void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
-    if (data.normals.size() == 0) return;
-    uint pointsSize(data.points.size());
-
+    if (data.normals.size() == 0) 
+        return;
+    const uint pointsSize(data.points.size());
     data.tangents.reserve(data.normals.size());
     data.binormals.reserve(data.normals.size());
     for (uint i = 0; i < pointsSize; i += 3) {
-        uint p0(i + 0);
-        uint p1(i + 1);
-        uint p2(i + 2);
+        const uint p0(i + 0);
+        const uint p1(i + 1);
+        const uint p2(i + 2);
 
         glm::vec3 point1, point2, point3;
         glm::vec2 uv1, uv2, uv3;
 
-        uint uvSize(data.uvs.size());
+        const uint uvSize(data.uvs.size());
 
         if (pointsSize > p0) point1 = data.points[p0];
         else                 point1 = glm::vec3(0.0f);
@@ -275,7 +275,8 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
         float ty(uv3.y - uv1.y);
         float dirCorrection = 1.0;
 
-        if ((tx * sy - ty * sx) < 0.0f) dirCorrection = -1.0f; //this is important for normals and mirrored mesh geometry using identical uv's
+        if ((tx * sy - ty * sx) < 0.0f) 
+            dirCorrection = -1.0f; //this is important for normals and mirrored mesh geometry using identical uv's
 
         // when t1, t2, t3 in same position in UV space, just use default UV direction.
         //if ( 0 == sx && 0 == sy && 0 == tx && 0 == ty ) {
@@ -301,11 +302,13 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
             else if (b == 1) p = p1;
             else             p = p2;
 
-            if (data.normals.size() > p) normal = data.normals[p];
-            else                         normal = glm::vec3(0.0f);
+            if (data.normals.size() > p) 
+                normal = data.normals[p];
+            else                         
+                normal = glm::vec3(0.0f);
 
             // project tangent and bitangent into the plane formed by the vertex' normal
-            glm::vec3 localTangent(tangent - normal * (tangent   * normal));
+            glm::vec3 localTangent(tangent - normal * (tangent * normal));
             glm::vec3 localBitangent(bitangent - normal * (bitangent * normal));
             localTangent   = glm::normalize(localTangent);
             localBitangent = glm::normalize(localBitangent);

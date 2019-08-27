@@ -252,15 +252,14 @@ GLuint Math::pack3NormalsInto32Int(const float x, const float y, const float z){
    const int _X = static_cast<int>(x * 511.0f);
    const int _Y = static_cast<int>(y * 511.0f);
    const int _Z = static_cast<int>(z * 511.0f);
-   return (_X & 0x3FF) | ((_Y & 0x3FF) << 10) | ((_Z & 0x3FF) << 20);
+   return (_X & 1023) | ((_Y & 1023) << 10) | ((_Z & 1023) << 20);
 }
 GLuint Math::pack3NormalsInto32Int(const glm::vec3& v){ 
 	return Math::pack3NormalsInto32Int(v.x,v.y,v.z); 
 }
 
 
-float Math::pack3FloatsInto1Float(float r,float g,float b){
-    //Scale and bias
+float Math::pack3FloatsInto1Float(float r, float g, float b){
     r = (r + 1.0f) * 0.5f;
 	const uchar _r = static_cast<uchar>(r * 255.0f);
     g = (g + 1.0f) * 0.5f;
@@ -306,23 +305,23 @@ glm::vec3 Math::unpack3FloatsInto1FloatUnsigned(float v){
     return ret;
 }
 uchar Math::pack2NibblesIntoChar(const float x, const float y) {
-    uchar packedData = 0x00;
-    int bits  = static_cast<int>(round(x / 0.0666f));
-    int bits1 = static_cast<int>(round(y / 0.0666f));
-	packedData |= bits & 0x0F;
-	packedData |= (bits1 << 4) & 0xF0;
+    uchar packedData = 0;
+    int bits  = static_cast<int>(round(x / 0.066666666666f));
+    int bits1 = static_cast<int>(round(y / 0.066666666666f));
+	packedData |= bits & 15;
+	packedData |= (bits1 << 4) & 240;
     return packedData;
 }
 glm::vec2 Math::unpack2NibblesFromChar(const uchar _packedData) {
-    int low  = _packedData & 0x0F; /* binary 00000001 */
-    int high = _packedData >> 4;   /* binary 10000000 */
-    return glm::vec2(static_cast<float>(low * 0.0666f), static_cast<float>(high * 0.0666f));
+    int low  = _packedData & 15;
+    int high = _packedData >> 4;
+    return glm::vec2(static_cast<float>(low * 0.066666666666f), static_cast<float>(high * 0.066666666666f));
 }
 //attempt to do the above using non bitwise operations for glsl versions that do not support bitwise operations
 float Math::pack2NibblesIntoCharBasic(const float x, const float y) {
-    float lowEnd = static_cast<float>(round(x / 0.0666f));
-    float highEnd = static_cast<float>(round(y / 0.0666f) * 16.0f);
-    return static_cast<float>(lowEnd + highEnd);
+    const float lowEnd = (round(x / 0.066666666666f));
+    const float highEnd = (round(y / 0.066666666666f) * 16.0f);
+    return (lowEnd + highEnd);
 }
 glm::vec2 Math::unpack2NibblesFromCharBasic(const float _packedData) {
     float highEnd = (_packedData / 16.0f);
@@ -352,26 +351,35 @@ void Math::translate(const btRigidBody& body,btVector3& vec,bool local){
         vec = vec.rotate(q.getAxis(), q.getAngle());
     }
 }
-
-glm::vec3 Math::midpoint(const glm::vec3& a, const glm::vec3& b){ return glm::vec3((a.x+b.x)/2.0f,(a.y+b.y)/2.0f,(a.z+b.z)/2.0f); }
-glm::vec3 Math::direction(const glm::vec3& eye, const glm::vec3& target){ return glm::normalize(eye-target); }
-glm::vec3 Math::getForward(const glm::quat& q){return glm::normalize(q * glm::vec3(0.0f,0.0f,-1.0f));}
-glm::vec3 Math::getRight(const glm::quat& q){return glm::normalize(q * glm::vec3(1.0f,0.0f,0.0f));}
-glm::vec3 Math::getUp(const glm::quat& q){return glm::normalize(q * glm::vec3(0.0f,1.0f,0.0f));}
+glm::vec3 Math::midpoint(const glm::vec3& a, const glm::vec3& b){ 
+    return glm::vec3((a.x + b.x) / 2.0f, (a.y + b.y) / 2.0f, (a.z + b.z) / 2.0f);
+}
+glm::vec3 Math::direction(const glm::vec3& eye, const glm::vec3& target){ 
+    return glm::normalize(eye - target);
+}
+glm::vec3 Math::getForward(const glm::quat& q){
+    return glm::normalize(q * glm::vec3(0.0f, 0.0f, -1.0f));
+}
+glm::vec3 Math::getRight(const glm::quat& q){
+    return glm::normalize(q * glm::vec3(1.0f, 0.0f, 0.0f));
+}
+glm::vec3 Math::getUp(const glm::quat& q){
+    return glm::normalize(q * glm::vec3(0.0f, 1.0f, 0.0f));
+}
 glm::vec3 Math::getColumnVector(const btRigidBody& b, const uint& column){
     btTransform t;
     b.getMotionState()->getWorldTransform(t);
     btVector3 v = t.getBasis().getColumn(column);
-    return glm::normalize(glm::vec3(v.x(),v.y(),v.z()));
+    return glm::normalize(glm::vec3(v.x(), v.y(), v.z()));
 }
-glm::vec3 Math::getForward(const btRigidBody& b){ 
-	return Math::getColumnVector(b,2); 
+glm::vec3 Math::getForward(const btRigidBody& b) {
+    return Math::getColumnVector(b, 2);
 }
-glm::vec3 Math::getRight(const btRigidBody& b){ 
-	return Math::getColumnVector(b,0); 
+glm::vec3 Math::getRight(const btRigidBody& b) {
+    return Math::getColumnVector(b, 0);
 }
-glm::vec3 Math::getUp(const btRigidBody& b){ 
-	return Math::getColumnVector(b,1); 
+glm::vec3 Math::getUp(const btRigidBody& b) {
+    return Math::getColumnVector(b, 1);
 }
 void Math::recalculateForwardRightUp(const glm::quat& o,glm::vec3& f,glm::vec3& r,glm::vec3& u){
     f = Math::getForward(o);
@@ -384,8 +392,8 @@ void Math::recalculateForwardRightUp(const btRigidBody& b,glm::vec3& f,glm::vec3
 	u = Math::getUp(b);
 }
 float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees){
-	if (a == b) return 0;
-    //float angle = glm::acos( glm::dot(glm::normalize(a),glm::normalize(b)) );
+	if (a == b) 
+        return 0.0f;
 	float angle = glm::acos(glm::dot(a, b));
     if(degrees) 
 		angle *= 57.2958f;
@@ -401,6 +409,7 @@ void Math::alignTo(glm::quat& o, const glm::vec3& direction,float speed){
     rot[1][0] = float(yaxis.x);      rot[1][1] = float(yaxis.y);      rot[1][2] = float(yaxis.z);
     rot[2][0] = float(_direction.x); rot[2][1] = float(_direction.y); rot[2][2] = float(_direction.z);
     o = glm::quat_cast(rot);
+    //TODO: rework or rethink this
     if(speed != 0.0f){
         const float& angle = Math::getAngleBetweenTwoVectors(_direction, getForward(original) ,true); // degrees
         speed *= 1.0f / angle;
@@ -475,10 +484,10 @@ bool Math::rayIntersectSphere(const glm::vec3& C, const float r, const glm::vec3
     const float& dot = glm::dot(rayVector, C - A);
     if(dot >= 0.0f) //check if point is behind
         return false;
-	const float& a = ((B.x - A.x) * (B.x - A.x)) + ((B.y - A.y) * (B.y - A.y)) + ((B.z - A.z) * (B.z - A.z));
-	const float& b = 2.0f * ((B.x - A.x) * (A.x - C.x) + (B.y - A.y) * (A.y - C.y) + (B.z - A.z) * (A.z - C.z));
-	const float& c = (((A.x - C.x) * (A.x - C.x)) + ((A.y - C.y) * (A.y - C.y)) + ((A.z - C.z) * (A.z - C.z))) - (r * r);
-	const float& d = (b * b) - (4.0f * a * c);
+    const float& a = ((B.x - A.x) * (B.x - A.x)) + ((B.y - A.y) * (B.y - A.y)) + ((B.z - A.z) * (B.z - A.z));
+    const float& b = 2.0f * ((B.x - A.x) * (A.x - C.x) + (B.y - A.y) * (A.y - C.y) + (B.z - A.z) * (A.z - C.z));
+    const float& c = (((A.x - C.x) * (A.x - C.x)) + ((A.y - C.y) * (A.y - C.y)) + ((A.z - C.z) * (A.z - C.z))) - (r * r);
+    const float& d = (b * b) - (4.0f * a * c);
     if(d < 0.0f)
         return false;
     return true;

@@ -33,7 +33,6 @@ namespace Engine {
             Renderer::sendUniform4Safe("Object_Color", i.color());
             Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
 
-            Renderer::sendUniform1Safe("AnimationPlaying", 0);
             glm::mat4 modelMatrix = parentModel * i.modelMatrix();
 
             glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
@@ -41,7 +40,6 @@ namespace Engine {
             const auto& winSize = Resources::getWindowSize();
             Renderer::sendUniform4Safe("Resolution", static_cast<float>(winSize.x), static_cast<float>(winSize.y), 0.0f, 0.0f);
             Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
-            Renderer::sendUniformMatrix4Safe("InvWorld", glm::inverse(modelMatrix));
             Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
         }};
         struct DefaultDecalUnbindFunctor { void operator()(EngineResource* r) const {
@@ -50,15 +48,15 @@ namespace Engine {
     };
 };
 
-Decal::Decal(Material& material, const glm::vec3& position, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax):EntityWrapper(scene) {
+Decal::Decal(Material& material, const glm::vec3& position, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax, const RenderStage::Stage stage):EntityWrapper(scene) {
     auto& body = *addComponent<ComponentBody>();
-    auto& model = *addComponent<ComponentModel>(Mesh::Cube, &material, ShaderProgram::Decal, RenderStage::Decals);
+    auto& model = *addComponent<ComponentModel>(Mesh::Cube, &material, ShaderProgram::Decal, stage);
 
     body.setPosition(position);
     glm::quat q;
     Math::alignTo(q, hitNormal);
     body.setRotation(q);
-    body.setScale(0.2 * size, 0.12f, 0.2f * size);
+    body.setScale(0.2 * size, 0.04f, 0.2f * size);
 
     model.setCustomBindFunctor(Engine::epriv::DefaultDecalBindFunctor());
     model.setCustomUnbindFunctor(Engine::epriv::DefaultDecalUnbindFunctor());
@@ -71,9 +69,7 @@ Decal::Decal(Material& material, const glm::vec3& position, const glm::vec3& hit
     m_InitialRotation = q;
 }
 Decal::~Decal() {
-    //TODO: probably not needed
-    m_LifetimeCurrent = 0.0f;
-    m_Active = false;
+
 }
 void Decal::update(const double& dt) {
     const float fdt = static_cast<float>(dt);
@@ -87,8 +83,6 @@ void Decal::update(const double& dt) {
             modelZero.setColor(color.x, color.y, color.z, alpha);
         }
         if (m_LifetimeCurrent >= m_LifetimeMax) {
-            auto& model = *getComponent<ComponentModel>();
-            model.hide();
             m_Active = false;
             destroy();
         }

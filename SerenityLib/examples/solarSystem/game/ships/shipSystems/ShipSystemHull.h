@@ -20,6 +20,8 @@ class ShipSystemHull final : public ShipSystem {
         float           m_RechargeRate;
         float           m_RechargeTimer;
         float           m_CollisionTimer;
+
+        void applyDamageDecal(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const bool forceHullFire = false);
     public:
         ShipSystemHull(Ship&, Map&, const uint health);
         ~ShipSystemHull();

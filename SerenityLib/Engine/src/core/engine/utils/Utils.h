@@ -101,7 +101,7 @@ template<typename T> const std::string convertNumToNumWithCommas(const T& n){
 }
 
 #define SAFE_DELETE_FUTURE(x){ if (x) { x->get(); delete x; x = 0; } }
-#define SAFE_DELETE_THREAD(x){ if (x) {if (x->joinable()) {x->detach();}delete x;x = 0;}}
+#define SAFE_DELETE_THREAD(x){ if (x) {if (x->joinable()) {x->join();}delete x;x = 0;}}
 #define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
 #define SAFE_DELETE(x) { if(x){ delete x; x = 0;} } // Convenience macro for deleting a pointer
 #define SAFE_DELETE_VECTOR(x){ for(auto& it:x){ SAFE_DELETE(it); } vector_clear(x); } // Convenience macro for deleting the pointer elements of a vector

@@ -13,19 +13,12 @@ class  Server;
 class  HUD;
 class  Core;
 class  ShipSystemSensors;
-namespace Engine {
-    namespace epriv {
-        struct ClientInternalPublicInterface {
-            static void update(Client*);
-        };
-    };
-};
+
 class Client{
     friend class  Server;
     friend class  HUD;
     friend class  Core;
     friend class  ShipSystemSensors;
-    friend struct Engine::epriv::ClientInternalPublicInterface;
     private:
         std::future<sf::Socket::Status>*      m_InitialConnectionThread;
         Engine::Networking::SocketTCP*        m_TcpSocket;
@@ -56,5 +49,6 @@ class Client{
         const sf::Socket::Status receive(sf::Packet& packet);
         const sf::Socket::Status receive(void* data, size_t size, size_t& received);
 
+        static void update(Client*, const double& dt);
 };
 #endif

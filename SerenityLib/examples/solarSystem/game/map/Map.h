@@ -60,14 +60,5 @@ class Map: public Scene{
         std::unordered_map<std::string, Ship*>& getShips() { return m_Ships; }
         Anchor* getRootAnchor();
         Anchor* getSpawnAnchor();
-
-        /*
-        void setAnchor(const float& x, const float& y, const float& z);
-        const glm::vec3& getOldClientPos() const;
-        const glm::vec3& getOldAnchorPos() const;
-        void setOldClientPos(const float& x, const float& y, const float& z);
-        void setOldAnchorPos(const float& x, const float& y, const float& z);
-        */
-
 };
 #endif
