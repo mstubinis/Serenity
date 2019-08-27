@@ -23,46 +23,44 @@
 using namespace Engine;
 using namespace std;
 
-struct GameCameraShipSelectorLogicFunctor final {
-    void operator()(ComponentLogic2& _component, const double& dt) const {
-        GameCamera& camera = *static_cast<GameCamera*>(_component.getUserPointer());
-        auto& core = *static_cast<Core*>(_component.getUserPointer1());
-        ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(_component.getUserPointer2());
-        if (core.gameState() == GameState::Host_Server_Lobby_And_Ship || core.gameState() == GameState::Join_Server_Server_Lobby) {
-            auto entity = camera.entity();
-            EntityDataRequest dataRequest(entity);
-            auto& thisCamera = *entity.getComponent<ComponentCamera>(dataRequest);
-            auto& thisBody = *entity.getComponent<ComponentBody>(dataRequest);
-            if ((window.m_IsCurrentlyOverShipWindow && dt >= 0.0) || window.m_IsCurrentlyDragging) {
-                camera.m_OrbitRadius += static_cast<float>(Engine::getMouseWheelDelta() * dt * 0.92);
-                camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 1.5f);
-            }
-            if (window.m_IsCurrentlyDragging || dt < 0.0) {
-                const auto& diff = Engine::getMouseDifference();
-                camera.m_CameraMouseFactor += glm::dvec2(-diff.y * (dt), diff.x * (dt));
-                thisBody.rotate(camera.m_CameraMouseFactor.x, camera.m_CameraMouseFactor.y, 0);
-                camera.m_CameraMouseFactor *= 0;
-            }
-            auto& targetEntity = camera.m_Target;
-            EntityDataRequest dataRequest1(targetEntity);
-
-            auto& targetBody = *targetEntity.getComponent<ComponentBody>(dataRequest1);
-            auto& targetModel = *targetEntity.getComponent<ComponentModel>(dataRequest1);
-
-            const glm::vec3& pos = (glm::vec3(0, 0, 1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0, 0, 1) * glm::length(targetModel.radius() * (1.0f + camera.m_OrbitRadius)));
-
-            glm::mat4 cameraModel = glm::mat4(1.0f);
-            cameraModel = glm::translate(cameraModel, targetBody.position());
-            cameraModel *= glm::mat4_cast(thisBody.rotation());
-            cameraModel = glm::translate(cameraModel, pos);
-
-            const glm::vec3 eye(cameraModel[3][0], cameraModel[3][1], cameraModel[3][2]);
-            thisBody.setPosition(eye);
-
-            thisCamera.lookAt(eye, targetBody.position(), thisBody.up());
+struct GameCameraShipSelectorLogicFunctor final { void operator()(ComponentLogic2& _component, const double& dt) const {
+    GameCamera& camera = *static_cast<GameCamera*>(_component.getUserPointer());
+    auto& core = *static_cast<Core*>(_component.getUserPointer1());
+    ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(_component.getUserPointer2());
+    if (core.gameState() == GameState::Host_Server_Lobby_And_Ship || core.gameState() == GameState::Join_Server_Server_Lobby) {
+        auto entity = camera.entity();
+        EntityDataRequest dataRequest(entity);
+        auto& thisCamera = *entity.getComponent<ComponentCamera>(dataRequest);
+        auto& thisBody = *entity.getComponent<ComponentBody>(dataRequest);
+        if ((window.m_IsCurrentlyOverShipWindow && dt >= 0.0) || window.m_IsCurrentlyDragging) {
+            camera.m_OrbitRadius += static_cast<float>(Engine::getMouseWheelDelta() * dt * 0.92);
+            camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 1.5f);
         }
+        if (window.m_IsCurrentlyDragging || dt < 0.0) {
+            const auto& diff = Engine::getMouseDifference();
+            camera.m_CameraMouseFactor += glm::dvec2(-diff.y * (dt), diff.x * (dt));
+            thisBody.rotate(camera.m_CameraMouseFactor.x, camera.m_CameraMouseFactor.y, 0);
+            camera.m_CameraMouseFactor *= 0;
+        }
+        auto& targetEntity = camera.m_Target;
+        EntityDataRequest dataRequest1(targetEntity->entity());
+
+        auto& targetBody = *targetEntity->getComponent<ComponentBody>(dataRequest1);
+        auto& targetModel = *targetEntity->getComponent<ComponentModel>(dataRequest1);
+
+        const glm::vec3& pos = (glm::vec3(0, 0, 1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0, 0, 1) * glm::length(targetModel.radius() * (1.0f + camera.m_OrbitRadius)));
+
+        glm::mat4 cameraModel = glm::mat4(1.0f);
+        cameraModel = glm::translate(cameraModel, targetBody.position());
+        cameraModel *= glm::mat4_cast(thisBody.rotation());
+        cameraModel = glm::translate(cameraModel, pos);
+
+        const glm::vec3 eye(cameraModel[3][0], cameraModel[3][1], cameraModel[3][2]);
+        thisBody.setPosition(eye);
+
+        thisCamera.lookAt(eye, targetBody.position(), thisBody.up());
     }
-};
+}};
 
 ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& scene, Camera& camera, const Font& font, const unsigned int& x, const unsigned int& y):m_Core(core),m_Font(const_cast<Font&>(font)) {
     m_Width = 578;
@@ -90,8 +88,8 @@ ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& s
 
     GameCamera& gameCamera = *static_cast<GameCamera*>(logic.getUserPointer());
     auto& targetEntity = gameCamera.m_Target;
-    auto& targetBody = *targetEntity.getComponent<ComponentBody>();
-    auto& targetModel = *targetEntity.getComponent<ComponentModel>();
+    auto& targetBody = *targetEntity->getComponent<ComponentBody>();
+    auto& targetModel = *targetEntity->getComponent<ComponentModel>();
 
 
     const glm::vec3& pos = (glm::vec3(0, 0, 1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0, 0, 1) * glm::length(targetModel.radius() * (1.0f + gameCamera.m_OrbitRadius)));

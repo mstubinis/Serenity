@@ -6,6 +6,8 @@
 #include <LinearMath/btVector3.h>
 #include <core/engine/physics/PhysicsEnums.h>
 
+#include <glm/vec3.hpp>
+
 class  btCollisionShape;
 class  Mesh;
 class  ComponentModel;
@@ -15,8 +17,8 @@ class  btHeightfieldTerrainShape;
 class Collision final {
     private:
         CollisionType::Type   m_Type;
-        btVector3             m_Inertia;
-        btCollisionShape* m_Shape;
+        btVector3             m_BtInertia;
+        btCollisionShape*     m_BtShape;
 
         void _init(ComponentBody* body, const std::vector<Mesh*>& meshes, const float& mass);
         void _baseInit(const CollisionType::Type _type, const float& mass);
@@ -35,8 +37,8 @@ class Collision final {
         ~Collision();
 
         void setMass(float mass);
-        const btVector3& getInertia() const;
-        btCollisionShape* getShape() const;
+        const btVector3& getBtInertia() const;
+        btCollisionShape* getBtShape() const;
         const uint getType() const;
 };
 

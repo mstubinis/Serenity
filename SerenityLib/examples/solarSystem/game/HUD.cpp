@@ -362,11 +362,11 @@ void HUD::update_game(const double& dt) {
 
 
         if (shipsVect.size() > 0) {
-            player.setTarget(shipsVect[_countShips]->entity().getComponent<ComponentName>()->name(), true);
-            ++_countShips;
             if (_countShips > shipsVect.size() - 1) {
                 _countShips = 0;
             }
+            player.setTarget(shipsVect[_countShips]->entity().getComponent<ComponentName>()->name(), true);
+            ++_countShips;
         }
     }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
         const auto& planets = scene->getPlanets();
@@ -377,12 +377,11 @@ void HUD::update_game(const double& dt) {
             planetsVect.push_back(p.second);
         }
 
-
-        player.setTarget(planetsVect[_countPlanets]->entity().getComponent<ComponentName>()->name(), true);
-        ++_countPlanets;
         if (_countPlanets > planetsVect.size() - 1) {
             _countPlanets = 0;
         }
+        player.setTarget(planetsVect[_countPlanets]->entity().getComponent<ComponentName>()->name(), true);
+        ++_countPlanets;
     }
 }
 void HUD::update_main_menu(const double& dt) {

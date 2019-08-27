@@ -20,6 +20,7 @@ struct PacketPhysicsUpdate;
 struct PacketCloakUpdate;
 struct PacketHealthUpdate;
 struct ShipLogicFunctor;
+struct GameCameraLogicFunctor;
 class  ShipSystemReactor;
 class  ShipSystemMainThrusters;
 class  ShipSystemYawThrusters;
@@ -38,6 +39,7 @@ struct PrimaryWeaponCannon;
 struct SecondaryWeaponTorpedo;
 
 class Ship: public EntityWrapper, public EventObserver {
+    friend struct GameCameraLogicFunctor;
     friend struct ShipLogicFunctor;
     friend  class ShipSystemReactor;
     friend  class ShipSystemMainThrusters;
@@ -62,6 +64,7 @@ class Ship: public EntityWrapper, public EventObserver {
         std::string                          m_ShipClass;
         std::vector<Decal*>                  m_DamageDecals;
         glm::vec3                            m_AimPositionDefault;
+        glm::vec3                            m_CameraOffsetDefault;
     public:
         Ship(
             Client& client,
@@ -74,7 +77,8 @@ class Ship: public EntityWrapper, public EventObserver {
             const glm::vec3 = glm::vec3(0),             //Position
             const glm::vec3 = glm::vec3(1),             //Scale
             CollisionType::Type = CollisionType::ConvexHull,
-            const glm::vec3 aimPosDefault = glm::vec3(0.0f)
+            const glm::vec3 aimPosDefault = glm::vec3(0.0f),
+            const glm::vec3 camOffsetDefault = glm::vec3(0.0f)
         );
         virtual ~Ship();
 

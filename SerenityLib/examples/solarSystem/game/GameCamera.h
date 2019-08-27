@@ -18,8 +18,8 @@ class GameCamera: public Camera{
     public:
         CameraState::State m_State;
         float m_OrbitRadius;
-        Entity m_Target;
-        Entity m_Player;
+        EntityWrapper* m_Target;
+        EntityWrapper* m_Player;
         glm::dvec2 m_CameraMouseFactor;
 
         GameCamera(float clipStart, float clipEnd, Scene* = nullptr);                                                  // Perspective camera Constructor
@@ -27,12 +27,12 @@ class GameCamera: public Camera{
         GameCamera(float left, float right, float bottom, float top, float clipStart, float clipEnd,Scene* = nullptr); // Orthographic camera Constructor
         virtual ~GameCamera();
 
-        void follow(Entity&);
-        void followTarget(Entity& target, Entity& player);
-        void orbit(Entity&);
+        void follow(EntityWrapper*);
+        void followTarget(EntityWrapper* target, EntityWrapper* player);
+        void orbit(EntityWrapper*);
 
-        void setTarget(Entity&);
-        Entity& getTarget();
+        void setTarget(EntityWrapper*);
+        EntityWrapper* getTarget();
         const CameraState::State getState() const;
 
         Entity getObjectInCenterRay(Entity& exclusion);

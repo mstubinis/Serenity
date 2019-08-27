@@ -18,7 +18,7 @@
 using namespace std;
 
 Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, ResourceManifest::BrelMesh, ResourceManifest::BrelMaterial, "Brel", map,player, name, position, scale, collisionType, glm::vec3(0.0f, 0.311455f, 0.397761f)) {
+:Ship(client, ResourceManifest::BrelMesh, ResourceManifest::BrelMaterial, "Brel", map,player, name, position, scale, collisionType, glm::vec3(0.0f, 0.311455f, 0.397761f), glm::vec3(0.0f,0.7f,0.7f)) {
 
     //blender 3d to game 3d: switch y and z, then negate z
 

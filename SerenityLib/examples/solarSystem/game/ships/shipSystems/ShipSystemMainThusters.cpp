@@ -44,13 +44,13 @@ void ShipSystemMainThrusters::update(const double& dt) {
             }
             if (!ismoving) {
                 auto current = rigidbody.getLinearVelocity();
-                const_cast<btRigidBody&>(rigidbody.getBody()).setDamping(0.05f, 0.2f);
+                const_cast<btRigidBody&>(rigidbody.getBtBody()).setDamping(0.05f, 0.2f);
             }else{
-                const_cast<btRigidBody&>(rigidbody.getBody()).setDamping(0.0f, 0.2f);
+                const_cast<btRigidBody&>(rigidbody.getBtBody()).setDamping(0.0f, 0.2f);
             }
         }
     }else{
-        const_cast<btRigidBody&>(rigidbody.getBody()).setDamping(0.0f, 0.2f);
+        const_cast<btRigidBody&>(rigidbody.getBtBody()).setDamping(0.0f, 0.2f);
     }
     ShipSystem::update(dt);
 }

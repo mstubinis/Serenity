@@ -68,30 +68,30 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         #pragma region PlayerCameraControls
         auto& camera = *ship.m_PlayerCamera;
         const auto& cameraState = camera.getState();
-        const Entity& target = camera.getTarget();
+        const auto* target = camera.getTarget();
         if (Engine::isKeyDownOnce(KeyboardKey::F1)) {
-            if (cameraState != CameraState::Follow || (cameraState == CameraState::Follow && target != ship.m_Entity)) {
+            if (cameraState != CameraState::Follow || (cameraState == CameraState::Follow && target != &ship)) {
                 map.centerSceneToObject(ship.m_Entity);
-                camera.follow(ship.m_Entity);
+                camera.follow(&ship);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
-            if (cameraState == CameraState::Follow || !mytarget || target != ship.m_Entity) {
+            if (cameraState == CameraState::Follow || !mytarget || target != &ship) {
                 map.centerSceneToObject(ship.m_Entity);
-                camera.orbit(ship.m_Entity);
+                camera.orbit(&ship);
             }else if (mytarget) {
                 auto dist = glm::distance2(ship.getPosition(), mytarget->getComponent<ComponentBody>()->position());
                 if (dist < 10000000000.0f) { //to prevent FP issues when viewing things billions of km away
                     map.centerSceneToObject(mytarget->entity());
-                    camera.orbit(mytarget->entity());
+                    camera.orbit(mytarget);
                 }
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
-            if (cameraState == CameraState::FollowTarget || (!mytarget && cameraState != CameraState::Follow) || target != ship.m_Entity) {
+            if (cameraState == CameraState::FollowTarget || (!mytarget && cameraState != CameraState::Follow) || target != &ship) {
                 map.centerSceneToObject(ship.m_Entity);
-                camera.follow(ship.m_Entity);
+                camera.follow(&ship);
             }else if (mytarget) {
                 map.centerSceneToObject(ship.m_Entity);
-                camera.followTarget(mytarget->entity(), ship.m_Entity);
+                camera.followTarget(mytarget, &ship);
             }
         }else if (Engine::isKeyDownOnce(KeyboardKey::F4)) {
 			camera.m_State = CameraState::Freeform;
@@ -180,14 +180,15 @@ struct HullCollisionFunctor final {
     }
 };
 
-Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, Map& map, bool player, const string& name, const glm::vec3 pos, const glm::vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault):EntityWrapper(map),m_Client(client){
-    m_WarpFactor         = 0;
-    m_IsPlayer           = player;
-    m_ShipClass          = shipClass;
-    m_IsWarping          = false;
-    m_PlayerCamera       = nullptr;
-    m_MouseFactor        = glm::dvec2(0.0);
-    m_AimPositionDefault = aimPosDefault;
+Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, Map& map, bool player, const string& name, const glm::vec3 pos, const glm::vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client){
+    m_WarpFactor          = 0;
+    m_IsPlayer            = player;
+    m_ShipClass           = shipClass;
+    m_IsWarping           = false;
+    m_PlayerCamera        = nullptr;
+    m_MouseFactor         = glm::dvec2(0.0);
+    m_AimPositionDefault  = aimPosDefault;
+    m_CameraOffsetDefault = camOffsetDefault;
 
     auto& modelComponent     = *addComponent<ComponentModel>(mesh, mat);
     auto& body               = *addComponent<ComponentBody>(collisionType);
@@ -196,8 +197,8 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, M
 
     setModel(mesh);
 
-    const_cast<btRigidBody&>(body.getBody()).setDamping(0.01f, 0.2f);
-    body.getBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
+    const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.01f, 0.2f);
+    body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     body.setPosition(pos);
     body.setScale(scl);
 
@@ -278,7 +279,7 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
     const float z = packet.pz + nearestAnchorPos.z;
 
     auto& body = *getComponent<ComponentBody>();
-    btRigidBody& bulletBody = *const_cast<btRigidBody*>(&body.getBody());
+    btRigidBody& bulletBody = *const_cast<btRigidBody*>(&body.getBtBody());
     bulletBody.activate(true);//this is needed for when objects are far apart, should probably find a way to better do this
     btTransform centerOfMass;
     const btVector3 pos(x, y, z);

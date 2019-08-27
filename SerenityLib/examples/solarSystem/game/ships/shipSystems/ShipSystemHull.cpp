@@ -32,6 +32,11 @@ ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const uint health) :ShipSy
 ShipSystemHull::~ShipSystemHull() {
 
 }
+void ShipSystemHull::destroy() {
+    m_HullEntity.destroy();
+    m_RechargeTimer = 0.0f;
+    m_CollisionTimer = 10.0f;
+}
 void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const bool forceHullFire) {
     auto& decalList = m_Ship.m_DamageDecals;
     Decal* d = nullptr;

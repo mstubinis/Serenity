@@ -52,8 +52,8 @@ class ComponentBody : public ComponentBaseClass {
     private:
         struct PhysicsData {
             Collision*           collision;
-            btRigidBody*         rigidBody;
-            btDefaultMotionState motionState;
+            btRigidBody*         bullet_rigidBody;
+            btDefaultMotionState bullet_motionState;
             float                mass;
             ushort               group;
             ushort               mask;
@@ -160,10 +160,10 @@ class ComponentBody : public ComponentBaseClass {
 		const glm::vec3 getLinearVelocity() const;
 		const glm::vec3 getAngularVelocity() const;
 		const glm::mat4 modelMatrix() const;
-		const btRigidBody& getBody() const;
+		const btRigidBody& getBtBody() const;
 
-        void setCollision(const CollisionType::Type, const float mass);
-        void setCollision(Collision*);
+        void setCollision(const CollisionType::Type collisionType, const float mass);
+        void setCollision(Collision* collision);
 
         void setCollisionGroup(const short& group);  //set the groups this body belongs to
         void setCollisionMask(const short& mask); //set the groups this body will register collisions with

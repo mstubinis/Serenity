@@ -36,7 +36,7 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
 
     MeshRequestPart part;
     part.name = name;
-    part.mesh = new Mesh(name, *static_cast<btHeightfieldTerrainShape*>(c->getShape()), 0.0005f);
+    part.mesh = new Mesh(name, *static_cast<btHeightfieldTerrainShape*>(c->getBtShape()), 0.0005f);
     part.mesh->setName(name);
     part.handle = epriv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
   

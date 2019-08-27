@@ -73,7 +73,7 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const uint health) :
     m_RechargeTimer = 0.0f;
 
     auto& boundBox = m_Ship.getComponent<ComponentModel>()->getModel(0).mesh()->getRadiusBox();
-    auto& btBody = const_cast<btRigidBody&>(shieldBody.getBody());
+    auto& btBody = const_cast<btRigidBody&>(shieldBody.getBtBody());
     shieldBody.addCollisionFlag(CollisionFlag::NoContactResponse);
     shieldBody.setCollisionGroup(CollisionFilter::_Custom_1); //group 1 are shields
     shieldBody.setCollisionMask(CollisionFilter::_Custom_2); //group 2 are weapons

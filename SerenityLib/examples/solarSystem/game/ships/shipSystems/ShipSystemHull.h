@@ -26,6 +26,8 @@ class ShipSystemHull final : public ShipSystem {
         ShipSystemHull(Ship&, Map&, const uint health);
         ~ShipSystemHull();
 
+        void destroy();
+
         void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage);
         void receiveCollision(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float damage);
 

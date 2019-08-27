@@ -141,6 +141,10 @@ class epriv::PhysicsManager::impl final{
                 btRigidBody* body = btRigidBody::upcast(data->world->getCollisionObjectArray()[i]);
                 if (body) {
                     if (body == _rigidBody) {
+                        for (int i = body->getNumConstraintRefs() - 1; i >= 0; i--){
+                            btTypedConstraint* con = body->getConstraintRef(i);
+                            data->world->removeConstraint(con);
+                        }
                         data->world->removeRigidBody(_rigidBody);
                         return;
                     }
@@ -232,7 +236,7 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e, Entit
     if (ignored) {
         ComponentBody* body = ignored->getComponent<ComponentBody>();
         if (body) {
-			const auto& rigid = body->getBody();
+			const auto& rigid = body->getBtBody();
             return Physics::rayCast(_s, _e, &const_cast<btRigidBody&>(rigid));
         }
     }
@@ -245,7 +249,7 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
     for(auto& o : ignored){
         ComponentBody* body = o.getComponent<ComponentBody>();
         if(body){
-			const auto& rigid = body->getBody();
+			const auto& rigid = body->getBtBody();
             objs.push_back(&const_cast<btRigidBody&>(rigid));
         }
     }

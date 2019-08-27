@@ -76,7 +76,7 @@ EntityWrapper* ShipSystemSensors::getTarget() {
 void ShipSystemSensors::setTarget(EntityWrapper* target, const bool sendPacket) {
     if (!target) {
         if (m_Ship.m_IsPlayer && m_Ship.m_PlayerCamera) {
-            m_Ship.m_PlayerCamera->follow(m_Ship.entity());
+            m_Ship.m_PlayerCamera->follow(&m_Ship);
         }
     }
     Ship* ship = dynamic_cast<Ship*>(target);

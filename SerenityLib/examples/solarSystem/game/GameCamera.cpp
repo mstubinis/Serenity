@@ -1,4 +1,5 @@
 #include "GameCamera.h"
+#include "Ship.h"
 
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -23,30 +24,36 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
     switch (camera.m_State) {
         case CameraState::Follow: {
             auto& targetEntity = camera.m_Target;
-            EntityDataRequest dataRequest1(targetEntity);
+            EntityDataRequest dataRequest1(targetEntity->entity());
 
-            auto& targetBody   = *targetEntity.getComponent<ComponentBody>(dataRequest1);
-            auto& targetModel  = *targetEntity.getComponent<ComponentModel>(dataRequest1);
+            auto& targetBody   = *targetEntity->getComponent<ComponentBody>(dataRequest1);
+            auto& targetModel  = *targetEntity->getComponent<ComponentModel>(dataRequest1);
             float targetRadius = targetModel.radius();
 
             camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 3.0f);
 
-            glm::vec3 pos = targetBody.position() + ((targetBody.forward() * glm::length(targetRadius) * 1.7f) + targetBody.up() * glm::length(targetRadius) * 0.3f) * (1.0f + camera.m_OrbitRadius);
+            auto calc2 = ((targetBody.forward() * glm::length(targetRadius) * 1.7f) + targetBody.up() * glm::length(targetRadius) * 0.3f);
+            
+            auto* ship = dynamic_cast<Ship*>(targetEntity);
+            if (ship)
+                calc2 += (targetBody.rotation() * ship->m_CameraOffsetDefault);
+            calc2 *= (1.0f + camera.m_OrbitRadius);
+
+            glm::vec3 pos = targetBody.position() + (calc2);
 
             thisBody.setPosition(pos);
-
-            thisCamera.lookAt(pos, targetBody.position() - targetBody.forward() * 50.0f, targetBody.up());
+            thisCamera.lookAt(pos, targetBody.position() - (glm::vec3(50000.0f) * targetBody.forward()), targetBody.up());
             break;
         }case CameraState::FollowTarget: {
             auto& targetEntity = camera.m_Target;
             auto& playerEntity = camera.m_Player;
-            EntityDataRequest dataRequest1(targetEntity);
-            EntityDataRequest dataRequest2(playerEntity);
+            EntityDataRequest dataRequest1(targetEntity->entity());
+            EntityDataRequest dataRequest2(playerEntity->entity());
 
-            auto& target = *targetEntity.getComponent<ComponentBody>(dataRequest1);
-            auto& player = *playerEntity.getComponent<ComponentBody>(dataRequest2);
-            auto& playerModel = *playerEntity.getComponent<ComponentModel>(dataRequest2);
+            auto& target = *targetEntity->getComponent<ComponentBody>(dataRequest1);
+            auto& player = *playerEntity->getComponent<ComponentBody>(dataRequest2);
+            auto& playerModel = *playerEntity->getComponent<ComponentModel>(dataRequest2);
 
             camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 3.0f);
@@ -64,10 +71,10 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             break;
         }case CameraState::Orbit: {
             auto& targetEntity = camera.m_Target;
-            EntityDataRequest dataRequest1(targetEntity);
+            EntityDataRequest dataRequest1(targetEntity->entity());
 
-            auto& targetBody = *targetEntity.getComponent<ComponentBody>(dataRequest1);
-            auto& targetModel = *targetEntity.getComponent<ComponentModel>(dataRequest1);
+            auto& targetBody = *targetEntity->getComponent<ComponentBody>(dataRequest1);
+            auto& targetModel = *targetEntity->getComponent<ComponentModel>(dataRequest1);
 
 			camera.m_OrbitRadius += Engine::getMouseWheelDelta() * dt * 0.92f;
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 70.0f);
@@ -106,8 +113,8 @@ GameCamera::GameCamera(float n, float f, Scene* scene):GameCamera(60,Resources::
 }
 GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a,r,n,f,scene){
     m_State = CameraState::Freeform;
-    m_Target = Entity::_null;
-    m_Player = Entity::_null;
+    m_Target = nullptr;
+    m_Player = nullptr;
     m_OrbitRadius = 0;
     m_CameraMouseFactor = glm::dvec2(0.0);
     auto& m_Logic = *getComponent<ComponentLogic2>();
@@ -116,8 +123,8 @@ GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a
 }
 GameCamera::GameCamera(float l, float r, float b, float t, float n, float f, Scene* scene):Camera(l,r,b,t,n,f,scene){
     m_State = CameraState::Freeform;
-    m_Target = Entity::_null;
-    m_Player = Entity::_null;
+    m_Target = nullptr;
+    m_Player = nullptr;
     m_OrbitRadius = 0;
     m_CameraMouseFactor = glm::dvec2(0.0);
     auto& m_Logic = *getComponent<ComponentLogic2>();
@@ -154,30 +161,30 @@ Entity GameCamera::getObjectInCenterRay(Entity& exclusion){
     }
     return ret;
 }
-void GameCamera::follow(Entity& target){
-    if (target.null()) 
+void GameCamera::follow(EntityWrapper* target){
+    if (!target) 
         return;
     m_Target = target;
     m_State = CameraState::Follow;
 }
-void GameCamera::followTarget(Entity& target, Entity& player){
-    if (target.null()) 
+void GameCamera::followTarget(EntityWrapper* target, EntityWrapper* player){
+    if (!target) 
         return;
     m_Target = target;
     m_Player = player;
     m_State = CameraState::FollowTarget;
 }
-void GameCamera::orbit(Entity& target){
-    if (target.null()) 
+void GameCamera::orbit(EntityWrapper* target){
+    if (!target) 
         return;
     m_Target = target;
     m_State = CameraState::Orbit;
     m_CameraMouseFactor = glm::dvec2(0.0);
 }
-void GameCamera::setTarget(Entity& target) { 
+void GameCamera::setTarget(EntityWrapper* target) {
     m_Target = target; 
 }
-Entity& GameCamera::getTarget() { 
+EntityWrapper* GameCamera::getTarget() {
     return m_Target; 
 }
 const CameraState::State GameCamera::getState() const { 

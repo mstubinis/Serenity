@@ -106,7 +106,7 @@ void Core::enterMap(const string& mapFile, const string& playership, const strin
     Ship* playerShip = map.createShip(*m_Client, playership, playername, true, glm::vec3(x, y, z));
     map.setPlayer(playerShip);
     GameCamera* playerCamera = (GameCamera*)map.getActiveCamera();
-    playerCamera->follow(playerShip->entity()); 
+    playerCamera->follow(playerShip); 
 
     window.keepMouseInWindow(true);
     window.setMouseCursorVisible(false);
@@ -135,7 +135,7 @@ void Core::init() {
     m_ChosenShip = new EntityWrapper(*s);
 
     auto e = m_ChosenShip->entity();
-    ship_camera->setTarget(e);
+    ship_camera->setTarget(m_ChosenShip);
     auto& body  = *e.addComponent<ComponentBody>();
     body.setPosition(0, 0, 8500);
     auto& model = *e.addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
