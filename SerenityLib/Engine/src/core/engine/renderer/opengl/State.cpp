@@ -255,7 +255,7 @@ const bool OpenGLState::GL_glColorMask(const GLboolean& r, const GLboolean& g, c
 }
 const bool OpenGLState::GL_glClearDepth(const GLdouble& depth) {
     //Values are clamped to the range [0,1]
-    const GLfloat d = glm::clamp(depth, 0.0, 1.0);
+    const GLdouble d = glm::clamp(depth, 0.0, 1.0);
     if (clearDepth.depth == d) {
         return false;
     }

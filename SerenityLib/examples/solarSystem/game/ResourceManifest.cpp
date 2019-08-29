@@ -78,8 +78,6 @@ std::unordered_map<std::string, boost::tuple<Handle, Handle, glm::vec3, glm::vec
 
 std::string ResourceManifest::BasePath;
 
-
-
 void ResourceManifest::init(){
     BasePath = "../";
     

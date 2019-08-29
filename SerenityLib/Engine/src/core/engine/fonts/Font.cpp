@@ -5,6 +5,8 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
 
+#include <sstream>
+
 using namespace Engine;
 using namespace std;
 
