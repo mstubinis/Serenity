@@ -26,7 +26,7 @@ namespace epriv {
             //general text debugging
             std::vector<std::string> text_queue;
         public:
-            DebugManager(const char* name, uint w, uint h);
+            DebugManager();
             ~DebugManager();
 
             void _init(const char* name, uint w, uint h);

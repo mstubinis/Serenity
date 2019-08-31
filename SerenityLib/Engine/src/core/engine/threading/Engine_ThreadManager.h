@@ -20,7 +20,7 @@ namespace epriv{
         public:
             ThreadPool* m_ThreadPool;
 
-            ThreadManager(const char* name,uint w, uint h);
+            ThreadManager();
             ~ThreadManager();
 
             void _update(const double& dt);

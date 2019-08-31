@@ -15,13 +15,13 @@ using namespace Engine::epriv;
 EngineCore* Core::m_Engine = nullptr;
 
 EngineCore::EngineCore(const EngineOptions& options) :
-m_EventManager(options.window_title, options.width, options.height),
+m_EventManager(),
 m_ResourceManager(options.window_title, options.width, options.height),
-m_DebugManager(options.window_title, options.width, options.height),
-m_SoundManager(options.window_title, options.width, options.height),
+m_DebugManager(),
+m_SoundManager(),
 m_RenderManager(options.window_title, options.width, options.height),
-m_PhysicsManager(options.window_title, options.width, options.height),
-m_ThreadManager(options.window_title, options.width, options.height)
+m_PhysicsManager(),
+m_ThreadManager()
 {
     m_Misc.m_Destroyed = m_Misc.m_Paused = false;
 }

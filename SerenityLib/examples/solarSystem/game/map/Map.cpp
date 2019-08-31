@@ -38,7 +38,9 @@ namespace boost_io = boost::iostreams;
 
 Map::Map(const string& n, const string& file):Scene(n){
     m_Player      = nullptr; 
+
     GameCamera* playerCamera = new GameCamera(0.35f,7000000000.0f,this);
+
     setActiveCamera(*playerCamera);
     m_Objects.push_back(playerCamera);
     m_Filename = file;

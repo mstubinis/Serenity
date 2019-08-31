@@ -23,7 +23,7 @@ namespace epriv{
         public:
             class impl; std::unique_ptr<impl> m_i;
 
-            PhysicsManager(const char* name, const uint& w, const uint& h);
+            PhysicsManager();
             ~PhysicsManager();
 
             void _init(const char* name, const uint& w, const uint& h, const uint& numCores);

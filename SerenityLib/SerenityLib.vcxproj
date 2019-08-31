@@ -321,7 +321,9 @@
     <ClInclude Include="Engine\src\core\engine\textures\DDS.h" />
     <ClInclude Include="Engine\src\core\engine\textures\Texture.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h" />
+    <ClInclude Include="Engine\src\core\engine\textures\TextureLoader.h" />
     <ClInclude Include="Engine\src\core\engine\threading\Engine_ThreadManager.h" />
+    <ClInclude Include="Engine\src\core\engine\threading\Queue_ThreadSafe.h" />
     <ClInclude Include="Engine\src\core\engine\threading\ThreadPool.h" />
     <ClInclude Include="Engine\src\core\engine\threading\WorkerThread.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h" />
@@ -426,6 +428,7 @@
     <ClCompile Include="Engine\src\core\engine\sounds\SoundQueue.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />
+    <ClCompile Include="Engine\src\core\engine\textures\TextureLoader.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\ThreadPool.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\WorkerThread.cpp" />

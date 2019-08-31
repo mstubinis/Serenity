@@ -78,7 +78,7 @@ ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& s
     m_ShipDisplay = &scene.addViewport(x + m_ShipWindow->width() + 1, y - m_Height, m_Height - 1, m_Height, camera);
     //m_ShipDisplay->setDepthMaskValue(100.0f);
     //m_ShipDisplay->activateDepthMask(true);
-    m_ShipDisplay->activate2DAPI(false);
+    m_ShipDisplay->removeRenderFlag(ViewportRenderingFlag::API2D);
     m_ShipDisplay->setAspectRatioSynced(true);
 
     auto& thisBody = *camera.entity().getComponent<ComponentBody>();

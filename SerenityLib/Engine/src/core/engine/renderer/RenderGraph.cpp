@@ -5,6 +5,7 @@
 #include <core/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Viewport.h>
+#include <core/engine/threading/Engine_ThreadManager.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
@@ -90,6 +91,7 @@ void RenderPipeline::sort(Camera& camera, const SortingMode::Mode sortingMode) {
 #endif
 }
 void RenderPipeline::clean(const uint entityData) {
+    vector<Engine::epriv::InstanceNode*> newNodesTotal;
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
             auto& instances = meshNode->instanceNodes;
@@ -98,12 +100,56 @@ void RenderPipeline::clean(const uint entityData) {
                 auto entity = instanceNode->instance->parent();
                 if (entity.data != entityData) {
                     newNodes.push_back(instanceNode);
+                    newNodesTotal.push_back(instanceNode);
                 }
             }
             instances.clear();
             std::move(newNodes.begin(), newNodes.end(), std::back_inserter(instances));
         }
     }
+    instancesTotal.clear();
+    std::move(newNodesTotal.begin(), newNodesTotal.end(), std::back_inserter(instancesTotal));
+}
+void RenderPipeline::cpu_execute(Viewport& viewport, Camera& camera, const double& dt) {
+    //sf::Clock c;
+    for (auto& materialNode : materialNodes) {
+        auto& _material = *materialNode->material;
+        _material.update(dt);
+    }  
+    auto lambda = [&](vector<epriv::InstanceNode*>& vector) {
+        for (auto& instanceNode : vector) {
+            auto& _modelInstance = *instanceNode->instance;
+            auto* body = _modelInstance.parent().getComponent<ComponentBody>();
+            auto& model = *_modelInstance.parent().getComponent<ComponentModel>();
+            if (InternalModelInstancePublicInterface::IsViewportValid(_modelInstance, viewport)) {
+                if (body) {
+                    const auto& radius = model.radius();
+                    auto pos = body->position() + _modelInstance.position();
+                    const uint sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
+                    auto comparison = radius * 1100.0f;
+                    if (!_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) { //optimization: using squared distance to remove the sqrt()
+                        _modelInstance.setPassedRenderCheck(false);
+                    }else{
+                        _modelInstance.setPassedRenderCheck(true);
+                    }
+                }else{
+                    _modelInstance.setPassedRenderCheck(false);
+                }
+            }else{
+                _modelInstance.setPassedRenderCheck(false);
+            }
+        }
+    };
+
+
+    lambda(instancesTotal);
+    //this block is for multi-threading this section of code
+    //auto vec = epriv::threading::splitVector(instancesTotal);
+    //for (auto& vector : vec) {
+    //    epriv::threading::addJobRef(lambda, vector);
+    //}
+    //epriv::threading::waitForAll();
+    //std::cout << c.restart().asMicroseconds() << std::endl;
 }
 void RenderPipeline::render(Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
     if(useDefaultShaders) 
@@ -111,7 +157,6 @@ void RenderPipeline::render(Viewport& viewport, Camera& camera, const double& dt
     for (auto& materialNode : materialNodes) {
         if (materialNode->meshNodes.size() > 0) {
             auto& _material = *materialNode->material;
-            _material.update(dt);
             _material.bind();
             for (auto& meshNode : materialNode->meshNodes) {
                 if (meshNode->instanceNodes.size() > 0) {
@@ -119,32 +164,12 @@ void RenderPipeline::render(Viewport& viewport, Camera& camera, const double& dt
                     _mesh.bind();
                     for (auto& instanceNode : meshNode->instanceNodes) {
                         auto& _modelInstance = *instanceNode->instance;
-                        auto body = _modelInstance.parent().getComponent<ComponentBody>();
-                        auto& model = *_modelInstance.parent().getComponent<ComponentModel>();
-
-                        if (epriv::InternalModelInstancePublicInterface::IsViewportValid(_modelInstance, viewport)) {
-                            if (body) {
-                                const auto& radius = model.radius();
-                                auto pos = body->position() + _modelInstance.position();
-                                auto model = body->modelMatrix();
-                                uint sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
-                                auto comparison = radius * 1100.0f;
-
-                                if (!_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) { //optimization: using squared distance to remove the sqrt()
-                                    _modelInstance.setPassedRenderCheck(false);
-                                }else{
-                                    _modelInstance.setPassedRenderCheck(true);
-                                    if (sortingMode != SortingMode::None) {
-                                        _mesh.sortTriangles(camera, _modelInstance, model, sortingMode);
-                                    }
-                                }
-                            }else{
-                                _modelInstance.setPassedRenderCheck(false);
-                            }
-                        }else{
-                            _modelInstance.setPassedRenderCheck(false);
-                        }
+                        auto* body = _modelInstance.parent().getComponent<ComponentBody>();
+                        auto modelMatrix = body->modelMatrix();
                         if (_modelInstance.passedRenderCheck()) {
+                            if (sortingMode != SortingMode::None) {
+                                _mesh.sortTriangles(camera, _modelInstance, modelMatrix, sortingMode);
+                            }
                             _modelInstance.bind();
                             _mesh.render(false);
                             _modelInstance.unbind();

@@ -20,36 +20,37 @@ using namespace Engine;
 using namespace std;
 
 ShipSystemSensors::ShipSystemSensors(Ship& _ship, Map& map, const float& range) :ShipSystem(ShipSystemType::Sensors, _ship),m_Map(map){
-    auto& radarMat = *(Material*)ResourceManifest::RaderMaterial.get();
+    auto& radarMat = *(Material*)ResourceManifest::RadarMaterial.get();
     const auto& radarTexture = *radarMat.getComponent(0).texture();
     const auto& winSize = Resources::getWindowSize();
 
     const auto halfWinWidth = winSize.x / 2.0f;
     const auto halfTextureWidth = radarTexture.width() / 2.0f;
 
-    //m_Camera = new Camera(0.0f, static_cast<float>(winSize.x), 0.0f, static_cast<float>(winSize.y), 0.005f, 1000.0f, &m_Map);
-    m_Camera = new Camera(60.0f, static_cast<float>(winSize.x) / static_cast<float>(winSize.y), 0.005f, 1000.0f, &m_Map);
+
+    const float aspect = static_cast<float>(winSize.x) / static_cast<float>(winSize.y);
+    m_Camera = new Camera(-1.0f, 1.0f, -1.0f, 1.0f, 0.0005f, 100.0f, &m_Map);
 
 
     m_ViewportObject = &m_Map.addViewport(halfWinWidth - halfTextureWidth, 0, radarTexture.width(), radarTexture.height(), *m_Camera);
+    m_Viewport = glm::vec4(halfWinWidth - halfTextureWidth, 0, radarTexture.width(), radarTexture.height());
+
     m_ViewportObject->activate();
-    m_ViewportObject->activate2DAPI(false);
+    m_ViewportObject->removeRenderFlag(ViewportRenderingFlag::API2D);
     //m_ViewportObject->setSkyboxVisible(false);
     m_ViewportObject->activateDepthMask();
-    m_ViewportObject->setDepthMaskValue(15);
+    m_ViewportObject->setDepthMaskValue(99.8f);
+    m_ViewportObject->removeRenderFlag(ViewportRenderingFlag::GodRays);
 
     m_RadarRingEntity = map.createEntity();
     m_RadarRingEntity.addComponent<ComponentBody>();
-    auto& radarModel = *m_RadarRingEntity.addComponent<ComponentModel>(ResourceManifest::RadarDiscMesh,Material::WhiteShadeless,ShaderProgram::Deferred,RenderStage::GeometryTransparent);
+    auto& radarModel = *m_RadarRingEntity.addComponent<ComponentModel>(ResourceManifest::RadarDiscMesh,Material::WhiteShadeless,ShaderProgram::Deferred,RenderStage::GeometryOpaque);
     radarModel.getModel().setColor(1, 1, 0, 1);
     radarModel.getModel().setViewportFlag(ViewportFlag::_2);
+    radarModel.getModel().setScale(0.95f);
 
     m_RadarRange = range;
     m_Target = nullptr;
-
-    const auto& radarTextureWidth = radarTexture.width();
-    const auto& radarTextureHalfWidth = static_cast<float>(radarTexture.height()) / 2.0f;
-    m_Viewport = glm::vec4((winSize.x / 2) - radarTextureHalfWidth, 0, radarTextureWidth, radarTexture.height());
 }
 ShipSystemSensors::~ShipSystemSensors() {
 
@@ -61,7 +62,7 @@ const Entity& ShipSystemSensors::radarCameraEntity() const {
     return m_Camera->entity();
 }
 void ShipSystemSensors::onResize(const uint& width, const uint& height) {
-    auto& radarMat = *(Material*)ResourceManifest::RaderMaterial.get();
+    auto& radarMat = *(Material*)ResourceManifest::RadarMaterial.get();
     const auto& radarTexture = *radarMat.getComponent(0).texture();
 
     const auto halfWinWidth = width / 2.0f;
@@ -125,7 +126,7 @@ void ShipSystemSensors::update(const double& dt) {
 
     auto& camBody = *m_Camera->getComponent<ComponentBody>();
     const auto shipForward = m_Ship.forward();
-    const auto extendedForward = shipForward * 100000.0f;
+    const auto extendedForward = shipForward  * 100000.0f;
     camBody.setPosition(m_Ship.getPosition() - extendedForward);
     camBody.setRotation(m_Ship.getRotation());
     const auto camPos = camBody.position();
@@ -150,7 +151,7 @@ void ShipSystemSensors::render() {
 
     const auto& winSize = Resources::getWindowSize();
 
-    auto& radarMat = *(Material*)ResourceManifest::RaderMaterial.get();
+    auto& radarMat = *(Material*)ResourceManifest::RadarMaterial.get();
     auto& radarEdgeMat = *(Material*)ResourceManifest::RadarEdgeMaterial.get();
     auto& radarTokenMat = *(Material*)ResourceManifest::RadarTokenMaterial.get();
 
@@ -201,7 +202,8 @@ void ShipSystemSensors::render() {
             otherVector *= glm::min((otherLen / m_RadarRange + 0.01f), 1.0f);
             otherVector = radarBodyPosition + otherVector;
 
-            const auto pos = Math::getScreenCoordinates(otherVector, *m_Camera, m_Camera->getView(), m_Camera->getProjection(), m_Viewport, false);
+            const auto pos = Math::getScreenCoordinates(otherVector, *m_Camera, m_Viewport, false);
+
             const glm::vec2 pos2D = glm::vec2(pos.x, pos.y);
             const float dotproduct = glm::dot(radarBodyPosition + m_Ship.forward(), otherVector - radarBodyPosition);
             if (dotproduct <= 0 /*&& !modByCloak*/) {

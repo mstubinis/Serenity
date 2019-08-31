@@ -60,7 +60,7 @@ struct ResourceManifest{
     static Handle CrosshairArrowMaterial;
     static Handle RadarEdgeMaterial;
     static Handle RadarTokenMaterial;
-    static Handle RaderMaterial;
+    static Handle RadarMaterial;
     static Handle StarFlareMaterial;
     static Handle ShieldMaterial;
     

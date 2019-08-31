@@ -11,12 +11,12 @@ Viewport::Viewport(const Scene& scene, const Camera& camera):m_Scene(const_cast<
     const auto& winSize   = Resources::getWindowSize();
     setViewportDimensions(0, 0, winSize.x, winSize.y);
     activate();
-    activate2DAPI();
     setAspectRatioSynced(true);
-    setSkyboxVisible(true);
 
     setDepthMaskValue(50.0f);
     activateDepthMask(false);
+
+    m_RenderFlags = ViewportRenderingFlag::_ALL;
 
     setBackgroundColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
@@ -29,12 +29,7 @@ const unsigned short& Viewport::id() const {
 void Viewport::setID(const unsigned short& id) {
     m_ID = id;
 }
-const bool& Viewport::isSkyboxVisible() const {
-    return m_SkyboxVisible;
-}
-void Viewport::setSkyboxVisible(const bool& visible) {
-    m_SkyboxVisible = visible;
-}
+
 
 const float& Viewport::getDepthMaskValue() const {
     return m_DepthMaskValue;
@@ -72,12 +67,6 @@ const Scene& Viewport::getScene() const {
 const Camera& Viewport::getCamera() const {
     return *m_Camera;
 }
-void Viewport::activate2DAPI(const bool& active) {
-    m_Using2DAPI = active;
-}
-const bool Viewport::isUsing2DAPI() const {
-    return m_Using2DAPI;
-}
 void Viewport::activate(const bool& active) {
     m_Active = active;
 }
@@ -100,4 +89,16 @@ void Viewport::setViewportDimensions(const unsigned int& x, const unsigned int& 
 }
 const glm::uvec4& Viewport::getViewportDimensions() const {
     return m_Viewport_Dimensions;
+}
+const unsigned int& Viewport::getRenderFlags() const {
+    return m_RenderFlags;
+}
+void Viewport::setRenderFlag(const ViewportRenderingFlag::Flag& flag) {
+    m_RenderFlags = static_cast<unsigned int>(flag);
+}
+void Viewport::addRenderFlag(const ViewportRenderingFlag::Flag& flag) {
+    m_RenderFlags = m_RenderFlags | static_cast<unsigned int>(flag);
+}
+void Viewport::removeRenderFlag(const ViewportRenderingFlag::Flag& flag) {
+    m_RenderFlags = m_RenderFlags & ~static_cast<unsigned int>(flag);
 }

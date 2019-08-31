@@ -1,5 +1,6 @@
 #include <core/engine/threading/WorkerThread.h>
 #include <core/engine/threading/ThreadPool.h>
+#include <core/engine/threading/Queue_ThreadSafe.h>
 #include <core/engine/utils/Utils.h>
 
 #include <future>
@@ -33,7 +34,7 @@ void WorkerThread::detach() {
 }
 void WorkerThread::Loop(WorkerThread& worker, ThreadPool& pool) {
     while (!worker.m_Stopped) {
-        std::shared_ptr<std::packaged_task<void()>> job = nullptr;
+        std::shared_ptr<std::packaged_task<void()>> job;
         {
             std::unique_lock<std::mutex> lock(pool.m_Mutex);
             pool.m_Condition.wait(lock, [&] {
@@ -52,7 +53,6 @@ void WorkerThread::Loop(WorkerThread& worker, ThreadPool& pool) {
             job = pool.m_Tasks.front();
             pool.m_Tasks.pop();
         }
-        if(job)
-            (*job)();
+        (*job)();
     }
 }

@@ -32,7 +32,7 @@ namespace Engine{
 
 
 
-                EventManager(const char* name, const uint w, const uint h);
+                EventManager();
                 ~EventManager();
 
                 void setMousePositionInternal(const float x, const float y, const bool resetDifference, const bool resetPrevious);

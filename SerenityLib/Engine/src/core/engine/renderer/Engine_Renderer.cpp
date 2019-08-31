@@ -1618,7 +1618,7 @@ class epriv::RenderManager::impl final{
 
             GLEnablei(GL_BLEND, 0); //this is needed for sure
             InternalScenePublicInterface::RenderGeometryOpaque(scene, viewport, camera, dt);
-            if (viewport.isSkyboxVisible()) {
+            if ((viewport.getRenderFlags() & ViewportRenderingFlag::Skybox)) {
                 _renderSkybox(scene.skybox(), scene, viewport, camera);
             }
             InternalScenePublicInterface::RenderGeometryTransparent(scene, viewport, camera, dt);
@@ -1907,7 +1907,7 @@ class epriv::RenderManager::impl final{
             //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
             gbuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
             Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
-            if (SSAO::ssao.m_ssao) {
+            if (SSAO::ssao.m_ssao && (viewport.getRenderFlags() & ViewportRenderingFlag::SSAO)) {
                 GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
                 gbuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
                 auto& ssaoShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO];
@@ -1955,7 +1955,7 @@ class epriv::RenderManager::impl final{
             Settings::clear(true, false, false); //godrays rgb channels cleared to black
             auto& godRaysPlatform = GodRays::godRays;
 
-            if (godRaysPlatform.godRays_active && godRaysPlatform.sun) {
+            if ((viewport.getRenderFlags() & ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active && godRaysPlatform.sun) {
                 auto& body = *godRaysPlatform.sun->getComponent<ComponentBody>();
                 const glm::vec3& oPos = body.position();
                 const glm::vec3& camPos = camera.getPosition();
@@ -1988,7 +1988,7 @@ class epriv::RenderManager::impl final{
             
             #pragma region Bloom
             //TODO: possible optimization: use stencil buffer to reject completely black pixels during blur passes
-            if (Bloom::bloom.bloom_active) {
+            if (Bloom::bloom.bloom_active && (viewport.getRenderFlags() & ViewportRenderingFlag::Bloom)) {
                 gbuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
                 auto& bloomShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom];
                 Bloom::bloom.pass(bloomShader, gbuffer, dimensions.z, dimensions.w, GBufferType::Lighting);
@@ -2004,7 +2004,7 @@ class epriv::RenderManager::impl final{
             GBufferType::Type sceneTexture = GBufferType::Misc;
             GBufferType::Type outTexture = GBufferType::Lighting;
             #pragma region DOF
-            if (DepthOfField::DOF.dof) {
+            if (DepthOfField::DOF.dof && (viewport.getRenderFlags() & ViewportRenderingFlag::DepthOfField)) {
                 auto& dofShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF];
                 gbuffer.bindFramebuffers(outTexture);
                 DepthOfField::DOF.pass(dofShader,gbuffer, dimensions.z, dimensions.w, sceneTexture);
@@ -2014,12 +2014,12 @@ class epriv::RenderManager::impl final{
             #pragma endregion
             glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             #pragma region Finalization and AA
-            if (!mainRenderFunc || aa_algorithm == AntiAliasingAlgorithm::None){
+            if (!mainRenderFunc || aa_algorithm == AntiAliasingAlgorithm::None || !(viewport.getRenderFlags() & ViewportRenderingFlag::GodRays)){
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport,camera,outTexture);
-            }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::FXAA){
+            }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::FXAA && (viewport.getRenderFlags() & ViewportRenderingFlag::GodRays)){
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
                 gbuffer.bindFramebuffers(sceneTexture);
@@ -2029,7 +2029,7 @@ class epriv::RenderManager::impl final{
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport, camera, sceneTexture);
 
-            }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::SMAA){
+            }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::SMAA && (viewport.getRenderFlags() & ViewportRenderingFlag::GodRays)){
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
 
@@ -2064,7 +2064,7 @@ class epriv::RenderManager::impl final{
             
             #pragma region RenderPhysics
             GLEnablei(GL_BLEND, 0);
-            if(mainRenderFunc){
+            if(mainRenderFunc && (viewport.getRenderFlags() & ViewportRenderingFlag::PhysicsDebug)){
                 if(draw_physics_debug  &&  &camera == scene.getActiveCamera()){
                     GLDisable(GL_DEPTH_TEST);
                     glDepthMask(GL_FALSE);
@@ -2079,7 +2079,7 @@ class epriv::RenderManager::impl final{
             GLEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
             if(mainRenderFunc){
-                if(viewport.isUsing2DAPI()){
+                if((viewport.getRenderFlags() & ViewportRenderingFlag::API2D)){
                     Settings::clear(false,true,false); //clear depth only
                     m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI]->bind();
                     sendUniformMatrix4("VP", m_2DProjectionMatrix);

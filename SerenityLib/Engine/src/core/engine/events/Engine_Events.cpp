@@ -8,7 +8,7 @@ using namespace std;
 
 EventManager* EventManager::m_EventManager = nullptr;
 
-EventManager::EventManager(const char* name, const uint w, const uint h):m_EventDispatcher(){
+EventManager::EventManager(){
     m_Delta = 0;
     m_Position = m_Position_Previous = m_Difference = glm::vec2(0.0f);
 

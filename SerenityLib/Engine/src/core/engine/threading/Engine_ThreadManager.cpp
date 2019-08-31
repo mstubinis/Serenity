@@ -6,7 +6,7 @@ using namespace std;
 
 epriv::ThreadManager* threadManager;
 
-epriv::ThreadManager::ThreadManager(const char* name, uint w, uint h){ 
+epriv::ThreadManager::ThreadManager(){ 
     m_ThreadPool = new ThreadPool();
     threadManager = this;
 }

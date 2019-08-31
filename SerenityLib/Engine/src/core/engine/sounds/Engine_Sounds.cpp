@@ -14,7 +14,7 @@ using namespace std;
 epriv::SoundManager* soundManager;
 
 
-epriv::SoundManager::SoundManager(const char* name,uint w,uint h){ 
+epriv::SoundManager::SoundManager(){ 
     soundManager = this;
     for (unsigned int i = 0; i < SoundManager::MAX_SOUND_EFFECTS; ++i) {
         m_FreelistEffects.push(i);

@@ -41,8 +41,9 @@ namespace Engine {
         class RenderPipeline final {
             friend class ::Scene;
             private:
-                ShaderProgram&              shaderProgram;
-                std::vector<MaterialNode*>  materialNodes;
+                ShaderProgram&               shaderProgram;
+                std::vector<MaterialNode*>   materialNodes;
+                std::vector<InstanceNode*>   instancesTotal;
             public:
                 RenderPipeline(ShaderProgram&);
                 ~RenderPipeline();
@@ -51,6 +52,7 @@ namespace Engine {
                 void sort(Camera& camera, const SortingMode::Mode sortingMode);
                 void sort_cheap(Camera& camera, const SortingMode::Mode sortingMode);
                 void render(Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
+                void cpu_execute(Viewport& viewport, Camera& camera, const double& dt);
         };
     };
 };

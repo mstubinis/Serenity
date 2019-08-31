@@ -306,6 +306,10 @@ void ModelInstance::setOrientation(const float& x, const float& y, const float& 
     Math::setRotation(m_Orientation, x, y, z);
     internalUpdateModelMatrix();
 }
+void ModelInstance::setScale(const float& scale) {
+    m_Scale = glm::vec3(scale, scale, scale);
+    internalUpdateModelMatrix();
+}
 void ModelInstance::setScale(const float& x, const float& y, const float& z){
     m_Scale = glm::vec3(x, y, z);
     internalUpdateModelMatrix();

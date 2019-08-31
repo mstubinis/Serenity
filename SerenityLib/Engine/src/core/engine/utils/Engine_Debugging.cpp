@@ -9,7 +9,7 @@
 using namespace Engine;
 using namespace std;
 
-epriv::DebugManager::DebugManager(const char* name, uint w, uint h){ 
+epriv::DebugManager::DebugManager(){ 
     clock = sf::Clock();
     output = "";
     m_logicTime = m_physicsTime = m_renderTime = m_soundTime = 0;

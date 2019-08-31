@@ -33,7 +33,7 @@ namespace Engine{
 
                 std::vector<SoundQueue*>       m_SoundQueues;
 
-                SoundManager(const char* name,uint w,uint h);
+                SoundManager();
                 ~SoundManager();
 
                 void _update(const double& dt);

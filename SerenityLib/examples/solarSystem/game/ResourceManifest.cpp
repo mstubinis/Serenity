@@ -59,7 +59,7 @@ Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
 Handle ResourceManifest::RadarEdgeMaterial;
 Handle ResourceManifest::RadarTokenMaterial;
-Handle ResourceManifest::RaderMaterial;
+Handle ResourceManifest::RadarMaterial;
 Handle ResourceManifest::StarFlareMaterial;
 Handle ResourceManifest::ShieldMaterial;
 
@@ -236,8 +236,7 @@ void ResourceManifest::init(){
     CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow", BasePath + "data/Textures/HUD/CrosshairArrow.dds");
     RadarEdgeMaterial = Resources::addMaterial("RadarEdge", BasePath + "data/Textures/HUD/RadarEdge.dds");
     RadarTokenMaterial = Resources::addMaterial("RadarToken", BasePath + "data/Textures/HUD/RadarToken.dds");
-    RaderMaterial = Resources::addMaterial("Radar", BasePath + "data/Textures/HUD/Radar.dds");
-
+    RadarMaterial = Resources::addMaterial("Radar", BasePath + "data/Textures/HUD/Radar.dds");
 
     auto& crosshairDiffuse = *(((Material*)CrosshairMaterial.get())->getComponent(0).texture());
     auto& crosshairArrowDiffuse = *(((Material*)CrosshairArrowMaterial.get())->getComponent(0).texture());

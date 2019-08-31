@@ -42,7 +42,7 @@ class epriv::PhysicsManager::impl final{
         PhysicsWorld* data;
         bool m_Paused;
 
-        void _init(const char* name, const uint& w, const uint& h){
+        void _init(){
             m_Paused = false;      
         }
         void _postInit(const char* name, const uint& w, const uint& h, const uint& numCores){
@@ -157,8 +157,9 @@ class epriv::PhysicsManager::impl final{
 };
 epriv::PhysicsManager::impl* physicsManager;
 
-epriv::PhysicsManager::PhysicsManager(const char* name, const uint& w, const uint& h):m_i(new impl){ 
-    m_i->_init(name,w,h); physicsManager = m_i.get(); 
+epriv::PhysicsManager::PhysicsManager():m_i(new impl){ 
+    m_i->_init();
+    physicsManager = m_i.get(); 
 }
 epriv::PhysicsManager::~PhysicsManager(){ 
     m_i->_destruct(); 

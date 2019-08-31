@@ -35,13 +35,13 @@ namespace Engine {
         class ThreadPool {
             friend class WorkerThread;
             private:
-                std::condition_variable                                   m_Condition;
-                std::mutex                                                m_Mutex;
-                std::queue<std::shared_ptr<std::packaged_task<void()>>>   m_Tasks;
-                std::vector<WorkerThread*>                                m_WorkerThreads;
-                std::vector<ThreadPoolFuture*>                            m_Futures;
-                bool                                                      m_Terminated;
-                bool                                                      m_Stopped;
+                std::condition_variable                                         m_Condition;
+                std::mutex                                                      m_Mutex;
+                std::queue<std::shared_ptr<std::packaged_task<void()>>>         m_Tasks;
+                std::vector<WorkerThread*>                                      m_WorkerThreads;
+                std::vector<ThreadPoolFuture*>                                  m_Futures;
+                bool                                                            m_Terminated;
+                bool                                                            m_Stopped;
 
                 void init(const unsigned int num_threads);
             public:

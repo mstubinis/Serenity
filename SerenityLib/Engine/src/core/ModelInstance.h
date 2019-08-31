@@ -136,13 +136,24 @@ class ModelInstance final: public BindableResource{
         void setMaterial(const Handle& materialHandle, ComponentModel&);
         void setMaterial(Material*, ComponentModel&);
 
-        void setPosition(const float& x, const float& y, const float& z);             void setPosition(const glm::vec3& position);
-        void setOrientation(const glm::quat& orientation);                            void setOrientation(const float& x, const float& y, const float& z);
-        void setScale(const float& x, const float& y, const float& z);                void setScale(const glm::vec3& scale);
+        void setPosition(const float& x, const float& y, const float& z);
+        void setPosition(const glm::vec3& position);
 
-        void translate(const float& x, const float& y, const float& z);               void translate(const glm::vec3& translation);
-        void rotate(const float& pitch, const float& yaw, const float& roll);         void rotate(const glm::vec3& rotation);
-        void scale(const float& x, const float& y, const float& z);                   void scale(const glm::vec3& scale);
+        void setOrientation(const glm::quat& orientation);
+        void setOrientation(const float& x, const float& y, const float& z);
+
+        void setScale(const float& scale);
+        void setScale(const float& x, const float& y, const float& z);
+        void setScale(const glm::vec3& scale);
+
+        void translate(const float& x, const float& y, const float& z);
+        void translate(const glm::vec3& translation);
+
+        void rotate(const float& pitch, const float& yaw, const float& roll);
+        void rotate(const glm::vec3& rotation);
+
+        void scale(const float& x, const float& y, const float& z);
+        void scale(const glm::vec3& scale);
 };
 
 #endif

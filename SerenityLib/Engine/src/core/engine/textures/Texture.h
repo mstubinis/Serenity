@@ -2,41 +2,14 @@
 #ifndef ENGINE_TEXTURE_INCLUDE_GUARD
 #define ENGINE_TEXTURE_INCLUDE_GUARD
 
-#include <core/engine/textures/TextureIncludes.h>
+#include <core/engine/textures/TextureLoader.h>
 #include <core/engine/resources/Engine_ResourceBasic.h>
 #include <core/engine/renderer/GLImageConstants.h>
 
-#include <glm/fwd.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec4.hpp>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-
-namespace Engine{
-namespace epriv{
-    struct TextureLoader final{
-        friend class ::Texture;
-
-        static void LoadDDSFile(Texture& texture, const std::string& filename, epriv::ImageLoadedStructure& image);
-
-        static void LoadTexture2DIntoOpenGL(Texture& texture);
-        static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
-        static void LoadTextureCubemapIntoOpenGL(Texture& texture);
-
-        static void EnumWrapToGL(uint& gl, const TextureWrap::Wrap& wrap);
-        static void EnumFilterToGL(uint& gl, const TextureFilter::Filter& filter, const bool& min);
-        static const bool IsCompressedType(const ImageInternalFormat::Format&);
-
-        static void GenerateMipmapsOpenGL(Texture& texture);
-        static void WithdrawPixelsFromOpenGLMemory(Texture& texture, const uint& imageIndex = 0, const uint& mipmapLevel = 0);
-        static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat, const ImageInternalFormat::Format& inInternalFormat);
-    };
-    struct InternalTexturePublicInterface final {
-        static void LoadCPU(Texture&);
-        static void LoadGPU(Texture&);
-        static void UnloadCPU(Texture&);
-        static void UnloadGPU(Texture&);
-    };
-};
-};
 
 class Texture: public EngineResource{
     friend struct Engine::epriv::TextureLoader;
@@ -45,7 +18,15 @@ class Texture: public EngineResource{
     public:
         static Texture *White, *Black, *Checkers, *BRDF; //loaded in renderer
     private:
-        class impl; std::unique_ptr<impl> m_i;
+        std::vector<Engine::epriv::ImageLoadedStructure*>   m_ImagesDatas;
+        std::vector<GLuint>                                 m_TextureAddress;
+        GLuint                                              m_Type;
+        TextureType::Type                                   m_TextureType;
+        bool                                                m_Mipmapped;
+        bool                                                m_IsToBeMipmapped;
+        GLuint                                              m_MinFilter; //used to determine filter type for mipmaps
+
+        void init_common(const GLuint& _openglTextureType, const bool& _toBeMipmapped);
     public:
         //Framebuffer
         Texture(const uint& renderTgtWidth,const uint& renderTgtHeight,const ImagePixelType::Type&,const ImagePixelFormat::Format&,const ImageInternalFormat::Format&,const float& divisor = 1.0f);
@@ -94,6 +75,5 @@ class Texture: public EngineResource{
         static void setFilter(const GLuint& type, const TextureFilter::Filter&);
 
         void render(const glm::vec2& pos, const glm::vec4& color, const float& angle = 0.0f, const glm::vec2& scale = glm::vec2(1.0f), const float& depth = 0.1f);
-        void genPBREnvMapData(const uint& convoludeTextureSize, const uint& preEnvFilterSize);
 };
 #endif

@@ -13,6 +13,22 @@ namespace Engine {
     };
 };
 
+struct ViewportRenderingFlag final {
+    enum Flag {
+        GodRays      = 1 << 0,
+        SSAO         = 1 << 1,
+        API2D        = 1 << 2,
+        HDR          = 1 << 3,
+        PhysicsDebug = 1 << 4,
+        AntiAliasing = 1 << 5,
+        Fog          = 1 << 6,
+        DepthOfField = 1 << 7,
+        Skybox       = 1 << 8,
+        Bloom        = 1 << 9,
+        _ALL         =     -1,
+    };
+};
+
 class Viewport final {
     friend class Scene;
     friend class Engine::epriv::RenderManager;
@@ -21,13 +37,12 @@ class Viewport final {
         Camera*        m_Camera;
         glm::uvec4     m_Viewport_Dimensions;
         bool           m_Active;
-        bool           m_Using2DAPI;
         bool           m_AspectRatioSynced;
-        bool           m_SkyboxVisible;
         glm::vec4      m_BackgroundColor;
         bool           m_DepthMaskActive;
         float          m_DepthMaskValue;
         unsigned short m_ID;
+        unsigned int   m_RenderFlags;
     public:
         Viewport(const Scene& scene, const Camera& camera);
 
@@ -41,9 +56,10 @@ class Viewport final {
         const unsigned short& id() const;
         void setID(const unsigned short& id);
 
-        const bool& isSkyboxVisible() const;
-        void setSkyboxVisible(const bool& visible = true);
-
+        const unsigned int& getRenderFlags() const;
+        void setRenderFlag(const ViewportRenderingFlag::Flag& flag);
+        void addRenderFlag(const ViewportRenderingFlag::Flag& flag);
+        void removeRenderFlag(const ViewportRenderingFlag::Flag& flag);
 
         const float& getDepthMaskValue() const;
         void setDepthMaskValue(const float& depth);
@@ -60,8 +76,6 @@ class Viewport final {
         void activate(const bool& activate = true);
         const bool isActive() const;
 
-        void activate2DAPI(const bool& active = true);
-        const bool isUsing2DAPI() const;
 
         const Scene& getScene() const;
         const Camera& getCamera() const;

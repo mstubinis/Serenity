@@ -126,7 +126,7 @@ void Core::init() {
     Camera* main_camera = new Camera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y), 0.1f, 15000.0f, s);
     GameCamera* ship_camera = new GameCamera(0.1f, 50.0f, s);
     s->setActiveCamera(*main_camera);
-    s->getMainViewport().setSkyboxVisible(false);
+    s->getMainViewport().removeRenderFlag(ViewportRenderingFlag::Skybox);
 
     SunLight* light = new SunLight(glm::vec3(0.0f), LightType::Sun, s);
     light->setColor(1.55f, 1.55f, 1.3f);

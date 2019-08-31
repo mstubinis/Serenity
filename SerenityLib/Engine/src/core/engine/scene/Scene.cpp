@@ -128,6 +128,7 @@ struct Scene::impl final {
         if (!instanceNode) {
             instanceNode = new InstanceNode(_modelInstance);
             meshNode->instanceNodes.push_back(instanceNode);
+            _pipeline->instancesTotal.push_back(instanceNode);
         }
     }
     void _removeModelInstanceFromPipeline(Scene& _scene, ModelInstance& _modelInstance, const vector<RenderPipeline*>& _pipelinesList, const RenderStage::Stage& _stage) {
@@ -163,6 +164,7 @@ struct Scene::impl final {
             }
             if (meshNode) {
                 removeFromVector(meshNode->instanceNodes, instanceNode);
+                removeFromVector(_pipeline->instancesTotal, instanceNode);
                 SAFE_DELETE(instanceNode);
                 if (meshNode->instanceNodes.size() == 0) {
                     removeFromVector(materialNode->meshNodes, meshNode);
@@ -209,6 +211,7 @@ void InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene, Viewport& 
     for (uint i = RenderStage::GeometryOpaque; i < RenderStage::GeometryOpaque_4; ++i) {
         for (auto& pipeline : scene.m_i->m_Pipelines[i]) {
             //pipeline->sort(camera, SortingMode::BackToFront);
+            pipeline->cpu_execute(viewport, camera, dt);
             pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::None);
         }
     }
@@ -217,6 +220,7 @@ void InternalScenePublicInterface::RenderGeometryTransparent(Scene& scene, Viewp
     for (uint i = RenderStage::GeometryTransparent; i < RenderStage::GeometryTransparent_4; ++i) {
         for (auto& pipeline : scene.m_i->m_Pipelines[i]) {
             pipeline->sort(camera, SortingMode::BackToFront);
+            pipeline->cpu_execute(viewport, camera, dt);
             pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::None);
         }
     }
@@ -225,6 +229,7 @@ void InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(Scen
     for (uint i = RenderStage::GeometryTransparentTrianglesSorted; i < RenderStage::GeometryTransparentTrianglesSorted_4; ++i) {
         for (auto& pipeline : scene.m_i->m_Pipelines[i]) {
             pipeline->sort(camera, SortingMode::FrontToBack);
+            pipeline->cpu_execute(viewport, camera, dt);
             pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::FrontToBack);
         }
     }
@@ -233,6 +238,7 @@ void InternalScenePublicInterface::RenderForwardOpaque(Scene& scene, Viewport& v
     for (uint i = RenderStage::ForwardOpaque; i < RenderStage::ForwardOpaque_4; ++i) {
         for (auto& pipeline : scene.m_i->m_Pipelines[i]) {
             //pipeline->sort(camera, SortingMode::BackToFront);
+            pipeline->cpu_execute(viewport, camera, dt);
             pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::None);
         }
     }
@@ -241,6 +247,7 @@ void InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Viewpo
     for (uint i = RenderStage::ForwardTransparent; i < RenderStage::ForwardTransparent_4; ++i) {
         for (auto& pipeline : scene.m_i->m_Pipelines[i]) {
             pipeline->sort(camera, SortingMode::BackToFront);
+            pipeline->cpu_execute(viewport, camera, dt);
             pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::None);
         }
     }
@@ -249,6 +256,7 @@ void InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(Scene
     for (uint i = RenderStage::ForwardTransparentTrianglesSorted; i < RenderStage::ForwardTransparentTrianglesSorted_4; ++i) {
         for (auto& pipeline : scene.m_i->m_Pipelines[i]) {
             pipeline->sort(camera, SortingMode::FrontToBack);
+            pipeline->cpu_execute(viewport, camera, dt);
             pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::FrontToBack);
         }
     }
@@ -257,6 +265,7 @@ void InternalScenePublicInterface::RenderForwardParticles(Scene& scene, Viewport
     for (uint i = RenderStage::ForwardParticles; i < RenderStage::ForwardParticles_4; ++i) {
         for (auto& pipeline : scene.m_i->m_Pipelines[i]) {
             pipeline->sort(camera, SortingMode::BackToFront);
+            pipeline->cpu_execute(viewport, camera, dt);
             pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::BackToFront);
         }
     }
@@ -265,6 +274,7 @@ void InternalScenePublicInterface::RenderDecals(Scene& scene, Viewport& viewport
     for (uint i = RenderStage::Decals; i < RenderStage::Decals_4; ++i) {
         for (auto& pipeline : scene.m_i->m_Pipelines[i]) {
             pipeline->sort(camera, SortingMode::None);
+            pipeline->cpu_execute(viewport, camera, dt);
             pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::None);
         }
     }
