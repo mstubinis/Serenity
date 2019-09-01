@@ -5,6 +5,9 @@
 #include <core/engine/materials/Material.h>
 #include <core/engine/textures/Texture.h>
 
+#include <iostream>
+#include <SFML/System.hpp>
+
 using namespace Engine;
 
 Handle ResourceManifest::skyFromSpace;
@@ -98,42 +101,69 @@ void ResourceManifest::init(){
     Handle shieldsFrag = Resources::addShader(BasePath + "data/Shaders/shields_frag.glsl", ShaderType::Fragment);
     shieldsShaderProgram = Resources::addShaderProgram("ShieldsShaderProgram", shieldsVert, shieldsFrag);
 
-    PlanetMesh = Resources::loadMeshAsync(BasePath + "data/Models/planet.objcc").at(0);
-    DefiantMesh = Resources::loadMeshAsync(BasePath + "data/Models/defiant.objcc").at(0); //220 metres long (0.22 km)
-    RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc").at(0);
-    ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc").at(0);
-    ShieldColMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields_Col.objcc").at(0);
-    RadarDiscMesh = Resources::loadMeshAsync(BasePath + "data/Models/radar_disc.objcc").at(0);
-    CannonEffectMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_bolt.objcc").at(0);
-    CannonTailMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_tail.objcc").at(0);
-    CannonEffectOutlineMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_outline.objcc").at(0);
-
+    PlanetMesh = Resources::loadMeshAsync(BasePath + "data/Models/planet.objcc")[0];
+    DefiantMesh = Resources::loadMeshAsync(BasePath + "data/Models/defiant.objcc")[0]; //220 metres long (0.22 km)
+    RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc")[0];
+    ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc")[0];
+    ShieldColMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields_Col.objcc")[0];
+    RadarDiscMesh = Resources::loadMeshAsync(BasePath + "data/Models/radar_rings.objcc")[0];
+    CannonEffectMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_bolt.objcc")[0];
+    CannonTailMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_tail.objcc")[0];
+    CannonEffectOutlineMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_outline.objcc")[0];
 
 	//extras
-	NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc").at(0);
-    MirandaMesh = Resources::loadMeshAsync(BasePath + "data/Models/miranda.objcc").at(0);
-	//VenerexMesh = Resources::loadMeshAsync(BasePath + "data/Models/venerex.objcc").at(0);
-	//IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.objcc").at(0);
-    ExcelsiorMesh = Resources::loadMeshAsync(BasePath + "data/Models/excelsior.objcc").at(0);
-    ConstitutionMesh = Resources::loadMeshAsync(BasePath + "data/Models/constitution.objcc").at(0);
-    //LeviathanMesh = Resources::loadMeshAsync(BasePath + "data/Models/leviathan.objcc").at(0);
-    ShrikeMesh = Resources::loadMeshAsync(BasePath + "data/Models/shrike.objcc").at(0);
-    BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.obj").at(0);
+	NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc")[0];
+    MirandaMesh = Resources::loadMeshAsync(BasePath + "data/Models/miranda.objcc")[0];
+	//VenerexMesh = Resources::loadMeshAsync(BasePath + "data/Models/venerex.objcc")[0];
+	//IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.objcc")[0];
+    ExcelsiorMesh = Resources::loadMeshAsync(BasePath + "data/Models/excelsior.objcc")[0];
+    ConstitutionMesh = Resources::loadMeshAsync(BasePath + "data/Models/constitution.objcc")[0];
+    //LeviathanMesh = Resources::loadMeshAsync(BasePath + "data/Models/leviathan.objcc")[0];
+    ShrikeMesh = Resources::loadMeshAsync(BasePath + "data/Models/shrike.objcc")[0];
+    BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.obj")[0];
 
+    CannonOutlineMaterial = Resources::loadMaterialAsync("CannonOutline", BasePath + "data/Textures/Effects/cannon_texture.dds", "","", "");
+    CannonTailMaterial = Resources::loadMaterialAsync("CannonTail", BasePath + "data/Textures/Effects/cannon_texture_tip.dds", "", "", "");
+    DefiantMaterial = Resources::loadMaterialAsync("Defiant", BasePath + "data/Textures/defiant/defiant.dds");
+    NovaMaterial = Resources::loadMaterialAsync("Nova", BasePath + "data/Textures/nova/nova.dds");
+    MirandaMaterial = Resources::loadMaterialAsync("Miranda", BasePath + "data/Textures/miranda/miranda.dds", BasePath + "data/Textures/miranda/miranda_Normal.dds", BasePath + "data/Textures/miranda/miranda_Glow.dds", BasePath + "data/Textures/miranda/miranda_Specular.dds");
+    //VenerexMaterial = Resources::loadMaterialAsync("Venerex", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
+    //IntrepidMaterial = Resources::loadMaterialAsync("Intrepid", BasePath + "data/Textures/intrepid.dds", BasePath + "data/Textures/intrepid_Normal.png", BasePath + "data/Textures/intrepid_Glow.png");
+    ExcelsiorMaterial = Resources::loadMaterialAsync("Excelsior", BasePath + "data/Textures/excelsior/excelsior.dds", BasePath + "data/Textures/excelsior/excelsior_Normal.dds", BasePath + "data/Textures/excelsior/excelsior_Glow.dds", BasePath + "data/Textures/excelsior/excelsior_Specular.dds");
+    ConstitutionMaterial = Resources::loadMaterialAsync("Constitution", BasePath + "data/Textures/constitution/constitution.dds", BasePath + "data/Textures/constitution/constitution_Normal.dds", BasePath + "data/Textures/constitution/constitution_Glow.dds", BasePath + "data/Textures/constitution/constitution_Specular.dds");
+    //DefiantSharkMaterial = Resources::loadMaterialAsync("DefiantShark", BasePath + "data/Textures/defiant/defiantShark.dds", BasePath + "data/Textures/defiant/defiant_Normal.dds", BasePath + "data/Textures/defiant/defiant_Glow.dds");
+    ShrikeMaterial = Resources::loadMaterialAsync("Shrike", BasePath + "data/Textures/shrike/shrike.dds", BasePath + "data/Textures/shrike/shrike_Normal.dds", BasePath + "data/Textures/shrike/shrike_Glow.dds", BasePath + "data/Textures/shrike/shrike_Specular.dds");
+    BrelMaterial = Resources::loadMaterialAsync("Brel", BasePath + "data/Textures/constitution/constitution.dds");
+
+    ShieldMaterial = Resources::loadMaterialAsync("Shields", BasePath + "data/Textures/Effects/shields_1.dds");
+    HullDamageOutline1Material = Resources::loadMaterialAsync("HullDamage1Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_1.dds");
+    HullDamageMaterial1 = Resources::loadMaterialAsync("HullDamage1", BasePath + "data/Textures/Effects/hull_dmg.dds");
+    HullDamageOutline2Material = Resources::loadMaterialAsync("HullDamage2Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_2.dds");
+    HullDamageMaterial2 = Resources::loadMaterialAsync("HullDamage2", BasePath + "data/Textures/Effects/hull_dmg.dds");
+    HullDamageOutline3Material = Resources::loadMaterialAsync("HullDamage3Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_3.dds");
+    HullDamageMaterial3 = Resources::loadMaterialAsync("HullDamage3", BasePath + "data/Textures/Effects/hull_dmg.dds");
+    StarMaterial = Resources::loadMaterialAsync("Star", BasePath + "data/Textures/Planets/Sun.dds");
+    EarthSkyMaterial = Resources::loadMaterialAsync("EarthSky", BasePath + "data/Textures/Planets/Earth.dds");
+    CrosshairMaterial = Resources::loadMaterialAsync("Crosshair", BasePath + "data/Textures/HUD/Crosshair.dds");
+    CrosshairArrowMaterial = Resources::loadMaterialAsync("CrosshairArrow", BasePath + "data/Textures/HUD/CrosshairArrow.dds");
+    RadarEdgeMaterial = Resources::loadMaterialAsync("RadarEdge", BasePath + "data/Textures/HUD/RadarEdge.dds");
+    RadarTokenMaterial = Resources::loadMaterialAsync("RadarToken", BasePath + "data/Textures/HUD/RadarToken.dds");
+    RadarMaterial = Resources::loadMaterialAsync("Radar", BasePath + "data/Textures/HUD/Radar.dds");
+    StarFlareMaterial = Resources::loadMaterialAsync("SunFlare", BasePath + "data/Textures/Skyboxes/StarFlare.dds");
+    
     Engine::epriv::threading::waitForAll();
 
-    CannonOutlineMaterial = Resources::addMaterial("CannonOutline", BasePath + "data/Textures/Effects/cannon_texture.dds", "","", "");
     Material& cannonOutlineMat = *((Material*)CannonOutlineMaterial.get());
     cannonOutlineMat.setShadeless(true);
     cannonOutlineMat.setGlow(1.0f);
 
-    CannonTailMaterial = Resources::addMaterial("CannonTail", BasePath + "data/Textures/Effects/cannon_texture_tip.dds", "", "", "");
+    
     Material& cannonTailMat = *((Material*)CannonTailMaterial.get());
     cannonTailMat.setShadeless(true);
     cannonTailMat.setGlow(1.0f);
 
 
-    DefiantMaterial = Resources::addMaterial("Defiant", BasePath + "data/Textures/defiant/defiant.dds");
+    
     Material& defMat = *((Material*)DefiantMaterial.get());
     auto* layer = defMat.getComponent(0).addLayer();
     layer->setTexture(BasePath + "data/Textures/Effects/Buzzards.dds");
@@ -143,8 +173,6 @@ void ResourceManifest::init(){
     defMat.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/defiant/defiant_Glow.dds");
     
     
-    
-    NovaMaterial = Resources::addMaterial("Nova", BasePath + "data/Textures/nova/nova.dds"); 
     Material& novaMat = *((Material*)NovaMaterial.get());
     auto* layer1 = novaMat.getComponent(0).addLayer();
     layer1->setTexture(BasePath + "data/Textures/Effects/Buzzards.dds");
@@ -153,20 +181,10 @@ void ResourceManifest::init(){
     novaMat.addComponent(MaterialComponentType::Normal, BasePath + "data/Textures/nova/nova_Normal.dds");
     novaMat.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/nova/nova_Glow.dds");
 
-    MirandaMaterial = Resources::addMaterial("Miranda", BasePath + "data/Textures/miranda/miranda.dds", BasePath + "data/Textures/miranda/miranda_Normal.dds", BasePath + "data/Textures/miranda/miranda_Glow.dds", BasePath + "data/Textures/miranda/miranda_Specular.dds");
-	//VenerexMaterial = Resources::addMaterial("Venerex", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
-	//IntrepidMaterial = Resources::addMaterial("Intrepid", BasePath + "data/Textures/intrepid.dds", BasePath + "data/Textures/intrepid_Normal.png", BasePath + "data/Textures/intrepid_Glow.png");
-    ExcelsiorMaterial = Resources::addMaterial("Excelsior", BasePath + "data/Textures/excelsior/excelsior.dds", BasePath + "data/Textures/excelsior/excelsior_Normal.dds", BasePath + "data/Textures/excelsior/excelsior_Glow.dds", BasePath + "data/Textures/excelsior/excelsior_Specular.dds");
-    ConstitutionMaterial = Resources::addMaterial("Constitution", BasePath + "data/Textures/constitution/constitution.dds", BasePath + "data/Textures/constitution/constitution_Normal.dds", BasePath + "data/Textures/constitution/constitution_Glow.dds", BasePath + "data/Textures/constitution/constitution_Specular.dds");
-    //DefiantSharkMaterial = Resources::addMaterial("DefiantShark", BasePath + "data/Textures/defiant/defiantShark.dds", BasePath + "data/Textures/defiant/defiant_Normal.dds", BasePath + "data/Textures/defiant/defiant_Glow.dds");
-    ShrikeMaterial = Resources::addMaterial("Shrike", BasePath + "data/Textures/shrike/shrike.dds", BasePath + "data/Textures/shrike/shrike_Normal.dds", BasePath + "data/Textures/shrike/shrike_Glow.dds", BasePath + "data/Textures/shrike/shrike_Specular.dds");
     Material& shrikeMat = *((Material*)ShrikeMaterial.get());
     shrikeMat.addComponentMetalness(BasePath + "data/Textures/shrike/shrike_Metalness.dds", 1.0f);
     shrikeMat.addComponentSmoothness(BasePath + "data/Textures/shrike/shrike_Smoothness.dds", 1.0f);
 
-    BrelMaterial = Resources::addMaterial("Brel", BasePath + "data/Textures/constitution/constitution.dds");
-
-    ShieldMaterial = Resources::addMaterial("Shields", BasePath + "data/Textures/Effects/shields_1.dds");
     Material& shieldMat = *((Material*)ShieldMaterial.get());
     shieldMat.setShadeless(true);
 
@@ -188,8 +206,6 @@ void ResourceManifest::init(){
     layershield3.setData2(1.0f, 1.0f, 1.0f, 0.4f);
 
 
-    HullDamageOutline1Material = Resources::addMaterial("HullDamage1Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_1.dds");
-    HullDamageMaterial1 = Resources::addMaterial("HullDamage1", BasePath + "data/Textures/Effects/hull_dmg.dds");
     Material& hullDamage1Material = *((Material*)HullDamageMaterial1.get());
     auto& hull1Layer1 = hullDamage1Material.getComponent(0).layer(0);
     hull1Layer1.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_1.dds");
@@ -200,8 +216,6 @@ void ResourceManifest::init(){
     hullDamage1Material.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/Effects/hull_dmg_mask_1.dds");
 
 
-    HullDamageOutline2Material = Resources::addMaterial("HullDamage2Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_2.dds");
-    HullDamageMaterial2 = Resources::addMaterial("HullDamage2", BasePath + "data/Textures/Effects/hull_dmg.dds");
     Material& hullDamage1Material2 = *((Material*)HullDamageMaterial2.get());
     auto& hull1Layer12 = hullDamage1Material2.getComponent(0).layer(0);
     hull1Layer12.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_2.dds");
@@ -212,9 +226,6 @@ void ResourceManifest::init(){
     hullDamage1Material2.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/Effects/hull_dmg_mask_2.dds");
 
 
-
-    HullDamageOutline3Material = Resources::addMaterial("HullDamage3Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_3.dds");
-    HullDamageMaterial3 = Resources::addMaterial("HullDamage3", BasePath + "data/Textures/Effects/hull_dmg.dds");
     Material& hullDamage1Material3 = *((Material*)HullDamageMaterial3.get());
     auto& hull1Layer13 = hullDamage1Material3.getComponent(0).layer(0);
     hull1Layer13.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_3.dds");
@@ -224,19 +235,8 @@ void ResourceManifest::init(){
     hull1Layer23.addUVModificationSimpleTranslation(0.1f, 0.1f);
     hullDamage1Material3.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/Effects/hull_dmg_mask_3.dds");
 
-
-
-    StarMaterial = Resources::addMaterial("Star", BasePath + "data/Textures/Planets/Sun.dds");
     ((Material*)StarMaterial.get())->setShadeless(true);
     ((Material*)StarMaterial.get())->setGlow(0.21f);
-
-    EarthSkyMaterial = Resources::addMaterial("EarthSky", BasePath + "data/Textures/Planets/Earth.dds");
-
-    CrosshairMaterial = Resources::addMaterial("Crosshair", BasePath + "data/Textures/HUD/Crosshair.dds");
-    CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow", BasePath + "data/Textures/HUD/CrosshairArrow.dds");
-    RadarEdgeMaterial = Resources::addMaterial("RadarEdge", BasePath + "data/Textures/HUD/RadarEdge.dds");
-    RadarTokenMaterial = Resources::addMaterial("RadarToken", BasePath + "data/Textures/HUD/RadarToken.dds");
-    RadarMaterial = Resources::addMaterial("Radar", BasePath + "data/Textures/HUD/Radar.dds");
 
     auto& crosshairDiffuse = *(((Material*)CrosshairMaterial.get())->getComponent(0).texture());
     auto& crosshairArrowDiffuse = *(((Material*)CrosshairArrowMaterial.get())->getComponent(0).texture());
@@ -244,9 +244,7 @@ void ResourceManifest::init(){
     crosshairDiffuse.setWrapping(TextureWrap::ClampToEdge);
     crosshairDiffuse.setFilter(TextureFilter::Nearest);
 
-    StarFlareMaterial = Resources::addMaterial("SunFlare", BasePath + "data/Textures/Skyboxes/StarFlare.dds");
-    Resources::getMaterial(StarFlareMaterial)->setShadeless(true);
-
+    ((Material*)StarFlareMaterial.get())->setShadeless(true);
 
     //sounds
     MenuMusic = Resources::addSoundData(BasePath + "data/Sounds/menu.ogg");

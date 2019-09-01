@@ -55,12 +55,12 @@ namespace epriv {
         std::string                           filename;
 
         ImageLoadedStructure();
-        ImageLoadedStructure(uint _w, uint _h, ImagePixelType::Type _pxlType, ImagePixelFormat::Format _pxlFormat, ImageInternalFormat::Format _internFormat);
-        ImageLoadedStructure(const sf::Image& i, std::string _filename = "");
+        ImageLoadedStructure(const uint width, const uint height, const ImagePixelType::Type _pxlType, const ImagePixelFormat::Format _pxlFormat, const ImageInternalFormat::Format _internFormat);
+        ImageLoadedStructure(const sf::Image& sfImage, const std::string& filename = "");
         ~ImageLoadedStructure();
 
-        void load(uint _width, uint _height, ImagePixelType::Type _pixelType, ImagePixelFormat::Format _pixelFormat, ImageInternalFormat::Format _internalFormat);
-        void load(const sf::Image& i, std::string _filename = "");
+        void load(const uint width, const uint height, const ImagePixelType::Type _pixelType, const ImagePixelFormat::Format _pixelFormat, const ImageInternalFormat::Format _internalFormat);
+        void load(const sf::Image& sfImage, const std::string& filename = "");
     };
 };
 };

@@ -11,9 +11,16 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
+namespace Engine {
+    namespace epriv {
+        struct InternalTextureRequestPublicInterface;
+    };
+};
+
 class Texture: public EngineResource{
     friend struct Engine::epriv::TextureLoader;
     friend struct Engine::epriv::InternalTexturePublicInterface;
+    friend struct Engine::epriv::InternalTextureRequestPublicInterface;
 
     public:
         static Texture *White, *Black, *Checkers, *BRDF; //loaded in renderer
@@ -26,7 +33,7 @@ class Texture: public EngineResource{
         bool                                                m_IsToBeMipmapped;
         GLuint                                              m_MinFilter; //used to determine filter type for mipmaps
 
-        void init_common(const GLuint& _openglTextureType, const bool& _toBeMipmapped);
+        Texture();
     public:
         //Framebuffer
         Texture(const uint& renderTgtWidth,const uint& renderTgtHeight,const ImagePixelType::Type&,const ImagePixelFormat::Format&,const ImageInternalFormat::Format&,const float& divisor = 1.0f);
@@ -47,14 +54,10 @@ class Texture: public EngineResource{
         const bool mipmapped() const;
         const bool compressed() const;
         void setAnisotropicFiltering(const float& anisotropicFiltering);
-        void resize(Engine::epriv::FramebufferObject&, const uint& width, const uint& height);
-
+        
         const ImageInternalFormat::Format internalFormat() const;
         const ImagePixelFormat::Format pixelFormat() const;
         const ImagePixelType::Type pixelType() const;
-
-        virtual void load();
-        virtual void unload();
 
         void setXWrapping(const TextureWrap::Wrap&);
         void setYWrapping(const TextureWrap::Wrap&);

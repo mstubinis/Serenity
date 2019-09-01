@@ -2014,12 +2014,12 @@ class epriv::RenderManager::impl final{
             #pragma endregion
             glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             #pragma region Finalization and AA
-            if (!mainRenderFunc || aa_algorithm == AntiAliasingAlgorithm::None || !(viewport.getRenderFlags() & ViewportRenderingFlag::GodRays)){
+            if (!mainRenderFunc || aa_algorithm == AntiAliasingAlgorithm::None || !(viewport.getRenderFlags() & ViewportRenderingFlag::AntiAliasing)){
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport,camera,outTexture);
-            }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::FXAA && (viewport.getRenderFlags() & ViewportRenderingFlag::GodRays)){
+            }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::FXAA && (viewport.getRenderFlags() & ViewportRenderingFlag::AntiAliasing)){
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
                 gbuffer.bindFramebuffers(sceneTexture);
@@ -2029,7 +2029,7 @@ class epriv::RenderManager::impl final{
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport, camera, sceneTexture);
 
-            }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::SMAA && (viewport.getRenderFlags() & ViewportRenderingFlag::GodRays)){
+            }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::SMAA && (viewport.getRenderFlags() & ViewportRenderingFlag::AntiAliasing)){
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
 

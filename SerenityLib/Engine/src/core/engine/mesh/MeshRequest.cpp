@@ -3,7 +3,6 @@
 #include <core/engine/mesh/MeshCollisionFactory.h>
 
 #include <core/engine/Engine.h>
-#include <core/engine/resources/Engine_Resources.h>
 
 #include <boost/filesystem.hpp>
 
@@ -41,14 +40,14 @@ void MeshRequest::requestAsync() {
 }
 
 void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
-    if (meshRequest.fileOrData != "") {
+    if (!meshRequest.fileOrData.empty()) {
         if (meshRequest.fileExists) {
             bool valid = InternalMeshRequestPublicInterface::Populate(meshRequest);
             if (valid){
                 if (meshRequest.async){
                     const auto& reference = std::ref(meshRequest);
-                    const auto& job = boost::bind(&InternalMeshRequestPublicInterface::LoadCPU, reference);
-                    const auto& cbk = boost::bind(&InternalMeshRequestPublicInterface::LoadGPU, reference);
+                    const auto& job = std::bind(&InternalMeshRequestPublicInterface::LoadCPU, reference);
+                    const auto& cbk = std::bind(&InternalMeshRequestPublicInterface::LoadGPU, reference);
                     threading::addJobWithPostCallback(job, cbk);
                 }else{
                     InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
@@ -92,7 +91,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         uint count = 0;
         MeshLoader::LoadProcessNodeData(meshRequest.parts, scene, root, meshRequest.map, count);
         MeshLoader::SaveTo_OBJCC(*const_cast<VertexData*>(meshRequest.parts[0].mesh->m_VertexData), meshRequest.fileOrData + ".objcc");
-    }else{
+    }else{ //objcc
         VertexData* vertexData = MeshLoader::LoadFrom_OBJCC(meshRequest.fileOrData);
         Mesh& mesh = *meshRequest.parts[0].mesh;
         //cpu

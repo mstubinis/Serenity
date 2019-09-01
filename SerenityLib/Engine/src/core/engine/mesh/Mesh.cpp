@@ -51,9 +51,6 @@ namespace Engine {
     };
 };
 
-void InternalMeshPublicInterface::LoadCPU(Mesh& mesh){
-
-}
 void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
     mesh.m_VertexData->finalize(); //transfer vertex data to gpu
     cout << "(Mesh) ";
@@ -443,7 +440,6 @@ void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationNa
 void Mesh::load(){
     if(!isLoaded()){
         auto& _this = *this;
-        InternalMeshPublicInterface::LoadCPU(_this);
         InternalMeshPublicInterface::LoadGPU(_this);
         EngineResource::load();
     }

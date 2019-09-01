@@ -79,13 +79,18 @@ namespace Engine{
         Handle addFont(const std::string& filename);
 
         std::vector<Handle> loadMesh(const std::string& fileOrData, const float& threshhold = 0.0005f);
-    
         std::vector<Handle> loadMeshAsync(const std::string& fileOrData, const float& threshhold = 0.0005f);
+
+        Handle loadTexture(const std::string& file, const ImageInternalFormat::Format & = ImageInternalFormat::SRGB8_ALPHA8, const bool& mipmaps = false);
+        Handle loadTextureAsync(const std::string& file, const ImageInternalFormat::Format & = ImageInternalFormat::SRGB8_ALPHA8, const bool& mipmaps = false);
 
         Handle addTexture(const std::string& file, const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8, const bool& mipmaps = false);
 
         Handle addMaterial(const std::string& name, const std::string& diffuse, const std::string& normal = "", const std::string& glow = "", const std::string& specular = "");
         Handle addMaterial(const std::string& name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr);
+
+        Handle loadMaterial(const std::string& name, const std::string& diffuse, const std::string& normal = "", const std::string& glow = "", const std::string& specular = "");
+        Handle loadMaterialAsync(const std::string& name, const std::string& diffuse, const std::string& normal = "", const std::string& glow = "", const std::string& specular = "");
 
         Handle addShader(const std::string& shaderFileOrData, const ShaderType::Type& shaderType, const bool& fromFile = true);
         Handle addSoundData(const std::string& file);

@@ -11,6 +11,8 @@
 #include <core/engine/scene/Scene.h>
 
 #include <core/engine/mesh/MeshRequest.h>
+#include <core/engine/textures/TextureRequest.h>
+#include <core/engine/materials/MaterialRequest.h>
 #include <core/engine/resources/Handle.h>
 
 #include <core/engine/sounds/SoundData.h>
@@ -138,6 +140,28 @@ vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float& t
     }
     return handles;
 }
+Handle Resources::loadTexture(const string& file, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
+    TextureRequest request(file, mipmaps, internalFormat);
+    request.request();
+    return request.part.handle;
+}
+Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
+    TextureRequest* request = new TextureRequest(file, mipmaps, internalFormat); //to extend the lifetime to the threads, we manually delete later
+    request->requestAsync();
+    return request->part.handle;
+}
+
+Handle Resources::loadMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular) {
+    auto request = MaterialRequest(name, diffuse, normal, glow, specular);
+    request.request();
+    return request.part.handle;
+}
+Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular) {
+    auto request = new MaterialRequest(name, diffuse, normal, glow, specular); //to extend the lifetime to the threads, we manually delete later
+    request->requestAsync();
+    return request->part.handle;
+}
+
 
 
 

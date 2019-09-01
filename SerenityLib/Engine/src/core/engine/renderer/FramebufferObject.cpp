@@ -54,7 +54,7 @@ epriv::FramebufferTexture::~FramebufferTexture(){
     SAFE_DELETE(m_Texture);
 }
 void epriv::FramebufferTexture::resize(FramebufferObject& fbo, const uint& w, const uint& h){
-    m_Texture->resize(fbo, w, h);
+    InternalTexturePublicInterface::Resize(*m_Texture, fbo, w, h);
 }
 const GLuint& epriv::FramebufferTexture::address() const {
     return m_Texture->address(); 

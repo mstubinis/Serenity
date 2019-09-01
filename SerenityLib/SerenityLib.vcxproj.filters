@@ -558,6 +558,15 @@
     <ClInclude Include="Engine\src\core\engine\textures\TextureLoader.h">
       <Filter>Header Files\Engine\Core\Textures</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\textures\TextureRequest.h">
+      <Filter>Header Files\Engine\Core\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\materials\MaterialRequest.h">
+      <Filter>Header Files\Engine\Core\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\materials\MaterialLoader.h">
+      <Filter>Header Files\Engine\Core\Materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -847,6 +856,15 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\textures\TextureLoader.cpp">
       <Filter>Source Files\Engine\Core\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\textures\TextureRequest.cpp">
+      <Filter>Source Files\Engine\Core\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\materials\MaterialRequest.cpp">
+      <Filter>Source Files\Engine\Core\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\materials\MaterialLoader.cpp">
+      <Filter>Source Files\Engine\Core\Materials</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -59,7 +59,7 @@ struct MeshRequest final {
 namespace Engine {
 namespace epriv {
     struct InternalMeshRequestPublicInterface final {
-        friend class  ::Mesh;
+        friend class  Mesh;
         static void Request(MeshRequest&);
         static bool Populate(MeshRequest&);
         static void LoadGPU(MeshRequest&);

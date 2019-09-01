@@ -110,6 +110,7 @@ void ThreadPool::wait_for_all() {
             future->m_Future.wait();
         }
     }
+    update();
 }
 void ThreadPool::shutdown() {
     std::lock_guard<std::mutex> lock(m_Mutex);

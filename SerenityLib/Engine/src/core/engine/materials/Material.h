@@ -19,6 +19,9 @@ namespace Engine{
     namespace epriv{
         struct DefaultMaterialBindFunctor;
         struct DefaultMaterialUnbindFunctor;
+        struct InternalMaterialPublicInterface;
+        struct InternalMaterialRequestPublicInterface;
+        struct MaterialLoader;
         class  RenderManager;
     };
 };
@@ -26,6 +29,9 @@ namespace Engine{
 class Material final: public BindableResource{
     friend struct Engine::epriv::DefaultMaterialBindFunctor;
     friend struct Engine::epriv::DefaultMaterialUnbindFunctor;
+    friend struct Engine::epriv::InternalMaterialRequestPublicInterface;
+    friend struct Engine::epriv::InternalMaterialPublicInterface;
+    friend struct Engine::epriv::MaterialLoader;
     friend class  Engine::epriv::RenderManager;
     public:
         static Material                  *Checkers, *WhiteShadeless; //loaded in renderer
@@ -45,8 +51,7 @@ class Material final: public BindableResource{
 
         MaterialComponent* internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
         void internalUpdateGlobalMaterialPool(const bool& addToDatabase);
-        void internalInit(Texture* diffuse, Texture* normal, Texture* glow, Texture* specular);
-
+        Material();
     public:
         Material(const std::string& name, const std::string& diffuse, const std::string& normal="", const std::string& glow="", const std::string& specular="");
         Material(const std::string& name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);

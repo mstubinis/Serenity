@@ -3,6 +3,11 @@
 #include <core/engine/textures/DDS.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/Engine.h>
+#include <core/engine/renderer/FramebufferObject.h>
+
+#include <boost/filesystem.hpp>
+
+#include <SFML/Graphics.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -11,6 +16,70 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace Engine::epriv::textures;
 using namespace std;
+
+void TextureLoader::InitCommon(Texture& texture, const GLuint& openglTextureType, const bool& toBeMipmapped) {
+    texture.m_Mipmapped       = false;
+    texture.m_IsToBeMipmapped = toBeMipmapped;
+    texture.m_MinFilter       = GL_LINEAR;
+    texture.m_Type            = openglTextureType;
+}
+
+void TextureLoader::InitFramebuffer(Texture& texture, const uint& w, const uint& h, const ImagePixelType::Type& pxlType, const ImagePixelFormat::Format& pxlFormat, const ImageInternalFormat::Format& _internal, const float& divisor) {
+    texture.m_TextureType = TextureType::RenderTarget;
+    const uint _width(static_cast<uint>(static_cast<float>(w) * divisor));
+    const uint _height(static_cast<uint>(static_cast<float>(h) * divisor));
+    ImageLoadedStructure* image = new ImageLoadedStructure(_width, _height, pxlType, pxlFormat, _internal);
+
+    TextureLoader::InitCommon(texture, GL_TEXTURE_2D, false);
+
+    texture.m_ImagesDatas.push_back(image);
+    texture.setName("RenderTarget");
+}
+void TextureLoader::InitFromMemory(Texture& texture, const sf::Image& sfImage, const string& name, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) {
+    texture.m_TextureType = TextureType::Texture2D;
+    ImageLoadedStructure* image = new ImageLoadedStructure(sfImage, name);
+    image->pixelType = ImagePixelType::UNSIGNED_BYTE;
+    image->internalFormat = _internal;
+
+    TextureLoader::InitCommon(texture, openglTextureType, genMipMaps);
+
+    TextureLoader::ChoosePixelFormat(image->pixelFormat, image->internalFormat);
+    texture.m_ImagesDatas.push_back(image);
+    texture.setName(name);
+}
+void TextureLoader::InitFromFile(Texture& texture, const string& filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) {
+    texture.m_TextureType = TextureType::Texture2D;
+    ImageLoadedStructure* image = new ImageLoadedStructure();
+    image->filename = filename;
+    const string& extension = boost::filesystem::extension(filename);
+    TextureLoader::InitCommon(texture, openglTextureType, genMipMaps);
+    if (extension == ".dds") {
+        TextureLoader::LoadDDSFile(texture, filename, *image);
+    }else{
+        image->pixelType = ImagePixelType::UNSIGNED_BYTE;
+        image->internalFormat = _internal;
+    }
+    TextureLoader::ChoosePixelFormat(image->pixelFormat, image->internalFormat);
+    texture.m_ImagesDatas.insert(texture.m_ImagesDatas.begin(), image);
+
+    texture.setName(filename);
+}
+void TextureLoader::InitFromFilesCubemap(Texture& texture, const string files[], const string& name, const bool& genMipMaps, const ImageInternalFormat::Format& _internal) {
+    texture.m_TextureType = TextureType::CubeMap;
+    for (uint j = 0; j < 6; ++j) {
+        ImageLoadedStructure* image = new ImageLoadedStructure();
+        image->filename = files[j];
+        texture.m_ImagesDatas.push_back(image);
+    }
+    TextureLoader::InitCommon(texture, GL_TEXTURE_CUBE_MAP, genMipMaps);
+    for (auto& sideImage : texture.m_ImagesDatas) {
+        texture.m_Type = GL_TEXTURE_CUBE_MAP;
+        sideImage->pixelType = ImagePixelType::UNSIGNED_BYTE;
+        sideImage->internalFormat = _internal;
+        TextureLoader::ChoosePixelFormat(sideImage->pixelFormat, sideImage->internalFormat);
+    }
+    texture.setName(name);
+}
 
 void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::epriv::ImageMipmap& mipmap, const GLuint& openGLType) {
     auto& imageData = *texture.m_ImagesDatas[0];
@@ -410,4 +479,108 @@ void TextureLoader::GeneratePBRData(Texture& texture, const unsigned int& convol
         glGenerateMipmap(texture.m_Type);
     }
     Core::m_Engine->m_RenderManager._genPBREnvMapData(texture, convoludeTextureSize, preEnvFilterSize);
+}
+
+void InternalTexturePublicInterface::LoadCPU(Texture& texture) {
+    if (texture.m_TextureAddress.size() == 0)
+        texture.m_TextureAddress.push_back(0);
+    for (auto& image : texture.m_ImagesDatas) {
+        if (!image->filename.empty()) {
+            bool _do = false;
+            if (image->mipmaps.size() == 0) { 
+                _do = true; 
+            }
+            if (!_do) {
+                for (auto& mip : image->mipmaps) {
+                    if (mip.pixels.size() == 0) {
+                        _do = true;
+                        break;
+                    }
+                }
+            }
+            if (_do) {
+                const string& extension = boost::filesystem::extension(image->filename);
+                if (extension == ".dds") {
+                    TextureLoader::LoadDDSFile(texture, image->filename, *image);
+                }else{
+                    sf::Image _sfImage;
+                    _sfImage.loadFromFile(image->filename);
+                    image->load(_sfImage, image->filename);
+                }
+            }
+        }
+    }
+}
+void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
+    Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddress[0]);
+    switch (texture.m_TextureType) {
+        case TextureType::RenderTarget: {
+            TextureLoader::LoadTextureFramebufferIntoOpenGL(texture);
+            break;
+        }case TextureType::Texture1D: {
+            break;
+        }case TextureType::Texture2D: {
+            TextureLoader::LoadTexture2DIntoOpenGL(texture);
+            break;
+        }case TextureType::Texture3D: {
+            break;
+        }case TextureType::CubeMap: {
+            TextureLoader::LoadTextureCubemapIntoOpenGL(texture);
+            break;
+        }
+        default: { break; }
+    }
+    if (texture.m_IsToBeMipmapped) {
+        TextureLoader::GenerateMipmapsOpenGL(texture);
+    }
+
+    cout << "(Texture) ";
+    texture.EngineResource::load();
+}
+void InternalTexturePublicInterface::UnloadCPU(Texture& texture) {
+    for (auto& image : texture.m_ImagesDatas) {
+        if (image->filename != "") {
+            for (auto& mipmap : image->mipmaps) {
+                if (mipmap.pixels.size() == 0) {
+                    vector_clear(mipmap.pixels);
+                }
+            }
+        }
+    }
+    texture.m_Mipmapped = false;
+
+    cout << "(Texture) ";
+    texture.EngineResource::unload();
+}
+void InternalTexturePublicInterface::UnloadGPU(Texture& texture) {
+    for (uint i = 0; i < texture.m_TextureAddress.size(); ++i) {
+        glDeleteTextures(1, &texture.m_TextureAddress[i]);
+    }
+    vector_clear(texture.m_TextureAddress);
+}
+void InternalTexturePublicInterface::Load(Texture& texture) {
+    if (!texture.isLoaded()) {
+        InternalTexturePublicInterface::LoadCPU(texture);
+        InternalTexturePublicInterface::LoadGPU(texture);
+    }
+}
+void InternalTexturePublicInterface::Unload(Texture& texture) {
+    if (texture.isLoaded()) {
+        InternalTexturePublicInterface::UnloadGPU(texture);
+        InternalTexturePublicInterface::UnloadCPU(texture);
+    }
+}
+void InternalTexturePublicInterface::Resize(Texture& texture, Engine::epriv::FramebufferObject& fbo, const uint& width, const uint& height) {
+    if (texture.m_TextureType != TextureType::RenderTarget) {
+        cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
+        return;
+    }
+    const float _divisor = fbo.divisor();
+    Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);
+    const uint _w = static_cast<uint>(static_cast<float>(width) * _divisor);
+    const uint _h = static_cast<uint>(static_cast<float>(height) * _divisor);
+    auto& imageData = *texture.m_ImagesDatas[0];
+    imageData.mipmaps[0].width = _w;
+    imageData.mipmaps[0].height = _h;
+    glTexImage2D(texture.m_Type, 0, imageData.internalFormat, _w, _h, 0, imageData.pixelFormat, imageData.pixelType, NULL);
 }

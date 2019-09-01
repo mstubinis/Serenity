@@ -34,7 +34,6 @@ namespace Engine{
         struct InternalMeshRequestPublicInterface;
         struct InternalMeshPublicInterface final {
             static void InitBlankMesh(Mesh&);
-            static void LoadCPU(Mesh&);
             static void LoadGPU(Mesh&);
             static void UnloadCPU(Mesh&);
             static void UnloadGPU(Mesh&);
@@ -65,10 +64,11 @@ class Mesh final: public BindableResource, public EventObserver{
         glm::vec3                              m_radiusBox;
         float                                  m_radius;
         float                                  m_threshold;
+
+        Mesh();
     public:
         static Mesh *FontPlane, *Plane, *Cube, *Triangle; //loaded in renderer
 
-        Mesh();
         Mesh(const std::string& name, const btHeightfieldTerrainShape& heightfield, float threshold);
         Mesh(VertexData*, const std::string& name, float threshold = 0.0005f);
         Mesh(const std::string& name,float width, float height,float threshold); //plane

@@ -248,6 +248,8 @@
     <ClInclude Include="Engine\src\core\engine\materials\MaterialComponent.h" />
     <ClInclude Include="Engine\src\core\engine\materials\MaterialEnums.h" />
     <ClInclude Include="Engine\src\core\engine\materials\MaterialLayer.h" />
+    <ClInclude Include="Engine\src\core\engine\materials\MaterialLoader.h" />
+    <ClInclude Include="Engine\src\core\engine\materials\MaterialRequest.h" />
     <ClInclude Include="Engine\src\core\engine\math\Engine_Math.h" />
     <ClInclude Include="Engine\src\core\engine\math\SimplexNoise.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h" />
@@ -322,6 +324,7 @@
     <ClInclude Include="Engine\src\core\engine\textures\Texture.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureLoader.h" />
+    <ClInclude Include="Engine\src\core\engine\textures\TextureRequest.h" />
     <ClInclude Include="Engine\src\core\engine\threading\Engine_ThreadManager.h" />
     <ClInclude Include="Engine\src\core\engine\threading\Queue_ThreadSafe.h" />
     <ClInclude Include="Engine\src\core\engine\threading\ThreadPool.h" />
@@ -368,6 +371,8 @@
     <ClCompile Include="Engine\src\core\engine\materials\Material.cpp" />
     <ClCompile Include="Engine\src\core\engine\materials\MaterialComponent.cpp" />
     <ClCompile Include="Engine\src\core\engine\materials\MaterialLayer.cpp" />
+    <ClCompile Include="Engine\src\core\engine\materials\MaterialLoader.cpp" />
+    <ClCompile Include="Engine\src\core\engine\materials\MaterialRequest.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\Engine_Math.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\SimplexNoise.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
@@ -429,6 +434,7 @@
     <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureLoader.cpp" />
+    <ClCompile Include="Engine\src\core\engine\textures\TextureRequest.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\ThreadPool.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\WorkerThread.cpp" />
