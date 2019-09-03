@@ -20,7 +20,7 @@ RenderPipeline::RenderPipeline(ShaderProgram& _shaderProgram) :shaderProgram(_sh
 RenderPipeline::~RenderPipeline() {
     SAFE_DELETE_VECTOR(materialNodes);
 }
-
+//TODO: correct this
 void RenderPipeline::sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
     std::sort(
         instancesTotal.begin(), instancesTotal.end(),
@@ -104,6 +104,7 @@ void RenderPipeline::sort_cheap(Camera& camera, const SortingMode::Mode sortingM
     }
 #endif
 }
+//TODO: correct this
 void RenderPipeline::sort(Camera& camera, const SortingMode::Mode sortingMode) {
 #ifndef _DEBUG
     for (auto& materialNode : materialNodes) {

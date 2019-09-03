@@ -80,6 +80,7 @@ Handle ResourceManifest::SoundPhotonTorpedo;
 
 //torpedos
 Handle ResourceManifest::TorpedoFlareMesh;
+Handle ResourceManifest::TorpedoFlareMaterial;
 Handle ResourceManifest::TorpedoCoreMaterial;
 Handle ResourceManifest::TorpedoGlowMaterial;
 
@@ -130,9 +131,14 @@ void ResourceManifest::init(){
     BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.obj")[0];
 
     //torpedos
-    TorpedoFlareMesh    = Resources::loadMeshAsync(BasePath + "data/Models/torpedo_flare.obj")[0];
-    TorpedoCoreMaterial = Resources::loadMaterialAsync("TorpedoCore", BasePath + "data/Textures/Effects/torpedo_core.dds", "", "", "");
-    TorpedoGlowMaterial = Resources::loadMaterialAsync("TorpedoGlow", BasePath + "data/Textures/Effects/torpedo_outer_glow.dds", "", "", "");
+    TorpedoFlareMesh     = Resources::loadMeshAsync(BasePath + "data/Models/torpedo_flare.obj")[0];
+    TorpedoFlareMaterial = Resources::loadMaterialAsync("TorpedoFlare", BasePath + "data/Textures/Effects/torpedo_flare.dds", "", "", "");
+    TorpedoCoreMaterial  = Resources::loadMaterialAsync("TorpedoCore", BasePath + "data/Textures/Effects/torpedo_core.dds", "", "", "");
+    TorpedoGlowMaterial  = Resources::loadMaterialAsync("TorpedoGlow", BasePath + "data/Textures/Effects/torpedo_outer_glow.dds", "", "", "");
+
+    Material& torpedoFlareMat = *((Material*)TorpedoFlareMaterial.get());
+    torpedoFlareMat.setShadeless(true);
+    torpedoFlareMat.setGlow(1.0f);
 
     Material& torpedoCoreMat = *((Material*)TorpedoCoreMaterial.get());
     torpedoCoreMat.setShadeless(true);

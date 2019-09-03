@@ -154,6 +154,7 @@ class ComponentBody : public ComponentBaseClass {
 		const glm::quat rotation() const;
 		const glm::vec3 getScale() const;
 		const glm::vec3 position() const;
+        const glm::vec3 position_render() const;
 		const glm::vec3 forward() const;
 		const glm::vec3 right() const;
 		const glm::vec3 up() const;
@@ -164,6 +165,7 @@ class ComponentBody : public ComponentBaseClass {
 
         void setCollision(const CollisionType::Type collisionType, const float mass);
         void setCollision(Collision* collision);
+        Collision* getCollision();
 
         void setCollisionGroup(const short& group);  //set the groups this body belongs to
         void setCollisionMask(const short& mask); //set the groups this body will register collisions with

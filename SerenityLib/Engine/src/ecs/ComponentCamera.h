@@ -47,7 +47,7 @@ class ComponentCamera : public ComponentBaseClass {
 			Orthographic, 
 		};
         Type m_Type;
-        glm::vec3 m_Eye, m_Up;
+        glm::vec3 m_Eye, m_Up, m_Forward;
         glm::mat4 m_ViewMatrix, m_ViewMatrixNoTranslation, m_ProjectionMatrix;
         glm::vec4 m_FrustumPlanes[6];
         float m_NearPlane, m_FarPlane, m_Bottom, m_Top;

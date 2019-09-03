@@ -364,6 +364,12 @@ void ComponentBody::alignTo(const glm::vec3& p_Direction, const float p_Speed) {
         Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
     }
 }
+Collision* ComponentBody::getCollision() {
+    if (m_Physics) {
+        return data.p->collision;
+    }
+    return nullptr;
+}
 void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, const float p_Mass) {
     auto& physicsData = *data.p;
     if (!physicsData.collision) { //TODO: clean this up, its hacky and evil. its being used on the ComponentBody_EntityAddedToSceneFunction
@@ -653,6 +659,14 @@ const glm::vec3 ComponentBody::position() const { //theres prob a better way to 
     if (m_Physics) {
         btTransform tr;
         data.p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
+        return Engine::Math::btVectorToGLM(tr.getOrigin());
+    }
+    glm::mat4& modelMatrix_ = data.n->modelMatrix;
+    return glm::vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
+}
+const glm::vec3 ComponentBody::position_render() const { //theres prob a better way to do this
+    if (m_Physics) {
+        auto tr = data.p->bullet_rigidBody->getWorldTransform();
         return Engine::Math::btVectorToGLM(tr.getOrigin());
     }
     glm::mat4& modelMatrix_ = data.n->modelMatrix;

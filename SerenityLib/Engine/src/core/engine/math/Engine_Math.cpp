@@ -411,10 +411,8 @@ void Math::alignTo(glm::quat& o, const glm::vec3& direction,float speed){
     o = glm::quat_cast(rot);
     //TODO: rework or rethink this
     if(speed != 0.0f){
-        const float& angle = Math::getAngleBetweenTwoVectors(_direction, getForward(original) ,true); // degrees
-        speed *= 1.0f / angle;
         speed *= (float)Resources::dt();
-		o = glm::mix(original, o, speed * 5.0f);
+		o = glm::mix(original, o, speed);
     }
     o = glm::normalize(o);
 }

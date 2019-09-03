@@ -79,6 +79,7 @@ struct ResourceManifest{
 
     //torpedos
     static Handle TorpedoFlareMesh;
+    static Handle TorpedoFlareMaterial;
     static Handle TorpedoCoreMaterial;
     static Handle TorpedoGlowMaterial;
 

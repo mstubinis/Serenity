@@ -100,9 +100,9 @@ void EngineCore::update_logic(const double& dt){
     //update current scene
     Scene& scene = *Resources::getCurrentScene();
     auto& ecs = InternalScenePublicInterface::GetECS(scene);
+    update_physics(dt);
     ecs.preUpdate(scene, dt);
     scene.update(dt);
-    update_physics(dt);
     ecs.update(dt, scene);
     ecs.postUpdate(scene,dt);
 

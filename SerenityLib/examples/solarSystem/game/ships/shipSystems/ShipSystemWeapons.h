@@ -7,11 +7,19 @@
 #include <glm/vec3.hpp>
 
 class EntityWrapper;
-struct PrimaryWeaponCannon {
-    Ship&       ship;
-    glm::vec3   position; //relative to the ship's model center
-    glm::vec3   forward;
-    float       arc;
+class ComponentBody;
+struct ShipWeapon {
+    Ship&           ship;
+    float           arc;
+    glm::vec3       position; //relative to the ship's model center
+    glm::vec3       forward;
+
+    ShipWeapon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc);
+
+    const bool isInArc(EntityWrapper* target, const float _arc);
+};
+
+struct PrimaryWeaponCannon : public ShipWeapon {
     uint        damage;
     float       impactRadius;
     float       impactTime;
@@ -35,30 +43,34 @@ struct PrimaryWeaponCannon {
         const float& _travelSpeed,
         const float& volume
     );
-    virtual bool fire();
+    virtual const bool fire();
     virtual void forceFire();
-    virtual const glm::vec3 calculatePredictedVector();
+    virtual const glm::vec3 calculatePredictedVector(ComponentBody& projectileBody);
     virtual void update(const double& dt);
 };
 
-struct PrimaryWeaponBeam {
-    Ship&     ship;
-    glm::vec3 position; //relative to the ship's model center
-    glm::vec3 forward;
-    float     arc;
+struct PrimaryWeaponBeam : public ShipWeapon {
 
     PrimaryWeaponBeam(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc);
-    virtual bool fire();
+    virtual const bool fire();
     virtual void forceFire();
     virtual const glm::vec3 calculatePredictedVector();
     virtual void update(const double& dt);
 };
 
-struct SecondaryWeaponTorpedo {
-    Ship&           ship;
-    glm::vec3       position; //relative to the ship's model center
-    glm::vec3       forward;
-    float           arc;
+struct SecondaryWeaponTorpedoPrediction final {
+    glm::vec3 pedictedPosition;
+    glm::vec3 pedictedVector;
+    EntityWrapper* target;
+    bool hasLock;
+    SecondaryWeaponTorpedoPrediction() {
+        hasLock = false;
+        target = nullptr;
+        pedictedPosition = pedictedVector = glm::vec3(0.0f);
+    }
+};
+
+struct SecondaryWeaponTorpedo : public ShipWeapon {
     uint            damage;
     float           impactRadius;
     float           impactTime;
@@ -69,9 +81,6 @@ struct SecondaryWeaponTorpedo {
     float           travelSpeed;
     float           volume;
     float           rotationAngleSpeed;
-    bool            hasLock;
-    EntityWrapper*  target;
-
 
     SecondaryWeaponTorpedo(
         Ship& _ship,
@@ -85,13 +94,15 @@ struct SecondaryWeaponTorpedo {
         const float& _impactTime,
         const float& _travelSpeed,
         const float& _volume,
-        const float& _rotAngleSpeed,
-        const bool& _hasLock
+        const float& _rotAngleSpeed
     );
 
-    virtual bool fire();
+    virtual const bool isInControlledArc(EntityWrapper* target);
+
+    virtual const bool canFire();
+    virtual const bool fire();
     virtual void forceFire();
-    virtual const glm::vec3 calculatePredictedVector();
+    virtual const SecondaryWeaponTorpedoPrediction calculatePredictedVector(ComponentBody& projectileBody);
     virtual void update(const double& dt);
 };
 
@@ -105,6 +116,8 @@ class ShipSystemWeapons final : public ShipSystem {
     public:
         ShipSystemWeapons(Ship&);
         ~ShipSystemWeapons();
+
+        static float calculate_quadratic_time_till_hit(const glm::vec3& pos, const glm::vec3& vel, const float& s);
 
         void addPrimaryWeaponBeam(PrimaryWeaponBeam&);
         void addPrimaryWeaponCannon(PrimaryWeaponCannon&);

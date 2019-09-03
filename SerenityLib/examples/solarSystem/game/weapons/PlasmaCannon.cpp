@@ -146,7 +146,7 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
     cannonBody.setLinearVelocity(shipLinVel, false);
     cannonBody.setAngularVelocity(shipAngVel, false);
 
-    auto offset = source.calculatePredictedVector();
+    auto offset = source.calculatePredictedVector(cannonBody);
     offset *= glm::vec3(source.travelSpeed);
     cannonBody.applyImpulse(offset.x, offset.y, offset.z, false);
     glm::quat q;
@@ -210,7 +210,7 @@ void PlasmaCannon::update(const double& dt) {
     }
     PrimaryWeaponCannon::update(dt);
 }
-bool PlasmaCannon::fire() {
+const bool PlasmaCannon::fire() {
     auto res = PrimaryWeaponCannon::fire();
     if (res) {
         forceFire();

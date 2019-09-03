@@ -165,7 +165,7 @@ void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec
             }
             */
         }
-        if (m_HealthPointsCurrent > 0 && m_ImpactPointsFreelist.size() > 0) {
+        if (m_ImpactPointsFreelist.size() > 0) {
             auto nextIndex = m_ImpactPointsFreelist[0];
             auto& impactPointData = m_ImpactPoints[nextIndex];
             impactPointData.impact(impactLocationLocal, impactRadius, maxTime, m_ImpactPointsFreelist);

@@ -44,6 +44,7 @@ const glm::vec3 epriv::ComponentCamera_Functions::GetViewVectorNoTranslation(Cam
 ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_AngleDegrees, const float p_AspectRatio, const float p_NearPlane, const float p_FarPlane) : ComponentBaseClass(p_Entity) {
     m_Eye                     = glm::vec3(0.0f);
 	m_Up                      = glm::vec3(0.0f, 1.0f, 0.0f);
+    m_Forward                 = glm::vec3(0, 0, -1.0f);
     m_Angle                   = glm::radians(p_AngleDegrees);
 	m_AspectRatio             = p_AspectRatio;
 	m_NearPlane               = p_NearPlane;
@@ -58,6 +59,7 @@ ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_AngleDegr
 ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_Left, const float p_Right, const float p_Bottom, const float p_Top, const float p_NearPlane, const float p_FarPlane) : ComponentBaseClass(p_Entity) {
     m_Eye                     = glm::vec3(0.0f);
 	m_Up                      = glm::vec3(0.0f, 1.0f, 0.0f);
+    m_Forward                 = glm::vec3(0, 0, -1.0f);
     m_Left                    = p_Left;
 	m_Right                   = p_Right;
 	m_Bottom                  = p_Bottom;
@@ -100,14 +102,16 @@ const uint ComponentCamera::sphereIntersectTest(const glm::vec3& p_Position, con
 void ComponentCamera::lookAt(const glm::vec3& p_Eye, const glm::vec3& p_Center, const glm::vec3& p_Up) {
     m_Eye                     = p_Eye;
     m_Up                      = p_Up;
-    m_ViewMatrix              = glm::lookAt(m_Eye, p_Center, m_Up);
-    m_ViewMatrixNoTranslation = glm::lookAt(glm::vec3(0.0f), p_Center - m_Eye, m_Up);
+    m_Forward                 = glm::normalize(m_Eye - p_Center);
+    m_ViewMatrix              = glm::lookAt(m_Eye, m_Eye - m_Forward, m_Up);
+    m_ViewMatrixNoTranslation = glm::lookAt(glm::vec3(0.0f), -m_Forward, m_Up);
 }
 
 const glm::vec3 ComponentCamera::forward() const {
-    auto inv = glm::transpose(m_ViewMatrixNoTranslation);
-    return glm::normalize(glm::vec3(inv[2][0], inv[2][1], inv[2][2]));
+    //auto inv = glm::transpose(m_ViewMatrixNoTranslation);
+    //return glm::normalize(glm::vec3(inv[2][0], inv[2][1], inv[2][2]));
     //return (getViewVector());
+    return m_Forward;
 }
 const glm::vec3 ComponentCamera::right() const {
     return glm::normalize(glm::vec3(m_ViewMatrixNoTranslation[0][0], m_ViewMatrixNoTranslation[1][0], m_ViewMatrixNoTranslation[2][0]));

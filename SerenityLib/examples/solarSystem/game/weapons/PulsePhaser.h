@@ -59,7 +59,7 @@ class PulsePhaser final: public PrimaryWeaponCannon{
         );
         ~PulsePhaser();
 
-        bool fire();
+        const bool fire();
         void forceFire();
         void update(const double& dt);
 };

@@ -59,7 +59,7 @@ class PlasmaCannon final : public PrimaryWeaponCannon {
         );
         ~PlasmaCannon();
 
-        bool fire();
+        const bool fire();
         void forceFire();
         void update(const double& dt);
 };
