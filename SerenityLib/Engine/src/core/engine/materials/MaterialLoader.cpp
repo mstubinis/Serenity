@@ -203,3 +203,15 @@ void InternalMaterialPublicInterface::UnloadGPU(Material& material) {
     }
     */
 }
+void InternalMaterialPublicInterface::Load(Material& material) {
+    if (!material.isLoaded()) {
+        InternalMaterialPublicInterface::LoadCPU(material);
+        InternalMaterialPublicInterface::LoadGPU(material);
+    }
+}
+void InternalMaterialPublicInterface::Unload(Material& material) {
+    if (material.isLoaded()) {
+        InternalMaterialPublicInterface::UnloadGPU(material);
+        InternalMaterialPublicInterface::UnloadCPU(material);
+    }
+}

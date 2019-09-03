@@ -100,9 +100,6 @@ class Material final: public BindableResource{
         void bind();
         void unbind();
 
-        void load();
-        void unload();
-
         void update(const double& dt);
 };
 #endif

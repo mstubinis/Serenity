@@ -1,0 +1,5 @@
+#pragma once
+#ifndef GAME_WEAPON_QUANTUM_TORPEDO_H
+#define GAME_WEAPON_QUANTUM_TORPEDO_H
+
+#endif

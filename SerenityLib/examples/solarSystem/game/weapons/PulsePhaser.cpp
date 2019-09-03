@@ -24,8 +24,7 @@
 using namespace Engine;
 using namespace std;
 
-struct PulsePhaserCollisionFunctor final { 
-void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+struct PulsePhaserCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
     auto pulsePhaserShipVoid    = owner.getUserPointer1();
     auto& pulsePhaserProjectile = *static_cast<PulsePhaserProjectile*>(owner.getUserPointer());
 
@@ -51,8 +50,7 @@ void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& 
             }
         }        
     }
-}
-};
+}};
 
 struct PulsePhaserInstanceBindFunctor {void operator()(EngineResource* r) const {
     glDepthMask(GL_TRUE);
@@ -74,8 +72,30 @@ struct PulsePhaserInstanceUnbindFunctor { void operator()(EngineResource* r) con
     glDepthMask(GL_FALSE);
 }};
 
+
+struct PulsePhaserOutlineInstanceBindFunctor { void operator()(EngineResource* r) const {
+    //glDepthMask(GL_TRUE);
+    auto& i = *static_cast<ModelInstance*>(r);
+    Entity& parent = i.parent();
+    auto& body = *parent.getComponent<ComponentBody>();
+
+    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 model = parentModel * i.modelMatrix();
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+
+    Renderer::sendUniform4Safe("Object_Color", i.color());
+    Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
+    Renderer::sendUniform1Safe("AnimationPlaying", 0);
+    Renderer::sendUniformMatrix4Safe("Model", model);
+    Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
+}};
+struct PulsePhaserOutlineInstanceUnbindFunctor {void operator()(EngineResource* r) const {
+    //glDepthMask(GL_FALSE);
+}};
+
+
 struct PulsePhaserTailInstanceBindFunctor {void operator()(EngineResource* r) const {
-    glDepthMask(GL_TRUE);
+    //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
@@ -100,7 +120,7 @@ struct PulsePhaserTailInstanceBindFunctor {void operator()(EngineResource* r) co
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
 struct PulsePhaserTailInstanceUnbindFunctor {void operator()(EngineResource* r) const {
-    glDepthMask(GL_FALSE);
+    //glDepthMask(GL_FALSE);
 }};
 
 
@@ -119,12 +139,14 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
     model.setCustomUnbindFunctor(PulsePhaserInstanceUnbindFunctor());
     model.getModel(0).setColor(1.0f, 0.77f, 0.0f, 1.0f);
     outline.setColor(1.0f, 0.43f, 0.0f, 1.0f);
+    outline.setCustomBindFunctor(PulsePhaserOutlineInstanceBindFunctor());
+    outline.setCustomUnbindFunctor(PulsePhaserOutlineInstanceUnbindFunctor());
     head.setColor(1.0f, 0.43f, 0.0f, 1.0f);
     tail.setColor(1.0f, 0.43f, 0.0f, 1.0f);
 
-    head.setPosition(0.0f, 0.0f, -0.41996f);
+    head.setPosition(0.0f, 0.0f, -0.38996f);
     head.setScale(0.142f, 0.142f, 0.142f);
-    tail.setPosition(0.0f, 0.0f, 0.41371f);
+    tail.setPosition(0.0f, 0.0f, 0.38371f);
     tail.setScale(0.102f, 0.102f, 0.102f);
     head.setCustomBindFunctor(PulsePhaserTailInstanceBindFunctor());
     head.setCustomUnbindFunctor(PulsePhaserTailInstanceUnbindFunctor());
@@ -160,6 +182,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
     cannonBody.setUserPointer2(&source);
     cannonBody.setCollisionFunctor(PulsePhaserCollisionFunctor());
     cannonBody.setInternalPhysicsUserPointer(&cannonBody);
+    const_cast<btRigidBody&>(cannonBody.getBtBody()).setDamping(0.0f, 0.0f);
 
 
     light = new PointLight(finalPosition, &map);

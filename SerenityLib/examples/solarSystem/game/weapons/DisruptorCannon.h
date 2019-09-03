@@ -16,6 +16,8 @@ struct DisruptorCannonInstanceBindFunctor;
 struct DisruptorCannonInstanceUnbindFunctor;
 struct DisruptorCannonTailInstanceBindFunctor;
 struct DisruptorCannonTailInstanceUnbindFunctor;
+struct DisruptorCannonOutlineInstanceBindFunctor;
+struct DisruptorCannonOutlineInstanceUnbindFunctor;
 
 struct DisruptorCannonProjectile final {
     Entity entity;
@@ -35,6 +37,8 @@ class DisruptorCannon final : public PrimaryWeaponCannon {
     friend struct DisruptorCannonInstanceUnbindFunctor;
     friend struct DisruptorCannonTailInstanceBindFunctor;
     friend struct DisruptorCannonTailInstanceUnbindFunctor;
+    friend struct DisruptorCannonOutlineInstanceBindFunctor;
+    friend struct DisruptorCannonOutlineInstanceUnbindFunctor;
 private:
     Map& m_Map;
     std::vector<DisruptorCannonProjectile*> m_ActiveProjectiles;

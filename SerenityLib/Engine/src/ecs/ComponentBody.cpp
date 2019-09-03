@@ -423,15 +423,11 @@ void ComponentBody::translate(const float p_X, const float p_Y, const float p_Z,
         ComponentBody::setPosition(position() + Engine::Math::btVectorToGLM(v));
     }else{
         auto& normalData = *data.n;
-        glm::vec3& position_ = normalData.position;
-		position_.x += p_X;
-		position_.y += p_Y;
-		position_.z += p_Z;
         glm::vec3 offset(p_X, p_Y, p_Z);
         if (p_Local) {
             offset = normalData.rotation * offset;
         }
-		ComponentBody::setPosition(position_ + offset);
+		ComponentBody::setPosition(normalData.position + offset);
     }
 }
 void ComponentBody::rotate(const glm::vec3& p_Rotation, const bool p_Local) {
@@ -540,18 +536,14 @@ void ComponentBody::setPosition(const float p_X, const float p_Y, const float p_
         Collision& collision = *physicsData.collision;
         if (collision.getType() == CollisionType::TriangleShapeStatic) {
             Physics::removeRigidBody(physicsData.bullet_rigidBody);
-            SAFE_DELETE(physicsData.bullet_rigidBody);
         }
         physicsData.bullet_motionState.setWorldTransform(tr);
-        if (collision.getType() == CollisionType::TriangleShapeStatic) {
-            btRigidBody::btRigidBodyConstructionInfo ci(physicsData.mass, &physicsData.bullet_motionState, collision.getBtShape(), collision.getBtInertia());
-            physicsData.bullet_rigidBody = new btRigidBody(ci);
-            physicsData.bullet_rigidBody->setUserPointer(this);
-            Physics::addRigidBody(physicsData.bullet_rigidBody, physicsData.group, physicsData.mask);
-        }
         physicsData.bullet_rigidBody->setMotionState(&physicsData.bullet_motionState); //is this needed?
         physicsData.bullet_rigidBody->setWorldTransform(tr);
         physicsData.bullet_rigidBody->setCenterOfMassTransform(tr);
+        if (collision.getType() == CollisionType::TriangleShapeStatic) {
+            Physics::addRigidBody(physicsData.bullet_rigidBody, physicsData.group, physicsData.mask);
+        }
     }else{
         auto& normalData = *data.n;
         glm::vec3& position_ = normalData.position;

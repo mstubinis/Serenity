@@ -16,6 +16,8 @@ struct PulsePhaserInstanceBindFunctor;
 struct PulsePhaserInstanceUnbindFunctor;
 struct PulsePhaserTailInstanceBindFunctor;
 struct PulsePhaserTailInstanceUnbindFunctor;
+struct PulsePhaserOutlineInstanceBindFunctor;
+struct PulsePhaserOutlineInstanceUnbindFunctor;
 
 struct PulsePhaserProjectile final {
     Entity entity;
@@ -35,6 +37,8 @@ class PulsePhaser final: public PrimaryWeaponCannon{
     friend struct PulsePhaserInstanceUnbindFunctor;
     friend struct PulsePhaserTailInstanceBindFunctor;
     friend struct PulsePhaserTailInstanceUnbindFunctor;
+    friend struct PulsePhaserOutlineInstanceBindFunctor;
+    friend struct PulsePhaserOutlineInstanceUnbindFunctor;
     private:
         Map& m_Map;
         std::vector<PulsePhaserProjectile*> m_ActiveProjectiles;

@@ -21,6 +21,62 @@ RenderPipeline::~RenderPipeline() {
     SAFE_DELETE_VECTOR(materialNodes);
 }
 
+void RenderPipeline::sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
+    std::sort(
+        instancesTotal.begin(), instancesTotal.end(),
+        [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
+            Entity& lhsParent = lhs->instance->parent();
+            Entity& rhsParent = rhs->instance->parent();
+            const EntityDataRequest& _dataReq1(lhsParent);
+            const EntityDataRequest& _dataReq2(rhsParent);
+
+            const ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>(_dataReq1);
+            const ComponentBody& rhsBody = *rhsParent.getComponent<ComponentBody>(_dataReq2);
+            const ComponentModel& lhsModel = *lhsParent.getComponent<ComponentModel>(_dataReq1);
+            const ComponentModel& rhsModel = *rhsParent.getComponent<ComponentModel>(_dataReq2);
+
+            const glm::vec3& lhsPos = lhsBody.position();
+            const glm::vec3& rhsPos = rhsBody.position();
+            const float& lhsRad = lhsModel.radius();
+            const float& rhsRad = rhsModel.radius();
+
+            const glm::vec3& camPos = camera.getPosition();
+            const glm::vec3& leftDir = glm::normalize(lhsPos - camPos);
+            const glm::vec3& rightDir = glm::normalize(rhsPos - camPos);
+
+            const glm::vec3& leftPos = lhsPos - (leftDir * lhsRad);
+            const glm::vec3& rightPos = rhsPos - (rightDir * rhsRad);
+
+            if (sortingMode == SortingMode::FrontToBack)
+                return camera.getDistanceSquared(leftPos) < camera.getDistanceSquared(rightPos);
+            else if (sortingMode == SortingMode::BackToFront)
+                return camera.getDistanceSquared(leftPos) > camera.getDistanceSquared(rightPos);
+            else
+                return false;
+        }
+    );
+}
+void RenderPipeline::sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
+    std::sort(
+        instancesTotal.begin(), instancesTotal.end(),
+        [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
+            Entity& lhsParent = lhs->instance->parent();
+            Entity& rhsParent = rhs->instance->parent();
+            const ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>();
+            const ComponentBody& rhsBody = *rhsParent.getComponent<ComponentBody>();
+            const glm::vec3& lhsPos = lhsBody.position();
+            const glm::vec3& rhsPos = rhsBody.position();
+
+            if (sortingMode == SortingMode::FrontToBack)
+                return camera.getDistanceSquared(lhsPos) < camera.getDistanceSquared(rhsPos);
+            else if (sortingMode == SortingMode::BackToFront)
+                return camera.getDistanceSquared(lhsPos) > camera.getDistanceSquared(rhsPos);
+            else
+                return false;
+        }
+    );
+}
+
 void RenderPipeline::sort_cheap(Camera& camera, const SortingMode::Mode sortingMode) {
 #ifndef _DEBUG
     for (auto& materialNode : materialNodes) {
@@ -28,7 +84,7 @@ void RenderPipeline::sort_cheap(Camera& camera, const SortingMode::Mode sortingM
             auto& vect = meshNode->instanceNodes;
             std::sort(
                 vect.begin(), vect.end(),
-                [&camera, &sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
+                [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
                     Entity& lhsParent = lhs->instance->parent();
                     Entity& rhsParent = rhs->instance->parent();
                     const ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>();
@@ -55,7 +111,7 @@ void RenderPipeline::sort(Camera& camera, const SortingMode::Mode sortingMode) {
             auto& vect = meshNode->instanceNodes;
             std::sort(
                 vect.begin(), vect.end(),
-                [&camera, &sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
+                [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
                     Entity& lhsParent = lhs->instance->parent();
                     Entity& rhsParent = rhs->instance->parent();
                     const EntityDataRequest& _dataReq1(lhsParent);
@@ -186,6 +242,37 @@ void RenderPipeline::render(Viewport& viewport, Camera& camera, const double& dt
                 }
             }
             _material.unbind();
+        }
+    }
+}
+void RenderPipeline::render_bruteforce(Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
+    if (useDefaultShaders)
+        shaderProgram.bind();
+    for (auto& instance : instancesTotal) {
+        auto& _modelInstance = *instance->instance;
+        auto& _mesh = *_modelInstance.mesh();
+        auto& _material = *_modelInstance.material();
+
+        auto* body = _modelInstance.parent().getComponent<ComponentBody>();
+        auto modelMatrix = body->modelMatrix();
+        if (_modelInstance.passedRenderCheck()) {
+            if (sortingMode != SortingMode::None) {
+                _mesh.sortTriangles(camera, _modelInstance, modelMatrix, sortingMode);
+            }
+            _material.bind();
+            _mesh.bind();
+            _modelInstance.bind();
+            _mesh.render(false);
+            _modelInstance.unbind();
+            _mesh.unbind();
+            _material.unbind();
+        }
+        //protect against any custom changes by restoring to the regular shader and material
+        if (useDefaultShaders) {
+            if (Core::m_Engine->m_RenderManager.RendererState.current_bound_shader_program != &shaderProgram) {
+                shaderProgram.bind();
+                _material.bind();
+            }
         }
     }
 }

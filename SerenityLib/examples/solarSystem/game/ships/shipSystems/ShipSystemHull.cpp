@@ -91,7 +91,7 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
     if (d)  decalList.push_back(d);
     if (d1) decalList.push_back(d1);
 }
-void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const uint damage) {
+void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const uint damage, const bool forceHullFire) {
     int newHP = m_HealthPointsCurrent - damage;
     if (newHP > 0) {
         //hull takes entire hit
@@ -100,7 +100,7 @@ void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& 
         //we destroyed the ship
         m_HealthPointsCurrent = 0;
     }
-    applyDamageDecal(impactNormal, impactLocationLocal, impactRadius);
+    applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, forceHullFire);
 }
 void ShipSystemHull::receiveCollision(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float damage) {
     if (m_CollisionTimer > static_cast<float>(HULL_TO_HULL_COLLISION_DELAY)) {

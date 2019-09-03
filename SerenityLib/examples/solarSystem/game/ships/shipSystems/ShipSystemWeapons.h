@@ -6,21 +6,35 @@
 #include <vector>
 #include <glm/vec3.hpp>
 
+class EntityWrapper;
 struct PrimaryWeaponCannon {
-    Ship&     ship;
-    glm::vec3 position; //relative to the ship's model center
-    glm::vec3 forward;
-    float     arc;
-    uint      damage;
-    float     impactRadius;
-    float     impactTime;
-    uint      numRounds;
-    uint      numRoundsMax;
-    float     rechargeTimePerRound;
-    float     rechargeTimer;
-    float     travelSpeed;
-    float     volume;
-    PrimaryWeaponCannon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc, const uint& _maxCharges, const uint& _damage,const float& _rechargePerRound,const float& _impactRadius,const float& _impactTime, const float& _travelSpeed, const float& volume);
+    Ship&       ship;
+    glm::vec3   position; //relative to the ship's model center
+    glm::vec3   forward;
+    float       arc;
+    uint        damage;
+    float       impactRadius;
+    float       impactTime;
+    uint        numRounds;
+    uint        numRoundsMax;
+    float       rechargeTimePerRound;
+    float       rechargeTimer;
+    float       travelSpeed;
+    float       volume;
+
+    PrimaryWeaponCannon(
+        Ship& _ship,
+        const glm::vec3& _position,
+        const glm::vec3& _forward,
+        const float& _arc,
+        const uint& _maxCharges,
+        const uint& _damage,
+        const float& _rechargePerRound,
+        const float& _impactRadius,
+        const float& _impactTime,
+        const float& _travelSpeed,
+        const float& volume
+    );
     virtual bool fire();
     virtual void forceFire();
     virtual const glm::vec3 calculatePredictedVector();
@@ -32,6 +46,7 @@ struct PrimaryWeaponBeam {
     glm::vec3 position; //relative to the ship's model center
     glm::vec3 forward;
     float     arc;
+
     PrimaryWeaponBeam(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc);
     virtual bool fire();
     virtual void forceFire();
@@ -40,11 +55,40 @@ struct PrimaryWeaponBeam {
 };
 
 struct SecondaryWeaponTorpedo {
-    Ship& ship;
-    glm::vec3 position; //relative to the ship's model center
-    glm::vec3 forward;
-    float arc;
-    SecondaryWeaponTorpedo(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc);
+    Ship&           ship;
+    glm::vec3       position; //relative to the ship's model center
+    glm::vec3       forward;
+    float           arc;
+    uint            damage;
+    float           impactRadius;
+    float           impactTime;
+    uint            numRounds;
+    uint            numRoundsMax;
+    float           rechargeTimePerRound;
+    float           rechargeTimer;
+    float           travelSpeed;
+    float           volume;
+    float           rotationAngleSpeed;
+    bool            hasLock;
+    EntityWrapper*  target;
+
+
+    SecondaryWeaponTorpedo(
+        Ship& _ship,
+        const glm::vec3& _position,
+        const glm::vec3& _forward,
+        const float& _arc,
+        const uint& _maxCharges,
+        const uint& _damage,
+        const float& _rechargePerRound,
+        const float& _impactRadius,
+        const float& _impactTime,
+        const float& _travelSpeed,
+        const float& _volume,
+        const float& _rotAngleSpeed,
+        const bool& _hasLock
+    );
+
     virtual bool fire();
     virtual void forceFire();
     virtual const glm::vec3 calculatePredictedVector();

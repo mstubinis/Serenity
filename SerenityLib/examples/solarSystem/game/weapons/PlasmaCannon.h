@@ -16,6 +16,8 @@ struct PlasmaCannonInstanceBindFunctor;
 struct PlasmaCannonInstanceUnbindFunctor;
 struct PlasmaCannonTailInstanceBindFunctor;
 struct PlasmaCannonTailInstanceUnbindFunctor;
+struct PlasmaCannonOutlineInstanceBindFunctor;
+struct PlasmaCannonOutlineInstanceUnbindFunctor;
 
 struct PlasmaCannonProjectile final {
     Entity entity;
@@ -35,6 +37,8 @@ class PlasmaCannon final : public PrimaryWeaponCannon {
     friend struct PlasmaCannonInstanceUnbindFunctor;
     friend struct PlasmaCannonTailInstanceBindFunctor;
     friend struct PlasmaCannonTailInstanceUnbindFunctor;
+    friend struct PlasmaCannonOutlineInstanceBindFunctor;
+    friend struct PlasmaCannonOutlineInstanceUnbindFunctor;
     private:
         Map& m_Map;
         std::vector<PlasmaCannonProjectile*> m_ActiveProjectiles;

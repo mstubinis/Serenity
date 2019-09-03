@@ -51,7 +51,12 @@ namespace Engine {
                 void clean(const uint entityData);
                 void sort(Camera& camera, const SortingMode::Mode sortingMode);
                 void sort_cheap(Camera& camera, const SortingMode::Mode sortingMode);
+
+                void sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode);
+                void sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode sortingMode);
+
                 void render(Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
+                void render_bruteforce(Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
                 void cpu_execute(Viewport& viewport, Camera& camera, const double& dt);
         };
     };

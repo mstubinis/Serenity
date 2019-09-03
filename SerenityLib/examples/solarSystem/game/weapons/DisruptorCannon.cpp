@@ -128,9 +128,9 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     head.setColor(0.31f, 0.9f, 0.28f, 1.0f);
     tail.setColor(0.31f, 0.9f, 0.28f, 1.0f);
 
-    head.setPosition(0.0f, 0.0f, -0.41996f);
+    head.setPosition(0.0f, 0.0f, -0.38996f);
     head.setScale(0.142f, 0.142f, 0.142f);
-    tail.setPosition(0.0f, 0.0f, 0.41371f);
+    tail.setPosition(0.0f, 0.0f, 0.38371f);
     tail.setScale(0.102f, 0.102f, 0.102f);
     head.setCustomBindFunctor(DisruptorCannonTailInstanceBindFunctor());
     head.setCustomUnbindFunctor(DisruptorCannonTailInstanceUnbindFunctor());
@@ -166,6 +166,7 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     cannonBody.setUserPointer2(&source);
     cannonBody.setCollisionFunctor(DisruptorCannonCollisionFunctor());
     cannonBody.setInternalPhysicsUserPointer(&cannonBody);
+    const_cast<btRigidBody&>(cannonBody.getBtBody()).setDamping(0.0f, 0.0f);
 
 
     light = new PointLight(finalPosition, &map);

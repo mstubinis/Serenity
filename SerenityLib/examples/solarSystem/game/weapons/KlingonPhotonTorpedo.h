@@ -1,0 +1,5 @@
+#pragma once
+#ifndef GAME_WEAPON_KLINGON_PHOTON_TORPEDO_H
+#define GAME_WEAPON_KLINGON_PHOTON_TORPEDO_H
+
+#endif

@@ -250,6 +250,9 @@ const unsigned short& ModelInstance::getViewportFlags() const {
     return m_ViewportFlag;
 }
 void ModelInstance::internalUpdateModelMatrix() {
+    auto* model = m_Parent.getComponent<ComponentModel>();
+    if(model)
+        Engine::epriv::ComponentModel_Functions::CalculateRadius(*model);
     Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);
 }
 void* ModelInstance::getUserPointer() const {

@@ -2,6 +2,8 @@
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
 #include "../../weapons/PulsePhaser.h"
+#include "../../weapons/QuantumTorpedo.h"
+#include "../../weapons/PhotonTorpedo.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"
@@ -48,10 +50,16 @@ Defiant::Defiant(Client& client, Map& map, bool player, const string& name, glm:
     //front left torpedo  (-0.358887, 0.657542, 0.023574)
     //front right torpedo (0.358887, 0.657542, 0.023574)
 
+    auto* leftTorp = new PhotonTorpedo(*this, map, glm::vec3(-0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 30.0f);
+    auto* rightTorp = new PhotonTorpedo(*this, map, glm::vec3(0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 30.0f);
+
     weapons.addPrimaryWeaponCannon(*leftTop);
     weapons.addPrimaryWeaponCannon(*leftBottom);
     weapons.addPrimaryWeaponCannon(*rightBottom);
     weapons.addPrimaryWeaponCannon(*rightTop);
+
+    weapons.addSecondaryWeaponTorpedo(*leftTorp);
+    weapons.addSecondaryWeaponTorpedo(*rightTorp);
 }
 Defiant::~Defiant() {
 

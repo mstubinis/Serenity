@@ -28,6 +28,8 @@ namespace Engine {
             static void LoadGPU(Material&);
             static void UnloadCPU(Material&);
             static void UnloadGPU(Material&);
+            static void Load(Material&);
+            static void Unload(Material&);
         };
     };
 };

@@ -55,24 +55,23 @@ vector<boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
 #pragma region Material
 
 Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular):BindableResource(name){
-    Texture* d = 0; Texture* n = 0; Texture* g = 0; Texture* s = 0;
-
-    d = MaterialLoader::LoadTextureDiffuse(*this, diffuse);
-    n = MaterialLoader::LoadTextureNormal(*this, normal);
-    g = MaterialLoader::LoadTextureGlow(*this, glow);
-    s = MaterialLoader::LoadTextureSpecular(*this, specular);
+    Texture* d = MaterialLoader::LoadTextureDiffuse(*this, diffuse);
+    Texture* n = MaterialLoader::LoadTextureNormal(*this, normal);
+    Texture* g = MaterialLoader::LoadTextureGlow(*this, glow);
+    Texture* s = MaterialLoader::LoadTextureSpecular(*this, specular);
 
     MaterialLoader::InternalInit(*this, d, n, g, s);
-    load();
+    InternalMaterialPublicInterface::Load(*this);
 }
 Material::Material() {
     MaterialLoader::InternalInitBase(*this);
 }
 Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular):BindableResource(name){
     MaterialLoader::InternalInit(*this, diffuse, normal, glow, specular);
-    load();
+    InternalMaterialPublicInterface::Load(*this);
 }
 Material::~Material(){
+    InternalMaterialPublicInterface::Unload(*this);
     SAFE_DELETE_VECTOR(m_Components);
 }
 MaterialComponent* Material::internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture, Texture* mask, Texture* cubemap) {
@@ -284,20 +283,6 @@ void Material::bind(){
 }
 void Material::unbind(){ 
     Core::m_Engine->m_RenderManager._unbindMaterial(); 
-}
-void Material::load(){
-    if(!isLoaded()){
-        auto& _this = *this;
-        InternalMaterialPublicInterface::LoadCPU(_this);
-        InternalMaterialPublicInterface::LoadGPU(_this);
-    }
-}
-void Material::unload(){
-    if(isLoaded()){
-        auto& _this = *this;
-        InternalMaterialPublicInterface::UnloadGPU(_this);
-        InternalMaterialPublicInterface::UnloadCPU(_this);
-    }
 }
 void Material::update(const double& dt) {
     for (uint i = 0; i < m_Components.size(); ++i) {

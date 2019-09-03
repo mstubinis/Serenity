@@ -291,6 +291,21 @@
     <ClInclude Include="game\ships\leviathan\Leviathan.h">
       <Filter>Header Files\Game\Ships\Leviathan</Filter>
     </ClInclude>
+    <ClInclude Include="game\weapons\PhotonTorpedo.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\KlingonPhotonTorpedo.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\PlasmaTorpedo.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\QuantumTorpedo.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\PhotonTorpedoOld.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -445,6 +460,21 @@
     </ClCompile>
     <ClCompile Include="game\ships\leviathan\Leviathan.cpp">
       <Filter>Source Files\Game\Ships\Leviathan</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\PhotonTorpedo.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\PhotonTorpedoOld.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\QuantumTorpedo.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\PlasmaTorpedo.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\KlingonPhotonTorpedo.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

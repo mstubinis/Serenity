@@ -26,10 +26,10 @@ const glm::vec3 PrimaryWeaponCannon::calculatePredictedVector() {
     auto shipRotation = shipBody.rotation();
     auto cannonForward = glm::normalize(shipRotation * forward);
     auto shipPosition = shipBody.position();
-    auto target = ship.getTarget();
-    if (target) {
-        auto& targetBody           = *target->getComponent<ComponentBody>();
-        auto* targetIsShip = dynamic_cast<Ship*>(target);
+    auto mytarget = ship.getTarget();
+    if (mytarget) {
+        auto& targetBody           = *mytarget->getComponent<ComponentBody>();
+        auto* targetIsShip = dynamic_cast<Ship*>(mytarget);
         glm::vec3 targetPosition;
         if (targetIsShip) {
             targetPosition = targetIsShip->getAimPositionDefault();
@@ -95,23 +95,88 @@ void PrimaryWeaponBeam::forceFire() {
 void PrimaryWeaponBeam::update(const double& dt) {
 
 }
-SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc) : ship(_ship) {
-    position = _position;
-    forward = _forward;
+SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const uint& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime,const float& _travelSpeed,const float& _volume,const float& _rotAngleSpeed, const bool& _hasLock) : ship(_ship) {
+    position = _pos;
+    forward = _fwd;
     arc = _arc;
+    damage = _dmg;
+    impactRadius = _impactRad;
+    impactTime = _impactTime;
+    numRounds = numRoundsMax = _maxCharges;
+    rechargeTimePerRound = _rechargePerRound;
+    travelSpeed = _travelSpeed;
+    volume = _volume;
+    rotationAngleSpeed = _rotAngleSpeed;
+    hasLock = _hasLock;
+    target = nullptr;
+    rechargeTimer = 0.0f;
 }
 const glm::vec3 SecondaryWeaponTorpedo::calculatePredictedVector() {
-    glm::vec3 ret = glm::vec3(0.0f);
-    return ret;
+    auto& shipBody = *ship.getComponent<ComponentBody>();
+    auto shipRotation = shipBody.rotation();
+    auto cannonForward = glm::normalize(shipRotation * forward);
+    auto shipPosition = shipBody.position();
+    auto mytarget = ship.getTarget();
+    if (mytarget) {
+        auto& targetBody = *mytarget->getComponent<ComponentBody>();
+        auto* targetIsShip = dynamic_cast<Ship*>(mytarget);
+        glm::vec3 targetPosition;
+        if (targetIsShip) {
+            targetPosition = targetIsShip->getAimPositionDefault();
+        }else{
+            targetPosition = targetBody.position();
+        }
+        const auto vecToTarget = shipPosition - targetPosition;
+        const auto vecToForward = shipPosition - (cannonForward * 100000000.0f);
+        const auto angleToTarget = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
+        if (angleToTarget <= arc) {
+            hasLock = true;
+            target = mytarget;
+            const auto targetLinearVelocity = targetBody.getLinearVelocity();
+            const auto distanceToTarget = glm::distance(targetPosition, shipPosition);
+            const auto travelTime = distanceToTarget / travelSpeed;
+
+            const auto predictedSpeed = targetLinearVelocity + (cannonForward * travelTime) /* * target.acceleration */; //TODO: figure this out later
+            const auto averageSpeed = (targetLinearVelocity + predictedSpeed) / 2.0f;
+            auto predictedPos = targetPosition + (averageSpeed * travelTime);
+
+            const auto myVelocity = shipBody.getLinearVelocity();
+            predictedPos -= (myVelocity / 2.0f);
+
+            return -glm::normalize((shipPosition + (shipRotation * position)) - predictedPos);
+        }
+    }
+    //not predicted firing
+    hasLock = false; 
+    return cannonForward;
 }
 bool SecondaryWeaponTorpedo::fire() {
+    if (numRounds > 0) {
+        --numRounds;
+        return true;
+    }
     return false;
 }
 void SecondaryWeaponTorpedo::forceFire() {
 
 }
 void SecondaryWeaponTorpedo::update(const double& dt) {
+    if (numRounds < numRoundsMax) {
+        const float fdt = static_cast<float>(dt);
+        rechargeTimer += fdt;
+        if (rechargeTimer >= rechargeTimePerRound) {
+            ++numRounds;
+            rechargeTimer = 0.0f;
+        }
+    }
+    //homing logic
+    if (hasLock) {
+        if (target) {
 
+        }else{
+
+        }
+    }
 }
 
 

@@ -383,11 +383,12 @@ OrbitInfo* Planet::getOrbitInfo() const {
 }
 float Planet::getGroundRadius(){ 
     auto& model = *getComponent<ComponentModel>();
-    return model.radius(); 
+    const auto& rad = model.radius();
+    return rad - (rad * m_AtmosphereHeight);
 }
 float Planet::getRadius() { 
     auto& model = *getComponent<ComponentModel>();
-    return model.radius() + (model.radius() * m_AtmosphereHeight); 
+    return model.radius(); 
 }
 float Planet::getAtmosphereHeight(){ 
     return m_AtmosphereHeight; 

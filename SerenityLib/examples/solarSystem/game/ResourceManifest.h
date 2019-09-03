@@ -67,6 +67,7 @@ struct ResourceManifest{
     static Handle CannonOutlineMaterial;
     static Handle CannonTailMaterial;
 
+
     //sounds
     static Handle MenuMusic;
     static Handle SoundCloakingActivated;
@@ -74,6 +75,12 @@ struct ResourceManifest{
     static Handle SoundPulsePhaser;
     static Handle SoundPlasmaCannon;
     static Handle SoundDisruptorCannon;
+    static Handle SoundPhotonTorpedo;
+
+    //torpedos
+    static Handle TorpedoFlareMesh;
+    static Handle TorpedoCoreMaterial;
+    static Handle TorpedoGlowMaterial;
 
 
     static std::string BasePath;

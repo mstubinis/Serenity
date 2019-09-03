@@ -161,16 +161,6 @@ void Server::update(Server* thisServer, const double& dt) {
         }
     }
 }
-//NOT multithreaded
-void Server::updateRemoveDisconnectedClients(Server& server) {
-    while (server.m_ClientsToBeDisconnected.size() > 0) {
-        server.m_mutex.lock();
-        server.m_clients.erase(server.m_ClientsToBeDisconnected.front());
-        server.m_ClientsToBeDisconnected.pop();
-        server.m_mutex.unlock();
-    }
-}
-
 //Listener thread
 void Server::updateAcceptNewClients(Server& server) {
     if (server.m_listener) {
@@ -196,6 +186,14 @@ void Server::updateAcceptNewClients(Server& server) {
     }
 }
 //NOT multithreaded
+void Server::updateRemoveDisconnectedClients(Server& server) {
+    while (server.m_ClientsToBeDisconnected.size() > 0) {
+        server.m_mutex.lock();
+        server.m_clients.erase(server.m_ClientsToBeDisconnected.front());
+        server.m_ClientsToBeDisconnected.pop();
+        server.m_mutex.unlock();
+    }
+}
 void Server::updateClientsGameLoop(const double& dt) {
     const auto active = m_Active.load(std::memory_order_relaxed);
     if (active == true) {

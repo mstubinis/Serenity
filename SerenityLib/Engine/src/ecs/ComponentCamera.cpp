@@ -105,10 +105,12 @@ void ComponentCamera::lookAt(const glm::vec3& p_Eye, const glm::vec3& p_Center, 
 }
 
 const glm::vec3 ComponentCamera::forward() const {
-    return (getViewVector()); //normalize later?
+    auto inv = glm::transpose(m_ViewMatrixNoTranslation);
+    return glm::normalize(glm::vec3(inv[2][0], inv[2][1], inv[2][2]));
+    //return (getViewVector());
 }
 const glm::vec3 ComponentCamera::right() const {
-    return (glm::cross(forward(), up())); //normalize later?
+    return glm::normalize(glm::vec3(m_ViewMatrixNoTranslation[0][0], m_ViewMatrixNoTranslation[1][0], m_ViewMatrixNoTranslation[2][0]));
 }
 const glm::vec3 ComponentCamera::up() const {
     return (m_Up); //normalize later?
@@ -134,7 +136,7 @@ const glm::mat4 ComponentCamera::getViewProjectionInverse() const {
 	return glm::inverse(m_ProjectionMatrix * m_ViewMatrix); 
 }
 const glm::vec3 ComponentCamera::getViewVector() const {
-	return glm::vec3(m_ViewMatrix[0][2], m_ViewMatrix[1][2], m_ViewMatrix[2][2]);
+	return glm::normalize(glm::vec3(m_ViewMatrix[0][2], m_ViewMatrix[1][2], m_ViewMatrix[2][2]));
 }
 const float ComponentCamera::getAngle() const {
 	return m_Angle; 

@@ -1629,9 +1629,9 @@ class epriv::RenderManager::impl final{
             gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting, "RGBA");
             InternalScenePublicInterface::RenderForwardOpaque(scene, viewport, camera, dt);
 
-            GLEnablei(GL_BLEND, 0); //this might need to be all buffers not just 0
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            
+            GLEnablei(GL_BLEND, 0); //this might need to be all buffers not just 0
+ 
             GLEnablei(GL_BLEND, 1); //yes this is important
             GLEnablei(GL_BLEND, 2); //yes this is important
             GLEnablei(GL_BLEND, 3); //yes this is important

@@ -76,6 +76,12 @@ Handle ResourceManifest::SoundCloakingDeactivated;
 Handle ResourceManifest::SoundPulsePhaser;
 Handle ResourceManifest::SoundPlasmaCannon;
 Handle ResourceManifest::SoundDisruptorCannon;
+Handle ResourceManifest::SoundPhotonTorpedo;
+
+//torpedos
+Handle ResourceManifest::TorpedoFlareMesh;
+Handle ResourceManifest::TorpedoCoreMaterial;
+Handle ResourceManifest::TorpedoGlowMaterial;
 
 std::unordered_map<std::string, boost::tuple<Handle, Handle, glm::vec3, glm::vec3>> ResourceManifest::Ships;
 
@@ -111,6 +117,7 @@ void ResourceManifest::init(){
     CannonTailMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_tail.objcc")[0];
     CannonEffectOutlineMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_outline.objcc")[0];
 
+
 	//extras
 	NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc")[0];
     MirandaMesh = Resources::loadMeshAsync(BasePath + "data/Models/miranda.objcc")[0];
@@ -121,6 +128,21 @@ void ResourceManifest::init(){
     //LeviathanMesh = Resources::loadMeshAsync(BasePath + "data/Models/leviathan.objcc")[0];
     ShrikeMesh = Resources::loadMeshAsync(BasePath + "data/Models/shrike.objcc")[0];
     BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.obj")[0];
+
+    //torpedos
+    TorpedoFlareMesh    = Resources::loadMeshAsync(BasePath + "data/Models/torpedo_flare.obj")[0];
+    TorpedoCoreMaterial = Resources::loadMaterialAsync("TorpedoCore", BasePath + "data/Textures/Effects/torpedo_core.dds", "", "", "");
+    TorpedoGlowMaterial = Resources::loadMaterialAsync("TorpedoGlow", BasePath + "data/Textures/Effects/torpedo_outer_glow.dds", "", "", "");
+
+    Material& torpedoCoreMat = *((Material*)TorpedoCoreMaterial.get());
+    torpedoCoreMat.setShadeless(true);
+    torpedoCoreMat.setGlow(1.0f);
+
+    Material& torpedoGlowMat = *((Material*)TorpedoGlowMaterial.get());
+    torpedoGlowMat.setShadeless(true);
+    torpedoGlowMat.setGlow(1.0f);
+
+
 
     CannonOutlineMaterial = Resources::loadMaterialAsync("CannonOutline", BasePath + "data/Textures/Effects/cannon_texture.dds", "","", "");
     CannonTailMaterial = Resources::loadMaterialAsync("CannonTail", BasePath + "data/Textures/Effects/cannon_texture_tip.dds", "", "", "");
@@ -246,6 +268,7 @@ void ResourceManifest::init(){
 
     ((Material*)StarFlareMaterial.get())->setShadeless(true);
 
+
     //sounds
     MenuMusic = Resources::addSoundData(BasePath + "data/Sounds/menu.ogg");
     SoundCloakingActivated = Resources::addSoundData(BasePath + "data/Sounds/effects/cloaking.ogg");
@@ -253,6 +276,7 @@ void ResourceManifest::init(){
     SoundPulsePhaser = Resources::addSoundData(BasePath + "data/Sounds/effects/pulse_phaser.ogg");
     SoundPlasmaCannon = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_cannon.ogg");
     SoundDisruptorCannon = Resources::addSoundData(BasePath + "data/Sounds/effects/disruptor_cannon.ogg");
+    SoundPhotonTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/photon_torpedo.ogg");
 
     const auto klingon = glm::vec3(0.72f, 0.11f, 0.11f);
     const auto romulan = glm::vec3(0.33f, 0.72f, 0.48f);
