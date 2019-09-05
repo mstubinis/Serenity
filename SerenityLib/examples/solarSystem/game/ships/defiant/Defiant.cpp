@@ -47,8 +47,8 @@ Defiant::Defiant(Client& client, Map& map, bool player, const string& name, glm:
     auto* rightBottom = new PulsePhaser(*this, map, glm::vec3(0.434018f, -0.163775, -0.093399), glm::vec3(-0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f);
     auto* rightTop    = new PulsePhaser(*this, map, glm::vec3(0.573355f, 0.072793f, -0.207088f), glm::vec3(-0.0055f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f);
 
-    auto* leftTorp = new PhotonTorpedo(*this, map, glm::vec3(-0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
-    auto* rightTorp = new PhotonTorpedo(*this, map, glm::vec3(0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
+    auto* leftTorp = new QuantumTorpedo(*this, map, glm::vec3(-0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
+    auto* rightTorp = new QuantumTorpedo(*this, map, glm::vec3(0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
     auto* aftTorp = new PhotonTorpedo(*this, map, glm::vec3(0.0f, 0.019991f, 1.04274f), glm::vec3(0, 0, 1), 15.0f);
 
     weapons.addPrimaryWeaponCannon(*leftTop);

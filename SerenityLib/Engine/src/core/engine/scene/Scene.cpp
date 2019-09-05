@@ -253,9 +253,10 @@ void InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Viewpo
 void InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(Scene& scene, Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders) {
     for (uint i = RenderStage::ForwardTransparentTrianglesSorted; i < RenderStage::ForwardTransparentTrianglesSorted_4; ++i) {
         for (auto& pipeline : scene.m_i->m_Pipelines[i]) {
-            pipeline->sort_bruteforce(camera, SortingMode::FrontToBack);
+            //TODO: sort_bruteforce and render_bruteforce doesn't work here... probably has to do with custom binds and unbinds and custom shader(s)
+            pipeline->sort(camera, SortingMode::FrontToBack);
             pipeline->cpu_execute(viewport, camera, dt);
-            pipeline->render_bruteforce(viewport, camera, dt, useDefaultShaders, SortingMode::FrontToBack);
+            pipeline->render(viewport, camera, dt, useDefaultShaders, SortingMode::FrontToBack);
         }
     }
 }
@@ -308,8 +309,8 @@ Scene::~Scene() {
 const uint Scene::numViewports() const {
     return m_i->m_Viewports.size();
 }
-const uint& Scene::id() const {
-    return m_i->m_ID; 
+const uint Scene::id() const {
+    return m_i->m_ID;
 }
 Viewport& Scene::addViewport(const uint& x, const uint& y, const uint& width, const uint& height, const Camera& camera) {
     Viewport* viewport = new Viewport(*this, camera);

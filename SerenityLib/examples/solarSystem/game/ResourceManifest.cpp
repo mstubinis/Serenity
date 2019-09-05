@@ -77,12 +77,17 @@ Handle ResourceManifest::SoundPulsePhaser;
 Handle ResourceManifest::SoundPlasmaCannon;
 Handle ResourceManifest::SoundDisruptorCannon;
 Handle ResourceManifest::SoundPhotonTorpedo;
+Handle ResourceManifest::SoundQuantumTorpedo;
+Handle ResourceManifest::SoundPhotonTorpedoOld;
+Handle ResourceManifest::SoundPlasmaTorpedo;
 
 //torpedos
 Handle ResourceManifest::TorpedoFlareMesh;
 Handle ResourceManifest::TorpedoFlareMaterial;
+Handle ResourceManifest::TorpedoFlareTriMaterial;
 Handle ResourceManifest::TorpedoCoreMaterial;
 Handle ResourceManifest::TorpedoGlowMaterial;
+Handle ResourceManifest::TorpedoGlow2Material;
 
 std::unordered_map<std::string, boost::tuple<Handle, Handle, glm::vec3, glm::vec3>> ResourceManifest::Ships;
 
@@ -131,14 +136,20 @@ void ResourceManifest::init(){
     BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.obj")[0];
 
     //torpedos
-    TorpedoFlareMesh     = Resources::loadMeshAsync(BasePath + "data/Models/torpedo_flare.obj")[0];
-    TorpedoFlareMaterial = Resources::loadMaterialAsync("TorpedoFlare", BasePath + "data/Textures/Effects/torpedo_flare.dds", "", "", "");
-    TorpedoCoreMaterial  = Resources::loadMaterialAsync("TorpedoCore", BasePath + "data/Textures/Effects/torpedo_core.dds", "", "", "");
-    TorpedoGlowMaterial  = Resources::loadMaterialAsync("TorpedoGlow", BasePath + "data/Textures/Effects/torpedo_outer_glow.dds", "", "", "");
+    TorpedoFlareMesh        = Resources::loadMeshAsync(BasePath + "data/Models/torpedo_flare.obj")[0];
+    TorpedoFlareMaterial    = Resources::loadMaterialAsync("TorpedoFlare", BasePath + "data/Textures/Effects/torpedo_flare.dds", "", "", "");
+    TorpedoFlareTriMaterial = Resources::loadMaterialAsync("TorpedoFlareTri", BasePath + "data/Textures/Effects/torpedo_flare_tri.dds", "", "", "");
+    TorpedoCoreMaterial     = Resources::loadMaterialAsync("TorpedoCore", BasePath + "data/Textures/Effects/torpedo_core.dds", "", "", "");
+    TorpedoGlowMaterial     = Resources::loadMaterialAsync("TorpedoGlow", BasePath + "data/Textures/Effects/torpedo_outer_glow.dds", "", "", "");
+    TorpedoGlow2Material    = Resources::loadMaterialAsync("TorpedoGlow2", BasePath + "data/Textures/Effects/torpedo_outer_glow_2.dds", "", "", "");
 
     Material& torpedoFlareMat = *((Material*)TorpedoFlareMaterial.get());
     torpedoFlareMat.setShadeless(true);
     torpedoFlareMat.setGlow(1.0f);
+
+    Material& torpedoFlareTriMat = *((Material*)TorpedoFlareTriMaterial.get());
+    torpedoFlareTriMat.setShadeless(true);
+    torpedoFlareTriMat.setGlow(1.0f);
 
     Material& torpedoCoreMat = *((Material*)TorpedoCoreMaterial.get());
     torpedoCoreMat.setShadeless(true);
@@ -148,6 +159,9 @@ void ResourceManifest::init(){
     torpedoGlowMat.setShadeless(true);
     torpedoGlowMat.setGlow(1.0f);
 
+    Material& torpedoGlowMat2 = *((Material*)TorpedoGlow2Material.get());
+    torpedoGlowMat2.setShadeless(true);
+    torpedoGlowMat2.setGlow(1.0f);
 
 
     CannonOutlineMaterial = Resources::loadMaterialAsync("CannonOutline", BasePath + "data/Textures/Effects/cannon_texture.dds", "","", "");
@@ -283,6 +297,9 @@ void ResourceManifest::init(){
     SoundPlasmaCannon = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_cannon.ogg");
     SoundDisruptorCannon = Resources::addSoundData(BasePath + "data/Sounds/effects/disruptor_cannon.ogg");
     SoundPhotonTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/photon_torpedo.ogg");
+    SoundQuantumTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/quantum_torpedo.ogg");
+    SoundPhotonTorpedoOld = Resources::addSoundData(BasePath + "data/Sounds/effects/photon_torpedo_old.ogg");
+    SoundPlasmaTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_torpedo.ogg");
 
     const auto klingon = glm::vec3(0.72f, 0.11f, 0.11f);
     const auto romulan = glm::vec3(0.33f, 0.72f, 0.48f);

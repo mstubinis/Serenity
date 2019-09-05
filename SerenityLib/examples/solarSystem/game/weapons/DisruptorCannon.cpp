@@ -52,62 +52,74 @@ struct DisruptorCannonCollisionFunctor final {
     }
 };
 
-struct DisruptorCannonInstanceBindFunctor {
-    void operator()(EngineResource* r) const {
-        glDepthMask(GL_TRUE);
-        auto& i = *static_cast<ModelInstance*>(r);
-        Entity& parent = i.parent();
-        auto& body = *parent.getComponent<ComponentBody>();
-        glm::mat4 parentModel = body.modelMatrix();
+struct DisruptorCannonInstanceBindFunctor { void operator()(EngineResource* r) const {
+    glDepthMask(GL_TRUE);
+    auto& i = *static_cast<ModelInstance*>(r);
+    Entity& parent = i.parent();
+    auto& body = *parent.getComponent<ComponentBody>();
+    glm::mat4 parentModel = body.modelMatrix();
 
-        glm::mat4 modelMatrix = parentModel * i.modelMatrix();
-        glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+    glm::mat4 modelMatrix = parentModel * i.modelMatrix();
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
 
-        Renderer::sendUniform4Safe("Object_Color", i.color());
-        Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
-        Renderer::sendUniform1Safe("AnimationPlaying", 0);
-        Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
-        Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
-    }
-};
-struct DisruptorCannonInstanceUnbindFunctor {
-    void operator()(EngineResource* r) const {
-        glDepthMask(GL_FALSE);
-    }
-};
+    Renderer::sendUniform4Safe("Object_Color", i.color());
+    Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
+    Renderer::sendUniform1Safe("AnimationPlaying", 0);
+    Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
+}};
+struct DisruptorCannonInstanceUnbindFunctor {void operator()(EngineResource* r) const {
+    glDepthMask(GL_FALSE);
+}};
 
-struct DisruptorCannonTailInstanceBindFunctor {
-    void operator()(EngineResource* r) const {
-        glDepthMask(GL_TRUE);
-        auto& i = *static_cast<ModelInstance*>(r);
-        Entity& parent = i.parent();
-        auto& body = *parent.getComponent<ComponentBody>();
-        auto& cam = *parent.scene().getActiveCamera();
-        auto camOrien = cam.getOrientation();
+struct DisruptorCannonOutlineInstanceBindFunctor { void operator()(EngineResource* r) const {
+    //glDepthMask(GL_TRUE);
+    auto& i = *static_cast<ModelInstance*>(r);
+    Entity& parent = i.parent();
+    auto& body = *parent.getComponent<ComponentBody>();
 
-        glm::mat4 parentModel = body.modelMatrix();
-        glm::mat4 model = parentModel * i.modelMatrix();
-        glm::vec3 worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
+    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 model = parentModel * i.modelMatrix();
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
 
-        glm::mat4 translation = glm::translate(worldPos);
-        glm::mat4 rotationMatrix = glm::mat4_cast(camOrien);
-        glm::mat4 scaleMatrix = glm::scale(body.getScale() * i.getScale());
+    Renderer::sendUniform4Safe("Object_Color", i.color());
+    Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
+    Renderer::sendUniform1Safe("AnimationPlaying", 0);
+    Renderer::sendUniformMatrix4Safe("Model", model);
+    Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
+}};
+struct DisruptorCannonOutlineInstanceUnbindFunctor { void operator()(EngineResource* r) const {
+    //glDepthMask(GL_FALSE);
+}};
 
-        glm::mat4 modelMatrix = glm::mat4(1.0f) * translation * rotationMatrix * scaleMatrix;
-        glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+struct DisruptorCannonTailInstanceBindFunctor { void operator()(EngineResource* r) const {
+    //glDepthMask(GL_TRUE);
+    auto& i = *static_cast<ModelInstance*>(r);
+    Entity& parent = i.parent();
+    auto& body = *parent.getComponent<ComponentBody>();
+    auto& cam = *parent.scene().getActiveCamera();
+    auto camOrien = cam.getOrientation();
 
-        Renderer::sendUniform4Safe("Object_Color", i.color());
-        Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
-        Renderer::sendUniform1Safe("AnimationPlaying", 0);
-        Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
-        Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
-    }
-};
-struct DisruptorCannonTailInstanceUnbindFunctor {
-    void operator()(EngineResource* r) const {
-        glDepthMask(GL_FALSE);
-    }
-};
+    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 model = parentModel * i.modelMatrix();
+    glm::vec3 worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
+
+    glm::mat4 translation = glm::translate(worldPos);
+    glm::mat4 rotationMatrix = glm::mat4_cast(camOrien);
+    glm::mat4 scaleMatrix = glm::scale(body.getScale() * i.getScale());
+
+    glm::mat4 modelMatrix = glm::mat4(1.0f) * translation * rotationMatrix * scaleMatrix;
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+
+    Renderer::sendUniform4Safe("Object_Color", i.color());
+    Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
+    Renderer::sendUniform1Safe("AnimationPlaying", 0);
+    Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
+}};
+struct DisruptorCannonTailInstanceUnbindFunctor { void operator()(EngineResource* r) const {
+    //glDepthMask(GL_FALSE);
+}};
 
 
 DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward) {
@@ -115,16 +127,20 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     currentTime = 0.0f;
     maxTime = 2.5f;
 
-    auto& model = *entity.addComponent<ComponentModel>(ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
+    EntityDataRequest request(entity);
+
+    auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& outline = model.addModel(ResourceManifest::CannonEffectOutlineMesh, ResourceManifest::CannonOutlineMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& head = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& tail = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
 
-    auto& cannonBody = *entity.addComponent<ComponentBody>(CollisionType::Box);
+    auto& cannonBody = *entity.addComponent<ComponentBody>(request, CollisionType::Box);
     model.setCustomBindFunctor(DisruptorCannonInstanceBindFunctor());
     model.setCustomUnbindFunctor(DisruptorCannonInstanceUnbindFunctor());
     model.getModel(0).setColor(0.62f, 1.00f, 0.6f, 1.0f);
     outline.setColor(0.31f, 0.9f, 0.28f, 1.0f);
+    outline.setCustomBindFunctor(DisruptorCannonOutlineInstanceBindFunctor());
+    outline.setCustomUnbindFunctor(DisruptorCannonOutlineInstanceUnbindFunctor());
     head.setColor(0.31f, 0.9f, 0.28f, 1.0f);
     tail.setColor(0.31f, 0.9f, 0.28f, 1.0f);
 
@@ -138,8 +154,7 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     tail.setCustomUnbindFunctor(DisruptorCannonTailInstanceUnbindFunctor());
 
     active = true;
-    Ship& s = source.ship;
-    auto& shipBody = *s.getComponent<ComponentBody>();
+    auto& shipBody = *source.ship.getComponent<ComponentBody>();
     auto shipMatrix = shipBody.modelMatrix();
     shipMatrix = glm::translate(shipMatrix, position + glm::vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
     glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
@@ -154,12 +169,13 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     cannonBody.setLinearVelocity(shipLinVel, false);
     cannonBody.setAngularVelocity(shipAngVel, false);
 
-    auto offset = source.calculatePredictedVector(cannonBody);
-    offset *= glm::vec3(source.travelSpeed);
-    cannonBody.applyImpulse(offset.x, offset.y, offset.z, false);
+    auto data = source.calculatePredictedVector(cannonBody);
+    auto offset = data.pedictedVector;
     glm::quat q;
     Math::alignTo(q, -offset);
     cannonBody.setRotation(q); //TODO: change rotation based on launching vector
+    offset *= glm::vec3(source.travelSpeed);
+    cannonBody.applyImpulse(offset.x, offset.y, offset.z, false);
 
     cannonBody.setUserPointer(this);
     cannonBody.setUserPointer1(&source.ship);

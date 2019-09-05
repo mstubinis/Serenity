@@ -76,13 +76,17 @@ struct ResourceManifest{
     static Handle SoundPlasmaCannon;
     static Handle SoundDisruptorCannon;
     static Handle SoundPhotonTorpedo;
+    static Handle SoundQuantumTorpedo;
+    static Handle SoundPhotonTorpedoOld;
+    static Handle SoundPlasmaTorpedo;
 
     //torpedos
     static Handle TorpedoFlareMesh;
     static Handle TorpedoFlareMaterial;
+    static Handle TorpedoFlareTriMaterial;
     static Handle TorpedoCoreMaterial;
     static Handle TorpedoGlowMaterial;
-
+    static Handle TorpedoGlow2Material;
 
     static std::string BasePath;
 

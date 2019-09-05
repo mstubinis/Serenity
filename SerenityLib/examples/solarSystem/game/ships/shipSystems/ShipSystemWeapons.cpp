@@ -8,12 +8,12 @@
 using namespace Engine;
 using namespace std;
 
-#define PREDICTED_PHYSICS_CONSTANT 0.3333333333333333f
+#define PREDICTED_PHYSICS_CONSTANT 0.11111111f
 
 float ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm::vec3& pos, const glm::vec3& vel, const float& s) {
-    float a = s * s - (vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
-    float b = pos.x * vel.x + pos.y * vel.y + pos.z * vel.z;
-    float c = pos.x * pos.x + pos.y * pos.y + pos.z * pos.z;
+    float a = s * s - glm::dot(vel, vel);
+    float b = glm::dot(pos, vel);
+    float c = glm::dot(pos, pos);
     float d = b * b + a * c;
     float t = 0;
     if (d >= 0) {
@@ -63,12 +63,19 @@ PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship,const glm::vec3& _pos,const
     volume                   = _volume;
     rechargeTimer            = 0.0f;
 }
-const glm::vec3 PrimaryWeaponCannon::calculatePredictedVector(ComponentBody& projectileBody) {
+const PrimaryWeaponCannonPrediction PrimaryWeaponCannon::calculatePredictedVector(ComponentBody& projectileBody) {
     auto& shipBody = *ship.getComponent<ComponentBody>();
     auto shipRotation = shipBody.rotation();
     auto cannonForward = glm::normalize(shipRotation * forward);
     auto shipPosition = shipBody.position();
     auto mytarget = ship.getTarget();
+
+    auto returnValue = PrimaryWeaponCannonPrediction();
+
+    auto defaultVelocityVector = cannonForward * travelSpeed;
+    auto currentVelocityVector = projectileBody.getLinearVelocity();
+    auto finalSpeed = glm::length(defaultVelocityVector + currentVelocityVector);
+    returnValue.finalProjectileSpeed = finalSpeed;
     if (mytarget) {
         auto& targetBody           = *mytarget->getComponent<ComponentBody>();
         auto* targetIsShip = dynamic_cast<Ship*>(mytarget);
@@ -82,24 +89,26 @@ const glm::vec3 PrimaryWeaponCannon::calculatePredictedVector(ComponentBody& pro
         const auto vecToForward    = shipPosition - (cannonForward * 100000000.0f);
         const auto angleToTarget   = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
         if (angleToTarget <= arc) {
+            const auto launcherPosition = shipPosition + (shipRotation * position);
             const auto targetLinearVelocity = targetBody.getLinearVelocity();
-            const auto distanceToTarget = glm::distance(targetPosition, shipPosition);
+            const auto distanceToTarget = glm::distance(targetPosition, launcherPosition);
 
-            auto defaultVelocityVector = cannonForward * travelSpeed;
-            auto currentVelocityVector = projectileBody.getLinearVelocity();
+            const auto finalTravelTime = distanceToTarget / finalSpeed;
 
-            auto finalSpeed = glm::length(defaultVelocityVector + currentVelocityVector);
-            const auto travelTime = distanceToTarget / travelSpeed;
-            
-            auto timeTillImpact = ShipSystemWeapons::calculate_quadratic_time_till_hit(targetPosition, (targetLinearVelocity * PREDICTED_PHYSICS_CONSTANT), finalSpeed);
-            auto predictedPos = targetPosition + (targetLinearVelocity * PREDICTED_PHYSICS_CONSTANT) * timeTillImpact;
-            predictedPos -= currentVelocityVector * travelTime;
+            auto myShipVelocity = shipBody.getLinearVelocity();
+            auto combinedVelocity = targetLinearVelocity - myShipVelocity;
+            const auto predictedSpeed = combinedVelocity + (cannonForward * finalTravelTime) /* * target.acceleration */; //TODO: figure this out later
+            const auto averageSpeed = (combinedVelocity + predictedSpeed) * 0.5f;
+            auto predictedPos = targetPosition + (averageSpeed * finalTravelTime);
 
-            return -glm::normalize((shipPosition + (shipRotation * position)) - predictedPos);
+            returnValue.pedictedVector = -glm::normalize(launcherPosition - predictedPos);
+            returnValue.pedictedPosition = predictedPos;
+            return returnValue;
         }
     }
-    //not predicted firing
-    return cannonForward;
+    returnValue.pedictedVector = cannonForward;
+    returnValue.pedictedPosition = cannonForward;
+    return returnValue;
 }
 const bool PrimaryWeaponCannon::fire() {
     if (numRounds > 0) {
@@ -157,7 +166,10 @@ const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredicte
     auto mytarget = ship.getTarget();
 
     auto returnValue = SecondaryWeaponTorpedoPrediction();
-
+    auto defaultVelocityVector = torpForward * travelSpeed;
+    auto currentVelocityVector = projectileBody.getLinearVelocity();
+    auto finalSpeed = glm::length(defaultVelocityVector + currentVelocityVector);
+    returnValue.finalProjectileSpeed = finalSpeed;
     if (mytarget) {
         auto& targetBody = *mytarget->getComponent<ComponentBody>();
         auto* targetIsShip = dynamic_cast<Ship*>(mytarget);
@@ -174,20 +186,21 @@ const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredicte
             returnValue.hasLock = true;
             returnValue.target = mytarget;
 
+            const auto launcherPosition = shipPosition + (shipRotation * position);
             const auto targetLinearVelocity = targetBody.getLinearVelocity();
-            const auto distanceToTarget = glm::distance(targetPosition, shipPosition);
+            const auto distanceToTarget = glm::distance(targetPosition, launcherPosition);
 
-            auto defaultVelocityVector = torpForward * travelSpeed;
-            auto currentVelocityVector = projectileBody.getLinearVelocity();
-            auto finalSpeed = glm::length(defaultVelocityVector + currentVelocityVector);
-            const auto travelTime = distanceToTarget / travelSpeed;
 
-            auto timeTillImpact = ShipSystemWeapons::calculate_quadratic_time_till_hit(targetPosition, (targetLinearVelocity * PREDICTED_PHYSICS_CONSTANT), finalSpeed);
-            auto predictedPos = targetPosition + (targetLinearVelocity * PREDICTED_PHYSICS_CONSTANT) * timeTillImpact;
-            predictedPos -= currentVelocityVector * travelTime;
+            const auto finalTravelTime = distanceToTarget / finalSpeed;
+            auto myShipVelocity = shipBody.getLinearVelocity();
+
+            auto combinedVelocity = targetLinearVelocity - myShipVelocity;
+            const auto predictedSpeed = combinedVelocity + (torpForward * finalTravelTime) /* * target.acceleration */; //TODO: figure this out later
+            const auto averageSpeed = (combinedVelocity + predictedSpeed) * 0.5f;
+            auto predictedPos = targetPosition + (averageSpeed * finalTravelTime);
 
             returnValue.pedictedPosition = predictedPos;
-            returnValue.pedictedVector = -glm::normalize((shipPosition + (shipRotation * position)) - predictedPos);
+            returnValue.pedictedVector = -glm::normalize(launcherPosition - predictedPos);
             return returnValue;
         }
     }

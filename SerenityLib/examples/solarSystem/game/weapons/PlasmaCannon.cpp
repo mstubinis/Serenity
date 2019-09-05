@@ -72,8 +72,28 @@ struct PlasmaCannonInstanceUnbindFunctor {void operator()(EngineResource* r) con
     glDepthMask(GL_FALSE);
 }};
 
+struct PlasmaCannonOutlineInstanceBindFunctor { void operator()(EngineResource* r) const {
+    //glDepthMask(GL_TRUE);
+    auto& i = *static_cast<ModelInstance*>(r);
+    Entity& parent = i.parent();
+    auto& body = *parent.getComponent<ComponentBody>();
+
+    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 model = parentModel * i.modelMatrix();
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+
+    Renderer::sendUniform4Safe("Object_Color", i.color());
+    Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
+    Renderer::sendUniform1Safe("AnimationPlaying", 0);
+    Renderer::sendUniformMatrix4Safe("Model", model);
+    Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
+}};
+struct PlasmaCannonOutlineInstanceUnbindFunctor { void operator()(EngineResource* r) const {
+    //glDepthMask(GL_FALSE);
+}};
+
 struct PlasmaCannonTailInstanceBindFunctor {void operator()(EngineResource* r) const {
-    glDepthMask(GL_TRUE);
+    //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
@@ -98,7 +118,7 @@ struct PlasmaCannonTailInstanceBindFunctor {void operator()(EngineResource* r) c
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
 struct PlasmaCannonTailInstanceUnbindFunctor {void operator()(EngineResource* r) const {
-    glDepthMask(GL_FALSE);
+    //glDepthMask(GL_FALSE);
 }};
 
 
@@ -107,16 +127,20 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
     currentTime = 0.0f;
     maxTime = 2.5f;
 
-    auto& model = *entity.addComponent<ComponentModel>(ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
+    EntityDataRequest request(entity);
+
+    auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& outline = model.addModel(ResourceManifest::CannonEffectOutlineMesh, ResourceManifest::CannonOutlineMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& head = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& tail = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
 
-    auto& cannonBody = *entity.addComponent<ComponentBody>(CollisionType::Box);
+    auto& cannonBody = *entity.addComponent<ComponentBody>(request, CollisionType::Box);
     model.setCustomBindFunctor(PlasmaCannonInstanceBindFunctor());
     model.setCustomUnbindFunctor(PlasmaCannonInstanceUnbindFunctor());
     model.getModel(0).setColor(0.82f, 1.00f, 0.8f, 1.0f);
     outline.setColor(0.29f, 1.0f, 0.47f, 1.0f);
+    outline.setCustomBindFunctor(PlasmaCannonOutlineInstanceBindFunctor());
+    outline.setCustomUnbindFunctor(PlasmaCannonOutlineInstanceUnbindFunctor());
     head.setColor(0.29f, 1.0f, 0.47f, 1.0f);
     tail.setColor(0.29f, 1.0f, 0.47f, 1.0f);
 
@@ -130,8 +154,7 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
     tail.setCustomUnbindFunctor(PlasmaCannonTailInstanceUnbindFunctor());
 
     active = true;
-    Ship& s = source.ship;
-    auto& shipBody = *s.getComponent<ComponentBody>();
+    auto& shipBody = *source.ship.getComponent<ComponentBody>();
     auto shipMatrix = shipBody.modelMatrix();
     shipMatrix = glm::translate(shipMatrix, position + glm::vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
     glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
@@ -146,12 +169,13 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
     cannonBody.setLinearVelocity(shipLinVel, false);
     cannonBody.setAngularVelocity(shipAngVel, false);
 
-    auto offset = source.calculatePredictedVector(cannonBody);
-    offset *= glm::vec3(source.travelSpeed);
-    cannonBody.applyImpulse(offset.x, offset.y, offset.z, false);
+    auto data = source.calculatePredictedVector(cannonBody);
+    auto offset = data.pedictedVector;
     glm::quat q;
     Math::alignTo(q, -offset);
     cannonBody.setRotation(q); //TODO: change rotation based on launching vector
+    offset *= glm::vec3(source.travelSpeed);
+    cannonBody.applyImpulse(offset.x, offset.y, offset.z, false);
 
     cannonBody.setUserPointer(this);
     cannonBody.setUserPointer1(&source.ship);

@@ -8,7 +8,6 @@
 
 class  Map;
 class  Ship;
-class  PhotonTorpedo;
 class  PointLight;
 class  PhotonTorpedo;
 struct PhotonTorpedoCollisionFunctor;
@@ -38,8 +37,7 @@ struct PhotonTorpedoFlare final {
 };
 struct PhotonTorpedoProjectile final {
     PhotonTorpedo& torpedo;
-    Entity entityCore;
-    Entity entityGlow;
+    EntityWrapper* entity;
     bool hasLock;
     EntityWrapper* target;
     float rotationAngleSpeed;

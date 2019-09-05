@@ -22,14 +22,17 @@ namespace epriv {
 				const EntityDataRequest dataRequest(entity);
                 return super::_add(dataRequest.ID, const_cast<E&>(entity), std::forward<ARGS>(args)...);
             }
-            inline bool removeComponent(const E& entity) {
+            template<typename... ARGS> inline T* addComponent(const EntityDataRequest& dataRequest, const E& entity, ARGS&& ... args) {
+                return super::_add(dataRequest.ID, const_cast<E&>(entity), std::forward<ARGS>(args)...);
+            }
+            inline const bool removeComponent(const E& entity) {
 				const EntityDataRequest dataRequest(entity);
                 return super::_remove(dataRequest.ID);
             }
-            inline bool removeComponent(const EntityDataRequest& dataRequest) {
+            inline const bool removeComponent(const EntityDataRequest& dataRequest) {
                 return super::_remove(dataRequest.ID);
             }
-            inline bool removeComponent(const uint& entityID) {
+            inline const bool removeComponent(const uint& entityID) {
                 return super::_remove(entityID);
             }
             inline T* getComponent(const E& entity) {

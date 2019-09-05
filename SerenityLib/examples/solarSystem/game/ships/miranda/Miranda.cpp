@@ -1,7 +1,7 @@
 #include "Miranda.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
-#include "../../weapons/PulsePhaser.h"
+#include "../../weapons/PhotonTorpedoOld.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"
@@ -18,7 +18,7 @@
 using namespace std;
 
 Miranda::Miranda(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, ResourceManifest::MirandaMesh, ResourceManifest::MirandaMaterial, "Miranda", map, player, name, position, scale, collisionType) {
+:Ship(client, ResourceManifest::MirandaMesh, ResourceManifest::MirandaMaterial, "Miranda", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.107337f, -0.272124f)) {
 
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
@@ -37,6 +37,15 @@ Miranda::Miranda(Client& client, Map& map, bool player, const string& name, glm:
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
+    auto* leftTorp = new PhotonTorpedoOld(*this, map, glm::vec3(-0.03427f, 0.310924f, 0.07898f), glm::vec3(0, 0, -1), 15.0f);
+    auto* rightTorp = new PhotonTorpedoOld(*this, map, glm::vec3(0.03427f, 0.310924f, 0.07898f), glm::vec3(0, 0, -1), 15.0f);
+    auto* aftTorpLeft = new PhotonTorpedoOld(*this, map, glm::vec3(-0.052569f, 0.306842f, 0.405438f), glm::vec3(0, 0, 1), 15.0f);
+    auto* aftTorpRight = new PhotonTorpedoOld(*this, map, glm::vec3(0.052569f, 0.306842f, 0.405438f), glm::vec3(0, 0, 1), 15.0f);
+
+    weapons.addSecondaryWeaponTorpedo(*leftTorp);
+    weapons.addSecondaryWeaponTorpedo(*rightTorp);
+    weapons.addSecondaryWeaponTorpedo(*aftTorpLeft);
+    weapons.addSecondaryWeaponTorpedo(*aftTorpRight);
 }
 Miranda::~Miranda() {
 

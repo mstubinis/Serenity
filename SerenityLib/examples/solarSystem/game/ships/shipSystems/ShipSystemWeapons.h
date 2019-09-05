@@ -19,6 +19,16 @@ struct ShipWeapon {
     const bool isInArc(EntityWrapper* target, const float _arc);
 };
 
+struct PrimaryWeaponCannonPrediction final {
+    glm::vec3 pedictedPosition;
+    glm::vec3 pedictedVector;
+    float finalProjectileSpeed;
+    PrimaryWeaponCannonPrediction() {
+        finalProjectileSpeed = 0.0f;
+        pedictedPosition = pedictedVector = glm::vec3(0.0f);
+    }
+};
+
 struct PrimaryWeaponCannon : public ShipWeapon {
     uint        damage;
     float       impactRadius;
@@ -45,7 +55,7 @@ struct PrimaryWeaponCannon : public ShipWeapon {
     );
     virtual const bool fire();
     virtual void forceFire();
-    virtual const glm::vec3 calculatePredictedVector(ComponentBody& projectileBody);
+    virtual const PrimaryWeaponCannonPrediction calculatePredictedVector(ComponentBody& projectileBody);
     virtual void update(const double& dt);
 };
 
@@ -61,11 +71,13 @@ struct PrimaryWeaponBeam : public ShipWeapon {
 struct SecondaryWeaponTorpedoPrediction final {
     glm::vec3 pedictedPosition;
     glm::vec3 pedictedVector;
+    float finalProjectileSpeed;
     EntityWrapper* target;
     bool hasLock;
     SecondaryWeaponTorpedoPrediction() {
         hasLock = false;
         target = nullptr;
+        finalProjectileSpeed = 0.0f;
         pedictedPosition = pedictedVector = glm::vec3(0.0f);
     }
 };

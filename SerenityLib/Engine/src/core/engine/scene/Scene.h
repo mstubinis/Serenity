@@ -50,7 +50,7 @@ class Scene: public EngineResource, public EventObserver{
         Scene(const std::string& name);
         virtual ~Scene();
 
-        const uint& id() const;
+        const uint id() const;
         const uint numViewports() const;
 
         //ecs

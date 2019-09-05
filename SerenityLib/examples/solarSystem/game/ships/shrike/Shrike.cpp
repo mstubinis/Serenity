@@ -3,6 +3,7 @@
 #include "../shipSystems/ShipSystemWeapons.h"
 #include "../../weapons/PlasmaCannon.h"
 #include "../../weapons/DisruptorCannon.h"
+#include "../../weapons/PlasmaTorpedo.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"
@@ -47,6 +48,12 @@ Shrike::Shrike(Client& client, Map& map, bool player, const string& name, glm::v
     weapons.addPrimaryWeaponCannon(*leftBottom);
     weapons.addPrimaryWeaponCannon(*rightBottom);
     weapons.addPrimaryWeaponCannon(*rightTop);
+
+    auto* frontTorp = new PlasmaTorpedo(*this, map, glm::vec3(0.0f, -0.049485f, -1.23634f), glm::vec3(0, 0, -1), 15.0f, 2);
+    auto* aftTorp = new PlasmaTorpedo(*this, map, glm::vec3(0.0f, -0.055816f, 1.46661f), glm::vec3(0, 0, 1), 15.0f);
+
+    weapons.addSecondaryWeaponTorpedo(*frontTorp);
+    weapons.addSecondaryWeaponTorpedo(*aftTorp);
 
 }
 Shrike::~Shrike() {

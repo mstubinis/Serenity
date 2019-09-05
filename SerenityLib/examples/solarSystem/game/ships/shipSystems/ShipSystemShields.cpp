@@ -67,8 +67,8 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const uint health) :
 
     m_HealthPointsMax = m_HealthPointsCurrent = health;
     //m_TimeSinceLastHit = 10.0f;
-    m_RechargeAmount = 150;
-    m_RechargeRate = 5.0f;
+    m_RechargeAmount = 450;
+    m_RechargeRate = 15.0f;
     //m_RechargeActivation = 5.0f;
     m_RechargeTimer = 0.0f;
 

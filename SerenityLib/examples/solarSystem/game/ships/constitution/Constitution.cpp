@@ -1,7 +1,7 @@
 #include "Constitution.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
-#include "../../weapons/PulsePhaser.h"
+#include "../../weapons/PhotonTorpedoOld.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"
@@ -18,7 +18,7 @@
 using namespace std;
 
 Constitution::Constitution(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, ResourceManifest::ConstitutionMesh, ResourceManifest::ConstitutionMaterial, "Constitution", map, player, name, position, scale, collisionType) {
+:Ship(client, ResourceManifest::ConstitutionMesh, ResourceManifest::ConstitutionMaterial, "Constitution", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.004208f, -0.383244f)) {
 
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
@@ -36,6 +36,13 @@ Constitution::Constitution(Client& client, Map& map, bool player, const string& 
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
+
+    auto* leftTorp = new PhotonTorpedoOld(*this, map, glm::vec3(-0.033864f, -0.129594f, -0.664163f), glm::vec3(0, 0, -1), 15.0f, 2);
+    auto* rightTorp = new PhotonTorpedoOld(*this, map, glm::vec3(0.033864f, -0.129594f, -0.664163f), glm::vec3(0, 0, -1), 15.0f, 2);
+
+
+    weapons.addSecondaryWeaponTorpedo(*leftTorp);
+    weapons.addSecondaryWeaponTorpedo(*rightTorp);
 
 }
 Constitution::~Constitution() {

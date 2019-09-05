@@ -72,7 +72,6 @@ struct PulsePhaserInstanceUnbindFunctor { void operator()(EngineResource* r) con
     glDepthMask(GL_FALSE);
 }};
 
-
 struct PulsePhaserOutlineInstanceBindFunctor { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
@@ -92,7 +91,6 @@ struct PulsePhaserOutlineInstanceBindFunctor { void operator()(EngineResource* r
 struct PulsePhaserOutlineInstanceUnbindFunctor {void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
-
 
 struct PulsePhaserTailInstanceBindFunctor {void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
@@ -129,12 +127,14 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
     currentTime = 0.0f;
     maxTime = 2.5f;
 
-    auto& model = *entity.addComponent<ComponentModel>(ResourceManifest::CannonEffectMesh, Material::WhiteShadeless,ShaderProgram::Forward,RenderStage::ForwardParticles);
-    auto& outline = model.addModel(ResourceManifest::CannonEffectOutlineMesh, ResourceManifest::CannonOutlineMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& head = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& tail = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    EntityDataRequest request(entity);
 
-    auto& cannonBody = *entity.addComponent<ComponentBody>(CollisionType::Box);
+    auto& model   = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless,ShaderProgram::Forward,RenderStage::ForwardParticles);
+    auto& outline = model.addModel(ResourceManifest::CannonEffectOutlineMesh, ResourceManifest::CannonOutlineMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& head    = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& tail    = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+
+    auto& cannonBody = *entity.addComponent<ComponentBody>(request, CollisionType::Box);
     model.setCustomBindFunctor(PulsePhaserInstanceBindFunctor());
     model.setCustomUnbindFunctor(PulsePhaserInstanceUnbindFunctor());
     model.getModel(0).setColor(1.0f, 0.77f, 0.0f, 1.0f);
@@ -154,8 +154,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
     tail.setCustomUnbindFunctor(PulsePhaserTailInstanceUnbindFunctor());
     
     active = true;
-    Ship& s = source.ship;
-    auto& shipBody = *s.getComponent<ComponentBody>();
+    auto& shipBody = *source.ship.getComponent<ComponentBody>();
     auto shipMatrix = shipBody.modelMatrix();
     shipMatrix = glm::translate(shipMatrix, position + glm::vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
     glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
@@ -170,12 +169,13 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
     cannonBody.setLinearVelocity(shipLinVel, false);
     cannonBody.setAngularVelocity(shipAngVel, false);
     
-    auto offset = source.calculatePredictedVector(cannonBody);
-    offset *= glm::vec3(source.travelSpeed);
-    cannonBody.applyImpulse(offset.x, offset.y, offset.z, false);
+    auto data = source.calculatePredictedVector(cannonBody);
+    auto offset = data.pedictedVector;
     glm::quat q;
     Math::alignTo(q, -offset);
     cannonBody.setRotation(q); //TODO: change rotation based on launching vector
+    offset *= glm::vec3(source.travelSpeed);
+    cannonBody.applyImpulse(offset.x, offset.y, offset.z, false);
 
     cannonBody.setUserPointer(this);
     cannonBody.setUserPointer1(&source.ship);

@@ -142,45 +142,45 @@ struct PhotonTorpedoFlareInstanceUnbindFunctor { void operator()(EngineResource*
 
 
 PhotonTorpedoProjectile::PhotonTorpedoProjectile(PhotonTorpedo& source, Map& map, const glm::vec3& position, const glm::vec3& forward):torpedo(source){
-    entityCore = map.createEntity();
+    entity = new EntityWrapper(map);
     currentTime = 0.0f;
     maxTime = 30.5f;
     hasLock = false;
     target = nullptr;
     rotationAngleSpeed = source.rotationAngleSpeed;
 
-    auto& coreModel = *entityCore.addComponent<ComponentModel>(Mesh::Plane, (Material*)(ResourceManifest::TorpedoCoreMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& core = coreModel.getModel(0);
+    EntityDataRequest request(entity->entity());
+    EntityDataRequest shipRequest(source.ship.entity());
 
+    auto& model    = *entity->addComponent<ComponentModel>(request, Mesh::Plane, (Material*)(ResourceManifest::TorpedoCoreMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles_2);
+    auto& glow     = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlowMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& body     = *entity->addComponent<ComponentBody>(request, CollisionType::Sphere);
+
+    auto& core = model.getModel(0);
     core.setCustomBindFunctor(PhotonTorpedoInstanceCoreBindFunctor());
     core.setCustomUnbindFunctor(PhotonTorpedoInstanceCoreUnbindFunctor());
     core.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-   
-    auto& torpedoCoreBody = *entityCore.addComponent<ComponentBody>(CollisionType::Sphere);
 
-    btMultiSphereShape* sph = static_cast<btMultiSphereShape*>(torpedoCoreBody.getCollision()->getBtShape());
+    btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body.getCollision()->getBtShape());
     const auto& _scl = btVector3(0.05f, 0.05f, 0.05f);
-    sph->setLocalScaling(_scl);
-    sph->setMargin(0.135f);
-    sph->setImplicitShapeDimensions(_scl);
-    sph->recalcLocalAabb();
+    sph.setLocalScaling(_scl);
+    sph.setMargin(0.135f);
+    sph.setImplicitShapeDimensions(_scl);
+    sph.recalcLocalAabb();
 
-    entityGlow = map.createEntity();
-    auto& glowModel = *entityGlow.addComponent<ComponentModel>(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlowMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& glow = glowModel.getModel(0);
-    glow.setColor(1.0f, 0.43f, 0.0f, 1.0f);
-    glow.setScale(0.6f);
+    const auto photonOrange = glm::vec4(1.0f, 0.3f, 0.0f, 1.0f);
+    const auto photonRedOrange = glm::vec4(1.0f, 0.21f, 0.0f, 1.0f);
+    glow.setColor(photonOrange);
+    glow.setScale(10.6f);
     glow.setCustomBindFunctor(PhotonTorpedoInstanceGlowBindFunctor());
     glow.setCustomUnbindFunctor(PhotonTorpedoInstanceGlowUnbindFunctor());
 
-    //flares
     for (uint i = 0; i < 6; ++i) {
-        auto& flare = glowModel.addModel(ResourceManifest::TorpedoFlareMesh, ResourceManifest::TorpedoFlareMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
+        auto& flare = model.addModel(ResourceManifest::TorpedoFlareMesh, ResourceManifest::TorpedoFlareMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
+        float randScale = Helper::GetRandomFloatFromTo(-1.1f, 1.1f);
 
-        float randScale = Helper::GetRandomFloatFromTo(-0.08f, 0.08f);
-
-        flare.setScale(0.12f + randScale);
-        flare.setColor(1.0f, 0.43f, 0.0f, 1.0f);
+        flare.setScale(2.2f + randScale);
+        flare.setColor(photonRedOrange);
         float angle = (360.0f / 6.0f) * i;
 
         float speed = 0.1f;
@@ -200,63 +200,58 @@ PhotonTorpedoProjectile::PhotonTorpedoProjectile(PhotonTorpedo& source, Map& map
 
         flares.push_back(flareD);
     }
-
     active = true;
-    Ship& s = source.ship;
-    auto& shipBody = *s.getComponent<ComponentBody>();
-    auto shipMatrix = shipBody.modelMatrix();
-    shipMatrix = glm::translate(shipMatrix, position);
-    glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
-    torpedoCoreBody.setPosition(finalPosition);
-    
-    torpedoCoreBody.addCollisionFlag(CollisionFlag::NoContactResponse);
-    torpedoCoreBody.setCollisionGroup(CollisionFilter::_Custom_2); //i belong to weapons (group 2)
-    torpedoCoreBody.setCollisionMask(CollisionFilter::_Custom_1 | CollisionFilter::_Custom_3); //i should only collide with shields and hull (group 1 and group 3)
-  
-    torpedoCoreBody.setUserPointer(this);
-    torpedoCoreBody.setUserPointer1(&source.ship);
-    torpedoCoreBody.setUserPointer2(&source);
-    torpedoCoreBody.setCollisionFunctor(PhotonTorpedoCollisionFunctor());
-    torpedoCoreBody.setInternalPhysicsUserPointer(&torpedoCoreBody);
-    torpedoCoreBody.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
-    const_cast<btRigidBody&>(torpedoCoreBody.getBtBody()).setDamping(0.0f, 0.0f);
+    glm::vec3 finalPosition = glm::vec3(0.0f);
 
-
-    
-    light = new PointLight(finalPosition, &map);
-    light->setColor(1.0f, 0.62f, 0.0f, 1.0f);
-    light->setAttenuation(LightRange::_20);
-
-    auto& torpedoGlowBody = *entityGlow.addComponent<ComponentBody>(CollisionType::None);
-    torpedoGlowBody.setPosition(finalPosition);
-
+    auto& shipBody = *source.ship.getComponent<ComponentBody>(shipRequest);
     auto shipLinVel = shipBody.getLinearVelocity();
     auto shipAngVel = shipBody.getAngularVelocity();
-    torpedoGlowBody.setLinearVelocity(shipLinVel, false);
-    torpedoGlowBody.setAngularVelocity(shipAngVel, false);
-    auto data = source.calculatePredictedVector(torpedoGlowBody);
+    auto shipMatrix = shipBody.modelMatrix();
+    shipMatrix = glm::translate(shipMatrix, position);
+    finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+    body.setPosition(finalPosition);
+    body.setLinearVelocity(shipLinVel, false);
+    body.setAngularVelocity(shipAngVel, false);
+
+    body.addCollisionFlag(CollisionFlag::NoContactResponse);
+    body.setCollisionGroup(CollisionFilter::_Custom_2); //i belong to weapons (group 2)
+    body.setCollisionMask(CollisionFilter::_Custom_1 | CollisionFilter::_Custom_3); //i should only collide with shields and hull (group 1 and group 3)
+
+    body.setUserPointer(this);
+    body.setUserPointer1(&source.ship);
+    body.setUserPointer2(&source);
+    body.setCollisionFunctor(PhotonTorpedoCollisionFunctor());
+    body.setInternalPhysicsUserPointer(&body);
+    body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
+    const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
+
+    light = new PointLight(finalPosition, &map);
+    light->setColor(photonOrange);
+    light->setAttenuation(LightRange::_20);
+
+    auto data = source.calculatePredictedVector(body);
     auto& offset = data.pedictedVector;
     hasLock = data.hasLock;
     target = data.target;
-    offset *= glm::vec3(source.travelSpeed);
-
     glm::quat q;
     Math::alignTo(q, -offset);
-    torpedoCoreBody.setRotation(q);
-    torpedoGlowBody.applyImpulse(offset.x, offset.y, offset.z, false);
+    body.setRotation(q);
+    offset *= glm::vec3(source.travelSpeed);
 
-    torpedoGlowBody.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
-    const_cast<btRigidBody&>(torpedoGlowBody.getBtBody()).setDamping(0.0f, 0.0f);
-    torpedoGlowBody.setRotation(q);
+    body.applyImpulse(offset.x, offset.y, offset.z, false);
+
+    body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
+    const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
+    body.setRotation(q);
 }
 PhotonTorpedoProjectile::~PhotonTorpedoProjectile() {
-
+    entity->destroy();
+    SAFE_DELETE(entity);
 }
 void PhotonTorpedoProjectile::destroy() {
     if (active) {
         active = false;
-        entityCore.destroy();
-        entityGlow.destroy();
+        entity->destroy();
         if (light) {
             light->destroy();
             SAFE_DELETE(light);
@@ -268,10 +263,9 @@ void PhotonTorpedoProjectile::update(const double& dt) {
         const float fdt = static_cast<float>(dt);
         currentTime += fdt;
 
-        auto& glowModel = *entityGlow.getComponent<ComponentModel>();
-        auto& glowBody = *entityGlow.getComponent<ComponentBody>();
-        auto& coreBody = *entityCore.getComponent<ComponentBody>();
-        auto glowBodyPos = glowBody.position_render();
+        auto& glowModel = *entity->getComponent<ComponentModel>();
+        auto& body = *entity->getComponent<ComponentBody>();
+        auto glowBodyPos = body.position_render();
 
         //homing logic
         if (hasLock && target) {
@@ -283,12 +277,12 @@ void PhotonTorpedoProjectile::update(const double& dt) {
         //TODO: hacky workaround for messed up camera forward vector
         auto vec = glm::normalize(glowBodyPos - camPos);
         vec *= 0.01f;
-        glowBody.setRotation(activeCam->getOrientation());
-        coreBody.setPosition(glowBodyPos - vec);
+        body.setRotation(activeCam->getOrientation());
+        glowModel.getModel(1).setPosition(vec);
 
         //flares
         for (uint i = 0; i < flares.size(); ++i) {
-            auto& flare = glowModel.getModel(1 + i);
+            auto& flare = glowModel.getModel(2 + i);
             flare.rotate(flares[i].spin);
         }
         if (light) {

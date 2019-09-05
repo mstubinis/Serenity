@@ -60,12 +60,14 @@ void RenderPipeline::sort_cheap_bruteforce(Camera& camera, const SortingMode::Mo
     std::sort(
         instancesTotal.begin(), instancesTotal.end(),
         [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
-            Entity& lhsParent = lhs->instance->parent();
-            Entity& rhsParent = rhs->instance->parent();
-            const ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>();
-            const ComponentBody& rhsBody = *rhsParent.getComponent<ComponentBody>();
-            const glm::vec3& lhsPos = lhsBody.position();
-            const glm::vec3& rhsPos = rhsBody.position();
+            auto& lhsInstance = *lhs->instance;
+            auto& rhsInstance = *rhs->instance;
+            Entity& lhsParent = lhsInstance.parent();
+            Entity& rhsParent = rhsInstance.parent();
+            const ComponentBody& lhsBody   = *lhsParent.getComponent<ComponentBody>();
+            const ComponentBody& rhsBody   = *rhsParent.getComponent<ComponentBody>();
+            glm::vec3 lhsPos = lhsBody.position() + lhsInstance.position();
+            glm::vec3 rhsPos = rhsBody.position() + rhsInstance.position();
 
             if (sortingMode == SortingMode::FrontToBack)
                 return camera.getDistanceSquared(lhsPos) < camera.getDistanceSquared(rhsPos);
@@ -85,12 +87,14 @@ void RenderPipeline::sort_cheap(Camera& camera, const SortingMode::Mode sortingM
             std::sort(
                 vect.begin(), vect.end(),
                 [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
-                    Entity& lhsParent = lhs->instance->parent();
-                    Entity& rhsParent = rhs->instance->parent();
+                    auto& lhsInstance = *lhs->instance;
+                    auto& rhsInstance = *rhs->instance;
+                    Entity& lhsParent = lhsInstance.parent();
+                    Entity& rhsParent = rhsInstance.parent();
                     const ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>();
                     const ComponentBody& rhsBody = *rhsParent.getComponent<ComponentBody>();
-                    const glm::vec3& lhsPos = lhsBody.position();
-                    const glm::vec3& rhsPos = rhsBody.position();
+                    glm::vec3 lhsPos = lhsBody.position() + lhsInstance.position();
+                    glm::vec3 rhsPos = rhsBody.position() + rhsInstance.position();
 
                     if (sortingMode == SortingMode::FrontToBack)
                         return camera.getDistanceSquared(lhsPos) < camera.getDistanceSquared(rhsPos);
