@@ -48,7 +48,7 @@ Client* Core::getClient() {
 
 void Core::startServer(const unsigned short& port, const string& mapname) {
     if (!m_Server) {
-        m_Server = new Server(*this, port, true);
+        m_Server = new Server(*this, port);
         m_Server->startup(mapname);
     }
 }

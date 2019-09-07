@@ -10,15 +10,15 @@ class Texture;
 namespace Engine {
     namespace epriv {
         struct MaterialLoader final {
-            static Texture* LoadTextureDiffuse(Material&, const std::string& file);
-            static Texture* LoadTextureNormal(Material&, const std::string& file);
-            static Texture* LoadTextureGlow(Material&, const std::string& file);
-            static Texture* LoadTextureSpecular(Material&, const std::string& file);
-            static Texture* LoadTextureAO(Material&, const std::string& file);
-            static Texture* LoadTextureMetalness(Material&, const std::string& file);
-            static Texture* LoadTextureSmoothness(Material&, const std::string& file);
-            static Texture* LoadTextureMask(Material&, const std::string& file);
-            static Texture* LoadTextureCubemap(Material&, const std::string& file);
+            static Texture* LoadTextureDiffuse(const std::string& file);
+            static Texture* LoadTextureNormal(const std::string& file);
+            static Texture* LoadTextureGlow(const std::string& file);
+            static Texture* LoadTextureSpecular(const std::string& file);
+            static Texture* LoadTextureAO(const std::string& file);
+            static Texture* LoadTextureMetalness(const std::string& file);
+            static Texture* LoadTextureSmoothness(const std::string& file);
+            static Texture* LoadTextureMask(const std::string& file);
+            static Texture* LoadTextureCubemap(const std::string& file);
 
             static void InternalInit(Material&, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular);
             static void InternalInitBase(Material&);

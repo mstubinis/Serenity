@@ -49,10 +49,12 @@ Shrike::Shrike(Client& client, Map& map, bool player, const string& name, glm::v
     weapons.addPrimaryWeaponCannon(*rightBottom);
     weapons.addPrimaryWeaponCannon(*rightTop);
 
-    auto* frontTorp = new PlasmaTorpedo(*this, map, glm::vec3(0.0f, -0.049485f, -1.23634f), glm::vec3(0, 0, -1), 15.0f, 2);
+    auto* frontTorp = new PlasmaTorpedo(*this, map, glm::vec3(0.0f, -0.049485f, -1.23634f), glm::vec3(0, 0, -1), 15.0f, 1);
+    auto* frontTorp1 = new PlasmaTorpedo(*this, map, glm::vec3(0.0f, -0.049485f, -1.23634f), glm::vec3(0, 0, -1), 15.0f, 1);
     auto* aftTorp = new PlasmaTorpedo(*this, map, glm::vec3(0.0f, -0.055816f, 1.46661f), glm::vec3(0, 0, 1), 15.0f);
 
     weapons.addSecondaryWeaponTorpedo(*frontTorp);
+    weapons.addSecondaryWeaponTorpedo(*frontTorp1);
     weapons.addSecondaryWeaponTorpedo(*aftTorp);
 
 }

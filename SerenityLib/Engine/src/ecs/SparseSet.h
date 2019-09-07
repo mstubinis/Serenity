@@ -7,6 +7,8 @@
 #include <core/engine/utils/Utils.h>
 #include <ecs/Entity.h>
 
+#include <iostream>
+
 //MAX_ENTITIES = 2097152;
 namespace Engine {
 namespace epriv {
@@ -19,13 +21,13 @@ namespace epriv {
         public:
             SparseSet() { 
                 maxLastIndex = 0;
-                sparse.reserve(50000);
             }
             virtual ~SparseSet() { 
                 maxLastIndex = 0;
                 sparse.clear();
             }
             virtual inline const bool _remove(const uint& entityID) { return false;  }
+            virtual inline void reserveMore(const uint amount) { }
     };
     template <typename TID, typename T> class SparseSet<TID, T> : public SparseSet<TID> {
         using super = SparseSet<TID>;
@@ -34,14 +36,21 @@ namespace epriv {
         public:
 			std::vector<T>& pool() { return dense; }
 
-            SparseSet() {
-                dense.reserve(50000);
-            }
+            SparseSet() {}
             SparseSet(const SparseSet& other) noexcept            = delete;
             SparseSet& operator=(const SparseSet& other) noexcept = delete;
             SparseSet(SparseSet&& other) noexcept                 = delete;
             SparseSet& operator=(SparseSet&& other) noexcept      = delete;
             virtual ~SparseSet()                                  = default;
+
+            inline void reserveMore(const uint amount) {
+                if (super::sparse.size() > super::sparse.capacity() - 1) {
+                    super::sparse.reserve(super::sparse.capacity() + amount);
+                }
+                if (dense.size() > dense.capacity() - 1) {
+                    dense.reserve(dense.capacity() + amount);
+                }
+            }
 
             template<typename... ARGS> inline T* _add(const uint& entityID, ARGS&&... args) {
                 const uint sparseIndex = entityID - 1;

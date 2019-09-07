@@ -1,4 +1,5 @@
 #include <core/engine/materials/MaterialLayer.h>
+#include <core/engine/materials/MaterialLoader.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -71,25 +72,19 @@ void MaterialLayer::setData2(const float& x, const float& y, const float& z, con
 void MaterialLayer::setTexture(const string& textureFile) {
     Texture* _texture = Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
     if (!_texture) {
-        _texture = new Texture(textureFile);
-        Core::m_Engine->m_ResourceManager._addTexture(_texture);
+        if (!textureFile.empty()) {
+            _texture = new Texture(textureFile);
+            Core::m_Engine->m_ResourceManager._addTexture(_texture);
+        }
     }
     setTexture(_texture);
 }
 void MaterialLayer::setMask(const string& maskFile) {
-    Texture* _texture = Core::m_Engine->m_ResourceManager._hasTexture(maskFile);
-    if (!_texture) {
-        _texture = new Texture(maskFile, false, ImageInternalFormat::R8);
-        Core::m_Engine->m_ResourceManager._addTexture(_texture);
-    }
+    Texture* _texture = MaterialLoader::LoadTextureMask(maskFile);
     setMask(_texture);
 }
 void MaterialLayer::setCubemap(const string& cubemapFile) {
-    Texture* _texture = Core::m_Engine->m_ResourceManager._hasTexture(cubemapFile);
-    if (!_texture) {
-        _texture = new Texture(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
-        Core::m_Engine->m_ResourceManager._addTexture(_texture);
-    }
+    Texture* _texture = MaterialLoader::LoadTextureCubemap(cubemapFile);
     setCubemap(_texture);
 }
 void MaterialLayer::setTexture(Texture* _texture) {

@@ -306,6 +306,9 @@
     <ClInclude Include="game\weapons\PhotonTorpedoOld.h">
       <Filter>Header Files\Game\Weapons</Filter>
     </ClInclude>
+    <ClInclude Include="game\weapons\PhaserBeam.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -474,6 +477,9 @@
       <Filter>Source Files\Game\Weapons</Filter>
     </ClCompile>
     <ClCompile Include="game\weapons\KlingonPhotonTorpedo.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\PhaserBeam.cpp">
       <Filter>Source Files\Game\Weapons</Filter>
     </ClCompile>
   </ItemGroup>

@@ -73,7 +73,7 @@ class PhotonTorpedoOld final : public SecondaryWeaponTorpedo {
             const glm::vec3& forward,
             const float& arc,
             const uint& maxCharges = 1,
-            const uint & damage = 1650,
+            const uint& damage = 1650,
             const float& _rechargePerRound = 4.5f,
             const float& _impactRadius = 5.5f,
             const float& _impactTime = 3.1f,

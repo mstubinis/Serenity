@@ -90,14 +90,12 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         auto& scene = *meshRequest.importer.scene;
         uint count = 0;
         MeshLoader::LoadProcessNodeData(meshRequest.parts, scene, root, meshRequest.map, count);
-        MeshLoader::SaveTo_OBJCC(*const_cast<VertexData*>(meshRequest.parts[0].mesh->m_VertexData), meshRequest.fileOrData + ".objcc");
+        //MeshLoader::SaveTo_OBJCC(*const_cast<VertexData*>(meshRequest.parts[0].mesh->m_VertexData), meshRequest.fileOrData + ".objcc");
     }else{ //objcc
         VertexData* vertexData = MeshLoader::LoadFrom_OBJCC(meshRequest.fileOrData);
         Mesh& mesh = *meshRequest.parts[0].mesh;
-        //cpu
         mesh.m_VertexData = vertexData;
         mesh.m_threshold = meshRequest.threshold;
-
         InternalMeshPublicInterface::CalculateRadius(mesh);
         mesh.m_CollisionFactory = new MeshCollisionFactory(mesh);
     }

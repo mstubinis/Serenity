@@ -45,6 +45,9 @@ namespace epriv {
             inline T* getComponent(const uint& entityID) { 
                 return super::_get(entityID);
             }
+            inline void reserveMore(const uint amount = 500) {
+                super::reserveMore(amount);
+            }
     };
 };
 };

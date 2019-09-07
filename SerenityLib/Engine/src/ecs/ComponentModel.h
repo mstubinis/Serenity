@@ -60,7 +60,7 @@ class ComponentModel : public ComponentBaseClass {
 
         ~ComponentModel();
 
-        const uint& getNumModels() const;
+        const uint getNumModels() const;
         const float& radius() const;
         const glm::vec3& boundingBox() const;
         void show();

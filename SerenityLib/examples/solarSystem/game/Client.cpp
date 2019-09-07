@@ -409,7 +409,7 @@ void Client::onReceive() {
                     auto spawn = map.getSpawnAnchor()->getPosition();
                     playerBody.setPosition(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
 
-                    Math::alignTo(orientation, playerBody.position()-spawn);
+                    Math::alignTo(orientation, playerBody.position() - spawn);
                     playerBody.setRotation(orientation);
 
                     PacketMessage pOut(pI);
@@ -507,19 +507,11 @@ void Client::onReceive() {
                     }
                     hud.m_ServerLobbyConnectedPlayersWindow->clear();
                     hud.m_ServerLobbyChatWindow->clear();
-                    stringstream ss(basePacket->data);
-                    vector<string> result;
-                    while (ss.good()){
-                        string substr;
-                        getline(ss, substr, ',');
-                        result.push_back(substr);
-                    }
-                    if (result.size() == 0 && !basePacket->data.empty()) {
-                        result.push_back(basePacket->data);
-                    }
-                    //result is a vector of connected players
-                    for (auto& _name : result) {
-                        if (!_name.empty()) {
+
+                    auto list = Helper::SeparateStringByCharacter(basePacket->data, ',');
+                    //list is a vector of connected players
+                    for (auto& _name : list) {
+                        if (!_name.empty()) { //trailing "," in data can lead to an empty string added into the list
                             Text* text = new Text(0, 0, *hud.m_Font, _name);
                             text->setColor(1, 1, 0, 1);
                             text->setTextScale(0.62f, 0.62f);

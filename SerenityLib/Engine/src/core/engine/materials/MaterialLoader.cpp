@@ -60,7 +60,7 @@ void MaterialLoader::InternalInitBase(Material& material) {
     material.setCustomUnbindFunctor(epriv::DefaultMaterialUnbindFunctor());
 }
 
-Texture* MaterialLoader::LoadTextureDiffuse(Material& material, const string& file) {
+Texture* MaterialLoader::LoadTextureDiffuse(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
@@ -71,7 +71,7 @@ Texture* MaterialLoader::LoadTextureDiffuse(Material& material, const string& fi
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureNormal(Material& material, const string& file) {
+Texture* MaterialLoader::LoadTextureNormal(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
@@ -82,7 +82,7 @@ Texture* MaterialLoader::LoadTextureNormal(Material& material, const string& fil
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureGlow(Material& material, const string& file) {
+Texture* MaterialLoader::LoadTextureGlow(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
@@ -93,7 +93,7 @@ Texture* MaterialLoader::LoadTextureGlow(Material& material, const string& file)
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureSpecular(Material& material, const string& file) {
+Texture* MaterialLoader::LoadTextureSpecular(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
@@ -104,7 +104,7 @@ Texture* MaterialLoader::LoadTextureSpecular(Material& material, const string& f
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureAO(Material& material, const string& file) {
+Texture* MaterialLoader::LoadTextureAO(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
@@ -115,7 +115,7 @@ Texture* MaterialLoader::LoadTextureAO(Material& material, const string& file) {
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureMetalness(Material& material, const string& file) {
+Texture* MaterialLoader::LoadTextureMetalness(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
@@ -126,7 +126,7 @@ Texture* MaterialLoader::LoadTextureMetalness(Material& material, const string& 
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureSmoothness(Material& material, const string& file) {
+Texture* MaterialLoader::LoadTextureSmoothness(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
@@ -137,7 +137,7 @@ Texture* MaterialLoader::LoadTextureSmoothness(Material& material, const string&
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureMask(Material& material, const string& file) {
+Texture* MaterialLoader::LoadTextureMask(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
@@ -148,7 +148,7 @@ Texture* MaterialLoader::LoadTextureMask(Material& material, const string& file)
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureCubemap(Material&, const string& file) {
+Texture* MaterialLoader::LoadTextureCubemap(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager._hasTexture(file);

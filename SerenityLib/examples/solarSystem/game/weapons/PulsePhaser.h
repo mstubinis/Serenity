@@ -50,7 +50,7 @@ class PulsePhaser final: public PrimaryWeaponCannon{
             const glm::vec3& forward,
             const float& arc,
             const uint& maxCharges = 5,
-            const uint & damage = 100,
+            const uint& damage = 100,
             const float& _rechargePerRound = 1.0f,
             const float& _impactRadius = 2.5f,
             const float& _impactTime = 1.8f,

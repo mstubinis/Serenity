@@ -72,7 +72,7 @@ public:
         const glm::vec3& forward,
         const float& arc,
         const uint& maxCharges = 1,
-        const uint & damage = 3000,
+        const uint& damage = 3000,
         const float& _rechargePerRound = 5.0f,
         const float& _impactRadius = 6.5f,
         const float& _impactTime = 4.2f,

@@ -33,8 +33,8 @@ class ComponentName : public ComponentBaseClass {
         ComponentName& operator=(ComponentName&& other) noexcept = default;
 
         const std::string& name() const;
-        const uint& size() const;
-        const bool& empty() const;
+        const uint size() const;
+        const bool empty() const;
 
         ~ComponentName();
 };

@@ -22,17 +22,9 @@ class Anchor final : public EntityWrapper {
 
         const std::unordered_map<std::string, Anchor*>& getChildren() const;
 
-        void finalize_this_only();
-        void finalize_all();
-
-        //const glm::vec3& getMidpoint() const;
-        const glm::vec3& getPosition();
+        const glm::vec3 getPosition();
         void update(const double& dt);
         
-
         void addChild(const std::string& key, Anchor* anchor);
-
 };
-
-
 #endif

@@ -53,6 +53,12 @@ void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
             textureRequest->selfClean = false;
             textureRequest->requestAsync();
         }
+        const auto& size = request.part.textureRequests.size();
+
+        for (uint i = 0; i < size; ++i) {
+            request.part.material->addComponent(static_cast<MaterialComponentType::Type>(i), "DEFAULT");
+        }
+
         const auto& reference = std::ref(request);
         const auto& job = std::bind(&InternalMaterialRequestPublicInterface::LoadCPU, reference);
         const auto& cbk = std::bind(&InternalMaterialRequestPublicInterface::LoadGPU, reference);
@@ -71,17 +77,8 @@ void InternalMaterialRequestPublicInterface::LoadCPU(MaterialRequest& request) {
 }
 void InternalMaterialRequestPublicInterface::LoadGPU(MaterialRequest& request) {
     const auto& size = request.part.textureRequests.size();
-    if (size > 0) {
-        request.part.material->addComponent(MaterialComponentType::Diffuse, request.part.textureRequests[0]->file);
-    }
-    if (size > 1) {
-        request.part.material->addComponent(MaterialComponentType::Normal, request.part.textureRequests[1]->file);
-    }
-    if (size > 2) {
-        request.part.material->addComponent(MaterialComponentType::Glow, request.part.textureRequests[2]->file);
-    }
-    if (size > 3) {
-        request.part.material->addComponent(MaterialComponentType::Specular, request.part.textureRequests[3]->file);
+    for (uint i = 0; i < size; ++i) {
+        request.part.material->getComponent(i).layer(0).setTexture(request.part.textureRequests[i]->file);
     }
     InternalMaterialPublicInterface::LoadGPU(*request.part.material);
     for (auto& textureRequest : request.part.textureRequests) {

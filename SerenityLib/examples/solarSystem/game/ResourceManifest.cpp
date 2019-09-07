@@ -136,7 +136,7 @@ void ResourceManifest::init(){
     BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.obj")[0];
 
     //torpedos
-    TorpedoFlareMesh        = Resources::loadMeshAsync(BasePath + "data/Models/torpedo_flare.obj")[0];
+    TorpedoFlareMesh        = Resources::loadMeshAsync(BasePath + "data/Models/torpedo_flare.objcc")[0];
     TorpedoFlareMaterial    = Resources::loadMaterialAsync("TorpedoFlare", BasePath + "data/Textures/Effects/torpedo_flare.dds", "", "", "");
     TorpedoFlareTriMaterial = Resources::loadMaterialAsync("TorpedoFlareTri", BasePath + "data/Textures/Effects/torpedo_flare_tri.dds", "", "", "");
     TorpedoCoreMaterial     = Resources::loadMaterialAsync("TorpedoCore", BasePath + "data/Textures/Effects/torpedo_core.dds", "", "", "");
@@ -193,8 +193,6 @@ void ResourceManifest::init(){
     RadarMaterial = Resources::loadMaterialAsync("Radar", BasePath + "data/Textures/HUD/Radar.dds");
     StarFlareMaterial = Resources::loadMaterialAsync("SunFlare", BasePath + "data/Textures/Skyboxes/StarFlare.dds");
     
-    Engine::epriv::threading::waitForAll();
-
     Material& cannonOutlineMat = *((Material*)CannonOutlineMaterial.get());
     cannonOutlineMat.setShadeless(true);
     cannonOutlineMat.setGlow(1.0f);
@@ -204,8 +202,6 @@ void ResourceManifest::init(){
     cannonTailMat.setShadeless(true);
     cannonTailMat.setGlow(1.0f);
 
-
-    
     Material& defMat = *((Material*)DefiantMaterial.get());
     auto* layer = defMat.getComponent(0).addLayer();
     layer->setTexture(BasePath + "data/Textures/Effects/Buzzards.dds");
@@ -213,7 +209,6 @@ void ResourceManifest::init(){
     layer->addUVModificationSimpleTranslation(0.02f, 0.02f);
     defMat.addComponent(MaterialComponentType::Normal, BasePath + "data/Textures/defiant/defiant_Normal.dds");
     defMat.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/defiant/defiant_Glow.dds");
-    
     
     Material& novaMat = *((Material*)NovaMaterial.get());
     auto* layer1 = novaMat.getComponent(0).addLayer();
@@ -257,7 +252,6 @@ void ResourceManifest::init(){
     hull1Layer2.addUVModificationSimpleTranslation(0.1f, 0.1f);
     hullDamage1Material.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/Effects/hull_dmg_mask_1.dds");
 
-
     Material& hullDamage1Material2 = *((Material*)HullDamageMaterial2.get());
     auto& hull1Layer12 = hullDamage1Material2.getComponent(0).layer(0);
     hull1Layer12.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_2.dds");
@@ -266,7 +260,6 @@ void ResourceManifest::init(){
     hull1Layer22.setMask(BasePath + "data/Textures/Effects/hull_dmg_mask_2_a.dds");
     hull1Layer22.addUVModificationSimpleTranslation(0.1f, 0.1f);
     hullDamage1Material2.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/Effects/hull_dmg_mask_2.dds");
-
 
     Material& hullDamage1Material3 = *((Material*)HullDamageMaterial3.get());
     auto& hull1Layer13 = hullDamage1Material3.getComponent(0).layer(0);

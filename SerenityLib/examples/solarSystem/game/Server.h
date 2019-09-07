@@ -13,6 +13,8 @@
 
 struct Packet;
 class  Server;
+class  ServerClient;
+class  ServerClientThread;
 class  Core;
 
 #define SERVER_CLIENT_TIMEOUT 20.0f
@@ -20,21 +22,21 @@ class  Core;
 
 class ServerClient final {
     friend class Server;
+    friend class ServerClientThread;
     private:
-        std::future<bool>*               m_Thread;
         Engine::Networking::SocketTCP*   m_TcpSocket;
         std::string                      m_username;
+        std::string                      m_Hash;
         Core&                            m_Core;
         Server&                          m_Server;
         bool                             m_Validated;
-        bool                             m_Active;
         double                           m_Timeout;
         double                           m_RecoveryTime;
 
-        void internalInit(const bool blocking);
+        void internalInit(const std::string& hash);
     public:
-        ServerClient(Server&, Core&, sf::TcpSocket*, const bool blocking = false);
-        ServerClient(Server&, Core&, const ushort& port, const std::string& ipAddress, const bool blocking = false);
+        ServerClient(const std::string& hash, Server&, Core&, sf::TcpSocket*);
+        ServerClient(const std::string& hash, Server&, Core&, const ushort& port, const std::string& ipAddress);
         ~ServerClient();
 
         void disconnect();
@@ -50,16 +52,28 @@ class ServerClient final {
         const sf::Socket::Status receive(void* data, size_t size, size_t& received);
 };
 
+class ServerClientThread final {
+    friend class ServerClient;
+    friend class Server;
+    private:
+        std::unordered_map<std::string, ServerClient*>   m_Clients;
+        std::atomic<unsigned int>                        m_Active;
+        bool                                             m_Shutdowned;
+        std::future<bool>*                               m_Thread;
+    public:
+        ServerClientThread();
+        ~ServerClientThread();
+};
 
 class Server {
     friend class ServerClient;
+    friend class ServerClientThread;
     private:
         sf::Mutex                                      m_mutex;
-        std::unordered_map<std::string, ServerClient*> m_clients;
+        std::vector<ServerClientThread*>               m_Threads;
         std::queue<std::string>                        m_ClientsToBeDisconnected;
         Engine::Networking::ListenerTCP*               m_listener;
         unsigned int                                   m_port;
-        bool                                           m_blocking;
         std::atomic<unsigned int>                      m_Active;
         Core&                                          m_Core;
         std::string                                    m_MapName;
@@ -68,7 +82,7 @@ class Server {
         void updateClientsGameLoop(const double& dt);
 
     public:
-        Server(Core& core, const unsigned int& port, const bool blocking = false, const std::string& ipRestriction = "");
+        Server(Core& core, const unsigned int& port, const std::string& ipRestriction = "");
         ~Server();
 
         const bool startup(const std::string& mapname);

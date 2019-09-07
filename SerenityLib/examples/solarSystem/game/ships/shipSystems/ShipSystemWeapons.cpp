@@ -24,10 +24,14 @@ float ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm::vec3& pos,
     return t;
 }
 
-ShipWeapon::ShipWeapon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc):ship(_ship) {
+ShipWeapon::ShipWeapon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc, const uint& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume):ship(_ship) {
     position = _position;
     forward  = _forward;
     arc      = _arc;
+    damage = _dmg;
+    impactRadius = _impactRad;
+    impactTime = _impactTime;
+    volume = _volume;
 }
 const bool ShipWeapon::isInArc(EntityWrapper* target, const float _arc) {
     auto& shipBody = *ship.getComponent<ComponentBody>();
@@ -53,7 +57,7 @@ const bool ShipWeapon::isInArc(EntityWrapper* target, const float _arc) {
     return false;
 }
 
-PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const uint& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume) : ShipWeapon(_ship, _pos, _fwd, _arc) {
+PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const uint& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume) : ShipWeapon(_ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume) {
     damage                   = _dmg;
     impactRadius             = _impactRad;
     impactTime               = _impactTime;
@@ -130,8 +134,9 @@ void PrimaryWeaponCannon::update(const double& dt) {
         }
     }
 }
-PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, const glm::vec3& _pos, const glm::vec3& _fwd, const float& _arc) : ShipWeapon(_ship, _pos, _fwd, _arc) {
-
+PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, const glm::vec3& _pos, const glm::vec3& _fwd, const float& _arc, const uint& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, std::vector<glm::vec3>& windupPts) : ShipWeapon(_ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume) {
+    windupPts = windupPts;
+    chargeTimer = 0.0f;
 }
 const const glm::vec3 PrimaryWeaponBeam::calculatePredictedVector() {
     glm::vec3 ret = glm::vec3(0.0f);
@@ -146,7 +151,7 @@ void PrimaryWeaponBeam::forceFire() {
 void PrimaryWeaponBeam::update(const double& dt) {
 
 }
-SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const uint& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime,const float& _travelSpeed,const float& _volume,const float& _rotAngleSpeed) : ShipWeapon(_ship,_pos,_fwd,_arc) {
+SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const uint& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime,const float& _travelSpeed,const float& _volume,const float& _rotAngleSpeed) : ShipWeapon(_ship,_pos,_fwd,_arc, _dmg, _impactRad, _impactTime, _volume) {
     damage                   = _dmg;
     impactRadius             = _impactRad;
     impactTime               = _impactTime;

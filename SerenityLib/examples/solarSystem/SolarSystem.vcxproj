@@ -245,6 +245,7 @@
     <ClInclude Include="game\ships\sphere\Sphere.h" />
     <ClInclude Include="game\weapons\DisruptorCannon.h" />
     <ClInclude Include="game\weapons\KlingonPhotonTorpedo.h" />
+    <ClInclude Include="game\weapons\PhaserBeam.h" />
     <ClInclude Include="game\weapons\PhotonTorpedo.h" />
     <ClInclude Include="game\weapons\PhotonTorpedoOld.h" />
     <ClInclude Include="game\weapons\PlasmaCannon.h" />
@@ -303,6 +304,7 @@
     <ClCompile Include="game\ships\sphere\Sphere.cpp" />
     <ClCompile Include="game\weapons\DisruptorCannon.cpp" />
     <ClCompile Include="game\weapons\KlingonPhotonTorpedo.cpp" />
+    <ClCompile Include="game\weapons\PhaserBeam.cpp" />
     <ClCompile Include="game\weapons\PhotonTorpedo.cpp" />
     <ClCompile Include="game\weapons\PhotonTorpedoOld.cpp" />
     <ClCompile Include="game\weapons\PlasmaCannon.cpp" />

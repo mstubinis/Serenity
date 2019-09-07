@@ -20,6 +20,9 @@ typedef unsigned char   uchar;
 
 namespace Engine{
 namespace Math{
+
+    const glm::vec3 polynomial_interpolate(std::vector<glm::vec3>& points, const float time);
+
     void extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection,glm::vec4* outPlanes);
 
     void Float32From16(float*     out, const uint16_t in);

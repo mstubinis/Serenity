@@ -13,8 +13,21 @@ struct ShipWeapon {
     float           arc;
     glm::vec3       position; //relative to the ship's model center
     glm::vec3       forward;
+    float           volume;
+    uint            damage;
+    float           impactRadius;
+    float           impactTime;
 
-    ShipWeapon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc);
+    ShipWeapon(
+        Ship& _ship,
+        const glm::vec3& _position,
+        const glm::vec3& _forward,
+        const float& _arc,
+        const uint& _dmg,
+        const float& _impactRad,
+        const float& _impactTime,
+        const float& _volume
+    );
 
     const bool isInArc(EntityWrapper* target, const float _arc);
 };
@@ -30,15 +43,11 @@ struct PrimaryWeaponCannonPrediction final {
 };
 
 struct PrimaryWeaponCannon : public ShipWeapon {
-    uint        damage;
-    float       impactRadius;
-    float       impactTime;
     uint        numRounds;
     uint        numRoundsMax;
     float       rechargeTimePerRound;
     float       rechargeTimer;
     float       travelSpeed;
-    float       volume;
 
     PrimaryWeaponCannon(
         Ship& _ship,
@@ -60,8 +69,20 @@ struct PrimaryWeaponCannon : public ShipWeapon {
 };
 
 struct PrimaryWeaponBeam : public ShipWeapon {
+    std::vector<glm::vec3>   windupPoints;
+    float                    chargeTimer;
 
-    PrimaryWeaponBeam(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc);
+    PrimaryWeaponBeam(
+        Ship& _ship,
+        const glm::vec3& _position,
+        const glm::vec3& _forward,
+        const float& _arc, 
+        const uint& _dmg,
+        const float& _impactRad,
+        const float& _impactTime,
+        const float& _volume,
+        std::vector<glm::vec3>& windupPts
+    );
     virtual const bool fire();
     virtual void forceFire();
     virtual const glm::vec3 calculatePredictedVector();
@@ -83,15 +104,11 @@ struct SecondaryWeaponTorpedoPrediction final {
 };
 
 struct SecondaryWeaponTorpedo : public ShipWeapon {
-    uint            damage;
-    float           impactRadius;
-    float           impactTime;
     uint            numRounds;
     uint            numRoundsMax;
     float           rechargeTimePerRound;
     float           rechargeTimer;
     float           travelSpeed;
-    float           volume;
     float           rotationAngleSpeed;
 
     SecondaryWeaponTorpedo(

@@ -20,10 +20,10 @@ ComponentName::~ComponentName() {
 const string& ComponentName::name() const { 
     return _data; 
 }
-const uint& ComponentName::size() const { 
+const uint ComponentName::size() const { 
     return _data.size(); 
 }
-const bool& ComponentName::empty() const {
+const bool ComponentName::empty() const {
     return _data.empty();
 }
 #pragma endregion

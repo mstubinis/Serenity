@@ -2,12 +2,12 @@
 
 namespace Engine{
     namespace epriv{
-        struct emptyFunctor{template<class T> void operator()(T* r) const {}};
+        struct EmptyFunctor{template<class T> void operator()(T* r) const {}};
     };
 };
 
 BindableResource::BindableResource(std::string name):EngineResource(name){
-    Engine::epriv::emptyFunctor a;
+    Engine::epriv::EmptyFunctor a;
     setCustomBindFunctor(a); 
     setCustomUnbindFunctor(a);
 }

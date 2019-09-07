@@ -29,10 +29,10 @@ void EngineResource::unload(){
         std::cout << ": " << m_Name << " - unloaded." << std::endl;
     }
 }
-bool EngineResource::isLoaded(){ 
+const bool EngineResource::isLoaded() const {
     return m_IsLoaded; 
 }
-uint EngineResource::useCount(){ 
+const uint EngineResource::useCount() const {
     return m_UsageCount; 
 }
 void EngineResource::incrementUseCount(){ 

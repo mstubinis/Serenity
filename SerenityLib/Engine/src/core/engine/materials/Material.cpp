@@ -55,10 +55,10 @@ vector<boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
 #pragma region Material
 
 Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular):BindableResource(name){
-    Texture* d = MaterialLoader::LoadTextureDiffuse(*this, diffuse);
-    Texture* n = MaterialLoader::LoadTextureNormal(*this, normal);
-    Texture* g = MaterialLoader::LoadTextureGlow(*this, glow);
-    Texture* s = MaterialLoader::LoadTextureSpecular(*this, specular);
+    Texture* d = MaterialLoader::LoadTextureDiffuse(diffuse);
+    Texture* n = MaterialLoader::LoadTextureNormal(normal);
+    Texture* g = MaterialLoader::LoadTextureGlow(glow);
+    Texture* s = MaterialLoader::LoadTextureSpecular(specular);
 
     MaterialLoader::InternalInit(*this, d, n, g, s);
     InternalMaterialPublicInterface::Load(*this);
@@ -101,41 +101,46 @@ void Material::internalUpdateGlobalMaterialPool(const bool& addToDatabase) {
 
 MaterialComponent& Material::addComponent(const MaterialComponentType::Type& type, const string& textureFile, const string& maskFile, const string& cubemapFile) {
     Texture* texture = Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
-    if (!texture && !textureFile.empty()) {
-        if (type == MaterialComponentType::Normal || type == MaterialComponentType::ParallaxOcclusion) {
-            texture = new Texture(textureFile, true, ImageInternalFormat::RGB8);
+    if (!texture) {
+        if (!textureFile.empty() && textureFile != "DEFAULT") {
+            if (type == MaterialComponentType::Normal || type == MaterialComponentType::ParallaxOcclusion) {
+                texture = new Texture(textureFile, true, ImageInternalFormat::RGB8);
+            }else{
+                texture = new Texture(textureFile, true, ImageInternalFormat::SRGB8_ALPHA8);
+            }
+            Core::m_Engine->m_ResourceManager._addTexture(texture);
+        }else if (textureFile == "DEFAULT") {
+            texture = Texture::Checkers;
         }else{
-            texture = new Texture(textureFile, true, ImageInternalFormat::SRGB8_ALPHA8);
         }
-        Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
-    Texture* mask = MaterialLoader::LoadTextureMask(*this, maskFile);
-    Texture* cubemap = MaterialLoader::LoadTextureCubemap(*this, cubemapFile);
+    Texture* mask = MaterialLoader::LoadTextureMask(maskFile);
+    Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapFile);
 
     return *internalAddComponentGeneric(type, texture, mask, cubemap);
 }
 MaterialComponent& Material::addComponentDiffuse(const string& textureFile){
-    Texture* texture = MaterialLoader::LoadTextureDiffuse(*this, textureFile);
+    Texture* texture = MaterialLoader::LoadTextureDiffuse(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Diffuse, texture);
     return component;
 }
 MaterialComponent& Material::addComponentNormal(const string& textureFile){
-    Texture* texture = MaterialLoader::LoadTextureNormal(*this, textureFile);
+    Texture* texture = MaterialLoader::LoadTextureNormal(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Normal, texture);
     return component;
 }
 MaterialComponent& Material::addComponentGlow(const string& textureFile){
-    Texture* texture = MaterialLoader::LoadTextureGlow(*this, textureFile);
+    Texture* texture = MaterialLoader::LoadTextureGlow(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Glow, texture);
     return component;
 }
 MaterialComponent& Material::addComponentSpecular(const string& textureFile){
-    Texture* texture = MaterialLoader::LoadTextureSpecular(*this, textureFile);
+    Texture* texture = MaterialLoader::LoadTextureSpecular(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Specular, texture);
     return component;
 }
 MaterialComponent& Material::addComponentAO(const string& textureFile,float baseValue){
-    Texture* texture = MaterialLoader::LoadTextureAO(*this, textureFile);
+    Texture* texture = MaterialLoader::LoadTextureAO(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::AO, texture);
     auto& layer = component.layer(0);
     auto& _data2 = layer.data2();
@@ -144,7 +149,7 @@ MaterialComponent& Material::addComponentAO(const string& textureFile,float base
     return component;
 }
 MaterialComponent& Material::addComponentMetalness(const string& textureFile,float baseValue){
-    Texture* texture = MaterialLoader::LoadTextureMetalness(*this, textureFile);
+    Texture* texture = MaterialLoader::LoadTextureMetalness(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Metalness, texture);
     auto& layer = component.layer(0);
     auto& _data2 = layer.data2();
@@ -153,7 +158,7 @@ MaterialComponent& Material::addComponentMetalness(const string& textureFile,flo
     return component;
 }
 MaterialComponent& Material::addComponentSmoothness(const string& textureFile,float baseValue){
-    Texture* texture = MaterialLoader::LoadTextureSmoothness(*this, textureFile);
+    Texture* texture = MaterialLoader::LoadTextureSmoothness(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Smoothness, texture);
     auto& layer = component.layer(0);
     auto& _data2 = layer.data2();
@@ -163,8 +168,8 @@ MaterialComponent& Material::addComponentSmoothness(const string& textureFile,fl
 }
 MaterialComponent& Material::addComponentReflection(const string& cubemapName, const string& maskFile,float mixFactor){
     //add checks to see if texture was loaded already
-    Texture* cubemap = MaterialLoader::LoadTextureCubemap(*this, cubemapName);
-    Texture* mask = MaterialLoader::LoadTextureMask(*this, maskFile);
+    Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapName);
+    Texture* mask = MaterialLoader::LoadTextureMask(maskFile);
     if (!cubemap)
         cubemap = Resources::getCurrentScene()->skybox()->texture();
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Reflection, nullptr);
@@ -177,8 +182,8 @@ MaterialComponent& Material::addComponentReflection(const string& cubemapName, c
 }
 MaterialComponent& Material::addComponentRefraction(const string& cubemapName, const string& maskFile,float refractiveIndex,float mixFactor){
     //add checks to see if texture was loaded already
-    Texture* cubemap = MaterialLoader::LoadTextureCubemap(*this, cubemapName);
-    Texture* mask = MaterialLoader::LoadTextureMask(*this, maskFile);
+    Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapName);
+    Texture* mask = MaterialLoader::LoadTextureMask(maskFile);
     if (!cubemap)
         cubemap = Resources::getCurrentScene()->skybox()->texture();
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Refraction, nullptr);
@@ -190,7 +195,7 @@ MaterialComponent& Material::addComponentRefraction(const string& cubemapName, c
     return component;
 }
 MaterialComponent& Material::addComponentParallaxOcclusion(const string& textureFile,float heightScale){
-    Texture* texture = MaterialLoader::LoadTextureNormal(*this, textureFile);
+    Texture* texture = MaterialLoader::LoadTextureNormal(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::ParallaxOcclusion, texture);
     auto& layer = component.layer(0);
     auto& _data2 = layer.data2();
@@ -278,8 +283,11 @@ void Material::setAlpha(const float& alpha) {
     m_BaseAlpha = glm::clamp(alpha, 0.0f, 1.0f);
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::bind(){ 
-    Core::m_Engine->m_RenderManager._bindMaterial(this); 
+void Material::bind(){
+    if(isLoaded())
+        Core::m_Engine->m_RenderManager._bindMaterial(this); 
+    else
+        Core::m_Engine->m_RenderManager._bindMaterial(Material::Checkers);
 }
 void Material::unbind(){ 
     Core::m_Engine->m_RenderManager._unbindMaterial(); 

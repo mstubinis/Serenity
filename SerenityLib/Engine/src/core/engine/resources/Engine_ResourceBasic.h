@@ -16,8 +16,8 @@ class EngineResource{
         const std::string& name() const;
         void setName(const std::string&);
 
-        bool isLoaded();
-        uint useCount();
+        const bool isLoaded() const;
+        const uint useCount() const;
 
         void incrementUseCount();
         void decrementUseCount();

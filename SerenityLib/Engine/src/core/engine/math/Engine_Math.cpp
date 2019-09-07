@@ -18,6 +18,66 @@ typedef unsigned char uchar;
 
 const float ROTATION_THRESHOLD = 0.00001f;
 
+const glm::vec3 Math::polynomial_interpolate(std::vector<glm::vec3>& points, const float time) {
+    glm::vec3 ret = glm::vec3(0.0f);
+    const auto n = points.size();
+    assert(n >= 3);
+
+    //first get the 3 points we need to work with based on time (0 <= time <= 1)
+
+    glm::vec3 P0;
+    glm::vec3 P1;
+    glm::vec3 P2;
+    if (n == 3) {
+        P0 = points[0];
+        P1 = points[1];
+        P2 = points[2];
+    }else{
+        const float indexFloat = glm::max(0.01f, (n * time) - 1.0f);
+        uint index1 = glm::floor(indexFloat);
+        uint index2;
+        uint index3;
+        if (index1 >= n - 2) {
+            index1 = n - 3;
+            index2 = n - 2;
+            index3 = n - 1;
+        }else{
+            index2 = index1 + 1;
+            index3 = index1 + 2;
+        }
+        P0 = points[index1];
+        P1 = points[index2];
+        P2 = points[index3];
+    }
+    //ok we have the three points
+    auto a2 = ((P1 - P0) - time * (P2 - P0)) / (time * (time - 1.0f));
+    auto a1 = P2 - P0 - a2;
+    ret = (a2 * (time * time)) + (a1 * time) + P0;
+
+    /*
+    P = a2(t^2) + a1(t) + a0
+
+    where P is a point on the curve, a0, a1 and a2 are three vectors defining the curve and t is the parameter
+
+     The curve passes through three points labelled P0, P1 and P2.
+     By convention the curve starts from point P0 with parameter value t=0,
+     goes through point P1 when t=t1 (0<t1<1) and finishes at P2 when t=1.
+     Using these conventions we can solve for the three a vectors as follows
+
+     t = 0    P0 = a0
+     t = 1    P2 = a2 + a1 + a0
+     t = t1   P1 = a2t^2(1) + a1t1 + a0
+
+     and rearranging these equations we get:
+
+     a0 = P0
+     a2 = (P1 - P0) - t1(P2 - P0) / t1(t1 - 1)
+     a1 = P2 - P0 - a2
+
+    */
+    return ret;
+}
+
 void Math::Float32From16(float*     out, const uint16_t in) {
     uint32_t t1, t2, t3;
     t1 = in & 0x7fff;                       // Non-sign bits

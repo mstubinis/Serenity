@@ -109,6 +109,9 @@ namespace epriv {
                     }
                     vector_clear(destroyedEntities);
                 }
+                for (auto& pool : componentPools) {
+                    pool->reserveMore(500);
+                }
             }
 
             template<typename TComponent> ECSComponentPool<TEntity, TComponent>& getPool() {

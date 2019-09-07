@@ -132,7 +132,7 @@ vector<Handle> Resources::loadMesh(const string& fileOrData, const float& thresh
     return handles;
 }
 vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float& threshhold) {
-    MeshRequest* request = new MeshRequest(fileOrData, threshhold); //to extend the lifetime to the threads, we manually delete later
+    auto* request = new MeshRequest(fileOrData, threshhold); //to extend the lifetime to the threads, we manually delete later
     request->requestAsync();
     vector<Handle> handles;
     for (auto& part : request->parts) {
@@ -146,7 +146,7 @@ Handle Resources::loadTexture(const string& file, const ImageInternalFormat::For
     return request.part.handle;
 }
 Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
-    TextureRequest* request = new TextureRequest(file, mipmaps, internalFormat); //to extend the lifetime to the threads, we manually delete later
+    auto* request = new TextureRequest(file, mipmaps, internalFormat); //to extend the lifetime to the threads, we manually delete later
     request->requestAsync();
     return request->part.handle;
 }
@@ -157,7 +157,7 @@ Handle Resources::loadMaterial(const string& name, const string& diffuse, const 
     return request.part.handle;
 }
 Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular) {
-    auto request = new MaterialRequest(name, diffuse, normal, glow, specular); //to extend the lifetime to the threads, we manually delete later
+    auto* request = new MaterialRequest(name, diffuse, normal, glow, specular); //to extend the lifetime to the threads, we manually delete later
     request->requestAsync();
     return request->part.handle;
 }
