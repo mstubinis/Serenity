@@ -110,7 +110,7 @@ namespace epriv {
                     vector_clear(destroyedEntities);
                 }
                 for (auto& pool : componentPools) {
-                    pool->reserveMore(500);
+                    pool->reserveMore(1500);
                 }
             }
 

@@ -15,15 +15,13 @@
 #include <core/engine/Engine.h>
 #include <core/engine/materials/Material.h>
 
-#include <ecs/Components.h>
 #include "../ships/shipSystems/ShipSystemShields.h"
 #include "../ships/shipSystems/ShipSystemHull.h"
 
 using namespace Engine;
 using namespace std;
 
-struct PlasmaCannonCollisionFunctor final {
-void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+struct PlasmaCannonCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
     auto plasmaCannonShipVoid = owner.getUserPointer1();
     auto& plasmaCannonProjectile = *static_cast<PlasmaCannonProjectile*>(owner.getUserPointer());
 
@@ -49,8 +47,7 @@ void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& 
             }
         }
     }
-}
-};
+}};
 
 struct PlasmaCannonInstanceBindFunctor {void operator()(EngineResource* r) const {
     glDepthMask(GL_TRUE);
@@ -122,11 +119,7 @@ struct PlasmaCannonTailInstanceUnbindFunctor {void operator()(EngineResource* r)
 }};
 
 
-PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward) {
-    entity = map.createEntity();
-    currentTime = 0.0f;
-    maxTime = 2.5f;
-
+PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward) : PrimaryWeaponCannonProjectile(map, position, forward) {
     EntityDataRequest request(entity);
 
     auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
@@ -192,29 +185,6 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
 PlasmaCannonProjectile::~PlasmaCannonProjectile() {
 
 }
-void PlasmaCannonProjectile::destroy() {
-    if (active) {
-        active = false;
-        entity.destroy();
-        if (light) {
-            light->destroy();
-            SAFE_DELETE(light);
-        }
-    }
-}
-void PlasmaCannonProjectile::update(const double& dt) {
-    if (active) {
-        const float fdt = static_cast<float>(dt);
-        currentTime += fdt;
-        if (light) {
-            auto& lightBody = *light->getComponent<ComponentBody>();
-            lightBody.setPosition(entity.getComponent<ComponentBody>()->position());
-        }
-        if (currentTime >= maxTime) {
-            destroy();
-        }
-    }
-}
 
 PlasmaCannon::PlasmaCannon(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const uint& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume) :PrimaryWeaponCannon(ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume), m_Map(map) {
 
@@ -235,7 +205,7 @@ void PlasmaCannon::update(const double& dt) {
     PrimaryWeaponCannon::update(dt);
 }
 const bool PlasmaCannon::fire() {
-    auto res = PrimaryWeaponCannon::fire();
+    const auto res = PrimaryWeaponCannon::fire();
     if (res) {
         forceFire();
         return true;
@@ -251,10 +221,10 @@ void PlasmaCannon::forceFire() {
     shipMatrix = glm::translate(shipMatrix, position);
     const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
 
-    auto* sound = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaCannon);
-    if (sound) {
-        sound->setVolume(volume);
-        sound->setPosition(finalPosition);
-        sound->setAttenuation(0.1f);
+    soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaCannon);
+    if (soundEffect) {
+        soundEffect->setVolume(volume);
+        soundEffect->setPosition(finalPosition);
+        soundEffect->setAttenuation(0.1f);
     }
 }

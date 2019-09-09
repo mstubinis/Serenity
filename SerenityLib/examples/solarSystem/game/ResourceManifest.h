@@ -23,6 +23,7 @@ struct ResourceManifest{
     static Handle CannonEffectMesh;
     static Handle CannonEffectOutlineMesh;
     static Handle CannonTailMesh;
+    static Handle PhaserBeamMesh;
 
 	/*extras*/
 	static Handle NovaMesh;
@@ -66,6 +67,7 @@ struct ResourceManifest{
     
     static Handle CannonOutlineMaterial;
     static Handle CannonTailMaterial;
+    static Handle PhaserBeamMaterial;
 
 
     //sounds
@@ -79,6 +81,7 @@ struct ResourceManifest{
     static Handle SoundQuantumTorpedo;
     static Handle SoundPhotonTorpedoOld;
     static Handle SoundPlasmaTorpedo;
+    static Handle SoundPhaserBeam;
 
     //torpedos
     static Handle TorpedoFlareMesh;

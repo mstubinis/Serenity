@@ -5,9 +5,18 @@
 #include "ShipSystemBaseClass.h"
 #include <vector>
 #include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
+#include <ecs/Entity.h>
 
-class EntityWrapper;
-class ComponentBody;
+class  EntityWrapper;
+class  ComponentBody;
+class  ComponentModel;
+class  SoundEffect;
+class  PointLight;
+class  RodLight;
+class  Map;
+class  Ship;
+
 struct ShipWeapon {
     Ship&           ship;
     float           arc;
@@ -17,6 +26,12 @@ struct ShipWeapon {
     uint            damage;
     float           impactRadius;
     float           impactTime;
+    SoundEffect*    soundEffect;
+
+    uint        numRounds;
+    uint        numRoundsMax;
+    float       rechargeTimePerRound;
+    float       rechargeTimer;
 
     ShipWeapon(
         Ship& _ship,
@@ -26,7 +41,9 @@ struct ShipWeapon {
         const uint& _dmg,
         const float& _impactRad,
         const float& _impactTime,
-        const float& _volume
+        const float& _volume,
+        const uint& _numRounds,
+        const float& _rechargeTimerPerRound
     );
 
     const bool isInArc(EntityWrapper* target, const float _arc);
@@ -42,11 +59,19 @@ struct PrimaryWeaponCannonPrediction final {
     }
 };
 
+struct PrimaryWeaponCannonProjectile {
+    Entity        entity;
+    PointLight*   light;
+    float         currentTime;
+    float         maxTime;
+    bool          active;
+    PrimaryWeaponCannonProjectile(Map& map, const glm::vec3& position, const glm::vec3& forward);
+    ~PrimaryWeaponCannonProjectile();
+    virtual void update(const double& dt);
+    virtual void destroy();
+};
+
 struct PrimaryWeaponCannon : public ShipWeapon {
-    uint        numRounds;
-    uint        numRoundsMax;
-    float       rechargeTimePerRound;
-    float       rechargeTimer;
     float       travelSpeed;
 
     PrimaryWeaponCannon(
@@ -71,9 +96,23 @@ struct PrimaryWeaponCannon : public ShipWeapon {
 struct PrimaryWeaponBeam : public ShipWeapon {
     std::vector<glm::vec3>   windupPoints;
     float                    chargeTimer;
+    float                    chargeTimerSpeed;
+    bool                     isFiring;
+    bool                     isFiringWeapon;
+    float                    firingTime;
+    float                    firingTimeMax;
+
+    EntityWrapper*           beamGraphic;
+    EntityWrapper*           beamEndPointGraphic;
+    RodLight*                beamLight;
+
+    std::vector<glm::vec3>   modPts;
+    std::vector<glm::vec2>   modUvs;
+
 
     PrimaryWeaponBeam(
         Ship& _ship,
+        Map& map,
         const glm::vec3& _position,
         const glm::vec3& _forward,
         const float& _arc, 
@@ -81,12 +120,19 @@ struct PrimaryWeaponBeam : public ShipWeapon {
         const float& _impactRad,
         const float& _impactTime,
         const float& _volume,
-        std::vector<glm::vec3>& windupPts
+        std::vector<glm::vec3>& windupPts,
+        const uint& _maxCharges,
+        const float& _rechargeTimePerRound,
+        const float& chargeTimerSpeed,
+        const float& _firingTime
     );
-    virtual const bool fire();
-    virtual void forceFire();
+    ~PrimaryWeaponBeam();
+    virtual const bool fire(const double& dt);
+    virtual void forceFire(const double& dt);
     virtual const glm::vec3 calculatePredictedVector();
     virtual void update(const double& dt);
+
+    void modifyBeamMesh(ComponentModel& beamModel, const float length);
 };
 
 struct SecondaryWeaponTorpedoPrediction final {
@@ -104,10 +150,6 @@ struct SecondaryWeaponTorpedoPrediction final {
 };
 
 struct SecondaryWeaponTorpedo : public ShipWeapon {
-    uint            numRounds;
-    uint            numRoundsMax;
-    float           rechargeTimePerRound;
-    float           rechargeTimer;
     float           travelSpeed;
     float           rotationAngleSpeed;
 

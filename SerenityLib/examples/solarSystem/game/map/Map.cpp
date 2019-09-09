@@ -349,8 +349,6 @@ void Map::loadFromFile(const string& filename) {
 
     centerSceneToObject(loadedAnchors.at("Spawn Anchor")->entity());
 
-    std::get<1>(m_RootAnchor)->finalize_all();
-
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
 }
 Ship* Map::createShip(Client& client, const string& shipClass, const string& shipName, const bool& playerShip, const glm::vec3& position) {

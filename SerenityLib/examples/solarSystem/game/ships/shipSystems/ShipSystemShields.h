@@ -8,7 +8,7 @@
 #include <glm/vec3.hpp>
 #include <vector>
 
-#define MAX_IMPACT_POINTS 60
+#define MAX_IMPACT_POINTS 64
 
 struct ShieldInstanceBindFunctor;
 struct ShieldInstanceUnbindFunctor;
@@ -56,7 +56,7 @@ class ShipSystemShields final : public ShipSystem {
     private:
         ShipSystemShieldsImpactPoint  m_ImpactPoints[MAX_IMPACT_POINTS];
         std::vector<uint>             m_ImpactPointsFreelist;
-        EntityWrapper                 m_ShieldEntity;
+        EntityWrapper*                m_ShieldEntity;
         uint                          m_HealthPointsCurrent;
         uint                          m_HealthPointsMax;
         //float                       m_TimeSinceLastHit;
@@ -68,6 +68,8 @@ class ShipSystemShields final : public ShipSystem {
     public:
         ShipSystemShields(Ship&, Map&, const uint health);
         ~ShipSystemShields();
+
+        EntityWrapper* getEntity();
 
         void destroy();
 

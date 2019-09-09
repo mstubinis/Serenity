@@ -184,14 +184,22 @@ void RenderPipeline::cpu_execute(Viewport& viewport, Camera& camera, const doubl
             auto& model = *_modelInstance.parent().getComponent<ComponentModel>();
             if (InternalModelInstancePublicInterface::IsViewportValid(_modelInstance, viewport)) {
                 if (body) {
-                    const auto& radius = model.radius();
-                    auto pos = body->position() + _modelInstance.position();
-                    const uint sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
-                    auto comparison = radius * 1100.0f;
-                    if (!_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) { //optimization: using squared distance to remove the sqrt()
-                        _modelInstance.setPassedRenderCheck(false);
+                    if (_modelInstance.isForceRendered()) {
+                        if (_modelInstance.visible()) {
+                            _modelInstance.setPassedRenderCheck(true);
+                        }else{
+                            _modelInstance.setPassedRenderCheck(false);
+                        }
                     }else{
-                        _modelInstance.setPassedRenderCheck(true);
+                        const auto& radius = model.radius();
+                        auto pos = body->position() + _modelInstance.position();
+                        const uint sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
+                        auto comparison = radius * 1100.0f;
+                        if (!_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) {
+                            _modelInstance.setPassedRenderCheck(false);
+                        }else{
+                            _modelInstance.setPassedRenderCheck(true);
+                        }
                     }
                 }else{
                     _modelInstance.setPassedRenderCheck(false);

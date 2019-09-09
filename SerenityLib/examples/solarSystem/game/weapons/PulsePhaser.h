@@ -4,12 +4,8 @@
 
 #include "../ships/shipSystems/ShipSystemWeapons.h"
 #include <vector>
-#include <ecs/Entity.h>
 
-class  Map;
-class  Ship;
 class  PulsePhaser;
-class  PointLight;
 
 struct PulsePhaserCollisionFunctor;
 struct PulsePhaserInstanceBindFunctor;
@@ -19,16 +15,9 @@ struct PulsePhaserTailInstanceUnbindFunctor;
 struct PulsePhaserOutlineInstanceBindFunctor;
 struct PulsePhaserOutlineInstanceUnbindFunctor;
 
-struct PulsePhaserProjectile final {
-    Entity entity;
-    PointLight* light;
-    float currentTime;
-    float maxTime;
-    bool active;
+struct PulsePhaserProjectile final: public PrimaryWeaponCannonProjectile {
     PulsePhaserProjectile(PulsePhaser&, Map& map, const glm::vec3& position, const glm::vec3& forward);
     ~PulsePhaserProjectile();
-    void update(const double& dt);
-    void destroy();
 };
 
 class PulsePhaser final: public PrimaryWeaponCannon{

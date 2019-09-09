@@ -254,7 +254,7 @@ void Client::onReceive() {
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
                         for (auto& str : info) {
                             auto& beam = ships[pI.name]->getPrimaryWeaponBeam(stoi(str));
-                            beam.forceFire();
+                            beam.forceFire(0.0f);
                         }
                     }
                     break;

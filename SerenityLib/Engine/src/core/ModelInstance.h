@@ -70,6 +70,7 @@ class ModelInstance final: public BindableResource{
         glm::vec4                                            m_Color;
         bool                                                 m_PassedRenderCheck;
         bool                                                 m_Visible;
+        bool                                                 m_ForceRender;
 
         void internalInit(Mesh* mesh, Material* mat, ShaderProgram* program);
         void internalUpdateModelMatrix();
@@ -94,6 +95,9 @@ class ModelInstance final: public BindableResource{
         void setViewportFlag(const ViewportFlag::Flag& flag);
         void addViewportFlag(const ViewportFlag::Flag& flag);
         const unsigned short& getViewportFlags() const;
+
+        void forceRender(const bool forced = true);
+        const bool isForceRendered() const;
 
         ShaderProgram* shaderProgram();
         Mesh* mesh();

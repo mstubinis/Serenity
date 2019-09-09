@@ -32,13 +32,19 @@ namespace epriv{
             void _render(Camera& camera);
     };
 };
+
+struct RayCastResult {
+    glm::vec3 hitPosition;
+    glm::vec3 hitNormal;
+};
+
 namespace Physics{
     // vector[0] = end point, vector[1] = hit normal
-    std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end, btRigidBody* ignoredObject = nullptr);
-    std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end, std::vector<btRigidBody*>& ignoredObjects);
+    std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, btRigidBody* ignoredObject = nullptr, const unsigned short group = -1, const unsigned short mask = -1);
+    std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, std::vector<btRigidBody*>& ignoredObjects, const unsigned short group = -1, const unsigned short mask = -1);
 
-    std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr);
-    std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects);
+    std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, const unsigned short group = -1, const unsigned short mask = -1);
+    std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, const unsigned short group = -1, const unsigned short mask = -1);
 
     void setGravity(const float x, const float y, const float z);
     void setGravity(const glm::vec3& gravity);

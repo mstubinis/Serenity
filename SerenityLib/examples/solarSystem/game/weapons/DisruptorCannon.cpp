@@ -15,42 +15,39 @@
 #include <core/engine/Engine.h>
 #include <core/engine/materials/Material.h>
 
-#include <ecs/Components.h>
 #include "../ships/shipSystems/ShipSystemShields.h"
 #include "../ships/shipSystems/ShipSystemHull.h"
 
 using namespace Engine;
 using namespace std;
 
-struct DisruptorCannonCollisionFunctor final {
-    void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
-        auto disruptorCannonShipVoid = owner.getUserPointer1();
-        auto& disruptorCannonProjectile = *static_cast<DisruptorCannonProjectile*>(owner.getUserPointer());
+struct DisruptorCannonCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+    auto disruptorCannonShipVoid = owner.getUserPointer1();
+    auto& disruptorCannonProjectile = *static_cast<DisruptorCannonProjectile*>(owner.getUserPointer());
 
-        auto otherPtrShip = other.getUserPointer1();
-        if (otherPtrShip && disruptorCannonShipVoid) {
-            if (otherPtrShip != disruptorCannonShipVoid) {//dont hit ourselves!
-                Ship* otherShip = static_cast<Ship*>(otherPtrShip);
-                if (otherShip && disruptorCannonProjectile.active) {
-                    Ship* sourceShip = static_cast<Ship*>(disruptorCannonShipVoid);
-                    DisruptorCannon& disruptorCannon = *static_cast<DisruptorCannon*>(owner.getUserPointer2());
-                    auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
-                    auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - other.position();
-                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                        shields->receiveHit(normal, local, disruptorCannon.impactRadius, disruptorCannon.impactTime, disruptorCannon.damage);
-                        disruptorCannonProjectile.destroy();
-                        return;
-                    }
-                    if (hull && other.getUserPointer() == hull) {
-                        hull->receiveHit(normal, local, disruptorCannon.impactRadius, disruptorCannon.impactTime, disruptorCannon.damage);
-                        disruptorCannonProjectile.destroy();
-                    }
+    auto otherPtrShip = other.getUserPointer1();
+    if (otherPtrShip && disruptorCannonShipVoid) {
+        if (otherPtrShip != disruptorCannonShipVoid) {//dont hit ourselves!
+            Ship* otherShip = static_cast<Ship*>(otherPtrShip);
+            if (otherShip && disruptorCannonProjectile.active) {
+                Ship* sourceShip = static_cast<Ship*>(disruptorCannonShipVoid);
+                DisruptorCannon& disruptorCannon = *static_cast<DisruptorCannon*>(owner.getUserPointer2());
+                auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
+                auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                auto local = otherHit - other.position();
+                if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
+                    shields->receiveHit(normal, local, disruptorCannon.impactRadius, disruptorCannon.impactTime, disruptorCannon.damage);
+                    disruptorCannonProjectile.destroy();
+                    return;
+                }
+                if (hull && other.getUserPointer() == hull) {
+                    hull->receiveHit(normal, local, disruptorCannon.impactRadius, disruptorCannon.impactTime, disruptorCannon.damage);
+                    disruptorCannonProjectile.destroy();
                 }
             }
         }
     }
-};
+}};
 
 struct DisruptorCannonInstanceBindFunctor { void operator()(EngineResource* r) const {
     glDepthMask(GL_TRUE);
@@ -122,11 +119,7 @@ struct DisruptorCannonTailInstanceUnbindFunctor { void operator()(EngineResource
 }};
 
 
-DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward) {
-    entity = map.createEntity();
-    currentTime = 0.0f;
-    maxTime = 2.5f;
-
+DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward) : PrimaryWeaponCannonProjectile(map, position, forward) {
     EntityDataRequest request(entity);
 
     auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
@@ -192,29 +185,6 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
 DisruptorCannonProjectile::~DisruptorCannonProjectile() {
 
 }
-void DisruptorCannonProjectile::destroy() {
-    if (active) {
-        active = false;
-        entity.destroy();
-        if (light) {
-            light->destroy();
-            SAFE_DELETE(light);
-        }
-    }
-}
-void DisruptorCannonProjectile::update(const double& dt) {
-    if (active) {
-        const float fdt = static_cast<float>(dt);
-        currentTime += fdt;
-        if (light) {
-            auto& lightBody = *light->getComponent<ComponentBody>();
-            lightBody.setPosition(entity.getComponent<ComponentBody>()->position());
-        }
-        if (currentTime >= maxTime) {
-            destroy();
-        }
-    }
-}
 
 DisruptorCannon::DisruptorCannon(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const uint& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume) :PrimaryWeaponCannon(ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume), m_Map(map) {
 
@@ -235,7 +205,7 @@ void DisruptorCannon::update(const double& dt) {
     PrimaryWeaponCannon::update(dt);
 }
 const bool DisruptorCannon::fire() {
-    auto res = PrimaryWeaponCannon::fire();
+    const auto res = PrimaryWeaponCannon::fire();
     if (res) {
         forceFire();
         return true;
@@ -251,10 +221,10 @@ void DisruptorCannon::forceFire() {
     shipMatrix = glm::translate(shipMatrix, position);
     const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
 
-    auto* sound = Engine::Sound::playEffect(ResourceManifest::SoundDisruptorCannon);
-    if (sound) {
-        sound->setVolume(volume);
-        sound->setPosition(finalPosition);
-        sound->setAttenuation(0.1f);
+    soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundDisruptorCannon);
+    if (soundEffect) {
+        soundEffect->setVolume(volume);
+        soundEffect->setPosition(finalPosition);
+        soundEffect->setAttenuation(0.1f);
     }
 }

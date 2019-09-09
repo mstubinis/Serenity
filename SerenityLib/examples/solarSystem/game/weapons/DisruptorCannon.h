@@ -4,13 +4,8 @@
 
 #include "../ships/shipSystems/ShipSystemWeapons.h"
 #include <vector>
-#include <ecs/Entity.h>
 
-class  Map;
-class  Ship;
 class  DisruptorCannon;
-class  PointLight;
-
 struct DisruptorCannonCollisionFunctor;
 struct DisruptorCannonInstanceBindFunctor;
 struct DisruptorCannonInstanceUnbindFunctor;
@@ -19,16 +14,9 @@ struct DisruptorCannonTailInstanceUnbindFunctor;
 struct DisruptorCannonOutlineInstanceBindFunctor;
 struct DisruptorCannonOutlineInstanceUnbindFunctor;
 
-struct DisruptorCannonProjectile final {
-    Entity entity;
-    PointLight* light;
-    float currentTime;
-    float maxTime;
-    bool active;
+struct DisruptorCannonProjectile final : public PrimaryWeaponCannonProjectile {
     DisruptorCannonProjectile(DisruptorCannon&, Map& map, const glm::vec3& position, const glm::vec3& forward);
     ~DisruptorCannonProjectile();
-    void update(const double& dt);
-    void destroy();
 };
 
 class DisruptorCannon final : public PrimaryWeaponCannon {

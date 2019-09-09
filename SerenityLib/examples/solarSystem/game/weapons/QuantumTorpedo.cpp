@@ -4,7 +4,6 @@
 #include "../Ship.h"
 #include "../Helper.h"
 
-
 #include <ecs/Components.h>
 #include <core/engine/math/Engine_Math.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,7 +16,6 @@
 #include <core/engine/Engine.h>
 #include <core/engine/materials/Material.h>
 
-#include <ecs/Components.h>
 #include "../ships/shipSystems/ShipSystemShields.h"
 #include "../ships/shipSystems/ShipSystemHull.h"
 
@@ -219,10 +217,6 @@ QuantumTorpedoProjectile::QuantumTorpedoProjectile(QuantumTorpedo& source, Map& 
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
 
-    light = new PointLight(finalPosition, &map);
-    light->setColor(quantumBlue);
-    light->setAttenuation(LightRange::_20);
-
     auto data    = source.calculatePredictedVector(body);
     auto& offset = data.pedictedVector;
     hasLock      = data.hasLock;
@@ -237,6 +231,10 @@ QuantumTorpedoProjectile::QuantumTorpedoProjectile(QuantumTorpedo& source, Map& 
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
     body.setRotation(q);
+
+    light = new PointLight(finalPosition, &map);
+    light->setColor(quantumBlue);
+    light->setAttenuation(LightRange::_20);
 }
 QuantumTorpedoProjectile::~QuantumTorpedoProjectile() {
     entity->destroy();
@@ -324,10 +322,10 @@ void QuantumTorpedo::forceFire() {
     shipMatrix = glm::translate(shipMatrix, position);
     const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
 
-    auto* sound = Engine::Sound::playEffect(ResourceManifest::SoundQuantumTorpedo);
-    if (sound) {
-        sound->setVolume(volume);
-        sound->setPosition(finalPosition);
-        sound->setAttenuation(0.05f);
+    soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundQuantumTorpedo);
+    if (soundEffect) {
+        soundEffect->setVolume(volume);
+        soundEffect->setPosition(finalPosition);
+        soundEffect->setAttenuation(0.05f);
     }
 }

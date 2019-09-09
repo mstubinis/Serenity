@@ -18,7 +18,7 @@
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <btBulletCollisionCommon.h>
-//#include <LinearMath/btIDebugDraw.h>
+#include <BulletCollision/NarrowPhaseCollision/btRaycastCallback.h>
 
 //Multi-threading
 #include <core/engine/threading/Engine_ThreadManager.h>
@@ -198,61 +198,77 @@ void Physics::removeRigidBody(btRigidBody* rigidBody){
 void Physics::updateRigidBody(btRigidBody* rigidBody){ 
     physicsManager->_updateRigidBody(rigidBody); 
 }
-vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end) {
-    btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
+vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& end, const unsigned short group, const unsigned short mask) {
+    btCollisionWorld::AllHitsRayResultCallback RayCallback(start, end);
+    RayCallback.m_collisionFilterMask = mask;
+    RayCallback.m_collisionFilterGroup = group;
+
     physicsManager->data->world->rayTest(start, end, RayCallback);
-    vector<glm::vec3> result;
+    //physicsManager->data->world->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
+
+    vector<RayCastResult> result;
     if (RayCallback.hasHit()) {
-        result.reserve(2); //is this needed performance wise?
-        glm::vec3 res1 = glm::vec3(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
-        glm::vec3 res2 = glm::vec3(RayCallback.m_hitNormalWorld.x(), RayCallback.m_hitNormalWorld.y(), RayCallback.m_hitNormalWorld.z());
-        result.push_back(res1);
-        result.push_back(res2);
+        auto& pts = RayCallback.m_hitPointWorld;
+        auto& normals = RayCallback.m_hitNormalWorld;
+
+        for (uint i = 0; i < pts.size(); ++i) {
+            const glm::vec3 hitPoint = Math::btVectorToGLM(RayCallback.m_hitPointWorld[i]);
+            const glm::vec3 hitNormal = Math::btVectorToGLM(RayCallback.m_hitNormalWorld[i]);
+
+            RayCastResult res;
+            res.hitPosition = hitPoint;
+            res.hitNormal = hitNormal;
+            result.push_back(res);
+        }
     }
     return result;
 }
-vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
+vector<RayCastResult> Physics::rayCast(const btVector3& start, const btVector3& end, btRigidBody* ignored, const unsigned short group, const unsigned short mask){
     if(ignored){
         physicsManager->data->world->removeRigidBody(ignored);
     }
-    vector<glm::vec3> result = _rayCastInternal(s,e);
+    vector<RayCastResult> result = _rayCastInternal(start, end, group, mask);
     if(ignored){
         physicsManager->data->world->addRigidBody(ignored);
     }
     return result;
 }
-vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector<btRigidBody*>& ignored){
+vector<RayCastResult> Physics::rayCast(const btVector3& start, const btVector3& end, vector<btRigidBody*>& ignored, const unsigned short group, const unsigned short mask){
     for(auto& object:ignored){
         physicsManager->data->world->removeRigidBody(object);
     }
-    vector<glm::vec3> result = _rayCastInternal(s,e);
+    vector<RayCastResult> result = _rayCastInternal(start, end, group, mask);
     for(auto& object:ignored){
         physicsManager->data->world->addRigidBody(object);
     }
     return result;
  }
-vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e, Entity* ignored){
-    btVector3 _s = Math::btVectorFromGLM(s);
-    btVector3 _e = Math::btVectorFromGLM(e);
+vector<RayCastResult> Physics::rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignored, const unsigned short group, const unsigned short mask){
+    const btVector3 start_ = Math::btVectorFromGLM(start);
+    const btVector3 end_ = Math::btVectorFromGLM(end);
     if (ignored) {
         ComponentBody* body = ignored->getComponent<ComponentBody>();
         if (body) {
-			const auto& rigid = body->getBtBody();
-            return Physics::rayCast(_s, _e, &const_cast<btRigidBody&>(rigid));
+            if (body->hasPhysics()) {
+                const auto& rigid = body->getBtBody();
+                return Physics::rayCast(start_, end_, &const_cast<btRigidBody&>(rigid), group, mask);
+            }
         }
     }
-    return Physics::rayCast(_s, _e, nullptr);
+    return Physics::rayCast(start_, end_, nullptr, group, mask);
  }
-vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<Entity>& ignored){
-    btVector3 _s = Math::btVectorFromGLM(s);
-    btVector3 _e = Math::btVectorFromGLM(e);
+vector<RayCastResult> Physics::rayCast(const glm::vec3& start, const glm::vec3& end ,vector<Entity>& ignored, const unsigned short group, const unsigned short mask){
+    const btVector3 start_ = Math::btVectorFromGLM(start);
+    const btVector3 end_ = Math::btVectorFromGLM(end);
     vector<btRigidBody*> objs;
     for(auto& o : ignored){
         ComponentBody* body = o.getComponent<ComponentBody>();
         if(body){
-			const auto& rigid = body->getBtBody();
-            objs.push_back(&const_cast<btRigidBody&>(rigid));
+            if (body->hasPhysics()) {
+                const auto& rigid = body->getBtBody();
+                objs.push_back(&const_cast<btRigidBody&>(rigid));
+            }
         }
     }
-    return Physics::rayCast(_s, _e, objs);
+    return Physics::rayCast(start_, end_, objs, group, mask);
 }

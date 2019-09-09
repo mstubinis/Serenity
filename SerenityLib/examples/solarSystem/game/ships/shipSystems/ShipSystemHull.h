@@ -12,7 +12,7 @@ class Map;
 class ShipSystemHull final : public ShipSystem {
     friend class Ship;
     private:
-        EntityWrapper   m_HullEntity;
+        EntityWrapper*  m_HullEntity;
         Map&            m_Map;
         uint            m_HealthPointsCurrent;
         uint            m_HealthPointsMax;
@@ -25,6 +25,8 @@ class ShipSystemHull final : public ShipSystem {
     public:
         ShipSystemHull(Ship&, Map&, const uint health);
         ~ShipSystemHull();
+
+        EntityWrapper* getEntity();
 
         void destroy();
 

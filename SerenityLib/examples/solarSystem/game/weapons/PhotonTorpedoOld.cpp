@@ -17,7 +17,6 @@
 #include <core/engine/Engine.h>
 #include <core/engine/materials/Material.h>
 
-#include <ecs/Components.h>
 #include "../ships/shipSystems/ShipSystemShields.h"
 #include "../ships/shipSystems/ShipSystemHull.h"
 
@@ -27,35 +26,33 @@
 using namespace Engine;
 using namespace std;
 
-struct PhotonTorpedoOldCollisionFunctor final {
-    void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
-        auto torpedoShipVoid = owner.getUserPointer1();
-        auto& torpedoProjectile = *static_cast<PhotonTorpedoOldProjectile*>(owner.getUserPointer());
+struct PhotonTorpedoOldCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+    auto torpedoShipVoid = owner.getUserPointer1();
+    auto& torpedoProjectile = *static_cast<PhotonTorpedoOldProjectile*>(owner.getUserPointer());
 
-        auto otherPtrShip = other.getUserPointer1();
-        if (otherPtrShip && torpedoShipVoid) {
-            if (otherPtrShip != torpedoShipVoid) {//dont hit ourselves!
-                Ship* otherShip = static_cast<Ship*>(otherPtrShip);
-                if (otherShip && torpedoProjectile.active) {
-                    Ship* sourceShip = static_cast<Ship*>(torpedoShipVoid);
-                    PhotonTorpedoOld& torpedo = *static_cast<PhotonTorpedoOld*>(owner.getUserPointer2());
-                    auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
-                    auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - other.position();
-                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                        shields->receiveHit(normal, local, torpedo.impactRadius, torpedo.impactTime, torpedo.damage);
-                        torpedoProjectile.destroy();
-                        return;
-                    }
-                    if (hull && other.getUserPointer() == hull) {
-                        hull->receiveHit(normal, local, torpedo.impactRadius, torpedo.impactTime, torpedo.damage, true);
-                        torpedoProjectile.destroy();
-                    }
+    auto otherPtrShip = other.getUserPointer1();
+    if (otherPtrShip && torpedoShipVoid) {
+        if (otherPtrShip != torpedoShipVoid) {//dont hit ourselves!
+            Ship* otherShip = static_cast<Ship*>(otherPtrShip);
+            if (otherShip && torpedoProjectile.active) {
+                Ship* sourceShip = static_cast<Ship*>(torpedoShipVoid);
+                PhotonTorpedoOld& torpedo = *static_cast<PhotonTorpedoOld*>(owner.getUserPointer2());
+                auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
+                auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                auto local = otherHit - other.position();
+                if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
+                    shields->receiveHit(normal, local, torpedo.impactRadius, torpedo.impactTime, torpedo.damage);
+                    torpedoProjectile.destroy();
+                    return;
+                }
+                if (hull && other.getUserPointer() == hull) {
+                    hull->receiveHit(normal, local, torpedo.impactRadius, torpedo.impactTime, torpedo.damage, true);
+                    torpedoProjectile.destroy();
                 }
             }
         }
     }
-};
+}};
 
 struct PhotonTorpedoOldInstanceCoreBindFunctor { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
@@ -168,7 +165,7 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(PhotonTorpedoOld& source,
     sph.setImplicitShapeDimensions(_scl);
     sph.recalcLocalAabb();
 
-    const auto photonRed = glm::vec4(1.0f, 0.13f, 0.13f, 1.0f);
+    const auto photonRed = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
     glow.setColor(photonRed);
     glow.setScale(10.6f);
     glow.setCustomBindFunctor(PhotonTorpedoOldInstanceGlowBindFunctor());
@@ -224,10 +221,6 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(PhotonTorpedoOld& source,
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
 
-    light = new PointLight(finalPosition, &map);
-    light->setColor(photonRed);
-    light->setAttenuation(LightRange::_20);
-
     auto data = source.calculatePredictedVector(body);
     auto& offset = data.pedictedVector;
     hasLock = data.hasLock;
@@ -242,6 +235,10 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(PhotonTorpedoOld& source,
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
     body.setRotation(q);
+
+    light = new PointLight(finalPosition, &map);
+    light->setColor(photonRed);
+    light->setAttenuation(LightRange::_20);
 }
 PhotonTorpedoOldProjectile::~PhotonTorpedoOldProjectile() {
     entity->destroy();
@@ -314,7 +311,7 @@ void PhotonTorpedoOld::update(const double& dt) {
     SecondaryWeaponTorpedo::update(dt);
 }
 const bool PhotonTorpedoOld::fire() {
-    auto res = SecondaryWeaponTorpedo::fire();
+    const auto res = SecondaryWeaponTorpedo::fire();
     if (res) {
         forceFire();
         return true;
@@ -329,10 +326,10 @@ void PhotonTorpedoOld::forceFire() {
     shipMatrix = glm::translate(shipMatrix, position);
     const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
 
-    auto* sound = Engine::Sound::playEffect(ResourceManifest::SoundPhotonTorpedoOld);
-    if (sound) {
-        sound->setVolume(volume);
-        sound->setPosition(finalPosition);
-        sound->setAttenuation(0.05f);
+    soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPhotonTorpedoOld);
+    if (soundEffect) {
+        soundEffect->setVolume(volume);
+        soundEffect->setPosition(finalPosition);
+        soundEffect->setAttenuation(0.05f);
     }
 }

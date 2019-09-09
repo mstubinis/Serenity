@@ -222,6 +222,7 @@ void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* progr
     m_UserPointer       = nullptr;
     m_Stage             = RenderStage::GeometryOpaque;
     m_PassedRenderCheck = false;
+    m_ForceRender       = false;
     m_Visible           = true;
     m_ShaderProgram     = program;
     m_Material          = mat;
@@ -233,6 +234,12 @@ void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* progr
     m_Scale             = glm::vec3(1.0f, 1.0f, 1.0f);
 
     internalUpdateModelMatrix();
+}
+void ModelInstance::forceRender(const bool forced) {
+    m_ForceRender = forced;
+}
+const bool ModelInstance::isForceRendered() const {
+    return m_ForceRender;
 }
 void ModelInstance::setViewportFlag(const unsigned short& flag) {
     m_ViewportFlag = flag;

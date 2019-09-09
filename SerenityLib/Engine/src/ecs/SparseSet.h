@@ -21,6 +21,7 @@ namespace epriv {
         public:
             SparseSet() { 
                 maxLastIndex = 0;
+                sparse.reserve(5000);
             }
             virtual ~SparseSet() { 
                 maxLastIndex = 0;
@@ -36,7 +37,9 @@ namespace epriv {
         public:
 			std::vector<T>& pool() { return dense; }
 
-            SparseSet() {}
+            SparseSet() {
+                dense.reserve(5000);
+            }
             SparseSet(const SparseSet& other) noexcept            = delete;
             SparseSet& operator=(const SparseSet& other) noexcept = delete;
             SparseSet(SparseSet&& other) noexcept                 = delete;

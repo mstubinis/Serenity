@@ -4,20 +4,13 @@
 
 #include "../ships/shipSystems/ShipSystemWeapons.h"
 #include <vector>
-#include <ecs/Entity.h>
 
-class  Map;
-class  Ship;
-class  PointLight;
 class  PhotonTorpedo;
 struct PhotonTorpedoCollisionFunctor;
-
 struct PhotonTorpedoInstanceCoreBindFunctor;
 struct PhotonTorpedoInstanceCoreUnbindFunctor;
-
 struct PhotonTorpedoInstanceGlowBindFunctor;
 struct PhotonTorpedoInstanceGlowUnbindFunctor;
-
 struct PhotonTorpedoFlareInstanceBindFunctor;
 struct PhotonTorpedoFlareInstanceUnbindFunctor;
 

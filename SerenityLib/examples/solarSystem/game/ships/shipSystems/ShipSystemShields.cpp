@@ -52,12 +52,13 @@ struct ShieldInstanceUnbindFunctor {void operator()(EngineResource* r) const {
     Renderer::GLEnable(GL_CULL_FACE);
 }};
 
-ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const uint health) :ShipSystem(ShipSystemType::Shields, _ship), m_ShieldEntity(map) {
-    auto& model = *(m_ShieldEntity.addComponent<ComponentModel>(ResourceManifest::ShieldMesh, ResourceManifest::ShieldMaterial, ResourceManifest::shieldsShaderProgram, RenderStage::ForwardParticles));
-    auto& logic = *(m_ShieldEntity.addComponent<ComponentLogic>(ShipSystemShieldsFunctor()));
+ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const uint health) :ShipSystem(ShipSystemType::Shields, _ship){
+    m_ShieldEntity = new EntityWrapper(map);
+    auto& model = *(m_ShieldEntity->addComponent<ComponentModel>(ResourceManifest::ShieldMesh, ResourceManifest::ShieldMaterial, ResourceManifest::shieldsShaderProgram, RenderStage::ForwardParticles));
+    auto& logic = *(m_ShieldEntity->addComponent<ComponentLogic>(ShipSystemShieldsFunctor()));
 
     //TODO: optimize collision hull if possible
-    auto& shieldBody = *(m_ShieldEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic));
+    auto& shieldBody = *(m_ShieldEntity->addComponent<ComponentBody>(CollisionType::TriangleShapeStatic));
     logic.setUserPointer(&m_Ship);
     shieldBody.setUserPointer(this);
     shieldBody.setUserPointer1(&_ship);
@@ -104,14 +105,17 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const uint health) :
 ShipSystemShields::~ShipSystemShields() {
 }
 void ShipSystemShields::destroy() {
-    m_ShieldEntity.destroy();
+    if (m_ShieldEntity) {
+        m_ShieldEntity->destroy();
+        SAFE_DELETE(m_ShieldEntity);
+    }
     m_ShieldsAreUp = false;
     for (uint i = 0; i < MAX_IMPACT_POINTS; ++i) {
         m_ImpactPoints[i] = ShipSystemShieldsImpactPoint();
     }
 }
 void ShipSystemShields::update(const double& dt) {
-    auto& shieldBody = *m_ShieldEntity.getComponent<ComponentBody>();
+    auto& shieldBody = *m_ShieldEntity->getComponent<ComponentBody>();
     auto& shipBody = *m_Ship.getComponent<ComponentBody>();
     shieldBody.setPosition(shipBody.position());
     shieldBody.setRotation(shipBody.rotation());
@@ -124,9 +128,8 @@ void ShipSystemShields::update(const double& dt) {
         if (!shown && impact.active)
             shown = true;
     }
-    auto& shieldModel = m_ShieldEntity.getComponent<ComponentModel>()->getModel();
+    auto& shieldModel = m_ShieldEntity->getComponent<ComponentModel>()->getModel();
     !shown ? shieldModel.hide() : shieldModel.show();
-
 
     //recharging here
     #pragma region Recharging
@@ -134,7 +137,12 @@ void ShipSystemShields::update(const double& dt) {
         if (m_HealthPointsCurrent < m_HealthPointsMax) { //dont need to recharge at max shields
             m_RechargeTimer += fdt;
             if (m_RechargeTimer >= m_RechargeRate) {
+
                 m_HealthPointsCurrent += m_RechargeAmount;
+                if (shieldBody.getCollisionMask() != CollisionFilter::_Custom_2) {
+                    shieldBody.setCollisionMask(CollisionFilter::_Custom_2); //group 2 are weapons
+                }
+
                 if (m_HealthPointsCurrent > m_HealthPointsMax) {
                     m_HealthPointsCurrent = m_HealthPointsMax;
                 }
@@ -171,6 +179,15 @@ void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec
             impactPointData.impact(impactLocationLocal, impactRadius, maxTime, m_ImpactPointsFreelist);
         }
     }
+    auto& shieldBody = *m_ShieldEntity->getComponent<ComponentBody>();
+    if (getHealthCurrent() <= 0) {
+        shieldBody.setCollisionMask(CollisionFilter::_Custom_5); //group 5 is misc / blank
+    }else{
+        shieldBody.setCollisionMask(CollisionFilter::_Custom_2); //group 2 are weapons
+    }
+}
+EntityWrapper* ShipSystemShields::getEntity() {
+    return m_ShieldEntity;
 }
 const uint ShipSystemShields::getHealthCurrent() const {
     return m_ShieldsAreUp ? m_HealthPointsCurrent : 0;
@@ -183,10 +200,18 @@ const float ShipSystemShields::getHealthPercent() const {
 }
 void ShipSystemShields::turnOffShields() {
     m_ShieldsAreUp = false;
+    auto& shieldBody = *m_ShieldEntity->getComponent<ComponentBody>();
+    shieldBody.setCollisionMask(CollisionFilter::_Custom_5); //group 5 is misc / blank
     //TODO: send packet indicating shields are off
 }
 void ShipSystemShields::turnOnShields() {
     m_ShieldsAreUp = true;
+    auto& shieldBody = *m_ShieldEntity->getComponent<ComponentBody>();
+    if (getHealthCurrent() <= 0) {
+        shieldBody.setCollisionMask(CollisionFilter::_Custom_5); //group 5 is misc / blank
+    }else{
+        shieldBody.setCollisionMask(CollisionFilter::_Custom_2); //group 2 are weapons
+    }
     //TODO: send packet indicating shields are on
 }
 const bool ShipSystemShields::shieldsAreUp() const {

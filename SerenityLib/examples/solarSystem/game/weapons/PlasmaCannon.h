@@ -4,13 +4,8 @@
 
 #include "../ships/shipSystems/ShipSystemWeapons.h"
 #include <vector>
-#include <ecs/Entity.h>
 
-class  Map;
-class  Ship;
 class  PlasmaCannon;
-class  PointLight;
-
 struct PlasmaCannonCollisionFunctor;
 struct PlasmaCannonInstanceBindFunctor;
 struct PlasmaCannonInstanceUnbindFunctor;
@@ -19,16 +14,9 @@ struct PlasmaCannonTailInstanceUnbindFunctor;
 struct PlasmaCannonOutlineInstanceBindFunctor;
 struct PlasmaCannonOutlineInstanceUnbindFunctor;
 
-struct PlasmaCannonProjectile final {
-    Entity entity;
-    PointLight* light;
-    float currentTime;
-    float maxTime;
-    bool active;
+struct PlasmaCannonProjectile final : public PrimaryWeaponCannonProjectile {
     PlasmaCannonProjectile(PlasmaCannon&, Map& map, const glm::vec3& position, const glm::vec3& forward);
     ~PlasmaCannonProjectile();
-    void update(const double& dt);
-    void destroy();
 };
 
 class PlasmaCannon final : public PrimaryWeaponCannon {

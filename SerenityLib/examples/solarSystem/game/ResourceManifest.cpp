@@ -24,6 +24,7 @@ Handle ResourceManifest::RadarDiscMesh;
 Handle ResourceManifest::CannonEffectMesh;
 Handle ResourceManifest::CannonEffectOutlineMesh;
 Handle ResourceManifest::CannonTailMesh;
+Handle ResourceManifest::PhaserBeamMesh;
 
 /*extras*/
 Handle ResourceManifest::NovaMesh;
@@ -68,6 +69,7 @@ Handle ResourceManifest::ShieldMaterial;
 
 Handle ResourceManifest::CannonOutlineMaterial;
 Handle ResourceManifest::CannonTailMaterial;
+Handle ResourceManifest::PhaserBeamMaterial;
 
 //sounds
 Handle ResourceManifest::MenuMusic;
@@ -80,6 +82,7 @@ Handle ResourceManifest::SoundPhotonTorpedo;
 Handle ResourceManifest::SoundQuantumTorpedo;
 Handle ResourceManifest::SoundPhotonTorpedoOld;
 Handle ResourceManifest::SoundPlasmaTorpedo;
+Handle ResourceManifest::SoundPhaserBeam;
 
 //torpedos
 Handle ResourceManifest::TorpedoFlareMesh;
@@ -122,7 +125,7 @@ void ResourceManifest::init(){
     CannonEffectMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_bolt.objcc")[0];
     CannonTailMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_tail.objcc")[0];
     CannonEffectOutlineMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_outline.objcc")[0];
-
+    PhaserBeamMesh = Resources::loadMeshAsync(BasePath + "data/Models/phaser_beam.obj")[0];
 
 	//extras
 	NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc")[0];
@@ -166,6 +169,7 @@ void ResourceManifest::init(){
 
     CannonOutlineMaterial = Resources::loadMaterialAsync("CannonOutline", BasePath + "data/Textures/Effects/cannon_texture.dds", "","", "");
     CannonTailMaterial = Resources::loadMaterialAsync("CannonTail", BasePath + "data/Textures/Effects/cannon_texture_tip.dds", "", "", "");
+    PhaserBeamMaterial = Resources::loadMaterialAsync("PhaserBeam", BasePath + "data/Textures/Effects/phaser_beam.dds", "", "", "");
     DefiantMaterial = Resources::loadMaterialAsync("Defiant", BasePath + "data/Textures/defiant/defiant.dds");
     NovaMaterial = Resources::loadMaterialAsync("Nova", BasePath + "data/Textures/nova/nova.dds");
     MirandaMaterial = Resources::loadMaterialAsync("Miranda", BasePath + "data/Textures/miranda/miranda.dds", BasePath + "data/Textures/miranda/miranda_Normal.dds", BasePath + "data/Textures/miranda/miranda_Glow.dds", BasePath + "data/Textures/miranda/miranda_Specular.dds");
@@ -193,11 +197,15 @@ void ResourceManifest::init(){
     RadarMaterial = Resources::loadMaterialAsync("Radar", BasePath + "data/Textures/HUD/Radar.dds");
     StarFlareMaterial = Resources::loadMaterialAsync("SunFlare", BasePath + "data/Textures/Skyboxes/StarFlare.dds");
     
+    Material& phaserBeamMat = *((Material*)PhaserBeamMaterial.get());
+    phaserBeamMat.setShadeless(true);
+    phaserBeamMat.setGlow(1.0f);
+    phaserBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(1.4f, 0.0f);
+
     Material& cannonOutlineMat = *((Material*)CannonOutlineMaterial.get());
     cannonOutlineMat.setShadeless(true);
     cannonOutlineMat.setGlow(1.0f);
 
-    
     Material& cannonTailMat = *((Material*)CannonTailMaterial.get());
     cannonTailMat.setShadeless(true);
     cannonTailMat.setGlow(1.0f);
@@ -293,6 +301,7 @@ void ResourceManifest::init(){
     SoundQuantumTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/quantum_torpedo.ogg");
     SoundPhotonTorpedoOld = Resources::addSoundData(BasePath + "data/Sounds/effects/photon_torpedo_old.ogg");
     SoundPlasmaTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_torpedo.ogg");
+    SoundPhaserBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/phaser_beam.ogg");
 
     const auto klingon = glm::vec3(0.72f, 0.11f, 0.11f);
     const auto romulan = glm::vec3(0.33f, 0.72f, 0.48f);

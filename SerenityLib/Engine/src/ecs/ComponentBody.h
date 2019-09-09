@@ -115,6 +115,7 @@ class ComponentBody : public ComponentBaseClass {
         void* getUserPointer1();
         void* getUserPointer2();
 
+        const bool&  hasPhysics() const;
         const ushort getCollisionGroup() const; //get the groups this body belongs to
         const ushort getCollisionMask() const;  //get the groups this body will register collisions with
         const ushort getCollisionFlags() const;
@@ -179,6 +180,12 @@ class ComponentBody : public ComponentBaseClass {
         void addCollisionGroup(const CollisionFilter::Filter& group); //add to the groups this body belongs to
         void addCollisionMask(const CollisionFilter::Filter& mask); //add to the groups this body will register collisions with
         void addCollisionFlag(const CollisionFlag::Flag& flag);
+        void removeCollisionGroup(const short& group);
+        void removeCollisionMask(const short& mask);
+        void removeCollisionFlag(const short& flag);
+        void removeCollisionGroup(const CollisionFilter::Filter& group);
+        void removeCollisionMask(const CollisionFilter::Filter& mask);
+        void removeCollisionFlag(const CollisionFlag::Flag& flag);
 
         void setDamping(const float linear, const float angular);
 

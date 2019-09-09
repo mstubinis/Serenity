@@ -300,6 +300,9 @@ void ComponentBody::setInternalPhysicsUserPointer(void* userPtr) {
         }
     }
 }
+const bool& ComponentBody::hasPhysics() const {
+    return m_Physics;
+}
 void ComponentBody::setUserPointer(void* userPtr) {
     m_UserPointer = userPtr;
 }
@@ -902,6 +905,48 @@ void ComponentBody::addCollisionFlag(const short& flag) {
 void ComponentBody::addCollisionFlag(const CollisionFlag::Flag& flag) {
     ComponentBody::addCollisionFlag(static_cast<short>(flag));
 }
+void ComponentBody::removeCollisionGroup(const short& group) {
+    if (m_Physics) {
+        auto& phyData = *data.p;
+        if (phyData.group != (phyData.group & ~group)) {
+            Physics::removeRigidBody(phyData.bullet_rigidBody);
+            phyData.group = phyData.group & ~group;
+            Physics::addRigidBody(phyData.bullet_rigidBody, phyData.group, phyData.mask);
+        }
+    }
+}
+void ComponentBody::removeCollisionMask(const short& mask) {
+    if (m_Physics) {
+        auto& phyData = *data.p;
+        if (phyData.mask != (phyData.mask & ~mask)) {
+            Physics::removeRigidBody(phyData.bullet_rigidBody);
+            phyData.mask = phyData.mask & ~mask;
+            Physics::addRigidBody(phyData.bullet_rigidBody, phyData.group, phyData.mask);
+        }
+    }
+}
+void ComponentBody::removeCollisionFlag(const short& flag) {
+    if (m_Physics) {
+        auto& phyData = *data.p;
+        auto& rigidBody = *phyData.bullet_rigidBody;
+        const auto& currFlags = rigidBody.getCollisionFlags();
+        if (currFlags != (currFlags & ~flag)) {
+            Physics::removeRigidBody(&rigidBody);
+            rigidBody.setCollisionFlags(currFlags & ~flag);
+            Physics::addRigidBody(&rigidBody, phyData.group, phyData.mask);
+        }
+    }
+}
+void ComponentBody::removeCollisionGroup(const CollisionFilter::Filter& group) {
+    ComponentBody::removeCollisionGroup(static_cast<short>(group));
+}
+void ComponentBody::removeCollisionMask(const CollisionFilter::Filter& mask) {
+    ComponentBody::removeCollisionMask(static_cast<short>(mask));
+}
+void ComponentBody::removeCollisionFlag(const CollisionFlag::Flag& flag) {
+    ComponentBody::removeCollisionFlag(static_cast<short>(flag));
+}
+
 
 //TODO: reconsider how this works
 void ComponentBody::setDynamic(const bool p_Dynamic) {

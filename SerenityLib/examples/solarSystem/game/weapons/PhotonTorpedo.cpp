@@ -17,7 +17,6 @@
 #include <core/engine/Engine.h>
 #include <core/engine/materials/Material.h>
 
-#include <ecs/Components.h>
 #include "../ships/shipSystems/ShipSystemShields.h"
 #include "../ships/shipSystems/ShipSystemHull.h"
 
@@ -225,10 +224,6 @@ PhotonTorpedoProjectile::PhotonTorpedoProjectile(PhotonTorpedo& source, Map& map
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
 
-    light = new PointLight(finalPosition, &map);
-    light->setColor(photonOrange);
-    light->setAttenuation(LightRange::_20);
-
     auto data = source.calculatePredictedVector(body);
     auto& offset = data.pedictedVector;
     hasLock = data.hasLock;
@@ -243,6 +238,10 @@ PhotonTorpedoProjectile::PhotonTorpedoProjectile(PhotonTorpedo& source, Map& map
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
     body.setRotation(q);
+
+    light = new PointLight(finalPosition, &map);
+    light->setColor(photonOrange);
+    light->setAttenuation(LightRange::_20);
 }
 PhotonTorpedoProjectile::~PhotonTorpedoProjectile() {
     entity->destroy();
@@ -315,7 +314,7 @@ void PhotonTorpedo::update(const double& dt) {
     SecondaryWeaponTorpedo::update(dt);
 }
 const bool PhotonTorpedo::fire() {
-    auto res = SecondaryWeaponTorpedo::fire();
+    const auto res = SecondaryWeaponTorpedo::fire();
     if (res) {
         forceFire();
         return true;
@@ -330,10 +329,10 @@ void PhotonTorpedo::forceFire() {
     shipMatrix = glm::translate(shipMatrix, position);
     const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
 
-    auto* sound = Engine::Sound::playEffect(ResourceManifest::SoundPhotonTorpedo);
-    if (sound) {
-        sound->setVolume(volume);
-        sound->setPosition(finalPosition);
-        sound->setAttenuation(0.05f);
+    soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPhotonTorpedo);
+    if (soundEffect) {
+        soundEffect->setVolume(volume);
+        soundEffect->setPosition(finalPosition);
+        soundEffect->setAttenuation(0.05f);
     }
 }

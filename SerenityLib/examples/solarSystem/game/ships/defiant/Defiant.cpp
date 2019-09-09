@@ -2,6 +2,7 @@
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
 #include "../../weapons/PulsePhaser.h"
+#include "../../weapons/PhaserBeam.h"
 #include "../../weapons/QuantumTorpedo.h"
 #include "../../weapons/PhotonTorpedo.h"
 
@@ -59,6 +60,37 @@ Defiant::Defiant(Client& client, Map& map, bool player, const string& name, glm:
     weapons.addSecondaryWeaponTorpedo(*leftTorp);
     weapons.addSecondaryWeaponTorpedo(*rightTorp);
     weapons.addSecondaryWeaponTorpedo(*aftTorp);
+
+    //phasers
+
+    vector<glm::vec3> top_beam_pts{
+        glm::vec3(-0.095116f, 0.150892f, -0.010849f),
+        glm::vec3(-0.050611f, 0.150892f, 0.017642f),
+        glm::vec3(0.0f, 0.150892f, 0.026531f),
+        glm::vec3(0.050611f, 0.150892f, 0.017642f),
+        glm::vec3(0.095116f, 0.150892f, -0.010849f),
+    };
+    vector<glm::vec3> ventral_left_beam_pts{
+        glm::vec3(-0.782141f, -0.087931f, 0.135678f),
+        glm::vec3(-0.735904f, -0.113648f, 0.135678f),
+        glm::vec3(-0.685293f, -0.129982f, 0.135678f),
+        glm::vec3(-0.633076f, -0.144912f, 0.135678f),
+        glm::vec3(-0.58733f, -0.157489f, 0.135678f),
+    };
+    vector<glm::vec3> ventral_right_beam_pts{
+        glm::vec3(0.782141f, -0.087931f, 0.135678f),
+        glm::vec3(0.735904f, -0.113648f, 0.135678f),
+        glm::vec3(0.685293f, -0.129982f, 0.135678f),
+        glm::vec3(0.633076f, -0.144912f, 0.135678f),
+        glm::vec3(0.58733f, -0.157489f, 0.135678f),
+    };
+    auto* topBeam = new PhaserBeam(*this, map, glm::vec3(0.0f, 0.150892f, 0.026531f), glm::vec3(0.0f, 1.0f, 0.0f), 65.0f, top_beam_pts);
+    auto* ventralLeftBeam = new PhaserBeam(*this, map, glm::vec3(-0.685293f, -0.129982f, 0.135678f), glm::vec3(-0.056611f, -0.228363f, 0.0f), 70.0f, ventral_left_beam_pts);
+    auto* ventralRightBeam = new PhaserBeam(*this, map, glm::vec3(0.685293f, -0.129982f, 0.135678f), glm::vec3(0.056611f, -0.228363f, 0.0f), 70.0f, ventral_right_beam_pts);
+
+    weapons.addPrimaryWeaponBeam(*topBeam);
+    weapons.addPrimaryWeaponBeam(*ventralRightBeam);
+    weapons.addPrimaryWeaponBeam(*ventralLeftBeam);
 }
 Defiant::~Defiant() {
 

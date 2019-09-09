@@ -11,7 +11,8 @@
 
 using namespace std;
 
-ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const uint health) :ShipSystem(ShipSystemType::Hull, _ship), m_HullEntity(map), m_Map(map){
+ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const uint health) :ShipSystem(ShipSystemType::Hull, _ship), m_Map(map){
+    m_HullEntity = new EntityWrapper(map);
     m_HealthPointsCurrent = m_HealthPointsMax = health;
 
     m_RechargeAmount = 50;
@@ -19,7 +20,7 @@ ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const uint health) :ShipSy
     m_RechargeTimer = 0.0f;
     m_CollisionTimer = 10.0f;
 
-    auto& hullBody = *m_HullEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic);
+    auto& hullBody = *m_HullEntity->addComponent<ComponentBody>(CollisionType::TriangleShapeStatic);
     auto col = new Collision(CollisionType::TriangleShapeStatic, _ship.getComponent<ComponentModel>()->getModel().mesh(), _ship.getComponent<ComponentBody>()->mass());
     hullBody.setCollision(col);
     hullBody.addCollisionFlag(CollisionFlag::NoContactResponse);
@@ -32,8 +33,14 @@ ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const uint health) :ShipSy
 ShipSystemHull::~ShipSystemHull() {
 
 }
+EntityWrapper* ShipSystemHull::getEntity() {
+    return m_HullEntity;
+}
 void ShipSystemHull::destroy() {
-    m_HullEntity.destroy();
+    if (m_HullEntity) {
+        m_HullEntity->destroy();
+        SAFE_DELETE(m_HullEntity);
+    }
     m_RechargeTimer = 0.0f;
     m_CollisionTimer = 10.0f;
 }
@@ -118,7 +125,7 @@ void ShipSystemHull::receiveCollision(const glm::vec3& impactNormal, const glm::
     }
 }
 void ShipSystemHull::update(const double& dt) {
-    auto& hullBody = *m_HullEntity.getComponent<ComponentBody>();
+    auto& hullBody = *m_HullEntity->getComponent<ComponentBody>();
     auto& shipBody = *m_Ship.getComponent<ComponentBody>();
     hullBody.setPosition(shipBody.position());
     hullBody.setRotation(shipBody.rotation());

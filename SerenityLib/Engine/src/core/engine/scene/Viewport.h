@@ -13,21 +13,19 @@ namespace Engine {
     };
 };
 
-struct ViewportRenderingFlag final {
-    enum Flag {
-        GodRays      = 1 << 0,
-        SSAO         = 1 << 1,
-        API2D        = 1 << 2,
-        HDR          = 1 << 3,
-        PhysicsDebug = 1 << 4,
-        AntiAliasing = 1 << 5,
-        Fog          = 1 << 6,
-        DepthOfField = 1 << 7,
-        Skybox       = 1 << 8,
-        Bloom        = 1 << 9,
-        _ALL         =     -1,
-    };
-};
+struct ViewportRenderingFlag final { enum Flag {
+    GodRays      = 1 << 0,
+    SSAO         = 1 << 1,
+    API2D        = 1 << 2,
+    HDR          = 1 << 3,
+    PhysicsDebug = 1 << 4,
+    AntiAliasing = 1 << 5,
+    Fog          = 1 << 6,
+    DepthOfField = 1 << 7,
+    Skybox       = 1 << 8,
+    Bloom        = 1 << 9,
+    _ALL         =     -1,
+};};
 
 class Viewport final {
     friend class Scene;

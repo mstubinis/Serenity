@@ -10,6 +10,7 @@
 #include <glm/gtc/matrix_access.hpp>
 
 #include <btBulletDynamicsCommon.h>
+#include <boost/math/interpolators/cubic_b_spline.hpp>
 
 using namespace Engine;
 using namespace std;
@@ -18,7 +19,8 @@ typedef unsigned char uchar;
 
 const float ROTATION_THRESHOLD = 0.00001f;
 
-const glm::vec3 Math::polynomial_interpolate(std::vector<glm::vec3>& points, const float time) {
+//could use some fixing
+const glm::vec3 Math::polynomial_interpolate_linear(vector<glm::vec3>& points, const float time) {
     glm::vec3 ret = glm::vec3(0.0f);
     const auto n = points.size();
     assert(n >= 3);
@@ -50,33 +52,34 @@ const glm::vec3 Math::polynomial_interpolate(std::vector<glm::vec3>& points, con
         P2 = points[index3];
     }
     //ok we have the three points
-    auto a2 = ((P1 - P0) - time * (P2 - P0)) / (time * (time - 1.0f));
-    auto a1 = P2 - P0 - a2;
-    ret = (a2 * (time * time)) + (a1 * time) + P0;
-
-    /*
-    P = a2(t^2) + a1(t) + a0
-
-    where P is a point on the curve, a0, a1 and a2 are three vectors defining the curve and t is the parameter
-
-     The curve passes through three points labelled P0, P1 and P2.
-     By convention the curve starts from point P0 with parameter value t=0,
-     goes through point P1 when t=t1 (0<t1<1) and finishes at P2 when t=1.
-     Using these conventions we can solve for the three a vectors as follows
-
-     t = 0    P0 = a0
-     t = 1    P2 = a2 + a1 + a0
-     t = t1   P1 = a2t^2(1) + a1t1 + a0
-
-     and rearranging these equations we get:
-
-     a0 = P0
-     a2 = (P1 - P0) - t1(P2 - P0) / t1(t1 - 1)
-     a1 = P2 - P0 - a2
-
-    */
+    const auto timeSquared = time * time;
+    const auto a2 = (P1 - P0) - time * (P2 - P0) / time * (time - 1.0f);
+    const auto a1 = P2 - P0 - a2;
+    const auto a0 = P0;
+    ret = a2 * timeSquared + a1 * time + a0;
     return ret;
 }
+//this works perfectly
+const glm::vec3 Math::polynomial_interpolate_cubic(vector<glm::vec3>& points, const float time) {
+    glm::vec3 ret = glm::vec3(0.0f);
+
+    const auto n = points.size();
+    vector<float> xs; xs.reserve(n);
+    vector<float> ys; ys.reserve(n);
+    vector<float> zs; zs.reserve(n);
+    for (auto& pt : points) {
+        xs.push_back(pt.x);
+        ys.push_back(pt.y);
+        zs.push_back(pt.z);
+    }
+    const auto step = 1.0f / static_cast<float>(n-1);
+    boost::math::cubic_b_spline<float> x_spline(xs.data(), n, 0.0f, step);
+    boost::math::cubic_b_spline<float> y_spline(ys.data(), n, 0.0f, step);
+    boost::math::cubic_b_spline<float> z_spline(zs.data(), n, 0.0f, step);
+
+    return glm::vec3(x_spline(time), y_spline(time), z_spline(time));
+}
+
 
 void Math::Float32From16(float*     out, const uint16_t in) {
     uint32_t t1, t2, t3;

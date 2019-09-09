@@ -5,20 +5,13 @@
 
 #include "../ships/shipSystems/ShipSystemWeapons.h"
 #include <vector>
-#include <ecs/Entity.h>
 
-class  Map;
-class  Ship;
-class  PointLight;
 class  PhotonTorpedoOld;
 struct PhotonTorpedoOldCollisionFunctor;
-
 struct PhotonTorpedoOldInstanceCoreBindFunctor;
 struct PhotonTorpedoOldInstanceCoreUnbindFunctor;
-
 struct PhotonTorpedoOldInstanceGlowBindFunctor;
 struct PhotonTorpedoOldInstanceGlowUnbindFunctor;
-
 struct PhotonTorpedoOldFlareInstanceBindFunctor;
 struct PhotonTorpedoOldFlareInstanceUnbindFunctor;
 
