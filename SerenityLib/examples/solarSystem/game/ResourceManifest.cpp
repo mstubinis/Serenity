@@ -169,7 +169,8 @@ void ResourceManifest::init(){
 
     CannonOutlineMaterial = Resources::loadMaterialAsync("CannonOutline", BasePath + "data/Textures/Effects/cannon_texture.dds", "","", "");
     CannonTailMaterial = Resources::loadMaterialAsync("CannonTail", BasePath + "data/Textures/Effects/cannon_texture_tip.dds", "", "", "");
-    PhaserBeamMaterial = Resources::loadMaterialAsync("PhaserBeam", BasePath + "data/Textures/Effects/phaser_beam.dds", "", "", "");
+    PhaserBeamMaterial = Resources::loadMaterialAsync("PhaserBeam", BasePath + "data/Textures/Effects/phaser_beam_outline.dds", "", "", "");
+
     DefiantMaterial = Resources::loadMaterialAsync("Defiant", BasePath + "data/Textures/defiant/defiant.dds");
     NovaMaterial = Resources::loadMaterialAsync("Nova", BasePath + "data/Textures/nova/nova.dds");
     MirandaMaterial = Resources::loadMaterialAsync("Miranda", BasePath + "data/Textures/miranda/miranda.dds", BasePath + "data/Textures/miranda/miranda_Normal.dds", BasePath + "data/Textures/miranda/miranda_Glow.dds", BasePath + "data/Textures/miranda/miranda_Specular.dds");
@@ -201,6 +202,12 @@ void ResourceManifest::init(){
     phaserBeamMat.setShadeless(true);
     phaserBeamMat.setGlow(1.0f);
     phaserBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(1.4f, 0.0f);
+    phaserBeamMat.getComponent(0).layer(0).setData2(1.0f, 0.25f, 0.0f, 1.0f);
+
+    auto* phaserLayer = phaserBeamMat.getComponent(0).addLayer();
+    phaserLayer->setTexture(BasePath + "data/Textures/Effects/phaser_beam_inside.dds");
+    phaserLayer->addUVModificationSimpleTranslation(1.4f, 0.0f);
+    phaserLayer->setData2(1.0f, 0.7f, 0.0f, 1.0f);
 
     Material& cannonOutlineMat = *((Material*)CannonOutlineMaterial.get());
     cannonOutlineMat.setShadeless(true);

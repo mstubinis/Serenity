@@ -11,11 +11,11 @@
 
 using namespace std;
 
-ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const uint health) :ShipSystem(ShipSystemType::Hull, _ship), m_Map(map){
+ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const float health) :ShipSystem(ShipSystemType::Hull, _ship), m_Map(map){
     m_HullEntity = new EntityWrapper(map);
     m_HealthPointsCurrent = m_HealthPointsMax = health;
 
-    m_RechargeAmount = 50;
+    m_RechargeAmount = 50.0f;
     m_RechargeRate = 5.0f;
     m_RechargeTimer = 0.0f;
     m_CollisionTimer = 10.0f;
@@ -29,6 +29,7 @@ ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const uint health) :ShipSy
 
     hullBody.setUserPointer(this);
     hullBody.setUserPointer1(&_ship);
+    hullBody.setUserPointer2(&_ship);
 }
 ShipSystemHull::~ShipSystemHull() {
 
@@ -98,7 +99,7 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
     if (d)  decalList.push_back(d);
     if (d1) decalList.push_back(d1);
 }
-void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const uint damage, const bool forceHullFire) {
+void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const uint damage, const bool forceHullFire, const bool paint) {
     int newHP = m_HealthPointsCurrent - damage;
     if (newHP > 0) {
         //hull takes entire hit
@@ -107,7 +108,8 @@ void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& 
         //we destroyed the ship
         m_HealthPointsCurrent = 0;
     }
-    applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, forceHullFire);
+    if(paint)
+        applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, forceHullFire);
 }
 void ShipSystemHull::receiveCollision(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float damage) {
     if (m_CollisionTimer > static_cast<float>(HULL_TO_HULL_COLLISION_DELAY)) {
@@ -150,12 +152,12 @@ void ShipSystemHull::update(const double& dt) {
 
     ShipSystem::update(dt);
 }
-const uint ShipSystemHull::getHealthCurrent() const {
+const float ShipSystemHull::getHealthCurrent() const {
     return m_HealthPointsCurrent;
 }
-const uint ShipSystemHull::getHealthMax() const {
+const float ShipSystemHull::getHealthMax() const {
     return m_HealthPointsMax;
 }
 const float ShipSystemHull::getHealthPercent() const {
-    return static_cast<float>(m_HealthPointsCurrent) / static_cast<float>(m_HealthPointsMax);
+    return (m_HealthPointsCurrent) / (m_HealthPointsMax);
 }

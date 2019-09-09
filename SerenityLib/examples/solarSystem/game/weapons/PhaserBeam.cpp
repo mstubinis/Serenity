@@ -25,6 +25,45 @@
 using namespace Engine;
 using namespace std;
 
+struct PhaserBeamCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+    auto phaserShipVoid = owner.getUserPointer1();
+    auto otherShipVoid = other.getUserPointer1();
+    if (otherShipVoid && phaserShipVoid) {
+        if (otherShipVoid != phaserShipVoid) {//dont hit ourselves!
+            Ship* otherShip = static_cast<Ship*>(otherShipVoid);
+            if (otherShip) {
+                PhaserBeam& phaser = *static_cast<PhaserBeam*>(owner.getUserPointer2());
+                if (phaser.firingTime > 0.0f) {
+                    Ship* sourceShip = static_cast<Ship*>(phaserShipVoid);
+                    auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
+                    auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                    auto local = otherHit - other.position();
+
+                    auto finalDamage = static_cast<float>(Resources::dt()) * phaser.damage;
+
+                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
+                        if (phaser.firingTimeShieldGraphicPing > 0.2f) {
+                            shields->receiveHit(normal, local, phaser.impactRadius, phaser.impactTime, finalDamage, true);
+                            phaser.firingTimeShieldGraphicPing = 0.0f;
+                        }else{
+                            shields->receiveHit(normal, local, phaser.impactRadius, phaser.impactTime, finalDamage, false);
+                        }
+                        return;
+                    }
+                    if (hull && other.getUserPointer() == hull) {
+                        if (phaser.firingTimeShieldGraphicPing > 1.0f) {
+                            hull->receiveHit(normal, local, phaser.impactRadius, phaser.impactTime, finalDamage, true, true);
+                            phaser.firingTimeShieldGraphicPing = 0.0f;
+                        }else{
+                            hull->receiveHit(normal, local, phaser.impactRadius, phaser.impactTime, finalDamage, false, false);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}};
+
 struct PhaserBeamInstanceBindFunctor { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
@@ -50,7 +89,7 @@ struct PhaserBeamInstanceUnbindFunctor { void operator()(EngineResource* r) cons
     //glDepthMask(GL_FALSE);
 }};
 
-PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const uint& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges,const float& _rechargeTimePerRound) : PrimaryWeaponBeam(ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime), m_Map(map) {
+PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges,const float& _rechargeTimePerRound) : PrimaryWeaponBeam(ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime), m_Map(map) {
     firstWindupGraphic = new EntityWrapper(map);
     secondWindupGraphic = new EntityWrapper(map);
 
@@ -62,10 +101,12 @@ PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm::vec3& position, const gl
     auto& firstModel = firstWindupModel.getModel();
     auto& secondModel = secondWindupModel.getModel();
 
-    firstModel.setScale(0.07f);
-    secondModel.setScale(0.07f);
+    firstModel.setScale(0.09f);
+    secondModel.setScale(0.09f);
 
     const auto photonOrange = glm::vec4(1.0f, 0.45f, 0.0f, 1.0f);
+    const auto photonYellow = glm::vec4(1.0f, 0.85f, 0.0f, 1.0f);
+
     firstModel.setColor(photonOrange);
     secondModel.setColor(photonOrange);
 
@@ -88,15 +129,22 @@ PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm::vec3& position, const gl
     auto& beamModel = *beamGraphic->getComponent<ComponentModel>();
     auto& beamModelOne = beamModel.getModel();
     beamModelOne.setUserPointer(this);
-    beamModelOne.setColor(photonOrange);
+    //beamModelOne.setColor(photonOrange);
     beamModelOne.setCustomBindFunctor(PhaserBeamInstanceBindFunctor());
     beamModelOne.setCustomUnbindFunctor(PhaserBeamInstanceUnbindFunctor());
 
     beamLight->setColor(photonOrange);
 
-    auto* beamEndModel = beamEndPointGraphic->getComponent<ComponentModel>();
-    auto& beamModelEnd = beamEndModel->getModel(0);
+    auto& beamEndBody = *beamEndPointGraphic->getComponent<ComponentBody>();
+    auto& beamEndModel = *beamEndPointGraphic->getComponent<ComponentModel>();
+    auto& beamModelEnd = beamEndModel.getModel(0);
     beamModelEnd.setColor(photonOrange);
+
+    beamEndBody.setUserPointer(this);
+    beamEndBody.setUserPointer1(&ship);
+    beamEndBody.setUserPointer2(this);
+    beamEndBody.setPosition(99999999999.9f);
+    beamEndBody.setCollisionFunctor(PhaserBeamCollisionFunctor());
 }
 PhaserBeam::~PhaserBeam() {
     firstWindupGraphic->destroy();
@@ -225,6 +273,7 @@ void PhaserBeam::update(const double& dt) {
                 --numRounds;
             }
             firingTime += fdt;
+            firingTimeShieldGraphicPing += fdt;
 
             auto& body = *beamGraphic->getComponent<ComponentBody>();
             auto& beamModelOne = beamModel.getModel(0);
@@ -248,14 +297,15 @@ void PhaserBeam::update(const double& dt) {
             ignored.push_back(ship.entity());
 
             
-            unsigned short group = -1;
+            unsigned short group = CollisionFilter::_Custom_2;
             unsigned short mask = -1;
+            //custom 1 is shields
             //do not ray cast against the convex hull (custom 4)
-            group = group & ~CollisionFilter::_Custom_4;
             mask = mask & ~CollisionFilter::_Custom_4;
             //do not ray cast against the shields if they are down
-            group = group & ~CollisionFilter::_Custom_5;
             mask = mask & ~CollisionFilter::_Custom_5;
+            //and ignore other weapons!
+            mask = mask & ~CollisionFilter::_Custom_2;
 
             auto rayCastPoints = Physics::rayCast(firstWindupPos, targetPos, ignored, group, mask);
             if (rayCastPoints.size() == 0){

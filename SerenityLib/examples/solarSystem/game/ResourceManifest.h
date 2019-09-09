@@ -69,7 +69,6 @@ struct ResourceManifest{
     static Handle CannonTailMaterial;
     static Handle PhaserBeamMaterial;
 
-
     //sounds
     static Handle MenuMusic;
     static Handle SoundCloakingActivated;

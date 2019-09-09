@@ -8,9 +8,11 @@
 class  PhaserBeam;
 struct PhaserBeamInstanceBindFunctor;
 struct PhaserBeamInstanceUnbindFunctor;
+struct PhaserBeamCollisionFunctor;
 class PhaserBeam final : public PrimaryWeaponBeam {
     friend struct PhaserBeamInstanceBindFunctor;
     friend struct PhaserBeamInstanceUnbindFunctor;
+    friend struct PhaserBeamCollisionFunctor;
     private:
         Map& m_Map;
 
@@ -27,9 +29,9 @@ class PhaserBeam final : public PrimaryWeaponBeam {
             const glm::vec3& forward,
             const float& arc,
             std::vector<glm::vec3>& windupPts,
-            const uint& damage = 100,
+            const float& damage = 150.0f,
             const float& _chargeTimerSpeed = 4.0f,
-            const float& _firingTime = 1.0f,
+            const float& _firingTime = 1.3f,
             const float& _impactRadius = 2.5f,
             const float& _impactTime = 1.8f,
             const float& _volume = 100.0f,

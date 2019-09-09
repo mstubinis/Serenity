@@ -65,7 +65,7 @@ class PlasmaTorpedo final : public SecondaryWeaponTorpedo {
             const glm::vec3& forward,
             const float& arc,
             const uint& maxCharges = 1,
-            const uint& damage = 2750,
+            const float& damage = 2750.0f,
             const float& _rechargePerRound = 5.0f,
             const float& _impactRadius = 6.8f,
             const float& _impactTime = 4.0f,

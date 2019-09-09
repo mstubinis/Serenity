@@ -8,6 +8,7 @@
 
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/math/Engine_Math.h>
+#include <BulletCollision/CollisionShapes/btMultiSphereShape.h>
 
 using namespace Engine;
 using namespace std;
@@ -28,7 +29,7 @@ float ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm::vec3& pos,
     return t;
 }
 
-ShipWeapon::ShipWeapon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc, const uint& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, const uint& _numRounds, const float& _rechargeTimerPerRound):ship(_ship) {
+ShipWeapon::ShipWeapon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, const uint& _numRounds, const float& _rechargeTimerPerRound):ship(_ship) {
     position                 = _position;
     forward                  = glm::normalize(_forward);
     arc                      = _arc;
@@ -101,7 +102,7 @@ void PrimaryWeaponCannonProjectile::destroy() {
 }
 
 
-PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const uint& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume) : ShipWeapon(_ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound) {
+PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume) : ShipWeapon(_ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound) {
     damage                   = _dmg;
     impactRadius             = _impactRad;
     impactTime               = _impactTime;
@@ -181,7 +182,7 @@ void PrimaryWeaponCannon::update(const double& dt) {
         }
     }
 }
-PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, Map& map, const glm::vec3& _pos, const glm::vec3& _fwd, const float& _arc, const uint& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime) : ShipWeapon(_ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound) {
+PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, Map& map, const glm::vec3& _pos, const glm::vec3& _fwd, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime) : ShipWeapon(_ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound) {
     windupPoints = _windupPts;
     chargeTimer = 0.0f;
     chargeTimerSpeed = _chargeTimerSpeed;
@@ -189,6 +190,7 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, Map& map, const glm::vec3& _po
     isFiringWeapon = false;
     firingTimeMax = _firingTime;
     firingTime = 0.0f;
+    firingTimeShieldGraphicPing = 0.0f;
 
     beamLight = new RodLight(_pos, 2.0f, &map);
     beamLight->deactivate();
@@ -199,14 +201,28 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, Map& map, const glm::vec3& _po
     auto* model = beamGraphic->addComponent<ComponentModel>(ResourceManifest::PhaserBeamMesh, ResourceManifest::PhaserBeamMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& beamModel = model->getModel(0);
     beamModel.hide();
-    beamModel.setScale(0.06f);
+    beamModel.setScale(0.09f);
 
     beamEndPointGraphic = new EntityWrapper(map);
-    auto* body1 = beamEndPointGraphic->addComponent<ComponentBody>();
-    auto* model1 = beamEndPointGraphic->addComponent<ComponentModel>(Mesh::Plane, (Material*)ResourceManifest::TorpedoGlow2Material.get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& beamModelEnd = model1->getModel(0);
-    beamModelEnd.setScale(0.5f);
+    auto& model1 = *beamEndPointGraphic->addComponent<ComponentModel>(Mesh::Plane, (Material*)ResourceManifest::TorpedoGlow2Material.get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& beamModelEnd = model1.getModel(0);
+    beamModelEnd.setScale(0.7f);
     beamModelEnd.hide();
+
+    auto& body1 = *beamEndPointGraphic->addComponent<ComponentBody>(CollisionType::Sphere);
+
+    btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body1.getCollision()->getBtShape());
+    const auto& _scl = btVector3(0.36f, 0.36f, 0.36f);
+    sph.setLocalScaling(_scl);
+    sph.setMargin(0.01f);
+    sph.setImplicitShapeDimensions(_scl);
+    sph.recalcLocalAabb();
+
+    body1.addCollisionFlag(CollisionFlag::NoContactResponse);
+    body1.setCollisionGroup(CollisionFilter::_Custom_2); //i belong to weapons (group 2)
+    body1.setCollisionMask(CollisionFilter::_Custom_1 | CollisionFilter::_Custom_3); //i should only collide with shields and hull (group 1 and group 3)
+    body1.setInternalPhysicsUserPointer(&body1);
+    const_cast<btRigidBody&>(body1.getBtBody()).setDamping(0.0f, 0.0f);
 }
 PrimaryWeaponBeam::~PrimaryWeaponBeam() {
     if (beamGraphic) {
@@ -289,7 +305,7 @@ void PrimaryWeaponBeam::update(const double& dt) {
         }
     }
 }
-SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const uint& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime,const float& _travelSpeed,const float& _volume,const float& _rotAngleSpeed) : ShipWeapon(_ship,_pos,_fwd,_arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound) {
+SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime,const float& _travelSpeed,const float& _volume,const float& _rotAngleSpeed) : ShipWeapon(_ship,_pos,_fwd,_arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound) {
     damage                   = _dmg;
     impactRadius             = _impactRad;
     impactTime               = _impactTime;

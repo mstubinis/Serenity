@@ -19,32 +19,11 @@ struct ShipSystemShieldsImpactPoint final {
     float      currentTime;
     float      maxTime;
     uint       indexInArray;
-    ShipSystemShieldsImpactPoint() {
-        active = false;
-        impactLocation = glm::vec3(0.0f);
-        impactRadius = maxTime = currentTime = 0.0f;
-        indexInArray = 0;
-    }
-    void impact(const glm::vec3& _impactLocation, const float& _impactRadius, const float& _maxTime, std::vector<uint>& freelist) {
-        active = true;
-        impactLocation = _impactLocation;
-        impactRadius = _impactRadius;
-        currentTime = 0.0f;
-        maxTime = _maxTime;
 
-        removeFromVector(freelist, indexInArray);
-    }
+    ShipSystemShieldsImpactPoint();
 
-    void update(const float& dt, std::vector<uint>& freelist) {
-        if (active) {
-            currentTime += dt;
-            if (currentTime >= maxTime) {
-                active = false;
-                currentTime = 0.0f;
-                freelist.push_back(indexInArray);
-            }
-        }
-    }
+    void impact(const glm::vec3& _impactLocation, const float& _impactRadius, const float& _maxTime, std::vector<uint>& freelist);
+    void update(const float& dt, std::vector<uint>& freelist);
 };
 
 
@@ -57,16 +36,16 @@ class ShipSystemShields final : public ShipSystem {
         ShipSystemShieldsImpactPoint  m_ImpactPoints[MAX_IMPACT_POINTS];
         std::vector<uint>             m_ImpactPointsFreelist;
         EntityWrapper*                m_ShieldEntity;
-        uint                          m_HealthPointsCurrent;
-        uint                          m_HealthPointsMax;
+        float                         m_HealthPointsCurrent;
+        float                         m_HealthPointsMax;
         //float                       m_TimeSinceLastHit;
         //float                       m_RechargeActivation;
-        uint                          m_RechargeAmount;
+        float                         m_RechargeAmount;
         float                         m_RechargeRate;
         float                         m_RechargeTimer;
         bool                          m_ShieldsAreUp;
     public:
-        ShipSystemShields(Ship&, Map&, const uint health);
+        ShipSystemShields(Ship&, Map&, const float health);
         ~ShipSystemShields();
 
         EntityWrapper* getEntity();
@@ -75,15 +54,16 @@ class ShipSystemShields final : public ShipSystem {
 
         void update(const double& dt);
 
-        const uint getHealthCurrent() const;
-        const uint getHealthMax() const;
+        const float getHealthCurrent() const;
+        const float getHealthMax() const;
         const float getHealthPercent() const; //returns percent from 0.0f to 1.0f
         const bool shieldsAreUp() const;
 
         void turnOffShields();
         void turnOnShields();
 
-        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage);
+        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage, const bool doImpactGraphic = true);
+        void addShieldImpact(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime);
 };
 
 #endif

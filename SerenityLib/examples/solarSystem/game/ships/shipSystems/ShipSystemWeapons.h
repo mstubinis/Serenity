@@ -23,7 +23,7 @@ struct ShipWeapon {
     glm::vec3       position; //relative to the ship's model center
     glm::vec3       forward;
     float           volume;
-    uint            damage;
+    float           damage;
     float           impactRadius;
     float           impactTime;
     SoundEffect*    soundEffect;
@@ -38,7 +38,7 @@ struct ShipWeapon {
         const glm::vec3& _position,
         const glm::vec3& _forward,
         const float& _arc,
-        const uint& _dmg,
+        const float& _dmg,
         const float& _impactRad,
         const float& _impactTime,
         const float& _volume,
@@ -80,7 +80,7 @@ struct PrimaryWeaponCannon : public ShipWeapon {
         const glm::vec3& _forward,
         const float& _arc,
         const uint& _maxCharges,
-        const uint& _damage,
+        const float& _damage,
         const float& _rechargePerRound,
         const float& _impactRadius,
         const float& _impactTime,
@@ -100,6 +100,7 @@ struct PrimaryWeaponBeam : public ShipWeapon {
     bool                     isFiring;
     bool                     isFiringWeapon;
     float                    firingTime;
+    float                    firingTimeShieldGraphicPing;
     float                    firingTimeMax;
 
     EntityWrapper*           beamGraphic;
@@ -116,7 +117,7 @@ struct PrimaryWeaponBeam : public ShipWeapon {
         const glm::vec3& _position,
         const glm::vec3& _forward,
         const float& _arc, 
-        const uint& _dmg,
+        const float& _dmg,
         const float& _impactRad,
         const float& _impactTime,
         const float& _volume,
@@ -159,7 +160,7 @@ struct SecondaryWeaponTorpedo : public ShipWeapon {
         const glm::vec3& _forward,
         const float& _arc,
         const uint& _maxCharges,
-        const uint& _damage,
+        const float& _damage,
         const float& _rechargePerRound,
         const float& _impactRadius,
         const float& _impactTime,

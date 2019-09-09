@@ -28,12 +28,12 @@ Nova::Nova(Client& client, Map& map, bool player, const string& name, glm::vec3 
         else if (i == 2)  system = new ShipSystemYawThrusters(*this);
         else if (i == 3)  system = new ShipSystemRollThrusters(*this);
         else if (i == 4)  system = nullptr; //no cloaking device
-        else if (i == 5)  system = new ShipSystemShields(*this, map, 10500);
+        else if (i == 5)  system = new ShipSystemShields(*this, map, 10500.0f);
         else if (i == 6)  system = new ShipSystemMainThrusters(*this);
         else if (i == 7)  system = new ShipSystemWarpDrive(*this);
         else if (i == 8)  system = new ShipSystemSensors(*this, map);
         else if (i == 9)  system = new ShipSystemWeapons(*this);
-        else if (i == 10)  system = new ShipSystemHull(*this, map, 8500);
+        else if (i == 10)  system = new ShipSystemHull(*this, map, 8500.0f);
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
