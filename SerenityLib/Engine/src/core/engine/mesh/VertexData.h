@@ -21,13 +21,13 @@ struct VertexData final{
     GLuint                                         vao;
     std::vector<std::unique_ptr<BufferObject>>     buffers;
 
-    VertexData() = delete;
-    VertexData(const VertexData& other) = delete;
-    VertexData& operator=(const VertexData& other) = delete;
-    VertexData(VertexData&& other) noexcept = default;
+    VertexData()                                       = delete;
+    VertexData(const VertexDataFormat& _format);
+    VertexData(const VertexData& other)                = delete;
+    VertexData& operator=(const VertexData& other)     = delete;
+    VertexData(VertexData&& other) noexcept            = default;
     VertexData& operator=(VertexData&& other) noexcept = default;
 
-    VertexData(const VertexDataFormat& _format);
     ~VertexData();
 
     template<typename T> const std::vector<T> getData(const size_t& attributeIndex) {

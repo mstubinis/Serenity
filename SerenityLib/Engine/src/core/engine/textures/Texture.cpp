@@ -42,7 +42,7 @@ Texture::Texture(const string files[], const string& name, const bool& genMipMap
 }
 Texture::~Texture(){
     InternalTexturePublicInterface::Unload(*this);
-    SAFE_DELETE_VECTOR(m_ImagesDatas);
+    //SAFE_DELETE_VECTOR(m_ImagesDatas);
 }
 void Texture::render(const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth){
     if (m_TextureType == TextureType::CubeMap)

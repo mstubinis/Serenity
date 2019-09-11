@@ -28,28 +28,28 @@ void TextureLoader::InitFramebuffer(Texture& texture, const uint& w, const uint&
     texture.m_TextureType = TextureType::RenderTarget;
     const uint _width(static_cast<uint>(static_cast<float>(w) * divisor));
     const uint _height(static_cast<uint>(static_cast<float>(h) * divisor));
-    ImageLoadedStructure* image = new ImageLoadedStructure(_width, _height, pxlType, pxlFormat, _internal);
+    auto image = std::make_unique<ImageLoadedStructure>(_width, _height, pxlType, pxlFormat, _internal);
 
     TextureLoader::InitCommon(texture, GL_TEXTURE_2D, false);
 
-    texture.m_ImagesDatas.push_back(image);
+    texture.m_ImagesDatas.push_back(std::move(image));
     texture.setName("RenderTarget");
 }
 void TextureLoader::InitFromMemory(Texture& texture, const sf::Image& sfImage, const string& name, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) {
     texture.m_TextureType = TextureType::Texture2D;
-    ImageLoadedStructure* image = new ImageLoadedStructure(sfImage, name);
+    auto image = std::make_unique<ImageLoadedStructure>(sfImage, name);
     image->pixelType = ImagePixelType::UNSIGNED_BYTE;
     image->internalFormat = _internal;
 
     TextureLoader::InitCommon(texture, openglTextureType, genMipMaps);
 
     TextureLoader::ChoosePixelFormat(image->pixelFormat, image->internalFormat);
-    texture.m_ImagesDatas.push_back(image);
+    texture.m_ImagesDatas.push_back(std::move(image));
     texture.setName(name);
 }
 void TextureLoader::InitFromFile(Texture& texture, const string& filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) {
     texture.m_TextureType = TextureType::Texture2D;
-    ImageLoadedStructure* image = new ImageLoadedStructure();
+    auto image = std::make_unique<ImageLoadedStructure>();
     image->filename = filename;
     const string& extension = boost::filesystem::extension(filename);
     TextureLoader::InitCommon(texture, openglTextureType, genMipMaps);
@@ -60,16 +60,16 @@ void TextureLoader::InitFromFile(Texture& texture, const string& filename, const
         image->internalFormat = _internal;
     }
     TextureLoader::ChoosePixelFormat(image->pixelFormat, image->internalFormat);
-    texture.m_ImagesDatas.insert(texture.m_ImagesDatas.begin(), image);
+    texture.m_ImagesDatas.insert(texture.m_ImagesDatas.begin(), std::move(image)); //yes, this NEEDS to be pushed into the front, not the back
 
     texture.setName(filename);
 }
 void TextureLoader::InitFromFilesCubemap(Texture& texture, const string files[], const string& name, const bool& genMipMaps, const ImageInternalFormat::Format& _internal) {
     texture.m_TextureType = TextureType::CubeMap;
     for (uint j = 0; j < 6; ++j) {
-        ImageLoadedStructure* image = new ImageLoadedStructure();
+        auto image = std::make_unique<ImageLoadedStructure>();
         image->filename = files[j];
-        texture.m_ImagesDatas.push_back(image);
+        texture.m_ImagesDatas.push_back(std::move(image));
     }
     TextureLoader::InitCommon(texture, GL_TEXTURE_CUBE_MAP, genMipMaps);
     for (auto& sideImage : texture.m_ImagesDatas) {
@@ -221,9 +221,9 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
             imgPtr->pixelFormat = image.pixelFormat;
             imgPtr->pixelType = image.pixelType;
             imgPtr->internalFormat = image.internalFormat;
-            texture.m_ImagesDatas.push_back(imgPtr);
+            texture.m_ImagesDatas.push_back(std::unique_ptr<ImageLoadedStructure>(imgPtr));
         }else{
-            imgPtr = texture.m_ImagesDatas[mainImageLevel];
+            imgPtr = texture.m_ImagesDatas[mainImageLevel].get();
         }
 
         _width = head.w;

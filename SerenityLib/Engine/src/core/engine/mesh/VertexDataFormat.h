@@ -23,7 +23,7 @@ struct VertexDataFormat {
     VertexDataFormat(VertexDataFormat&& other) noexcept            = default;
     VertexDataFormat& operator=(VertexDataFormat&& other) noexcept = default;
 
-    void add(int size,int type,bool normalized,int stride,size_t offset,size_t typeSize);
+    void add(const int size, const int type, const bool normalized, const int stride, const size_t offset, const size_t typeSize);
     void bind(const VertexData& vertData);
     void unbind();
 

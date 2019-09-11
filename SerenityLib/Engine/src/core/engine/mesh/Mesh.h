@@ -75,6 +75,12 @@ class Mesh final: public BindableResource, public EventObserver{
         Mesh(const std::string& fileOrData, float threshold = 0.0005f); //file or data
         ~Mesh();
 
+        Mesh(const Mesh&)                      = delete;
+        Mesh& operator=(const Mesh&)           = delete;
+        Mesh(Mesh&& other) noexcept            = delete;
+        Mesh& operator=(Mesh&& other) noexcept = delete;
+
+
         std::unordered_map<std::string, Engine::epriv::AnimationData>& animationData();
         const glm::vec3& getRadiusBox() const;
         const float getRadius() const;

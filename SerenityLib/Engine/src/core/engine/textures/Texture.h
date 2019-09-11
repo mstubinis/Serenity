@@ -10,6 +10,7 @@
 #include <glm/vec4.hpp>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
+#include <memory>
 
 namespace Engine {
     namespace epriv {
@@ -25,13 +26,13 @@ class Texture: public EngineResource{
     public:
         static Texture *White, *Black, *Checkers, *BRDF; //loaded in renderer
     private:
-        std::vector<Engine::epriv::ImageLoadedStructure*>   m_ImagesDatas;
-        std::vector<GLuint>                                 m_TextureAddress;
-        GLuint                                              m_Type;
-        TextureType::Type                                   m_TextureType;
-        bool                                                m_Mipmapped;
-        bool                                                m_IsToBeMipmapped;
-        GLuint                                              m_MinFilter; //used to determine filter type for mipmaps
+        std::vector<std::unique_ptr<Engine::epriv::ImageLoadedStructure>>   m_ImagesDatas;
+        std::vector<GLuint>                                                 m_TextureAddress;
+        GLuint                                                              m_Type;
+        TextureType::Type                                                   m_TextureType;
+        bool                                                                m_Mipmapped;
+        bool                                                                m_IsToBeMipmapped;
+        GLuint                                                              m_MinFilter; //used to determine filter type for mipmaps
 
         Texture();
     public:
@@ -44,6 +45,11 @@ class Texture: public EngineResource{
         //Cubemap from 6 files
         Texture(const std::string files[],const std::string& name = "Cubemap",const bool& genMipmaps = false,const ImageInternalFormat::Format& = ImageInternalFormat::Format::SRGB8_ALPHA8);
         virtual ~Texture();
+
+        Texture(const Texture&)                      = delete;
+        Texture& operator=(const Texture&)           = delete;
+        Texture(Texture&& other) noexcept            = delete;
+        Texture& operator=(Texture&& other) noexcept = delete;
 
         const uchar* pixels();
         const GLuint& address(const uint& index = 0) const;

@@ -21,6 +21,11 @@ namespace Engine {
             GLDebugDrawer*                          debugDrawer;
             PhysicsWorld(const unsigned int numCores);
             ~PhysicsWorld();
+
+            PhysicsWorld(const PhysicsWorld&)                      = delete;
+            PhysicsWorld& operator=(const PhysicsWorld&)           = delete;
+            PhysicsWorld(PhysicsWorld&& other) noexcept            = delete;
+            PhysicsWorld& operator=(PhysicsWorld&& other) noexcept = delete;
         };
 
         //This is derived so we can render btUniformScalingShapes, the current Bullet build has this bugged.

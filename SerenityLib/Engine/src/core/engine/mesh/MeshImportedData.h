@@ -23,6 +23,11 @@ namespace epriv {
           
         MeshImportedData();
         ~MeshImportedData();
+
+        MeshImportedData(const MeshImportedData&)                      = delete;
+        MeshImportedData& operator=(const MeshImportedData&)           = delete;
+        MeshImportedData(MeshImportedData&& other) noexcept            = delete;
+        MeshImportedData& operator=(MeshImportedData&& other) noexcept = delete;
     };
 };
 };

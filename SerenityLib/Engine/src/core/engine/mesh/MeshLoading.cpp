@@ -137,7 +137,7 @@ void epriv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, con
                     float Weight = assimpBone.mWeights[j].mWeight;
                     epriv::VertexBoneData d;
                     d.AddBoneData(BoneIndex, Weight);
-                    data.m_Bones.emplace(VertexID, d);
+                    data.m_Bones.emplace(VertexID, std::move(d));
                 }
             }
             //build skeleton parent child relationship

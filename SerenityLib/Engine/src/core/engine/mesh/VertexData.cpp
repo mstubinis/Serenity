@@ -91,7 +91,7 @@ void VertexData::setIndices(vector<ushort>& _data, const bool addToGPU, const bo
                     tri.index3 = index;
                     tri.midpoint = tri.position1 + tri.position2 + tri.position3;
                     tri.midpoint /= 3.0f;
-                    triangles.push_back(tri);
+                    triangles.push_back(std::move(tri));
                     j = 0;
                 }
             }

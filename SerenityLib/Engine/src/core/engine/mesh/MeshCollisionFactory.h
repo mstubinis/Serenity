@@ -34,6 +34,10 @@ namespace epriv {
         public:
             MeshCollisionFactory(Mesh& _mesh);
             ~MeshCollisionFactory();
+            MeshCollisionFactory(const MeshCollisionFactory&)                      = delete;
+            MeshCollisionFactory& operator=(const MeshCollisionFactory&)           = delete;
+            MeshCollisionFactory(MeshCollisionFactory&& other) noexcept            = delete;
+            MeshCollisionFactory& operator=(MeshCollisionFactory&& other) noexcept = delete;
 
             btMultiSphereShape*            buildSphereShape();
             btBoxShape*                    buildBoxShape();

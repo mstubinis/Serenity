@@ -57,6 +57,11 @@ class Material final: public BindableResource{
         Material(const std::string& name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);
         ~Material();
 
+        Material(const Material&)                      = delete;
+        Material& operator=(const Material&)           = delete;
+        Material(Material&& other) noexcept            = delete;
+        Material& operator=(Material&& other) noexcept = delete;
+
         MaterialComponent& getComponent(const uint& index);
 
         MaterialComponent& addComponent(const MaterialComponentType::Type& type, const std::string& textureFile = "", const std::string& maskFile = "", const std::string& cubemapFile = "");

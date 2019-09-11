@@ -37,6 +37,11 @@ class MaterialLayer final{
         MaterialLayer();
         ~MaterialLayer();
 
+        MaterialLayer(const MaterialLayer&)                      = delete;
+        MaterialLayer& operator=(const MaterialLayer&)           = delete;
+        MaterialLayer(MaterialLayer&& other) noexcept            = delete;
+        MaterialLayer& operator=(MaterialLayer&& other) noexcept = delete;
+
         Texture* getTexture() const;
         Texture* getMask() const;
         Texture* getCubemap() const;

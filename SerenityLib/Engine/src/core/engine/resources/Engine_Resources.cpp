@@ -152,7 +152,7 @@ Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat
 }
 
 Handle Resources::loadMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular) {
-    auto request = MaterialRequest(name, diffuse, normal, glow, specular);
+    MaterialRequest request(name, diffuse, normal, glow, specular);
     request.request();
     return request.part.handle;
 }

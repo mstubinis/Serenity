@@ -56,7 +56,7 @@ Decal::Decal(Material& material, const glm::vec3& position, const glm::vec3& hit
     glm::quat q;
     Math::alignTo(q, hitNormal);
     body.setRotation(q);
-    body.setScale(0.2 * size, 0.04f, 0.2f * size);
+    body.setScale(0.2f * size, 0.04f, 0.2f * size);
 
     model.setCustomBindFunctor(Engine::epriv::DefaultDecalBindFunctor());
     model.setCustomUnbindFunctor(Engine::epriv::DefaultDecalUnbindFunctor());

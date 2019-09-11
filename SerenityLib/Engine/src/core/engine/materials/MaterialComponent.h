@@ -16,6 +16,11 @@ class MaterialComponent {
         MaterialComponent(const MaterialComponentType::Type& type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
         virtual ~MaterialComponent();
 
+        MaterialComponent(const MaterialComponent&)                      = delete;
+        MaterialComponent& operator=(const MaterialComponent&)           = delete;
+        MaterialComponent(MaterialComponent&& other) noexcept            = delete;
+        MaterialComponent& operator=(MaterialComponent&& other) noexcept = delete;
+
         virtual void bind(const uint& component_index, uint& textureUnit);
         virtual void unbind();
 

@@ -10,12 +10,14 @@ struct BufferDataType final {enum Type {
     VertexArray  = GL_ARRAY_BUFFER,
     ElementArray = GL_ELEMENT_ARRAY_BUFFER,
 };};
+
 struct BufferDataDrawType final{enum Type {
     Unassigned   = 0,
     Static       = GL_STATIC_DRAW,
     Dynamic      = GL_DYNAMIC_DRAW,
     Stream       = GL_STREAM_DRAW,
 _TOTAL};};
+
 struct BufferObject {
     GLuint                    buffer;
     BufferDataDrawType::Type  drawType;
@@ -41,9 +43,9 @@ struct BufferObject {
     void setDataOrphan(const void* _data);
 
     template<typename T> void setData(const std::vector<T>& _data, BufferDataDrawType::Type _drawType) {
-        drawType = _drawType;
+        drawType     = _drawType;
         size_t _size = _data.size() * sizeof(T);
-        capacity = _size;
+        capacity     = _size;
         glBufferData(type, _size, _data.data(), drawType);
     }
     template<typename T> void setData(size_t _startingIndex, const std::vector<T>& _data) {

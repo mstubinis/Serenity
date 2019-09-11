@@ -22,6 +22,11 @@ struct MaterialRequestPart final {
     ~MaterialRequestPart() {
         textureRequests.clear();
     }
+    MaterialRequestPart(const MaterialRequestPart&)                      = delete;
+    MaterialRequestPart& operator=(const MaterialRequestPart&)           = delete;
+    MaterialRequestPart(MaterialRequestPart&& other) noexcept            = delete;
+    MaterialRequestPart& operator=(MaterialRequestPart&& other) noexcept = delete;
+
 };
 
 struct MaterialRequest final {
@@ -31,6 +36,11 @@ struct MaterialRequest final {
     MaterialRequest();
     MaterialRequest(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular);
     ~MaterialRequest();
+
+    MaterialRequest(const MaterialRequest&)                      = delete;
+    MaterialRequest& operator=(const MaterialRequest&)           = delete;
+    MaterialRequest(MaterialRequest&& other) noexcept            = delete;
+    MaterialRequest& operator=(MaterialRequest&& other) noexcept = delete;
 
     void request();
     void requestAsync();
