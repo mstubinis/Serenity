@@ -27,6 +27,7 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <iostream>
 #include <fstream>
+#include <execution>
 
 using namespace std;
 using namespace Engine;
@@ -468,13 +469,14 @@ void Mesh::onEvent(const Event& e) {
 //TODO: optimize this a bit more (bubble sort?)
 void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, const SortingMode::Mode& sortMode) {
 #ifndef _DEBUG
+
     auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
     const auto& indices = vertexDataStructure.indices;
     auto& triangles = vertexDataStructure.triangles;
 
-    const glm::vec3& camPos = camera.getPosition();
+    const glm::vec3 camPos = camera.getPosition();
 
-    const auto& sorter = [&camPos, &instance, &bodyModelMatrix, &sortMode](epriv::Triangle& lhs, epriv::Triangle& rhs) {
+    const auto& lambda_sorter = [&camPos, &instance, &bodyModelMatrix, &sortMode](epriv::Triangle& lhs, epriv::Triangle& rhs) {
         glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;
         glm::mat4 model2 = model1;
 
@@ -490,8 +492,10 @@ void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat
             return glm::distance2(camPos, model1Pos) > glm::distance2(camPos, model2Pos);
         else
             return false;
+        return false;
     };
-    std::sort( triangles.begin(), triangles.end(), sorter);
+    //std::execution::par_unseq seems to really help here for performance, but keep profiling other related functionality.
+    std::sort( std::execution::par_unseq, triangles.begin(), triangles.end(), lambda_sorter);
 
     vector<ushort> newIndices;
     newIndices.reserve(indices.size());
@@ -502,5 +506,6 @@ void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat
         newIndices.push_back(triangle.index3);
     }
     Mesh::modifyIndices(newIndices);
+
 #endif
 }

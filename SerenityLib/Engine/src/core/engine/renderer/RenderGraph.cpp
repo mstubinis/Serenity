@@ -9,10 +9,13 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
+#include <execution>
 
 using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
+
+//TODO: profile std::execution::par_unseq compared to regular execution, the overhead to set up par_unseq might be more trouble than it's worth for these, unlike in the mesh triangle sorter
 
 
 RenderPipeline::RenderPipeline(ShaderProgram& _shaderProgram) :shaderProgram(_shaderProgram) {
@@ -22,61 +25,59 @@ RenderPipeline::~RenderPipeline() {
 }
 //TODO: correct this
 void RenderPipeline::sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
-    std::sort(
-        instancesTotal.begin(), instancesTotal.end(),
-        [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
-            Entity& lhsParent = lhs->instance->parent();
-            Entity& rhsParent = rhs->instance->parent();
-            const EntityDataRequest& _dataReq1(lhsParent);
-            const EntityDataRequest& _dataReq2(rhsParent);
+    const auto& lambda_sorter = [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
+        Entity& lhsParent = lhs->instance->parent();
+        Entity& rhsParent = rhs->instance->parent();
+        const EntityDataRequest& _dataReq1(lhsParent);
+        const EntityDataRequest& _dataReq2(rhsParent);
 
-            const ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>(_dataReq1);
-            const ComponentBody& rhsBody = *rhsParent.getComponent<ComponentBody>(_dataReq2);
-            const ComponentModel& lhsModel = *lhsParent.getComponent<ComponentModel>(_dataReq1);
-            const ComponentModel& rhsModel = *rhsParent.getComponent<ComponentModel>(_dataReq2);
+        const ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>(_dataReq1);
+        const ComponentBody& rhsBody = *rhsParent.getComponent<ComponentBody>(_dataReq2);
+        const ComponentModel& lhsModel = *lhsParent.getComponent<ComponentModel>(_dataReq1);
+        const ComponentModel& rhsModel = *rhsParent.getComponent<ComponentModel>(_dataReq2);
 
-            const glm::vec3& lhsPos = lhsBody.position();
-            const glm::vec3& rhsPos = rhsBody.position();
-            const float& lhsRad = lhsModel.radius();
-            const float& rhsRad = rhsModel.radius();
+        const glm::vec3& lhsPos = lhsBody.position();
+        const glm::vec3& rhsPos = rhsBody.position();
+        const float& lhsRad = lhsModel.radius();
+        const float& rhsRad = rhsModel.radius();
 
-            const glm::vec3& camPos = camera.getPosition();
-            const glm::vec3& leftDir = glm::normalize(lhsPos - camPos);
-            const glm::vec3& rightDir = glm::normalize(rhsPos - camPos);
+        const glm::vec3& camPos = camera.getPosition();
+        const glm::vec3& leftDir = glm::normalize(lhsPos - camPos);
+        const glm::vec3& rightDir = glm::normalize(rhsPos - camPos);
 
-            const glm::vec3& leftPos = lhsPos - (leftDir * lhsRad);
-            const glm::vec3& rightPos = rhsPos - (rightDir * rhsRad);
+        const glm::vec3& leftPos = lhsPos - (leftDir * lhsRad);
+        const glm::vec3& rightPos = rhsPos - (rightDir * rhsRad);
 
-            if (sortingMode == SortingMode::FrontToBack)
-                return camera.getDistanceSquared(leftPos) < camera.getDistanceSquared(rightPos);
-            else if (sortingMode == SortingMode::BackToFront)
-                return camera.getDistanceSquared(leftPos) > camera.getDistanceSquared(rightPos);
-            else
-                return false;
-        }
-    );
+        if (sortingMode == SortingMode::FrontToBack)
+            return camera.getDistanceSquared(leftPos) < camera.getDistanceSquared(rightPos);
+        else if (sortingMode == SortingMode::BackToFront)
+            return camera.getDistanceSquared(leftPos) > camera.getDistanceSquared(rightPos);
+        else
+            return false;
+        return false;
+    };
+    std::sort( /*std::execution::par_unseq,*/ instancesTotal.begin(), instancesTotal.end(), lambda_sorter );
 }
 void RenderPipeline::sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
-    std::sort(
-        instancesTotal.begin(), instancesTotal.end(),
-        [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
-            auto& lhsInstance = *lhs->instance;
-            auto& rhsInstance = *rhs->instance;
-            Entity& lhsParent = lhsInstance.parent();
-            Entity& rhsParent = rhsInstance.parent();
-            const ComponentBody& lhsBody   = *lhsParent.getComponent<ComponentBody>();
-            const ComponentBody& rhsBody   = *rhsParent.getComponent<ComponentBody>();
-            glm::vec3 lhsPos = lhsBody.position() + lhsInstance.position();
-            glm::vec3 rhsPos = rhsBody.position() + rhsInstance.position();
+    const auto& lambda_sorter = [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
+        auto& lhsInstance = *lhs->instance;
+        auto& rhsInstance = *rhs->instance;
+        Entity& lhsParent = lhsInstance.parent();
+        Entity& rhsParent = rhsInstance.parent();
+        const ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>();
+        const ComponentBody& rhsBody = *rhsParent.getComponent<ComponentBody>();
+        glm::vec3 lhsPos = lhsBody.position() + lhsInstance.position();
+        glm::vec3 rhsPos = rhsBody.position() + rhsInstance.position();
 
-            if (sortingMode == SortingMode::FrontToBack)
-                return camera.getDistanceSquared(lhsPos) < camera.getDistanceSquared(rhsPos);
-            else if (sortingMode == SortingMode::BackToFront)
-                return camera.getDistanceSquared(lhsPos) > camera.getDistanceSquared(rhsPos);
-            else
-                return false;
-        }
-    );
+        if (sortingMode == SortingMode::FrontToBack)
+            return camera.getDistanceSquared(lhsPos) < camera.getDistanceSquared(rhsPos);
+        else if (sortingMode == SortingMode::BackToFront)
+            return camera.getDistanceSquared(lhsPos) > camera.getDistanceSquared(rhsPos);
+        else
+            return false;
+        return false;
+    };
+    std::sort( /*std::execution::par_unseq,*/ instancesTotal.begin(), instancesTotal.end(), lambda_sorter );
 }
 
 void RenderPipeline::sort_cheap(Camera& camera, const SortingMode::Mode sortingMode) {
@@ -84,26 +85,27 @@ void RenderPipeline::sort_cheap(Camera& camera, const SortingMode::Mode sortingM
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
             auto& vect = meshNode->instanceNodes;
-            std::sort(
-                vect.begin(), vect.end(),
-                [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
-                    auto& lhsInstance = *lhs->instance;
-                    auto& rhsInstance = *rhs->instance;
-                    Entity& lhsParent = lhsInstance.parent();
-                    Entity& rhsParent = rhsInstance.parent();
-                    const ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>();
-                    const ComponentBody& rhsBody = *rhsParent.getComponent<ComponentBody>();
-                    glm::vec3 lhsPos = lhsBody.position() + lhsInstance.position();
-                    glm::vec3 rhsPos = rhsBody.position() + rhsInstance.position();
 
-                    if (sortingMode == SortingMode::FrontToBack)
-                        return camera.getDistanceSquared(lhsPos) < camera.getDistanceSquared(rhsPos);
-                    else if (sortingMode == SortingMode::BackToFront)
-                        return camera.getDistanceSquared(lhsPos) > camera.getDistanceSquared(rhsPos);
-                    else
-                        return false;
-                }
-            );
+            const auto& lambda_sorter = [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
+                auto& lhsInstance = *lhs->instance;
+                auto& rhsInstance = *rhs->instance;
+                Entity& lhsParent = lhsInstance.parent();
+                Entity& rhsParent = rhsInstance.parent();
+                const ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>();
+                const ComponentBody& rhsBody = *rhsParent.getComponent<ComponentBody>();
+                glm::vec3 lhsPos = lhsBody.position() + lhsInstance.position();
+                glm::vec3 rhsPos = rhsBody.position() + rhsInstance.position();
+
+                if (sortingMode == SortingMode::FrontToBack)
+                    return camera.getDistanceSquared(lhsPos) < camera.getDistanceSquared(rhsPos);
+                else if (sortingMode == SortingMode::BackToFront)
+                    return camera.getDistanceSquared(lhsPos) > camera.getDistanceSquared(rhsPos);
+                else
+                    return false;
+                return false;
+            };
+
+            std::sort( /*std::execution::par_unseq,*/ vect.begin(), vect.end(), lambda_sorter );
         }
     }
 #endif
