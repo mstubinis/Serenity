@@ -22,7 +22,11 @@ namespace Engine {
                 static uint lastIndex;
                 static boost::unordered_map<boost_type_index, uint> slotMap;
             public:
-                ECSRegistry() = default;
+                ECSRegistry() {}
+                ECSRegistry(const ECSRegistry&)                      = delete;
+                ECSRegistry& operator=(const ECSRegistry&)           = delete;
+                ECSRegistry(ECSRegistry&& other) noexcept            = delete;
+                ECSRegistry& operator=(ECSRegistry&& other) noexcept = delete;
                 ~ECSRegistry() { 
                     lastIndex = 0;
                     slotMap.clear(); 

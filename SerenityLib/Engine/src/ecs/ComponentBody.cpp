@@ -29,30 +29,6 @@ ComponentBody::PhysicsData::PhysicsData(){
     bullet_rigidBody = nullptr;
     collision        = nullptr;
 }
-ComponentBody::PhysicsData::PhysicsData(const ComponentBody::PhysicsData& p_Other){
-    //copy constructor
-    mass               = p_Other.mass;
-    bullet_motionState = p_Other.bullet_motionState;
-    bullet_rigidBody   = p_Other.bullet_rigidBody;
-    group              = p_Other.group;
-    mask               = p_Other.mask;
-
-    if (p_Other.collision) collision = new Collision(*p_Other.collision);
-    else                   collision = nullptr;
-
-    if (p_Other.bullet_rigidBody)
-        bullet_rigidBody = new btRigidBody(*p_Other.bullet_rigidBody);
-    else
-        bullet_rigidBody = nullptr;
-}
-ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(const ComponentBody::PhysicsData& p_Other) {
-    //copy assignment
-    if (&p_Other == this)
-        return *this;
-    ComponentBody::PhysicsData tmp(p_Other); // re-use copy-constructor
-    *this = std::move(tmp);                  // re-use move-assignment
-    return *this;
-}
 ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& p_Other) noexcept {
     //move constructor
     using std::swap;
@@ -104,21 +80,6 @@ ComponentBody::NormalData::NormalData(){
     position    = glm::vec3(0.0f, 0.0f, 0.0f);
     rotation    = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     modelMatrix = glm::mat4(1.0f);
-}
-ComponentBody::NormalData::NormalData(const ComponentBody::NormalData& p_Other) {
-    //copy constructor
-    position = p_Other.position;
-    rotation = p_Other.rotation;
-    scale = p_Other.scale;
-    modelMatrix = p_Other.modelMatrix;
-}
-ComponentBody::NormalData& ComponentBody::NormalData::operator=(const ComponentBody::NormalData& p_Other) {
-    //copy assignment
-    if (&p_Other == this)
-        return *this;
-    ComponentBody::NormalData tmp(p_Other); // re-use copy-constructor
-    *this = std::move(tmp);               // re-use move-assignment
-    return *this;
 }
 ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcept {
     //move constructor
@@ -202,36 +163,6 @@ ComponentBody::~ComponentBody() {
     }else{
         SAFE_DELETE(data.n);
     }
-}
-
-ComponentBody::ComponentBody(const ComponentBody& p_Other) {
-    //copy constructor
-    //Might need more testing here...
-	m_Physics          = p_Other.m_Physics;
-    m_Forward          = p_Other.m_Forward;
-    m_Right            = p_Other.m_Right;
-    m_Up               = p_Other.m_Up;
-    owner.data         = p_Other.owner.data;
-    m_CollisionFunctor = p_Other.m_CollisionFunctor;
-    m_UserPointer      = p_Other.m_UserPointer;
-    m_UserPointer1     = p_Other.m_UserPointer1;
-    m_UserPointer2     = p_Other.m_UserPointer2;
-    if (p_Other.m_Physics) {
-        if (p_Other.data.p) data.p = new PhysicsData(*p_Other.data.p);
-        else                data.p = nullptr;
-    }else{
-        if (p_Other.data.n) data.n = new NormalData(*p_Other.data.n);
-        else                data.n = nullptr;
-    }
-    setInternalPhysicsUserPointer(this);
-}
-ComponentBody& ComponentBody::operator=(const ComponentBody& p_Other) {
-    //copy assignment
-    //Might need more testing here...
-    ComponentBody tmp(p_Other); // re-use copy-constructor
-    *this = std::move(tmp);   // re-use move-assignment
-    setInternalPhysicsUserPointer(this);
-    return *this;
 }
 ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
     //move constructor

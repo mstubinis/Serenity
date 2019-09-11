@@ -5,19 +5,18 @@
 #include <ecs/ComponentBaseClass.h>
 #include <ecs/ECSSystem.h>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 
 class ComponentLogic1;
 namespace Engine {
-namespace epriv {
-    struct ComponentLogic1_UpdateFunction;
-    struct ComponentLogic1_EntityAddedToSceneFunction;
-    struct ComponentLogic1_ComponentAddedToEntityFunction;
-    struct ComponentLogic1_SceneEnteredFunction;
-    struct ComponentLogic1_SceneLeftFunction;
-    struct ComponentLogic1_EmptyFunctor final { void operator()(ComponentLogic1& _component, const double& dt) const {} };
-};
+    namespace epriv {
+        struct ComponentLogic1_UpdateFunction;
+        struct ComponentLogic1_EntityAddedToSceneFunction;
+        struct ComponentLogic1_ComponentAddedToEntityFunction;
+        struct ComponentLogic1_SceneEnteredFunction;
+        struct ComponentLogic1_SceneLeftFunction;
+        struct ComponentLogic1_EmptyFunctor final { void operator()(ComponentLogic1& _component, const double& dt) const {} };
+    };
 };
 
 class ComponentLogic1 : public ComponentBaseClass {
@@ -30,7 +29,7 @@ class ComponentLogic1 : public ComponentBaseClass {
         void*                                _userPtr;
         void*                                _userPtr1;
         void*                                _userPtr2;
-        boost::function<void(const double&)> _functor;
+        std::function<void(const double&)>   _functor;
     public:
         ComponentLogic1(const Entity& _e);
         template<typename T> ComponentLogic1(const Entity& _e, const T& functor, void* ptr = 0, void* ptr1 = 0, void* ptr2 = 0) : ComponentBaseClass(_e) {
@@ -48,7 +47,9 @@ class ComponentLogic1 : public ComponentBaseClass {
 
         void call(const double& dt);
 
-        template<typename T> void setFunctor(const T& functor) { _functor = boost::bind<void>(functor, *this, _1); }
+        template<typename T> void setFunctor(const T& functor) { 
+            _functor = std::bind<void>(std::move(functor), *this, std::placeholders::_1);
+        }
 
         void setUserPointer(void* ptr);
         void setUserPointer1(void* ptr);

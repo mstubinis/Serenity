@@ -122,9 +122,9 @@ class Ship: public EntityWrapper, public EventObserver {
         void setTarget(EntityWrapper* entityWrapper, const bool sendPacket);
         void setTarget(const std::string&, const bool sendPacket);
 
-        const glm::vec3& forward();
-        const glm::vec3& right();
-        const glm::vec3& up();
+        const glm::vec3 forward();
+        const glm::vec3 right();
+        const glm::vec3 up();
 
 
         PrimaryWeaponBeam& getPrimaryWeaponBeam(const uint index);

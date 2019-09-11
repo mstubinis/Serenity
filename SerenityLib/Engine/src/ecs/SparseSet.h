@@ -27,8 +27,11 @@ namespace epriv {
                 maxLastIndex = 0;
                 sparse.clear();
             }
-            virtual inline const bool _remove(const uint& entityID) { return false;  }
-            virtual inline void reserveMore(const uint amount) { }
+            virtual inline const bool _remove(const uint& entityID) { 
+                return false;  
+            }
+            virtual inline void reserveMore(const uint amount) { 
+            }
     };
     template <typename TID, typename T> class SparseSet<TID, T> : public SparseSet<TID> {
         using super = SparseSet<TID>;

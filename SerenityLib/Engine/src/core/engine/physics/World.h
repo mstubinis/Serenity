@@ -3,13 +3,25 @@
 #define ENGINE_PHYSICS_WORLD_H
 
 #include <btBulletDynamicsCommon.h>
+#include <memory>
 
 class btSequentialImpulseConstraintSolverMt;
 namespace Engine {
     namespace epriv {
         class  GLDebugDrawer;
-        struct PhysicsWorld;
         class  PhyiscsDynamicWorld;
+
+        struct PhysicsWorld {
+            btBroadphaseInterface*                  broadphase;
+            btDefaultCollisionConfiguration*        collisionConfiguration;
+            btCollisionDispatcher*                  dispatcher;
+            btSequentialImpulseConstraintSolver*    solver;
+            btSequentialImpulseConstraintSolverMt*  solverMT;
+            PhyiscsDynamicWorld*                    world;
+            GLDebugDrawer*                          debugDrawer;
+            PhysicsWorld(const unsigned int numCores);
+            ~PhysicsWorld();
+        };
 
         //This is derived so we can render btUniformScalingShapes, the current Bullet build has this bugged.
         class PhyiscsDynamicWorld : public btDiscreteDynamicsWorld {
@@ -19,18 +31,6 @@ namespace Engine {
                 PhyiscsDynamicWorld(btDispatcher* dp, btBroadphaseInterface* pc, btConstraintSolver* cs, btCollisionConfiguration* cc);
                 virtual ~PhyiscsDynamicWorld();
                 void debugDrawObject(const btTransform& worldTransform, const btCollisionShape* shape, const btVector3& color);
-        };
-
-        struct PhysicsWorld {
-            btBroadphaseInterface* broadphase;
-            btDefaultCollisionConfiguration* collisionConfiguration;
-            btCollisionDispatcher* dispatcher;
-            btSequentialImpulseConstraintSolver* solver;
-            btSequentialImpulseConstraintSolverMt* solverMT;
-            PhyiscsDynamicWorld* world;
-            GLDebugDrawer* debugDrawer;
-            PhysicsWorld(const unsigned int numCores);
-            ~PhysicsWorld();
         };
     };
 };

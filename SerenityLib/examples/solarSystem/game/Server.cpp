@@ -185,9 +185,10 @@ void Server::update(Server* thisServer, const double& dt) {
                     return true;
                 Server::updateClient(client);
             }
+            return false;
         };
         for (auto& thread : server.m_Threads) {
-            epriv::threading::addJobRef(updateClientThread, std::ref(*thread));
+            epriv::threading::addJobRef(updateClientThread, *thread);
         }
         //epriv::threading::waitForAll();
         

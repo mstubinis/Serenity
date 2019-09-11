@@ -151,18 +151,18 @@ void epriv::PhyiscsDynamicWorld::debugDrawObject(const btTransform& worldTransfo
     m_scale = btScalar(1.0);
 }
 epriv::PhysicsWorld::PhysicsWorld(const unsigned int numCores) {
-    broadphase = new btDbvtBroadphase();
+    broadphase             = new btDbvtBroadphase();
     collisionConfiguration = new btDefaultCollisionConfiguration();
-    dispatcher = new btCollisionDispatcher(collisionConfiguration);
+    dispatcher             = new btCollisionDispatcher(collisionConfiguration);
     //if (numCores <= 1) {
-    solver = new btSequentialImpulseConstraintSolver();
-    solverMT = nullptr;
-    //world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-    world = new PhyiscsDynamicWorld(dispatcher, broadphase, solver, collisionConfiguration);
+    solver                 = new btSequentialImpulseConstraintSolver();
+    solverMT               = nullptr;
+    //world                = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+    world                  = new PhyiscsDynamicWorld(dispatcher, broadphase, solver, collisionConfiguration);
     //}else{
-    //    solver = new btSequentialImpulseConstraintSolver();
-    //    solverMT = new btSequentialImpulseConstraintSolverMt();
-    //    world = new btDiscreteDynamicsWorldMt(dispatcher,broadphase,(btConstraintSolverPoolMt*)solverMT, solver, collisionConfiguration);
+    //    solver           = new btSequentialImpulseConstraintSolver();
+    //    solverMT         = new btSequentialImpulseConstraintSolverMt();
+    //    world            = new btDiscreteDynamicsWorldMt(dispatcher,broadphase,(btConstraintSolverPoolMt*)solverMT, solver, collisionConfiguration);
     //}
     debugDrawer = new GLDebugDrawer();
     debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);

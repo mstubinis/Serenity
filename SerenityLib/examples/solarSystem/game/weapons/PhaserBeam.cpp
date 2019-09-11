@@ -104,7 +104,7 @@ PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm::vec3& position, const gl
     firstModel.setScale(0.09f);
     secondModel.setScale(0.09f);
 
-    const auto photonOrange = glm::vec4(1.0f, 0.45f, 0.0f, 1.0f);
+    const auto photonOrange = glm::vec4(1.0f, 0.55f, 0.0f, 1.0f);
     const auto photonYellow = glm::vec4(1.0f, 0.85f, 0.0f, 1.0f);
 
     firstModel.setColor(photonOrange);

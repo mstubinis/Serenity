@@ -193,6 +193,7 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, Map& map, const glm::vec3& _po
     firingTimeShieldGraphicPing = 0.0f;
 
     beamLight = new RodLight(_pos, 2.0f, &map);
+    beamLight->setAttenuation(LightRange::_7);
     beamLight->deactivate();
 
     beamGraphic = new EntityWrapper(map);
@@ -206,17 +207,17 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, Map& map, const glm::vec3& _po
     beamEndPointGraphic = new EntityWrapper(map);
     auto& model1 = *beamEndPointGraphic->addComponent<ComponentModel>(Mesh::Plane, (Material*)ResourceManifest::TorpedoGlow2Material.get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& beamModelEnd = model1.getModel(0);
-    beamModelEnd.setScale(0.7f);
     beamModelEnd.hide();
 
     auto& body1 = *beamEndPointGraphic->addComponent<ComponentBody>(CollisionType::Sphere);
 
     btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body1.getCollision()->getBtShape());
-    const auto& _scl = btVector3(0.36f, 0.36f, 0.36f);
+    const auto& _scl = btVector3(0.01f, 0.01f, 0.01f);
     sph.setLocalScaling(_scl);
     sph.setMargin(0.01f);
     sph.setImplicitShapeDimensions(_scl);
     sph.recalcLocalAabb();
+    beamModelEnd.setScale(10.7f);
 
     body1.addCollisionFlag(CollisionFlag::NoContactResponse);
     body1.setCollisionGroup(CollisionFilter::_Custom_2); //i belong to weapons (group 2)

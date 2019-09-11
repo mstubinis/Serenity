@@ -32,7 +32,7 @@ uint epriv::FramebufferObjectAttatchment::attatchment(){
 }
 void epriv::FramebufferObjectAttatchment::resize(FramebufferObject& fbo, const uint& w, const uint& h){
 }
-const GLuint& epriv::FramebufferObjectAttatchment::address() const {
+const GLuint epriv::FramebufferObjectAttatchment::address() const {
     return 0; 
 }
 void epriv::FramebufferObjectAttatchment::bind(){
@@ -56,7 +56,7 @@ epriv::FramebufferTexture::~FramebufferTexture(){
 void epriv::FramebufferTexture::resize(FramebufferObject& fbo, const uint& w, const uint& h){
     InternalTexturePublicInterface::Resize(*m_Texture, fbo, w, h);
 }
-const GLuint& epriv::FramebufferTexture::address() const {
+const GLuint epriv::FramebufferTexture::address() const {
     return m_Texture->address(); 
 }
 Texture& epriv::FramebufferTexture::texture() {
@@ -81,7 +81,7 @@ void epriv::RenderbufferObject::resize(FramebufferObject& fbo, const uint& w, co
     glRenderbufferStorage(GL_RENDERBUFFER, attatchment(), m_Width, m_Height);
     Renderer::unbindRBO();
 }
-const GLuint& epriv::RenderbufferObject::address() const {
+const GLuint epriv::RenderbufferObject::address() const {
     return m_RBO; 
 }
 
@@ -193,7 +193,7 @@ const uint epriv::FramebufferObject::width() const {
 const uint epriv::FramebufferObject::height() const {
     return m_FramebufferHeight; 
 }
-const GLuint& epriv::FramebufferObject::address() const { 
+const GLuint epriv::FramebufferObject::address() const { 
     return m_FBO[m_CurrentFBOIndex]; 
 }
 unordered_map<uint,epriv::FramebufferObjectAttatchment*>& epriv::FramebufferObject::attatchments(){ 

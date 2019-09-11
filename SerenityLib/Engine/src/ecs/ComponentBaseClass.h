@@ -11,9 +11,9 @@ class ComponentBaseClass{
 		inline ComponentBaseClass() { owner = Entity::_null; }
 		inline ComponentBaseClass(const Entity& p_Owner) { owner.data = p_Owner.data; }
 
-		ComponentBaseClass& operator=(const ComponentBaseClass& p_Other) = default;
-		ComponentBaseClass(const ComponentBaseClass& p_Other) = default;
-		ComponentBaseClass(ComponentBaseClass&& p_Other) noexcept = default;
+		ComponentBaseClass& operator=(const ComponentBaseClass& p_Other)     = delete;
+		ComponentBaseClass(const ComponentBaseClass& p_Other)                = delete;
+		ComponentBaseClass(ComponentBaseClass&& p_Other) noexcept            = default;
 		ComponentBaseClass& operator=(ComponentBaseClass&& p_Other) noexcept = default;
 
 		virtual ~ComponentBaseClass() = default;

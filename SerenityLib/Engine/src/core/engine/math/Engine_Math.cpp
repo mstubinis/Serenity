@@ -36,7 +36,7 @@ const glm::vec3 Math::polynomial_interpolate_linear(vector<glm::vec3>& points, c
         P2 = points[2];
     }else{
         const float indexFloat = glm::max(0.01f, (n * time) - 1.0f);
-        uint index1 = glm::floor(indexFloat);
+        uint index1 = static_cast<uint>(glm::floor(static_cast<uint>(indexFloat)));
         uint index2;
         uint index3;
         if (index1 >= n - 2) {

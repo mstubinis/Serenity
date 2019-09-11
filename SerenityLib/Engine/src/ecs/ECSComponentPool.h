@@ -6,49 +6,49 @@
 #include <ecs/EntityDataRequest.h>
 
 namespace Engine {
-namespace epriv {
-    template<typename ...> class ECSComponentPool;
-    template <typename E,typename T> class ECSComponentPool<E,T> : public SparseSet<E, T>{
-        using super = SparseSet<E, T>;
-        public:
-            ECSComponentPool()                                                  = default;
-            ECSComponentPool(const ECSComponentPool& other) noexcept            = delete;
-            ECSComponentPool& operator=(const ECSComponentPool& other) noexcept = delete;
-            ECSComponentPool(ECSComponentPool&& other) noexcept                 = delete;
-            ECSComponentPool& operator=(ECSComponentPool&& other) noexcept      = delete;
-            ~ECSComponentPool()                                                 = default;
+    namespace epriv {
+        template<typename ...> class ECSComponentPool;
+        template <typename E,typename T> class ECSComponentPool<E,T> : public SparseSet<E, T>{
+            using super = SparseSet<E, T>;
+            public:
+                ECSComponentPool()                                                  = default;
+                ECSComponentPool(const ECSComponentPool& other) noexcept            = delete;
+                ECSComponentPool& operator=(const ECSComponentPool& other) noexcept = delete;
+                ECSComponentPool(ECSComponentPool&& other) noexcept                 = delete;
+                ECSComponentPool& operator=(ECSComponentPool&& other) noexcept      = delete;
+                ~ECSComponentPool()                                                 = default;
 
-            template<typename... ARGS> inline T* addComponent(const E& entity, ARGS&&... args) {
-				const EntityDataRequest dataRequest(entity);
-                return super::_add(dataRequest.ID, const_cast<E&>(entity), std::forward<ARGS>(args)...);
-            }
-            template<typename... ARGS> inline T* addComponent(const EntityDataRequest& dataRequest, const E& entity, ARGS&& ... args) {
-                return super::_add(dataRequest.ID, const_cast<E&>(entity), std::forward<ARGS>(args)...);
-            }
-            inline const bool removeComponent(const E& entity) {
-				const EntityDataRequest dataRequest(entity);
-                return super::_remove(dataRequest.ID);
-            }
-            inline const bool removeComponent(const EntityDataRequest& dataRequest) {
-                return super::_remove(dataRequest.ID);
-            }
-            inline const bool removeComponent(const uint& entityID) {
-                return super::_remove(entityID);
-            }
-            inline T* getComponent(const E& entity) {
-				const EntityDataRequest dataRequest(entity);
-                return super::_get(dataRequest.ID);
-            }
-            inline T* getComponent(const EntityDataRequest& dataRequest) {
-                return super::_get(dataRequest.ID);
-            }
-            inline T* getComponent(const uint& entityID) { 
-                return super::_get(entityID);
-            }
-            inline void reserveMore(const uint amount = 500) {
-                super::reserveMore(amount);
-            }
+                template<typename... ARGS> inline T* addComponent(const E& entity, ARGS&&... args) {
+				    const EntityDataRequest dataRequest(entity);
+                    return super::_add(dataRequest.ID, const_cast<E&>(entity), std::forward<ARGS>(args)...);
+                }
+                template<typename... ARGS> inline T* addComponent(const EntityDataRequest& dataRequest, const E& entity, ARGS&& ... args) {
+                    return super::_add(dataRequest.ID, const_cast<E&>(entity), std::forward<ARGS>(args)...);
+                }
+                inline const bool removeComponent(const E& entity) {
+				    const EntityDataRequest dataRequest(entity);
+                    return super::_remove(dataRequest.ID);
+                }
+                inline const bool removeComponent(const EntityDataRequest& dataRequest) {
+                    return super::_remove(dataRequest.ID);
+                }
+                inline const bool removeComponent(const uint& entityID) {
+                    return super::_remove(entityID);
+                }
+                inline T* getComponent(const E& entity) {
+				    const EntityDataRequest dataRequest(entity);
+                    return super::_get(dataRequest.ID);
+                }
+                inline T* getComponent(const EntityDataRequest& dataRequest) {
+                    return super::_get(dataRequest.ID);
+                }
+                inline T* getComponent(const uint& entityID) { 
+                    return super::_get(entityID);
+                }
+                inline void reserveMore(const uint amount = 500) {
+                    super::reserveMore(amount);
+                }
+        };
     };
-};
 };
 #endif

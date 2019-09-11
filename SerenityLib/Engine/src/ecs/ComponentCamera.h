@@ -64,9 +64,9 @@ class ComponentCamera : public ComponentBaseClass {
         ComponentCamera(const Entity& entity, const float angle, const float aspectRatio, const float nearPlane, const float farPlane);
 		ComponentCamera(const Entity& entity, const float left, const float right, const float bottom, const float top, const float nearPlane, const float farPlane);
 
-        ComponentCamera(const ComponentCamera& other) = default;
-        ComponentCamera& operator=(const ComponentCamera& other) = default;
-        ComponentCamera(ComponentCamera&& other) noexcept = default;
+        ComponentCamera(const ComponentCamera& other)                = delete;
+        ComponentCamera& operator=(const ComponentCamera& other)     = delete;
+        ComponentCamera(ComponentCamera&& other) noexcept            = default;
         ComponentCamera& operator=(ComponentCamera&& other) noexcept = default;
 
         ~ComponentCamera();

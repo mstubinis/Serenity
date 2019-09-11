@@ -211,7 +211,7 @@ vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& 
         auto& pts = RayCallback.m_hitPointWorld;
         auto& normals = RayCallback.m_hitNormalWorld;
 
-        for (uint i = 0; i < pts.size(); ++i) {
+        for (int i = 0; i < pts.size(); ++i) {
             const glm::vec3 hitPoint = Math::btVectorToGLM(RayCallback.m_hitPointWorld[i]);
             const glm::vec3 hitNormal = Math::btVectorToGLM(RayCallback.m_hitNormalWorld[i]);
 

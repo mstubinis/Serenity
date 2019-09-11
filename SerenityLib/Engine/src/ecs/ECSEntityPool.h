@@ -14,8 +14,12 @@ namespace epriv {
             std::vector<EntityPOD>    _pool;
             std::vector<uint>         _freelist;
         public:
-            ECSEntityPool()  = default;
-            ~ECSEntityPool() = default;
+            ECSEntityPool() {}
+            ~ECSEntityPool() {}
+            ECSEntityPool(const ECSEntityPool&)                      = delete;
+            ECSEntityPool& operator=(const ECSEntityPool&)           = delete;
+            ECSEntityPool(ECSEntityPool&& other) noexcept            = delete;
+            ECSEntityPool& operator=(ECSEntityPool&& other) noexcept = delete;
 
             void destroyFlaggedEntity(const uint& entityID) {
                 const uint index = entityID - 1;

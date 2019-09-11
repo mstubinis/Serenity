@@ -447,13 +447,13 @@ void Ship::setTarget(EntityWrapper* target, const bool sendPacket) {
     if (sensors)
         sensors->setTarget(target, sendPacket);
 }
-const glm::vec3& Ship::forward() {
+const glm::vec3 Ship::forward() {
     return getComponent<ComponentBody>()->forward();
 }
-const glm::vec3& Ship::right() {
+const glm::vec3 Ship::right() {
     return getComponent<ComponentBody>()->right();
 }
-const glm::vec3& Ship::up() {
+const glm::vec3 Ship::up() {
     return getComponent<ComponentBody>()->up();
 }
 const bool Ship::isCloaked() {

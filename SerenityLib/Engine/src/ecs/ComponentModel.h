@@ -53,9 +53,9 @@ class ComponentModel : public ComponentBaseClass {
         ComponentModel(const Entity&, Handle& meshHandle, Material*, Handle& shaderPHandle, const RenderStage::Stage& = RenderStage::GeometryOpaque);
         ComponentModel(const Entity&, Mesh*, Material*, Handle& shaderPHandle, const RenderStage::Stage& = RenderStage::GeometryOpaque);
 
-        ComponentModel(const ComponentModel& other) = default;
-        ComponentModel& operator=(const ComponentModel& other) = default;
-        ComponentModel(ComponentModel&& other) noexcept = default;
+        ComponentModel(const ComponentModel& other)                = delete;
+        ComponentModel& operator=(const ComponentModel& other)     = delete;
+        ComponentModel(ComponentModel&& other) noexcept            = default;
         ComponentModel& operator=(ComponentModel&& other) noexcept = default;
 
         ~ComponentModel();
