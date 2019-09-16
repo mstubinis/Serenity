@@ -4,6 +4,7 @@
 
 #include <core/engine/networking/ListenerTCP.h>
 #include <core/engine/networking/SocketTCP.h>
+#include <core/engine/networking/SocketUDP.h>
 
 #include <unordered_map>
 #include <queue>
@@ -27,13 +28,15 @@ class ServerClient final {
         Engine::Networking::SocketTCP*   m_TcpSocket;
         std::string                      m_username;
         std::string                      m_Hash;
+        std::string                      m_IP;
         Core&                            m_Core;
         Server&                          m_Server;
         bool                             m_Validated;
+        uint                             m_ID;
         double                           m_Timeout;
         double                           m_RecoveryTime;
 
-        void internalInit(const std::string& hash);
+        void internalInit(const std::string& hash, const uint& numClients);
     public:
         ServerClient(const std::string& hash, Server&, Core&, sf::TcpSocket*);
         ServerClient(const std::string& hash, Server&, Core&, const ushort& port, const std::string& ipAddress);
@@ -69,18 +72,19 @@ class Server {
     friend class ServerClient;
     friend class ServerClientThread;
     private:
+        Engine::Networking::SocketUDP*                 m_UdpSocket;
         sf::Mutex                                      m_mutex;
         std::vector<ServerClientThread*>               m_Threads;
         std::queue<std::string>                        m_ClientsToBeDisconnected;
         Engine::Networking::ListenerTCP*               m_listener;
-        unsigned int                                   m_port;
+        ushort                                         m_port;
         std::atomic<unsigned int>                      m_Active;
         Core&                                          m_Core;
         std::string                                    m_MapName;
         double                                         m_DeepspaceAnchorTimer;
 
         void updateClientsGameLoop(const double& dt);
-
+        void onReceiveUDP();
     public:
         Server(Core& core, const unsigned int& port, const std::string& ipRestriction = "");
         ~Server();
@@ -89,6 +93,7 @@ class Server {
         void shutdown(const bool destructor = false);
 
         const bool isValidName(const std::string& name) const;
+        const uint numClients() const;
 
         const sf::Socket::Status send_to_client(ServerClient&, Packet& packet);
         const sf::Socket::Status send_to_client(ServerClient&, sf::Packet& packet);
@@ -104,6 +109,18 @@ class Server {
         void send_to_all(sf::Packet& packet);
         void send_to_all(const void* data, size_t size);
         void send_to_all(const void* data, size_t size, size_t& sent);
+
+        void send_to_all_but_client_udp(ServerClient& serverClient, Packet& packet);
+        void send_to_all_but_client_udp(ServerClient& serverClient, sf::Packet& packet);
+        void send_to_all_but_client_udp(ServerClient& serverClient, const void* data, size_t size);
+
+        void send_to_all_udp(Packet& packet);
+        void send_to_all_udp(sf::Packet& packet);
+        void send_to_all_udp(const void* data, size_t size);
+        const sf::Socket::Status receive_udp(sf::Packet& packet);
+        const sf::Socket::Status receive_udp(void* data, size_t size, size_t& received);
+
+        ServerClient* getClientByName(const std::string& username);
 
         static void update(Server* thisServer, const double& dt);
         static void updateAcceptNewClients(Server& thisServer);

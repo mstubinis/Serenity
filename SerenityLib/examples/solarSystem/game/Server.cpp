@@ -32,22 +32,24 @@ const double TIMER_DEEP_SPACE_ANCHOR_SPAM = 1.0;
 
 ServerClient::ServerClient(const string& hash, Server& server, Core& core, sf::TcpSocket* sfTCPSocket) : m_Core(core), m_Server(server) {
     m_TcpSocket = new Networking::SocketTCP(sfTCPSocket);
-    internalInit(hash);
+    internalInit(hash, server.numClients());
 }
 ServerClient::ServerClient(const string& hash, Server& server, Core& core, const ushort& port, const string& ipAddress) : m_Core(core), m_Server(server) {
     m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
-    internalInit(hash);
+    internalInit(hash, server.numClients());
 }
 ServerClient::~ServerClient() {
     SAFE_DELETE(m_TcpSocket);
 }
-void ServerClient::internalInit(const string& hash) {
+void ServerClient::internalInit(const string& hash, const uint& numClients) {
     m_TcpSocket->setBlocking(false);
     m_RecoveryTime = 0.0;
     m_Hash         = hash;
     m_Timeout      = 0.0;
     m_username     = "";
     m_Validated    = false;
+    m_IP = m_TcpSocket->ip();
+    m_ID = numClients + 1;
 }
 const bool ServerClient::disconnected() const {
     return (m_Timeout >= SERVER_CLIENT_TIMEOUT) ? true : false;
@@ -81,6 +83,7 @@ const sf::Socket::Status ServerClient::receive(void* data, size_t size, size_t& 
     const auto status = m_TcpSocket->receive(data, size, received);
     return status;
 }
+
 const string& ServerClient::username() const {
     return m_username;
 }
@@ -120,17 +123,29 @@ ServerClientThread::~ServerClientThread() {
 }
 #pragma endregion
 
-
 #pragma region Server
 
 Server::Server(Core& core, const unsigned int& port, const string& ipRestriction) :m_Core(core) {
     m_port                             = port;
     m_listener                         = new ListenerTCP(port, ipRestriction);
     m_DeepspaceAnchorTimer             = 0.0f;
+    m_UdpSocket                        = new SocketUDP(port, ipRestriction);
+    m_UdpSocket->setBlocking(false);
+    m_UdpSocket->bind();
     m_Active.store(0, std::memory_order_relaxed);
 }
 Server::~Server() {
+    m_UdpSocket->unbind();
     shutdown(true);
+}
+const uint Server::numClients() const {
+    uint numClients = 0;
+    for (auto& thread : m_Threads) {
+        for (auto& client : thread->m_Clients) {
+            ++numClients;
+        }
+    }
+    return numClients;
 }
 
 const bool Server::startup(const string& mapname) {
@@ -167,6 +182,7 @@ void Server::shutdown(const bool destructor) {
         m_listener->close();
     }
 }
+
 void Server::update(Server* thisServer, const double& dt) {
     auto& server = *thisServer;
     const auto server_active = server.m_Active.load(std::memory_order_relaxed);
@@ -214,24 +230,56 @@ void Server::updateAcceptNewClients(Server& server) {
                     leastThread = clientThread;
                 }
             }
-
-            //TODO: optimize the mutex logic here
-            if (leastThread) { //probably redundant
-                server.m_mutex.lock();
+            if (leastThread) { //probably redundant        
                 if (!leastThread->m_Clients.count(client_address)) {
                     sfClient.setBlocking(false);
                     ServerClient* client = new ServerClient(client_address, server, server.m_Core, sf_client);
+                    server.m_mutex.lock();
                     leastThread->m_Clients.emplace(client_address, client);
                     leastThread->m_Active.store(1, std::memory_order_relaxed);
+                    server.m_mutex.unlock();
                     std::cout << "Server: New client in dictionary: " << client_address << std::endl;
                 }
-                server.m_mutex.unlock();
+                
             }
         }else{
             SAFE_DELETE(sf_client);
         }
     }
 }
+void Server::onReceiveUDP() {
+    //udp parsing
+    sf::Packet sf_packet_udp;
+    const auto status_udp = receive_udp(sf_packet_udp);
+    if (status_udp == sf::Socket::Done) {
+        Packet* pp = Packet::getPacket(sf_packet_udp);
+        auto& pIn = *pp;
+        if (pp && pIn.validate(sf_packet_udp)) {
+            switch (pIn.PacketType) {
+                case PacketType::Client_To_Server_Ship_Physics_Update: {
+                    //a client has sent the server it's physics information, lets forward it
+                    PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(pp);
+                    PacketPhysicsUpdate pOut(pI);
+                    pOut.PacketType = PacketType::Server_To_Client_Ship_Physics_Update;
+
+                    //get the client who sent it
+                    //TODO: this is sort of expensive
+                    const auto list = Helper::SeparateStringByCharacter(pI.data, ',');
+                    ServerClient* client = getClientByName(list[1]);
+                    if (client) { //this works...
+                        client->m_Timeout = 0.0f;
+                        send_to_all_but_client_udp(*client, pOut);
+                    }
+                    break;
+                }default: {
+                    break;
+                }
+            }
+        }
+        SAFE_DELETE(pp);
+    }
+}
+
 //NOT multithreaded
 void Server::updateRemoveDisconnectedClients(Server& server) {
     while (server.m_ClientsToBeDisconnected.size() > 0) {
@@ -244,6 +292,7 @@ void Server::updateRemoveDisconnectedClients(Server& server) {
 void Server::updateClientsGameLoop(const double& dt) {
     const auto active = m_Active.load(std::memory_order_relaxed);
     if (active == 1) {
+        onReceiveUDP();
         for (auto& clientThread : m_Threads) {
             for (auto& _client : clientThread->m_Clients) {
                 auto& client = *_client.second;
@@ -279,7 +328,7 @@ void Server::updateClient(ServerClient& client) {
     auto& server = client.m_Server;
 
     sf::Packet sf_packet;
-    const auto status = client.receive(sf_packet);
+    const auto status     = client.receive(sf_packet);
     if (status == sf::Socket::Done) {
         Packet* pp = Packet::getPacket(sf_packet);
         auto& pIn = *pp;
@@ -422,6 +471,7 @@ void Server::updateClient(ServerClient& client) {
                                 }
                             }
                         }
+                        pOut.data += std::to_string(client.m_ID) + ",";
                         if (!pOut.data.empty())
                             pOut.data.pop_back();
                         server.send_to_client(client, pOut);
@@ -546,6 +596,95 @@ void Server::send_to_all(const void* data, size_t size, size_t& sent) {
         }
     }
 }
+
+
+void Server::send_to_all_but_client_udp(ServerClient& c, Packet& packet) {
+    sf::Packet sf_packet;
+    packet.build(sf_packet);
+    for (auto& clientThread : m_Threads) {
+        for (auto& client : clientThread->m_Clients) {
+            if (client.second != &c) {
+                const auto clientIP = client.second->m_IP;
+                const auto clientID = client.second->m_ID;
+                auto status = m_UdpSocket->send(m_port + 1 + clientID, sf_packet, clientIP);
+            }
+        }
+    }
+}
+void Server::send_to_all_but_client_udp(ServerClient& c, sf::Packet& packet) {
+    for (auto& clientThread : m_Threads) {
+        for (auto& client : clientThread->m_Clients) {
+            if (client.second != &c) {
+                const auto clientIP = client.second->m_IP;
+                const auto clientID = client.second->m_ID;
+                auto status = m_UdpSocket->send(m_port + 1 + clientID, packet, clientIP);
+            }
+        }
+    }
+}
+void Server::send_to_all_but_client_udp(ServerClient& c, const void* data, size_t size) {
+    for (auto& clientThread : m_Threads) {
+        for (auto& client : clientThread->m_Clients) {
+            if (client.second != &c) {
+                const auto clientIP = client.second->m_IP;
+                const auto clientID = client.second->m_ID;
+                auto status = m_UdpSocket->send(m_port + 1 + clientID, data, size, clientIP);
+            }
+        }
+    }
+}
+
+
+void Server::send_to_all_udp(Packet& packet) {
+    sf::Packet sf_packet;
+    packet.build(sf_packet);
+    for (auto& clientThread : m_Threads) {
+        for (auto& client : clientThread->m_Clients) {
+            const auto clientIP = client.second->m_IP;
+            const auto clientID = client.second->m_ID;
+            auto status = m_UdpSocket->send(m_port + 1 + clientID, sf_packet, clientIP);
+        }
+    }
+}
+void Server::send_to_all_udp(sf::Packet& packet) {
+    for (auto& clientThread : m_Threads) {
+        for (auto& client : clientThread->m_Clients) {
+            const auto clientIP = client.second->m_IP;
+            const auto clientID = client.second->m_ID;
+            auto status = m_UdpSocket->send(m_port + 1 + clientID, packet, clientIP);
+        }
+    }
+}
+void Server::send_to_all_udp(const void* data, size_t size) {
+    for (auto& clientThread : m_Threads) {
+        for (auto& client : clientThread->m_Clients) {
+            const auto clientIP = client.second->m_IP;
+            const auto clientID = client.second->m_ID;
+            auto status = m_UdpSocket->send(m_port + 1 + clientID, data, size, clientIP);
+        }
+    }
+}
+const sf::Socket::Status Server::receive_udp(sf::Packet& packet) {
+    const auto status = m_UdpSocket->receive(packet);
+    return status;
+}
+const sf::Socket::Status Server::receive_udp(void* data, size_t size, size_t& received) {
+    const auto status = m_UdpSocket->receive(data, size, received);
+    return status;
+}
+
+ServerClient* Server::getClientByName(const string& username) {
+    ServerClient* ret = nullptr;
+    for (auto& clientThread : m_Threads) {
+        for (auto& client : clientThread->m_Clients) {
+            if (client.second->m_username == username) {
+                return client.second;
+            }
+        }
+    }
+    return ret;
+}
+
 const bool Server::isValidName(const string& name) const {
     if (name.empty())
         return false;

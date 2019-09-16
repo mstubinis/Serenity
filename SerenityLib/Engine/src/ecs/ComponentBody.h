@@ -86,7 +86,8 @@ class ComponentBody : public ComponentBaseClass {
         void* m_UserPointer;
         void* m_UserPointer1;
         void* m_UserPointer2;
-        glm::vec3 m_Forward, m_Right, m_Up;
+        glm::vec3 m_Forward, m_Right, m_Up, m_Goal, m_GoalVelocity;
+        float m_GoalSpeed;
 
         boost::function<void(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal)> m_CollisionFunctor;
 
@@ -106,6 +107,11 @@ class ComponentBody : public ComponentBaseClass {
             m_CollisionFunctor = boost::bind<void>(functor, _1, _2, _3, _4, _5);
         }
         void collisionResponse(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal);
+
+        const glm::vec3& getGoal() const;
+        const float& getGoalSpeed() const;
+        void setGoal(const glm::vec3& _goal, const float& speed = 1.0f);
+        void setGoal(const float& x, const float& y, const float& z, const float& speed = 1.0f);
 
         void setInternalPhysicsUserPointer(void* userPtr);
         void setUserPointer(void* userPtr);

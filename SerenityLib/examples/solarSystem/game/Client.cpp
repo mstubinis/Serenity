@@ -35,7 +35,6 @@
 using namespace std;
 using namespace Engine;
 
-const float  PHYSICS_PACKET_TIMER_LIMIT  = 0.25f;
 const double DISTANCE_CHECK_NEAREST_ANCHOR  = 1000000.0 * 1000000.0;
 const double DISTANCE_CHECK_NEAREST_OTHER_PLAYER = 100000.0  * 100000.0;
 
@@ -59,20 +58,22 @@ struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
     camera.entity().getComponent<ComponentLogic2>()->call(-0.0001);
 }};
 
-Client::Client(Core& core, sf::TcpSocket* socket) : m_Core(core){
-    m_TcpSocket = new Networking::SocketTCP(socket);
-    internalInit();
-}
-Client::Client(Core& core, const ushort& port, const string& ipAddress) : m_Core(core) {
-    m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
-    internalInit();
+Client::Client(Core& core, const ushort& server_port, const string& server_ipAddress, const uint& id) : m_Core(core) {
+    m_TcpSocket = new Networking::SocketTCP(server_port,          server_ipAddress);
+    m_UdpSocket = new Networking::SocketUDP(server_port + 1 + id, server_ipAddress);
+    internalInit(server_port, server_ipAddress);
 }
 
 Client::~Client() {
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     SAFE_DELETE(m_TcpSocket);
+    SAFE_DELETE(m_UdpSocket);
 }
-void Client::internalInit() {
+void Client::internalInit(const ushort& server_port, const string& server_ipAddress) {
+    m_UdpSocket->setBlocking(false);
+    m_UdpSocket->bind();
+    m_Port = server_port;
+    m_ServerIP = server_ipAddress;
     m_username = "";
     m_mapname = "";
     m_Validated = false;
@@ -80,6 +81,13 @@ void Client::internalInit() {
     m_InitialConnectionThread = nullptr;
     m_IsCurrentlyConnecting = false;
 }
+void Client::setClientID(const uint id) {
+    SAFE_DELETE(m_UdpSocket);
+    m_UdpSocket = new Networking::SocketUDP(m_Port + 1 + id, m_ServerIP);
+    m_UdpSocket->setBlocking(false);
+    m_UdpSocket->bind();
+}
+
 void Client::changeConnectionDestination(const ushort& port, const string& ipAddress) {
     m_IsCurrentlyConnecting = false;
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
@@ -117,6 +125,7 @@ const sf::Socket::Status Client::connect(const ushort& timeout) {
 }
 void Client::disconnect() {
     m_TcpSocket->disconnect();
+    m_UdpSocket->unbind();
 }
 const sf::Socket::Status Client::send(Packet& packet) {
     sf::Packet sf_packet;
@@ -144,6 +153,29 @@ const sf::Socket::Status Client::receive(void* data, size_t size, size_t& receiv
     const auto status = m_TcpSocket->receive(data,size,received);
     return status;
 }
+const sf::Socket::Status Client::send_udp(Packet& packet) {
+    sf::Packet sf_packet;
+    packet.build(sf_packet);
+    const auto status = m_UdpSocket->send(m_Port, sf_packet, m_ServerIP);
+    return status;
+}
+const sf::Socket::Status Client::send_udp(sf::Packet& packet) {
+    const auto status = m_UdpSocket->send(m_Port, packet, m_ServerIP);
+    return status;
+}
+const sf::Socket::Status Client::send_udp(const void* data, size_t size) {
+    const auto status = m_UdpSocket->send(m_Port, data, size, m_ServerIP);
+    return status;
+}
+const sf::Socket::Status Client::receive_udp(sf::Packet& packet) {
+    const auto status = m_UdpSocket->receive(packet);
+    return status;
+}
+const sf::Socket::Status Client::receive_udp(void* data, size_t size, size_t& received) {
+    const auto status = m_UdpSocket->receive(data, size, received);
+    return status;
+}
+
 const string& Client::username() const {
     return m_username;
 }
@@ -170,9 +202,9 @@ void Client::update(Client* _client, const double& dt) {
         for (auto& closest : list) {
             finalAnchor = finalAnchor->getChildren().at(closest);
         }
-        PacketPhysicsUpdate p(playerShip, map, finalAnchor, list);
+        PacketPhysicsUpdate p(playerShip, map, finalAnchor, list, client.m_username);
         p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
-        client.send(p);
+        client.send_udp(p);
 
         auto playerPos = playerShip.getPosition();
         auto nearestAnchorPos = finalAnchor->getPosition();
@@ -207,12 +239,53 @@ void Client::update(Client* _client, const double& dt) {
         }
         client.m_PingTime = 0.0;
     }
+    client.onReceiveUDP();
     client.onReceive();
 }
+void Client::onReceiveUDP() {
+    sf::Packet sf_packet_udp;
+    const auto& status_udp = receive_udp(sf_packet_udp);
+    if (status_udp == sf::Socket::Status::Done) {
+        Packet* basePacket = Packet::getPacket(sf_packet_udp);
+        if (basePacket && basePacket->validate(sf_packet_udp)) {
+            // Data extracted successfully...
+            HUD& hud = *m_Core.m_HUD;
+            switch (basePacket->PacketType) {
+                case PacketType::Server_To_Client_Ship_Physics_Update: {
+                    if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
+                        PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(basePacket);
+                        auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
 
+                        auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+                        auto& playername = info[1];
+                        auto& shipclass = info[0];
+                        auto& ships = map.getShips();
+
+                        Ship* ship = nullptr;
+                        if (ships.size() == 0 || !ships.count(playername)) {
+                            auto handles = ResourceManifest::Ships[shipclass];
+                            auto spawnPosition = map.getSpawnAnchor()->getPosition();
+                            auto x = Helper::GetRandomFloatFromTo(-400, 400);
+                            auto y = Helper::GetRandomFloatFromTo(-400, 400);
+                            auto z = Helper::GetRandomFloatFromTo(-400, 400);
+                            auto randOffsetForSafety = glm::vec3(x, y, z);
+                            ship = map.createShip(*this, shipclass, playername, false, spawnPosition + randOffsetForSafety);
+                        }else{
+                            ship = ships.at(playername);
+                        }
+                        ship->updatePhysicsFromPacket(pI, map, info);
+                    }
+                    break;
+                }default: {
+                    break;
+                }
+            }
+        }
+    }
+}
 void Client::onReceive() {
     sf::Packet sf_packet;
-    const auto& status = receive(sf_packet);
+    const auto& status     = receive(sf_packet);
     if (status == sf::Socket::Status::Done) {
         Packet* basePacket = Packet::getPacket(sf_packet);
         if (basePacket && basePacket->validate(sf_packet)) {
@@ -509,6 +582,8 @@ void Client::onReceive() {
                     hud.m_ServerLobbyChatWindow->clear();
 
                     auto list = Helper::SeparateStringByCharacter(basePacket->data, ',');
+                    auto client_id = list.back();
+                    list.pop_back();
                     //list is a vector of connected players
                     for (auto& _name : list) {
                         if (!_name.empty()) { //trailing "," in data can lead to an empty string added into the list
@@ -518,6 +593,7 @@ void Client::onReceive() {
                             hud.m_ServerLobbyConnectedPlayersWindow->addContent(text);
                         }
                     }
+                    setClientID(std::stoi(client_id));
                     break;
                 }case PacketType::Server_To_Client_Reject_Connection: {
                     m_Validated = false;

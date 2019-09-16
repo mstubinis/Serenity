@@ -282,7 +282,6 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
     btRigidBody& bulletBody = *const_cast<btRigidBody*>(&body.getBtBody());
     bulletBody.activate(true);//this is needed for when objects are far apart, should probably find a way to better do this
     btTransform centerOfMass;
-    const btVector3 pos(x, y, z);
 
     float qx, qy, qz, qw, ax, ay, az, lx, ly, lz;
 
@@ -292,6 +291,7 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
 
     const btQuaternion rot(qx, qy, qz, qw);
 
+    const btVector3 pos(x, y, z);
     centerOfMass.setOrigin(pos);
     centerOfMass.setRotation(rot);
     bulletBody.getMotionState()->setWorldTransform(centerOfMass);
@@ -300,6 +300,7 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
     body.clearAllForces();
     body.setAngularVelocity(ax, ay, az, false);
     body.setLinearVelocity(lx - (packet.wx * WARP_PHYSICS_MODIFIER), ly - (packet.wy * WARP_PHYSICS_MODIFIER), lz - (packet.wz * WARP_PHYSICS_MODIFIER), false);
+    //body.setGoal(x, y, z, PHYSICS_PACKET_TIMER_LIMIT);
 }
 bool Ship::canSeeCloak() {
     if (m_IsPlayer) { //TODO: or is this ship an ally of the player
@@ -354,7 +355,7 @@ void Ship::updateCloakFromPacket(const PacketCloakUpdate& packet) {
 }
 void Ship::updateHealthFromPacket(const PacketHealthUpdate& packet) {
     auto* shields = static_cast<ShipSystemShields*>(m_ShipSystems[ShipSystemType::Shields]);
-    auto* hull = static_cast<ShipSystemHull*>(m_ShipSystems[ShipSystemType::Hull]);
+    auto* hull    = static_cast<ShipSystemHull*>(m_ShipSystems[ShipSystemType::Hull]);
     if (shields) {
         shields->m_HealthPointsCurrent = packet.currentShieldsHealth;
         if (packet.flags & PacketHealthUpdate::PacketHealthFlags::ShieldsActive) {

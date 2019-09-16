@@ -567,6 +567,9 @@
     <ClInclude Include="Engine\src\core\engine\materials\MaterialLoader.h">
       <Filter>Header Files\Engine\Core\Materials</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\ParticleEmitter.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -865,6 +868,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\materials\MaterialLoader.cpp">
       <Filter>Source Files\Engine\Core\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\ParticleEmitter.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

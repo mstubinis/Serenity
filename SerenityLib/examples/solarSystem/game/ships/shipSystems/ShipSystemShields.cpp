@@ -192,7 +192,7 @@ void ShipSystemShields::addShieldImpact(const glm::vec3& impactLocationLocal, co
         impactPointData.impact(impactLocationLocal, impactRadius, maxTime, m_ImpactPointsFreelist);
     }
 }
-void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const uint damage, const bool doImpactGraphic) {
+void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const bool doImpactGraphic) {
     if (m_ShieldsAreUp) {
         //m_TimeSinceLastHit = 0.0f;
         const float bleed = m_HealthPointsCurrent - damage;

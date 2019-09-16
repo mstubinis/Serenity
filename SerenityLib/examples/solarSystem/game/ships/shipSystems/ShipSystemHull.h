@@ -30,7 +30,7 @@ class ShipSystemHull final : public ShipSystem {
 
         void destroy();
 
-        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage, const bool forceHullFire = false, const bool paint = true);
+        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const float damage, const bool forceHullFire = false, const bool paint = true);
         void receiveCollision(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float damage);
 
         const float getHealthCurrent() const;

@@ -68,6 +68,7 @@ struct ResourceManifest{
     static Handle CannonOutlineMaterial;
     static Handle CannonTailMaterial;
     static Handle PhaserBeamMaterial;
+    static Handle PlasmaBeamMaterial;
 
     //sounds
     static Handle MenuMusic;
@@ -81,6 +82,7 @@ struct ResourceManifest{
     static Handle SoundPhotonTorpedoOld;
     static Handle SoundPlasmaTorpedo;
     static Handle SoundPhaserBeam;
+    static Handle SoundPlasmaBeam;
 
     //torpedos
     static Handle TorpedoFlareMesh;

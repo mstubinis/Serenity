@@ -87,7 +87,7 @@ namespace Engine{
                 virtual ~FramebufferObject();
 
                 void resize(const uint& width, const uint& height);
-                FramebufferTexture* attatchTexture(Texture*, const FramebufferAttatchment::Attatchment&);
+                FramebufferTexture* attatchTexture(Texture*, const FramebufferAttatchment::Attatchment);
                 RenderbufferObject* attatchRenderBuffer(RenderbufferObject&);
                 const uint width() const;
                 const uint height() const;

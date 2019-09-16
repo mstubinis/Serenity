@@ -199,10 +199,6 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, Map& map, const glm::vec3& _po
     beamGraphic = new EntityWrapper(map);
 
     auto* body = beamGraphic->addComponent<ComponentBody>();
-    auto* model = beamGraphic->addComponent<ComponentModel>(ResourceManifest::PhaserBeamMesh, ResourceManifest::PhaserBeamMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& beamModel = model->getModel(0);
-    beamModel.hide();
-    beamModel.setScale(0.09f);
 
     beamEndPointGraphic = new EntityWrapper(map);
     auto& model1 = *beamEndPointGraphic->addComponent<ComponentModel>(Mesh::Plane, (Material*)ResourceManifest::TorpedoGlow2Material.get(), ShaderProgram::Forward, RenderStage::ForwardParticles);

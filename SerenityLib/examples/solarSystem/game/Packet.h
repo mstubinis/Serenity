@@ -99,8 +99,8 @@ struct PacketHealthUpdate : public Packet {
         ShieldsTurnedOn = 1 << 2,
         All = -1,
     };};
-    unsigned int currentHullHealth;
-    unsigned int currentShieldsHealth;
+    float        currentHullHealth;
+    float        currentShieldsHealth;
     unsigned int flags;
 
     PacketHealthUpdate();
@@ -121,7 +121,7 @@ struct PacketPhysicsUpdate: public Packet {
     uint16_t         lx, ly, lz;     //linear velocity
     uint16_t         ax, ay, az;     //angular velocity
     PacketPhysicsUpdate();
-    PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* closestAnchor, const std::vector<std::string>& anchorList);
+    PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* closestAnchor, const std::vector<std::string>& anchorList, const std::string& username);
     bool validate(sf::Packet& sfPacket) {
         return (sfPacket >> PacketType >> data >> px >> py >> pz >> wx >> wy >> wz >> qx >> qy >> qz >> qw >> lx >> ly >> lz >> ax >> ay >> az);
     }

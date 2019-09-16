@@ -138,7 +138,7 @@ PacketPhysicsUpdate::PacketPhysicsUpdate():Packet() {
     px = py = pz = wx = wy = wz = 0.0f;
     qw = 1;
 }
-PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnchor, const vector<string>& anchorList) :Packet() {
+PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnchor, const vector<string>& anchorList, const string& username) :Packet() {
     auto& ent = ship.entity();
     EntityDataRequest request(ent);
     const auto pbody = ent.getComponent<ComponentBody>(request);
@@ -147,6 +147,8 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
     data += ship.getClass();
     if (pname)
         data += ("," + pname->name());
+    else
+        data += ("," + username);
     if (pbody) {
         auto& body = *pbody;
 

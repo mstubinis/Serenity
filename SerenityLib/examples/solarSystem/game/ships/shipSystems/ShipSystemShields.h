@@ -62,7 +62,7 @@ class ShipSystemShields final : public ShipSystem {
         void turnOffShields();
         void turnOnShields();
 
-        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const uint damage, const bool doImpactGraphic = true);
+        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const float damage, const bool doImpactGraphic = true);
         void addShieldImpact(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime);
 };
 

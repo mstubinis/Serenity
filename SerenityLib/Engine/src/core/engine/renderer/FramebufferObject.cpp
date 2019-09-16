@@ -160,15 +160,15 @@ void epriv::FramebufferObject::resize(const uint& w, const uint& h){
         }
     }
 }
-epriv::FramebufferTexture* epriv::FramebufferObject::attatchTexture(Texture* t, const FramebufferAttatchment::Attatchment& a){
-    if (m_Attatchments.count(a)) 
+epriv::FramebufferTexture* epriv::FramebufferObject::attatchTexture(Texture* texture, const FramebufferAttatchment::Attatchment attatchment){
+    if (m_Attatchments.count(attatchment))
         return nullptr;
-    FramebufferTexture* framebufferTexture = new FramebufferTexture(*this, a, *t);
+    FramebufferTexture* framebufferTexture = new FramebufferTexture(*this, attatchment, *texture);
     for (uint i = 0; i < m_FBO.size(); ++i) {
         Renderer::bindFBO(m_FBO[i]);
         glFramebufferTexture2D(GL_FRAMEBUFFER, framebufferTexture->attatchment(), framebufferTexture->m_Texture->type(), framebufferTexture->m_Texture->address(), 0);
     }
-    m_Attatchments.emplace(a, framebufferTexture);
+    m_Attatchments.emplace(attatchment, framebufferTexture);
     Renderer::unbindFBO();
     return framebufferTexture;
 }
@@ -200,11 +200,12 @@ unordered_map<uint,epriv::FramebufferObjectAttatchment*>& epriv::FramebufferObje
     return m_Attatchments; 
 }
 const bool epriv::FramebufferObject::check(){
-    for (uint i = 0; i < m_FBO.size(); ++i) {
-        Renderer::bindFBO(m_FBO[i]);
+    for (auto& fbo : m_FBO) {
+        Renderer::bindFBO(fbo);
         GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (err != GL_FRAMEBUFFER_COMPLETE) {
-            cout << "Framebuffer completeness in FramebufferObject::impl _check() (index " + to_string(i) + ") is incomplete!" << endl; cout << "Error is: " << err << std::endl;
+            cout << "Framebuffer completeness in FramebufferObject::impl _check() (index " + to_string(fbo) + ") is incomplete!" << endl; 
+            cout << "Error is: " << err << endl;
             return false;
         }
     }

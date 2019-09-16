@@ -24,7 +24,7 @@ namespace epriv{
             uint                              m_Width;
             uint                              m_Height;
 
-            void internalBuildTextureBuffer(FramebufferObject* fbo, const uint& t, const uint& w, const uint& h);
+            void internalBuildTextureBuffer(FramebufferObject* fbo, const GBufferType::Type gbuffer_type, const uint& w, const uint& h);
             void internalDestruct();
             void internalStart(const uint* types, const uint& size, const std::string& channels, const bool first_fbo);
 

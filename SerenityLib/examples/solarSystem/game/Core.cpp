@@ -60,7 +60,7 @@ void Core::shutdownServer() {
 }
 void Core::startClient(const unsigned short& port, const string& name, const string& ip) {
     if (!m_Client) {
-        m_Client = new Client(*this, port, ip);
+        m_Client = new Client(*this, port, ip, 0);
     }
     auto& client = *m_Client;
     client.m_username = name;

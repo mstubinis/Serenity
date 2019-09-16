@@ -198,6 +198,14 @@ void Physics::removeRigidBody(btRigidBody* rigidBody){
 void Physics::updateRigidBody(btRigidBody* rigidBody){ 
     physicsManager->_updateRigidBody(rigidBody); 
 }
+void Physics::addRigidBody(ComponentBody& body) {
+    physicsManager->_addRigidBody(&const_cast<btRigidBody&>(body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
+}
+void Physics::removeRigidBody(ComponentBody& body) {
+    physicsManager->_removeRigidBody(&const_cast<btRigidBody&>(body.getBtBody()));
+}
+
+
 vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& end, const unsigned short group, const unsigned short mask) {
     btCollisionWorld::AllHitsRayResultCallback RayCallback(start, end);
     RayCallback.m_collisionFilterMask = mask;
@@ -223,23 +231,23 @@ vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& 
     }
     return result;
 }
-vector<RayCastResult> Physics::rayCast(const btVector3& start, const btVector3& end, btRigidBody* ignored, const unsigned short group, const unsigned short mask){
+vector<RayCastResult> Physics::rayCast(const btVector3& start, const btVector3& end, ComponentBody* ignored, const unsigned short group, const unsigned short mask){
     if(ignored){
-        physicsManager->data->world->removeRigidBody(ignored);
+        Physics::removeRigidBody(*ignored);
     }
     vector<RayCastResult> result = _rayCastInternal(start, end, group, mask);
     if(ignored){
-        physicsManager->data->world->addRigidBody(ignored);
+        Physics::addRigidBody(*ignored);
     }
     return result;
 }
-vector<RayCastResult> Physics::rayCast(const btVector3& start, const btVector3& end, vector<btRigidBody*>& ignored, const unsigned short group, const unsigned short mask){
+vector<RayCastResult> Physics::rayCast(const btVector3& start, const btVector3& end, vector<ComponentBody*>& ignored, const unsigned short group, const unsigned short mask){
     for(auto& object:ignored){
-        physicsManager->data->world->removeRigidBody(object);
+        Physics::removeRigidBody(*object);
     }
     vector<RayCastResult> result = _rayCastInternal(start, end, group, mask);
     for(auto& object:ignored){
-        physicsManager->data->world->addRigidBody(object);
+        Physics::addRigidBody(*object);
     }
     return result;
  }
@@ -250,8 +258,7 @@ vector<RayCastResult> Physics::rayCast(const glm::vec3& start, const glm::vec3& 
         ComponentBody* body = ignored->getComponent<ComponentBody>();
         if (body) {
             if (body->hasPhysics()) {
-                const auto& rigid = body->getBtBody();
-                return Physics::rayCast(start_, end_, &const_cast<btRigidBody&>(rigid), group, mask);
+                return Physics::rayCast(start_, end_, body, group, mask);
             }
         }
     }
@@ -260,13 +267,12 @@ vector<RayCastResult> Physics::rayCast(const glm::vec3& start, const glm::vec3& 
 vector<RayCastResult> Physics::rayCast(const glm::vec3& start, const glm::vec3& end ,vector<Entity>& ignored, const unsigned short group, const unsigned short mask){
     const btVector3 start_ = Math::btVectorFromGLM(start);
     const btVector3 end_ = Math::btVectorFromGLM(end);
-    vector<btRigidBody*> objs;
+    vector<ComponentBody*> objs;
     for(auto& o : ignored){
         ComponentBody* body = o.getComponent<ComponentBody>();
         if(body){
             if (body->hasPhysics()) {
-                const auto& rigid = body->getBtBody();
-                objs.push_back(&const_cast<btRigidBody&>(rigid));
+                objs.push_back(body);
             }
         }
     }

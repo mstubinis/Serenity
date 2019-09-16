@@ -29,21 +29,24 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             auto& targetBody   = *targetEntity->getComponent<ComponentBody>(dataRequest1);
             auto& targetModel  = *targetEntity->getComponent<ComponentModel>(dataRequest1);
             float targetRadius = targetModel.radius();
+            const auto targetFwd = targetBody.forward();
+            const auto targetPos = targetBody.position();
+            const auto targetUp = targetBody.up();
 
             camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 3.0f);
 
-            auto calc2 = ((targetBody.forward() * glm::length(targetRadius) * 1.7f) + targetBody.up() * glm::length(targetRadius) * 0.3f);
+            auto calc2 = ((targetFwd * glm::length(targetRadius) * 1.7f) + targetUp * glm::length(targetRadius) * 0.3f);
             
             auto* ship = dynamic_cast<Ship*>(targetEntity);
             if (ship)
                 calc2 += (targetBody.rotation() * ship->m_CameraOffsetDefault);
             calc2 *= (1.0f + camera.m_OrbitRadius);
 
-            glm::vec3 pos = targetBody.position() + (calc2);
+            const glm::vec3 pos = targetPos + calc2;
 
             thisBody.setPosition(pos);
-            thisCamera.lookAt(pos, targetBody.position() - (glm::vec3(50000.0f) * targetBody.forward()), targetBody.up());
+            thisCamera.lookAt(pos, targetPos - (glm::vec3(50000.0f) * targetFwd), targetUp);
             break;
         }case CameraState::FollowTarget: {
             auto& targetEntity = camera.m_Target;
@@ -61,7 +64,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, player.position() -
                 ((glm::normalize(target.position() - player.position())*(playerModel.radius() * 2.7f) * (1.0f + camera.m_OrbitRadius))
-                    - player.up() * glm::length(playerModel.radius())*0.3f));
+                    - player.up() * glm::length(playerModel.radius()) * 0.55f));
 
             glm::vec3 pos(model[3][0], model[3][1], model[3][2]);
 

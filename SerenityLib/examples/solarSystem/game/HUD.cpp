@@ -122,7 +122,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
                         if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) { //letters only please
                             const int port = stoi(portstring);
                             hud.m_Core.startServer(port, map);
-                            hud.m_Core.startClient(port, username, "127.0.01"); //the client will request validation at this stage
+                            hud.m_Core.startClient(port, username, "127.0.0.1"); //the client will request validation at this stage
                             hud.m_ServerLobbyChatWindow->setUserPointer(hud.m_Core.getClient());
                         }else{
                             hud.setErrorText("The username must only contain letters");

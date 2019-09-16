@@ -248,6 +248,7 @@
     <ClInclude Include="game\weapons\PhaserBeam.h" />
     <ClInclude Include="game\weapons\PhotonTorpedo.h" />
     <ClInclude Include="game\weapons\PhotonTorpedoOld.h" />
+    <ClInclude Include="game\weapons\PlasmaBeam.h" />
     <ClInclude Include="game\weapons\PlasmaCannon.h" />
     <ClInclude Include="game\weapons\PlasmaTorpedo.h" />
     <ClInclude Include="game\weapons\PulsePhaser.h" />
@@ -307,6 +308,7 @@
     <ClCompile Include="game\weapons\PhaserBeam.cpp" />
     <ClCompile Include="game\weapons\PhotonTorpedo.cpp" />
     <ClCompile Include="game\weapons\PhotonTorpedoOld.cpp" />
+    <ClCompile Include="game\weapons\PlasmaBeam.cpp" />
     <ClCompile Include="game\weapons\PlasmaCannon.cpp" />
     <ClCompile Include="game\weapons\PlasmaTorpedo.cpp" />
     <ClCompile Include="game\weapons\PulsePhaser.cpp" />

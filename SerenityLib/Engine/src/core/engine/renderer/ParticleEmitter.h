@@ -1,0 +1,7 @@
+#pragma once
+#ifndef ENGINE_RENDERER_PARTICLE_EMITTER_H
+#define ENGINE_RENDERER_PARTICLE_EMITTER_H
+
+
+
+#endif

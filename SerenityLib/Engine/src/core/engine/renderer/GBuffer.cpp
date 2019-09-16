@@ -11,22 +11,6 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-vector<boost::tuple<ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = [](){
-    vector<boost::tuple<ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m;
-    m.resize(epriv::GBufferType::_TOTAL);
-                                                           //internFormat        //pxl_components                   //pxl_format
-    m[GBufferType::Diffuse]  = boost::make_tuple(ImageInternalFormat::RGB8,             ImagePixelFormat::RGB,           ImagePixelType::UNSIGNED_BYTE,      FramebufferAttatchment::Color_0);
-    //r,g = Normals as Octahedron Compressed. b = MaterialID and AO. a = Packed Metalness / Smoothness 
-    m[GBufferType::Normal]   = boost::make_tuple(ImageInternalFormat::RGBA16F,          ImagePixelFormat::RGBA,          ImagePixelType::FLOAT,              FramebufferAttatchment::Color_1);
-    //r = OutGlow. g = OutSpecular. b = GodRaysRG (nibbles) a = GodRaysB 
-    m[GBufferType::Misc]     = boost::make_tuple(ImageInternalFormat::RGBA8,            ImagePixelFormat::RGBA,          ImagePixelType::UNSIGNED_BYTE,      FramebufferAttatchment::Color_2);
-    m[GBufferType::Lighting] = boost::make_tuple(ImageInternalFormat::RGB16F,           ImagePixelFormat::RGB,           ImagePixelType::FLOAT,              FramebufferAttatchment::Color_3);
-    m[GBufferType::Bloom]    = boost::make_tuple(ImageInternalFormat::RGBA4,            ImagePixelFormat::RGBA,          ImagePixelType::UNSIGNED_BYTE,      FramebufferAttatchment::Color_0);
-    m[GBufferType::GodRays]  = boost::make_tuple(ImageInternalFormat::RGBA4,            ImagePixelFormat::RGBA,          ImagePixelType::UNSIGNED_BYTE,      FramebufferAttatchment::Color_1);
-    m[GBufferType::Depth]    = boost::make_tuple(ImageInternalFormat::Depth24Stencil8,  ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8,  FramebufferAttatchment::DepthAndStencil);
-
-    return m;
-}();
 GBuffer::GBuffer(const uint& width, const uint& height){
     m_FBO = m_SmallFBO = nullptr;
     internalDestruct(); //just incase this method is called on resize, we want to delete any previous buffers
@@ -43,13 +27,15 @@ GBuffer::GBuffer(const uint& width, const uint& height){
     internalBuildTextureBuffer(m_FBO, GBufferType::Lighting, m_Width, m_Height);
     internalBuildTextureBuffer(m_FBO, GBufferType::Depth, m_Width, m_Height);
 
-    if (!m_FBO->check()) return;
+    if (!m_FBO->check()) 
+        return;
 
     m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO", m_Width, m_Height, 0.5f, 2);
     internalBuildTextureBuffer(m_SmallFBO, GBufferType::Bloom, m_Width, m_Height);
     internalBuildTextureBuffer(m_SmallFBO, GBufferType::GodRays, m_Width, m_Height);
 
-    if (!m_SmallFBO->check()) return;
+    if (!m_SmallFBO->check()) 
+        return;
 
     //this should be better performance wise, but clean up this code a bit
     auto& depthTexture = m_Buffers[GBufferType::Depth]->texture();
@@ -79,10 +65,29 @@ void GBuffer::internalDestruct() {
 GBuffer::~GBuffer(){ 
     internalDestruct();
 }
-void GBuffer::internalBuildTextureBuffer(FramebufferObject* fbo, const uint& t, const uint& w, const uint& h) {
-    auto& i = GBUFFER_TYPE_DATA[t];
+void GBuffer::internalBuildTextureBuffer(FramebufferObject* fbo, const GBufferType::Type gbufferType, const uint& w, const uint& h) {
+    vector<boost::tuple<ImageInternalFormat::Format, ImagePixelFormat::Format, ImagePixelType::Type, FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = []() {
+        vector<boost::tuple<ImageInternalFormat::Format, ImagePixelFormat::Format, ImagePixelType::Type, FramebufferAttatchment::Attatchment>> m;
+        m.resize(static_cast<uint>(GBufferType::_TOTAL));
+        //internFormat        //pxl_components                   //pxl_format
+        m[GBufferType::Diffuse] = boost::make_tuple(ImageInternalFormat::RGB8, ImagePixelFormat::RGB, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_0);
+        //r,g = Normals as Octahedron Compressed. b = MaterialID and AO. a = Packed Metalness / Smoothness 
+        m[GBufferType::Normal] = boost::make_tuple(ImageInternalFormat::RGBA16F, ImagePixelFormat::RGBA, ImagePixelType::FLOAT, FramebufferAttatchment::Color_1);
+        //r = OutGlow. g = OutSpecular. b = GodRaysRG (nibbles) a = GodRaysB 
+        m[GBufferType::Misc] = boost::make_tuple(ImageInternalFormat::RGBA8, ImagePixelFormat::RGBA, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_2);
+        m[GBufferType::Lighting] = boost::make_tuple(ImageInternalFormat::RGB16F, ImagePixelFormat::RGB, ImagePixelType::FLOAT, FramebufferAttatchment::Color_3);
+        m[GBufferType::Bloom] = boost::make_tuple(ImageInternalFormat::RGBA4, ImagePixelFormat::RGBA, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_0);
+        m[GBufferType::GodRays] = boost::make_tuple(ImageInternalFormat::RGBA4, ImagePixelFormat::RGBA, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_1);
+        m[GBufferType::Depth] = boost::make_tuple(ImageInternalFormat::Depth24Stencil8, ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8, FramebufferAttatchment::DepthAndStencil);
+
+        return m;
+    }();
+   const auto i = GBUFFER_TYPE_DATA[gbufferType];
+
+    const auto attatchment = i.get<3>();
+    cout << attatchment << std::endl;
     Texture* texture = new Texture(w, h, i.get<2>(), i.get<1>(), i.get<0>(), fbo->divisor());
-    m_Buffers[t] = fbo->attatchTexture(texture, i.get<3>());
+    m_Buffers[static_cast<uint>(gbufferType)] = fbo->attatchTexture(texture, attatchment);
 }
 bool GBuffer::resize(const uint& width, const uint& height){
     if (m_Width == width && m_Height == height)

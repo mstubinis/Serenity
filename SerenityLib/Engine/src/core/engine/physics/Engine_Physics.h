@@ -9,6 +9,7 @@
 
 struct Entity;
 class  btRigidBody;
+class  ComponentBody;
 class  Camera;
 namespace Engine{
     namespace epriv{
@@ -40,8 +41,8 @@ struct RayCastResult {
 
 namespace Physics{
     // vector[0] = end point, vector[1] = hit normal
-    std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, btRigidBody* ignoredObject = nullptr, const unsigned short group = -1, const unsigned short mask = -1);
-    std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, std::vector<btRigidBody*>& ignoredObjects, const unsigned short group = -1, const unsigned short mask = -1);
+    std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, ComponentBody* ignoredObject = nullptr, const unsigned short group = -1, const unsigned short mask = -1);
+    std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentBody*>& ignoredObjects, const unsigned short group = -1, const unsigned short mask = -1);
 
     std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, const unsigned short group = -1, const unsigned short mask = -1);
     std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, const unsigned short group = -1, const unsigned short mask = -1);
@@ -54,6 +55,9 @@ namespace Physics{
     void addRigidBody(btRigidBody*);
     void removeRigidBody(btRigidBody*);
     void updateRigidBody(btRigidBody*);
+
+    void addRigidBody(ComponentBody&);
+    void removeRigidBody(ComponentBody&);
 };
 };
 #endif

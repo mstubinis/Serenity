@@ -290,6 +290,7 @@
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\VersionConversion.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\State.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\UniformBufferObject.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\ParticleEmitter.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Bloom.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\DepthOfField.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Fog.h" />
@@ -407,6 +408,7 @@
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\VersionConversion.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\State.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\UniformBufferObject.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\ParticleEmitter.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Bloom.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\DepthOfField.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Fog.cpp" />

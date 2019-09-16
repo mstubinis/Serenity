@@ -99,7 +99,7 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
     if (d)  decalList.push_back(d);
     if (d1) decalList.push_back(d1);
 }
-void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const uint damage, const bool forceHullFire, const bool paint) {
+void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const bool forceHullFire, const bool paint) {
     float newHP = m_HealthPointsCurrent - damage;
     if (newHP > 0.0f) {
         //hull takes entire hit

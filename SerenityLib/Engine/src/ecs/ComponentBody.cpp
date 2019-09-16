@@ -10,6 +10,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/norm.hpp>
 
 #include <BulletCollision/Gimpact/btGImpactShape.h>
 
@@ -108,6 +109,8 @@ ComponentBody::NormalData::~NormalData() {
 #pragma region Component
 
 ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Entity) {
+    m_GoalSpeed               = 1.0f;
+    m_Goal = m_GoalVelocity   = glm::vec3(0.0f);
     m_Physics                 = false;
     m_UserPointer             = nullptr;
     m_UserPointer1            = nullptr;
@@ -123,6 +126,8 @@ ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Enti
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
 }
 ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p_CollisionType) : ComponentBaseClass(p_Entity) {
+    m_GoalSpeed             = 1.0f;
+    m_Goal = m_GoalVelocity = glm::vec3(0.0f);
     m_Physics               = true;
     m_UserPointer           = nullptr;
     m_UserPointer1          = nullptr;
@@ -176,6 +181,8 @@ ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
     swap(m_UserPointer, p_Other.m_UserPointer);
     swap(m_UserPointer1, p_Other.m_UserPointer1);
     swap(m_UserPointer2, p_Other.m_UserPointer2);
+    swap(m_Goal, p_Other.m_Goal);
+    swap(m_GoalSpeed, p_Other.m_GoalSpeed);
     if (p_Other.m_Physics) {
         swap(data.p, p_Other.data.p);
 		p_Other.data.p = nullptr;
@@ -197,6 +204,8 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& p_Other) noexcept {
     swap(m_UserPointer, p_Other.m_UserPointer);
     swap(m_UserPointer1, p_Other.m_UserPointer1);
     swap(m_UserPointer2, p_Other.m_UserPointer2);
+    swap(m_Goal, p_Other.m_Goal);
+    swap(m_GoalSpeed, p_Other.m_GoalSpeed);
     if (p_Other.m_Physics) {
         swap(data.p, p_Other.data.p);
     }else{
@@ -230,6 +239,20 @@ void ComponentBody::setInternalPhysicsUserPointer(void* userPtr) {
             }
         }
     }
+}
+const float& ComponentBody::getGoalSpeed() const {
+    return m_GoalSpeed;
+}
+const glm::vec3& ComponentBody::getGoal() const {
+    return m_Goal;
+}
+void ComponentBody::setGoal(const glm::vec3& _goal, const float& speed) {
+    m_Goal = _goal;
+    m_GoalSpeed = speed;
+}
+void ComponentBody::setGoal(const float& x, const float& y, const float& z, const float& speed) {
+    m_Goal.x = x; m_Goal.y = y; m_Goal.z = z;
+    m_GoalSpeed = speed;
 }
 const bool& ComponentBody::hasPhysics() const {
     return m_Physics;
@@ -1049,9 +1072,33 @@ void ComponentBody::setMass(const float p_Mass) {
 #pragma region System
 
 struct epriv::ComponentBody_UpdateFunction final {
-    static void _defaultUpdate(const vector<uint>& p_Vector, vector<ComponentBody>& p_Components) {
+    static void _defaultUpdate(const vector<uint>& p_Vector, vector<ComponentBody>& p_Components, const float& dt) {
         for (uint j = 0; j < p_Vector.size(); ++j) {
             ComponentBody& b = p_Components[p_Vector[j]];
+            const auto pos = b.position();
+            //TODO: goals need to be properly tested and fixed
+            const auto zero = glm::vec3(0.0f);
+            if (b.m_Goal != zero){
+                if (glm::distance2(b.m_Goal, pos) > 1.5f) {
+                    const auto vecTo = pos - b.m_Goal;
+                    const auto vecToNorm = glm::normalize(vecTo);
+                    if (b.m_GoalVelocity == zero) {
+                        //calc goal velocity
+                        const auto len = glm::length(vecTo);
+                        const float velPerSec = len * dt;
+                        const float velSpeed = velPerSec * b.m_GoalSpeed;
+                        b.m_GoalVelocity = vecToNorm * velSpeed;
+                    }
+                    const auto goal = pos + b.m_GoalVelocity;
+                    if (glm::length2(goal) > glm::length2(vecTo)) {
+                        b.setPosition(goal);
+                    }else{
+                        b.setPosition(b.m_Goal);
+                    }
+                }else{
+                    b.m_Goal = b.m_GoalVelocity = glm::vec3(0.0f);
+                }
+            }
             if (b.m_Physics) {
                 auto& rigidBody = *b.data.p->bullet_rigidBody;
                 Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
@@ -1064,12 +1111,13 @@ struct epriv::ComponentBody_UpdateFunction final {
             }
         }
     }
-    void operator()(void* p_ComponentPool, const double& p_Dt, Scene& p_Scene) const {
+    void operator()(void* p_ComponentPool, const double& dt, Scene& p_Scene) const {
         auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
         auto& components = pool.pool();
         auto split = epriv::threading::splitVectorIndices(components);
+        const auto fdt = static_cast<float>(dt);
         for (auto& vec : split) {
-            epriv::threading::addJobRef(_defaultUpdate, vec, components);
+            epriv::threading::addJobRef(_defaultUpdate, vec, components, fdt);
         }
         epriv::threading::waitForAll();
     }
