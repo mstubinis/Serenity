@@ -28,16 +28,16 @@ class ServerLobbyShipSelectorWindow final {
         Viewport*    m_ShipDisplay;
         Font&        m_Font;
         Core&        m_Core;
-        unsigned int m_Width;
-        unsigned int m_Height;
+        float        m_Width;
+        float        m_Height;
         void*        m_UserPointer;
         std::string  m_ChosenShipName;
     public:
-        ServerLobbyShipSelectorWindow(Core& core, Scene& scene,Camera& camera, const Font& font, const unsigned int& x, const unsigned int& y);
+        ServerLobbyShipSelectorWindow(Core& core, Scene& scene,Camera& camera, const Font& font, const float x, const float y);
         ~ServerLobbyShipSelectorWindow();
 
         void setColor(const float& r, const float& g, const float& b, const float& a);
-        void setPosition(const unsigned int& x, const unsigned int& y);
+        void setPosition(const float x, const float y);
 
         void setShipViewportActive(const bool& active);
 

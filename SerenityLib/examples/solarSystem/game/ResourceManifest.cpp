@@ -36,6 +36,8 @@ Handle ResourceManifest::ConstitutionMesh;
 Handle ResourceManifest::LeviathanMesh;
 Handle ResourceManifest::ShrikeMesh;
 Handle ResourceManifest::BrelMesh;
+Handle ResourceManifest::AkiraMesh;
+Handle ResourceManifest::NorwayMesh;
 
 Handle ResourceManifest::NovaMaterial;
 Handle ResourceManifest::MirandaMaterial;
@@ -46,6 +48,8 @@ Handle ResourceManifest::ConstitutionMaterial;
 Handle ResourceManifest::DefiantSharkMaterial;
 Handle ResourceManifest::ShrikeMaterial;
 Handle ResourceManifest::BrelMaterial;
+Handle ResourceManifest::AkiraMaterial;
+Handle ResourceManifest::NorwayMaterial;
 
 //hull damage
 Handle ResourceManifest::HullDamageOutline1Material;
@@ -133,12 +137,14 @@ void ResourceManifest::init(){
 	NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc")[0];
     MirandaMesh = Resources::loadMeshAsync(BasePath + "data/Models/miranda.objcc")[0];
 	//VenerexMesh = Resources::loadMeshAsync(BasePath + "data/Models/venerex.objcc")[0];
-	//IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.objcc")[0];
+	IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.obj")[0];
     ExcelsiorMesh = Resources::loadMeshAsync(BasePath + "data/Models/excelsior.objcc")[0];
     ConstitutionMesh = Resources::loadMeshAsync(BasePath + "data/Models/constitution.objcc")[0];
     //LeviathanMesh = Resources::loadMeshAsync(BasePath + "data/Models/leviathan.objcc")[0];
     ShrikeMesh = Resources::loadMeshAsync(BasePath + "data/Models/shrike.objcc")[0];
     BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.obj")[0];
+    AkiraMesh = Resources::loadMeshAsync(BasePath + "data/Models/akira.objcc")[0];
+    NorwayMesh = Resources::loadMeshAsync(BasePath + "data/Models/norway.objcc")[0];
 
     //torpedos
     TorpedoFlareMesh        = Resources::loadMeshAsync(BasePath + "data/Models/torpedo_flare.objcc")[0];
@@ -178,12 +184,14 @@ void ResourceManifest::init(){
     NovaMaterial = Resources::loadMaterialAsync("Nova", BasePath + "data/Textures/nova/nova.dds");
     MirandaMaterial = Resources::loadMaterialAsync("Miranda", BasePath + "data/Textures/miranda/miranda.dds", BasePath + "data/Textures/miranda/miranda_Normal.dds", BasePath + "data/Textures/miranda/miranda_Glow.dds", BasePath + "data/Textures/miranda/miranda_Specular.dds");
     //VenerexMaterial = Resources::loadMaterialAsync("Venerex", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
-    //IntrepidMaterial = Resources::loadMaterialAsync("Intrepid", BasePath + "data/Textures/intrepid.dds", BasePath + "data/Textures/intrepid_Normal.png", BasePath + "data/Textures/intrepid_Glow.png");
+    IntrepidMaterial = Resources::loadMaterialAsync("Intrepid", BasePath + "data/Textures/intrepid/intrepid.dds", BasePath + "data/Textures/intrepid/intrepid_Normal.dds", BasePath + "data/Textures/intrepid/intrepid_Glow.dds");
     ExcelsiorMaterial = Resources::loadMaterialAsync("Excelsior", BasePath + "data/Textures/excelsior/excelsior.dds", BasePath + "data/Textures/excelsior/excelsior_Normal.dds", BasePath + "data/Textures/excelsior/excelsior_Glow.dds", BasePath + "data/Textures/excelsior/excelsior_Specular.dds");
     ConstitutionMaterial = Resources::loadMaterialAsync("Constitution", BasePath + "data/Textures/constitution/constitution.dds", BasePath + "data/Textures/constitution/constitution_Normal.dds", BasePath + "data/Textures/constitution/constitution_Glow.dds", BasePath + "data/Textures/constitution/constitution_Specular.dds");
     //DefiantSharkMaterial = Resources::loadMaterialAsync("DefiantShark", BasePath + "data/Textures/defiant/defiantShark.dds", BasePath + "data/Textures/defiant/defiant_Normal.dds", BasePath + "data/Textures/defiant/defiant_Glow.dds");
     ShrikeMaterial = Resources::loadMaterialAsync("Shrike", BasePath + "data/Textures/shrike/shrike.dds", BasePath + "data/Textures/shrike/shrike_Normal.dds", BasePath + "data/Textures/shrike/shrike_Glow.dds", BasePath + "data/Textures/shrike/shrike_Specular.dds");
     BrelMaterial = Resources::loadMaterialAsync("Brel", BasePath + "data/Textures/constitution/constitution.dds");
+    AkiraMaterial = Resources::loadMaterialAsync("Akira", BasePath + "data/Textures/akira/akira.dds", BasePath + "data/Textures/akira/akira_Normal.dds", BasePath + "data/Textures/akira/akira_Glow.dds");
+    NorwayMaterial = Resources::loadMaterialAsync("Norway", BasePath + "data/Textures/norway/norway.dds", BasePath + "data/Textures/norway/norway_Normal.dds", BasePath + "data/Textures/norway/norway_Glow.dds");
 
     ShieldMaterial = Resources::loadMaterialAsync("Shields", BasePath + "data/Textures/Effects/shields_1.dds");
     HullDamageOutline1Material = Resources::loadMaterialAsync("HullDamage1Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_1.dds");
@@ -206,21 +214,24 @@ void ResourceManifest::init(){
     phaserBeamMat.setGlow(1.0f);
     phaserBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(1.4f, 0.0f);
     phaserBeamMat.getComponent(0).layer(0).setData2(1.0f, 0.25f, 0.0f, 1.0f);
+    phaserBeamMat.getComponent(0).layer(0).getTexture()->setFilter(TextureFilter::Nearest);
     auto* phaserLayer = phaserBeamMat.getComponent(0).addLayer();
     phaserLayer->setTexture(BasePath + "data/Textures/Effects/phaser_beam_inside.dds");
     phaserLayer->addUVModificationSimpleTranslation(1.4f, 0.0f);
     phaserLayer->setData2(1.0f, 0.7f, 0.0f, 1.0f);
+    phaserLayer->getTexture()->setFilter(TextureFilter::Nearest);
 
     Material& plasmaBeamMat = *((Material*)PlasmaBeamMaterial.get());
     plasmaBeamMat.setShadeless(true);
     plasmaBeamMat.setGlow(1.0f);
     plasmaBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(1.4f, 0.0f);
     plasmaBeamMat.getComponent(0).layer(0).setData2(0.0f, 0.93f, 0.6f, 1.0f);
+    plasmaBeamMat.getComponent(0).layer(0).getTexture()->setFilter(TextureFilter::Nearest);
     auto* plasmaLayer = plasmaBeamMat.getComponent(0).addLayer();
     plasmaLayer->setTexture(BasePath + "data/Textures/Effects/phaser_beam_inside.dds");
     plasmaLayer->addUVModificationSimpleTranslation(1.4f, 0.0f);
     plasmaLayer->setData2(0.53f, 1.0f, 0.73f, 1.0f);
-
+    plasmaLayer->getTexture()->setFilter(TextureFilter::Nearest);
 
 
 
@@ -337,6 +348,9 @@ void ResourceManifest::init(){
 
     ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(DefiantMesh,      DefiantMaterial, fed, blue);
     ResourceManifest::Ships["Nova"]         = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(NovaMesh,         NovaMaterial, fed, blue);
+    ResourceManifest::Ships["Akira"]        = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(AkiraMesh, AkiraMaterial, fed, blue);
+    ResourceManifest::Ships["Intrepid"]     = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(IntrepidMesh, IntrepidMaterial, fed, blue);
+    ResourceManifest::Ships["Norway"]       = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(NorwayMesh, NorwayMaterial, fed, blue);
     ResourceManifest::Ships["Excelsior"]    = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ExcelsiorMesh,    ExcelsiorMaterial, fed, blue);
     ResourceManifest::Ships["Miranda"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(MirandaMesh,      MirandaMaterial, fed, blue);
     ResourceManifest::Ships["Constitution"] = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ConstitutionMesh, ConstitutionMaterial, fed, blue);

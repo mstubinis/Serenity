@@ -95,13 +95,15 @@ void EngineCore::update_physics(const double& dt) {
 void EngineCore::update_logic(const double& dt){
     // update logic   //////////////////////////////////////////
     m_DebugManager.stop_clock();
-    Game::onPreUpdate(dt);
-    Game::update(dt);
     //update current scene
     Scene& scene = *Resources::getCurrentScene();
     auto& ecs = InternalScenePublicInterface::GetECS(scene);
     update_physics(dt);
     ecs.preUpdate(scene, dt);
+    Game::onPreUpdate(dt);
+
+    Game::update(dt);
+
     scene.update(dt);
     ecs.update(dt, scene);
     ecs.postUpdate(scene,dt);
@@ -129,7 +131,8 @@ void EngineCore::update(const double& dt){
 void EngineCore::render(const double& dt){
     m_DebugManager.stop_clock();
     Game::render();
-    auto& viewports = InternalScenePublicInterface::GetViewports(*Resources::getCurrentScene());
+    auto& scene = *Resources::getCurrentScene();
+    auto& viewports = InternalScenePublicInterface::GetViewports(scene);
     for (auto& viewport : viewports) {
         if (viewport->isActive()) {
             m_RenderManager._render(dt, *viewport, true, 0, 0);
@@ -138,6 +141,9 @@ void EngineCore::render(const double& dt){
     Resources::getWindow().display();
     m_RenderManager._clear2DAPICommands();
     m_DebugManager.calculate_render();
+}
+void EngineCore::cleanup(const double& dt) {
+    m_ResourceManager.onPostUpdate();
 }
 void EngineCore::on_event_resize(const uint& w, const uint& h, const bool& saveSize){
     Core::m_Engine->m_RenderManager._resize(w,h);
@@ -406,6 +412,7 @@ void EngineCore::run(){
         handle_events();
         update(dt);
         render(dt);
+        cleanup(dt);
         m_DebugManager.calculate();
     }
     Game::cleanup();

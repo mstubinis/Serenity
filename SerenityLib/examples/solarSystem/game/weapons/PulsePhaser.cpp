@@ -1,7 +1,5 @@
-#include "PulsePhaser.h"
+#include "Weapons.h"
 #include "../map/Map.h"
-#include "../ResourceManifest.h"
-#include "../Ship.h"
 
 #include <ecs/Components.h>
 #include <core/engine/math/Engine_Math.h>
@@ -33,18 +31,18 @@ struct PulsePhaserCollisionFunctor final { void operator()(ComponentBody& owner,
             Ship*        otherShip   = static_cast<Ship*>(otherPtrShip);
             if (otherShip && pulsePhaserProjectile.active) {
                 Ship* sourceShip = static_cast<Ship*>(pulsePhaserShipVoid);
-                PulsePhaser& pulsePhaser = *static_cast<PulsePhaser*>(owner.getUserPointer2());
-                auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
-                auto* hull    = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                auto local = otherHit - other.position();
-                if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                    shields->receiveHit(normal, local, pulsePhaser.impactRadius, pulsePhaser.impactTime, pulsePhaser.damage);
-                    pulsePhaserProjectile.destroy();
-                    return;
-                }
-                if (hull && other.getUserPointer() == hull) {
-                    hull->receiveHit(normal, local, pulsePhaser.impactRadius, pulsePhaser.impactTime, pulsePhaser.damage);
-                    pulsePhaserProjectile.destroy();
+                if (sourceShip->IsPlayer()) {
+                    PulsePhaser& pulsePhaser = *static_cast<PulsePhaser*>(owner.getUserPointer2());
+                    auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
+                    auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                    auto local = otherHit - other.position();
+                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
+                        pulsePhaserProjectile.clientToServerImpact(pulsePhaser.m_Map.getClient(), *otherShip, local, normal, pulsePhaser.impactRadius, pulsePhaser.damage, pulsePhaser.impactTime, true);
+                        return;
+                    }
+                    if (hull && other.getUserPointer() == hull) {
+                        pulsePhaserProjectile.clientToServerImpact(pulsePhaser.m_Map.getClient(), *otherShip, local, normal, pulsePhaser.impactRadius, pulsePhaser.damage, pulsePhaser.impactTime, false);
+                    }
                 }
             }
         }        
@@ -121,7 +119,7 @@ struct PulsePhaserTailInstanceUnbindFunctor {void operator()(EngineResource* r) 
 }};
 
 
-PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, const glm::vec3& position, const glm::vec3& forward) : PrimaryWeaponCannonProjectile(map,position,forward){
+PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index) : PrimaryWeaponCannonProjectile(map,position,forward, index){
     EntityDataRequest request(entity);
 
     auto& model   = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless,ShaderProgram::Forward,RenderStage::ForwardParticles);
@@ -188,7 +186,7 @@ PulsePhaserProjectile::~PulsePhaserProjectile() {
 
 }
 
-PulsePhaser::PulsePhaser(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume):PrimaryWeaponCannon(ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume), m_Map(map){
+PulsePhaser::PulsePhaser(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume):PrimaryWeaponCannon(map,WeaponType::PulsePhaser, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume){
 
 }
 PulsePhaser::~PulsePhaser() {
@@ -196,36 +194,5 @@ PulsePhaser::~PulsePhaser() {
 }
 
 void PulsePhaser::update(const double& dt) {
-    for (auto& projectile : m_ActiveProjectiles) {
-        projectile->update(dt);
-    }
-    for (auto& projectile : m_ActiveProjectiles) {
-        if (!projectile->active) {
-            removeFromVector(m_ActiveProjectiles, projectile);
-        }
-    }
     PrimaryWeaponCannon::update(dt);
-}
-const bool PulsePhaser::fire() {
-    const auto res = PrimaryWeaponCannon::fire();
-    if (res) {
-        forceFire();
-        return true;
-    }
-    return false;
-}
-void PulsePhaser::forceFire() {
-    auto* projectile = new PulsePhaserProjectile(*this, m_Map, position, forward);
-    m_ActiveProjectiles.push_back(projectile);
-    auto& shipBody = *ship.getComponent<ComponentBody>();
-    auto shipMatrix = shipBody.modelMatrix();
-    shipMatrix = glm::translate(shipMatrix, position);
-    const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
-
-    soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPulsePhaser);
-    if (soundEffect) {
-        soundEffect->setVolume(volume);
-        soundEffect->setPosition(finalPosition);
-        soundEffect->setAttenuation(0.1f);
-    }
 }

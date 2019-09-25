@@ -65,6 +65,7 @@ namespace Engine{
                 void update_physics(const double& dt);
                 void update(const double& dt);
                 void render(const double& dt);
+                void cleanup(const double& dt);
 
             public:
                 struct Misc final {

@@ -13,6 +13,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/utils/Utils.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/resources/Engine_Resources.h>
 
 #include <core/engine/Engine.h>
 #include <core/engine/utils/Engine_Debugging.h>
@@ -161,7 +162,14 @@ const bool Server::startup(const string& mapname) {
     if (status == sf::Socket::Status::Done) {
         listener.setBlocking(false);
         m_Active.store(1, std::memory_order_relaxed);
-        Map* map = new Map(m_MapName, ResourceManifest::BasePath + "data/Systems/" + m_MapName + ".txt");
+        return true;
+    }
+    return false;
+}
+const bool Server::startupMap() {
+    Map* map = static_cast<Map*>(Resources::getScene(m_MapName));
+    if (!map) {
+        map = new Map(*m_Core.m_Client, m_MapName, ResourceManifest::BasePath + "data/Systems/" + m_MapName + ".txt");
         return true;
     }
     return false;
@@ -181,6 +189,13 @@ void Server::shutdown(const bool destructor) {
     }else{
         m_listener->close();
     }
+}
+const bool Server::shutdownMap() {
+    const auto res = Resources::deleteScene(m_MapName);
+    if (res) {
+        Resources::setCurrentScene("Menu");
+    }
+    return res;
 }
 
 void Server::update(Server* thisServer, const double& dt) {
@@ -336,7 +351,22 @@ void Server::updateClient(ServerClient& client) {
             client.m_Timeout = 0.0f;
             // Data extracted successfully...
             switch (pIn.PacketType) {
-                case PacketType::Client_To_Server_Periodic_Ping: {
+                case PacketType::Client_To_Server_Projectile_Cannon_Impact: {
+                    //just forward it
+                    PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(pp);
+                    PacketProjectileImpact pOut(pI);
+                    pOut.PacketType = PacketType::Server_To_Client_Projectile_Cannon_Impact;
+                    server.send_to_all(pOut);
+                    break;
+                }case PacketType::Client_To_Server_Projectile_Torpedo_Impact: {
+                    //just forward it
+                    PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(pp);
+                    PacketProjectileImpact pOut(pI);
+                    pOut.PacketType = PacketType::Server_To_Client_Projectile_Torpedo_Impact;
+                    server.send_to_all(pOut);
+                    break;
+
+                }case PacketType::Client_To_Server_Periodic_Ping: {
                     //thanks for staying with us
                     client.m_Timeout = 0.0f;
                     break;
@@ -345,21 +375,21 @@ void Server::updateClient(ServerClient& client) {
                     PacketMessage& pI = *static_cast<PacketMessage*>(pp);
                     PacketMessage pOut(pI);
                     pOut.PacketType = PacketType::Server_To_Client_Client_Fired_Beams;
-                    server.send_to_all_but_client(client, pOut);
+                    server.send_to_all(pOut);
                     break;
                 }case PacketType::Client_To_Server_Client_Fired_Cannons: {
                     //just forward it
                     PacketMessage& pI = *static_cast<PacketMessage*>(pp);
                     PacketMessage pOut(pI);
                     pOut.PacketType = PacketType::Server_To_Client_Client_Fired_Cannons;
-                    server.send_to_all_but_client(client, pOut);
+                    server.send_to_all(pOut);
                     break;
                 }case PacketType::Client_To_Server_Client_Fired_Torpedos: {
                     //just forward it
                     PacketMessage& pI = *static_cast<PacketMessage*>(pp);
                     PacketMessage pOut(pI);
                     pOut.PacketType = PacketType::Server_To_Client_Client_Fired_Torpedos;
-                    server.send_to_all_but_client(client, pOut);
+                    server.send_to_all(pOut);
                     break;
                 }case PacketType::Client_To_Server_Client_Changed_Target: {
                     //just forward it

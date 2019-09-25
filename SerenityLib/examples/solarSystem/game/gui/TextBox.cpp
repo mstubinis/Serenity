@@ -16,11 +16,11 @@ struct OnEnter final {void operator()(TextBox* textBox) const {
 
 
 
-TextBox::TextBox(const string& label, const Font& font, const unsigned short& maxCharacters, const unsigned int& x, const unsigned int& y):Button(font,x,y,25,25) {
-    m_Text = "";
-    m_Active = false;
-    m_Timer = 0.0f;
-    m_Label = label;
+TextBox::TextBox(const string& label, const Font& font, const unsigned short maxCharacters, const float x, const float y):Button(font, x, y, 25.0f, 25.0f) {
+    m_Text          = "";
+    m_Active        = false;
+    m_Timer         = 0.0f;
+    m_Label         = label;
     m_MaxCharacters = maxCharacters;
 
     internalUpdateSize();
@@ -30,7 +30,7 @@ TextBox::TextBox(const string& label, const Font& font, const unsigned short& ma
     m_TextAlignment = TextAlignment::Left;
     registerEvent(EventType::TextEntered);
 }
-TextBox::TextBox(const string& label, const Font& font, const unsigned short& maxCharacters, const glm::uvec2& position) : TextBox(label, font, maxCharacters, position.x, position.y) {
+TextBox::TextBox(const string& label, const Font& font, const unsigned short maxCharacters, const glm::vec2& position) : TextBox(label, font, maxCharacters, position.x, position.y) {
 
 }
 
@@ -39,8 +39,8 @@ TextBox::~TextBox() {
 }
 
 void TextBox::internalUpdateSize() {
-    m_Width = ((m_Font->getTextWidth("X") * m_MaxCharacters) + 20) * m_TextScale.x;
-    m_Height = (m_Font->getTextHeight("X") + 20) * m_TextScale.y;
+    m_Width = ((m_Font->getTextWidth("X") * m_MaxCharacters) + 20.0f) * m_TextScale.x;
+    m_Height = (m_Font->getTextHeight("X") + 20.0f) * m_TextScale.y;
 }
 
 const string& TextBox::getLabel() const {
@@ -49,18 +49,16 @@ const string& TextBox::getLabel() const {
 void TextBox::setLabel(const char* label) {
     m_Label = label;
 }
-void TextBox::setLabel(const std::string& label) {
+void TextBox::setLabel(const string& label) {
     m_Label = label;
 }
-void TextBox::setTextScale(const float& x, const float& y) {
+void TextBox::setTextScale(const float x, const float y) {
     m_TextScale.x = x;
     m_TextScale.y = y;
-
     internalUpdateSize();
 }
 void TextBox::setTextScale(const glm::vec2& scale) {
     m_TextScale = scale;
-
     internalUpdateSize();
 }
 void TextBox::setText(const string& text) {
@@ -118,12 +116,12 @@ void TextBox::render() {
     const auto finalLabelString = m_Label + ": ";
     const auto lineHeight = m_Font->getTextHeight(finalLabelString) * m_TextScale.y;
 
-    const auto& pos = glm::vec2(m_Position.x - (m_Width/2)  - 4, m_Position.y + lineHeight);
+    const auto pos = glm::vec2(m_Position.x - (m_Width / 2.0f) - 4.0f, m_Position.y + lineHeight);
 
     m_Font->renderText(finalLabelString, pos, m_TextColor, 0, glm::vec2(m_TextScale), 0.008f, TextAlignment::Right);
 
     if (m_Active && m_Timer <= 0.5f) {
-        const glm::vec2 blinkerPos = glm::vec2(m_Position.x - (m_Width / 2) + getTextWidth() + 4, m_Position.y);
+        const glm::vec2 blinkerPos = glm::vec2(m_Position.x - (m_Width / 2.0f) + getTextWidth() + 4.0f, m_Position.y);
         Renderer::renderRectangle(blinkerPos, glm::vec4(1.0f), 3, lineHeight + 8, 0, 0.004f);
     }
 }

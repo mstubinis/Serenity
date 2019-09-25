@@ -15,11 +15,11 @@ class SoundData final : public EngineResource {
         SoundData(const std::string& filename);
         ~SoundData();
 
-        const float& getDuration() const;
+        const float getDuration() const;
         void buildBuffer();
         sf::SoundBuffer* getBuffer();
         const std::string& getFilename();
-        const float& getVolume() const;
+        const float getVolume() const;
         void setVolume(const float& volume);
 };
 

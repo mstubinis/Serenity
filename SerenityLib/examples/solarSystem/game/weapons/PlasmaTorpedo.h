@@ -28,21 +28,13 @@ struct PlasmaTorpedoFlare final {
         spin = _spin;
     }
 };
-struct PlasmaTorpedoProjectile final {
-    PlasmaTorpedo& torpedo;
-    EntityWrapper* entity;
-    EntityWrapper* target;
-    std::vector<PlasmaTorpedoFlare> flares;
-    bool hasLock;
-    float rotationAngleSpeed;
-    PointLight* light;
-    float currentTime;
-    float maxTime;
-    bool active;
-    PlasmaTorpedoProjectile(PlasmaTorpedo&, Map& map, const glm::vec3& position, const glm::vec3& forward);
+struct PlasmaTorpedoProjectile final : public SecondaryWeaponTorpedoProjectile {
+    PlasmaTorpedo&                   torpedo;
+    std::vector<PlasmaTorpedoFlare>  flares;
+
+    PlasmaTorpedoProjectile(PlasmaTorpedo&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index);
     ~PlasmaTorpedoProjectile();
     void update(const double& dt);
-    void destroy();
 };
 
 
@@ -54,9 +46,6 @@ class PlasmaTorpedo final : public SecondaryWeaponTorpedo {
     friend struct PlasmaTorpedoInstanceGlowUnbindFunctor;
     friend struct PlasmaTorpedoFlareInstanceBindFunctor;
     friend struct PlasmaTorpedoFlareInstanceUnbindFunctor;
-    private:
-        Map& m_Map;
-        std::vector<PlasmaTorpedoProjectile*> m_ActiveProjectiles;
     public:
         PlasmaTorpedo(
             Ship&,
@@ -75,8 +64,6 @@ class PlasmaTorpedo final : public SecondaryWeaponTorpedo {
         );
         ~PlasmaTorpedo();
 
-        const bool fire();
-        void forceFire();
         void update(const double& dt);
 };
 

@@ -27,21 +27,21 @@ class  SoundMusic : public SoundBaseClass {
         const bool pause();
         const bool stop(const bool& stopAllLoops = false);
         const bool restart();
-        const float& getDuration() const;
+        const float getDuration() const;
         const uint getChannelCount();
         const float getMinDistance();
         void setMinDistance(const float& minDistance);
         const bool isRelativeToListener();
         void setRelativeToListener(const bool relative = true);
 
-        const float& getAttenuation() const;
+        const float getAttenuation() const;
         void setAttenuation(const float& attenuation);
-        const glm::vec3& getPosition();
+        const glm::vec3 getPosition();
         void setPosition(const float& x, const float& y, const float& z);
         void setPosition(const glm::vec3& position);
-        const float& getVolume() const;
+        const float getVolume() const;
         void setVolume(const float& volume);
-        const float& getPitch() const;
+        const float getPitch() const;
         void setPitch(const float& pitch);
 };
 #endif

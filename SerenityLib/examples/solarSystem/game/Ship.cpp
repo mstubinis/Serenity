@@ -263,6 +263,51 @@ const glm::vec3 Ship::getPosition(const EntityDataRequest& dataRequest) {
 const glm::quat Ship::getRotation(const EntityDataRequest& dataRequest) {
     return getComponent<ComponentBody>(dataRequest)->rotation();
 }
+void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
+    glm::vec3 normal;
+    float rad, time;
+    Engine::Math::Float32From16(&rad, packet.radius);
+    Engine::Math::Float32From16(&time, packet.time);
+    Engine::Math::Float32From16(&normal.x, packet.normalX);
+    Engine::Math::Float32From16(&normal.y, packet.normalY);
+    Engine::Math::Float32From16(&normal.z, packet.normalZ);
+    Map& map = static_cast<Map&>(entity().scene());
+    if (packet.shields) {
+        auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
+        if (shields) {
+            shields->receiveHit(normal, glm::vec3(packet.impactX, packet.impactY, packet.impactZ), rad, time, packet.damage);
+        }
+        if (packet.PacketType == PacketType::Server_To_Client_Projectile_Cannon_Impact) {
+            auto* proj = map.getCannonProjectile(packet.index);
+            if (proj) {
+                proj->destroy();
+            }
+        }else if (packet.PacketType == PacketType::Server_To_Client_Projectile_Torpedo_Impact) {
+            auto* proj = map.getTorpedoProjectile(packet.index);
+            if (proj) {
+                proj->destroy();
+            }
+        }
+        return;
+    }else{
+        auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
+        if (hull) {
+            hull->receiveHit(normal, glm::vec3(packet.impactX, packet.impactY, packet.impactZ), rad, time, packet.damage);
+        }
+        if (packet.PacketType == PacketType::Server_To_Client_Projectile_Cannon_Impact) {
+            auto* proj = map.getCannonProjectile(packet.index);
+            if (proj) {
+                proj->destroy();
+            }
+        }else if (packet.PacketType == PacketType::Server_To_Client_Projectile_Torpedo_Impact) {
+            auto* proj = map.getTorpedoProjectile(packet.index);
+            if (proj) {
+                proj->destroy();
+            }
+        }
+        return;
+    }
+}
 void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
     const unsigned int& size = stoi(info[2]);
     Anchor* closest = map.getRootAnchor();

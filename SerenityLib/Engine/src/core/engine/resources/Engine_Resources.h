@@ -33,9 +33,12 @@ namespace Engine{
                 Scene*                                         m_CurrentScene;
                 bool                                           m_DynamicMemory;
                 std::vector<Scene*>                            m_Scenes;
+                std::vector<Scene*>                            m_ScenesToBeDeleted;
 
                 ResourceManager(const char* name, const uint& width, const uint& height);
                 ~ResourceManager();
+
+                void onPostUpdate();
 
                 void _init(const char* name, const uint& width, const uint& height);
  
@@ -66,6 +69,7 @@ namespace Engine{
         glm::uvec2 getWindowSize();
 
         Scene* getScene(const std::string& sceneName);
+        const bool deleteScene(const std::string& sceneName);
 
         void getShader(Handle& inHandle,Shader*& outPtr);           Shader*    getShader(Handle& inHandle);
         void getSoundData(Handle& inHandle,SoundData*& outPtr);     SoundData* getSoundData(Handle& inHandle);

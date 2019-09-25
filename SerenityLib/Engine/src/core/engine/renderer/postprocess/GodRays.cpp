@@ -1,5 +1,7 @@
 #include <core/engine/renderer/postprocess/GodRays.h>
 #include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/scene/Scene.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
 #include <core/engine/shaders/ShaderProgram.h>
@@ -22,7 +24,6 @@ GodRays::GodRays() {
     samples = 80;
     fovDegrees = 75.0f;
     alphaFalloff = 2.0f;
-    sun = nullptr;
 }
 GodRays::~GodRays() {
 }
@@ -88,7 +89,7 @@ void Renderer::godRays::setWeight(const float w) {
     GodRays::godRays.weight = w;
 }
 void Renderer::godRays::setSamples(const unsigned int s) {
-    GodRays::godRays.samples = glm::max((unsigned int)0, s);
+    GodRays::godRays.samples = glm::max(0U, s);
 }
 void Renderer::godRays::setFOVDegrees(const float d) {
     GodRays::godRays.fovDegrees = d;
@@ -96,9 +97,9 @@ void Renderer::godRays::setFOVDegrees(const float d) {
 void Renderer::godRays::setAlphaFalloff(const float a) {
     GodRays::godRays.alphaFalloff = a;
 }
-void Renderer::godRays::setSun(Entity* entity) { 
-    GodRays::godRays.sun = entity;
+void Renderer::godRays::setSun(Entity* entity) {
+    Resources::getCurrentScene()->setGodRaysSun(entity);
 }
 Entity* Renderer::godRays::getSun() { 
-    return GodRays::godRays.sun;
+    return Resources::getCurrentScene()->getGodRaysSun();
 }

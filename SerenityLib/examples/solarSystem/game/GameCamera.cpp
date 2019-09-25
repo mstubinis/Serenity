@@ -33,7 +33,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             const auto targetPos = targetBody.position();
             const auto targetUp = targetBody.up();
 
-            camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
+            camera.m_OrbitRadius += (static_cast<float>(Engine::getMouseWheelDelta()) * 0.02f);
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 3.0f);
 
             auto calc2 = ((targetFwd * glm::length(targetRadius) * 1.7f) + targetUp * glm::length(targetRadius) * 0.3f);
@@ -58,7 +58,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             auto& player = *playerEntity->getComponent<ComponentBody>(dataRequest2);
             auto& playerModel = *playerEntity->getComponent<ComponentModel>(dataRequest2);
 
-            camera.m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
+            camera.m_OrbitRadius += (static_cast<float>(Engine::getMouseWheelDelta()) * 0.02f);
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 3.0f);
 
             glm::mat4 model = glm::mat4(1.0f);
@@ -79,7 +79,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             auto& targetBody = *targetEntity->getComponent<ComponentBody>(dataRequest1);
             auto& targetModel = *targetEntity->getComponent<ComponentModel>(dataRequest1);
 
-			camera.m_OrbitRadius += Engine::getMouseWheelDelta() * dt * 0.92f;
+			camera.m_OrbitRadius += static_cast<float>(Engine::getMouseWheelDelta()) * static_cast<float>(dt) * 0.92f;
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 70.0f);
 
 			const auto& diff = Engine::getMouseDifference();

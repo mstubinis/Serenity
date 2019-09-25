@@ -130,6 +130,24 @@
     <Filter Include="Source Files\Game\Ships\Leviathan">
       <UniqueIdentifier>{86d54eca-335d-4278-8b3d-501cd7e6f2b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Ships\Akira">
+      <UniqueIdentifier>{21a85047-561c-423c-8800-ff281a4d070f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Akira">
+      <UniqueIdentifier>{382fc284-0591-4cad-bfa4-aa5e7515709d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Norway">
+      <UniqueIdentifier>{4860a158-2d16-4dc6-956a-9b40492290f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Intrepid">
+      <UniqueIdentifier>{08ca1385-6317-4abf-92c6-ac6fecc8c87a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Norway">
+      <UniqueIdentifier>{5d7af936-4f95-4bec-80ff-96b191804d5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Intrepid">
+      <UniqueIdentifier>{84398728-f33f-4c85-9af1-cfbf379e937d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -312,6 +330,24 @@
     <ClInclude Include="game\weapons\PlasmaBeam.h">
       <Filter>Header Files\Game\Weapons</Filter>
     </ClInclude>
+    <ClInclude Include="game\ships\akira\Akira.h">
+      <Filter>Header Files\Game\Ships\Akira</Filter>
+    </ClInclude>
+    <ClInclude Include="game\map\Freelist.h">
+      <Filter>Header Files\Game\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\intrepid\Intrepid.h">
+      <Filter>Header Files\Game\Ships\Intrepid</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\norway\Norway.h">
+      <Filter>Header Files\Game\Ships\Norway</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\Weapons.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\WeaponIncludes.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -487,6 +523,15 @@
     </ClCompile>
     <ClCompile Include="game\weapons\PlasmaBeam.cpp">
       <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\akira\Akira.cpp">
+      <Filter>Source Files\Game\Ships\Akira</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\intrepid\Intrepid.cpp">
+      <Filter>Source Files\Game\Ships\Intrepid</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\norway\Norway.cpp">
+      <Filter>Source Files\Game\Ships\Norway</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

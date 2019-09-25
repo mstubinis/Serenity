@@ -21,7 +21,6 @@ namespace epriv {
             float       weight;
             float       fovDegrees;
             float       alphaFalloff;
-            Entity*     sun;
             int         samples;
 
             GodRays();

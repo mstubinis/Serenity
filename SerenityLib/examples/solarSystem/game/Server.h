@@ -90,7 +90,9 @@ class Server {
         ~Server();
 
         const bool startup(const std::string& mapname);
+        const bool startupMap();
         void shutdown(const bool destructor = false);
+        const bool shutdownMap();
 
         const bool isValidName(const std::string& name) const;
         const uint numClients() const;

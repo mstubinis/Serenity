@@ -16,26 +16,28 @@ class Button : public Widget {
         glm::vec2                 m_TextScale;
         glm::vec4                 m_TextColor;
         boost::function<void()>   m_FunctorOnClick;
-        unsigned int              m_Padding;
+        float                     m_Padding;
         TextAlignment::Type       m_TextAlignment;
 
         void internalSetSize();
     public:
-        Button(const Font& font, const unsigned int& x, const unsigned int& y, const unsigned int& width, const unsigned int& height);
-        Button(const Font& font, const glm::uvec2& position, const unsigned int& width, const unsigned int& height);
+        Button(const Font& font, const float x, const float y, const float width, const float height);
+        Button(const Font& font, const glm::vec2& position, const float width, const float height);
         virtual ~Button();
 
         const std::string& text() const;
 
-        template<class T> void setOnClickFunctor(const T& functor) { m_FunctorOnClick = boost::bind<void>(functor, this); }
+        template<class T> void setOnClickFunctor(const T& functor) { 
+            m_FunctorOnClick = boost::bind<void>(functor, this); 
+        }
 
-        const unsigned int getTextHeight() const;
-        const unsigned int getTextWidth() const;
+        const float getTextHeight() const;
+        const float getTextWidth() const;
         void setTextAlignment(const TextAlignment::Type&);
         const TextAlignment::Type& getTextAlignment() const;
 
         virtual void setTextScale(const glm::vec2& scale);
-        virtual void setTextScale(const float& x, const float& y);
+        virtual void setTextScale(const float x, const float y);
         const glm::vec2& getTextScale() const;
 
         void setFont(const Font& font);

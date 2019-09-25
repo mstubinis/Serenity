@@ -1954,9 +1954,9 @@ class epriv::RenderManager::impl final{
             gbuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
             Settings::clear(true, false, false); //godrays rgb channels cleared to black
             auto& godRaysPlatform = GodRays::godRays;
-
-            if ((viewport.getRenderFlags() & ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active && godRaysPlatform.sun) {
-                auto& body = *godRaysPlatform.sun->getComponent<ComponentBody>();
+            auto* sun = godRays::getSun();
+            if ((viewport.getRenderFlags() & ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active && sun) {
+                auto& body = *sun->getComponent<ComponentBody>();
                 const glm::vec3& oPos = body.position();
                 const glm::vec3& camPos = camera.getPosition();
                 const glm::vec3& camVec = camera.getViewVector();
@@ -2390,7 +2390,7 @@ inline const GLint& Renderer::getUniformLocUnsafe(const char* location) {
 
 
 //a collection of 2d rendering api functors
-void Renderer::alignmentOffset(const Alignment::Type& align, uint& x, uint& y, const uint& width, const uint& height) {
+void Renderer::alignmentOffset(const Alignment::Type& align, float& x, float& y, const float& width, const float& height) {
     switch (align) {
         case Alignment::TopLeft: {
             x += width / 2;
@@ -2430,7 +2430,7 @@ void Renderer::alignmentOffset(const Alignment::Type& align, uint& x, uint& y, c
 
 
 struct RenderingAPI2D final {
-    static void Render2DText(const string& text, const Font& font, const glm::uvec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const TextAlignment::Type& alignType) { 
+    static void Render2DText(const string& text, const Font& font, const glm::vec2& pos, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type& alignType) { 
         auto& impl = *renderManagerImpl;
         impl.text_pts.clear();
         impl.text_uvs.clear();
@@ -2449,7 +2449,7 @@ struct RenderingAPI2D final {
         float z = -0.001f - depth;
 
         glm::mat4 m = impl.m_IdentityMat4;
-        m = glm::translate(m, glm::vec3(position.x, position.y, 0));
+        m = glm::translate(m, glm::vec3(pos.x, pos.y, 0));
         m = glm::rotate(m, angle, impl.m_RotationAxis2D);
         m = glm::scale(m, glm::vec3(scale.x, scale.y, 1));
         sendUniformMatrix4("Model", m);
@@ -2466,15 +2466,15 @@ struct RenderingAPI2D final {
         mesh.modifyIndices(impl.text_ind);
         mesh.render(false);
     }
-    static void Render2DTexture(const Texture* texture, const glm::uvec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth, const Alignment::Type& align) {
+    static void Render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type& align) {
         auto& impl = *renderManagerImpl;
         auto& mesh = *Mesh::Plane;
         mesh.bind();
         glm::mat4 m = impl.m_IdentityMat4;
         sendUniform4("Object_Color", color);
 
-        uint translationX = position.x;
-        uint translationY = position.y;
+        float translationX = position.x;
+        float translationY = position.y;
         float totalSizeX   = scale.x;
         float totalSizeY   = scale.y;
         if (texture) {
@@ -2487,7 +2487,7 @@ struct RenderingAPI2D final {
             sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
             sendUniform1("DiffuseTextureEnabled", 0);
         }
-        Renderer::alignmentOffset(align, translationX, translationY, static_cast<uint>(totalSizeX), static_cast<uint>(totalSizeY));
+        Renderer::alignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
 
         m = glm::translate(m, glm::vec3(translationX, translationY, -0.001f - depth));
         m = glm::rotate(m, Math::toRadians(angle), impl.m_RotationAxis2D);
@@ -2495,7 +2495,7 @@ struct RenderingAPI2D final {
         sendUniformMatrix4("Model", m);
         mesh.render(false);
     }
-    static void RenderTriangle(const glm::uvec2& position, const glm::vec4& color, const float& angle, const uint& width, const uint& height, const float& depth, const Alignment::Type& align) {
+    static void RenderTriangle(const glm::vec2& pos, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align) {
         auto& impl = *renderManagerImpl;
 
         auto& mesh = *Mesh::Triangle;
@@ -2505,8 +2505,8 @@ struct RenderingAPI2D final {
         sendUniform1("DiffuseTextureEnabled", 0);
         sendUniform4("Object_Color", color);
 
-        uint translationX = position.x;
-        uint translationY = position.y;
+        float translationX = pos.x;
+        float translationY = pos.y;
 
         Renderer::alignmentOffset(align, translationX, translationY, width, height);
 
@@ -2518,46 +2518,46 @@ struct RenderingAPI2D final {
 
         mesh.render(false);
     }
-    static void GLScissor(const int& x, const int& y, const GLsizei& width, const GLsizei& height) {
+    static void GLScissor(const float x, const float y, const float width, const float height) {
         glScissor(x, y, width, height);
     }
     static void GLScissorDisable() {
-        const auto& winSize = Resources::getWindowSize();
+        const auto winSize = Resources::getWindowSize();
         glScissor(0, 0, winSize.x, winSize.y);
     }
 };
-void Renderer::renderTriangle(const glm::uvec2& position, const glm::vec4& color, const float& angle, const uint& width, const uint& height, const float& depth, const Alignment::Type& align) {
+void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align) {
     boost_func f = boost::bind<void>(&RenderingAPI2D::RenderTriangle, position, color, angle, width, height, depth, align);
     renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
 }
-void Renderer::renderRectangle(const glm::uvec2& pos, const glm::vec4& col, const uint& width, const uint& height, const float& angle, const float& depth, const Alignment::Type& align){
+void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type& align){
     boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DTexture, nullptr, pos, col, angle, glm::vec2(width, height), depth, align);
     renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
 }
-void Renderer::renderTexture(const Texture& tex, const glm::uvec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const Alignment::Type& align){
+void Renderer::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type& align){
     boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DTexture, &tex, p, c, a, s, d, align);
     renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
 }
-void Renderer::renderText(const string& t, const Font& fnt, const glm::uvec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const TextAlignment::Type& align) {
+void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type& align) {
     boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DText, t, boost::ref(fnt), p, c, a, s, d, align);
     renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
 }
-void Renderer::renderBorder(const uint& borderSize, const glm::uvec2& pos, const glm::vec4& col, const uint& w, const uint& h, const float& angle, const float& depth, const Alignment::Type& align) {
-    const uint& doubleBorder = borderSize * 2;
-    const uint& halfWidth = w / 2;
-    const uint& halfHeight = h / 2;
+void Renderer::renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, const float w, const float h, const float angle, const float depth, const Alignment::Type& align) {
+    const float doubleBorder = borderSize * 2.0f;
+    const float halfWidth    = w / 2.0f;
+    const float halfHeight   = h / 2.0f;
 
-    uint translationX = pos.x;
-    uint translationY = pos.y;
+    float translationX = pos.x;
+    float translationY = pos.y;
     Renderer::alignmentOffset(align, translationX, translationY, w, h);
-    glm::uvec2 newPos(translationX, translationY);
+    glm::vec2 newPos(translationX, translationY);
 
-    Renderer::renderRectangle(newPos - glm::uvec2(halfWidth, 0), col, borderSize, h + doubleBorder, angle, depth,Alignment::Right);
-    Renderer::renderRectangle(newPos + glm::uvec2(halfWidth, 0), col, borderSize, h + doubleBorder, angle, depth,Alignment::Left);
-    Renderer::renderRectangle(newPos - glm::uvec2(0, halfHeight), col, w, borderSize, angle, depth,Alignment::TopCenter);
-    Renderer::renderRectangle(newPos + glm::uvec2(0, halfHeight + borderSize), col, w, borderSize, angle, depth,Alignment::BottomCenter);
+    Renderer::renderRectangle(newPos - glm::vec2(halfWidth, 0.0f), col, borderSize, h + doubleBorder, angle, depth,Alignment::Right);
+    Renderer::renderRectangle(newPos + glm::vec2(halfWidth, 0.0f), col, borderSize, h + doubleBorder, angle, depth,Alignment::Left);
+    Renderer::renderRectangle(newPos - glm::vec2(0.0f, halfHeight), col, w, borderSize, angle, depth,Alignment::TopCenter);
+    Renderer::renderRectangle(newPos + glm::vec2(0.0f, halfHeight + borderSize), col, w, borderSize, angle, depth,Alignment::BottomCenter);
 }
-void Renderer::scissor(const int& x, const int& y, const uint& width, const uint& height) {
+void Renderer::scissor(const float x, const float y, const float width, const float height) {
     boost_func f = boost::bind<void>(&RenderingAPI2D::GLScissor, x, y, width, height);
     renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
 }

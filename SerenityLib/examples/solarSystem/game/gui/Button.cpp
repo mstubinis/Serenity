@@ -18,17 +18,17 @@ void Button::internalSetSize() {
     m_Height = getTextHeight() + m_Padding;
     m_Width = getTextWidth() + m_Padding;
 }
-Button::Button(const Font& font, const unsigned int& x, const unsigned int& y, const unsigned int& width, const unsigned int& height) : Widget(x, y, width, height) {
+Button::Button(const Font& font, const float x, const float y, const float width, const float height) : Widget(x, y, width, height) {
     setFont(font);
     setText("Button");
     setOnClickFunctor(epriv::emptyFunctor());
     setTextScale(1.0f, 1.0f);
-    m_Padding = 20;
+    m_Padding = 20.0f;
     setAlignment(Alignment::Center);
     setTextAlignment(TextAlignment::Center);
     internalSetSize();
 }
-Button::Button(const Font& font, const glm::uvec2& position, const unsigned int& width, const unsigned int& height) : Button(font,position.x,position.y,width,height) {
+Button::Button(const Font& font, const glm::vec2& position, const float width, const float height) : Button(font, position.x, position.y, width, height) {
 }
 Button::~Button() {
 
@@ -37,7 +37,7 @@ void Button::setTextScale(const glm::vec2& scale) {
     m_TextScale = scale;
     internalSetSize();
 }
-void Button::setTextScale(const float& x, const float& y) {
+void Button::setTextScale(const float x, const float y) {
     m_TextScale.x = x;
     m_TextScale.y = y;
     internalSetSize();
@@ -55,11 +55,11 @@ const string& Button::text() const {
     return m_Text;
 }
 
-const unsigned int Button::getTextHeight() const {
-    return static_cast<unsigned int>(m_Font->getTextHeight(m_Text) * m_TextScale.y);
+const float Button::getTextHeight() const {
+    return (m_Font->getTextHeight(m_Text) * m_TextScale.y);
 }
-const unsigned int Button::getTextWidth() const {
-    return static_cast<unsigned int>(m_Font->getTextWidth(m_Text) * m_TextScale.x);
+const float Button::getTextWidth() const {
+    return (m_Font->getTextWidth(m_Text) * m_TextScale.x);
 }
 
 void Button::setTextColor(const float& r, const float& g, const float& b, const float& a) {
@@ -90,25 +90,25 @@ void Button::render() {
     if (m_MouseIsOver)
         color += glm::vec4(0.15f);
     Renderer::renderRectangle(m_Position, color, m_Width, m_Height, 0, 0.01f, m_Alignment);
-    glm::uvec2 newPosTxt; 
+    glm::vec2 newPosTxt; 
     switch (m_TextAlignment) {
         case TextAlignment::Left: {
-            newPosTxt = glm::uvec2(m_Position.x - m_Width / 2, m_Position.y + getTextHeight());
+            newPosTxt = glm::vec2(m_Position.x - m_Width / 2.0f, m_Position.y + getTextHeight());
             break;
         }case TextAlignment::Center: {
-            newPosTxt = glm::uvec2(m_Position.x, m_Position.y + getTextHeight());
+            newPosTxt = glm::vec2(m_Position.x, m_Position.y + getTextHeight());
             break;
         }case TextAlignment::Right: {
-            newPosTxt = glm::uvec2(m_Position.x + m_Width / 2, m_Position.y + getTextHeight());
+            newPosTxt = glm::vec2(m_Position.x + m_Width / 2.0f, m_Position.y + getTextHeight());
             break;
         }default: {
-            newPosTxt = glm::uvec2(m_Position.x, m_Position.y + getTextHeight());
+            newPosTxt = glm::vec2(m_Position.x, m_Position.y + getTextHeight());
             break;
         }
     }
-    unsigned int fX = 0;
-    unsigned int fY = 0;
+    float fX = 0.0f;
+    float fY = 0.0f;
     Renderer::alignmentOffset(m_Alignment, fX, fY, m_Width, m_Height);
 
-    m_Font->renderText(m_Text, glm::uvec2(newPosTxt.x + fX, newPosTxt.y + fY), m_TextColor, 0, m_TextScale, 0.008f, m_TextAlignment);
+    m_Font->renderText(m_Text, glm::vec2(newPosTxt.x + fX, newPosTxt.y + fY), m_TextColor, 0, m_TextScale, 0.008f, m_TextAlignment);
 }

@@ -36,8 +36,11 @@ using namespace Engine;
 using namespace std;
 namespace boost_io = boost::iostreams;
 
-Map::Map(const string& n, const string& file):Scene(n){
+Map::Map(Client& client, const string& n, const string& file):Scene(n), m_Client(client){
     m_Player      = nullptr; 
+
+    m_ActiveCannonProjectiles.initialize(2500);
+    m_ActiveTorpedoProjectiles.initialize(2500);
 
     GameCamera* playerCamera = new GameCamera(0.35f,7000000000.0f,this);
 
@@ -51,6 +54,40 @@ Map::Map(const string& n, const string& file):Scene(n){
 }
 Map::~Map(){
     SAFE_DELETE_VECTOR(m_Objects);
+}
+PrimaryWeaponCannonProjectile* Map::getCannonProjectile(const int index) {
+    return m_ActiveCannonProjectiles[index];
+}
+SecondaryWeaponTorpedoProjectile* Map::getTorpedoProjectile(const int index) {
+    return m_ActiveTorpedoProjectiles[index];
+}
+void Map::removeCannonProjectile(const int index) {
+    const auto res = m_ActiveCannonProjectiles.delete_data_index(index);
+}
+void Map::removeTorpedoProjectile(const int index) {
+    const auto res = m_ActiveTorpedoProjectiles.delete_data_index(index);
+}
+const int Map::addCannonProjectile(PrimaryWeaponCannonProjectile* projectile, const int index) {
+    if(index == -1)
+        return m_ActiveCannonProjectiles.push_back(projectile);
+    return m_ActiveCannonProjectiles.insert(projectile, index);
+}
+const int Map::addTorpedoProjectile(SecondaryWeaponTorpedoProjectile* projectile, const int index) {
+    if (index == -1)
+        return m_ActiveTorpedoProjectiles.push_back(projectile);
+    return m_ActiveTorpedoProjectiles.insert(projectile, index);
+}
+const int Map::try_addCannonProjectile() {
+    return m_ActiveCannonProjectiles.use_next_available_index();
+}
+const int Map::try_addTorpedoProjectile() {
+    return m_ActiveTorpedoProjectiles.use_next_available_index();
+}
+const bool Map::try_addCannonProjectile(const int requestedIndex) {
+    return m_ActiveCannonProjectiles.can_push_at_index(requestedIndex);
+}
+const bool Map::try_addTorpedoProjectile(const int requestedIndex) {
+    return m_ActiveTorpedoProjectiles.can_push_at_index(requestedIndex);
 }
 
 string Map::allowedShipsSingleString() {
@@ -125,6 +162,9 @@ Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& this
         loadedAnchors.emplace(key, anchor);
     }
     return anchor;
+}
+Client& Map::getClient() {
+    return m_Client;
 }
 Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const glm::vec3& position) {
     return internalCreateAnchor(parentAnchor, thisName, loadedAnchors, position.x, position.y, position.z);
@@ -373,7 +413,12 @@ Ship* Map::createShip(Client& client, const string& shipClass, const string& shi
         ship = new Excelsior(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Leviathan")
         ship = new Leviathan(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-
+    else if (shipClass == "Akira")
+        ship = new Akira(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+    else if (shipClass == "Norway")
+        ship = new Norway(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+    else if (shipClass == "Intrepid")
+        ship = new Intrepid(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     return ship;
 }
 Anchor* Map::getRootAnchor() {
@@ -412,5 +457,27 @@ const vector<string> Map::getClosestAnchor(Anchor* currentAnchor) {
     return res;
 }
 void Map::update(const double& dt){
+    //torpedos
+    auto& torps = m_ActiveTorpedoProjectiles.data();
+    for (uint i = 0; i < torps.size(); ++i) {
+        auto* t = torps[i];
+        if (t && t->active) {
+            t->update(dt);
+            if (!t->active) {
+                m_ActiveTorpedoProjectiles.delete_data_index(i);
+            }
+        }
+    }
+    //cannons
+    auto& cannons = m_ActiveCannonProjectiles.data();
+    for (uint i = 0; i < cannons.size(); ++i) {
+        auto* c = cannons[i];
+        if (c && c->active) {
+            c->update(dt);
+            if (!c->active) {
+                m_ActiveCannonProjectiles.delete_data_index(i);
+            }
+        }
+    }
     Scene::update(dt);
 }

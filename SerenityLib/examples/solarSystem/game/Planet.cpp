@@ -410,8 +410,8 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor, glm::vec3 godRaysColor,glm:
     //addChild(m_Light);
     m_Light->setPosition(pos);
     scene->m_Objects.push_back(m_Light);
-    if(!Renderer::godRays::getSun()){
-        Renderer::godRays::setSun(&m_Entity);
+    if(!scene->getGodRaysSun()){
+        scene->setGodRaysSun(&m_Entity);
     }
 }
 Star::~Star(){

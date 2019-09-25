@@ -19,6 +19,12 @@ struct PacketType {enum Type: unsigned int {
     Undefined,
     Server_Shutdown,
 
+    Client_To_Server_Projectile_Cannon_Impact,
+    Client_To_Server_Projectile_Torpedo_Impact,
+    Server_To_Client_Projectile_Cannon_Impact,
+    Server_To_Client_Projectile_Torpedo_Impact,
+
+
     Client_To_Server_Ship_Health_Update,
     Server_To_Client_Ship_Health_Update,
 
@@ -90,6 +96,23 @@ struct Packet: public IPacket {
     }
     virtual void print() {}
     static Packet* getPacket(const sf::Packet& sfPacket);
+};
+
+struct PacketProjectileImpact : public Packet {
+    float impactX, impactY, impactZ, damage;
+    uint16_t normalX, normalY, normalZ, time, radius; //half floats
+    bool shields;
+    int index;
+    PacketProjectileImpact() {
+        damage = 0.0f;
+    }
+    bool validate(sf::Packet& sfPacket) {
+        return (sfPacket >> PacketType >> data >> impactX >> impactY >> impactZ >> damage >> normalX >> normalY >> normalZ >> time >> radius >> shields >> index);
+    }
+    bool build(sf::Packet& sfPacket) {
+        return (sfPacket << PacketType << data << impactX << impactY << impactZ << damage << normalX << normalY << normalZ << time << radius << shields << index);
+    }
+    void print() {}
 };
 struct PacketHealthUpdate : public Packet {
     struct PacketHealthFlags final { enum Flag {

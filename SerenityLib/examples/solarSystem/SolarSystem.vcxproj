@@ -212,20 +212,24 @@
     <ClInclude Include="game\Helper.h" />
     <ClInclude Include="game\HUD.h" />
     <ClInclude Include="game\map\Anchor.h" />
+    <ClInclude Include="game\map\Freelist.h" />
     <ClInclude Include="game\map\Map.h" />
     <ClInclude Include="game\Packet.h" />
     <ClInclude Include="game\Planet.h" />
     <ClInclude Include="game\ResourceManifest.h" />
     <ClInclude Include="game\Server.h" />
     <ClInclude Include="game\Ship.h" />
+    <ClInclude Include="game\ships\akira\Akira.h" />
     <ClInclude Include="game\ships\brel\Brel.h" />
     <ClInclude Include="game\ships\constitution\Constitution.h" />
     <ClInclude Include="game\ships\cube\Cube.h" />
     <ClInclude Include="game\ships\defiant\Defiant.h" />
     <ClInclude Include="game\ships\diamond\Diamond.h" />
     <ClInclude Include="game\ships\excelsior\Excelsior.h" />
+    <ClInclude Include="game\ships\intrepid\Intrepid.h" />
     <ClInclude Include="game\ships\leviathan\Leviathan.h" />
     <ClInclude Include="game\ships\miranda\Miranda.h" />
+    <ClInclude Include="game\ships\norway\Norway.h" />
     <ClInclude Include="game\ships\nova\Nova.h" />
     <ClInclude Include="game\ships\probe\Probe.h" />
     <ClInclude Include="game\ships\Ships.h" />
@@ -253,6 +257,8 @@
     <ClInclude Include="game\weapons\PlasmaTorpedo.h" />
     <ClInclude Include="game\weapons\PulsePhaser.h" />
     <ClInclude Include="game\weapons\QuantumTorpedo.h" />
+    <ClInclude Include="game\weapons\WeaponIncludes.h" />
+    <ClInclude Include="game\weapons\Weapons.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\Client.cpp" />
@@ -279,14 +285,17 @@
     <ClCompile Include="game\ResourceManifest.cpp" />
     <ClCompile Include="game\Server.cpp" />
     <ClCompile Include="game\Ship.cpp" />
+    <ClCompile Include="game\ships\akira\Akira.cpp" />
     <ClCompile Include="game\ships\brel\Brel.cpp" />
     <ClCompile Include="game\ships\constitution\Constitution.cpp" />
     <ClCompile Include="game\ships\cube\Cube.cpp" />
     <ClCompile Include="game\ships\defiant\Defiant.cpp" />
     <ClCompile Include="game\ships\diamond\Diamond.cpp" />
     <ClCompile Include="game\ships\excelsior\Excelsior.cpp" />
+    <ClCompile Include="game\ships\intrepid\Intrepid.cpp" />
     <ClCompile Include="game\ships\leviathan\Leviathan.cpp" />
     <ClCompile Include="game\ships\miranda\Miranda.cpp" />
+    <ClCompile Include="game\ships\norway\Norway.cpp" />
     <ClCompile Include="game\ships\nova\Nova.cpp" />
     <ClCompile Include="game\ships\probe\Probe.cpp" />
     <ClCompile Include="game\ships\shipSystems\ShipSystemBaseClass.cpp" />

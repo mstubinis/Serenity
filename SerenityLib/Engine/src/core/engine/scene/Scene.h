@@ -61,7 +61,7 @@ class Scene: public EngineResource, public EventObserver{
 
         
         Viewport& getMainViewport();
-        Viewport& addViewport(const uint& x, const uint& y, const uint& width, const uint& height, const Camera& camera);
+        Viewport& addViewport(const float x, const float y, const float width, const float height, const Camera& camera);
 
         Camera* getActiveCamera() const;
         void setActiveCamera(Camera&);
@@ -75,7 +75,9 @@ class Scene: public EngineResource, public EventObserver{
         void setGlobalIllumination(const float global, const float diffuse, const float specular);
         void setGlobalIllumination(const glm::vec3& globalIllumination);
 
-        
+        void setGodRaysSun(Entity*);
+        Entity* getGodRaysSun();
+
         Skybox* skybox() const;
         void setSkybox(Skybox*);
 

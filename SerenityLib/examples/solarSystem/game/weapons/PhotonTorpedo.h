@@ -28,21 +28,12 @@ struct PhotonTorpedoFlare final {
         spin = _spin;
     }
 };
-struct PhotonTorpedoProjectile final {
-    PhotonTorpedo& torpedo;
-    EntityWrapper* entity;
-    bool hasLock;
-    EntityWrapper* target;
-    float rotationAngleSpeed;
-    std::vector<PhotonTorpedoFlare> flares;
-    PointLight* light;
-    float currentTime;
-    float maxTime;
-    bool active;
-    PhotonTorpedoProjectile(PhotonTorpedo&, Map& map, const glm::vec3& position, const glm::vec3& forward);
+struct PhotonTorpedoProjectile final : public SecondaryWeaponTorpedoProjectile {
+    PhotonTorpedo&                    torpedo;
+    std::vector<PhotonTorpedoFlare>   flares;
+    PhotonTorpedoProjectile(PhotonTorpedo&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index);
     ~PhotonTorpedoProjectile();
     void update(const double& dt);
-    void destroy();
 };
 
 
@@ -54,9 +45,6 @@ class PhotonTorpedo final : public SecondaryWeaponTorpedo {
     friend struct PhotonTorpedoInstanceGlowUnbindFunctor;
     friend struct PhotonTorpedoFlareInstanceBindFunctor;
     friend struct PhotonTorpedoFlareInstanceUnbindFunctor;
-    private:
-        Map& m_Map;
-        std::vector<PhotonTorpedoProjectile*> m_ActiveProjectiles;
     public:
         PhotonTorpedo(
             Ship&,
@@ -75,8 +63,6 @@ class PhotonTorpedo final : public SecondaryWeaponTorpedo {
         );
         ~PhotonTorpedo();
 
-        const bool fire();
-        void forceFire();
         void update(const double& dt);
 };
 

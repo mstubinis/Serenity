@@ -13,13 +13,13 @@
 
 using namespace std;
 
-ServerLobbyConnectedPlayersWindow::ServerLobbyConnectedPlayersWindow(const Font& font, const unsigned int& x, const unsigned int& y) :m_Font(const_cast<Font&>(font)) {
+ServerLobbyConnectedPlayersWindow::ServerLobbyConnectedPlayersWindow(const Font& font, const float x, const float y) :m_Font(const_cast<Font&>(font)) {
     m_UserPointer = nullptr;
-    m_Width = 200;
-    m_Height = 300;
+    m_Width = 200.0f;
+    m_Height = 300.0f;
 
     m_ChatWindow = new ScrollFrame(x, y, m_Width, m_Height);
-    m_ChatWindow->setColor(1, 1, 0, 1);
+    m_ChatWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
 }
 ServerLobbyConnectedPlayersWindow::~ServerLobbyConnectedPlayersWindow() {
     SAFE_DELETE(m_ChatWindow);
@@ -58,7 +58,7 @@ ScrollFrame& ServerLobbyConnectedPlayersWindow::getWindowFrame() {
 void ServerLobbyConnectedPlayersWindow::setColor(const float& r, const float& g, const float& b, const float& a) {
     m_ChatWindow->setColor(r, g, b, a);
 }
-void ServerLobbyConnectedPlayersWindow::setPosition(const unsigned int& x, const unsigned int& y) {
+void ServerLobbyConnectedPlayersWindow::setPosition(const float x, const float y) {
     m_ChatWindow->setPosition(x, y);
 }
 void ServerLobbyConnectedPlayersWindow::update(const double& dt) {

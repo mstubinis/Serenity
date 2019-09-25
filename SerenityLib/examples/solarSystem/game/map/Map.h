@@ -1,10 +1,12 @@
 #pragma once
-#ifndef GAME_Map_H
-#define GAME_Map_H
+#ifndef GAME_MAP_H
+#define GAME_MAP_H
 
 #include <core/engine/scene/Scene.h>
 #include <unordered_map>
 #include <tuple>
+#include "../ships/shipSystems/ShipSystemWeapons.h"
+#include "Freelist.h"
 
 class Star;
 class Ship;
@@ -16,17 +18,18 @@ class Anchor;
 class Client;
 class Map: public Scene{
     private:
-        std::unordered_map<std::string, Planet*>   m_Planets;
-        std::unordered_map<std::string, Ship*>     m_Ships;
-        std::string                                m_Filename;
-        std::string                                m_SkyboxFile;
-        Ship*                                      m_Player;
+        std::unordered_map<std::string, Planet*>       m_Planets;
+        std::unordered_map<std::string, Ship*>         m_Ships;
+        std::string                                    m_Filename;
+        std::string                                    m_SkyboxFile;
+        Ship*                                          m_Player;
+        Client&                                        m_Client;
 
-        std::tuple<std::string, Anchor*>           m_RootAnchor;
-        std::tuple<std::string, Anchor*>           m_SpawnAnchor;
+        std::tuple<std::string, Anchor*>               m_RootAnchor;
+        std::tuple<std::string, Anchor*>               m_SpawnAnchor;
 
-        glm::vec3 m_oldClientPos;
-        glm::vec3 m_oldAnchorPos;
+        Freelist<PrimaryWeaponCannonProjectile*>       m_ActiveCannonProjectiles;
+        Freelist<SecondaryWeaponTorpedoProjectile*>    m_ActiveTorpedoProjectiles;
 
         void loadFromFile(const std::string& file);
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const float& x = 0, const float& y = 0, const float& z = 0);
@@ -36,10 +39,12 @@ class Map: public Scene{
 
         std::vector<EntityWrapper*> m_Objects;
 
-        Map(const std::string& name, const std::string& file);
+        Map(Client&, const std::string& name, const std::string& file);
         virtual ~Map();
 
         virtual void update(const double& dt);
+
+        Client& getClient();
 
         const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr);
         const bool hasShip(const std::string& shipName) const;
@@ -60,5 +65,19 @@ class Map: public Scene{
         std::unordered_map<std::string, Ship*>& getShips() { return m_Ships; }
         Anchor* getRootAnchor();
         Anchor* getSpawnAnchor();
+
+        const int addCannonProjectile(PrimaryWeaponCannonProjectile*, const int index = -1);
+        const int addTorpedoProjectile(SecondaryWeaponTorpedoProjectile*, const int index = -1);
+
+        PrimaryWeaponCannonProjectile* getCannonProjectile(const int index);
+        SecondaryWeaponTorpedoProjectile* getTorpedoProjectile(const int index);
+
+        void removeCannonProjectile(const int index);
+        void removeTorpedoProjectile(const int index);
+
+        const int try_addCannonProjectile();
+        const int try_addTorpedoProjectile();
+        const bool try_addCannonProjectile(const int requestedIndex);
+        const bool try_addTorpedoProjectile(const int requestedIndex);
 };
 #endif

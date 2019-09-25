@@ -12,12 +12,12 @@ class Text;
 class ScrollFrame: public Widget {
     private:
         ScrollBar*                                m_ScrollBar;
-        unsigned int                              m_BorderSize;
-        unsigned int                              m_ContentPadding;
-        unsigned int                              m_ContentHeight;
+        float                                     m_BorderSize;
+        float                                     m_ContentPadding;
+        float                                     m_ContentHeight;
         std::vector<Widget*>                      m_Content;
     public:
-        ScrollFrame(const unsigned int& x, const unsigned int& y, const unsigned int& w, const unsigned int& h);
+        ScrollFrame(const float x, const float y, const float w, const float h);
         ~ScrollFrame();
 
         const float contentHeight() const;
@@ -25,17 +25,17 @@ class ScrollFrame: public Widget {
         void addContent(Widget* widget);
         void setAlignment(const Alignment::Type& alignment);
 
-        void setBorderSize(const unsigned int);
-        void setContentPadding(const unsigned int);
+        void setBorderSize(const float borderSize);
+        void setContentPadding(const float padding);
 
         void internalAddContent();
         std::vector<Widget*>& content();
 
-        const unsigned int width() const;
-        const unsigned int height() const;
+        const float width() const;
+        const float height() const;
 
-        void setPosition(const unsigned int& x, const unsigned int& y);
-        void setPosition(const glm::uvec2& position);
+        void setPosition(const float x, const float y);
+        void setPosition(const glm::vec2& position);
 
         void setColor(const float& r, const float& g, const float& b, const float& a);
         void setColor(const glm::vec4& color);

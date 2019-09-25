@@ -32,18 +32,18 @@ struct OnEnterFunctor final {
 };
 
 
-ServerLobbyChatWindow::ServerLobbyChatWindow(const Font& font, const unsigned int& x, const unsigned int& y):m_Font(const_cast<Font&>(font)){
+ServerLobbyChatWindow::ServerLobbyChatWindow(const Font& font, const float x, const float y):m_Font(const_cast<Font&>(font)){
     m_UserPointer = nullptr;
-    m_Width = 630;
-    m_Height = 300;
+    m_Width = 630.0f;
+    m_Height = 300.0f;
 
     m_ChatWindow = new ScrollFrame(x, y, m_Width, m_Height);
-    m_ChatWindow->setColor(1, 1, 0, 1);
+    m_ChatWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
 
-    m_ChatInput = new TextBox("Chat", font,85, 0 , 0);
-    m_ChatInput->setPosition(x + (m_Width / 2) + 145, y - m_Height - m_ChatInput->getTextHeight() / 2 - 15);
-    m_ChatInput->setColor(0.5f, 0.5f, 0.5f, 1);
-    m_ChatInput->setTextColor(1, 1, 0, 1);
+    m_ChatInput = new TextBox("Chat", font, 85, 0.0f , 0.0f);
+    m_ChatInput->setPosition(x + (m_Width / 2.0f) + 145.0f, y - m_Height - m_ChatInput->getTextHeight() / 2.0f - 15.0f);
+    m_ChatInput->setColor(0.5f, 0.5f, 0.5f, 1.0f);
+    m_ChatInput->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
     m_ChatInput->setTextScale(0.62f, 0.62f);
     m_ChatInput->setOnEnterFunctor(OnEnterFunctor());
     m_ChatInput->setUserPointer(this);
@@ -79,9 +79,9 @@ void ServerLobbyChatWindow::setColor(const float& r, const float& g, const float
     m_ChatWindow->setColor(r,g,b,a);
     m_ChatInput->setTextColor(r,g,b,a);
 }
-void ServerLobbyChatWindow::setPosition(const unsigned int& x, const unsigned int& y) {
-    m_ChatWindow->setPosition(x,y);
-    m_ChatInput->setPosition(x + (m_Width / 2) + 145,y - m_Height - m_ChatInput->getTextHeight() / 2 - 15);
+void ServerLobbyChatWindow::setPosition(const float x, const float y) {
+    m_ChatWindow->setPosition(x, y);
+    m_ChatInput->setPosition(x + (m_Width / 2.0f) + 145.0f, y - m_Height - m_ChatInput->getTextHeight() / 2.0f - 15.0f);
 }
 
 void ServerLobbyChatWindow::update(const double& dt) {

@@ -99,13 +99,13 @@ namespace Engine {
                 }
                 void postUpdate(Scene& scene, const double& dt) {
                     if (destroyedEntities.size() > 0) {
-                        for (auto& pool: componentPools) {
+                        for (auto& entityID : destroyedEntities) {
+                            entityPool.destroyFlaggedEntity(entityID);
+                        }
+                        for (auto& pool : componentPools) {
                             for (auto& entityID : destroyedEntities) {
                                 pool->_remove(entityID);
                             }
-                        }
-                        for (auto& entityID : destroyedEntities) {
-                            entityPool.destroyFlaggedEntity(entityID);
                         }
                         vector_clear(destroyedEntities);
                     }

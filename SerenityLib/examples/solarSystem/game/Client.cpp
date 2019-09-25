@@ -29,6 +29,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "ships/shipSystems/ShipSystemWeapons.h"
+#include "weapons/Weapons.h"
 
 #include <iostream>
 
@@ -292,7 +293,23 @@ void Client::onReceive() {
             // Data extracted successfully...
             HUD& hud = *m_Core.m_HUD;
             switch (basePacket->PacketType) {
-                case PacketType::Server_To_Client_Client_Left_Map: {
+                case PacketType::Server_To_Client_Projectile_Cannon_Impact: {
+                    PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(basePacket);
+                    auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
+                    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
+                    auto* targetShip = map.getShips().at(list[0]);
+                    if(targetShip)
+                        targetShip->updateProjectileImpact(pI);
+                    break;
+                }case PacketType::Server_To_Client_Projectile_Torpedo_Impact: {
+                    PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(basePacket);
+                    auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
+                    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
+                    auto* targetShip = map.getShips().at(list[0]);
+                    if(targetShip)
+                        targetShip->updateProjectileImpact(pI);
+                    break;
+                }case PacketType::Server_To_Client_Client_Left_Map: {
                     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
                     auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
                     auto& ships = map.getShips();
@@ -312,10 +329,12 @@ void Client::onReceive() {
                     auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
                     auto& ships = map.getShips();
                     if (map.hasShip(pI.name)) {
+                        auto* ship = ships.at(pI.name);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                        for (auto& str : info) {
-                            auto& cannon = ships[pI.name]->getPrimaryWeaponCannon(stoi(str));
-                            cannon.forceFire();
+                        for (uint i = 0; i < info.size() / 2; ++i) {
+                            auto& cannon = ship->getPrimaryWeaponCannon(stoi(info[i * 2]));
+                            const auto projectile_index = stoi(info[(i * 2) + 1]);
+                            const bool success = cannon.forceFire(projectile_index);
                         }
                     }
                     break;
@@ -324,10 +343,12 @@ void Client::onReceive() {
                     auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
                     auto& ships = map.getShips();
                     if (map.hasShip(pI.name)) {
+                        auto* ship = ships.at(pI.name);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                        for (auto& str : info) {
-                            auto& beam = ships[pI.name]->getPrimaryWeaponBeam(stoi(str));
-                            beam.forceFire(0.0f);
+                        for (uint i = 0; i < info.size() / 2; ++i) {
+                            auto& beam = ship->getPrimaryWeaponBeam(stoi(info[i * 2]));
+                            const auto projectile_index = stoi(info[(i * 2) + 1]);
+                            beam.fire(0.0f);
                         }
                     }
                     break;
@@ -336,10 +357,12 @@ void Client::onReceive() {
                     auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
                     auto& ships = map.getShips();
                     if (map.hasShip(pI.name)) {
+                        auto* ship = ships.at(pI.name);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                        for (auto& str : info) {
-                            auto& torpedo = ships[pI.name]->getSecondaryWeaponTorpedo(stoi(str));
-                            torpedo.forceFire();
+                        for (uint i = 0; i < info.size() / 2; ++i) {
+                            auto& torpedo = ship->getSecondaryWeaponTorpedo(stoi(info[i * 2]));
+                            const auto projectile_index = stoi(info[(i * 2) + 1]);
+                            const bool success = torpedo.forceFire(projectile_index);
                         }
                     }
                     break;
@@ -500,7 +523,7 @@ void Client::onReceive() {
                     m_mapname = mapname;
                     Map* map = static_cast<Map*>(Resources::getScene(mapname));
                     if (!map) {
-                        map = new Map(mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
+                        map = new Map(*this, mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
                     }
                     auto& menuScene = *const_cast<Scene*>(Resources::getScene("Menu"));
                     auto* menuSkybox = menuScene.skybox();

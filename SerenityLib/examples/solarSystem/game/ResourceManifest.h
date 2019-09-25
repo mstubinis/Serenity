@@ -35,6 +35,8 @@ struct ResourceManifest{
     static Handle LeviathanMesh;
     static Handle ShrikeMesh;
     static Handle BrelMesh;
+    static Handle AkiraMesh;
+    static Handle NorwayMesh;
 
 	static Handle NovaMaterial;
     static Handle MirandaMaterial;
@@ -45,6 +47,8 @@ struct ResourceManifest{
     static Handle DefiantSharkMaterial;
     static Handle ShrikeMaterial;
     static Handle BrelMaterial;
+    static Handle AkiraMaterial;
+    static Handle NorwayMaterial;
 
     //hull damage
     static Handle HullDamageOutline1Material;

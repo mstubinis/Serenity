@@ -1,9 +1,5 @@
-#include "PhotonTorpedo.h"
+#include "Weapons.h"
 #include "../map/Map.h"
-#include "../ResourceManifest.h"
-#include "../Ship.h"
-#include "../Helper.h"
-
 
 #include <ecs/Components.h>
 #include <core/engine/math/Engine_Math.h>
@@ -36,18 +32,18 @@ struct PhotonTorpedoCollisionFunctor final { void operator()(ComponentBody& owne
             Ship* otherShip = static_cast<Ship*>(otherPtrShip);
             if (otherShip && torpedoProjectile.active) {
                 Ship* sourceShip = static_cast<Ship*>(torpedoShipVoid);
-                PhotonTorpedo& torpedo = *static_cast<PhotonTorpedo*>(owner.getUserPointer2());
-                auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
-                auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                auto local = otherHit - other.position();
-                if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                    shields->receiveHit(normal, local, torpedo.impactRadius, torpedo.impactTime, torpedo.damage);
-                    torpedoProjectile.destroy();
-                    return;
-                }
-                if (hull && other.getUserPointer() == hull) {
-                    hull->receiveHit(normal, local, torpedo.impactRadius, torpedo.impactTime, torpedo.damage, true);
-                    torpedoProjectile.destroy();
+                if (sourceShip->IsPlayer()) {
+                    PhotonTorpedo& torpedo = *static_cast<PhotonTorpedo*>(owner.getUserPointer2());
+                    auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
+                    auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                    auto local = otherHit - other.position();
+                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
+                        torpedoProjectile.clientToServerImpact(torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, true);
+                        return;
+                    }
+                    if (hull && other.getUserPointer() == hull) {
+                        torpedoProjectile.clientToServerImpact(torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, false);
+                    }
                 }
             }
         }
@@ -140,20 +136,16 @@ struct PhotonTorpedoFlareInstanceUnbindFunctor { void operator()(EngineResource*
 
 
 
-PhotonTorpedoProjectile::PhotonTorpedoProjectile(PhotonTorpedo& source, Map& map, const glm::vec3& position, const glm::vec3& forward):torpedo(source){
-    entity = new EntityWrapper(map);
-    currentTime = 0.0f;
+PhotonTorpedoProjectile::PhotonTorpedoProjectile(PhotonTorpedo& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index):torpedo(source), SecondaryWeaponTorpedoProjectile(map,position,forward,index){
     maxTime = 30.5f;
-    hasLock = false;
-    target = nullptr;
     rotationAngleSpeed = source.rotationAngleSpeed;
 
-    EntityDataRequest request(entity->entity());
+    EntityDataRequest request(entity);
     EntityDataRequest shipRequest(source.ship.entity());
 
-    auto& model    = *entity->addComponent<ComponentModel>(request, Mesh::Plane, (Material*)(ResourceManifest::TorpedoCoreMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles_2);
+    auto& model    = *entity.addComponent<ComponentModel>(request, Mesh::Plane, (Material*)(ResourceManifest::TorpedoCoreMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles_2);
     auto& glow     = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlowMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& body     = *entity->addComponent<ComponentBody>(request, CollisionType::Sphere);
+    auto& body     = *entity.addComponent<ComponentBody>(request, CollisionType::Sphere);
 
     auto& core = model.getModel(0);
     core.setCustomBindFunctor(PhotonTorpedoInstanceCoreBindFunctor());
@@ -199,7 +191,6 @@ PhotonTorpedoProjectile::PhotonTorpedoProjectile(PhotonTorpedo& source, Map& map
 
         flares.push_back(flareD);
     }
-    active = true;
     glm::vec3 finalPosition = glm::vec3(0.0f);
 
     auto& shipBody = *source.ship.getComponent<ComponentBody>(shipRequest);
@@ -244,58 +235,24 @@ PhotonTorpedoProjectile::PhotonTorpedoProjectile(PhotonTorpedo& source, Map& map
     light->setAttenuation(LightRange::_20);
 }
 PhotonTorpedoProjectile::~PhotonTorpedoProjectile() {
-    entity->destroy();
-    SAFE_DELETE(entity);
-}
-void PhotonTorpedoProjectile::destroy() {
-    if (active) {
-        active = false;
-        entity->destroy();
-        if (light) {
-            light->destroy();
-            SAFE_DELETE(light);
-        }
-    }
 }
 void PhotonTorpedoProjectile::update(const double& dt) {
     if (active) {
-        const float fdt = static_cast<float>(dt);
-        currentTime += fdt;
-
-        auto& glowModel = *entity->getComponent<ComponentModel>();
-        auto& body = *entity->getComponent<ComponentBody>();
-        auto glowBodyPos = body.position_render();
-
+        auto& glowModel = *entity.getComponent<ComponentModel>();
         //homing logic
         if (hasLock && target) {
 
         }
-        auto* activeCam = glowModel.getOwner().scene().getActiveCamera();
-        auto camPos = activeCam->getPosition();
-
-        //TODO: hacky workaround for messed up camera forward vector
-        auto vec = glm::normalize(glowBodyPos - camPos);
-        vec *= 0.01f;
-        body.setRotation(activeCam->getOrientation());
-        glowModel.getModel(1).setPosition(vec);
-
         //flares
         for (uint i = 0; i < flares.size(); ++i) {
             auto& flare = glowModel.getModel(2 + i);
             flare.rotate(flares[i].spin);
         }
-        if (light) {
-            auto& lightBody = *light->getComponent<ComponentBody>();
-            lightBody.setPosition(glowBodyPos);
-        }
-
-        if (currentTime >= maxTime) {
-            destroy();
-        }
     }
+    SecondaryWeaponTorpedoProjectile::update(dt);
 }
 
-PhotonTorpedo::PhotonTorpedo(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume, const float& _rotAngleSpeed) :SecondaryWeaponTorpedo(ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume, _rotAngleSpeed), m_Map(map) {
+PhotonTorpedo::PhotonTorpedo(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume, const float& _rotAngleSpeed) :SecondaryWeaponTorpedo(map, WeaponType::PhotonTorpedo, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume, _rotAngleSpeed){
 
 }
 PhotonTorpedo::~PhotonTorpedo() {
@@ -303,36 +260,5 @@ PhotonTorpedo::~PhotonTorpedo() {
 }
 
 void PhotonTorpedo::update(const double& dt) {
-    for (auto& projectile : m_ActiveProjectiles) {
-        projectile->update(dt);
-    }
-    for (auto& projectile : m_ActiveProjectiles) {
-        if (!projectile->active) {
-            removeFromVector(m_ActiveProjectiles, projectile);
-        }
-    }
     SecondaryWeaponTorpedo::update(dt);
-}
-const bool PhotonTorpedo::fire() {
-    const auto res = SecondaryWeaponTorpedo::fire();
-    if (res) {
-        forceFire();
-        return true;
-    }
-    return false;
-}
-void PhotonTorpedo::forceFire() {
-    auto* projectile = new PhotonTorpedoProjectile(*this, m_Map, position, forward);
-    m_ActiveProjectiles.push_back(projectile);
-    auto& shipBody = *ship.getComponent<ComponentBody>();
-    auto shipMatrix = shipBody.modelMatrix();
-    shipMatrix = glm::translate(shipMatrix, position);
-    const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
-
-    soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPhotonTorpedo);
-    if (soundEffect) {
-        soundEffect->setVolume(volume);
-        soundEffect->setPosition(finalPosition);
-        soundEffect->setAttenuation(0.05f);
-    }
 }

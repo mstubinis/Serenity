@@ -3,6 +3,7 @@
 #define GAME_SHIP_SYSTEM_WEAPONS_H
 
 #include "ShipSystemBaseClass.h"
+#include "../../weapons/WeaponIncludes.h"
 #include <vector>
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
@@ -16,17 +17,21 @@ class  PointLight;
 class  RodLight;
 class  Map;
 class  Ship;
+class  Client;
 
 struct ShipWeapon {
-    Ship&           ship;
-    float           arc;
-    glm::vec3       position; //relative to the ship's model center
-    glm::vec3       forward;
-    float           volume;
-    float           damage;
-    float           impactRadius;
-    float           impactTime;
-    SoundEffect*    soundEffect;
+    Map&             m_Map;
+    uint             index;
+    WeaponType::Type type;
+    Ship&            ship;
+    float            arc;
+    glm::vec3        position; //relative to the ship's model center
+    glm::vec3        forward;
+    float            volume;
+    float            damage;
+    float            impactRadius;
+    float            impactTime;
+    SoundEffect*     soundEffect;
 
     uint        numRounds;
     uint        numRoundsMax;
@@ -34,6 +39,8 @@ struct ShipWeapon {
     float       rechargeTimer;
 
     ShipWeapon(
+        Map&,
+        WeaponType::Type _type,
         Ship& _ship,
         const glm::vec3& _position,
         const glm::vec3& _forward,
@@ -60,21 +67,27 @@ struct PrimaryWeaponCannonPrediction final {
 };
 
 struct PrimaryWeaponCannonProjectile {
+    Map& map;
+    uint          projectile_index;
     Entity        entity;
     PointLight*   light;
     float         currentTime;
     float         maxTime;
     bool          active;
-    PrimaryWeaponCannonProjectile(Map& map, const glm::vec3& position, const glm::vec3& forward);
-    ~PrimaryWeaponCannonProjectile();
+    bool          destroyed;
+    PrimaryWeaponCannonProjectile(Map& map, const glm::vec3& position, const glm::vec3& forward, const int index);
+    virtual ~PrimaryWeaponCannonProjectile();
     virtual void update(const double& dt);
     virtual void destroy();
+
+    void clientToServerImpact(Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const bool& shields);
 };
 
 struct PrimaryWeaponCannon : public ShipWeapon {
     float       travelSpeed;
-
     PrimaryWeaponCannon(
+        Map&,
+        WeaponType::Type _type,
         Ship& _ship,
         const glm::vec3& _position,
         const glm::vec3& _forward,
@@ -87,31 +100,41 @@ struct PrimaryWeaponCannon : public ShipWeapon {
         const float& _travelSpeed,
         const float& volume
     );
-    virtual const bool fire();
-    virtual void forceFire();
+    virtual const int canFire();
+    const bool forceFire(const int index);
     virtual const PrimaryWeaponCannonPrediction calculatePredictedVector(ComponentBody& projectileBody);
     virtual void update(const double& dt);
 };
+
+
+struct BeamWeaponState final {enum State {
+    JustStarted,
+    WindingUp,
+    Firing,
+    CoolingDown,
+    JustTurnedOff,
+    Off,
+};};
 
 struct PrimaryWeaponBeam : public ShipWeapon {
     std::vector<glm::vec3>   windupPoints;
     float                    chargeTimer;
     float                    chargeTimerSpeed;
-    bool                     isFiring;
-    bool                     isFiringWeapon;
+    BeamWeaponState::State   state;
+    //bool                     isFiring;
+    //bool                     isFiringWeapon;
     float                    firingTime;
     float                    firingTimeShieldGraphicPing;
     float                    firingTimeMax;
 
-    EntityWrapper*           beamGraphic;
-    EntityWrapper*           beamEndPointGraphic;
+    Entity                   beamGraphic;
+    Entity                   beamEndPointGraphic;
     RodLight*                beamLight;
 
     std::vector<glm::vec3>   modPts;
     std::vector<glm::vec2>   modUvs;
-
-
     PrimaryWeaponBeam(
+        WeaponType::Type _type,
         Ship& _ship,
         Map& map,
         const glm::vec3& _position,
@@ -128,8 +151,9 @@ struct PrimaryWeaponBeam : public ShipWeapon {
         const float& _firingTime
     );
     ~PrimaryWeaponBeam();
+    const bool canFire();
     virtual const bool fire(const double& dt);
-    virtual void forceFire(const double& dt);
+    virtual const bool forceFire(const double& dt);
     virtual const glm::vec3 calculatePredictedVector();
     virtual void update(const double& dt);
 
@@ -150,11 +174,32 @@ struct SecondaryWeaponTorpedoPrediction final {
     }
 };
 
+struct SecondaryWeaponTorpedoProjectile {
+    Map& map;
+    uint             projectile_index;
+    Entity           entity;
+    bool             hasLock;
+    EntityWrapper*   target;
+    float            rotationAngleSpeed;
+    PointLight*      light;
+    float            currentTime;
+    float            maxTime;
+    bool             active;
+    bool             destroyed;
+    SecondaryWeaponTorpedoProjectile(Map& map, const glm::vec3& position, const glm::vec3& forward, const int index);
+    virtual ~SecondaryWeaponTorpedoProjectile();
+    virtual void update(const double& dt);
+    virtual void destroy();
+
+    void clientToServerImpact(Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const bool& shields);
+};
+
 struct SecondaryWeaponTorpedo : public ShipWeapon {
     float           travelSpeed;
     float           rotationAngleSpeed;
-
     SecondaryWeaponTorpedo(
+        Map&,
+        WeaponType::Type _type,
         Ship& _ship,
         const glm::vec3& _position,
         const glm::vec3& _forward,
@@ -171,9 +216,8 @@ struct SecondaryWeaponTorpedo : public ShipWeapon {
 
     virtual const bool isInControlledArc(EntityWrapper* target);
 
-    virtual const bool canFire();
-    virtual const bool fire();
-    virtual void forceFire();
+    virtual const int canFire();
+    const bool forceFire(const int index);
     virtual const SecondaryWeaponTorpedoPrediction calculatePredictedVector(ComponentBody& projectileBody);
     virtual void update(const double& dt);
 };
@@ -194,6 +238,10 @@ class ShipSystemWeapons final : public ShipSystem {
         void addPrimaryWeaponBeam(PrimaryWeaponBeam&);
         void addPrimaryWeaponCannon(PrimaryWeaponCannon&);
         void addSecondaryWeaponTorpedo(SecondaryWeaponTorpedo&);
+
+        PrimaryWeaponBeam& getPrimaryWeaponBeam(const uint index);
+        PrimaryWeaponCannon& getPrimaryWeaponCannon(const uint index);
+        SecondaryWeaponTorpedo& getSecondaryWeaponTorpedo(const uint index);
 
         void update(const double& dt);
 };

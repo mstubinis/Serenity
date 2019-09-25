@@ -54,6 +54,7 @@ void Core::startServer(const unsigned short& port, const string& mapname) {
 }
 void Core::shutdownServer() {
     if (m_Server) {
+        m_Server->shutdownMap();
         m_Server->shutdown();
         SAFE_DELETE(m_Server);
     }
@@ -121,18 +122,18 @@ void Core::init() {
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(60);
 
-    Scene* s = new Scene("Menu");
-    Resources::setCurrentScene(s);
-    Camera* main_camera = new Camera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y), 0.1f, 15000.0f, s);
-    GameCamera* ship_camera = new GameCamera(0.1f, 50.0f, s);
-    s->setActiveCamera(*main_camera);
-    s->getMainViewport().removeRenderFlag(ViewportRenderingFlag::Skybox);
+    Scene* menuScene = new Scene("Menu");
+    Resources::setCurrentScene(menuScene);
+    Camera* main_camera = new Camera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y), 0.1f, 15000.0f, menuScene);
+    GameCamera* ship_camera = new GameCamera(0.1f, 50.0f, menuScene);
+    menuScene->setActiveCamera(*main_camera);
+    menuScene->getMainViewport().removeRenderFlag(ViewportRenderingFlag::Skybox);
 
-    SunLight* light = new SunLight(glm::vec3(0.0f), LightType::Sun, s);
+    SunLight* light = new SunLight(glm::vec3(0.0f), LightType::Sun, menuScene);
     light->setColor(1.55f, 1.55f, 1.3f);
-    light->setPosition(0, 3000, -10000);
+    light->setPosition(0.0f, 3000.0f, -10000.0f);
 
-    m_ChosenShip = new EntityWrapper(*s);
+    m_ChosenShip = new EntityWrapper(*menuScene);
 
     auto e = m_ChosenShip->entity();
     ship_camera->setTarget(m_ChosenShip);
@@ -143,7 +144,7 @@ void Core::init() {
 
     ModelInstance::setDefaultViewportFlag(ViewportFlag::_1);
 
-    m_HUD        = new HUD(*s,*ship_camera, m_GameState, *this);
+    m_HUD        = new HUD(*menuScene, *ship_camera, m_GameState, *this);
     m_Initalized = true;
     m_HUD->go_to_main_menu();
 }

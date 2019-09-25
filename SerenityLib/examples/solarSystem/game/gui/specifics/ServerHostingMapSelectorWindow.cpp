@@ -31,31 +31,30 @@ struct MapSelectorButtonOnClick final{ void operator()(Button* button) const {
 }};
 
 
-ServerHostingMapSelectorWindow::ServerHostingMapSelectorWindow(const Font& font, const unsigned int& x, const unsigned int& y):m_Font(const_cast<Font&>(font)){
-    m_Width = 600;
-    m_Height = 300;
-    m_MapFileWindow = new ScrollFrame(Resources::getWindowSize().x / 2 - (m_Width / 2), 630, m_Width, m_Height);
+ServerHostingMapSelectorWindow::ServerHostingMapSelectorWindow(const Font& font, const float x, const float y):m_Font(const_cast<Font&>(font)){
+    m_Width = 600.0f;
+    m_Height = 300.0f;
+    m_MapFileWindow = new ScrollFrame(Resources::getWindowSize().x / 2.0f - (m_Width / 2.0f), 630.0f, m_Width, m_Height);
     m_MapFileWindow->setColor(1, 1, 0, 1);
-    m_MapFileWindow->setContentPadding(0);
+    m_MapFileWindow->setContentPadding(0.0f);
     //m_ServerHostMapSelector->setAlignment(Alignment::Center);
     //get a list of maps and add em
     string path = (ResourceManifest::BasePath + "data/Systems/");
     if (!path.empty()) {
-        namespace fs = boost::filesystem;
-        fs::path apk_path(path);
-        fs::recursive_directory_iterator end;
-        for (fs::recursive_directory_iterator i(apk_path); i != end; ++i) {
-            fs::path cp = (*i);
-            Button* button = new Button(m_Font, 0, 0, 100, 40);
+        boost::filesystem::path apk_path(path);
+        boost::filesystem::recursive_directory_iterator end;
+        for (boost::filesystem::recursive_directory_iterator i(apk_path); i != end; ++i) {
+            boost::filesystem::path cp = (*i);
+            Button* button = new Button(m_Font, 0.0f, 0.0f, 100.0f, 40.0f);
             const string& file = (cp.filename().string());
             const string& ext = boost::filesystem::extension(file);
             string copy = file;
             copy = copy.substr(0, copy.size() - ext.size());
             button->setText(copy);
             button->setColor(0.5f, 0.5f, 0.5f, 0.0f);
-            button->setTextColor(1, 1, 0, 1);
+            button->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
             button->setAlignment(Alignment::TopLeft);
-            button->setWidth(600);
+            button->setWidth(600.0f);
             button->setTextAlignment(TextAlignment::Left);
             button->setUserPointer(this);
             button->setOnClickFunctor(MapSelectorButtonOnClick());
@@ -64,12 +63,12 @@ ServerHostingMapSelectorWindow::ServerHostingMapSelectorWindow(const Font& font,
         }
     }
     m_Label = new Text(x, y, m_Font, "Choose Map");
-    m_Label->setColor(1, 1, 0, 1);
-    const auto& lineHeight = m_Font.getTextHeight("X") * m_Label->textScale().y;
-    m_Label->setPosition(x, y + 50);
+    m_Label->setColor(1.0f, 1.0f, 0.0f, 1.0f);
+    const auto lineHeight = m_Font.getTextHeight("X") * m_Label->textScale().y;
+    m_Label->setPosition(x, y + 50.0f);
 
-    m_CurrentChoice = new Text(x + m_Width, y + 50, m_Font);
-    m_CurrentChoice->setColor(0, 1, 0, 1);
+    m_CurrentChoice = new Text(x + m_Width, y + 50.0f, m_Font);
+    m_CurrentChoice->setColor(0.0f, 1.0f, 0.0f, 1.0f);
     m_CurrentChoice->setTextAlignment(TextAlignment::Right);
 }
 ServerHostingMapSelectorWindow::~ServerHostingMapSelectorWindow() {
@@ -83,12 +82,12 @@ const Text& ServerHostingMapSelectorWindow::getCurrentChoice() const {
 void ServerHostingMapSelectorWindow::setColor(const float& r, const float& g, const float& b, const float& a) {
     m_MapFileWindow->setColor(r, g, b, a);
 }
-void ServerHostingMapSelectorWindow::setPosition(const unsigned int& x, const unsigned int& y) {
+void ServerHostingMapSelectorWindow::setPosition(const float x, const float y) {
     m_MapFileWindow->setPosition(x, y);
 
-    const auto& lineHeight = m_Font.getTextHeight("X");
-    m_Label->setPosition(x, y + 50);
-    m_CurrentChoice->setPosition(x + m_Width, y + 50);
+    const auto lineHeight = m_Font.getTextHeight("X");
+    m_Label->setPosition(x, y + 50.0f);
+    m_CurrentChoice->setPosition(x + m_Width, y + 50.0f);
 }
 
 void ServerHostingMapSelectorWindow::setUserPointer(void* ptr) {

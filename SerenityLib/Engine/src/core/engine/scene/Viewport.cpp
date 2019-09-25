@@ -9,7 +9,7 @@ using namespace std;
 Viewport::Viewport(const Scene& scene, const Camera& camera):m_Scene(const_cast<Scene&>(scene)){
     setCamera(camera);
     const auto& winSize   = Resources::getWindowSize();
-    setViewportDimensions(0, 0, winSize.x, winSize.y);
+    setViewportDimensions(0.0f, 0.0f, static_cast<float>(winSize.x), static_cast<float>(winSize.y));
     activate();
     setAspectRatioSynced(true);
 
@@ -81,13 +81,13 @@ bool Viewport::setCamera(const Camera& camera) {
     }
     return false;
 }
-void Viewport::setViewportDimensions(const unsigned int& x, const unsigned int& y, const unsigned int& width, const unsigned int& height) {
+void Viewport::setViewportDimensions(const float x, const float y, const float width, const float height) {
     m_Viewport_Dimensions.x = x;
     m_Viewport_Dimensions.y = y;
     m_Viewport_Dimensions.z = width;
     m_Viewport_Dimensions.w = height;
 }
-const glm::uvec4& Viewport::getViewportDimensions() const {
+const glm::vec4& Viewport::getViewportDimensions() const {
     return m_Viewport_Dimensions;
 }
 const unsigned int& Viewport::getRenderFlags() const {

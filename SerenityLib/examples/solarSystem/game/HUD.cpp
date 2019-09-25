@@ -123,6 +123,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
                             const int port = stoi(portstring);
                             hud.m_Core.startServer(port, map);
                             hud.m_Core.startClient(port, username, "127.0.0.1"); //the client will request validation at this stage
+                            hud.m_Core.getServer()->startupMap();
                             hud.m_ServerLobbyChatWindow->setUserPointer(hud.m_Core.getClient());
                         }else{
                             hud.setErrorText("The username must only contain letters");
@@ -179,21 +180,21 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
 HUD::HUD(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
     m_FontHandle = Resources::addFont(ResourceManifest::BasePath + "data/Fonts/consolas.fnt");
     m_Font = Resources::getFont(m_FontHandle);
-    Engine::Math::setColor(m_Color, 255, 255, 0);
+    Engine::Math::setColor(m_Color, 255.0f, 255.0f, 0.0f);
     m_Active = true;
     m_MessageText = "";
     m_ErrorTimer = 0.0f;
 
     const auto& windowDimensions = Resources::getWindowSize();
 
-    m_ButtonHost = new Button(*m_Font, glm::vec2(windowDimensions.x / 2, 275), 150, 50);
+    m_ButtonHost = new Button(*m_Font, glm::vec2(windowDimensions.x / 2.0f, 275.0f), 150.0f, 50.0f);
     m_ButtonHost->setText("Host");
-    m_ButtonHost->setColor(0.5f, 0.5f, 0.5f, 1);
-    m_ButtonHost->setTextColor(1, 1, 0, 1);
-    m_ButtonJoin = new Button(*m_Font, glm::vec2(windowDimensions.x / 2, 155), 150, 50);
+    m_ButtonHost->setColor(0.5f, 0.5f, 0.5f, 1.0f);
+    m_ButtonHost->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
+    m_ButtonJoin = new Button(*m_Font, glm::vec2(windowDimensions.x / 2.0f, 155.0f), 150.0f, 50.0f);
     m_ButtonJoin->setText("Join");
-    m_ButtonJoin->setColor(0.5f, 0.5f, 0.5f, 1);
-    m_ButtonJoin->setTextColor(1, 1, 0, 1);
+    m_ButtonJoin->setColor(0.5f, 0.5f, 0.5f, 1.0f);
+    m_ButtonJoin->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
     
     m_ButtonHost->setUserPointer(this);
     m_ButtonJoin->setUserPointer(this);
@@ -202,14 +203,14 @@ HUD::HUD(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m_G
     m_ButtonJoin->setOnClickFunctor(ButtonJoin_OnClick());
 
 
-    m_Back = new Button(*m_Font, glm::vec2(100, 50), 150, 50);
+    m_Back = new Button(*m_Font, glm::vec2(100.0f, 50.0f), 150.0f, 50.0f);
     m_Back->setText("Back");
-    m_Back->setColor(0.5f, 0.5f, 0.5f, 1);
-    m_Back->setTextColor(1, 1, 0, 1);
-    m_Next = new Button(*m_Font, glm::vec2(windowDimensions.x - 100, 50), 150, 50);
+    m_Back->setColor(0.5f, 0.5f, 0.5f, 1.0f);
+    m_Back->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
+    m_Next = new Button(*m_Font, glm::vec2(windowDimensions.x - 100.0f, 50.0f), 150.0f, 50.0f);
     m_Next->setText("Next");
-    m_Next->setColor(0.5f, 0.5f, 0.5f, 1);
-    m_Next->setTextColor(1, 1, 0, 1);
+    m_Next->setColor(0.5f, 0.5f, 0.5f, 1.0f);
+    m_Next->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
     m_Back->setUserPointer(this);
     m_Next->setUserPointer(this);
 
@@ -217,33 +218,33 @@ HUD::HUD(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m_G
     m_Next->setOnClickFunctor(ButtonNext_OnClick());
 
 
-    m_ServerIp = new TextBox("Server IP",*m_Font, 40, windowDimensions.x / 2, 115);
-    m_ServerIp->setColor(0.5f, 0.5f, 0.5f, 1);
-    m_ServerIp->setTextColor(1, 1, 0, 1);
-    m_UserName = new TextBox("Your Name",*m_Font, 20, windowDimensions.x / 2, 275);
-    m_UserName->setColor(0.5f, 0.5f, 0.5f, 1);
-    m_UserName->setTextColor(1, 1, 0, 1);
-    m_ServerPort = new TextBox("Server Port",*m_Font, 7, windowDimensions.x / 2, 195);
-    m_ServerPort->setColor(0.5f, 0.5f, 0.5f, 1);
-    m_ServerPort->setTextColor(1, 1, 0, 1);
+    m_ServerIp = new TextBox("Server IP",*m_Font, 40, windowDimensions.x / 2.0f, 115.0f);
+    m_ServerIp->setColor(0.5f, 0.5f, 0.5f, 1.0f);
+    m_ServerIp->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
+    m_UserName = new TextBox("Your Name",*m_Font, 20, windowDimensions.x / 2.0f, 275.0f);
+    m_UserName->setColor(0.5f, 0.5f, 0.5f, 1.0f);
+    m_UserName->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
+    m_ServerPort = new TextBox("Server Port",*m_Font, 7, windowDimensions.x / 2.0f, 195.0f);
+    m_ServerPort->setColor(0.5f, 0.5f, 0.5f, 1.0f);
+    m_ServerPort->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
     m_ServerPort->setText("55000");
 
-    m_InfoText = new Text(Resources::getWindowSize().x / 2, 65, *m_Font);
+    m_InfoText = new Text(Resources::getWindowSize().x / 2.0f, 65.0f, *m_Font);
     m_InfoText->setTextAlignment(TextAlignment::Center);
 
 
-    m_ServerHostMapSelector = new ServerHostingMapSelectorWindow(*m_Font, Resources::getWindowSize().x / 2 - 300, 630);
+    m_ServerHostMapSelector = new ServerHostingMapSelectorWindow(*m_Font, Resources::getWindowSize().x / 2.0f - 300.0f, 630.0f);
 
 
 
-    m_ServerLobbyChatWindow = new ServerLobbyChatWindow(*m_Font, 50, 140 + 300);
-    m_ServerLobbyChatWindow->setColor(1, 1, 0, 1);
+    m_ServerLobbyChatWindow = new ServerLobbyChatWindow(*m_Font, 50.0f, 140.0f + 300.0f);
+    m_ServerLobbyChatWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
 
-    m_ServerLobbyConnectedPlayersWindow = new ServerLobbyConnectedPlayersWindow(*m_Font, 50 + m_ServerLobbyChatWindow->getWindowFrame().width(), 140 + 300);
-    m_ServerLobbyConnectedPlayersWindow->setColor(1, 1, 0, 1);
+    m_ServerLobbyConnectedPlayersWindow = new ServerLobbyConnectedPlayersWindow(*m_Font, 50.0f + m_ServerLobbyChatWindow->getWindowFrame().width(), 140.0f + 300.0f);
+    m_ServerLobbyConnectedPlayersWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
 
-    m_ServerLobbyShipSelectorWindow = new ServerLobbyShipSelectorWindow(core,scene, camera, *m_Font, 50, windowDimensions.y - 50);
-    m_ServerLobbyShipSelectorWindow->setColor(1, 1, 0, 1);
+    m_ServerLobbyShipSelectorWindow = new ServerLobbyShipSelectorWindow(core,scene, camera, *m_Font, 50.0f, windowDimensions.y - 50.0f);
+    m_ServerLobbyShipSelectorWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
     m_ServerLobbyShipSelectorWindow->setUserPointer(core.m_ChosenShip);
 
     m_MainMenuMusic = Engine::Sound::playMusic(ResourceManifest::MenuMusic);
@@ -281,7 +282,7 @@ void HUD::enter_the_game() {
         p.data = m_ServerLobbyShipSelectorWindow->m_ChosenShipName + "," + m_Core.m_Client->m_mapname;
         m_Core.m_Client->send(p);
     }else{
-        setErrorText("You must choose your ship", 5);
+        setErrorText("You must choose your ship", 5.0f);
     }
 }
 
@@ -289,7 +290,7 @@ void HUD::go_to_main_menu() {
     m_GameState = GameState::Main_Menu;
     m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
     m_Next->setText("Next");
-    setErrorText("", 0);
+    setErrorText("", 0.0f);
     auto& window = Resources::getWindow();
     auto _status = m_MainMenuMusic->status();
     if (_status == SoundStatus::Fresh || _status == SoundStatus::Stopped || _status == SoundStatus::Paused) {
@@ -303,39 +304,39 @@ void HUD::go_to_main_menu() {
 void HUD::setGoodText(const string& text, const float errorTime) {
     m_InfoText->setText(text);
     m_ErrorTimer = errorTime;
-    m_InfoText->setColor(0, 1, 0, 1);
+    m_InfoText->setColor(0.0f, 1.0f, 0.0f, 1.0f);
 }
 void HUD::setNormalText(const string& text, const float errorTime) {
     m_InfoText->setText(text);
     m_ErrorTimer = errorTime;
-    m_InfoText->setColor(1, 1, 0, 1);
+    m_InfoText->setColor(1.0f, 1.0f, 0.0f, 1.0f);
 }
 void HUD::setErrorText(const string& text, const float errorTime) {
     m_InfoText->setText(text);
     m_ErrorTimer = errorTime;
-    m_InfoText->setColor(1,0,0,1);
+    m_InfoText->setColor(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
 void HUD::onResize(const uint& width, const uint& height) {
-    m_ButtonHost->setPosition(width / 2, 275);
-    m_ButtonJoin->setPosition(width / 2, 155);
+    m_ButtonHost->setPosition(width / 2.0f, 275.0f);
+    m_ButtonJoin->setPosition(width / 2.0f, 155.0f);
 
-    m_Back->setPosition(100, 50);
-    m_Next->setPosition(width - 100, 50);
+    m_Back->setPosition(100.0f, 50.0f);
+    m_Next->setPosition(width - 100.0f, 50.0f);
 
-    m_ServerIp->setPosition(width / 2, 115);
-    m_ServerPort->setPosition(width / 2, 275);
-    m_UserName->setPosition(width / 2, 195);
+    m_ServerIp->setPosition(width / 2.0f, 115.0f);
+    m_ServerPort->setPosition(width / 2.0f, 275.0f);
+    m_UserName->setPosition(width / 2.0f, 195.0f);
 
-    m_InfoText->setPosition(width / 2 , 65);
+    m_InfoText->setPosition(width / 2.0f, 65.0f);
 
-    m_ServerHostMapSelector->setPosition(Resources::getWindowSize().x / 2 - 300, 630);
+    m_ServerHostMapSelector->setPosition(Resources::getWindowSize().x / 2.0f - 300.0f, 630.0f);
 
-    m_ServerLobbyChatWindow->setPosition(50, 140 + 300);
-    m_ServerLobbyConnectedPlayersWindow->setPosition(50 + m_ServerLobbyChatWindow->getWindowFrame().width(), 140 + 300);
+    m_ServerLobbyChatWindow->setPosition(50.0f, 140.0f + 300.0f);
+    m_ServerLobbyConnectedPlayersWindow->setPosition(50.0f + m_ServerLobbyChatWindow->getWindowFrame().width(), 140.0f + 300.0f);
 
     const auto& winSize = Resources::getWindowSize();
-    m_ServerLobbyShipSelectorWindow->setPosition(50, winSize.y - 50);
+    m_ServerLobbyShipSelectorWindow->setPosition(50, winSize.y - 50.0f);
 }
 
 uint _countShips = 0;
@@ -471,54 +472,54 @@ void HUD::render_game() {
                 auto* _hull = static_cast<ShipSystemHull*>(ship->getShipSystem(ShipSystemType::Hull));
                 if (shields) {
                     auto& shield = *shields;
-                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 26), glm::vec4(0.0f, 0.08f, 0.13f, 1.0f), healthDisplayWidthMax, 2, 0, 0.10f, Alignment::BottomLeft);
-                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 26), glm::vec4(0.0f, 0.674f, 1.0f, 1.0f), shield.getHealthPercent() * healthDisplayWidthMax, 2, 0, 0.09f, Alignment::BottomLeft);
+                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 26.0f), glm::vec4(0.0f, 0.08f, 0.13f, 1.0f), healthDisplayWidthMax, 2, 0, 0.10f, Alignment::BottomLeft);
+                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 26.0f), glm::vec4(0.0f, 0.674f, 1.0f, 1.0f), shield.getHealthPercent() * healthDisplayWidthMax, 2, 0, 0.09f, Alignment::BottomLeft);
 
                 }
                 if (_hull) {
                     auto& hull = *_hull;
-                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 27), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), healthDisplayWidthMax, 2, 0, 0.10f, Alignment::TopLeft);
-                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 27), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), hull.getHealthPercent() * healthDisplayWidthMax, 2, 0, 0.09f, Alignment::TopLeft);
+                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 27.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), healthDisplayWidthMax, 2, 0, 0.10f, Alignment::TopLeft);
+                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 27.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), hull.getHealthPercent() * healthDisplayWidthMax, 2, 0, 0.09f, Alignment::TopLeft);
                 }
             }
         }else{ //behind
-            float angle = 0;
+            float angle = 0.0f;
             Material& crosshairArrow = *(Material*)ResourceManifest::CrosshairArrowMaterial.get();
             auto& crosshairArrowTexture = *crosshairArrow.getComponent(0).texture();
             uint textureSizeOffset = (crosshairArrowTexture.width() / 2) + 4;
             if (pos.y > 2 && pos.y < winSize.y - 2) { //if y is within window bounds
                 if (pos.x < 2) {
-                    angle = -45;
+                    angle = -45.0f;
                     pos.x += textureSizeOffset;
                 }else {
-                    angle = 135;
+                    angle = 135.0f;
                     pos.x -= textureSizeOffset;
                 }
             }else if (pos.y <= 1) { //if y is below the window bounds
                 pos.y += textureSizeOffset;
                 if (pos.x <= 1) { //bottom left corner
-                    angle = 0;
+                    angle = 0.0f;
                     pos.x += textureSizeOffset - 4;
                     pos.y -= 4;
                 }else if (pos.x > winSize.x - 2) { //bottom right corner
-                    angle = 90;
+                    angle = 90.0f;
                     pos.x -= textureSizeOffset - 4;
                     pos.y -= 4;
                 }else { //bottom normal
-                    angle = 45;
+                    angle = 45.0f;
                 }
             }else { //if y is above the window bounds
                 pos.y -= textureSizeOffset;
                 if (pos.x < 2) { //top left corner
-                    angle = -90;
+                    angle = -90.0f;
                     pos.x += textureSizeOffset - 4;
                     pos.y += 4;
                 }else if (pos.x > winSize.x - 2) { //top right corner
-                    angle = 180;
+                    angle = 180.0f;
                     pos.x -= textureSizeOffset - 4;
                     pos.y += 4;
                 }else { //top normal
-                    angle = -135;
+                    angle = -135.0f;
                 }
             }
             crosshairArrowTexture.render(glm::vec2(pos.x, pos.y), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f), angle);
@@ -532,7 +533,7 @@ void HUD::render_game() {
 #pragma region DrawDebugStuff
     m_Font->renderText(Engine::Data::reportTime() +
         epriv::Core::m_Engine->m_DebugManager.reportDebug(),
-        glm::vec2(10, Resources::getWindowSize().y - 10), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1), 0, glm::vec2(0.8f, 0.8f), 0.1f);
+        glm::vec2(10.0f, Resources::getWindowSize().y - 10.0f), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f), 0, glm::vec2(0.8f, 0.8f), 0.1f);
 
 #pragma endregion
 
@@ -591,10 +592,10 @@ void HUD::update(const double& dt) {
             break;
         }
     }
-    if (m_ErrorTimer > 0) {
+    if (m_ErrorTimer > 0.0f) {
         m_ErrorTimer -= static_cast<float>(dt);
-        if (m_ErrorTimer < 0) {
-            setErrorText("", 0);
+        if (m_ErrorTimer < 0.0f) {
+            setErrorText("", 0.0f);
             m_ErrorTimer = 0.0f;
         }
     }

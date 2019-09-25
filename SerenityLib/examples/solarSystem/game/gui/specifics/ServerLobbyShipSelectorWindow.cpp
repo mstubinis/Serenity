@@ -39,8 +39,8 @@ struct GameCameraShipSelectorLogicFunctor final { void operator()(ComponentLogic
         if (window.m_IsCurrentlyDragging || dt < 0.0) {
             const auto& diff = Engine::getMouseDifference();
             camera.m_CameraMouseFactor += glm::dvec2(-diff.y * (dt), diff.x * (dt));
-            thisBody.rotate(camera.m_CameraMouseFactor.x, camera.m_CameraMouseFactor.y, 0);
-            camera.m_CameraMouseFactor *= 0;
+            thisBody.rotate(camera.m_CameraMouseFactor.x, camera.m_CameraMouseFactor.y, 0.0);
+            camera.m_CameraMouseFactor *= 0.0;
         }
         auto& targetEntity = camera.m_Target;
         EntityDataRequest dataRequest1(targetEntity->entity());
@@ -48,7 +48,7 @@ struct GameCameraShipSelectorLogicFunctor final { void operator()(ComponentLogic
         auto& targetBody = *targetEntity->getComponent<ComponentBody>(dataRequest1);
         auto& targetModel = *targetEntity->getComponent<ComponentModel>(dataRequest1);
 
-        const glm::vec3& pos = (glm::vec3(0, 0, 1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0, 0, 1) * glm::length(targetModel.radius() * (1.0f + camera.m_OrbitRadius)));
+        const glm::vec3 pos = (glm::vec3(0.0f, 0.0f, 1.0f) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0.0f, 0.0f, 1.0f) * glm::length(targetModel.radius() * (1.0f + camera.m_OrbitRadius)));
 
         glm::mat4 cameraModel = glm::mat4(1.0f);
         cameraModel = glm::translate(cameraModel, targetBody.position());
@@ -62,9 +62,9 @@ struct GameCameraShipSelectorLogicFunctor final { void operator()(ComponentLogic
     }
 }};
 
-ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& scene, Camera& camera, const Font& font, const unsigned int& x, const unsigned int& y):m_Core(core),m_Font(const_cast<Font&>(font)) {
-    m_Width = 578;
-    m_Height = 270;
+ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& scene, Camera& camera, const Font& font, const float x, const float y):m_Core(core),m_Font(const_cast<Font&>(font)) {
+    m_Width = 578.0f;
+    m_Height = 270.0f;
     m_IsCurrentlyDragging = false;
     m_IsCurrentlyOverShipWindow = false;
     auto& logic = *camera.entity().getComponent<ComponentLogic2>();
@@ -72,10 +72,10 @@ ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& s
     logic.setUserPointer2(this);
     logic.setFunctor(GameCameraShipSelectorLogicFunctor());
     m_ShipWindow = new ScrollFrame(x, y, m_Width, m_Height);
-    m_ShipWindow->setContentPadding(0);
+    m_ShipWindow->setContentPadding(0.0f);
     m_ChosenShipName = "";
     
-    m_ShipDisplay = &scene.addViewport(x + m_ShipWindow->width() + 1, y - m_Height, m_Height - 1, m_Height, camera);
+    m_ShipDisplay = &scene.addViewport(x + m_ShipWindow->width() + 3.0f, y - m_Height, m_Height - 1.0f, m_Height, camera);
     //m_ShipDisplay->setDepthMaskValue(100.0f);
     //m_ShipDisplay->activateDepthMask(true);
     m_ShipDisplay->removeRenderFlag(ViewportRenderingFlag::API2D);
@@ -92,7 +92,7 @@ ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& s
     auto& targetModel = *targetEntity->getComponent<ComponentModel>();
 
 
-    const glm::vec3& pos = (glm::vec3(0, 0, 1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0, 0, 1) * glm::length(targetModel.radius() * (1.0f + gameCamera.m_OrbitRadius)));
+    const glm::vec3 pos = (glm::vec3(0, 0, 1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0.0f, 0.0f, 1.0f) * glm::length(targetModel.radius() * (1.0f + gameCamera.m_OrbitRadius)));
     glm::mat4 cameraModel = glm::mat4(1.0f);
     cameraModel = glm::translate(cameraModel, targetBody.position());
     cameraModel *= glm::mat4_cast(thisBody.rotation());
@@ -112,9 +112,9 @@ void ServerLobbyShipSelectorWindow::setShipViewportActive(const bool& active) {
 void ServerLobbyShipSelectorWindow::setColor(const float& r, const float& g, const float& b, const float& a) {
     m_ShipWindow->setColor(r, g, b, a);
 }
-void ServerLobbyShipSelectorWindow::setPosition(const unsigned int& x, const unsigned int& y) {
+void ServerLobbyShipSelectorWindow::setPosition(const float x, const float y) {
     m_ShipWindow->setPosition(x, y);
-    m_ShipDisplay->setViewportDimensions(x + m_ShipWindow->width() + 1, y - m_Height, m_Height - 1, m_Height);
+    m_ShipDisplay->setViewportDimensions(x + m_ShipWindow->width() + 3.0f, y - m_Height, m_Height - 1.0f, m_Height);
 }
 void ServerLobbyShipSelectorWindow::setUserPointer(void* ptr) {
     m_UserPointer = ptr;
@@ -156,5 +156,5 @@ void ServerLobbyShipSelectorWindow::update(const double& dt) {
 void ServerLobbyShipSelectorWindow::render() {
     m_ShipWindow->render();
     auto& dimensions = m_ShipDisplay->getViewportDimensions();
-    Renderer::renderBorder(1, glm::uvec2(dimensions.x - 1, dimensions.y), m_ShipWindow->color(), dimensions.z + 3, dimensions.w, 0, 0.01f, Alignment::BottomLeft);
+    Renderer::renderBorder(1.0f, glm::vec2(dimensions.x + 1.0f, dimensions.y), m_ShipWindow->color(), dimensions.z + 1.0f, dimensions.w, 0, 0.01f, Alignment::BottomLeft);
 }

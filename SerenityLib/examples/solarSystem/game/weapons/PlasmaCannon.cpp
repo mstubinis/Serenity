@@ -1,7 +1,5 @@
-#include "PlasmaCannon.h"
+#include "Weapons.h"
 #include "../map/Map.h"
-#include "../ResourceManifest.h"
-#include "../Ship.h"
 
 #include <ecs/Components.h>
 #include <core/engine/math/Engine_Math.h>
@@ -31,18 +29,18 @@ struct PlasmaCannonCollisionFunctor final { void operator()(ComponentBody& owner
             Ship* otherShip = static_cast<Ship*>(otherPtrShip);
             if (otherShip && plasmaCannonProjectile.active) {
                 Ship* sourceShip = static_cast<Ship*>(plasmaCannonShipVoid);
-                PlasmaCannon& plasmaCannon = *static_cast<PlasmaCannon*>(owner.getUserPointer2());
-                auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
-                auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                auto local = otherHit - other.position();
-                if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                    shields->receiveHit(normal, local, plasmaCannon.impactRadius, plasmaCannon.impactTime, plasmaCannon.damage);
-                    plasmaCannonProjectile.destroy();
-                    return;
-                }
-                if (hull && other.getUserPointer() == hull) {
-                    hull->receiveHit(normal, local, plasmaCannon.impactRadius, plasmaCannon.impactTime, plasmaCannon.damage);
-                    plasmaCannonProjectile.destroy();
+                if (sourceShip->IsPlayer()) {
+                    PlasmaCannon& plasmaCannon = *static_cast<PlasmaCannon*>(owner.getUserPointer2());
+                    auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
+                    auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                    auto local = otherHit - other.position();
+                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
+                        plasmaCannonProjectile.clientToServerImpact(plasmaCannon.m_Map.getClient(), *otherShip, local, normal, plasmaCannon.impactRadius, plasmaCannon.damage, plasmaCannon.impactTime, true);
+                        return;
+                    }
+                    if (hull && other.getUserPointer() == hull) {
+                        plasmaCannonProjectile.clientToServerImpact(plasmaCannon.m_Map.getClient(), *otherShip, local, normal, plasmaCannon.impactRadius, plasmaCannon.damage, plasmaCannon.impactTime, false);
+                    }
                 }
             }
         }
@@ -119,7 +117,7 @@ struct PlasmaCannonTailInstanceUnbindFunctor {void operator()(EngineResource* r)
 }};
 
 
-PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward) : PrimaryWeaponCannonProjectile(map, position, forward) {
+PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index) : PrimaryWeaponCannonProjectile(map, position, forward, index) {
     EntityDataRequest request(entity);
 
     auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
@@ -186,7 +184,7 @@ PlasmaCannonProjectile::~PlasmaCannonProjectile() {
 
 }
 
-PlasmaCannon::PlasmaCannon(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume) :PrimaryWeaponCannon(ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume), m_Map(map) {
+PlasmaCannon::PlasmaCannon(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume) :PrimaryWeaponCannon(map,WeaponType::PlasmaCannon, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume) {
 
 }
 PlasmaCannon::~PlasmaCannon() {
@@ -194,37 +192,5 @@ PlasmaCannon::~PlasmaCannon() {
 }
 
 void PlasmaCannon::update(const double& dt) {
-    for (auto& projectile : m_ActiveProjectiles) {
-        projectile->update(dt);
-    }
-    for (auto& projectile : m_ActiveProjectiles) {
-        if (!projectile->active) {
-            removeFromVector(m_ActiveProjectiles, projectile);
-        }
-    }
     PrimaryWeaponCannon::update(dt);
-}
-const bool PlasmaCannon::fire() {
-    const auto res = PrimaryWeaponCannon::fire();
-    if (res) {
-        forceFire();
-        return true;
-    }
-    return false;
-}
-void PlasmaCannon::forceFire() {
-    auto* projectile = new PlasmaCannonProjectile(*this, m_Map, position, forward);
-    m_ActiveProjectiles.push_back(projectile);
-
-    auto& shipBody = *ship.getComponent<ComponentBody>();
-    auto shipMatrix = shipBody.modelMatrix();
-    shipMatrix = glm::translate(shipMatrix, position);
-    const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
-
-    soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaCannon);
-    if (soundEffect) {
-        soundEffect->setVolume(volume);
-        soundEffect->setPosition(finalPosition);
-        soundEffect->setAttenuation(0.1f);
-    }
 }

@@ -20,10 +20,10 @@ SunLight::SunLight(const glm::vec3 pos, const LightType::Type type, Scene* scene
     }
     epriv::InternalScenePublicInterface::GetLights(*scene).push_back(this);
 
-    auto body = addComponent<ComponentBody>();
-    if (body) { //evil, but needed for some reason... find out why...
+    auto* body = addComponent<ComponentBody>();
+    //if (body) { //evil, but needed for some reason... find out why...
         body->setPosition(pos);
-    }
+    //}
 }
 SunLight::~SunLight() {
 }

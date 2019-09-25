@@ -35,7 +35,7 @@ class ShipSystemShields final : public ShipSystem {
     private:
         ShipSystemShieldsImpactPoint  m_ImpactPoints[MAX_IMPACT_POINTS];
         std::vector<uint>             m_ImpactPointsFreelist;
-        EntityWrapper*                m_ShieldEntity;
+        Entity                        m_ShieldEntity;
         float                         m_HealthPointsCurrent;
         float                         m_HealthPointsMax;
         //float                       m_TimeSinceLastHit;
@@ -48,7 +48,7 @@ class ShipSystemShields final : public ShipSystem {
         ShipSystemShields(Ship&, Map&, const float health);
         ~ShipSystemShields();
 
-        EntityWrapper* getEntity();
+        Entity getEntity();
 
         void destroy();
 

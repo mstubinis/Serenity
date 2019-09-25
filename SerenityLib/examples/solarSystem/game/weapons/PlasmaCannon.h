@@ -15,7 +15,7 @@ struct PlasmaCannonOutlineInstanceBindFunctor;
 struct PlasmaCannonOutlineInstanceUnbindFunctor;
 
 struct PlasmaCannonProjectile final : public PrimaryWeaponCannonProjectile {
-    PlasmaCannonProjectile(PlasmaCannon&, Map& map, const glm::vec3& position, const glm::vec3& forward);
+    PlasmaCannonProjectile(PlasmaCannon&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index);
     ~PlasmaCannonProjectile();
 };
 
@@ -27,9 +27,6 @@ class PlasmaCannon final : public PrimaryWeaponCannon {
     friend struct PlasmaCannonTailInstanceUnbindFunctor;
     friend struct PlasmaCannonOutlineInstanceBindFunctor;
     friend struct PlasmaCannonOutlineInstanceUnbindFunctor;
-    private:
-        Map& m_Map;
-        std::vector<PlasmaCannonProjectile*> m_ActiveProjectiles;
     public:
         PlasmaCannon(
             Ship&,
@@ -47,8 +44,6 @@ class PlasmaCannon final : public PrimaryWeaponCannon {
         );
         ~PlasmaCannon();
 
-        const bool fire();
-        void forceFire();
         void update(const double& dt);
 };
 

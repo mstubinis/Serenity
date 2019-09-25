@@ -72,6 +72,16 @@ Texture* epriv::ResourceManager::_hasTexture(const string& n){
     }
     return 0;
 }
+void epriv::ResourceManager::onPostUpdate() {
+    if (m_ScenesToBeDeleted.size() > 0) {
+        for (auto& scene : m_ScenesToBeDeleted) {
+            removeFromVector(resourceManager->m_Scenes, scene);
+            SAFE_DELETE(scene);
+            --InternalScenePublicInterface::NumScenes;
+        }
+        vector_clear(m_ScenesToBeDeleted);
+    }   
+}
 Handle epriv::ResourceManager::_addTexture(Texture* t) {
     return resourceManager->m_Resources->add(t, ResourceType::Texture);
 }
@@ -91,9 +101,19 @@ void Resources::Settings::disableDynamicMemory(){ resourceManager->m_DynamicMemo
 Engine_Window& Resources::getWindow(){ return *resourceManager->m_Window; }
 glm::uvec2 Resources::getWindowSize(){ return resourceManager->m_Window->getSize(); }
 
-Scene* Resources::getScene(const string& n){ 
+const bool Resources::deleteScene(const string& sceneName) {
     for (auto& scene : resourceManager->m_Scenes) {
-        if (scene->name() == n) {
+        if (scene->name() == sceneName) { 
+            resourceManager->m_ScenesToBeDeleted.push_back(scene);
+            return true;
+        }
+    }
+    return false;
+}
+
+Scene* Resources::getScene(const string& sceneName){
+    for (auto& scene : resourceManager->m_Scenes) {
+        if (scene->name() == sceneName) {
             return scene;
         }
     }

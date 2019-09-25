@@ -33,7 +33,7 @@ class Viewport final {
     private:
         Scene&         m_Scene;
         Camera*        m_Camera;
-        glm::uvec4     m_Viewport_Dimensions;
+        glm::vec4      m_Viewport_Dimensions;
         bool           m_Active;
         bool           m_AspectRatioSynced;
         glm::vec4      m_BackgroundColor;
@@ -77,10 +77,10 @@ class Viewport final {
 
         const Scene& getScene() const;
         const Camera& getCamera() const;
-        const glm::uvec4& getViewportDimensions() const;
+        const glm::vec4& getViewportDimensions() const;
 
         bool setCamera(const Camera& camera);
-        void setViewportDimensions(const unsigned int& x, const unsigned int& y, const unsigned int& width, const unsigned int& height);
+        void setViewportDimensions(const float x, const float y, const float width, const float height);
 };
 
 #endif

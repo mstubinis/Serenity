@@ -28,21 +28,12 @@ struct QuantumTorpedoFlare final {
         spin = _spin;
     }
 };
-struct QuantumTorpedoProjectile final {
-    QuantumTorpedo& torpedo;
-    EntityWrapper* entity;
-    EntityWrapper* target;
-    std::vector<QuantumTorpedoFlare> flares;
-    bool hasLock;
-    float rotationAngleSpeed;
-    PointLight* light;
-    float currentTime;
-    float maxTime;
-    bool active;
-    QuantumTorpedoProjectile(QuantumTorpedo&, Map& map, const glm::vec3& position, const glm::vec3& forward);
+struct QuantumTorpedoProjectile final : public SecondaryWeaponTorpedoProjectile {
+    QuantumTorpedo&                    torpedo;
+    std::vector<QuantumTorpedoFlare>   flares;
+    QuantumTorpedoProjectile(QuantumTorpedo&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index);
     ~QuantumTorpedoProjectile();
     void update(const double& dt);
-    void destroy();
 };
 
 
@@ -54,30 +45,25 @@ class QuantumTorpedo final : public SecondaryWeaponTorpedo {
     friend struct QuantumTorpedoInstanceGlowUnbindFunctor;
     friend struct QuantumTorpedoFlareInstanceBindFunctor;
     friend struct QuantumTorpedoFlareInstanceUnbindFunctor;
-private:
-    Map& m_Map;
-    std::vector<QuantumTorpedoProjectile*> m_ActiveProjectiles;
-public:
-    QuantumTorpedo(
-        Ship&,
-        Map&,
-        const glm::vec3& position,
-        const glm::vec3& forward,
-        const float& arc,
-        const uint& maxCharges = 1,
-        const float& damage = 3000.0f,
-        const float& _rechargePerRound = 5.0f,
-        const float& _impactRadius = 6.5f,
-        const float& _impactTime = 4.2f,
-        const float& _travelSpeed = 16.5f,
-        const float& _volume = 100.0f,
-        const float& _rotAngleSpeed = 0.5f
-    );
-    ~QuantumTorpedo();
+    public:
+        QuantumTorpedo(
+            Ship&,
+            Map&,
+            const glm::vec3& position,
+            const glm::vec3& forward,
+            const float& arc,
+            const uint& maxCharges = 1,
+            const float& damage = 3000.0f,
+            const float& _rechargePerRound = 5.0f,
+            const float& _impactRadius = 6.5f,
+            const float& _impactTime = 4.2f,
+            const float& _travelSpeed = 16.5f,
+            const float& _volume = 100.0f,
+            const float& _rotAngleSpeed = 0.5f
+        );
+        ~QuantumTorpedo();
 
-    const bool fire();
-    void forceFire();
-    void update(const double& dt);
+        void update(const double& dt);
 };
 
 #endif

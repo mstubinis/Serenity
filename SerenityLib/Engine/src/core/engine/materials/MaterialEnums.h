@@ -4,7 +4,7 @@
 
 #define MAX_MATERIAL_LAYERS_PER_COMPONENT 5
 #define MAX_MATERIAL_COMPONENTS 12
-#define MAX_LIGHTS_PER_PASS 12
+#define MAX_LIGHTS_PER_PASS 16
 
 struct MaterialLayerBlendMode final { enum Mode {
     Default,

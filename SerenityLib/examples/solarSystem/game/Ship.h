@@ -20,6 +20,7 @@ class  Decal;
 struct PacketPhysicsUpdate;
 struct PacketCloakUpdate;
 struct PacketHealthUpdate;
+struct PacketProjectileImpact;
 struct ShipLogicFunctor;
 struct GameCameraLogicFunctor;
 class  ShipSystemReactor;
@@ -100,6 +101,7 @@ class Ship: public EntityWrapper, public EventObserver {
         void updateHealthFromPacket(const PacketHealthUpdate& packet);
 
         void updateDamageDecalsCloak(const float& alpha);
+        void updateProjectileImpact(const PacketProjectileImpact& packet);
 
         void setModel(Handle& handle);
 

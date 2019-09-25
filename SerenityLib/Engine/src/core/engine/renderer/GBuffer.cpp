@@ -85,7 +85,6 @@ void GBuffer::internalBuildTextureBuffer(FramebufferObject* fbo, const GBufferTy
    const auto i = GBUFFER_TYPE_DATA[gbufferType];
 
     const auto attatchment = i.get<3>();
-    cout << attatchment << std::endl;
     Texture* texture = new Texture(w, h, i.get<2>(), i.get<1>(), i.get<0>(), fbo->divisor());
     m_Buffers[static_cast<uint>(gbufferType)] = fbo->attatchTexture(texture, attatchment);
 }

@@ -206,6 +206,30 @@ void Physics::removeRigidBody(ComponentBody& body) {
 }
 
 
+RayCastResult _rayCastInternal_Nearest(const btVector3& start, const btVector3& end, const unsigned short group, const unsigned short mask) {
+    btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
+    RayCallback.m_collisionFilterMask = mask;
+    RayCallback.m_collisionFilterGroup = group;
+
+    physicsManager->data->world->rayTest(start, end, RayCallback);
+    //physicsManager->data->world->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
+
+    RayCastResult result;
+    if (RayCallback.hasHit()) {
+        auto& pts = RayCallback.m_hitPointWorld;
+        auto& normals = RayCallback.m_hitNormalWorld;
+
+        const glm::vec3 hitPoint = Math::btVectorToGLM(RayCallback.m_hitPointWorld);
+        const glm::vec3 hitNormal = Math::btVectorToGLM(RayCallback.m_hitNormalWorld);
+
+        result.hitPosition = hitPoint;
+        result.hitNormal = hitNormal;
+    }
+    return result;
+}
+
+
+
 vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& end, const unsigned short group, const unsigned short mask) {
     btCollisionWorld::AllHitsRayResultCallback RayCallback(start, end);
     RayCallback.m_collisionFilterMask = mask;
@@ -277,4 +301,56 @@ vector<RayCastResult> Physics::rayCast(const glm::vec3& start, const glm::vec3& 
         }
     }
     return Physics::rayCast(start_, end_, objs, group, mask);
+}
+
+
+
+
+
+RayCastResult Physics::rayCastNearest(const btVector3& start, const btVector3& end, ComponentBody* ignored, const unsigned short group, const unsigned short mask) {
+    if (ignored) {
+        Physics::removeRigidBody(*ignored);
+    }
+    RayCastResult result = _rayCastInternal_Nearest(start, end, group, mask);
+    if (ignored) {
+        Physics::addRigidBody(*ignored);
+    }
+    return result;
+}
+RayCastResult Physics::rayCastNearest(const btVector3& start, const btVector3& end, vector<ComponentBody*>& ignored, const unsigned short group, const unsigned short mask) {
+    for (auto& object : ignored) {
+        Physics::removeRigidBody(*object);
+    }
+    RayCastResult result = _rayCastInternal_Nearest(start, end, group, mask);
+    for (auto& object : ignored) {
+        Physics::addRigidBody(*object);
+    }
+    return result;
+}
+RayCastResult Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity* ignored, const unsigned short group, const unsigned short mask) {
+    const btVector3 start_ = Math::btVectorFromGLM(start);
+    const btVector3 end_ = Math::btVectorFromGLM(end);
+    if (ignored) {
+        ComponentBody* body = ignored->getComponent<ComponentBody>();
+        if (body) {
+            if (body->hasPhysics()) {
+                return Physics::rayCastNearest(start_, end_, body, group, mask);
+            }
+        }
+    }
+    return Physics::rayCastNearest(start_, end_, nullptr, group, mask);
+}
+RayCastResult Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, vector<Entity>& ignored, const unsigned short group, const unsigned short mask) {
+    const btVector3 start_ = Math::btVectorFromGLM(start);
+    const btVector3 end_ = Math::btVectorFromGLM(end);
+    vector<ComponentBody*> objs;
+    for (auto& o : ignored) {
+        ComponentBody* body = o.getComponent<ComponentBody>();
+        if (body) {
+            if (body->hasPhysics()) {
+                objs.push_back(body);
+            }
+        }
+    }
+    return Physics::rayCastNearest(start_, end_, objs, group, mask);
 }

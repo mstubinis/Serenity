@@ -25,7 +25,7 @@ const bool SoundBaseClass::stop() {
 const bool SoundBaseClass::restart() {
     return false;
 }
-const uint& SoundBaseClass::getLoopsLeft() {
+const uint SoundBaseClass::getLoopsLeft() {
     return m_Loops - m_CurrentLoop;
 }
 const float SoundBaseClass::getAttenuation() {
@@ -49,7 +49,7 @@ const bool SoundBaseClass::isRelativeToListener() {
 void SoundBaseClass::setRelativeToListener(const bool relative) {
 
 }
-const glm::vec3& SoundBaseClass::getPosition() {
+const glm::vec3 SoundBaseClass::getPosition() {
     return glm::vec3(0.0f);
 }
 void SoundBaseClass::setPosition(const float& x, const float& y, const float& z) {

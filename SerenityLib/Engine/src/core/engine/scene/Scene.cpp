@@ -40,11 +40,13 @@ struct Scene::impl final {
     vector<uint>                      m_Entities;
 
     ECS<Entity>                       m_ECS;
+    Entity*                           m_Sun;
 
     void _init(Scene& super, const string& _name) {
         m_GI              = glm::vec3(1.0f);
         m_Skybox          = nullptr;
-        
+        m_Sun             = nullptr;
+
         m_Pipelines.resize(RenderStage::_TOTAL);
         super.setName(_name);
         Core::m_Engine->m_ResourceManager._addScene(super);
@@ -306,13 +308,19 @@ Scene::~Scene() {
     unregisterEvent(EventType::SceneChanged);
     m_i->_destruct();
 }
+void Scene::setGodRaysSun(Entity* sun) {
+    m_i->m_Sun = sun;
+}
+Entity* Scene::getGodRaysSun() {
+    return m_i->m_Sun;
+}
 const uint Scene::numViewports() const {
     return m_i->m_Viewports.size();
 }
 const uint Scene::id() const {
     return m_i->m_ID;
 }
-Viewport& Scene::addViewport(const uint& x, const uint& y, const uint& width, const uint& height, const Camera& camera) {
+Viewport& Scene::addViewport(const float x, const float y, const float width, const float height, const Camera& camera) {
     Viewport* viewport = new Viewport(*this, camera);
     viewport->setViewportDimensions(x, y, width, height);
     viewport->m_ID = static_cast<unsigned short>(numViewports());

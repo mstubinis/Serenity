@@ -17,10 +17,10 @@ void ShipSystemPitchThrusters::update(const double& dt) {
             if (m_Ship.getPlayerCamera()->getState() != CameraState::Orbit) {
                 const auto& diff = Engine::getMouseDifference().y;
                 m_Ship.m_MouseFactor.y += diff * 0.00065;
-                const float& massFactor = 1.0f / (rigidbody.mass() * 5.0f);
-                const float& amount = m_Ship.m_MouseFactor.y * massFactor;
+                const float massFactor = 1.0f / (rigidbody.mass() * 5.0f);
+                const float amount = m_Ship.m_MouseFactor.y * massFactor;
                 rigidbody.applyTorque(amount, 0, 0);
-                const double& step = (1.0 - dt);
+                const double step = (1.0 - dt);
                 m_Ship.m_MouseFactor.y *= (step * step);
             }
         }

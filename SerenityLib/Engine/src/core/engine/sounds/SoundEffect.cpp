@@ -18,7 +18,7 @@ SoundEffect::~SoundEffect() {
 
 }
 void SoundEffect::update(const double& dt) {
-    const auto& sfStatus = m_Sound.getStatus();
+    const auto sfStatus = m_Sound.getStatus();
     if (sfStatus == sf::SoundSource::Status::Stopped) {
         if (m_Loops >= 2) {//handle the looping logic
             if (getLoopsLeft() >= 2) {
@@ -34,11 +34,11 @@ void SoundEffect::update(const double& dt) {
         }
     }
 }
-const float& SoundEffect::getDuration() const {
+const float SoundEffect::getDuration() const {
     return m_Duration;
 }
 const bool SoundEffect::play(const uint& numLoops) {
-    const auto& sfStatus = m_Sound.getStatus();
+    const auto sfStatus = m_Sound.getStatus();
     m_Loops = numLoops;
     switch (sfStatus) {
         case sf::SoundSource::Status::Stopped: {//it starts
@@ -65,7 +65,7 @@ const bool SoundEffect::play(const uint& numLoops) {
     return true;
 }
 const bool SoundEffect::pause() {
-    const auto& sfStatus = m_Sound.getStatus();
+    const auto sfStatus = m_Sound.getStatus();
     switch (sfStatus) {
         case sf::SoundSource::Status::Stopped: {
             m_Status = SoundStatus::Stopped;
@@ -90,7 +90,7 @@ const bool SoundEffect::pause() {
     return true;
 }
 const bool SoundEffect::stop(const bool& stopAllLoops) {
-    const auto& sfStatus = m_Sound.getStatus();
+    const auto sfStatus = m_Sound.getStatus();
     switch (sfStatus) {
         case sf::SoundSource::Status::Stopped: {
             if (m_Status != SoundStatus::Stopped) {
@@ -128,7 +128,7 @@ const bool SoundEffect::stop(const bool& stopAllLoops) {
     return true;
 }
 const bool SoundEffect::restart() {
-    const auto& sfStatus = m_Sound.getStatus();
+    const auto sfStatus = m_Sound.getStatus();
     switch (sfStatus) {
         case sf::SoundSource::Status::Stopped: {
             return false;
@@ -154,11 +154,11 @@ const bool SoundEffect::restart() {
     return true;
 }
 
-const float& SoundEffect::getAttenuation() const {
+const float SoundEffect::getAttenuation() const {
     return m_Sound.getAttenuation();
 }
-const glm::vec3& SoundEffect::getPosition() {
-    const sf::Vector3f& v = m_Sound.getPosition();
+const glm::vec3 SoundEffect::getPosition() {
+    const sf::Vector3f v = m_Sound.getPosition();
     return glm::vec3(v.x, v.y, v.z);
 }
 const uint SoundEffect::getChannelCount() {
@@ -188,13 +188,13 @@ void SoundEffect::setPosition(const float& x, const float& y, const float& z) {
 void SoundEffect::setPosition(const glm::vec3& position) {
     m_Sound.setPosition(position.x, position.y, position.z);
 }
-const float& SoundEffect::getVolume() const {
+const float SoundEffect::getVolume() const {
     return m_Sound.getVolume();
 }
 void SoundEffect::setVolume(const float& volume) {
     m_Sound.setVolume(volume);
 }
-const float& SoundEffect::getPitch() const {
+const float SoundEffect::getPitch() const {
     return m_Sound.getPitch();
 }
 void SoundEffect::setPitch(const float& pitch) {

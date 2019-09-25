@@ -20,8 +20,8 @@ class TextBox : public Button, public EventObserver {
 
         void internalUpdateSize();
     public:
-        TextBox(const std::string& label, const Font& font, const unsigned short& maxCharacters, const unsigned int& x, const unsigned int& y);
-        TextBox(const std::string& label, const Font& font, const unsigned short& maxCharacters, const glm::uvec2& position);
+        TextBox(const std::string& label, const Font& font, const unsigned short maxCharacters, const float x, const float y);
+        TextBox(const std::string& label, const Font& font, const unsigned short maxCharacters, const glm::vec2& position);
         virtual ~TextBox();
 
         template<class T> void setOnClickFunctor(const T& functor) { 
@@ -34,7 +34,7 @@ class TextBox : public Button, public EventObserver {
         const std::string& getLabel() const;
 
         void setText(const std::string& text);
-        void setTextScale(const float& x, const float& y);
+        void setTextScale(const float x, const float y);
         void setTextScale(const glm::vec2& scale);
 
         void setLabel(const char* text);

@@ -1,10 +1,12 @@
 #include "ShipSystemWeapons.h"
+#include "../../weapons/Weapons.h"
 #include "../../Ship.h"
 #include "../../ResourceManifest.h"
 #include "../../Packet.h"
 #include "../../map/Map.h"
 #include <core/engine/lights/Lights.h>
 #include <core/engine/mesh/Mesh.h>
+#include <core/engine/math/Engine_Math.h>
 
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/math/Engine_Math.h>
@@ -29,7 +31,8 @@ float ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm::vec3& pos,
     return t;
 }
 
-ShipWeapon::ShipWeapon(Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, const uint& _numRounds, const float& _rechargeTimerPerRound):ship(_ship) {
+ShipWeapon::ShipWeapon(Map& map, WeaponType::Type _type, Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, const uint& _numRounds, const float& _rechargeTimerPerRound):ship(_ship),m_Map(map){
+    type                     = _type;
     position                 = _position;
     forward                  = glm::normalize(_forward);
     arc                      = _arc;
@@ -57,7 +60,7 @@ const bool ShipWeapon::isInArc(EntityWrapper* target, const float _arc) {
     }else{
         targetPosition = targetBody.position();
     }
-    auto cannonForward = glm::normalize(shipRotation * forward);
+    const auto cannonForward = glm::normalize(shipRotation * forward);
 
     const auto vecToTarget = shipPosition - targetPosition;
     const auto vecToForward = shipPosition - (cannonForward * 100000000.0f);
@@ -69,10 +72,13 @@ const bool ShipWeapon::isInArc(EntityWrapper* target, const float _arc) {
 }
 
 
-PrimaryWeaponCannonProjectile::PrimaryWeaponCannonProjectile(Map& map, const glm::vec3& position, const glm::vec3& forward) {
-    entity       = map.createEntity();
+PrimaryWeaponCannonProjectile::PrimaryWeaponCannonProjectile(Map& _map, const glm::vec3& position, const glm::vec3& forward, const int index):map(_map) {
+    entity       = _map.createEntity();
     currentTime  = 0.0f;
     maxTime      = 2.5f;
+    active       = false;
+    destroyed    = false;
+    projectile_index = index;
 }
 PrimaryWeaponCannonProjectile::~PrimaryWeaponCannonProjectile() {
 
@@ -91,18 +97,38 @@ void PrimaryWeaponCannonProjectile::update(const double& dt) {
     }
 }
 void PrimaryWeaponCannonProjectile::destroy() {
-    if (active) {
-        active = false;
+    if (!destroyed) {
         entity.destroy();
         if (light) {
             light->destroy();
             SAFE_DELETE(light);
         }
+        map.removeCannonProjectile(projectile_index);
+        active = false;
+        destroyed = true;
     }
+}
+void PrimaryWeaponCannonProjectile::clientToServerImpact(Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const bool& shields) {
+    PacketProjectileImpact packet;
+    packet.PacketType = PacketType::Client_To_Server_Projectile_Cannon_Impact;
+    packet.damage     = damage;
+    packet.impactX    = impactLocalPosition.x;
+    packet.impactY    = impactLocalPosition.y;
+    packet.impactZ    = impactLocalPosition.z;
+    packet.shields    = shields;
+    packet.data       = shipHit.getName() + ",";
+    packet.index      = projectile_index;
+    Math::Float16From32(&packet.time, time);
+    Math::Float16From32(&packet.radius, impactRadius);
+    Math::Float16From32(&packet.normalX, impactNormal.x);
+    Math::Float16From32(&packet.normalY, impactNormal.y);
+    Math::Float16From32(&packet.normalZ, impactNormal.z);
+    active = false;
+    client.send(packet);
 }
 
 
-PrimaryWeaponCannon::PrimaryWeaponCannon(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume) : ShipWeapon(_ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound) {
+PrimaryWeaponCannon::PrimaryWeaponCannon(Map& map, WeaponType::Type _type, Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound){
     damage                   = _dmg;
     impactRadius             = _impactRad;
     impactTime               = _impactTime;
@@ -156,15 +182,21 @@ const PrimaryWeaponCannonPrediction PrimaryWeaponCannon::calculatePredictedVecto
     returnValue.pedictedPosition = cannonForward;
     return returnValue;
 }
-const bool PrimaryWeaponCannon::fire() {
+const int PrimaryWeaponCannon::canFire() {
     if (numRounds > 0) {
-        --numRounds;
-        return true;
+        return m_Map.try_addCannonProjectile();
+    }
+    return -1;
+}
+const bool PrimaryWeaponCannon::forceFire(const int index) {
+    if (numRounds > 0) {
+        const bool can = m_Map.try_addCannonProjectile(index);
+        if (can) {
+            Weapons::spawnProjectile(*this, ship, m_Map, position, forward, index);
+            return true;
+        }
     }
     return false;
-}
-void PrimaryWeaponCannon::forceFire() {
-
 }
 void PrimaryWeaponCannon::update(const double& dt) {
     if (soundEffect && (soundEffect->status() == SoundStatus::Playing || soundEffect->status() == SoundStatus::PlayingLooped)) {
@@ -182,12 +214,11 @@ void PrimaryWeaponCannon::update(const double& dt) {
         }
     }
 }
-PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, Map& map, const glm::vec3& _pos, const glm::vec3& _fwd, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime) : ShipWeapon(_ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound) {
+PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& map, const glm::vec3& _pos, const glm::vec3& _fwd, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound) {
     windupPoints = _windupPts;
     chargeTimer = 0.0f;
     chargeTimerSpeed = _chargeTimerSpeed;
-    isFiring = false;
-    isFiringWeapon = false;
+    state = BeamWeaponState::Off;
     firingTimeMax = _firingTime;
     firingTime = 0.0f;
     firingTimeShieldGraphicPing = 0.0f;
@@ -196,16 +227,16 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, Map& map, const glm::vec3& _po
     beamLight->setAttenuation(LightRange::_7);
     beamLight->deactivate();
 
-    beamGraphic = new EntityWrapper(map);
+    beamGraphic = map.createEntity();
 
-    auto* body = beamGraphic->addComponent<ComponentBody>();
+    auto* body = beamGraphic.addComponent<ComponentBody>();
 
-    beamEndPointGraphic = new EntityWrapper(map);
-    auto& model1 = *beamEndPointGraphic->addComponent<ComponentModel>(Mesh::Plane, (Material*)ResourceManifest::TorpedoGlow2Material.get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    beamEndPointGraphic = map.createEntity();
+    auto& model1 = *beamEndPointGraphic.addComponent<ComponentModel>(Mesh::Plane, (Material*)ResourceManifest::TorpedoGlow2Material.get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& beamModelEnd = model1.getModel(0);
     beamModelEnd.hide();
 
-    auto& body1 = *beamEndPointGraphic->addComponent<ComponentBody>(CollisionType::Sphere);
+    auto& body1 = *beamEndPointGraphic.addComponent<ComponentBody>(CollisionType::Sphere);
 
     btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body1.getCollision()->getBtShape());
     const auto& _scl = btVector3(0.01f, 0.01f, 0.01f);
@@ -222,14 +253,8 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(Ship& _ship, Map& map, const glm::vec3& _po
     const_cast<btRigidBody&>(body1.getBtBody()).setDamping(0.0f, 0.0f);
 }
 PrimaryWeaponBeam::~PrimaryWeaponBeam() {
-    if (beamGraphic) {
-        beamGraphic->destroy();
-        SAFE_DELETE(beamGraphic);
-    }
-    if (beamEndPointGraphic) {
-        beamEndPointGraphic->destroy();
-        SAFE_DELETE(beamEndPointGraphic);
-    }
+    beamGraphic.destroy();
+    beamEndPointGraphic.destroy();
     if (beamLight) {
         beamLight->destroy();
         SAFE_DELETE(beamLight);
@@ -243,6 +268,9 @@ void PrimaryWeaponBeam::modifyBeamMesh(ComponentModel& beamModel, const float le
 
     auto& beamModelOne = beamModel.getModel(0);
     const auto len2 = length * (1.0f / beamModelOne.getScale().x);
+
+    if (modPts.size() == 0 || modUvs.size() == 0) //TODO: find out why this is needed
+        return;
 
     modPts[0].z = len2;
     modPts[4].z = len2;
@@ -283,14 +311,20 @@ const glm::vec3 PrimaryWeaponBeam::calculatePredictedVector() {
     glm::vec3 ret = glm::vec3(0.0f);
     return ret;
 }
+const bool PrimaryWeaponBeam::canFire() {
+    if (numRounds > 0) {
+        return true;
+    }
+    return false;
+}
 const bool PrimaryWeaponBeam::fire(const double& dt) {
     if (numRounds > 0) {
         return true;
     }
     return false;
 }
-void PrimaryWeaponBeam::forceFire(const double& dt) {
-
+const bool PrimaryWeaponBeam::forceFire(const double& dt) {
+    return false;
 }
 void PrimaryWeaponBeam::update(const double& dt) {
     if (numRounds < numRoundsMax) {
@@ -302,7 +336,7 @@ void PrimaryWeaponBeam::update(const double& dt) {
         }
     }
 }
-SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime,const float& _travelSpeed,const float& _volume,const float& _rotAngleSpeed) : ShipWeapon(_ship,_pos,_fwd,_arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound) {
+SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Map& map, WeaponType::Type _type, Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime,const float& _travelSpeed,const float& _volume,const float& _rotAngleSpeed) : ShipWeapon(map, _type, _ship,_pos,_fwd,_arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound) {
     damage                   = _dmg;
     impactRadius             = _impactRad;
     impactTime               = _impactTime;
@@ -366,21 +400,21 @@ const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredicte
 const bool SecondaryWeaponTorpedo::isInControlledArc(EntityWrapper* target) {
     return isInArc(target, 45.0f);
 }
-const bool SecondaryWeaponTorpedo::canFire() {
+const int SecondaryWeaponTorpedo::canFire() {
     if (numRounds > 0) {
-        return true;
+        return m_Map.try_addTorpedoProjectile();
+    }
+    return -1;
+}
+const bool SecondaryWeaponTorpedo::forceFire(const int index) {
+    if (numRounds > 0) {
+        const bool can = m_Map.try_addTorpedoProjectile(index);
+        if (can) {
+            Weapons::spawnProjectile(*this, ship, m_Map, position, forward, index);
+            return true;
+        }
     }
     return false;
-}
-const bool SecondaryWeaponTorpedo::fire() {
-    if (numRounds > 0) {
-        --numRounds;
-        return true;
-    }
-    return false;
-}
-void SecondaryWeaponTorpedo::forceFire() {
-
 }
 void SecondaryWeaponTorpedo::update(const double& dt) {
     if (soundEffect && (soundEffect->status() == SoundStatus::Playing || soundEffect->status() == SoundStatus::PlayingLooped)) {
@@ -398,6 +432,80 @@ void SecondaryWeaponTorpedo::update(const double& dt) {
         }
     }
 }
+SecondaryWeaponTorpedoProjectile::SecondaryWeaponTorpedoProjectile(Map& _map, const glm::vec3& position, const glm::vec3& forward, const int index) :map(_map) {
+    entity             = _map.createEntity();
+    currentTime        = 0.0f;
+    maxTime            = 30.5f;
+    hasLock            = false;
+    target             = nullptr;
+    light              = nullptr;
+    rotationAngleSpeed = 0.0f;
+    active             = true;
+    destroyed          = false;
+    projectile_index   = index;
+}
+SecondaryWeaponTorpedoProjectile::~SecondaryWeaponTorpedoProjectile() {
+    active = false;
+}
+void SecondaryWeaponTorpedoProjectile::clientToServerImpact(Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const bool& shields) {
+    PacketProjectileImpact packet;
+    packet.PacketType = PacketType::Client_To_Server_Projectile_Torpedo_Impact;
+    packet.damage     = damage;
+    packet.impactX    = impactLocalPosition.x;
+    packet.impactY    = impactLocalPosition.y;
+    packet.impactZ    = impactLocalPosition.z;
+    packet.shields    = shields;
+    packet.index      = projectile_index;
+    packet.data = shipHit.getName() + ",";
+    Math::Float16From32(&packet.time, time);
+    Math::Float16From32(&packet.radius, impactRadius);
+    Math::Float16From32(&packet.normalX, impactNormal.x);
+    Math::Float16From32(&packet.normalY, impactNormal.y);
+    Math::Float16From32(&packet.normalZ, impactNormal.z);
+    active = false;
+    client.send(packet);
+}
+void SecondaryWeaponTorpedoProjectile::update(const double& dt) {
+    if (active) {
+        const float fdt = static_cast<float>(dt);
+        currentTime += fdt;
+
+        auto& glowModel = *entity.getComponent<ComponentModel>();
+        auto& body = *entity.getComponent<ComponentBody>();
+        const auto glowBodyPos = body.position_render();
+        auto* activeCam = glowModel.getOwner().scene().getActiveCamera();
+        const auto camPos = activeCam->getPosition();
+
+        //TODO: hacky workaround for messed up camera forward vector
+        auto vec = glm::normalize(glowBodyPos - camPos);
+        vec *= 0.01f;
+        body.setRotation(activeCam->getOrientation());
+        glowModel.getModel(1).setPosition(vec);
+
+        if (light) {
+            auto& lightBody = *light->getComponent<ComponentBody>();
+            lightBody.setPosition(glowBodyPos);
+        }
+
+        if (currentTime >= maxTime) {
+            destroy();
+        }
+    }
+}
+void SecondaryWeaponTorpedoProjectile::destroy() {
+    if (!destroyed) {
+        entity.destroy();
+        if (light) {
+            light->destroy();
+            SAFE_DELETE(light);
+        }
+        map.removeTorpedoProjectile(projectile_index);
+        active = false;
+        destroyed = true;
+    }
+}
+
+
 
 
 
@@ -414,18 +522,19 @@ void ShipSystemWeapons::update(const double& dt) {
     const bool isWarping = m_Ship.IsWarping();
     const bool isPlayer = m_Ship.IsPlayer();
     if (isPlayer && Engine::isMouseButtonDownOnce(MouseButton::Left) && !isCloaked && !isWarping) {
-        vector<uint> primaryWeaponsBeamsFired;
-        vector<uint> primaryWeaponsCannonsFired;
+        #pragma region primary weapons
+        vector<std::pair<uint, int>> primaryWeaponsBeamsFired;
+        vector<std::pair<uint, int>> primaryWeaponsCannonsFired;
         for (uint i = 0; i < m_PrimaryWeaponsBeams.size(); ++i) {
-            const auto res = m_PrimaryWeaponsBeams[i]->fire(dt);
+            const auto res = m_PrimaryWeaponsBeams[i]->canFire();
             if (res) {
-                primaryWeaponsBeamsFired.push_back(i);
+                primaryWeaponsBeamsFired.push_back(std::make_pair(i, res));
             }
         }
         for (uint i = 0; i < m_PrimaryWeaponsCannons.size(); ++i) {
-            const auto res = m_PrimaryWeaponsCannons[i]->fire();
-            if (res) {
-                primaryWeaponsCannonsFired.push_back(i);
+            const int resIndex = m_PrimaryWeaponsCannons[i]->canFire();
+            if (resIndex >= 0) {
+                primaryWeaponsCannonsFired.push_back(std::make_pair(i, resIndex));
             }
         }
         //send packet with indices
@@ -433,40 +542,46 @@ void ShipSystemWeapons::update(const double& dt) {
             PacketMessage pOut;
             pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Beams;
             pOut.name = m_Ship.getName();
-            pOut.data = to_string(primaryWeaponsBeamsFired[0]);
+            pOut.data = to_string(primaryWeaponsBeamsFired[0].first) + "," + to_string(primaryWeaponsBeamsFired[0].second);
             for (uint i = 1; i < primaryWeaponsBeamsFired.size(); ++i)
-                pOut.data += "," + to_string(primaryWeaponsBeamsFired[i]);
+                pOut.data += "," + to_string(primaryWeaponsBeamsFired[i].first) + "," + to_string(primaryWeaponsBeamsFired[i].second);
             m_Ship.m_Client.send(pOut);
         }
         if (primaryWeaponsCannonsFired.size() > 0) {
             PacketMessage pOut;
             pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Cannons;
             pOut.name = m_Ship.getName();
-            pOut.data = to_string(primaryWeaponsCannonsFired[0]);
+            pOut.data = to_string(primaryWeaponsCannonsFired[0].first) + "," + to_string(primaryWeaponsCannonsFired[0].second);
             for (uint i = 1; i < primaryWeaponsCannonsFired.size(); ++i)
-                pOut.data += "," + to_string(primaryWeaponsCannonsFired[i]);
+                pOut.data += "," + to_string(primaryWeaponsCannonsFired[i].first) + "," + to_string(primaryWeaponsCannonsFired[i].second);
             m_Ship.m_Client.send(pOut);
         }
+        #pragma endregion
     }
     if (isPlayer && Engine::isMouseButtonDownOnce(MouseButton::Right) && !isCloaked && !isWarping) {
-        vector<uint> secWeaponsTorpedosFired;
+        #pragma region secondary weapons
+        vector<std::pair<uint, int>> secWeaponsTorpedosFired;
 
         //first, get the arcs that are in range of the target if applicable
-        vector<uint> secWeaponsTorpedosFiredInValidArc;
+        vector<std::pair<uint, int>> secWeaponsTorpedosFiredInValidArc;
         auto* mytarget = m_Ship.getTarget();
         if (mytarget) {
             for (uint i = 0; i < m_SecondaryWeaponsTorpedos.size(); ++i) {
                 auto torpedo = m_SecondaryWeaponsTorpedos[i];
                 if (torpedo->isInControlledArc(mytarget)) {
-                    if (torpedo->canFire()) {
-                        secWeaponsTorpedosFiredInValidArc.push_back(i);
+                    const int resIndex = torpedo->canFire();
+                    if (resIndex >= 0) {
+                        secWeaponsTorpedosFiredInValidArc.push_back(std::make_pair(i, resIndex));
                     }
                 }
             }
         }else{
             for (uint i = 0; i < m_SecondaryWeaponsTorpedos.size(); ++i) {
                 auto torpedo = m_SecondaryWeaponsTorpedos[i];
-                secWeaponsTorpedosFiredInValidArc.push_back(i);
+                const int resIndex = torpedo->canFire();
+                if (resIndex >= 0) {
+                    secWeaponsTorpedosFiredInValidArc.push_back(std::make_pair(i, resIndex));
+                }
             }
         }
 
@@ -474,17 +589,17 @@ void ShipSystemWeapons::update(const double& dt) {
         uint maxRounds = 0;
         uint chosenIndex = 0;
         for (auto& weapIndex : secWeaponsTorpedosFiredInValidArc) {
-            auto& launcher = m_SecondaryWeaponsTorpedos[weapIndex];
+            auto& launcher = m_SecondaryWeaponsTorpedos[weapIndex.first];
             if (launcher->numRounds > maxRounds) {
                 maxRounds = launcher->numRounds;
-                chosenIndex = weapIndex;
+                chosenIndex = weapIndex.first;
             }
         }
         //now fire this chosen launcher
         if(secWeaponsTorpedosFiredInValidArc.size() > 0){
-            const auto res = m_SecondaryWeaponsTorpedos[chosenIndex]->fire();
-            if (res) {
-                secWeaponsTorpedosFired.push_back(chosenIndex);
+            const int resIndex = m_SecondaryWeaponsTorpedos[chosenIndex]->canFire();
+            if (resIndex >= 0) {
+                secWeaponsTorpedosFired.push_back(std::make_pair(chosenIndex, resIndex));
             }
         }
 
@@ -496,11 +611,12 @@ void ShipSystemWeapons::update(const double& dt) {
             PacketMessage pOut;
             pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Torpedos;
             pOut.name = m_Ship.getName();
-            pOut.data = to_string(secWeaponsTorpedosFired[0]);
+            pOut.data = to_string(secWeaponsTorpedosFired[0].first) + "," + to_string(secWeaponsTorpedosFired[0].second);
             for (uint i = 1; i < secWeaponsTorpedosFired.size(); ++i)
-                pOut.data += "," + to_string(secWeaponsTorpedosFired[i]);
+                pOut.data += "," + to_string(secWeaponsTorpedosFired[i].first) + "," + to_string(secWeaponsTorpedosFired[i].second);
             m_Ship.m_Client.send(pOut);
         }
+        #pragma endregion
     }
     for (auto& beam : m_PrimaryWeaponsBeams) {
         beam->update(dt);
@@ -513,11 +629,23 @@ void ShipSystemWeapons::update(const double& dt) {
     }
 }
 void ShipSystemWeapons::addPrimaryWeaponBeam(PrimaryWeaponBeam& beam) {
+    beam.index = m_PrimaryWeaponsBeams.size();
     m_PrimaryWeaponsBeams.push_back(&beam);
 }
 void ShipSystemWeapons::addPrimaryWeaponCannon(PrimaryWeaponCannon& cannon) {
+    cannon.index = m_PrimaryWeaponsCannons.size();
     m_PrimaryWeaponsCannons.push_back(&cannon);
 }
 void ShipSystemWeapons::addSecondaryWeaponTorpedo(SecondaryWeaponTorpedo& torpedo) {
+    torpedo.index = m_SecondaryWeaponsTorpedos.size();
     m_SecondaryWeaponsTorpedos.push_back(&torpedo);
+}
+PrimaryWeaponBeam& ShipSystemWeapons::getPrimaryWeaponBeam(const uint index) {
+    return *m_PrimaryWeaponsBeams[index];
+}
+PrimaryWeaponCannon& ShipSystemWeapons::getPrimaryWeaponCannon(const uint index) {
+    return *m_PrimaryWeaponsCannons[index];
+}
+SecondaryWeaponTorpedo& ShipSystemWeapons::getSecondaryWeaponTorpedo(const uint index) {
+    return *m_SecondaryWeaponsTorpedos[index];
 }

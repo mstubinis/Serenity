@@ -19,7 +19,7 @@ void SoundData::buildBuffer() {
     }
     m_Buffer->loadFromFile(m_File);
 }
-const float& SoundData::getDuration() const {
+const float SoundData::getDuration() const {
     return m_Buffer->getDuration().asSeconds();
 }
 sf::SoundBuffer* SoundData::getBuffer() {
@@ -28,7 +28,7 @@ sf::SoundBuffer* SoundData::getBuffer() {
 const std::string& SoundData::getFilename() {
     return m_File;
 }
-const float& SoundData::getVolume() const {
+const float SoundData::getVolume() const {
     return m_Volume;
 }
 void SoundData::setVolume(const float& volume) {

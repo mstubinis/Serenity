@@ -96,6 +96,16 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketHealthUpdate(); break;
         }case PacketType::Server_To_Client_Ship_Health_Update: {
             p = new PacketHealthUpdate(); break;
+
+        }case PacketType::Client_To_Server_Projectile_Cannon_Impact: {
+            p = new PacketProjectileImpact(); break;
+        }case PacketType::Client_To_Server_Projectile_Torpedo_Impact: {
+            p = new PacketProjectileImpact(); break;
+        }case PacketType::Server_To_Client_Projectile_Cannon_Impact: {
+            p = new PacketProjectileImpact(); break;
+        }case PacketType::Server_To_Client_Projectile_Torpedo_Impact: {
+            p = new PacketProjectileImpact(); break;
+
         }default: {
             break;
         }

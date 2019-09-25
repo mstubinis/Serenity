@@ -14,10 +14,8 @@ class PlasmaBeam final : public PrimaryWeaponBeam {
     friend struct PlasmaBeamInstanceUnbindFunctor;
     friend struct PlasmaBeamCollisionFunctor;
     private:
-        Map& m_Map;
-
-        EntityWrapper* firstWindupGraphic;
-        EntityWrapper* secondWindupGraphic;
+        Entity      firstWindupGraphic;
+        Entity      secondWindupGraphic;
 
         PointLight* firstWindupLight;
         PointLight* secondWindupLight;
@@ -29,7 +27,7 @@ class PlasmaBeam final : public PrimaryWeaponBeam {
             const glm::vec3& forward,
             const float& arc,
             std::vector<glm::vec3>& windupPts,
-            const float& damage = 240.0f,
+            const float& damage = 450.0f,
             const float& _chargeTimerSpeed = 4.0f,
             const float& _firingTime = 1.05f,
             const float& _impactRadius = 2.5f,
@@ -41,7 +39,7 @@ class PlasmaBeam final : public PrimaryWeaponBeam {
         ~PlasmaBeam();
 
         const bool fire(const double& dt);
-        void forceFire(const double& dt);
+        const bool forceFire(const double& dt);
         void update(const double& dt);
 };
 #endif

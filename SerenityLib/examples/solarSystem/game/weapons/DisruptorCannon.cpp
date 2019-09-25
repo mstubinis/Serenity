@@ -1,7 +1,5 @@
-#include "DisruptorCannon.h"
+#include "Weapons.h"
 #include "../map/Map.h"
-#include "../ResourceManifest.h"
-#include "../Ship.h"
 
 #include <ecs/Components.h>
 #include <core/engine/math/Engine_Math.h>
@@ -31,18 +29,20 @@ struct DisruptorCannonCollisionFunctor final { void operator()(ComponentBody& ow
             Ship* otherShip = static_cast<Ship*>(otherPtrShip);
             if (otherShip && disruptorCannonProjectile.active) {
                 Ship* sourceShip = static_cast<Ship*>(disruptorCannonShipVoid);
-                DisruptorCannon& disruptorCannon = *static_cast<DisruptorCannon*>(owner.getUserPointer2());
-                auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
-                auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                auto local = otherHit - other.position();
-                if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                    shields->receiveHit(normal, local, disruptorCannon.impactRadius, disruptorCannon.impactTime, disruptorCannon.damage);
-                    disruptorCannonProjectile.destroy();
-                    return;
-                }
-                if (hull && other.getUserPointer() == hull) {
-                    hull->receiveHit(normal, local, disruptorCannon.impactRadius, disruptorCannon.impactTime, disruptorCannon.damage);
-                    disruptorCannonProjectile.destroy();
+                if (sourceShip->IsPlayer()) {
+                    DisruptorCannon& disruptorCannon = *static_cast<DisruptorCannon*>(owner.getUserPointer2());
+                    auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
+                    auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                    auto local = otherHit - other.position();
+                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
+                        //shields->receiveHit(normal, local, disruptorCannon.impactRadius, disruptorCannon.impactTime, disruptorCannon.damage);
+                        disruptorCannonProjectile.clientToServerImpact(disruptorCannon.m_Map.getClient(), *otherShip, local, normal, disruptorCannon.impactRadius, disruptorCannon.damage, disruptorCannon.impactTime, true);
+                        return;
+                    }
+                    if (hull && other.getUserPointer() == hull) {
+                        //hull->receiveHit(normal, local, disruptorCannon.impactRadius, disruptorCannon.impactTime, disruptorCannon.damage);
+                        disruptorCannonProjectile.clientToServerImpact(disruptorCannon.m_Map.getClient(), *otherShip, local, normal, disruptorCannon.impactRadius, disruptorCannon.damage, disruptorCannon.impactTime, false);
+                    }
                 }
             }
         }
@@ -119,7 +119,7 @@ struct DisruptorCannonTailInstanceUnbindFunctor { void operator()(EngineResource
 }};
 
 
-DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward) : PrimaryWeaponCannonProjectile(map, position, forward) {
+DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index) : PrimaryWeaponCannonProjectile(map, position, forward, index) {
     EntityDataRequest request(entity);
 
     auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
@@ -186,7 +186,7 @@ DisruptorCannonProjectile::~DisruptorCannonProjectile() {
 
 }
 
-DisruptorCannon::DisruptorCannon(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume) :PrimaryWeaponCannon(ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume), m_Map(map) {
+DisruptorCannon::DisruptorCannon(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume) :PrimaryWeaponCannon(map,WeaponType::DisruptorCannon, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume){
 
 }
 DisruptorCannon::~DisruptorCannon() {
@@ -194,37 +194,5 @@ DisruptorCannon::~DisruptorCannon() {
 }
 
 void DisruptorCannon::update(const double& dt) {
-    for (auto& projectile : m_ActiveProjectiles) {
-        projectile->update(dt);
-    }
-    for (auto& projectile : m_ActiveProjectiles) {
-        if (!projectile->active) {
-            removeFromVector(m_ActiveProjectiles, projectile);
-        }
-    }
     PrimaryWeaponCannon::update(dt);
-}
-const bool DisruptorCannon::fire() {
-    const auto res = PrimaryWeaponCannon::fire();
-    if (res) {
-        forceFire();
-        return true;
-    }
-    return false;
-}
-void DisruptorCannon::forceFire() {
-    auto* projectile = new DisruptorCannonProjectile(*this, m_Map, position, forward);
-    m_ActiveProjectiles.push_back(projectile);
-
-    auto& shipBody = *ship.getComponent<ComponentBody>();
-    auto shipMatrix = shipBody.modelMatrix();
-    shipMatrix = glm::translate(shipMatrix, position);
-    const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
-
-    soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundDisruptorCannon);
-    if (soundEffect) {
-        soundEffect->setVolume(volume);
-        soundEffect->setPosition(finalPosition);
-        soundEffect->setAttenuation(0.1f);
-    }
 }
