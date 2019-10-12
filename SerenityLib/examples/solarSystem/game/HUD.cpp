@@ -462,18 +462,27 @@ void HUD::render_game() {
                 float distanceInm = (targetBody.getDistance(player->entity())) * 100.0f;
                 stringRepresentation = to_string(uint(distanceInm)) + " m";
             }
-            m_Font->renderText(name + "\n" + stringRepresentation, glm::vec2(pos.x + 40, pos.y - 15), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1), 0, glm::vec2(0.7f, 0.7f), 0.1f);
+            m_Font->renderText(name + "\n" + stringRepresentation, glm::vec2(pos.x + 20, pos.y + 20), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1), 0, glm::vec2(0.7f, 0.7f), 0.1f);
 
 
-            const auto healthDisplayWidthMax = 70;
+            const auto healthDisplayWidthMax = 100.0f;
             Ship* ship = dynamic_cast<Ship*>(target);
             if (ship) {
                 auto* shields = static_cast<ShipSystemShields*>(ship->getShipSystem(ShipSystemType::Shields));
                 auto* _hull = static_cast<ShipSystemHull*>(ship->getShipSystem(ShipSystemType::Hull));
                 if (shields) {
                     auto& shield = *shields;
-                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 26.0f), glm::vec4(0.0f, 0.08f, 0.13f, 1.0f), healthDisplayWidthMax, 2, 0, 0.10f, Alignment::BottomLeft);
-                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 26.0f), glm::vec4(0.0f, 0.674f, 1.0f, 1.0f), shield.getHealthPercent() * healthDisplayWidthMax, 2, 0, 0.09f, Alignment::BottomLeft);
+
+                    auto startX = 0;
+                    auto incrX = (healthDisplayWidthMax / 6.0f) - 2.0f;
+                    for (uint i = 0; i < 6; ++i) {
+                        Renderer::renderRectangle(glm::vec2((pos.x - (healthDisplayWidthMax / 2)) + startX, pos.y - 26.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), incrX, 2, 0, 0.10f, Alignment::BottomLeft);
+                        Renderer::renderRectangle(glm::vec2((pos.x - (healthDisplayWidthMax / 2)) + startX, pos.y - 26.0f), glm::vec4(0.0f, 0.674f, 1.0f, 1.0f), shield.getHealthPercent(i) * incrX, 2, 0, 0.09f, Alignment::BottomLeft);
+                        startX += (incrX + 3.0f);
+                    }
+
+
+
 
                 }
                 if (_hull) {

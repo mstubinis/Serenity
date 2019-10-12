@@ -38,7 +38,7 @@ class PhaserBeam final : public PrimaryWeaponBeam {
         );
         ~PhaserBeam();
 
-        const bool fire(const double& dt);
+        const bool fire(const double& dt, const glm::vec3& chosen_target_pt);
         const bool forceFire(const double& dt);
         void update(const double& dt);
 };

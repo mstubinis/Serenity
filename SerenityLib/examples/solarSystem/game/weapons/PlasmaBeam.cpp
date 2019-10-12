@@ -26,46 +26,45 @@
 using namespace Engine;
 using namespace std;
 
-struct PlasmaBeamCollisionFunctor final {
-    void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
-        auto phaserShipVoid = owner.getUserPointer1();
-        auto otherShipVoid = other.getUserPointer1();
-        if (otherShipVoid && phaserShipVoid) {
-            if (otherShipVoid != phaserShipVoid) {//dont hit ourselves!
-                Ship* otherShip = static_cast<Ship*>(otherShipVoid);
-                if (otherShip) {
-                    PlasmaBeam& Plasma = *static_cast<PlasmaBeam*>(owner.getUserPointer2());
-                    if (Plasma.firingTime > 0.0f) {
-                        Ship* sourceShip = static_cast<Ship*>(phaserShipVoid);
-                        auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
-                        auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                        auto local = otherHit - other.position();
-
-                        auto finalDamage = static_cast<float>(Resources::dt()) * Plasma.damage;
-
-                        if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                            if (Plasma.firingTimeShieldGraphicPing > 0.2f) {
-                                shields->receiveHit(normal, local, Plasma.impactRadius, Plasma.impactTime, finalDamage, true);
-                                Plasma.firingTimeShieldGraphicPing = 0.0f;
+struct PlasmaBeamCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+    auto phaserShipVoid = owner.getUserPointer1();
+    auto otherShipVoid = other.getUserPointer1();
+    if (otherShipVoid && phaserShipVoid) {
+        if (otherShipVoid != phaserShipVoid) {//dont hit ourselves!
+            Ship* otherShip = static_cast<Ship*>(otherShipVoid);
+            if (otherShip) {
+                auto& weapon = *static_cast<PlasmaBeam*>(owner.getUserPointer2());
+                if (weapon.firingTime > 0.0f) {
+                    Ship* sourceShip = static_cast<Ship*>(phaserShipVoid);
+                    auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
+                    auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                    auto local = otherHit - other.position();
+                    auto finalDamage = static_cast<float>(Resources::dt()) * weapon.damage;
+                    if (shields && other.getUserPointer() == shields) {
+                        const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
+                        if (shields->getHealthCurrent(shieldSide) > 0) {
+                            if (weapon.firingTimeShieldGraphicPing > 0.2f) {
+                                shields->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
+                                weapon.firingTimeShieldGraphicPing = 0.0f;
                             }else{
-                                shields->receiveHit(normal, local, Plasma.impactRadius, Plasma.impactTime, finalDamage, false);
+                                shields->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
                             }
                             return;
                         }
-                        if (hull && other.getUserPointer() == hull) {
-                            if (Plasma.firingTimeShieldGraphicPing > 1.0f) {
-                                hull->receiveHit(normal, local, Plasma.impactRadius, Plasma.impactTime, finalDamage, true, true);
-                                Plasma.firingTimeShieldGraphicPing = 0.0f;
-                            }else{
-                                hull->receiveHit(normal, local, Plasma.impactRadius, Plasma.impactTime, finalDamage, false, false);
-                            }
+                    }
+                    if (hull && other.getUserPointer() == hull) {
+                        if (weapon.firingTimeShieldGraphicPing > 1.0f) {
+                            hull->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, true, true);
+                            weapon.firingTimeShieldGraphicPing = 0.0f;
+                        }else{
+                            hull->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, false, false);
                         }
                     }
                 }
             }
         }
     }
-};
+}};
 
 struct PlasmaBeamInstanceBindFunctor { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
@@ -162,9 +161,10 @@ PlasmaBeam::~PlasmaBeam() {
     SAFE_DELETE(firstWindupLight);
     SAFE_DELETE(secondWindupLight);
 }
-const bool PlasmaBeam::fire(const double& dt) {
+const bool PlasmaBeam::fire(const double& dt, const glm::vec3& chosen_target_pt) {
     auto* target = ship.getTarget();
     auto res2 = isInArc(target, arc);
+    targetCoordinates = chosen_target_pt;
     if (res2) {
         auto& targetBody = *target->getComponent<ComponentBody>();
         auto& shipBody = *ship.getComponent<ComponentBody>();
@@ -174,7 +174,7 @@ const bool PlasmaBeam::fire(const double& dt) {
         const auto distSquared = glm::distance2(launcherPosition, targetBody.position());
 
         if (distSquared < 100 * 100) { //100 * 100 should be 10 KM
-            const auto res = PrimaryWeaponBeam::fire(dt);
+            const auto res = PrimaryWeaponBeam::fire(dt, chosen_target_pt);
             if (res) {
                 return forceFire(dt);
             }
@@ -231,21 +231,8 @@ void PlasmaBeam::update(const double& dt) {
         secondWindupLight->activate();
         beamLight->activate();
         state = BeamWeaponState::WindingUp;
-
-
-        auto* target = ship.getTarget();
-        auto& targetBody = *target->getComponent<ComponentBody>();
-        auto* targetIsShip = dynamic_cast<Ship*>(target);
-        if (targetIsShip) {
-            targetCoordinates = targetIsShip->getAimPositionRandomLocal(); //TODO: use getAimPositionRandom() later and send the final coordinates via packet
-        }
-        else {
-            targetCoordinates = glm::vec3(0.0f);
-        }
-
 #pragma endregion
-    }
-    else if (state == BeamWeaponState::WindingUp) {
+    }else if (state == BeamWeaponState::WindingUp) {
 #pragma region WindingUp
         auto& cam = *firstWindupBody.getOwner().scene().getActiveCamera();
         auto camRotation = cam.getOrientation();
@@ -266,8 +253,7 @@ void PlasmaBeam::update(const double& dt) {
         }
         if (windupPoints.size() == 1) {
             firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
-        }
-        else {
+        }else{
             const auto halfCharge = chargeTimer * 0.5f;
             firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
             secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
@@ -283,8 +269,7 @@ void PlasmaBeam::update(const double& dt) {
             return;
         }
 #pragma endregion
-    }
-    else if (state == BeamWeaponState::Firing) {
+    }else if (state == BeamWeaponState::Firing) {
 #pragma region Firing
         auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
@@ -298,8 +283,7 @@ void PlasmaBeam::update(const double& dt) {
         const auto shipPosition = ship.getPosition();
         if (windupPoints.size() == 1) {
             firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
-        }
-        else {
+        }else{
             const auto halfCharge = chargeTimer * 0.5f;
             firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
             secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
@@ -369,8 +353,7 @@ void PlasmaBeam::update(const double& dt) {
         glm::vec3 finPos;
         if (time >= len) {
             finPos = rayCastPoints.hitPosition;
-        }
-        else {
+        }else{
             finPos = realTargetPos;
         }
         beamEndBody.setPosition(finPos);
@@ -387,8 +370,7 @@ void PlasmaBeam::update(const double& dt) {
             state = BeamWeaponState::CoolingDown;
         }
 #pragma endregion
-    }
-    else if (state == BeamWeaponState::CoolingDown) {
+    }else if (state == BeamWeaponState::CoolingDown) {
 #pragma region CoolingDown
         auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
@@ -408,8 +390,7 @@ void PlasmaBeam::update(const double& dt) {
         const auto shipPosition = ship.getPosition();
         if (windupPoints.size() == 1) {
             firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
-        }
-        else {
+        }else{
             const auto halfCharge = chargeTimer * 0.5f;
             firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
             secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
@@ -474,8 +455,7 @@ void PlasmaBeam::update(const double& dt) {
         glm::vec3 finPos;
         if (time >= len) {
             finPos = rayCastPoints.hitPosition;
-        }
-        else {
+        }else{
             finPos = realTargetPos;
         }
         beamEndBody.setPosition(finPos);
@@ -487,8 +467,7 @@ void PlasmaBeam::update(const double& dt) {
             return;
         }
 #pragma endregion
-    }
-    else if (state == BeamWeaponState::JustTurnedOff) {
+    }else if (state == BeamWeaponState::JustTurnedOff) {
 #pragma region JustTurnedOff
         firingTime = 0.0f;
         chargeTimer = 0.0f;

@@ -29,7 +29,7 @@ Nova::Nova(Client& client, Map& map, bool player, const string& name, glm::vec3 
         else if (i == 2)  system = new ShipSystemYawThrusters(_this);
         else if (i == 3)  system = new ShipSystemRollThrusters(_this);
         else if (i == 4)  system = nullptr; //no cloaking device
-        else if (i == 5)  system = new ShipSystemShields(_this, map, 10500.0f);
+        else if (i == 5)  system = new ShipSystemShields(_this, map, 10500.0f, 10500.0f, 10500.0f, 10500.0f, 14000.0f, 14000.0f);
         else if (i == 6)  system = new ShipSystemMainThrusters(_this);
         else if (i == 7)  system = new ShipSystemWarpDrive(_this);
         else if (i == 8)  system = new ShipSystemSensors(_this, map);

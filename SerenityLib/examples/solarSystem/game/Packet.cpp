@@ -116,7 +116,12 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
 }
 PacketHealthUpdate::PacketHealthUpdate() :Packet() {
     currentHullHealth = 0;
-    currentShieldsHealth = 0;
+    currentShieldsHealthF = 0;
+    currentShieldsHealthA = 0;
+    currentShieldsHealthP = 0;
+    currentShieldsHealthS = 0;
+    currentShieldsHealthD = 0;
+    currentShieldsHealthV = 0;
     flags = PacketHealthFlags::None;
 }
 PacketHealthUpdate::PacketHealthUpdate(Ship& ship) : Packet() {
@@ -125,7 +130,14 @@ PacketHealthUpdate::PacketHealthUpdate(Ship& ship) : Packet() {
     flags = PacketHealthFlags::None;
     if (shields) {
         auto& shield = *shields;
-        currentShieldsHealth = shield.getHealthCurrent();
+
+        currentShieldsHealthF = shield.getHealthCurrent(0);
+        currentShieldsHealthA = shield.getHealthCurrent(1);
+        currentShieldsHealthP = shield.getHealthCurrent(2);
+        currentShieldsHealthS = shield.getHealthCurrent(3);
+        currentShieldsHealthD = shield.getHealthCurrent(4);
+        currentShieldsHealthV = shield.getHealthCurrent(5);
+
         flags = flags | PacketHealthFlags::ShieldsInstalled;
         if (shield.shieldsAreUp()) {
             flags = flags | PacketHealthFlags::ShieldsTurnedOn;

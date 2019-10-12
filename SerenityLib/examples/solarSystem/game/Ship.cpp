@@ -257,7 +257,18 @@ const glm::vec3 Ship::getAimPositionDefaultLocal() {
     }
     return (body.rotation() * m_AimPositionDefaults[0]);
 }
+
+const uint Ship::getAimPositionRandomLocalIndex() {
+    if (m_AimPositionDefaults.size() == 1) {
+        return 0;
+    }
+    const auto randIndex = Helper::GetRandomIntFromTo(0, m_AimPositionDefaults.size() - 1);
+    return randIndex;
+}
 const glm::vec3 Ship::getAimPositionRandomLocal() {
+    return getAimPositionLocal(getAimPositionRandomLocalIndex());
+}
+const glm::vec3 Ship::getAimPositionLocal(const uint index) {
     if (m_AimPositionDefaults.size() == 0 || (m_AimPositionDefaults[0].x == 0.0f && m_AimPositionDefaults[0].y == 0.0f && m_AimPositionDefaults[0].z == 0.0f)) {
         return glm::vec3(0.0f);
     }
@@ -265,8 +276,7 @@ const glm::vec3 Ship::getAimPositionRandomLocal() {
     if (m_AimPositionDefaults.size() == 1) {
         return (body.rotation() * m_AimPositionDefaults[0]);
     }
-    const auto randIndex = Helper::GetRandomIntFromTo(0, m_AimPositionDefaults.size() - 1);
-    return (body.rotation() * m_AimPositionDefaults[randIndex]);
+    return (body.rotation() * m_AimPositionDefaults[index]);
 }
 
 void Ship::destroy() {
@@ -313,7 +323,9 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     if (packet.shields) {
         auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
         if (shields) {
-            shields->receiveHit(normal, glm::vec3(packet.impactX, packet.impactY, packet.impactZ), rad, time, packet.damage);
+            const glm::vec3 local = glm::vec3(packet.impactX, packet.impactY, packet.impactZ);
+            const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
+            shields->receiveHit(normal, local, rad, time, packet.damage, shieldSide);
         }
         if (packet.PacketType == PacketType::Server_To_Client_Projectile_Cannon_Impact) {
             auto* proj = map.getCannonProjectile(packet.index);
@@ -440,7 +452,15 @@ void Ship::updateHealthFromPacket(const PacketHealthUpdate& packet) {
     auto* shields = static_cast<ShipSystemShields*>(m_ShipSystems[ShipSystemType::Shields]);
     auto* hull    = static_cast<ShipSystemHull*>(m_ShipSystems[ShipSystemType::Hull]);
     if (shields) {
-        shields->m_HealthPointsCurrent = packet.currentShieldsHealth;
+
+        shields->m_HealthPointsCurrent[0] = packet.currentShieldsHealthF;
+        shields->m_HealthPointsCurrent[1] = packet.currentShieldsHealthA;
+        shields->m_HealthPointsCurrent[2] = packet.currentShieldsHealthP;
+        shields->m_HealthPointsCurrent[3] = packet.currentShieldsHealthS;
+        shields->m_HealthPointsCurrent[4] = packet.currentShieldsHealthD;
+        shields->m_HealthPointsCurrent[5] = packet.currentShieldsHealthV;
+
+
         if (packet.flags & PacketHealthUpdate::PacketHealthFlags::ShieldsActive) {
         }
         if (packet.flags & PacketHealthUpdate::PacketHealthFlags::ShieldsInstalled) {

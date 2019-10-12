@@ -44,6 +44,7 @@ ShipWeapon::ShipWeapon(Map& map, WeaponType::Type _type, Ship& _ship, const glm:
     rechargeTimePerRound     = _rechargeTimerPerRound;
     rechargeTimer            = 0.0f;
     soundEffect              = nullptr;
+    index                    = 0;
 }
 const bool ShipWeapon::isInArc(EntityWrapper* target, const float _arc) {
     if (!target)
@@ -73,11 +74,11 @@ const bool ShipWeapon::isInArc(EntityWrapper* target, const float _arc) {
 
 
 PrimaryWeaponCannonProjectile::PrimaryWeaponCannonProjectile(Map& _map, const glm::vec3& position, const glm::vec3& forward, const int index):map(_map) {
-    entity       = _map.createEntity();
-    currentTime  = 0.0f;
-    maxTime      = 2.5f;
-    active       = false;
-    destroyed    = false;
+    entity           = _map.createEntity();
+    currentTime      = 0.0f;
+    maxTime          = 2.5f;
+    active           = false;
+    destroyed        = false;
     projectile_index = index;
 }
 PrimaryWeaponCannonProjectile::~PrimaryWeaponCannonProjectile() {
@@ -149,15 +150,19 @@ const PrimaryWeaponCannonPrediction PrimaryWeaponCannon::calculatePredictedVecto
     auto finalSpeed = glm::length(defaultVelocityVector + currentVelocityVector);
     returnValue.finalProjectileSpeed = finalSpeed;
     if (mytarget) {
-        auto& targetBody           = *mytarget->getComponent<ComponentBody>();
-        auto* targetIsShip         = dynamic_cast<Ship*>(mytarget);
-        const auto vecToTarget     = shipPosition - chosen_target_pos;
-        const auto vecToForward    = shipPosition - (cannonForward * 100000000.0f);
-        const auto angleToTarget   = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
+        auto& targetBody                = *mytarget->getComponent<ComponentBody>();
+        auto* targetIsShip              = dynamic_cast<Ship*>(mytarget);
+        const auto targetPositionCenter = targetBody.position();
+
+        const auto worldPositionTarget  = targetPositionCenter + chosen_target_pos;
+
+        const auto vecToTarget          = shipPosition - worldPositionTarget;
+        const auto vecToForward         = shipPosition - (cannonForward * 100000000.0f);
+        const auto angleToTarget        = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
         if (angleToTarget <= arc) {
             const auto launcherPosition = shipPosition + (shipRotation * position);
             const auto targetLinearVelocity = targetBody.getLinearVelocity();
-            const auto distanceToTarget = glm::distance(chosen_target_pos, launcherPosition);
+            const auto distanceToTarget = glm::distance(worldPositionTarget, launcherPosition);
 
             const auto finalTravelTime = distanceToTarget / finalSpeed;
 
@@ -165,7 +170,7 @@ const PrimaryWeaponCannonPrediction PrimaryWeaponCannon::calculatePredictedVecto
             auto combinedVelocity = targetLinearVelocity - myShipVelocity;
             const auto predictedSpeed = combinedVelocity + (cannonForward * finalTravelTime) /* * target.acceleration */; //TODO: figure this out later
             const auto averageSpeed = (combinedVelocity + predictedSpeed) * 0.5f;
-            auto predictedPos = chosen_target_pos + (averageSpeed * finalTravelTime);
+            auto predictedPos = worldPositionTarget + (averageSpeed * finalTravelTime);
 
             returnValue.pedictedVector = -glm::normalize(launcherPosition - predictedPos);
             returnValue.pedictedPosition = predictedPos;
@@ -175,6 +180,9 @@ const PrimaryWeaponCannonPrediction PrimaryWeaponCannon::calculatePredictedVecto
     returnValue.pedictedVector = cannonForward;
     returnValue.pedictedPosition = cannonForward;
     return returnValue;
+}
+const bool PrimaryWeaponCannon::isInControlledArc(EntityWrapper* target) {
+    return isInArc(target, arc + 5.0f);
 }
 const int PrimaryWeaponCannon::canFire() {
     if (numRounds > 0) {
@@ -208,6 +216,9 @@ void PrimaryWeaponCannon::update(const double& dt) {
         }
     }
 }
+
+#pragma region Beam
+
 PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& map, const glm::vec3& _pos, const glm::vec3& _fwd, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound) {
     windupPoints = _windupPts;
     targetCoordinates = glm::vec3(0.0f);
@@ -322,7 +333,7 @@ const bool PrimaryWeaponBeam::canFire() {
     }
     return false;
 }
-const bool PrimaryWeaponBeam::fire(const double& dt) {
+const bool PrimaryWeaponBeam::fire(const double& dt, const glm::vec3& chosen_target_pt) {
     if (numRounds > 0) {
         return true;
     }
@@ -350,6 +361,9 @@ SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Map& map, WeaponType::Type _type,
     rotationAngleSpeed       = _rotAngleSpeed;
 }
 
+#pragma endregion
+
+#pragma region Torpedo
 const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredictedVector(ComponentBody& projectileBody, const glm::vec3& chosen_target_pos) {
     auto& shipBody = *ship.getComponent<ComponentBody>();
     auto shipRotation = shipBody.rotation();
@@ -366,7 +380,11 @@ const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredicte
         auto& targetBody = *mytarget->getComponent<ComponentBody>();
         auto* targetIsShip = dynamic_cast<Ship*>(mytarget);
 
-        const auto vecToTarget = shipPosition - chosen_target_pos;
+        const auto targetPositionCenter = targetBody.position();
+
+        const auto worldPositionTarget = targetPositionCenter + chosen_target_pos;
+
+        const auto vecToTarget = shipPosition - worldPositionTarget;
         const auto vecToForward = shipPosition - (torpForward * 100000000.0f);
         const auto angleToTarget = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
         if (angleToTarget <= arc) {
@@ -375,7 +393,7 @@ const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredicte
 
             const auto launcherPosition = shipPosition + (shipRotation * position);
             const auto targetLinearVelocity = targetBody.getLinearVelocity();
-            const auto distanceToTarget = glm::distance(chosen_target_pos, launcherPosition);
+            const auto distanceToTarget = glm::distance(worldPositionTarget, launcherPosition);
 
 
             const auto finalTravelTime = distanceToTarget / finalSpeed;
@@ -384,7 +402,7 @@ const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredicte
             auto combinedVelocity = targetLinearVelocity - myShipVelocity;
             const auto predictedSpeed = combinedVelocity + (torpForward * finalTravelTime) /* * target.acceleration */; //TODO: figure this out later
             const auto averageSpeed = (combinedVelocity + predictedSpeed) * 0.5f;
-            auto predictedPos = chosen_target_pos + (averageSpeed * finalTravelTime);
+            auto predictedPos = worldPositionTarget + (averageSpeed * finalTravelTime);
 
             returnValue.pedictedPosition = predictedPos;
             returnValue.pedictedVector = -glm::normalize(launcherPosition - predictedPos);
@@ -504,7 +522,7 @@ void SecondaryWeaponTorpedoProjectile::destroy() {
         destroyed = true;
     }
 }
-
+#pragma endregion
 
 
 
@@ -526,51 +544,76 @@ void ShipSystemWeapons::update(const double& dt) {
     if (mytarget) {
         Ship* ship = dynamic_cast<Ship*>(mytarget);
         if (ship) {
-            cannonTargetPoint = ship->getAimPositionRandom();
-            torpedoTargetPoint = ship->getAimPositionRandom();
+            cannonTargetPoint = ship->getAimPositionRandomLocal();
+            torpedoTargetPoint = ship->getAimPositionRandomLocal();
         }else{
-            auto& targetBody = *mytarget->getComponent<ComponentBody>();
-            const auto pos = targetBody.position();
-            cannonTargetPoint = pos;
-            torpedoTargetPoint = pos;
+            cannonTargetPoint = glm::vec3(0.0f);
+            torpedoTargetPoint = glm::vec3(0.0f);
         }
     }
-
-
     if (isPlayer && Engine::isMouseButtonDownOnce(MouseButton::Left) && !isCloaked && !isWarping) {
-        #pragma region primary weapons
-        vector<std::pair<uint, int>> primaryWeaponsBeamsFired;
-        vector<std::pair<uint, int>> primaryWeaponsCannonsFired;
+        #pragma region Beams
+        vector<std::tuple<uint, int, int>> primaryWeaponsBeamsFired;
         for (uint i = 0; i < m_PrimaryWeaponsBeams.size(); ++i) {
             const auto res = m_PrimaryWeaponsBeams[i]->canFire();
             if (res) {
-                primaryWeaponsBeamsFired.push_back(std::make_pair(i, res));
+                if (mytarget) {
+                    Ship* ship = dynamic_cast<Ship*>(mytarget);
+                    if (ship) {
+                        primaryWeaponsBeamsFired.push_back(std::make_tuple(i, res, static_cast<int>(ship->getAimPositionRandomLocalIndex())));
+                    }else{
+                        primaryWeaponsBeamsFired.push_back(std::make_tuple(i, res, 0));
+                    }
+                }
             }
         }
-        for (uint i = 0; i < m_PrimaryWeaponsCannons.size(); ++i) {
-            const int resIndex = m_PrimaryWeaponsCannons[i]->canFire();
-            if (resIndex >= 0) {
-                primaryWeaponsCannonsFired.push_back(std::make_pair(i, resIndex));
+        #pragma endregion
+        #pragma region Cannons
+        vector<std::pair<uint, int>> primaryWeaponsCannonsFired;
+        auto* mytarget = m_Ship.getTarget();
+        if (mytarget) {
+            for (uint i = 0; i < m_PrimaryWeaponsCannons.size(); ++i) {
+                auto cannon = m_PrimaryWeaponsCannons[i];
+                if (cannon->isInControlledArc(mytarget)) {
+                    const int resIndex = cannon->canFire();
+                    if (resIndex >= 0) {
+                        primaryWeaponsCannonsFired.push_back(std::make_pair(i, resIndex));
+                    }
+                }
+            }
+        }else{
+            for (uint i = 0; i < m_PrimaryWeaponsCannons.size(); ++i) {
+                auto cannon = m_PrimaryWeaponsCannons[i];
+                const int resIndex = cannon->canFire();
+                if (resIndex >= 0) {
+                    primaryWeaponsCannonsFired.push_back(std::make_pair(i, resIndex));
+                }
             }
         }
+        #pragma endregion
+
         //send packet with indices
         if (primaryWeaponsBeamsFired.size() > 0) {
             PacketMessage pOut;
             pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Beams;
             pOut.name = m_Ship.getName();
-            //TODO: sync this
-            //pOut.r = cannonTargetPoint.x;
-            //pOut.g = cannonTargetPoint.y;
-            //pOut.b = cannonTargetPoint.z;
-            pOut.data = to_string(primaryWeaponsBeamsFired[0].first) + "," + to_string(primaryWeaponsBeamsFired[0].second);
-            for (uint i = 1; i < primaryWeaponsBeamsFired.size(); ++i)
-                pOut.data += "," + to_string(primaryWeaponsBeamsFired[i].first) + "," + to_string(primaryWeaponsBeamsFired[i].second);
+            pOut.data = to_string(std::get<0>(primaryWeaponsBeamsFired[0])) + "," 
+                      + to_string(std::get<1>(primaryWeaponsBeamsFired[0])) + "," 
+                      + to_string(std::get<2>(primaryWeaponsBeamsFired[0]));
+            for (uint i = 1; i < primaryWeaponsBeamsFired.size(); ++i) {
+                pOut.data += "," + to_string(std::get<0>(primaryWeaponsBeamsFired[i])) + "," 
+                                 + to_string(std::get<1>(primaryWeaponsBeamsFired[i])) + "," 
+                                 + to_string(std::get<2>(primaryWeaponsBeamsFired[i]));
+            }
             m_Ship.m_Client.send(pOut);
         }
         if (primaryWeaponsCannonsFired.size() > 0) {
             PacketMessage pOut;
             pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Cannons;
             pOut.name = m_Ship.getName();
+            /*
+            TODO: add a bit of random offset to this...
+            */
             pOut.r = cannonTargetPoint.x;
             pOut.g = cannonTargetPoint.y;
             pOut.b = cannonTargetPoint.z;
@@ -579,10 +622,9 @@ void ShipSystemWeapons::update(const double& dt) {
                 pOut.data += "," + to_string(primaryWeaponsCannonsFired[i].first) + "," + to_string(primaryWeaponsCannonsFired[i].second);
             m_Ship.m_Client.send(pOut);
         }
-        #pragma endregion
     }
     if (isPlayer && Engine::isMouseButtonDownOnce(MouseButton::Right) && !isCloaked && !isWarping) {
-        #pragma region secondary weapons
+        #pragma region Torpedos
         vector<std::pair<uint, int>> secWeaponsTorpedosFired;
 
         //first, get the arcs that are in range of the target if applicable
@@ -625,15 +667,16 @@ void ShipSystemWeapons::update(const double& dt) {
                 secWeaponsTorpedosFired.push_back(std::make_pair(chosenIndex, resIndex));
             }
         }
-
-
-
+        #pragma endregion
 
         //send packet with indices
         if (secWeaponsTorpedosFired.size() > 0) {
             PacketMessage pOut;
             pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Torpedos;
             pOut.name = m_Ship.getName();
+            /*
+            TODO: add a bit of random offset to this...
+            */
             pOut.r = torpedoTargetPoint.x;
             pOut.g = torpedoTargetPoint.y;
             pOut.b = torpedoTargetPoint.z;
@@ -642,7 +685,6 @@ void ShipSystemWeapons::update(const double& dt) {
                 pOut.data += "," + to_string(secWeaponsTorpedosFired[i].first) + "," + to_string(secWeaponsTorpedosFired[i].second);
             m_Ship.m_Client.send(pOut);
         }
-        #pragma endregion
     }
     for (auto& beam : m_PrimaryWeaponsBeams) {
         beam->update(dt);

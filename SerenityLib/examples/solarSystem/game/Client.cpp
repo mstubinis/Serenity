@@ -345,10 +345,22 @@ void Client::onReceive() {
                     if (map.hasShip(pI.name)) {
                         auto* ship = ships.at(pI.name);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                        for (uint i = 0; i < info.size() / 2; ++i) {
-                            auto& beam = ship->getPrimaryWeaponBeam(stoi(info[i * 2]));
-                            const auto projectile_index = stoi(info[(i * 2) + 1]);
-                            beam.fire(0.0f);
+                        for (uint i = 0; i < info.size() / 3; ++i) {
+                            auto& beam = ship->getPrimaryWeaponBeam(stoi(info[i * 3]));
+                            const auto projectile_index = stoi(info[(i * 3) + 1]);
+                            const auto chosen_impact_pt_index = stoi(info[(i * 3) + 2]);
+
+                            auto* mytarget = ship->getTarget();
+                            glm::vec3 chosen_impact_pt;
+                            if (mytarget) {
+                                Ship* tgtship = dynamic_cast<Ship*>(mytarget);
+                                if (tgtship) {
+                                    chosen_impact_pt = tgtship->getAimPositionLocal(chosen_impact_pt_index);
+                                }else{
+                                    chosen_impact_pt = glm::vec3(0.0f);
+                                }
+                            }
+                            beam.fire(0.0f, chosen_impact_pt);
                         }
                     }
                     break;
@@ -373,6 +385,7 @@ void Client::onReceive() {
                     auto& ships = map.getShips();
                     if (map.hasShip(pI.name)) {
                         ships[pI.name]->setTarget(pI.data, false);
+                        std::cout << pI.name << ": " << "changing target to: " << pI.data << "\n";
                     }
                     break;
                 }case PacketType::Server_To_Client_Anchor_Creation_Deep_Space_Initial: {

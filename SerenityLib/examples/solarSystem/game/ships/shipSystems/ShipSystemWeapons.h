@@ -100,6 +100,8 @@ struct PrimaryWeaponCannon : public ShipWeapon {
         const float& _travelSpeed,
         const float& volume
     );
+    virtual const bool isInControlledArc(EntityWrapper* target);
+
     virtual const int canFire();
     const bool forceFire(const int index, const glm::vec3& chosen_target_pos);
     virtual const PrimaryWeaponCannonPrediction calculatePredictedVector(ComponentBody& projectileBody, const glm::vec3& chosen_target_pos);
@@ -151,7 +153,7 @@ struct PrimaryWeaponBeam : public ShipWeapon {
     );
     ~PrimaryWeaponBeam();
     const bool canFire();
-    virtual const bool fire(const double& dt);
+    virtual const bool fire(const double& dt, const glm::vec3& chosen_target_pt);
     virtual const bool forceFire(const double& dt);
     virtual const glm::vec3 calculatePredictedVector();
     virtual void update(const double& dt);
@@ -212,7 +214,6 @@ struct SecondaryWeaponTorpedo : public ShipWeapon {
         const float& _volume,
         const float& _rotAngleSpeed
     );
-
     virtual const bool isInControlledArc(EntityWrapper* target);
 
     virtual const int canFire();

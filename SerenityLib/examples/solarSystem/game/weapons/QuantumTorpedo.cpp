@@ -33,13 +33,17 @@ struct QuantumTorpedoCollisionFunctor final { void operator()(ComponentBody& own
             if (otherShip && torpedoProjectile.active) {
                 Ship* sourceShip = static_cast<Ship*>(torpedoShipVoid);
                 if (sourceShip->IsPlayer()) {
-                    QuantumTorpedo& torpedo = *static_cast<QuantumTorpedo*>(owner.getUserPointer2());
+                    auto& torpedo = *static_cast<QuantumTorpedo*>(owner.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                     auto local = otherHit - other.position();
-                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                        torpedoProjectile.clientToServerImpact(torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, true);
-                        return;
+
+                    if (shields && other.getUserPointer() == shields) {
+                        const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
+                        if (shields->getHealthCurrent(shieldSide) > 0) {
+                            torpedoProjectile.clientToServerImpact(torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, true);
+                            return;
+                        }
                     }
                     if (hull && other.getUserPointer() == hull) {
                         torpedoProjectile.clientToServerImpact(torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, false);

@@ -20,28 +20,30 @@ using namespace Engine;
 using namespace std;
 
 struct DisruptorCannonCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
-    auto disruptorCannonShipVoid = owner.getUserPointer1();
-    auto& disruptorCannonProjectile = *static_cast<DisruptorCannonProjectile*>(owner.getUserPointer());
+    auto weaponShipVoid = owner.getUserPointer1();
+    auto& cannonProjectile = *static_cast<DisruptorCannonProjectile*>(owner.getUserPointer());
 
     auto otherPtrShip = other.getUserPointer1();
-    if (otherPtrShip && disruptorCannonShipVoid) {
-        if (otherPtrShip != disruptorCannonShipVoid) {//dont hit ourselves!
+    if (otherPtrShip && weaponShipVoid) {
+        if (otherPtrShip != weaponShipVoid) {//dont hit ourselves!
             Ship* otherShip = static_cast<Ship*>(otherPtrShip);
-            if (otherShip && disruptorCannonProjectile.active) {
-                Ship* sourceShip = static_cast<Ship*>(disruptorCannonShipVoid);
+            if (otherShip && cannonProjectile.active) {
+                Ship* sourceShip = static_cast<Ship*>(weaponShipVoid);
                 if (sourceShip->IsPlayer()) {
-                    DisruptorCannon& disruptorCannon = *static_cast<DisruptorCannon*>(owner.getUserPointer2());
+                    auto& weapon = *static_cast<DisruptorCannon*>(owner.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - other.position();
-                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                        //shields->receiveHit(normal, local, disruptorCannon.impactRadius, disruptorCannon.impactTime, disruptorCannon.damage);
-                        disruptorCannonProjectile.clientToServerImpact(disruptorCannon.m_Map.getClient(), *otherShip, local, normal, disruptorCannon.impactRadius, disruptorCannon.damage, disruptorCannon.impactTime, true);
-                        return;
+                    const auto local = otherHit - other.position();
+
+                    if (shields && other.getUserPointer() == shields) {
+                        const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
+                        if (shields->getHealthCurrent(shieldSide) > 0) {
+                            cannonProjectile.clientToServerImpact(weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, true);
+                            return;
+                        }
                     }
                     if (hull && other.getUserPointer() == hull) {
-                        //hull->receiveHit(normal, local, disruptorCannon.impactRadius, disruptorCannon.impactTime, disruptorCannon.damage);
-                        disruptorCannonProjectile.clientToServerImpact(disruptorCannon.m_Map.getClient(), *otherShip, local, normal, disruptorCannon.impactRadius, disruptorCannon.damage, disruptorCannon.impactTime, false);
+                        cannonProjectile.clientToServerImpact(weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, false);
                     }
                 }
             }

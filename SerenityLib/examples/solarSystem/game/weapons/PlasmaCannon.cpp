@@ -20,26 +20,30 @@ using namespace Engine;
 using namespace std;
 
 struct PlasmaCannonCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
-    auto plasmaCannonShipVoid = owner.getUserPointer1();
-    auto& plasmaCannonProjectile = *static_cast<PlasmaCannonProjectile*>(owner.getUserPointer());
+    auto weaponShipVoid = owner.getUserPointer1();
+    auto& cannonProjectile = *static_cast<PlasmaCannonProjectile*>(owner.getUserPointer());
 
     auto otherPtrShip = other.getUserPointer1();
-    if (otherPtrShip && plasmaCannonShipVoid) {
-        if (otherPtrShip != plasmaCannonShipVoid) {//dont hit ourselves!
+    if (otherPtrShip && weaponShipVoid) {
+        if (otherPtrShip != weaponShipVoid) {//dont hit ourselves!
             Ship* otherShip = static_cast<Ship*>(otherPtrShip);
-            if (otherShip && plasmaCannonProjectile.active) {
-                Ship* sourceShip = static_cast<Ship*>(plasmaCannonShipVoid);
+            if (otherShip && cannonProjectile.active) {
+                Ship* sourceShip = static_cast<Ship*>(weaponShipVoid);
                 if (sourceShip->IsPlayer()) {
-                    PlasmaCannon& plasmaCannon = *static_cast<PlasmaCannon*>(owner.getUserPointer2());
+                    auto& weapon = *static_cast<PlasmaCannon*>(owner.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - other.position();
-                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                        plasmaCannonProjectile.clientToServerImpact(plasmaCannon.m_Map.getClient(), *otherShip, local, normal, plasmaCannon.impactRadius, plasmaCannon.damage, plasmaCannon.impactTime, true);
-                        return;
+                    const auto local = otherHit - other.position();
+
+                    if (shields && other.getUserPointer() == shields) {
+                        const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
+                        if (shields->getHealthCurrent(shieldSide) > 0) {
+                            cannonProjectile.clientToServerImpact(weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, true);
+                            return;
+                        }
                     }
                     if (hull && other.getUserPointer() == hull) {
-                        plasmaCannonProjectile.clientToServerImpact(plasmaCannon.m_Map.getClient(), *otherShip, local, normal, plasmaCannon.impactRadius, plasmaCannon.damage, plasmaCannon.impactTime, false);
+                        cannonProjectile.clientToServerImpact(weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, false);
                     }
                 }
             }

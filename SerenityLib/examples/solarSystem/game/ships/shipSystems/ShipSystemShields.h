@@ -59,17 +59,18 @@ class ShipSystemShields final : public ShipSystem {
         ShipSystemShieldsImpactPoint  m_ImpactPoints[MAX_IMPACT_POINTS];
         std::vector<uint>             m_ImpactPointsFreelist;
         Entity                        m_ShieldEntity;
-        float                         m_HealthPointsCurrent;
-        float                         m_HealthPointsMax;
-        //float                       m_TimeSinceLastHit;
-        //float                       m_RechargeActivation;
+
+        std::vector<float>            m_HealthPointsCurrent;
+        std::vector<float>            m_HealthPointsMax;
+
         float                         m_RechargeAmount;
         float                         m_RechargeRate;
         float                         m_RechargeTimer;
         bool                          m_ShieldsAreUp;
         std::vector<Pyramid>          m_Pyramids;
     public:
-        ShipSystemShields(Ship&, Map&, const float health);
+        ShipSystemShields(Ship&, Map&, const float avg_health);
+        ShipSystemShields(Ship&, Map&, const float fwd, const float aft, const float port, const float starboard, const float dorsal, const float ventral);
         ~ShipSystemShields();
 
         Entity getEntity();
@@ -78,15 +79,50 @@ class ShipSystemShields final : public ShipSystem {
 
         void update(const double& dt);
 
-        const float getHealthCurrent() const;
-        const float getHealthMax() const;
-        const float getHealthPercent() const; //returns percent from 0.0f to 1.0f
+        const float getHealthCurrent(const uint index) const;
+        const float getHealthMax(const uint index) const;
+        const float getHealthPercent(const uint index) const; //returns percent from 0.0f to 1.0f
+
+
+        const float getHealthCurrentForward() const;
+        const float getHealthMaxForward() const;
+        const float getHealthPercentForward() const; //returns percent from 0.0f to 1.0f
+
+        const float getHealthCurrentAft() const;
+        const float getHealthMaxAft() const;
+        const float getHealthPercentAft() const; //returns percent from 0.0f to 1.0f
+
+        const float getHealthCurrentPort() const;
+        const float getHealthMaxPort() const;
+        const float getHealthPercentPort() const; //returns percent from 0.0f to 1.0f
+
+        const float getHealthCurrentStarboard() const;
+        const float getHealthMaxStarboard() const;
+        const float getHealthPercentStarboard() const; //returns percent from 0.0f to 1.0f
+
+        const float getHealthCurrentDorsal() const;
+        const float getHealthMaxDorsal() const;
+        const float getHealthPercentDorsal() const; //returns percent from 0.0f to 1.0f
+
+        const float getHealthCurrentVentral() const;
+        const float getHealthMaxVentral() const;
+        const float getHealthPercentVentral() const; //returns percent from 0.0f to 1.0f
+
+
         const bool shieldsAreUp() const;
 
         void turnOffShields();
         void turnOnShields();
 
-        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const float damage, const bool doImpactGraphic = true);
+        void receiveHit(
+            const glm::vec3& impactNormal,
+            const glm::vec3& impactLocation,
+            const float& impactRadius,
+            const float& maxTime,
+            const float damage,
+            const uint shieldSide,
+            const bool doImpactGraphic = true
+        );
         void addShieldImpact(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime);
 
         ShieldSide::Side getImpactSide(const glm::vec3& impactLocation);

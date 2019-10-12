@@ -33,30 +33,31 @@ struct PhaserBeamCollisionFunctor final { void operator()(ComponentBody& owner, 
         if (otherShipVoid != phaserShipVoid) {//dont hit ourselves!
             Ship* otherShip = static_cast<Ship*>(otherShipVoid);
             if (otherShip) {
-                PhaserBeam& phaser = *static_cast<PhaserBeam*>(owner.getUserPointer2());
-                if (phaser.firingTime > 0.0f) {
+                auto& weapon = *static_cast<PhaserBeam*>(owner.getUserPointer2());
+                if (weapon.firingTime > 0.0f) {
                     Ship* sourceShip = static_cast<Ship*>(phaserShipVoid);
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                     auto local = otherHit - other.position();
-
-                    auto finalDamage = static_cast<float>(Resources::dt()) * phaser.damage;
-
-                    if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
-                        if (phaser.firingTimeShieldGraphicPing > 0.2f) {
-                            shields->receiveHit(normal, local, phaser.impactRadius, phaser.impactTime, finalDamage, true);
-                            phaser.firingTimeShieldGraphicPing = 0.0f;
-                        }else{
-                            shields->receiveHit(normal, local, phaser.impactRadius, phaser.impactTime, finalDamage, false);
+                    auto finalDamage = static_cast<float>(Resources::dt()) * weapon.damage;
+                    if (shields && other.getUserPointer() == shields) {
+                        const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
+                        if (shields->getHealthCurrent(shieldSide) > 0) {
+                            if (weapon.firingTimeShieldGraphicPing > 0.2f) {
+                                shields->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
+                                weapon.firingTimeShieldGraphicPing = 0.0f;
+                            }else{
+                                shields->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
+                            }
+                            return;
                         }
-                        return;
                     }
                     if (hull && other.getUserPointer() == hull) {
-                        if (phaser.firingTimeShieldGraphicPing > 1.0f) {
-                            hull->receiveHit(normal, local, phaser.impactRadius, phaser.impactTime, finalDamage, true, true);
-                            phaser.firingTimeShieldGraphicPing = 0.0f;
+                        if (weapon.firingTimeShieldGraphicPing > 1.0f) {
+                            hull->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, true, true);
+                            weapon.firingTimeShieldGraphicPing = 0.0f;
                         }else{
-                            hull->receiveHit(normal, local, phaser.impactRadius, phaser.impactTime, finalDamage, false, false);
+                            hull->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, false, false);
                         }
                     }
                 }
@@ -160,9 +161,10 @@ PhaserBeam::~PhaserBeam() {
     SAFE_DELETE(firstWindupLight);
     SAFE_DELETE(secondWindupLight);
 }
-const bool PhaserBeam::fire(const double& dt) {
+const bool PhaserBeam::fire(const double& dt, const glm::vec3& chosen_target_pt) {
     auto* target = ship.getTarget();
     auto res2 = isInArc(target, arc);
+    targetCoordinates = chosen_target_pt;
     if (res2) {
         auto& targetBody = *target->getComponent<ComponentBody>();
         auto& shipBody = *ship.getComponent<ComponentBody>();
@@ -172,7 +174,7 @@ const bool PhaserBeam::fire(const double& dt) {
         const auto distSquared = glm::distance2(launcherPosition, targetBody.position());
 
         if (distSquared < 100 * 100) { //100 * 100 should be 10 KM
-            const auto res = PrimaryWeaponBeam::fire(dt);
+            const auto res = PrimaryWeaponBeam::fire(dt, chosen_target_pt);
             if (res) {
                 return forceFire(dt);
             }
@@ -227,17 +229,6 @@ void PhaserBeam::update(const double& dt) {
         secondWindupLight->activate();
         beamLight->activate();
         state = BeamWeaponState::WindingUp;
-
-
-        auto* target = ship.getTarget();
-        auto& targetBody = *target->getComponent<ComponentBody>();
-        auto* targetIsShip = dynamic_cast<Ship*>(target);
-        if (targetIsShip) {
-            targetCoordinates = targetIsShip->getAimPositionRandomLocal(); //TODO: use getAimPositionRandom() later and send the final coordinates via packet
-        }else{
-            targetCoordinates = glm::vec3(0.0f);
-        }
-
         #pragma endregion
     }else if (state == BeamWeaponState::WindingUp) {
         #pragma region WindingUp

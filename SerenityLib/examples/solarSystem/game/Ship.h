@@ -97,6 +97,8 @@ class Ship: public EntityWrapper, public EventObserver {
         const glm::vec3 getAimPositionRandom();
         const glm::vec3 getAimPositionDefaultLocal();
         const glm::vec3 getAimPositionRandomLocal();
+        const uint getAimPositionRandomLocalIndex();
+        const glm::vec3 getAimPositionLocal(const uint index);
         const glm::quat getRotation();
         const glm::vec3 getPosition(const EntityDataRequest& dataRequest);
         const glm::quat getRotation(const EntityDataRequest& dataRequest);

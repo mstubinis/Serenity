@@ -134,8 +134,10 @@ void ShipSystemShieldsImpactPoint::update(const float& dt, vector<uint>& freelis
 }
 #pragma endregion
 
+ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float health) :ShipSystemShields(_ship, map, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f) {
 
-ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float health) :ShipSystem(ShipSystemType::Shields, _ship){
+}
+ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, const float aft, const float prt, const float sbd, const float dsl, const float vnt) :ShipSystem(ShipSystemType::Shields, _ship){
     m_ShieldEntity = map.createEntity();
     auto& model = *(m_ShieldEntity.addComponent<ComponentModel>(ResourceManifest::ShieldMesh, ResourceManifest::ShieldMaterial, ResourceManifest::shieldsShaderProgram, RenderStage::ForwardParticles));
     auto& logic = *(m_ShieldEntity.addComponent<ComponentLogic>(ShipSystemShieldsFunctor()));
@@ -150,7 +152,24 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float health) 
     Collision* c = new Collision(CollisionType::TriangleShapeStatic, shieldColMesh, shieldBody.mass());
     shieldBody.setCollision(c);
 
-    m_HealthPointsMax = m_HealthPointsCurrent = health;
+    m_HealthPointsMax.reserve(6);
+    m_HealthPointsCurrent.reserve(6);
+
+    m_HealthPointsCurrent.push_back(fwd);
+    m_HealthPointsCurrent.push_back(aft);
+    m_HealthPointsCurrent.push_back(prt);
+    m_HealthPointsCurrent.push_back(sbd);
+    m_HealthPointsCurrent.push_back(dsl);
+    m_HealthPointsCurrent.push_back(vnt);
+
+    m_HealthPointsMax.push_back(fwd);
+    m_HealthPointsMax.push_back(aft);
+    m_HealthPointsMax.push_back(prt);
+    m_HealthPointsMax.push_back(sbd);
+    m_HealthPointsMax.push_back(dsl);
+    m_HealthPointsMax.push_back(vnt);
+
+
     //m_TimeSinceLastHit = 10.0f;
     m_RechargeAmount = 450.0f;
     m_RechargeRate = 15.0f;
@@ -236,7 +255,6 @@ void ShipSystemShields::update(const double& dt) {
     
     bool shown = false;
     const float fdt = static_cast<float>(dt);
-    //m_TimeSinceLastHit += fdt;
     for (auto& impact : m_ImpactPoints) {
         impact.update(fdt, m_ImpactPointsFreelist);
         if (!shown && impact.active)
@@ -247,23 +265,27 @@ void ShipSystemShields::update(const double& dt) {
 
     //recharging here
     #pragma region Recharging
-    //if (m_TimeSinceLastHit >= m_RechargeActivation) { //only start recharging after not being fired upon for a while
-        if (m_HealthPointsCurrent < m_HealthPointsMax) { //dont need to recharge at max shields
-            m_RechargeTimer += fdt;
-            if (m_RechargeTimer >= m_RechargeRate) {
-
-                m_HealthPointsCurrent += m_RechargeAmount;
-                if (shieldBody.getCollisionMask() != CollisionFilter::_Custom_2) {
-                    shieldBody.setCollisionMask(CollisionFilter::_Custom_2); //group 2 are weapons
-                }
-
-                if (m_HealthPointsCurrent > m_HealthPointsMax) {
-                    m_HealthPointsCurrent = m_HealthPointsMax;
-                }
-                m_RechargeTimer = 0.0f;
-            }
+    bool shouldRecharge = false;
+    for (uint i = 0; i < m_HealthPointsCurrent.size(); ++i) {
+        if (m_HealthPointsCurrent[i] < m_HealthPointsMax[i]) { //dont need to recharge at max shields
+            shouldRecharge = true;
+            break;
         }
-    //}
+    }
+    if (shouldRecharge) {
+        m_RechargeTimer += fdt;
+        if (m_RechargeTimer >= m_RechargeRate) {
+            for (uint i = 0; i < m_HealthPointsCurrent.size(); ++i) {
+                if (m_HealthPointsCurrent[i] < m_HealthPointsMax[i]) { //dont need to recharge at max shields
+                    m_HealthPointsCurrent[i] += m_RechargeAmount;
+                    if (m_HealthPointsCurrent[i] > m_HealthPointsMax[i]) {
+                        m_HealthPointsCurrent[i] = m_HealthPointsMax[i];
+                    }
+                }
+            }
+            m_RechargeTimer = 0.0f;
+        }
+    }
     #pragma endregion
 
     ShipSystem::update(dt);
@@ -302,16 +324,16 @@ void ShipSystemShields::addShieldImpact(const glm::vec3& impactLocationLocal, co
         impactPointData.impact(impactLocationLocal, impactRadius, maxTime, m_ImpactPointsFreelist);
     }
 }
-void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const bool doImpactGraphic) {
+void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide, const bool doImpactGraphic) {
     if (m_ShieldsAreUp) {
         //m_TimeSinceLastHit = 0.0f;
-        const float bleed = m_HealthPointsCurrent - damage;
+        const float bleed = m_HealthPointsCurrent[shieldSide] - damage;
 
         if (bleed >= 0) {
             //shields take the entire hit
-            m_HealthPointsCurrent -= damage;
+            m_HealthPointsCurrent[shieldSide] -= damage;
         }else{
-            m_HealthPointsCurrent = 0.0f;
+            m_HealthPointsCurrent[shieldSide] = 0.0f;
             //uncomment below to apply bleed damage after shields drop
             /*
             uint bleedDamage = glm::abs(bleed);
@@ -324,25 +346,20 @@ void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec
         if(doImpactGraphic)
             addShieldImpact(impactLocationLocal, impactRadius, maxTime);
     }
+    /*
+    //this logic is really only good for universal (non-sided) shields
     auto& shieldBody = *m_ShieldEntity.getComponent<ComponentBody>();
     if (getHealthCurrent() <= 0) {
         shieldBody.setCollisionMask(CollisionFilter::_Custom_5); //group 5 is misc / blank
     }else{
         shieldBody.setCollisionMask(CollisionFilter::_Custom_2); //group 2 are weapons
     }
+    */
 }
 Entity ShipSystemShields::getEntity() {
     return m_ShieldEntity;
 }
-const float ShipSystemShields::getHealthCurrent() const {
-    return m_ShieldsAreUp ? m_HealthPointsCurrent : 0.0f;
-}
-const float ShipSystemShields::getHealthMax() const {
-    return m_HealthPointsMax;
-}
-const float ShipSystemShields::getHealthPercent() const {
-    return (getHealthCurrent()) / (m_HealthPointsMax);
-}
+
 void ShipSystemShields::turnOffShields() {
     m_ShieldsAreUp = false;
     auto& shieldBody = *m_ShieldEntity.getComponent<ComponentBody>();
@@ -352,13 +369,98 @@ void ShipSystemShields::turnOffShields() {
 void ShipSystemShields::turnOnShields() {
     m_ShieldsAreUp = true;
     auto& shieldBody = *m_ShieldEntity.getComponent<ComponentBody>();
-    if (getHealthCurrent() <= 0) {
-        shieldBody.setCollisionMask(CollisionFilter::_Custom_5); //group 5 is misc / blank
-    }else{
-        shieldBody.setCollisionMask(CollisionFilter::_Custom_2); //group 2 are weapons
-    }
+    shieldBody.setCollisionMask(CollisionFilter::_Custom_2); //group 2 are weapons
     //TODO: send packet indicating shields are on
 }
 const bool ShipSystemShields::shieldsAreUp() const {
     return m_ShieldsAreUp;
+}
+
+
+
+const float ShipSystemShields::getHealthCurrent(const uint index) const {
+    return m_ShieldsAreUp ? m_HealthPointsCurrent[index] : 0.0f;
+}
+const float ShipSystemShields::getHealthMax(const uint index) const {
+    return m_HealthPointsMax[index];
+}
+const float ShipSystemShields::getHealthPercent(const uint index) const {
+    return getHealthCurrent(index) / getHealthMax(index);
+}
+
+
+
+const float ShipSystemShields::getHealthCurrentForward() const {
+    return m_ShieldsAreUp ? m_HealthPointsCurrent[0] : 0.0f;
+}
+const float ShipSystemShields::getHealthMaxForward() const {
+    return m_HealthPointsMax[0];
+}
+const float ShipSystemShields::getHealthPercentForward() const {
+    return getHealthCurrentForward() / getHealthMaxForward();
+}
+
+
+
+
+const float ShipSystemShields::getHealthCurrentAft() const {
+    return m_ShieldsAreUp ? m_HealthPointsCurrent[1] : 0.0f;
+}
+const float ShipSystemShields::getHealthMaxAft() const {
+    return m_HealthPointsMax[1];
+}
+const float ShipSystemShields::getHealthPercentAft() const {
+    return getHealthCurrentAft() / getHealthMaxAft();
+}
+
+
+
+
+const float ShipSystemShields::getHealthCurrentPort() const {
+    return m_ShieldsAreUp ? m_HealthPointsCurrent[2] : 0.0f;
+}
+const float ShipSystemShields::getHealthMaxPort() const {
+    return m_HealthPointsMax[2];
+}
+const float ShipSystemShields::getHealthPercentPort() const {
+    return getHealthCurrentPort() / getHealthMaxPort();
+}
+
+
+
+
+const float ShipSystemShields::getHealthCurrentStarboard() const {
+    return m_ShieldsAreUp ? m_HealthPointsCurrent[3] : 0.0f;
+}
+const float ShipSystemShields::getHealthMaxStarboard() const {
+    return m_HealthPointsMax[3];
+}
+const float ShipSystemShields::getHealthPercentStarboard() const {
+    return getHealthCurrentStarboard() / getHealthMaxStarboard();
+}
+
+
+
+
+const float ShipSystemShields::getHealthCurrentDorsal() const {
+    return m_ShieldsAreUp ? m_HealthPointsCurrent[4] : 0.0f;
+}
+const float ShipSystemShields::getHealthMaxDorsal() const {
+    return m_HealthPointsMax[4];
+}
+const float ShipSystemShields::getHealthPercentDorsal() const {
+    return getHealthCurrentDorsal() / getHealthMaxDorsal();
+}
+
+
+
+
+const float ShipSystemShields::getHealthCurrentVentral() const {
+    return m_ShieldsAreUp ? m_HealthPointsCurrent[5] : 0.0f;
+}
+const float ShipSystemShields::getHealthMaxVentral() const {
+    return m_HealthPointsMax[5];
+}
+const float ShipSystemShields::getHealthPercentVentral() const {
+    return getHealthCurrentVentral() / getHealthMaxVentral();
 }

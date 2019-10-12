@@ -123,16 +123,23 @@ struct PacketHealthUpdate : public Packet {
         All = -1,
     };};
     float        currentHullHealth;
-    float        currentShieldsHealth;
+
+    float        currentShieldsHealthF;
+    float        currentShieldsHealthA;
+    float        currentShieldsHealthP;
+    float        currentShieldsHealthS;
+    float        currentShieldsHealthD;
+    float        currentShieldsHealthV;
+
     unsigned int flags;
 
     PacketHealthUpdate();
     PacketHealthUpdate(Ship& ship);
     bool validate(sf::Packet& sfPacket) {
-        return (sfPacket >> PacketType >> data >> currentHullHealth >> currentShieldsHealth >> flags);
+        return (sfPacket >> PacketType >> data >> currentHullHealth >> currentShieldsHealthF >> currentShieldsHealthA >> currentShieldsHealthP >> currentShieldsHealthS >> currentShieldsHealthD >> currentShieldsHealthV >> flags);
     }
     bool build(sf::Packet& sfPacket) {
-        return (sfPacket << PacketType << data << currentHullHealth << currentShieldsHealth << flags);
+        return (sfPacket << PacketType << data << currentHullHealth << currentShieldsHealthF << currentShieldsHealthA << currentShieldsHealthP << currentShieldsHealthS << currentShieldsHealthD << currentShieldsHealthV << flags);
     }
     void print() {}
 };
