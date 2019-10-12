@@ -16,6 +16,59 @@
 using namespace Engine;
 using namespace std;
 
+#pragma region Plane
+
+ShipSystemShields::Plane::Plane() {
+
+}
+ShipSystemShields::Plane::Plane(const glm::vec3& _a, const glm::vec3& _b, const glm::vec3& _c) {
+    a = _a;
+    b = _b;
+    c = _c;
+}
+const float ShipSystemShields::Plane::CalcSide(const glm::vec3& point, const glm::quat& rot) {
+    glm::vec3 tempA = rot * a;
+    glm::vec3 tempB = rot * b;
+    glm::vec3 tempC = rot * c;
+    glm::vec3 tempN = glm::normalize(glm::cross(tempB - tempA, tempC - tempA));
+    return glm::dot(point, tempN);
+}
+
+#pragma endregion
+
+#pragma region Pyramid
+ShipSystemShields::Pyramid::Pyramid() {
+}
+ShipSystemShields::Pyramid::Pyramid(const glm::vec3& A, const glm::vec3& B, const glm::vec3& C, const glm::vec3& D, const glm::vec3& E) { 
+    ShipSystemShields::Plane left(E, C, A);//E,C,A
+    ShipSystemShields::Plane right(E, B, D);//E,B,D
+    ShipSystemShields::Plane top(E, A, B);//E,A,B
+    ShipSystemShields::Plane bottom(E, D, C);//E,D,C
+    ShipSystemShields::Plane frontTopLeft(A, B, D);//A,B,C
+    ShipSystemShields::Plane frontBottomRight(D, C, A);//B,D,C
+
+    planes.resize(6);
+
+    planes[0] = left;
+    planes[1] = right;
+    planes[2] = top;
+    planes[3] = bottom;
+    planes[4] = frontTopLeft;
+    planes[5] = frontBottomRight;
+}
+const bool ShipSystemShields::Pyramid::isInside(const glm::vec3& point, const glm::quat& rot) {
+    for (auto& plane : planes) {
+        const float res = plane.CalcSide(point, rot);
+        if (res > 0.0f) {
+            return false;
+        }
+    }
+    return true;
+}
+
+#pragma endregion
+
+
 struct ShipSystemShieldsFunctor final { void operator()(ComponentLogic& _component, const double& dt) const {
 
 }};
@@ -104,14 +157,14 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float health) 
     //m_RechargeActivation = 5.0f;
     m_RechargeTimer = 0.0f;
 
-    auto& boundBox = m_Ship.getComponent<ComponentModel>()->getModel(0).mesh()->getRadiusBox();
+    const glm::vec3 shieldScale = m_Ship.getComponent<ComponentModel>()->getModel(0).mesh()->getRadiusBox() * SHIELD_SCALE_FACTOR;
     auto& btBody = const_cast<btRigidBody&>(shieldBody.getBtBody());
     shieldBody.addCollisionFlag(CollisionFlag::NoContactResponse);
     shieldBody.setCollisionGroup(CollisionFilter::_Custom_1); //group 1 are shields
     shieldBody.setCollisionMask(CollisionFilter::_Custom_2); //group 2 are weapons
 
     btBody.setUserPointer(&m_Ship);
-    shieldBody.setScale((boundBox.x * 1.37f), (boundBox.y * 1.37f), (boundBox.z * 1.37f)); //todo: fix this for when other ships are created
+    shieldBody.setScale(shieldScale);
 
 
     auto& handles = ResourceManifest::Ships.at(m_Ship.getClass());
@@ -132,6 +185,39 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float health) 
         m_ImpactPointsFreelist.push_back(i);
     }
     m_ShieldsAreUp = true;
+
+
+    //TODO: create shield pyramids (6 total) here
+    const auto x = shieldScale.x;
+    const auto y = shieldScale.y;
+    const auto z = shieldScale.z;
+    glm::vec3 A, B, C, D, E, F, G, H, I;
+
+    A = glm::vec3(-x,  y, -z);
+    B = glm::vec3( x,  y, -z);
+    C = glm::vec3(-x, -y, -z);
+    D = glm::vec3( x, -y, -z);
+    E = glm::vec3( 0,  0,  0);
+    F = glm::vec3(-x,  y,  z);
+    G = glm::vec3( x,  y,  z);
+    H = glm::vec3(-x, -y,  z);
+    I = glm::vec3( x, -y,  z);
+
+    ShipSystemShields::Pyramid front(G, F, I, H, E);
+    ShipSystemShields::Pyramid back(A, B, C, D, E);
+    ShipSystemShields::Pyramid left(B, G, D, I, E);
+    ShipSystemShields::Pyramid right(F, A, H, C, E);
+    ShipSystemShields::Pyramid top(A, B, F, G, E);
+    //ShipSystemShields::Pyramid bottom(C, D, H, I, E);
+
+    m_Pyramids.resize(5);
+
+    m_Pyramids[0] = front;
+    m_Pyramids[1] = back;
+    m_Pyramids[2] = left;
+    m_Pyramids[3] = right;
+    m_Pyramids[4] = top;
+    //m_Pyramids[5] = bottom;
 }
 ShipSystemShields::~ShipSystemShields() {
 }
@@ -182,6 +268,33 @@ void ShipSystemShields::update(const double& dt) {
 
     ShipSystem::update(dt);
 }
+ShipSystemShields::ShieldSide::Side ShipSystemShields::getImpactSide(const glm::vec3& impactLocation) {
+    const auto& rot = m_Ship.getRotation();
+    for (uint i = 0; i < m_Pyramids.size(); ++i) {
+        const auto res = m_Pyramids[i].isInside(impactLocation, rot);
+        if (res == true) {
+            return static_cast<ShipSystemShields::ShieldSide::Side>(i);
+        }
+    }
+    return ShipSystemShields::ShieldSide::Ventral;
+}
+const string ShipSystemShields::getImpactSideString(const ShieldSide::Side side) {
+    if (side == ShieldSide::Side::Forward)
+        return "Forward";
+    if (side == ShieldSide::Side::Aft)
+        return "Aft";
+    if (side == ShieldSide::Side::Port)
+        return "Port";
+    if (side == ShieldSide::Side::Starboard)
+        return "Starboard";
+    if (side == ShieldSide::Side::Dorsal)
+        return "Dorsal";
+    if (side == ShieldSide::Side::Ventral)
+        return "Ventral";
+    if (side == ShieldSide::Side::Err)
+        return "Error";
+}
+
 void ShipSystemShields::addShieldImpact(const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime) {
     if (m_ImpactPointsFreelist.size() > 0) {
         auto nextIndex = m_ImpactPointsFreelist[0];

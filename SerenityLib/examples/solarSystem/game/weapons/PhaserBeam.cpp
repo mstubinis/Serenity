@@ -101,8 +101,8 @@ PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm::vec3& position, const gl
 
     auto& firstWindupBody = *firstWindupGraphic.addComponent<ComponentBody>();
     auto& secondWindupBody = *secondWindupGraphic.addComponent<ComponentBody>();
-    auto& firstWindupModel = *firstWindupGraphic.addComponent<ComponentModel>(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlow2Material).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& secondWindupModel = *secondWindupGraphic.addComponent<ComponentModel>(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlow2Material).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& firstWindupModel = *firstWindupGraphic.addComponent<ComponentModel>(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlowMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& secondWindupModel = *secondWindupGraphic.addComponent<ComponentModel>(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlowMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
 
     auto& firstModel = firstWindupModel.getModel();
     auto& secondModel = secondWindupModel.getModel();
@@ -227,6 +227,17 @@ void PhaserBeam::update(const double& dt) {
         secondWindupLight->activate();
         beamLight->activate();
         state = BeamWeaponState::WindingUp;
+
+
+        auto* target = ship.getTarget();
+        auto& targetBody = *target->getComponent<ComponentBody>();
+        auto* targetIsShip = dynamic_cast<Ship*>(target);
+        if (targetIsShip) {
+            targetCoordinates = targetIsShip->getAimPositionRandomLocal(); //TODO: use getAimPositionRandom() later and send the final coordinates via packet
+        }else{
+            targetCoordinates = glm::vec3(0.0f);
+        }
+
         #pragma endregion
     }else if (state == BeamWeaponState::WindingUp) {
         #pragma region WindingUp
@@ -267,17 +278,9 @@ void PhaserBeam::update(const double& dt) {
         #pragma endregion
     }else if (state == BeamWeaponState::Firing) {
         #pragma region Firing
-        glm::vec3 targetPosition;
         auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
-        auto* targetIsShip = dynamic_cast<Ship*>(target);
-        if (targetIsShip) {
-            targetPosition = targetIsShip->getAimPositionDefault();
-        }else{
-            targetPosition = targetBody.position();
-        }
-        firingTime += fdt;
-        firingTimeShieldGraphicPing += fdt;
+        const glm::vec3 tgt = targetBody.position() + targetCoordinates;
 
         beamEndModel.show();
         beamModelOne.show();
@@ -302,12 +305,12 @@ void PhaserBeam::update(const double& dt) {
 
         auto startPos = firstWindupPos;
         const auto startPos2 = firstWindupPos;
-        auto BigDirTargetToStart = targetPosition - startPos;
+        auto BigDirTargetToStart = tgt - startPos;
         auto lenTarToStart = glm::length(BigDirTargetToStart);
         auto dirTargetToStart = glm::normalize(BigDirTargetToStart);
 
         dirTargetToStart *= glm::min(time2, lenTarToStart);
-        startPos = targetPosition - dirTargetToStart;
+        startPos = tgt - dirTargetToStart;
 
         body.setPosition(startPos);
         firstWindupBody.setPosition(startPos);
@@ -317,7 +320,7 @@ void PhaserBeam::update(const double& dt) {
 
         glm::quat q;
 
-        auto bigDir = startPos2 - targetPosition;
+        auto bigDir = startPos2 - tgt;
         auto len = glm::length(bigDir);
         auto dir = glm::normalize(bigDir);
         Math::alignTo(q, -dir);
@@ -337,35 +340,34 @@ void PhaserBeam::update(const double& dt) {
 
         unsigned short group = CollisionFilter::_Custom_2;
         unsigned short mask = -1;
-        //custom 1 is shields
-        //do not ray cast against the convex hull (custom 4)
-        mask = mask & ~CollisionFilter::_Custom_4;
-        //do not ray cast against the shields if they are down
-        mask = mask & ~CollisionFilter::_Custom_5;
-        //and ignore other weapons!
-        mask = mask & ~CollisionFilter::_Custom_2;
+        mask = mask & ~CollisionFilter::_Custom_4; //do not ray cast against the convex hull (custom 4)
+        mask = mask & ~CollisionFilter::_Custom_5; //do not ray cast against the shields if they are down
+        mask = mask & ~CollisionFilter::_Custom_2; //and ignore other weapons!
 
-        const auto rayCastPoints = Physics::rayCastNearest(startPos, targetPosition, ignored, group, mask);
+        firingTime += fdt;
+        firingTimeShieldGraphicPing += fdt;
+
+        const auto rayCastPoints = Physics::rayCastNearest(startPos, tgt, ignored, group, mask);
         if (rayCastPoints.hitNormal == glm::vec3(0.0f)) {
             state = BeamWeaponState::CoolingDown;
             return;
         }
-        const auto len2 = glm::length(realTargetPos - startPos);
-
-        beamLight->setRodLength(len2);
 
         const glm::vec3 midpt = Math::midpoint(startPos, realTargetPos);
 
         beamLightBody.setPosition(midpt);
         beamLightBody.setRotation(q);
-
+        glm::vec3 finPos;
         if (time >= len) {
-            beamEndBody.setPosition(rayCastPoints.hitPosition);
+            finPos = rayCastPoints.hitPosition;    
         }else{
-            beamEndBody.setPosition(realTargetPos);
+            finPos = realTargetPos;
         }
+        beamEndBody.setPosition(finPos);
+        const auto len2 = glm::length(finPos - startPos);
+        beamLight->setRodLength(len2);
         modifyBeamMesh(beamModel, len2);
-        auto x = (-1.0f * (lenTarToStart / factor)) + firingTimeMax;
+        auto x = (-1.0f * (glm::length(finPos - startPos) / factor)) + firingTimeMax;
         if ((firingTime + fdt) >= x) {
             state = BeamWeaponState::CoolingDown;
             return;
@@ -377,23 +379,15 @@ void PhaserBeam::update(const double& dt) {
         #pragma endregion
     }else if (state == BeamWeaponState::CoolingDown) {
         #pragma region CoolingDown
+        auto* target = ship.getTarget();
+        auto& targetBody = *target->getComponent<ComponentBody>();
+        const auto tgt = targetBody.position() + targetCoordinates;
+
         firstWindupModel.hide();
         secondWindupModel.hide();
         const auto inf = glm::vec3(9999999999999.9f);
         firstWindupBody.setPosition(inf);
         secondWindupBody.setPosition(inf);
-
-        glm::vec3 targetPosition;
-        auto* target = ship.getTarget();
-        auto& targetBody = *target->getComponent<ComponentBody>();
-        auto* targetIsShip = dynamic_cast<Ship*>(target);
-        if (targetIsShip) {
-            targetPosition = targetIsShip->getAimPositionDefault();
-        }else{
-            targetPosition = targetBody.position();
-        }
-        firingTime += fdt;
-        firingTimeShieldGraphicPing += fdt;
 
         beamEndModel.show();
         beamModelOne.show();
@@ -417,19 +411,17 @@ void PhaserBeam::update(const double& dt) {
 
         auto startPos = firstWindupPos;
         const auto startPos2 = firstWindupPos;
-        auto BigDirTargetToStart = targetPosition - startPos;
+        auto BigDirTargetToStart = tgt - startPos;
         auto lenTarToStart = glm::length(BigDirTargetToStart);
-        auto dirTargetToStart = glm::normalize(BigDirTargetToStart);
-
-        dirTargetToStart *= glm::min(time2, lenTarToStart);
-        startPos = targetPosition - dirTargetToStart;
+        auto TargetToStart = glm::normalize(BigDirTargetToStart) * glm::min(time2, lenTarToStart);
+        startPos = tgt - TargetToStart;
 
         body.setPosition(startPos);
         firstWindupLightBody.setPosition(startPos);
         secondWindupLightBody.setPosition(startPos);
 
         glm::quat q;
-        auto bigDir = startPos2 - targetPosition;
+        auto bigDir = startPos2 - tgt;
         auto len = glm::length(bigDir);
         auto dir = glm::normalize(bigDir);
         Math::alignTo(q, -dir);
@@ -449,36 +441,37 @@ void PhaserBeam::update(const double& dt) {
         unsigned short group = CollisionFilter::_Custom_2;
         unsigned short mask = -1;
         //custom 1 is shields
-        //do not ray cast against the convex hull (custom 4)
-        mask = mask & ~CollisionFilter::_Custom_4;
-        //do not ray cast against the shields if they are down
-        mask = mask & ~CollisionFilter::_Custom_5;
-        //and ignore other weapons!
-        mask = mask & ~CollisionFilter::_Custom_2;
+        mask = mask & ~CollisionFilter::_Custom_4; //do not ray cast against the convex hull (custom 4)
+        mask = mask & ~CollisionFilter::_Custom_5; //do not ray cast against the shields if they are down
+        mask = mask & ~CollisionFilter::_Custom_2; //and ignore other weapons!
 
-        const auto rayCastPoints = Physics::rayCastNearest(startPos, targetPosition, ignored, group, mask);
+
+        firingTime += fdt;
+        firingTimeShieldGraphicPing += fdt;
+
+        const auto rayCastPoints = Physics::rayCastNearest(startPos, tgt, ignored, group, mask);
         if (rayCastPoints.hitNormal == glm::vec3(0.0f)) {
             state = BeamWeaponState::JustTurnedOff;
             return;
         }
-        const auto len2 = glm::length(realTargetPos - startPos);
-
-        beamLight->setRodLength(len2);
 
         const glm::vec3 midpt = Math::midpoint(startPos, realTargetPos);
 
         beamLightBody.setPosition(midpt);
         beamLightBody.setRotation(q);
+        glm::vec3 finPos;
         if (time >= len) {
-            beamEndBody.setPosition(rayCastPoints.hitPosition);
+            finPos = rayCastPoints.hitPosition;
         }else{
-            beamEndBody.setPosition(realTargetPos);
+            finPos = realTargetPos;
         }
-
+        beamEndBody.setPosition(finPos);
+        const auto len2 = glm::length(finPos - startPos);
+        beamLight->setRodLength(len2);
         modifyBeamMesh(beamModel, len2);
-
         if (firingTime >= firingTimeMax) {
             state = BeamWeaponState::JustTurnedOff;
+            return;
         }
         #pragma endregion
     }else if (state == BeamWeaponState::JustTurnedOff) {
@@ -497,6 +490,7 @@ void PhaserBeam::update(const double& dt) {
             soundEffect->stop();
         }
         state = BeamWeaponState::Off;
+        return;
         #pragma endregion
     }
     PrimaryWeaponBeam::update(dt);

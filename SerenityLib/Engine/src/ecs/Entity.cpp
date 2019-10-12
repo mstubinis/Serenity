@@ -48,7 +48,10 @@ const bool Entity::null() {
 
 
 EntityWrapper::EntityWrapper(Scene& scene) {
-    m_Entity = scene.createEntity();
+    Scene* scene_ = &scene;
+    if (!scene_)
+        scene_ = Resources::getCurrentScene();
+    m_Entity = scene_->createEntity();
 }
 EntityWrapper::~EntityWrapper() {
     m_Entity = Entity::_null;

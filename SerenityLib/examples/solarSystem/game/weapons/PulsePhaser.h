@@ -16,7 +16,7 @@ struct PulsePhaserOutlineInstanceBindFunctor;
 struct PulsePhaserOutlineInstanceUnbindFunctor;
 
 struct PulsePhaserProjectile final: public PrimaryWeaponCannonProjectile {
-    PulsePhaserProjectile(PulsePhaser&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index);
+    PulsePhaserProjectile(PulsePhaser&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index, const glm::vec3& chosen_target_pos);
     ~PulsePhaserProjectile();
 };
 

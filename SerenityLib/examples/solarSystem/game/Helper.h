@@ -25,6 +25,11 @@ class Helper {
             const float result = minValue + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxValue - minValue)));
             return result;
         }
+        static int GetRandomIntFromTo(const int& minVal, const int& maxVal) {
+            const int result = minVal + static_cast<int>(rand()) / (static_cast<int>(RAND_MAX / (maxVal - minVal)));
+            return result;
+        }
 };
+
 
 #endif

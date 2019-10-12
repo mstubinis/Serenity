@@ -187,7 +187,7 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, M
     m_IsWarping           = false;
     m_PlayerCamera        = nullptr;
     m_MouseFactor         = glm::dvec2(0.0);
-    m_AimPositionDefault  = aimPosDefault;
+    m_AimPositionDefaults.push_back(aimPosDefault);
     m_CameraOffsetDefault = camOffsetDefault;
 
     auto& modelComponent     = *addComponent<ComponentModel>(mesh, mat);
@@ -224,13 +224,51 @@ Ship::~Ship(){
     SAFE_DELETE_VECTOR(m_DamageDecals);
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
+void Ship::addHullTargetPoints(vector<glm::vec3>& points) {
+    for (auto& pt : points) {
+        m_AimPositionDefaults.push_back(pt);
+    }
+}
 const glm::vec3 Ship::getAimPositionDefault() {
-    if (m_AimPositionDefault.x == 0.0f && m_AimPositionDefault.y == 0.0f && m_AimPositionDefault.z == 0.0f) {
+    if (m_AimPositionDefaults.size() == 0 || (m_AimPositionDefaults[0].x == 0.0f && m_AimPositionDefaults[0].y == 0.0f && m_AimPositionDefaults[0].z == 0.0f)) {
         return getPosition();
     }
     auto& body = *getComponent<ComponentBody>();
-    return body.position() + (body.rotation() * m_AimPositionDefault);
+    return body.position() + (body.rotation() * m_AimPositionDefaults[0]);
 }
+const glm::vec3 Ship::getAimPositionRandom() {
+    if (m_AimPositionDefaults.size() == 0 || (m_AimPositionDefaults[0].x == 0.0f && m_AimPositionDefaults[0].y == 0.0f && m_AimPositionDefaults[0].z == 0.0f)) {
+        return getPosition();
+    }
+    auto& body = *getComponent<ComponentBody>();
+    if (m_AimPositionDefaults.size() == 1) {
+        return body.position() + (body.rotation() * m_AimPositionDefaults[0]);
+    }
+    const auto randIndex = Helper::GetRandomIntFromTo(0, m_AimPositionDefaults.size() - 1);
+    return body.position() + (body.rotation() * m_AimPositionDefaults[randIndex]);
+}
+const glm::vec3 Ship::getAimPositionDefaultLocal() {
+    if (m_AimPositionDefaults.size() == 0 || (m_AimPositionDefaults[0].x == 0.0f && m_AimPositionDefaults[0].y == 0.0f && m_AimPositionDefaults[0].z == 0.0f)) {
+        return glm::vec3(0.0f);
+    }
+    auto& body = *getComponent<ComponentBody>();
+    if (m_AimPositionDefaults.size() == 1) {
+        return (body.rotation() * m_AimPositionDefaults[0]);
+    }
+    return (body.rotation() * m_AimPositionDefaults[0]);
+}
+const glm::vec3 Ship::getAimPositionRandomLocal() {
+    if (m_AimPositionDefaults.size() == 0 || (m_AimPositionDefaults[0].x == 0.0f && m_AimPositionDefaults[0].y == 0.0f && m_AimPositionDefaults[0].z == 0.0f)) {
+        return glm::vec3(0.0f);
+    }
+    auto& body = *getComponent<ComponentBody>();
+    if (m_AimPositionDefaults.size() == 1) {
+        return (body.rotation() * m_AimPositionDefaults[0]);
+    }
+    const auto randIndex = Helper::GetRandomIntFromTo(0, m_AimPositionDefaults.size() - 1);
+    return (body.rotation() * m_AimPositionDefaults[randIndex]);
+}
+
 void Ship::destroy() {
     for (auto& system : m_ShipSystems) {
         if (system.second) {

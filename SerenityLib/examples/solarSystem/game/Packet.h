@@ -194,11 +194,8 @@ struct PacketClientRequestConnectionToServer : public Packet {
 
 
 struct PacketMessage : public Packet {
-    std::string  name;
-    float r;
-    float g;
-    float b;
-
+    std::string   name;
+    float         r, g, b;
     PacketMessage() {
         name = "";
         r = g = b = 1.0f;

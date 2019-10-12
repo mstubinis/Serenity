@@ -148,6 +148,22 @@ Akira::Akira(Client& client, Map& map, bool player, const string& name, glm::vec
     auto* btm_front_left_beam = new PhaserBeam(_this, map, bottom_right[2], glm::vec3(-0.301313f, -0.353465f, -0.197012f), 60.0f, bottom_right);
     weapons.addPrimaryWeaponBeam(*btm_left_left_beam);
     weapons.addPrimaryWeaponBeam(*btm_front_left_beam);
+
+    //TODO: fill this info for the rest of the ships
+    //random hull target points
+    vector<glm::vec3> hull_target_points = {
+        glm::vec3(-0.613995f, 0.027912f, -1.6191f),
+        glm::vec3(0.613995f, 0.027912f, -1.6191f),
+        glm::vec3(-0.38463f, 0.027912f, -2.04564f),
+        glm::vec3(0.38463f, 0.027912f, -2.04564f),
+        glm::vec3(0.0f, 0.000098f, -2.41808f),
+        glm::vec3(-0.535411f, 0.201759f, -0.839661f),
+        glm::vec3(0.535411f, 0.201759f, -0.839661f),
+        glm::vec3(-0.810765f, 0.253006f, 0.720679f),
+        glm::vec3(0.810765f, 0.253006f, 0.720679f),
+        glm::vec3(0.0f, 0.455842f, -0.487045f),
+    };
+    addHullTargetPoints(hull_target_points);
 }
 Akira::~Akira() {
 

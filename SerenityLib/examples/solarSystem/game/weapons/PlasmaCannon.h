@@ -15,7 +15,7 @@ struct PlasmaCannonOutlineInstanceBindFunctor;
 struct PlasmaCannonOutlineInstanceUnbindFunctor;
 
 struct PlasmaCannonProjectile final : public PrimaryWeaponCannonProjectile {
-    PlasmaCannonProjectile(PlasmaCannon&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index);
+    PlasmaCannonProjectile(PlasmaCannon&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index, const glm::vec3& chosen_target_pos);
     ~PlasmaCannonProjectile();
 };
 

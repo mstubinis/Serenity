@@ -119,7 +119,7 @@ struct DisruptorCannonTailInstanceUnbindFunctor { void operator()(EngineResource
 }};
 
 
-DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index) : PrimaryWeaponCannonProjectile(map, position, forward, index) {
+DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index, const glm::vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map, position, forward, index) {
     EntityDataRequest request(entity);
 
     auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
@@ -162,7 +162,7 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     cannonBody.setLinearVelocity(shipLinVel, false);
     cannonBody.setAngularVelocity(shipAngVel, false);
 
-    auto data = source.calculatePredictedVector(cannonBody);
+    auto data = source.calculatePredictedVector(cannonBody, chosen_target_pos);
     auto offset = data.pedictedVector;
     glm::quat q;
     Math::alignTo(q, -offset);

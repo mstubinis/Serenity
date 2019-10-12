@@ -176,7 +176,6 @@ const sf::Socket::Status Client::receive_udp(void* data, size_t size, size_t& re
     const auto status = m_UdpSocket->receive(data, size, received);
     return status;
 }
-
 const string& Client::username() const {
     return m_username;
 }
@@ -330,11 +329,12 @@ void Client::onReceive() {
                     auto& ships = map.getShips();
                     if (map.hasShip(pI.name)) {
                         auto* ship = ships.at(pI.name);
+                        const auto chosen_target_position = glm::vec3(pI.r, pI.g, pI.b);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
                         for (uint i = 0; i < info.size() / 2; ++i) {
                             auto& cannon = ship->getPrimaryWeaponCannon(stoi(info[i * 2]));
                             const auto projectile_index = stoi(info[(i * 2) + 1]);
-                            const bool success = cannon.forceFire(projectile_index);
+                            const bool success = cannon.forceFire(projectile_index, chosen_target_position);
                         }
                     }
                     break;
@@ -359,10 +359,11 @@ void Client::onReceive() {
                     if (map.hasShip(pI.name)) {
                         auto* ship = ships.at(pI.name);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+                        const auto chosen_target_position = glm::vec3(pI.r, pI.g, pI.b);
                         for (uint i = 0; i < info.size() / 2; ++i) {
                             auto& torpedo = ship->getSecondaryWeaponTorpedo(stoi(info[i * 2]));
                             const auto projectile_index = stoi(info[(i * 2) + 1]);
-                            const bool success = torpedo.forceFire(projectile_index);
+                            const bool success = torpedo.forceFire(projectile_index, chosen_target_position);
                         }
                     }
                     break;

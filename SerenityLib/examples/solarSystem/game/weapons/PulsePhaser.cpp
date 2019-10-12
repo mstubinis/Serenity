@@ -35,7 +35,7 @@ struct PulsePhaserCollisionFunctor final { void operator()(ComponentBody& owner,
                     PulsePhaser& pulsePhaser = *static_cast<PulsePhaser*>(owner.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - other.position();
+                    const auto local = otherHit - other.position();
                     if (shields && shields->getHealthCurrent() > 0 && other.getUserPointer() == shields) {
                         pulsePhaserProjectile.clientToServerImpact(pulsePhaser.m_Map.getClient(), *otherShip, local, normal, pulsePhaser.impactRadius, pulsePhaser.damage, pulsePhaser.impactTime, true);
                         return;
@@ -119,7 +119,7 @@ struct PulsePhaserTailInstanceUnbindFunctor {void operator()(EngineResource* r) 
 }};
 
 
-PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index) : PrimaryWeaponCannonProjectile(map,position,forward, index){
+PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index, const glm::vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map,position,forward, index){
     EntityDataRequest request(entity);
 
     auto& model   = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless,ShaderProgram::Forward,RenderStage::ForwardParticles);
@@ -162,7 +162,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(PulsePhaser& source, Map& map, cons
     cannonBody.setLinearVelocity(shipLinVel, false);
     cannonBody.setAngularVelocity(shipAngVel, false);
     
-    auto data = source.calculatePredictedVector(cannonBody);
+    auto data = source.calculatePredictedVector(cannonBody, chosen_target_pos);
     auto offset = data.pedictedVector;
     glm::quat q;
     Math::alignTo(q, -offset);

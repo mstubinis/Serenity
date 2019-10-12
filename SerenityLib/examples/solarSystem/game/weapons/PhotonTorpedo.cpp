@@ -136,7 +136,7 @@ struct PhotonTorpedoFlareInstanceUnbindFunctor { void operator()(EngineResource*
 
 
 
-PhotonTorpedoProjectile::PhotonTorpedoProjectile(PhotonTorpedo& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index):torpedo(source), SecondaryWeaponTorpedoProjectile(map,position,forward,index){
+PhotonTorpedoProjectile::PhotonTorpedoProjectile(PhotonTorpedo& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index, const glm::vec3& chosen_target_pos):torpedo(source), SecondaryWeaponTorpedoProjectile(map,position,forward,index){
     maxTime = 30.5f;
     rotationAngleSpeed = source.rotationAngleSpeed;
 
@@ -215,7 +215,7 @@ PhotonTorpedoProjectile::PhotonTorpedoProjectile(PhotonTorpedo& source, Map& map
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
 
-    auto data = source.calculatePredictedVector(body);
+    auto data = source.calculatePredictedVector(body, chosen_target_pos);
     auto& offset = data.pedictedVector;
     hasLock = data.hasLock;
     target = data.target;

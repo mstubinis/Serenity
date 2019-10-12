@@ -65,7 +65,7 @@ class Ship: public EntityWrapper, public EventObserver {
         float                                m_WarpFactor;
         std::string                          m_ShipClass;
         std::vector<Decal*>                  m_DamageDecals;
-        glm::vec3                            m_AimPositionDefault;
+        std::vector<glm::vec3>               m_AimPositionDefaults;
         glm::vec3                            m_CameraOffsetDefault;
     public:
         Ship(
@@ -88,10 +88,15 @@ class Ship: public EntityWrapper, public EventObserver {
 
         void destroy();
 
+        void addHullTargetPoints(std::vector<glm::vec3>& points);
+
         const std::string getName();
         const glm::vec3 getWarpSpeedVector3();
         const glm::vec3 getPosition();
         const glm::vec3 getAimPositionDefault();
+        const glm::vec3 getAimPositionRandom();
+        const glm::vec3 getAimPositionDefaultLocal();
+        const glm::vec3 getAimPositionRandomLocal();
         const glm::quat getRotation();
         const glm::vec3 getPosition(const EntityDataRequest& dataRequest);
         const glm::quat getRotation(const EntityDataRequest& dataRequest);

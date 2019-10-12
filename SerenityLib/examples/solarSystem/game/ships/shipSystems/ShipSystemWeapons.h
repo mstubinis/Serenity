@@ -101,8 +101,8 @@ struct PrimaryWeaponCannon : public ShipWeapon {
         const float& volume
     );
     virtual const int canFire();
-    const bool forceFire(const int index);
-    virtual const PrimaryWeaponCannonPrediction calculatePredictedVector(ComponentBody& projectileBody);
+    const bool forceFire(const int index, const glm::vec3& chosen_target_pos);
+    virtual const PrimaryWeaponCannonPrediction calculatePredictedVector(ComponentBody& projectileBody, const glm::vec3& chosen_target_pos);
     virtual void update(const double& dt);
 };
 
@@ -121,8 +121,6 @@ struct PrimaryWeaponBeam : public ShipWeapon {
     float                    chargeTimer;
     float                    chargeTimerSpeed;
     BeamWeaponState::State   state;
-    //bool                     isFiring;
-    //bool                     isFiringWeapon;
     float                    firingTime;
     float                    firingTimeShieldGraphicPing;
     float                    firingTimeMax;
@@ -130,6 +128,7 @@ struct PrimaryWeaponBeam : public ShipWeapon {
     Entity                   beamGraphic;
     Entity                   beamEndPointGraphic;
     RodLight*                beamLight;
+    glm::vec3                targetCoordinates;
 
     std::vector<glm::vec3>   modPts;
     std::vector<glm::vec2>   modUvs;
@@ -217,8 +216,8 @@ struct SecondaryWeaponTorpedo : public ShipWeapon {
     virtual const bool isInControlledArc(EntityWrapper* target);
 
     virtual const int canFire();
-    const bool forceFire(const int index);
-    virtual const SecondaryWeaponTorpedoPrediction calculatePredictedVector(ComponentBody& projectileBody);
+    const bool forceFire(const int index, const glm::vec3& chosen_target_pos);
+    virtual const SecondaryWeaponTorpedoPrediction calculatePredictedVector(ComponentBody& projectileBody, const glm::vec3& chosen_target_pos);
     virtual void update(const double& dt);
 };
 
@@ -234,6 +233,9 @@ class ShipSystemWeapons final : public ShipSystem {
         ~ShipSystemWeapons();
 
         static float calculate_quadratic_time_till_hit(const glm::vec3& pos, const glm::vec3& vel, const float& s);
+
+        glm::vec3 cannonTargetPoint; //for random target spots on the hull / random subsystem targets
+        glm::vec3 torpedoTargetPoint;//for random target spots on the hull / random subsystem targets
 
         void addPrimaryWeaponBeam(PrimaryWeaponBeam&);
         void addPrimaryWeaponCannon(PrimaryWeaponCannon&);

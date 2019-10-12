@@ -32,7 +32,7 @@ struct PlasmaTorpedoProjectile final : public SecondaryWeaponTorpedoProjectile {
     PlasmaTorpedo&                   torpedo;
     std::vector<PlasmaTorpedoFlare>  flares;
 
-    PlasmaTorpedoProjectile(PlasmaTorpedo&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index);
+    PlasmaTorpedoProjectile(PlasmaTorpedo&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index, const glm::vec3& chosen_target_pos);
     ~PlasmaTorpedoProjectile();
     void update(const double& dt);
 };
