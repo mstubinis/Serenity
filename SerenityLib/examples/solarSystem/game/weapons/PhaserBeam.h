@@ -27,7 +27,7 @@ class PhaserBeam final : public PrimaryWeaponBeam {
             const glm::vec3& forward,
             const float& arc,
             std::vector<glm::vec3>& windupPts,
-            const float& damage = 355.0f,
+            const float& damage = 450.0f,
             const float& _chargeTimerSpeed = 4.0f,
             const float& _firingTime = 1.3f,
             const float& _impactRadius = 2.5f,

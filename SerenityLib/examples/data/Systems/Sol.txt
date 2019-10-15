@@ -360,6 +360,10 @@ R parent=Saturn r=-1 g=-1 b=-1 position=1014 radius=2 break=1
 
 
 M name=Titan parent=Saturn radius=2575.5 r=1 g=1 b=1 position=1221870 x=11474493 y=0 z=-4199125 a=-5.93236971 type=Rock atmosphereHeight=0 texture=Titan.dds eccentricity=0.0288 tilt=0 period=15.945 majorAxis=1221870 days=15.945
+M name=Tethys parent=Saturn radius=531.6 r=1 g=1 b=1 position=294619 x=2880975 y=0 z=616457 a=0 type=Rock atmosphereHeight=0 texture=Tethys.dds eccentricity=0.0001 tilt=1.12 period=1.887802 majorAxis=294619 days=1.887802
+M name=Mimas parent=Saturn radius=198.6 r=1 g=1 b=1 position=185539 x=792957 y=0 z=-1677406 a=0 type=Rock atmosphereHeight=0 texture=Mimas.dds eccentricity=0.0196 tilt=1.574 period=0.942 majorAxis=185539 days=0.942
+M name=Rhea parent=Saturn radius=763.8 r=1 g=1 b=1 position=527108 x=-3508863 y=0 z=-3933467 a=0 type=Rock atmosphereHeight=0 texture=Rhea.dds eccentricity=0.0012583 tilt=0 period=4.518212 majorAxis=527108 days=4.518212
+
 #M name=S/2009-S-1 parent=Saturn
 #M name=Pan parent=Saturn
 #M name=Daphnis parent=Saturn
@@ -369,19 +373,15 @@ M name=Titan parent=Saturn radius=2575.5 r=1 g=1 b=1 position=1221870 x=11474493
 #M name=Epimetheus parent=Saturn
 #M name=Janus parent=Saturn
 #M name=Aegaeon parent=Saturn
-#M name=Mimas parent=Saturn
 #M name=Methone parent=Saturn
 #M name=Anthe parent=Saturn
 #M name=Pallene parent=Saturn
 #M name=Enceladus parent=Saturn
-#M name=Tethys parent=Saturn
 #M name=Telesto parent=Saturn
 #M name=Calypso parent=Saturn
 #M name=Dione parent=Saturn
 #M name=Helene parent=Saturn
 #M name=Polydeuces parent=Saturn
-#M name=Rhea parent=Saturn
-#M name=Titan parent=Saturn
 #M name=Hyperion parent=Saturn
 #M name=Iapetus parent=Saturn
 #M name=Kiviuq parent=Saturn
@@ -454,6 +454,8 @@ P name=Uranus parent=Sun radius=25362 r=1 g=1 b=1 position=2877000000 x=25162815
 #M name=Ferdinand parent=Uranus
 
 P name=Neptune parent=Sun radius=24622 r=1 g=1 b=1 position=4503000000 x=-31618052100 y=0 z=-32062433300 a=3.93396902 type=IceGiant atmosphereHeight=0 texture=Neptune.dds tilt=28.32 eccentricity=0.009456 period=60182 majorAxis=4504449781.15 days=0.67125 inclination=6.43
+M name=Triton parent=Neptune radius=1353.4 r=1 g=1 b=1 position=354759 x=3321173 y=0 z=-1247080 a=0 type=Rock atmosphereHeight=0 texture=Triton.dds tilt=0 eccentricity=0.000016 period=5.876854 majorAxis=354759 days=5.876854
+
 #M name=Naiad parent=Neptune
 #M name=Thalassa parent=Neptune
 #M name=Despina parent=Neptune
@@ -461,7 +463,6 @@ P name=Neptune parent=Sun radius=24622 r=1 g=1 b=1 position=4503000000 x=-316180
 #M name=Larissa parent=Neptune
 #M name=S/2004-N-1 parent=Neptune
 #M name=Proteus parent=Neptune
-#M name=Triton parent=Neptune
 #M name=Nereid parent=Neptune
 #M name=Halimede parent=Neptune
 #M name=Sao parent=Neptune

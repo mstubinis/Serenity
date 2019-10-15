@@ -221,20 +221,20 @@ void PlasmaBeam::update(const double& dt) {
     auto& beamModel = *beamGraphic.getComponent<ComponentModel>();
     auto& beamModelOne = beamModel.getModel(0);
 
-    const auto factor = 195.0f;
+    const auto factor = 255.0f;
 
     if (state == BeamWeaponState::JustStarted) {
-#pragma region JustStarted
+        #pragma region JustStarted
         firstWindupModel.show();
         secondWindupModel.show();
         firstWindupLight->activate();
         secondWindupLight->activate();
         beamLight->activate();
         state = BeamWeaponState::WindingUp;
-#pragma endregion
+        #pragma endregion
     }
     else if (state == BeamWeaponState::WindingUp) {
-#pragma region WindingUp
+        #pragma region WindingUp
         auto& cam = *firstWindupBody.getOwner().scene().getActiveCamera();
         auto camRotation = cam.getOrientation();
 
@@ -270,10 +270,10 @@ void PlasmaBeam::update(const double& dt) {
             --numRounds;
             return;
         }
-#pragma endregion
+        #pragma endregion
     }
     else if (state == BeamWeaponState::Firing) {
-#pragma region Firing
+        #pragma region Firing
         auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
         const glm::vec3 tgt = targetBody.position() + targetCoordinates;
@@ -401,10 +401,10 @@ void PlasmaBeam::update(const double& dt) {
             firingTime = x;
             state = BeamWeaponState::CoolingDown;
         }
-#pragma endregion
+        #pragma endregion
     }
     else if (state == BeamWeaponState::CoolingDown) {
-#pragma region CoolingDown
+        #pragma region CoolingDown
         auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
         const auto tgt = targetBody.position() + targetCoordinates;
@@ -528,10 +528,10 @@ void PlasmaBeam::update(const double& dt) {
             state = BeamWeaponState::JustTurnedOff;
             return;
         }
-#pragma endregion
+        #pragma endregion
     }
     else if (state == BeamWeaponState::JustTurnedOff) {
-#pragma region JustTurnedOff
+        #pragma region JustTurnedOff
         firingTime = 0.0f;
         chargeTimer = 0.0f;
         firstWindupModel.hide();
@@ -547,7 +547,7 @@ void PlasmaBeam::update(const double& dt) {
         }
         state = BeamWeaponState::Off;
         return;
-#pragma endregion
+        #pragma endregion
     }
     PrimaryWeaponBeam::update(dt);
 }

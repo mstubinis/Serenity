@@ -60,7 +60,7 @@ Shrike::Shrike(Client& client, Map& map, bool player, const string& name, glm::v
     weapons.addSecondaryWeaponTorpedo(*aftTorp);
 
     vector<glm::vec3> beam_pt{ glm::vec3(0.0f, -0.049803f, -1.26533f) };
-    auto* frontBeam = new PlasmaBeam(_this, map, beam_pt[0], glm::vec3(0, 0, -1), 30.0f, beam_pt);
+    auto* frontBeam = new PlasmaBeam(_this, map, beam_pt[0], glm::vec3(0, 0, -1), 30.0f, beam_pt, 750.0f);
     weapons.addPrimaryWeaponBeam(*frontBeam);
 
 }

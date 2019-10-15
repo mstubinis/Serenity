@@ -244,7 +244,7 @@ void Map::loadFromFile(const string& filename) {
                 long long X = 0;
                 long long Y = 0;
                 long long Z = 0;
-                float     A = 0;
+                float     Angle = 0;
 
                 uint BREAK = 0;
 
@@ -279,7 +279,7 @@ void Map::loadFromFile(const string& filename) {
                     else if (key == "qx")               qx = stof(value);
                     else if (key == "qy")               qy = stof(value);
                     else if (key == "qz")               qz = stof(value);
-                    else if (key == "a")                A = stof(value);
+                    else if (key == "a")                Angle = stof(value);
 
                     else if (key == "parent")           PARENT = value;
                     else if (key == "type")             TYPE = value;
@@ -336,7 +336,7 @@ void Map::loadFromFile(const string& filename) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
                         if (ORBIT_PERIOD != -1.0f) {
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), A, *parent, INCLINATION));
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), Angle, *parent, INCLINATION));
                         }
                         if (ROTATIONAL_TILT != -1.0f) {
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
@@ -356,7 +356,7 @@ void Map::loadFromFile(const string& filename) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
                         if (ORBIT_PERIOD != -1.0f) {
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), A, *parent, INCLINATION));
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), Angle, *parent, INCLINATION));
                         }
                         if (ROTATIONAL_TILT != -1.0f) {
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
