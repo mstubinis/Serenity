@@ -342,7 +342,7 @@ void ResourceManifest::init(){
     const auto romulan = glm::vec3(0.33f, 0.72f, 0.48f);
     const auto fed = glm::vec3(1, 1, 1);
 
-    const auto blue = glm::vec3(0, 0, 1);
+    const auto blue = glm::vec3(0.0822f, 0.408f, 1.0f);
     const auto green = glm::vec3(0, 1, 0);
     const auto red = glm::vec3(1, 0, 0);
 

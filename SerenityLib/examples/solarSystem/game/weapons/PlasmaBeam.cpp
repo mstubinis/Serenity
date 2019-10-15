@@ -232,7 +232,8 @@ void PlasmaBeam::update(const double& dt) {
         beamLight->activate();
         state = BeamWeaponState::WindingUp;
 #pragma endregion
-    }else if (state == BeamWeaponState::WindingUp) {
+    }
+    else if (state == BeamWeaponState::WindingUp) {
 #pragma region WindingUp
         auto& cam = *firstWindupBody.getOwner().scene().getActiveCamera();
         auto camRotation = cam.getOrientation();
@@ -253,7 +254,8 @@ void PlasmaBeam::update(const double& dt) {
         }
         if (windupPoints.size() == 1) {
             firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
-        }else{
+        }
+        else {
             const auto halfCharge = chargeTimer * 0.5f;
             firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
             secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
@@ -269,7 +271,8 @@ void PlasmaBeam::update(const double& dt) {
             return;
         }
 #pragma endregion
-    }else if (state == BeamWeaponState::Firing) {
+    }
+    else if (state == BeamWeaponState::Firing) {
 #pragma region Firing
         auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
@@ -283,7 +286,8 @@ void PlasmaBeam::update(const double& dt) {
         const auto shipPosition = ship.getPosition();
         if (windupPoints.size() == 1) {
             firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
-        }else{
+        }
+        else {
             const auto halfCharge = chargeTimer * 0.5f;
             firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
             secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
@@ -340,20 +344,48 @@ void PlasmaBeam::update(const double& dt) {
         firingTime += fdt;
         firingTimeShieldGraphicPing += fdt;
 
-        const auto rayCastPoints = Physics::rayCastNearest(startPos, tgt, ignored, group, mask);
-        if (rayCastPoints.hitNormal == glm::vec3(0.0f)) {
+        auto rayCastPoints = Physics::rayCast(startPos, tgt, ignored, group, mask);
+        Engine::RayCastResult* closest = nullptr;
+
+        auto lambda_get_closest = [&](vector<Engine::RayCastResult>& vec, float& min_dist, uint& closest_index, Engine::RayCastResult*& closest_, const glm::vec3& startPos_) {
+            for (uint i = 0; i < vec.size(); ++i) {
+                const auto dist = glm::distance2(vec[i].hitPosition, startPos_);
+                if (dist < min_dist) {
+                    min_dist = dist;
+                    closest_ = &const_cast<Engine::RayCastResult&>(vec[i]);
+                    closest_index = i;
+                }
+            }
+        };
+
+        //get closest 2 points
+        float minDist = 9999999999999.0f;
+        uint closestIndex = 0;
+        lambda_get_closest(rayCastPoints, minDist, closestIndex, closest, startPos);
+        if (!closest || closest->hitNormal == glm::vec3(0.0f)) {
             state = BeamWeaponState::CoolingDown;
             return;
         }
-
+        Ship* targetShip = dynamic_cast<Ship*>(target);
+        if (targetShip) {
+            auto* targetShields = static_cast<ShipSystemShields*>(targetShip->getShipSystem(ShipSystemType::Shields));
+            const auto side = targetShields->getImpactSide(closest->hitPosition);
+            if (targetShields->getHealthCurrent(side) <= 0.0f) {
+                rayCastPoints.erase(rayCastPoints.begin() + closestIndex);
+            }
+            minDist = 9999999999999.0f;
+            closestIndex = 0;
+            lambda_get_closest(rayCastPoints, minDist, closestIndex, closest, startPos);
+        }
         const glm::vec3 midpt = Math::midpoint(startPos, realTargetPos);
 
         beamLightBody.setPosition(midpt);
         beamLightBody.setRotation(q);
         glm::vec3 finPos;
         if (time >= len) {
-            finPos = rayCastPoints.hitPosition;
-        }else{
+            finPos = closest->hitPosition;
+        }
+        else {
             finPos = realTargetPos;
         }
         beamEndBody.setPosition(finPos);
@@ -370,7 +402,8 @@ void PlasmaBeam::update(const double& dt) {
             state = BeamWeaponState::CoolingDown;
         }
 #pragma endregion
-    }else if (state == BeamWeaponState::CoolingDown) {
+    }
+    else if (state == BeamWeaponState::CoolingDown) {
 #pragma region CoolingDown
         auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
@@ -390,7 +423,8 @@ void PlasmaBeam::update(const double& dt) {
         const auto shipPosition = ship.getPosition();
         if (windupPoints.size() == 1) {
             firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
-        }else{
+        }
+        else {
             const auto halfCharge = chargeTimer * 0.5f;
             firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
             secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
@@ -442,20 +476,48 @@ void PlasmaBeam::update(const double& dt) {
         firingTime += fdt;
         firingTimeShieldGraphicPing += fdt;
 
-        const auto rayCastPoints = Physics::rayCastNearest(startPos, tgt, ignored, group, mask);
-        if (rayCastPoints.hitNormal == glm::vec3(0.0f)) {
-            state = BeamWeaponState::JustTurnedOff;
+        auto rayCastPoints = Physics::rayCast(startPos, tgt, ignored, group, mask);
+        Engine::RayCastResult* closest = nullptr;
+
+        auto lambda_get_closest = [&](vector<Engine::RayCastResult>& vec, float& min_dist, uint& closest_index, Engine::RayCastResult*& closest_, const glm::vec3& startPos_) {
+            for (uint i = 0; i < vec.size(); ++i) {
+                const auto dist = glm::distance2(vec[i].hitPosition, startPos_);
+                if (dist < min_dist) {
+                    min_dist = dist;
+                    closest_ = &const_cast<Engine::RayCastResult&>(vec[i]);
+                    closest_index = i;
+                }
+            }
+        };
+
+        //get closest 2 points
+        float minDist = 9999999999999.0f;
+        uint closestIndex = 0;
+        lambda_get_closest(rayCastPoints, minDist, closestIndex, closest, startPos);
+        if (!closest || closest->hitNormal == glm::vec3(0.0f)) {
+            state = BeamWeaponState::CoolingDown;
             return;
         }
-
+        Ship* targetShip = dynamic_cast<Ship*>(target);
+        if (targetShip) {
+            auto* targetShields = static_cast<ShipSystemShields*>(targetShip->getShipSystem(ShipSystemType::Shields));
+            const auto side = targetShields->getImpactSide(closest->hitPosition);
+            if (targetShields->getHealthCurrent(side) <= 0.0f) {
+                rayCastPoints.erase(rayCastPoints.begin() + closestIndex);
+            }
+            minDist = 9999999999999.0f;
+            closestIndex = 0;
+            lambda_get_closest(rayCastPoints, minDist, closestIndex, closest, startPos);
+        }
         const glm::vec3 midpt = Math::midpoint(startPos, realTargetPos);
 
         beamLightBody.setPosition(midpt);
         beamLightBody.setRotation(q);
         glm::vec3 finPos;
         if (time >= len) {
-            finPos = rayCastPoints.hitPosition;
-        }else{
+            finPos = closest->hitPosition;
+        }
+        else {
             finPos = realTargetPos;
         }
         beamEndBody.setPosition(finPos);
@@ -467,7 +529,8 @@ void PlasmaBeam::update(const double& dt) {
             return;
         }
 #pragma endregion
-    }else if (state == BeamWeaponState::JustTurnedOff) {
+    }
+    else if (state == BeamWeaponState::JustTurnedOff) {
 #pragma region JustTurnedOff
         firingTime = 0.0f;
         chargeTimer = 0.0f;
