@@ -311,13 +311,52 @@ uint Math::Max(const uint x, const uint y, const uint z, const uint w){
 	return glm::max(x,glm::max(y,glm::max(z,w))); 
 }
 
-GLuint Math::pack3NormalsInto32Int(const float x, const float y, const float z){
-   const int _X = static_cast<int>(x * 511.0f);
-   const int _Y = static_cast<int>(y * 511.0f);
-   const int _Z = static_cast<int>(z * 511.0f);
-   return (_X & 1023) | ((_Y & 1023) << 10) | ((_Z & 1023) << 20);
+const glm::vec3 Math::unpack3NormalsFrom32Int(const uint32_t& data) {
+    glm::vec3 conversions;
+    glm::vec3 negatives = glm::vec3(1.0f);
+    //X
+    conversions.x = data & 1023 << 0;
+    if (conversions.x >= 512.0f) { //2^9
+        conversions.x = 1023 - conversions.x; //2^10
+        negatives.x *= -1.0f;
+    }
+    conversions.x /= 511.0f * negatives.x; //(2^9) - 1
+    //Y 
+    conversions.y = data & 1023 << 10;
+    if (conversions.y >= 524289.0f) { //2^19
+        conversions.y = 1048575.0f - conversions.y; //2^20
+        negatives.y *= -1.0f;
+    }
+    conversions.y /= 524288.0f * negatives.y; //(2^19) - 1
+    //Z
+    conversions.z = data & 1023 << 20;
+    if (conversions.z >= 536870912.0f) { //2^29
+        conversions.z = 1073741824.0f - conversions.z; //2^30
+        negatives.z *= -1.0f;
+    }
+    conversions.z /= 536870911.0f * negatives.z; //(2^29) - 1
+    return conversions;
 }
-GLuint Math::pack3NormalsInto32Int(const glm::vec3& v){ 
+const uint32_t Math::pack3NormalsInto32Int(const float x, const float y, const float z){
+    //2^10 = 1024, each component uses 10 bits
+    //2^9 = 512
+    const uint32_t xsign = x < 0; //if x < 0, this = 1, else this = 0
+    const uint32_t ysign = y < 0; //if y < 0, this = 1, else this = 0
+    const uint32_t zsign = z < 0; //if z < 0, this = 1, else this = 0
+    const float w = 0.0f;         //2 bits left for w, should i ever want to use it
+    const uint32_t wsign = w < 0; //if w < 0, this = 1, else this = 0
+    const uint32_t intW = ((uint32_t)(w       + (wsign << 1)) & 1);
+    const uint32_t intZ = ((uint32_t)(z * 511 + (zsign << 9)) & 511);
+    const uint32_t intY = ((uint32_t)(y * 511 + (ysign << 9)) & 511);
+    const uint32_t intX = ((uint32_t)(x * 511 + (xsign << 9)) & 511);
+    const uint32_t data = 
+        (wsign << 31 | intW << 30) |
+        (zsign << 29 | intZ << 20) |
+        (ysign << 19 | intY << 10) |
+        (xsign << 9  | intX      );
+    return data;
+}
+const uint32_t Math::pack3NormalsInto32Int(const glm::vec3& v){
 	return Math::pack3NormalsInto32Int(v.x,v.y,v.z); 
 }
 
@@ -360,7 +399,7 @@ float Math::pack3FloatsInto1FloatUnsigned(const glm::vec3& c){
 	return Math::pack3FloatsInto1Float(c.r,c.g,c.b); 
 }
 glm::vec3 Math::unpack3FloatsInto1FloatUnsigned(float v){
-    const glm::vec3& ret = glm::vec3(
+    const glm::vec3 ret = glm::vec3(
 		static_cast<float>(fmod(v, 1.0f)),
 		static_cast<float>(fmod(v * 256.0f, 1.0f)),
 		static_cast<float>(fmod(v * 65536.0f, 1.0f))
@@ -369,15 +408,15 @@ glm::vec3 Math::unpack3FloatsInto1FloatUnsigned(float v){
 }
 uchar Math::pack2NibblesIntoChar(const float x, const float y) {
     uchar packedData = 0;
-    int bits  = static_cast<int>(round(x / 0.066666666666f));
-    int bits1 = static_cast<int>(round(y / 0.066666666666f));
+    const int bits  = static_cast<int>(round(x / 0.066666666666f));
+    const int bits1 = static_cast<int>(round(y / 0.066666666666f));
 	packedData |= bits & 15;
 	packedData |= (bits1 << 4) & 240;
     return packedData;
 }
 glm::vec2 Math::unpack2NibblesFromChar(const uchar _packedData) {
-    int low  = _packedData & 15;
-    int high = _packedData >> 4;
+    const int low  = _packedData & 15;
+    const int high = _packedData >> 4;
     return glm::vec2(static_cast<float>(low * 0.066666666666f), static_cast<float>(high * 0.066666666666f));
 }
 //attempt to do the above using non bitwise operations for glsl versions that do not support bitwise operations

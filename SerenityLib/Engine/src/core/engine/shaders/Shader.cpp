@@ -8,6 +8,7 @@
 #include <core/engine/renderer/opengl/glsl/Materials.h>
 #include <core/engine/renderer/opengl/glsl/Lighting.h>
 #include <core/engine/renderer/opengl/glsl/SSAOCode.h>
+#include <core/engine/renderer/opengl/glsl/DepthOfFieldCode.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -127,6 +128,7 @@ void InternalShaderPublicInterface::ConvertCode(Shader& shader) {
     opengl::glsl::Materials::convert(shader.m_Code, versionNumber, shader.m_Type);
     opengl::glsl::Lighting::convert(shader.m_Code, versionNumber, shader.m_Type);
     opengl::glsl::SSAOCode::convert(shader.m_Code, versionNumber, shader.m_Type);
+    opengl::glsl::DepthOfFieldCode::convert(shader.m_Code, versionNumber, shader.m_Type);
     opengl::glsl::Compression::convert(shader.m_Code, versionNumber);
     opengl::glsl::Common::convert(shader.m_Code, versionNumber);
 

@@ -156,7 +156,7 @@ PacketHealthUpdate::PacketHealthUpdate(Ship& ship) : Packet() {
 }
 
 PacketPhysicsUpdate::PacketPhysicsUpdate():Packet() {
-    qx = qy = qz = lx = ly = lz = ax = ay = az = 0;
+    qXYZ = lx = ly = lz = ax = ay = az = 0;
     px = py = pz = wx = wy = wz = 0.0f;
     qw = 1;
 }
@@ -193,9 +193,7 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
         py = pos.y - nearestAnchorPos.y;
         pz = pos.z - nearestAnchorPos.z;
 
-        Math::Float16From32(&qx, rot.x);
-        Math::Float16From32(&qy, rot.y);
-        Math::Float16From32(&qz, rot.z);
+        qXYZ = Math::pack3NormalsInto32Int(rot.x,rot.y,rot.z);
         Math::Float16From32(&qw, rot.w);
 
         Math::Float16From32(&lx, lv.x);

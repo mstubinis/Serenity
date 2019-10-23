@@ -147,16 +147,17 @@ struct PacketPhysicsUpdate: public Packet {
     //256 bits (64 bytes)
     float            px, py, pz;     //position
     float            wx, wy, wz;     //warp speed
-    uint16_t         qx, qy, qz, qw; //rotation
+    unsigned int     qXYZ;
+    uint16_t         qw;
     uint16_t         lx, ly, lz;     //linear velocity
     uint16_t         ax, ay, az;     //angular velocity
     PacketPhysicsUpdate();
     PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* closestAnchor, const std::vector<std::string>& anchorList, const std::string& username);
     bool validate(sf::Packet& sfPacket) {
-        return (sfPacket >> PacketType >> data >> px >> py >> pz >> wx >> wy >> wz >> qx >> qy >> qz >> qw >> lx >> ly >> lz >> ax >> ay >> az);
+        return (sfPacket >> PacketType >> data >> px >> py >> pz >> wx >> wy >> wz >> qXYZ >> qw >> lx >> ly >> lz >> ax >> ay >> az);
     }
     bool build(sf::Packet& sfPacket) {
-        return (sfPacket << PacketType << data << px << py << pz << wx << wy << wz << qx << qy << qz << qw << lx << ly << lz << ax << ay << az);
+        return (sfPacket << PacketType << data << px << py << pz << wx << wy << wz << qXYZ << qw << lx << ly << lz << ax << ay << az);
     }
     void print() {}
 };

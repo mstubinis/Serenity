@@ -284,6 +284,7 @@
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\Extensions.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\Common.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\Compression.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\DepthOfFieldCode.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\Lighting.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\Materials.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\SSAOCode.h" />
@@ -402,6 +403,7 @@
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\Extensions.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\Common.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\Compression.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\DepthOfFieldCode.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\Lighting.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\Materials.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\SSAOCode.cpp" />

@@ -378,13 +378,15 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
     bulletBody.activate(true);//this is needed for when objects are far apart, should probably find a way to better do this
     btTransform centerOfMass;
 
-    float qx, qy, qz, qw, ax, ay, az, lx, ly, lz;
+    float qw, ax, ay, az, lx, ly, lz;
 
-    Math::Float32From16(&qx, packet.qx);  Math::Float32From16(&qy, packet.qy);  Math::Float32From16(&qz, packet.qz);  Math::Float32From16(&qw, packet.qw);
+    auto quat_xyz = Math::unpack3NormalsFrom32Int(packet.qXYZ);
+
+    Math::Float32From16(&qw, packet.qw);
     Math::Float32From16(&lx, packet.lx);  Math::Float32From16(&ly, packet.ly);  Math::Float32From16(&lz, packet.lz);
     Math::Float32From16(&ax, packet.ax);  Math::Float32From16(&ay, packet.ay);  Math::Float32From16(&az, packet.az);
 
-    const btQuaternion rot(qx, qy, qz, qw);
+    const btQuaternion rot(quat_xyz.x, quat_xyz.y, quat_xyz.z, qw);
 
     const btVector3 pos(x, y, z);
     centerOfMass.setOrigin(pos);

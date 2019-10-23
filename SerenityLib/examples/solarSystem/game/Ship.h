@@ -11,7 +11,7 @@
 #include "ships/shipSystems/ShipSystemBaseClass.h"
 
 #define WARP_PHYSICS_MODIFIER 1.333333333f
-#define PHYSICS_PACKET_TIMER_LIMIT 0.3f
+#define PHYSICS_PACKET_TIMER_LIMIT 0.25f
 
 class  GameCamera;
 class  Ship;

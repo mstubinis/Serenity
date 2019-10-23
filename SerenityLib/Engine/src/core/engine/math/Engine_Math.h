@@ -62,8 +62,9 @@ namespace Math{
     float pack2NibblesIntoCharBasic(const float x, const float y);
     glm::vec2 unpack2NibblesFromCharBasic(const float);
 
-    GLuint pack3NormalsInto32Int(const float x, const float y, const float z);
-    GLuint pack3NormalsInto32Int(const glm::vec3&);
+    const std::uint32_t pack3NormalsInto32Int(const float x, const float y, const float z);
+    const glm::vec3     unpack3NormalsFrom32Int(const std::uint32_t&);
+    const std::uint32_t pack3NormalsInto32Int(const glm::vec3&);
 
     float pack3FloatsInto1Float(float,float,float);
     float pack3FloatsInto1Float(const glm::vec3&);

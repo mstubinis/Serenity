@@ -189,7 +189,7 @@ void ResourceManifest::init(){
     ConstitutionMaterial = Resources::loadMaterialAsync("Constitution", BasePath + "data/Textures/constitution/constitution.dds", BasePath + "data/Textures/constitution/constitution_Normal.dds", BasePath + "data/Textures/constitution/constitution_Glow.dds", BasePath + "data/Textures/constitution/constitution_Specular.dds");
     //DefiantSharkMaterial = Resources::loadMaterialAsync("DefiantShark", BasePath + "data/Textures/defiant/defiantShark.dds", BasePath + "data/Textures/defiant/defiant_Normal.dds", BasePath + "data/Textures/defiant/defiant_Glow.dds");
     ShrikeMaterial = Resources::loadMaterialAsync("Shrike", BasePath + "data/Textures/shrike/shrike.dds", BasePath + "data/Textures/shrike/shrike_Normal.dds", BasePath + "data/Textures/shrike/shrike_Glow.dds", BasePath + "data/Textures/shrike/shrike_Specular.dds");
-    BrelMaterial = Resources::loadMaterialAsync("Brel", BasePath + "data/Textures/constitution/constitution.dds");
+    BrelMaterial = Resources::loadMaterialAsync("Brel", BasePath + "data/Textures/brel/brel.dds", "", "", "");
     AkiraMaterial = Resources::loadMaterialAsync("Akira", BasePath + "data/Textures/akira/akira.dds", BasePath + "data/Textures/akira/akira_Normal.dds", BasePath + "data/Textures/akira/akira_Glow.dds");
     NorwayMaterial = Resources::loadMaterialAsync("Norway", BasePath + "data/Textures/norway/norway.dds", BasePath + "data/Textures/norway/norway_Normal.dds", BasePath + "data/Textures/norway/norway_Glow.dds");
 
