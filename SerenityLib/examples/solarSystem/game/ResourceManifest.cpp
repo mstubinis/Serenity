@@ -84,6 +84,7 @@ Handle ResourceManifest::SoundPulsePhaser;
 Handle ResourceManifest::SoundPlasmaCannon;
 Handle ResourceManifest::SoundDisruptorCannon;
 Handle ResourceManifest::SoundPhotonTorpedo;
+Handle ResourceManifest::SoundKlingonTorpedo;
 Handle ResourceManifest::SoundQuantumTorpedo;
 Handle ResourceManifest::SoundPhotonTorpedoOld;
 Handle ResourceManifest::SoundPlasmaTorpedo;
@@ -137,12 +138,12 @@ void ResourceManifest::init(){
 	NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc")[0];
     MirandaMesh = Resources::loadMeshAsync(BasePath + "data/Models/miranda.objcc")[0];
 	//VenerexMesh = Resources::loadMeshAsync(BasePath + "data/Models/venerex.objcc")[0];
-	IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.obj")[0];
+	IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.objcc")[0];
     ExcelsiorMesh = Resources::loadMeshAsync(BasePath + "data/Models/excelsior.objcc")[0];
     ConstitutionMesh = Resources::loadMeshAsync(BasePath + "data/Models/constitution.objcc")[0];
     //LeviathanMesh = Resources::loadMeshAsync(BasePath + "data/Models/leviathan.objcc")[0];
     ShrikeMesh = Resources::loadMeshAsync(BasePath + "data/Models/shrike.objcc")[0];
-    BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.obj")[0];
+    BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.objcc")[0];
     AkiraMesh = Resources::loadMeshAsync(BasePath + "data/Models/akira.objcc")[0];
     NorwayMesh = Resources::loadMeshAsync(BasePath + "data/Models/norway.objcc")[0];
 
@@ -189,7 +190,7 @@ void ResourceManifest::init(){
     ConstitutionMaterial = Resources::loadMaterialAsync("Constitution", BasePath + "data/Textures/constitution/constitution.dds", BasePath + "data/Textures/constitution/constitution_Normal.dds", BasePath + "data/Textures/constitution/constitution_Glow.dds", BasePath + "data/Textures/constitution/constitution_Specular.dds");
     //DefiantSharkMaterial = Resources::loadMaterialAsync("DefiantShark", BasePath + "data/Textures/defiant/defiantShark.dds", BasePath + "data/Textures/defiant/defiant_Normal.dds", BasePath + "data/Textures/defiant/defiant_Glow.dds");
     ShrikeMaterial = Resources::loadMaterialAsync("Shrike", BasePath + "data/Textures/shrike/shrike.dds", BasePath + "data/Textures/shrike/shrike_Normal.dds", BasePath + "data/Textures/shrike/shrike_Glow.dds", BasePath + "data/Textures/shrike/shrike_Specular.dds");
-    BrelMaterial = Resources::loadMaterialAsync("Brel", BasePath + "data/Textures/brel/brel.dds", "", "", "");
+    BrelMaterial = Resources::loadMaterialAsync("Brel", BasePath + "data/Textures/brel/brel.dds", BasePath + "data/Textures/brel/brel_Normal.dds", BasePath + "data/Textures/brel/brel_Glow.dds", BasePath + "data/Textures/brel/brel_Specular.dds");
     AkiraMaterial = Resources::loadMaterialAsync("Akira", BasePath + "data/Textures/akira/akira.dds", BasePath + "data/Textures/akira/akira_Normal.dds", BasePath + "data/Textures/akira/akira_Glow.dds");
     NorwayMaterial = Resources::loadMaterialAsync("Norway", BasePath + "data/Textures/norway/norway.dds", BasePath + "data/Textures/norway/norway_Normal.dds", BasePath + "data/Textures/norway/norway_Glow.dds");
 
@@ -332,6 +333,7 @@ void ResourceManifest::init(){
     SoundPlasmaCannon = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_cannon.ogg");
     SoundDisruptorCannon = Resources::addSoundData(BasePath + "data/Sounds/effects/disruptor_cannon.ogg");
     SoundPhotonTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/photon_torpedo.ogg");
+    SoundKlingonTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/klingon_torpedo.ogg");
     SoundQuantumTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/quantum_torpedo.ogg");
     SoundPhotonTorpedoOld = Resources::addSoundData(BasePath + "data/Sounds/effects/photon_torpedo_old.ogg");
     SoundPlasmaTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_torpedo.ogg");

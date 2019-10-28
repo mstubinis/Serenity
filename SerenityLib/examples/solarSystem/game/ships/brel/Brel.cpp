@@ -2,6 +2,7 @@
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
 #include "../../weapons/DisruptorCannon.h"
+#include "../../weapons/KlingonPhotonTorpedo.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"
@@ -49,6 +50,12 @@ Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 
     weapons.addPrimaryWeaponCannon(*leftBottom);
     weapons.addPrimaryWeaponCannon(*rightBottom);
     weapons.addPrimaryWeaponCannon(*rightTop);
+
+    auto* fwd_torp = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 2);
+    auto* aft_torp = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.115291f, 0.511922f), glm::vec3(0.0f, 0.0f, 1.0f), 35.0f, 1);
+
+    weapons.addSecondaryWeaponTorpedo(*fwd_torp);
+    weapons.addSecondaryWeaponTorpedo(*aft_torp);
 }
 Brel::~Brel() {
 

@@ -61,6 +61,18 @@ class Weapons {
                     break;
                 }
                 case WeaponType::KlingonPhotonTorpedo: {
+                    auto& w = static_cast<KlingonPhotonTorpedo&>(weapon);
+                    auto* projectile = new KlingonPhotonTorpedoProjectile(w, map, position, forward, projectile_index, chosen_target_pos);
+                    const auto res = map.addTorpedoProjectile(projectile, projectile_index);
+                    if (res >= 0) {
+                        w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundKlingonTorpedo);
+                        if (w.soundEffect) {
+                            w.soundEffect->setVolume(w.volume);
+                            w.soundEffect->setPosition(finalPosition);
+                            w.soundEffect->setAttenuation(0.05f);
+                        }
+                        --weapon.numRounds;
+                    }
                     break;
                 }
                 case WeaponType::PhaserBeam: {

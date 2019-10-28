@@ -82,6 +82,7 @@ struct ResourceManifest{
     static Handle SoundPlasmaCannon;
     static Handle SoundDisruptorCannon;
     static Handle SoundPhotonTorpedo;
+    static Handle SoundKlingonTorpedo;
     static Handle SoundQuantumTorpedo;
     static Handle SoundPhotonTorpedoOld;
     static Handle SoundPlasmaTorpedo;
