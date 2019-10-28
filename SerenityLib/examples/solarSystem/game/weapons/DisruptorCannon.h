@@ -15,7 +15,7 @@ struct DisruptorCannonOutlineInstanceBindFunctor;
 struct DisruptorCannonOutlineInstanceUnbindFunctor;
 
 struct DisruptorCannonProjectile final : public PrimaryWeaponCannonProjectile {
-    DisruptorCannonProjectile(DisruptorCannon&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index, const glm::vec3& chosen_target_pos);
+    DisruptorCannonProjectile(DisruptorCannon&, Map& map, const glm_vec3& position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos);
     ~DisruptorCannonProjectile();
 };
 
@@ -31,8 +31,8 @@ class DisruptorCannon final : public PrimaryWeaponCannon {
         DisruptorCannon(
             Ship&,
             Map&,
-            const glm::vec3& position,
-            const glm::vec3& forward,
+            const glm_vec3& position,
+            const glm_vec3& forward,
             const float& arc,
             const uint& maxCharges = 5,
             const float& damage = 100.0f,

@@ -573,6 +573,9 @@
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\DepthOfFieldCode.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\math\Numbers.h">
+      <Filter>Header Files\Engine\Core\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">

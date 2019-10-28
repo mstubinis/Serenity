@@ -117,8 +117,8 @@ namespace Engine {
                             const glm::vec3& pos = body.position();
                             const float cullingDistance = r.rodLength() + (r.getCullingRadius() * 2.0f);
                             const float half = r.rodLength() / 2.0f;
-                            const glm::vec3& firstEndPt = pos + (body.forward() * half);
-                            const glm::vec3& secndEndPt = pos - (body.forward() * half);
+                            const glm::vec3& firstEndPt = pos + (glm::vec3(body.forward()) * half);
+                            const glm::vec3& secndEndPt = pos - (glm::vec3(body.forward()) * half);
                             Renderer::sendUniform4Safe((start + "DataA").c_str(), r.getAmbientIntensity(), r.getDiffuseIntensity(), r.getSpecularIntensity(), firstEndPt.x);
                             Renderer::sendUniform4Safe((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, r.getConstant(), r.getLinear());
                             Renderer::sendUniform4Safe((start + "DataC").c_str(), r.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);

@@ -42,9 +42,9 @@ const glm::vec3 epriv::ComponentCamera_Functions::GetViewVectorNoTranslation(Cam
 #pragma region Component
 
 ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_AngleDegrees, const float p_AspectRatio, const float p_NearPlane, const float p_FarPlane) : ComponentBaseClass(p_Entity) {
-    m_Eye                     = glm::vec3(0.0f);
-	m_Up                      = glm::vec3(0.0f, 1.0f, 0.0f);
-    m_Forward                 = glm::vec3(0, 0, -1.0f);
+    m_Eye                     = glm_vec3(static_cast<decimal>(0.0));
+	m_Up                      = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(1.0), static_cast<decimal>(0.0));
+    m_Forward                 = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(-1.0));
     m_Angle                   = glm::radians(p_AngleDegrees);
 	m_AspectRatio             = p_AspectRatio;
 	m_NearPlane               = p_NearPlane;
@@ -52,14 +52,14 @@ ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_AngleDegr
 	m_Bottom                  = 0.0f;
 	m_Top                     = 0.0f;
     m_ProjectionMatrix        = glm::perspective(m_Angle, m_AspectRatio, m_NearPlane, m_FarPlane);
-    m_ViewMatrix              = glm::lookAt(m_Eye, glm::vec3(0.0f, 0.0f, -1.0f), m_Up);
+    m_ViewMatrix              = glm::lookAt(m_Eye, glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(-1.0)), m_Up);
 	m_ViewMatrixNoTranslation = m_ViewMatrix;
     m_Type                    = Type::Perspective;
 }
 ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_Left, const float p_Right, const float p_Bottom, const float p_Top, const float p_NearPlane, const float p_FarPlane) : ComponentBaseClass(p_Entity) {
-    m_Eye                     = glm::vec3(0.0f);
-	m_Up                      = glm::vec3(0.0f, 1.0f, 0.0f);
-    m_Forward                 = glm::vec3(0, 0, -1.0f);
+    m_Eye                     = glm_vec3(static_cast<decimal>(0.0));
+    m_Up                      = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(1.0), static_cast<decimal>(0.0));
+    m_Forward                 = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(-1.0));
     m_Left                    = p_Left;
 	m_Right                   = p_Right;
 	m_Bottom                  = p_Bottom;
@@ -67,7 +67,7 @@ ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_Left, con
 	m_NearPlane               = p_NearPlane;
 	m_FarPlane                = p_FarPlane;
     m_ProjectionMatrix        = glm::ortho(m_Left, m_Right, m_Bottom, m_Top, m_NearPlane, m_FarPlane);
-    m_ViewMatrix              = glm::lookAt(m_Eye, glm::vec3(0.0f, 0.0f, -1.0f), m_Up);
+    m_ViewMatrix              = glm::lookAt(m_Eye, glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(-1.0)), m_Up);
 	m_ViewMatrixNoTranslation = m_ViewMatrix;
     m_Type                    = Type::Orthographic;
 }
@@ -79,44 +79,45 @@ void ComponentCamera::resize(const uint p_Width, const uint p_Height) {
     }
     epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
-const uint ComponentCamera::pointIntersectTest(const glm::vec3& p_Position) const {
+const uint ComponentCamera::pointIntersectTest(const glm_vec3& p_Position) const {
     for (int i = 0; i < 6; ++i) {
-        float d = m_FrustumPlanes[i].x * p_Position.x + m_FrustumPlanes[i].y * p_Position.y + m_FrustumPlanes[i].z * p_Position.z + m_FrustumPlanes[i].w;
-        if (d > 0.0f) return 0; //outside
+        const auto d = m_FrustumPlanes[i].x * p_Position.x + m_FrustumPlanes[i].y * p_Position.y + m_FrustumPlanes[i].z * p_Position.z + m_FrustumPlanes[i].w;
+        if (d > static_cast<decimal>(0.0)) 
+            return 0; //outside
     }
     return 1;//inside
 }
-const uint ComponentCamera::sphereIntersectTest(const glm::vec3& p_Position, const float& p_Radius) const {
+const uint ComponentCamera::sphereIntersectTest(const glm_vec3& p_Position, const float& p_Radius) const {
     uint res = 1; //inside the viewing frustum
-    if (p_Radius <= 0.0f)
+    if (p_Radius <= static_cast<decimal>(0.0))
 		return 0;
     for (int i = 0; i < 6; ++i) {
         float d = m_FrustumPlanes[i].x * p_Position.x + m_FrustumPlanes[i].y * p_Position.y + m_FrustumPlanes[i].z * p_Position.z + m_FrustumPlanes[i].w;
-        if (d > p_Radius * 2.0f)
+        if (d > p_Radius * static_cast<decimal>(2.0))
 			return 0; //outside the viewing frustrum
-        else if (d > 0.0f) 
+        else if (d > static_cast<decimal>(0.0))
 			res = 2; //intersecting the viewing plane
     }
     return res;
 }
-void ComponentCamera::lookAt(const glm::vec3& p_Eye, const glm::vec3& p_Center, const glm::vec3& p_Up) {
+void ComponentCamera::lookAt(const glm_vec3& p_Eye, const glm_vec3& p_Center, const glm_vec3& p_Up) {
     m_Eye                     = p_Eye;
     m_Up                      = p_Up;
     m_Forward                 = glm::normalize(m_Eye - p_Center);
     m_ViewMatrix              = glm::lookAt(m_Eye, m_Eye - m_Forward, m_Up);
-    m_ViewMatrixNoTranslation = glm::lookAt(glm::vec3(0.0f), -m_Forward, m_Up);
+    m_ViewMatrixNoTranslation = glm::lookAt(glm_vec3(static_cast<decimal>(0.0)), -m_Forward, m_Up);
 }
 
-const glm::vec3 ComponentCamera::forward() const {
+const glm_vec3 ComponentCamera::forward() const {
     //auto inv = glm::transpose(m_ViewMatrixNoTranslation);
     //return glm::normalize(glm::vec3(inv[2][0], inv[2][1], inv[2][2]));
     //return (getViewVector());
     return m_Forward;
 }
-const glm::vec3 ComponentCamera::right() const {
-    return glm::normalize(glm::vec3(m_ViewMatrixNoTranslation[0][0], m_ViewMatrixNoTranslation[1][0], m_ViewMatrixNoTranslation[2][0]));
+const glm_vec3 ComponentCamera::right() const {
+    return glm::normalize(glm_vec3(m_ViewMatrixNoTranslation[0][0], m_ViewMatrixNoTranslation[1][0], m_ViewMatrixNoTranslation[2][0]));
 }
-const glm::vec3 ComponentCamera::up() const {
+const glm_vec3 ComponentCamera::up() const {
     return (m_Up); //normalize later?
 }
 

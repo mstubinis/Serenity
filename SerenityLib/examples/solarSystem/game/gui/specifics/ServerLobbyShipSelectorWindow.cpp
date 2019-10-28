@@ -51,8 +51,8 @@ struct GameCameraShipSelectorLogicFunctor final { void operator()(ComponentLogic
         const glm::vec3 pos = (glm::vec3(0.0f, 0.0f, 1.0f) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0.0f, 0.0f, 1.0f) * glm::length(targetModel.radius() * (1.0f + camera.m_OrbitRadius)));
 
         glm::mat4 cameraModel = glm::mat4(1.0f);
-        cameraModel = glm::translate(cameraModel, targetBody.position());
-        cameraModel *= glm::mat4_cast(thisBody.rotation());
+        cameraModel = glm::translate(cameraModel, glm::vec3(targetBody.position()));
+        cameraModel *= glm::mat4_cast(glm::quat(thisBody.rotation()));
         cameraModel = glm::translate(cameraModel, pos);
 
         const glm::vec3 eye(cameraModel[3][0], cameraModel[3][1], cameraModel[3][2]);
@@ -94,8 +94,8 @@ ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& s
 
     const glm::vec3 pos = (glm::vec3(0, 0, 1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0.0f, 0.0f, 1.0f) * glm::length(targetModel.radius() * (1.0f + gameCamera.m_OrbitRadius)));
     glm::mat4 cameraModel = glm::mat4(1.0f);
-    cameraModel = glm::translate(cameraModel, targetBody.position());
-    cameraModel *= glm::mat4_cast(thisBody.rotation());
+    cameraModel = glm::translate(cameraModel, glm::vec3(targetBody.position()));
+    cameraModel *= glm::mat4_cast(glm::quat(thisBody.rotation()));
     cameraModel = glm::translate(cameraModel, pos);
     const glm::vec3 eye(cameraModel[3][0], cameraModel[3][1], cameraModel[3][2]);
     thisBody.setPosition(eye);

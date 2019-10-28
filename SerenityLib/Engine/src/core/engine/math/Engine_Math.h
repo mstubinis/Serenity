@@ -10,6 +10,7 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics/Color.hpp>
+#include <core/engine/math/Numbers.h>
 
 class btVector3;
 class btRigidBody;
@@ -20,6 +21,8 @@ typedef unsigned char   uchar;
 
 namespace Engine{
 namespace Math{
+
+    const glm_vec3 rotate_vec3(const glm_quat& rotation, const glm_vec3& vec);
 
     const glm::vec3 polynomial_interpolate_linear(std::vector<glm::vec3>& points, const float time);
     const glm::vec3 polynomial_interpolate_cubic(std::vector<glm::vec3>& points, const float time);
@@ -34,11 +37,11 @@ namespace Math{
 
     glm::vec2 rotate2DPoint(const glm::vec2& point, const float angle, const glm::vec2& origin = glm::vec2(0.0f, 0.0f));
 
-    glm::quat btToGLMQuat(const btQuaternion& q);
-    btQuaternion glmToBTQuat(const glm::quat& q);
+    const glm_quat btToGLMQuat(const btQuaternion& q);
+    btQuaternion glmToBTQuat(const glm_quat& q);
 
-    glm::vec3 btVectorToGLM(const btVector3&);
-    btVector3 btVectorFromGLM(const glm::vec3&);
+    const glm_vec3 btVectorToGLM(const btVector3&);
+    btVector3 btVectorFromGLM(const glm_vec3&);
 
     glm::vec3 assimpToGLMVec3(const aiVector3D&);
     glm::mat4 assimpToGLMMat4(const aiMatrix4x4&);
@@ -53,9 +56,12 @@ namespace Math{
     glm::vec3 direction(const glm::vec3& eye, const glm::vec3& target);
 
     void translate(const btRigidBody&,btVector3&,bool local);
+    void rotate(glm_quat& orientation, const decimal& pitch, const decimal& yaw, const decimal& roll);
     void rotate(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll);
+    void setRotation(glm_quat& orientation, const decimal& pitch, const decimal& yaw, const decimal& roll);
     void setRotation(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll);
-    void setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position,const glm::quat& rotation, const glm::vec3& scale);
+    void setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position,const glm_quat& rotation, const glm_vec3& scale);
+    void setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
 
     uchar pack2NibblesIntoChar(const float x, const float y);
     glm::vec2 unpack2NibblesFromChar(const uchar);
@@ -82,19 +88,19 @@ namespace Math{
 
     void removeMatrixPosition(glm::mat4&);
 
-    void recalculateForwardRightUp(const glm::quat&,glm::vec3& forward,glm::vec3& right,glm::vec3& up);
-    void recalculateForwardRightUp(const btRigidBody&,glm::vec3& forward,glm::vec3& right,glm::vec3& up);
+    void recalculateForwardRightUp(const glm_quat&,glm_vec3& forward,glm_vec3& right,glm_vec3& up);
+    void recalculateForwardRightUp(const btRigidBody&,glm_vec3& forward,glm_vec3& right,glm_vec3& up);
 
-    glm::vec3 getForward(const glm::quat& q);
-    glm::vec3 getRight(const glm::quat& q);
-    glm::vec3 getUp(const glm::quat& q);
+    glm::vec3 getForward(const glm_quat& q);
+    glm::vec3 getRight(const glm_quat& q);
+    glm::vec3 getUp(const glm_quat& q);
     glm::vec3 getColumnVector(const btRigidBody& b, const uint& column);
     glm::vec3 getForward(const btRigidBody& b);
     glm::vec3 getRight(const btRigidBody& b);
     glm::vec3 getUp(const btRigidBody& b);
 
     float getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees = true);
-    void alignTo(glm::quat& o, const glm::vec3& direction,float speed=0);
+    void alignTo(glm_quat& o, const glm_vec3& direction, decimal speed=0);
 
     void setColor(glm::vec3& color, float r, float g, float b);
     void setColor(glm::vec4& color, float r, float g, float b, float a);

@@ -23,8 +23,8 @@ class PhaserBeam final : public PrimaryWeaponBeam {
         PhaserBeam(
             Ship& ship,
             Map& map,
-            const glm::vec3& position,
-            const glm::vec3& forward,
+            const glm_vec3& position,
+            const glm_vec3& forward,
             const float& arc,
             std::vector<glm::vec3>& windupPts,
             const float& damage = 450.0f,
@@ -38,7 +38,7 @@ class PhaserBeam final : public PrimaryWeaponBeam {
         );
         ~PhaserBeam();
 
-        const bool fire(const double& dt, const glm::vec3& chosen_target_pt);
+        const bool fire(const double& dt, const glm_vec3& chosen_target_pt);
         const bool forceFire(const double& dt);
         void update(const double& dt);
 };

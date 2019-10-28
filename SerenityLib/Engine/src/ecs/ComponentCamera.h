@@ -47,7 +47,7 @@ class ComponentCamera : public ComponentBaseClass {
 			Orthographic, 
 		};
         Type m_Type;
-        glm::vec3 m_Eye, m_Up, m_Forward;
+        glm_vec3 m_Eye, m_Up, m_Forward;
         glm::mat4 m_ViewMatrix, m_ViewMatrixNoTranslation, m_ProjectionMatrix;
         glm::vec4 m_FrustumPlanes[6];
         float m_NearPlane, m_FarPlane, m_Bottom, m_Top;
@@ -72,7 +72,7 @@ class ComponentCamera : public ComponentBaseClass {
         ~ComponentCamera();
 
         void resize(const uint width, const uint height);
-        void lookAt(const glm::vec3& eye, const glm::vec3& forward, const glm::vec3& up);
+        void lookAt(const glm_vec3& eye, const glm_vec3& forward, const glm_vec3& up);
 
 		const float getAngle() const;    void setAngle(const float angle);
 		const float getAspect() const;   void setAspect(const float aspectRatio);
@@ -87,12 +87,12 @@ class ComponentCamera : public ComponentBaseClass {
 		const glm::mat4 getViewProjectionInverse() const;
 		const glm::vec3 getViewVector() const;
 
-		const glm::vec3 forward() const;
-		const glm::vec3 right() const;
-		const glm::vec3 up() const;
+		const glm_vec3 forward() const;
+		const glm_vec3 right() const;
+		const glm_vec3 up() const;
 
-		const uint pointIntersectTest(const glm::vec3& objectPosition) const;
-		const uint sphereIntersectTest(const glm::vec3& objectPosition, const float& objectRadius) const;
+		const uint pointIntersectTest(const glm_vec3& objectPosition) const;
+		const uint sphereIntersectTest(const glm_vec3& objectPosition, const float& objectRadius) const;
 };
 
 class ComponentCamera_System : public Engine::epriv::ECSSystemCI {

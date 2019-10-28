@@ -29,9 +29,9 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             auto& targetBody   = *targetEntity->getComponent<ComponentBody>(dataRequest1);
             auto& targetModel  = *targetEntity->getComponent<ComponentModel>(dataRequest1);
             float targetRadius = targetModel.radius();
-            const auto targetFwd = targetBody.forward();
-            const auto targetPos = targetBody.position();
-            const auto targetUp = targetBody.up();
+            const auto targetFwd = glm::vec3(targetBody.forward());
+            const auto targetPos = glm::vec3(targetBody.position());
+            const auto targetUp = glm::vec3(targetBody.up());
 
             camera.m_OrbitRadius += (static_cast<float>(Engine::getMouseWheelDelta()) * 0.02f);
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 3.0f);
@@ -40,10 +40,10 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             
             auto* ship = dynamic_cast<Ship*>(targetEntity);
             if (ship)
-                calc2 += (targetBody.rotation() * ship->m_CameraOffsetDefault);
+                calc2 += (glm::quat(targetBody.rotation()) * ship->m_CameraOffsetDefault);
             calc2 *= (1.0f + camera.m_OrbitRadius);
 
-            const glm::vec3 pos = targetPos + calc2;
+            const auto pos = targetPos + calc2;
 
             thisBody.setPosition(pos);
             thisCamera.lookAt(pos, targetPos - (glm::vec3(50000.0f) * targetFwd), targetUp);
@@ -62,9 +62,9 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 3.0f);
 
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, player.position() -
-                ((glm::normalize(target.position() - player.position())*(playerModel.radius() * 2.7f) * (1.0f + camera.m_OrbitRadius))
-                    - player.up() * glm::length(playerModel.radius()) * 0.55f));
+            model = glm::translate(model, glm::vec3(player.position()) -
+                ((glm::normalize(glm::vec3(target.position()) - glm::vec3(player.position()))*(playerModel.radius() * 2.7f) * (1.0f + camera.m_OrbitRadius))
+                    - glm::vec3(player.up()) * glm::length(playerModel.radius()) * 0.55f));
 
             glm::vec3 pos(model[3][0], model[3][1], model[3][2]);
 
@@ -92,8 +92,8 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             const glm::vec3& pos = (glm::vec3(0, 0, 1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0, 0, 1) * glm::length(targetModel.radius() * (1.0f + camera.m_OrbitRadius)));
 
             glm::mat4 cameraModel = glm::mat4(1.0f);
-            cameraModel = glm::translate(cameraModel, targetBody.position());
-            cameraModel *= glm::mat4_cast(thisBody.rotation());
+            cameraModel = glm::translate(cameraModel, glm::vec3(targetBody.position()));
+            cameraModel *= glm::mat4_cast(glm::quat(thisBody.rotation()));
             cameraModel = glm::translate(cameraModel, pos);
 
             const glm::vec3 eye(cameraModel[3][0], cameraModel[3][1], cameraModel[3][2]);
@@ -151,11 +151,11 @@ Entity GameCamera::getObjectInCenterRay(Entity& exclusion){
     if(objs.size() == 0) return ret;
     if(objs.size() == 1) return objs[0];
 
-    float distance = -1;
+    decimal distance = -1;
     for(auto& object:objs){
         auto* body = object.getComponent<ComponentBody>();
         if (body) {
-            float d = glm::distance(body->position(), getPosition());
+            decimal d = glm::distance(body->position(), getPosition());
             if (distance == -1 || d < distance) {
                 distance = d;
                 ret = object;

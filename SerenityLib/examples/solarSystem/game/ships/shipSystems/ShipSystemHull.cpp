@@ -61,7 +61,7 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         hullDamage = (Material*)ResourceManifest::HullDamageMaterial3.get();
     }
 
-    const auto impactLocation = impactLocationLocal * m_Ship.getRotation();
+    const auto impactLocation = glm_vec3(impactLocationLocal) * m_Ship.getRotation();
     const auto impactR = impactRadius * 0.16f;
 
     if (forceHullFire) {
@@ -80,7 +80,7 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         //get list of nearby impact points
         vector<Decal*> nearbys;
         for (auto& dec : decalList) {
-            auto dist = glm::distance2(dec->initialPosition(), impactLocation);
+            auto dist = glm::distance2(glm_vec3(dec->initialPosition()), impactLocation);
             if (dist < (impactR * impactR) * 0.4f) {
                 nearbys.push_back(dec);
             }

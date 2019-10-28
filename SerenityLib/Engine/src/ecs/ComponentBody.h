@@ -66,10 +66,10 @@ class ComponentBody : public ComponentBaseClass {
             ~PhysicsData();         
         };
         struct NormalData {
-            glm::vec3 scale;
-            glm::vec3 position;
-            glm::quat rotation;
-            glm::mat4 modelMatrix;
+            glm_vec3 scale;
+            glm_vec3 position;
+            glm_quat rotation;
+            glm_mat4 modelMatrix;
 
             NormalData();
             NormalData(const NormalData& other)            = delete;
@@ -86,8 +86,8 @@ class ComponentBody : public ComponentBaseClass {
         void* m_UserPointer;
         void* m_UserPointer1;
         void* m_UserPointer2;
-        glm::vec3 m_Forward, m_Right, m_Up, m_Goal, m_GoalVelocity;
-        float m_GoalSpeed;
+        glm_vec3 m_Forward, m_Right, m_Up, m_Goal, m_GoalVelocity;
+        decimal m_GoalSpeed;
 
         boost::function<void(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal)> m_CollisionFunctor;
 
@@ -108,10 +108,10 @@ class ComponentBody : public ComponentBaseClass {
         }
         void collisionResponse(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal);
 
-        const glm::vec3& getGoal() const;
-        const float& getGoalSpeed() const;
-        void setGoal(const glm::vec3& _goal, const float& speed = 1.0f);
-        void setGoal(const float& x, const float& y, const float& z, const float& speed = 1.0f);
+        const glm_vec3& getGoal() const;
+        const decimal& getGoalSpeed() const;
+        void setGoal(const glm_vec3& _goal, const decimal& speed = 1.0f);
+        void setGoal(const decimal& x, const decimal& y, const decimal& z, const decimal& speed = 1.0f);
 
         void setInternalPhysicsUserPointer(void* userPtr);
         void setUserPointer(void* userPtr);
@@ -126,48 +126,47 @@ class ComponentBody : public ComponentBaseClass {
         const ushort getCollisionMask() const;  //get the groups this body will register collisions with
         const ushort getCollisionFlags() const;
 
-        void alignTo(const glm::vec3& direction, const float speed);
+        void alignTo(const glm_vec3& direction, const decimal speed);
 
-        void translate(const glm::vec3& translation, const bool local = true);
-        void translate(const float x, const float y, const float z, const bool local = true);
-        void translate(const float t, const bool local = true);
+        void translate(const glm_vec3& translation, const bool local = true);
+        void translate(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
+        void translate(const decimal& t, const bool local = true);
 
-        void rotate(const glm::vec3& rotation, const bool local = true);
-        void rotate(const float pitch, const float yaw, const float roll, const bool local = true);
-		void rotate(const double pitch, const double yaw, const double roll, const bool local = true);
+        void rotate(const glm_vec3& rotation, const bool local = true);
+        void rotate(const decimal& pitch, const decimal& yaw, const decimal& roll, const bool local = true);
 
-        void scale(const glm::vec3& amount);
-        void scale(const float x, const float y, const float z);
-        void scale(const float s);
+        void scale(const glm_vec3& amount);
+        void scale(const decimal& x, const decimal& y, const decimal& z);
+        void scale(const decimal& s);
 
-        void setPosition(const glm::vec3& newPosition);
-        void setPosition(const float x, const float y, const float z);
-        void setPosition(const float p);
+        void setPosition(const glm_vec3& newPosition);
+        void setPosition(const decimal& x, const decimal& y, const decimal& z);
+        void setPosition(const decimal& p);
 
-        void setRotation(const glm::quat& newRotation);
-        void setRotation(const float x, const float y, const float z, const float w);
+        void setRotation(const glm_quat& newRotation);
+        void setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w);
 
-        void setScale(const glm::vec3& newScale);
-        void setScale(const float x, const float y, const float z);
-        void setScale(const float s);
+        void setScale(const glm_vec3& newScale);
+        void setScale(const decimal& x, const decimal& y, const decimal& z);
+        void setScale(const decimal& s);
 
 		const float mass() const;
-        float getDistance(const Entity& other);
-        unsigned long long getDistanceLL(const Entity& other);
+        const decimal getDistance(const Entity& other);
+        const unsigned long long getDistanceLL(const Entity& other);
         glm::vec3 getScreenCoordinates(const bool clampToEdge = false);
 
         ScreenBoxCoordinates getScreenBoxCoordinates(const float minOffset = 10.0f);
 
-		const glm::quat rotation() const;
-		const glm::vec3 getScale() const;
-		const glm::vec3 position() const;
+		const glm_quat rotation() const;
+		const glm_vec3 getScale() const;
+		const glm_vec3 position() const;
         const glm::vec3 position_render() const;
-		const glm::vec3 forward() const;
-		const glm::vec3 right() const;
-		const glm::vec3 up() const;
-		const glm::vec3 getLinearVelocity() const;
-		const glm::vec3 getAngularVelocity() const;
-		const glm::mat4 modelMatrix() const;
+		const glm_vec3& forward() const;
+		const glm_vec3& right() const;
+		const glm_vec3& up() const;
+		const glm_vec3 getLinearVelocity() const;
+		const glm_vec3 getAngularVelocity() const;
+		const glm_mat4 modelMatrix() const;
 		const btRigidBody& getBtBody() const;
 
         void setCollision(const CollisionType::Type collisionType, const float mass);
@@ -193,39 +192,33 @@ class ComponentBody : public ComponentBaseClass {
         void removeCollisionMask(const CollisionFilter::Filter& mask);
         void removeCollisionFlag(const CollisionFlag::Flag& flag);
 
-        void setDamping(const float linear, const float angular);
+        void setDamping(const decimal& linear, const decimal& angular);
 
         void setDynamic(const bool dynamic);
         void setMass(const float mass);
-        void setGravity(const float& x, const float& y, const float& z);
+        void setGravity(const decimal& x, const decimal& y, const decimal& z);
 
         void clearLinearForces();
         void clearAngularForces();
         void clearAllForces();
 
-        void setLinearVelocity(const float x, const float y, const float z, const bool local = true);
-		void setLinearVelocity(const double x, const double y, const double z, const bool local = true);
-        void setLinearVelocity(const glm::vec3& velocity, const bool local = true);
+        void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
+        void setLinearVelocity(const glm_vec3& velocity, const bool local = true);
 
-        void setAngularVelocity(const float x, const float y, const float z, const bool local = true);
-		void setAngularVelocity(const double x, const double y, const double z, const bool local = true);
-        void setAngularVelocity(const glm::vec3& velocity, bool local = true);
+        void setAngularVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
+        void setAngularVelocity(const glm_vec3& velocity, bool local = true);
 
-        void applyForce(const float x, const float y, const float z, const bool local = true);
-		void applyForce(const double x, const double y, const double z, const bool local = true);
-        void applyForce(const glm::vec3& force, const glm::vec3& origin = glm::vec3(0.0f), bool local = true);
+        void applyForce(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
+        void applyForce(const glm_vec3& force, const glm_vec3& origin = glm_vec3(0.0f), bool local = true);
 
-        void applyImpulse(const float x, const float y, const float z, const bool local = true);
-		void applyImpulse(const double x, const double y, const double z, const bool local = true);
-        void applyImpulse(const glm::vec3& impulse, const glm::vec3& origin = glm::vec3(0.0f), bool local = true);
+        void applyImpulse(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
+        void applyImpulse(const glm_vec3& impulse, const glm_vec3& origin = glm_vec3(0.0f), bool local = true);
 
-        void applyTorque(const float x, const float y, const float z, const bool local = true);
-		void applyTorque(const double x, const double y, const double z, const bool local = true);
-        void applyTorque(const glm::vec3& torque, const bool local = true);
+        void applyTorque(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
+        void applyTorque(const glm_vec3& torque, const bool local = true);
 
-        void applyTorqueImpulse(const float x, const float y, const float z, const bool local = true);
-		void applyTorqueImpulse(const double x, const double y, const double z, const bool local = true);
-        void applyTorqueImpulse(const glm::vec3& torqueImpulse, const bool local = true);
+        void applyTorqueImpulse(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
+        void applyTorqueImpulse(const glm_vec3& torqueImpulse, const bool local = true);
 };
 
 class ComponentBody_System : public Engine::epriv::ECSSystemCI {

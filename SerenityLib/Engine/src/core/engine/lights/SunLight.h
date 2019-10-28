@@ -22,7 +22,7 @@ class SunLight : public EntityWrapper {
         float              m_SpecularIntensity;
     public:
         SunLight(
-            const glm::vec3 position   = glm::vec3(0.0f, 0.0f, 0.0f),
+            const glm_vec3 position   = glm_vec3(0.0),
             const LightType::Type type = LightType::Sun,
             Scene* scene               = nullptr
         );
@@ -30,7 +30,7 @@ class SunLight : public EntityWrapper {
 
         inline void destroy();
 
-        const glm::vec3 position();
+        const glm_vec3 position();
         const glm::vec4& color() const;
         const bool isActive() const;
         const uint type() const;
@@ -46,8 +46,8 @@ class SunLight : public EntityWrapper {
         void setColor(const float r, const float g, const float b, const float a = 1.0f);    
         void setColor(const glm::vec4& color);
         void setColor(const glm::vec3& color);
-        void setPosition(const float x, const float y, const float z);                       
-        void setPosition(const glm::vec3&);
+        void setPosition(const decimal& x, const decimal& y, const decimal& z);
+        void setPosition(const glm_vec3&);
         void activate(const bool active = true);                          
         void deactivate();
 };

@@ -125,7 +125,7 @@ class ShipSystemShields final : public ShipSystem {
         );
         void addShieldImpact(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime);
 
-        ShieldSide::Side getImpactSide(const glm::vec3& impactLocation);
+        ShieldSide::Side getImpactSide(const glm::vec3& impactLocationLocal);
         const std::string getImpactSideString(const ShieldSide::Side);
 };
 

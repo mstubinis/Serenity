@@ -268,7 +268,7 @@ void Client::onReceiveUDP() {
                             auto x = Helper::GetRandomFloatFromTo(-400, 400);
                             auto y = Helper::GetRandomFloatFromTo(-400, 400);
                             auto z = Helper::GetRandomFloatFromTo(-400, 400);
-                            auto randOffsetForSafety = glm::vec3(x, y, z);
+                            auto randOffsetForSafety = glm_vec3(x, y, z);
                             ship = map.createShip(*this, shipclass, playername, false, spawnPosition + randOffsetForSafety);
                         }else{
                             ship = ships.at(playername);
@@ -454,7 +454,7 @@ void Client::onReceive() {
                             auto x = Helper::GetRandomFloatFromTo(-400, 400);
                             auto y = Helper::GetRandomFloatFromTo(-400, 400);
                             auto z = Helper::GetRandomFloatFromTo(-400, 400);
-                            auto randOffsetForSafety = glm::vec3(x, y, z);
+                            auto randOffsetForSafety = glm_vec3(x, y, z);
                             ship = map.createShip(*this, shipclass, playername, false, spawnPosition + randOffsetForSafety);
                         }else{
                             ship = ships.at(playername);
@@ -508,12 +508,12 @@ void Client::onReceive() {
                     auto sin = Helper::GetRandomFloatFromTo(0, 2 * 3.14159f);
                     auto cos = Helper::GetRandomFloatFromTo(0, 2 * 3.14159f);
 
-                    glm::quat orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+                    auto orientation = glm_quat(1.0f, 0.0f, 0.0f, 0.0f);
                     Math::rotate(orientation, sin, cos, 0.0f);
 
 
                     glm::mat4 modelMatrix = glm::mat4(1.0f);
-                    auto position = glm::vec3(0, 0, -dist);
+                    auto position = glm_vec3(0, 0, -dist);
                     modelMatrix = glm::mat4_cast(orientation) * glm::translate(position);
                     auto& playerBody = *map.getPlayer()->getComponent<ComponentBody>();
                     auto spawn = map.getSpawnAnchor()->getPosition();

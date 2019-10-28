@@ -17,12 +17,12 @@ using namespace std;
 
 #define PREDICTED_PHYSICS_CONSTANT 0.11111111f
 
-float ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm::vec3& pos, const glm::vec3& vel, const float& s) {
-    float a = s * s - glm::dot(vel, vel);
-    float b = glm::dot(pos, vel);
-    float c = glm::dot(pos, pos);
-    float d = b * b + a * c;
-    float t = 0;
+const float ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm_vec3& pos, const glm_vec3& vel, const float& s) {
+    auto a = s * s - glm::dot(vel, vel);
+    auto b = glm::dot(pos, vel);
+    auto c = glm::dot(pos, pos);
+    auto d = b * b + a * c;
+    auto t = 0;
     if (d >= 0) {
         t = (b + sqrt(d)) / a;
         if (t < 0)
@@ -31,7 +31,7 @@ float ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm::vec3& pos,
     return t;
 }
 
-ShipWeapon::ShipWeapon(Map& map, WeaponType::Type _type, Ship& _ship, const glm::vec3& _position, const glm::vec3& _forward, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, const uint& _numRounds, const float& _rechargeTimerPerRound):ship(_ship),m_Map(map){
+ShipWeapon::ShipWeapon(Map& map, WeaponType::Type _type, Ship& _ship, const glm_vec3& _position, const glm_vec3& _forward, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, const uint& _numRounds, const float& _rechargeTimerPerRound):ship(_ship),m_Map(map){
     type                     = _type;
     position                 = _position;
     forward                  = glm::normalize(_forward);
@@ -55,7 +55,7 @@ const bool ShipWeapon::isInArc(EntityWrapper* target, const float _arc) {
 
     auto& targetBody = *target->getComponent<ComponentBody>();
     auto* targetIsShip = dynamic_cast<Ship*>(target);
-    glm::vec3 targetPosition;
+    glm_vec3 targetPosition;
     if (targetIsShip) {
         targetPosition = targetIsShip->getAimPositionDefault();
     }else{
@@ -64,7 +64,7 @@ const bool ShipWeapon::isInArc(EntityWrapper* target, const float _arc) {
     const auto cannonForward = glm::normalize(shipRotation * forward);
 
     const auto vecToTarget = shipPosition - targetPosition;
-    const auto vecToForward = shipPosition - (cannonForward * 100000000.0f);
+    const auto vecToForward = shipPosition - (cannonForward * static_cast<decimal>(100000000.0));
     const auto angleToTarget = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
     if (angleToTarget <= _arc) {
         return true;
@@ -73,7 +73,7 @@ const bool ShipWeapon::isInArc(EntityWrapper* target, const float _arc) {
 }
 
 
-PrimaryWeaponCannonProjectile::PrimaryWeaponCannonProjectile(Map& _map, const glm::vec3& position, const glm::vec3& forward, const int index):map(_map) {
+PrimaryWeaponCannonProjectile::PrimaryWeaponCannonProjectile(Map& _map, const glm_vec3& position, const glm_vec3& forward, const int index):map(_map) {
     entity           = _map.createEntity();
     currentTime      = 0.0f;
     maxTime          = 2.5f;
@@ -129,17 +129,17 @@ void PrimaryWeaponCannonProjectile::clientToServerImpact(Client& client, Ship& s
 }
 
 
-PrimaryWeaponCannon::PrimaryWeaponCannon(Map& map, WeaponType::Type _type, Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound){
+PrimaryWeaponCannon::PrimaryWeaponCannon(Map& map, WeaponType::Type _type, Ship& _ship,const glm_vec3& _pos,const glm_vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound){
     damage                   = _dmg;
     impactRadius             = _impactRad;
     impactTime               = _impactTime;
     travelSpeed              = _travelSpeed;
     volume                   = _volume;
 }
-const PrimaryWeaponCannonPrediction PrimaryWeaponCannon::calculatePredictedVector(ComponentBody& projectileBody, const glm::vec3& chosen_target_pos) {
+const PrimaryWeaponCannonPrediction PrimaryWeaponCannon::calculatePredictedVector(ComponentBody& projectileBody, const glm_vec3& chosen_target_pos) {
     auto& shipBody = *ship.getComponent<ComponentBody>();
     auto shipRotation = shipBody.rotation();
-    auto cannonForward = glm::normalize(shipRotation * forward);
+    auto cannonForward = glm::normalize(Math::rotate_vec3(shipRotation, forward));
     auto shipPosition = shipBody.position();
     auto mytarget = ship.getTarget();
 
@@ -157,10 +157,10 @@ const PrimaryWeaponCannonPrediction PrimaryWeaponCannon::calculatePredictedVecto
         const auto worldPositionTarget  = targetPositionCenter + chosen_target_pos;
 
         const auto vecToTarget          = shipPosition - worldPositionTarget;
-        const auto vecToForward         = shipPosition - (cannonForward * 100000000.0f);
+        const auto vecToForward         = shipPosition - (cannonForward * static_cast<decimal>(100000000.0));
         const auto angleToTarget        = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
         if (angleToTarget <= arc) {
-            const auto launcherPosition = shipPosition + (shipRotation * position);
+            const auto launcherPosition = shipPosition + Math::rotate_vec3(shipRotation, position);
             const auto targetLinearVelocity = targetBody.getLinearVelocity();
             const auto distanceToTarget = glm::distance(worldPositionTarget, launcherPosition);
 
@@ -169,7 +169,7 @@ const PrimaryWeaponCannonPrediction PrimaryWeaponCannon::calculatePredictedVecto
             auto myShipVelocity = shipBody.getLinearVelocity();
             auto combinedVelocity = targetLinearVelocity - myShipVelocity;
             const auto predictedSpeed = combinedVelocity + (cannonForward * finalTravelTime) /* * target.acceleration */; //TODO: figure this out later
-            const auto averageSpeed = (combinedVelocity + predictedSpeed) * 0.5f;
+            const auto averageSpeed = (combinedVelocity + predictedSpeed) * static_cast<decimal>(0.5);
             auto predictedPos = worldPositionTarget + (averageSpeed * finalTravelTime);
 
             returnValue.pedictedVector = -glm::normalize(launcherPosition - predictedPos);
@@ -190,7 +190,7 @@ const int PrimaryWeaponCannon::canFire() {
     }
     return -1;
 }
-const bool PrimaryWeaponCannon::forceFire(const int index, const glm::vec3& chosen_target_pos) {
+const bool PrimaryWeaponCannon::forceFire(const int index, const glm_vec3& chosen_target_pos) {
     if (numRounds > 0) {
         const bool can = m_Map.try_addCannonProjectile(index);
         if (can) {
@@ -204,7 +204,7 @@ void PrimaryWeaponCannon::update(const double& dt) {
     if (soundEffect && (soundEffect->status() == SoundStatus::Playing || soundEffect->status() == SoundStatus::PlayingLooped)) {
         const auto shipRotation = ship.getRotation();
         const auto shipPosition = ship.getPosition();
-        const auto launcherPosition = shipPosition + (shipRotation * position);
+        const auto launcherPosition = shipPosition + Math::rotate_vec3(shipRotation, position);
         soundEffect->setPosition(launcherPosition);
     }
     if (numRounds < numRoundsMax) {
@@ -219,7 +219,7 @@ void PrimaryWeaponCannon::update(const double& dt) {
 
 #pragma region Beam
 
-PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& map, const glm::vec3& _pos, const glm::vec3& _fwd, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound) {
+PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& map, const glm_vec3& _pos, const glm_vec3& _fwd, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound) {
     windupPoints = _windupPts;
     targetCoordinates = glm::vec3(0.0f);
     chargeTimer = 0.0f;
@@ -313,8 +313,8 @@ void PrimaryWeaponBeam::modifyBeamMesh(ComponentModel& beamModel, const float le
     modUvs[30].x = length;
     modUvs[31].x = length;
 }
-const glm::vec3 PrimaryWeaponBeam::calculatePredictedVector() {
-    glm::vec3 ret = glm::vec3(0.0f);
+const glm_vec3 PrimaryWeaponBeam::calculatePredictedVector() {
+    auto ret = glm_vec3(0.0f);
     auto mytarget = ship.getTarget();
     if (mytarget) {
         auto& targetBody = *mytarget->getComponent<ComponentBody>();
@@ -333,7 +333,7 @@ const bool PrimaryWeaponBeam::canFire() {
     }
     return false;
 }
-const bool PrimaryWeaponBeam::fire(const double& dt, const glm::vec3& chosen_target_pt) {
+const bool PrimaryWeaponBeam::fire(const double& dt, const glm_vec3& chosen_target_pt) {
     if (numRounds > 0) {
         return true;
     }
@@ -352,7 +352,7 @@ void PrimaryWeaponBeam::update(const double& dt) {
         }
     }
 }
-SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Map& map, WeaponType::Type _type, Ship& _ship,const glm::vec3& _pos,const glm::vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime,const float& _travelSpeed,const float& _volume,const float& _rotAngleSpeed) : ShipWeapon(map, _type, _ship,_pos,_fwd,_arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound) {
+SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Map& map, WeaponType::Type _type, Ship& _ship,const glm_vec3& _pos,const glm_vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime,const float& _travelSpeed,const float& _volume,const float& _rotAngleSpeed) : ShipWeapon(map, _type, _ship,_pos,_fwd,_arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound) {
     damage                   = _dmg;
     impactRadius             = _impactRad;
     impactTime               = _impactTime;
@@ -364,10 +364,10 @@ SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Map& map, WeaponType::Type _type,
 #pragma endregion
 
 #pragma region Torpedo
-const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredictedVector(ComponentBody& projectileBody, const glm::vec3& chosen_target_pos) {
+const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredictedVector(ComponentBody& projectileBody, const glm_vec3& chosen_target_pos) {
     auto& shipBody = *ship.getComponent<ComponentBody>();
     auto shipRotation = shipBody.rotation();
-    auto torpForward = glm::normalize(shipRotation * forward);
+    auto torpForward = glm::normalize(Math::rotate_vec3(shipRotation, forward));
     auto shipPosition = shipBody.position();
     auto mytarget = ship.getTarget();
 
@@ -385,13 +385,13 @@ const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredicte
         const auto worldPositionTarget = targetPositionCenter + chosen_target_pos;
 
         const auto vecToTarget = shipPosition - worldPositionTarget;
-        const auto vecToForward = shipPosition - (torpForward * 100000000.0f);
+        const auto vecToForward = shipPosition - (torpForward * static_cast<decimal>(100000000.0));
         const auto angleToTarget = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
         if (angleToTarget <= arc) {
             returnValue.hasLock = true;
             returnValue.target = mytarget;
 
-            const auto launcherPosition = shipPosition + (shipRotation * position);
+            const auto launcherPosition = shipPosition + Math::rotate_vec3(shipRotation, position);
             const auto targetLinearVelocity = targetBody.getLinearVelocity();
             const auto distanceToTarget = glm::distance(worldPositionTarget, launcherPosition);
 
@@ -401,7 +401,7 @@ const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredicte
 
             auto combinedVelocity = targetLinearVelocity - myShipVelocity;
             const auto predictedSpeed = combinedVelocity + (torpForward * finalTravelTime) /* * target.acceleration */; //TODO: figure this out later
-            const auto averageSpeed = (combinedVelocity + predictedSpeed) * 0.5f;
+            const auto averageSpeed = (combinedVelocity + predictedSpeed) * static_cast<decimal>(0.5);
             auto predictedPos = worldPositionTarget + (averageSpeed * finalTravelTime);
 
             returnValue.pedictedPosition = predictedPos;
@@ -424,7 +424,7 @@ const int SecondaryWeaponTorpedo::canFire() {
     }
     return -1;
 }
-const bool SecondaryWeaponTorpedo::forceFire(const int index, const glm::vec3& chosen_target_pos) {
+const bool SecondaryWeaponTorpedo::forceFire(const int index, const glm_vec3& chosen_target_pos) {
     if (numRounds > 0) {
         const bool can = m_Map.try_addTorpedoProjectile(index);
         if (can) {
@@ -438,7 +438,7 @@ void SecondaryWeaponTorpedo::update(const double& dt) {
     if (soundEffect && (soundEffect->status() == SoundStatus::Playing || soundEffect->status() == SoundStatus::PlayingLooped)) {
         const auto shipRotation = ship.getRotation();
         const auto shipPosition = ship.getPosition();
-        const auto launcherPosition = shipPosition + (shipRotation * position);
+        const auto launcherPosition = shipPosition + Math::rotate_vec3(shipRotation, position);
         soundEffect->setPosition(launcherPosition);
     }
     if (numRounds < numRoundsMax) {
@@ -450,7 +450,7 @@ void SecondaryWeaponTorpedo::update(const double& dt) {
         }
     }
 }
-SecondaryWeaponTorpedoProjectile::SecondaryWeaponTorpedoProjectile(Map& _map, const glm::vec3& position, const glm::vec3& forward, const int index) :map(_map) {
+SecondaryWeaponTorpedoProjectile::SecondaryWeaponTorpedoProjectile(Map& _map, const glm_vec3& position, const glm_vec3& forward, const int index) :map(_map) {
     entity             = _map.createEntity();
     currentTime        = 0.0f;
     maxTime            = 30.5f;
@@ -490,13 +490,13 @@ void SecondaryWeaponTorpedoProjectile::update(const double& dt) {
 
         auto& glowModel = *entity.getComponent<ComponentModel>();
         auto& body = *entity.getComponent<ComponentBody>();
-        const auto glowBodyPos = body.position_render();
+        const auto glowBodyPos = glm_vec3(body.position_render());
         auto* activeCam = glowModel.getOwner().scene().getActiveCamera();
         const auto camPos = activeCam->getPosition();
 
         //TODO: hacky workaround for messed up camera forward vector
         auto vec = glm::normalize(glowBodyPos - camPos);
-        vec *= 0.01f;
+        vec *= static_cast<decimal>(0.01);
         body.setRotation(activeCam->getOrientation());
         glowModel.getModel(1).setPosition(vec);
 

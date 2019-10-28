@@ -35,10 +35,10 @@ Camera::Camera(const float left, const float right, const float bottom, const fl
 }
 Camera::~Camera(){ 
 }
-void Camera::lookAt(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up) {
+void Camera::lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3& up) {
     m_Entity.getComponent<ComponentCamera>()->lookAt(eye, center, up);
 }
-const glm::vec3 Camera::getPosition(){ 
+const glm_vec3 Camera::getPosition(){ 
     return m_Entity.getComponent<ComponentBody>()->position(); 
 }
 const glm::quat Camera::getOrientation(){
@@ -89,41 +89,41 @@ const glm::mat4 Camera::getViewProjection(){
 const glm::vec3 Camera::getViewVector(){ 
     return m_Entity.getComponent<ComponentCamera>()->getViewVector(); 
 }
-const glm::vec3 Camera::forward(){ 
+const glm_vec3 Camera::forward(){ 
     return m_Entity.getComponent<ComponentCamera>()->forward(); 
 }
-const glm::vec3 Camera::right(){ 
+const glm_vec3 Camera::right(){ 
     return m_Entity.getComponent<ComponentCamera>()->right(); 
 }
-const glm::vec3 Camera::up(){ 
+const glm_vec3 Camera::up(){ 
     return m_Entity.getComponent<ComponentCamera>()->up(); 
 }
-const float Camera::getDistance(Entity& e){
+const decimal Camera::getDistance(Entity& e){
     auto& b = *e.getComponent<ComponentBody>();
     return glm::distance(b.position(),getPosition());
 }
-const float Camera::getDistance(const glm::vec3& objPos){
+const decimal Camera::getDistance(const glm_vec3& objPos){
     return glm::distance(objPos,getPosition()); 
 }
-const float Camera::getDistanceSquared(Entity& e) {
+const decimal Camera::getDistanceSquared(Entity& e) {
     auto& b = *e.getComponent<ComponentBody>();
     return glm::distance2(b.position(), getPosition());
 }
-const float Camera::getDistanceSquared(const glm::vec3& objPos) {
+const decimal Camera::getDistanceSquared(const glm_vec3& objPos) {
     return glm::distance2(objPos, getPosition()); 
 }
-const uint Camera::sphereIntersectTest(const glm::vec3& pos, const float radius) {
+const uint Camera::sphereIntersectTest(const glm_vec3& pos, const float radius) {
     return m_Entity.getComponent<ComponentCamera>()->sphereIntersectTest(pos,radius); 
 }
-const uint Camera::pointIntersectTest(const glm::vec3& pos) {
+const uint Camera::pointIntersectTest(const glm_vec3& pos) {
     return m_Entity.getComponent<ComponentCamera>()->pointIntersectTest(pos); 
 }
 const bool Camera::rayIntersectSphere(Entity& entity){
-    auto* body       = entity.getComponent<ComponentBody>();
-    auto* model      = entity.getComponent<ComponentModel>();
-    auto& thisBody   = *m_Entity.getComponent<ComponentBody>();
-    auto& thisCamera = *m_Entity.getComponent<ComponentCamera>();
-    float radius     = 0.0f;
+    auto* body        = entity.getComponent<ComponentBody>();
+    auto* model       = entity.getComponent<ComponentModel>();
+    auto& thisBody    = *m_Entity.getComponent<ComponentBody>();
+    auto& thisCamera  = *m_Entity.getComponent<ComponentCamera>();
+    auto radius       = 0.0f;
     if(model) 
         radius = model->radius();
     if (!body)

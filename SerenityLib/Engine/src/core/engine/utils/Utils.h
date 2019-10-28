@@ -18,6 +18,7 @@
 #endif
 #endif
 
+#include <core/engine/math/Numbers.h>
 #include <vector>
 #include <string>
 #include <cstdint>

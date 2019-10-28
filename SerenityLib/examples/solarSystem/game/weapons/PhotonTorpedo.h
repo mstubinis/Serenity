@@ -18,20 +18,20 @@ struct PhotonTorpedoFlare final {
     glm::vec3 spin;
     glm::quat start;
     PhotonTorpedoFlare() {
-        start = glm::quat();
+        start   = glm::quat();
         start.w = 1.0f;
-        spin = glm::vec3(0.0f);
+        spin    = glm::vec3(0.0f);
     }
     PhotonTorpedoFlare(glm::vec3& _spin) {
-        start = glm::quat();
+        start   = glm::quat();
         start.w = 1.0f;
-        spin = _spin;
+        spin    = _spin;
     }
 };
 struct PhotonTorpedoProjectile final : public SecondaryWeaponTorpedoProjectile {
     PhotonTorpedo&                    torpedo;
     std::vector<PhotonTorpedoFlare>   flares;
-    PhotonTorpedoProjectile(PhotonTorpedo&, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index, const glm::vec3& chosen_target_pos);
+    PhotonTorpedoProjectile(PhotonTorpedo&, Map& map, const glm_vec3& position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos);
     ~PhotonTorpedoProjectile();
     void update(const double& dt);
 };
@@ -49,8 +49,8 @@ class PhotonTorpedo final : public SecondaryWeaponTorpedo {
         PhotonTorpedo(
             Ship&,
             Map&,
-            const glm::vec3& position,
-            const glm::vec3& forward,
+            const glm_vec3& position,
+            const glm_vec3& forward,
             const float& arc,
             const uint& maxCharges = 1,
             const float& damage = 2000.0f,

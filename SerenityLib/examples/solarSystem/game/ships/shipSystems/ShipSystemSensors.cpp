@@ -126,7 +126,7 @@ void ShipSystemSensors::update(const double& dt) {
 
     auto& camBody = *m_Camera->getComponent<ComponentBody>();
     const auto shipForward = m_Ship.forward();
-    const auto extendedForward = shipForward  * 100000.0f;
+    const auto extendedForward = shipForward * static_cast<decimal>(100000.0);
     camBody.setPosition(m_Ship.getPosition() - extendedForward);
     camBody.setRotation(m_Ship.getRotation());
     const auto camPos = camBody.position();
@@ -134,7 +134,7 @@ void ShipSystemSensors::update(const double& dt) {
 
     auto& radarBody = *m_RadarRingEntity.getComponent<ComponentBody>();
     auto& radarModel = *m_RadarRingEntity.getComponent<ComponentModel>();
-    radarBody.setPosition(camPos - (shipForward * glm::vec3(2.05f)));
+    radarBody.setPosition(camPos - (shipForward * glm_vec3(2.05)));
 
     ShipSystem::update(dt);
 
@@ -169,16 +169,16 @@ void ShipSystemSensors::render() {
     auto* myTarget = m_Ship.getTarget();
     for (auto& ship : m_Map.getShips()) {
         if (ship.first != m_Ship.getName()) {
-            glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); //red first (enemy)
-            glm::vec3 otherVector = ship.second->getPosition() - myPos;
+            auto color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); //red first (enemy)
+            auto otherVector = ship.second->getPosition() - myPos;
             auto* cloakingDevice = static_cast<ShipSystemCloakingDevice*>(ship.second->getShipSystem(ShipSystemType::CloakingDevice));
-            bool modByCloak = false;
+            auto modByCloak = false;
             if (cloakingDevice) {
                 auto timer = cloakingDevice->getCloakTimer();
                 //1.0 - see, 0.0 or below is invisible
                 if (timer < 1.0f) {
                     timer = glm::max(0.0f, timer);
-                    float invTimer = 1.0f - timer;
+                    auto invTimer = 1.0f - timer;
                     const auto _small = m_RadarRange * 0.03f;
                     const auto _large = m_RadarRange * 0.22f;
                     auto randX2 = Helper::GetRandomFloatFromTo(-_small, _small);
@@ -192,20 +192,20 @@ void ShipSystemSensors::render() {
                     color.b = 0.0f;
                     color.a = glm::max(0.35f, 1.0f * timer);
                     modByCloak = true;
-                    otherVector += glm::vec3(randX, randY, randZ) * ((glm::length(otherVector) / m_RadarRange) + 0.01f);
+                    otherVector += glm_vec3(randX, randY, randZ) * ((glm::length(otherVector) / m_RadarRange) + 0.01f);
                 }
             }
             
             //scale otherPos down to the range
-            const float otherLen = glm::length(otherVector);
+            const auto otherLen = glm::length(otherVector);
             otherVector /= otherLen;
-            otherVector *= glm::min((otherLen / m_RadarRange + 0.01f), 1.0f);
+            otherVector *= glm::min((otherLen / static_cast<decimal>(m_RadarRange + 0.01f)), static_cast<decimal>(1.0));
             otherVector = radarBodyPosition + otherVector;
 
             const auto pos = Math::getScreenCoordinates(otherVector, *m_Camera, m_Viewport, false);
 
-            const glm::vec2 pos2D = glm::vec2(pos.x, pos.y);
-            const float dotproduct = glm::dot(radarBodyPosition + m_Ship.forward(), otherVector - radarBodyPosition);
+            const auto pos2D = glm::vec2(pos.x, pos.y);
+            const auto dotproduct = glm::dot(radarBodyPosition + m_Ship.forward(), otherVector - radarBodyPosition);
             if (dotproduct <= 0 /*&& !modByCloak*/) {
                 color.a = 0.5f;
             }

@@ -57,7 +57,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                         auto _otherBody = e.getComponent<ComponentBody>(dataRequest);
                         if (_otherBody) {
                             auto& otherBody = *_otherBody;
-                            otherBody.setPosition(otherBody.position() + (speed * static_cast<float>(dt)));
+                            otherBody.setPosition(otherBody.position() + (speed * static_cast<decimal>(dt)));
                         }
                     }
                 }
@@ -80,7 +80,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                 camera.orbit(&ship);
             }else if (mytarget) {
                 auto dist = glm::distance2(ship.getPosition(), mytarget->getComponent<ComponentBody>()->position());
-                if (dist < 10000000000.0f) { //to prevent FP issues when viewing things billions of km away
+                if (dist < static_cast<decimal>(10000000000.0)) { //to prevent FP issues when viewing things billions of km away
                     map.centerSceneToObject(mytarget->entity());
                     camera.orbit(mytarget);
                 }
@@ -142,45 +142,43 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
 }};
 
 //TODO: move to the hull system?
-struct HullCollisionFunctor final {
-    void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
-        auto ownerShipVoid = owner.getUserPointer1();
-        if (ownerShipVoid) {
-            auto otherShipVoid = other.getUserPointer1();
-            if (otherShipVoid && ownerShipVoid != otherShipVoid) { //redundant?
-                if (owner.getCollisionGroup() == CollisionFilter::_Custom_4 && other.getCollisionGroup() == CollisionFilter::_Custom_4) { //hull on hull only
-                    Ship* ownerShip = static_cast<Ship*>(ownerShipVoid);
-                    Ship* otherShip = static_cast<Ship*>(otherShipVoid);
-                    ShipSystemHull* ownerHull = static_cast<ShipSystemHull*>(ownerShip->getShipSystem(ShipSystemType::Hull));
-                    ShipSystemHull* otherHull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    if (ownerHull && otherHull) {
-                        const float ownerMass = owner.mass() * 3000.0f;
-                        const float otherMass = other.mass() * 3000.0f;
-                        const float massTotal = ownerMass + otherMass;
+struct HullCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+    auto ownerShipVoid = owner.getUserPointer1();
+    if (ownerShipVoid) {
+        auto otherShipVoid = other.getUserPointer1();
+        if (otherShipVoid && ownerShipVoid != otherShipVoid) { //redundant?
+            if (owner.getCollisionGroup() == CollisionFilter::_Custom_4 && other.getCollisionGroup() == CollisionFilter::_Custom_4) { //hull on hull only
+                auto* ownerShip = static_cast<Ship*>(ownerShipVoid);
+                auto* otherShip = static_cast<Ship*>(otherShipVoid);
+                auto* ownerHull = static_cast<ShipSystemHull*>(ownerShip->getShipSystem(ShipSystemType::Hull));
+                auto* otherHull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                if (ownerHull && otherHull) {
+                    const auto ownerMass = owner.mass() * 3000.0f;
+                    const auto otherMass = other.mass() * 3000.0f;
+                    const auto massTotal = ownerMass + otherMass;
 
-                        glm::vec3 ownerLocal = ownerHit - owner.position();
-                        glm::vec3 otherLocal = otherHit - other.position();
+                    const auto ownerLocal = ownerHit - glm::vec3(owner.position());
+                    const auto otherLocal = otherHit - glm::vec3(other.position());
 
-                        glm::vec3 ownerMomentum = ownerMass * ownerShip->getLinearVelocity();
-                        glm::vec3 otherMomentum = otherMass * otherShip->getLinearVelocity();
-                        glm::vec3 totalMomentum = ownerMomentum + otherMomentum;
+                    const auto ownerMomentum = ownerMass * glm::vec3(ownerShip->getLinearVelocity());
+                    const auto otherMomentum = otherMass * glm::vec3(otherShip->getLinearVelocity());
+                    const auto totalMomentum = ownerMomentum + otherMomentum;
 
-                        glm::vec3 damageTotal1 = (ownerMass / massTotal) * totalMomentum;
-                        glm::vec3 damageTotal2 = (otherMass / massTotal) * totalMomentum;
+                    const auto damageTotal1 = (ownerMass / massTotal) * totalMomentum;
+                    const auto damageTotal2 = (otherMass / massTotal) * totalMomentum;
 
-                        const float damageRadiusOwner = 4.0f;
-                        const float damageRadiusOther = 4.0f;
+                    const auto damageRadiusOwner = 4.0f;
+                    const auto damageRadiusOther = 4.0f;
 
-                        ownerHull->receiveCollision(normal, ownerLocal, damageRadiusOwner, glm::length(damageTotal2));
-                        otherHull->receiveCollision(normal, otherLocal, damageRadiusOther, glm::length(damageTotal1));
-                    }
+                    ownerHull->receiveCollision( normal, ownerLocal, damageRadiusOwner, glm::length(damageTotal2) );
+                    otherHull->receiveCollision( normal, otherLocal, damageRadiusOther, glm::length(damageTotal1) );
                 }
             }
         }
     }
-};
+}};
 
-Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, Map& map, bool player, const string& name, const glm::vec3 pos, const glm::vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client){
+Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, Map& map, bool player, const string& name, const glm_vec3 pos, const glm_vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client){
     m_WarpFactor          = 0;
     m_IsPlayer            = player;
     m_ShipClass           = shipClass;
@@ -234,7 +232,7 @@ const glm::vec3 Ship::getAimPositionDefault() {
         return getPosition();
     }
     auto& body = *getComponent<ComponentBody>();
-    return body.position() + (body.rotation() * m_AimPositionDefaults[0]);
+    return body.position() + Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
 }
 const glm::vec3 Ship::getAimPositionRandom() {
     if (m_AimPositionDefaults.size() == 0 || (m_AimPositionDefaults[0].x == 0.0f && m_AimPositionDefaults[0].y == 0.0f && m_AimPositionDefaults[0].z == 0.0f)) {
@@ -242,10 +240,10 @@ const glm::vec3 Ship::getAimPositionRandom() {
     }
     auto& body = *getComponent<ComponentBody>();
     if (m_AimPositionDefaults.size() == 1) {
-        return body.position() + (body.rotation() * m_AimPositionDefaults[0]);
+        return body.position() + Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
     }
     const auto randIndex = Helper::GetRandomIntFromTo(0, m_AimPositionDefaults.size() - 1);
-    return body.position() + (body.rotation() * m_AimPositionDefaults[randIndex]);
+    return body.position() + Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[randIndex]);
 }
 const glm::vec3 Ship::getAimPositionDefaultLocal() {
     if (m_AimPositionDefaults.size() == 0 || (m_AimPositionDefaults[0].x == 0.0f && m_AimPositionDefaults[0].y == 0.0f && m_AimPositionDefaults[0].z == 0.0f)) {
@@ -253,9 +251,9 @@ const glm::vec3 Ship::getAimPositionDefaultLocal() {
     }
     auto& body = *getComponent<ComponentBody>();
     if (m_AimPositionDefaults.size() == 1) {
-        return (body.rotation() * m_AimPositionDefaults[0]);
+        return Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
     }
-    return (body.rotation() * m_AimPositionDefaults[0]);
+    return Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
 }
 
 const uint Ship::getAimPositionRandomLocalIndex() {
@@ -274,9 +272,9 @@ const glm::vec3 Ship::getAimPositionLocal(const uint index) {
     }
     auto& body = *getComponent<ComponentBody>();
     if (m_AimPositionDefaults.size() == 1) {
-        return (body.rotation() * m_AimPositionDefaults[0]);
+        return Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
     }
-    return (body.rotation() * m_AimPositionDefaults[index]);
+    return Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[index]);
 }
 
 void Ship::destroy() {
@@ -288,27 +286,27 @@ void Ship::destroy() {
     EntityWrapper::destroy();
     SAFE_DELETE_VECTOR(m_DamageDecals);
 }
-const glm::vec3 Ship::getWarpSpeedVector3() {
+const glm_vec3 Ship::getWarpSpeedVector3() {
     if (m_IsWarping && m_WarpFactor > 0) {
         auto& body = *getComponent<ComponentBody>();
-        const float& speed = (m_WarpFactor * 1.0f / 0.46f) * 2.0f;
-        return (body.forward() * glm::pow(speed, 15.0f)) / glm::log2(body.mass() + 0.5f);
+        const auto speed = (m_WarpFactor * 1.0f / 0.46f) * 2.0f;
+        return (body.forward() * glm::pow(static_cast<decimal>(speed), static_cast<decimal>(15.0))) / glm::log2(static_cast<decimal>(body.mass()) + static_cast<decimal>(0.5));
     }
-    return glm::vec3(0.0f);
+    return glm_vec3(static_cast<decimal>(0.0));
 }
 const string Ship::getName() {
     return getComponent<ComponentName>()->name();
 }
-const glm::vec3 Ship::getPosition() {
+const glm_vec3 Ship::getPosition() {
     return getComponent<ComponentBody>()->position();
 }
-const glm::quat Ship::getRotation() {
+const glm_quat Ship::getRotation() {
     return getComponent<ComponentBody>()->rotation();
 }
-const glm::vec3 Ship::getPosition(const EntityDataRequest& dataRequest) {
+const glm_vec3 Ship::getPosition(const EntityDataRequest& dataRequest) {
     return getComponent<ComponentBody>(dataRequest)->position();
 }
-const glm::quat Ship::getRotation(const EntityDataRequest& dataRequest) {
+const glm_quat Ship::getRotation(const EntityDataRequest& dataRequest) {
     return getComponent<ComponentBody>(dataRequest)->rotation();
 }
 void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
@@ -480,13 +478,12 @@ void Ship::setModel(Handle& modelHandle) {
     auto& modelComponent     = *getComponent<ComponentModel>();
     modelComponent.setModelMesh(modelHandle, 0);
 
-
-    const glm::vec3& boundingBox = modelComponent.boundingBox();
-    const float& volume = boundingBox.x * boundingBox.y * boundingBox.z;
+    const auto& boundingBox = modelComponent.boundingBox();
+    const auto volume = boundingBox.x * boundingBox.y * boundingBox.z;
     rigidBodyComponent.setMass((volume * 0.4f) + 1.0f);
 }
 void Ship::translateWarp(const double& amount, const double& dt){
-    double amountToAdd = amount * (1.0 / 0.5);
+    const auto amountToAdd = amount * (1.0 / 0.5);
     if((amount > 0.0 && m_WarpFactor + amount < 1.07) || (amount < 0.0 && m_WarpFactor > 0.0f)){
         m_WarpFactor += static_cast<float>(amountToAdd * dt);
     }
@@ -531,9 +528,9 @@ Entity& Ship::entity() {
 ShipSystem* Ship::getShipSystem(const uint type) { 
     return m_ShipSystems[type]; 
 }
-const glm::vec3 Ship::getLinearVelocity() {
+const glm_vec3 Ship::getLinearVelocity() {
     if (m_IsWarping && m_IsPlayer) {
-        return -(getWarpSpeedVector3() * WARP_PHYSICS_MODIFIER);
+        return -(getWarpSpeedVector3() * static_cast<decimal>(WARP_PHYSICS_MODIFIER));
     }
     return getComponent<ComponentBody>()->getLinearVelocity();
 }
@@ -553,13 +550,13 @@ void Ship::setTarget(EntityWrapper* target, const bool sendPacket) {
     if (sensors)
         sensors->setTarget(target, sendPacket);
 }
-const glm::vec3 Ship::forward() {
+const glm_vec3& Ship::forward() {
     return getComponent<ComponentBody>()->forward();
 }
-const glm::vec3 Ship::right() {
+const glm_vec3& Ship::right() {
     return getComponent<ComponentBody>()->right();
 }
-const glm::vec3 Ship::up() {
+const glm_vec3& Ship::up() {
     return getComponent<ComponentBody>()->up();
 }
 const bool Ship::isCloaked() {

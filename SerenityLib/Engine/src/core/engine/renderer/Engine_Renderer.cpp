@@ -1473,7 +1473,7 @@ class epriv::RenderManager::impl final{
         void _renderSunLight(Camera& c, SunLight& s) {
             if (!s.isActive()) return;
             auto& body = *s.getComponent<ComponentBody>();
-            const glm::vec3& pos = body.position();
+            const auto pos = glm::vec3(body.position());
             Renderer::sendUniform4("light.DataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, 0.0f);
             Renderer::sendUniform4("light.DataC", 0.0f, pos.x, pos.y, pos.z);
             Renderer::sendUniform4("light.DataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, static_cast<float>(s.m_Type));
@@ -1484,7 +1484,7 @@ class epriv::RenderManager::impl final{
         void _renderPointLight(Camera& c, PointLight& p) {
             if (!p.isActive()) return;
             auto& body = *p.getComponent<ComponentBody>();
-            const auto& pos = body.position();
+            const auto pos = glm::vec3(body.position());
             const auto factor = 1100.0f * p.m_CullingRadius;
             if ((!c.sphereIntersectTest(pos, p.m_CullingRadius)) || (c.getDistanceSquared(pos) > factor * factor))
                 return;
@@ -1495,7 +1495,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform4Safe("light.DataE", 0.0f, 0.0f, static_cast<float>(p.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
-            const glm::mat4& model = body.modelMatrix();
+            const auto model = body.modelMatrix();
 
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", m_UBOCameraData.ViewProj);
@@ -1515,7 +1515,7 @@ class epriv::RenderManager::impl final{
         void _renderDirectionalLight(Camera& c, DirectionalLight& d) {
             if (!d.isActive()) return;
             auto& body = *d.getComponent<ComponentBody>();
-            const glm::vec3& _forward = body.forward();
+            const auto _forward = glm::vec3(body.forward());
             Renderer::sendUniform4("light.DataA", d.m_AmbientIntensity, d.m_DiffuseIntensity, d.m_SpecularIntensity, _forward.x);
             Renderer::sendUniform4("light.DataB", _forward.y, _forward.z, 0.0f, 0.0f);
             Renderer::sendUniform4("light.DataD", d.m_Color.x, d.m_Color.y, d.m_Color.z, static_cast<float>(d.m_Type));
@@ -1525,8 +1525,8 @@ class epriv::RenderManager::impl final{
         void _renderSpotLight(Camera& c, SpotLight& s) {
             if (!s.isActive()) return;
             auto& body = *s.m_Entity.getComponent<ComponentBody>();
-            glm::vec3 pos = body.position();
-            glm::vec3 _forward = body.forward();
+            auto pos = glm::vec3(body.position());
+            auto _forward = glm::vec3(body.forward());
             const auto factor = 1100.0f * s.m_CullingRadius;
             if (!c.sphereIntersectTest(pos, s.m_CullingRadius) || (c.getDistanceSquared(pos) > factor * factor))
                 return;
@@ -1538,7 +1538,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform2Safe("VertexShaderData", s.m_OuterCutoff, s.m_CullingRadius);
             Renderer::sendUniform1Safe("Type", 2.0f);
 
-            const glm::mat4& model = body.modelMatrix();
+            const auto model = body.modelMatrix();
 
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", m_UBOCameraData.ViewProj);
@@ -1560,14 +1560,14 @@ class epriv::RenderManager::impl final{
         void _renderRodLight(Camera& c, RodLight& r) {
             if (!r.isActive()) return;
             auto& body = *r.m_Entity.getComponent<ComponentBody>();
-            const glm::vec3& pos = body.position();
+            const auto pos = glm::vec3(body.position());
             float cullingDistance = r.m_RodLength + (r.m_CullingRadius * 2.0f);
             const auto factor = 1100.0f * cullingDistance;
             if (!c.sphereIntersectTest(pos, cullingDistance) || (c.getDistanceSquared(pos) > factor * factor))
                 return;
             const float half = r.m_RodLength / 2.0f;
-            const glm::vec3& firstEndPt = pos + (body.forward() * half);
-            const glm::vec3& secndEndPt = pos - (body.forward() * half);
+            const auto firstEndPt = pos + (glm::vec3(body.forward()) * half);
+            const auto secndEndPt = pos - (glm::vec3(body.forward()) * half);
             Renderer::sendUniform4("light.DataA", r.m_AmbientIntensity, r.m_DiffuseIntensity, r.m_SpecularIntensity, firstEndPt.x);
             Renderer::sendUniform4("light.DataB", firstEndPt.y, firstEndPt.z, r.m_C, r.m_L);
             Renderer::sendUniform4("light.DataC", r.m_E, secndEndPt.x, secndEndPt.y, secndEndPt.z);
@@ -1575,7 +1575,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform4Safe("light.DataE", r.m_RodLength, 0.0f, static_cast<float>(r.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
-            const glm::mat4& model = body.modelMatrix();
+            const auto model = body.modelMatrix();
 
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", m_UBOCameraData.ViewProj);

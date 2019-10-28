@@ -38,7 +38,7 @@ struct PlasmaBeamCollisionFunctor final { void operator()(ComponentBody& owner, 
                     Ship* sourceShip = static_cast<Ship*>(phaserShipVoid);
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - other.position();
+                    auto local = otherHit - glm::vec3(other.position());
                     auto finalDamage = static_cast<float>(Resources::dt()) * weapon.damage;
                     if (shields && other.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
@@ -91,7 +91,7 @@ struct PlasmaBeamInstanceUnbindFunctor { void operator()(EngineResource* r) cons
     //glDepthMask(GL_FALSE);
 }};
 
-PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges, const float& _rechargeTimePerRound) : PrimaryWeaponBeam(WeaponType::PlasmaBeam, ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime){
+PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges, const float& _rechargeTimePerRound) : PrimaryWeaponBeam(WeaponType::PlasmaBeam, ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime){
     firstWindupGraphic = map.createEntity();
     secondWindupGraphic = map.createEntity();
 
@@ -161,7 +161,7 @@ PlasmaBeam::~PlasmaBeam() {
     SAFE_DELETE(firstWindupLight);
     SAFE_DELETE(secondWindupLight);
 }
-const bool PlasmaBeam::fire(const double& dt, const glm::vec3& chosen_target_pt) {
+const bool PlasmaBeam::fire(const double& dt, const glm_vec3& chosen_target_pt) {
     auto* target = ship.getTarget();
     auto res2 = isInArc(target, arc);
     targetCoordinates = chosen_target_pt;
@@ -189,7 +189,7 @@ const bool PlasmaBeam::forceFire(const double& dt) {
         auto& shipBody = *ship.getComponent<ComponentBody>();
         auto shipMatrix = shipBody.modelMatrix();
         shipMatrix = glm::translate(shipMatrix, position);
-        const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+        const auto finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
         soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaBeam);
         if (soundEffect) {
             soundEffect->setVolume(volume);
@@ -221,20 +221,20 @@ void PlasmaBeam::update(const double& dt) {
     auto& beamModel = *beamGraphic.getComponent<ComponentModel>();
     auto& beamModelOne = beamModel.getModel(0);
 
-    const auto factor = 255.0f;
+    const auto factor = 235.0f;
 
     if (state == BeamWeaponState::JustStarted) {
-        #pragma region JustStarted
+#pragma region JustStarted
         firstWindupModel.show();
         secondWindupModel.show();
         firstWindupLight->activate();
         secondWindupLight->activate();
         beamLight->activate();
         state = BeamWeaponState::WindingUp;
-        #pragma endregion
+#pragma endregion
     }
     else if (state == BeamWeaponState::WindingUp) {
-        #pragma region WindingUp
+#pragma region WindingUp
         auto& cam = *firstWindupBody.getOwner().scene().getActiveCamera();
         auto camRotation = cam.getOrientation();
 
@@ -248,17 +248,17 @@ void PlasmaBeam::update(const double& dt) {
         //place the windups properly
         const auto shipRotation = ship.getRotation();
         const auto shipPosition = ship.getPosition();
-        const auto launcherPosition = shipPosition + (shipRotation * position);
+        const auto launcherPosition = shipPosition + Math::rotate_vec3(shipRotation, position);
         if (soundEffect) {
             soundEffect->setPosition(launcherPosition);
         }
         if (windupPoints.size() == 1) {
-            firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
+            firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
         }
         else {
             const auto halfCharge = chargeTimer * 0.5f;
-            firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
-            secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
+            firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
+            secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
         }
         firstWindupBody.setPosition(firstWindupPos);
         secondWindupBody.setPosition(secondWindupPos);
@@ -270,13 +270,13 @@ void PlasmaBeam::update(const double& dt) {
             --numRounds;
             return;
         }
-        #pragma endregion
+#pragma endregion
     }
     else if (state == BeamWeaponState::Firing) {
-        #pragma region Firing
+#pragma region Firing
         auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
-        const glm::vec3 tgt = targetBody.position() + targetCoordinates;
+        const glm::vec3 tgt = glm::vec3(targetBody.position()) + targetCoordinates;
 
         beamEndModel.show();
         beamModelOne.show();
@@ -285,12 +285,12 @@ void PlasmaBeam::update(const double& dt) {
         const auto shipRotation = ship.getRotation();
         const auto shipPosition = ship.getPosition();
         if (windupPoints.size() == 1) {
-            firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
+            firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
         }
         else {
             const auto halfCharge = chargeTimer * 0.5f;
-            firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
-            secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
+            firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
+            secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
         }
 
         //bring the windups closer to the target at the end
@@ -315,7 +315,7 @@ void PlasmaBeam::update(const double& dt) {
         firstWindupLightBody.setPosition(startPos);
         secondWindupLightBody.setPosition(startPos);
 
-        glm::quat q;
+        glm_quat q;
 
         auto bigDir = startPos2 - tgt;
         auto len = glm::length(bigDir);
@@ -369,7 +369,7 @@ void PlasmaBeam::update(const double& dt) {
         Ship* targetShip = dynamic_cast<Ship*>(target);
         if (targetShip) {
             auto* targetShields = static_cast<ShipSystemShields*>(targetShip->getShipSystem(ShipSystemType::Shields));
-            const auto side = targetShields->getImpactSide(closest->hitPosition);
+            const auto side = targetShields->getImpactSide(closest->hitPosition - glm::vec3(targetShip->getPosition()));
             if (targetShields->getHealthCurrent(side) <= 0.0f) {
                 rayCastPoints.erase(rayCastPoints.begin() + closestIndex);
             }
@@ -401,13 +401,13 @@ void PlasmaBeam::update(const double& dt) {
             firingTime = x;
             state = BeamWeaponState::CoolingDown;
         }
-        #pragma endregion
+#pragma endregion
     }
     else if (state == BeamWeaponState::CoolingDown) {
-        #pragma region CoolingDown
+#pragma region CoolingDown
         auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
-        const auto tgt = targetBody.position() + targetCoordinates;
+        const auto tgt = glm::vec3(targetBody.position()) + targetCoordinates;
 
         firstWindupModel.hide();
         secondWindupModel.hide();
@@ -422,12 +422,12 @@ void PlasmaBeam::update(const double& dt) {
         const auto shipRotation = ship.getRotation();
         const auto shipPosition = ship.getPosition();
         if (windupPoints.size() == 1) {
-            firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
+            firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
         }
         else {
             const auto halfCharge = chargeTimer * 0.5f;
-            firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
-            secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
+            firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
+            secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
         }
         //bring the windups closer to the target at the end
         auto end = (firingTimeMax - firingTime);
@@ -447,7 +447,7 @@ void PlasmaBeam::update(const double& dt) {
         firstWindupLightBody.setPosition(startPos);
         secondWindupLightBody.setPosition(startPos);
 
-        glm::quat q;
+        glm_quat q;
         auto bigDir = startPos2 - tgt;
         auto len = glm::length(bigDir);
         auto dir = glm::normalize(bigDir);
@@ -501,7 +501,7 @@ void PlasmaBeam::update(const double& dt) {
         Ship* targetShip = dynamic_cast<Ship*>(target);
         if (targetShip) {
             auto* targetShields = static_cast<ShipSystemShields*>(targetShip->getShipSystem(ShipSystemType::Shields));
-            const auto side = targetShields->getImpactSide(closest->hitPosition);
+            const auto side = targetShields->getImpactSide(closest->hitPosition - glm::vec3(targetShip->getPosition()));
             if (targetShields->getHealthCurrent(side) <= 0.0f) {
                 rayCastPoints.erase(rayCastPoints.begin() + closestIndex);
             }
@@ -528,10 +528,10 @@ void PlasmaBeam::update(const double& dt) {
             state = BeamWeaponState::JustTurnedOff;
             return;
         }
-        #pragma endregion
+#pragma endregion
     }
     else if (state == BeamWeaponState::JustTurnedOff) {
-        #pragma region JustTurnedOff
+#pragma region JustTurnedOff
         firingTime = 0.0f;
         chargeTimer = 0.0f;
         firstWindupModel.hide();
@@ -547,7 +547,7 @@ void PlasmaBeam::update(const double& dt) {
         }
         state = BeamWeaponState::Off;
         return;
-        #pragma endregion
+#pragma endregion
     }
     PrimaryWeaponBeam::update(dt);
 }

@@ -19,23 +19,23 @@ class Decal final: public EntityWrapper{
         float m_LifetimeCurrent;
         float m_LifetimeMax;
         bool  m_Active;
-        glm::vec3 m_InitialPosition;
-        glm::quat m_InitialRotation;
+        glm_vec3 m_InitialPosition;
+        glm_quat m_InitialRotation;
     public:
-        Decal(Material& material, const glm::vec3& position, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax, const RenderStage::Stage stage = RenderStage::Decals);
+        Decal(Material& material, const glm_vec3& position, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax, const RenderStage::Stage stage = RenderStage::Decals);
         ~Decal();
 
         void update(const double& dt);
         const bool& active() const;
-        const glm::vec3 position();
-        const glm::quat rotation();
-        const glm::vec3& initialPosition() const;
-        const glm::quat& initialRotation() const;
+        const glm_vec3 position();
+        const glm_quat rotation();
+        const glm_vec3& initialPosition() const;
+        const glm_quat& initialRotation() const;
         const glm::vec3 getScale();
-        void setPosition(const glm::vec3& position);
-        void setPosition(const float& x, const float& y, const float& z);
-        void setRotation(const glm::quat& rotation);
-        void setRotation(const float& x, const float& y, const float& z, const float& w);
+        void setPosition(const glm_vec3& position);
+        void setPosition(const decimal& x, const decimal& y, const decimal& z);
+        void setRotation(const glm_quat& rotation);
+        void setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w);
 };
 
 #endif

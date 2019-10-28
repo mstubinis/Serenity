@@ -290,10 +290,10 @@ void ShipSystemShields::update(const double& dt) {
 
     ShipSystem::update(dt);
 }
-ShipSystemShields::ShieldSide::Side ShipSystemShields::getImpactSide(const glm::vec3& impactLocation) {
+ShipSystemShields::ShieldSide::Side ShipSystemShields::getImpactSide(const glm::vec3& impactLocationLocal) {
     const auto& rot = m_Ship.getRotation();
     for (uint i = 0; i < m_Pyramids.size(); ++i) {
-        const auto res = m_Pyramids[i].isInside(impactLocation, rot);
+        const auto res = m_Pyramids[i].isInside(impactLocationLocal, rot);
         if (res == true) {
             return static_cast<ShipSystemShields::ShieldSide::Side>(i);
         }

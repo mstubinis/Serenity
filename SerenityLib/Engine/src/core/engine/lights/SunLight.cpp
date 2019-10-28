@@ -4,7 +4,7 @@ using namespace Engine;
 using namespace std;
 
 
-SunLight::SunLight(const glm::vec3 pos, const LightType::Type type, Scene* scene) :EntityWrapper(*scene){
+SunLight::SunLight(const glm_vec3 pos, const LightType::Type type, Scene* scene) :EntityWrapper(*scene){
     if (!scene) {
         scene = Resources::getCurrentScene();
     }
@@ -21,13 +21,11 @@ SunLight::SunLight(const glm::vec3 pos, const LightType::Type type, Scene* scene
     epriv::InternalScenePublicInterface::GetLights(*scene).push_back(this);
 
     auto* body = addComponent<ComponentBody>();
-    //if (body) { //evil, but needed for some reason... find out why...
-        body->setPosition(pos);
-    //}
+    body->setPosition(pos);
 }
 SunLight::~SunLight() {
 }
-const glm::vec3 SunLight::position() {
+const glm_vec3 SunLight::position() {
     return getComponent<ComponentBody>()->position(); 
 }
 const glm::vec4& SunLight::color() const {
@@ -58,10 +56,10 @@ void SunLight::setColor(const glm::vec4& col) {
 void SunLight::setColor(const glm::vec3& col) {
     m_Color.r = col.r; m_Color.g = col.g; m_Color.b = col.b; 
 }
-void SunLight::setPosition(const float x, const float y, const float z) { 
+void SunLight::setPosition(const decimal& x, const decimal& y, const decimal& z) {
     getComponent<ComponentBody>()->setPosition(x, y, z); 
 }
-void SunLight::setPosition(const glm::vec3& pos) { 
+void SunLight::setPosition(const glm_vec3& pos) { 
     getComponent<ComponentBody>()->setPosition(pos); 
 }
 void SunLight::setAmbientIntensity(const float a) {

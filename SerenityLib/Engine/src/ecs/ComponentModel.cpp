@@ -33,7 +33,7 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& super) {
     super._radiusBox = boundingBox;
     auto* body = super.owner.getComponent<ComponentBody>();
     if (body) {
-        const float& bodyScale = Math::Max(body->getScale());
+        const auto bodyScale = Math::Max(glm::vec3(body->getScale()));
         super._radius    *= bodyScale;
         super._radiusBox *= bodyScale;
     }

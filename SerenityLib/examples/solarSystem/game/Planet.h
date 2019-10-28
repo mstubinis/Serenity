@@ -72,23 +72,23 @@ class Planet:public EntityWrapper {
         Planet(
             Handle& materialHandle,               //Material
             PlanetType::Type = PlanetType::Rocky, //Type
-            glm::vec3 = glm::vec3(0),             //Position
-            float = 1,                            //Radius
+            glm_vec3 = glm_vec3(0),               //Position
+            decimal = 1.0,                        //Radius
             std::string = "Planet",               //Name
             float = 0,                            //Atmosphere size
             Map * = nullptr
         );
         virtual ~Planet();
 
-        glm::vec3 getPosition();
-        glm::vec2 getGravityInfo();
+        const glm_vec3 getPosition();
+        const glm::vec2 getGravityInfo();
         OrbitInfo* getOrbitInfo() const;
-        float getGroundRadius();
-        float getRadius();
-        float getAtmosphereHeight();
+        const float getGroundRadius();
+        const float getRadius();
+        const float getAtmosphereHeight();
 
-        void setPosition(float x,float y,float z);
-        void setPosition(glm::vec3 pos);
+        void setPosition(const decimal& x, const decimal& y, const decimal& z);
+        void setPosition(const glm_vec3& pos);
 
         void addRing(Ring*);
 
@@ -100,12 +100,12 @@ class Star: public Planet{
         SunLight* m_Light;
     public:
         Star(
-            glm::vec3 = glm::vec3(1.0f,1.0f,0.0f),   //Star Color
-            glm::vec3 = glm::vec3(1.0f,1.0f,1.0f),   //Sunlight Color
-            glm::vec3 = glm::vec3(1.0f,1.0f,1.0f),   //GodRays Color
-            glm::vec3 = glm::vec3(0.0f),             //Position
-            float = 1,                               //Scale
-            std::string = "Star",                    //Name
+            glm::vec3 = glm::vec3(1.0f,1.0f,0.0f), //Star Color
+            glm::vec3 = glm::vec3(1.0f,1.0f,1.0f), //Sunlight Color
+            glm::vec3 = glm::vec3(1.0f,1.0f,1.0f), //GodRays Color
+            glm_vec3 = glm_vec3(0.0f),             //Position
+            decimal = 1.0,                         //Scale
+            std::string = "Star",                  //Name
             Map * = nullptr
         );
         virtual ~Star();

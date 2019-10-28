@@ -76,8 +76,8 @@ class Ship: public EntityWrapper, public EventObserver {
             Map& map,
             bool player = false,                  //Player Ship?
             const std::string& name = "Ship",     //Name
-            const glm::vec3 = glm::vec3(0),             //Position
-            const glm::vec3 = glm::vec3(1),             //Scale
+            const glm_vec3 = glm_vec3(0),         //Position
+            const glm_vec3 = glm_vec3(1),         //Scale
             CollisionType::Type = CollisionType::ConvexHull,
             const glm::vec3 aimPosDefault = glm::vec3(0.0f),
             const glm::vec3 camOffsetDefault = glm::vec3(0.0f)
@@ -91,17 +91,17 @@ class Ship: public EntityWrapper, public EventObserver {
         void addHullTargetPoints(std::vector<glm::vec3>& points);
 
         const std::string getName();
-        const glm::vec3 getWarpSpeedVector3();
-        const glm::vec3 getPosition();
+        const glm_vec3 getWarpSpeedVector3();
+        const glm_vec3 getPosition();
         const glm::vec3 getAimPositionDefault();
         const glm::vec3 getAimPositionRandom();
         const glm::vec3 getAimPositionDefaultLocal();
         const glm::vec3 getAimPositionRandomLocal();
         const uint getAimPositionRandomLocalIndex();
         const glm::vec3 getAimPositionLocal(const uint index);
-        const glm::quat getRotation();
-        const glm::vec3 getPosition(const EntityDataRequest& dataRequest);
-        const glm::quat getRotation(const EntityDataRequest& dataRequest);
+        const glm_quat getRotation();
+        const glm_vec3 getPosition(const EntityDataRequest& dataRequest);
+        const glm_quat getRotation(const EntityDataRequest& dataRequest);
 
         void updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, std::vector<std::string>& info);
         void updateCloakFromPacket(const PacketCloakUpdate& packet);
@@ -112,7 +112,7 @@ class Ship: public EntityWrapper, public EventObserver {
 
         void setModel(Handle& handle);
 
-        const glm::vec3 getLinearVelocity();
+        const glm_vec3 getLinearVelocity();
 
         void translateWarp(const double& amount, const double& dt);
         void toggleWarp();
@@ -132,9 +132,9 @@ class Ship: public EntityWrapper, public EventObserver {
         void setTarget(EntityWrapper* entityWrapper, const bool sendPacket);
         void setTarget(const std::string&, const bool sendPacket);
 
-        const glm::vec3 forward();
-        const glm::vec3 right();
-        const glm::vec3 up();
+        const glm_vec3& forward();
+        const glm_vec3& right();
+        const glm_vec3& up();
 
 
         PrimaryWeaponBeam& getPrimaryWeaponBeam(const uint index);

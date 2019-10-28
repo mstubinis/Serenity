@@ -48,12 +48,12 @@ namespace Engine {
     };
 };
 
-Decal::Decal(Material& material, const glm::vec3& position, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax, const RenderStage::Stage stage):EntityWrapper(scene) {
+Decal::Decal(Material& material, const glm_vec3& position, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax, const RenderStage::Stage stage):EntityWrapper(scene) {
     auto& body = *addComponent<ComponentBody>();
     auto& model = *addComponent<ComponentModel>(Mesh::Cube, &material, ShaderProgram::Decal, stage);
 
     body.setPosition(position);
-    glm::quat q;
+    glm_quat q;
     Math::alignTo(q, hitNormal);
     body.setRotation(q);
     body.setScale(0.2f * size, 0.04f, 0.2f * size);
@@ -91,30 +91,30 @@ void Decal::update(const double& dt) {
 const bool& Decal::active() const {
     return m_Active;
 }
-const glm::vec3& Decal::initialPosition() const {
+const glm_vec3& Decal::initialPosition() const {
     return m_InitialPosition;
 }
-const glm::quat& Decal::initialRotation() const {
+const glm_quat& Decal::initialRotation() const {
     return m_InitialRotation;
 }
-const glm::vec3 Decal::position() {
+const glm_vec3 Decal::position() {
     return getComponent<ComponentBody>()->position();
 }
-const glm::quat Decal::rotation() {
+const glm_quat Decal::rotation() {
     return getComponent<ComponentBody>()->rotation();
 }
 const glm::vec3 Decal::getScale() {
     return getComponent<ComponentBody>()->getScale();
 }
-void Decal::setPosition(const glm::vec3& position) {
+void Decal::setPosition(const glm_vec3& position) {
     getComponent<ComponentBody>()->setPosition(position);
 }
-void Decal::setPosition(const float& x, const float& y, const float& z) {
+void Decal::setPosition(const decimal& x, const decimal& y, const decimal& z) {
     getComponent<ComponentBody>()->setPosition(x, y, z);
 }
-void Decal::setRotation(const glm::quat& rotation) {
+void Decal::setRotation(const glm_quat& rotation) {
     getComponent<ComponentBody>()->setRotation(rotation);
 }
-void Decal::setRotation(const float& x, const float& y, const float& z, const float& w) {
+void Decal::setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w) {
     getComponent<ComponentBody>()->setRotation(x, y, z, w);
 }

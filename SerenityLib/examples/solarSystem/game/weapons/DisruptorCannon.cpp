@@ -33,7 +33,7 @@ struct DisruptorCannonCollisionFunctor final { void operator()(ComponentBody& ow
                     auto& weapon = *static_cast<DisruptorCannon*>(owner.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    const auto local = otherHit - other.position();
+                    const auto local = otherHit - glm::vec3(other.position());
 
                     if (shields && other.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
@@ -105,7 +105,7 @@ struct DisruptorCannonTailInstanceBindFunctor { void operator()(EngineResource* 
 
     glm::mat4 translation = glm::translate(worldPos);
     glm::mat4 rotationMatrix = glm::mat4_cast(camOrien);
-    glm::mat4 scaleMatrix = glm::scale(body.getScale() * i.getScale());
+    glm::mat4 scaleMatrix = glm::scale(glm::vec3(body.getScale()) * i.getScale());
 
     glm::mat4 modelMatrix = glm::mat4(1.0f) * translation * rotationMatrix * scaleMatrix;
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
@@ -121,7 +121,7 @@ struct DisruptorCannonTailInstanceUnbindFunctor { void operator()(EngineResource
 }};
 
 
-DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index, const glm::vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map, position, forward, index) {
+DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm_vec3& position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map, position, forward, index) {
     EntityDataRequest request(entity);
 
     auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
@@ -151,8 +151,8 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     active = true;
     auto& shipBody = *source.ship.getComponent<ComponentBody>();
     auto shipMatrix = shipBody.modelMatrix();
-    shipMatrix = glm::translate(shipMatrix, position + glm::vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
-    glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+    shipMatrix = glm::translate(shipMatrix, position + glm_vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
+    auto finalPosition = glm_vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
     cannonBody.setPosition(finalPosition);
     cannonBody.addCollisionFlag(CollisionFlag::NoContactResponse);
     cannonBody.setCollisionGroup(CollisionFilter::_Custom_2); //i belong to weapons (group 2)
@@ -166,10 +166,10 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
 
     auto data = source.calculatePredictedVector(cannonBody, chosen_target_pos);
     auto offset = data.pedictedVector;
-    glm::quat q;
+    glm_quat q;
     Math::alignTo(q, -offset);
     cannonBody.setRotation(q); //TODO: change rotation based on launching vector
-    offset *= glm::vec3(source.travelSpeed);
+    offset *= glm_vec3(source.travelSpeed);
     cannonBody.applyImpulse(offset.x, offset.y, offset.z, false);
 
     cannonBody.setUserPointer(this);
@@ -188,7 +188,7 @@ DisruptorCannonProjectile::~DisruptorCannonProjectile() {
 
 }
 
-DisruptorCannon::DisruptorCannon(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume) :PrimaryWeaponCannon(map,WeaponType::DisruptorCannon, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume){
+DisruptorCannon::DisruptorCannon(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume) :PrimaryWeaponCannon(map,WeaponType::DisruptorCannon, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume){
 
 }
 DisruptorCannon::~DisruptorCannon() {

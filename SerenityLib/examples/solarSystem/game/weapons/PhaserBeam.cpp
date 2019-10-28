@@ -38,7 +38,7 @@ struct PhaserBeamCollisionFunctor final { void operator()(ComponentBody& owner, 
                     Ship* sourceShip = static_cast<Ship*>(phaserShipVoid);
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - other.position();
+                    auto local = otherHit - glm::vec3(other.position());
                     auto finalDamage = static_cast<float>(Resources::dt()) * weapon.damage;
                     if (shields && other.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
@@ -91,7 +91,7 @@ struct PhaserBeamInstanceUnbindFunctor { void operator()(EngineResource* r) cons
     //glDepthMask(GL_FALSE);
 }};
 
-PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges,const float& _rechargeTimePerRound) : PrimaryWeaponBeam(WeaponType::PhaserBeam, ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime){
+PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges,const float& _rechargeTimePerRound) : PrimaryWeaponBeam(WeaponType::PhaserBeam, ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime){
     firstWindupGraphic = map.createEntity();
     secondWindupGraphic = map.createEntity();
 
@@ -161,7 +161,7 @@ PhaserBeam::~PhaserBeam() {
     SAFE_DELETE(firstWindupLight);
     SAFE_DELETE(secondWindupLight);
 }
-const bool PhaserBeam::fire(const double& dt, const glm::vec3& chosen_target_pt) {
+const bool PhaserBeam::fire(const double& dt, const glm_vec3& chosen_target_pt) {
     auto* target = ship.getTarget();
     auto res2 = isInArc(target, arc);
     targetCoordinates = chosen_target_pt;
@@ -246,17 +246,17 @@ void PhaserBeam::update(const double& dt) {
         //place the windups properly
         const auto shipRotation = ship.getRotation();
         const auto shipPosition = ship.getPosition();
-        const auto launcherPosition = shipPosition + (shipRotation * position);
+        const auto launcherPosition = shipPosition + Math::rotate_vec3(shipRotation, position);
         if (soundEffect) {
             soundEffect->setPosition(launcherPosition);
         }
         if (windupPoints.size() == 1) {
-            firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
+            firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
         }
         else {
             const auto halfCharge = chargeTimer * 0.5f;
-            firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
-            secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
+            firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
+            secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
         }
         firstWindupBody.setPosition(firstWindupPos);
         secondWindupBody.setPosition(secondWindupPos);
@@ -274,7 +274,7 @@ void PhaserBeam::update(const double& dt) {
         #pragma region Firing
         auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
-        const glm::vec3 tgt = targetBody.position() + targetCoordinates;
+        const glm::vec3 tgt = glm::vec3(targetBody.position()) + targetCoordinates;
 
         beamEndModel.show();
         beamModelOne.show();
@@ -283,12 +283,12 @@ void PhaserBeam::update(const double& dt) {
         const auto shipRotation = ship.getRotation();
         const auto shipPosition = ship.getPosition();
         if (windupPoints.size() == 1) {
-            firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
+            firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
         }
         else {
             const auto halfCharge = chargeTimer * 0.5f;
-            firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
-            secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
+            firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
+            secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
         }
 
         //bring the windups closer to the target at the end
@@ -313,7 +313,7 @@ void PhaserBeam::update(const double& dt) {
         firstWindupLightBody.setPosition(startPos);
         secondWindupLightBody.setPosition(startPos);
 
-        glm::quat q;
+        glm_quat q;
 
         auto bigDir = startPos2 - tgt;
         auto len = glm::length(bigDir);
@@ -367,7 +367,7 @@ void PhaserBeam::update(const double& dt) {
         Ship* targetShip = dynamic_cast<Ship*>(target);
         if (targetShip) {
             auto* targetShields = static_cast<ShipSystemShields*>(targetShip->getShipSystem(ShipSystemType::Shields));
-            const auto side = targetShields->getImpactSide(closest->hitPosition);
+            const auto side = targetShields->getImpactSide(closest->hitPosition - glm::vec3(targetShip->getPosition()));
             if (targetShields->getHealthCurrent(side) <= 0.0f) {
                 rayCastPoints.erase(rayCastPoints.begin() + closestIndex);
             }
@@ -405,7 +405,7 @@ void PhaserBeam::update(const double& dt) {
         #pragma region CoolingDown
         auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
-        const auto tgt = targetBody.position() + targetCoordinates;
+        const auto tgt = glm::vec3(targetBody.position()) + targetCoordinates;
 
         firstWindupModel.hide();
         secondWindupModel.hide();
@@ -420,12 +420,12 @@ void PhaserBeam::update(const double& dt) {
         const auto shipRotation = ship.getRotation();
         const auto shipPosition = ship.getPosition();
         if (windupPoints.size() == 1) {
-            firstWindupPos = secondWindupPos = (shipPosition + (shipRotation * windupPoints[0]));
+            firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
         }
         else {
             const auto halfCharge = chargeTimer * 0.5f;
-            firstWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
-            secondWindupPos = shipPosition + (shipRotation * Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
+            firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
+            secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
         }
         //bring the windups closer to the target at the end
         auto end = (firingTimeMax - firingTime);
@@ -445,7 +445,7 @@ void PhaserBeam::update(const double& dt) {
         firstWindupLightBody.setPosition(startPos);
         secondWindupLightBody.setPosition(startPos);
 
-        glm::quat q;
+        glm_quat q;
         auto bigDir = startPos2 - tgt;
         auto len = glm::length(bigDir);
         auto dir = glm::normalize(bigDir);
@@ -499,7 +499,7 @@ void PhaserBeam::update(const double& dt) {
         Ship* targetShip = dynamic_cast<Ship*>(target);
         if (targetShip) {
             auto* targetShields = static_cast<ShipSystemShields*>(targetShip->getShipSystem(ShipSystemType::Shields));
-            const auto side = targetShields->getImpactSide(closest->hitPosition);
+            const auto side = targetShields->getImpactSide(closest->hitPosition - glm::vec3(targetShip->getPosition()));
             if (targetShields->getHealthCurrent(side) <= 0.0f) {
                 rayCastPoints.erase(rayCastPoints.begin() + closestIndex);
             }
@@ -514,8 +514,7 @@ void PhaserBeam::update(const double& dt) {
         glm::vec3 finPos;
         if (time >= len) {
             finPos = closest->hitPosition;
-        }
-        else {
+        }else{
             finPos = realTargetPos;
         }
         beamEndBody.setPosition(finPos);

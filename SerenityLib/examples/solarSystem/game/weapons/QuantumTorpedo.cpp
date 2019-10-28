@@ -36,7 +36,7 @@ struct QuantumTorpedoCollisionFunctor final { void operator()(ComponentBody& own
                     auto& torpedo = *static_cast<QuantumTorpedo*>(owner.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - other.position();
+                    auto local = otherHit - glm::vec3(other.position());
 
                     if (shields && other.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
@@ -70,7 +70,7 @@ struct QuantumTorpedoInstanceCoreBindFunctor { void operator()(EngineResource* r
     auto worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
     modelMatrix = glm::translate(modelMatrix, worldPos);
     modelMatrix *= glm::mat4_cast(camOrien);
-    modelMatrix = glm::scale(modelMatrix, body.getScale() * i.getScale());
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(body.getScale()) * i.getScale());
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
 
@@ -113,13 +113,13 @@ struct QuantumTorpedoFlareInstanceBindFunctor { void operator()(EngineResource* 
     auto& cam = *parent.scene().getActiveCamera();
     auto camOrien = cam.getOrientation();
 
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = glm::mat4(body.modelMatrix());
     glm::mat4 model = parentModel * i.modelMatrix();
     glm::vec3 worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
 
     glm::mat4 translation = glm::translate(worldPos);
     glm::mat4 rotationMatrix = glm::mat4_cast(camOrien);
-    glm::mat4 scaleMatrix = glm::scale(body.getScale() * i.getScale());
+    glm::mat4 scaleMatrix = glm::scale(glm::vec3(body.getScale()) * i.getScale());
 
     glm::mat4 modelMatrix = glm::mat4(1.0f) * translation * rotationMatrix * scaleMatrix;
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
@@ -135,7 +135,7 @@ struct QuantumTorpedoFlareInstanceUnbindFunctor { void operator()(EngineResource
 }};
 
 
-QuantumTorpedoProjectile::QuantumTorpedoProjectile(QuantumTorpedo& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index, const glm::vec3& chosen_target_pos) : torpedo(source), SecondaryWeaponTorpedoProjectile(map, position, forward, index) {
+QuantumTorpedoProjectile::QuantumTorpedoProjectile(QuantumTorpedo& source, Map& map, const glm_vec3& position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : torpedo(source), SecondaryWeaponTorpedoProjectile(map, position, forward, index) {
     maxTime            = 30.5f;
     rotationAngleSpeed = source.rotationAngleSpeed;
 
@@ -189,7 +189,7 @@ QuantumTorpedoProjectile::QuantumTorpedoProjectile(QuantumTorpedo& source, Map& 
 
         flares.push_back(flareD);
     }
-    glm::vec3 finalPosition = glm::vec3(0.0f); 
+    auto finalPosition = glm_vec3(0.0f); 
 
     auto& shipBody = *source.ship.getComponent<ComponentBody>(shipRequest);
     auto shipLinVel = shipBody.getLinearVelocity();
@@ -217,10 +217,10 @@ QuantumTorpedoProjectile::QuantumTorpedoProjectile(QuantumTorpedo& source, Map& 
     auto& offset = data.pedictedVector;
     hasLock      = data.hasLock;
     target       = data.target;
-    glm::quat q;
+    glm_quat q;
     Math::alignTo(q, -offset);
     body.setRotation(q);
-    offset      *= glm::vec3(source.travelSpeed);
+    offset      *= glm_vec3(source.travelSpeed);
 
     body.applyImpulse(offset.x, offset.y, offset.z, false);
 
@@ -250,7 +250,7 @@ void QuantumTorpedoProjectile::update(const double& dt) {
     SecondaryWeaponTorpedoProjectile::update(dt);
 }
 
-QuantumTorpedo::QuantumTorpedo(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume, const float& _rotAngleSpeed) :SecondaryWeaponTorpedo(map,WeaponType::QuantumTorpedo, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume, _rotAngleSpeed){
+QuantumTorpedo::QuantumTorpedo(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume, const float& _rotAngleSpeed) :SecondaryWeaponTorpedo(map,WeaponType::QuantumTorpedo, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume, _rotAngleSpeed){
 
 }
 QuantumTorpedo::~QuantumTorpedo() {

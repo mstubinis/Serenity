@@ -36,7 +36,7 @@ struct PhotonTorpedoOldCollisionFunctor final { void operator()(ComponentBody& o
                     auto& torpedo = *static_cast<PhotonTorpedoOld*>(owner.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - other.position();
+                    auto local = otherHit - glm::vec3(other.position());
 
                     if (shields && other.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
@@ -70,7 +70,7 @@ struct PhotonTorpedoOldInstanceCoreBindFunctor { void operator()(EngineResource*
     auto worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
     modelMatrix = glm::translate(modelMatrix, worldPos);
     modelMatrix *= glm::mat4_cast(camOrien);
-    modelMatrix = glm::scale(modelMatrix, body.getScale() * i.getScale());
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(body.getScale()) * i.getScale());
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
 
@@ -122,7 +122,7 @@ struct PhotonTorpedoOldFlareInstanceBindFunctor { void operator()(EngineResource
 
     glm::mat4 translation = glm::translate(worldPos);
     glm::mat4 rotationMatrix = glm::mat4_cast(camOrien);
-    glm::mat4 scaleMatrix = glm::scale(body.getScale() * i.getScale());
+    glm::mat4 scaleMatrix = glm::scale(glm::vec3(body.getScale()) * i.getScale());
 
     glm::mat4 modelMatrix = glm::mat4(1.0f) * translation * rotationMatrix * scaleMatrix;
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
@@ -138,7 +138,7 @@ struct PhotonTorpedoOldFlareInstanceUnbindFunctor { void operator()(EngineResour
 }};
 
 
-PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(PhotonTorpedoOld& source, Map& map, const glm::vec3& position, const glm::vec3& forward, const int index, const glm::vec3& chosen_target_pos) :torpedo(source), SecondaryWeaponTorpedoProjectile(map, position, forward, index) {
+PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(PhotonTorpedoOld& source, Map& map, const glm_vec3& position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) :torpedo(source), SecondaryWeaponTorpedoProjectile(map, position, forward, index) {
     maxTime = 30.5f;
     rotationAngleSpeed = source.rotationAngleSpeed;
 
@@ -192,7 +192,7 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(PhotonTorpedoOld& source,
 
         flares.push_back(flareD);
     }
-    glm::vec3 finalPosition = glm::vec3(0.0f);
+    auto finalPosition = glm_vec3(0.0f);
 
     auto& shipBody = *source.ship.getComponent<ComponentBody>(shipRequest);
     auto shipLinVel = shipBody.getLinearVelocity();
@@ -220,7 +220,7 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(PhotonTorpedoOld& source,
     auto& offset = data.pedictedVector;
     hasLock = data.hasLock;
     target = data.target;
-    glm::quat q;
+    glm_quat q;
     Math::alignTo(q, -offset);
     body.setRotation(q);
     offset *= glm::vec3(source.travelSpeed);
@@ -253,7 +253,7 @@ void PhotonTorpedoOldProjectile::update(const double& dt) {
     SecondaryWeaponTorpedoProjectile::update(dt);
 }
 
-PhotonTorpedoOld::PhotonTorpedoOld(Ship& ship, Map& map, const glm::vec3& position, const glm::vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume, const float& _rotAngleSpeed) :SecondaryWeaponTorpedo(map,WeaponType::PhotonTorpedoOld, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume, _rotAngleSpeed){
+PhotonTorpedoOld::PhotonTorpedoOld(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume, const float& _rotAngleSpeed) :SecondaryWeaponTorpedo(map,WeaponType::PhotonTorpedoOld, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume, _rotAngleSpeed){
 
 }
 PhotonTorpedoOld::~PhotonTorpedoOld() {
