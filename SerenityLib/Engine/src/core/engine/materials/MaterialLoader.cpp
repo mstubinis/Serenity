@@ -15,7 +15,7 @@ namespace Engine {
             void operator()(BindableResource* r) const {
                 auto& material = *static_cast<Material*>(r);
                 const int& numComponents = material.m_Components.size();
-                uint textureUnit = 0;
+                unsigned int textureUnit = 0;
                 for (int i = 0; i < numComponents; ++i) {
                     if (material.m_Components[i]) {
                         auto& component = *material.m_Components[i];

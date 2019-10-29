@@ -2,10 +2,8 @@
 #ifndef ENGINE_NETWORKING_SOCKET_TCP_H
 #define ENGINE_NETWORKING_SOCKET_TCP_H
 
-
 #include <core/engine/networking/SocketInterface.h>
-
-typedef std::uint32_t   uint;
+#include <core/engine/utils/Utils.h>
 
 namespace Engine {
     namespace Networking {

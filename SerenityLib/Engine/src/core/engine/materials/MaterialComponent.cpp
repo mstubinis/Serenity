@@ -106,7 +106,7 @@ const MaterialComponentType::Type& MaterialComponent::type() const {
     return m_ComponentType;
 }
 
-void MaterialComponent::bind(const uint& component_index, uint& textureUnit) {
+void MaterialComponent::bind(const uint& component_index, unsigned int& textureUnit) {
     const string wholeString = "components[" + to_string(component_index) + "].";
     Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
     Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));

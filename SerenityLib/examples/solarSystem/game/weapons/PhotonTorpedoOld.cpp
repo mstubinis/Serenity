@@ -213,7 +213,7 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(PhotonTorpedoOld& source,
     body.setUserPointer2(&source);
     body.setCollisionFunctor(PhotonTorpedoOldCollisionFunctor());
     body.setInternalPhysicsUserPointer(&body);
-    body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
+    //body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
 
     auto data = source.calculatePredictedVector(body, chosen_target_pos);
@@ -227,7 +227,7 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(PhotonTorpedoOld& source,
 
     body.applyImpulse(offset.x, offset.y, offset.z, false);
 
-    body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
+    //body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
     body.setRotation(q);
 

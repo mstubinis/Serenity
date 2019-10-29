@@ -20,12 +20,10 @@ epriv::MeshCollisionFactory::MeshCollisionFactory(Mesh& _mesh) :m_Mesh(_mesh) {
     m_ConvesHullShape     = nullptr;
     m_TriangleStaticData  = nullptr;
     m_TriangleStaticShape = nullptr;
-    //m_Zero = new btVector3(0, 0, 0);
     _initConvexData(data);
     _initTriangleData(data);
 }
 epriv::MeshCollisionFactory::~MeshCollisionFactory() {
-    //SAFE_DELETE(m_Zero);
     SAFE_DELETE(m_ConvexHullData);
     SAFE_DELETE(m_ConvesHullShape);
     SAFE_DELETE(m_TriangleStaticData);
@@ -46,7 +44,7 @@ void epriv::MeshCollisionFactory::_initConvexData(VertexData& data) {
         for (int i = 0; i < m_ConvexHullData->numVertices(); ++i) {
             m_ConvesHullShape->addPoint(ptsArray[i]);
         }
-        m_ConvesHullShape->setMargin(0.001f);
+        m_ConvesHullShape->setMargin(static_cast<btScalar>(0.001));
         m_ConvesHullShape->recalcLocalAabb();
     }
 }
@@ -74,35 +72,42 @@ void epriv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
             }
         }
         m_TriangleStaticShape = new btBvhTriangleMeshShape(m_TriangleStaticData, true);
-        m_TriangleStaticShape->setMargin(0.001f);
+        m_TriangleStaticShape->setMargin(static_cast<btScalar>(0.001));
         m_TriangleStaticShape->recalcLocalAabb();
     }
 }
 btMultiSphereShape* epriv::MeshCollisionFactory::buildSphereShape() {
-    const auto& rad = m_Mesh.getRadius();
+    const auto& rad = static_cast<btScalar>(m_Mesh.getRadius());
     auto v = btVector3(0, 0, 0);
     btMultiSphereShape* sphere = new btMultiSphereShape(&v, &rad, 1);
-    sphere->setMargin(0.001f);
+    sphere->setMargin(static_cast<btScalar>(0.001));
     sphere->recalcLocalAabb();
     return sphere;
 }
 btBoxShape* epriv::MeshCollisionFactory::buildBoxShape() {
     btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_Mesh.getRadiusBox()));
-    box->setMargin(0.001f);
+    box->setMargin(static_cast<btScalar>(0.001));
     return box;
 }
 btUniformScalingShape* epriv::MeshCollisionFactory::buildConvexHull() {
-    btUniformScalingShape* uniformScalingShape = new btUniformScalingShape(m_ConvesHullShape, 1.0f);
-    uniformScalingShape->setMargin(0.001f);
+    btUniformScalingShape* uniformScalingShape = new btUniformScalingShape(m_ConvesHullShape, static_cast<btScalar>(1.0));
+    uniformScalingShape->setMargin(static_cast<btScalar>(0.001));
     return uniformScalingShape;
 }
 btScaledBvhTriangleMeshShape* epriv::MeshCollisionFactory::buildTriangleShape() {
-    btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape, btVector3(1.0f, 1.0f, 1.0f));
+    btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape(
+        m_TriangleStaticShape,
+        btVector3(
+            static_cast<btScalar>(1.0),
+            static_cast<btScalar>(1.0),
+            static_cast<btScalar>(1.0)
+        )
+    );
     return scaledBVH;
 }
 btGImpactMeshShape* epriv::MeshCollisionFactory::buildTriangleShapeGImpact() {
     btGImpactMeshShape* gImpact = new btGImpactMeshShape(m_TriangleStaticData);
-    gImpact->setMargin(0.001f);
+    gImpact->setMargin(static_cast<btScalar>(0.001));
     gImpact->updateBound();
     gImpact->postUpdate();
     return gImpact;

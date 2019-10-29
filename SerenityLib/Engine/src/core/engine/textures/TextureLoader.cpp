@@ -433,13 +433,13 @@ void TextureLoader::GenerateMipmapsOpenGL(Texture& texture) {
     texture.m_Mipmapped = true;
     //uint mipmaplevels = uint(glm::log2(glm::max(_w,_h)) + 1.0f);
 }
-void TextureLoader::EnumWrapToGL(uint& gl, const TextureWrap::Wrap& wrap) {
+void TextureLoader::EnumWrapToGL(unsigned int& gl, const TextureWrap::Wrap& wrap) {
     if      (wrap == TextureWrap::Repeat)         gl = GL_REPEAT;
     else if (wrap == TextureWrap::RepeatMirrored) gl = GL_MIRRORED_REPEAT;
     else if (wrap == TextureWrap::ClampToBorder)  gl = GL_CLAMP_TO_BORDER;
     else if (wrap == TextureWrap::ClampToEdge)    gl = GL_CLAMP_TO_EDGE;
 }
-void TextureLoader::EnumFilterToGL(uint& gl, const TextureFilter::Filter& filter, const bool& min) {
+void TextureLoader::EnumFilterToGL(unsigned int& gl, const TextureFilter::Filter& filter, const bool& min) {
     if (min) {
         if      (filter == TextureFilter::Linear)                  gl = GL_LINEAR;
         else if (filter == TextureFilter::Nearest)                 gl = GL_NEAREST;

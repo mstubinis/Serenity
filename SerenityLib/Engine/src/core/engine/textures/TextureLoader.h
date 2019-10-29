@@ -16,8 +16,8 @@ namespace Engine {
             static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
             static void LoadTextureCubemapIntoOpenGL(Texture& texture);
 
-            static void EnumWrapToGL(uint& gl, const TextureWrap::Wrap& wrap);
-            static void EnumFilterToGL(uint& gl, const TextureFilter::Filter& filter, const bool& min);
+            static void EnumWrapToGL(unsigned int& gl, const TextureWrap::Wrap& wrap);
+            static void EnumFilterToGL(unsigned int& gl, const TextureFilter::Filter& filter, const bool& min);
             static const bool IsCompressedType(const ImageInternalFormat::Format&);
 
             static void GenerateMipmapsOpenGL(Texture& texture);

@@ -195,7 +195,7 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, M
 
     setModel(mesh);
 
-    const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.01f, 0.2f);
+    const_cast<btRigidBody&>(body.getBtBody()).setDamping(static_cast<btScalar>(0.01), static_cast<btScalar>(0.2));
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     body.setPosition(pos);
     body.setScale(scl);
@@ -367,9 +367,9 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
         closest = children.at(info[i]);
     }
     const auto nearestAnchorPos = closest->getPosition();
-    const float x = packet.px + nearestAnchorPos.x;
-    const float y = packet.py + nearestAnchorPos.y;
-    const float z = packet.pz + nearestAnchorPos.z;
+    const auto x = packet.px + nearestAnchorPos.x;
+    const auto y = packet.py + nearestAnchorPos.y;
+    const auto z = packet.pz + nearestAnchorPos.z;
 
     auto& body = *getComponent<ComponentBody>();
     btRigidBody& bulletBody = *const_cast<btRigidBody*>(&body.getBtBody());
@@ -394,7 +394,7 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
 
     body.clearAllForces();
     body.setAngularVelocity(ax, ay, az, false);
-    body.setLinearVelocity(lx - (packet.wx * WARP_PHYSICS_MODIFIER), ly - (packet.wy * WARP_PHYSICS_MODIFIER), lz - (packet.wz * WARP_PHYSICS_MODIFIER), false);
+    body.setLinearVelocity(static_cast<decimal>(lx - (packet.wx * WARP_PHYSICS_MODIFIER)), static_cast<decimal>(ly - (packet.wy * WARP_PHYSICS_MODIFIER)), static_cast<decimal>(lz - (packet.wz * WARP_PHYSICS_MODIFIER)), false);
     //body.setGoal(x, y, z, PHYSICS_PACKET_TIMER_LIMIT);
 }
 bool Ship::canSeeCloak() {

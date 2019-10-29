@@ -51,10 +51,10 @@ void epriv::SoundManager::_update(const double& dt){
     if (scene) {
         auto camera = scene->getActiveCamera();
         if (camera) {
-            auto& cam = *camera;
-            auto& camPos = cam.getPosition();
-            auto& camForward = cam.forward();
-            auto& camUp = cam.up();
+            auto& cam             = *camera;
+            const auto camPos     = glm::vec3(cam.getPosition());
+            const auto camForward = glm::vec3(cam.forward());
+            const auto camUp      = glm::vec3(cam.up());
             sf::Listener::setPosition(camPos.x, camPos.y, camPos.z);
             sf::Listener::setDirection(camForward.x, camForward.y, camForward.z);
             sf::Listener::setUpVector(camUp.x, camUp.y, camUp.z);

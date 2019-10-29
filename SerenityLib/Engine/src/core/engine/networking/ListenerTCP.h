@@ -3,8 +3,7 @@
 #define ENGINE_NETWORKING_LISTENER_TCP_H
 
 #include <core/engine/networking/SocketInterface.h>
-
-typedef std::uint32_t   uint;
+#include <core/engine/utils/Utils.h>
 
 namespace Engine {
     namespace Networking {

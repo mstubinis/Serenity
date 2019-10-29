@@ -123,7 +123,7 @@ void Engine::setMousePosition(const float x, const float y, const bool resetDiff
     sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(x), static_cast<int>(y)), Resources::getWindow().getSFMLHandle());
     EventManager::m_EventManager->setMousePositionInternal(x, y, resetDifference, resetPreviousPosition);
 }
-void Engine::setMousePosition(const uint x, const uint y, const bool resetDifference, const bool resetPreviousPosition){
+void Engine::setMousePosition(const unsigned int x, const unsigned int y, const bool resetDifference, const bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(x, y), Resources::getWindow().getSFMLHandle());
     EventManager::m_EventManager->setMousePositionInternal(static_cast<float>(x), static_cast<float>(y), resetDifference, resetPreviousPosition);
 }

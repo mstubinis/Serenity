@@ -21,7 +21,7 @@ class MaterialComponent {
         MaterialComponent(MaterialComponent&& other) noexcept            = delete;
         MaterialComponent& operator=(MaterialComponent&& other) noexcept = delete;
 
-        virtual void bind(const uint& component_index, uint& textureUnit);
+        virtual void bind(const uint& component_index, unsigned int& textureUnit);
         virtual void unbind();
 
         MaterialLayer* addLayer(const std::string& textureFile, const std::string& maskFile = "", const std::string& cubemapFile = "");

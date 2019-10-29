@@ -97,7 +97,7 @@ bool GBuffer::resize(const uint& width, const uint& height){
     m_SmallFBO->resize(width, height);
     return true;
 }
-void GBuffer::internalStart(const uint* types, const uint& size, const string& channels, const bool first_fbo) {
+void GBuffer::internalStart(const unsigned int* types, const unsigned int& size, const string& channels, const bool first_fbo) {
     if (first_fbo) { m_FBO->bind(); }
     else { m_SmallFBO->bind(); }
     bool r, g, b, a;
@@ -108,24 +108,24 @@ void GBuffer::internalStart(const uint* types, const uint& size, const string& c
     glDrawBuffers(size, types);
     Renderer::colorMask(r, g, b, a);
 }
-void GBuffer::bindFramebuffers(const uint t1, const string& c, const bool mainFBO){
-    uint t[1] = { m_Buffers[t1]->attatchment() };
+void GBuffer::bindFramebuffers(const unsigned int t1, const string& c, const bool mainFBO){
+    unsigned int t[1] = { m_Buffers[t1]->attatchment() };
     internalStart(t, 1, c, mainFBO);
 }
-void GBuffer::bindFramebuffers(const uint t1, const uint t2, const string& c, const bool mainFBO){
-    uint t[2] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment() };
+void GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const string& c, const bool mainFBO){
+    unsigned int t[2] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment() };
     internalStart(t, 2, c, mainFBO);
 }
-void GBuffer::bindFramebuffers(const uint t1, const uint t2, const uint t3, const string& c, const bool mainFBO){
-    uint t[3] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment(),m_Buffers[t3]->attatchment() };
+void GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const string& c, const bool mainFBO){
+    unsigned int t[3] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment(),m_Buffers[t3]->attatchment() };
     internalStart(t, 3, c, mainFBO);
 }
-void GBuffer::bindFramebuffers(const uint t1, const uint t2, const uint t3, const uint t4, const string& c, const bool mainFBO){
-    uint t[4] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment(),m_Buffers[t3]->attatchment(),m_Buffers[t4]->attatchment() };
+void GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const unsigned int t4, const string& c, const bool mainFBO){
+    unsigned int t[4] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment(),m_Buffers[t3]->attatchment(),m_Buffers[t4]->attatchment() };
     internalStart(t, 4, c, mainFBO);
 }
-void GBuffer::bindFramebuffers(const uint t1, const uint t2, const uint t3, const uint t4, const uint t5, const string& c, const bool mainFBO){
-    uint t[5] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment(),m_Buffers[t3]->attatchment(),m_Buffers[t4]->attatchment(),m_Buffers[t5]->attatchment() };
+void GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const unsigned int t4, const unsigned int t5, const string& c, const bool mainFBO){
+    unsigned int t[5] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment(),m_Buffers[t3]->attatchment(),m_Buffers[t4]->attatchment(),m_Buffers[t5]->attatchment() };
     internalStart(t, 5, c, mainFBO);
 }
 

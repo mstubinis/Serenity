@@ -2519,7 +2519,7 @@ struct RenderingAPI2D final {
         mesh.render(false);
     }
     static void GLScissor(const float x, const float y, const float width, const float height) {
-        glScissor(x, y, width, height);
+        glScissor(static_cast<GLint>(x), static_cast<GLint>(y), width, height);
     }
     static void GLScissorDisable() {
         const auto winSize = Resources::getWindowSize();

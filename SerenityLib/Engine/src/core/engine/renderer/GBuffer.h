@@ -26,7 +26,7 @@ namespace epriv{
 
             void internalBuildTextureBuffer(FramebufferObject* fbo, const GBufferType::Type gbuffer_type, const uint& w, const uint& h);
             void internalDestruct();
-            void internalStart(const uint* types, const uint& size, const std::string& channels, const bool first_fbo);
+            void internalStart(const unsigned int* types, const unsigned int& size, const std::string& channels, const bool first_fbo);
 
         public:
             GBuffer(const uint& width, const uint& height);
@@ -34,11 +34,11 @@ namespace epriv{
 
             bool resize(const uint& width, const uint& height);
 
-            void bindFramebuffers(const uint, const std::string& channels = "RGBA", const bool isMainFBO = true);
-            void bindFramebuffers(const uint, const uint, const std::string& channels = "RGBA", const bool isMainFBO = true);
-            void bindFramebuffers(const uint, const uint, const uint, const std::string& channels = "RGBA", const bool isMainFBO = true);
-            void bindFramebuffers(const uint, const uint, const uint, const uint, const std::string& channels = "RGBA", const bool isMainFBO = true);
-            void bindFramebuffers(const uint, const uint, const uint, const uint, const uint, const std::string& channels = "RGBA", const bool isMainFBO = true);
+            void bindFramebuffers(const unsigned int, const std::string& channels = "RGBA", const bool isMainFBO = true);
+            void bindFramebuffers(const unsigned int, const unsigned int, const std::string& channels = "RGBA", const bool isMainFBO = true);
+            void bindFramebuffers(const unsigned int, const unsigned int, const unsigned int, const std::string& channels = "RGBA", const bool isMainFBO = true);
+            void bindFramebuffers(const unsigned int, const unsigned int, const unsigned int, const unsigned int, const std::string& channels = "RGBA", const bool isMainFBO = true);
+            void bindFramebuffers(const unsigned int, const unsigned int, const unsigned int, const unsigned int, const unsigned int, const std::string& channels = "RGBA", const bool isMainFBO = true);
 
             void bindBackbuffer(Viewport&, const GLuint final_fbo = 0, const GLuint final_rbo = 0);
 

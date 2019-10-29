@@ -92,7 +92,7 @@ const uint ComponentCamera::sphereIntersectTest(const glm_vec3& p_Position, cons
     if (p_Radius <= static_cast<decimal>(0.0))
 		return 0;
     for (int i = 0; i < 6; ++i) {
-        float d = m_FrustumPlanes[i].x * p_Position.x + m_FrustumPlanes[i].y * p_Position.y + m_FrustumPlanes[i].z * p_Position.z + m_FrustumPlanes[i].w;
+        const auto d = m_FrustumPlanes[i].x * p_Position.x + m_FrustumPlanes[i].y * p_Position.y + m_FrustumPlanes[i].z * p_Position.z + m_FrustumPlanes[i].w;
         if (d > p_Radius * static_cast<decimal>(2.0))
 			return 0; //outside the viewing frustrum
         else if (d > static_cast<decimal>(0.0))

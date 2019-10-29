@@ -770,7 +770,10 @@ const glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way t
         glm::mat4 modelMatrix_(static_cast<decimal>(1.0));
         btTransform tr;
         physicsData.bullet_rigidBody->getMotionState()->getWorldTransform(tr);
-        tr.getOpenGLMatrix(glm::value_ptr(modelMatrix_));
+
+        auto* val_ptr = (btScalar*)(glm::value_ptr(modelMatrix_));
+
+        tr.getOpenGLMatrix(val_ptr);
         auto& collision_ = *physicsData.collision;
         if (collision_.getBtShape()) {
 			modelMatrix_ = glm::scale(modelMatrix_, glm::vec3(getScale()));
@@ -1051,7 +1054,7 @@ void ComponentBody::setMass(const float p_Mass) {
         if (collision.getBtShape()) {
             collision.setMass(physicsData.mass);
             if (physicsData.bullet_rigidBody) {
-                physicsData.bullet_rigidBody->setMassProps(physicsData.mass, collision.getBtInertia());
+                physicsData.bullet_rigidBody->setMassProps(static_cast<btScalar>(physicsData.mass), collision.getBtInertia());
             }
         }
     }

@@ -155,7 +155,7 @@ void EngineCore::on_event_resize(const uint& w, const uint& h, const bool& saveS
 
     for (auto& scene : Core::m_Engine->m_ResourceManager.scenes()) {
         InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(w, h);
-        InternalScenePublicInterface::GetViewports(*scene)[0]->setViewportDimensions(0, 0, w, h);
+        InternalScenePublicInterface::GetViewports(*scene)[0]->setViewportDimensions(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h));
     }
 
     EventWindowResized e(w,h);

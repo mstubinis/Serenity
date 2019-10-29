@@ -65,7 +65,7 @@ namespace Engine{
     const double     getMouseWheelDelta();
 
     void setMousePosition(const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
-    void setMousePosition(const uint x, const uint y, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(const unsigned int x, const unsigned int y, const bool resetDifference = false, const bool resetPreviousPosition = false);
     void setMousePosition(const glm::vec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
     void setMousePosition(const glm::uvec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
 };
