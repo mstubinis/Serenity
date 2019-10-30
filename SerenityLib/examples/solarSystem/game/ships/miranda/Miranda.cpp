@@ -19,7 +19,7 @@
 using namespace std;
 
 Miranda::Miranda(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, ResourceManifest::MirandaMesh, ResourceManifest::MirandaMaterial, "Miranda", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.128851f, -0.125263f), glm::vec3(0.0f, 0.1f, 0.1f)) {
+:Ship(client, "Miranda", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.128851f, -0.125263f), glm::vec3(0.0f, 0.1f, 0.1f)) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

@@ -97,14 +97,13 @@ void Core::requestValidation(const string& name) {
         m_HUD->setErrorText("Connection timed out");
     }
 }
-void Core::enterMap(const string& mapFile, const string& playership, const string& playername, const float& x, const float& y, const float& z) {
+void Core::enterMap(const string& mapFile, const string& playerShipClass, const string& playername, const float& x, const float& y, const float& z) {
     auto& window = Resources::getWindow();
     Resources::setCurrentScene(mapFile);
 
     Map& map = *static_cast<Map*>(Resources::getScene(mapFile));
 
-    auto& handles = ResourceManifest::Ships.at(playership);
-    Ship* playerShip = map.createShip(*m_Client, playership, playername, true, glm::vec3(x, y, z));
+    Ship* playerShip = map.createShip(*m_Client, playerShipClass, playername, true, glm::vec3(x, y, z));
     map.setPlayer(playerShip);
     GameCamera* playerCamera = (GameCamera*)map.getActiveCamera();
     playerCamera->follow(playerShip); 

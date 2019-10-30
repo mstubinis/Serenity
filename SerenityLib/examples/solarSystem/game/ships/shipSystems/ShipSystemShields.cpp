@@ -4,6 +4,7 @@
 #include "../../map/Map.h"
 #include "../../ResourceManifest.h"
 #include "../../Helper.h"
+#include "../../ships/Ships.h"
 
 #include <core/ModelInstance.h>
 #include <ecs/Components.h>
@@ -199,13 +200,10 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, con
     btBody.setUserPointer(&m_Ship);
     shieldBody.setScale(shieldScale);
 
-
-    auto& handles = ResourceManifest::Ships.at(m_Ship.getClass());
-    auto& r = handles.get<3>().r;
-    auto& g = handles.get<3>().g;
-    auto& b = handles.get<3>().b;
+    auto& shipInfo = Ships::Database.at(m_Ship.getClass());
+    auto& shieldColor = shipInfo.FactionInformation.ColorShield;
     auto& instance = model.getModel(0);
-    instance.setColor(r, g, b, 0.7f);
+    instance.setColor(shieldColor.r, shieldColor.g, shieldColor.b, shieldColor.a);
     instance.setCustomBindFunctor(ShieldInstanceBindFunctor());
     instance.setCustomUnbindFunctor(ShieldInstanceUnbindFunctor());
     instance.setUserPointer(this);

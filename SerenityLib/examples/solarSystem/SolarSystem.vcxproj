@@ -195,6 +195,7 @@
   <ItemGroup>
     <ClInclude Include="game\Client.h" />
     <ClInclude Include="game\Core.h" />
+    <ClInclude Include="game\factions\Faction.h" />
     <ClInclude Include="game\GameCamera.h" />
     <ClInclude Include="game\GameSkybox.h" />
     <ClInclude Include="game\GameState.h" />
@@ -263,6 +264,7 @@
   <ItemGroup>
     <ClCompile Include="game\Client.cpp" />
     <ClCompile Include="game\Core.cpp" />
+    <ClCompile Include="game\factions\Faction.cpp" />
     <ClCompile Include="game\Game.cpp" />
     <ClCompile Include="game\GameCamera.cpp" />
     <ClCompile Include="game\GameSkybox.cpp" />
@@ -298,6 +300,7 @@
     <ClCompile Include="game\ships\norway\Norway.cpp" />
     <ClCompile Include="game\ships\nova\Nova.cpp" />
     <ClCompile Include="game\ships\probe\Probe.cpp" />
+    <ClCompile Include="game\ships\Ships.cpp" />
     <ClCompile Include="game\ships\shipSystems\ShipSystemBaseClass.cpp" />
     <ClCompile Include="game\ships\shipSystems\ShipSystemCloakingDevice.cpp" />
     <ClCompile Include="game\ships\shipSystems\ShipSystemHull.cpp" />

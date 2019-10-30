@@ -21,7 +21,7 @@
 using namespace std;
 
 Defiant::Defiant(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client,ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,"Defiant",map,player,name,position,scale, collisionType){
+:Ship(client,"Defiant",map,player,name,position,scale, collisionType){
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

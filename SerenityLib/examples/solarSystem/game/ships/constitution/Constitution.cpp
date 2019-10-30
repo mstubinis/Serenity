@@ -19,7 +19,7 @@
 using namespace std;
 
 Constitution::Constitution(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, ResourceManifest::ConstitutionMesh, ResourceManifest::ConstitutionMaterial, "Constitution", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.004208f, -0.383244f)) {
+:Ship(client,"Constitution", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.004208f, -0.383244f)) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

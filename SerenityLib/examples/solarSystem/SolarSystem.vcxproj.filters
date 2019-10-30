@@ -148,6 +148,12 @@
     <Filter Include="Header Files\Game\Ships\Intrepid">
       <UniqueIdentifier>{84398728-f33f-4c85-9af1-cfbf379e937d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Factions">
+      <UniqueIdentifier>{b5a13637-ba69-43e0-bb06-0d4b5614c3e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Factions">
+      <UniqueIdentifier>{eb7ef79f-5bc5-4a64-a96d-4f88c599d27a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -348,6 +354,9 @@
     <ClInclude Include="game\weapons\WeaponIncludes.h">
       <Filter>Header Files\Game\Weapons</Filter>
     </ClInclude>
+    <ClInclude Include="game\factions\Faction.h">
+      <Filter>Header Files\Game\Factions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -532,6 +541,12 @@
     </ClCompile>
     <ClCompile Include="game\ships\norway\Norway.cpp">
       <Filter>Source Files\Game\Ships\Norway</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\Ships.cpp">
+      <Filter>Source Files\Game\Ships</Filter>
+    </ClCompile>
+    <ClCompile Include="game\factions\Faction.cpp">
+      <Filter>Source Files\Game\Factions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -30,6 +30,7 @@
 
 #include "ships/shipSystems/ShipSystemWeapons.h"
 #include "weapons/Weapons.h"
+#include "ships/Ships.h"
 
 #include <iostream>
 
@@ -46,13 +47,13 @@ struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
     }
     button->setColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-    auto& shipname = button->text();
-    auto& handles = ResourceManifest::Ships.at(shipname);
-    window.m_ChosenShipName = shipname;
+    auto& shipClass = button->text();
+    auto& shipData = Ships::Database.at(shipClass);
+    window.m_ChosenShipName = shipClass;
     EntityWrapper& entity = *static_cast<EntityWrapper*>(window.getUserPointer());
     ComponentModel& model = *entity.entity().getComponent<ComponentModel>();
-    model.setModelMesh(handles.get<0>(),0);
-    model.setModelMaterial(handles.get<1>(), 0);
+    model.setModelMesh(shipData.MeshHandles[0], 0);
+    model.setModelMaterial(shipData.MaterialHandles[0], 0);
     model.show();
 
     auto& camera = const_cast<Camera&>(window.getShipDisplay().getCamera());
@@ -263,7 +264,6 @@ void Client::onReceiveUDP() {
 
                         Ship* ship = nullptr;
                         if (ships.size() == 0 || !ships.count(playername)) {
-                            auto handles = ResourceManifest::Ships[shipclass];
                             auto spawnPosition = map.getSpawnAnchor()->getPosition();
                             auto x = Helper::GetRandomFloatFromTo(-400, 400);
                             auto y = Helper::GetRandomFloatFromTo(-400, 400);
@@ -449,7 +449,6 @@ void Client::onReceive() {
 
                         Ship* ship = nullptr;
                         if (ships.size() == 0 || !ships.count(playername)) {
-                            auto handles = ResourceManifest::Ships[shipclass];
                             auto spawnPosition = map.getSpawnAnchor()->getPosition();
                             auto x = Helper::GetRandomFloatFromTo(-400, 400);
                             auto y = Helper::GetRandomFloatFromTo(-400, 400);
@@ -549,15 +548,12 @@ void Client::onReceive() {
                     hud.m_ServerLobbyShipSelectorWindow->clear();
                     auto ships = map->allowedShips();
                     for (auto& ship : ships) {
-                        auto& handles = ResourceManifest::Ships.at(ship);
-                        auto& r = handles.get<2>().r;
-                        auto& g = handles.get<2>().g;
-                        auto& b = handles.get<2>().b;
+                        auto& textColor = Ships::Database.at(ship).FactionInformation.ColorText;
 
                         Button* shipbutton = new Button(*hud.m_Font, 0, 0, 100, 40);
                         shipbutton->setText(ship);
                         shipbutton->setColor(0.5f, 0.5f, 0.5f, 0.0f);
-                        shipbutton->setTextColor(r, g, b, 1.0f);
+                        shipbutton->setTextColor(textColor.r, textColor.g, textColor.b, 1.0f);
                         shipbutton->setAlignment(Alignment::TopLeft);
                         shipbutton->setWidth(600);
                         shipbutton->setTextAlignment(TextAlignment::Left);

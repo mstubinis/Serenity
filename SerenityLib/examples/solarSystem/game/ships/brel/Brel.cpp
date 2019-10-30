@@ -19,20 +19,24 @@
 #include "../../ships/shipSystems/ShipSystemYawThrusters.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
+#include "../../ships/Ships.h"
 
 using namespace std;
 using namespace Engine;
 
 Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, ResourceManifest::BrelMeshHead, ResourceManifest::BrelMaterial, "Brel", map,player, name, position, scale, collisionType, glm::vec3(0.0f, 0.311455f, 0.397761f), glm::vec3(0.0f,0.7f,0.7f)) {
+:Ship(client, "Brel", map,player, name, position, scale, collisionType, glm::vec3(0.0f, 0.311455f, 0.397761f), glm::vec3(0.0f,0.7f,0.7f)) {
 
     m_InitialCamera = glm::vec3(0.0f, 0.7f, 0.7f);
 
     //add wings
     auto& model = *getComponent<ComponentModel>();
-    auto& wing1 = model.addModel(ResourceManifest::BrelMeshWing, ResourceManifest::BrelMaterial);
+
+    model.getModel(0).setMesh(Ships::Database.at("Brel").MeshHandles[1], model); //brel head only
+
+    auto& wing1 = model.addModel(ResourceManifest::BrelMeshWing, Ships::Database.at("Brel").MaterialHandles[0]);
     wing1.setPosition(0.232951f, 0.316462f, 0.08058f);
-    auto& wing2 = model.addModel(ResourceManifest::BrelMeshWing2, ResourceManifest::BrelMaterial);
+    auto& wing2 = model.addModel(ResourceManifest::BrelMeshWing2, Ships::Database.at("Brel").MaterialHandles[0]);
     wing2.setPosition(-0.232951f, 0.316462f, 0.08058f);
 
     const auto mass = updateShipDimensions();
@@ -65,7 +69,7 @@ Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 
         m_ShipSystems.emplace(i, system);
     }
     //update shield size
-    const auto shieldScale = ((Mesh*)ResourceManifest::BrelMesh.get())->getRadiusBox() * SHIELD_SCALE_FACTOR;
+    const auto shieldScale = ((Mesh*)Ships::Database.at("Brel").MeshHandles[0].get())->getRadiusBox() * SHIELD_SCALE_FACTOR;
     auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
     auto& shieldsBody = *shields->getEntity().getComponent<ComponentBody>();
     shieldsBody.setScale(shieldScale);

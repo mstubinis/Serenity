@@ -14,4 +14,32 @@
 #include "nova/Nova.h"
 #include "leviathan/Leviathan.h"
 
+#include "../factions/Faction.h"
+#include <core/engine/resources/Handle.h>
+
+struct ShipInformation final {
+    std::string            Class;
+    FactionEnum::Type      Faction;
+    FactionInformation     FactionInformation;
+    std::vector<Handle>    MeshHandles;
+    std::vector<Handle>    MaterialHandles;
+
+    ShipInformation();
+};
+class Ships final{
+    public:
+        static std::unordered_map<std::string, ShipInformation> Database;
+
+        static const glm::vec4& getShieldsColor(const FactionEnum::Type&);
+        static const glm::vec4& getTextColor(const FactionEnum::Type&);
+        static const std::string& getFactionNameShort(const FactionEnum::Type&);
+        static const std::string& getFactionNameLong(const FactionEnum::Type&);
+
+        static const FactionInformation& getFactionInformation(const std::string& shipClass);
+
+        static void createShipEntry(const std::string& shipClass, const FactionEnum::Type& faction);
+
+        static void init();
+};
+
 #endif

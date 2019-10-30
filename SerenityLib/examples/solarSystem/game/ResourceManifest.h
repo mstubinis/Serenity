@@ -15,7 +15,6 @@ struct ResourceManifest{
     static Handle shieldsShaderProgram;
 
     static Handle PlanetMesh;
-    static Handle DefiantMesh;
     static Handle RingMesh;
     static Handle ShieldMesh;
     static Handle ShieldColMesh;
@@ -26,32 +25,12 @@ struct ResourceManifest{
     static Handle PhaserBeamMesh;
 
 	/*extras*/
-	static Handle NovaMesh;
-    static Handle MirandaMesh;
 	static Handle VenerexMesh;
-	static Handle IntrepidMesh;
-    static Handle ExcelsiorMesh;
-    static Handle ConstitutionMesh;
-    static Handle LeviathanMesh;
-    static Handle ShrikeMesh;
-    static Handle BrelMesh;
     static Handle BrelMeshHead;
     static Handle BrelMeshWing;
     static Handle BrelMeshWing2;
-    static Handle AkiraMesh;
-    static Handle NorwayMesh;
 
-	static Handle NovaMaterial;
-    static Handle MirandaMaterial;
 	static Handle VenerexMaterial;
-	static Handle IntrepidMaterial;
-    static Handle ExcelsiorMaterial;
-    static Handle ConstitutionMaterial;
-    static Handle DefiantSharkMaterial;
-    static Handle ShrikeMaterial;
-    static Handle BrelMaterial;
-    static Handle AkiraMaterial;
-    static Handle NorwayMaterial;
 
     //hull damage
     static Handle HullDamageOutline1Material;
@@ -63,7 +42,6 @@ struct ResourceManifest{
 
     static Handle StarMaterial;
     static Handle EarthSkyMaterial;
-    static Handle DefiantMaterial;
     static Handle CrosshairMaterial;
     static Handle CrosshairArrowMaterial;
     static Handle RadarEdgeMaterial;
@@ -101,8 +79,6 @@ struct ResourceManifest{
     static Handle TorpedoGlow2Material;
 
     static std::string BasePath;
-
-    static std::unordered_map<std::string, boost::tuple<Handle, Handle, glm::vec3, glm::vec3>> Ships;
 
     static void init();
 };

@@ -1,4 +1,6 @@
 #include "ResourceManifest.h"
+#include "factions/Faction.h"
+#include "ships/Ships.h"
 
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -16,7 +18,6 @@ Handle ResourceManifest::groundFromSpace;
 Handle ResourceManifest::shieldsShaderProgram;
 
 Handle ResourceManifest::PlanetMesh;
-Handle ResourceManifest::DefiantMesh;
 Handle ResourceManifest::RingMesh;
 Handle ResourceManifest::ShieldMesh;
 Handle ResourceManifest::ShieldColMesh;
@@ -27,32 +28,12 @@ Handle ResourceManifest::CannonTailMesh;
 Handle ResourceManifest::PhaserBeamMesh;
 
 /*extras*/
-Handle ResourceManifest::NovaMesh;
-Handle ResourceManifest::MirandaMesh;
 Handle ResourceManifest::VenerexMesh;
-Handle ResourceManifest::IntrepidMesh;
-Handle ResourceManifest::ExcelsiorMesh;
-Handle ResourceManifest::ConstitutionMesh;
-Handle ResourceManifest::LeviathanMesh;
-Handle ResourceManifest::ShrikeMesh;
-Handle ResourceManifest::BrelMesh;
 Handle ResourceManifest::BrelMeshHead;
 Handle ResourceManifest::BrelMeshWing;
 Handle ResourceManifest::BrelMeshWing2;
-Handle ResourceManifest::AkiraMesh;
-Handle ResourceManifest::NorwayMesh;
 
-Handle ResourceManifest::NovaMaterial;
-Handle ResourceManifest::MirandaMaterial;
 Handle ResourceManifest::VenerexMaterial;
-Handle ResourceManifest::IntrepidMaterial;
-Handle ResourceManifest::ExcelsiorMaterial;
-Handle ResourceManifest::ConstitutionMaterial;
-Handle ResourceManifest::DefiantSharkMaterial;
-Handle ResourceManifest::ShrikeMaterial;
-Handle ResourceManifest::BrelMaterial;
-Handle ResourceManifest::AkiraMaterial;
-Handle ResourceManifest::NorwayMaterial;
 
 //hull damage
 Handle ResourceManifest::HullDamageOutline1Material;
@@ -65,7 +46,6 @@ Handle ResourceManifest::HullDamageMaterial3;
 
 Handle ResourceManifest::StarMaterial;
 Handle ResourceManifest::EarthSkyMaterial;
-Handle ResourceManifest::DefiantMaterial;
 Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
 Handle ResourceManifest::RadarEdgeMaterial;
@@ -102,11 +82,14 @@ Handle ResourceManifest::TorpedoCoreMaterial;
 Handle ResourceManifest::TorpedoGlowMaterial;
 Handle ResourceManifest::TorpedoGlow2Material;
 
-std::unordered_map<std::string, boost::tuple<Handle, Handle, glm::vec3, glm::vec3>> ResourceManifest::Ships;
-
 std::string ResourceManifest::BasePath;
 
 void ResourceManifest::init(){
+    Factions::init();
+    Ships::init();
+
+    epriv::threading::waitForAll();
+
     BasePath = "../";
     
     Handle skyFromSpaceVert = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
@@ -127,7 +110,6 @@ void ResourceManifest::init(){
     shieldsShaderProgram = Resources::addShaderProgram("ShieldsShaderProgram", shieldsVert, shieldsFrag);
 
     PlanetMesh = Resources::loadMeshAsync(BasePath + "data/Models/planet.objcc")[0];
-    DefiantMesh = Resources::loadMeshAsync(BasePath + "data/Models/defiant.objcc")[0]; //220 metres long (0.22 km)
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc")[0];
     ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc")[0];
     ShieldColMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields_Col.objcc")[0];
@@ -138,20 +120,9 @@ void ResourceManifest::init(){
     PhaserBeamMesh = Resources::loadMeshAsync(BasePath + "data/Models/phaser_beam.objcc")[0];
 
 	//extras
-	NovaMesh = Resources::loadMeshAsync(BasePath + "data/Models/nova.objcc")[0];
-    MirandaMesh = Resources::loadMeshAsync(BasePath + "data/Models/miranda.objcc")[0];
-	//VenerexMesh = Resources::loadMeshAsync(BasePath + "data/Models/venerex.objcc")[0];
-	IntrepidMesh = Resources::loadMeshAsync(BasePath + "data/Models/intrepid.objcc")[0];
-    ExcelsiorMesh = Resources::loadMeshAsync(BasePath + "data/Models/excelsior.objcc")[0];
-    ConstitutionMesh = Resources::loadMeshAsync(BasePath + "data/Models/constitution.objcc")[0];
-    //LeviathanMesh = Resources::loadMeshAsync(BasePath + "data/Models/leviathan.objcc")[0];
-    ShrikeMesh = Resources::loadMeshAsync(BasePath + "data/Models/shrike.objcc")[0];
-    BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.objcc")[0];
-    BrelMeshHead = Resources::loadMeshAsync(BasePath + "data/Models/brel_head.obj")[0];
-    BrelMeshWing = Resources::loadMeshAsync(BasePath + "data/Models/brel_wing.obj")[0];
-    BrelMeshWing2 = Resources::loadMeshAsync(BasePath + "data/Models/brel_wing2.obj")[0];
-    AkiraMesh = Resources::loadMeshAsync(BasePath + "data/Models/akira.objcc")[0];
-    NorwayMesh = Resources::loadMeshAsync(BasePath + "data/Models/norway.objcc")[0];
+    BrelMeshHead = Resources::loadMeshAsync(BasePath + "data/Ships/brel/brel_head.objcc")[0];
+    BrelMeshWing = Resources::loadMeshAsync(BasePath + "data/Ships/brel/brel_wing.objcc")[0];
+    BrelMeshWing2 = Resources::loadMeshAsync(BasePath + "data/Ships/brel/brel_wing2.objcc")[0];
 
     //torpedos
     TorpedoFlareMesh        = Resources::loadMeshAsync(BasePath + "data/Models/torpedo_flare.objcc")[0];
@@ -187,19 +158,6 @@ void ResourceManifest::init(){
     PhaserBeamMaterial = Resources::loadMaterialAsync("PhaserBeam", BasePath + "data/Textures/Effects/phaser_beam_outline.dds", "", "", "");
     PlasmaBeamMaterial = Resources::loadMaterialAsync("PlasmaBeam", BasePath + "data/Textures/Effects/phaser_beam_outline.dds", "", "", "");
 
-    DefiantMaterial = Resources::loadMaterialAsync("Defiant", BasePath + "data/Textures/defiant/defiant.dds");
-    NovaMaterial = Resources::loadMaterialAsync("Nova", BasePath + "data/Textures/nova/nova.dds");
-    MirandaMaterial = Resources::loadMaterialAsync("Miranda", BasePath + "data/Textures/miranda/miranda.dds", BasePath + "data/Textures/miranda/miranda_Normal.dds", BasePath + "data/Textures/miranda/miranda_Glow.dds", BasePath + "data/Textures/miranda/miranda_Specular.dds");
-    //VenerexMaterial = Resources::loadMaterialAsync("Venerex", BasePath + "data/Textures/venerex.dds", BasePath + "data/Textures/venerex_Normal.png", BasePath + "data/Textures/venerex_Glow.png");
-    IntrepidMaterial = Resources::loadMaterialAsync("Intrepid", BasePath + "data/Textures/intrepid/intrepid.dds", BasePath + "data/Textures/intrepid/intrepid_Normal.dds", BasePath + "data/Textures/intrepid/intrepid_Glow.dds");
-    ExcelsiorMaterial = Resources::loadMaterialAsync("Excelsior", BasePath + "data/Textures/excelsior/excelsior.dds", BasePath + "data/Textures/excelsior/excelsior_Normal.dds", BasePath + "data/Textures/excelsior/excelsior_Glow.dds", BasePath + "data/Textures/excelsior/excelsior_Specular.dds");
-    ConstitutionMaterial = Resources::loadMaterialAsync("Constitution", BasePath + "data/Textures/constitution/constitution.dds", BasePath + "data/Textures/constitution/constitution_Normal.dds", BasePath + "data/Textures/constitution/constitution_Glow.dds", BasePath + "data/Textures/constitution/constitution_Specular.dds");
-    //DefiantSharkMaterial = Resources::loadMaterialAsync("DefiantShark", BasePath + "data/Textures/defiant/defiantShark.dds", BasePath + "data/Textures/defiant/defiant_Normal.dds", BasePath + "data/Textures/defiant/defiant_Glow.dds");
-    ShrikeMaterial = Resources::loadMaterialAsync("Shrike", BasePath + "data/Textures/shrike/shrike.dds", BasePath + "data/Textures/shrike/shrike_Normal.dds", BasePath + "data/Textures/shrike/shrike_Glow.dds", BasePath + "data/Textures/shrike/shrike_Specular.dds");
-    BrelMaterial = Resources::loadMaterialAsync("Brel", BasePath + "data/Textures/brel/brel.dds", BasePath + "data/Textures/brel/brel_Normal.dds", BasePath + "data/Textures/brel/brel_Glow.dds", BasePath + "data/Textures/brel/brel_Specular.dds");
-    AkiraMaterial = Resources::loadMaterialAsync("Akira", BasePath + "data/Textures/akira/akira.dds", BasePath + "data/Textures/akira/akira_Normal.dds", BasePath + "data/Textures/akira/akira_Glow.dds");
-    NorwayMaterial = Resources::loadMaterialAsync("Norway", BasePath + "data/Textures/norway/norway.dds", BasePath + "data/Textures/norway/norway_Normal.dds", BasePath + "data/Textures/norway/norway_Glow.dds");
-
     ShieldMaterial = Resources::loadMaterialAsync("Shields", BasePath + "data/Textures/Effects/shields_1.dds");
     HullDamageOutline1Material = Resources::loadMaterialAsync("HullDamage1Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_1.dds");
     HullDamageMaterial1 = Resources::loadMaterialAsync("HullDamage1", BasePath + "data/Textures/Effects/hull_dmg.dds");
@@ -216,6 +174,8 @@ void ResourceManifest::init(){
     RadarMaterial = Resources::loadMaterialAsync("Radar", BasePath + "data/Textures/HUD/Radar.dds");
     StarFlareMaterial = Resources::loadMaterialAsync("SunFlare", BasePath + "data/Textures/Skyboxes/StarFlare.dds");
     
+    epriv::threading::waitForAll();
+
     Material& phaserBeamMat = *((Material*)PhaserBeamMaterial.get());
     phaserBeamMat.setShadeless(true);
     phaserBeamMat.setGlow(1.0f);
@@ -250,26 +210,6 @@ void ResourceManifest::init(){
     Material& cannonTailMat = *((Material*)CannonTailMaterial.get());
     cannonTailMat.setShadeless(true);
     cannonTailMat.setGlow(1.0f);
-
-    Material& defMat = *((Material*)DefiantMaterial.get());
-    auto* layer = defMat.getComponent(0).addLayer();
-    layer->setTexture(BasePath + "data/Textures/Effects/Buzzards.dds");
-    layer->setMask(BasePath + "data/Textures/defiant/defiant_Mask_1.dds");
-    layer->addUVModificationSimpleTranslation(0.02f, 0.02f);
-    defMat.addComponent(MaterialComponentType::Normal, BasePath + "data/Textures/defiant/defiant_Normal.dds");
-    defMat.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/defiant/defiant_Glow.dds");
-    
-    Material& novaMat = *((Material*)NovaMaterial.get());
-    auto* layer1 = novaMat.getComponent(0).addLayer();
-    layer1->setTexture(BasePath + "data/Textures/Effects/Buzzards.dds");
-    layer1->setMask(BasePath + "data/Textures/nova/nova_Mask_1.dds");
-    layer1->addUVModificationSimpleTranslation(0.02f, 0.02f);
-    novaMat.addComponent(MaterialComponentType::Normal, BasePath + "data/Textures/nova/nova_Normal.dds");
-    novaMat.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/nova/nova_Glow.dds");
-
-    Material& shrikeMat = *((Material*)ShrikeMaterial.get());
-    shrikeMat.addComponentMetalness(BasePath + "data/Textures/shrike/shrike_Metalness.dds", 1.0f);
-    shrikeMat.addComponentSmoothness(BasePath + "data/Textures/shrike/shrike_Smoothness.dds", 1.0f);
 
     Material& shieldMat = *((Material*)ShieldMaterial.get());
     shieldMat.setShadeless(true);
@@ -345,24 +285,4 @@ void ResourceManifest::init(){
     SoundPlasmaTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_torpedo.ogg");
     SoundPhaserBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/phaser_beam.ogg");
     SoundPlasmaBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_beam.ogg");
-
-    const auto klingon = glm::vec3(0.72f, 0.11f, 0.11f);
-    const auto romulan = glm::vec3(0.33f, 0.72f, 0.48f);
-    const auto fed = glm::vec3(1, 1, 1);
-
-    const auto blue = glm::vec3(0.0822f, 0.408f, 1.0f);
-    const auto green = glm::vec3(0, 1, 0);
-    const auto red = glm::vec3(1, 0, 0);
-
-    ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(DefiantMesh,      DefiantMaterial, fed, blue);
-    ResourceManifest::Ships["Nova"]         = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(NovaMesh,         NovaMaterial, fed, blue);
-    ResourceManifest::Ships["Akira"]        = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(AkiraMesh,        AkiraMaterial, fed, blue);
-    ResourceManifest::Ships["Intrepid"]     = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(IntrepidMesh,     IntrepidMaterial, fed, blue);
-    ResourceManifest::Ships["Norway"]       = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(NorwayMesh,       NorwayMaterial, fed, blue);
-    ResourceManifest::Ships["Excelsior"]    = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ExcelsiorMesh,    ExcelsiorMaterial, fed, blue);
-    ResourceManifest::Ships["Miranda"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(MirandaMesh,      MirandaMaterial, fed, blue);
-    ResourceManifest::Ships["Constitution"] = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ConstitutionMesh, ConstitutionMaterial, fed, blue);
-    ResourceManifest::Ships["Shrike"]       = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ShrikeMesh,       ShrikeMaterial, romulan, green);
-    ResourceManifest::Ships["Leviathan"]    = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(LeviathanMesh,    DefiantMaterial, fed, blue);
-    ResourceManifest::Ships["Brel"]         = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(BrelMesh,         BrelMaterial, klingon, red);
 }

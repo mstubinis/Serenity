@@ -70,8 +70,6 @@ class Ship: public EntityWrapper, public EventObserver {
     public:
         Ship(
             Client& client,
-            Handle& meshHandle,                   //Mesh
-            Handle& materialHandle,               //Material
             const std::string& shipClass,
             Map& map,
             bool player = false,                  //Player Ship?

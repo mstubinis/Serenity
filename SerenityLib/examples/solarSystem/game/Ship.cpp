@@ -5,6 +5,7 @@
 #include "Helper.h"
 #include "map/Anchor.h"
 #include "ResourceManifest.h"
+#include "ships/Ships.h"
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/Engine.h>
@@ -178,7 +179,7 @@ struct HullCollisionFunctor final { void operator()(ComponentBody& owner, const 
     }
 }};
 
-Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, Map& map, bool player, const string& name, const glm_vec3 pos, const glm_vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client){
+Ship::Ship(Client& client, const string& shipClass, Map& map, bool player, const string& name, const glm_vec3 pos, const glm_vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client){
     m_WarpFactor          = 0;
     m_IsPlayer            = player;
     m_ShipClass           = shipClass;
@@ -188,12 +189,14 @@ Ship::Ship(Client& client, Handle& mesh, Handle& mat, const string& shipClass, M
     m_AimPositionDefaults.push_back(aimPosDefault);
     m_CameraOffsetDefault = camOffsetDefault;
 
-    auto& modelComponent     = *addComponent<ComponentModel>(mesh, mat);
+    auto& shipInfo = Ships::Database[shipClass];
+
+    auto& modelComponent     = *addComponent<ComponentModel>(shipInfo.MeshHandles[0], shipInfo.MaterialHandles[0]);
     auto& body               = *addComponent<ComponentBody>(collisionType);
     auto& nameComponent      = *addComponent<ComponentName>(name);
     auto& logicComponent     = *addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
-    setModel(mesh);
+    setModel(shipInfo.MeshHandles[0]);
 
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(static_cast<btScalar>(0.01), static_cast<btScalar>(0.2));
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...

@@ -18,7 +18,7 @@
 using namespace std;
 
 Leviathan::Leviathan(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, ResourceManifest::LeviathanMesh, ResourceManifest::DefiantMaterial, "Leviathan", map, player, name, position, scale, collisionType) {
+:Ship(client, "Leviathan", map, player, name, position, scale, collisionType) {
 
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
