@@ -108,6 +108,8 @@ class ComponentBody : public ComponentBaseClass {
         }
         void collisionResponse(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal);
 
+        void rebuildRigidBody(const bool addBodyToPhysicsWorld = true);
+
         const glm_vec3& getGoal() const;
         const decimal& getGoalSpeed() const;
         void setGoal(const glm_vec3& _goal, const decimal& speed = 1.0f);

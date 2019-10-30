@@ -150,9 +150,9 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
 
     active = true;
     auto& shipBody = *source.ship.getComponent<ComponentBody>();
-    auto shipMatrix = shipBody.modelMatrix();
-    shipMatrix = glm::translate(shipMatrix, position + glm_vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
-    auto finalPosition = glm_vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+
+    auto finalPosition = position + Math::rotate_vec3(shipBody.rotation(), glm_vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
+
     cannonBody.setPosition(finalPosition);
     cannonBody.addCollisionFlag(CollisionFlag::NoContactResponse);
     cannonBody.setCollisionGroup(CollisionFilter::_Custom_2); //i belong to weapons (group 2)
@@ -188,7 +188,7 @@ PlasmaCannonProjectile::~PlasmaCannonProjectile() {
 
 }
 
-PlasmaCannon::PlasmaCannon(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume) :PrimaryWeaponCannon(map,WeaponType::PlasmaCannon, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume) {
+PlasmaCannon::PlasmaCannon(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume, const unsigned int& _modelIndex) :PrimaryWeaponCannon(map,WeaponType::PlasmaCannon, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume, _modelIndex) {
 
 }
 PlasmaCannon::~PlasmaCannon() {

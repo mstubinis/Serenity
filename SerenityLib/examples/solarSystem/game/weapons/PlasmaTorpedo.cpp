@@ -183,15 +183,12 @@ PlasmaTorpedoProjectile::PlasmaTorpedoProjectile(PlasmaTorpedo& source, Map& map
 
         flares.push_back(flareD);
     }
-    auto finalPosition = glm_vec3(0.0f);
 
     auto& shipBody = *source.ship.getComponent<ComponentBody>(shipRequest);
     auto shipLinVel = shipBody.getLinearVelocity();
     auto shipAngVel = shipBody.getAngularVelocity();
-    auto shipMatrix = shipBody.modelMatrix();
-    shipMatrix = glm::translate(shipMatrix, position);
-    finalPosition = glm_vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
-    body.setPosition(finalPosition);
+
+    body.setPosition(position);
     body.setLinearVelocity(shipLinVel, false);
     body.setAngularVelocity(shipAngVel, false);
 
@@ -222,7 +219,7 @@ PlasmaTorpedoProjectile::PlasmaTorpedoProjectile(PlasmaTorpedo& source, Map& map
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
     body.setRotation(q);
 
-    light = new PointLight(finalPosition, &map);
+    light = new PointLight(position, &map);
     light->setColor(plasmaGreen);
     light->setAttenuation(LightRange::_20);
 }
@@ -244,7 +241,7 @@ void PlasmaTorpedoProjectile::update(const double& dt) {
     SecondaryWeaponTorpedoProjectile::update(dt);
 }
 
-PlasmaTorpedo::PlasmaTorpedo(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume, const float& _rotAngleSpeed) :SecondaryWeaponTorpedo(map,WeaponType::PlasmaTorpedo, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume, _rotAngleSpeed){
+PlasmaTorpedo::PlasmaTorpedo(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume, const float& _rotAngleSpeed, const unsigned int& _modelIndex) :SecondaryWeaponTorpedo(map,WeaponType::PlasmaTorpedo, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume, _rotAngleSpeed, _modelIndex){
 
 }
 PlasmaTorpedo::~PlasmaTorpedo() {

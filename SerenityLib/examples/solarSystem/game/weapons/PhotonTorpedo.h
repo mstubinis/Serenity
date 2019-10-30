@@ -59,7 +59,8 @@ class PhotonTorpedo final : public SecondaryWeaponTorpedo {
             const float& _impactTime = 3.1f,
             const float& _travelSpeed = 16.5f,
             const float& _volume = 100.0f,
-            const float& _rotAngleSpeed = 0.5f
+            const float& _rotAngleSpeed = 0.5f,
+            const unsigned int& _modelIndex = 0
         );
         ~PhotonTorpedo();
 

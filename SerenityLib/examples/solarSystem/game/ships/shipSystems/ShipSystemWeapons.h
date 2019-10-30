@@ -37,6 +37,7 @@ struct ShipWeapon {
     uint        numRoundsMax;
     float       rechargeTimePerRound;
     float       rechargeTimer;
+    unsigned int modelIndex;
 
     ShipWeapon(
         Map&,
@@ -50,7 +51,8 @@ struct ShipWeapon {
         const float& _impactTime,
         const float& _volume,
         const uint& _numRounds,
-        const float& _rechargeTimerPerRound
+        const float& _rechargeTimerPerRound,
+        const unsigned int& _modelIndex
     );
 
     const bool isInArc(EntityWrapper* target, const float _arc);
@@ -98,7 +100,8 @@ struct PrimaryWeaponCannon : public ShipWeapon {
         const float& _impactRadius,
         const float& _impactTime,
         const float& _travelSpeed,
-        const float& volume
+        const float& volume,
+        const unsigned int& _modelIndex = 0
     );
     virtual const bool isInControlledArc(EntityWrapper* target);
 
@@ -149,7 +152,8 @@ struct PrimaryWeaponBeam : public ShipWeapon {
         const uint& _maxCharges,
         const float& _rechargeTimePerRound,
         const float& chargeTimerSpeed,
-        const float& _firingTime
+        const float& _firingTime,
+        const unsigned int& _modelIndex = 0
     );
     ~PrimaryWeaponBeam();
     const bool canFire();
@@ -212,7 +216,8 @@ struct SecondaryWeaponTorpedo : public ShipWeapon {
         const float& _impactTime,
         const float& _travelSpeed,
         const float& _volume,
-        const float& _rotAngleSpeed
+        const float& _rotAngleSpeed,
+        const unsigned int& _modelIndex = 0
     );
     virtual const bool isInControlledArc(EntityWrapper* target);
 

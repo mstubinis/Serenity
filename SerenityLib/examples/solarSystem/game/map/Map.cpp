@@ -479,5 +479,8 @@ void Map::update(const double& dt){
             }
         }
     }
+
+    for (auto& ship : m_Ships)
+        ship.second->update(dt);
     Scene::update(dt);
 }

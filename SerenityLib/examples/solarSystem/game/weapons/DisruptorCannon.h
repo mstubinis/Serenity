@@ -40,7 +40,8 @@ class DisruptorCannon final : public PrimaryWeaponCannon {
             const float& _impactRadius = 2.5f,
             const float& _impactTime = 1.8f,
             const float& _travelSpeed = 50.5f,
-            const float& _volume = 100.0f
+            const float& _volume = 100.0f,
+            const unsigned int& _modelIndex = 0
         );
         ~DisruptorCannon();
 

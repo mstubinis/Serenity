@@ -31,7 +31,7 @@ const float ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm_vec3&
     return t;
 }
 
-ShipWeapon::ShipWeapon(Map& map, WeaponType::Type _type, Ship& _ship, const glm_vec3& _position, const glm_vec3& _forward, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, const uint& _numRounds, const float& _rechargeTimerPerRound):ship(_ship),m_Map(map){
+ShipWeapon::ShipWeapon(Map& map, WeaponType::Type _type, Ship& _ship, const glm_vec3& _position, const glm_vec3& _forward, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, const uint& _numRounds, const float& _rechargeTimerPerRound, const unsigned int& _modelIndex):ship(_ship),m_Map(map){
     type                     = _type;
     position                 = _position;
     forward                  = glm::normalize(_forward);
@@ -45,6 +45,7 @@ ShipWeapon::ShipWeapon(Map& map, WeaponType::Type _type, Ship& _ship, const glm_
     rechargeTimer            = 0.0f;
     soundEffect              = nullptr;
     index                    = 0;
+    modelIndex               = _modelIndex;
 }
 const bool ShipWeapon::isInArc(EntityWrapper* target, const float _arc) {
     if (!target)
@@ -129,7 +130,7 @@ void PrimaryWeaponCannonProjectile::clientToServerImpact(Client& client, Ship& s
 }
 
 
-PrimaryWeaponCannon::PrimaryWeaponCannon(Map& map, WeaponType::Type _type, Ship& _ship,const glm_vec3& _pos,const glm_vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound){
+PrimaryWeaponCannon::PrimaryWeaponCannon(Map& map, WeaponType::Type _type, Ship& _ship,const glm_vec3& _pos,const glm_vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume, const unsigned int& _modelIndex) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound, _modelIndex){
     damage                   = _dmg;
     impactRadius             = _impactRad;
     impactTime               = _impactTime;
@@ -194,7 +195,7 @@ const bool PrimaryWeaponCannon::forceFire(const int index, const glm_vec3& chose
     if (numRounds > 0) {
         const bool can = m_Map.try_addCannonProjectile(index);
         if (can) {
-            Weapons::spawnProjectile(*this, ship, m_Map, position, forward, index, chosen_target_pos);
+            Weapons::spawnProjectile(*this, ship, m_Map, position, forward, index, chosen_target_pos, modelIndex);
             return true;
         }
     }
@@ -219,7 +220,7 @@ void PrimaryWeaponCannon::update(const double& dt) {
 
 #pragma region Beam
 
-PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& map, const glm_vec3& _pos, const glm_vec3& _fwd, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound) {
+PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& map, const glm_vec3& _pos, const glm_vec3& _fwd, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime, const unsigned int& _modelIndex) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound, _modelIndex) {
     windupPoints = _windupPts;
     targetCoordinates = glm::vec3(0.0f);
     chargeTimer = 0.0f;
@@ -352,7 +353,7 @@ void PrimaryWeaponBeam::update(const double& dt) {
         }
     }
 }
-SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Map& map, WeaponType::Type _type, Ship& _ship,const glm_vec3& _pos,const glm_vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime,const float& _travelSpeed,const float& _volume,const float& _rotAngleSpeed) : ShipWeapon(map, _type, _ship,_pos,_fwd,_arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound) {
+SecondaryWeaponTorpedo::SecondaryWeaponTorpedo(Map& map, WeaponType::Type _type, Ship& _ship,const glm_vec3& _pos,const glm_vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime,const float& _travelSpeed,const float& _volume,const float& _rotAngleSpeed, const unsigned int& _modelIndex) : ShipWeapon(map, _type, _ship,_pos,_fwd,_arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound, _modelIndex) {
     damage                   = _dmg;
     impactRadius             = _impactRad;
     impactTime               = _impactTime;
@@ -428,7 +429,7 @@ const bool SecondaryWeaponTorpedo::forceFire(const int index, const glm_vec3& ch
     if (numRounds > 0) {
         const bool can = m_Map.try_addTorpedoProjectile(index);
         if (can) {
-            Weapons::spawnProjectile(*this, ship, m_Map, position, forward, index, chosen_target_pos);
+            Weapons::spawnProjectile(*this, ship, m_Map, position, forward, index, chosen_target_pos, modelIndex);
             return true;
         }
     }

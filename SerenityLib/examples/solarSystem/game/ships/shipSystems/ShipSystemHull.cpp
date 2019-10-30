@@ -21,7 +21,7 @@ ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const float health) :ShipS
     m_CollisionTimer = 10.0f;
 
     auto& hullBody = *m_HullEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic);
-    auto col = new Collision(CollisionType::TriangleShapeStatic, _ship.getComponent<ComponentModel>()->getModel().mesh(), _ship.getComponent<ComponentBody>()->mass());
+    auto* col = new Collision(&hullBody, *_ship.getComponent<ComponentModel>(), _ship.getComponent<ComponentBody>()->mass(), CollisionType::TriangleShapeStatic);
     hullBody.setCollision(col);
     hullBody.addCollisionFlag(CollisionFlag::NoContactResponse);
     hullBody.setCollisionGroup(CollisionFilter::_Custom_3); //group 3 are hull

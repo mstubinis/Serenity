@@ -24,7 +24,9 @@ const float ShipSystemCloakingDevice::getCloakTimer() const {
 }
 bool ShipSystemCloakingDevice::cloak(ComponentModel& model, bool sendPacket) {
     if (m_CloakTimer >= 1.0f) {
-        model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
+        for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+            model.setModelShaderProgram(ShaderProgram::Forward, i, RenderStage::ForwardTransparentTrianglesSorted);
+        }
         m_Active = true;
 
         auto* shields = static_cast<ShipSystemShields*>(m_Ship.getShipSystem(ShipSystemType::Shields));
@@ -72,7 +74,6 @@ bool ShipSystemCloakingDevice::decloak(ComponentModel& model, bool sendPacket) {
 void ShipSystemCloakingDevice::update(const double& dt) {
     auto _fdt = static_cast<float>(dt) * 0.37f;
     auto& model = *m_Ship.getComponent<ComponentModel>();
-    auto& instance = model.getModel(0);
     if (isOnline()) {
         if (m_Ship.IsPlayer()) {
             if (Engine::isKeyDownOnce(KeyboardKey::C)) {
@@ -88,14 +89,21 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                 if (m_CloakTimer > -0.2f) {
                     if (m_CloakTimer > 0.0f) {
                         m_CloakTimer -= _fdt;
-                        instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+
+                        for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+                            auto& instance = model.getModel(i);
+                            instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+                        }
                         m_Ship.updateDamageDecalsCloak(glm::abs(m_CloakTimer));
                     }else{
                         m_CloakTimer -= _fdt * 0.35f;
                         if (m_CloakTimer < -0.2f) {
                             m_CloakTimer = -0.2f;
                         }
-                        instance.setColor(0.369f, 0.912f, 1, glm::abs(m_CloakTimer));
+                        for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+                            auto& instance = model.getModel(i);
+                            instance.setColor(0.369f, 0.912f, 1, glm::abs(m_CloakTimer));
+                        }
                         m_Ship.updateDamageDecalsCloak(glm::abs(m_CloakTimer));
                     }
                 }
@@ -106,7 +114,10 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                         m_CloakTimer = 0.0f;
                         model.hide();
                     }
-                    instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+                    for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+                        auto& instance = model.getModel(i);
+                        instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+                    }
                     m_Ship.updateDamageDecalsCloak(glm::abs(m_CloakTimer));
                 }
             }
@@ -116,7 +127,10 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                 m_CloakTimer += _fdt;
                 if (m_CloakTimer > 1.0f) {
                     m_CloakTimer = 1.0f;
-                    model.setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryOpaque);
+
+                    for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+                        model.setModelShaderProgram(ShaderProgram::Deferred, i, RenderStage::GeometryOpaque);
+                    }
 
                     auto* shields = static_cast<ShipSystemShields*>(m_Ship.getShipSystem(ShipSystemType::Shields));
                     if (shields) {
@@ -124,7 +138,10 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                     }
                 }
             }
-            instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+            for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+                auto& instance = model.getModel(i);
+                instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+            }
             m_Ship.updateDamageDecalsCloak(glm::abs(m_CloakTimer));
         }
     }else{
@@ -136,15 +153,20 @@ void ShipSystemCloakingDevice::update(const double& dt) {
             m_CloakTimer += _fdt;
             if (m_CloakTimer > 1.0f) {
                 m_CloakTimer = 1.0f;
-                model.setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryOpaque);
 
+                for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+                    model.setModelShaderProgram(ShaderProgram::Deferred, i, RenderStage::GeometryOpaque);
+                }
                 auto* shields = static_cast<ShipSystemShields*>(m_Ship.getShipSystem(ShipSystemType::Shields));
                 if (shields) {
                     shields->turnOnShields();
                 }
             }
         }
-        instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+        for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+            auto& instance = model.getModel(i);
+            instance.setColor(1, 1, 1, glm::abs(m_CloakTimer));
+        }
         m_Ship.updateDamageDecalsCloak(glm::abs(m_CloakTimer));
     }
     ShipSystem::update(dt);

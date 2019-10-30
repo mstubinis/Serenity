@@ -14,18 +14,22 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-void Collision::_init(ComponentBody* body, const vector<Mesh*>& _meshes, const float& _mass) {
+void Collision::_init(ComponentBody* body, const vector<ModelInstance*>& _modelInstances, const float& _mass, const CollisionType::Type _type) {
     btCompoundShape* btCompound = new btCompoundShape();
-    btTransform t = btTransform(btQuaternion(0, 0, 0, 1));
-    for (auto& mesh : _meshes) {
-        btCollisionShape* btShape = InternalMeshPublicInterface::BuildCollision(mesh, CollisionType::ConvexHull);
+    btTransform localTransform;  
+    for (auto& modelInstance : _modelInstances) {
+        auto* mesh = modelInstance->mesh();
+        btCollisionShape* btShape = InternalMeshPublicInterface::BuildCollision(mesh, _type);
         btShape->setUserPointer(body);
-        btCompound->addChildShape(t, btShape);
+        localTransform = btTransform(Math::glmToBTQuat(modelInstance->orientation()), Math::btVectorFromGLM(modelInstance->position()));
+        btCompound->addChildShape(localTransform, btShape);
+        btShape->calculateLocalInertia(_mass, m_BtInertia); //this is important
     }
     btCompound->setMargin(0.001f);
     btCompound->recalculateLocalAabb();
     btCompound->setUserPointer(body);
     m_BtShape = btCompound;
+    setMass(_mass);
 }
 void Collision::_baseInit(const CollisionType::Type _type, const float& _mass) {
     m_BtInertia = btVector3(0.0f, 0.0f, 0.0f);
@@ -43,19 +47,19 @@ Collision::Collision(btHeightfieldTerrainShape& heightField, const CollisionType
     _baseInit(_type, _mass);
     m_BtShape = &heightField;
 }
-Collision::Collision(ComponentBody* body, ComponentModel& _modelComponent, const float& _mass) {
-    //construtor
-    vector<Mesh*> meshes;
-    for (uint i = 0; i < _modelComponent.getNumModels(); ++i) {
-        meshes.push_back(_modelComponent.getModel(i).mesh());
-    }
-    _init(body, meshes, _mass);
-}
 Collision::Collision(const CollisionType::Type _type, Mesh* _mesh, const float& _mass) {
     //construtor
     btCollisionShape* btShape = InternalMeshPublicInterface::BuildCollision(_mesh, _type);
     m_BtShape = btShape;
     _baseInit(_type, _mass);
+}
+Collision::Collision(ComponentBody* body, ComponentModel& _modelComponent, const float& _mass, const CollisionType::Type _type) {
+    //construtor
+    vector<ModelInstance*> modelInstances;
+    for (uint i = 0; i < _modelComponent.getNumModels(); ++i) {
+        modelInstances.push_back(&_modelComponent.getModel(i));
+    }
+    _init(body, modelInstances, _mass, _type);
 }
 Collision::~Collision() {
     //destructor
@@ -111,10 +115,23 @@ Collision& Collision::operator=(Collision&& other) noexcept {
 }
 
 
-void Collision::setMass(float _mass) {
+void Collision::setMass(const float _mass) {
     if (!m_BtShape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None)
         return;
     if (m_BtShape->getShapeType() != EMPTY_SHAPE_PROXYTYPE) {
+        /*
+        auto* compound = dynamic_cast<btCompoundShape*>(m_BtShape);
+        if (compound) {
+            const auto numChildren = compound->getNumChildShapes();
+            if (numChildren > 0) {
+                for (int i = 0; i < numChildren; ++i) {
+                    auto* child_shape = compound->getChildShape(i);
+                    if(child_shape)
+                        child_shape->calculateLocalInertia(_mass, m_BtInertia);
+                }
+            }
+        }
+        */
         m_BtShape->calculateLocalInertia(_mass, m_BtInertia);
     }
 }

@@ -473,11 +473,20 @@ void Ship::updateHealthFromPacket(const PacketHealthUpdate& packet) {
         hull->m_HealthPointsCurrent = packet.currentHullHealth;
     }
 }
+const float Ship::updateShipDimensions() {
+    auto& rigidBodyComponent = *getComponent<ComponentBody>();
+    auto& modelComponent = *getComponent<ComponentModel>();
+
+    const auto& boundingBox = modelComponent.boundingBox();
+    const auto volume = boundingBox.x * boundingBox.y * boundingBox.z;
+    auto mass = (volume * 0.4f) + 1.0f;
+    rigidBodyComponent.setMass(mass);
+    return mass;
+}
 void Ship::setModel(Handle& modelHandle) {
     auto& rigidBodyComponent = *getComponent<ComponentBody>();
     auto& modelComponent     = *getComponent<ComponentModel>();
     modelComponent.setModelMesh(modelHandle, 0);
-
     const auto& boundingBox = modelComponent.boundingBox();
     const auto volume = boundingBox.x * boundingBox.y * boundingBox.z;
     rigidBodyComponent.setMass((volume * 0.4f) + 1.0f);
@@ -594,4 +603,7 @@ PrimaryWeaponCannon& Ship::getPrimaryWeaponCannon(const uint index) {
 SecondaryWeaponTorpedo& Ship::getSecondaryWeaponTorpedo(const uint index) {
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
     return *weapons.m_SecondaryWeaponsTorpedos[index];
+}
+void Ship::update(const double& dt) {
+
 }

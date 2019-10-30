@@ -91,7 +91,7 @@ struct PhaserBeamInstanceUnbindFunctor { void operator()(EngineResource* r) cons
     //glDepthMask(GL_FALSE);
 }};
 
-PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges,const float& _rechargeTimePerRound) : PrimaryWeaponBeam(WeaponType::PhaserBeam, ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime){
+PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges,const float& _rechargeTimePerRound, const unsigned int& _modelIndex) : PrimaryWeaponBeam(WeaponType::PhaserBeam, ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime, _modelIndex){
     firstWindupGraphic = map.createEntity();
     secondWindupGraphic = map.createEntity();
 

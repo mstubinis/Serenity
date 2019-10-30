@@ -36,6 +36,9 @@ Handle ResourceManifest::ConstitutionMesh;
 Handle ResourceManifest::LeviathanMesh;
 Handle ResourceManifest::ShrikeMesh;
 Handle ResourceManifest::BrelMesh;
+Handle ResourceManifest::BrelMeshHead;
+Handle ResourceManifest::BrelMeshWing;
+Handle ResourceManifest::BrelMeshWing2;
 Handle ResourceManifest::AkiraMesh;
 Handle ResourceManifest::NorwayMesh;
 
@@ -144,6 +147,9 @@ void ResourceManifest::init(){
     //LeviathanMesh = Resources::loadMeshAsync(BasePath + "data/Models/leviathan.objcc")[0];
     ShrikeMesh = Resources::loadMeshAsync(BasePath + "data/Models/shrike.objcc")[0];
     BrelMesh = Resources::loadMeshAsync(BasePath + "data/Models/brel.objcc")[0];
+    BrelMeshHead = Resources::loadMeshAsync(BasePath + "data/Models/brel_head.obj")[0];
+    BrelMeshWing = Resources::loadMeshAsync(BasePath + "data/Models/brel_wing.obj")[0];
+    BrelMeshWing2 = Resources::loadMeshAsync(BasePath + "data/Models/brel_wing2.obj")[0];
     AkiraMesh = Resources::loadMeshAsync(BasePath + "data/Models/akira.objcc")[0];
     NorwayMesh = Resources::loadMeshAsync(BasePath + "data/Models/norway.objcc")[0];
 
@@ -350,9 +356,9 @@ void ResourceManifest::init(){
 
     ResourceManifest::Ships["Defiant"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(DefiantMesh,      DefiantMaterial, fed, blue);
     ResourceManifest::Ships["Nova"]         = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(NovaMesh,         NovaMaterial, fed, blue);
-    ResourceManifest::Ships["Akira"]        = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(AkiraMesh, AkiraMaterial, fed, blue);
-    ResourceManifest::Ships["Intrepid"]     = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(IntrepidMesh, IntrepidMaterial, fed, blue);
-    ResourceManifest::Ships["Norway"]       = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(NorwayMesh, NorwayMaterial, fed, blue);
+    ResourceManifest::Ships["Akira"]        = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(AkiraMesh,        AkiraMaterial, fed, blue);
+    ResourceManifest::Ships["Intrepid"]     = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(IntrepidMesh,     IntrepidMaterial, fed, blue);
+    ResourceManifest::Ships["Norway"]       = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(NorwayMesh,       NorwayMaterial, fed, blue);
     ResourceManifest::Ships["Excelsior"]    = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ExcelsiorMesh,    ExcelsiorMaterial, fed, blue);
     ResourceManifest::Ships["Miranda"]      = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(MirandaMesh,      MirandaMaterial, fed, blue);
     ResourceManifest::Ships["Constitution"] = boost::tuple<Handle, Handle, glm::vec3, glm::vec3>(ConstitutionMesh, ConstitutionMaterial, fed, blue);

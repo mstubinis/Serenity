@@ -4,9 +4,22 @@
 
 #include "../../Ship.h"
 
+constexpr auto BREL_WING_SPAN_MAX = 0.67771135f;
+
+
 class Brel final : public Ship {
     private:
+        struct BrelWingSpanState final {enum State {
+            Down,
+            RotatingUp,
+            Up,
+            RotatingDown,
+        };};
 
+        Brel::BrelWingSpanState::State m_WingState;
+        glm_vec3 m_ShieldScale;
+        glm_vec3 m_InitialCamera;
+        float m_WingRotation;
     public:
         Brel(
             Client& client,
@@ -18,6 +31,14 @@ class Brel final : public Ship {
             CollisionType::Type = CollisionType::ConvexHull
         );
         ~Brel();
+
+        const Brel::BrelWingSpanState::State getWingState() const;
+
+        void updateWingSpan(const double& dt, const BrelWingSpanState::State end, const int mod);
+
+        void foldWingsUp();
+        void foldWingsDown();
+        void update(const double& dt);
 };
 
 #endif

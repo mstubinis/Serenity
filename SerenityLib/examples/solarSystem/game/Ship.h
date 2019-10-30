@@ -84,6 +84,8 @@ class Ship: public EntityWrapper, public EventObserver {
         );
         virtual ~Ship();
 
+        virtual void update(const double& dt);
+
         void onEvent(const Event&);
 
         void destroy();
@@ -111,6 +113,7 @@ class Ship: public EntityWrapper, public EventObserver {
         void updateProjectileImpact(const PacketProjectileImpact& packet);
 
         void setModel(Handle& handle);
+        const float updateShipDimensions();
 
         const glm_vec3 getLinearVelocity();
 

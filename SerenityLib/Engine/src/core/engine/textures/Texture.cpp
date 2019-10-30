@@ -127,7 +127,9 @@ const bool Texture::mipmapped() const {
     return m_Mipmapped; 
 }
 const bool Texture::compressed() const {
-    return (m_ImagesDatas[0]->mipmaps[0].compressedSize > 0) ? true : false;
+    const auto& img = m_ImagesDatas[0].get();
+    auto& mip = img->mipmaps[0];
+    return (mip.compressedSize > 0) ? true : false;
 }
 const uchar* Texture::pixels(){
     TextureLoader::WithdrawPixelsFromOpenGLMemory(*this); 

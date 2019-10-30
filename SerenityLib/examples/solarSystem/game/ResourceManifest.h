@@ -35,6 +35,9 @@ struct ResourceManifest{
     static Handle LeviathanMesh;
     static Handle ShrikeMesh;
     static Handle BrelMesh;
+    static Handle BrelMeshHead;
+    static Handle BrelMeshWing;
+    static Handle BrelMeshWing2;
     static Handle AkiraMesh;
     static Handle NorwayMesh;
 

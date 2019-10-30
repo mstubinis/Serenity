@@ -34,7 +34,8 @@ class PlasmaBeam final : public PrimaryWeaponBeam {
             const float& _impactTime = 1.8f,
             const float& _volume = 100.0f,
             const uint & _maxCharges = 1,
-            const float& _rechargeTimePerRound = 6.0f
+            const float& _rechargeTimePerRound = 6.0f,
+            const unsigned int& _modelIndex = 0
         );
         ~PlasmaBeam();
 

@@ -10,6 +10,7 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/scene/Camera.h>
+#include <core/engine/math/Engine_Math.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -143,7 +144,7 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, con
     auto& logic = *(m_ShieldEntity.addComponent<ComponentLogic>(ShipSystemShieldsFunctor()));
 
     //TODO: optimize collision hull if possible
-    auto& shieldBody = *(m_ShieldEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic));
+    auto& shieldBody = *m_ShieldEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic);
     logic.setUserPointer(&m_Ship);
     shieldBody.setUserPointer(this);
     shieldBody.setUserPointer1(&_ship);
@@ -176,7 +177,8 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, con
     //m_RechargeActivation = 5.0f;
     m_RechargeTimer = 0.0f;
 
-    const glm::vec3 shieldScale = m_Ship.getComponent<ComponentModel>()->getModel(0).mesh()->getRadiusBox() * SHIELD_SCALE_FACTOR;
+    const auto shieldScale = m_Ship.getComponent<ComponentModel>()->boundingBox() * SHIELD_SCALE_FACTOR;
+
     auto& btBody = const_cast<btRigidBody&>(shieldBody.getBtBody());
     shieldBody.addCollisionFlag(CollisionFlag::NoContactResponse);
     shieldBody.setCollisionGroup(CollisionFilter::_Custom_1); //group 1 are shields
@@ -249,9 +251,11 @@ void ShipSystemShields::destroy() {
 }
 void ShipSystemShields::update(const double& dt) {
     auto& shieldBody = *m_ShieldEntity.getComponent<ComponentBody>();
+    auto& shieldModel = *m_ShieldEntity.getComponent<ComponentModel>();
     auto& shipBody = *m_Ship.getComponent<ComponentBody>();
-    shieldBody.setPosition(shipBody.position());
-    shieldBody.setRotation(shipBody.rotation());
+    auto shipBodyRot = shipBody.rotation();
+    shieldBody.setPosition(shipBody.position() + Math::rotate_vec3(shipBodyRot, glm_vec3(shieldModel.getModel(0).position())));
+    shieldBody.setRotation(shipBodyRot);
     
     bool shown = false;
     const float fdt = static_cast<float>(dt);
@@ -260,7 +264,6 @@ void ShipSystemShields::update(const double& dt) {
         if (!shown && impact.active)
             shown = true;
     }
-    auto& shieldModel = m_ShieldEntity.getComponent<ComponentModel>()->getModel();
     !shown ? shieldModel.hide() : shieldModel.show();
 
     //recharging here

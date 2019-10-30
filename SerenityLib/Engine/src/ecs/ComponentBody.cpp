@@ -144,32 +144,16 @@ ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p
     m_UserPointer2          = nullptr;
     data.n                  = nullptr;
     data.p                  = new PhysicsData();
-    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
     auto& physicsData       = *data.p;
     m_Forward               = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(-1.0));
 	m_Right                 = glm_vec3(static_cast<decimal>(1.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
 	m_Up                    = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(1.0), static_cast<decimal>(0.0));
 
+    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
+
     physicsData.bullet_motionState = btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1)));
-    float mass              = 1.0f;
-    physicsData.mass        = mass;
-
-    setCollision(p_CollisionType, mass);
-
-    setMass(mass);
-    Collision& collision     = *physicsData.collision;
-    btCollisionShape* shape  = collision.getBtShape();
-    const btVector3& inertia = collision.getBtInertia();
-
-    btRigidBody::btRigidBodyConstructionInfo CI(mass, &physicsData.bullet_motionState, shape, inertia);
-    physicsData.bullet_rigidBody = new btRigidBody(CI);
-    auto& rigidBody = *physicsData.bullet_rigidBody;
-    rigidBody.setSleepingThresholds(0.015f, 0.015f);
-    rigidBody.setFriction(0.3f);
-    rigidBody.setDamping(0.1f, 0.4f);//air friction 
-    rigidBody.setMassProps(mass, inertia);
-    rigidBody.updateInertiaTensor();
-    setInternalPhysicsUserPointer(this);
+    setCollision(p_CollisionType, 1.0f);
+    rebuildRigidBody(false);
 }
 ComponentBody::~ComponentBody() {
     //destructor
@@ -224,13 +208,35 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& p_Other) noexcept {
     setInternalPhysicsUserPointer(this);
     return *this;
 }
+void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld) {
+    if (m_Physics) {
+        auto& physics = *data.p;
+        if (physics.bullet_rigidBody) {
+            Physics::removeRigidBody(physics.bullet_rigidBody);
+            SAFE_DELETE(physics.bullet_rigidBody);     
+        }
+        auto& inertia = physics.collision->getBtInertia();
+        auto& shape = *physics.collision->getBtShape();
+        btRigidBody::btRigidBodyConstructionInfo CI(physics.mass, &physics.bullet_motionState, &shape, inertia);
+        physics.bullet_rigidBody = new btRigidBody(CI);
+        auto& rigidBody = *physics.bullet_rigidBody;
+        rigidBody.setSleepingThresholds(0.015f, 0.015f);
+        rigidBody.setFriction(0.3f);
+        rigidBody.setDamping(0.1f, 0.4f);//air friction 
+        rigidBody.setMassProps(physics.mass, inertia);
+        rigidBody.updateInertiaTensor();
+        setInternalPhysicsUserPointer(this);
+        if(addBodyToPhysicsWorld)
+            Physics::addRigidBody(physics.bullet_rigidBody);
+    }
+}
 //kinda ugly
 void ComponentBody::setInternalPhysicsUserPointer(void* userPtr) {
     if (m_Physics) {
-        auto rigid = data.p->bullet_rigidBody;
+        auto* rigid = data.p->bullet_rigidBody;
         if (rigid) {
             rigid->setUserPointer(userPtr);
-            auto shape = rigid->getCollisionShape();
+            auto* shape = rigid->getCollisionShape();
             if (shape) {
                 shape->setUserPointer(userPtr);
                 if (data.p->collision && data.p->collision->getType() == CollisionType::Compound) {
@@ -240,8 +246,8 @@ void ComponentBody::setInternalPhysicsUserPointer(void* userPtr) {
                         compound->setUserPointer(userPtr); //do we need this?
                         if (numChildren > 0) {
                             for (int i = 0; i < numChildren; ++i) {
-                                btCollisionShape* shape = compound->getChildShape(i);
-                                shape->setUserPointer(userPtr);
+                                btCollisionShape* child_shape = compound->getChildShape(i);
+                                child_shape->setUserPointer(userPtr);
                             }
                         }
                     }
@@ -351,12 +357,14 @@ void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, cons
             physicsData.collision = new Collision(p_CollisionType, nullptr, p_Mass);
         }
     }
+    physicsData.mass = p_Mass;
     Collision& collision = *physicsData.collision;
     auto& shape = *collision.getBtShape();
+    collision.setMass(physicsData.mass);
     if (physicsData.bullet_rigidBody) {
         auto& bt_rigidBody = *physicsData.bullet_rigidBody;
         bt_rigidBody.setCollisionShape(&shape);
-        bt_rigidBody.setMassProps(physicsData.mass, collision.getBtInertia());
+        bt_rigidBody.setMassProps(static_cast<btScalar>(physicsData.mass), collision.getBtInertia());
         bt_rigidBody.updateInertiaTensor();
     }
     setInternalPhysicsUserPointer(this);
@@ -374,7 +382,8 @@ void ComponentBody::setCollision(Collision* p_Collision) {
     if (physicsData.bullet_rigidBody) {
         auto& bt_rigidBody = *physicsData.bullet_rigidBody;
         bt_rigidBody.setCollisionShape(&shape);
-        bt_rigidBody.setMassProps(physicsData.mass, collision.getBtInertia());
+        auto& inertia = collision.getBtInertia();
+        bt_rigidBody.setMassProps(physicsData.mass, inertia);
         bt_rigidBody.updateInertiaTensor();
         Physics::addRigidBody(&bt_rigidBody);
     }
@@ -1052,6 +1061,21 @@ void ComponentBody::setMass(const float p_Mass) {
         physicsData.mass = p_Mass;
         Collision& collision = *physicsData.collision;
         if (collision.getBtShape()) {
+            /*
+            auto* compound = dynamic_cast<btCompoundShape*>(collision.getBtShape());
+            if (compound) {
+                btVector3& inertia = const_cast<btVector3&>(collision.getBtInertia());
+                const auto numChildren = compound->getNumChildShapes();
+                if (numChildren > 0) {
+                    for (int i = 0; i < numChildren; ++i) {
+                        auto* child_shape = compound->getChildShape(i);
+                        if (child_shape) {
+                            child_shape->calculateLocalInertia(physicsData.mass, inertia);
+                        }
+                    }
+                }
+            }
+            */
             collision.setMass(physicsData.mass);
             if (physicsData.bullet_rigidBody) {
                 physicsData.bullet_rigidBody->setMassProps(static_cast<btScalar>(physicsData.mass), collision.getBtInertia());
@@ -1125,7 +1149,6 @@ struct epriv::ComponentBody_EntityAddedToSceneFunction final {void operator()(vo
         if (component.m_Physics) {
             auto& physicsData = *component.data.p;
             component.setCollision(static_cast<CollisionType::Type>(physicsData.collision->getType()), physicsData.mass);
-
             auto currentScene = Resources::getCurrentScene();
             if (currentScene && currentScene == &p_Scene) {
                 auto& phyData = *component.data.p;
