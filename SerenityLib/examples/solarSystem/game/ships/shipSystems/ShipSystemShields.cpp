@@ -81,11 +81,23 @@ struct ShieldInstanceBindFunctor {void operator()(EngineResource* r) const {
     auto& shields = *static_cast<ShipSystemShields*>(i.getUserPointer());
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
+    auto bodypos = body.position();
     glm::mat4 parentModel = body.modelMatrix();
 
     Renderer::sendUniform4Safe("Object_Color", i.color());
     glm::mat4 modelMatrix = parentModel * i.modelMatrix();
+
+    /*
+    for some reason, body.modelMatrix() is outputing perfect world positioning during the rendering stage, but the bullet rigid body (or more specifically, maybe it's collision position)
+    it not outputting the updated positioning, gotta dumb it down here...
+    */
+    modelMatrix[3][0] = bodypos.x;
+    modelMatrix[3][1] = bodypos.y;
+    modelMatrix[3][2] = bodypos.z;
+
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+
+
 
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
@@ -254,8 +266,9 @@ void ShipSystemShields::update(const double& dt) {
     auto& shieldModel = *m_ShieldEntity.getComponent<ComponentModel>();
     auto& shipBody = *m_Ship.getComponent<ComponentBody>();
     auto shipBodyRot = shipBody.rotation();
-    shieldBody.setPosition(shipBody.position() + Math::rotate_vec3(shipBodyRot, glm_vec3(shieldModel.getModel(0).position())));
+
     shieldBody.setRotation(shipBodyRot);
+    shieldBody.setPosition(shipBody.position() + Math::rotate_vec3(shipBodyRot, shieldModel.getModel(0).position()));
     
     bool shown = false;
     const float fdt = static_cast<float>(dt);

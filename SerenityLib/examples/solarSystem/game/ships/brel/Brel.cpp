@@ -150,19 +150,27 @@ void Brel::updateWingSpan(const double& dt, const BrelWingSpanState::State end, 
     glm_vec3 newLocalPos = glm_vec3(0, m_WingRotation * 0.5f, 0);
     m_CameraOffsetDefault = m_InitialCamera - (newLocalPos * static_cast<decimal>(0.5));
 
-
     auto& model1 = shieldsModel.getModel(0);
     model1.setPosition(newLocalPos);
 
-    auto scl = m_ShieldScale + glm_vec3(m_WingRotation * 0.3f, 0.0f, 0.0f);
-    shieldsBody.setScale(scl);
-    model1.setScale(scl);
+    auto shieldScale = m_ShieldScale + glm_vec3(m_WingRotation * 0.3f, 0.0f, 0.0f);
+    shieldsBody.setScale(shieldScale);
 }
 void Brel::update(const double& dt) {
-    if (m_IsPlayer && Engine::isKeyDownOnce(KeyboardKey::Space)) {
+
+    auto& sensors = *static_cast<ShipSystemSensors*>(getShipSystem(ShipSystemType::Sensors));
+    const auto& closestEnemy = sensors.getClosestShip();
+    if (closestEnemy.ship) {
+        if (closestEnemy.distanceAway2 < static_cast<decimal>(150.0 * 150.0)) { //15km away
+            foldWingsDown();
+        }else{
+            foldWingsUp();
+        }
+    }else{
         foldWingsUp();
-        foldWingsDown();
     }
+
+
     if (m_WingState == BrelWingSpanState::RotatingUp) {
         updateWingSpan(dt, BrelWingSpanState::Up, 1);
     }

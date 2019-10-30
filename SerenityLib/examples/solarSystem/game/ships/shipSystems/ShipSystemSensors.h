@@ -8,19 +8,47 @@
 
 class Map;
 class Camera;
+class Ship;
+
+struct DetectedShip final {
+    Ship*   ship;
+    decimal distanceAway2;
+    DetectedShip() {
+        ship = nullptr;
+        distanceAway2 = static_cast<decimal>(-1.0);
+    }
+};
+
 class ShipSystemSensors final : public ShipSystem {
     friend class Ship;
     private:
-        EntityWrapper*  m_Target;
-        Map&            m_Map;
-        Camera*         m_Camera;
-        Entity          m_RadarRingEntity;
-        float           m_RadarRange;
-        glm::vec4       m_Viewport;
-        Viewport*       m_ViewportObject;
+        EntityWrapper*      m_Target;
+        Map&                m_Map;
+        Camera*             m_Camera;
+        Entity              m_RadarRingEntity;
+        decimal             m_RadarRange;
+        glm::vec4           m_Viewport;
+        Viewport*           m_ViewportObject;
+
+        std::vector<Ship*>  m_DetectedEnemyShips;
+        std::vector<Ship*>  m_DetectedShips;
+        std::vector<Ship*>  m_DetectedAlliedShips;
+        std::vector<Ship*>  m_DetectedNeutralShips;
     public:
-        ShipSystemSensors(Ship&, Map&, const float& range = 100.0f); //10km
+        ShipSystemSensors(Ship&, Map&, const decimal& range = static_cast<decimal>(1000.0)); //100km
         ~ShipSystemSensors();
+
+        const bool validateDetection(Ship& othership, const glm_vec3& thisShipPos);
+
+        DetectedShip getClosestAlliedShip();
+        DetectedShip getClosestNeutralShip();
+        DetectedShip getClosestEnemyShip();
+        DetectedShip getClosestShip();
+
+        std::vector<Ship*>&   getEnemyShips();
+        std::vector<Ship*>&   getShips();
+        std::vector<Ship*>&   getAlliedShips();
+        std::vector<Ship*>&   getNeutralShips();
 
         const Entity& radarRingEntity() const;
         const Entity& radarCameraEntity() const;

@@ -152,24 +152,24 @@ epriv::EShaders::lighting_vert =
     "    return v;\n"
     "}\n"
     "void main(){\n"
-    "    mat4 ModelClone = Model;\n"
+    //"    mat4 ModelClone = Model;\n"
     "    vec3 vert = position;\n"
     "    if(Type == 2.0){\n" //spot light
     "        vert = doSpotLightStuff(vert);\n"
-    "        ModelClone[3][0] -= CameraRealPosition.x;\n"
-    "        ModelClone[3][1] -= CameraRealPosition.y;\n"
-    "        ModelClone[3][2] -= CameraRealPosition.z;\n"
+    //"        ModelClone[3][0] -= CameraRealPosition.x;\n"
+    //"        ModelClone[3][1] -= CameraRealPosition.y;\n"
+    //"        ModelClone[3][2] -= CameraRealPosition.z;\n"
     "    }else if(Type == 1.0){\n" //point / rod / etc
-    "        ModelClone[3][0] -= CameraRealPosition.x;\n"
-    "        ModelClone[3][1] -= CameraRealPosition.y;\n"
-    "        ModelClone[3][2] -= CameraRealPosition.z;\n"
+    //"        ModelClone[3][0] -= CameraRealPosition.x;\n"
+    //"        ModelClone[3][1] -= CameraRealPosition.y;\n"
+    //"        ModelClone[3][2] -= CameraRealPosition.z;\n"
     "    }else if(Type == 0.0){\n" //fullscreen quad / triangle
     "        vert.x *= screenSizeDivideBy2.x;\n"
     "        vert.y *= screenSizeDivideBy2.y;\n"
     "    }\n"
     "    texcoords = uv;\n"
     "    CamRealPosition = CameraRealPosition;\n"
-    "    gl_Position = VP * ModelClone * vec4(vert,1.0);\n"
+    "    gl_Position = VP * Model * vec4(vert,1.0);\n"
     "}";
 #pragma endregion
 
