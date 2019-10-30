@@ -31,7 +31,7 @@ struct QuantumTorpedoFlare final {
 struct QuantumTorpedoProjectile final : public SecondaryWeaponTorpedoProjectile {
     QuantumTorpedo&                    torpedo;
     std::vector<QuantumTorpedoFlare>   flares;
-    QuantumTorpedoProjectile(QuantumTorpedo&, Map& map, const glm_vec3& position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos);
+    QuantumTorpedoProjectile(QuantumTorpedo&, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos);
     ~QuantumTorpedoProjectile();
     void update(const double& dt);
 };

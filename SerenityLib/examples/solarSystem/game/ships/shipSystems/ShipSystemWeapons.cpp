@@ -62,7 +62,7 @@ const bool ShipWeapon::isInArc(EntityWrapper* target, const float _arc) {
     }else{
         targetPosition = targetBody.position();
     }
-    const auto cannonForward = glm::normalize(shipRotation * forward);
+    const auto cannonForward = glm::normalize(Math::rotate_vec3(shipRotation, forward));
 
     const auto vecToTarget = shipPosition - targetPosition;
     const auto vecToForward = shipPosition - (cannonForward * static_cast<decimal>(100000000.0));
@@ -138,11 +138,11 @@ PrimaryWeaponCannon::PrimaryWeaponCannon(Map& map, WeaponType::Type _type, Ship&
     volume                   = _volume;
 }
 const PrimaryWeaponCannonPrediction PrimaryWeaponCannon::calculatePredictedVector(ComponentBody& projectileBody, const glm_vec3& chosen_target_pos) {
-    auto& shipBody = *ship.getComponent<ComponentBody>();
-    auto shipRotation = shipBody.rotation();
+    auto& shipBody     = *ship.getComponent<ComponentBody>();
+    auto shipRotation  = shipBody.rotation();
     auto cannonForward = glm::normalize(Math::rotate_vec3(shipRotation, forward));
-    auto shipPosition = shipBody.position();
-    auto mytarget = ship.getTarget();
+    auto shipPosition  = shipBody.position();
+    auto mytarget      = ship.getTarget();
 
     auto returnValue = PrimaryWeaponCannonPrediction();
 
@@ -153,15 +153,14 @@ const PrimaryWeaponCannonPrediction PrimaryWeaponCannon::calculatePredictedVecto
     if (mytarget) {
         auto& targetBody                = *mytarget->getComponent<ComponentBody>();
         auto* targetIsShip              = dynamic_cast<Ship*>(mytarget);
-        const auto targetPositionCenter = targetBody.position();
 
-        const auto worldPositionTarget  = targetPositionCenter + chosen_target_pos;
+        const auto worldPositionTarget  = targetBody.position() + chosen_target_pos;
+        const auto launcherPosition     = projectileBody.position();
 
-        const auto vecToTarget          = shipPosition - worldPositionTarget;
-        const auto vecToForward         = shipPosition - (cannonForward * static_cast<decimal>(100000000.0));
+        const auto vecToTarget          = launcherPosition - worldPositionTarget;
+        const auto vecToForward         = launcherPosition - (cannonForward * static_cast<decimal>(100000000.0));
         const auto angleToTarget        = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
         if (angleToTarget <= arc) {
-            const auto launcherPosition = shipPosition + Math::rotate_vec3(shipRotation, position);
             const auto targetLinearVelocity = targetBody.getLinearVelocity();
             const auto distanceToTarget = glm::distance(worldPositionTarget, launcherPosition);
 
@@ -381,18 +380,16 @@ const SecondaryWeaponTorpedoPrediction SecondaryWeaponTorpedo::calculatePredicte
         auto& targetBody = *mytarget->getComponent<ComponentBody>();
         auto* targetIsShip = dynamic_cast<Ship*>(mytarget);
 
-        const auto targetPositionCenter = targetBody.position();
+        const auto worldPositionTarget = targetBody.position() + chosen_target_pos;
+        const auto launcherPosition = projectileBody.position();
 
-        const auto worldPositionTarget = targetPositionCenter + chosen_target_pos;
-
-        const auto vecToTarget = shipPosition - worldPositionTarget;
-        const auto vecToForward = shipPosition - (torpForward * static_cast<decimal>(100000000.0));
+        const auto vecToTarget = launcherPosition - worldPositionTarget;
+        const auto vecToForward = launcherPosition - (torpForward * static_cast<decimal>(100000000.0));
         const auto angleToTarget = Math::getAngleBetweenTwoVectors(glm::normalize(vecToTarget), glm::normalize(vecToForward), true);
         if (angleToTarget <= arc) {
             returnValue.hasLock = true;
             returnValue.target = mytarget;
 
-            const auto launcherPosition = shipPosition + Math::rotate_vec3(shipRotation, position);
             const auto targetLinearVelocity = targetBody.getLinearVelocity();
             const auto distanceToTarget = glm::distance(worldPositionTarget, launcherPosition);
 

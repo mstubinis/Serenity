@@ -121,7 +121,7 @@ struct DisruptorCannonTailInstanceUnbindFunctor { void operator()(EngineResource
 }};
 
 
-DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm_vec3& position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map, position, forward, index) {
+DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map, final_world_position, forward, index) {
     EntityDataRequest request(entity);
 
     auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
@@ -129,7 +129,7 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     auto& head = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& tail = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
 
-    auto& cannonBody = *entity.addComponent<ComponentBody>(request, CollisionType::Box);
+    auto& cannonProjectileBody = *entity.addComponent<ComponentBody>(request, CollisionType::Box);
     model.setCustomBindFunctor(DisruptorCannonInstanceBindFunctor());
     model.setCustomUnbindFunctor(DisruptorCannonInstanceUnbindFunctor());
     model.getModel(0).setColor(0.62f, 1.00f, 0.6f, 1.0f);
@@ -151,33 +151,33 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     active = true;
     auto& shipBody = *source.ship.getComponent<ComponentBody>();
 
-    auto finalPosition = position + Math::rotate_vec3(shipBody.rotation(), glm_vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
+    auto finalPosition = final_world_position + Math::rotate_vec3(shipBody.rotation(), glm_vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
 
-    cannonBody.setPosition(finalPosition);
-    cannonBody.addCollisionFlag(CollisionFlag::NoContactResponse);
-    cannonBody.setCollisionGroup(CollisionFilter::_Custom_2); //i belong to weapons (group 2)
-    cannonBody.setCollisionMask(CollisionFilter::_Custom_1 | CollisionFilter::_Custom_3); //i should only collide with shields and hull (group 1 and group 3)
+    cannonProjectileBody.setPosition(finalPosition);
+    cannonProjectileBody.addCollisionFlag(CollisionFlag::NoContactResponse);
+    cannonProjectileBody.setCollisionGroup(CollisionFilter::_Custom_2); //i belong to weapons (group 2)
+    cannonProjectileBody.setCollisionMask(CollisionFilter::_Custom_1 | CollisionFilter::_Custom_3); //i should only collide with shields and hull (group 1 and group 3)
 
     auto shipLinVel = shipBody.getLinearVelocity();
     auto shipAngVel = shipBody.getAngularVelocity();
 
-    cannonBody.setLinearVelocity(shipLinVel, false);
-    cannonBody.setAngularVelocity(shipAngVel, false);
+    cannonProjectileBody.setLinearVelocity(shipLinVel, false);
+    cannonProjectileBody.setAngularVelocity(shipAngVel, false);
 
-    auto data = source.calculatePredictedVector(cannonBody, chosen_target_pos);
+    auto data = source.calculatePredictedVector(cannonProjectileBody, chosen_target_pos);
     auto offset = data.pedictedVector;
     glm_quat q;
     Math::alignTo(q, -offset);
-    cannonBody.setRotation(q); //TODO: change rotation based on launching vector
+    cannonProjectileBody.setRotation(q); //TODO: change rotation based on launching vector
     offset *= glm_vec3(source.travelSpeed);
-    cannonBody.applyImpulse(offset.x, offset.y, offset.z, false);
+    cannonProjectileBody.applyImpulse(offset.x, offset.y, offset.z, false);
 
-    cannonBody.setUserPointer(this);
-    cannonBody.setUserPointer1(&source.ship);
-    cannonBody.setUserPointer2(&source);
-    cannonBody.setCollisionFunctor(DisruptorCannonCollisionFunctor());
-    cannonBody.setInternalPhysicsUserPointer(&cannonBody);
-    const_cast<btRigidBody&>(cannonBody.getBtBody()).setDamping(0.0f, 0.0f);
+    cannonProjectileBody.setUserPointer(this);
+    cannonProjectileBody.setUserPointer1(&source.ship);
+    cannonProjectileBody.setUserPointer2(&source);
+    cannonProjectileBody.setCollisionFunctor(DisruptorCannonCollisionFunctor());
+    cannonProjectileBody.setInternalPhysicsUserPointer(&cannonProjectileBody);
+    const_cast<btRigidBody&>(cannonProjectileBody.getBtBody()).setDamping(0.0f, 0.0f);
 
 
     light = new PointLight(finalPosition, &map);

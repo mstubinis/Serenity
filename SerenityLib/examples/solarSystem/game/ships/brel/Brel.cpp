@@ -159,6 +159,7 @@ void Brel::updateWingSpan(const double& dt, const BrelWingSpanState::State end, 
 void Brel::update(const double& dt) {
 
     auto& sensors = *static_cast<ShipSystemSensors*>(getShipSystem(ShipSystemType::Sensors));
+    //TODO: change to sensors.getClosestEnemyShip(); once that is correctly coded
     const auto& closestEnemy = sensors.getClosestShip();
     if (closestEnemy.ship) {
         if (closestEnemy.distanceAway2 < static_cast<decimal>(150.0 * 150.0)) { //15km away

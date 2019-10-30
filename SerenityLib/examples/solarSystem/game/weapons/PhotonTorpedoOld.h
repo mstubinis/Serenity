@@ -32,7 +32,7 @@ struct PhotonTorpedoOldFlare final {
 struct PhotonTorpedoOldProjectile final : public SecondaryWeaponTorpedoProjectile {
     PhotonTorpedoOld&                   torpedo;
     std::vector<PhotonTorpedoOldFlare>  flares;
-    PhotonTorpedoOldProjectile(PhotonTorpedoOld&, Map& map, const glm_vec3& position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos);
+    PhotonTorpedoOldProjectile(PhotonTorpedoOld&, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos);
     ~PhotonTorpedoOldProjectile();
     void update(const double& dt);
 };

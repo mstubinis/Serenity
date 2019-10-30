@@ -135,7 +135,7 @@ struct PlasmaTorpedoFlareInstanceUnbindFunctor { void operator()(EngineResource*
 }};
 
 
-PlasmaTorpedoProjectile::PlasmaTorpedoProjectile(PlasmaTorpedo& source, Map& map, const glm_vec3& position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : torpedo(source), SecondaryWeaponTorpedoProjectile(map, position, forward, index) {
+PlasmaTorpedoProjectile::PlasmaTorpedoProjectile(PlasmaTorpedo& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : torpedo(source), SecondaryWeaponTorpedoProjectile(map, final_world_position, forward, index) {
     maxTime = 30.5f;
     rotationAngleSpeed = source.rotationAngleSpeed;
 
@@ -188,7 +188,7 @@ PlasmaTorpedoProjectile::PlasmaTorpedoProjectile(PlasmaTorpedo& source, Map& map
     auto shipLinVel = shipBody.getLinearVelocity();
     auto shipAngVel = shipBody.getAngularVelocity();
 
-    body.setPosition(position);
+    body.setPosition(final_world_position);
     body.setLinearVelocity(shipLinVel, false);
     body.setAngularVelocity(shipAngVel, false);
 
@@ -201,7 +201,6 @@ PlasmaTorpedoProjectile::PlasmaTorpedoProjectile(PlasmaTorpedo& source, Map& map
     body.setUserPointer2(&source);
     body.setCollisionFunctor(PlasmaTorpedoCollisionFunctor());
     body.setInternalPhysicsUserPointer(&body);
-    //body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
 
     auto data = source.calculatePredictedVector(body, chosen_target_pos);
@@ -215,11 +214,11 @@ PlasmaTorpedoProjectile::PlasmaTorpedoProjectile(PlasmaTorpedo& source, Map& map
 
     body.applyImpulse(offset.x, offset.y, offset.z, false);
 
-    //body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
+    body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
     body.setRotation(q);
 
-    light = new PointLight(position, &map);
+    light = new PointLight(final_world_position, &map);
     light->setColor(plasmaGreen);
     light->setAttenuation(LightRange::_20);
 }

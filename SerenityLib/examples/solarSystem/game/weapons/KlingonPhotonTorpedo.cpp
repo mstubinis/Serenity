@@ -140,7 +140,7 @@ struct KlingonPhotonTorpedoFlareInstanceUnbindFunctor {void operator()(EngineRes
 
 
 
-KlingonPhotonTorpedoProjectile::KlingonPhotonTorpedoProjectile(KlingonPhotonTorpedo& source, Map& map, const glm_vec3& position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) :torpedo(source), SecondaryWeaponTorpedoProjectile(map, position, forward, index) {
+KlingonPhotonTorpedoProjectile::KlingonPhotonTorpedoProjectile(KlingonPhotonTorpedo& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) :torpedo(source), SecondaryWeaponTorpedoProjectile(map, final_world_position, forward, index) {
     maxTime = 30.5f;
     rotationAngleSpeed = source.rotationAngleSpeed;
 
@@ -200,7 +200,7 @@ KlingonPhotonTorpedoProjectile::KlingonPhotonTorpedoProjectile(KlingonPhotonTorp
     auto shipLinVel = shipBody.getLinearVelocity();
     auto shipAngVel = shipBody.getAngularVelocity();
 
-    body.setPosition(position);
+    body.setPosition(final_world_position);
     body.setLinearVelocity(shipLinVel, false);
     body.setAngularVelocity(shipAngVel, false);
 
@@ -213,7 +213,6 @@ KlingonPhotonTorpedoProjectile::KlingonPhotonTorpedoProjectile(KlingonPhotonTorp
     body.setUserPointer2(&source);
     body.setCollisionFunctor(KlingonPhotonTorpedoCollisionFunctor());
     body.setInternalPhysicsUserPointer(&body);
-    //body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
 
     auto data = source.calculatePredictedVector(body, chosen_target_pos);
@@ -227,11 +226,11 @@ KlingonPhotonTorpedoProjectile::KlingonPhotonTorpedoProjectile(KlingonPhotonTorp
 
     body.applyImpulse(offset.x, offset.y, offset.z, false);
 
-    //body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
+    body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
     body.setRotation(q);
 
-    light = new PointLight(position, &map);
+    light = new PointLight(final_world_position, &map);
     light->setColor(photonRed);
     light->setAttenuation(LightRange::_20);
 }

@@ -121,7 +121,7 @@ struct PlasmaCannonTailInstanceUnbindFunctor {void operator()(EngineResource* r)
 }};
 
 
-PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, const glm_vec3& position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map, position, forward, index) {
+PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map, final_world_position, forward, index) {
     EntityDataRequest request(entity);
 
     auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
@@ -151,7 +151,7 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
     active = true;
     auto& shipBody = *source.ship.getComponent<ComponentBody>();
 
-    auto finalPosition = position + Math::rotate_vec3(shipBody.rotation(), glm_vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
+    auto finalPosition = final_world_position + Math::rotate_vec3(shipBody.rotation(), glm_vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
 
     cannonBody.setPosition(finalPosition);
     cannonBody.addCollisionFlag(CollisionFlag::NoContactResponse);
