@@ -16,11 +16,11 @@ _TOTAL};};
 class GameCamera: public Camera{
     friend struct ::GameCameraLogicFunctor;
     public:
-        CameraState::State m_State;
-        float m_OrbitRadius;
-        EntityWrapper* m_Target;
-        EntityWrapper* m_Player;
-        glm::dvec2 m_CameraMouseFactor;
+        CameraState::State   m_State;
+        float                m_OrbitRadius;
+        EntityWrapper*       m_Target;
+        EntityWrapper*       m_Player;
+        glm::dvec2           m_CameraMouseFactor;
 
         GameCamera(float clipStart, float clipEnd, Scene* = nullptr);                                                  // Perspective camera Constructor
         GameCamera(float angle, float aspectRatio, float clipStart, float clipEnd,Scene* = nullptr);                   // Perspective camera Constructor

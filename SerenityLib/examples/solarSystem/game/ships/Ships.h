@@ -23,6 +23,8 @@ struct ShipInformation final {
     FactionInformation     FactionInformation;
     std::vector<Handle>    MeshHandles;
     std::vector<Handle>    MaterialHandles;
+    Handle                 IconTextureHandle;
+    Handle                 IconBorderTextureHandle;
 
     ShipInformation();
 };

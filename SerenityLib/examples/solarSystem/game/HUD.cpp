@@ -8,6 +8,7 @@
 #include "Client.h"
 #include "Packet.h"
 #include "ResourceManifest.h"
+#include "GameCamera.h"
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/events/Engine_Events.h>
@@ -367,6 +368,7 @@ void HUD::update_game(const double& dt) {
                 _countShips = 0;
             }
             player.setTarget(shipsVect[_countShips]->entity().getComponent<ComponentName>()->name(), true);
+            player.getPlayerCamera()->setTarget(shipsVect[_countShips]);
             ++_countShips;
         }
     }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
@@ -382,6 +384,7 @@ void HUD::update_game(const double& dt) {
             _countPlanets = 0;
         }
         player.setTarget(planetsVect[_countPlanets]->entity().getComponent<ComponentName>()->name(), true);
+        player.getPlayerCamera()->setTarget(planetsVect[_countPlanets]);
         ++_countPlanets;
     }
 }

@@ -135,6 +135,18 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
 
 #pragma endregion
 
+    //ship icon texture
+    boost::filesystem::recursive_directory_iterator it2(root);
+    boost::filesystem::recursive_directory_iterator endit2;
+    while (it2 != endit2) {
+        const auto path_string = it2->path().string();
+        if (boost::filesystem::is_regular_file(*it2) && it2->path().extension() == ".dds" && boost::algorithm::contains(path_string, ship_class_lower + "_icon")){
+            auto handle = Resources::loadTexture(path_string); //TODO: include and modify second parameter?
+            info.IconTextureHandle = handle;
+        }
+        ++it2;
+    }
+
     Database.emplace(shipClass, info);
 }
 void Ships::init() {

@@ -78,14 +78,10 @@ Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     //blender 3d to game 3d: switch y and z, then negate z
-    auto* leftTop = new DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f, 1);
-    auto* leftBottom = new DisruptorCannon(_this, map, glm::vec3(-0.78429f, -0.65897f, -0.662792f), glm::vec3(0.01f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f, 1);
-    auto* rightBottom = new DisruptorCannon(_this, map, glm::vec3(0.78429f, -0.65897f, -0.662792f), glm::vec3(-0.01f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f, 2);
-    auto* rightTop = new DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f, 2);
+    auto* leftTop = new DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 10.0f, 6, 500, 0.7f, 2.5f, 1.8f, 50.5f, 50.0f, 1);
+    auto* rightTop = new DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 10.0f, 6, 500, 0.7f, 2.5f, 1.8f, 50.5f, 50.0f, 2);
 
     weapons.addPrimaryWeaponCannon(*leftTop);
-    weapons.addPrimaryWeaponCannon(*leftBottom);
-    weapons.addPrimaryWeaponCannon(*rightBottom);
     weapons.addPrimaryWeaponCannon(*rightTop);
 
     auto* fwd_torp = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 2);
@@ -174,8 +170,13 @@ void Brel::update(const double& dt) {
     }else{
         foldWingsUp();
     }
-
-
+    /*
+    //for testing only
+    if (m_IsPlayer && Engine::isKeyDownOnce(KeyboardKey::Space)) {
+        foldWingsUp();
+        foldWingsDown();
+    }
+    */
     if (m_WingState == BrelWingSpanState::RotatingUp) {
         updateWingSpan(dt, BrelWingSpanState::Up, 1);
     }

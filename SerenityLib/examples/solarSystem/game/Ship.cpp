@@ -80,8 +80,8 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                 map.centerSceneToObject(ship.m_Entity);
                 camera.orbit(&ship);
             }else if (mytarget) {
-                auto dist = glm::distance2(ship.getPosition(), mytarget->getComponent<ComponentBody>()->position());
-                if (dist < static_cast<decimal>(10000000000.0)) { //to prevent FP issues when viewing things billions of km away
+                const auto dist2 = glm::distance2(ship.getPosition(), mytarget->getComponent<ComponentBody>()->position());
+                if (dist2 < static_cast<decimal>(10000000000.0)) { //to prevent FP issues when viewing things billions of km away
                     map.centerSceneToObject(mytarget->entity());
                     camera.orbit(mytarget);
                 }

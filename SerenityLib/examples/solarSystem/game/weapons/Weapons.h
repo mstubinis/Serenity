@@ -40,14 +40,8 @@ class Weapons {
                 auto& model = shipModel.getModel(modelIndex);
                 auto modelPos = glm_vec3(model.position());
                 auto modelRot = model.orientation();
-                modelRot.z *= -1;
                 auto part1 = Math::rotate_vec3(modelRot, localPosition);
-                glm_vec3 localPos;
-
-                localPos.x = modelPos.x - part1.x;
-                localPos.y = modelPos.y + part1.y;
-                localPos.z = modelPos.z + part1.z;
-
+                glm_vec3 localPos = modelPos + part1;
                 auto shipMatrix = shipBody.modelMatrix();
                 shipMatrix = glm::translate(shipMatrix, localPos);
                 final_world_position = glm_vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
