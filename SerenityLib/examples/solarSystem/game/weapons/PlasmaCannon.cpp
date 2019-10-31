@@ -15,6 +15,7 @@
 
 #include "../ships/shipSystems/ShipSystemShields.h"
 #include "../ships/shipSystems/ShipSystemHull.h"
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
 
 using namespace Engine;
 using namespace std;
@@ -152,6 +153,12 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
     auto& shipBody = *source.ship.getComponent<ComponentBody>();
 
     auto finalPosition = final_world_position + Math::rotate_vec3(shipBody.rotation(), glm_vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
+
+    auto& sph = *static_cast<btBoxShape*>(cannonBody.getCollision()->getBtShape());
+    const auto& _scl = btVector3(0.05f, 0.05f, 0.05f);
+    sph.setLocalScaling(_scl);
+    sph.setMargin(0.165f);
+    sph.setImplicitShapeDimensions(_scl);
 
     cannonBody.setPosition(finalPosition);
     cannonBody.addCollisionFlag(CollisionFlag::NoContactResponse);

@@ -117,11 +117,9 @@ void EngineCore::update_logic(const double& dt){
     ////////////////////////////////////////////////////////////
 }
 void EngineCore::update_sounds(const double& dt){
-    // update sounds ///////////////////////////////////////////
     m_DebugManager.stop_clock();
     m_SoundManager._update(dt);
     m_DebugManager.calculate_sounds();
-    ////////////////////////////////////////////////////////////
 }
 void EngineCore::update(const double& dt){
     update_logic(dt);
@@ -132,6 +130,8 @@ void EngineCore::render(const double& dt){
     m_DebugManager.stop_clock();
     Game::render();
     auto& scene = *Resources::getCurrentScene();
+    scene.render();
+    m_RenderManager._sort2DAPICommands();
     auto& viewports = InternalScenePublicInterface::GetViewports(scene);
     for (auto& viewport : viewports) {
         if (viewport->isActive()) {
@@ -154,6 +154,7 @@ void EngineCore::on_event_resize(const uint& w, const uint& h, const bool& saveS
     //resize cameras here
 
     for (auto& scene : Core::m_Engine->m_ResourceManager.scenes()) {
+        scene->onResize(w, h);
         InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(w, h);
         InternalScenePublicInterface::GetViewports(*scene)[0]->setViewportDimensions(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h));
     }

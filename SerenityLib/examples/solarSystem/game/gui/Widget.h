@@ -49,6 +49,7 @@ class Widget : public IWidget {
         void hide();
 
         virtual void update(const double& dt);
+        virtual void render(const glm::vec4& scissor);
         virtual void render();
 };
 

@@ -24,11 +24,11 @@ class ShipSystemSensors final : public ShipSystem {
     private:
         EntityWrapper*      m_Target;
         Map&                m_Map;
-        Camera*             m_Camera;
-        Entity              m_RadarRingEntity;
+        //Camera*             m_Camera;
+        //Entity              m_RadarRingEntity;
         decimal             m_RadarRange;
-        glm::vec4           m_Viewport;
-        Viewport*           m_ViewportObject;
+        //glm::vec4           m_Viewport;
+        //Viewport*           m_ViewportObject;
 
         std::vector<Ship*>  m_DetectedEnemyShips;
         std::vector<Ship*>  m_DetectedShips;
@@ -39,6 +39,7 @@ class ShipSystemSensors final : public ShipSystem {
         ~ShipSystemSensors();
 
         const bool validateDetection(Ship& othership, const glm_vec3& thisShipPos);
+        const decimal& getRadarRange() const;
 
         DetectedShip getClosestAlliedShip();
         DetectedShip getClosestNeutralShip();
@@ -50,10 +51,10 @@ class ShipSystemSensors final : public ShipSystem {
         std::vector<Ship*>&   getAlliedShips();
         std::vector<Ship*>&   getNeutralShips();
 
-        const Entity& radarRingEntity() const;
-        const Entity& radarCameraEntity() const;
+        //const Entity& radarRingEntity() const;
+        //const Entity& radarCameraEntity() const;
 
-        void onResize(const uint& width, const uint& height);
+        //void onResize(const uint& width, const uint& height);
 
         EntityWrapper* getTarget();
         void setTarget(EntityWrapper* entityWrapper, const bool sendPacket);

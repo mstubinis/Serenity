@@ -6,19 +6,21 @@
 #include <string>
 #include <core/engine/utils/Utils.h>
 
-class HUD;
-class Server;
-class Client;
-class EntityWrapper;
-class ShipSystemSensors;
+class  Menu;
+class  Server;
+class  Client;
+class  EntityWrapper;
+class  ShipSystemSensors;
+class  SensorStatusDisplay;
 class Core final {
-    friend class HUD;
-    friend class Client;
-    friend class Server;
-    friend class ShipSystemSensors;
+    friend class  Menu;
+    friend class  Client;
+    friend class  Server;
+    friend class  ShipSystemSensors;
+    friend class  SensorStatusDisplay;
     private:
         EntityWrapper*      m_ChosenShip;
-        HUD*                m_HUD;
+        Menu*               m_Menu;
         Server*             m_Server;
         Client*             m_Client;
         bool                m_Initalized;

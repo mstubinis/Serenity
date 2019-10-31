@@ -38,7 +38,9 @@ class Scene: public EngineResource, public EventObserver{
     friend struct Engine::epriv::InternalScenePublicInterface;
     public:
         virtual void update(const double& dt);
+        virtual void render();
         virtual void onEvent(const Event& _event);
+        virtual void onResize(const unsigned int& width, const unsigned int& height);
 
         template<typename T> void setOnUpdateFunctor(const T& functor) {
             m_OnUpdateFunctor = boost::bind<void>(functor, this, _1);

@@ -14,12 +14,12 @@ class  Client;
 struct GameCameraShipSelectorLogicFunctor;
 struct ShipSelectorButtonOnClick;
 struct ButtonNext_OnClick;
-class  HUD;
+class  Menu;
 class ServerLobbyShipSelectorWindow final {
     friend struct GameCameraShipSelectorLogicFunctor;
     friend struct ShipSelectorButtonOnClick;
     friend struct ButtonNext_OnClick;
-    friend class  HUD;
+    friend class  Menu;
     friend class  Client;
     private:
         bool         m_IsCurrentlyDragging;

@@ -1,6 +1,6 @@
 #include "Core.h"
 
-#include "HUD.h"
+#include "Menu.h"
 #include "Server.h"
 #include "Client.h"
 #include "Ship.h"
@@ -22,7 +22,7 @@ using namespace std;
 using namespace Engine;
 
 Core::Core() {
-    m_HUD               = nullptr;
+    m_Menu              = nullptr;
     m_Server            = nullptr;
     m_Client            = nullptr;
     m_Initalized        = false;
@@ -37,7 +37,7 @@ Core::~Core() {
     SAFE_DELETE(m_ChosenShip);
     SAFE_DELETE(m_Client);
     SAFE_DELETE(m_Server);
-    SAFE_DELETE(m_HUD);
+    SAFE_DELETE(m_Menu);
 }
 Server* Core::getServer() {
     return m_Server;
@@ -83,7 +83,7 @@ void Core::shutdownClient(const bool& serverShutdownFirst) {
         client.disconnect();
 
         Resources::setCurrentScene("Menu");
-        m_HUD->go_to_main_menu();
+        m_Menu->go_to_main_menu();
     }
 }
 void Core::requestValidation(const string& name) {
@@ -94,7 +94,7 @@ void Core::requestValidation(const string& name) {
     if (status == sf::Socket::Status::Done) {
         cout << "Client: requesting validation connection to the server..." << endl;
     }else{
-        m_HUD->setErrorText("Connection timed out");
+        m_Menu->setErrorText("Connection timed out");
     }
 }
 void Core::enterMap(const string& mapFile, const string& playerShipClass, const string& playername, const float& x, const float& y, const float& z) {
@@ -112,7 +112,7 @@ void Core::enterMap(const string& mapFile, const string& playerShipClass, const 
     window.setMouseCursorVisible(false);
 }
 void Core::onResize(const uint& width, const uint& height) {
-    m_HUD->onResize(width, height);
+    m_Menu->onResize(width, height);
 }
 void Core::init() {
     if (m_Initalized) return;
@@ -143,9 +143,9 @@ void Core::init() {
 
     ModelInstance::setDefaultViewportFlag(ViewportFlag::_1);
 
-    m_HUD        = new HUD(*menuScene, *ship_camera, m_GameState, *this);
+    m_Menu = new Menu(*menuScene, *ship_camera, m_GameState, *this);
     m_Initalized = true;
-    m_HUD->go_to_main_menu();
+    m_Menu->go_to_main_menu();
 }
 void Core::update(const double& dt) {
     m_GameTime += dt;
@@ -161,10 +161,10 @@ void Core::update(const double& dt) {
 
     if(m_Client) m_Client->update(m_Client, dt);
     if(m_Server) m_Server->update(m_Server, dt);
-    m_HUD->update(dt);
+    m_Menu->update(dt);
 }
 void Core::render() {
-    m_HUD->render();
+    m_Menu->render();
 }
 
 const GameState::State& Core::gameState() const {

@@ -39,37 +39,21 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
 
     ShipInformation info;
 
-    info.Class = shipClass;
-    info.Faction = faction;
-    info.FactionInformation = Factions::Database[faction];
+    info.Class                  = shipClass;
+    info.Faction                = faction;
+    info.FactionInformation     = Factions::Database[faction];
 
-    const auto ship_class_lower = boost::algorithm::to_lower_copy(shipClass);
+    auto ship_class_lower = boost::algorithm::to_lower_copy(shipClass);
+    boost::replace_all(ship_class_lower, "'", "");
 
-    //get objcc files
-#pragma region Meshes
-    map<string, boost::filesystem::path> objcc_files;
     string root = "../data/Ships/" + ship_class_lower + "/";
     if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) 
         return;
 
     boost::filesystem::recursive_directory_iterator it(root);
     boost::filesystem::recursive_directory_iterator endit;
-    while (it != endit){
-        if (boost::filesystem::is_regular_file(*it) && it->path().extension() == ".objcc")
-            objcc_files.emplace(it->path().filename().string(), it->path());
-        ++it;
 
-    }
-    for(auto& path : objcc_files){
-        auto handles = Resources::loadMeshAsync(path.second.string());
-        for (auto& handle : handles) {
-            info.MeshHandles.push_back(handle);
-        }
-    }
-#pragma endregion
-
-    //get material files (.dds)
-#pragma region Materials
+    map<string, boost::filesystem::path> objcc_files;
     vector<string> texture_files_contains{
         ship_class_lower,
         ship_class_lower + "_Normal",
@@ -80,25 +64,46 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
         ship_class_lower + "_Smoothness",
     };
     unordered_map<string, boost::filesystem::path> texture_files;
+    string diffuse, normal, glow, specular, ao, metalness, smoothness = "";
 
-    boost::filesystem::recursive_directory_iterator it1(root);
-    boost::filesystem::recursive_directory_iterator endit1;
-    while (it1 != endit1) {
-        if (boost::filesystem::is_regular_file(*it1) && it1->path().extension() == ".dds") {
+    while (it != endit){
+        const auto extension = it->path().extension().string();
+        const auto path_string = it->path().string();
 
-            for (auto& texture_contain : texture_files_contains) {
-                auto& contain_str = it1->path().string();
-                if (boost::algorithm::contains(contain_str, texture_contain + ".dds")) {
-                    auto& path = it1->path();
-                    texture_files.emplace(texture_contain, path);
-                    break;
+        if (boost::filesystem::is_regular_file(*it)) {
+            if (extension == ".objcc") {
+                objcc_files.emplace(path_string, it->path());
+            }else if ( extension == ".dds") {
+                for (auto& texture_contain : texture_files_contains) {
+                    if (boost::algorithm::contains(path_string, texture_contain + ".dds")) {
+                        auto& path = it->path();
+                        texture_files.emplace(texture_contain, path);
+                        break;
+                    }
+                }
+                if (boost::algorithm::contains(path_string, ship_class_lower + "_icon_Border")) { //ship icon border texture
+                    auto handle = Resources::loadTextureAsync(path_string); //TODO: include and modify second parameter?
+                    info.IconBorderTextureHandle = handle;
+                }else if (boost::algorithm::contains(path_string, ship_class_lower + "_icon")) { //ship icon texture
+                    auto handle = Resources::loadTextureAsync(path_string); //TODO: include and modify second parameter?
+                    info.IconTextureHandle = handle;
                 }
             }
         }
-        ++it1;
-
+        ++it;
     }
-    string diffuse, normal, glow, specular, ao, metalness, smoothness = "";
+    //get objcc files
+#pragma region Meshes
+    for(auto& path : objcc_files){
+        auto handles = Resources::loadMeshAsync(path.second.string());
+        for (auto& handle : handles) {
+            info.MeshHandles.push_back(handle);
+        }
+    }
+#pragma endregion
+
+
+#pragma region Materials
     for (auto& entry : texture_files) {
         const auto path = entry.second.string();
         if (!path.empty()) {
@@ -132,20 +137,7 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
     if (!smoothness.empty()) {
         mat.addComponentSmoothness(smoothness, 1.0f);
     }
-
 #pragma endregion
-
-    //ship icon texture
-    boost::filesystem::recursive_directory_iterator it2(root);
-    boost::filesystem::recursive_directory_iterator endit2;
-    while (it2 != endit2) {
-        const auto path_string = it2->path().string();
-        if (boost::filesystem::is_regular_file(*it2) && it2->path().extension() == ".dds" && boost::algorithm::contains(path_string, ship_class_lower + "_icon")){
-            auto handle = Resources::loadTexture(path_string); //TODO: include and modify second parameter?
-            info.IconTextureHandle = handle;
-        }
-        ++it2;
-    }
 
     Database.emplace(shipClass, info);
 }

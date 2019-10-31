@@ -157,7 +157,7 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(PhotonTorpedoOld& source,
     btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body.getCollision()->getBtShape());
     const auto& _scl = btVector3(0.05f, 0.05f, 0.05f);
     sph.setLocalScaling(_scl);
-    sph.setMargin(0.135f);
+    sph.setMargin(0.165f);
     sph.setImplicitShapeDimensions(_scl);
     sph.recalcLocalAabb();
 

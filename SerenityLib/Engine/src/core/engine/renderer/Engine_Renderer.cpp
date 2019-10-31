@@ -32,6 +32,7 @@
 #include <queue>
 
 #include <iostream>
+#include <execution>
 
 #include <boost/function.hpp>
 
@@ -54,6 +55,12 @@ uint epriv::RenderManager::OPENGL_VERSION;
 
 namespace Engine{
     namespace epriv{
+
+        struct API2DCommand {
+            boost_func func;
+            float depth;
+            glm::vec4 scissor;
+        };
 
         struct srtKeyShaderProgram final{inline bool operator() ( ShaderProgram* _1,  ShaderProgram* _2){return (_1->name() < _2->name());}};
 
@@ -172,7 +179,7 @@ class epriv::RenderManager::impl final{
         GBuffer* m_GBuffer;
         glm::mat4 m_2DProjectionMatrix;
 
-        vector<boost_func> m_2DAPICommands;
+        vector<API2DCommand> m_2DAPICommands;
 
         vector<glm::vec3>   text_pts;
         vector<glm::vec2>   text_uvs;
@@ -1845,7 +1852,10 @@ class epriv::RenderManager::impl final{
             }
             Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
             gbuffer.resize(dimensions.z, dimensions.w);
-            Renderer::scissorDisable();
+
+            //scissor disabling
+            glScissor(0, 0, winSize.x, winSize.y);
+
             m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(winSize.x), 0.0f, static_cast<float>(winSize.y), 0.005f, 3000.0f);
             //this is god awful and ugly, but its needed. definately find a way to refactor this properly
             for (uint i = 0; i < 9; ++i) {
@@ -2084,9 +2094,8 @@ class epriv::RenderManager::impl final{
                     m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI]->bind();
                     sendUniformMatrix4("VP", m_2DProjectionMatrix);
                     GLEnable(GL_SCISSOR_TEST);
-
                     for (auto& command : m_2DAPICommands) {
-                        command();
+                        command.func();
                     }
                     GLDisable(GL_SCISSOR_TEST);
                 }
@@ -2126,6 +2135,13 @@ void epriv::RenderManager::_onOpenGLContextCreation(uint windowWidth,uint window
 }
 void epriv::RenderManager::_clear2DAPICommands() {
     vector_clear(m_i->m_2DAPICommands);
+}
+void epriv::RenderManager::_sort2DAPICommands() {
+    vector<API2DCommand>& commands = m_i->m_2DAPICommands;
+    const auto& lambda_sorter = [&](API2DCommand& lhs, API2DCommand& rhs) {
+        return lhs.depth > rhs.depth;
+    };
+    std::sort( std::execution::par_unseq, commands.begin(), commands.end(), lambda_sorter);
 }
 epriv::GBuffer& epriv::RenderManager::getGbuffer() {
     return *m_i->m_GBuffer;
@@ -2387,9 +2403,118 @@ inline const GLint& Renderer::getUniformLocUnsafe(const char* location) {
 
 
 
+struct RenderingAPI2D final {
+    //TODO: optimize scissoring
+    static inline void GLScissorDisable() {
+        const auto winSize = Resources::getWindowSize();
+        glScissor(0, 0, winSize.x, winSize.y);
+    }
+    static void GLScissor(const glm::vec4& s) {
+        if (s == glm::vec4(-1.0f)) {
+            GLScissorDisable();
+        }else{
+            glScissor(static_cast<GLint>(s.x), static_cast<GLint>(s.y), s.z, s.w);
+        }
+    }
+    static void Render2DText(const string& text, const Font& font, const glm::vec2& pos, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type& alignType, const glm::vec4& scissor) {
+        GLScissor(scissor);
+        
+        auto& impl = *renderManagerImpl;
+        impl.text_pts.clear();
+        impl.text_uvs.clear();
+        impl.text_ind.clear();
 
+        auto& mesh = *Mesh::FontPlane;
+        mesh.bind();
+        sendUniform1("DiffuseTextureEnabled", 1);
 
-//a collection of 2d rendering api functors
+        const auto& newLineGlyphHeight = font.getGlyphData('X').height;
+        const auto& texture = font.getGlyphTexture();
+        sendTexture("DiffuseTexture", texture, 0);
+        sendUniform4("Object_Color", color);
+        float y = 0.0f;
+        float x = 0.0f;
+        float z = -0.001f - depth;
+
+        glm::mat4 m = impl.m_IdentityMat4;
+        m = glm::translate(m, glm::vec3(pos.x, pos.y, 0));
+        m = glm::rotate(m, angle, impl.m_RotationAxis2D);
+        m = glm::scale(m, glm::vec3(scale.x, scale.y, 1));
+        sendUniformMatrix4("Model", m);
+
+        if (alignType == TextAlignment::Left) {
+            impl._renderTextLeft(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
+        }
+        else if (alignType == TextAlignment::Right) {
+            impl._renderTextRight(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
+        }
+        else if (alignType == TextAlignment::Center) {
+            impl._renderTextCenter(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
+        }
+        mesh.modifyVertices(0, impl.text_pts, MeshModifyFlags::Default); //prevent gpu upload until after all the data is collected
+        mesh.modifyVertices(1, impl.text_uvs);
+        mesh.modifyIndices(impl.text_ind);
+        mesh.render(false);
+    }
+    static void Render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
+        GLScissor(scissor);
+        
+        auto& impl = *renderManagerImpl;
+        auto& mesh = *Mesh::Plane;
+        mesh.bind();
+        glm::mat4 m = impl.m_IdentityMat4;
+        sendUniform4("Object_Color", color);
+
+        float translationX = position.x;
+        float translationY = position.y;
+        float totalSizeX = scale.x;
+        float totalSizeY = scale.y;
+        if (texture) {
+            totalSizeX *= texture->width();
+            totalSizeY *= texture->height();
+
+            sendTexture("DiffuseTexture", *texture, 0);
+            sendUniform1("DiffuseTextureEnabled", 1);
+        }
+        else {
+            sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
+            sendUniform1("DiffuseTextureEnabled", 0);
+        }
+        Renderer::alignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
+
+        m = glm::translate(m, glm::vec3(translationX, translationY, -0.001f - depth));
+        m = glm::rotate(m, Math::toRadians(angle), impl.m_RotationAxis2D);
+        m = glm::scale(m, glm::vec3(totalSizeX, totalSizeY, 1.0f));
+        sendUniformMatrix4("Model", m);
+        mesh.render(false);
+    }
+    static void RenderTriangle(const glm::vec2& pos, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
+        GLScissor(scissor);
+        
+        auto& impl = *renderManagerImpl;
+
+        auto& mesh = *Mesh::Triangle;
+        mesh.bind();
+
+        sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
+        sendUniform1("DiffuseTextureEnabled", 0);
+        sendUniform4("Object_Color", color);
+
+        float translationX = pos.x;
+        float translationY = pos.y;
+
+        Renderer::alignmentOffset(align, translationX, translationY, width, height);
+
+        glm::mat4 m = impl.m_IdentityMat4;
+        m = glm::translate(m, glm::vec3(translationX, translationY, -0.001f - depth));
+        m = glm::rotate(m, Math::toRadians(angle), impl.m_RotationAxis2D);
+        m = glm::scale(m, glm::vec3(width, height, 1));
+        sendUniformMatrix4("Model", m);
+
+        mesh.render(false);
+    }
+};
+
 void Renderer::alignmentOffset(const Alignment::Type& align, float& x, float& y, const float& width, const float& height) {
     switch (align) {
         case Alignment::TopLeft: {
@@ -2427,122 +2552,31 @@ void Renderer::alignmentOffset(const Alignment::Type& align, float& x, float& y,
         }
     }
 }
-
-
-struct RenderingAPI2D final {
-    static void Render2DText(const string& text, const Font& font, const glm::vec2& pos, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type& alignType) { 
-        auto& impl = *renderManagerImpl;
-        impl.text_pts.clear();
-        impl.text_uvs.clear();
-        impl.text_ind.clear();
-
-        auto& mesh = *Mesh::FontPlane;
-        mesh.bind();
-        sendUniform1("DiffuseTextureEnabled", 1);
-
-        const auto& newLineGlyphHeight = font.getGlyphData('X').height;
-        const auto& texture = font.getGlyphTexture();
-        sendTexture("DiffuseTexture", texture, 0);
-        sendUniform4("Object_Color", color);
-        float y = 0.0f;
-        float x = 0.0f;
-        float z = -0.001f - depth;
-
-        glm::mat4 m = impl.m_IdentityMat4;
-        m = glm::translate(m, glm::vec3(pos.x, pos.y, 0));
-        m = glm::rotate(m, angle, impl.m_RotationAxis2D);
-        m = glm::scale(m, glm::vec3(scale.x, scale.y, 1));
-        sendUniformMatrix4("Model", m);
-
-        if (alignType == TextAlignment::Left) {
-            impl._renderTextLeft(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
-        }else if (alignType == TextAlignment::Right) {
-            impl._renderTextRight(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
-        }else if (alignType == TextAlignment::Center) {
-            impl._renderTextCenter(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
-        }
-        mesh.modifyVertices(0, impl.text_pts, MeshModifyFlags::Default); //prevent gpu upload until after all the data is collected
-        mesh.modifyVertices(1, impl.text_uvs);
-        mesh.modifyIndices(impl.text_ind);
-        mesh.render(false);
-    }
-    static void Render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type& align) {
-        auto& impl = *renderManagerImpl;
-        auto& mesh = *Mesh::Plane;
-        mesh.bind();
-        glm::mat4 m = impl.m_IdentityMat4;
-        sendUniform4("Object_Color", color);
-
-        float translationX = position.x;
-        float translationY = position.y;
-        float totalSizeX   = scale.x;
-        float totalSizeY   = scale.y;
-        if (texture) {
-            totalSizeX *= texture->width();
-            totalSizeY *= texture->height();
-
-            sendTexture("DiffuseTexture", *texture, 0);
-            sendUniform1("DiffuseTextureEnabled", 1);
-        }else{
-            sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
-            sendUniform1("DiffuseTextureEnabled", 0);
-        }
-        Renderer::alignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
-
-        m = glm::translate(m, glm::vec3(translationX, translationY, -0.001f - depth));
-        m = glm::rotate(m, Math::toRadians(angle), impl.m_RotationAxis2D);
-        m = glm::scale(m, glm::vec3(totalSizeX, totalSizeY, 1.0f));
-        sendUniformMatrix4("Model", m);
-        mesh.render(false);
-    }
-    static void RenderTriangle(const glm::vec2& pos, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align) {
-        auto& impl = *renderManagerImpl;
-
-        auto& mesh = *Mesh::Triangle;
-        mesh.bind();
-
-        sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
-        sendUniform1("DiffuseTextureEnabled", 0);
-        sendUniform4("Object_Color", color);
-
-        float translationX = pos.x;
-        float translationY = pos.y;
-
-        Renderer::alignmentOffset(align, translationX, translationY, width, height);
-
-        glm::mat4 m = impl.m_IdentityMat4;
-        m = glm::translate(m, glm::vec3(translationX, translationY, -0.001f - depth));
-        m = glm::rotate(m, Math::toRadians(angle), impl.m_RotationAxis2D);
-        m = glm::scale(m, glm::vec3(width, height, 1));
-        sendUniformMatrix4("Model", m);
-
-        mesh.render(false);
-    }
-    static void GLScissor(const float x, const float y, const float width, const float height) {
-        glScissor(static_cast<GLint>(x), static_cast<GLint>(y), width, height);
-    }
-    static void GLScissorDisable() {
-        const auto winSize = Resources::getWindowSize();
-        glScissor(0, 0, winSize.x, winSize.y);
-    }
-};
-void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align) {
-    boost_func f = boost::bind<void>(&RenderingAPI2D::RenderTriangle, position, color, angle, width, height, depth, align);
-    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
+void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
+    epriv::API2DCommand command;
+    command.func = boost::bind<void>(&RenderingAPI2D::RenderTriangle, position, color, angle, width, height, depth, align, scissor);
+    command.depth = depth;
+    renderManagerImpl->m_2DAPICommands.push_back(std::move(command));
 }
-void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type& align){
-    boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DTexture, nullptr, pos, col, angle, glm::vec2(width, height), depth, align);
-    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
+void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type& align, const glm::vec4& scissor){
+    epriv::API2DCommand command;
+    command.func = boost::bind<void>(&RenderingAPI2D::Render2DTexture, nullptr, pos, col, angle, glm::vec2(width, height), depth, align, scissor);
+    command.depth = depth;
+    renderManagerImpl->m_2DAPICommands.push_back(std::move(command));
 }
-void Renderer::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type& align){
-    boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DTexture, &tex, p, c, a, s, d, align);
-    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
+void Renderer::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type& align, const glm::vec4& scissor){
+    epriv::API2DCommand command;
+    command.func = boost::bind<void>(&RenderingAPI2D::Render2DTexture, &tex, p, c, a, s, d, align, scissor);
+    command.depth = d;
+    renderManagerImpl->m_2DAPICommands.push_back(std::move(command));
 }
-void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type& align) {
-    boost_func f = boost::bind<void>(&RenderingAPI2D::Render2DText, t, boost::ref(fnt), p, c, a, s, d, align);
-    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
+void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type& align, const glm::vec4& scissor) {
+    epriv::API2DCommand command;
+    command.func = boost::bind<void>(&RenderingAPI2D::Render2DText, t, boost::ref(fnt), p, c, a, s, d, align, scissor);
+    command.depth = d;
+    renderManagerImpl->m_2DAPICommands.push_back(std::move(command));
 }
-void Renderer::renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, const float w, const float h, const float angle, const float depth, const Alignment::Type& align) {
+void Renderer::renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, const float w, const float h, const float angle, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
     const float doubleBorder = borderSize * 2.0f;
     const float halfWidth    = w / 2.0f;
     const float halfHeight   = h / 2.0f;
@@ -2552,20 +2586,11 @@ void Renderer::renderBorder(const float borderSize, const glm::vec2& pos, const 
     Renderer::alignmentOffset(align, translationX, translationY, w, h);
     glm::vec2 newPos(translationX, translationY);
 
-    Renderer::renderRectangle(newPos - glm::vec2(halfWidth, 0.0f), col, borderSize, h + doubleBorder, angle, depth,Alignment::Right);
-    Renderer::renderRectangle(newPos + glm::vec2(halfWidth, 0.0f), col, borderSize, h + doubleBorder, angle, depth,Alignment::Left);
-    Renderer::renderRectangle(newPos - glm::vec2(0.0f, halfHeight), col, w, borderSize, angle, depth,Alignment::TopCenter);
-    Renderer::renderRectangle(newPos + glm::vec2(0.0f, halfHeight + borderSize), col, w, borderSize, angle, depth,Alignment::BottomCenter);
+    Renderer::renderRectangle(newPos - glm::vec2(halfWidth, 0.0f), col, borderSize, h + doubleBorder, angle, depth,Alignment::Right, scissor);
+    Renderer::renderRectangle(newPos + glm::vec2(halfWidth, 0.0f), col, borderSize, h + doubleBorder, angle, depth,Alignment::Left, scissor);
+    Renderer::renderRectangle(newPos - glm::vec2(0.0f, halfHeight), col, w, borderSize, angle, depth,Alignment::TopCenter, scissor);
+    Renderer::renderRectangle(newPos + glm::vec2(0.0f, halfHeight + borderSize), col, w, borderSize, angle, depth,Alignment::BottomCenter, scissor);
 }
-void Renderer::scissor(const float x, const float y, const float width, const float height) {
-    boost_func f = boost::bind<void>(&RenderingAPI2D::GLScissor, x, y, width, height);
-    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
-}
-void Renderer::scissorDisable() {
-    boost_func f = boost::bind<void>(&RenderingAPI2D::GLScissorDisable);
-    renderManagerImpl->m_2DAPICommands.push_back(std::move(f));
-}
-
 
 void Renderer::renderFullscreenQuad(const uint& w, const uint& h, const uint& startX, const uint& startY){
     renderManagerImpl->_renderFullscreenQuad(w,h,startX,startY); 

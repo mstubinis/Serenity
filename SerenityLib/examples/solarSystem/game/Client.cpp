@@ -1,7 +1,7 @@
 #include "Client.h"
 #include "Packet.h"
 #include "Core.h"
-#include "HUD.h"
+#include "Menu.h"
 #include "Helper.h"
 #include "ResourceManifest.h"
 #include "gui/Button.h"
@@ -100,16 +100,16 @@ const sf::Socket::Status Client::connect(const ushort& timeout) {
     if (m_TcpSocket->isBlocking()) {
         auto lambda = [&](Client* client, const ushort timeout) {
             client->m_IsCurrentlyConnecting = true;
-            m_Core.m_HUD->setNormalText("Connecting...", static_cast<float>(timeout) + 2.2f);
+            m_Core.m_Menu->setNormalText("Connecting...", static_cast<float>(timeout) + 2.2f);
             const auto status = client->m_TcpSocket->connect(timeout);
             if (status == sf::Socket::Status::Done) {
-                m_Core.m_HUD->setGoodText("Connected!", 2);
+                m_Core.m_Menu->setGoodText("Connected!", 2);
                 client->m_TcpSocket->setBlocking(false);
                 m_Core.requestValidation(m_username);
             }else if (status == sf::Socket::Status::Error) {
-                m_Core.m_HUD->setErrorText("Connection to the server failed",20);
+                m_Core.m_Menu->setErrorText("Connection to the server failed",20);
             }else if (status == sf::Socket::Status::Disconnected) {
-                m_Core.m_HUD->setErrorText("Disconnected from the server",20);
+                m_Core.m_Menu->setErrorText("Disconnected from the server",20);
             }
             client->m_IsCurrentlyConnecting = false;
             return status;
@@ -250,7 +250,7 @@ void Client::onReceiveUDP() {
         Packet* basePacket = Packet::getPacket(sf_packet_udp);
         if (basePacket && basePacket->validate(sf_packet_udp)) {
             // Data extracted successfully...
-            HUD& hud = *m_Core.m_HUD;
+            Menu& menu = *m_Core.m_Menu;
             switch (basePacket->PacketType) {
                 case PacketType::Server_To_Client_Ship_Physics_Update: {
                     if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
@@ -290,7 +290,7 @@ void Client::onReceive() {
         Packet* basePacket = Packet::getPacket(sf_packet);
         if (basePacket && basePacket->validate(sf_packet)) {
             // Data extracted successfully...
-            HUD& hud = *m_Core.m_HUD;
+            Menu& menu = *m_Core.m_Menu;
             switch (basePacket->PacketType) {
                 case PacketType::Server_To_Client_Projectile_Cannon_Impact: {
                     PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(basePacket);
@@ -497,10 +497,10 @@ void Client::onReceive() {
 
                     auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map
 
-                    hud.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
+                    menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
                     m_Core.enterMap(info[1], info[0], pI.name, pI.r, pI.g, pI.b);
-                    hud.m_Next->setText("Next");
-                    hud.m_GameState = GameState::Game;//ok, ive entered the map
+                    menu.m_Next->setText("Next");
+                    menu.m_GameState = GameState::Game;//ok, ive entered the map
                     Map& map = *static_cast<Map*>(Resources::getScene(info[1]));
 
                     auto dist = Helper::GetRandomFloatFromTo(200, 250);
@@ -545,32 +545,32 @@ void Client::onReceive() {
                     menuScene.setSkybox(newMenuSkybox);
                     menuScene.setGlobalIllumination(map->getGlobalIllumination());
 
-                    hud.m_ServerLobbyShipSelectorWindow->clear();
+                    menu.m_ServerLobbyShipSelectorWindow->clear();
                     auto ships = map->allowedShips();
                     for (auto& ship : ships) {
                         auto& textColor = Ships::Database.at(ship).FactionInformation.ColorText;
 
-                        Button* shipbutton = new Button(*hud.m_Font, 0, 0, 100, 40);
+                        Button* shipbutton = new Button(*menu.m_Font, 0, 0, 100, 40);
                         shipbutton->setText(ship);
                         shipbutton->setColor(0.5f, 0.5f, 0.5f, 0.0f);
                         shipbutton->setTextColor(textColor.r, textColor.g, textColor.b, 1.0f);
                         shipbutton->setAlignment(Alignment::TopLeft);
                         shipbutton->setWidth(600);
                         shipbutton->setTextAlignment(TextAlignment::Left);
-                        shipbutton->setUserPointer(hud.m_ServerLobbyShipSelectorWindow);
+                        shipbutton->setUserPointer(menu.m_ServerLobbyShipSelectorWindow);
                         shipbutton->setOnClickFunctor(ShipSelectorButtonOnClick());
-                        hud.m_ServerLobbyShipSelectorWindow->addContent(shipbutton);
+                        menu.m_ServerLobbyShipSelectorWindow->addContent(shipbutton);
                     }
-                    hud.m_ServerLobbyShipSelectorWindow->setShipViewportActive(true);
+                    menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(true);
                     break;
                 }case PacketType::Server_To_Client_Chat_Message: {
                     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
                     auto message = pI.name + ": " + pI.data;
 
-                    Text* text = new Text(0, 0, *hud.m_Font, message);
+                    Text* text = new Text(0, 0, *menu.m_Font, message);
                     text->setColor(1, 1, 0, 1);
                     text->setTextScale(0.62f, 0.62f);
-                    hud.m_ServerLobbyChatWindow->addContent(text);
+                    menu.m_ServerLobbyChatWindow->addContent(text);
                     break;
                 
                 }case PacketType::Server_To_Client_Client_Joined_Server: {
@@ -578,41 +578,41 @@ void Client::onReceive() {
                     auto message = pI.name + ": Has joined the server";
 
 
-                    Text* text = new Text(0, 0, *hud.m_Font, pI.name);
+                    Text* text = new Text(0, 0, *menu.m_Font, pI.name);
                     text->setColor(1, 1, 0, 1);
                     text->setTextScale(0.62f, 0.62f);
-                    hud.m_ServerLobbyConnectedPlayersWindow->addContent(text);
+                    menu.m_ServerLobbyConnectedPlayersWindow->addContent(text);
 
-                    Text* text1 = new Text(0, 0, *hud.m_Font, message);
+                    Text* text1 = new Text(0, 0, *menu.m_Font, message);
                     text1->setColor(0.8f, 1, 0.2f, 1);
                     text1->setTextScale(0.62f, 0.62f);
-                    hud.m_ServerLobbyChatWindow->addContent(text1);
+                    menu.m_ServerLobbyChatWindow->addContent(text1);
                     break;
                 }case PacketType::Server_To_Client_Client_Left_Server:{
                     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
                     auto message = pI.name + ": Has left the server";
 
-                    Text* text = new Text(0, 0, *hud.m_Font, pI.name);
+                    Text* text = new Text(0, 0, *menu.m_Font, pI.name);
                     text->setColor(1, 1, 0, 1);
                     text->setTextScale(0.62f, 0.62f);
-                    hud.m_ServerLobbyConnectedPlayersWindow->removeContent(pI.name);
+                    menu.m_ServerLobbyConnectedPlayersWindow->removeContent(pI.name);
 
-                    Text* text1 = new Text(0, 0, *hud.m_Font, message);
+                    Text* text1 = new Text(0, 0, *menu.m_Font, message);
                     text1->setColor(0.907f, 0.341f, 0.341f, 1.0f);
                     text1->setTextScale(0.62f, 0.62f);
-                    hud.m_ServerLobbyChatWindow->addContent(text1);
+                    menu.m_ServerLobbyChatWindow->addContent(text1);
                     break;
                 }case PacketType::Server_To_Client_Accept_Connection: {
                     m_Validated = true;
                     if (m_Core.m_GameState != GameState::Host_Server_Lobby_And_Ship && m_Core.m_GameState == GameState::Host_Server_Port_And_Name_And_Map) {
                         m_Core.m_GameState = GameState::Host_Server_Lobby_And_Ship;
-                        hud.m_Next->setText("Enter Game");
+                        menu.m_Next->setText("Enter Game");
                     }else if (m_Core.m_GameState != GameState::Join_Server_Server_Lobby && m_Core.m_GameState == GameState::Join_Server_Port_And_Name_And_IP) {
                         m_Core.m_GameState = GameState::Join_Server_Server_Lobby;
-                        hud.m_Next->setText("Enter Game");
+                        menu.m_Next->setText("Enter Game");
                     }
-                    hud.m_ServerLobbyConnectedPlayersWindow->clear();
-                    hud.m_ServerLobbyChatWindow->clear();
+                    menu.m_ServerLobbyConnectedPlayersWindow->clear();
+                    menu.m_ServerLobbyChatWindow->clear();
 
                     auto list = Helper::SeparateStringByCharacter(basePacket->data, ',');
                     auto client_id = list.back();
@@ -620,27 +620,27 @@ void Client::onReceive() {
                     //list is a vector of connected players
                     for (auto& _name : list) {
                         if (!_name.empty()) { //trailing "," in data can lead to an empty string added into the list
-                            Text* text = new Text(0, 0, *hud.m_Font, _name);
+                            Text* text = new Text(0, 0, *menu.m_Font, _name);
                             text->setColor(1, 1, 0, 1);
                             text->setTextScale(0.62f, 0.62f);
-                            hud.m_ServerLobbyConnectedPlayersWindow->addContent(text);
+                            menu.m_ServerLobbyConnectedPlayersWindow->addContent(text);
                         }
                     }
                     setClientID(std::stoi(client_id));
                     break;
                 }case PacketType::Server_To_Client_Reject_Connection: {
                     m_Validated = false;
-                    hud.setErrorText("Someone has already chosen that name");
+                    menu.setErrorText("Someone has already chosen that name");
                     break;
                 }case PacketType::Server_Shutdown: {
                     m_Validated = false;
                     m_Core.shutdownClient(true);
-                    hud.setErrorText("Disconnected from the server",600);
+                    menu.setErrorText("Disconnected from the server",600);
                     m_Core.m_GameState = GameState::Main_Menu;
-                    hud.m_Next->setText("Next");
+                    menu.m_Next->setText("Next");
 
-                    hud.m_ServerLobbyChatWindow->clear();
-                    hud.m_ServerLobbyConnectedPlayersWindow->clear();
+                    menu.m_ServerLobbyChatWindow->clear();
+                    menu.m_ServerLobbyConnectedPlayersWindow->clear();
                     break;
                 }default: {
                     break;

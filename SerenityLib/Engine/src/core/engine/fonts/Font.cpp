@@ -105,6 +105,6 @@ const FontGlyph& Font::getGlyphData(const uchar& character) const {
         return m_FontGlyphs.at('?');
     return m_FontGlyphs.at(character);
 }
-void Font::renderText(const string& t, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const TextAlignment::Type& al){
-    Renderer::renderText(t, *this, p, c, a, s, d, al);
+void Font::renderText(const string& t, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const TextAlignment::Type& al, const glm::vec4& scissor){
+    Renderer::renderText(t, *this, p, c, a, s, d, al, scissor);
 }

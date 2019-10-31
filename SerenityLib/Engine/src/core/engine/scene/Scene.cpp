@@ -362,6 +362,13 @@ void Scene::centerSceneToObject(const Entity& centerEntity){
 void Scene::update(const double& dt){
     m_OnUpdateFunctor(dt);
 }
+void Scene::onResize(const unsigned int& width, const unsigned int& height) {
+
+}
+void Scene::render() {
+
+}
+
 const glm::vec4& Scene::getBackgroundColor() const {
     return m_i->m_Viewports[0]->m_BackgroundColor;
 }

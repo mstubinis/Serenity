@@ -211,7 +211,10 @@
     <ClInclude Include="game\gui\Widget.h" />
     <ClInclude Include="game\gui\WidgetInterface.h" />
     <ClInclude Include="game\Helper.h" />
-    <ClInclude Include="game\HUD.h" />
+    <ClInclude Include="game\Menu.h" />
+    <ClInclude Include="game\hud\HUD.h" />
+    <ClInclude Include="game\hud\SensorStatusDisplay.h" />
+    <ClInclude Include="game\hud\ShipStatusDisplay.h" />
     <ClInclude Include="game\map\Anchor.h" />
     <ClInclude Include="game\map\Freelist.h" />
     <ClInclude Include="game\map\Map.h" />
@@ -278,7 +281,10 @@
     <ClCompile Include="game\gui\Text.cpp" />
     <ClCompile Include="game\gui\TextBox.cpp" />
     <ClCompile Include="game\gui\Widget.cpp" />
-    <ClCompile Include="game\HUD.cpp" />
+    <ClCompile Include="game\Menu.cpp" />
+    <ClCompile Include="game\hud\HUD.cpp" />
+    <ClCompile Include="game\hud\SensorStatusDisplay.cpp" />
+    <ClCompile Include="game\hud\ShipStatusDisplay.cpp" />
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\map\Anchor.cpp" />
     <ClCompile Include="game\map\Map.cpp" />

@@ -11,15 +11,16 @@
 struct Packet;
 class  Client;
 class  Server;
-class  HUD;
+class  Menu;
 class  Core;
 class  ShipSystemSensors;
-
+class  SensorStatusDisplay;
 class Client{
     friend class  Server;
-    friend class  HUD;
+    friend class  Menu;
     friend class  Core;
     friend class  ShipSystemSensors;
+    friend class  SensorStatusDisplay;
     private:
         std::future<sf::Socket::Status>*      m_InitialConnectionThread;
         Engine::Networking::SocketTCP*        m_TcpSocket;
@@ -57,16 +58,12 @@ class Client{
         const sf::Socket::Status receive(sf::Packet& packet);
         const sf::Socket::Status receive(void* data, size_t size, size_t& received);
 
-
-
         const sf::Socket::Status send_udp(Packet& packet);
         const sf::Socket::Status send_udp(sf::Packet& packet);
         const sf::Socket::Status send_udp(const void* data, size_t size);
 
         const sf::Socket::Status receive_udp(sf::Packet& packet);
         const sf::Socket::Status receive_udp(void* data, size_t size, size_t& received);
-
-
 
         static void update(Client*, const double& dt);
 };

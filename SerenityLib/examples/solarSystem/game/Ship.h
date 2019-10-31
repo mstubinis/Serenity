@@ -35,6 +35,7 @@ class  ShipSystemShields;
 class  ShipSystemWeapons;
 class  ShipSystemHull;
 class  ShipSystem;
+class  SensorStatusDisplay;
 
 struct PrimaryWeaponBeam;
 struct PrimaryWeaponCannon;
@@ -55,6 +56,7 @@ class Ship: public EntityWrapper, public EventObserver {
     friend  class ShipSystemWeapons;
     friend  class ShipSystemHull;
 	friend  class ShipSystem;
+    friend  class SensorStatusDisplay;
     protected:
         Client&                              m_Client;
         std::unordered_map<uint,ShipSystem*> m_ShipSystems;

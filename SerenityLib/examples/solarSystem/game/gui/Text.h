@@ -34,6 +34,7 @@ class Text final: public Widget {
         const glm::vec2& textScale() const;
 
         void update(const double& dt);
+        void render(const glm::vec4& scissor);
         void render();
 };
 #endif

@@ -47,6 +47,7 @@ class Button : public Widget {
         virtual void setText(const std::string& text);
 
         virtual void update(const double& dt);
+        virtual void render(const glm::vec4& scissor);
         virtual void render();
 };
 

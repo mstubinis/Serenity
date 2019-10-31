@@ -143,3 +143,6 @@ const glm::vec2 Widget::positionFromAlignment() {
 
 void Widget::render() {
 }
+void Widget::render(const glm::vec4& scissor) {
+
+}

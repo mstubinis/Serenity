@@ -16,6 +16,7 @@ class EntityWrapper;
 class GameSkybox;
 class Anchor;
 class Client;
+class HUD;
 class Map: public Scene{
     private:
         std::unordered_map<std::string, Planet*>       m_Planets;
@@ -24,6 +25,7 @@ class Map: public Scene{
         std::string                                    m_SkyboxFile;
         Ship*                                          m_Player;
         Client&                                        m_Client;
+        HUD*                                           m_HUD;
 
         std::tuple<std::string, Anchor*>               m_RootAnchor;
         std::tuple<std::string, Anchor*>               m_SpawnAnchor;
@@ -43,18 +45,20 @@ class Map: public Scene{
         virtual ~Map();
 
         virtual void update(const double& dt);
+        virtual void onResize(const unsigned int& width, const unsigned int& height);
+        virtual void render();
 
         Client& getClient();
 
         const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr);
         const bool hasShip(const std::string& shipName) const;
         
-
+        HUD& getHUD();
         Ship* createShip(Client& client, const std::string& shipClass, const std::string& shipName, const bool& playerShip, const glm::vec3& position);
 
 
-        Ship* getPlayer() { return m_Player; }
-        void setPlayer(Ship* p){ m_Player = p; }
+        Ship* getPlayer();
+        void setPlayer(Ship* p);
 
         const std::string& skyboxFile() const;
 

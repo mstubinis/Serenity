@@ -110,6 +110,21 @@ void TextBox::update(const double& dt) {
         }
     }
 }
+void TextBox::render(const glm::vec4& scissor) {
+    Button::render(scissor);
+
+    const auto finalLabelString = m_Label + ": ";
+    const auto lineHeight = m_Font->getTextHeight(finalLabelString) * m_TextScale.y;
+
+    const auto pos = glm::vec2(m_Position.x - (m_Width / 2.0f) - 4.0f, m_Position.y + lineHeight);
+
+    m_Font->renderText(finalLabelString, pos, m_TextColor, 0, glm::vec2(m_TextScale), 0.008f, TextAlignment::Right, scissor);
+
+    if (m_Active && m_Timer <= 0.5f) {
+        const glm::vec2 blinkerPos = glm::vec2(m_Position.x - (m_Width / 2.0f) + getTextWidth() + 4.0f, m_Position.y);
+        Renderer::renderRectangle(blinkerPos, glm::vec4(1.0f), 3, lineHeight + 8, 0, 0.004f, Alignment::Center, scissor);
+    }
+}
 void TextBox::render() {
     Button::render();
 

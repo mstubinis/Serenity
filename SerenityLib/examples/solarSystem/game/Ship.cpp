@@ -32,6 +32,9 @@
 #include "ships/shipSystems/ShipSystemWeapons.h"
 #include "ships/shipSystems/ShipSystemHull.h"
 
+#include "hud/SensorStatusDisplay.h"
+#include "hud/HUD.h"
+
 #include <glm/gtx/norm.hpp>
 
 
@@ -53,8 +56,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                     const EntityDataRequest dataRequest(e);
                     auto* cam = e.getComponent<ComponentCamera>(dataRequest);
                     //TODO: parent->child relationship
-                    auto* sensors = static_cast<ShipSystemSensors*>(ship.getShipSystem(ShipSystemType::Sensors));
-                    if (e != ship.m_Entity && !cam && (sensors && e != sensors->radarRingEntity() && e != sensors->radarCameraEntity())) {
+                    if (e != ship.m_Entity && !cam && (e != map.getHUD().getSensorDisplay().radarRingEntity() && e != map.getHUD().getSensorDisplay().radarCameraEntity())) {
                         auto _otherBody = e.getComponent<ComponentBody>(dataRequest);
                         if (_otherBody) {
                             auto& otherBody = *_otherBody;

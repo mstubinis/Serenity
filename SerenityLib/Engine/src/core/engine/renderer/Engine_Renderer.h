@@ -60,6 +60,7 @@ namespace epriv{
             const bool _bindShaderProgram(ShaderProgram*);
             const bool _unbindShaderProgram();
             void _clear2DAPICommands();
+            void _sort2DAPICommands();
             const bool _bindMaterial(Material*);
             const bool _unbindMaterial();
             const float _getGIPackedData();
@@ -141,14 +142,62 @@ namespace Renderer{
     void sendTextureSafe(const char* location,const GLuint textureAddress,const int& slot,const GLuint& glTextureType);
     
     void alignmentOffset(const Alignment::Type& align, float& x, float& y, const float& width, const float& height);
-    void renderTexture(const Texture&, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type& = Alignment::Type::Center);
-    void renderText(const std::string& text, const Font&, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type& = TextAlignment::Left);
-    void renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type& = Alignment::Type::Center);
-    void renderBorder(const float borderSize, const glm::vec2& position, const glm::vec4& color, const float width, const float height, const float angle, const float depth, const Alignment::Type& = Alignment::Type::Center);
-    void renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& = Alignment::Type::Center);
 
-    void scissor(const float x, const float y, const float width, const float height);
-    void scissorDisable();
+    void renderTexture(
+        const Texture&,
+        const glm::vec2& position,
+        const glm::vec4& color,
+        const float angle,
+        const glm::vec2& scale,
+        const float depth,
+        const Alignment::Type& = Alignment::Type::Center,
+        const glm::vec4& scissor = glm::vec4(-1.0f)
+    );
+    void renderText(
+        const std::string& text,
+        const Font&,
+        const glm::vec2& position,
+        const glm::vec4& color,
+        const float angle,
+        const glm::vec2& scale,
+        const float depth,
+        const TextAlignment::Type& = TextAlignment::Left,
+        const glm::vec4& scissor = glm::vec4(-1.0f)
+    );
+    void renderRectangle(
+        const glm::vec2& pos,
+        const glm::vec4& col,
+        const float width,
+        const float height,
+        const float angle,
+        const float depth,
+        const Alignment::Type& = Alignment::Type::Center,
+        const glm::vec4& scissor = glm::vec4(-1.0f)
+    );
+    void renderBorder(
+        const float borderSize,
+        const glm::vec2& position,
+        const glm::vec4& color,
+        const float width,
+        const float height,
+        const float angle,
+        const float depth,
+        const Alignment::Type& = Alignment::Type::Center,
+        const glm::vec4& scissor = glm::vec4(-1.0f)
+    );
+    void renderTriangle(
+        const glm::vec2& position,
+        const glm::vec4& color,
+        const float angle,
+        const float width,
+        const float height,
+        const float depth,
+        const Alignment::Type& = Alignment::Type::Center,
+        const glm::vec4& scissor = glm::vec4(-1.0f)
+    );
+
+    //void scissor(const float x, const float y, const float width, const float height);
+    //void scissorDisable();
 
     #pragma region UniformSending
     //Uniform 1

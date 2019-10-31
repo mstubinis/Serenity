@@ -154,15 +154,18 @@
     <Filter Include="Header Files\Game\Factions">
       <UniqueIdentifier>{eb7ef79f-5bc5-4a64-a96d-4f88c599d27a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\HUD">
+      <UniqueIdentifier>{a6181730-e754-4cb5-ba40-c21ba683fbbb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\HUD">
+      <UniqueIdentifier>{72c5341f-54ba-4d71-974f-cbf9a80063fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="game\GameSkybox.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="game\HUD.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="game\Planet.h">
@@ -357,13 +360,22 @@
     <ClInclude Include="game\factions\Faction.h">
       <Filter>Header Files\Game\Factions</Filter>
     </ClInclude>
+    <ClInclude Include="game\hud\ShipStatusDisplay.h">
+      <Filter>Header Files\Game\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="game\hud\SensorStatusDisplay.h">
+      <Filter>Header Files\Game\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="game\hud\HUD.h">
+      <Filter>Header Files\Game\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="game\Menu.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game\HUD.cpp">
-      <Filter>Source Files\Game</Filter>
     </ClCompile>
     <ClCompile Include="game\Game.cpp">
       <Filter>Source Files\Game</Filter>
@@ -547,6 +559,18 @@
     </ClCompile>
     <ClCompile Include="game\factions\Faction.cpp">
       <Filter>Source Files\Game\Factions</Filter>
+    </ClCompile>
+    <ClCompile Include="game\hud\ShipStatusDisplay.cpp">
+      <Filter>Source Files\Game\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="game\hud\SensorStatusDisplay.cpp">
+      <Filter>Source Files\Game\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="game\hud\HUD.cpp">
+      <Filter>Source Files\Game\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="game\Menu.cpp">
+      <Filter>Source Files\Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -41,6 +41,7 @@ class ScrollFrame: public Widget {
         void setColor(const glm::vec4& color);
 
         void update(const double& dt);
+        void render(const glm::vec4& scissor);
         void render();
 };
 

@@ -6,6 +6,7 @@
 #include "../Ship.h"
 #include "../GameSkybox.h"
 #include "../Helper.h"
+#include "../hud/HUD.h"
 
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/renderer/Engine_Renderer.h>
@@ -32,12 +33,15 @@
 #include "../ships/Ships.h"
 #include <SFML/Graphics.hpp>
 
+#include "../hud/SensorStatusDisplay.h"
+#include "../hud/ShipStatusDisplay.h"
+
 using namespace Engine;
 using namespace std;
 namespace boost_io = boost::iostreams;
 
 Map::Map(Client& client, const string& n, const string& file):Scene(n), m_Client(client){
-    m_Player      = nullptr; 
+    m_Player      = nullptr;
 
     m_ActiveCannonProjectiles.initialize(2500);
     m_ActiveTorpedoProjectiles.initialize(2500);
@@ -51,9 +55,12 @@ Map::Map(Client& client, const string& n, const string& file):Scene(n), m_Client
     m_RootAnchor = std::tuple<std::string,Anchor*>("",nullptr);
     if(file != "NULL")
         Map::loadFromFile(file);
+    m_HUD = new HUD(*this);
 }
+
 Map::~Map(){
     SAFE_DELETE_VECTOR(m_Objects);
+    SAFE_DELETE(m_HUD);
 }
 PrimaryWeaponCannonProjectile* Map::getCannonProjectile(const int index) {
     return m_ActiveCannonProjectiles[index];
@@ -104,6 +111,15 @@ string Map::allowedShipsSingleString() {
     }
     return "";
 }
+Ship* Map::getPlayer() { 
+    return m_Player; 
+}
+void Map::setPlayer(Ship* p) { 
+    m_Player = p; 
+    m_HUD->getSensorDisplay().setShip(p);
+    m_HUD->getShipStatusDisplay().setTarget(p);
+}
+
 const string& Map::skyboxFile() const {
     return m_SkyboxFile;
 }
@@ -429,6 +445,9 @@ Anchor* Map::getSpawnAnchor() {
 const bool Map::hasShip(const string& shipName) const {
     return (m_Ships.size() > 0 && m_Ships.count(shipName)) ? true : false;
 }
+HUD& Map::getHUD() {
+    return *m_HUD;
+}
 const vector<string> Map::getClosestAnchor(Anchor* currentAnchor) {
     vector<string> res;
     if (!currentAnchor) {
@@ -454,6 +473,10 @@ const vector<string> Map::getClosestAnchor(Anchor* currentAnchor) {
         res.push_back(least);
     }
     return res;
+}
+void Map::onResize(const unsigned int& width, const unsigned int& height) {
+    m_HUD->onResize(width, height);
+    Scene::onResize(width, height);
 }
 void Map::update(const double& dt){
     //torpedos
@@ -481,5 +504,10 @@ void Map::update(const double& dt){
 
     for (auto& ship : m_Ships)
         ship.second->update(dt);
+    m_HUD->update(dt);
     Scene::update(dt);
+}
+void Map::render() {
+    m_HUD->render();
+    Scene::render();
 }

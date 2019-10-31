@@ -89,7 +89,6 @@ void ServerHostingMapSelectorWindow::setPosition(const float x, const float y) {
     m_Label->setPosition(x, y + 50.0f);
     m_CurrentChoice->setPosition(x + m_Width, y + 50.0f);
 }
-
 void ServerHostingMapSelectorWindow::setUserPointer(void* ptr) {
     m_UserPointer = ptr;
 }
@@ -99,18 +98,15 @@ void* ServerHostingMapSelectorWindow::getUserPointer() {
 void ServerHostingMapSelectorWindow::clear() {
     vector_clear(m_MapFileWindow->content());
 }
-
 void ServerHostingMapSelectorWindow::addContent(Widget* widget) {
     m_MapFileWindow->addContent(widget);
 }
-
 Font& ServerHostingMapSelectorWindow::getFont() {
     return m_Font;
 }
 ScrollFrame& ServerHostingMapSelectorWindow::getWindowFrame() {
     return *m_MapFileWindow;
 }
-
 void ServerHostingMapSelectorWindow::update(const double& dt) {
     m_MapFileWindow->update(dt);
     m_Label->update(dt);

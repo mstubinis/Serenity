@@ -41,7 +41,9 @@ class ScrollBar final : public Widget {
         const float getSliderHeight() const;
         const float getSliderPosition() const;
 
+
         void update(const double& dt);
+        void render(const glm::vec4& scissor);
         void render();
 };
 

@@ -1,7 +1,7 @@
 #include "Server.h"
 #include "Packet.h"
 #include "Core.h"
-#include "HUD.h"
+#include "Menu.h"
 #include "Helper.h"
 #include "ResourceManifest.h"
 #include "gui/specifics/ServerLobbyChatWindow.h"
@@ -179,8 +179,8 @@ void Server::shutdown(const bool destructor) {
     Packet p;
     p.PacketType = PacketType::Server_Shutdown;
     send_to_all(p);
-    m_Core.m_HUD->m_ServerLobbyChatWindow->clear();
-    m_Core.m_HUD->m_ServerLobbyConnectedPlayersWindow->clear();
+    m_Core.m_Menu->m_ServerLobbyChatWindow->clear();
+    m_Core.m_Menu->m_ServerLobbyConnectedPlayersWindow->clear();
     m_Active.store(0, std::memory_order_relaxed);
     Sleep(500); //messy
     if (destructor) {

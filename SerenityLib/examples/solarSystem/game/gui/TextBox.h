@@ -43,6 +43,7 @@ class TextBox : public Button, public EventObserver {
         void onEvent(const Event& e);
 
         void update(const double& dt);
+        void render(const glm::vec4& scissor);
         void render();
 };
 

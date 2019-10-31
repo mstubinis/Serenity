@@ -41,9 +41,10 @@ class Font final: public EngineResource{
             const glm::vec2& pos,
             const glm::vec4& color = glm::vec4(1),
             const float& angle = 0.0f,
-            const glm::vec2& scl = glm::vec2(1.0f),
+            const glm::vec2 & scl = glm::vec2(1.0f),
             const float& depth = 0.1f,
-            const TextAlignment::Type& = TextAlignment::Left
+            const TextAlignment::Type & = TextAlignment::Left,
+            const glm::vec4& scissor = glm::vec4(-1.0f)
         );
 
         const float getTextWidth(const std::string& text) const;
