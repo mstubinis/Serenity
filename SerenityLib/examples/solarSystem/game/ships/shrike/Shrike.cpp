@@ -36,15 +36,15 @@ Shrike::Shrike(Client& client, Map& map, bool player, const string& name, glm::v
         else if (i == 7)  system = new ShipSystemWarpDrive(_this);
         else if (i == 8)  system = new ShipSystemSensors(_this, map);
         else if (i == 9)  system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 7500.0f);
+        else if (i == 10)  system = new ShipSystemHull(_this, map, 16500.0f);
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
-    auto* leftTop     = new PlasmaCannon(_this, map, glm::vec3(-0.934207f, 0.02951f, -0.224055f), glm::vec3(0.009f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 75.0f);
-    auto* leftBottom  = new PlasmaCannon(_this, map, glm::vec3(-0.308448f, 0.032778f, -0.819245f), glm::vec3(0.0008f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 75.0f);
-    auto* rightBottom = new PlasmaCannon(_this, map, glm::vec3(0.308448f, 0.032778f, -0.819245f), glm::vec3(-0.0008f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 75.0f);
-    auto* rightTop    = new PlasmaCannon(_this, map, glm::vec3(0.934207f, 0.02951f, -0.224055f), glm::vec3(-0.009f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 75.0f);
+    auto* leftTop     = new PlasmaCannon(_this, map, glm::vec3(-0.934207f, 0.02951f, -0.224055f), glm::vec3(0.009f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 75.0f);
+    auto* leftBottom  = new PlasmaCannon(_this, map, glm::vec3(-0.308448f, 0.032778f, -0.819245f), glm::vec3(0.0008f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 75.0f);
+    auto* rightBottom = new PlasmaCannon(_this, map, glm::vec3(0.308448f, 0.032778f, -0.819245f), glm::vec3(-0.0008f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 75.0f);
+    auto* rightTop    = new PlasmaCannon(_this, map, glm::vec3(0.934207f, 0.02951f, -0.224055f), glm::vec3(-0.009f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 75.0f);
 
     weapons.addPrimaryWeaponCannon(*leftTop);
     weapons.addPrimaryWeaponCannon(*leftBottom);
@@ -63,6 +63,38 @@ Shrike::Shrike(Client& client, Map& map, bool player, const string& name, glm::v
     auto* frontBeam = new PlasmaBeam(_this, map, beam_pt[0], glm::vec3(0, 0, -1), 30.0f, beam_pt, 750.0f);
     weapons.addPrimaryWeaponBeam(*frontBeam);
 
+
+    vector<glm::vec3> hull_target_points = {
+        glm::vec3(0,0, -1.01683f),
+        glm::vec3(0,0, -0.695241f),
+        glm::vec3(0,0, -0.40262f),
+        glm::vec3(0,0, -0.015259f),
+        glm::vec3(0,0, 0.290298f),
+        glm::vec3(0,0, 0.56271f),
+        glm::vec3(0,0, 0.859813f),
+        glm::vec3(-1.15097f,-0.039035f, -0.344808f),
+        glm::vec3(1.15097f,-0.039035f, -0.344808f),
+        glm::vec3(-1.15097f,-0.039035f, 0.125788f),
+        glm::vec3(1.15097f,-0.039035f, 0.125788f),
+        glm::vec3(-1.15097f,-0.039035f, 0.525935f),
+        glm::vec3(1.15097f,-0.039035f, 0.525935),
+        glm::vec3(-0.892489f,0.028702f, 0.17479f),
+        glm::vec3(0.892489f,0.028702f, 0.17479f),
+        glm::vec3(-0.576472f,0.045644f, 0.17479f),
+        glm::vec3(0.576472f,0.045644f, 0.17479f),
+        glm::vec3(-0.212936f,0.03548f, 0.17479f),
+        glm::vec3(0.212936f,0.03548f, 0.17479f),
+        glm::vec3(-0.306575f,0.047673f, -0.387041f),
+        glm::vec3(0.306575f,0.047673f, -0.387041f),
+        glm::vec3(-0.532802f,0.048486f, -0.098031f),
+        glm::vec3(0.532802f,0.048486f, -0.098031f),
+        glm::vec3(-0.459521f,0.040023f, 0.410263f),
+        glm::vec3(0.459521f,0.040023f, 0.410263f),
+        glm::vec3(-0.223905f,0.025798f, 0.709812f),
+        glm::vec3(0.223905f,0.025798f, 0.709812f),
+        glm::vec3(0.0f,-0.091898f, -1.19035f),
+    };
+    addHullTargetPoints(hull_target_points);
 }
 Shrike::~Shrike() {
 

@@ -12,7 +12,6 @@
 #include "constitution/Constitution.h"
 #include "excelsior/Excelsior.h"
 #include "nova/Nova.h"
-#include "leviathan/Leviathan.h"
 
 #include "../factions/Faction.h"
 #include <core/engine/resources/Handle.h>

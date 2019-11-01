@@ -12,12 +12,14 @@ struct Packet;
 class  Client;
 class  Server;
 class  Menu;
+class  Map;
 class  Core;
 class  ShipSystemSensors;
 class  SensorStatusDisplay;
 class Client{
     friend class  Server;
     friend class  Menu;
+    friend class  Map;
     friend class  Core;
     friend class  ShipSystemSensors;
     friend class  SensorStatusDisplay;

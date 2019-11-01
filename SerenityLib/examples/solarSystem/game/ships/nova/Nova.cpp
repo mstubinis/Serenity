@@ -34,7 +34,7 @@ Nova::Nova(Client& client, Map& map, bool player, const string& name, glm::vec3 
         else if (i == 7)  system = new ShipSystemWarpDrive(_this);
         else if (i == 8)  system = new ShipSystemSensors(_this, map);
         else if (i == 9)  system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 8500.0f);
+        else if (i == 10)  system = new ShipSystemHull(_this, map, 19500.0f);
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
@@ -169,6 +169,36 @@ Nova::Nova(Client& client, Map& map, bool player, const string& name, glm::vec3 
 
     weapons.addPrimaryWeaponBeam(*topLeftAftAftBeam);
     weapons.addPrimaryWeaponBeam(*topRightAftAftBeam);
+
+    vector<glm::vec3> hull_target_points = {
+        glm::vec3(0,-0.037148f, -1.59167f),
+        glm::vec3(0,-0.00876f, -1.32041f),
+        glm::vec3(0,-0.00876f, -1.08877f),
+        glm::vec3(0,-0.00876f, -0.795511f),
+        glm::vec3(0,-0.067915f, -0.546877f),
+        glm::vec3(0,-0.158947f, -0.227487f),
+        glm::vec3(0,-0.158947f, 0.108439f),
+        glm::vec3(0,-0.1116f, 0.439613f),
+        glm::vec3(0.377811f,-0.024278f, 0.377212f),
+        glm::vec3(-0.377811f,-0.024278f, 0.377212f),
+        glm::vec3(0.690702f,0.136448f, 0.188719f),
+        glm::vec3(-0.690702f,0.136448f, 0.188719f),
+        glm::vec3(0.690702f,0.136448f,0.64893f),
+        glm::vec3(-0.690702f,0.136448f, 0.64893f),
+        glm::vec3(0.690702f,0.136448f,1.19759f),
+        glm::vec3(-0.690702f,0.136448f, 1.19759f),
+        glm::vec3(0.411738f,-0.04425f,-0.963249f),
+        glm::vec3(-0.411738f,-0.04425f, -0.963249f),
+        glm::vec3(0.342042f,-0.028517f,-1.33733f),
+        glm::vec3(-0.342042f,-0.028517f, -1.33733f),
+        glm::vec3(0.248232f,-0.033119f,-0.563544f),
+        glm::vec3(-0.248232f,-0.033119f, -0.563544f),
+        glm::vec3(0.160302f,-0.196626f,-0.143006f),
+        glm::vec3(-0.160302f,-0.196626f, -0.143006f),
+        glm::vec3(0.151609f,-0.271522f,-0.629339f),
+        glm::vec3(-0.151609f,-0.271522f, -0.629339f),
+    };
+    addHullTargetPoints(hull_target_points);
 }
 Nova::~Nova() {
 

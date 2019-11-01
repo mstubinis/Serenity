@@ -1,5 +1,8 @@
 #include "Map.h"
 #include "Anchor.h"
+#include "../Core.h"
+#include "../Menu.h"
+#include "../Client.h"
 #include "../ResourceManifest.h"
 #include "../Planet.h"
 #include "../GameCamera.h"
@@ -55,7 +58,8 @@ Map::Map(Client& client, const string& n, const string& file):Scene(n), m_Client
     m_RootAnchor = std::tuple<std::string,Anchor*>("",nullptr);
     if(file != "NULL")
         Map::loadFromFile(file);
-    m_HUD = new HUD(*this);
+    Font& font = client.m_Core.m_Menu->getFont();
+    m_HUD = new HUD(*this, font);
 }
 
 Map::~Map(){
@@ -418,7 +422,7 @@ Ship* Map::createShip(Client& client, const string& shipClass, const string& shi
         ship = new Nova(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Shrike")
         ship = new Shrike(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if(shipClass == "Brel")
+    else if(shipClass == "B'rel")
         ship = new Brel(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Constitution")
         ship = new Constitution(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
@@ -426,8 +430,6 @@ Ship* Map::createShip(Client& client, const string& shipClass, const string& shi
         ship = new Miranda(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Excelsior")
         ship = new Excelsior(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if (shipClass == "Leviathan")
-        ship = new Leviathan(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Akira")
         ship = new Akira(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Norway")

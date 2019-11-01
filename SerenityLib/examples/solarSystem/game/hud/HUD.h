@@ -9,22 +9,25 @@ struct Entity;
 class  Map;
 class  SensorStatusDisplay;
 class  ShipStatusDisplay;
+class  Font;
 
 class HUD final {
     private:
         Map& m_Map;
-
+        Font& m_Font;
         SensorStatusDisplay*  m_SensorDisplay;
         ShipStatusDisplay*    m_ShipStatusDisplay;
         ShipStatusDisplay*    m_ShipTargetStatusDisplay;
           
     public:
-        HUD(Map&);
+        HUD(Map&, Font&);
         ~HUD();
 
         SensorStatusDisplay& getSensorDisplay();
         ShipStatusDisplay&   getShipStatusDisplay();
         ShipStatusDisplay&   getShipTargetStatusDisplay();
+
+        Font& getFont();
 
         void setTarget(Planet*);
         void setTarget(Ship*);

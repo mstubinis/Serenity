@@ -25,18 +25,19 @@ using namespace std;
 using namespace Engine;
 
 Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, "Brel", map,player, name, position, scale, collisionType, glm::vec3(0.0f, 0.311455f, 0.397761f), glm::vec3(0.0f,0.7f,0.7f)) {
+:Ship(client, "B'rel", map,player, name, position, scale, collisionType, glm::vec3(0.0f, 0.311455f, 0.397761f), glm::vec3(0.0f,0.7f,0.7f)) {
 
     m_InitialCamera = glm::vec3(0.0f, 0.7f, 0.7f);
+    const auto className = getClass();
 
     //add wings
     auto& model = *getComponent<ComponentModel>();
 
-    model.getModel(0).setMesh(Ships::Database.at("Brel").MeshHandles[1], model); //brel head only
+    model.getModel(0).setMesh(Ships::Database.at(className).MeshHandles[1], model); //brel head only
 
-    auto& wing1 = model.addModel(ResourceManifest::BrelMeshWing, Ships::Database.at("Brel").MaterialHandles[0]);
+    auto& wing1 = model.addModel(ResourceManifest::BrelMeshWing, Ships::Database.at(className).MaterialHandles[0]);
     wing1.setPosition(0.232951f, 0.316462f, 0.08058f);
-    auto& wing2 = model.addModel(ResourceManifest::BrelMeshWing2, Ships::Database.at("Brel").MaterialHandles[0]);
+    auto& wing2 = model.addModel(ResourceManifest::BrelMeshWing2, Ships::Database.at(className).MaterialHandles[0]);
     wing2.setPosition(-0.232951f, 0.316462f, 0.08058f);
 
     const auto mass = updateShipDimensions();
@@ -50,6 +51,9 @@ Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 
 
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(static_cast<btScalar>(0.01), static_cast<btScalar>(0.2));
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
+    body.setCollisionGroup(CollisionFilter::_Custom_4); //i belong to ramming hull group (group 4)
+    body.setCollisionMask(CollisionFilter::_Custom_4); //i should only collide with other ramming hulls only
+
 
     //blender 3d to game 3d: switch y and z, then negate z
     auto& _this = *this;
@@ -65,11 +69,11 @@ Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 
         else if (i == 7)  system = new ShipSystemWarpDrive(_this);
         else if (i == 8)  system = new ShipSystemSensors(_this, map);
         else if (i == 9)  system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 7100.0f);
+        else if (i == 10)  system = new ShipSystemHull(_this, map, 15100.0f);
         m_ShipSystems.emplace(i, system);
     }
     //update shield size
-    const auto shieldScale = ((Mesh*)Ships::Database.at("Brel").MeshHandles[0].get())->getRadiusBox() * SHIELD_SCALE_FACTOR;
+    const auto shieldScale = ((Mesh*)Ships::Database.at(className).MeshHandles[0].get())->getRadiusBox() * SHIELD_SCALE_FACTOR;
     auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
     auto& shieldsBody = *shields->getEntity().getComponent<ComponentBody>();
     shieldsBody.setScale(shieldScale);
@@ -78,8 +82,8 @@ Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     //blender 3d to game 3d: switch y and z, then negate z
-    auto* leftTop = new DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 10.0f, 6, 500, 0.7f, 2.5f, 1.8f, 50.5f, 50.0f, 1);
-    auto* rightTop = new DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 10.0f, 6, 500, 0.7f, 2.5f, 1.8f, 50.5f, 50.0f, 2);
+    auto* leftTop = new DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 1);
+    auto* rightTop = new DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 2);
 
     weapons.addPrimaryWeaponCannon(*leftTop);
     weapons.addPrimaryWeaponCannon(*rightTop);
@@ -92,6 +96,24 @@ Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 
 
     foldWingsUp();
     updateWingSpan(100000.0f, BrelWingSpanState::State::Up, 1);
+
+    vector<glm::vec3> hull_target_points = {
+        glm::vec3(0, 0.196357f, -0.839703f),
+        glm::vec3(0, 0.196357f, -0.652894f),
+        glm::vec3(0, 0.18686f, -0.523145f),
+        glm::vec3(0, 0.215453f, -0.314285f),
+        glm::vec3(0, 0.288782f, -0.096017f),
+        glm::vec3(0, 0.288782f, 0.136811f),
+        glm::vec3(0, 0.288782f, 0.345834f),
+        glm::vec3(0, 0.288782f, 0.475843f),
+        glm::vec3(0.207882f, 0.416252f, 0.265136f),
+        glm::vec3(-0.207882f, 0.416252f, 0.265136f),
+        glm::vec3(0.1024f, 0.331857f, 0.085601f),
+        glm::vec3(-0.1024f, 0.331857f, 0.085601f),
+        glm::vec3(0.0f, 0.105164f, 0.421337f),
+        glm::vec3(0.0f, 0.158835f, 0.154595f),
+    };
+    addHullTargetPoints(hull_target_points);
 }
 Brel::~Brel() {
 

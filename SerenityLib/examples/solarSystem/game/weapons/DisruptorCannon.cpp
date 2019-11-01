@@ -44,6 +44,13 @@ struct DisruptorCannonCollisionFunctor final { void operator()(ComponentBody& ow
                         }
                     }
                     if (hull && other.getUserPointer() == hull) {
+                        if (shields) {
+                            const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
+                            if (shields->getHealthCurrent(shieldSide) > 0) {
+                                cannonProjectile.clientToServerImpact(weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, true);
+                                return;
+                            }
+                        }
                         cannonProjectile.clientToServerImpact(weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, false);
                     }
                 }
@@ -157,10 +164,7 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     auto finalPosition = final_world_position + Math::rotate_vec3(shipBody.rotation(), glm_vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
 
     auto& sph = *static_cast<btBoxShape*>(cannonProjectileBody.getCollision()->getBtShape());
-    const auto& _scl = btVector3(0.05f, 0.05f, 0.05f);
-    sph.setLocalScaling(_scl);
-    sph.setMargin(0.165f);
-    sph.setImplicitShapeDimensions(_scl);
+    sph.setMargin(0.01f);
 
 
     cannonProjectileBody.setPosition(finalPosition);

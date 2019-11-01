@@ -25,7 +25,7 @@ class Brel final : public Ship {
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?
-            const std::string& name = "Ship",     //Name
+            const std::string& name = "B'rel Class Ship",     //Name
             glm::vec3 = glm::vec3(0),             //Position
             glm::vec3 = glm::vec3(1),             //Scale
             CollisionType::Type = CollisionType::ConvexHull

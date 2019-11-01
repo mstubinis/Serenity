@@ -266,6 +266,9 @@ Menu::~Menu() {
     SAFE_DELETE(m_ServerLobbyChatWindow);
     SAFE_DELETE(m_ServerLobbyShipSelectorWindow);
 }
+Font& Menu::getFont() {
+    return *m_Font;
+}
 const bool Menu::isActive() const {
     return m_Active;
 }

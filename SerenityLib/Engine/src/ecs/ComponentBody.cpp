@@ -213,7 +213,7 @@ void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld) {
         auto& physics = *data.p;
         if (physics.bullet_rigidBody) {
             Physics::removeRigidBody(physics.bullet_rigidBody);
-            SAFE_DELETE(physics.bullet_rigidBody);     
+            SAFE_DELETE(physics.bullet_rigidBody);
         }
         auto& inertia = physics.collision->getBtInertia();
         auto& shape = *physics.collision->getBtShape();
@@ -227,7 +227,7 @@ void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld) {
         rigidBody.updateInertiaTensor();
         setInternalPhysicsUserPointer(this);
         if(addBodyToPhysicsWorld)
-            Physics::addRigidBody(physics.bullet_rigidBody);
+            Physics::addRigidBody(physics.bullet_rigidBody, physics.group, physics.mask);
     }
 }
 //kinda ugly
@@ -385,7 +385,7 @@ void ComponentBody::setCollision(Collision* p_Collision) {
         auto& inertia = collision.getBtInertia();
         bt_rigidBody.setMassProps(physicsData.mass, inertia);
         bt_rigidBody.updateInertiaTensor();
-        Physics::addRigidBody(&bt_rigidBody);
+        Physics::addRigidBody(&bt_rigidBody, physicsData.group, physicsData.mask);
     }
     setInternalPhysicsUserPointer(this);
 }

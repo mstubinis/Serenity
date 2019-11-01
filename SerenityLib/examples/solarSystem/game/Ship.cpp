@@ -233,14 +233,14 @@ void Ship::addHullTargetPoints(vector<glm::vec3>& points) {
     }
 }
 const glm::vec3 Ship::getAimPositionDefault() {
-    if (m_AimPositionDefaults.size() == 0 || (m_AimPositionDefaults[0].x == 0.0f && m_AimPositionDefaults[0].y == 0.0f && m_AimPositionDefaults[0].z == 0.0f)) {
+    if (m_AimPositionDefaults.size() == 0) {
         return getPosition();
     }
     auto& body = *getComponent<ComponentBody>();
     return body.position() + Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
 }
 const glm::vec3 Ship::getAimPositionRandom() {
-    if (m_AimPositionDefaults.size() == 0 || (m_AimPositionDefaults[0].x == 0.0f && m_AimPositionDefaults[0].y == 0.0f && m_AimPositionDefaults[0].z == 0.0f)) {
+    if (m_AimPositionDefaults.size() == 0) {
         return getPosition();
     }
     auto& body = *getComponent<ComponentBody>();
@@ -251,7 +251,7 @@ const glm::vec3 Ship::getAimPositionRandom() {
     return body.position() + Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[randIndex]);
 }
 const glm::vec3 Ship::getAimPositionDefaultLocal() {
-    if (m_AimPositionDefaults.size() == 0 || (m_AimPositionDefaults[0].x == 0.0f && m_AimPositionDefaults[0].y == 0.0f && m_AimPositionDefaults[0].z == 0.0f)) {
+    if (m_AimPositionDefaults.size() == 0) {
         return glm::vec3(0.0f);
     }
     auto& body = *getComponent<ComponentBody>();
@@ -272,7 +272,7 @@ const glm::vec3 Ship::getAimPositionRandomLocal() {
     return getAimPositionLocal(getAimPositionRandomLocalIndex());
 }
 const glm::vec3 Ship::getAimPositionLocal(const uint index) {
-    if (m_AimPositionDefaults.size() == 0 || (m_AimPositionDefaults[0].x == 0.0f && m_AimPositionDefaults[0].y == 0.0f && m_AimPositionDefaults[0].z == 0.0f)) {
+    if (m_AimPositionDefaults.size() == 0) {
         return glm::vec3(0.0f);
     }
     auto& body = *getComponent<ComponentBody>();

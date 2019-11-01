@@ -149,11 +149,22 @@ void Ships::init() {
     createShipEntry("Excelsior", FactionEnum::Federation);
     createShipEntry("Constitution", FactionEnum::Federation);
     createShipEntry("Miranda", FactionEnum::Federation);
+    //createShipEntry("Saber", FactionEnum::Federation);
+    //createShipEntry("Norway", FactionEnum::Federation);
+    //createShipEntry("Galaxy", FactionEnum::Federation);
+    //createShipEntry("Nebula", FactionEnum::Federation);
+    //createShipEntry("Sovereign", FactionEnum::Federation);
+    //createShipEntry("Liberty", FactionEnum::Federation);
 
-    createShipEntry("Brel", FactionEnum::Klingon);
+    createShipEntry("B'rel", FactionEnum::Klingon);
+    //createShipEntry("Vor'cha", FactionEnum::Klingon);
+    //createShipEntry("Negh'var", FactionEnum::Klingon);
+    //createShipEntry("Kahless", FactionEnum::Klingon);
 
     createShipEntry("Shrike", FactionEnum::Romulan);
-
+    //createShipEntry("Venerex", FactionEnum::Romulan);
+    //createShipEntry("D'deridex", FactionEnum::Romulan);
+    //createShipEntry("Aeterna", FactionEnum::Romulan);
 
     Material& defMat = *((Material*)Database["Defiant"].MaterialHandles[0].get());
     auto* layer = defMat.getComponent(0).addLayer();

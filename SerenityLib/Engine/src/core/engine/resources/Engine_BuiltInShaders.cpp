@@ -1569,8 +1569,6 @@ epriv::EShaders::deferred_frag_hud =
     "    gl_FragColor = Object_Color;\n"
     "    if(DiffuseTextureEnabled == 1){\n"
     "        vec4 color = texture2D(DiffuseTexture, UV); \n"
-    //"        if (color.a <= 0.1)\n"
-    //"             discard; \n"
     "        gl_FragColor *= color;\n"
     "    }\n"
     "}";

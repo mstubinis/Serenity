@@ -7,6 +7,7 @@
 #include <core/engine/utils/Utils.h>
 
 class  Menu;
+class  Map;
 class  Server;
 class  Client;
 class  EntityWrapper;
@@ -14,6 +15,7 @@ class  ShipSystemSensors;
 class  SensorStatusDisplay;
 class Core final {
     friend class  Menu;
+    friend class  Map;
     friend class  Client;
     friend class  Server;
     friend class  ShipSystemSensors;

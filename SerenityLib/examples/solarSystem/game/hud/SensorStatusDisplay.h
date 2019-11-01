@@ -11,8 +11,10 @@ class  Map;
 class  ShipSystemSensors;
 class  Camera;
 class  Viewport;
+class  HUD;
 class SensorStatusDisplay final {
     private:
+        HUD&                m_HUD;
         Map&                m_Map;
         Ship*               m_Ship;
         ShipSystemSensors*  m_Sensors;
@@ -29,7 +31,7 @@ class SensorStatusDisplay final {
         Alignment::Type  m_Alignment;
 
     public:
-        SensorStatusDisplay(Map&, const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, const Alignment::Type& alignment);
+        SensorStatusDisplay(HUD&, Map&, const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, const Alignment::Type& alignment);
         ~SensorStatusDisplay();
 
         void setShip(Ship*);

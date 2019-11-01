@@ -46,6 +46,13 @@ struct PhotonTorpedoCollisionFunctor final { void operator()(ComponentBody& owne
                         }
                     }
                     if (hull && other.getUserPointer() == hull) {
+                        if (shields) {
+                            const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
+                            if (shields->getHealthCurrent(shieldSide) > 0) {
+                                torpedoProjectile.clientToServerImpact(torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, true);
+                                return;
+                            }
+                        }
                         torpedoProjectile.clientToServerImpact(torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, false);
                     }
                 }

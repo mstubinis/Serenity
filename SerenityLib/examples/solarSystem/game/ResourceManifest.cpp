@@ -53,6 +53,12 @@ Handle ResourceManifest::RadarTokenMaterial;
 Handle ResourceManifest::RadarMaterial;
 Handle ResourceManifest::StarFlareMaterial;
 Handle ResourceManifest::ShieldMaterial;
+Handle ResourceManifest::ShieldRingHUDTexture;
+Handle ResourceManifest::ShieldRingBorderHUDTexture;
+Handle ResourceManifest::ShieldRing2HUDTexture;
+Handle ResourceManifest::ShieldRingBorder2HUDTexture;
+Handle ResourceManifest::ShipStatusBackgroundHUDTexture;
+Handle ResourceManifest::ShipStatusBackgroundBorderHUDTexture;
 
 Handle ResourceManifest::CannonOutlineMaterial;
 Handle ResourceManifest::CannonTailMaterial;
@@ -269,6 +275,14 @@ void ResourceManifest::init(){
     crosshairDiffuse.setFilter(TextureFilter::Nearest);
 
     ((Material*)StarFlareMaterial.get())->setShadeless(true);
+
+
+    ShieldRingHUDTexture = Resources::loadTextureAsync(BasePath + "data/Textures/HUD/shield_Ring.dds");
+    ShieldRingBorderHUDTexture = Resources::loadTextureAsync(BasePath + "data/Textures/HUD/shield_Ring_Border.dds");
+    ShieldRing2HUDTexture = Resources::loadTextureAsync(BasePath + "data/Textures/HUD/shield_Ring_2.dds");
+    ShieldRingBorder2HUDTexture = Resources::loadTextureAsync(BasePath + "data/Textures/HUD/shield_Ring_2_Border.dds");
+    ShipStatusBackgroundHUDTexture = Resources::loadTextureAsync(BasePath + "data/Textures/HUD/ShipStatusBackground.dds");
+    ShipStatusBackgroundBorderHUDTexture = Resources::loadTextureAsync(BasePath + "data/Textures/HUD/ShipStatusBackgroundBorder.dds");
 
 
     //sounds

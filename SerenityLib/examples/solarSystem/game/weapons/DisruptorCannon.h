@@ -35,11 +35,11 @@ class DisruptorCannon final : public PrimaryWeaponCannon {
             const glm_vec3& forward,
             const float& arc,
             const uint& maxCharges = 5,
-            const float& damage = 100.0f,
+            const float& damage = 200.0f,
             const float& _rechargePerRound = 1.0f,
             const float& _impactRadius = 2.5f,
             const float& _impactTime = 1.8f,
-            const float& _travelSpeed = 50.5f,
+            const float& _travelSpeed = 40.5f,
             const float& _volume = 100.0f,
             const unsigned int& _modelIndex = 0
         );

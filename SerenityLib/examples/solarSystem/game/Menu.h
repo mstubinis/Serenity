@@ -11,6 +11,7 @@
 
 class  Font;
 class  Ship;
+class  Map;
 class  Core;
 class  SoundMusic;
 struct Entity;
@@ -40,9 +41,10 @@ class Menu final{
     friend struct ButtonJoin_OnClick;
     friend struct ButtonBack_OnClick;
     friend struct ButtonNext_OnClick;
-    friend class Core;
-    friend class Client;
-    friend class Server;
+    friend class  Core;
+    friend class  Map;
+    friend class  Client;
+    friend class  Server;
     private:
         glm::vec3                      m_Color;
         Handle                         m_FontHandle;
@@ -95,6 +97,8 @@ class Menu final{
 
         void onResize(const uint& width, const uint& height);
         const bool isActive() const;
+
+        Font& getFont();
 
         void setGoodText(const std::string& error, const float errorTime = 3.0f);
         void setErrorText(const std::string& error, const float errorTime = 3.0f);

@@ -37,17 +37,17 @@ Defiant::Defiant(Client& client, Map& map, bool player, const string& name, glm:
         else if (i == 7)  system = new ShipSystemWarpDrive(_this);
         else if (i == 8)  system = new ShipSystemSensors(_this, map);
         else if (i == 9)  system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 8000.0f);
+        else if (i == 10)  system = new ShipSystemHull(_this, map, 17000.0f);
         m_ShipSystems.emplace(i, system);
     }
 
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     //blender 3d to game 3d: switch y and z, then negate z
-    auto* leftTop     = new PulsePhaser(_this, map, glm::vec3(-0.573355f, 0.072793f, -0.207088f), glm::vec3(0.0055f, 0, -1), 10.0f, 6,250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f);
-    auto* leftBottom  = new PulsePhaser(_this, map, glm::vec3(-0.434018f, -0.163775, -0.093399), glm::vec3(0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f);
-    auto* rightBottom = new PulsePhaser(_this, map, glm::vec3(0.434018f, -0.163775, -0.093399), glm::vec3(-0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f);
-    auto* rightTop    = new PulsePhaser(_this, map, glm::vec3(0.573355f, 0.072793f, -0.207088f), glm::vec3(-0.0055f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 50.5f, 25.0f);
+    auto* leftTop     = new PulsePhaser(_this, map, glm::vec3(-0.573355f, 0.072793f, -0.207088f), glm::vec3(0.0055f, 0, -1), 10.0f, 6,250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
+    auto* leftBottom  = new PulsePhaser(_this, map, glm::vec3(-0.434018f, -0.163775, -0.093399), glm::vec3(0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
+    auto* rightBottom = new PulsePhaser(_this, map, glm::vec3(0.434018f, -0.163775, -0.093399), glm::vec3(-0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
+    auto* rightTop    = new PulsePhaser(_this, map, glm::vec3(0.573355f, 0.072793f, -0.207088f), glm::vec3(-0.0055f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
 
     auto* leftTorp = new QuantumTorpedo(_this, map, glm::vec3(-0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
     auto* rightTorp = new QuantumTorpedo(_this, map, glm::vec3(0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
@@ -92,6 +92,29 @@ Defiant::Defiant(Client& client, Map& map, bool player, const string& name, glm:
     weapons.addPrimaryWeaponBeam(*topBeam);
     weapons.addPrimaryWeaponBeam(*ventralRightBeam);
     weapons.addPrimaryWeaponBeam(*ventralLeftBeam);
+    
+    vector<glm::vec3> hull_target_points = {
+        glm::vec3(0.001f,0.001f,-0.944632f),
+        glm::vec3(0.001f, 0.024758f, -0.671542f),
+        glm::vec3(-0.237229f, 0.024758f, -0.444627f),
+        glm::vec3(0.237229f, 0.024758f, -0.444627f),
+        glm::vec3(-0.260109f, 0.024758f, -0.012753f),
+        glm::vec3(0.260109f, 0.024758f, -0.012753f),
+        glm::vec3(-0.499616f, -0.018225f, 0.2071f),
+        glm::vec3(0.499616f, -0.018225f, 0.2071f),
+        glm::vec3(-0.188694f, 0.0429f, 0.404107f),
+        glm::vec3(0.188694f, 0.0429f, 0.404107f),
+        glm::vec3(-0.188694f, 0.0429f, 0.750788f),
+        glm::vec3(0.188694f, 0.0429f, 0.750788f),
+        glm::vec3(0.0f, 0.026626f, 0.870882f),
+        glm::vec3(0.0f, 0.026626f, 0.443375f),
+        glm::vec3(0.0f, 0.026626f, 0.136259f),
+        glm::vec3(0.0f, 0.026626f, -0.23),
+        glm::vec3(0.0f, 0.026626f, -0.46),
+        glm::vec3(-0.118821f,0.026626f, -0.201665f),
+        glm::vec3(0.118821f,0.026626f, -0.201665f),
+    };
+    addHullTargetPoints(hull_target_points);
 }
 Defiant::~Defiant() {
 

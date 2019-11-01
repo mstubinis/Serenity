@@ -56,6 +56,7 @@ class Texture: public EngineResource{
         const GLuint type() const;
         const uint width() const;
         const uint height() const;
+        const glm::uvec2 size() const;
         const uint numAddresses() const;
         const bool mipmapped() const;
         const bool compressed() const;

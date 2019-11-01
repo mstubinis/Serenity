@@ -22,6 +22,7 @@ void Collision::_init(ComponentBody* body, const vector<ModelInstance*>& _modelI
         btCollisionShape* btShape = InternalMeshPublicInterface::BuildCollision(mesh, _type);
         btShape->setUserPointer(body);
         localTransform = btTransform(Math::glmToBTQuat(modelInstance->orientation()), Math::btVectorFromGLM(modelInstance->position()));
+        btShape->setMargin(0.001f);
         btCompound->addChildShape(localTransform, btShape);
         btShape->calculateLocalInertia(_mass, m_BtInertia); //this is important
     }

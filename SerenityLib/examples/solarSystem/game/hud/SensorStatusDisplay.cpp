@@ -17,11 +17,12 @@
 #include "../Client.h"
 #include "../Menu.h"
 #include "../Helper.h"
+#include "../hud/HUD.h"
 
 using namespace std;
 using namespace Engine;
 
-SensorStatusDisplay::SensorStatusDisplay(Map& map, const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, const Alignment::Type& alignment):m_Map(map) {
+SensorStatusDisplay::SensorStatusDisplay(HUD& hud, Map& map, const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, const Alignment::Type& alignment):m_HUD(hud),m_Map(map) {
     m_Ship      = nullptr;
     m_Sensors   = nullptr;
     setPosition(pos.x, pos.y);

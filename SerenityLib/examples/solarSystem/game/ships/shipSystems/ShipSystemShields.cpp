@@ -14,6 +14,7 @@
 #include <core/engine/math/Engine_Math.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
 using namespace Engine;
 using namespace std;
@@ -164,6 +165,7 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, con
     shieldBody.setUserPointer2(&_ship);
     Mesh* shieldColMesh = (Mesh*)ResourceManifest::ShieldColMesh.get();
     Collision* c = new Collision(CollisionType::TriangleShapeStatic, shieldColMesh, shieldBody.mass());
+    c->getBtShape()->setMargin(0.04f);
     shieldBody.setCollision(c);
 
     m_HealthPointsMax.reserve(6);

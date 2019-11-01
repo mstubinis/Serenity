@@ -10,28 +10,33 @@
 #include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/materials/MaterialLayer.h>
 #include <core/engine/textures/Texture.h>
+#include <core/engine/fonts/Font.h>
 
 using namespace std;
 using namespace Engine;
 
 
-HUD::HUD(Map& map):m_Map(map){
+HUD::HUD(Map& map, Font& font):m_Map(map), m_Font(font){
     const auto& winSize = Resources::getWindowSize();
 
     auto& radarMat = *(Material*)ResourceManifest::RadarMaterial.get();
     const auto& radarTexture = *radarMat.getComponent(0).texture();
     const auto textureWidth = radarTexture.width();
 
-    m_SensorDisplay = new SensorStatusDisplay(map, glm::vec2(winSize.x / 2.0f, 0), glm::vec2(textureWidth, radarTexture.height()), glm::vec4(1, 1, 0, 1), Alignment::BottomCenter);
-    m_ShipStatusDisplay = new ShipStatusDisplay(glm::vec2((winSize.x / 2.0f) - textureWidth / 2.0f, 0), glm::vec2(330, 256), glm::vec4(1,1,0,1), Alignment::BottomRight);
-    m_ShipTargetStatusDisplay = new ShipStatusDisplay(glm::vec2((winSize.x / 2.0f) + textureWidth / 2.0f, 0), glm::vec2(330, 256), glm::vec4(1, 1, 0, 1), Alignment::BottomLeft);
+    Texture& background = *(Texture*)((ResourceManifest::ShipStatusBackgroundHUDTexture).get());
+
+    m_SensorDisplay = new SensorStatusDisplay(*this, map, glm::vec2(winSize.x / 2.0f, 0), glm::vec2(textureWidth, radarTexture.height()), glm::vec4(1, 1, 0, 1), Alignment::BottomCenter);
+    m_ShipStatusDisplay = new ShipStatusDisplay(*this, glm::vec2((winSize.x / 2.0f) - textureWidth / 2.0f, 0), background.size(), glm::vec4(1,1,0,1), Alignment::BottomRight);
+    m_ShipTargetStatusDisplay = new ShipStatusDisplay(*this, glm::vec2((winSize.x / 2.0f) + textureWidth / 2.0f, 0), background.size(), glm::vec4(1, 1, 0, 1), Alignment::BottomLeft);
 }
 HUD::~HUD() {
     SAFE_DELETE(m_SensorDisplay);
     SAFE_DELETE(m_ShipStatusDisplay);
     SAFE_DELETE(m_ShipTargetStatusDisplay);
 }
-
+Font& HUD::getFont() {
+    return m_Font;
+}
 SensorStatusDisplay& HUD::getSensorDisplay() {
     return *m_SensorDisplay;
 }

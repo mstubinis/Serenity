@@ -34,7 +34,7 @@ Intrepid::Intrepid(Client& client, Map& map, bool player, const string& name, gl
         else if (i == 7)   system = new ShipSystemWarpDrive(_this);
         else if (i == 8)   system = new ShipSystemSensors(_this, map);
         else if (i == 9)   system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 10000.0f);
+        else if (i == 10)  system = new ShipSystemHull(_this, map, 26000.0f);
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
@@ -233,6 +233,55 @@ Intrepid::Intrepid(Client& client, Map& map, bool player, const string& name, gl
     weapons.addPrimaryWeaponBeam(*ventral_top_right_right);
     weapons.addPrimaryWeaponBeam(*ventral_top_left);
     weapons.addPrimaryWeaponBeam(*ventral_top_right);
+
+
+    vector<glm::vec3> hull_target_points = {
+        glm::vec3(0,0.187934f, -2.14433f),
+        glm::vec3(0,0.187934f, -1.76738f),
+        glm::vec3(0,0.187934f, -1.42096f),
+        glm::vec3(0,0.187934f, -1.17599f),
+        glm::vec3(0,0.263242f, -0.882292f),
+        glm::vec3(0,0.263242f, -0.573299f),
+        glm::vec3(0,0.263242f, -0.215486f),
+        glm::vec3(0,0.082578f, 0.2588f),
+        glm::vec3(0,0.0487f, 0.506052f),
+        glm::vec3(0,-0.03808f, 0.836647f),
+        glm::vec3(0,-0.03808f, 1.28013f),
+        glm::vec3(0,-0.03808f, 1.66896f),
+        glm::vec3(0,-0.239327f, 0.570865f),
+        glm::vec3(0,-0.280726f, -0.076472f),
+        glm::vec3(-0.816978f,-0.121007f, 0.811069f),
+        glm::vec3(0.816978f,-0.121007f, 0.811069f),
+        glm::vec3(-0.816978f,-0.121007f, 1.3022f),
+        glm::vec3(0.816978f,-0.121007f, 1.3022f),
+        glm::vec3(-0.816978f,-0.121007f, 1.79231f),
+        glm::vec3(0.816978f,-0.121007f, 1.79231f),
+        glm::vec3(-0.545999f,-0.121007f,1.30003f),
+        glm::vec3(0.545999f,-0.121007f, 1.30003f),
+        glm::vec3(-0.293086f,-0.121007f,1.58907f),
+        glm::vec3(0.293086f,-0.121007f, 1.58907f),
+        glm::vec3(-0.258588f,0.146209f,-2.0831f),
+        glm::vec3(0.258588f,0.146209f, -2.0831f),
+        glm::vec3(-0.540406f,0.146209f,-1.66037f),
+        glm::vec3(0.540406f,0.146209f, -1.66037f),
+        glm::vec3(-0.615326f,0.146209f,-1.07974f),
+        glm::vec3(0.615326f,0.146209f, -1.07974f),
+        glm::vec3(-0.540406f,0.146209f,-0.424189f),
+        glm::vec3(0.540406f,0.146209f, -0.424189f),
+        glm::vec3(0.251651f,0.146209f,0.098691f),
+        glm::vec3(-0.251651f,0.146209f, 0.098691f),
+        glm::vec3(-0.279746f,0.202415f,-1.54019f),
+        glm::vec3(0.279746f,0.202415f, -1.54019f),
+        glm::vec3(-0.354666f,0.202415f,-1.02511f),
+        glm::vec3(0.354666f,0.202415f, -1.02511f),
+        glm::vec3(-0.195461f,0.202415f,-0.257179f),
+        glm::vec3(0.195461f,0.202415f, -0.257179f),
+        glm::vec3(-0.128033f,-0.005906f,0.664339f),
+        glm::vec3(0.128033f,-0.005906f, 0.664339f),
+        glm::vec3(-0.173718f,0.435077f,-0.557595f),
+        glm::vec3(0.173718f,0.435077f, -0.557595f),
+    };
+    addHullTargetPoints(hull_target_points);
 }
 Intrepid::~Intrepid() {
 

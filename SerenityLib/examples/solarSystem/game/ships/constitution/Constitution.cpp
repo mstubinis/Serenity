@@ -34,7 +34,7 @@ Constitution::Constitution(Client& client, Map& map, bool player, const string& 
         else if (i == 7)  system = new ShipSystemWarpDrive(_this);
         else if (i == 8)  system = new ShipSystemSensors(_this, map);
         else if (i == 9)  system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 10000.0f);
+        else if (i == 10)  system = new ShipSystemHull(_this, map, 20000.0f);
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));

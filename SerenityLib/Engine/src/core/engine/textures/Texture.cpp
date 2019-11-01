@@ -150,6 +150,10 @@ const uint Texture::width() const {
 const uint Texture::height() const { 
     return m_ImagesDatas[0]->mipmaps[0].height; 
 }
+const glm::uvec2 Texture::size() const {
+    return glm::uvec2(width(), height());
+}
+
 const ImageInternalFormat::Format Texture::internalFormat() const { 
     return m_ImagesDatas[0]->internalFormat; 
 }

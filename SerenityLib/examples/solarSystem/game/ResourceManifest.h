@@ -49,7 +49,13 @@ struct ResourceManifest{
     static Handle RadarMaterial;
     static Handle StarFlareMaterial;
     static Handle ShieldMaterial;
-    
+    static Handle ShieldRingHUDTexture;
+    static Handle ShieldRingBorderHUDTexture;
+    static Handle ShieldRing2HUDTexture;
+    static Handle ShieldRingBorder2HUDTexture;
+    static Handle ShipStatusBackgroundHUDTexture;
+    static Handle ShipStatusBackgroundBorderHUDTexture;
+
     static Handle CannonOutlineMaterial;
     static Handle CannonTailMaterial;
     static Handle PhaserBeamMaterial;
