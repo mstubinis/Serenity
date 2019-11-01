@@ -214,7 +214,7 @@ Ship::Ship(Client& client, const string& shipClass, Map& map, bool player, const
 		m_PlayerCamera = static_cast<GameCamera*>(map.getActiveCamera());
 	}
     body.setUserPointer1(this);
-
+    
     map.m_Objects.push_back(this);
     map.getShips().emplace(name, this);
 

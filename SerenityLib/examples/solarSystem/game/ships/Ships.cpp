@@ -71,7 +71,7 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
         const auto path_string = it->path().string();
 
         if (boost::filesystem::is_regular_file(*it)) {
-            if (extension == ".objcc") {
+            if (extension == ".objcc" || extension == ".obj") {
                 objcc_files.emplace(path_string, it->path());
             }else if ( extension == ".dds") {
                 for (auto& texture_contain : texture_files_contains) {
@@ -157,7 +157,7 @@ void Ships::init() {
     //createShipEntry("Liberty", FactionEnum::Federation);
 
     createShipEntry("B'rel", FactionEnum::Klingon);
-    //createShipEntry("Vor'cha", FactionEnum::Klingon);
+    createShipEntry("Vor'cha", FactionEnum::Klingon);
     //createShipEntry("Negh'var", FactionEnum::Klingon);
     //createShipEntry("Kahless", FactionEnum::Klingon);
 

@@ -154,6 +154,12 @@
     <Filter Include="Source Files\Game\HUD">
       <UniqueIdentifier>{72c5341f-54ba-4d71-974f-cbf9a80063fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Ships\Vorcha">
+      <UniqueIdentifier>{9c3c9ebf-c42c-4dea-8221-9f4bb8c45976}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Vorcha">
+      <UniqueIdentifier>{9593531f-107a-4391-8e8b-a51abf1b3681}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -363,6 +369,9 @@
     <ClInclude Include="game\Menu.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
+    <ClInclude Include="game\ships\vorcha\Vorcha.h">
+      <Filter>Header Files\Game\Ships\Vorcha</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -559,6 +568,9 @@
     </ClCompile>
     <ClCompile Include="game\Menu.cpp">
       <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\vorcha\Vorcha.cpp">
+      <Filter>Source Files\Game\Ships\Vorcha</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

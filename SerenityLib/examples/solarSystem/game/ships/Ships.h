@@ -7,6 +7,7 @@
 #include "intrepid/Intrepid.h"
 #include "shrike/Shrike.h"
 #include "brel/Brel.h"
+#include "vorcha/Vorcha.h"
 #include "defiant/Defiant.h"
 #include "miranda/Miranda.h"
 #include "constitution/Constitution.h"

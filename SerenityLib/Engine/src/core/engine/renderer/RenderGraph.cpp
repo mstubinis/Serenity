@@ -147,6 +147,7 @@ void RenderPipeline::sort(Camera& camera, const SortingMode::Mode sortingMode) {
                         return camera.getDistanceSquared(leftPos) > camera.getDistanceSquared(rightPos);
                     else
                         return false;
+                    return false;
                 }
             );
         }
@@ -242,7 +243,7 @@ void RenderPipeline::render(Viewport& viewport, Camera& camera, const double& dt
                                 _mesh.sortTriangles(camera, _modelInstance, modelMatrix, sortingMode);
                             }
                             _modelInstance.bind();
-                            _mesh.render(false);
+                            _mesh.render(false, _modelInstance.getDrawingMode());
                             _modelInstance.unbind();
                         }
                     }
@@ -277,7 +278,7 @@ void RenderPipeline::render_bruteforce(Viewport& viewport, Camera& camera, const
             _material.bind();
             _mesh.bind();
             _modelInstance.bind();
-            _mesh.render(false);
+            _mesh.render(false, _modelInstance.getDrawingMode());
             _modelInstance.unbind();
             _mesh.unbind();
             _material.unbind();

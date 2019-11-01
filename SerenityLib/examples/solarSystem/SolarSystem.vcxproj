@@ -250,6 +250,7 @@
     <ClInclude Include="game\ships\shipSystems\ShipSystemYawThrusters.h" />
     <ClInclude Include="game\ships\shrike\Shrike.h" />
     <ClInclude Include="game\ships\sphere\Sphere.h" />
+    <ClInclude Include="game\ships\vorcha\Vorcha.h" />
     <ClInclude Include="game\weapons\DisruptorCannon.h" />
     <ClInclude Include="game\weapons\KlingonPhotonTorpedo.h" />
     <ClInclude Include="game\weapons\PhaserBeam.h" />
@@ -319,6 +320,7 @@
     <ClCompile Include="game\ships\shipSystems\ShipSystemYawThrusters.cpp" />
     <ClCompile Include="game\ships\shrike\Shrike.cpp" />
     <ClCompile Include="game\ships\sphere\Sphere.cpp" />
+    <ClCompile Include="game\ships\vorcha\Vorcha.cpp" />
     <ClCompile Include="game\weapons\DisruptorCannon.cpp" />
     <ClCompile Include="game\weapons\KlingonPhotonTorpedo.cpp" />
     <ClCompile Include="game\weapons\PhaserBeam.cpp" />

@@ -10,15 +10,6 @@
 const uint NUM_BONES_PER_VERTEX   = 4;
 const uint NUM_MAX_INSTANCES      = 65536;
 
-struct MeshDrawMode {enum Mode {
-    Triangles       = GL_TRIANGLES,
-    Quads           = GL_QUADS,
-    Points          = GL_POINTS,
-    Lines           = GL_LINES,
-    TriangleStrip   = GL_TRIANGLE_STRIP,
-    TriangleFan     = GL_TRIANGLE_FAN,
-    QuadStrip       = GL_QUAD_STRIP,
-};};
 struct MeshModifyFlags {enum Flag {
     Default              = 1 << 0,
     Orphan               = 1 << 1,

@@ -436,6 +436,8 @@ Ship* Map::createShip(Client& client, const string& shipClass, const string& shi
         ship = new Norway(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Intrepid")
         ship = new Intrepid(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+    else if (shipClass == "Vor'cha")
+        ship = new Vorcha(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     return ship;
 }
 Anchor* Map::getRootAnchor() {

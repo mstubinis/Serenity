@@ -50,7 +50,6 @@ namespace Engine {
                 }
             }
         };
-
         struct DefaultModelInstanceBindFunctor {void operator()(EngineResource* r) const {
             auto& i = *static_cast<ModelInstance*>(r);
             const auto& stage = i.stage();
@@ -187,8 +186,6 @@ namespace Engine {
         struct DefaultModelInstanceUnbindFunctor {void operator()(EngineResource* r) const {
             //auto& i = *static_cast<ModelInstance*>(r);
         }};
-
-
     };
 };
 
@@ -218,6 +215,7 @@ void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* progr
     if (!program) {
         program = ShaderProgram::Deferred;
     }
+    m_DrawingMode       = ModelDrawingMode::Triangles;
     m_ViewportFlag      = ModelInstance::m_ViewportFlagDefault;
     m_UserPointer       = nullptr;
     m_Stage             = RenderStage::GeometryOpaque;
@@ -235,6 +233,13 @@ void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* progr
 
     internalUpdateModelMatrix();
 }
+const ModelDrawingMode::Mode& ModelInstance::getDrawingMode() const {
+    return m_DrawingMode;
+}
+void ModelInstance::setDrawingMode(const ModelDrawingMode::Mode& drawMode) {
+    m_DrawingMode = drawMode;
+}
+
 void ModelInstance::forceRender(const bool forced) {
     m_ForceRender = forced;
 }

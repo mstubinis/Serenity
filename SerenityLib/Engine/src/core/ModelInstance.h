@@ -29,6 +29,22 @@ namespace Engine{
     };
 };
 
+struct ModelDrawingMode final { enum Mode {
+    Triangles = GL_TRIANGLES,
+    TriangleStrip = GL_TRIANGLE_STRIP,
+    TriangleFan = GL_TRIANGLE_FAN,
+    Points = GL_POINTS,
+    LineStrip = GL_LINE_STRIP,
+    LineLoop = GL_LINE_LOOP,
+    Lines = GL_LINES,
+    Patches = GL_PATCHES,
+
+//GL_LINE_STRIP_ADJACENCY, GL_LINES_ADJACENCY, GL_TRIANGLE_STRIP_ADJACENCY and GL_TRIANGLES_ADJACENCY are available only if the GL version is 3.2 or greater.
+    TriangleStripAdjacency = GL_TRIANGLE_STRIP_ADJACENCY,
+    TrianglesAdjacency = GL_TRIANGLES_ADJACENCY,
+    LineStripAdjacency = GL_LINE_STRIP_ADJACENCY,
+    LinesAdjacency = GL_LINES_ADJACENCY,
+};};
 
 struct ViewportFlag final { enum Flag {
     None    = 0,
@@ -55,6 +71,7 @@ class ModelInstance final: public BindableResource{
     friend struct Engine::epriv::DefaultModelInstanceUnbindFunctor;
     friend class  ComponentModel;
     private:
+        ModelDrawingMode::Mode                               m_DrawingMode;
         static unsigned short                                m_ViewportFlagDefault;
         unsigned short                                       m_ViewportFlag; //determine what viewports this can be seen in
         void*                                                m_UserPointer;
@@ -89,6 +106,9 @@ class ModelInstance final: public BindableResource{
 
         static void setDefaultViewportFlag(const unsigned short& flag);
         static void setDefaultViewportFlag(const ViewportFlag::Flag& flag);
+
+        const ModelDrawingMode::Mode& getDrawingMode() const;
+        void setDrawingMode(const ModelDrawingMode::Mode&);
 
         void setViewportFlag(const unsigned short& flag);
         void addViewportFlag(const unsigned short& flag);
