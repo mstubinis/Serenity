@@ -9,6 +9,7 @@ class Nova final : public Ship {
 
     public:
         Nova(
+            Team& team,
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?

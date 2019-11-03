@@ -104,6 +104,21 @@ ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, ShaderPr
     ComponentModel_Functions::CalculateRadius(*this);
     return instance;
 }
+
+ModelInstance& ComponentModel::addModel(Handle& mesh, Handle& material, Handle& shaderProgram, const RenderStage::Stage& stage) {
+    return ComponentModel::addModel((Mesh*)mesh.get(), (Material*)material.get(), (ShaderProgram*)shaderProgram.get(), stage);
+}
+ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, Handle& shaderProgram, const RenderStage::Stage& stage) {
+    return ComponentModel::addModel(mesh, material, (ShaderProgram*)shaderProgram.get(), stage);
+}
+
+
+
+
+
+
+
+
 void ComponentModel::setModel(Handle& mesh, Handle& material, const uint& index, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
     ComponentModel::setModel((Mesh*)mesh.get(), (Material*)material.get(), index, shaderProgram, stage);
 }

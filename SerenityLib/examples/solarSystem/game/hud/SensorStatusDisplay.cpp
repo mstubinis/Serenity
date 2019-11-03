@@ -123,12 +123,21 @@ void SensorStatusDisplay::render() {
     const auto& radarBodyPosition = m_RadarRingEntity.getComponent<ComponentBody>()->position();
     const auto& myPos = ship.getComponent<ComponentBody>()->position();
     auto* myTarget = ship.getTarget();
-    for (auto& other_ship : m_Sensors->getShips()) {
-        auto color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); //red first (enemy)
-        auto otherVector = other_ship->getPosition() - myPos;
-        auto* cloakingDevice = static_cast<ShipSystemCloakingDevice*>(other_ship->getShipSystem(ShipSystemType::CloakingDevice));
+    for (auto& other_ship_ptr : m_Sensors->getShips()) {
+        auto& other_ship = *other_ship_ptr;
+        glm::vec4 color;
+        if (ship.isEnemy(other_ship)) {
+            color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); //red (enemy)
+        }else if (ship.isAlly(other_ship)) {
+            color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f); //green (ally)
+        }else {
+            color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f); //yellow (neutral)
+        }
+
+        auto otherVector = other_ship.getPosition() - myPos;
+        auto* cloakingDevice = static_cast<ShipSystemCloakingDevice*>(other_ship.getShipSystem(ShipSystemType::CloakingDevice));
         auto modByCloak = false;
-        if (cloakingDevice) {
+        if (cloakingDevice && !other_ship.isAlly(ship)) {
             auto timer = cloakingDevice->getCloakTimer();
             //1.0 - see, 0.0 or below is invisible
             if (timer < 1.0f) {
@@ -167,7 +176,7 @@ void SensorStatusDisplay::render() {
         //render radar token
         Renderer::renderTexture(radarTokenTexture, pos2D, color, 0, glm::vec2(1.0f), 0.14f, Alignment::Center);
 
-        if (myTarget && myTarget->getComponent<ComponentName>()->name() == other_ship->getName()) {
+        if (myTarget && myTarget->getComponent<ComponentName>()->name() == other_ship.getName()) {
             Renderer::renderTexture(radarTokenTexture, pos2D, glm::vec4(1, 1, 1, 1), 0, glm::vec2(1.2f), 0.16f, Alignment::Center);
         }
     }

@@ -181,7 +181,7 @@ struct HullCollisionFunctor final { void operator()(ComponentBody& owner, const 
     }
 }};
 
-Ship::Ship(Client& client, const string& shipClass, Map& map, bool player, const string& name, const glm_vec3 pos, const glm_vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client){
+Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, bool player, const string& name, const glm_vec3 pos, const glm_vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client),m_Team(team){
     m_WarpFactor          = 0;
     m_IsPlayer            = player;
     m_ShipClass           = shipClass;
@@ -192,8 +192,7 @@ Ship::Ship(Client& client, const string& shipClass, Map& map, bool player, const
     m_CameraOffsetDefault = camOffsetDefault;
 
     auto& shipInfo = Ships::Database[shipClass];
-
-    auto& modelComponent     = *addComponent<ComponentModel>(shipInfo.MeshHandles[0], shipInfo.MaterialHandles[0]);
+    auto& modelComponent     = *addComponent<ComponentModel>(shipInfo.MeshHandles[0], shipInfo.MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
     auto& body               = *addComponent<ComponentBody>(collisionType);
     auto& nameComponent      = *addComponent<ComponentName>(name);
     auto& logicComponent     = *addComponent<ComponentLogic>(ShipLogicFunctor(), this);
@@ -260,7 +259,6 @@ const glm::vec3 Ship::getAimPositionDefaultLocal() {
     }
     return Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
 }
-
 const uint Ship::getAimPositionRandomLocalIndex() {
     if (m_AimPositionDefaults.size() == 1) {
         return 0;
@@ -281,7 +279,6 @@ const glm::vec3 Ship::getAimPositionLocal(const uint index) {
     }
     return Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[index]);
 }
-
 void Ship::destroy() {
     for (auto& system : m_ShipSystems) {
         if (system.second) {
@@ -298,6 +295,9 @@ const glm_vec3 Ship::getWarpSpeedVector3() {
         return (body.forward() * glm::pow(static_cast<decimal>(speed), static_cast<decimal>(15.0))) / glm::log2(static_cast<decimal>(body.mass()) + static_cast<decimal>(0.5));
     }
     return glm_vec3(static_cast<decimal>(0.0));
+}
+const Team& Ship::getTeam() const {
+    return m_Team;
 }
 const string Ship::getName() {
     return getComponent<ComponentName>()->name();
@@ -362,9 +362,9 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     }
 }
 void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
-    const unsigned int& size = stoi(info[2]);
+    const unsigned int& size = stoi(info[3]);
     Anchor* closest = map.getRootAnchor();
-    for (unsigned int i = 3; i < 3 + size; ++i) {
+    for (unsigned int i = 4; i < 4 + size; ++i) {
         auto& children = closest->getChildren();
         if (!children.count(info[i])) {
             return;
@@ -402,8 +402,8 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
     body.setLinearVelocity(static_cast<decimal>(lx - (packet.wx * WARP_PHYSICS_MODIFIER)), static_cast<decimal>(ly - (packet.wy * WARP_PHYSICS_MODIFIER)), static_cast<decimal>(lz - (packet.wz * WARP_PHYSICS_MODIFIER)), false);
     //body.setGoal(x, y, z, PHYSICS_PACKET_TIMER_LIMIT);
 }
-bool Ship::canSeeCloak() {
-    if (m_IsPlayer) { //TODO: or is this ship an ally of the player
+const bool Ship::canSeeCloak(Ship* otherShip) {
+    if (m_IsPlayer || otherShip->getTeam().isAllyTeam(m_Team)) { //TODO: or is this ship an enemy but detected by anti cloak scan?
         return true;
     }
     return false;
@@ -412,9 +412,11 @@ void Ship::updateDamageDecalsCloak(const float& alpha) {
     for (auto& decal : m_DamageDecals) {
         if (decal && decal->active()) {
             auto& model = *decal->getComponent<ComponentModel>();
-            auto& modelOne = model.getModel(0);
-            auto& color = modelOne.color();
-            modelOne.setColor(color.r, color.g, color.b, alpha);
+            for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+                auto& instance = model.getModel(i);
+                auto& color = instance.color();
+                instance.setColor(color.r, color.g, color.b, alpha);
+            }
         }
     }
 }
@@ -424,8 +426,9 @@ void Ship::updateCloakFromPacket(const PacketCloakUpdate& packet) {
     ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
     cloak.m_CloakTimer = packet.cloakTimer;
     auto& model = *getComponent<ComponentModel>();
-    auto& instance = model.getModel(0);
-    if (!canSeeCloak()) {
+
+    Map& map = static_cast<Map&>(entity().scene());
+    if (!canSeeCloak(map.getPlayer())) {
         if (cloak.m_CloakTimer < 0.0) {
             cloak.m_CloakTimer = 0.0f; 
         }
@@ -439,17 +442,26 @@ void Ship::updateCloakFromPacket(const PacketCloakUpdate& packet) {
             Ship::decloak(false);
     }else{
         if (cloak.m_CloakTimer < 1.0f && cloak.m_CloakTimer >= 0.0f) {
-            model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
-            instance.setColor(1, 1, 1, glm::abs(cloak.m_CloakTimer));
-            updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
+            for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+                auto& instance = model.getModel(i);
+                model.setModelShaderProgram(ResourceManifest::ShipShaderProgramForward, i, RenderStage::ForwardTransparentTrianglesSorted);
+                instance.setColor(1, 1, 1, glm::abs(cloak.m_CloakTimer));
+                updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
+            }
         }else if(cloak.m_CloakTimer < 0.0f){
-            model.setModelShaderProgram(ShaderProgram::Forward, 0, RenderStage::ForwardTransparentTrianglesSorted);
-            instance.setColor(0.369f, 0.912f, 1, glm::abs(cloak.m_CloakTimer));
-            updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
+            for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+                auto& instance = model.getModel(i);
+                model.setModelShaderProgram(ResourceManifest::ShipShaderProgramForward, i, RenderStage::ForwardTransparentTrianglesSorted);
+                instance.setColor(0.369f, 0.912f, 1, glm::abs(cloak.m_CloakTimer));
+                updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
+            }
         }else{
-            model.setModelShaderProgram(ShaderProgram::Deferred, 0, RenderStage::GeometryOpaque);
-            instance.setColor(1, 1, 1, glm::abs(cloak.m_CloakTimer));
-            updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
+            for (unsigned int i = 0; i < model.getNumModels(); ++i) {
+                auto& instance = model.getModel(i);
+                model.setModelShaderProgram(ResourceManifest::ShipShaderProgramDeferred, i, RenderStage::GeometryOpaque);
+                instance.setColor(1, 1, 1, glm::abs(cloak.m_CloakTimer));
+                updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
+            }
         }
     }
 }
@@ -556,13 +568,15 @@ EntityWrapper* Ship::getTarget() {
 }
 void Ship::setTarget(const string& target, const bool sendPacket) {
     auto* sensors = static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]);
-    if (sensors)
+    if (sensors) {
         sensors->setTarget(target, sendPacket);
+    }
 }
 void Ship::setTarget(EntityWrapper* target, const bool sendPacket) {
     auto* sensors = static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]);
-    if (sensors)
+    if (sensors) {
         sensors->setTarget(target, sendPacket);
+    }
 }
 const glm_vec3& Ship::forward() {
     return getComponent<ComponentBody>()->forward();
@@ -587,6 +601,16 @@ const bool Ship::isFullyCloaked() {
     }
     return false;
 }
+const bool Ship::isAlly(Ship& other) {
+    return m_Team.isAllyTeam(other.getTeam());
+}
+const bool Ship::isEnemy(Ship& other) {
+    return m_Team.isEnemyTeam(other.getTeam());
+}
+const bool Ship::isNeutral(Ship& other) {
+    return m_Team.isNeutralTeam(other.getTeam());
+}
+
 void Ship::onEvent(const Event& e){
     if (e.type == EventType::WindowResized) {
         for (auto& system : m_ShipSystems) {

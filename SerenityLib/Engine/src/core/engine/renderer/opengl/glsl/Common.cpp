@@ -54,7 +54,7 @@ void opengl::glsl::Common::convert(string& code, const unsigned int& versionNumb
 #pragma endregion
 
 #pragma region normal map
-    if (ShaderHelper::sfind(code, "CalcBumpedNormal(") || ShaderHelper::sfind(code, "CalcBumpedNormalCompressed(")) {
+    if (ShaderHelper::sfind(code, "CalcBumpedNormal(") || ShaderHelper::sfind(code, "CalcBumpedNormalCompressed(") || ShaderHelper::sfind(code, "CalcBumpedNormalLOD(") || ShaderHelper::sfind(code, "CalcBumpedNormalCompressedLOD(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcBumpedNormal(")) {
             if (ShaderHelper::sfind(code, "varying mat3 TBN;")) {
                 boost::replace_all(code, "varying mat3 TBN;", "");
@@ -67,6 +67,16 @@ void opengl::glsl::Common::convert(string& code, const unsigned int& versionNumb
                 "}\n"
                 "vec3 CalcBumpedNormalCompressed(vec2 _uv,sampler2D _inTexture){//generated\n"
                 "    vec2 _t = (texture2D(_inTexture, _uv).yx) * 2.0 - 1.0;\n" //notice the yx flip, its needed
+                "    float _z = sqrt(1.0 - _t.x * _t.x - _t.y * _t.y);\n"
+                "    vec3 normal = vec3(_t.xy, _z);\n"//recalc z in the shader
+                "    return normalize(TBN * normal);\n"
+                "}\n"
+                "vec3 CalcBumpedNormalLOD(vec2 _uv,sampler2D _inTexture, in float lod){//generated\n"
+                "    vec3 _t = (texture2DLod(_inTexture, _uv, lod).xyz) * 2.0 - 1.0;\n"
+                "    return normalize(TBN * _t);\n"
+                "}\n"
+                "vec3 CalcBumpedNormalCompressedLOD(vec2 _uv,sampler2D _inTexture, in float lod){//generated\n"
+                "    vec2 _t = (texture2DLod(_inTexture, _uv, lod).yx) * 2.0 - 1.0;\n" //notice the yx flip, its needed
                 "    float _z = sqrt(1.0 - _t.x * _t.x - _t.y * _t.y);\n"
                 "    vec3 normal = vec3(_t.xy, _z);\n"//recalc z in the shader
                 "    return normalize(TBN * normal);\n"

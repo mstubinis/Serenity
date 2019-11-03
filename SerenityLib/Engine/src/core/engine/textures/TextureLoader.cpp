@@ -415,13 +415,14 @@ const bool TextureLoader::IsCompressedType(const ImageInternalFormat::Format& fo
     }
     return false;
 }
-void TextureLoader::GenerateMipmapsOpenGL(Texture& texture) {
-    if (texture.m_Mipmapped)
+void TextureLoader::GenerateMipmapsOpenGL(Texture& texture, const unsigned int addressIndex) {
+    if (texture.m_Mipmapped) {
         return;
+    }
     //const auto& image = *texture.m_ImagesDatas[0];
     //const uint& _w = image.mipmaps[0].width;
     //const uint& _h = image.mipmaps[0].height;
-    Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);
+    Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[addressIndex]);
     glTexParameteri(texture.m_Type, GL_TEXTURE_BASE_LEVEL, 0);
     if (texture.m_MinFilter == GL_LINEAR) {
         texture.m_MinFilter = GL_LINEAR_MIPMAP_LINEAR;

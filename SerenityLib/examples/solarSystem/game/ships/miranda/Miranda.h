@@ -9,6 +9,7 @@ class Miranda final : public Ship {
 
     public:
         Miranda(
+            Team& team,
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?

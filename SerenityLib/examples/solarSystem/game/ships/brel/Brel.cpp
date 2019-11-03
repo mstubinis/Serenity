@@ -24,8 +24,8 @@
 using namespace std;
 using namespace Engine;
 
-Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, "B'rel", map,player, name, position, scale, collisionType, glm::vec3(0.0f, 0.311455f, 0.397761f), glm::vec3(0.0f,0.7f,0.7f)) {
+Brel::Brel(Team& team, Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+:Ship(team,client, "B'rel", map,player, name, position, scale, collisionType, glm::vec3(0.0f, 0.311455f, 0.397761f), glm::vec3(0.0f,0.7f,0.7f)) {
 
     m_InitialCamera = glm::vec3(0.0f, 0.7f, 0.7f);
     const auto className = getClass();
@@ -35,9 +35,9 @@ Brel::Brel(Client& client, Map& map, bool player, const string& name, glm::vec3 
 
     model.getModel(0).setMesh(Ships::Database.at(className).MeshHandles[1], model); //brel head only
 
-    auto& wing1 = model.addModel(ResourceManifest::BrelMeshWing, Ships::Database.at(className).MaterialHandles[0]);
+    auto& wing1 = model.addModel(ResourceManifest::BrelMeshWing, Ships::Database.at(className).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
     wing1.setPosition(0.232951f, 0.316462f, 0.08058f);
-    auto& wing2 = model.addModel(ResourceManifest::BrelMeshWing2, Ships::Database.at(className).MaterialHandles[0]);
+    auto& wing2 = model.addModel(ResourceManifest::BrelMeshWing2, Ships::Database.at(className).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
     wing2.setPosition(-0.232951f, 0.316462f, 0.08058f);
 
     const auto mass = updateShipDimensions();
@@ -181,8 +181,7 @@ void Brel::updateWingSpan(const double& dt, const BrelWingSpanState::State end, 
 void Brel::update(const double& dt) {
 
     auto& sensors = *static_cast<ShipSystemSensors*>(getShipSystem(ShipSystemType::Sensors));
-    //TODO: change to sensors.getClosestEnemyShip(); once that is correctly coded
-    const auto& closestEnemy = sensors.getClosestShip();
+    const auto& closestEnemy = sensors.getClosestEnemyShip();
     if (closestEnemy.ship) {
         if (closestEnemy.distanceAway2 < static_cast<decimal>(150.0 * 150.0)) { //15km away
             foldWingsDown();

@@ -36,6 +36,9 @@
 #include "../ships/Ships.h"
 #include <SFML/Graphics.hpp>
 
+#include "../modes/GameplayMode.h"
+#include "../teams/Team.h"
+
 #include "../hud/SensorStatusDisplay.h"
 #include "../hud/ShipStatusDisplay.h"
 
@@ -43,7 +46,7 @@ using namespace Engine;
 using namespace std;
 namespace boost_io = boost::iostreams;
 
-Map::Map(Client& client, const string& n, const string& file):Scene(n), m_Client(client){
+Map::Map(GameplayMode& mode, Client& client, const string& n, const string& file):Scene(n), m_Client(client), m_GameplayMode(mode){
     m_Player      = nullptr;
 
     m_ActiveCannonProjectiles.initialize(2500);
@@ -411,33 +414,33 @@ void Map::loadFromFile(const string& filename) {
 
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
 }
-Ship* Map::createShip(Client& client, const string& shipClass, const string& shipName, const bool& playerShip, const glm::vec3& position) {
+Ship* Map::createShip(Team& team, Client& client, const string& shipClass, const string& shipName, const bool& playerShip, const glm::vec3& position) {
     if (m_Ships.size() > 0 && m_Ships.count(shipName))
         return nullptr;
     Ship* ship = nullptr;
 
     if     (shipClass == "Defiant")
-        ship = new Defiant(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Defiant(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Nova")
-        ship = new Nova(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Nova(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Shrike")
-        ship = new Shrike(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Shrike(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "B'rel")
-        ship = new Brel(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Brel(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Constitution")
-        ship = new Constitution(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Constitution(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Miranda")
-        ship = new Miranda(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Miranda(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Excelsior")
-        ship = new Excelsior(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Excelsior(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Akira")
-        ship = new Akira(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Akira(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Norway")
-        ship = new Norway(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Norway(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Intrepid")
-        ship = new Intrepid(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Intrepid(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Vor'cha")
-        ship = new Vorcha(client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Vorcha(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     return ship;
 }
 Anchor* Map::getRootAnchor() {

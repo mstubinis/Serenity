@@ -9,6 +9,7 @@ class Akira final : public Ship {
 
     public:
         Akira(
+            Team& team,
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?

@@ -22,6 +22,7 @@ class Brel final : public Ship {
         float m_WingRotation;
     public:
         Brel(
+            Team& team,
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?

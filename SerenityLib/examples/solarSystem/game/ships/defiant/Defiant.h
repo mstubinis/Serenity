@@ -9,6 +9,7 @@ class Defiant final : public Ship {
 
     public:
         Defiant(
+            Team& team,
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?

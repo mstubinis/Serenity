@@ -17,6 +17,7 @@ class  Server;
 class  ServerClient;
 class  ServerClientThread;
 class  Core;
+class  GameplayMode;
 
 #define SERVER_CLIENT_TIMEOUT 20.0f
 #define SERVER_CLIENT_RECOVERY_TIME 60.0f
@@ -72,6 +73,7 @@ class Server {
     friend class ServerClient;
     friend class ServerClientThread;
     private:
+        GameplayMode*                                  m_GameplayMode;
         Engine::Networking::SocketUDP*                 m_UdpSocket;
         sf::Mutex                                      m_mutex;
         std::vector<ServerClientThread*>               m_Threads;
@@ -90,7 +92,7 @@ class Server {
         ~Server();
 
         const bool startup(const std::string& mapname);
-        const bool startupMap();
+        const bool startupMap(GameplayMode& mode);
         void shutdown(const bool destructor = false);
         const bool shutdownMap();
 

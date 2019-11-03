@@ -16,6 +16,8 @@ Handle ResourceManifest::skyFromSpace;
 Handle ResourceManifest::skyFromAtmosphere;
 Handle ResourceManifest::groundFromSpace;
 Handle ResourceManifest::shieldsShaderProgram;
+Handle ResourceManifest::ShipShaderProgramDeferred;
+Handle ResourceManifest::ShipShaderProgramForward;
 
 Handle ResourceManifest::PlanetMesh;
 Handle ResourceManifest::RingMesh;
@@ -114,6 +116,17 @@ void ResourceManifest::init(){
     Handle shieldsVert = Resources::addShader(BasePath + "data/Shaders/shields_vert.glsl", ShaderType::Vertex);
     Handle shieldsFrag = Resources::addShader(BasePath + "data/Shaders/shields_frag.glsl", ShaderType::Fragment);
     shieldsShaderProgram = Resources::addShaderProgram("ShieldsShaderProgram", shieldsVert, shieldsFrag);
+
+    Handle ShipShaderProgramDeferredVert = Resources::addShader(BasePath + "data/Shaders/shipDef_vert.glsl", ShaderType::Vertex);
+    Handle ShipShaderProgramDeferredFrag = Resources::addShader(BasePath + "data/Shaders/shipDef_frag.glsl", ShaderType::Fragment);
+    ShipShaderProgramDeferred = Resources::addShaderProgram("ShipShaderProgramDeferred", ShipShaderProgramDeferredVert, ShipShaderProgramDeferredFrag);
+
+    Handle ShipShaderProgramForwardVert = Resources::addShader(BasePath + "data/Shaders/shipFwd_vert.glsl", ShaderType::Vertex);
+    Handle ShipShaderProgramForwardFrag = Resources::addShader(BasePath + "data/Shaders/shipFwd_frag.glsl", ShaderType::Fragment);
+    ShipShaderProgramForward = Resources::addShaderProgram("ShipShaderProgramForward", ShipShaderProgramForwardVert, ShipShaderProgramForwardFrag);
+
+
+
 
     PlanetMesh = Resources::loadMeshAsync(BasePath + "data/Models/planet.objcc")[0];
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc")[0];

@@ -18,8 +18,8 @@
 
 using namespace std;
 
-Intrepid::Intrepid(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, "Intrepid", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.140914f, -0.585431f)) {
+Intrepid::Intrepid(Team& team, Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+:Ship(team,client, "Intrepid", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.140914f, -0.585431f)) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

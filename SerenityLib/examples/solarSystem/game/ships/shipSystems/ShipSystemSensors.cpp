@@ -5,7 +5,7 @@
 #include "../../map/Map.h"
 #include "../../Helper.h"
 #include "../../Core.h"
-//#include "../../HUD.h"
+#include "../../hud/HUD.h"
 #include "../../GameCamera.h"
 #include "../../Packet.h"
 
@@ -38,7 +38,7 @@ void ShipSystemSensors::setTarget(EntityWrapper* target, const bool sendPacket) 
         }
     }
     Ship* ship = dynamic_cast<Ship*>(target);
-    if (ship && ship->isFullyCloaked()) {
+    if (ship && ship->isFullyCloaked() && !ship->isAlly(m_Ship)) {
         return;
     }
     if (sendPacket) {
@@ -56,17 +56,18 @@ void ShipSystemSensors::setTarget(EntityWrapper* target, const bool sendPacket) 
         m_Ship.m_Client.send(pOut);
     }
     m_Target = target;
+    m_Map.getHUD().setTarget(m_Target);
 }
 void ShipSystemSensors::setTarget(const string& target, const bool sendPacket) {
     if (target.empty()) {
-        m_Ship.setTarget(nullptr, sendPacket);
+        setTarget(nullptr, sendPacket);
     }
     Map& map = static_cast<Map&>(m_Ship.entity().scene());
     for (auto& entity : map.m_Objects) {
         auto* componentName = entity->getComponent<ComponentName>();
         if (componentName) {
             if (componentName->name() == target) {
-                m_Ship.setTarget(entity, sendPacket);
+                setTarget(entity, sendPacket);
             }
         }
     }
@@ -76,7 +77,7 @@ const bool ShipSystemSensors::validateDetection(Ship& othership, const glm_vec3&
     bool ret = false;
     const auto dist2 = glm::distance2(othership.getPosition(), thisShipPos);
     if (dist2 <= m_RadarRange * m_RadarRange) {
-        if (!othership.isFullyCloaked()) {
+        if (  (!othership.isFullyCloaked() && !othership.isAlly(m_Ship)) || (othership.isAlly(m_Ship))    ) {
             ret = true;
         }
     }
@@ -88,7 +89,7 @@ void ShipSystemSensors::update(const double& dt) {
     if (thisShipTarget) {
         Ship* target = dynamic_cast<Ship*>(thisShipTarget);
         if (target) {
-            if (target->isFullyCloaked()) {
+            if (target->isFullyCloaked() && !target->isAlly(m_Ship)) {
                 m_Ship.setTarget(nullptr, true);
             }
         }
@@ -104,8 +105,15 @@ void ShipSystemSensors::update(const double& dt) {
         if (&ship != &m_Ship) {
             const bool res = validateDetection(ship, m_Ship.getPosition());
             if (res) {
-                //TODO: place ship in enemy / ally / neutral position via teams
                 m_DetectedShips.push_back(&ship);
+
+                if (ship.isAlly(m_Ship)) {
+                    m_DetectedAlliedShips.push_back(&ship);
+                }else if (ship.isEnemy(m_Ship)) {
+                    m_DetectedEnemyShips.push_back(&ship);
+                }else if (ship.isNeutral(m_Ship)) {
+                    m_DetectedNeutralShips.push_back(&ship);
+                }
             }
         }
     }

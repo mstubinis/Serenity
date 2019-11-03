@@ -18,8 +18,8 @@
 
 using namespace std;
 
-Excelsior::Excelsior(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client,"Excelsior", map, player, name, position, scale, collisionType, glm::vec3(0.0f, -0.306522f, -0.368403f)) {
+Excelsior::Excelsior(Team& team, Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+:Ship(team,client,"Excelsior", map, player, name, position, scale, collisionType, glm::vec3(0.0f, -0.306522f, -0.368403f)) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

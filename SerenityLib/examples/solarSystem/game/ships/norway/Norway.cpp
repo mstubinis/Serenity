@@ -18,8 +18,8 @@
 
 using namespace std;
 
-Norway::Norway(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client, "Norway", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.0f, -1.58693f)) {
+Norway::Norway(Team& team, Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+:Ship(team,client, "Norway", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.0f, -1.58693f)) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

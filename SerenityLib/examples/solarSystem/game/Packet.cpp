@@ -96,7 +96,6 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketHealthUpdate(); break;
         }case PacketType::Server_To_Client_Ship_Health_Update: {
             p = new PacketHealthUpdate(); break;
-
         }case PacketType::Client_To_Server_Projectile_Cannon_Impact: {
             p = new PacketProjectileImpact(); break;
         }case PacketType::Client_To_Server_Projectile_Torpedo_Impact: {
@@ -105,7 +104,10 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketProjectileImpact(); break;
         }case PacketType::Server_To_Client_Projectile_Torpedo_Impact: {
             p = new PacketProjectileImpact(); break;
-
+        }case PacketType::Client_To_Server_Request_GameplayMode: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Request_GameplayMode: {
+            p = new PacketMessage(); break;
         }default: {
             break;
         }
@@ -166,11 +168,11 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
     const auto pbody = ent.getComponent<ComponentBody>(request);
     const auto pname = ent.getComponent<ComponentName>(request);
 
-    data += ship.getClass();
+    data += ship.getClass(); //[0]
     if (pname)
-        data += ("," + pname->name());
+        data += ("," + pname->name()); //[1]
     else
-        data += ("," + username);
+        data += ("," + username); //[1]
     if (pbody) {
         auto& body = *pbody;
 
@@ -183,8 +185,9 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
         wx = warp.x;
         wy = warp.y;
         wz = warp.z;
-        
-        data += "," + to_string(anchorList.size());
+      
+        data += "," + to_string(static_cast<unsigned int>(ship.getTeam().getTeamNumber())); //[2]
+        data += "," + to_string(anchorList.size()); //[3]
         for (auto& closest : anchorList)
             data += "," + closest;
         const auto nearestAnchorPos = finalAnchor->getPosition();
@@ -209,11 +212,11 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
 
 
 PacketCloakUpdate::PacketCloakUpdate() :Packet() {
-    cloakTimer = 1.0f;
+    cloakTimer        = 1.0f;
     cloakSystemOnline = false;
-    cloakActive = false;
-    justTurnedOn = false;
-    justTurnedOff = false;
+    cloakActive       = false;
+    justTurnedOn      = false;
+    justTurnedOff     = false;
 }
 PacketCloakUpdate::PacketCloakUpdate(Ship& ship) : Packet() {
     cloakTimer = 1.0f;
@@ -225,9 +228,9 @@ PacketCloakUpdate::PacketCloakUpdate(Ship& ship) : Packet() {
     const auto pname = ent.getComponent<ComponentName>(request);
     justTurnedOn = false;
     justTurnedOff = false;
-    data += ship.getClass();
+    data += ship.getClass(); //[0]
     if (pname)
-        data += ("," + pname->name());
+        data += ("," + pname->name()); //[1]
     if (ship.getShipSystem(ShipSystemType::CloakingDevice)) {
         ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(ship.getShipSystem(ShipSystemType::CloakingDevice));
         cloakTimer = cloak.getCloakTimer();

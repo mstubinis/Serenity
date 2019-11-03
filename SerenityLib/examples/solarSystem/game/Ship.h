@@ -7,6 +7,7 @@
 #include <core/engine/utils/Utils.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include "Client.h"
+#include "teams/Team.h"
 
 #include "ships/shipSystems/ShipSystemBaseClass.h"
 
@@ -58,6 +59,7 @@ class Ship: public EntityWrapper, public EventObserver {
 	friend  class ShipSystem;
     friend  class SensorStatusDisplay;
     protected:
+        Team&                                m_Team;
         Client&                              m_Client;
         std::unordered_map<uint,ShipSystem*> m_ShipSystems;
         bool                                 m_IsPlayer;
@@ -71,6 +73,7 @@ class Ship: public EntityWrapper, public EventObserver {
         glm::vec3                            m_CameraOffsetDefault;
     public:
         Ship(
+            Team& team,
             Client& client,
             const std::string& shipClass,
             Map& map,
@@ -92,6 +95,7 @@ class Ship: public EntityWrapper, public EventObserver {
 
         void addHullTargetPoints(std::vector<glm::vec3>& points);
 
+        const Team& getTeam() const;
         const std::string getName();
         const glm_vec3 getWarpSpeedVector3();
         const glm_vec3 getPosition();
@@ -119,7 +123,7 @@ class Ship: public EntityWrapper, public EventObserver {
 
         void translateWarp(const double& amount, const double& dt);
         void toggleWarp();
-        bool canSeeCloak();
+        const bool canSeeCloak(Ship* otherShip);
         bool cloak(const bool sendPacket = true);
         bool decloak(const bool sendPacket = true);
 
@@ -138,6 +142,10 @@ class Ship: public EntityWrapper, public EventObserver {
         const glm_vec3& forward();
         const glm_vec3& right();
         const glm_vec3& up();
+
+        const bool isAlly(Ship& other);
+        const bool isEnemy(Ship& other);
+        const bool isNeutral(Ship& other);
 
 
         PrimaryWeaponBeam& getPrimaryWeaponBeam(const uint index);

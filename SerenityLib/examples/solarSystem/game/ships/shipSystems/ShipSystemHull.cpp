@@ -1,4 +1,5 @@
 #include "ShipSystemHull.h"
+#include "ShipSystemCloakingDevice.h"
 #include "../../Ship.h"
 #include "../../map/Map.h"
 #include "../../ResourceManifest.h"
@@ -62,19 +63,21 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
     }
 
     const auto impactLocation = glm_vec3(impactLocationLocal) * m_Ship.getRotation();
-    const auto impactR = impactRadius * 0.16f;
-
+    const auto impactR        = impactRadius * 0.16f;
+    auto*      cloakingDevice = static_cast<ShipSystemCloakingDevice*>(m_Ship.getShipSystem(ShipSystemType::CloakingDevice));
     if (forceHullFire) {
         d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
         decalList.push_back(d);
         d1 = new Decal(*hullDamage, impactLocation, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
         decalList.push_back(d1);
+        if (cloakingDevice) m_Ship.updateDamageDecalsCloak(glm::abs(cloakingDevice->getCloakTimer()));
         return;
     }
 
     if (decalList.size() == 0) {
         d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
         decalList.push_back(d);
+        if (cloakingDevice) m_Ship.updateDamageDecalsCloak(glm::abs(cloakingDevice->getCloakTimer()));
         return;
     }else{
         //get list of nearby impact points
@@ -85,16 +88,20 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
                 nearbys.push_back(dec);
             }
         }
-        if (nearbys.size() >= 8)
+        if (nearbys.size() >= 8) {
             return; //forget it, no need to have so many
+        }
 
         d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
         if (nearbys.size() >= 4) {
             d1 = new Decal(*hullDamage, impactLocation, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
         }
     }
-    if (d)  decalList.push_back(d);
-    if (d1) decalList.push_back(d1);
+    if (d)  
+        decalList.push_back(d);
+    if (d1) 
+        decalList.push_back(d1);
+    if(cloakingDevice) m_Ship.updateDamageDecalsCloak(glm::abs(cloakingDevice->getCloakTimer()));
 }
 void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const bool forceHullFire, const bool paint) {
     float newHP = m_HealthPointsCurrent - damage;

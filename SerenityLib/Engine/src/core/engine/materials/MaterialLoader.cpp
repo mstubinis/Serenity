@@ -37,12 +37,15 @@ namespace Engine {
     };
 };
 
-void MaterialLoader::InternalInit(Material& material, Texture* diffuse_ptr, Texture* normal_ptr, Texture* glow_ptr, Texture* specular_ptr) {
+void MaterialLoader::InternalInit(Material& material, Texture* diffuse_ptr, Texture* normal_ptr, Texture* glow_ptr, Texture* specular_ptr, Texture* ao_ptr, Texture* metalness_ptr, Texture* smoothness_ptr) {
     InternalInitBase(material);
-    if (diffuse_ptr)   material.internalAddComponentGeneric(MaterialComponentType::Diffuse,  diffuse_ptr);
-    if (normal_ptr)    material.internalAddComponentGeneric(MaterialComponentType::Normal,   normal_ptr);
-    if (glow_ptr)      material.internalAddComponentGeneric(MaterialComponentType::Glow,     glow_ptr);
-    if (specular_ptr)  material.internalAddComponentGeneric(MaterialComponentType::Specular, specular_ptr);
+    if (diffuse_ptr)     material.internalAddComponentGeneric(MaterialComponentType::Diffuse,  diffuse_ptr);
+    if (normal_ptr)      material.internalAddComponentGeneric(MaterialComponentType::Normal,   normal_ptr);
+    if (glow_ptr)        material.internalAddComponentGeneric(MaterialComponentType::Glow,     glow_ptr);
+    if (specular_ptr)    material.internalAddComponentGeneric(MaterialComponentType::Specular, specular_ptr);
+    if (ao_ptr)          material.internalAddComponentGeneric(MaterialComponentType::AO, ao_ptr);
+    if (metalness_ptr)   material.internalAddComponentGeneric(MaterialComponentType::Metalness, metalness_ptr);
+    if (smoothness_ptr)  material.internalAddComponentGeneric(MaterialComponentType::Smoothness, smoothness_ptr);
 }
 void MaterialLoader::InternalInitBase(Material& material) {
     material.m_Components.reserve(MAX_MATERIAL_COMPONENTS);
@@ -76,7 +79,7 @@ Texture* MaterialLoader::LoadTextureNormal(const string& file) {
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
         if (!texture) {
-            texture = new Texture(file, false, ImageInternalFormat::RGB8, GL_TEXTURE_2D);
+            texture = new Texture(file, true, ImageInternalFormat::RGB8, GL_TEXTURE_2D);
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
@@ -87,7 +90,7 @@ Texture* MaterialLoader::LoadTextureGlow(const string& file) {
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
         if (!texture) {
-            texture = new Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+            texture = new Texture(file, true, ImageInternalFormat::R8, GL_TEXTURE_2D);
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }

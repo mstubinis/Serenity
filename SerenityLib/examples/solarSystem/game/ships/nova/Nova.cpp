@@ -18,8 +18,8 @@
 
 using namespace std;
 
-Nova::Nova(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client,"Nova", map, player, name, position, scale, collisionType, glm::vec3(0.0f, -0.136252f, -0.420117f)) {
+Nova::Nova(Team& team, Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+:Ship(team,client,"Nova", map, player, name, position, scale, collisionType, glm::vec3(0.0f, -0.136252f, -0.420117f)) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

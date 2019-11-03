@@ -171,13 +171,13 @@ Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat
     return request->part.handle;
 }
 
-Handle Resources::loadMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular) {
-    MaterialRequest request(name, diffuse, normal, glow, specular);
+Handle Resources::loadMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {
+    MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
     request.request();
     return request.part.handle;
 }
-Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular) {
-    auto* request = new MaterialRequest(name, diffuse, normal, glow, specular); //to extend the lifetime to the threads, we manually delete later
+Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {
+    auto* request = new MaterialRequest(name, diffuse, normal, glow, specular, ao, metalness, smoothness); //to extend the lifetime to the threads, we manually delete later
     request->requestAsync();
     return request->part.handle;
 }
@@ -190,12 +190,12 @@ Handle Resources::addTexture(const string& file, const ImageInternalFormat::Form
     return resourceManager->m_Resources->add(texture, ResourceType::Texture);
 }
 
-Handle Resources::addMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular){
-    Material* material = new Material(name,diffuse,normal,glow,specular);
+Handle Resources::addMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness){
+    Material* material = new Material(name,diffuse,normal,glow,specular,ao,metalness,smoothness);
     return resourceManager->m_Resources->add(material, ResourceType::Material);
 }
-Handle Resources::addMaterial(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular){
-    Material* material = new Material(name,diffuse,normal,glow,specular);
+Handle Resources::addMaterial(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness){
+    Material* material = new Material(name,diffuse,normal,glow,specular,ao,metalness,smoothness);
     return resourceManager->m_Resources->add(material, ResourceType::Material);
 }
 

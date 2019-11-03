@@ -9,6 +9,7 @@ class Intrepid final : public Ship {
 
     public:
         Intrepid(
+            Team& team,
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?

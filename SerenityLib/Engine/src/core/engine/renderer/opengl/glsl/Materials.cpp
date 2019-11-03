@@ -19,7 +19,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
 
 
 #pragma region process component
-    if (ShaderHelper::sfind(code, "ProcessComponent(")) {
+    if (ShaderHelper::sfind(code, "ProcessComponent(") || ShaderHelper::sfind(code, "ProcessComponentLOD(")) {
         if (!ShaderHelper::sfind(code, "void ProcessComponent(")) {
             const string process_component =
                 "void ProcessComponent(in Component inComponent, inout InData data) {//generated\n"
@@ -65,6 +65,50 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "            data.uv = CalculateParallaxMap(inComponent.layers[i], ViewDir, data.uv);\n"
                 "        }\n"
                 "    }\n"
+                "}\n"
+                "void ProcessComponentLOD(in Component inComponent, inout InData data, in float lod) {//generated\n"
+                "    if (inComponent.componentType == 0) {\n"
+                "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+                "            data.diffuse = CalculateDiffuseLOD(inComponent.layers[i], data.diffuse, data.objectColor, data.uv, lod);\n"
+                "       }\n"
+                "    }else if (inComponent.componentType == 1) {\n"
+                "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+                "            data.normals = CalculateNormalsLOD(inComponent.layers[i], data.normals, data.uv, lod);\n"
+                "        }\n"
+                "    }else if (inComponent.componentType == 2) {\n"
+                "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+                "            data.glow = CalculateGlowLOD(inComponent.layers[i], data.glow, data.uv, lod);\n"
+                "        }\n"
+                "    }else if (inComponent.componentType == 3) {\n"
+                "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+                "            data.specular = CalculateSpecularLOD(inComponent.layers[i], data.specular, data.uv, lod);\n"
+                "        }\n"
+                "    }else if (inComponent.componentType == 4) {\n"
+                "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+                "            data.ao = CalculateAOLOD(inComponent.layers[i], data.ao, data.uv, lod);\n"
+                "        }\n"
+                "    }else if (inComponent.componentType == 5) {\n"
+                "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+                "            data.metalness = CalculateMetalnessLOD(inComponent.layers[i], data.metalness, data.uv, lod);\n"
+                "        }\n"
+                "    }else if (inComponent.componentType == 6) {\n"
+                "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+                "            data.smoothness = CalculateSmoothnessLOD(inComponent.layers[i], data.smoothness, data.uv, lod);\n"
+                "        }\n"
+                "    }else if (inComponent.componentType == 7) {\n"
+                "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+                "            data.diffuse = CalculateReflectionLOD(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, data.worldPosition, lod);\n"
+                "        }\n"
+                "    }else if (inComponent.componentType == 8) {\n"
+                "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+                "            data.diffuse = CalculateRefractionLOD(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, data.worldPosition, lod);\n"
+                "        }\n"
+                "    }else if (inComponent.componentType == 9) {\n"
+                "        for (int i = 0; i < inComponent.numLayers; ++i) {\n"
+                "            vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);\n"
+                "            data.uv = CalculateParallaxMapLOD(inComponent.layers[i], ViewDir, data.uv, lod);\n"
+                "        }\n"
+                "    }\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, process_component, " main(");
         }
@@ -72,7 +116,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
 #pragma endregion
 
 #pragma region calculate diffuse
-    if (ShaderHelper::sfind(code, "CalculateDiffuse(")) {
+
+    if (ShaderHelper::sfind(code, "CalculateDiffuse(") || ShaderHelper::sfind(code, "CalculateDiffuseLOD(")) {
         if (!ShaderHelper::sfind(code, "vec4 CalculateDiffuse(")) {
             const string calculate_diffuse =
                 "vec4 CalculateDiffuse(in Layer inLayer, in vec4 canvas, in vec4 objectColor, in vec2 inUVs) {//generated\n"
@@ -87,6 +132,19 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    }\n"
                 "    paint *= inLayer.data2;\n"
                 "    return DoBlend(paint, canvas, inLayer);\n"
+                "}\n"
+                "vec4 CalculateDiffuseLOD(in Layer inLayer, in vec4 canvas, in vec4 objectColor, in vec2 inUVs, in float lod) {//generated\n"
+                "    vec4 paint = objectColor;\n"
+                "    if (inLayer.data1.y >= 0.5) {\n"
+                "        paint *= texture2DLod(inLayer.texture, inUVs + inLayer.uvModifications, lod);\n"
+                "    }else{\n"
+                "        paint *= vec4(Material_F0AndID.rgb, 1.0);\n"
+                "    }\n"
+                "    if (inLayer.data1.z >= 0.5) {\n"
+                "        paint *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
+                "    }\n"
+                "    paint *= inLayer.data2;\n"
+                "    return DoBlend(paint, canvas, inLayer);\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_diffuse, "void ProcessComponent(");
         }
@@ -94,7 +152,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
 #pragma endregion
 
 #pragma region calculate normals
-    if (ShaderHelper::sfind(code, "CalculateNormals(")) {
+    if (ShaderHelper::sfind(code, "CalculateNormals(") || ShaderHelper::sfind(code, "CalculateNormalsLOD(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalculateNormals(")) {
             const string calculate_normals =
                 "vec3 CalculateNormals(in Layer inLayer, in vec3 objectNormals, in vec2 inUVs) {//generated\n"
@@ -110,6 +168,20 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    outNormals *= inLayer.data2.xyz;\n"
                 "    outNormals *= inLayer.data2.w;\n"
                 "    return outNormals;\n"
+                "}\n"
+                "vec3 CalculateNormalsLOD(in Layer inLayer, in vec3 objectNormals, in vec2 inUVs, in float lod) {//generated\n"
+                "    vec3 outNormals = objectNormals;\n"
+                "    if (inLayer.data1.y > 0.9) {\n"
+                "        outNormals = CalcBumpedNormalLOD(inUVs + inLayer.uvModifications, inLayer.texture, lod);\n"
+                "    }else if (inLayer.data1.y > 0.4) {\n"
+                "        outNormals = CalcBumpedNormalCompressedLOD(inUVs + inLayer.uvModifications, inLayer.texture, lod);\n"
+                "    }\n"
+                "    if (inLayer.data1.z >= 0.5) {\n"
+                "        outNormals *= texture2D(inLayer.mask, inUVs).r;\n"
+                "    }\n"
+                "    outNormals *= inLayer.data2.xyz;\n"
+                "    outNormals *= inLayer.data2.w;\n"
+                "    return outNormals;\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_normals, "vec4 CalculateDiffuse(");
         }
@@ -118,16 +190,28 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
 
 
 #pragma region calculate glow
-    if (ShaderHelper::sfind(code, "CalculateGlow(")) {
+    if (ShaderHelper::sfind(code, "CalculateGlow(") || ShaderHelper::sfind(code, "CalculateGlowLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateGlow(")) {
             const string calculate_glow =
-            "float CalculateGlow(in Layer inLayer, in float objectGlow, in vec2 inUVs) {//generated\n"
+                "float CalculateGlow(in Layer inLayer, in float objectGlow, in vec2 inUVs) {//generated\n"
                 "    float outGlow = objectGlow;\n"
                 "    if (inLayer.data1.y >= 0.5) {\n"
                 "        outGlow += texture2D(inLayer.texture, inUVs + inLayer.uvModifications).r;\n"
                 "    }\n"
                 "    if (inLayer.data1.z >= 0.5) {\n"
                 "        outGlow *= texture2D(inLayer.mask, inUVs).r;\n"
+                "    }\n"
+                "    outGlow = clamp(outGlow, inLayer.data2.x, inLayer.data2.y);\n"
+                "    outGlow *= inLayer.data2.z;\n"
+                "    return outGlow;\n"
+                "}\n"
+                "float CalculateGlowLOD(in Layer inLayer, in float objectGlow, in vec2 inUVs, in float lod) {//generated\n"
+                "    float outGlow = objectGlow;\n"
+                "    if (inLayer.data1.y >= 0.5) {\n"
+                "        outGlow += texture2DLod(inLayer.texture, inUVs + inLayer.uvModifications, lod).r;\n"
+                "    }\n"
+                "    if (inLayer.data1.z >= 0.5) {\n"
+                "        outGlow *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
                 "    }\n"
                 "    outGlow = clamp(outGlow, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outGlow *= inLayer.data2.z;\n"
@@ -139,16 +223,28 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
 #pragma endregion
 
 #pragma region calculate specular
-    if (ShaderHelper::sfind(code, "CalculateSpecular(")) {
+    if (ShaderHelper::sfind(code, "CalculateSpecular(") || ShaderHelper::sfind(code, "CalculateSpecularLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateSpecular(")) {
             const string calculate_spec =
-            "float CalculateSpecular(in Layer inLayer, in float objectSpecular, in vec2 inUVs) {//generated\n"
+                "float CalculateSpecular(in Layer inLayer, in float objectSpecular, in vec2 inUVs) {//generated\n"
                 "    float outSpecular = objectSpecular;\n"
                 "    if (inLayer.data1.y >= 0.5) {\n"
                 "        outSpecular *= texture2D(inLayer.texture, inUVs + inLayer.uvModifications).r;\n"
                 "    }\n"
                 "    if (inLayer.data1.z >= 0.5) {\n"
                 "        outSpecular *= texture2D(inLayer.mask, inUVs).r;\n"
+                "    }\n"
+                "    outSpecular = clamp(outSpecular, inLayer.data2.x, inLayer.data2.y);\n"
+                "    outSpecular *= inLayer.data2.z;\n"
+                "    return outSpecular;\n"
+                "}\n"
+                "float CalculateSpecularLOD(in Layer inLayer, in float objectSpecular, in vec2 inUVs, in float lod) {//generated\n"
+                "    float outSpecular = objectSpecular;\n"
+                "    if (inLayer.data1.y >= 0.5) {\n"
+                "        outSpecular *= texture2DLod(inLayer.texture, inUVs + inLayer.uvModifications, lod).r;\n"
+                "    }\n"
+                "    if (inLayer.data1.z >= 0.5) {\n"
+                "        outSpecular *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
                 "    }\n"
                 "    outSpecular = clamp(outSpecular, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outSpecular *= inLayer.data2.z;\n"
@@ -161,7 +257,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
 
 
 #pragma region calculate ao
-    if (ShaderHelper::sfind(code, "CalculateAO(")) {
+    if (ShaderHelper::sfind(code, "CalculateAO(") || ShaderHelper::sfind(code, "CalculateAOLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateAO(")) {
             const string calculate_ao =
                 "float CalculateAO(in Layer inLayer, in float objectAO, in vec2 inUVs) {//generated\n"
@@ -175,6 +271,18 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    outAO = clamp(outAO, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outAO *= inLayer.data2.z;\n"
                 "    return outAO;\n"
+                "}\n"
+                "float CalculateAOLOD(in Layer inLayer, in float objectAO, in vec2 inUVs, in float lod) {//generated\n"
+                "    float outAO = objectAO;\n"
+                "    if (inLayer.data1.y >= 0.5) {\n"
+                "        outAO *= texture2DLod(inLayer.texture, inUVs + inLayer.uvModifications, lod).r;\n"
+                "    }\n"
+                "    if (inLayer.data1.z >= 0.5) {\n"
+                "        outAO *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
+                "    }\n"
+                "    outAO = clamp(outAO, inLayer.data2.x, inLayer.data2.y);\n"
+                "    outAO *= inLayer.data2.z;\n"
+                "    return outAO;\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_ao, "float CalculateSpecular(");
         }
@@ -183,7 +291,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
 
 
 #pragma region calculate metalness
-    if (ShaderHelper::sfind(code, "CalculateMetalness(")) {
+    if (ShaderHelper::sfind(code, "CalculateMetalness(") || ShaderHelper::sfind(code, "CalculateMetalnessLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateMetalness(")) {
             const string calculate_metalness =
                 "float CalculateMetalness(in Layer inLayer, in float objectMetalness, in vec2 inUVs) {//generated\n"
@@ -197,6 +305,18 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outMetalness *= inLayer.data2.z;\n"
                 "    return clamp(outMetalness,0.01,0.99);\n"
+                "}\n"
+                "float CalculateMetalnessLOD(in Layer inLayer, in float objectMetalness, in vec2 inUVs, in float lod) {//generated\n"
+                "    float outMetalness = objectMetalness;\n"
+                "    if (inLayer.data1.y >= 0.5) {\n"
+                "        outMetalness *= texture2DLod(inLayer.texture, inUVs + inLayer.uvModifications, lod).r;\n"
+                "    }\n"
+                "    if (inLayer.data1.z >= 0.5) {\n"
+                "        outMetalness *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
+                "    }\n"
+                "    outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);\n"
+                "    outMetalness *= inLayer.data2.z;\n"
+                "    return clamp(outMetalness,0.01,0.99);\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_metalness, "float CalculateAO(");
         }
@@ -205,7 +325,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
 
 
 #pragma region calculate smoothness
-    if (ShaderHelper::sfind(code, "CalculateSmoothness(")) {
+    if (ShaderHelper::sfind(code, "CalculateSmoothness(") || ShaderHelper::sfind(code, "CalculateSmoothnessLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateSmoothness(")) {
             const string calculate_smoothness =
                 "float CalculateSmoothness(in Layer inLayer, in float objectSmoothness, in vec2 inUVs) {//generated\n"
@@ -219,6 +339,18 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outSmoothness *= inLayer.data2.z;\n"
                 "    return clamp(outSmoothness,0.01,0.99);\n"
+                "}\n"
+                "float CalculateSmoothnessLOD(in Layer inLayer, in float objectSmoothness, in vec2 inUVs, in float lod) {//generated\n"
+                "    float outSmoothness = objectSmoothness;\n"
+                "    if (inLayer.data1.y >= 0.5) {\n"
+                "        outSmoothness *= texture2DLod(inLayer.texture, inUVs + inLayer.uvModifications, lod).r;\n"
+                "    }\n"
+                "    if (inLayer.data1.z >= 0.5) {\n"
+                "        outSmoothness *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
+                "    }\n"
+                "    outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);\n"
+                "    outSmoothness *= inLayer.data2.z;\n"
+                "    return clamp(outSmoothness,0.01,0.99);\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, calculate_smoothness, "float CalculateMetalness(");
         }
@@ -226,13 +358,21 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
 #pragma endregion
 
 #pragma region calculate reflection
-    if (ShaderHelper::sfind(code, "CalculateReflection(")) {
+    if (ShaderHelper::sfind(code, "CalculateReflection(") || ShaderHelper::sfind(code, "CalculateReflectionLOD(")) {
         if (!ShaderHelper::sfind(code, "vec4 CalculateReflection(")) {
             const string calculate_reflection =
                 "vec4 CalculateReflection(in Layer inLayer, in vec2 inUVs,in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition){//generated\n"
                 //"    inUVs += inLayer.uvModifications;\n"
                 "    vec4 r = vec4(0.0);\n"
                 "    r = textureCube(inLayer.cubemap,reflect(inNormals,normalize(inCameraPosition - inWorldPosition))) * texture2D(inLayer.mask,inUVs).r;\n"
+                "    r.a *= inLayer.data2.x;\n"
+                "    r = PaintersAlgorithm(r,inDiffuse);\n"
+                "    return r;\n"
+                "}\n"
+                "vec4 CalculateReflectionLOD(in Layer inLayer, in vec2 inUVs,in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition, in float lod){//generated\n"
+                //"    inUVs += inLayer.uvModifications;\n"
+                "    vec4 r = vec4(0.0);\n"
+                "    r = textureCubeLod(inLayer.cubemap,reflect(inNormals,normalize(inCameraPosition - inWorldPosition)), lod) * texture2D(inLayer.mask,inUVs).r;\n"
                 "    r.a *= inLayer.data2.x;\n"
                 "    r = PaintersAlgorithm(r,inDiffuse);\n"
                 "    return r;\n"
@@ -243,13 +383,21 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
 #pragma endregion
 
 #pragma region calculate refraction
-    if (ShaderHelper::sfind(code, "CalculateRefraction(")) {
+    if (ShaderHelper::sfind(code, "CalculateRefraction(") || ShaderHelper::sfind(code, "CalculateRefractionLOD(")) {
         if (!ShaderHelper::sfind(code, "vec4 CalculateRefraction(")) {
             const string calculate_refraction =
                 "vec4 CalculateRefraction(in Layer inLayer, in vec2 inUVs,in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition){//generated\n"
                 //"    inUVs += inLayer.uvModifications;\n"
                 "    vec4 r = vec4(0.0);\n"
                 "    r = textureCube(inLayer.cubemap,refract(inNormals,normalize(inCameraPosition - inWorldPosition),1.0 / inLayer.data2.y)) * texture2D(inLayer.mask,inUVs).r;\n"
+                "    r.a *= inLayer.data2.x;\n"
+                "    r = PaintersAlgorithm(r,inDiffuse);\n"
+                "    return r;\n"
+                "}\n"
+                "vec4 CalculateRefractionLOD(in Layer inLayer, in vec2 inUVs,in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition, in float lod){//generated\n"
+                //"    inUVs += inLayer.uvModifications;\n"
+                "    vec4 r = vec4(0.0);\n"
+                "    r = textureCubeLod(inLayer.cubemap,refract(inNormals,normalize(inCameraPosition - inWorldPosition),1.0 / inLayer.data2.y), lod) * texture2D(inLayer.mask,inUVs).r;\n"
                 "    r.a *= inLayer.data2.x;\n"
                 "    r = PaintersAlgorithm(r,inDiffuse);\n"
                 "    return r;\n"
@@ -260,8 +408,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
 #pragma endregion
 
 #pragma region calculate parallax 
-
-    if (ShaderHelper::sfind(code, "CalculateParallaxMap(")) {
+    if (ShaderHelper::sfind(code, "CalculateParallaxMap(") || ShaderHelper::sfind(code, "CalculateParallaxMapLOD(")) {
         if (!ShaderHelper::sfind(code, "vec2 CalculateParallaxMap(")) {
             const string calculate_parallax =
                 "vec2 CalculateParallaxMap(in Layer inLayer, vec3 _ViewDir, in vec2 inUVs){//generated\n"
@@ -283,6 +430,28 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int& versionN
                 "    vec2 prevUV = currentUV + deltaUV;\n" // get texture coordinates before collision (reverse operations)
                 "    float afterDepth  = currentDepth - currentLayerDepth;\n" // get depth after and before collision for linear interpolation
                 "    float beforeDepth = texture2D(inLayer.texture, prevUV).r - currentLayerDepth + layerDepth;\n"
+                "    float weight = afterDepth / (afterDepth - beforeDepth);\n" // interpolation of texture coordinates
+                "    return prevUV * weight + currentUV * (1.0 - weight);\n"
+                "}\n"
+                "vec2 CalculateParallaxMapLOD(in Layer inLayer, vec3 _ViewDir, in vec2 inUVs, in float lod){//generated\n"
+                //"    inUVs += inLayer.uvModifications;\n"
+                "    float minLayers = min(5.0,(5.0 * inLayer.data2.x) + 1.0);\n"
+                "    float maxLayers = min(30.0,(30.0 * inLayer.data2.x) + 1.0);\n"
+                "    float num_Layers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), _ViewDir)));\n"
+                "    float layerDepth = 1.0 / num_Layers;\n"// calculate the size of each layer 
+                "    float currentLayerDepth = 0.0;\n"// depth of current layer  
+                "    vec2 P = _ViewDir.xy * inLayer.data2.x;\n"// the amount to shift the texture coordinates per layer (from vector P)
+                "    vec2 deltaUV = P / num_Layers;\n"
+                "    vec2  currentUV = inUVs;\n"
+                "    float currentDepth = texture2DLod(inLayer.texture, currentUV, lod).r;\n"
+                "    while(currentLayerDepth < currentDepth){\n"
+                "    	currentUV -= deltaUV;\n"// shift texture coordinates along direction of P
+                "    	currentDepth = texture2DLod(inLayer.texture, currentUV, lod).r;\n"
+                "    	currentLayerDepth += layerDepth;\n"
+                "    }\n"
+                "    vec2 prevUV = currentUV + deltaUV;\n" // get texture coordinates before collision (reverse operations)
+                "    float afterDepth  = currentDepth - currentLayerDepth;\n" // get depth after and before collision for linear interpolation
+                "    float beforeDepth = texture2DLod(inLayer.texture, prevUV, lod).r - currentLayerDepth + layerDepth;\n"
                 "    float weight = afterDepth / (afterDepth - beforeDepth);\n" // interpolation of texture coordinates
                 "    return prevUV * weight + currentUV * (1.0 - weight);\n"
                 "}\n";

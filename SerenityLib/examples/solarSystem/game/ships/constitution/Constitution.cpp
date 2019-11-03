@@ -18,8 +18,8 @@
 
 using namespace std;
 
-Constitution::Constitution(Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(client,"Constitution", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.004208f, -0.383244f)) {
+Constitution::Constitution(Team& team, Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+:Ship(team,client,"Constitution", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.004208f, -0.383244f)) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

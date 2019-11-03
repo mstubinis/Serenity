@@ -20,7 +20,7 @@ namespace Engine {
             static void EnumFilterToGL(unsigned int& gl, const TextureFilter::Filter& filter, const bool& min);
             static const bool IsCompressedType(const ImageInternalFormat::Format&);
 
-            static void GenerateMipmapsOpenGL(Texture& texture);
+            static void GenerateMipmapsOpenGL(Texture& texture, const unsigned int addressIndex = 0);
             static void WithdrawPixelsFromOpenGLMemory(Texture& texture, const uint& imageIndex = 0, const uint & mipmapLevel = 0);
             static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat, const ImageInternalFormat::Format& inInternalFormat);
 

@@ -34,7 +34,16 @@ struct MaterialRequest final {
     bool                 async;
 
     MaterialRequest();
-    MaterialRequest(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular);
+    MaterialRequest(
+        const std::string& name,
+        const std::string& diffuse,
+        const std::string& normal,
+        const std::string& glow,
+        const std::string& specular,
+        const std::string& ao,
+        const std::string& metalness,
+        const std::string& smoothness
+    );
     ~MaterialRequest();
 
     MaterialRequest(const MaterialRequest&)                      = delete;

@@ -48,6 +48,7 @@
 #include "ships/shipSystems/ShipSystemHull.h"
 
 #include "hud/HUD.h"
+#include "modes/GameplayMode.h"
 
 #include <regex>
 
@@ -125,8 +126,27 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
                         if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) { //letters only please
                             const int port = stoi(portstring);
                             menu.m_Core.startServer(port, map);
-                            menu.m_Core.startClient(port, username, "127.0.0.1"); //the client will request validation at this stage
-                            menu.m_Core.getServer()->startupMap();
+
+                            //TODO: replace this hard coded test case with real input values
+                            GameplayMode* mode = new GameplayMode(GameplayModeType::TeamDeathmatch, 50);
+                            vector<TeamNumber::Enum> nil;
+                            vector<TeamNumber::Enum> team1enemy{ TeamNumber::Team_2 };
+                            vector<TeamNumber::Enum> team2enemy{ TeamNumber::Team_1 };
+                            Team* team1 = new Team(
+                                TeamNumber::Team_1,
+                                nil,
+                                team1enemy
+                            );
+                            Team* team2 = new Team(
+                                TeamNumber::Team_2,
+                                nil,
+                                team2enemy
+                            );
+                            mode->addTeam(*team1);
+                            mode->addTeam(*team2);
+
+                            menu.m_Core.startClient(*mode, nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
+                            menu.m_Core.getServer()->startupMap(*mode);
                             menu.m_ServerLobbyChatWindow->setUserPointer(menu.m_Core.getClient());
                         }else{
                             menu.setErrorText("The username must only contain letters");
@@ -153,7 +173,14 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
                 if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) {
                     if (username.find_first_not_of(' ') != std::string::npos) {
                         if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) {
-                            menu.m_Core.startClient(stoi(portstring), username, ip); //the client will request validation at this stage
+                            const int port = stoi(portstring);
+
+
+                            GameplayMode* mode = new GameplayMode(); //get mode data via serialization later on
+
+
+                            menu.m_Core.startClient(*mode, nullptr, port, username, ip); //the client will request validation at this stage
+
                             menu.m_ServerLobbyChatWindow->setUserPointer(menu.m_Core.getClient());
                         }else {
                             menu.setErrorText("The username must only contain letters");
@@ -281,7 +308,15 @@ void Menu::enter_the_game() {
         PacketMessage p;
         p.PacketType = PacketType::Client_To_Server_Request_Map_Entry;
         p.name = m_Core.m_Client->m_username;
-        p.data = m_ServerLobbyShipSelectorWindow->m_ChosenShipName + "," + m_Core.m_Client->m_mapname;
+
+        p.data = m_ServerLobbyShipSelectorWindow->m_ChosenShipName;
+        p.data += "," + m_Core.m_Client->m_mapname;
+        if (m_Core.m_Client->m_Team) {
+            p.data += "," + m_Core.m_Client->m_Team->getTeamNumberAsString();
+        }else{
+            p.data += ",-1"; //error, the client did not choose or was not assigned a team yet
+        }
+
         m_Core.m_Client->send(p);
     }else{
         setErrorText("You must choose your ship", 5.0f);
@@ -366,7 +401,6 @@ void Menu::update_game(const double& dt) {
             }
             player.setTarget(shipsVect[_countShips]->entity().getComponent<ComponentName>()->name(), true);
             player.getPlayerCamera()->setTarget(shipsVect[_countShips]);
-            map->getHUD().setTarget(shipsVect[_countShips]);
             ++_countShips;
         }
     }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
@@ -383,7 +417,6 @@ void Menu::update_game(const double& dt) {
         }
         player.setTarget(planetsVect[_countPlanets]->entity().getComponent<ComponentName>()->name(), true);
         player.getPlayerCamera()->setTarget(planetsVect[_countPlanets]);
-        map->getHUD().setTarget(planetsVect[_countPlanets]);
         ++_countPlanets;
     }
 }

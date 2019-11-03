@@ -9,6 +9,7 @@ class Excelsior final : public Ship {
 
     public:
         Excelsior(
+            Team& team,
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?

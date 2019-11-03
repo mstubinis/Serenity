@@ -13,6 +13,8 @@ class  Client;
 class  EntityWrapper;
 class  ShipSystemSensors;
 class  SensorStatusDisplay;
+class  Team;
+class  GameplayMode;
 class Core final {
     friend class  Menu;
     friend class  Map;
@@ -35,7 +37,7 @@ class Core final {
         Server* getServer();
         Client* getClient();
 
-        void startClient(const unsigned short& port, const std::string& name, const std::string& ip = "127.0.0.1");
+        void startClient(GameplayMode& mode, Team* team, const unsigned short& port, const std::string& name, const std::string& ip = "127.0.0.1");
         void shutdownClient(const bool& serverShutdownFirst = false);
 
         void requestValidation(const std::string& name);
@@ -45,7 +47,7 @@ class Core final {
 
         void onResize(const uint& width, const uint& height);
 
-        void enterMap(const std::string& mapFile, const std::string& playership, const std::string& playername, const float& x, const float& y, const float& z);
+        void enterMap(Team& playerTeam, const std::string& mapFile, const std::string& playership, const std::string& playername, const float& x, const float& y, const float& z);
 
         const GameState::State& gameState() const;
 

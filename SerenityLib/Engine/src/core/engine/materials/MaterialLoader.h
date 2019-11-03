@@ -20,7 +20,7 @@ namespace Engine {
             static Texture* LoadTextureMask(const std::string& file);
             static Texture* LoadTextureCubemap(const std::string& file);
 
-            static void InternalInit(Material&, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular);
+            static void InternalInit(Material&, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness);
             static void InternalInitBase(Material&);
         };
         struct InternalMaterialPublicInterface final {

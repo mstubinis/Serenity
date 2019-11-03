@@ -9,6 +9,7 @@ class Shrike final : public Ship {
 
     public:
         Shrike(
+            Team& team,
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?

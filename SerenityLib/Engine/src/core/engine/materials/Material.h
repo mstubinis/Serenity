@@ -53,8 +53,26 @@ class Material final: public BindableResource{
         void internalUpdateGlobalMaterialPool(const bool& addToDatabase);
         Material();
     public:
-        Material(const std::string& name, const std::string& diffuse, const std::string& normal="", const std::string& glow="", const std::string& specular="");
-        Material(const std::string& name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);
+        Material(
+            const std::string& name,
+            const std::string& diffuse,
+            const std::string& normal = "",
+            const std::string& glow = "",
+            const std::string& specular = "",
+            const std::string& ao = "",
+            const std::string& metalness = "",
+            const std::string& smoothness = ""
+        );
+        Material(
+            const std::string& name,
+            Texture* diffuse,
+            Texture* normal = nullptr,
+            Texture* glow = nullptr,
+            Texture* specular = nullptr,
+            Texture* ao = nullptr,
+            Texture* metalness = nullptr,
+            Texture* smoothness = nullptr
+        );
         ~Material();
 
         Material(const Material&)                      = delete;

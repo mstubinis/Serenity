@@ -54,20 +54,23 @@ vector<boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
 
 #pragma region Material
 
-Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular):BindableResource(name){
-    Texture* d = MaterialLoader::LoadTextureDiffuse(diffuse);
-    Texture* n = MaterialLoader::LoadTextureNormal(normal);
-    Texture* g = MaterialLoader::LoadTextureGlow(glow);
-    Texture* s = MaterialLoader::LoadTextureSpecular(specular);
+Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness):BindableResource(name){
+    Texture* d  = MaterialLoader::LoadTextureDiffuse(diffuse);
+    Texture* n  = MaterialLoader::LoadTextureNormal(normal);
+    Texture* g  = MaterialLoader::LoadTextureGlow(glow);
+    Texture* s  = MaterialLoader::LoadTextureSpecular(specular);
+    Texture* a  = MaterialLoader::LoadTextureAO(ao);
+    Texture* m  = MaterialLoader::LoadTextureMetalness(metalness);
+    Texture* sm = MaterialLoader::LoadTextureSmoothness(smoothness);
 
-    MaterialLoader::InternalInit(*this, d, n, g, s);
+    MaterialLoader::InternalInit(*this, d, n, g, s, a, m, sm);
     InternalMaterialPublicInterface::Load(*this);
 }
 Material::Material() {
     MaterialLoader::InternalInitBase(*this);
 }
-Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular):BindableResource(name){
-    MaterialLoader::InternalInit(*this, diffuse, normal, glow, specular);
+Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness):BindableResource(name){
+    MaterialLoader::InternalInit(*this, diffuse, normal, glow, specular, ao, metalness, smoothness);
     InternalMaterialPublicInterface::Load(*this);
 }
 Material::~Material(){
@@ -114,30 +117,26 @@ MaterialComponent& Material::addComponent(const MaterialComponentType::Type& typ
         }else{
         }
     }
-    Texture* mask = MaterialLoader::LoadTextureMask(maskFile);
+    Texture* mask    = MaterialLoader::LoadTextureMask(maskFile);
     Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapFile);
 
     return *internalAddComponentGeneric(type, texture, mask, cubemap);
 }
 MaterialComponent& Material::addComponentDiffuse(const string& textureFile){
     Texture* texture = MaterialLoader::LoadTextureDiffuse(textureFile);
-    auto& component = *internalAddComponentGeneric(MaterialComponentType::Diffuse, texture);
-    return component;
+    return *internalAddComponentGeneric(MaterialComponentType::Diffuse, texture);
 }
 MaterialComponent& Material::addComponentNormal(const string& textureFile){
     Texture* texture = MaterialLoader::LoadTextureNormal(textureFile);
-    auto& component = *internalAddComponentGeneric(MaterialComponentType::Normal, texture);
-    return component;
+    return *internalAddComponentGeneric(MaterialComponentType::Normal, texture);
 }
 MaterialComponent& Material::addComponentGlow(const string& textureFile){
     Texture* texture = MaterialLoader::LoadTextureGlow(textureFile);
-    auto& component = *internalAddComponentGeneric(MaterialComponentType::Glow, texture);
-    return component;
+    return *internalAddComponentGeneric(MaterialComponentType::Glow, texture);
 }
 MaterialComponent& Material::addComponentSpecular(const string& textureFile){
     Texture* texture = MaterialLoader::LoadTextureSpecular(textureFile);
-    auto& component = *internalAddComponentGeneric(MaterialComponentType::Specular, texture);
-    return component;
+    return *internalAddComponentGeneric(MaterialComponentType::Specular, texture);
 }
 MaterialComponent& Material::addComponentAO(const string& textureFile,float baseValue){
     Texture* texture = MaterialLoader::LoadTextureAO(textureFile);

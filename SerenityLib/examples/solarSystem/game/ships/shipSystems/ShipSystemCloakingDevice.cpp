@@ -4,6 +4,7 @@
 #include "../../Ship.h"
 #include "../../Packet.h"
 #include "../../ResourceManifest.h"
+#include "../../map/Map.h"
 
 #include <core/engine/sounds/Engine_Sounds.h>
 
@@ -25,7 +26,7 @@ const float ShipSystemCloakingDevice::getCloakTimer() const {
 bool ShipSystemCloakingDevice::cloak(ComponentModel& model, bool sendPacket) {
     if (m_CloakTimer >= 1.0f) {
         for (unsigned int i = 0; i < model.getNumModels(); ++i) {
-            model.setModelShaderProgram(ShaderProgram::Forward, i, RenderStage::ForwardTransparentTrianglesSorted);
+            model.setModelShaderProgram(ResourceManifest::ShipShaderProgramForward, i, RenderStage::ForwardTransparentTrianglesSorted);
         }
         m_Active = true;
 
@@ -85,7 +86,8 @@ void ShipSystemCloakingDevice::update(const double& dt) {
             }
         }
         if (m_Active) {
-            if (m_Ship.canSeeCloak()) {
+            Map& map = static_cast<Map&>(m_Ship.entity().scene());
+            if (m_Ship.canSeeCloak(map.getPlayer())) {
                 if (m_CloakTimer > -0.2f) {
                     if (m_CloakTimer > 0.0f) {
                         m_CloakTimer -= _fdt;
@@ -129,7 +131,7 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                     m_CloakTimer = 1.0f;
 
                     for (unsigned int i = 0; i < model.getNumModels(); ++i) {
-                        model.setModelShaderProgram(ShaderProgram::Deferred, i, RenderStage::GeometryOpaque);
+                        model.setModelShaderProgram(ResourceManifest::ShipShaderProgramDeferred, i, RenderStage::GeometryOpaque);
                     }
 
                     auto* shields = static_cast<ShipSystemShields*>(m_Ship.getShipSystem(ShipSystemType::Shields));
@@ -155,7 +157,7 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                 m_CloakTimer = 1.0f;
 
                 for (unsigned int i = 0; i < model.getNumModels(); ++i) {
-                    model.setModelShaderProgram(ShaderProgram::Deferred, i, RenderStage::GeometryOpaque);
+                    model.setModelShaderProgram(ResourceManifest::ShipShaderProgramDeferred, i, RenderStage::GeometryOpaque);
                 }
                 auto* shields = static_cast<ShipSystemShields*>(m_Ship.getShipSystem(ShipSystemType::Shields));
                 if (shields) {

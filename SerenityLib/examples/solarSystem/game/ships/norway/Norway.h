@@ -9,6 +9,7 @@ class Norway final : public Ship {
 
     public:
         Norway(
+            Team& team,
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?

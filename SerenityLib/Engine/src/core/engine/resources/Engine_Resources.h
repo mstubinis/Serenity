@@ -90,11 +90,47 @@ namespace Engine{
 
         Handle addTexture(const std::string& file, const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8, const bool& mipmaps = false);
 
-        Handle addMaterial(const std::string& name, const std::string& diffuse, const std::string& normal = "", const std::string& glow = "", const std::string& specular = "");
-        Handle addMaterial(const std::string& name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr);
+        Handle addMaterial(
+            const std::string& name, 
+            const std::string& diffuse, 
+            const std::string& normal = "", 
+            const std::string& glow = "", 
+            const std::string& specular = "",
+            const std::string& ao = "",
+            const std::string& metalness = "",
+            const std::string& smoothness = ""
+        );
+        Handle addMaterial(
+            const std::string& name,
+            Texture* diffuse,
+            Texture* normal = nullptr,
+            Texture* glow = nullptr,
+            Texture* specular = nullptr,
+            Texture * ao = nullptr,
+            Texture * metalness = nullptr,
+            Texture * smoothness = nullptr
+        );
 
-        Handle loadMaterial(const std::string& name, const std::string& diffuse, const std::string& normal = "", const std::string& glow = "", const std::string& specular = "");
-        Handle loadMaterialAsync(const std::string& name, const std::string& diffuse, const std::string& normal = "", const std::string& glow = "", const std::string& specular = "");
+        Handle loadMaterial(
+            const std::string& name, 
+            const std::string& diffuse, 
+            const std::string& normal = "", 
+            const std::string& glow = "", 
+            const std::string& specular = "",
+            const std::string& ao = "",
+            const std::string& metalness = "",
+            const std::string& smoothness = ""
+        );
+        Handle loadMaterialAsync(
+            const std::string& name,
+            const std::string& diffuse,
+            const std::string& normal = "",
+            const std::string& glow = "",
+            const std::string& specular = "",
+            const std::string & ao = "",
+            const std::string & metalness = "",
+            const std::string & smoothness = ""
+        );
 
         Handle addShader(const std::string& shaderFileOrData, const ShaderType::Type& shaderType, const bool& fromFile = true);
         Handle addSoundData(const std::string& file);

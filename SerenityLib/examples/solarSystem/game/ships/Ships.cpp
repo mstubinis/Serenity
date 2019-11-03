@@ -124,19 +124,10 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
             }
         }
     }
-    auto mat_handle = Resources::loadMaterialAsync(shipClass + "Material", diffuse, normal, glow, specular);
+    auto mat_handle = Resources::loadMaterialAsync(shipClass + "Material", diffuse, normal, glow, specular, ao, metalness, smoothness);
     auto& mat = *(Material*)mat_handle.get();
     info.MaterialHandles.push_back(mat_handle);
 
-    if (!ao.empty()) {
-        mat.addComponentAO(ao, 1.0f);
-    }
-    if (!metalness.empty()) {
-        mat.addComponentMetalness(metalness, 1.0f);
-    }
-    if (!smoothness.empty()) {
-        mat.addComponentSmoothness(smoothness, 1.0f);
-    }
 #pragma endregion
 
     Database.emplace(shipClass, info);
@@ -151,6 +142,7 @@ void Ships::init() {
     createShipEntry("Miranda", FactionEnum::Federation);
     //createShipEntry("Saber", FactionEnum::Federation);
     //createShipEntry("Norway", FactionEnum::Federation);
+    //createShipEntry("Steamrunner", FactionEnum::Federation);
     //createShipEntry("Galaxy", FactionEnum::Federation);
     //createShipEntry("Nebula", FactionEnum::Federation);
     //createShipEntry("Sovereign", FactionEnum::Federation);
@@ -171,14 +163,10 @@ void Ships::init() {
     layer->setTexture("../data/Textures/Effects/Buzzards.dds");
     layer->setMask("../data/Ships/defiant/defiant_Mask_1.dds");
     layer->addUVModificationSimpleTranslation(0.02f, 0.02f);
-    defMat.addComponent(MaterialComponentType::Normal, "../data/Ships/defiant/defiant_Normal.dds");
-    defMat.addComponent(MaterialComponentType::Glow, "../data/Ships/defiant/defiant_Glow.dds");
 
     Material& novaMat = *((Material*)Database["Nova"].MaterialHandles[0].get());
     auto* layer1 = novaMat.getComponent(0).addLayer();
     layer1->setTexture("../data/Textures/Effects/Buzzards.dds");
     layer1->setMask("../data/Ships/nova/nova_Mask_1.dds");
     layer1->addUVModificationSimpleTranslation(0.02f, 0.02f);
-    novaMat.addComponent(MaterialComponentType::Normal, "../data/Ships/nova/nova_Normal.dds");
-    novaMat.addComponent(MaterialComponentType::Glow,  "../data/Ships/nova/nova_Glow.dds");
 }

@@ -9,6 +9,7 @@ class Vorcha final : public Ship {
 
     public:
         Vorcha(
+            Team& team,
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?

@@ -9,6 +9,7 @@ class Constitution final : public Ship {
 
     public:
         Constitution(
+            Team& team,
             Client& client,
             Map& map,
             bool player = false,                  //Player Ship?

@@ -34,12 +34,18 @@ ShipStatusDisplay::~ShipStatusDisplay() {
 void ShipStatusDisplay::setTarget(Planet* planet) {
     m_TargetAsShip    = nullptr;
     m_TargetAsWrapper = planet;
-    m_Target          = planet->entity();
+    if (planet)
+        m_Target = planet->entity();
+    else
+        m_Target = Entity::_null;
 }
 void ShipStatusDisplay::setTarget(Ship* ship) {
     m_TargetAsShip    = ship;
     m_TargetAsWrapper = ship;
-    m_Target          = ship->entity();
+    if (ship)
+        m_Target = ship->entity();
+    else
+        m_Target = Entity::_null;
 }
 void ShipStatusDisplay::setTarget(EntityWrapper* wrapper) {
     Ship* ship = dynamic_cast<Ship*>(wrapper);
@@ -50,7 +56,10 @@ void ShipStatusDisplay::setTarget(EntityWrapper* wrapper) {
         m_TargetAsShip = nullptr;
     }
     m_TargetAsWrapper = wrapper;
-    m_Target = wrapper->entity();
+    if (wrapper)
+        m_Target = wrapper->entity();
+    else
+        m_Target = Entity::_null;
 }
 void ShipStatusDisplay::setTarget(Entity& entity) {
     m_TargetAsShip    = nullptr;

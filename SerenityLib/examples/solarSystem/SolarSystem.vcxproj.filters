@@ -160,6 +160,18 @@
     <Filter Include="Header Files\Game\Ships\Vorcha">
       <UniqueIdentifier>{9593531f-107a-4391-8e8b-a51abf1b3681}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Teams">
+      <UniqueIdentifier>{9d06c78d-4910-4591-b872-264b0cf88e41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Teams">
+      <UniqueIdentifier>{8baa5680-a8da-4a1b-ba91-5b2af5350dff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Modes">
+      <UniqueIdentifier>{c5042b0f-de67-41fa-9a71-92bb971ded53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Modes">
+      <UniqueIdentifier>{f73a75dd-d5f6-4974-84fb-25a2b99de32f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -372,6 +384,18 @@
     <ClInclude Include="game\ships\vorcha\Vorcha.h">
       <Filter>Header Files\Game\Ships\Vorcha</Filter>
     </ClInclude>
+    <ClInclude Include="game\modes\GameplayMode.h">
+      <Filter>Header Files\Game\Modes</Filter>
+    </ClInclude>
+    <ClInclude Include="game\modes\FFA.h">
+      <Filter>Header Files\Game\Modes</Filter>
+    </ClInclude>
+    <ClInclude Include="game\teams\TeamIncludes.h">
+      <Filter>Header Files\Game\Teams</Filter>
+    </ClInclude>
+    <ClInclude Include="game\teams\Team.h">
+      <Filter>Header Files\Game\Teams</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -572,6 +596,15 @@
     <ClCompile Include="game\ships\vorcha\Vorcha.cpp">
       <Filter>Source Files\Game\Ships\Vorcha</Filter>
     </ClCompile>
+    <ClCompile Include="game\modes\GameplayMode.cpp">
+      <Filter>Source Files\Game\Modes</Filter>
+    </ClCompile>
+    <ClCompile Include="game\modes\FFA.cpp">
+      <Filter>Source Files\Game\Modes</Filter>
+    </ClCompile>
+    <ClCompile Include="game\teams\Team.cpp">
+      <Filter>Source Files\Game\Teams</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\data\Shaders\AS_groundFromSpace_frag.glsl">
@@ -596,6 +629,18 @@
       <Filter>Resource Files\Shaders</Filter>
     </None>
     <None Include="..\data\Shaders\shields_vert.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\data\Shaders\shipDef_frag.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\data\Shaders\shipDef_vert.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\data\Shaders\shipFwd_frag.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\data\Shaders\shipFwd_vert.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>

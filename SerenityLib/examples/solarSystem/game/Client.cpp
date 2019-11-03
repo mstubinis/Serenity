@@ -32,6 +32,9 @@
 #include "weapons/Weapons.h"
 #include "ships/Ships.h"
 
+#include "teams/Team.h"
+#include "modes/GameplayMode.h"
+
 #include <iostream>
 
 using namespace std;
@@ -60,7 +63,8 @@ struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
     camera.entity().getComponent<ComponentLogic2>()->call(-0.0001);
 }};
 
-Client::Client(Core& core, const ushort& server_port, const string& server_ipAddress, const uint& id) : m_Core(core) {
+Client::Client(GameplayMode& mode, Team* team, Core& core, const ushort& server_port, const string& server_ipAddress, const uint& id) : m_Core(core), m_GameplayMode(mode){
+    m_Team = team;
     m_TcpSocket = new Networking::SocketTCP(server_port,          server_ipAddress);
     m_UdpSocket = new Networking::SocketUDP(server_port + 1 + id, server_ipAddress);
     internalInit(server_port, server_ipAddress);
@@ -258,6 +262,7 @@ void Client::onReceiveUDP() {
                         auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
 
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+                        TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(info[2]));
                         auto& playername = info[1];
                         auto& shipclass = info[0];
                         auto& ships = map.getShips();
@@ -269,7 +274,7 @@ void Client::onReceiveUDP() {
                             auto y = Helper::GetRandomFloatFromTo(-400, 400);
                             auto z = Helper::GetRandomFloatFromTo(-400, 400);
                             auto randOffsetForSafety = glm_vec3(x, y, z);
-                            ship = map.createShip(*this, shipclass, playername, false, spawnPosition + randOffsetForSafety);
+                            ship = map.createShip(*m_GameplayMode.getTeams().at(teamNumber), *this, shipclass, playername, false, spawnPosition + randOffsetForSafety);
                         }else{
                             ship = ships.at(playername);
                         }
@@ -292,6 +297,11 @@ void Client::onReceive() {
             // Data extracted successfully...
             Menu& menu = *m_Core.m_Menu;
             switch (basePacket->PacketType) {
+                case PacketType::Server_To_Client_Request_GameplayMode: {
+                    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
+                    m_GameplayMode.deserialize(pI.data);
+                    break;
+                }
                 case PacketType::Server_To_Client_Projectile_Cannon_Impact: {
                     PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(basePacket);
                     auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
@@ -443,6 +453,7 @@ void Client::onReceive() {
                         auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
 
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+                        TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(info[2]));
                         auto& playername = info[1];
                         auto& shipclass = info[0];
                         auto& ships = map.getShips();
@@ -454,7 +465,7 @@ void Client::onReceive() {
                             auto y = Helper::GetRandomFloatFromTo(-400, 400);
                             auto z = Helper::GetRandomFloatFromTo(-400, 400);
                             auto randOffsetForSafety = glm_vec3(x, y, z);
-                            ship = map.createShip(*this, shipclass, playername, false, spawnPosition + randOffsetForSafety);
+                            ship = map.createShip(*m_GameplayMode.getTeams().at(teamNumber), *this, shipclass, playername, false, spawnPosition + randOffsetForSafety);
                         }else{
                             ship = ships.at(playername);
                         }
@@ -466,10 +477,11 @@ void Client::onReceive() {
                     
                     auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map
 
+                    TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(info[2]));
                     Map& map = *static_cast<Map*>(Resources::getScene(info[1]));
 
                     auto spawn = map.getSpawnAnchor()->getPosition();
-                    Ship* ship = map.createShip(*this, info[0], pI.name, false, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z));
+                    Ship* ship = map.createShip(*m_GameplayMode.getTeams().at(teamNumber), *this, info[0], pI.name, false, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z));
                     if (ship) { //if the ship was successfully added
                         //send the new guy several of our statuses
                         auto player = map.getPlayer();
@@ -495,10 +507,11 @@ void Client::onReceive() {
                     //ok the server let me in, let me tell the server i successfully went in
                     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
 
-                    auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map
+                    auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map,teamNumber
+                    TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(info[2]));
 
                     menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
-                    m_Core.enterMap(info[1], info[0], pI.name, pI.r, pI.g, pI.b);
+                    m_Core.enterMap(*m_GameplayMode.getTeams().at(teamNumber), info[1], info[0], pI.name, pI.r, pI.g, pI.b);
                     menu.m_Next->setText("Next");
                     menu.m_GameState = GameState::Game;//ok, ive entered the map
                     Map& map = *static_cast<Map*>(Resources::getScene(info[1]));
@@ -536,7 +549,7 @@ void Client::onReceive() {
                     m_mapname = mapname;
                     Map* map = static_cast<Map*>(Resources::getScene(mapname));
                     if (!map) {
-                        map = new Map(*this, mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
+                        map = new Map(m_GameplayMode, *this, mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
                     }
                     auto& menuScene = *const_cast<Scene*>(Resources::getScene("Menu"));
                     auto* menuSkybox = menuScene.skybox();

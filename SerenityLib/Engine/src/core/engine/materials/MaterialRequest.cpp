@@ -16,16 +16,22 @@ using namespace Engine::epriv;
 MaterialRequest::MaterialRequest() {
     async = false;
 }
-MaterialRequest::MaterialRequest(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular) : MaterialRequest() {
-    auto d = new TextureRequest(diffuse,  true,  ImageInternalFormat::SRGB8_ALPHA8);
-    auto n = new TextureRequest(normal,   false, ImageInternalFormat::RGBA8);
-    auto g = new TextureRequest(glow,     false, ImageInternalFormat::R8);
-    auto s = new TextureRequest(specular, false, ImageInternalFormat::R8);
-    
+MaterialRequest::MaterialRequest(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) : MaterialRequest() {
+    auto d  = new TextureRequest(diffuse,    false,  ImageInternalFormat::SRGB8_ALPHA8);
+    auto n  = new TextureRequest(normal,     false,  ImageInternalFormat::RGBA8);
+    auto g  = new TextureRequest(glow,       false,  ImageInternalFormat::R8);
+    auto s  = new TextureRequest(specular,   false, ImageInternalFormat::R8);
+    auto a  = new TextureRequest(ao,         false, ImageInternalFormat::R8);
+    auto m  = new TextureRequest(metalness,  false, ImageInternalFormat::R8);
+    auto sm = new TextureRequest(smoothness, false, ImageInternalFormat::R8);
+
     part.textureRequests.push_back(d);
     part.textureRequests.push_back(n);
     part.textureRequests.push_back(g);
     part.textureRequests.push_back(s);
+    part.textureRequests.push_back(a);
+    part.textureRequests.push_back(m);
+    part.textureRequests.push_back(sm);
     part.name = name;
 }
 MaterialRequest::~MaterialRequest() {

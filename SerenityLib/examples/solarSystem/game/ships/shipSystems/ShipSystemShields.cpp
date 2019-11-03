@@ -154,8 +154,8 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float health) 
 }
 ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, const float aft, const float prt, const float sbd, const float dsl, const float vnt) :ShipSystem(ShipSystemType::Shields, _ship){
     m_ShieldEntity = map.createEntity();
-    auto& model = *(m_ShieldEntity.addComponent<ComponentModel>(ResourceManifest::ShieldMesh, ResourceManifest::ShieldMaterial, ResourceManifest::shieldsShaderProgram, RenderStage::ForwardParticles));
-    auto& logic = *(m_ShieldEntity.addComponent<ComponentLogic>(ShipSystemShieldsFunctor()));
+    auto& model = *m_ShieldEntity.addComponent<ComponentModel>(ResourceManifest::ShieldMesh, ResourceManifest::ShieldMaterial, ResourceManifest::shieldsShaderProgram, RenderStage::ForwardParticles);
+    auto& logic = *m_ShieldEntity.addComponent<ComponentLogic>(ShipSystemShieldsFunctor());
 
     //TODO: optimize collision hull if possible
     auto& shieldBody = *m_ShieldEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic);

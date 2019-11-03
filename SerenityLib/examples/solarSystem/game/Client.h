@@ -16,6 +16,8 @@ class  Map;
 class  Core;
 class  ShipSystemSensors;
 class  SensorStatusDisplay;
+class  GameplayMode;
+class  Team;
 class Client{
     friend class  Server;
     friend class  Menu;
@@ -24,6 +26,8 @@ class Client{
     friend class  ShipSystemSensors;
     friend class  SensorStatusDisplay;
     private:
+        GameplayMode&                         m_GameplayMode;
+        Team*                                 m_Team;
         std::future<sf::Socket::Status>*      m_InitialConnectionThread;
         Engine::Networking::SocketTCP*        m_TcpSocket;
         Engine::Networking::SocketUDP*        m_UdpSocket;
@@ -38,7 +42,7 @@ class Client{
         ushort                                m_Port;
         void internalInit(const ushort& server_port, const std::string& server_ipAddress);
     public:
-        Client(Core&, const ushort& server_port, const std::string& server_ipAddress, const uint& id);
+        Client(GameplayMode& , Team* ,Core&, const ushort& server_port, const std::string& server_ipAddress, const uint& id);
         ~Client();
 
         void setClientID(const uint id);

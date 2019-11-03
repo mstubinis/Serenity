@@ -10,6 +10,8 @@
 #include "GameCamera.h"
 #include "GameSkybox.h"
 #include "ResourceManifest.h"
+#include "teams/Team.h"
+#include "modes/GameplayMode.h"
 
 #include <core/engine/Engine.h>
 #include <core/engine/scene/Viewport.h>
@@ -22,6 +24,7 @@ using namespace std;
 using namespace Engine;
 
 Core::Core() {
+    m_ChosenShip        = nullptr;
     m_Menu              = nullptr;
     m_Server            = nullptr;
     m_Client            = nullptr;
@@ -59,9 +62,9 @@ void Core::shutdownServer() {
         SAFE_DELETE(m_Server);
     }
 }
-void Core::startClient(const unsigned short& port, const string& name, const string& ip) {
+void Core::startClient(GameplayMode& mode, Team* team, const unsigned short& port, const string& name, const string& ip) {
     if (!m_Client) {
-        m_Client = new Client(*this, port, ip, 0);
+        m_Client = new Client(mode, team, *this, port, ip, 0);
     }
     auto& client = *m_Client;
     client.m_username = name;
@@ -97,13 +100,13 @@ void Core::requestValidation(const string& name) {
         m_Menu->setErrorText("Connection timed out");
     }
 }
-void Core::enterMap(const string& mapFile, const string& playerShipClass, const string& playername, const float& x, const float& y, const float& z) {
+void Core::enterMap(Team& playerTeam, const string& mapFile, const string& playerShipClass, const string& playername, const float& x, const float& y, const float& z) {
     auto& window = Resources::getWindow();
     Resources::setCurrentScene(mapFile);
 
     Map& map = *static_cast<Map*>(Resources::getScene(mapFile));
 
-    Ship* playerShip = map.createShip(*m_Client, playerShipClass, playername, true, glm::vec3(x, y, z));
+    Ship* playerShip = map.createShip(playerTeam, *m_Client, playerShipClass, playername, true, glm::vec3(x, y, z));
     map.setPlayer(playerShip);
     GameCamera* playerCamera = (GameCamera*)map.getActiveCamera();
     playerCamera->follow(playerShip); 

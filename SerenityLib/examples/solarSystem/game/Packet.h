@@ -19,6 +19,9 @@ struct PacketType {enum Type: unsigned int {
     Undefined,
     Server_Shutdown,
 
+    Client_To_Server_Request_GameplayMode,
+    Server_To_Client_Request_GameplayMode,
+
     Client_To_Server_Projectile_Cannon_Impact,
     Client_To_Server_Projectile_Torpedo_Impact,
     Server_To_Client_Projectile_Cannon_Impact,

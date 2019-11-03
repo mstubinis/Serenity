@@ -17,8 +17,11 @@ class GameSkybox;
 class Anchor;
 class Client;
 class HUD;
+class GameplayMode;
+class Team;
 class Map: public Scene{
     private:
+        GameplayMode&                                  m_GameplayMode;
         std::unordered_map<std::string, Planet*>       m_Planets;
         std::unordered_map<std::string, Ship*>         m_Ships;
         std::string                                    m_Filename;
@@ -41,7 +44,7 @@ class Map: public Scene{
 
         std::vector<EntityWrapper*> m_Objects;
 
-        Map(Client&, const std::string& name, const std::string& file);
+        Map(GameplayMode& mode, Client& client, const std::string& name, const std::string& file);
         virtual ~Map();
 
         virtual void update(const double& dt);
@@ -54,7 +57,7 @@ class Map: public Scene{
         const bool hasShip(const std::string& shipName) const;
         
         HUD& getHUD();
-        Ship* createShip(Client& client, const std::string& shipClass, const std::string& shipName, const bool& playerShip, const glm::vec3& position);
+        Ship* createShip(Team& team, Client& client, const std::string& shipClass, const std::string& shipName, const bool& playerShip, const glm::vec3& position);
 
 
         Ship* getPlayer();

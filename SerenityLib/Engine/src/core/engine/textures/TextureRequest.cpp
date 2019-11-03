@@ -13,11 +13,11 @@ using namespace Engine;
 using namespace Engine::epriv;
 
 TextureRequest::TextureRequest() {
-    file = "";
+    file          = "";
     fileExtension = "";
-    fileExists = false;
-    async = false;
-    selfClean = true;
+    fileExists    = false;
+    async         = false;
+    selfClean     = true;
 }
 TextureRequest::TextureRequest(const string& _filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) :TextureRequest() {
     file = _filename;

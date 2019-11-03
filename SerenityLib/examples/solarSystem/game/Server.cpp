@@ -1,14 +1,18 @@
 #include "Server.h"
 #include "Packet.h"
 #include "Core.h"
+#include "Client.h"
 #include "Menu.h"
 #include "Helper.h"
 #include "ResourceManifest.h"
 #include "gui/specifics/ServerLobbyChatWindow.h"
 #include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
+#include "modes/GameplayMode.h"
 
 #include "map/Map.h"
 #include "map/Anchor.h"
+#include "teams/Team.h"
+#include "modes/GameplayMode.h"
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/utils/Utils.h>
@@ -127,6 +131,7 @@ ServerClientThread::~ServerClientThread() {
 #pragma region Server
 
 Server::Server(Core& core, const unsigned int& port, const string& ipRestriction) :m_Core(core) {
+    m_GameplayMode                     = nullptr;
     m_port                             = port;
     m_listener                         = new ListenerTCP(port, ipRestriction);
     m_DeepspaceAnchorTimer             = 0.0f;
@@ -166,10 +171,11 @@ const bool Server::startup(const string& mapname) {
     }
     return false;
 }
-const bool Server::startupMap() {
+const bool Server::startupMap(GameplayMode& mode) {
+    m_GameplayMode = &mode;
     Map* map = static_cast<Map*>(Resources::getScene(m_MapName));
     if (!map) {
-        map = new Map(*m_Core.m_Client, m_MapName, ResourceManifest::BasePath + "data/Systems/" + m_MapName + ".txt");
+        map = new Map(mode , *m_Core.m_Client, m_MapName, ResourceManifest::BasePath + "data/Systems/" + m_MapName + ".txt");
         return true;
     }
     return false;
@@ -186,6 +192,7 @@ void Server::shutdown(const bool destructor) {
     if (destructor) {
         SAFE_DELETE_VECTOR(m_Threads);
         SAFE_DELETE(m_listener);
+        SAFE_DELETE(m_GameplayMode);
     }else{
         m_listener->close();
     }
@@ -472,6 +479,27 @@ void Server::updateClient(ServerClient& client) {
                     PacketMessage& pI = *static_cast<PacketMessage*>(pp);
                     PacketMessage pOut(pI);
                     pOut.PacketType = PacketType::Server_To_Client_Approve_Map_Entry;
+
+                    auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+                    const auto teamNumber = stoi(info[2]);
+                    if (teamNumber == -1) {
+                        //assign the player a team number
+                        auto& teams = server.m_GameplayMode->getTeams();
+                        Team* chosen = nullptr;
+                        unsigned int minVal = -1;
+                        for (auto& team : teams) {
+                            const auto numberOfPlayers = team.second->getNumberOfPlayersOnTeam();
+                            if (numberOfPlayers < minVal) {
+                                minVal = numberOfPlayers;
+                                chosen = team.second;
+                            }
+                        }
+                        if (chosen) {
+                            boost::replace_all(pOut.data, ",-1", "," + chosen->getTeamNumberAsString());
+                            teams.at(chosen->getTeamNumber())->addPlayerToTeam(client.m_username);
+                        }
+                    }
+
                     server.send_to_client(client, pOut);
                     break;
                 }case PacketType::Client_To_Server_Chat_Message: {
@@ -506,6 +534,17 @@ void Server::updateClient(ServerClient& client) {
                             pOut.data.pop_back();
                         server.send_to_client(client, pOut);
                         std::cout << "Server: Approving: " + pIn.data + "'s connection" << std::endl;
+
+                        //now send the client info about the gameplay mode, dont do this for the player client
+                        if (client.m_username != server.m_Core.m_Client->m_username) {
+                            auto& mode = *server.m_GameplayMode;
+                            const auto info = mode.serialize();
+                            PacketMessage pOut0;
+                            pOut0.name = client.m_username;
+                            pOut0.data = info;
+                            pOut0.PacketType = PacketType::Server_To_Client_Request_GameplayMode;
+                            server.send_to_client(client, pOut0);
+                        }
 
                         PacketMessage pOut1;
                         pOut1.name = client.m_username;

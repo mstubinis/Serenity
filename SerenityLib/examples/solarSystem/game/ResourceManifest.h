@@ -13,6 +13,8 @@ struct ResourceManifest{
     static Handle skyFromAtmosphere;
     static Handle groundFromSpace;
     static Handle shieldsShaderProgram;
+    static Handle ShipShaderProgramDeferred;
+    static Handle ShipShaderProgramForward;
 
     static Handle PlanetMesh;
     static Handle RingMesh;
