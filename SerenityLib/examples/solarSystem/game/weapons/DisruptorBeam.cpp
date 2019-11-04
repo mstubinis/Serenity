@@ -1,4 +1,4 @@
-#include "PlasmaBeam.h"
+#include "DisruptorBeam.h"
 #include "../map/Map.h"
 #include "../ResourceManifest.h"
 #include "../Ship.h"
@@ -26,14 +26,14 @@
 using namespace Engine;
 using namespace std;
 
-struct PlasmaBeamCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+struct DisruptorBeamCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
     auto phaserShipVoid = owner.getUserPointer1();
     auto otherShipVoid = other.getUserPointer1();
     if (otherShipVoid && phaserShipVoid) {
         if (otherShipVoid != phaserShipVoid) {//dont hit ourselves!
             Ship* otherShip = static_cast<Ship*>(otherShipVoid);
             if (otherShip) {
-                auto& weapon = *static_cast<PlasmaBeam*>(owner.getUserPointer2());
+                auto& weapon = *static_cast<DisruptorBeam*>(owner.getUserPointer2());
                 if (weapon.firingTime > 0.0f) {
                     Ship* sourceShip = static_cast<Ship*>(phaserShipVoid);
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
@@ -66,12 +66,12 @@ struct PlasmaBeamCollisionFunctor final { void operator()(ComponentBody& owner, 
     }
 }};
 
-struct PlasmaBeamInstanceBindFunctor { void operator()(EngineResource* r) const {
+struct DisruptorBeamInstanceBindFunctor { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
-    PlasmaBeam& beam = *static_cast<PlasmaBeam*>(i.getUserPointer());
+    auto& beam = *static_cast<DisruptorBeam*>(i.getUserPointer());
 
     glm::mat4 parentModel = body.modelMatrix();
     glm::mat4 model = parentModel * i.modelMatrix();
@@ -87,23 +87,23 @@ struct PlasmaBeamInstanceBindFunctor { void operator()(EngineResource* r) const 
     mesh.modifyVertices(0, beam.modPts, MeshModifyFlags::Default);
     mesh.modifyVertices(1, beam.modUvs, MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
 }};
-struct PlasmaBeamInstanceUnbindFunctor { void operator()(EngineResource* r) const {
+struct DisruptorBeamInstanceUnbindFunctor { void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
 
-PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges, const float& _rechargeTimePerRound, const unsigned int& _modelIndex, const float& endpointExtraScale, const float& beamSizeExtraScale, const float& RangeInKM) : PrimaryWeaponBeam(WeaponType::PlasmaBeam, ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime, _modelIndex, endpointExtraScale, beamSizeExtraScale, RangeInKM){
+DisruptorBeam::DisruptorBeam(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges, const float& _rechargeTimePerRound, const unsigned int& _modelIndex, const float& endpointExtraScale, const float& beamSizeExtraScale, const float& RangeInKM) : PrimaryWeaponBeam(WeaponType::PlasmaBeam, ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime, _modelIndex, endpointExtraScale, beamSizeExtraScale, RangeInKM) {
     firstWindupGraphic = map.createEntity();
     secondWindupGraphic = map.createEntity();
 
-    auto* model = beamGraphic.addComponent<ComponentModel>(ResourceManifest::PhaserBeamMesh, ResourceManifest::PlasmaBeamMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto* model = beamGraphic.addComponent<ComponentModel>(ResourceManifest::PhaserBeamMesh, ResourceManifest::DisruptorBeamMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& beamModel1 = model->getModel(0);
     beamModel1.hide();
     beamModel1.setScale(0.095f * additionalBeamSizeScale);
 
     auto& firstWindupBody = *firstWindupGraphic.addComponent<ComponentBody>();
     auto& secondWindupBody = *secondWindupGraphic.addComponent<ComponentBody>();
-    auto& firstWindupModel = *firstWindupGraphic.addComponent<ComponentModel>(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlowMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& secondWindupModel = *secondWindupGraphic.addComponent<ComponentModel>(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlowMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& firstWindupModel = *firstWindupGraphic.addComponent<ComponentModel>(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlow2Material).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& secondWindupModel = *secondWindupGraphic.addComponent<ComponentModel>(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlow2Material).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
 
     auto& firstModel = firstWindupModel.getModel();
     auto& secondModel = secondWindupModel.getModel();
@@ -111,11 +111,11 @@ PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
     firstModel.setScale(0.095f * additionalEndPointScale);
     secondModel.setScale(0.095f * additionalEndPointScale);
 
-    const auto plasmaGreen = glm::vec4(0.0f, 0.93f, 0.6f, 1.0f);
-    const auto plasmaTeal = glm::vec4(0.53f, 1.0f, 0.73f, 1.0f);
+    const auto disruptorGreen = glm::vec4(0.15f, 0.969f, 0.192f, 1.0f);
+    const auto disruptorTeal = glm::vec4(0.632f, 1.0f, 0.0f, 1.0f);
 
-    firstModel.setColor(plasmaGreen);
-    secondModel.setColor(plasmaGreen);
+    firstModel.setColor(disruptorGreen);
+    secondModel.setColor(disruptorGreen);
 
     auto& shipBody = *ship.getComponent<ComponentBody>();
 
@@ -124,36 +124,36 @@ PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
     const auto finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
 
     firstWindupLight = new PointLight(finalPosition, &map);
-    firstWindupLight->setColor(plasmaGreen);
+    firstWindupLight->setColor(disruptorGreen);
     firstWindupLight->setAttenuation(LightRange::_7);
     firstWindupLight->deactivate();
 
     secondWindupLight = new PointLight(finalPosition, &map);
-    secondWindupLight->setColor(plasmaGreen);
+    secondWindupLight->setColor(disruptorGreen);
     secondWindupLight->setAttenuation(LightRange::_7);
     secondWindupLight->deactivate();
 
     auto& beamModel = *beamGraphic.getComponent<ComponentModel>();
     auto& beamModelOne = beamModel.getModel();
     beamModelOne.setUserPointer(this);
-    //beamModelOne.setColor(plasmaGreen);
-    beamModelOne.setCustomBindFunctor(PlasmaBeamInstanceBindFunctor());
-    beamModelOne.setCustomUnbindFunctor(PlasmaBeamInstanceUnbindFunctor());
+    //beamModelOne.setColor(disruptorGreen);
+    beamModelOne.setCustomBindFunctor(DisruptorBeamInstanceBindFunctor());
+    beamModelOne.setCustomUnbindFunctor(DisruptorBeamInstanceUnbindFunctor());
 
-    beamLight->setColor(plasmaGreen);
+    beamLight->setColor(disruptorGreen);
 
     auto& beamEndBody = *beamEndPointGraphic.getComponent<ComponentBody>();
     auto& beamEndModel = *beamEndPointGraphic.getComponent<ComponentModel>();
     auto& beamModelEnd = beamEndModel.getModel(0);
-    beamModelEnd.setColor(plasmaGreen);
+    beamModelEnd.setColor(disruptorGreen);
 
     beamEndBody.setUserPointer(this);
     beamEndBody.setUserPointer1(&ship);
     beamEndBody.setUserPointer2(this);
     beamEndBody.setPosition(99999999999.9f);
-    beamEndBody.setCollisionFunctor(PlasmaBeamCollisionFunctor());
+    beamEndBody.setCollisionFunctor(DisruptorBeamCollisionFunctor());
 }
-PlasmaBeam::~PlasmaBeam() {
+DisruptorBeam::~DisruptorBeam() {
     firstWindupGraphic.destroy();
     secondWindupGraphic.destroy();
     firstWindupLight->destroy();
@@ -161,7 +161,7 @@ PlasmaBeam::~PlasmaBeam() {
     SAFE_DELETE(firstWindupLight);
     SAFE_DELETE(secondWindupLight);
 }
-const bool PlasmaBeam::fire(const double& dt, const glm_vec3& chosen_target_pt) {
+const bool DisruptorBeam::fire(const double& dt, const glm_vec3& chosen_target_pt) {
     auto res2 = isInArc(target, arc);
     targetCoordinates = chosen_target_pt;
     if (res2) {
@@ -181,7 +181,7 @@ const bool PlasmaBeam::fire(const double& dt, const glm_vec3& chosen_target_pt) 
     }
     return false;
 }
-const bool PlasmaBeam::forceFire(const double& dt) {
+const bool DisruptorBeam::forceFire(const double& dt) {
     //move the two end flares towards the middle using the interpolation
     if (state == BeamWeaponState::Off) {
 
@@ -189,7 +189,7 @@ const bool PlasmaBeam::forceFire(const double& dt) {
         auto shipMatrix = shipBody.modelMatrix();
         shipMatrix = glm::translate(shipMatrix, position);
         const auto finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
-        soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaBeam);
+        soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundDisruptorBeam);
         if (soundEffect) {
             soundEffect->setVolume(volume);
             soundEffect->setPosition(finalPosition);
@@ -200,7 +200,7 @@ const bool PlasmaBeam::forceFire(const double& dt) {
     }
     return false;
 }
-void PlasmaBeam::update(const double& dt) {
+void DisruptorBeam::update(const double& dt) {
     const auto fdt = static_cast<float>(dt);
     glm::vec3 firstWindupPos;
     glm::vec3 secondWindupPos;
@@ -253,7 +253,8 @@ void PlasmaBeam::update(const double& dt) {
         }
         if (windupPoints.size() == 1) {
             firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
-        }else {
+        }
+        else {
             const auto halfCharge = chargeTimer * 0.5f;
             firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
             secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
@@ -283,7 +284,8 @@ void PlasmaBeam::update(const double& dt) {
         const auto shipPosition = ship.getPosition();
         if (windupPoints.size() == 1) {
             firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
-        }else {
+        }
+        else {
             const auto halfCharge = chargeTimer * 0.5f;
             firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
             secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
@@ -380,7 +382,8 @@ void PlasmaBeam::update(const double& dt) {
         glm::vec3 finPos;
         if (time >= len) {
             finPos = closest->hitPosition;
-        }else {
+        }
+        else {
             finPos = realTargetPos;
         }
         beamEndBody.setPosition(finPos);

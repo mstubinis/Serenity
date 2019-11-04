@@ -400,7 +400,6 @@ void Menu::update_game(const double& dt) {
                 _countShips = 0;
             }
             player.setTarget(shipsVect[_countShips]->entity().getComponent<ComponentName>()->name(), true);
-            player.getPlayerCamera()->setTarget(shipsVect[_countShips]);
             ++_countShips;
         }
     }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
@@ -416,7 +415,6 @@ void Menu::update_game(const double& dt) {
             _countPlanets = 0;
         }
         player.setTarget(planetsVect[_countPlanets]->entity().getComponent<ComponentName>()->name(), true);
-        player.getPlayerCamera()->setTarget(planetsVect[_countPlanets]);
         ++_countPlanets;
     }
 }

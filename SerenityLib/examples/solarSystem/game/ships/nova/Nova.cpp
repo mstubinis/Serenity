@@ -15,6 +15,7 @@
 #include "../../ships/shipSystems/ShipSystemYawThrusters.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
+#include "../../ai/AI.h"
 
 using namespace std;
 
@@ -43,8 +44,8 @@ Nova::Nova(const AIType::Type ai_type, Team& team, Client& client, Map& map,  co
     auto* rightTorp = new PhotonTorpedo(_this, map, glm::vec3(0.223032f, -0.089813f, -1.82296f), glm::vec3(0, 0, -1), 15.0f);
     auto* aftTorp = new PhotonTorpedo(_this, map, glm::vec3(0.0f, -0.182921f, 0.810231f), glm::vec3(0, 0, 1), 15.0f);
 
-    weapons.addSecondaryWeaponTorpedo(*leftTorp);
-    weapons.addSecondaryWeaponTorpedo(*rightTorp);
+    weapons.addSecondaryWeaponTorpedo(*leftTorp, true);
+    weapons.addSecondaryWeaponTorpedo(*rightTorp, true);
     weapons.addSecondaryWeaponTorpedo(*aftTorp);
 
     //phasers
@@ -199,6 +200,8 @@ Nova::Nova(const AIType::Type ai_type, Team& team, Client& client, Map& map,  co
         glm::vec3(-0.151609f,-0.271522f, -0.629339f),
     };
     addHullTargetPoints(hull_target_points);
+
+    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
 }
 Nova::~Nova() {
 

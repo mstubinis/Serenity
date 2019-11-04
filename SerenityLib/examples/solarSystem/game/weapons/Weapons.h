@@ -31,7 +31,7 @@ using namespace Engine;
 
 class Weapons {
     public:
-        static void spawnProjectile(ShipWeapon& weapon, Ship& ship, Map& map, const glm_vec3& localPosition, const glm_vec3& forward, const int projectile_index, const glm_vec3& chosen_target_pos, const unsigned int modelIndex) {
+        static void spawnProjectile(EntityWrapper* target, ShipWeapon& weapon, Ship& ship, Map& map, const glm_vec3& localPosition, const glm_vec3& forward, const int projectile_index, glm_vec3& chosen_target_pos, const unsigned int modelIndex) {
             auto& shipBody = *ship.getComponent<ComponentBody>();
             auto& shipModel = *ship.getComponent<ComponentModel>();
             glm_vec3 final_world_position;
@@ -46,11 +46,12 @@ class Weapons {
                 shipMatrix = glm::translate(shipMatrix, localPos);
                 final_world_position = glm_vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
             }else{
-            
                 auto shipMatrix = shipBody.modelMatrix();
                 shipMatrix = glm::translate(shipMatrix, localPosition);
                 final_world_position = glm_vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
             }
+            if(target)
+                chosen_target_pos = target->getComponent<ComponentBody>()->position() + chosen_target_pos;
 
             switch (weapon.type) {
                 case WeaponType::BorgTorpedo: {
@@ -64,14 +65,14 @@ class Weapons {
                 }
                 case WeaponType::DisruptorCannon: {
                     auto& w = static_cast<DisruptorCannon&>(weapon);
-                    auto* projectile = new DisruptorCannonProjectile(w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = new DisruptorCannonProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addCannonProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundDisruptorCannon);
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.1f);
+                            w.soundEffect->setAttenuation(0.9f);
                         }
                         --weapon.numRounds;
                     }
@@ -79,14 +80,14 @@ class Weapons {
                 }
                 case WeaponType::KlingonPhotonTorpedo: {
                     auto& w = static_cast<KlingonPhotonTorpedo&>(weapon);
-                    auto* projectile = new KlingonPhotonTorpedoProjectile(w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = new KlingonPhotonTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addTorpedoProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundKlingonTorpedo);
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.05f);
+                            w.soundEffect->setAttenuation(0.9f);
                         }
                         --weapon.numRounds;
                     }
@@ -97,14 +98,14 @@ class Weapons {
                 }
                 case WeaponType::PhotonTorpedo: {
                     auto& w = static_cast<PhotonTorpedo&>(weapon);
-                    auto* projectile = new PhotonTorpedoProjectile(w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = new PhotonTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addTorpedoProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPhotonTorpedo);
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.05f);
+                            w.soundEffect->setAttenuation(0.9f);
                         }
                         --weapon.numRounds;
                     }
@@ -112,14 +113,14 @@ class Weapons {
                 }
                 case WeaponType::PhotonTorpedoOld: {
                     auto& w = static_cast<PhotonTorpedoOld&>(weapon);
-                    auto* projectile = new PhotonTorpedoOldProjectile(w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = new PhotonTorpedoOldProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addTorpedoProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPhotonTorpedoOld);
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.05f);
+                            w.soundEffect->setAttenuation(0.9f);
                         }
                         --weapon.numRounds;
                     }
@@ -130,14 +131,14 @@ class Weapons {
                 }
                 case WeaponType::PlasmaCannon: {
                     auto& w = static_cast<PlasmaCannon&>(weapon);
-                    auto* projectile = new PlasmaCannonProjectile(w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = new PlasmaCannonProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addCannonProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaCannon);
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.1f);
+                            w.soundEffect->setAttenuation(0.9f);
                         }
                         --weapon.numRounds;
                     }
@@ -145,14 +146,14 @@ class Weapons {
                 }
                 case WeaponType::PlasmaTorpedo: {
                     auto& w = static_cast<PlasmaTorpedo&>(weapon);
-                    auto* projectile = new PlasmaTorpedoProjectile(w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = new PlasmaTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addTorpedoProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaTorpedo);
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.05f);
+                            w.soundEffect->setAttenuation(0.9f);
                         }
                         --weapon.numRounds;
                     }
@@ -160,14 +161,14 @@ class Weapons {
                 }
                 case WeaponType::PulsePhaser: {
                     auto& w = static_cast<PulsePhaser&>(weapon);
-                    auto* projectile = new PulsePhaserProjectile(w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = new PulsePhaserProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addCannonProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPulsePhaser);
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.1f);
+                            w.soundEffect->setAttenuation(0.9f);
                         }
                         --weapon.numRounds;
                     }
@@ -175,14 +176,14 @@ class Weapons {
                 }
                 case WeaponType::QuantumTorpedo: {
                     auto& w = static_cast<QuantumTorpedo&>(weapon);
-                    auto* projectile = new QuantumTorpedoProjectile(w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = new QuantumTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addTorpedoProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundQuantumTorpedo);
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.05f);
+                            w.soundEffect->setAttenuation(0.9f);
                         }
                         --weapon.numRounds;
                     }

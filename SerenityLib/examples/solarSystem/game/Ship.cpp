@@ -7,6 +7,7 @@
 #include "ResourceManifest.h"
 #include "ships/Ships.h"
 #include "ai/AI.h"
+#include "ai/FireAtWill.h"
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/Engine.h>
@@ -111,6 +112,19 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
             }
         }
     }
+
+    if (ship.m_AI) {
+        auto& ai = *ship.m_AI;
+        auto* fire_at_will = ai.getFireAtWill();
+        if (ship.IsPlayer() && fire_at_will) {
+            if (Engine::isKeyDownOnce(KeyboardKey::G)) {
+                fire_at_will->toggle();
+            }
+        }
+
+        ai.update(dt);
+    }
+
     for (auto& decal : ship.m_DamageDecals) {
         auto& _decal = *decal;
         auto& shipBody = *ship.getComponent<ComponentBody>();
@@ -268,6 +282,9 @@ void Ship::destroy() {
     }
     EntityWrapper::destroy();
     SAFE_DELETE_VECTOR(m_DamageDecals);
+}
+AI* Ship::getAI() {
+    return m_AI;
 }
 const AIType::Type Ship::getAIType() const {
     if(m_AI)
@@ -557,11 +574,19 @@ void Ship::setTarget(const string& target, const bool sendPacket) {
     if (sensors) {
         sensors->setTarget(target, sendPacket);
     }
+    auto* camera = getPlayerCamera();
+    if (camera) {
+        camera->setTarget(target);
+    }
 }
 void Ship::setTarget(EntityWrapper* target, const bool sendPacket) {
     auto* sensors = static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]);
     if (sensors) {
         sensors->setTarget(target, sendPacket);
+    }
+    auto* camera = getPlayerCamera();
+    if (camera) {
+        camera->setTarget(target);
     }
 }
 const glm_vec3& Ship::forward() {

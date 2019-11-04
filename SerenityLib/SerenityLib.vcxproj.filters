@@ -184,6 +184,12 @@
     <Filter Include="Source Files\Engine\Core\Shaders">
       <UniqueIdentifier>{9ce0f80b-4d37-44a3-864a-230877c0e19b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\pipelines">
+      <UniqueIdentifier>{095efaf1-5b4d-4232-985b-17f045ef4b1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\pipelines">
+      <UniqueIdentifier>{1b4e9717-958b-45be-8856-56dee08df9d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -576,6 +582,12 @@
     <ClInclude Include="Engine\src\core\engine\math\Numbers.h">
       <Filter>Header Files\Engine\Core\Math</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\pipelines\IRenderingPipeline.h">
+      <Filter>Header Files\Engine\Core\Renderer\pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\pipelines\DeferredPipeline.h">
+      <Filter>Header Files\Engine\Core\Renderer\pipelines</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -880,6 +892,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\DepthOfFieldCode.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\pipelines\DeferredPipeline.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\pipelines</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

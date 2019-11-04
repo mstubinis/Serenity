@@ -48,6 +48,7 @@ class Map: public Scene{
         Map(GameplayMode& mode, Client& client, const std::string& name, const std::string& file);
         virtual ~Map();
 
+        EntityWrapper* getEntityFromName(const std::string& name);
         virtual void update(const double& dt);
         virtual void onResize(const unsigned int& width, const unsigned int& height);
         virtual void render();

@@ -411,6 +411,12 @@
     <ClInclude Include="game\ai\AIIncludes.h">
       <Filter>Header Files\Game\AI</Filter>
     </ClInclude>
+    <ClInclude Include="game\weapons\DisruptorBeam.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ai\FireAtWill.h">
+      <Filter>Header Files\Game\AI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -618,6 +624,12 @@
       <Filter>Source Files\Game\Networking</Filter>
     </ClCompile>
     <ClCompile Include="game\ai\AI.cpp">
+      <Filter>Source Files\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\DisruptorBeam.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ai\FireAtWill.cpp">
       <Filter>Source Files\Game\AI</Filter>
     </ClCompile>
   </ItemGroup>

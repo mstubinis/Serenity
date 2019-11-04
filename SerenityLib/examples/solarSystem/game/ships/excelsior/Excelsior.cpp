@@ -15,6 +15,7 @@
 #include "../../ships/shipSystems/ShipSystemYawThrusters.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
+#include "../../ai/AI.h"
 
 using namespace std;
 
@@ -45,8 +46,8 @@ Excelsior::Excelsior(const AIType::Type ai_type, Team& team, Client& client, Map
     auto* leftTorpAft = new PhotonTorpedoOld(_this, map, glm::vec3(-0.151062f, -0.276966f, 2.24787f), glm::vec3(0, 0, 1), 15.0f, 1);
     auto* rightTorpAft = new PhotonTorpedoOld(_this, map, glm::vec3(0.151062f, -0.276966f, 2.24787f), glm::vec3(0, 0, 1), 15.0f, 1);
 
-    weapons.addSecondaryWeaponTorpedo(*leftTorp);
-    weapons.addSecondaryWeaponTorpedo(*rightTorp);
+    weapons.addSecondaryWeaponTorpedo(*leftTorp, true);
+    weapons.addSecondaryWeaponTorpedo(*rightTorp, true);
     weapons.addSecondaryWeaponTorpedo(*leftTorpAft);
     weapons.addSecondaryWeaponTorpedo(*rightTorpAft);
 
@@ -86,8 +87,8 @@ Excelsior::Excelsior(const AIType::Type ai_type, Team& team, Client& client, Map
     auto* topRightRightLeftPhaser = new PhaserBeam(_this, map, top_right_right_left[0], glm::vec3(0.251434f, 0.484739f, 0.032068f), 35.0f, top_right_right_left);
     auto* topRightRightRightPhaser = new PhaserBeam(_this, map, top_right_right_right[0], glm::vec3(0.251434f, 0.484739f, 0.032068f), 35.0f, top_right_right_right);
 
-    weapons.addPrimaryWeaponBeam(*topCentralPhaserLeft);
-    weapons.addPrimaryWeaponBeam(*topCentralPhaserRight);
+    weapons.addPrimaryWeaponBeam(*topCentralPhaserLeft, true);
+    weapons.addPrimaryWeaponBeam(*topCentralPhaserRight, true);
     weapons.addPrimaryWeaponBeam(*topLeftLeftPhaser);
     weapons.addPrimaryWeaponBeam(*topLeftRightPhaser);
     weapons.addPrimaryWeaponBeam(*topLeftLeftLeftPhaser);
@@ -140,8 +141,8 @@ Excelsior::Excelsior(const AIType::Type ai_type, Team& team, Client& client, Map
     auto* topRight2LeftPhaser = new PhaserBeam(_this, map, bottom_right2_left[0], glm::vec3(-0.141667f, -0.407625f, 0.079637f), 35.0f, bottom_right2_left);
     auto* topRight2RightPhaser = new PhaserBeam(_this, map, bottom_right2_right[0], glm::vec3(-0.141667f, -0.407625f, 0.079637f), 35.0f, bottom_right2_right);
 
-    weapons.addPrimaryWeaponBeam(*btmCentralPhaserLeft);
-    weapons.addPrimaryWeaponBeam(*btmCentralPhaserRight);
+    weapons.addPrimaryWeaponBeam(*btmCentralPhaserLeft, true);
+    weapons.addPrimaryWeaponBeam(*btmCentralPhaserRight, true);
     weapons.addPrimaryWeaponBeam(*btmLeftLeftPhaser);
     weapons.addPrimaryWeaponBeam(*btmLeftRightPhaser);
     weapons.addPrimaryWeaponBeam(*btmLeft2LeftPhaser);
@@ -150,6 +151,8 @@ Excelsior::Excelsior(const AIType::Type ai_type, Team& team, Client& client, Map
     weapons.addPrimaryWeaponBeam(*btmRightRightPhaser);
     weapons.addPrimaryWeaponBeam(*topRight2LeftPhaser);
     weapons.addPrimaryWeaponBeam(*topRight2RightPhaser);
+
+    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
 
 }
 Excelsior::~Excelsior() {

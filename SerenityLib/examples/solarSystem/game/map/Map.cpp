@@ -103,6 +103,14 @@ const bool Map::try_addCannonProjectile(const int requestedIndex) {
 const bool Map::try_addTorpedoProjectile(const int requestedIndex) {
     return m_ActiveTorpedoProjectiles.can_push_at_index(requestedIndex);
 }
+EntityWrapper* Map::getEntityFromName(const string& name) {
+    for (auto& wrapper : m_Objects) {
+        auto* Name = wrapper->getComponent<ComponentName>();
+        if (Name  && Name->name() == name)
+            return wrapper;
+    }
+    return nullptr;
+}
 
 string Map::allowedShipsSingleString() {
     uint                                             count = 0;

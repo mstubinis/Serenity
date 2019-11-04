@@ -20,6 +20,7 @@
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
 #include "../../ships/Ships.h"
+#include "../../ai/AI.h"
 
 using namespace std;
 using namespace Engine;
@@ -60,9 +61,9 @@ Brel::Brel(const AIType::Type ai_type, Team& team, Client& client, Map& map, con
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
         if (i == 0)  system = new ShipSystemReactor(_this, 1000);
-        else if (i == 1)  system = new ShipSystemPitchThrusters(_this);
-        else if (i == 2)  system = new ShipSystemYawThrusters(_this);
-        else if (i == 3)  system = new ShipSystemRollThrusters(_this);
+        else if (i == 1)  system = new ShipSystemPitchThrusters(_this, 1.22f);
+        else if (i == 2)  system = new ShipSystemYawThrusters(_this, 1.22f);
+        else if (i == 3)  system = new ShipSystemRollThrusters(_this, 1.2f);
         else if (i == 4)  system = new ShipSystemCloakingDevice(_this);
         else if (i == 5)  system = new ShipSystemShields(_this, map, 7700.0f, 7700.0f, 7700.0f, 7700.0f, 10700.0f, 10700.0f);
         else if (i == 6)  system = new ShipSystemMainThrusters(_this);
@@ -73,8 +74,11 @@ Brel::Brel(const AIType::Type ai_type, Team& team, Client& client, Map& map, con
         m_ShipSystems.emplace(i, system);
     }
     //update shield size
-    const auto shieldScale = ((Mesh*)Ships::Database.at(className).MeshHandles[0].get())->getRadiusBox() * SHIELD_SCALE_FACTOR;
     auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
+    auto shieldScale = ((Mesh*)Ships::Database.at(className).MeshHandles[0].get())->getRadiusBox() * SHIELD_SCALE_FACTOR;
+    shieldScale *= shields->getAdditionalShieldSizeScale();
+
+
     auto& shieldsBody = *shields->getEntity().getComponent<ComponentBody>();
     shieldsBody.setScale(shieldScale);
     m_ShieldScale = shieldScale;
@@ -82,16 +86,16 @@ Brel::Brel(const AIType::Type ai_type, Team& team, Client& client, Map& map, con
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     //blender 3d to game 3d: switch y and z, then negate z
-    auto* leftTop = new DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 1);
-    auto* rightTop = new DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 2);
+    auto* leftTop = new DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 2);
+    auto* rightTop = new DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 1);
 
-    weapons.addPrimaryWeaponCannon(*leftTop);
-    weapons.addPrimaryWeaponCannon(*rightTop);
+    weapons.addPrimaryWeaponCannon(*leftTop, true);
+    weapons.addPrimaryWeaponCannon(*rightTop, true);
 
     auto* fwd_torp = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 2);
     auto* aft_torp = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.115291f, 0.511922f), glm::vec3(0.0f, 0.0f, 1.0f), 35.0f, 1);
 
-    weapons.addSecondaryWeaponTorpedo(*fwd_torp);
+    weapons.addSecondaryWeaponTorpedo(*fwd_torp, true);
     weapons.addSecondaryWeaponTorpedo(*aft_torp);
 
     foldWingsUp();
@@ -114,6 +118,8 @@ Brel::Brel(const AIType::Type ai_type, Team& team, Client& client, Map& map, con
         glm::vec3(0.0f, 0.158835f, 0.154595f),
     };
     addHullTargetPoints(hull_target_points);
+
+    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
 }
 Brel::~Brel() {
 
@@ -191,13 +197,13 @@ void Brel::update(const double& dt) {
     }else{
         foldWingsUp();
     }
-    /*
+    
     //for testing only
-    if (m_IsPlayer && Engine::isKeyDownOnce(KeyboardKey::Space)) {
+    if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
         foldWingsUp();
         foldWingsDown();
     }
-    */
+    
     if (m_WingState == BrelWingSpanState::RotatingUp) {
         updateWingSpan(dt, BrelWingSpanState::Up, 1);
     }

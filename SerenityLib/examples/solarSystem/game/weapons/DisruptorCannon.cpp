@@ -44,6 +44,7 @@ struct DisruptorCannonCollisionFunctor final { void operator()(ComponentBody& ow
                         }
                     }
                     if (hull && other.getUserPointer() == hull) {
+                        /*
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                             if (shields->getHealthCurrent(shieldSide) > 0) {
@@ -51,6 +52,7 @@ struct DisruptorCannonCollisionFunctor final { void operator()(ComponentBody& ow
                                 return;
                             }
                         }
+                        */
                         cannonProjectile.clientToServerImpact(weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, false);
                     }
                 }
@@ -129,7 +131,7 @@ struct DisruptorCannonTailInstanceUnbindFunctor { void operator()(EngineResource
 }};
 
 
-DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map, final_world_position, forward, index) {
+DisruptorCannonProjectile::DisruptorCannonProjectile(EntityWrapper* target, DisruptorCannon& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map, final_world_position, forward, index) {
     EntityDataRequest request(entity);
 
     auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
@@ -161,7 +163,10 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     active = true;
     auto& shipBody = *source.ship.getComponent<ComponentBody>();
 
-    auto finalPosition = final_world_position + Math::rotate_vec3(shipBody.rotation(), glm_vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
+    const auto world_space_dir = Math::rotate_vec3(shipBody.rotation(), forward);
+    const auto size = static_cast<decimal>(model.getModel().mesh()->getRadiusBox().z);
+    auto finalPosition = final_world_position + (world_space_dir * size);
+
 
     auto& sph = *static_cast<btBoxShape*>(cannonProjectileBody.getCollision()->getBtShape());
     sph.setMargin(0.01f);
@@ -178,7 +183,7 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(DisruptorCannon& source, Ma
     cannonProjectileBody.setLinearVelocity(shipLinVel, false);
     cannonProjectileBody.setAngularVelocity(shipAngVel, false);
 
-    auto data = source.calculatePredictedVector(cannonProjectileBody, chosen_target_pos);
+    auto data = source.calculatePredictedVector(target, cannonProjectileBody, chosen_target_pos);
     auto offset = data.pedictedVector;
     glm_quat q;
     Math::alignTo(q, -offset);
@@ -203,7 +208,7 @@ DisruptorCannonProjectile::~DisruptorCannonProjectile() {
 
 }
 
-DisruptorCannon::DisruptorCannon(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume, const unsigned int& _modelIndex) :PrimaryWeaponCannon(map,WeaponType::DisruptorCannon, ship, position, forward, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume, _modelIndex){
+DisruptorCannon::DisruptorCannon(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward_vector, const float& arc, const uint& _maxCharges, const float& _damage, const float& _rechargePerRound, const float& _impactRadius, const float& _impactTime, const float& _travelSpeed, const float& _volume, const unsigned int& _modelIndex) :PrimaryWeaponCannon(map,WeaponType::DisruptorCannon, ship, position, forward_vector, arc, _maxCharges, _damage, _rechargePerRound, _impactRadius, _impactTime, _travelSpeed, _volume, _modelIndex){
 
 }
 DisruptorCannon::~DisruptorCannon() {

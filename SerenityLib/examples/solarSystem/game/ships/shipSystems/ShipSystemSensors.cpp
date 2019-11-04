@@ -32,8 +32,9 @@ EntityWrapper* ShipSystemSensors::getTarget() {
     return m_Target;
 }
 void ShipSystemSensors::setTarget(EntityWrapper* target, const bool sendPacket) {
+    const auto is_player = m_Ship.IsPlayer();
     if (!target) {
-        if (m_Ship.IsPlayer() && m_Ship.m_PlayerCamera) {
+        if (is_player && m_Ship.m_PlayerCamera) {
             m_Ship.m_PlayerCamera->setTarget(&m_Ship);
         }
     }
@@ -56,32 +57,38 @@ void ShipSystemSensors::setTarget(EntityWrapper* target, const bool sendPacket) 
         m_Ship.m_Client.send(pOut);
     }
     m_Target = target;
-    m_Map.getHUD().setTarget(m_Target);
+    if (is_player) {
+        m_Map.getHUD().setTarget(m_Target);
+    }
 }
-void ShipSystemSensors::setTarget(const string& target, const bool sendPacket) {
-    if (target.empty()) {
+void ShipSystemSensors::setTarget(const string& targetName, const bool sendPacket) {
+    if (targetName.empty()) {
         setTarget(nullptr, sendPacket);
     }
     Map& map = static_cast<Map&>(m_Ship.entity().scene());
     for (auto& entity : map.m_Objects) {
         auto* componentName = entity->getComponent<ComponentName>();
         if (componentName) {
-            if (componentName->name() == target) {
+            if (componentName->name() == targetName) {
                 setTarget(entity, sendPacket);
+                return;
             }
         }
     }
 }
 
-const bool ShipSystemSensors::validateDetection(Ship& othership, const glm_vec3& thisShipPos) {
-    bool ret = false;
+const ShipSystemSensors::Detection ShipSystemSensors::validateDetection(Ship& othership, const glm_vec3& thisShipPos) {
     const auto dist2 = glm::distance2(othership.getPosition(), thisShipPos);
+
+    Detection d;
+    d.valid = false;
+    d.distanceSquared = dist2;
     if (dist2 <= m_RadarRange * m_RadarRange) {
-        if (  (!othership.isFullyCloaked() && !othership.isAlly(m_Ship)) || (othership.isAlly(m_Ship))    ) {
-            ret = true;
+        if (  (!othership.isFullyCloaked() && !othership.isAlly(m_Ship)) || (othership.isAlly(m_Ship))  /*   or is it an enemy ship detected by anti-cloak scan?    */   ) {
+            d.valid = true;
         }
     }
-    return ret;
+    return d;
 }
 
 void ShipSystemSensors::update(const double& dt) {
@@ -103,16 +110,20 @@ void ShipSystemSensors::update(const double& dt) {
     for (auto& shipItr : m_Map.getShips()) {
         auto& ship = *shipItr.second;
         if (&ship != &m_Ship) {
-            const bool res = validateDetection(ship, m_Ship.getPosition());
-            if (res) {
-                m_DetectedShips.push_back(&ship);
+            const auto& res = validateDetection(ship, m_Ship.getPosition());
+            if (res.valid) {
 
+                DetectedShip detected;
+                detected.ship = &ship;
+                detected.distanceAway2 = res.distanceSquared;
+
+                m_DetectedShips.push_back(detected);//std::move() here?
                 if (ship.isAlly(m_Ship)) {
-                    m_DetectedAlliedShips.push_back(&ship);
+                    m_DetectedAlliedShips.push_back(std::move(detected));
                 }else if (ship.isEnemy(m_Ship)) {
-                    m_DetectedEnemyShips.push_back(&ship);
+                    m_DetectedEnemyShips.push_back(std::move(detected));
                 }else if (ship.isNeutral(m_Ship)) {
-                    m_DetectedNeutralShips.push_back(&ship);
+                    m_DetectedNeutralShips.push_back(std::move(detected));
                 }
             }
         }
@@ -126,12 +137,9 @@ const decimal& ShipSystemSensors::getRadarRange() const {
 DetectedShip ShipSystemSensors::getClosestAlliedShip() {
     DetectedShip ret;
     if (m_DetectedAlliedShips.size() > 0) {
-        auto& thisShipPos = m_Ship.getPosition();
         for (auto& ship : m_DetectedAlliedShips) {
-            const auto dist2 = glm::distance2(ship->getPosition(), thisShipPos);
-            if (dist2 <= ret.distanceAway2 || ret.distanceAway2 < static_cast<decimal>(0.0)) {
-                ret.ship = ship;
-                ret.distanceAway2 = dist2;
+            if (ship.distanceAway2 <= ret.distanceAway2 || ret.distanceAway2 < static_cast<decimal>(0.0)) {
+                ret = ship;
             }
         }
     }
@@ -140,12 +148,9 @@ DetectedShip ShipSystemSensors::getClosestAlliedShip() {
 DetectedShip ShipSystemSensors::getClosestNeutralShip() {
     DetectedShip ret;
     if (m_DetectedNeutralShips.size() > 0) {
-        auto& thisShipPos = m_Ship.getPosition();
         for (auto& ship : m_DetectedNeutralShips) {
-            const auto dist2 = glm::distance2(ship->getPosition(), thisShipPos);
-            if (dist2 <= ret.distanceAway2 || ret.distanceAway2 < static_cast<decimal>(0.0)) {
-                ret.ship = ship;
-                ret.distanceAway2 = dist2;
+            if (ship.distanceAway2 <= ret.distanceAway2 || ret.distanceAway2 < static_cast<decimal>(0.0)) {
+                ret = ship;
             }
         }
     }
@@ -154,41 +159,48 @@ DetectedShip ShipSystemSensors::getClosestNeutralShip() {
 DetectedShip ShipSystemSensors::getClosestEnemyShip() {
     DetectedShip ret;
     if (m_DetectedEnemyShips.size() > 0) {
-        auto& thisShipPos = m_Ship.getPosition();
         for (auto& ship : m_DetectedEnemyShips) {
-            const auto dist2 = glm::distance2(ship->getPosition(), thisShipPos);
-            if (dist2 <= ret.distanceAway2 || ret.distanceAway2 < static_cast<decimal>(0.0)) {
-                ret.ship = ship;
-                ret.distanceAway2 = dist2;
+            if (ship.distanceAway2 <= ret.distanceAway2 || ret.distanceAway2 < static_cast<decimal>(0.0)) {
+                ret = ship;
             }
         }
     }
     return ret;
 }
+DetectedShip ShipSystemSensors::getClosestEnemyCloakedShip() {
+    DetectedShip ret;
+    if (m_DetectedEnemyShips.size() > 0) {
+        for (auto& ship : m_DetectedEnemyShips) {
+            if ((ship.ship->isCloaked() /* should we only check for fully cloaked ships? */ || ship.ship->isFullyCloaked()) && ship.distanceAway2 <= ret.distanceAway2 || ret.distanceAway2 < static_cast<decimal>(0.0)) {
+                ret = ship;
+            }
+        }
+    }
+    return ret;
+}
+
 DetectedShip ShipSystemSensors::getClosestShip() {
     DetectedShip ret;
     if (m_DetectedShips.size() > 0) {
         auto& thisShipPos = m_Ship.getPosition();
         for (auto& ship : m_DetectedShips) {
-            const auto dist2 = glm::distance2(ship->getPosition(), thisShipPos);
-            if (dist2 <= ret.distanceAway2 || ret.distanceAway2 < static_cast<decimal>(0.0)) {
-                ret.ship = ship;
-                ret.distanceAway2 = dist2;
+            if (ship.distanceAway2 <= ret.distanceAway2 || ret.distanceAway2 < static_cast<decimal>(0.0)) {
+                ret = ship;
             }
         }
     }
     return ret;
 }
-vector<Ship*>& ShipSystemSensors::getEnemyShips() {
+vector<DetectedShip>& ShipSystemSensors::getEnemyShips() {
     return m_DetectedEnemyShips;
 }
-vector<Ship*>& ShipSystemSensors::getShips() {
+vector<DetectedShip>& ShipSystemSensors::getShips() {
     return m_DetectedShips;
 }
-vector<Ship*>& ShipSystemSensors::getAlliedShips() {
+vector<DetectedShip>& ShipSystemSensors::getAlliedShips() {
     return m_DetectedAlliedShips;
 }
-vector<Ship*>& ShipSystemSensors::getNeutralShips() {
+vector<DetectedShip>& ShipSystemSensors::getNeutralShips() {
     return m_DetectedNeutralShips;
 }
 

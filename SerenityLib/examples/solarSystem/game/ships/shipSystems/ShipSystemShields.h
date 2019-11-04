@@ -62,6 +62,9 @@ class ShipSystemShields final : public ShipSystem {
 
         std::vector<float>            m_HealthPointsCurrent;
         std::vector<float>            m_HealthPointsMax;
+        
+        glm::vec3                     m_ShieldsOffset;
+        glm::vec3                     m_AdditionalShieldScale;
 
         float                         m_RechargeAmount;
         float                         m_RechargeRate;
@@ -69,8 +72,25 @@ class ShipSystemShields final : public ShipSystem {
         bool                          m_ShieldsAreUp;
         std::vector<Pyramid>          m_Pyramids;
     public:
-        ShipSystemShields(Ship&, Map&, const float avg_health);
-        ShipSystemShields(Ship&, Map&, const float fwd, const float aft, const float port, const float starboard, const float dorsal, const float ventral);
+        ShipSystemShields(
+            Ship&,
+            Map&,
+            const float avg_health,
+            const glm::vec3& offset = glm::vec3(0.0f),
+            const glm::vec3& additional_size_scale = glm::vec3(1.0f)
+        );
+        ShipSystemShields(
+            Ship&,
+            Map&,
+            const float fwd,
+            const float aft,
+            const float port,
+            const float starboard,
+            const float dorsal,
+            const float ventral,
+            const glm::vec3& offset = glm::vec3(0.0f),
+            const glm::vec3& additional_size_scale = glm::vec3(1.0f)
+        );
         ~ShipSystemShields();
 
         Entity getEntity();
@@ -78,6 +98,8 @@ class ShipSystemShields final : public ShipSystem {
         void destroy();
 
         void update(const double& dt);
+
+        const glm::vec3& getAdditionalShieldSizeScale() const;
 
         const float getHealthCurrent(const uint index) const;
         const float getHealthMax(const uint index) const;

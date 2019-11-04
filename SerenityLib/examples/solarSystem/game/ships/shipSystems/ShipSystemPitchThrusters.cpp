@@ -4,8 +4,8 @@
 
 #include <core/engine/events/Engine_Events.h>
 
-ShipSystemPitchThrusters::ShipSystemPitchThrusters(Ship& _ship) :ShipSystem(ShipSystemType::ThrustersPitch, _ship) {
-
+ShipSystemPitchThrusters::ShipSystemPitchThrusters(Ship& _ship, const float additional_strength) :ShipSystem(ShipSystemType::ThrustersPitch, _ship) {
+    m_AdditionalStrength = additional_strength;
 }
 ShipSystemPitchThrusters::~ShipSystemPitchThrusters() {
 
@@ -19,7 +19,7 @@ void ShipSystemPitchThrusters::update(const double& dt) {
                 m_Ship.m_MouseFactor.y += diff * 0.00065;
                 const float massFactor = 1.0f / (rigidbody.mass() * 5.0f);
                 const float amount = m_Ship.m_MouseFactor.y * massFactor;
-                rigidbody.applyTorque(amount, 0, 0);
+                rigidbody.applyTorque(static_cast<decimal>(amount) * static_cast<decimal>(m_AdditionalStrength), 0, 0);
                 const double step = (1.0 - dt);
                 m_Ship.m_MouseFactor.y *= (step * step);
             }

@@ -149,11 +149,13 @@ void ShipSystemShieldsImpactPoint::update(const float& dt, vector<uint>& freelis
 }
 #pragma endregion
 
-ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float health) :ShipSystemShields(_ship, map, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f) {
+ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float health, const glm::vec3& offset, const glm::vec3& additional_size_scale) :ShipSystemShields(_ship, map, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, offset, additional_size_scale) {
 
 }
-ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, const float aft, const float prt, const float sbd, const float dsl, const float vnt) :ShipSystem(ShipSystemType::Shields, _ship){
+ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, const float aft, const float prt, const float sbd, const float dsl, const float vnt, const glm::vec3& offset, const glm::vec3& additional_size_scale) :ShipSystem(ShipSystemType::Shields, _ship){
     m_ShieldEntity = map.createEntity();
+    m_ShieldsOffset = offset;
+    m_AdditionalShieldScale = additional_size_scale;
     auto& model = *m_ShieldEntity.addComponent<ComponentModel>(ResourceManifest::ShieldMesh, ResourceManifest::ShieldMaterial, ResourceManifest::shieldsShaderProgram, RenderStage::ForwardParticles);
     auto& logic = *m_ShieldEntity.addComponent<ComponentLogic>(ShipSystemShieldsFunctor());
 
@@ -192,7 +194,8 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, con
     //m_RechargeActivation = 5.0f;
     m_RechargeTimer = 0.0f;
 
-    const auto shieldScale = m_Ship.getComponent<ComponentModel>()->boundingBox() * SHIELD_SCALE_FACTOR;
+    auto shieldScale = m_Ship.getComponent<ComponentModel>()->boundingBox() * SHIELD_SCALE_FACTOR;
+    shieldScale *= m_AdditionalShieldScale;
 
     auto& btBody = const_cast<btRigidBody&>(shieldBody.getBtBody());
     shieldBody.addCollisionFlag(CollisionFlag::NoContactResponse);
@@ -268,7 +271,7 @@ void ShipSystemShields::update(const double& dt) {
     auto shipBodyRot = shipBody.rotation();
 
     shieldBody.setRotation(shipBodyRot);
-    shieldBody.setPosition(shipBody.position() + Math::rotate_vec3(shipBodyRot, shieldModel.getModel(0).position()));
+    shieldBody.setPosition(shipBody.position() + Math::rotate_vec3(shipBodyRot, shieldModel.getModel(0).position() + m_ShieldsOffset));
     
     bool shown = false;
     const float fdt = static_cast<float>(dt);
@@ -306,6 +309,9 @@ void ShipSystemShields::update(const double& dt) {
 
     ShipSystem::update(dt);
 }
+const glm::vec3& ShipSystemShields::getAdditionalShieldSizeScale() const {
+    return m_AdditionalShieldScale;
+}
 ShipSystemShields::ShieldSide::Side ShipSystemShields::getImpactSide(const glm::vec3& impactLocationLocal) {
     const auto& rot = m_Ship.getRotation();
     for (uint i = 0; i < m_Pyramids.size(); ++i) {
@@ -331,6 +337,7 @@ const string ShipSystemShields::getImpactSideString(const ShieldSide::Side side)
         return "Ventral";
     if (side == ShieldSide::Side::Err)
         return "Error";
+    return "Error";
 }
 
 void ShipSystemShields::addShieldImpact(const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime) {

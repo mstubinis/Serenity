@@ -17,6 +17,7 @@
 #include "../../ships/shipSystems/ShipSystemYawThrusters.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
+#include "../../ai/AI.h"
 
 using namespace std;
 
@@ -53,13 +54,13 @@ Defiant::Defiant(const AIType::Type ai_type, Team& team, Client& client, Map& ma
     auto* rightTorp = new QuantumTorpedo(_this, map, glm::vec3(0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
     auto* aftTorp = new PhotonTorpedo(_this, map, glm::vec3(0.0f, 0.019991f, 1.04274f), glm::vec3(0, 0, 1), 15.0f);
 
-    weapons.addPrimaryWeaponCannon(*leftTop);
-    weapons.addPrimaryWeaponCannon(*leftBottom);
-    weapons.addPrimaryWeaponCannon(*rightBottom);
-    weapons.addPrimaryWeaponCannon(*rightTop);
+    weapons.addPrimaryWeaponCannon(*leftTop, true);
+    weapons.addPrimaryWeaponCannon(*leftBottom, true);
+    weapons.addPrimaryWeaponCannon(*rightBottom, true);
+    weapons.addPrimaryWeaponCannon(*rightTop, true);
 
-    weapons.addSecondaryWeaponTorpedo(*leftTorp);
-    weapons.addSecondaryWeaponTorpedo(*rightTorp);
+    weapons.addSecondaryWeaponTorpedo(*leftTorp, true);
+    weapons.addSecondaryWeaponTorpedo(*rightTorp, true);
     weapons.addSecondaryWeaponTorpedo(*aftTorp);
 
     //phasers
@@ -115,6 +116,8 @@ Defiant::Defiant(const AIType::Type ai_type, Team& team, Client& client, Map& ma
         glm::vec3(0.118821f,0.026626f, -0.201665f),
     };
     addHullTargetPoints(hull_target_points);
+
+    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
 }
 Defiant::~Defiant() {
 

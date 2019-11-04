@@ -10,8 +10,10 @@
 class Helper {
     public:
         static std::vector<std::string> SeparateStringByCharacter(const std::string& str, const char character) {
-            std::stringstream ss(str);
             std::vector<std::string> result;
+            if (str.empty())
+                return result;
+            std::stringstream ss(str);
             while (ss.good()) {
                 std::string substr;
                 std::getline(ss, substr, ',');

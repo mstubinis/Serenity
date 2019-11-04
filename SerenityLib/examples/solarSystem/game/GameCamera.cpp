@@ -213,16 +213,20 @@ void GameCamera::setState(const CameraState::State& new_state){
     }else if (new_state == CameraState::Cockpit) {
         map.centerSceneToObject(m_Player->entity());
     }else if (new_state == CameraState::FollowTarget) {
-        if (!m_Target || (m_Target && m_Target == m_Player)) {
-            m_State = CameraState::Cockpit;
-            return;
-        }
         auto* ship = dynamic_cast<Ship*>(m_Player);
         if (ship) {
             auto* sensors = static_cast<ShipSystemSensors*>(ship->getShipSystem(ShipSystemType::Sensors));
             auto* target = sensors->getTarget();
             if (target) {
                 m_Target = target;
+            }else{
+                m_Target = m_Player;
+                if (old_state == CameraState::FollowTarget) {
+                    m_State = CameraState::Cockpit;
+                }else{
+                    m_State = old_state;
+                }
+                return;
             }
         }
         map.centerSceneToObject(m_Player->entity());
@@ -231,6 +235,23 @@ void GameCamera::setState(const CameraState::State& new_state){
 void GameCamera::setTarget(EntityWrapper* target) {
     m_Target = target; 
     setState(m_State);
+}
+void GameCamera::setTarget(const string& targetName) {
+    if (targetName.empty()) {
+        setTarget(nullptr);
+    }
+    //if (m_Player) {
+        Map& map = static_cast<Map&>(m_Player->entity().scene());
+        for (auto& entity : map.m_Objects) {
+            auto* componentName = entity->getComponent<ComponentName>();
+            if (componentName) {
+                if (componentName->name() == targetName) {
+                    setTarget(entity);
+                    return;
+                }
+            }
+        }
+    //}
 }
 void GameCamera::setPlayer(EntityWrapper* player) {
     m_Player = player;

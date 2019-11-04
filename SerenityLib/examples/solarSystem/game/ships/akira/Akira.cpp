@@ -15,6 +15,7 @@
 #include "../../ships/shipSystems/ShipSystemYawThrusters.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
+#include "../../ai/AI.h"
 
 using namespace std;
 
@@ -64,14 +65,14 @@ Akira::Akira(const AIType::Type ai_type, Team& team, Client& client, Map& map, c
     auto* aft_torp_6 = new PhotonTorpedo(_this, map, glm::vec3(0.118947f, 0.503108f, 0.860294f), glm::vec3(0.26491f, 0, 0.318563f), 20.0f);
 
 
-    weapons.addSecondaryWeaponTorpedo(*top_torp_1);
-    weapons.addSecondaryWeaponTorpedo(*top_torp_2);
-    weapons.addSecondaryWeaponTorpedo(*top_torp_3);
-    weapons.addSecondaryWeaponTorpedo(*top_torp_4);
-    weapons.addSecondaryWeaponTorpedo(*top_torp_5);
-    weapons.addSecondaryWeaponTorpedo(*top_torp_6);
-    weapons.addSecondaryWeaponTorpedo(*top_torp_7);
-    weapons.addSecondaryWeaponTorpedo(*ventral_torp_8);
+    weapons.addSecondaryWeaponTorpedo(*top_torp_1, true);
+    weapons.addSecondaryWeaponTorpedo(*top_torp_2, true);
+    weapons.addSecondaryWeaponTorpedo(*top_torp_3, true);
+    weapons.addSecondaryWeaponTorpedo(*top_torp_4, true);
+    weapons.addSecondaryWeaponTorpedo(*top_torp_5, true);
+    weapons.addSecondaryWeaponTorpedo(*top_torp_6, true);
+    weapons.addSecondaryWeaponTorpedo(*top_torp_7, true);
+    weapons.addSecondaryWeaponTorpedo(*ventral_torp_8, true);
 
     weapons.addSecondaryWeaponTorpedo(*left_torp_1);
     weapons.addSecondaryWeaponTorpedo(*left_torp_2);
@@ -125,9 +126,9 @@ Akira::Akira(const AIType::Type ai_type, Team& team, Client& client, Map& map, c
     auto* top_front_right_beam = new PhaserBeam(_this, map, top_front_right[2], glm::vec3(0.24479f, 0.249497f, -0.342036f), 40.0f, top_front_right);
 
     weapons.addPrimaryWeaponBeam(*top_left_left_beam);
-    weapons.addPrimaryWeaponBeam(*top_front_left_beam);
+    weapons.addPrimaryWeaponBeam(*top_front_left_beam, true);
     weapons.addPrimaryWeaponBeam(*top_right_right_beam);
-    weapons.addPrimaryWeaponBeam(*top_front_right_beam);
+    weapons.addPrimaryWeaponBeam(*top_front_right_beam, true);
 
     //bottom phasers
     vector<glm::vec3> bottom_left{
@@ -146,8 +147,8 @@ Akira::Akira(const AIType::Type ai_type, Team& team, Client& client, Map& map, c
     };
     auto* btm_left_left_beam = new PhaserBeam(_this, map, bottom_left[2], glm::vec3(0.301313f, -0.353465f, -0.197012f), 60.0f, bottom_left);
     auto* btm_front_left_beam = new PhaserBeam(_this, map, bottom_right[2], glm::vec3(-0.301313f, -0.353465f, -0.197012f), 60.0f, bottom_right);
-    weapons.addPrimaryWeaponBeam(*btm_left_left_beam);
-    weapons.addPrimaryWeaponBeam(*btm_front_left_beam);
+    weapons.addPrimaryWeaponBeam(*btm_left_left_beam, true);
+    weapons.addPrimaryWeaponBeam(*btm_front_left_beam, true);
 
     //TODO: fill this info for the rest of the ships
     //random hull target points
@@ -164,6 +165,8 @@ Akira::Akira(const AIType::Type ai_type, Team& team, Client& client, Map& map, c
         glm::vec3(0.0f, 0.455842f, -0.487045f),
     };
     addHullTargetPoints(hull_target_points);
+
+    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
 }
 Akira::~Akira() {
 

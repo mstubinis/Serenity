@@ -44,6 +44,7 @@ struct PlasmaCannonCollisionFunctor final { void operator()(ComponentBody& owner
                         }
                     }
                     if (hull && other.getUserPointer() == hull) {
+                        /*
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                             if (shields->getHealthCurrent(shieldSide) > 0) {
@@ -51,6 +52,7 @@ struct PlasmaCannonCollisionFunctor final { void operator()(ComponentBody& owner
                                 return;
                             }
                         }
+                        */
                         cannonProjectile.clientToServerImpact(weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, false);
                     }
                 }
@@ -129,7 +131,7 @@ struct PlasmaCannonTailInstanceUnbindFunctor {void operator()(EngineResource* r)
 }};
 
 
-PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map, final_world_position, forward, index) {
+PlasmaCannonProjectile::PlasmaCannonProjectile(EntityWrapper* target, PlasmaCannon& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : PrimaryWeaponCannonProjectile(map, final_world_position, forward, index) {
     EntityDataRequest request(entity);
 
     auto& model = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless, ShaderProgram::Forward, RenderStage::ForwardParticles);
@@ -159,7 +161,9 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
     active = true;
     auto& shipBody = *source.ship.getComponent<ComponentBody>();
 
-    auto finalPosition = final_world_position + Math::rotate_vec3(shipBody.rotation(), glm_vec3(0, 0, -model.getModel().mesh()->getRadiusBox().z));
+    const auto world_space_dir = Math::rotate_vec3(shipBody.rotation(), forward);
+    const auto size = static_cast<decimal>(model.getModel().mesh()->getRadiusBox().z);
+    auto finalPosition = final_world_position + (world_space_dir * size);
 
     auto& sph = *static_cast<btBoxShape*>(cannonBody.getCollision()->getBtShape());
     sph.setMargin(0.01f);
@@ -175,7 +179,7 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(PlasmaCannon& source, Map& map, c
     cannonBody.setLinearVelocity(shipLinVel, false);
     cannonBody.setAngularVelocity(shipAngVel, false);
 
-    auto data = source.calculatePredictedVector(cannonBody, chosen_target_pos);
+    auto data = source.calculatePredictedVector(target, cannonBody, chosen_target_pos);
     auto offset = data.pedictedVector;
     glm_quat q;
     Math::alignTo(q, -offset);

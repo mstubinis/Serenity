@@ -91,14 +91,14 @@ struct PhaserBeamInstanceUnbindFunctor { void operator()(EngineResource* r) cons
     //glDepthMask(GL_FALSE);
 }};
 
-PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges,const float& _rechargeTimePerRound, const unsigned int& _modelIndex) : PrimaryWeaponBeam(WeaponType::PhaserBeam, ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime, _modelIndex){
+PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges,const float& _rechargeTimePerRound, const unsigned int& _modelIndex, const float& endpointExtraScale, const float& beamSizeExtraScale, const float& RangeInKM) : PrimaryWeaponBeam(WeaponType::PhaserBeam, ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime, _modelIndex, endpointExtraScale, beamSizeExtraScale, RangeInKM){
     firstWindupGraphic = map.createEntity();
     secondWindupGraphic = map.createEntity();
 
     auto* model = beamGraphic.addComponent<ComponentModel>(ResourceManifest::PhaserBeamMesh, ResourceManifest::PhaserBeamMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& beamModel1 = model->getModel(0);
     beamModel1.hide();
-    beamModel1.setScale(0.095f);
+    beamModel1.setScale(0.095f * additionalBeamSizeScale);
 
     auto& firstWindupBody = *firstWindupGraphic.addComponent<ComponentBody>();
     auto& secondWindupBody = *secondWindupGraphic.addComponent<ComponentBody>();
@@ -108,8 +108,8 @@ PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
     auto& firstModel = firstWindupModel.getModel();
     auto& secondModel = secondWindupModel.getModel();
 
-    firstModel.setScale(0.095f);
-    secondModel.setScale(0.095f);
+    firstModel.setScale(0.095f * additionalEndPointScale);
+    secondModel.setScale(0.095f * additionalEndPointScale);
 
     const auto photonOrange = glm::vec4(1.0f, 0.55f, 0.0f, 1.0f);
     const auto photonYellow = glm::vec4(1.0f, 0.85f, 0.0f, 1.0f);
@@ -162,7 +162,6 @@ PhaserBeam::~PhaserBeam() {
     SAFE_DELETE(secondWindupLight);
 }
 const bool PhaserBeam::fire(const double& dt, const glm_vec3& chosen_target_pt) {
-    auto* target = ship.getTarget();
     auto res2 = isInArc(target, arc);
     targetCoordinates = chosen_target_pt;
     if (res2) {
@@ -173,7 +172,7 @@ const bool PhaserBeam::fire(const double& dt, const glm_vec3& chosen_target_pt) 
         const auto launcherPosition = shipPosition + (shipRotation * position);
         const auto distSquared = glm::distance2(launcherPosition, targetBody.position());
 
-        if (distSquared < 100 * 100) { //100 * 100 should be 10 KM
+        if (distSquared < rangeInKMSquared) {
             const auto res = PrimaryWeaponBeam::fire(dt, chosen_target_pt);
             if (res) {
                 return forceFire(dt);
@@ -192,7 +191,7 @@ const bool PhaserBeam::forceFire(const double& dt) {
         if (soundEffect) {
             soundEffect->setVolume(volume);
             soundEffect->setPosition(finalPosition);
-            soundEffect->setAttenuation(0.1f);
+            soundEffect->setAttenuation(0.8f);
         }
         state = BeamWeaponState::JustStarted;
         return true;
@@ -272,7 +271,6 @@ void PhaserBeam::update(const double& dt) {
     }
     else if (state == BeamWeaponState::Firing) {
         #pragma region Firing
-        auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
         const glm::vec3 tgt = glm::vec3(targetBody.position()) + targetCoordinates;
 
@@ -284,8 +282,7 @@ void PhaserBeam::update(const double& dt) {
         const auto shipPosition = ship.getPosition();
         if (windupPoints.size() == 1) {
             firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
-        }
-        else {
+        }else{
             const auto halfCharge = chargeTimer * 0.5f;
             firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
             secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
@@ -403,7 +400,6 @@ void PhaserBeam::update(const double& dt) {
     }
     else if (state == BeamWeaponState::CoolingDown) {
         #pragma region CoolingDown
-        auto* target = ship.getTarget();
         auto& targetBody = *target->getComponent<ComponentBody>();
         const auto tgt = glm::vec3(targetBody.position()) + targetCoordinates;
 
@@ -421,8 +417,7 @@ void PhaserBeam::update(const double& dt) {
         const auto shipPosition = ship.getPosition();
         if (windupPoints.size() == 1) {
             firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
-        }
-        else {
+        }else{
             const auto halfCharge = chargeTimer * 0.5f;
             firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Engine::Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
             secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Engine::Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));

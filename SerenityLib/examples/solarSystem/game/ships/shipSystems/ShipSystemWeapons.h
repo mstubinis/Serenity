@@ -18,6 +18,7 @@ class  RodLight;
 class  Map;
 class  Ship;
 class  Client;
+struct DetectedShip;
 
 struct ShipWeapon {
     Map&             m_Map;
@@ -25,8 +26,8 @@ struct ShipWeapon {
     WeaponType::Type type;
     Ship&            ship;
     float            arc;
-    glm_vec3        position; //relative to the ship's model center
-    glm_vec3        forward;
+    glm_vec3         position; //relative to the ship's model center
+    glm_vec3         forward;
     float            volume;
     float            damage;
     float            impactRadius;
@@ -54,8 +55,12 @@ struct ShipWeapon {
         const float& _rechargeTimerPerRound,
         const unsigned int& _modelIndex
     );
-
+    const glm_vec3 getWorldPosition();
+    const decimal getDistanceSquared(const glm_vec3&);
+    const decimal getDistanceSquared(DetectedShip& ship);
+    const decimal getDistanceSquared(EntityWrapper* target);
     const bool isInArc(EntityWrapper* target, const float _arc);
+    const bool isInArc(const glm_vec3& world_position, const float _arc);
 };
 
 struct PrimaryWeaponCannonPrediction final {
@@ -106,8 +111,8 @@ struct PrimaryWeaponCannon : public ShipWeapon {
     virtual const bool isInControlledArc(EntityWrapper* target);
 
     virtual const int canFire();
-    const bool forceFire(const int index, const glm_vec3& chosen_target_pos);
-    virtual const PrimaryWeaponCannonPrediction calculatePredictedVector(ComponentBody& projectileBody, const glm_vec3& chosen_target_pos);
+    const bool forceFire(EntityWrapper* mytarget, const int index, const glm_vec3& chosen_target_pos);
+    virtual const PrimaryWeaponCannonPrediction calculatePredictedVector(EntityWrapper* mytarget, ComponentBody& projectileBody, const glm_vec3& chosen_target_pos);
     virtual void update(const double& dt);
 };
 
@@ -122,6 +127,7 @@ struct BeamWeaponState final {enum State {
 };};
 
 struct PrimaryWeaponBeam : public ShipWeapon {
+    EntityWrapper*           target;
     std::vector<glm::vec3>   windupPoints;
     float                    chargeTimer;
     float                    chargeTimerSpeed;
@@ -129,6 +135,9 @@ struct PrimaryWeaponBeam : public ShipWeapon {
     float                    firingTime;
     float                    firingTimeShieldGraphicPing;
     float                    firingTimeMax;
+    float                    additionalEndPointScale;
+    float                    additionalBeamSizeScale;
+    float                    rangeInKMSquared;
 
     Entity                   beamGraphic;
     Entity                   beamEndPointGraphic;
@@ -153,10 +162,15 @@ struct PrimaryWeaponBeam : public ShipWeapon {
         const float& _rechargeTimePerRound,
         const float& chargeTimerSpeed,
         const float& _firingTime,
-        const unsigned int& _modelIndex = 0
+        const unsigned int& _modelIndex = 0,
+        const float& endpointExtraScale = 1.0f,
+        const float& beamSizeExtraScale = 1.0f,
+        const float& RangeInKM = 10.0f
     );
     ~PrimaryWeaponBeam();
     const bool canFire();
+    void setTarget(EntityWrapper*);
+    EntityWrapper* getTarget();
     virtual const bool fire(const double& dt, const glm_vec3& chosen_target_pt);
     virtual const bool forceFire(const double& dt);
     virtual const glm_vec3 calculatePredictedVector();
@@ -222,18 +236,52 @@ struct SecondaryWeaponTorpedo : public ShipWeapon {
     virtual const bool isInControlledArc(EntityWrapper* target);
 
     virtual const int canFire();
-    const bool forceFire(const int index, const glm_vec3& chosen_target_pos);
-    virtual const SecondaryWeaponTorpedoPrediction calculatePredictedVector(ComponentBody& projectileBody, const glm_vec3& chosen_target_pos);
+    const bool forceFire(EntityWrapper* mytarget, const int index, const glm_vec3& chosen_target_pos);
+    virtual const SecondaryWeaponTorpedoPrediction calculatePredictedVector(EntityWrapper* mytarget, ComponentBody& projectileBody, const glm_vec3& chosen_target_pos);
     virtual void update(const double& dt);
 };
-
 
 class ShipSystemWeapons final : public ShipSystem {
     friend class Ship;
     private:
+
+        struct WeaponBeam final {
+            PrimaryWeaponBeam* beam;
+            unsigned int main_container_index;
+            WeaponBeam() {
+                beam = nullptr;
+                main_container_index = 0;
+            }
+        };
+        struct WeaponCannon final {
+            PrimaryWeaponCannon* cannon;
+            unsigned int main_container_index;
+            WeaponCannon() {
+                cannon = nullptr;
+                main_container_index = 0;
+            }
+        };
+        struct WeaponTorpedo final {
+            SecondaryWeaponTorpedo* torpedo;
+            unsigned int main_container_index;
+            WeaponTorpedo() {
+                torpedo = nullptr;
+                main_container_index = 0;
+            }
+        };
+
         std::vector<PrimaryWeaponCannon*>      m_PrimaryWeaponsCannons;
         std::vector<PrimaryWeaponBeam*>        m_PrimaryWeaponsBeams;
         std::vector<SecondaryWeaponTorpedo*>   m_SecondaryWeaponsTorpedos;
+
+
+        std::vector<WeaponCannon>              m_PrimaryWeaponsCannonsFwd;
+        std::vector<WeaponBeam>                m_PrimaryWeaponsBeamsFwd;
+        std::vector<WeaponTorpedo>             m_SecondaryWeaponsTorpedosFwd;
+
+        std::vector<WeaponCannon>              m_PrimaryWeaponsCannonsNonFwd;
+        std::vector<WeaponBeam>                m_PrimaryWeaponsBeamsNonFwd;
+        std::vector<WeaponTorpedo>             m_SecondaryWeaponsTorpedosNonFwd;
     public:
         ShipSystemWeapons(Ship&);
         ~ShipSystemWeapons();
@@ -243,13 +291,28 @@ class ShipSystemWeapons final : public ShipSystem {
         glm::vec3 cannonTargetPoint; //for random target spots on the hull / random subsystem targets
         glm::vec3 torpedoTargetPoint;//for random target spots on the hull / random subsystem targets
 
-        void addPrimaryWeaponBeam(PrimaryWeaponBeam&);
-        void addPrimaryWeaponCannon(PrimaryWeaponCannon&);
-        void addSecondaryWeaponTorpedo(SecondaryWeaponTorpedo&);
+
+        void addPrimaryWeaponBeam(PrimaryWeaponBeam&, const bool isForwardWeapon = false);
+        void addPrimaryWeaponCannon(PrimaryWeaponCannon&, const bool isForwardWeapon = false);
+        void addSecondaryWeaponTorpedo(SecondaryWeaponTorpedo&, const bool isForwardWeapon = false);
 
         PrimaryWeaponBeam& getPrimaryWeaponBeam(const uint index);
         PrimaryWeaponCannon& getPrimaryWeaponCannon(const uint index);
         SecondaryWeaponTorpedo& getSecondaryWeaponTorpedo(const uint index);
+
+        std::vector<PrimaryWeaponCannon*>& getCannons();
+        std::vector<PrimaryWeaponBeam*>& getBeams();
+        std::vector<SecondaryWeaponTorpedo*>& getTorpedos();
+
+
+        std::vector<WeaponCannon>& getForwardCannons();
+        std::vector<WeaponBeam>& getForwardBeams();
+        std::vector<WeaponTorpedo>& getForwardTorpedos();
+
+        std::vector<WeaponCannon>& getNonForwardCannons();
+        std::vector<WeaponBeam>& getNonForwardBeams();
+        std::vector<WeaponTorpedo>& getNonForwardTorpedos();
+
 
         void update(const double& dt);
 };

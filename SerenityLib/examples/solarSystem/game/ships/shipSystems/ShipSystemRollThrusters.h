@@ -6,8 +6,10 @@
 
 class ShipSystemRollThrusters final : public ShipSystem {
     friend class Ship;
+    private:
+        float m_AdditionalStrength;
     public:
-        ShipSystemRollThrusters(Ship&);
+        ShipSystemRollThrusters(Ship&, const float additional_strength = 1.0f);
         ~ShipSystemRollThrusters();
 
         void update(const double& dt);

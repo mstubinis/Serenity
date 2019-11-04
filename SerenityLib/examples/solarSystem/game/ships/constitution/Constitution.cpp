@@ -15,6 +15,7 @@
 #include "../../ships/shipSystems/ShipSystemYawThrusters.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
+#include "../../ai/AI.h"
 
 using namespace std;
 
@@ -42,8 +43,8 @@ Constitution::Constitution(const AIType::Type ai_type, Team& team, Client& clien
     auto* leftTorp = new PhotonTorpedoOld(_this, map, glm::vec3(-0.033864f, -0.129594f, -0.664163f), glm::vec3(0, 0, -1), 15.0f, 2);
     auto* rightTorp = new PhotonTorpedoOld(_this, map, glm::vec3(0.033864f, -0.129594f, -0.664163f), glm::vec3(0, 0, -1), 15.0f, 2);
 
-    weapons.addSecondaryWeaponTorpedo(*leftTorp);
-    weapons.addSecondaryWeaponTorpedo(*rightTorp);
+    weapons.addSecondaryWeaponTorpedo(*leftTorp, true);
+    weapons.addSecondaryWeaponTorpedo(*rightTorp, true);
 
     vector<glm::vec3> top_center_left_beam{ glm::vec3(-0.014609f, 0.303966f, -1.82334f) };
     vector<glm::vec3> top_center_right_beam{ glm::vec3(0.014609f, 0.303966f, -1.82334f) };
@@ -81,20 +82,22 @@ Constitution::Constitution(const AIType::Type ai_type, Team& team, Client& clien
     auto* btm_right_left_phaser = new PhaserBeam(_this, map, btm_right_left_beam[0], glm::vec3(-0.286489f, -0.219888f, 0.0f), 35.0f, btm_right_left_beam);
     auto* btm_right_right_phaser = new PhaserBeam(_this, map, btm_right_right_beam[0], glm::vec3(-0.286489f, -0.219888f, 0.0f), 35.0f, btm_right_right_beam);
 
-    weapons.addPrimaryWeaponBeam(*top_center_left_phaser);
-    weapons.addPrimaryWeaponBeam(*top_center_right_phaser);
+    weapons.addPrimaryWeaponBeam(*top_center_left_phaser, true);
+    weapons.addPrimaryWeaponBeam(*top_center_right_phaser, true);
     weapons.addPrimaryWeaponBeam(*top_left_left_phaser);
     weapons.addPrimaryWeaponBeam(*top_left_right_phaser);
     weapons.addPrimaryWeaponBeam(*top_right_left_phaser);
     weapons.addPrimaryWeaponBeam(*top_right_right_phaser);
     weapons.addPrimaryWeaponBeam(*aft_left_phaser);
     weapons.addPrimaryWeaponBeam(*aft_right_phaser);
-    weapons.addPrimaryWeaponBeam(*btm_center_left_phaser);
-    weapons.addPrimaryWeaponBeam(*btm_center_right_phaser);
+    weapons.addPrimaryWeaponBeam(*btm_center_left_phaser, true);
+    weapons.addPrimaryWeaponBeam(*btm_center_right_phaser, true);
     weapons.addPrimaryWeaponBeam(*btm_left_left_phaser);
     weapons.addPrimaryWeaponBeam(*btm_left_right_phaser);
     weapons.addPrimaryWeaponBeam(*btm_right_left_phaser);
     weapons.addPrimaryWeaponBeam(*btm_right_right_phaser);
+
+    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
 
 }
 Constitution::~Constitution() {

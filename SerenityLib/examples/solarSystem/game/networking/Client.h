@@ -18,6 +18,7 @@ class  ShipSystemSensors;
 class  SensorStatusDisplay;
 class  GameplayMode;
 class  Team;
+class  FireAtWill;
 class Client{
     friend class  Server;
     friend class  Menu;
@@ -25,6 +26,7 @@ class Client{
     friend class  Core;
     friend class  ShipSystemSensors;
     friend class  SensorStatusDisplay;
+    friend class  FireAtWill;
     private:
         GameplayMode&                         m_GameplayMode;
         Team*                                 m_Team;

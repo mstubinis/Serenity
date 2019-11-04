@@ -124,7 +124,7 @@ void SensorStatusDisplay::render() {
     const auto& myPos = ship.getComponent<ComponentBody>()->position();
     auto* myTarget = ship.getTarget();
     for (auto& other_ship_ptr : m_Sensors->getShips()) {
-        auto& other_ship = *other_ship_ptr;
+        Ship& other_ship = *other_ship_ptr.ship;
         glm::vec4 color;
         if (ship.isEnemy(other_ship)) {
             color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); //red (enemy)

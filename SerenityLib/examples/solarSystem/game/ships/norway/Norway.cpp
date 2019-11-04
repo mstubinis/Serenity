@@ -15,6 +15,7 @@
 #include "../../ships/shipSystems/ShipSystemYawThrusters.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
+#include "../../ai/AI.h"
 
 using namespace std;
 
@@ -70,6 +71,8 @@ Norway::Norway(const AIType::Type ai_type, Team& team, Client& client, Map& map,
         glm::vec3(0.181716f,-0.013666f, -0.943106f),
     };
     addHullTargetPoints(hull_target_points);
+
+    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
 }
 Norway::~Norway() {
 

@@ -341,10 +341,12 @@ void Client::onReceiveTCP() {
                         auto* ship = ships.at(pI.name);
                         const auto chosen_target_position = glm::vec3(pI.r, pI.g, pI.b);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                        for (uint i = 0; i < info.size() / 2; ++i) {
-                            auto& cannon = ship->getPrimaryWeaponCannon(stoi(info[i * 2]));
-                            const auto projectile_index = stoi(info[(i * 2) + 1]);
-                            const bool success = cannon.forceFire(projectile_index, chosen_target_position);
+                        for (uint i = 0; i < info.size() / 3; ++i) {
+                            auto& cannon = ship->getPrimaryWeaponCannon(stoi(info[i * 3]));
+                            const auto projectile_index = stoi(info[(i * 3) + 1]);
+                            const auto target_name = info[(i * 3) + 2];
+                            auto* mytarget = map.getEntityFromName(target_name);
+                            const bool success = cannon.forceFire(mytarget, projectile_index, chosen_target_position);
                         }
                     }
                     break;
@@ -355,21 +357,13 @@ void Client::onReceiveTCP() {
                     if (map.hasShip(pI.name)) {
                         auto* ship = ships.at(pI.name);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                        for (uint i = 0; i < info.size() / 3; ++i) {
-                            auto& beam = ship->getPrimaryWeaponBeam(stoi(info[i * 3]));
-                            const auto projectile_index = stoi(info[(i * 3) + 1]);
-                            const auto chosen_impact_pt_index = stoi(info[(i * 3) + 2]);
+                        for (uint i = 0; i < info.size() / 2; ++i) {
+                            auto& beam                        = ship->getPrimaryWeaponBeam(stoi(info[i * 2]));
+                            const auto target_name            =      info[(i * 2) + 1];
 
-                            auto* mytarget = ship->getTarget();
-                            glm::vec3 chosen_impact_pt;
-                            if (mytarget) {
-                                Ship* tgtship = dynamic_cast<Ship*>(mytarget);
-                                if (tgtship) {
-                                    chosen_impact_pt = tgtship->getAimPositionLocal(chosen_impact_pt_index);
-                                }else{
-                                    chosen_impact_pt = glm::vec3(0.0f);
-                                }
-                            }
+                            beam.setTarget(map.getEntityFromName(target_name));
+                            auto* mytarget = beam.getTarget();
+                            glm::vec3 chosen_impact_pt = glm::vec3(pI.r, pI.g, pI.b);
                             beam.fire(0.0f, chosen_impact_pt);
                         }
                     }
@@ -382,10 +376,12 @@ void Client::onReceiveTCP() {
                         auto* ship = ships.at(pI.name);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
                         const auto chosen_target_position = glm::vec3(pI.r, pI.g, pI.b);
-                        for (uint i = 0; i < info.size() / 2; ++i) {
-                            auto& torpedo = ship->getSecondaryWeaponTorpedo(stoi(info[i * 2]));
-                            const auto projectile_index = stoi(info[(i * 2) + 1]);
-                            const bool success = torpedo.forceFire(projectile_index, chosen_target_position);
+                        for (uint i = 0; i < info.size() / 3; ++i) {
+                            auto& torpedo               = ship->getSecondaryWeaponTorpedo(stoi(info[i * 3]));
+                            const auto projectile_index = stoi(info[(i * 3) + 1]);
+                            const auto target_name      = info[(i * 3) + 2];
+                            auto* mytarget              = map.getEntityFromName(target_name);
+                            const bool success = torpedo.forceFire(mytarget, projectile_index, chosen_target_position);
                         }
                     }
                     break;
@@ -395,7 +391,6 @@ void Client::onReceiveTCP() {
                     auto& ships = map.getShips();
                     if (map.hasShip(pI.name)) {
                         ships[pI.name]->setTarget(pI.data, false);
-                        std::cout << pI.name << ": " << "changing target to: " << pI.data << "\n";
                     }
                     break;
                 }case PacketType::Server_To_Client_Anchor_Creation_Deep_Space_Initial: {
@@ -447,31 +442,6 @@ void Client::onReceiveTCP() {
                         ship.updateCloakFromPacket(pI);
                     }
                     break;
-                /*}case PacketType::Server_To_Client_Ship_Physics_Update: {
-                    if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
-                        PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(basePacket);
-                        auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
-
-                        auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                        TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(info[2]));
-                        auto& playername = info[1];
-                        auto& shipclass = info[0];
-                        auto& ships = map.getShips();
-
-                        Ship* ship = nullptr;
-                        if (ships.size() == 0 || !ships.count(playername)) {
-                            auto spawnPosition = map.getSpawnAnchor()->getPosition();
-                            auto x = Helper::GetRandomFloatFromTo(-400, 400);
-                            auto y = Helper::GetRandomFloatFromTo(-400, 400);
-                            auto z = Helper::GetRandomFloatFromTo(-400, 400);
-                            auto randOffsetForSafety = glm_vec3(x, y, z);
-                            ship = map.createShip(AIType::Player_Other ,*m_GameplayMode.getTeams().at(teamNumber), *this, shipclass, playername, spawnPosition + randOffsetForSafety);
-                        }else{
-                            ship = ships.at(playername);
-                        }
-                        ship->updatePhysicsFromPacket(pI, map, info);
-                    }
-                    break;*/
                 }case PacketType::Server_To_Client_New_Client_Entered_Map: {
                     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
                     

@@ -4,8 +4,8 @@
 
 #include <core/engine/events/Engine_Events.h>
 
-ShipSystemYawThrusters::ShipSystemYawThrusters(Ship& _ship) :ShipSystem(ShipSystemType::ThrustersYaw, _ship) {
-
+ShipSystemYawThrusters::ShipSystemYawThrusters(Ship& _ship, const float additional_strength) :ShipSystem(ShipSystemType::ThrustersYaw, _ship) {
+    m_AdditionalStrength = additional_strength;
 }
 ShipSystemYawThrusters::~ShipSystemYawThrusters() {
 
@@ -19,7 +19,7 @@ void ShipSystemYawThrusters::update(const double& dt) {
                 m_Ship.m_MouseFactor.x += diff * 0.00065;
                 const auto massFactor = 1.0f / (rigidbody.mass() * 5.0f);
                 const auto amount = m_Ship.m_MouseFactor.x * massFactor;
-                rigidbody.applyTorque(0, amount, 0);
+                rigidbody.applyTorque(0, static_cast<decimal>(amount) * static_cast<decimal>(m_AdditionalStrength), 0);
                 const auto step = (1.0 - dt);
                 m_Ship.m_MouseFactor.x *= (step * step);
             }

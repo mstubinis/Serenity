@@ -1478,7 +1478,8 @@ class epriv::RenderManager::impl final{
             }
         }
         void _renderSunLight(Camera& c, SunLight& s) {
-            if (!s.isActive()) return;
+            if (!s.isActive())
+                return;
             auto& body = *s.getComponent<ComponentBody>();
             const auto pos = glm::vec3(body.position());
             Renderer::sendUniform4("light.DataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, 0.0f);
@@ -1489,11 +1490,13 @@ class epriv::RenderManager::impl final{
             Renderer::renderFullscreenTriangle();
         }
         void _renderPointLight(Camera& c, PointLight& p) {
-            if (!p.isActive()) return;
+            if (!p.isActive()) 
+                return;
             auto& body = *p.getComponent<ComponentBody>();
             const auto pos = glm::vec3(body.position());
             const auto factor = 1100.0f * p.m_CullingRadius;
-            if ((!c.sphereIntersectTest(pos, p.m_CullingRadius)) || (c.getDistanceSquared(pos) > factor * factor))
+            const auto distSq = static_cast<float>(c.getDistanceSquared(pos));
+            if ((!c.sphereIntersectTest(pos, p.m_CullingRadius)) || (distSq > factor * factor))
                 return;
             Renderer::sendUniform4("light.DataA", p.m_AmbientIntensity, p.m_DiffuseIntensity, p.m_SpecularIntensity, 0.0f);
             Renderer::sendUniform4("light.DataB", 0.0f, 0.0f, p.m_C, p.m_L);
@@ -1507,7 +1510,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", m_UBOCameraData.ViewProj);
 
-            if (c.getDistanceSquared(pos) <= (p.m_CullingRadius * p.m_CullingRadius)) { //inside the light volume
+            if (distSq <= (p.m_CullingRadius * p.m_CullingRadius)) { //inside the light volume
                 Renderer::cullFace(GL_FRONT);
             }else{
                 Renderer::cullFace(GL_BACK);
@@ -1520,7 +1523,8 @@ class epriv::RenderManager::impl final{
             Renderer::cullFace(GL_BACK);
         }
         void _renderDirectionalLight(Camera& c, DirectionalLight& d) {
-            if (!d.isActive()) return;
+            if (!d.isActive()) 
+                return;
             auto& body = *d.getComponent<ComponentBody>();
             const auto _forward = glm::vec3(body.forward());
             Renderer::sendUniform4("light.DataA", d.m_AmbientIntensity, d.m_DiffuseIntensity, d.m_SpecularIntensity, _forward.x);
@@ -1530,12 +1534,14 @@ class epriv::RenderManager::impl final{
             Renderer::renderFullscreenTriangle();
         }
         void _renderSpotLight(Camera& c, SpotLight& s) {
-            if (!s.isActive()) return;
+            if (!s.isActive()) 
+                return;
             auto& body = *s.m_Entity.getComponent<ComponentBody>();
             auto pos = glm::vec3(body.position());
             auto _forward = glm::vec3(body.forward());
             const auto factor = 1100.0f * s.m_CullingRadius;
-            if (!c.sphereIntersectTest(pos, s.m_CullingRadius) || (c.getDistanceSquared(pos) > factor * factor))
+            const auto distSq = static_cast<float>(c.getDistanceSquared(pos));
+            if (!c.sphereIntersectTest(pos, s.m_CullingRadius) || (distSq > factor * factor))
                 return;
             Renderer::sendUniform4("light.DataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, _forward.x);
             Renderer::sendUniform4("light.DataB", _forward.y, _forward.z, s.m_C, s.m_L);
@@ -1550,7 +1556,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", m_UBOCameraData.ViewProj);
 
-            if (c.getDistanceSquared(pos) <= (s.m_CullingRadius * s.m_CullingRadius)) { //inside the light volume                                                 
+            if (distSq <= (s.m_CullingRadius * s.m_CullingRadius)) { //inside the light volume                                                 
                 Renderer::cullFace(GL_FRONT);
             }else{
                 Renderer::cullFace(GL_BACK);
@@ -1565,12 +1571,14 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
         }
         void _renderRodLight(Camera& c, RodLight& r) {
-            if (!r.isActive()) return;
+            if (!r.isActive()) 
+                return;
             auto& body = *r.m_Entity.getComponent<ComponentBody>();
             const auto pos = glm::vec3(body.position());
-            float cullingDistance = r.m_RodLength + (r.m_CullingRadius * 2.0f);
+            auto cullingDistance = r.m_RodLength + (r.m_CullingRadius * 2.0f);
             const auto factor = 1100.0f * cullingDistance;
-            if (!c.sphereIntersectTest(pos, cullingDistance) || (c.getDistanceSquared(pos) > factor * factor))
+            const auto distSq = static_cast<float>(c.getDistanceSquared(pos));
+            if (!c.sphereIntersectTest(pos, cullingDistance) || (distSq > factor * factor))
                 return;
             const float half = r.m_RodLength / 2.0f;
             const auto firstEndPt = pos + (glm::vec3(body.forward()) * half);
@@ -1587,7 +1595,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", m_UBOCameraData.ViewProj);
 
-            if (c.getDistanceSquared(pos) <= (cullingDistance * cullingDistance)) {
+            if (distSq <= (cullingDistance * cullingDistance)) {
                 Renderer::cullFace(GL_FRONT);
             }else{
                 Renderer::cullFace(GL_BACK);

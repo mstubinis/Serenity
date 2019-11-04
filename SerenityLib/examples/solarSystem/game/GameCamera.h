@@ -33,6 +33,7 @@ class GameCamera: public Camera{
         void setState(const CameraState::State&);
 
         void setPlayer(EntityWrapper*);
+        void setTarget(const std::string& targetName);
         void setTarget(EntityWrapper*);
         EntityWrapper* getTarget();
         const CameraState::State getState() const;

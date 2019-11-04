@@ -15,6 +15,7 @@
 #include "../../ships/shipSystems/ShipSystemYawThrusters.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
+#include "../../ai/AI.h"
 
 using namespace std;
 
@@ -44,8 +45,8 @@ Miranda::Miranda(const AIType::Type ai_type, Team& team, Client& client, Map& ma
     auto* aftTorpLeft = new PhotonTorpedoOld(_this, map, glm::vec3(-0.052569f, 0.306842f, 0.405438f), glm::vec3(0, 0, 1), 15.0f);
     auto* aftTorpRight = new PhotonTorpedoOld(_this, map, glm::vec3(0.052569f, 0.306842f, 0.405438f), glm::vec3(0, 0, 1), 15.0f);
 
-    weapons.addSecondaryWeaponTorpedo(*leftTorp);
-    weapons.addSecondaryWeaponTorpedo(*rightTorp);
+    weapons.addSecondaryWeaponTorpedo(*leftTorp, true);
+    weapons.addSecondaryWeaponTorpedo(*rightTorp, true);
     weapons.addSecondaryWeaponTorpedo(*aftTorpLeft);
     weapons.addSecondaryWeaponTorpedo(*aftTorpRight);
 
@@ -62,8 +63,8 @@ Miranda::Miranda(const AIType::Type ai_type, Team& team, Client& client, Map& ma
     auto* aft_pylon_left = new PhaserBeam(_this, map, aft_pylon_left_pts[0], glm::vec3(0, 0, 1), 10.0f, aft_pylon_left_pts);
     auto* aft_pylon_right = new PhaserBeam(_this, map, aft_pylon_right_pts[0], glm::vec3(0, 0, 1), 10.0f, aft_pylon_right_pts);
 
-    weapons.addPrimaryWeaponBeam(*front_pylon_left);
-    weapons.addPrimaryWeaponBeam(*front_pylon_right);
+    weapons.addPrimaryWeaponBeam(*front_pylon_left, true);
+    weapons.addPrimaryWeaponBeam(*front_pylon_right, true);
     weapons.addPrimaryWeaponBeam(*aft_pylon_left);
     weapons.addPrimaryWeaponBeam(*aft_pylon_right);
 
@@ -112,18 +113,20 @@ Miranda::Miranda(const AIType::Type ai_type, Team& team, Client& client, Map& ma
     auto* btm_right_beam_left = new PhaserBeam(_this, map, btm_right_left_pts[0], glm::vec3(0.221065f, -0.135797f, 0.0f), 35.0f, btm_right_left_pts);
     auto* btm_right_beam_right = new PhaserBeam(_this, map, btm_right_right_pts[0], glm::vec3(0.221065f, -0.135797f, 0.0f), 35.0f, btm_right_right_pts);
 
-    weapons.addPrimaryWeaponBeam(*top_front_beam_left);
-    weapons.addPrimaryWeaponBeam(*top_front_beam_right);
+    weapons.addPrimaryWeaponBeam(*top_front_beam_left, true);
+    weapons.addPrimaryWeaponBeam(*top_front_beam_right, true);
     weapons.addPrimaryWeaponBeam(*top_left_beam_left);
     weapons.addPrimaryWeaponBeam(*top_left_beam_right);
     weapons.addPrimaryWeaponBeam(*top_right_beam_left);
     weapons.addPrimaryWeaponBeam(*top_right_beam_right);
-    weapons.addPrimaryWeaponBeam(*btm_front_beam_left);
-    weapons.addPrimaryWeaponBeam(*btm_front_beam_right);
+    weapons.addPrimaryWeaponBeam(*btm_front_beam_left, true);
+    weapons.addPrimaryWeaponBeam(*btm_front_beam_right, true);
     weapons.addPrimaryWeaponBeam(*btm_left_beam_left);
     weapons.addPrimaryWeaponBeam(*btm_left_beam_right);
     weapons.addPrimaryWeaponBeam(*btm_right_beam_left);
     weapons.addPrimaryWeaponBeam(*btm_right_beam_right);
+
+    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
 }
 Miranda::~Miranda() {
 

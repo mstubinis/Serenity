@@ -15,6 +15,7 @@
 #include "../../ships/shipSystems/ShipSystemYawThrusters.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
+#include "../../ai/AI.h"
 
 using namespace std;
 
@@ -46,8 +47,8 @@ Intrepid::Intrepid(const AIType::Type ai_type, Team& team, Client& client, Map& 
     auto* aft_right_torp = new PhotonTorpedo(_this, map, glm::vec3(0.055742f, 0.289654f, 0.338158f), glm::vec3(0, 0, 1), 20.0f, 1);
     auto* aft_left_torp = new PhotonTorpedo(_this, map, glm::vec3(-0.055742f, 0.289654f, 0.338158f), glm::vec3(0, 0, 1), 20.0f, 1);
 
-    weapons.addSecondaryWeaponTorpedo(*front_left_torp);
-    weapons.addSecondaryWeaponTorpedo(*front_right_torp);
+    weapons.addSecondaryWeaponTorpedo(*front_left_torp, true);
+    weapons.addSecondaryWeaponTorpedo(*front_right_torp, true);
     weapons.addSecondaryWeaponTorpedo(*aft_left_torp);
     weapons.addSecondaryWeaponTorpedo(*aft_right_torp);
 
@@ -91,8 +92,8 @@ Intrepid::Intrepid(const AIType::Type ai_type, Team& team, Client& client, Map& 
     };
     auto* top_front_left_left = new PhaserBeam(_this, map, top_front_left_left_pts[2], glm::vec3(-0.18991f, 0.137347f, -0.011459f), 55.0f, top_front_left_left_pts);
     auto* top_front_right_right = new PhaserBeam(_this, map, top_front_right_right_pts[2], glm::vec3(0.18991f, 0.137347f, -0.011459f), 55.0f, top_front_right_right_pts);
-    weapons.addPrimaryWeaponBeam(*top_front_left_left);
-    weapons.addPrimaryWeaponBeam(*top_front_right_right);
+    weapons.addPrimaryWeaponBeam(*top_front_left_left, true);
+    weapons.addPrimaryWeaponBeam(*top_front_right_right, true);
 
     //top front left
     vector<glm::vec3> top_front_left_pts{
@@ -231,8 +232,8 @@ Intrepid::Intrepid(const AIType::Type ai_type, Team& team, Client& client, Map& 
 
     weapons.addPrimaryWeaponBeam(*ventral_top_left_left);
     weapons.addPrimaryWeaponBeam(*ventral_top_right_right);
-    weapons.addPrimaryWeaponBeam(*ventral_top_left);
-    weapons.addPrimaryWeaponBeam(*ventral_top_right);
+    weapons.addPrimaryWeaponBeam(*ventral_top_left, true);
+    weapons.addPrimaryWeaponBeam(*ventral_top_right, true);
 
 
     vector<glm::vec3> hull_target_points = {
@@ -282,6 +283,8 @@ Intrepid::Intrepid(const AIType::Type ai_type, Team& team, Client& client, Map& 
         glm::vec3(0.173718f,0.435077f, -0.557595f),
     };
     addHullTargetPoints(hull_target_points);
+
+    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
 }
 Intrepid::~Intrepid() {
 

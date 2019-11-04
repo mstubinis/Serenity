@@ -195,6 +195,7 @@
   <ItemGroup>
     <ClInclude Include="game\ai\AI.h" />
     <ClInclude Include="game\ai\AIIncludes.h" />
+    <ClInclude Include="game\ai\FireAtWill.h" />
     <ClInclude Include="game\Core.h" />
     <ClInclude Include="game\factions\Faction.h" />
     <ClInclude Include="game\GameCamera.h" />
@@ -256,6 +257,7 @@
     <ClInclude Include="game\ships\vorcha\Vorcha.h" />
     <ClInclude Include="game\teams\Team.h" />
     <ClInclude Include="game\teams\TeamIncludes.h" />
+    <ClInclude Include="game\weapons\DisruptorBeam.h" />
     <ClInclude Include="game\weapons\DisruptorCannon.h" />
     <ClInclude Include="game\weapons\KlingonPhotonTorpedo.h" />
     <ClInclude Include="game\weapons\PhaserBeam.h" />
@@ -271,6 +273,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\ai\AI.cpp" />
+    <ClCompile Include="game\ai\FireAtWill.cpp" />
     <ClCompile Include="game\Core.cpp" />
     <ClCompile Include="game\factions\Faction.cpp" />
     <ClCompile Include="game\Game.cpp" />
@@ -329,6 +332,7 @@
     <ClCompile Include="game\ships\sphere\Sphere.cpp" />
     <ClCompile Include="game\ships\vorcha\Vorcha.cpp" />
     <ClCompile Include="game\teams\Team.cpp" />
+    <ClCompile Include="game\weapons\DisruptorBeam.cpp" />
     <ClCompile Include="game\weapons\DisruptorCannon.cpp" />
     <ClCompile Include="game\weapons\KlingonPhotonTorpedo.cpp" />
     <ClCompile Include="game\weapons\PhaserBeam.cpp" />

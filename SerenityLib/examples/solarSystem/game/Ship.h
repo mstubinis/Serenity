@@ -39,6 +39,7 @@ class  ShipSystemHull;
 class  ShipSystem;
 class  SensorStatusDisplay;
 class  AI;
+class  FireAtWill;
 struct PrimaryWeaponBeam;
 struct PrimaryWeaponCannon;
 struct SecondaryWeaponTorpedo;
@@ -59,6 +60,10 @@ class Ship: public EntityWrapper, public EventObserver {
     friend  class ShipSystemHull;
 	friend  class ShipSystem;
     friend  class SensorStatusDisplay;
+    friend  class FireAtWill;
+    friend struct PrimaryWeaponBeam;
+    friend struct PrimaryWeaponCannon;
+    friend struct SecondaryWeaponTorpedo;
     protected:
         Team&                                m_Team;
         Client&                              m_Client;
@@ -96,6 +101,7 @@ class Ship: public EntityWrapper, public EventObserver {
 
         void addHullTargetPoints(std::vector<glm::vec3>& points);
 
+        AI* getAI();
         const AIType::Type getAIType() const;
         const Team& getTeam() const;
         const std::string getName();

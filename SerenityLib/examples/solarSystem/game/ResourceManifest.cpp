@@ -67,6 +67,7 @@ Handle ResourceManifest::CannonOutlineMaterial;
 Handle ResourceManifest::CannonTailMaterial;
 Handle ResourceManifest::PhaserBeamMaterial;
 Handle ResourceManifest::PlasmaBeamMaterial;
+Handle ResourceManifest::DisruptorBeamMaterial;
 
 //sounds
 Handle ResourceManifest::MenuMusic;
@@ -82,6 +83,7 @@ Handle ResourceManifest::SoundPhotonTorpedoOld;
 Handle ResourceManifest::SoundPlasmaTorpedo;
 Handle ResourceManifest::SoundPhaserBeam;
 Handle ResourceManifest::SoundPlasmaBeam;
+Handle ResourceManifest::SoundDisruptorBeam;
 
 //torpedos
 Handle ResourceManifest::TorpedoFlareMesh;
@@ -178,6 +180,7 @@ void ResourceManifest::init(){
     CannonTailMaterial = Resources::loadMaterialAsync("CannonTail", BasePath + "data/Textures/Effects/cannon_texture_tip.dds", "", "", "");
     PhaserBeamMaterial = Resources::loadMaterialAsync("PhaserBeam", BasePath + "data/Textures/Effects/phaser_beam_outline.dds", "", "", "");
     PlasmaBeamMaterial = Resources::loadMaterialAsync("PlasmaBeam", BasePath + "data/Textures/Effects/phaser_beam_outline.dds", "", "", "");
+    DisruptorBeamMaterial = Resources::loadMaterialAsync("DisruptorBeam", BasePath + "data/Textures/Effects/phaser_beam_outline.dds", "", "", "");
 
     ShieldMaterial = Resources::loadMaterialAsync("Shields", BasePath + "data/Textures/Effects/shields_1.dds");
     HullDamageOutline1Material = Resources::loadMaterialAsync("HullDamage1Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_1.dds");
@@ -220,6 +223,20 @@ void ResourceManifest::init(){
     plasmaLayer->addUVModificationSimpleTranslation(1.4f, 0.0f);
     plasmaLayer->setData2(0.53f, 1.0f, 0.73f, 1.0f);
     plasmaLayer->getTexture()->setFilter(TextureFilter::Nearest);
+
+
+
+    Material& disBeamMat = *((Material*)DisruptorBeamMaterial.get());
+    disBeamMat.setShadeless(true);
+    disBeamMat.setGlow(1.0f);
+    disBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(1.4f, 0.0f);
+    disBeamMat.getComponent(0).layer(0).setData2(0.15f, 0.969f, 0.192f, 1.0f);
+    disBeamMat.getComponent(0).layer(0).getTexture()->setFilter(TextureFilter::Nearest);
+    auto* disLayer = disBeamMat.getComponent(0).addLayer();
+    disLayer->setTexture(BasePath + "data/Textures/Effects/phaser_beam_inside.dds");
+    disLayer->addUVModificationSimpleTranslation(1.4f, 0.0f);
+    disLayer->setData2(0.632f, 1.0f, 0.0f, 1.0f);
+    disLayer->getTexture()->setFilter(TextureFilter::Nearest);
 
 
 
@@ -314,4 +331,5 @@ void ResourceManifest::init(){
     SoundPlasmaTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_torpedo.ogg");
     SoundPhaserBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/phaser_beam.ogg");
     SoundPlasmaBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_beam.ogg");
+    SoundDisruptorBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/disruptor_beam.ogg");
 }

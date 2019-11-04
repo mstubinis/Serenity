@@ -35,7 +35,10 @@ class PlasmaBeam final : public PrimaryWeaponBeam {
             const float& _volume = 100.0f,
             const uint & _maxCharges = 1,
             const float& _rechargeTimePerRound = 6.0f,
-            const unsigned int& _modelIndex = 0
+            const unsigned int& _modelIndex = 0,
+            const float& endpointExtraScale = 1.0f,
+            const float& beamSizeExtraScale = 1.0f,
+            const float& RangeInKM = 10.0f
         );
         ~PlasmaBeam();
 

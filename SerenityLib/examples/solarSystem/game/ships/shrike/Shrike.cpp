@@ -17,6 +17,7 @@
 #include "../../ships/shipSystems/ShipSystemYawThrusters.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
+#include "../../ai/AI.h"
 
 using namespace std;
 
@@ -46,22 +47,22 @@ Shrike::Shrike(const AIType::Type ai_type, Team& team, Client& client, Map& map,
     auto* rightBottom = new PlasmaCannon(_this, map, glm::vec3(0.308448f, 0.032778f, -0.819245f), glm::vec3(-0.0008f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 75.0f);
     auto* rightTop    = new PlasmaCannon(_this, map, glm::vec3(0.934207f, 0.02951f, -0.224055f), glm::vec3(-0.009f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 75.0f);
 
-    weapons.addPrimaryWeaponCannon(*leftTop);
-    weapons.addPrimaryWeaponCannon(*leftBottom);
-    weapons.addPrimaryWeaponCannon(*rightBottom);
-    weapons.addPrimaryWeaponCannon(*rightTop);
+    weapons.addPrimaryWeaponCannon(*leftTop, true);
+    weapons.addPrimaryWeaponCannon(*leftBottom, true);
+    weapons.addPrimaryWeaponCannon(*rightBottom, true);
+    weapons.addPrimaryWeaponCannon(*rightTop, true);
 
     auto* frontTorp = new PlasmaTorpedo(_this, map, glm::vec3(0.0f, -0.049485f, -1.23634f), glm::vec3(0, 0, -1), 15.0f, 1);
     auto* frontTorp1 = new PlasmaTorpedo(_this, map, glm::vec3(0.0f, -0.049485f, -1.23634f), glm::vec3(0, 0, -1), 15.0f, 1);
     auto* aftTorp = new PlasmaTorpedo(_this, map, glm::vec3(0.0f, -0.055816f, 1.46661f), glm::vec3(0, 0, 1), 15.0f);
 
-    weapons.addSecondaryWeaponTorpedo(*frontTorp);
-    weapons.addSecondaryWeaponTorpedo(*frontTorp1);
+    weapons.addSecondaryWeaponTorpedo(*frontTorp, true);
+    weapons.addSecondaryWeaponTorpedo(*frontTorp1, true);
     weapons.addSecondaryWeaponTorpedo(*aftTorp);
 
     vector<glm::vec3> beam_pt{ glm::vec3(0.0f, -0.049803f, -1.26533f) };
     auto* frontBeam = new PlasmaBeam(_this, map, beam_pt[0], glm::vec3(0, 0, -1), 30.0f, beam_pt, 750.0f);
-    weapons.addPrimaryWeaponBeam(*frontBeam);
+    weapons.addPrimaryWeaponBeam(*frontBeam, true);
 
 
     vector<glm::vec3> hull_target_points = {
@@ -95,6 +96,8 @@ Shrike::Shrike(const AIType::Type ai_type, Team& team, Client& client, Map& map,
         glm::vec3(0.0f,-0.091898f, -1.19035f),
     };
     addHullTargetPoints(hull_target_points);
+
+    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
 }
 Shrike::~Shrike() {
 

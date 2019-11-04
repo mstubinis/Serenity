@@ -60,7 +60,7 @@ varying vec3 TangentFragPos;
 void main(){
     InData inData;
     inData.uv = UV;
-    inData.diffuse = vec4(0.0,0.0,0.0,0.0001); //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
+    inData.diffuse = vec4(0.0,0.0,0.0,0.0001);
     inData.objectColor = Object_Color;
     inData.normals = normalize(Normals);
     inData.glow = MaterialBasePropertiesOne.x;
@@ -75,9 +75,6 @@ void main(){
     }
     inData.diffuse.a *= MaterialBasePropertiesTwo.x;
 
-    vec2 encodedNormals = EncodeOctahedron(inData.normals); //yes these two lines are evil and not needed, but they sync up the results with the deferred pass...
-    inData.normals = DecodeOctahedron(encodedNormals);
-
     float totalAlpha = 0.0;
     for (int j = 0; j < numImpacts; ++j) {
         float dist = distance(impacts[j].Position - CamRealPosition, WorldPosition);
@@ -88,7 +85,5 @@ void main(){
     }
     inData.diffuse.a *= clamp(totalAlpha, 0.0, 1.0);
     gl_FragData[0] = inData.diffuse;
-    gl_FragData[1] = vec4(encodedNormals, 0.0, 0.0);
-    gl_FragData[2] = vec4(inData.glow, inData.specular, 0.0, 0.0);
     gl_FragData[3] = inData.diffuse;
 }

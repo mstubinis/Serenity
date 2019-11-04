@@ -46,6 +46,7 @@ struct QuantumTorpedoCollisionFunctor final { void operator()(ComponentBody& own
                         }
                     }
                     if (hull && other.getUserPointer() == hull) {
+                        /*
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                             if (shields->getHealthCurrent(shieldSide) > 0) {
@@ -53,6 +54,7 @@ struct QuantumTorpedoCollisionFunctor final { void operator()(ComponentBody& own
                                 return;
                             }
                         }
+                        */
                         torpedoProjectile.clientToServerImpact(torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, false);
                     }
                 }
@@ -142,7 +144,7 @@ struct QuantumTorpedoFlareInstanceUnbindFunctor { void operator()(EngineResource
 }};
 
 
-QuantumTorpedoProjectile::QuantumTorpedoProjectile(QuantumTorpedo& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : torpedo(source), SecondaryWeaponTorpedoProjectile(map, final_world_position, forward, index) {
+QuantumTorpedoProjectile::QuantumTorpedoProjectile(EntityWrapper* target, QuantumTorpedo& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : torpedo(source), SecondaryWeaponTorpedoProjectile(map, final_world_position, forward, index) {
     maxTime            = 30.5f;
     rotationAngleSpeed = source.rotationAngleSpeed;
 
@@ -216,7 +218,7 @@ QuantumTorpedoProjectile::QuantumTorpedoProjectile(QuantumTorpedo& source, Map& 
     body.setInternalPhysicsUserPointer(&body);
     const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
 
-    auto data    = source.calculatePredictedVector(body, chosen_target_pos);
+    auto data    = source.calculatePredictedVector(target, body, chosen_target_pos);
     auto& offset = data.pedictedVector;
     hasLock      = data.hasLock;
     target       = data.target;
