@@ -2,7 +2,7 @@
 #include "../../weapons/Weapons.h"
 #include "../../Ship.h"
 #include "../../ResourceManifest.h"
-#include "../../Packet.h"
+#include "../../networking/Packet.h"
 #include "../../map/Map.h"
 #include <core/engine/lights/Lights.h>
 #include <core/engine/mesh/Mesh.h>

@@ -7,7 +7,7 @@
 #include "../../Core.h"
 #include "../../hud/HUD.h"
 #include "../../GameCamera.h"
-#include "../../Packet.h"
+#include "../../networking/Packet.h"
 
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialComponent.h>
@@ -33,8 +33,8 @@ EntityWrapper* ShipSystemSensors::getTarget() {
 }
 void ShipSystemSensors::setTarget(EntityWrapper* target, const bool sendPacket) {
     if (!target) {
-        if (m_Ship.m_IsPlayer && m_Ship.m_PlayerCamera) {
-            m_Ship.m_PlayerCamera->follow(&m_Ship);
+        if (m_Ship.IsPlayer() && m_Ship.m_PlayerCamera) {
+            m_Ship.m_PlayerCamera->setTarget(&m_Ship);
         }
     }
     Ship* ship = dynamic_cast<Ship*>(target);

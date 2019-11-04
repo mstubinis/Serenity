@@ -16,9 +16,9 @@
 
 #include "../Text.h"
 
-#include "../../Client.h"
+#include "../../networking/Client.h"
 #include "../../Core.h"
-#include "../../Packet.h"
+#include "../../networking/Packet.h"
 
 using namespace Engine;
 using namespace std;

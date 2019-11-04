@@ -51,7 +51,7 @@ class Client{
 
         const sf::Socket::Status connect(const ushort& timeout = 0);
         void disconnect();
-        void onReceive();
+        void onReceiveTCP();
         void onReceiveUDP();
 
         const std::string& username() const;

@@ -5,16 +5,19 @@
 #include <core/engine/scene/Camera.h>
 
 struct GameCameraLogicFunctor;
+class Map;
 
 struct CameraState {enum State {
     Freeform,
     Orbit,
-    Follow,
+    Cockpit,
     FollowTarget,
 _TOTAL};};
 
 class GameCamera: public Camera{
     friend struct ::GameCameraLogicFunctor;
+    private:
+        const bool validateDistanceForOrbit(Map& map);
     public:
         CameraState::State   m_State;
         float                m_OrbitRadius;
@@ -27,10 +30,9 @@ class GameCamera: public Camera{
         GameCamera(float left, float right, float bottom, float top, float clipStart, float clipEnd,Scene* = nullptr); // Orthographic camera Constructor
         virtual ~GameCamera();
 
-        void follow(EntityWrapper*);
-        void followTarget(EntityWrapper* target, EntityWrapper* player);
-        void orbit(EntityWrapper*);
+        void setState(const CameraState::State&);
 
+        void setPlayer(EntityWrapper*);
         void setTarget(EntityWrapper*);
         EntityWrapper* getTarget();
         const CameraState::State getState() const;

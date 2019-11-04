@@ -3,7 +3,7 @@
 #include "../ResourceManifest.h"
 #include "../Ship.h"
 #include "../Helper.h"
-#include "../Packet.h"
+#include "../networking/Packet.h"
 
 #include <ecs/Components.h>
 #include <core/engine/math/Engine_Math.h>

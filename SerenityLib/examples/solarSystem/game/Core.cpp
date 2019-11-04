@@ -1,11 +1,11 @@
 #include "Core.h"
 
 #include "Menu.h"
-#include "Server.h"
-#include "Client.h"
+#include "networking/Server.h"
+#include "networking/Client.h"
 #include "Ship.h"
 #include "map/Map.h"
-#include "Packet.h"
+#include "networking/Packet.h"
 #include "Planet.h"
 #include "GameCamera.h"
 #include "GameSkybox.h"
@@ -106,10 +106,12 @@ void Core::enterMap(Team& playerTeam, const string& mapFile, const string& playe
 
     Map& map = *static_cast<Map*>(Resources::getScene(mapFile));
 
-    Ship* playerShip = map.createShip(playerTeam, *m_Client, playerShipClass, playername, true, glm::vec3(x, y, z));
+    Ship* playerShip = map.createShip(AIType::Player_You, playerTeam, *m_Client, playerShipClass, playername, glm::vec3(x, y, z));
     map.setPlayer(playerShip);
     GameCamera* playerCamera = (GameCamera*)map.getActiveCamera();
-    playerCamera->follow(playerShip); 
+    playerCamera->setPlayer(playerShip);
+    playerCamera->setTarget(playerShip);
+    playerCamera->setState(CameraState::Cockpit);
 
     window.keepMouseInWindow(true);
     window.setMouseCursorVisible(false);

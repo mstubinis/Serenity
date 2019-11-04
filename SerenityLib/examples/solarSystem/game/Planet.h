@@ -18,8 +18,15 @@ struct AtmosphericScatteringSkyModelInstanceUnbindFunctor;
 struct StarModelInstanceBindFunctor;
 struct StarModelInstanceUnbindFunctor;
 
+
+
 struct PlanetType{ enum Type {
-    Rocky,Ice,GasGiant,IceGiant,Moon,Star,Asteroid,
+    Rocky,
+    GasGiant,
+    GasGiantRinged,
+    Moon,
+    Star,
+    Asteroid,
 };};
 struct RotationInfo final{
     float tilt;
@@ -52,7 +59,13 @@ struct RingInfo final{
         alphaBreakpoint = ab;
     }
 };
-class Planet:public EntityWrapper {
+class Planets final {
+    public:
+        static std::unordered_map<PlanetType::Type, Handle> IconDatabase;
+        static void init();
+};
+
+class Planet: public EntityWrapper {
     friend class  ::Ring;
     friend struct ::PlanetLogicFunctor;
     friend struct ::PlanetaryRingModelInstanceBindFunctor;
@@ -62,12 +75,17 @@ class Planet:public EntityWrapper {
     friend struct ::AtmosphericScatteringSkyModelInstanceUnbindFunctor;
     friend struct ::StarModelInstanceBindFunctor;
     friend struct ::StarModelInstanceUnbindFunctor;
+    private:
     protected:
+        std::string         m_TypeName;
         std::vector<Ring*>  m_Rings;
         PlanetType::Type    m_Type;
         OrbitInfo*          m_OrbitInfo;
         RotationInfo*       m_RotationInfo;
         float               m_AtmosphereHeight;
+
+        const std::string getPlanetTypeNameAsString() const;
+
     public:
         Planet(
             Handle& materialHandle,               //Material
@@ -76,16 +94,20 @@ class Planet:public EntityWrapper {
             decimal = 1.0,                        //Radius
             std::string = "Planet",               //Name
             float = 0,                            //Atmosphere size
-            Map * = nullptr
+            Map * = nullptr,
+            std::string planet_type_name = ""
         );
         virtual ~Planet();
 
+        const std::string getName();
         const glm_vec3 getPosition();
         const glm::vec2 getGravityInfo();
         OrbitInfo* getOrbitInfo() const;
         const float getGroundRadius();
         const float getRadius();
-        const float getAtmosphereHeight();
+        const float& getAtmosphereHeight() const;
+        const PlanetType::Type& getType() const;
+        const std::string& getTypeName() const;
 
         void setPosition(const decimal& x, const decimal& y, const decimal& z);
         void setPosition(const glm_vec3& pos);
@@ -106,7 +128,8 @@ class Star: public Planet{
             glm_vec3 = glm_vec3(0.0f),             //Position
             decimal = 1.0,                         //Scale
             std::string = "Star",                  //Name
-            Map * = nullptr
+            Map * = nullptr,
+            std::string star_type_name = ""
         );
         virtual ~Star();
 };

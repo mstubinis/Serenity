@@ -4,7 +4,7 @@
 
 #include "WeaponIncludes.h"
 #include "../Ship.h"
-#include "../Packet.h"
+#include "../networking/Packet.h"
 #include "../Helper.h"
 #include "../ResourceManifest.h"
 #include "../map/Map.h"

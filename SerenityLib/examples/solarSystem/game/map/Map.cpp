@@ -2,7 +2,7 @@
 #include "Anchor.h"
 #include "../Core.h"
 #include "../Menu.h"
-#include "../Client.h"
+#include "../networking/Client.h"
 #include "../ResourceManifest.h"
 #include "../Planet.h"
 #include "../GameCamera.h"
@@ -249,7 +249,7 @@ void Map::loadFromFile(const string& filename) {
                 float R, G, B, R1, G1, B1, R2, G2, B2, qx, qy, qz;
                 qx = qy = qz = 0.0f;
                 float ATMOSPHERE_HEIGHT = 0.0f;
-                string TYPE;
+                PlanetType::Type TYPE;
                 string TEXTURE = ResourceManifest::BasePath + "data/Textures/Planets/";
                 string MATERIAL_NAME = "";
 
@@ -305,7 +305,7 @@ void Map::loadFromFile(const string& filename) {
                     else if (key == "a")                Angle = stof(value);
 
                     else if (key == "parent")           PARENT = value;
-                    else if (key == "type")             TYPE = value;
+                    else if (key == "type")             TYPE = static_cast<PlanetType::Type>(static_cast<unsigned int>(stoi(value)));
                     else if (key == "atmosphereHeight") ATMOSPHERE_HEIGHT = stof(value);
                     else if (key == "break")            BREAK = stoi(value);
                     else if (key == "eccentricity")     ORBIT_ECCENTRICITY = stof(value);
@@ -348,13 +348,7 @@ void Map::loadFromFile(const string& filename) {
                     m_Planets.emplace(NAME, star);
                     internalCreateAnchor("Root", NAME, loadedAnchors, star->getPosition());
                 }else if (line[0] == 'P') {//Planet
-                    PlanetType::Type PLANET_TYPE;
-                    if      (TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
-                    else if (TYPE == "Ice")      PLANET_TYPE = PlanetType::Ice;
-                    else if (TYPE == "GasGiant") PLANET_TYPE = PlanetType::GasGiant;
-                    else if (TYPE == "IceGiant") PLANET_TYPE = PlanetType::IceGiant;
-                    else if (TYPE == "Asteroid") PLANET_TYPE = PlanetType::Asteroid;
-                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME), PLANET_TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
+                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
                     if (!PARENT.empty()) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
@@ -368,13 +362,7 @@ void Map::loadFromFile(const string& filename) {
                     m_Planets.emplace(NAME, planetoid);
                     internalCreateAnchor(PARENT, NAME, loadedAnchors, planetoid->getPosition());
                 }else if (line[0] == 'M') {//Moon
-                    PlanetType::Type PLANET_TYPE;
-                    if      (TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
-                    else if (TYPE == "Ice")      PLANET_TYPE = PlanetType::Ice;
-                    else if (TYPE == "GasGiant") PLANET_TYPE = PlanetType::GasGiant;
-                    else if (TYPE == "IceGiant") PLANET_TYPE = PlanetType::IceGiant;
-                    else if (TYPE == "Asteroid") PLANET_TYPE = PlanetType::Asteroid;
-                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME), PLANET_TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
+                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
                     if (!PARENT.empty()) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
@@ -414,33 +402,33 @@ void Map::loadFromFile(const string& filename) {
 
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
 }
-Ship* Map::createShip(Team& team, Client& client, const string& shipClass, const string& shipName, const bool& playerShip, const glm::vec3& position) {
+Ship* Map::createShip(const AIType::Type ai_type, Team& team, Client& client, const string& shipClass, const string& shipName, const glm::vec3& position) {
     if (m_Ships.size() > 0 && m_Ships.count(shipName))
         return nullptr;
     Ship* ship = nullptr;
 
     if     (shipClass == "Defiant")
-        ship = new Defiant(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Defiant(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Nova")
-        ship = new Nova(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Nova(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Shrike")
-        ship = new Shrike(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Shrike(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "B'rel")
-        ship = new Brel(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Brel(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Constitution")
-        ship = new Constitution(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Constitution(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Miranda")
-        ship = new Miranda(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Miranda(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Excelsior")
-        ship = new Excelsior(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Excelsior(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Akira")
-        ship = new Akira(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Akira(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Norway")
-        ship = new Norway(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Norway(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Intrepid")
-        ship = new Intrepid(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Intrepid(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Vor'cha")
-        ship = new Vorcha(team, client, *this, playerShip, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new Vorcha(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     return ship;
 }
 Anchor* Map::getRootAnchor() {

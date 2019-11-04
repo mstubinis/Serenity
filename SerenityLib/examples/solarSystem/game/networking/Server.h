@@ -18,6 +18,7 @@ class  ServerClient;
 class  ServerClientThread;
 class  Core;
 class  GameplayMode;
+struct PacketMessage;
 
 #define SERVER_CLIENT_TIMEOUT 20.0f
 #define SERVER_CLIENT_RECOVERY_TIME 60.0f
@@ -85,6 +86,7 @@ class Server {
         std::string                                    m_MapName;
         double                                         m_DeepspaceAnchorTimer;
 
+        void assignRandomTeam(PacketMessage& packet_out, ServerClient& client);
         void updateClientsGameLoop(const double& dt);
         void onReceiveUDP();
     public:

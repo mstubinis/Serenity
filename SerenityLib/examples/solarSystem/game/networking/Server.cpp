@@ -1,18 +1,18 @@
 #include "Server.h"
 #include "Packet.h"
-#include "Core.h"
 #include "Client.h"
-#include "Menu.h"
-#include "Helper.h"
-#include "ResourceManifest.h"
-#include "gui/specifics/ServerLobbyChatWindow.h"
-#include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
-#include "modes/GameplayMode.h"
+#include "../Core.h"
+#include "../Menu.h"
+#include "../Helper.h"
+#include "../ResourceManifest.h"
+#include "../gui/specifics/ServerLobbyChatWindow.h"
+#include "../gui/specifics/ServerLobbyConnectedPlayersWindow.h"
+#include "../modes/GameplayMode.h"
 
-#include "map/Map.h"
-#include "map/Anchor.h"
-#include "teams/Team.h"
-#include "modes/GameplayMode.h"
+#include "../map/Map.h"
+#include "../map/Anchor.h"
+#include "../teams/Team.h"
+#include "../modes/GameplayMode.h"
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/utils/Utils.h>
@@ -481,36 +481,16 @@ void Server::updateClient(ServerClient& client) {
                     pOut.PacketType = PacketType::Server_To_Client_Approve_Map_Entry;
 
                     auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                    const auto teamNumber = stoi(info[2]);
+                    const int teamNumber = stoi(info[2]);
                     if (teamNumber == -1) {
-                        //assign the player a team number
-                        auto& teams = server.m_GameplayMode->getTeams();
-                        Team* chosen = nullptr;
-                        unsigned int minVal = -1;
-                        for (auto& team : teams) {
-                            const auto numberOfPlayers = team.second->getNumberOfPlayersOnTeam();
-                            if (numberOfPlayers < minVal) {
-                                minVal = numberOfPlayers;
-                                chosen = team.second;
-                            }
-                        }
-                        if (chosen) {
-                            boost::replace_all(pOut.data, ",-1", "," + chosen->getTeamNumberAsString());
-                            teams.at(chosen->getTeamNumber())->addPlayerToTeam(client.m_username);
-                        }
+                        server.assignRandomTeam(pOut, client);
                     }
-
                     server.send_to_client(client, pOut);
                     break;
                 }case PacketType::Client_To_Server_Chat_Message: {
-                    PacketMessage pOut;
                     PacketMessage& pI = *static_cast<PacketMessage*>(pp);
+                    PacketMessage pOut(pI);
                     pOut.PacketType = PacketType::Server_To_Client_Chat_Message;
-                    pOut.data = pI.data;
-                    pOut.name = pI.name;
-                    pOut.r = pI.r;
-                    pOut.g = pI.g;
-                    pOut.b = pI.b;
                     server.send_to_all(pOut);
                     break;
                 }case PacketType::Client_To_Server_Request_Connection: {
@@ -740,6 +720,24 @@ const sf::Socket::Status Server::receive_udp(sf::Packet& packet) {
 const sf::Socket::Status Server::receive_udp(void* data, size_t size, size_t& received) {
     const auto status = m_UdpSocket->receive(data, size, received);
     return status;
+}
+
+void Server::assignRandomTeam(PacketMessage& packet_out, ServerClient& client) {
+    //assign the player a team number
+    auto& teams = m_GameplayMode->getTeams();
+    Team* chosen = nullptr;
+    unsigned int minVal = -1;
+    for (auto& team : teams) {
+        const auto numberOfPlayers = team.second->getNumberOfPlayersOnTeam();
+        if (numberOfPlayers < minVal) {
+            minVal = numberOfPlayers;
+            chosen = team.second;
+        }
+    }
+    if (chosen) {
+        boost::replace_all(packet_out.data, ",-1", "," + chosen->getTeamNumberAsString());
+        teams.at(chosen->getTeamNumber())->addPlayerToTeam(client.m_username);
+    }
 }
 
 ServerClient* Server::getClientByName(const string& username) {

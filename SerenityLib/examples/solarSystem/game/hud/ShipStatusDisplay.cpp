@@ -211,5 +211,27 @@ void ShipStatusDisplay::render() {
             0.168f,
             TextAlignment::Center
         );
+    }else{
+        //then its not a ship, probably a star or planet
+        Planet* planet = dynamic_cast<Planet*>(m_TargetAsWrapper);
+        if (planet) {
+            Texture& planet_icon = *(Texture*)Planets::IconDatabase[planet->getType()].get();
+
+            const auto pos = bottomLeftCorner + glm::vec2((m_Size.y / 2.0f) - (27.0f / 2.0f));
+
+            Renderer::renderTexture(planet_icon, pos, m_Color, 180, glm::vec2(1.0f), 0.15f, Alignment::Center);
+
+            //finally, render planet name & type
+            Renderer::renderText(
+                planet->getName() + " - " + planet->getTypeName(),
+                m_HUD.getFont(),
+                bottomLeftCorner + glm::vec2(m_Size.x / 2, m_Size.y - 4),
+                m_Color,
+                0,
+                glm::vec2(0.6f),
+                0.168f,
+                TextAlignment::Center
+            );
+        }
     }
 }

@@ -4,9 +4,9 @@
 #include "Planet.h"
 #include "Ship.h"
 #include "Core.h"
-#include "Server.h"
-#include "Client.h"
-#include "Packet.h"
+#include "networking/Server.h"
+#include "networking/Client.h"
+#include "networking/Packet.h"
 #include "ResourceManifest.h"
 #include "GameCamera.h"
 

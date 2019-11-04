@@ -1,14 +1,18 @@
 #include "GameCamera.h"
 #include "Ship.h"
+#include "map/Map.h"
 
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/scene/Scene.h>
 
+#include "ships/shipSystems/ShipSystemSensors.h"
+
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/norm.hpp>
 
 using namespace Engine;
 using namespace std;
@@ -22,8 +26,8 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
     auto& thisBody   = *entity.getComponent<ComponentBody>(dataRequest);
 
     switch (camera.m_State) {
-        case CameraState::Follow: {
-            auto& targetEntity = camera.m_Target;
+        case CameraState::Cockpit: {
+            auto& targetEntity = camera.m_Player;
             EntityDataRequest dataRequest1(targetEntity->entity());
 
             auto& targetBody   = *targetEntity->getComponent<ComponentBody>(dataRequest1);
@@ -83,7 +87,12 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 70.0f);
 
 			const auto& diff = Engine::getMouseDifference();
-			camera.m_CameraMouseFactor += glm::dvec2(diff.y * (dt * 0.1), -diff.x * (dt * 0.1));
+            auto x_amount = (diff.y * 0.8) * (dt * 0.1);
+            auto y_amount = (-diff.x * 0.8) * (dt * 0.1);
+            camera.m_CameraMouseFactor.x += x_amount;
+            camera.m_CameraMouseFactor.x = glm::clamp(camera.m_CameraMouseFactor.x, -0.06, 0.06);
+            camera.m_CameraMouseFactor.y += y_amount;
+            camera.m_CameraMouseFactor.y = glm::clamp(camera.m_CameraMouseFactor.y, -0.06, 0.06);
 
 			thisBody.rotate(camera.m_CameraMouseFactor.x, camera.m_CameraMouseFactor.y, 0);
 			const double& step = (1.0 - dt);
@@ -112,7 +121,6 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 
 
 GameCamera::GameCamera(float n, float f, Scene* scene):GameCamera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y),n,f,scene) {
-
 }
 GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a,r,n,f,scene){
     m_State = CameraState::Freeform;
@@ -164,28 +172,69 @@ Entity GameCamera::getObjectInCenterRay(Entity& exclusion){
     }
     return ret;
 }
-void GameCamera::follow(EntityWrapper* target){
-    if (!target) 
-        return;
-    m_Target = target;
-    m_State = CameraState::Follow;
+
+const bool GameCamera::validateDistanceForOrbit(Map& map) {
+    auto* ship = dynamic_cast<Ship*>(m_Player);
+    if (ship) {
+        auto* sensors = static_cast<ShipSystemSensors*>(ship->getShipSystem(ShipSystemType::Sensors));
+        auto* target = sensors->getTarget();
+        if (target && target != m_Player) {
+            const auto dist2 = glm::distance2(ship->getPosition(), target->getComponent<ComponentBody>()->position());
+            if (dist2 < static_cast<decimal>(10000000000.0)) { //to prevent FP issues when viewing things billions of km away
+                map.centerSceneToObject(m_Target->entity());
+                m_Target = target;
+                return true;
+            }
+        }
+    }
+    m_Target = m_Player;
+    return false;
 }
-void GameCamera::followTarget(EntityWrapper* target, EntityWrapper* player){
-    if (!target) 
-        return;
-    m_Target = target;
-    m_Player = player;
-    m_State = CameraState::FollowTarget;
-}
-void GameCamera::orbit(EntityWrapper* target){
-    if (!target) 
-        return;
-    m_Target = target;
-    m_State = CameraState::Orbit;
-    m_CameraMouseFactor = glm::dvec2(0.0);
+
+void GameCamera::setState(const CameraState::State& new_state){
+    const auto old_state = m_State;
+    m_State = new_state;
+    Map& map = static_cast<Map&>(m_Entity.scene());
+    if (new_state == CameraState::Orbit) {
+        m_CameraMouseFactor = glm::dvec2(0.0);
+
+        if (old_state == CameraState::Cockpit || old_state == CameraState::FollowTarget) {
+            validateDistanceForOrbit(map);
+            map.centerSceneToObject(m_Player->entity());
+        }else{
+            if (!m_Target || (m_Target && m_Target == m_Player)) {
+                validateDistanceForOrbit(map);
+            }else if(m_Player && m_Target && (m_Target != m_Player)){
+                map.centerSceneToObject(m_Player->entity());
+                m_Target = m_Player;
+            }
+        }
+
+    }else if (new_state == CameraState::Cockpit) {
+        map.centerSceneToObject(m_Player->entity());
+    }else if (new_state == CameraState::FollowTarget) {
+        if (!m_Target || (m_Target && m_Target == m_Player)) {
+            m_State = CameraState::Cockpit;
+            return;
+        }
+        auto* ship = dynamic_cast<Ship*>(m_Player);
+        if (ship) {
+            auto* sensors = static_cast<ShipSystemSensors*>(ship->getShipSystem(ShipSystemType::Sensors));
+            auto* target = sensors->getTarget();
+            if (target) {
+                m_Target = target;
+            }
+        }
+        map.centerSceneToObject(m_Player->entity());
+    }
 }
 void GameCamera::setTarget(EntityWrapper* target) {
     m_Target = target; 
+    setState(m_State);
+}
+void GameCamera::setPlayer(EntityWrapper* player) {
+    m_Player = player;
+    setState(m_State);
 }
 EntityWrapper* GameCamera::getTarget() {
     return m_Target; 

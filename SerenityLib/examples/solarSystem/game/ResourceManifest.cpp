@@ -1,6 +1,7 @@
 #include "ResourceManifest.h"
 #include "factions/Faction.h"
 #include "ships/Ships.h"
+#include "Planet.h"
 
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -95,6 +96,7 @@ std::string ResourceManifest::BasePath;
 void ResourceManifest::init(){
     Factions::init();
     Ships::init();
+    Planets::init();
 
     epriv::threading::waitForAll();
 

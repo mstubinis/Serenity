@@ -1,11 +1,12 @@
 #include "Ship.h"
 #include "GameCamera.h"
 #include "map/Map.h"
-#include "Packet.h"
+#include "networking/Packet.h"
 #include "Helper.h"
 #include "map/Anchor.h"
 #include "ResourceManifest.h"
 #include "ships/Ships.h"
+#include "ai/AI.h"
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/Engine.h>
@@ -45,7 +46,13 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
     Ship& ship = *static_cast<Ship*>(_component.getUserPointer());
     Map& map = static_cast<Map&>(ship.entity().scene());
 
-    if (ship.m_IsPlayer) {
+    for (auto& shipSystem : ship.m_ShipSystems) {
+        if (shipSystem.second) { //some ships wont have all the systems (cloaking device, etc)
+            shipSystem.second->update(dt);
+        }
+    }
+
+    if (ship.IsPlayer()) {
         #pragma region PlayerFlightControls
         auto* mytarget = ship.getTarget();
         if (!Engine::paused()) {
@@ -73,31 +80,11 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         const auto& cameraState = camera.getState();
         const auto* target = camera.getTarget();
         if (Engine::isKeyDownOnce(KeyboardKey::F1)) {
-            if (cameraState != CameraState::Follow || (cameraState == CameraState::Follow && target != &ship)) {
-                map.centerSceneToObject(ship.m_Entity);
-                camera.follow(&ship);
-            }
-        }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
-            if (cameraState == CameraState::Follow || !mytarget || target != &ship) {
-                map.centerSceneToObject(ship.m_Entity);
-                camera.orbit(&ship);
-            }else if (mytarget) {
-                const auto dist2 = glm::distance2(ship.getPosition(), mytarget->getComponent<ComponentBody>()->position());
-                if (dist2 < static_cast<decimal>(10000000000.0)) { //to prevent FP issues when viewing things billions of km away
-                    map.centerSceneToObject(mytarget->entity());
-                    camera.orbit(mytarget);
-                }
-            }
+            camera.setState(CameraState::Cockpit);
         }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
-            if (cameraState == CameraState::FollowTarget || (!mytarget && cameraState != CameraState::Follow) || target != &ship) {
-                map.centerSceneToObject(ship.m_Entity);
-                camera.follow(&ship);
-            }else if (mytarget) {
-                map.centerSceneToObject(ship.m_Entity);
-                camera.followTarget(mytarget, &ship);
-            }
-        }else if (Engine::isKeyDownOnce(KeyboardKey::F4)) {
-			camera.m_State = CameraState::Freeform;
+            camera.setState(CameraState::Orbit);
+        }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
+            camera.setState(CameraState::FollowTarget);
         }
         #pragma endregion
 
@@ -118,13 +105,6 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                 }
             }
         }
-    }
-    for (auto& shipSystem : ship.m_ShipSystems) {
-        if (shipSystem.second) { //some ships wont have all the systems (cloaking device, etc)
-            shipSystem.second->update(dt);
-        }
-    }
-    if (ship.IsPlayer()) {
         for (auto& shipSystem : ship.m_ShipSystems) {
             if (shipSystem.second) {
                 shipSystem.second->render();
@@ -181,9 +161,9 @@ struct HullCollisionFunctor final { void operator()(ComponentBody& owner, const 
     }
 }};
 
-Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, bool player, const string& name, const glm_vec3 pos, const glm_vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client),m_Team(team){
+Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const AIType::Type ai_type, const string& name, const glm_vec3 pos, const glm_vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client),m_Team(team){
     m_WarpFactor          = 0;
-    m_IsPlayer            = player;
+    m_AI                  = new AI(ai_type);
     m_ShipClass           = shipClass;
     m_IsWarping           = false;
     m_PlayerCamera        = nullptr;
@@ -209,7 +189,7 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, bool p
     body.setCollisionMask(CollisionFilter::_Custom_4); //i should only collide with other ramming hulls only
     body.setCollisionFunctor(HullCollisionFunctor());
 
-	if (player) {
+	if (IsPlayer()) {
 		m_PlayerCamera = static_cast<GameCamera*>(map.getActiveCamera());
 	}
     body.setUserPointer1(this);
@@ -223,6 +203,7 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, bool p
 }
 Ship::~Ship(){
     unregisterEvent(EventType::WindowResized);
+    SAFE_DELETE(m_AI);
     SAFE_DELETE_VECTOR(m_DamageDecals);
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
@@ -287,6 +268,11 @@ void Ship::destroy() {
     }
     EntityWrapper::destroy();
     SAFE_DELETE_VECTOR(m_DamageDecals);
+}
+const AIType::Type Ship::getAIType() const {
+    if(m_AI)
+        return m_AI->getType();
+    return AIType::AI_None;
 }
 const glm_vec3 Ship::getWarpSpeedVector3() {
     if (m_IsWarping && m_WarpFactor > 0) {
@@ -403,7 +389,7 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
     //body.setGoal(x, y, z, PHYSICS_PACKET_TIMER_LIMIT);
 }
 const bool Ship::canSeeCloak(Ship* otherShip) {
-    if (m_IsPlayer || otherShip->getTeam().isAllyTeam(m_Team)) { //TODO: or is this ship an enemy but detected by anti cloak scan?
+    if (IsPlayer() || otherShip->getTeam().isAllyTeam(m_Team)) { //TODO: or is this ship an enemy but detected by anti cloak scan?
         return true;
     }
     return false;
@@ -543,7 +529,7 @@ GameCamera* Ship::getPlayerCamera() {
     return m_PlayerCamera; 
 }
 const bool Ship::IsPlayer() const {
-    return m_IsPlayer; 
+    return (m_AI && m_AI->getType() == AIType::Player_You) ? true : false;
 }
 const bool Ship::IsWarping() const {
     return m_IsWarping; 
@@ -555,7 +541,7 @@ ShipSystem* Ship::getShipSystem(const uint type) {
     return m_ShipSystems[type]; 
 }
 const glm_vec3 Ship::getLinearVelocity() {
-    if (m_IsWarping && m_IsPlayer) {
+    if (m_IsWarping && IsPlayer()) {
         return -(getWarpSpeedVector3() * static_cast<decimal>(WARP_PHYSICS_MODIFIER));
     }
     return getComponent<ComponentBody>()->getLinearVelocity();

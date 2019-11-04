@@ -23,6 +23,20 @@
 using namespace Engine;
 using namespace std;
 
+unordered_map<PlanetType::Type, Handle> Planets::IconDatabase;
+
+void Planets::init() {
+    
+    Planets::IconDatabase[PlanetType::Rocky] = Resources::loadTextureAsync("../data/Textures/HUD/RockyIcon.dds");
+    Planets::IconDatabase[PlanetType::GasGiant] = Resources::loadTextureAsync("../data/Textures/HUD/GasGiantIcon.dds");
+    Planets::IconDatabase[PlanetType::GasGiantRinged] = Resources::loadTextureAsync("../data/Textures/HUD/GasGiantRingedIcon.dds");
+    Planets::IconDatabase[PlanetType::Moon] = Resources::loadTextureAsync("../data/Textures/HUD/MoonIcon.dds");
+    Planets::IconDatabase[PlanetType::Star] = Resources::loadTextureAsync("../data/Textures/HUD/StarIcon.dds");
+    //Planets::IconDatabase[PlanetType::Asteroid] = Resources::loadTextureAsync("../data/Textures/HUD/AsteroidIcon.dds");
+    
+}
+
+
 float PlanetaryRenderSpace(float& outerRadius,float& _distanceReal) {
     //2.718281828459045235360287471352 = euler's number
     float _factor = 1.0f - glm::smoothstep(0.0f, glm::pow(outerRadius, 0.67f) * 215.0f, _distanceReal);
@@ -313,7 +327,7 @@ struct AtmosphericScatteringSkyModelInstanceUnbindFunctor{void operator()(Engine
     Renderer::cullFace(GL_BACK);
 }};
 
-Planet::Planet(Handle& mat,PlanetType::Type type,glm_vec3 pos,decimal scl,string name,float atmosphere, Map* scene):EntityWrapper(*scene){
+Planet::Planet(Handle& mat,PlanetType::Type type,glm_vec3 pos,decimal scl,string name,float atmosphere, Map* scene,string planet_type_name):EntityWrapper(*scene){
     auto& componentName = *m_Entity.addComponent<ComponentName>(name);
 
     auto& body = *addComponent<ComponentBody>();
@@ -345,6 +359,12 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm_vec3 pos,decimal scl,string
     auto& logic = *addComponent<ComponentLogic>(PlanetLogicFunctor(), this);
 
     m_Type = type;
+    if (planet_type_name.empty()) {
+        m_TypeName = getPlanetTypeNameAsString();
+    }else{
+        m_TypeName = planet_type_name;
+    }
+
     m_OrbitInfo = nullptr;
     m_RotationInfo = nullptr;
 
@@ -354,6 +374,35 @@ Planet::~Planet(){
     SAFE_DELETE_VECTOR(m_Rings);
     SAFE_DELETE(m_OrbitInfo);
     SAFE_DELETE(m_RotationInfo);
+}
+const string Planet::getPlanetTypeNameAsString() const {
+    switch (m_Type){
+        case PlanetType::Asteroid: {
+            return "Asteroid";
+        }case PlanetType::GasGiant: {
+            return "Gas Giant";
+        }case PlanetType::GasGiantRinged: {
+            return "Ringed Gas Giant";
+        }case PlanetType::Moon: {
+            return "Moon";
+        }case PlanetType::Rocky: {
+            return "Rocky Planet";
+        }case PlanetType::Star: {
+            return "Star";
+        }default: {
+            return "Planet";
+        }
+    }
+    return "Planet";
+}
+const string& Planet::getTypeName() const {
+    return m_TypeName;
+}
+const PlanetType::Type& Planet::getType() const {
+    return m_Type;
+}
+const string Planet::getName() {
+    return getComponent<ComponentName>()->name();
 }
 const glm_vec3 Planet::getPosition(){ 
     return getComponent<ComponentBody>()->position(); 
@@ -375,13 +424,13 @@ void Planet::setRotation(RotationInfo* r){
 void Planet::addRing(Ring* ring){ 
     m_Rings.push_back(ring); 
 }
-const glm::vec2 Planet::getGravityInfo(){
-    return glm::vec2(getRadius() * 5,getRadius() * 7); 
+const glm::vec2 Planet::getGravityInfo() {
+    return glm::vec2(getRadius() * 5, getRadius() * 7); 
 }
 OrbitInfo* Planet::getOrbitInfo() const { 
     return m_OrbitInfo; 
 }
-const float Planet::getGroundRadius(){
+const float Planet::getGroundRadius() {
     auto& model = *getComponent<ComponentModel>();
     const auto& rad = model.radius();
     return rad - (rad * m_AtmosphereHeight);
@@ -390,11 +439,11 @@ const float Planet::getRadius() {
     auto& model = *getComponent<ComponentModel>();
     return model.radius(); 
 }
-const float Planet::getAtmosphereHeight(){
+const float& Planet::getAtmosphereHeight() const {
     return m_AtmosphereHeight; 
 }
 
-Star::Star(glm::vec3 starColor,glm::vec3 lightColor, glm::vec3 godRaysColor,glm_vec3 pos,decimal scl,string name, Map* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
+Star::Star(glm::vec3 starColor,glm::vec3 lightColor, glm::vec3 godRaysColor,glm_vec3 pos,decimal scl,string name, Map* scene,string type_name):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene, type_name){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor);
 

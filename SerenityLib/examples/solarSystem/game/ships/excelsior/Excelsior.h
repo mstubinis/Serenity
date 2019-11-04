@@ -9,10 +9,10 @@ class Excelsior final : public Ship {
 
     public:
         Excelsior(
+            const AIType::Type ai_type,
             Team& team,
             Client& client,
             Map& map,
-            bool player = false,                  //Player Ship?
             const std::string& name = "Excelsior Class Ship",     //Name
             glm::vec3 = glm::vec3(0),             //Position
             glm::vec3 = glm::vec3(1),             //Scale

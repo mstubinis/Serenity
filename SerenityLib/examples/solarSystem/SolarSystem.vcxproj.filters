@@ -172,6 +172,18 @@
     <Filter Include="Header Files\Game\Modes">
       <UniqueIdentifier>{f73a75dd-d5f6-4974-84fb-25a2b99de32f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\AI">
+      <UniqueIdentifier>{612e872c-1f24-4215-af09-72eec14bbed5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\AI">
+      <UniqueIdentifier>{e7284934-72c9-420c-9fae-4a9e663ce98f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Networking">
+      <UniqueIdentifier>{2042dce0-3a1b-41d6-aaca-f417094835fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Networking">
+      <UniqueIdentifier>{4445c16d-5c02-4df2-8a08-40e3a212770c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -187,15 +199,6 @@
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="game\Ship.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="game\Server.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="game\Client.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="game\Packet.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="game\Core.h">
@@ -387,14 +390,26 @@
     <ClInclude Include="game\modes\GameplayMode.h">
       <Filter>Header Files\Game\Modes</Filter>
     </ClInclude>
-    <ClInclude Include="game\modes\FFA.h">
-      <Filter>Header Files\Game\Modes</Filter>
-    </ClInclude>
     <ClInclude Include="game\teams\TeamIncludes.h">
       <Filter>Header Files\Game\Teams</Filter>
     </ClInclude>
     <ClInclude Include="game\teams\Team.h">
       <Filter>Header Files\Game\Teams</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\Client.h">
+      <Filter>Header Files\Game\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\Packet.h">
+      <Filter>Header Files\Game\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\Server.h">
+      <Filter>Header Files\Game\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ai\AI.h">
+      <Filter>Header Files\Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ai\AIIncludes.h">
+      <Filter>Header Files\Game\AI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -417,15 +432,6 @@
       <Filter>Source Files\Game</Filter>
     </ClCompile>
     <ClCompile Include="game\Ship.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="game\Server.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="game\Client.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="game\Packet.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
     <ClCompile Include="game\Core.cpp">
@@ -599,11 +605,20 @@
     <ClCompile Include="game\modes\GameplayMode.cpp">
       <Filter>Source Files\Game\Modes</Filter>
     </ClCompile>
-    <ClCompile Include="game\modes\FFA.cpp">
-      <Filter>Source Files\Game\Modes</Filter>
-    </ClCompile>
     <ClCompile Include="game\teams\Team.cpp">
       <Filter>Source Files\Game\Teams</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\Client.cpp">
+      <Filter>Source Files\Game\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\Packet.cpp">
+      <Filter>Source Files\Game\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\Server.cpp">
+      <Filter>Source Files\Game\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ai\AI.cpp">
+      <Filter>Source Files\Game\AI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

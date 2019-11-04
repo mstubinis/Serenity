@@ -7,6 +7,7 @@
 #include <tuple>
 #include "../ships/shipSystems/ShipSystemWeapons.h"
 #include "Freelist.h"
+#include "../ai/AIIncludes.h"
 
 class Star;
 class Ship;
@@ -57,7 +58,7 @@ class Map: public Scene{
         const bool hasShip(const std::string& shipName) const;
         
         HUD& getHUD();
-        Ship* createShip(Team& team, Client& client, const std::string& shipClass, const std::string& shipName, const bool& playerShip, const glm::vec3& position);
+        Ship* createShip(const AIType::Type ai_type, Team& team, Client& client, const std::string& shipClass, const std::string& shipName, const glm::vec3& position);
 
 
         Ship* getPlayer();

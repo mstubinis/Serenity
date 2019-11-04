@@ -1,22 +1,22 @@
 #include "Packet.h"
-#include "Ship.h"
-#include "map/Anchor.h"
-#include "map/Map.h"
+#include "../Ship.h"
+#include "../map/Anchor.h"
+#include "../map/Map.h"
 
 #include <core/engine/math/Engine_Math.h>
 #include <ecs/ComponentBody.h>
 
-#include "ships/shipSystems/ShipSystemCloakingDevice.h"
-#include "ships/shipSystems/ShipSystemMainThrusters.h"
-#include "ships/shipSystems/ShipSystemPitchThrusters.h"
-#include "ships/shipSystems/ShipSystemReactor.h"
-#include "ships/shipSystems/ShipSystemRollThrusters.h"
-#include "ships/shipSystems/ShipSystemSensors.h"
-#include "ships/shipSystems/ShipSystemShields.h"
-#include "ships/shipSystems/ShipSystemWarpDrive.h"
-#include "ships/shipSystems/ShipSystemYawThrusters.h"
-#include "ships/shipSystems/ShipSystemWeapons.h"
-#include "ships/shipSystems/ShipSystemHull.h"
+#include "../ships/shipSystems/ShipSystemCloakingDevice.h"
+#include "../ships/shipSystems/ShipSystemMainThrusters.h"
+#include "../ships/shipSystems/ShipSystemPitchThrusters.h"
+#include "../ships/shipSystems/ShipSystemReactor.h"
+#include "../ships/shipSystems/ShipSystemRollThrusters.h"
+#include "../ships/shipSystems/ShipSystemSensors.h"
+#include "../ships/shipSystems/ShipSystemShields.h"
+#include "../ships/shipSystems/ShipSystemWarpDrive.h"
+#include "../ships/shipSystems/ShipSystemYawThrusters.h"
+#include "../ships/shipSystems/ShipSystemWeapons.h"
+#include "../ships/shipSystems/ShipSystemHull.h"
 
 using namespace Engine;
 using namespace std;

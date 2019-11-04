@@ -193,7 +193,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="game\Client.h" />
+    <ClInclude Include="game\ai\AI.h" />
+    <ClInclude Include="game\ai\AIIncludes.h" />
     <ClInclude Include="game\Core.h" />
     <ClInclude Include="game\factions\Faction.h" />
     <ClInclude Include="game\GameCamera.h" />
@@ -218,12 +219,12 @@
     <ClInclude Include="game\map\Anchor.h" />
     <ClInclude Include="game\map\Freelist.h" />
     <ClInclude Include="game\map\Map.h" />
-    <ClInclude Include="game\modes\FFA.h" />
     <ClInclude Include="game\modes\GameplayMode.h" />
-    <ClInclude Include="game\Packet.h" />
+    <ClInclude Include="game\networking\Client.h" />
+    <ClInclude Include="game\networking\Packet.h" />
+    <ClInclude Include="game\networking\Server.h" />
     <ClInclude Include="game\Planet.h" />
     <ClInclude Include="game\ResourceManifest.h" />
-    <ClInclude Include="game\Server.h" />
     <ClInclude Include="game\Ship.h" />
     <ClInclude Include="game\ships\akira\Akira.h" />
     <ClInclude Include="game\ships\brel\Brel.h" />
@@ -269,7 +270,7 @@
     <ClInclude Include="game\weapons\Weapons.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="game\Client.cpp" />
+    <ClCompile Include="game\ai\AI.cpp" />
     <ClCompile Include="game\Core.cpp" />
     <ClCompile Include="game\factions\Faction.cpp" />
     <ClCompile Include="game\Game.cpp" />
@@ -292,12 +293,12 @@
     <ClCompile Include="game\main.cpp" />
     <ClCompile Include="game\map\Anchor.cpp" />
     <ClCompile Include="game\map\Map.cpp" />
-    <ClCompile Include="game\modes\FFA.cpp" />
     <ClCompile Include="game\modes\GameplayMode.cpp" />
-    <ClCompile Include="game\Packet.cpp" />
+    <ClCompile Include="game\networking\Client.cpp" />
+    <ClCompile Include="game\networking\Packet.cpp" />
+    <ClCompile Include="game\networking\Server.cpp" />
     <ClCompile Include="game\Planet.cpp" />
     <ClCompile Include="game\ResourceManifest.cpp" />
-    <ClCompile Include="game\Server.cpp" />
     <ClCompile Include="game\Ship.cpp" />
     <ClCompile Include="game\ships\akira\Akira.cpp" />
     <ClCompile Include="game\ships\brel\Brel.cpp" />

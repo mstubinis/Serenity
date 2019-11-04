@@ -20,8 +20,8 @@
 
 using namespace std;
 
-Defiant::Defiant(Team& team, Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client,"Defiant",map,player,name,position,scale, collisionType){
+Defiant::Defiant(const AIType::Type ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+:Ship(team,client,"Defiant",map,ai_type,name,position,scale, collisionType){
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

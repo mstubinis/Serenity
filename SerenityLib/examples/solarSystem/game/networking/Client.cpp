@@ -1,20 +1,20 @@
 #include "Client.h"
 #include "Packet.h"
-#include "Core.h"
-#include "Menu.h"
-#include "Helper.h"
-#include "ResourceManifest.h"
-#include "gui/Button.h"
-#include "gui/Text.h"
-#include "gui/specifics/ServerLobbyChatWindow.h"
-#include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
-#include "gui/specifics/ServerLobbyShipSelectorWindow.h"
-#include "gui/specifics/ServerHostingMapSelectorWindow.h"
+#include "../Core.h"
+#include "../Menu.h"
+#include "../Helper.h"
+#include "../ResourceManifest.h"
+#include "../gui/Button.h"
+#include "../gui/Text.h"
+#include "../gui/specifics/ServerLobbyChatWindow.h"
+#include "../gui/specifics/ServerLobbyConnectedPlayersWindow.h"
+#include "../gui/specifics/ServerLobbyShipSelectorWindow.h"
+#include "../gui/specifics/ServerHostingMapSelectorWindow.h"
 
-#include "map/Map.h"
-#include "map/Anchor.h"
-#include "GameSkybox.h"
-#include "Ship.h"
+#include "../map/Map.h"
+#include "../map/Anchor.h"
+#include "../GameSkybox.h"
+#include "../Ship.h"
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/utils/Utils.h>
 #include <core/engine/math/Engine_Math.h>
@@ -28,12 +28,12 @@
 #include <boost/algorithm/algorithm.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "ships/shipSystems/ShipSystemWeapons.h"
-#include "weapons/Weapons.h"
-#include "ships/Ships.h"
+#include "../ships/shipSystems/ShipSystemWeapons.h"
+#include "../weapons/Weapons.h"
+#include "../ships/Ships.h"
 
-#include "teams/Team.h"
-#include "modes/GameplayMode.h"
+#include "../teams/Team.h"
+#include "../modes/GameplayMode.h"
 
 #include <iostream>
 
@@ -245,7 +245,7 @@ void Client::update(Client* _client, const double& dt) {
         client.m_PingTime = 0.0;
     }
     client.onReceiveUDP();
-    client.onReceive();
+    client.onReceiveTCP();
 }
 void Client::onReceiveUDP() {
     sf::Packet sf_packet_udp;
@@ -274,7 +274,7 @@ void Client::onReceiveUDP() {
                             auto y = Helper::GetRandomFloatFromTo(-400, 400);
                             auto z = Helper::GetRandomFloatFromTo(-400, 400);
                             auto randOffsetForSafety = glm_vec3(x, y, z);
-                            ship = map.createShip(*m_GameplayMode.getTeams().at(teamNumber), *this, shipclass, playername, false, spawnPosition + randOffsetForSafety);
+                            ship = map.createShip(AIType::Player_Other ,*m_GameplayMode.getTeams().at(teamNumber), *this, shipclass, playername, spawnPosition + randOffsetForSafety);
                         }else{
                             ship = ships.at(playername);
                         }
@@ -288,7 +288,7 @@ void Client::onReceiveUDP() {
         }
     }
 }
-void Client::onReceive() {
+void Client::onReceiveTCP() {
     sf::Packet sf_packet;
     const auto& status     = receive(sf_packet);
     if (status == sf::Socket::Status::Done) {
@@ -447,7 +447,7 @@ void Client::onReceive() {
                         ship.updateCloakFromPacket(pI);
                     }
                     break;
-                }case PacketType::Server_To_Client_Ship_Physics_Update: {
+                /*}case PacketType::Server_To_Client_Ship_Physics_Update: {
                     if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
                         PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(basePacket);
                         auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
@@ -465,13 +465,13 @@ void Client::onReceive() {
                             auto y = Helper::GetRandomFloatFromTo(-400, 400);
                             auto z = Helper::GetRandomFloatFromTo(-400, 400);
                             auto randOffsetForSafety = glm_vec3(x, y, z);
-                            ship = map.createShip(*m_GameplayMode.getTeams().at(teamNumber), *this, shipclass, playername, false, spawnPosition + randOffsetForSafety);
+                            ship = map.createShip(AIType::Player_Other ,*m_GameplayMode.getTeams().at(teamNumber), *this, shipclass, playername, spawnPosition + randOffsetForSafety);
                         }else{
                             ship = ships.at(playername);
                         }
                         ship->updatePhysicsFromPacket(pI, map, info);
                     }
-                    break;
+                    break;*/
                 }case PacketType::Server_To_Client_New_Client_Entered_Map: {
                     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
                     
@@ -481,7 +481,7 @@ void Client::onReceive() {
                     Map& map = *static_cast<Map*>(Resources::getScene(info[1]));
 
                     auto spawn = map.getSpawnAnchor()->getPosition();
-                    Ship* ship = map.createShip(*m_GameplayMode.getTeams().at(teamNumber), *this, info[0], pI.name, false, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z));
+                    Ship* ship = map.createShip(AIType::Player_Other, *m_GameplayMode.getTeams().at(teamNumber), *this, info[0], pI.name, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z));
                     if (ship) { //if the ship was successfully added
                         //send the new guy several of our statuses
                         auto player = map.getPlayer();

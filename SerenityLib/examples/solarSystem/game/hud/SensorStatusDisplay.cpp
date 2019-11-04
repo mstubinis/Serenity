@@ -14,7 +14,7 @@
 #include "../map/Map.h"
 #include "../ResourceManifest.h"
 #include "../Core.h"
-#include "../Client.h"
+#include "../networking/Client.h"
 #include "../Menu.h"
 #include "../Helper.h"
 #include "../hud/HUD.h"
@@ -85,7 +85,7 @@ void SensorStatusDisplay::update(const double& dt) {
     auto& thisShipPos = ship.getPosition();
     auto& camBody = *m_Camera->getComponent<ComponentBody>();
     const auto shipForward = ship.forward();
-    const auto extendedForward = shipForward * static_cast<decimal>(100000.0);
+    const auto extendedForward = shipForward * static_cast<decimal>(1000.0);
     camBody.setPosition(thisShipPos - extendedForward);
     camBody.setRotation(ship.getRotation());
     const auto camPos = camBody.position();

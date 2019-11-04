@@ -18,8 +18,8 @@
 
 using namespace std;
 
-Vorcha::Vorcha(Team& team, Client& client, Map& map, bool player, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client, "Vor'cha", map, player, name, position, scale, collisionType, glm::vec3(0.0f, 0.0f, -1.58693f)) {
+Vorcha::Vorcha(const AIType::Type ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+:Ship(team,client, "Vor'cha", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.0f, -1.58693f)) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

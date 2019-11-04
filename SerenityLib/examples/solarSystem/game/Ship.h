@@ -6,8 +6,9 @@
 #include <glm/vec2.hpp>
 #include <core/engine/utils/Utils.h>
 #include <core/engine/events/Engine_EventObject.h>
-#include "Client.h"
+#include "networking/Client.h"
 #include "teams/Team.h"
+#include "ai/AIIncludes.h"
 
 #include "ships/shipSystems/ShipSystemBaseClass.h"
 
@@ -37,7 +38,7 @@ class  ShipSystemWeapons;
 class  ShipSystemHull;
 class  ShipSystem;
 class  SensorStatusDisplay;
-
+class  AI;
 struct PrimaryWeaponBeam;
 struct PrimaryWeaponCannon;
 struct SecondaryWeaponTorpedo;
@@ -62,7 +63,7 @@ class Ship: public EntityWrapper, public EventObserver {
         Team&                                m_Team;
         Client&                              m_Client;
         std::unordered_map<uint,ShipSystem*> m_ShipSystems;
-        bool                                 m_IsPlayer;
+        AI*                                  m_AI;
         GameCamera*                          m_PlayerCamera;
 		glm::dvec2                           m_MouseFactor;
         bool                                 m_IsWarping;
@@ -77,7 +78,7 @@ class Ship: public EntityWrapper, public EventObserver {
             Client& client,
             const std::string& shipClass,
             Map& map,
-            bool player = false,                  //Player Ship?
+            const AIType::Type ai_type,
             const std::string& name = "Ship",     //Name
             const glm_vec3 = glm_vec3(0),         //Position
             const glm_vec3 = glm_vec3(1),         //Scale
@@ -95,6 +96,7 @@ class Ship: public EntityWrapper, public EventObserver {
 
         void addHullTargetPoints(std::vector<glm::vec3>& points);
 
+        const AIType::Type getAIType() const;
         const Team& getTeam() const;
         const std::string getName();
         const glm_vec3 getWarpSpeedVector3();
