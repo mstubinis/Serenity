@@ -2,11 +2,13 @@
 #ifndef ENGINE_PHYSICS_DEBUG_DRAWER_H
 #define ENGINE_PHYSICS_DEBUG_DRAWER_H
 
-#include <LinearMath/btIDebugDraw.h>
-#include <btBulletCollisionCommon.h>
+#include <core/engine/utils/Utils.h>
 #include <core/engine/events/Engine_EventObject.h>
+#include <BulletCollision/CollisionShapes/btTriangleCallback.h>
+#include <LinearMath/btVector3.h>
+#include <LinearMath/btTransform.h>
+#include <LinearMath/btIDebugDraw.h>
 
-#include <glm/vec3.hpp>
 #include <vector>
 
 #include <GL/glew.h>
@@ -29,7 +31,7 @@ namespace Engine {
             friend class Engine::epriv::PhysicsManager;
             private:
                 GLuint m_Mode, m_VAO, m_VertexBuffer, C_MAX_POINTS;
-                struct LineVertex {
+                struct LineVertex final {
                     glm::vec3 position;
                     glm::vec3 color;
                     LineVertex();

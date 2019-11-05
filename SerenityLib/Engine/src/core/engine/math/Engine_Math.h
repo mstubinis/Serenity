@@ -2,22 +2,17 @@
 #ifndef ENGINE_ENGINE_MATH_H
 #define ENGINE_ENGINE_MATH_H
 
-#include <glm/fwd.hpp>
-#include <glm/gtc/quaternion.hpp>
 #include <core/engine/utils/Utils.h>
 
 #include <assimp/Importer.hpp>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics/Color.hpp>
-#include <core/engine/math/Numbers.h>
 
 class btVector3;
 class btRigidBody;
 class btQuaternion;
 class Camera;
-typedef unsigned short  ushort;
-typedef unsigned char   uchar;
 
 namespace Engine{
 namespace Math{

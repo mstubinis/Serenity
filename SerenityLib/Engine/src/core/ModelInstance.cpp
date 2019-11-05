@@ -58,7 +58,7 @@ namespace Engine {
             glm::vec3 camPos = cam.getPosition();
             Entity& parent = i.m_Parent;
             auto& body = *(parent.getComponent<ComponentBody>());
-            glm::mat4 parentModel = body.modelMatrix();
+            glm::mat4 parentModel = body.modelMatrixRendering();
 
             auto& animationQueue = i.m_AnimationQueue;
             Renderer::sendUniform4Safe("Object_Color", i.m_Color);

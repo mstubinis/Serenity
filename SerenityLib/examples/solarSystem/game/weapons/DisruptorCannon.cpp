@@ -66,7 +66,7 @@ struct DisruptorCannonInstanceBindFunctor { void operator()(EngineResource* r) c
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
 
     glm::mat4 modelMatrix = parentModel * i.modelMatrix();
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
@@ -87,7 +87,7 @@ struct DisruptorCannonOutlineInstanceBindFunctor { void operator()(EngineResourc
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
 
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
     glm::mat4 model = parentModel * i.modelMatrix();
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
 
@@ -109,7 +109,7 @@ struct DisruptorCannonTailInstanceBindFunctor { void operator()(EngineResource* 
     auto& cam = *parent.scene().getActiveCamera();
     auto camOrien = cam.getOrientation();
 
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
     glm::mat4 model = parentModel * i.modelMatrix();
     glm::vec3 worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
 
@@ -196,7 +196,7 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(EntityWrapper* target, Disr
     cannonProjectileBody.setUserPointer2(&source);
     cannonProjectileBody.setCollisionFunctor(DisruptorCannonCollisionFunctor());
     cannonProjectileBody.setInternalPhysicsUserPointer(&cannonProjectileBody);
-    const_cast<btRigidBody&>(cannonProjectileBody.getBtBody()).setDamping(0.0f, 0.0f);
+    cannonProjectileBody.setDamping(static_cast<decimal>(0.0), static_cast<decimal>(0.0));
 
 
 

@@ -71,7 +71,7 @@ struct PhotonTorpedoOldInstanceCoreBindFunctor { void operator()(EngineResource*
     auto& cam = *parent.scene().getActiveCamera();
     const auto camOrien = cam.getOrientation();
 
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
     glm::mat4 model = parentModel * i.modelMatrix();
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -101,7 +101,7 @@ struct PhotonTorpedoOldInstanceGlowBindFunctor { void operator()(EngineResource*
     auto& cam = *parent.scene().getActiveCamera();
     const auto camOrien = cam.getOrientation();
 
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
     glm::mat4 model = parentModel * i.modelMatrix();
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
@@ -125,7 +125,7 @@ struct PhotonTorpedoOldFlareInstanceBindFunctor { void operator()(EngineResource
     auto& cam = *parent.scene().getActiveCamera();
     auto camOrien = cam.getOrientation();
 
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
     glm::mat4 model = parentModel * i.modelMatrix();
     glm::vec3 worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
 
@@ -219,7 +219,6 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(EntityWrapper* target, Ph
     body.setUserPointer2(&source);
     body.setCollisionFunctor(PhotonTorpedoOldCollisionFunctor());
     body.setInternalPhysicsUserPointer(&body);
-    const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
 
     auto data = source.calculatePredictedVector(target, body, chosen_target_pos);
     auto& offset = data.pedictedVector;
@@ -233,7 +232,7 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(EntityWrapper* target, Ph
     body.applyImpulse(offset.x, offset.y, offset.z, false);
 
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
-    const_cast<btRigidBody&>(body.getBtBody()).setDamping(0.0f, 0.0f);
+    body.setDamping(static_cast<decimal>(0.0), static_cast<decimal>(0.0));
     body.setRotation(q);
 
     light = new PointLight(final_world_position, &map);

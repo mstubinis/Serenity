@@ -2,22 +2,30 @@
 #ifndef ENGINE_PHYSICS_WORLD_H
 #define ENGINE_PHYSICS_WORLD_H
 
-#include <btBulletDynamicsCommon.h>
-#include <memory>
+#include <core/engine/utils/Utils.h>
 
 class btSequentialImpulseConstraintSolverMt;
+class btSequentialImpulseConstraintSolver;
+class btDefaultCollisionConfiguration;
+class btCollisionDispatcher;
+class btCollisionConfiguration;
+class btConstraintSolver;
+class btBroadphaseInterface;
+class btDispatcher;
+class btCollisionShape;
+class btTransform;
+class btVector3;
+class btDiscreteDynamicsWorld;
 namespace Engine {
     namespace epriv {
         class  GLDebugDrawer;
-        class  PhyiscsDynamicWorld;
-
         struct PhysicsWorld {
             btBroadphaseInterface*                  broadphase;
             btDefaultCollisionConfiguration*        collisionConfiguration;
             btCollisionDispatcher*                  dispatcher;
             btSequentialImpulseConstraintSolver*    solver;
             btSequentialImpulseConstraintSolverMt*  solverMT;
-            PhyiscsDynamicWorld*                    world;
+            btDiscreteDynamicsWorld*                world;
             GLDebugDrawer*                          debugDrawer;
             PhysicsWorld(const unsigned int numCores);
             ~PhysicsWorld();
@@ -26,16 +34,6 @@ namespace Engine {
             PhysicsWorld& operator=(const PhysicsWorld&)           = delete;
             PhysicsWorld(PhysicsWorld&& other) noexcept            = delete;
             PhysicsWorld& operator=(PhysicsWorld&& other) noexcept = delete;
-        };
-
-        //This is derived so we can render btUniformScalingShapes, the current Bullet build has this bugged.
-        class PhyiscsDynamicWorld : public btDiscreteDynamicsWorld {
-            private:
-                btScalar m_scale;
-            public:
-                PhyiscsDynamicWorld(btDispatcher* dp, btBroadphaseInterface* pc, btConstraintSolver* cs, btCollisionConfiguration* cc);
-                virtual ~PhyiscsDynamicWorld();
-                void debugDrawObject(const btTransform& worldTransform, const btCollisionShape* shape, const btVector3& color);
         };
     };
 };

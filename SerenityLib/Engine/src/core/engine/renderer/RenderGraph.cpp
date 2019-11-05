@@ -197,7 +197,7 @@ void RenderPipeline::cpu_execute(Viewport& viewport, Camera& camera, const doubl
                         const auto& radius = model.radius();
                         auto pos = glm::vec3(body->position()) + _modelInstance.position();
                         const auto sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
-                        auto comparison = radius * 1100.0f;
+                        auto comparison = radius * static_cast<decimal>(1100.0);
                         if (!_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) {
                             _modelInstance.setPassedRenderCheck(false);
                         }else{
@@ -237,7 +237,7 @@ void RenderPipeline::render(Viewport& viewport, Camera& camera, const double& dt
                     for (auto& instanceNode : meshNode->instanceNodes) {
                         auto& _modelInstance = *instanceNode->instance;
                         auto* body = _modelInstance.parent().getComponent<ComponentBody>();
-                        auto modelMatrix = body->modelMatrix();
+                        auto modelMatrix = body->modelMatrixRendering();
                         if (_modelInstance.passedRenderCheck()) {
                             if (sortingMode != SortingMode::None) {
                                 _mesh.sortTriangles(camera, _modelInstance, modelMatrix, sortingMode);
@@ -270,7 +270,7 @@ void RenderPipeline::render_bruteforce(Viewport& viewport, Camera& camera, const
         auto& _material = *_modelInstance.material();
 
         auto* body = _modelInstance.parent().getComponent<ComponentBody>();
-        auto modelMatrix = body->modelMatrix();
+        auto modelMatrix = body->modelMatrixRendering();
         if (_modelInstance.passedRenderCheck()) {
             if (sortingMode != SortingMode::None) {
                 _mesh.sortTriangles(camera, _modelInstance, modelMatrix, sortingMode);

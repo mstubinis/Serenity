@@ -471,7 +471,7 @@ M name=Triton parent=Neptune radius=1353.4 r=1 g=1 b=1 position=354759 x=3321173
 #M name=Neso parent=Neptune
 
 #NOTE pluto orbits a point outside itself. Perhaps add this in a future version
-P name=Pluto parent=Sun radius=1184 r=1 g=1 b=1 position=5906380000 x=-12683008000 y=0 z=67685995500 a=1.78721583 type=1 atmosphereHeight=0 texture=Pluto.dds tilt=57.47 eccentricity=0.24905 period=90581 majorAxis=5915099807.478 days=6.39 inclination=17.0
+P name=Pluto parent=Sun radius=1184 r=1 g=1 b=1 position=5906380000 x=-12683008000 y=0 z=67685995500 a=1.78721583 type=0 atmosphereHeight=0 texture=Pluto.dds tilt=57.47 eccentricity=0.24905 period=90581 majorAxis=5915099807.478 days=6.39 inclination=17.0
 M name=Charon parent=Pluto radius=606 r=1 g=1 b=1 position=17536 x=56222 y=0 z=166102 a=1.24441886 type=3 atmosphereHeight=0 texture=Charon.dds eccentricity=0.0002 tilt=0 period=6.387 majorAxis=19591 days=6.387
 
 #M name=Styx parent=Pluto

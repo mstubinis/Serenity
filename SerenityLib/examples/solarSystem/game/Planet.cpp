@@ -36,7 +36,6 @@ void Planets::init() {
     
 }
 
-
 float PlanetaryRenderSpace(float& outerRadius,float& _distanceReal) {
     //2.718281828459045235360287471352 = euler's number
     float _factor = 1.0f - glm::smoothstep(0.0f, glm::pow(outerRadius, 0.67f) * 215.0f, _distanceReal);
@@ -62,10 +61,10 @@ struct PlanetaryRingModelInstanceBindFunctor{void operator()(EngineResource* r) 
     Planet& obj = *(Planet*)i.getUserPointer(); 
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     float atmosphereHeight = obj.getAtmosphereHeight();
-    auto* m_Body = obj.getComponent<ComponentBody>();
+    auto& m_Body = *obj.getComponent<ComponentBody>();
 
-    glm::vec3 pos = m_Body->position();
-    glm::quat orientation = m_Body->rotation();
+    glm::vec3 pos = m_Body.position();
+    glm::quat orientation = m_Body.rotation();
     glm::vec3 camPosR = c->getPosition();
     glm::vec3 camPos = camPosR - pos;
     float camHeight = glm::length(camPos);
@@ -81,13 +80,13 @@ struct PlanetaryRingModelInstanceBindFunctor{void operator()(EngineResource* r) 
     float Km = 0.0025f;
     float Kr = 0.0015f;
     float ESun = 20.0f;
-    glm::vec3 scl = m_Body->getScale();
+    glm::vec3 scl = m_Body.getScale();
     
     float fScaledepth = 0.25f;
     float innerRadius = obj.getGroundRadius() * 0.5f; //includes rings too
     float outerRadius = obj.getRadius();
 
-    glm::mat4 model = m_Body->modelMatrix();
+    glm::mat4 model = m_Body.modelMatrixRendering();
 
     //TODO: experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
     /*
@@ -130,11 +129,11 @@ struct PlanetaryRingModelInstanceBindFunctor{void operator()(EngineResource* r) 
 struct StarModelInstanceBindFunctor{void operator()(EngineResource* r) const {
     ModelInstance& i = *(ModelInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
-    auto* m_Body = obj.getComponent<ComponentBody>();
-    Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    glm::vec3 pos = m_Body->position();
-    glm::vec3 camPosR = c->getPosition();
-    glm::quat orientation = m_Body->rotation();
+    auto& m_Body = *obj.getComponent<ComponentBody>();
+    Camera& c = *Resources::getCurrentScene()->getActiveCamera();
+    glm::vec3 pos = m_Body.position();
+    glm::vec3 camPosR = c.getPosition();
+    glm::quat orientation = m_Body.rotation();
 
     Renderer::sendUniform4Safe("Object_Color",i.color());
     Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
@@ -172,13 +171,13 @@ struct StarModelInstanceUnbindFunctor {void operator()(EngineResource* r) const 
 struct AtmosphericScatteringGroundModelInstanceBindFunctor{void operator()(EngineResource* r) const {
     ModelInstance& i = *(ModelInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
-    Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    auto* m_Body = obj.getComponent<ComponentBody>();
+    Camera& c = *Resources::getCurrentScene()->getActiveCamera();
+    auto& m_Body = *obj.getComponent<ComponentBody>();
     float atmosphereHeight = obj.getAtmosphereHeight();
 
-    glm::vec3 pos = m_Body->position();
-    glm::quat orientation = m_Body->rotation();
-    glm::vec3 camPosR = c->getPosition();
+    glm::vec3 pos = m_Body.position();
+    glm::quat orientation = m_Body.rotation();
+    glm::vec3 camPosR = c.getPosition();
     glm::vec3 camPos = camPosR - pos;
     float camHeight = glm::length(camPos);
     float camHeight2 = camHeight*camHeight;
@@ -193,13 +192,13 @@ struct AtmosphericScatteringGroundModelInstanceBindFunctor{void operator()(Engin
     float Km = 0.0025f;
     float Kr = 0.0015f;
     float ESun = 20.0f;
-    glm::vec3 scl = m_Body->getScale();
+    glm::vec3 scl = m_Body.getScale();
     
     float fScaledepth = 0.25f;
     float innerRadius = obj.getGroundRadius(); //includes rings too
     float outerRadius = obj.getRadius();
 
-    glm::mat4 model = m_Body->modelMatrix();
+    glm::mat4 model = m_Body.modelMatrixRendering();
 
     //TODO: experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
     /*
@@ -253,13 +252,13 @@ struct AtmosphericScatteringGroundModelInstanceUnbindFunctor{void operator()(Eng
 struct AtmosphericScatteringSkyModelInstanceBindFunctor{void operator()(EngineResource* r) const {
     ModelInstance& i = *(ModelInstance*)r;
     Planet& obj = *(Planet*)i.getUserPointer();
-    Camera* c = Resources::getCurrentScene()->getActiveCamera();
+    Camera& c = *Resources::getCurrentScene()->getActiveCamera();
     auto& m_Body = *obj.getComponent<ComponentBody>();
     float atmosphereHeight = obj.getAtmosphereHeight();
 
     glm::vec3 thisPos = m_Body.position();
     glm::quat orientation = m_Body.rotation();
-    glm::vec3 camPosR = c->getPosition();
+    glm::vec3 camPosR = c.getPosition();
     glm::vec3 camPos = camPosR - thisPos;
     float camHeight = glm::length(camPos);
     float camHeight2 = camHeight * camHeight;

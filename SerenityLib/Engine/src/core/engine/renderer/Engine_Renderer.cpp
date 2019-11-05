@@ -1479,7 +1479,7 @@ class epriv::RenderManager::impl final{
             if (!s.isActive())
                 return;
             auto& body = *s.getComponent<ComponentBody>();
-            const auto pos = glm::vec3(body.position());
+            const auto pos = body.position_render();
             Renderer::sendUniform4("light.DataA", s.m_AmbientIntensity, s.m_DiffuseIntensity, s.m_SpecularIntensity, 0.0f);
             Renderer::sendUniform4("light.DataC", 0.0f, pos.x, pos.y, pos.z);
             Renderer::sendUniform4("light.DataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, static_cast<float>(s.m_Type));
@@ -1491,7 +1491,7 @@ class epriv::RenderManager::impl final{
             if (!p.isActive()) 
                 return;
             auto& body = *p.getComponent<ComponentBody>();
-            const auto pos = glm::vec3(body.position());
+            const auto pos = body.position_render();
             const auto factor = 1100.0f * p.m_CullingRadius;
             const auto distSq = static_cast<float>(c.getDistanceSquared(pos));
             if ((!c.sphereIntersectTest(pos, p.m_CullingRadius)) || (distSq > factor * factor))
@@ -1503,7 +1503,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform4Safe("light.DataE", 0.0f, 0.0f, static_cast<float>(p.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
-            const auto model = body.modelMatrix();
+            const auto model = body.modelMatrixRendering();
 
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", m_UBOCameraData.ViewProj);
@@ -1535,7 +1535,7 @@ class epriv::RenderManager::impl final{
             if (!s.isActive()) 
                 return;
             auto& body = *s.m_Entity.getComponent<ComponentBody>();
-            auto pos = glm::vec3(body.position());
+            auto pos = body.position_render();
             auto _forward = glm::vec3(body.forward());
             const auto factor = 1100.0f * s.m_CullingRadius;
             const auto distSq = static_cast<float>(c.getDistanceSquared(pos));
@@ -1549,7 +1549,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform2Safe("VertexShaderData", s.m_OuterCutoff, s.m_CullingRadius);
             Renderer::sendUniform1Safe("Type", 2.0f);
 
-            const auto model = body.modelMatrix();
+            const auto model = body.modelMatrixRendering();
 
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", m_UBOCameraData.ViewProj);
@@ -1572,7 +1572,7 @@ class epriv::RenderManager::impl final{
             if (!r.isActive()) 
                 return;
             auto& body = *r.m_Entity.getComponent<ComponentBody>();
-            const auto pos = glm::vec3(body.position());
+            const auto pos = body.position_render();
             auto cullingDistance = r.m_RodLength + (r.m_CullingRadius * 2.0f);
             const auto factor = 1100.0f * cullingDistance;
             const auto distSq = static_cast<float>(c.getDistanceSquared(pos));
@@ -1588,7 +1588,7 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform4Safe("light.DataE", r.m_RodLength, 0.0f, static_cast<float>(r.m_AttenuationModel), 0.0f);
             Renderer::sendUniform1Safe("Type", 1.0f);
 
-            const auto model = body.modelMatrix();
+            const auto model = body.modelMatrixRendering();
 
             Renderer::sendUniformMatrix4("Model", model);
             Renderer::sendUniformMatrix4("VP", m_UBOCameraData.ViewProj);

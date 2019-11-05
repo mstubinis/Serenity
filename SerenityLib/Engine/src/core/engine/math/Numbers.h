@@ -19,7 +19,7 @@
     typedef glm::mat4   glm_mat4;
 #else
     //TODO: find a way to get bullet to use double precision without compiler / linker errors
-    //#define BT_USE_DOUBLE_PRECISION
+    #define BT_USE_DOUBLE_PRECISION
 
     typedef double      decimal;
     typedef glm::dvec2  glm_vec2;

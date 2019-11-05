@@ -169,6 +169,7 @@ class ComponentBody : public ComponentBaseClass {
 		const glm_vec3 getLinearVelocity() const;
 		const glm_vec3 getAngularVelocity() const;
 		const glm_mat4 modelMatrix() const;
+        const glm::mat4 modelMatrixRendering() const;
 		const btRigidBody& getBtBody() const;
 
         void setCollision(const CollisionType::Type collisionType, const float mass);

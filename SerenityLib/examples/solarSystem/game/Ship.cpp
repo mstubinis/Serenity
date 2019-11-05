@@ -54,7 +54,7 @@ void ShipModelInstanceBindFunctor::operator()(EngineResource* r) const {
     glm::vec3 camPos = cam.getPosition();
     Entity& parent = i.parent();
     auto& body = *(parent.getComponent<ComponentBody>());
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
 
     Renderer::sendUniform4Safe("Object_Color", i.color());
     Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
@@ -301,7 +301,7 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
 
     setModel(shipInfo.MeshHandles[0]);
 
-    const_cast<btRigidBody&>(body.getBtBody()).setDamping(static_cast<btScalar>(0.01), static_cast<btScalar>(0.2));
+    body.setDamping(static_cast<decimal>(0.01), static_cast<decimal>(0.2));
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     body.setPosition(pos);
     body.setScale(scl);

@@ -66,7 +66,7 @@ struct PulsePhaserInstanceBindFunctor {void operator()(EngineResource* r) const 
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
 
     glm::mat4 modelMatrix = parentModel * i.modelMatrix();
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
@@ -87,7 +87,7 @@ struct PulsePhaserOutlineInstanceBindFunctor { void operator()(EngineResource* r
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
 
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
     glm::mat4 model = parentModel * i.modelMatrix();
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
 
@@ -109,7 +109,7 @@ struct PulsePhaserTailInstanceBindFunctor {void operator()(EngineResource* r) co
     auto& cam = *parent.scene().getActiveCamera();
     auto camOrien = cam.getOrientation();
 
-    auto parentModel = glm::mat4(body.modelMatrix());
+    auto parentModel = body.modelMatrixRendering();
     auto model = parentModel * i.modelMatrix();
     auto worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
 
@@ -192,7 +192,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(EntityWrapper* target, PulsePhaser&
     cannonBody.setUserPointer2(&source);
     cannonBody.setCollisionFunctor(PulsePhaserCollisionFunctor());
     cannonBody.setInternalPhysicsUserPointer(&cannonBody);
-    const_cast<btRigidBody&>(cannonBody.getBtBody()).setDamping(0.0f, 0.0f);
+    cannonBody.setDamping(static_cast<decimal>(0.0), static_cast<decimal>(0.0));
 
 
     light = new PointLight(finalPosition, &map);

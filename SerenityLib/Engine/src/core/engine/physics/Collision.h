@@ -3,10 +3,8 @@
 #define ENGINE_PHYSICS_COLLISION_H
 
 #include <core/engine/utils/Utils.h>
-#include <LinearMath/btVector3.h>
 #include <core/engine/physics/PhysicsEnums.h>
-
-#include <glm/vec3.hpp>
+#include <LinearMath/btVector3.h>
 
 class  btCollisionShape;
 class  Mesh;

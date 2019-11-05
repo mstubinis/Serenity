@@ -2,6 +2,8 @@
 #ifndef ENGINE_UTILS_H
 #define ENGINE_UTILS_H
 
+
+
 #if _WIN32 || _WIN64
     #if _WIN64
         #define ENVIRONMENT64
@@ -22,7 +24,6 @@
 
 #else
 #endif
-
 #include <core/engine/math/Numbers.h>
 #include <vector>
 #include <string>
@@ -94,7 +95,7 @@ template <typename E> void vector_clear(E& t){
 //formats a number to have commas to represent thousandth places
 template<typename T> const std::string convertNumToNumWithCommas(const T& n){
     std::string r = std::to_string(n);
-    auto p = r.length() - 3;
+    int p = static_cast<int>(r.length()) - 3;
     while(p > 0){
         r.insert(p, ",");
         p -= 3;

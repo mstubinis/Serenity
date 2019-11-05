@@ -57,7 +57,7 @@ Brel::Brel(const AIType::Type ai_type, Team& team, Client& client, Map& map, con
 
     body.rebuildRigidBody();
 
-    const_cast<btRigidBody&>(body.getBtBody()).setDamping(static_cast<btScalar>(0.01), static_cast<btScalar>(0.2));
+    body.setDamping(static_cast<decimal>(0.01), static_cast<decimal>(0.2));
     body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     body.setCollisionGroup(CollisionFilter::_Custom_4); //i belong to ramming hull group (group 4)
     body.setCollisionMask(CollisionFilter::_Custom_4); //i should only collide with other ramming hulls only
@@ -99,10 +99,12 @@ Brel::Brel(const AIType::Type ai_type, Team& team, Client& client, Map& map, con
     weapons.addPrimaryWeaponCannon(*leftTop, true);
     weapons.addPrimaryWeaponCannon(*rightTop, true);
 
-    auto* fwd_torp = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 2);
+    auto* fwd_torp_1 = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 1);
+    auto* fwd_torp_2 = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 1);
     auto* aft_torp = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.115291f, 0.511922f), glm::vec3(0.0f, 0.0f, 1.0f), 35.0f, 1);
 
-    weapons.addSecondaryWeaponTorpedo(*fwd_torp, true);
+    weapons.addSecondaryWeaponTorpedo(*fwd_torp_1, true);
+    weapons.addSecondaryWeaponTorpedo(*fwd_torp_2, true);
     weapons.addSecondaryWeaponTorpedo(*aft_torp);
 
     foldWingsUp();

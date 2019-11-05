@@ -84,7 +84,7 @@ struct ShieldInstanceBindFunctor {void operator()(EngineResource* r) const {
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
     auto bodypos = glm::vec3(body.position());
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
 
     Renderer::sendUniform4Safe("Object_Color", i.color());
     glm::mat4 modelMatrix = parentModel * i.modelMatrix();

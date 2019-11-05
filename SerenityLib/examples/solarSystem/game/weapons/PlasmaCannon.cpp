@@ -66,7 +66,7 @@ struct PlasmaCannonInstanceBindFunctor {void operator()(EngineResource* r) const
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
 
     glm::mat4 modelMatrix = parentModel * i.modelMatrix();
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
@@ -87,7 +87,7 @@ struct PlasmaCannonOutlineInstanceBindFunctor { void operator()(EngineResource* 
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
 
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
     glm::mat4 model = parentModel * i.modelMatrix();
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
 
@@ -109,7 +109,7 @@ struct PlasmaCannonTailInstanceBindFunctor {void operator()(EngineResource* r) c
     auto& cam = *parent.scene().getActiveCamera();
     auto camOrien = cam.getOrientation();
 
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
     glm::mat4 model = parentModel * i.modelMatrix();
     glm::vec3 worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
 
@@ -192,7 +192,7 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(EntityWrapper* target, PlasmaCann
     cannonBody.setUserPointer2(&source);
     cannonBody.setCollisionFunctor(PlasmaCannonCollisionFunctor());
     cannonBody.setInternalPhysicsUserPointer(&cannonBody);
-    const_cast<btRigidBody&>(cannonBody.getBtBody()).setDamping(0.0f, 0.0f);
+    cannonBody.setDamping(static_cast<decimal>(0.0), static_cast<decimal>(0.0));
 
 
     light = new PointLight(finalPosition, &map);

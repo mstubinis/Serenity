@@ -73,7 +73,7 @@ struct PlasmaBeamInstanceBindFunctor { void operator()(EngineResource* r) const 
     auto& body = *parent.getComponent<ComponentBody>();
     PlasmaBeam& beam = *static_cast<PlasmaBeam*>(i.getUserPointer());
 
-    glm::mat4 parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrixRendering();
     glm::mat4 model = parentModel * i.modelMatrix();
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
 
@@ -118,10 +118,7 @@ PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
     secondModel.setColor(plasmaGreen);
 
     auto& shipBody = *ship.getComponent<ComponentBody>();
-
-    auto shipMatrix = shipBody.modelMatrix();
-    shipMatrix = glm::translate(shipMatrix, position);
-    const auto finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+    const glm::vec3 finalPosition = shipBody.position() + Math::rotate_vec3(shipBody.rotation(), position);
 
     firstWindupLight = new PointLight(finalPosition, &map);
     firstWindupLight->setColor(plasmaGreen);

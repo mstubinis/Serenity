@@ -294,7 +294,7 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& m
     body1.setCollisionGroup(CollisionFilter::_Custom_2); //i belong to weapons (group 2)
     body1.setCollisionMask(CollisionFilter::_Custom_1 | CollisionFilter::_Custom_3); //i should only collide with shields and hull (group 1 and group 3)
     body1.setInternalPhysicsUserPointer(&body1);
-    const_cast<btRigidBody&>(body1.getBtBody()).setDamping(0.0f, 0.0f);
+    body1.setDamping(static_cast<decimal>(0.0), static_cast<decimal>(0.0));
 }
 PrimaryWeaponBeam::~PrimaryWeaponBeam() {
     beamGraphic.destroy();

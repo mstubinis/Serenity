@@ -31,17 +31,21 @@ class Map: public Scene{
         Client&                                        m_Client;
         HUD*                                           m_HUD;
 
-        std::tuple<std::string, Anchor*>               m_RootAnchor;
-        std::tuple<std::string, Anchor*>               m_SpawnAnchor;
-
         Freelist<PrimaryWeaponCannonProjectile*>       m_ActiveCannonProjectiles;
         Freelist<SecondaryWeaponTorpedoProjectile*>    m_ActiveTorpedoProjectiles;
 
         void loadFromFile(const std::string& file);
-        Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const decimal& x = 0, const decimal & y = 0, const decimal & z = 0);
+    private:
+        std::tuple<std::string, Anchor*>               m_RootAnchor;
+        std::tuple<std::string, Anchor*>               m_SpawnAnchor;
+        Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const decimal& x = 0, const decimal& y = 0, const decimal& z = 0);
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const glm_vec3& position);
     public:
         Anchor* internalCreateDeepspaceAnchor(const decimal& x, const decimal& y, const decimal& z, const std::string& name = "");
+        Anchor* getRootAnchor();
+        Anchor* getSpawnAnchor();
+        const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr);
+    public:
 
         std::vector<EntityWrapper*> m_Objects;
 
@@ -55,7 +59,6 @@ class Map: public Scene{
 
         Client& getClient();
 
-        const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr);
         const bool hasShip(const std::string& shipName) const;
         
         HUD& getHUD();
@@ -72,8 +75,6 @@ class Map: public Scene{
 
         std::unordered_map<std::string, Planet*>& getPlanets() { return m_Planets; }
         std::unordered_map<std::string, Ship*>& getShips() { return m_Ships; }
-        Anchor* getRootAnchor();
-        Anchor* getSpawnAnchor();
 
         const int addCannonProjectile(PrimaryWeaponCannonProjectile*, const int index = -1);
         const int addTorpedoProjectile(SecondaryWeaponTorpedoProjectile*, const int index = -1);

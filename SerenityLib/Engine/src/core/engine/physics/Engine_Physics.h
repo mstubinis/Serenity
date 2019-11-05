@@ -2,9 +2,9 @@
 #ifndef ENGINE_ENGINE_PHYSICS_H
 #define ENGINE_ENGINE_PHYSICS_H
 
+#include <core/engine/utils/Utils.h>
 #include <glm/vec3.hpp>
 #include <memory>
-#include <core/engine/utils/Utils.h>
 #include <LinearMath/btVector3.h>
 
 struct Entity;
