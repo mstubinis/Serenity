@@ -14,7 +14,7 @@ namespace Engine {
         struct DefaultMaterialBindFunctor {
             void operator()(BindableResource* r) const {
                 auto& material = *static_cast<Material*>(r);
-                const int& numComponents = material.m_Components.size();
+                const auto& numComponents = material.m_Components.size();
                 unsigned int textureUnit = 0;
                 for (int i = 0; i < numComponents; ++i) {
                     if (material.m_Components[i]) {
@@ -22,7 +22,7 @@ namespace Engine {
                         component.bind(i, textureUnit);
                     }
                 }
-                Renderer::sendUniform1Safe("numComponents", numComponents);
+                Renderer::sendUniform1Safe("numComponents", int(numComponents));
                 Renderer::sendUniform1Safe("Shadeless", static_cast<int>(material.m_Shadeless));
                 Renderer::sendUniform4Safe("Material_F0AndID", material.m_F0Color.r, material.m_F0Color.g, material.m_F0Color.b, static_cast<float>(material.m_ID));
                 Renderer::sendUniform4Safe("MaterialBasePropertiesOne", material.m_BaseGlow, material.m_BaseAO, material.m_BaseMetalness, material.m_BaseSmoothness);

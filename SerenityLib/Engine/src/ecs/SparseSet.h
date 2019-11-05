@@ -16,8 +16,8 @@ namespace epriv {
     template <typename...>      class SparseSet;
     template <typename TID>     class SparseSet<TID> {
         protected:
-            uint                              maxLastIndex;
-            std::vector<uint>                 sparse; //maps entity ID to component Index in dense
+            size_t                            maxLastIndex;
+            std::vector<size_t>               sparse; //maps entity ID to component Index in dense
         public:
             SparseSet() { 
                 maxLastIndex = 0;
@@ -59,7 +59,7 @@ namespace epriv {
             }
 
             template<typename... ARGS> inline T* _add(const uint& entityID, ARGS&&... args) {
-                const uint sparseIndex = entityID - 1;
+                const auto sparseIndex = entityID - 1;
                 if (sparseIndex >= super::sparse.size()) {
                     super::sparse.resize(sparseIndex + 1, 0);
                 }
@@ -74,18 +74,18 @@ namespace epriv {
             }
             //TODO: this entire function needs a serious look at
             inline const bool _remove(const uint& entityID) {
-                const uint removedEntityIndex = entityID - 1;
+                const auto removedEntityIndex = entityID - 1;
                 if (removedEntityIndex >= super::sparse.size()) { //needed for scene.removeEntity(), as it iterates over all systems and some might not have the entity in them
                     return false;
                 }
-                const uint removedComponentID = super::sparse[removedEntityIndex];
+                const auto removedComponentID = super::sparse[removedEntityIndex];
                 if (removedComponentID == 0) {
                     return false;
                 }
                 super::sparse[removedEntityIndex] = 0;
                 super::maxLastIndex = 0;
-                uint maxValue = 0;
-                for (uint i = super::sparse.size(); i-- > 0;) { 
+                size_t maxValue = 0;
+                for (size_t i = super::sparse.size(); i-- > 0;) { 
                     if (super::sparse[i] > 0) {
                         if (super::sparse[i] > maxValue) {
                             super::maxLastIndex = i;
@@ -94,8 +94,8 @@ namespace epriv {
                     } 
                 } 
                 if (dense.size() > 1) {
-                    const uint firstIndex = removedComponentID - 1;
-                    const uint lastIndex = dense.size() - 1;
+                    const auto firstIndex = removedComponentID - 1;
+                    const auto lastIndex = dense.size() - 1;
                     if (firstIndex != lastIndex) {
                         if (firstIndex < lastIndex) {
                             std::swap(dense[firstIndex], dense[lastIndex]);
@@ -107,12 +107,12 @@ namespace epriv {
                 return true;
             }
             inline T* _get(const uint& entityID) {
-                const uint entityIndexInSparse = entityID - 1;
-                const uint sparseSize  = super::sparse.size();
+                const auto entityIndexInSparse = entityID - 1;
+                const auto sparseSize  = super::sparse.size();
                 if (sparseSize == 0 || entityIndexInSparse >= sparseSize || super::sparse[entityIndexInSparse] == 0) {
                     return nullptr;
                 }
-                const uint retIndex = super::sparse[entityIndexInSparse] - 1;
+                const auto retIndex = super::sparse[entityIndexInSparse] - 1;
                 if (retIndex >= dense.size()) {
                     return nullptr;
                 }

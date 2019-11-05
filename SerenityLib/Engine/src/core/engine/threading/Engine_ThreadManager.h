@@ -25,21 +25,21 @@ namespace epriv{
 
             void _update(const double& dt);
 
-            const uint cores() const;
+            const size_t cores() const;
     };
 namespace threading{
 
     //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
-    template<typename T> std::vector<std::vector<T>> splitVector(const std::vector<T>& v, uint n = 0) {
+    template<typename T> std::vector<std::vector<T>> splitVector(const std::vector<T>& v, size_t n = 0) {
         if (n == 0)
             n = Core::m_Engine->m_ThreadManager.cores();
-        const uint& vs = v.size();
+        const auto vs = v.size();
         std::vector<std::vector<T>> outVec;
-        uint length = vs / n;
-        uint remain = vs % n;
-        uint begin = 0;
-        uint end = 0;
-        for (uint i = 0; i < std::min(n, vs); ++i) {
+        auto length = vs / n;
+        auto remain = vs % n;
+        size_t begin = 0;
+        size_t end = 0;
+        for (auto i = 0; i < std::min(n, vs); ++i) {
             end += (remain > 0) ? (length + !!(remain--)) : length;
             outVec.emplace_back(v.begin() + begin, v.begin() + end);
             begin = end;
@@ -47,23 +47,23 @@ namespace threading{
         return outVec;
     }
     //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
-    template<typename T> std::vector<std::vector<uint>> splitVectorIndices(const std::vector<T>& v, uint n = 0) {
+    template<typename T> std::vector<std::vector<uint>> splitVectorIndices(const std::vector<T>& v, size_t n = 0) {
         if (n == 0) 
             n = Core::m_Engine->m_ThreadManager.cores();
-        const uint& vs = v.size();
+        const auto vs = v.size();
         std::vector<std::vector<uint>> outVec;
-        uint length = vs / n;
-        uint remain = vs % n;
-        uint begin = 0;
-        uint end = 0;
-        uint splitAmount = std::min(n, vs);
-        for (uint i = 0; i < splitAmount; ++i) {
+        auto length = vs / n;
+        auto remain = vs % n;
+        size_t begin = 0;
+        size_t end = 0;
+        auto splitAmount = std::min(n, vs);
+        for (auto i = 0; i < splitAmount; ++i) {
             outVec.emplace_back();
             end += (remain > 0) ? (length + !!(remain--)) : length;
-            uint splitSize = end - begin;
+            auto splitSize = end - begin;
             outVec[i].resize(splitSize);
-            for (uint j = 0; j < splitSize; ++j) {
-                outVec[i][j] = begin + j;
+            for (auto j = 0; j < splitSize; ++j) {
+                outVec[i][j] = static_cast<uint>(begin + j);
             }
             begin = end;
         }

@@ -400,7 +400,7 @@ void ComponentBody::translate(const decimal& p_X, const decimal& p_Y, const deci
     if (m_Physics) {
         auto& bt_rigidBody = *data.p->bullet_rigidBody;
         bt_rigidBody.activate();
-        btVector3 v(p_X, p_Y, p_Z);
+        btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         Math::translate(bt_rigidBody, v, p_Local);
         ComponentBody::setPosition(position() + Engine::Math::btVectorToGLM(v));
     }else{
@@ -421,7 +421,7 @@ void ComponentBody::rotate(const decimal& p_Pitch, const decimal& p_Yaw, const d
         btQuaternion quat = bt_rigidBody.getWorldTransform().getRotation().normalize();
         glm_quat glmquat(quat.w(), quat.x(), quat.y(), quat.z());
         Math::rotate(glmquat, p_Pitch, p_Yaw, p_Roll);
-        quat = btQuaternion(glmquat.x, glmquat.y, glmquat.z, glmquat.w);
+        quat = btQuaternion(static_cast<btScalar>(glmquat.x), static_cast<btScalar>(glmquat.y), static_cast<btScalar>(glmquat.z), static_cast<btScalar>(glmquat.w));
         bt_rigidBody.getWorldTransform().setRotation(quat);
         Math::recalculateForwardRightUp(bt_rigidBody, m_Forward, m_Right, m_Up);
     }else{
@@ -438,7 +438,7 @@ void ComponentBody::scale(const decimal& p_ScaleAmount) {
 }
 void ComponentBody::scale(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
     if (m_Physics) {
-        const auto& newScale = btVector3(p_X, p_Y, p_Z);
+        const auto& newScale = btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         const auto& physicsData = *data.p;
         Collision& collision_ = *physicsData.collision;
         auto collisionShape = collision_.getBtShape();
@@ -510,7 +510,7 @@ void ComponentBody::setPosition(const decimal& p_X, const decimal& p_Y, const de
     if (m_Physics) {
         auto& physicsData = *data.p;
         btTransform tr;
-        tr.setOrigin(btVector3(p_X, p_Y, p_Z));
+        tr.setOrigin(btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z)));
         tr.setRotation(physicsData.bullet_rigidBody->getOrientation());
         Collision& collision = *physicsData.collision;
         if (collision.getType() == CollisionType::TriangleShapeStatic) {
@@ -538,7 +538,7 @@ void ComponentBody::setPosition(const decimal& p_X, const decimal& p_Y, const de
 void ComponentBody::setGravity(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
     if (m_Physics) {
         auto& physicsData = *data.p;
-        physicsData.bullet_rigidBody->setGravity(btVector3(p_X, p_Y, p_Z));
+        physicsData.bullet_rigidBody->setGravity(btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z)));
     }
 }
 void ComponentBody::setRotation(const glm_quat& p_NewRotation) {
@@ -547,7 +547,7 @@ void ComponentBody::setRotation(const glm_quat& p_NewRotation) {
 void ComponentBody::setRotation(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const decimal& p_W) {
     if (m_Physics) {
         auto& physicsData = *data.p;
-        btQuaternion quat(p_X, p_Y, p_Z, p_W);
+        btQuaternion quat(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z), static_cast<btScalar>(p_W));
         quat = quat.normalize();
         auto& rigidBody = *physicsData.bullet_rigidBody;
         btTransform tr; tr.setOrigin(rigidBody.getWorldTransform().getOrigin());
@@ -574,7 +574,7 @@ void ComponentBody::setScale(const decimal& p_NewScale) {
 }
 void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
     if (m_Physics) {
-        const auto& newScale = btVector3(p_X, p_Y, p_Z);
+        const auto& newScale = btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         const auto& physicsData = *data.p;
         Collision& collision_ = *physicsData.collision;
         auto collisionShape = collision_.getBtShape();
@@ -795,7 +795,7 @@ const btRigidBody& ComponentBody::getBtBody() const {
 	return *data.p->bullet_rigidBody;
 }
 void ComponentBody::setDamping(const decimal& p_LinearFactor, const decimal& p_AngularFactor) {
-	data.p->bullet_rigidBody->setDamping(p_LinearFactor, p_AngularFactor);
+	data.p->bullet_rigidBody->setDamping(static_cast<btScalar>(p_LinearFactor), static_cast<btScalar>(p_AngularFactor));
 }
 void ComponentBody::setCollisionGroup(const short& group) {
     if (m_Physics) {
@@ -945,7 +945,7 @@ void ComponentBody::setLinearVelocity(const decimal& p_X, const decimal& p_Y, co
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 v(p_X, p_Y, p_Z);
+        btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         Math::translate(rigidBody, v, p_Local);
         rigidBody.setLinearVelocity(v);
     }
@@ -957,7 +957,7 @@ void ComponentBody::setAngularVelocity(const decimal& p_X, const decimal& p_Y, c
     if (m_Physics) {
 		auto& rigidBody = *data.p->bullet_rigidBody;
 		rigidBody.activate();
-		btVector3 v(p_X, p_Y, p_Z);
+		btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
 		Math::translate(rigidBody, v, p_Local);
 		rigidBody.setAngularVelocity(v);
     }
@@ -969,7 +969,7 @@ void ComponentBody::applyForce(const decimal& p_X, const decimal& p_Y, const dec
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 v(p_X, p_Y, p_Z);
+        btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         Math::translate(rigidBody, v, p_Local);
         rigidBody.applyCentralForce(v);
     }
@@ -978,16 +978,16 @@ void ComponentBody::applyForce(const glm_vec3& p_Force, const glm_vec3& p_Origin
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 v(p_Force.x, p_Force.y, p_Force.z);
+        btVector3 v(static_cast<btScalar>(p_Force.x), static_cast<btScalar>(p_Force.y), static_cast<btScalar>(p_Force.z));
         Math::translate(rigidBody, v, p_Local);
-        rigidBody.applyForce(v, btVector3(p_Origin.x, p_Origin.y, p_Origin.z));
+        rigidBody.applyForce(v, btVector3(static_cast<btScalar>(p_Origin.x), static_cast<btScalar>(p_Origin.y), static_cast<btScalar>(p_Origin.z)));
     }
 }
 void ComponentBody::applyImpulse(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const bool p_Local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 v(p_X, p_Y, p_Z);
+        btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         Math::translate(rigidBody, v, p_Local);
         rigidBody.applyCentralImpulse(v);
     }
@@ -996,16 +996,16 @@ void ComponentBody::applyImpulse(const glm_vec3& p_Impulse, const glm_vec3& p_Or
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 v(p_Impulse.x, p_Impulse.y, p_Impulse.z);
+        btVector3 v(static_cast<btScalar>(p_Impulse.x), static_cast<btScalar>(p_Impulse.y), static_cast<btScalar>(p_Impulse.z));
         Math::translate(rigidBody, v, p_Local);
-        rigidBody.applyImpulse(v, btVector3(p_Origin.x, p_Origin.y, p_Origin.z));
+        rigidBody.applyImpulse(v, btVector3(static_cast<btScalar>(p_Origin.x), static_cast<btScalar>(p_Origin.y), static_cast<btScalar>(p_Origin.z)));
     }
 }
 void ComponentBody::applyTorque(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const bool p_Local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 t(p_X, p_Y, p_Z);
+        btVector3 t(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         if (p_Local) {
             t = rigidBody.getInvInertiaTensorWorld().inverse() * (rigidBody.getWorldTransform().getBasis() * t);
         }
@@ -1019,7 +1019,7 @@ void ComponentBody::applyTorqueImpulse(const decimal& p_X, const decimal& p_Y, c
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 t(p_X, p_Y, p_Z);
+        btVector3 t(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         if (p_Local) {
             t = rigidBody.getInvInertiaTensorWorld().inverse() * (rigidBody.getWorldTransform().getBasis() * t);
         }

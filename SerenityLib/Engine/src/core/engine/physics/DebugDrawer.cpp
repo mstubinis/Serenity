@@ -66,11 +66,11 @@ void epriv::GLDebugDrawer::bindDataToGPU() {
 void epriv::GLDebugDrawer::renderLines() {
     if (m_VAO) {
         Renderer::bindVAO(m_VAO);
-        glDrawArrays(GL_LINES, 0, vertices.size());
+        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices.size()));
         Renderer::bindVAO(0);
     }else{
         bindDataToGPU();
-        glDrawArrays(GL_LINES, 0, vertices.size());
+        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices.size()));
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
     }

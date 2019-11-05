@@ -38,10 +38,10 @@ class Map: public Scene{
         Freelist<SecondaryWeaponTorpedoProjectile*>    m_ActiveTorpedoProjectiles;
 
         void loadFromFile(const std::string& file);
-        Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const float& x = 0, const float& y = 0, const float& z = 0);
-        Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const glm::vec3& position);
+        Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const decimal& x = 0, const decimal & y = 0, const decimal & z = 0);
+        Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const glm_vec3& position);
     public:
-        Anchor* internalCreateDeepspaceAnchor(const float& x, const float& y, const float& z, const std::string& name = "");
+        Anchor* internalCreateDeepspaceAnchor(const decimal& x, const decimal& y, const decimal& z, const std::string& name = "");
 
         std::vector<EntityWrapper*> m_Objects;
 

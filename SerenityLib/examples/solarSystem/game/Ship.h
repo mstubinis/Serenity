@@ -44,6 +44,13 @@ struct PrimaryWeaponBeam;
 struct PrimaryWeaponCannon;
 struct SecondaryWeaponTorpedo;
 
+struct ShipModelInstanceBindFunctor {
+    void operator()(EngineResource* r) const;
+};
+struct ShipModelInstanceUnbindFunctor {
+    void operator()(EngineResource* r) const;
+};
+
 class Ship: public EntityWrapper, public EventObserver {
     friend struct GameCameraLogicFunctor;
     friend struct ShipLogicFunctor;

@@ -16,7 +16,7 @@ epriv::ThreadManager::~ThreadManager(){
 void epriv::ThreadManager::_update(const double& dt){ 
     m_ThreadPool->update();
 }
-const uint epriv::ThreadManager::cores() const{  
+const size_t epriv::ThreadManager::cores() const{  
     return threadManager->m_ThreadPool->numThreads();
 }
 void epriv::threading::finalizeJob(std::function<void()>& task){

@@ -341,7 +341,7 @@ void Client::onReceiveTCP() {
                         auto* ship = ships.at(pI.name);
                         const auto chosen_target_position = glm::vec3(pI.r, pI.g, pI.b);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                        for (uint i = 0; i < info.size() / 3; ++i) {
+                        for (size_t i = 0; i < info.size() / 3; ++i) {
                             auto& cannon = ship->getPrimaryWeaponCannon(stoi(info[i * 3]));
                             const auto projectile_index = stoi(info[(i * 3) + 1]);
                             const auto target_name = info[(i * 3) + 2];
@@ -357,7 +357,7 @@ void Client::onReceiveTCP() {
                     if (map.hasShip(pI.name)) {
                         auto* ship = ships.at(pI.name);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                        for (uint i = 0; i < info.size() / 2; ++i) {
+                        for (size_t i = 0; i < info.size() / 2; ++i) {
                             auto& beam                        = ship->getPrimaryWeaponBeam(stoi(info[i * 2]));
                             const auto target_name            =      info[(i * 2) + 1];
 
@@ -376,7 +376,7 @@ void Client::onReceiveTCP() {
                         auto* ship = ships.at(pI.name);
                         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
                         const auto chosen_target_position = glm::vec3(pI.r, pI.g, pI.b);
-                        for (uint i = 0; i < info.size() / 3; ++i) {
+                        for (size_t i = 0; i < info.size() / 3; ++i) {
                             auto& torpedo               = ship->getSecondaryWeaponTorpedo(stoi(info[i * 3]));
                             const auto projectile_index = stoi(info[(i * 3) + 1]);
                             const auto target_name      = info[(i * 3) + 2];
@@ -405,15 +405,15 @@ void Client::onReceiveTCP() {
                     auto& map = *static_cast<Map*>(Resources::getScene(m_mapname));
                     auto info = Helper::SeparateStringByCharacter(pI.data, ',');
 
-                    const unsigned int& size = stoi(info[0]);
+                    const size_t size = stoi(info[0]);
                     Anchor* closest = map.getRootAnchor();
-                    for (unsigned int i = 1; i < 1 + size; ++i) {
+                    for (size_t i = 1; i < 1 + size; ++i) {
                         closest = closest->getChildren().at(info[i]);
                     }
                     auto anchorPos = closest->getPosition();
-                    const float x = pI.r + anchorPos.x;
-                    const float y = pI.g + anchorPos.y;
-                    const float z = pI.b + anchorPos.z;
+                    const auto x = pI.r + anchorPos.x;
+                    const auto y = pI.g + anchorPos.y;
+                    const auto z = pI.b + anchorPos.z;
                     map.internalCreateDeepspaceAnchor(x, y, z);
                     //std::cout << "creating deep space anchor" << std::endl;
                     break;
@@ -506,9 +506,9 @@ void Client::onReceiveTCP() {
 
                     PacketMessage pOut(pI);
                     pOut.PacketType = PacketType::Client_To_Server_Successfully_Entered_Map;
-                    pOut.r = modelMatrix[3][0] - spawn.x;
-                    pOut.g = modelMatrix[3][1] - spawn.y;
-                    pOut.b = modelMatrix[3][2] - spawn.z;
+                    pOut.r = modelMatrix[3][0] - static_cast<float>(spawn.x);
+                    pOut.g = modelMatrix[3][1] - static_cast<float>(spawn.y);
+                    pOut.b = modelMatrix[3][2] - static_cast<float>(spawn.z);
                     send(pOut);
                     break;
                 }case PacketType::Server_To_Client_Reject_Map_Entry: {

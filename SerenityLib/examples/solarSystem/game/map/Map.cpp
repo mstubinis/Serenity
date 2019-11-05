@@ -152,7 +152,7 @@ vector<string> Map::allowedShips() {
     }
     return vector<string>();
 }
-Anchor* Map::internalCreateDeepspaceAnchor(const float& x, const float& y, const float& z, const string& name) {
+Anchor* Map::internalCreateDeepspaceAnchor(const decimal& x, const decimal& y, const decimal& z, const string& name) {
     Anchor* anchor = new Anchor(*this, x, y, z);
     Anchor* root = std::get<1>(m_RootAnchor);
     m_Objects.push_back(anchor);
@@ -175,7 +175,7 @@ Anchor* Map::internalCreateDeepspaceAnchor(const float& x, const float& y, const
     }
     return anchor;
 }
-Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const float& x, const float& y, const float& z) {
+Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const decimal& x, const decimal& y, const decimal& z) {
     Anchor* anchor = new Anchor(*this, x, y, z);
     m_Objects.push_back(anchor);
     const string key = thisName + " Anchor";
@@ -197,7 +197,7 @@ Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& this
 Client& Map::getClient() {
     return m_Client;
 }
-Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const glm::vec3& position) {
+Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const glm_vec3& position) {
     return internalCreateAnchor(parentAnchor, thisName, loadedAnchors, position.x, position.y, position.z);
 }
 void Map::loadFromFile(const string& filename) {
@@ -211,7 +211,7 @@ void Map::loadFromFile(const string& filename) {
     float gi_specular = 1.0f;
     float gi_global   = 1.0f;
 
-    internalCreateAnchor("", "Root", loadedAnchors, 0.0f, 0.0f, 0.0f);
+    internalCreateAnchor("", "Root", loadedAnchors, static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
 
     for (string line; getline(str, line, '\n');) {
         line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
@@ -254,8 +254,7 @@ void Map::loadFromFile(const string& filename) {
                 string LAGRANGE_TYPE;
                 string LAGRANGE_PLANET_1, LAGRANGE_PLANET_2;
                 string PARENT = "";
-                float R, G, B, R1, G1, B1, R2, G2, B2, qx, qy, qz;
-                qx = qy = qz = 0.0f;
+                float R, G, B, R1, G1, B1, R2, G2, B2, qx, qy, qz = 0.0f;
                 float ATMOSPHERE_HEIGHT = 0.0f;
                 PlanetType::Type TYPE;
                 string TEXTURE = ResourceManifest::BasePath + "data/Textures/Planets/";
@@ -456,15 +455,15 @@ const vector<string> Map::getClosestAnchor(Anchor* currentAnchor) {
     if (!currentAnchor) {
         currentAnchor = std::get<1>(m_RootAnchor);
     }
-    float minDist = -1.0f;
+    decimal minDist = static_cast<decimal>(-1.0);
     while (currentAnchor->m_Children.size() > 0) {
         string least = currentAnchor->m_Children.begin()._Ptr->_Myval.first;
         bool hasChanged = false;
         for (auto& child : currentAnchor->m_Children) {
             auto childPos = child.second->getPosition();
             auto playerPos = m_Player->getComponent<ComponentBody>()->position();
-            const float dist = glm::distance(playerPos, childPos);
-            if (minDist < 0 || dist < minDist) {
+            const auto dist = glm::distance(playerPos, childPos);
+            if (minDist < static_cast<decimal>(0.0) || dist < minDist) {
                 minDist = dist;
                 least = child.first;
                 currentAnchor = child.second;

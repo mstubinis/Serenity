@@ -71,7 +71,7 @@ ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(_modelInstances);
 }
 
-const uint ComponentModel::getNumModels() const {
+const size_t ComponentModel::getNumModels() const {
     return _modelInstances.size();
 }
 ModelInstance& ComponentModel::getModel(const uint& index) {

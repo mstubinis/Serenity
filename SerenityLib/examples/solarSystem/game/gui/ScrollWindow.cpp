@@ -109,8 +109,8 @@ void ScrollFrame::update(const double& dt) {
     Widget::update(dt);
     m_ScrollBar->update(dt);
 
-    float height = 0.0f;
-    float scrollOffset = m_ScrollBar->getSliderPosition() * (m_ContentHeight / (m_Height - (m_ScrollBar->width() * 2.0f)));
+    auto height = 0.0f;
+    auto scrollOffset = m_ScrollBar->getSliderPosition() * (m_ContentHeight / (m_Height - (m_ScrollBar->width() * 2.0f)));
     for (auto& widget : m_Content) {
         widget->setPosition(m_Position.x + 1.0f, ((m_Position.y - (m_ContentPadding / 2.0f)) - height) - scrollOffset);
         height += widget->height();
@@ -119,7 +119,7 @@ void ScrollFrame::update(const double& dt) {
     }
 
     if (m_MouseIsOver || m_ScrollBar->isMouseOver()) {
-        const auto& delta = Engine::getMouseWheelDelta();
+        const auto delta = Engine::getMouseWheelDelta();
         if (delta != 0.0) {
             m_ScrollBar->scroll(static_cast<float>(delta * 0.2));
         }
@@ -132,7 +132,7 @@ void ScrollFrame::render(const glm::vec4& scissor) {
     Renderer::renderBorder(m_BorderSize, glm::vec2(m_Position.x + 1.0f, m_Position.y), m_Color, m_Width, m_Height, 0, 0.02f, m_Alignment, scissor);
 
     //content background
-    int scrollOffset = m_ScrollBar->getSliderPosition() * (m_ContentHeight / (m_Height - (m_ScrollBar->width() * 2.0f)));
+    auto scrollOffset = m_ScrollBar->getSliderPosition() * (m_ContentHeight / (m_Height - (m_ScrollBar->width() * 2.0f)));
     Renderer::renderRectangle(glm::vec2(m_Position.x, m_Position.y - scrollOffset), glm::vec4(0.3f), m_Width, m_ContentHeight, 0, 0.021f, m_Alignment, scissor);
 
     for (auto& widget : m_Content) {
@@ -147,7 +147,7 @@ void ScrollFrame::render() {
     const auto scissor = glm::vec4(m_Position.x, m_Position.y - m_Height, m_Width, m_Height);
 
     //content background
-    int scrollOffset = m_ScrollBar->getSliderPosition() * (m_ContentHeight / (m_Height - (m_ScrollBar->width() * 2.0f)));
+    auto scrollOffset = m_ScrollBar->getSliderPosition() * (m_ContentHeight / (m_Height - (m_ScrollBar->width() * 2.0f)));
     Renderer::renderRectangle(glm::vec2(m_Position.x, m_Position.y - scrollOffset), glm::vec4(0.3f), m_Width, m_ContentHeight, 0, 0.021f, m_Alignment, scissor);
    
     for (auto& widget : m_Content) {

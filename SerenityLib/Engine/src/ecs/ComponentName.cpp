@@ -20,7 +20,7 @@ ComponentName::~ComponentName() {
 const string& ComponentName::name() const { 
     return _data; 
 }
-const uint ComponentName::size() const { 
+const size_t ComponentName::size() const {
     return _data.size(); 
 }
 const bool ComponentName::empty() const {

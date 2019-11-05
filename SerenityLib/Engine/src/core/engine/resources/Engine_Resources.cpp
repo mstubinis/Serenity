@@ -91,7 +91,7 @@ Scene& epriv::ResourceManager::_getSceneByID(const uint& id) {
 void epriv::ResourceManager::_addScene(Scene& s){
     m_Scenes.push_back(&s);
 }
-uint epriv::ResourceManager::_numScenes(){
+const size_t epriv::ResourceManager::_numScenes(){
     return m_Scenes.size();
 }
 

@@ -19,16 +19,16 @@ using namespace std;
 
 #define PREDICTED_PHYSICS_CONSTANT 0.11111111f
 
-const float ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm_vec3& pos, const glm_vec3& vel, const float& s) {
+const decimal ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm_vec3& pos, const glm_vec3& vel, const float& s) {
     auto a = s * s - glm::dot(vel, vel);
     auto b = glm::dot(pos, vel);
     auto c = glm::dot(pos, pos);
     auto d = b * b + a * c;
-    auto t = 0;
-    if (d >= 0) {
+    auto t = 0.0;
+    if (d >= 0.0) {
         t = (b + sqrt(d)) / a;
-        if (t < 0)
-            t = 0;
+        if (t < 0.0)
+            t = 0.0;
     }
     return t;
 }

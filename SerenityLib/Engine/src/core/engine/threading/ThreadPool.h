@@ -49,7 +49,7 @@ namespace Engine {
                 ThreadPool(const unsigned int num_threads);
                 ~ThreadPool();
 
-                const unsigned int numThreads() const;
+                const size_t numThreads() const;
 
                 void addJob(std::function<void()>&& job);
                 void addJob(std::function<void()>&& job, std::function<void()>&& callback);

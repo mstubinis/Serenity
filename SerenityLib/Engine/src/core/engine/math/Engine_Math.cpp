@@ -40,9 +40,9 @@ const glm::vec3 Math::polynomial_interpolate_linear(vector<glm::vec3>& points, c
         P2 = points[2];
     }else{
         const float indexFloat = glm::max(0.01f, (n * time) - 1.0f);
-        uint index1 = static_cast<uint>(glm::floor(static_cast<uint>(indexFloat)));
-        uint index2;
-        uint index3;
+        size_t index1 = static_cast<size_t>(glm::floor(static_cast<size_t>(indexFloat)));
+        size_t index2;
+        size_t index3;
         if (index1 >= n - 2) {
             index1 = n - 3;
             index2 = n - 2;
@@ -342,21 +342,21 @@ const glm::vec3 Math::unpack3NormalsFrom32Int(const uint32_t& data) {
     glm::vec3 conversions;
     glm::vec3 negatives = glm::vec3(1.0f);
     //X
-    conversions.x = data & 1023 << 0;
+    conversions.x = static_cast<float>(data & 1023 << 0);
     if (conversions.x >= 512.0f) { //2^9
         conversions.x = 1023 - conversions.x; //2^10
         negatives.x *= -1.0f;
     }
     conversions.x /= 511.0f * negatives.x; //(2^9) - 1
     //Y 
-    conversions.y = data & 1023 << 10;
+    conversions.y = static_cast<float>(data & 1023 << 10);
     if (conversions.y >= 524289.0f) { //2^19
         conversions.y = 1048575.0f - conversions.y; //2^20
         negatives.y *= -1.0f;
     }
     conversions.y /= 524288.0f * negatives.y; //(2^19) - 1
     //Z
-    conversions.z = data & 1023 << 20;
+    conversions.z = static_cast<float>(data & 1023 << 20);
     if (conversions.z >= 536870912.0f) { //2^29
         conversions.z = 1073741824.0f - conversions.z; //2^30
         negatives.z *= -1.0f;

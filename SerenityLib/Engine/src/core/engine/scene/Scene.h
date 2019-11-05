@@ -53,7 +53,7 @@ class Scene: public EngineResource, public EventObserver{
         virtual ~Scene();
 
         const uint id() const;
-        const uint numViewports() const;
+        const size_t numViewports() const;
 
         //ecs
         Entity createEntity();

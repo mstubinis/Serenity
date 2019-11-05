@@ -21,7 +21,7 @@ Team::~Team() {
 const TeamNumber::Enum& Team::getTeamNumber() const {
     return m_TeamNumber;
 }
-const unsigned int Team::getNumberOfPlayersOnTeam() const {
+const size_t Team::getNumberOfPlayersOnTeam() const {
     return m_TeamPlayers.size();
 }
 string Team::getTeamNumberAsString() const {

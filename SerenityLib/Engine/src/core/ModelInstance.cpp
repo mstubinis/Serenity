@@ -157,7 +157,7 @@ namespace Engine {
                     }
                 }
                 Renderer::sendUniform1Safe("AnimationPlaying", 1);
-                Renderer::sendUniformMatrix4vSafe("gBones[0]", transforms, transforms.size());
+                Renderer::sendUniformMatrix4vSafe("gBones[0]", transforms, static_cast<uint>(transforms.size()));
                 //cleanup the animation queue
                 for (auto it = animationQueue.cbegin(); it != animationQueue.cend();) {
                     ModelInstanceAnimation* anim = (*it);

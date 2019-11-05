@@ -135,7 +135,7 @@
     </PostBuildEvent>
     <Lib>
       <AdditionalDependencies>%(AdditionalDependencies);lua.lib;assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;Bullet2FileLoader_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;BulletCollision_Debug_doubles.lib;BulletDynamics_Debug_doubles.lib;Bullet2FileLoader_Debug_doubles.lib;BulletSoftBody_Debug_doubles.lib;LinearMath_Debug_doubles.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\lib\32\Debug;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\lib\32\Debug;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -158,8 +158,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Debug;D:\dev\assimp\lib\64\Debug;D:\dev\SFML\lib\64\Debug;D:\dev\lua\lib\64\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew64s.lib;lua.lib;assimp.lib;freeglut64.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;Bullet2FileLoader_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;BulletCollision_Debug_doubles.lib;BulletDynamics_Debug_doubles.lib;Bullet2FileLoader_Debug_doubles.lib;BulletSoftBody_Debug_doubles.lib;LinearMath_Debug_doubles.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\SFML\lib\64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Debug;D:\dev\assimp\lib\64\Debug;D:\dev\SFML\lib\64\Debug;D:\dev\lua\lib\64\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;lua.lib;assimp.lib;freeglut64.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;Bullet2FileLoader_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;BulletCollision_Debug_doubles.lib;BulletDynamics_Debug_doubles.lib;Bullet2FileLoader_Debug_doubles.lib;BulletSoftBody_Debug_doubles.lib;LinearMath_Debug_doubles.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -194,7 +194,7 @@
     </PostBuildEvent>
     <Lib>
       <AdditionalDependencies>%(AdditionalDependencies);lua.lib;assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;Bullet2FileLoader.lib;BulletSoftBody.lib;LinearMath.lib;BulletCollision_doubles.lib;BulletDynamics_doubles.lib;Bullet2FileLoader_doubles.lib;BulletSoftBody_doubles.lib;LinearMath_doubles.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -220,8 +220,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\lib\64\Release;D:\dev\SFML\lib\64\Release;D:\dev\lua\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew64s.lib;lua.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;Bullet2FileLoader.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\lib\64\Release;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\lua\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;lua.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;Bullet2FileLoader.lib;BulletSoftBody.lib;LinearMath.lib;BulletCollision_doubles.lib;BulletDynamics_doubles.lib;Bullet2FileLoader_doubles.lib;BulletSoftBody_doubles.lib;LinearMath_doubles.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>

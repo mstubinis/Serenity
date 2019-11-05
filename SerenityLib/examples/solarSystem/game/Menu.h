@@ -49,7 +49,6 @@ class Menu final{
         glm::vec3                      m_Color;
         Handle                         m_FontHandle;
         Font*                          m_Font;
-        bool                           m_Active;
         GameState::State&              m_GameState;
         Core&                          m_Core;
 
@@ -96,7 +95,6 @@ class Menu final{
         ~Menu();
 
         void onResize(const uint& width, const uint& height);
-        const bool isActive() const;
 
         Font& getFont();
 

@@ -176,11 +176,11 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
     if (pbody) {
         auto& body = *pbody;
 
-        const auto& pos = body.position();
-        const auto& rot = body.rotation();
-        const auto& lv  = body.getLinearVelocity();
-        const auto& av  = body.getAngularVelocity();
-        const auto warp = ship.getWarpSpeedVector3();
+        const auto pos      = body.position();
+        const auto rot      = glm::quat(body.rotation());
+        const glm::vec3 lv  = glm::vec3(body.getLinearVelocity());
+        const glm::vec3 av  = glm::vec3(body.getAngularVelocity());
+        const auto warp     = glm::vec3(ship.getWarpSpeedVector3());
 
         wx = warp.x;
         wy = warp.y;

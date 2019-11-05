@@ -106,6 +106,6 @@ void SoundQueue::activate() {
 void SoundQueue::deactivate() {
     m_Active = false;
 }
-const uint SoundQueue::size() const {
+const size_t SoundQueue::size() const {
     return m_Queue.size();
 }

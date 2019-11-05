@@ -1265,8 +1265,8 @@ class epriv::RenderManager::impl final{
             };
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude]->bind();
 
-            Renderer::sendTexture("cubemap",texture.address(),0,texType);
-            Renderer::setViewport(0,0,size,size);
+            Renderer::sendTexture("cubemap", texture.address(), 0, texType);
+            Renderer::setViewport(0.0f, 0.0f, static_cast<float>(size), static_cast<float>(size));
             for (uint i = 0; i < 6; ++i){
                 const glm::mat4 vp = captureProjection * captureViews[i];
                 Renderer::sendUniformMatrix4("VP",vp);
@@ -1381,10 +1381,8 @@ class epriv::RenderManager::impl final{
 
             uint i = 0;
             for (auto& line : lines) {
-                for (int j = line.size(); j >= 0; --j) {
+                for (int j = static_cast<int>(line.size()); j >= 0; --j) {
                     const auto& character = line[j];
-                    //if ((text_ind.size() * 6) >= text_ind.capacity())
-                        //return;
                     if (character != '\0') {   
                         const uint& accum = i * 4;
                         ++i;
@@ -1689,7 +1687,7 @@ class epriv::RenderManager::impl final{
             const auto& fbo_width = static_cast<float>(fboWidth);
             const auto& fbo_height = static_cast<float>(fboHeight);
 
-            sendUniform4v("materials[0]", Material::m_MaterialProperities, Material::m_MaterialProperities.size());
+            sendUniform4v("materials[0]", Material::m_MaterialProperities, static_cast<uint>(Material::m_MaterialProperities.size()));
             sendUniform4("ScreenData", 0.0f, gamma, fbo_width, fbo_height);
 
             sendTexture("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
@@ -1729,7 +1727,7 @@ class epriv::RenderManager::impl final{
                     sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
                 }
                 
-                sendUniform4v("materials[0]", Material::m_MaterialProperities, Material::m_MaterialProperities.size());
+                sendUniform4v("materials[0]", Material::m_MaterialProperities, static_cast<uint>(Material::m_MaterialProperities.size()));
                 sendUniform4("ScreenData", lighting_gi_pack, gamma, fbo_width, fbo_height);
                 sendTexture("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
                 sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 1);
@@ -1858,7 +1856,7 @@ class epriv::RenderManager::impl final{
             if (viewport.isAspectRatioSynced()) {
                 camera.setAspect(dimensions.z / static_cast<float>(dimensions.w));
             }
-            Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+            Renderer::setViewport(static_cast<float>(dimensions.x), static_cast<float>(dimensions.y), static_cast<float>(dimensions.z), static_cast<float>(dimensions.w));
             gbuffer.resize(dimensions.z, dimensions.w);
 
             //scissor disabling
@@ -2281,9 +2279,9 @@ const bool Renderer::setDepthFunc(const GLenum& func){
     auto& i = *renderManager;
     return i.OpenGLStateMachine.GL_glDepthFunc(func);
 }
-const bool Renderer::setViewport(const uint& x, const uint& y, const uint& w, const uint& h){
+const bool Renderer::setViewport(const float& x, const float& y, const float& w, const float& h){
     auto& i = *renderManager;
-    return i.OpenGLStateMachine.GL_glViewport(x, y, w, h);
+    return i.OpenGLStateMachine.GL_glViewport(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(w), static_cast<GLsizei>(h));
 }
 const bool Renderer::stencilFunc(const GLenum& func, const GLint& ref, const GLuint& mask) {
     auto& i = *renderManager;
@@ -2421,7 +2419,7 @@ struct RenderingAPI2D final {
         if (s == glm::vec4(-1.0f)) {
             GLScissorDisable();
         }else{
-            glScissor(static_cast<GLint>(s.x), static_cast<GLint>(s.y), s.z, s.w);
+            glScissor(static_cast<GLint>(s.x), static_cast<GLint>(s.y), static_cast<GLsizei>(s.z), static_cast<GLsizei>(s.w));
         }
     }
     static void Render2DText(const string& text, const Font& font, const glm::vec2& pos, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type& alignType, const glm::vec4& scissor) {

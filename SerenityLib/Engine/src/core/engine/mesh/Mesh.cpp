@@ -422,7 +422,7 @@ const float Mesh::getRadius() const {
     return m_radius; 
 }
 void Mesh::render(const bool instancing, const ModelDrawingMode::Mode mode){
-    const uint& indicesSize = m_VertexData->indices.size();
+    const auto indicesSize = m_VertexData->indices.size();
     if (indicesSize == 0) 
         return;
     if (instancing && epriv::InternalMeshPublicInterface::SupportsInstancing()) {
@@ -437,7 +437,7 @@ void Mesh::render(const bool instancing, const ModelDrawingMode::Mode mode){
         //    glDrawElementsInstancedARB(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
         //}
     }else{
-        glDrawElements(static_cast<GLenum>(mode), indicesSize, GL_UNSIGNED_SHORT, 0);
+        glDrawElements(static_cast<GLenum>(mode), static_cast<GLsizei>(indicesSize), GL_UNSIGNED_SHORT, 0);
     }
 }
 void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationName,float time){

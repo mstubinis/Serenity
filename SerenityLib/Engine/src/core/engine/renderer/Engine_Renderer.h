@@ -104,7 +104,7 @@ namespace Renderer{
 
     const bool cullFace(const GLenum& state);
     const bool setDepthFunc(const GLenum& func);
-    const bool setViewport(const uint& x, const uint& y, const uint& width, const uint& height);
+    const bool setViewport(const float& x, const float& y, const float& width, const float& height);
 
     const bool stencilFunc(const GLenum& func, const GLint& ref, const GLuint& mask);
     const bool stencilMask(const GLuint& mask);
@@ -195,9 +195,6 @@ namespace Renderer{
         const Alignment::Type& = Alignment::Type::Center,
         const glm::vec4& scissor = glm::vec4(-1.0f)
     );
-
-    //void scissor(const float x, const float y, const float width, const float height);
-    //void scissorDisable();
 
     #pragma region UniformSending
     //Uniform 1

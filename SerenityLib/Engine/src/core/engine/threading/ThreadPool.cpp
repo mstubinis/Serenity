@@ -96,7 +96,7 @@ void ThreadPool::update() {
         else { ++it; }
     }
 }
-const unsigned int ThreadPool::numThreads() const {
+const size_t ThreadPool::numThreads() const {
     return m_WorkerThreads.size();
 }
 void ThreadPool::join_all() {

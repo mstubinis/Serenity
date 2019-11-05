@@ -55,7 +55,7 @@ struct VertexData final{
             if (format.interleavingType == VertexAttributeLayout::Interleaved) {
                 sendDataToGPU(orphan,-1);
             }else{
-                sendDataToGPU(orphan,attributeIndex);
+                sendDataToGPU(orphan,static_cast<int>(attributeIndex));
             }
         }
     }

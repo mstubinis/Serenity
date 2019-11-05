@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{1D073C3A-2D83-4AD7-B4F3-0F01D58B7394}</ProjectGuid>
+    <RootNamespace>SolarSystem</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PreferredToolArchitecture>x86</PreferredToolArchitecture>
+    <VCToolsVersion>14.21.27702</VCToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PreferredToolArchitecture>x86</PreferredToolArchitecture>
+    <VCToolsVersion>14.21.27702</VCToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <VCToolsVersion>14.21.27702</VCToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <VCToolsVersion>14.21.27702</VCToolsVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)Builds\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Builds\$(ProjectName)\$(Configuration)\objs\</IntDir>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)Builds\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Builds\$(ProjectName)\$(Configuration)\objs\</IntDir>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x64;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)Builds\$(ProjectName)64\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Builds\$(ProjectName)64\$(Configuration)\objs\</IntDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)64</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.17134.0\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17134.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\ucrt\x64;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)Builds\$(ProjectName)64\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Builds\$(ProjectName)64\$(Configuration)\objs\</IntDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_WIN32_WINNT=0x0501;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>Default</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);Serenity.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+      <LinkStatus>true</LinkStatus>
+    </Link>
+    <PostBuildEvent>
+      <Message>Copying Release Binary...</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;_WIN32_WINNT=0x0501;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\lib\32\Debug;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);Serenity-d.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Message>Copying Debug Binary...</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;_WIN32_WINNT=0x0501;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Debug;D:\dev\assimp\lib\64\Debug;D:\dev\SFML\lib\64\Debug;D:\dev\lua\lib\64\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Serenity-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_WIN32_WINNT=0x0501;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\lib\64\Release;D:\dev\SFML\lib\64\Release;D:\dev\lua\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+      <LinkStatus>true</LinkStatus>
+      <AdditionalDependencies>Serenity.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="game\ai\AI.h" />
+    <ClInclude Include="game\ai\AIIncludes.h" />
+    <ClInclude Include="game\ai\FireAtWill.h" />
+    <ClInclude Include="game\Core.h" />
+    <ClInclude Include="game\factions\Faction.h" />
+    <ClInclude Include="game\GameCamera.h" />
+    <ClInclude Include="game\GameSkybox.h" />
+    <ClInclude Include="game\GameState.h" />
+    <ClInclude Include="game\gui\Button.h" />
+    <ClInclude Include="game\gui\ScrollBar.h" />
+    <ClInclude Include="game\gui\ScrollWindow.h" />
+    <ClInclude Include="game\gui\specifics\ServerHostingMapSelectorWindow.h" />
+    <ClInclude Include="game\gui\specifics\ServerLobbyChatWindow.h" />
+    <ClInclude Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.h" />
+    <ClInclude Include="game\gui\specifics\ServerLobbyShipSelectorWindow.h" />
+    <ClInclude Include="game\gui\Text.h" />
+    <ClInclude Include="game\gui\TextBox.h" />
+    <ClInclude Include="game\gui\Widget.h" />
+    <ClInclude Include="game\gui\WidgetInterface.h" />
+    <ClInclude Include="game\Helper.h" />
+    <ClInclude Include="game\Menu.h" />
+    <ClInclude Include="game\hud\HUD.h" />
+    <ClInclude Include="game\hud\SensorStatusDisplay.h" />
+    <ClInclude Include="game\hud\ShipStatusDisplay.h" />
+    <ClInclude Include="game\map\Anchor.h" />
+    <ClInclude Include="game\map\Freelist.h" />
+    <ClInclude Include="game\map\Map.h" />
+    <ClInclude Include="game\modes\GameplayMode.h" />
+    <ClInclude Include="game\networking\Client.h" />
+    <ClInclude Include="game\networking\Packet.h" />
+    <ClInclude Include="game\networking\Server.h" />
+    <ClInclude Include="game\Planet.h" />
+    <ClInclude Include="game\ResourceManifest.h" />
+    <ClInclude Include="game\Ship.h" />
+    <ClInclude Include="game\ships\akira\Akira.h" />
+    <ClInclude Include="game\ships\brel\Brel.h" />
+    <ClInclude Include="game\ships\constitution\Constitution.h" />
+    <ClInclude Include="game\ships\cube\Cube.h" />
+    <ClInclude Include="game\ships\defiant\Defiant.h" />
+    <ClInclude Include="game\ships\diamond\Diamond.h" />
+    <ClInclude Include="game\ships\excelsior\Excelsior.h" />
+    <ClInclude Include="game\ships\intrepid\Intrepid.h" />
+    <ClInclude Include="game\ships\miranda\Miranda.h" />
+    <ClInclude Include="game\ships\norway\Norway.h" />
+    <ClInclude Include="game\ships\nova\Nova.h" />
+    <ClInclude Include="game\ships\probe\Probe.h" />
+    <ClInclude Include="game\ships\Ships.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemBaseClass.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemCloakingDevice.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemHull.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemMainThrusters.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemPitchThrusters.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemReactor.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemRollThrusters.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemSensors.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemShields.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemWarpDrive.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemWeapons.h" />
+    <ClInclude Include="game\ships\shipSystems\ShipSystemYawThrusters.h" />
+    <ClInclude Include="game\ships\shrike\Shrike.h" />
+    <ClInclude Include="game\ships\sphere\Sphere.h" />
+    <ClInclude Include="game\ships\vorcha\Vorcha.h" />
+    <ClInclude Include="game\teams\Team.h" />
+    <ClInclude Include="game\teams\TeamIncludes.h" />
+    <ClInclude Include="game\weapons\DisruptorBeam.h" />
+    <ClInclude Include="game\weapons\DisruptorCannon.h" />
+    <ClInclude Include="game\weapons\KlingonPhotonTorpedo.h" />
+    <ClInclude Include="game\weapons\PhaserBeam.h" />
+    <ClInclude Include="game\weapons\PhotonTorpedo.h" />
+    <ClInclude Include="game\weapons\PhotonTorpedoOld.h" />
+    <ClInclude Include="game\weapons\PlasmaBeam.h" />
+    <ClInclude Include="game\weapons\PlasmaCannon.h" />
+    <ClInclude Include="game\weapons\PlasmaTorpedo.h" />
+    <ClInclude Include="game\weapons\PulsePhaser.h" />
+    <ClInclude Include="game\weapons\QuantumTorpedo.h" />
+    <ClInclude Include="game\weapons\WeaponIncludes.h" />
+    <ClInclude Include="game\weapons\Weapons.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="game\ai\AI.cpp" />
+    <ClCompile Include="game\ai\FireAtWill.cpp" />
+    <ClCompile Include="game\Core.cpp" />
+    <ClCompile Include="game\factions\Faction.cpp" />
+    <ClCompile Include="game\Game.cpp" />
+    <ClCompile Include="game\GameCamera.cpp" />
+    <ClCompile Include="game\GameSkybox.cpp" />
+    <ClCompile Include="game\gui\Button.cpp" />
+    <ClCompile Include="game\gui\ScrollBar.cpp" />
+    <ClCompile Include="game\gui\ScrollWindow.cpp" />
+    <ClCompile Include="game\gui\specifics\ServerHostingMapSelectorWindow.cpp" />
+    <ClCompile Include="game\gui\specifics\ServerLobbyChatWindow.cpp" />
+    <ClCompile Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.cpp" />
+    <ClCompile Include="game\gui\specifics\ServerLobbyShipSelectorWindow.cpp" />
+    <ClCompile Include="game\gui\Text.cpp" />
+    <ClCompile Include="game\gui\TextBox.cpp" />
+    <ClCompile Include="game\gui\Widget.cpp" />
+    <ClCompile Include="game\Menu.cpp" />
+    <ClCompile Include="game\hud\HUD.cpp" />
+    <ClCompile Include="game\hud\SensorStatusDisplay.cpp" />
+    <ClCompile Include="game\hud\ShipStatusDisplay.cpp" />
+    <ClCompile Include="game\main.cpp" />
+    <ClCompile Include="game\map\Anchor.cpp" />
+    <ClCompile Include="game\map\Map.cpp" />
+    <ClCompile Include="game\modes\GameplayMode.cpp" />
+    <ClCompile Include="game\networking\Client.cpp" />
+    <ClCompile Include="game\networking\Packet.cpp" />
+    <ClCompile Include="game\networking\Server.cpp" />
+    <ClCompile Include="game\Planet.cpp" />
+    <ClCompile Include="game\ResourceManifest.cpp" />
+    <ClCompile Include="game\Ship.cpp" />
+    <ClCompile Include="game\ships\akira\Akira.cpp" />
+    <ClCompile Include="game\ships\brel\Brel.cpp" />
+    <ClCompile Include="game\ships\constitution\Constitution.cpp" />
+    <ClCompile Include="game\ships\cube\Cube.cpp" />
+    <ClCompile Include="game\ships\defiant\Defiant.cpp" />
+    <ClCompile Include="game\ships\diamond\Diamond.cpp" />
+    <ClCompile Include="game\ships\excelsior\Excelsior.cpp" />
+    <ClCompile Include="game\ships\intrepid\Intrepid.cpp" />
+    <ClCompile Include="game\ships\miranda\Miranda.cpp" />
+    <ClCompile Include="game\ships\norway\Norway.cpp" />
+    <ClCompile Include="game\ships\nova\Nova.cpp" />
+    <ClCompile Include="game\ships\probe\Probe.cpp" />
+    <ClCompile Include="game\ships\Ships.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemBaseClass.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemCloakingDevice.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemHull.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemMainThusters.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemPitchThrusters.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemReactor.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemRollThrusters.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemSensors.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemShields.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemWarpDrive.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemWeapons.cpp" />
+    <ClCompile Include="game\ships\shipSystems\ShipSystemYawThrusters.cpp" />
+    <ClCompile Include="game\ships\shrike\Shrike.cpp" />
+    <ClCompile Include="game\ships\sphere\Sphere.cpp" />
+    <ClCompile Include="game\ships\vorcha\Vorcha.cpp" />
+    <ClCompile Include="game\teams\Team.cpp" />
+    <ClCompile Include="game\weapons\DisruptorBeam.cpp" />
+    <ClCompile Include="game\weapons\DisruptorCannon.cpp" />
+    <ClCompile Include="game\weapons\KlingonPhotonTorpedo.cpp" />
+    <ClCompile Include="game\weapons\PhaserBeam.cpp" />
+    <ClCompile Include="game\weapons\PhotonTorpedo.cpp" />
+    <ClCompile Include="game\weapons\PhotonTorpedoOld.cpp" />
+    <ClCompile Include="game\weapons\PlasmaBeam.cpp" />
+    <ClCompile Include="game\weapons\PlasmaCannon.cpp" />
+    <ClCompile Include="game\weapons\PlasmaTorpedo.cpp" />
+    <ClCompile Include="game\weapons\PulsePhaser.cpp" />
+    <ClCompile Include="game\weapons\QuantumTorpedo.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\SerenityLib.vcxproj">
+      <Project>{cb117fee-0b28-4982-bb5f-1e1f95c614b8}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\data\Shaders\AS_groundFromSpace_frag.glsl" />
+    <None Include="..\data\Shaders\AS_groundFromSpace_vert.glsl" />
+    <None Include="..\data\Shaders\AS_skyFromAtmosphere_frag.glsl" />
+    <None Include="..\data\Shaders\AS_skyFromAtmosphere_vert.glsl" />
+    <None Include="..\data\Shaders\AS_skyFromSpace_frag.glsl" />
+    <None Include="..\data\Shaders\AS_skyFromSpace_vert.glsl" />
+    <None Include="..\data\Shaders\shields_frag.glsl" />
+    <None Include="..\data\Shaders\shields_vert.glsl" />
+    <None Include="..\data\Shaders\shipDef_frag.glsl" />
+    <None Include="..\data\Shaders\shipDef_vert.glsl" />
+    <None Include="..\data\Shaders\shipFwd_frag.glsl" />
+    <None Include="..\data\Shaders\shipFwd_vert.glsl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

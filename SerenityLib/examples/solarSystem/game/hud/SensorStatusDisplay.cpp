@@ -95,7 +95,7 @@ void SensorStatusDisplay::update(const double& dt) {
     auto& radarModel = *m_RadarRingEntity.getComponent<ComponentModel>();
     radarBody.setPosition(camPos - (shipForward * glm_vec3(2.05)));
 
-    if (!ship.m_Client.m_Core.m_Menu->isActive()) {
+    if (m_Map.getHUD().isHidden()) {
         radarModel.hide();
     }else{
         radarModel.show();

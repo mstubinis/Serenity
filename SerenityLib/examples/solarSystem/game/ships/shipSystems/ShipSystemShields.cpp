@@ -83,7 +83,7 @@ struct ShieldInstanceBindFunctor {void operator()(EngineResource* r) const {
     auto& shields = *static_cast<ShipSystemShields*>(i.getUserPointer());
     Entity& parent = i.parent();
     auto& body = *parent.getComponent<ComponentBody>();
-    auto bodypos = body.position();
+    auto bodypos = glm::vec3(body.position());
     glm::mat4 parentModel = body.modelMatrix();
 
     Renderer::sendUniform4Safe("Object_Color", i.color());
@@ -401,13 +401,13 @@ const bool ShipSystemShields::shieldsAreUp() const {
 
 
 
-const float ShipSystemShields::getHealthCurrent(const uint index) const {
+const float ShipSystemShields::getHealthCurrent(const size_t& index) const {
     return m_ShieldsAreUp ? m_HealthPointsCurrent[index] : 0.0f;
 }
-const float ShipSystemShields::getHealthMax(const uint index) const {
+const float ShipSystemShields::getHealthMax(const size_t& index) const {
     return m_HealthPointsMax[index];
 }
-const float ShipSystemShields::getHealthPercent(const uint index) const {
+const float ShipSystemShields::getHealthPercent(const size_t& index) const {
     return getHealthCurrent(index) / getHealthMax(index);
 }
 

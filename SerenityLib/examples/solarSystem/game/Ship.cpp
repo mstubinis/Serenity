@@ -15,6 +15,8 @@
 #include <core/engine/lights/Lights.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/renderer/Decal.h>
+#include <core/engine/scene/Skybox.h>
+#include <core/engine/textures/Texture.h>
 
 #include <core/engine/utils/Engine_Debugging.h>
 
@@ -42,6 +44,112 @@
 
 using namespace Engine;
 using namespace std;
+
+
+void ShipModelInstanceBindFunctor::operator()(EngineResource* r) const {
+    auto& i = *static_cast<ModelInstance*>(r);
+    const auto& stage = i.stage();
+    auto& scene = *Resources::getCurrentScene();
+    Camera& cam = *scene.getActiveCamera();
+    glm::vec3 camPos = cam.getPosition();
+    Entity& parent = i.parent();
+    auto& body = *(parent.getComponent<ComponentBody>());
+    glm::mat4 parentModel = body.modelMatrix();
+
+    Renderer::sendUniform4Safe("Object_Color", i.color());
+    Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
+
+    if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
+        auto& lights = epriv::InternalScenePublicInterface::GetLights(scene);
+        int maxLights = glm::min(static_cast<int>(lights.size()), MAX_LIGHTS_PER_PASS);
+        Renderer::sendUniform1Safe("numLights", maxLights);
+        for (int i = 0; i < maxLights; ++i) {
+            auto& light = *lights[i];
+            const auto& lightType = light.type();
+            const auto start = "light[" + to_string(i) + "].";
+            switch (lightType) {
+                case LightType::Sun: {
+                    SunLight& s = static_cast<SunLight&>(light);
+                    auto& body = *s.getComponent<ComponentBody>();
+                    const glm::vec3& pos = body.position();
+                    Renderer::sendUniform4Safe((start + "DataA").c_str(), s.getAmbientIntensity(), s.getDiffuseIntensity(), s.getSpecularIntensity(), 0.0f);
+                    Renderer::sendUniform4Safe((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
+                    Renderer::sendUniform4Safe((start + "DataD").c_str(), s.color().x, s.color().y, s.color().z, static_cast<float>(lightType));
+                    break;
+                }case LightType::Directional: {
+                    DirectionalLight& d = static_cast<DirectionalLight&>(light);
+                    auto& body = *d.getComponent<ComponentBody>();
+                    const glm::vec3& _forward = body.forward();
+                    Renderer::sendUniform4Safe((start + "DataA").c_str(), d.getAmbientIntensity(), d.getDiffuseIntensity(), d.getSpecularIntensity(), _forward.x);
+                    Renderer::sendUniform4Safe((start + "DataB").c_str(), _forward.y, _forward.z, 0.0f, 0.0f);
+                    Renderer::sendUniform4Safe((start + "DataD").c_str(), d.color().x, d.color().y, d.color().z, static_cast<float>(lightType));
+                    break;
+                }case LightType::Point: {
+                    PointLight& p = static_cast<PointLight&>(light);
+                    auto& body = *p.getComponent<ComponentBody>();
+                    const glm::vec3& pos = body.position();
+                    Renderer::sendUniform4Safe((start + "DataA").c_str(), p.getAmbientIntensity(), p.getDiffuseIntensity(), p.getSpecularIntensity(), 0.0f);
+                    Renderer::sendUniform4Safe((start + "DataB").c_str(), 0.0f, 0.0f, p.getConstant(), p.getLinear());
+                    Renderer::sendUniform4Safe((start + "DataC").c_str(), p.getExponent(), pos.x, pos.y, pos.z);
+                    Renderer::sendUniform4Safe((start + "DataD").c_str(), p.color().x, p.color().y, p.color().z, static_cast<float>(lightType));
+                    Renderer::sendUniform4Safe((start + "DataE").c_str(), 0.0f, 0.0f, static_cast<float>(p.getAttenuationModel()), 0.0f);
+                    break;
+                }case LightType::Spot: {
+                    SpotLight& s = static_cast<SpotLight&>(light);
+                    auto& body = *s.getComponent<ComponentBody>();
+                    const glm::vec3& pos = body.position();
+                    const glm::vec3 _forward = body.forward();
+                    Renderer::sendUniform4Safe((start + "DataA").c_str(), s.getAmbientIntensity(), s.getDiffuseIntensity(), s.getSpecularIntensity(), _forward.x);
+                    Renderer::sendUniform4Safe((start + "DataB").c_str(), _forward.y, _forward.z, s.getConstant(), s.getLinear());
+                    Renderer::sendUniform4Safe((start + "DataC").c_str(), s.getExponent(), pos.x, pos.y, pos.z);
+                    Renderer::sendUniform4Safe((start + "DataD").c_str(), s.color().x, s.color().y, s.color().z, static_cast<float>(lightType));
+                    Renderer::sendUniform4Safe((start + "DataE").c_str(), s.getCutoff(), s.getCutoffOuter(), static_cast<float>(s.getAttenuationModel()), 0.0f);
+                    break;
+                }case LightType::Rod: {
+                    RodLight& r = static_cast<RodLight&>(light);
+                    auto& body = *r.getComponent<ComponentBody>();
+                    const glm::vec3& pos = body.position();
+                    const float cullingDistance = r.rodLength() + (r.getCullingRadius() * 2.0f);
+                    const float half = r.rodLength() / 2.0f;
+                    const glm::vec3& firstEndPt = pos + (glm::vec3(body.forward()) * half);
+                    const glm::vec3& secndEndPt = pos - (glm::vec3(body.forward()) * half);
+                    Renderer::sendUniform4Safe((start + "DataA").c_str(), r.getAmbientIntensity(), r.getDiffuseIntensity(), r.getSpecularIntensity(), firstEndPt.x);
+                    Renderer::sendUniform4Safe((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, r.getConstant(), r.getLinear());
+                    Renderer::sendUniform4Safe((start + "DataC").c_str(), r.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);
+                    Renderer::sendUniform4Safe((start + "DataD").c_str(), r.color().x, r.color().y, r.color().z, static_cast<float>(lightType));
+                    Renderer::sendUniform4Safe((start + "DataE").c_str(), r.rodLength(), 0.0f, static_cast<float>(r.getAttenuationModel()), 0.0f);
+                    break;
+                }default: {
+                    break;
+                }
+            }
+        }
+        Skybox* skybox = scene.skybox();
+        Renderer::sendUniform4Safe("ScreenData", epriv::Core::m_Engine->m_RenderManager._getGIPackedData(), Renderer::Settings::getGamma(), 0.0f, 0.0f);
+        auto maxTextures = epriv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
+        if (skybox && skybox->texture()->numAddresses() >= 3) {
+            Renderer::sendTextureSafe("irradianceMap", skybox->texture()->address(1), maxTextures - 2, GL_TEXTURE_CUBE_MAP);
+            Renderer::sendTextureSafe("prefilterMap", skybox->texture()->address(2), maxTextures - 1, GL_TEXTURE_CUBE_MAP);
+            Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, maxTextures);
+        }else{
+            Renderer::sendTextureSafe("irradianceMap", Texture::Black->address(0), maxTextures - 2, GL_TEXTURE_2D);
+            Renderer::sendTextureSafe("prefilterMap", Texture::Black->address(0), maxTextures - 1, GL_TEXTURE_2D);
+            Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, maxTextures);
+        }
+    }
+    Renderer::sendUniform1Safe("AnimationPlaying", 0);
+    glm::mat4 modelMatrix = parentModel * i.modelMatrix();
+
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+
+    Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
+};
+void ShipModelInstanceUnbindFunctor::operator()(EngineResource* r) const {
+    //auto& i = *static_cast<ModelInstance*>(r);
+};
+
+
 
 struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
     Ship& ship = *static_cast<Ship*>(_component.getUserPointer());
@@ -214,6 +322,8 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
     registerEvent(EventType::WindowResized);
 
     //derived classes need to add their own ship systems
+    modelComponent.setCustomBindFunctor(ShipModelInstanceBindFunctor());
+    modelComponent.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor());
 }
 Ship::~Ship(){
     unregisterEvent(EventType::WindowResized);
@@ -241,7 +351,7 @@ const glm::vec3 Ship::getAimPositionRandom() {
     if (m_AimPositionDefaults.size() == 1) {
         return body.position() + Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
     }
-    const auto randIndex = Helper::GetRandomIntFromTo(0, m_AimPositionDefaults.size() - 1);
+    const auto randIndex = Helper::GetRandomIntFromTo(0, static_cast<int>(m_AimPositionDefaults.size()) - 1);
     return body.position() + Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[randIndex]);
 }
 const glm::vec3 Ship::getAimPositionDefaultLocal() {
@@ -258,7 +368,7 @@ const uint Ship::getAimPositionRandomLocalIndex() {
     if (m_AimPositionDefaults.size() == 1) {
         return 0;
     }
-    const auto randIndex = Helper::GetRandomIntFromTo(0, m_AimPositionDefaults.size() - 1);
+    const auto randIndex = Helper::GetRandomIntFromTo(0, static_cast<int>(m_AimPositionDefaults.size()) - 1);
     return randIndex;
 }
 const glm::vec3 Ship::getAimPositionRandomLocal() {
@@ -365,7 +475,7 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     }
 }
 void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
-    const unsigned int& size = stoi(info[3]);
+    const unsigned int size = stoi(info[3]);
     Anchor* closest = map.getRootAnchor();
     for (unsigned int i = 4; i < 4 + size; ++i) {
         auto& children = closest->getChildren();
@@ -394,7 +504,7 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
 
     const btQuaternion rot(quat_xyz.x, quat_xyz.y, quat_xyz.z, qw);
 
-    const btVector3 pos(x, y, z);
+    const btVector3 pos(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z));
     centerOfMass.setOrigin(pos);
     centerOfMass.setRotation(rot);
     bulletBody.getMotionState()->setWorldTransform(centerOfMass);

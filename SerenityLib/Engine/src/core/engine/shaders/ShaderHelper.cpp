@@ -48,7 +48,7 @@ void ShaderHelper::insertStringAtAndReplaceLine(string& src, const string& newco
     }
 }
 void ShaderHelper::insertStringAtEndOfMainFunc(string& src, const string& content) {
-    unsigned int position = src.size() - 1; 
+    auto position = src.size() - 1; 
     while (position > 0) {
         const char& character = src[position];
         --position;

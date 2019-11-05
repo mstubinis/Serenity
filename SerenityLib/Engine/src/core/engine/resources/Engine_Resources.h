@@ -50,7 +50,7 @@ namespace Engine{
                 bool _hasScene(const std::string&);
                 void _addScene(Scene&);
                 Texture* _hasTexture(const std::string&);
-                uint _numScenes();
+                const size_t _numScenes();
         };
     };
     namespace Resources{

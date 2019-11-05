@@ -15,9 +15,10 @@ using namespace Engine;
 
 FireAtWill::FireAtWill(Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) : m_Ship(ship), m_Map(map), m_Sensors(sensors), m_Weapons(weapons){
     m_Activated = false;
-    m_TimerTorpedo = 0.0;
-    m_TimerCannon = 0.0;
-    m_TimerBeam = 0.0;
+    internal_reset_timers();
+
+    std::random_device rd;
+    m_random_device = std::mt19937(rd());
 }
 FireAtWill::~FireAtWill() {
 
@@ -39,7 +40,7 @@ void FireAtWill::internal_execute_beams() {
                     dist_to_enemy = beam.getDistanceSquared(enemy_ship_pos);
                     if (dist_to_enemy < beam.rangeInKMSquared + static_cast<decimal>(enemyShip.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
                         auto pts = enemyShip.m_AimPositionDefaults;
-                        std::random_shuffle(pts.begin(), pts.end());
+                        std::shuffle(pts.begin(), pts.end(), m_random_device);
                         for (unsigned int i = 0; i < pts.size(); ++i) {
                             offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
                             world_pos = enemy_ship_pos + offset;
@@ -50,9 +51,9 @@ void FireAtWill::internal_execute_beams() {
                                     PacketMessage pOut;
                                     pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Beams;
                                     pOut.name = m_Ship.getName();
-                                    pOut.r = offset.r;
-                                    pOut.g = offset.g;
-                                    pOut.b = offset.b;
+                                    pOut.r = static_cast<float>(offset.r);
+                                    pOut.g = static_cast<float>(offset.g);
+                                    pOut.b = static_cast<float>(offset.b);
                                     pOut.data = to_string(beam.index) + "," + enemyShip.getName();
                                     m_Ship.m_Client.send(pOut);
                                     return;
@@ -83,7 +84,7 @@ void FireAtWill::internal_execute_cannons() {
                     dist_to_enemy = cannon.getDistanceSquared(enemy_ship_pos);
                     if (dist_to_enemy < 100.0 * 100.0) { //TODO: add range later?
                         auto pts = enemyShip.m_AimPositionDefaults;
-                        std::random_shuffle(pts.begin(), pts.end());
+                        std::shuffle(pts.begin(), pts.end(), m_random_device);
                         for (unsigned int i = 0; i < pts.size(); ++i) {
                             offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
                             world_pos = enemy_ship_pos + offset;
@@ -93,9 +94,9 @@ void FireAtWill::internal_execute_cannons() {
                                     PacketMessage pOut;
                                     pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Cannons;
                                     pOut.name = m_Ship.getName();
-                                    pOut.r = offset.x;
-                                    pOut.g = offset.y;
-                                    pOut.b = offset.z;
+                                    pOut.r = static_cast<float>(offset.x);
+                                    pOut.g = static_cast<float>(offset.y);
+                                    pOut.b = static_cast<float>(offset.z);
                                     pOut.data = to_string(cannon.index) + "," + to_string(res) + "," + enemyShip.getName();
                                     m_Ship.m_Client.send(pOut);
                                     return;
@@ -126,7 +127,7 @@ void FireAtWill::internal_execute_torpedos() {
                     dist_to_enemy = torpedo.getDistanceSquared(enemy_ship_pos);
                     if (dist_to_enemy < 100.0 * 100.0) { //TODO: add range later?
                         auto pts = enemyShip.m_AimPositionDefaults;
-                        std::random_shuffle(pts.begin(), pts.end());
+                        std::shuffle(pts.begin(), pts.end(), m_random_device);
                         for (unsigned int i = 0; i < pts.size(); ++i) {
                             offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
                             world_pos = enemy_ship_pos + offset;
@@ -136,9 +137,9 @@ void FireAtWill::internal_execute_torpedos() {
                                     PacketMessage pOut;
                                     pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Torpedos;
                                     pOut.name = m_Ship.getName();
-                                    pOut.r = offset.x;
-                                    pOut.g = offset.y;
-                                    pOut.b = offset.z;
+                                    pOut.r = static_cast<float>(offset.x);
+                                    pOut.g = static_cast<float>(offset.y);
+                                    pOut.b = static_cast<float>(offset.z);
                                     pOut.data = to_string(torpedo.index) + "," + to_string(res) + "," + enemyShip.getName();
                                     m_Ship.m_Client.send(pOut);
                                     return;
@@ -156,7 +157,6 @@ void FireAtWill::internal_reset_timers() {
     m_TimerCannon  = 0.0;
     m_TimerBeam    = 0.0;
 }
-
 void FireAtWill::update(const double& dt) {
     if (!m_Activated || m_Ship.getAIType() == AIType::Player_Other)
         return;

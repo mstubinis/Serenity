@@ -3,32 +3,33 @@
 #define ENGINE_UTILS_H
 
 #if _WIN32 || _WIN64
-#if _WIN64
-#define ENVIRONMENT64
-#else
-#define ENVIRONMENT32
-#endif
+    #if _WIN64
+        #define ENVIRONMENT64
+    #else
+        #define ENVIRONMENT32
+    #endif
 #endif
 
 #if __GNUC__
-#if __x86_64__ || __ppc64__
-#define ENVIRONMENT64
-#else
-#define ENVIRONMENT32
+    #if __x86_64__ || __ppc64__
+        #define ENVIRONMENT64
+    #else
+        #define ENVIRONMENT32
+    #endif
 #endif
+
+#ifdef ENVIRONMENT64
+
+#else
 #endif
 
 #include <core/engine/math/Numbers.h>
 #include <vector>
 #include <string>
 #include <cstdint>
-#include <algorithm>// std::remove
+#include <algorithm>
 
-#ifdef ENVIRONMENT64
-typedef std::uint64_t   uint; //TODO: try to make it std::uint64_t
-#else
 typedef std::uint32_t   uint;
-#endif
 
 typedef unsigned char   uchar;
 typedef unsigned short  ushort;
@@ -93,7 +94,7 @@ template <typename E> void vector_clear(E& t){
 //formats a number to have commas to represent thousandth places
 template<typename T> const std::string convertNumToNumWithCommas(const T& n){
     std::string r = std::to_string(n);
-    int p = r.length() - 3;
+    auto p = r.length() - 3;
     while(p > 0){
         r.insert(p, ",");
         p -= 3;

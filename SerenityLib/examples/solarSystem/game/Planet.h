@@ -122,9 +122,9 @@ class Star: public Planet{
         SunLight* m_Light;
     public:
         Star(
-            glm::vec3 = glm::vec3(1.0f,1.0f,0.0f), //Star Color
-            glm::vec3 = glm::vec3(1.0f,1.0f,1.0f), //Sunlight Color
-            glm::vec3 = glm::vec3(1.0f,1.0f,1.0f), //GodRays Color
+            glm::vec3 starColor = glm::vec3(1.0f,1.0f,0.0f), //Star Color
+            glm::vec3 lightColor = glm::vec3(1.0f,1.0f,1.0f), //Sunlight Color
+            glm::vec3 godRaysColor = glm::vec3(1.0f,1.0f,1.0f), //GodRays Color
             glm_vec3 = glm_vec3(0.0f),             //Position
             decimal = 1.0,                         //Scale
             std::string = "Star",                  //Name

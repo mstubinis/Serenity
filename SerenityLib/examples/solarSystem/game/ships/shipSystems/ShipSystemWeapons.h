@@ -22,7 +22,7 @@ struct DetectedShip;
 
 struct ShipWeapon {
     Map&             m_Map;
-    uint             index;
+    size_t           index;
     WeaponType::Type type;
     Ship&            ship;
     float            arc;
@@ -66,9 +66,9 @@ struct ShipWeapon {
 struct PrimaryWeaponCannonPrediction final {
     glm_vec3 pedictedPosition;
     glm_vec3 pedictedVector;
-    float finalProjectileSpeed;
+    decimal finalProjectileSpeed;
     PrimaryWeaponCannonPrediction() {
-        finalProjectileSpeed = 0.0f;
+        finalProjectileSpeed = static_cast<decimal>(0.0);
         pedictedPosition = pedictedVector = glm_vec3(static_cast<decimal>(0.0));
     }
 };
@@ -182,13 +182,13 @@ struct PrimaryWeaponBeam : public ShipWeapon {
 struct SecondaryWeaponTorpedoPrediction final {
     glm_vec3 pedictedPosition;
     glm_vec3 pedictedVector;
-    float finalProjectileSpeed;
+    decimal finalProjectileSpeed;
     EntityWrapper* target;
     bool hasLock;
     SecondaryWeaponTorpedoPrediction() {
         hasLock = false;
         target = nullptr;
-        finalProjectileSpeed = 0.0f;
+        finalProjectileSpeed = static_cast<decimal>(0.0);
         pedictedPosition = pedictedVector = glm_vec3(static_cast<decimal>(0.0));
     }
 };
@@ -247,7 +247,7 @@ class ShipSystemWeapons final : public ShipSystem {
 
         struct WeaponBeam final {
             PrimaryWeaponBeam* beam;
-            unsigned int main_container_index;
+            size_t main_container_index;
             WeaponBeam() {
                 beam = nullptr;
                 main_container_index = 0;
@@ -255,7 +255,7 @@ class ShipSystemWeapons final : public ShipSystem {
         };
         struct WeaponCannon final {
             PrimaryWeaponCannon* cannon;
-            unsigned int main_container_index;
+            size_t main_container_index;
             WeaponCannon() {
                 cannon = nullptr;
                 main_container_index = 0;
@@ -263,7 +263,7 @@ class ShipSystemWeapons final : public ShipSystem {
         };
         struct WeaponTorpedo final {
             SecondaryWeaponTorpedo* torpedo;
-            unsigned int main_container_index;
+            size_t main_container_index;
             WeaponTorpedo() {
                 torpedo = nullptr;
                 main_container_index = 0;
@@ -286,7 +286,7 @@ class ShipSystemWeapons final : public ShipSystem {
         ShipSystemWeapons(Ship&);
         ~ShipSystemWeapons();
 
-        static const float calculate_quadratic_time_till_hit(const glm_vec3& pos, const glm_vec3& vel, const float& s);
+        static const decimal calculate_quadratic_time_till_hit(const glm_vec3& pos, const glm_vec3& vel, const float& s);
 
         glm::vec3 cannonTargetPoint; //for random target spots on the hull / random subsystem targets
         glm::vec3 torpedoTargetPoint;//for random target spots on the hull / random subsystem targets

@@ -228,7 +228,7 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(EntityWrapper* target, Ph
     glm_quat q;
     Math::alignTo(q, -offset);
     body.setRotation(q);
-    offset *= glm::vec3(source.travelSpeed);
+    offset *= glm_vec3(source.travelSpeed);
 
     body.applyImpulse(offset.x, offset.y, offset.z, false);
 

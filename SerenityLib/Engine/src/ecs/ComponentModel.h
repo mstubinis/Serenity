@@ -43,15 +43,15 @@ class ComponentModel : public ComponentBaseClass {
         glm::vec3                   _radiusBox;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentModel(const Entity&, Handle& meshHandle, Handle& materialHandle, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
-        ComponentModel(const Entity&, Mesh*, Handle& materialHandle, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
-        ComponentModel(const Entity&, Handle& meshHandle, Material*, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
-        ComponentModel(const Entity&, Mesh*, Material*, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity&, Handle& meshHandle, Handle& materialHandle, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity&, Mesh*, Handle& materialHandle, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity&, Handle& meshHandle, Material*, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity&, Mesh*, Material*, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
 
-        ComponentModel(const Entity&, Handle& meshHandle, Handle& materialHandle, Handle& shaderPHandle, const RenderStage::Stage& = RenderStage::GeometryOpaque);
-        ComponentModel(const Entity&, Mesh*, Handle& materialHandle, Handle& shaderPHandle, const RenderStage::Stage& = RenderStage::GeometryOpaque);
-        ComponentModel(const Entity&, Handle& meshHandle, Material*, Handle& shaderPHandle, const RenderStage::Stage& = RenderStage::GeometryOpaque);
-        ComponentModel(const Entity&, Mesh*, Material*, Handle& shaderPHandle, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity&, Handle& meshHandle, Handle& materialHandle, Handle& shaderPHandle, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity&, Mesh*, Handle& materialHandle, Handle& shaderPHandle, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity&, Handle& meshHandle, Material*, Handle& shaderPHandle, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity&, Mesh*, Material*, Handle& shaderPHandle, const RenderStage::Stage& = RenderStage::GeometryOpaque);
 
         ComponentModel(const ComponentModel& other)                = delete;
         ComponentModel& operator=(const ComponentModel& other)     = delete;
@@ -60,7 +60,7 @@ class ComponentModel : public ComponentBaseClass {
 
         ~ComponentModel();
 
-        const uint getNumModels() const;
+        const size_t getNumModels() const;
         const float& radius() const;
         const glm::vec3& boundingBox() const;
         void show();

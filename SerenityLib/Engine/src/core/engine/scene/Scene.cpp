@@ -314,7 +314,7 @@ void Scene::setGodRaysSun(Entity* sun) {
 Entity* Scene::getGodRaysSun() {
     return m_i->m_Sun;
 }
-const uint Scene::numViewports() const {
+const size_t Scene::numViewports() const {
     return m_i->m_Viewports.size();
 }
 const uint Scene::id() const {

@@ -422,9 +422,9 @@ void Server::updateClient(ServerClient& client) {
                             auto anchorPosition = anchor.second->getPosition();
                             PacketMessage pOut2;
                             pOut2.PacketType = PacketType::Server_To_Client_Anchor_Creation_Deep_Space_Initial;
-                            pOut2.r = anchorPosition.x - spawnPosition.x;
-                            pOut2.g = anchorPosition.y - spawnPosition.y;
-                            pOut2.b = anchorPosition.z - spawnPosition.z;
+                            pOut2.r = static_cast<float>(anchorPosition.x) - static_cast<float>(spawnPosition.x);
+                            pOut2.g = static_cast<float>(anchorPosition.y) - static_cast<float>(spawnPosition.y);
+                            pOut2.b = static_cast<float>(anchorPosition.z) - static_cast<float>(spawnPosition.z);
                             pOut2.data = anchor.first;
                             server.send_to_client(client, pOut2);
                         }
@@ -726,7 +726,7 @@ void Server::assignRandomTeam(PacketMessage& packet_out, ServerClient& client) {
     //assign the player a team number
     auto& teams = m_GameplayMode->getTeams();
     Team* chosen = nullptr;
-    unsigned int minVal = -1;
+    size_t minVal = -1;
     for (auto& team : teams) {
         const auto numberOfPlayers = team.second->getNumberOfPlayersOnTeam();
         if (numberOfPlayers < minVal) {

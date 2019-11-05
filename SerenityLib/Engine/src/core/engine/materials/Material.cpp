@@ -213,7 +213,7 @@ const glm::vec3& Material::f0() const{
 const float& Material::glow() const { 
     return m_BaseGlow; 
 }
-const uint& Material::id() const { 
+const size_t& Material::id() const { 
     return m_ID; 
 }
 const uint& Material::diffuseModel() const { 

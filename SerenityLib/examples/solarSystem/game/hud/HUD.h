@@ -4,7 +4,7 @@
 
 class  Ship;
 class  Planet;
-struct EntityWrapper;
+class  EntityWrapper;
 struct Entity;
 class  Map;
 class  SensorStatusDisplay;
@@ -18,6 +18,7 @@ class HUD final {
         SensorStatusDisplay*  m_SensorDisplay;
         ShipStatusDisplay*    m_ShipStatusDisplay;
         ShipStatusDisplay*    m_ShipTargetStatusDisplay;
+        bool m_Shown;
           
     public:
         HUD(Map&, Font&);
@@ -33,6 +34,12 @@ class HUD final {
         void setTarget(Ship*);
         void setTarget(EntityWrapper*);
         void setTarget(Entity&);
+
+        const bool isHidden() const;
+
+        void show(const bool shown = true);
+        void hide();
+        void toggle();
 
         void onResize(const unsigned int& width, const unsigned int& height);
 

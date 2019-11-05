@@ -184,7 +184,7 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(EntityWrapper* target, PlasmaCann
     glm_quat q;
     Math::alignTo(q, -offset);
     cannonBody.setRotation(q); //TODO: change rotation based on launching vector
-    offset *= glm::vec3(source.travelSpeed);
+    offset *= glm_vec3(source.travelSpeed);
     cannonBody.applyImpulse(offset.x, offset.y, offset.z, false);
 
     cannonBody.setUserPointer(this);

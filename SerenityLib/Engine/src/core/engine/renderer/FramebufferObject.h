@@ -75,7 +75,7 @@ namespace Engine{
             friend struct Engine::epriv::FramebufferObjectDefaultBindFunctor;
             friend struct Engine::epriv::FramebufferObjectDefaultUnbindFunctor;
             private:
-                uint                                                    m_CurrentFBOIndex;
+                size_t                                                  m_CurrentFBOIndex;
                 uint                                                    m_FramebufferWidth;
                 uint                                                    m_FramebufferHeight;
                 float                                                   m_Divisor;

@@ -106,10 +106,10 @@ void Skybox::bindMesh(){
     Engine::epriv::SkyboxImplInterface::initMesh();
     if(m_VAO){
         Renderer::bindVAO(m_VAO);
-        glDrawArrays(GL_TRIANGLES, 0, m_Vertices.size());
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_Vertices.size()));
     }else{
         Engine::epriv::SkyboxImplInterface::bindDataToGPU();
-        glDrawArrays(GL_TRIANGLES, 0, m_Vertices.size());
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_Vertices.size()));
         glDisableVertexAttribArray(0);
     }
 }

@@ -192,7 +192,7 @@ const bool OpenGLState::GL_glActiveTexture(const GLenum& textureUnit) {
 }
 
 const bool OpenGLState::GL_glBindTextureForModification(const GLenum& textureTarget, const GLuint& textureObject) {
-    const auto& unit = textureUnits.capacity() - 1;
+    const auto unit = static_cast<GLenum>(textureUnits.capacity() - 1);
     currentTextureUnit = unit;
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(textureTarget, textureObject);

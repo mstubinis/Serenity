@@ -101,9 +101,9 @@ class ShipSystemShields final : public ShipSystem {
 
         const glm::vec3& getAdditionalShieldSizeScale() const;
 
-        const float getHealthCurrent(const uint index) const;
-        const float getHealthMax(const uint index) const;
-        const float getHealthPercent(const uint index) const; //returns percent from 0.0f to 1.0f
+        const float getHealthCurrent(const size_t& index) const;
+        const float getHealthMax(const size_t& index) const;
+        const float getHealthPercent(const size_t& index) const; //returns percent from 0.0f to 1.0f
 
 
         const float getHealthCurrentForward() const;

@@ -57,7 +57,7 @@ class Texture: public EngineResource{
         const uint width() const;
         const uint height() const;
         const glm::uvec2 size() const;
-        const uint numAddresses() const;
+        const size_t numAddresses() const;
         const bool mipmapped() const;
         const bool compressed() const;
         void setAnisotropicFiltering(const float& anisotropicFiltering);

@@ -96,7 +96,7 @@ namespace Engine {
     namespace epriv {
         struct FramebufferObjectDefaultBindFunctor final {void operator()(BindableResource* r) const {
             FramebufferObject& fbo = *static_cast<FramebufferObject*>(r);
-            Renderer::setViewport(0, 0, fbo.width(), fbo.height());
+            Renderer::setViewport(0.0f, 0.0f, static_cast<float>(fbo.width()), static_cast<float>(fbo.height()));
 
             //swap buffers
             ++fbo.m_CurrentFBOIndex;
@@ -114,8 +114,8 @@ namespace Engine {
                 attatchment.second->unbind(); 
             }
             Renderer::unbindFBO();
-            const auto& winSize = Resources::getWindowSize();
-            Renderer::setViewport(0, 0, winSize.x, winSize.y);
+            const auto winSize = Resources::getWindowSize();
+            Renderer::setViewport(0.0f, 0.0f, static_cast<float>(winSize.x), static_cast<float>(winSize.y));
         }};
     };
 };
@@ -152,7 +152,7 @@ epriv::FramebufferObject::~FramebufferObject(){
 void epriv::FramebufferObject::resize(const uint& w, const uint& h){
     m_FramebufferWidth  = static_cast<uint>(static_cast<float>(w) * m_Divisor);
     m_FramebufferHeight = static_cast<uint>(static_cast<float>(h) * m_Divisor);
-    Renderer::setViewport(0, 0, m_FramebufferWidth, m_FramebufferHeight);
+    Renderer::setViewport(0.0f, 0.0f, static_cast<float>(m_FramebufferWidth), static_cast<float>(m_FramebufferHeight));
     for (uint i = 0; i < m_FBO.size(); ++i) {
         Renderer::bindFBO(m_FBO[i]);
         for (auto& attatchment : m_Attatchments) {

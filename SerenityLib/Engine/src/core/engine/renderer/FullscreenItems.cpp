@@ -54,11 +54,11 @@ void epriv::FullscreenTriangle::bindToGPU() {
 void epriv::FullscreenTriangle::render(){ 
     if (m_VAO) {
         Renderer::bindVAO(m_VAO);
-        glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);
         //Renderer::bindVAO(0);
     }else{
         bindToGPU();
-        glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
     }
@@ -126,11 +126,11 @@ void epriv::FullscreenQuad::bindToGPU() {
 void epriv::FullscreenQuad::render(){ 
     if (m_VAO) {
         Renderer::bindVAO(m_VAO);
-        glDrawElements(GL_QUADS, m_Indices.size(), GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_QUADS, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);
         //Renderer::bindVAO(0);
     }else{
         bindToGPU();
-        glDrawElements(GL_QUADS, m_Indices.size(), GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_QUADS, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
     }

@@ -138,7 +138,7 @@ const uchar* Texture::pixels(){
 const GLuint& Texture::address(const uint& index) const { 
     return m_TextureAddress[index]; 
 }
-const uint Texture::numAddresses() const {
+const size_t Texture::numAddresses() const {
     return m_TextureAddress.size(); 
 }
 const GLuint Texture::type() const { 

@@ -47,7 +47,7 @@ class Material final: public BindableResource{
         float                             m_BaseMetalness;
         float                             m_BaseSmoothness;
         float                             m_BaseAlpha;
-        uint                              m_ID;
+        size_t                            m_ID;
 
         MaterialComponent* internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
         void internalUpdateGlobalMaterialPool(const bool& addToDatabase);
@@ -94,7 +94,7 @@ class Material final: public BindableResource{
         MaterialComponent& addComponentRefraction(const std::string& cubeMapName, const std::string& mapFile, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
         MaterialComponent& addComponentParallaxOcclusion(const std::string& textureFile, const float heightScale = 0.1f);
 
-        const uint& id() const;
+        const size_t& id() const;
     
         const bool& shadeless() const;
         const glm::vec3& f0() const;

@@ -11,24 +11,31 @@ void VertexDataFormat::add(const int _size, const int _type, const bool _normali
 }
 void VertexDataFormat::bind(const VertexData& vertData) {
     if (interleavingType == VertexAttributeLayout::Interleaved) {
+        auto glint = GLuint(0);
         for (size_t i = 0; i < attributes.size(); ++i) {
             const auto& attribute = attributes[i];
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i, attribute.size, attribute.type, attribute.normalized, attribute.stride, (void*)attribute.offset);
+            glint = GLuint(i);
+            glEnableVertexAttribArray(glint);
+            glVertexAttribPointer(glint, attribute.size, attribute.type, attribute.normalized, attribute.stride, (void*)attribute.offset);
         }
     }else{
         size_t accumulator = 0;
+        auto glint = GLuint(0);
         for (size_t i = 0; i < attributes.size(); ++i) {
             const auto& attribute = attributes[i];
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i, attribute.size, attribute.type, attribute.normalized, 0, (void*)accumulator);
+            glint = GLuint(i);
+            glEnableVertexAttribArray(glint);
+            glVertexAttribPointer(glint, attribute.size, attribute.type, attribute.normalized, 0, (void*)accumulator);
             accumulator += vertData.dataSizes[i] * attribute.typeSize;
         }
     }
 }
 void VertexDataFormat::unbind() { 
-    for (size_t i = 0; i < attributes.size(); ++i)
-        glDisableVertexAttribArray(i); 
+    auto glint = GLuint(0);
+    for (size_t i = 0; i < attributes.size(); ++i) {
+        glint = GLuint(i);
+        glDisableVertexAttribArray(glint);
+    }
 }
 
 

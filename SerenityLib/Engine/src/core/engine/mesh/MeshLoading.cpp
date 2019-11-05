@@ -227,7 +227,7 @@ bool epriv::MeshLoader::IsSpecialFloat(const glm::vec3& v) {
     return false;
 }
 bool epriv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts, vector<glm::vec2>& uvs, vector<glm::vec3>& norms, unsigned short& result, const float& threshold) {
-    for (uint t = 0; t < pts.size(); ++t) {
+    for (auto t = 0; t < pts.size(); ++t) {
         if (IsNear(in_pos, pts[t], threshold) && IsNear(in_uv, uvs[t], threshold) && IsNear(in_norm, norms[t], threshold)) {
             result = t;
             return true;
@@ -238,18 +238,18 @@ bool epriv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_u
 void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
     if (data.normals.size() == 0) 
         return;
-    const uint pointsSize(data.points.size());
+    const auto pointsSize(data.points.size());
     data.tangents.reserve(data.normals.size());
     data.binormals.reserve(data.normals.size());
-    for (uint i = 0; i < pointsSize; i += 3) {
-        const uint p0(i + 0);
-        const uint p1(i + 1);
-        const uint p2(i + 2);
+    for (auto i = 0; i < pointsSize; i += 3) {
+        const auto p0(i + 0);
+        const auto p1(i + 1);
+        const auto p2(i + 2);
 
         glm::vec3 point1, point2, point3;
         glm::vec2 uv1, uv2, uv3;
 
-        const uint uvSize(data.uvs.size());
+        const auto uvSize(data.uvs.size());
 
         if (pointsSize > p0) point1 = data.points[p0];
         else                 point1 = glm::vec3(0.0f);
@@ -324,7 +324,7 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
             data.binormals.push_back(localBitangent);
         }
     }
-    for (uint i = 0; i < data.points.size(); ++i) {
+    for (auto i = 0; i < data.points.size(); ++i) {
         //hmm.. should b and t be swapped here?
         auto& n = data.normals[i];
         auto& b = data.tangents[i];
@@ -448,8 +448,8 @@ void epriv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
 
     //header - should only be 3 entries, one for m_Vertices , one for m_Indices, and one to tell if animation data is present or not
     uint32_t   sizes[3];
-    sizes[0] = data.dataSizes[0];
-    sizes[1] = data.indices.size();
+    sizes[0] = static_cast<uint32_t>(data.dataSizes[0]);
+    sizes[1] = static_cast<uint32_t>(data.indices.size());
     if (data.data.size() > 5) { //vertices contain animation data
         sizes[2] = 1;
     }else{

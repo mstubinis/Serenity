@@ -54,7 +54,7 @@ void EngineCore::init(const EngineOptions& options) {
 
     engine.m_DebugManager._init(options.window_title, options.width, options.height);
     engine.m_RenderManager._init(options.window_title, options.width, options.height);
-    engine.m_PhysicsManager._init(options.window_title, options.width, options.height, engine.m_ThreadManager.cores());
+    engine.m_PhysicsManager._init(options.window_title, options.width, options.height, static_cast<uint>(engine.m_ThreadManager.cores()));
 
     //init the game here
     Engine::setMousePosition(options.width / 2, options.height / 2);

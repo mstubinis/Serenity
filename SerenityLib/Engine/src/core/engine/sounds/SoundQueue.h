@@ -34,7 +34,7 @@ class SoundQueue final {
         void clear();
         const bool empty() const;
         const bool& active() const;
-        const uint size() const;
+        const size_t size() const;
 
         void activate();
         void deactivate();

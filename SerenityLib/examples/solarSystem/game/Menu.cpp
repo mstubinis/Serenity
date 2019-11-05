@@ -211,7 +211,6 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
     m_FontHandle = Resources::addFont(ResourceManifest::BasePath + "data/Fonts/consolas.fnt");
     m_Font = Resources::getFont(m_FontHandle);
     Engine::Math::setColor(m_Color, 255.0f, 255.0f, 0.0f);
-    m_Active = true;
     m_MessageText = "";
     m_ErrorTimer = 0.0f;
 
@@ -296,9 +295,6 @@ Menu::~Menu() {
 Font& Menu::getFont() {
     return *m_Font;
 }
-const bool Menu::isActive() const {
-    return m_Active;
-}
 void Menu::enter_the_game() {
     /*
     TODO: once a client wants to enter the game, he will ping the server that he entered the map. the server will then respond with the other connected players currently
@@ -375,10 +371,6 @@ void Menu::onResize(const uint& width, const uint& height) {
 uint _countShips = 0;
 uint _countPlanets = 0;
 void Menu::update_game(const double& dt) {
-    if (Engine::isKeyDownOnce(KeyboardKey::LeftAlt, KeyboardKey::X) || Engine::isKeyDownOnce(KeyboardKey::RightAlt, KeyboardKey::X)) {
-        m_Active = !m_Active;
-    }
-
     Map* map = static_cast<Map*>(Resources::getCurrentScene());
     auto& player = *map->getPlayer();
     auto& playerName = player.entity().getComponent<ComponentName>()->name();
@@ -506,9 +498,9 @@ void Menu::render_game() {
                 if (shields) {
                     auto& shield = *shields;
 
-                    auto startX = 0;
+                    auto startX = 0.0f;
                     auto incrX = (healthDisplayWidthMax / 6.0f) - 2.0f;
-                    for (uint i = 0; i < 6; ++i) {
+                    for (size_t i = 0; i < 6; ++i) {
                         Renderer::renderRectangle(glm::vec2((pos.x - (healthDisplayWidthMax / 2)) + startX, pos.y - 26.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), incrX, 2, 0, 0.10f, Alignment::BottomLeft);
                         Renderer::renderRectangle(glm::vec2((pos.x - (healthDisplayWidthMax / 2)) + startX, pos.y - 26.0f), glm::vec4(0.0f, 0.674f, 1.0f, 1.0f), shield.getHealthPercent(i) * incrX, 2, 0, 0.09f, Alignment::BottomLeft);
                         startX += (incrX + 3.0f);
@@ -567,18 +559,7 @@ void Menu::render_game() {
             crosshairArrowTexture.render(glm::vec2(pos.x, pos.y), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f), angle);
         }
     }
-
 #pragma endregion
-
-    if (!m_Active) return;
-
-#pragma region DrawDebugStuff
-    m_Font->renderText(Engine::Data::reportTime() +
-        epriv::Core::m_Engine->m_DebugManager.reportDebug(),
-        glm::vec2(10.0f, Resources::getWindowSize().y - 10.0f), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f), 0, glm::vec2(0.8f, 0.8f), 0.1f);
-
-#pragma endregion
-
 }
 void Menu::render_main_menu() {
     m_ButtonHost->render();

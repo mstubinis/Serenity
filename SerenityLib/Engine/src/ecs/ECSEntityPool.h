@@ -22,7 +22,7 @@ namespace epriv {
             ECSEntityPool& operator=(ECSEntityPool&& other) noexcept = delete;
 
             void destroyFlaggedEntity(const uint& entityID) {
-                const uint index = entityID - 1;
+                const auto index = entityID - 1;
                 ++_pool[index].versionID;
                 _freelist.emplace_back(index);
             }
@@ -31,7 +31,7 @@ namespace epriv {
                     _pool.emplace_back(0, 0);
                     _freelist.emplace_back(_pool.size() - 1);
                 }
-                const uint id = _freelist.back();
+                const auto id = _freelist.back();
                 _freelist.pop_back();
                 EntityPOD& element = _pool[id];
                 element.ID = id + 1;
@@ -44,7 +44,7 @@ namespace epriv {
                     return nullptr;
                 }
                 const EntityDataRequest dataRequest(entityData);
-                const uint index = dataRequest.ID - 1;
+                const auto index = dataRequest.ID - 1;
                 if (index < _pool.size() && _pool[index].versionID == dataRequest.versionID) {
                     return &_pool[index];
                 }

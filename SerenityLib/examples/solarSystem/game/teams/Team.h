@@ -18,7 +18,7 @@ class Team {
 
         const TeamNumber::Enum& getTeamNumber() const;
         std::string getTeamNumberAsString() const;
-        const unsigned int getNumberOfPlayersOnTeam() const;
+        const size_t getNumberOfPlayersOnTeam() const;
 
         std::unordered_set<std::string>& getPlayers();
         std::unordered_set<TeamNumber::Enum>&   getAllyTeams();
