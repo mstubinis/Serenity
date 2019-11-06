@@ -62,6 +62,7 @@ class ShipSystemSensors final : public ShipSystem {
 
         const bool isShipDetectedByAntiCloak(Ship* ship);
         const bool toggleAntiCloakScan(const bool sendPacket = false);
+        const bool disableAntiCloakScan(const bool sendPacket = false);
         void sendAntiCloakScanStatusPacket();
 
         const double& getAntiCloakingScanTimer() const;

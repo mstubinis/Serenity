@@ -116,9 +116,9 @@ void SensorStatusDisplay::render() {
     const auto& radarEdgeTexture = *radarEdgeMat.getComponent(0).texture();
     const auto& radarTokenTexture = *radarTokenMat.getComponent(0).texture();
     //render radar 2d graphic
-    Renderer::renderTexture(radarTexture, m_Position, glm::vec4(1, 1, 1, 1), 0, glm::vec2(1.0f), 0.2f, Alignment::BottomCenter);
+    Renderer::renderTexture(radarTexture, m_Position, glm::vec4(1, 1, 1, 1), 180.0f, glm::vec2(1.0f), 0.2f, Alignment::BottomCenter);
     //render radar edge
-    Renderer::renderTexture(radarEdgeTexture, m_Position, glm::vec4(0.11f, 0.16f, 0.19f, 1), 0, glm::vec2(1.0f), 0.17f, Alignment::BottomCenter);
+    Renderer::renderTexture(radarEdgeTexture, m_Position, glm::vec4(0.11f, 0.16f, 0.19f, 1), 180.0f, glm::vec2(1.0f), 0.17f, Alignment::BottomCenter);
 
     const auto& radarBodyPosition = m_RadarRingEntity.getComponent<ComponentBody>()->position();
     const auto& myPos = ship.getComponent<ComponentBody>()->position();

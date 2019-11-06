@@ -47,6 +47,18 @@ void ShipSystemSensors::sendAntiCloakScanStatusPacket() {
     pOut.data = m_AntiCloakScanActive ? "1" : "0";
     m_Ship.m_Client.send(pOut);
 }
+const bool ShipSystemSensors::disableAntiCloakScan(const bool sendPacket) {
+    if (m_AntiCloakScanActive) {
+        m_AntiCloakScanTimer = 0.0;
+        m_AntiCloakScanTimerSound = 0.0;
+        m_AntiCloakScanActive = false;
+        if (sendPacket) {
+            sendAntiCloakScanStatusPacket();
+        }
+        return true;
+    }
+    return false;
+}
 const bool ShipSystemSensors::toggleAntiCloakScan(const bool sendPacket) {
     if (!m_AntiCloakScanActive) {
         if (!m_Ship.isCloaked()) {
@@ -257,6 +269,11 @@ void ShipSystemSensors::update(const double& dt) {
     internal_update_clear_target_automatically_if_applicable(dt);
 
     if (m_AntiCloakScanActive) {
+
+        auto* cloak = static_cast<ShipSystemCloakingDevice*>(m_Ship.getShipSystem(ShipSystemType::CloakingDevice));
+        if (cloak && cloak->isCloakActive()) {
+            disableAntiCloakScan(true);
+        }
         internal_update_anti_cloak_scan(dt);
     }
 
