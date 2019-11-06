@@ -180,4 +180,31 @@ void SensorStatusDisplay::render() {
             Renderer::renderTexture(radarTokenTexture, pos2D, glm::vec4(1, 1, 1, 1), 0, glm::vec2(1.2f), 0.16f, Alignment::Center);
         }
     }
+
+    //anti cloak detected ships
+    for (auto& other_ship_ptr : m_Sensors->getAntiCloakDetectedShips()) {
+        Ship& other_ship = *other_ship_ptr.ship;
+        glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); //red (enemy)
+
+        auto otherVector = other_ship.getPosition() - myPos;
+        //scale otherPos down to the range
+        const auto otherLen = glm::length(otherVector);
+        otherVector /= otherLen;
+        otherVector *= glm::min((otherLen / radarRange + static_cast<decimal>(0.01)), static_cast<decimal>(1.0));
+        otherVector = radarBodyPosition + otherVector;
+
+        const auto pos = Math::getScreenCoordinates(otherVector, *m_Camera, m_Viewport, false);
+
+        const auto pos2D = glm::vec2(pos.x, pos.y);
+        const auto dotproduct = glm::dot(radarBodyPosition + ship.forward(), otherVector - radarBodyPosition);
+        if (dotproduct <= 0 /*&& !modByCloak*/) {
+            color.a = 0.5f;
+        }
+        //render radar token
+        Renderer::renderTexture(radarTokenTexture, pos2D, color, 0, glm::vec2(1.0f), 0.14f, Alignment::Center);
+
+        if (myTarget && myTarget->getComponent<ComponentName>()->name() == other_ship.getName()) {
+            Renderer::renderTexture(radarTokenTexture, pos2D, glm::vec4(1, 1, 1, 1), 0, glm::vec2(1.2f), 0.16f, Alignment::Center);
+        }
+    }
 }

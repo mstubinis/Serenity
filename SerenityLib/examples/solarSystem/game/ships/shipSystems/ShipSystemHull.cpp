@@ -65,19 +65,20 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
     const auto impactLocation = glm_vec3(impactLocationLocal) * m_Ship.getRotation();
     const auto impactR        = impactRadius * 0.16f;
     auto*      cloakingDevice = static_cast<ShipSystemCloakingDevice*>(m_Ship.getShipSystem(ShipSystemType::CloakingDevice));
+    auto&      model          = *m_Ship.getComponent<ComponentModel>();
     if (forceHullFire) {
         d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
         decalList.push_back(d);
         d1 = new Decal(*hullDamage, impactLocation, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
         decalList.push_back(d1);
-        if (cloakingDevice) m_Ship.updateDamageDecalsCloak(glm::abs(cloakingDevice->getCloakTimer()));
+        if (cloakingDevice) m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
         return;
     }
 
     if (decalList.size() == 0) {
         d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
         decalList.push_back(d);
-        if (cloakingDevice) m_Ship.updateDamageDecalsCloak(glm::abs(cloakingDevice->getCloakTimer()));
+        if (cloakingDevice) m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
         return;
     }else{
         //get list of nearby impact points
@@ -101,7 +102,7 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         decalList.push_back(d);
     if (d1) 
         decalList.push_back(d1);
-    if(cloakingDevice) m_Ship.updateDamageDecalsCloak(glm::abs(cloakingDevice->getCloakTimer()));
+    if(cloakingDevice) m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
 }
 void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const bool forceHullFire, const bool paint) {
     float newHP = m_HealthPointsCurrent - damage;

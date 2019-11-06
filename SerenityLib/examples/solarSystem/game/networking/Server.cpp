@@ -358,7 +358,14 @@ void Server::updateClient(ServerClient& client) {
             client.m_Timeout = 0.0f;
             // Data extracted successfully...
             switch (pIn.PacketType) {
-                case PacketType::Client_To_Server_Projectile_Cannon_Impact: {
+                case PacketType::Client_To_Server_Anti_Cloak_Status: {
+                    //just forward it
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
+                    PacketMessage pOut(pI);
+                    pOut.PacketType = PacketType::Server_To_Client_Anti_Cloak_Status;
+                    server.send_to_all_but_client(client, pOut);
+                    break;
+                }case PacketType::Client_To_Server_Projectile_Cannon_Impact: {
                     //just forward it
                     PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(pp);
                     PacketProjectileImpact pOut(pI);
@@ -516,7 +523,7 @@ void Server::updateClient(ServerClient& client) {
                         std::cout << "Server: Approving: " + pIn.data + "'s connection" << std::endl;
 
                         //now send the client info about the gameplay mode, dont do this for the player client
-                        if (client.m_username != server.m_Core.m_Client->m_username) {
+                        if (client.m_username != server.m_Core.m_Client->m_Username) {
                             auto& mode = *server.m_GameplayMode;
                             const auto info = mode.serialize();
                             PacketMessage pOut0;

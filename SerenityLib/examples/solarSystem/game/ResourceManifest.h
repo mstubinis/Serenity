@@ -79,6 +79,8 @@ struct ResourceManifest{
     static Handle SoundPhaserBeam;
     static Handle SoundPlasmaBeam;
     static Handle SoundDisruptorBeam;
+    static Handle SoundAntiCloakScan;
+    static Handle SoundAntiCloakScanDetection;
 
     //torpedos
     static Handle TorpedoFlareMesh;

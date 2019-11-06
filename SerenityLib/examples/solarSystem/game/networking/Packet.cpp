@@ -108,6 +108,10 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Request_GameplayMode: {
             p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Anti_Cloak_Status: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Anti_Cloak_Status: {
+            p = new PacketMessage(); break;
         }default: {
             break;
         }

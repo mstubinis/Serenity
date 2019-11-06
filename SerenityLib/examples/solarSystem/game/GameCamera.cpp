@@ -37,7 +37,7 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
             const auto targetPos = glm::vec3(targetBody.position());
             const auto targetUp = glm::vec3(targetBody.up());
 
-            camera.m_OrbitRadius += (static_cast<float>(Engine::getMouseWheelDelta()) * 0.02f);
+            camera.m_OrbitRadius += (static_cast<float>(Engine::getMouseWheelDelta()) * 0.007f);
 			camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 3.0f);
 
             auto calc2 = ((targetFwd * glm::length(targetRadius) * 1.7f) + targetUp * glm::length(targetRadius) * 0.3f);

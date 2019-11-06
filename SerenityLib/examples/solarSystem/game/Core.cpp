@@ -67,7 +67,7 @@ void Core::startClient(GameplayMode& mode, Team* team, const unsigned short& por
         m_Client = new Client(mode, team, *this, port, ip, 0);
     }
     auto& client = *m_Client;
-    client.m_username = name;
+    client.m_Username = name;
     if (!client.m_IsCurrentlyConnecting) {
         client.changeConnectionDestination(port, ip);
         auto status = m_Client->connect(10);

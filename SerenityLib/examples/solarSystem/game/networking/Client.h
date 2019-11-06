@@ -33,8 +33,8 @@ class Client{
         std::future<sf::Socket::Status>*      m_InitialConnectionThread;
         Engine::Networking::SocketTCP*        m_TcpSocket;
         Engine::Networking::SocketUDP*        m_UdpSocket;
-        std::string                           m_username;
-        std::string                           m_mapname;
+        std::string                           m_Username;
+        std::string                           m_Mapname;
         std::string                           m_ServerIP;
         Core&                                 m_Core;
         bool                                  m_Validated;
@@ -42,7 +42,32 @@ class Client{
         double                                m_PingTime;
         bool                                  m_IsCurrentlyConnecting;
         ushort                                m_Port;
+
         void internalInit(const ushort& server_port, const std::string& server_ipAddress);
+
+        void on_receive_anti_cloak_status(Packet*, Map& map);
+        void on_receive_server_game_mode(Packet*);
+        void on_receive_physics_update(Packet*, Map& map);
+        void on_receive_cannon_impact(Packet*, Map& map);
+        void on_receive_torpedo_impact(Packet*, Map& map);
+        void on_receive_client_left_map(Packet*, Map& map);
+        void on_receive_client_fired_cannons(Packet*, Map& map);
+        void on_receive_client_fired_beams(Packet*, Map& map);
+        void on_receive_client_fired_torpedos(Packet*, Map& map);
+        void on_receive_target_changed(Packet*, Map& map);
+        void on_receive_create_deep_space_anchor_initial(Packet*, Map& map);
+        void on_receive_create_deep_space_anchor(Packet*, Map& map);
+        void on_receive_health_update(Packet*, Map& map);
+        void on_receive_cloak_update(Packet*, Map& map);
+        void on_receive_new_client_entered_map(Packet*);
+        void on_receive_new_client_approve_map_entry(Packet*, Menu&);
+        void on_receive_map_data(Packet*, Menu&);
+        void on_receive_chat_message(Packet*, Menu&);
+        void on_receive_client_just_joined_server_lobby(Packet*, Menu&);
+        void on_receive_client_just_left_server(Packet*, Menu&);
+        void on_receive_connection_accepted_by_server(Packet*, Menu&);
+        void on_receive_connection_rejected_by_server(Packet*, Menu&);
+        void on_receive_server_shutdown(Packet*, Menu&);
     public:
         Client(GameplayMode& , Team* ,Core&, const ushort& server_port, const std::string& server_ipAddress, const uint& id);
         ~Client();

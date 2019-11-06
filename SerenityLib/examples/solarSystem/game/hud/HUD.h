@@ -9,6 +9,7 @@ struct Entity;
 class  Map;
 class  SensorStatusDisplay;
 class  ShipStatusDisplay;
+class  TargetRedicule;
 class  Font;
 
 class HUD final {
@@ -18,6 +19,7 @@ class HUD final {
         SensorStatusDisplay*  m_SensorDisplay;
         ShipStatusDisplay*    m_ShipStatusDisplay;
         ShipStatusDisplay*    m_ShipTargetStatusDisplay;
+        TargetRedicule*       m_TargetRedicule;
         bool m_Shown;
           
     public:

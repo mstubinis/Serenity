@@ -213,6 +213,7 @@
     <ClInclude Include="game\gui\Widget.h" />
     <ClInclude Include="game\gui\WidgetInterface.h" />
     <ClInclude Include="game\Helper.h" />
+    <ClInclude Include="game\hud\TargetRedicule.h" />
     <ClInclude Include="game\Menu.h" />
     <ClInclude Include="game\hud\HUD.h" />
     <ClInclude Include="game\hud\SensorStatusDisplay.h" />
@@ -289,6 +290,7 @@
     <ClCompile Include="game\gui\Text.cpp" />
     <ClCompile Include="game\gui\TextBox.cpp" />
     <ClCompile Include="game\gui\Widget.cpp" />
+    <ClCompile Include="game\hud\TargetRedicule.cpp" />
     <ClCompile Include="game\Menu.cpp" />
     <ClCompile Include="game\hud\HUD.cpp" />
     <ClCompile Include="game\hud\SensorStatusDisplay.cpp" />

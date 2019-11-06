@@ -1,8 +1,6 @@
 #include "Menu.h"
 #include "map/Map.h"
 #include "map/Anchor.h"
-#include "Planet.h"
-#include "Ship.h"
 #include "Core.h"
 #include "networking/Server.h"
 #include "networking/Client.h"
@@ -21,7 +19,6 @@
 #include <core/engine/scene/Camera.h>
 #include <core/engine/materials/Material.h>
 
-
 #include <glm/vec4.hpp>
 #include <boost/algorithm/algorithm.hpp>
 #include <boost/algorithm/string.hpp>
@@ -35,23 +32,11 @@
 #include "gui/specifics/ServerLobbyShipSelectorWindow.h"
 #include "gui/specifics/ServerHostingMapSelectorWindow.h"
 
-#include "ships/shipSystems/ShipSystemCloakingDevice.h"
-#include "ships/shipSystems/ShipSystemMainThrusters.h"
-#include "ships/shipSystems/ShipSystemPitchThrusters.h"
-#include "ships/shipSystems/ShipSystemReactor.h"
-#include "ships/shipSystems/ShipSystemRollThrusters.h"
-#include "ships/shipSystems/ShipSystemSensors.h"
-#include "ships/shipSystems/ShipSystemShields.h"
-#include "ships/shipSystems/ShipSystemWarpDrive.h"
-#include "ships/shipSystems/ShipSystemYawThrusters.h"
-#include "ships/shipSystems/ShipSystemWeapons.h"
-#include "ships/shipSystems/ShipSystemHull.h"
-
 #include "hud/HUD.h"
 #include "modes/GameplayMode.h"
+#include "teams/Team.h"
 
 #include <regex>
-
 #include <core/engine/sounds/Sounds.h>
 
 using namespace Engine;
@@ -278,7 +263,6 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
 
 }
 Menu::~Menu() {
-    //menu stuff
     SAFE_DELETE(m_ButtonHost);
     SAFE_DELETE(m_ButtonJoin);
     SAFE_DELETE(m_Back);
@@ -303,10 +287,10 @@ void Menu::enter_the_game() {
     if (!m_ServerLobbyShipSelectorWindow->m_ChosenShipName.empty()) {
         PacketMessage p;
         p.PacketType = PacketType::Client_To_Server_Request_Map_Entry;
-        p.name = m_Core.m_Client->m_username;
+        p.name = m_Core.m_Client->m_Username;
 
         p.data = m_ServerLobbyShipSelectorWindow->m_ChosenShipName;
-        p.data += "," + m_Core.m_Client->m_mapname;
+        p.data += "," + m_Core.m_Client->m_Mapname;
         if (m_Core.m_Client->m_Team) {
             p.data += "," + m_Core.m_Client->m_Team->getTeamNumberAsString();
         }else{
@@ -368,47 +352,8 @@ void Menu::onResize(const uint& width, const uint& height) {
     m_ServerLobbyShipSelectorWindow->setPosition(50, winSize.y - 50.0f);
 }
 
-uint _countShips = 0;
-uint _countPlanets = 0;
 void Menu::update_game(const double& dt) {
-    Map* map = static_cast<Map*>(Resources::getCurrentScene());
-    auto& player = *map->getPlayer();
-    auto& playerName = player.entity().getComponent<ComponentName>()->name();
 
-    if (Engine::isKeyDownOnce(KeyboardKey::Comma)) {
-        const auto& ships = map->getShips();
-        vector<Ship*> shipsVect;
-        shipsVect.reserve(ships.size());
-
-        for (auto& p : ships) {
-            auto& name = p.second->entity().getComponent<ComponentName>()->name();
-            if (name != playerName)
-                shipsVect.push_back(p.second);
-        }
-
-
-        if (shipsVect.size() > 0) {
-            if (_countShips > shipsVect.size() - 1) {
-                _countShips = 0;
-            }
-            player.setTarget(shipsVect[_countShips]->entity().getComponent<ComponentName>()->name(), true);
-            ++_countShips;
-        }
-    }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
-        const auto& planets = map->getPlanets();
-        vector<Planet*> planetsVect;
-        planetsVect.reserve(planets.size());
-
-        for (auto& p : planets) {
-            planetsVect.push_back(p.second);
-        }
-
-        if (_countPlanets > planetsVect.size() - 1) {
-            _countPlanets = 0;
-        }
-        player.setTarget(planetsVect[_countPlanets]->entity().getComponent<ComponentName>()->name(), true);
-        ++_countPlanets;
-    }
 }
 void Menu::update_main_menu(const double& dt) {
     m_Font->renderText(epriv::Core::m_Engine->m_DebugManager.reportDebug(), glm::vec2(50), glm::vec4(1.0), 0);
@@ -451,115 +396,6 @@ void Menu::update_join_server_server_lobby(const double& dt) {
 
 void Menu::render_game() {
 
-    Map* scene = static_cast<Map*>(Resources::getCurrentScene());
-    Ship* player = scene->getPlayer();
-    glm::vec2 winSize = glm::vec2(Resources::getWindowSize().x, Resources::getWindowSize().y);
-
-#pragma region renderCrossHairAndOtherInfo
-
-    auto target = player->getTarget();
-    if (target) {
-        auto& body = *target->getComponent<ComponentBody>();
-        glm::vec3 pos = body.getScreenCoordinates(true);
-        if (pos.z == 1) { //infront 
-            auto boxPos = body.getScreenBoxCoordinates(8.0f);
-            Material& crosshair = *(Material*)ResourceManifest::CrosshairMaterial.get();
-
-            auto& crosshairTexture = *crosshair.getComponent(0).texture();
-            const glm::vec4& color = glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f);
-
-            crosshairTexture.render(boxPos.topLeft, color, 270.0f);
-            crosshairTexture.render(boxPos.topRight, color, 180.0f);
-            crosshairTexture.render(boxPos.bottomLeft, color, 0.0f);
-            crosshairTexture.render(boxPos.bottomRight, color, 90.0f);
-
-            auto& targetBody = *target->getComponent<ComponentBody>();
-            string name = "";
-            auto targetName = target->getComponent<ComponentName>();
-            if (targetName) {
-                name = targetName->name();
-            }
-            unsigned long long distanceInKm = (targetBody.getDistanceLL(player->entity()) / 10);
-            string stringRepresentation = "";
-            if (distanceInKm > 0) {
-                stringRepresentation = convertNumToNumWithCommas(unsigned long long(distanceInKm)) + " Km";
-            }else {
-                float distanceInm = (targetBody.getDistance(player->entity())) * 100.0f;
-                stringRepresentation = to_string(uint(distanceInm)) + " m";
-            }
-            m_Font->renderText(name + "\n" + stringRepresentation, glm::vec2(pos.x + 20, pos.y + 20), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1), 0, glm::vec2(0.7f, 0.7f), 0.1f);
-
-
-            const auto healthDisplayWidthMax = 100.0f;
-            Ship* ship = dynamic_cast<Ship*>(target);
-            if (ship) {
-                auto* shields = static_cast<ShipSystemShields*>(ship->getShipSystem(ShipSystemType::Shields));
-                auto* _hull = static_cast<ShipSystemHull*>(ship->getShipSystem(ShipSystemType::Hull));
-                if (shields) {
-                    auto& shield = *shields;
-
-                    auto startX = 0.0f;
-                    auto incrX = (healthDisplayWidthMax / 6.0f) - 2.0f;
-                    for (size_t i = 0; i < 6; ++i) {
-                        Renderer::renderRectangle(glm::vec2((pos.x - (healthDisplayWidthMax / 2)) + startX, pos.y - 26.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), incrX, 2, 0, 0.10f, Alignment::BottomLeft);
-                        Renderer::renderRectangle(glm::vec2((pos.x - (healthDisplayWidthMax / 2)) + startX, pos.y - 26.0f), glm::vec4(0.0f, 0.674f, 1.0f, 1.0f), shield.getHealthPercent(i) * incrX, 2, 0, 0.09f, Alignment::BottomLeft);
-                        startX += (incrX + 3.0f);
-                    }
-
-
-
-
-                }
-                if (_hull) {
-                    auto& hull = *_hull;
-                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 27.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), healthDisplayWidthMax, 2, 0, 0.10f, Alignment::TopLeft);
-                    Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 27.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), hull.getHealthPercent() * healthDisplayWidthMax, 2, 0, 0.09f, Alignment::TopLeft);
-                }
-            }
-        }else{ //behind
-            float angle = 0.0f;
-            Material& crosshairArrow = *(Material*)ResourceManifest::CrosshairArrowMaterial.get();
-            auto& crosshairArrowTexture = *crosshairArrow.getComponent(0).texture();
-            uint textureSizeOffset = (crosshairArrowTexture.width() / 2) + 4;
-            if (pos.y > 2 && pos.y < winSize.y - 2) { //if y is within window bounds
-                if (pos.x < 2) {
-                    angle = -45.0f;
-                    pos.x += textureSizeOffset;
-                }else {
-                    angle = 135.0f;
-                    pos.x -= textureSizeOffset;
-                }
-            }else if (pos.y <= 1) { //if y is below the window bounds
-                pos.y += textureSizeOffset;
-                if (pos.x <= 1) { //bottom left corner
-                    angle = 0.0f;
-                    pos.x += textureSizeOffset - 4;
-                    pos.y -= 4;
-                }else if (pos.x > winSize.x - 2) { //bottom right corner
-                    angle = 90.0f;
-                    pos.x -= textureSizeOffset - 4;
-                    pos.y -= 4;
-                }else { //bottom normal
-                    angle = 45.0f;
-                }
-            }else { //if y is above the window bounds
-                pos.y -= textureSizeOffset;
-                if (pos.x < 2) { //top left corner
-                    angle = -90.0f;
-                    pos.x += textureSizeOffset - 4;
-                    pos.y += 4;
-                }else if (pos.x > winSize.x - 2) { //top right corner
-                    angle = 180.0f;
-                    pos.x -= textureSizeOffset - 4;
-                    pos.y += 4;
-                }else { //top normal
-                    angle = -135.0f;
-                }
-            }
-            crosshairArrowTexture.render(glm::vec2(pos.x, pos.y), glm::vec4(m_Color.x, m_Color.y, m_Color.z, 1.0f), angle);
-        }
-    }
-#pragma endregion
 }
 void Menu::render_main_menu() {
     m_ButtonHost->render();

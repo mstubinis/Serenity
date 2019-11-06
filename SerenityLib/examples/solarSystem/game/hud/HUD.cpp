@@ -2,9 +2,12 @@
 
 #include "../map/Map.h"
 #include "../ResourceManifest.h"
+#include "../Ship.h"
+#include "../Planet.h"
 
 #include "../hud/SensorStatusDisplay.h"
 #include "../hud/ShipStatusDisplay.h"
+#include "../hud/TargetRedicule.h"
 
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialComponent.h>
@@ -27,13 +30,15 @@ HUD::HUD(Map& map, Font& font):m_Map(map), m_Font(font){
     Texture& background = *(Texture*)((ResourceManifest::ShipStatusBackgroundHUDTexture).get());
 
     m_SensorDisplay = new SensorStatusDisplay(*this, map, glm::vec2(winSize.x / 2.0f, 0), glm::vec2(textureWidth, radarTexture.height()), glm::vec4(1, 1, 0, 1), Alignment::BottomCenter);
-    m_ShipStatusDisplay = new ShipStatusDisplay(*this, glm::vec2((winSize.x / 2.0f) - textureWidth / 2.0f, 0), background.size(), glm::vec4(1,1,0,1), Alignment::BottomRight);
-    m_ShipTargetStatusDisplay = new ShipStatusDisplay(*this, glm::vec2((winSize.x / 2.0f) + textureWidth / 2.0f, 0), background.size(), glm::vec4(1, 1, 0, 1), Alignment::BottomLeft);
+    m_ShipStatusDisplay = new ShipStatusDisplay(*this, glm::vec2((winSize.x / 2.0f) - ((m_SensorDisplay->size().x / 2.0f) + 30), 0), background.size(), glm::vec4(1,1,0,1), Alignment::BottomRight);
+    m_ShipTargetStatusDisplay = new ShipStatusDisplay(*this, glm::vec2((winSize.x / 2.0f) + ((m_SensorDisplay->size().x / 2.0f) + 30), 0), background.size(), glm::vec4(1, 1, 0, 1), Alignment::BottomLeft);
+    m_TargetRedicule = new TargetRedicule(map, font);
 }
 HUD::~HUD() {
     SAFE_DELETE(m_SensorDisplay);
     SAFE_DELETE(m_ShipStatusDisplay);
     SAFE_DELETE(m_ShipTargetStatusDisplay);
+    SAFE_DELETE(m_TargetRedicule);
 }
 const bool HUD::isHidden() const {
     return !m_Shown;
@@ -61,8 +66,8 @@ ShipStatusDisplay& HUD::getShipTargetStatusDisplay() {
 }
 void HUD::onResize(const unsigned int& width, const unsigned int& height) {
     m_SensorDisplay->onResize(width, height);
-    m_ShipStatusDisplay->setPosition((width / 2.0f) - (m_SensorDisplay->size().x / 2.0f), 0);
-    m_ShipTargetStatusDisplay->setPosition((width / 2.0f) + (m_SensorDisplay->size().x / 2.0f), 0);
+    m_ShipStatusDisplay->setPosition((width / 2.0f) - ((m_SensorDisplay->size().x / 2.0f) + 30), 0);
+    m_ShipTargetStatusDisplay->setPosition((width / 2.0f) + ((m_SensorDisplay->size().x / 2.0f) + 30), 0);
 }
 void HUD::setTarget(Planet* planet) {
     m_ShipTargetStatusDisplay->setTarget(planet);
@@ -76,14 +81,58 @@ void HUD::setTarget(EntityWrapper* wrapper) {
 void HUD::setTarget(Entity& entity) {
     m_ShipTargetStatusDisplay->setTarget(entity);
 }
+uint _countShips = 0;
+uint _countPlanets = 0;
 void HUD::update(const double& dt) {
     if (Engine::isKeyDownOnce(KeyboardKey::LeftAlt, KeyboardKey::X) || Engine::isKeyDownOnce(KeyboardKey::RightAlt, KeyboardKey::X)) {
         toggle();
     }
+    Map* map = static_cast<Map*>(Resources::getCurrentScene());
+    auto& player = *map->getPlayer();
+    auto& playerName = player.entity().getComponent<ComponentName>()->name();
+
+    if (Engine::isKeyDownOnce(KeyboardKey::Comma)) {
+        const auto& ships = map->getShipsPlayerControlled();
+        vector<Ship*> shipsVect;
+        shipsVect.reserve(ships.size());
+
+        for (auto& p : ships) {
+            auto& name = p.second->entity().getComponent<ComponentName>()->name();
+            if (name != playerName)
+                shipsVect.push_back(p.second);
+        }
+
+
+        if (shipsVect.size() > 0) {
+            if (_countShips > shipsVect.size() - 1) {
+                _countShips = 0;
+            }
+            player.setTarget(shipsVect[_countShips]->entity().getComponent<ComponentName>()->name(), true);
+            ++_countShips;
+        }
+    }
+    else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
+        const auto& planets = map->getPlanets();
+        vector<Planet*> planetsVect;
+        planetsVect.reserve(planets.size());
+
+        for (auto& p : planets) {
+            planetsVect.push_back(p.second);
+        }
+
+        if (_countPlanets > planetsVect.size() - 1) {
+            _countPlanets = 0;
+        }
+        player.setTarget(planetsVect[_countPlanets]->entity().getComponent<ComponentName>()->name(), true);
+        ++_countPlanets;
+    }
+
+
 
     m_SensorDisplay->update(dt);
     m_ShipStatusDisplay->update(dt);
     m_ShipTargetStatusDisplay->update(dt);
+    m_TargetRedicule->update(dt);
 }
 void HUD::render() {
     if (!m_Shown) 
@@ -92,7 +141,7 @@ void HUD::render() {
     m_SensorDisplay->render();
     m_ShipStatusDisplay->render();
     m_ShipTargetStatusDisplay->render();
-
+    m_TargetRedicule->render();
 
 #pragma region DrawDebugStuff
     m_Font.renderText(Engine::Data::reportTime() +

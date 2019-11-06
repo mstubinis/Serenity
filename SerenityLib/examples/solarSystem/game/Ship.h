@@ -19,6 +19,7 @@ class  GameCamera;
 class  Ship;
 class  Map;
 class  Decal;
+struct PacketMessage;
 struct PacketPhysicsUpdate;
 struct PacketCloakUpdate;
 struct PacketHealthUpdate;
@@ -81,6 +82,7 @@ class Ship: public EntityWrapper, public EventObserver {
         bool                                 m_IsWarping;
         float                                m_WarpFactor;
         std::string                          m_ShipClass;
+        std::string                          m_MapKey;
         std::vector<Decal*>                  m_DamageDecals;
         std::vector<glm::vec3>               m_AimPositionDefaults;
         glm::vec3                            m_CameraOffsetDefault;
@@ -111,6 +113,7 @@ class Ship: public EntityWrapper, public EventObserver {
         AI* getAI();
         const AIType::Type getAIType() const;
         const Team& getTeam() const;
+        const std::string& getMapKey() const;
         const std::string getName();
         const glm_vec3 getWarpSpeedVector3();
         const glm_vec3 getPosition();
@@ -126,9 +129,11 @@ class Ship: public EntityWrapper, public EventObserver {
 
         void updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, std::vector<std::string>& info);
         void updateCloakFromPacket(const PacketCloakUpdate& packet);
+        void updateAntiCloakScanFromPacket(const PacketMessage& packet);
         void updateHealthFromPacket(const PacketHealthUpdate& packet);
 
-        void updateDamageDecalsCloak(const float& alpha);
+        void updateCloakVisuals(const float& r, const float& g, const float& b, const float& alpha, ComponentModel& model);
+        void updateCloakVisuals(const float& alpha, ComponentModel& model);
         void updateProjectileImpact(const PacketProjectileImpact& packet);
 
         void setModel(Handle& handle);

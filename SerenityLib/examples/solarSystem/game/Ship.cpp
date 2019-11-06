@@ -316,8 +316,20 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
 	}
     body.setUserPointer1(this);
     
+    m_MapKey = name;
+    uint c = 1;
+    while (map.getShips().count(m_MapKey)) {
+        m_MapKey = name + "_" + to_string(c);
+        ++c;
+    }
+
     map.m_Objects.push_back(this);
-    map.getShips().emplace(name, this);
+    map.getShips().emplace(m_MapKey, this);
+    if (ai_type == AIType::Player_Other || ai_type == AIType::Player_You) {
+        map.getShipsPlayerControlled().emplace(m_MapKey, this);
+    }else{
+        map.getShipsNPCControlled().emplace(m_MapKey, this);
+    }
 
     registerEvent(EventType::WindowResized);
 
@@ -331,6 +343,10 @@ Ship::~Ship(){
     SAFE_DELETE_VECTOR(m_DamageDecals);
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
+const string& Ship::getMapKey() const {
+    return m_MapKey;
+}
+
 void Ship::addHullTargetPoints(vector<glm::vec3>& points) {
     for (auto& pt : points) {
         m_AimPositionDefaults.push_back(pt);
@@ -427,6 +443,15 @@ const glm_vec3 Ship::getPosition(const EntityDataRequest& dataRequest) {
 const glm_quat Ship::getRotation(const EntityDataRequest& dataRequest) {
     return getComponent<ComponentBody>(dataRequest)->rotation();
 }
+void Ship::updateAntiCloakScanFromPacket(const PacketMessage& packet) {
+    auto* sensors = static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]);
+    if (sensors) {
+        auto info = Helper::SeparateStringByCharacter(packet.data, ',');
+        sensors->toggleAntiCloakScan(false);
+        sensors->m_AntiCloakScanActive = (info[0] == "1") ? true : false;
+        sensors->m_AntiCloakScanTimer = packet.r;
+    }
+}
 void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     glm::vec3 normal;
     float rad, time;
@@ -521,17 +546,26 @@ const bool Ship::canSeeCloak(Ship* otherShip) {
     }
     return false;
 }
-void Ship::updateDamageDecalsCloak(const float& alpha) {
+void Ship::updateCloakVisuals(const float& r, const float& g, const float& b, const float& alpha, ComponentModel& model) {
     for (auto& decal : m_DamageDecals) {
         if (decal && decal->active()) {
-            auto& model = *decal->getComponent<ComponentModel>();
-            for (unsigned int i = 0; i < model.getNumModels(); ++i) {
-                auto& instance = model.getModel(i);
+            auto& decal_model = *decal->getComponent<ComponentModel>();
+            for (unsigned int i = 0; i < decal_model.getNumModels(); ++i) {
+                auto& instance = decal_model.getModel(i);
                 auto& color = instance.color();
                 instance.setColor(color.r, color.g, color.b, alpha);
             }
         }
     }
+    if (r >= 0.0f && g >= 0.0f && b >= 0.0f) {
+        for (size_t i = 0; i < model.getNumModels(); ++i) {
+            auto& instance = model.getModel(i);
+            instance.setColor(r, g, b, alpha);
+        }
+    }
+}
+void Ship::updateCloakVisuals(const float& alpha, ComponentModel& model) {
+    updateCloakVisuals(-1.0f, -1.0f, -1.0f, alpha, model);
 }
 void Ship::updateCloakFromPacket(const PacketCloakUpdate& packet) {
     if (!m_ShipSystems[ShipSystemType::CloakingDevice])
@@ -556,25 +590,19 @@ void Ship::updateCloakFromPacket(const PacketCloakUpdate& packet) {
     }else{
         if (cloak.m_CloakTimer < 1.0f && cloak.m_CloakTimer >= 0.0f) {
             for (unsigned int i = 0; i < model.getNumModels(); ++i) {
-                auto& instance = model.getModel(i);
                 model.setModelShaderProgram(ResourceManifest::ShipShaderProgramForward, i, RenderStage::ForwardTransparentTrianglesSorted);
-                instance.setColor(1, 1, 1, glm::abs(cloak.m_CloakTimer));
-                updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
             }
+            updateCloakVisuals(1, 1, 1, glm::abs(cloak.m_CloakTimer), model);
         }else if(cloak.m_CloakTimer < 0.0f){
             for (unsigned int i = 0; i < model.getNumModels(); ++i) {
-                auto& instance = model.getModel(i);
                 model.setModelShaderProgram(ResourceManifest::ShipShaderProgramForward, i, RenderStage::ForwardTransparentTrianglesSorted);
-                instance.setColor(0.369f, 0.912f, 1, glm::abs(cloak.m_CloakTimer));
-                updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
             }
+            updateCloakVisuals(0.369f, 0.912f, 1, glm::abs(cloak.m_CloakTimer), model);
         }else{
             for (unsigned int i = 0; i < model.getNumModels(); ++i) {
-                auto& instance = model.getModel(i);
                 model.setModelShaderProgram(ResourceManifest::ShipShaderProgramDeferred, i, RenderStage::GeometryOpaque);
-                instance.setColor(1, 1, 1, glm::abs(cloak.m_CloakTimer));
-                updateDamageDecalsCloak(glm::abs(cloak.m_CloakTimer));
             }
+            updateCloakVisuals(1, 1, 1, glm::abs(cloak.m_CloakTimer), model);
         }
     }
 }

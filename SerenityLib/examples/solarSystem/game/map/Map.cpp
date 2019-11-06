@@ -126,6 +126,18 @@ string Map::allowedShipsSingleString() {
     }
     return "";
 }
+unordered_map<string, Planet*>& Map::getPlanets() { 
+    return m_Planets; 
+}
+unordered_map<string, Ship*>& Map::getShipsPlayerControlled() { 
+    return m_ShipsPlayerControlled; 
+}
+unordered_map<string, Ship*>& Map::getShipsNPCControlled() {
+    return m_ShipsNPCControlled;
+}
+unordered_map<string, Ship*>& Map::getShips() {
+    return m_Ships;
+}
 Ship* Map::getPlayer() { 
     return m_Player; 
 }
@@ -410,7 +422,7 @@ void Map::loadFromFile(const string& filename) {
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
 }
 Ship* Map::createShip(const AIType::Type ai_type, Team& team, Client& client, const string& shipClass, const string& shipName, const glm::vec3& position) {
-    if (m_Ships.size() > 0 && m_Ships.count(shipName))
+    if ((ai_type == AIType::Player_You || ai_type == AIType::Player_Other) && m_ShipsPlayerControlled.count(shipName))
         return nullptr;
     Ship* ship = nullptr;
 
@@ -444,9 +456,16 @@ Anchor* Map::getRootAnchor() {
 Anchor* Map::getSpawnAnchor() {
     return std::get<1>(m_SpawnAnchor);
 }
+const bool Map::hasShipPlayer(const string& shipName) const {
+    return (m_ShipsPlayerControlled.size() > 0 && m_ShipsPlayerControlled.count(shipName)) ? true : false;
+}
+const bool Map::hasShipNPC(const string& shipName) const {
+    return (m_ShipsNPCControlled.size() > 0 && m_ShipsNPCControlled.count(shipName)) ? true : false;
+}
 const bool Map::hasShip(const string& shipName) const {
     return (m_Ships.size() > 0 && m_Ships.count(shipName)) ? true : false;
 }
+
 HUD& Map::getHUD() {
     return *m_HUD;
 }
@@ -503,9 +522,11 @@ void Map::update(const double& dt){
             }
         }
     }
-
-    for (auto& ship : m_Ships)
+    for (auto& ship : m_ShipsPlayerControlled)
         ship.second->update(dt);
+    for (auto& ship : m_ShipsNPCControlled)
+        ship.second->update(dt);
+
     m_HUD->update(dt);
     Scene::update(dt);
 }

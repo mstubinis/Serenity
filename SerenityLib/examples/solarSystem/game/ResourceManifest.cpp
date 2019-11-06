@@ -84,6 +84,8 @@ Handle ResourceManifest::SoundPlasmaTorpedo;
 Handle ResourceManifest::SoundPhaserBeam;
 Handle ResourceManifest::SoundPlasmaBeam;
 Handle ResourceManifest::SoundDisruptorBeam;
+Handle ResourceManifest::SoundAntiCloakScan;
+Handle ResourceManifest::SoundAntiCloakScanDetection;
 
 //torpedos
 Handle ResourceManifest::TorpedoFlareMesh;
@@ -332,4 +334,6 @@ void ResourceManifest::init(){
     SoundPhaserBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/phaser_beam.ogg");
     SoundPlasmaBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_beam.ogg");
     SoundDisruptorBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/disruptor_beam.ogg");
+    SoundAntiCloakScan = Resources::addSoundData(BasePath + "data/Sounds/effects/anti_cloak_scan.ogg");
+    SoundAntiCloakScanDetection = Resources::addSoundData(BasePath + "data/Sounds/effects/anti_cloak_scan_detection.ogg");
 }

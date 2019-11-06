@@ -27,21 +27,45 @@ class ShipSystemSensors final : public ShipSystem {
             bool     valid;
             decimal  distanceSquared;
         };
+        struct AntiCloakDetection final {
+            Ship* ship;
+            double detection_timer_max;
+            double detection_timer_current;
+        };
+
+        double                     m_AntiCloakScanPingTime;
+        double                     m_AntiCloakScanTimer;
+        double                     m_AntiCloakScanTimerSound;
+        bool                       m_AntiCloakScanActive;
 
         EntityWrapper*             m_Target;
         Map&                       m_Map;
         decimal                    m_RadarRange;
 
-        std::vector<DetectedShip>  m_DetectedEnemyShips;
-        std::vector<DetectedShip>  m_DetectedShips;
-        std::vector<DetectedShip>  m_DetectedAlliedShips;
-        std::vector<DetectedShip>  m_DetectedNeutralShips;
+        std::vector<AntiCloakDetection>  m_DetectedAntiCloakedShips;
+        std::vector<DetectedShip>        m_DetectedEnemyShips;
+        std::vector<DetectedShip>        m_DetectedShips;
+        std::vector<DetectedShip>        m_DetectedAlliedShips;
+        std::vector<DetectedShip>        m_DetectedNeutralShips;
+
+        void internal_update_clear_target_automatically_if_applicable(const double& dt);
+        void internal_update_anti_cloak_scan(const double& dt);
+        void internal_update_anti_cloak_scan_detected_ships(const double& dt);
+        void internal_update_populate_detected_ships(const double& dt);
     public:
-        ShipSystemSensors(Ship&, Map&, const decimal& range = static_cast<decimal>(1000.0)); //100km
+        //                                                                         //100km
+        ShipSystemSensors(Ship&, Map&, const decimal& range = static_cast<decimal>(1000.0), const double AntiCloakScanPingTime = 5.0);
         ~ShipSystemSensors();
 
         const ShipSystemSensors::Detection validateDetection(Ship& othership, const glm_vec3& thisShipPos);
         const decimal& getRadarRange() const;
+
+        const bool isShipDetectedByAntiCloak(Ship* ship);
+        const bool toggleAntiCloakScan(const bool sendPacket = false);
+        void sendAntiCloakScanStatusPacket();
+
+        const double& getAntiCloakingScanTimer() const;
+        const bool& isAntiCloakScanActive() const;
 
         DetectedShip getClosestAlliedShip();
         DetectedShip getClosestNeutralShip();
@@ -49,10 +73,11 @@ class ShipSystemSensors final : public ShipSystem {
         DetectedShip getClosestEnemyCloakedShip();
         DetectedShip getClosestShip();
 
-        std::vector<DetectedShip>&   getEnemyShips();
-        std::vector<DetectedShip>&   getShips();
-        std::vector<DetectedShip>&   getAlliedShips();
-        std::vector<DetectedShip>&   getNeutralShips();
+        std::vector<AntiCloakDetection>&  getAntiCloakDetectedShips();
+        std::vector<DetectedShip>&        getEnemyShips();
+        std::vector<DetectedShip>&        getShips();
+        std::vector<DetectedShip>&        getAlliedShips();
+        std::vector<DetectedShip>&        getNeutralShips();
 
         EntityWrapper* getTarget();
         void setTarget(EntityWrapper* entityWrapper, const bool sendPacket);

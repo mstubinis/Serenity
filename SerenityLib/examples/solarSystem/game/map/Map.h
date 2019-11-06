@@ -25,6 +25,8 @@ class Map: public Scene{
         GameplayMode&                                  m_GameplayMode;
         std::unordered_map<std::string, Planet*>       m_Planets;
         std::unordered_map<std::string, Ship*>         m_Ships;
+        std::unordered_map<std::string, Ship*>         m_ShipsPlayerControlled;
+        std::unordered_map<std::string, Ship*>         m_ShipsNPCControlled;
         std::string                                    m_Filename;
         std::string                                    m_SkyboxFile;
         Ship*                                          m_Player;
@@ -59,8 +61,6 @@ class Map: public Scene{
 
         Client& getClient();
 
-        const bool hasShip(const std::string& shipName) const;
-        
         HUD& getHUD();
         Ship* createShip(const AIType::Type ai_type, Team& team, Client& client, const std::string& shipClass, const std::string& shipName, const glm::vec3& position);
 
@@ -73,8 +73,14 @@ class Map: public Scene{
         std::vector<std::string> allowedShips();
         std::string allowedShipsSingleString();
 
-        std::unordered_map<std::string, Planet*>& getPlanets() { return m_Planets; }
-        std::unordered_map<std::string, Ship*>& getShips() { return m_Ships; }
+        std::unordered_map<std::string, Planet*>& getPlanets();
+        std::unordered_map<std::string, Ship*>& getShips();
+        std::unordered_map<std::string, Ship*>& getShipsPlayerControlled();
+        std::unordered_map<std::string, Ship*>& getShipsNPCControlled();
+
+        const bool hasShip(const std::string& shipName) const;
+        const bool hasShipPlayer(const std::string& shipName) const;
+        const bool hasShipNPC(const std::string& shipName) const;
 
         const int addCannonProjectile(PrimaryWeaponCannonProjectile*, const int index = -1);
         const int addTorpedoProjectile(SecondaryWeaponTorpedoProjectile*, const int index = -1);

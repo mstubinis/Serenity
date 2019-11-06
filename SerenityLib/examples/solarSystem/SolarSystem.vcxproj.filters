@@ -417,6 +417,9 @@
     <ClInclude Include="game\ai\FireAtWill.h">
       <Filter>Header Files\Game\AI</Filter>
     </ClInclude>
+    <ClInclude Include="game\hud\TargetRedicule.h">
+      <Filter>Header Files\Game\HUD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -631,6 +634,9 @@
     </ClCompile>
     <ClCompile Include="game\ai\FireAtWill.cpp">
       <Filter>Source Files\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\hud\TargetRedicule.cpp">
+      <Filter>Source Files\Game\HUD</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

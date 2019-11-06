@@ -10,16 +10,19 @@ class ShipSystemCloakingDevice final : public ShipSystem {
     private:
         bool  m_Active;
         float m_CloakTimer;
+        float m_CloakSpeed;
+        float m_MaxAlphaWhileCloaked;
     public:
-        ShipSystemCloakingDevice(Ship&);
+        ShipSystemCloakingDevice(Ship&, const float cloakTimer = 1.0f, const float maxAlphaWhileCloaked = 0.2f);
         ~ShipSystemCloakingDevice();
 
         const bool  isCloakActive() const;
         const float getCloakTimer() const;
+        const float getMaxAlphaWhileCloaked() const;
 
         void update(const double& dt);
-        bool cloak(ComponentModel&, bool sendPacket = true);
-        bool decloak(ComponentModel&, bool sendPacket = true);
+        const bool cloak(ComponentModel&, bool sendPacket = true);
+        const bool decloak(ComponentModel&, bool sendPacket = true);
 };
 
 #endif

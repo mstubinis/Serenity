@@ -19,6 +19,10 @@ struct PacketType {enum Type: unsigned int {
     Undefined,
     Server_Shutdown,
 
+    Client_To_Server_Anti_Cloak_Status,
+    Server_To_Client_Anti_Cloak_Status,
+
+
     Client_To_Server_Request_GameplayMode,
     Server_To_Client_Request_GameplayMode,
 

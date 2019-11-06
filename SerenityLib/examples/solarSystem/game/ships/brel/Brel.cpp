@@ -206,13 +206,13 @@ void Brel::update(const double& dt) {
     }else{
         foldWingsUp();
     }
-    
+    /*
     //for testing only
     if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
         foldWingsUp();
         foldWingsDown();
     }
-    
+    */
     if (m_WingState == BrelWingSpanState::RotatingUp) {
         updateWingSpan(dt, BrelWingSpanState::Up, 1);
     }
