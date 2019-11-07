@@ -19,7 +19,7 @@ TextureRequest::TextureRequest() {
     async         = false;
     selfClean     = true;
 }
-TextureRequest::TextureRequest(const string& _filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) :TextureRequest() {
+TextureRequest::TextureRequest(const string& _filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) : TextureRequest() {
     file = _filename;
     if (!file.empty()) {
         fileExtension = boost::filesystem::extension(file);
@@ -27,9 +27,9 @@ TextureRequest::TextureRequest(const string& _filename, const bool& genMipMaps, 
             fileExists = true;
         }
     }
-    internalFormat = _internal;
+    internalFormat  = _internal;
     isToBeMipmapped = genMipMaps;
-    type = openglTextureType;
+    type            = openglTextureType;
 
     if (type == GL_TEXTURE_2D)
         textureType = TextureType::Texture2D;
@@ -40,6 +40,8 @@ TextureRequest::TextureRequest(const string& _filename, const bool& genMipMaps, 
     else if (type == GL_TEXTURE_CUBE_MAP)
         textureType = TextureType::CubeMap;
 }
+
+
 TextureRequest::~TextureRequest() {
 
 }

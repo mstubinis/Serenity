@@ -4,15 +4,19 @@
 
 using namespace std;
 
-EngineResource::EngineResource(const string& name){
+EngineResource::EngineResource(const ResourceType::Type& type, const string& name){
     m_Name = name;
     m_IsLoaded = false;
     m_UsageCount = 0;
+    m_ResourceType = type;
 }
 EngineResource::~EngineResource(){
 }
 void EngineResource::setName(const string& name){
     m_Name = name;
+}
+const ResourceType::Type& EngineResource::type() const {
+    return m_ResourceType;
 }
 const string& EngineResource::name() const {
     return m_Name;

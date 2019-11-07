@@ -588,6 +588,9 @@
     <ClInclude Include="Engine\src\core\engine\renderer\pipelines\DeferredPipeline.h">
       <Filter>Header Files\Engine\Core\Renderer\pipelines</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\resources\ResourcesIncludes.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">

@@ -54,6 +54,7 @@ struct ShipModelInstanceUnbindFunctor {
 
 class Ship: public EntityWrapper, public EventObserver {
     friend struct GameCameraLogicFunctor;
+    friend  class GameCamera;
     friend struct ShipLogicFunctor;
     friend  class ShipSystemReactor;
     friend  class ShipSystemMainThrusters;

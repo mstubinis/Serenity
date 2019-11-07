@@ -93,28 +93,20 @@ void EngineCore::update_physics(const double& dt) {
     m_DebugManager.calculate_physics();
 }
 void EngineCore::update_logic(const double& dt){
-    // update logic   //////////////////////////////////////////
     m_DebugManager.stop_clock();
-    //update current scene
     Scene& scene = *Resources::getCurrentScene();
     auto& ecs = InternalScenePublicInterface::GetECS(scene);
     update_physics(dt);
     ecs.preUpdate(scene, dt);
     Game::onPreUpdate(dt);
-
     Game::update(dt);
-
     scene.update(dt);
     ecs.update(dt, scene);
     ecs.postUpdate(scene,dt);
-
     m_ThreadManager._update(dt);
     Game::onPostUpdate(dt);
-
     m_DebugManager.calculate_logic();
-
     m_EventManager.onResetEvents(dt);
-    ////////////////////////////////////////////////////////////
 }
 void EngineCore::update_sounds(const double& dt){
     m_DebugManager.stop_clock();

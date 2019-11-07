@@ -33,9 +33,11 @@ class ShipSystemSensors final : public ShipSystem {
             double detection_timer_current;
         };
 
-        double                     m_AntiCloakScanPingTime;
+        bool                       m_IsPingingForShips;
+        double                     m_IsPingingForShipsTimer;
+
+        double                     m_AntiCloakScanTimerMax;
         double                     m_AntiCloakScanTimer;
-        double                     m_AntiCloakScanTimerSound;
         bool                       m_AntiCloakScanActive;
 
         EntityWrapper*             m_Target;
@@ -54,7 +56,7 @@ class ShipSystemSensors final : public ShipSystem {
         void internal_update_populate_detected_ships(const double& dt);
     public:
         //                                                                         //100km
-        ShipSystemSensors(Ship&, Map&, const decimal& range = static_cast<decimal>(1000.0), const double AntiCloakScanPingTime = 5.0);
+        ShipSystemSensors(Ship&, Map&, const decimal& range = static_cast<decimal>(1000.0), const double AntiCloakScanTimerMax = 5.0);
         ~ShipSystemSensors();
 
         const ShipSystemSensors::Detection validateDetection(Ship& othership, const glm_vec3& thisShipPos);
@@ -66,6 +68,8 @@ class ShipSystemSensors final : public ShipSystem {
         void sendAntiCloakScanStatusPacket();
 
         const double& getAntiCloakingScanTimer() const;
+        const double& getAntiCloakingScanTimerMax() const;
+
         const bool& isAntiCloakScanActive() const;
 
         DetectedShip getClosestAlliedShip();

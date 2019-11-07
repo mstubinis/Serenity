@@ -16,7 +16,7 @@ using namespace Engine::epriv;
 MaterialRequest::MaterialRequest() {
     async = false;
 }
-MaterialRequest::MaterialRequest(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) : MaterialRequest() {
+MaterialRequest::MaterialRequest(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) : MaterialRequest() { 
     auto d  = new TextureRequest(diffuse,    false,  ImageInternalFormat::SRGB8_ALPHA8);
     auto n  = new TextureRequest(normal,     false,  ImageInternalFormat::RGBA8);
     auto g  = new TextureRequest(glow,       false,  ImageInternalFormat::R8);
@@ -34,6 +34,12 @@ MaterialRequest::MaterialRequest(const string& name, const string& diffuse, cons
     part.textureRequests.push_back(sm);
     part.name = name;
 }
+MaterialRequest::MaterialRequest(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
+    part.material = new Material(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
+    part.handle = Core::m_Engine->m_ResourceManager.m_Resources->add(part.material, ResourceType::Material);
+    part.name = name;
+}
+
 MaterialRequest::~MaterialRequest() {
 
 }
@@ -54,17 +60,18 @@ void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
     request.part.material->setName(request.part.name);
     request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources->add(request.part.material, ResourceType::Material);
 
+    const auto size = request.part.textureRequests.size();
+    for (size_t i = 0; i < size; ++i) {
+        if (request.part.textureRequests[i]->fileExists) {
+            auto& component = request.part.material->addComponent(static_cast<MaterialComponentType::Type>(i), "DEFAULT");
+        }
+    }
+
     if (request.async) {
         for (auto& textureRequest : request.part.textureRequests) {
             textureRequest->selfClean = false;
             textureRequest->requestAsync();
         }
-        const auto& size = request.part.textureRequests.size();
-
-        for (uint i = 0; i < size; ++i) {
-            request.part.material->addComponent(static_cast<MaterialComponentType::Type>(i), "DEFAULT");
-        }
-
         const auto& reference = std::ref(request);
         const auto& job = std::bind(&InternalMaterialRequestPublicInterface::LoadCPU, reference);
         const auto& cbk = std::bind(&InternalMaterialRequestPublicInterface::LoadGPU, reference);
@@ -82,15 +89,21 @@ void InternalMaterialRequestPublicInterface::LoadCPU(MaterialRequest& request) {
     InternalMaterialPublicInterface::LoadCPU(*request.part.material);
 }
 void InternalMaterialRequestPublicInterface::LoadGPU(MaterialRequest& request) {
-    const auto& size = request.part.textureRequests.size();
-    for (uint i = 0; i < size; ++i) {
-        request.part.material->getComponent(i).layer(0).setTexture(request.part.textureRequests[i]->file);
+    const auto& requests = request.part.textureRequests;
+    size_t count = 0;
+    for (size_t i = 0; i < requests.size(); ++i) {
+        if (requests[i]->fileExists) {
+            request.part.material->getComponent(count).layer(0).setTexture(requests[i]->file);
+            ++count;
+        }
     }
     InternalMaterialPublicInterface::LoadGPU(*request.part.material);
-    for (auto& textureRequest : request.part.textureRequests) {
-        if (textureRequest && !textureRequest->selfClean)
+    for (auto& textureRequest : requests) {
+        if (textureRequest && !textureRequest->selfClean) {
             delete(textureRequest);
+        }
     }
-    if (request.async)
+    if (request.async) {
         delete(&request); //yes its ugly, but its needed. see Resources::loadMaterialAsync()
+    }
 }

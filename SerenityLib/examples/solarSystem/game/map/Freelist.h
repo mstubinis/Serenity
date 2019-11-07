@@ -14,8 +14,11 @@ template<typename T> class Freelist {
         Freelist() {
             m_Size = 0;
         }
-        const unsigned int& size() const {
-            return m_Size;
+        Freelist(const unsigned int _capacity) {
+            initialize(_capacity);
+        }
+        ~Freelist() {
+            clear(false);
         }
         void initialize(const unsigned int _capacity) {
             m_Items.reserve(_capacity);
@@ -26,16 +29,22 @@ template<typename T> class Freelist {
                 m_Freelist.push(i);
             }
         }
-        Freelist(const unsigned int _capacity) {
-            initialize(_capacity);
+        const unsigned int& size() const {
+            return m_Size;
         }
-        ~Freelist() {
+        void clear(const bool reinit = true) {
+            auto cap = m_Items.capacity();
             for (unsigned int i = 0; i < m_Items.size(); ++i) {
                 if (m_Items[i]) {
                     delete m_Items[i];
                     m_Items[i] = nullptr;
                 }
             }
+            m_Items.clear();
+            m_Freelist = std::stack<unsigned int>();
+            m_Size = 0;
+            if(reinit)
+                initialize(cap);
         }
         const bool delete_data(T& data) {
             for (unsigned int i = 0; i < m_Items.size(); ++i) {

@@ -500,9 +500,9 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     }
 }
 void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
-    const unsigned int size = stoi(info[3]);
+    const unsigned int size = stoi(info[4]);
     Anchor* closest = map.getRootAnchor();
-    for (unsigned int i = 4; i < 4 + size; ++i) {
+    for (unsigned int i = 5; i < 5 + size; ++i) {
         auto& children = closest->getChildren();
         if (!children.count(info[i])) {
             return;

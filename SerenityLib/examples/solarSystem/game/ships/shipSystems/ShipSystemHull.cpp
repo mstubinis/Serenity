@@ -71,38 +71,44 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         decalList.push_back(d);
         d1 = new Decal(*hullDamage, impactLocation, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
         decalList.push_back(d1);
-        if (cloakingDevice) m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
+        if (cloakingDevice) {
+            m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
+        }
         return;
     }
-
     if (decalList.size() == 0) {
         d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
         decalList.push_back(d);
-        if (cloakingDevice) m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
+        if (cloakingDevice) {
+            m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
+        }
         return;
     }else{
         //get list of nearby impact points
         vector<Decal*> nearbys;
         for (auto& dec : decalList) {
-            auto dist = glm::distance2(glm_vec3(dec->initialPosition()), impactLocation);
-            if (dist < (impactR * impactR) * 0.4f) {
+            decimal dist = glm::distance2(glm_vec3(dec->initialPosition()), impactLocation);
+            if (dist < static_cast<decimal>(impactR * impactR) * static_cast<decimal>(0.4f)) {
                 nearbys.push_back(dec);
             }
         }
         if (nearbys.size() >= 8) {
             return; //forget it, no need to have so many
         }
-
         d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
         if (nearbys.size() >= 4) {
             d1 = new Decal(*hullDamage, impactLocation, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
         }
     }
-    if (d)  
+    if (d) {
         decalList.push_back(d);
-    if (d1) 
+    }
+    if (d1) {
         decalList.push_back(d1);
-    if(cloakingDevice) m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
+    }
+    if (cloakingDevice) {
+        m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
+    }
 }
 void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const bool forceHullFire, const bool paint) {
     float newHP = m_HealthPointsCurrent - damage;
@@ -113,8 +119,9 @@ void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& 
         //we destroyed the ship
         m_HealthPointsCurrent = 0.0f;
     }
-    if(paint)
+    if (paint) {
         applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, forceHullFire);
+    }
 }
 void ShipSystemHull::receiveCollision(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float damage) {
     if (m_CollisionTimer > static_cast<float>(HULL_TO_HULL_COLLISION_DELAY)) {

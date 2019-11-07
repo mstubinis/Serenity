@@ -167,7 +167,7 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, con
     shieldBody.setUserPointer2(&_ship);
     Mesh* shieldColMesh = (Mesh*)ResourceManifest::ShieldColMesh.get();
     Collision* c = new Collision(CollisionType::TriangleShapeStatic, shieldColMesh, shieldBody.mass());
-    c->getBtShape()->setMargin(0.04f);
+    c->getBtShape()->setMargin(0.08f);
     shieldBody.setCollision(c);
 
     m_HealthPointsMax.reserve(6);
@@ -399,91 +399,24 @@ const bool ShipSystemShields::shieldsAreUp() const {
     return m_ShieldsAreUp;
 }
 
-
-
-const float ShipSystemShields::getHealthCurrent(const size_t& index) const {
-    return m_ShieldsAreUp ? m_HealthPointsCurrent[index] : 0.0f;
-}
-const float ShipSystemShields::getHealthMax(const size_t& index) const {
-    return m_HealthPointsMax[index];
-}
-const float ShipSystemShields::getHealthPercent(const size_t& index) const {
-    return getHealthCurrent(index) / getHealthMax(index);
-}
-
-
-
-const float ShipSystemShields::getHealthCurrentForward() const {
-    return m_ShieldsAreUp ? m_HealthPointsCurrent[0] : 0.0f;
-}
-const float ShipSystemShields::getHealthMaxForward() const {
-    return m_HealthPointsMax[0];
-}
-const float ShipSystemShields::getHealthPercentForward() const {
-    return getHealthCurrentForward() / getHealthMaxForward();
-}
-
-
-
-
-const float ShipSystemShields::getHealthCurrentAft() const {
-    return m_ShieldsAreUp ? m_HealthPointsCurrent[1] : 0.0f;
-}
-const float ShipSystemShields::getHealthMaxAft() const {
-    return m_HealthPointsMax[1];
-}
-const float ShipSystemShields::getHealthPercentAft() const {
-    return getHealthCurrentAft() / getHealthMaxAft();
-}
-
-
-
-
-const float ShipSystemShields::getHealthCurrentPort() const {
-    return m_ShieldsAreUp ? m_HealthPointsCurrent[2] : 0.0f;
-}
-const float ShipSystemShields::getHealthMaxPort() const {
-    return m_HealthPointsMax[2];
-}
-const float ShipSystemShields::getHealthPercentPort() const {
-    return getHealthCurrentPort() / getHealthMaxPort();
-}
-
-
-
-
-const float ShipSystemShields::getHealthCurrentStarboard() const {
-    return m_ShieldsAreUp ? m_HealthPointsCurrent[3] : 0.0f;
-}
-const float ShipSystemShields::getHealthMaxStarboard() const {
-    return m_HealthPointsMax[3];
-}
-const float ShipSystemShields::getHealthPercentStarboard() const {
-    return getHealthCurrentStarboard() / getHealthMaxStarboard();
-}
-
-
-
-
-const float ShipSystemShields::getHealthCurrentDorsal() const {
-    return m_ShieldsAreUp ? m_HealthPointsCurrent[4] : 0.0f;
-}
-const float ShipSystemShields::getHealthMaxDorsal() const {
-    return m_HealthPointsMax[4];
-}
-const float ShipSystemShields::getHealthPercentDorsal() const {
-    return getHealthCurrentDorsal() / getHealthMaxDorsal();
-}
-
-
-
-
-const float ShipSystemShields::getHealthCurrentVentral() const {
-    return m_ShieldsAreUp ? m_HealthPointsCurrent[5] : 0.0f;
-}
-const float ShipSystemShields::getHealthMaxVentral() const {
-    return m_HealthPointsMax[5];
-}
-const float ShipSystemShields::getHealthPercentVentral() const {
-    return getHealthCurrentVentral() / getHealthMaxVentral();
-}
+const float ShipSystemShields::getHealthCurrent(const size_t& index) const { return m_ShieldsAreUp ? m_HealthPointsCurrent[index] : 0.0f; }
+const float ShipSystemShields::getHealthMax(const size_t& index) const { return m_HealthPointsMax[index]; }
+const float ShipSystemShields::getHealthPercent(const size_t& index) const { return getHealthCurrent(index) / getHealthMax(index); }
+const float ShipSystemShields::getHealthCurrentForward() const { return m_ShieldsAreUp ? m_HealthPointsCurrent[0] : 0.0f; }
+const float ShipSystemShields::getHealthMaxForward() const { return m_HealthPointsMax[0]; }
+const float ShipSystemShields::getHealthPercentForward() const { return getHealthCurrentForward() / getHealthMaxForward(); }
+const float ShipSystemShields::getHealthCurrentAft() const { return m_ShieldsAreUp ? m_HealthPointsCurrent[1] : 0.0f; }
+const float ShipSystemShields::getHealthMaxAft() const { return m_HealthPointsMax[1]; }
+const float ShipSystemShields::getHealthPercentAft() const { return getHealthCurrentAft() / getHealthMaxAft(); }
+const float ShipSystemShields::getHealthCurrentPort() const { return m_ShieldsAreUp ? m_HealthPointsCurrent[2] : 0.0f; }
+const float ShipSystemShields::getHealthMaxPort() const { return m_HealthPointsMax[2]; }
+const float ShipSystemShields::getHealthPercentPort() const { return getHealthCurrentPort() / getHealthMaxPort(); }
+const float ShipSystemShields::getHealthCurrentStarboard() const { return m_ShieldsAreUp ? m_HealthPointsCurrent[3] : 0.0f; }
+const float ShipSystemShields::getHealthMaxStarboard() const { return m_HealthPointsMax[3]; }
+const float ShipSystemShields::getHealthPercentStarboard() const { return getHealthCurrentStarboard() / getHealthMaxStarboard(); }
+const float ShipSystemShields::getHealthCurrentDorsal() const { return m_ShieldsAreUp ? m_HealthPointsCurrent[4] : 0.0f; }
+const float ShipSystemShields::getHealthMaxDorsal() const { return m_HealthPointsMax[4]; }
+const float ShipSystemShields::getHealthPercentDorsal() const { return getHealthCurrentDorsal() / getHealthMaxDorsal(); }
+const float ShipSystemShields::getHealthCurrentVentral() const { return m_ShieldsAreUp ? m_HealthPointsCurrent[5] : 0.0f; }
+const float ShipSystemShields::getHealthMaxVentral() const { return m_HealthPointsMax[5]; }
+const float ShipSystemShields::getHealthPercentVentral() const { return getHealthCurrentVentral() / getHealthMaxVentral(); }

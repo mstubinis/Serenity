@@ -8,6 +8,7 @@
 #include <core/engine/textures/TextureRequest.h>
 
 class Material;
+class Texture;
 struct MaterialRequestPart final {
     Material*                     material;
     Handle                        handle;
@@ -43,6 +44,16 @@ struct MaterialRequest final {
         const std::string& ao,
         const std::string& metalness,
         const std::string& smoothness
+    );
+    MaterialRequest(
+        const std::string& name,
+        Texture* diffuse,
+        Texture* normal,
+        Texture* glow,
+        Texture* specular,
+        Texture* ao,
+        Texture* metalness,
+        Texture* smoothness
     );
     ~MaterialRequest();
 

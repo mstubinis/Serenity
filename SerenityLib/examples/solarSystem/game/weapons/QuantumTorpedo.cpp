@@ -63,7 +63,7 @@ struct QuantumTorpedoCollisionFunctor final { void operator()(ComponentBody& own
     }
 }};
 
-struct QuantumTorpedoInstanceCoreBindFunctor { void operator()(EngineResource* r) const {
+struct QuantumTorpedoInstanceCoreBindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -89,10 +89,10 @@ struct QuantumTorpedoInstanceCoreBindFunctor { void operator()(EngineResource* r
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct QuantumTorpedoInstanceCoreUnbindFunctor { void operator()(EngineResource* r) const {
+struct QuantumTorpedoInstanceCoreUnbindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
-struct QuantumTorpedoInstanceGlowBindFunctor { void operator()(EngineResource* r) const {
+struct QuantumTorpedoInstanceGlowBindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -111,10 +111,10 @@ struct QuantumTorpedoInstanceGlowBindFunctor { void operator()(EngineResource* r
     Renderer::sendUniformMatrix4Safe("Model", model);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct QuantumTorpedoInstanceGlowUnbindFunctor { void operator()(EngineResource* r) const {
+struct QuantumTorpedoInstanceGlowUnbindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
-struct QuantumTorpedoFlareInstanceBindFunctor { void operator()(EngineResource* r) const {
+struct QuantumTorpedoFlareInstanceBindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -139,7 +139,7 @@ struct QuantumTorpedoFlareInstanceBindFunctor { void operator()(EngineResource* 
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct QuantumTorpedoFlareInstanceUnbindFunctor { void operator()(EngineResource* r) const {
+struct QuantumTorpedoFlareInstanceUnbindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
 
@@ -147,29 +147,30 @@ struct QuantumTorpedoFlareInstanceUnbindFunctor { void operator()(EngineResource
 QuantumTorpedoProjectile::QuantumTorpedoProjectile(EntityWrapper* target, QuantumTorpedo& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : torpedo(source), SecondaryWeaponTorpedoProjectile(map, final_world_position, forward, index) {
     maxTime            = 30.5f;
     rotationAngleSpeed = source.rotationAngleSpeed;
+    const auto quantumBlue = glm::vec4(0.25f, 0.64f, 1.0f, 1.0f);
 
     EntityDataRequest request(entity);
     EntityDataRequest shipRequest(source.ship.entity());
 
     auto& model    = *entity.addComponent<ComponentModel>(request, Mesh::Plane, (Material*)(ResourceManifest::TorpedoCoreMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles_2);
-    auto& glow     = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlow2Material).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& body     = *entity.addComponent<ComponentBody>(request, CollisionType::Sphere);
 
     auto& core = model.getModel(0);
     core.setCustomBindFunctor(QuantumTorpedoInstanceCoreBindFunctor());
     core.setCustomUnbindFunctor(QuantumTorpedoInstanceCoreUnbindFunctor());
     core.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-
+    core.setScale(0.5f);
+    
     btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body.getCollision()->getBtShape());
-    const auto& _scl = btVector3(0.05f, 0.05f, 0.05f);
+    const auto& _scl = btVector3(static_cast<btScalar>(TORPEDO_COL_BASE_SCALE), static_cast<btScalar>(TORPEDO_COL_BASE_SCALE), static_cast<btScalar>(TORPEDO_COL_BASE_SCALE));
     sph.setLocalScaling(_scl);
-    sph.setMargin(0.165f);
+    sph.setMargin(TORPEDO_COL_MARGIN);
     sph.setImplicitShapeDimensions(_scl);
     sph.recalcLocalAabb();
-
-    const auto quantumBlue = glm::vec4(0.25f, 0.64f, 1.0f, 1.0f);
+    
+    auto& glow = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlow2Material).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     glow.setColor(quantumBlue);
-    glow.setScale(10.6f);
+    glow.setScale(5.6f);
     glow.setCustomBindFunctor(QuantumTorpedoInstanceGlowBindFunctor());
     glow.setCustomUnbindFunctor(QuantumTorpedoInstanceGlowUnbindFunctor());
 
@@ -177,7 +178,7 @@ QuantumTorpedoProjectile::QuantumTorpedoProjectile(EntityWrapper* target, Quantu
         auto& flare = model.addModel(ResourceManifest::TorpedoFlareMesh, ResourceManifest::TorpedoFlareMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
         float randScale = Helper::GetRandomFloatFromTo(-1.1f, 1.1f);
 
-        flare.setScale(2.2f + randScale);
+        flare.setScale(1.1f + randScale);
         flare.setColor(quantumBlue);
         float angle = (360.0f / 6.0f) * i;
 

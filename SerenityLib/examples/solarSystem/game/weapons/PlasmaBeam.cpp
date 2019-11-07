@@ -95,10 +95,13 @@ PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
     firstWindupGraphic = map.createEntity();
     secondWindupGraphic = map.createEntity();
 
+    const auto plasmaGreen = glm::vec4(0.0f, 0.93f, 0.6f, 1.0f);
+    const auto plasmaTeal = glm::vec4(0.53f, 1.0f, 0.73f, 1.0f);
+
     auto* model = beamGraphic.addComponent<ComponentModel>(ResourceManifest::PhaserBeamMesh, ResourceManifest::PlasmaBeamMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& beamModel1 = model->getModel(0);
     beamModel1.hide();
-    beamModel1.setScale(0.095f * additionalBeamSizeScale);
+    beamModel1.setScale(BEAM_SIZE_DEFAULT * additionalBeamSizeScale);
 
     auto& firstWindupBody = *firstWindupGraphic.addComponent<ComponentBody>();
     auto& secondWindupBody = *secondWindupGraphic.addComponent<ComponentBody>();
@@ -108,11 +111,8 @@ PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
     auto& firstModel = firstWindupModel.getModel();
     auto& secondModel = secondWindupModel.getModel();
 
-    firstModel.setScale(0.095f * additionalEndPointScale);
-    secondModel.setScale(0.095f * additionalEndPointScale);
-
-    const auto plasmaGreen = glm::vec4(0.0f, 0.93f, 0.6f, 1.0f);
-    const auto plasmaTeal = glm::vec4(0.53f, 1.0f, 0.73f, 1.0f);
+    firstModel.setScale(BEAM_SIZE_DEFAULT_END_POINT * additionalEndPointScale);
+    secondModel.setScale(BEAM_SIZE_DEFAULT_END_POINT * additionalEndPointScale);
 
     firstModel.setColor(plasmaGreen);
     secondModel.setColor(plasmaGreen);

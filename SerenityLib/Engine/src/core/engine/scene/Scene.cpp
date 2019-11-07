@@ -70,19 +70,22 @@ struct Scene::impl final {
     }
     void _centerToObject(Scene& super, const Entity& centerEntity) {
         //TODO: handle parent->child relationship
-        ComponentBody& centerBody = *const_cast<Entity&>(centerEntity).getComponent<ComponentBody>();
-        auto& entities = InternalScenePublicInterface::GetEntities(super);
-        for (auto& data : entities) {
-            Entity e = super.getEntity(data);
+        auto& centerBody = *const_cast<Entity&>(centerEntity).getComponent<ComponentBody>();
+        auto centerPos = centerBody.position();
+        glm_vec3 other_pos;
+        Entity e;
+        for (auto& data : InternalScenePublicInterface::GetEntities(super)) {
+            e = super.getEntity(data);
             if (e != centerEntity) {
                 auto* eBody = e.getComponent<ComponentBody>();
                 if (eBody) {
                     auto& _eBody = *eBody;
-                    _eBody.setPosition(_eBody.position() - centerBody.position());
+                    other_pos = _eBody.position();
+                    _eBody.setPosition(other_pos - centerPos);
                 }
             }
         }
-        centerBody.setPosition(0.0f);
+        centerBody.setPosition(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
     }
     void _addModelInstanceToPipeline(Scene& _scene, ModelInstance& _modelInstance, const vector<RenderPipeline*>& _pipelinesList, const RenderStage::Stage& _stage) {
         RenderPipeline* _pipeline = nullptr;
@@ -299,7 +302,7 @@ void InternalScenePublicInterface::RemoveModelInstanceFromPipeline(Scene& scene,
     scene.m_i->_removeModelInstanceFromPipeline(scene, modelInstance, scene.m_i->m_Pipelines[stage], stage);
 }
 
-Scene::Scene(const string& name):m_i(new impl){
+Scene::Scene(const string& name):m_i(new impl),EngineResource(ResourceType::Scene, name){
     m_i->_init(*this, name);
     registerEvent(EventType::SceneChanged);
     setOnUpdateFunctor(EmptyOnUpdateFunctor());
@@ -314,18 +317,19 @@ void Scene::setGodRaysSun(Entity* sun) {
 Entity* Scene::getGodRaysSun() {
     return m_i->m_Sun;
 }
-const size_t Scene::numViewports() const {
-    return m_i->m_Viewports.size();
+const unsigned int Scene::numViewports() const {
+    return static_cast<unsigned int>(m_i->m_Viewports.size());
 }
 const uint Scene::id() const {
     return m_i->m_ID;
 }
 Viewport& Scene::addViewport(const float x, const float y, const float width, const float height, const Camera& camera) {
-    Viewport* viewport = new Viewport(*this, camera);
-    viewport->setViewportDimensions(x, y, width, height);
-    viewport->m_ID = static_cast<unsigned short>(numViewports());
-    m_i->m_Viewports.push_back(viewport);
-    return *viewport;
+    Viewport& viewport = *(new Viewport(*this, camera));
+    viewport.setViewportDimensions(x, y, width, height);
+    unsigned int id = numViewports();
+    viewport.m_ID = id;
+    m_i->m_Viewports.push_back(&viewport);
+    return viewport;
 }
 Entity Scene::createEntity() { 
     return m_i->m_ECS.createEntity(*this); 
@@ -350,8 +354,10 @@ Camera* Scene::getActiveCamera() const {
 }
 void Scene::setActiveCamera(Camera& camera){
     if (m_i->m_Viewports.size() == 0) {
-        Viewport* viewport = new Viewport(*this, camera);
-        m_i->m_Viewports.push_back(viewport);
+        Viewport& viewport = *(new Viewport(*this, camera));
+        unsigned int id = numViewports();
+        viewport.m_ID = id;
+        m_i->m_Viewports.push_back(&viewport);
         return;
     }
     m_i->m_Viewports[0]->setCamera(camera);

@@ -239,12 +239,12 @@ void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
 }
 
 
-Mesh::Mesh() {
+Mesh::Mesh():BindableResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
 }
 
 //TERRAIN MESH
-Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, float threshold) {
+Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, float threshold) : BindableResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_threshold = threshold;
     MeshImportedData data;
@@ -298,12 +298,12 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
 }
 
 
-Mesh::Mesh(VertexData* data, const string& name, float threshold):BindableResource(name) {
+Mesh::Mesh(VertexData* data, const string& name, float threshold) :BindableResource(ResourceType::Mesh, name) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_VertexData = data;
     m_threshold = threshold;
 }
-Mesh::Mesh(const string& name,float width, float height,float threshold):BindableResource(name){
+Mesh::Mesh(const string& name,float width, float height,float threshold):BindableResource(ResourceType::Mesh, name){
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_threshold = threshold;
 
@@ -333,7 +333,7 @@ Mesh::Mesh(const string& name,float width, float height,float threshold):Bindabl
 
     load();
 }
-Mesh::Mesh(const string& fileOrData,float threshold):BindableResource(""){
+Mesh::Mesh(const string& fileOrData, float threshold) : BindableResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_threshold = threshold;
 

@@ -18,7 +18,7 @@
     typedef glm::mat4   glm_mat3;
     typedef glm::mat4   glm_mat4;
 #else
-    //TODO: find a way to get bullet to use double precision without compiler / linker errors
+    //TODO: fix wierd out of stack space / no rendering showing SOMETIMES on double precision bullet
     #define BT_USE_DOUBLE_PRECISION
 
     typedef double      decimal;

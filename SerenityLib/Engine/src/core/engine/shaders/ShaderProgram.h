@@ -42,7 +42,7 @@ class ShaderProgram final: public BindableResource{
 		bool                                      m_LoadedCPU;
 		bool                                      m_LoadedGPU;
     public:
-        ShaderProgram(std::string name, Shader& vertexShader, Shader& fragmentShader);
+        ShaderProgram(const std::string& name, Shader& vertexShader, Shader& fragmentShader);
         virtual ~ShaderProgram();
 
         ShaderProgram(const ShaderProgram& other) = default;

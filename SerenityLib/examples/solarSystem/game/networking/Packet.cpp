@@ -121,14 +121,14 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
     return p;
 }
 PacketHealthUpdate::PacketHealthUpdate() :Packet() {
-    currentHullHealth = 0;
+    currentHullHealth     = 0;
     currentShieldsHealthF = 0;
     currentShieldsHealthA = 0;
     currentShieldsHealthP = 0;
     currentShieldsHealthS = 0;
     currentShieldsHealthD = 0;
     currentShieldsHealthV = 0;
-    flags = PacketHealthFlags::None;
+    flags                 = PacketHealthFlags::None;
 }
 PacketHealthUpdate::PacketHealthUpdate(Ship& ship) : Packet() {
     auto* shields = static_cast<ShipSystemShields*>(ship.getShipSystem(ShipSystemType::Shields));
@@ -155,10 +155,8 @@ PacketHealthUpdate::PacketHealthUpdate(Ship& ship) : Packet() {
     if (hull) {
         currentHullHealth = hull->getHealthCurrent();
     }
-    const auto pname = ship.getComponent<ComponentName>();
     data += ship.getClass();
-    if (pname)
-        data += ("," + pname->name());
+    data += "," + ship.getMapKey();
 }
 
 PacketPhysicsUpdate::PacketPhysicsUpdate():Packet() {
@@ -170,13 +168,10 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
     auto& ent = ship.entity();
     EntityDataRequest request(ent);
     const auto pbody = ent.getComponent<ComponentBody>(request);
-    const auto pname = ent.getComponent<ComponentName>(request);
 
     data += ship.getClass(); //[0]
-    if (pname)
-        data += ("," + pname->name()); //[1]
-    else
-        data += ("," + username); //[1]
+    data += "," + ship.getMapKey(); //[1]
+    data += "," + username; //[2]
     if (pbody) {
         auto& body = *pbody;
 
@@ -190,8 +185,8 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
         wy = warp.y;
         wz = warp.z;
       
-        data += "," + to_string(static_cast<unsigned int>(ship.getTeam().getTeamNumber())); //[2]
-        data += "," + to_string(anchorList.size()); //[3]
+        data += "," + to_string(static_cast<unsigned int>(ship.getTeam().getTeamNumber())); //[3]
+        data += "," + to_string(anchorList.size()); //[4]
         for (auto& closest : anchorList)
             data += "," + closest;
         const auto nearestAnchorPos = finalAnchor->getPosition();
@@ -227,18 +222,14 @@ PacketCloakUpdate::PacketCloakUpdate(Ship& ship) : Packet() {
     cloakSystemOnline = false;
     cloakActive = false;
 
-    auto& ent = ship.entity();
-    EntityDataRequest request(ent);
-    const auto pname = ent.getComponent<ComponentName>(request);
     justTurnedOn = false;
     justTurnedOff = false;
     data += ship.getClass(); //[0]
-    if (pname)
-        data += ("," + pname->name()); //[1]
+    data += "," + ship.getMapKey(); //[1]
     if (ship.getShipSystem(ShipSystemType::CloakingDevice)) {
         ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(ship.getShipSystem(ShipSystemType::CloakingDevice));
-        cloakTimer = cloak.getCloakTimer();
+        cloakTimer        = cloak.getCloakTimer();
         cloakSystemOnline = cloak.isOnline();
-        cloakActive = cloak.isCloakActive();
+        cloakActive       = cloak.isCloakActive();
     }
 }

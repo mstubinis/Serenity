@@ -33,7 +33,7 @@ Defiant::Defiant(const AIType::Type ai_type, Team& team, Client& client, Map& ma
         else if (i == 3)  system = new ShipSystemRollThrusters(_this);
         else if (i == 4)  system = nullptr; //no cloaking device
         //else if (i == 4)  system = new ShipSystemCloakingDevice(_this);
-        else if (i == 5)  system = new ShipSystemShields(_this, map, 9000.0f, 9000.0f, 9000.0f, 9000.0f, 12000.0f, 12000.0f);
+        else if (i == 5)  system = new ShipSystemShields(_this, map, 9000.0f, 9000.0f, 9000.0f, 9000.0f, 12000.0f, 12000.0f, glm::vec3(0.0f), glm::vec3(1.15f, 2.1f, 1.15f));
         else if (i == 6)  system = new ShipSystemMainThrusters(_this);
         else if (i == 7)  system = new ShipSystemWarpDrive(_this);
         else if (i == 8)  system = new ShipSystemSensors(_this, map);

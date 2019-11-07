@@ -326,7 +326,7 @@ struct AtmosphericScatteringSkyModelInstanceUnbindFunctor{void operator()(Engine
     Renderer::cullFace(GL_BACK);
 }};
 
-Planet::Planet(Handle& mat,PlanetType::Type type,glm_vec3 pos,decimal scl,string name,float atmosphere, Map* scene,string planet_type_name):EntityWrapper(*scene){
+Planet::Planet(Handle& mat, const PlanetType::Type type, const glm_vec3& pos, const decimal scl, const string& name, const float atmosphere, Map* scene, const string& planet_type_name) : EntityWrapper(*scene) {
     auto& componentName = *m_Entity.addComponent<ComponentName>(name);
 
     auto& body = *addComponent<ComponentBody>();
@@ -342,12 +342,7 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm_vec3 pos,decimal scl,string
         instance.setCustomUnbindFunctor(AtmosphericScatteringGroundModelInstanceUnbindFunctor());
     }
     if(m_AtmosphereHeight > 0){
-        ModelInstance& skyInstance = model.addModel(
-            ResourceManifest::PlanetMesh,
-            ResourceManifest::EarthSkyMaterial,
-            (ShaderProgram*)ResourceManifest::skyFromSpace.get(),
-            RenderStage::GeometryTransparent
-        );
+        auto& skyInstance = model.addModel(ResourceManifest::PlanetMesh, ResourceManifest::EarthSkyMaterial, (ShaderProgram*)ResourceManifest::skyFromSpace.get(), RenderStage::GeometryTransparent);
         float aScale = instance.getScale().x;
         aScale = aScale + (aScale * m_AtmosphereHeight);
         skyInstance.setCustomBindFunctor(AtmosphericScatteringSkyModelInstanceBindFunctor());
@@ -442,7 +437,7 @@ const float& Planet::getAtmosphereHeight() const {
     return m_AtmosphereHeight; 
 }
 
-Star::Star(glm::vec3 starColor,glm::vec3 lightColor, glm::vec3 godRaysColor,glm_vec3 pos,decimal scl,string name, Map* scene,string type_name):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene, type_name){
+Star::Star(const glm::vec3& starColor, const glm::vec3& lightColor, const glm::vec3& godRaysColor, const glm_vec3& pos, const decimal scl, const string& name, Map* scene, const string& type_name) : Planet(ResourceManifest::StarMaterial, PlanetType::Star, pos, scl, name, 0.0f, scene, type_name) {
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor);
 
@@ -466,6 +461,7 @@ Star::~Star(){
 }
 Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     m_Parent = parent;
+    
     _makeRingImage(rings);
     m_Parent->addRing(this);
 
@@ -481,10 +477,12 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     const float aScale = 1.0f;
     ringInstance.setScale(aScale,aScale,aScale);
     ringInstance.setUserPointer(parent);
+    
 }
 Ring::~Ring(){
 }
 void Ring::_makeRingImage(const vector<RingInfo>& rings){
+    
     sf::Image ringImage;
     ringImage.create(1024, 2, sf::Color(0,0,0,0));
     const auto& ringImageX = ringImage.getSize().x;
@@ -525,11 +523,15 @@ void Ring::_makeRingImage(const vector<RingInfo>& rings){
             }
         }
     }
-    Texture* diffuse = new Texture(ringImage,"RingDiffuse",false,ImageInternalFormat::SRGB8_ALPHA8);
-    diffuse->setAnisotropicFiltering(2.0f);
-    epriv::Core::m_Engine->m_ResourceManager._addTexture(diffuse);
-    m_MaterialHandle = Resources::addMaterial("RingMaterial", diffuse, nullptr, nullptr, nullptr);
-	((Material*)m_MaterialHandle.get())->setSpecularModel(SpecularModel::None);
+    auto* texture = Resources::getTexture("RingDiffuse");
+    if (!texture) {
+        texture = new Texture(ringImage, "RingDiffuse", false, ImageInternalFormat::SRGB8_ALPHA8);
+        texture->setAnisotropicFiltering(2.0f);
+        epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
+    }
+    auto handle = Resources::loadMaterial("RingMaterial", texture);
+    m_MaterialHandle = handle;
+    ((Material*)m_MaterialHandle.get())->setSpecularModel(SpecularModel::None);
 }
 OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,Planet& _parent,float _inclination){
     //x = eccentricity, y = days, z = minorRadius, w = majorRadius

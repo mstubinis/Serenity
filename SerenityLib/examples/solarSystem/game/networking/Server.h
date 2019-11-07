@@ -86,6 +86,8 @@ class Server {
         std::string                                    m_MapName;
         double                                         m_DeepspaceAnchorTimer;
 
+        void assign_username_to_client(ServerClient&, const std::string& username);
+        void completely_remove_client(ServerClient&);
         void assignRandomTeam(PacketMessage& packet_out, ServerClient& client);
         void updateClientsGameLoop(const double& dt);
         void onReceiveUDP();

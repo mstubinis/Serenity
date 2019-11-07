@@ -6,22 +6,6 @@
 
 class  EngineResource;
 
-struct ResourceType final {enum Type {
-    Empty, //do NOT move this specific enum
-    Texture,
-    Mesh,
-    Material,
-    Sound,
-    Object,
-    Font,
-    Camera,
-    Shader,
-    ShaderProgram,
-    SoundData,
-    Scene,
-    _TOTAL
-};};
-
 struct Handle final {
     uint32_t index : 12;
     uint32_t version : 15;

@@ -123,7 +123,7 @@ namespace Engine {
 epriv::FramebufferObjectDefaultBindFunctor   DEFAULT_BIND_FUNCTOR;
 epriv::FramebufferObjectDefaultUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
-epriv::FramebufferObject::FramebufferObject(const string& name, const uint& w, const uint& h, const float& divisor, const uint& swapBufferCount):BindableResource(name){
+epriv::FramebufferObject::FramebufferObject(const string& name, const uint& w, const uint& h, const float& divisor, const uint& swapBufferCount):BindableResource(ResourceType::Empty, name){
     m_CurrentFBOIndex   = 0;
     m_Divisor           = divisor;
     m_FramebufferWidth  = static_cast<uint>(static_cast<float>(w) * m_Divisor);

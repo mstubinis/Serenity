@@ -7,6 +7,7 @@ using namespace Engine;
 using namespace std;
 
 Viewport::Viewport(const Scene& scene, const Camera& camera):m_Scene(const_cast<Scene&>(scene)){
+    m_ID = 0;
     setCamera(camera);
     const auto& winSize   = Resources::getWindowSize();
     setViewportDimensions(0.0f, 0.0f, static_cast<float>(winSize.x), static_cast<float>(winSize.y));
@@ -23,10 +24,10 @@ Viewport::Viewport(const Scene& scene, const Camera& camera):m_Scene(const_cast<
 Viewport::~Viewport() {
 }
 
-const unsigned short& Viewport::id() const {
+const unsigned int Viewport::id() const {
     return m_ID;
 }
-void Viewport::setID(const unsigned short& id) {
+void Viewport::setID(const unsigned int id) {
     m_ID = id;
 }
 

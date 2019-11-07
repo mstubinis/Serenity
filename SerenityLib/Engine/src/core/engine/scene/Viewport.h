@@ -13,7 +13,7 @@ namespace Engine {
     };
 };
 
-struct ViewportRenderingFlag final { enum Flag {
+struct ViewportRenderingFlag final { enum Flag: unsigned int {
     GodRays      = 1 << 0,
     SSAO         = 1 << 1,
     API2D        = 1 << 2,
@@ -24,7 +24,7 @@ struct ViewportRenderingFlag final { enum Flag {
     DepthOfField = 1 << 7,
     Skybox       = 1 << 8,
     Bloom        = 1 << 9,
-    _ALL         =     -1,
+    _ALL         = 4294967295,
 };};
 
 class Viewport final {
@@ -39,7 +39,7 @@ class Viewport final {
         glm::vec4      m_BackgroundColor;
         bool           m_DepthMaskActive;
         float          m_DepthMaskValue;
-        unsigned short m_ID;
+        unsigned int   m_ID;
         unsigned int   m_RenderFlags;
     public:
         Viewport(const Scene& scene, const Camera& camera);
@@ -51,8 +51,8 @@ class Viewport final {
 
         ~Viewport();
 
-        const unsigned short& id() const;
-        void setID(const unsigned short& id);
+        const unsigned int id() const;
+        void setID(const unsigned int id);
 
         const unsigned int& getRenderFlags() const;
         void setRenderFlag(const ViewportRenderingFlag::Flag& flag);

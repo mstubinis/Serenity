@@ -85,6 +85,7 @@ namespace Engine {
                         system.onSceneLeft(scene); 
                     }
                 }
+                //add newly created entities to the scene with their components as defined in their systems, etc
                 void preUpdate(Scene& scene, const double& dt) {
                     if (justAddedEntities.size() > 0) {
                         for (uint i = 0; i < systems.size(); ++i) {
@@ -97,6 +98,8 @@ namespace Engine {
                     }
 				
                 }
+
+                //destroy flagged entities & their components, if any
                 void postUpdate(Scene& scene, const double& dt) {
                     if (destroyedEntities.size() > 0) {
                         for (auto& entityID : destroyedEntities) {

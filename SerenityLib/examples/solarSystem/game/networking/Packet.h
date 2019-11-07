@@ -112,6 +112,7 @@ struct PacketProjectileImpact : public Packet {
     int index;
     PacketProjectileImpact() {
         damage = 0.0f;
+        time = radius = normalZ = normalY = normalX = index = shields = 0;
     }
     bool validate(sf::Packet& sfPacket) {
         return (sfPacket >> PacketType >> data >> impactX >> impactY >> impactZ >> damage >> normalX >> normalY >> normalZ >> time >> radius >> shields >> index);
@@ -123,11 +124,11 @@ struct PacketProjectileImpact : public Packet {
 };
 struct PacketHealthUpdate : public Packet {
     struct PacketHealthFlags final { enum Flag {
-        None = 0,
-        ShieldsInstalled = 1 << 0,
-        ShieldsActive = 1 << 1,
-        ShieldsTurnedOn = 1 << 2,
-        All = -1,
+        None              = 0,
+        ShieldsInstalled  = 1 << 0,
+        ShieldsActive     = 1 << 1,
+        ShieldsTurnedOn   = 1 << 2,
+        All               = 4294967295,
     };};
     float        currentHullHealth;
 

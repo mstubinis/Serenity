@@ -10,7 +10,7 @@ class BindableResource: public EngineResource{
     private:
         boost::function<void()> m_CustomBindFunctor, m_CustomUnbindFunctor;
     public:
-        BindableResource(std::string name = "");
+        BindableResource(const ResourceType::Type& type, const std::string& name = "");
         virtual ~BindableResource();
 
         virtual void bind();

@@ -65,8 +65,18 @@ Map::Map(GameplayMode& mode, Client& client, const string& n, const string& file
     m_HUD = new HUD(*this, font);
 }
 
-Map::~Map(){
+void Map::cleanup() {
+    m_ActiveCannonProjectiles.clear();
+    m_ActiveTorpedoProjectiles.clear();
+    m_Planets.clear();
+    m_ShipsNPCControlled.clear();
+    m_ShipsPlayerControlled.clear();
+    m_Ships.clear();
     SAFE_DELETE_VECTOR(m_Objects);
+}
+
+Map::~Map(){
+    cleanup();
     SAFE_DELETE(m_HUD);
 }
 PrimaryWeaponCannonProjectile* Map::getCannonProjectile(const int index) {
@@ -355,7 +365,7 @@ void Map::loadFromFile(const string& filename) {
                         glowFile = "";
                     }
                     if (!loadedMaterials.count(MATERIAL_NAME)) {
-                        Handle handle = Resources::addMaterial(MATERIAL_NAME, TEXTURE, normalFile, glowFile);
+                        Handle handle = Resources::loadMaterial(MATERIAL_NAME, TEXTURE, normalFile, glowFile, "", "", "", "");
                         loadedMaterials.emplace(MATERIAL_NAME, handle);
                     }
                 }

@@ -54,6 +54,8 @@ Handle ResourceManifest::CrosshairArrowMaterial;
 Handle ResourceManifest::RadarEdgeMaterial;
 Handle ResourceManifest::RadarTokenMaterial;
 Handle ResourceManifest::RadarMaterial;
+Handle ResourceManifest::RadarAntiCloakBarMaterial;
+Handle ResourceManifest::RadarAntiCloakBarBackgroundMaterial;
 Handle ResourceManifest::StarFlareMaterial;
 Handle ResourceManifest::ShieldMaterial;
 Handle ResourceManifest::ShieldRingHUDTexture;
@@ -192,13 +194,15 @@ void ResourceManifest::init(){
     HullDamageOutline3Material = Resources::loadMaterialAsync("HullDamage3Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_3.dds");
     HullDamageMaterial3 = Resources::loadMaterialAsync("HullDamage3", BasePath + "data/Textures/Effects/hull_dmg.dds");
     StarMaterial = Resources::loadMaterialAsync("Star", BasePath + "data/Textures/Planets/Sun.dds");
+    StarFlareMaterial = Resources::loadMaterialAsync("SunFlare", BasePath + "data/Textures/Skyboxes/StarFlare.dds");
     EarthSkyMaterial = Resources::loadMaterialAsync("EarthSky", BasePath + "data/Textures/Planets/Earth.dds");
     CrosshairMaterial = Resources::loadMaterialAsync("Crosshair", BasePath + "data/Textures/HUD/Crosshair.dds");
     CrosshairArrowMaterial = Resources::loadMaterialAsync("CrosshairArrow", BasePath + "data/Textures/HUD/CrosshairArrow.dds");
     RadarEdgeMaterial = Resources::loadMaterialAsync("RadarEdge", BasePath + "data/Textures/HUD/RadarEdge.dds");
     RadarTokenMaterial = Resources::loadMaterialAsync("RadarToken", BasePath + "data/Textures/HUD/RadarToken.dds");
     RadarMaterial = Resources::loadMaterialAsync("Radar", BasePath + "data/Textures/HUD/Radar.dds");
-    StarFlareMaterial = Resources::loadMaterialAsync("SunFlare", BasePath + "data/Textures/Skyboxes/StarFlare.dds");
+    RadarAntiCloakBarMaterial = Resources::loadMaterialAsync("RadarAntiCloakBar", BasePath + "data/Textures/HUD/RadarAntiCloakBar.dds");
+    RadarAntiCloakBarBackgroundMaterial = Resources::loadMaterialAsync("RadarAntiCloakBarBackground", BasePath + "data/Textures/HUD/RadarAntiCloakBarBackground.dds");
     
     epriv::threading::waitForAll();
 
@@ -260,16 +264,16 @@ void ResourceManifest::init(){
 
     auto& layershield1 = *shieldMat.getComponent(0).addLayer();
     layershield1.setTexture(BasePath + "data/Textures/Effects/shields_1.dds");
-    layershield1.addUVModificationSimpleTranslation(-0.8f, -0.6f);
-    layershield1.setData2(1.0f, 1.0f, 1.0f, 0.5f);
+    layershield1.addUVModificationSimpleTranslation(-1.6f, -1.2f);
+    layershield1.setData2(1.0f, 1.0f, 1.0f, 0.4f);
     auto& layershield2 = *shieldMat.getComponent(0).addLayer();
     layershield2.setTexture(BasePath + "data/Textures/Effects/shields_2.dds");
-    layershield2.addUVModificationSimpleTranslation(-0.4f, -0.6f);
-    layershield2.setData2(1.0f, 1.0f, 1.0f, 0.4f);
+    layershield2.addUVModificationSimpleTranslation(-0.8f, -1.2f);
+    layershield2.setData2(1.0f, 1.0f, 1.0f, 0.7f);
     auto& layershield3 = *shieldMat.getComponent(0).addLayer();
     layershield3.setTexture(BasePath + "data/Textures/Effects/shields_3.dds");
-    layershield3.addUVModificationSimpleTranslation(0.2f, -0.35f);
-    layershield3.setData2(1.0f, 1.0f, 1.0f, 0.4f);
+    layershield3.addUVModificationSimpleTranslation(0.6f, -0.7f);
+    layershield3.setData2(1.0f, 1.0f, 1.0f, 0.7f);
 
 
     Material& hullDamage1Material = *((Material*)HullDamageMaterial1.get());

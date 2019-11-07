@@ -79,9 +79,20 @@ namespace epriv{
                     m_Pool[index].resource = _ptr;
                 }
             }
-            Handle add(T* _ptr,uint _type){
+            template<typename R> Handle getHandle(R& resource) {
+                for (uint i = 0; i < MAX_ENTRIES - 1; ++i) {
+                    R* res = dynamic_cast<R*>(m_Pool[i].resource);
+                    if (res) {
+                        if (res->name() == resource.name()) {
+                            return Handle(i + 1, m_Pool[i].version, resource.type());
+                        }
+                    }
+                }
+            }
+            Handle add(T* _ptr, uint _type){
                 const uint newIndex = m_firstFreeEntry - 1;
-                if(newIndex >= MAX_ENTRIES) return Handle(); //null handle
+                if(newIndex >= MAX_ENTRIES) 
+                    return Handle(); //null handle
                 m_firstFreeEntry = m_Pool[newIndex].nextFreeIndex;
                 m_Pool[newIndex].nextFreeIndex = 0;
                 ++m_Pool[newIndex].version;

@@ -47,9 +47,10 @@ namespace Engine{
 
                 std::vector<Scene*>& scenes();
 
-                bool _hasScene(const std::string&);
+                const bool _hasScene(const std::string&);
                 void _addScene(Scene&);
                 Texture* _hasTexture(const std::string&);
+                Material* _hasMaterial(const std::string&);
                 const size_t _numScenes();
         };
     };
@@ -70,47 +71,50 @@ namespace Engine{
 
         Scene* getScene(const std::string& sceneName);
         const bool deleteScene(const std::string& sceneName);
+        const bool deleteScene(Scene& scene);
 
-        void getShader(Handle& inHandle,Shader*& outPtr);           Shader*    getShader(Handle& inHandle);
-        void getSoundData(Handle& inHandle,SoundData*& outPtr);     SoundData* getSoundData(Handle& inHandle);
-        void getCamera(Handle& inHandle,Camera*& outPtr);           Camera*    getCamera(Handle& inHandle);
-        void getFont(Handle& inHandle,Font*& outPtr);               Font*      getFont(Handle& inHandle);
-        void getTexture(Handle& inHandle,Texture*& outPtr);         Texture*   getTexture(Handle& inHandle);
-        void getMesh(Handle& inHandle,Mesh*& outPtr);               Mesh*      getMesh(Handle& inHandle);
-        void getMaterial(Handle& inHandle,Material*& outPtr);       Material*  getMaterial(Handle& inHandle);
-        void getShaderProgram(Handle& inHandle,ShaderProgram*& outPtr);   ShaderProgram*   getShaderProgram(Handle& inHandle);
+        void getShader(Handle& inHandle,Shader*& outPtr);                  Shader*    getShader(Handle& inHandle);
+        void getSoundData(Handle& inHandle,SoundData*& outPtr);            SoundData* getSoundData(Handle& inHandle);
+        void getCamera(Handle& inHandle,Camera*& outPtr);                  Camera*    getCamera(Handle& inHandle);
+        void getFont(Handle& inHandle,Font*& outPtr);                      Font*      getFont(Handle& inHandle);
+
+        void     getTexture(Handle& inHandle, Texture*& outPtr);
+        Texture* getTexture(Handle& inHandle);
+        Texture* getTexture(const std::string& name);
+        Handle   getTextureHandle(const std::string& name);
+        Handle   getTextureHandle(Texture*);
+
+        void getMesh(Handle& inHandle,Mesh*& outPtr);                      Mesh*      getMesh(Handle& inHandle);
+
+        void      getMaterial(Handle& inHandle,Material*& outPtr);
+        Material* getMaterial(Handle& inHandle);
+        Handle    getMaterialHandle(const std::string& name);
+        Handle    getMaterialHandle(Material*);
+
+        void getShaderProgram(Handle& inHandle,ShaderProgram*& outPtr);    ShaderProgram*   getShaderProgram(Handle& inHandle);
+
 
         Handle addFont(const std::string& filename);
 
-        std::vector<Handle> loadMesh(const std::string& fileOrData, const float& threshhold = 0.0005f);
-        std::vector<Handle> loadMeshAsync(const std::string& fileOrData, const float& threshhold = 0.0005f);
-
-        Handle loadTexture(const std::string& file, const ImageInternalFormat::Format & = ImageInternalFormat::SRGB8_ALPHA8, const bool& mipmaps = false);
-        Handle loadTextureAsync(const std::string& file, const ImageInternalFormat::Format & = ImageInternalFormat::SRGB8_ALPHA8, const bool& mipmaps = false);
-
-        Handle addTexture(const std::string& file, const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8, const bool& mipmaps = false);
-
-        Handle addMaterial(
-            const std::string& name, 
-            const std::string& diffuse, 
-            const std::string& normal = "", 
-            const std::string& glow = "", 
-            const std::string& specular = "",
-            const std::string& ao = "",
-            const std::string& metalness = "",
-            const std::string& smoothness = ""
+        std::vector<Handle> loadMesh(
+            const std::string& fileOrData,
+            const float& threshhold = 0.0005f
         );
-        Handle addMaterial(
-            const std::string& name,
-            Texture* diffuse,
-            Texture* normal = nullptr,
-            Texture* glow = nullptr,
-            Texture* specular = nullptr,
-            Texture * ao = nullptr,
-            Texture * metalness = nullptr,
-            Texture * smoothness = nullptr
+        std::vector<Handle> loadMeshAsync(
+            const std::string& fileOrData,
+            const float& threshhold = 0.0005f
         );
 
+        Handle loadTexture(
+            const std::string& file,
+            const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8,
+            const bool& mipmaps = false
+        );
+        Handle loadTextureAsync(
+            const std::string& file,
+            const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8,
+            const bool& mipmaps = false
+        );
         Handle loadMaterial(
             const std::string& name, 
             const std::string& diffuse, 
@@ -131,6 +135,20 @@ namespace Engine{
             const std::string & metalness = "",
             const std::string & smoothness = ""
         );
+        Handle loadMaterial(
+            const std::string& name,
+            Texture* diffuse,
+            Texture* normal = nullptr,
+            Texture* glow = nullptr,
+            Texture* specular = nullptr,
+            Texture* ao = nullptr,
+            Texture* metalness = nullptr,
+            Texture* smoothness = nullptr
+        );
+
+
+
+
 
         Handle addShader(const std::string& shaderFileOrData, const ShaderType::Type& shaderType, const bool& fromFile = true);
         Handle addSoundData(const std::string& file);

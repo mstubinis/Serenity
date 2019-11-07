@@ -49,6 +49,8 @@ struct ResourceManifest{
     static Handle RadarEdgeMaterial;
     static Handle RadarTokenMaterial;
     static Handle RadarMaterial;
+    static Handle RadarAntiCloakBarMaterial;
+    static Handle RadarAntiCloakBarBackgroundMaterial;
     static Handle StarFlareMaterial;
     static Handle ShieldMaterial;
     static Handle ShieldRingHUDTexture;

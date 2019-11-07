@@ -26,7 +26,7 @@
 using namespace Engine;
 using namespace std;
 
-unsigned short ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
+unsigned int ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 
 namespace Engine {
     namespace epriv {
@@ -188,8 +188,14 @@ namespace Engine {
         }};
     };
 };
+const bool epriv::InternalModelInstancePublicInterface::IsViewportValid(ModelInstance& modelInstance, Viewport& viewport) {
+    const auto flags = modelInstance.getViewportFlags();
+    return (!((flags & (1 << viewport.id())) || flags == 0)) ? false : true;
+}
 
-ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderProgram* program):m_Parent(parent){
+
+
+ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderProgram* program):m_Parent(parent),BindableResource(ResourceType::Empty){
     internalInit(mesh, mat, program);
     setCustomBindFunctor(epriv::DefaultModelInstanceBindFunctor());
     setCustomUnbindFunctor(epriv::DefaultModelInstanceUnbindFunctor());
@@ -204,11 +210,11 @@ ModelInstance::~ModelInstance() {
     SAFE_DELETE_VECTOR(m_AnimationQueue);
 }
 
-void ModelInstance::setDefaultViewportFlag(const unsigned short& flag) {
-    ModelInstance::m_ViewportFlagDefault = flag;
+void ModelInstance::setDefaultViewportFlag(const unsigned int flag) {
+    m_ViewportFlagDefault = flag;
 }
-void ModelInstance::setDefaultViewportFlag(const ViewportFlag::Flag& flag) {
-    ModelInstance::m_ViewportFlagDefault = static_cast<unsigned short>(flag);
+void ModelInstance::setDefaultViewportFlag(const ViewportFlag::Flag flag) {
+    m_ViewportFlagDefault = static_cast<unsigned int>(flag);
 }
 
 void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* program) {
@@ -246,19 +252,19 @@ void ModelInstance::forceRender(const bool forced) {
 const bool ModelInstance::isForceRendered() const {
     return m_ForceRender;
 }
-void ModelInstance::setViewportFlag(const unsigned short& flag) {
+void ModelInstance::setViewportFlag(const unsigned int flag) {
     m_ViewportFlag = flag;
 }
-void ModelInstance::addViewportFlag(const unsigned short& flag) {
+void ModelInstance::addViewportFlag(const unsigned int flag) {
     m_ViewportFlag = m_ViewportFlag | flag;
 }
-void ModelInstance::setViewportFlag(const ViewportFlag::Flag& flag) {
-    m_ViewportFlag = static_cast<unsigned short>(flag);
+void ModelInstance::setViewportFlag(const ViewportFlag::Flag flag) {
+    m_ViewportFlag = static_cast<unsigned int>(flag);
 }
-void ModelInstance::addViewportFlag(const ViewportFlag::Flag& flag) {
-    m_ViewportFlag = m_ViewportFlag | static_cast<unsigned short>(flag);
+void ModelInstance::addViewportFlag(const ViewportFlag::Flag flag) {
+    m_ViewportFlag = m_ViewportFlag | static_cast<unsigned int>(flag);
 }
-const unsigned short& ModelInstance::getViewportFlags() const {
+const unsigned int ModelInstance::getViewportFlags() const {
     return m_ViewportFlag;
 }
 void ModelInstance::internalUpdateModelMatrix() {
@@ -409,12 +415,4 @@ void ModelInstance::setMaterial(Material* material, ComponentModel& componentMod
 }
 void ModelInstance::playAnimation(const string& animName, const float& start, const float& end, const uint& reqLoops){
     m_AnimationQueue.push_back(new epriv::ModelInstanceAnimation(*mesh(), animName, start, end, reqLoops));
-}
-
-
-
-
-const bool epriv::InternalModelInstancePublicInterface::IsViewportValid(ModelInstance& modelInstance, Viewport& viewport) {
-    const auto flags = modelInstance.getViewportFlags();
-    return (!((flags & (1 << viewport.id())) || flags == 0)) ? false : true;
 }

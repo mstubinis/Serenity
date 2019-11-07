@@ -21,13 +21,14 @@
 using namespace Engine;
 using namespace std;
 
-ShipSystemSensors::ShipSystemSensors(Ship& _ship, Map& map, const decimal& range, const double AntiCloakScanPingTime) :ShipSystem(ShipSystemType::Sensors, _ship),m_Map(map){
-    m_RadarRange            = range;
-    m_Target                = nullptr;
-    m_AntiCloakScanTimer    = 0.0;
-    m_AntiCloakScanTimerSound = 0.0;
-    m_AntiCloakScanActive   = false;
-    m_AntiCloakScanPingTime = AntiCloakScanPingTime;
+ShipSystemSensors::ShipSystemSensors(Ship& _ship, Map& map, const decimal& range, const double AntiCloakScanTimerMax) :ShipSystem(ShipSystemType::Sensors, _ship),m_Map(map){
+    m_RadarRange               = range;
+    m_Target                   = nullptr;
+    m_AntiCloakScanActive      = false;
+    m_AntiCloakScanTimer       = 0.0;
+    m_AntiCloakScanTimerMax    = AntiCloakScanTimerMax;
+    m_IsPingingForShips        = false;
+    m_IsPingingForShipsTimer   = 0.0;
 }
 ShipSystemSensors::~ShipSystemSensors() {
 
@@ -36,22 +37,27 @@ ShipSystemSensors::~ShipSystemSensors() {
 const double& ShipSystemSensors::getAntiCloakingScanTimer() const {
     return m_AntiCloakScanTimer;
 }
+const double& ShipSystemSensors::getAntiCloakingScanTimerMax() const {
+    return m_AntiCloakScanTimerMax;
+}
+
 const bool& ShipSystemSensors::isAntiCloakScanActive() const {
     return m_AntiCloakScanActive;
 }
 void ShipSystemSensors::sendAntiCloakScanStatusPacket() {
     PacketMessage pOut;
     pOut.PacketType = PacketType::Client_To_Server_Anti_Cloak_Status;
-    pOut.r = m_AntiCloakScanTimer;
-    pOut.name = m_Ship.getName();
+    pOut.r = static_cast<float>(m_AntiCloakScanTimer);
+    pOut.name = m_Ship.getMapKey();
     pOut.data = m_AntiCloakScanActive ? "1" : "0";
     m_Ship.m_Client.send(pOut);
 }
 const bool ShipSystemSensors::disableAntiCloakScan(const bool sendPacket) {
     if (m_AntiCloakScanActive) {
         m_AntiCloakScanTimer = 0.0;
-        m_AntiCloakScanTimerSound = 0.0;
         m_AntiCloakScanActive = false;
+        m_IsPingingForShips = false;
+        m_IsPingingForShipsTimer = 0.0;
         if (sendPacket) {
             sendAntiCloakScanStatusPacket();
         }
@@ -64,7 +70,6 @@ const bool ShipSystemSensors::toggleAntiCloakScan(const bool sendPacket) {
         if (!m_Ship.isCloaked()) {
             m_AntiCloakScanActive = true;
             m_AntiCloakScanTimer = 0.0;
-            m_AntiCloakScanTimerSound = 0.0;
             if (sendPacket) {
                 sendAntiCloakScanStatusPacket();
             }
@@ -72,8 +77,9 @@ const bool ShipSystemSensors::toggleAntiCloakScan(const bool sendPacket) {
         }
     }else{
         m_AntiCloakScanTimer = 0.0;
-        m_AntiCloakScanTimerSound = 0.0;
         m_AntiCloakScanActive = false;
+        m_IsPingingForShips = false;
+        m_IsPingingForShipsTimer = 0.0;
         if (sendPacket) {
             sendAntiCloakScanStatusPacket();
         }
@@ -113,11 +119,15 @@ void ShipSystemSensors::setTarget(EntityWrapper* target, const bool sendPacket) 
     if (sendPacket) {
         PacketMessage pOut;
         pOut.PacketType = PacketType::Client_To_Server_Client_Changed_Target;
-        pOut.name = m_Ship.getName();
+        pOut.name = m_Ship.getMapKey();
         if (target) {
-            auto* cName = target->getComponent<ComponentName>();
-            if (cName) {
-                pOut.data = cName->name();
+            if (ship) {
+                pOut.data = ship->getMapKey();
+            }else{
+                auto* cName = target->getComponent<ComponentName>();
+                if (cName) {
+                    pOut.data = cName->name();
+                }
             }
         }else{
             pOut.data = "";
@@ -162,51 +172,56 @@ const ShipSystemSensors::Detection ShipSystemSensors::validateDetection(Ship& ot
 
 void ShipSystemSensors::internal_update_anti_cloak_scan(const double& dt) {
     m_AntiCloakScanTimer += dt;
-    m_AntiCloakScanTimerSound += dt;
-    if (m_AntiCloakScanTimerSound > m_AntiCloakScanPingTime - 1.0) {
+    if (m_AntiCloakScanTimer > m_AntiCloakScanTimerMax) {
         auto* sound = Sound::playEffect(ResourceManifest::SoundAntiCloakScan);
         if (sound) {
             sound->setPosition(m_Ship.getPosition());
             sound->setAttenuation(0.2f);
         }
-        m_AntiCloakScanTimerSound = -100.0;
-    }
-    if (m_AntiCloakScanTimer > m_AntiCloakScanPingTime) {
-        //ping
-        auto maxRange = m_RadarRange * m_RadarRange;
-        float rand;
-        double percent, dist2, factor;
-        for (auto& ship_itr : m_Map.getShips()) {
-            auto& ship = *ship_itr.second;
-            if (!ship.isAlly(m_Ship) && ship.isFullyCloaked()) {
-                dist2 = glm::distance2(ship.getPosition(), m_Ship.getPosition());
-                if (dist2 <= maxRange) {
-                    factor = ((maxRange - dist2) / maxRange);
-                    percent = (factor * 25.0); //0 to 25, modify by signature radius, ship perks, etc
-                    percent = glm::clamp(percent, 0.1, 25.0);
-                    rand = Helper::GetRandomFloatFromTo(0.0f, 100.0f);
-                    if (rand <= percent) {
-                        //success
-
-                        auto* sound = Sound::playEffect(ResourceManifest::SoundAntiCloakScanDetection);
-                        if (sound) {
-                            //sound->setPosition(m_Ship.getPosition());
-                            //sound->setAttenuation(0.0f);
-                        }
-                        AntiCloakDetection d;
-
-                        d.ship = &ship;
-                        d.detection_timer_current = 0.0;
-                        d.detection_timer_max = 4.5; //this should probably be modified by signature radius and other stuff
-
-                        m_DetectedAntiCloakedShips.push_back(std::move(d));
-                    }
-                }
-
-            }
-        }
-        m_AntiCloakScanTimerSound = 0.0;
         m_AntiCloakScanTimer = 0.0;
+
+        m_IsPingingForShips = true;
+        m_IsPingingForShipsTimer = 0.0;
+
+    }
+    if (m_IsPingingForShips) {
+        m_IsPingingForShipsTimer += dt;
+        if (m_IsPingingForShipsTimer > 1.0) {
+            auto maxRange = m_RadarRange * m_RadarRange;
+            float rand;
+            double percent, dist2, factor;
+            for (auto& ship_itr : m_Map.getShips()) {
+                auto& ship = *ship_itr.second;
+                if (!ship.isAlly(m_Ship) && ship.isFullyCloaked()) {
+                    dist2 = glm::distance2(ship.getPosition(), m_Ship.getPosition());
+                    if (dist2 <= maxRange) {
+                        factor = ((maxRange - dist2) / maxRange);
+                        percent = (factor * 25.0); //0 to 25, modify by signature radius, ship perks, etc
+                        percent = glm::clamp(percent, 0.1, 25.0);
+                        rand = Helper::GetRandomFloatFromTo(0.0f, 100.0f);
+                        if (rand <= percent) {
+                            //success
+
+                            auto* sound = Sound::playEffect(ResourceManifest::SoundAntiCloakScanDetection);
+                            if (sound) {
+                                //sound->setPosition(m_Ship.getPosition());
+                                sound->setAttenuation(0.0f);
+                            }
+                            AntiCloakDetection d;
+
+                            d.ship = &ship;
+                            d.detection_timer_current = 0.0;
+                            d.detection_timer_max = 4.5; //this should probably be modified by signature radius and other stuff
+
+                            m_DetectedAntiCloakedShips.push_back(std::move(d));
+                        }
+                    }
+
+                }
+            }
+            m_IsPingingForShips = false;
+            m_IsPingingForShipsTimer = 0.0;
+        }
     }
 }
 void ShipSystemSensors::internal_update_anti_cloak_scan_detected_ships(const double& dt) {

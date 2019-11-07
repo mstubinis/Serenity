@@ -185,7 +185,8 @@ void RenderPipeline::cpu_execute(Viewport& viewport, Camera& camera, const doubl
             auto& _modelInstance = *instanceNode->instance;
             auto* body = _modelInstance.parent().getComponent<ComponentBody>();
             auto& model = *_modelInstance.parent().getComponent<ComponentModel>();
-            if (InternalModelInstancePublicInterface::IsViewportValid(_modelInstance, viewport)) {
+            const bool is_valid_viewport = InternalModelInstancePublicInterface::IsViewportValid(_modelInstance, viewport);
+            if (is_valid_viewport) {
                 if (body) {
                     if (_modelInstance.isForceRendered()) {
                         if (_modelInstance.visible()) {
@@ -194,10 +195,10 @@ void RenderPipeline::cpu_execute(Viewport& viewport, Camera& camera, const doubl
                             _modelInstance.setPassedRenderCheck(false);
                         }
                     }else{
-                        const auto& radius = model.radius();
-                        auto pos = glm::vec3(body->position()) + _modelInstance.position();
-                        const auto sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
-                        auto comparison = radius * static_cast<decimal>(1100.0);
+                        const float& radius = model.radius();
+                        glm_vec3 pos = body->position() + glm_vec3(_modelInstance.position());
+                        const uint sphereTest = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
+                        decimal comparison = static_cast<decimal>(radius) * static_cast<decimal>(1100.0);
                         if (!_modelInstance.visible() || sphereTest == 0 || camera.getDistanceSquared(pos) > comparison * comparison) {
                             _modelInstance.setPassedRenderCheck(false);
                         }else{

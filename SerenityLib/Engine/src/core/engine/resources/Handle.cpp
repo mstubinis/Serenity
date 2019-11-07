@@ -21,7 +21,8 @@ const bool Handle::null() const {
     return (type == ResourceType::Empty) ? true : false; 
 }
 const EngineResource* Handle::get() const {
-    if (null()) return nullptr;
+    if (null()) 
+        return nullptr;
     return epriv::Core::m_Engine->m_ResourceManager.m_Resources->getAsFast<EngineResource>(index);
 }
 const EngineResource* Handle::operator ->() const { 

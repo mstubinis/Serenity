@@ -9,6 +9,12 @@
 #include <glm/vec2.hpp>
 #include <ecs/Entity.h>
 
+#define BEAM_SIZE_DEFAULT 0.095f
+#define BEAM_SIZE_DEFAULT_END_POINT 0.095f
+
+#define TORPEDO_COL_BASE_SCALE 0.1f
+#define TORPEDO_COL_MARGIN 0.135f
+
 class  EntityWrapper;
 class  ComponentBody;
 class  ComponentModel;

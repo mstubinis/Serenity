@@ -63,7 +63,7 @@ struct PhotonTorpedoOldCollisionFunctor final { void operator()(ComponentBody& o
     }
 }};
 
-struct PhotonTorpedoOldInstanceCoreBindFunctor { void operator()(EngineResource* r) const {
+struct PhotonTorpedoOldInstanceCoreBindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -89,11 +89,11 @@ struct PhotonTorpedoOldInstanceCoreBindFunctor { void operator()(EngineResource*
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct PhotonTorpedoOldInstanceCoreUnbindFunctor { void operator()(EngineResource* r) const {
+struct PhotonTorpedoOldInstanceCoreUnbindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
 
-struct PhotonTorpedoOldInstanceGlowBindFunctor { void operator()(EngineResource* r) const {
+struct PhotonTorpedoOldInstanceGlowBindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -112,12 +112,11 @@ struct PhotonTorpedoOldInstanceGlowBindFunctor { void operator()(EngineResource*
     Renderer::sendUniformMatrix4Safe("Model", model);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct PhotonTorpedoOldInstanceGlowUnbindFunctor { void operator()(EngineResource* r) const {
+struct PhotonTorpedoOldInstanceGlowUnbindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
 
-
-struct PhotonTorpedoOldFlareInstanceBindFunctor { void operator()(EngineResource* r) const {
+struct PhotonTorpedoOldFlareInstanceBindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -142,7 +141,7 @@ struct PhotonTorpedoOldFlareInstanceBindFunctor { void operator()(EngineResource
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct PhotonTorpedoOldFlareInstanceUnbindFunctor { void operator()(EngineResource* r) const {
+struct PhotonTorpedoOldFlareInstanceUnbindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
 
@@ -150,6 +149,7 @@ struct PhotonTorpedoOldFlareInstanceUnbindFunctor { void operator()(EngineResour
 PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(EntityWrapper* target, PhotonTorpedoOld& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) :torpedo(source), SecondaryWeaponTorpedoProjectile(map, final_world_position, forward, index) {
     maxTime = 30.5f;
     rotationAngleSpeed = source.rotationAngleSpeed;
+    const auto photonRed = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
     EntityDataRequest request(entity);
     EntityDataRequest shipRequest(source.ship.entity());
@@ -162,25 +162,25 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(EntityWrapper* target, Ph
     core.setCustomBindFunctor(PhotonTorpedoOldInstanceCoreBindFunctor());
     core.setCustomUnbindFunctor(PhotonTorpedoOldInstanceCoreUnbindFunctor());
     core.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+    core.setScale(0.5f);
 
-    btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body.getCollision()->getBtShape());
-    const auto& _scl = btVector3(0.05f, 0.05f, 0.05f);
-    sph.setLocalScaling(_scl);
-    sph.setMargin(0.165f);
-    sph.setImplicitShapeDimensions(_scl);
-    sph.recalcLocalAabb();
-
-    const auto photonRed = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
     glow.setColor(photonRed);
-    glow.setScale(10.6f);
+    glow.setScale(5.6f);
     glow.setCustomBindFunctor(PhotonTorpedoOldInstanceGlowBindFunctor());
     glow.setCustomUnbindFunctor(PhotonTorpedoOldInstanceGlowUnbindFunctor());
+
+    btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body.getCollision()->getBtShape());
+    const auto& _scl = btVector3(static_cast<btScalar>(TORPEDO_COL_BASE_SCALE), static_cast<btScalar>(TORPEDO_COL_BASE_SCALE), static_cast<btScalar>(TORPEDO_COL_BASE_SCALE));
+    sph.setLocalScaling(_scl);
+    sph.setMargin(TORPEDO_COL_MARGIN);
+    sph.setImplicitShapeDimensions(_scl);
+    sph.recalcLocalAabb();
 
     for (uint i = 0; i < 6; ++i) {
         auto& flare = model.addModel(ResourceManifest::TorpedoFlareMesh, ResourceManifest::TorpedoFlareMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
         float randScale = Helper::GetRandomFloatFromTo(-1.1f, 1.1f);
 
-        flare.setScale(2.2f + randScale);
+        flare.setScale(1.1f + randScale);
         flare.setColor(photonRed);
         float angle = (360.0f / 6.0f) * i;
 

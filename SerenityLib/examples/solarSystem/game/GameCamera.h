@@ -18,6 +18,10 @@ class GameCamera: public Camera{
     friend struct ::GameCameraLogicFunctor;
     private:
         const bool validateDistanceForOrbit(Map& map);
+
+        void internal_update_cockpit(EntityWrapper* target, const double& dt);
+        void internal_update_follow_target(EntityWrapper* target, const double& dt);
+        void internal_update_orbit(EntityWrapper* target, const double& dt);
     public:
         CameraState::State   m_State;
         float                m_OrbitRadius;

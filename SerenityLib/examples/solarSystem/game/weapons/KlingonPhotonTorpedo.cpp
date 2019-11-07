@@ -63,7 +63,7 @@ struct KlingonPhotonTorpedoCollisionFunctor final { void operator()(ComponentBod
     }
 }};
 
-struct KlingonPhotonTorpedoInstanceCoreBindFunctor { void operator()(EngineResource* r) const {
+struct KlingonPhotonTorpedoInstanceCoreBindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -89,12 +89,11 @@ struct KlingonPhotonTorpedoInstanceCoreBindFunctor { void operator()(EngineResou
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct KlingonPhotonTorpedoInstanceCoreUnbindFunctor {void operator()(EngineResource* r) const {
+struct KlingonPhotonTorpedoInstanceCoreUnbindFunctor final {void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
 
-
-struct KlingonPhotonTorpedoInstanceGlowBindFunctor {void operator()(EngineResource* r) const {
+struct KlingonPhotonTorpedoInstanceGlowBindFunctor final {void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -113,12 +112,11 @@ struct KlingonPhotonTorpedoInstanceGlowBindFunctor {void operator()(EngineResour
     Renderer::sendUniformMatrix4Safe("Model", model);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct KlingonPhotonTorpedoInstanceGlowUnbindFunctor {void operator()(EngineResource* r) const {
+struct KlingonPhotonTorpedoInstanceGlowUnbindFunctor final {void operator()(EngineResource* r) const {
      //glDepthMask(GL_FALSE);
 }};
 
-
-struct KlingonPhotonTorpedoFlareInstanceBindFunctor {void operator()(EngineResource* r) const {
+struct KlingonPhotonTorpedoFlareInstanceBindFunctor final {void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -143,7 +141,7 @@ struct KlingonPhotonTorpedoFlareInstanceBindFunctor {void operator()(EngineResou
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct KlingonPhotonTorpedoFlareInstanceUnbindFunctor {void operator()(EngineResource* r) const {
+struct KlingonPhotonTorpedoFlareInstanceUnbindFunctor final {void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
 
@@ -152,6 +150,8 @@ struct KlingonPhotonTorpedoFlareInstanceUnbindFunctor {void operator()(EngineRes
 KlingonPhotonTorpedoProjectile::KlingonPhotonTorpedoProjectile(EntityWrapper* target, KlingonPhotonTorpedo& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) :torpedo(source), SecondaryWeaponTorpedoProjectile(map, final_world_position, forward, index) {
     maxTime = 30.5f;
     rotationAngleSpeed = source.rotationAngleSpeed;
+    const auto photonRed = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    const auto photonRedOrange = glm::vec4(1.0f, 0.05f, 0.0f, 1.0f);
 
     EntityDataRequest request(entity);
     EntityDataRequest shipRequest(source.ship.entity());
@@ -164,26 +164,26 @@ KlingonPhotonTorpedoProjectile::KlingonPhotonTorpedoProjectile(EntityWrapper* ta
     core.setCustomBindFunctor(KlingonPhotonTorpedoInstanceCoreBindFunctor());
     core.setCustomUnbindFunctor(KlingonPhotonTorpedoInstanceCoreUnbindFunctor());
     core.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+    core.setScale(0.5f);
+
+    glow.setColor(photonRed);
+    glow.setScale(5.6f);
+    glow.setCustomBindFunctor(KlingonPhotonTorpedoInstanceGlowBindFunctor());
+    glow.setCustomUnbindFunctor(KlingonPhotonTorpedoInstanceGlowUnbindFunctor());
 
     btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body.getCollision()->getBtShape());
-    const auto& _scl = btVector3(0.05f, 0.05f, 0.05f);
+    const auto& _scl = btVector3(static_cast<btScalar>(TORPEDO_COL_BASE_SCALE), static_cast<btScalar>(TORPEDO_COL_BASE_SCALE), static_cast<btScalar>(TORPEDO_COL_BASE_SCALE));
     sph.setLocalScaling(_scl);
-    sph.setMargin(0.165f);
+    sph.setMargin(TORPEDO_COL_MARGIN);
     sph.setImplicitShapeDimensions(_scl);
     sph.recalcLocalAabb();
 
-    const auto photonRed = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    const auto photonRedOrange = glm::vec4(1.0f, 0.05f, 0.0f, 1.0f);
-    glow.setColor(photonRed);
-    glow.setScale(10.6f);
-    glow.setCustomBindFunctor(KlingonPhotonTorpedoInstanceGlowBindFunctor());
-    glow.setCustomUnbindFunctor(KlingonPhotonTorpedoInstanceGlowUnbindFunctor());
 
     for (uint i = 0; i < 6; ++i) {
         auto& flare = model.addModel(ResourceManifest::TorpedoFlareMesh, ResourceManifest::TorpedoFlareMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
         float randScale = Helper::GetRandomFloatFromTo(-1.1f, 1.1f);
 
-        flare.setScale(2.2f + randScale);
+        flare.setScale(1.1f + randScale);
         flare.setColor(photonRedOrange);
         float angle = (360.0f / 6.0f) * i;
 

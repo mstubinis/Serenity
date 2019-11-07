@@ -144,6 +144,31 @@ Server::~Server() {
     m_UdpSocket->unbind();
     shutdown(true);
 }
+void Server::shutdown(const bool destructor) {
+    //alert all the clients that the server is shutting down
+    Packet p;
+    p.PacketType = PacketType::Server_Shutdown;
+    send_to_all(p);
+    m_Core.m_Menu->m_ServerLobbyChatWindow->clear();
+    m_Core.m_Menu->m_ServerLobbyConnectedPlayersWindow->clear();
+    m_Active.store(0, std::memory_order_relaxed);
+    Sleep(500); //messy
+    if (destructor) {
+        SAFE_DELETE_VECTOR(m_Threads);
+        SAFE_DELETE(m_listener);
+        SAFE_DELETE(m_GameplayMode);
+    }
+    else {
+        m_listener->close();
+    }
+}
+const bool Server::shutdownMap() {
+    const auto res = Resources::deleteScene(m_MapName);
+    if (res) {
+        Resources::setCurrentScene("Menu");
+    }
+    return res;
+}
 const uint Server::numClients() const {
     uint numClients = 0;
     for (auto& thread : m_Threads) {
@@ -180,31 +205,6 @@ const bool Server::startupMap(GameplayMode& mode) {
     }
     return false;
 }
-void Server::shutdown(const bool destructor) {
-    //alert all the clients that the server is shutting down
-    Packet p;
-    p.PacketType = PacketType::Server_Shutdown;
-    send_to_all(p);
-    m_Core.m_Menu->m_ServerLobbyChatWindow->clear();
-    m_Core.m_Menu->m_ServerLobbyConnectedPlayersWindow->clear();
-    m_Active.store(0, std::memory_order_relaxed);
-    Sleep(500); //messy
-    if (destructor) {
-        SAFE_DELETE_VECTOR(m_Threads);
-        SAFE_DELETE(m_listener);
-        SAFE_DELETE(m_GameplayMode);
-    }else{
-        m_listener->close();
-    }
-}
-const bool Server::shutdownMap() {
-    const auto res = Resources::deleteScene(m_MapName);
-    if (res) {
-        Resources::setCurrentScene("Menu");
-    }
-    return res;
-}
-
 void Server::update(Server* thisServer, const double& dt) {
     auto& server = *thisServer;
     const auto server_active = server.m_Active.load(std::memory_order_relaxed);
@@ -311,6 +311,21 @@ void Server::updateRemoveDisconnectedClients(Server& server) {
         server.m_ClientsToBeDisconnected.pop();
     }
 }
+void Server::completely_remove_client(ServerClient& client) {
+    for (auto& clientThread : m_Threads) {
+        for (auto& _client : clientThread->m_Clients) {
+            string username_cpy = _client.second->m_username;
+            if (client.m_username == _client.second->m_username) {
+                std::cout << "Client: " << username_cpy << " - has been completely removed from the server" << std::endl;
+                clientThread->m_Clients.erase(_client.first);
+                if (clientThread->m_Clients.size() == 0) {
+                    clientThread->m_Active.store(0, std::memory_order_relaxed);
+                }
+                return;
+            }
+        }
+    }
+}
 void Server::updateClientsGameLoop(const double& dt) {
     const auto active = m_Active.load(std::memory_order_relaxed);
     if (active == 1) {
@@ -321,17 +336,13 @@ void Server::updateClientsGameLoop(const double& dt) {
                 if (client.disconnected()) {
                     client.m_RecoveryTime += dt;
                     if (client.m_RecoveryTime > SERVER_CLIENT_RECOVERY_TIME) {
-                        std::cout << "Client: " << client.m_username << " has fully timed out, removing him completely" << std::endl;
                         //notify the other players of his removal
                         PacketMessage pOut;
                         pOut.PacketType = PacketType::Server_To_Client_Client_Left_Map;
                         pOut.name = client.m_username;
                         send_to_all_but_client(client, pOut);
 
-                        clientThread->m_Clients.erase(_client.first);
-                        if (clientThread->m_Clients.size() == 0)
-                            clientThread->m_Active.store(0, std::memory_order_relaxed);
-
+                        completely_remove_client(client);
                         return;
                     }
                 }else{
@@ -426,7 +437,7 @@ void Server::updateClient(ServerClient& client) {
                     auto spawnPosition = map.getSpawnAnchor()->getPosition();
                     for (auto& anchor : map.getRootAnchor()->getChildren()) {
                         if (boost::contains(anchor.first, "Deepspace Anchor")) {
-                            auto anchorPosition = anchor.second->getPosition();
+                            const auto anchorPosition = anchor.second->getPosition();
                             PacketMessage pOut2;
                             pOut2.PacketType = PacketType::Server_To_Client_Anchor_Creation_Deep_Space_Initial;
                             pOut2.r = static_cast<float>(anchorPosition.x) - static_cast<float>(spawnPosition.x);
@@ -460,19 +471,19 @@ void Server::updateClient(ServerClient& client) {
                     PacketCloakUpdate pOut(pI);
                     pOut.PacketType = PacketType::Server_To_Client_Ship_Cloak_Update;
 
-                    auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                    if (info.size() >= 3) {
-                        for (auto& clientThread : server.m_Threads) {
-                            for (auto& connectedClients : clientThread->m_Clients) {
-                                if (connectedClients.second->m_username == info[2]) {
-                                    server.send_to_client(*connectedClients.second, pOut);
-                                    break;
-                                }
-                            }
-                        }
-                    }else{
+                    //auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+                    //if (info.size() >= 3) {
+                    //    for (auto& clientThread : server.m_Threads) {
+                    //        for (auto& connectedClients : clientThread->m_Clients) {
+                    //            if (connectedClients.second->m_username == info[2]) {
+                    //                server.send_to_client(*connectedClients.second, pOut);
+                    //                break;
+                    //            }
+                    //        }
+                    //    }
+                    //}else{
                         server.send_to_all_but_client(client, pOut);
-                    }
+                    //}
                     break;
                 }case PacketType::Client_To_Server_Ship_Physics_Update: {
                     //a client has sent the server it's physics information, lets forward it
@@ -502,10 +513,10 @@ void Server::updateClient(ServerClient& client) {
                     break;
                 }case PacketType::Client_To_Server_Request_Connection: {
                     const bool valid = server.isValidName(pIn.data);
+                    server.assign_username_to_client(client, pIn.data);
                     Packet pOut;
                     if (valid) {
                         //a client wants to connect to the server
-                        client.m_username = pIn.data;
                         client.m_Validated = true;
                         pOut.PacketType = PacketType::Server_To_Client_Accept_Connection;
                         pOut.data = "";
@@ -549,6 +560,7 @@ void Server::updateClient(ServerClient& client) {
                         pOut.PacketType = PacketType::Server_To_Client_Reject_Connection;
                         std::cout << "Server: Rejecting: " + pIn.data + "'s connection" << std::endl;
                         server.send_to_client(client, pOut);
+                        server.completely_remove_client(client);
                     }
                     break;
                 }case PacketType::Client_To_Server_Request_Disconnection: {
@@ -653,7 +665,6 @@ void Server::send_to_all(const void* data, size_t size, size_t& sent) {
     }
 }
 
-
 void Server::send_to_all_but_client_udp(ServerClient& c, Packet& packet) {
     sf::Packet sf_packet;
     packet.build(sf_packet);
@@ -689,7 +700,6 @@ void Server::send_to_all_but_client_udp(ServerClient& c, const void* data, size_
         }
     }
 }
-
 
 void Server::send_to_all_udp(Packet& packet) {
     sf::Packet sf_packet;
@@ -770,6 +780,20 @@ const bool Server::isValidName(const string& name) const {
         }
     }
     return true;
+}
+
+void Server::assign_username_to_client(ServerClient& client, const string& username) {
+    string final_username = username;
+    unsigned int count = 0;
+    for (auto& thread : m_Threads) {
+        for (auto& server_client_ptr : thread->m_Clients) {
+            if (server_client_ptr.second->m_username == final_username) {
+                ++count;
+                final_username = username + "_" + to_string(count);
+            }
+        }
+    }
+    client.m_username = final_username;
 }
 
 #pragma endregion

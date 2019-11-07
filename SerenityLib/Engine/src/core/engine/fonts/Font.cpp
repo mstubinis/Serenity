@@ -10,7 +10,7 @@
 using namespace Engine;
 using namespace std;
 
-Font::Font(const string& filename):EngineResource(filename){ 
+Font::Font(const string& filename):EngineResource(ResourceType::Font, filename){ 
     string rawname = filename;
     const size_t& lastindex = filename.find_last_of(".");
     if (lastindex != string::npos) {

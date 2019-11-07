@@ -37,7 +37,12 @@ struct TextureRequest final {
     ImageInternalFormat::Format  internalFormat;
 
     TextureRequest();
-    TextureRequest(const std::string& filenameOrData, const bool& genMipMaps = true, const ImageInternalFormat::Format& _internal = ImageInternalFormat::Format::SRGB8_ALPHA8, const GLuint& openglTextureType = GL_TEXTURE_2D);
+    TextureRequest(
+        const std::string& filenameOrData,
+        const bool& genMipMaps = true,
+        const ImageInternalFormat::Format& _internal = ImageInternalFormat::Format::SRGB8_ALPHA8,
+        const GLuint& openglTextureType = GL_TEXTURE_2D
+    );
     ~TextureRequest();
 
     void request();

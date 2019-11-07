@@ -62,11 +62,12 @@ void Core::shutdownServer() {
         SAFE_DELETE(m_Server);
     }
 }
-void Core::startClient(GameplayMode& mode, Team* team, const unsigned short& port, const string& name, const string& ip) {
+void Core::startClient(GameplayMode* mode, Team* team, const unsigned short& port, const string& name, const string& ip) {
     if (!m_Client) {
-        m_Client = new Client(mode, team, *this, port, ip, 0);
+        m_Client = new Client(team, *this, port, ip, 0);
     }
     auto& client = *m_Client;
+    client.m_GameplayMode = mode;
     client.m_Username = name;
     if (!client.m_IsCurrentlyConnecting) {
         client.changeConnectionDestination(port, ip);
@@ -120,7 +121,8 @@ void Core::onResize(const uint& width, const uint& height) {
     m_Menu->onResize(width, height);
 }
 void Core::init() {
-    if (m_Initalized) return;
+    if (m_Initalized)
+        return;
 
     auto& window = Resources::getWindow();
     window.setKeyRepeatEnabled(false);
@@ -146,11 +148,12 @@ void Core::init() {
     auto& model = *e.addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
     model.hide();
 
-    ModelInstance::setDefaultViewportFlag(ViewportFlag::_1);
-
     m_Menu = new Menu(*menuScene, *ship_camera, m_GameState, *this);
-    m_Initalized = true;
     m_Menu->go_to_main_menu();
+
+    ModelInstance::setDefaultViewportFlag(ViewportFlag::_1); //for now on, all objects render in the first viewport only unless otherwise specified
+
+    m_Initalized = true;
 }
 void Core::update(const double& dt) {
     m_GameTime += dt;

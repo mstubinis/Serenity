@@ -28,7 +28,7 @@ class Client{
     friend class  SensorStatusDisplay;
     friend class  FireAtWill;
     private:
-        GameplayMode&                         m_GameplayMode;
+        GameplayMode*                         m_GameplayMode;
         Team*                                 m_Team;
         std::future<sf::Socket::Status>*      m_InitialConnectionThread;
         Engine::Networking::SocketTCP*        m_TcpSocket;
@@ -67,9 +67,9 @@ class Client{
         void on_receive_client_just_left_server(Packet*, Menu&);
         void on_receive_connection_accepted_by_server(Packet*, Menu&);
         void on_receive_connection_rejected_by_server(Packet*, Menu&);
-        void on_receive_server_shutdown(Packet*, Menu&);
+        void on_receive_server_shutdown(Packet*, Menu&, Map& map);
     public:
-        Client(GameplayMode& , Team* ,Core&, const ushort& server_port, const std::string& server_ipAddress, const uint& id);
+        Client(Team* ,Core&, const ushort& server_port, const std::string& server_ipAddress, const uint& id);
         ~Client();
 
         void setClientID(const uint id);

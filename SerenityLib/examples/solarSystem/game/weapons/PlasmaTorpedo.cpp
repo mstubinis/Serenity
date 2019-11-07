@@ -63,7 +63,7 @@ struct PlasmaTorpedoCollisionFunctor final { void operator()(ComponentBody& owne
     }
 }};
 
-struct PlasmaTorpedoInstanceCoreBindFunctor { void operator()(EngineResource* r) const {
+struct PlasmaTorpedoInstanceCoreBindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -89,10 +89,10 @@ struct PlasmaTorpedoInstanceCoreBindFunctor { void operator()(EngineResource* r)
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct PlasmaTorpedoInstanceCoreUnbindFunctor { void operator()(EngineResource* r) const {
+struct PlasmaTorpedoInstanceCoreUnbindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
-struct PlasmaTorpedoInstanceGlowBindFunctor { void operator()(EngineResource* r) const {
+struct PlasmaTorpedoInstanceGlowBindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -111,10 +111,10 @@ struct PlasmaTorpedoInstanceGlowBindFunctor { void operator()(EngineResource* r)
     Renderer::sendUniformMatrix4Safe("Model", model);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct PlasmaTorpedoInstanceGlowUnbindFunctor { void operator()(EngineResource* r) const {
+struct PlasmaTorpedoInstanceGlowUnbindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
-struct PlasmaTorpedoFlareInstanceBindFunctor { void operator()(EngineResource* r) const {
+struct PlasmaTorpedoFlareInstanceBindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_TRUE);
     auto& i = *static_cast<ModelInstance*>(r);
     Entity& parent = i.parent();
@@ -139,7 +139,7 @@ struct PlasmaTorpedoFlareInstanceBindFunctor { void operator()(EngineResource* r
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }};
-struct PlasmaTorpedoFlareInstanceUnbindFunctor { void operator()(EngineResource* r) const {
+struct PlasmaTorpedoFlareInstanceUnbindFunctor final { void operator()(EngineResource* r) const {
     //glDepthMask(GL_FALSE);
 }};
 
@@ -147,6 +147,7 @@ struct PlasmaTorpedoFlareInstanceUnbindFunctor { void operator()(EngineResource*
 PlasmaTorpedoProjectile::PlasmaTorpedoProjectile(EntityWrapper* target, PlasmaTorpedo& source, Map& map, const glm_vec3& final_world_position, const glm_vec3& forward, const int index, const glm_vec3& chosen_target_pos) : torpedo(source), SecondaryWeaponTorpedoProjectile(map, final_world_position, forward, index) {
     maxTime = 30.5f;
     rotationAngleSpeed = source.rotationAngleSpeed;
+    const auto plasmaGreen = glm::vec4(0.162f, 0.96f, 0.5f, 1.0f);
 
     EntityDataRequest request(entity);
     EntityDataRequest shipRequest(source.ship.entity());
@@ -159,23 +160,23 @@ PlasmaTorpedoProjectile::PlasmaTorpedoProjectile(EntityWrapper* target, PlasmaTo
     core.setCustomBindFunctor(PlasmaTorpedoInstanceCoreBindFunctor());
     core.setCustomUnbindFunctor(PlasmaTorpedoInstanceCoreUnbindFunctor());
     core.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+    core.setScale(0.5f);
 
-    btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body.getCollision()->getBtShape());
-    const auto& _scl = btVector3(0.05f, 0.05f, 0.05f);
-    sph.setLocalScaling(_scl);
-    sph.setMargin(0.165f);
-    sph.setImplicitShapeDimensions(_scl);
-    sph.recalcLocalAabb();
-
-    const auto plasmaGreen = glm::vec4(0.162f, 0.96f, 0.5f, 1.0f);
     glow.setColor(plasmaGreen);
-    glow.setScale(10.6f);
+    glow.setScale(5.6f);
     glow.setCustomBindFunctor(PlasmaTorpedoInstanceGlowBindFunctor());
     glow.setCustomUnbindFunctor(PlasmaTorpedoInstanceGlowUnbindFunctor());
 
+    btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body.getCollision()->getBtShape());
+    const auto& _scl = btVector3(static_cast<btScalar>(TORPEDO_COL_BASE_SCALE), static_cast<btScalar>(TORPEDO_COL_BASE_SCALE), static_cast<btScalar>(TORPEDO_COL_BASE_SCALE));
+    sph.setLocalScaling(_scl);
+    sph.setMargin(TORPEDO_COL_MARGIN);
+    sph.setImplicitShapeDimensions(_scl);
+    sph.recalcLocalAabb();
+
     for (uint i = 0; i < 1; ++i) {
         auto& flare = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::TorpedoFlareTriMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
-        flare.setScale(12.2f);
+        flare.setScale(6.7f);
         flare.setColor(plasmaGreen);
 
         float speed = 0.2f;

@@ -46,7 +46,7 @@ struct ModelDrawingMode final { enum Mode {
     LinesAdjacency = GL_LINES_ADJACENCY,
 };};
 
-struct ViewportFlag final { enum Flag {
+struct ViewportFlag final { enum Flag: unsigned int {
     None    = 0,
     _1 = 1 << 0,
     _2 = 1 << 1,
@@ -63,7 +63,7 @@ struct ViewportFlag final { enum Flag {
     _13 = 1 << 13,
     _14 = 1 << 14,
     _15 = 1 << 15,
-    All     = -1,
+    All     = 4294967295,
 };};
 
 class ModelInstance final: public BindableResource{
@@ -72,8 +72,8 @@ class ModelInstance final: public BindableResource{
     friend class  ComponentModel;
     private:
         ModelDrawingMode::Mode                               m_DrawingMode;
-        static unsigned short                                m_ViewportFlagDefault;
-        unsigned short                                       m_ViewportFlag; //determine what viewports this can be seen in
+        static unsigned int                                  m_ViewportFlagDefault;
+        unsigned int                                         m_ViewportFlag; //determine what viewports this can be seen in
         void*                                                m_UserPointer;
         std::vector<Engine::epriv::ModelInstanceAnimation*>  m_AnimationQueue;
         Entity                                               m_Parent;
@@ -104,17 +104,17 @@ class ModelInstance final: public BindableResource{
 
         ~ModelInstance();
 
-        static void setDefaultViewportFlag(const unsigned short& flag);
-        static void setDefaultViewportFlag(const ViewportFlag::Flag& flag);
+        static void setDefaultViewportFlag(const unsigned int flag);
+        static void setDefaultViewportFlag(const ViewportFlag::Flag flag);
 
         const ModelDrawingMode::Mode& getDrawingMode() const;
         void setDrawingMode(const ModelDrawingMode::Mode&);
 
-        void setViewportFlag(const unsigned short& flag);
-        void addViewportFlag(const unsigned short& flag);
-        void setViewportFlag(const ViewportFlag::Flag& flag);
-        void addViewportFlag(const ViewportFlag::Flag& flag);
-        const unsigned short& getViewportFlags() const;
+        void setViewportFlag(const unsigned int flag);
+        void addViewportFlag(const unsigned int flag);
+        void setViewportFlag(const ViewportFlag::Flag flag);
+        void addViewportFlag(const ViewportFlag::Flag flag);
+        const unsigned int getViewportFlags() const;
 
         void forceRender(const bool forced = true);
         const bool isForceRendered() const;

@@ -54,7 +54,7 @@ vector<boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
 
 #pragma region Material
 
-Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness):BindableResource(name){
+Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness):BindableResource(ResourceType::Material,name){
     Texture* d  = MaterialLoader::LoadTextureDiffuse(diffuse);
     Texture* n  = MaterialLoader::LoadTextureNormal(normal);
     Texture* g  = MaterialLoader::LoadTextureGlow(glow);
@@ -66,10 +66,10 @@ Material::Material(const string& name, const string& diffuse, const string& norm
     MaterialLoader::InternalInit(*this, d, n, g, s, a, m, sm);
     InternalMaterialPublicInterface::Load(*this);
 }
-Material::Material() {
+Material::Material() : BindableResource(ResourceType::Material) {
     MaterialLoader::InternalInitBase(*this);
 }
-Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness):BindableResource(name){
+Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness):BindableResource(ResourceType::Material, name){
     MaterialLoader::InternalInit(*this, diffuse, normal, glow, specular, ao, metalness, smoothness);
     InternalMaterialPublicInterface::Load(*this);
 }
@@ -292,8 +292,8 @@ void Material::unbind(){
     Core::m_Engine->m_RenderManager._unbindMaterial(); 
 }
 void Material::update(const double& dt) {
-    for (uint i = 0; i < m_Components.size(); ++i) {
-        MaterialComponent* component = m_Components[i];
+    for (size_t i = 0; i < m_Components.size(); ++i) {
+        auto* component = m_Components[i];
         if (!component)
             break; //this assumes there will never be a null component before defined components. be careful here
         component->update(dt);

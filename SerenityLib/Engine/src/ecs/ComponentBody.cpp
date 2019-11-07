@@ -630,19 +630,20 @@ void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decim
 }
 const glm_vec3 ComponentBody::position() const { //theres prob a better way to do this
     if (m_Physics) {
+        auto& physicsData = *data.p;
         btTransform tr;
-        data.p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
-        return Engine::Math::btVectorToGLM(tr.getOrigin());
+        physicsData.bullet_rigidBody->getMotionState()->getWorldTransform(tr);
+        return Math::btVectorToGLM(tr.getOrigin());
     }
-    auto& modelMatrix_ = data.n->modelMatrix;
+    const auto& modelMatrix_ = data.n->modelMatrix;
     return glm_vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
 }
 const glm::vec3 ComponentBody::position_render() const { //theres prob a better way to do this
     if (m_Physics) {
         auto tr = data.p->bullet_rigidBody->getWorldTransform();
-        return Engine::Math::btVectorToGLM(tr.getOrigin());
+        return Math::btVectorToGLM(tr.getOrigin());
     }
-    auto& modelMatrix_ = data.n->modelMatrix;
+    const auto& modelMatrix_ = data.n->modelMatrix;
     return glm::vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
 }
 glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) {
@@ -776,57 +777,28 @@ const float ComponentBody::mass() const {
 const glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do this
     if (m_Physics) {
         auto& physicsData = *data.p;
+#ifndef BT_USE_DOUBLE_PRECISION
+        glm::mat4 modelMatrix_(1.0f);
+#else
         glm_mat4 modelMatrix_(static_cast<decimal>(1.0));
+#endif
         btTransform tr;
         physicsData.bullet_rigidBody->getMotionState()->getWorldTransform(tr);
-
-        auto* val_ptr = (btScalar*)(glm::value_ptr(modelMatrix_));
-
+        btScalar* val_ptr = (btScalar*)glm::value_ptr(modelMatrix_);
         tr.getOpenGLMatrix(val_ptr);
         auto& collision_ = *physicsData.collision;
         if (collision_.getBtShape()) {
-			modelMatrix_ = glm::scale(modelMatrix_, getScale());
+            const auto scale = getScale();
+            modelMatrix_ = glm::scale(modelMatrix_, scale);
         }
         return modelMatrix_;
     }
     return data.n->modelMatrix;
 }
 const glm::mat4 ComponentBody::modelMatrixRendering() const {
-#ifndef ENGINE_HIGH_PRECISION
-    if (m_Physics) {
-        auto& physicsData = *data.p;
-        glm::mat4 modelMatrix_(1.0f);
-        btTransform tr;
-        physicsData.bullet_rigidBody->getMotionState()->getWorldTransform(tr);
-
-        auto* val_ptr = (btScalar*)(glm::value_ptr(modelMatrix_));
-
-        tr.getOpenGLMatrix(val_ptr);
-        auto& collision_ = *physicsData.collision;
-        if (collision_.getBtShape()) {
-            modelMatrix_ = glm::scale(modelMatrix_, getScale());
-        }
-        return modelMatrix_;
-    }
-    return data.n->modelMatrix;
-#else
-    if (m_Physics) {
-        auto& physicsData = *data.p;
-        glm_mat4 modelMatrix_(static_cast<decimal>(1.0));
-        btTransform tr;
-        physicsData.bullet_rigidBody->getMotionState()->getWorldTransform(tr);
-
-        auto* val_ptr = (btScalar*)(glm::value_ptr(modelMatrix_));
-
-        tr.getOpenGLMatrix(val_ptr);
-        auto& collision_ = *physicsData.collision;
-        if (collision_.getBtShape()) {
-            modelMatrix_ = glm::scale(modelMatrix_, getScale());
-        }
-        return static_cast<glm::mat4>(modelMatrix_);
-    }
-    return static_cast<glm::mat4>(data.n->modelMatrix);
-#endif
+    glm::mat4 ret;
+    ret = static_cast<glm::mat4>(modelMatrix());
+    return ret;
 }
 const btRigidBody& ComponentBody::getBtBody() const {
 	return *data.p->bullet_rigidBody;

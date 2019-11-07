@@ -130,7 +130,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
                             mode->addTeam(*team1);
                             mode->addTeam(*team2);
 
-                            menu.m_Core.startClient(*mode, nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
+                            menu.m_Core.startClient(mode, nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
                             menu.m_Core.getServer()->startupMap(*mode);
                             menu.m_ServerLobbyChatWindow->setUserPointer(menu.m_Core.getClient());
                         }else{
@@ -164,7 +164,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
                             GameplayMode* mode = new GameplayMode(); //get mode data via serialization later on
 
 
-                            menu.m_Core.startClient(*mode, nullptr, port, username, ip); //the client will request validation at this stage
+                            menu.m_Core.startClient(mode, nullptr, port, username, ip); //the client will request validation at this stage
 
                             menu.m_ServerLobbyChatWindow->setUserPointer(menu.m_Core.getClient());
                         }else {

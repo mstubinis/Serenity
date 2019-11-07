@@ -66,7 +66,7 @@ string getNormalDepthFunctions() {
 }
 
 
-Shader::Shader(const string& filenameOrCode, const ShaderType::Type& shaderType, const bool& fromFile) {
+Shader::Shader(const string& filenameOrCode, const ShaderType::Type& shaderType, const bool& fromFile) : EngineResource(ResourceType::Shader) {
     m_FileName = filenameOrCode;
     m_Type = shaderType;
     m_FromFile = fromFile;

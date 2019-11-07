@@ -36,7 +36,7 @@ namespace Engine{
     };
 };
 
-ShaderProgram::ShaderProgram(string _name, Shader& vs, Shader& fs):m_VertexShader(vs), m_FragmentShader(fs){
+ShaderProgram::ShaderProgram(const string& _name, Shader& vs, Shader& fs):m_VertexShader(vs), m_FragmentShader(fs), BindableResource(ResourceType::ShaderProgram, _name){
     m_LoadedGPU = m_LoadedCPU = false;
 
     setCustomBindFunctor(DefaultShaderBindFunctor());

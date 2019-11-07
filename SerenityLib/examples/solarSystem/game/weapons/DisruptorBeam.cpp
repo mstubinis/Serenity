@@ -94,11 +94,13 @@ struct DisruptorBeamInstanceUnbindFunctor { void operator()(EngineResource* r) c
 DisruptorBeam::DisruptorBeam(Ship& ship, Map& map, const glm_vec3& position, const glm_vec3& forward, const float& arc, vector<glm::vec3>& windupPts, const float& damage, const float& _chargeTimerSpeed, const float& _firingTime, const float& _impactRadius, const float& _impactTime, const float& _volume, const uint& _maxCharges, const float& _rechargeTimePerRound, const unsigned int& _modelIndex, const float& endpointExtraScale, const float& beamSizeExtraScale, const float& RangeInKM) : PrimaryWeaponBeam(WeaponType::PlasmaBeam, ship, map, position, forward, arc, damage, _impactRadius, _impactTime, _volume, windupPts, _maxCharges, _rechargeTimePerRound, _chargeTimerSpeed, _firingTime, _modelIndex, endpointExtraScale, beamSizeExtraScale, RangeInKM) {
     firstWindupGraphic = map.createEntity();
     secondWindupGraphic = map.createEntity();
+    const auto disruptorGreen = glm::vec4(0.15f, 0.969f, 0.192f, 1.0f);
+    const auto disruptorTeal = glm::vec4(0.632f, 1.0f, 0.0f, 1.0f);
 
     auto* model = beamGraphic.addComponent<ComponentModel>(ResourceManifest::PhaserBeamMesh, ResourceManifest::DisruptorBeamMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& beamModel1 = model->getModel(0);
     beamModel1.hide();
-    beamModel1.setScale(0.095f * additionalBeamSizeScale);
+    beamModel1.setScale(BEAM_SIZE_DEFAULT * additionalBeamSizeScale);
 
     auto& firstWindupBody = *firstWindupGraphic.addComponent<ComponentBody>();
     auto& secondWindupBody = *secondWindupGraphic.addComponent<ComponentBody>();
@@ -108,11 +110,8 @@ DisruptorBeam::DisruptorBeam(Ship& ship, Map& map, const glm_vec3& position, con
     auto& firstModel = firstWindupModel.getModel();
     auto& secondModel = secondWindupModel.getModel();
 
-    firstModel.setScale(0.095f * additionalEndPointScale);
-    secondModel.setScale(0.095f * additionalEndPointScale);
-
-    const auto disruptorGreen = glm::vec4(0.15f, 0.969f, 0.192f, 1.0f);
-    const auto disruptorTeal = glm::vec4(0.632f, 1.0f, 0.0f, 1.0f);
+    firstModel.setScale(BEAM_SIZE_DEFAULT_END_POINT * additionalEndPointScale);
+    secondModel.setScale(BEAM_SIZE_DEFAULT_END_POINT * additionalEndPointScale);
 
     firstModel.setColor(disruptorGreen);
     secondModel.setColor(disruptorGreen);

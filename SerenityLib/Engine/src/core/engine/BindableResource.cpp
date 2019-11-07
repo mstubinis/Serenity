@@ -1,12 +1,14 @@
 #include <core/engine/BindableResource.h>
 
+using namespace std;
+
 namespace Engine{
     namespace epriv{
         struct EmptyFunctor{template<class T> void operator()(T* r) const {}};
     };
 };
 
-BindableResource::BindableResource(std::string name):EngineResource(name){
+BindableResource::BindableResource(const ResourceType::Type& type, const string& name):EngineResource(type, name){
     Engine::epriv::EmptyFunctor a;
     setCustomBindFunctor(a); 
     setCustomUnbindFunctor(a);

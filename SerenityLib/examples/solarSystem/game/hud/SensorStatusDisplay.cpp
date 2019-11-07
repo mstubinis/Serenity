@@ -32,8 +32,8 @@ SensorStatusDisplay::SensorStatusDisplay(HUD& hud, Map& map, const glm::vec2& po
 
     m_Camera = new Camera(-1.0f, 1.0f, -1.0f, 1.0f, 0.0005f, 100.0f, &m_Map);
 
-    m_ViewportObject = &m_Map.addViewport(pos.x - (size.x / 2.0f), pos.y, size.x, size.y, *m_Camera);
-    m_Viewport = glm::vec4(pos.x - (size.x / 2.0f), pos.y, size.x, size.y);
+    m_ViewportObject = &m_Map.addViewport(pos.x - (size.x / 2.0f), pos.y + (size.y - size.x), size.x, size.x, *m_Camera);
+    m_Viewport = glm::vec4(pos.x - (size.x / 2.0f), pos.y + (size.y - size.x), size.x, size.x);
 
     m_ViewportObject->activate();
     m_ViewportObject->removeRenderFlag(ViewportRenderingFlag::API2D);
@@ -45,9 +45,10 @@ SensorStatusDisplay::SensorStatusDisplay(HUD& hud, Map& map, const glm::vec2& po
     m_RadarRingEntity = map.createEntity();
     m_RadarRingEntity.addComponent<ComponentBody>();
     auto& radarModel = *m_RadarRingEntity.addComponent<ComponentModel>(ResourceManifest::RadarDiscMesh, Material::WhiteShadeless, ShaderProgram::Deferred, RenderStage::GeometryOpaque);
-    radarModel.getModel().setColor(1, 1, 0, 1);
-    radarModel.getModel().setViewportFlag(ViewportFlag::_2);
-    radarModel.getModel().setScale(0.95f);
+    auto& radarModelInstance = radarModel.getModel();
+    radarModelInstance.setColor(1, 1, 0, 1);
+    radarModelInstance.setViewportFlag(ViewportFlag::_2); //only render in the 2nd viewport
+    radarModelInstance.setScale(0.95f);
 }
 SensorStatusDisplay::~SensorStatusDisplay() {
 
@@ -61,8 +62,8 @@ const Entity& SensorStatusDisplay::radarCameraEntity() const {
 void SensorStatusDisplay::onResize(const unsigned int& width, const unsigned int& height) {
     m_Position.x = static_cast<float>(width) / 2.0f;
 
-    m_ViewportObject->setViewportDimensions(m_Position.x - (m_Size.x / 2.0f), 0, m_Size.x, m_Size.y);
-    m_Viewport = glm::vec4(m_Position.x - (m_Size.x / 2.0f), 0, m_Size.x, m_Size.y);
+    m_ViewportObject->setViewportDimensions(m_Position.x - (m_Size.x / 2.0f), m_Position.y +(m_Size.y - m_Size.x), m_Size.x, m_Size.x);
+    m_Viewport = glm::vec4(m_Position.x - (m_Size.x / 2.0f), m_Position.y +(m_Size.y - m_Size.x), m_Size.x, m_Size.x);
 }
 void SensorStatusDisplay::setShip(Ship* ship) {
     if (!ship) {
@@ -123,8 +124,20 @@ void SensorStatusDisplay::render() {
     const auto& radarBodyPosition = m_RadarRingEntity.getComponent<ComponentBody>()->position();
     const auto& myPos = ship.getComponent<ComponentBody>()->position();
     auto* myTarget = ship.getTarget();
-    for (auto& other_ship_ptr : m_Sensors->getShips()) {
-        Ship& other_ship = *other_ship_ptr.ship;
+
+
+    //radar anti cloak bar
+    auto& anti_cloak_bar_bg_mat = *(Material*)ResourceManifest::RadarAntiCloakBarBackgroundMaterial.get();
+    auto& anti_cloak_bar_mat = *(Material*)ResourceManifest::RadarAntiCloakBarMaterial.get();
+    const auto& anti_cloak_bar_bg = *anti_cloak_bar_bg_mat.getComponent(0).texture();
+    const auto& anti_cloak_bar = *anti_cloak_bar_mat.getComponent(0).texture();
+    const auto height_above_bottom = 20;
+    Renderer::renderTexture(anti_cloak_bar_bg, glm::vec2(m_Position.x - (anti_cloak_bar_bg.size().x / 2), m_Position.y + height_above_bottom), glm::vec4(1, 1, 1, 1), 180.0f, glm::vec2(1.0f), 0.19f, Alignment::BottomLeft);
+    const auto anti_cloak_bar_width = (m_Sensors->getAntiCloakingScanTimer() / m_Sensors->getAntiCloakingScanTimerMax()) * anti_cloak_bar.width();
+    glm::vec4 scissor = glm::vec4(m_Position.x - (anti_cloak_bar_bg.size().x / 2), m_Position.y + height_above_bottom, anti_cloak_bar_width, anti_cloak_bar.height());
+    Renderer::renderTexture(anti_cloak_bar, glm::vec2(m_Position.x - (anti_cloak_bar_bg.size().x / 2), m_Position.y + height_above_bottom), glm::vec4(1, 1, 1, 1), 180.0f, glm::vec2(1.0f), 0.19f, Alignment::BottomLeft, scissor);
+
+    auto lambda = [&](Ship& other_ship) {
         glm::vec4 color;
         if (ship.isEnemy(other_ship)) {
             color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); //red (enemy)
@@ -133,8 +146,8 @@ void SensorStatusDisplay::render() {
         }else {
             color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f); //yellow (neutral)
         }
-
         auto otherVector = other_ship.getPosition() - myPos;
+        /*
         auto* cloakingDevice = static_cast<ShipSystemCloakingDevice*>(other_ship.getShipSystem(ShipSystemType::CloakingDevice));
         auto modByCloak = false;
         if (cloakingDevice && !other_ship.isAlly(ship)) {
@@ -159,7 +172,7 @@ void SensorStatusDisplay::render() {
                 otherVector += glm_vec3(randX, randY, randZ) * ((glm::length(otherVector) / radarRange) + 0.01f);
             }
         }
-
+        */
         //scale otherPos down to the range
         const auto otherLen = glm::length(otherVector);
         otherVector /= otherLen;
@@ -179,32 +192,13 @@ void SensorStatusDisplay::render() {
         if (myTarget && myTarget->getComponent<ComponentName>()->name() == other_ship.getName()) {
             Renderer::renderTexture(radarTokenTexture, pos2D, glm::vec4(1, 1, 1, 1), 0, glm::vec2(1.2f), 0.16f, Alignment::Center);
         }
+    };
+    for (auto& other_ship_ptr : m_Sensors->getShips()) {
+        Ship& other_ship = *other_ship_ptr.ship;
+        lambda(other_ship);  
     }
-
-    //anti cloak detected ships
     for (auto& other_ship_ptr : m_Sensors->getAntiCloakDetectedShips()) {
         Ship& other_ship = *other_ship_ptr.ship;
-        glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); //red (enemy)
-
-        auto otherVector = other_ship.getPosition() - myPos;
-        //scale otherPos down to the range
-        const auto otherLen = glm::length(otherVector);
-        otherVector /= otherLen;
-        otherVector *= glm::min((otherLen / radarRange + static_cast<decimal>(0.01)), static_cast<decimal>(1.0));
-        otherVector = radarBodyPosition + otherVector;
-
-        const auto pos = Math::getScreenCoordinates(otherVector, *m_Camera, m_Viewport, false);
-
-        const auto pos2D = glm::vec2(pos.x, pos.y);
-        const auto dotproduct = glm::dot(radarBodyPosition + ship.forward(), otherVector - radarBodyPosition);
-        if (dotproduct <= 0 /*&& !modByCloak*/) {
-            color.a = 0.5f;
-        }
-        //render radar token
-        Renderer::renderTexture(radarTokenTexture, pos2D, color, 0, glm::vec2(1.0f), 0.14f, Alignment::Center);
-
-        if (myTarget && myTarget->getComponent<ComponentName>()->name() == other_ship.getName()) {
-            Renderer::renderTexture(radarTokenTexture, pos2D, glm::vec4(1, 1, 1, 1), 0, glm::vec2(1.2f), 0.16f, Alignment::Center);
-        }
+        lambda(other_ship);
     }
 }

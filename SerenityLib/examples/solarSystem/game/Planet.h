@@ -88,14 +88,14 @@ class Planet: public EntityWrapper {
 
     public:
         Planet(
-            Handle& materialHandle,               //Material
-            PlanetType::Type = PlanetType::Rocky, //Type
-            glm_vec3 = glm_vec3(0),               //Position
-            decimal = 1.0,                        //Radius
-            std::string = "Planet",               //Name
-            float = 0,                            //Atmosphere size
+            Handle& materialHandle,                     //Material
+            const PlanetType::Type = PlanetType::Rocky, //Type
+            const glm_vec3& = glm_vec3(0),               //Position
+            const decimal = 1.0,                        //Radius
+            const std::string& = "Planet",              //Name
+            const float = 0,                            //Atmosphere size
             Map * = nullptr,
-            std::string planet_type_name = ""
+            const std::string& planet_type_name = ""
         );
         virtual ~Planet();
 
@@ -122,14 +122,14 @@ class Star: public Planet{
         SunLight* m_Light;
     public:
         Star(
-            glm::vec3 starColor = glm::vec3(1.0f,1.0f,0.0f), //Star Color
-            glm::vec3 lightColor = glm::vec3(1.0f,1.0f,1.0f), //Sunlight Color
-            glm::vec3 godRaysColor = glm::vec3(1.0f,1.0f,1.0f), //GodRays Color
-            glm_vec3 = glm_vec3(0.0f),             //Position
-            decimal = 1.0,                         //Scale
-            std::string = "Star",                  //Name
+            const glm::vec3& starColor = glm::vec3(1.0f,1.0f,0.0f), //Star Color
+            const glm::vec3& lightColor = glm::vec3(1.0f,1.0f,1.0f), //Sunlight Color
+            const glm::vec3& godRaysColor = glm::vec3(1.0f,1.0f,1.0f), //GodRays Color
+            const glm_vec3& = glm_vec3(0.0f),             //Position
+            const decimal = 1.0,                         //Scale
+            const std::string& = "Star",                  //Name
             Map * = nullptr,
-            std::string star_type_name = ""
+            const std::string& star_type_name = ""
         );
         virtual ~Star();
 };
@@ -140,7 +140,7 @@ class Ring final{
         Planet* m_Parent;
         void _makeRingImage(const std::vector<RingInfo>&);
     public:
-        Ring(std::vector<RingInfo>&,Planet*);
+        Ring(std::vector<RingInfo>&, Planet*);
         ~Ring();
 };
 #endif

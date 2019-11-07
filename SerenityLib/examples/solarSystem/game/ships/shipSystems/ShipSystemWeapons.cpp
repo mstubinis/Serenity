@@ -650,7 +650,11 @@ void ShipSystemWeapons::update(const double& dt) {
             auto* target_ptr = std::get<1>(primaryWeaponsBeamsFired[0]);
             string target_name = "N/A";
             if (target_ptr) {
-                target_name = target_ptr->getComponent<ComponentName>()->name();
+                if (ship) {
+                    target_name = ship->getMapKey();
+                }else {
+                    target_name = target_ptr->getComponent<ComponentName>()->name();
+                }
             }
             pOut.data += "," + target_name;
             for (uint i = 1; i < primaryWeaponsBeamsFired.size(); ++i) {
@@ -659,7 +663,11 @@ void ShipSystemWeapons::update(const double& dt) {
                 target_ptr = std::get<1>(primaryWeaponsBeamsFired[0]);
                 target_name = "N/A";
                 if (target_ptr) {
-                    target_name = target_ptr->getComponent<ComponentName>()->name();
+                    if (ship) {
+                        target_name = ship->getMapKey();
+                    }else{
+                        target_name = target_ptr->getComponent<ComponentName>()->name();
+                    }
                 }
                 pOut.data += "," + target_name;
             }
@@ -680,7 +688,11 @@ void ShipSystemWeapons::update(const double& dt) {
             auto* target_ptr = std::get<2>(primaryWeaponsCannonsFired[0]);
             string target_name = "N/A";
             if (target_ptr) {
-                target_name = target_ptr->getComponent<ComponentName>()->name();
+                if (ship) {
+                    target_name = ship->getMapKey();
+                }else{
+                    target_name = target_ptr->getComponent<ComponentName>()->name();
+                }
             }
             pOut.data += "," + target_name;
 
@@ -690,7 +702,11 @@ void ShipSystemWeapons::update(const double& dt) {
                 target_ptr = std::get<2>(primaryWeaponsCannonsFired[i]);
                 target_name = "N/A";
                 if (target_ptr) {
-                    target_name = target_ptr->getComponent<ComponentName>()->name();
+                    if (ship) {
+                        target_name = ship->getMapKey();
+                    }else{
+                        target_name = target_ptr->getComponent<ComponentName>()->name();
+                    }
                 }
                 pOut.data += "," + target_name;
             }
@@ -758,7 +774,11 @@ void ShipSystemWeapons::update(const double& dt) {
             auto* target_ptr = std::get<2>(secWeaponsTorpedosFired[0]);
             string target_name = "N/A";
             if (target_ptr) {
-                target_name = target_ptr->getComponent<ComponentName>()->name();
+                if (ship) {
+                    target_name = ship->getMapKey();
+                }else{
+                    target_name = target_ptr->getComponent<ComponentName>()->name();
+                }
             }
             pOut.data += "," + target_name;
             for (uint i = 1; i < secWeaponsTorpedosFired.size(); ++i) {
@@ -766,7 +786,11 @@ void ShipSystemWeapons::update(const double& dt) {
                 target_ptr = std::get<2>(secWeaponsTorpedosFired[i]);
                 target_name = "N/A";
                 if (target_ptr) {
-                    target_name = target_ptr->getComponent<ComponentName>()->name();
+                    if (ship) {
+                        target_name = ship->getMapKey();
+                    }else{
+                        target_name = target_ptr->getComponent<ComponentName>()->name();
+                    }
                 }
                 pOut.data += "," + target_name;
             }
