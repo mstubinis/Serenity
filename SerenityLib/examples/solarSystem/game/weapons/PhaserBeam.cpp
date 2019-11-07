@@ -188,7 +188,7 @@ const bool PhaserBeam::forceFire(const double& dt) {
         if (soundEffect) {
             soundEffect->setVolume(volume);
             soundEffect->setPosition(finalPosition);
-            soundEffect->setAttenuation(0.8f);
+            soundEffect->setAttenuation(0.6f);
         }
         state = BeamWeaponState::JustStarted;
         return true;

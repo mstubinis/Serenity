@@ -5,6 +5,6 @@ data/Textures/Skyboxes/Skybox6/Skybox.dds
 giDiffuse=1.0 giSpecular=1.0 giGlobal=0.4
 Defiant,Nova,Akira,Intrepid,Miranda,Constitution,Excelsior,Shrike,B'rel,Vor'cha
 
-S name=Devil's Inferno radius=695800 r=1.0 g=0.22 b=0.22 r1=1.55 g1=0.55 b1=0.6 r2=1.0 g2=1.0 b2=1.0 position=0 x=0 y=0 z=0
+S name=Devil's Inferno mesh=planet.objcc radius=695800 r=1.0 g=0.22 b=0.22 r1=1.55 g1=0.55 b1=0.6 r2=1.0 g2=1.0 b2=1.0 position=0 x=0 y=0 z=0 texture=Sun.dds
 
 ? parent=Devil's Inferno position=6767695 x=-67676895 y=0 z=-67676965

@@ -37,15 +37,16 @@ struct RotationInfo final{
     }
 };
 class OrbitInfo final{
+    private:
+        glm::vec4    info; //x = eccentricity, y = days, z = minorRadius, w = majorRadius
+        decimal      inclination;
+        decimal      angle;
+        Planet*      parent;
     public:
-        glm::vec4 info; //x = eccentricity, y = days, z = minorRadius, w = majorRadius
-        float inclination;
-        float angle;
-        Planet* parent;
-        OrbitInfo(float eccentricity, float days, float majorRadius,float angle, Planet& parent, float inclination = 0);
+        OrbitInfo(const float eccentricity, const float days, const float majorRadius, const decimal angle, Planet& parent, const decimal inclination = 0);
         ~OrbitInfo(){}
-        void setOrbitalPosition(float angle, Planet& planet);
-        glm::vec3 getOrbitalPosition(float angle, Planet& planet);
+        void setOrbitalPosition(const decimal angle, Planet& planet);
+        const glm_vec3 getOrbitalPosition(const decimal angle, Planet& planet);
 };
 struct RingInfo final{
     uint position;
@@ -84,10 +85,11 @@ class Planet: public EntityWrapper {
         RotationInfo*       m_RotationInfo;
         float               m_AtmosphereHeight;
 
-        const std::string getPlanetTypeNameAsString() const;
+        const std::string getPlanetTypeNameAsString(const std::string& in_type_name) const;
 
     public:
         Planet(
+            Handle& meshHandle,
             Handle& materialHandle,                     //Material
             const PlanetType::Type = PlanetType::Rocky, //Type
             const glm_vec3& = glm_vec3(0),               //Position
@@ -122,6 +124,7 @@ class Star: public Planet{
         SunLight* m_Light;
     public:
         Star(
+            Handle& meshHandle,
             const glm::vec3& starColor = glm::vec3(1.0f,1.0f,0.0f), //Star Color
             const glm::vec3& lightColor = glm::vec3(1.0f,1.0f,1.0f), //Sunlight Color
             const glm::vec3& godRaysColor = glm::vec3(1.0f,1.0f,1.0f), //GodRays Color
@@ -138,7 +141,8 @@ class Ring final{
     private:
         Handle m_MaterialHandle;
         Planet* m_Parent;
-        void _makeRingImage(const std::vector<RingInfo>&);
+
+        void internal_make_ring_image(const std::vector<RingInfo>& ring_list);
     public:
         Ring(std::vector<RingInfo>&, Planet*);
         ~Ring();

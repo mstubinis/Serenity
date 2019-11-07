@@ -136,8 +136,8 @@ void ResourceManifest::init(){
 
 
 
-    PlanetMesh = Resources::loadMeshAsync(BasePath + "data/Models/planet.objcc")[0];
-    RingMesh = Resources::loadMeshAsync(BasePath + "data/Models/ring.objcc")[0];
+    PlanetMesh = Resources::loadMeshAsync(BasePath + "data/Planets/Models/planet.objcc")[0];
+    RingMesh = Resources::loadMeshAsync(BasePath + "data/Planets/Models/ring.objcc")[0];
     ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc")[0];
     ShieldColMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields_Col.objcc")[0];
     RadarDiscMesh = Resources::loadMeshAsync(BasePath + "data/Models/radar_rings.objcc")[0];

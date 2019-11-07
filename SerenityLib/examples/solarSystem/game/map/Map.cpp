@@ -227,6 +227,7 @@ void Map::loadFromFile(const string& filename) {
     boost_io::stream<boost_io::mapped_file_source>   str(filename);
     unordered_map<string, vector<RingInfo>>          planetRings;
     unordered_map<string, Handle>                    loadedMaterials;
+    unordered_map<string, Handle>                    loadedMeshes;
     unordered_map<string, Anchor*>                   loadedAnchors;
 
     float gi_diffuse  = 1.0f;
@@ -279,8 +280,10 @@ void Map::loadFromFile(const string& filename) {
                 float R, G, B, R1, G1, B1, R2, G2, B2, qx, qy, qz = 0.0f;
                 float ATMOSPHERE_HEIGHT = 0.0f;
                 PlanetType::Type TYPE;
-                string TEXTURE = ResourceManifest::BasePath + "data/Textures/Planets/";
+                string MESH = ResourceManifest::BasePath + "data/Planets/Models/";
+                string TEXTURE = ResourceManifest::BasePath + "data/Planets/Textures/";
                 string MATERIAL_NAME = "";
+                string MESH_NAME = "";
 
                 float ORBIT_PERIOD = -1;
                 unsigned long long ORBIT_MAJOR_AXIS = -1;
@@ -343,13 +346,20 @@ void Map::loadFromFile(const string& filename) {
                     else if (key == "days")             ROTATIONAL_PERIOD = stof(value);
                     else if (key == "tilt")             ROTATIONAL_TILT = stof(value);
                     else if (key == "inclination")      INCLINATION = stof(value);
-                    else if (key == "material") { MATERIAL_NAME = value; TEXTURE = ""; } //todo: implement this somehow
+                    //else if (key == "material") { //todo: implement this somehow
+                    //    MATERIAL_NAME = value;
+                    //    TEXTURE = ""; 
+                    //}
                     else if (key == "texture") {
                         TEXTURE += value;
                         auto ext = boost::filesystem::extension(value);
                         MATERIAL_NAME = value.substr(0, value.size() - ext.size());
                     }
-
+                    else if (key == "mesh") {
+                        MESH += value;
+                        auto ext = boost::filesystem::extension(value);
+                        MESH_NAME = value.substr(0, value.size() - ext.size());
+                    }
                 }
                 const float x = static_cast<float>(X);
                 const float y = static_cast<float>(Y);
@@ -365,19 +375,27 @@ void Map::loadFromFile(const string& filename) {
                         glowFile = "";
                     }
                     if (!loadedMaterials.count(MATERIAL_NAME)) {
-                        Handle handle = Resources::loadMaterial(MATERIAL_NAME, TEXTURE, normalFile, glowFile, "", "", "", "");
-                        loadedMaterials.emplace(MATERIAL_NAME, handle);
+                        Handle material_handle = Resources::loadMaterial(MATERIAL_NAME, TEXTURE, normalFile, glowFile, "", "", "", "");
+                        loadedMaterials.emplace(MATERIAL_NAME, material_handle);
                     }
                 }
+                if (!MESH_NAME.empty()) {
+                    if (!loadedMeshes.count(MESH_NAME)) {
+                        Handle mesh_handle = Resources::loadMesh(MESH)[0];
+                        loadedMeshes.emplace(MESH_NAME, mesh_handle);
+                    }
+                }
+
+
                 if (line[0] == 'S') {//Star
-                    Star* star = new Star(glm::vec3(R, G, B), glm::vec3(R1, G1, B1), glm::vec3(R2, G2, B2), glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, this);
+                    Star* star = new Star(loadedMeshes.at(MESH_NAME), glm::vec3(R, G, B), glm::vec3(R1, G1, B1), glm::vec3(R2, G2, B2), glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, this);
                     if (!PARENT.empty()) {
                         star->setPosition(m_Planets.at(PARENT)->getPosition() + star->getPosition());
                     }
                     m_Planets.emplace(NAME, star);
                     internalCreateAnchor("Root", NAME, loadedAnchors, star->getPosition());
                 }else if (line[0] == 'P') {//Planet
-                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
+                    planetoid = new Planet(loadedMeshes.at(MESH_NAME), loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
                     if (!PARENT.empty()) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
@@ -391,7 +409,7 @@ void Map::loadFromFile(const string& filename) {
                     m_Planets.emplace(NAME, planetoid);
                     internalCreateAnchor(PARENT, NAME, loadedAnchors, planetoid->getPosition());
                 }else if (line[0] == 'M') {//Moon
-                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
+                    planetoid = new Planet(loadedMeshes.at(MESH_NAME), loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
                     if (!PARENT.empty()) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());

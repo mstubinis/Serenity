@@ -25,6 +25,42 @@ using namespace std;
 
 unordered_map<PlanetType::Type, Handle> Planets::IconDatabase;
 
+#pragma region OrbitInfo
+
+OrbitInfo::OrbitInfo(const float _eccentricity, const float _days, const float _majorRadius, const decimal _angle, Planet& _parent, const decimal _inclination) {
+    auto _majorRadiusSquared  = _majorRadius * _majorRadius;
+    auto _eccentricitySquared = _eccentricity * _eccentricity;
+    angle                     = _angle;
+    inclination               = glm::radians(_inclination);
+    info.x                    = _eccentricity;
+    info.y                    = _days;
+    info.z                    = glm::sqrt(_majorRadiusSquared * (1.0f - _eccentricitySquared)); //minor radius
+    info.w                    = _majorRadius;
+    parent                    = &_parent;
+}
+const glm_vec3 OrbitInfo::getOrbitalPosition(const decimal angle_, Planet& thisPlanet) {
+    glm_vec3 offset               = glm_vec3(0.0);
+    const glm_vec3 currentPos     = thisPlanet.getPosition();
+    if (parent) {
+        const glm_vec3 parentPos  = parent->getPosition();
+        const auto newX           = parentPos.x - glm::cos(angle_) * info.w;
+        const auto newZ           = parentPos.z - glm::sin(angle_) * info.z;
+        offset                    = glm_vec3(newX - currentPos.x, 0.0f, newZ - currentPos.z);
+    }
+    return (currentPos + offset);
+}
+void OrbitInfo::setOrbitalPosition(const decimal angle_, Planet& planet) {
+    angle              += angle_;
+    const auto nextPos = getOrbitalPosition(angle, planet);
+    auto modelMatrix   = glm_mat4(1.0f);
+    modelMatrix        = glm::rotate(modelMatrix, inclination, glm_vec3(0.0, 1.0, 0.0));
+    modelMatrix        = glm::translate(modelMatrix, nextPos);
+    planet.setPosition(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
+}
+
+#pragma endregion
+
+
 void Planets::init() {
     
     Planets::IconDatabase[PlanetType::Rocky] = Resources::loadTextureAsync("../data/Textures/HUD/RockyIcon.dds");
@@ -32,11 +68,11 @@ void Planets::init() {
     Planets::IconDatabase[PlanetType::GasGiantRinged] = Resources::loadTextureAsync("../data/Textures/HUD/GasGiantRingedIcon.dds");
     Planets::IconDatabase[PlanetType::Moon] = Resources::loadTextureAsync("../data/Textures/HUD/MoonIcon.dds");
     Planets::IconDatabase[PlanetType::Star] = Resources::loadTextureAsync("../data/Textures/HUD/StarIcon.dds");
-    //Planets::IconDatabase[PlanetType::Asteroid] = Resources::loadTextureAsync("../data/Textures/HUD/AsteroidIcon.dds");
+    Planets::IconDatabase[PlanetType::Asteroid] = Resources::loadTextureAsync("../data/Textures/HUD/AsteroidIcon.dds");
     
 }
 
-float PlanetaryRenderSpace(float& outerRadius,float& _distanceReal) {
+const float PlanetaryRenderSpace(const float& outerRadius, const float& _distanceReal) {
     //2.718281828459045235360287471352 = euler's number
     float _factor = 1.0f - glm::smoothstep(0.0f, glm::pow(outerRadius, 0.67f) * 215.0f, _distanceReal);
     _factor = glm::clamp(_factor, 0.01f, 0.99f);
@@ -326,42 +362,45 @@ struct AtmosphericScatteringSkyModelInstanceUnbindFunctor{void operator()(Engine
     Renderer::cullFace(GL_BACK);
 }};
 
-Planet::Planet(Handle& mat, const PlanetType::Type type, const glm_vec3& pos, const decimal scl, const string& name, const float atmosphere, Map* scene, const string& planet_type_name) : EntityWrapper(*scene) {
-    auto& componentName = *m_Entity.addComponent<ComponentName>(name);
+Planet::Planet(Handle& mesh, Handle& mat, const PlanetType::Type type, const glm_vec3& pos, const decimal scl, const string& name, const float atmosphere, Map* scene, const string& planet_type_name) : EntityWrapper(*scene) {
+    m_Type               = type;
+    m_OrbitInfo          = nullptr;
+    m_RotationInfo       = nullptr;
+    m_AtmosphereHeight   = atmosphere;
+    m_TypeName           = getPlanetTypeNameAsString(planet_type_name);
+    
+    auto& componentName  = *addComponent<ComponentName>(name);
+    auto& componentLogic = *addComponent<ComponentLogic>(PlanetLogicFunctor(), this);
+    ComponentBody*  componentBody;
+    ComponentModel* componentModel;
 
-    auto& body = *addComponent<ComponentBody>();
-    body.setPosition(pos);
-    auto& model = *addComponent<ComponentModel>(ResourceManifest::PlanetMesh, mat, ResourceManifest::groundFromSpace);
-    body.setScale(scl, scl, scl);
-    auto& instance = model.getModel();
+
+    if (type == PlanetType::Asteroid) {
+        componentModel = addComponent<ComponentModel>(mesh, mat);
+        componentBody = addComponent<ComponentBody>(CollisionType::TriangleShapeStatic);
+        componentBody->setCollisionGroup(CollisionFilter::_Custom_4); //i belong to ramming hull group (group 4)
+        componentBody->setCollisionMask(CollisionFilter::_Custom_4); //i should only collide with other ramming hulls only
+    }else {
+        componentBody = addComponent<ComponentBody>();
+        componentModel = addComponent<ComponentModel>(mesh, mat, ResourceManifest::groundFromSpace);
+    }
+    componentBody->setPosition(pos);
+    componentBody->setScale(scl, scl, scl);
+    auto& instance = componentModel->getModel(0);
     instance.setUserPointer(this);
-
-    m_AtmosphereHeight = atmosphere;
-    if(type != PlanetType::Star){
+    if (type != PlanetType::Star) {
         instance.setCustomBindFunctor(AtmosphericScatteringGroundModelInstanceBindFunctor());
         instance.setCustomUnbindFunctor(AtmosphericScatteringGroundModelInstanceUnbindFunctor());
     }
-    if(m_AtmosphereHeight > 0){
-        auto& skyInstance = model.addModel(ResourceManifest::PlanetMesh, ResourceManifest::EarthSkyMaterial, (ShaderProgram*)ResourceManifest::skyFromSpace.get(), RenderStage::GeometryTransparent);
+    if (m_AtmosphereHeight > 0) {
+        auto& skyInstance = componentModel->addModel(mesh, ResourceManifest::EarthSkyMaterial, (ShaderProgram*)ResourceManifest::skyFromSpace.get(), RenderStage::GeometryTransparent);
         float aScale = instance.getScale().x;
         aScale = aScale + (aScale * m_AtmosphereHeight);
         skyInstance.setCustomBindFunctor(AtmosphericScatteringSkyModelInstanceBindFunctor());
         skyInstance.setCustomUnbindFunctor(AtmosphericScatteringSkyModelInstanceUnbindFunctor());
-        skyInstance.setScale(aScale,aScale,aScale);
+        skyInstance.setScale(aScale, aScale, aScale);
         skyInstance.setUserPointer(this);
     }
-    auto& logic = *addComponent<ComponentLogic>(PlanetLogicFunctor(), this);
-
-    m_Type = type;
-    if (planet_type_name.empty()) {
-        m_TypeName = getPlanetTypeNameAsString();
-    }else{
-        m_TypeName = planet_type_name;
-    }
-
-    m_OrbitInfo = nullptr;
-    m_RotationInfo = nullptr;
-
     scene->m_Objects.push_back(this);
 }
 Planet::~Planet(){  
@@ -369,25 +408,27 @@ Planet::~Planet(){
     SAFE_DELETE(m_OrbitInfo);
     SAFE_DELETE(m_RotationInfo);
 }
-const string Planet::getPlanetTypeNameAsString() const {
-    switch (m_Type){
-        case PlanetType::Asteroid: {
-            return "Asteroid";
-        }case PlanetType::GasGiant: {
-            return "Gas Giant";
-        }case PlanetType::GasGiantRinged: {
-            return "Ringed Gas Giant";
-        }case PlanetType::Moon: {
-            return "Moon";
-        }case PlanetType::Rocky: {
-            return "Rocky Planet";
-        }case PlanetType::Star: {
-            return "Star";
-        }default: {
-            return "Planet";
+const string Planet::getPlanetTypeNameAsString(const string& in_type_name) const {
+    if (in_type_name.empty()) {
+        switch (m_Type) {
+            case PlanetType::Asteroid: {
+                return "Asteroid";
+            }case PlanetType::GasGiant: {
+                return "Gas Giant";
+            }case PlanetType::GasGiantRinged: {
+                return "Ringed Gas Giant";
+            }case PlanetType::Moon: {
+                return "Moon";
+            }case PlanetType::Rocky: {
+                return "Rocky Planet";
+            }case PlanetType::Star: {
+                return "Star";
+            }default: {
+                return "Planet";
+            }
         }
     }
-    return "Planet";
+    return in_type_name;
 }
 const string& Planet::getTypeName() const {
     return m_TypeName;
@@ -437,7 +478,7 @@ const float& Planet::getAtmosphereHeight() const {
     return m_AtmosphereHeight; 
 }
 
-Star::Star(const glm::vec3& starColor, const glm::vec3& lightColor, const glm::vec3& godRaysColor, const glm_vec3& pos, const decimal scl, const string& name, Map* scene, const string& type_name) : Planet(ResourceManifest::StarMaterial, PlanetType::Star, pos, scl, name, 0.0f, scene, type_name) {
+Star::Star(Handle& mesh, const glm::vec3& starColor, const glm::vec3& lightColor, const glm::vec3& godRaysColor, const glm_vec3& pos, const decimal scl, const string& name, Map* scene, const string& type_name) : Planet(mesh, ResourceManifest::StarMaterial, PlanetType::Star, pos, scl, name, 0.0f, scene, type_name) {
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor);
 
@@ -459,50 +500,37 @@ Star::Star(const glm::vec3& starColor, const glm::vec3& lightColor, const glm::v
 }
 Star::~Star(){
 }
-Ring::Ring(vector<RingInfo>& rings,Planet* parent){
+Ring::Ring(vector<RingInfo>& ring_list, Planet* parent){
     m_Parent = parent;
     
-    _makeRingImage(rings);
-    m_Parent->addRing(this);
+    internal_make_ring_image(ring_list);
 
     auto& model = *m_Parent->getComponent<ComponentModel>();
 
-    ModelInstance& ringInstance = model.addModel(
-        ResourceManifest::RingMesh,
-        m_MaterialHandle,
-        (ShaderProgram*)ResourceManifest::groundFromSpace.get(), 
-        RenderStage::GeometryTransparent
-    );
+    auto& ringInstance = model.addModel(ResourceManifest::RingMesh, m_MaterialHandle, (ShaderProgram*)ResourceManifest::groundFromSpace.get(), RenderStage::GeometryTransparent);
     ringInstance.setCustomBindFunctor(PlanetaryRingModelInstanceBindFunctor());
-    const float aScale = 1.0f;
-    ringInstance.setScale(aScale,aScale,aScale);
-    ringInstance.setUserPointer(parent);
-    
+    const float scale = 1.0f;
+    ringInstance.setScale(scale);
+    ringInstance.setUserPointer(parent);  
 }
 Ring::~Ring(){
 }
-void Ring::_makeRingImage(const vector<RingInfo>& rings){
-    
+void Ring::internal_make_ring_image(const vector<RingInfo>& ring_list){
     sf::Image ringImage;
     ringImage.create(1024, 2, sf::Color(0,0,0,0));
-    const auto& ringImageX = ringImage.getSize().x;
-    const auto& ringImageY = ringImage.getSize().y;
-    for(auto& ringInfo: rings){
-        sf::Color paint_color(
-			static_cast<sf::Uint8>(ringInfo.color.r),
-			static_cast<sf::Uint8>(ringInfo.color.g),
-			static_cast<sf::Uint8>(ringInfo.color.b),
-            static_cast<sf::Uint8>(255)
-		);
-
-        uint alphaChange = ringInfo.size - ringInfo.alphaBreakpoint;
+    const auto ringImageX = ringImage.getSize().x;
+    const auto ringImageY = ringImage.getSize().y;
+    const auto two_fifty_five = static_cast<sf::Uint8>(255);
+    for(auto& ringInfo: ring_list){
+        sf::Color paint_color(static_cast<sf::Uint8>(ringInfo.color.r), static_cast<sf::Uint8>(ringInfo.color.g), static_cast<sf::Uint8>(ringInfo.color.b), two_fifty_five);
+        const uint alphaChange = ringInfo.size - ringInfo.alphaBreakpoint;
         uint alpha_i = 0;
         for(uint i = 0; i < ringInfo.size; ++i){
             if (i > ringInfo.alphaBreakpoint) {
                 paint_color.a = static_cast<sf::Uint8>(((static_cast<float>(alphaChange - alpha_i) / static_cast<float>(alphaChange))) * 255.0f);
                 ++alpha_i;
 			}else{
-				paint_color.a = static_cast<sf::Uint8>(255);
+				paint_color.a = two_fifty_five;
 			}
             int xBack  =  ringInfo.position - i;
             int xFront =  ringInfo.position + i;
@@ -513,8 +541,8 @@ void Ring::_makeRingImage(const vector<RingInfo>& rings){
                 sf::Color finalColorBack  = Math::PaintersAlgorithm(paint_color, canvas_color_back);
                 if (ringInfo.color.r < 0 && ringInfo.color.g < 0 && ringInfo.color.b < 0) {
                     //transparent color, removing the canvas color 
-                    finalColorFront = sf::Color(canvas_color_front.r, canvas_color_front.g, canvas_color_front.b, static_cast<sf::Uint8>(255) - paint_color.a);
-                    finalColorBack  = sf::Color(canvas_color_back.r,  canvas_color_back.g,  canvas_color_back.b, static_cast<sf::Uint8>(255) - paint_color.a);
+                    finalColorFront = sf::Color(canvas_color_front.r, canvas_color_front.g, canvas_color_front.b, two_fifty_five - paint_color.a);
+                    finalColorBack  = sf::Color(canvas_color_back.r,  canvas_color_back.g,  canvas_color_back.b, two_fifty_five - paint_color.a);
                 }
                 for (uint s = 0; s < ringImageY; ++s) {
                     ringImage.setPixel(xFront, s, finalColorFront);
@@ -523,42 +551,18 @@ void Ring::_makeRingImage(const vector<RingInfo>& rings){
             }
         }
     }
-    auto* texture = Resources::getTexture("RingDiffuse");
+    auto size = m_Parent->m_Rings.size();
+    auto texture_name = m_Parent->getName() + "RingDiffuse_" + to_string(size);
+    auto material_name = m_Parent->getName() + "RingMaterial_" + to_string(size);
+    auto* texture = Resources::getTexture(texture_name);
     if (!texture) {
-        texture = new Texture(ringImage, "RingDiffuse", false, ImageInternalFormat::SRGB8_ALPHA8);
+        texture = new Texture(ringImage, texture_name, false, ImageInternalFormat::SRGB8_ALPHA8);
         texture->setAnisotropicFiltering(2.0f);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
-    auto handle = Resources::loadMaterial("RingMaterial", texture);
+    auto handle = Resources::loadMaterial(material_name, texture);
     m_MaterialHandle = handle;
     ((Material*)m_MaterialHandle.get())->setSpecularModel(SpecularModel::None);
-}
-OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,Planet& _parent,float _inclination){
-    //x = eccentricity, y = days, z = minorRadius, w = majorRadius
-    angle = _angle;
-    inclination = glm::radians(_inclination);
-    info.x = _eccentricity;
-    info.y = _days;
-    info.w = _majorRadius;
-    info.z = glm::sqrt(_majorRadius * _majorRadius * (1.0f - (_eccentricity * _eccentricity)));
-    parent = &_parent;
-}
-glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet& thisPlanet){
-    glm::vec3 offset = glm::vec3(0.0f);
-    const glm::vec3& currentPos = thisPlanet.getPosition();
-    if(parent){
-        const glm::vec3 parentPos = parent->getPosition();
-        const float newX = parentPos.x - glm::cos(angle) * info.w;
-        const float newZ = parentPos.z - glm::sin(angle) * info.z;
-        offset = glm::vec3(newX - currentPos.x, 0.0f, newZ - currentPos.z);
-    }
-    return (currentPos + offset);
-}
-void OrbitInfo::setOrbitalPosition(float a,Planet& planet){
-    angle += a;
-    const glm::vec3& nextPos = getOrbitalPosition(angle,planet);
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::rotate(modelMatrix,inclination,glm::vec3(0,1,0));
-    modelMatrix = glm::translate(modelMatrix,nextPos);
-    planet.setPosition(modelMatrix[3][0],modelMatrix[3][1],modelMatrix[3][2]);
+
+    m_Parent->addRing(this);
 }

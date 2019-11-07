@@ -36,6 +36,8 @@ class Weapons {
             auto& shipModel = *ship.getComponent<ComponentModel>();
             glm_vec3 final_world_position;
             
+            const auto attenuation = 0.28f;
+
             if (modelIndex > 0) {
                 auto& model = shipModel.getModel(modelIndex);
                 auto modelPos = glm_vec3(model.position());
@@ -72,7 +74,7 @@ class Weapons {
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.9f);
+                            w.soundEffect->setAttenuation(attenuation);
                         }
                         --weapon.numRounds;
                     }
@@ -87,7 +89,7 @@ class Weapons {
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.9f);
+                            w.soundEffect->setAttenuation(attenuation);
                         }
                         --weapon.numRounds;
                     }
@@ -105,7 +107,7 @@ class Weapons {
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.9f);
+                            w.soundEffect->setAttenuation(attenuation);
                         }
                         --weapon.numRounds;
                     }
@@ -120,7 +122,7 @@ class Weapons {
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.9f);
+                            w.soundEffect->setAttenuation(attenuation);
                         }
                         --weapon.numRounds;
                     }
@@ -138,7 +140,7 @@ class Weapons {
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.9f);
+                            w.soundEffect->setAttenuation(attenuation);
                         }
                         --weapon.numRounds;
                     }
@@ -153,7 +155,7 @@ class Weapons {
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.9f);
+                            w.soundEffect->setAttenuation(attenuation);
                         }
                         --weapon.numRounds;
                     }
@@ -168,7 +170,7 @@ class Weapons {
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.9f);
+                            w.soundEffect->setAttenuation(attenuation);
                         }
                         --weapon.numRounds;
                     }
@@ -183,7 +185,7 @@ class Weapons {
                         if (w.soundEffect) {
                             w.soundEffect->setVolume(w.volume);
                             w.soundEffect->setPosition(final_world_position);
-                            w.soundEffect->setAttenuation(0.9f);
+                            w.soundEffect->setAttenuation(attenuation);
                         }
                         --weapon.numRounds;
                     }
