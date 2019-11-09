@@ -39,7 +39,7 @@ struct PulsePhaserCollisionFunctor final { void operator()(ComponentBody& owner,
                     if (shields && other.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
-                            cannonProjectile.clientToServerImpact(weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, true);
+                            cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
                             return;
                         }
                     }
@@ -48,12 +48,12 @@ struct PulsePhaserCollisionFunctor final { void operator()(ComponentBody& owner,
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                             if (shields->getHealthCurrent(shieldSide) > 0) {
-                                cannonProjectile.clientToServerImpact(weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, true);
+                                cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
                                 return;
                             }
                         }
                         */
-                        cannonProjectile.clientToServerImpact(weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime, false);
+                        cannonProjectile.clientToServerImpactHull(true, weapon.m_Map.getClient(), *otherShip, local, normal, weapon.impactRadius, weapon.damage, weapon.impactTime);
                     }
                 }
             }

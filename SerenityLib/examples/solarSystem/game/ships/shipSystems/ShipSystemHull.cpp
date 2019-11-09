@@ -12,14 +12,13 @@
 
 using namespace std;
 
-ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const float health) :ShipSystem(ShipSystemType::Hull, _ship), m_Map(map){
+ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const float health, const float recharge_amount, const float recharge_rate) :ShipSystem(ShipSystemType::Hull, _ship), m_Map(map){
     m_HullEntity = map.createEntity();
     m_HealthPointsCurrent = m_HealthPointsMax = health;
 
-    m_RechargeAmount = 50.0f;
-    m_RechargeRate = 5.0f;
+    m_RechargeAmount = recharge_amount;
+    m_RechargeRate = recharge_rate;
     m_RechargeTimer = 0.0f;
-    m_CollisionTimer = 10.0f;
 
     auto& hullBody = *m_HullEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic);
     auto* col = new Collision(&hullBody, *_ship.getComponent<ComponentModel>(), _ship.getComponent<ComponentBody>()->mass(), CollisionType::TriangleShapeStatic);
@@ -41,7 +40,6 @@ Entity ShipSystemHull::getEntity() {
 void ShipSystemHull::destroy() {
     m_HullEntity.destroy();
     m_RechargeTimer = 0.0f;
-    m_CollisionTimer = 10.0f;
 }
 void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const bool forceHullFire) {
     auto& decalList = m_Ship.m_DamageDecals;
@@ -123,32 +121,28 @@ void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& 
         applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, forceHullFire);
     }
 }
-void ShipSystemHull::receiveCollision(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float damage) {
-    if (m_CollisionTimer > static_cast<float>(HULL_TO_HULL_COLLISION_DELAY)) {
-        float newHP = m_HealthPointsCurrent - damage;
-        if (newHP > 0.0f) {
-            //hull takes entire hit
-            m_HealthPointsCurrent -= damage;
-        }else{
-            //we destroyed the ship
-            m_HealthPointsCurrent = 0.0f;
-        }
-        m_CollisionTimer = 0.0f;
-        applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, true);
+void ShipSystemHull::receiveCollisionDamage(const float damage) {
+    const float newHP = m_HealthPointsCurrent - damage;
+    if (newHP > 0.0f) {
+        //hull takes entire hit
+        m_HealthPointsCurrent -= damage;
+    }else{
+        //we destroyed the ship
+        m_HealthPointsCurrent = 0.0f;
     }
 }
+void ShipSystemHull::receiveCollisionVisual(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius) {
+    applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, true);
+}
+
 void ShipSystemHull::update(const double& dt) {
     auto& hullBody = *m_HullEntity.getComponent<ComponentBody>();
     auto& shipBody = *m_Ship.getComponent<ComponentBody>();
     hullBody.setPosition(shipBody.position());
     hullBody.setRotation(shipBody.rotation());
 
-    const float fdt = static_cast<float>(dt);
-    if (m_CollisionTimer < 10.0f + static_cast<float>(HULL_TO_HULL_COLLISION_DELAY)) {
-        m_CollisionTimer += fdt;
-    }
-
 #pragma region Recharging
+    const auto fdt = static_cast<float>(dt);
     if (m_HealthPointsCurrent < m_HealthPointsMax) { //dont need to recharge at max shields
         m_RechargeTimer += fdt;
         if (m_RechargeTimer >= m_RechargeRate) {

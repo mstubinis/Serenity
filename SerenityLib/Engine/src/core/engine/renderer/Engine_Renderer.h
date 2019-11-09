@@ -6,7 +6,7 @@
 #include <core/engine/renderer/RendererState.h>
 #include <core/engine/utils/Utils.h>
 
-#include <core/engine/renderer/RendererEnums.h>
+#include <core/engine/renderer/RendererIncludes.h>
 #include <core/engine/renderer/postprocess/SSAO.h>
 #include <core/engine/renderer/postprocess/HDR.h>
 #include <core/engine/renderer/postprocess/DepthOfField.h>
@@ -93,6 +93,9 @@ namespace Renderer{
             void setGIContribution(const float global, const float diffuse, const float specular);
         };
     };
+    void restoreDefaultOpenGLState();
+    void restoreCurrentOpenGLState();
+
     void renderFullscreenQuad(const uint& width, const uint& height, const uint& startX = 0, const uint& startY = 0);
     void renderFullscreenTriangle(const uint& width, const uint& height, const uint& startX = 0, const uint& startY = 0);
 

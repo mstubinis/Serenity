@@ -33,6 +33,67 @@ using namespace Engine::Networking;
 
 const double TIMER_DEEP_SPACE_ANCHOR_SPAM = 1.0;
 
+#pragma region CollisionEntries
+CollisionEntries::CollisionEntries(Server& server):m_Server(server) {
+
+}
+CollisionEntries::~CollisionEntries() {
+
+}
+
+void CollisionEntries::processCollision(const PacketCollisionEvent& packet_in, Map& map) {
+    auto info = Helper::SeparateStringByCharacter(packet_in.data, ',');
+    string key1 = info[0] + "|" + info[1];
+    string key2 = info[1] + "|" + info[0];
+
+    const bool is_key_1 = m_CollisionPairs.count(key1);
+    const bool is_key_2 = m_CollisionPairs.count(key2);
+    
+    auto lambda_send = [&]() {
+        PacketCollisionEvent pOut(packet_in);
+        pOut.PacketType = PacketType::Server_To_Client_Collision_Event;
+        m_Server.send_to_all(pOut);
+    };
+
+    if (!is_key_1 && !is_key_2) {
+        m_CollisionPairs.emplace(key1, 2.0);
+        lambda_send();
+    }else{
+        if (is_key_1) {
+            if (m_CollisionPairs[key1] <= 0.0) {
+                m_CollisionPairs[key1] = 2.0;
+                lambda_send();
+            }
+        }else if (is_key_2) {
+            if (m_CollisionPairs[key2] <= 0.0) {
+                m_CollisionPairs[key2] = 2.0;
+                lambda_send();
+            }
+        }
+    }
+}
+void CollisionEntries::cleanup() {
+    for (auto it = m_CollisionPairs.begin(); it != m_CollisionPairs.end();) {
+        if (it->second <= 0.0) {
+            it = m_CollisionPairs.erase(it);
+        }else {
+            it++;
+        }
+    }
+
+}
+void CollisionEntries::update(const double& dt) {
+    for (auto& it : m_CollisionPairs) {
+        if (it.second > 0.0) {
+            it.second -= dt;
+            if (it.second <= 0.0) {
+                it.second = 0.0;
+            }
+        }
+    }
+}
+#pragma endregion
+
 #pragma region ServerClient
 
 ServerClient::ServerClient(const string& hash, Server& server, Core& core, sf::TcpSocket* sfTCPSocket) : m_Core(core), m_Server(server) {
@@ -130,7 +191,7 @@ ServerClientThread::~ServerClientThread() {
 
 #pragma region Server
 
-Server::Server(Core& core, const unsigned int& port, const string& ipRestriction) :m_Core(core) {
+Server::Server(Core& core, const unsigned int& port, const string& ipRestriction) :m_Core(core), m_CollisionEntries(*this) {
     m_GameplayMode                     = nullptr;
     m_port                             = port;
     m_listener                         = new ListenerTCP(port, ipRestriction);
@@ -157,8 +218,7 @@ void Server::shutdown(const bool destructor) {
         SAFE_DELETE_VECTOR(m_Threads);
         SAFE_DELETE(m_listener);
         SAFE_DELETE(m_GameplayMode);
-    }
-    else {
+    }else{
         m_listener->close();
     }
 }
@@ -211,6 +271,7 @@ void Server::update(Server* thisServer, const double& dt) {
     if (server_active == 1) {
         server.m_DeepspaceAnchorTimer += dt;
         updateAcceptNewClients(server);
+        server.m_CollisionEntries.update(dt);
         server.updateClientsGameLoop(dt);
 
         //TODO: it works but it's kind of hacky, in the future create a standalone server exe ///////////////////////////////////////////////////
@@ -369,6 +430,22 @@ void Server::updateClient(ServerClient& client) {
             client.m_Timeout = 0.0f;
             // Data extracted successfully...
             switch (pIn.PacketType) {
+                case PacketType::Client_To_Server_Request_Ship_Current_Info: {
+                    //just forward it
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
+                    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
+                    PacketMessage pOut(pI);
+                    pOut.PacketType = PacketType::Server_To_Client_Request_Ship_Current_Info;
+                    auto* c = server.getClientByName(list[1]);
+                    server.send_to_client(*c, pOut);
+                    break;
+                }
+                case PacketType::Client_To_Server_Collision_Event: {
+                    PacketCollisionEvent& pI = *static_cast<PacketCollisionEvent*>(pp);
+                    auto& map = *static_cast<Map*>(Resources::getScene(server.m_MapName));
+                    server.m_CollisionEntries.processCollision(pI, map);
+                    break;
+                }
                 case PacketType::Client_To_Server_Anti_Cloak_Status: {
                     //just forward it
                     PacketMessage& pI = *static_cast<PacketMessage*>(pp);
@@ -424,7 +501,10 @@ void Server::updateClient(ServerClient& client) {
                     server.send_to_all_but_client(client, pOut);
                     break;
                 }case PacketType::Client_To_Server_Successfully_Entered_Map: {
-                    //client told me he entered, lets give him his data to the other clients, and give him info about the current deep space anchors
+                    //client told me he entered, lets give his data to the other clients, and give him info about the current deep space anchors, and info about each other client
+
+                    //when a client receives  PacketType::Server_To_Client_New_Client_Entered_Map, they add the new client ship to their map pool and send the server info about themselves
+
                     PacketMessage& pI = *static_cast<PacketMessage*>(pp);
                     PacketMessage pOut1(pI);
 
@@ -470,20 +550,7 @@ void Server::updateClient(ServerClient& client) {
                     PacketCloakUpdate& pI = *static_cast<PacketCloakUpdate*>(pp);
                     PacketCloakUpdate pOut(pI);
                     pOut.PacketType = PacketType::Server_To_Client_Ship_Cloak_Update;
-
-                    //auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                    //if (info.size() >= 3) {
-                    //    for (auto& clientThread : server.m_Threads) {
-                    //        for (auto& connectedClients : clientThread->m_Clients) {
-                    //            if (connectedClients.second->m_username == info[2]) {
-                    //                server.send_to_client(*connectedClients.second, pOut);
-                    //                break;
-                    //            }
-                    //        }
-                    //    }
-                    //}else{
-                        server.send_to_all_but_client(client, pOut);
-                    //}
+                    server.send_to_all_but_client(client, pOut);
                     break;
                 }case PacketType::Client_To_Server_Ship_Physics_Update: {
                     //a client has sent the server it's physics information, lets forward it

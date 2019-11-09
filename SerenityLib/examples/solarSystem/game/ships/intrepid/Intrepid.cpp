@@ -30,7 +30,7 @@ Intrepid::Intrepid(const AIType::Type ai_type, Team& team, Client& client, Map& 
         else if (i == 2)   system = new ShipSystemYawThrusters(_this);
         else if (i == 3)   system = new ShipSystemRollThrusters(_this);
         else if (i == 4)   system = nullptr; //no cloaking device
-        else if (i == 5)   system = new ShipSystemShields(_this, map, 11500.0f, 11500.0f, 11500.0f, 11500.0f, 15000.0f, 15000.0f);
+        else if (i == 5)   system = new ShipSystemShields(_this, map, 11500.0f, 11500.0f, 11500.0f, 11500.0f, 15000.0f, 15000.0f, glm::vec3(0.0f), glm::vec3(1.35f, 1.5f, 1.0f));
         else if (i == 6)   system = new ShipSystemMainThrusters(_this);
         else if (i == 7)   system = new ShipSystemWarpDrive(_this);
         else if (i == 8)   system = new ShipSystemSensors(_this, map);
@@ -41,14 +41,18 @@ Intrepid::Intrepid(const AIType::Type ai_type, Team& team, Client& client, Map& 
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     //torps
-    auto* front_right_torp = new PhotonTorpedo(_this, map, glm::vec3(0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 2);
-    auto* front_left_torp = new PhotonTorpedo(_this, map, glm::vec3(-0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 2);
+    auto* front_right_torp_1 = new PhotonTorpedo(_this, map, glm::vec3(0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* front_left_torp_1 = new PhotonTorpedo(_this, map, glm::vec3(-0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* front_right_torp_2 = new PhotonTorpedo(_this, map, glm::vec3(0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* front_left_torp_2 = new PhotonTorpedo(_this, map, glm::vec3(-0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
 
     auto* aft_right_torp = new PhotonTorpedo(_this, map, glm::vec3(0.055742f, 0.289654f, 0.338158f), glm::vec3(0, 0, 1), 20.0f, 1);
     auto* aft_left_torp = new PhotonTorpedo(_this, map, glm::vec3(-0.055742f, 0.289654f, 0.338158f), glm::vec3(0, 0, 1), 20.0f, 1);
 
-    weapons.addSecondaryWeaponTorpedo(*front_left_torp, true);
-    weapons.addSecondaryWeaponTorpedo(*front_right_torp, true);
+    weapons.addSecondaryWeaponTorpedo(*front_left_torp_1, true);
+    weapons.addSecondaryWeaponTorpedo(*front_right_torp_1, true);
+    weapons.addSecondaryWeaponTorpedo(*front_left_torp_2, true);
+    weapons.addSecondaryWeaponTorpedo(*front_right_torp_2, true);
     weapons.addSecondaryWeaponTorpedo(*aft_left_torp);
     weapons.addSecondaryWeaponTorpedo(*aft_right_torp);
 

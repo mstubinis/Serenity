@@ -12,6 +12,7 @@
 #include <core/engine/utils/Utils.h>
 #include <memory>
 #include <functional>
+#include <utility>
 
 namespace Engine{
 namespace epriv{
@@ -69,6 +70,43 @@ namespace threading{
         }
         return outVec;
     }
+    //creates a vector of pairs, each pair contains a start and ending index to iterate over a very large single vector
+    template<typename T> std::vector<std::pair<int, int>> splitVectorPairs(const std::vector<T>& v, size_t num_cores = 0) {
+        if (num_cores == 0)
+            num_cores = Core::m_Engine->m_ThreadManager.cores();
+        const auto vector_size = v.size();
+        std::vector<std::pair<int,int>> outVec;
+        outVec.reserve(num_cores);
+
+        int c = (int)vector_size / num_cores;
+        int remainder = vector_size % num_cores; /* Likely uses the result of the division. */
+
+        size_t accumulator = 0;
+
+        std::pair<int, int> res;
+        int b;
+        int e = (num_cores - remainder);
+        for (size_t i = 0; i < num_cores; ++i) { //for each core
+            b = accumulator + (c - 1);
+            if (i == e) {
+                if (i != (num_cores - remainder)) {
+                    ++accumulator;
+                    ++b;
+                }
+                ++b;
+                ++e;
+            }
+            res = std::make_pair(accumulator, b );
+
+
+            outVec.push_back(res);
+            accumulator += c;
+        }
+        return outVec;
+    }
+
+
+
     void waitForAll();
     void finalizeJob(std::function<void()>& task);
     void finalizeJob(std::function<void()>& task, std::function<void()>& then_task);

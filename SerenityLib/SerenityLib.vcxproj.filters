@@ -471,9 +471,6 @@
     <ClInclude Include="Engine\src\core\engine\sounds\SoundQueue.h">
       <Filter>Header Files\Engine\Core\Sounds</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\renderer\RendererEnums.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\State.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
     </ClInclude>
@@ -590,6 +587,15 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\resources\ResourcesIncludes.h">
       <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\RendererIncludes.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\Particle.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\ParticleEmissionProperties.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -898,6 +904,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\pipelines\DeferredPipeline.cpp">
       <Filter>Source Files\Engine\Core\Renderer\pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\Particle.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\ParticleEmissionProperties.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

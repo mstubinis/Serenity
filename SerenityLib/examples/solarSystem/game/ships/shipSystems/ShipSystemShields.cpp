@@ -1,5 +1,6 @@
 #include "ShipSystemShields.h"
 #include "ShipSystemHull.h"
+#include "ShipSystemSensors.h"
 #include "../../Ship.h"
 #include "../../map/Map.h"
 #include "../../ResourceManifest.h"
@@ -349,26 +350,30 @@ void ShipSystemShields::addShieldImpact(const glm::vec3& impactLocationLocal, co
 }
 void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide, const bool doImpactGraphic) {
     if (m_ShieldsAreUp) {
-        //m_TimeSinceLastHit = 0.0f;
-        const float bleed = m_HealthPointsCurrent[shieldSide] - damage;
-
-        if (bleed >= 0) {
-            //shields take the entire hit
-            m_HealthPointsCurrent[shieldSide] -= damage;
+        /*
+        rules : 
+            - if anti-cloak scan active, shields take 10% more damage
+        */
+        auto final_damage = damage;
+        auto* sensors = static_cast<ShipSystemSensors*>(m_Ship.getShipSystem(ShipSystemType::Sensors));
+        if (sensors) {
+            if (sensors->isAntiCloakScanActive()) {
+                final_damage *= 1.1f;
+            }
+        }
+        const float bleed_damage = m_HealthPointsCurrent[shieldSide] - final_damage;
+        if (bleed_damage >= 0) {
+            m_HealthPointsCurrent[shieldSide] -= final_damage; //shields take the entire hit
         }else{
             m_HealthPointsCurrent[shieldSide] = 0.0f;
-            //uncomment below to apply bleed damage after shields drop
-            /*
-            uint bleedDamage = glm::abs(bleed);
-            auto* hull = static_cast<ShipSystemHull*>(m_Ship.getShipSystem(ShipSystemType::Hull));
-            if (hull) {
-                hull->receiveHit(impactNormal, impactLocationLocal, impactRadius, maxTime, bleed);
-            }
-            */
+            //bleed_damage *= -1.0f;
+            //receiveHitBleedDamage(impactNormal, impactLocationLocal, impactRadius, maxTime, bleed_damage, shieldSide);
         }
-        if(doImpactGraphic)
+        if (doImpactGraphic) {
             addShieldImpact(impactLocationLocal, impactRadius, maxTime);
+        }
     }
+
     /*
     //this logic is really only good for universal (non-sided) shields
     auto& shieldBody = *m_ShieldEntity.getComponent<ComponentBody>();
@@ -379,6 +384,15 @@ void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec
     }
     */
 }
+void ShipSystemShields::receiveHitBleedDamage(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide) {
+    auto* hull = static_cast<ShipSystemHull*>(m_Ship.getShipSystem(ShipSystemType::Hull));
+    m_HealthPointsCurrent[shieldSide] = 0.0f;
+    if (hull) {
+        hull->receiveHit(impactNormal, impactLocation, impactRadius, maxTime, damage);
+    }
+}
+
+
 Entity ShipSystemShields::getEntity() {
     return m_ShieldEntity;
 }
@@ -398,7 +412,7 @@ void ShipSystemShields::turnOnShields() {
 const bool ShipSystemShields::shieldsAreUp() const {
     return m_ShieldsAreUp;
 }
-
+const float ShipSystemShields::getActualShieldHealthCurrent(const size_t& index) const { return m_HealthPointsCurrent[index]; }
 const float ShipSystemShields::getHealthCurrent(const size_t& index) const { return m_ShieldsAreUp ? m_HealthPointsCurrent[index] : 0.0f; }
 const float ShipSystemShields::getHealthMax(const size_t& index) const { return m_HealthPointsMax[index]; }
 const float ShipSystemShields::getHealthPercent(const size_t& index) const { return getHealthCurrent(index) / getHealthMax(index); }

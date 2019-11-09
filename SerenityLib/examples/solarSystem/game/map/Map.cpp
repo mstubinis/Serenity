@@ -388,7 +388,7 @@ void Map::loadFromFile(const string& filename) {
 
 
                 if (line[0] == 'S') {//Star
-                    Star* star = new Star(loadedMeshes.at(MESH_NAME), glm::vec3(R, G, B), glm::vec3(R1, G1, B1), glm::vec3(R2, G2, B2), glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, this);
+                    Star* star = new Star(loadedMeshes.at(MESH_NAME), loadedMaterials.at(MATERIAL_NAME), glm::vec3(R, G, B), glm::vec3(R1, G1, B1), glm::vec3(R2, G2, B2), glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, this);
                     if (!PARENT.empty()) {
                         star->setPosition(m_Planets.at(PARENT)->getPosition() + star->getPosition());
                     }

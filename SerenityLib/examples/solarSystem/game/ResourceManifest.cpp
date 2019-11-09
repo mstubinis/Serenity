@@ -1,12 +1,14 @@
 #include "ResourceManifest.h"
 #include "factions/Faction.h"
 #include "ships/Ships.h"
+#include "particles/Fire.h"
 #include "Planet.h"
 
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/textures/Texture.h>
+#include <core/engine/renderer/ParticleEmissionProperties.h>
 
 #include <iostream>
 #include <SFML/System.hpp>
@@ -20,7 +22,6 @@ Handle ResourceManifest::shieldsShaderProgram;
 Handle ResourceManifest::ShipShaderProgramDeferred;
 Handle ResourceManifest::ShipShaderProgramForward;
 
-Handle ResourceManifest::PlanetMesh;
 Handle ResourceManifest::RingMesh;
 Handle ResourceManifest::ShieldMesh;
 Handle ResourceManifest::ShieldColMesh;
@@ -38,16 +39,19 @@ Handle ResourceManifest::BrelMeshWing2;
 
 Handle ResourceManifest::VenerexMaterial;
 
-//hull damage
+//effects
 Handle ResourceManifest::HullDamageOutline1Material;
 Handle ResourceManifest::HullDamageMaterial1;
 Handle ResourceManifest::HullDamageOutline2Material;
 Handle ResourceManifest::HullDamageMaterial2;
 Handle ResourceManifest::HullDamageOutline3Material;
 Handle ResourceManifest::HullDamageMaterial3;
+Handle ResourceManifest::SmokeMaterial1;
+Handle ResourceManifest::SmokeMaterial2;
+Handle ResourceManifest::SmokeMaterial3;
+Handle ResourceManifest::SparksMaterial1;
 
 
-Handle ResourceManifest::StarMaterial;
 Handle ResourceManifest::EarthSkyMaterial;
 Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
@@ -134,9 +138,6 @@ void ResourceManifest::init(){
     ShipShaderProgramForward = Resources::addShaderProgram("ShipShaderProgramForward", ShipShaderProgramForwardVert, ShipShaderProgramForwardFrag);
 
 
-
-
-    PlanetMesh = Resources::loadMeshAsync(BasePath + "data/Planets/Models/planet.objcc")[0];
     RingMesh = Resources::loadMeshAsync(BasePath + "data/Planets/Models/ring.objcc")[0];
     ShieldMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields.objcc")[0];
     ShieldColMesh = Resources::loadMeshAsync(BasePath + "data/Models/shields_Col.objcc")[0];
@@ -193,7 +194,13 @@ void ResourceManifest::init(){
     HullDamageMaterial2 = Resources::loadMaterialAsync("HullDamage2", BasePath + "data/Textures/Effects/hull_dmg.dds");
     HullDamageOutline3Material = Resources::loadMaterialAsync("HullDamage3Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_3.dds");
     HullDamageMaterial3 = Resources::loadMaterialAsync("HullDamage3", BasePath + "data/Textures/Effects/hull_dmg.dds");
-    StarMaterial = Resources::loadMaterialAsync("Star", BasePath + "data/Textures/Planets/Sun.dds");
+
+    SmokeMaterial1 = Resources::loadMaterialAsync("Smoke1", BasePath + "data/Textures/Effects/smoke_1.dds");
+    SmokeMaterial2 = Resources::loadMaterialAsync("Smoke2", BasePath + "data/Textures/Effects/smoke_2.dds");
+    SmokeMaterial3 = Resources::loadMaterialAsync("Smoke3", BasePath + "data/Textures/Effects/smoke_3.dds");
+    SparksMaterial1 = Resources::loadMaterialAsync("Sparks1", BasePath + "data/Textures/Effects/sparks_1.dds");
+
+
     StarFlareMaterial = Resources::loadMaterialAsync("SunFlare", BasePath + "data/Textures/Skyboxes/StarFlare.dds");
     EarthSkyMaterial = Resources::loadMaterialAsync("EarthSky", BasePath + "data/Textures/Planets/Earth.dds");
     CrosshairMaterial = Resources::loadMaterialAsync("Crosshair", BasePath + "data/Textures/HUD/Crosshair.dds");
@@ -205,6 +212,15 @@ void ResourceManifest::init(){
     RadarAntiCloakBarBackgroundMaterial = Resources::loadMaterialAsync("RadarAntiCloakBarBackground", BasePath + "data/Textures/HUD/RadarAntiCloakBarBackground.dds");
     
     epriv::threading::waitForAll();
+
+    ((Material*)SmokeMaterial1.get())->setShadeless(true);
+    ((Material*)SmokeMaterial2.get())->setShadeless(true);
+    ((Material*)SmokeMaterial3.get())->setShadeless(true);
+    ((Material*)SmokeMaterial1.get())->setGlow(1.0f);
+    ((Material*)SmokeMaterial2.get())->setGlow(1.0f);
+    ((Material*)SmokeMaterial3.get())->setGlow(1.0f);
+    ((Material*)SparksMaterial1.get())->setShadeless(true);
+    ((Material*)SparksMaterial1.get())->setGlow(1.0f);
 
     Material& phaserBeamMat = *((Material*)PhaserBeamMaterial.get());
     phaserBeamMat.setShadeless(true);
@@ -303,9 +319,6 @@ void ResourceManifest::init(){
     hull1Layer23.addUVModificationSimpleTranslation(0.1f, 0.1f);
     hullDamage1Material3.addComponent(MaterialComponentType::Glow, BasePath + "data/Textures/Effects/hull_dmg_mask_3.dds");
 
-    ((Material*)StarMaterial.get())->setShadeless(true);
-    ((Material*)StarMaterial.get())->setGlow(0.21f);
-
     auto& crosshairDiffuse = *(((Material*)CrosshairMaterial.get())->getComponent(0).texture());
     auto& crosshairArrowDiffuse = *(((Material*)CrosshairArrowMaterial.get())->getComponent(0).texture());
 
@@ -340,4 +353,9 @@ void ResourceManifest::init(){
     SoundDisruptorBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/disruptor_beam.ogg");
     SoundAntiCloakScan = Resources::addSoundData(BasePath + "data/Sounds/effects/anti_cloak_scan.ogg");
     SoundAntiCloakScanDetection = Resources::addSoundData(BasePath + "data/Sounds/effects/anti_cloak_scan_detection.ogg");
+
+    Fire::init();
+}
+void ResourceManifest::destruct() {
+    Fire::destruct();
 }

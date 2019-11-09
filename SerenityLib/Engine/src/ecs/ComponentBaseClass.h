@@ -6,10 +6,10 @@
 
 class ComponentBaseClass{
 	protected:
-		Entity owner;
+		Entity m_Owner;
 	public:
-		inline ComponentBaseClass() { owner = Entity::_null; }
-		inline ComponentBaseClass(const Entity& p_Owner) { owner.data = p_Owner.data; }
+		inline ComponentBaseClass() { m_Owner = Entity::_null; }
+		inline ComponentBaseClass(const Entity& p_Owner) { m_Owner.data = p_Owner.data; }
 
 		ComponentBaseClass& operator=(const ComponentBaseClass& p_Other)     = delete;
 		ComponentBaseClass(const ComponentBaseClass& p_Other)                = delete;
@@ -18,7 +18,7 @@ class ComponentBaseClass{
 
 		virtual ~ComponentBaseClass() = default;
 
-        Entity& getOwner() { return owner; }
+        Entity& getOwner() { return m_Owner; }
 };
 
 #endif

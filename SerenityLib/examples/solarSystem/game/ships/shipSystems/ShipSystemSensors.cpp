@@ -176,7 +176,7 @@ void ShipSystemSensors::internal_update_anti_cloak_scan(const double& dt) {
         auto* sound = Sound::playEffect(ResourceManifest::SoundAntiCloakScan);
         if (sound) {
             sound->setPosition(m_Ship.getPosition());
-            sound->setAttenuation(0.2f);
+            sound->setAttenuation(0.45f);
         }
         m_AntiCloakScanTimer = 0.0;
 
@@ -187,36 +187,38 @@ void ShipSystemSensors::internal_update_anti_cloak_scan(const double& dt) {
     if (m_IsPingingForShips) {
         m_IsPingingForShipsTimer += dt;
         if (m_IsPingingForShipsTimer > 1.0) {
-            auto maxRange = m_RadarRange * m_RadarRange;
-            float rand;
-            double percent, dist2, factor;
-            for (auto& ship_itr : m_Map.getShips()) {
-                auto& ship = *ship_itr.second;
-                if (!ship.isAlly(m_Ship) && ship.isFullyCloaked()) {
-                    dist2 = glm::distance2(ship.getPosition(), m_Ship.getPosition());
-                    if (dist2 <= maxRange) {
-                        factor = ((maxRange - dist2) / maxRange);
-                        percent = (factor * 25.0); //0 to 25, modify by signature radius, ship perks, etc
-                        percent = glm::clamp(percent, 0.1, 25.0);
-                        rand = Helper::GetRandomFloatFromTo(0.0f, 100.0f);
-                        if (rand <= percent) {
-                            //success
+            if (m_Ship.IsPlayer()) { //TODO: move this up more? it might cause some damage with syncing
+                auto maxRange = m_RadarRange * m_RadarRange;
+                float rand;
+                double percent, dist2, factor;
+                for (auto& ship_itr : m_Map.getShips()) {
+                    auto& ship = *ship_itr.second;
+                    if (!ship.isAlly(m_Ship) && ship.isFullyCloaked()) {
+                        dist2 = glm::distance2(ship.getPosition(), m_Ship.getPosition());
+                        if (dist2 <= maxRange) {
+                            factor = ((maxRange - dist2) / maxRange);
+                            percent = (factor * 25.0); //0 to 25, modify by signature radius, ship perks, etc
+                            percent = glm::clamp(percent, 0.1, 25.0);
+                            rand = Helper::GetRandomFloatFromTo(0.0f, 100.0f);
+                            if (rand <= percent) {
+                                //success
 
-                            auto* sound = Sound::playEffect(ResourceManifest::SoundAntiCloakScanDetection);
-                            if (sound) {
-                                //sound->setPosition(m_Ship.getPosition());
-                                sound->setAttenuation(0.0f);
+                                auto* sound = Sound::playEffect(ResourceManifest::SoundAntiCloakScanDetection);
+                                if (sound) {
+                                    //sound->setPosition(m_Ship.getPosition());
+                                    sound->setAttenuation(0.0f);
+                                }
+                                AntiCloakDetection d;
+
+                                d.ship = &ship;
+                                d.detection_timer_current = 0.0;
+                                d.detection_timer_max = 4.5; //this should probably be modified by signature radius and other stuff
+
+                                m_DetectedAntiCloakedShips.push_back(std::move(d));
                             }
-                            AntiCloakDetection d;
-
-                            d.ship = &ship;
-                            d.detection_timer_current = 0.0;
-                            d.detection_timer_max = 4.5; //this should probably be modified by signature radius and other stuff
-
-                            m_DetectedAntiCloakedShips.push_back(std::move(d));
                         }
-                    }
 
+                    }
                 }
             }
             m_IsPingingForShips = false;

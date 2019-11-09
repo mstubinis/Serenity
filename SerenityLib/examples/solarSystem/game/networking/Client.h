@@ -8,6 +8,8 @@
 #include <thread>
 #include <future>
 
+#define PACKET_HEALTH_UPDATE_FREQUENCY 0.5
+
 struct Packet;
 class  Client;
 class  Server;
@@ -40,11 +42,14 @@ class Client{
         bool                                  m_Validated;
         uint                                  m_ID;
         double                                m_PingTime;
+        double                                m_PingTimeHealthUpdate;
         bool                                  m_IsCurrentlyConnecting;
         ushort                                m_Port;
 
         void internalInit(const ushort& server_port, const std::string& server_ipAddress);
 
+        void on_receive_client_wants_my_ship_info(Packet*, Map& map);
+        void on_receive_collision_event(Packet*, Map& map);
         void on_receive_anti_cloak_status(Packet*, Map& map);
         void on_receive_server_game_mode(Packet*);
         void on_receive_physics_update(Packet*, Map& map);
@@ -60,7 +65,7 @@ class Client{
         void on_receive_health_update(Packet*, Map& map);
         void on_receive_cloak_update(Packet*, Map& map);
         void on_receive_new_client_entered_map(Packet*);
-        void on_receive_new_client_approve_map_entry(Packet*, Menu&);
+        void on_receive_server_approve_map_entry(Packet*, Menu&);
         void on_receive_map_data(Packet*, Menu&);
         void on_receive_chat_message(Packet*, Menu&);
         void on_receive_client_just_joined_server_lobby(Packet*, Menu&);

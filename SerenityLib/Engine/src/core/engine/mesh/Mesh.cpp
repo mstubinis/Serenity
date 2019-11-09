@@ -87,7 +87,7 @@ void InternalMeshPublicInterface::InitBlankMesh(Mesh& mesh) {
 }
 
 bool InternalMeshPublicInterface::SupportsInstancing(){
-    if(RenderManager::OPENGL_VERSION >= 31 || OpenGLExtension::supported(OpenGLExtension::EXT_draw_instanced) || OpenGLExtension::supported(OpenGLExtension::ARB_draw_instanced)){
+    if(RenderManager::OPENGL_VERSION >= 31 || OpenGLExtensions::supported(OpenGLExtensions::EXT_draw_instanced) || OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced)){
         return true;
     }
     return false;

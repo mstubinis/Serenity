@@ -101,6 +101,7 @@ class ShipSystemShields final : public ShipSystem {
 
         const glm::vec3& getAdditionalShieldSizeScale() const;
 
+        const float getActualShieldHealthCurrent(const size_t& index) const;
         const float getHealthCurrent(const size_t& index) const;
         const float getHealthMax(const size_t& index) const;
         const float getHealthPercent(const size_t& index) const; //returns percent from 0.0f to 1.0f
@@ -136,15 +137,9 @@ class ShipSystemShields final : public ShipSystem {
         void turnOffShields();
         void turnOnShields();
 
-        void receiveHit(
-            const glm::vec3& impactNormal,
-            const glm::vec3& impactLocation,
-            const float& impactRadius,
-            const float& maxTime,
-            const float damage,
-            const uint shieldSide,
-            const bool doImpactGraphic = true
-        );
+        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide, const bool doImpactGraphic = true);
+        void receiveHitBleedDamage(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide);
+
         void addShieldImpact(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime);
 
         ShieldSide::Side getImpactSide(const glm::vec3& impactLocationLocal);

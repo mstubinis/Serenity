@@ -16,7 +16,6 @@ struct ResourceManifest{
     static Handle ShipShaderProgramDeferred;
     static Handle ShipShaderProgramForward;
 
-    static Handle PlanetMesh;
     static Handle RingMesh;
     static Handle ShieldMesh;
     static Handle ShieldColMesh;
@@ -34,15 +33,19 @@ struct ResourceManifest{
 
 	static Handle VenerexMaterial;
 
-    //hull damage
+    //effects
     static Handle HullDamageOutline1Material;
     static Handle HullDamageMaterial1;
     static Handle HullDamageOutline2Material;
     static Handle HullDamageMaterial2;
     static Handle HullDamageOutline3Material;
     static Handle HullDamageMaterial3;
+    static Handle SmokeMaterial1;
+    static Handle SmokeMaterial2;
+    static Handle SmokeMaterial3;
+    static Handle SparksMaterial1;
 
-    static Handle StarMaterial;
+
     static Handle EarthSkyMaterial;
     static Handle CrosshairMaterial;
     static Handle CrosshairArrowMaterial;
@@ -95,6 +98,7 @@ struct ResourceManifest{
     static std::string BasePath;
 
     static void init();
+    static void destruct();
 };
 
 #endif

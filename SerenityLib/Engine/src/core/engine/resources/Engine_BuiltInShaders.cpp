@@ -49,7 +49,6 @@ string epriv::EShaders::deferred_frag;
 string epriv::EShaders::zprepass_frag;
 string epriv::EShaders::deferred_frag_hud;
 string epriv::EShaders::deferred_frag_skybox;
-string epriv::EShaders::deferred_frag_skybox_fake;
 string epriv::EShaders::copy_depth_frag;
 string epriv::EShaders::cubemap_convolude_frag;
 string epriv::EShaders::cubemap_prefilter_envmap_frag;
@@ -1577,26 +1576,19 @@ epriv::EShaders::deferred_frag_hud =
 #pragma region DeferredFragSkybox
 epriv::EShaders::deferred_frag_skybox =
     "\n"
+    "uniform vec4 Color;\n"
+    "uniform int IsFake;\n"
     "uniform samplerCube Texture;\n"
     "varying vec3 UV;\n"
     "varying vec3 WorldPosition;\n"
     "void main(){\n"
-    "    gl_FragData[0]    = textureCube(Texture, UV);\n"
+    "    if(IsFake == 1){\n"
+    "        gl_FragData[0] = Color;\n"
+    "    }else{\n"
+    "        gl_FragData[0] = textureCube(Texture, UV);\n"
+    "    }\n"
     "    gl_FragData[1].rg = vec2(1.0);\n"
     "    gl_FragData[2]    = vec4(0.0);\n"
-    "}";
-#pragma endregion
-
-#pragma region DeferredFragSkyboxFake
-epriv::EShaders::deferred_frag_skybox_fake =
-    "\n"
-    "uniform vec4 Color;\n"
-    "varying vec3 UV;\n"
-    "varying vec3 WorldPosition;\n"
-    "void main(){\n"
-    "    gl_FragData[0].rgba = Color;\n"
-    "    gl_FragData[1].rg   = vec2(1.0);\n"
-    "    gl_FragData[2]      = vec4(0.0);\n"
     "}";
 #pragma endregion
 

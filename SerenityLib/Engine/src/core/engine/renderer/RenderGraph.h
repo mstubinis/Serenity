@@ -3,7 +3,7 @@
 #define ENGINE_RENDER_GRAPH_INCLUDE_GUARD
 
 #include <core/engine/utils/Utils.h>
-#include <core/engine/renderer/RendererEnums.h>
+#include <core/engine/renderer/RendererIncludes.h>
 
 class  ShaderProgram;
 class  Camera;
@@ -15,6 +15,7 @@ struct Entity;
 class  Viewport;
 namespace Engine {
     namespace epriv {
+        struct InternalScenePublicInterface;
         struct InstanceNode final {
             ModelInstance* instance;
             InstanceNode(const ModelInstance& modelInstance) : instance(&const_cast<ModelInstance&>(modelInstance)) {
@@ -38,15 +39,16 @@ namespace Engine {
                 SAFE_DELETE_VECTOR(meshNodes);
             }
         };
-        class RenderPipeline final {
-            friend class ::Scene;
+        class RenderGraph final {
+            friend class  Scene;
+            friend struct Engine::epriv::InternalScenePublicInterface;
             private:
                 ShaderProgram&               shaderProgram;
                 std::vector<MaterialNode*>   materialNodes;
                 std::vector<InstanceNode*>   instancesTotal;
             public:
-                RenderPipeline(ShaderProgram&);
-                ~RenderPipeline();
+                RenderGraph(ShaderProgram&);
+                ~RenderGraph();
 
                 void clean(const uint entityData);
                 void sort(Camera& camera, const SortingMode::Mode sortingMode);
@@ -55,9 +57,9 @@ namespace Engine {
                 void sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode);
                 void sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode sortingMode);
 
-                void render(Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
-                void render_bruteforce(Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
-                void cpu_execute(Viewport& viewport, Camera& camera, const double& dt);
+                void render(Viewport& viewport, Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
+                void render_bruteforce(Viewport& viewport, Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
+                void validate_model_instances_for_rendering(Viewport& viewport, Camera& camera);
         };
     };
 };

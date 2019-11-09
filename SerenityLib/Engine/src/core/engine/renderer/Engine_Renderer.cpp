@@ -80,7 +80,6 @@ namespace Engine{
             ZPrepassFrag,
             DeferredFrag2DAPI,
             DeferredFragSkybox,
-            DeferredFragSkyboxFake,
             CopyDepthFrag,
             SSAOFrag,
             BloomFrag,
@@ -123,7 +122,6 @@ namespace Engine{
             DepthAndTransparency,
             DeferredFXAA,
             DeferredSkybox,
-            DeferredSkyboxFake,
             CopyDepth,
             DeferredLighting,
             DeferredLightingOptimized,
@@ -261,36 +259,35 @@ class epriv::RenderManager::impl final{
             epriv::threading::addJob(emplaceShader, 12, boost::ref(EShaders::zprepass_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
             epriv::threading::addJob(emplaceShader, 13, boost::ref(EShaders::deferred_frag_hud), boost::ref(m_InternalShaders), ShaderType::Fragment);
             epriv::threading::addJob(emplaceShader, 14, boost::ref(EShaders::deferred_frag_skybox), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 15, boost::ref(EShaders::deferred_frag_skybox_fake), boost::ref(m_InternalShaders), ShaderType::Fragment);
 
-            epriv::threading::addJob(emplaceShader, 16, boost::ref(EShaders::copy_depth_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 17, boost::ref(EShaders::ssao_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 18, boost::ref(EShaders::bloom_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 19, boost::ref(EShaders::hdr_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 20, boost::ref(EShaders::blur_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 15, boost::ref(EShaders::copy_depth_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 16, boost::ref(EShaders::ssao_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 17, boost::ref(EShaders::bloom_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 18, boost::ref(EShaders::hdr_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 19, boost::ref(EShaders::blur_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
 
-            epriv::threading::addJob(emplaceShader, 21, boost::ref(EShaders::depth_of_field), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 22, boost::ref(EShaders::ssao_blur_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 23, boost::ref(EShaders::godRays_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 24, boost::ref(EShaders::final_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 25, boost::ref(EShaders::depth_and_transparency_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 20, boost::ref(EShaders::depth_of_field), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 21, boost::ref(EShaders::ssao_blur_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 22, boost::ref(EShaders::godRays_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 23, boost::ref(EShaders::final_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 24, boost::ref(EShaders::depth_and_transparency_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
 
-            epriv::threading::addJob(emplaceShader, 26, boost::ref(EShaders::lighting_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 27, boost::ref(EShaders::lighting_frag_optimized), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 28, boost::ref(EShaders::lighting_frag_gi), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 29, boost::ref(EShaders::cubemap_convolude_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 30, boost::ref(EShaders::cubemap_prefilter_envmap_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 31, boost::ref(EShaders::brdf_precompute), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 32, boost::ref(EShaders::greyscale_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 33, boost::ref(EShaders::stencil_passover), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 34, boost::ref(EShaders::smaa_vertex_1), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            epriv::threading::addJob(emplaceShader, 35, boost::ref(EShaders::smaa_vertex_2), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            epriv::threading::addJob(emplaceShader, 36, boost::ref(EShaders::smaa_vertex_3), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            epriv::threading::addJob(emplaceShader, 37, boost::ref(EShaders::smaa_vertex_4), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            epriv::threading::addJob(emplaceShader, 38, boost::ref(EShaders::smaa_frag_1), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 39, boost::ref(EShaders::smaa_frag_2), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 40, boost::ref(EShaders::smaa_frag_3), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 41, boost::ref(EShaders::smaa_frag_4), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 25, boost::ref(EShaders::lighting_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 26, boost::ref(EShaders::lighting_frag_optimized), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 27, boost::ref(EShaders::lighting_frag_gi), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 28, boost::ref(EShaders::cubemap_convolude_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 29, boost::ref(EShaders::cubemap_prefilter_envmap_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 30, boost::ref(EShaders::brdf_precompute), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 31, boost::ref(EShaders::greyscale_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 32, boost::ref(EShaders::stencil_passover), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 33, boost::ref(EShaders::smaa_vertex_1), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            epriv::threading::addJob(emplaceShader, 34, boost::ref(EShaders::smaa_vertex_2), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            epriv::threading::addJob(emplaceShader, 35, boost::ref(EShaders::smaa_vertex_3), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            epriv::threading::addJob(emplaceShader, 36, boost::ref(EShaders::smaa_vertex_4), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            epriv::threading::addJob(emplaceShader, 37, boost::ref(EShaders::smaa_frag_1), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 38, boost::ref(EShaders::smaa_frag_2), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 39, boost::ref(EShaders::smaa_frag_3), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 40, boost::ref(EShaders::smaa_frag_4), boost::ref(m_InternalShaders), ShaderType::Fragment);
 
             epriv::threading::waitForAll();
 
@@ -312,7 +309,6 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DepthAndTransparency] = new ShaderProgram("DepthAndTransparency", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::DepthAndTransparencyFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA] = new ShaderProgram("Deferred_FXAA", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::FXAAFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox] = new ShaderProgram("Deferred_Skybox", *m_InternalShaders[EngineInternalShaders::VertexSkybox], *m_InternalShaders[EngineInternalShaders::DeferredFragSkybox]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake] = new ShaderProgram("Deferred_Skybox_Fake", *m_InternalShaders[EngineInternalShaders::VertexSkybox], *m_InternalShaders[EngineInternalShaders::DeferredFragSkyboxFake]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth] = new ShaderProgram("Copy_Depth", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::CopyDepthFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting] = new ShaderProgram("Deferred_Light", *m_InternalShaders[EngineInternalShaders::LightingVertex], *m_InternalShaders[EngineInternalShaders::LightingFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingOptimized] = new ShaderProgram("Deferred_Light_Optimized", *m_InternalShaders[EngineInternalShaders::LightingVertex], *m_InternalShaders[EngineInternalShaders::LightingFragOptimized]);
@@ -1144,7 +1140,6 @@ class epriv::RenderManager::impl final{
             Material::Checkers->setSpecularModel(SpecularModel::None);
             Material::Checkers->setSmoothness(0.0f);
 
-
             Material::WhiteShadeless = new Material("MaterialDefaultWhiteShadeless", Texture::White);
             Material::WhiteShadeless->setSpecularModel(SpecularModel::None);
             Material::WhiteShadeless->setSmoothness(0.0f);
@@ -1201,21 +1196,24 @@ class epriv::RenderManager::impl final{
         }
         void _renderSkybox(Skybox* skybox, Scene& scene, Viewport& viewport, Camera& camera){
             glm::mat4 view = camera.getView();
-            Math::removeMatrixPosition(view);
-            if(skybox){
-                m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox]->bind();
-                sendUniformMatrix4("VP", camera.getProjection() * view);
-                sendTexture("Texture", skybox->texture()->address(0),0, GL_TEXTURE_CUBE_MAP);
-                Skybox::bindMesh();
-            }else{//render a fake skybox.
-                m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkyboxFake]->bind();
-                auto& bgColor = scene.getBackgroundColor();
-                sendUniformMatrix4("VP", camera.getProjection() * view);
-                sendUniform4("Color", bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-                Skybox::bindMesh();
-            }
-            sendTextureSafe("Texture", 0, 0, GL_TEXTURE_CUBE_MAP); //this is needed to render stuff in geometry transparent using the normal deferred shader. i do not know why just yet...
+            view[3][0] = 0.0f;
+            view[3][1] = 0.0f;
+            view[3][2] = 0.0f;
+
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox]->bind();
+            if (skybox)
+                Renderer::sendUniform1("IsFake", 0);
+            else
+                Renderer::sendUniform1("IsFake", 1);
+            Renderer::sendUniformMatrix4("VP", camera.getProjection() * view);
+            const auto& bgColor = scene.getBackgroundColor();
+            Renderer::sendUniform4Safe("Color", bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+            Renderer::sendTextureSafe("Texture", skybox->texture()->address(0), 0, GL_TEXTURE_CUBE_MAP);
+            Skybox::bindMesh();
+
+            Renderer::sendTextureSafe("Texture", 0, 0, GL_TEXTURE_CUBE_MAP); //this is needed to render stuff in geometry transparent using the normal deferred shader. i do not know why just yet...
             //could also change sendTexture("Texture", skybox->texture()->address(0),0, GL_TEXTURE_CUBE_MAP); above to use a different slot...
+
         }
         void _resize(const uint& w, const uint& h){
             m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(w), 0.0f, static_cast<float>(h), 0.005f, 3000.0f);
@@ -1630,12 +1628,12 @@ class epriv::RenderManager::impl final{
             glDepthMask(GL_TRUE);
 
             GLEnablei(GL_BLEND, 0); //this is needed for sure
-            InternalScenePublicInterface::RenderGeometryOpaque(scene, viewport, camera, dt);
+            InternalScenePublicInterface::RenderGeometryOpaque(scene, viewport, camera);
             if ((viewport.getRenderFlags() & ViewportRenderingFlag::Skybox)) {
                 _renderSkybox(scene.skybox(), scene, viewport, camera);
             }
-            InternalScenePublicInterface::RenderGeometryTransparent(scene, viewport, camera, dt);
-            InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(scene, viewport, camera, dt, true);
+            InternalScenePublicInterface::RenderGeometryTransparent(scene, viewport, camera);
+            InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(scene, viewport, camera, true);
         }
         void _passForwardRendering(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
@@ -1650,11 +1648,11 @@ class epriv::RenderManager::impl final{
             GLEnablei(GL_BLEND, 3); //yes this is important
 
             glDepthMask(GL_TRUE);
-            InternalScenePublicInterface::RenderForwardTransparent(scene, viewport, camera, dt);
-            InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, viewport, camera, dt);
+            InternalScenePublicInterface::RenderForwardTransparent(scene, viewport, camera);
+            InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(scene, viewport, camera);
             glDepthMask(GL_FALSE);
-            InternalScenePublicInterface::RenderDecals(scene, viewport, camera, dt);
-            InternalScenePublicInterface::RenderForwardParticles(scene, viewport, camera, dt);
+            InternalScenePublicInterface::RenderDecals(scene, viewport, camera);
+            InternalScenePublicInterface::RenderForwardParticles(scene, viewport, camera);
             GLDisablei(GL_BLEND, 0); //this is needed for smaa at least
             GLDisablei(GL_BLEND, 1);
             GLDisablei(GL_BLEND, 2);
@@ -2196,6 +2194,15 @@ const bool epriv::RenderManager::_unbindMaterial(){
 void epriv::RenderManager::_genPBREnvMapData(Texture& texture, uint size1, uint size2){
     m_i->_generatePBREnvMapData(texture,size1,size2);
 }
+
+void Renderer::restoreDefaultOpenGLState() {
+    const auto winWidth = Resources::getWindowSize();
+    renderManager->OpenGLStateMachine.GL_RESTORE_DEFAULT_STATE_MACHINE(winWidth.x, winWidth.y);
+}
+void Renderer::restoreCurrentOpenGLState() {
+    renderManager->OpenGLStateMachine.GL_RESTORE_CURRENT_STATE_MACHINE();
+}
+
 
 void Renderer::Settings::Lighting::enable(const bool b){
     renderManagerImpl->lighting = b; 

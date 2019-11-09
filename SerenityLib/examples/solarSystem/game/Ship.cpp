@@ -255,28 +255,64 @@ struct HullCollisionFunctor final { void operator()(ComponentBody& owner, const 
             if (owner.getCollisionGroup() == CollisionFilter::_Custom_4 && other.getCollisionGroup() == CollisionFilter::_Custom_4) { //hull on hull only
                 auto* ownerShip = static_cast<Ship*>(ownerShipVoid);
                 auto* otherShip = static_cast<Ship*>(otherShipVoid);
-                auto* ownerHull = static_cast<ShipSystemHull*>(ownerShip->getShipSystem(ShipSystemType::Hull));
-                auto* otherHull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                if (ownerHull && otherHull) {
-                    const auto ownerMass = owner.mass() * 3000.0f;
-                    const auto otherMass = other.mass() * 3000.0f;
-                    const auto massTotal = ownerMass + otherMass;
 
-                    const auto ownerLocal = ownerHit - glm::vec3(owner.position());
-                    const auto otherLocal = otherHit - glm::vec3(other.position());
+                if (ownerShip->IsPlayer() /*|| otherShip->IsPlayer()*/) {
 
-                    const auto ownerMomentum = ownerMass * glm::vec3(ownerShip->getLinearVelocity());
-                    const auto otherMomentum = otherMass * glm::vec3(otherShip->getLinearVelocity());
-                    const auto totalMomentum = ownerMomentum + otherMomentum;
+                    auto* ownerHull = static_cast<ShipSystemHull*>(ownerShip->getShipSystem(ShipSystemType::Hull));
+                    auto* otherHull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
+                    if (ownerHull && otherHull) {
+                        const auto ownerMass = owner.mass() * 3000.0f;
+                        const auto otherMass = other.mass() * 3000.0f;
+                        const auto massTotal = ownerMass + otherMass;
 
-                    const auto damageTotal1 = (ownerMass / massTotal) * totalMomentum;
-                    const auto damageTotal2 = (otherMass / massTotal) * totalMomentum;
+                        const auto ownerLocal = ownerHit - glm::vec3(owner.position());
+                        const auto otherLocal = otherHit - glm::vec3(other.position());
 
-                    const auto damageRadiusOwner = 4.0f;
-                    const auto damageRadiusOther = 4.0f;
+                        const auto owner_linear_velocity = ownerShip->getLinearVelocity();
+                        const auto other_linear_velocity = otherShip->getLinearVelocity();
 
-                    ownerHull->receiveCollision( normal, ownerLocal, damageRadiusOwner, glm::length(damageTotal2) );
-                    otherHull->receiveCollision( normal, otherLocal, damageRadiusOther, glm::length(damageTotal1) );
+                        const auto ownerMomentum = ownerMass * glm::vec3(owner_linear_velocity);
+                        const auto otherMomentum = otherMass * glm::vec3(other_linear_velocity);
+                        const auto totalMomentum = ownerMomentum + otherMomentum;
+
+                        const auto damageTotal1 = (ownerMass / massTotal) * totalMomentum;
+                        const auto damageTotal2 = (otherMass / massTotal) * totalMomentum;
+
+                        const auto damageRadiusOwner = 4.0f;
+                        const auto damageRadiusOther = 4.0f;
+
+                        PacketCollisionEvent pOut;
+                        pOut.PacketType = PacketType::Client_To_Server_Collision_Event;
+                        pOut.damage1 = glm::length(damageTotal2);
+                        pOut.damage2 = glm::length(damageTotal1);
+                        pOut.data =        ownerShip->getMapKey();
+                        pOut.data += "," + otherShip->getMapKey();
+                        
+                        const auto owner_angular_velocity = owner.getAngularVelocity();
+                        const auto other_angular_velocity = other.getAngularVelocity();
+
+                        Math::Float16From32(&pOut.ax1, owner_angular_velocity.x);
+                        Math::Float16From32(&pOut.ay1, owner_angular_velocity.y);
+                        Math::Float16From32(&pOut.az1, owner_angular_velocity.z);
+
+                        Math::Float16From32(&pOut.ax2, other_angular_velocity.x);
+                        Math::Float16From32(&pOut.ay2, other_angular_velocity.y);
+                        Math::Float16From32(&pOut.az2, other_angular_velocity.z);
+
+
+                        Math::Float16From32(&pOut.lx1, owner_linear_velocity.x);
+                        Math::Float16From32(&pOut.ly1, owner_linear_velocity.y);
+                        Math::Float16From32(&pOut.lz1, owner_linear_velocity.z);
+
+                        Math::Float16From32(&pOut.lx2, other_linear_velocity.x);
+                        Math::Float16From32(&pOut.ly2, other_linear_velocity.y);
+                        Math::Float16From32(&pOut.lz2, other_linear_velocity.z);
+
+                        ownerShip->m_Client.send(pOut);
+
+                        ownerHull->receiveCollisionVisual(normal, ownerLocal, damageRadiusOwner);
+                        otherHull->receiveCollisionVisual(normal, otherLocal, damageRadiusOther);
+                    }
                 }
             }
         }
@@ -315,6 +351,7 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
 		m_PlayerCamera = static_cast<GameCamera*>(map.getActiveCamera());
 	}
     body.setUserPointer1(this);
+    body.setUserPointer2(&client);
     
     m_MapKey = name;
     uint c = 1;
@@ -455,48 +492,33 @@ void Ship::updateAntiCloakScanFromPacket(const PacketMessage& packet) {
 void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     glm::vec3 normal;
     float rad, time;
-    Engine::Math::Float32From16(&rad, packet.radius);
-    Engine::Math::Float32From16(&time, packet.time);
-    Engine::Math::Float32From16(&normal.x, packet.normalX);
-    Engine::Math::Float32From16(&normal.y, packet.normalY);
-    Engine::Math::Float32From16(&normal.z, packet.normalZ);
+    Math::Float32From16(&rad, packet.radius);
+    Math::Float32From16(&time, packet.time);
+    Math::Float32From16(&normal.x, packet.normalX);
+    Math::Float32From16(&normal.y, packet.normalY);
+    Math::Float32From16(&normal.z, packet.normalZ);
     Map& map = static_cast<Map&>(entity().scene());
+    WeaponProjectile* proj = nullptr;
+
+    if (packet.PacketType == PacketType::Server_To_Client_Projectile_Cannon_Impact) {
+        proj = map.getCannonProjectile(packet.projectile_index);
+    }else if (packet.PacketType == PacketType::Server_To_Client_Projectile_Torpedo_Impact) {
+        proj = map.getTorpedoProjectile(packet.projectile_index);
+    }
     if (packet.shields) {
         auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
         if (shields) {
             const glm::vec3 local = glm::vec3(packet.impactX, packet.impactY, packet.impactZ);
-            const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
-            shields->receiveHit(normal, local, rad, time, packet.damage, shieldSide);
+            shields->receiveHit(normal, local, rad, time, packet.damage, packet.shield_side);
         }
-        if (packet.PacketType == PacketType::Server_To_Client_Projectile_Cannon_Impact) {
-            auto* proj = map.getCannonProjectile(packet.index);
-            if (proj) {
-                proj->destroy();
-            }
-        }else if (packet.PacketType == PacketType::Server_To_Client_Projectile_Torpedo_Impact) {
-            auto* proj = map.getTorpedoProjectile(packet.index);
-            if (proj) {
-                proj->destroy();
-            }
-        }
-        return;
     }else{
         auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
         if (hull) {
             hull->receiveHit(normal, glm::vec3(packet.impactX, packet.impactY, packet.impactZ), rad, time, packet.damage);
         }
-        if (packet.PacketType == PacketType::Server_To_Client_Projectile_Cannon_Impact) {
-            auto* proj = map.getCannonProjectile(packet.index);
-            if (proj) {
-                proj->destroy();
-            }
-        }else if (packet.PacketType == PacketType::Server_To_Client_Projectile_Torpedo_Impact) {
-            auto* proj = map.getTorpedoProjectile(packet.index);
-            if (proj) {
-                proj->destroy();
-            }
-        }
-        return;
+    }
+    if (proj) {
+        proj->destroy();
     }
 }
 void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
@@ -541,8 +563,14 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
     //body.setGoal(x, y, z, PHYSICS_PACKET_TIMER_LIMIT);
 }
 const bool Ship::canSeeCloak(Ship* otherShip) {
-    if (IsPlayer() || otherShip->getTeam().isAllyTeam(m_Team)) { //TODO: or is this ship an enemy but detected by anti cloak scan?
+    if (IsPlayer() || otherShip->isAlly(*this)) {
         return true;
+    }
+    auto* sensors = static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]);
+    if (sensors) {
+        if (sensors->isShipDetectedByAntiCloak(otherShip)) {
+            return true;
+        }
     }
     return false;
 }
@@ -571,7 +599,7 @@ void Ship::updateCloakFromPacket(const PacketCloakUpdate& packet) {
     if (!m_ShipSystems[ShipSystemType::CloakingDevice])
         return;
     ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(m_ShipSystems[ShipSystemType::CloakingDevice]);
-    cloak.m_CloakTimer = packet.cloakTimer;
+    Math::Float32From16(&cloak.m_CloakTimer, packet.cloakTimer);
     auto& model = *getComponent<ComponentModel>();
 
     Map& map = static_cast<Map&>(entity().scene());
@@ -588,6 +616,12 @@ void Ship::updateCloakFromPacket(const PacketCloakUpdate& packet) {
         if (packet.justTurnedOff)
             Ship::decloak(false);
     }else{
+        auto* shields = static_cast<ShipSystemShields*>(m_ShipSystems[ShipSystemType::Shields]);
+        if (shields) {
+            if (cloak.m_Active) {
+                shields->turnOffShields();
+            }
+        }
         if (cloak.m_CloakTimer < 1.0f && cloak.m_CloakTimer >= 0.0f) {
             for (unsigned int i = 0; i < model.getNumModels(); ++i) {
                 model.setModelShaderProgram(ResourceManifest::ShipShaderProgramForward, i, RenderStage::ForwardTransparentTrianglesSorted);

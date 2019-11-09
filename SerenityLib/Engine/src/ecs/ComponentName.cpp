@@ -5,26 +5,26 @@ using namespace Engine::epriv;
 using namespace std;
 
 #pragma region Component
-ComponentName::ComponentName(const Entity& _entity) : ComponentBaseClass(_entity){
-    _data = "";
+ComponentName::ComponentName(const Entity& entity) : ComponentBaseClass(entity){
+    m_Data = "";
 }
-ComponentName::ComponentName(const Entity& _entity, const string& _name) : ComponentBaseClass(_entity) {
-    _data = _name;
+ComponentName::ComponentName(const Entity& entity, const string& Name) : ComponentBaseClass(entity) {
+    m_Data = Name;
 }
-ComponentName::ComponentName(const Entity& _entity, const char* _name) : ComponentBaseClass(_entity) {
-    _data = _name;
+ComponentName::ComponentName(const Entity& entity, const char* Name) : ComponentBaseClass(entity) {
+    m_Data = Name;
 }
 ComponentName::~ComponentName() {
-    _data = "";
+    m_Data = "";
 }
 const string& ComponentName::name() const { 
-    return _data; 
+    return m_Data;
 }
 const size_t ComponentName::size() const {
-    return _data.size(); 
+    return m_Data.size();
 }
 const bool ComponentName::empty() const {
-    return _data.empty();
+    return m_Data.empty();
 }
 #pragma endregion
 

@@ -52,6 +52,7 @@ void MaterialLoader::InternalInitBase(Material& material) {
     material.internalUpdateGlobalMaterialPool(true);
     material.setDiffuseModel(DiffuseModel::Lambert);
     material.setSpecularModel(SpecularModel::GGX);
+    material.m_UpdatedThisFrame = false;
     material.setShadeless(false);
     material.setGlow(0.0f);
     material.setSmoothness(0.25f);

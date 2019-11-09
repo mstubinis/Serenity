@@ -170,7 +170,7 @@ ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
     swap(m_Forward, p_Other.m_Forward);
     swap(m_Right, p_Other.m_Right);
     swap(m_Up, p_Other.m_Up);
-    swap(owner.data, p_Other.owner.data);
+    swap(m_Owner.data, p_Other.m_Owner.data);
     swap(m_CollisionFunctor, p_Other.m_CollisionFunctor);
     swap(m_UserPointer, p_Other.m_UserPointer);
     swap(m_UserPointer1, p_Other.m_UserPointer1);
@@ -193,7 +193,7 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& p_Other) noexcept {
     swap(m_Forward, p_Other.m_Forward);
     swap(m_Right, p_Other.m_Right);
     swap(m_Up, p_Other.m_Up);
-    swap(owner.data, p_Other.owner.data);
+    swap(m_Owner.data, p_Other.m_Owner.data);
     swap(m_CollisionFunctor, p_Other.m_CollisionFunctor);
     swap(m_UserPointer, p_Other.m_UserPointer);
     swap(m_UserPointer1, p_Other.m_UserPointer1);
@@ -346,7 +346,7 @@ Collision* ComponentBody::getCollision() {
 void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, const float p_Mass) {
     auto& physicsData = *data.p;
     if (!physicsData.collision) { //TODO: clean this up, its hacky and evil. its being used on the ComponentBody_EntityAddedToSceneFunction
-        auto* modelComponent = owner.getComponent<ComponentModel>();
+        auto* modelComponent = m_Owner.getComponent<ComponentModel>();
         if (modelComponent) {
             if (p_CollisionType == CollisionType::Compound) {
                 physicsData.collision = new Collision(this, *modelComponent, p_Mass);
@@ -495,7 +495,7 @@ void ComponentBody::scale(const decimal& p_X, const decimal& p_Y, const decimal&
 		scale_.y += p_Y;
 		scale_.z += p_Z;
     }
-    auto* models = owner.getComponent<ComponentModel>();
+    auto* models = m_Owner.getComponent<ComponentModel>();
     if (models) {
         ComponentModel_Functions::CalculateRadius(*models);
     }
@@ -623,7 +623,7 @@ void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decim
 		scale.y = p_Y;
 		scale.z = p_Z;
     }
-    auto* models = owner.getComponent<ComponentModel>();
+    auto* models = m_Owner.getComponent<ComponentModel>();
     if (models) {
         epriv::ComponentModel_Functions::CalculateRadius(*models);
     }
@@ -647,14 +647,14 @@ const glm::vec3 ComponentBody::position_render() const { //theres prob a better 
     return glm::vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
 }
 glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) {
-	return Math::getScreenCoordinates(position(), *owner.scene().getActiveCamera(), p_ClampToEdge);
+	return Math::getScreenCoordinates(position(), *m_Owner.scene().getActiveCamera(), p_ClampToEdge);
 }
 ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_MinOffset) {
     ScreenBoxCoordinates ret;
     const auto& worldPos    = position();
     auto radius             = 0.0001f;
-    auto* model             = owner.getComponent<ComponentModel>();
-    auto& camera            = *owner.scene().getActiveCamera();
+    auto* model             = m_Owner.getComponent<ComponentModel>();
+    auto& camera            = *m_Owner.scene().getActiveCamera();
     const auto& center2DRes = Math::getScreenCoordinates(worldPos, camera, false);
     auto center2D           = glm::vec2(center2DRes.x, center2DRes.y);
     if (model) {

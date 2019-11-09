@@ -94,7 +94,7 @@ void ShipSystemCloakingDevice::update(const double& dt) {
         if (m_Active) {
             Map& map = static_cast<Map&>(m_Ship.entity().scene());
             Ship* playerShip = map.getPlayer();
-            if (m_Ship.canSeeCloak(playerShip)) {
+            if (m_Ship.isAlly(*playerShip) || &m_Ship == playerShip) {
                 if (m_CloakTimer > -m_MaxAlphaWhileCloaked) {
                     if (m_CloakTimer > 0.0f) {
                         m_CloakTimer -= _fdt;
@@ -133,7 +133,7 @@ void ShipSystemCloakingDevice::update(const double& dt) {
                     }
                 }
             }
-        }else{
+        }else{//if not cloaking device is active...
             if (m_CloakTimer < 1.0f) {
                 model.show();
                 m_CloakTimer += _fdt;
@@ -152,7 +152,7 @@ void ShipSystemCloakingDevice::update(const double& dt) {
             }
             m_Ship.updateCloakVisuals(1, 1, 1, glm::abs(m_CloakTimer), model);
         }
-    }else{
+    }else{//if cloak is offline...
         if (m_CloakTimer <= 0.0f) {
             ShipSystemCloakingDevice::decloak(model);
         }

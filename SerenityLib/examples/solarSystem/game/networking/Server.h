@@ -13,15 +13,33 @@
 #include <future>
 
 struct Packet;
+class  Map;
 class  Server;
 class  ServerClient;
 class  ServerClientThread;
 class  Core;
 class  GameplayMode;
 struct PacketMessage;
+struct PacketCollisionEvent;
 
 #define SERVER_CLIENT_TIMEOUT 20.0f
 #define SERVER_CLIENT_RECOVERY_TIME 60.0f
+
+//a simple data structure to coordinate ship on ship / station / whatever collisions
+class CollisionEntries final {
+    private:
+        std::unordered_map<std::string, double> m_CollisionPairs; //key = ship1.key + "|" + ship2.key, double is time left until another collision entry can be processed
+        Server& m_Server;
+    public:
+        CollisionEntries(Server&);
+        ~CollisionEntries();
+
+        void processCollision(const PacketCollisionEvent& packet, Map& map);
+
+        void cleanup();
+        void update(const double& dt);
+
+};
 
 class ServerClient final {
     friend class Server;
@@ -74,6 +92,7 @@ class Server {
     friend class ServerClient;
     friend class ServerClientThread;
     private:
+        CollisionEntries                               m_CollisionEntries;
         GameplayMode*                                  m_GameplayMode;
         Engine::Networking::SocketUDP*                 m_UdpSocket;
         sf::Mutex                                      m_mutex;

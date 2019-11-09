@@ -37,6 +37,7 @@ Core::Core() {
     //Resources::getWindow().setIcon(iconPath);
 }
 Core::~Core() {
+    ResourceManifest::destruct();
     SAFE_DELETE(m_ChosenShip);
     SAFE_DELETE(m_Client);
     SAFE_DELETE(m_Server);

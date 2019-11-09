@@ -41,7 +41,7 @@ struct KlingonPhotonTorpedoCollisionFunctor final { void operator()(ComponentBod
                     if (shields && other.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
-                            torpedoProjectile.clientToServerImpact(torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, true);
+                            torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
                             return;
                         }
                     }
@@ -50,12 +50,12 @@ struct KlingonPhotonTorpedoCollisionFunctor final { void operator()(ComponentBod
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                             if (shields->getHealthCurrent(shieldSide) > 0) {
-                                torpedoProjectile.clientToServerImpact(torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, true);
+                                torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
                                 return;
                             }
                         }
                         */
-                        torpedoProjectile.clientToServerImpact(torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, false);
+                        torpedoProjectile.clientToServerImpactHull(false, torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime);
                     }
                 }
             }

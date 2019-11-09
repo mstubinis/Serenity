@@ -36,13 +36,13 @@ void opengl::glsl::VersionConversion::convert(string& code, const unsigned int& 
         if (shaderType == ShaderType::Vertex) {
             if (ShaderHelper::sfind(code, "layout") && ShaderHelper::sfind(code, "location") && ShaderHelper::sfind(code, "=")) {
                 if (versionNumber > 130) {
-                    if (OpenGLExtension::supported(OpenGLExtension::EXT_separate_shader_objects)) {
+                    if (OpenGLExtensions::supported(OpenGLExtensions::EXT_separate_shader_objects)) {
                         ShaderHelper::insertStringAtLine(code, "#extension GL_EXT_seperate_shader_objects : enable", 1);
-                    }else if (OpenGLExtension::supported(OpenGLExtension::ARB_separate_shader_objects)) {
+                    }else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_separate_shader_objects)) {
                         ShaderHelper::insertStringAtLine(code, "#extension GL_ARB_seperate_shader_objects : enable", 1);
-                    }if (OpenGLExtension::supported(OpenGLExtension::EXT_explicit_attrib_location)) {
+                    }if (OpenGLExtensions::supported(OpenGLExtensions::EXT_explicit_attrib_location)) {
                         ShaderHelper::insertStringAtLine(code, "#extension GL_EXT_explicit_attrib_location : enable", 1);
-                    }else if (OpenGLExtension::supported(OpenGLExtension::ARB_explicit_attrib_location)) {
+                    }else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_explicit_attrib_location)) {
                         ShaderHelper::insertStringAtLine(code, "#extension GL_ARB_explicit_attrib_location : enable", 1);
                     }
                 }else{

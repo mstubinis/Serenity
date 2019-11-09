@@ -56,7 +56,8 @@ Decal::Decal(Material& material, const glm_vec3& position, const glm::vec3& hitN
     glm_quat q;
     Math::alignTo(q, hitNormal);
     body.setRotation(q);
-    body.setScale(0.2f * size, 0.04f, 0.2f * size);
+    const decimal factor = static_cast<decimal>(0.2f * size);
+    body.setScale(factor, static_cast<decimal>(0.04), factor);
 
     model.setCustomBindFunctor(Engine::epriv::DefaultDecalBindFunctor());
     model.setCustomUnbindFunctor(Engine::epriv::DefaultDecalUnbindFunctor());
@@ -77,10 +78,10 @@ void Decal::update(const double& dt) {
         m_LifetimeCurrent += fdt;
         if (m_LifetimeCurrent < m_LifetimeMax && m_LifetimeCurrent >= m_LifetimeMax - 1.0f) {
             auto& model = *getComponent<ComponentModel>();
-            auto& modelZero = model.getModel();
-            const auto& color = modelZero.color();
+            auto& instance = model.getModel();
+            const auto& color = instance.color();
             const float alpha = m_LifetimeMax - m_LifetimeCurrent;
-            modelZero.setColor(color.x, color.y, color.z, alpha);
+            instance.setColor(color.x, color.y, color.z, alpha);
         }
         if (m_LifetimeCurrent >= m_LifetimeMax) {
             m_Active = false;

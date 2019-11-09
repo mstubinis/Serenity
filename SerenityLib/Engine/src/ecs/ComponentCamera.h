@@ -14,22 +14,22 @@ class ComponentModel;
 class ComponentCamera;
 
 namespace Engine {
-namespace epriv {
-    struct ComponentCamera_UpdateFunction;
-    struct ComponentCamera_EntityAddedToSceneFunction;
-    struct ComponentCamera_ComponentAddedToEntityFunction;
-    struct ComponentCamera_SceneEnteredFunction;
-    struct ComponentCamera_SceneLeftFunction;
+    namespace epriv {
+        struct ComponentCamera_UpdateFunction;
+        struct ComponentCamera_EntityAddedToSceneFunction;
+        struct ComponentCamera_ComponentAddedToEntityFunction;
+        struct ComponentCamera_SceneEnteredFunction;
+        struct ComponentCamera_SceneLeftFunction;
 
-    struct ComponentCamera_Functions final {
-        static void            RebuildProjectionMatrix(ComponentCamera& componentCamera);
-        static const glm::mat4 GetViewNoTranslation(Camera& camera);
-        static const glm::mat4 GetViewInverseNoTranslation(Camera& camera);
-        static const glm::mat4 GetViewProjectionNoTranslation(Camera& camera);
-        static const glm::mat4 GetViewProjectionInverseNoTranslation(Camera& camera);
-        static const glm::vec3 GetViewVectorNoTranslation(Camera& camera);
+        struct ComponentCamera_Functions final {
+            static void            RebuildProjectionMatrix(ComponentCamera& componentCamera);
+            static const glm::mat4 GetViewNoTranslation(Camera& camera);
+            static const glm::mat4 GetViewInverseNoTranslation(Camera& camera);
+            static const glm::mat4 GetViewProjectionNoTranslation(Camera& camera);
+            static const glm::mat4 GetViewProjectionInverseNoTranslation(Camera& camera);
+            static const glm::vec3 GetViewVectorNoTranslation(Camera& camera);
+        };
     };
-};
 };
 
 class ComponentCamera : public ComponentBaseClass {
@@ -46,18 +46,18 @@ class ComponentCamera : public ComponentBaseClass {
 			Perspective,
 			Orthographic, 
 		};
-        Type m_Type;
-        glm_vec3 m_Eye, m_Up, m_Forward;
-        glm::mat4 m_ViewMatrix, m_ViewMatrixNoTranslation, m_ProjectionMatrix;
-        glm::vec4 m_FrustumPlanes[6];
-        float m_NearPlane, m_FarPlane, m_Bottom, m_Top;
+        Type        m_Type;
+        glm_vec3    m_Eye, m_Up, m_Forward;
+        glm::mat4   m_ViewMatrix, m_ViewMatrixNoTranslation, m_ProjectionMatrix;
+        glm::vec4   m_FrustumPlanes[6];
+        float       m_NearPlane, m_FarPlane, m_Bottom, m_Top;
         union { 
-			float m_Angle;
-			float m_Left; 
+			float   m_Angle;
+			float   m_Left; 
 		};
         union { 
-			float m_AspectRatio;
-			float m_Right; 
+			float   m_AspectRatio;
+			float   m_Right; 
 		};
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS

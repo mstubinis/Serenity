@@ -29,11 +29,19 @@
 #include <boost/algorithm/string.hpp>
 
 #include "../ships/shipSystems/ShipSystemWeapons.h"
+#include "../ships/shipSystems/ShipSystemShields.h"
+#include "../ships/shipSystems/ShipSystemSensors.h"
+#include "../ships/shipSystems/ShipSystemHull.h"
 #include "../weapons/Weapons.h"
 #include "../ships/Ships.h"
 
 #include "../teams/Team.h"
 #include "../modes/GameplayMode.h"
+
+#include <core/engine/renderer/ParticleEmitter.h>
+#include <core/engine/renderer/ParticleEmissionProperties.h>
+
+#include "../particles/Fire.h"
 
 #include <iostream>
 
@@ -85,6 +93,7 @@ void Client::internalInit(const ushort& server_port, const string& server_ipAddr
     m_Mapname                 = "";
     m_Validated               = false;
     m_PingTime                = 0.0;
+    m_PingTimeHealthUpdate    = 0.0;
     m_InitialConnectionThread = nullptr;
     m_IsCurrentlyConnecting   = false;
 }
@@ -184,57 +193,74 @@ void Client::update(Client* _client, const double& dt) {
     auto& client = *_client;
     client.m_PingTime += dt;
 
-    if (client.m_PingTime > 3.0 && client.m_Core.gameState() != GameState::Game) {
-        //hacky way of not d/cing outside the game
-        Packet pOut;
-        pOut.PacketType = PacketType::Client_To_Server_Periodic_Ping;
-        client.send(pOut);
-        client.m_PingTime = 0.0;
-    }else if (client.m_PingTime > PHYSICS_PACKET_TIMER_LIMIT && client.m_Core.gameState() == GameState::Game) {
-        //keep pinging the server, sending your ship physics info
-        auto& map = *static_cast<Map*>(Resources::getScene(client.m_Mapname));
-        auto& playerShip = *map.getPlayer();
 
-        Anchor* finalAnchor = map.getRootAnchor();
-        const auto& list = map.getClosestAnchor();
-        for (auto& closest : list) {
-            finalAnchor = finalAnchor->getChildren().at(closest);
+    if (client.m_Core.gameState() != GameState::Game) {
+        if (client.m_PingTime > 3.0) {
+            //hacky way of not d/cing outside the game
+            Packet pOut;
+            pOut.PacketType = PacketType::Client_To_Server_Periodic_Ping;
+            client.send(pOut);
+            client.m_PingTime = 0.0;
         }
-        PacketPhysicsUpdate p(playerShip, map, finalAnchor, list, client.m_Username);
-        p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
-        client.send_udp(p);
+    }else{
+        client.m_PingTimeHealthUpdate += dt;
+        if (client.m_PingTimeHealthUpdate > PACKET_HEALTH_UPDATE_FREQUENCY) {
+            auto& map = *static_cast<Map*>(Resources::getScene(client.m_Mapname));
+            auto& player = *map.getPlayer();
 
-        auto playerPos = playerShip.getPosition();
-        auto nearestAnchorPos = finalAnchor->getPosition();
-        double distFromMeToNearestAnchor = static_cast<double>(glm::distance2(nearestAnchorPos, playerPos));
-            
-        if (distFromMeToNearestAnchor > DISTANCE_CHECK_NEAREST_ANCHOR) {
-            for (auto& otherShips : map.getShips()) {
-                if (otherShips.first != playerShip.getName()) {
-                    auto otherPlayerPos = otherShips.second->getPosition();
-                    double distFromMeToOtherPlayerSq = static_cast<double>(glm::distance2(otherPlayerPos, playerPos));
-                    const auto calc = (distFromMeToNearestAnchor - DISTANCE_CHECK_NEAREST_ANCHOR) * 0.5f;
-                    if (distFromMeToOtherPlayerSq < glm::max(calc, DISTANCE_CHECK_NEAREST_OTHER_PLAYER)) {
-                        const glm::vec3 midpoint = Math::midpoint(otherPlayerPos, playerPos);
+            //health status
+            PacketHealthUpdate pOut2(player);
+            pOut2.PacketType = PacketType::Client_To_Server_Ship_Health_Update;
+            client.send(pOut2);
 
-                        PacketMessage pOut;
-                        pOut.PacketType = PacketType::Client_To_Server_Request_Anchor_Creation;
-                        pOut.r    = midpoint.x - nearestAnchorPos.x;
-                        pOut.g    = midpoint.y - nearestAnchorPos.y;
-                        pOut.b    = midpoint.z - nearestAnchorPos.z;
-                        pOut.data = "";
-                        pOut.data += to_string(list.size());
-                        for (auto& closest : list) {
-                            pOut.data += "," + closest;
+            client.m_PingTimeHealthUpdate = 0.0;
+        }
+        if (client.m_PingTime > PHYSICS_PACKET_TIMER_LIMIT) {
+            //keep pinging the server, sending your ship physics info
+            auto& map = *static_cast<Map*>(Resources::getScene(client.m_Mapname));
+            auto& playerShip = *map.getPlayer();
+
+            Anchor* finalAnchor = map.getRootAnchor();
+            const auto& list = map.getClosestAnchor();
+            for (auto& closest : list) {
+                finalAnchor = finalAnchor->getChildren().at(closest);
+            }
+            PacketPhysicsUpdate p(playerShip, map, finalAnchor, list, client.m_Username);
+            p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
+            client.send_udp(p);
+
+            auto playerPos = playerShip.getPosition();
+            auto nearestAnchorPos = finalAnchor->getPosition();
+            double distFromMeToNearestAnchor = static_cast<double>(glm::distance2(nearestAnchorPos, playerPos));
+
+            if (distFromMeToNearestAnchor > DISTANCE_CHECK_NEAREST_ANCHOR) {
+                for (auto& otherShips : map.getShips()) {
+                    if (otherShips.first != playerShip.getName()) {
+                        auto otherPlayerPos = otherShips.second->getPosition();
+                        double distFromMeToOtherPlayerSq = static_cast<double>(glm::distance2(otherPlayerPos, playerPos));
+                        const auto calc = (distFromMeToNearestAnchor - DISTANCE_CHECK_NEAREST_ANCHOR) * 0.5f;
+                        if (distFromMeToOtherPlayerSq < glm::max(calc, DISTANCE_CHECK_NEAREST_OTHER_PLAYER)) {
+                            const glm::vec3 midpoint = Math::midpoint(otherPlayerPos, playerPos);
+
+                            PacketMessage pOut;
+                            pOut.PacketType = PacketType::Client_To_Server_Request_Anchor_Creation;
+                            pOut.r = midpoint.x - nearestAnchorPos.x;
+                            pOut.g = midpoint.y - nearestAnchorPos.y;
+                            pOut.b = midpoint.z - nearestAnchorPos.z;
+                            pOut.data = "";
+                            pOut.data += to_string(list.size());
+                            for (auto& closest : list) {
+                                pOut.data += "," + closest;
+                            }
+                            //we want to create an anchor at r,g,b (the midpoint between two nearby ships), we send the nearest valid anchor as a reference
+                            client.send(pOut);
+                            break;
                         }
-                        //we want to create an anchor at r,g,b (the midpoint between two nearby ships), we send the nearest valid anchor as a reference
-                        client.send(pOut);
-                        break;
                     }
                 }
             }
+            client.m_PingTime = 0.0;
         }
-        client.m_PingTime = 0.0;
     }
     client.onReceiveUDP();
     client.onReceiveTCP();
@@ -243,26 +269,103 @@ void Client::update(Client* _client, const double& dt) {
 void Client::on_receive_physics_update(Packet* basePacket, Map& map) {
     if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
         PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(basePacket);
-
         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+        auto& shipclass             = info[0];
+        auto& shipkey               = info[1];
+        auto& playername            = info[2];
         TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(info[3]));
-        auto& shipkey = info[1];
-        auto& shipclass = info[0];
-        auto& playername = info[2];
-        auto& ships = map.getShips();
-
+        auto& ships                 = map.getShips();
         Ship* ship = nullptr;
         if (ships.size() == 0 || !ships.count(shipkey)) {
             auto spawnPosition = map.getSpawnAnchor()->getPosition();
-            auto x = Helper::GetRandomFloatFromTo(-400, 400);
-            auto y = Helper::GetRandomFloatFromTo(-400, 400);
-            auto z = Helper::GetRandomFloatFromTo(-400, 400);
+            auto x = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
+            auto y = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
+            auto z = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
             auto randOffsetForSafety = glm_vec3(x, y, z);
             ship = map.createShip(AIType::Player_Other, *m_GameplayMode->getTeams().at(teamNumber), *this, shipclass, playername, spawnPosition + randOffsetForSafety);
+            if (ship) {
+                //hey a new ship entered my map, i want info about it!
+                //if (map.getShipsPlayerControlled().size() >= 2) {
+                PacketMessage pOut;
+                pOut.PacketType = PacketType::Client_To_Server_Request_Ship_Current_Info;
+                pOut.name = map.getPlayer()->getMapKey();
+                pOut.data = ship->getMapKey();
+                pOut.data += "," + playername;
+                send(pOut);
+                //}
+            }
         }else{
             ship = ships.at(shipkey);
         }
         ship->updatePhysicsFromPacket(pI, map, info);
+    }
+}
+void Client::on_receive_client_wants_my_ship_info(Packet* basePacket, Map& map) {
+    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
+    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
+    auto* player = map.getPlayer();
+    //auto* source_ship = map.getShips().at(pI.name);
+    //const auto& source_ship_mapkey = source_ship->getMapKey();
+
+    if (player) {
+        //TODO: add ALOT more here
+
+        //health status
+        PacketHealthUpdate pOut2(*player);
+        pOut2.PacketType = PacketType::Client_To_Server_Ship_Health_Update;
+        send(pOut2);
+
+        //cloak status
+        PacketCloakUpdate pOut1(*player);
+        pOut1.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
+        send(pOut1);
+
+        //target status
+        player->setTarget(player->getTarget(), true); //sends target packet info to the new guy
+
+        //anti cloak scan status
+        auto* sensors = static_cast<ShipSystemSensors*>(player->getShipSystem(ShipSystemType::Sensors));
+        if (sensors) {
+            sensors->sendAntiCloakScanStatusPacket();
+        }
+    }
+}
+void Client::on_receive_collision_event(Packet* basePacket, Map& map) {
+    PacketCollisionEvent& pI = *static_cast<PacketCollisionEvent*>(basePacket);
+    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
+    Ship* ship1 = map.getShips().at(list[0]);
+    Ship* ship2 = map.getShips().at(list[1]);
+    if (ship1 && ship2) {
+        auto* hull1 = static_cast<ShipSystemHull*>(ship1->getShipSystem(ShipSystemType::Hull));
+        auto* hull2 = static_cast<ShipSystemHull*>(ship2->getShipSystem(ShipSystemType::Hull));
+        hull1->receiveCollisionDamage(pI.damage1);
+        hull2->receiveCollisionDamage(pI.damage2);
+
+        auto& body1 = *ship1->getComponent<ComponentBody>();
+        auto& body2 = *ship2->getComponent<ComponentBody>();
+
+        
+        glm::vec3 av1, av2, lv1, lv2;
+        Math::Float32From16(&av1.x, pI.ax1);
+        Math::Float32From16(&av1.y, pI.ay1);
+        Math::Float32From16(&av1.z, pI.az1);
+
+        Math::Float32From16(&av2.x, pI.ax2);
+        Math::Float32From16(&av2.y, pI.ay2);
+        Math::Float32From16(&av2.z, pI.az2);
+
+        Math::Float32From16(&lv1.x, pI.lx1);
+        Math::Float32From16(&lv1.y, pI.ly1);
+        Math::Float32From16(&lv1.z, pI.lz1);
+
+        Math::Float32From16(&lv2.x, pI.lx2);
+        Math::Float32From16(&lv2.y, pI.ly2);
+        Math::Float32From16(&lv2.z, pI.lz2);
+
+        body1.setLinearVelocity(lv1);
+        body1.setAngularVelocity(av1);
+        body2.setLinearVelocity(lv2);
+        body2.setAngularVelocity(av2);
     }
 }
 
@@ -387,8 +490,8 @@ void Client::on_receive_create_deep_space_anchor(Packet* basePacket, Map& map) {
 }
 void Client::on_receive_health_update(Packet* basePacket, Map& map) {
     PacketHealthUpdate& pI = *static_cast<PacketHealthUpdate*>(basePacket);
-    auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-    auto& shipkey = info[1];
+    auto  info      = Helper::SeparateStringByCharacter(pI.data, ',');
+    auto& shipkey   = info[1];
     auto& shipclass = info[0];
     if (map.hasShip(shipkey)) {
         auto& ships = map.getShips();
@@ -399,8 +502,8 @@ void Client::on_receive_health_update(Packet* basePacket, Map& map) {
 void Client::on_receive_cloak_update(Packet* basePacket, Map& map) {
     PacketCloakUpdate& pI = *static_cast<PacketCloakUpdate*>(basePacket);
     auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-    auto& shipkey = info[1];
     auto& shipclass = info[0];
+    auto& shipkey   = info[1];
     if (map.hasShip(shipkey)) {
         auto& ships = map.getShips();
         Ship& ship = *ships.at(shipkey);
@@ -414,29 +517,8 @@ void Client::on_receive_new_client_entered_map(Packet* basePacket) {
     Map& map = *static_cast<Map*>(Resources::getScene(info[1]));
     auto spawn = map.getSpawnAnchor()->getPosition();
     Ship* ship = map.createShip(AIType::Player_Other, *m_GameplayMode->getTeams().at(teamNumber), *this, info[0], pI.name, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z));
-    if (ship) { //if the ship was successfully added
-        //send the new guy several of our statuses
-        auto player = map.getPlayer();
-        const auto mapkey = ship->getMapKey();
-        if (player) {
-            //cloak status
-            PacketCloakUpdate pOut1(*player);
-            pOut1.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
-            pOut1.data += ("," + mapkey);
-            send(pOut1);
-
-            //target status
-            player->setTarget(player->getTarget(), true); //sends target packet info to the new guy
-
-            //health status
-            PacketHealthUpdate pOut2(*player);
-            pOut2.PacketType = PacketType::Client_To_Server_Ship_Health_Update;
-            pOut1.data += ("," + mapkey);
-            send(pOut2);
-        }
-    }
 }
-void Client::on_receive_new_client_approve_map_entry(Packet* basePacket, Menu& menu) {
+void Client::on_receive_server_approve_map_entry(Packet* basePacket, Menu& menu) {
     //ok the server let me in, let me tell the server i successfully went in
     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
 
@@ -450,8 +532,8 @@ void Client::on_receive_new_client_approve_map_entry(Packet* basePacket, Menu& m
     Map& map = *static_cast<Map*>(Resources::getScene(info[1]));
 
     auto dist = Helper::GetRandomFloatFromTo(200, 250);
-    auto sin = Helper::GetRandomFloatFromTo(0, 2 * 3.14159f);
-    auto cos = Helper::GetRandomFloatFromTo(0, 2 * 3.14159f);
+    auto sin  = Helper::GetRandomFloatFromTo(0, 2 * 3.14159f);
+    auto cos  = Helper::GetRandomFloatFromTo(0, 2 * 3.14159f);
 
     auto orientation = glm_quat(1.0f, 0.0f, 0.0f, 0.0f);
     Math::rotate(orientation, sin, cos, 0.0f);
@@ -466,6 +548,17 @@ void Client::on_receive_new_client_approve_map_entry(Packet* basePacket, Menu& m
 
     Math::alignTo(orientation, playerBody.position() - spawn);
     playerBody.setRotation(orientation);
+
+    glm::vec2 pos;
+    for (size_t i = 0; i < 10; ++i) {
+        for (size_t j = 0; j < 10; ++j) {
+            pos = glm::vec2(i, j);
+
+            ParticleEmitter e(*Fire::m_Properties, map, 160);
+            e.getComponent<ComponentBody>()->setPosition(playerBody.position() + glm_vec3(pos.x, 0, pos.y));
+            map.addParticleEmitter(e);
+        }
+    }
 
     PacketMessage pOut(pI);
     pOut.PacketType = PacketType::Client_To_Server_Successfully_Entered_Map;
@@ -613,9 +706,14 @@ void Client::onReceiveTCP() {
             Menu& menu = *m_Core.m_Menu;
             Map& map = *static_cast<Map*>(Resources::getScene(m_Mapname));
             switch (basePacket->PacketType) {
-                //on_receive_anti_cloak_status
-
-                case PacketType::Client_To_Server_Anti_Cloak_Status: {
+                case PacketType::Server_To_Client_Request_Ship_Current_Info: {
+                    on_receive_client_wants_my_ship_info(basePacket, map);
+                    break;
+                }
+                case PacketType::Server_To_Client_Collision_Event: {
+                    on_receive_collision_event(basePacket, map);
+                    break;
+                }case PacketType::Server_To_Client_Anti_Cloak_Status: {
                     on_receive_anti_cloak_status(basePacket, map);
                     break;
                 }case PacketType::Server_To_Client_Request_GameplayMode: {
@@ -658,7 +756,7 @@ void Client::onReceiveTCP() {
                     on_receive_new_client_entered_map(basePacket);
                     break;
                 }case PacketType::Server_To_Client_Approve_Map_Entry: {
-                    on_receive_new_client_approve_map_entry(basePacket, menu);
+                    on_receive_server_approve_map_entry(basePacket, menu);
                     break;
                 }case PacketType::Server_To_Client_Reject_Map_Entry: {
                     break;

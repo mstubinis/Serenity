@@ -21,6 +21,7 @@ namespace Engine{
         struct DefaultMaterialUnbindFunctor;
         struct InternalMaterialPublicInterface;
         struct InternalMaterialRequestPublicInterface;
+        struct InternalScenePublicInterface;
         struct MaterialLoader;
         class  RenderManager;
     };
@@ -29,6 +30,7 @@ namespace Engine{
 class Material final: public BindableResource{
     friend struct Engine::epriv::DefaultMaterialBindFunctor;
     friend struct Engine::epriv::DefaultMaterialUnbindFunctor;
+    friend struct Engine::epriv::InternalScenePublicInterface;
     friend struct Engine::epriv::InternalMaterialRequestPublicInterface;
     friend struct Engine::epriv::InternalMaterialPublicInterface;
     friend struct Engine::epriv::MaterialLoader;
@@ -41,6 +43,7 @@ class Material final: public BindableResource{
         uint                              m_DiffuseModel;
         uint                              m_SpecularModel;
         bool                              m_Shadeless;
+        bool                              m_UpdatedThisFrame;
         glm::vec3                         m_F0Color;
         float                             m_BaseGlow;
         float                             m_BaseAO;

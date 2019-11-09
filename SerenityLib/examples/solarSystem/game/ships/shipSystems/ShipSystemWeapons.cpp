@@ -19,7 +19,7 @@ using namespace std;
 
 #define PREDICTED_PHYSICS_CONSTANT 0.11111111f
 
-const decimal ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm_vec3& pos, const glm_vec3& vel, const float& s) {
+const decimal ShipSystemWeapons::calculate_quadratic_time_till_hit(const glm_vec3& pos, const glm_vec3& vel, const decimal& s) {
     auto a = s * s - glm::dot(vel, vel);
     auto b = glm::dot(pos, vel);
     auto c = glm::dot(pos, pos);
@@ -108,8 +108,8 @@ const decimal ShipWeapon::getDistanceSquared(EntityWrapper* target) {
 }
 
 
-PrimaryWeaponCannonProjectile::PrimaryWeaponCannonProjectile(Map& _map, const glm_vec3& position, const glm_vec3& forward, const int index):map(_map) {
-    entity           = _map.createEntity();
+WeaponProjectile::WeaponProjectile(Map& map_, const int index) : map(map_) {
+    entity           = map_.createEntity();
     currentTime      = 0.0f;
     maxTime          = 2.5f;
     active           = false;
@@ -117,10 +117,10 @@ PrimaryWeaponCannonProjectile::PrimaryWeaponCannonProjectile(Map& _map, const gl
     projectile_index = index;
     light            = nullptr;
 }
-PrimaryWeaponCannonProjectile::~PrimaryWeaponCannonProjectile() {
+WeaponProjectile::~WeaponProjectile() {
 
 }
-void PrimaryWeaponCannonProjectile::update(const double& dt) {
+void WeaponProjectile::update(const double& dt) {
     if (active) {
         const float fdt = static_cast<float>(dt);
         currentTime += fdt;
@@ -133,28 +133,53 @@ void PrimaryWeaponCannonProjectile::update(const double& dt) {
         }
     }
 }
-void PrimaryWeaponCannonProjectile::destroy() {
+void WeaponProjectile::destroy() {
     if (!destroyed) {
         entity.destroy();
         if (light) {
             light->destroy();
             SAFE_DELETE(light);
         }
-        map.removeCannonProjectile(projectile_index);
         active = false;
         destroyed = true;
     }
 }
-void PrimaryWeaponCannonProjectile::clientToServerImpact(Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const bool& shields) {
+void WeaponProjectile::clientToServerImpactShields(const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const unsigned int& shield_face) {
     PacketProjectileImpact packet;
-    packet.PacketType = PacketType::Client_To_Server_Projectile_Cannon_Impact;
-    packet.damage     = damage;
-    packet.impactX    = impactLocalPosition.x;
-    packet.impactY    = impactLocalPosition.y;
-    packet.impactZ    = impactLocalPosition.z;
-    packet.shields    = shields;
-    packet.data       = shipHit.getName() + ",";
-    packet.index      = projectile_index;
+    if(cannon)
+        packet.PacketType = PacketType::Client_To_Server_Projectile_Cannon_Impact;
+    else
+        packet.PacketType = PacketType::Client_To_Server_Projectile_Torpedo_Impact;
+    packet.damage = damage;
+    packet.impactX = impactLocalPosition.x;
+    packet.impactY = impactLocalPosition.y;
+    packet.impactZ = impactLocalPosition.z;
+    packet.shields = true;
+    packet.shield_side = shield_face;
+    packet.data = shipHit.getName() + ",";
+    packet.projectile_index = projectile_index;
+    Math::Float16From32(&packet.time, time);
+    Math::Float16From32(&packet.radius, impactRadius);
+    Math::Float16From32(&packet.normalX, impactNormal.x);
+    Math::Float16From32(&packet.normalY, impactNormal.y);
+    Math::Float16From32(&packet.normalZ, impactNormal.z);
+    active = false;
+    client.send(packet);
+}
+void WeaponProjectile::clientToServerImpactHull(const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time) {
+    PacketProjectileImpact packet;
+    if (cannon)
+        packet.PacketType = PacketType::Client_To_Server_Projectile_Cannon_Impact;
+    else
+        packet.PacketType = PacketType::Client_To_Server_Projectile_Torpedo_Impact;
+    packet.damage = damage;
+    packet.impactX = impactLocalPosition.x;
+    packet.impactY = impactLocalPosition.y;
+    packet.impactZ = impactLocalPosition.z;
+    packet.shields = false;
+    packet.shield_side = -1;
+    packet.data = shipHit.getName() + ",";
+    packet.projectile_index = projectile_index;
     Math::Float16From32(&packet.time, time);
     Math::Float16From32(&packet.radius, impactRadius);
     Math::Float16From32(&packet.normalX, impactNormal.x);
@@ -164,6 +189,15 @@ void PrimaryWeaponCannonProjectile::clientToServerImpact(Client& client, Ship& s
     client.send(packet);
 }
 
+PrimaryWeaponCannonProjectile::PrimaryWeaponCannonProjectile(Map& _map, const glm_vec3& position, const glm_vec3& forward, const int index) : WeaponProjectile(_map, index) {
+}
+PrimaryWeaponCannonProjectile::~PrimaryWeaponCannonProjectile() {
+
+}
+void PrimaryWeaponCannonProjectile::destroy() {
+    WeaponProjectile::destroy();
+    map.removeCannonProjectile(projectile_index);
+}
 
 PrimaryWeaponCannon::PrimaryWeaponCannon(Map& map, WeaponType::Type _type, Ship& _ship,const glm_vec3& _pos,const glm_vec3& _fwd,const float& _arc,const uint& _maxCharges,const float& _dmg,const float& _rechargePerRound,const float& _impactRad,const float& _impactTime, const float& _travelSpeed, const float& _volume, const unsigned int& _modelIndex) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargePerRound, _modelIndex){
     damage                   = _dmg;
@@ -491,44 +525,19 @@ void SecondaryWeaponTorpedo::update(const double& dt) {
         }
     }
 }
-SecondaryWeaponTorpedoProjectile::SecondaryWeaponTorpedoProjectile(Map& _map, const glm_vec3& position, const glm_vec3& forward, const int index) :map(_map) {
-    entity             = _map.createEntity();
-    currentTime        = 0.0f;
+
+SecondaryWeaponTorpedoProjectile::SecondaryWeaponTorpedoProjectile(Map& _map, const glm_vec3& position, const glm_vec3& forward, const int index) : WeaponProjectile(_map, index) {
     maxTime            = 30.5f;
-    hasLock            = false;
     target             = nullptr;
-    light              = nullptr;
     rotationAngleSpeed = 0.0f;
     active             = true;
-    destroyed          = false;
-    projectile_index   = index;
+    hasLock            = false;
 }
 SecondaryWeaponTorpedoProjectile::~SecondaryWeaponTorpedoProjectile() {
-    active = false;
-}
-void SecondaryWeaponTorpedoProjectile::clientToServerImpact(Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const bool& shields) {
-    PacketProjectileImpact packet;
-    packet.PacketType = PacketType::Client_To_Server_Projectile_Torpedo_Impact;
-    packet.damage     = damage;
-    packet.impactX    = impactLocalPosition.x;
-    packet.impactY    = impactLocalPosition.y;
-    packet.impactZ    = impactLocalPosition.z;
-    packet.shields    = shields;
-    packet.index      = projectile_index;
-    packet.data = shipHit.getName() + ",";
-    Math::Float16From32(&packet.time, time);
-    Math::Float16From32(&packet.radius, impactRadius);
-    Math::Float16From32(&packet.normalX, impactNormal.x);
-    Math::Float16From32(&packet.normalY, impactNormal.y);
-    Math::Float16From32(&packet.normalZ, impactNormal.z);
-    active = false;
-    client.send(packet);
+    //active = false;
 }
 void SecondaryWeaponTorpedoProjectile::update(const double& dt) {
     if (active) {
-        const float fdt = static_cast<float>(dt);
-        currentTime += fdt;
-
         auto& glowModel = *entity.getComponent<ComponentModel>();
         auto& body = *entity.getComponent<ComponentBody>();
         const auto glowBodyPos = glm_vec3(body.position_render());
@@ -541,27 +550,12 @@ void SecondaryWeaponTorpedoProjectile::update(const double& dt) {
         body.setRotation(activeCam->getOrientation());
         glowModel.getModel(1).setPosition(vec);
 
-        if (light) {
-            auto& lightBody = *light->getComponent<ComponentBody>();
-            lightBody.setPosition(glowBodyPos);
-        }
-
-        if (currentTime >= maxTime) {
-            destroy();
-        }
     }
+    WeaponProjectile::update(dt);
 }
 void SecondaryWeaponTorpedoProjectile::destroy() {
-    if (!destroyed) {
-        entity.destroy();
-        if (light) {
-            light->destroy();
-            SAFE_DELETE(light);
-        }
-        map.removeTorpedoProjectile(projectile_index);
-        active = false;
-        destroyed = true;
-    }
+    WeaponProjectile::destroy();
+    map.removeTorpedoProjectile(projectile_index);
 }
 #pragma endregion
 

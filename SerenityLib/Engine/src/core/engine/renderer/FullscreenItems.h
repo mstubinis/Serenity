@@ -16,7 +16,6 @@ namespace epriv{
         glm::vec3 position;
         glm::vec2 uv;
     };
-
     class FullscreenTriangle final: public EventObserver{
         private:
             std::vector<ushort>                     m_Indices;
@@ -35,10 +34,10 @@ namespace epriv{
     };
     class FullscreenQuad final: public EventObserver{
         private:
-            std::vector<ushort> m_Indices;
-            std::vector<MeshVertexDataFullscreen> m_Vertices;
-            std::vector<GLuint> m_Buffers;
-            GLuint m_VAO;
+            std::vector<ushort>                     m_Indices;
+            std::vector<MeshVertexDataFullscreen>   m_Vertices;
+            std::vector<GLuint>                     m_Buffers;
+            GLuint                                  m_VAO;
 
             void bindToGPU();
             void buildVAO();

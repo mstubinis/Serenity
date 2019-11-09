@@ -19,11 +19,10 @@ class ShipSystemHull final : public ShipSystem {
         float           m_RechargeAmount;
         float           m_RechargeRate;
         float           m_RechargeTimer;
-        float           m_CollisionTimer;
 
         void applyDamageDecal(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const bool forceHullFire = false);
     public:
-        ShipSystemHull(Ship&, Map&, const float health);
+        ShipSystemHull(Ship&, Map&, const float health, const float recharge_amount = 50.0f, const float recharge_rate = 5.0f);
         ~ShipSystemHull();
 
         Entity getEntity();
@@ -31,7 +30,8 @@ class ShipSystemHull final : public ShipSystem {
         void destroy();
 
         void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const float damage, const bool forceHullFire = false, const bool paint = true);
-        void receiveCollision(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float damage);
+        void receiveCollisionDamage(const float damage);
+        void receiveCollisionVisual(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius);
 
         const float getHealthCurrent() const;
         const float getHealthMax() const;

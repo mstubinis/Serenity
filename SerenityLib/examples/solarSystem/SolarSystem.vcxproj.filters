@@ -184,6 +184,12 @@
     <Filter Include="Source Files\Game\Networking">
       <UniqueIdentifier>{4445c16d-5c02-4df2-8a08-40e3a212770c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Particles">
+      <UniqueIdentifier>{ba45c06e-cdae-47d2-8526-a827ba1907ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Particles">
+      <UniqueIdentifier>{c75f8cb2-b378-427a-b412-ce1e335a8dcc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -420,6 +426,9 @@
     <ClInclude Include="game\hud\TargetRedicule.h">
       <Filter>Header Files\Game\HUD</Filter>
     </ClInclude>
+    <ClInclude Include="game\particles\Fire.h">
+      <Filter>Header Files\Game\Particles</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -637,6 +646,9 @@
     </ClCompile>
     <ClCompile Include="game\hud\TargetRedicule.cpp">
       <Filter>Source Files\Game\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="game\particles\Fire.cpp">
+      <Filter>Source Files\Game\Particles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

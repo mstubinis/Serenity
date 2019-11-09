@@ -14,7 +14,7 @@ template<typename T> class Freelist {
         Freelist() {
             m_Size = 0;
         }
-        Freelist(const unsigned int _capacity) {
+        Freelist(const size_t _capacity) {
             initialize(_capacity);
         }
         ~Freelist() {

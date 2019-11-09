@@ -18,13 +18,13 @@ using namespace std;
 //TODO: profile std::execution::par_unseq compared to regular execution, the overhead to set up par_unseq might be more trouble than it's worth for these, unlike in the mesh triangle sorter
 
 
-RenderPipeline::RenderPipeline(ShaderProgram& _shaderProgram) :shaderProgram(_shaderProgram) {
+RenderGraph::RenderGraph(ShaderProgram& _shaderProgram) :shaderProgram(_shaderProgram) {
 }
-RenderPipeline::~RenderPipeline() {
+RenderGraph::~RenderGraph() {
     SAFE_DELETE_VECTOR(materialNodes);
 }
 //TODO: correct this
-void RenderPipeline::sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
+void RenderGraph::sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
     const auto& lambda_sorter = [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
         auto& lhsParent = lhs->instance->parent();
         auto& rhsParent = rhs->instance->parent();
@@ -58,7 +58,7 @@ void RenderPipeline::sort_bruteforce(Camera& camera, const SortingMode::Mode sor
     };
     std::sort( /*std::execution::par_unseq,*/ instancesTotal.begin(), instancesTotal.end(), lambda_sorter );
 }
-void RenderPipeline::sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
+void RenderGraph::sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
     const auto& lambda_sorter = [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
         auto& lhsInstance = *lhs->instance;
         auto& rhsInstance = *rhs->instance;
@@ -80,7 +80,7 @@ void RenderPipeline::sort_cheap_bruteforce(Camera& camera, const SortingMode::Mo
     std::sort( /*std::execution::par_unseq,*/ instancesTotal.begin(), instancesTotal.end(), lambda_sorter );
 }
 
-void RenderPipeline::sort_cheap(Camera& camera, const SortingMode::Mode sortingMode) {
+void RenderGraph::sort_cheap(Camera& camera, const SortingMode::Mode sortingMode) {
 #ifndef _DEBUG
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
@@ -111,7 +111,7 @@ void RenderPipeline::sort_cheap(Camera& camera, const SortingMode::Mode sortingM
 #endif
 }
 //TODO: correct this
-void RenderPipeline::sort(Camera& camera, const SortingMode::Mode sortingMode) {
+void RenderGraph::sort(Camera& camera, const SortingMode::Mode sortingMode) {
 #ifndef _DEBUG
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
@@ -154,7 +154,7 @@ void RenderPipeline::sort(Camera& camera, const SortingMode::Mode sortingMode) {
     }
 #endif
 }
-void RenderPipeline::clean(const uint entityData) {
+void RenderGraph::clean(const uint entityData) {
     vector<Engine::epriv::InstanceNode*> newNodesTotal;
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
@@ -174,12 +174,8 @@ void RenderPipeline::clean(const uint entityData) {
     instancesTotal.clear();
     std::move(newNodesTotal.begin(), newNodesTotal.end(), std::back_inserter(instancesTotal));
 }
-void RenderPipeline::cpu_execute(Viewport& viewport, Camera& camera, const double& dt) {
+void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Camera& camera) {
     //sf::Clock c;
-    for (auto& materialNode : materialNodes) {
-        auto& _material = *materialNode->material;
-        _material.update(dt);
-    }  
     auto lambda = [&](vector<epriv::InstanceNode*>& vector) {
         for (auto& instanceNode : vector) {
             auto& _modelInstance = *instanceNode->instance;
@@ -213,8 +209,6 @@ void RenderPipeline::cpu_execute(Viewport& viewport, Camera& camera, const doubl
             }
         }
     };
-
-
     lambda(instancesTotal);
     //this block is for multi-threading this section of code
     //auto vec = epriv::threading::splitVector(instancesTotal);
@@ -224,7 +218,7 @@ void RenderPipeline::cpu_execute(Viewport& viewport, Camera& camera, const doubl
     //epriv::threading::waitForAll();
     //std::cout << c.restart().asMicroseconds() << std::endl;
 }
-void RenderPipeline::render(Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
+void RenderGraph::render(Viewport& viewport, Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
     if(useDefaultShaders) 
         shaderProgram.bind();
     for (auto& materialNode : materialNodes) {
@@ -262,7 +256,7 @@ void RenderPipeline::render(Viewport& viewport, Camera& camera, const double& dt
         }
     }
 }
-void RenderPipeline::render_bruteforce(Viewport& viewport, Camera& camera, const double& dt, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
+void RenderGraph::render_bruteforce(Viewport& viewport, Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
     if (useDefaultShaders)
         shaderProgram.bind();
     for (auto& instance : instancesTotal) {

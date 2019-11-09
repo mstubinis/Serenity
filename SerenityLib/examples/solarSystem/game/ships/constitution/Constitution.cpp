@@ -40,11 +40,15 @@ Constitution::Constitution(const AIType::Type ai_type, Team& team, Client& clien
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
-    auto* leftTorp = new PhotonTorpedoOld(_this, map, glm::vec3(-0.033864f, -0.129594f, -0.664163f), glm::vec3(0, 0, -1), 15.0f, 2);
-    auto* rightTorp = new PhotonTorpedoOld(_this, map, glm::vec3(0.033864f, -0.129594f, -0.664163f), glm::vec3(0, 0, -1), 15.0f, 2);
+    auto* leftTorp_1 = new PhotonTorpedoOld(_this, map, glm::vec3(-0.033864f, -0.129594f, -0.664163f), glm::vec3(0, 0, -1), 15.0f, 1);
+    auto* rightTorp_1 = new PhotonTorpedoOld(_this, map, glm::vec3(0.033864f, -0.129594f, -0.664163f), glm::vec3(0, 0, -1), 15.0f, 1);
+    auto* leftTorp_2 = new PhotonTorpedoOld(_this, map, glm::vec3(-0.033864f, -0.129594f, -0.664163f), glm::vec3(0, 0, -1), 15.0f, 1);
+    auto* rightTorp_2 = new PhotonTorpedoOld(_this, map, glm::vec3(0.033864f, -0.129594f, -0.664163f), glm::vec3(0, 0, -1), 15.0f, 1);
 
-    weapons.addSecondaryWeaponTorpedo(*leftTorp, true);
-    weapons.addSecondaryWeaponTorpedo(*rightTorp, true);
+    weapons.addSecondaryWeaponTorpedo(*leftTorp_1, true);
+    weapons.addSecondaryWeaponTorpedo(*rightTorp_1, true);
+    weapons.addSecondaryWeaponTorpedo(*leftTorp_2, true);
+    weapons.addSecondaryWeaponTorpedo(*rightTorp_2, true);
 
     vector<glm::vec3> top_center_left_beam{ glm::vec3(-0.014609f, 0.303966f, -1.82334f) };
     vector<glm::vec3> top_center_right_beam{ glm::vec3(0.014609f, 0.303966f, -1.82334f) };

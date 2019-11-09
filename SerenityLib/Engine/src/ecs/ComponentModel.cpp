@@ -13,15 +13,15 @@ using namespace Engine::epriv;
 using namespace std;
 
 float ComponentModel_Functions::CalculateRadius(ComponentModel& super) {
-    float maxLength = 0;
+    float maxLength = 0.0f;
     glm::vec3 boundingBox = glm::vec3(0.0f);
-    for (uint i = 0; i < super._modelInstances.size(); ++i) {
-        auto& modelInstance = *super._modelInstances[i];
-        const glm::mat4& m = modelInstance.modelMatrix();
-        const glm::vec3& localPosition = glm::vec3(m[3][0], m[3][1], m[3][2]);
+    for (uint i = 0; i < super.m_ModelInstances.size(); ++i) {
+        auto& modelInstance            = *super.m_ModelInstances[i];
+        const glm::mat4& modelMatrix   = modelInstance.modelMatrix();
+        const glm::vec3& localPosition = glm::vec3(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
         const auto& modelInstanceScale = Math::Max(modelInstance.getScale());
-        const float length = glm::length(localPosition) + modelInstance.mesh()->getRadius() * modelInstanceScale;
-        const glm::vec3 box = localPosition + modelInstance.mesh()->getRadiusBox() * modelInstanceScale;
+        const float length             = glm::length(localPosition) + modelInstance.mesh()->getRadius() * modelInstanceScale;
+        const glm::vec3 box            = localPosition + modelInstance.mesh()->getRadiusBox() * modelInstanceScale;
         if (length > maxLength) { 
             maxLength = length; 
         }
@@ -29,15 +29,15 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& super) {
             boundingBox = box; 
         }
     }
-    super._radius = maxLength;
-    super._radiusBox = boundingBox;
-    auto* body = super.owner.getComponent<ComponentBody>();
+    super.m_Radius    = maxLength;
+    super.m_RadiusBox = boundingBox;
+    auto* body        = super.m_Owner.getComponent<ComponentBody>();
     if (body) {
-        const auto bodyScale = Math::Max(glm::vec3(body->getScale()));
-        super._radius    *= bodyScale;
-        super._radiusBox *= bodyScale;
+        const auto bodyScale =  Math::Max(glm::vec3(body->getScale()));
+        super.m_Radius       *= bodyScale;
+        super.m_RadiusBox    *= bodyScale;
     }
-    return super._radius; //now modified by the body scale
+    return super.m_Radius; //now modified by the body scale
 };
 
 
@@ -68,37 +68,37 @@ ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Material* mater
     addModel(mesh, material, (ShaderProgram*)shaderProgram.get(), stage);
 }
 ComponentModel::~ComponentModel() {
-    SAFE_DELETE_VECTOR(_modelInstances);
+    SAFE_DELETE_VECTOR(m_ModelInstances);
 }
 
 const size_t ComponentModel::getNumModels() const {
-    return _modelInstances.size();
+    return m_ModelInstances.size();
 }
-ModelInstance& ComponentModel::getModel(const uint& index) {
-    return *_modelInstances[index];
+ModelInstance& ComponentModel::getModel(const size_t& index) {
+    return *m_ModelInstances[index];
 }
 void ComponentModel::show() { 
-    for (auto& modelInstance : _modelInstances)
+    for (auto& modelInstance : m_ModelInstances)
         modelInstance->show();
 }
 void ComponentModel::hide() { 
-    for (auto& modelInstance : _modelInstances)
+    for (auto& modelInstance : m_ModelInstances)
         modelInstance->hide();
 }
 const float& ComponentModel::radius() const {
-    return _radius; 
+    return m_Radius; 
 }
 const glm::vec3& ComponentModel::boundingBox() const {
-    return _radiusBox;
+    return m_RadiusBox;
 }
 ModelInstance& ComponentModel::addModel(Handle& mesh, Handle& material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
     return ComponentModel::addModel((Mesh*)mesh.get(), (Material*)material.get(), shaderProgram, stage);
 }
 ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
-    auto modelInstance = new ModelInstance(owner, mesh, material, shaderProgram);
-    _modelInstances.push_back(modelInstance);
+    auto modelInstance = new ModelInstance(m_Owner, mesh, material, shaderProgram);
+    m_ModelInstances.push_back(modelInstance);
     auto& instance = *modelInstance;
-    auto& _scene = owner.scene();
+    auto& _scene = m_Owner.scene();
     instance.m_Stage = stage;
     InternalScenePublicInterface::AddModelInstanceToPipeline(_scene, instance, stage);
     ComponentModel_Functions::CalculateRadius(*this);
@@ -113,18 +113,12 @@ ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, Handle& 
 }
 
 
-
-
-
-
-
-
 void ComponentModel::setModel(Handle& mesh, Handle& material, const uint& index, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
     ComponentModel::setModel((Mesh*)mesh.get(), (Material*)material.get(), index, shaderProgram, stage);
 }
 void ComponentModel::setModel(Mesh* mesh, Material* material, const uint& index, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
-    auto& instance = *_modelInstances[index];
-    auto& _scene = owner.scene();
+    auto& instance = *m_ModelInstances[index];
+    auto& _scene = m_Owner.scene();
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(_scene, instance, instance.stage());
 
     instance.m_ShaderProgram = shaderProgram;
@@ -136,8 +130,8 @@ void ComponentModel::setModel(Mesh* mesh, Material* material, const uint& index,
     ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelShaderProgram(ShaderProgram* shaderProgram, const uint& index, const RenderStage::Stage& stage) {
-    auto& instance = *_modelInstances[index];
-    auto& scene   = owner.scene();
+    auto& instance = *m_ModelInstances[index];
+    auto& scene   = m_Owner.scene();
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, instance, instance.stage());
 
     instance.m_ShaderProgram = shaderProgram;
@@ -150,8 +144,8 @@ void ComponentModel::setModelShaderProgram(Handle& shaderPHandle, const uint& in
     ComponentModel::setModelShaderProgram((ShaderProgram*)shaderPHandle.get(), index, stage); 
 }
 void ComponentModel::setStage(const RenderStage::Stage& stage, const uint& index) {
-    auto& instance = *_modelInstances[index];
-    auto& scene = owner.scene();
+    auto& instance = *m_ModelInstances[index];
+    auto& scene = m_Owner.scene();
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, instance, instance.stage());
 
     instance.m_Stage = stage;
@@ -159,8 +153,8 @@ void ComponentModel::setStage(const RenderStage::Stage& stage, const uint& index
     InternalScenePublicInterface::AddModelInstanceToPipeline(scene, instance, stage);
 }
 void ComponentModel::setModelMesh(Mesh* mesh, const uint& index, const RenderStage::Stage& stage) {
-    auto& instance = *_modelInstances[index];
-    auto& scene   = owner.scene();
+    auto& instance = *m_ModelInstances[index];
+    auto& scene   = m_Owner.scene();
 
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, instance, instance.stage());
 
@@ -174,8 +168,8 @@ void ComponentModel::setModelMesh(Handle& mesh, const uint& index, const RenderS
     ComponentModel::setModelMesh((Mesh*)mesh.get(), index, stage); 
 }
 void ComponentModel::setModelMaterial(Material* material, const uint& index, const RenderStage::Stage& stage) {
-    auto& instance = *_modelInstances[index];
-    auto& scene   = owner.scene();
+    auto& instance = *m_ModelInstances[index];
+    auto& scene   = m_Owner.scene();
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, instance, instance.stage());
 
     instance.m_Material = material;
@@ -187,8 +181,8 @@ void ComponentModel::setModelMaterial(Handle& material, const uint& index, const
     ComponentModel::setModelMaterial((Material*)(material.get()), index, stage);
 }
 const bool ComponentModel::rayIntersectSphere(const ComponentCamera& camera) {
-    auto& body = *owner.getComponent<ComponentBody>();
-    return Math::rayIntersectSphere(body.position(), _radius, camera.m_Eye, camera.getViewVector());
+    auto& body = *m_Owner.getComponent<ComponentBody>();
+    return Math::rayIntersectSphere(body.position(), m_Radius, camera.m_Eye, camera.getViewVector());
 }
 
 #pragma endregion

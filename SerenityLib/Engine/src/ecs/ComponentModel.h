@@ -29,7 +29,7 @@ namespace Engine {
     };
 };
 
-class ComponentModel : public ComponentBaseClass {
+class ComponentModel: public ComponentBaseClass {
     friend struct Engine::epriv::ComponentModel_UpdateFunction;
     friend struct Engine::epriv::ComponentModel_EntityAddedToSceneFunction;
     friend struct Engine::epriv::ComponentModel_ComponentAddedToEntityFunction;
@@ -38,9 +38,9 @@ class ComponentModel : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentModel_Functions;
     friend class  ComponentCamera;
     private:
-        std::vector<ModelInstance*> _modelInstances;
-        float                       _radius;
-        glm::vec3                   _radiusBox;
+        std::vector<ModelInstance*>  m_ModelInstances;
+        float                        m_Radius;
+        glm::vec3                    m_RadiusBox;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         explicit ComponentModel(const Entity&, Handle& meshHandle, Handle& materialHandle, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
@@ -66,11 +66,9 @@ class ComponentModel : public ComponentBaseClass {
         void show();
         void hide();
 
-        ModelInstance& getModel(const uint& index = 0);
-
+        ModelInstance& getModel(const size_t& index = 0);
         ModelInstance& addModel(Handle& meshHandle, Handle& materialHandle, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
         ModelInstance& addModel(Mesh*,              Material*,              ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
-
         ModelInstance& addModel(Handle& meshHandle, Handle& materialHandle, Handle& shaderProgram, const RenderStage::Stage & = RenderStage::GeometryOpaque);
         ModelInstance& addModel(Mesh*,              Material*,              Handle& shaderProgram, const RenderStage::Stage & = RenderStage::GeometryOpaque);
 
@@ -92,10 +90,10 @@ class ComponentModel : public ComponentBaseClass {
         const bool rayIntersectSphere(const ComponentCamera& camera);
 
         template<class T> void setCustomBindFunctor(const T& functor, const uint& index = 0) { 
-            _modelInstances[index]->setCustomBindFunctor(functor);
+            m_ModelInstances[index]->setCustomBindFunctor(functor);
         }
         template<class T> void setCustomUnbindFunctor(const T& functor, const uint& index = 0) {
-            _modelInstances[index]->setCustomUnbindFunctor(functor);
+            m_ModelInstances[index]->setCustomUnbindFunctor(functor);
         }
 };
 

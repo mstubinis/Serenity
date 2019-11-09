@@ -478,9 +478,13 @@ const float& Planet::getAtmosphereHeight() const {
     return m_AtmosphereHeight; 
 }
 
-Star::Star(Handle& mesh, const glm::vec3& starColor, const glm::vec3& lightColor, const glm::vec3& godRaysColor, const glm_vec3& pos, const decimal scl, const string& name, Map* scene, const string& type_name) : Planet(mesh, ResourceManifest::StarMaterial, PlanetType::Star, pos, scl, name, 0.0f, scene, type_name) {
+Star::Star(Handle& meshHandle, Handle& materialHandle, const glm::vec3& starColor, const glm::vec3& lightColor, const glm::vec3& godRaysColor, const glm_vec3& pos, const decimal scl, const string& name, Map* scene, const string& type_name) : Planet(meshHandle, materialHandle, PlanetType::Star, pos, scl, name, 0.0f, scene, type_name) {
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor);
+
+    auto& star_material = *((Material*)materialHandle.get());
+    star_material.setShadeless(true);
+    star_material.setGlow(0.21f);
 
     auto* starModel = getComponent<ComponentModel>();
     if (starModel) {

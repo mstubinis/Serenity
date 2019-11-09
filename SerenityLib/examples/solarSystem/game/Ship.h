@@ -13,7 +13,7 @@
 #include "ships/shipSystems/ShipSystemBaseClass.h"
 
 #define WARP_PHYSICS_MODIFIER 1.333333333f
-#define PHYSICS_PACKET_TIMER_LIMIT 0.25f
+#define PHYSICS_PACKET_TIMER_LIMIT 0.25
 
 class  GameCamera;
 class  Ship;
@@ -26,6 +26,7 @@ struct PacketHealthUpdate;
 struct PacketProjectileImpact;
 struct ShipLogicFunctor;
 struct GameCameraLogicFunctor;
+struct HullCollisionFunctor;
 class  ShipSystemReactor;
 class  ShipSystemMainThrusters;
 class  ShipSystemYawThrusters;
@@ -54,6 +55,7 @@ struct ShipModelInstanceUnbindFunctor {
 
 class Ship: public EntityWrapper, public EventObserver {
     friend struct GameCameraLogicFunctor;
+    friend struct HullCollisionFunctor;
     friend  class GameCamera;
     friend struct ShipLogicFunctor;
     friend  class ShipSystemReactor;

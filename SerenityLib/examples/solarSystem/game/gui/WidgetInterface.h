@@ -2,7 +2,7 @@
 #ifndef GAME_WIDGET_INTERFACE_H
 #define GAME_WIDGET_INTERFACE_H
 
-#include <core/engine/renderer/RendererEnums.h>
+#include <core/engine/renderer/RendererIncludes.h>
 #include <glm/vec4.hpp>
 
 class IWidget {

@@ -101,8 +101,10 @@ void EngineCore::update_logic(const double& dt){
     Game::onPreUpdate(dt);
     Game::update(dt);
     scene.update(dt);
+    InternalScenePublicInterface::UpdateParticleEmitters(scene, dt);
     ecs.update(dt, scene);
     ecs.postUpdate(scene,dt);
+    InternalScenePublicInterface::UpdateMaterials(scene, dt);
     m_ThreadManager._update(dt);
     Game::onPostUpdate(dt);
     m_DebugManager.calculate_logic();

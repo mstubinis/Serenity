@@ -69,6 +69,26 @@ struct ShipWeapon {
     const bool isInArc(const glm_vec3& world_position, const float _arc);
 };
 
+struct WeaponProjectile {
+    Map& map;
+    uint             projectile_index;
+    Entity           entity;
+    bool             active;
+    bool             destroyed;
+    float            currentTime;
+    float            maxTime;
+    PointLight* light;
+    WeaponProjectile(Map& map_, const int index);
+    virtual ~WeaponProjectile();
+    virtual void update(const double& dt);
+    virtual void destroy();
+
+    void clientToServerImpactShields(const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const unsigned int& shieldSide);
+    void clientToServerImpactHull(const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time);
+
+};
+
+
 struct PrimaryWeaponCannonPrediction final {
     glm_vec3 pedictedPosition;
     glm_vec3 pedictedVector;
@@ -79,21 +99,11 @@ struct PrimaryWeaponCannonPrediction final {
     }
 };
 
-struct PrimaryWeaponCannonProjectile {
-    Map& map;
-    uint          projectile_index;
-    Entity        entity;
-    PointLight*   light;
-    float         currentTime;
-    float         maxTime;
-    bool          active;
-    bool          destroyed;
+struct PrimaryWeaponCannonProjectile : public WeaponProjectile {
     PrimaryWeaponCannonProjectile(Map& map, const glm_vec3& position, const glm_vec3& forward, const int index);
-    virtual ~PrimaryWeaponCannonProjectile();
-    virtual void update(const double& dt);
-    virtual void destroy();
+    ~PrimaryWeaponCannonProjectile();
 
-    void clientToServerImpact(Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const bool& shields);
+    void destroy();
 };
 
 struct PrimaryWeaponCannon : public ShipWeapon {
@@ -199,24 +209,14 @@ struct SecondaryWeaponTorpedoPrediction final {
     }
 };
 
-struct SecondaryWeaponTorpedoProjectile {
-    Map& map;
-    uint             projectile_index;
-    Entity           entity;
+struct SecondaryWeaponTorpedoProjectile : public WeaponProjectile {
     bool             hasLock;
     EntityWrapper*   target;
     float            rotationAngleSpeed;
-    PointLight*      light;
-    float            currentTime;
-    float            maxTime;
-    bool             active;
-    bool             destroyed;
     SecondaryWeaponTorpedoProjectile(Map& map, const glm_vec3& position, const glm_vec3& forward, const int index);
-    virtual ~SecondaryWeaponTorpedoProjectile();
-    virtual void update(const double& dt);
-    virtual void destroy();
-
-    void clientToServerImpact(Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const bool& shields);
+    ~SecondaryWeaponTorpedoProjectile();
+    void update(const double& dt);
+    void destroy();
 };
 
 struct SecondaryWeaponTorpedo : public ShipWeapon {
@@ -292,7 +292,7 @@ class ShipSystemWeapons final : public ShipSystem {
         ShipSystemWeapons(Ship&);
         ~ShipSystemWeapons();
 
-        static const decimal calculate_quadratic_time_till_hit(const glm_vec3& pos, const glm_vec3& vel, const float& s);
+        static const decimal calculate_quadratic_time_till_hit(const glm_vec3& pos, const glm_vec3& vel, const decimal& s);
 
         glm::vec3 cannonTargetPoint; //for random target spots on the hull / random subsystem targets
         glm::vec3 torpedoTargetPoint;//for random target spots on the hull / random subsystem targets

@@ -125,6 +125,7 @@ class Star: public Planet{
     public:
         Star(
             Handle& meshHandle,
+            Handle& materialHandle,                     //Material
             const glm::vec3& starColor = glm::vec3(1.0f,1.0f,0.0f), //Star Color
             const glm::vec3& lightColor = glm::vec3(1.0f,1.0f,1.0f), //Sunlight Color
             const glm::vec3& godRaysColor = glm::vec3(1.0f,1.0f,1.0f), //GodRays Color

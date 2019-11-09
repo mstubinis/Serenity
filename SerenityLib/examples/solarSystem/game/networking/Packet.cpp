@@ -25,7 +25,7 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
     sf::Packet hardCopy = sf::Packet(sfPacket);
     Packet pp;
     pp.validate(hardCopy);
-    unsigned int packetType = pp.PacketType;
+    const unsigned int packetType = pp.PacketType;
     Packet* p = nullptr;
     switch (packetType) {
         case PacketType::Server_To_Client_Accept_Connection: {
@@ -112,6 +112,14 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Anti_Cloak_Status: {
             p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Collision_Event: {
+            p = new PacketCollisionEvent(); break;
+        }case PacketType::Server_To_Client_Collision_Event: {
+            p = new PacketCollisionEvent(); break;
+        }case PacketType::Client_To_Server_Request_Ship_Current_Info: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Request_Ship_Current_Info: {
+            p = new PacketMessage(); break;
         }default: {
             break;
         }
@@ -120,7 +128,7 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
         cout << "Invalid packet type in getPacket(), please see Packet.cpp" << endl;
     return p;
 }
-PacketHealthUpdate::PacketHealthUpdate() :Packet() {
+PacketHealthUpdate::PacketHealthUpdate() : Packet() {
     currentHullHealth     = 0;
     currentShieldsHealthF = 0;
     currentShieldsHealthA = 0;
@@ -130,19 +138,18 @@ PacketHealthUpdate::PacketHealthUpdate() :Packet() {
     currentShieldsHealthV = 0;
     flags                 = PacketHealthFlags::None;
 }
-PacketHealthUpdate::PacketHealthUpdate(Ship& ship) : Packet() {
+PacketHealthUpdate::PacketHealthUpdate(Ship& ship) : PacketHealthUpdate() {
     auto* shields = static_cast<ShipSystemShields*>(ship.getShipSystem(ShipSystemType::Shields));
     auto* hull = static_cast<ShipSystemHull*>(ship.getShipSystem(ShipSystemType::Hull));
-    flags = PacketHealthFlags::None;
     if (shields) {
         auto& shield = *shields;
 
-        currentShieldsHealthF = shield.getHealthCurrent(0);
-        currentShieldsHealthA = shield.getHealthCurrent(1);
-        currentShieldsHealthP = shield.getHealthCurrent(2);
-        currentShieldsHealthS = shield.getHealthCurrent(3);
-        currentShieldsHealthD = shield.getHealthCurrent(4);
-        currentShieldsHealthV = shield.getHealthCurrent(5);
+        currentShieldsHealthF = shield.getActualShieldHealthCurrent(0);
+        currentShieldsHealthA = shield.getActualShieldHealthCurrent(1);
+        currentShieldsHealthP = shield.getActualShieldHealthCurrent(2);
+        currentShieldsHealthS = shield.getActualShieldHealthCurrent(3);
+        currentShieldsHealthD = shield.getActualShieldHealthCurrent(4);
+        currentShieldsHealthV = shield.getActualShieldHealthCurrent(5);
 
         flags = flags | PacketHealthFlags::ShieldsInstalled;
         if (shield.shieldsAreUp()) {
@@ -159,12 +166,12 @@ PacketHealthUpdate::PacketHealthUpdate(Ship& ship) : Packet() {
     data += "," + ship.getMapKey();
 }
 
-PacketPhysicsUpdate::PacketPhysicsUpdate():Packet() {
+PacketPhysicsUpdate::PacketPhysicsUpdate() : Packet() {
     qXYZ = lx = ly = lz = ax = ay = az = 0;
     px = py = pz = wx = wy = wz = 0.0f;
     qw = 1;
 }
-PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnchor, const vector<string>& anchorList, const string& username) :Packet() {
+PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnchor, const vector<string>& anchorList, const string& username) : PacketPhysicsUpdate() {
     auto& ent = ship.entity();
     EntityDataRequest request(ent);
     const auto pbody = ent.getComponent<ComponentBody>(request);
@@ -210,26 +217,25 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
 
 
 
-PacketCloakUpdate::PacketCloakUpdate() :Packet() {
+PacketCloakUpdate::PacketCloakUpdate() : Packet() {
     cloakTimer        = 1.0f;
     cloakSystemOnline = false;
     cloakActive       = false;
     justTurnedOn      = false;
     justTurnedOff     = false;
 }
-PacketCloakUpdate::PacketCloakUpdate(Ship& ship) : Packet() {
-    cloakTimer = 1.0f;
-    cloakSystemOnline = false;
-    cloakActive = false;
-
-    justTurnedOn = false;
-    justTurnedOff = false;
-    data += ship.getClass(); //[0]
+PacketCloakUpdate::PacketCloakUpdate(Ship& ship) : PacketCloakUpdate() {
+    data =        ship.getClass();  //[0]
     data += "," + ship.getMapKey(); //[1]
     if (ship.getShipSystem(ShipSystemType::CloakingDevice)) {
         ShipSystemCloakingDevice& cloak = *static_cast<ShipSystemCloakingDevice*>(ship.getShipSystem(ShipSystemType::CloakingDevice));
-        cloakTimer        = cloak.getCloakTimer();
+        Math::Float16From32(&cloakTimer, cloak.getCloakTimer());
         cloakSystemOnline = cloak.isOnline();
         cloakActive       = cloak.isCloakActive();
     }
+}
+
+PacketCollisionEvent::PacketCollisionEvent() {
+    damage1 = damage2 = 0.0;
+    lx1 = ly1 = lz1 = ax1 = ay1 = az1 = lx2 = ly2 = lz2 = ax2 = ay2 = az2 = 0;
 }

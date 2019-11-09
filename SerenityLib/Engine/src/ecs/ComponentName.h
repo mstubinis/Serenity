@@ -21,11 +21,11 @@ class ComponentName : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentName_SceneEnteredFunction;
     friend struct Engine::epriv::ComponentName_SceneLeftFunction;
     private:
-        std::string _data;
+        std::string m_Data;
     public:
-        ComponentName(const Entity&);
-        ComponentName(const Entity&, const std::string& name);
-        ComponentName(const Entity&, const char* name);
+        ComponentName(const Entity& entity);
+        ComponentName(const Entity& entity, const std::string& name);
+        ComponentName(const Entity& entity, const char* name);
 
         ComponentName(const ComponentName& other)                = delete;
         ComponentName& operator=(const ComponentName& other)     = delete;

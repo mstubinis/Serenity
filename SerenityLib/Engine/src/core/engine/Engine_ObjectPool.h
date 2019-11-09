@@ -88,6 +88,7 @@ namespace epriv{
                         }
                     }
                 }
+                return Handle();
             }
             Handle add(T* _ptr, uint _type){
                 const uint newIndex = m_firstFreeEntry - 1;

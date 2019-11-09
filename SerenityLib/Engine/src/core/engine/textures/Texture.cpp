@@ -113,10 +113,10 @@ void Texture::setAnisotropicFiltering(const float& anisotropicFiltering){
     	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, const_cast<GLfloat*>(&anisotropicFiltering));
     	glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering);
     }else{     
-        if(OpenGLExtension::supported(OpenGLExtension::ARB_Ansiotropic_Filtering)){
+        if(OpenGLExtensions::supported(OpenGLExtensions::ARB_Ansiotropic_Filtering)){
             //glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_ARB, const_cast<GLfloat*>(&anisotropicFiltering));
             //glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY_ARB, anisotropicFiltering);
-        }else if(OpenGLExtension::supported(OpenGLExtension::EXT_Ansiotropic_Filtering)){
+        }else if(OpenGLExtensions::supported(OpenGLExtensions::EXT_Ansiotropic_Filtering)){
             glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, const_cast<GLfloat*>(&anisotropicFiltering));
             glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropicFiltering);
         }

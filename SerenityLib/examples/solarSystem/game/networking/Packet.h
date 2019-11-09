@@ -19,6 +19,12 @@ struct PacketType {enum Type: unsigned int {
     Undefined,
     Server_Shutdown,
 
+    Client_To_Server_Request_Ship_Current_Info,
+    Server_To_Client_Request_Ship_Current_Info,
+
+    Client_To_Server_Collision_Event,
+    Server_To_Client_Collision_Event,
+
     Client_To_Server_Anti_Cloak_Status,
     Server_To_Client_Anti_Cloak_Status,
 
@@ -92,7 +98,7 @@ struct Packet: public IPacket {
     unsigned int   PacketType;
     std::string     data;
     Packet() {
-        PacketType = static_cast<unsigned int>(PacketType::Undefined);
+        PacketType = 0;
         data = "";
     }
     virtual bool validate(sf::Packet& sfPacket){
@@ -109,16 +115,17 @@ struct PacketProjectileImpact : public Packet {
     float impactX, impactY, impactZ, damage;
     uint16_t normalX, normalY, normalZ, time, radius; //half floats
     bool shields;
-    int index;
+    int projectile_index;
+    int shield_side;
     PacketProjectileImpact() {
-        damage = 0.0f;
-        time = radius = normalZ = normalY = normalX = index = shields = 0;
+        damage = impactX = impactY = impactZ = 0.0f;
+        time = radius = normalZ = normalY = normalX = projectile_index = shields = shield_side = 0;
     }
     bool validate(sf::Packet& sfPacket) {
-        return (sfPacket >> PacketType >> data >> impactX >> impactY >> impactZ >> damage >> normalX >> normalY >> normalZ >> time >> radius >> shields >> index);
+        return (sfPacket >> PacketType >> data >> impactX >> impactY >> impactZ >> damage >> normalX >> normalY >> normalZ >> time >> radius >> shields >> projectile_index >> shield_side);
     }
     bool build(sf::Packet& sfPacket) {
-        return (sfPacket << PacketType << data << impactX << impactY << impactZ << damage << normalX << normalY << normalZ << time << radius << shields << index);
+        return (sfPacket << PacketType << data << impactX << impactY << impactZ << damage << normalX << normalY << normalZ << time << radius << shields << projectile_index << shield_side);
     }
     void print() {}
 };
@@ -170,7 +177,7 @@ struct PacketPhysicsUpdate: public Packet {
     void print() {}
 };
 struct PacketCloakUpdate : public Packet {
-    float cloakTimer;
+    uint16_t cloakTimer;
     bool cloakSystemOnline;
     bool cloakActive;
     bool justTurnedOn;
@@ -207,7 +214,24 @@ struct PacketClientRequestConnectionToServer : public Packet {
     }
     void print() {}
 };
+struct PacketCollisionEvent : public Packet {
+    //256 bits (64 bytes)
+    float            damage1, damage2;
+    uint16_t         lx1, ly1, lz1;     //linear velocity
+    uint16_t         ax1, ay1, az1;     //angular velocity
 
+    uint16_t         lx2, ly2, lz2;     //linear velocity
+    uint16_t         ax2, ay2, az2;     //angular velocity
+
+    PacketCollisionEvent();
+    bool validate(sf::Packet& sfPacket) {
+        return (sfPacket >> PacketType >> data >> damage1 >> damage2 >> lx1 >> ly1 >> lz1 >> ax1 >> ay1 >> az1 >> lx2 >> ly2 >> lz2 >> ax2 >> ay2 >> az2);
+    }
+    bool build(sf::Packet& sfPacket) {
+        return (sfPacket << PacketType << data << damage1 << damage2 << lx1 << ly1 << lz1 << ax1 << ay1 << az1 << lx2 << ly2 << lz2 << ax2 << ay2 << az2);
+    }
+    void print() {}
+};
 
 struct PacketMessage : public Packet {
     std::string   name;

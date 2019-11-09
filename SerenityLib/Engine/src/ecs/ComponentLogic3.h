@@ -26,17 +26,17 @@ class ComponentLogic3 : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentLogic3_SceneEnteredFunction;
     friend struct Engine::epriv::ComponentLogic3_SceneLeftFunction;
     private:
-        void*                                _userPtr;
-        void*                                _userPtr1;
-        void*                                _userPtr2;
-        std::function<void(const double&)>   _functor;
+        void*                                m_UserPointer;
+        void*                                m_UserPointer1;
+        void*                                m_UserPointer2;
+        std::function<void(const double&)>   m_Functor;
     public:
-        ComponentLogic3(const Entity& _e);
-        template<typename T> ComponentLogic3(const Entity& _e, const T& functor, void* ptr = 0, void* ptr1 = 0, void* ptr2 = 0) : ComponentBaseClass(_e) {
-            _userPtr = ptr;
-            _userPtr1 = ptr1;
-            _userPtr2 = ptr2;
-            setFunctor(functor);
+        ComponentLogic3(const Entity& entity);
+        template<typename T> ComponentLogic3(const Entity& entity, const T& Functor, void* UserPointer = 0, void* UserPointer1 = 0, void* UserPointer2 = 0) : ComponentBaseClass(entity) {
+            m_UserPointer  = UserPointer;
+            m_UserPointer1 = UserPointer1;
+            m_UserPointer2 = UserPointer2;
+            setFunctor(Functor);
         }
         ComponentLogic3(const ComponentLogic3& other);
         ComponentLogic3& operator=(const ComponentLogic3& other);
@@ -48,12 +48,12 @@ class ComponentLogic3 : public ComponentBaseClass {
         void call(const double& dt);
 
         template<typename T> void setFunctor(const T& functor) { 
-            _functor = std::bind<void>(std::move(functor), *this, std::placeholders::_1);
+            m_Functor = std::bind<void>(std::move(functor), *this, std::placeholders::_1);
         }
 
-        void setUserPointer(void* ptr);
-        void setUserPointer1(void* ptr);
-        void setUserPointer2(void* ptr);
+        void setUserPointer(void* UserPointer);
+        void setUserPointer1(void* UserPointer1);
+        void setUserPointer2(void* UserPointer2);
         
         void* getUserPointer() const;
         void* getUserPointer1() const;

@@ -90,7 +90,7 @@ void InternalMaterialRequestPublicInterface::LoadCPU(MaterialRequest& request) {
 }
 void InternalMaterialRequestPublicInterface::LoadGPU(MaterialRequest& request) {
     const auto& requests = request.part.textureRequests;
-    size_t count = 0;
+    unsigned int count = 0;
     for (size_t i = 0; i < requests.size(); ++i) {
         if (requests[i]->fileExists) {
             request.part.material->getComponent(count).layer(0).setTexture(requests[i]->file);

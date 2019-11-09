@@ -56,6 +56,26 @@ EntityWrapper::EntityWrapper(Scene& scene) {
 EntityWrapper::~EntityWrapper() {
     m_Entity = Entity::_null;
 }
+EntityWrapper::EntityWrapper(const EntityWrapper& other) {
+    m_Entity = other.m_Entity;
+}
+EntityWrapper& EntityWrapper::operator=(const EntityWrapper& other) {
+    if (&other == this)
+        return *this;
+    m_Entity = other.m_Entity;
+    return *this;
+}
+EntityWrapper::EntityWrapper(EntityWrapper&& other) noexcept {
+    using std::swap;
+    swap(m_Entity, other.m_Entity);
+}
+EntityWrapper& EntityWrapper::operator=(EntityWrapper&& other) noexcept {
+    using std::swap;
+    swap(m_Entity, other.m_Entity);
+    return *this;
+}
+
+
 void EntityWrapper::destroy() {
     m_Entity.destroy();
 }

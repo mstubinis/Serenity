@@ -6,69 +6,69 @@ using namespace std;
 
 #pragma region Component
 
-ComponentLogic2::ComponentLogic2(const Entity& _e) : ComponentBaseClass(_e) {
-    _userPtr  = nullptr;
-    _userPtr1 = nullptr;
-    _userPtr2 = nullptr;
+ComponentLogic2::ComponentLogic2(const Entity& entity) : ComponentBaseClass(entity) {
+    m_UserPointer  = nullptr;
+    m_UserPointer1 = nullptr;
+    m_UserPointer2 = nullptr;
     setFunctor(Engine::epriv::ComponentLogic2_EmptyFunctor());
 }
 ComponentLogic2::~ComponentLogic2() {
 }
 
 ComponentLogic2::ComponentLogic2(const ComponentLogic2& other) {
-    owner = other.owner;
-    _functor = other._functor;
-    _userPtr = other._userPtr;
-    _userPtr1 = other._userPtr1;
-    _userPtr2 = other._userPtr2;
+    m_Owner        = other.m_Owner;
+    m_Functor      = other.m_Functor;
+    m_UserPointer  = other.m_UserPointer;
+    m_UserPointer1 = other.m_UserPointer1;
+    m_UserPointer2 = other.m_UserPointer2;
 }
 ComponentLogic2& ComponentLogic2::operator=(const ComponentLogic2& other) {
     if (&other == this)
         return *this;
-    owner = other.owner;
-    _functor = other._functor;
-    _userPtr = other._userPtr;
-    _userPtr1 = other._userPtr1;
-    _userPtr2 = other._userPtr2;
+    m_Owner        = other.m_Owner;
+    m_Functor      = other.m_Functor;
+    m_UserPointer  = other.m_UserPointer;
+    m_UserPointer1 = other.m_UserPointer1;
+    m_UserPointer2 = other.m_UserPointer2;
     return *this;
 }
 ComponentLogic2::ComponentLogic2(ComponentLogic2&& other) noexcept {
     using std::swap;
-    swap(owner, other.owner);
-    swap(_functor, other._functor);
-    swap(_userPtr, other._userPtr);
-    swap(_userPtr1, other._userPtr1);
-    swap(_userPtr2, other._userPtr2);
+    swap(m_Owner, other.m_Owner);
+    swap(m_Functor, other.m_Functor);
+    swap(m_UserPointer, other.m_UserPointer);
+    swap(m_UserPointer1, other.m_UserPointer1);
+    swap(m_UserPointer2, other.m_UserPointer2);
 }
 ComponentLogic2& ComponentLogic2::operator=(ComponentLogic2&& other) noexcept {
     using std::swap;
-    swap(owner, other.owner);
-    swap(_functor, other._functor);
-    swap(_userPtr, other._userPtr);
-    swap(_userPtr1, other._userPtr1);
-    swap(_userPtr2, other._userPtr2);
+    swap(m_Owner, other.m_Owner);
+    swap(m_Functor, other.m_Functor);
+    swap(m_UserPointer, other.m_UserPointer);
+    swap(m_UserPointer1, other.m_UserPointer1);
+    swap(m_UserPointer2, other.m_UserPointer2);
     return *this;
 }
-void ComponentLogic2::setUserPointer(void* ptr) {
-    _userPtr = ptr;
+void ComponentLogic2::setUserPointer(void* UserPointer) {
+    m_UserPointer = UserPointer;
 }
-void ComponentLogic2::setUserPointer1(void* ptr) {
-    _userPtr1 = ptr;
+void ComponentLogic2::setUserPointer1(void* UserPointer1) {
+    m_UserPointer1 = UserPointer1;
 }
-void ComponentLogic2::setUserPointer2(void* ptr) {
-    _userPtr2 = ptr;
+void ComponentLogic2::setUserPointer2(void* UserPointer2) {
+    m_UserPointer2 = UserPointer2;
 }
 void* ComponentLogic2::getUserPointer() const {
-    return _userPtr;
+    return m_UserPointer;
 }
 void* ComponentLogic2::getUserPointer1() const {
-    return _userPtr1;
+    return m_UserPointer1;
 }
 void* ComponentLogic2::getUserPointer2() const {
-    return _userPtr2;
+    return m_UserPointer2;
 }
 void ComponentLogic2::call(const double& dt) { 
-    _functor(dt); 
+    m_Functor(dt); 
 }
 
 #pragma endregion

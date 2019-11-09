@@ -58,6 +58,12 @@ class EntityWrapper {
     public:
         EntityWrapper(Scene& scene);
         virtual ~EntityWrapper();
+
+        EntityWrapper(const EntityWrapper& other);
+        EntityWrapper& operator=(const EntityWrapper& other);
+        EntityWrapper(EntityWrapper&& other) noexcept;
+        EntityWrapper& operator=(EntityWrapper&& other) noexcept;
+
         virtual void destroy();
         Entity& entity();
         const bool null();
