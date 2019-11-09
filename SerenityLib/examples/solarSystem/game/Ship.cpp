@@ -15,6 +15,7 @@
 #include <core/engine/lights/Lights.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/renderer/Decal.h>
+#include <core/engine/renderer/Particle.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/textures/Texture.h>
 
@@ -166,7 +167,7 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
         auto* mytarget = ship.getTarget();
         if (!Engine::paused()) {
             if (ship.m_IsWarping && ship.m_WarpFactor > 0) {
-                auto& speed = ship.getWarpSpeedVector3();
+                auto speed = ship.getWarpSpeedVector3() * static_cast<decimal>(dt);
                 for (auto& pod : epriv::InternalScenePublicInterface::GetEntities(map)) {
                     Entity e = map.getEntity(pod);
                     const EntityDataRequest dataRequest(e);
@@ -176,9 +177,12 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
                         auto _otherBody = e.getComponent<ComponentBody>(dataRequest);
                         if (_otherBody) {
                             auto& otherBody = *_otherBody;
-                            otherBody.setPosition(otherBody.position() + (speed * static_cast<decimal>(dt)));
+                            otherBody.setPosition(otherBody.position() + speed);
                         }
                     }
+                }
+                for (auto& particle : epriv::InternalScenePublicInterface::GetParticles(map)) {
+                    particle.setPosition(particle.position() + glm::vec3(speed));
                 }
             }
         }

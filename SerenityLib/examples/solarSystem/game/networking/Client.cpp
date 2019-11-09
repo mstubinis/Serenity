@@ -549,16 +549,24 @@ void Client::on_receive_server_approve_map_entry(Packet* basePacket, Menu& menu)
     Math::alignTo(orientation, playerBody.position() - spawn);
     playerBody.setRotation(orientation);
 
+    //TODO: just testing particles here....
+    /*
     glm::vec2 pos;
-    for (size_t i = 0; i < 10; ++i) {
-        for (size_t j = 0; j < 10; ++j) {
+    for (size_t i = 0; i < 50; ++i) {
+        for (size_t j = 0; j < 50; ++j) {
             pos = glm::vec2(i, j);
 
-            ParticleEmitter e(*Fire::m_Properties, map, 160);
+            ParticleEmitter e(*Fire::m_Properties, map, 0.0);
             e.getComponent<ComponentBody>()->setPosition(playerBody.position() + glm_vec3(pos.x, 0, pos.y));
             map.addParticleEmitter(e);
         }
     }
+    */
+    /*
+    ParticleEmitter e(*Fire::m_Properties, map, 0.0);
+    e.getComponent<ComponentBody>()->setPosition(playerBody.position());
+    map.addParticleEmitter(e);
+    */
 
     PacketMessage pOut(pI);
     pOut.PacketType = PacketType::Client_To_Server_Successfully_Entered_Map;

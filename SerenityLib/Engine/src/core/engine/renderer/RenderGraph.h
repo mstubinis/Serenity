@@ -60,6 +60,7 @@ namespace Engine {
                 void render(Viewport& viewport, Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
                 void render_bruteforce(Viewport& viewport, Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
                 void validate_model_instances_for_rendering(Viewport& viewport, Camera& camera);
+
         };
     };
 };

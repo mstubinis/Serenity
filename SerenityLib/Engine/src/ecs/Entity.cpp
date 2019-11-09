@@ -1,4 +1,5 @@
 #include <ecs/Entity.h>
+#include <core/engine/scene/Scene.h>
 
 using namespace Engine;
 using namespace std;

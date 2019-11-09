@@ -31,6 +31,7 @@ string epriv::EShaders::fullscreen_quad_vertex;
 string epriv::EShaders::vertex_basic;
 string epriv::EShaders::vertex_2DAPI;
 string epriv::EShaders::vertex_skybox;
+string epriv::EShaders::particle_vertex;
 string epriv::EShaders::lighting_vert;
 string epriv::EShaders::stencil_passover;
 string epriv::EShaders::depth_of_field;
@@ -45,6 +46,7 @@ string epriv::EShaders::smaa_vertex_4;
 string epriv::EShaders::smaa_frag_4;
 string epriv::EShaders::fxaa_frag;
 string epriv::EShaders::forward_frag;
+string epriv::EShaders::particle_frag;
 string epriv::EShaders::deferred_frag;
 string epriv::EShaders::zprepass_frag;
 string epriv::EShaders::deferred_frag_hud;
@@ -244,6 +246,28 @@ epriv::EShaders::decal_vertex =
 "    CamRealPosition = CameraRealPosition;\n"
 "    TangentCameraPos = TBN * CameraPosition;\n"
 "    TangentFragPos = TBN * worldPos.xyz;\n"
+"}";
+#pragma endregion
+
+#pragma region ParticleVertex
+epriv::EShaders::particle_vertex =
+"USE_LOG_DEPTH_VERTEX\n"
+"\n"
+"layout (location = 0) in vec3 position;\n"
+"layout (location = 1) in vec2 uv;\n"
+"\n"
+"uniform mat4 Model;\n"
+"varying vec2 UV;\n"
+"\n"
+"void main(){\n"
+"    mat4 ModelMatrix = Model;\n"
+"    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
+"    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
+"    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
+
+"    vec4 worldPos = (ModelMatrix * vec4(position, 1.0));\n"
+"    gl_Position = CameraViewProj * worldPos;\n"
+"    UV = uv;\n"
 "}";
 #pragma endregion
 
@@ -1457,6 +1481,21 @@ epriv::EShaders::forward_frag =
     "    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
     "    gl_FragData[3] = inData.diffuse;\n"
     "\n"
+    "}";
+#pragma endregion
+
+#pragma region ParticleFrag
+epriv::EShaders::particle_frag =
+    "\n"
+    "USE_LOG_DEPTH_FRAGMENT\n"
+    "\n"
+    "uniform sampler2D DiffuseTexture;\n"
+    "uniform vec4 Object_Color;\n"
+    "varying vec2 UV;\n"
+    "void main(){\n"
+    "    vec4 color = Object_Color * texture2D(DiffuseTexture, UV); \n"
+    "    gl_FragData[0] = color;\n"
+    "    gl_FragData[3] = color;\n"
     "}";
 #pragma endregion
 

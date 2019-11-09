@@ -25,6 +25,7 @@ RenderGraph::~RenderGraph() {
 }
 //TODO: correct this
 void RenderGraph::sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
+#ifndef _DEBUG
     const auto& lambda_sorter = [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
         auto& lhsParent = lhs->instance->parent();
         auto& rhsParent = rhs->instance->parent();
@@ -57,8 +58,10 @@ void RenderGraph::sort_bruteforce(Camera& camera, const SortingMode::Mode sortin
         return false;
     };
     std::sort( /*std::execution::par_unseq,*/ instancesTotal.begin(), instancesTotal.end(), lambda_sorter );
+#endif
 }
 void RenderGraph::sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
+#ifndef _DEBUG
     const auto& lambda_sorter = [&camera, sortingMode](InstanceNode* lhs, InstanceNode* rhs) {
         auto& lhsInstance = *lhs->instance;
         auto& rhsInstance = *rhs->instance;
@@ -78,6 +81,7 @@ void RenderGraph::sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode 
         return false;
     };
     std::sort( /*std::execution::par_unseq,*/ instancesTotal.begin(), instancesTotal.end(), lambda_sorter );
+#endif
 }
 
 void RenderGraph::sort_cheap(Camera& camera, const SortingMode::Mode sortingMode) {

@@ -19,14 +19,17 @@ class  DirectionalLight;
 class  PointLight;
 class  SpotLight;
 class  RodLight;
+class  ShaderProgram;
 
 class  Viewport;
 class  Skybox;
 class  ModelInstance;
 class  ParticleEmitter;
+class  Particle;
 struct Entity;
 
 #define NUMBER_OF_PARTICLE_EMITTERS_LIMIT 1000
+#define NUMBER_OF_PARTICLE_LIMIT 1000000
 
 namespace Engine {
     namespace epriv {
@@ -95,6 +98,7 @@ namespace Engine {
             friend class Scene;
             friend class Engine::epriv::RenderGraph;
 
+            static std::vector<Particle>&            GetParticles(Scene&);
             static std::vector<EntityPOD>&           GetEntities(Scene&);
             static std::vector<Viewport*>&           GetViewports(Scene&);
             static std::vector<Camera*>&             GetCameras(Scene&);
@@ -115,6 +119,7 @@ namespace Engine {
             static void           RenderForwardTransparentTrianglesSorted(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);
             static void           RenderForwardParticles(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);
             static void           RenderDecals(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);
+            static void           RenderParticles(Scene&, Viewport&, Camera&, ShaderProgram& program);
 
             static void           AddModelInstanceToPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
             static void           RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);

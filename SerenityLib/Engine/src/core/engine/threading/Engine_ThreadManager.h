@@ -71,23 +71,26 @@ namespace threading{
         return outVec;
     }
     //creates a vector of pairs, each pair contains a start and ending index to iterate over a very large single vector
-    template<typename T> std::vector<std::pair<int, int>> splitVectorPairs(const std::vector<T>& v, size_t num_cores = 0) {
+    template<typename T> std::vector<std::pair<unsigned int, unsigned int>> splitVectorPairs(const std::vector<T>& v, size_t num_cores = 0) {
         if (num_cores == 0)
             num_cores = Core::m_Engine->m_ThreadManager.cores();
         const auto vector_size = v.size();
-        std::vector<std::pair<int,int>> outVec;
+        std::vector<std::pair<unsigned int, unsigned int>> outVec;
         outVec.reserve(num_cores);
 
-        int c = (int)vector_size / num_cores;
-        int remainder = vector_size % num_cores; /* Likely uses the result of the division. */
+        unsigned int c = (unsigned int)vector_size / num_cores;
+        unsigned int remainder = vector_size % num_cores; /* Likely uses the result of the division. */
 
         size_t accumulator = 0;
 
-        std::pair<int, int> res;
-        int b;
-        int e = (num_cores - remainder);
-        for (size_t i = 0; i < num_cores; ++i) { //for each core
-            b = accumulator + (c - 1);
+        std::pair<unsigned int, unsigned int> res;
+        unsigned int b;
+        unsigned int e = (num_cores - remainder);
+        for (size_t i = 0; i < std::min(num_cores, vector_size); ++i) {
+            if (c == 0)
+                b = remainder - 1;
+            else
+                b = accumulator + (c - 1);
             if (i == e) {
                 if (i != (num_cores - remainder)) {
                     ++accumulator;

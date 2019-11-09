@@ -22,6 +22,7 @@ namespace epriv{
             static std::string vertex_basic;
             static std::string vertex_2DAPI;
             static std::string vertex_skybox;
+            static std::string particle_vertex;
                 
             static std::string lighting_vert;
             static std::string stencil_passover;
@@ -41,6 +42,7 @@ namespace epriv{
             static std::string fxaa_frag;
 
             static std::string forward_frag;
+            static std::string particle_frag;
             static std::string deferred_frag;
             static std::string zprepass_frag;
             static std::string deferred_frag_hud;

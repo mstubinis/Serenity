@@ -43,7 +43,6 @@ ParticleEmissionProperties ParticleEmissionProperties::DefaultProperties;
 ParticleEmissionProperties::ParticleEmissionProperties(){
     m_Lifetime = 4.0;
     m_SpawnRate = 0.4;
-    m_Stage = RenderStage::ForwardParticles;
 
     setColorFunctor(DefaultColorFunctor());
     setChangeInAngularVelocityFunctor(DefaultAngularVelocityFunctor());
@@ -56,11 +55,10 @@ ParticleEmissionProperties::ParticleEmissionProperties(){
     setInitialAngularVelocityFunctor(DefaultInitialAngularVelocityFunctor());
 }
 
-ParticleEmissionProperties::ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate, const RenderStage::Stage stage):ParticleEmissionProperties(){
+ParticleEmissionProperties::ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate):ParticleEmissionProperties(){
     m_Lifetime = lifeTime;
     m_SpawnRate = spawnRate;
     m_ParticleMaterials.push_back(Resources::getMaterial(materialHandle));
-    m_Stage = stage;
 }
 ParticleEmissionProperties::~ParticleEmissionProperties() {
 

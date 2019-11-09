@@ -106,6 +106,8 @@ namespace Engine{
             SMAAFrag2,
             SMAAFrag3,
             SMAAFrag4,
+            ParticleVertex,
+            ParticleFrag,
         _TOTAL};};
         struct EngineInternalShaderPrograms final{enum Program{
             BulletPhysics,
@@ -135,6 +137,7 @@ namespace Engine{
             SMAA2,
             SMAA3,
             SMAA4,
+            Particle,
         _TOTAL};};
 
         struct UBOCamera final{
@@ -288,6 +291,9 @@ class epriv::RenderManager::impl final{
             epriv::threading::addJob(emplaceShader, 38, boost::ref(EShaders::smaa_frag_2), boost::ref(m_InternalShaders), ShaderType::Fragment);
             epriv::threading::addJob(emplaceShader, 39, boost::ref(EShaders::smaa_frag_3), boost::ref(m_InternalShaders), ShaderType::Fragment);
             epriv::threading::addJob(emplaceShader, 40, boost::ref(EShaders::smaa_frag_4), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 41, boost::ref(EShaders::particle_vertex), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            epriv::threading::addJob(emplaceShader, 42, boost::ref(EShaders::particle_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+
 
             epriv::threading::waitForAll();
 
@@ -322,7 +328,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA2] = new ShaderProgram("Deferred_SMAA_2", *m_InternalShaders[EngineInternalShaders::SMAAVertex2], *m_InternalShaders[EngineInternalShaders::SMAAFrag2]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3] = new ShaderProgram("Deferred_SMAA_3", *m_InternalShaders[EngineInternalShaders::SMAAVertex3], *m_InternalShaders[EngineInternalShaders::SMAAFrag3]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4] = new ShaderProgram("Deferred_SMAA_4", *m_InternalShaders[EngineInternalShaders::SMAAVertex4], *m_InternalShaders[EngineInternalShaders::SMAAFrag4]);
-
+            m_InternalShaderPrograms[EngineInternalShaderPrograms::Particle] = new ShaderProgram("Particle", *m_InternalShaders[EngineInternalShaders::ParticleVertex], *m_InternalShaders[EngineInternalShaders::ParticleFrag]);
 #pragma endregion
 
 #pragma region MeshData
@@ -1653,6 +1659,8 @@ class epriv::RenderManager::impl final{
             glDepthMask(GL_FALSE);
             InternalScenePublicInterface::RenderDecals(scene, viewport, camera);
             InternalScenePublicInterface::RenderForwardParticles(scene, viewport, camera);
+            InternalScenePublicInterface::RenderParticles(scene, viewport, camera, *m_InternalShaderPrograms[EngineInternalShaderPrograms::Particle]);
+
             GLDisablei(GL_BLEND, 0); //this is needed for smaa at least
             GLDisablei(GL_BLEND, 1);
             GLDisablei(GL_BLEND, 2);

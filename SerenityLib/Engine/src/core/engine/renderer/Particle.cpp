@@ -5,39 +5,13 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
+#include <core/engine/scene/Scene.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/math/Engine_Math.h>
 
 using namespace std;
 using namespace Engine;
-
-struct DefaultParticleBindFunctor { void operator()(EngineResource* r) const {
-    auto& i = *static_cast<ModelInstance*>(r);
-    const auto& stage = i.stage();
-    auto& scene = *Resources::getCurrentScene();
-    Camera& camera = *scene.getActiveCamera();
-    glm::vec3 camPos = camera.getPosition();
-    Entity& parent = i.parent();
-    auto& body = *(parent.getComponent<ComponentBody>());
-    glm::mat4 parentModel = body.modelMatrixRendering();
-
-
-    Renderer::sendUniform4Safe("Object_Color", i.color());
-    Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
-
-    Renderer::sendUniform1Safe("AnimationPlaying", 0);
-    
-    glm::mat4 modelMatrix = parentModel * i.modelMatrix();
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
-
-    Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
-    Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
-}};
-struct DefaultParticleUnbindFunctor { void operator()(EngineResource* r) const {
-    //auto& i = *static_cast<ModelInstance*>(r);
-}};
-
 
 ParticleData::ParticleData(){
     m_Properties = &ParticleEmissionProperties::DefaultProperties;
@@ -117,120 +91,76 @@ ParticleData& ParticleData::operator=(ParticleData&& other) noexcept {
 
 
 
+Particle::Particle(){
+    m_Scene = Resources::getCurrentScene();
+    m_Hidden = false;
+    m_PassedRenderCheck = false;
+    m_Position = glm::vec3(0.0f);
+    m_Material = Material::Checkers;
+}
 
-Particle::Particle() : EntityWrapper(*Resources::getCurrentScene()){}
-
-Particle::Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmissionProperties& properties, Scene& scene, const RenderStage::Stage stage) : EntityWrapper(scene){
-    auto& randMat = const_cast<Material&>(properties.getParticleMaterialRandom());
-
-    auto& particleBody = *addComponent<ComponentBody>();
-    auto& particleModel = *addComponent<ComponentModel>(Mesh::Plane, &randMat, ShaderProgram::Forward, RenderStage::ForwardParticles);
-    particleModel.setCustomBindFunctor(DefaultParticleBindFunctor());
-    particleModel.setCustomUnbindFunctor(DefaultParticleUnbindFunctor());
+Particle::Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmissionProperties& properties, Scene& scene){
+    m_Scene = &scene;
+    m_Material = &const_cast<Material&>(properties.getParticleMaterialRandom());
 
     auto data = ParticleData(properties);
-    init(data, emitterPosition, emitterRotation, particleBody, particleModel);
+    init(data, emitterPosition, emitterRotation);
 }
-void Particle::init(ParticleData& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ComponentBody& particleBody, ComponentModel& particleModel) {
+void Particle::init(ParticleData& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
     m_Data = data;
-    particleBody.setPosition(emitterPosition);
+    m_Data.m_Active = true;
+    m_Position = emitterPosition;
     m_Data.m_Velocity = Math::rotate_vec3(emitterRotation, m_Data.m_Velocity);
-    particleModel.show();
+    m_Hidden = false;
+    m_PassedRenderCheck = false;
 }
 Particle::~Particle() {
 
 }
-Particle::Particle(const Particle& other) : EntityWrapper(other) {
+Particle::Particle(const Particle& other){
     m_Data = other.m_Data;
+    m_Scene = other.m_Scene;
+    m_Hidden = other.m_Hidden;
+    m_Position = other.m_Position;
+    m_PassedRenderCheck = other.m_PassedRenderCheck;
+    m_Material = other.m_Material;
 }
 Particle& Particle::operator=(const Particle& other) {
     if (&other == this)
         return *this;
     m_Data = other.m_Data;
+    m_Scene = other.m_Scene;
+    m_Hidden = other.m_Hidden;
+    m_Position = other.m_Position;
+    m_PassedRenderCheck = other.m_PassedRenderCheck;
+    m_Material = other.m_Material;
     return *this;
 }
-Particle::Particle(Particle&& other) noexcept : EntityWrapper(other) {
+Particle::Particle(Particle&& other) noexcept {
     using std::swap;
     swap(m_Data, other.m_Data);
+    swap(m_Scene, other.m_Scene);
+    swap(m_Hidden, other.m_Hidden);
+    swap(m_Position, other.m_Position);
+    swap(m_PassedRenderCheck, other.m_PassedRenderCheck);
+    swap(m_Material, other.m_Material);
 }
 Particle& Particle::operator=(Particle&& other) noexcept {
     using std::swap;
     swap(m_Data, other.m_Data);
+    swap(m_Scene, other.m_Scene);
+    swap(m_Hidden, other.m_Hidden);
+    swap(m_Position, other.m_Position);
+    swap(m_PassedRenderCheck, other.m_PassedRenderCheck);
+    swap(m_Material, other.m_Material);
     return *this;
 }
 
-
-
-
-void Particle::update(const double& dt) {
-    if (m_Data.m_Active) {
-        m_Data.m_Timer += dt;
-        const auto fdt = static_cast<float>(dt);
-        auto& prop = *m_Data.m_Properties;
-        auto& bodyComponent = *getComponent<ComponentBody>();
-        auto& modelComponent = *getComponent<ComponentModel>();
-        auto& instance = modelComponent.getModel();
-        auto& camera = *entity().scene().getActiveCamera();
-
-        m_Data.m_Scale           += prop.m_ChangeInScaleFunctor(m_Data.m_Timer, dt);
-        m_Data.m_Color            = prop.m_ColorFunctor(m_Data.m_Timer, dt);
-        m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt);
-        m_Data.m_Angle           += m_Data.m_AngularVelocity;
-        m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt);
-        m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt);
-
-        bodyComponent.translate(m_Data.m_Velocity * fdt, false);
-        bodyComponent.setRotation(camera.getOrientation());
-        bodyComponent.rotate(0, 0, static_cast<decimal>(m_Data.m_Angle));
-        instance.setColor(m_Data.m_Color);
-        instance.setScale(m_Data.m_Scale.x, m_Data.m_Scale.y, 1.0f);
-        //instance.rotate(0, 0, m_Data.m_Angle);
-
-        auto vec = glm::normalize(bodyComponent.position() - camera.getPosition()) * static_cast<decimal>(m_Data.m_Depth);
-        instance.setPosition(glm::vec3(vec));
-        if (m_Data.m_Timer >= prop.m_Lifetime) {
-            m_Data.m_Active = false;
-            m_Data.m_Timer = 0.0;
-            modelComponent.hide();
-        }
-    }
+void Particle::setPosition(const glm::vec3& newPosition) {
+    m_Position = newPosition;
 }
-void Particle::update_multithreaded(const double& dt, mutex& mutex_) {
-    if (m_Data.m_Active) {
-        m_Data.m_Timer += dt;
-        const auto fdt = static_cast<float>(dt);
-        auto& prop = *m_Data.m_Properties;
-        auto& camera = *entity().scene().getActiveCamera();
-        mutex_.lock();
-        auto& bodyComponent = *getComponent<ComponentBody>();
-        auto& modelComponent = *getComponent<ComponentModel>();
-        auto& bodyPos = bodyComponent.position();
-        auto& cameraPos = camera.getPosition();
-        mutex_.unlock();
-        auto& instance = modelComponent.getModel();
-
-        m_Data.m_Scale += prop.m_ChangeInScaleFunctor(m_Data.m_Timer, dt);
-        m_Data.m_Color = prop.m_ColorFunctor(m_Data.m_Timer, dt);
-        m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt);
-        m_Data.m_Angle += m_Data.m_AngularVelocity;
-        m_Data.m_Velocity += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt);
-        m_Data.m_Depth = prop.m_DepthFunctor(m_Data.m_Timer, dt);
-
-        bodyComponent.translate(m_Data.m_Velocity * fdt, false);
-        bodyComponent.setRotation(camera.getOrientation());
-        bodyComponent.rotate(0, 0, static_cast<decimal>(m_Data.m_Angle));
-        instance.setColor(m_Data.m_Color);
-        instance.setScale(m_Data.m_Scale.x, m_Data.m_Scale.y, 1.0f);
-        //instance.rotate(0, 0, m_Data.m_Angle);
-
-        auto vec = glm::normalize(bodyPos - cameraPos) * static_cast<decimal>(m_Data.m_Depth);
-        instance.setPosition(glm::vec3(vec));
-        if (m_Data.m_Timer >= prop.m_Lifetime) {
-            m_Data.m_Active = false;
-            m_Data.m_Timer = 0.0;
-            modelComponent.hide();
-        }
-    }
+const glm::vec3& Particle::position() const {
+    return m_Position;
 }
 const bool& Particle::isActive() const {
     return m_Data.m_Active;
@@ -243,4 +173,54 @@ const glm::vec3& Particle::velocity() const {
 }
 const double Particle::lifetime() const {
     return m_Data.m_Properties->m_Lifetime;
+}
+
+
+
+void Particle::update(const size_t& index, stack<unsigned int>& freelist, const double& dt) {
+    if (m_Data.m_Active) {
+        m_Data.m_Timer += dt;
+        const auto fdt = static_cast<float>(dt);
+        auto& prop = *m_Data.m_Properties;
+        
+        m_Data.m_Scale           += prop.m_ChangeInScaleFunctor(m_Data.m_Timer, dt);
+        m_Data.m_Color            = prop.m_ColorFunctor(m_Data.m_Timer, dt);
+        m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt);
+        m_Data.m_Angle           += m_Data.m_AngularVelocity;
+        m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt);
+        m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt);
+
+        m_Position               += (m_Data.m_Velocity * fdt);
+
+        
+        //auto& camera = *m_Scene->getActiveCamera();
+        //auto vec = glm::normalize(bodyComponent.position() - camera.getPosition()) * static_cast<decimal>(m_Data.m_Depth);
+        //instance.setPosition(glm::vec3(vec));
+        if (m_Data.m_Timer >= prop.m_Lifetime) {
+            m_Data.m_Active = false;
+            m_Data.m_Timer = 0.0;
+            m_Hidden = true;
+            freelist.push(index);
+        }
+    }
+}
+void Particle::update_multithreaded(const size_t& index, stack<unsigned int>& freelist, const double& dt, mutex& mutex_) {
+
+}
+void Particle::render() {
+    m_Material->bind();
+
+    Camera& camera = *m_Scene->getActiveCamera();
+
+    Renderer::sendUniform4Safe("Object_Color", m_Data.m_Color);
+
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, m_Position);
+    modelMatrix *= glm::mat4_cast(camera.getOrientation());
+    modelMatrix = glm::rotate(modelMatrix, m_Data.m_Angle, glm::vec3(0, 0, 1));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(m_Data.m_Scale.x, m_Data.m_Scale.y, 1.0f));
+
+    Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+
+    Mesh::Plane->render();
 }

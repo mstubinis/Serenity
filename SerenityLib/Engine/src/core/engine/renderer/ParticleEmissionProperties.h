@@ -33,13 +33,12 @@ class ParticleEmissionProperties final {
         std::function<glm::vec2()>   m_InitialScaleFunctor;
         std::function<float()>       m_InitialAngularVelocityFunctor;
 
-        RenderStage::Stage      m_Stage;
         std::vector<Material*>  m_ParticleMaterials;
         double                  m_Lifetime;
         double                  m_SpawnRate;
     public:
         ParticleEmissionProperties();
-        ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate, const RenderStage::Stage = RenderStage::ForwardParticles);
+        ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate);
         ~ParticleEmissionProperties();    
 
 
