@@ -36,12 +36,12 @@ struct KlingonPhotonTorpedoCollisionFunctor final { void operator()(CollisionCal
                     auto& torpedo = *static_cast<KlingonPhotonTorpedo*>(data.ownerBody.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = data.otherHit - glm::vec3(data.otherBody.position());
+                    auto modelSpacePosition = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * data.otherBody.rotation());
 
                     if (shields && data.otherBody.getUserPointer() == shields) {
-                        const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
+                        const uint shieldSide = static_cast<uint>(shields->getImpactSide(modelSpacePosition));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
-                            torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, local, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
+                            torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
                             return;
                         }
                     }
@@ -50,12 +50,12 @@ struct KlingonPhotonTorpedoCollisionFunctor final { void operator()(CollisionCal
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                             if (shields->getHealthCurrent(shieldSide) > 0) {
-                                torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, local, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
+                                torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
                                 return;
                             }
                         }
                         */
-                        torpedoProjectile.clientToServerImpactHull(false, torpedo.m_Map.getClient(), *otherShip, local, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime);
+                        torpedoProjectile.clientToServerImpactHull(false, torpedo.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, data.otherModelInstanceIndex);
                     }
                 }
             }

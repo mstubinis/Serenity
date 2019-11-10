@@ -20,13 +20,11 @@ void Collision::_init(ComponentBody* body, vector<ModelInstance*>& modelInstance
     for (size_t i = 0; i < modelInstances.size(); ++i) {
         auto& instance = *modelInstances[i];
         auto* mesh = instance.mesh();
-        btCollisionShape* btShape = InternalMeshPublicInterface::BuildCollision(mesh, _type);
-        btShape->setUserPointer(body);
+        btCollisionShape* btShape = InternalMeshPublicInterface::BuildCollision(&instance, _type, true);
         localTransform = btTransform(Math::glmToBTQuat(instance.orientation()), Math::btVectorFromGLM(instance.position()));
         btShape->setMargin(0.001f);
-        btCompound->addChildShape(localTransform, btShape);
         btShape->calculateLocalInertia(_mass, m_BtInertia); //this is important
-        btShape->setUserPointer(&instance.m_Index);
+        btCompound->addChildShape(localTransform, btShape);
     }
     btCompound->setMargin(0.001f);
     btCompound->recalculateLocalAabb();
@@ -50,12 +48,20 @@ Collision::Collision(btHeightfieldTerrainShape& heightField, const CollisionType
     _baseInit(_type, _mass);
     m_BtShape = &heightField;
 }
-Collision::Collision(const CollisionType::Type _type, Mesh* _mesh, const float& _mass) {
+
+Collision::Collision(const CollisionType::Type _type, ModelInstance* modelInstance, const float& _mass) {
     //construtor
-    btCollisionShape* btShape = InternalMeshPublicInterface::BuildCollision(_mesh, _type);
+    btCollisionShape* btShape = InternalMeshPublicInterface::BuildCollision(modelInstance, _type);
     m_BtShape = btShape;
     _baseInit(_type, _mass);
 }
+Collision::Collision(const CollisionType::Type _type, Mesh& mesh, const float& _mass) {
+    //construtor
+    btCollisionShape* btShape = InternalMeshPublicInterface::BuildCollision(&mesh, _type);
+    m_BtShape = btShape;
+    _baseInit(_type, _mass);
+}
+
 Collision::Collision(ComponentBody* body, ComponentModel& _modelComponent, const float& _mass, const CollisionType::Type _type) {
     //construtor
     vector<ModelInstance*> modelInstances;

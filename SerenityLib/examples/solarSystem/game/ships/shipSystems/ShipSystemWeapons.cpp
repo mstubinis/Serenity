@@ -144,16 +144,17 @@ void WeaponProjectile::destroy() {
         destroyed = true;
     }
 }
-void WeaponProjectile::clientToServerImpactShields(const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const unsigned int& shield_face) {
+void WeaponProjectile::clientToServerImpactShields(const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactModelSpacePosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const unsigned int& shield_face) {
     PacketProjectileImpact packet;
     if(cannon)
         packet.PacketType = PacketType::Client_To_Server_Projectile_Cannon_Impact;
     else
         packet.PacketType = PacketType::Client_To_Server_Projectile_Torpedo_Impact;
     packet.damage = damage;
-    packet.impactX = impactLocalPosition.x;
-    packet.impactY = impactLocalPosition.y;
-    packet.impactZ = impactLocalPosition.z;
+    packet.model_index = 0;
+    packet.impactX = impactModelSpacePosition.x;
+    packet.impactY = impactModelSpacePosition.y;
+    packet.impactZ = impactModelSpacePosition.z;
     packet.shields = true;
     packet.shield_side = shield_face;
     packet.data = shipHit.getName() + ",";
@@ -166,16 +167,17 @@ void WeaponProjectile::clientToServerImpactShields(const bool cannon, Client& cl
     active = false;
     client.send(packet);
 }
-void WeaponProjectile::clientToServerImpactHull(const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time) {
+void WeaponProjectile::clientToServerImpactHull(const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactModelSpacePosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const size_t modelIndex) {
     PacketProjectileImpact packet;
     if (cannon)
         packet.PacketType = PacketType::Client_To_Server_Projectile_Cannon_Impact;
     else
         packet.PacketType = PacketType::Client_To_Server_Projectile_Torpedo_Impact;
     packet.damage = damage;
-    packet.impactX = impactLocalPosition.x;
-    packet.impactY = impactLocalPosition.y;
-    packet.impactZ = impactLocalPosition.z;
+    packet.model_index = static_cast<int>(modelIndex);
+    packet.impactX = impactModelSpacePosition.x;
+    packet.impactY = impactModelSpacePosition.y;
+    packet.impactZ = impactModelSpacePosition.z;
     packet.shields = false;
     packet.shield_side = -1;
     packet.data = shipHit.getName() + ",";

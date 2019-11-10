@@ -34,12 +34,12 @@ struct PulsePhaserCollisionFunctor final { void operator()(CollisionCallbackEven
                     auto& weapon = *static_cast<PulsePhaser*>(data.ownerBody.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    const auto local = data.otherHit - glm::vec3(data.otherBody.position());
+                    auto modelSpacePosition = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * data.otherBody.rotation());
 
                     if (shields && data.otherBody.getUserPointer() == shields) {
-                        const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
+                        const uint shieldSide = static_cast<uint>(shields->getImpactSide(modelSpacePosition));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
-                            cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, local, data.normal, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
+                            cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
                             return;
                         }
                     }
@@ -48,12 +48,12 @@ struct PulsePhaserCollisionFunctor final { void operator()(CollisionCallbackEven
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                             if (shields->getHealthCurrent(shieldSide) > 0) {
-                                cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, local, data.normal, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
+                                cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
                                 return;
                             }
                         }
                         */
-                        cannonProjectile.clientToServerImpactHull(true, weapon.m_Map.getClient(), *otherShip, local, data.normal, weapon.impactRadius, weapon.damage, weapon.impactTime);
+                        cannonProjectile.clientToServerImpactHull(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, weapon.impactRadius, weapon.damage, weapon.impactTime, data.otherModelInstanceIndex);
                     }
                 }
             }

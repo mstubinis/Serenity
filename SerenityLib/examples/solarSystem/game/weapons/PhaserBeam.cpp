@@ -38,26 +38,26 @@ struct PhaserBeamCollisionFunctor final { void operator()(CollisionCallbackEvent
                     Ship* sourceShip = static_cast<Ship*>(phaserShipVoid);
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * data.otherBody.rotation());
+                    auto modelSpacePosition = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * data.otherBody.rotation());
                     auto finalDamage = static_cast<float>(Resources::dt()) * weapon.damage;
                     if (shields && data.otherBody.getUserPointer() == shields) {
-                        const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
+                        const uint shieldSide = static_cast<uint>(shields->getImpactSide(modelSpacePosition));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
                             if (weapon.firingTimeShieldGraphicPing > 0.2f) {
-                                shields->receiveHit(data.normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
+                                shields->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
                                 weapon.firingTimeShieldGraphicPing = 0.0f;
                             }else{
-                                shields->receiveHit(data.normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
+                                shields->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
                             }
                             return;
                         }
                     }
                     if (hull && data.otherBody.getUserPointer() == hull) {
                         if (weapon.firingTimeShieldGraphicPing > 1.0f) {
-                            hull->receiveHit(data.normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, true, true);
+                            hull->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, true, true);
                             weapon.firingTimeShieldGraphicPing = 0.0f;
                         }else{
-                            hull->receiveHit(data.normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, false, false);
+                            hull->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, false, false);
                         }
                     }
                 }
@@ -361,7 +361,8 @@ void PhaserBeam::update(const double& dt) {
         Ship* targetShip = dynamic_cast<Ship*>(target);
         if (targetShip) {
             auto* targetShields = static_cast<ShipSystemShields*>(targetShip->getShipSystem(ShipSystemType::Shields));
-            const auto side = targetShields->getImpactSide(closest->hitPosition - glm::vec3(targetShip->getPosition()));
+            auto positionModelSpace = (closest->hitPosition - glm::vec3(targetShip->getPosition())) * glm::quat(targetShip->getRotation());
+            const auto side = targetShields->getImpactSide(positionModelSpace);
             if (targetShields->getHealthCurrent(side) <= 0.0f) {
                 rayCastPoints.erase(rayCastPoints.begin() + closestIndex);
             }
@@ -491,7 +492,8 @@ void PhaserBeam::update(const double& dt) {
         Ship* targetShip = dynamic_cast<Ship*>(target);
         if (targetShip) {
             auto* targetShields = static_cast<ShipSystemShields*>(targetShip->getShipSystem(ShipSystemType::Shields));
-            const auto side = targetShields->getImpactSide(closest->hitPosition - glm::vec3(targetShip->getPosition()));
+            auto positionModelSpace = (closest->hitPosition - glm::vec3(targetShip->getPosition())) * glm::quat(targetShip->getRotation());
+            const auto side = targetShields->getImpactSide(positionModelSpace);
             if (targetShields->getHealthCurrent(side) <= 0.0f) {
                 rayCastPoints.erase(rayCastPoints.begin() + closestIndex);
             }

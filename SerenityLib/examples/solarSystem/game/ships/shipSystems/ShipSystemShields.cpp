@@ -23,19 +23,16 @@ using namespace std;
 #pragma region Plane
 
 ShipSystemShields::Plane::Plane() {
-    a = b = c = glm::vec3(0.0f);
+    a = b = c = normal = glm::vec3(0.0f);
 }
 ShipSystemShields::Plane::Plane(const glm::vec3& _a, const glm::vec3& _b, const glm::vec3& _c) {
     a = _a;
     b = _b;
     c = _c;
+    normal = glm::normalize(glm::cross(b - a, c - a));
 }
-const float ShipSystemShields::Plane::CalcSide(const glm::vec3& point, const glm::quat& rot) {
-    glm::vec3 tempA = rot * a;
-    glm::vec3 tempB = rot * b;
-    glm::vec3 tempC = rot * c;
-    glm::vec3 tempN = glm::normalize(glm::cross(tempB - tempA, tempC - tempA));
-    return glm::dot(point, tempN);
+const float ShipSystemShields::Plane::CalcSide(const glm::vec3& impactLocationModelSpace) {
+    return glm::dot(impactLocationModelSpace, normal);
 }
 
 #pragma endregion
@@ -60,9 +57,9 @@ ShipSystemShields::Pyramid::Pyramid(const glm::vec3& A, const glm::vec3& B, cons
     planes[4] = frontTopLeft;
     planes[5] = frontBottomRight;
 }
-const bool ShipSystemShields::Pyramid::isInside(const glm::vec3& point, const glm::quat& rot) {
+const bool ShipSystemShields::Pyramid::isInside(const glm::vec3& impactLocationModelSpace) {
     for (auto& plane : planes) {
-        const float res = plane.CalcSide(point, rot);
+        const float res = plane.CalcSide(impactLocationModelSpace);
         if (res > 0.0f) {
             return false;
         }
@@ -109,7 +106,7 @@ struct ShieldInstanceBindFunctor {void operator()(EngineResource* r) const {
     for (uint i = 0; i < MAX_IMPACT_POINTS; ++i) {
         auto& impact = shields.m_ImpactPoints[i];
         if (impact.active) {
-            glm::vec3 worldPosition = finalModelPosition + impact.impactLocation;
+            glm::vec3 worldPosition = finalModelPosition + glm::vec3(Math::rotate_vec3(body.rotation(), impact.impactLocation));
             Renderer::sendUniform3Safe(("impacts[" + to_string(count) + "].Position").c_str(), worldPosition);
             Renderer::sendUniform3Safe(("impacts[" + to_string(count) + "].Data").c_str(), impact.impactRadius, impact.currentTime, impact.maxTime);
             ++count;
@@ -166,7 +163,7 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, con
     shieldBody.setUserPointer(this);
     shieldBody.setUserPointer1(&_ship);
     shieldBody.setUserPointer2(&_ship);
-    Mesh* shieldColMesh = (Mesh*)ResourceManifest::ShieldColMesh.get();
+    Mesh& shieldColMesh = *(Mesh*)ResourceManifest::ShieldColMesh.get();
     Collision* c = new Collision(CollisionType::TriangleShapeStatic, shieldColMesh, shieldBody.mass());
     c->getBtShape()->setMargin(0.08f);
     shieldBody.setCollision(c);
@@ -320,10 +317,9 @@ void ShipSystemShields::update(const double& dt) {
 const glm::vec3& ShipSystemShields::getAdditionalShieldSizeScale() const {
     return m_AdditionalShieldScale;
 }
-ShipSystemShields::ShieldSide::Side ShipSystemShields::getImpactSide(const glm::vec3& impactLocationLocal) {
-    const auto& rot = m_Ship.getRotation();
+ShipSystemShields::ShieldSide::Side ShipSystemShields::getImpactSide(const glm::vec3& impactLocationModelSpace) {
     for (uint i = 0; i < m_Pyramids.size(); ++i) {
-        const auto res = m_Pyramids[i].isInside(impactLocationLocal, rot);
+        const auto res = m_Pyramids[i].isInside(impactLocationModelSpace);
         if (res == true) {
             return static_cast<ShipSystemShields::ShieldSide::Side>(i);
         }
@@ -348,14 +344,14 @@ const string ShipSystemShields::getImpactSideString(const ShieldSide::Side side)
     return "Error";
 }
 
-void ShipSystemShields::addShieldImpact(const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime) {
+void ShipSystemShields::addShieldImpact(const glm::vec3& impactModelSpacePosition, const float& impactRadius, const float& maxTime) {
     if (m_ImpactPointsFreelist.size() > 0) {
         auto nextIndex = m_ImpactPointsFreelist[0];
         auto& impactPointData = m_ImpactPoints[nextIndex];
-        impactPointData.impact(impactLocationLocal, impactRadius, maxTime, m_ImpactPointsFreelist);
+        impactPointData.impact(impactModelSpacePosition, impactRadius, maxTime, m_ImpactPointsFreelist);
     }
 }
-void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide, const bool doImpactGraphic) {
+void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactModelSpacePosition, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide, const bool doImpactGraphic) {
     if (m_ShieldsAreUp) {
         if (m_Ship.m_State != ShipState::Destroyed && m_Ship.m_State != ShipState::JustFlaggedAsFullyDestroyed) {
             /*
@@ -375,10 +371,10 @@ void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec
             }else{
                 m_HealthPointsCurrent[shieldSide] = 0.0f;
                 //bleed_damage *= -1.0f;
-                //receiveHitBleedDamage(impactNormal, impactLocationLocal, impactRadius, maxTime, bleed_damage, shieldSide);
+                //receiveHitBleedDamage(impactNormal, impactModelSpacePosition, impactRadius, maxTime, bleed_damage, shieldSide);
             }
             if (doImpactGraphic) {
-                addShieldImpact(impactLocationLocal, impactRadius, maxTime);
+                addShieldImpact(impactModelSpacePosition, impactRadius, maxTime);
             }
         }
     }
@@ -397,7 +393,7 @@ void ShipSystemShields::receiveHitBleedDamage(const glm::vec3& impactNormal, con
     auto* hull = static_cast<ShipSystemHull*>(m_Ship.getShipSystem(ShipSystemType::Hull));
     m_HealthPointsCurrent[shieldSide] = 0.0f;
     if (hull) {
-        hull->receiveHit(impactNormal, impactLocation, impactRadius, maxTime, damage);
+        hull->receiveHit(impactNormal, impactLocation, impactRadius, maxTime, damage, 0); //0 is hard coded model index, but there should not be hull visuals due to bleed damage
     }
 }
 

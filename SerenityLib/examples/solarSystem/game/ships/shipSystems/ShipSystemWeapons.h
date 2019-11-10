@@ -84,7 +84,7 @@ struct WeaponProjectile {
     virtual void destroy();
 
     void clientToServerImpactShields(const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const unsigned int& shieldSide);
-    void clientToServerImpactHull(const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time);
+    void clientToServerImpactHull(const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactLocalPosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const size_t modelIndex);
 
 };
 

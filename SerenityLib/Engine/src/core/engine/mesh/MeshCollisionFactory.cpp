@@ -76,39 +76,48 @@ void epriv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
         m_TriangleStaticShape->recalcLocalAabb();
     }
 }
-btMultiSphereShape* epriv::MeshCollisionFactory::buildSphereShape() {
+btMultiSphereShape* epriv::MeshCollisionFactory::buildSphereShape(ModelInstance* modelInstance, const bool isCompoundChild) {
     const auto& rad = static_cast<btScalar>(m_Mesh.getRadius());
     auto v = btVector3(0, 0, 0);
     btMultiSphereShape* sphere = new btMultiSphereShape(&v, &rad, 1);
     sphere->setMargin(static_cast<btScalar>(0.001));
     sphere->recalcLocalAabb();
+    if(isCompoundChild)
+        sphere->setUserPointer(modelInstance);
     return sphere;
 }
-btBoxShape* epriv::MeshCollisionFactory::buildBoxShape() {
+btBoxShape* epriv::MeshCollisionFactory::buildBoxShape(ModelInstance* modelInstance, const bool isCompoundChild) {
     btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_Mesh.getRadiusBox()));
     box->setMargin(static_cast<btScalar>(0.001));
+    if (isCompoundChild) {
+        box->setUserPointer(modelInstance);
+    }
     return box;
 }
-btUniformScalingShape* epriv::MeshCollisionFactory::buildConvexHull() {
+btUniformScalingShape* epriv::MeshCollisionFactory::buildConvexHull(ModelInstance* modelInstance, const bool isCompoundChild) {
     btUniformScalingShape* uniformScalingShape = new btUniformScalingShape(m_ConvesHullShape, static_cast<btScalar>(1.0));
     uniformScalingShape->setMargin(static_cast<btScalar>(0.001));
+    if (isCompoundChild) {
+        uniformScalingShape->getChildShape()->setUserPointer(modelInstance);
+        uniformScalingShape->setUserPointer(&modelInstance);
+    }
     return uniformScalingShape;
 }
-btScaledBvhTriangleMeshShape* epriv::MeshCollisionFactory::buildTriangleShape() {
-    btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape(
-        m_TriangleStaticShape,
-        btVector3(
-            static_cast<btScalar>(1.0),
-            static_cast<btScalar>(1.0),
-            static_cast<btScalar>(1.0)
-        )
-    );
+btScaledBvhTriangleMeshShape* epriv::MeshCollisionFactory::buildTriangleShape(ModelInstance* modelInstance, const bool isCompoundChild) {
+    btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape, btVector3(static_cast<btScalar>(1.0), static_cast<btScalar>(1.0), static_cast<btScalar>(1.0)));
+    if (isCompoundChild) {
+        scaledBVH->getChildShape()->setUserPointer(modelInstance);
+        scaledBVH->setUserPointer(modelInstance);
+    }
     return scaledBVH;
 }
-btGImpactMeshShape* epriv::MeshCollisionFactory::buildTriangleShapeGImpact() {
+btGImpactMeshShape* epriv::MeshCollisionFactory::buildTriangleShapeGImpact(ModelInstance* modelInstance, const bool isCompoundChild) {
     btGImpactMeshShape* gImpact = new btGImpactMeshShape(m_TriangleStaticData);
     gImpact->setMargin(static_cast<btScalar>(0.001));
     gImpact->updateBound();
     gImpact->postUpdate();
+    if (isCompoundChild) {
+        gImpact->setUserPointer(modelInstance);
+    }
     return gImpact;
 }

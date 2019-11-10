@@ -50,8 +50,8 @@ void ShipSystemHull::destroy() {
     m_HullEntity.destroy();
     m_RechargeTimer = 0.0f;
 }
-void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const bool forceHullFire) {
-
+void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const size_t modelIndex, const bool forceHullFire) {
+    std::cout << modelIndex << "\n";
     auto shipRotation = m_Ship.getRotation();
     auto lamda_apply_random_emitter = [&]() {
         auto rand = Helper::GetRandomIntFromTo(0, 100);
@@ -71,8 +71,7 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
 
             auto* emitter = m_Map.addParticleEmitter(emitter_);
             if (emitter) {
-                //TODO: change modelIndex from 0 to actual value... will require some thinking on my part
-                m_Ship.m_EmittersDestruction.push_back(std::make_tuple(emitter, static_cast<size_t>(0), impactLocationLocal, q));
+                m_Ship.m_EmittersDestruction.push_back(std::make_tuple(emitter, modelIndex, impactLocationLocal, q));
             }
         }
     };
@@ -148,10 +147,10 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
     }
 }
-void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const bool forceHullFire, const bool paint) {
+void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactModelSpacePosition, const float& impactRadius, const float damage, const size_t modelIndex, const bool forceHullFire, const bool paint) {
     receiveCollisionDamage(damage);
     if (paint) {
-        applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, forceHullFire);
+        applyDamageDecal(impactNormal, impactModelSpacePosition, impactRadius, modelIndex, forceHullFire);
     }
 }
 void ShipSystemHull::receiveCollisionDamage(const float damage) {
@@ -167,8 +166,8 @@ void ShipSystemHull::receiveCollisionDamage(const float damage) {
         }
     }
 }
-void ShipSystemHull::receiveCollisionVisual(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius) {
-    applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, true);
+void ShipSystemHull::receiveCollisionVisual(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const size_t modelIndex) {
+    applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, modelIndex, true);
 }
 
 void ShipSystemHull::update(const double& dt) {

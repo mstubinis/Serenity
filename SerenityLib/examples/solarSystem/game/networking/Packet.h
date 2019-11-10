@@ -122,17 +122,17 @@ struct PacketProjectileImpact : public Packet {
     float impactX, impactY, impactZ, damage;
     uint16_t normalX, normalY, normalZ, time, radius; //half floats
     bool shields;
-    int projectile_index;
+    int projectile_index, model_index;
     int shield_side;
     PacketProjectileImpact() {
         damage = impactX = impactY = impactZ = 0.0f;
-        time = radius = normalZ = normalY = normalX = projectile_index = shields = shield_side = 0;
+        time = radius = normalZ = normalY = normalX = projectile_index = model_index = shields = shield_side = 0;
     }
     bool validate(sf::Packet& sfPacket) {
-        return (sfPacket >> PacketType >> data >> impactX >> impactY >> impactZ >> damage >> normalX >> normalY >> normalZ >> time >> radius >> shields >> projectile_index >> shield_side);
+        return (sfPacket >> PacketType >> data >> impactX >> impactY >> impactZ >> damage >> normalX >> normalY >> normalZ >> time >> radius >> shields >> projectile_index >> model_index >> shield_side);
     }
     bool build(sf::Packet& sfPacket) {
-        return (sfPacket << PacketType << data << impactX << impactY << impactZ << damage << normalX << normalY << normalZ << time << radius << shields << projectile_index << shield_side);
+        return (sfPacket << PacketType << data << impactX << impactY << impactZ << damage << normalX << normalY << normalZ << time << radius << shields << projectile_index << model_index << shield_side);
     }
     void print() {}
 };

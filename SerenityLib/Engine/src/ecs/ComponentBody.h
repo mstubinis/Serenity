@@ -30,8 +30,8 @@ struct CollisionCallbackEventData final {
     glm::vec3& normal;
     btCollisionObject* ownerCollisionObj;
     btCollisionObject* otherCollisionObj;
-    int ownerModelInstanceIndex;
-    int otherModelInstanceIndex;
+    size_t ownerModelInstanceIndex;
+    size_t otherModelInstanceIndex;
     CollisionCallbackEventData(ComponentBody& ownerBody_, ComponentBody& otherBody_, glm::vec3& ownerHit_, glm::vec3& otherHit_, glm::vec3& normal_);
 };
 

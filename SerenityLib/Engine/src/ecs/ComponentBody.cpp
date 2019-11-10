@@ -249,19 +249,6 @@ void ComponentBody::setInternalPhysicsUserPointer(void* userPtr) {
             auto* shape = rigid->getCollisionShape();
             if (shape) {
                 shape->setUserPointer(userPtr);
-                if (data.p->collision && data.p->collision->getType() == CollisionType::Compound) {
-                    auto* compound = dynamic_cast<btCompoundShape*>(shape);
-                    if (compound) {
-                        const auto numChildren = compound->getNumChildShapes();
-                        compound->setUserPointer(userPtr); //do we need this?
-                        if (numChildren > 0) {
-                            for (int i = 0; i < numChildren; ++i) {
-                                btCollisionShape* child_shape = compound->getChildShape(i);
-                                child_shape->setUserPointer(userPtr);
-                            }
-                        }
-                    }
-                }
             }
         }
     }
@@ -367,7 +354,7 @@ void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, cons
             if (p_CollisionType == CollisionType::Compound) {
                 physicsData.collision = new Collision(this, *modelComponent, p_Mass);
             }else{
-                physicsData.collision = new Collision(p_CollisionType, modelComponent->getModel().mesh(), p_Mass);
+                physicsData.collision = new Collision(p_CollisionType, &modelComponent->getModel(), p_Mass);
             }
         }else{
             physicsData.collision = new Collision(p_CollisionType, nullptr, p_Mass);

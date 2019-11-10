@@ -272,8 +272,8 @@ struct HullCollisionFunctor final { void operator()(CollisionCallbackEventData& 
 
                         ownerShip->m_Client.send(pOut);
 
-                        ownerHull->receiveCollisionVisual(data.normal, ownerLocal, damageRadiusOwner);
-                        otherHull->receiveCollisionVisual(data.normal, otherLocal, damageRadiusOther);
+                        ownerHull->receiveCollisionVisual(data.normal, ownerLocal, damageRadiusOwner, data.ownerModelInstanceIndex);
+                        otherHull->receiveCollisionVisual(data.normal, otherLocal, damageRadiusOther, data.otherModelInstanceIndex);
                     }
                 }
             }
@@ -493,7 +493,7 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
         auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
         if (hull) {
             auto rand5 = Helper::GetRandomFloatFromTo(2.5f, 4.4f);
-            hull->applyDamageDecal(-norms[randVertexIndex], localPos, rand5, true);
+            hull->applyDamageDecal(-norms[randVertexIndex], localPos, rand5, modelIndex, true);
         }
 
 
@@ -780,16 +780,18 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     }else if (packet.PacketType == PacketType::Server_To_Client_Projectile_Torpedo_Impact) {
         proj = map.getTorpedoProjectile(packet.projectile_index);
     }
+    const glm::vec3 impactModelSpacePosition = glm::vec3(packet.impactX, packet.impactY, packet.impactZ);
+
     if (packet.shields) {
         auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
         if (shields) {
-            const glm::vec3 local = glm::vec3(packet.impactX, packet.impactY, packet.impactZ);
-            shields->receiveHit(normal, local, rad, time, packet.damage, packet.shield_side);
+            const glm::vec3 impactModelSpacePosition = glm::vec3(packet.impactX, packet.impactY, packet.impactZ);
+            shields->receiveHit(normal, impactModelSpacePosition, rad, time, packet.damage, packet.shield_side, true);
         }
     }else{
         auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
         if (hull) {
-            hull->receiveHit(normal, glm::vec3(packet.impactX, packet.impactY, packet.impactZ) * glm::quat(getRotation()), rad, time, packet.damage);
+            hull->receiveHit(normal, impactModelSpacePosition, rad, packet.damage, static_cast<size_t>(packet.model_index), false, true);
         }
     }
     if (proj) {

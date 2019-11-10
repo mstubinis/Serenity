@@ -4,8 +4,8 @@
 
 struct VertexData;
 class  Mesh;
+class  ModelInstance;
 class  btShapeHull;
-//class  btVector3;
 class  btMultiSphereShape;
 class  btConvexHullShape;
 class  btTriangleMesh;
@@ -18,12 +18,9 @@ class  btGImpactMeshShape;
 
 namespace Engine {
 namespace epriv {
-    // slightly missleading with the name. its a class (per mesh) that allows for
-    // bullet physics collision objects to be created using the mesh data
     class MeshCollisionFactory final {
         private:
             Mesh&                          m_Mesh;
-            //btVector3*                     m_Zero;
             btShapeHull*                   m_ConvexHullData;
             btConvexHullShape*             m_ConvesHullShape;
             btTriangleMesh*                m_TriangleStaticData;
@@ -39,11 +36,11 @@ namespace epriv {
             MeshCollisionFactory(MeshCollisionFactory&& other) noexcept            = delete;
             MeshCollisionFactory& operator=(MeshCollisionFactory&& other) noexcept = delete;
 
-            btMultiSphereShape*            buildSphereShape();
-            btBoxShape*                    buildBoxShape();
-            btUniformScalingShape*         buildConvexHull();
-            btScaledBvhTriangleMeshShape*  buildTriangleShape();
-            btGImpactMeshShape*            buildTriangleShapeGImpact();
+            btMultiSphereShape*            buildSphereShape(ModelInstance* modelInstance, const bool isCompoundChild = false);
+            btBoxShape*                    buildBoxShape(ModelInstance* modelInstance, const bool isCompoundChild = false);
+            btUniformScalingShape*         buildConvexHull(ModelInstance* modelInstance, const bool isCompoundChild = false);
+            btScaledBvhTriangleMeshShape*  buildTriangleShape(ModelInstance* modelInstance, const bool isCompoundChild = false);
+            btGImpactMeshShape*            buildTriangleShapeGImpact(ModelInstance* modelInstance, const bool isCompoundChild = false);
     };
 };
 };

@@ -24,7 +24,8 @@ class Collision final {
     public:
         Collision();
         Collision(btHeightfieldTerrainShape&, const CollisionType::Type, const float& mass = 0);
-        Collision(const CollisionType::Type, Mesh* mesh, const float& mass = 0);
+        Collision(const CollisionType::Type, ModelInstance* modelInstance, const float& mass = 0);
+        Collision(const CollisionType::Type, Mesh& mesh, const float& mass = 0);
         Collision(ComponentBody* body, ComponentModel&, const float& mass = 0, const CollisionType::Type = CollisionType::ConvexHull);
 
         Collision(const Collision& other);

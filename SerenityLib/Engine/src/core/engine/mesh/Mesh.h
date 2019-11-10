@@ -38,7 +38,8 @@ namespace Engine{
             static void UnloadCPU(Mesh&);
             static void UnloadGPU(Mesh&);
             static bool SupportsInstancing();
-            static btCollisionShape* BuildCollision(Mesh*, const CollisionType::Type&);
+            static btCollisionShape* BuildCollision(ModelInstance*, const CollisionType::Type&, const bool isCompoundChild = false);
+            static btCollisionShape* BuildCollision(Mesh*, const CollisionType::Type&, const bool isCompoundChild = false);
 
             static void FinalizeVertexData(Mesh&, MeshImportedData& data);
             static void TriangulateComponentIndices(Mesh&, MeshImportedData& data, std::vector<std::vector<uint>>& indices, const unsigned char flags);

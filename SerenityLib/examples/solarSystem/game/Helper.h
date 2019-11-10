@@ -30,7 +30,7 @@ class Helper {
         static int GetRandomIntFromTo(const int& minVal, const int& maxVal) {
             if (minVal == maxVal)
                 return minVal;
-            const int result = minVal + static_cast<int>(rand()) / (static_cast<int>(RAND_MAX / (maxVal - minVal)));
+            const int result = minVal + static_cast<int>(rand()) / (static_cast<int>(RAND_MAX / (  (maxVal+1) - minVal)));
             return result;
         }
 };

@@ -41,16 +41,16 @@ class ShipSystemShields final : public ShipSystem {
         Err,
     };};
     struct Plane final {
-        glm::vec3 a, b, c;
+        glm::vec3 a, b, c, normal;
         Plane();
         Plane(const glm::vec3& _a, const glm::vec3& _b, const glm::vec3& _c);
-        const float CalcSide(const glm::vec3& point, const glm::quat& rot);
+        const float CalcSide(const glm::vec3& impactLocationModelSpace);
     };
     struct Pyramid final {
         std::vector<Plane> planes;
         Pyramid();
         Pyramid(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4, const glm::vec3& p5);
-        const bool isInside(const glm::vec3& point, const glm::quat& rot);
+        const bool isInside(const glm::vec3& impactLocationModelSpace);
     };
     friend struct ShieldInstanceBindFunctor;
     friend struct ShieldInstanceUnbindFunctor;

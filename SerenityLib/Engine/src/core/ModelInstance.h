@@ -110,6 +110,7 @@ class ModelInstance final: public BindableResource{
         static void setDefaultViewportFlag(const unsigned int flag);
         static void setDefaultViewportFlag(const ViewportFlag::Flag flag);
 
+        const size_t& index() const;
         const ModelDrawingMode::Mode& getDrawingMode() const;
         void setDrawingMode(const ModelDrawingMode::Mode&);
 

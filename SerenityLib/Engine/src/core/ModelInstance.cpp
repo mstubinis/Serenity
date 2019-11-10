@@ -240,6 +240,9 @@ void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* progr
 
     internalUpdateModelMatrix();
 }
+const size_t& ModelInstance::index() const {
+    return m_Index;
+}
 const ModelDrawingMode::Mode& ModelInstance::getDrawingMode() const {
     return m_DrawingMode;
 }
