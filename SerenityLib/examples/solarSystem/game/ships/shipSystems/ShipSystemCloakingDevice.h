@@ -21,6 +21,12 @@ class ShipSystemCloakingDevice final : public ShipSystem {
         const float getMaxAlphaWhileCloaked() const;
 
         void update(const double& dt);
+
+        void forceCloakOff(bool sendPacket = true);
+        void forceCloakOff(ComponentModel& model, bool sendPacket = true);
+
+        const bool cloak(bool sendPacket = true);
+        const bool decloak(bool sendPacket = true);
         const bool cloak(ComponentModel&, bool sendPacket = true);
         const bool decloak(ComponentModel&, bool sendPacket = true);
 };

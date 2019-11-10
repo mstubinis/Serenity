@@ -37,6 +37,8 @@ class ShipSystemHull final : public ShipSystem {
         const float getHealthMax() const;
         const float getHealthPercent() const; //returns percent from 0.0f to 1.0f
 
+        void restoreToFull();
+
         void update(const double& dt);
 };
 

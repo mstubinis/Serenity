@@ -14,17 +14,19 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-void Collision::_init(ComponentBody* body, const vector<ModelInstance*>& _modelInstances, const float& _mass, const CollisionType::Type _type) {
+void Collision::_init(ComponentBody* body, vector<ModelInstance*>& modelInstances, const float& _mass, const CollisionType::Type _type) {
     btCompoundShape* btCompound = new btCompoundShape();
     btTransform localTransform;  
-    for (auto& modelInstance : _modelInstances) {
-        auto* mesh = modelInstance->mesh();
+    for (size_t i = 0; i < modelInstances.size(); ++i) {
+        auto& instance = *modelInstances[i];
+        auto* mesh = instance.mesh();
         btCollisionShape* btShape = InternalMeshPublicInterface::BuildCollision(mesh, _type);
         btShape->setUserPointer(body);
-        localTransform = btTransform(Math::glmToBTQuat(modelInstance->orientation()), Math::btVectorFromGLM(modelInstance->position()));
+        localTransform = btTransform(Math::glmToBTQuat(instance.orientation()), Math::btVectorFromGLM(instance.position()));
         btShape->setMargin(0.001f);
         btCompound->addChildShape(localTransform, btShape);
         btShape->calculateLocalInertia(_mass, m_BtInertia); //this is important
+        btShape->setUserPointer(&instance.m_Index);
     }
     btCompound->setMargin(0.001f);
     btCompound->recalculateLocalAabb();

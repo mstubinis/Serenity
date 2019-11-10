@@ -29,6 +29,9 @@ const float ShipSystemCloakingDevice::getCloakTimer() const {
 const float ShipSystemCloakingDevice::getMaxAlphaWhileCloaked() const {
     return m_MaxAlphaWhileCloaked;
 }
+const bool ShipSystemCloakingDevice::cloak(bool sendPacket) {
+    return cloak(*m_Ship.getComponent<ComponentModel>(), sendPacket);
+}
 const bool ShipSystemCloakingDevice::cloak(ComponentModel& model, bool sendPacket) {
     if (m_CloakTimer >= 1.0f) {
         for (unsigned int i = 0; i < model.getNumModels(); ++i) {
@@ -57,8 +60,22 @@ const bool ShipSystemCloakingDevice::cloak(ComponentModel& model, bool sendPacke
     }
     return false;
 }
+
+const bool ShipSystemCloakingDevice::decloak(bool sendPacket) {
+    return decloak(*m_Ship.getComponent<ComponentModel>(), sendPacket);
+}
 const bool ShipSystemCloakingDevice::decloak(ComponentModel& model, bool sendPacket) {
     if (m_CloakTimer <= 0.0f) {
+        forceCloakOff(model, sendPacket);
+        return true;
+    }
+    return false;
+}
+void ShipSystemCloakingDevice::forceCloakOff(bool sendPacket) {
+    forceCloakOff(*m_Ship.getComponent<ComponentModel>(), sendPacket);
+}
+void ShipSystemCloakingDevice::forceCloakOff(ComponentModel& model, bool sendPacket) {
+    if (m_CloakTimer < 1.0f) {
         m_Active = false;
         m_CloakTimer = 0.0f;
         model.show();
@@ -74,10 +91,9 @@ const bool ShipSystemCloakingDevice::decloak(ComponentModel& model, bool sendPac
             pOut.justTurnedOff = true;
             m_Ship.m_Client.send(pOut);
         }
-        return true;
     }
-    return false;
 }
+
 void ShipSystemCloakingDevice::update(const double& dt) {
     auto _fdt = (static_cast<float>(dt) * 0.37f) * m_CloakSpeed;
     auto& model = *m_Ship.getComponent<ComponentModel>();

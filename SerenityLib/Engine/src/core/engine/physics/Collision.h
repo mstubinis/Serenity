@@ -19,7 +19,7 @@ class Collision final {
         btVector3             m_BtInertia;
         btCollisionShape*     m_BtShape;
 
-        void _init(ComponentBody* body, const std::vector<ModelInstance*>& meshes, const float& mass, const CollisionType::Type _type = CollisionType::ConvexHull);
+        void _init(ComponentBody* body, std::vector<ModelInstance*>& modelInstances, const float& mass, const CollisionType::Type _type = CollisionType::ConvexHull);
         void _baseInit(const CollisionType::Type _type, const float& mass);
     public:
         Collision();

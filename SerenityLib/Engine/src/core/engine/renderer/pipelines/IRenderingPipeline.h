@@ -21,6 +21,7 @@ class RodLight;
 class Skybox;
 class Font;
 class Texture;
+class Particle;
 namespace Engine {
     namespace epriv {
         class IRenderingPipeline {
@@ -39,6 +40,8 @@ namespace Engine {
                 virtual void renderDirectionalLight(Camera& camera, DirectionalLight& directionalLight) = 0;
                 virtual void renderSpotLight(Camera& camera, SpotLight& spotLight) = 0;
                 virtual void renderRodLight(Camera& camera, RodLight& rodLight) = 0;
+
+                virtual void renderParticle(Particle& particle) = 0;
 
                 virtual void render2DText(const std::string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type& textAlignment, const glm::vec4& scissor = glm::vec4(-1.0f)) = 0;
                 virtual void render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type& align, const glm::vec4& scissor = glm::vec4(-1.0f)) = 0;

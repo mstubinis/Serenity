@@ -193,12 +193,14 @@ void SensorStatusDisplay::render() {
             Renderer::renderTexture(radarTokenTexture, pos2D, glm::vec4(1, 1, 1, 1), 0, glm::vec2(1.2f), 0.16f, Alignment::Center);
         }
     };
-    for (auto& other_ship_ptr : m_Sensors->getShips()) {
-        Ship& other_ship = *other_ship_ptr.ship;
-        lambda(other_ship);  
-    }
-    for (auto& other_ship_ptr : m_Sensors->getAntiCloakDetectedShips()) {
-        Ship& other_ship = *other_ship_ptr.ship;
-        lambda(other_ship);
+    if (!m_Ship->isFullyDestroyed()) {
+        for (auto& other_ship_ptr : m_Sensors->getShips()) {
+            Ship& other_ship = *other_ship_ptr.ship;
+            lambda(other_ship);
+        }
+        for (auto& other_ship_ptr : m_Sensors->getAntiCloakDetectedShips()) {
+            Ship& other_ship = *other_ship_ptr.ship;
+            lambda(other_ship);
+        }
     }
 }

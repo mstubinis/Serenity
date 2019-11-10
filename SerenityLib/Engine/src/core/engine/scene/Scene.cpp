@@ -9,11 +9,11 @@
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/engine/renderer/ParticleEmitter.h>
+#include <core/engine/renderer/particles/ParticleSystem.h>
+#include <core/engine/renderer/particles/ParticleEmitter.h>
+
 
 #include <ecs/Components.h>
-#include <stack>
-#include <execution>
 
 using namespace Engine;
 using namespace Engine::epriv;
@@ -29,17 +29,10 @@ struct Scene::impl final {
     glm::vec3                         m_GI;
     uint                              m_ID;
 
-    std::mutex                        m_Mutex;
     Skybox*                           m_Skybox;
 
 
-
-    vector<ParticleEmitter>           m_ParticleEmitters;
-    vector<Particle>                  m_Particles;
-    stack<unsigned int>               m_ParticleEmitterFreelist;
-    stack<unsigned int>               m_ParticleFreelist;
-
-
+    Engine::epriv::ParticleSystem     m_ParticleSystem;
 
     vector<Viewport*>                 m_Viewports;
     vector<Camera*>                   m_Cameras;
@@ -61,9 +54,6 @@ struct Scene::impl final {
         m_GI              = glm::vec3(1.0f);
         m_Skybox          = nullptr;
         m_Sun             = nullptr;
-
-        m_ParticleEmitters.reserve(NUMBER_OF_PARTICLE_EMITTERS_LIMIT);
-        m_Particles.reserve(NUMBER_OF_PARTICLE_LIMIT);
 
 
         m_RenderGraphs.resize(RenderStage::_TOTAL);
@@ -104,7 +94,7 @@ struct Scene::impl final {
                 }
             }
         }
-        for (auto& particle : m_Particles) {
+        for (auto& particle : m_ParticleSystem.getParticles()) {
             particle.setPosition(particle.position() - glm::vec3(centerPos));
         }
 
@@ -208,7 +198,7 @@ struct Scene::impl final {
     }
 };
 vector<Particle>& InternalScenePublicInterface::GetParticles(Scene& scene) {
-    return scene.m_i->m_Particles;
+    return scene.m_i->m_ParticleSystem.getParticles();
 }
 vector<Viewport*>& InternalScenePublicInterface::GetViewports(Scene& scene) {
     return scene.m_i->m_Viewports;
@@ -261,41 +251,9 @@ void InternalScenePublicInterface::UpdateMaterials(Scene& scene, const double& d
         }
     }
 }
-void InternalScenePublicInterface::UpdateParticleEmitters(Scene& scene, const double& dt) {
+void InternalScenePublicInterface::UpdateParticleSystem(Scene& scene, const double& dt) {
     auto& i = *(scene.m_i);
-    auto& emitters = i.m_ParticleEmitters;
-    auto& particles = i.m_Particles;
-    if (emitters.size() == 0)
-        return;
-
-    //sf::Clock c;
-    
-
-
-    for (size_t j = 0; j < particles.size(); ++j) {
-        auto& particle = particles[j];
-        particle.update(j, i.m_ParticleFreelist, dt);
-
-    }
-    for (size_t j = 0; j < emitters.size(); ++j) {
-        auto& emitter = emitters[j];
-        emitter.update(j, dt, particles, i.m_ParticleFreelist, i.m_ParticleEmitterFreelist);
-    }
-
-    /*
-    auto lamda = [&](pair<int, int>& pair_) {
-        for (size_t j = pair_.first; j <= pair_.second; ++j) {
-            emitters[j].update_multithreaded(dt, i.m_Mutex);
-        }
-    };
-    auto split = epriv::threading::splitVectorPairs(emitters);
-    for (auto& pair_ : split) {
-        epriv::threading::addJobRef(lamda, pair_);
-    }
-    epriv::threading::waitForAll();
-    */
-
-    //std::cout << c.restart().asMicroseconds() << "\n";
+    i.m_ParticleSystem.update(dt);
 }
 
 void InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene, Viewport& viewport, Camera& camera, const bool useDefaultShaders) {
@@ -377,54 +335,9 @@ void InternalScenePublicInterface::RenderDecals(Scene& scene, Viewport& viewport
         }
     }
 }
-void InternalScenePublicInterface::RenderParticles(Scene& scene, Viewport& viewport, Camera& camera, ShaderProgram& program) {
+void InternalScenePublicInterface::RenderParticles(Scene& scene, Viewport& viewport, Camera& camera, ShaderProgram& program, GBuffer& gBuffer) {
     auto& i = *(scene.m_i);
-    auto& particles = i.m_Particles;
-    if (particles.size() == 0)
-        return;
-
-    std::vector<Particle> seen;
-    seen.reserve(particles.size());
-    
-    auto lamda_culler = [&](pair<unsigned int, unsigned int>& pair_) {
-        for (size_t j = pair_.first; j <= pair_.second; ++j) {
-            auto& particle = particles[j];
-            const float radius = Mesh::Plane->getRadius() * Math::Max(particle.m_Data.m_Scale.x, particle.m_Data.m_Scale.y);
-            const uint sphereTest = camera.sphereIntersectTest(particle.m_Position, radius); //per mesh instance radius instead?
-            decimal comparison = static_cast<decimal>(radius) * static_cast<decimal>(1100.0);
-            if (particle.m_Hidden || sphereTest == 0 || camera.getDistanceSquared(particle.m_Position) > comparison * comparison) {
-                particle.m_PassedRenderCheck = false;
-            }else{
-                particle.m_PassedRenderCheck = true;
-                i.m_Mutex.lock();
-                seen.push_back(particle);
-                i.m_Mutex.unlock();
-            }
-        }
-    };
-    
-    auto lambda_sorter = [&](Particle& lhs, Particle& rhs) {
-        return camera.getDistanceSquared(lhs.m_Position) > camera.getDistanceSquared(rhs.m_Position);
-    };
-    
-    auto split = epriv::threading::splitVectorPairs(particles);
-    for (auto& pair_ : split) {
-        epriv::threading::addJobRef(lamda_culler, pair_);
-    }
-    epriv::threading::waitForAll();
-    
-    //auto pair_ = std::make_pair(0U, static_cast<unsigned int>(particles.size() - 1));
-    //lamda(pair_);
-
-    std::sort(std::execution::par_unseq, seen.begin(), seen.end(), lambda_sorter);
-
-    program.bind();
-    Mesh::Plane->bind();
-    for (auto& particle : seen) {
-        //if (particle.m_PassedRenderCheck) { //TODO: using "seen" vector for now, do not need bool check, should profile using seen vector over using bool and full vector...
-            particle.render();
-        //}
-    }
+    i.m_ParticleSystem.render(camera, program, gBuffer);
 }
 
 
@@ -468,22 +381,9 @@ const uint Scene::id() const {
     return m_i->m_ID;
 }
 
-const bool Scene::addParticleEmitter(ParticleEmitter& emitter) {
+ParticleEmitter* Scene::addParticleEmitter(ParticleEmitter& emitter) {
     auto& i = *m_i;
-    //first, try to reuse an empty
-    if (i.m_ParticleEmitterFreelist.size() > 0) {
-        auto freeindex = i.m_ParticleEmitterFreelist.top();
-        using std::swap;
-        swap(i.m_ParticleEmitters[freeindex], emitter);
-        i.m_ParticleEmitterFreelist.pop();
-        return true;
-    }
-    //otherwise...
-    if (i.m_ParticleEmitters.size() < i.m_ParticleEmitters.capacity()) {
-        i.m_ParticleEmitters.push_back(std::move(emitter));
-        return true;
-    }
-    return false;
+    return i.m_ParticleSystem.add_emitter(emitter);
 }
 
 Viewport& Scene::addViewport(const float x, const float y, const float width, const float height, const Camera& camera) {

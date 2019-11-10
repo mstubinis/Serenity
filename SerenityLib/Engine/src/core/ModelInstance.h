@@ -17,6 +17,7 @@ class  Mesh;
 class  ComponentModel;
 class  Viewport;
 class  ModelInstance;
+class  Collision;
 namespace Engine{
     namespace epriv{
         struct DefaultModelInstanceBindFunctor;
@@ -70,6 +71,7 @@ class ModelInstance final: public BindableResource{
     friend struct Engine::epriv::DefaultModelInstanceBindFunctor;
     friend struct Engine::epriv::DefaultModelInstanceUnbindFunctor;
     friend class  ComponentModel;
+    friend class  Collision;
     private:
         ModelDrawingMode::Mode                               m_DrawingMode;
         static unsigned int                                  m_ViewportFlagDefault;
@@ -88,6 +90,7 @@ class ModelInstance final: public BindableResource{
         bool                                                 m_PassedRenderCheck;
         bool                                                 m_Visible;
         bool                                                 m_ForceRender;
+        size_t                                               m_Index;
 
         void internalInit(Mesh* mesh, Material* mat, ShaderProgram* program);
         void internalUpdateModelMatrix();

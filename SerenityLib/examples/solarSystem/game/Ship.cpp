@@ -15,7 +15,7 @@
 #include <core/engine/lights/Lights.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/renderer/Decal.h>
-#include <core/engine/renderer/Particle.h>
+#include <core/engine/renderer/particles/Particle.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/textures/Texture.h>
 
@@ -41,6 +41,9 @@
 #include "hud/HUD.h"
 
 #include <glm/gtx/norm.hpp>
+
+#include <core/engine/renderer/particles/ParticleEmitter.h>
+#include "particles/Fire.h"
 
 
 using namespace Engine;
@@ -155,108 +158,63 @@ void ShipModelInstanceUnbindFunctor::operator()(EngineResource* r) const {
 struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
     Ship& ship = *static_cast<Ship*>(_component.getUserPointer());
     Map& map = static_cast<Map&>(ship.entity().scene());
-
+    switch (ship.m_State) {
+        case ShipState::Nominal: {
+            if (ship.IsPlayer()) {
+                ship.internal_update_player_you_logic(dt, map);
+            }
+            if (ship.m_AI) {
+                ship.internal_update_ai(dt, map);
+            }
+            break;
+        }case ShipState::JustFlaggedForDestruction: {
+            ship.internal_update_just_flagged_for_destruction(dt, map);
+            break;
+        }case ShipState::UndergoingDestruction: {
+            ship.internal_update_undergoing_destruction(dt, map);
+            break;
+        }case ShipState::JustFlaggedAsFullyDestroyed: {
+            ship.internal_update_just_destroyed_fully(dt, map);
+            break;
+        }case ShipState::Destroyed: {
+            break;
+        }case ShipState::JustFlaggedToRespawn: {
+            ship.internal_update_just_flagged_for_respawn(dt, map);
+            break;
+        }case ShipState::UndergoingRespawning: {
+            ship.internal_update_undergoing_respawning(dt, map);
+            break;
+        }case ShipState::WaitingForServerToRespawnMe: {
+            break;
+        }default: {
+            break;
+        }
+    }
+    for (auto it2 = ship.m_EmittersDestruction.begin(); it2 != ship.m_EmittersDestruction.end();){
+        auto& tuple = (*it2);
+        auto active = std::get<0>(tuple)->isActive();
+        if (!active){
+            it2 = ship.m_EmittersDestruction.erase(it2);
+        }else{
+            ++it2;
+        }
+    }
     for (auto& shipSystem : ship.m_ShipSystems) {
         if (shipSystem.second) { //some ships wont have all the systems (cloaking device, etc)
             shipSystem.second->update(dt);
         }
     }
-
-    if (ship.IsPlayer()) {
-        #pragma region PlayerFlightControls
-        auto* mytarget = ship.getTarget();
-        if (!Engine::paused()) {
-            if (ship.m_IsWarping && ship.m_WarpFactor > 0) {
-                auto speed = ship.getWarpSpeedVector3() * static_cast<decimal>(dt);
-                for (auto& pod : epriv::InternalScenePublicInterface::GetEntities(map)) {
-                    Entity e = map.getEntity(pod);
-                    const EntityDataRequest dataRequest(e);
-                    auto* cam = e.getComponent<ComponentCamera>(dataRequest);
-                    //TODO: parent->child relationship
-                    if (e != ship.m_Entity && !cam && (e != map.getHUD().getSensorDisplay().radarRingEntity() && e != map.getHUD().getSensorDisplay().radarCameraEntity())) {
-                        auto _otherBody = e.getComponent<ComponentBody>(dataRequest);
-                        if (_otherBody) {
-                            auto& otherBody = *_otherBody;
-                            otherBody.setPosition(otherBody.position() + speed);
-                        }
-                    }
-                }
-                for (auto& particle : epriv::InternalScenePublicInterface::GetParticles(map)) {
-                    particle.setPosition(particle.position() + glm::vec3(speed));
-                }
-            }
-        }
-        #pragma endregion
-
-        #pragma region PlayerCameraControls
-        auto& camera = *ship.m_PlayerCamera;
-        const auto& cameraState = camera.getState();
-        const auto* target = camera.getTarget();
-        if (Engine::isKeyDownOnce(KeyboardKey::F1)) {
-            camera.setState(CameraState::Cockpit);
-        }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
-            camera.setState(CameraState::Orbit);
-        }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
-            camera.setState(CameraState::FollowTarget);
-        }
-        #pragma endregion
-
-        if (Engine::isKeyDownOnce(KeyboardKey::T) && map.name() != "Menu") {
-            Entity scan = camera.getObjectInCenterRay(ship.m_Entity);
-            if (!scan.null()) {
-                auto* componentName = scan.getComponent<ComponentName>();
-                if (componentName) {
-                    EntityWrapper* scannedTarget = nullptr;
-                    for (auto& obj : map.m_Objects) {
-                        auto* componentName1 = obj->getComponent<ComponentName>();
-                        if (componentName1 && componentName1->name() == componentName->name()) {
-                            scannedTarget = obj;
-                            break;
-                        }
-                    }
-                    ship.setTarget(scannedTarget, true);
-                }
-            }
-        }
-        for (auto& shipSystem : ship.m_ShipSystems) {
-            if (shipSystem.second) {
-                shipSystem.second->render();
-            }
-        }
-    }
-
-    if (ship.m_AI) {
-        auto& ai = *ship.m_AI;
-        auto* fire_at_will = ai.getFireAtWill();
-        if (ship.IsPlayer() && fire_at_will) {
-            if (Engine::isKeyDownOnce(KeyboardKey::G)) {
-                fire_at_will->toggle();
-            }
-        }
-
-        ai.update(dt);
-    }
-
-    for (auto& decal : ship.m_DamageDecals) {
-        auto& _decal = *decal;
-        auto& shipBody = *ship.getComponent<ComponentBody>();
-        const auto shipRotation = shipBody.rotation();
-        _decal.setPosition(shipBody.position() + (shipRotation * _decal.initialPosition()));
-        _decal.setRotation(shipRotation * _decal.initialRotation());
-        _decal.update(dt);
-        if (!_decal.active()) {
-            removeFromVector(ship.m_DamageDecals, decal); //might be dangerous
-        }
-    }
+    ship.internal_update_damage_emitters(dt, map);
+    ship.internal_update_decals(dt, map);
 }};
 
 //TODO: move to the hull system?
-struct HullCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
-    auto ownerShipVoid = owner.getUserPointer1();
+struct HullCollisionFunctor final { void operator()(CollisionCallbackEventData& data) const {
+    auto ownerShipVoid = data.ownerBody.getUserPointer1();
     if (ownerShipVoid) {
-        auto otherShipVoid = other.getUserPointer1();
+        auto otherShipVoid = data.otherBody.getUserPointer1();
         if (otherShipVoid && ownerShipVoid != otherShipVoid) { //redundant?
-            if (owner.getCollisionGroup() == CollisionFilter::_Custom_4 && other.getCollisionGroup() == CollisionFilter::_Custom_4) { //hull on hull only
+            if (data.ownerBody.getCollisionGroup() == CollisionFilter::_Custom_4 && data.otherBody.getCollisionGroup() == CollisionFilter::_Custom_4) { //hull on hull only
                 auto* ownerShip = static_cast<Ship*>(ownerShipVoid);
                 auto* otherShip = static_cast<Ship*>(otherShipVoid);
 
@@ -265,12 +223,12 @@ struct HullCollisionFunctor final { void operator()(ComponentBody& owner, const 
                     auto* ownerHull = static_cast<ShipSystemHull*>(ownerShip->getShipSystem(ShipSystemType::Hull));
                     auto* otherHull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                     if (ownerHull && otherHull) {
-                        const auto ownerMass = owner.mass() * 3000.0f;
-                        const auto otherMass = other.mass() * 3000.0f;
+                        const auto ownerMass = data.ownerBody.mass() * 3000.0f;
+                        const auto otherMass = data.otherBody.mass() * 3000.0f;
                         const auto massTotal = ownerMass + otherMass;
 
-                        const auto ownerLocal = ownerHit - glm::vec3(owner.position());
-                        const auto otherLocal = otherHit - glm::vec3(other.position());
+                        const auto ownerLocal = data.ownerHit - glm::vec3(data.ownerBody.position());
+                        const auto otherLocal = data.otherHit - glm::vec3(data.otherBody.position());
 
                         const auto owner_linear_velocity = ownerShip->getLinearVelocity();
                         const auto other_linear_velocity = otherShip->getLinearVelocity();
@@ -292,8 +250,8 @@ struct HullCollisionFunctor final { void operator()(ComponentBody& owner, const 
                         pOut.data =        ownerShip->getMapKey();
                         pOut.data += "," + otherShip->getMapKey();
                         
-                        const auto owner_angular_velocity = owner.getAngularVelocity();
-                        const auto other_angular_velocity = other.getAngularVelocity();
+                        const auto owner_angular_velocity = data.ownerBody.getAngularVelocity();
+                        const auto other_angular_velocity = data.otherBody.getAngularVelocity();
 
                         Math::Float16From32(&pOut.ax1, owner_angular_velocity.x);
                         Math::Float16From32(&pOut.ay1, owner_angular_velocity.y);
@@ -314,8 +272,8 @@ struct HullCollisionFunctor final { void operator()(ComponentBody& owner, const 
 
                         ownerShip->m_Client.send(pOut);
 
-                        ownerHull->receiveCollisionVisual(normal, ownerLocal, damageRadiusOwner);
-                        otherHull->receiveCollisionVisual(normal, otherLocal, damageRadiusOther);
+                        ownerHull->receiveCollisionVisual(data.normal, ownerLocal, damageRadiusOwner);
+                        otherHull->receiveCollisionVisual(data.normal, otherLocal, damageRadiusOther);
                     }
                 }
             }
@@ -324,38 +282,45 @@ struct HullCollisionFunctor final { void operator()(ComponentBody& owner, const 
 }};
 
 Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const AIType::Type ai_type, const string& name, const glm_vec3 pos, const glm_vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client),m_Team(team){
-    m_WarpFactor          = 0;
-    m_AI                  = new AI(ai_type);
-    m_ShipClass           = shipClass;
-    m_IsWarping           = false;
-    m_PlayerCamera        = nullptr;
-    m_MouseFactor         = glm::dvec2(0.0);
-    m_AimPositionDefaults.push_back(aimPosDefault);
-    m_CameraOffsetDefault = camOffsetDefault;
+    m_WarpFactor              = 0;
+    m_State                   = ShipState::Nominal;
+    m_DestructionTimerCurrent = 0.0;
+    m_DestructionTimerDecalTimer = 0.0;
+    m_DestructionTimerDecalTimerMax = 0.5;
+    m_RespawnTimer = 0.0;
+    m_RespawnTimerMax = 120.0;
 
-    auto& shipInfo = Ships::Database[shipClass];
-    auto& modelComponent     = *addComponent<ComponentModel>(shipInfo.MeshHandles[0], shipInfo.MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
-    auto& body               = *addComponent<ComponentBody>(collisionType);
-    auto& nameComponent      = *addComponent<ComponentName>(name);
-    auto& logicComponent     = *addComponent<ComponentLogic>(ShipLogicFunctor(), this);
+    m_AI                      = new AI(ai_type);
+    m_ShipClass               = shipClass;
+    m_IsWarping               = false;
+    m_PlayerCamera            = nullptr;
+    m_MouseFactor             = glm::dvec2(0.0);
+    m_CameraOffsetDefault     = camOffsetDefault;
+    m_AimPositionDefaults.push_back(aimPosDefault);
+
+    auto& shipInfo            = Ships::Database[shipClass];
+    auto& modelComponent      = *addComponent<ComponentModel>(shipInfo.MeshHandles[0], shipInfo.MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    auto& bodyComponent       = *addComponent<ComponentBody>(collisionType);
+    auto& nameComponent       = *addComponent<ComponentName>(name);
+    auto& logicComponent      = *addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
     setModel(shipInfo.MeshHandles[0]);
 
-    body.setDamping(static_cast<decimal>(0.01), static_cast<decimal>(0.2));
-    body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
-    body.setPosition(pos);
-    body.setScale(scl);
+    bodyComponent.setDamping(static_cast<decimal>(0.01), static_cast<decimal>(0.2));
+    bodyComponent.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
+    bodyComponent.setPosition(pos);
+    bodyComponent.setScale(scl);
 
     //the body is using a convex hull for ship to ship ramming
-    body.setCollisionGroup(CollisionFilter::_Custom_4); //i belong to ramming hull group (group 4)
-    body.setCollisionMask(CollisionFilter::_Custom_4); //i should only collide with other ramming hulls only
-    body.setCollisionFunctor(HullCollisionFunctor());
+    bodyComponent.setCollisionGroup(CollisionFilter::_Custom_4); //i belong to ramming hull group (group 4)
+    bodyComponent.setCollisionMask(CollisionFilter::_Custom_4); //i should only collide with other ramming hulls only
+    bodyComponent.setCollisionFunctor(HullCollisionFunctor());
 
 	if (IsPlayer()) {
 		m_PlayerCamera = static_cast<GameCamera*>(map.getActiveCamera());
 	}
-    body.setUserPointer1(this);
-    body.setUserPointer2(&client);
+    bodyComponent.setUserPointer1(this);
+    bodyComponent.setUserPointer2(&client);
     
     m_MapKey = name;
     uint c = 1;
@@ -377,6 +342,8 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
     //derived classes need to add their own ship systems
     modelComponent.setCustomBindFunctor(ShipModelInstanceBindFunctor());
     modelComponent.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor());
+
+    internal_calculate_ship_destruction_time_max(modelComponent);
 }
 Ship::~Ship(){
     unregisterEvent(EventType::WindowResized);
@@ -384,8 +351,312 @@ Ship::~Ship(){
     SAFE_DELETE_VECTOR(m_DamageDecals);
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
+void Ship::respawn(const glm_vec3& newPosition, const string& nearest_spawn_anchor, Map& map) {
+    auto& bodyComponent = *getComponent<ComponentBody>();
+    auto& modelComponent = *getComponent<ComponentModel>();
+
+    auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
+    auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
+    if (shields) {
+        shields->restoreToFull();
+        shields->reset_all_impact_points();
+        shields->turnOnShields();
+        shields->getEntity().getComponent<ComponentBody>()->addPhysicsToWorld();
+        bodyComponent.addPhysicsToWorld();
+    }
+    if (hull) {
+        hull->restoreToFull();
+        hull->getEntity().getComponent<ComponentBody>()->addPhysicsToWorld();
+
+    }
+    getPlayerCamera()->setState(CameraState::Cockpit);
+
+    modelComponent.show();
+    auto& anchorPos = map.getSpawnAnchor(nearest_spawn_anchor)->getPosition();
+    bodyComponent.setPosition(anchorPos + newPosition);
+    auto vec = glm::normalize(newPosition);
+    glm_quat q;
+    Engine::Math::alignTo(q, vec);
+    bodyComponent.setRotation(q);
+    setState(ShipState::Nominal);
+}
+
+void Ship::internal_update_undergoing_respawning(const double& dt, Map& map) {
+    m_RespawnTimer += dt;
+    if (m_RespawnTimer >= m_RespawnTimerMax) {
+        setState(ShipState::WaitingForServerToRespawnMe);
+        m_RespawnTimer = 0.0;
+    }
+}
+void Ship::internal_update_just_flagged_for_respawn(const double& dt, Map& map) {
+    setState(ShipState::UndergoingRespawning);
+}
+void Ship::internal_update_just_flagged_for_destruction(const double& dt, Map& map) {
+    setDamping(0.0, 0.0);
+    m_DestructionTimerCurrent = 0.0;
+
+    auto* sensors = static_cast<ShipSystemSensors*>(getShipSystem(ShipSystemType::Sensors));
+    auto* cloak = static_cast<ShipSystemCloakingDevice*>(getShipSystem(ShipSystemType::CloakingDevice));
+    if (sensors) {
+        sensors->disableAntiCloakScan(true);
+    }
+    if (cloak) {
+        cloak->forceCloakOff(true);
+    }
+    setTarget(nullptr, true);
+    setState(ShipState::UndergoingDestruction);
+}
+void Ship::internal_update_just_destroyed_fully(const double& dt, Map& map) {
+    auto& bodyComponent = *getComponent<ComponentBody>();
+    auto& modelComponent = *getComponent<ComponentModel>();
+
+    auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
+    auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
+    if (shields) {
+        shields->reset_all_impact_points();
+        shields->turnOffShields();
+        shields->getEntity().getComponent<ComponentBody>()->removePhysicsFromWorld();
+        bodyComponent.removePhysicsFromWorld();
+    }
+    if (hull) {
+        hull->getEntity().getComponent<ComponentBody>()->removePhysicsFromWorld();
+        
+    }
+
+    for (auto& ptr : m_EmittersDestruction) {
+        auto& emitter = *std::get<0>(ptr);
+        emitter.deactivate();
+    }
+    //TODO: notify server if its the player or an npc ship (might need to rethink this)
+    if (getAIType() != AIType::Player_Other) {
+        PacketMessage pOut;
+        pOut.PacketType = PacketType::Client_To_Server_Ship_Was_Just_Destroyed;
+        pOut.name = getMapKey();
+        pOut.data = getClass(); //[0]
+
+        Anchor* finalAnchor = map.getRootAnchor();
+        const auto& list = map.getClosestAnchor();
+        for (auto& closest : list) {
+            finalAnchor = finalAnchor->getChildren().at(closest);
+        }
+        pOut.data += "," + to_string(list.size()); //[1]
+        for (auto& closest : list)
+            pOut.data += "," + closest;
+        const auto nearestAnchorPos = finalAnchor->getPosition();
+        pOut.r = nearestAnchorPos.x;
+        pOut.g = nearestAnchorPos.y;
+        pOut.b = nearestAnchorPos.z;
+
+
+        m_Client.send(pOut);
+    }
+
+    modelComponent.hide();
+    SAFE_DELETE_VECTOR(m_DamageDecals);
+    setState(ShipState::Destroyed);
+}
+void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
+    m_DestructionTimerCurrent += dt;
+    m_DestructionTimerDecalTimer += dt;
+
+    if (m_DestructionTimerDecalTimer > m_DestructionTimerDecalTimerMax) {
+        //apply random hull fire decal, particle effect, and small (or large explosion sound at various times)
+
+        auto rand = Helper::GetRandomIntFromTo(0, 100);
+
+        auto rand2 = Helper::GetRandomFloatFromTo(0.15f, 0.4f) + 0.3f;
+
+        m_DestructionTimerDecalTimerMax = rand2;
+
+        Handle randSmallSound;
+        if (rand < 33) {
+            randSmallSound = ResourceManifest::SoundExplosionSmall1;
+        }else if (rand >= 33 && rand < 66) {
+            randSmallSound = ResourceManifest::SoundExplosionSmall2;
+        }else {
+            randSmallSound = ResourceManifest::SoundExplosionSmall3;
+        }
+
+        auto rand3 = Helper::GetRandomFloatFromTo(0.75f, 1.0f);
+        auto rand4 = Helper::GetRandomFloatFromTo(25.75f, 35.0f);
+
+        auto& shipModelComponent = *getComponent<ComponentModel>();
+        const auto modelIndex = Helper::GetRandomIntFromTo(0, static_cast<int>(shipModelComponent.getNumModels() - 1));
+
+        auto& mesh = *shipModelComponent.getModel(modelIndex).mesh();
+        auto& verts = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(0);
+        auto& norms = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(2);
+        const auto randVertexIndex = Helper::GetRandomIntFromTo(0, verts.size() - 1);
+
+        auto localPos = verts[randVertexIndex] + ((glm::normalize(verts[randVertexIndex])) * 0.03f);
+
+        auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
+        if (hull) {
+            auto rand5 = Helper::GetRandomFloatFromTo(2.5f, 4.4f);
+            hull->applyDamageDecal(-norms[randVertexIndex], localPos, rand5, true);
+        }
+
+
+        auto* sound = Sound::playEffect(randSmallSound);
+        if (sound) {
+            sound->setPosition(getPosition());
+            sound->setAttenuation(0.3f);
+        }
+
+        m_DestructionTimerDecalTimer = 0.0;
+    }
+
+
+    if (m_DestructionTimerCurrent >= m_DestructionTimerMax) {
+        m_DestructionTimerCurrent = 0.0;
+        m_DestructionTimerDecalTimer = 0.0;
+
+
+        auto rand = Helper::GetRandomIntFromTo(0, 100);
+
+        Handle randLargeSound;
+        if (rand < 50) {
+            randLargeSound = ResourceManifest::SoundExplosionLarge1;
+        }
+        else {
+            randLargeSound = ResourceManifest::SoundExplosionLarge2;
+        }
+        auto* sound = Sound::playEffect(randLargeSound);
+        if (sound) {
+            sound->setPosition(getPosition());
+            sound->setAttenuation(0.3f);
+        }
+
+
+        setState(ShipState::JustFlaggedAsFullyDestroyed);
+
+        //TODO: alert server?
+    }
+}
+void Ship::internal_update_damage_emitters(const double& dt, Map& map) {
+    for (auto& ptr : m_EmittersDestruction) {
+
+        auto& emitter = *std::get<0>(ptr);
+        auto& modelIndex = std::get<1>(ptr);
+        auto& initialPos = std::get<2>(ptr);
+        auto& initialRot = std::get<3>(ptr);
+
+        auto& shipBody = *getComponent<ComponentBody>();
+        const auto shipRotation = shipBody.rotation();
+        emitter.setPosition(shipBody.position() + (shipRotation * initialPos));
+        emitter.setRotation(shipRotation * initialRot);
+    }
+}
+void Ship::internal_update_decals(const double& dt, Map& map) {
+    for (auto& decal_ptr : m_DamageDecals) {
+        auto& decal = *decal_ptr;
+        auto& shipBody = *getComponent<ComponentBody>();
+        const auto shipRotation = shipBody.rotation();
+        decal.setPosition(shipBody.position() + (shipRotation * decal.initialPosition()));
+        decal.setRotation(shipRotation * decal.initialRotation());
+        decal.update(dt);
+        if (!decal.active()) {
+            removeFromVector(m_DamageDecals, decal_ptr); //might be dangerous
+        }
+    }
+}
+void Ship::internal_update_ai(const double& dt, Map& map) {
+    auto& ai = *m_AI;
+    if (IsPlayer()) {
+        if (Engine::isKeyDownOnce(KeyboardKey::H)) {
+            auto* fire_at_will = ai.getFireAtWill();
+            if (fire_at_will) {
+                fire_at_will->toggle();
+            }
+        }
+    }
+    ai.update(dt);
+}
+void Ship::internal_update_player_you_logic(const double& dt, Map& map) {
+    #pragma region PlayerFlightControls
+    auto* mytarget = getTarget();
+    if (!Engine::paused()) {
+        if (m_IsWarping && m_WarpFactor > 0) {
+            auto speed = getWarpSpeedVector3() * static_cast<decimal>(dt);
+            for (auto& pod : epriv::InternalScenePublicInterface::GetEntities(map)) {
+                Entity e = map.getEntity(pod);
+                const EntityDataRequest dataRequest(e);
+                auto* cam = e.getComponent<ComponentCamera>(dataRequest);
+                //TODO: parent->child relationship
+                if (e != m_Entity && !cam && (e != map.getHUD().getSensorDisplay().radarRingEntity() && e != map.getHUD().getSensorDisplay().radarCameraEntity())) {
+                    auto _otherBody = e.getComponent<ComponentBody>(dataRequest);
+                    if (_otherBody) {
+                        auto& otherBody = *_otherBody;
+                        otherBody.setPosition(otherBody.position() + speed);
+                    }
+                }
+            }
+            for (auto& particle : epriv::InternalScenePublicInterface::GetParticles(map)) {
+                particle.setPosition(particle.position() + glm::vec3(speed));
+            }
+        }
+    }
+    #pragma endregion
+
+
+    auto& camera = *m_PlayerCamera;
+    if (Engine::isKeyDownOnce(KeyboardKey::F1)) {
+        camera.setState(CameraState::Cockpit);
+    }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
+        camera.setState(CameraState::Orbit);
+    }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
+        camera.setState(CameraState::FollowTarget);
+    }
+    //target whatever is in direct line of sight of the camera
+    /*
+    if (Engine::isKeyDownOnce(KeyboardKey::T) && map.name() != "Menu") {
+        vector<Entity> exclusions{ m_Entity, static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull))->getEntity(), camera.entity() };
+        auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
+        if (shields)
+            exclusions.push_back(shields->getEntity());
+        Entity scan = camera.getObjectInCenterRay(exclusions);
+        if (!scan.null()) {    
+            auto* componentName = scan.getComponent<ComponentName>();
+            if (componentName) {
+                EntityWrapper* scannedTarget = nullptr;
+                for (auto& obj : map.m_Objects) {
+                    auto* componentName1 = obj->getComponent<ComponentName>();
+                    if (componentName1 && componentName1->name() == componentName->name()) {
+                        scannedTarget = obj;
+                        break;
+                    }
+                }
+                setTarget(scannedTarget, true);
+            }
+        }
+    }
+    */
+    for (auto& shipSystem : m_ShipSystems) {
+        if (shipSystem.second) {
+            shipSystem.second->render();
+        }
+    }
+}
+
+void Ship::internal_calculate_ship_destruction_time_max(ComponentModel& model) {
+    auto rad = model.radius();
+    m_DestructionTimerMax = (rad * 5.0) + 2.5;
+}
+
 const string& Ship::getMapKey() const {
     return m_MapKey;
+}
+
+const bool Ship::setState(const ShipState::State& state) {
+    if (m_State != state) {
+        m_State = state;
+        return true;
+    }
+    return false;
+}
+void Ship::setDamping(const decimal& linear, const decimal& angular) {
+    auto& body = *getComponent<ComponentBody>();
+    body.setDamping(linear, angular);
 }
 
 void Ship::addHullTargetPoints(vector<glm::vec3>& points) {
@@ -518,7 +789,7 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     }else{
         auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
         if (hull) {
-            hull->receiveHit(normal, glm::vec3(packet.impactX, packet.impactY, packet.impactZ), rad, time, packet.damage);
+            hull->receiveHit(normal, glm::vec3(packet.impactX, packet.impactY, packet.impactZ) * glm::quat(getRotation()), rad, time, packet.damage);
         }
     }
     if (proj) {
@@ -714,6 +985,34 @@ void Ship::toggleWarp() {
     m_WarpFactor = 0;
     auto& rigidBodyComponent = *getComponent<ComponentBody>();
     rigidBodyComponent.clearLinearForces();
+}
+/*
+    Nominal,
+    JustFlaggedForDestruction,
+    UndergoingDestruction,
+    JustFlaggedAsFullyDestroyed,
+    Destroyed,
+    JustFlaggedToRespawn,
+    UndergoingRespawning,
+    WaitingForServerToRespawnMe,
+*/
+const bool Ship::isDestroyed() const {
+    return (m_State == ShipState::JustFlaggedForDestruction ||
+            m_State == ShipState::UndergoingDestruction ||
+            m_State == ShipState::JustFlaggedAsFullyDestroyed ||
+            m_State == ShipState::Destroyed ||
+            m_State == ShipState::JustFlaggedToRespawn || 
+            m_State == ShipState::UndergoingRespawning ||
+            m_State == ShipState::WaitingForServerToRespawnMe
+    ) ? true : false;
+}
+const bool Ship::isFullyDestroyed() const {
+    return (m_State == ShipState::JustFlaggedAsFullyDestroyed ||
+            m_State == ShipState::Destroyed ||
+            m_State == ShipState::JustFlaggedToRespawn ||
+            m_State == ShipState::UndergoingRespawning ||
+            m_State == ShipState::WaitingForServerToRespawnMe
+    ) ? true : false;
 }
 const string& Ship::getClass() const { 
     return m_ShipClass; 

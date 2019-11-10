@@ -162,7 +162,7 @@ const ShipSystemSensors::Detection ShipSystemSensors::validateDetection(Ship& ot
     d.valid = false;
     d.distanceSquared = dist2;
     if (dist2 <= m_RadarRange * m_RadarRange) {
-        if (  (!othership.isFullyCloaked() && !othership.isAlly(m_Ship)) || (othership.isAlly(m_Ship))  /*   or is it an enemy ship detected by anti-cloak scan?    */   ) {
+        if (  ((!othership.isFullyCloaked() && !othership.isAlly(m_Ship)) || (othership.isAlly(m_Ship))) && (!othership.isFullyDestroyed())  ) {
             d.valid = true;
         }
     }
@@ -264,38 +264,52 @@ void ShipSystemSensors::internal_update_populate_detected_ships(const double& dt
     }
 }
 void ShipSystemSensors::internal_update_clear_target_automatically_if_applicable(const double& dt) {
+    
+    if (!isOnline()) {
+        m_Ship.setTarget(nullptr, true);
+    }   
     auto* thisShipTarget = m_Ship.getTarget();
     if (thisShipTarget) {
-        Ship* target = dynamic_cast<Ship*>(thisShipTarget);
-        if (target) {
-            if (target->isFullyCloaked() && !target->isAlly(m_Ship)) {
-                if (!isShipDetectedByAntiCloak(target)) {
-                    m_Ship.setTarget(nullptr, true);
-                }
+        Ship* target_ptr = dynamic_cast<Ship*>(thisShipTarget);
+        if (target_ptr) {
+            Ship& target = *target_ptr;
+            if ((target.isFullyCloaked() && !target.isAlly(m_Ship) && !isShipDetectedByAntiCloak(target_ptr))
+            || 
+            (target.m_State == ShipState::Destroyed || target.m_State == ShipState::JustFlaggedAsFullyDestroyed || target.m_State == ShipState::JustFlaggedToRespawn || target.m_State == ShipState::UndergoingRespawning) ){
+                m_Ship.setTarget(nullptr, true);
             }
         }
     }
 }
 void ShipSystemSensors::update(const double& dt) {
-
-    if (m_Ship.IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::I)) {
-        toggleAntiCloakScan(true);
-    }
-
-    internal_update_anti_cloak_scan_detected_ships(dt);
-    internal_update_clear_target_automatically_if_applicable(dt);
-
-    if (m_AntiCloakScanActive) {
-
-        auto* cloak = static_cast<ShipSystemCloakingDevice*>(m_Ship.getShipSystem(ShipSystemType::CloakingDevice));
-        if (cloak && cloak->isCloakActive()) {
-            disableAntiCloakScan(true);
+    if (!m_Ship.isDestroyed()) {
+        if (m_Ship.IsPlayer() ){
+            if (Engine::isKeyDownOnce(KeyboardKey::I)) {
+                toggleAntiCloakScan(true);
+            }else if (Engine::isKeyDownOnce(KeyboardKey::T)) {
+                auto* ship = getClosestEnemyShip().ship;
+                if (ship) {
+                    setTarget(ship, true);
+                }
+            }else if (Engine::isKeyDownOnce(KeyboardKey::G)) {
+                auto* ship = getClosestEnemyCloakedShip().ship;
+                if (ship) {
+                    setTarget(ship, true);
+                }
+            }
         }
-        internal_update_anti_cloak_scan(dt);
+        internal_update_anti_cloak_scan_detected_ships(dt);
+        internal_update_clear_target_automatically_if_applicable(dt);
+
+        if (m_AntiCloakScanActive) {
+            auto* cloak = static_cast<ShipSystemCloakingDevice*>(m_Ship.getShipSystem(ShipSystemType::CloakingDevice));
+            if (cloak && cloak->isCloakActive()) {
+                disableAntiCloakScan(true);
+            }
+            internal_update_anti_cloak_scan(dt);
+        }
+        internal_update_populate_detected_ships(dt);
     }
-
-    internal_update_populate_detected_ships(dt);
-
     ShipSystem::update(dt);
 }
 const decimal& ShipSystemSensors::getRadarRange() const {

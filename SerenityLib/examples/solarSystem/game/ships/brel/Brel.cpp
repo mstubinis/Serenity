@@ -58,10 +58,10 @@ Brel::Brel(const AIType::Type ai_type, Team& team, Client& client, Map& map, con
     body.rebuildRigidBody();
 
     body.setDamping(static_cast<decimal>(0.01), static_cast<decimal>(0.2));
-    body.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
+    auto& btBody = const_cast<btRigidBody&>(body.getBtBody());
+    btBody.setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
     body.setCollisionGroup(CollisionFilter::_Custom_4); //i belong to ramming hull group (group 4)
     body.setCollisionMask(CollisionFilter::_Custom_4); //i should only collide with other ramming hulls only
-
 
     //blender 3d to game 3d: switch y and z, then negate z
     auto& _this = *this;
@@ -194,30 +194,31 @@ void Brel::updateWingSpan(const double& dt, const BrelWingSpanState::State end, 
     shieldsBody.setScale(shieldScale);
 }
 void Brel::update(const double& dt) {
-
-    auto& sensors = *static_cast<ShipSystemSensors*>(getShipSystem(ShipSystemType::Sensors));
-    const auto& closestEnemy = sensors.getClosestEnemyShip();
-    if (closestEnemy.ship) {
-        if (closestEnemy.distanceAway2 < static_cast<decimal>(150.0 * 150.0)) { //15km away
-            foldWingsDown();
+    if (!isDestroyed()) {
+        auto& sensors = *static_cast<ShipSystemSensors*>(getShipSystem(ShipSystemType::Sensors));
+        const auto& closestEnemy = sensors.getClosestEnemyShip();
+        if (closestEnemy.ship) {
+            if (closestEnemy.distanceAway2 < static_cast<decimal>(150.0 * 150.0)) { //15km away
+                foldWingsDown();
+            }else{
+                foldWingsUp();
+            }
         }else{
             foldWingsUp();
         }
-    }else{
-        foldWingsUp();
-    }
-    /*
-    //for testing only
-    if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
-        foldWingsUp();
-        foldWingsDown();
-    }
-    */
-    if (m_WingState == BrelWingSpanState::RotatingUp) {
-        updateWingSpan(dt, BrelWingSpanState::Up, 1);
-    }
-    if (m_WingState == BrelWingSpanState::RotatingDown) {
-        updateWingSpan(dt, BrelWingSpanState::Down, -1);
+        /*
+        //for testing only
+        if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
+            foldWingsUp();
+            foldWingsDown();
+        }
+        */
+        if (m_WingState == BrelWingSpanState::RotatingUp) {
+            updateWingSpan(dt, BrelWingSpanState::Up, 1);
+        }
+        if (m_WingState == BrelWingSpanState::RotatingDown) {
+            updateWingSpan(dt, BrelWingSpanState::Down, -1);
+        }
     }
     Ship::update(dt);
 }

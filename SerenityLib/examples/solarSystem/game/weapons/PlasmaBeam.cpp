@@ -26,38 +26,38 @@
 using namespace Engine;
 using namespace std;
 
-struct PlasmaBeamCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
-    auto phaserShipVoid = owner.getUserPointer1();
-    auto otherShipVoid = other.getUserPointer1();
+struct PlasmaBeamCollisionFunctor final { void operator()(CollisionCallbackEventData& data) const {
+    auto phaserShipVoid = data.ownerBody.getUserPointer1();
+    auto otherShipVoid = data.otherBody.getUserPointer1();
     if (otherShipVoid && phaserShipVoid) {
         if (otherShipVoid != phaserShipVoid) {//dont hit ourselves!
             Ship* otherShip = static_cast<Ship*>(otherShipVoid);
             if (otherShip) {
-                auto& weapon = *static_cast<PlasmaBeam*>(owner.getUserPointer2());
+                auto& weapon = *static_cast<PlasmaBeam*>(data.ownerBody.getUserPointer2());
                 if (weapon.firingTime > 0.0f) {
                     Ship* sourceShip = static_cast<Ship*>(phaserShipVoid);
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - glm::vec3(other.position());
+                    auto local = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * data.otherBody.rotation());
                     auto finalDamage = static_cast<float>(Resources::dt()) * weapon.damage;
-                    if (shields && other.getUserPointer() == shields) {
+                    if (shields && data.otherBody.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
                             if (weapon.firingTimeShieldGraphicPing > 0.2f) {
-                                shields->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
+                                shields->receiveHit(data.normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
                                 weapon.firingTimeShieldGraphicPing = 0.0f;
                             }else{
-                                shields->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
+                                shields->receiveHit(data.normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
                             }
                             return;
                         }
                     }
-                    if (hull && other.getUserPointer() == hull) {
+                    if (hull && data.otherBody.getUserPointer() == hull) {
                         if (weapon.firingTimeShieldGraphicPing > 1.0f) {
-                            hull->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, true, true);
+                            hull->receiveHit(data.normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, true, true);
                             weapon.firingTimeShieldGraphicPing = 0.0f;
                         }else{
-                            hull->receiveHit(normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, false, false);
+                            hull->receiveHit(data.normal, local, weapon.impactRadius, weapon.impactTime, finalDamage, false, false);
                         }
                     }
                 }

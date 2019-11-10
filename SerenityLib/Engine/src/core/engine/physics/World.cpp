@@ -24,12 +24,16 @@
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMT.h>
 
+#include <iostream>
+
+using namespace std;
 using namespace Engine;
 
 void _preTicCallback(btDynamicsWorld* world, btScalar timeStep) {
 }
 void _postTicCallback(btDynamicsWorld* world, btScalar timeStep) {
 }
+
 epriv::PhysicsWorld::PhysicsWorld(const unsigned int numCores) {
     broadphase             = new btDbvtBroadphase();
     collisionConfiguration = new btDefaultCollisionConfiguration();

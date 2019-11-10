@@ -8,7 +8,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/textures/Texture.h>
-#include <core/engine/renderer/ParticleEmissionProperties.h>
+#include <core/engine/renderer/particles/ParticleEmissionProperties.h>
 
 #include <iostream>
 #include <SFML/System.hpp>
@@ -76,7 +76,6 @@ Handle ResourceManifest::PlasmaBeamMaterial;
 Handle ResourceManifest::DisruptorBeamMaterial;
 
 //sounds
-Handle ResourceManifest::MenuMusic;
 Handle ResourceManifest::SoundCloakingActivated;
 Handle ResourceManifest::SoundCloakingDeactivated;
 Handle ResourceManifest::SoundPulsePhaser;
@@ -92,6 +91,12 @@ Handle ResourceManifest::SoundPlasmaBeam;
 Handle ResourceManifest::SoundDisruptorBeam;
 Handle ResourceManifest::SoundAntiCloakScan;
 Handle ResourceManifest::SoundAntiCloakScanDetection;
+Handle ResourceManifest::SoundExplosionSmall1;
+Handle ResourceManifest::SoundExplosionSmall2;
+Handle ResourceManifest::SoundExplosionSmall3;
+Handle ResourceManifest::SoundExplosionLarge1;
+Handle ResourceManifest::SoundExplosionLarge2;
+Handle ResourceManifest::SoundExplosionVeryLarge1;
 
 //torpedos
 Handle ResourceManifest::TorpedoFlareMesh;
@@ -247,7 +252,6 @@ void ResourceManifest::init(){
     plasmaLayer->getTexture()->setFilter(TextureFilter::Nearest);
 
 
-
     Material& disBeamMat = *((Material*)DisruptorBeamMaterial.get());
     disBeamMat.setShadeless(true);
     disBeamMat.setGlow(1.0f);
@@ -337,7 +341,6 @@ void ResourceManifest::init(){
 
 
     //sounds
-    MenuMusic = Resources::addSoundData(BasePath + "data/Sounds/menu.ogg");
     SoundCloakingActivated = Resources::addSoundData(BasePath + "data/Sounds/effects/cloaking.ogg");
     SoundCloakingDeactivated = Resources::addSoundData(BasePath + "data/Sounds/effects/decloaking.ogg");
     SoundPulsePhaser = Resources::addSoundData(BasePath + "data/Sounds/effects/pulse_phaser.ogg");
@@ -353,6 +356,12 @@ void ResourceManifest::init(){
     SoundDisruptorBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/disruptor_beam.ogg");
     SoundAntiCloakScan = Resources::addSoundData(BasePath + "data/Sounds/effects/anti_cloak_scan.ogg");
     SoundAntiCloakScanDetection = Resources::addSoundData(BasePath + "data/Sounds/effects/anti_cloak_scan_detection.ogg");
+    SoundExplosionSmall1 = Resources::addSoundData(BasePath + "data/Sounds/effects/explosion_small_1.ogg");
+    SoundExplosionSmall2 = Resources::addSoundData(BasePath + "data/Sounds/effects/explosion_small_2.ogg");
+    SoundExplosionSmall3 = Resources::addSoundData(BasePath + "data/Sounds/effects/explosion_small_3.ogg");
+    SoundExplosionLarge1 = Resources::addSoundData(BasePath + "data/Sounds/effects/explosion_large_1.ogg");
+    SoundExplosionLarge2 = Resources::addSoundData(BasePath + "data/Sounds/effects/explosion_large_2.ogg");
+    SoundExplosionVeryLarge1 = Resources::addSoundData(BasePath + "data/Sounds/effects/explosion_very_large_1.ogg");
 
     Fire::init();
 }

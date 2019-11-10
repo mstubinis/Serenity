@@ -4,8 +4,11 @@
 #include "../../map/Map.h"
 #include "../../ResourceManifest.h"
 #include "../../Helper.h"
+#include "../../particles/Fire.h"
 
 #include <core/engine/renderer/Decal.h>
+#include <core/engine/math/Engine_Math.h>
+#include <core/engine/renderer/particles/ParticleEmitter.h>
 
 #include <ecs/Components.h>
 #include <glm/gtx/norm.hpp>
@@ -30,9 +33,15 @@ ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const float health, const 
     hullBody.setUserPointer(this);
     hullBody.setUserPointer1(&_ship);
     hullBody.setUserPointer2(&_ship);
+
+    auto& btBody = const_cast<btRigidBody&>(hullBody.getBtBody());
+    btBody.setCollisionFlags(btBody.getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 }
 ShipSystemHull::~ShipSystemHull() {
 
+}
+void ShipSystemHull::restoreToFull() {
+    m_HealthPointsCurrent = m_HealthPointsMax;
 }
 Entity ShipSystemHull::getEntity() {
     return m_HullEntity;
@@ -42,6 +51,34 @@ void ShipSystemHull::destroy() {
     m_RechargeTimer = 0.0f;
 }
 void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const bool forceHullFire) {
+
+    auto shipRotation = m_Ship.getRotation();
+    auto lamda_apply_random_emitter = [&]() {
+        auto rand = Helper::GetRandomIntFromTo(0, 100);
+        if (rand < 85) {
+            auto lifetime = Helper::GetRandomFloatFromTo(32.75f, 46.0f);
+
+            auto finalPos = m_Ship.getPosition() + Engine::Math::rotate_vec3(shipRotation, impactLocationLocal);
+
+            ParticleEmitter emitter_(*Fire::ShortLived, m_Map, lifetime);
+            EntityDataRequest req(emitter_.entity());
+
+            glm_quat q;
+            Engine::Math::alignTo(q, -impactNormal);
+
+            emitter_.setPosition(finalPos, req);
+            emitter_.setRotation(q);
+
+            auto* emitter = m_Map.addParticleEmitter(emitter_);
+            if (emitter) {
+                //TODO: change modelIndex from 0 to actual value... will require some thinking on my part
+                m_Ship.m_EmittersDestruction.push_back(std::make_tuple(emitter, static_cast<size_t>(0), impactLocationLocal, q));
+            }
+        }
+    };
+
+
+
     auto& decalList = m_Ship.m_DamageDecals;
     Decal* d = nullptr;
     Decal* d1 = nullptr;
@@ -60,22 +97,24 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         hullDamage = (Material*)ResourceManifest::HullDamageMaterial3.get();
     }
 
-    const auto impactLocation = glm_vec3(impactLocationLocal) * m_Ship.getRotation();
     const auto impactR        = impactRadius * 0.16f;
     auto*      cloakingDevice = static_cast<ShipSystemCloakingDevice*>(m_Ship.getShipSystem(ShipSystemType::CloakingDevice));
     auto&      model          = *m_Ship.getComponent<ComponentModel>();
     if (forceHullFire) {
-        d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
+        d = new Decal(*hullDamageOutline, impactLocationLocal, impactNormal, impactR, m_Map, 120);
         decalList.push_back(d);
-        d1 = new Decal(*hullDamage, impactLocation, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
+        d1 = new Decal(*hullDamage, impactLocationLocal, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
         decalList.push_back(d1);
+
+        lamda_apply_random_emitter();
+
         if (cloakingDevice) {
             m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
         }
         return;
     }
     if (decalList.size() == 0) {
-        d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
+        d = new Decal(*hullDamageOutline, impactLocationLocal, impactNormal, impactR, m_Map, 120);
         decalList.push_back(d);
         if (cloakingDevice) {
             m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
@@ -85,7 +124,7 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         //get list of nearby impact points
         vector<Decal*> nearbys;
         for (auto& dec : decalList) {
-            decimal dist = glm::distance2(glm_vec3(dec->initialPosition()), impactLocation);
+            decimal dist = glm::distance2(glm_vec3(dec->initialPosition()), glm_vec3(impactLocationLocal));
             if (dist < static_cast<decimal>(impactR * impactR) * static_cast<decimal>(0.4f)) {
                 nearbys.push_back(dec);
             }
@@ -93,9 +132,9 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         if (nearbys.size() >= 8) {
             return; //forget it, no need to have so many
         }
-        d = new Decal(*hullDamageOutline, impactLocation, impactNormal, impactR, m_Map, 120);
+        d = new Decal(*hullDamageOutline, impactLocationLocal, impactNormal, impactR, m_Map, 120);
         if (nearbys.size() >= 4) {
-            d1 = new Decal(*hullDamage, impactLocation, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
+            d1 = new Decal(*hullDamage, impactLocationLocal, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
         }
     }
     if (d) {
@@ -103,20 +142,14 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
     }
     if (d1) {
         decalList.push_back(d1);
+        lamda_apply_random_emitter();
     }
     if (cloakingDevice) {
         m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
     }
 }
 void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const bool forceHullFire, const bool paint) {
-    float newHP = m_HealthPointsCurrent - damage;
-    if (newHP > 0.0f) {
-        //hull takes entire hit
-        m_HealthPointsCurrent -= damage;
-    }else{
-        //we destroyed the ship
-        m_HealthPointsCurrent = 0.0f;
-    }
+    receiveCollisionDamage(damage);
     if (paint) {
         applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, forceHullFire);
     }
@@ -129,6 +162,9 @@ void ShipSystemHull::receiveCollisionDamage(const float damage) {
     }else{
         //we destroyed the ship
         m_HealthPointsCurrent = 0.0f;
+        if (!m_Ship.isDestroyed()) {
+            m_Ship.setState(ShipState::JustFlaggedForDestruction);
+        }
     }
 }
 void ShipSystemHull::receiveCollisionVisual(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius) {
@@ -142,15 +178,17 @@ void ShipSystemHull::update(const double& dt) {
     hullBody.setRotation(shipBody.rotation());
 
 #pragma region Recharging
-    const auto fdt = static_cast<float>(dt);
-    if (m_HealthPointsCurrent < m_HealthPointsMax) { //dont need to recharge at max shields
-        m_RechargeTimer += fdt;
-        if (m_RechargeTimer >= m_RechargeRate) {
-            m_HealthPointsCurrent += m_RechargeAmount;
-            if (m_HealthPointsCurrent > m_HealthPointsMax) {
-                m_HealthPointsCurrent = m_HealthPointsMax;
+    if (m_Ship.m_State == ShipState::Nominal) {
+        const auto fdt = static_cast<float>(dt);
+        if (m_HealthPointsCurrent < m_HealthPointsMax) { //dont need to recharge at max shields
+            m_RechargeTimer += fdt;
+            if (m_RechargeTimer >= m_RechargeRate) {
+                m_HealthPointsCurrent += m_RechargeAmount;
+                if (m_HealthPointsCurrent > m_HealthPointsMax) {
+                    m_HealthPointsCurrent = m_HealthPointsMax;
+                }
+                m_RechargeTimer = 0.0f;
             }
-            m_RechargeTimer = 0.0f;
         }
     }
 #pragma endregion

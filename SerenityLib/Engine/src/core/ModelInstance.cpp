@@ -236,6 +236,7 @@ void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* progr
     m_Position          = glm::vec3(0.0f, 0.0f, 0.0f);
     m_Orientation       = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     m_Scale             = glm::vec3(1.0f, 1.0f, 1.0f);
+    m_Index             = 0;
 
     internalUpdateModelMatrix();
 }

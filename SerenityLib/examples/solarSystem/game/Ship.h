@@ -53,10 +53,26 @@ struct ShipModelInstanceUnbindFunctor {
     void operator()(EngineResource* r) const;
 };
 
+struct ShipState final { enum State {
+    Nominal,
+    JustFlaggedForDestruction,
+    UndergoingDestruction,
+    JustFlaggedAsFullyDestroyed,
+    Destroyed,
+    JustFlaggedToRespawn,
+    UndergoingRespawning,
+    WaitingForServerToRespawnMe,
+};};
+//struct ShipFlags final { enum Flag {
+//    None            = 0,
+//    Invincible = 1 << 0,
+//};};
+
 class Ship: public EntityWrapper, public EventObserver {
     friend struct GameCameraLogicFunctor;
     friend struct HullCollisionFunctor;
     friend  class GameCamera;
+    friend  class Client;
     friend struct ShipLogicFunctor;
     friend  class ShipSystemReactor;
     friend  class ShipSystemMainThrusters;
@@ -75,7 +91,31 @@ class Ship: public EntityWrapper, public EventObserver {
     friend struct PrimaryWeaponBeam;
     friend struct PrimaryWeaponCannon;
     friend struct SecondaryWeaponTorpedo;
+    private:
+        void internal_update_undergoing_respawning(const double& dt, Map& map);
+        void internal_update_just_flagged_for_respawn(const double& dt, Map& map);
+        void internal_update_just_flagged_for_destruction(const double& dt, Map& map);
+        void internal_update_just_destroyed_fully(const double& dt, Map& map);
+        void internal_update_undergoing_destruction(const double& dt, Map& map);
+        void internal_update_damage_emitters(const double& dt, Map& map);
+        void internal_update_decals(const double& dt, Map& map);
+        void internal_update_ai(const double& dt, Map& map);
+        void internal_update_player_you_logic(const double& dt, Map& map);
+        void internal_calculate_ship_destruction_time_max(ComponentModel&);
     protected:
+        std::vector<std::tuple<ParticleEmitter*,size_t,glm_vec3,glm_quat>>        m_EmittersDestruction;
+
+
+        //unsigned int                         m_Flags;
+        ShipState::State                     m_State;
+
+        double                               m_DestructionTimerCurrent;
+        double                               m_DestructionTimerDecalTimer;
+        double                               m_DestructionTimerDecalTimerMax;
+        double                               m_DestructionTimerMax;
+        double                               m_RespawnTimer;
+        double                               m_RespawnTimerMax;
+
         Team&                                m_Team;
         Client&                              m_Client;
         std::unordered_map<uint,ShipSystem*> m_ShipSystems;
@@ -111,9 +151,13 @@ class Ship: public EntityWrapper, public EventObserver {
 
         void destroy();
 
+        void respawn(const glm_vec3& newPosition, const std::string& nearest_spawn_anchor, Map& map);
+        const bool setState(const ShipState::State& state);
         void addHullTargetPoints(std::vector<glm::vec3>& points);
 
         AI* getAI();
+        const bool isDestroyed() const;
+        const bool isFullyDestroyed() const;
         const AIType::Type getAIType() const;
         const Team& getTeam() const;
         const std::string& getMapKey() const;
@@ -144,6 +188,7 @@ class Ship: public EntityWrapper, public EventObserver {
 
         const glm_vec3 getLinearVelocity();
 
+        void setDamping(const decimal& linear, const decimal& angular);
         void translateWarp(const double& amount, const double& dt);
         void toggleWarp();
         const bool canSeeCloak(Ship* otherShip);

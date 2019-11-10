@@ -8,6 +8,8 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/fonts/Font.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/materials/Material.h>
+#include <core/engine/renderer/particles/Particle.h>
 
 using namespace std;
 using namespace Engine;
@@ -238,6 +240,28 @@ void DeferredPipeline::renderRodLight(Camera& c, RodLight& r) {
     cullFace(GL_BACK);
     sendUniform1Safe("Type", 0.0f); //is this really needed?
 }
+void DeferredPipeline::renderParticle(Particle& particle) {
+    particle.getMaterial()->bind();
+
+    auto maxTextures = epriv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
+
+    Camera& camera = *particle.scene().getActiveCamera();
+    Renderer::sendTextureSafe("gDepthMap", m_GBuffer->getTexture(Engine::epriv::GBufferType::Depth), maxTextures);
+    Renderer::sendUniform4Safe("Object_Color", particle.color());
+    Renderer::sendUniform2Safe("ScreenData", glm::vec2(Resources::getWindowSize()));
+
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, particle.position());
+    modelMatrix *= glm::mat4_cast(camera.getOrientation());
+    modelMatrix = glm::rotate(modelMatrix, particle.angle(), glm::vec3(0, 0, 1));
+    const auto& scale = particle.getScale();
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(scale.x, scale.y, 1.0f));
+
+    Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+
+    Mesh::Plane->render();
+}
+
 
 void DeferredPipeline::internal_render_2d_text_left(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
     unsigned int i = 0;

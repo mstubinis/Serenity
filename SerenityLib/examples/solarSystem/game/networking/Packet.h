@@ -19,6 +19,13 @@ struct PacketType {enum Type: unsigned int {
     Undefined,
     Server_Shutdown,
 
+    Server_To_Client_Notify_Ship_Of_Respawn,
+
+    Server_To_Client_Notify_Ship_Of_Impending_Respawn,
+
+    Client_To_Server_Ship_Was_Just_Destroyed,
+    Server_To_Client_Ship_Was_Just_Destroyed,
+
     Client_To_Server_Request_Ship_Current_Info,
     Server_To_Client_Request_Ship_Current_Info,
 

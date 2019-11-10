@@ -81,7 +81,6 @@ void HUD::setTarget(EntityWrapper* wrapper) {
 void HUD::setTarget(Entity& entity) {
     m_ShipTargetStatusDisplay->setTarget(entity);
 }
-uint _countShips = 0;
 uint _countPlanets = 0;
 void HUD::update(const double& dt) {
     if (Engine::isKeyDownOnce(KeyboardKey::LeftAlt, KeyboardKey::X) || Engine::isKeyDownOnce(KeyboardKey::RightAlt, KeyboardKey::X)) {
@@ -90,24 +89,7 @@ void HUD::update(const double& dt) {
     auto& player = *m_Map.getPlayer();
     auto& playerKey = player.getMapKey();
 
-    if (Engine::isKeyDownOnce(KeyboardKey::Comma)) {
-        const auto& ships = m_Map.getShipsPlayerControlled();
-        vector<Ship*> shipsVect;
-        shipsVect.reserve(ships.size());
-
-        for (auto& p : ships) {
-            if (p.second->getMapKey() != playerKey) {
-                shipsVect.push_back(p.second);
-            }
-        }
-        if (shipsVect.size() > 0) {
-            if (_countShips > shipsVect.size() - 1) {
-                _countShips = 0;
-            }
-            player.setTarget(shipsVect[_countShips]->getMapKey(), true);
-            ++_countShips;
-        }
-    }else if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
+   if (Engine::isKeyDownOnce(KeyboardKey::Period)) {
         const auto& planets = m_Map.getPlanets();
         vector<Planet*> planetsVect;
         planetsVect.reserve(planets.size());

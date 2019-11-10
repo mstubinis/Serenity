@@ -77,7 +77,8 @@ class ShipSystemShields final : public ShipSystem {
             Map&,
             const float avg_health,
             const glm::vec3& offset = glm::vec3(0.0f),
-            const glm::vec3& additional_size_scale = glm::vec3(1.0f)
+            const glm::vec3& additional_size_scale = glm::vec3(1.0f),
+            const float recharge_amount = 650.0f
         );
         ShipSystemShields(
             Ship&,
@@ -89,7 +90,8 @@ class ShipSystemShields final : public ShipSystem {
             const float dorsal,
             const float ventral,
             const glm::vec3& offset = glm::vec3(0.0f),
-            const glm::vec3& additional_size_scale = glm::vec3(1.0f)
+            const glm::vec3& additional_size_scale = glm::vec3(1.0f),
+            const float recharge_amount = 650.0f
         );
         ~ShipSystemShields();
 
@@ -98,6 +100,8 @@ class ShipSystemShields final : public ShipSystem {
         void destroy();
 
         void update(const double& dt);
+
+        void reset_all_impact_points();
 
         const glm::vec3& getAdditionalShieldSizeScale() const;
 
@@ -133,6 +137,7 @@ class ShipSystemShields final : public ShipSystem {
 
 
         const bool shieldsAreUp() const;
+        void restoreToFull();
 
         void turnOffShields();
         void turnOnShields();

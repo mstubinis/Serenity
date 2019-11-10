@@ -10,8 +10,8 @@ ShipSystemWarpDrive::~ShipSystemWarpDrive() {
 
 }
 void ShipSystemWarpDrive::update(const double& dt) {
-    if (isOnline()) {
-        if (!Engine::paused()) {
+    if (!m_Ship.isDestroyed()) {
+        if (isOnline()) {
             if (m_Ship.IsPlayer()) {
                 if (Engine::isKeyDownOnce(KeyboardKey::L)) {
                     m_Ship.toggleWarp();

@@ -25,18 +25,30 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
     auto& thisCamera = *entity.getComponent<ComponentCamera>(dataRequest);
     auto& thisBody   = *entity.getComponent<ComponentBody>(dataRequest);
 
+    Ship* player = dynamic_cast<Ship*>(camera.m_Player);
+
     switch (camera.m_State) {
         case CameraState::Cockpit: {
-            camera.internal_update_cockpit(camera.m_Player, dt);
-            break;
-        }case CameraState::FollowTarget: {
-            if(camera.m_Target)
-                camera.internal_update_follow_target(camera.m_Target, dt);
+            if (player && player->isDestroyed())
+                camera.internal_update_orbit(player, dt);
             else
                 camera.internal_update_cockpit(camera.m_Player, dt);
             break;
+        }case CameraState::FollowTarget: {
+            if (player && player->isDestroyed())
+                camera.internal_update_orbit(player, dt);
+            else {
+                if (camera.m_Target)
+                    camera.internal_update_follow_target(camera.m_Target, dt);
+                else
+                    camera.internal_update_cockpit(camera.m_Player, dt);
+            }
+            break;
         }case CameraState::Orbit: {
-            camera.internal_update_orbit(camera.m_Target, dt);
+            if(player && player->isDestroyed())
+                camera.internal_update_orbit(player, dt);
+            else
+                camera.internal_update_orbit(camera.m_Target, dt);
             break;
         }case CameraState::Freeform: {
             thisCamera.lookAt(thisBody.position(), thisBody.position() + thisBody.forward(), thisBody.up());
@@ -168,33 +180,47 @@ void GameCamera::internal_update_orbit(EntityWrapper* target, const double& dt) 
     thisCamera.lookAt(eye, targetBody.position(), thisBody.up());
 }
 
-Entity GameCamera::getObjectInCenterRay(Entity& exclusion){
+Entity GameCamera::getObjectInCenterRay(vector<Entity>& exclusions) {
+    Scene& scene = m_Entity.scene();
     Entity ret = Entity::_null;
     vector<Entity> objs;
-    Scene& s = *Resources::getCurrentScene();
-    for(auto& data:epriv::InternalScenePublicInterface::GetEntities(s)){
-        Entity e = s.getEntity(data);
-        if(rayIntersectSphere(e)){
-            if(e != exclusion){
+    for (auto& data : epriv::InternalScenePublicInterface::GetEntities(scene)) {
+        Entity e = scene.getEntity(data);
+        if (rayIntersectSphere(e)) {
+            bool is_valid = true;
+            for (auto& exclusion : exclusions) {
+                if (e == exclusion) {
+                    is_valid = false;
+                    break;
+                }
+            }
+            if (is_valid) {
                 objs.push_back(e);
             }
         }
     }
-    if(objs.size() == 0) return ret;
-    if(objs.size() == 1) return objs[0];
+    if (objs.size() == 0) return ret;
+    if (objs.size() == 1) return objs[0];
 
-    decimal distance = -1;
-    for(auto& object:objs){
+    const auto camera_position = getPosition();
+    decimal leastDistance = -1.0;
+    for (auto& object : objs) {
         auto* body = object.getComponent<ComponentBody>();
         if (body) {
-            decimal d = glm::distance(body->position(), getPosition());
-            if (distance == -1 || d < distance) {
-                distance = d;
+            const decimal distSquared = glm::distance2(body->position(), camera_position);
+            if (leastDistance == -1 || distSquared < leastDistance) {
+                leastDistance = distSquared;
                 ret = object;
             }
         }
     }
     return ret;
+}
+
+Entity GameCamera::getObjectInCenterRay(Entity& exclusion){
+    vector<Entity> ent;
+    ent.push_back(exclusion);
+    return getObjectInCenterRay(ent);
 }
 
 const bool GameCamera::validateDistanceForOrbit(Map& map) {
@@ -209,7 +235,7 @@ const bool GameCamera::validateDistanceForOrbit(Map& map) {
 #else
             if (dist2 < static_cast<decimal>(100000000000000.0)) { //to prevent FP issues when viewing things billions of km away
 #endif
-                map.centerSceneToObject(m_Target->entity());
+                map.centerSceneToObject(target->entity());
                 m_Target = target;
                 return true;
             }

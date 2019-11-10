@@ -1,4 +1,4 @@
-#include <core/engine/renderer/ParticleEmissionProperties.h>
+#include <core/engine/renderer/particles/ParticleEmissionProperties.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/materials/Material.h>
 

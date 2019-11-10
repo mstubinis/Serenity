@@ -120,6 +120,14 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Request_Ship_Current_Info: {
             p = new PacketMessage(); break;
+        }case PacketType::Client_To_Server_Ship_Was_Just_Destroyed: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Ship_Was_Just_Destroyed: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Notify_Ship_Of_Impending_Respawn: {
+            p = new PacketMessage(); break;
+        }case PacketType::Server_To_Client_Notify_Ship_Of_Respawn: {
+            p = new PacketMessage(); break;
         }default: {
             break;
         }

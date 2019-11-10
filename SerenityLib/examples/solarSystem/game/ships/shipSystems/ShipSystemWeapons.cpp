@@ -571,224 +571,237 @@ ShipSystemWeapons::~ShipSystemWeapons() {
    SAFE_DELETE_VECTOR(m_SecondaryWeaponsTorpedos);
 }
 void ShipSystemWeapons::update(const double& dt) {
-    const bool isCloaked = m_Ship.isCloaked();
-    const bool isWarping = m_Ship.IsWarping();
-    const bool isPlayer = m_Ship.IsPlayer();
+    const bool isDestroyed = m_Ship.isDestroyed();
 
-    auto* mytarget = m_Ship.getTarget();
-    Ship* ship = nullptr;
-    if (mytarget) {
-        ship = dynamic_cast<Ship*>(mytarget);
-        if (ship) {
-            cannonTargetPoint  = ship->getAimPositionRandomLocal();
-            torpedoTargetPoint = ship->getAimPositionRandomLocal();
-        }else{
-            cannonTargetPoint  = glm::vec3(0.0f);
-            torpedoTargetPoint = glm::vec3(0.0f);
-        }
-    }
-    if (isPlayer && Engine::isMouseButtonDownOnce(MouseButton::Left) && !isCloaked && !isWarping) {
-        #pragma region Beams
-        vector<std::tuple<uint, EntityWrapper*>> primaryWeaponsBeamsFired;
-        for (uint i = 0; i < m_PrimaryWeaponsBeams.size(); ++i) {
-            const auto res = m_PrimaryWeaponsBeams[i]->canFire();
-            if (res) {
-                if (mytarget) {
-                    primaryWeaponsBeamsFired.push_back(std::make_tuple(i, mytarget));
-                }
-            }
-        }
+    if (!isDestroyed) {
+        const bool isCloaked = m_Ship.isCloaked();
+        const bool isWarping = m_Ship.IsWarping();
+        const bool isPlayer = m_Ship.IsPlayer();
 
-        #pragma endregion
-        #pragma region Cannons
-        vector<std::tuple<uint, int, EntityWrapper*>> primaryWeaponsCannonsFired;
+        auto* mytarget = m_Ship.getTarget();
+        Ship* ship = nullptr;
         if (mytarget) {
-            for (uint i = 0; i < m_PrimaryWeaponsCannons.size(); ++i) {
-                auto* cannon = m_PrimaryWeaponsCannons[i];
-                if (cannon->isInControlledArc(mytarget)) {
-                    const int resIndex = cannon->canFire();
-                    if (resIndex >= 0) {
-                        primaryWeaponsCannonsFired.push_back(std::make_tuple(i, resIndex, mytarget));
-                    }
-                }
-            }
-        }else{
-            for (uint i = 0; i < m_PrimaryWeaponsCannonsFwd.size(); ++i) {
-                auto& cannon = m_PrimaryWeaponsCannonsFwd[i];
-                const int resIndex = cannon.cannon->canFire();
-                if (resIndex >= 0) {
-                    primaryWeaponsCannonsFired.push_back(std::make_tuple(cannon.main_container_index, resIndex, mytarget));
-                }
-            }
-        }
-        #pragma endregion
-
-        //send packet with indices
-        if (primaryWeaponsBeamsFired.size() > 0) {
-            PacketMessage pOut;
-            pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Beams;
-            pOut.name = m_Ship.getName();
-            pOut.data = to_string(std::get<0>(primaryWeaponsBeamsFired[0]));
-
-            glm::vec3 target_point;
-
+            ship = dynamic_cast<Ship*>(mytarget);
             if (ship) {
-                target_point = ship->getAimPositionRandomLocal();
+                cannonTargetPoint = ship->getAimPositionRandomLocal();
+                torpedoTargetPoint = ship->getAimPositionRandomLocal();
             }else{
-                target_point = glm::vec3(0.0f);
+                cannonTargetPoint = glm::vec3(0.0f);
+                torpedoTargetPoint = glm::vec3(0.0f);
             }
-            pOut.r = target_point.r;
-            pOut.g = target_point.g;
-            pOut.b = target_point.b;
-
-            auto* target_ptr = std::get<1>(primaryWeaponsBeamsFired[0]);
-            string target_name = "N/A";
-            if (target_ptr) {
-                if (ship) {
-                    target_name = ship->getMapKey();
-                }else {
-                    target_name = target_ptr->getComponent<ComponentName>()->name();
+        }
+        if (isPlayer && Engine::isMouseButtonDownOnce(MouseButton::Left) && !isCloaked && !isWarping) {
+#pragma region Beams
+            vector<std::tuple<uint, EntityWrapper*>> primaryWeaponsBeamsFired;
+            for (uint i = 0; i < m_PrimaryWeaponsBeams.size(); ++i) {
+                const auto res = m_PrimaryWeaponsBeams[i]->canFire();
+                if (res) {
+                    if (mytarget) {
+                        primaryWeaponsBeamsFired.push_back(std::make_tuple(i, mytarget));
+                    }
                 }
             }
-            pOut.data += "," + target_name;
-            for (uint i = 1; i < primaryWeaponsBeamsFired.size(); ++i) {
-                pOut.data += "," + to_string(std::get<0>(primaryWeaponsBeamsFired[i]));
 
-                target_ptr = std::get<1>(primaryWeaponsBeamsFired[0]);
-                target_name = "N/A";
+#pragma endregion
+#pragma region Cannons
+            vector<std::tuple<uint, int, EntityWrapper*>> primaryWeaponsCannonsFired;
+            if (mytarget) {
+                for (uint i = 0; i < m_PrimaryWeaponsCannons.size(); ++i) {
+                    auto* cannon = m_PrimaryWeaponsCannons[i];
+                    if (cannon->isInControlledArc(mytarget)) {
+                        const int resIndex = cannon->canFire();
+                        if (resIndex >= 0) {
+                            primaryWeaponsCannonsFired.push_back(std::make_tuple(i, resIndex, mytarget));
+                        }
+                    }
+                }
+            }
+            else {
+                for (uint i = 0; i < m_PrimaryWeaponsCannonsFwd.size(); ++i) {
+                    auto& cannon = m_PrimaryWeaponsCannonsFwd[i];
+                    const int resIndex = cannon.cannon->canFire();
+                    if (resIndex >= 0) {
+                        primaryWeaponsCannonsFired.push_back(std::make_tuple(cannon.main_container_index, resIndex, mytarget));
+                    }
+                }
+            }
+#pragma endregion
+
+            //send packet with indices
+            if (primaryWeaponsBeamsFired.size() > 0) {
+                PacketMessage pOut;
+                pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Beams;
+                pOut.name = m_Ship.getName();
+                pOut.data = to_string(std::get<0>(primaryWeaponsBeamsFired[0]));
+
+                glm::vec3 target_point;
+
+                if (ship) {
+                    target_point = ship->getAimPositionRandomLocal();
+                }
+                else {
+                    target_point = glm::vec3(0.0f);
+                }
+                pOut.r = target_point.r;
+                pOut.g = target_point.g;
+                pOut.b = target_point.b;
+
+                auto* target_ptr = std::get<1>(primaryWeaponsBeamsFired[0]);
+                string target_name = "N/A";
                 if (target_ptr) {
                     if (ship) {
                         target_name = ship->getMapKey();
-                    }else{
+                    }
+                    else {
                         target_name = target_ptr->getComponent<ComponentName>()->name();
                     }
                 }
                 pOut.data += "," + target_name;
-            }
-            m_Ship.m_Client.send(pOut);
-        }
-        if (primaryWeaponsCannonsFired.size() > 0) {
-            PacketMessage pOut;
-            pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Cannons;
-            pOut.name = m_Ship.getName();
-            /*
-            TODO: add a bit of random offset to this...
-            */
-            pOut.r = cannonTargetPoint.x;
-            pOut.g = cannonTargetPoint.y;
-            pOut.b = cannonTargetPoint.z;
-            pOut.data = to_string(std::get<0>(primaryWeaponsCannonsFired[0])) + "," + to_string(std::get<1>(primaryWeaponsCannonsFired[0]));
+                for (uint i = 1; i < primaryWeaponsBeamsFired.size(); ++i) {
+                    pOut.data += "," + to_string(std::get<0>(primaryWeaponsBeamsFired[i]));
 
-            auto* target_ptr = std::get<2>(primaryWeaponsCannonsFired[0]);
-            string target_name = "N/A";
-            if (target_ptr) {
-                if (ship) {
-                    target_name = ship->getMapKey();
-                }else{
-                    target_name = target_ptr->getComponent<ComponentName>()->name();
+                    target_ptr = std::get<1>(primaryWeaponsBeamsFired[0]);
+                    target_name = "N/A";
+                    if (target_ptr) {
+                        if (ship) {
+                            target_name = ship->getMapKey();
+                        }
+                        else {
+                            target_name = target_ptr->getComponent<ComponentName>()->name();
+                        }
+                    }
+                    pOut.data += "," + target_name;
                 }
+                m_Ship.m_Client.send(pOut);
             }
-            pOut.data += "," + target_name;
+            if (primaryWeaponsCannonsFired.size() > 0) {
+                PacketMessage pOut;
+                pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Cannons;
+                pOut.name = m_Ship.getName();
+                /*
+                TODO: add a bit of random offset to this...
+                */
+                pOut.r = cannonTargetPoint.x;
+                pOut.g = cannonTargetPoint.y;
+                pOut.b = cannonTargetPoint.z;
+                pOut.data = to_string(std::get<0>(primaryWeaponsCannonsFired[0])) + "," + to_string(std::get<1>(primaryWeaponsCannonsFired[0]));
 
-            for (uint i = 1; i < primaryWeaponsCannonsFired.size(); ++i) {
-                pOut.data += "," + to_string(std::get<0>(primaryWeaponsCannonsFired[i])) + "," + to_string(std::get<1>(primaryWeaponsCannonsFired[i]));
-
-                target_ptr = std::get<2>(primaryWeaponsCannonsFired[i]);
-                target_name = "N/A";
+                auto* target_ptr = std::get<2>(primaryWeaponsCannonsFired[0]);
+                string target_name = "N/A";
                 if (target_ptr) {
                     if (ship) {
                         target_name = ship->getMapKey();
-                    }else{
+                    }
+                    else {
                         target_name = target_ptr->getComponent<ComponentName>()->name();
                     }
                 }
                 pOut.data += "," + target_name;
-            }
-            m_Ship.m_Client.send(pOut);
-        }
-    }
-    if (isPlayer && Engine::isMouseButtonDownOnce(MouseButton::Right) && !isCloaked && !isWarping) {
-        #pragma region Torpedos
-        vector<std::tuple<uint, int, EntityWrapper*>> secWeaponsTorpedosFired;
 
-        //first, get the arcs that are in range of the target if applicable
-        vector<std::tuple<uint, int, EntityWrapper*>> secWeaponsTorpedosFiredInValidArc;
-        if (mytarget) {
-            for (uint i = 0; i < m_SecondaryWeaponsTorpedos.size(); ++i) {
-                auto torpedo = m_SecondaryWeaponsTorpedos[i];
-                if (torpedo->isInControlledArc(mytarget)) {
+                for (uint i = 1; i < primaryWeaponsCannonsFired.size(); ++i) {
+                    pOut.data += "," + to_string(std::get<0>(primaryWeaponsCannonsFired[i])) + "," + to_string(std::get<1>(primaryWeaponsCannonsFired[i]));
+
+                    target_ptr = std::get<2>(primaryWeaponsCannonsFired[i]);
+                    target_name = "N/A";
+                    if (target_ptr) {
+                        if (ship) {
+                            target_name = ship->getMapKey();
+                        }
+                        else {
+                            target_name = target_ptr->getComponent<ComponentName>()->name();
+                        }
+                    }
+                    pOut.data += "," + target_name;
+                }
+                m_Ship.m_Client.send(pOut);
+            }
+        }
+        if (isPlayer && Engine::isMouseButtonDownOnce(MouseButton::Right) && !isCloaked && !isWarping) {
+#pragma region Torpedos
+            vector<std::tuple<uint, int, EntityWrapper*>> secWeaponsTorpedosFired;
+
+            //first, get the arcs that are in range of the target if applicable
+            vector<std::tuple<uint, int, EntityWrapper*>> secWeaponsTorpedosFiredInValidArc;
+            if (mytarget) {
+                for (uint i = 0; i < m_SecondaryWeaponsTorpedos.size(); ++i) {
+                    auto torpedo = m_SecondaryWeaponsTorpedos[i];
+                    if (torpedo->isInControlledArc(mytarget)) {
+                        const int resIndex = torpedo->canFire();
+                        if (resIndex >= 0) {
+                            secWeaponsTorpedosFiredInValidArc.push_back(std::make_tuple(i, resIndex, mytarget));
+                        }
+                    }
+                }
+            }
+            else {
+                for (uint i = 0; i < m_SecondaryWeaponsTorpedos.size(); ++i) {
+                    auto torpedo = m_SecondaryWeaponsTorpedos[i];
                     const int resIndex = torpedo->canFire();
                     if (resIndex >= 0) {
                         secWeaponsTorpedosFiredInValidArc.push_back(std::make_tuple(i, resIndex, mytarget));
                     }
                 }
             }
-        }else{
-            for (uint i = 0; i < m_SecondaryWeaponsTorpedos.size(); ++i) {
-                auto torpedo = m_SecondaryWeaponsTorpedos[i];
-                const int resIndex = torpedo->canFire();
+
+            //now we have our valid torpedo launchers, pick the launcher with the most rounds
+            uint maxRounds = 0;
+            uint chosenIndex = 0;
+            for (auto& weapIndex : secWeaponsTorpedosFiredInValidArc) {
+                auto& launcher = m_SecondaryWeaponsTorpedos[std::get<0>(weapIndex)];
+                if (launcher->numRounds > maxRounds) {
+                    maxRounds = launcher->numRounds;
+                    chosenIndex = std::get<0>(weapIndex);
+                }
+            }
+            //now fire this chosen launcher
+            if (secWeaponsTorpedosFiredInValidArc.size() > 0) {
+                const int resIndex = m_SecondaryWeaponsTorpedos[chosenIndex]->canFire();
                 if (resIndex >= 0) {
-                    secWeaponsTorpedosFiredInValidArc.push_back(std::make_tuple(i, resIndex, mytarget));
+                    secWeaponsTorpedosFired.push_back(std::make_tuple(chosenIndex, resIndex, mytarget));
                 }
             }
-        }
+#pragma endregion
 
-        //now we have our valid torpedo launchers, pick the launcher with the most rounds
-        uint maxRounds = 0;
-        uint chosenIndex = 0;
-        for (auto& weapIndex : secWeaponsTorpedosFiredInValidArc) {
-            auto& launcher = m_SecondaryWeaponsTorpedos[std::get<0>(weapIndex)];
-            if (launcher->numRounds > maxRounds) {
-                maxRounds = launcher->numRounds;
-                chosenIndex = std::get<0>(weapIndex);
-            }
-        }
-        //now fire this chosen launcher
-        if(secWeaponsTorpedosFiredInValidArc.size() > 0){
-            const int resIndex = m_SecondaryWeaponsTorpedos[chosenIndex]->canFire();
-            if (resIndex >= 0) {
-                secWeaponsTorpedosFired.push_back(std::make_tuple(chosenIndex, resIndex, mytarget));
-            }
-        }
-        #pragma endregion
+            //send packet with indices
+            if (secWeaponsTorpedosFired.size() > 0) {
+                PacketMessage pOut;
+                pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Torpedos;
+                pOut.name = m_Ship.getName();
+                /*
+                TODO: add a bit of random offset to this...
+                */
+                pOut.r = torpedoTargetPoint.x;
+                pOut.g = torpedoTargetPoint.y;
+                pOut.b = torpedoTargetPoint.z;
+                pOut.data = to_string(std::get<0>(secWeaponsTorpedosFired[0])) + "," + to_string(std::get<1>(secWeaponsTorpedosFired[0]));
 
-        //send packet with indices
-        if (secWeaponsTorpedosFired.size() > 0) {
-            PacketMessage pOut;
-            pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Torpedos;
-            pOut.name = m_Ship.getName();
-            /*
-            TODO: add a bit of random offset to this...
-            */
-            pOut.r = torpedoTargetPoint.x;
-            pOut.g = torpedoTargetPoint.y;
-            pOut.b = torpedoTargetPoint.z;
-            pOut.data = to_string(std::get<0>(secWeaponsTorpedosFired[0])) + "," + to_string(std::get<1>(secWeaponsTorpedosFired[0]));
-
-            auto* target_ptr = std::get<2>(secWeaponsTorpedosFired[0]);
-            string target_name = "N/A";
-            if (target_ptr) {
-                if (ship) {
-                    target_name = ship->getMapKey();
-                }else{
-                    target_name = target_ptr->getComponent<ComponentName>()->name();
-                }
-            }
-            pOut.data += "," + target_name;
-            for (uint i = 1; i < secWeaponsTorpedosFired.size(); ++i) {
-                pOut.data += "," + to_string(std::get<0>(secWeaponsTorpedosFired[i])) + "," + to_string(std::get<1>(secWeaponsTorpedosFired[i]));
-                target_ptr = std::get<2>(secWeaponsTorpedosFired[i]);
-                target_name = "N/A";
+                auto* target_ptr = std::get<2>(secWeaponsTorpedosFired[0]);
+                string target_name = "N/A";
                 if (target_ptr) {
                     if (ship) {
                         target_name = ship->getMapKey();
-                    }else{
+                    }
+                    else {
                         target_name = target_ptr->getComponent<ComponentName>()->name();
                     }
                 }
                 pOut.data += "," + target_name;
+                for (uint i = 1; i < secWeaponsTorpedosFired.size(); ++i) {
+                    pOut.data += "," + to_string(std::get<0>(secWeaponsTorpedosFired[i])) + "," + to_string(std::get<1>(secWeaponsTorpedosFired[i]));
+                    target_ptr = std::get<2>(secWeaponsTorpedosFired[i]);
+                    target_name = "N/A";
+                    if (target_ptr) {
+                        if (ship) {
+                            target_name = ship->getMapKey();
+                        }
+                        else {
+                            target_name = target_ptr->getComponent<ComponentName>()->name();
+                        }
+                    }
+                    pOut.data += "," + target_name;
+                }
+                m_Ship.m_Client.send(pOut);
             }
-            m_Ship.m_Client.send(pOut);
         }
     }
     for (auto& beam : m_PrimaryWeaponsBeams) { beam->update(dt); }

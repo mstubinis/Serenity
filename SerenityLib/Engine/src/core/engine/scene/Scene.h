@@ -28,11 +28,9 @@ class  ParticleEmitter;
 class  Particle;
 struct Entity;
 
-#define NUMBER_OF_PARTICLE_EMITTERS_LIMIT 1000
-#define NUMBER_OF_PARTICLE_LIMIT 1000000
-
 namespace Engine {
     namespace epriv {
+        class  GBuffer;
         class  RenderGraph;
         struct InternalScenePublicInterface;
         struct EntityPOD;
@@ -70,7 +68,7 @@ class Scene: public EngineResource, public EventObserver{
         
         Viewport& getMainViewport();
         Viewport& addViewport(const float x, const float y, const float width, const float height, const Camera& camera);
-        const bool addParticleEmitter(ParticleEmitter& emitter);
+        ParticleEmitter* addParticleEmitter(ParticleEmitter& emitter);
 
         Camera* getActiveCamera() const;
         void setActiveCamera(Camera&);
@@ -110,7 +108,7 @@ namespace Engine {
             static std::vector<RodLight*>&           GetRodLights(Scene&);
 
             static void           UpdateMaterials(Scene&, const double& dt);
-            static void           UpdateParticleEmitters(Scene&, const double& dt);
+            static void           UpdateParticleSystem(Scene&, const double& dt);
             static void           RenderGeometryOpaque(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);
             static void           RenderGeometryTransparent(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);
             static void           RenderGeometryTransparentTrianglesSorted(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);
@@ -119,7 +117,7 @@ namespace Engine {
             static void           RenderForwardTransparentTrianglesSorted(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);
             static void           RenderForwardParticles(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);
             static void           RenderDecals(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);
-            static void           RenderParticles(Scene&, Viewport&, Camera&, ShaderProgram& program);
+            static void           RenderParticles(Scene&, Viewport&, Camera&, ShaderProgram& program, GBuffer&);
 
             static void           AddModelInstanceToPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
             static void           RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);

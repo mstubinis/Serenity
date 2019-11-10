@@ -1,7 +1,10 @@
-#include <core/engine/renderer/Particle.h>
-#include <core/engine/renderer/ParticleEmitter.h>
-#include <core/engine/renderer/ParticleEmissionProperties.h>
+#include <core/engine/renderer/particles/Particle.h>
+#include <core/engine/renderer/particles/ParticleEmitter.h>
+#include <core/engine/renderer/particles/ParticleEmissionProperties.h>
+#include <core/engine/renderer/particles/ParticleSystem.h>
 #include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/GBuffer.h>
+
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
@@ -106,6 +109,9 @@ Particle::Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRot
     auto data = ParticleData(properties);
     init(data, emitterPosition, emitterRotation);
 }
+Particle::~Particle() {
+
+}
 void Particle::init(ParticleData& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
     m_Data = data;
     m_Data.m_Active = true;
@@ -114,9 +120,7 @@ void Particle::init(ParticleData& data, const glm::vec3& emitterPosition, const 
     m_Hidden = false;
     m_PassedRenderCheck = false;
 }
-Particle::~Particle() {
 
-}
 Particle::Particle(const Particle& other){
     m_Data = other.m_Data;
     m_Scene = other.m_Scene;
@@ -156,8 +160,20 @@ Particle& Particle::operator=(Particle&& other) noexcept {
     return *this;
 }
 
+Scene& Particle::scene() const {
+    return *m_Scene;
+}
 void Particle::setPosition(const glm::vec3& newPosition) {
     m_Position = newPosition;
+}
+Material* Particle::getMaterial() {
+    return m_Material;
+}
+const float& Particle::angle() const {
+    return m_Data.m_Angle;
+}
+const glm::vec2& Particle::getScale() const {
+    return m_Data.m_Scale;
 }
 const glm::vec3& Particle::position() const {
     return m_Position;
@@ -177,7 +193,7 @@ const double Particle::lifetime() const {
 
 
 
-void Particle::update(const size_t& index, stack<unsigned int>& freelist, const double& dt) {
+void Particle::update(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem) {
     if (m_Data.m_Active) {
         m_Data.m_Timer += dt;
         const auto fdt = static_cast<float>(dt);
@@ -188,7 +204,7 @@ void Particle::update(const size_t& index, stack<unsigned int>& freelist, const 
         m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt);
         m_Data.m_Angle           += m_Data.m_AngularVelocity;
         m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt);
-        m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt);
+        //m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt);
 
         m_Position               += (m_Data.m_Velocity * fdt);
 
@@ -200,19 +216,48 @@ void Particle::update(const size_t& index, stack<unsigned int>& freelist, const 
             m_Data.m_Active = false;
             m_Data.m_Timer = 0.0;
             m_Hidden = true;
-            freelist.push(index);
+            particleSystem.m_ParticleFreelist.push(index);
         }
     }
 }
-void Particle::update_multithreaded(const size_t& index, stack<unsigned int>& freelist, const double& dt, mutex& mutex_) {
+void Particle::update_multithreaded(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem) {
+    if (m_Data.m_Active) {
+        m_Data.m_Timer += dt;
+        const auto fdt = static_cast<float>(dt);
+        auto& prop = *m_Data.m_Properties;
 
+        m_Data.m_Scale           += prop.m_ChangeInScaleFunctor(m_Data.m_Timer, dt);
+        m_Data.m_Color            = prop.m_ColorFunctor(m_Data.m_Timer, dt);
+        m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt);
+        m_Data.m_Angle           += m_Data.m_AngularVelocity;
+        m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt);
+        //m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt);
+
+        m_Position               += (m_Data.m_Velocity * fdt);
+
+
+        //auto& camera = *m_Scene->getActiveCamera();
+        //auto vec = glm::normalize(bodyComponent.position() - camera.getPosition()) * static_cast<decimal>(m_Data.m_Depth);
+        //instance.setPosition(glm::vec3(vec));
+        if (m_Data.m_Timer >= prop.m_Lifetime) {
+            m_Data.m_Active = false;
+            m_Data.m_Timer = 0.0;
+            m_Hidden = true;
+            particleSystem.m_Mutex.lock();
+            particleSystem.m_ParticleFreelist.push(index);
+            particleSystem.m_Mutex.unlock();
+        }
+    }
 }
-void Particle::render() {
+void Particle::render(Engine::epriv::GBuffer& gBuffer) {
     m_Material->bind();
 
-    Camera& camera = *m_Scene->getActiveCamera();
+    auto maxTextures = epriv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
 
+    Camera& camera = *m_Scene->getActiveCamera();
+    Renderer::sendTextureSafe("gDepthMap", gBuffer.getTexture(Engine::epriv::GBufferType::Depth), maxTextures);
     Renderer::sendUniform4Safe("Object_Color", m_Data.m_Color);
+    Renderer::sendUniform2Safe("ScreenData", glm::vec2(Resources::getWindowSize()));
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, m_Position);

@@ -23,7 +23,7 @@ using namespace std;
 #pragma region Plane
 
 ShipSystemShields::Plane::Plane() {
-
+    a = b = c = glm::vec3(0.0f);
 }
 ShipSystemShields::Plane::Plane(const glm::vec3& _a, const glm::vec3& _b, const glm::vec3& _c) {
     a = _a;
@@ -150,10 +150,10 @@ void ShipSystemShieldsImpactPoint::update(const float& dt, vector<uint>& freelis
 }
 #pragma endregion
 
-ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float health, const glm::vec3& offset, const glm::vec3& additional_size_scale) :ShipSystemShields(_ship, map, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, offset, additional_size_scale) {
+ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float health, const glm::vec3& offset, const glm::vec3& additional_size_scale, const float recharge_amount) :ShipSystemShields(_ship, map, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, offset, additional_size_scale, recharge_amount) {
 
 }
-ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, const float aft, const float prt, const float sbd, const float dsl, const float vnt, const glm::vec3& offset, const glm::vec3& additional_size_scale) :ShipSystem(ShipSystemType::Shields, _ship){
+ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, const float aft, const float prt, const float sbd, const float dsl, const float vnt, const glm::vec3& offset, const glm::vec3& additional_size_scale, const float recharge_amount) :ShipSystem(ShipSystemType::Shields, _ship){
     m_ShieldEntity = map.createEntity();
     m_ShieldsOffset = offset;
     m_AdditionalShieldScale = additional_size_scale;
@@ -188,11 +188,8 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, con
     m_HealthPointsMax.push_back(dsl);
     m_HealthPointsMax.push_back(vnt);
 
-
-    //m_TimeSinceLastHit = 10.0f;
-    m_RechargeAmount = 450.0f;
+    m_RechargeAmount = recharge_amount;
     m_RechargeRate = 15.0f;
-    //m_RechargeActivation = 5.0f;
     m_RechargeTimer = 0.0f;
 
     auto shieldScale = m_Ship.getComponent<ComponentModel>()->boundingBox() * SHIELD_SCALE_FACTOR;
@@ -261,6 +258,14 @@ ShipSystemShields::~ShipSystemShields() {
 void ShipSystemShields::destroy() {
     m_ShieldEntity.destroy();
     m_ShieldsAreUp = false;
+    reset_all_impact_points();
+}
+void ShipSystemShields::restoreToFull() {
+    for (size_t i = 0; i < m_HealthPointsCurrent.size(); ++i) {
+        m_HealthPointsCurrent[i] = m_HealthPointsMax[i];
+    }
+}
+void ShipSystemShields::reset_all_impact_points() {
     for (uint i = 0; i < MAX_IMPACT_POINTS; ++i) {
         m_ImpactPoints[i] = ShipSystemShieldsImpactPoint();
     }
@@ -285,25 +290,27 @@ void ShipSystemShields::update(const double& dt) {
 
     //recharging here
     #pragma region Recharging
-    bool shouldRecharge = false;
-    for (uint i = 0; i < m_HealthPointsCurrent.size(); ++i) {
-        if (m_HealthPointsCurrent[i] < m_HealthPointsMax[i]) { //dont need to recharge at max shields
-            shouldRecharge = true;
-            break;
+    if (m_Ship.m_State == ShipState::Nominal) {
+        bool shouldRecharge = false;
+        for (uint i = 0; i < m_HealthPointsCurrent.size(); ++i) {
+            if (m_HealthPointsCurrent[i] < m_HealthPointsMax[i]) { //dont need to recharge at max shields
+                shouldRecharge = true;
+                break;
+            }
         }
-    }
-    if (shouldRecharge) {
-        m_RechargeTimer += fdt;
-        if (m_RechargeTimer >= m_RechargeRate) {
-            for (uint i = 0; i < m_HealthPointsCurrent.size(); ++i) {
-                if (m_HealthPointsCurrent[i] < m_HealthPointsMax[i]) { //dont need to recharge at max shields
-                    m_HealthPointsCurrent[i] += m_RechargeAmount;
-                    if (m_HealthPointsCurrent[i] > m_HealthPointsMax[i]) {
-                        m_HealthPointsCurrent[i] = m_HealthPointsMax[i];
+        if (shouldRecharge) {
+            m_RechargeTimer += fdt;
+            if (m_RechargeTimer >= m_RechargeRate) {
+                for (uint i = 0; i < m_HealthPointsCurrent.size(); ++i) {
+                    if (m_HealthPointsCurrent[i] < m_HealthPointsMax[i]) { //dont need to recharge at max shields
+                        m_HealthPointsCurrent[i] += m_RechargeAmount;
+                        if (m_HealthPointsCurrent[i] > m_HealthPointsMax[i]) {
+                            m_HealthPointsCurrent[i] = m_HealthPointsMax[i];
+                        }
                     }
                 }
+                m_RechargeTimer = 0.0f;
             }
-            m_RechargeTimer = 0.0f;
         }
     }
     #pragma endregion
@@ -350,27 +357,29 @@ void ShipSystemShields::addShieldImpact(const glm::vec3& impactLocationLocal, co
 }
 void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide, const bool doImpactGraphic) {
     if (m_ShieldsAreUp) {
-        /*
-        rules : 
-            - if anti-cloak scan active, shields take 10% more damage
-        */
-        auto final_damage = damage;
-        auto* sensors = static_cast<ShipSystemSensors*>(m_Ship.getShipSystem(ShipSystemType::Sensors));
-        if (sensors) {
-            if (sensors->isAntiCloakScanActive()) {
-                final_damage *= 1.1f;
+        if (m_Ship.m_State != ShipState::Destroyed && m_Ship.m_State != ShipState::JustFlaggedAsFullyDestroyed) {
+            /*
+            rules :
+                - if anti-cloak scan active, shields take 10% more damage
+            */
+            auto final_damage = damage;
+            auto* sensors = static_cast<ShipSystemSensors*>(m_Ship.getShipSystem(ShipSystemType::Sensors));
+            if (sensors) {
+                if (sensors->isAntiCloakScanActive()) {
+                    final_damage *= 1.1f;
+                }
             }
-        }
-        const float bleed_damage = m_HealthPointsCurrent[shieldSide] - final_damage;
-        if (bleed_damage >= 0) {
-            m_HealthPointsCurrent[shieldSide] -= final_damage; //shields take the entire hit
-        }else{
-            m_HealthPointsCurrent[shieldSide] = 0.0f;
-            //bleed_damage *= -1.0f;
-            //receiveHitBleedDamage(impactNormal, impactLocationLocal, impactRadius, maxTime, bleed_damage, shieldSide);
-        }
-        if (doImpactGraphic) {
-            addShieldImpact(impactLocationLocal, impactRadius, maxTime);
+            const float bleed_damage = m_HealthPointsCurrent[shieldSide] - final_damage;
+            if (bleed_damage >= 0) {
+                m_HealthPointsCurrent[shieldSide] -= final_damage; //shields take the entire hit
+            }else{
+                m_HealthPointsCurrent[shieldSide] = 0.0f;
+                //bleed_damage *= -1.0f;
+                //receiveHitBleedDamage(impactNormal, impactLocationLocal, impactRadius, maxTime, bleed_damage, shieldSide);
+            }
+            if (doImpactGraphic) {
+                addShieldImpact(impactLocationLocal, impactRadius, maxTime);
+            }
         }
     }
 

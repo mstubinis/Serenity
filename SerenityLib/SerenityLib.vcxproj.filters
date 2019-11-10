@@ -190,6 +190,12 @@
     <Filter Include="Header Files\Engine\Core\Renderer\pipelines">
       <UniqueIdentifier>{1b4e9717-958b-45be-8856-56dee08df9d2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\particles">
+      <UniqueIdentifier>{2ee24e24-abcc-4650-964c-718c8e251234}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\particles">
+      <UniqueIdentifier>{d23e9a0a-0ee7-4f0b-96ba-bf4ced4223e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -570,9 +576,6 @@
     <ClInclude Include="Engine\src\core\engine\materials\MaterialLoader.h">
       <Filter>Header Files\Engine\Core\Materials</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\renderer\ParticleEmitter.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\DepthOfFieldCode.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClInclude>
@@ -591,11 +594,17 @@
     <ClInclude Include="Engine\src\core\engine\renderer\RendererIncludes.h">
       <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\renderer\Particle.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    <ClInclude Include="Engine\src\core\engine\renderer\particles\Particle.h">
+      <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\renderer\ParticleEmissionProperties.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    <ClInclude Include="Engine\src\core\engine\renderer\particles\ParticleEmitter.h">
+      <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\particles\ParticleEmissionProperties.h">
+      <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\particles\ParticleSystem.h">
+      <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -896,20 +905,23 @@
     <ClCompile Include="Engine\src\core\engine\materials\MaterialLoader.cpp">
       <Filter>Source Files\Engine\Core\Materials</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\renderer\ParticleEmitter.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\DepthOfFieldCode.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\pipelines\DeferredPipeline.cpp">
       <Filter>Source Files\Engine\Core\Renderer\pipelines</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\renderer\Particle.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    <ClCompile Include="Engine\src\core\engine\renderer\particles\Particle.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\renderer\ParticleEmissionProperties.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    <ClCompile Include="Engine\src\core\engine\renderer\particles\ParticleEmitter.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\particles\ParticleEmissionProperties.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\particles\ParticleSystem.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

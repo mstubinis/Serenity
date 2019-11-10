@@ -20,6 +20,16 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
+#pragma region CollisionCallbackParticipant
+CollisionCallbackEventData::CollisionCallbackEventData(ComponentBody& a, ComponentBody& b, glm::vec3& c, glm::vec3& d, glm::vec3& e) :ownerBody(a), otherBody(b), ownerHit(c), otherHit(d), normal(e) {
+    ownerCollisionObj = nullptr;
+    otherCollisionObj = nullptr;
+    ownerModelInstanceIndex = 0;
+    otherModelInstanceIndex = 0;
+}
+#pragma endregion
+
+
 #pragma region PhysicsData
 
 ComponentBody::PhysicsData::PhysicsData(){ 
@@ -212,7 +222,7 @@ void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld) {
     if (m_Physics) {
         auto& physics = *data.p;
         if (physics.bullet_rigidBody) {
-            Physics::removeRigidBody(physics.bullet_rigidBody);
+            removePhysicsFromWorld();
             SAFE_DELETE(physics.bullet_rigidBody);
         }
         auto& inertia = physics.collision->getBtInertia();
@@ -226,8 +236,8 @@ void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld) {
         rigidBody.setMassProps(static_cast<btScalar>(physics.mass), inertia);
         rigidBody.updateInertiaTensor();
         setInternalPhysicsUserPointer(this);
-        if(addBodyToPhysicsWorld)
-            Physics::addRigidBody(physics.bullet_rigidBody, physics.group, physics.mask);
+        if (addBodyToPhysicsWorld)
+            addPhysicsToWorld();
     }
 }
 //kinda ugly
@@ -255,6 +265,12 @@ void ComponentBody::setInternalPhysicsUserPointer(void* userPtr) {
             }
         }
     }
+}
+void ComponentBody::removePhysicsFromWorld() {
+    Physics::removeRigidBody(*this);
+}
+void ComponentBody::addPhysicsToWorld() {
+    Physics::addRigidBody(*this);
 }
 const decimal& ComponentBody::getGoalSpeed() const {
     return m_GoalSpeed;
@@ -291,9 +307,9 @@ void* ComponentBody::getUserPointer1() {
 void* ComponentBody::getUserPointer2() {
     return m_UserPointer2;
 }
-void ComponentBody::collisionResponse(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) {
+void ComponentBody::collisionResponse(CollisionCallbackEventData& data) {
     if (m_CollisionFunctor.vtable && !m_CollisionFunctor.empty()) { //hacky, but needed for some reason...
-        m_CollisionFunctor(std::ref(owner), std::ref(ownerHit), std::ref(other), std::ref(otherHit), std::ref(normal));
+        m_CollisionFunctor( std::ref(data) );
     }
 }
 const ushort ComponentBody::getCollisionGroup() const {
@@ -373,7 +389,7 @@ void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, cons
 void ComponentBody::setCollision(Collision* p_Collision) {
     auto& physicsData = *data.p;
     if (physicsData.collision) {
-        Physics::removeRigidBody(physicsData.bullet_rigidBody);
+        removePhysicsFromWorld();
         SAFE_DELETE(physicsData.collision);
     }
     physicsData.collision = p_Collision;
@@ -385,7 +401,7 @@ void ComponentBody::setCollision(Collision* p_Collision) {
         auto& inertia = collision.getBtInertia();
         bt_rigidBody.setMassProps(static_cast<btScalar>(physicsData.mass), inertia);
         bt_rigidBody.updateInertiaTensor();
-        Physics::addRigidBody(&bt_rigidBody, physicsData.group, physicsData.mask);
+        addPhysicsToWorld();
     }
     setInternalPhysicsUserPointer(this);
 }
@@ -514,14 +530,14 @@ void ComponentBody::setPosition(const decimal& p_X, const decimal& p_Y, const de
         tr.setRotation(physicsData.bullet_rigidBody->getOrientation());
         Collision& collision = *physicsData.collision;
         if (collision.getType() == CollisionType::TriangleShapeStatic) {
-            Physics::removeRigidBody(physicsData.bullet_rigidBody);
+            removePhysicsFromWorld();
         }
         physicsData.bullet_motionState.setWorldTransform(tr);
         physicsData.bullet_rigidBody->setMotionState(&physicsData.bullet_motionState); //is this needed?
         physicsData.bullet_rigidBody->setWorldTransform(tr);
         physicsData.bullet_rigidBody->setCenterOfMassTransform(tr);
         if (collision.getType() == CollisionType::TriangleShapeStatic) {
-            Physics::addRigidBody(physicsData.bullet_rigidBody, physicsData.group, physicsData.mask);
+            addPhysicsToWorld();
         }
     }else{
         auto& normalData = *data.n;
@@ -810,9 +826,9 @@ void ComponentBody::setCollisionGroup(const short& group) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.group != group) {
-            Physics::removeRigidBody(phyData.bullet_rigidBody);
+            removePhysicsFromWorld();
             phyData.group = group;
-            Physics::addRigidBody(phyData.bullet_rigidBody, phyData.group, phyData.mask);
+            addPhysicsToWorld();
         }
     }
 }
@@ -820,9 +836,9 @@ void ComponentBody::setCollisionMask(const short& mask) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.mask != mask) {
-            Physics::removeRigidBody(phyData.bullet_rigidBody);
+            removePhysicsFromWorld();
             phyData.mask = mask;
-            Physics::addRigidBody(phyData.bullet_rigidBody, phyData.group, phyData.mask);
+            addPhysicsToWorld();
         }
     }
 }
@@ -836,9 +852,9 @@ void ComponentBody::addCollisionGroup(const short& group) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.group != (phyData.group | group)) {
-            Physics::removeRigidBody(phyData.bullet_rigidBody);
+            removePhysicsFromWorld();
             phyData.group = phyData.group | group;
-            Physics::addRigidBody(phyData.bullet_rigidBody, phyData.group, phyData.mask);
+            addPhysicsToWorld();
         }
     }
 }
@@ -846,9 +862,9 @@ void ComponentBody::addCollisionMask(const short& mask) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.mask != (phyData.mask | mask)) {
-            Physics::removeRigidBody(phyData.bullet_rigidBody);
+            removePhysicsFromWorld();
             phyData.mask = phyData.mask | mask;
-            Physics::addRigidBody(phyData.bullet_rigidBody, phyData.group, phyData.mask);
+            addPhysicsToWorld();
         }
     }
 }
@@ -864,9 +880,9 @@ void ComponentBody::setCollisionFlag(const short& flag) {
         auto& rigidBody = *phyData.bullet_rigidBody;
         const auto& currFlags = rigidBody.getCollisionFlags();
         if (currFlags != flag) {
-            Physics::removeRigidBody(&rigidBody);
+            removePhysicsFromWorld();
             rigidBody.setCollisionFlags(flag);
-            Physics::addRigidBody(&rigidBody, phyData.group, phyData.mask);
+            addPhysicsToWorld();
         }
     }
 }
@@ -879,9 +895,9 @@ void ComponentBody::addCollisionFlag(const short& flag) {
         auto& rigidBody = *phyData.bullet_rigidBody;
         const auto& currFlags = rigidBody.getCollisionFlags();
         if (currFlags != (currFlags | flag)) {
-            Physics::removeRigidBody(&rigidBody);
+            removePhysicsFromWorld();
             rigidBody.setCollisionFlags(currFlags | flag);
-            Physics::addRigidBody(&rigidBody, phyData.group, phyData.mask);
+            addPhysicsToWorld();
         }
     }
 }
@@ -892,9 +908,9 @@ void ComponentBody::removeCollisionGroup(const short& group) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.group != (phyData.group & ~group)) {
-            Physics::removeRigidBody(phyData.bullet_rigidBody);
+            removePhysicsFromWorld();
             phyData.group = phyData.group & ~group;
-            Physics::addRigidBody(phyData.bullet_rigidBody, phyData.group, phyData.mask);
+            addPhysicsToWorld();
         }
     }
 }
@@ -902,9 +918,9 @@ void ComponentBody::removeCollisionMask(const short& mask) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.mask != (phyData.mask & ~mask)) {
-            Physics::removeRigidBody(phyData.bullet_rigidBody);
+            removePhysicsFromWorld();
             phyData.mask = phyData.mask & ~mask;
-            Physics::addRigidBody(phyData.bullet_rigidBody, phyData.group, phyData.mask);
+            addPhysicsToWorld();
         }
     }
 }
@@ -914,9 +930,9 @@ void ComponentBody::removeCollisionFlag(const short& flag) {
         auto& rigidBody = *phyData.bullet_rigidBody;
         const auto& currFlags = rigidBody.getCollisionFlags();
         if (currFlags != (currFlags & ~flag)) {
-            Physics::removeRigidBody(&rigidBody);
+            removePhysicsFromWorld();
             rigidBody.setCollisionFlags(currFlags & ~flag);
-            Physics::addRigidBody(&rigidBody, phyData.group, phyData.mask);
+            addPhysicsToWorld();
         }
     }
 }
@@ -937,15 +953,15 @@ void ComponentBody::setDynamic(const bool p_Dynamic) {
         auto& physicsData = *data.p;
         auto& rigidBody = *physicsData.bullet_rigidBody;
         if (p_Dynamic) {
-            Physics::removeRigidBody(&rigidBody);
+            removePhysicsFromWorld();
             rigidBody.setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
-            Physics::addRigidBody(&rigidBody, physicsData.group, physicsData.mask);
+            addPhysicsToWorld();
             rigidBody.activate();
         }else{
-            Physics::removeRigidBody(&rigidBody);
+            removePhysicsFromWorld();
             rigidBody.setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
             ComponentBody::clearAllForces();
-            Physics::addRigidBody(&rigidBody, physicsData.group, physicsData.mask);
+            addPhysicsToWorld();
             rigidBody.activate();
         }
     }
@@ -1160,8 +1176,7 @@ struct epriv::ComponentBody_EntityAddedToSceneFunction final {void operator()(vo
             component.setCollision(static_cast<CollisionType::Type>(physicsData.collision->getType()), physicsData.mass);
             auto currentScene = Resources::getCurrentScene();
             if (currentScene && currentScene == &p_Scene) {
-                auto& phyData = *component.data.p;
-                Physics::addRigidBody(phyData.bullet_rigidBody, phyData.group, phyData.mask);
+                component.addPhysicsToWorld();
             }
         }
     }
@@ -1170,8 +1185,7 @@ struct epriv::ComponentBody_SceneEnteredFunction final {void operator()(void* p_
 	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).pool();
     for (auto& component : pool) { 
         if (component.m_Physics) {
-            auto& phyData = *component.data.p;
-            Physics::addRigidBody(phyData.bullet_rigidBody, phyData.group, phyData.mask);
+            component.addPhysicsToWorld();
         } 
     }
 }};
@@ -1179,8 +1193,7 @@ struct epriv::ComponentBody_SceneLeftFunction final {void operator()(void* p_Com
 	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).pool();
     for (auto& component : pool) { 
         if (component.m_Physics) {
-            auto& phyData = *component.data.p;
-            Physics::removeRigidBody(phyData.bullet_rigidBody);
+            component.removePhysicsFromWorld();
         } 
     }
 }};

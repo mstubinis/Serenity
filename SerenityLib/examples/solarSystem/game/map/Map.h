@@ -39,14 +39,18 @@ class Map: public Scene{
         void loadFromFile(const std::string& file);
     private:
         std::tuple<std::string, Anchor*>               m_RootAnchor;
-        std::tuple<std::string, Anchor*>               m_SpawnAnchor;
+        std::vector<std::tuple<std::string, Anchor*>>  m_SpawnAnchors;
+
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const decimal& x = 0, const decimal& y = 0, const decimal& z = 0);
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const glm_vec3& position);
     public:
         Anchor* internalCreateDeepspaceAnchor(const decimal& x, const decimal& y, const decimal& z, const std::string& name = "");
         Anchor* getRootAnchor();
         Anchor* getSpawnAnchor();
+
+        Anchor* getSpawnAnchor(const std::string& name);
         const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr);
+        const std::string getClosestSpawnAnchor();
     public:
 
         std::vector<EntityWrapper*> m_Objects;

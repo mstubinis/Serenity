@@ -25,6 +25,7 @@ struct ShipInformation final {
     std::vector<Handle>    MaterialHandles;
     Handle                 IconTextureHandle;
     Handle                 IconBorderTextureHandle;
+    double                 RespawnTime;
 
     ShipInformation();
 };
@@ -39,7 +40,7 @@ class Ships final{
 
         static const FactionInformation& getFactionInformation(const std::string& shipClass);
 
-        static void createShipEntry(const std::string& shipClass, const FactionEnum::Type& faction);
+        static void createShipEntry(const std::string& shipClass, const FactionEnum::Type& faction, const double respawnTime);
 
         static void init();
 };

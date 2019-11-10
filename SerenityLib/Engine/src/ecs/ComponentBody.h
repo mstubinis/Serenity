@@ -20,6 +20,21 @@
 class Collision;
 class ComponentModel;
 class ComponentBody;
+class btCollisionObject;
+
+struct CollisionCallbackEventData final {
+    ComponentBody& ownerBody;
+    ComponentBody& otherBody;
+    glm::vec3& ownerHit;
+    glm::vec3& otherHit;
+    glm::vec3& normal;
+    btCollisionObject* ownerCollisionObj;
+    btCollisionObject* otherCollisionObj;
+    int ownerModelInstanceIndex;
+    int otherModelInstanceIndex;
+    CollisionCallbackEventData(ComponentBody& ownerBody_, ComponentBody& otherBody_, glm::vec3& ownerHit_, glm::vec3& otherHit_, glm::vec3& normal_);
+};
+
 struct ScreenBoxCoordinates {
     bool      inBounds;
     glm::vec2 topLeft;
@@ -36,7 +51,7 @@ namespace Engine {
         struct ComponentBody_SceneEnteredFunction;
         struct ComponentBody_SceneLeftFunction;
         struct ComponentBody_EmptyCollisionFunctor final { 
-            void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
+            void operator()(CollisionCallbackEventData& data) const {
             } 
         };
     };
@@ -89,7 +104,7 @@ class ComponentBody : public ComponentBaseClass {
         glm_vec3 m_Forward, m_Right, m_Up, m_Goal, m_GoalVelocity;
         decimal m_GoalSpeed;
 
-        boost::function<void(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal)> m_CollisionFunctor;
+        boost::function<void(CollisionCallbackEventData& data)> m_CollisionFunctor;
 
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
@@ -104,11 +119,14 @@ class ComponentBody : public ComponentBaseClass {
         ~ComponentBody();
 
         template<typename T> void setCollisionFunctor(const T& functor) {
-            m_CollisionFunctor = boost::bind<void>(functor, _1, _2, _3, _4, _5);
+            m_CollisionFunctor = boost::bind<void>(functor, _1);
         }
-        void collisionResponse(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal);
+        void collisionResponse(CollisionCallbackEventData& data);
 
         void rebuildRigidBody(const bool addBodyToPhysicsWorld = true);
+
+        void removePhysicsFromWorld();
+        void addPhysicsToWorld();
 
         const glm_vec3& getGoal() const;
         const decimal& getGoalSpeed() const;

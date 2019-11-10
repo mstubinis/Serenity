@@ -25,6 +25,22 @@ struct PacketCollisionEvent;
 #define SERVER_CLIENT_TIMEOUT 20.0f
 #define SERVER_CLIENT_RECOVERY_TIME 60.0f
 
+//a simple data structure to coordinate ship respawning
+class ShipRespawning final {
+    private:
+        std::unordered_map<std::string, std::tuple<std::string, std::string, double>> m_Ships; //key = shipkey, value = ship class,  closest spawn anchor, respawn time left
+        Server& m_Server;
+    public:
+        ShipRespawning(Server&);
+        ~ShipRespawning();
+
+        void processShip(const std::string& shipMapKey, const std::string& shipClass, const std::string& closest_spawn_anchor);
+
+        void cleanup();
+        void update(const double& dt);
+};
+
+
 //a simple data structure to coordinate ship on ship / station / whatever collisions
 class CollisionEntries final {
     private:
@@ -46,7 +62,8 @@ class ServerClient final {
     friend class ServerClientThread;
     private:
         Engine::Networking::SocketTCP*   m_TcpSocket;
-        std::string                      m_username;
+        std::string                      m_Username;
+        std::string                      m_MapKey;
         std::string                      m_Hash;
         std::string                      m_IP;
         Core&                            m_Core;
@@ -66,6 +83,7 @@ class ServerClient final {
         const bool disconnected() const;
 
         const std::string& username() const;
+        const std::string& getMapKey() const;
         const sf::Socket::Status send(Packet& packet);
         const sf::Socket::Status send(sf::Packet& packet);
         const sf::Socket::Status send(const void* data, size_t size);
@@ -93,6 +111,8 @@ class Server {
     friend class ServerClientThread;
     private:
         CollisionEntries                               m_CollisionEntries;
+        ShipRespawning                                 m_RespawningShips;
+
         GameplayMode*                                  m_GameplayMode;
         Engine::Networking::SocketUDP*                 m_UdpSocket;
         sf::Mutex                                      m_mutex;
@@ -147,7 +167,8 @@ class Server {
         const sf::Socket::Status receive_udp(sf::Packet& packet);
         const sf::Socket::Status receive_udp(void* data, size_t size, size_t& received);
 
-        ServerClient* getClientByName(const std::string& username);
+        ServerClient* getClientByUsername(const std::string& UserName);
+        ServerClient* getClientByMapKey(const std::string& MapKey);
 
         static void update(Server* thisServer, const double& dt);
         static void updateAcceptNewClients(Server& thisServer);

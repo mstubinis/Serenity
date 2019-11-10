@@ -1,6 +1,6 @@
 #include "Fire.h"
 #include <core/engine/utils/Utils.h>
-#include <core/engine/renderer/ParticleEmissionProperties.h>
+#include <core/engine/renderer/particles/ParticleEmissionProperties.h>
 #include "../ResourceManifest.h"
 
 #include <glm/vec4.hpp>
@@ -9,7 +9,8 @@
 
 using namespace std;
 
-ParticleEmissionProperties* Fire::m_Properties = nullptr;
+ParticleEmissionProperties* Fire::Regular = nullptr;
+ParticleEmissionProperties* Fire::ShortLived = nullptr;
 
 #define FIRE_COLOR_CUTOFF 0.45
 
@@ -64,20 +65,36 @@ struct FireInitialAngularFunctor final { float operator()(ParticleEmissionProper
 
 
 void Fire::init() {
-    m_Properties = new ParticleEmissionProperties(ResourceManifest::SmokeMaterial1, 5.0, 0.02);
-    m_Properties->addMaterial(ResourceManifest::SmokeMaterial2);
-    m_Properties->addMaterial(ResourceManifest::SmokeMaterial3);
+    Regular = new ParticleEmissionProperties(ResourceManifest::SmokeMaterial1, 5.0, 0.04);
+    Regular->addMaterial(ResourceManifest::SmokeMaterial2);
+    Regular->addMaterial(ResourceManifest::SmokeMaterial3);
 
-    m_Properties->setColorFunctor(FireColorFunctor());
-    m_Properties->setDepthFunctor(FireDepthFunctor());
-    m_Properties->setChangeInScaleFunctor(FireScaleFunctor());
-    m_Properties->setChangeInAngularVelocityFunctor(FireAngularVelocityFunctor());
-    m_Properties->setChangeInVelocityFunctor(FireVelocityFunctor());
+    Regular->setColorFunctor(FireColorFunctor());
+    Regular->setDepthFunctor(FireDepthFunctor());
+    Regular->setChangeInScaleFunctor(FireScaleFunctor());
+    Regular->setChangeInAngularVelocityFunctor(FireAngularVelocityFunctor());
+    Regular->setChangeInVelocityFunctor(FireVelocityFunctor());
 
-    m_Properties->setInitialVelocityFunctor(FireInitialVelocityFunctor());
-    m_Properties->setInitialScaleFunctor(FireInitialScaleFunctor());
-    m_Properties->setInitialAngularVelocityFunctor(FireInitialAngularFunctor());
+    Regular->setInitialVelocityFunctor(FireInitialVelocityFunctor());
+    Regular->setInitialScaleFunctor(FireInitialScaleFunctor());
+    Regular->setInitialAngularVelocityFunctor(FireInitialAngularFunctor());
+
+
+    ShortLived = new ParticleEmissionProperties(ResourceManifest::SmokeMaterial1, 2.0, 0.06);
+    ShortLived->addMaterial(ResourceManifest::SmokeMaterial2);
+    ShortLived->addMaterial(ResourceManifest::SmokeMaterial3);
+
+    ShortLived->setColorFunctor(FireColorFunctor());
+    ShortLived->setDepthFunctor(FireDepthFunctor());
+    ShortLived->setChangeInScaleFunctor(FireScaleFunctor());
+    ShortLived->setChangeInAngularVelocityFunctor(FireAngularVelocityFunctor());
+    ShortLived->setChangeInVelocityFunctor(FireVelocityFunctor());
+
+    ShortLived->setInitialVelocityFunctor(FireInitialVelocityFunctor());
+    ShortLived->setInitialScaleFunctor(FireInitialScaleFunctor());
+    ShortLived->setInitialAngularVelocityFunctor(FireInitialAngularFunctor());
 }
 void Fire::destruct() {
-    SAFE_DELETE(m_Properties);
+    SAFE_DELETE(Regular);
+    SAFE_DELETE(ShortLived);
 }

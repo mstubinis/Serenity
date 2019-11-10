@@ -292,9 +292,10 @@
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\glsl\VersionConversion.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\State.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\UniformBufferObject.h" />
-    <ClInclude Include="Engine\src\core\engine\renderer\Particle.h" />
-    <ClInclude Include="Engine\src\core\engine\renderer\ParticleEmitter.h" />
-    <ClInclude Include="Engine\src\core\engine\renderer\ParticleEmissionProperties.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\particles\Particle.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\particles\ParticleEmissionProperties.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\particles\ParticleEmitter.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\particles\ParticleSystem.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\pipelines\DeferredPipeline.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\pipelines\IRenderingPipeline.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\postprocess\Bloom.h" />
@@ -416,9 +417,10 @@
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\glsl\VersionConversion.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\State.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\UniformBufferObject.cpp" />
-    <ClCompile Include="Engine\src\core\engine\renderer\Particle.cpp" />
-    <ClCompile Include="Engine\src\core\engine\renderer\ParticleEmitter.cpp" />
-    <ClCompile Include="Engine\src\core\engine\renderer\ParticleEmissionProperties.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\particles\Particle.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\particles\ParticleEmissionProperties.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\particles\ParticleEmitter.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\particles\ParticleSystem.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\pipelines\DeferredPipeline.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Bloom.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\DepthOfField.cpp" />

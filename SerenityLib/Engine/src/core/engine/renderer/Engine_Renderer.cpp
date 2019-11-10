@@ -21,6 +21,7 @@
 #include <ecs/ComponentBody.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
 #include <core/engine/renderer/Decal.h>
+#include <core/engine/renderer/particles/Particle.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
@@ -1612,6 +1613,26 @@ class epriv::RenderManager::impl final{
             Renderer::sendUniform1Safe("Type", 0.0f); //is this really needed?
         }
         
+        void _renderParticle(Particle& p, Camera& c, Scene& s) {
+            p.getMaterial()->bind();
+
+            auto maxTextures = epriv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
+
+            Renderer::sendTextureSafe("gDepthMap", m_GBuffer->getTexture(GBufferType::Depth), maxTextures);
+            Renderer::sendUniform4Safe("Object_Color", p.color());
+            Renderer::sendUniform2Safe("ScreenData", glm::vec2(Resources::getWindowSize()));
+
+            glm::mat4 modelMatrix = glm::mat4(1.0f);
+            modelMatrix = glm::translate(modelMatrix, p.position());
+            modelMatrix *= glm::mat4_cast(c.getOrientation());
+            modelMatrix = glm::rotate(modelMatrix, p.angle(), glm::vec3(0, 0, 1));
+            auto& scale = p.getScale();
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(scale.x, scale.y, 1.0f));
+
+            Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+
+            Mesh::Plane->render();
+        }
 
         void _passGeometry(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
@@ -1659,7 +1680,7 @@ class epriv::RenderManager::impl final{
             glDepthMask(GL_FALSE);
             InternalScenePublicInterface::RenderDecals(scene, viewport, camera);
             InternalScenePublicInterface::RenderForwardParticles(scene, viewport, camera);
-            InternalScenePublicInterface::RenderParticles(scene, viewport, camera, *m_InternalShaderPrograms[EngineInternalShaderPrograms::Particle]);
+            InternalScenePublicInterface::RenderParticles(scene, viewport, camera, *m_InternalShaderPrograms[EngineInternalShaderPrograms::Particle] ,gbuffer);
 
             GLDisablei(GL_BLEND, 0); //this is needed for smaa at least
             GLDisablei(GL_BLEND, 1);

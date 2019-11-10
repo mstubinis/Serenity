@@ -22,40 +22,40 @@
 using namespace Engine;
 using namespace std;
 
-struct KlingonPhotonTorpedoCollisionFunctor final { void operator()(ComponentBody& owner, const glm::vec3& ownerHit, ComponentBody& other, const glm::vec3& otherHit, const glm::vec3& normal) const {
-    auto torpedoShipVoid = owner.getUserPointer1();
-    auto& torpedoProjectile = *static_cast<KlingonPhotonTorpedoProjectile*>(owner.getUserPointer());
+struct KlingonPhotonTorpedoCollisionFunctor final { void operator()(CollisionCallbackEventData& data) const {
+    auto torpedoShipVoid = data.ownerBody.getUserPointer1();
+    auto& torpedoProjectile = *static_cast<KlingonPhotonTorpedoProjectile*>(data.ownerBody.getUserPointer());
 
-    auto otherPtrShip = other.getUserPointer1();
+    auto otherPtrShip = data.otherBody.getUserPointer1();
     if (otherPtrShip && torpedoShipVoid) {
         if (otherPtrShip != torpedoShipVoid) {//dont hit ourselves!
             Ship* otherShip = static_cast<Ship*>(otherPtrShip);
             if (otherShip && torpedoProjectile.active) {
                 Ship* sourceShip = static_cast<Ship*>(torpedoShipVoid);
                 if (sourceShip->IsPlayer()) {
-                    auto& torpedo = *static_cast<KlingonPhotonTorpedo*>(owner.getUserPointer2());
+                    auto& torpedo = *static_cast<KlingonPhotonTorpedo*>(data.ownerBody.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto local = otherHit - glm::vec3(other.position());
+                    auto local = data.otherHit - glm::vec3(data.otherBody.position());
 
-                    if (shields && other.getUserPointer() == shields) {
+                    if (shields && data.otherBody.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
-                            torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
+                            torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, local, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
                             return;
                         }
                     }
-                    if (hull && other.getUserPointer() == hull) {
+                    if (hull && data.otherBody.getUserPointer() == hull) {
                         /*
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                             if (shields->getHealthCurrent(shieldSide) > 0) {
-                                torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
+                                torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, local, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
                                 return;
                             }
                         }
                         */
-                        torpedoProjectile.clientToServerImpactHull(false, torpedo.m_Map.getClient(), *otherShip, local, normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime);
+                        torpedoProjectile.clientToServerImpactHull(false, torpedo.m_Map.getClient(), *otherShip, local, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime);
                     }
                 }
             }

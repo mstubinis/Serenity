@@ -16,6 +16,7 @@
 #include <ecs/ComponentBody.h>
 
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/NarrowPhaseCollision/btRaycastCallback.h>
@@ -37,6 +38,64 @@
 using namespace Engine;
 using namespace std;
 
+bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1) {
+    btCollisionObject *collisionObjectA, *collisionObjectB;
+    btCollisionShape* childShapeA = nullptr;
+    btCollisionShape* childShapeB = nullptr;
+    if (colObj0Wrap->getCollisionShape()->getShapeType() == COMPOUND_SHAPE_PROXYTYPE) {
+        btCompoundShape* compound = (btCompoundShape*)colObj0Wrap->getCollisionShape();
+        childShapeA = compound->getChildShape(index0);
+        collisionObjectA = (btCollisionObject*)childShapeA;
+    }else{
+        collisionObjectA = const_cast<btCollisionObject*>(colObj0Wrap->getCollisionObject());
+    }
+    if (colObj1Wrap->getCollisionShape()->getShapeType() == COMPOUND_SHAPE_PROXYTYPE) {
+        btCompoundShape* compound = (btCompoundShape*)colObj1Wrap->getCollisionShape();
+        childShapeB = compound->getChildShape(index1);
+        collisionObjectB = (btCollisionObject*)childShapeB;
+    }else{
+        collisionObjectB = const_cast<btCollisionObject*>(colObj1Wrap->getCollisionObject());
+    }
+
+    if (cp.getDistance() < 0.0f) {
+        glm::vec3 ptA = Math::btVectorToGLM(cp.getPositionWorldOnA());
+        glm::vec3 ptB = Math::btVectorToGLM(cp.getPositionWorldOnB());
+        glm::vec3 normalOnB = Math::btVectorToGLM(cp.m_normalWorldOnB);
+        void* aPtr = const_cast<btCollisionObject*>(colObj0Wrap->getCollisionObject())->getUserPointer();
+        void* bPtr = const_cast<btCollisionObject*>(colObj1Wrap->getCollisionObject())->getUserPointer();
+        ComponentBody* _a = static_cast<ComponentBody*>(aPtr);
+        ComponentBody* _b = static_cast<ComponentBody*>(bPtr);
+        if (_a && _b) {
+            ComponentBody& a = *_a;
+            ComponentBody& b = *_b;
+
+            CollisionCallbackEventData dataA(a, b, ptA, ptB, normalOnB);
+            dataA.ownerCollisionObj = collisionObjectA;
+            dataA.otherCollisionObj = collisionObjectB;
+            CollisionCallbackEventData dataB(b, a, ptB, ptA, normalOnB);
+            dataB.ownerCollisionObj = collisionObjectB;
+            dataB.otherCollisionObj = collisionObjectA;
+
+            if (childShapeA) {
+                const int modelIndex = static_cast<int>(*static_cast<size_t*>(childShapeA->getUserPointer()));
+                dataA.ownerModelInstanceIndex = modelIndex;
+                dataB.otherModelInstanceIndex = modelIndex;
+            }
+            if (childShapeB) {
+                const int modelIndex = static_cast<int>(*static_cast<size_t*>(childShapeA->getUserPointer()));
+                dataA.otherModelInstanceIndex = modelIndex;
+                dataB.ownerModelInstanceIndex = modelIndex;
+            }
+
+            a.collisionResponse(dataA);
+            b.collisionResponse(dataB);
+
+            cp.setDistance((btScalar)99999999999.0); //hacky way of saying "ok don't reprocess this later on again"
+        }
+    }
+    return true;
+}
+
 class epriv::PhysicsManager::impl final{
     public:
         PhysicsWorld* data;
@@ -48,6 +107,8 @@ class epriv::PhysicsManager::impl final{
         void _postInit(const char* name, const uint& w, const uint& h, const uint& numCores){
             data = new epriv::PhysicsWorld(numCores);
             data->debugDrawer->initRenderingContext();
+
+            gContactAddedCallback = CustomMaterialContactAddedCallback;
         }
         void _destructWorldObjectsOnly() {
             auto& world = *data->world;
@@ -73,14 +134,15 @@ class epriv::PhysicsManager::impl final{
             if(m_Paused) 
                 return;
             data->world->stepSimulation(static_cast<btScalar>(dt),maxSteps,other);
+            
+            auto& dispatcher = *data->dispatcher;
+            for (int i = 0; i < dispatcher.getNumManifolds(); ++i){
+                btPersistentManifold& contactManifold = *dispatcher.getManifoldByIndexInternal(i);
 
-            uint numManifolds = data->dispatcher->getNumManifolds();
-            for (uint i = 0; i < numManifolds; ++i){
-                btPersistentManifold* contactManifold = data->dispatcher->getManifoldByIndexInternal(i);
-                btCollisionObject* collisionObjectA = const_cast<btCollisionObject*>(contactManifold->getBody0());
-                btCollisionObject* collisionObjectB = const_cast<btCollisionObject*>(contactManifold->getBody1());
-                for (int j = 0; j < contactManifold->getNumContacts(); ++j){
-                    btManifoldPoint& pt = contactManifold->getContactPoint(j);
+                btCollisionObject* collisionObjectA = const_cast<btCollisionObject*>(contactManifold.getBody0());
+                btCollisionObject* collisionObjectB = const_cast<btCollisionObject*>(contactManifold.getBody1());
+                for (int j = 0; j < contactManifold.getNumContacts(); ++j){
+                    btManifoldPoint& pt = contactManifold.getContactPoint(j);
                     if (pt.getDistance() < 0.0f){
                         glm::vec3 ptA = Math::btVectorToGLM(pt.getPositionWorldOnA());
                         glm::vec3 ptB = Math::btVectorToGLM(pt.getPositionWorldOnB());
@@ -88,15 +150,21 @@ class epriv::PhysicsManager::impl final{
 
                         auto aPtr = collisionObjectA->getUserPointer();
                         auto bPtr = collisionObjectB->getUserPointer();
-
                         ComponentBody* _a = static_cast<ComponentBody*>(aPtr);
                         ComponentBody* _b = static_cast<ComponentBody*>(bPtr);
                         if (_a && _b) {
                             ComponentBody& a = *_a;
                             ComponentBody& b = *_b;
 
-                            a.collisionResponse(a, ptA, b, ptB, normalOnB);
-                            b.collisionResponse(b, ptB, a, ptA, normalOnB);
+                            CollisionCallbackEventData dataA(a, b, ptA, ptB, normalOnB);
+                            dataA.ownerCollisionObj = collisionObjectA;
+                            dataA.otherCollisionObj = collisionObjectB;
+                            CollisionCallbackEventData dataB(b, a, ptB, ptA, normalOnB);
+                            dataB.ownerCollisionObj = collisionObjectB;
+                            dataB.otherCollisionObj = collisionObjectA;
+
+                            a.collisionResponse(dataA);
+                            b.collisionResponse(dataB);
                         }
                     }
                 }

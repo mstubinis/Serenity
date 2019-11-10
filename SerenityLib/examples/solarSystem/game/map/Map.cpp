@@ -422,10 +422,15 @@ void Map::loadFromFile(const string& filename) {
                     }
                     m_Planets.emplace(NAME, planetoid);
                     internalCreateAnchor(PARENT, NAME, loadedAnchors, planetoid->getPosition());
-                }else if (line[0] == '?') {//Anchor (Spawn) point
+                }else if (line[0] == '?') {//Anchor (Primary Spawn) point
                     const auto& parentPos = m_Planets.at(PARENT)->getPosition();
                     auto spawnAnchor = internalCreateAnchor(PARENT, "Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
-                    m_SpawnAnchor = std::tuple<std::string, Anchor*>("Spawn Anchor", spawnAnchor);
+                    m_SpawnAnchors.push_back( std::make_tuple("Spawn Anchor", spawnAnchor) );
+                }else if (line[0] == '>') {//Anchor (Secondary Spawn) point
+                    const auto& parentPos = m_Planets.at(PARENT)->getPosition();
+                    auto spawnAnchor = internalCreateAnchor(PARENT, PARENT + " Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
+                    m_SpawnAnchors.push_back(std::make_tuple(PARENT + " Spawn Anchor", spawnAnchor));
+
                 }else if (line[0] == 'R') {//Rings
                     if (!PARENT.empty()) {
                         if (!planetRings.count(PARENT)) {
@@ -482,7 +487,7 @@ Anchor* Map::getRootAnchor() {
     return std::get<1>(m_RootAnchor);
 }
 Anchor* Map::getSpawnAnchor() {
-    return std::get<1>(m_SpawnAnchor);
+    return std::get<1>(m_SpawnAnchors[0]);
 }
 const bool Map::hasShipPlayer(const string& shipName) const {
     return (m_ShipsPlayerControlled.size() > 0 && m_ShipsPlayerControlled.count(shipName)) ? true : false;
@@ -497,18 +502,40 @@ const bool Map::hasShip(const string& shipName) const {
 HUD& Map::getHUD() {
     return *m_HUD;
 }
+Anchor* Map::getSpawnAnchor(const string& spawn_anchor_name) {
+    for (auto& tuple : m_SpawnAnchors) {
+        auto& name = std::get<0>(tuple);
+        if (name == spawn_anchor_name)
+            return std::get<1>(tuple);
+    }
+    return nullptr;
+}
+const string Map::getClosestSpawnAnchor() {
+    string ret = "";
+    decimal minDist = static_cast<decimal>(-1.0);
+    auto playerPos = m_Player->getComponent<ComponentBody>()->position();
+    for (auto& spawn_anchor_tuple : m_SpawnAnchors) {
+        auto& spawn_anchor = *std::get<1>(spawn_anchor_tuple);
+        const auto dist = glm::distance(playerPos, spawn_anchor.getPosition());
+        if (minDist < static_cast<decimal>(0.0) || dist < minDist) {
+            minDist = dist;
+            ret = std::get<0>(spawn_anchor_tuple);
+        }
+    }
+    return ret;
+}
 const vector<string> Map::getClosestAnchor(Anchor* currentAnchor) {
     vector<string> res;
     if (!currentAnchor) {
         currentAnchor = std::get<1>(m_RootAnchor);
     }
     decimal minDist = static_cast<decimal>(-1.0);
+    auto playerPos = m_Player->getComponent<ComponentBody>()->position();
     while (currentAnchor->m_Children.size() > 0) {
         string least = currentAnchor->m_Children.begin()._Ptr->_Myval.first;
         bool hasChanged = false;
         for (auto& child : currentAnchor->m_Children) {
             auto childPos = child.second->getPosition();
-            auto playerPos = m_Player->getComponent<ComponentBody>()->position();
             const auto dist = glm::distance(playerPos, childPos);
             if (minDist < static_cast<decimal>(0.0) || dist < minDist) {
                 minDist = dist;

@@ -38,8 +38,8 @@
 #include "../teams/Team.h"
 #include "../modes/GameplayMode.h"
 
-#include <core/engine/renderer/ParticleEmitter.h>
-#include <core/engine/renderer/ParticleEmissionProperties.h>
+#include <core/engine/renderer/particles/ParticleEmitter.h>
+#include <core/engine/renderer/particles/ParticleEmissionProperties.h>
 
 #include "../particles/Fire.h"
 
@@ -298,6 +298,26 @@ void Client::on_receive_physics_update(Packet* basePacket, Map& map) {
             ship = ships.at(shipkey);
         }
         ship->updatePhysicsFromPacket(pI, map, info);
+    }
+}
+
+void Client::on_receive_ship_notified_of_respawn(Packet* basePacket, Map& map) {
+    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
+    auto respawnPosition = glm_vec3(static_cast<decimal>(pI.r), static_cast<decimal>(pI.g), static_cast<decimal>(pI.b));
+    if (map.hasShip(pI.name)) {
+        auto& ship = *map.getShips().at(pI.name);
+        ship.respawn(respawnPosition, pI.data, map);
+    }
+}
+void Client::on_receive_ship_was_just_destroyed(Packet* basePacket, Map& map) {
+    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
+}
+void Client::on_receive_ship_notified_of_impending_respawn(Packet* basePacket, Map& map) {
+    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
+    auto* player = map.getPlayer();
+    if (player) {
+        player->setState(ShipState::JustFlaggedToRespawn);
+        player->m_RespawnTimerMax = pI.r;
     }
 }
 void Client::on_receive_client_wants_my_ship_info(Packet* basePacket, Map& map) {
@@ -561,8 +581,6 @@ void Client::on_receive_server_approve_map_entry(Packet* basePacket, Menu& menu)
             map.addParticleEmitter(e);
         }
     }
-    */
-    /*
     ParticleEmitter e(*Fire::m_Properties, map, 0.0);
     e.getComponent<ComponentBody>()->setPosition(playerBody.position());
     map.addParticleEmitter(e);
@@ -570,6 +588,7 @@ void Client::on_receive_server_approve_map_entry(Packet* basePacket, Menu& menu)
 
     PacketMessage pOut(pI);
     pOut.PacketType = PacketType::Client_To_Server_Successfully_Entered_Map;
+    pOut.name = map.getPlayer()->getMapKey();
     pOut.r = modelMatrix[3][0] - static_cast<float>(spawn.x);
     pOut.g = modelMatrix[3][1] - static_cast<float>(spawn.y);
     pOut.b = modelMatrix[3][2] - static_cast<float>(spawn.z);
@@ -714,11 +733,19 @@ void Client::onReceiveTCP() {
             Menu& menu = *m_Core.m_Menu;
             Map& map = *static_cast<Map*>(Resources::getScene(m_Mapname));
             switch (basePacket->PacketType) {
-                case PacketType::Server_To_Client_Request_Ship_Current_Info: {
+                case PacketType::Server_To_Client_Notify_Ship_Of_Respawn: {
+                    on_receive_ship_notified_of_respawn(basePacket, map);
+                    break;
+                }case PacketType::Server_To_Client_Notify_Ship_Of_Impending_Respawn: {
+                    on_receive_ship_notified_of_impending_respawn(basePacket, map);
+                    break;
+                }case PacketType::Server_To_Client_Ship_Was_Just_Destroyed: {
+                    on_receive_ship_was_just_destroyed(basePacket, map);
+                    break;
+                }case PacketType::Server_To_Client_Request_Ship_Current_Info: {
                     on_receive_client_wants_my_ship_info(basePacket, map);
                     break;
-                }
-                case PacketType::Server_To_Client_Collision_Event: {
+                }case PacketType::Server_To_Client_Collision_Event: {
                     on_receive_collision_event(basePacket, map);
                     break;
                 }case PacketType::Server_To_Client_Anti_Cloak_Status: {

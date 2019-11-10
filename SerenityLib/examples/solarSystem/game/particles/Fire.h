@@ -6,7 +6,8 @@
 class ParticleEmissionProperties;
 class Fire {
     public:
-        static ParticleEmissionProperties* m_Properties;
+        static ParticleEmissionProperties* Regular;
+        static ParticleEmissionProperties* ShortLived;
 
         static void init();
         static void destruct();

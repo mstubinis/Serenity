@@ -48,6 +48,9 @@ class Client{
 
         void internalInit(const ushort& server_port, const std::string& server_ipAddress);
 
+        void on_receive_ship_notified_of_respawn(Packet*, Map& map);
+        void on_receive_ship_notified_of_impending_respawn(Packet*, Map& map);
+        void on_receive_ship_was_just_destroyed(Packet*, Map& map);
         void on_receive_client_wants_my_ship_info(Packet*, Map& map);
         void on_receive_collision_event(Packet*, Map& map);
         void on_receive_anti_cloak_status(Packet*, Map& map);

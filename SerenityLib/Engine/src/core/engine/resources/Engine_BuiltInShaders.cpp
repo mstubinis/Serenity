@@ -258,15 +258,18 @@ epriv::EShaders::particle_vertex =
 "\n"
 "uniform mat4 Model;\n"
 "varying vec2 UV;\n"
+"varying vec3 WorldPosition;\n"
 "\n"
 "void main(){\n"
 "    mat4 ModelMatrix = Model;\n"
 "    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
 "    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
 "    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
-
+"\n"
 "    vec4 worldPos = (ModelMatrix * vec4(position, 1.0));\n"
 "    gl_Position = CameraViewProj * worldPos;\n"
+"\n"
+"    WorldPosition = worldPos.xyz;\n"
 "    UV = uv;\n"
 "}";
 #pragma endregion
@@ -1490,10 +1493,21 @@ epriv::EShaders::particle_frag =
     "USE_LOG_DEPTH_FRAGMENT\n"
     "\n"
     "uniform sampler2D DiffuseTexture;\n"
+    "uniform sampler2D gDepthMap;\n"
+    "uniform vec2 ScreenData;\n"
     "uniform vec4 Object_Color;\n"
     "varying vec2 UV;\n"
+    "varying vec3 WorldPosition;\n"
     "void main(){\n"
+    //this code is for soft particles
+    "    vec2 screen_uv = gl_FragCoord.xy / vec2(ScreenData.x, ScreenData.y);\n"
+    "    vec3 worldPos = GetWorldPosition(screen_uv, CameraNear, CameraFar);\n"
+    "    float dist = distance(worldPos, WorldPosition);\n"
+    "    float alpha = clamp(dist, 0.0, 1.0);\n"
+    
     "    vec4 color = Object_Color * texture2D(DiffuseTexture, UV); \n"
+    "    color.a *= alpha;\n"
+
     "    gl_FragData[0] = color;\n"
     "    gl_FragData[3] = color;\n"
     "}";

@@ -11,15 +11,17 @@ ShipSystemRollThrusters::~ShipSystemRollThrusters() {
 
 }
 void ShipSystemRollThrusters::update(const double& dt) {
-    if (isOnline()) {
-        auto& rigidbody = *m_Ship.getComponent<ComponentBody>();
-        if (m_Ship.IsPlayer()) {
-            float amount = 1.0f / rigidbody.mass();
-            if (Engine::isKeyDown(KeyboardKey::Q)) {
-                rigidbody.applyTorque(0, 0, static_cast<decimal>(amount) * static_cast<decimal>(m_AdditionalStrength));
-            }
-            if (Engine::isKeyDown(KeyboardKey::E)) {
-                rigidbody.applyTorque(0, 0, static_cast<decimal>(-amount) * static_cast<decimal>(m_AdditionalStrength));
+    if (!m_Ship.isDestroyed()) {
+        if (isOnline()) {
+            auto& rigidbody = *m_Ship.getComponent<ComponentBody>();
+            if (m_Ship.IsPlayer()) {
+                float amount = 1.0f / rigidbody.mass();
+                if (Engine::isKeyDown(KeyboardKey::Q)) {
+                    rigidbody.applyTorque(0, 0, static_cast<decimal>(amount) * static_cast<decimal>(m_AdditionalStrength));
+                }
+                if (Engine::isKeyDown(KeyboardKey::E)) {
+                    rigidbody.applyTorque(0, 0, static_cast<decimal>(-amount) * static_cast<decimal>(m_AdditionalStrength));
+                }
             }
         }
     }

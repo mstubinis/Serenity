@@ -43,6 +43,7 @@ class GameCamera: public Camera{
         const CameraState::State getState() const;
 
         Entity getObjectInCenterRay(Entity& exclusion);
+        Entity getObjectInCenterRay(std::vector<Entity>& exclusions);
 };
 
 #endif

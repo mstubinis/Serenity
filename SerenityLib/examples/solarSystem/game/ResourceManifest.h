@@ -70,7 +70,6 @@ struct ResourceManifest{
     static Handle DisruptorBeamMaterial;
 
     //sounds
-    static Handle MenuMusic;
     static Handle SoundCloakingActivated;
     static Handle SoundCloakingDeactivated;
     static Handle SoundPulsePhaser;
@@ -86,6 +85,13 @@ struct ResourceManifest{
     static Handle SoundDisruptorBeam;
     static Handle SoundAntiCloakScan;
     static Handle SoundAntiCloakScanDetection;
+    static Handle SoundExplosionSmall1;
+    static Handle SoundExplosionSmall2;
+    static Handle SoundExplosionSmall3;
+    static Handle SoundExplosionLarge1;
+    static Handle SoundExplosionLarge2;
+    static Handle SoundExplosionVeryLarge1;
+
 
     //torpedos
     static Handle TorpedoFlareMesh;
