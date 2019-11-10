@@ -348,7 +348,10 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
 Ship::~Ship(){
     unregisterEvent(EventType::WindowResized);
     SAFE_DELETE(m_AI);
-    SAFE_DELETE_VECTOR(m_DamageDecals);
+    for (auto& tuple : m_DamageDecals) {
+        SAFE_DELETE(std::get<0>(tuple));
+    }
+    m_DamageDecals.clear();
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
 void Ship::respawn(const glm_vec3& newPosition, const string& nearest_spawn_anchor, Map& map) {
@@ -369,7 +372,10 @@ void Ship::respawn(const glm_vec3& newPosition, const string& nearest_spawn_anch
         hull->getEntity().getComponent<ComponentBody>()->addPhysicsToWorld();
 
     }
-    getPlayerCamera()->setState(CameraState::Cockpit);
+    auto* playerCamera = getPlayerCamera();
+    if (IsPlayer() && playerCamera) {
+        playerCamera->setState(CameraState::Cockpit);
+    }
 
     modelComponent.show();
     auto& anchorPos = map.getSpawnAnchor(nearest_spawn_anchor)->getPosition();
@@ -452,7 +458,10 @@ void Ship::internal_update_just_destroyed_fully(const double& dt, Map& map) {
     }
 
     modelComponent.hide();
-    SAFE_DELETE_VECTOR(m_DamageDecals);
+    for (auto& tuple : m_DamageDecals) {
+        SAFE_DELETE(std::get<0>(tuple));
+    }
+    m_DamageDecals.clear();
     setState(ShipState::Destroyed);
 }
 void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
@@ -482,14 +491,14 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
 
         auto& shipModelComponent = *getComponent<ComponentModel>();
         const auto modelIndex = Helper::GetRandomIntFromTo(0, static_cast<int>(shipModelComponent.getNumModels() - 1));
-
-        auto& mesh = *shipModelComponent.getModel(modelIndex).mesh();
+        auto& instance = shipModelComponent.getModel(modelIndex);
+        auto& mesh = *instance.mesh();
         auto& verts = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(0);
         auto& norms = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(2);
         const auto randVertexIndex = Helper::GetRandomIntFromTo(0, verts.size() - 1);
 
         auto localPos = verts[randVertexIndex] + ((glm::normalize(verts[randVertexIndex])) * 0.03f);
-
+        localPos = localPos + instance.position();
         auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
         if (hull) {
             auto rand5 = Helper::GetRandomFloatFromTo(2.5f, 4.4f);
@@ -542,21 +551,56 @@ void Ship::internal_update_damage_emitters(const double& dt, Map& map) {
         auto& initialRot = std::get<3>(ptr);
 
         auto& shipBody = *getComponent<ComponentBody>();
+        auto& shipModel = *getComponent<ComponentModel>();
         const auto shipRotation = shipBody.rotation();
-        emitter.setPosition(shipBody.position() + (shipRotation * initialPos));
-        emitter.setRotation(shipRotation * initialRot);
+
+        if (modelIndex > 0) {
+            auto& instance = shipModel.getModel(modelIndex);
+            auto instancePos = glm_vec3(instance.position());
+            auto instanceRot = instance.orientation();
+            auto part1 = Math::rotate_vec3(instanceRot, initialPos);
+            glm_vec3 localPos = instancePos + part1;
+
+            emitter.setPosition(shipBody.position() + (shipRotation * localPos));
+            emitter.setRotation(shipRotation * (glm_quat(instanceRot) * initialRot));
+
+        }else{
+            emitter.setPosition(shipBody.position() + (shipRotation * initialPos));
+            emitter.setRotation(shipRotation * initialRot);
+        }
     }
 }
 void Ship::internal_update_decals(const double& dt, Map& map) {
-    for (auto& decal_ptr : m_DamageDecals) {
+
+    auto& shipBody = *getComponent<ComponentBody>();
+    auto& shipModel = *getComponent<ComponentModel>();
+    const auto shipRotation = shipBody.rotation();
+    for (auto& tuple : m_DamageDecals) {
+        auto* decal_ptr = std::get<0>(tuple);
         auto& decal = *decal_ptr;
-        auto& shipBody = *getComponent<ComponentBody>();
-        const auto shipRotation = shipBody.rotation();
-        decal.setPosition(shipBody.position() + (shipRotation * decal.initialPosition()));
-        decal.setRotation(shipRotation * decal.initialRotation());
+        auto& modelIndex = std::get<1>(tuple);
+
+
+
+        if (modelIndex > 0) {
+            
+            auto& instance = shipModel.getModel(modelIndex);
+            auto instancePos = glm_vec3(instance.position());
+            auto instanceRot = instance.orientation();
+            auto part1 = Math::rotate_vec3(instanceRot, decal.initialPosition());
+            glm_vec3 localPos = instancePos + part1;
+
+            decal.setPosition(shipBody.position() + (shipRotation * localPos));
+            decal.setRotation(shipRotation * (glm_quat(instanceRot) * decal.initialRotation()));
+            
+        }else {
+            decal.setPosition(shipBody.position() + (shipRotation * decal.initialPosition()));
+            decal.setRotation(shipRotation * decal.initialRotation());
+        }
+
         decal.update(dt);
         if (!decal.active()) {
-            removeFromVector(m_DamageDecals, decal_ptr); //might be dangerous
+            removeFromVector(m_DamageDecals, tuple); //might be dangerous
         }
     }
 }
@@ -719,7 +763,10 @@ void Ship::destroy() {
         }
     }
     EntityWrapper::destroy();
-    SAFE_DELETE_VECTOR(m_DamageDecals);
+    for (auto& tuple : m_DamageDecals) {
+        SAFE_DELETE(std::get<0>(tuple));
+    }
+    m_DamageDecals.clear();
 }
 AI* Ship::getAI() {
     return m_AI;
@@ -852,7 +899,8 @@ const bool Ship::canSeeCloak(Ship* otherShip) {
     return false;
 }
 void Ship::updateCloakVisuals(const float& r, const float& g, const float& b, const float& alpha, ComponentModel& model) {
-    for (auto& decal : m_DamageDecals) {
+    for (auto& tuple : m_DamageDecals) {
+        auto* decal = std::get<0>(tuple);
         if (decal && decal->active()) {
             auto& decal_model = *decal->getComponent<ComponentModel>();
             for (unsigned int i = 0; i < decal_model.getNumModels(); ++i) {
@@ -988,16 +1036,7 @@ void Ship::toggleWarp() {
     auto& rigidBodyComponent = *getComponent<ComponentBody>();
     rigidBodyComponent.clearLinearForces();
 }
-/*
-    Nominal,
-    JustFlaggedForDestruction,
-    UndergoingDestruction,
-    JustFlaggedAsFullyDestroyed,
-    Destroyed,
-    JustFlaggedToRespawn,
-    UndergoingRespawning,
-    WaitingForServerToRespawnMe,
-*/
+
 const bool Ship::isDestroyed() const {
     return (m_State == ShipState::JustFlaggedForDestruction ||
             m_State == ShipState::UndergoingDestruction ||

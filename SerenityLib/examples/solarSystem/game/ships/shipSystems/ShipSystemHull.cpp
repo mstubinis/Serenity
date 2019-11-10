@@ -51,27 +51,33 @@ void ShipSystemHull::destroy() {
     m_RechargeTimer = 0.0f;
 }
 void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const size_t modelIndex, const bool forceHullFire) {
-    std::cout << modelIndex << "\n";
+    auto& model = *m_Ship.getComponent<ComponentModel>();
+    auto& instance = model.getModel(modelIndex);
+    const auto impactR = impactRadius * 0.16f;
+    auto* cloakingDevice = static_cast<ShipSystemCloakingDevice*>(m_Ship.getShipSystem(ShipSystemType::CloakingDevice));
+
+    auto impactLocationModelSpace = impactLocationLocal - instance.position();
+
     auto shipRotation = m_Ship.getRotation();
     auto lamda_apply_random_emitter = [&]() {
         auto rand = Helper::GetRandomIntFromTo(0, 100);
         if (rand < 85) {
             auto lifetime = Helper::GetRandomFloatFromTo(32.75f, 46.0f);
 
-            auto finalPos = m_Ship.getPosition() + Engine::Math::rotate_vec3(shipRotation, impactLocationLocal);
+            auto finalPos = m_Ship.getPosition() + Engine::Math::rotate_vec3(shipRotation, impactLocationModelSpace);
 
             ParticleEmitter emitter_(*Fire::ShortLived, m_Map, lifetime);
             EntityDataRequest req(emitter_.entity());
 
             glm_quat q;
             Engine::Math::alignTo(q, -impactNormal);
-
+            //q = glm_quat(instance.orientation()) * q;
             emitter_.setPosition(finalPos, req);
             emitter_.setRotation(q);
 
             auto* emitter = m_Map.addParticleEmitter(emitter_);
             if (emitter) {
-                m_Ship.m_EmittersDestruction.push_back(std::make_tuple(emitter, modelIndex, impactLocationLocal, q));
+                m_Ship.m_EmittersDestruction.push_back(make_tuple(emitter, modelIndex, impactLocationModelSpace, q));
             }
         }
     };
@@ -95,15 +101,11 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         hullDamageOutline = (Material*)ResourceManifest::HullDamageOutline3Material.get();
         hullDamage = (Material*)ResourceManifest::HullDamageMaterial3.get();
     }
-
-    const auto impactR        = impactRadius * 0.16f;
-    auto*      cloakingDevice = static_cast<ShipSystemCloakingDevice*>(m_Ship.getShipSystem(ShipSystemType::CloakingDevice));
-    auto&      model          = *m_Ship.getComponent<ComponentModel>();
     if (forceHullFire) {
-        d = new Decal(*hullDamageOutline, impactLocationLocal, impactNormal, impactR, m_Map, 120);
-        decalList.push_back(d);
-        d1 = new Decal(*hullDamage, impactLocationLocal, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
-        decalList.push_back(d1);
+        d = new Decal(*hullDamageOutline, impactLocationModelSpace, impactNormal, impactR, m_Map, 120);
+        decalList.push_back(make_tuple(d, modelIndex));
+        d1 = new Decal(*hullDamage, impactLocationModelSpace, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
+        decalList.push_back(make_tuple(d1, modelIndex));
 
         lamda_apply_random_emitter();
 
@@ -113,8 +115,8 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         return;
     }
     if (decalList.size() == 0) {
-        d = new Decal(*hullDamageOutline, impactLocationLocal, impactNormal, impactR, m_Map, 120);
-        decalList.push_back(d);
+        d = new Decal(*hullDamageOutline, impactLocationModelSpace, impactNormal, impactR, m_Map, 120);
+        decalList.push_back(make_tuple(d, modelIndex));
         if (cloakingDevice) {
             m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
         }
@@ -122,25 +124,26 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
     }else{
         //get list of nearby impact points
         vector<Decal*> nearbys;
-        for (auto& dec : decalList) {
-            decimal dist = glm::distance2(glm_vec3(dec->initialPosition()), glm_vec3(impactLocationLocal));
+        for (auto& tuple : decalList) {
+            auto& decal = *std::get<0>(tuple);
+            decimal dist = glm::distance2(glm_vec3(decal.initialPosition()), glm_vec3(impactLocationModelSpace));
             if (dist < static_cast<decimal>(impactR * impactR) * static_cast<decimal>(0.4f)) {
-                nearbys.push_back(dec);
+                nearbys.push_back(&decal);
             }
         }
         if (nearbys.size() >= 8) {
             return; //forget it, no need to have so many
         }
-        d = new Decal(*hullDamageOutline, impactLocationLocal, impactNormal, impactR, m_Map, 120);
+        d = new Decal(*hullDamageOutline, impactLocationModelSpace, impactNormal, impactR, m_Map, 120);
         if (nearbys.size() >= 4) {
-            d1 = new Decal(*hullDamage, impactLocationLocal, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
+            d1 = new Decal(*hullDamage, impactLocationModelSpace, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
         }
     }
     if (d) {
-        decalList.push_back(d);
+        decalList.push_back(make_tuple(d, modelIndex));
     }
     if (d1) {
-        decalList.push_back(d1);
+        decalList.push_back(make_tuple(d1, modelIndex));
         lamda_apply_random_emitter();
     }
     if (cloakingDevice) {

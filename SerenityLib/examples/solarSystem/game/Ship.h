@@ -104,6 +104,7 @@ class Ship: public EntityWrapper, public EventObserver {
         void internal_calculate_ship_destruction_time_max(ComponentModel&);
     protected:
         std::vector<std::tuple<ParticleEmitter*,size_t,glm_vec3,glm_quat>>        m_EmittersDestruction;
+        std::vector<std::tuple<Decal*,size_t>>                                    m_DamageDecals;
 
 
         //unsigned int                         m_Flags;
@@ -126,7 +127,6 @@ class Ship: public EntityWrapper, public EventObserver {
         float                                m_WarpFactor;
         std::string                          m_ShipClass;
         std::string                          m_MapKey;
-        std::vector<Decal*>                  m_DamageDecals;
         std::vector<glm::vec3>               m_AimPositionDefaults;
         glm::vec3                            m_CameraOffsetDefault;
     public:
