@@ -258,9 +258,6 @@
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventDispatcher.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\events\Engine_EventEnums.h">
-      <Filter>Header Files\Engine\Core\Events</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventObject.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
@@ -623,6 +620,12 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\physics\PhysicsIncludes.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\scene\SceneOptions.h">
+      <Filter>Header Files\Engine\Core\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\Engine_EventIncludes.h">
+      <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

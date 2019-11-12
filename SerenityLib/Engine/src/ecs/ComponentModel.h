@@ -69,26 +69,26 @@ class ComponentModel: public ComponentBaseClass {
         ModelInstance& addModel(Mesh*,              Material*,              Handle& shaderProgram, const RenderStage::Stage & = RenderStage::GeometryOpaque);
 
 
-        void setStage(const RenderStage::Stage& stage, const uint& index = 0);
+        void setStage(const RenderStage::Stage& stage, const size_t& index = 0);
 
-        void setModel(Handle& meshHandle, Handle& materialHandle, const uint& index, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
-        void setModel(Mesh*, Material*, const uint& index, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        void setModel(Handle& meshHandle, Handle& materialHandle, const size_t& index, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        void setModel(Mesh*, Material*, const size_t& index, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
 
-        void setModelMesh(Mesh*, const uint& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
-        void setModelMesh(Handle& meshHandle, const uint& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        void setModelMesh(Mesh*, const size_t& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        void setModelMesh(Handle& meshHandle, const size_t& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
 
-        void setModelMaterial(Material*, const uint& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
-        void setModelMaterial(Handle& materialHandle, const uint& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        void setModelMaterial(Material*, const size_t& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        void setModelMaterial(Handle& materialHandle, const size_t& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
 
-        void setModelShaderProgram(ShaderProgram*, const uint& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
-        void setModelShaderProgram(Handle& materialHandle, const uint& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        void setModelShaderProgram(ShaderProgram*, const size_t& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
+        void setModelShaderProgram(Handle& materialHandle, const size_t& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
 
         const bool rayIntersectSphere(const ComponentCamera& camera);
 
-        template<class T> void setCustomBindFunctor(const T& functor, const uint& index = 0) { 
+        template<class T> void setCustomBindFunctor(const T& functor, const size_t& index = 0) {
             m_ModelInstances[index]->setCustomBindFunctor(functor);
         }
-        template<class T> void setCustomUnbindFunctor(const T& functor, const uint& index = 0) {
+        template<class T> void setCustomUnbindFunctor(const T& functor, const size_t& index = 0) {
             m_ModelInstances[index]->setCustomUnbindFunctor(functor);
         }
 };

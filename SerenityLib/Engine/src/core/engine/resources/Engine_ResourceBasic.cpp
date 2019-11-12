@@ -36,7 +36,7 @@ void EngineResource::unload(){
 const bool EngineResource::isLoaded() const {
     return m_IsLoaded; 
 }
-const uint EngineResource::useCount() const {
+const unsigned int EngineResource::useCount() const {
     return m_UsageCount; 
 }
 void EngineResource::incrementUseCount(){ 

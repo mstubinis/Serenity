@@ -33,22 +33,22 @@ void EventManager::setMousePositionInternal(const float x, const float y, const 
     }
 }
 
-void EventManager::onEventKeyPressed(const uint& key){
+void EventManager::onEventKeyPressed(const unsigned int& key){
     m_previousKey    = m_currentKey;
     m_currentKey     = key;
     m_KeyStatus[key] = true;
 }
-void EventManager::onEventKeyReleased(const uint& key){
+void EventManager::onEventKeyReleased(const unsigned int& key){
     m_previousKey    = KeyboardKey::Unknown;
     m_currentKey     = KeyboardKey::Unknown;
     m_KeyStatus[key] = false;
 }
-void EventManager::onEventMouseButtonPressed(const uint& mouseButton){
+void EventManager::onEventMouseButtonPressed(const unsigned int& mouseButton){
     m_previousButton           = m_currentButton;
     m_currentButton            = mouseButton;
     m_MouseStatus[mouseButton] = true;
 }
-void EventManager::onEventMouseButtonReleased(const uint& mouseButton){
+void EventManager::onEventMouseButtonReleased(const unsigned int& mouseButton){
     m_previousButton           = MouseButton::Unknown;
     m_currentButton            = MouseButton::Unknown;
     m_MouseStatus[mouseButton] = false;

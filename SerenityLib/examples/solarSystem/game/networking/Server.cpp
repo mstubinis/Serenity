@@ -80,7 +80,7 @@ void ShipRespawning::update(const double& dt) {
                 auto x = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
                 auto y = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
                 auto z = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
-                glm_vec3 respawnPosition = glm_vec3(x, y, z);
+                auto respawnPosition = glm::vec3(x, y, z);
 
                 PacketMessage pOut;
                 pOut.PacketType = PacketType::Server_To_Client_Notify_Ship_Of_Respawn;

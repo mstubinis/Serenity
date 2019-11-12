@@ -1,5 +1,6 @@
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialLoader.h>
+#include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/Engine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/math/Engine_Math.h>
@@ -54,7 +55,7 @@ vector<boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
 
 #pragma region Material
 
-Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness):BindableResource(ResourceType::Material,name){
+Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) : BindableResource(ResourceType::Material,name){
     Texture* d  = MaterialLoader::LoadTextureDiffuse(diffuse);
     Texture* n  = MaterialLoader::LoadTextureNormal(normal);
     Texture* g  = MaterialLoader::LoadTextureGlow(glow);
@@ -69,7 +70,7 @@ Material::Material(const string& name, const string& diffuse, const string& norm
 Material::Material() : BindableResource(ResourceType::Material) {
     MaterialLoader::InternalInitBase(*this);
 }
-Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness):BindableResource(ResourceType::Material, name){
+Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) : BindableResource(ResourceType::Material, name){
     MaterialLoader::InternalInit(*this, diffuse, normal, glow, specular, ao, metalness, smoothness);
     InternalMaterialPublicInterface::Load(*this);
 }
@@ -201,7 +202,7 @@ MaterialComponent& Material::addComponentParallaxOcclusion(const string& texture
     layer.setData2(heightScale, _data2.y, _data2.z, _data2.w);
     return component;
 }
-MaterialComponent& Material::getComponent(const uint& index) {
+MaterialComponent& Material::getComponent(const unsigned int& index) {
     return *m_Components[index];
 }
 const bool& Material::shadeless() const { 
@@ -216,10 +217,10 @@ const float& Material::glow() const {
 const size_t& Material::id() const { 
     return m_ID; 
 }
-const uint& Material::diffuseModel() const { 
+const unsigned int& Material::diffuseModel() const {
     return m_DiffuseModel; 
 }
-const uint& Material::specularModel() const { 
+const unsigned int& Material::specularModel() const {
     return m_SpecularModel; 
 }
 const float& Material::ao() const { 

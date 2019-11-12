@@ -3,6 +3,7 @@
 #define ENGINE_RENDERER_DECAL_H
 
 #include <ecs/EntityWrapper.h>
+#include <core/engine/math/Numbers.h>
 
 namespace Engine {
     namespace epriv {

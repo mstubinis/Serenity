@@ -113,10 +113,10 @@ const decimal Camera::getDistanceSquared(Entity& e) {
 const decimal Camera::getDistanceSquared(const glm_vec3& objPos) {
     return glm::distance2(objPos, getPosition()); 
 }
-const uint Camera::sphereIntersectTest(const glm_vec3& pos, const float radius) {
+const unsigned int Camera::sphereIntersectTest(const glm_vec3& pos, const float radius) {
     return m_Entity.getComponent<ComponentCamera>()->sphereIntersectTest(pos,radius); 
 }
-const uint Camera::pointIntersectTest(const glm_vec3& pos) {
+const unsigned int Camera::pointIntersectTest(const glm_vec3& pos) {
     return m_Entity.getComponent<ComponentCamera>()->pointIntersectTest(pos); 
 }
 const bool Camera::rayIntersectSphere(Entity& entity){

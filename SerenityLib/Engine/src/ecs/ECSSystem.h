@@ -2,7 +2,7 @@
 #ifndef ENGINE_ECS_SYSTEM_H
 #define ENGINE_ECS_SYSTEM_H
 
-#include <ecs/ECS.h>
+#include <ecs/ECSComponentPool.h>
 #include <ecs/ECSSystemConstructorInfo.h>
 
 namespace Engine {
@@ -30,7 +30,7 @@ namespace Engine {
                 virtual void onSceneEntered(Scene&) {}
         };
 
-        template <class TEntity, class TComponent> class ECSSystem<TEntity,TComponent> final : public ECSSystem<TEntity> {
+        template <class TEntity, class TComponent> class ECSSystem<TEntity, TComponent> final : public ECSSystem<TEntity> {
             using super     = ECSSystem<TEntity>;
             using CPoolType = ECSComponentPool<TEntity, TComponent>;
             private:

@@ -4,6 +4,7 @@
 
 #include <ecs/ComponentBaseClass.h>
 #include <ecs/ECSSystemConstructorInfo.h>
+#include <core/engine/math/Numbers.h>
 
 class Camera;
 class ComponentModel;
@@ -67,7 +68,7 @@ class ComponentCamera : public ComponentBaseClass {
 
         ~ComponentCamera();
 
-        void resize(const uint width, const uint height);
+        void resize(const unsigned int width, const unsigned int height);
         void lookAt(const glm_vec3& eye, const glm_vec3& forward, const glm_vec3& up);
 
 		const float getAngle() const;    void setAngle(const float angle);
@@ -87,8 +88,8 @@ class ComponentCamera : public ComponentBaseClass {
 		const glm_vec3 right() const;
 		const glm_vec3 up() const;
 
-		const uint pointIntersectTest(const glm_vec3& objectPosition) const;
-		const uint sphereIntersectTest(const glm_vec3& objectPosition, const float& objectRadius) const;
+		const unsigned int pointIntersectTest(const glm_vec3& objectPosition) const;
+		const unsigned int sphereIntersectTest(const glm_vec3& objectPosition, const float& objectRadius) const;
 };
 
 class ComponentCamera_System_CI : public Engine::epriv::ECSSystemCI {

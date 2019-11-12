@@ -2,27 +2,24 @@
 #include <core/engine/mesh/MeshImportedData.h>
 #include <core/engine/math/Engine_Math.h>
 
-#include <glm/gtc/matrix_transform.hpp>
-
 using namespace Engine;
 using namespace std;
-
 
 epriv::AnimationData::AnimationData(const MeshSkeleton& meshSkeleton, const aiAnimation& assimpAnimation) {
     m_MeshSkeleton = const_cast<MeshSkeleton*>(&meshSkeleton);
     m_TicksPerSecond = assimpAnimation.mTicksPerSecond;
     m_DurationInTicks = assimpAnimation.mDuration;
-    for (uint o = 0; o < assimpAnimation.mNumChannels; ++o) {
-        const aiNodeAnim& aiAnimNode = *assimpAnimation.mChannels[o];
+    for (unsigned int c = 0; c < assimpAnimation.mNumChannels; ++c) {
+        const aiNodeAnim& aiAnimNode = *assimpAnimation.mChannels[c];
         if (!m_KeyframeData.count(aiAnimNode.mNodeName.data)) {
             AnimationChannel animChannel;
-            for (uint b = 0; b < aiAnimNode.mNumPositionKeys; ++b) {
+            for (unsigned int b = 0; b < aiAnimNode.mNumPositionKeys; ++b) {
                 animChannel.PositionKeys.emplace_back(aiAnimNode.mPositionKeys[b].mTime, Math::assimpToGLMVec3(aiAnimNode.mPositionKeys[b].mValue));
             }
-            for (uint b = 0; b < aiAnimNode.mNumRotationKeys; ++b) {
+            for (unsigned int b = 0; b < aiAnimNode.mNumRotationKeys; ++b) {
                 animChannel.RotationKeys.emplace_back(aiAnimNode.mRotationKeys[b].mTime, aiAnimNode.mRotationKeys[b].mValue);
             }
-            for (uint b = 0; b < aiAnimNode.mNumScalingKeys; ++b) {
+            for (unsigned int b = 0; b < aiAnimNode.mNumScalingKeys; ++b) {
                 animChannel.ScalingKeys.emplace_back(aiAnimNode.mScalingKeys[b].mTime, Math::assimpToGLMVec3(aiAnimNode.mScalingKeys[b].mValue));
             }
             m_KeyframeData.emplace(aiAnimNode.mNodeName.data, std::move(animChannel));
@@ -49,14 +46,14 @@ void epriv::AnimationData::ReadNodeHeirarchy(const string& animationName, float 
     glm::mat4 Transform(ParentTransform * NodeTransform);
     auto& skeleton = *m_MeshSkeleton;
     if (skeleton.m_BoneMapping.count(BoneName)) {
-        uint BoneIndex(skeleton.m_BoneMapping.at(BoneName));
+        unsigned int BoneIndex(skeleton.m_BoneMapping.at(BoneName));
         BoneInfo& boneInfo = skeleton.m_BoneInfo[BoneIndex];
         glm::mat4& Final = boneInfo.FinalTransform;
         Final = skeleton.m_GlobalInverseTransform * Transform * boneInfo.BoneOffset;
         //this line allows for animation combinations. only works when additional animations start off in their resting places...
         Final = Transforms[BoneIndex] * Final;
     }
-    for (uint i = 0; i < node->Children.size(); ++i) {
+    for (size_t i = 0; i < node->Children.size(); ++i) {
         ReadNodeHeirarchy(animationName, time, node->Children[i], Transform, Transforms);
     }
 }
@@ -67,7 +64,7 @@ void epriv::AnimationData::BoneTransform(const string& animationName, float Time
     glm::mat4 ParentIdentity(1.0f);
     auto& skeleton = *m_MeshSkeleton;
     ReadNodeHeirarchy(animationName, AnimationTime, skeleton.m_RootNode, ParentIdentity, Transforms);
-    for (uint i = 0; i < skeleton.m_NumBones; ++i) {
+    for (unsigned int i = 0; i < skeleton.m_NumBones; ++i) {
         Transforms[i] = skeleton.m_BoneInfo[i].FinalTransform;
     }
 }
@@ -75,8 +72,8 @@ void epriv::AnimationData::CalcInterpolatedPosition(glm::vec3& Out, float Animat
     if (node.PositionKeys.size() == 1) {
         Out = node.PositionKeys[0].value; return;
     }
-    uint PositionIndex(FindPosition(AnimationTime, node));
-    uint NextIndex(PositionIndex + 1);
+    size_t PositionIndex(FindPosition(AnimationTime, node));
+    size_t NextIndex(PositionIndex + 1);
     float DeltaTime((float)(node.PositionKeys[NextIndex].time - node.PositionKeys[PositionIndex].time));
     float Factor((AnimationTime - (float)node.PositionKeys[PositionIndex].time) / DeltaTime);
     glm::vec3 Start(node.PositionKeys[PositionIndex].value);
@@ -87,8 +84,8 @@ void epriv::AnimationData::CalcInterpolatedRotation(aiQuaternion& Out, float Ani
     if (node.RotationKeys.size() == 1) {
         Out = node.RotationKeys[0].value; return;
     }
-    uint RotationIndex(FindRotation(AnimationTime, node));
-    uint NextIndex(RotationIndex + 1);
+    size_t RotationIndex(FindRotation(AnimationTime, node));
+    size_t NextIndex(RotationIndex + 1);
     float DeltaTime((float)(node.RotationKeys[NextIndex].time - node.RotationKeys[RotationIndex].time));
     float Factor((AnimationTime - (float)node.RotationKeys[RotationIndex].time) / DeltaTime);
     const aiQuaternion& StartRotationQ = node.RotationKeys[RotationIndex].value;
@@ -100,24 +97,24 @@ void epriv::AnimationData::CalcInterpolatedScaling(glm::vec3& Out, float Animati
     if (node.ScalingKeys.size() == 1) {
         Out = node.ScalingKeys[0].value; return;
     }
-    uint ScalingIndex(FindScaling(AnimationTime, node));
-    uint NextIndex(ScalingIndex + 1);
+    size_t ScalingIndex(FindScaling(AnimationTime, node));
+    size_t NextIndex(ScalingIndex + 1);
     float DeltaTime((float)(node.ScalingKeys[NextIndex].time - node.ScalingKeys[ScalingIndex].time));
     float Factor((AnimationTime - (float)node.ScalingKeys[ScalingIndex].time) / DeltaTime);
     glm::vec3 Start(node.ScalingKeys[ScalingIndex].value);
     glm::vec3 End(node.ScalingKeys[NextIndex].value);
     Out = Start + Factor * (End - Start);
 }
-uint epriv::AnimationData::FindPosition(float AnimationTime, const AnimationChannel& node) {
-    for (uint i = 0; i < node.PositionKeys.size() - 1; ++i) { if (AnimationTime < (float)node.PositionKeys[i + 1].time) { return i; } }return 0;
+const size_t epriv::AnimationData::FindPosition(const float AnimationTime, const AnimationChannel& node) {
+    for (size_t i = 0; i < node.PositionKeys.size() - 1; ++i) { if (AnimationTime < (float)node.PositionKeys[i + 1].time) { return i; } }return 0;
 }
-uint epriv::AnimationData::FindRotation(float AnimationTime, const AnimationChannel& node) {
-    for (uint i = 0; i < node.RotationKeys.size() - 1; ++i) { if (AnimationTime < (float)node.RotationKeys[i + 1].time) { return i; } }return 0;
+const size_t epriv::AnimationData::FindRotation(const float AnimationTime, const AnimationChannel& node) {
+    for (size_t i = 0; i < node.RotationKeys.size() - 1; ++i) { if (AnimationTime < (float)node.RotationKeys[i + 1].time) { return i; } }return 0;
 }
-uint epriv::AnimationData::FindScaling(float AnimationTime, const AnimationChannel& node) {
-    for (uint i = 0; i < node.ScalingKeys.size() - 1; ++i) { if (AnimationTime < (float)node.ScalingKeys[i + 1].time) { return i; } }return 0;
+const size_t epriv::AnimationData::FindScaling(const float AnimationTime, const AnimationChannel& node) {
+    for (size_t i = 0; i < node.ScalingKeys.size() - 1; ++i) { if (AnimationTime < (float)node.ScalingKeys[i + 1].time) { return i; } }return 0;
 }
-float epriv::AnimationData::duration() {
+const float epriv::AnimationData::duration() {
     float TicksPerSecond(float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f)); return float(float(m_DurationInTicks) / TicksPerSecond);
 }
 
@@ -144,7 +141,9 @@ epriv::MeshSkeleton::~MeshSkeleton() {
     clear();
     cleanup();
 }
-
+const unsigned int& epriv::MeshSkeleton::numBones() {
+    return m_NumBones; 
+}
 void epriv::MeshSkeleton::fill(const MeshImportedData& data) {
     for (auto& _b : data.m_Bones) {
         const VertexBoneData& b = _b.second;

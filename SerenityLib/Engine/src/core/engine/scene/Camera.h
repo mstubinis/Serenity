@@ -44,8 +44,8 @@ class Camera: public EntityWrapper{
         const glm::mat4 getViewProjection();
         const glm::mat4 getViewProjectionInverse();
 
-        const uint sphereIntersectTest(const glm_vec3& pos, const float radius);
-        const uint pointIntersectTest(const glm_vec3& pos);
+        const unsigned int sphereIntersectTest(const glm_vec3& pos, const float radius);
+        const unsigned int pointIntersectTest(const glm_vec3& pos);
 
         const bool rayIntersectSphere(Entity&);
 };

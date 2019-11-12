@@ -1,4 +1,5 @@
 #include <core/engine/materials/MaterialLoader.h>
+#include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/Engine.h>

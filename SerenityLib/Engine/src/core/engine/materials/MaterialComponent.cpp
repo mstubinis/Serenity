@@ -90,27 +90,27 @@ MaterialLayer* MaterialComponent::addLayer(Texture* texture, Texture* mask, Text
     return &layer;
 }
 
-Texture* MaterialComponent::texture(const uint& index) const {
+Texture* MaterialComponent::texture(const unsigned int& index) const {
     return m_Layers[index].getTexture();
 }
-Texture* MaterialComponent::mask(const uint& index) const {
+Texture* MaterialComponent::mask(const unsigned int& index) const {
     return m_Layers[index].getMask();
 }
-Texture* MaterialComponent::cubemap(const uint& index) const {
+Texture* MaterialComponent::cubemap(const unsigned int& index) const {
     return m_Layers[index].getCubemap();
 }
-MaterialLayer& MaterialComponent::layer(const uint& index) {
+MaterialLayer& MaterialComponent::layer(const unsigned int& index) {
     return m_Layers[index];
 }
 const MaterialComponentType::Type& MaterialComponent::type() const {
     return m_ComponentType;
 }
 
-void MaterialComponent::bind(const uint& component_index, unsigned int& textureUnit) {
+void MaterialComponent::bind(const unsigned int& component_index, unsigned int& textureUnit) {
     const string wholeString = "components[" + to_string(component_index) + "].";
     Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
     Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));
-    for (uint layerIndex = 0; layerIndex < m_NumLayers; ++layerIndex) {
+    for (unsigned int layerIndex = 0; layerIndex < m_NumLayers; ++layerIndex) {
         m_Layers[layerIndex].sendDataToGPU(wholeString, component_index, layerIndex, textureUnit);
     }
 }

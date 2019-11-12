@@ -26,7 +26,7 @@ struct EmptyOnUpdateFunctor final {void operator()(Scene* scene, const double& d
 
 struct Scene::impl final {
     glm::vec3                         m_GI;
-    uint                              m_ID;
+    unsigned int                      m_ID;
 
     Skybox*                           m_Skybox;
 
@@ -206,7 +206,7 @@ vector<Camera*>& InternalScenePublicInterface::GetCameras(Scene& scene) {
     return scene.m_i->m_Cameras;
 }
 vector<Engine::epriv::EntityPOD>& InternalScenePublicInterface::GetEntities(Scene& scene) {
-    return scene.m_i->m_ECS.entityPool._pool;
+    return scene.m_i->m_ECS.m_EntityPool._pool;
 }
 vector<SunLight*>& InternalScenePublicInterface::GetLights(Scene& scene) {
     return scene.m_i->m_Lights;
@@ -399,7 +399,7 @@ Entity Scene::createEntity() {
 Entity Scene::getEntity(const Engine::epriv::EntityPOD& data) { 
     return Entity(data.ID, data.sceneID, data.versionID); 
 }
-void Scene::removeEntity(const uint& entityID) {
+void Scene::removeEntity(const unsigned int& entityID) {
     m_i->m_ECS.removeEntity(entityID);
 }
 void Scene::removeEntity(Entity& entity) { 

@@ -20,6 +20,8 @@
 #include <core/engine/renderer/Decal.h>
 #include <BulletCollision/CollisionShapes/btMultiSphereShape.h>
 
+#include <core/engine/scene/Camera.h>
+
 using namespace Engine;
 using namespace std;
 

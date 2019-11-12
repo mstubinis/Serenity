@@ -7,12 +7,12 @@
 #include <ecs/EntityDataRequest.h>
 
 struct Entity{   
-    uint data;
+    std::uint32_t data;
 
     Entity();
-    Entity(const uint entityID, const uint sceneID, const uint versionID);
+    Entity(const unsigned int& entityID, const unsigned int& sceneID, const unsigned int& versionID);
     ~Entity();
-    void process(const uint entityID, const uint sceneID, const uint versionID);
+    void process(const unsigned int& entityID, const unsigned int& sceneID, const unsigned int& versionID);
     Entity(const Entity& other)                = default;
     Entity& operator=(const Entity& other)     = default;
     Entity(Entity&& other) noexcept            = default;

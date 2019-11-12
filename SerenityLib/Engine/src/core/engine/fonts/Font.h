@@ -12,15 +12,9 @@
 #include <core/engine/fonts/FontIncludes.h>
 
 class Texture;
-
-typedef unsigned char uchar;
-
 struct FontGlyph final{
-     uint id;
-     uint x; uint y;
-     uint width; uint height;
+     unsigned int id, x, y, width, height, xadvance;
      int xoffset; int yoffset;
-     uint xadvance;
 
      //mesh specific
      std::vector<glm::vec3> pts;
@@ -28,10 +22,10 @@ struct FontGlyph final{
 };
 class Font final: public EngineResource{
     public:
-        static const uint MAX_CHARACTERS_RENDERED_PER_FRAME = 4096;
+        static const unsigned int MAX_CHARACTERS_RENDERED_PER_FRAME = 4096;
     private:
         Texture* m_FontTexture;
-        std::unordered_map<uchar, FontGlyph> m_FontGlyphs;
+        std::unordered_map<unsigned char, FontGlyph> m_FontGlyphs;
     public:
         Font(const std::string& filename);
         ~Font();
@@ -46,11 +40,10 @@ class Font final: public EngineResource{
             const TextAlignment::Type & = TextAlignment::Left,
             const glm::vec4& scissor = glm::vec4(-1.0f)
         );
-
         const float getTextWidth(const std::string& text) const;
         const float getTextHeight(const std::string& text) const;
 
         const Texture& getGlyphTexture() const;
-        const FontGlyph& getGlyphData(const uchar& character) const;
+        const FontGlyph& getGlyphData(const unsigned char& character) const;
 };
 #endif

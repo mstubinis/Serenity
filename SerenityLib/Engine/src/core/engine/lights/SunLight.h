@@ -2,15 +2,17 @@
 #ifndef ENGINE_LIGHT_SUN_INCLUDE_GUARD
 #define ENGINE_LIGHT_SUN_INCLUDE_GUARD
 
-#include <core/engine/scene/Camera.h>
+//#include <core/engine/scene/Camera.h>
 #include <core/engine/lights/LightIncludes.h>
+//#include <core/engine/math/Numbers.h>
+#include <ecs/EntityWrapper.h>
 
 namespace Engine {
-namespace epriv {
-    class RenderManager;
+    namespace epriv {
+        class RenderManager;
+    };
 };
-};
-
+class Scene;
 class SunLight : public EntityWrapper {
     friend class ::Engine::epriv::RenderManager;
     protected:
@@ -22,7 +24,7 @@ class SunLight : public EntityWrapper {
         float              m_SpecularIntensity;
     public:
         SunLight(
-            const glm_vec3 position   = glm_vec3(0.0),
+            const glm_vec3 position    = glm_vec3(0.0),
             const LightType::Type type = LightType::Sun,
             Scene* scene               = nullptr
         );
@@ -33,7 +35,7 @@ class SunLight : public EntityWrapper {
         const glm_vec3 position();
         const glm::vec4& color() const;
         const bool isActive() const;
-        const uint type() const;
+        const unsigned int type() const;
 
         const float getAmbientIntensity() const;
         const float getDiffuseIntensity() const;

@@ -13,6 +13,7 @@
 
 #include <core/engine/Engine.h>
 #include <core/engine/materials/Material.h>
+#include <core/engine/scene/Camera.h>
 
 #include "../ships/shipSystems/ShipSystemShields.h"
 #include "../ships/shipSystems/ShipSystemHull.h"

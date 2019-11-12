@@ -7,11 +7,10 @@
 
 #include <vector>
 #include <string>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 #include <core/engine/materials/MaterialEnums.h>
 
-typedef boost::function<void(const float& dt)> boost_uv_func;
+typedef std::function<void(const float& dt)> std_uv_func;
 
 class  MaterialLayer;
 class  Texture;
@@ -19,20 +18,16 @@ struct SimpleUVTranslationFunctor;
 class MaterialLayer final{
     friend struct SimpleUVTranslationFunctor;
     private:
-        Texture*    m_Texture;
-        Texture*    m_Mask;
-        Texture*    m_Cubemap;
+        Texture*                   m_Texture;
+        Texture*                   m_Mask;
+        Texture*                   m_Cubemap;
 
         //x = blend mode? | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
-        glm::vec4   m_Data1;
+        glm::vec4                  m_Data1;
+        glm::vec4                  m_Data2; 
+        glm::vec2                  m_UVModifications;
 
-
-        glm::vec4   m_Data2; 
-
-        glm::vec2   m_UVModifications;
-
-        std::vector<boost_uv_func> m_UVModificationQueue;
-
+        std::vector<std_uv_func>   m_UVModificationQueue;
     public:
         MaterialLayer();
         ~MaterialLayer();
@@ -50,7 +45,7 @@ class MaterialLayer final{
         const glm::vec4& data2() const;
         const MaterialLayerBlendMode::Mode blendMode() const;
 
-        void addUVModificationFunctor(const boost_uv_func& functor);
+        void addUVModificationFunctor(const std_uv_func& functor);
         void addUVModificationSimpleTranslation(const float& translationX, const float& translationY);
 
         void setBlendMode(const MaterialLayerBlendMode::Mode& mode);

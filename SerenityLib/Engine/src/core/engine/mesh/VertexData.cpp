@@ -4,7 +4,7 @@
 using namespace Engine;
 using namespace std;
 
-VertexData::VertexData(const VertexDataFormat& _format) :format(const_cast<VertexDataFormat&>(_format)), vao(0) {
+VertexData::VertexData(const VertexDataFormat& _format) : format(const_cast<VertexDataFormat&>(_format)), vao(0) {
     data.reserve(_format.attributes.size());
     for (size_t i = 0; i < data.capacity(); ++i) { 
 		data.emplace_back(nullptr); 
@@ -59,7 +59,7 @@ void VertexData::unbind() {
     }
 }
 
-void VertexData::setIndices(vector<ushort>& _data, const bool addToGPU, const bool orphan, const bool reCalcTriangles) {
+void VertexData::setIndices(vector<unsigned short>& _data, const bool addToGPU, const bool orphan, const bool reCalcTriangles) {
     if (buffers.size() == 1)
         buffers.push_back(std::make_unique<ElementBufferObject>());
     auto& _buffer = *buffers[1];
@@ -75,9 +75,9 @@ void VertexData::setIndices(vector<ushort>& _data, const bool addToGPU, const bo
         if (positions.size() >= 0) {
             triangles.clear();
             triangles.reserve(_data.size() / 3);
-            uint j = 0;
+            size_t j = 0;
             Engine::epriv::Triangle tri;
-            for (uint i = 0; i < indices.size(); ++i) {
+            for (size_t i = 0; i < indices.size(); ++i) {
                 ++j;
                 auto& index = indices[i];
                 if (j == 1) {

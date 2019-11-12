@@ -45,11 +45,11 @@ const glm::vec4& MaterialLayer::data2() const {
 }
 void MaterialLayer::addUVModificationSimpleTranslation(const float& translationX, const float& translationY) {
     SimpleUVTranslationFunctor functor;
-    boost_uv_func f = boost::bind<void>(functor, _1, std::ref(*this), translationX, translationY);
+    std_uv_func f = std::bind<void>(functor, std::placeholders::_1, std::ref(*this), translationX, translationY);
     m_UVModificationQueue.push_back(std::move(f));
 }
-void MaterialLayer::addUVModificationFunctor(const boost_uv_func& functor) {
-    //m_UVModificationQueue.push_back(std::move(functor));
+void MaterialLayer::addUVModificationFunctor(const std_uv_func& functor) {
+    m_UVModificationQueue.push_back(std::move(functor));
 }
 void MaterialLayer::setBlendMode(const MaterialLayerBlendMode::Mode& mode) {
     m_Data1.x = static_cast<float>(mode);

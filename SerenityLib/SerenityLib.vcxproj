@@ -232,7 +232,7 @@
     <ClInclude Include="Engine\src\core\engine\Engine_ObjectPool.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_Window.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventDispatcher.h" />
-    <ClInclude Include="Engine\src\core\engine\events\Engine_EventEnums.h" />
+    <ClInclude Include="Engine\src\core\engine\events\Engine_EventIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventObject.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_Events.h" />
     <ClInclude Include="Engine\src\core\engine\fonts\Font.h" />
@@ -320,6 +320,7 @@
     <ClInclude Include="Engine\src\core\engine\resources\ResourcesIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\scene\Camera.h" />
     <ClInclude Include="Engine\src\core\engine\scene\Scene.h" />
+    <ClInclude Include="Engine\src\core\engine\scene\SceneOptions.h" />
     <ClInclude Include="Engine\src\core\engine\scene\Skybox.h" />
     <ClInclude Include="Engine\src\core\engine\scene\Viewport.h" />
     <ClInclude Include="Engine\src\core\engine\scene\ViewportIncludes.h" />

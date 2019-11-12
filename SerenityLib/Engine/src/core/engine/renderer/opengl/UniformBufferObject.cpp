@@ -9,10 +9,10 @@ using namespace Engine::epriv;
 using namespace std;
 
 GLint UniformBufferObject::MAX_UBO_BINDINGS;
-uint UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT = 0;
+unsigned int UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT = 0;
 UniformBufferObject* UniformBufferObject::UBO_CAMERA = nullptr;
 
-UniformBufferObject::UniformBufferObject(const char* nameInShader, const uint& sizeofStruct, const int& globalBindingPointNumber) {
+UniformBufferObject::UniformBufferObject(const char* nameInShader, const unsigned int& sizeofStruct, const int& globalBindingPointNumber) {
     m_NameInShader = nameInShader;
     if (RenderManager::GLSL_VERSION < 140)
         return;
@@ -70,7 +70,7 @@ void UniformBufferObject::attachToShader(const ShaderProgram& shaderProgram) {
     const GLuint& program = shaderProgram.m_ShaderProgram;
     if (RenderManager::GLSL_VERSION < 140 || shaderProgram.m_AttachedUBOs.count(m_UBOObject))
         return;
-    const uint& programBlockIndex = glGetUniformBlockIndex(program, m_NameInShader);
+    const unsigned int programBlockIndex = glGetUniformBlockIndex(program, m_NameInShader);
     glUniformBlockBinding(program, programBlockIndex, m_GlobalBindingPointNumber);
     const_cast<ShaderProgram&>(shaderProgram).m_AttachedUBOs.emplace(m_UBOObject);
 }

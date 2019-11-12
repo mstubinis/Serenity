@@ -2,19 +2,19 @@
 #ifndef ENGINE_MATERIAL_H
 #define ENGINE_MATERIAL_H
 
-#include <core/engine/BindableResource.h>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <glm/vec4.hpp>
 #include <glm/vec3.hpp>
-#include <unordered_map>
+#include <vector>
 
+#include <core/engine/BindableResource.h>
 #include <core/engine/materials/MaterialEnums.h>
-#include <core/engine/materials/MaterialComponent.h>
 
 class  ShaderProgram;
 class  Mesh;
-
+class  MaterialComponent;
+class  Texture;
 namespace Engine{
     namespace epriv{
         struct DefaultMaterialBindFunctor;
@@ -40,8 +40,8 @@ class Material final: public BindableResource{
     private:
         static std::vector<glm::vec4>     m_MaterialProperities;
         std::vector<MaterialComponent*>   m_Components;
-        uint                              m_DiffuseModel;
-        uint                              m_SpecularModel;
+        unsigned int                      m_DiffuseModel;
+        unsigned int                      m_SpecularModel;
         bool                              m_Shadeless;
         bool                              m_UpdatedThisFrame;
         glm::vec3                         m_F0Color;
@@ -83,7 +83,7 @@ class Material final: public BindableResource{
         Material(Material&& other) noexcept            = delete;
         Material& operator=(Material&& other) noexcept = delete;
 
-        MaterialComponent& getComponent(const uint& index);
+        MaterialComponent& getComponent(const unsigned int& index);
 
         MaterialComponent& addComponent(const MaterialComponentType::Type& type, const std::string& textureFile = "", const std::string& maskFile = "", const std::string& cubemapFile = "");
         MaterialComponent& addComponentDiffuse(const std::string& textureFile);
@@ -118,9 +118,9 @@ class Material final: public BindableResource{
         void setMetalness(const float& metalness);
         void setAlpha(const float& alpha);
     
-        const uint& specularModel() const;
+        const unsigned int& specularModel() const;
         void setSpecularModel(const SpecularModel::Model& specularModel);
-        const uint& diffuseModel() const;    
+        const unsigned int& diffuseModel() const;
         void setDiffuseModel(const DiffuseModel::Model& diffuseModel);
 
         void bind();

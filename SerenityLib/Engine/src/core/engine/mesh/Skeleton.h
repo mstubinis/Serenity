@@ -2,13 +2,11 @@
 #ifndef ENGINE_MESH_SKELETON_INCLUDE_GUARD
 #define ENGINE_MESH_SKELETON_INCLUDE_GUARD
 
-#include <glm/glm.hpp>
-#include <core/engine/utils/Utils.h>
 #include <unordered_map>
 #include <assimp/scene.h>
+#include <glm/mat4x4.hpp>
 
 class  Mesh;
-
 namespace Engine {
     namespace epriv {
         struct InternalMeshPublicInterface;
@@ -45,10 +43,10 @@ namespace Engine {
             friend struct Engine::epriv::InternalMeshPublicInterface;
             private:
                 BoneNode*                                       m_RootNode;
-                uint                                            m_NumBones;
+                unsigned int                                    m_NumBones;
                 std::vector<BoneInfo>                           m_BoneInfo;
                 std::vector<glm::vec4>                          m_BoneIDs, m_BoneWeights;
-                std::unordered_map<std::string, uint>           m_BoneMapping; // maps a bone name to its index
+                std::unordered_map<std::string, unsigned int>   m_BoneMapping; // maps a bone name to its index
                 std::unordered_map<std::string, AnimationData>  m_AnimationData;
                 glm::mat4                                       m_GlobalInverseTransform;
 
@@ -66,7 +64,7 @@ namespace Engine {
                 MeshSkeleton(MeshSkeleton&& other) noexcept            = delete;
                 MeshSkeleton& operator=(MeshSkeleton&& other) noexcept = delete;
 
-                uint numBones() { return m_NumBones; }
+                const unsigned int& numBones();
         };
         struct Vector3Key final {
             glm::vec3  value;
@@ -103,9 +101,9 @@ namespace Engine {
                 void CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const AnimationChannel& node);
                 void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const AnimationChannel& node);
                 void CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const AnimationChannel& node);
-                uint FindPosition(float AnimationTime, const AnimationChannel& node);
-                uint FindRotation(float AnimationTime, const AnimationChannel& node);
-                uint FindScaling(float AnimationTime, const AnimationChannel& node);
+                const size_t FindPosition(const float AnimationTime, const AnimationChannel& node);
+                const size_t FindRotation(const float AnimationTime, const AnimationChannel& node);
+                const size_t FindScaling(const float AnimationTime, const AnimationChannel& node);
             public:
                 AnimationData() = delete;
                 AnimationData(const Engine::epriv::MeshSkeleton&, const aiAnimation&);
@@ -116,7 +114,7 @@ namespace Engine {
                 AnimationData& operator=(AnimationData&& other) noexcept = delete;
                 ~AnimationData();
 
-                float duration();
+                const float duration();
         };
     };
 };

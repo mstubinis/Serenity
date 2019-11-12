@@ -22,6 +22,7 @@
 #include "../ships/shipSystems/ShipSystemHull.h"
 
 #include <core/engine/renderer/Decal.h>
+#include <core/engine/scene/Camera.h>
 
 using namespace Engine;
 using namespace std;

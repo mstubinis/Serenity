@@ -230,11 +230,11 @@ struct HullCollisionFunctor final { void operator()(CollisionCallbackEventData& 
                         const auto ownerLocal = data.ownerHit - glm::vec3(data.ownerBody.position());
                         const auto otherLocal = data.otherHit - glm::vec3(data.otherBody.position());
 
-                        const auto owner_linear_velocity = ownerShip->getLinearVelocity();
-                        const auto other_linear_velocity = otherShip->getLinearVelocity();
+                        const auto owner_linear_velocity = glm::vec3(ownerShip->getLinearVelocity());
+                        const auto other_linear_velocity = glm::vec3(otherShip->getLinearVelocity());
 
-                        const auto ownerMomentum = ownerMass * glm::vec3(owner_linear_velocity);
-                        const auto otherMomentum = otherMass * glm::vec3(other_linear_velocity);
+                        const auto ownerMomentum = ownerMass * owner_linear_velocity;
+                        const auto otherMomentum = otherMass * other_linear_velocity;
                         const auto totalMomentum = ownerMomentum + otherMomentum;
 
                         const auto damageTotal1 = (ownerMass / massTotal) * totalMomentum;
@@ -250,8 +250,8 @@ struct HullCollisionFunctor final { void operator()(CollisionCallbackEventData& 
                         pOut.data =        ownerShip->getMapKey();
                         pOut.data += "," + otherShip->getMapKey();
                         
-                        const auto owner_angular_velocity = data.ownerBody.getAngularVelocity();
-                        const auto other_angular_velocity = data.otherBody.getAngularVelocity();
+                        const auto owner_angular_velocity = glm::vec3(data.ownerBody.getAngularVelocity());
+                        const auto other_angular_velocity = glm::vec3(data.otherBody.getAngularVelocity());
 
                         Math::Float16From32(&pOut.ax1, owner_angular_velocity.x);
                         Math::Float16From32(&pOut.ay1, owner_angular_velocity.y);
@@ -448,7 +448,7 @@ void Ship::internal_update_just_destroyed_fully(const double& dt, Map& map) {
         pOut.data += "," + to_string(list.size()); //[1]
         for (auto& closest : list)
             pOut.data += "," + closest;
-        const auto nearestAnchorPos = finalAnchor->getPosition();
+        const auto nearestAnchorPos = glm::vec3(finalAnchor->getPosition());
         pOut.r = nearestAnchorPos.x;
         pOut.g = nearestAnchorPos.y;
         pOut.b = nearestAnchorPos.z;
@@ -495,7 +495,7 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
         auto& mesh = *instance.mesh();
         auto& verts = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(0);
         auto& norms = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(2);
-        const auto randVertexIndex = Helper::GetRandomIntFromTo(0, verts.size() - 1);
+        const auto randVertexIndex = Helper::GetRandomIntFromTo(size_t(0), verts.size() - 1);
 
         auto localPos = verts[randVertexIndex] + ((glm::normalize(verts[randVertexIndex])) * 0.03f);
         localPos = localPos + instance.position();
@@ -884,7 +884,6 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, 
     body.clearAllForces();
     body.setAngularVelocity(ax, ay, az, false);
     body.setLinearVelocity(static_cast<decimal>(lx - (packet.wx * WARP_PHYSICS_MODIFIER)), static_cast<decimal>(ly - (packet.wy * WARP_PHYSICS_MODIFIER)), static_cast<decimal>(lz - (packet.wz * WARP_PHYSICS_MODIFIER)), false);
-    //body.setGoal(x, y, z, PHYSICS_PACKET_TIMER_LIMIT);
 }
 const bool Ship::canSeeCloak(Ship* otherShip) {
     if (IsPlayer() || otherShip->isAlly(*this)) {

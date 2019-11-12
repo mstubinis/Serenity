@@ -7,6 +7,9 @@
 #include <core/engine/events/Engine_EventObject.h>
 #include <functional>
 
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+
 class  Camera;
 class  SunLight;
 class  DirectionalLight;
@@ -49,13 +52,13 @@ class Scene: public EngineResource, public EventObserver{
         Scene(const std::string& name);
         virtual ~Scene();
 
-        const uint id() const;
+        const unsigned int id() const;
         const unsigned int numViewports() const;
 
         //ecs
         Entity createEntity();
         Entity getEntity(const Engine::epriv::EntityPOD&);
-        void removeEntity(const uint& entityID);
+        void removeEntity(const unsigned int& entityID);
         void removeEntity(Entity& entity);
 
         
@@ -115,8 +118,8 @@ namespace Engine {
             static void           AddModelInstanceToPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
             static void           RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, const RenderStage::Stage& stage);
             static ECS<Entity>&   GetECS(Scene&);
-            static void           CleanECS(Scene&, const uint entityData);
-            static uint           NumScenes;
+            static void           CleanECS(Scene&, const unsigned int entityData);
+            static unsigned int   NumScenes;
         };
     };
 };

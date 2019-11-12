@@ -1,4 +1,5 @@
 #include <core/engine/mesh/MeshRequest.h>
+#include <core/engine/mesh/Mesh.h>
 #include <core/engine/mesh/MeshLoading.h>
 #include <core/engine/mesh/MeshCollisionFactory.h>
 

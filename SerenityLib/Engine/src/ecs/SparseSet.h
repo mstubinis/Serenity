@@ -56,7 +56,7 @@ namespace epriv {
             template<typename... ARGS> inline T* _add(const unsigned int& entityID, ARGS&&... args) {
                 const auto sparseIndex = entityID - 1;
                 if (sparseIndex >= super::sparse.size()) {
-                    super::sparse.resize(sparseIndex + 1, 0);
+                    super::sparse.resize(static_cast<size_t>(sparseIndex + 1), 0);
                 }
                 if (super::sparse[sparseIndex] != 0) {
                     return nullptr;

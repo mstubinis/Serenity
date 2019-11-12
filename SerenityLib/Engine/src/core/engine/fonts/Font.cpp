@@ -100,7 +100,7 @@ const float Font::getTextHeight(const string& text) const {
 const Texture& Font::getGlyphTexture() const {
     return *m_FontTexture; 
 }
-const FontGlyph& Font::getGlyphData(const uchar& character) const {
+const FontGlyph& Font::getGlyphData(const unsigned char& character) const {
     if (!m_FontGlyphs.count(character))
         return m_FontGlyphs.at('?');
     return m_FontGlyphs.at(character);

@@ -7,16 +7,12 @@
 #include <core/engine/mesh/MeshIncludes.h>
 #include <memory>
 
-typedef unsigned short ushort;
-
-
-//client side memory for mesh data
 struct VertexData final{
     VertexDataFormat&                              format;
     std::vector<char*>                             data;
     std::vector<size_t>                            dataSizes;
     std::vector<size_t>                            dataSizesCapacity;
-    std::vector<ushort>                            indices;
+    std::vector<unsigned short>                    indices;
     std::vector<Engine::epriv::Triangle>           triangles;
     GLuint                                         vao;
     std::vector<std::unique_ptr<BufferObject>>     buffers;
@@ -59,7 +55,7 @@ struct VertexData final{
             }
         }
     }
-    void setIndices(std::vector<ushort>& _data, const bool addToGPU = false, const bool orphan = false, const bool reCalcTriangles = false);
+    void setIndices(std::vector<unsigned short>& _data, const bool addToGPU = false, const bool orphan = false, const bool reCalcTriangles = false);
 
     void finalize();
     void bind();

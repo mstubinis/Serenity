@@ -73,22 +73,22 @@ ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_Left, con
 }
 ComponentCamera::~ComponentCamera() {
 }
-void ComponentCamera::resize(const uint p_Width, const uint p_Height) {
+void ComponentCamera::resize(const unsigned int p_Width, const unsigned int p_Height) {
     if (m_Type == Type::Perspective) {
         m_AspectRatio = p_Width / static_cast<float>(p_Height);
     }
     epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
-const uint ComponentCamera::pointIntersectTest(const glm_vec3& p_Position) const {
-    for (int i = 0; i < 6; ++i) {
+const unsigned int ComponentCamera::pointIntersectTest(const glm_vec3& p_Position) const {
+    for (unsigned int i = 0; i < 6; ++i) {
         const auto d = m_FrustumPlanes[i].x * p_Position.x + m_FrustumPlanes[i].y * p_Position.y + m_FrustumPlanes[i].z * p_Position.z + m_FrustumPlanes[i].w;
         if (d > static_cast<decimal>(0.0)) 
             return 0; //outside
     }
     return 1;//inside
 }
-const uint ComponentCamera::sphereIntersectTest(const glm_vec3& p_Position, const float& p_Radius) const {
-    uint res = 1; //inside the viewing frustum
+const unsigned int ComponentCamera::sphereIntersectTest(const glm_vec3& p_Position, const float& p_Radius) const {
+    unsigned int res = 1; //inside the viewing frustum
     if (p_Radius <= static_cast<decimal>(0.0))
 		return 0;
     for (int i = 0; i < 6; ++i) {
@@ -109,9 +109,6 @@ void ComponentCamera::lookAt(const glm_vec3& p_Eye, const glm_vec3& p_Center, co
 }
 
 const glm_vec3 ComponentCamera::forward() const {
-    //auto inv = glm::transpose(m_ViewMatrixNoTranslation);
-    //return glm::normalize(glm::vec3(inv[2][0], inv[2][1], inv[2][2]));
-    //return (getViewVector());
     return m_Forward;
 }
 const glm_vec3 ComponentCamera::right() const {
@@ -176,23 +173,21 @@ void ComponentCamera::setFar(const float p_FarPlane) {
 
 #pragma region System
 
-struct epriv::ComponentCamera_UpdateFunction final {
-    void operator()(void* p_ComponentPool, const double& p_Dt, Scene& p_Scene) const {
-		auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)p_ComponentPool;
-		auto& components = pool.pool();
-        auto lamda_update = [&](pair<size_t, size_t>& pair_) {
-            for (size_t j = pair_.first; j <= pair_.second; ++j) {
-                ComponentCamera& b = components[j];
-                Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update view frustrum 
-            }
-        };
-		auto split = epriv::threading::splitVectorPairs(components);
-        for (auto& pair : split) {
-            epriv::threading::addJobRef(lamda_update, pair);
+struct epriv::ComponentCamera_UpdateFunction final { void operator()(void* p_ComponentPool, const double& p_Dt, Scene& p_Scene) const {
+	auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)p_ComponentPool;
+	auto& components = pool.pool();
+    auto lamda_update = [&](pair<size_t, size_t>& pair_) {
+        for (size_t j = pair_.first; j <= pair_.second; ++j) {
+            ComponentCamera& b = components[j];
+            Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update view frustrum 
         }
-        epriv::threading::waitForAll();
+    };
+	auto split = epriv::threading::splitVectorPairs(components);
+    for (auto& pair : split) {
+        epriv::threading::addJobRef(lamda_update, pair);
     }
-};
+    epriv::threading::waitForAll();
+}};
 struct epriv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* p_ComponentCamera, Entity& p_Entity) const {
 }};
 struct epriv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* p_ComponentPool, Entity& p_Entity, Scene& p_Scene) const {

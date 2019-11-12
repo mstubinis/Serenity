@@ -12,6 +12,10 @@
 #include <core/engine/materials/Material.h>
 #include <core/engine/renderer/particles/Particle.h>
 
+#include <core/engine/scene/Camera.h>
+
+#include <ecs/ComponentBody.h>
+
 using namespace std;
 using namespace Engine;
 using namespace Engine::epriv;

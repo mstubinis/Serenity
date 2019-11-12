@@ -6,6 +6,7 @@
 #include <ecs/ECSSystemConstructorInfo.h>
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <LinearMath/btDefaultMotionState.h>
+#include <core/engine/math/Numbers.h>
 
 class Collision;
 class ComponentModel;
@@ -61,8 +62,8 @@ class ComponentBody : public ComponentBaseClass {
             btRigidBody*         bullet_rigidBody;
             btDefaultMotionState bullet_motionState;
             float                mass;
-            ushort               group;
-            ushort               mask;
+            unsigned short       group;
+            unsigned short       mask;
 
             PhysicsData();
             PhysicsData(const PhysicsData& other)            = delete;
@@ -127,9 +128,9 @@ class ComponentBody : public ComponentBaseClass {
         void* getUserPointer2();
 
         const bool&  hasPhysics() const;
-        const ushort getCollisionGroup() const; //get the groups this body belongs to
-        const ushort getCollisionMask() const;  //get the groups this body will register collisions with
-        const ushort getCollisionFlags() const;
+        const unsigned short getCollisionGroup() const; //get the groups this body belongs to
+        const unsigned short getCollisionMask() const;  //get the groups this body will register collisions with
+        const unsigned short getCollisionFlags() const;
 
         void alignTo(const glm_vec3& direction, const decimal speed);
 

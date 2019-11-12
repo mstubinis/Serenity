@@ -30,12 +30,12 @@ unsigned int ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 namespace Engine {
     namespace epriv {
         struct ModelInstanceAnimation final{
-            uint m_CurrentLoops, m_RequestedLoops;
+            unsigned int m_CurrentLoops, m_RequestedLoops;
             float m_CurrentTime, m_StartTime, m_EndTime;
             string m_AnimationName;
             Mesh* m_Mesh;
 
-            ModelInstanceAnimation(Mesh& _mesh, const std::string& _animName, float _startTime, float _endTime, uint _requestedLoops = 1) {
+            ModelInstanceAnimation(Mesh& _mesh, const std::string& _animName, float _startTime, float _endTime, unsigned int _requestedLoops = 1) {
                 m_CurrentLoops = 0;
                 m_RequestedLoops = _requestedLoops;
                 m_CurrentTime = 0;
@@ -416,6 +416,6 @@ void ModelInstance::setMaterial(const Handle& materialHandle, ComponentModel& co
 void ModelInstance::setMaterial(Material* material, ComponentModel& componentModel){
     componentModel.setModel(m_Mesh, material, 0, m_ShaderProgram, m_Stage);
 }
-void ModelInstance::playAnimation(const string& animName, const float& start, const float& end, const uint& reqLoops){
+void ModelInstance::playAnimation(const string& animName, const float& start, const float& end, const unsigned int& reqLoops){
     m_AnimationQueue.push_back(new epriv::ModelInstanceAnimation(*mesh(), animName, start, end, reqLoops));
 }

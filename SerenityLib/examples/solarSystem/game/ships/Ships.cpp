@@ -4,6 +4,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include <core/engine/materials/Material.h>
+#include <core/engine/materials/MaterialComponent.h>
 
 using namespace std;
 using namespace Engine;

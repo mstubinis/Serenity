@@ -5,25 +5,29 @@
 #include <vector>
 #include <string>
 #include <core/engine/resources/Handle.h>
-#include <core/engine/mesh/Mesh.h>
-#include <core/engine/mesh/Skeleton.h>
+//#include <core/engine/mesh/Mesh.h>
+//#include <core/engine/mesh/Skeleton.h>
+
+#include <unordered_map>
 
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+class Mesh;
 namespace Engine {
-namespace epriv {
-    struct AssimpSceneImport final {
-        Assimp::Importer importer;
-        aiScene*         scene;
-        aiNode*          root;
-        AssimpSceneImport() { 
-            scene = 0;
-            root = 0; 
-        }
+    namespace epriv {
+        struct BoneNode;
+        struct AssimpSceneImport final {
+            Assimp::Importer importer;
+            aiScene*         scene;
+            aiNode*          root;
+            AssimpSceneImport() { 
+                scene = 0;
+                root = 0; 
+            }
+        };
     };
-};
 };
 struct MeshRequestPart final {
     Mesh*        mesh;
@@ -57,15 +61,15 @@ struct MeshRequest final {
 
 
 namespace Engine {
-namespace epriv {
-    struct InternalMeshRequestPublicInterface final {
-        friend class  Mesh;
-        static void Request(MeshRequest&);
-        static bool Populate(MeshRequest&);
-        static void LoadGPU(MeshRequest&);
-        static void LoadCPU(MeshRequest&);
+    namespace epriv {
+        struct InternalMeshRequestPublicInterface final {
+            friend class  Mesh;
+            static void Request(MeshRequest&);
+            static bool Populate(MeshRequest&);
+            static void LoadGPU(MeshRequest&);
+            static void LoadCPU(MeshRequest&);
+        };
     };
-};
 };
 
 

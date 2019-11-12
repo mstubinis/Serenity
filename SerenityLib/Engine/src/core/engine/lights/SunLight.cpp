@@ -1,11 +1,13 @@
 #include <core/engine/lights/SunLight.h>
 #include <core/engine/resources/Engine_Resources.h>
 
+#include <ecs/ComponentBody.h>
+
 using namespace Engine;
 using namespace std;
 
 
-SunLight::SunLight(const glm_vec3 pos, const LightType::Type type, Scene* scene) :EntityWrapper(*scene){
+SunLight::SunLight(const glm_vec3 pos, const LightType::Type type, Scene* scene) : EntityWrapper(*scene){
     if (!scene) {
         scene = Resources::getCurrentScene();
     }

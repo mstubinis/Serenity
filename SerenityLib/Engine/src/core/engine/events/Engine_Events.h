@@ -3,7 +3,7 @@
 #define ENGINE_ENGINE_EVENTS_H
 
 #include <core/engine/events/Engine_EventDispatcher.h>
-#include <core/engine/events/Engine_EventEnums.h>
+#include <core/engine/events/Engine_EventIncludes.h>
 
 #include <string>
 #include <glm/vec2.hpp>
@@ -13,22 +13,22 @@ namespace Engine{
     namespace epriv{
         class EventManager final{
             public:
-                static EventManager*             m_EventManager;
+                static EventManager*                     m_EventManager;
 
-                std::unordered_map<uint, bool>   m_KeyStatus;
-                std::unordered_map<uint, bool>   m_MouseStatus;
-                double                           m_Delta;
-                glm::vec2                        m_Position;
-                glm::vec2                        m_Position_Previous;
-                glm::vec2                        m_Difference;
+                std::unordered_map<unsigned int, bool>   m_KeyStatus;
+                std::unordered_map<unsigned int, bool>   m_MouseStatus;
+                double                                   m_Delta;
+                glm::vec2                                m_Position;
+                glm::vec2                                m_Position_Previous;
+                glm::vec2                                m_Difference;
 
-                uint                             m_currentKey;
-                uint                             m_previousKey;
+                unsigned int                             m_currentKey;
+                unsigned int                             m_previousKey;
 
-                uint                             m_currentButton;
-                uint                             m_previousButton;
+                unsigned int                             m_currentButton;
+                unsigned int                             m_previousButton;
 
-                EventDispatcher                  m_EventDispatcher;
+                EventDispatcher                          m_EventDispatcher;
 
 
 
@@ -36,10 +36,10 @@ namespace Engine{
                 ~EventManager();
 
                 void setMousePositionInternal(const float x, const float y, const bool resetDifference, const bool resetPrevious);
-                void onEventKeyPressed(const uint& key);
-                void onEventKeyReleased(const uint& key);
-                void onEventMouseButtonPressed(const uint& mouseButton);
-                void onEventMouseButtonReleased(const uint& mouseButton);
+                void onEventKeyPressed(const unsigned int& key);
+                void onEventKeyReleased(const unsigned int& key);
+                void onEventMouseButtonPressed(const unsigned int& mouseButton);
+                void onEventMouseButtonReleased(const unsigned int& mouseButton);
                 void onEventMouseWheelMoved(const int& delta);
                 void onResetEvents(const double& dt);
         };

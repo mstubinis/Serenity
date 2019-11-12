@@ -111,7 +111,7 @@ class ModelInstance final: public BindableResource{
         const RenderStage::Stage& stage() const;
         void setStage(const RenderStage::Stage& stage);
 
-        void playAnimation(const std::string& animName, const float& startTime, const float& endTime = -1.0f, const uint& requestedLoops = 1);
+        void playAnimation(const std::string& animName, const float& startTime, const float& endTime = -1.0f, const unsigned int& requestedLoops = 1);
 
         void setColor(const float& r, const float& g, const float& b, const float& a = 1.0f);
         void setColor(const glm::vec4& color);

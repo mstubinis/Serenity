@@ -6,6 +6,7 @@
 #include <ecs/EntityWrapper.h>
 #include <vector>
 #include <mutex>
+#include <core/engine/math/Numbers.h>
 
 class  ParticleEmissionProperties;
 namespace Engine {

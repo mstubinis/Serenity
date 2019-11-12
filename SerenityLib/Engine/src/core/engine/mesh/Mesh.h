@@ -14,8 +14,6 @@
 
 #include <assimp/scene.h>
 
-typedef unsigned short ushort;
-
 class  Mesh;
 class  Camera;
 class  btHeightfieldTerrainShape;

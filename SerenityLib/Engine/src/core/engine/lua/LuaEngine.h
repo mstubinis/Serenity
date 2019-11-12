@@ -3,18 +3,18 @@
 #define ENGINE_LUAENGINE_H_INCLUDE_GUARD
 
 namespace Engine {
-namespace epriv {
-    class LUAEngine final {
-        private:
+    namespace epriv {
+        class LUAEngine final {
+            private:
 
-        public:
-            LUAEngine();
-            ~LUAEngine();
+            public:
+                LUAEngine();
+                ~LUAEngine();
 
-            void init();
-            void cleanup();
+                void init();
+                void cleanup();
+        };
     };
-};
 };
 
 #endif

@@ -4,6 +4,7 @@
 
 #include <core/engine/Engine.h>
 #include <core/engine/events/Engine_EventDispatcher.h>
+#include <core/engine/events/Engine_EventObject.h>
 
 using namespace Engine;
 using namespace Engine::epriv;

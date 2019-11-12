@@ -29,11 +29,11 @@ namespace Engine{
                 FramebufferObjectAttatchment(const FramebufferObject&, const FramebufferAttatchment::Attatchment&, const Texture&);
                 virtual ~FramebufferObjectAttatchment();
 
-                const uint width() const;
-                const uint height() const;
+                const unsigned int width() const;
+                const unsigned int height() const;
                 GLuint internalFormat();
-                uint attatchment();
-                virtual void resize(FramebufferObject&, const uint& width, const uint& height);
+                unsigned int attatchment();
+                virtual void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height);
                 virtual const GLuint address() const;
                 virtual void bind();
                 virtual void unbind();
@@ -45,10 +45,10 @@ namespace Engine{
                 GLuint         m_PixelFormat;
                 GLuint         m_PixelType;
             public:
-                FramebufferTexture(const FramebufferObject&,const FramebufferAttatchment::Attatchment&,const Texture&);
+                FramebufferTexture(const FramebufferObject&, const FramebufferAttatchment::Attatchment&, const Texture&);
                 virtual ~FramebufferTexture();
 
-                void resize(FramebufferObject&, const uint& width, const uint& height);
+                void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height);
                 const GLuint address() const;
                 Texture& texture();
                 void bind();
@@ -57,14 +57,14 @@ namespace Engine{
         class RenderbufferObject final: public FramebufferObjectAttatchment{
             friend class  Engine::epriv::FramebufferObject;
             private:
-                GLuint m_RBO;
-                uint   m_Width;
-                uint   m_Height;
+                GLuint         m_RBO;
+                unsigned int   m_Width;
+                unsigned int   m_Height;
             public:
-                RenderbufferObject(FramebufferObject&,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
+                RenderbufferObject(FramebufferObject&, FramebufferAttatchment::Attatchment, ImageInternalFormat::Format);
                 virtual ~RenderbufferObject();
 
-                void resize(FramebufferObject&, const uint& width, const uint& height);
+                void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height);
                 const GLuint address() const;
                 void bind();
                 void unbind();
@@ -75,23 +75,23 @@ namespace Engine{
             friend struct Engine::epriv::FramebufferObjectDefaultBindFunctor;
             friend struct Engine::epriv::FramebufferObjectDefaultUnbindFunctor;
             private:
-                size_t                                                  m_CurrentFBOIndex;
-                uint                                                    m_FramebufferWidth;
-                uint                                                    m_FramebufferHeight;
-                float                                                   m_Divisor;
-                std::vector<GLuint>                                     m_FBO;
-                std::unordered_map<uint, FramebufferObjectAttatchment*> m_Attatchments;
+                size_t                                                             m_CurrentFBOIndex;
+                unsigned int                                                       m_FramebufferWidth;
+                unsigned int                                                       m_FramebufferHeight;
+                float                                                              m_Divisor;
+                std::vector<GLuint>                                                m_FBO;
+                std::unordered_map<unsigned int, FramebufferObjectAttatchment*>    m_Attatchments;
             public:
-                FramebufferObject(const std::string& name, const uint& width, const uint& height, const float& divisor = 1.0f, const uint& swapBufferCount = 1);
-                FramebufferObject(const std::string& name, const uint& width, const uint& height, const ImageInternalFormat::Format&, const float& divisor = 1.0f, const uint& swapBufferCount = 1);
+                FramebufferObject(const std::string& name, const unsigned int& width, const unsigned int& height, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
+                FramebufferObject(const std::string& name, const unsigned int& width, const unsigned int& height, const ImageInternalFormat::Format&, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
                 virtual ~FramebufferObject();
 
-                void resize(const uint& width, const uint& height);
+                void resize(const unsigned int& width, const unsigned int& height);
                 FramebufferTexture* attatchTexture(Texture*, const FramebufferAttatchment::Attatchment);
                 RenderbufferObject* attatchRenderBuffer(RenderbufferObject&);
-                const uint width() const;
-                const uint height() const;
-                std::unordered_map<uint, FramebufferObjectAttatchment*>& attatchments();
+                const unsigned int width() const;
+                const unsigned int height() const;
+                std::unordered_map<unsigned int, FramebufferObjectAttatchment*>& attatchments();
                 const GLuint address() const;
                 const bool check();
                 const float divisor() const;

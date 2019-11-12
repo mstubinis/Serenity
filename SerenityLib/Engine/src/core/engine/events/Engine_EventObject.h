@@ -2,42 +2,16 @@
 #ifndef ENGINE_EVENT_OBJECT_H
 #define ENGINE_EVENT_OBJECT_H
 
-#include <core/engine/events/Engine_EventEnums.h>
-#include <core/engine/utils/Utils.h>
+#include <core/engine/events/Engine_EventIncludes.h>
 
 class  Scene;
-
-struct EventType final{ enum Type {
-    WindowResized,
-    WindowGainedFocus,
-    WindowLostFocus,
-    WindowClosed,
-    WindowFullscreenChanged,
-    SoundStatusChanged,
-    KeyPressed,
-    KeyReleased,
-    MouseButtonPressed,
-    MouseButtonReleased,
-    MouseWheelMoved,
-    MouseMoved,
-    MouseEnteredWindow,
-    MouseLeftWindow,
-    JoystickConnected,
-    JoystickDisconnected,
-    JoystickButtonPressed,
-    JoystickButtonReleased,
-    JoystickMoved,
-    TextEntered,
-    SceneChanged,
-_TOTAL};};
-
 namespace Engine{
 namespace epriv{
     struct EventWindowResized final{ 
-        uint  width;
-        uint  height; 
+        unsigned int  width;
+        unsigned int  height;
         EventWindowResized() = default;
-        EventWindowResized(const uint& _width, const uint& _height) {
+        EventWindowResized(const unsigned int& _width, const unsigned int& _height) {
             width = _width;
             height = _height;
         }
@@ -106,36 +80,36 @@ namespace epriv{
         }
     };
     struct EventJoystickMoved final{ 
-        uint                joystickID;
+        unsigned int        joystickID;
         JoystickAxis::Axis  axis;
         float               position;
         EventJoystickMoved() = default;
-        EventJoystickMoved(const uint& _joystickID, const JoystickAxis::Axis& _axis, const float& _position) {
+        EventJoystickMoved(const unsigned int& _joystickID, const JoystickAxis::Axis& _axis, const float& _position) {
             joystickID = _joystickID;
             axis       = _axis;
             position   = _position;
         }
     };
     struct EventJoystickButton final{ 
-        uint  joystickID;
-        uint  button; 
+        unsigned int  joystickID;
+        unsigned int  button;
         EventJoystickButton() = default;
-        EventJoystickButton(const uint& _joystickID, const uint& _button) {
+        EventJoystickButton(const unsigned int& _joystickID, const unsigned int& _button) {
             joystickID = _joystickID;
             button     = _button;
         }
     };
     struct EventJoystickConnection final{ 
-        uint  joystickID; 
+        unsigned int  joystickID;
         EventJoystickConnection() = default;
-        EventJoystickConnection(const uint& _joystickID) {
+        EventJoystickConnection(const unsigned int& _joystickID) {
             joystickID = _joystickID;
         }
     };
     struct EventSoundStatusChanged final {
-        uint  status;
+        unsigned int  status;
         EventSoundStatusChanged() = default;
-        EventSoundStatusChanged(const uint& _status) {
+        EventSoundStatusChanged(const unsigned int& _status) {
             status = _status;
         }
     };

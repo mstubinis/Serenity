@@ -10,7 +10,7 @@ Entity Entity::_null = Entity(0,0,0);
 Entity::Entity() {
     data = 0;
 }
-Entity::Entity(const uint entityID, const uint sceneID, const uint versionID) {
+Entity::Entity(const unsigned int& entityID, const unsigned int& sceneID, const unsigned int& versionID) {
     process(entityID, sceneID, versionID);
 }
 Entity::~Entity() {
@@ -34,7 +34,7 @@ void Entity::destroy() {
     auto& ecs = epriv::InternalScenePublicInterface::GetECS(_scene);
     ecs.removeEntity(*this);
 }
-void Entity::process(const uint entityID, const uint sceneID, const uint versionID) {
+void Entity::process(const unsigned int& entityID, const unsigned int& sceneID, const unsigned int& versionID) {
     data = versionID << 28 | sceneID << 21 | entityID;
 }
 const bool Entity::operator==(const Entity& other) const {
