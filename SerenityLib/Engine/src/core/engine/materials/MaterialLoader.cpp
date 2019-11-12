@@ -15,9 +15,9 @@ namespace Engine {
         struct DefaultMaterialBindFunctor {
             void operator()(BindableResource* r) const {
                 auto& material = *static_cast<Material*>(r);
-                const auto& numComponents = material.m_Components.size();
+                const size_t numComponents = material.m_Components.size();
                 unsigned int textureUnit = 0;
-                for (int i = 0; i < numComponents; ++i) {
+                for (size_t i = 0; i < numComponents; ++i) {
                     if (material.m_Components[i]) {
                         auto& component = *material.m_Components[i];
                         component.bind(i, textureUnit);

@@ -226,7 +226,7 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
 
 
 PacketCloakUpdate::PacketCloakUpdate() : Packet() {
-    cloakTimer        = 1.0f;
+    cloakTimer        = 1;
     cloakSystemOnline = false;
     cloakActive       = false;
     justTurnedOn      = false;

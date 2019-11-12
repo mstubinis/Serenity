@@ -14,14 +14,14 @@ void ShaderHelper::insertStringAtLine(string& src, const string& newcontent, con
     if (linenumber == 0) {
         src = newcontent + "\n" + src; 
     }else{
-        istringstream str(src);
-        string line;
+        stringstream str(src);
+        string line = "";
         vector<string> lines;
         unsigned int count = 0;
-        while (getline(str, line)) {
-            lines.push_back(line + "\n");
+        while (std::getline(str, line)) {
+            lines.emplace_back(line + "\n");
             if (count == linenumber) {
-                lines.push_back(newcontent + "\n"); 
+                lines.emplace_back(newcontent + "\n");
             }
             ++count;
         }
@@ -32,11 +32,11 @@ void ShaderHelper::insertStringAtLine(string& src, const string& newcontent, con
     }
 }
 void ShaderHelper::insertStringAtAndReplaceLine(string& src, const string& newcontent, const unsigned int linenumber) {
-    istringstream str(src); 
-    string line;
+    stringstream str(src); 
+    string line = "";
     vector<string> lines; 
-    while (getline(str, line)) {
-        lines.push_back(line + "\n");
+    while (std::getline(str, line)) {
+        lines.emplace_back(line + "\n");
     }
     unsigned int count = 0; 
     src = ""; 
@@ -59,13 +59,13 @@ void ShaderHelper::insertStringAtEndOfMainFunc(string& src, const string& conten
     src.insert(position, content);
 }
 void ShaderHelper::insertStringRightBeforeLineContent(string& src, const string& newContent, const string& lineContent) {
-    istringstream str(src);
-    string line;
+    stringstream str(src);
+    string line = "";
     vector<string> lines;
     bool done = false;
     unsigned int count = 0;
-    while (getline(str, line)) {
-        lines.push_back(line + "\n");
+    while (std::getline(str, line)) {
+        lines.emplace_back(line + "\n");
         if (ShaderHelper::sfind(line, lineContent) && !done) {
             lines.insert(lines.cend() - 1, newContent + "\n");
             done = true;
@@ -78,14 +78,14 @@ void ShaderHelper::insertStringRightBeforeLineContent(string& src, const string&
     }
 }
 void ShaderHelper::insertStringRightAfterLineContent(string& src, const string& newContent, const string& lineContent) {
-    istringstream str(src); 
-    string line;
+    stringstream str(src); 
+    string line = "";
     vector<string> lines; 
     bool done = false;
-    while (getline(str, line)) {
-        lines.push_back(line + "\n");
+    while (std::getline(str, line)) {
+        lines.emplace_back(line + "\n");
         if (ShaderHelper::sfind(line, lineContent) && !done) {
-            lines.push_back(newContent + "\n"); 
+            lines.emplace_back(newContent + "\n");
             done = true;
         } 
     }

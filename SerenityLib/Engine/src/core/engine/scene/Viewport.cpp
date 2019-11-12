@@ -1,5 +1,6 @@
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/scene/Scene.h>
+#include <core/engine/scene/Camera.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
 
@@ -8,6 +9,7 @@ using namespace std;
 
 Viewport::Viewport(const Scene& scene, const Camera& camera):m_Scene(const_cast<Scene&>(scene)){
     m_ID = 0;
+    
     setCamera(camera);
     const auto& winSize   = Resources::getWindowSize();
     setViewportDimensions(0.0f, 0.0f, static_cast<float>(winSize.x), static_cast<float>(winSize.y));

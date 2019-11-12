@@ -6,6 +6,7 @@
 #include <core/engine/resources/Engine_ResourceBasic.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include <functional>
+#include <vector>
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>

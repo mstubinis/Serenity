@@ -65,7 +65,7 @@ Collision::Collision(const CollisionType::Type _type, Mesh& mesh, const float& _
 Collision::Collision(ComponentBody* body, ComponentModel& _modelComponent, const float& _mass, const CollisionType::Type _type) {
     //construtor
     vector<ModelInstance*> modelInstances;
-    for (uint i = 0; i < _modelComponent.getNumModels(); ++i) {
+    for (size_t i = 0; i < _modelComponent.getNumModels(); ++i) {
         modelInstances.push_back(&_modelComponent.getModel(i));
     }
     _init(body, modelInstances, _mass, _type);
@@ -150,6 +150,6 @@ const btVector3& Collision::getBtInertia() const {
 btCollisionShape* Collision::getBtShape() const { 
     return m_BtShape; 
 }
-const uint Collision::getType() const { 
+const unsigned int& Collision::getType() const {
     return m_Type; 
 }

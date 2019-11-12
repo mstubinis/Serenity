@@ -52,7 +52,7 @@ void ShipRespawning::processShip(const string& shipMapKey, const string& shipCla
     PacketMessage pOut;
     pOut.PacketType = PacketType::Server_To_Client_Notify_Ship_Of_Impending_Respawn;
     pOut.name = shipMapKey;
-    pOut.r = Ships::Database[shipClass].RespawnTime;
+    pOut.r = static_cast<float>(Ships::Database[shipClass].RespawnTime);
     m_Server.send_to_client(*m_Server.getClientByMapKey(shipMapKey), pOut);
 
     //std::cout << "Processing Ship: " << shipMapKey << " (" << shipClass << ") at closest anchor: " << closest_spawn_anchor << ", for duration: " << to_string(Ships::Database[shipClass].RespawnTime) << "\n";

@@ -227,9 +227,9 @@ bool epriv::MeshLoader::IsSpecialFloat(const glm::vec3& v) {
     return false;
 }
 bool epriv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts, vector<glm::vec2>& uvs, vector<glm::vec3>& norms, unsigned short& result, const float& threshold) {
-    for (auto t = 0; t < pts.size(); ++t) {
+    for (size_t t = 0; t < pts.size(); ++t) {
         if (IsNear(in_pos, pts[t], threshold) && IsNear(in_uv, uvs[t], threshold) && IsNear(in_norm, norms[t], threshold)) {
-            result = t;
+            result = static_cast<unsigned short>(t);
             return true;
         }
     }
@@ -241,10 +241,10 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
     const auto pointsSize(data.points.size());
     data.tangents.reserve(data.normals.size());
     data.binormals.reserve(data.normals.size());
-    for (auto i = 0; i < pointsSize; i += 3) {
-        const auto p0(i + 0);
-        const auto p1(i + 1);
-        const auto p2(i + 2);
+    for (size_t i = 0; i < pointsSize; i += 3) {
+        const size_t p0(i + 0);
+        const size_t p1(i + 1);
+        const size_t p2(i + 2);
 
         glm::vec3 point1, point2, point3;
         glm::vec2 uv1, uv2, uv3;
@@ -295,8 +295,8 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
         bitangent.z = (w.z * sx - v.z * tx) * dirCorrection;
 
         // store for every vertex of that face
-        for (uint b = 0; b < 3; ++b) {
-            uint p;
+        for (size_t b = 0; b < 3; ++b) {
+            size_t p;
             glm::vec3 normal;
             if (b == 0)      p = p0;
             else if (b == 1) p = p1;
@@ -314,8 +314,8 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
             localBitangent = glm::normalize(localBitangent);
 
             // reconstruct tangent/bitangent according to normal and bitangent/tangent when it's infinite or NaN.
-            bool invalid_tangent   = IsSpecialFloat(localTangent);
-            bool invalid_bitangent = IsSpecialFloat(localBitangent);
+            const bool invalid_tangent   = IsSpecialFloat(localTangent);
+            const bool invalid_bitangent = IsSpecialFloat(localBitangent);
             if (invalid_tangent != invalid_bitangent) {
                 if (invalid_tangent) localTangent   = glm::normalize(glm::cross(normal, localBitangent));
                 else                 localBitangent = glm::normalize(glm::cross(localTangent, normal));
@@ -324,7 +324,7 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
             data.binormals.push_back(localBitangent);
         }
     }
-    for (auto i = 0; i < data.points.size(); ++i) {
+    for (size_t i = 0; i < data.points.size(); ++i) {
         //hmm.. should b and t be swapped here?
         auto& n = data.normals[i];
         auto& b = data.tangents[i];
@@ -443,7 +443,7 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
 void epriv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
     ofstream stream(filename, ios::binary);
 
-    vector<vector<uint>> _indices;
+    vector<vector<size_t>> _indices;
     _indices.resize(3);
 
     //header - should only be 3 entries, one for m_Vertices , one for m_Indices, and one to tell if animation data is present or not
@@ -455,7 +455,7 @@ void epriv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
     }else{
         sizes[2] = 0;
     }
-    for (uint i = 0; i < 3; ++i) {
+    for (size_t i = 0; i < 3; ++i) {
         writeUint32tBigEndian(sizes[i], stream);
     }
     const auto& positions   = data.getData<glm::vec3>(0);
@@ -529,7 +529,7 @@ void epriv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
         }
     }
     //indices
-    for (uint i = 0; i < sizes[1]; ++i) {
+    for (size_t i = 0; i < sizes[1]; ++i) {
         uint16_t _ind = data.indices[i];
         writeUint16tBigEndian(_ind, stream);
     }

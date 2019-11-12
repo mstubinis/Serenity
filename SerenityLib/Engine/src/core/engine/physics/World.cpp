@@ -1,21 +1,8 @@
 #include <core/engine/physics/World.h>
 #include <core/engine/physics/DebugDrawer.h>
-#include <core/engine/math/Engine_Math.h>
+#include <core/engine/utils/Utils.h>
 
-#include <BulletCollision/Gimpact/btCompoundFromGimpact.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
-#include <BulletCollision/Gimpact/btGImpactShape.h>
-
-#include <BulletCollision/CollisionShapes/btShapeHull.h>
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <BulletCollision/CollisionShapes/btConvexPolyhedron.h>
-#include <BulletCollision/CollisionShapes/btUniformScalingShape.h>
-#include <BulletCollision/CollisionShapes/btSphereShape.h>
-#include <BulletCollision/CollisionShapes/btConeShape.h>
-#include <BulletCollision/CollisionShapes/btCapsuleShape.h>
-#include <BulletCollision/CollisionShapes/btCylinderShape.h>
-#include <BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h>
-#include <BulletCollision/CollisionShapes/btMultiSphereShape.h>
 
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
@@ -24,16 +11,11 @@
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMT.h>
 
-#include <iostream>
-
 using namespace std;
 using namespace Engine;
 
-void _preTicCallback(btDynamicsWorld* world, btScalar timeStep) {
-}
-void _postTicCallback(btDynamicsWorld* world, btScalar timeStep) {
-}
-
+void _preTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
+void _postTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
 epriv::PhysicsWorld::PhysicsWorld(const unsigned int numCores) {
     broadphase             = new btDbvtBroadphase();
     collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -50,7 +32,7 @@ epriv::PhysicsWorld::PhysicsWorld(const unsigned int numCores) {
     debugDrawer = new GLDebugDrawer();
     debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
     world->setDebugDrawer(debugDrawer);
-    world->setGravity(btVector3(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0)));
+    world->setGravity(btVector3(static_cast<btScalar>(0.0), static_cast<btScalar>(0.0), static_cast<btScalar>(0.0)));
     btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher);
     world->setInternalTickCallback(_preTicCallback, (void*)world, true);
     world->setInternalTickCallback(_postTicCallback, (void*)world, false);

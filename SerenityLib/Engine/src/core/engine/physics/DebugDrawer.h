@@ -2,12 +2,14 @@
 #ifndef ENGINE_PHYSICS_DEBUG_DRAWER_H
 #define ENGINE_PHYSICS_DEBUG_DRAWER_H
 
-#include <core/engine/utils/Utils.h>
+#include <core/engine/math/Numbers.h> //do NOT move this, needed to maintain bullet double precision
 #include <core/engine/events/Engine_EventObject.h>
 #include <BulletCollision/CollisionShapes/btTriangleCallback.h>
 #include <LinearMath/btVector3.h>
 #include <LinearMath/btTransform.h>
 #include <LinearMath/btIDebugDraw.h>
+
+#include <glm/vec3.hpp>
 
 #include <vector>
 

@@ -229,15 +229,15 @@ void Client::update(Client* _client, const double& dt) {
             p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
             client.send_udp(p);
 
-            auto playerPos = playerShip.getPosition();
-            auto nearestAnchorPos = finalAnchor->getPosition();
+            auto playerPos = glm::vec3(playerShip.getPosition());
+            auto nearestAnchorPos = glm::vec3(finalAnchor->getPosition());
             double distFromMeToNearestAnchor = static_cast<double>(glm::distance2(nearestAnchorPos, playerPos));
 
             if (distFromMeToNearestAnchor > DISTANCE_CHECK_NEAREST_ANCHOR) {
                 for (auto& otherShips : map.getShips()) {
                     if (otherShips.first != playerShip.getName()) {
-                        auto otherPlayerPos = otherShips.second->getPosition();
-                        double distFromMeToOtherPlayerSq = static_cast<double>(glm::distance2(otherPlayerPos, playerPos));
+                        auto otherPlayerPos = glm::vec3(otherShips.second->getPosition());
+                        auto distFromMeToOtherPlayerSq = glm::distance2(otherPlayerPos, playerPos);
                         const auto calc = (distFromMeToNearestAnchor - DISTANCE_CHECK_NEAREST_ANCHOR) * 0.5f;
                         if (distFromMeToOtherPlayerSq < glm::max(calc, DISTANCE_CHECK_NEAREST_OTHER_PLAYER)) {
                             const glm::vec3 midpoint = Math::midpoint(otherPlayerPos, playerPos);

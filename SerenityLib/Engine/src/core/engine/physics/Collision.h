@@ -2,9 +2,10 @@
 #ifndef ENGINE_PHYSICS_COLLISION_H
 #define ENGINE_PHYSICS_COLLISION_H
 
-#include <core/engine/utils/Utils.h>
+#include <core/engine/math/Numbers.h>
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <LinearMath/btVector3.h>
+#include <vector>
 
 class  btCollisionShape;
 class  Mesh;
@@ -12,7 +13,6 @@ class  ModelInstance;
 class  ComponentModel;
 class  ComponentBody;
 class  btHeightfieldTerrainShape;
-
 class Collision final {
     private:
         CollisionType::Type   m_Type;
@@ -33,13 +33,11 @@ class Collision final {
         Collision(Collision&& other) noexcept;
         Collision& operator=(Collision&& other) noexcept;
 
-
         ~Collision();
 
         void setMass(const float mass);
         const btVector3& getBtInertia() const;
         btCollisionShape* getBtShape() const;
-        const uint getType() const;
+        const unsigned int& getType() const;
 };
-
 #endif

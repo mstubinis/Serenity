@@ -2,8 +2,6 @@
 #ifndef ENGINE_PHYSICS_WORLD_H
 #define ENGINE_PHYSICS_WORLD_H
 
-#include <core/engine/utils/Utils.h>
-
 class btSequentialImpulseConstraintSolverMt;
 class btSequentialImpulseConstraintSolver;
 class btDefaultCollisionConfiguration;
@@ -37,6 +35,4 @@ namespace Engine {
         };
     };
 };
-
-
 #endif

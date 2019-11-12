@@ -2,6 +2,8 @@
 #ifndef GAME_SHIP_H
 #define GAME_SHIP_H
 
+#include <unordered_map>
+
 #include <ecs/Components.h>
 #include <glm/vec2.hpp>
 #include <core/engine/utils/Utils.h>
@@ -108,28 +110,28 @@ class Ship: public EntityWrapper, public EventObserver {
         std::vector<std::tuple<Decal*,size_t>>                                    m_DamageDecals;
 
 
-        //unsigned int                         m_Flags;
-        ShipState::State                     m_State;
+        //unsigned int                                 m_Flags;
+        ShipState::State                               m_State;
 
-        double                               m_DestructionTimerCurrent;
-        double                               m_DestructionTimerDecalTimer;
-        double                               m_DestructionTimerDecalTimerMax;
-        double                               m_DestructionTimerMax;
-        double                               m_RespawnTimer;
-        double                               m_RespawnTimerMax;
+        double                                         m_DestructionTimerCurrent;
+        double                                         m_DestructionTimerDecalTimer;
+        double                                         m_DestructionTimerDecalTimerMax;
+        double                                         m_DestructionTimerMax;
+        double                                         m_RespawnTimer;
+        double                                         m_RespawnTimerMax;
 
-        Team&                                m_Team;
-        Client&                              m_Client;
-        std::unordered_map<uint,ShipSystem*> m_ShipSystems;
-        AI*                                  m_AI;
-        GameCamera*                          m_PlayerCamera;
-		glm::dvec2                           m_MouseFactor;
-        bool                                 m_IsWarping;
-        float                                m_WarpFactor;
-        std::string                          m_ShipClass;
-        std::string                          m_MapKey;
-        std::vector<glm::vec3>               m_AimPositionDefaults;
-        glm::vec3                            m_CameraOffsetDefault;
+        Team&                                          m_Team;
+        Client&                                        m_Client;
+        std::unordered_map<unsigned int,ShipSystem*>   m_ShipSystems;
+        AI*                                            m_AI;
+        GameCamera*                                    m_PlayerCamera;
+		glm::dvec2                                     m_MouseFactor;
+        bool                                           m_IsWarping;
+        float                                          m_WarpFactor;
+        std::string                                    m_ShipClass;
+        std::string                                    m_MapKey;
+        std::vector<glm::vec3>                         m_AimPositionDefaults;
+        glm::vec3                                      m_CameraOffsetDefault;
     public:
         Ship(
             Team& team,

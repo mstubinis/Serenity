@@ -1,4 +1,3 @@
-
 USE_LOG_DEPTH_VERTEX
 
 layout (location = 0) in vec3 position;
@@ -12,12 +11,12 @@ layout (location = 6) in vec4 Weights;
 uniform mat4 Model;
 uniform int nSamples;
 
-uniform vec4 VertDataMisc1;         //xyz = camPos,                              w = lightDir.x
-uniform vec4 VertDataMisc2;         //x = camHeight, y = camHeight2, z = UNUSED, w = lightDir.y
-uniform vec4 VertDataMisc3;         //xyz = v3InvWaveLength,                     w = lightDir.z
-uniform vec4 VertDataScale;         //fScale,fScaledepth,fScaleOverScaleDepth,fSamples
-uniform vec4 VertDataRadius;        //out, out2, inn, inn2
-uniform vec4 VertDatafK;            //fKrESun,fKmESun,fKr4PI,fKm4PI
+uniform vec4 VertDataMisc1;
+uniform vec4 VertDataMisc2;
+uniform vec4 VertDataMisc3;
+uniform vec4 VertDataScale;
+uniform vec4 VertDataRadius;
+uniform vec4 VertDatafK;
 
 varying vec3 c0;
 varying vec3 c1;

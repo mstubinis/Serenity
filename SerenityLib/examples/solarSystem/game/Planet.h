@@ -5,6 +5,7 @@
 #include <ecs/Components.h>
 #include <ecs/EntityWrapper.h>
 #include <core/engine/resources/Handle.h>
+#include <unordered_map>
 
 class SunLight;
 class Ring;

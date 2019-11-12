@@ -25,8 +25,8 @@ template<typename T> class Freelist {
             for (size_t i = 0; i < _capacity; ++i) {
                 m_Items.push_back(nullptr);
             }
-            for (int i = _capacity - 1; i >= 0; --i) {
-                m_Freelist.push(i);
+            for (int i = static_cast<int>(_capacity) - 1; i >= 0; --i) {
+                m_Freelist.push(static_cast<unsigned int>(i));
             }
         }
         const size_t& size() const {
@@ -51,7 +51,7 @@ template<typename T> class Freelist {
                 if (m_Items[i] == data) {
                     delete m_Items[i];
                     m_Items[i] = nullptr;
-                    m_Freelist.push(i);
+                    m_Freelist.push(static_cast<unsigned int>(i));
                     --m_Size;
                     return true;
                 }

@@ -58,9 +58,8 @@ void TargetRedicule::render() {
             string stringRepresentation = "";
             if (distanceInKm > 0) {
                 stringRepresentation = convertNumToNumWithCommas(unsigned long long(distanceInKm)) + " Km";
-            }
-            else {
-                float distanceInm = (targetBody.getDistance(player->entity())) * 100.0f;
+            }else{
+                auto distanceInm = (targetBody.getDistance(player->entity())) * 100.0f;
                 stringRepresentation = to_string(uint(distanceInm)) + " m";
             }
             m_Font.renderText(name + "\n" + stringRepresentation, glm::vec2(pos.x + 20, pos.y + 20), glm::vec4(1, 1, 0, 1), 0, glm::vec2(0.7f, 0.7f), 0.1f);
