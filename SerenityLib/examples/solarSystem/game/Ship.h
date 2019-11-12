@@ -11,6 +11,7 @@
 #include "ai/AIIncludes.h"
 
 #include "ships/shipSystems/ShipSystemBaseClass.h"
+#include <ecs/EntityWrapper.h>
 
 #define WARP_PHYSICS_MODIFIER 1.333333333f
 #define PHYSICS_PACKET_TIMER_LIMIT 0.25

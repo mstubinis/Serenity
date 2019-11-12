@@ -3,19 +3,15 @@
 #define ENGINE_ECS_COMPONENT_MODEL_H
 
 #include <ecs/ComponentBaseClass.h>
-#include <ecs/ECSSystem.h>
-
-#include <core/engine/events/Engine_EventObject.h>
-#include <core/ModelInstance.h>
+#include <ecs/ECSSystemConstructorInfo.h>
+#include <core/engine/model/ModelInstance.h>
 
 struct Handle;
 class  ShaderProgram;
 class  Mesh;
 class  Material;
-
 class  ComponentModel;
 class  ComponentCamera;
-
 namespace Engine {
     namespace epriv {
         struct ComponentModel_UpdateFunction;
@@ -97,10 +93,10 @@ class ComponentModel: public ComponentBaseClass {
         }
 };
 
-class ComponentModel_System : public Engine::epriv::ECSSystemCI {
+class ComponentModel_System_CI : public Engine::epriv::ECSSystemCI {
     public:
-        ComponentModel_System();
-        ~ComponentModel_System() = default;
+        ComponentModel_System_CI();
+        ~ComponentModel_System_CI() = default;
 };
 
 #endif

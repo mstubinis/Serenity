@@ -8,7 +8,7 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 #include <core/engine/scene/Scene.h>
 
 // ecs

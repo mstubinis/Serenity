@@ -1,9 +1,8 @@
 #include <core/engine/scene/Scene.h>
 #include <core/engine/lights/Lights.h>
-#include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/Engine.h>
 #include <core/engine/math/Engine_Math.h>
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/scene/Viewport.h>
@@ -62,14 +61,14 @@ struct Scene::impl final {
         ++InternalScenePublicInterface::NumScenes;
         m_ID = InternalScenePublicInterface::NumScenes;   
 
-        m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System());
-        m_ECS.assignSystem<ComponentBody>  (ComponentBody_System());
-        m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System());
-        m_ECS.assignSystem<ComponentCamera>(ComponentCamera_System());
-        m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System());
-        m_ECS.assignSystem<ComponentModel> (ComponentModel_System());
-        m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System());
-        m_ECS.assignSystem<ComponentName>  (ComponentName_System());
+        m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI());
+        m_ECS.assignSystem<ComponentBody>  (ComponentBody_System_CI());
+        m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System_CI());
+        m_ECS.assignSystem<ComponentCamera>(ComponentCamera_System_CI());
+        m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System_CI());
+        m_ECS.assignSystem<ComponentModel> (ComponentModel_System_CI());
+        m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System_CI());
+        m_ECS.assignSystem<ComponentName>  (ComponentName_System_CI());
     }
     void _destruct() {
         SAFE_DELETE(m_Skybox);

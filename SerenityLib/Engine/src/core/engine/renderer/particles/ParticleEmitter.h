@@ -3,7 +3,7 @@
 #define ENGINE_RENDERER_PARTICLE_EMITTER_H
 
 #include <core/engine/renderer/particles/Particle.h>
-#include <ecs/Entity.h>
+#include <ecs/EntityWrapper.h>
 #include <vector>
 #include <mutex>
 
@@ -68,8 +68,8 @@ class ParticleEmitter final : public EntityWrapper{
 
         void setProperties(ParticleEmissionProperties& properties);
 
-        void update(const unsigned int& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem);
-        void update_multithreaded(const unsigned int& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem);
+        void update(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem);
+        void update_multithreaded(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem);
 };
 
 #endif

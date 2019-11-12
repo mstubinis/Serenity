@@ -1,26 +1,19 @@
 #pragma once
-#ifndef ENGINE_SCENE_H
-#define ENGINE_SCENE_H
+#ifndef ENGINE_SCENE_H_INCLUDE_GUARD
+#define ENGINE_SCENE_H_INCLUDE_GUARD
 
 #include <core/engine/renderer/RendererIncludes.h>
 #include <core/engine/resources/Engine_ResourceBasic.h>
 #include <core/engine/events/Engine_EventObject.h>
-#include <vector>
-#include <glm/vec4.hpp>
-#include <glm/vec3.hpp>
-
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 
 class  Camera;
-
 class  SunLight;
 class  DirectionalLight;
 class  PointLight;
 class  SpotLight;
 class  RodLight;
 class  ShaderProgram;
-
 class  Viewport;
 class  Skybox;
 class  ModelInstance;
@@ -47,11 +40,11 @@ class Scene: public EngineResource, public EventObserver{
         virtual void onResize(const unsigned int& width, const unsigned int& height);
 
         template<typename T> void setOnUpdateFunctor(const T& functor) {
-            m_OnUpdateFunctor = boost::bind<void>(functor, this, _1);
+            m_OnUpdateFunctor = std::bind<void>(functor, this, std::placeholders::_1);
         }
     private:
         struct impl; std::unique_ptr<impl>   m_i;
-        boost::function<void(const double&)> m_OnUpdateFunctor;
+        std::function<void(const double&)> m_OnUpdateFunctor;
     public:
         Scene(const std::string& name);
         virtual ~Scene();

@@ -196,6 +196,12 @@
     <Filter Include="Source Files\Engine\Core\Renderer\particles">
       <UniqueIdentifier>{d23e9a0a-0ee7-4f0b-96ba-bf4ced4223e8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Model">
+      <UniqueIdentifier>{a6115fc1-3416-4b9b-9aaa-25c6fee15cec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Model">
+      <UniqueIdentifier>{507f5eab-86ea-44d3-9262-24d581e2f567}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -486,13 +492,7 @@
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\Extensions.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\ModelInstance.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\physics\Collision.h">
-      <Filter>Header Files\Engine\Core\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\physics\PhysicsEnums.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h">
@@ -605,6 +605,24 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\renderer\particles\ParticleSystem.h">
       <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\model\ModelInstance.h">
+      <Filter>Header Files\Engine\Core\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\model\ModelInstanceIncludes.h">
+      <Filter>Header Files\Engine\Core\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\scene\ViewportIncludes.h">
+      <Filter>Header Files\Engine\Core\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\EntityWrapper.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\ECSSystemConstructorInfo.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\physics\PhysicsIncludes.h">
+      <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -833,9 +851,6 @@
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\Extensions.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\ModelInstance.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\physics\Collision.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
@@ -922,6 +937,15 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\particles\ParticleSystem.cpp">
       <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\model\ModelInstance.cpp">
+      <Filter>Source Files\Engine\Core\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\ecs\EntityWrapper.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\ecs\ComponentBaseClass.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

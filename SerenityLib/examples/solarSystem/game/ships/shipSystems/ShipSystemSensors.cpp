@@ -15,7 +15,8 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Camera.h>
-#include <core/engine/sounds/Engine_Sounds.h>
+//#include <core/engine/sounds/Engine_Sounds.h>
+#include <core/engine/Engine.h>
 #include <glm/gtx/norm.hpp>
 
 using namespace Engine;

@@ -3,12 +3,11 @@
 #define ENGINE_BINDABLE_RESOURCE_H
 
 #include <core/engine/resources/Engine_ResourceBasic.h>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 
 class BindableResource: public EngineResource{
     private:
-        boost::function<void()> m_CustomBindFunctor, m_CustomUnbindFunctor;
+        std::function<void()> m_CustomBindFunctor, m_CustomUnbindFunctor;
     public:
         BindableResource(const ResourceType::Type& type, const std::string& name = "");
         virtual ~BindableResource();
@@ -16,7 +15,11 @@ class BindableResource: public EngineResource{
         virtual void bind();
         virtual void unbind();
 
-        template<class T> void setCustomBindFunctor  (const T& functor){ m_CustomBindFunctor   = boost::bind<void>(functor,this); }
-        template<class T> void setCustomUnbindFunctor(const T& functor){ m_CustomUnbindFunctor = boost::bind<void>(functor,this); }
+        template<class T> void setCustomBindFunctor  (const T& functor){ 
+            m_CustomBindFunctor   = std::bind<void>(functor, this); 
+        }
+        template<class T> void setCustomUnbindFunctor(const T& functor){ 
+            m_CustomUnbindFunctor = std::bind<void>(functor, this); 
+        }
 };
 #endif

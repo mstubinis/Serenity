@@ -1,6 +1,7 @@
 #include <core/engine/renderer/pipelines/DeferredPipeline.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
+#include <core/engine/Engine.h>
 #include <core/engine/lights/Lights.h>
 #include <core/engine/resources/Engine_BuiltInResources.h>
 #include <core/engine/mesh/Mesh.h>

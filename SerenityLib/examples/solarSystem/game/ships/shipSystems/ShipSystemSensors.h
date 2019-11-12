@@ -3,7 +3,7 @@
 #define GAME_SHIP_SYSTEM_SENSORS_H
 
 #include "ShipSystemBaseClass.h"
-#include <ecs/Entity.h>
+#include <ecs/EntityWrapper.h>
 #include <core/engine/scene/Viewport.h>
 
 class Map;

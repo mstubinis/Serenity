@@ -4,6 +4,7 @@
 
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
+#include <core/engine/Engine.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
 
 #include <iostream>

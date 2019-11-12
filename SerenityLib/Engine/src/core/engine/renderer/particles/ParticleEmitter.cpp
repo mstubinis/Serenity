@@ -1,6 +1,7 @@
 #include <core/engine/renderer/particles/ParticleSystem.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/renderer/particles/ParticleEmissionProperties.h>
+#include <core/engine/resources/Engine_Resources.h>
 #include <ecs/ComponentBody.h>
 #include <ecs/ComponentModel.h>
 
@@ -86,7 +87,7 @@ void ParticleEmitter::setProperties(ParticleEmissionProperties& properties) {
 }
 
 
-void ParticleEmitter::update_multithreaded(const unsigned int& index, const double& dt, epriv::ParticleSystem& particleSystem) {
+void ParticleEmitter::update_multithreaded(const size_t& index, const double& dt, epriv::ParticleSystem& particleSystem) {
     //handle spawning
     if (m_Active) {
         m_Timer += dt;
@@ -107,7 +108,7 @@ void ParticleEmitter::update_multithreaded(const unsigned int& index, const doub
         }
     }
 }
-void ParticleEmitter::update(const unsigned int& index, const double& dt, epriv::ParticleSystem& particleSystem) {
+void ParticleEmitter::update(const size_t& index, const double& dt, epriv::ParticleSystem& particleSystem) {
     //handle spawning
     if (m_Active) {
         m_Timer += dt;

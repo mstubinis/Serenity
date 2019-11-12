@@ -1,5 +1,5 @@
 #include <core/engine/renderer/Decal.h>
-
+#include <core/engine/Engine.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/mesh/Mesh.h>
@@ -25,7 +25,7 @@ namespace Engine {
             auto& body = *(parent.getComponent<ComponentBody>());
             glm::mat4 parentModel = body.modelMatrix();
 
-            auto& renderMgr = Core::m_Engine->m_RenderManager;
+            auto& renderMgr = epriv::Core::m_Engine->m_RenderManager;
             auto maxTextures = renderMgr.OpenGLStateMachine.getMaxTextureUnits() - 1;
             auto& gbuffer = renderMgr.getGbuffer();
             Renderer::sendTextureSafe("gDepthMap", gbuffer.getTexture(GBufferType::Depth), maxTextures);

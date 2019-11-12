@@ -3,11 +3,7 @@
 #define ENGINE_ECS_COMPONENT_CAMERA_H
 
 #include <ecs/ComponentBaseClass.h>
-#include <ecs/ECSSystem.h>
-
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
+#include <ecs/ECSSystemConstructorInfo.h>
 
 class Camera;
 class ComponentModel;
@@ -95,10 +91,10 @@ class ComponentCamera : public ComponentBaseClass {
 		const uint sphereIntersectTest(const glm_vec3& objectPosition, const float& objectRadius) const;
 };
 
-class ComponentCamera_System : public Engine::epriv::ECSSystemCI {
+class ComponentCamera_System_CI : public Engine::epriv::ECSSystemCI {
     public:
-        ComponentCamera_System();
-        ~ComponentCamera_System() = default;
+        ComponentCamera_System_CI();
+        ~ComponentCamera_System_CI() = default;
 };
 
 #endif

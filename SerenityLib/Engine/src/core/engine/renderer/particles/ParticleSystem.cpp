@@ -29,14 +29,7 @@ void epriv::ParticleSystem::internal_update_emitters(const double& dt) {
         return;
 
     //TODO: determine when the overhead for creating the threading calls will out-perform the single core call for not so many emitters on the screen
-
-    /*
-    for (size_t j = 0; j < m_ParticleEmitters.size(); ++j) {
-        auto& emitter = m_ParticleEmitters[j];
-        emitter.update(j, dt, *this);
-    }
-    */
-    auto lamda_update_emitters = [&](pair<unsigned int, unsigned int>& pair_) {
+    auto lamda_update_emitters = [&](pair<size_t, size_t>& pair_) {
         for (size_t j = pair_.first; j <= pair_.second; ++j) {
             m_ParticleEmitters[j].update_multithreaded(j, dt, *this);
         }
@@ -50,7 +43,7 @@ void epriv::ParticleSystem::internal_update_emitters(const double& dt) {
 void epriv::ParticleSystem::internal_update_particles(const double& dt) {
     if (m_Particles.size() == 0)
         return;
-    auto lamda_update_particles = [&](pair<unsigned int, unsigned int>& pair_) {
+    auto lamda_update_particles = [&](pair<size_t, size_t>& pair_) {
         for (size_t j = pair_.first; j <= pair_.second; ++j) {
             m_Particles[j].update_multithreaded(j, dt, *this);
         }
@@ -107,7 +100,7 @@ void epriv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuff
     vector<Particle> seen;
     seen.reserve(m_Particles.size());
 
-    auto lamda_culler = [&](pair<unsigned int, unsigned int>& pair_) {
+    auto lamda_culler = [&](pair<size_t, size_t>& pair_) {
         for (size_t j = pair_.first; j <= pair_.second; ++j) {
             auto& particle = m_Particles[j];
             const float radius = Mesh::Plane->getRadius() * Math::Max(particle.m_Data.m_Scale.x, particle.m_Data.m_Scale.y);

@@ -5,6 +5,7 @@
 #include <ecs/Components.h>
 #include <SFML/System.hpp>
 #include <core/engine/events/Engine_EventObject.h>
+#include <ecs/EntityWrapper.h>
 
 namespace sf{ 
     class Image;

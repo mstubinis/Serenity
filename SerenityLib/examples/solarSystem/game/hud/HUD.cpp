@@ -14,6 +14,7 @@
 #include <core/engine/materials/MaterialLayer.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/fonts/Font.h>
+#include <core/engine/Engine.h>
 
 using namespace std;
 using namespace Engine;

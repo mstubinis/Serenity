@@ -6,7 +6,10 @@
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/Engine.h>
+#include <core/engine/physics/Collision.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
+#include <BulletDynamics/Dynamics/btRigidBody.h>
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"

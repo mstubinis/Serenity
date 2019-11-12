@@ -94,7 +94,7 @@ struct epriv::ComponentLogic2_SceneLeftFunction final {void operator()(void* _co
 
 }};
 
-ComponentLogic2_System::ComponentLogic2_System() {
+ComponentLogic2_System_CI::ComponentLogic2_System_CI() {
     setUpdateFunction(ComponentLogic2_UpdateFunction());
     setOnComponentAddedToEntityFunction(ComponentLogic2_ComponentAddedToEntityFunction());
     setOnEntityAddedToSceneFunction(ComponentLogic2_EntityAddedToSceneFunction());

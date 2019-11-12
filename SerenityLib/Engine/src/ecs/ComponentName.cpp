@@ -41,7 +41,7 @@ struct epriv::ComponentName_SceneEnteredFunction final {void operator()(void* _c
 struct epriv::ComponentName_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 }};
 
-ComponentName_System::ComponentName_System() {
+ComponentName_System_CI::ComponentName_System_CI() {
     setUpdateFunction(ComponentName_UpdateFunction());
     setOnComponentAddedToEntityFunction(ComponentName_ComponentAddedToEntityFunction());
     setOnEntityAddedToSceneFunction(ComponentName_EntityAddedToSceneFunction());

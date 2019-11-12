@@ -7,15 +7,17 @@
 #include "../../Helper.h"
 #include "../../ships/Ships.h"
 
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 #include <ecs/Components.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/physics/Collision.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <BulletDynamics/Dynamics/btRigidBody.h>
 
 using namespace Engine;
 using namespace std;
@@ -389,11 +391,11 @@ void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec
     }
     */
 }
-void ShipSystemShields::receiveHitBleedDamage(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide) {
+void ShipSystemShields::receiveHitBleedDamage(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float damage, const uint shieldSide) {
     auto* hull = static_cast<ShipSystemHull*>(m_Ship.getShipSystem(ShipSystemType::Hull));
     m_HealthPointsCurrent[shieldSide] = 0.0f;
     if (hull) {
-        hull->receiveHit(impactNormal, impactLocation, impactRadius, maxTime, damage, 0); //0 is hard coded model index, but there should not be hull visuals due to bleed damage
+        hull->receiveHit(impactNormal, impactLocation, impactRadius, damage, 0, false, false); //0 is hard coded model index, but there should not be hull visuals due to bleed damage
     }
 }
 

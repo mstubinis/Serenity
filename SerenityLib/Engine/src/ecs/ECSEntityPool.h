@@ -8,11 +8,11 @@
 
 namespace Engine {
     namespace epriv {
-        template<typename E> class ECSEntityPool final{
+        template<typename TEntity> class ECSEntityPool final{
             friend struct Engine::epriv::InternalScenePublicInterface;
             private:
-                std::vector<EntityPOD>    _pool;
-                std::vector<uint>         _freelist;
+                std::vector<EntityPOD>       _pool;
+                std::vector<unsigned int>    _freelist;
             public:
                 ECSEntityPool() {}
                 ~ECSEntityPool() {}
@@ -21,12 +21,12 @@ namespace Engine {
                 ECSEntityPool(ECSEntityPool&& other) noexcept            = delete;
                 ECSEntityPool& operator=(ECSEntityPool&& other) noexcept = delete;
 
-                void destroyFlaggedEntity(const uint& entityID) {
+                void destroyFlaggedEntity(const unsigned int& entityID) {
                     const auto index = entityID - 1;
                     ++_pool[index].versionID;
                     _freelist.emplace_back(index);
                 }
-                E addEntity(const Scene& scene) {
+                TEntity addEntity(const Scene& scene) {
                     if (_freelist.empty()) {
                         _pool.emplace_back(0, 0);
                         _freelist.emplace_back(_pool.size() - 1);
@@ -36,10 +36,10 @@ namespace Engine {
                     EntityPOD& element = _pool[id];
                     element.ID = id + 1;
                     element.sceneID = scene.id();
-                    E entity = E(element.ID, element.sceneID, element.versionID);
+                    TEntity entity = TEntity(element.ID, element.sceneID, element.versionID);
                     return std::move(entity);
                 }
-                EntityPOD* getEntity(const uint& entityData) {
+                EntityPOD* getEntity(const unsigned int& entityData) {
                     if (entityData == 0) {
                         return nullptr;
                     }
@@ -50,7 +50,7 @@ namespace Engine {
                     }
                     return nullptr;
                 }
-                EntityPOD* getEntity(const E& entity) {
+                EntityPOD* getEntity(const TEntity& entity) {
                     return getEntity(entity.data);
                 }
             };

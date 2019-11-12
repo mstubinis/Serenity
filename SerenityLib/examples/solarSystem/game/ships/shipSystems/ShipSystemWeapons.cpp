@@ -8,6 +8,7 @@
 #include <core/engine/lights/Lights.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/physics/Collision.h>
 
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/math/Engine_Math.h>
@@ -693,8 +694,7 @@ void ShipSystemWeapons::update(const double& dt) {
                 if (target_ptr) {
                     if (ship) {
                         target_name = ship->getMapKey();
-                    }
-                    else {
+                    }else{
                         target_name = target_ptr->getComponent<ComponentName>()->name();
                     }
                 }
@@ -708,8 +708,7 @@ void ShipSystemWeapons::update(const double& dt) {
                     if (target_ptr) {
                         if (ship) {
                             target_name = ship->getMapKey();
-                        }
-                        else {
+                        }else{
                             target_name = target_ptr->getComponent<ComponentName>()->name();
                         }
                     }

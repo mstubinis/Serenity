@@ -13,6 +13,7 @@
 #include <memory>
 #include <functional>
 #include <utility>
+#include <thread>
 
 namespace Engine{
 namespace epriv{
@@ -31,16 +32,16 @@ namespace epriv{
 namespace threading{
 
     //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
-    template<typename T> std::vector<std::vector<T>> splitVector(const std::vector<T>& v, size_t n = 0) {
-        if (n == 0)
-            n = Core::m_Engine->m_ThreadManager.cores();
+    template<typename T> std::vector<std::vector<T>> splitVector(const std::vector<T>& v, size_t num_cores = 0) {
+        if (num_cores == 0)
+            num_cores = std::thread::hardware_concurrency();
         const auto vs = v.size();
         std::vector<std::vector<T>> outVec;
-        auto length = vs / n;
-        auto remain = vs % n;
+        auto length = vs / num_cores;
+        auto remain = vs % num_cores;
         size_t begin = 0;
         size_t end = 0;
-        for (auto i = 0; i < std::min(n, vs); ++i) {
+        for (auto i = 0; i < std::min(num_cores, vs); ++i) {
             end += (remain > 0) ? (length + !!(remain--)) : length;
             outVec.emplace_back(v.begin() + begin, v.begin() + end);
             begin = end;
@@ -48,16 +49,16 @@ namespace threading{
         return outVec;
     }
     //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
-    template<typename T> std::vector<std::vector<uint>> splitVectorIndices(const std::vector<T>& v, size_t n = 0) {
-        if (n == 0) 
-            n = Core::m_Engine->m_ThreadManager.cores();
+    template<typename T> std::vector<std::vector<uint>> splitVectorIndices(const std::vector<T>& v, size_t num_cores = 0) {
+        if (num_cores == 0)
+            num_cores = std::thread::hardware_concurrency();
         const auto vs = v.size();
         std::vector<std::vector<uint>> outVec;
-        auto length = vs / n;
-        auto remain = vs % n;
+        auto length = vs / num_cores;
+        auto remain = vs % num_cores;
         size_t begin = 0;
         size_t end = 0;
-        auto splitAmount = std::min(n, vs);
+        auto splitAmount = std::min(num_cores, vs);
         for (auto i = 0; i < splitAmount; ++i) {
             outVec.emplace_back();
             end += (remain > 0) ? (length + !!(remain--)) : length;
@@ -71,21 +72,21 @@ namespace threading{
         return outVec;
     }
     //creates a vector of pairs, each pair contains a start and ending index to iterate over a very large single vector
-    template<typename T> std::vector<std::pair<unsigned int, unsigned int>> splitVectorPairs(const std::vector<T>& v, size_t num_cores = 0) {
+    template<typename T> std::vector<std::pair<size_t, size_t>> splitVectorPairs(const std::vector<T>& v, size_t num_cores = 0) {
         if (num_cores == 0)
-            num_cores = Core::m_Engine->m_ThreadManager.cores();
+            num_cores = std::thread::hardware_concurrency();
         const auto vector_size = v.size();
-        std::vector<std::pair<unsigned int, unsigned int>> outVec;
+        std::vector<std::pair<size_t, size_t>> outVec;
         outVec.reserve(num_cores);
 
-        unsigned int c = (unsigned int)vector_size / num_cores;
-        unsigned int remainder = vector_size % num_cores; /* Likely uses the result of the division. */
+        size_t c = vector_size / num_cores;
+        size_t remainder = vector_size % num_cores; /* Likely uses the result of the division. */
 
         size_t accumulator = 0;
 
-        std::pair<unsigned int, unsigned int> res;
-        unsigned int b;
-        unsigned int e = (num_cores - remainder);
+        std::pair<size_t, size_t> res;
+        size_t b;
+        size_t e = (num_cores - remainder);
         for (size_t i = 0; i < std::min(num_cores, vector_size); ++i) {
             if (c == 0)
                 b = remainder - 1;
@@ -100,14 +101,11 @@ namespace threading{
                 ++e;
             }
             res = std::make_pair(accumulator, b );
-
-
             outVec.push_back(res);
             accumulator += c;
         }
         return outVec;
     }
-
 
 
     void waitForAll();

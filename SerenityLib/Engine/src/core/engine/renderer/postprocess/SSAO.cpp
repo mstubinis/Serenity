@@ -1,6 +1,7 @@
 #include <core/engine/renderer/postprocess/SSAO.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
+#include <core/engine/renderer/Engine_Renderer.h>
 
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/scene/Camera.h>

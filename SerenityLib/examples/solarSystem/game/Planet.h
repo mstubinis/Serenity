@@ -3,6 +3,8 @@
 #define GAME_PLANET_H
 
 #include <ecs/Components.h>
+#include <ecs/EntityWrapper.h>
+#include <core/engine/resources/Handle.h>
 
 class SunLight;
 class Ring;

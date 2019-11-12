@@ -2,14 +2,9 @@
 #ifndef ENGINE_ECS_SPARSE_SET_H
 #define ENGINE_ECS_SPARSE_SET_H
 
-#include <algorithm> //std::swap (until C++11)
-#include <utility>   //std::swap (since C++11)
-#include <core/engine/utils/Utils.h>
+#include <utility>
 #include <ecs/Entity.h>
 
-#include <iostream>
-
-//MAX_ENTITIES = 2097152;
 namespace Engine {
 namespace epriv {
 
@@ -27,10 +22,10 @@ namespace epriv {
                 maxLastIndex = 0;
                 sparse.clear();
             }
-            virtual inline const bool _remove(const uint& entityID) { 
+            virtual inline const bool _remove(const unsigned int& entityID) { 
                 return false;  
             }
-            virtual inline void reserveMore(const uint amount) { 
+            virtual inline void reserveMore(const unsigned int amount) {
             }
     };
     template <typename TID, typename T> class SparseSet<TID, T> : public SparseSet<TID> {
@@ -49,7 +44,7 @@ namespace epriv {
             SparseSet& operator=(SparseSet&& other) noexcept      = delete;
             virtual ~SparseSet()                                  = default;
 
-            inline void reserveMore(const uint amount) {
+            inline void reserveMore(const unsigned int amount) {
                 if (super::sparse.size() > super::sparse.capacity() - 1) {
                     super::sparse.reserve(super::sparse.capacity() + amount);
                 }
@@ -58,7 +53,7 @@ namespace epriv {
                 }
             }
 
-            template<typename... ARGS> inline T* _add(const uint& entityID, ARGS&&... args) {
+            template<typename... ARGS> inline T* _add(const unsigned int& entityID, ARGS&&... args) {
                 const auto sparseIndex = entityID - 1;
                 if (sparseIndex >= super::sparse.size()) {
                     super::sparse.resize(sparseIndex + 1, 0);
@@ -73,7 +68,7 @@ namespace epriv {
                 return ret;
             }
             //TODO: this entire function needs a serious look at
-            inline const bool _remove(const uint& entityID) {
+            inline const bool _remove(const unsigned int& entityID) {
                 const auto removedEntityIndex = entityID - 1;
                 if (removedEntityIndex >= super::sparse.size()) { //needed for scene.removeEntity(), as it iterates over all systems and some might not have the entity in them
                     return false;
@@ -106,7 +101,7 @@ namespace epriv {
                 dense.pop_back();
                 return true;
             }
-            inline T* _get(const uint& entityID) {
+            inline T* _get(const unsigned int& entityID) {
                 const auto entityIndexInSparse = entityID - 1;
                 const auto sparseSize  = super::sparse.size();
                 if (sparseSize == 0 || entityIndexInSparse >= sparseSize || super::sparse[entityIndexInSparse] == 0) {

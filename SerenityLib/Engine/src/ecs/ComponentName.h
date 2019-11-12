@@ -3,6 +3,7 @@
 #define ENGINE_ECS_COMPONENT_NAME_H_INCLUDE_GUARD
 
 #include <ecs/ComponentBaseClass.h>
+#include <ecs/ECSSystemConstructorInfo.h>
 
 namespace Engine {
     namespace epriv {
@@ -13,7 +14,6 @@ namespace Engine {
         struct ComponentName_SceneLeftFunction;
     };
 };
-
 class ComponentName : public ComponentBaseClass {
     friend struct Engine::epriv::ComponentName_UpdateFunction;
     friend struct Engine::epriv::ComponentName_EntityAddedToSceneFunction;
@@ -38,11 +38,10 @@ class ComponentName : public ComponentBaseClass {
 
         ~ComponentName();
 };
-
-class ComponentName_System : public Engine::epriv::ECSSystemCI {
+class ComponentName_System_CI : public Engine::epriv::ECSSystemCI {
     public:
-        ComponentName_System();
-        ~ComponentName_System() = default;
+        ComponentName_System_CI();
+        ~ComponentName_System_CI() = default;
 };
 
 #endif

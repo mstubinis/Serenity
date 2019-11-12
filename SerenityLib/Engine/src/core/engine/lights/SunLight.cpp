@@ -1,4 +1,5 @@
 #include <core/engine/lights/SunLight.h>
+#include <core/engine/resources/Engine_Resources.h>
 
 using namespace Engine;
 using namespace std;

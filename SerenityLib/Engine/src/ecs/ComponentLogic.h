@@ -3,9 +3,7 @@
 #define ENGINE_ECS_COMPONENT_LOGIC_H
 
 #include <ecs/ComponentBaseClass.h>
-#include <ecs/ECSSystem.h>
-
-#include <functional>
+#include <ecs/ECSSystemConstructorInfo.h>
 
 class ComponentLogic;
 namespace Engine {
@@ -60,10 +58,10 @@ class ComponentLogic : public ComponentBaseClass {
         void* getUserPointer2() const;
 };
 
-class ComponentLogic_System : public Engine::epriv::ECSSystemCI {
+class ComponentLogic_System_CI : public Engine::epriv::ECSSystemCI {
     public:
-        ComponentLogic_System();
-        ~ComponentLogic_System() = default;
+        ComponentLogic_System_CI();
+        ~ComponentLogic_System_CI() = default;
 };
 
 #endif

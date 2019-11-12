@@ -7,8 +7,8 @@
 
 #include <core/engine/BindableResource.h>
 #include <core/engine/events/Engine_EventObject.h>
-#include <core/engine/physics/PhysicsEnums.h>
-#include <core/ModelInstance.h>
+#include <core/engine/physics/PhysicsIncludes.h>
+#include <core/engine/model/ModelInstance.h>
 
 #include <unordered_map>
 

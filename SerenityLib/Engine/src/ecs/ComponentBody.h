@@ -3,24 +3,15 @@
 #define ENGINE_ECS_COMPONENT_BODY_H
 
 #include <ecs/ComponentBaseClass.h>
-#include <ecs/ECSSystem.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
-
+#include <ecs/ECSSystemConstructorInfo.h>
+#include <core/engine/physics/PhysicsIncludes.h>
 #include <LinearMath/btDefaultMotionState.h>
-#include <BulletDynamics/Dynamics/btRigidBody.h>
-#include <core/engine/physics/Collision.h>
-
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-
-#include <iostream>
 
 class Collision;
 class ComponentModel;
 class ComponentBody;
 class btCollisionObject;
+class btRigidBody;
 
 struct CollisionCallbackEventData final {
     ComponentBody& ownerBody;
@@ -101,10 +92,9 @@ class ComponentBody : public ComponentBaseClass {
         void* m_UserPointer;
         void* m_UserPointer1;
         void* m_UserPointer2;
-        glm_vec3 m_Forward, m_Right, m_Up, m_Goal, m_GoalVelocity;
-        decimal m_GoalSpeed;
+        glm_vec3 m_Forward, m_Right, m_Up;
 
-        boost::function<void(CollisionCallbackEventData& data)> m_CollisionFunctor;
+        std::function<void(CollisionCallbackEventData& data)> m_CollisionFunctor;
 
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
@@ -119,7 +109,7 @@ class ComponentBody : public ComponentBaseClass {
         ~ComponentBody();
 
         template<typename T> void setCollisionFunctor(const T& functor) {
-            m_CollisionFunctor = boost::bind<void>(functor, _1);
+            m_CollisionFunctor = std::bind<void>(functor, std::placeholders::_1);
         }
         void collisionResponse(CollisionCallbackEventData& data);
 
@@ -127,11 +117,6 @@ class ComponentBody : public ComponentBaseClass {
 
         void removePhysicsFromWorld();
         void addPhysicsToWorld();
-
-        const glm_vec3& getGoal() const;
-        const decimal& getGoalSpeed() const;
-        void setGoal(const glm_vec3& _goal, const decimal& speed = 1.0f);
-        void setGoal(const decimal& x, const decimal& y, const decimal& z, const decimal& speed = 1.0f);
 
         void setInternalPhysicsUserPointer(void* userPtr);
         void setUserPointer(void* userPtr);
@@ -242,10 +227,10 @@ class ComponentBody : public ComponentBaseClass {
         void applyTorqueImpulse(const glm_vec3& torqueImpulse, const bool local = true);
 };
 
-class ComponentBody_System : public Engine::epriv::ECSSystemCI {
+class ComponentBody_System_CI : public Engine::epriv::ECSSystemCI {
     public:
-        ComponentBody_System();
-        ~ComponentBody_System() = default;
+        ComponentBody_System_CI();
+        ~ComponentBody_System_CI() = default;
 };
 
 #endif

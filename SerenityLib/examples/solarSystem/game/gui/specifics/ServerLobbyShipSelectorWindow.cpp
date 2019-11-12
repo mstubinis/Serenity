@@ -1,5 +1,5 @@
 #include "ServerLobbyShipSelectorWindow.h"
-
+#include <core/engine/Engine.h>
 #include <core/engine/fonts/Font.h>
 
 #include <core/engine/resources/Engine_Resources.h>

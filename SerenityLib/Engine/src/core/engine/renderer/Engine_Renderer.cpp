@@ -15,7 +15,7 @@
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/materials/Material.h>
 #include <ecs/ComponentBody.h>

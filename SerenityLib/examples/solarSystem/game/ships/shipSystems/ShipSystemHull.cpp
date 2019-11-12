@@ -9,6 +9,8 @@
 #include <core/engine/renderer/Decal.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
+#include <core/engine/physics/Collision.h>
+#include <BulletDynamics/Dynamics/btRigidBody.h>
 
 #include <ecs/Components.h>
 #include <glm/gtx/norm.hpp>

@@ -1,6 +1,7 @@
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/resources/Engine_Resources.h>
 
 #include <glm/gtx/norm.hpp>
 

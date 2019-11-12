@@ -2,11 +2,10 @@
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/renderer/particles/ParticleEmissionProperties.h>
 #include <core/engine/renderer/particles/ParticleSystem.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/Engine.h>
 #include <core/engine/renderer/GBuffer.h>
 
-#include <core/engine/resources/Engine_Resources.h>
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/mesh/Mesh.h>

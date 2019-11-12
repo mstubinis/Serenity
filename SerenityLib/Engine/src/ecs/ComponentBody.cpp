@@ -2,9 +2,11 @@
 #include <ecs/ComponentModel.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/scene/Camera.h>
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/physics/Collision.h>
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
@@ -124,8 +126,6 @@ ComponentBody::NormalData::~NormalData() {
 #pragma region Component
 
 ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Entity) {
-    m_GoalSpeed               = static_cast<decimal>(1.0);
-    m_Goal = m_GoalVelocity   = glm_vec3(static_cast<decimal>(0.0));
     m_Physics                 = false;
     m_UserPointer             = nullptr;
     m_UserPointer1            = nullptr;
@@ -146,8 +146,6 @@ ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Enti
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
 }
 ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p_CollisionType) : ComponentBaseClass(p_Entity) {
-    m_GoalSpeed             = static_cast<decimal>(1.0);
-    m_Goal = m_GoalVelocity = glm_vec3(static_cast<decimal>(0.0));
     m_Physics               = true;
     m_UserPointer           = nullptr;
     m_UserPointer1          = nullptr;
@@ -185,8 +183,6 @@ ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
     swap(m_UserPointer, p_Other.m_UserPointer);
     swap(m_UserPointer1, p_Other.m_UserPointer1);
     swap(m_UserPointer2, p_Other.m_UserPointer2);
-    swap(m_Goal, p_Other.m_Goal);
-    swap(m_GoalSpeed, p_Other.m_GoalSpeed);
     if (p_Other.m_Physics) {
         swap(data.p, p_Other.data.p);
 		p_Other.data.p = nullptr;
@@ -208,8 +204,6 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& p_Other) noexcept {
     swap(m_UserPointer, p_Other.m_UserPointer);
     swap(m_UserPointer1, p_Other.m_UserPointer1);
     swap(m_UserPointer2, p_Other.m_UserPointer2);
-    swap(m_Goal, p_Other.m_Goal);
-    swap(m_GoalSpeed, p_Other.m_GoalSpeed);
     if (p_Other.m_Physics) {
         swap(data.p, p_Other.data.p);
     }else{
@@ -259,20 +253,6 @@ void ComponentBody::removePhysicsFromWorld() {
 void ComponentBody::addPhysicsToWorld() {
     Physics::addRigidBody(*this);
 }
-const decimal& ComponentBody::getGoalSpeed() const {
-    return m_GoalSpeed;
-}
-const glm_vec3& ComponentBody::getGoal() const {
-    return m_Goal;
-}
-void ComponentBody::setGoal(const glm_vec3& _goal, const decimal& speed) {
-    m_Goal      = _goal;
-    m_GoalSpeed = speed;
-}
-void ComponentBody::setGoal(const decimal& x, const decimal& y, const decimal& z, const decimal& speed) {
-    m_Goal.x    = x; m_Goal.y = y; m_Goal.z = z;
-    m_GoalSpeed = speed;
-}
 const bool& ComponentBody::hasPhysics() const {
     return m_Physics;
 }
@@ -295,9 +275,7 @@ void* ComponentBody::getUserPointer2() {
     return m_UserPointer2;
 }
 void ComponentBody::collisionResponse(CollisionCallbackEventData& data) {
-    if (m_CollisionFunctor.vtable && !m_CollisionFunctor.empty()) { //hacky, but needed for some reason...
-        m_CollisionFunctor( std::ref(data) );
-    }
+    m_CollisionFunctor( std::ref(data) );
 }
 const ushort ComponentBody::getCollisionGroup() const {
     if (m_Physics) {
@@ -1101,52 +1079,30 @@ void ComponentBody::setMass(const float p_Mass) {
 #pragma region System
 
 struct epriv::ComponentBody_UpdateFunction final {
-    static void _defaultUpdate(const vector<uint>& p_Vector, vector<ComponentBody>& p_Components, const float& dt) {
-        for (uint j = 0; j < p_Vector.size(); ++j) {
-            ComponentBody& b = p_Components[p_Vector[j]];
-            const auto pos = b.position();
-            //TODO: goals need to be properly tested and fixed
-            const auto zero = glm_vec3(0.0);
-            if (b.m_Goal != zero){
-                if (glm::distance2(b.m_Goal, pos) > static_cast<decimal>(1.5)) {
-                    const auto vecTo = pos - b.m_Goal;
-                    const auto vecToNorm = glm::normalize(vecTo);
-                    if (b.m_GoalVelocity == zero) {
-                        //calc goal velocity
-                        const auto len = glm::length(vecTo);
-                        const auto velPerSec = len * dt;
-                        const auto velSpeed = velPerSec * b.m_GoalSpeed;
-                        b.m_GoalVelocity = vecToNorm * velSpeed;
-                    }
-                    const auto goal = pos + b.m_GoalVelocity;
-                    if (glm::length2(goal) > glm::length2(vecTo)) {
-                        b.setPosition(goal);
-                    }else{
-                        b.setPosition(b.m_Goal);
-                    }
-                }else{
-                    b.m_Goal = b.m_GoalVelocity = glm_vec3(static_cast<decimal>(0.0));
-                }
-            }
-            if (b.m_Physics) {
-                auto& rigidBody = *b.data.p->bullet_rigidBody;
-                Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
-            }else{
-                auto& n = *b.data.n;
-                //TODO: implement parent->child relations
-                //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
-                n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
-                //Engine::Math::recalculateForwardRightUp(n.rotation, b._forward, b._right, b._up); //double check if this is needed
-            }
-        }
-    }
+
     void operator()(void* p_ComponentPool, const double& dt, Scene& p_Scene) const {
         auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
         auto& components = pool.pool();
-        auto split = epriv::threading::splitVectorIndices(components);
+        auto lamda_update = [&](pair<size_t, size_t>& pair_) {
+            for (size_t j = pair_.first; j <= pair_.second; ++j) {
+                ComponentBody& b = components[j];
+                if (b.m_Physics) {
+                    auto& rigidBody = *b.data.p->bullet_rigidBody;
+                    Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
+                }else{
+                    auto& n = *b.data.n;
+                    //TODO: implement parent->child relations
+                    //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
+                    n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
+                    //Engine::Math::recalculateForwardRightUp(n.rotation, b._forward, b._right, b._up); //double check if this is needed
+                }
+            }
+        };
+
+        auto split = epriv::threading::splitVectorPairs(components);
         const auto fdt = static_cast<float>(dt);
-        for (auto& vec : split) {
-            epriv::threading::addJobRef(_defaultUpdate, vec, components, fdt);
+        for (auto& pair : split) {
+            epriv::threading::addJobRef(lamda_update, pair);
         }
         epriv::threading::waitForAll();
     }
@@ -1185,7 +1141,7 @@ struct epriv::ComponentBody_SceneLeftFunction final {void operator()(void* p_Com
     }
 }};
     
-ComponentBody_System::ComponentBody_System() {
+ComponentBody_System_CI::ComponentBody_System_CI() {
     setUpdateFunction(ComponentBody_UpdateFunction());
     setOnComponentAddedToEntityFunction(ComponentBody_ComponentAddedToEntityFunction());
     setOnEntityAddedToSceneFunction(ComponentBody_EntityAddedToSceneFunction());

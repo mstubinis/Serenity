@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_PHYSICS_ENUMS_H
-#define ENGINE_PHYSICS_ENUMS_H
+#ifndef ENGINE_PHYSICS_INCLUDES_H_INCLUDE_GUARD
+#define ENGINE_PHYSICS_INCLUDES_H_INCLUDE_GUARD
 
 struct CollisionType {enum Type {
     None,

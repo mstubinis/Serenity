@@ -2,7 +2,7 @@
 #ifndef ENGINE_RENDERER_DECAL_H
 #define ENGINE_RENDERER_DECAL_H
 
-#include <ecs/Entity.h>
+#include <ecs/EntityWrapper.h>
 
 namespace Engine {
     namespace epriv {

@@ -5,6 +5,7 @@
 #include <core/engine/mesh/MeshCollisionFactory.h>
 
 #include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/physics/Collision.h>
 #include <core/engine/math/Engine_Math.h>

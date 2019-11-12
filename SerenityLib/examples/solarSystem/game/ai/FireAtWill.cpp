@@ -30,6 +30,8 @@ void FireAtWill::internal_execute_beams() {
     bool res;
 
     auto lamda = [&](Ship& enemyShip, PrimaryWeaponBeam& beam) {
+        if (enemyShip.isDestroyed())
+            return false;
         enemy_ship_pos = enemyShip.getPosition();
         if (beam.isInArc(enemy_ship_pos, beam.arc)) {
             res = beam.canFire();
@@ -88,6 +90,8 @@ void FireAtWill::internal_execute_cannons() {
     int res;
 
     auto lamda = [&](Ship& enemyShip, PrimaryWeaponCannon& cannon) {
+        if (enemyShip.isDestroyed())
+            return false;
         enemy_ship_pos = enemyShip.getPosition();
         if (cannon.isInArc(enemy_ship_pos, cannon.arc)) {
             res = cannon.canFire();
@@ -144,6 +148,8 @@ void FireAtWill::internal_execute_torpedos() {
     int res;
 
     auto lamda = [&](Ship& enemyShip, SecondaryWeaponTorpedo& torpedo) {
+        if (enemyShip.isDestroyed())
+            return false;
         enemy_ship_pos = enemyShip.getPosition();
         if (torpedo.isInArc(enemy_ship_pos, torpedo.arc)) {
             res = torpedo.canFire();

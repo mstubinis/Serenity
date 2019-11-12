@@ -15,7 +15,7 @@
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/lights/Lights.h>
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 
 #include <algorithm>
 #include <sstream>
@@ -28,7 +28,7 @@
 
 #include <ecs/Entity.h>
 #include <ecs/Components.h>
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/materials/Material.h>
 

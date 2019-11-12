@@ -2,10 +2,10 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/materials/Material.h>
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Viewport.h>
-#include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/Engine.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
@@ -18,7 +18,7 @@ using namespace std;
 //TODO: profile std::execution::par_unseq compared to regular execution, the overhead to set up par_unseq might be more trouble than it's worth for these, unlike in the mesh triangle sorter
 
 
-RenderGraph::RenderGraph(ShaderProgram& _shaderProgram) :shaderProgram(_shaderProgram) {
+RenderGraph::RenderGraph(ShaderProgram& _shaderProgram) : shaderProgram(_shaderProgram) {
 }
 RenderGraph::~RenderGraph() {
     SAFE_DELETE_VECTOR(materialNodes);

@@ -2,7 +2,7 @@
 #ifndef GAME_MAP_ANCHOR_H
 #define GAME_MAP_ANCHOR_H
 
-#include <ecs/Entity.h>
+#include <ecs/EntityWrapper.h>
 
 #include <unordered_map>
 #include <string>

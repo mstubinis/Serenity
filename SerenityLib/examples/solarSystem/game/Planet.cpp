@@ -7,7 +7,7 @@
 #include <core/engine/lights/Lights.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Scene.h>

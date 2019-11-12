@@ -9,6 +9,7 @@
 #include <core/engine/sounds/Engine_Sounds.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/lights/Lights.h>
+#include <core/engine/physics/Collision.h>
 
 #include <core/engine/Engine.h>
 #include <core/engine/materials/Material.h>

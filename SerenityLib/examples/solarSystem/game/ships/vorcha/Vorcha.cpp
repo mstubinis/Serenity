@@ -31,7 +31,7 @@ Vorcha::Vorcha(const AIType::Type ai_type, Team& team, Client& client, Map& map,
         else if (i == 2)   system = new ShipSystemYawThrusters(_this, 1.25f);
         else if (i == 3)   system = new ShipSystemRollThrusters(_this, 1.17f);
         else if (i == 4)   system = new ShipSystemCloakingDevice(_this);
-        else if (i == 5)   system = new ShipSystemShields(_this, map, 21500.0f, 21500.0f, 21500.0f, 21500.0f, 30000.0f, 30000.0f, glm::vec3(0.0f, -0.107706f, 0.279445f));
+        else if (i == 5)   system = new ShipSystemShields(_this, map, 21500.0f, 21500.0f, 21500.0f, 21500.0f, 30000.0f, 30000.0f, glm::vec3(0.0f, -0.107706f, 0.279445f), glm::vec3(1.0f,1.3f,1.0f));
         else if (i == 6)   system = new ShipSystemMainThrusters(_this, 1.15f);
         else if (i == 7)   system = new ShipSystemWarpDrive(_this);
         else if (i == 8)   system = new ShipSystemSensors(_this, map);

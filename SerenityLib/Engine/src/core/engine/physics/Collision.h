@@ -3,7 +3,7 @@
 #define ENGINE_PHYSICS_COLLISION_H
 
 #include <core/engine/utils/Utils.h>
-#include <core/engine/physics/PhysicsEnums.h>
+#include <core/engine/physics/PhysicsIncludes.h>
 #include <LinearMath/btVector3.h>
 
 class  btCollisionShape;

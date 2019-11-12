@@ -4,7 +4,7 @@
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/math/Engine_Math.h>
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/mesh/Mesh.h>
 
@@ -213,7 +213,7 @@ struct epriv::ComponentModel_SceneLeftFunction final {void operator()(void* comp
 }};
 
 
-ComponentModel_System::ComponentModel_System() {
+ComponentModel_System_CI::ComponentModel_System_CI() {
     setUpdateFunction(ComponentModel_UpdateFunction());
     setOnComponentAddedToEntityFunction(ComponentModel_ComponentAddedToEntityFunction());
     setOnEntityAddedToSceneFunction(ComponentModel_EntityAddedToSceneFunction());

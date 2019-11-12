@@ -1,12 +1,13 @@
 #include "Terrain.h"
 
 #include <core/engine/mesh/Mesh.h>
-#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/Engine.h>
 #include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/mesh/MeshRequest.h>
+#include <core/engine/physics/Collision.h>
 
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <btBulletDynamicsCommon.h>

@@ -266,6 +266,8 @@
     <ClInclude Include="Engine\src\core\engine\mesh\VertexBufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexData.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexDataFormat.h" />
+    <ClInclude Include="Engine\src\core\engine\model\ModelInstance.h" />
+    <ClInclude Include="Engine\src\core\engine\model\ModelInstanceIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\networking\Networking.h" />
     <ClInclude Include="Engine\src\core\engine\networking\ListenerTCP.h" />
     <ClInclude Include="Engine\src\core\engine\networking\SocketInterface.h" />
@@ -274,7 +276,7 @@
     <ClInclude Include="Engine\src\core\engine\physics\Collision.h" />
     <ClInclude Include="Engine\src\core\engine\physics\DebugDrawer.h" />
     <ClInclude Include="Engine\src\core\engine\physics\Engine_Physics.h" />
-    <ClInclude Include="Engine\src\core\engine\physics\PhysicsEnums.h" />
+    <ClInclude Include="Engine\src\core\engine\physics\PhysicsIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\physics\World.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\Decal.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\Engine_Renderer.h" />
@@ -320,6 +322,7 @@
     <ClInclude Include="Engine\src\core\engine\scene\Scene.h" />
     <ClInclude Include="Engine\src\core\engine\scene\Skybox.h" />
     <ClInclude Include="Engine\src\core\engine\scene\Viewport.h" />
+    <ClInclude Include="Engine\src\core\engine\scene\ViewportIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\shaders\Shader.h" />
     <ClInclude Include="Engine\src\core\engine\shaders\ShaderHelper.h" />
     <ClInclude Include="Engine\src\core\engine\shaders\ShaderIncludes.h" />
@@ -342,7 +345,6 @@
     <ClInclude Include="Engine\src\core\engine\threading\WorkerThread.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Utils.h" />
-    <ClInclude Include="Engine\src\core\ModelInstance.h" />
     <ClInclude Include="Engine\src\core\Terrain.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBody.h" />
@@ -359,8 +361,10 @@
     <ClInclude Include="Engine\src\ecs\ECSEntityPool.h" />
     <ClInclude Include="Engine\src\ecs\ECSRegistry.h" />
     <ClInclude Include="Engine\src\ecs\ECSSystem.h" />
+    <ClInclude Include="Engine\src\ecs\ECSSystemConstructorInfo.h" />
     <ClInclude Include="Engine\src\ecs\Entity.h" />
     <ClInclude Include="Engine\src\ecs\EntityDataRequest.h" />
+    <ClInclude Include="Engine\src\ecs\EntityWrapper.h" />
     <ClInclude Include="Engine\src\ecs\SparseSet.h" />
   </ItemGroup>
   <ItemGroup>
@@ -395,6 +399,7 @@
     <ClCompile Include="Engine\src\core\engine\mesh\VertexBufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexData.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexDataFormat.cpp" />
+    <ClCompile Include="Engine\src\core\engine\model\ModelInstance.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\ListenerTCP.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketTCP.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketUDP.cpp" />
@@ -456,8 +461,8 @@
     <ClCompile Include="Engine\src\core\engine\threading\ThreadPool.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\WorkerThread.cpp" />
     <ClCompile Include="Engine\src\core\engine\utils\Engine_Debugging.cpp" />
-    <ClCompile Include="Engine\src\core\ModelInstance.cpp" />
     <ClCompile Include="Engine\src\core\Terrain.cpp" />
+    <ClCompile Include="Engine\src\ecs\ComponentBaseClass.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentCamera.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentLogic.cpp" />
@@ -469,6 +474,7 @@
     <ClCompile Include="Engine\src\ecs\ECSRegistry.cpp" />
     <ClCompile Include="Engine\src\ecs\Entity.cpp" />
     <ClCompile Include="Engine\src\ecs\EntityDataRequest.cpp" />
+    <ClCompile Include="Engine\src\ecs\EntityWrapper.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

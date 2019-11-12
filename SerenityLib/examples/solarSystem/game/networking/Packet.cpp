@@ -206,9 +206,9 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
             data += "," + closest;
         const auto nearestAnchorPos = finalAnchor->getPosition();
 
-        px = pos.x - nearestAnchorPos.x;
-        py = pos.y - nearestAnchorPos.y;
-        pz = pos.z - nearestAnchorPos.z;
+        px = static_cast<float>(pos.x - nearestAnchorPos.x);
+        py = static_cast<float>(pos.y - nearestAnchorPos.y);
+        pz = static_cast<float>(pos.z - nearestAnchorPos.z);
 
         qXYZ = Math::pack3NormalsInto32Int(rot.x,rot.y,rot.z);
         Math::Float16From32(&qw, rot.w);

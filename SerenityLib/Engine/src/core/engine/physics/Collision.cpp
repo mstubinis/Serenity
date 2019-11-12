@@ -3,7 +3,7 @@
 
 #include <ecs/ComponentModel.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/ModelInstance.h>
+#include <core/engine/model/ModelInstance.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <btBulletDynamicsCommon.h>

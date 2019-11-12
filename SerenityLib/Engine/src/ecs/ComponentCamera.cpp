@@ -177,18 +177,18 @@ void ComponentCamera::setFar(const float p_FarPlane) {
 #pragma region System
 
 struct epriv::ComponentCamera_UpdateFunction final {
-    static void _defaultUpdate(const vector<uint>& p_Vector, vector<ComponentCamera>& p_ComponentCameras, const double& dt) {
-        for (uint j = 0; j < p_Vector.size(); ++j) {
-            ComponentCamera& b = p_ComponentCameras[p_Vector[j]];
-            Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update view frustrum 
-        }
-    }
     void operator()(void* p_ComponentPool, const double& p_Dt, Scene& p_Scene) const {
 		auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)p_ComponentPool;
 		auto& components = pool.pool();
-		auto split = epriv::threading::splitVectorIndices(components);
-        for (auto& vec : split) {
-            epriv::threading::addJobRef(_defaultUpdate, vec, components, p_Dt);
+        auto lamda_update = [&](pair<size_t, size_t>& pair_) {
+            for (size_t j = pair_.first; j <= pair_.second; ++j) {
+                ComponentCamera& b = components[j];
+                Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update view frustrum 
+            }
+        };
+		auto split = epriv::threading::splitVectorPairs(components);
+        for (auto& pair : split) {
+            epriv::threading::addJobRef(lamda_update, pair);
         }
         epriv::threading::waitForAll();
     }
@@ -202,7 +202,7 @@ struct epriv::ComponentCamera_SceneEnteredFunction final {void operator()(void* 
 struct epriv::ComponentCamera_SceneLeftFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
 }};
 
-ComponentCamera_System::ComponentCamera_System() {
+ComponentCamera_System_CI::ComponentCamera_System_CI() {
     setUpdateFunction(ComponentCamera_UpdateFunction());
     setOnComponentAddedToEntityFunction(ComponentCamera_ComponentAddedToEntityFunction());
     setOnEntityAddedToSceneFunction(ComponentCamera_EntityAddedToSceneFunction());

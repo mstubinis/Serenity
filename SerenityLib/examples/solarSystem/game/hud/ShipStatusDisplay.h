@@ -2,7 +2,7 @@
 #ifndef GAME_SHIP_STATUS_DISPLAY_H
 #define GAME_SHIP_STATUS_DISPLAY_H
 
-#include <ecs/Entity.h>
+#include <ecs/EntityWrapper.h>
 #include <glm/vec4.hpp>
 #include <glm/vec2.hpp>
 
@@ -10,6 +10,7 @@ class  Ship;
 class  Planet;
 class  ShipSystemShields;
 class  HUD;
+class  Texture;
 class ShipStatusDisplay final {
     private:
         HUD&             m_HUD;
