@@ -24,7 +24,7 @@ namespace Engine{
             Camera* camera = scene->getActiveCamera();    if(!camera) return;
             Camera& c = *camera;
 
-            float fcoeff = (2.0f / glm::log2(c.getFar() + 1.0f)) * 0.5f;
+            const float fcoeff = (2.0f / glm::log2(c.getFar() + 1.0f)) * 0.5f;
             Renderer::sendUniform1Safe("fcoeff",fcoeff);
 
             //yes this is needed
@@ -86,8 +86,7 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
         if (res == GL_FALSE) {
             if (shaderP.m_VertexShader.fromFile()) {
                 cout << "VertexShader Log (" + shaderP.m_VertexShader.m_FileName + "): " << endl;
-            }
-            else {
+            }else{
                 cout << "VertexShader Log (" + shaderP.m_VertexShader.name() + "): " << endl;
             }
             cout << &ve[0] << endl;
@@ -106,8 +105,7 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
         if (res == GL_FALSE) {
             if (shaderP.m_FragmentShader.fromFile()) {
                 cout << "FragmentShader Log (" + shaderP.m_FragmentShader.m_FileName + "): " << endl;
-            }
-            else {
+            }else{
                 cout << "FragmentShader Log (" + shaderP.m_FragmentShader.name() + "): " << endl;
             }
             cout << &fe[0] << endl;
@@ -117,7 +115,7 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
         glAttachShader(shaderP.m_ShaderProgram, vid);
         glAttachShader(shaderP.m_ShaderProgram, fid);
 
-        for (uint i = 0; i < 100; ++i) {
+        for (unsigned int i = 0; i < 100; ++i) {
             string outFragCol = "out vec4 FRAG_COL_" + to_string(i) + ";";
             if (ShaderHelper::sfind(FragmentCode, outFragCol)) {
                 glBindFragDataLocation(shaderP.m_ShaderProgram, i, string("FRAG_COL_" + to_string(i)).c_str());

@@ -7,10 +7,11 @@
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-class ParticleEmitter;
-class ParticleEmissionProperties;
-class Scene;
-class Material;
+class  ParticleEmitter;
+class  ParticleEmissionProperties;
+class  Scene;
+class  Material;
+struct Entity;
 namespace Engine {
     namespace epriv {
         struct InternalScenePublicInterface;
@@ -50,7 +51,7 @@ class Particle {
         glm::vec3      m_Position;
     public:
         Particle();
-        Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmissionProperties& properties, Scene& scene);
+        Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmissionProperties& properties, Scene& scene, Entity& parent);
         ~Particle();
 
         Particle(const Particle& other);
@@ -58,7 +59,7 @@ class Particle {
         Particle(Particle&& other) noexcept;
         Particle& operator=(Particle&& other) noexcept;
 
-        void init(ParticleData& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation);
+        void init(ParticleData& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation, Entity& parent);
 
         const bool& isActive() const;
         void setPosition(const glm::vec3& newPosition);

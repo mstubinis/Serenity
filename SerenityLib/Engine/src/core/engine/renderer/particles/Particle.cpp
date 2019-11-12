@@ -101,21 +101,27 @@ Particle::Particle(){
     m_Material = Material::Checkers;
 }
 
-Particle::Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmissionProperties& properties, Scene& scene){
+Particle::Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmissionProperties& properties, Scene& scene, Entity& parent){
     m_Scene = &scene;
     m_Material = &const_cast<Material&>(properties.getParticleMaterialRandom());
-
     auto data = ParticleData(properties);
-    init(data, emitterPosition, emitterRotation);
+    init(data, emitterPosition, emitterRotation, parent);
 }
 Particle::~Particle() {
 
 }
-void Particle::init(ParticleData& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
+void Particle::init(ParticleData& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation, Entity& parent) {
     m_Data = data;
     m_Data.m_Active = true;
     m_Position = emitterPosition;
-    m_Data.m_Velocity = Math::rotate_vec3(emitterRotation, m_Data.m_Velocity);
+    auto rotated_initial_velocity = Math::rotate_vec3(emitterRotation, m_Data.m_Velocity);
+    if (!parent.null()) {
+        auto* body = parent.getComponent<ComponentBody>();
+        if (body) {
+            m_Data.m_Velocity = glm::vec3(body->getLinearVelocity()) * data.m_Properties->m_Drag;
+        }
+    }
+    m_Data.m_Velocity += rotated_initial_velocity;
     m_Hidden = false;
     m_PassedRenderCheck = false;
 }

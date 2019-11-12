@@ -2,8 +2,8 @@
 #ifndef ENGINE_MATERIAL_ENUMS_H
 #define ENGINE_MATERIAL_ENUMS_H
 
-#define MAX_MATERIAL_LAYERS_PER_COMPONENT 5
-#define MAX_MATERIAL_COMPONENTS 12
+#define MAX_MATERIAL_LAYERS_PER_COMPONENT 4
+#define MAX_MATERIAL_COMPONENTS 10
 #define MAX_LIGHTS_PER_PASS 16
 
 struct MaterialLayerBlendMode final { enum Mode {
@@ -30,12 +30,10 @@ struct MaterialLayerBlendMode final { enum Mode {
     Color,
     Value,
 _TOTAL};};
-
 struct MaterialUVModificationType final { enum Type {
     Translation,
     Rotation,
 _TOTAL};};
-
 struct MaterialComponentType final { enum Type {
     Diffuse,
     Normal,

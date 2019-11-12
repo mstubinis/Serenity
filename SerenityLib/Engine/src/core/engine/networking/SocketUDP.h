@@ -3,23 +3,23 @@
 #define ENGINE_NETWORKING_SOCKET_UDP_H
 
 #include <core/engine/networking/SocketInterface.h>
-#include <core/engine/utils/Utils.h>
+#include <string>
 
 namespace Engine {
     namespace Networking {
         class SocketUDP : public ISocket {
             private:
                 sf::UdpSocket*  m_Socket;
-                ushort          m_Port;
+                unsigned short  m_Port;
                 sf::IpAddress   m_IP;
             public:
-                SocketUDP(const uint port, const std::string& _ip = "");
+                SocketUDP(const unsigned short port, const std::string& _ip = "");
                 ~SocketUDP();
 
                 void                       setBlocking(const bool blocking);
                 const bool                 isBlocking();
                 const sf::UdpSocket&       socket();
-                const ushort               localPort();
+                const unsigned short       localPort();
 
                 const sf::Socket::Status   bind(const std::string& _ip = "");
                 void                       unbind();

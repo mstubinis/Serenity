@@ -85,28 +85,27 @@ MaterialLayer* MaterialComponent::addLayer(Texture* texture, Texture* mask, Text
             break;
         }
     }
-
     ++m_NumLayers;
     return &layer;
 }
 
-Texture* MaterialComponent::texture(const unsigned int& index) const {
+Texture* MaterialComponent::texture(const size_t& index) const {
     return m_Layers[index].getTexture();
 }
-Texture* MaterialComponent::mask(const unsigned int& index) const {
+Texture* MaterialComponent::mask(const size_t& index) const {
     return m_Layers[index].getMask();
 }
-Texture* MaterialComponent::cubemap(const unsigned int& index) const {
+Texture* MaterialComponent::cubemap(const size_t& index) const {
     return m_Layers[index].getCubemap();
 }
-MaterialLayer& MaterialComponent::layer(const unsigned int& index) {
+MaterialLayer& MaterialComponent::layer(const size_t& index) {
     return m_Layers[index];
 }
 const MaterialComponentType::Type& MaterialComponent::type() const {
     return m_ComponentType;
 }
 
-void MaterialComponent::bind(const unsigned int& component_index, unsigned int& textureUnit) {
+void MaterialComponent::bind(const size_t& component_index, size_t& textureUnit) {
     const string wholeString = "components[" + to_string(component_index) + "].";
     Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
     Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));

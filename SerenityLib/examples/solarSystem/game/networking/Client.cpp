@@ -71,7 +71,7 @@ struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
     camera.entity().getComponent<ComponentLogic2>()->call(-0.0001);
 }};
 
-Client::Client(Team* team, Core& core, const ushort& server_port, const string& server_ipAddress, const uint& id) : m_Core(core){
+Client::Client(Team* team, Core& core, const unsigned short& server_port, const string& server_ipAddress, const unsigned int& id) : m_Core(core){
     m_GameplayMode = nullptr;
     m_Team = team;
     m_TcpSocket = new Networking::SocketTCP(server_port,          server_ipAddress);
@@ -84,7 +84,7 @@ Client::~Client() {
     SAFE_DELETE(m_TcpSocket);
     SAFE_DELETE(m_UdpSocket);
 }
-void Client::internalInit(const ushort& server_port, const string& server_ipAddress) {
+void Client::internalInit(const unsigned short& server_port, const string& server_ipAddress) {
     m_UdpSocket->setBlocking(false);
     m_UdpSocket->bind();
     m_Port                    = server_port;
@@ -97,21 +97,21 @@ void Client::internalInit(const ushort& server_port, const string& server_ipAddr
     m_InitialConnectionThread = nullptr;
     m_IsCurrentlyConnecting   = false;
 }
-void Client::setClientID(const uint id) {
+void Client::setClientID(const unsigned int id) {
     SAFE_DELETE(m_UdpSocket);
     m_UdpSocket = new Networking::SocketUDP(m_Port + 1 + id, m_ServerIP);
     m_UdpSocket->setBlocking(false);
     m_UdpSocket->bind();
 }
 
-void Client::changeConnectionDestination(const ushort& port, const string& ipAddress) {
+void Client::changeConnectionDestination(const unsigned short& port, const string& ipAddress) {
     m_IsCurrentlyConnecting = false;
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     SAFE_DELETE(m_TcpSocket);
     m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
 }
-const sf::Socket::Status Client::connect(const ushort& timeout) {
-    auto lambda_connect = [&](Client& client, const ushort timeout) {
+const sf::Socket::Status Client::connect(const unsigned short& timeout) {
+    auto lambda_connect = [&](Client& client, const unsigned short timeout) {
         client.m_IsCurrentlyConnecting = true;
         m_Core.m_Menu->setNormalText("Connecting...", static_cast<float>(timeout) + 3.2f);
         const auto status = client.m_TcpSocket->connect(timeout);

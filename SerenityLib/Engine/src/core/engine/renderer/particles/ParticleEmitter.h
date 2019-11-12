@@ -24,10 +24,12 @@ class ParticleEmitter final : public EntityWrapper{
         double                         m_SpawningTimer;
         double                         m_Timer;
         double                         m_Lifetime;
+        Entity                         m_Parent;
         void internal_init();
     public:
         ParticleEmitter();
-        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime);
+        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, EntityWrapper* parent = nullptr);
+        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, Entity& parent = Entity::_null);
         ~ParticleEmitter();
 
 

@@ -3,7 +3,7 @@
 #define ENGINE_NETWORKING_LISTENER_TCP_H
 
 #include <core/engine/networking/SocketInterface.h>
-#include <core/engine/utils/Utils.h>
+#include <string>
 
 namespace Engine {
     namespace Networking {
@@ -11,10 +11,10 @@ namespace Engine {
         class ListenerTCP : public ISocket {
             private:
                 sf::TcpListener  m_Listener;
-                ushort           m_Port;
+                unsigned short   m_Port;
                 std::string      m_Ip;
             public:
-                ListenerTCP(const uint port, const std::string& ip = "");
+                ListenerTCP(const unsigned short port, const std::string& ip = "");
                 ~ListenerTCP();
 
                 void                     close();
@@ -22,7 +22,7 @@ namespace Engine {
 
                 const bool               isBlocking();
                 const sf::TcpListener&   socket();
-                const ushort             localPort();
+                const unsigned short     localPort();
 
                 const sf::Socket::Status accept(SocketTCP& tcpSocket);
                 const sf::Socket::Status accept(sf::TcpSocket& sfmlTcpSocket);

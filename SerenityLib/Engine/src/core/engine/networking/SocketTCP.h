@@ -3,7 +3,7 @@
 #define ENGINE_NETWORKING_SOCKET_TCP_H
 
 #include <core/engine/networking/SocketInterface.h>
-#include <core/engine/utils/Utils.h>
+#include <string>
 
 namespace Engine {
     namespace Networking {
@@ -11,9 +11,9 @@ namespace Engine {
             private:
                 sf::TcpSocket*  m_Socket;
                 std::string     m_IP;
-                ushort          m_Port;
+                unsigned short  m_Port;
             public: 
-                SocketTCP(const ushort port, const std::string& ip = ""); //client side socket
+                SocketTCP(const unsigned short port, const std::string& ip = ""); //client side socket
                 SocketTCP(sf::TcpSocket*); //server side client socket
                 ~SocketTCP();
 
@@ -22,12 +22,12 @@ namespace Engine {
                 void                       setBlocking(const bool blocking);
                 const bool                 isBlocking();
                 const sf::TcpSocket&       socket();
-                const ushort               localPort();
+                const unsigned short       localPort();
 
                 const std::string          ip();
-                const ushort               remotePort();
+                const unsigned short       remotePort();
     
-                const sf::Socket::Status   connect(const ushort& timeout = 0);
+                const sf::Socket::Status   connect(const unsigned short& timeout = 0);
 
                 const sf::Socket::Status   send(sf::Packet& packet);
                 const sf::Socket::Status   send(const void* data, size_t size);

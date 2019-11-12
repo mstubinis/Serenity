@@ -40,13 +40,13 @@ class Client{
         std::string                           m_ServerIP;
         Core&                                 m_Core;
         bool                                  m_Validated;
-        uint                                  m_ID;
+        unsigned int                          m_ID;
         double                                m_PingTime;
         double                                m_PingTimeHealthUpdate;
         bool                                  m_IsCurrentlyConnecting;
-        ushort                                m_Port;
+        unsigned short                        m_Port;
 
-        void internalInit(const ushort& server_port, const std::string& server_ipAddress);
+        void internalInit(const unsigned short& server_port, const std::string& server_ipAddress);
 
         void on_receive_ship_notified_of_respawn(Packet*, Map& map);
         void on_receive_ship_notified_of_impending_respawn(Packet*, Map& map);
@@ -77,14 +77,14 @@ class Client{
         void on_receive_connection_rejected_by_server(Packet*, Menu&);
         void on_receive_server_shutdown(Packet*, Menu&, Map& map);
     public:
-        Client(Team* ,Core&, const ushort& server_port, const std::string& server_ipAddress, const uint& id);
+        Client(Team* ,Core&, const unsigned short& server_port, const std::string& server_ipAddress, const unsigned int& id);
         ~Client();
 
-        void setClientID(const uint id);
+        void setClientID(const unsigned int id);
 
-        void changeConnectionDestination(const ushort& port, const std::string& ipAddress);
+        void changeConnectionDestination(const unsigned short& port, const std::string& ipAddress);
 
-        const sf::Socket::Status connect(const ushort& timeout = 0);
+        const sf::Socket::Status connect(const unsigned short& timeout = 0);
         void disconnect();
         void onReceiveTCP();
         void onReceiveUDP();

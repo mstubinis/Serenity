@@ -1,11 +1,10 @@
 #include <core/engine/networking/SocketTCP.h>
-#include <core/engine/utils/Utils.h>
 
 using namespace Engine;
 using namespace std;
 
 
-Networking::SocketTCP::SocketTCP(const ushort port, const std::string& ip) {  //client side socket
+Networking::SocketTCP::SocketTCP(const unsigned short port, const std::string& ip) {  //client side socket
     m_Socket    = new sf::TcpSocket();
     m_IP        = ip;
     m_Port      = port;
@@ -17,7 +16,7 @@ Networking::SocketTCP::SocketTCP(sf::TcpSocket* socket) { //server side client s
 }
 
 Networking::SocketTCP::~SocketTCP() { 
-    SAFE_DELETE(m_Socket);
+    delete m_Socket;
 }
 const sf::TcpSocket& Networking::SocketTCP::socket() {
     return *m_Socket;
@@ -25,10 +24,10 @@ const sf::TcpSocket& Networking::SocketTCP::socket() {
 const string Networking::SocketTCP::ip() {
     return m_Socket->getRemoteAddress().toString();
 }
-const ushort Networking::SocketTCP::remotePort() {
+const unsigned short Networking::SocketTCP::remotePort() {
     return m_Socket->getRemotePort();
 }
-const ushort Networking::SocketTCP::localPort() {
+const unsigned short Networking::SocketTCP::localPort() {
     return m_Socket->getLocalPort();
 }
 void Networking::SocketTCP::setBlocking(const bool b) {
@@ -40,7 +39,7 @@ const bool Networking::SocketTCP::isBlocking() {
 void Networking::SocketTCP::disconnect() {
     m_Socket->disconnect();
 }
-const sf::Socket::Status Networking::SocketTCP::connect(const ushort& timeout) {
+const sf::Socket::Status Networking::SocketTCP::connect(const unsigned short& timeout) {
     return m_Socket->connect(m_IP, m_Port, sf::seconds(timeout));
 }
 const sf::Socket::Status Networking::SocketTCP::send(sf::Packet& _packet) {

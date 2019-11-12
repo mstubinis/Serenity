@@ -95,6 +95,8 @@ class ShipSystemShields final : public ShipSystem {
         );
         ~ShipSystemShields();
 
+        const bool isPointInside(const glm::vec3& ptInModelSpace);
+
         Entity getEntity();
 
         void destroy();

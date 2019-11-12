@@ -259,6 +259,16 @@ void ShipSystemShields::destroy() {
     m_ShieldsAreUp = false;
     reset_all_impact_points();
 }
+
+const bool ShipSystemShields::isPointInside(const glm::vec3& ptInModelSpace) {
+    const glm::vec3 radi = getEntity().getComponent<ComponentBody>()->getScale();
+    const auto x1 = (ptInModelSpace.x) * (ptInModelSpace.x);
+    const auto y1 = (ptInModelSpace.y) * (ptInModelSpace.y);
+    const auto z1 = (ptInModelSpace.z) * (ptInModelSpace.z);
+    const auto res = (x1 / (radi.x * radi.x)) + (y1 / (radi.z * radi.z)) + (z1 / (radi.y * radi.y));
+    return (res < 1.0f) ? true : false;
+}
+
 void ShipSystemShields::restoreToFull() {
     for (size_t i = 0; i < m_HealthPointsCurrent.size(); ++i) {
         m_HealthPointsCurrent[i] = m_HealthPointsMax[i];

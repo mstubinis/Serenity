@@ -36,9 +36,10 @@ class ParticleEmissionProperties final {
         std::vector<Material*>  m_ParticleMaterials;
         double                  m_Lifetime;
         double                  m_SpawnRate;
+        float                   m_Drag;
     public:
         ParticleEmissionProperties();
-        ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate);
+        ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate, const float drag = 1.0f);
         ~ParticleEmissionProperties();    
 
 

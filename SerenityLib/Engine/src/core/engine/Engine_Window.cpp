@@ -17,11 +17,11 @@ using namespace std;
 
 class Engine_Window::impl final{
     public:
-        uint m_Style;
+        unsigned int m_Style;
         sf::VideoMode m_VideoMode;
         const char* m_WindowName;
         sf::Window m_SFMLWindow;
-        uint m_Width, m_Height, m_FramerateLimit;
+        unsigned int m_Width, m_Height, m_FramerateLimit;
         bool m_MouseCursorVisible;
         bool m_Fullscreen;
         bool m_Active;
@@ -31,7 +31,7 @@ class Engine_Window::impl final{
 		int minorVersion;
 		int glslVersion;
         sf::ContextSettings m_SFContextSettings;
-        void _init(const char* name, const uint& width, const uint& height){
+        void _init(const char* name, const unsigned int& width, const unsigned int& height){
             m_FramerateLimit = 0;
             m_MouseCursorVisible = true;
             m_Fullscreen = m_Vsync = m_MouseCursorGrabbed = false;
@@ -84,12 +84,12 @@ class Engine_Window::impl final{
                 m_Height = m_VideoMode.height;
             }
             m_SFMLWindow.create(m_VideoMode,name,m_Style,settings);
-            uint opengl_version = stoi(to_string(settings.majorVersion) + to_string(settings.minorVersion));
+            unsigned int opengl_version = stoi(to_string(settings.majorVersion) + to_string(settings.minorVersion));
             epriv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_Width,m_Height,_glslVersion,opengl_version);
 
             return m_SFMLWindow.getSettings();
         }
-        void _setFullScreen(const bool& fullscreen, const bool isWindowedMode){
+        void _setFullScreen(const bool& fullscreen, const bool& isWindowedMode){
             if(m_Fullscreen == fullscreen) 
                 return;
             if((isWindowedMode && m_Style == sf::Style::None) && fullscreen)
@@ -131,13 +131,13 @@ class Engine_Window::impl final{
             ev.type = EventType::WindowFullscreenChanged;
             epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
         }
-        void _setStyle(const uint& style){
+        void _setStyle(const unsigned int& style){
             if(m_Style == style) return;
             m_Style = style;
             m_SFMLWindow.close();
             _createOpenGLWindow(m_WindowName,m_Width,m_Height, majorVersion, minorVersion, glslVersion);
         }
-        void _setSize(const uint& w, const uint& h){
+        void _setSize(const unsigned int& w, const unsigned int& h){
             m_Width = w; m_Height = h;
             m_SFMLWindow.setSize(sf::Vector2u(w,h));
         }
@@ -163,7 +163,7 @@ class Engine_Window::impl final{
                 m_MouseCursorVisible = visible;
             }
         }
-        void _setFramerateLimit(const uint& limit){
+        void _setFramerateLimit(const unsigned int& limit){
             m_SFMLWindow.setFramerateLimit(limit);
             m_FramerateLimit = limit;
         }
@@ -175,13 +175,13 @@ class Engine_Window::impl final{
         }
 };
 
-Engine_Window::Engine_Window(const char* name, const uint& width, const uint& height):m_i(new impl){
+Engine_Window::Engine_Window(const char* name, const unsigned int& width, const unsigned int& height):m_i(new impl){
     m_i->_init(name,width,height);
 }
 Engine_Window::~Engine_Window(){
     m_i->_destruct();
 }
-glm::uvec2 Engine_Window::getSize(){ 
+const glm::uvec2 Engine_Window::getSize(){ 
     sf::Vector2u size = m_i->m_SFMLWindow.getSize(); 
     return glm::uvec2(size.x,size.y); 
 }
@@ -218,16 +218,16 @@ void Engine_Window::requestFocus(){
 void Engine_Window::close(){
     m_i->m_SFMLWindow.close();
 }
-bool Engine_Window::hasFocus(){
+const bool Engine_Window::hasFocus(){
     return m_i->m_SFMLWindow.hasFocus();
 }
-bool Engine_Window::isOpen(){
+const bool Engine_Window::isOpen(){
     return m_i->m_SFMLWindow.isOpen();
 }
-bool Engine_Window::isActive(){ 
+const bool Engine_Window::isActive(){ 
     return m_i->m_Active; 
 }
-bool Engine_Window::isFullscreen(){
+const bool Engine_Window::isFullscreen(){
     return m_i->m_Fullscreen;
 }
 void Engine_Window::display(){
@@ -237,10 +237,10 @@ void Engine_Window::setActive(const bool active){
     m_i->m_Active = active;
     m_i->m_SFMLWindow.setActive(active);
 }
-void Engine_Window::setSize(const uint& w, const uint& h){
+void Engine_Window::setSize(const unsigned int& w, const unsigned int& h){
     m_i->_setSize(w,h);
 }
-void Engine_Window::setStyle(const uint& style){
+void Engine_Window::setStyle(const unsigned int& style){
     m_i->_setStyle(style);
 }
 void Engine_Window::setFullScreen(const bool fullscreen, const bool isWindowedMode){
@@ -249,15 +249,15 @@ void Engine_Window::setFullScreen(const bool fullscreen, const bool isWindowedMo
 void Engine_Window::keepMouseInWindow(const bool keep){
     m_i->_keepMouseInWindow(keep); 
 }
-void Engine_Window::setFramerateLimit(const uint& limit){
+void Engine_Window::setFramerateLimit(const unsigned int& limit){
     m_i->_setFramerateLimit(limit); 
 }
 sf::Window& Engine_Window::getSFMLHandle() const { 
     return m_i->m_SFMLWindow; 
 }
-uint Engine_Window::getStyle(){ 
+const unsigned int Engine_Window::getStyle(){
     return m_i->m_Style; 
 }
-uint Engine_Window::getFramerateLimit() const{ 
+const unsigned int Engine_Window::getFramerateLimit() const{
     return m_i->m_FramerateLimit; 
 }

@@ -2,7 +2,6 @@
 #ifndef ENGINE_SOUND_QUEUE_H
 #define ENGINE_SOUND_QUEUE_H
 
-#include <core/engine/utils/Utils.h>
 #include <queue>
 
 struct Handle;
@@ -12,7 +11,6 @@ namespace Engine {
         class SoundManager;
     };
 };
-
 class SoundQueue final {
     friend class Engine::epriv::SoundManager;
     private:
@@ -27,8 +25,8 @@ class SoundQueue final {
         SoundQueue(Engine::epriv::SoundManager& manager, const float& delay = 0.5f);
         ~SoundQueue();
 
-        void enqueueEffect(Handle, const uint& loops = 1); //need a clone handle due to type conversion for determining effect or music
-        void enqueueMusic(Handle, const uint& loops = 1); //need a clone handle due to type conversion for determining effect or music
+        void enqueueEffect(Handle&, const unsigned int& loops = 1); //need a clone handle due to type conversion for determining effect or music
+        void enqueueMusic(Handle&, const unsigned int& loops = 1); //need a clone handle due to type conversion for determining effect or music
         void dequeue();
         void update(const double& dt);
         void clear();
@@ -39,5 +37,4 @@ class SoundQueue final {
         void activate();
         void deactivate();
 };
-
 #endif

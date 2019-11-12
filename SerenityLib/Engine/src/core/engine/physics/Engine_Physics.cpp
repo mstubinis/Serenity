@@ -112,7 +112,7 @@ class epriv::PhysicsManager::impl final{
         void _init(){
             m_Paused = false;      
         }
-        void _postInit(const char* name, const uint& w, const uint& h, const uint& numCores){
+        void _postInit(const char* name, const unsigned int& w, const unsigned int& h, const unsigned int& numCores){
             data = new epriv::PhysicsWorld(numCores);
             data->debugDrawer->initRenderingContext();
 
@@ -243,7 +243,7 @@ epriv::PhysicsManager::PhysicsManager():m_i(new impl){
 epriv::PhysicsManager::~PhysicsManager(){ 
     m_i->_destruct(); 
 }
-void epriv::PhysicsManager::_init(const char* name, const uint& w, const uint& h, const uint& numCores){ 
+void epriv::PhysicsManager::_init(const char* name, const unsigned int& w, const unsigned int& h, const unsigned int& numCores){
     m_i->_postInit(name,w,h,numCores); 
 }
 void epriv::PhysicsManager::_update(const double& dt,int maxsteps,float other){ 

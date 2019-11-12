@@ -16,13 +16,16 @@ using namespace Engine;
 ParticleEmitter::ParticleEmitter() : EntityWrapper(*Resources::getCurrentScene()) {
     m_Properties = nullptr;
     m_Active = false;
+    m_Parent = Entity::_null;
     m_Lifetime = 0.0;
     internal_init();
 
 }
-ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime) : EntityWrapper(scene){
+ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, EntityWrapper* parent) : ParticleEmitter(properties, scene, lifetime, parent->entity()){}
+ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, Entity& parent) : EntityWrapper(scene){
     setProperties(properties);
     m_Active = true;
+    m_Parent = parent;
     m_Lifetime = lifetime;
     internal_init();
 }
@@ -45,6 +48,7 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitter& other) : EntityWrapper(o
     m_Active = other.m_Active;
     m_Timer = other.m_Timer;
     m_Lifetime = other.m_Lifetime;
+    m_Parent = other.m_Parent;
 }
 ParticleEmitter& ParticleEmitter::operator=(const ParticleEmitter& other) {
     if (&other == this)
@@ -54,6 +58,7 @@ ParticleEmitter& ParticleEmitter::operator=(const ParticleEmitter& other) {
     m_Active = other.m_Active;
     m_Timer = other.m_Timer;
     m_Lifetime = other.m_Lifetime;
+    m_Parent = other.m_Parent;
     return *this;
 }
 ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept : EntityWrapper(other) {
@@ -63,6 +68,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept : EntityWrapp
     swap(m_Active, other.m_Active);
     swap(m_Timer, other.m_Timer);
     swap(m_Lifetime, other.m_Lifetime);
+    swap(m_Parent, other.m_Parent);
 }
 ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {
     using std::swap;
@@ -71,6 +77,7 @@ ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {
     swap(m_Active, other.m_Active);
     swap(m_Timer, other.m_Timer);
     swap(m_Lifetime, other.m_Lifetime);
+    swap(m_Parent, other.m_Parent);
     return *this;
 }
 

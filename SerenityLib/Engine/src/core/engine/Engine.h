@@ -2,7 +2,6 @@
 #ifndef ENGINE_ENGINE_H
 #define ENGINE_ENGINE_H
 
-#include <core/engine/utils/Utils.h>
 #include <core/engine/utils/Engine_Debugging.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Engine_Renderer.h>
@@ -45,20 +44,20 @@ namespace Engine{
                 void on_event_close();
                 void on_event_lost_focus();
                 void on_event_gained_focus();
-                void on_event_text_entered(const uint& unicode);
-                void on_event_key_pressed(const uint& key);
-                void on_event_key_released(const uint& key);
+                void on_event_text_entered(const unsigned int& unicode);
+                void on_event_key_pressed(const unsigned int& key);
+                void on_event_key_released(const unsigned int& key);
                 void on_event_mouse_wheel_moved(const int& delta);
-                void on_event_mouse_button_pressed(const uint& mouseButton);
-                void on_event_mouse_button_released(const uint& mouseButton);
+                void on_event_mouse_button_pressed(const unsigned int& mouseButton);
+                void on_event_mouse_button_released(const unsigned int& mouseButton);
                 void on_event_mouse_moved(const int& mouseX, const int& mouseY);
                 void on_event_mouse_entered();
                 void on_event_mouse_left();
-                void on_event_joystick_button_pressed(const uint& button, const uint& id);
-                void on_event_joystick_button_released(const uint& button, const uint& id);
-                void on_event_joystick_moved(const uint& id, const float& position, const uint axis);
-                void on_event_joystick_connected(const uint& id);
-                void on_event_joystick_disconnected(const uint& id);
+                void on_event_joystick_button_pressed(const unsigned int& button, const unsigned int& id);
+                void on_event_joystick_button_released(const unsigned int& button, const unsigned int& id);
+                void on_event_joystick_moved(const unsigned int& id, const float& position, const unsigned int axis);
+                void on_event_joystick_connected(const unsigned int& id);
+                void on_event_joystick_disconnected(const unsigned int& id);
 
                 void update_logic(const double& dt);
                 void update_sounds(const double& dt);
@@ -89,7 +88,7 @@ namespace Engine{
 
                 static void init(const EngineOptions& options);
                 void run();
-                void on_event_resize(const uint& w, const uint& h, const bool& saveSize);
+                void on_event_resize(const unsigned int& w, const unsigned int& h, const bool& saveSize);
                 void handle_events();
         };
         struct Core final{
@@ -118,16 +117,16 @@ namespace Game{
     void cleanup();
 
     #pragma region EventHandlers
-    void onResize(const uint& width, const uint& height);
+    void onResize(const unsigned int& width, const unsigned int& height);
     void onClose();
     void onLostFocus();
     void onGainedFocus();
-    void onTextEntered(const uint& unicode);
-    void onKeyPressed(const uint& key);
-    void onKeyReleased(const uint& key);
+    void onTextEntered(const unsigned int& unicode);
+    void onKeyPressed(const unsigned int& key);
+    void onKeyReleased(const unsigned int& key);
     void onMouseWheelMoved(const int& delta);
-    void onMouseButtonPressed(const uint& button);
-    void onMouseButtonReleased(const uint& button);
+    void onMouseButtonPressed(const unsigned int& button);
+    void onMouseButtonReleased(const unsigned int& button);
     void onMouseMoved(const float& mouseX, const float& mouseY);
     void onMouseEntered();
     void onMouseLeft();

@@ -25,7 +25,7 @@ namespace Engine {
                 ~Queue_ThreadSafe() {
                 }
 
-                bool try_pop(T& value) {
+                const bool try_pop(T& value) {
                     std::lock_guard<std::mutex> lock(m_Mutex);
                     if (m_Queue.empty())
                         return false;
@@ -63,7 +63,7 @@ namespace Engine {
                     m_Queue.push(std::move(pushedValue));
                     m_ConditionVariable.notify_one();
                 }
-                bool empty() const {
+                const bool empty() const {
                     std::lock_guard<std::mutex> lock(m_Mutex);
                     return m_Queue.empty();
                 }

@@ -1,13 +1,11 @@
 #include <core/engine/networking/ListenerTCP.h>
 #include <core/engine/networking/SocketTCP.h>
 
-#include <core/engine/utils/Utils.h>
-
 using namespace Engine;
 using namespace std;
 
 
-Networking::ListenerTCP::ListenerTCP(const uint _port, const string& ip){
+Networking::ListenerTCP::ListenerTCP(const unsigned short _port, const string& ip){
     m_Port = _port;
     m_Ip = ip;
     m_Listener.setBlocking(false);
@@ -18,7 +16,7 @@ Networking::ListenerTCP::~ListenerTCP() {
 const sf::TcpListener& Networking::ListenerTCP::socket() { 
     return m_Listener; 
 }
-const ushort Networking::ListenerTCP::localPort() { 
+const unsigned short Networking::ListenerTCP::localPort() {
     return m_Listener.getLocalPort(); 
 }
 void Networking::ListenerTCP::setBlocking(bool b) { 

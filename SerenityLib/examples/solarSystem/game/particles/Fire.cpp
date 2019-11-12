@@ -24,12 +24,12 @@ struct FireColorFunctor final { glm::vec4 operator()(ParticleEmissionProperties&
     auto factor = particle_lifetime / FIRE_COLOR_CUTOFF; //0 to 1
     //yellow to red
     red = glm::min(1.0f, static_cast<float>(2.0 - factor));
-    green = 1.0 - factor;
+    green = static_cast<float>(1.0 - factor);
     green = glm::clamp(green, 0.05f, 1.0f);
     if (particle_lifetime > FIRE_COLOR_CUTOFF) {
         //blackish now
         auto factor1 = (particle_lifetime - FIRE_COLOR_CUTOFF);
-        red -= factor1;
+        red -= static_cast<float>(factor1);
         red = glm::clamp(red, 0.05f, 1.0f);
     }
     return glm::vec4(red, green, 0.05f, alpha);
@@ -65,7 +65,7 @@ struct FireInitialAngularFunctor final { float operator()(ParticleEmissionProper
 
 
 void Fire::init() {
-    Regular = new ParticleEmissionProperties(ResourceManifest::SmokeMaterial1, 5.0, 0.04);
+    Regular = new ParticleEmissionProperties(ResourceManifest::SmokeMaterial1, 5.0, 0.04, 1.0f);
     Regular->addMaterial(ResourceManifest::SmokeMaterial2);
     Regular->addMaterial(ResourceManifest::SmokeMaterial3);
 
@@ -80,7 +80,7 @@ void Fire::init() {
     Regular->setInitialAngularVelocityFunctor(FireInitialAngularFunctor());
 
 
-    ShortLived = new ParticleEmissionProperties(ResourceManifest::SmokeMaterial1, 2.0, 0.06);
+    ShortLived = new ParticleEmissionProperties(ResourceManifest::SmokeMaterial1, 2.0, 0.06, 1.0f);
     ShortLived->addMaterial(ResourceManifest::SmokeMaterial2);
     ShortLived->addMaterial(ResourceManifest::SmokeMaterial3);
 

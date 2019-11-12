@@ -166,14 +166,14 @@ ServerClient::ServerClient(const string& hash, Server& server, Core& core, sf::T
     m_TcpSocket = new Networking::SocketTCP(sfTCPSocket);
     internalInit(hash, server.numClients());
 }
-ServerClient::ServerClient(const string& hash, Server& server, Core& core, const ushort& port, const string& ipAddress) : m_Core(core), m_Server(server) {
+ServerClient::ServerClient(const string& hash, Server& server, Core& core, const unsigned short& port, const string& ipAddress) : m_Core(core), m_Server(server) {
     m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
     internalInit(hash, server.numClients());
 }
 ServerClient::~ServerClient() {
     SAFE_DELETE(m_TcpSocket);
 }
-void ServerClient::internalInit(const string& hash, const uint& numClients) {
+void ServerClient::internalInit(const string& hash, const unsigned int& numClients) {
     m_TcpSocket->setBlocking(false);
     m_RecoveryTime = 0.0;
     m_Hash         = hash;
@@ -299,8 +299,8 @@ const bool Server::shutdownMap() {
     }
     return res;
 }
-const uint Server::numClients() const {
-    uint numClients = 0;
+const unsigned int Server::numClients() const {
+    unsigned int numClients = 0;
     for (auto& thread : m_Threads) {
         for (auto& client : thread->m_Clients) {
             ++numClients;
@@ -314,7 +314,7 @@ const bool Server::startup(const string& mapname) {
     m_MapName = mapname;
     const sf::Socket::Status status = listener.listen();
 
-    for (uint i = 0; i < std::thread::hardware_concurrency(); ++i) {
+    for (unsigned int i = 0; i < std::thread::hardware_concurrency(); ++i) {
         auto* thread = new ServerClientThread();
         m_Threads.push_back(thread);
     }

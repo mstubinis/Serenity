@@ -62,7 +62,7 @@ template<typename T> class Freelist {
             if (m_Items[index]) {
                 delete m_Items[index];
                 m_Items[index] = nullptr;
-                m_Freelist.push(index);
+                m_Freelist.push(static_cast<unsigned int>(index));
                 --m_Size;
                 return true;
             }

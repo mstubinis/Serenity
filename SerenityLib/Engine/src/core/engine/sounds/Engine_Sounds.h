@@ -2,10 +2,11 @@
 #ifndef ENGINE_ENGINE_SOUNDS_H
 #define ENGINE_ENGINE_SOUNDS_H
 
-#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/resources/Handle.h>
 #include <SFML/Audio.hpp>
 #include <glm/vec3.hpp>
 #include <stack>
+#include <vector>
 
 #include <core/engine/sounds/SoundBaseClass.h>
 #include <core/engine/sounds/SoundMusic.h>
@@ -15,23 +16,18 @@ class SoundQueue;
 class SoundData;
 namespace Engine{
     namespace epriv{
-        class SoundManager;
-    };
-};
-namespace Engine{
-    namespace epriv{
         class SoundManager final{
             friend class ::SoundBaseClass;
             public:
-                static const uint MAX_SOUND_EFFECTS = 128;
-                static const uint MAX_SOUND_MUSIC   = 6;
+                static const unsigned int              MAX_SOUND_EFFECTS = 128;
+                static const unsigned int              MAX_SOUND_MUSIC   = 6;
 
-                SoundEffect                    m_SoundEffects[MAX_SOUND_EFFECTS];
-                SoundMusic                     m_SoundMusics[MAX_SOUND_MUSIC];
-                std::stack<uint>               m_FreelistEffects;
-                std::stack<uint>               m_FreelistMusics;
+                SoundEffect                            m_SoundEffects[MAX_SOUND_EFFECTS];
+                SoundMusic                             m_SoundMusics[MAX_SOUND_MUSIC];
+                std::stack<unsigned int>               m_FreelistEffects;
+                std::stack<unsigned int>               m_FreelistMusics;
 
-                std::vector<SoundQueue*>       m_SoundQueues;
+                std::vector<SoundQueue*>               m_SoundQueues;
 
                 SoundManager();
                 ~SoundManager();
@@ -48,8 +44,8 @@ namespace Engine{
     };
     namespace Sound{
         SoundQueue* createQueue(const float& delay);
-        SoundEffect* playEffect(Handle&, const uint& numLoops = 1);
-        SoundMusic* playMusic(Handle&, const uint& numLoops = 1);
+        SoundEffect* playEffect(Handle&, const unsigned int& numLoops = 1);
+        SoundMusic* playMusic(Handle&, const unsigned int& numLoops = 1);
 
         void stop_all_music();
         void stop_all_effect();

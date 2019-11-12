@@ -13,6 +13,7 @@
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Camera.h>
+#include <core/engine/shaders/ShaderProgram.h>
 #include <BulletCollision/CollisionShapes/btMultiSphereShape.h>
 #include <glm/gtx/norm.hpp>
 

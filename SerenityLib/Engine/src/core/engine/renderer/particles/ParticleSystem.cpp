@@ -73,12 +73,12 @@ const bool epriv::ParticleSystem::add_particle(ParticleEmitter& emitter, const g
     if (m_ParticleFreelist.size() > 0) { //first, try to reuse an empty
         ParticleData data(*emitter.m_Properties);
         auto freeindex = m_ParticleFreelist.top();
-        m_Particles[freeindex].init(data, emitterPosition, emitterRotation);
+        m_Particles[freeindex].init(data, emitterPosition, emitterRotation, emitter.m_Parent);
         m_ParticleFreelist.pop();
         return true;
     }
     if (m_Particles.size() < m_Particles.capacity()) {
-        Particle particle(emitterPosition, emitterRotation, *emitter.m_Properties, emitter.entity().scene());
+        Particle particle(emitterPosition, emitterRotation, *emitter.m_Properties, emitter.entity().scene(), emitter.m_Parent);
         m_Particles.push_back(std::move(particle));
         return true;
     }

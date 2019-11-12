@@ -1,6 +1,6 @@
 #include <core/engine/sounds/SoundBaseClass.h>
 
-SoundBaseClass::SoundBaseClass(const uint& numLoops) {
+SoundBaseClass::SoundBaseClass(const unsigned int& numLoops) {
     m_Status      = SoundStatus::Fresh;
     m_Loops       = numLoops;
     m_CurrentLoop = 0;
@@ -13,7 +13,7 @@ const SoundStatus::Status& SoundBaseClass::status() {
 }
 void SoundBaseClass::update(const double& dt) {
 }
-const bool SoundBaseClass::play(const uint& numLoops) {
+const bool SoundBaseClass::play(const unsigned int& numLoops) {
     return false;
 }
 const bool SoundBaseClass::pause() {
@@ -25,13 +25,13 @@ const bool SoundBaseClass::stop() {
 const bool SoundBaseClass::restart() {
     return false;
 }
-const uint SoundBaseClass::getLoopsLeft() {
+const unsigned int SoundBaseClass::getLoopsLeft() {
     return m_Loops - m_CurrentLoop;
 }
 const float SoundBaseClass::getAttenuation() {
     return 0;
 }
-const uint SoundBaseClass::getChannelCount() {
+const unsigned int SoundBaseClass::getChannelCount() {
     return 0;
 }
 void SoundBaseClass::setAttenuation(const float& attenuation) {

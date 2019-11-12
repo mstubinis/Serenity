@@ -68,7 +68,7 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
 
             auto finalPos = m_Ship.getPosition() + Engine::Math::rotate_vec3(shipRotation, impactLocationModelSpace);
 
-            ParticleEmitter emitter_(*Fire::ShortLived, m_Map, lifetime);
+            ParticleEmitter emitter_(*Fire::ShortLived, m_Map, lifetime, &m_Ship);
             EntityDataRequest req(emitter_.entity());
 
             glm_quat q;

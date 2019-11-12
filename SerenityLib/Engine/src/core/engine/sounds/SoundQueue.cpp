@@ -16,7 +16,7 @@ SoundQueue::SoundQueue(Engine::epriv::SoundManager& manager, const float& delay)
 SoundQueue::~SoundQueue() {
     clear();
 }
-void SoundQueue::enqueueEffect(Handle handle, const uint& loops) {
+void SoundQueue::enqueueEffect(Handle& handle, const unsigned int& loops) {
     if (!m_Current) {
         m_Current = m_SoundManager._getFreeEffect();
         if (m_Current) {
@@ -26,7 +26,7 @@ void SoundQueue::enqueueEffect(Handle handle, const uint& loops) {
     }
     m_Queue.push(handle);
 }
-void SoundQueue::enqueueMusic(Handle handle, const uint& loops) {
+void SoundQueue::enqueueMusic(Handle& handle, const unsigned int& loops) {
     if (!m_Current) {
         m_Current = m_SoundManager._getFreeMusic();
         if (m_Current) {

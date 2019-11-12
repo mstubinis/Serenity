@@ -3,7 +3,7 @@
 #define ENGINE_SHADERPROGRAM_H
 
 #include <core/engine/BindableResource.h>
-#include <core/engine/utils/Utils.h>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -60,6 +60,6 @@ class ShaderProgram final: public BindableResource{
 
         const GLuint& program() const;
 
-        const std::unordered_map<std::string,GLint>& uniforms() const;
+        const std::unordered_map<std::string, GLint>& uniforms() const;
 };
 #endif

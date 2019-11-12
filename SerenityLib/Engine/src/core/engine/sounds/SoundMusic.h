@@ -23,12 +23,12 @@ class  SoundMusic : public SoundBaseClass {
         ~SoundMusic();
 
         void update(const double& dt);
-        const bool play(const uint& numLoops = 1);
+        const bool play(const unsigned int& numLoops = 1);
         const bool pause();
         const bool stop(const bool& stopAllLoops = false);
         const bool restart();
         const float getDuration() const;
-        const uint getChannelCount();
+        const unsigned int getChannelCount();
         const float getMinDistance();
         void setMinDistance(const float& minDistance);
         const bool isRelativeToListener();

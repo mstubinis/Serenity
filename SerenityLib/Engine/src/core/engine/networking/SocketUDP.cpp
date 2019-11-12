@@ -1,22 +1,20 @@
 #include <core/engine/networking/SocketUDP.h>
-#include <core/engine/utils/Utils.h>
 
 using namespace Engine;
 using namespace std;
 
-
-Networking::SocketUDP::SocketUDP(const uint _port, const string& _ip){
+Networking::SocketUDP::SocketUDP(const unsigned short _port, const string& _ip){
     m_Socket    = new sf::UdpSocket();
     m_Port      = _port;
     m_IP        = sf::IpAddress(_ip);
 }
 Networking::SocketUDP::~SocketUDP() { 
-    SAFE_DELETE(m_Socket);
+    delete m_Socket;
 }
 const sf::UdpSocket& Networking::SocketUDP::socket() { 
     return *m_Socket; 
 }
-const ushort Networking::SocketUDP::localPort() { 
+const unsigned short Networking::SocketUDP::localPort() {
     return m_Socket->getLocalPort(); 
 }
 void Networking::SocketUDP::setBlocking(bool b) { 
@@ -33,7 +31,6 @@ const sf::Socket::Status Networking::SocketUDP::bind(const string& _ip) {
     }else{ 
         status = m_Socket->bind(m_Port, _ip);
     }
-    //do whatever with status here
     return status;
 }
 void Networking::SocketUDP::unbind() { 
@@ -64,13 +61,13 @@ const sf::Socket::Status Networking::SocketUDP::receive(void* _data, size_t _siz
     return status;
 }
 
-const sf::Socket::Status   Networking::SocketUDP::send(const unsigned short port, sf::Packet& packet, const string& _ip) {
+const sf::Socket::Status Networking::SocketUDP::send(const unsigned short port, sf::Packet& packet, const string& _ip) {
     if (_ip.empty())
         return m_Socket->send(packet, m_IP, port);
     else
         return m_Socket->send(packet, _ip, port);
 }
-const sf::Socket::Status   Networking::SocketUDP::send(const unsigned short port, const void* data, size_t size, const string& _ip) {
+const sf::Socket::Status Networking::SocketUDP::send(const unsigned short port, const void* data, size_t size, const string& _ip) {
     if (_ip.empty())
         return m_Socket->send(data, size, m_IP, port);
     else

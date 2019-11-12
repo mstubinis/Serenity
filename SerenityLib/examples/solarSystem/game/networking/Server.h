@@ -69,14 +69,14 @@ class ServerClient final {
         Core&                            m_Core;
         Server&                          m_Server;
         bool                             m_Validated;
-        uint                             m_ID;
+        unsigned int                     m_ID;
         double                           m_Timeout;
         double                           m_RecoveryTime;
 
-        void internalInit(const std::string& hash, const uint& numClients);
+        void internalInit(const std::string& hash, const unsigned int& numClients);
     public:
         ServerClient(const std::string& hash, Server&, Core&, sf::TcpSocket*);
-        ServerClient(const std::string& hash, Server&, Core&, const ushort& port, const std::string& ipAddress);
+        ServerClient(const std::string& hash, Server&, Core&, const unsigned short& port, const std::string& ipAddress);
         ~ServerClient();
 
         void disconnect();
@@ -119,7 +119,7 @@ class Server {
         std::vector<ServerClientThread*>               m_Threads;
         std::queue<std::string>                        m_ClientsToBeDisconnected;
         Engine::Networking::ListenerTCP*               m_listener;
-        ushort                                         m_port;
+        unsigned short                                 m_port;
         std::atomic<unsigned int>                      m_Active;
         Core&                                          m_Core;
         std::string                                    m_MapName;
@@ -140,7 +140,7 @@ class Server {
         const bool shutdownMap();
 
         const bool isValidName(const std::string& name) const;
-        const uint numClients() const;
+        const unsigned int numClients() const;
 
         const sf::Socket::Status send_to_client(ServerClient&, Packet& packet);
         const sf::Socket::Status send_to_client(ServerClient&, sf::Packet& packet);

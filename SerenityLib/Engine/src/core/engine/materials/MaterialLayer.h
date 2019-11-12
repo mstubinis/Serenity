@@ -59,7 +59,7 @@ class MaterialLayer final{
         void setData1(const float& x, const float& y, const float& z, const float& w);
         void setData2(const float& x, const float& y, const float& z, const float& w);
 
-        void sendDataToGPU(const std::string& uniform_component_string, const unsigned int& component_index, const unsigned int& layer_index, unsigned int& textureUnit);
+        void sendDataToGPU(const std::string& uniform_component_string, const size_t& component_index, const size_t& layer_index, size_t& textureUnit);
 
         const glm::vec2& getUVModifications() const;
 

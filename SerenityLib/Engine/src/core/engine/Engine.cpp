@@ -54,7 +54,7 @@ void EngineCore::init(const EngineOptions& options) {
 
     engine.m_DebugManager._init(options.window_title, options.width, options.height);
     engine.m_RenderManager._init(options.window_title, options.width, options.height);
-    engine.m_PhysicsManager._init(options.window_title, options.width, options.height, static_cast<uint>(engine.m_ThreadManager.cores()));
+    engine.m_PhysicsManager._init(options.window_title, options.width, options.height, static_cast<unsigned int>(engine.m_ThreadManager.cores()));
 
     //init the game here
     Engine::setMousePosition(options.width / 2, options.height / 2);
@@ -83,7 +83,7 @@ void EngineCore::init(const EngineOptions& options) {
 void EngineCore::update_physics(const double& dt) {
     m_DebugManager.stop_clock();
     //It's important that timeStep is always less than maxSubSteps * fixedTimeStep, otherwise you are losing time. dt < maxSubSteps * fixedTimeStep
-    uint maxSubSteps = 0;
+    unsigned int maxSubSteps = 0;
     while (true) {
         ++maxSubSteps;
         if (dt < static_cast<double>(maxSubSteps * PHYSICS_MIN_STEP))
@@ -139,7 +139,7 @@ void EngineCore::render(const double& dt){
 void EngineCore::cleanup(const double& dt) {
     m_ResourceManager.onPostUpdate();
 }
-void EngineCore::on_event_resize(const uint& w, const uint& h, const bool& saveSize){
+void EngineCore::on_event_resize(const unsigned int& w, const unsigned int& h, const bool& saveSize){
     Core::m_Engine->m_RenderManager._resize(w,h);
 
     if(saveSize) 
@@ -181,7 +181,7 @@ void EngineCore::on_event_gained_focus(){
     ev.type = EventType::WindowGainedFocus;
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EngineCore::on_event_text_entered(const uint& unicode){
+void EngineCore::on_event_text_entered(const unsigned int& unicode){
     Game::onTextEntered(unicode); 
 
     EventTextEntered e(unicode);
@@ -190,7 +190,7 @@ void EngineCore::on_event_text_entered(const uint& unicode){
     ev.type = EventType::TextEntered;
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EngineCore::on_event_key_pressed(const uint& key){
+void EngineCore::on_event_key_pressed(const unsigned int& key){
     Core::m_Engine->m_EventManager.onEventKeyPressed(key);
     Game::onKeyPressed(key);
 
@@ -206,7 +206,7 @@ void EngineCore::on_event_key_pressed(const uint& key){
     ev.type = EventType::KeyPressed;
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EngineCore::on_event_key_released(const uint& key){
+void EngineCore::on_event_key_released(const unsigned int& key){
     Core::m_Engine->m_EventManager.onEventKeyReleased(key);
     Game::onKeyReleased(key);
 
@@ -231,7 +231,7 @@ void EngineCore::on_event_mouse_wheel_moved(const int& delta){
     ev.type = EventType::MouseWheelMoved;
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EngineCore::on_event_mouse_button_pressed(const uint& mouseButton){
+void EngineCore::on_event_mouse_button_pressed(const unsigned int& mouseButton){
     Core::m_Engine->m_EventManager.onEventMouseButtonPressed(mouseButton);
     Game::onMouseButtonPressed(mouseButton);
 
@@ -242,7 +242,7 @@ void EngineCore::on_event_mouse_button_pressed(const uint& mouseButton){
     ev.type = EventType::MouseButtonPressed;
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EngineCore::on_event_mouse_button_released(const uint& mouseButton){
+void EngineCore::on_event_mouse_button_released(const unsigned int& mouseButton){
     Core::m_Engine->m_EventManager.onEventMouseButtonReleased(mouseButton);
     Game::onMouseButtonReleased(mouseButton);
 
@@ -287,7 +287,7 @@ void EngineCore::on_event_mouse_left(){
     ev.type = EventType::MouseLeftWindow;
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EngineCore::on_event_joystick_button_pressed(const uint& button, const uint& id){
+void EngineCore::on_event_joystick_button_pressed(const unsigned int& button, const unsigned int& id){
     Game::onJoystickButtonPressed();
 
     EventJoystickButton e(id,button);
@@ -296,7 +296,7 @@ void EngineCore::on_event_joystick_button_pressed(const uint& button, const uint
     ev.type = EventType::JoystickButtonPressed;
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EngineCore::on_event_joystick_button_released(const uint& button, const uint& id){
+void EngineCore::on_event_joystick_button_released(const unsigned int& button, const unsigned int& id){
     Game::onJoystickButtonReleased();
 
     EventJoystickButton e(id,button);
@@ -305,7 +305,7 @@ void EngineCore::on_event_joystick_button_released(const uint& button, const uin
     ev.type = EventType::JoystickButtonReleased;
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EngineCore::on_event_joystick_moved(const uint& id, const float& position, const uint axis){
+void EngineCore::on_event_joystick_moved(const unsigned int& id, const float& position, const unsigned int axis){
     Game::onJoystickMoved();
 
     EventJoystickMoved e(id, (JoystickAxis::Axis)axis,position);
@@ -314,7 +314,7 @@ void EngineCore::on_event_joystick_moved(const uint& id, const float& position, 
     ev.type = EventType::JoystickMoved;
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EngineCore::on_event_joystick_connected(const uint& id){
+void EngineCore::on_event_joystick_connected(const unsigned int& id){
     Game::onJoystickConnected(); 
 
     EventJoystickConnection e(id);
@@ -323,7 +323,7 @@ void EngineCore::on_event_joystick_connected(const uint& id){
     ev.type = EventType::JoystickConnected;
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EngineCore::on_event_joystick_disconnected(const uint& id){
+void EngineCore::on_event_joystick_disconnected(const unsigned int& id){
     Game::onJoystickDisconnected(); 
 
     EventJoystickConnection e(id);

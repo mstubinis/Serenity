@@ -3,20 +3,19 @@
 #define ENGINE_WINDOW_H
 
 #include <memory>
-#include <glm/fwd.hpp>
 #include <SFML/Window.hpp>
-#include <core/engine/utils/Utils.h>
+#include <glm/vec2.hpp>
 
 class Engine_Window final{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        Engine_Window(const char* name, const uint& width, const uint& height);
+        Engine_Window(const char* name, const unsigned int& width, const unsigned int& height);
         ~Engine_Window();
         const char* name() const;
-        glm::uvec2 getSize();
+        const glm::uvec2 getSize();
         void setName(const char* name);
-        void setSize(const uint& width, const uint& height);
+        void setSize(const unsigned int& width, const unsigned int& height);
         void setIcon(const Texture& texture);
         void setIcon(const char* file);
         void setIcon(const std::string& file);
@@ -49,13 +48,13 @@ class Engine_Window final{
         //This is not to be confused with requestFocus().
         void setActive(const bool);
 
-        uint getStyle();
-        bool hasFocus();
-        bool isOpen();
-        bool isFullscreen();
-        bool isActive();
+        const unsigned int getStyle();
+        const bool hasFocus();
+        const bool isOpen();
+        const bool isFullscreen();
+        const bool isActive();
         void setFullScreen(const bool isFullscreen, const bool isWindowedMode = false);
-        void setStyle(const uint& style);
+        void setStyle(const unsigned int& style);
         void display();
 
         //Grab or release the mouse cursor. If set, grabs the mouse cursor inside this window's client area so it may no
@@ -67,9 +66,9 @@ class Engine_Window final{
         //SFML will try to match the given limit as much as it can, but since it internally uses sf::sleep,
         //whose precision depends on the underlying OS, the results may be a little unprecise as well
         //(for example, you can get 65 FPS when requesting 60).
-        void setFramerateLimit(const uint& limit);
+        void setFramerateLimit(const unsigned int& limit);
 
-        uint getFramerateLimit() const;
+        const unsigned int getFramerateLimit() const;
 
         sf::Window& getSFMLHandle() const;
 };

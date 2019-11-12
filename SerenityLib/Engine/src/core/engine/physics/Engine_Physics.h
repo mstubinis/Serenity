@@ -2,9 +2,10 @@
 #ifndef ENGINE_ENGINE_PHYSICS_H
 #define ENGINE_ENGINE_PHYSICS_H
 
-#include <core/engine/utils/Utils.h>
+#include <core/engine/math/Numbers.h>
 #include <glm/vec3.hpp>
 #include <memory>
+#include <vector>
 #include <LinearMath/btVector3.h>
 
 struct Entity;
@@ -27,7 +28,7 @@ namespace epriv{
             PhysicsManager();
             ~PhysicsManager();
 
-            void _init(const char* name, const uint& w, const uint& h, const uint& numCores);
+            void _init(const char* name, const unsigned int& w, const unsigned int& h, const unsigned int& numCores);
 
             void _update(const double& dt, int maxSteps = 1, float = 0.0166666f);
             void _render(Camera& camera);

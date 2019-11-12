@@ -2,7 +2,7 @@
 #ifndef ENGINE_SOUND_BASE_CLASS_H
 #define ENGINE_SOUND_BASE_CLASS_H
 
-#include <core/engine/utils/Utils.h>
+//#include <core/engine/utils/Utils.h>
 #include <glm/vec3.hpp>
 
 struct SoundStatus final {enum Status {
@@ -23,10 +23,10 @@ class SoundBaseClass {
     friend class Engine::epriv::SoundManager;
     protected:
         SoundStatus::Status      m_Status;
-        uint                     m_Loops;
-        uint                     m_CurrentLoop;
+        unsigned int             m_Loops;
+        unsigned int             m_CurrentLoop;
 
-        SoundBaseClass(const uint& numLoops);
+        SoundBaseClass(const unsigned int& numLoops);
     public:
         SoundBaseClass& operator=(const SoundBaseClass&) = delete;
         SoundBaseClass(const SoundBaseClass&) = default;
@@ -35,12 +35,12 @@ class SoundBaseClass {
 
         const SoundStatus::Status& status();
         virtual void update(const double& dt);
-        virtual const bool play(const uint& numLoops = 1);
+        virtual const bool play(const unsigned int& numLoops = 1);
         virtual const bool pause();
         virtual const bool stop();
         virtual const bool restart();
-        const uint getLoopsLeft();
-        virtual const uint getChannelCount();
+        const unsigned int getLoopsLeft();
+        virtual const unsigned int getChannelCount();
         virtual const float getMinDistance();
         virtual void setMinDistance(const float& minDistance);
         virtual const bool isRelativeToListener();

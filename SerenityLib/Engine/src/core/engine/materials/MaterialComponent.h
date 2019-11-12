@@ -19,16 +19,16 @@ class MaterialComponent {
         MaterialComponent(MaterialComponent&& other) noexcept            = delete;
         MaterialComponent& operator=(MaterialComponent&& other) noexcept = delete;
 
-        virtual void bind(const unsigned int& component_index, unsigned int& textureUnit);
+        virtual void bind(const size_t& component_index, size_t& textureUnit);
         virtual void unbind();
 
         MaterialLayer* addLayer(const std::string& textureFile, const std::string& maskFile = "", const std::string& cubemapFile = "");
         MaterialLayer* addLayer(Texture* texture = nullptr, Texture* mask = nullptr, Texture* cubemap = nullptr);
 
-        Texture* texture(const unsigned int& index = 0) const;
-        Texture* mask(const unsigned int& index = 0) const;
-        Texture* cubemap(const unsigned int& index = 0) const;
-        MaterialLayer& layer(const unsigned int& index = 0);
+        Texture* texture(const size_t& index = 0) const;
+        Texture* mask(const size_t& index = 0) const;
+        Texture* cubemap(const size_t& index = 0) const;
+        MaterialLayer& layer(const size_t& index = 0);
 
         const MaterialComponentType::Type& type() const;
 
