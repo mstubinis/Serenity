@@ -388,10 +388,10 @@ void Server::updateAcceptNewClients(Server& server) {
                 if (!leastThread->m_Clients.count(client_address)) {
                     sfClient.setBlocking(false);
                     ServerClient* client = new ServerClient(client_address, server, server.m_Core, sf_client);
-                    server.m_mutex.lock();
+                    server.m_Mutex.lock();
                     leastThread->m_Clients.emplace(client_address, client);
                     leastThread->m_Active.store(1, std::memory_order_relaxed);
-                    server.m_mutex.unlock();
+                    server.m_Mutex.unlock();
                     std::cout << "Server: New client in dictionary: " << client_address << std::endl;
                 }
                 
@@ -437,6 +437,7 @@ void Server::onReceiveUDP() {
 //NOT multithreaded
 void Server::updateRemoveDisconnectedClients(Server& server) {
     while (server.m_ClientsToBeDisconnected.size() > 0) {
+        //std::lock_guard<std::mutex> lock_guard(m_Mutex);
         for (auto& clientThread : server.m_Threads) {
             clientThread->m_Clients.erase(server.m_ClientsToBeDisconnected.front());
         }
@@ -449,6 +450,7 @@ void Server::completely_remove_client(ServerClient& client) {
             string username_cpy = _client.second->m_Username;
             if (client.m_MapKey == _client.second->m_MapKey) {
                 std::cout << "Client: " << username_cpy << " - has been completely removed from the server" << std::endl;
+                std::lock_guard<std::mutex> lock_guard(m_Mutex);
                 clientThread->m_Clients.erase(_client.first);
                 if (clientThread->m_Clients.size() == 0) {
                     clientThread->m_Active.store(0, std::memory_order_relaxed);
@@ -726,9 +728,9 @@ void Server::updateClient(ServerClient& client) {
                     server.send_to_all(pOut1);
 
                     client.disconnect();
-                    server.m_mutex.lock();
+                    server.m_Mutex.lock();
                     server.m_ClientsToBeDisconnected.push(client_address);
-                    server.m_mutex.unlock();
+                    server.m_Mutex.unlock();
                     break;
                 }default: {
                     break;

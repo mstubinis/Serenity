@@ -11,6 +11,7 @@
 #include <thread>
 #include <atomic>
 #include <future>
+#include <mutex>
 
 struct Packet;
 class  Map;
@@ -115,7 +116,7 @@ class Server {
 
         GameplayMode*                                  m_GameplayMode;
         Engine::Networking::SocketUDP*                 m_UdpSocket;
-        sf::Mutex                                      m_mutex;
+        std::mutex                                     m_Mutex;
         std::vector<ServerClientThread*>               m_Threads;
         std::queue<std::string>                        m_ClientsToBeDisconnected;
         Engine::Networking::ListenerTCP*               m_listener;

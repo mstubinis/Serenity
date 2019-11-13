@@ -92,7 +92,7 @@ class ModelInstance final: public BindableResource{
         Mesh* mesh();
         Material* material();
         void* getUserPointer() const;
-        void setUserPointer(void* t);
+        void setUserPointer(void* UserPointer);
         Entity& parent();
 
         const glm::vec4& color() const;

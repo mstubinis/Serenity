@@ -30,7 +30,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& 
     internal_init();
 }
 void ParticleEmitter::internal_init() {
-    m_SpawningTimer = 0.0;
+    m_SpawningTimer = m_Properties->m_SpawnRate - 0.01f;
     m_Timer = 0.0;
     addComponent<ComponentBody>();
 
@@ -102,7 +102,8 @@ void ParticleEmitter::update_multithreaded(const size_t& index, const double& dt
         auto& properties = *m_Properties;
         if (m_SpawningTimer > properties.m_SpawnRate) {
             particleSystem.m_Mutex.lock();
-            particleSystem.add_particle(*this);
+            for(unsigned int i = 0; i < properties.m_ParticlesPerSpawn; ++i)
+                particleSystem.add_particle(*this);
             particleSystem.m_Mutex.unlock();
             m_SpawningTimer = 0.0;
         }
@@ -122,7 +123,8 @@ void ParticleEmitter::update(const size_t& index, const double& dt, epriv::Parti
         m_SpawningTimer += dt;
         auto& properties = *m_Properties;
         if (m_SpawningTimer > properties.m_SpawnRate) {
-            particleSystem.add_particle(*this);
+            for (unsigned int i = 0; i < properties.m_ParticlesPerSpawn; ++i)
+                particleSystem.add_particle(*this);
             m_SpawningTimer = 0.0;
         }
         if (m_Lifetime > 0.0 && m_Timer >= m_Lifetime) {

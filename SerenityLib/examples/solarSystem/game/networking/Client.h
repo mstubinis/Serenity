@@ -84,7 +84,7 @@ class Client{
 
         void changeConnectionDestination(const unsigned short& port, const std::string& ipAddress);
 
-        const sf::Socket::Status connect(const unsigned short& timeout = 0);
+        void connect(const unsigned short& timeout = 0);
         void disconnect();
         void onReceiveTCP();
         void onReceiveUDP();

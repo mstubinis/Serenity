@@ -72,6 +72,8 @@ struct ShipState final { enum State {
 //};};
 
 class Ship: public EntityWrapper, public EventObserver {
+    friend struct ShipModelInstanceBindFunctor;
+    friend struct ShipModelInstanceUnbindFunctor;
     friend struct GameCameraLogicFunctor;
     friend struct HullCollisionFunctor;
     friend  class GameCamera;
@@ -119,6 +121,8 @@ class Ship: public EntityWrapper, public EventObserver {
         double                                         m_DestructionTimerMax;
         double                                         m_RespawnTimer;
         double                                         m_RespawnTimerMax;
+        float                                          m_OfflineGlowFactor;
+        float                                          m_OfflineGlowFactorTimer;
 
         Team&                                          m_Team;
         Client&                                        m_Client;

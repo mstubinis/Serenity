@@ -65,7 +65,7 @@ struct FireInitialAngularFunctor final { float operator()(ParticleEmissionProper
 
 
 void Fire::init() {
-    Regular = new ParticleEmissionProperties(ResourceManifest::SmokeMaterial1, 5.0, 0.04, 1.0f);
+    Regular = new ParticleEmissionProperties(ResourceManifest::SmokeMaterial1, 5.0, 0.04, 1, 1.0f);
     Regular->addMaterial(ResourceManifest::SmokeMaterial2);
     Regular->addMaterial(ResourceManifest::SmokeMaterial3);
 
@@ -80,7 +80,7 @@ void Fire::init() {
     Regular->setInitialAngularVelocityFunctor(FireInitialAngularFunctor());
 
 
-    ShortLived = new ParticleEmissionProperties(ResourceManifest::SmokeMaterial1, 2.0, 0.06, 1.0f);
+    ShortLived = new ParticleEmissionProperties(ResourceManifest::SmokeMaterial1, 2.0, 0.06, 1, 1.0f);
     ShortLived->addMaterial(ResourceManifest::SmokeMaterial2);
     ShortLived->addMaterial(ResourceManifest::SmokeMaterial3);
 

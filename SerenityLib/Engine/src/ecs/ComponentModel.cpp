@@ -186,6 +186,12 @@ const bool ComponentModel::rayIntersectSphere(const ComponentCamera& camera) {
     auto& body = *m_Owner.getComponent<ComponentBody>();
     return Math::rayIntersectSphere(body.position(), m_Radius, camera.m_Eye, camera.getViewVector());
 }
+void ComponentModel::setUserPointer(void* UserPointer) {
+    for (auto& instance : m_ModelInstances) {
+        instance->setUserPointer(UserPointer);
+    }
+}
+
 
 #pragma endregion
 

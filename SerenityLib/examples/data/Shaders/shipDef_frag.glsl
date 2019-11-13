@@ -39,6 +39,7 @@ uniform int Shadeless;
 uniform vec4 Object_Color;
 uniform vec4 Material_F0AndID;
 uniform vec3 Gods_Rays_Color;
+uniform float OfflineGlowFactor;
 
 varying vec3 WorldPosition;
 varying vec2 UV;
@@ -72,6 +73,8 @@ void main(){
         OutNormals = ConstantOneVec2;
         inData.diffuse *= (1.0 + inData.glow);
     }
+    inData.glow *= OfflineGlowFactor;
+
 	float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(inData.metalness,inData.smoothness);
     vec4 GodRays = vec4(Gods_Rays_Color,1.0);
     float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);

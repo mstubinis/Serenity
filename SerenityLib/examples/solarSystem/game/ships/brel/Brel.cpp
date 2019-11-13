@@ -50,6 +50,7 @@ Brel::Brel(const AIType::Type ai_type, Team& team, Client& client, Map& map, con
     model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(),1);
     model.setCustomBindFunctor(ShipModelInstanceBindFunctor(),2);
     model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(),2);
+    model.setUserPointer(this);
 
     const auto mass = updateShipDimensions();
 

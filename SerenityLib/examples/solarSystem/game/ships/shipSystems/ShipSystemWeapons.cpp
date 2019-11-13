@@ -8,6 +8,7 @@
 #include <core/engine/lights/Lights.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/physics/Collision.h>
 
 #include <core/engine/events/Engine_Events.h>
@@ -16,6 +17,9 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <BulletCollision/CollisionShapes/btMultiSphereShape.h>
 #include <glm/gtx/norm.hpp>
+
+#include "../../ships/shipSystems/ShipSystemShields.h"
+#include "../../ships/shipSystems/ShipSystemHull.h"
 
 using namespace Engine;
 using namespace std;
@@ -291,7 +295,7 @@ void PrimaryWeaponCannon::update(const double& dt) {
 
 #pragma region Beam
 
-PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& map, const glm_vec3& _pos, const glm_vec3& _fwd, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime, const unsigned int& _modelIndex, const float& endpointExtraScale, const float& beamSizeExtraScale, const float& RangeInKM) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound, _modelIndex) {
+PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& map, const glm_vec3& _pos, const glm_vec3& _fwd, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime, const unsigned int& _modelIndex, const float& endpointExtraScale, const float& beamSizeExtraScale, const float& RangeInKM, const float& BeamLaunchSpeed) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound, _modelIndex) {
     windupPoints = _windupPts;
     target = nullptr;
     targetCoordinates = glm::vec3(0.0f);
@@ -305,6 +309,7 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& m
     additionalBeamSizeScale = beamSizeExtraScale;
     auto range = RangeInKM * 10.0f;
     rangeInKMSquared = range * range;
+    launchSpeed = BeamLaunchSpeed;
 
     beamLight = new RodLight(_pos, 2.0f, &map);
     beamLight->setAttenuation(LightRange::_7);
@@ -426,6 +431,217 @@ const bool PrimaryWeaponBeam::fire(const double& dt, const glm_vec3& chosen_targ
 const bool PrimaryWeaponBeam::forceFire(const double& dt) {
     return false;
 }
+
+void PrimaryWeaponBeam::internal_update_initial_firing(const double& dt) {
+    auto& firstWindupModel = *firstWindupGraphic.getComponent<ComponentModel>();
+    auto& secondWindupModel = *secondWindupGraphic.getComponent<ComponentModel>();
+    firstWindupModel.show();
+    secondWindupModel.show();
+    firstWindupLight->activate();
+    secondWindupLight->activate();
+    beamLight->activate();
+    state = BeamWeaponState::WindingUp;
+}
+void PrimaryWeaponBeam::internal_update_winding_up(const double& dt) {
+    glm::vec3 firstWindupPos;
+    glm::vec3 secondWindupPos;
+    auto& firstWindupBody = *firstWindupGraphic.getComponent<ComponentBody>();
+    auto& secondWindupBody = *secondWindupGraphic.getComponent<ComponentBody>();
+    auto& firstWindupLightBody = *firstWindupLight->getComponent<ComponentBody>();
+    auto& secondWindupLightBody = *secondWindupLight->getComponent<ComponentBody>();
+
+    auto& firstWindupModel = *firstWindupGraphic.getComponent<ComponentModel>();
+    auto& secondWindupModel = *secondWindupGraphic.getComponent<ComponentModel>();
+
+    auto& beamEndModel = *beamEndPointGraphic.getComponent<ComponentModel>();
+
+    auto& cam = *firstWindupBody.getOwner().scene().getActiveCamera();
+    auto camRotation = cam.getOrientation();
+
+    firstWindupModel.getModel().setOrientation(camRotation);
+    secondWindupModel.getModel().setOrientation(camRotation);
+    beamEndModel.getModel().setOrientation(camRotation);
+
+    const auto chargeSpeedModifier = static_cast<float>(dt) * chargeTimerSpeed;
+    chargeTimer += chargeSpeedModifier;
+
+    //place the windups properly
+    const auto shipRotation = ship.getRotation();
+    const auto shipPosition = ship.getPosition();
+    const auto launcherPosition = shipPosition + Math::rotate_vec3(shipRotation, position);
+    if (soundEffect) {
+        soundEffect->setPosition(launcherPosition);
+    }
+    if (windupPoints.size() == 1) {
+        firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
+    }else{
+        const auto halfCharge = chargeTimer * 0.5f;
+        firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
+        secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
+    }
+    firstWindupBody.setPosition(firstWindupPos);
+    secondWindupBody.setPosition(secondWindupPos);
+    firstWindupLightBody.setPosition(firstWindupPos);
+    secondWindupLightBody.setPosition(secondWindupPos);
+    if (chargeTimer >= 1.0f) {
+        state = BeamWeaponState::Firing;
+        chargeTimer = 1.0f;
+        --numRounds;
+    }
+}
+void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
+    const auto fdt = static_cast<float>(dt);
+    firingTime += fdt;
+    firingTimeShieldGraphicPing += fdt;
+    glm::vec3 firstWindupPos;
+    glm::vec3 secondWindupPos;
+    auto& firstWindupBody = *firstWindupGraphic.getComponent<ComponentBody>();
+    auto& secondWindupBody = *secondWindupGraphic.getComponent<ComponentBody>();
+    auto& firstWindupLightBody = *firstWindupLight->getComponent<ComponentBody>();
+    auto& secondWindupLightBody = *secondWindupLight->getComponent<ComponentBody>();
+
+    auto& firstWindupModel = *firstWindupGraphic.getComponent<ComponentModel>();
+    auto& secondWindupModel = *secondWindupGraphic.getComponent<ComponentModel>();
+    auto& beamLightBody = *beamLight->getComponent<ComponentBody>();
+
+    auto& beamEndBody = *beamEndPointGraphic.getComponent<ComponentBody>();
+    auto& beamEndModel = *beamEndPointGraphic.getComponent<ComponentModel>();
+    auto& body = *beamGraphic.getComponent<ComponentBody>();
+
+    auto& beamModel = *beamGraphic.getComponent<ComponentModel>();
+    auto& beamModelInstance = beamModel.getModel(0);
+    beamEndModel.show();
+    beamModelInstance.show();
+    beamModelInstance.forceRender(true);
+    Ship* targetShip = dynamic_cast<Ship*>(target);
+    const auto shipRotation = ship.getRotation();
+    const auto shipPosition = ship.getPosition();
+    unsigned short group = CollisionFilter::_Custom_2;
+    unsigned short mask = -1;
+    mask = mask & ~CollisionFilter::_Custom_4; //do not ray cast against the convex hull (custom 4)
+    mask = mask & ~CollisionFilter::_Custom_5; //do not ray cast against the shields if they are down
+    mask = mask & ~CollisionFilter::_Custom_2; //and ignore other weapons!
+    auto* shipShields = static_cast<ShipSystemShields*>(ship.getShipSystem(ShipSystemType::Shields));
+    auto* shipHull = static_cast<ShipSystemHull*>(ship.getShipSystem(ShipSystemType::Hull));
+    vector<Entity> ignored; ignored.reserve(3);
+    ignored.push_back(shipShields->getEntity());
+    ignored.push_back(shipHull->getEntity());
+    ignored.push_back(ship.entity());
+    auto target_central_position = glm::vec3(target->getComponent<ComponentBody>()->position());
+
+
+    glm::vec3 target_world_position = target_central_position + targetCoordinates;
+    if (windupPoints.size() == 1) {
+        firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
+    }else{
+        const auto halfCharge = chargeTimer * 0.5f;
+        firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
+        secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
+    }
+
+
+
+
+
+
+    glm::vec3 beam_starting_position = firstWindupPos;
+    glm::vec3 beam_ending_position = firstWindupPos;
+
+    auto rayCastPoints = Physics::rayCast(beam_starting_position, target_world_position, ignored, group, mask);
+    Engine::RayCastResult* closest = nullptr;
+
+    auto lambda_get_closest = [&](vector<Engine::RayCastResult>& vec, float& min_dist, uint& closest_index, Engine::RayCastResult*& closest_, const glm::vec3& startPos_) {
+        for (size_t i = 0; i < vec.size(); ++i) {
+            const auto dist = glm::distance2(vec[i].hitPosition, startPos_);
+            if (dist < min_dist) {
+                min_dist = dist;
+                closest_ = &const_cast<Engine::RayCastResult&>(vec[i]);
+                closest_index = i;
+            }
+        }
+    };
+
+    //get closest 2 points
+    float minDist = 9999999999999.0f;
+    uint closestIndex = 0;
+    lambda_get_closest(rayCastPoints, minDist, closestIndex, closest, beam_starting_position);
+    if (!closest || closest->hitNormal == glm::vec3(0.0f)) {
+        state = BeamWeaponState::JustTurnedOff;
+        return;
+    }
+    if (targetShip) {
+        auto* targetShields = static_cast<ShipSystemShields*>(targetShip->getShipSystem(ShipSystemType::Shields));
+        auto positionModelSpace = (closest->hitPosition - target_central_position) * glm::quat(targetShip->getRotation());
+        const auto side = targetShields->getImpactSide(positionModelSpace);
+        if (targetShields->getHealthCurrent(side) <= 0.0f) {
+            rayCastPoints.erase(rayCastPoints.begin() + closestIndex);
+        }
+        minDist = 9999999999999.0f;
+        closestIndex = 0;
+        lambda_get_closest(rayCastPoints, minDist, closestIndex, closest, beam_starting_position);
+    }
+    target_world_position = closest->hitPosition;
+
+    glm::vec3 vector_to_target = beam_starting_position - target_world_position;
+    float length_to_target = glm::length(vector_to_target);
+    auto normal_to_target = vector_to_target / length_to_target;
+    float end_point_length   = glm::min(firingTime * launchSpeed, length_to_target);
+    float start_point_length = glm::min((firingTimeMax - firingTime) * launchSpeed, length_to_target);
+    end_point_length = glm::max(0.0f, end_point_length);
+    start_point_length = glm::max(0.0f, start_point_length);
+
+    beam_ending_position = firstWindupPos + (-normal_to_target * end_point_length);
+    beam_starting_position = target_world_position - (-normal_to_target * start_point_length);
+
+    const auto len2 = glm::min(start_point_length, end_point_length);
+    glm_quat q;
+    Math::alignTo(q, -normal_to_target);
+    beamModelInstance.setOrientation(q);
+
+    body.setPosition(beam_starting_position);
+    firstWindupBody.setPosition(beam_starting_position);
+    secondWindupBody.setPosition(beam_starting_position);
+    firstWindupLightBody.setPosition(beam_starting_position);
+    secondWindupLightBody.setPosition(beam_starting_position);
+
+    beamEndBody.setPosition(beam_ending_position);
+    const glm::vec3 midpt = Math::midpoint(beam_starting_position, beam_ending_position);
+    beamLightBody.setPosition(midpt);
+    beamLightBody.setRotation(q);
+    beamLight->setRodLength(len2);
+    modifyBeamMesh(beamModel, len2);
+  
+    auto x = firingTimeMax - (len2 / launchSpeed);
+    if (!isInArc(target, arc + 5.0f) && firingTime < x) {
+        firingTime = x;
+    }  
+    if (firingTime >= firingTimeMax) {
+        state = BeamWeaponState::JustTurnedOff;
+    }
+}
+void PrimaryWeaponBeam::internal_update_ending(const double& dt) {
+    auto& firstWindupModel  = *firstWindupGraphic.getComponent<ComponentModel>();
+    auto& secondWindupModel = *secondWindupGraphic.getComponent<ComponentModel>();
+    auto& beamEndModel      = *beamEndPointGraphic.getComponent<ComponentModel>();
+    auto& beamModel         = *beamGraphic.getComponent<ComponentModel>();
+    auto& beamEndBody       = *beamEndPointGraphic.getComponent<ComponentBody>();
+
+    firingTime = 0.0f;
+    chargeTimer = 0.0f;
+    firstWindupModel.hide();
+    secondWindupModel.hide();
+    beamModel.hide();
+    beamEndModel.hide();
+    beamEndBody.setPosition(99999999999999.0f, 9999999999999999999999.0f, 9999999999999999999999999.0f);
+    firstWindupLight->deactivate();
+    secondWindupLight->deactivate();
+    beamLight->deactivate();
+    if (soundEffect) {
+        soundEffect->stop();
+    }
+    state = BeamWeaponState::Off;
+}
+
 void PrimaryWeaponBeam::update(const double& dt) {
     if (numRounds < numRoundsMax) {
         const float fdt = static_cast<float>(dt);

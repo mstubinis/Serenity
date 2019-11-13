@@ -95,13 +95,13 @@ void EngineCore::update_physics(const double& dt) {
 void EngineCore::update_logic(const double& dt){
     m_DebugManager.stop_clock();
     Scene& scene = *Resources::getCurrentScene();
-    auto& ecs = InternalScenePublicInterface::GetECS(scene);
-    update_physics(dt);
+    auto& ecs = InternalScenePublicInterface::GetECS(scene); 
     ecs.preUpdate(scene, dt);
     Game::onPreUpdate(dt);
     Game::update(dt);
     scene.update(dt);
     InternalScenePublicInterface::UpdateParticleSystem(scene, dt);
+    update_physics(dt);
     ecs.update(dt, scene);
     ecs.postUpdate(scene,dt);
     InternalScenePublicInterface::UpdateMaterials(scene, dt);

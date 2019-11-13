@@ -37,9 +37,10 @@ class ParticleEmissionProperties final {
         double                  m_Lifetime;
         double                  m_SpawnRate;
         float                   m_Drag;
+        unsigned int            m_ParticlesPerSpawn;
     public:
         ParticleEmissionProperties();
-        ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate, const float drag = 1.0f);
+        ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate, const unsigned int ParticlesPerSpawn = 1, const float drag = 1.0f);
         ~ParticleEmissionProperties();    
 
 

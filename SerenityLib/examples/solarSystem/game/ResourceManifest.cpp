@@ -231,24 +231,24 @@ void ResourceManifest::init(){
     Material& phaserBeamMat = *((Material*)PhaserBeamMaterial.get());
     phaserBeamMat.setShadeless(true);
     phaserBeamMat.setGlow(1.0f);
-    phaserBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(1.4f, 0.0f);
+    phaserBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(-1.4f, 0.0f);
     phaserBeamMat.getComponent(0).layer(0).setData2(1.0f, 0.25f, 0.0f, 1.0f);
     phaserBeamMat.getComponent(0).layer(0).getTexture()->setFilter(TextureFilter::Nearest);
     auto* phaserLayer = phaserBeamMat.getComponent(0).addLayer();
     phaserLayer->setTexture(BasePath + "data/Textures/Effects/phaser_beam_inside.dds");
-    phaserLayer->addUVModificationSimpleTranslation(1.4f, 0.0f);
+    phaserLayer->addUVModificationSimpleTranslation(-1.4f, 0.0f);
     phaserLayer->setData2(1.0f, 0.7f, 0.0f, 1.0f);
     phaserLayer->getTexture()->setFilter(TextureFilter::Nearest);
 
     Material& plasmaBeamMat = *((Material*)PlasmaBeamMaterial.get());
     plasmaBeamMat.setShadeless(true);
     plasmaBeamMat.setGlow(1.0f);
-    plasmaBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(1.4f, 0.0f);
+    plasmaBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(-1.4f, 0.0f);
     plasmaBeamMat.getComponent(0).layer(0).setData2(0.0f, 0.93f, 0.6f, 1.0f);
     plasmaBeamMat.getComponent(0).layer(0).getTexture()->setFilter(TextureFilter::Nearest);
     auto* plasmaLayer = plasmaBeamMat.getComponent(0).addLayer();
     plasmaLayer->setTexture(BasePath + "data/Textures/Effects/phaser_beam_inside.dds");
-    plasmaLayer->addUVModificationSimpleTranslation(1.4f, 0.0f);
+    plasmaLayer->addUVModificationSimpleTranslation(-1.4f, 0.0f);
     plasmaLayer->setData2(0.53f, 1.0f, 0.73f, 1.0f);
     plasmaLayer->getTexture()->setFilter(TextureFilter::Nearest);
 
@@ -256,12 +256,12 @@ void ResourceManifest::init(){
     Material& disBeamMat = *((Material*)DisruptorBeamMaterial.get());
     disBeamMat.setShadeless(true);
     disBeamMat.setGlow(1.0f);
-    disBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(1.4f, 0.0f);
+    disBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(-1.4f, 0.0f);
     disBeamMat.getComponent(0).layer(0).setData2(0.15f, 0.969f, 0.192f, 1.0f);
     disBeamMat.getComponent(0).layer(0).getTexture()->setFilter(TextureFilter::Nearest);
     auto* disLayer = disBeamMat.getComponent(0).addLayer();
     disLayer->setTexture(BasePath + "data/Textures/Effects/phaser_beam_inside.dds");
-    disLayer->addUVModificationSimpleTranslation(1.4f, 0.0f);
+    disLayer->addUVModificationSimpleTranslation(-1.4f, 0.0f);
     disLayer->setData2(0.632f, 1.0f, 0.0f, 1.0f);
     disLayer->getTexture()->setFilter(TextureFilter::Nearest);
 

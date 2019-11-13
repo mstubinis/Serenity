@@ -279,8 +279,8 @@ void ModelInstance::internalUpdateModelMatrix() {
 void* ModelInstance::getUserPointer() const {
     return m_UserPointer; 
 }
-void ModelInstance::setUserPointer(void* t) {
-    m_UserPointer = t; 
+void ModelInstance::setUserPointer(void* UserPointer) {
+    m_UserPointer = UserPointer;
 }
 Entity& ModelInstance::parent() {
     return m_Parent; 

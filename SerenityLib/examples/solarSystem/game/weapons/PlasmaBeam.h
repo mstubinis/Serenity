@@ -13,12 +13,6 @@ class PlasmaBeam final : public PrimaryWeaponBeam {
     friend struct PlasmaBeamInstanceBindFunctor;
     friend struct PlasmaBeamInstanceUnbindFunctor;
     friend struct PlasmaBeamCollisionFunctor;
-    private:
-        Entity      firstWindupGraphic;
-        Entity      secondWindupGraphic;
-
-        PointLight* firstWindupLight;
-        PointLight* secondWindupLight;
     public:
         PlasmaBeam(
             Ship& ship,
@@ -27,7 +21,7 @@ class PlasmaBeam final : public PrimaryWeaponBeam {
             const glm_vec3& forward,
             const float& arc,
             std::vector<glm::vec3>& windupPts,
-            const float& damage = 450.0f,
+            const float& damage = 300.0f,
             const float& _chargeTimerSpeed = 4.0f,
             const float& _firingTime = 1.05f,
             const float& _impactRadius = 2.5f,
@@ -38,7 +32,8 @@ class PlasmaBeam final : public PrimaryWeaponBeam {
             const unsigned int& _modelIndex = 0,
             const float& endpointExtraScale = 1.0f,
             const float& beamSizeExtraScale = 1.0f,
-            const float& RangeInKM = 10.0f
+            const float& RangeInKM = 10.0f,
+            const float& BeamLaunchSpeed = 235.0f
         );
         ~PlasmaBeam();
 

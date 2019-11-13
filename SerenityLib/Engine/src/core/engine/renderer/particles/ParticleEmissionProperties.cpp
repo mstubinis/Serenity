@@ -55,11 +55,12 @@ ParticleEmissionProperties::ParticleEmissionProperties(){
     setInitialAngularVelocityFunctor(DefaultInitialAngularVelocityFunctor());
 }
 
-ParticleEmissionProperties::ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate, const float drag):ParticleEmissionProperties(){
+ParticleEmissionProperties::ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate, const unsigned int ParticlesPerSpawn, const float drag):ParticleEmissionProperties(){
     m_Lifetime = lifeTime;
     m_Drag = drag;
     m_SpawnRate = spawnRate;
     m_ParticleMaterials.push_back(Resources::getMaterial(materialHandle));
+    m_ParticlesPerSpawn = ParticlesPerSpawn;
 }
 ParticleEmissionProperties::~ParticleEmissionProperties() {
 

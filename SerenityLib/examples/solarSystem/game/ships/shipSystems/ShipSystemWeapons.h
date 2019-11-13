@@ -137,7 +137,6 @@ struct BeamWeaponState final {enum State {
     JustStarted,
     WindingUp,
     Firing,
-    CoolingDown,
     JustTurnedOff,
     Off,
 };};
@@ -154,6 +153,7 @@ struct PrimaryWeaponBeam : public ShipWeapon {
     float                    additionalEndPointScale;
     float                    additionalBeamSizeScale;
     float                    rangeInKMSquared;
+    float                    launchSpeed;
 
     Entity                   beamGraphic;
     Entity                   beamEndPointGraphic;
@@ -162,6 +162,13 @@ struct PrimaryWeaponBeam : public ShipWeapon {
 
     std::vector<glm::vec3>   modPts;
     std::vector<glm::vec2>   modUvs;
+
+    Entity                   firstWindupGraphic;
+    Entity                   secondWindupGraphic;
+
+    PointLight*              firstWindupLight;
+    PointLight*              secondWindupLight;
+
     PrimaryWeaponBeam(
         WeaponType::Type _type,
         Ship& _ship,
@@ -181,7 +188,8 @@ struct PrimaryWeaponBeam : public ShipWeapon {
         const unsigned int& _modelIndex = 0,
         const float& endpointExtraScale = 1.0f,
         const float& beamSizeExtraScale = 1.0f,
-        const float& RangeInKM = 10.0f
+        const float& RangeInKM = 10.0f,
+        const float& BeamLaunchSpeed = 235.0f
     );
     ~PrimaryWeaponBeam();
     const bool canFire();
@@ -193,6 +201,11 @@ struct PrimaryWeaponBeam : public ShipWeapon {
     virtual void update(const double& dt);
 
     void modifyBeamMesh(ComponentModel& beamModel, const float length);
+
+    void internal_update_initial_firing(const double& dt);
+    void internal_update_winding_up(const double& dt);
+    void internal_update_firing(const double& dt);
+    void internal_update_ending(const double& dt);
 };
 
 struct SecondaryWeaponTorpedoPrediction final {

@@ -57,10 +57,13 @@ void epriv::ParticleSystem::internal_update_particles(const double& dt) {
 
 ParticleEmitter* epriv::ParticleSystem::add_emitter(ParticleEmitter& emitter) {
     if (m_ParticleEmitterFreelist.size() > 0) { //first, try to reuse an empty
-        auto freeindex = m_ParticleEmitterFreelist.top();
+        const auto freeindex = m_ParticleEmitterFreelist.top();
+        m_ParticleEmitterFreelist.pop();
+        if (freeindex >= m_ParticleEmitters.size()) {
+            return nullptr;
+        }
         using std::swap;
         swap(m_ParticleEmitters[freeindex], emitter);
-        m_ParticleEmitterFreelist.pop();
         return &m_ParticleEmitters[freeindex];
     }
     if (m_ParticleEmitters.size() < m_ParticleEmitters.capacity()) {
@@ -72,9 +75,12 @@ ParticleEmitter* epriv::ParticleSystem::add_emitter(ParticleEmitter& emitter) {
 const bool epriv::ParticleSystem::add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
     if (m_ParticleFreelist.size() > 0) { //first, try to reuse an empty
         ParticleData data(*emitter.m_Properties);
-        auto freeindex = m_ParticleFreelist.top();
-        m_Particles[freeindex].init(data, emitterPosition, emitterRotation, emitter.m_Parent);
+        const auto freeindex = m_ParticleFreelist.top();
         m_ParticleFreelist.pop();
+        if (freeindex >= m_Particles.size()) {
+            return false;
+        }
+        m_Particles[freeindex].init(data, emitterPosition, emitterRotation, emitter.m_Parent);
         return true;
     }
     if (m_Particles.size() < m_Particles.capacity()) {

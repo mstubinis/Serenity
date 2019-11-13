@@ -52,12 +52,13 @@ using namespace std;
 
 void ShipModelInstanceBindFunctor::operator()(EngineResource* r) const {
     auto& i = *static_cast<ModelInstance*>(r);
+    Entity& parent = i.parent();
     const auto& stage = i.stage();
-    auto& scene = *Resources::getCurrentScene();
+    auto& scene = parent.scene();
     Camera& cam = *scene.getActiveCamera();
     glm::vec3 camPos = cam.getPosition();
-    Entity& parent = i.parent();
     auto& body = *(parent.getComponent<ComponentBody>());
+    Ship& ship = *static_cast<Ship*>(i.getUserPointer());
     glm::mat4 parentModel = body.modelMatrixRendering();
 
     Renderer::sendUniform4Safe("Object_Color", i.color());
@@ -142,6 +143,7 @@ void ShipModelInstanceBindFunctor::operator()(EngineResource* r) const {
         }
     }
     Renderer::sendUniform1Safe("AnimationPlaying", 0);
+    Renderer::sendUniform1("OfflineGlowFactor", ship.m_OfflineGlowFactor);
     glm::mat4 modelMatrix = parentModel * i.modelMatrix();
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
@@ -160,11 +162,29 @@ struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const
     Map& map = static_cast<Map&>(ship.entity().scene());
     switch (ship.m_State) {
         case ShipState::Nominal: {
+            
             if (ship.IsPlayer()) {
                 ship.internal_update_player_you_logic(dt, map);
             }
             if (ship.m_AI) {
                 ship.internal_update_ai(dt, map);
+            }
+            auto* hull = static_cast<ShipSystemHull*>(ship.getShipSystem(ShipSystemType::Hull));
+            if (hull) {
+                auto hull_percent = hull->getHealthPercent();
+                if (hull_percent < 0.15f) {
+                    ship.m_OfflineGlowFactorTimer += static_cast<float>(dt);
+                    if (ship.m_OfflineGlowFactorTimer > 0.2f) {
+                        const auto rand = Helper::GetRandomFloatFromTo(0.0f, 100.0f);
+                        if (rand < 9.0f) {
+                            ship.m_OfflineGlowFactor = 0.0f;
+                        }else{
+                            ship.m_OfflineGlowFactor = 1.0f;
+                        }
+                        ship.m_OfflineGlowFactorTimer = 0.0f;
+                    }
+                }
+
             }
             break;
         }case ShipState::JustFlaggedForDestruction: {
@@ -289,6 +309,8 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
     m_DestructionTimerDecalTimerMax = 0.5;
     m_RespawnTimer = 0.0;
     m_RespawnTimerMax = 120.0;
+    m_OfflineGlowFactor = 1.0f;
+    m_OfflineGlowFactorTimer = 0.0f;
 
     m_AI                      = new AI(ai_type);
     m_ShipClass               = shipClass;
@@ -342,6 +364,7 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
     //derived classes need to add their own ship systems
     modelComponent.setCustomBindFunctor(ShipModelInstanceBindFunctor());
     modelComponent.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor());
+    modelComponent.setUserPointer(this);
 
     internal_calculate_ship_destruction_time_max(modelComponent);
 }
@@ -376,6 +399,8 @@ void Ship::respawn(const glm_vec3& newPosition, const string& nearest_spawn_anch
     if (IsPlayer() && playerCamera) {
         playerCamera->setState(CameraState::Cockpit);
     }
+    m_OfflineGlowFactorTimer = 0.0f;
+    m_OfflineGlowFactor = 1.0f;
 
     modelComponent.show();
     auto& anchorPos = map.getSpawnAnchor(nearest_spawn_anchor)->getPosition();
@@ -468,6 +493,16 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
     m_DestructionTimerCurrent += dt;
     m_DestructionTimerDecalTimer += dt;
 
+    m_OfflineGlowFactorTimer += static_cast<float>(dt);
+    if (m_OfflineGlowFactorTimer > 0.2f) {
+        const auto rand = Helper::GetRandomFloatFromTo(0.0f, 100.0f);
+        if (rand < ((m_DestructionTimerCurrent / m_DestructionTimerMax) * 100.0f) * 0.4f) {
+            m_OfflineGlowFactor = 0.0f;
+        }else{
+            m_OfflineGlowFactor = 1.0f;
+        }
+        m_OfflineGlowFactorTimer = 0.0f;
+    }
     if (m_DestructionTimerDecalTimer > m_DestructionTimerDecalTimerMax) {
         //apply random hull fire decal, particle effect, and small (or large explosion sound at various times)
 
@@ -822,10 +857,12 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     Map& map = static_cast<Map&>(entity().scene());
     WeaponProjectile* proj = nullptr;
 
+    bool forceHull = false;
     if (packet.PacketType == PacketType::Server_To_Client_Projectile_Cannon_Impact) {
         proj = map.getCannonProjectile(packet.projectile_index);
     }else if (packet.PacketType == PacketType::Server_To_Client_Projectile_Torpedo_Impact) {
         proj = map.getTorpedoProjectile(packet.projectile_index);
+        forceHull = true;
     }
     const glm::vec3 impactModelSpacePosition = glm::vec3(packet.impactX, packet.impactY, packet.impactZ);
 
@@ -838,7 +875,7 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     }else{
         auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
         if (hull) {
-            hull->receiveHit(normal, impactModelSpacePosition, rad, packet.damage, static_cast<size_t>(packet.model_index), false, true);
+            hull->receiveHit(normal, impactModelSpacePosition, rad, packet.damage, static_cast<size_t>(packet.model_index), forceHull, true);
         }
     }
     if (proj) {

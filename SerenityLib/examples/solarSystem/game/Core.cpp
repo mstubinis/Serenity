@@ -72,7 +72,7 @@ void Core::startClient(GameplayMode* mode, Team* team, const unsigned short& por
     client.m_Username = name;
     if (!client.m_IsCurrentlyConnecting) {
         client.changeConnectionDestination(port, ip);
-        auto status = m_Client->connect(10);
+        m_Client->connect(10);
     }
 }
 void Core::shutdownClient(const bool& serverShutdownFirst) {

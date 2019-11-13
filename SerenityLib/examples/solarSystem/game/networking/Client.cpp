@@ -110,7 +110,7 @@ void Client::changeConnectionDestination(const unsigned short& port, const strin
     SAFE_DELETE(m_TcpSocket);
     m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
 }
-const sf::Socket::Status Client::connect(const unsigned short& timeout) {
+void Client::connect(const unsigned short& timeout) {
     auto lambda_connect = [&](Client& client, const unsigned short timeout) {
         client.m_IsCurrentlyConnecting = true;
         m_Core.m_Menu->setNormalText("Connecting...", static_cast<float>(timeout) + 3.2f);
@@ -129,7 +129,6 @@ const sf::Socket::Status Client::connect(const unsigned short& timeout) {
     };
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     m_InitialConnectionThread = new std::future<sf::Socket::Status>(std::move(std::async(std::launch::async, lambda_connect, std::ref(*this), timeout)));
-    return m_InitialConnectionThread->get();
 }
 void Client::disconnect() {
     m_TcpSocket->disconnect();
@@ -524,7 +523,7 @@ void Client::on_receive_cloak_update(Packet* basePacket, Map& map) {
     auto info = Helper::SeparateStringByCharacter(pI.data, ',');
     auto& shipclass = info[0];
     auto& shipkey   = info[1];
-    if (map.hasShip(shipkey)) {
+    if (map.hasShip(shipkey) && map.getPlayer()) {
         auto& ships = map.getShips();
         Ship& ship = *ships.at(shipkey);
         ship.updateCloakFromPacket(pI);

@@ -85,6 +85,8 @@ class ComponentModel: public ComponentBaseClass {
 
         const bool rayIntersectSphere(const ComponentCamera& camera);
 
+        void setUserPointer(void* UserPointer);
+
         template<class T> void setCustomBindFunctor(const T& functor, const size_t& index = 0) {
             m_ModelInstances[index]->setCustomBindFunctor(functor);
         }
