@@ -171,4 +171,10 @@ void Ships::init() {
     layer1->setTexture("../data/Textures/Effects/Buzzards.dds");
     layer1->setMask("../data/Ships/nova/nova_Mask_1.dds");
     layer1->addUVModificationSimpleTranslation(0.02f, 0.02f);
+
+    Material& vorchaMat = *((Material*)Database["Vor'cha"].MaterialHandles[0].get());
+    auto* layer2 = vorchaMat.getComponent(0).addLayer();
+    layer2->setTexture("../data/Textures/Effects/Buzzards.dds");
+    layer2->setMask("../data/Ships/vorcha/vorcha_Mask_1.dds");
+    layer2->addUVModificationSimpleTranslation(0.02f, 0.02f);
 }

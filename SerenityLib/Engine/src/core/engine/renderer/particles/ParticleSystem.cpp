@@ -74,17 +74,17 @@ ParticleEmitter* epriv::ParticleSystem::add_emitter(ParticleEmitter& emitter) {
 }
 const bool epriv::ParticleSystem::add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
     if (m_ParticleFreelist.size() > 0) { //first, try to reuse an empty
-        ParticleData data(*emitter.m_Properties);
         const auto freeindex = m_ParticleFreelist.top();
         m_ParticleFreelist.pop();
         if (freeindex >= m_Particles.size()) {
             return false;
         }
+        ParticleData data(*emitter.m_Properties, emitter, m_Particles[freeindex]);
         m_Particles[freeindex].init(data, emitterPosition, emitterRotation, emitter.m_Parent);
         return true;
     }
     if (m_Particles.size() < m_Particles.capacity()) {
-        Particle particle(emitterPosition, emitterRotation, *emitter.m_Properties, emitter.entity().scene(), emitter.m_Parent);
+        Particle particle(emitterPosition, emitterRotation, emitter);
         m_Particles.push_back(std::move(particle));
         return true;
     }

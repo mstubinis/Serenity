@@ -5,6 +5,7 @@
 #include "../../ResourceManifest.h"
 #include "../../Helper.h"
 #include "../../particles/Fire.h"
+#include "../../particles/Sparks.h"
 
 #include <core/engine/renderer/Decal.h>
 #include <core/engine/math/Engine_Math.h>
@@ -62,6 +63,7 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
 
     auto shipRotation = m_Ship.getRotation();
     auto lamda_apply_random_emitter = [&]() {
+        
         auto rand = Helper::GetRandomIntFromTo(0, 100);
         if (rand < 85) {
             auto lifetime = Helper::GetRandomFloatFromTo(32.75f, 46.0f);
@@ -81,7 +83,21 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
             if (emitter) {
                 m_Ship.m_EmittersDestruction.push_back(make_tuple(emitter, modelIndex, impactLocationModelSpace, q));
             }
+
+            ParticleEmitter emitter_1(*Sparks::Burst, m_Map, 0.1f, &m_Ship);
+            EntityDataRequest req1(emitter_1.entity());
+            Engine::Math::alignTo(q, -impactNormal);
+            //q = glm_quat(instance.orientation()) * q;
+            emitter_1.setPosition(finalPos, req1);
+            emitter_1.setRotation(q);
+            auto* emitter1 = m_Map.addParticleEmitter(emitter_1);
+            if (emitter1) {
+                m_Ship.m_EmittersDestruction.push_back(std::make_tuple(emitter, modelIndex, impactLocationModelSpace, q));
+            }
+
+
         }
+        
     };
 
 

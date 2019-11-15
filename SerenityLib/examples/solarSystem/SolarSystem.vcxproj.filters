@@ -429,6 +429,9 @@
     <ClInclude Include="game\particles\Fire.h">
       <Filter>Header Files\Game\Particles</Filter>
     </ClInclude>
+    <ClInclude Include="game\particles\Sparks.h">
+      <Filter>Header Files\Game\Particles</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -648,6 +651,9 @@
       <Filter>Source Files\Game\HUD</Filter>
     </ClCompile>
     <ClCompile Include="game\particles\Fire.cpp">
+      <Filter>Source Files\Game\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="game\particles\Sparks.cpp">
       <Filter>Source Files\Game\Particles</Filter>
     </ClCompile>
   </ItemGroup>

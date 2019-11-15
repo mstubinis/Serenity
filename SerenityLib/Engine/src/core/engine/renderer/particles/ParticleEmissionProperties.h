@@ -23,15 +23,15 @@ class ParticleEmissionProperties final {
         static ParticleEmissionProperties DefaultProperties;
     private:
 
-        std::function<glm::vec4(const double& lifetime, const double& dt)>   m_ColorFunctor;
-        std::function<float(const double& lifetime, const double& dt)>       m_ChangeInAngularVelocityFunctor;
-        std::function<glm::vec3(const double& lifetime, const double& dt)>   m_ChangeInVelocityFunctor;
-        std::function<glm::vec2(const double& lifetime, const double& dt)>   m_ChangeInScaleFunctor;
-        std::function<float(const double& lifetime, const double& dt)>       m_DepthFunctor;
+        std::function<glm::vec4(const double& lifetime, const double& dt, ParticleEmitter*, Particle& particle)>   m_ColorFunctor;
+        std::function<float(const double& lifetime, const double& dt, ParticleEmitter*, Particle& particle)>       m_ChangeInAngularVelocityFunctor;
+        std::function<glm::vec3(const double& lifetime, const double& dt, ParticleEmitter*, Particle& particle)>   m_ChangeInVelocityFunctor;
+        std::function<glm::vec2(const double& lifetime, const double& dt, ParticleEmitter*, Particle& particle)>   m_ChangeInScaleFunctor;
+        std::function<float(const double& lifetime, const double& dt, ParticleEmitter*, Particle& particle)>       m_DepthFunctor;
 
-        std::function<glm::vec3()>   m_InitialVelocityFunctor;
-        std::function<glm::vec2()>   m_InitialScaleFunctor;
-        std::function<float()>       m_InitialAngularVelocityFunctor;
+        std::function<glm::vec3(ParticleEmitter& emitter, Particle& particle, ParticleData& data)>   m_InitialVelocityFunctor;
+        std::function<glm::vec2(ParticleEmitter& emitter, Particle& particle, ParticleData& data)>   m_InitialScaleFunctor;
+        std::function<float(ParticleEmitter& emitter, Particle& particle, ParticleData& data)>       m_InitialAngularVelocityFunctor;
 
         std::vector<Material*>  m_ParticleMaterials;
         double                  m_Lifetime;
@@ -43,6 +43,12 @@ class ParticleEmissionProperties final {
         ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate, const unsigned int ParticlesPerSpawn = 1, const float drag = 1.0f);
         ~ParticleEmissionProperties();    
 
+        /*
+        ParticleEmissionProperties(const ParticleEmissionProperties& other);
+        ParticleEmissionProperties& operator=(const ParticleEmissionProperties& other);
+        ParticleEmissionProperties(ParticleEmissionProperties&& other) noexcept;
+        ParticleEmissionProperties& operator=(ParticleEmissionProperties&& other) noexcept;
+        */
 
         const double& getLifetime() const;
         const double& getSpawnRate() const;
@@ -54,30 +60,30 @@ class ParticleEmissionProperties final {
         const Material& getParticleMaterial(const size_t index = 0) const;
 
         template<typename T> void setColorFunctor(const T& functor) {
-            m_ColorFunctor = std::bind<glm::vec4>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2);
+            m_ColorFunctor = std::bind<glm::vec4>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
         }
         template<typename T> void setChangeInAngularVelocityFunctor(const T& functor) {
-            m_ChangeInAngularVelocityFunctor = std::bind<float>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2);
+            m_ChangeInAngularVelocityFunctor = std::bind<float>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
         }
         template<typename T> void setChangeInVelocityFunctor(const T& functor) {
-            m_ChangeInVelocityFunctor = std::bind<glm::vec3>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2);
+            m_ChangeInVelocityFunctor = std::bind<glm::vec3>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
         }
         template<typename T> void setChangeInScaleFunctor(const T& functor) {
-            m_ChangeInScaleFunctor = std::bind<glm::vec2>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2);
+            m_ChangeInScaleFunctor = std::bind<glm::vec2>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
         }
         template<typename T> void setDepthFunctor(const T& functor) {
-            m_DepthFunctor = std::bind<float>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2);
+            m_DepthFunctor = std::bind<float>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
         }
 
 
         template<typename T> void setInitialVelocityFunctor(const T& functor) {
-            m_InitialVelocityFunctor = std::bind<glm::vec3>(std::move(functor), *this);
+            m_InitialVelocityFunctor = std::bind<glm::vec3>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
         }
         template<typename T> void setInitialScaleFunctor(const T& functor) {
-            m_InitialScaleFunctor = std::bind<glm::vec2>(std::move(functor), *this);
+            m_InitialScaleFunctor = std::bind<glm::vec2>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
         }
         template<typename T> void setInitialAngularVelocityFunctor(const T& functor) {
-            m_InitialAngularVelocityFunctor = std::bind<float>(std::move(functor), *this);
+            m_InitialAngularVelocityFunctor = std::bind<float>(std::move(functor), *this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
         }
 };
 

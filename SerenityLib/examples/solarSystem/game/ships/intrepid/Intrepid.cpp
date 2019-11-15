@@ -26,12 +26,12 @@ Intrepid::Intrepid(const AIType::Type ai_type, Team& team, Client& client, Map& 
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
         if (i == 0)        system = new ShipSystemReactor(_this, 1000);
-        else if (i == 1)   system = new ShipSystemPitchThrusters(_this);
-        else if (i == 2)   system = new ShipSystemYawThrusters(_this);
-        else if (i == 3)   system = new ShipSystemRollThrusters(_this);
+        else if (i == 1)   system = new ShipSystemPitchThrusters(_this, 1.2f);
+        else if (i == 2)   system = new ShipSystemYawThrusters(_this, 1.2f);
+        else if (i == 3)   system = new ShipSystemRollThrusters(_this, 1.25f);
         else if (i == 4)   system = nullptr; //no cloaking device
         else if (i == 5)   system = new ShipSystemShields(_this, map, 11500.0f, 11500.0f, 11500.0f, 11500.0f, 15000.0f, 15000.0f, glm::vec3(0.0f), glm::vec3(1.35f, 1.5f, 1.0f));
-        else if (i == 6)   system = new ShipSystemMainThrusters(_this);
+        else if (i == 6)   system = new ShipSystemMainThrusters(_this, 1.15f);
         else if (i == 7)   system = new ShipSystemWarpDrive(_this);
         else if (i == 8)   system = new ShipSystemSensors(_this, map);
         else if (i == 9)   system = new ShipSystemWeapons(_this);

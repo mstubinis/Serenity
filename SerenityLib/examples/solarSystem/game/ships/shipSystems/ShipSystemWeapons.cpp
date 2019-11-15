@@ -583,8 +583,8 @@ void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
     target_world_position = closest->hitPosition;
 
     glm::vec3 vector_to_target = beam_starting_position - target_world_position;
-    float length_to_target = glm::length(vector_to_target);
-    auto normal_to_target = vector_to_target / length_to_target;
+    const float length_to_target = glm::length(vector_to_target);
+    const auto normal_to_target = vector_to_target / length_to_target;
     float end_point_length   = glm::min(firingTime * launchSpeed, length_to_target);
     float start_point_length = glm::min((firingTimeMax - firingTime) * launchSpeed, length_to_target);
     end_point_length = glm::max(0.0f, end_point_length);
@@ -611,7 +611,7 @@ void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
     beamLight->setRodLength(len2);
     modifyBeamMesh(beamModel, len2);
   
-    auto x = firingTimeMax - (len2 / launchSpeed);
+    const auto x = firingTimeMax - (len2 / launchSpeed);
     if (!isInArc(target, arc + 5.0f) && firingTime < x) {
         firingTime = x;
     }  

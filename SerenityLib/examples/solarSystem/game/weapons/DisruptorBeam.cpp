@@ -24,6 +24,9 @@
 #include <core/engine/renderer/Decal.h>
 #include <core/engine/scene/Camera.h>
 
+#include "../particles/Sparks.h"
+#include <core/engine/renderer/particles/ParticleEmitter.h>
+
 using namespace Engine;
 using namespace std;
 
@@ -56,6 +59,20 @@ struct DisruptorBeamCollisionFunctor final { void operator()(CollisionCallbackEv
                     if (hull && data.otherBody.getUserPointer() == hull) {
                         if (weapon.firingTimeShieldGraphicPing > 1.0f) {
                             hull->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, true, true);
+
+                            Map& map = static_cast<Map&>(otherShip->entity().scene());
+                            ParticleEmitter emitter_(*Sparks::Spray, map, 0.1f, otherShip);
+                            EntityDataRequest req(emitter_.entity());
+                            glm_quat q;
+                            Engine::Math::alignTo(q, -data.normal);
+                            //q = glm_quat(instance.orientation()) * q;
+                            emitter_.setPosition(data.otherHit, req);
+                            emitter_.setRotation(q);
+                            auto* emitter = map.addParticleEmitter(emitter_);
+                            if (emitter) {
+                                otherShip->m_EmittersDestruction.push_back(std::make_tuple(emitter, data.otherModelInstanceIndex, modelSpacePosition, q));
+                            }
+
                             weapon.firingTimeShieldGraphicPing = 0.0f;
                         }else{
                             hull->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, false, false);

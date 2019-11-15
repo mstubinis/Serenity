@@ -226,6 +226,7 @@
     <ClInclude Include="game\networking\Packet.h" />
     <ClInclude Include="game\networking\Server.h" />
     <ClInclude Include="game\particles\Fire.h" />
+    <ClInclude Include="game\particles\Sparks.h" />
     <ClInclude Include="game\Planet.h" />
     <ClInclude Include="game\ResourceManifest.h" />
     <ClInclude Include="game\Ship.h" />
@@ -304,6 +305,7 @@
     <ClCompile Include="game\networking\Packet.cpp" />
     <ClCompile Include="game\networking\Server.cpp" />
     <ClCompile Include="game\particles\Fire.cpp" />
+    <ClCompile Include="game\particles\Sparks.cpp" />
     <ClCompile Include="game\Planet.cpp" />
     <ClCompile Include="game\ResourceManifest.cpp" />
     <ClCompile Include="game\Ship.cpp" />

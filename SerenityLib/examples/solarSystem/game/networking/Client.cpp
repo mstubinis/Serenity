@@ -42,6 +42,7 @@
 #include <core/engine/renderer/particles/ParticleEmissionProperties.h>
 
 #include "../particles/Fire.h"
+#include "../particles/Sparks.h"
 
 #include <iostream>
 
@@ -580,10 +581,11 @@ void Client::on_receive_server_approve_map_entry(Packet* basePacket, Menu& menu)
             map.addParticleEmitter(e);
         }
     }
-    ParticleEmitter e(*Fire::m_Properties, map, 0.0);
+    ParticleEmitter e(*Sparks::Spray, map, 0.0,nullptr);
     e.getComponent<ComponentBody>()->setPosition(playerBody.position());
     map.addParticleEmitter(e);
     */
+    
 
     PacketMessage pOut(pI);
     pOut.PacketType = PacketType::Client_To_Server_Successfully_Entered_Map;
@@ -730,61 +732,72 @@ void Client::onReceiveTCP() {
         if (basePacket && basePacket->validate(sf_packet)) {
             // Data extracted successfully...
             Menu& menu = *m_Core.m_Menu;
-            Map& map = *static_cast<Map*>(Resources::getScene(m_Mapname));
+            Map* map_ptr = static_cast<Map*>(Resources::getScene(m_Mapname));
+            if (map_ptr) {
+                auto& map = *map_ptr;
+                switch (basePacket->PacketType) {
+                    case PacketType::Server_To_Client_Notify_Ship_Of_Respawn: {
+                        on_receive_ship_notified_of_respawn(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Notify_Ship_Of_Impending_Respawn: {
+                        on_receive_ship_notified_of_impending_respawn(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Ship_Was_Just_Destroyed: {
+                        on_receive_ship_was_just_destroyed(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Request_Ship_Current_Info: {
+                        on_receive_client_wants_my_ship_info(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Collision_Event: {
+                        on_receive_collision_event(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Anti_Cloak_Status: {
+                        on_receive_anti_cloak_status(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Projectile_Cannon_Impact: {
+                        on_receive_cannon_impact(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Projectile_Torpedo_Impact: {
+                        on_receive_torpedo_impact(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Client_Left_Map: {
+                        on_receive_client_left_map(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Client_Fired_Cannons: {
+                        on_receive_client_fired_cannons(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Client_Fired_Beams: {
+                        on_receive_client_fired_beams(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Client_Fired_Torpedos: {
+                        on_receive_client_fired_torpedos(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Client_Changed_Target: {
+                        on_receive_target_changed(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Anchor_Creation_Deep_Space_Initial: {
+                        on_receive_create_deep_space_anchor_initial(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Anchor_Creation: {
+                        on_receive_create_deep_space_anchor(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Ship_Health_Update: {
+                        on_receive_health_update(basePacket, map);
+                        break;
+                    }case PacketType::Server_To_Client_Ship_Cloak_Update: {
+                        on_receive_cloak_update(basePacket, map);
+                        break;
+                    }case PacketType::Server_Shutdown: {
+                        on_receive_server_shutdown(basePacket, menu, map);
+                        break;
+                    }default: {
+                        break;
+                    }
+                }
+            }
             switch (basePacket->PacketType) {
-                case PacketType::Server_To_Client_Notify_Ship_Of_Respawn: {
-                    on_receive_ship_notified_of_respawn(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Notify_Ship_Of_Impending_Respawn: {
-                    on_receive_ship_notified_of_impending_respawn(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Ship_Was_Just_Destroyed: {
-                    on_receive_ship_was_just_destroyed(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Request_Ship_Current_Info: {
-                    on_receive_client_wants_my_ship_info(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Collision_Event: {
-                    on_receive_collision_event(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Anti_Cloak_Status: {
-                    on_receive_anti_cloak_status(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Request_GameplayMode: {
+                case PacketType::Server_To_Client_Request_GameplayMode: {
                     on_receive_server_game_mode(basePacket);
-                    break;
-                }case PacketType::Server_To_Client_Projectile_Cannon_Impact: {
-                    on_receive_cannon_impact(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Projectile_Torpedo_Impact: {
-                    on_receive_torpedo_impact(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Client_Left_Map: {
-                    on_receive_client_left_map(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Client_Fired_Cannons: {
-                    on_receive_client_fired_cannons(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Client_Fired_Beams: {
-                    on_receive_client_fired_beams(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Client_Fired_Torpedos: {
-                    on_receive_client_fired_torpedos(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Client_Changed_Target: {
-                    on_receive_target_changed(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Anchor_Creation_Deep_Space_Initial: {
-                    on_receive_create_deep_space_anchor_initial(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Anchor_Creation: {
-                    on_receive_create_deep_space_anchor(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Ship_Health_Update:{
-                    on_receive_health_update(basePacket, map);
-                    break;
-                }case PacketType::Server_To_Client_Ship_Cloak_Update: {
-                    on_receive_cloak_update(basePacket, map);
                     break;
                 }case PacketType::Server_To_Client_New_Client_Entered_Map: {
                     on_receive_new_client_entered_map(basePacket);
@@ -811,9 +824,6 @@ void Client::onReceiveTCP() {
                     break;
                 }case PacketType::Server_To_Client_Reject_Connection: {
                     on_receive_connection_rejected_by_server(basePacket, menu);
-                    break;
-                }case PacketType::Server_Shutdown: {
-                    on_receive_server_shutdown(basePacket, menu, map);
                     break;
                 }default: {
                     break;

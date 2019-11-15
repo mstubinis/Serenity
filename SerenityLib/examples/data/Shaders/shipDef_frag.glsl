@@ -74,12 +74,12 @@ void main(){
         inData.diffuse *= (1.0 + inData.glow);
     }
     inData.glow *= OfflineGlowFactor;
-
-	float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(inData.metalness,inData.smoothness);
+	float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(inData.metalness, inData.smoothness);
     vec4 GodRays = vec4(Gods_Rays_Color,1.0);
     float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);
     inData.diffuse.a *= MaterialBasePropertiesTwo.x;
     gl_FragData[0] = inData.diffuse;
     gl_FragData[1] = vec4(OutNormals, OutMatIDAndAO, OutPackedMetalnessAndSmoothness);
     gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);
+    gl_FragData[3] = inData.diffuse;
 }

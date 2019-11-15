@@ -7,6 +7,7 @@
 
 template<typename T> class Freelist {
     private:
+        T                         m_NULL;
         std::vector<T>            m_Items;
         std::stack<unsigned int>  m_Freelist;
         size_t                    m_Size;
@@ -22,6 +23,7 @@ template<typename T> class Freelist {
         }
         void initialize(const size_t _capacity) {
             m_Items.reserve(_capacity);
+            m_NULL = nullptr;
             for (size_t i = 0; i < _capacity; ++i) {
                 m_Items.push_back(nullptr);
             }
@@ -107,6 +109,8 @@ template<typename T> class Freelist {
             return false;
         }
         T& operator[](const size_t index) {
+            if (index >= m_Items.size())
+                return m_NULL;
             return m_Items[index];
         }
         std::vector<T>& data() {

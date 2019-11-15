@@ -107,8 +107,9 @@ class Ship: public EntityWrapper, public EventObserver {
         void internal_update_ai(const double& dt, Map& map);
         void internal_update_player_you_logic(const double& dt, Map& map);
         void internal_calculate_ship_destruction_time_max(ComponentModel&);
+    public:
+        std::vector<std::tuple<ParticleEmitter*, size_t, glm_vec3, glm_quat>>        m_EmittersDestruction;
     protected:
-        std::vector<std::tuple<ParticleEmitter*,size_t,glm_vec3,glm_quat>>        m_EmittersDestruction;
         std::vector<std::tuple<Decal*,size_t>>                                    m_DamageDecals;
 
 

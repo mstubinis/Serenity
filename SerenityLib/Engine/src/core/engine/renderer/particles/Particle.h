@@ -7,6 +7,7 @@
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+class  Particle;
 class  ParticleEmitter;
 class  ParticleEmissionProperties;
 class  Scene;
@@ -31,7 +32,8 @@ struct ParticleData final {
     bool                         m_Active;
 
     ParticleData();
-    ParticleData(ParticleEmissionProperties& properties);
+    ParticleData(ParticleEmitter& emitter, Particle& particle);
+    ParticleData(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle);
 
     ParticleData(const ParticleData& other);
     ParticleData& operator=(const ParticleData& other);
@@ -42,16 +44,19 @@ struct ParticleData final {
 class Particle {
     friend struct Engine::epriv::InternalScenePublicInterface;
     friend class  Engine::epriv::ParticleSystem;
+    friend struct ParticleData;
     private:
-        ParticleData   m_Data;
-        Material*      m_Material;
-        Scene*         m_Scene;
-        bool           m_Hidden;
-        bool           m_PassedRenderCheck;
-        glm::vec3      m_Position;
+        ParticleEmitter*   m_EmitterSource;
+        Material*          m_Material;
+        Scene*             m_Scene;
+        bool               m_Hidden;
+        bool               m_PassedRenderCheck;
+        glm::vec3          m_Position;
     public:
+        ParticleData       m_Data;
+
         Particle();
-        Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmissionProperties& properties, Scene& scene, Entity& parent);
+        Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& emitter);
         ~Particle();
 
         Particle(const Particle& other);

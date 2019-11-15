@@ -74,8 +74,15 @@ namespace Engine{
             template<typename T> std::vector<std::pair<size_t, size_t>> splitVectorPairs(const std::vector<T>& v, size_t num_cores = 0) {
                 if (num_cores == 0)
                     num_cores = std::thread::hardware_concurrency();
-                const auto vector_size = v.size();
+
                 std::vector<std::pair<size_t, size_t>> outVec;
+                if (v.size() <= num_cores) {
+                    outVec.emplace_back(  std::make_pair(0, v.size() - 1)  );
+                    return outVec;
+                }
+
+
+                const auto vector_size = v.size();
                 outVec.reserve(num_cores);
 
                 size_t c = vector_size / num_cores;

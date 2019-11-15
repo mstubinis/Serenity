@@ -21,7 +21,7 @@ ParticleEmitter::ParticleEmitter() : EntityWrapper(*Resources::getCurrentScene()
     internal_init();
 
 }
-ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, EntityWrapper* parent) : ParticleEmitter(properties, scene, lifetime, parent->entity()){}
+ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, EntityWrapper* parent) : ParticleEmitter(properties, scene, lifetime, (parent) ? parent->entity() : Entity::_null){}
 ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, Entity& parent) : EntityWrapper(scene){
     setProperties(properties);
     m_Active = true;

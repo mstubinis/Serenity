@@ -40,11 +40,6 @@ struct ResourceManifest{
     static Handle HullDamageMaterial2;
     static Handle HullDamageOutline3Material;
     static Handle HullDamageMaterial3;
-    static Handle SmokeMaterial1;
-    static Handle SmokeMaterial2;
-    static Handle SmokeMaterial3;
-    static Handle SparksMaterial1;
-
 
     static Handle EarthSkyMaterial;
     static Handle CrosshairMaterial;

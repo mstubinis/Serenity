@@ -37,9 +37,9 @@ namespace Engine {
                 ParticleSystem();
                 ~ParticleSystem();
 
-                ParticleSystem(const ParticleSystem&) = delete;
-                ParticleSystem& operator=(const ParticleSystem&) = delete;
-                ParticleSystem(ParticleSystem&& other) noexcept = delete;
+                ParticleSystem(const ParticleSystem&)                      = delete;
+                ParticleSystem& operator=(const ParticleSystem&)           = delete;
+                ParticleSystem(ParticleSystem&& other) noexcept            = delete;
                 ParticleSystem& operator=(ParticleSystem&& other) noexcept = delete;
 
 

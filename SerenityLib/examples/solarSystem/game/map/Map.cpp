@@ -49,8 +49,8 @@ namespace boost_io = boost::iostreams;
 Map::Map(GameplayMode& mode, Client& client, const string& n, const string& file):Scene(n), m_Client(client), m_GameplayMode(mode){
     m_Player      = nullptr;
 
-    m_ActiveCannonProjectiles.initialize(2500);
-    m_ActiveTorpedoProjectiles.initialize(2500);
+    m_ActiveCannonProjectiles.initialize(5500);
+    m_ActiveTorpedoProjectiles.initialize(5500);
 
     GameCamera* playerCamera = new GameCamera(0.35f,7000000000.0f,this);
 

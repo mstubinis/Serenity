@@ -17,6 +17,8 @@ namespace Engine {
 };
 class ParticleEmitter final : public EntityWrapper{
     friend class  Engine::epriv::ParticleSystem;
+    friend class  Particle;
+    friend struct ParticleData;
     friend struct Engine::epriv::InternalScenePublicInterface;
     private:
         ParticleEmissionProperties*    m_Properties;
@@ -31,6 +33,11 @@ class ParticleEmitter final : public EntityWrapper{
         ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, EntityWrapper* parent = nullptr);
         ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, Entity& parent = Entity::_null);
         ~ParticleEmitter();
+
+        ParticleEmitter(const ParticleEmitter& other);
+        ParticleEmitter& operator=(const ParticleEmitter& other);
+        ParticleEmitter(ParticleEmitter&& other) noexcept;
+        ParticleEmitter& operator=(ParticleEmitter&& other) noexcept;
 
 
         void setPosition(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request);
@@ -58,11 +65,6 @@ class ParticleEmitter final : public EntityWrapper{
 
         const glm_quat rotation(EntityDataRequest& request);
         const glm_quat rotation();
-
-        ParticleEmitter(const ParticleEmitter& other);
-        ParticleEmitter& operator=(const ParticleEmitter& other);
-        ParticleEmitter(ParticleEmitter&& other) noexcept;
-        ParticleEmitter& operator=(ParticleEmitter&& other) noexcept;
 
         const bool& isActive() const;
 

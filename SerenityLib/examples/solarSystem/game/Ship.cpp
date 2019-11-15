@@ -44,7 +44,7 @@
 
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include "particles/Fire.h"
-
+#include "particles/Sparks.h"
 
 using namespace Engine;
 using namespace std;
@@ -507,7 +507,6 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
         //apply random hull fire decal, particle effect, and small (or large explosion sound at various times)
 
         auto rand = Helper::GetRandomIntFromTo(0, 100);
-
         auto rand2 = Helper::GetRandomFloatFromTo(0.15f, 0.4f) + 0.3f;
 
         m_DestructionTimerDecalTimerMax = rand2;
@@ -532,7 +531,7 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
         auto& norms = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(2);
         const auto randVertexIndex = Helper::GetRandomIntFromTo(size_t(0), verts.size() - 1);
 
-        auto localPos = verts[randVertexIndex] + ((glm::normalize(verts[randVertexIndex])) * 0.03f);
+        auto localPos = verts[randVertexIndex];
         localPos = localPos + instance.position();
         auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
         if (hull) {
@@ -540,29 +539,24 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
             hull->applyDamageDecal(-norms[randVertexIndex], localPos, rand5, modelIndex, true);
         }
 
-
         auto* sound = Sound::playEffect(randSmallSound);
         if (sound) {
             sound->setPosition(getPosition());
             sound->setAttenuation(0.3f);
         }
-
         m_DestructionTimerDecalTimer = 0.0;
     }
-
 
     if (m_DestructionTimerCurrent >= m_DestructionTimerMax) {
         m_DestructionTimerCurrent = 0.0;
         m_DestructionTimerDecalTimer = 0.0;
-
 
         auto rand = Helper::GetRandomIntFromTo(0, 100);
 
         Handle randLargeSound;
         if (rand < 50) {
             randLargeSound = ResourceManifest::SoundExplosionLarge1;
-        }
-        else {
+        }else {
             randLargeSound = ResourceManifest::SoundExplosionLarge2;
         }
         auto* sound = Sound::playEffect(randLargeSound);
@@ -570,8 +564,6 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
             sound->setPosition(getPosition());
             sound->setAttenuation(0.3f);
         }
-
-
         setState(ShipState::JustFlaggedAsFullyDestroyed);
 
         //TODO: alert server?
@@ -616,9 +608,8 @@ void Ship::internal_update_decals(const double& dt, Map& map) {
         auto& modelIndex = std::get<1>(tuple);
 
 
-
         if (modelIndex > 0) {
-            
+           
             auto& instance = shipModel.getModel(modelIndex);
             auto instancePos = glm_vec3(instance.position());
             auto instanceRot = instance.orientation();
@@ -626,14 +617,23 @@ void Ship::internal_update_decals(const double& dt, Map& map) {
             glm_vec3 localPos = instancePos + part1;
 
             decal.setPosition(shipBody.position() + (shipRotation * localPos));
-            decal.setRotation(shipRotation * (glm_quat(instanceRot) * decal.initialRotation()));
-            
+            decal.setRotation(shipRotation * (glm_quat(instanceRot) * decal.initialRotation()));     
         }else {
             decal.setPosition(shipBody.position() + (shipRotation * decal.initialPosition()));
             decal.setRotation(shipRotation * decal.initialRotation());
         }
-
         decal.update(dt);
+
+        const auto rand = Helper::GetRandomIntFromTo(0, 13000);
+        if (rand < 2) {
+            ParticleEmitter emitter_(*Sparks::Spray, map, 3.0, this);
+            EntityDataRequest req(emitter_.entity());
+            auto* emitter = map.addParticleEmitter(emitter_);
+            if (emitter) {
+                m_EmittersDestruction.push_back(make_tuple(emitter, modelIndex, decal.initialPosition(), decal.initialRotation()));
+            }
+        }
+
         if (!decal.active()) {
             removeFromVector(m_DamageDecals, tuple); //might be dangerous
         }

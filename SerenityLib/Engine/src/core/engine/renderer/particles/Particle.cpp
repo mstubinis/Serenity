@@ -12,33 +12,69 @@
 #include <core/engine/materials/Material.h>
 #include <core/engine/math/Engine_Math.h>
 
+#include <iostream>
+
 using namespace std;
 using namespace Engine;
 
-ParticleData::ParticleData(){
-    m_Properties = &ParticleEmissionProperties::DefaultProperties;
-    m_Velocity = m_Properties->m_InitialVelocityFunctor();
-    m_Scale = m_Properties->m_InitialScaleFunctor();
-    m_AngularVelocity = m_Properties->m_InitialAngularVelocityFunctor();
-    m_Active = true;
-    m_Timer = 0.0;
-    m_Depth = 0.0f;
-    m_Angle = 0.0f;
-    m_Color = glm::vec4(1.0f);
+ParticleData::ParticleData() {
+    m_Properties      = &ParticleEmissionProperties::DefaultProperties;
+    m_Active          = true;
+    m_Timer           = 0.0;
+    m_Depth           = 0.0f;
+    m_Angle           = 0.0f;
+    m_Velocity        = glm::vec3(0.0f);
+    m_Scale           = glm::vec2(1.0f);
+    m_AngularVelocity = 0.0f;
+    m_Color           = glm::vec4(1.0f);
 }
-ParticleData::ParticleData(ParticleEmissionProperties& properties){
-    m_Properties = &properties;
-    m_Active = true;
-    m_Timer = 0.0;
-    m_Depth = 0.0f;
-    m_Angle = 0.0f;
-    m_Color = glm::vec4(1.0f);
+ParticleData::ParticleData(ParticleEmitter& emitter, Particle& particle){
+    m_Properties      = &ParticleEmissionProperties::DefaultProperties;
+    m_Active          = true;
+    m_Timer           = 0.0;
+    m_Depth           = 0.0f;
+    m_Angle           = 0.0f;
+    m_Color           = glm::vec4(1.0f);
 
-    auto& randMat = const_cast<Material&>(properties.getParticleMaterialRandom());
+    m_Velocity = m_Properties->m_InitialVelocityFunctor(emitter, particle, *this);
+    auto rotated_initial_velocity = Math::rotate_vec3(emitter.rotation(), m_Velocity);
+    if (!emitter.m_Parent.null()) {
+        auto* body = emitter.m_Parent.getComponent<ComponentBody>();
+        if (body) {
+            m_Velocity = glm::vec3(body->getLinearVelocity()) * m_Properties->m_Drag;
+        }
+    }
+    m_Velocity        += rotated_initial_velocity;
 
-    m_Velocity = properties.m_InitialVelocityFunctor();
-    m_Scale = properties.m_InitialScaleFunctor();
-    m_AngularVelocity = properties.m_InitialAngularVelocityFunctor();
+
+
+    m_Scale           = m_Properties->m_InitialScaleFunctor(emitter, particle, *this);
+    m_AngularVelocity = m_Properties->m_InitialAngularVelocityFunctor(emitter, particle, *this);
+}
+ParticleData::ParticleData(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle){
+    m_Properties      = &properties;
+    m_Active          = true;
+    m_Timer           = 0.0;
+    m_Depth           = 0.0f;
+    m_Angle           = 0.0f;
+    m_Color           = glm::vec4(1.0f);
+
+
+    particle.m_Material = &const_cast<Material&>(properties.getParticleMaterialRandom());
+
+    m_Velocity        = properties.m_InitialVelocityFunctor(emitter, particle, *this);
+    auto rotated_initial_velocity = Math::rotate_vec3(emitter.rotation(), m_Velocity);
+    if (!emitter.m_Parent.null()) {
+        auto* body = emitter.m_Parent.getComponent<ComponentBody>();
+        if (body) {
+            m_Velocity = glm::vec3(body->getLinearVelocity()) * m_Properties->m_Drag;
+        }
+    }
+    m_Velocity        += rotated_initial_velocity;
+
+
+    m_Scale           = properties.m_InitialScaleFunctor(emitter, particle, *this);
+    m_AngularVelocity = properties.m_InitialAngularVelocityFunctor(emitter, particle, *this);
 }
 ParticleData::ParticleData(const ParticleData& other){
     m_Active = other.m_Active;
@@ -92,38 +128,33 @@ ParticleData& ParticleData::operator=(ParticleData&& other) noexcept {
 }
 
 
-
 Particle::Particle(){
-    m_Scene = Resources::getCurrentScene();
-    m_Hidden = false;
+    m_EmitterSource     = nullptr;
+    m_Scene             = Resources::getCurrentScene();
+    m_Hidden            = false;
     m_PassedRenderCheck = false;
-    m_Position = glm::vec3(0.0f);
-    m_Material = Material::Checkers;
+    m_Position          = glm::vec3(0.0f);
+    m_Material          = Material::Checkers;
 }
 
-Particle::Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmissionProperties& properties, Scene& scene, Entity& parent){
-    m_Scene = &scene;
-    m_Material = &const_cast<Material&>(properties.getParticleMaterialRandom());
-    auto data = ParticleData(properties);
-    init(data, emitterPosition, emitterRotation, parent);
+Particle::Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& emitter){
+    m_EmitterSource  = &emitter;
+    m_Scene          = &emitter.entity().scene();
+    auto& properties = *emitter.m_Properties;
+    m_Position       = emitterPosition;
+
+    auto data        = ParticleData(properties, emitter, *this);
+    init(data, emitterPosition, emitterRotation, emitter.m_Parent);
 }
 Particle::~Particle() {
 
 }
 void Particle::init(ParticleData& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation, Entity& parent) {
-    m_Data = data;
-    m_Data.m_Active = true;
-    m_Position = emitterPosition;
-    auto rotated_initial_velocity = Math::rotate_vec3(emitterRotation, m_Data.m_Velocity);
-    if (!parent.null()) {
-        auto* body = parent.getComponent<ComponentBody>();
-        if (body) {
-            m_Data.m_Velocity = glm::vec3(body->getLinearVelocity()) * data.m_Properties->m_Drag;
-        }
-    }
-    m_Data.m_Velocity += rotated_initial_velocity;
-    m_Hidden = false;
+    m_Hidden            = false;
     m_PassedRenderCheck = false;
+    m_Data.m_Active     = true;
+    m_Position          = emitterPosition;
+    m_Data              = data;
 }
 
 Particle::Particle(const Particle& other){
@@ -133,6 +164,7 @@ Particle::Particle(const Particle& other){
     m_Position = other.m_Position;
     m_PassedRenderCheck = other.m_PassedRenderCheck;
     m_Material = other.m_Material;
+    m_EmitterSource = other.m_EmitterSource;
 }
 Particle& Particle::operator=(const Particle& other) {
     if (&other == this)
@@ -143,9 +175,10 @@ Particle& Particle::operator=(const Particle& other) {
     m_Position = other.m_Position;
     m_PassedRenderCheck = other.m_PassedRenderCheck;
     m_Material = other.m_Material;
+    m_EmitterSource = other.m_EmitterSource;
     return *this;
 }
-Particle::Particle(Particle&& other) noexcept {
+Particle::Particle(Particle&& other) noexcept{
     using std::swap;
     swap(m_Data, other.m_Data);
     swap(m_Scene, other.m_Scene);
@@ -153,6 +186,7 @@ Particle::Particle(Particle&& other) noexcept {
     swap(m_Position, other.m_Position);
     swap(m_PassedRenderCheck, other.m_PassedRenderCheck);
     swap(m_Material, other.m_Material);
+    swap(m_EmitterSource, other.m_EmitterSource);
 }
 Particle& Particle::operator=(Particle&& other) noexcept {
     using std::swap;
@@ -162,6 +196,7 @@ Particle& Particle::operator=(Particle&& other) noexcept {
     swap(m_Position, other.m_Position);
     swap(m_PassedRenderCheck, other.m_PassedRenderCheck);
     swap(m_Material, other.m_Material);
+    swap(m_EmitterSource, other.m_EmitterSource);
     return *this;
 }
 
@@ -201,15 +236,15 @@ const double Particle::lifetime() const {
 void Particle::update(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem) {
     if (m_Data.m_Active) {
         m_Data.m_Timer += dt;
-        const auto fdt = static_cast<float>(dt);
-        auto& prop = *m_Data.m_Properties;
+        const auto fdt  = static_cast<float>(dt);
+        auto& prop      = *m_Data.m_Properties;
         
-        m_Data.m_Scale           += prop.m_ChangeInScaleFunctor(m_Data.m_Timer, dt);
-        m_Data.m_Color            = prop.m_ColorFunctor(m_Data.m_Timer, dt);
-        m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt);
+        m_Data.m_Scale           += prop.m_ChangeInScaleFunctor(m_Data.m_Timer, dt , m_EmitterSource, *this);
+        m_Data.m_Color            = prop.m_ColorFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
+        m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
         m_Data.m_Angle           += m_Data.m_AngularVelocity;
-        m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt);
-        //m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt);
+        m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
+        //m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
 
         m_Position               += (m_Data.m_Velocity * fdt);
 
@@ -218,9 +253,9 @@ void Particle::update(const size_t& index, const double& dt, Engine::epriv::Part
         //auto vec = glm::normalize(bodyComponent.position() - camera.getPosition()) * static_cast<decimal>(m_Data.m_Depth);
         //instance.setPosition(glm::vec3(vec));
         if (m_Data.m_Timer >= prop.m_Lifetime) {
-            m_Data.m_Active = false;
-            m_Data.m_Timer = 0.0;
-            m_Hidden = true;
+            m_Data.m_Active  = false;
+            m_Data.m_Timer   = 0.0;
+            m_Hidden         = true;
             particleSystem.m_ParticleFreelist.push(index);
         }
     }
@@ -228,15 +263,15 @@ void Particle::update(const size_t& index, const double& dt, Engine::epriv::Part
 void Particle::update_multithreaded(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem) {
     if (m_Data.m_Active) {
         m_Data.m_Timer += dt;
-        const auto fdt = static_cast<float>(dt);
-        auto& prop = *m_Data.m_Properties;
+        const auto fdt  = static_cast<float>(dt);
+        auto& prop      = *m_Data.m_Properties;
 
-        m_Data.m_Scale           += prop.m_ChangeInScaleFunctor(m_Data.m_Timer, dt);
-        m_Data.m_Color            = prop.m_ColorFunctor(m_Data.m_Timer, dt);
-        m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt);
+        m_Data.m_Scale           += prop.m_ChangeInScaleFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
+        m_Data.m_Color            = prop.m_ColorFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
+        m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
         m_Data.m_Angle           += m_Data.m_AngularVelocity;
-        m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt);
-        //m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt);
+        m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
+        //m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
 
         m_Position               += (m_Data.m_Velocity * fdt);
 
@@ -245,9 +280,9 @@ void Particle::update_multithreaded(const size_t& index, const double& dt, Engin
         //auto vec = glm::normalize(bodyComponent.position() - camera.getPosition()) * static_cast<decimal>(m_Data.m_Depth);
         //instance.setPosition(glm::vec3(vec));
         if (m_Data.m_Timer >= prop.m_Lifetime) {
-            m_Data.m_Active = false;
-            m_Data.m_Timer = 0.0;
-            m_Hidden = true;
+            m_Data.m_Active  = false;
+            m_Data.m_Timer   = 0.0;
+            m_Hidden         = true;
             particleSystem.m_Mutex.lock();
             particleSystem.m_ParticleFreelist.push(index);
             particleSystem.m_Mutex.unlock();

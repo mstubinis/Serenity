@@ -56,10 +56,12 @@ void MaterialLoader::InternalInitBase(Material& material) {
     material.m_UpdatedThisFrame = false;
     material.setShadeless(false);
     material.setGlow(0.0f);
+
+    material.setMetalness(0.0f);
     material.setSmoothness(0.25f);
+
     material.setAlpha(1.0f);
     material.setAO(1.0f);
-    material.setMetalness(0.0f);
     material.setF0Color(0.04f, 0.04f, 0.04f);
     material.setCustomBindFunctor(epriv::DefaultMaterialBindFunctor());
     material.setCustomUnbindFunctor(epriv::DefaultMaterialUnbindFunctor());

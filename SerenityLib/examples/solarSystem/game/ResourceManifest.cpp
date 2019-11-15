@@ -2,6 +2,7 @@
 #include "factions/Faction.h"
 #include "ships/Ships.h"
 #include "particles/Fire.h"
+#include "particles/Sparks.h"
 #include "Planet.h"
 
 #include <core/engine/threading/Engine_ThreadManager.h>
@@ -47,10 +48,6 @@ Handle ResourceManifest::HullDamageOutline2Material;
 Handle ResourceManifest::HullDamageMaterial2;
 Handle ResourceManifest::HullDamageOutline3Material;
 Handle ResourceManifest::HullDamageMaterial3;
-Handle ResourceManifest::SmokeMaterial1;
-Handle ResourceManifest::SmokeMaterial2;
-Handle ResourceManifest::SmokeMaterial3;
-Handle ResourceManifest::SparksMaterial1;
 
 
 Handle ResourceManifest::EarthSkyMaterial;
@@ -201,11 +198,6 @@ void ResourceManifest::init(){
     HullDamageOutline3Material = Resources::loadMaterialAsync("HullDamage3Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_3.dds");
     HullDamageMaterial3 = Resources::loadMaterialAsync("HullDamage3", BasePath + "data/Textures/Effects/hull_dmg.dds");
 
-    SmokeMaterial1 = Resources::loadMaterialAsync("Smoke1", BasePath + "data/Textures/Effects/smoke_1.dds");
-    SmokeMaterial2 = Resources::loadMaterialAsync("Smoke2", BasePath + "data/Textures/Effects/smoke_2.dds");
-    SmokeMaterial3 = Resources::loadMaterialAsync("Smoke3", BasePath + "data/Textures/Effects/smoke_3.dds");
-    SparksMaterial1 = Resources::loadMaterialAsync("Sparks1", BasePath + "data/Textures/Effects/sparks_1.dds");
-
 
     StarFlareMaterial = Resources::loadMaterialAsync("SunFlare", BasePath + "data/Textures/Skyboxes/StarFlare.dds");
     EarthSkyMaterial = Resources::loadMaterialAsync("EarthSky", BasePath + "data/Textures/Planets/Earth.dds");
@@ -219,14 +211,6 @@ void ResourceManifest::init(){
     
     epriv::threading::waitForAll();
 
-    ((Material*)SmokeMaterial1.get())->setShadeless(true);
-    ((Material*)SmokeMaterial2.get())->setShadeless(true);
-    ((Material*)SmokeMaterial3.get())->setShadeless(true);
-    ((Material*)SmokeMaterial1.get())->setGlow(1.0f);
-    ((Material*)SmokeMaterial2.get())->setGlow(1.0f);
-    ((Material*)SmokeMaterial3.get())->setGlow(1.0f);
-    ((Material*)SparksMaterial1.get())->setShadeless(true);
-    ((Material*)SparksMaterial1.get())->setGlow(1.0f);
 
     Material& phaserBeamMat = *((Material*)PhaserBeamMaterial.get());
     phaserBeamMat.setShadeless(true);
@@ -365,7 +349,9 @@ void ResourceManifest::init(){
     SoundExplosionVeryLarge1 = Resources::addSoundData(BasePath + "data/Sounds/effects/explosion_very_large_1.ogg");
 
     Fire::init();
+    Sparks::init();
 }
 void ResourceManifest::destruct() {
     Fire::destruct();
+    Sparks::destruct();
 }

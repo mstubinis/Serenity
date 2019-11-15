@@ -1502,7 +1502,7 @@ epriv::EShaders::particle_frag =
          //this code is for soft particles
     "    vec2 screen_uv = gl_FragCoord.xy / vec2(ScreenData.x, ScreenData.y);\n"
     "    vec3 worldPos = GetWorldPosition(screen_uv, CameraNear, CameraFar);\n"
-    "    float dist = distance(worldPos, WorldPosition) * 2.2;\n" //increasing that number will make the particles fade less from edges, but might increase the risk for sharper edges like without soft particles
+    "    float dist = distance(worldPos, WorldPosition) * 4.2;\n" //increasing that number will make the particles fade less from edges, but might increase the risk for sharper edges like without soft particles
     "    float alpha = clamp(dist, 0.0, 1.0);\n"
     
     "    vec4 color = Object_Color * texture2D(DiffuseTexture, UV); \n"
