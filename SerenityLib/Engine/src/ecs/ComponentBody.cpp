@@ -23,9 +23,10 @@ using namespace Engine::epriv;
 using namespace std;
 
 #pragma region CollisionCallbackParticipant
-CollisionCallbackEventData::CollisionCallbackEventData(ComponentBody& a, ComponentBody& b, glm::vec3& c, glm::vec3& d, glm::vec3& e) :ownerBody(a), otherBody(b), ownerHit(c), otherHit(d), normal(e) {
-    ownerCollisionObj = nullptr;
-    otherCollisionObj = nullptr;
+CollisionCallbackEventData::CollisionCallbackEventData(ComponentBody& a, ComponentBody& b, glm::vec3& c, glm::vec3& d, glm::vec3& e, glm::vec3& f, glm::vec3& g, glm::vec3& h) :
+ownerBody(a), otherBody(b), ownerHit(c), otherHit(d), normalOnB(e), ownerLocalHit(f), otherLocalHit(g), normalFromAB(h) {
+    ownerCollisionObj       = nullptr;
+    otherCollisionObj       = nullptr;
     ownerModelInstanceIndex = 0;
     otherModelInstanceIndex = 0;
 }
@@ -304,17 +305,17 @@ const unsigned long long ComponentBody::getDistanceLL(const Entity& p_Other) {
     const auto& other_position = const_cast<Entity&>(p_Other).getComponent<ComponentBody>()->position();
     return static_cast<unsigned long long>(glm::distance(position(), other_position));
 }
-void ComponentBody::alignTo(const glm_vec3& p_Direction, const decimal p_Speed) {
+void ComponentBody::alignTo(const glm_vec3& p_Direction) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         //recheck this
         btTransform tr;
         rigidBody.getMotionState()->getWorldTransform(tr);
-        //Math::alignTo(Math::btToGLMQuat(tr.getRotation()),direction,speed);
+        //Math::alignTo(Math::btToGLMQuat(tr.getRotation()),direction);
         Math::recalculateForwardRightUp(rigidBody, m_Forward, m_Right, m_Up);
     }else{
         auto& normalData = *data.n;
-        Math::alignTo(normalData.rotation, p_Direction, p_Speed);
+        Math::alignTo(normalData.rotation, p_Direction);
         Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
     }
 }

@@ -65,19 +65,27 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
     if (cp.getDistance() < 0.0f) {
         btCollisionObject* collisionObjectA = const_cast<btCollisionObject*>(colObj0Wrap->getCollisionObject());
         btCollisionObject* collisionObjectB = const_cast<btCollisionObject*>(colObj1Wrap->getCollisionObject());
-        glm::vec3 ptA = Math::btVectorToGLM(cp.getPositionWorldOnA());
-        glm::vec3 ptB = Math::btVectorToGLM(cp.getPositionWorldOnB());
-        glm::vec3 normalOnB = Math::btVectorToGLM(cp.m_normalWorldOnB);
+        
         ComponentBody* _a = static_cast<ComponentBody*>(collisionObjectA->getUserPointer());
         ComponentBody* _b = static_cast<ComponentBody*>(collisionObjectB->getUserPointer());
         if (_a && _b) {
+            glm::vec3 ptA       = Math::btVectorToGLM(cp.getPositionWorldOnA());
+            glm::vec3 ptB       = Math::btVectorToGLM(cp.getPositionWorldOnB());
+            glm::vec3 normalOnB = Math::btVectorToGLM(cp.m_normalWorldOnB);
+
+            glm::vec3 localA = Math::btVectorToGLM(cp.m_localPointA);
+            glm::vec3 localB = Math::btVectorToGLM(cp.m_localPointB);
+
+            glm::vec3 normalA = glm::normalize(ptB - ptA);
+            glm::vec3 normalB = glm::normalize(ptA - ptB);
+
             ComponentBody& a = *_a;
             ComponentBody& b = *_b;
 
-            CollisionCallbackEventData dataA(a, b, ptA, ptB, normalOnB);
+            CollisionCallbackEventData dataA(a, b, ptA, ptB, normalOnB, localA, localB, normalA);
             dataA.ownerCollisionObj = collisionObjectA;
             dataA.otherCollisionObj = collisionObjectB;
-            CollisionCallbackEventData dataB(b, a, ptB, ptA, normalOnB);
+            CollisionCallbackEventData dataB(b, a, ptB, ptA, normalOnB, localB, localA, normalB);
             dataB.ownerCollisionObj = collisionObjectB;
             dataB.otherCollisionObj = collisionObjectA;
 
@@ -148,14 +156,10 @@ class epriv::PhysicsManager::impl final{
                 btPersistentManifold& contactManifold = *dispatcher.getManifoldByIndexInternal(i);
 
                 for (int j = 0; j < contactManifold.getNumContacts(); ++j){
-                    btManifoldPoint& pt = contactManifold.getContactPoint(j);
-                    if (pt.getDistance() < 0.0f){
+                    btManifoldPoint& cp = contactManifold.getContactPoint(j);
+                    if (cp.getDistance() < 0.0f){
                         btCollisionObject* collisionObjectA = const_cast<btCollisionObject*>(contactManifold.getBody0());
                         btCollisionObject* collisionObjectB = const_cast<btCollisionObject*>(contactManifold.getBody1());
-                        glm::vec3 ptA = Math::btVectorToGLM(pt.getPositionWorldOnA());
-                        glm::vec3 ptB = Math::btVectorToGLM(pt.getPositionWorldOnB());
-                        glm::vec3 normalOnB = Math::btVectorToGLM(pt.m_normalWorldOnB);
-
                         auto aPtr = collisionObjectA->getUserPointer();
                         auto bPtr = collisionObjectB->getUserPointer();
                         ComponentBody* _a = static_cast<ComponentBody*>(aPtr);
@@ -164,17 +168,27 @@ class epriv::PhysicsManager::impl final{
                             ComponentBody& a = *_a;
                             ComponentBody& b = *_b;
 
-                            CollisionCallbackEventData dataA(a, b, ptA, ptB, normalOnB);
+                            glm::vec3 ptA = Math::btVectorToGLM(cp.getPositionWorldOnA());
+                            glm::vec3 ptB = Math::btVectorToGLM(cp.getPositionWorldOnB());
+                            glm::vec3 normalOnB = Math::btVectorToGLM(cp.m_normalWorldOnB);
+
+                            glm::vec3 localA = Math::btVectorToGLM(cp.m_localPointA);
+                            glm::vec3 localB = Math::btVectorToGLM(cp.m_localPointB);
+
+                            glm::vec3 normalA = glm::normalize(ptB - ptA);
+                            glm::vec3 normalB = glm::normalize(ptA - ptB);
+
+                            CollisionCallbackEventData dataA(a, b, ptA, ptB, normalOnB, localA, localB, normalA);
                             dataA.ownerCollisionObj = collisionObjectA;
                             dataA.otherCollisionObj = collisionObjectB;
-                            CollisionCallbackEventData dataB(b, a, ptB, ptA, normalOnB);
+                            CollisionCallbackEventData dataB(b, a, ptB, ptA, normalOnB, localB, localA, normalB);
                             dataB.ownerCollisionObj = collisionObjectB;
                             dataB.otherCollisionObj = collisionObjectA;
 
                             a.collisionResponse(dataA);
                             b.collisionResponse(dataB);
 
-                            pt.setDistance((btScalar)9999999999999.0); //hacky way of saying "dont process this again"
+                            cp.setDistance((btScalar)9999999999999.0); //hacky way of saying "dont process this again"
                         }
                     }
                 }

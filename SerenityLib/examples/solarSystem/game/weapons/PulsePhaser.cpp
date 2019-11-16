@@ -41,7 +41,7 @@ struct PulsePhaserCollisionFunctor final { void operator()(CollisionCallbackEven
                     if (shields && data.otherBody.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(modelSpacePosition));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
-                            cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
+                            cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
                             return;
                         }
                     }
@@ -50,12 +50,12 @@ struct PulsePhaserCollisionFunctor final { void operator()(CollisionCallbackEven
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                             if (shields->getHealthCurrent(shieldSide) > 0) {
-                                cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
+                                cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
                                 return;
                             }
                         }
                         */
-                        cannonProjectile.clientToServerImpactHull(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, weapon.impactRadius, weapon.damage, weapon.impactTime, data.otherModelInstanceIndex);
+                        cannonProjectile.clientToServerImpactHull(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, weapon.impactRadius, weapon.damage, weapon.impactTime, data.otherModelInstanceIndex);
                     }
                 }
             }
@@ -183,7 +183,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(EntityWrapper* target, PulsePhaser&
     
     auto data = source.calculatePredictedVector(target, cannonBody, chosen_target_pos);
     auto offset = data.pedictedVector;
-    glm_quat q;
+    glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
     Math::alignTo(q, -offset);
     cannonBody.setRotation(q); //TODO: change rotation based on launching vector
     offset *= glm_vec3(source.travelSpeed);

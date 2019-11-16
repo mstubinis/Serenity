@@ -104,6 +104,12 @@ Vorcha::Vorcha(const AIType::Type ai_type, Team& team, Client& client, Map& map,
     weapons.addPrimaryWeaponCannon(*aft_right_dis_cannon);
 
 
+    auto* dorsal_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(0.0f, 0.535206f, 1.0818f), glm::vec3(0.0f, 0.958169f, -0.169276f), 45.0f, 3, 200.0f);
+    auto* ventral_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(0.0f, -0.080504f, -0.086177f), glm::vec3(0.0f, -1.0f, 0.0f), 45.0f, 3, 200.0f);
+    weapons.addPrimaryWeaponCannon(*dorsal_dis_cannon);
+    weapons.addPrimaryWeaponCannon(*ventral_dis_cannon);
+
+
     vector<glm::vec3> hull_target_points = {
         glm::vec3(0,0.07566f, -2.00476f),
         glm::vec3(0,0.07566f, -1.62338f),

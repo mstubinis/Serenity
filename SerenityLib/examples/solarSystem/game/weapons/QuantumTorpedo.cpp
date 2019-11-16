@@ -44,7 +44,7 @@ struct QuantumTorpedoCollisionFunctor final { void operator()(CollisionCallbackE
                     if (shields && data.otherBody.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(modelSpacePosition));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
-                            torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
+                            torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
                             return;
                         }
                     }
@@ -53,12 +53,12 @@ struct QuantumTorpedoCollisionFunctor final { void operator()(CollisionCallbackE
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                             if (shields->getHealthCurrent(shieldSide) > 0) {
-                                torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
+                                torpedoProjectile.clientToServerImpactShields(false, torpedo.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
                                 return;
                             }
                         }
                         */
-                        torpedoProjectile.clientToServerImpactHull(false, torpedo.m_Map.getClient(), *otherShip, modelSpacePosition, data.normal, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, data.otherModelInstanceIndex);
+                        torpedoProjectile.clientToServerImpactHull(false, torpedo.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, data.otherModelInstanceIndex);
                     }
                 }
             }
@@ -225,7 +225,7 @@ QuantumTorpedoProjectile::QuantumTorpedoProjectile(EntityWrapper* target, Quantu
     auto& offset = data.pedictedVector;
     hasLock      = data.hasLock;
     target       = data.target;
-    glm_quat q;
+    glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
     Math::alignTo(q, -offset);
     body.setRotation(q);
     offset      *= glm_vec3(source.travelSpeed);
@@ -250,7 +250,7 @@ void QuantumTorpedoProjectile::update(const double& dt) {
 
         }
         //flares
-        for (uint i = 0; i < flares.size(); ++i) {
+        for (size_t i = 0; i < flares.size(); ++i) {
             auto& flare = glowModel.getModel(2 + i);
             flare.rotate(flares[i].spin);
         }

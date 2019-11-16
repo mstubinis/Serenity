@@ -31,43 +31,46 @@ using namespace Engine;
 using namespace std;
 
 struct PlasmaBeamCollisionFunctor final { void operator()(CollisionCallbackEventData& data) const {
-    auto phaserShipVoid = data.ownerBody.getUserPointer1();
+    auto plasmaShipVoid = data.ownerBody.getUserPointer1();
     auto otherShipVoid = data.otherBody.getUserPointer1();
-    if (otherShipVoid && phaserShipVoid) {
-        if (otherShipVoid != phaserShipVoid) {//dont hit ourselves!
+    if (otherShipVoid && plasmaShipVoid) {
+        if (otherShipVoid != plasmaShipVoid) {//dont hit ourselves!
             Ship* otherShip = static_cast<Ship*>(otherShipVoid);
             if (otherShip) {
                 auto& weapon = *static_cast<PlasmaBeam*>(data.ownerBody.getUserPointer2());
                 if (weapon.firingTime > 0.0f) {
-                    Ship* sourceShip = static_cast<Ship*>(phaserShipVoid);
+                    auto& otherRotation = otherShip->getRotation();
+                    Ship* sourceShip = static_cast<Ship*>(plasmaShipVoid);
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto modelSpacePosition = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * data.otherBody.rotation());
+                    auto modelSpacePosition = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * otherRotation);
                     auto finalDamage = static_cast<float>(Resources::dt()) * weapon.damage;
+
+
+                    glm::vec3 localNormal = data.normalOnB * glm::quat(otherRotation);
+
                     if (shields && data.otherBody.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(modelSpacePosition));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
                             if (weapon.firingTimeShieldGraphicPing > 0.2f) {
-                                shields->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
+                                shields->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
                                 weapon.firingTimeShieldGraphicPing = 0.0f;
                             }else{
-                                shields->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
+                                shields->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
                             }
                             return;
                         }
                     }
                     if (hull && data.otherBody.getUserPointer() == hull) {
                         if (weapon.firingTimeShieldGraphicPing > 1.0f) {
-                            hull->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, true, true);
+                            hull->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, true, true);
 
 
                             Map& map = static_cast<Map&>(otherShip->entity().scene());
                             ParticleEmitter emitter_(*Sparks::Spray, map, 0.1f, otherShip);
-                            EntityDataRequest req(emitter_.entity());
-                            glm_quat q;
-                            Engine::Math::alignTo(q, -data.normal);
-                            //q = glm_quat(instance.orientation()) * q;
-                            emitter_.setPosition(data.otherHit, req);
+                            glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
+                            Engine::Math::alignTo(q, -localNormal);
+                            emitter_.setPosition(data.otherHit);
                             emitter_.setRotation(q);
                             auto* emitter = map.addParticleEmitter(emitter_);
                             if (emitter) {
@@ -77,7 +80,7 @@ struct PlasmaBeamCollisionFunctor final { void operator()(CollisionCallbackEvent
 
                             weapon.firingTimeShieldGraphicPing = 0.0f;
                         }else{
-                            hull->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, false, false);
+                            hull->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, false, false);
                         }
                     }
                 }
@@ -119,9 +122,9 @@ PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
     const auto plasmaTeal = glm::vec4(0.53f, 1.0f, 0.73f, 1.0f);
 
     auto* model = beamGraphic.addComponent<ComponentModel>(ResourceManifest::PhaserBeamMesh, ResourceManifest::PlasmaBeamMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& beamModel1 = model->getModel(0);
-    beamModel1.hide();
-    beamModel1.setScale(BEAM_SIZE_DEFAULT * additionalBeamSizeScale);
+    auto& beamModelInstance = model->getModel(0);
+    beamModelInstance.hide();
+    beamModelInstance.setScale(BEAM_SIZE_DEFAULT * additionalBeamSizeScale);
 
     auto& firstWindupBody = *firstWindupGraphic.addComponent<ComponentBody>();
     auto& secondWindupBody = *secondWindupGraphic.addComponent<ComponentBody>();
@@ -150,12 +153,10 @@ PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
     secondWindupLight->setAttenuation(LightRange::_7);
     secondWindupLight->deactivate();
 
-    auto& beamModel = *beamGraphic.getComponent<ComponentModel>();
-    auto& beamModelOne = beamModel.getModel();
-    beamModelOne.setUserPointer(this);
-    //beamModelOne.setColor(plasmaGreen);
-    beamModelOne.setCustomBindFunctor(PlasmaBeamInstanceBindFunctor());
-    beamModelOne.setCustomUnbindFunctor(PlasmaBeamInstanceUnbindFunctor());
+    beamModelInstance.setUserPointer(this);
+    //beamModelInstance.setColor(plasmaGreen);
+    beamModelInstance.setCustomBindFunctor(PlasmaBeamInstanceBindFunctor());
+    beamModelInstance.setCustomUnbindFunctor(PlasmaBeamInstanceUnbindFunctor());
 
     beamLight->setColor(plasmaGreen);
 

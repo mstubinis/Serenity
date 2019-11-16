@@ -95,7 +95,7 @@ namespace Math{
     glm::vec3 getUp(const btRigidBody& b);
 
     float getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees = true);
-    void alignTo(glm_quat& o, const glm_vec3& direction, decimal speed=0);
+    void alignTo(glm_quat& o, const glm_vec3& direction);
 
     void setColor(glm::vec3& color, float r, float g, float b);
     void setColor(glm::vec4& color, float r, float g, float b, float a);

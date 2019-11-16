@@ -39,34 +39,37 @@ struct DisruptorBeamCollisionFunctor final { void operator()(CollisionCallbackEv
             if (otherShip) {
                 auto& weapon = *static_cast<DisruptorBeam*>(data.ownerBody.getUserPointer2());
                 if (weapon.firingTime > 0.0f) {
+                    auto& otherRotation = otherShip->getRotation();
                     Ship* sourceShip = static_cast<Ship*>(disruptorShipVoid);
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
-                    auto modelSpacePosition = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * data.otherBody.rotation());
+                    auto modelSpacePosition = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * otherRotation);
                     auto finalDamage = static_cast<float>(Resources::dt()) * weapon.damage;
+
+
+                    glm::vec3 localNormal = data.normalOnB * glm::quat(otherRotation);
+
                     if (shields && data.otherBody.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(modelSpacePosition));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
                             if (weapon.firingTimeShieldGraphicPing > 0.2f) {
-                                shields->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
+                                shields->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
                                 weapon.firingTimeShieldGraphicPing = 0.0f;
                             }else{
-                                shields->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
+                                shields->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
                             }
                             return;
                         }
                     }
                     if (hull && data.otherBody.getUserPointer() == hull) {
                         if (weapon.firingTimeShieldGraphicPing > 1.0f) {
-                            hull->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, true, true);
+                            hull->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, true, true);
 
                             Map& map = static_cast<Map&>(otherShip->entity().scene());
                             ParticleEmitter emitter_(*Sparks::Spray, map, 0.1f, otherShip);
-                            EntityDataRequest req(emitter_.entity());
-                            glm_quat q;
-                            Engine::Math::alignTo(q, -data.normal);
-                            //q = glm_quat(instance.orientation()) * q;
-                            emitter_.setPosition(data.otherHit, req);
+                            glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
+                            Engine::Math::alignTo(q, -localNormal);
+                            emitter_.setPosition(data.otherHit);
                             emitter_.setRotation(q);
                             auto* emitter = map.addParticleEmitter(emitter_);
                             if (emitter) {
@@ -75,7 +78,7 @@ struct DisruptorBeamCollisionFunctor final { void operator()(CollisionCallbackEv
 
                             weapon.firingTimeShieldGraphicPing = 0.0f;
                         }else{
-                            hull->receiveHit(data.normal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, false, false);
+                            hull->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, false, false);
                         }
                     }
                 }
@@ -116,9 +119,9 @@ DisruptorBeam::DisruptorBeam(Ship& ship, Map& map, const glm_vec3& position, con
     const auto disruptorTeal = glm::vec4(0.632f, 1.0f, 0.0f, 1.0f);
 
     auto* model = beamGraphic.addComponent<ComponentModel>(ResourceManifest::PhaserBeamMesh, ResourceManifest::DisruptorBeamMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& beamModel1 = model->getModel(0);
-    beamModel1.hide();
-    beamModel1.setScale(BEAM_SIZE_DEFAULT * additionalBeamSizeScale);
+    auto& beamModelInstance = model->getModel(0);
+    beamModelInstance.hide();
+    beamModelInstance.setScale(BEAM_SIZE_DEFAULT * additionalBeamSizeScale);
 
     auto& firstWindupBody = *firstWindupGraphic.addComponent<ComponentBody>();
     auto& secondWindupBody = *secondWindupGraphic.addComponent<ComponentBody>();
@@ -148,12 +151,10 @@ DisruptorBeam::DisruptorBeam(Ship& ship, Map& map, const glm_vec3& position, con
     secondWindupLight->setAttenuation(LightRange::_7);
     secondWindupLight->deactivate();
 
-    auto& beamModel = *beamGraphic.getComponent<ComponentModel>();
-    auto& beamModelOne = beamModel.getModel();
-    beamModelOne.setUserPointer(this);
-    //beamModelOne.setColor(disruptorGreen);
-    beamModelOne.setCustomBindFunctor(DisruptorBeamInstanceBindFunctor());
-    beamModelOne.setCustomUnbindFunctor(DisruptorBeamInstanceUnbindFunctor());
+    beamModelInstance.setUserPointer(this);
+    //beamModelInstance.setColor(disruptorGreen);
+    beamModelInstance.setCustomBindFunctor(DisruptorBeamInstanceBindFunctor());
+    beamModelInstance.setCustomUnbindFunctor(DisruptorBeamInstanceUnbindFunctor());
 
     beamLight->setColor(disruptorGreen);
 

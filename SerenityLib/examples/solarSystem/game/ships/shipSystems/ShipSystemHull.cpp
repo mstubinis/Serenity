@@ -53,7 +53,7 @@ void ShipSystemHull::destroy() {
     m_HullEntity.destroy();
     m_RechargeTimer = 0.0f;
 }
-void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const size_t modelIndex, const bool forceHullFire) {
+void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormalModelSpace, const glm::vec3& impactLocationLocal, const float& impactRadius, const size_t modelIndex, const bool forceHullFire) {
     auto& model = *m_Ship.getComponent<ComponentModel>();
     auto& instance = model.getModel(modelIndex);
     const auto impactR = impactRadius * 0.16f;
@@ -71,37 +71,29 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
             auto finalPos = m_Ship.getPosition() + Engine::Math::rotate_vec3(shipRotation, impactLocationModelSpace);
 
             ParticleEmitter emitter_(*Fire::ShortLived, m_Map, lifetime, &m_Ship);
-            EntityDataRequest req(emitter_.entity());
 
-            glm_quat q;
-            Engine::Math::alignTo(q, -impactNormal);
-            //q = glm_quat(instance.orientation()) * q;
-            emitter_.setPosition(finalPos, req);
+            glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
+            Engine::Math::alignTo(q, impactNormalModelSpace);
+            emitter_.setPosition(finalPos);
             emitter_.setRotation(q);
 
             auto* emitter = m_Map.addParticleEmitter(emitter_);
             if (emitter) {
                 m_Ship.m_EmittersDestruction.push_back(make_tuple(emitter, modelIndex, impactLocationModelSpace, q));
             }
-
+            
+            glm_quat q1 = glm_quat(1.0, 0.0, 0.0, 0.0);
+            Engine::Math::alignTo(q1, impactNormalModelSpace);
             ParticleEmitter emitter_1(*Sparks::Burst, m_Map, 0.1f, &m_Ship);
-            EntityDataRequest req1(emitter_1.entity());
-            Engine::Math::alignTo(q, -impactNormal);
-            //q = glm_quat(instance.orientation()) * q;
-            emitter_1.setPosition(finalPos, req1);
-            emitter_1.setRotation(q);
+            emitter_1.setPosition(finalPos);
+            emitter_1.setRotation(q1);
             auto* emitter1 = m_Map.addParticleEmitter(emitter_1);
             if (emitter1) {
-                m_Ship.m_EmittersDestruction.push_back(std::make_tuple(emitter, modelIndex, impactLocationModelSpace, q));
+                m_Ship.m_EmittersDestruction.push_back(std::make_tuple(emitter1, modelIndex, impactLocationModelSpace, q1));
             }
-
-
         }
         
     };
-
-
-
     auto& decalList = m_Ship.m_DamageDecals;
     Decal* d = nullptr;
     Decal* d1 = nullptr;
@@ -120,9 +112,9 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         hullDamage = (Material*)ResourceManifest::HullDamageMaterial3.get();
     }
     if (forceHullFire) {
-        d = new Decal(*hullDamageOutline, impactLocationModelSpace, impactNormal, impactR, m_Map, 120);
+        d = new Decal(*hullDamageOutline, impactLocationModelSpace, impactNormalModelSpace, impactR, m_Map, 120);
         decalList.push_back(make_tuple(d, modelIndex));
-        d1 = new Decal(*hullDamage, impactLocationModelSpace, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
+        d1 = new Decal(*hullDamage, impactLocationModelSpace, impactNormalModelSpace, impactR, m_Map, 120, RenderStage::Decals_2);
         decalList.push_back(make_tuple(d1, modelIndex));
 
         lamda_apply_random_emitter();
@@ -133,7 +125,7 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         return;
     }
     if (decalList.size() == 0) {
-        d = new Decal(*hullDamageOutline, impactLocationModelSpace, impactNormal, impactR, m_Map, 120);
+        d = new Decal(*hullDamageOutline, impactLocationModelSpace, impactNormalModelSpace, impactR, m_Map, 120);
         decalList.push_back(make_tuple(d, modelIndex));
         if (cloakingDevice) {
             m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
@@ -152,9 +144,9 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormal, const glm::
         if (nearbys.size() >= 8) {
             return; //forget it, no need to have so many
         }
-        d = new Decal(*hullDamageOutline, impactLocationModelSpace, impactNormal, impactR, m_Map, 120);
+        d = new Decal(*hullDamageOutline, impactLocationModelSpace, impactNormalModelSpace, impactR, m_Map, 120);
         if (nearbys.size() >= 4) {
-            d1 = new Decal(*hullDamage, impactLocationModelSpace, impactNormal, impactR, m_Map, 120, RenderStage::Decals_2);
+            d1 = new Decal(*hullDamage, impactLocationModelSpace, impactNormalModelSpace, impactR, m_Map, 120, RenderStage::Decals_2);
         }
     }
     if (d) {

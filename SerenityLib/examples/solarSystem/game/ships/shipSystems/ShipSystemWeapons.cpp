@@ -16,6 +16,7 @@
 #include <core/engine/scene/Camera.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <BulletCollision/CollisionShapes/btMultiSphereShape.h>
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <glm/gtx/norm.hpp>
 
 #include "../../ships/shipSystems/ShipSystemShields.h"
@@ -296,20 +297,20 @@ void PrimaryWeaponCannon::update(const double& dt) {
 #pragma region Beam
 
 PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& map, const glm_vec3& _pos, const glm_vec3& _fwd, const float& _arc, const float& _dmg, const float& _impactRad, const float& _impactTime, const float& _volume, vector<glm::vec3>& _windupPts,const uint& _maxCharges,const float& _rechargeTimePerRound, const float& _chargeTimerSpeed, const float& _firingTime, const unsigned int& _modelIndex, const float& endpointExtraScale, const float& beamSizeExtraScale, const float& RangeInKM, const float& BeamLaunchSpeed) : ShipWeapon(map, _type, _ship, _pos, _fwd, _arc, _dmg, _impactRad, _impactTime, _volume, _maxCharges, _rechargeTimePerRound, _modelIndex) {
-    windupPoints = _windupPts;
-    target = nullptr;
-    targetCoordinates = glm::vec3(0.0f);
-    chargeTimer = 0.0f;
-    chargeTimerSpeed = _chargeTimerSpeed;
-    state = BeamWeaponState::Off;
-    firingTimeMax = _firingTime;
-    firingTime = 0.0f;
+    windupPoints                = _windupPts;
+    target                      = nullptr;
+    targetCoordinates           = glm::vec3(0.0f);
+    chargeTimer                 = 0.0f;
+    chargeTimerSpeed            = _chargeTimerSpeed;
+    state                       = BeamWeaponState::Off;
+    firingTimeMax               = _firingTime;
+    firingTime                  = 0.0f;
     firingTimeShieldGraphicPing = 0.0f;
-    additionalEndPointScale = endpointExtraScale;
-    additionalBeamSizeScale = beamSizeExtraScale;
-    auto range = RangeInKM * 10.0f;
-    rangeInKMSquared = range * range;
-    launchSpeed = BeamLaunchSpeed;
+    additionalEndPointScale     = endpointExtraScale;
+    additionalBeamSizeScale     = beamSizeExtraScale;
+    auto range                  = RangeInKM * 10.0f;
+    rangeInKMSquared            = range * range;
+    launchSpeed                 = BeamLaunchSpeed;
 
     beamLight = new RodLight(_pos, 2.0f, &map);
     beamLight->setAttenuation(LightRange::_7);
@@ -324,15 +325,14 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& m
     auto& beamModelEnd = modelEndPt.getModel(0);
     beamModelEnd.hide();
 
-    auto& body1 = *beamEndPointGraphic.addComponent<ComponentBody>(CollisionType::Sphere);
+    auto& body1 = *beamEndPointGraphic.addComponent<ComponentBody>(CollisionType::Box);
 
-    btMultiSphereShape& sph = *static_cast<btMultiSphereShape*>(body1.getCollision()->getBtShape());
-    const auto& _scl = btVector3(0.01f, 0.01f, 0.01f);
-    sph.setLocalScaling(_scl);
-    sph.setMargin(0.01f);
-    sph.setImplicitShapeDimensions(_scl);
-    sph.recalcLocalAabb();
-    beamModelEnd.setScale(10.7f * additionalBeamSizeScale);
+    btBoxShape& box = *static_cast<btBoxShape*>(body1.getCollision()->getBtShape());
+    const auto& _scl = btVector3(0.001f, 0.001f, 0.001f);
+    box.setLocalScaling(_scl);
+    box.setMargin(0.01f);
+    box.setImplicitShapeDimensions(_scl);
+    beamModelEnd.setScale(0.17f * additionalBeamSizeScale);
 
     body1.addCollisionFlag(CollisionFlag::NoContactResponse);
     body1.setCollisionGroup(CollisionFilter::_Custom_2); //i belong to weapons (group 2)
@@ -583,9 +583,11 @@ void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
     target_world_position = closest->hitPosition;
 
     glm::vec3 vector_to_target = beam_starting_position - target_world_position;
+
     const float length_to_target = glm::length(vector_to_target);
     const auto normal_to_target = vector_to_target / length_to_target;
-    float end_point_length   = glm::min(firingTime * launchSpeed, length_to_target);
+
+    float end_point_length   = glm::min(firingTime * launchSpeed, length_to_target) - 0.004f;
     float start_point_length = glm::min((firingTimeMax - firingTime) * launchSpeed, length_to_target);
     end_point_length = glm::max(0.0f, end_point_length);
     start_point_length = glm::max(0.0f, start_point_length);
@@ -594,7 +596,7 @@ void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
     beam_starting_position = target_world_position - (-normal_to_target * start_point_length);
 
     const auto len2 = glm::min(start_point_length, end_point_length);
-    glm_quat q;
+    glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
     Math::alignTo(q, -normal_to_target);
     beamModelInstance.setOrientation(q);
 

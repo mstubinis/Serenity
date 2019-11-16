@@ -53,7 +53,7 @@ Decal::Decal(Material& material, const glm_vec3& position, const glm::vec3& hitN
     auto& model = *addComponent<ComponentModel>(Mesh::Cube, &material, ShaderProgram::Decal, stage);
 
     body.setPosition(position);
-    glm_quat q;
+    glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
     Math::alignTo(q, hitNormal);
     body.setRotation(q);
     const decimal factor = static_cast<decimal>(0.2f * size);

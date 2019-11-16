@@ -34,8 +34,11 @@ void ParticleEmitter::internal_init() {
     m_Timer = 0.0;
     addComponent<ComponentBody>();
 
-    //auto& modelComponent = *addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
-    //modelComponent.getModel().setScale(0.1f, 0.1f, 0.1f);
+    /*
+    auto& modelComponent = *addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
+    modelComponent.getModel().setScale(0.01f, 0.01f, 0.1f);
+    modelComponent.getModel().translate(0.0f, 0.0f, 0.1f);
+    */
 }
 ParticleEmitter::~ParticleEmitter() {
 

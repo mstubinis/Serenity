@@ -19,12 +19,24 @@ struct CollisionCallbackEventData final {
     ComponentBody& otherBody;
     glm::vec3& ownerHit;
     glm::vec3& otherHit;
-    glm::vec3& normal;
+    glm::vec3& ownerLocalHit;
+    glm::vec3& otherLocalHit;
+    glm::vec3& normalOnB;
+    glm::vec3& normalFromAB;
     btCollisionObject* ownerCollisionObj;
     btCollisionObject* otherCollisionObj;
     size_t ownerModelInstanceIndex;
     size_t otherModelInstanceIndex;
-    CollisionCallbackEventData(ComponentBody& ownerBody_, ComponentBody& otherBody_, glm::vec3& ownerHit_, glm::vec3& otherHit_, glm::vec3& normal_);
+    CollisionCallbackEventData(
+        ComponentBody& ownerBody_,
+        ComponentBody& otherBody_,
+        glm::vec3& ownerHit_,
+        glm::vec3& otherHit_,
+        glm::vec3& normal_,
+        glm::vec3& ownerLocalHit_,
+        glm::vec3& otherLocalHit_,
+        glm::vec3& normalFromAB_
+    );
 };
 
 struct ScreenBoxCoordinates {
@@ -132,7 +144,7 @@ class ComponentBody : public ComponentBaseClass {
         const unsigned short getCollisionMask() const;  //get the groups this body will register collisions with
         const unsigned short getCollisionFlags() const;
 
-        void alignTo(const glm_vec3& direction, const decimal speed);
+        void alignTo(const glm_vec3& direction);
 
         void translate(const glm_vec3& translation, const bool local = true);
         void translate(const decimal& x, const decimal& y, const decimal& z, const bool local = true);

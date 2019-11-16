@@ -292,8 +292,8 @@ struct HullCollisionFunctor final { void operator()(CollisionCallbackEventData& 
 
                         ownerShip->m_Client.send(pOut);
 
-                        ownerHull->receiveCollisionVisual(data.normal, ownerLocal, damageRadiusOwner, data.ownerModelInstanceIndex);
-                        otherHull->receiveCollisionVisual(data.normal, otherLocal, damageRadiusOther, data.otherModelInstanceIndex);
+                        ownerHull->receiveCollisionVisual(data.normalOnB, ownerLocal, damageRadiusOwner, data.ownerModelInstanceIndex);
+                        otherHull->receiveCollisionVisual(data.normalOnB, otherLocal, damageRadiusOther, data.otherModelInstanceIndex);
                     }
                 }
             }
@@ -307,10 +307,10 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
     m_DestructionTimerCurrent = 0.0;
     m_DestructionTimerDecalTimer = 0.0;
     m_DestructionTimerDecalTimerMax = 0.5;
-    m_RespawnTimer = 0.0;
-    m_RespawnTimerMax = 120.0;
-    m_OfflineGlowFactor = 1.0f;
-    m_OfflineGlowFactorTimer = 0.0f;
+    m_RespawnTimer            = 0.0;
+    m_RespawnTimerMax         = 120.0;
+    m_OfflineGlowFactor       = 1.0f;
+    m_OfflineGlowFactorTimer  = 0.0f;
 
     m_AI                      = new AI(ai_type);
     m_ShipClass               = shipClass;
@@ -406,7 +406,7 @@ void Ship::respawn(const glm_vec3& newPosition, const string& nearest_spawn_anch
     auto& anchorPos = map.getSpawnAnchor(nearest_spawn_anchor)->getPosition();
     bodyComponent.setPosition(anchorPos + newPosition);
     auto vec = glm::normalize(newPosition);
-    glm_quat q;
+    glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
     Engine::Math::alignTo(q, vec);
     bodyComponent.setRotation(q);
     setState(ShipState::Nominal);
@@ -528,15 +528,19 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
         auto& instance = shipModelComponent.getModel(modelIndex);
         auto& mesh = *instance.mesh();
         auto& verts = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(0);
-        auto& norms = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(2);
+        auto& norms = const_cast<VertexData&>(mesh.getVertexData()).getData<std::uint32_t>(2);
         const auto randVertexIndex = Helper::GetRandomIntFromTo(size_t(0), verts.size() - 1);
 
-        auto localPos = verts[randVertexIndex];
+
+        auto localNormal = glm::normalize(Math::unpack3NormalsFrom32Int(norms[randVertexIndex]));
+
+        auto localPos    = verts[randVertexIndex];
+
         localPos = localPos + instance.position();
         auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
         if (hull) {
             auto rand5 = Helper::GetRandomFloatFromTo(2.5f, 4.4f);
-            hull->applyDamageDecal(-norms[randVertexIndex], localPos, rand5, modelIndex, true);
+            hull->applyDamageDecal(localNormal, localPos, rand5, modelIndex, true);
         }
 
         auto* sound = Sound::playEffect(randSmallSound);
@@ -572,10 +576,10 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
 void Ship::internal_update_damage_emitters(const double& dt, Map& map) {
     for (auto& ptr : m_EmittersDestruction) {
 
-        auto& emitter = *std::get<0>(ptr);
-        auto& modelIndex = std::get<1>(ptr);
-        auto& initialPos = std::get<2>(ptr);
-        auto& initialRot = std::get<3>(ptr);
+        auto& emitter    = *std::get<0>(ptr);
+        auto& modelIndex =  std::get<1>(ptr);
+        auto& initialPos =  std::get<2>(ptr);
+        auto& initialRot =  std::get<3>(ptr);
 
         auto& shipBody = *getComponent<ComponentBody>();
         auto& shipModel = *getComponent<ComponentModel>();
@@ -607,9 +611,7 @@ void Ship::internal_update_decals(const double& dt, Map& map) {
         auto& decal = *decal_ptr;
         auto& modelIndex = std::get<1>(tuple);
 
-
-        if (modelIndex > 0) {
-           
+        if (modelIndex > 0) {      
             auto& instance = shipModel.getModel(modelIndex);
             auto instancePos = glm_vec3(instance.position());
             auto instanceRot = instance.orientation();
@@ -627,7 +629,6 @@ void Ship::internal_update_decals(const double& dt, Map& map) {
         const auto rand = Helper::GetRandomIntFromTo(0, 13000);
         if (rand < 2) {
             ParticleEmitter emitter_(*Sparks::Spray, map, 3.0, this);
-            EntityDataRequest req(emitter_.entity());
             auto* emitter = map.addParticleEmitter(emitter_);
             if (emitter) {
                 m_EmittersDestruction.push_back(make_tuple(emitter, modelIndex, decal.initialPosition(), decal.initialRotation()));
@@ -1197,5 +1198,9 @@ SecondaryWeaponTorpedo& Ship::getSecondaryWeaponTorpedo(const uint index) {
     return *weapons.m_SecondaryWeaponsTorpedos[index];
 }
 void Ship::update(const double& dt) {
-
+    if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
+        //foldWingsUp();
+        //foldWingsDown();
+        setState(ShipState::UndergoingDestruction);
+    }
 }

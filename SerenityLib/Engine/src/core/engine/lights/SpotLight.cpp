@@ -14,7 +14,7 @@ SpotLight::SpotLight(const glm::vec3 pos, const glm::vec3 direction, const float
 
     auto body = getComponent<ComponentBody>();
     if (body) {//evil, but needed for now... find out why...
-        body->alignTo(direction, 0);
+        body->alignTo(direction);
     }
 
     if (m_Type == LightType::Spot) {

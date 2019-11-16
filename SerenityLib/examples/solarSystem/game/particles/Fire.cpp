@@ -57,9 +57,13 @@ struct FireDepthFunctor final { float operator()(ParticleEmissionProperties& pro
 
 struct FireInitialVelocityFunctor final { glm::vec3 operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle, ParticleData& data) const {
     const auto random_amount_x = (static_cast<float>((rand() % 101) - 50) / 50.0f);
-    const auto random_amount_y = (static_cast<float>((rand() % 10)  + 40) / 100.0f); 
-    const auto random_amount_z = (static_cast<float>((rand() % 101) - 50) / 50.0f);
-    return glm::vec3(random_amount_x * 0.03f, random_amount_y * 0.22f, random_amount_z * 0.03f);
+    const auto random_amount_y = (static_cast<float>((rand() % 101) - 50) / 50.0f); 
+    const auto random_amount_z = (static_cast<float>((rand() % 10) + 40) / 100.0f);
+
+    const auto final_x = random_amount_x * 0.03f;
+    const auto final_y = random_amount_y * 0.03f;
+    const auto final_z = random_amount_z * 0.22f;
+    return glm::vec3(final_x, final_y, final_z);
 }};
 struct FireInitialScaleFunctor final { glm::vec2 operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle, ParticleData& data) const {
     return glm::vec2(0.076f);
