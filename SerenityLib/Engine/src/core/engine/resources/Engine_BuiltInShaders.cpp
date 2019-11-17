@@ -340,7 +340,7 @@ epriv::EShaders::decal_frag =
     "    if ( x < 0.0 || y < 0.0 || z < 0.0 || length(WorldPosition) > 500.0) {\n" //hacky way of eliminating against skybox
     "        discard;\n"
     "    }\n"
-    "    vec2 uvs = (ObjectPosition.xz + 1.0) * 0.5;\n"
+    "    vec2 uvs = (ObjectPosition.xy + 1.0) * 0.5;\n"
     //normal mapping...
     /*
 vec3 ddxWp = ddx(WorldPosition);

@@ -147,36 +147,10 @@ void SensorStatusDisplay::render() {
             color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f); //yellow (neutral)
         }
         auto otherVector = other_ship.getPosition() - myPos;
-        /*
-        auto* cloakingDevice = static_cast<ShipSystemCloakingDevice*>(other_ship.getShipSystem(ShipSystemType::CloakingDevice));
-        auto modByCloak = false;
-        if (cloakingDevice && !other_ship.isAlly(ship)) {
-            auto timer = cloakingDevice->getCloakTimer();
-            //1.0 - see, 0.0 or below is invisible
-            if (timer < 1.0f) {
-                timer = glm::max(0.0f, timer);
-                auto invTimer = 1.0f - timer;
-                const auto _small = radarRange * 0.03f;
-                const auto _large = radarRange * 0.22f;
-                auto randX2 = Helper::GetRandomFloatFromTo(-_small, _small);
-                auto randY2 = Helper::GetRandomFloatFromTo(-_small, _small);
-                auto randZ2 = Helper::GetRandomFloatFromTo(-_small, _small);
-                auto randX = Helper::GetRandomFloatFromTo((-_large + randX2) * invTimer, (_large + randX2) * invTimer);
-                auto randY = Helper::GetRandomFloatFromTo((-_large + randY2) * invTimer, (_large + randY2) * invTimer);
-                auto randZ = Helper::GetRandomFloatFromTo((-_large + randZ2) * invTimer, (_large + randZ2) * invTimer);
-                color.r = 1.0f; //cannot tell if cloaked vessel is enemy or not
-                color.g = 1.0f;
-                color.b = 0.0f;
-                color.a = glm::max(0.35f, 1.0f * timer);
-                modByCloak = true;
-                otherVector += glm_vec3(randX, randY, randZ) * ((glm::length(otherVector) / radarRange) + 0.01f);
-            }
-        }
-        */
         //scale otherPos down to the range
         const auto otherLen = glm::length(otherVector);
         otherVector /= otherLen;
-        otherVector *= glm::min((otherLen / radarRange + static_cast<decimal>(0.01)), static_cast<decimal>(1.0));
+        otherVector *= glm::min((otherLen / 1.0), static_cast<decimal>(1.0));
         otherVector = radarBodyPosition + otherVector;
 
         const auto pos = Math::getScreenCoordinates(otherVector, *m_Camera, m_Viewport, false);

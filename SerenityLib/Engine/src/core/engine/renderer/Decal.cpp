@@ -57,7 +57,7 @@ Decal::Decal(Material& material, const glm_vec3& position, const glm::vec3& hitN
     Math::alignTo(q, hitNormal);
     body.setRotation(q);
     const decimal factor = static_cast<decimal>(0.2f * size);
-    body.setScale(factor, static_cast<decimal>(0.04), factor);
+    body.setScale(factor, factor, static_cast<decimal>(0.04));
 
     model.setCustomBindFunctor(Engine::epriv::DefaultDecalBindFunctor());
     model.setCustomUnbindFunctor(Engine::epriv::DefaultDecalUnbindFunctor());

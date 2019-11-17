@@ -448,13 +448,13 @@ void Ship::internal_update_just_destroyed_fully(const double& dt, Map& map) {
         shields->reset_all_impact_points();
         shields->turnOffShields();
         shields->getEntity().getComponent<ComponentBody>()->removePhysicsFromWorld();
-        bodyComponent.removePhysicsFromWorld();
     }
     if (hull) {
         hull->getEntity().getComponent<ComponentBody>()->removePhysicsFromWorld();
         
     }
-
+    bodyComponent.clearAllForces();
+    bodyComponent.removePhysicsFromWorld();
     for (auto& ptr : m_EmittersDestruction) {
         auto& emitter = *std::get<0>(ptr);
         emitter.deactivate();
@@ -607,14 +607,14 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
         if (emitter) {
             m_EmittersDestruction.push_back(make_tuple(emitter, 0, glm::vec3(0.0f), q));
         }
-
+        const auto shipLinV = getLinearVelocity();
         for (int i = 0; i < 8 + int(m_DestructionTimerMax); ++i) {
             auto rand_n_x = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
             auto rand_n_y = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
             auto rand_n_z = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
             auto norm = glm::normalize(glm::vec3(rand_n_x, rand_n_y, rand_n_z));
 
-            auto factor = Helper::GetRandomFloatFromTo(0.8f, 1.5f);
+            auto factor = Helper::GetRandomFloatFromTo(0.45f, 0.55f);
             auto randScale = Helper::GetRandomFloatFromTo(1.0f, 1.6f);
             auto pos = getPosition();
 
@@ -624,7 +624,9 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
             emitter_2.setPosition(pos);
             emitter_2.setRotation(q);
             emitter_2.setScale(randScale, randScale, randScale);
-            emitter_2.setLinearVelocity(norm* factor);
+            emitter_2.setLinearVelocity(shipLinV, false);
+            auto newVel = glm_vec3(norm * factor);
+            emitter_2.applyLinearVelocity(newVel, true);
             auto* emitter2 = map.addParticleEmitter(emitter_2);
             if (emitter2) {
                 emitter2->m_UserData.y = 0.4f;

@@ -17,13 +17,21 @@ class Decal final: public EntityWrapper{
     friend struct Engine::epriv::DefaultDecalBindFunctor;
     friend struct Engine::epriv::DefaultDecalUnbindFunctor;
     private:
-        float m_LifetimeCurrent;
-        float m_LifetimeMax;
-        bool  m_Active;
-        glm_vec3 m_InitialPosition;
-        glm_quat m_InitialRotation;
+        float      m_LifetimeCurrent;
+        float      m_LifetimeMax;
+        bool       m_Active;
+        glm_vec3   m_InitialPosition;
+        glm_quat   m_InitialRotation;
     public:
-        Decal(Material& material, const glm_vec3& position, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax, const RenderStage::Stage stage = RenderStage::Decals);
+        Decal(
+            Material& material,
+            const glm_vec3& position,
+            const glm::vec3& hitNormal,
+            const float& size,
+            Scene& scene,
+            const float& lifetimeMax,
+            const RenderStage::Stage stage = RenderStage::Decals
+        );
         ~Decal();
 
         void update(const double& dt);

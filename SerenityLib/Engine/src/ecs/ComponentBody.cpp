@@ -528,10 +528,10 @@ void ComponentBody::setGravity(const decimal& p_X, const decimal& p_Y, const dec
 void ComponentBody::setRotation(const glm_quat& p_NewRotation) {
 	ComponentBody::setRotation(p_NewRotation.x, p_NewRotation.y, p_NewRotation.z, p_NewRotation.w);
 }
-void ComponentBody::setRotation(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const decimal& p_W) {
+void ComponentBody::setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w) {
     if (m_Physics) {
         auto& physicsData = *data.p;
-        btQuaternion quat(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z), static_cast<btScalar>(p_W));
+        btQuaternion quat(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z), static_cast<btScalar>(w));
         quat = quat.normalize();
         auto& rigidBody = *physicsData.bullet_rigidBody;
         btTransform tr; tr.setOrigin(rigidBody.getWorldTransform().getOrigin());
@@ -543,11 +543,10 @@ void ComponentBody::setRotation(const decimal& p_X, const decimal& p_Y, const de
         clearAngularForces();
     }else{
         auto& normalData = *data.n;
-        glm_quat newRotation(p_W, p_X, p_Y, p_Z);
+        glm_quat newRotation(w, x, y, z);
         newRotation = glm::normalize(newRotation);
-        auto& rotation_ = normalData.rotation;
-		rotation_ = newRotation;
-        Math::recalculateForwardRightUp(rotation_, m_Forward, m_Right, m_Up);
+        normalData.rotation = newRotation;
+        Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
     }
 }
 void ComponentBody::setScale(const glm_vec3& p_NewScale) {
@@ -935,36 +934,36 @@ void ComponentBody::setDynamic(const bool p_Dynamic) {
         }
     }
 }
-void ComponentBody::setLinearVelocity(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const bool p_Local) {
+void ComponentBody::setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
-        Math::translate(rigidBody, v, p_Local);
+        btVector3 v(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z));
+        Math::translate(rigidBody, v, local);
         rigidBody.setLinearVelocity(v);
     }else{
         auto& normalData = *data.n;
-        glm_vec3 offset(p_X, p_Y, p_Z);
-        if (p_Local) {
+        glm_vec3 offset(x, y, z);
+        if (local) {
             offset = normalData.rotation * offset;
         }
         normalData.linearVelocity = offset;
     }
 }
-void ComponentBody::setLinearVelocity(const glm_vec3& p_Velocity, const bool p_Local) {
-	ComponentBody::setLinearVelocity(p_Velocity.x, p_Velocity.y, p_Velocity.z, p_Local);
+void ComponentBody::setLinearVelocity(const glm_vec3& velocity, const bool local) {
+	ComponentBody::setLinearVelocity(velocity.x, velocity.y, velocity.z, local);
 }
-void ComponentBody::setAngularVelocity(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const bool p_Local) {
+void ComponentBody::setAngularVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local) {
     if (m_Physics) {
 		auto& rigidBody = *data.p->bullet_rigidBody;
 		rigidBody.activate();
-		btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
-		Math::translate(rigidBody, v, p_Local);
+		btVector3 v(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z));
+		Math::translate(rigidBody, v, local);
 		rigidBody.setAngularVelocity(v);
     }
 }
-void ComponentBody::setAngularVelocity(const glm_vec3& p_Velocity, const bool p_Local) {
-	ComponentBody::setAngularVelocity(p_Velocity.x, p_Velocity.y, p_Velocity.z, p_Local);
+void ComponentBody::setAngularVelocity(const glm_vec3& velocity, const bool local) {
+	ComponentBody::setAngularVelocity(velocity.x, velocity.y, velocity.z, local);
 }
 void ComponentBody::applyForce(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const bool p_Local) {
     if (m_Physics) {

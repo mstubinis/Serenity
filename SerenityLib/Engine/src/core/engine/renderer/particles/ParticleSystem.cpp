@@ -10,6 +10,7 @@
 #include <core/engine/shaders/ShaderProgram.h>
 
 #include <execution>
+#include <glm/gtx/norm.hpp>
 
 
 using namespace std;
@@ -106,13 +107,15 @@ void epriv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuff
     vector<Particle> seen;
     seen.reserve(m_Particles.size());
 
-    auto lamda_culler = [&](pair<size_t, size_t>& pair_) {
+    const auto cameraPosition = glm::vec3(camera.getPosition());
+
+    auto lamda_culler = [&](pair<size_t, size_t>& pair_, const glm::vec3& camPos) {
         for (size_t j = pair_.first; j <= pair_.second; ++j) {
             auto& particle = m_Particles[j];
             const float radius = Mesh::Plane->getRadius() * Math::Max(particle.m_Data.m_Scale.x, particle.m_Data.m_Scale.y);
             const uint sphereTest = camera.sphereIntersectTest(particle.m_Position, radius); //per mesh instance radius instead?
-            decimal comparison = static_cast<decimal>(radius) * static_cast<decimal>(1100.0);
-            if (particle.m_Hidden || sphereTest == 0 || camera.getDistanceSquared(particle.m_Position) > comparison * comparison) {
+            float comparison = radius * 3100.0f; //TODO: this is obviously different from the other culling functions
+            if (particle.m_Hidden || sphereTest == 0 || glm::distance2(particle.m_Position, cameraPosition) > comparison * comparison) {
                 particle.m_PassedRenderCheck = false;
             }else{
                 particle.m_PassedRenderCheck = true;
@@ -124,14 +127,14 @@ void epriv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuff
     };
     auto split = epriv::threading::splitVectorPairs(m_Particles);
     for (auto& pair_ : split) {
-        epriv::threading::addJobRef(lamda_culler, pair_);
+        epriv::threading::addJobRef(lamda_culler, pair_, cameraPosition);
     }
     epriv::threading::waitForAll();
 
-    auto lambda_sorter = [&](Particle& lhs, Particle& rhs, const glm_vec3& camPos) {
-        return camera.getDistanceSquared(lhs.m_Position, camPos) > camera.getDistanceSquared(rhs.m_Position, camPos);
+    auto lambda_sorter = [&](Particle& lhs, Particle& rhs, const glm::vec3& camPos) {
+        return glm::distance2(lhs.m_Position, camPos) > glm::distance2(rhs.m_Position, camPos);
     };
-    std::sort(std::execution::par_unseq, seen.begin(), seen.end(), std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, camera.getPosition()));
+    std::sort(std::execution::par_unseq, seen.begin(), seen.end(), std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, cameraPosition));
 
     program.bind();
     Mesh::Plane->bind();

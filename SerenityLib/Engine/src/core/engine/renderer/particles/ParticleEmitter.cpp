@@ -233,18 +233,52 @@ const glm_quat ParticleEmitter::rotation() {
     return getComponent<ComponentBody>()->rotation();
 }
 
-void ParticleEmitter::setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request) {
-    getComponent<ComponentBody>(request)->setLinearVelocity(x, y, z);
+void ParticleEmitter::setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request, const bool local) {
+    getComponent<ComponentBody>(request)->setLinearVelocity(x, y, z, local);
 }
-void ParticleEmitter::setLinearVelocity(const glm_vec3& lv, EntityDataRequest& request) {
-    getComponent<ComponentBody>(request)->setLinearVelocity(lv);
+void ParticleEmitter::setLinearVelocity(const glm_vec3& lv, EntityDataRequest& request, const bool local) {
+    getComponent<ComponentBody>(request)->setLinearVelocity(lv, local);
 }
-void ParticleEmitter::setLinearVelocity(const decimal& x, const decimal& y, const decimal& z) {
-    getComponent<ComponentBody>()->setLinearVelocity(x, y, z);
+void ParticleEmitter::setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local) {
+    getComponent<ComponentBody>()->setLinearVelocity(x, y, z, local);
 }
-void ParticleEmitter::setLinearVelocity(const glm_vec3& lv) {
-    getComponent<ComponentBody>()->setLinearVelocity(lv);
+void ParticleEmitter::setLinearVelocity(const glm_vec3& lv, const bool local) {
+    getComponent<ComponentBody>()->setLinearVelocity(lv, local);
 }
+
+
+
+void ParticleEmitter::applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request, const bool local) {
+    auto& body = *getComponent<ComponentBody>(request);
+    const auto currVel = body.getLinearVelocity();
+    auto newVel = glm_vec3(x, y, z);
+    if (local)
+        newVel = body.rotation() * newVel;
+    body.setLinearVelocity(currVel + newVel, false);
+}
+void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, EntityDataRequest& request, const bool local) {
+    auto& body = *getComponent<ComponentBody>(request);
+    const auto currVel = body.getLinearVelocity();
+    if (local)
+        velocity = body.rotation() * velocity;
+    body.setLinearVelocity(currVel + velocity, false);
+}
+void ParticleEmitter::applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local) {
+    auto& body = *getComponent<ComponentBody>();
+    const auto currVel = body.getLinearVelocity();
+    auto newVel = glm_vec3(x, y, z);
+    if (local)
+        newVel = body.rotation() * newVel;
+    body.setLinearVelocity(currVel + newVel, false);
+}
+void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const bool local) {
+    auto& body = *getComponent<ComponentBody>();
+    const auto currVel = body.getLinearVelocity();
+    if (local)
+        velocity = body.rotation() * velocity;
+    body.setLinearVelocity(currVel + velocity, false);
+}
+
 
 const glm_vec3 ParticleEmitter::linearVelocity(EntityDataRequest& request) {
     return getComponent<ComponentBody>(request)->getLinearVelocity();

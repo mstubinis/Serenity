@@ -66,11 +66,16 @@ class ParticleEmitter final : public EntityWrapper{
         void setScale(const decimal& x, const decimal& y, const decimal& z);
         void setScale(const glm_vec3& scale);
 
-        void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request);
-        void setLinearVelocity(const glm_vec3& scale, EntityDataRequest& request);
-        void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z);
-        void setLinearVelocity(const glm_vec3& scale);
+        void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request, const bool local = true);
+        void setLinearVelocity(const glm_vec3& velocity, EntityDataRequest& request, const bool local = true);
+        void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
+        void setLinearVelocity(const glm_vec3& velocity, const bool local = true);
  
+        void applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request, const bool local = true);
+        void applyLinearVelocity(glm_vec3& velocity, EntityDataRequest& request, const bool local = true);
+        void applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
+        void applyLinearVelocity(glm_vec3& velocity, const bool local = true);
+
         const glm_vec3 getScale(EntityDataRequest& request);
         const glm_vec3 getScale();
 
