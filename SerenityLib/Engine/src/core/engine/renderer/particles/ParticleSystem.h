@@ -10,7 +10,7 @@
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#define NUMBER_OF_PARTICLE_EMITTERS_LIMIT 1000
+#define NUMBER_OF_PARTICLE_EMITTERS_LIMIT 2000
 #define NUMBER_OF_PARTICLE_LIMIT 1000000
 
 class ParticleEmitter;

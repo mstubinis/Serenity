@@ -43,6 +43,7 @@
 #include <glm/gtx/norm.hpp>
 
 #include <core/engine/renderer/particles/ParticleEmitter.h>
+#include <core/engine/renderer/particles/ParticleEmissionProperties.h>
 #include "particles/Fire.h"
 #include "particles/Sparks.h"
 
@@ -489,6 +490,33 @@ void Ship::internal_update_just_destroyed_fully(const double& dt, Map& map) {
     m_DamageDecals.clear();
     setState(ShipState::Destroyed);
 }
+
+struct Test final { void operator()(const double& dt, ParticleEmitter& emitter, ParticleEmissionProperties& properties, std::mutex& mutex_) {
+    emitter.m_UserData.x += static_cast<float>(dt);
+    if (emitter.m_UserData.x > emitter.m_UserData.y) {
+        auto& map_ = static_cast<Map&>(emitter.entity().scene());
+        mutex_.lock();
+        ParticleEmitter emitter_3(*Fire::OutwardFireball, map_, 8.0, nullptr);
+        auto x = map_.addParticleEmitter(emitter_3);
+        mutex_.unlock();
+
+        auto rand_rot_x = Helper::GetRandomFloatFromTo(-0.15f, 0.15f);
+        auto rand_rot_y = Helper::GetRandomFloatFromTo(-0.15f, 0.15f);
+        auto rand_rot_z = Helper::GetRandomFloatFromTo(-0.15f, 0.15f);
+        glm_vec3 n = glm_vec3(rand_rot_x, rand_rot_y, rand_rot_z);
+
+        emitter_3.setPosition(emitter.position());
+        emitter_3.setScale(emitter.getScale());
+        emitter_3.setRotation(emitter.rotation());
+        emitter_3.rotate(n.x, n.y, n.z);
+        emitter_3.setLinearVelocity( (emitter.linearVelocity() * 0.65)  * emitter.rotation());
+
+
+        emitter.m_UserData.x = 0.0f;
+        emitter.m_UserData.y = Helper::GetRandomFloatFromTo(1.1f, 1.4f);
+    }
+};};
+
 void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
     m_DestructionTimerCurrent += dt;
     m_DestructionTimerDecalTimer += dt;
@@ -529,7 +557,7 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
         auto& mesh = *instance.mesh();
         auto& verts = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(0);
         auto& norms = const_cast<VertexData&>(mesh.getVertexData()).getData<std::uint32_t>(2);
-        const auto randVertexIndex = Helper::GetRandomIntFromTo(size_t(0), verts.size() - 1);
+        const auto randVertexIndex = Helper::GetRandomIntFromTo(0, static_cast<int>(verts.size()) - 1);
 
 
         auto localNormal = glm::normalize(Math::unpack3NormalsFrom32Int(norms[randVertexIndex]));
@@ -570,6 +598,39 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
         }
         setState(ShipState::JustFlaggedAsFullyDestroyed);
 
+
+        ParticleEmitter emitter_(*Sparks::ExplosionSparks, map, 0.01, this);
+        glm::quat q = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+        emitter_.setPosition(glm::vec3(0.0f));
+
+        auto* emitter = map.addParticleEmitter(emitter_);
+        if (emitter) {
+            m_EmittersDestruction.push_back(make_tuple(emitter, 0, glm::vec3(0.0f), q));
+        }
+
+        for (int i = 0; i < 8 + int(m_DestructionTimerMax); ++i) {
+            auto rand_n_x = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
+            auto rand_n_y = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
+            auto rand_n_z = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
+            auto norm = glm::normalize(glm::vec3(rand_n_x, rand_n_y, rand_n_z));
+
+            auto factor = Helper::GetRandomFloatFromTo(0.8f, 1.5f);
+            auto randScale = Helper::GetRandomFloatFromTo(1.0f, 1.6f);
+            auto pos = getPosition();
+
+            ParticleEmitter emitter_2(*Fire::OutwardFireballDebrisFire, map, 6.0, nullptr);
+            glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
+            Math::alignTo(q, -norm);
+            emitter_2.setPosition(pos);
+            emitter_2.setRotation(q);
+            emitter_2.setScale(randScale, randScale, randScale);
+            emitter_2.setLinearVelocity(norm* factor);
+            auto* emitter2 = map.addParticleEmitter(emitter_2);
+            if (emitter2) {
+                emitter2->m_UserData.y = 0.4f;
+                emitter2->setUpdateFunctor(Test());
+            }
+        }
         //TODO: alert server?
     }
 }

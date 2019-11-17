@@ -143,12 +143,12 @@ PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
 
     firstWindupLight = new PointLight(finalPosition, &map);
     firstWindupLight->setColor(photonOrange);
-    firstWindupLight->setAttenuation(LightRange::_7);
+    firstWindupLight->setAttenuation(LightRange::_20);
     firstWindupLight->deactivate();
 
     secondWindupLight = new PointLight(finalPosition, &map);
     secondWindupLight->setColor(photonOrange);
-    secondWindupLight->setAttenuation(LightRange::_7);
+    secondWindupLight->setAttenuation(LightRange::_20);
     secondWindupLight->deactivate();
 
     beamModelInstance.setUserPointer(this);

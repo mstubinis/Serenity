@@ -24,6 +24,7 @@ class  ModelInstance;
 class  ParticleEmitter;
 class  Particle;
 struct Entity;
+struct SceneOptions;
 
 namespace Engine {
     namespace epriv {
@@ -32,11 +33,27 @@ namespace Engine {
         struct InternalScenePublicInterface;
         struct EntityPOD;
         template<typename T> class ECS;
+
+        struct SceneData final {
+            std::vector<Viewport*>                 m_Viewports;
+            std::vector<Camera*>                   m_Cameras;
+            std::vector<std::vector<RenderGraph*>> m_RenderGraphs;
+
+            std::vector<SunLight*>                 m_Lights;
+            std::vector<SunLight*>                 m_SunLights;
+            std::vector<DirectionalLight*>         m_DirectionalLights;
+            std::vector<PointLight*>               m_PointLights;
+            std::vector<SpotLight*>                m_SpotLights;
+            std::vector<RodLight*>                 m_RodLights;
+
+            std::vector<unsigned int>              m_Entities;
+        };
     };
 };
 class Scene: public EngineResource, public EventObserver{
     friend class  Engine::epriv::RenderGraph;
     friend struct Engine::epriv::InternalScenePublicInterface;
+    friend struct Engine::epriv::SceneData;
     public:
         virtual void update(const double& dt);
         virtual void render();
@@ -48,9 +65,12 @@ class Scene: public EngineResource, public EventObserver{
         }
     private:
         struct impl; std::unique_ptr<impl>   m_i;
+
+        Engine::epriv::SceneData m_Data;
         std::function<void(const double&)> m_OnUpdateFunctor;
     public:
         Scene(const std::string& name);
+        Scene(const std::string& name, const SceneOptions& options);
         virtual ~Scene();
 
         const unsigned int id() const;

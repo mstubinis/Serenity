@@ -313,7 +313,7 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& m
     launchSpeed                 = BeamLaunchSpeed;
 
     beamLight = new RodLight(_pos, 2.0f, &map);
-    beamLight->setAttenuation(LightRange::_7);
+    beamLight->setAttenuation(LightRange::_20);
     beamLight->deactivate();
 
     beamGraphic = map.createEntity();
@@ -607,6 +607,7 @@ void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
     secondWindupLightBody.setPosition(beam_starting_position);
 
     beamEndBody.setPosition(beam_ending_position);
+    beamEndBody.setRotation(q);
     const glm::vec3 midpt = Math::midpoint(beam_starting_position, beam_ending_position);
     beamLightBody.setPosition(midpt);
     beamLightBody.setRotation(q);

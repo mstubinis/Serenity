@@ -20,7 +20,10 @@ class ParticleEmitter final : public EntityWrapper{
     friend class  Particle;
     friend struct ParticleData;
     friend struct Engine::epriv::InternalScenePublicInterface;
+    public:
+        glm::vec4                      m_UserData;
     private:
+        std::function<void(const double&, ParticleEmitter& emitter, ParticleEmissionProperties& properties, std::mutex&)> m_UpdateFunctor;
         ParticleEmissionProperties*    m_Properties;
         bool                           m_Active;
         double                         m_SpawningTimer;
@@ -39,6 +42,9 @@ class ParticleEmitter final : public EntityWrapper{
         ParticleEmitter(ParticleEmitter&& other) noexcept;
         ParticleEmitter& operator=(ParticleEmitter&& other) noexcept;
 
+        template<typename T> void setUpdateFunctor(const T& functor) {
+            m_UpdateFunctor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+        }
 
         void setPosition(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request);
         void setPosition(const glm_vec3& position, EntityDataRequest& request);
@@ -51,12 +57,20 @@ class ParticleEmitter final : public EntityWrapper{
         void setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w);
         void setRotation(const glm_quat& rotation);
 
+        void rotate(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request);
+        void rotate(const decimal& x, const decimal& y, const decimal& z);
+
 
         void setScale(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request);
         void setScale(const glm_vec3& scale, EntityDataRequest& request);
         void setScale(const decimal& x, const decimal& y, const decimal& z);
         void setScale(const glm_vec3& scale);
 
+        void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request);
+        void setLinearVelocity(const glm_vec3& scale, EntityDataRequest& request);
+        void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z);
+        void setLinearVelocity(const glm_vec3& scale);
+ 
         const glm_vec3 getScale(EntityDataRequest& request);
         const glm_vec3 getScale();
 
@@ -66,11 +80,15 @@ class ParticleEmitter final : public EntityWrapper{
         const glm_quat rotation(EntityDataRequest& request);
         const glm_quat rotation();
 
+        const glm_vec3 linearVelocity(EntityDataRequest& request);
+        const glm_vec3 linearVelocity();
+
         const bool& isActive() const;
 
         void activate();
         void deactivate();
 
+        ParticleEmissionProperties* getProperties();
         void setProperties(ParticleEmissionProperties& properties);
 
         void update(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem);

@@ -27,6 +27,7 @@ ParticleData::ParticleData() {
     m_Scale           = glm::vec2(1.0f);
     m_AngularVelocity = 0.0f;
     m_Color           = glm::vec4(1.0f);
+    m_UserData        = glm::vec4(0.0f);
 }
 ParticleData::ParticleData(ParticleEmitter& emitter, Particle& particle){
     m_Properties      = &ParticleEmissionProperties::DefaultProperties;
@@ -35,8 +36,15 @@ ParticleData::ParticleData(ParticleEmitter& emitter, Particle& particle){
     m_Depth           = 0.0f;
     m_Angle           = 0.0f;
     m_Color           = glm::vec4(1.0f);
+    m_UserData        = glm::vec4(0.0f);
 
-    m_Velocity = m_Properties->m_InitialVelocityFunctor(emitter, particle, *this);
+    auto& emitterBody = *emitter.getComponent<ComponentBody>();
+    const auto emitterScale = glm::vec3(emitterBody.getScale());
+    
+
+    m_Velocity = m_Properties->m_InitialVelocityFunctor(emitter, particle, *this) * emitterScale;
+
+
     auto rotated_initial_velocity = Math::rotate_vec3(emitter.rotation(), m_Velocity);
     if (!emitter.m_Parent.null()) {
         auto* body = emitter.m_Parent.getComponent<ComponentBody>();
@@ -48,7 +56,7 @@ ParticleData::ParticleData(ParticleEmitter& emitter, Particle& particle){
 
 
 
-    m_Scale           = m_Properties->m_InitialScaleFunctor(emitter, particle, *this);
+    m_Scale           = m_Properties->m_InitialScaleFunctor(emitter, particle, *this) * Math::Max(emitterScale.x, emitterScale.y, emitterScale.z);
     m_AngularVelocity = m_Properties->m_InitialAngularVelocityFunctor(emitter, particle, *this);
 }
 ParticleData::ParticleData(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle){
@@ -58,11 +66,15 @@ ParticleData::ParticleData(ParticleEmissionProperties& properties, ParticleEmitt
     m_Depth           = 0.0f;
     m_Angle           = 0.0f;
     m_Color           = glm::vec4(1.0f);
-
+    m_UserData        = glm::vec4(0.0f);
 
     particle.m_Material = &const_cast<Material&>(properties.getParticleMaterialRandom());
 
-    m_Velocity        = properties.m_InitialVelocityFunctor(emitter, particle, *this);
+    auto& emitterBody = *emitter.getComponent<ComponentBody>();
+    const auto emitterScale = glm::vec3(emitterBody.getScale());
+
+
+    m_Velocity        = properties.m_InitialVelocityFunctor(emitter, particle, *this) * emitterScale;
     auto rotated_initial_velocity = Math::rotate_vec3(emitter.rotation(), m_Velocity);
     if (!emitter.m_Parent.null()) {
         auto* body = emitter.m_Parent.getComponent<ComponentBody>();
@@ -73,7 +85,7 @@ ParticleData::ParticleData(ParticleEmissionProperties& properties, ParticleEmitt
     m_Velocity        += rotated_initial_velocity;
 
 
-    m_Scale           = properties.m_InitialScaleFunctor(emitter, particle, *this);
+    m_Scale           = properties.m_InitialScaleFunctor(emitter, particle, *this) * Math::Max(emitterScale.x, emitterScale.y, emitterScale.z);
     m_AngularVelocity = properties.m_InitialAngularVelocityFunctor(emitter, particle, *this);
 }
 ParticleData::ParticleData(const ParticleData& other){
@@ -86,6 +98,7 @@ ParticleData::ParticleData(const ParticleData& other){
     m_Depth = other.m_Depth;
     m_AngularVelocity = other.m_AngularVelocity;
     m_Properties = other.m_Properties;
+    m_UserData = other.m_UserData;
 }
 ParticleData& ParticleData::operator=(const ParticleData& other) {
     if (&other == this)
@@ -99,6 +112,7 @@ ParticleData& ParticleData::operator=(const ParticleData& other) {
     m_Depth = other.m_Depth;
     m_AngularVelocity = other.m_AngularVelocity;
     m_Properties = other.m_Properties;
+    m_UserData = other.m_UserData;
     return *this;
 }
 ParticleData::ParticleData(ParticleData&& other) noexcept{
@@ -112,6 +126,7 @@ ParticleData::ParticleData(ParticleData&& other) noexcept{
     swap(m_Depth, other.m_Depth);
     swap(m_AngularVelocity, other.m_AngularVelocity);
     swap(m_Properties, other.m_Properties);
+    swap(m_UserData, other.m_UserData);
 }
 ParticleData& ParticleData::operator=(ParticleData&& other) noexcept {
     using std::swap;
@@ -124,6 +139,7 @@ ParticleData& ParticleData::operator=(ParticleData&& other) noexcept {
     swap(m_Depth, other.m_Depth);
     swap(m_AngularVelocity, other.m_AngularVelocity);
     swap(m_Properties, other.m_Properties);
+    swap(m_UserData, other.m_UserData);
     return *this;
 }
 
@@ -200,6 +216,47 @@ Particle& Particle::operator=(Particle&& other) noexcept {
     return *this;
 }
 
+
+void Particle::setUserDataX(const float x) {
+    m_Data.m_UserData.x = x;
+}
+void Particle::setUserDataY(const float y) {
+    m_Data.m_UserData.y = y;
+}
+void Particle::setUserDataZ(const float z) {
+    m_Data.m_UserData.z = z;
+}
+void Particle::setUserDataW(const float w) {
+    m_Data.m_UserData.w = w;
+}
+void Particle::setUserData(const float x, const float y, const float z, const float w) {
+    m_Data.m_UserData.x = x;
+    m_Data.m_UserData.y = y;
+    m_Data.m_UserData.z = z;
+    m_Data.m_UserData.w = w;
+}
+void Particle::setUserData(const glm::vec4& data) {
+    m_Data.m_UserData = data;
+}
+
+const float Particle::getUserDataX() const {
+    return m_Data.m_UserData.x;
+}
+const float Particle::getUserDataY() const {
+    return m_Data.m_UserData.y;
+}
+const float Particle::getUserDataZ() const {
+    return m_Data.m_UserData.z;
+}
+const float Particle::getUserDataW() const {
+    return m_Data.m_UserData.w;
+}
+const glm::vec4& Particle::getUserData() const {
+    return m_Data.m_UserData;
+}
+
+
+
 Scene& Particle::scene() const {
     return *m_Scene;
 }
@@ -244,14 +301,14 @@ void Particle::update(const size_t& index, const double& dt, Engine::epriv::Part
         m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
         m_Data.m_Angle           += m_Data.m_AngularVelocity;
         m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
-        //m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
+        m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
 
         m_Position               += (m_Data.m_Velocity * fdt);
 
         
-        //auto& camera = *m_Scene->getActiveCamera();
-        //auto vec = glm::normalize(bodyComponent.position() - camera.getPosition()) * static_cast<decimal>(m_Data.m_Depth);
-        //instance.setPosition(glm::vec3(vec));
+        auto& camera = *m_Scene->getActiveCamera();
+        auto vec = glm::normalize(m_Position - glm::vec3(camera.getPosition())) * m_Data.m_Depth;
+        m_Position += vec;
         if (m_Data.m_Timer >= prop.m_Lifetime) {
             m_Data.m_Active  = false;
             m_Data.m_Timer   = 0.0;
@@ -271,14 +328,14 @@ void Particle::update_multithreaded(const size_t& index, const double& dt, Engin
         m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
         m_Data.m_Angle           += m_Data.m_AngularVelocity;
         m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
-        //m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
+        m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
 
         m_Position               += (m_Data.m_Velocity * fdt);
 
 
-        //auto& camera = *m_Scene->getActiveCamera();
-        //auto vec = glm::normalize(bodyComponent.position() - camera.getPosition()) * static_cast<decimal>(m_Data.m_Depth);
-        //instance.setPosition(glm::vec3(vec));
+        auto& camera = *m_Scene->getActiveCamera();
+        auto vec = glm::normalize(m_Position - glm::vec3(camera.getPosition())) * m_Data.m_Depth;
+        m_Position += vec;
         if (m_Data.m_Timer >= prop.m_Lifetime) {
             m_Data.m_Active  = false;
             m_Data.m_Timer   = 0.0;

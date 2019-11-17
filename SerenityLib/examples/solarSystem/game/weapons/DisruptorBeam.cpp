@@ -143,12 +143,12 @@ DisruptorBeam::DisruptorBeam(Ship& ship, Map& map, const glm_vec3& position, con
 
     firstWindupLight = new PointLight(finalPosition, &map);
     firstWindupLight->setColor(disruptorGreen);
-    firstWindupLight->setAttenuation(LightRange::_7);
+    firstWindupLight->setAttenuation(LightRange::_20);
     firstWindupLight->deactivate();
 
     secondWindupLight = new PointLight(finalPosition, &map);
     secondWindupLight->setColor(disruptorGreen);
-    secondWindupLight->setAttenuation(LightRange::_7);
+    secondWindupLight->setAttenuation(LightRange::_20);
     secondWindupLight->deactivate();
 
     beamModelInstance.setUserPointer(this);

@@ -145,12 +145,12 @@ PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
 
     firstWindupLight = new PointLight(finalPosition, &map);
     firstWindupLight->setColor(plasmaGreen);
-    firstWindupLight->setAttenuation(LightRange::_7);
+    firstWindupLight->setAttenuation(LightRange::_20);
     firstWindupLight->deactivate();
 
     secondWindupLight = new PointLight(finalPosition, &map);
     secondWindupLight->setColor(plasmaGreen);
-    secondWindupLight->setAttenuation(LightRange::_7);
+    secondWindupLight->setAttenuation(LightRange::_20);
     secondWindupLight->deactivate();
 
     beamModelInstance.setUserPointer(this);

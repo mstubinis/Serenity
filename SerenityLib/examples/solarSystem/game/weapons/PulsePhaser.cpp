@@ -199,7 +199,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(EntityWrapper* target, PulsePhaser&
 
     light = new PointLight(finalPosition, &map);
     light->setColor(1.0f, 0.62f, 0.0f, 1.0f);
-    light->setAttenuation(LightRange::_20);
+    light->setAttenuation(LightRange::_32);
 }
 PulsePhaserProjectile::~PulsePhaserProjectile() {
 

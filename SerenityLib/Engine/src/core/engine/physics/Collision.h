@@ -38,6 +38,6 @@ class Collision final {
         void setMass(const float mass);
         const btVector3& getBtInertia() const;
         btCollisionShape* getBtShape() const;
-        const unsigned int& getType() const;
+        const CollisionType::Type& getType() const;
 };
 #endif

@@ -11,6 +11,7 @@ class Sparks {
 
         static ParticleEmissionProperties* Spray;
         static ParticleEmissionProperties* Burst;
+        static ParticleEmissionProperties* ExplosionSparks;
 
         static void init();
         static void destruct();

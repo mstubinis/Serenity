@@ -238,7 +238,7 @@ QuantumTorpedoProjectile::QuantumTorpedoProjectile(EntityWrapper* target, Quantu
 
     light = new PointLight(final_world_position, &map);
     light->setColor(quantumBlue);
-    light->setAttenuation(LightRange::_20);
+    light->setAttenuation(LightRange::_32);
 }
 QuantumTorpedoProjectile::~QuantumTorpedoProjectile() {
 }

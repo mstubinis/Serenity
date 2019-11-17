@@ -22,6 +22,7 @@ namespace Engine {
 };
 struct ParticleData final {
     ParticleEmissionProperties*  m_Properties;
+    glm::vec4                    m_UserData;
     glm::vec2                    m_Scale;
     glm::vec3                    m_Velocity;
     glm::vec4                    m_Color;
@@ -78,6 +79,22 @@ class Particle {
         const double lifetime() const;
         void update(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem);
         void update_multithreaded(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem);
+
+
+
+        void setUserDataX(const float x);
+        void setUserDataY(const float y);
+        void setUserDataZ(const float z);
+        void setUserDataW(const float w);
+        void setUserData(const float x, const float y, const float z, const float w);
+        void setUserData(const glm::vec4& data);
+
+        const float getUserDataX() const;
+        const float getUserDataY() const;
+        const float getUserDataZ() const;
+        const float getUserDataW() const;
+        const glm::vec4& getUserData() const;
+
 
         void render(Engine::epriv::GBuffer&);
 

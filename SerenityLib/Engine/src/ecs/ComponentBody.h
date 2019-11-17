@@ -89,6 +89,7 @@ class ComponentBody : public ComponentBaseClass {
             glm_vec3 position;
             glm_quat rotation;
             glm_mat4 modelMatrix;
+            glm_vec3 linearVelocity;
 
             NormalData();
             NormalData(const NormalData& other)            = delete;

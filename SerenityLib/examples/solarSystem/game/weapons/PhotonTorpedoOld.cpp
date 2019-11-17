@@ -240,7 +240,7 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(EntityWrapper* target, Ph
 
     light = new PointLight(final_world_position, &map);
     light->setColor(photonRed);
-    light->setAttenuation(LightRange::_20);
+    light->setAttenuation(LightRange::_32);
 }
 PhotonTorpedoOldProjectile::~PhotonTorpedoOldProjectile() {
 }

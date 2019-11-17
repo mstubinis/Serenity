@@ -232,7 +232,7 @@ PlasmaTorpedoProjectile::PlasmaTorpedoProjectile(EntityWrapper* target, PlasmaTo
 
     light = new PointLight(final_world_position, &map);
     light->setColor(plasmaGreen);
-    light->setAttenuation(LightRange::_20);
+    light->setAttenuation(LightRange::_32);
 }
 PlasmaTorpedoProjectile::~PlasmaTorpedoProjectile() {
 }

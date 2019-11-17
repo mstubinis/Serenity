@@ -43,36 +43,36 @@ ComponentBody::PhysicsData::PhysicsData(){
     bullet_rigidBody = nullptr;
     collision        = nullptr;
 }
-ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& p_Other) noexcept {
+ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& other) noexcept {
     //move constructor
     using std::swap;
-    swap(mass, p_Other.mass);
-    swap(bullet_motionState, p_Other.bullet_motionState);
-    swap(group, p_Other.group);
-    swap(mask, p_Other.mask);
+    swap(mass, other.mass);
+    swap(bullet_motionState, other.bullet_motionState);
+    swap(group, other.group);
+    swap(mask, other.mask);
 
-    if (p_Other.collision)
-        swap(collision, p_Other.collision);
+    if (other.collision)
+        swap(collision, other.collision);
     else
         collision = nullptr;
-    if (p_Other.bullet_rigidBody)
-        swap(bullet_rigidBody, p_Other.bullet_rigidBody);
+    if (other.bullet_rigidBody)
+        swap(bullet_rigidBody, other.bullet_rigidBody);
     else
         bullet_rigidBody = nullptr;
 }
-ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody::PhysicsData&& p_Other) noexcept {
+ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody::PhysicsData&& other) noexcept {
     //move assignment
     using std::swap;
-    swap(mass, p_Other.mass);
-    swap(bullet_motionState, p_Other.bullet_motionState);
-    swap(group, p_Other.group);
-    swap(mask, p_Other.mask);
-    if (p_Other.collision) 
-        swap(collision, p_Other.collision);
+    swap(mass, other.mass);
+    swap(bullet_motionState, other.bullet_motionState);
+    swap(group, other.group);
+    swap(mask, other.mask);
+    if (other.collision)
+        swap(collision, other.collision);
     else                   
         collision = nullptr;
-    if (p_Other.bullet_rigidBody) 
-        swap(bullet_rigidBody, p_Other.bullet_rigidBody);
+    if (other.bullet_rigidBody)
+        swap(bullet_rigidBody, other.bullet_rigidBody);
     else                   
         bullet_rigidBody = nullptr;
     return *this;
@@ -90,15 +90,16 @@ ComponentBody::PhysicsData::~PhysicsData() {
 
 ComponentBody::NormalData::NormalData(){
     //constructor
-    scale       = glm_vec3(static_cast<decimal>(1.0));
-    position    = glm_vec3(static_cast<decimal>(0.0));
-    rotation    = glm_quat(
+    scale          = glm_vec3(static_cast<decimal>(1.0));
+    position       = glm_vec3(static_cast<decimal>(0.0));
+    rotation       = glm_quat(
         static_cast<decimal>(1.0), 
         static_cast<decimal>(0.0),
         static_cast<decimal>(0.0),
         static_cast<decimal>(0.0)
     );
-    modelMatrix = glm_mat4(static_cast<decimal>(1.0));
+    modelMatrix    = glm_mat4(static_cast<decimal>(1.0));
+    linearVelocity = glm_vec3(static_cast<decimal>(0.0));
 }
 ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcept {
     //move constructor
@@ -107,14 +108,16 @@ ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcep
     swap(rotation, other.rotation);
     swap(scale, other.scale);
     swap(modelMatrix, other.modelMatrix);
+    swap(linearVelocity, other.linearVelocity);
 }
-ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::NormalData&& p_Other) noexcept {
+ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::NormalData&& other) noexcept {
     //move assignment
     using std::swap;
-    swap(position, p_Other.position);
-    swap(rotation, p_Other.rotation);
-    swap(scale, p_Other.scale);
-    swap(modelMatrix, p_Other.modelMatrix);
+    swap(position, other.position);
+    swap(rotation, other.rotation);
+    swap(scale, other.scale);
+    swap(modelMatrix, other.modelMatrix);
+    swap(linearVelocity, other.linearVelocity);
     return *this;
 }
 ComponentBody::NormalData::~NormalData() {
@@ -311,7 +314,6 @@ void ComponentBody::alignTo(const glm_vec3& p_Direction) {
         //recheck this
         btTransform tr;
         rigidBody.getMotionState()->getWorldTransform(tr);
-        //Math::alignTo(Math::btToGLMQuat(tr.getRotation()),direction);
         Math::recalculateForwardRightUp(rigidBody, m_Forward, m_Right, m_Up);
     }else{
         auto& normalData = *data.n;
@@ -744,7 +746,8 @@ const glm_vec3 ComponentBody::getLinearVelocity() const  {
         const btVector3& v = data.p->bullet_rigidBody->getLinearVelocity();
         return Engine::Math::btVectorToGLM(v);
     }
-    return glm_vec3(static_cast<decimal>(0.0));
+    auto& normalData = *data.n;
+    return normalData.linearVelocity;
 }
 const glm_vec3 ComponentBody::getAngularVelocity() const  {
     if (m_Physics) {
@@ -939,6 +942,13 @@ void ComponentBody::setLinearVelocity(const decimal& p_X, const decimal& p_Y, co
         btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         Math::translate(rigidBody, v, p_Local);
         rigidBody.setLinearVelocity(v);
+    }else{
+        auto& normalData = *data.n;
+        glm_vec3 offset(p_X, p_Y, p_Z);
+        if (p_Local) {
+            offset = normalData.rotation * offset;
+        }
+        normalData.linearVelocity = offset;
     }
 }
 void ComponentBody::setLinearVelocity(const glm_vec3& p_Velocity, const bool p_Local) {
@@ -1079,35 +1089,33 @@ void ComponentBody::setMass(const float p_Mass) {
 
 #pragma region System
 
-struct epriv::ComponentBody_UpdateFunction final {
-
-    void operator()(void* p_ComponentPool, const double& dt, Scene& p_Scene) const {
-        auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
-        auto& components = pool.pool();
-        auto lamda_update = [&](pair<size_t, size_t>& pair_) {
-            for (size_t j = pair_.first; j <= pair_.second; ++j) {
-                ComponentBody& b = components[j];
-                if (b.m_Physics) {
-                    auto& rigidBody = *b.data.p->bullet_rigidBody;
-                    Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
-                }else{
-                    auto& n = *b.data.n;
-                    //TODO: implement parent->child relations
-                    //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
-                    n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
-                    //Engine::Math::recalculateForwardRightUp(n.rotation, b._forward, b._right, b._up); //double check if this is needed
-                }
+struct epriv::ComponentBody_UpdateFunction final { void operator()(void* p_ComponentPool, const double& dt, Scene& p_Scene) const {
+    auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
+    auto& components = pool.pool();
+    auto lamda_update = [&](pair<size_t, size_t>& pair_) {
+        for (size_t j = pair_.first; j <= pair_.second; ++j) {
+            ComponentBody& b = components[j];
+            if (b.m_Physics) {
+                auto& rigidBody = *b.data.p->bullet_rigidBody;
+                Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
+            }else{
+                auto& n = *b.data.n;
+                n.position += (n.linearVelocity * dt);
+                //TODO: implement parent->child relations
+                //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
+                n.modelMatrix = glm::mat4(1.0f);
+                n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
+                //Engine::Math::recalculateForwardRightUp(n.rotation, b._forward, b._right, b._up); //double check if this is needed
             }
-        };
-
-        auto split = epriv::threading::splitVectorPairs(components);
-        const auto fdt = static_cast<float>(dt);
-        for (auto& pair : split) {
-            epriv::threading::addJobRef(lamda_update, pair);
         }
-        epriv::threading::waitForAll();
+    };
+    auto split = epriv::threading::splitVectorPairs(components);
+    const auto fdt = static_cast<float>(dt);
+    for (auto& pair : split) {
+        epriv::threading::addJobRef(lamda_update, pair);
     }
-};
+    epriv::threading::waitForAll();
+}};
 struct epriv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* p_Component, Entity& p_Entity) const {
 }};
 struct epriv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* p_ComponentPool,Entity& p_Entity, Scene& p_Scene) const {

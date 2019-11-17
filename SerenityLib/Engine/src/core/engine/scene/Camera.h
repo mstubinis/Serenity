@@ -29,6 +29,8 @@ class Camera: public EntityWrapper{
         const decimal getDistance(const glm_vec3&);
         const decimal getDistanceSquared(Entity&);
         const decimal getDistanceSquared(const glm_vec3&);
+        const decimal getDistanceSquared(Entity& e, const glm_vec3& this_pos);
+        const decimal getDistanceSquared(const glm_vec3& objPos, const glm_vec3& this_pos);
 
         const float& getAngle();    void setAngle(const float angle);
         const float& getAspect();   void setAspect(const float aspectRatio);

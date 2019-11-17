@@ -204,7 +204,7 @@ DisruptorCannonProjectile::DisruptorCannonProjectile(EntityWrapper* target, Disr
 
     light = new PointLight(finalPosition, &map);
     light->setColor(0.17f, 0.82f, 0.14f, 1.0f);
-    light->setAttenuation(LightRange::_20);
+    light->setAttenuation(LightRange::_32);
 }
 DisruptorCannonProjectile::~DisruptorCannonProjectile() {
 

@@ -8,6 +8,8 @@
 #include <ecs/ECSSystem.h>
 #include <core/engine/utils/Utils.h>
 
+struct SceneOptions;
+
 namespace Engine {
     namespace epriv {
 
@@ -42,7 +44,8 @@ namespace Engine {
                     }
                 }
             public:
-                ECS() {}
+                ECS(/*const SceneOptions& options*/) {
+                }
                 virtual ~ECS() {
                     SAFE_DELETE_VECTOR(m_Systems);
                     SAFE_DELETE_VECTOR(m_ComponentPools);

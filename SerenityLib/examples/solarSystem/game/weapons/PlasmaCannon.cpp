@@ -199,7 +199,7 @@ PlasmaCannonProjectile::PlasmaCannonProjectile(EntityWrapper* target, PlasmaCann
 
     light = new PointLight(finalPosition, &map);
     light->setColor(0.64f, 1.0f, 0.75f, 1.0f);
-    light->setAttenuation(LightRange::_20);
+    light->setAttenuation(LightRange::_32);
 }
 PlasmaCannonProjectile::~PlasmaCannonProjectile() {
 

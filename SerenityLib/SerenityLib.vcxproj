@@ -443,6 +443,7 @@
     <ClCompile Include="Engine\src\core\engine\resources\Handle.cpp" />
     <ClCompile Include="Engine\src\core\engine\scene\Camera.cpp" />
     <ClCompile Include="Engine\src\core\engine\scene\Scene.cpp" />
+    <ClCompile Include="Engine\src\core\engine\scene\SceneOptions.cpp" />
     <ClCompile Include="Engine\src\core\engine\scene\Skybox.cpp" />
     <ClCompile Include="Engine\src\core\engine\scene\Viewport.cpp" />
     <ClCompile Include="Engine\src\core\engine\shaders\Shader.cpp" />

@@ -1,4 +1,5 @@
 #include "Sparks.h"
+#include "../Helper.h"
 #include <core/engine/utils/Utils.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -18,8 +19,11 @@ using namespace Engine;
 
 Handle Sparks::SparksMaterial1;
 
-ParticleEmissionProperties* Sparks::Spray = nullptr;
-ParticleEmissionProperties* Sparks::Burst = nullptr;
+ParticleEmissionProperties* Sparks::Spray           = nullptr;
+ParticleEmissionProperties* Sparks::Burst           = nullptr;
+ParticleEmissionProperties* Sparks::ExplosionSparks = nullptr;
+
+#pragma region SprayAndBurst
 
 struct SprayColorFunctor final { glm::vec4 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
     //auto& maxLife = properties.getLifetime();
@@ -79,41 +83,108 @@ struct SprayInitialAngularFunctor final { float operator()(ParticleEmissionPrope
     return angle;
 }};
 
+#pragma endregion
+
+#pragma region ExplosionSparks
+
+#define FIRE_COLOR_CUTOFF 0.8
+
+struct ExplosionSparksColorFunctor final { glm::vec4 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
+    auto& maxLife = properties.getLifetime();
+
+    float red, green;
+    const auto alpha = glm::min(static_cast<float>(maxLife - particle_lifetime), 1.0f);
+    //yellow to red very quickly then to black very quickly
+
+    auto factor = (particle_lifetime / FIRE_COLOR_CUTOFF) * particle.m_Data.m_UserData.x;
+    //yellow to red
+    red = glm::min(1.0f, static_cast<float>(2.0 - factor));
+    green = static_cast<float>(1.0 - factor);
+    green = glm::clamp(green, 0.05f, 1.0f);
+    if (particle_lifetime > FIRE_COLOR_CUTOFF) {
+        //blackish now
+        auto factor1 = (particle_lifetime - FIRE_COLOR_CUTOFF);
+        red -= static_cast<float>(factor1);
+        red = glm::clamp(red, 0.05f, 1.0f);
+    }
+    return glm::vec4(red, green, 0.05f, alpha);
+}};
+struct ExplosionSparksAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
+    return 0.0f;
+}};
+struct ExplosionSparksVelocityFunctor final { glm::vec3 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
+    return glm::vec3(0.0f);
+}};
+struct ExplosionSparksScaleFunctor final { glm::vec2 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
+    return glm::vec2(0.0f);
+}};
+struct ExplosionSparksDepthFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
+    return 0.01f;
+}};
+
+
+struct ExplosionSparksInitialVelocityFunctor final { glm::vec3 operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle, ParticleData& data) const {
+    const auto rand_n_x = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
+    const auto rand_n_y = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
+    const auto rand_n_z = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
+    const auto normal = glm::normalize(glm::vec3(rand_n_x, rand_n_y, rand_n_z));
+
+    const auto random_len = Helper::GetRandomFloatFromTo(0.45f, 0.6f);
+
+    data.m_UserData.x = Helper::GetRandomFloatFromTo(1.0f, 4.5f);
+
+    return normal * random_len;
+}};
+struct ExplosionSparksInitialScaleFunctor final { glm::vec2 operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle, ParticleData& data) const {
+    return glm::vec2(0.035f);
+}};
+struct ExplosionSparksInitialAngularFunctor final { float operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle, ParticleData& data) const {
+    return 0.0f;
+}};
+
+#pragma endregion
 
 void Sparks::init() {
     SparksMaterial1 = Resources::loadMaterialAsync("Sparks1", "../data/Textures/Effects/sparks_1.dds");
     ((Material*)SparksMaterial1.get())->setShadeless(true);
     ((Material*)SparksMaterial1.get())->setGlow(1.0f);
 
+    {
+        Spray = new ParticleEmissionProperties(Sparks::SparksMaterial1, 0.4, 0.005, 1, 1.0f);
+        Spray->setColorFunctor(SprayColorFunctor());
+        Spray->setDepthFunctor(SprayDepthFunctor());
+        Spray->setChangeInScaleFunctor(SprayScaleFunctor());
+        Spray->setChangeInAngularVelocityFunctor(SprayAngularVelocityFunctor());
+        Spray->setChangeInVelocityFunctor(SprayVelocityFunctor());
+        Spray->setInitialVelocityFunctor(SprayInitialVelocityFunctor());
+        Spray->setInitialScaleFunctor(SprayInitialScaleFunctor());
+        Spray->setInitialAngularVelocityFunctor(SprayInitialAngularFunctor());
+    }
 
-    Spray = new ParticleEmissionProperties(Sparks::SparksMaterial1, 0.4, 0.005, 1, 1.0f);
+    {
+        Burst = new ParticleEmissionProperties(Sparks::SparksMaterial1, 0.4, 1.005, 15, 0.01f);
+        Burst->setColorFunctor(SprayColorFunctor());
+        Burst->setDepthFunctor(SprayDepthFunctor());
+        Burst->setChangeInScaleFunctor(SprayScaleFunctor());
+        Burst->setChangeInAngularVelocityFunctor(SprayAngularVelocityFunctor());
+        Burst->setChangeInVelocityFunctor(SprayVelocityFunctor());
+        Burst->setInitialVelocityFunctor(SprayInitialVelocityFunctor());
+        Burst->setInitialScaleFunctor(SprayInitialScaleFunctor());
+        Burst->setInitialAngularVelocityFunctor(SprayInitialAngularFunctor());
+    }
 
-
-    Spray->setColorFunctor(SprayColorFunctor());
-    Spray->setDepthFunctor(SprayDepthFunctor());
-    Spray->setChangeInScaleFunctor(SprayScaleFunctor());
-    Spray->setChangeInAngularVelocityFunctor(SprayAngularVelocityFunctor());
-    Spray->setChangeInVelocityFunctor(SprayVelocityFunctor());
-
-    Spray->setInitialVelocityFunctor(SprayInitialVelocityFunctor());
-    Spray->setInitialScaleFunctor(SprayInitialScaleFunctor());
-    Spray->setInitialAngularVelocityFunctor(SprayInitialAngularFunctor());
-
-
-    Burst = new ParticleEmissionProperties(Sparks::SparksMaterial1, 0.4, 1.005, 15, 0.01f);
-
-
-    Burst->setColorFunctor(SprayColorFunctor());
-    Burst->setDepthFunctor(SprayDepthFunctor());
-    Burst->setChangeInScaleFunctor(SprayScaleFunctor());
-    Burst->setChangeInAngularVelocityFunctor(SprayAngularVelocityFunctor());
-    Burst->setChangeInVelocityFunctor(SprayVelocityFunctor());
-
-    Burst->setInitialVelocityFunctor(SprayInitialVelocityFunctor());
-    Burst->setInitialScaleFunctor(SprayInitialScaleFunctor());
-    Burst->setInitialAngularVelocityFunctor(SprayInitialAngularFunctor());
+    ExplosionSparks = new ParticleEmissionProperties(ResourceManifest::TorpedoCoreMaterial, 2.5, 0.01, 1200, 1.0f); 
+    ExplosionSparks->setColorFunctor(ExplosionSparksColorFunctor());
+    ExplosionSparks->setDepthFunctor(ExplosionSparksDepthFunctor());
+    ExplosionSparks->setChangeInScaleFunctor(ExplosionSparksScaleFunctor());
+    ExplosionSparks->setChangeInAngularVelocityFunctor(ExplosionSparksAngularVelocityFunctor());
+    ExplosionSparks->setChangeInVelocityFunctor(ExplosionSparksVelocityFunctor());
+    ExplosionSparks->setInitialVelocityFunctor(ExplosionSparksInitialVelocityFunctor());
+    ExplosionSparks->setInitialScaleFunctor(ExplosionSparksInitialScaleFunctor());
+    ExplosionSparks->setInitialAngularVelocityFunctor(ExplosionSparksInitialAngularFunctor());
 }
 void Sparks::destruct() {
     SAFE_DELETE(Spray);
     SAFE_DELETE(Burst);
+    SAFE_DELETE(ExplosionSparks);
 }

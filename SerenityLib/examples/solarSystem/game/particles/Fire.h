@@ -13,6 +13,8 @@ class Fire {
 
         static ParticleEmissionProperties* Regular;
         static ParticleEmissionProperties* ShortLived;
+        static ParticleEmissionProperties* OutwardFireballDebrisFire;
+        static ParticleEmissionProperties* OutwardFireball;
 
         static void init();
         static void destruct();

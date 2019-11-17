@@ -6,6 +6,7 @@ struct SceneOptions final {
     size_t maxAmountOfEntities;
     size_t maxAmountOfParticleEmitters;
     size_t maxAmountOfParticles;
+    
     SceneOptions() {
         #ifdef ENVIRONMENT32
             maxAmountOfEntities = 200000;
@@ -17,6 +18,8 @@ struct SceneOptions final {
             maxAmountOfParticles = 500000;
         #endif
     }
+   
+    static SceneOptions DEFAULT_OPTIONS;
 };
 
 #endif

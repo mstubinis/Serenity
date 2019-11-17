@@ -122,17 +122,16 @@ void epriv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuff
             }
         }
     };
-    auto lambda_sorter = [&](Particle& lhs, Particle& rhs) {
-        return camera.getDistanceSquared(lhs.m_Position) > camera.getDistanceSquared(rhs.m_Position);
-    };
-
     auto split = epriv::threading::splitVectorPairs(m_Particles);
     for (auto& pair_ : split) {
         epriv::threading::addJobRef(lamda_culler, pair_);
     }
     epriv::threading::waitForAll();
 
-    std::sort(std::execution::par_unseq, seen.begin(), seen.end(), lambda_sorter);
+    auto lambda_sorter = [&](Particle& lhs, Particle& rhs, const glm_vec3& camPos) {
+        return camera.getDistanceSquared(lhs.m_Position, camPos) > camera.getDistanceSquared(rhs.m_Position, camPos);
+    };
+    std::sort(std::execution::par_unseq, seen.begin(), seen.end(), std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, camera.getPosition()));
 
     program.bind();
     Mesh::Plane->bind();

@@ -950,5 +950,8 @@
     <ClCompile Include="Engine\src\ecs\ComponentBaseClass.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\scene\SceneOptions.cpp">
+      <Filter>Source Files\Engine\Core\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

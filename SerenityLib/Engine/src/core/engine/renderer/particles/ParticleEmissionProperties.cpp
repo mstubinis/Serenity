@@ -65,7 +65,7 @@ ParticleEmissionProperties::ParticleEmissionProperties(Handle& materialHandle, c
 ParticleEmissionProperties::~ParticleEmissionProperties() {
 
 }
-/*
+
 ParticleEmissionProperties::ParticleEmissionProperties(const ParticleEmissionProperties& other) {
     
     m_Lifetime = other.m_Lifetime;
@@ -145,7 +145,7 @@ ParticleEmissionProperties& ParticleEmissionProperties::operator=(ParticleEmissi
     swap(m_InitialAngularVelocityFunctor, other.m_InitialAngularVelocityFunctor);
     return *this;
 }
-*/
+
 const double& ParticleEmissionProperties::getLifetime() const {
     return m_Lifetime;
 }

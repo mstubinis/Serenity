@@ -504,7 +504,7 @@ void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat
 
     const glm::vec3 camPos = camera.getPosition();
 
-    const auto& lambda_sorter = [&camPos, &instance, &bodyModelMatrix, &sortMode](epriv::Triangle& lhs, epriv::Triangle& rhs) {
+    const auto& lambda_sorter = [&](epriv::Triangle& lhs, epriv::Triangle& rhs) {
         glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;
         glm::mat4 model2 = model1;
 
