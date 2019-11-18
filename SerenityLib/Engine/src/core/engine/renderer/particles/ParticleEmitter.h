@@ -23,7 +23,7 @@ class ParticleEmitter final : public EntityWrapper{
     public:
         glm::vec4                      m_UserData;
     private:
-        std::function<void(const double&, ParticleEmitter& emitter, ParticleEmissionProperties& properties, std::mutex&)> m_UpdateFunctor;
+        std::function<void(const double& dt, ParticleEmissionProperties& properties, std::mutex&)> m_UpdateFunctor;
         ParticleEmissionProperties*    m_Properties;
         bool                           m_Active;
         double                         m_SpawningTimer;
@@ -43,7 +43,7 @@ class ParticleEmitter final : public EntityWrapper{
         ParticleEmitter& operator=(ParticleEmitter&& other) noexcept;
 
         template<typename T> void setUpdateFunctor(const T& functor) {
-            m_UpdateFunctor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+            m_UpdateFunctor = std::bind<void>(std::move(functor), this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
         }
 
         void setPosition(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request);

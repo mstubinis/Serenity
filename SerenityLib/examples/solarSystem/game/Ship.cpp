@@ -491,26 +491,32 @@ void Ship::internal_update_just_destroyed_fully(const double& dt, Map& map) {
     setState(ShipState::Destroyed);
 }
 
-struct Test final { void operator()(const double& dt, ParticleEmitter& emitter, ParticleEmissionProperties& properties, std::mutex& mutex_) {
+struct Test final { void operator()(ParticleEmitter* emitter_ptr, const double& dt, ParticleEmissionProperties& properties, std::mutex& mutex_) {
+    ParticleEmitter& emitter = *emitter_ptr;
     emitter.m_UserData.x += static_cast<float>(dt);
     if (emitter.m_UserData.x > emitter.m_UserData.y) {
-        auto& map_ = static_cast<Map&>(emitter.entity().scene());
-        mutex_.lock();
-        ParticleEmitter emitter_3(*Fire::OutwardFireball, map_, 8.0, nullptr);
-        auto x = map_.addParticleEmitter(emitter_3);
-        mutex_.unlock();
-
         auto rand_rot_x = Helper::GetRandomFloatFromTo(-0.15f, 0.15f);
         auto rand_rot_y = Helper::GetRandomFloatFromTo(-0.15f, 0.15f);
         auto rand_rot_z = Helper::GetRandomFloatFromTo(-0.15f, 0.15f);
         glm_vec3 n = glm_vec3(rand_rot_x, rand_rot_y, rand_rot_z);
 
-        emitter_3.setPosition(emitter.position());
-        emitter_3.setScale(emitter.getScale());
-        emitter_3.setRotation(emitter.rotation());
-        emitter_3.rotate(n.x, n.y, n.z);
-        emitter_3.setLinearVelocity( (emitter.linearVelocity() * 0.65)  * emitter.rotation());
+        mutex_.lock();
+        auto& emitter_entity = emitter.entity();
+        auto& map_ = static_cast<Map&>(emitter_entity.scene());
+        ParticleEmitter emitter_3(*Fire::OutwardFireball, map_, 8.0, nullptr);
+        auto request = EntityDataRequest(emitter_entity);
+        auto request_3 = EntityDataRequest(emitter_3.entity());
+        auto x = map_.addParticleEmitter(emitter_3);
+        mutex_.unlock();
 
+        const auto rot = emitter.rotation(request);
+        const auto pos = emitter.position(request);
+
+        emitter_3.setPosition(pos, request_3);
+        emitter_3.setScale(emitter.getScale(), request_3);
+        emitter_3.setRotation(rot, request_3);
+        emitter_3.rotate(n.x, n.y, n.z, request_3);
+        emitter_3.setLinearVelocity( (emitter.linearVelocity(request) * 0.65)  * rot, request_3, true);
 
         emitter.m_UserData.x = 0.0f;
         emitter.m_UserData.y = Helper::GetRandomFloatFromTo(1.1f, 1.4f);
@@ -532,10 +538,9 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
         m_OfflineGlowFactorTimer = 0.0f;
     }
     if (m_DestructionTimerDecalTimer > m_DestructionTimerDecalTimerMax) {
-        //apply random hull fire decal, particle effect, and small (or large explosion sound at various times)
-
-        auto rand = Helper::GetRandomIntFromTo(0, 100);
-        auto rand2 = Helper::GetRandomFloatFromTo(0.15f, 0.4f) + 0.3f;
+        const auto ship_position = getPosition();
+        auto rand                = Helper::GetRandomIntFromTo(0, 100);
+        auto rand2               = Helper::GetRandomFloatFromTo(0.15f, 0.4f) + 0.3f;
 
         m_DestructionTimerDecalTimerMax = rand2;
 
@@ -573,17 +578,18 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
 
         auto* sound = Sound::playEffect(randSmallSound);
         if (sound) {
-            sound->setPosition(getPosition());
+            sound->setPosition(ship_position);
             sound->setAttenuation(0.3f);
         }
         m_DestructionTimerDecalTimer = 0.0;
     }
-
     if (m_DestructionTimerCurrent >= m_DestructionTimerMax) {
-        m_DestructionTimerCurrent = 0.0;
-        m_DestructionTimerDecalTimer = 0.0;
-
-        auto rand = Helper::GetRandomIntFromTo(0, 100);
+        const auto ship_linear_velocity = getLinearVelocity();
+        const auto ship_position        = getPosition();
+        m_DestructionTimerCurrent       = 0.0;
+        m_DestructionTimerDecalTimer    = 0.0;
+        auto rand                       = Helper::GetRandomIntFromTo(0, 100);
+        glm::quat q                     = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
         Handle randLargeSound;
         if (rand < 50) {
@@ -593,21 +599,17 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
         }
         auto* sound = Sound::playEffect(randLargeSound);
         if (sound) {
-            sound->setPosition(getPosition());
+            sound->setPosition(ship_position);
             sound->setAttenuation(0.3f);
         }
-        setState(ShipState::JustFlaggedAsFullyDestroyed);
-
 
         ParticleEmitter emitter_(*Sparks::ExplosionSparks, map, 0.01, this);
-        glm::quat q = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
         emitter_.setPosition(glm::vec3(0.0f));
 
         auto* emitter = map.addParticleEmitter(emitter_);
         if (emitter) {
             m_EmittersDestruction.push_back(make_tuple(emitter, 0, glm::vec3(0.0f), q));
         }
-        const auto shipLinV = getLinearVelocity();
         for (int i = 0; i < 8 + int(m_DestructionTimerMax); ++i) {
             auto rand_n_x = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
             auto rand_n_y = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
@@ -616,15 +618,14 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
 
             auto factor = Helper::GetRandomFloatFromTo(0.45f, 0.55f);
             auto randScale = Helper::GetRandomFloatFromTo(1.0f, 1.6f);
-            auto pos = getPosition();
 
             ParticleEmitter emitter_2(*Fire::OutwardFireballDebrisFire, map, 6.0, nullptr);
-            glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
-            Math::alignTo(q, -norm);
-            emitter_2.setPosition(pos);
-            emitter_2.setRotation(q);
+            glm_quat q1 = glm_quat(1.0, 0.0, 0.0, 0.0);
+            Math::alignTo(q1, -norm);
+            emitter_2.setPosition(ship_position);
+            emitter_2.setRotation(q1);
             emitter_2.setScale(randScale, randScale, randScale);
-            emitter_2.setLinearVelocity(shipLinV, false);
+            emitter_2.setLinearVelocity(ship_linear_velocity, false);
             auto newVel = glm_vec3(norm * factor);
             emitter_2.applyLinearVelocity(newVel, true);
             auto* emitter2 = map.addParticleEmitter(emitter_2);
@@ -634,6 +635,8 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
             }
         }
         //TODO: alert server?
+
+        setState(ShipState::JustFlaggedAsFullyDestroyed);
     }
 }
 void Ship::internal_update_damage_emitters(const double& dt, Map& map) {

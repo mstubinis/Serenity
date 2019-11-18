@@ -13,7 +13,7 @@
 using namespace std;
 using namespace Engine;
 
-struct EmptyUpdate final { void operator()(const double& dt, ParticleEmitter& emitter, ParticleEmissionProperties& properties, std::mutex& mutex_) {
+struct EmptyUpdate final { void operator()(ParticleEmitter* emitter, const double& dt, ParticleEmissionProperties& properties, std::mutex& mutex_) {
 
 };};
 
@@ -123,7 +123,7 @@ void ParticleEmitter::update_multithreaded(const size_t& index, const double& dt
         m_Timer += dt;
         m_SpawningTimer += dt;
         auto& properties = *m_Properties;
-        m_UpdateFunctor(dt, std::ref(*this), std::ref(properties), std::ref(particleSystem.m_Mutex));
+        m_UpdateFunctor(dt, std::ref(properties), std::ref(particleSystem.m_Mutex));
         if (m_SpawningTimer > properties.m_SpawnRate) {
             particleSystem.m_Mutex.lock();
             for(unsigned int i = 0; i < properties.m_ParticlesPerSpawn; ++i)
