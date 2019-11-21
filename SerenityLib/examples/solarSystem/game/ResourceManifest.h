@@ -63,6 +63,8 @@ struct ResourceManifest{
     static Handle PhaserBeamMaterial;
     static Handle PlasmaBeamMaterial;
     static Handle DisruptorBeamMaterial;
+    static Handle BorgBeamMaterial;
+    static Handle BorgCuttingBeamMaterial;
 
     //sounds
     static Handle SoundCloakingActivated;
@@ -78,6 +80,9 @@ struct ResourceManifest{
     static Handle SoundPhaserBeam;
     static Handle SoundPlasmaBeam;
     static Handle SoundDisruptorBeam;
+    static Handle SoundBorgBeam;
+    static Handle SoundBorgCuttingBeam;
+    static Handle SoundBorgTorpedo;
     static Handle SoundAntiCloakScan;
     static Handle SoundAntiCloakScanDetection;
     static Handle SoundExplosionSmall1;

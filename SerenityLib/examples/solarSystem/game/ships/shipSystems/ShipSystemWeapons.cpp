@@ -513,6 +513,8 @@ void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
     beamEndModel.show();
     beamModelInstance.show();
     beamModelInstance.forceRender(true);
+
+
     Ship* targetShip = dynamic_cast<Ship*>(target);
     const auto shipRotation = ship.getRotation();
     const auto shipPosition = ship.getPosition();
@@ -529,7 +531,7 @@ void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
     ignored.push_back(ship.entity());
     auto target_central_position = glm::vec3(target->getComponent<ComponentBody>()->position());
 
-
+    
     glm::vec3 target_world_position = target_central_position + targetCoordinates;
     if (windupPoints.size() == 1) {
         firstWindupPos = secondWindupPos = (shipPosition + Math::rotate_vec3(shipRotation, windupPoints[0]));
@@ -538,12 +540,6 @@ void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
         firstWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, halfCharge));
         secondWindupPos = shipPosition + Math::rotate_vec3(shipRotation, Math::polynomial_interpolate_cubic(windupPoints, 1.0f - halfCharge));
     }
-
-
-
-
-
-
     glm::vec3 beam_starting_position = firstWindupPos;
     glm::vec3 beam_ending_position = firstWindupPos;
 
@@ -614,6 +610,16 @@ void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
     beamLight->setRodLength(len2);
     modifyBeamMesh(beamModel, len2);
   
+
+
+    auto& cam = *firstWindupBody.getOwner().scene().getActiveCamera();
+    auto camRotation = cam.getOrientation();
+    firstWindupModel.getModel().setOrientation(camRotation);
+    secondWindupModel.getModel().setOrientation(camRotation);
+    beamEndModel.getModel().setOrientation(camRotation);
+
+
+
     const auto x = firingTimeMax - (len2 / launchSpeed);
     if (!isInArc(target, arc + 5.0f) && firingTime < x) {
         firingTime = x;

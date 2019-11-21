@@ -432,6 +432,15 @@
     <ClInclude Include="game\particles\Sparks.h">
       <Filter>Header Files\Game\Particles</Filter>
     </ClInclude>
+    <ClInclude Include="game\weapons\BorgBeam.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\BorgCuttingBeam.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\BorgTorpedo.h">
+      <Filter>Header Files\Game\Weapons</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -658,6 +667,15 @@
     </ClCompile>
     <ClCompile Include="game\Helper.cpp">
       <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\BorgBeam.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\BorgCuttingBeam.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\BorgTorpedo.cpp">
+      <Filter>Source Files\Game\Weapons</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

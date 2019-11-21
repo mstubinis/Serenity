@@ -260,6 +260,9 @@
     <ClInclude Include="game\ships\vorcha\Vorcha.h" />
     <ClInclude Include="game\teams\Team.h" />
     <ClInclude Include="game\teams\TeamIncludes.h" />
+    <ClInclude Include="game\weapons\BorgBeam.h" />
+    <ClInclude Include="game\weapons\BorgCuttingBeam.h" />
+    <ClInclude Include="game\weapons\BorgTorpedo.h" />
     <ClInclude Include="game\weapons\DisruptorBeam.h" />
     <ClInclude Include="game\weapons\DisruptorCannon.h" />
     <ClInclude Include="game\weapons\KlingonPhotonTorpedo.h" />
@@ -339,6 +342,9 @@
     <ClCompile Include="game\ships\sphere\Sphere.cpp" />
     <ClCompile Include="game\ships\vorcha\Vorcha.cpp" />
     <ClCompile Include="game\teams\Team.cpp" />
+    <ClCompile Include="game\weapons\BorgBeam.cpp" />
+    <ClCompile Include="game\weapons\BorgCuttingBeam.cpp" />
+    <ClCompile Include="game\weapons\BorgTorpedo.cpp" />
     <ClCompile Include="game\weapons\DisruptorBeam.cpp" />
     <ClCompile Include="game\weapons\DisruptorCannon.cpp" />
     <ClCompile Include="game\weapons\KlingonPhotonTorpedo.cpp" />

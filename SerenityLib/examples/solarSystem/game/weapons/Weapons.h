@@ -17,12 +17,15 @@
 
 #include "PhaserBeam.h"
 #include "PlasmaBeam.h"
+#include "BorgBeam.h"
+#include "BorgCuttingBeam.h"
 
 #include "PhotonTorpedo.h"
 #include "PhotonTorpedoOld.h"
 #include "QuantumTorpedo.h"
 #include "KlingonPhotonTorpedo.h"
 #include "PlasmaTorpedo.h"
+#include "BorgTorpedo.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -57,9 +60,24 @@ class Weapons {
 
             switch (weapon.type) {
                 case WeaponType::BorgTorpedo: {
+                    auto& w = static_cast<BorgTorpedo&>(weapon);
+                    auto* projectile = new BorgTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    const auto res = map.addTorpedoProjectile(projectile, projectile_index);
+                    if (res >= 0) {
+                        w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundBorgTorpedo);
+                        if (w.soundEffect) {
+                            w.soundEffect->setVolume(w.volume);
+                            w.soundEffect->setPosition(final_world_position);
+                            w.soundEffect->setAttenuation(attenuation);
+                        }
+                        --weapon.numRounds;
+                    }
                     break;
                 }
-                case WeaponType::CuttingBeam: {
+                case WeaponType::BorgBeam: {
+                    break;
+                }
+                case WeaponType::BorgCuttingBeam: {
                     break;
                 }
                 case WeaponType::DisruptorBeam: {

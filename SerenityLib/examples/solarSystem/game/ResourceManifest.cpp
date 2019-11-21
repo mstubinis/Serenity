@@ -72,6 +72,8 @@ Handle ResourceManifest::CannonTailMaterial;
 Handle ResourceManifest::PhaserBeamMaterial;
 Handle ResourceManifest::PlasmaBeamMaterial;
 Handle ResourceManifest::DisruptorBeamMaterial;
+Handle ResourceManifest::BorgBeamMaterial;
+Handle ResourceManifest::BorgCuttingBeamMaterial;
 
 //sounds
 Handle ResourceManifest::SoundCloakingActivated;
@@ -87,6 +89,9 @@ Handle ResourceManifest::SoundPlasmaTorpedo;
 Handle ResourceManifest::SoundPhaserBeam;
 Handle ResourceManifest::SoundPlasmaBeam;
 Handle ResourceManifest::SoundDisruptorBeam;
+Handle ResourceManifest::SoundBorgBeam;
+Handle ResourceManifest::SoundBorgCuttingBeam;
+Handle ResourceManifest::SoundBorgTorpedo;
 Handle ResourceManifest::SoundAntiCloakScan;
 Handle ResourceManifest::SoundAntiCloakScanDetection;
 Handle ResourceManifest::SoundExplosionSmall1;
@@ -189,6 +194,9 @@ void ResourceManifest::init(){
     PhaserBeamMaterial = Resources::loadMaterialAsync("PhaserBeam", BasePath + "data/Textures/Effects/phaser_beam_outline.dds", "", "", "");
     PlasmaBeamMaterial = Resources::loadMaterialAsync("PlasmaBeam", BasePath + "data/Textures/Effects/phaser_beam_outline.dds", "", "", "");
     DisruptorBeamMaterial = Resources::loadMaterialAsync("DisruptorBeam", BasePath + "data/Textures/Effects/phaser_beam_outline.dds", "", "", "");
+    BorgBeamMaterial = Resources::loadMaterialAsync("BorgBeam", BasePath + "data/Textures/Effects/phaser_beam_outline.dds", "", "", "");
+    BorgCuttingBeamMaterial = Resources::loadMaterialAsync("BorgCuttingBeam", BasePath + "data/Textures/Effects/cutting_beam.dds", "", "", "");
+
 
     ShieldMaterial = Resources::loadMaterialAsync("Shields", BasePath + "data/Textures/Effects/shields_1.dds");
     HullDamageOutline1Material = Resources::loadMaterialAsync("HullDamage1Outline", BasePath + "data/Textures/Effects/hull_dmg_outline_1.dds");
@@ -248,6 +256,39 @@ void ResourceManifest::init(){
     disLayer->addUVModificationSimpleTranslation(-1.4f, 0.0f);
     disLayer->setData2(0.632f, 1.0f, 0.0f, 1.0f);
     disLayer->getTexture()->setFilter(TextureFilter::Nearest);
+
+
+
+    Material& borgBeamMat = *((Material*)BorgBeamMaterial.get());
+    borgBeamMat.setShadeless(true);
+    borgBeamMat.setGlow(1.0f);
+    borgBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(-1.4f, 0.0f);
+    borgBeamMat.getComponent(0).layer(0).setData2(0.085f, 0.97f, 0.43f, 1.0f);
+    borgBeamMat.getComponent(0).layer(0).getTexture()->setFilter(TextureFilter::Nearest);
+    auto* borgBeamLayer = borgBeamMat.getComponent(0).addLayer();
+    borgBeamLayer->setTexture(BasePath + "data/Textures/Effects/phaser_beam_inside.dds");
+    borgBeamLayer->addUVModificationSimpleTranslation(-1.4f, 0.0f);
+    borgBeamLayer->setData2(0.411f, 0.87f, 0.45f, 1.0f);
+    borgBeamLayer->getTexture()->setFilter(TextureFilter::Nearest);
+
+
+
+
+    Material& borgCuttingBeamMat = *((Material*)BorgCuttingBeamMaterial.get());
+    borgCuttingBeamMat.setShadeless(true);
+    borgCuttingBeamMat.setGlow(1.0f);
+    borgCuttingBeamMat.getComponent(0).layer(0).addUVModificationSimpleTranslation(0.0f, -1.2f);
+    borgCuttingBeamMat.getComponent(0).layer(0).setData2(0.23f, 0.57f, 0.45f, 1.0f);
+    borgCuttingBeamMat.getComponent(0).layer(0).getTexture()->setFilter(TextureFilter::Nearest);
+    /*
+    auto* borgCuttingBeamLayer = borgCuttingBeamMat.getComponent(0).addLayer();
+    borgCuttingBeamLayer->setTexture(BasePath + "data/Textures/Effects/phaser_beam_inside.dds");
+    borgCuttingBeamLayer->addUVModificationSimpleTranslation(0.0f, 0.2f);
+    borgCuttingBeamLayer->setData2(0.411f, 0.87f, 0.45f, 1.0f);
+    borgCuttingBeamLayer->getTexture()->setFilter(TextureFilter::Nearest);
+    */
+
+
 
 
 
@@ -339,6 +380,12 @@ void ResourceManifest::init(){
     SoundPhaserBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/phaser_beam.ogg");
     SoundPlasmaBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_beam.ogg");
     SoundDisruptorBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/disruptor_beam.ogg");
+
+
+    SoundBorgBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/borg_beam.ogg");
+    SoundBorgCuttingBeam = Resources::addSoundData(BasePath + "data/Sounds/effects/borg_cutting_beam.ogg");
+    SoundBorgTorpedo = Resources::addSoundData(BasePath + "data/Sounds/effects/borg_torpedo.ogg");
+
     SoundAntiCloakScan = Resources::addSoundData(BasePath + "data/Sounds/effects/anti_cloak_scan.ogg");
     SoundAntiCloakScanDetection = Resources::addSoundData(BasePath + "data/Sounds/effects/anti_cloak_scan_detection.ogg");
     SoundExplosionSmall1 = Resources::addSoundData(BasePath + "data/Sounds/effects/explosion_small_1.ogg");

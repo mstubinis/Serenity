@@ -10,7 +10,9 @@ struct WeaponType final { enum Type {
     PhaserBeam,
     PlasmaBeam,
     DisruptorBeam,
-    CuttingBeam,
+
+    BorgBeam,
+    BorgCuttingBeam,
 
     PhotonTorpedo,
     PhotonTorpedoOld,

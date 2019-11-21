@@ -5,6 +5,10 @@
 #include "../../weapons/KlingonPhotonTorpedo.h"
 #include "../../weapons/DisruptorBeam.h"
 
+#include "../../weapons/BorgBeam.h"
+#include "../../weapons/BorgCuttingBeam.h"
+#include "../../weapons/BorgTorpedo.h"
+
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"
 #include "../../ships/shipSystems/ShipSystemPitchThrusters.h"
