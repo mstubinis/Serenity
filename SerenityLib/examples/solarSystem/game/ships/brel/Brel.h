@@ -22,7 +22,7 @@ class Brel final : public Ship {
         float m_WingRotation;
     public:
         Brel(
-            const AIType::Type ai_type,
+            AIType::Type& ai_type,
             Team& team,
             Client& client,
             Map& map,

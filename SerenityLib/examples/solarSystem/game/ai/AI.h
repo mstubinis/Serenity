@@ -10,21 +10,25 @@ class Ship;
 class Map;
 class ShipSystemSensors;
 class ShipSystemWeapons;
+class ThreatTable;
 class AI {
-    private:
-        AIType::Type  m_Type;
-        FireAtWill*   m_FireAtWill;
+    protected:
+        AIType::Type   m_Type;
+        FireAtWill*    m_FireAtWill;
+        ThreatTable*   m_Threat;
     public:
         AI(const AIType::Type type);
-        ~AI();
+        virtual ~AI();
 
         const AIType::Type& getType() const;
 
         virtual void update(const double& dt);
 
-        void installFireAtWill(Ship&, Map&, ShipSystemSensors&, ShipSystemWeapons&);
+        void installFireAtWill(AIType::Type&, Ship&, Map&, ShipSystemSensors&, ShipSystemWeapons&);
+        void installThreatTable(Map& map);
 
         FireAtWill* getFireAtWill();
+        ThreatTable* getThreatTable();
         /*
         const std::string serialize() const;
         void deserialize(const std::string& input);

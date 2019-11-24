@@ -109,8 +109,10 @@ class Ship: public EntityWrapper, public EventObserver {
         void internal_calculate_ship_destruction_time_max(ComponentModel&);
     public:
         std::vector<std::tuple<ParticleEmitter*, size_t, glm_vec3, glm_quat>>        m_EmittersDestruction;
+        std::vector<glm::vec3>                                                       m_AimPositionDefaults;
+        Client&                                                                      m_Client;
     protected:
-        std::vector<std::tuple<Decal*,size_t>>                                    m_DamageDecals;
+        std::vector<std::tuple<Decal*,size_t>>                                       m_DamageDecals;
 
 
         //unsigned int                                 m_Flags;
@@ -126,7 +128,6 @@ class Ship: public EntityWrapper, public EventObserver {
         float                                          m_OfflineGlowFactorTimer;
 
         Team&                                          m_Team;
-        Client&                                        m_Client;
         std::unordered_map<unsigned int,ShipSystem*>   m_ShipSystems;
         AI*                                            m_AI;
         GameCamera*                                    m_PlayerCamera;
@@ -135,7 +136,6 @@ class Ship: public EntityWrapper, public EventObserver {
         float                                          m_WarpFactor;
         std::string                                    m_ShipClass;
         std::string                                    m_MapKey;
-        std::vector<glm::vec3>                         m_AimPositionDefaults;
         glm::vec3                                      m_CameraOffsetDefault;
     public:
         Ship(
@@ -223,6 +223,7 @@ class Ship: public EntityWrapper, public EventObserver {
         const bool isEnemy(Ship& other);
         const bool isNeutral(Ship& other);
 
+        void apply_threat(const std::string& source, const unsigned int threat_amount);
 
         PrimaryWeaponBeam& getPrimaryWeaponBeam(const uint index);
         PrimaryWeaponCannon& getPrimaryWeaponCannon(const uint index);

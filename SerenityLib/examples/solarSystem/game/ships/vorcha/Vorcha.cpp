@@ -5,10 +5,6 @@
 #include "../../weapons/KlingonPhotonTorpedo.h"
 #include "../../weapons/DisruptorBeam.h"
 
-#include "../../weapons/BorgBeam.h"
-#include "../../weapons/BorgCuttingBeam.h"
-#include "../../weapons/BorgTorpedo.h"
-
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"
 #include "../../ships/shipSystems/ShipSystemPitchThrusters.h"
@@ -24,7 +20,7 @@
 
 using namespace std;
 
-Vorcha::Vorcha(const AIType::Type ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client, "Vor'cha", map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
@@ -198,8 +194,8 @@ Vorcha::Vorcha(const AIType::Type ai_type, Team& team, Client& client, Map& map,
     };
     addHullTargetPoints(hull_target_points);
 
-    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
-
+    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
+    m_AI->installThreatTable(map);
 }
 Vorcha::~Vorcha() {
 }

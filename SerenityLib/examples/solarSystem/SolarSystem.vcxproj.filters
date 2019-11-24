@@ -190,6 +190,18 @@
     <Filter Include="Source Files\Game\Particles">
       <UniqueIdentifier>{c75f8cb2-b378-427a-b412-ce1e335a8dcc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Ships\Sovereign">
+      <UniqueIdentifier>{2e5ec781-39a6-4c52-a14d-1de38e95a236}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Sovereign">
+      <UniqueIdentifier>{a59b2147-2b59-4ceb-9c94-095729f2ef4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\AI\Logic">
+      <UniqueIdentifier>{bd38b115-1bc8-41cf-8c9c-7beb28f6a386}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\AI\Logic">
+      <UniqueIdentifier>{006da8f0-9526-4d61-bbba-a9ec95362760}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -441,6 +453,21 @@
     <ClInclude Include="game\weapons\BorgTorpedo.h">
       <Filter>Header Files\Game\Weapons</Filter>
     </ClInclude>
+    <ClInclude Include="game\ships\sovereign\Sovereign.h">
+      <Filter>Header Files\Game\Ships\Sovereign</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ai\AIStationaryNPC.h">
+      <Filter>Header Files\Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ai\ThreatTable.h">
+      <Filter>Header Files\Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ai\AINPC.h">
+      <Filter>Header Files\Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ai\logic\GunneryBaseClass.h">
+      <Filter>Header Files\Game\AI\Logic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -676,6 +703,21 @@
     </ClCompile>
     <ClCompile Include="game\weapons\BorgTorpedo.cpp">
       <Filter>Source Files\Game\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\sovereign\Sovereign.cpp">
+      <Filter>Source Files\Game\Ships\Sovereign</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ai\AIStationaryNPC.cpp">
+      <Filter>Source Files\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ai\ThreatTable.cpp">
+      <Filter>Source Files\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ai\AINPC.cpp">
+      <Filter>Source Files\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ai\logic\GunneryBaseClass.cpp">
+      <Filter>Source Files\Game\AI\Logic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

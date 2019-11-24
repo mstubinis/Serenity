@@ -19,7 +19,7 @@
 
 using namespace std;
 
-Excelsior::Excelsior(const AIType::Type ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+Excelsior::Excelsior(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client,"Excelsior", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, -0.306522f, -0.368403f)) {
 
     auto& _this = *this;
@@ -156,8 +156,8 @@ Excelsior::Excelsior(const AIType::Type ai_type, Team& team, Client& client, Map
     weapons.addPrimaryWeaponBeam(*topRight2LeftPhaser);
     weapons.addPrimaryWeaponBeam(*topRight2RightPhaser);
 
-    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
-
+    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
+    m_AI->installThreatTable(map);
 }
 Excelsior::~Excelsior() {
 

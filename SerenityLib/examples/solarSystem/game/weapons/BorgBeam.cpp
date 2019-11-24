@@ -38,6 +38,7 @@ struct BorgBeamCollisionFunctor final { void operator()(CollisionCallbackEventDa
             Ship* otherShip = static_cast<Ship*>(otherShipVoid);
             if (otherShip) {
                 auto& weapon = *static_cast<BorgBeam*>(data.ownerBody.getUserPointer2());
+                auto& source = static_cast<Ship*>(disruptorShipVoid)->getMapKey();
                 if (weapon.firingTime > 0.0f) {
                     auto& otherRotation = otherShip->getRotation();
                     Ship* sourceShip = static_cast<Ship*>(disruptorShipVoid);
@@ -52,17 +53,17 @@ struct BorgBeamCollisionFunctor final { void operator()(CollisionCallbackEventDa
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(modelSpacePosition));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
                             if (weapon.firingTimeShieldGraphicPing > 0.2f) {
-                                shields->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
+                                shields->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, true);
                                 weapon.firingTimeShieldGraphicPing = 0.0f;
                             }else{
-                                shields->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
+                                shields->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, weapon.impactTime, finalDamage, shieldSide, false);
                             }
                             return;
                         }
                     }
                     if (hull && data.otherBody.getUserPointer() == hull) {
                         if (weapon.firingTimeShieldGraphicPing > 1.0f) {
-                            hull->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, true, true);
+                            hull->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, true, true);
 
                             Map& map = static_cast<Map&>(otherShip->entity().scene());
                             ParticleEmitter emitter_(*Sparks::Spray, map, 0.1f, otherShip);
@@ -77,7 +78,7 @@ struct BorgBeamCollisionFunctor final { void operator()(CollisionCallbackEventDa
 
                             weapon.firingTimeShieldGraphicPing = 0.0f;
                         }else{
-                            hull->receiveHit(localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, false, false);
+                            hull->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, false, false);
                         }
                     }
                 }

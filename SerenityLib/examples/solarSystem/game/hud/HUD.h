@@ -31,6 +31,7 @@ class HUD final {
         ShipStatusDisplay&   getShipTargetStatusDisplay();
 
         Font& getFont();
+        Map& getMap();
 
         void setTarget(Planet*);
         void setTarget(Ship*);

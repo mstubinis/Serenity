@@ -91,6 +91,16 @@ void main(){
     vec2 encodedNormals = EncodeOctahedron(inData.normals); //yes these two lines are evil and not needed, but they sync up the results with the deferred pass...
     inData.normals = DecodeOctahedron(encodedNormals);
     vec3 lightTotal = ConstantZeroVec3;
+
+    inData.glow *= OfflineGlowFactor;
+    inData.diffuse.a *= MaterialBasePropertiesTwo.x;
+
+    vec4 GodRays = vec4(Gods_Rays_Color,1.0);
+    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);
+
+    gl_FragData[1] = vec4(encodedNormals, 0.0, 0.0); //old: OutMatIDAndAO, OutPackedMetalnessAndSmoothness. keeping normals around for possible decals later
+    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);
+    gl_FragData[3] = vec4(inData.diffuse.rgb, 1.0);
     if(Shadeless != 1){
         vec3 lightCalculation = ConstantZeroVec3;
         for (int j = 0; j < numLights; ++j) {
@@ -137,12 +147,5 @@ void main(){
 
         inData.diffuse.rgb = lightTotal;
     }
-    inData.glow *= OfflineGlowFactor;
-    inData.diffuse.a *= MaterialBasePropertiesTwo.x;
-    vec4 GodRays = vec4(Gods_Rays_Color,1.0);
-    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);
     gl_FragData[0] = inData.diffuse;
-    gl_FragData[1] = vec4(encodedNormals, 0.0, 0.0); //old: OutMatIDAndAO, OutPackedMetalnessAndSmoothness. keeping normals around for possible decals later
-    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);
-    gl_FragData[3] = inData.diffuse;
 }

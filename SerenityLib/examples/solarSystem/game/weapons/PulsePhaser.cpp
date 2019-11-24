@@ -41,7 +41,7 @@ struct PulsePhaserCollisionFunctor final { void operator()(CollisionCallbackEven
                     if (shields && data.otherBody.getUserPointer() == shields) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(modelSpacePosition));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
-                            cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
+                            cannonProjectile.clientToServerImpactShields(*sourceShip, true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
                             return;
                         }
                     }
@@ -50,12 +50,12 @@ struct PulsePhaserCollisionFunctor final { void operator()(CollisionCallbackEven
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
                             if (shields->getHealthCurrent(shieldSide) > 0) {
-                                cannonProjectile.clientToServerImpactShields(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
+                                cannonProjectile.clientToServerImpactShields(*sourceShip,true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
                                 return;
                             }
                         }
                         */
-                        cannonProjectile.clientToServerImpactHull(true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, weapon.impactRadius, weapon.damage, weapon.impactTime, data.otherModelInstanceIndex);
+                        cannonProjectile.clientToServerImpactHull(*sourceShip, true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, weapon.impactRadius, weapon.damage, weapon.impactTime, data.otherModelInstanceIndex);
                     }
                 }
             }

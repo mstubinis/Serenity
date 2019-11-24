@@ -99,6 +99,8 @@ class ShipSystemShields final : public ShipSystem {
 
         Entity getEntity();
 
+        void apply_damage_amount(const std::string& source, const float& damage, const uint& shield_side);
+
         void destroy();
 
         void update(const double& dt);
@@ -144,8 +146,24 @@ class ShipSystemShields final : public ShipSystem {
         void turnOffShields();
         void turnOnShields();
 
-        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide, const bool doImpactGraphic = true);
-        void receiveHitBleedDamage(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float damage, const uint shieldSide);
+        void receiveHit(
+            const std::string& source,
+            const glm::vec3& impactNormal,
+            const glm::vec3& impactLocation,
+            const float& impactRadius,
+            const float& maxTime,
+            const float damage,
+            const uint shieldSide,
+            const bool doImpactGraphic = true
+        );
+        void receiveHitBleedDamage(
+            const std::string& source,
+            const glm::vec3& impactNormal,
+            const glm::vec3& impactLocation,
+            const float& impactRadius,
+            const float damage,
+            const uint shieldSide
+        );
 
         void addShieldImpact(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime);
 

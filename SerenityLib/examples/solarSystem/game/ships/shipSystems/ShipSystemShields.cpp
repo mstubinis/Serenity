@@ -363,7 +363,7 @@ void ShipSystemShields::addShieldImpact(const glm::vec3& impactModelSpacePositio
         impactPointData.impact(impactModelSpacePosition, impactRadius, maxTime, m_ImpactPointsFreelist);
     }
 }
-void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactModelSpacePosition, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide, const bool doImpactGraphic) {
+void ShipSystemShields::receiveHit(const string& source, const glm::vec3& impactNormal, const glm::vec3& impactModelSpacePosition, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide, const bool doImpactGraphic) {
     if (m_ShieldsAreUp) {
         if (m_Ship.m_State != ShipState::Destroyed && m_Ship.m_State != ShipState::JustFlaggedAsFullyDestroyed) {
             /*
@@ -379,9 +379,9 @@ void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec
             }
             const float bleed_damage = m_HealthPointsCurrent[shieldSide] - final_damage;
             if (bleed_damage >= 0) {
-                m_HealthPointsCurrent[shieldSide] -= final_damage; //shields take the entire hit
+                apply_damage_amount(source, final_damage, shieldSide);
             }else{
-                m_HealthPointsCurrent[shieldSide] = 0.0f;
+                apply_damage_amount(source, m_HealthPointsCurrent[shieldSide], shieldSide);
                 //bleed_damage *= -1.0f;
                 //receiveHitBleedDamage(impactNormal, impactModelSpacePosition, impactRadius, maxTime, bleed_damage, shieldSide);
             }
@@ -401,14 +401,23 @@ void ShipSystemShields::receiveHit(const glm::vec3& impactNormal, const glm::vec
     }
     */
 }
-void ShipSystemShields::receiveHitBleedDamage(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float damage, const uint shieldSide) {
+void ShipSystemShields::receiveHitBleedDamage(const string& source, const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float damage, const uint shieldSide) {
     auto* hull = static_cast<ShipSystemHull*>(m_Ship.getShipSystem(ShipSystemType::Hull));
-    m_HealthPointsCurrent[shieldSide] = 0.0f;
     if (hull) {
-        hull->receiveHit(impactNormal, impactLocation, impactRadius, damage, 0, false, false); //0 is hard coded model index, but there should not be hull visuals due to bleed damage
+        hull->receiveHit(source, impactNormal, impactLocation, impactRadius, damage, 0, false, false); //0 is hard coded model index, but there should not be hull visuals due to bleed damage
     }
 }
+void ShipSystemShields::apply_damage_amount(const string& source, const float& damage, const uint& shield_side) {
+    m_HealthPointsCurrent[shield_side] -= damage;
+    //now apply threat
 
+    Ship* source_ship = static_cast<Map&>(m_Ship.entity().scene()).getShips().at(source);
+    if (source_ship) { //TODO: should not need this nullptr check
+        const auto& threat_modifier = Ships::Database[source_ship->getClass()].ThreatModifier;
+        auto final_threat_amount = (damage * 10.0f) * threat_modifier; //this 10.0f is just to expand on the unsigned int amount to give more room for modifiers to change the value
+        m_Ship.apply_threat(source, static_cast<unsigned int>(final_threat_amount));
+    }
+}
 
 Entity ShipSystemShields::getEntity() {
     return m_ShieldEntity;

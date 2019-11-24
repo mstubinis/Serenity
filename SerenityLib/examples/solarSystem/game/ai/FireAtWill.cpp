@@ -13,12 +13,19 @@
 using namespace std;
 using namespace Engine;
 
-FireAtWill::FireAtWill(Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) : m_Ship(ship), m_Map(map), m_Sensors(sensors), m_Weapons(weapons){
-    m_Activated = false;
+FireAtWill::FireAtWill(const AIType::Type& type, Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) : m_Ship(ship), m_Map(map), m_Sensors(sensors), m_Weapons(weapons){
     internal_reset_timers();
 
     std::random_device rd;
-    m_random_device = std::mt19937(rd());
+    m_RandomDevice = std::mt19937(rd());
+
+    if (type == AIType::Player_You || type == AIType::Player_Other) {
+        m_IsUsingForwardWeapons = false;
+        m_Activated = false;
+    }else{
+        m_IsUsingForwardWeapons = true;
+        m_Activated = true;
+    }
 }
 FireAtWill::~FireAtWill() {
 
@@ -27,20 +34,20 @@ void FireAtWill::internal_execute_beams() {
     decimal dist_to_i, dist_to_enemy;
     glm_vec3 world_pos, offset, enemy_ship_pos = glm_vec3(0.0);
     glm_quat enemy_ship_rot;
-    bool res;
+    int res;
 
-    auto lamda = [&](Ship& enemyShip, PrimaryWeaponBeam& beam) {
+    auto lamda = [&](Ship& enemyShip, PrimaryWeaponBeam& beam, PacketMessage& pOut) {
         if (enemyShip.isDestroyed())
             return false;
         enemy_ship_pos = enemyShip.getPosition();
         if (beam.isInArc(enemy_ship_pos, beam.arc)) {
             res = beam.canFire();
-            if (res) {
+            if (res >= 0) {
                 enemy_ship_rot = enemyShip.getRotation();
                 dist_to_enemy = beam.getDistanceSquared(enemy_ship_pos);
                 if (dist_to_enemy < beam.rangeInKMSquared + static_cast<decimal>(enemyShip.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
                     auto pts = enemyShip.m_AimPositionDefaults;
-                    std::shuffle(pts.begin(), pts.end(), m_random_device);
+                    std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
                     for (unsigned int i = 0; i < pts.size(); ++i) {
                         offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
                         world_pos = enemy_ship_pos + offset;
@@ -48,16 +55,18 @@ void FireAtWill::internal_execute_beams() {
                         if (dist_to_i < beam.rangeInKMSquared) {
                             if (beam.isInArc(world_pos, beam.arc)) {
                                 beam.setTarget(&enemyShip);
-                                PacketMessage pOut;
                                 pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Beams;
                                 pOut.name = m_Ship.getName();
                                 pOut.r = static_cast<float>(offset.r);
                                 pOut.g = static_cast<float>(offset.g);
                                 pOut.b = static_cast<float>(offset.b);
-                                pOut.data = to_string(beam.index) + "," + enemyShip.getName();
-                                m_Ship.m_Client.send(pOut);
-                                return true;
 
+                                if (pOut.data.empty()) {
+                                    pOut.data += to_string(beam.index) + "," + enemyShip.getName();
+                                }else{
+                                    pOut.data += "," + to_string(beam.index) + "," + enemyShip.getName();
+                                }
+                                return true;
                             }
                         }
                     }
@@ -66,21 +75,26 @@ void FireAtWill::internal_execute_beams() {
         }
         return false;
     };
-
-    for (auto& beam_ptr : m_Weapons.getNonForwardBeams()) {
-        auto& beam = *beam_ptr.beam;
-        for (auto& enemy : m_Sensors.getEnemyShips()) {
-            auto& enemyShip = *enemy.ship;
-            const auto res = lamda(enemyShip, beam);
-            if (res)
-                return;
+    auto lamda_execute = [&](std::vector<ShipSystemWeapons::WeaponBeam>& beams) {
+        PacketMessage pOut;
+        for (auto& beam_ptr : beams) {
+            auto& beam = *beam_ptr.beam;
+            for (auto& enemy : m_Sensors.getEnemyShips()) {
+                auto& enemyShip = *enemy.ship;
+                const auto res = lamda(enemyShip, beam, pOut);
+            }
+            for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
+                auto& enemyShip = *enemy.ship;
+                const auto res = lamda(enemyShip, beam, pOut);
+            }
         }
-        for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
-            auto& enemyShip = *enemy.ship;
-            const auto res = lamda(enemyShip, beam);
-            if (res)
-                return;
-        }
+        if (!pOut.data.empty())
+            m_Ship.m_Client.send(pOut);
+    };
+    if (!m_IsUsingForwardWeapons) {
+        lamda_execute(m_Weapons.getNonForwardBeams());
+    }else{
+        lamda_execute(m_Weapons.getBeams());
     }
 }
 void FireAtWill::internal_execute_cannons() {
@@ -89,7 +103,7 @@ void FireAtWill::internal_execute_cannons() {
     glm_quat enemy_ship_rot;
     int res;
 
-    auto lamda = [&](Ship& enemyShip, PrimaryWeaponCannon& cannon) {
+    auto lamda = [&](Ship& enemyShip, PrimaryWeaponCannon& cannon, PacketMessage& pOut) {
         if (enemyShip.isDestroyed())
             return false;
         enemy_ship_pos = enemyShip.getPosition();
@@ -100,21 +114,23 @@ void FireAtWill::internal_execute_cannons() {
                 dist_to_enemy = cannon.getDistanceSquared(enemy_ship_pos);
                 if (dist_to_enemy < 100.0 * 100.0) { //TODO: add range later?
                     auto pts = enemyShip.m_AimPositionDefaults;
-                    std::shuffle(pts.begin(), pts.end(), m_random_device);
+                    std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
                     for (unsigned int i = 0; i < pts.size(); ++i) {
                         offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
                         world_pos = enemy_ship_pos + offset;
                         dist_to_i = cannon.getDistanceSquared(world_pos);
                         if (dist_to_i < 100.0 * 100.0) { //TODO: add range later?
                             if (cannon.isInArc(world_pos, cannon.arc)) {
-                                PacketMessage pOut;
                                 pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Cannons;
                                 pOut.name = m_Ship.getName();
                                 pOut.r = static_cast<float>(offset.x);
                                 pOut.g = static_cast<float>(offset.y);
                                 pOut.b = static_cast<float>(offset.z);
-                                pOut.data = to_string(cannon.index) + "," + to_string(res) + "," + enemyShip.getName();
-                                m_Ship.m_Client.send(pOut);
+                                if (pOut.data.empty()) {
+                                    pOut.data += to_string(cannon.index) + "," + to_string(res) + "," + enemyShip.getName();
+                                }else{
+                                    pOut.data += "," + to_string(cannon.index) + "," + to_string(res) + "," + enemyShip.getName();
+                                }
                                 return true;
                             }
                         }
@@ -125,20 +141,26 @@ void FireAtWill::internal_execute_cannons() {
         }
         return false;
     };
-    for (auto& cannon_ptr : m_Weapons.getNonForwardCannons()) {
-        auto& cannon = *cannon_ptr.cannon;
-        for (auto& enemy : m_Sensors.getEnemyShips()) {
-            auto& enemyShip = *enemy.ship;
-            const auto res = lamda(enemyShip, cannon);
-            if (res)
-                return;
+    auto lamda_execute = [&](std::vector<ShipSystemWeapons::WeaponCannon>& cannons) {
+        PacketMessage pOut;
+        for (auto& ptr : cannons) {
+            auto& weapon = *ptr.cannon;
+            for (auto& enemy : m_Sensors.getEnemyShips()) {
+                auto& enemyShip = *enemy.ship;
+                const auto res = lamda(enemyShip, weapon, pOut);
+            }
+            for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
+                auto& enemyShip = *enemy.ship;
+                const auto res = lamda(enemyShip, weapon, pOut);
+            }
         }
-        for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
-            auto& enemyShip = *enemy.ship;
-            const auto res = lamda(enemyShip, cannon);
-            if (res)
-                return;
-        }
+        if(!pOut.data.empty())
+            m_Ship.m_Client.send(pOut);
+    };
+    if (!m_IsUsingForwardWeapons) {
+        lamda_execute(m_Weapons.getNonForwardCannons());
+    }else{
+        lamda_execute(m_Weapons.getCannons());
     }
 }
 void FireAtWill::internal_execute_torpedos() {
@@ -158,7 +180,7 @@ void FireAtWill::internal_execute_torpedos() {
                 dist_to_enemy = torpedo.getDistanceSquared(enemy_ship_pos);
                 if (dist_to_enemy < 100.0 * 100.0) { //TODO: add range later?
                     auto pts = enemyShip.m_AimPositionDefaults;
-                    std::shuffle(pts.begin(), pts.end(), m_random_device);
+                    std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
                     for (unsigned int i = 0; i < pts.size(); ++i) {
                         offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
                         world_pos = enemy_ship_pos + offset;
@@ -171,8 +193,13 @@ void FireAtWill::internal_execute_torpedos() {
                                 pOut.r = static_cast<float>(offset.x);
                                 pOut.g = static_cast<float>(offset.y);
                                 pOut.b = static_cast<float>(offset.z);
-                                pOut.data = to_string(torpedo.index) + "," + to_string(res) + "," + enemyShip.getName();
-                                m_Ship.m_Client.send(pOut);
+                                if (pOut.data.empty()) {
+                                    pOut.data += to_string(torpedo.index) + "," + to_string(res) + "," + enemyShip.getName();
+                                }else{
+                                    pOut.data += "," + to_string(torpedo.index) + "," + to_string(res) + "," + enemyShip.getName();
+                                }
+                                if (!pOut.data.empty())
+                                    m_Ship.m_Client.send(pOut);
                                 return true;
                             }
                         }
@@ -182,20 +209,27 @@ void FireAtWill::internal_execute_torpedos() {
         }
         return false;
     };
-    for (auto& torpedo_ptr : m_Weapons.getNonForwardTorpedos()) {
-        auto& torpedo = *torpedo_ptr.torpedo;
-        for (auto& enemy : m_Sensors.getEnemyShips()) {
-            auto& enemyShip = *enemy.ship;
-            const auto res = lamda(enemyShip, torpedo);
-            if (res)
-                return;
+    auto lamda_execute = [&](std::vector<ShipSystemWeapons::WeaponTorpedo>& torpedos) {
+        for (auto& ptr : torpedos) {
+            auto& weapon = *ptr.torpedo;
+            for (auto& enemy : m_Sensors.getEnemyShips()) {
+                auto& enemyShip = *enemy.ship;
+                const auto res = lamda(enemyShip, weapon);
+                if (res)
+                    return;
+            }
+            for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
+                auto& enemyShip = *enemy.ship;
+                const auto res = lamda(enemyShip, weapon);
+                if (res)
+                    return;
+            }
         }
-        for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
-            auto& enemyShip = *enemy.ship;
-            const auto res = lamda(enemyShip, torpedo);
-            if (res)
-                return;
-        }
+    };
+    if (!m_IsUsingForwardWeapons) {
+        lamda_execute(m_Weapons.getNonForwardTorpedos());
+    }else{
+        lamda_execute(m_Weapons.getTorpedos());
     }
 }
 void FireAtWill::internal_reset_timers() {

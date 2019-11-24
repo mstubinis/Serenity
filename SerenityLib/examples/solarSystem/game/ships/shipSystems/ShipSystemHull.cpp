@@ -6,6 +6,7 @@
 #include "../../Helper.h"
 #include "../../particles/Fire.h"
 #include "../../particles/Sparks.h"
+#include "../Ships.h"
 
 #include <core/engine/renderer/Decal.h>
 #include <core/engine/math/Engine_Math.h>
@@ -160,20 +161,20 @@ void ShipSystemHull::applyDamageDecal(const glm::vec3& impactNormalModelSpace, c
         m_Ship.updateCloakVisuals(glm::abs(cloakingDevice->getCloakTimer()), model);
     }
 }
-void ShipSystemHull::receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactModelSpacePosition, const float& impactRadius, const float damage, const size_t modelIndex, const bool forceHullFire, const bool paint) {
-    receiveCollisionDamage(damage);
+void ShipSystemHull::receiveHit(const string& source, const glm::vec3& impactNormal, const glm::vec3& impactModelSpacePosition, const float& impactRadius, const float damage, const size_t modelIndex, const bool forceHullFire, const bool paint) {
+    receiveCollisionDamage(source, damage);
     if (paint) {
         applyDamageDecal(impactNormal, impactModelSpacePosition, impactRadius, modelIndex, forceHullFire);
     }
 }
-void ShipSystemHull::receiveCollisionDamage(const float damage) {
+void ShipSystemHull::receiveCollisionDamage(const string& source, const float damage) {
     const float newHP = m_HealthPointsCurrent - damage;
     if (newHP > 0.0f) {
         //hull takes entire hit
-        m_HealthPointsCurrent -= damage;
+        apply_damage_amount(source, damage);
     }else{
         //we destroyed the ship
-        m_HealthPointsCurrent = 0.0f;
+        apply_damage_amount(source, m_HealthPointsCurrent);
         if (!m_Ship.isDestroyed()) {
             m_Ship.setState(ShipState::JustFlaggedForDestruction);
         }
@@ -182,6 +183,16 @@ void ShipSystemHull::receiveCollisionDamage(const float damage) {
 void ShipSystemHull::receiveCollisionVisual(const glm::vec3& impactNormal, const glm::vec3& impactLocationLocal, const float& impactRadius, const size_t modelIndex) {
     applyDamageDecal(impactNormal, impactLocationLocal, impactRadius, modelIndex, true);
 }
+void ShipSystemHull::apply_damage_amount(const string& source, const float& damage) {
+    m_HealthPointsCurrent -= damage;
+    //now apply threat
+    Ship* source_ship = static_cast<Map&>(m_Ship.entity().scene()).getShips().at(source);
+    if (source_ship) { //TODO: should not need this nullptr check
+        const auto& threat_modifier = Ships::Database[source_ship->getClass()].ThreatModifier;
+        auto final_threat_amount = (damage * 10.0f) * threat_modifier; //this 10.0f is just to expand on the unsigned int amount to give more room for modifiers to change the value
+        m_Ship.apply_threat(source, static_cast<unsigned int>(final_threat_amount));
+    }
+}
 
 void ShipSystemHull::update(const double& dt) {
     auto& hullBody = *m_HullEntity.getComponent<ComponentBody>();
@@ -189,7 +200,7 @@ void ShipSystemHull::update(const double& dt) {
     hullBody.setPosition(shipBody.position());
     hullBody.setRotation(shipBody.rotation());
 
-#pragma region Recharging
+    #pragma region Recharging
     if (m_Ship.m_State == ShipState::Nominal) {
         const auto fdt = static_cast<float>(dt);
         if (m_HealthPointsCurrent < m_HealthPointsMax) { //dont need to recharge at max shields
@@ -203,7 +214,7 @@ void ShipSystemHull::update(const double& dt) {
             }
         }
     }
-#pragma endregion
+    #pragma endregion
 
     ShipSystem::update(dt);
 }

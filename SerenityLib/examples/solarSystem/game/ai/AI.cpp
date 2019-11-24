@@ -1,15 +1,18 @@
 #include "AI.h"
 #include "FireAtWill.h"
+#include "ThreatTable.h"
 #include <core/engine/utils/Utils.h>
 
 using namespace std;
 
 AI::AI(const AIType::Type type) {
-    m_Type = type;
-    m_FireAtWill = nullptr;
+    m_Type         = type;
+    m_FireAtWill   = nullptr;
+    m_Threat       = nullptr;
 }
 AI::~AI() {
     SAFE_DELETE(m_FireAtWill);
+    SAFE_DELETE(m_Threat);
 }
 
 const AIType::Type& AI::getType() const {
@@ -21,13 +24,21 @@ void AI::update(const double& dt) {
         m_FireAtWill->update(dt);
     }
 }
-void AI::installFireAtWill(Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) {
+void AI::installFireAtWill(AIType::Type& type, Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) {
     SAFE_DELETE(m_FireAtWill);
-    m_FireAtWill = new FireAtWill(ship, map, sensors, weapons);
+    m_FireAtWill = new FireAtWill(type, ship, map, sensors, weapons);
+}
+void AI::installThreatTable(Map& map) {
+    SAFE_DELETE(m_Threat);
+    m_Threat = new ThreatTable(map);
 }
 FireAtWill* AI::getFireAtWill() {
     return m_FireAtWill;
 }
+ThreatTable* AI::getThreatTable() {
+    return m_Threat;
+}
+
 /*
 const string AI::serialize() const {
     string res = "";

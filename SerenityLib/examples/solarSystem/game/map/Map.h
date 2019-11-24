@@ -52,7 +52,6 @@ class Map: public Scene{
         const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr);
         const std::string getClosestSpawnAnchor();
     public:
-
         std::vector<EntityWrapper*> m_Objects;
 
         Map(GameplayMode& mode, Client& client, const std::string& name, const std::string& file);
@@ -65,10 +64,13 @@ class Map: public Scene{
         virtual void onResize(const unsigned int& width, const unsigned int& height);
         virtual void render();
 
+
+        void clear_source_of_all_threat(const std::string& source);
+
         Client& getClient();
 
         HUD& getHUD();
-        Ship* createShip(const AIType::Type ai_type, Team& team, Client& client, const std::string& shipClass, const std::string& shipName, const glm::vec3& position);
+        Ship* createShip(AIType::Type ai_type, Team& team, Client& client, const std::string& shipClass, const std::string& shipName, const glm::vec3& position);
 
 
         Ship* getPlayer();

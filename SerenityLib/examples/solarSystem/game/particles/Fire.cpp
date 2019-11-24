@@ -89,35 +89,19 @@ struct OutwardDebrisFireColorFunctor final { glm::vec4 operator()(ParticleEmissi
     auto& maxLife = properties.getLifetime();
 
     float red, green, blue;
-    red   = 1.0f;
-    green = 0.7f;
-    blue  = 0.6f;
     auto lower_clamp = 0.05f * particle.m_Data.m_UserData.x;
     const auto alpha = glm::min(static_cast<float>(maxLife - particle_lifetime), 1.0f);
 
-    if (particle_lifetime <= 0.025) {
-        //white to yellow
-        auto factorBlue = particle_lifetime / 0.025; //0 to 1
-
-        red = 1.0f;
-        green = 0.7f;
-        blue = static_cast<float>(1.0 - factorBlue);
-        blue = glm::clamp(blue, lower_clamp, 1.0f);
-    }else if (particle_lifetime > 0.025 && particle_lifetime <= 0.05) {
-        //yellow to red
-        auto factorGreen = (particle_lifetime - 0.025) * 20.0;
-        red = 1.0f;
-        green -= static_cast<float>(factorGreen);
-        green = glm::clamp(green, lower_clamp, 1.0f);
-        blue = lower_clamp;
-    }else{
-        //red to black
-        auto factor = (particle_lifetime - 0.05) * 20.0;
-        red -= static_cast<float>(factor);
-        red = glm::clamp(red, lower_clamp, 1.0f);
-        green = lower_clamp;
-        blue = lower_clamp;
-    }
+    red = 1.0f;
+    green = 0.62f;
+    blue = 0.05f;
+    auto factor = particle_lifetime * 2.0;
+    red -= static_cast<float>(factor);
+    red = glm::clamp(red, lower_clamp, 1.0f);
+    green -= static_cast<float>(factor) * 1.1;
+    green = glm::clamp(green, lower_clamp, 1.0f);
+    blue -= static_cast<float>(factor);
+    blue = glm::clamp(blue, lower_clamp, 1.0f) * 1.2;
     return glm::vec4(red, green, blue, alpha);
 }};
 struct OutwardDebrisAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
@@ -137,9 +121,9 @@ struct OutwardDebrisInitialVelocityFunctor final { glm::vec3 operator()(Particle
     const auto random_amount_y = (static_cast<float>((rand() % 101) - 50) / 50.0f);
     const auto random_amount_z = (static_cast<float>((rand() % 10) + 40) / 100.0f);
 
-    const auto final_x = random_amount_x * 0.065f;
-    const auto final_y = random_amount_y * 0.065f;
-    const auto final_z = random_amount_z * 0.22f;
+    const auto final_x = random_amount_x * 0.005f;
+    const auto final_y = random_amount_y * 0.005f;
+    const auto final_z = random_amount_z * 0.012f;
     data.m_UserData.x = Helper::GetRandomFloatFromTo(0.8f, 1.2f);
     return glm::vec3(final_x, final_y, final_z);
 }};
@@ -153,7 +137,7 @@ struct OutwardDebrisSmokeInitialScaleFunctor final { glm::vec2 operator()(Partic
 struct OutwardDebrisInitialAngularFunctor final { float operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle, ParticleData& data) const {
     const auto first = (rand() % 101) - 50; //-50 to 50
     const float random_amount = glm::clamp(static_cast<float>(first) / 50.0f, -1.0f, 1.0f); //-1 to 1
-    return 0.01f * random_amount;
+    return 0.015f * random_amount;
 }};
 #pragma endregion
 
@@ -162,35 +146,19 @@ struct OutwardFireballFireColorFunctor final { glm::vec4 operator()(ParticleEmis
     auto& maxLife = properties.getLifetime();
 
     float red, green, blue;
-    red = 1.0f;
-    green = 0.85f;
-    blue = 0.7f;
     auto lower_clamp = 0.05f * particle.m_Data.m_UserData.x;
     const auto alpha = glm::min(static_cast<float>(maxLife - particle_lifetime), 1.0f);
 
-    if (particle_lifetime <= 0.025) {
-        //white to yellow
-        auto factorBlue = particle_lifetime / 0.025; //0 to 1
-
-        red = 1.0f;
-        green = 0.85f;
-        blue = static_cast<float>(1.0 - factorBlue);
-        blue = glm::clamp(blue, lower_clamp, 1.0f);
-    }else if (particle_lifetime > 0.025 && particle_lifetime <= 0.05) {
-        //yellow to red
-        auto factorGreen = (particle_lifetime - 0.025) * 10.0;
-        red = 1.0f;
-        green -= static_cast<float>(factorGreen);
-        green = glm::clamp(green, lower_clamp, 1.0f);
-        blue = lower_clamp;
-    }else {
-        //red to black
-        auto factor = (particle_lifetime - 0.05) * 10.0;
-        red -= static_cast<float>(factor);
-        red = glm::clamp(red, lower_clamp, 1.0f);
-        green = lower_clamp;
-        blue = lower_clamp;
-    }
+    red = 1.0f;
+    green = 0.62f;
+    blue = 0.05f;
+    auto factor = particle_lifetime * 2.0;
+    red -= static_cast<float>(factor);
+    red = glm::clamp(red, lower_clamp, 1.0f);
+    green -= static_cast<float>(factor) * 1.1;
+    green = glm::clamp(green, lower_clamp, 1.0f);
+    blue -= static_cast<float>(factor);
+    blue = glm::clamp(blue, lower_clamp, 1.0f) * 1.2;
     return glm::vec4(red, green, blue, alpha);
 }};
 struct OutwardFireballAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
@@ -210,9 +178,9 @@ struct OutwardFireballInitialVelocityFunctor final { glm::vec3 operator()(Partic
     const auto random_amount_y = (static_cast<float>((rand() % 101) - 50) / 50.0f);
     const auto random_amount_z = (static_cast<float>((rand() % 10) + 40) / 100.0f);
 
-    const auto final_x = random_amount_x * 0.065f;
-    const auto final_y = random_amount_y * 0.065f;
-    const auto final_z = random_amount_z * 0.22f;
+    const auto final_x = random_amount_x * 0.005f;
+    const auto final_y = random_amount_y * 0.005f;
+    const auto final_z = random_amount_z * 0.012f;
     data.m_UserData.x = Helper::GetRandomFloatFromTo(0.8f, 1.2f);
     return glm::vec3(final_x, final_y, final_z);
 }};
@@ -225,7 +193,7 @@ struct OutwardFireballSmokeInitialScaleFunctor final { glm::vec2 operator()(Part
 struct OutwardFireballInitialAngularFunctor final { float operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle, ParticleData& data) const {
     const auto first = (rand() % 101) - 50; //-50 to 50
     const float random_amount = glm::clamp(static_cast<float>(first) / 50.0f, -1.0f, 1.0f); //-1 to 1
-    return 0.01f * random_amount;
+    return 0.015f * random_amount;
 }};
 #pragma endregion
 
@@ -242,8 +210,8 @@ void Fire::init() {
 
     {
         Regular = new ParticleEmissionProperties(Fire::SmokeMaterial1, 5.0, 0.02, 1, 1.0f);
-        Regular->addMaterial(Fire::SmokeMaterial2);
-        Regular->addMaterial(Fire::SmokeMaterial3);
+        //Regular->addMaterial(Fire::SmokeMaterial2);
+        //Regular->addMaterial(Fire::SmokeMaterial3);
         Regular->setColorFunctor(FireColorFunctor());
         Regular->setDepthFunctor(FireDepthFunctor());
         Regular->setChangeInScaleFunctor(FireScaleFunctor());
@@ -255,8 +223,8 @@ void Fire::init() {
     }
     {
         ShortLived = new ParticleEmissionProperties(Fire::SmokeMaterial1, 3.2, 0.023, 1, 1.0f);
-        ShortLived->addMaterial(Fire::SmokeMaterial2);
-        ShortLived->addMaterial(Fire::SmokeMaterial3);
+        //ShortLived->addMaterial(Fire::SmokeMaterial2);
+        //ShortLived->addMaterial(Fire::SmokeMaterial3);
         ShortLived->setColorFunctor(FireColorFunctor());
         ShortLived->setDepthFunctor(FireDepthFunctor());
         ShortLived->setChangeInScaleFunctor(FireScaleFunctor());
@@ -268,9 +236,9 @@ void Fire::init() {
     }
 
     {
-        OutwardFireballDebrisFire = new ParticleEmissionProperties(Fire::SmokeMaterial1, 4.0f, 0.004, 1, 1.0f);
-        OutwardFireballDebrisFire->addMaterial(Fire::SmokeMaterial2);
-        OutwardFireballDebrisFire->addMaterial(Fire::SmokeMaterial3);
+        OutwardFireballDebrisFire = new ParticleEmissionProperties(Fire::SmokeMaterial1, 4.0f, 0.04, 1, 1.0f);
+        //OutwardFireballDebrisFire->addMaterial(Fire::SmokeMaterial2);
+        //OutwardFireballDebrisFire->addMaterial(Fire::SmokeMaterial3);
         OutwardFireballDebrisFire->setColorFunctor(OutwardDebrisFireColorFunctor());
         OutwardFireballDebrisFire->setDepthFunctor(OutwardDebrisDepthFunctor());
         OutwardFireballDebrisFire->setChangeInScaleFunctor(OutwardDebrisScaleFunctor());
@@ -282,9 +250,9 @@ void Fire::init() {
     }
 
     {
-        OutwardFireball = new ParticleEmissionProperties(Fire::SmokeMaterial1, 0.9f, 0.005, 1, 1.0f);
-        OutwardFireball->addMaterial(Fire::SmokeMaterial2);
-        OutwardFireball->addMaterial(Fire::SmokeMaterial3);
+        OutwardFireball = new ParticleEmissionProperties(Fire::SmokeMaterial1, 0.9f, 0.04, 1, 1.0f);
+        //OutwardFireball->addMaterial(Fire::SmokeMaterial2);
+        //OutwardFireball->addMaterial(Fire::SmokeMaterial3);
         OutwardFireball->setColorFunctor(OutwardFireballFireColorFunctor());
         OutwardFireball->setDepthFunctor(OutwardFireballDepthFunctor());
         OutwardFireball->setChangeInScaleFunctor(OutwardFireballScaleFunctor());

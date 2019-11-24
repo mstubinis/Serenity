@@ -9,7 +9,7 @@ class Defiant final : public Ship {
 
     public:
         Defiant(
-            const AIType::Type ai_type,
+            AIType::Type& ai_type,
             Team& team,
             Client& client,
             Map& map,

@@ -38,6 +38,8 @@
 
 #include "../modes/GameplayMode.h"
 #include "../teams/Team.h"
+#include "../ai/AI.h"
+#include "../ai/ThreatTable.h"
 
 #include "../hud/SensorStatusDisplay.h"
 #include "../hud/ShipStatusDisplay.h"
@@ -120,6 +122,18 @@ EntityWrapper* Map::getEntityFromName(const string& name) {
             return wrapper;
     }
     return nullptr;
+}
+
+void Map::clear_source_of_all_threat(const string& source) {
+    for (auto& ship : m_Ships) {
+        auto* ai = ship.second->getAI();
+        if (ai) {
+            auto* threat_table = ai->getThreatTable();
+            if (threat_table) {
+                threat_table->clearSpecificSource(source);
+            }
+        }
+    }
 }
 
 string Map::allowedShipsSingleString() {
@@ -454,7 +468,7 @@ void Map::loadFromFile(const string& filename) {
 
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
 }
-Ship* Map::createShip(const AIType::Type ai_type, Team& team, Client& client, const string& shipClass, const string& shipName, const glm::vec3& position) {
+Ship* Map::createShip(AIType::Type ai_type, Team& team, Client& client, const string& shipClass, const string& shipName, const glm::vec3& position) {
     if ((ai_type == AIType::Player_You || ai_type == AIType::Player_Other) && m_ShipsPlayerControlled.count(shipName))
         return nullptr;
     Ship* ship = nullptr;
@@ -481,6 +495,9 @@ Ship* Map::createShip(const AIType::Type ai_type, Team& team, Client& client, co
         ship = new Intrepid(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Vor'cha")
         ship = new Vorcha(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+    else if (shipClass == "Sovereign")
+        ship = new Sovereign(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+
     return ship;
 }
 Anchor* Map::getRootAnchor() {

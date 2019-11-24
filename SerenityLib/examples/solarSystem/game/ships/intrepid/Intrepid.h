@@ -9,7 +9,7 @@ class Intrepid final : public Ship {
 
     public:
         Intrepid(
-            const AIType::Type ai_type,
+            AIType::Type& ai_type,
             Team& team,
             Client& client,
             Map& map,

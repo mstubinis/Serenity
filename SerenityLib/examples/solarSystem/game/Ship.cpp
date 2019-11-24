@@ -7,7 +7,9 @@
 #include "ResourceManifest.h"
 #include "ships/Ships.h"
 #include "ai/AI.h"
+#include "ai/AIStationaryNPC.h"
 #include "ai/FireAtWill.h"
+#include "ai/ThreatTable.h"
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/Engine.h>
@@ -67,7 +69,7 @@ void ShipModelInstanceBindFunctor::operator()(EngineResource* r) const {
 
     if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
         auto& lights = epriv::InternalScenePublicInterface::GetLights(scene);
-        int maxLights = glm::min(static_cast<int>(lights.size()), MAX_LIGHTS_PER_PASS);
+        const int maxLights = glm::min(static_cast<int>(lights.size()), MAX_LIGHTS_PER_PASS);
         Renderer::sendUniform1Safe("numLights", maxLights);
         for (int i = 0; i < maxLights; ++i) {
             auto& light = *lights[i];
@@ -156,14 +158,11 @@ void ShipModelInstanceUnbindFunctor::operator()(EngineResource* r) const {
     //auto& i = *static_cast<ModelInstance*>(r);
 };
 
-
-
 struct ShipLogicFunctor final {void operator()(ComponentLogic& _component, const double& dt) const {
     Ship& ship = *static_cast<Ship*>(_component.getUserPointer());
     Map& map = static_cast<Map&>(ship.entity().scene());
     switch (ship.m_State) {
-        case ShipState::Nominal: {
-            
+        case ShipState::Nominal: { 
             if (ship.IsPlayer()) {
                 ship.internal_update_player_you_logic(dt, map);
             }
@@ -313,7 +312,34 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
     m_OfflineGlowFactor       = 1.0f;
     m_OfflineGlowFactorTimer  = 0.0f;
 
-    m_AI                      = new AI(ai_type);
+    switch (ai_type) {
+        case AIType::AI_Stationary: {
+            m_AI = new AIStationaryNPC(*this);
+            break;
+        }case AIType::AI_Easy: {
+            m_AI = nullptr;
+            break;
+        }case AIType::AI_Medium: {
+            m_AI = nullptr;
+            break;
+        }case AIType::AI_Hard: {
+            m_AI = nullptr;
+            break;
+        }case AIType::AI_None: {
+            m_AI = nullptr;
+            break;
+        }case AIType::Player_You: {
+            m_AI = new AI(ai_type);
+            break;
+        }case AIType::Player_Other: {
+            m_AI = new AI(ai_type);
+            break;
+        }default: {
+            m_AI = new AI(ai_type);
+            break;
+        }
+    }
+
     m_ShipClass               = shipClass;
     m_IsWarping               = false;
     m_PlayerCamera            = nullptr;
@@ -453,6 +479,17 @@ void Ship::internal_update_just_destroyed_fully(const double& dt, Map& map) {
         hull->getEntity().getComponent<ComponentBody>()->removePhysicsFromWorld();
         
     }
+    if (m_AI) {
+        auto* faw          = m_AI->getFireAtWill();
+        auto* threat_table = m_AI->getThreatTable();
+        if (faw) {
+        }
+        if (threat_table) {
+            threat_table->clear();
+        }
+    }
+    map.clear_source_of_all_threat(getMapKey());
+
     bodyComponent.clearAllForces();
     bodyComponent.removePhysicsFromWorld();
     for (auto& ptr : m_EmittersDestruction) {
@@ -586,6 +623,7 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
     if (m_DestructionTimerCurrent >= m_DestructionTimerMax) {
         const auto ship_linear_velocity = getLinearVelocity();
         const auto ship_position        = getPosition();
+        const auto ship_rotation        = getRotation();
         m_DestructionTimerCurrent       = 0.0;
         m_DestructionTimerDecalTimer    = 0.0;
         auto rand                       = Helper::GetRandomIntFromTo(0, 100);
@@ -603,6 +641,11 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
             sound->setAttenuation(0.3f);
         }
 
+
+
+
+        auto& shipModelComponent = *getComponent<ComponentModel>();
+        
         ParticleEmitter emitter_(*Sparks::ExplosionSparks, map, 0.01, this);
         emitter_.setPosition(glm::vec3(0.0f));
 
@@ -611,6 +654,15 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
             m_EmittersDestruction.push_back(make_tuple(emitter, 0, glm::vec3(0.0f), q));
         }
         for (int i = 0; i < 8 + int(m_DestructionTimerMax); ++i) {
+            const auto modelIndex = Helper::GetRandomIntFromTo(0, static_cast<int>(shipModelComponent.getNumModels() - 1));
+            auto& instance = shipModelComponent.getModel(modelIndex);
+            auto& mesh = *instance.mesh();
+            auto& verts = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(0);
+            auto& norms = const_cast<VertexData&>(mesh.getVertexData()).getData<std::uint32_t>(2);
+            const auto randVertexIndex = Helper::GetRandomIntFromTo(0, static_cast<int>(verts.size()) - 1);
+            auto localPos = verts[randVertexIndex];
+
+
             auto rand_n_x = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
             auto rand_n_y = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
             auto rand_n_z = Helper::GetRandomFloatFromTo(-1.0f, 1.0f);
@@ -622,7 +674,7 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
             ParticleEmitter emitter_2(*Fire::OutwardFireballDebrisFire, map, 6.0, nullptr);
             glm_quat q1 = glm_quat(1.0, 0.0, 0.0, 0.0);
             Math::alignTo(q1, -norm);
-            emitter_2.setPosition(ship_position);
+            emitter_2.setPosition(ship_position + (Math::rotate_vec3(ship_rotation, localPos) * 0.3)); //0.5 just to make it closer to the explosion center, looks better that way
             emitter_2.setRotation(q1);
             emitter_2.setScale(randScale, randScale, randScale);
             emitter_2.setLinearVelocity(ship_linear_velocity, false);
@@ -924,6 +976,8 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     Map& map = static_cast<Map&>(entity().scene());
     WeaponProjectile* proj = nullptr;
 
+    auto list = Helper::SeparateStringByCharacter(packet.data, ',');
+
     bool forceHull = false;
     if (packet.PacketType == PacketType::Server_To_Client_Projectile_Cannon_Impact) {
         proj = map.getCannonProjectile(packet.projectile_index);
@@ -937,12 +991,12 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
         auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
         if (shields) {
             const glm::vec3 impactModelSpacePosition = glm::vec3(packet.impactX, packet.impactY, packet.impactZ);
-            shields->receiveHit(normal, impactModelSpacePosition, rad, time, packet.damage, packet.shield_side, true);
+            shields->receiveHit(list[1], normal, impactModelSpacePosition, rad, time, packet.damage, packet.shield_side, true);
         }
     }else{
         auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
         if (hull) {
-            hull->receiveHit(normal, impactModelSpacePosition, rad, packet.damage, static_cast<size_t>(packet.model_index), forceHull, true);
+            hull->receiveHit(list[1], normal, impactModelSpacePosition, rad, packet.damage, static_cast<size_t>(packet.model_index), forceHull, true);
         }
     }
     if (proj) {
@@ -950,9 +1004,9 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     }
 }
 void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
-    const unsigned int size = stoi(info[4]);
+    const unsigned int size = stoi(info[5]);
     Anchor* closest = map.getRootAnchor();
-    for (unsigned int i = 5; i < 5 + size; ++i) {
+    for (unsigned int i = 6; i < 6 + size; ++i) {
         auto& children = closest->getChildren();
         if (!children.count(info[i])) {
             return;
@@ -1139,6 +1193,12 @@ void Ship::toggleWarp() {
     auto& rigidBodyComponent = *getComponent<ComponentBody>();
     rigidBodyComponent.clearLinearForces();
 }
+void Ship::apply_threat(const string& source, const unsigned int threat_amount) {
+    auto* threat_table = m_AI->getThreatTable();
+    if (threat_table) {
+        threat_table->modify_threat(source, threat_amount);
+    }
+}
 
 const bool Ship::isDestroyed() const {
     return (m_State == ShipState::JustFlaggedForDestruction ||
@@ -1253,20 +1313,18 @@ void Ship::onEvent(const Event& e){
 
 PrimaryWeaponBeam& Ship::getPrimaryWeaponBeam(const uint index) {
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
-    return *weapons.m_PrimaryWeaponsBeams[index];
+    return *weapons.m_PrimaryWeaponsBeams[index].beam;
 }
 PrimaryWeaponCannon& Ship::getPrimaryWeaponCannon(const uint index) {
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
-    return *weapons.m_PrimaryWeaponsCannons[index];
+    return *weapons.m_PrimaryWeaponsCannons[index].cannon;
 }
 SecondaryWeaponTorpedo& Ship::getSecondaryWeaponTorpedo(const uint index) {
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
-    return *weapons.m_SecondaryWeaponsTorpedos[index];
+    return *weapons.m_SecondaryWeaponsTorpedos[index].torpedo;
 }
 void Ship::update(const double& dt) {
-    if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
-        //foldWingsUp();
-        //foldWingsDown();
-        setState(ShipState::UndergoingDestruction);
-    }
+    //if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
+    //    setState(ShipState::UndergoingDestruction);
+    //}
 }

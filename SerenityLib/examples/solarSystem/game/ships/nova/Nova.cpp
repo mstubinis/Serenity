@@ -19,7 +19,7 @@
 
 using namespace std;
 
-Nova::Nova(const AIType::Type ai_type, Team& team, Client& client, Map& map,  const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+Nova::Nova(AIType::Type& ai_type, Team& team, Client& client, Map& map,  const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client,"Nova", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, -0.136252f, -0.420117f)) {
 
     auto& _this = *this;
@@ -201,7 +201,8 @@ Nova::Nova(const AIType::Type ai_type, Team& team, Client& client, Map& map,  co
     };
     addHullTargetPoints(hull_target_points);
 
-    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
+    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
+    m_AI->installThreatTable(map);
 }
 Nova::~Nova() {
 

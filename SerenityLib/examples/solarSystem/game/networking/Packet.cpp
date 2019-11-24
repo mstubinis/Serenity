@@ -187,6 +187,8 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
     data += ship.getClass(); //[0]
     data += "," + ship.getMapKey(); //[1]
     data += "," + username; //[2]
+    data += "," + to_string(static_cast<unsigned int>(ship.getTeam().getTeamNumber())); //[3]
+    data += "," + to_string(static_cast<unsigned int>(ship.getAIType())); //[4]
     if (pbody) {
         auto& body = *pbody;
 
@@ -200,8 +202,7 @@ PacketPhysicsUpdate::PacketPhysicsUpdate(Ship& ship, Map& map, Anchor* finalAnch
         wy = warp.y;
         wz = warp.z;
       
-        data += "," + to_string(static_cast<unsigned int>(ship.getTeam().getTeamNumber())); //[3]
-        data += "," + to_string(anchorList.size()); //[4]
+        data += "," + to_string(anchorList.size()); //[5]
         for (auto& closest : anchorList)
             data += "," + closest;
         const auto nearestAnchorPos = finalAnchor->getPosition();

@@ -102,11 +102,11 @@ struct IPacket {
 };
 
 struct Packet: public IPacket {
-    unsigned int   PacketType;
+    unsigned int    PacketType;
     std::string     data;
     Packet() {
-        PacketType = 0;
-        data = "";
+        PacketType  = 0;
+        data        = "";
     }
     virtual bool validate(sf::Packet& sfPacket){
         return (sfPacket >> PacketType >> data);

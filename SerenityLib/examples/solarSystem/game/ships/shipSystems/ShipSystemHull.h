@@ -27,10 +27,12 @@ class ShipSystemHull final : public ShipSystem {
 
         Entity getEntity();
 
+        void apply_damage_amount(const std::string& source, const float& damage);
+
         void destroy();
 
-        void receiveHit(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float damage, const size_t modelIndex, const bool forceHullFire = false, const bool paint = true);
-        void receiveCollisionDamage(const float damage);
+        void receiveHit(const std::string& source, const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const float damage, const size_t modelIndex, const bool forceHullFire = false, const bool paint = true);
+        void receiveCollisionDamage(const std::string& source, const float damage);
         void receiveCollisionVisual(const glm::vec3& impactNormal, const glm::vec3& impactLocation, const float& impactRadius, const size_t modelIndex);
 
         const float getHealthCurrent() const;

@@ -13,6 +13,7 @@
 #include "constitution/Constitution.h"
 #include "excelsior/Excelsior.h"
 #include "nova/Nova.h"
+#include "sovereign/Sovereign.h"
 
 #include "../factions/Faction.h"
 #include <core/engine/resources/Handle.h>
@@ -26,6 +27,7 @@ struct ShipInformation final {
     Handle                 IconTextureHandle;
     Handle                 IconBorderTextureHandle;
     double                 RespawnTime;
+    float                  ThreatModifier;
 
     ShipInformation();
 };
@@ -40,7 +42,7 @@ class Ships final{
 
         static const FactionInformation& getFactionInformation(const std::string& shipClass);
 
-        static void createShipEntry(const std::string& shipClass, const FactionEnum::Type& faction, const double respawnTime);
+        static void createShipEntry(const std::string& shipClass, const FactionEnum::Type& faction, const double respawnTime, const float threatModifier);
 
         static void init();
 };

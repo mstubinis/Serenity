@@ -33,6 +33,8 @@ const bool ShipSystemCloakingDevice::cloak(bool sendPacket) {
     return cloak(*m_Ship.getComponent<ComponentModel>(), sendPacket);
 }
 const bool ShipSystemCloakingDevice::cloak(ComponentModel& model, bool sendPacket) {
+    if (m_Ship.isDestroyed())
+        return false;
     if (m_CloakTimer >= 1.0f) {
         for (unsigned int i = 0; i < model.getNumModels(); ++i) {
             model.setModelShaderProgram(ResourceManifest::ShipShaderProgramForward, i, RenderStage::ForwardTransparentTrianglesSorted);
@@ -65,6 +67,10 @@ const bool ShipSystemCloakingDevice::decloak(bool sendPacket) {
     return decloak(*m_Ship.getComponent<ComponentModel>(), sendPacket);
 }
 const bool ShipSystemCloakingDevice::decloak(ComponentModel& model, bool sendPacket) {
+    if (m_Ship.isDestroyed()) {
+        forceCloakOff(model, sendPacket);
+        return true;
+    }
     if (m_CloakTimer <= 0.0f) {
         forceCloakOff(model, sendPacket);
         return true;

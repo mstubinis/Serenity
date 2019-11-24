@@ -56,6 +56,9 @@ void HUD::toggle() {
 Font& HUD::getFont() {
     return m_Font;
 }
+Map& HUD::getMap() {
+    return m_Map;
+}
 SensorStatusDisplay& HUD::getSensorDisplay() {
     return *m_SensorDisplay;
 }

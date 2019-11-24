@@ -8,6 +8,7 @@ struct AIType final { enum Type {
     AI_Easy,
     AI_Medium,
     AI_Hard,
+    AI_Stationary,
     AI_None,
 };};
 

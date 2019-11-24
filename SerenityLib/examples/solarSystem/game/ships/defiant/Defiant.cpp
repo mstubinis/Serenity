@@ -21,7 +21,7 @@
 
 using namespace std;
 
-Defiant::Defiant(const AIType::Type ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client,"Defiant",map,ai_type,name,position,scale, collisionType){
 
     auto& _this = *this;
@@ -133,7 +133,8 @@ Defiant::Defiant(const AIType::Type ai_type, Team& team, Client& client, Map& ma
     };
     addHullTargetPoints(hull_target_points);
 
-    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
+    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
+    m_AI->installThreatTable(map);
 }
 Defiant::~Defiant() {
 

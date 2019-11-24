@@ -152,7 +152,7 @@ void GameCamera::internal_update_orbit(EntityWrapper* target, const double& dt) 
     auto& targetBody = *target->getComponent<ComponentBody>(dataRequest1);
     auto& targetModel = *target->getComponent<ComponentModel>(dataRequest1);
 
-    m_OrbitRadius += static_cast<float>(Engine::getMouseWheelDelta()) * static_cast<float>(dt) * 0.92f;
+    m_OrbitRadius += static_cast<float>(Engine::getMouseWheelDelta()) * static_cast<float>(dt) * 0.62f;
     m_OrbitRadius = glm::clamp(m_OrbitRadius, 0.0f, 70.0f);
 
     const auto& diff = Engine::getMouseDifference();

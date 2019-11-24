@@ -33,7 +33,6 @@ struct ParticleData final {
     bool                         m_Active;
 
     ParticleData();
-    ParticleData(ParticleEmitter& emitter, Particle& particle);
     ParticleData(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle);
 
     ParticleData(const ParticleData& other);

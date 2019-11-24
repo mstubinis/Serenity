@@ -195,7 +195,11 @@
   <ItemGroup>
     <ClInclude Include="game\ai\AI.h" />
     <ClInclude Include="game\ai\AIIncludes.h" />
+    <ClInclude Include="game\ai\AINPC.h" />
+    <ClInclude Include="game\ai\AIStationaryNPC.h" />
     <ClInclude Include="game\ai\FireAtWill.h" />
+    <ClInclude Include="game\ai\logic\GunneryBaseClass.h" />
+    <ClInclude Include="game\ai\ThreatTable.h" />
     <ClInclude Include="game\Core.h" />
     <ClInclude Include="game\factions\Faction.h" />
     <ClInclude Include="game\GameCamera.h" />
@@ -256,6 +260,7 @@
     <ClInclude Include="game\ships\shipSystems\ShipSystemWeapons.h" />
     <ClInclude Include="game\ships\shipSystems\ShipSystemYawThrusters.h" />
     <ClInclude Include="game\ships\shrike\Shrike.h" />
+    <ClInclude Include="game\ships\sovereign\Sovereign.h" />
     <ClInclude Include="game\ships\sphere\Sphere.h" />
     <ClInclude Include="game\ships\vorcha\Vorcha.h" />
     <ClInclude Include="game\teams\Team.h" />
@@ -279,7 +284,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\ai\AI.cpp" />
+    <ClCompile Include="game\ai\AINPC.cpp" />
+    <ClCompile Include="game\ai\AIStationaryNPC.cpp" />
     <ClCompile Include="game\ai\FireAtWill.cpp" />
+    <ClCompile Include="game\ai\logic\GunneryBaseClass.cpp" />
+    <ClCompile Include="game\ai\ThreatTable.cpp" />
     <ClCompile Include="game\Core.cpp" />
     <ClCompile Include="game\factions\Faction.cpp" />
     <ClCompile Include="game\Game.cpp" />
@@ -339,6 +348,7 @@
     <ClCompile Include="game\ships\shipSystems\ShipSystemWeapons.cpp" />
     <ClCompile Include="game\ships\shipSystems\ShipSystemYawThrusters.cpp" />
     <ClCompile Include="game\ships\shrike\Shrike.cpp" />
+    <ClCompile Include="game\ships\sovereign\Sovereign.cpp" />
     <ClCompile Include="game\ships\sphere\Sphere.cpp" />
     <ClCompile Include="game\ships\vorcha\Vorcha.cpp" />
     <ClCompile Include="game\teams\Team.cpp" />

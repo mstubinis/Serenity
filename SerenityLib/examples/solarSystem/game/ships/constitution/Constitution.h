@@ -9,7 +9,7 @@ class Constitution final : public Ship {
 
     public:
         Constitution(
-            const AIType::Type ai_type,
+            AIType::Type& ai_type,
             Team& team,
             Client& client,
             Map& map,

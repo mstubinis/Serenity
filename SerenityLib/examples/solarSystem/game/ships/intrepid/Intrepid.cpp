@@ -19,7 +19,7 @@
 
 using namespace std;
 
-Intrepid::Intrepid(const AIType::Type ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
+Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client, "Intrepid", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.140914f, -0.585431f)) {
 
     auto& _this = *this;
@@ -288,7 +288,8 @@ Intrepid::Intrepid(const AIType::Type ai_type, Team& team, Client& client, Map& 
     };
     addHullTargetPoints(hull_target_points);
 
-    m_AI->installFireAtWill(_this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
+    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
+    m_AI->installThreatTable(map);
 }
 Intrepid::~Intrepid() {
 

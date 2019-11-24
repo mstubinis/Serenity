@@ -29,43 +29,12 @@ ParticleData::ParticleData() {
     m_Color           = glm::vec4(1.0f);
     m_UserData        = glm::vec4(0.0f);
 }
-ParticleData::ParticleData(ParticleEmitter& emitter, Particle& particle){
-    m_Properties      = &ParticleEmissionProperties::DefaultProperties;
-    m_Active          = true;
-    m_Timer           = 0.0;
-    m_Depth           = 0.0f;
-    m_Angle           = 0.0f;
-    m_Color           = glm::vec4(1.0f);
-    m_UserData        = glm::vec4(0.0f);
-
-    auto& emitterBody = *emitter.getComponent<ComponentBody>();
-    const auto emitterScale = glm::vec3(emitterBody.getScale());
-    
-
-    m_Velocity = m_Properties->m_InitialVelocityFunctor(emitter, particle, *this) * emitterScale;
-
-
-    auto rotated_initial_velocity = Math::rotate_vec3(emitter.rotation(), m_Velocity);
-    if (!emitter.m_Parent.null()) {
-        auto* body = emitter.m_Parent.getComponent<ComponentBody>();
-        if (body) {
-            m_Velocity = glm::vec3(body->getLinearVelocity()) * m_Properties->m_Drag;
-        }
-    }
-    m_Velocity        += rotated_initial_velocity;
-
-
-
-    m_Scale           = m_Properties->m_InitialScaleFunctor(emitter, particle, *this) * Math::Max(emitterScale.x, emitterScale.y, emitterScale.z);
-    m_AngularVelocity = m_Properties->m_InitialAngularVelocityFunctor(emitter, particle, *this);
-}
 ParticleData::ParticleData(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle){
     m_Properties      = &properties;
     m_Active          = true;
     m_Timer           = 0.0;
     m_Depth           = 0.0f;
     m_Angle           = 0.0f;
-    m_Color           = glm::vec4(1.0f);
     m_UserData        = glm::vec4(0.0f);
 
     particle.m_Material = &const_cast<Material&>(properties.getParticleMaterialRandom());
@@ -87,6 +56,8 @@ ParticleData::ParticleData(ParticleEmissionProperties& properties, ParticleEmitt
 
     m_Scale           = properties.m_InitialScaleFunctor(emitter, particle, *this) * Math::Max(emitterScale.x, emitterScale.y, emitterScale.z);
     m_AngularVelocity = properties.m_InitialAngularVelocityFunctor(emitter, particle, *this);
+
+    m_Color = properties.m_ColorFunctor(m_Timer, 0.0, &emitter, particle);
 }
 ParticleData::ParticleData(const ParticleData& other){
     m_Active = other.m_Active;

@@ -6,13 +6,19 @@
 #include <core/engine/fonts/Font.h>
 
 #include "../Ship.h"
+#include "../ai/AI.h"
+#include "../ai/ThreatTable.h"
 #include "../Planet.h"
 #include "../ships/Ships.h"
 #include "../ResourceManifest.h"
 #include "../hud/HUD.h"
+#include "../map/Map.h"
 
 #include "../ships/shipSystems/ShipSystemHull.h"
 #include "../ships/shipSystems/ShipSystemShields.h"
+
+#include <sstream>
+#include <iomanip>
 
 using namespace Engine;
 using namespace std;
@@ -200,6 +206,33 @@ void ShipStatusDisplay::render() {
             renderDorsalShieldStatus(centerHullIcon, shields, texture2, textureBorder2);
             renderVentralShieldStatus(centerHullIcon, shields, texture2, textureBorder2);
         }
+
+        auto* player_ship = m_HUD.getMap().getPlayer();
+        if (player_ship ){
+            const auto& player_key = player_ship->getMapKey();
+            const auto& target_key = m_TargetAsShip->getMapKey();
+            if (player_key != target_key) {
+                auto* threat_table = m_TargetAsShip->getAI()->getThreatTable();
+                if (threat_table) {
+                    const auto percent = threat_table->getThreatPercent(*player_ship);
+                    if (percent > 0.0f) {
+                        stringstream strm;
+                        strm << std::fixed << std::setprecision(1) << percent;
+                        std::string res = strm.str() + "%";
+                        glm::vec4 color;
+                        if (percent >= 100.0f) {
+                            color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                        }else if (percent >= 85.0f) {
+                            color = glm::vec4(1.0f, 0.5f, 0.0f, 1.0f);
+                        }else {
+                            color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+                        }
+                        Renderer::renderText(res, m_HUD.getFont(), bottomLeftCorner + glm::vec2(5,18), color, 0, glm::vec2(0.45f), 0.168f, TextAlignment::Left);
+                    }
+                }
+            }
+        }
+
         //finally, render name & ship class
         Renderer::renderText(
             m_TargetAsShip->getName() + " - " + m_TargetAsShip->getClass(),

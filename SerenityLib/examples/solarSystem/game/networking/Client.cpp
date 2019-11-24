@@ -274,6 +274,7 @@ void Client::on_receive_physics_update(Packet* basePacket, Map& map) {
         auto& shipkey               = info[1];
         auto& playername            = info[2];
         TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(info[3]));
+        AIType::Type aiType         = static_cast<AIType::Type>(stoi(info[4]));
         auto& ships                 = map.getShips();
         Ship* ship = nullptr;
         if (ships.size() == 0 || !ships.count(shipkey)) {
@@ -282,16 +283,22 @@ void Client::on_receive_physics_update(Packet* basePacket, Map& map) {
             auto y = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
             auto z = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
             auto randOffsetForSafety = glm_vec3(x, y, z);
-            ship = map.createShip(AIType::Player_Other, *m_GameplayMode->getTeams().at(teamNumber), *this, shipclass, playername, spawnPosition + randOffsetForSafety);
+
+            AIType::Type final_ai;
+            if (aiType == AIType::Player_You && map.getPlayer())
+                final_ai = AIType::Player_Other;
+            //TODO: create proper AI for npc's
+
+            ship = map.createShip(final_ai, *m_GameplayMode->getTeams().at(teamNumber), *this, shipclass, playername, spawnPosition + randOffsetForSafety);
             if (ship) {
                 //hey a new ship entered my map, i want info about it!
                 //if (map.getShipsPlayerControlled().size() >= 2) {
-                PacketMessage pOut;
-                pOut.PacketType = PacketType::Client_To_Server_Request_Ship_Current_Info;
-                pOut.name = map.getPlayer()->getMapKey();
-                pOut.data = ship->getMapKey();
-                pOut.data += "," + playername;
-                send(pOut);
+                    PacketMessage pOut;
+                    pOut.PacketType = PacketType::Client_To_Server_Request_Ship_Current_Info;
+                    pOut.name = map.getPlayer()->getMapKey();
+                    pOut.data = ship->getMapKey();
+                    pOut.data += "," + playername;
+                    send(pOut);
                 //}
             }
         }else{
@@ -358,8 +365,8 @@ void Client::on_receive_collision_event(Packet* basePacket, Map& map) {
     if (ship1 && ship2) {
         auto* hull1 = static_cast<ShipSystemHull*>(ship1->getShipSystem(ShipSystemType::Hull));
         auto* hull2 = static_cast<ShipSystemHull*>(ship2->getShipSystem(ShipSystemType::Hull));
-        hull1->receiveCollisionDamage(pI.damage1);
-        hull2->receiveCollisionDamage(pI.damage2);
+        hull1->receiveCollisionDamage(list[1], pI.damage1);
+        hull2->receiveCollisionDamage(list[0], pI.damage2);
 
         auto& body1 = *ship1->getComponent<ComponentBody>();
         auto& body2 = *ship2->getComponent<ComponentBody>();
