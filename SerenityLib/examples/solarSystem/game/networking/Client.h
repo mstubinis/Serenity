@@ -80,6 +80,8 @@ class Client{
         Client(Team* ,Core&, const unsigned short& server_port, const std::string& server_ipAddress, const unsigned int& id);
         ~Client();
 
+        GameplayMode* getGameplayMode();
+
         void setClientID(const unsigned int id);
 
         void changeConnectionDestination(const unsigned short& port, const std::string& ipAddress);

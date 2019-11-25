@@ -20,7 +20,9 @@ class Client;
 class HUD;
 class GameplayMode;
 class Team;
+class Server;
 class Map: public Scene{
+    friend class Server;
     private:
         GameplayMode&                                  m_GameplayMode;
         std::unordered_map<std::string, Planet*>       m_Planets;
@@ -32,6 +34,7 @@ class Map: public Scene{
         Ship*                                          m_Player;
         Client&                                        m_Client;
         HUD*                                           m_HUD;
+        bool                                           m_IsServer;
 
         Freelist<PrimaryWeaponCannonProjectile*>       m_ActiveCannonProjectiles;
         Freelist<SecondaryWeaponTorpedoProjectile*>    m_ActiveTorpedoProjectiles;
@@ -49,7 +52,7 @@ class Map: public Scene{
         Anchor* getSpawnAnchor();
 
         Anchor* getSpawnAnchor(const std::string& name);
-        const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr);
+        const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr, Ship* ship = nullptr);
         const std::string getClosestSpawnAnchor();
     public:
         std::vector<EntityWrapper*> m_Objects;
@@ -57,6 +60,7 @@ class Map: public Scene{
         Map(GameplayMode& mode, Client& client, const std::string& name, const std::string& file);
         virtual ~Map();
 
+        const bool& isServer() const;
         void cleanup();
 
         EntityWrapper* getEntityFromName(const std::string& name);
@@ -99,9 +103,10 @@ class Map: public Scene{
         void removeCannonProjectile(const int index);
         void removeTorpedoProjectile(const int index);
 
-        const int try_addCannonProjectile();
-        const int try_addTorpedoProjectile();
+        const int  get_and_use_next_cannon_projectile_index();
         const bool try_addCannonProjectile(const int requestedIndex);
+
+        const int  get_and_use_next_torpedo_projectile_index();
         const bool try_addTorpedoProjectile(const int requestedIndex);
 };
 #endif

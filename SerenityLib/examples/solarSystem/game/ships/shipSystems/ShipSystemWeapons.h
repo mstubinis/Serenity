@@ -70,7 +70,7 @@ struct ShipWeapon {
         const float& _rechargeTimerPerRound,
         const unsigned int& _modelIndex
     );
-    virtual const int canFire();
+    virtual const int acquire_index();
 
 
     const glm_vec3 getWorldPosition();
@@ -138,7 +138,7 @@ struct PrimaryWeaponCannon : public ShipWeapon {
     );
     virtual const bool isInControlledArc(EntityWrapper* target);
 
-    const int canFire();
+    const int acquire_index();
     const bool forceFire(EntityWrapper* mytarget, const int index, const glm_vec3& chosen_target_pos);
     virtual const PrimaryWeaponCannonPrediction calculatePredictedVector(EntityWrapper* mytarget, ComponentBody& projectileBody, const glm_vec3& chosen_target_pos);
     virtual void update(const double& dt);
@@ -195,7 +195,7 @@ struct PrimaryWeaponBeam : public ShipWeapon {
         const float& BeamLaunchSpeed = 235.0f
     );
     ~PrimaryWeaponBeam();
-    const int canFire();
+    const int acquire_index();
     void setTarget(EntityWrapper*);
     EntityWrapper* getTarget();
     virtual const bool fire(const double& dt, const glm_vec3& chosen_target_pt);
@@ -257,7 +257,7 @@ struct SecondaryWeaponTorpedo : public ShipWeapon {
     );
     virtual const bool isInControlledArc(EntityWrapper* target);
 
-    const int canFire();
+    const int acquire_index();
     const bool forceFire(EntityWrapper* mytarget, const int index, const glm_vec3& chosen_target_pos);
     virtual const SecondaryWeaponTorpedoPrediction calculatePredictedVector(EntityWrapper* mytarget, ComponentBody& projectileBody, const glm_vec3& chosen_target_pos);
     virtual void update(const double& dt);

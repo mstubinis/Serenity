@@ -34,26 +34,26 @@ void FireAtWill::internal_execute_beams() {
     decimal dist_to_i, dist_to_enemy;
     glm_vec3 world_pos, offset, enemy_ship_pos = glm_vec3(0.0);
     glm_quat enemy_ship_rot;
-    int res;
+    int acquired_index;
 
     auto lamda = [&](Ship& enemyShip, PrimaryWeaponBeam& beam, PacketMessage& pOut) {
         if (enemyShip.isDestroyed())
             return false;
         enemy_ship_pos = enemyShip.getPosition();
         if (beam.isInArc(enemy_ship_pos, beam.arc)) {
-            res = beam.canFire();
-            if (res >= 0) {
-                enemy_ship_rot = enemyShip.getRotation();
-                dist_to_enemy = beam.getDistanceSquared(enemy_ship_pos);
-                if (dist_to_enemy < beam.rangeInKMSquared + static_cast<decimal>(enemyShip.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
-                    auto pts = enemyShip.m_AimPositionDefaults;
-                    std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
-                    for (unsigned int i = 0; i < pts.size(); ++i) {
-                        offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
-                        world_pos = enemy_ship_pos + offset;
-                        dist_to_i = beam.getDistanceSquared(world_pos);
-                        if (dist_to_i < beam.rangeInKMSquared) {
-                            if (beam.isInArc(world_pos, beam.arc)) {
+            enemy_ship_rot = enemyShip.getRotation();
+            dist_to_enemy = beam.getDistanceSquared(enemy_ship_pos);
+            if (dist_to_enemy < beam.rangeInKMSquared + static_cast<decimal>(enemyShip.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
+                auto pts = enemyShip.m_AimPositionDefaults;
+                std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
+                for (unsigned int i = 0; i < pts.size(); ++i) {
+                    offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
+                    world_pos = enemy_ship_pos + offset;
+                    dist_to_i = beam.getDistanceSquared(world_pos);
+                    if (dist_to_i < beam.rangeInKMSquared) {
+                        if (beam.isInArc(world_pos, beam.arc)) {
+                            acquired_index = beam.acquire_index();
+                            if (acquired_index >= 0) {
                                 beam.setTarget(&enemyShip);
                                 pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Beams;
                                 pOut.name = m_Ship.getName();
@@ -101,41 +101,41 @@ void FireAtWill::internal_execute_cannons() {
     decimal dist_to_i, dist_to_enemy;
     glm_vec3 world_pos, offset, enemy_ship_pos = glm_vec3(0.0);
     glm_quat enemy_ship_rot;
-    int res;
+    int acquired_index;
 
     auto lamda = [&](Ship& enemyShip, PrimaryWeaponCannon& cannon, PacketMessage& pOut) {
         if (enemyShip.isDestroyed())
             return false;
         enemy_ship_pos = enemyShip.getPosition();
         if (cannon.isInArc(enemy_ship_pos, cannon.arc)) {
-            res = cannon.canFire();
-            if (res >= 0) {
-                enemy_ship_rot = enemyShip.getRotation();
-                dist_to_enemy = cannon.getDistanceSquared(enemy_ship_pos);
-                if (dist_to_enemy < 100.0 * 100.0) { //TODO: add range later?
-                    auto pts = enemyShip.m_AimPositionDefaults;
-                    std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
-                    for (unsigned int i = 0; i < pts.size(); ++i) {
-                        offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
-                        world_pos = enemy_ship_pos + offset;
-                        dist_to_i = cannon.getDistanceSquared(world_pos);
-                        if (dist_to_i < 100.0 * 100.0) { //TODO: add range later?
-                            if (cannon.isInArc(world_pos, cannon.arc)) {
+            enemy_ship_rot = enemyShip.getRotation();
+            dist_to_enemy = cannon.getDistanceSquared(enemy_ship_pos);
+            if (dist_to_enemy < cannon.rangeInKMSquared) {
+                auto pts = enemyShip.m_AimPositionDefaults;
+                std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
+                for (unsigned int i = 0; i < pts.size(); ++i) {
+                    offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
+                    world_pos = enemy_ship_pos + offset;
+                    dist_to_i = cannon.getDistanceSquared(world_pos);
+                    if (dist_to_i < cannon.rangeInKMSquared) {
+                        if (cannon.isInArc(world_pos, cannon.arc)) {
+                            acquired_index = cannon.acquire_index();
+                            if (acquired_index >= 0) {
                                 pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Cannons;
                                 pOut.name = m_Ship.getName();
                                 pOut.r = static_cast<float>(offset.x);
                                 pOut.g = static_cast<float>(offset.y);
                                 pOut.b = static_cast<float>(offset.z);
                                 if (pOut.data.empty()) {
-                                    pOut.data += to_string(cannon.index) + "," + to_string(res) + "," + enemyShip.getName();
+                                    pOut.data += to_string(cannon.index) + "," + to_string(acquired_index) + "," + enemyShip.getName();
                                 }else{
-                                    pOut.data += "," + to_string(cannon.index) + "," + to_string(res) + "," + enemyShip.getName();
+                                    pOut.data += "," + to_string(cannon.index) + "," + to_string(acquired_index) + "," + enemyShip.getName();
                                 }
                                 return true;
                             }
                         }
-
                     }
+
                 }
             }
         }
@@ -167,26 +167,26 @@ void FireAtWill::internal_execute_torpedos() {
     decimal dist_to_i, dist_to_enemy;
     glm_vec3 world_pos, offset, enemy_ship_pos = glm_vec3(0.0);
     glm_quat enemy_ship_rot;
-    int res;
+    int acquired_index;
 
     auto lamda = [&](Ship& enemyShip, SecondaryWeaponTorpedo& torpedo) {
         if (enemyShip.isDestroyed())
             return false;
         enemy_ship_pos = enemyShip.getPosition();
         if (torpedo.isInArc(enemy_ship_pos, torpedo.arc)) {
-            res = torpedo.canFire();
-            if (res >= 0) {
-                enemy_ship_rot = enemyShip.getRotation();
-                dist_to_enemy = torpedo.getDistanceSquared(enemy_ship_pos);
-                if (dist_to_enemy < 100.0 * 100.0) { //TODO: add range later?
-                    auto pts = enemyShip.m_AimPositionDefaults;
-                    std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
-                    for (unsigned int i = 0; i < pts.size(); ++i) {
-                        offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
-                        world_pos = enemy_ship_pos + offset;
-                        dist_to_i = torpedo.getDistanceSquared(world_pos);
-                        if (dist_to_i < 100.0 * 100.0) { //TODO: add range later?
-                            if (torpedo.isInArc(world_pos, torpedo.arc)) {
+            enemy_ship_rot = enemyShip.getRotation();
+            dist_to_enemy = torpedo.getDistanceSquared(enemy_ship_pos);
+            if (dist_to_enemy < torpedo.rangeInKMSquared) {
+                auto pts = enemyShip.m_AimPositionDefaults;
+                std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
+                for (unsigned int i = 0; i < pts.size(); ++i) {
+                    offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
+                    world_pos = enemy_ship_pos + offset;
+                    dist_to_i = torpedo.getDistanceSquared(world_pos);
+                    if (dist_to_i < torpedo.rangeInKMSquared) {
+                        if (torpedo.isInArc(world_pos, torpedo.arc)) {
+                            acquired_index = torpedo.acquire_index();
+                            if (acquired_index >= 0) {
                                 PacketMessage pOut;
                                 pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Torpedos;
                                 pOut.name = m_Ship.getName();
@@ -194,9 +194,9 @@ void FireAtWill::internal_execute_torpedos() {
                                 pOut.g = static_cast<float>(offset.y);
                                 pOut.b = static_cast<float>(offset.z);
                                 if (pOut.data.empty()) {
-                                    pOut.data += to_string(torpedo.index) + "," + to_string(res) + "," + enemyShip.getName();
+                                    pOut.data += to_string(torpedo.index) + "," + to_string(acquired_index) + "," + enemyShip.getName();
                                 }else{
-                                    pOut.data += "," + to_string(torpedo.index) + "," + to_string(res) + "," + enemyShip.getName();
+                                    pOut.data += "," + to_string(torpedo.index) + "," + to_string(acquired_index) + "," + enemyShip.getName();
                                 }
                                 if (!pOut.data.empty())
                                     m_Ship.m_Client.send(pOut);

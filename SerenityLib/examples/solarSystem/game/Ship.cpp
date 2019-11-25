@@ -10,6 +10,7 @@
 #include "ai/AIStationaryNPC.h"
 #include "ai/FireAtWill.h"
 #include "ai/ThreatTable.h"
+#include "modes/GameplayMode.h"
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/Engine.h>
@@ -312,34 +313,6 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
     m_OfflineGlowFactor       = 1.0f;
     m_OfflineGlowFactorTimer  = 0.0f;
 
-    switch (ai_type) {
-        case AIType::AI_Stationary: {
-            m_AI = new AIStationaryNPC(*this);
-            break;
-        }case AIType::AI_Easy: {
-            m_AI = nullptr;
-            break;
-        }case AIType::AI_Medium: {
-            m_AI = nullptr;
-            break;
-        }case AIType::AI_Hard: {
-            m_AI = nullptr;
-            break;
-        }case AIType::AI_None: {
-            m_AI = nullptr;
-            break;
-        }case AIType::Player_You: {
-            m_AI = new AI(ai_type);
-            break;
-        }case AIType::Player_Other: {
-            m_AI = new AI(ai_type);
-            break;
-        }default: {
-            m_AI = new AI(ai_type);
-            break;
-        }
-    }
-
     m_ShipClass               = shipClass;
     m_IsWarping               = false;
     m_PlayerCamera            = nullptr;
@@ -365,7 +338,7 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
     bodyComponent.setCollisionMask(CollisionFilter::_Custom_4); //i should only collide with other ramming hulls only
     bodyComponent.setCollisionFunctor(HullCollisionFunctor());
 
-	if (IsPlayer()) {
+	if (ai_type == AIType::Player_You) {
 		m_PlayerCamera = static_cast<GameCamera*>(map.getActiveCamera());
 	}
     bodyComponent.setUserPointer1(this);
@@ -394,6 +367,35 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
     modelComponent.setUserPointer(this);
 
     internal_calculate_ship_destruction_time_max(modelComponent);
+}
+void Ship::internal_finialize_init(const AIType::Type& type) {
+    switch (type) {
+        case AIType::AI_Stationary: {
+            m_AI = new AIStationaryNPC(*this);
+            break;
+        }case AIType::AI_Easy: {
+            m_AI = nullptr;
+            break;
+        }case AIType::AI_Medium: {
+            m_AI = nullptr;
+            break;
+        }case AIType::AI_Hard: {
+            m_AI = nullptr;
+            break;
+        }case AIType::AI_None: {
+            m_AI = nullptr;
+            break;
+        }case AIType::Player_You: {
+            m_AI = new AI(type);
+            break;
+        }case AIType::Player_Other: {
+            m_AI = new AI(type);
+            break;
+        }default: {
+            m_AI = new AI(type);
+            break;
+        }
+    }
 }
 Ship::~Ship(){
     unregisterEvent(EventType::WindowResized);
@@ -489,6 +491,8 @@ void Ship::internal_update_just_destroyed_fully(const double& dt, Map& map) {
         }
     }
     map.clear_source_of_all_threat(getMapKey());
+
+    m_WarpFactor = 0;
 
     bodyComponent.clearAllForces();
     bodyComponent.removePhysicsFromWorld();
@@ -1324,7 +1328,12 @@ SecondaryWeaponTorpedo& Ship::getSecondaryWeaponTorpedo(const uint index) {
     return *weapons.m_SecondaryWeaponsTorpedos[index].torpedo;
 }
 void Ship::update(const double& dt) {
-    //if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
-    //    setState(ShipState::UndergoingDestruction);
-    //}
+    if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
+        //setState(ShipState::UndergoingDestruction);
+
+
+        //auto& map = static_cast<Map&>(entity().scene());
+        //auto& team = *m_Client.getGameplayMode()->getTeams().at(TeamNumber::Team_2);
+        //map.createShip(AIType::AI_Stationary, team, m_Client, "Federation Defense Platform", "Def " + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -20.0));
+    }
 }

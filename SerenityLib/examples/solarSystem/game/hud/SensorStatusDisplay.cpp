@@ -163,8 +163,15 @@ void SensorStatusDisplay::render() {
         //render radar token
         Renderer::renderTexture(radarTokenTexture, pos2D, color, 0, glm::vec2(1.0f), 0.14f, Alignment::Center);
 
-        if (myTarget && myTarget->getComponent<ComponentName>()->name() == other_ship.getName()) {
-            Renderer::renderTexture(radarTokenTexture, pos2D, glm::vec4(1, 1, 1, 1), 0, glm::vec2(1.2f), 0.16f, Alignment::Center);
+        if (myTarget) {
+            Ship* myTargetAsShip = dynamic_cast<Ship*>(myTarget);
+            if (myTargetAsShip && myTargetAsShip->getMapKey() == other_ship.getMapKey()) {
+                Renderer::renderTexture(radarTokenTexture, pos2D, glm::vec4(1, 1, 1, 1), 0, glm::vec2(1.2f), 0.16f, Alignment::Center);
+            }//else{
+             //   if (myTarget->getComponent<ComponentName>()->name() == other_ship.getName()) {
+             //       Renderer::renderTexture(radarTokenTexture, pos2D, glm::vec4(1, 1, 1, 1), 0, glm::vec2(1.2f), 0.16f, Alignment::Center);
+             //   }
+            //}
         }
     };
     if (!m_Ship->isFullyDestroyed()) {

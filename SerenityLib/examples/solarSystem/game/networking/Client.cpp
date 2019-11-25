@@ -131,6 +131,9 @@ void Client::connect(const unsigned short& timeout) {
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     m_InitialConnectionThread = new std::future<sf::Socket::Status>(std::move(std::async(std::launch::async, lambda_connect, std::ref(*this), timeout)));
 }
+GameplayMode* Client::getGameplayMode() {
+    return m_GameplayMode;
+}
 void Client::disconnect() {
     m_TcpSocket->disconnect();
     m_UdpSocket->unbind();
@@ -268,15 +271,15 @@ void Client::update(Client* _client, const double& dt) {
 
 void Client::on_receive_physics_update(Packet* basePacket, Map& map) {
     if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
-        PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(basePacket);
-        auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+        PacketPhysicsUpdate& pI     = *static_cast<PacketPhysicsUpdate*>(basePacket);
+        auto info                   = Helper::SeparateStringByCharacter(pI.data, ',');
         auto& shipclass             = info[0];
         auto& shipkey               = info[1];
-        auto& playername            = info[2];
+        auto& new_ship_playername   = info[2];
         TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(info[3]));
         AIType::Type aiType         = static_cast<AIType::Type>(stoi(info[4]));
         auto& ships                 = map.getShips();
-        Ship* ship = nullptr;
+        Ship* new_ship = nullptr;
         if (ships.size() == 0 || !ships.count(shipkey)) {
             auto spawnPosition = map.getSpawnAnchor()->getPosition();
             auto x = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
@@ -284,27 +287,27 @@ void Client::on_receive_physics_update(Packet* basePacket, Map& map) {
             auto z = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
             auto randOffsetForSafety = glm_vec3(x, y, z);
 
+            Ship* player_you = map.getPlayer();
+
             AIType::Type final_ai;
-            if (aiType == AIType::Player_You && map.getPlayer())
+            if (aiType == AIType::Player_You && player_you)
                 final_ai = AIType::Player_Other;
             //TODO: create proper AI for npc's
 
-            ship = map.createShip(final_ai, *m_GameplayMode->getTeams().at(teamNumber), *this, shipclass, playername, spawnPosition + randOffsetForSafety);
-            if (ship) {
+            new_ship = map.createShip(final_ai, *m_GameplayMode->getTeams().at(teamNumber), *this, shipclass, new_ship_playername, spawnPosition + randOffsetForSafety);
+            if (new_ship) {
                 //hey a new ship entered my map, i want info about it!
-                //if (map.getShipsPlayerControlled().size() >= 2) {
-                    PacketMessage pOut;
-                    pOut.PacketType = PacketType::Client_To_Server_Request_Ship_Current_Info;
-                    pOut.name = map.getPlayer()->getMapKey();
-                    pOut.data = ship->getMapKey();
-                    pOut.data += "," + playername;
-                    send(pOut);
-                //}
+                PacketMessage pOut;
+                pOut.PacketType = PacketType::Client_To_Server_Request_Ship_Current_Info;
+                pOut.name       = player_you->getMapKey();
+                pOut.data       = new_ship->getMapKey();
+                pOut.data      += "," + new_ship_playername;
+                send(pOut);
             }
         }else{
-            ship = ships.at(shipkey);
+            new_ship = ships.at(shipkey);
         }
-        ship->updatePhysicsFromPacket(pI, map, info);
+        new_ship->updatePhysicsFromPacket(pI, map, info);
     }
 }
 

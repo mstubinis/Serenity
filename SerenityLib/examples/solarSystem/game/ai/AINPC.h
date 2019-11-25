@@ -14,7 +14,7 @@ class AINPC: public AI {
         virtual ~AINPC();
 
 
-        virtual void installGunneryLogic(AIType::Type&, ThreatTable&, Ship&, Map&, ShipSystemSensors&, ShipSystemWeapons&);
+        virtual void installGunneryLogic(Ship&, Map&, ShipSystemSensors&, ShipSystemWeapons&);
 
         virtual void update(const double& dt);
 

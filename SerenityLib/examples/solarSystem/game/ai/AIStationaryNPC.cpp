@@ -10,15 +10,15 @@
 using namespace std;
 
 AIStationaryNPC::AIStationaryNPC(Ship& ship) : AINPC(AIType::AI_Stationary){
-
     Map& map = static_cast<Map&>(ship.entity().scene());
-    auto* sensors = static_cast<ShipSystemSensors*>(ship.getShipSystem(ShipSystemType::Sensors));
-    auto* weapons = static_cast<ShipSystemWeapons*>(ship.getShipSystem(ShipSystemType::Weapons));
+    ShipSystemWeapons* weapons = static_cast<ShipSystemWeapons*>(ship.getShipSystem(ShipSystemType::Weapons));
+    ShipSystemSensors* sensors = static_cast<ShipSystemSensors*>(ship.getShipSystem(ShipSystemType::Sensors));
 
     if (weapons && sensors) {
-        installGunneryLogic(m_Type, *m_Threat, ship, map, *sensors, *weapons);
+        installThreatTable(map);
+        installGunneryLogic(ship, map, *sensors, *weapons);
     }else{
-        cout << "Stationary AI NPC does not have gunnery logic\n";
+        std::cout << "Stationary AI NPC does not have gunnery logic\n";
     }
 }
 AIStationaryNPC::~AIStationaryNPC() {

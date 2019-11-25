@@ -84,6 +84,8 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
         else if (i == 10)  system = new ShipSystemHull(_this, map, 15100.0f);
         m_ShipSystems.emplace(i, system);
     }
+    internal_finialize_init(ai_type);
+
     //update shield size
     auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
     auto shieldScale = ((Mesh*)Ships::Database.at(className).MeshHandles[0].get())->getRadiusBox() * SHIELD_SCALE_FACTOR;

@@ -38,6 +38,8 @@ Constitution::Constitution(AIType::Type& ai_type, Team& team, Client& client, Ma
         else if (i == 10)  system = new ShipSystemHull(_this, map, 20000.0f);
         m_ShipSystems.emplace(i, system);
     }
+    internal_finialize_init(ai_type);
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     auto* leftTorp_1 = new PhotonTorpedoOld(_this, map, glm::vec3(-0.033864f, -0.129594f, -0.664163f), glm::vec3(0, 0, -1), 15.0f, 1);

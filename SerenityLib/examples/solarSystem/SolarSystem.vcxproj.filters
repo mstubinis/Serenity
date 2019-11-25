@@ -202,6 +202,12 @@
     <Filter Include="Source Files\Game\AI\Logic">
       <UniqueIdentifier>{006da8f0-9526-4d61-bbba-a9ec95362760}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Ships\FedDefPlatform">
+      <UniqueIdentifier>{cad339f9-7b1c-4780-a977-6d431d20910a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\FedDefPlatform">
+      <UniqueIdentifier>{e2b03480-e9bc-4ca5-8a6e-f3459cee9dab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -468,6 +474,9 @@
     <ClInclude Include="game\ai\logic\GunneryBaseClass.h">
       <Filter>Header Files\Game\AI\Logic</Filter>
     </ClInclude>
+    <ClInclude Include="game\ships\fed_def_platform\FedDefPlatform.h">
+      <Filter>Header Files\Game\Ships\FedDefPlatform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -718,6 +727,9 @@
     </ClCompile>
     <ClCompile Include="game\ai\logic\GunneryBaseClass.cpp">
       <Filter>Source Files\Game\AI\Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\fed_def_platform\FedDefPlatform.cpp">
+      <Filter>Source Files\Game\Ships\FedDefPlatform</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

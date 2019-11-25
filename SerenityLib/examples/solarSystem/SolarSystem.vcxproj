@@ -117,7 +117,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <SuppressStartupBanner>false</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>Default</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -142,6 +142,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <SuppressStartupBanner>false</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\lib\32\Debug;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -162,6 +163,7 @@
       <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;_WIN32_WINNT=0x0501;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Debug;D:\dev\assimp\lib\64\Debug;D:\dev\SFML\lib\64\Debug;D:\dev\lua\lib\64\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -241,6 +243,7 @@
     <ClInclude Include="game\ships\defiant\Defiant.h" />
     <ClInclude Include="game\ships\diamond\Diamond.h" />
     <ClInclude Include="game\ships\excelsior\Excelsior.h" />
+    <ClInclude Include="game\ships\fed_def_platform\FedDefPlatform.h" />
     <ClInclude Include="game\ships\intrepid\Intrepid.h" />
     <ClInclude Include="game\ships\miranda\Miranda.h" />
     <ClInclude Include="game\ships\norway\Norway.h" />
@@ -329,6 +332,7 @@
     <ClCompile Include="game\ships\defiant\Defiant.cpp" />
     <ClCompile Include="game\ships\diamond\Diamond.cpp" />
     <ClCompile Include="game\ships\excelsior\Excelsior.cpp" />
+    <ClCompile Include="game\ships\fed_def_platform\FedDefPlatform.cpp" />
     <ClCompile Include="game\ships\intrepid\Intrepid.cpp" />
     <ClCompile Include="game\ships\miranda\Miranda.cpp" />
     <ClCompile Include="game\ships\norway\Norway.cpp" />

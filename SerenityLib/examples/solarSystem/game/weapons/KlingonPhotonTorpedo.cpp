@@ -35,7 +35,8 @@ struct KlingonPhotonTorpedoCollisionFunctor final { void operator()(CollisionCal
             Ship* otherShip = static_cast<Ship*>(otherPtrShip);
             if (otherShip && torpedoProjectile.active) {
                 Ship* sourceShip = static_cast<Ship*>(torpedoShipVoid);
-                if (sourceShip->IsPlayer()) {
+                const auto& sourceAI = sourceShip->getAIType();
+                if (sourceShip->IsPlayer() || (sourceAI != AIType::AI_None && sourceAI != AIType::Player_Other)) {
                     auto& torpedo = *static_cast<KlingonPhotonTorpedo*>(data.ownerBody.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));

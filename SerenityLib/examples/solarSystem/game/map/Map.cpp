@@ -50,6 +50,7 @@ namespace boost_io = boost::iostreams;
 
 Map::Map(GameplayMode& mode, Client& client, const string& n, const string& file):Scene(n), m_Client(client), m_GameplayMode(mode){
     m_Player      = nullptr;
+    m_IsServer    = false;
 
     m_ActiveCannonProjectiles.initialize(5500);
     m_ActiveTorpedoProjectiles.initialize(5500);
@@ -81,39 +82,56 @@ Map::~Map(){
     cleanup();
     SAFE_DELETE(m_HUD);
 }
+const bool& Map::isServer() const {
+    return m_IsServer;
+}
 PrimaryWeaponCannonProjectile* Map::getCannonProjectile(const int index) {
-    return m_ActiveCannonProjectiles[index];
+    PrimaryWeaponCannonProjectile* projectile = m_ActiveCannonProjectiles[index];
+    return projectile;
 }
 SecondaryWeaponTorpedoProjectile* Map::getTorpedoProjectile(const int index) {
-    return m_ActiveTorpedoProjectiles[index];
+    SecondaryWeaponTorpedoProjectile* projectile = m_ActiveTorpedoProjectiles[index];
+    return projectile;
 }
 void Map::removeCannonProjectile(const int index) {
-    const auto res = m_ActiveCannonProjectiles.delete_data_index(index);
+    const bool success = m_ActiveCannonProjectiles.delete_data_index(index);
 }
 void Map::removeTorpedoProjectile(const int index) {
-    const auto res = m_ActiveTorpedoProjectiles.delete_data_index(index);
+    const bool success = m_ActiveTorpedoProjectiles.delete_data_index(index);
 }
 const int Map::addCannonProjectile(PrimaryWeaponCannonProjectile* projectile, const int index) {
-    if(index == -1)
-        return m_ActiveCannonProjectiles.push_back(projectile);
-    return m_ActiveCannonProjectiles.insert(projectile, index);
+    int result_index = -1;
+    if (index == -1) {
+        result_index = m_ActiveCannonProjectiles.push_back(projectile);
+    }else{
+        result_index = m_ActiveCannonProjectiles.insert(projectile, index);
+    }
+    return result_index;
 }
 const int Map::addTorpedoProjectile(SecondaryWeaponTorpedoProjectile* projectile, const int index) {
-    if (index == -1)
-        return m_ActiveTorpedoProjectiles.push_back(projectile);
-    return m_ActiveTorpedoProjectiles.insert(projectile, index);
+    int result_index = -1;
+    if (index == -1) {
+        result_index = m_ActiveTorpedoProjectiles.push_back(projectile);
+    }else{
+        result_index = m_ActiveTorpedoProjectiles.insert(projectile, index);
+    }
+    return result_index;
 }
-const int Map::try_addCannonProjectile() {
-    return m_ActiveCannonProjectiles.use_next_available_index();
+const int Map::get_and_use_next_cannon_projectile_index() {
+    int used_next_available_index = m_ActiveCannonProjectiles.use_next_available_index();
+    return used_next_available_index;
 }
-const int Map::try_addTorpedoProjectile() {
-    return m_ActiveTorpedoProjectiles.use_next_available_index();
+const int Map::get_and_use_next_torpedo_projectile_index() {
+    int used_next_available_index = m_ActiveTorpedoProjectiles.use_next_available_index();
+    return used_next_available_index;
 }
 const bool Map::try_addCannonProjectile(const int requestedIndex) {
-    return m_ActiveCannonProjectiles.can_push_at_index(requestedIndex);
+    bool success = m_ActiveCannonProjectiles.can_push_at_index(requestedIndex);
+    return success;
 }
 const bool Map::try_addTorpedoProjectile(const int requestedIndex) {
-    return m_ActiveTorpedoProjectiles.can_push_at_index(requestedIndex);
+    bool success = m_ActiveTorpedoProjectiles.can_push_at_index(requestedIndex);
+    return success;
 }
 EntityWrapper* Map::getEntityFromName(const string& name) {
     for (auto& wrapper : m_Objects) {
@@ -497,7 +515,8 @@ Ship* Map::createShip(AIType::Type ai_type, Team& team, Client& client, const st
         ship = new Vorcha(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Sovereign")
         ship = new Sovereign(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-
+    else if (shipClass == "Federation Defense Platform")
+        ship = new FedDefPlatform(team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     return ship;
 }
 Anchor* Map::getRootAnchor() {
@@ -541,19 +560,21 @@ const string Map::getClosestSpawnAnchor() {
     }
     return ret;
 }
-const vector<string> Map::getClosestAnchor(Anchor* currentAnchor) {
+const vector<string> Map::getClosestAnchor(Anchor* currentAnchor, Ship* ship) {
+    if (!ship)
+        ship = m_Player;
     vector<string> res;
     if (!currentAnchor) {
         currentAnchor = std::get<1>(m_RootAnchor);
     }
     decimal minDist = static_cast<decimal>(-1.0);
-    auto playerPos = m_Player->getComponent<ComponentBody>()->position();
+    auto pos = ship->getComponent<ComponentBody>()->position();
     while (currentAnchor->m_Children.size() > 0) {
         string least = currentAnchor->m_Children.begin()._Ptr->_Myval.first;
         bool hasChanged = false;
         for (auto& child : currentAnchor->m_Children) {
             auto childPos = child.second->getPosition();
-            const auto dist = glm::distance(playerPos, childPos);
+            const auto dist = glm::distance(pos, childPos);
             if (minDist < static_cast<decimal>(0.0) || dist < minDist) {
                 minDist = dist;
                 least = child.first;

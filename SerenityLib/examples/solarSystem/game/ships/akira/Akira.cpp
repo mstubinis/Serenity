@@ -38,6 +38,8 @@ Akira::Akira(AIType::Type& ai_type, Team& team, Client& client, Map& map, const 
         else if (i == 10)  system = new ShipSystemHull(_this, map, 55500.0f);
         m_ShipSystems.emplace(i, system);
     }
+    internal_finialize_init(ai_type);
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     //rack torpedos

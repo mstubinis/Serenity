@@ -13,7 +13,7 @@
 using namespace std;
 using namespace Engine;
 
-GunneryBaseClass::GunneryBaseClass(AIType::Type& type, AI& ai, ThreatTable& threatTable, Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) : m_AIType(type), m_AI(ai), m_ThreatTable(threatTable), m_Ship(ship), m_Map(map), m_Sensors(sensors), m_Weapons(weapons){
+GunneryBaseClass::GunneryBaseClass(AIType::Type type, AI& ai, ThreatTable& threatTable, Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) : m_AIType(type), m_AI(ai), m_ThreatTable(threatTable), m_Ship(ship), m_Map(map), m_Sensors(sensors), m_Weapons(weapons){
     std::random_device rd;
     m_RandomDevice  = std::mt19937(rd());
     m_BeamTimer     = 0.0;
@@ -43,17 +43,16 @@ void GunneryBaseClass::update(const double& dt) {
         decimal dist_to_i, dist_to_enemy;
         glm_vec3 world_pos, offset, enemy_ship_pos = glm_vec3(0.0);
         glm_quat enemy_ship_rot;
-        int res = weapon_.canFire();
 
-        if (res >= 0) {
-            for (auto& hostile_ship : sensors_.getEnemyShips()) {
-                auto& ship                = *hostile_ship.ship;
-                const auto& shipMapKey    = ship.getMapKey();
-                enemy_ship_pos            = ship.getPosition();
-                dist_to_enemy             = weapon_.getDistanceSquared(enemy_ship_pos);
-                enemy_ship_rot            = ship.getRotation();
+        for (auto& hostile_ship : sensors_.getEnemyShips()) {
+            auto& ship                = *hostile_ship.ship;
+            const auto& shipMapKey    = ship.getMapKey();
+            enemy_ship_pos            = ship.getPosition();
+            dist_to_enemy             = weapon_.getDistanceSquared(enemy_ship_pos);
+            enemy_ship_rot            = ship.getRotation();
 
-                auto lamda_2 = [&]() {
+            auto lamda_2 = [&]() {
+                if (!ship.isDestroyed()) {
                     if (weapon_.isInArc(enemy_ship_pos, weapon_.arc)) {
                         if (dist_to_enemy < weapon_.rangeInKMSquared + static_cast<decimal>(ship.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
                             auto pts = ship.m_AimPositionDefaults;
@@ -64,39 +63,43 @@ void GunneryBaseClass::update(const double& dt) {
                                 dist_to_i = weapon_.getDistanceSquared(world_pos);
                                 if (dist_to_i < weapon_.rangeInKMSquared) {
                                     if (weapon_.isInArc(world_pos, weapon_.arc)) {
-                                        weapon_.setTarget(&ship);
-                                        pOut_.PacketType = PacketType::Client_To_Server_Client_Fired_Beams;
-                                        pOut_.name = m_Ship.getName();
-                                        pOut_.r = static_cast<float>(offset.r);
-                                        pOut_.g = static_cast<float>(offset.g);
-                                        pOut_.b = static_cast<float>(offset.b);
-                                        if (pOut_.data.empty()) {
-                                            pOut_.data += to_string(weapon_.index) + "," + ship.getName();
-                                        }else{
-                                            pOut_.data += "," + to_string(weapon_.index) + "," + ship.getName();
+                                        int res = weapon_.acquire_index();
+                                        if (res >= 0) {
+                                            weapon_.setTarget(&ship);
+                                            pOut_.PacketType = PacketType::Client_To_Server_Client_Fired_Beams;
+                                            pOut_.name = m_Ship.getName();
+                                            pOut_.r = static_cast<float>(offset.r);
+                                            pOut_.g = static_cast<float>(offset.g);
+                                            pOut_.b = static_cast<float>(offset.b);
+                                            if (pOut_.data.empty()) {
+                                                pOut_.data += to_string(weapon_.index) + "," + ship.getName();
+                                            }else{
+                                                pOut_.data += "," + to_string(weapon_.index) + "," + ship.getName();
+                                            }
+                                            return true;
                                         }
-                                        return true;
                                     }
                                 }
                             }
                         }
                     }
-                };
+                }
+                return false;
+            };
 
-                if(m_ThreatTable.getShipsWithThreat().size() > 0){
-                    for (auto& ships_with_threat : m_ThreatTable.getShipsWithThreat()) {
-                        if (shipMapKey == ships_with_threat.first) {
-                            const auto res1 = lamda_2();
-                            if (res1) {
-                                return true;
-                            }
+            if(m_ThreatTable.getShipsWithThreat().size() > 0){
+                for (auto& ships_with_threat : m_ThreatTable.getShipsWithThreat()) {
+                    if (shipMapKey == ships_with_threat.first) {
+                        const auto res1 = lamda_2();
+                        if (res1) {
+                            return true;
                         }
                     }
-                }else{
-                    const auto res1 = lamda_2();
-                    if (res1) {
-                        return true;
-                    }
+                }
+            }else{
+                const auto res1 = lamda_2();
+                if (res1) {
+                    return true;
                 }
             }
         }
@@ -106,16 +109,16 @@ void GunneryBaseClass::update(const double& dt) {
         decimal dist_to_i, dist_to_enemy;
         glm_vec3 world_pos, offset, enemy_ship_pos = glm_vec3(0.0);
         glm_quat enemy_ship_rot;
-        int res = weapon_.canFire();
-        if (res >= 0) {
-            for (auto& hostile_ship : sensors_.getEnemyShips()) {
-                auto& ship             = *hostile_ship.ship;
-                const auto& shipMapKey = ship.getMapKey();
-                enemy_ship_pos         = ship.getPosition();
-                dist_to_enemy          = weapon_.getDistanceSquared(enemy_ship_pos);
-                enemy_ship_rot         = ship.getRotation();
 
-                auto lamda_2 = [&]() {
+        for (auto& hostile_ship : sensors_.getEnemyShips()) {
+            auto& ship             = *hostile_ship.ship;
+            const auto& shipMapKey = ship.getMapKey();
+            enemy_ship_pos         = ship.getPosition();
+            dist_to_enemy          = weapon_.getDistanceSquared(enemy_ship_pos);
+            enemy_ship_rot         = ship.getRotation();
+
+            auto lamda_2 = [&]() {
+                if (!ship.isDestroyed()) {
                     if (weapon_.isInArc(enemy_ship_pos, weapon_.arc)) {
                         if (dist_to_enemy < weapon_.rangeInKMSquared + static_cast<decimal>(ship.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
                             auto pts = ship.m_AimPositionDefaults;
@@ -126,38 +129,41 @@ void GunneryBaseClass::update(const double& dt) {
                                 dist_to_i = weapon_.getDistanceSquared(world_pos);
                                 if (dist_to_i < weapon_.rangeInKMSquared) {
                                     if (weapon_.isInArc(world_pos, weapon_.arc)) {
-                                        pOut_.PacketType = PacketType::Client_To_Server_Client_Fired_Cannons;
-                                        pOut_.name = m_Ship.getName();
-                                        pOut_.r = static_cast<float>(offset.x);
-                                        pOut_.g = static_cast<float>(offset.y);
-                                        pOut_.b = static_cast<float>(offset.z);
-                                        if (pOut_.data.empty()) {
-                                            pOut_.data += to_string(weapon_.index) + "," + to_string(res) + "," + ship.getName();
-                                        }else{
-                                            pOut_.data += "," + to_string(weapon_.index) + "," + to_string(res) + "," + ship.getName();
+                                        int res = weapon_.acquire_index();
+                                        if (res >= 0) {
+                                            pOut_.PacketType = PacketType::Client_To_Server_Client_Fired_Cannons;
+                                            pOut_.name = m_Ship.getName();
+                                            pOut_.r = static_cast<float>(offset.x);
+                                            pOut_.g = static_cast<float>(offset.y);
+                                            pOut_.b = static_cast<float>(offset.z);
+                                            if (pOut_.data.empty()) {
+                                                pOut_.data += to_string(weapon_.index) + "," + to_string(res) + "," + ship.getName();
+                                            }else{
+                                                pOut_.data += "," + to_string(weapon_.index) + "," + to_string(res) + "," + ship.getName();
+                                            }
+                                            return true;
                                         }
-                                        return true;
                                     }
                                 }
                             }
                         }
                     }
-                };   
-            
-                if (m_ThreatTable.getShipsWithThreat().size() > 0) {
-                    for (auto& ships_with_threat : m_ThreatTable.getShipsWithThreat()) {
-                        if (shipMapKey == ships_with_threat.first) {
-                            const auto res1 = lamda_2();
-                            if (res1) {
-                                return true;
-                            }
+                }
+                return false;
+            };   
+            if (m_ThreatTable.getShipsWithThreat().size() > 0) {
+                for (auto& ships_with_threat : m_ThreatTable.getShipsWithThreat()) {
+                    if (shipMapKey == ships_with_threat.first) {
+                        const auto res1 = lamda_2();
+                        if (res1) {
+                            return true;
                         }
                     }
-                }else{
-                    const auto res1 = lamda_2();
-                    if (res1) {
-                        return true;
-                    }
+                }
+            }else{
+                const auto res1 = lamda_2();
+                if (res1) {
+                    return true;
                 }
             }
         }
@@ -168,16 +174,16 @@ void GunneryBaseClass::update(const double& dt) {
         decimal dist_to_i, dist_to_enemy;
         glm_vec3 world_pos, offset, enemy_ship_pos = glm_vec3(0.0);
         glm_quat enemy_ship_rot;
-        int res = weapon_.canFire();
-        if (res >= 0) {
-            for (auto& hostile_ship : sensors_.getEnemyShips()) {
-                auto& ship             = *hostile_ship.ship;
-                const auto& shipMapKey = ship.getMapKey();
-                enemy_ship_pos         = ship.getPosition();
-                dist_to_enemy          = weapon_.getDistanceSquared(enemy_ship_pos);
-                enemy_ship_rot         = ship.getRotation();
 
-                auto lamda_2 = [&]() {
+        for (auto& hostile_ship : sensors_.getEnemyShips()) {
+            auto& ship             = *hostile_ship.ship;
+            const auto& shipMapKey = ship.getMapKey();
+            enemy_ship_pos         = ship.getPosition();
+            dist_to_enemy          = weapon_.getDistanceSquared(enemy_ship_pos);
+            enemy_ship_rot         = ship.getRotation();
+
+            auto lamda_2 = [&]() {
+                if (!ship.isDestroyed()) {
                     if (weapon_.isInArc(enemy_ship_pos, weapon_.arc)) {
                         if (dist_to_enemy < weapon_.rangeInKMSquared + static_cast<decimal>(ship.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
                             auto pts = ship.m_AimPositionDefaults;
@@ -188,41 +194,45 @@ void GunneryBaseClass::update(const double& dt) {
                                 dist_to_i = weapon_.getDistanceSquared(world_pos);
                                 if (dist_to_i < weapon_.rangeInKMSquared) {
                                     if (weapon_.isInArc(world_pos, weapon_.arc)) {
-                                        PacketMessage pOut;
-                                        pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Torpedos;
-                                        pOut.name = m_Ship.getName();
-                                        pOut.r = static_cast<float>(offset.x);
-                                        pOut.g = static_cast<float>(offset.y);
-                                        pOut.b = static_cast<float>(offset.z);
-                                        if (pOut.data.empty()) {
-                                            pOut.data += to_string(weapon_.index) + "," + to_string(res) + "," + ship.getName();
-                                        }else{
-                                            pOut.data += "," + to_string(weapon_.index) + "," + to_string(res) + "," + ship.getName();
+                                        int res = weapon_.acquire_index();
+                                        if (res >= 0) {
+                                            PacketMessage pOut;
+                                            pOut.PacketType = PacketType::Client_To_Server_Client_Fired_Torpedos;
+                                            pOut.name = m_Ship.getName();
+                                            pOut.r = static_cast<float>(offset.x);
+                                            pOut.g = static_cast<float>(offset.y);
+                                            pOut.b = static_cast<float>(offset.z);
+                                            if (pOut.data.empty()) {
+                                                pOut.data += to_string(weapon_.index) + "," + to_string(res) + "," + ship.getName();
+                                            }else{
+                                                pOut.data += "," + to_string(weapon_.index) + "," + to_string(res) + "," + ship.getName();
+                                            }
+                                            if (!pOut.data.empty()) {
+                                                m_Ship.m_Client.send(pOut);
+                                            }
+                                            return true;
                                         }
-                                        if (!pOut.data.empty()) {
-                                            m_Ship.m_Client.send(pOut);
-                                        }
-                                        return true;
                                     }
                                 }
                             }
                         }
                     }
-                };
-                if (m_ThreatTable.getShipsWithThreat().size() > 0) {
-                    for (auto& ships_with_threat : m_ThreatTable.getShipsWithThreat()) {
-                        if (shipMapKey == ships_with_threat.first) {
-                            const auto res1 = lamda_2();
-                            if (res1) {
-                                return true;
-                            }
+                }
+                return false;
+            };
+            if (m_ThreatTable.getShipsWithThreat().size() > 0) {
+                for (auto& ships_with_threat : m_ThreatTable.getShipsWithThreat()) {
+                    if (shipMapKey == ships_with_threat.first) {
+                        const auto res1 = lamda_2();
+                        if (res1) {
+                            return true;
                         }
                     }
-                }else{
-                    const auto res1 = lamda_2();
-                    if (res1) {
-                        return true;
-                    }
+                }
+            }else{
+                const auto res1 = lamda_2();
+                if (res1) {
+                    return true;
                 }
             }
         }

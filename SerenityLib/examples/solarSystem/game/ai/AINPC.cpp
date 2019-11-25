@@ -18,8 +18,8 @@ void AINPC::update(const double& dt) {
 GunneryBaseClass* AINPC::getGunneryLogic() {
     return m_Gunnery;
 }
-void AINPC::installGunneryLogic(AIType::Type& type, ThreatTable& table, Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) {
+void AINPC::installGunneryLogic(Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) {
     SAFE_DELETE(m_Gunnery);
     //TODO: switch(type) and install gunnery derived classes
-    m_Gunnery = new GunneryBaseClass(type, *this, table, ship, map, sensors, weapons);
+    m_Gunnery = new GunneryBaseClass(m_Type, *this, *m_Threat, ship, map, sensors, weapons);
 }

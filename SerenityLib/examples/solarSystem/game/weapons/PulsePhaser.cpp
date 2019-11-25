@@ -32,7 +32,8 @@ struct PulsePhaserCollisionFunctor final { void operator()(CollisionCallbackEven
             Ship*        otherShip   = static_cast<Ship*>(otherPtrShip);
             if (otherShip && cannonProjectile.active) {
                 Ship* sourceShip = static_cast<Ship*>(weaponShipVoid);
-                if (sourceShip->IsPlayer()) {
+                const auto& sourceAI = sourceShip->getAIType();
+                if (sourceShip->IsPlayer() || (sourceAI != AIType::AI_None && sourceAI != AIType::Player_Other)) {
                     auto& weapon = *static_cast<PulsePhaser*>(data.ownerBody.getUserPointer2());
                     auto* shields = static_cast<ShipSystemShields*>(otherShip->getShipSystem(ShipSystemType::Shields));
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));

@@ -38,6 +38,8 @@ Excelsior::Excelsior(AIType::Type& ai_type, Team& team, Client& client, Map& map
         else if (i == 10)  system = new ShipSystemHull(_this, map, 26000.0f);
         m_ShipSystems.emplace(i, system);
     }
+    internal_finialize_init(ai_type);
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     auto* leftTorp_1 = new PhotonTorpedoOld(_this, map, glm::vec3(-0.252308f, -0.294315f, -1.15895f), glm::vec3(0, 0, -1), 15.0f, 1);

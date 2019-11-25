@@ -15,6 +15,11 @@
 #include "../modes/GameplayMode.h"
 #include "../ships/Ships.h"
 
+#include "../ships/shipSystems/ShipSystemWeapons.h"
+#include "../ships/shipSystems/ShipSystemShields.h"
+#include "../ships/shipSystems/ShipSystemSensors.h"
+#include "../ships/shipSystems/ShipSystemHull.h"
+
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/utils/Utils.h>
 #include <core/engine/math/Engine_Math.h>
@@ -263,9 +268,11 @@ ServerClientThread::~ServerClientThread() {
 
 Server::Server(Core& core, const unsigned int& port, const string& ipRestriction) :m_Core(core), m_CollisionEntries(*this), m_RespawningShips(*this) {
     m_GameplayMode                     = nullptr;
+    m_OwnerClient                      = nullptr;
     m_port                             = port;
     m_listener                         = new ListenerTCP(port, ipRestriction);
-    m_DeepspaceAnchorTimer             = 0.0f;
+    m_DeepspaceAnchorTimer             = 0.0;
+    m_PingTime                         = 0.0;
     m_UdpSocket                        = new SocketUDP(port, ipRestriction);
     m_UdpSocket->setBlocking(false);
     m_UdpSocket->bind();
@@ -283,6 +290,7 @@ void Server::shutdown(const bool destructor) {
     m_Core.m_Menu->m_ServerLobbyChatWindow->clear();
     m_Core.m_Menu->m_ServerLobbyConnectedPlayersWindow->clear();
     m_Active.store(0, std::memory_order_relaxed);
+    m_OwnerClient = nullptr;
     Sleep(500); //messy
     if (destructor) {
         SAFE_DELETE_VECTOR(m_Threads);
@@ -331,9 +339,67 @@ const bool Server::startupMap(GameplayMode& mode) {
     Map* map = static_cast<Map*>(Resources::getScene(m_MapName));
     if (!map) {
         map = new Map(mode , *m_Core.m_Client, m_MapName, ResourceManifest::BasePath + "data/Systems/" + m_MapName + ".txt");
+        map->m_IsServer = true;
         return true;
     }
     return false;
+}
+void Server::update_server_entities(const double& dt) {
+    if (m_Core.gameState() != GameState::Game)
+        return;
+
+    m_PingTime += dt;
+    if (m_PingTime > PHYSICS_PACKET_TIMER_LIMIT) {
+        //keep pinging the server, sending your ship physics info
+        auto& map = *static_cast<Map*>(Resources::getScene(m_MapName));
+
+        Anchor* finalAnchor = nullptr;
+        vector<string> list;
+        for (auto& ship_ptr : map.getShipsNPCControlled()) {
+            Ship& ship = *ship_ptr.second;
+            finalAnchor = map.getRootAnchor();
+            list = map.getClosestAnchor(nullptr, &ship);
+            for (auto& closest : list) {
+                finalAnchor = finalAnchor->getChildren().at(closest);
+            }
+            PacketPhysicsUpdate p(ship, map, finalAnchor, list, ship.getName());
+            p.PacketType = PacketType::Server_To_Client_Ship_Physics_Update;
+            send_to_all_but_client_udp(*m_OwnerClient, p);
+        }
+        /*
+        auto playerPos = glm::vec3(playerShip.getPosition());
+        auto nearestAnchorPos = glm::vec3(finalAnchor->getPosition());
+        double distFromMeToNearestAnchor = static_cast<double>(glm::distance2(nearestAnchorPos, playerPos));
+
+        if (distFromMeToNearestAnchor > DISTANCE_CHECK_NEAREST_ANCHOR) {
+            for (auto& otherShips : map.getShips()) {
+                if (otherShips.first != playerShip.getName()) {
+                    auto otherPlayerPos = glm::vec3(otherShips.second->getPosition());
+                    auto distFromMeToOtherPlayerSq = glm::distance2(otherPlayerPos, playerPos);
+                    const auto calc = (distFromMeToNearestAnchor - DISTANCE_CHECK_NEAREST_ANCHOR) * 0.5f;
+                    if (distFromMeToOtherPlayerSq < glm::max(calc, DISTANCE_CHECK_NEAREST_OTHER_PLAYER)) {
+                        const glm::vec3 midpoint = Math::midpoint(otherPlayerPos, playerPos);
+
+                        PacketMessage pOut;
+                        pOut.PacketType = PacketType::Client_To_Server_Request_Anchor_Creation;
+                        pOut.r = midpoint.x - nearestAnchorPos.x;
+                        pOut.g = midpoint.y - nearestAnchorPos.y;
+                        pOut.b = midpoint.z - nearestAnchorPos.z;
+                        pOut.data = "";
+                        pOut.data += to_string(list.size());
+                        for (auto& closest : list) {
+                            pOut.data += "," + closest;
+                        }
+                        //we want to create an anchor at r,g,b (the midpoint between two nearby ships), we send the nearest valid anchor as a reference
+                        client.send(pOut);
+                        break;
+                    }
+                }
+            }
+        }
+        */
+        m_PingTime = 0.0;
+    }
 }
 void Server::update(Server* thisServer, const double& dt) {
     auto& server = *thisServer;
@@ -341,6 +407,7 @@ void Server::update(Server* thisServer, const double& dt) {
     if (server_active == 1) {
         server.m_DeepspaceAnchorTimer += dt;
         updateAcceptNewClients(server);
+        server.update_server_entities(dt);
         server.m_CollisionEntries.update(dt);
         server.m_RespawningShips.update(dt);
         server.updateClientsGameLoop(dt);
@@ -391,6 +458,9 @@ void Server::updateAcceptNewClients(Server& server) {
                     server.m_Mutex.lock();
                     leastThread->m_Clients.emplace(client_address, client);
                     leastThread->m_Active.store(1, std::memory_order_relaxed);
+                    if (!server.m_OwnerClient) {
+                        server.m_OwnerClient = client;
+                    }
                     server.m_Mutex.unlock();
                     std::cout << "Server: New client in dictionary: " << client_address << std::endl;
                 }
@@ -445,6 +515,11 @@ void Server::updateRemoveDisconnectedClients(Server& server) {
     }
 }
 void Server::completely_remove_client(ServerClient& client) {
+    if (m_OwnerClient) {
+        if (m_OwnerClient->m_MapKey == client.m_MapKey) {
+            m_OwnerClient = nullptr;
+        }
+    }
     for (auto& clientThread : m_Threads) {
         for (auto& _client : clientThread->m_Clients) {
             string username_cpy = _client.second->m_Username;
@@ -523,8 +598,42 @@ void Server::updateClient(ServerClient& client) {
                     auto list = Helper::SeparateStringByCharacter(pI.data, ',');
                     PacketMessage pOut(pI);
                     pOut.PacketType = PacketType::Server_To_Client_Request_Ship_Current_Info;
+
+
                     auto* c = server.getClientByUsername(list[1]);
-                    server.send_to_client(*c, pOut);
+
+                    if (!c) {
+                        //TODO: add ALOT more here
+                        auto& map = *static_cast<Map*>(Resources::getScene(server.m_MapName));
+                        auto& sourceMapKey = list[0];
+                        auto* sourceClient = server.getClientByUsername(pI.name);
+                        auto& ships = map.getShips();
+                        if (ships.count(sourceMapKey)) {
+                            Ship* ship = ships.at(sourceMapKey);
+                            if (ship) { //TODO: should not need this nullptr check
+                                //health status
+                                PacketHealthUpdate pOut2(*ship);
+                                pOut2.PacketType = PacketType::Server_To_Client_Ship_Health_Update;
+                                server.send_to_client(*sourceClient, pOut2);
+
+                                //cloak status
+                                PacketCloakUpdate pOut1(*ship);
+                                pOut1.PacketType = PacketType::Server_To_Client_Ship_Cloak_Update;
+                                server.send_to_client(*sourceClient, pOut1);
+
+                                //target status
+                                ship->setTarget(ship->getTarget(), true); //sends target packet info to the new guy
+
+                                //anti cloak scan status
+                                ShipSystemSensors* sensors = static_cast<ShipSystemSensors*>(ship->getShipSystem(ShipSystemType::Sensors));
+                                if (sensors) {
+                                    sensors->sendAntiCloakScanStatusPacket();
+                                }
+                            }
+                        }
+                    }else{
+                        server.send_to_client(*c, pOut); //ask the client for info
+                    }
                     break;
                 }case PacketType::Client_To_Server_Collision_Event: {
                     PacketCollisionEvent& pI = *static_cast<PacketCollisionEvent*>(pp);

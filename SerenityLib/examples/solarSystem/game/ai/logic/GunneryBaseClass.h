@@ -27,7 +27,7 @@ class GunneryBaseClass {
         ShipSystemWeapons&   m_Weapons;
         ShipSystemSensors&   m_Sensors;
     public:
-        GunneryBaseClass(AIType::Type&, AI&, ThreatTable&, Ship&, Map&, ShipSystemSensors&, ShipSystemWeapons&);
+        GunneryBaseClass(AIType::Type, AI&, ThreatTable&, Ship&, Map&, ShipSystemSensors&, ShipSystemWeapons&);
         virtual ~GunneryBaseClass();
 
         virtual void update(const double& dt);

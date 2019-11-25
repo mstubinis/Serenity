@@ -38,6 +38,8 @@ Nova::Nova(AIType::Type& ai_type, Team& team, Client& client, Map& map,  const s
         else if (i == 10)  system = new ShipSystemHull(_this, map, 19500.0f);
         m_ShipSystems.emplace(i, system);
     }
+    internal_finialize_init(ai_type);
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     auto* leftTorp = new PhotonTorpedo(_this, map, glm::vec3(-0.223032f, -0.089813f, -1.82296f), glm::vec3(0, 0, -1), 15.0f);

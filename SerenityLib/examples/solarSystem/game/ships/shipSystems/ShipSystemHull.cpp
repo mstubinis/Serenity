@@ -186,11 +186,15 @@ void ShipSystemHull::receiveCollisionVisual(const glm::vec3& impactNormal, const
 void ShipSystemHull::apply_damage_amount(const string& source, const float& damage) {
     m_HealthPointsCurrent -= damage;
     //now apply threat
-    Ship* source_ship = static_cast<Map&>(m_Ship.entity().scene()).getShips().at(source);
-    if (source_ship) { //TODO: should not need this nullptr check
-        const auto& threat_modifier = Ships::Database[source_ship->getClass()].ThreatModifier;
-        auto final_threat_amount = (damage * 10.0f) * threat_modifier; //this 10.0f is just to expand on the unsigned int amount to give more room for modifiers to change the value
-        m_Ship.apply_threat(source, static_cast<unsigned int>(final_threat_amount));
+    Map& map = static_cast<Map&>(m_Ship.entity().scene());
+    auto& ships = map.getShips();
+    if (ships.count(source)) {
+        Ship* source_ship = ships.at(source);
+        if (source_ship) { //TODO: should not need this nullptr check
+            const auto& threat_modifier = Ships::Database[source_ship->getClass()].ThreatModifier;
+            auto final_threat_amount = (damage * 10.0f) * threat_modifier; //this 10.0f is just to expand on the unsigned int amount to give more room for modifiers to change the value
+            m_Ship.apply_threat(source, static_cast<unsigned int>(final_threat_amount));
+        }
     }
 }
 

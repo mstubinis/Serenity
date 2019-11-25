@@ -38,6 +38,8 @@ Miranda::Miranda(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
         else if (i == 10)  system = new ShipSystemHull(_this, map, 17000.0f);
         m_ShipSystems.emplace(i, system);
     }
+    internal_finialize_init(ai_type);
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     auto* leftTorp = new PhotonTorpedoOld(_this, map, glm::vec3(-0.03427f, 0.310924f, 0.07898f), glm::vec3(0, 0, -1), 15.0f);

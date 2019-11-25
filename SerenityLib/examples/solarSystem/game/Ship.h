@@ -112,6 +112,9 @@ class Ship: public EntityWrapper, public EventObserver {
         std::vector<glm::vec3>                                                       m_AimPositionDefaults;
         Client&                                                                      m_Client;
     protected:
+        void internal_finialize_init(const AIType::Type& type);
+
+
         std::vector<std::tuple<Decal*,size_t>>                                       m_DamageDecals;
 
 

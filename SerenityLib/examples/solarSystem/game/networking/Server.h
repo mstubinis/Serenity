@@ -125,7 +125,10 @@ class Server {
         Core&                                          m_Core;
         std::string                                    m_MapName;
         double                                         m_DeepspaceAnchorTimer;
+        double                                         m_PingTime;
+        ServerClient*                                  m_OwnerClient;
 
+        void update_server_entities(const double& dt);
         void assign_username_to_client(ServerClient&, const std::string& username);
         void completely_remove_client(ServerClient&);
         void assignRandomTeam(PacketMessage& packet_out, ServerClient& client);

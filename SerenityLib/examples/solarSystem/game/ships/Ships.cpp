@@ -48,6 +48,7 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
 
     auto ship_class_lower = boost::algorithm::to_lower_copy(shipClass);
     boost::replace_all(ship_class_lower, "'", "");
+    boost::replace_all(ship_class_lower, " ", "_");
 
     string root = "../data/Ships/" + ship_class_lower + "/";
     if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) 
@@ -150,6 +151,7 @@ void Ships::init() {
     //createShipEntry("Nebula",         FactionEnum::Federation,   30,   1.25f);
     createShipEntry("Sovereign",        FactionEnum::Federation,   30,   1.35f);
     //createShipEntry("Liberty",        FactionEnum::Federation,   40,   1.5f);
+    createShipEntry("Federation Defense Platform", FactionEnum::Federation,   0,    1.0f);
 
     createShipEntry("B'rel",            FactionEnum::Klingon,      6,    1.0f);
     createShipEntry("Vor'cha",          FactionEnum::Klingon,      20,   1.2f);
