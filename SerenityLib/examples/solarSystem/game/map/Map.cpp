@@ -44,6 +44,8 @@
 #include "../hud/SensorStatusDisplay.h"
 #include "../hud/ShipStatusDisplay.h"
 
+#include <iostream>
+
 using namespace Engine;
 using namespace std;
 namespace boost_io = boost::iostreams;
@@ -95,9 +97,13 @@ SecondaryWeaponTorpedoProjectile* Map::getTorpedoProjectile(const int index) {
 }
 void Map::removeCannonProjectile(const int index) {
     const bool success = m_ActiveCannonProjectiles.delete_data_index(index);
+    if (!success)
+        std::cout << "Error: removeCannonProjectile(const int index)\n";
 }
 void Map::removeTorpedoProjectile(const int index) {
     const bool success = m_ActiveTorpedoProjectiles.delete_data_index(index);
+    if (!success)
+        std::cout << "Error: removeTorpedoProjectile(const int index)\n";
 }
 const int Map::addCannonProjectile(PrimaryWeaponCannonProjectile* projectile, const int index) {
     int result_index = -1;
@@ -106,6 +112,8 @@ const int Map::addCannonProjectile(PrimaryWeaponCannonProjectile* projectile, co
     }else{
         result_index = m_ActiveCannonProjectiles.insert(projectile, index);
     }
+    if (result_index == -1)
+        std::cout << "Error: addCannonProjectile(PrimaryWeaponCannonProjectile* projectile, const int index)\n";
     return result_index;
 }
 const int Map::addTorpedoProjectile(SecondaryWeaponTorpedoProjectile* projectile, const int index) {
@@ -115,22 +123,32 @@ const int Map::addTorpedoProjectile(SecondaryWeaponTorpedoProjectile* projectile
     }else{
         result_index = m_ActiveTorpedoProjectiles.insert(projectile, index);
     }
+    if (result_index == -1)
+        std::cout << "Error: addTorpedoProjectile(SecondaryWeaponTorpedoProjectile* projectile, const int index)\n";
     return result_index;
 }
 const int Map::get_and_use_next_cannon_projectile_index() {
     int used_next_available_index = m_ActiveCannonProjectiles.use_next_available_index();
+    if (used_next_available_index == -1)
+        std::cout << "Error: get_and_use_next_cannon_projectile_index()\n";
     return used_next_available_index;
 }
 const int Map::get_and_use_next_torpedo_projectile_index() {
     int used_next_available_index = m_ActiveTorpedoProjectiles.use_next_available_index();
+    if (used_next_available_index == -1)
+        std::cout << "Error: get_and_use_next_torpedo_projectile_index()\n";
     return used_next_available_index;
 }
 const bool Map::try_addCannonProjectile(const int requestedIndex) {
     bool success = m_ActiveCannonProjectiles.can_push_at_index(requestedIndex);
+    if (!success)
+        std::cout << "Error: try_addCannonProjectile(const int requestedIndex)\n";
     return success;
 }
 const bool Map::try_addTorpedoProjectile(const int requestedIndex) {
     bool success = m_ActiveTorpedoProjectiles.can_push_at_index(requestedIndex);
+    if (!success)
+        std::cout << "Error: try_addTorpedoProjectile(const int requestedIndex)\n";
     return success;
 }
 EntityWrapper* Map::getEntityFromName(const string& name) {
@@ -516,7 +534,7 @@ Ship* Map::createShip(AIType::Type ai_type, Team& team, Client& client, const st
     else if (shipClass == "Sovereign")
         ship = new Sovereign(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Federation Defense Platform")
-        ship = new FedDefPlatform(team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = new FedDefPlatform(team, client, *this, shipName, position, glm::vec3(1.0f));
     return ship;
 }
 Anchor* Map::getRootAnchor() {

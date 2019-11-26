@@ -18,10 +18,12 @@
 #include "../../ai/AI.h"
 #include "../Ships.h"
 
+constexpr auto CLASS = "Intrepid";
+
 using namespace std;
 
 Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client, "Intrepid", map, ai_type, name, position, scale, collisionType) {
+:Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -242,8 +244,8 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
     weapons.addPrimaryWeaponBeam(*ventral_top_left, true);
     weapons.addPrimaryWeaponBeam(*ventral_top_right, true);
 
-    if (Ships::Database["Intrepid"].HullImpactPoints.size() == 0) {
-        Ships::Database["Intrepid"].HullImpactPoints = {
+    if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
+        Ships::Database[CLASS].HullImpactPoints = {
             glm::vec3(0.0f, 0.140914f, -0.585431f),
             glm::vec3(0,0.187934f, -2.14433f),
             glm::vec3(0,0.187934f, -1.76738f),

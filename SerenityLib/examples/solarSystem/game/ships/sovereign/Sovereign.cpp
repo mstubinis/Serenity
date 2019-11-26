@@ -18,10 +18,12 @@
 #include "../../ai/AI.h"
 #include "../Ships.h"
 
+constexpr auto CLASS = "Sovereign";
+
 using namespace std;
 
 Sovereign::Sovereign(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team, client, "Sovereign", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.0f, -1.58693f)) {
+:Ship(team, client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.0f, -1.58693f)) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

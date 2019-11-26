@@ -20,10 +20,12 @@
 #include "../../ai/AI.h"
 #include "../Ships.h"
 
+constexpr auto CLASS = "Defiant";
+
 using namespace std;
 
 Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client,"Defiant",map,ai_type,name,position,scale, collisionType){
+:Ship(team,client, CLASS,map,ai_type,name,position,scale, collisionType){
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -96,8 +98,8 @@ Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
     weapons.addPrimaryWeaponBeam(*ventralRightBeam);
     weapons.addPrimaryWeaponBeam(*ventralLeftBeam);
     
-    if (Ships::Database["Defiant"].HullImpactPoints.size() == 0) {
-        Ships::Database["Defiant"].HullImpactPoints = {
+    if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
+        Ships::Database[CLASS].HullImpactPoints = {
             glm::vec3(0.001f,0.001f,-0.944632f),
             glm::vec3(0.001f, 0.024758f, -0.671542f),
             glm::vec3(-0.237229f, 0.024758f, -0.444627f),

@@ -18,10 +18,12 @@
 #include "../../ai/AI.h"
 #include "../Ships.h"
 
+constexpr auto CLASS = "Miranda";
+
 using namespace std;
 
 Miranda::Miranda(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client, "Miranda", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.1f, 0.1f)) {
+:Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.1f, 0.1f)) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -129,8 +131,8 @@ Miranda::Miranda(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
     weapons.addPrimaryWeaponBeam(*btm_right_beam_left);
     weapons.addPrimaryWeaponBeam(*btm_right_beam_right);
 
-    if (Ships::Database["Miranda"].HullImpactPoints.size() == 0) {
-        Ships::Database["Miranda"].HullImpactPoints = {
+    if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
+        Ships::Database[CLASS].HullImpactPoints = {
             glm::vec3(0.0f, 0.128851f, -0.125263f),
         };
     }

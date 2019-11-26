@@ -163,8 +163,11 @@ const ShipSystemSensors::Detection ShipSystemSensors::validateDetection(Ship& ot
     d.valid = false;
     d.distanceSquared = dist2;
     if (dist2 <= m_RadarRange * m_RadarRange) {
-        if (  ((!othership.isFullyCloaked() && !othership.isAlly(m_Ship)) || (othership.isAlly(m_Ship))) && (!othership.isFullyDestroyed())  ) {
-            d.valid = true;
+        if (!othership.isFullyDestroyed()) {
+            if ((!othership.isFullyCloaked() && !othership.isAlly(m_Ship)) || othership.isAlly(m_Ship)) {
+                d.valid = true;
+                return d;
+            }
         }
     }
     return d;
@@ -243,10 +246,12 @@ void ShipSystemSensors::internal_update_populate_detected_ships(const double& dt
     m_DetectedEnemyShips.clear();
     m_DetectedAlliedShips.clear();
     m_DetectedNeutralShips.clear();
+    const auto& my_position = m_Ship.getPosition();
+    const auto& my_key = m_Ship.getMapKey();
     for (auto& shipItr : m_Map.getShips()) {
         auto& ship = *shipItr.second;
         if (&ship != &m_Ship) {
-            const auto& res = validateDetection(ship, m_Ship.getPosition());
+            const auto& res = validateDetection(ship, my_position);
             if (res.valid) {
                 DetectedShip detected;
                 detected.ship = &ship;

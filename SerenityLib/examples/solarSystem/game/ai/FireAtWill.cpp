@@ -47,7 +47,7 @@ void FireAtWill::internal_execute_beams() {
             if (dist_to_enemy < beam.rangeInKMSquared + static_cast<decimal>(enemyShip.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
                 auto pts = Ships::Database[enemyShip.getClass()].HullImpactPoints;
                 std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
-                for (unsigned int i = 0; i < pts.size(); ++i) {
+                for (size_t i = 0; i < pts.size(); ++i) {
                     offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
                     world_pos = enemy_ship_pos + offset;
                     dist_to_i = beam.getDistanceSquared(world_pos);
@@ -69,6 +69,7 @@ void FireAtWill::internal_execute_beams() {
                                 }
                                 return true;
                             }
+                            return false;
                         }
                     }
                 }
@@ -76,7 +77,7 @@ void FireAtWill::internal_execute_beams() {
         }
         return false;
     };
-    auto lamda_execute = [&](std::vector<ShipSystemWeapons::WeaponBeam>& beams) {
+    auto lamda_execute = [&](vector<ShipSystemWeapons::WeaponBeam>& beams) {
         PacketMessage pOut;
         for (auto& beam_ptr : beams) {
             auto& beam = *beam_ptr.beam;
@@ -114,7 +115,7 @@ void FireAtWill::internal_execute_cannons() {
             if (dist_to_enemy < cannon.rangeInKMSquared) {
                 auto pts = Ships::Database[enemyShip.getClass()].HullImpactPoints;
                 std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
-                for (unsigned int i = 0; i < pts.size(); ++i) {
+                for (size_t i = 0; i < pts.size(); ++i) {
                     offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
                     world_pos = enemy_ship_pos + offset;
                     dist_to_i = cannon.getDistanceSquared(world_pos);
@@ -134,6 +135,7 @@ void FireAtWill::internal_execute_cannons() {
                                 }
                                 return true;
                             }
+                            return false;
                         }
                     }
 
@@ -142,7 +144,7 @@ void FireAtWill::internal_execute_cannons() {
         }
         return false;
     };
-    auto lamda_execute = [&](std::vector<ShipSystemWeapons::WeaponCannon>& cannons) {
+    auto lamda_execute = [&](vector<ShipSystemWeapons::WeaponCannon>& cannons) {
         PacketMessage pOut;
         for (auto& ptr : cannons) {
             auto& weapon = *ptr.cannon;
@@ -180,7 +182,7 @@ void FireAtWill::internal_execute_torpedos() {
             if (dist_to_enemy < torpedo.rangeInKMSquared) {
                 auto pts = Ships::Database[enemyShip.getClass()].HullImpactPoints;
                 std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
-                for (unsigned int i = 0; i < pts.size(); ++i) {
+                for (size_t i = 0; i < pts.size(); ++i) {
                     offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
                     world_pos = enemy_ship_pos + offset;
                     dist_to_i = torpedo.getDistanceSquared(world_pos);
@@ -203,6 +205,7 @@ void FireAtWill::internal_execute_torpedos() {
                                     m_Ship.m_Client.send(pOut);
                                 return true;
                             }
+                            return false;
                         }
                     }
                 }
@@ -210,20 +213,22 @@ void FireAtWill::internal_execute_torpedos() {
         }
         return false;
     };
-    auto lamda_execute = [&](std::vector<ShipSystemWeapons::WeaponTorpedo>& torpedos) {
+    auto lamda_execute = [&](vector<ShipSystemWeapons::WeaponTorpedo>& torpedos) {
         for (auto& ptr : torpedos) {
             auto& weapon = *ptr.torpedo;
             for (auto& enemy : m_Sensors.getEnemyShips()) {
                 auto& enemyShip = *enemy.ship;
                 const auto res = lamda(enemyShip, weapon);
-                if (res)
+                if (res) {
                     return;
+                }
             }
             for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
                 auto& enemyShip = *enemy.ship;
                 const auto res = lamda(enemyShip, weapon);
-                if (res)
+                if (res) {
                     return;
+                }
             }
         }
     };

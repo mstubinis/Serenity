@@ -18,10 +18,12 @@
 #include "../../ai/AI.h"
 #include "../Ships.h"
 
+constexpr auto CLASS = "Norway";
+
 using namespace std;
 
 Norway::Norway(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client, "Norway", map, ai_type, name, position, scale, collisionType) {
+:Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -44,8 +46,8 @@ Norway::Norway(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
 
-    if (Ships::Database["Norway"].HullImpactPoints.size() == 0) {
-        Ships::Database["Norway"].HullImpactPoints = {
+    if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
+        Ships::Database[CLASS].HullImpactPoints = {
             glm::vec3(0.0f, 0.0f, -1.58693f),
             glm::vec3(0,-0.12653f, -1.68783f),
             glm::vec3(0,-0.086775f, -1.39145f),

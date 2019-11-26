@@ -20,10 +20,12 @@
 #include "../../ai/AI.h"
 #include "../Ships.h"
 
+constexpr auto CLASS = "Shrike";
+
 using namespace std;
 
 Shrike::Shrike(AIType::Type& ai_type, Team& team, Client& client, Map& map,  const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client, "Shrike", map, ai_type, name, position, scale, collisionType) {
+:Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -68,8 +70,8 @@ Shrike::Shrike(AIType::Type& ai_type, Team& team, Client& client, Map& map,  con
     weapons.addPrimaryWeaponBeam(*frontBeam, true);
 
 
-    if (Ships::Database["Shrike"].HullImpactPoints.size() == 0) {
-        Ships::Database["Shrike"].HullImpactPoints = {
+    if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
+        Ships::Database[CLASS].HullImpactPoints = {
             glm::vec3(0,0, -1.01683f),
             glm::vec3(0,0, -0.695241f),
             glm::vec3(0,0, -0.40262f),

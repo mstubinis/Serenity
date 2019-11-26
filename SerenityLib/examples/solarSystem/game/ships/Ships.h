@@ -29,6 +29,7 @@ struct ShipInformation final {
     Handle                         IconBorderTextureHandle;
     double                         RespawnTime;
     float                          ThreatModifier;
+    bool                           PrintClassNameOnHUD;
     std::vector<glm::vec3>         HullImpactPoints;
 
     ShipInformation();
@@ -44,7 +45,7 @@ class Ships final{
 
         static const FactionInformation& getFactionInformation(const std::string& shipClass);
 
-        static void createShipEntry(const std::string& shipClass, const FactionEnum::Type& faction, const double respawnTime, const float threatModifier);
+        static void createShipEntry(const std::string& shipClass, const FactionEnum::Type& faction, const double respawnTime, const float threatModifier, const bool printClassNameOnHUD = true);
 
         static void init();
 };

@@ -14,8 +14,7 @@ class FedDefPlatform final : public Ship {
             Map& map,
             const std::string& name = "Federation Defense Platform",     //Name
             glm::vec3 = glm::vec3(0),             //Position
-            glm::vec3 = glm::vec3(1),             //Scale
-            CollisionType::Type = CollisionType::ConvexHull
+            glm::vec3 = glm::vec3(1)             //Scale
         );
         ~FedDefPlatform();
 };

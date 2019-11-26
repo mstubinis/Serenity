@@ -26,11 +26,13 @@
 #include "../../ai/AI.h"
 #include "../Ships.h"
 
+constexpr auto CLASS = "B'rel";
+
 using namespace std;
 using namespace Engine;
 
 Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client, "B'rel", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f,0.7f,0.7f)) {
+:Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f,0.7f,0.7f)) {
 
     m_InitialCamera = glm::vec3(0.0f, 0.7f, 0.7f);
     const auto className = getClass();
@@ -117,8 +119,8 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
     foldWingsUp();
     updateWingSpan(100000.0f, BrelWingSpanState::State::Up, 1);
 
-    if (Ships::Database["B'rel"].HullImpactPoints.size() == 0) {
-        Ships::Database["B'rel"].HullImpactPoints = {
+    if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
+        Ships::Database[CLASS].HullImpactPoints = {
             glm::vec3(0.0f, 0.311455f, 0.397761f),
             glm::vec3(0, 0.196357f, -0.839703f),
             glm::vec3(0, 0.196357f, -0.652894f),

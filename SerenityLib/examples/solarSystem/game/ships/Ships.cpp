@@ -34,7 +34,7 @@ const FactionInformation& Ships::getFactionInformation(const string& shipClass) 
     return Database[shipClass].FactionInformation;
 }
 
-void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& faction, const double respawnTime, const float threatModifier) {
+void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& faction, const double respawnTime, const float threatModifier, const bool printClassNameOnHUD) {
     if (Database.count(shipClass))
         return;
 
@@ -45,6 +45,7 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
     info.FactionInformation     = Factions::Database[faction];
     info.RespawnTime            = respawnTime;
     info.ThreatModifier         = threatModifier;
+    info.PrintClassNameOnHUD    = printClassNameOnHUD;
 
     auto ship_class_lower = boost::algorithm::to_lower_copy(shipClass);
     boost::replace_all(ship_class_lower, "'", "");
@@ -151,7 +152,7 @@ void Ships::init() {
     //createShipEntry("Nebula",         FactionEnum::Federation,   30,   1.25f);
     createShipEntry("Sovereign",        FactionEnum::Federation,   30,   1.35f);
     //createShipEntry("Liberty",        FactionEnum::Federation,   40,   1.5f);
-    createShipEntry("Federation Defense Platform", FactionEnum::Federation,   0,    1.0f);
+    createShipEntry("Federation Defense Platform", FactionEnum::Federation,   60,    1.0f, false);
 
     createShipEntry("B'rel",            FactionEnum::Klingon,      6,    1.0f);
     createShipEntry("Vor'cha",          FactionEnum::Klingon,      20,   1.2f);

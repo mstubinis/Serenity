@@ -190,6 +190,8 @@ void ShipStatusDisplay::render() {
     const auto centerHullIcon = bottomLeftCorner + glm::vec2((m_Size.y / 2.0f) - (27.0f / 2.0f));
     if (m_TargetAsShip) {
         renderShipHullStatus(bottomLeftCorner);
+        auto& data = Ships::Database[m_TargetAsShip->getClass()];
+        auto& target_name = m_TargetAsShip->getName();
         auto* shields_ptr = static_cast<ShipSystemShields*>(m_TargetAsShip->getShipSystem(ShipSystemType::Shields));
         if (shields_ptr) {
             auto& shields = *shields_ptr;
@@ -233,9 +235,9 @@ void ShipStatusDisplay::render() {
             }
         }
 
-        //finally, render name & ship class
+        //finally, render name & ship class if specified
         Renderer::renderText(
-            m_TargetAsShip->getName() + " - " + m_TargetAsShip->getClass(),
+            (data.PrintClassNameOnHUD) ? target_name + " - " + data.Class : target_name,
             m_HUD.getFont(),
             bottomLeftCorner + glm::vec2(m_Size.x / 2, m_Size.y - 4),
             m_Color, 

@@ -19,10 +19,12 @@
 #include "../../ai/AI.h"
 #include "../Ships.h"
 
+constexpr auto CLASS = "Vor'cha";
+
 using namespace std;
 
 Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client, "Vor'cha", map, ai_type, name, position, scale, collisionType) {
+:Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -112,8 +114,8 @@ Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
     weapons.addPrimaryWeaponCannon(*dorsal_dis_cannon);
     weapons.addPrimaryWeaponCannon(*ventral_dis_cannon);
 
-    if (Ships::Database["Vor'cha"].HullImpactPoints.size() == 0) {
-        Ships::Database["Vor'cha"].HullImpactPoints = {
+    if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
+        Ships::Database[CLASS].HullImpactPoints = {
             glm::vec3(0,0.07566f, -2.00476f),
             glm::vec3(0,0.07566f, -1.62338f),
             glm::vec3(0,0.07566f, -1.38325f),

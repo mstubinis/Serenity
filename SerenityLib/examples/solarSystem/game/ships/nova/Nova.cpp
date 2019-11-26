@@ -18,10 +18,12 @@
 #include "../../ai/AI.h"
 #include "../Ships.h"
 
+constexpr auto CLASS = "Nova";
+
 using namespace std;
 
 Nova::Nova(AIType::Type& ai_type, Team& team, Client& client, Map& map,  const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client,"Nova", map, ai_type, name, position, scale, collisionType) {
+:Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -174,8 +176,8 @@ Nova::Nova(AIType::Type& ai_type, Team& team, Client& client, Map& map,  const s
     weapons.addPrimaryWeaponBeam(*topLeftAftAftBeam);
     weapons.addPrimaryWeaponBeam(*topRightAftAftBeam);
 
-    if (Ships::Database["Nova"].HullImpactPoints.size() == 0) {
-        Ships::Database["Nova"].HullImpactPoints = {
+    if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
+        Ships::Database[CLASS].HullImpactPoints = {
             glm::vec3(0.0f, -0.136252f, -0.420117f),
             glm::vec3(0,-0.037148f, -1.59167f),
             glm::vec3(0,-0.00876f, -1.32041f),

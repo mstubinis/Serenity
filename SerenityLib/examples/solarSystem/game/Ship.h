@@ -128,6 +128,7 @@ class Ship: public EntityWrapper, public EventObserver {
         double                                         m_RespawnTimerMax;
         float                                          m_OfflineGlowFactor;
         float                                          m_OfflineGlowFactorTimer;
+        float                                          m_VisualMass; //to differentiate between physics mass, for hull collisions
 
         Team&                                          m_Team;
         std::unordered_map<unsigned int,ShipSystem*>   m_ShipSystems;

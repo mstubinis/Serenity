@@ -18,10 +18,12 @@
 #include "../../ai/AI.h"
 #include "../Ships.h"
 
+constexpr auto CLASS = "Excelsior";
+
 using namespace std;
 
 Excelsior::Excelsior(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client,"Excelsior", map, ai_type, name, position, scale, collisionType) {
+:Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -159,8 +161,8 @@ Excelsior::Excelsior(AIType::Type& ai_type, Team& team, Client& client, Map& map
     weapons.addPrimaryWeaponBeam(*topRight2LeftPhaser);
     weapons.addPrimaryWeaponBeam(*topRight2RightPhaser);
 
-    if (Ships::Database["Excelsior"].HullImpactPoints.size() == 0) {
-        Ships::Database["Excelsior"].HullImpactPoints = {
+    if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
+        Ships::Database[CLASS].HullImpactPoints = {
             glm::vec3(0.0f, -0.306522f, -0.368403f),
         };
     }

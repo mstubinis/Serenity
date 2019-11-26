@@ -23,6 +23,7 @@
 #include <core/engine/textures/Texture.h>
 
 #include <core/engine/utils/Engine_Debugging.h>
+#include <core/engine/physics/Collision.h>
 
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
@@ -244,8 +245,8 @@ struct HullCollisionFunctor final { void operator()(CollisionCallbackEventData& 
                     auto* ownerHull = static_cast<ShipSystemHull*>(ownerShip->getShipSystem(ShipSystemType::Hull));
                     auto* otherHull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                     if (ownerHull && otherHull) {
-                        const auto ownerMass = data.ownerBody.mass() * 3000.0f;
-                        const auto otherMass = data.otherBody.mass() * 3000.0f;
+                        const auto ownerMass = ownerShip->m_VisualMass * 3000.0f;
+                        const auto otherMass = otherShip->m_VisualMass * 3000.0f;
                         const auto massTotal = ownerMass + otherMass;
 
                         const auto ownerLocal = data.ownerHit - glm::vec3(data.ownerBody.position());
@@ -293,8 +294,9 @@ struct HullCollisionFunctor final { void operator()(CollisionCallbackEventData& 
 
                         ownerShip->m_Client.send(pOut);
 
-                        ownerHull->receiveCollisionVisual(data.normalOnB, ownerLocal, damageRadiusOwner, data.ownerModelInstanceIndex);
-                        otherHull->receiveCollisionVisual(data.normalOnB, otherLocal, damageRadiusOther, data.otherModelInstanceIndex);
+                        //just does not look good
+                        //ownerHull->receiveCollisionVisual(data.normalOnB, ownerLocal, damageRadiusOwner, data.ownerModelInstanceIndex);
+                        //otherHull->receiveCollisionVisual(data.normalOnB, otherLocal, damageRadiusOther, data.otherModelInstanceIndex);
                     }
                 }
             }
@@ -364,6 +366,7 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
     modelComponent.setCustomBindFunctor(ShipModelInstanceBindFunctor());
     modelComponent.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor());
     modelComponent.setUserPointer(this);
+
 
     internal_calculate_ship_destruction_time_max(modelComponent);
 }
@@ -695,16 +698,15 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
     }
 }
 void Ship::internal_update_damage_emitters(const double& dt, Map& map) {
+    auto& shipBody = *getComponent<ComponentBody>();
+    auto& shipModel = *getComponent<ComponentModel>();
+    const auto shipRotation = shipBody.rotation();
+    const auto shipPosition = shipBody.position();
     for (auto& ptr : m_EmittersDestruction) {
-
         auto& emitter    = *std::get<0>(ptr);
         auto& modelIndex =  std::get<1>(ptr);
         auto& initialPos =  std::get<2>(ptr);
         auto& initialRot =  std::get<3>(ptr);
-
-        auto& shipBody = *getComponent<ComponentBody>();
-        auto& shipModel = *getComponent<ComponentModel>();
-        const auto shipRotation = shipBody.rotation();
 
         if (modelIndex > 0) {
             auto& instance = shipModel.getModel(modelIndex);
@@ -713,11 +715,11 @@ void Ship::internal_update_damage_emitters(const double& dt, Map& map) {
             auto part1 = Math::rotate_vec3(instanceRot, initialPos);
             glm_vec3 localPos = instancePos + part1;
 
-            emitter.setPosition(shipBody.position() + (shipRotation * localPos));
+            emitter.setPosition(shipPosition + (shipRotation * localPos));
             emitter.setRotation(shipRotation * (glm_quat(instanceRot) * initialRot));
 
         }else{
-            emitter.setPosition(shipBody.position() + (shipRotation * initialPos));
+            emitter.setPosition(shipPosition + (shipRotation * initialPos));
             emitter.setRotation(shipRotation * initialRot);
         }
     }
@@ -727,6 +729,7 @@ void Ship::internal_update_decals(const double& dt, Map& map) {
     auto& shipBody = *getComponent<ComponentBody>();
     auto& shipModel = *getComponent<ComponentModel>();
     const auto shipRotation = shipBody.rotation();
+    const auto shipPosition = shipBody.position();
     for (auto& tuple : m_DamageDecals) {
         auto* decal_ptr = std::get<0>(tuple);
         auto& decal = *decal_ptr;
@@ -739,10 +742,10 @@ void Ship::internal_update_decals(const double& dt, Map& map) {
             auto part1 = Math::rotate_vec3(instanceRot, decal.initialPosition());
             glm_vec3 localPos = instancePos + part1;
 
-            decal.setPosition(shipBody.position() + (shipRotation * localPos));
+            decal.setPosition(shipPosition + (shipRotation * localPos));
             decal.setRotation(shipRotation * (glm_quat(instanceRot) * decal.initialRotation()));     
         }else {
-            decal.setPosition(shipBody.position() + (shipRotation * decal.initialPosition()));
+            decal.setPosition(shipPosition + (shipRotation * decal.initialPosition()));
             decal.setRotation(shipRotation * decal.initialRotation());
         }
         decal.update(dt);
@@ -1164,9 +1167,19 @@ void Ship::setModel(Handle& modelHandle) {
     auto& rigidBodyComponent = *getComponent<ComponentBody>();
     auto& modelComponent     = *getComponent<ComponentModel>();
     modelComponent.setModelMesh(modelHandle, 0);
-    const auto& boundingBox = modelComponent.boundingBox();
-    const auto volume = boundingBox.x * boundingBox.y * boundingBox.z;
-    rigidBodyComponent.setMass((volume * 0.4f) + 1.0f);
+    const auto& boundingBox  = modelComponent.boundingBox();
+    const auto volume        = boundingBox.x * boundingBox.y * boundingBox.z;
+
+    const auto mass_ = (volume * 0.4f) + 1.0f;
+    rigidBodyComponent.setMass(mass_);
+    m_VisualMass = mass_;
+    if (rigidBodyComponent.getCollision()->getType() == CollisionType::TriangleShapeStatic) {
+        rigidBodyComponent.setMass(0.0f);
+        rigidBodyComponent.setDynamic(false);
+    }else{
+        rigidBodyComponent.setMass(mass_);
+        rigidBodyComponent.setDynamic(true);
+    }
 }
 void Ship::translateWarp(const double& amount, const double& dt){
     const auto amountToAdd = amount * (1.0 / 0.5);
@@ -1331,8 +1344,8 @@ void Ship::update(const double& dt) {
         //setState(ShipState::UndergoingDestruction);
 
 
-        //auto& map = static_cast<Map&>(entity().scene());
-        //auto& team = *m_Client.getGameplayMode()->getTeams().at(TeamNumber::Team_2);
-        //map.createShip(AIType::AI_Stationary, team, m_Client, "Federation Defense Platform", "Def " + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -20.0));
+        auto& map = static_cast<Map&>(entity().scene());
+        auto& team = *m_Client.getGameplayMode()->getTeams().at(TeamNumber::Team_2);
+        map.createShip(AIType::AI_Stationary, team, m_Client, "Federation Defense Platform", "Defense Platform " + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -20.0));
     }
 }

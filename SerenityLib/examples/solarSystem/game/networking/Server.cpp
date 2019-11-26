@@ -588,7 +588,7 @@ void Server::updateClient(ServerClient& client) {
                     auto& map = *static_cast<Map*>(Resources::getScene(server.m_MapName));
                     auto list = Helper::SeparateStringByCharacter(pI.data, ',');
                     if (map.hasShipPlayer(pI.name)) {
-                        //this is a player ship, give it permission to respawn
+                        //this is a player ship, give it permission to respawn, currently NPC's do not respawn
                         server.m_RespawningShips.processShip(pI.name, list[0], map.getClosestSpawnAnchor());
                     }
                     break;

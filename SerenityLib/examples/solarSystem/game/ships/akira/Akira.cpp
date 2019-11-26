@@ -18,10 +18,12 @@
 #include "../../ai/AI.h"
 #include "../Ships.h"
 
+constexpr auto CLASS = "Akira";
+
 using namespace std;
 
 Akira::Akira(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client,"Akira", map, ai_type, name, position, scale, collisionType) {
+:Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -154,8 +156,8 @@ Akira::Akira(AIType::Type& ai_type, Team& team, Client& client, Map& map, const 
     weapons.addPrimaryWeaponBeam(*btm_front_left_beam, true);
 
 
-    if (Ships::Database["Akira"].HullImpactPoints.size() == 0) {
-        Ships::Database["Akira"].HullImpactPoints = {
+    if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
+        Ships::Database[CLASS].HullImpactPoints = {
             glm::vec3(0.0f, 0.0f, -1.58693f),
             glm::vec3(-0.613995f, 0.027912f, -1.6191f),
             glm::vec3(0.613995f, 0.027912f, -1.6191f),

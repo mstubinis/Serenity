@@ -43,6 +43,7 @@
 
 #include "../particles/Fire.h"
 #include "../particles/Sparks.h"
+#include <core/engine/physics/Collision.h>
 
 #include <iostream>
 
@@ -392,10 +393,14 @@ void Client::on_receive_collision_event(Packet* basePacket, Map& map) {
         Math::Float32From16(&lv2.y, pI.ly2);
         Math::Float32From16(&lv2.z, pI.lz2);
 
-        body1.setLinearVelocity(lv1);
-        body1.setAngularVelocity(av1);
-        body2.setLinearVelocity(lv2);
-        body2.setAngularVelocity(av2);
+        if (body1.getCollision()->getType() != CollisionType::TriangleShapeStatic) {
+            body1.setLinearVelocity(lv1);
+            body1.setAngularVelocity(av1);
+        }
+        if (body2.getCollision()->getType() != CollisionType::TriangleShapeStatic) {
+            body2.setLinearVelocity(lv2);
+            body2.setAngularVelocity(av2);
+        }
     }
 }
 

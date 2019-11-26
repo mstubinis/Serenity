@@ -12,6 +12,10 @@ class Map;
 class ShipSystemSensors;
 class ShipSystemWeapons;
 class GunneryBaseClass {
+    private:
+        void internal_execute_beams(const double& dt);
+        void internal_execute_cannons(const double& dt);
+        void internal_execute_torpedos(const double& dt);
     protected:
         double m_BeamTimer;
         double m_CannonTimer;
