@@ -16,11 +16,12 @@
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
 #include "../../ai/AI.h"
+#include "../Ships.h"
 
 using namespace std;
 
 Excelsior::Excelsior(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client,"Excelsior", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, -0.306522f, -0.368403f)) {
+:Ship(team,client,"Excelsior", map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -157,6 +158,12 @@ Excelsior::Excelsior(AIType::Type& ai_type, Team& team, Client& client, Map& map
     weapons.addPrimaryWeaponBeam(*btmRightRightPhaser);
     weapons.addPrimaryWeaponBeam(*topRight2LeftPhaser);
     weapons.addPrimaryWeaponBeam(*topRight2RightPhaser);
+
+    if (Ships::Database["Excelsior"].HullImpactPoints.size() == 0) {
+        Ships::Database["Excelsior"].HullImpactPoints = {
+            glm::vec3(0.0f, -0.306522f, -0.368403f),
+        };
+    }
 
     m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
     m_AI->installThreatTable(map);

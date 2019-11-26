@@ -16,11 +16,12 @@
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
 #include "../../ai/AI.h"
+#include "../Ships.h"
 
 using namespace std;
 
 Miranda::Miranda(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client, "Miranda", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.128851f, -0.125263f), glm::vec3(0.0f, 0.1f, 0.1f)) {
+:Ship(team,client, "Miranda", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.1f, 0.1f)) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -127,6 +128,13 @@ Miranda::Miranda(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
     weapons.addPrimaryWeaponBeam(*btm_left_beam_right);
     weapons.addPrimaryWeaponBeam(*btm_right_beam_left);
     weapons.addPrimaryWeaponBeam(*btm_right_beam_right);
+
+    if (Ships::Database["Miranda"].HullImpactPoints.size() == 0) {
+        Ships::Database["Miranda"].HullImpactPoints = {
+            glm::vec3(0.0f, 0.128851f, -0.125263f),
+        };
+    }
+
 
     m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
     m_AI->installThreatTable(map);

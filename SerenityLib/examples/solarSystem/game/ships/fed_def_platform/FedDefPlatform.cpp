@@ -18,6 +18,7 @@
 #include "../../ships/shipSystems/ShipSystemHull.h"
 #include "../../ai/AI.h"
 #include "../../ai/AIStationaryNPC.h"
+#include "../Ships.h"
 
 #include <iostream>
 

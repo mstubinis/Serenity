@@ -16,11 +16,12 @@
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
 #include "../../ai/AI.h"
+#include "../Ships.h"
 
 using namespace std;
 
 Nova::Nova(AIType::Type& ai_type, Team& team, Client& client, Map& map,  const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client,"Nova", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, -0.136252f, -0.420117f)) {
+:Ship(team,client,"Nova", map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -173,35 +174,37 @@ Nova::Nova(AIType::Type& ai_type, Team& team, Client& client, Map& map,  const s
     weapons.addPrimaryWeaponBeam(*topLeftAftAftBeam);
     weapons.addPrimaryWeaponBeam(*topRightAftAftBeam);
 
-    vector<glm::vec3> hull_target_points = {
-        glm::vec3(0,-0.037148f, -1.59167f),
-        glm::vec3(0,-0.00876f, -1.32041f),
-        glm::vec3(0,-0.00876f, -1.08877f),
-        glm::vec3(0,-0.00876f, -0.795511f),
-        glm::vec3(0,-0.067915f, -0.546877f),
-        glm::vec3(0,-0.158947f, -0.227487f),
-        glm::vec3(0,-0.158947f, 0.108439f),
-        glm::vec3(0,-0.1116f, 0.439613f),
-        glm::vec3(0.377811f,-0.024278f, 0.377212f),
-        glm::vec3(-0.377811f,-0.024278f, 0.377212f),
-        glm::vec3(0.690702f,0.136448f, 0.188719f),
-        glm::vec3(-0.690702f,0.136448f, 0.188719f),
-        glm::vec3(0.690702f,0.136448f,0.64893f),
-        glm::vec3(-0.690702f,0.136448f, 0.64893f),
-        glm::vec3(0.690702f,0.136448f,1.19759f),
-        glm::vec3(-0.690702f,0.136448f, 1.19759f),
-        glm::vec3(0.411738f,-0.04425f,-0.963249f),
-        glm::vec3(-0.411738f,-0.04425f, -0.963249f),
-        glm::vec3(0.342042f,-0.028517f,-1.33733f),
-        glm::vec3(-0.342042f,-0.028517f, -1.33733f),
-        glm::vec3(0.248232f,-0.033119f,-0.563544f),
-        glm::vec3(-0.248232f,-0.033119f, -0.563544f),
-        glm::vec3(0.160302f,-0.196626f,-0.143006f),
-        glm::vec3(-0.160302f,-0.196626f, -0.143006f),
-        glm::vec3(0.151609f,-0.271522f,-0.629339f),
-        glm::vec3(-0.151609f,-0.271522f, -0.629339f),
-    };
-    addHullTargetPoints(hull_target_points);
+    if (Ships::Database["Nova"].HullImpactPoints.size() == 0) {
+        Ships::Database["Nova"].HullImpactPoints = {
+            glm::vec3(0.0f, -0.136252f, -0.420117f),
+            glm::vec3(0,-0.037148f, -1.59167f),
+            glm::vec3(0,-0.00876f, -1.32041f),
+            glm::vec3(0,-0.00876f, -1.08877f),
+            glm::vec3(0,-0.00876f, -0.795511f),
+            glm::vec3(0,-0.067915f, -0.546877f),
+            glm::vec3(0,-0.158947f, -0.227487f),
+            glm::vec3(0,-0.158947f, 0.108439f),
+            glm::vec3(0,-0.1116f, 0.439613f),
+            glm::vec3(0.377811f,-0.024278f, 0.377212f),
+            glm::vec3(-0.377811f,-0.024278f, 0.377212f),
+            glm::vec3(0.690702f,0.136448f, 0.188719f),
+            glm::vec3(-0.690702f,0.136448f, 0.188719f),
+            glm::vec3(0.690702f,0.136448f,0.64893f),
+            glm::vec3(-0.690702f,0.136448f, 0.64893f),
+            glm::vec3(0.690702f,0.136448f,1.19759f),
+            glm::vec3(-0.690702f,0.136448f, 1.19759f),
+            glm::vec3(0.411738f,-0.04425f,-0.963249f),
+            glm::vec3(-0.411738f,-0.04425f, -0.963249f),
+            glm::vec3(0.342042f,-0.028517f,-1.33733f),
+            glm::vec3(-0.342042f,-0.028517f, -1.33733f),
+            glm::vec3(0.248232f,-0.033119f,-0.563544f),
+            glm::vec3(-0.248232f,-0.033119f, -0.563544f),
+            glm::vec3(0.160302f,-0.196626f,-0.143006f),
+            glm::vec3(-0.160302f,-0.196626f, -0.143006f),
+            glm::vec3(0.151609f,-0.271522f,-0.629339f),
+            glm::vec3(-0.151609f,-0.271522f, -0.629339f),
+        };
+    }
 
     m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
     m_AI->installThreatTable(map);

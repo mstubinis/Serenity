@@ -16,11 +16,12 @@
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
 #include "../../ai/AI.h"
+#include "../Ships.h"
 
 using namespace std;
 
 Norway::Norway(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client, "Norway", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.0f, -1.58693f)) {
+:Ship(team,client, "Norway", map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -43,36 +44,37 @@ Norway::Norway(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
 
-
-    vector<glm::vec3> hull_target_points = {
-        glm::vec3(0,-0.12653f, -1.68783f),
-        glm::vec3(0,-0.086775f, -1.39145f),
-        glm::vec3(0,-0.043406f, -1.04447f),
-        glm::vec3(0,0.010806f, -0.733638f),
-        glm::vec3(0,0.010806f, -0.477052f),
-        glm::vec3(0,0.061423f, -0.148036f),
-        glm::vec3(-0.943021f,-0.01354f,0.295371f),
-        glm::vec3(0.943021f,-0.01354f, 0.295371f),
-        glm::vec3(-0.943021f,-0.01354f,0.797967f),
-        glm::vec3(0.943021f,-0.01354f, 0.797967f),
-        glm::vec3(-0.943021f,-0.01354f,1.3579f),
-        glm::vec3(0.943021f,-0.01354f, 1.3579f),
-        glm::vec3(-0.74871f,0.058747f,1.14439f),
-        glm::vec3(0.74871f,0.058747f, 1.14439f),
-        glm::vec3(-0.432982f,0.142455f,0.865092f),
-        glm::vec3(0.432982f,0.142455f, 0.865092f),
-        glm::vec3(-0.432982f,0.142455f,1.271f),
-        glm::vec3(0.432982f,0.142455f, 1.271f),
-        glm::vec3(-0.645729f,-0.117819f,-0.682427f),
-        glm::vec3(0.645729f,-0.117819f, -0.682427f),
-        glm::vec3(-0.467915f,-0.117819f,-0.986012f),
-        glm::vec3(0.467915f,-0.117819f, -0.986012f),
-        glm::vec3(-0.318995f,-0.117819f,-1.37057f),
-        glm::vec3(0.318995f,-0.117819f, -1.37057f),
-        glm::vec3(-0.181716f,-0.013666f,-0.943106f),
-        glm::vec3(0.181716f,-0.013666f, -0.943106f),
-    };
-    addHullTargetPoints(hull_target_points);
+    if (Ships::Database["Norway"].HullImpactPoints.size() == 0) {
+        Ships::Database["Norway"].HullImpactPoints = {
+            glm::vec3(0.0f, 0.0f, -1.58693f),
+            glm::vec3(0,-0.12653f, -1.68783f),
+            glm::vec3(0,-0.086775f, -1.39145f),
+            glm::vec3(0,-0.043406f, -1.04447f),
+            glm::vec3(0,0.010806f, -0.733638f),
+            glm::vec3(0,0.010806f, -0.477052f),
+            glm::vec3(0,0.061423f, -0.148036f),
+            glm::vec3(-0.943021f,-0.01354f,0.295371f),
+            glm::vec3(0.943021f,-0.01354f, 0.295371f),
+            glm::vec3(-0.943021f,-0.01354f,0.797967f),
+            glm::vec3(0.943021f,-0.01354f, 0.797967f),
+            glm::vec3(-0.943021f,-0.01354f,1.3579f),
+            glm::vec3(0.943021f,-0.01354f, 1.3579f),
+            glm::vec3(-0.74871f,0.058747f,1.14439f),
+            glm::vec3(0.74871f,0.058747f, 1.14439f),
+            glm::vec3(-0.432982f,0.142455f,0.865092f),
+            glm::vec3(0.432982f,0.142455f, 0.865092f),
+            glm::vec3(-0.432982f,0.142455f,1.271f),
+            glm::vec3(0.432982f,0.142455f, 1.271f),
+            glm::vec3(-0.645729f,-0.117819f,-0.682427f),
+            glm::vec3(0.645729f,-0.117819f, -0.682427f),
+            glm::vec3(-0.467915f,-0.117819f,-0.986012f),
+            glm::vec3(0.467915f,-0.117819f, -0.986012f),
+            glm::vec3(-0.318995f,-0.117819f,-1.37057f),
+            glm::vec3(0.318995f,-0.117819f, -1.37057f),
+            glm::vec3(-0.181716f,-0.013666f,-0.943106f),
+            glm::vec3(0.181716f,-0.013666f, -0.943106f),
+        };
+    }
 
     m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
     m_AI->installThreatTable(map);

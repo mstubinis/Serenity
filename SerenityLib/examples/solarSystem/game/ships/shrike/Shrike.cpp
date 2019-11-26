@@ -18,6 +18,7 @@
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
 #include "../../ai/AI.h"
+#include "../Ships.h"
 
 using namespace std;
 
@@ -67,37 +68,38 @@ Shrike::Shrike(AIType::Type& ai_type, Team& team, Client& client, Map& map,  con
     weapons.addPrimaryWeaponBeam(*frontBeam, true);
 
 
-    vector<glm::vec3> hull_target_points = {
-        glm::vec3(0,0, -1.01683f),
-        glm::vec3(0,0, -0.695241f),
-        glm::vec3(0,0, -0.40262f),
-        glm::vec3(0,0, -0.015259f),
-        glm::vec3(0,0, 0.290298f),
-        glm::vec3(0,0, 0.56271f),
-        glm::vec3(0,0, 0.859813f),
-        glm::vec3(-1.15097f,-0.039035f, -0.344808f),
-        glm::vec3(1.15097f,-0.039035f, -0.344808f),
-        glm::vec3(-1.15097f,-0.039035f, 0.125788f),
-        glm::vec3(1.15097f,-0.039035f, 0.125788f),
-        glm::vec3(-1.15097f,-0.039035f, 0.525935f),
-        glm::vec3(1.15097f,-0.039035f, 0.525935),
-        glm::vec3(-0.892489f,0.028702f, 0.17479f),
-        glm::vec3(0.892489f,0.028702f, 0.17479f),
-        glm::vec3(-0.576472f,0.045644f, 0.17479f),
-        glm::vec3(0.576472f,0.045644f, 0.17479f),
-        glm::vec3(-0.212936f,0.03548f, 0.17479f),
-        glm::vec3(0.212936f,0.03548f, 0.17479f),
-        glm::vec3(-0.306575f,0.047673f, -0.387041f),
-        glm::vec3(0.306575f,0.047673f, -0.387041f),
-        glm::vec3(-0.532802f,0.048486f, -0.098031f),
-        glm::vec3(0.532802f,0.048486f, -0.098031f),
-        glm::vec3(-0.459521f,0.040023f, 0.410263f),
-        glm::vec3(0.459521f,0.040023f, 0.410263f),
-        glm::vec3(-0.223905f,0.025798f, 0.709812f),
-        glm::vec3(0.223905f,0.025798f, 0.709812f),
-        glm::vec3(0.0f,-0.091898f, -1.19035f),
-    };
-    addHullTargetPoints(hull_target_points);
+    if (Ships::Database["Shrike"].HullImpactPoints.size() == 0) {
+        Ships::Database["Shrike"].HullImpactPoints = {
+            glm::vec3(0,0, -1.01683f),
+            glm::vec3(0,0, -0.695241f),
+            glm::vec3(0,0, -0.40262f),
+            glm::vec3(0,0, -0.015259f),
+            glm::vec3(0,0, 0.290298f),
+            glm::vec3(0,0, 0.56271f),
+            glm::vec3(0,0, 0.859813f),
+            glm::vec3(-1.15097f,-0.039035f, -0.344808f),
+            glm::vec3(1.15097f,-0.039035f, -0.344808f),
+            glm::vec3(-1.15097f,-0.039035f, 0.125788f),
+            glm::vec3(1.15097f,-0.039035f, 0.125788f),
+            glm::vec3(-1.15097f,-0.039035f, 0.525935f),
+            glm::vec3(1.15097f,-0.039035f, 0.525935),
+            glm::vec3(-0.892489f,0.028702f, 0.17479f),
+            glm::vec3(0.892489f,0.028702f, 0.17479f),
+            glm::vec3(-0.576472f,0.045644f, 0.17479f),
+            glm::vec3(0.576472f,0.045644f, 0.17479f),
+            glm::vec3(-0.212936f,0.03548f, 0.17479f),
+            glm::vec3(0.212936f,0.03548f, 0.17479f),
+            glm::vec3(-0.306575f,0.047673f, -0.387041f),
+            glm::vec3(0.306575f,0.047673f, -0.387041f),
+            glm::vec3(-0.532802f,0.048486f, -0.098031f),
+            glm::vec3(0.532802f,0.048486f, -0.098031f),
+            glm::vec3(-0.459521f,0.040023f, 0.410263f),
+            glm::vec3(0.459521f,0.040023f, 0.410263f),
+            glm::vec3(-0.223905f,0.025798f, 0.709812f),
+            glm::vec3(0.223905f,0.025798f, 0.709812f),
+            glm::vec3(0.0f,-0.091898f, -1.19035f),
+        };
+    }
 
     m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
     m_AI->installThreatTable(map);

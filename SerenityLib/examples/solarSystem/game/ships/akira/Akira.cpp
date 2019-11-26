@@ -16,11 +16,12 @@
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
 #include "../../ai/AI.h"
+#include "../Ships.h"
 
 using namespace std;
 
 Akira::Akira(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client,"Akira", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.0f, -1.58693f)) {
+:Ship(team,client,"Akira", map, ai_type, name, position, scale, collisionType) {
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
@@ -152,21 +153,22 @@ Akira::Akira(AIType::Type& ai_type, Team& team, Client& client, Map& map, const 
     weapons.addPrimaryWeaponBeam(*btm_left_left_beam, true);
     weapons.addPrimaryWeaponBeam(*btm_front_left_beam, true);
 
-    //TODO: fill this info for the rest of the ships
-    //random hull target points
-    vector<glm::vec3> hull_target_points = {
-        glm::vec3(-0.613995f, 0.027912f, -1.6191f),
-        glm::vec3(0.613995f, 0.027912f, -1.6191f),
-        glm::vec3(-0.38463f, 0.027912f, -2.04564f),
-        glm::vec3(0.38463f, 0.027912f, -2.04564f),
-        glm::vec3(0.0f, 0.000098f, -2.41808f),
-        glm::vec3(-0.535411f, 0.201759f, -0.839661f),
-        glm::vec3(0.535411f, 0.201759f, -0.839661f),
-        glm::vec3(-0.810765f, 0.253006f, 0.720679f),
-        glm::vec3(0.810765f, 0.253006f, 0.720679f),
-        glm::vec3(0.0f, 0.455842f, -0.487045f),
-    };
-    addHullTargetPoints(hull_target_points);
+
+    if (Ships::Database["Akira"].HullImpactPoints.size() == 0) {
+        Ships::Database["Akira"].HullImpactPoints = {
+            glm::vec3(0.0f, 0.0f, -1.58693f),
+            glm::vec3(-0.613995f, 0.027912f, -1.6191f),
+            glm::vec3(0.613995f, 0.027912f, -1.6191f),
+            glm::vec3(-0.38463f, 0.027912f, -2.04564f),
+            glm::vec3(0.38463f, 0.027912f, -2.04564f),
+            glm::vec3(0.0f, 0.000098f, -2.41808f),
+            glm::vec3(-0.535411f, 0.201759f, -0.839661f),
+            glm::vec3(0.535411f, 0.201759f, -0.839661f),
+            glm::vec3(-0.810765f, 0.253006f, 0.720679f),
+            glm::vec3(0.810765f, 0.253006f, 0.720679f),
+            glm::vec3(0.0f, 0.455842f, -0.487045f),
+        };
+    }
 
     m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
     m_AI->installThreatTable(map);

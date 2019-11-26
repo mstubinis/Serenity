@@ -302,7 +302,7 @@ struct HullCollisionFunctor final { void operator()(CollisionCallbackEventData& 
     }
 }};
 
-Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const AIType::Type ai_type, const string& name, const glm_vec3 pos, const glm_vec3 scl, CollisionType::Type collisionType, const glm::vec3 aimPosDefault, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client),m_Team(team){
+Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const AIType::Type ai_type, const string& name, const glm_vec3 pos, const glm_vec3 scl, CollisionType::Type collisionType, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client),m_Team(team){
     m_WarpFactor              = 0;
     m_State                   = ShipState::Nominal;
     m_DestructionTimerCurrent = 0.0;
@@ -318,7 +318,6 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
     m_PlayerCamera            = nullptr;
     m_MouseFactor             = glm::dvec2(0.0);
     m_CameraOffsetDefault     = camOffsetDefault;
-    m_AimPositionDefaults.push_back(aimPosDefault);
 
     auto& shipInfo            = Ships::Database[shipClass];
     auto& modelComponent      = *addComponent<ComponentModel>(shipInfo.MeshHandles[0], shipInfo.MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
@@ -861,58 +860,58 @@ void Ship::setDamping(const decimal& linear, const decimal& angular) {
     body.setDamping(linear, angular);
 }
 
-void Ship::addHullTargetPoints(vector<glm::vec3>& points) {
-    for (auto& pt : points) {
-        m_AimPositionDefaults.push_back(pt);
-    }
-}
 const glm::vec3 Ship::getAimPositionDefault() {
-    if (m_AimPositionDefaults.size() == 0) {
+    auto& pts = Ships::Database[m_ShipClass].HullImpactPoints;
+    if (pts.size() == 0) {
         return getPosition();
     }
     auto& body = *getComponent<ComponentBody>();
-    return body.position() + Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
+    return body.position() + Math::rotate_vec3(body.rotation(), pts[0]);
 }
 const glm::vec3 Ship::getAimPositionRandom() {
-    if (m_AimPositionDefaults.size() == 0) {
+    auto& pts = Ships::Database[m_ShipClass].HullImpactPoints;
+    if (Ships::Database[m_ShipClass].HullImpactPoints.size() == 0) {
         return getPosition();
     }
     auto& body = *getComponent<ComponentBody>();
-    if (m_AimPositionDefaults.size() == 1) {
-        return body.position() + Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
+    if (pts.size() == 1) {
+        return body.position() + Math::rotate_vec3(body.rotation(), pts[0]);
     }
-    const auto randIndex = Helper::GetRandomIntFromTo(0, static_cast<int>(m_AimPositionDefaults.size()) - 1);
-    return body.position() + Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[randIndex]);
+    const auto randIndex = Helper::GetRandomIntFromTo(0, static_cast<int>(pts.size()) - 1);
+    return body.position() + Math::rotate_vec3(body.rotation(), pts[randIndex]);
 }
 const glm::vec3 Ship::getAimPositionDefaultLocal() {
-    if (m_AimPositionDefaults.size() == 0) {
+    auto& pts = Ships::Database[m_ShipClass].HullImpactPoints;
+    if (pts.size() == 0) {
         return glm::vec3(0.0f);
     }
     auto& body = *getComponent<ComponentBody>();
-    if (m_AimPositionDefaults.size() == 1) {
-        return Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
+    if (pts.size() == 1) {
+        return Math::rotate_vec3(body.rotation(), pts[0]);
     }
-    return Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
+    return Math::rotate_vec3(body.rotation(), pts[0]);
 }
 const uint Ship::getAimPositionRandomLocalIndex() {
-    if (m_AimPositionDefaults.size() == 1) {
+    auto& pts = Ships::Database[m_ShipClass].HullImpactPoints;
+    if (pts.size() == 1) {
         return 0;
     }
-    const auto randIndex = Helper::GetRandomIntFromTo(0, static_cast<int>(m_AimPositionDefaults.size()) - 1);
+    const auto randIndex = Helper::GetRandomIntFromTo(0, static_cast<int>(pts.size()) - 1);
     return randIndex;
 }
 const glm::vec3 Ship::getAimPositionRandomLocal() {
     return getAimPositionLocal(getAimPositionRandomLocalIndex());
 }
 const glm::vec3 Ship::getAimPositionLocal(const uint index) {
-    if (m_AimPositionDefaults.size() == 0) {
+    auto& pts = Ships::Database[m_ShipClass].HullImpactPoints;
+    if (pts.size() == 0) {
         return glm::vec3(0.0f);
     }
     auto& body = *getComponent<ComponentBody>();
-    if (m_AimPositionDefaults.size() == 1) {
-        return Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[0]);
+    if (pts.size() == 1) {
+        return Math::rotate_vec3(body.rotation(), pts[0]);
     }
-    return Math::rotate_vec3(body.rotation(), m_AimPositionDefaults[index]);
+    return Math::rotate_vec3(body.rotation(), pts[index]);
 }
 void Ship::destroy() {
     for (auto& system : m_ShipSystems) {

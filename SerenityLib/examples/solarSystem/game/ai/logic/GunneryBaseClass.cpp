@@ -5,8 +5,10 @@
 #include "../../map/Map.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemSensors.h"
-#include <core/engine/math/Engine_Math.h>
 #include "../../networking/Packet.h"
+#include "../../ships/Ships.h"
+
+#include <core/engine/math/Engine_Math.h>
 
 #include <algorithm>
 
@@ -55,7 +57,7 @@ void GunneryBaseClass::update(const double& dt) {
                 if (!ship.isDestroyed()) {
                     if (weapon_.isInArc(enemy_ship_pos, weapon_.arc)) {
                         if (dist_to_enemy < weapon_.rangeInKMSquared + static_cast<decimal>(ship.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
-                            auto pts = ship.m_AimPositionDefaults;
+                            auto pts = Ships::Database[ship.getClass()].HullImpactPoints;
                             std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
                             for (unsigned int i = 0; i < pts.size(); ++i) {
                                 offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
@@ -121,7 +123,7 @@ void GunneryBaseClass::update(const double& dt) {
                 if (!ship.isDestroyed()) {
                     if (weapon_.isInArc(enemy_ship_pos, weapon_.arc)) {
                         if (dist_to_enemy < weapon_.rangeInKMSquared + static_cast<decimal>(ship.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
-                            auto pts = ship.m_AimPositionDefaults;
+                            auto pts = Ships::Database[ship.getClass()].HullImpactPoints;
                             std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
                             for (unsigned int i = 0; i < pts.size(); ++i) {
                                 offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
@@ -186,7 +188,7 @@ void GunneryBaseClass::update(const double& dt) {
                 if (!ship.isDestroyed()) {
                     if (weapon_.isInArc(enemy_ship_pos, weapon_.arc)) {
                         if (dist_to_enemy < weapon_.rangeInKMSquared + static_cast<decimal>(ship.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
-                            auto pts = ship.m_AimPositionDefaults;
+                            auto pts = Ships::Database[ship.getClass()].HullImpactPoints;
                             std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
                             for (unsigned int i = 0; i < pts.size(); ++i) {
                                 offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);

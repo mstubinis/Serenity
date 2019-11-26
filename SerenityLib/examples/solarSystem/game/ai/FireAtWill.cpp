@@ -7,6 +7,7 @@
 #include "../Ship.h"
 #include "../networking/Packet.h"
 #include "../networking/Client.h"
+#include "../ships/Ships.h"
 
 #include <algorithm>
 
@@ -44,7 +45,7 @@ void FireAtWill::internal_execute_beams() {
             enemy_ship_rot = enemyShip.getRotation();
             dist_to_enemy = beam.getDistanceSquared(enemy_ship_pos);
             if (dist_to_enemy < beam.rangeInKMSquared + static_cast<decimal>(enemyShip.getComponent<ComponentModel>()->radius()) * static_cast<decimal>(1.1)) {
-                auto pts = enemyShip.m_AimPositionDefaults;
+                auto pts = Ships::Database[enemyShip.getClass()].HullImpactPoints;
                 std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
                 for (unsigned int i = 0; i < pts.size(); ++i) {
                     offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
@@ -111,7 +112,7 @@ void FireAtWill::internal_execute_cannons() {
             enemy_ship_rot = enemyShip.getRotation();
             dist_to_enemy = cannon.getDistanceSquared(enemy_ship_pos);
             if (dist_to_enemy < cannon.rangeInKMSquared) {
-                auto pts = enemyShip.m_AimPositionDefaults;
+                auto pts = Ships::Database[enemyShip.getClass()].HullImpactPoints;
                 std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
                 for (unsigned int i = 0; i < pts.size(); ++i) {
                     offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);
@@ -177,7 +178,7 @@ void FireAtWill::internal_execute_torpedos() {
             enemy_ship_rot = enemyShip.getRotation();
             dist_to_enemy = torpedo.getDistanceSquared(enemy_ship_pos);
             if (dist_to_enemy < torpedo.rangeInKMSquared) {
-                auto pts = enemyShip.m_AimPositionDefaults;
+                auto pts = Ships::Database[enemyShip.getClass()].HullImpactPoints;
                 std::shuffle(pts.begin(), pts.end(), m_RandomDevice);
                 for (unsigned int i = 0; i < pts.size(); ++i) {
                     offset = Math::rotate_vec3(enemy_ship_rot, pts[i]);

@@ -24,12 +24,13 @@
 #include "../../ships/shipSystems/ShipSystemHull.h"
 #include "../../ships/Ships.h"
 #include "../../ai/AI.h"
+#include "../Ships.h"
 
 using namespace std;
 using namespace Engine;
 
 Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client, "B'rel", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.311455f, 0.397761f), glm::vec3(0.0f,0.7f,0.7f)) {
+:Ship(team,client, "B'rel", map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f,0.7f,0.7f)) {
 
     m_InitialCamera = glm::vec3(0.0f, 0.7f, 0.7f);
     const auto className = getClass();
@@ -116,23 +117,25 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
     foldWingsUp();
     updateWingSpan(100000.0f, BrelWingSpanState::State::Up, 1);
 
-    vector<glm::vec3> hull_target_points = {
-        glm::vec3(0, 0.196357f, -0.839703f),
-        glm::vec3(0, 0.196357f, -0.652894f),
-        glm::vec3(0, 0.18686f, -0.523145f),
-        glm::vec3(0, 0.215453f, -0.314285f),
-        glm::vec3(0, 0.288782f, -0.096017f),
-        glm::vec3(0, 0.288782f, 0.136811f),
-        glm::vec3(0, 0.288782f, 0.345834f),
-        glm::vec3(0, 0.288782f, 0.475843f),
-        glm::vec3(0.207882f, 0.416252f, 0.265136f),
-        glm::vec3(-0.207882f, 0.416252f, 0.265136f),
-        glm::vec3(0.1024f, 0.331857f, 0.085601f),
-        glm::vec3(-0.1024f, 0.331857f, 0.085601f),
-        glm::vec3(0.0f, 0.105164f, 0.421337f),
-        glm::vec3(0.0f, 0.158835f, 0.154595f),
-    };
-    addHullTargetPoints(hull_target_points);
+    if (Ships::Database["B'rel"].HullImpactPoints.size() == 0) {
+        Ships::Database["B'rel"].HullImpactPoints = {
+            glm::vec3(0.0f, 0.311455f, 0.397761f),
+            glm::vec3(0, 0.196357f, -0.839703f),
+            glm::vec3(0, 0.196357f, -0.652894f),
+            glm::vec3(0, 0.18686f, -0.523145f),
+            glm::vec3(0, 0.215453f, -0.314285f),
+            glm::vec3(0, 0.288782f, -0.096017f),
+            glm::vec3(0, 0.288782f, 0.136811f),
+            glm::vec3(0, 0.288782f, 0.345834f),
+            glm::vec3(0, 0.288782f, 0.475843f),
+            glm::vec3(0.207882f, 0.416252f, 0.265136f),
+            glm::vec3(-0.207882f, 0.416252f, 0.265136f),
+            glm::vec3(0.1024f, 0.331857f, 0.085601f),
+            glm::vec3(-0.1024f, 0.331857f, 0.085601f),
+            glm::vec3(0.0f, 0.105164f, 0.421337f),
+            glm::vec3(0.0f, 0.158835f, 0.154595f),
+        };
+    }
 
     m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
     m_AI->installThreatTable(map);

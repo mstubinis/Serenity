@@ -20,15 +20,16 @@
 #include <core/engine/resources/Handle.h>
 
 struct ShipInformation final {
-    std::string            Class;
-    FactionEnum::Type      Faction;
-    FactionInformation     FactionInformation;
-    std::vector<Handle>    MeshHandles;
-    std::vector<Handle>    MaterialHandles;
-    Handle                 IconTextureHandle;
-    Handle                 IconBorderTextureHandle;
-    double                 RespawnTime;
-    float                  ThreatModifier;
+    std::string                    Class;
+    FactionEnum::Type              Faction;
+    FactionInformation             FactionInformation;
+    std::vector<Handle>            MeshHandles;
+    std::vector<Handle>            MaterialHandles;
+    Handle                         IconTextureHandle;
+    Handle                         IconBorderTextureHandle;
+    double                         RespawnTime;
+    float                          ThreatModifier;
+    std::vector<glm::vec3>         HullImpactPoints;
 
     ShipInformation();
 };

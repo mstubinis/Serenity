@@ -109,7 +109,6 @@ class Ship: public EntityWrapper, public EventObserver {
         void internal_calculate_ship_destruction_time_max(ComponentModel&);
     public:
         std::vector<std::tuple<ParticleEmitter*, size_t, glm_vec3, glm_quat>>        m_EmittersDestruction;
-        std::vector<glm::vec3>                                                       m_AimPositionDefaults;
         Client&                                                                      m_Client;
     protected:
         void internal_finialize_init(const AIType::Type& type);
@@ -151,7 +150,6 @@ class Ship: public EntityWrapper, public EventObserver {
             const glm_vec3 = glm_vec3(0),         //Position
             const glm_vec3 = glm_vec3(1),         //Scale
             CollisionType::Type = CollisionType::ConvexHull,
-            const glm::vec3 aimPosDefault = glm::vec3(0.0f),
             const glm::vec3 camOffsetDefault = glm::vec3(0.0f)
         );
         virtual ~Ship();
@@ -164,7 +162,6 @@ class Ship: public EntityWrapper, public EventObserver {
 
         void respawn(const glm_vec3& newPosition, const std::string& nearest_spawn_anchor, Map& map);
         const bool setState(const ShipState::State& state);
-        void addHullTargetPoints(std::vector<glm::vec3>& points);
 
         AI* getAI();
         const bool isDestroyed() const;
