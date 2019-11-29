@@ -17,7 +17,9 @@ flat varying vec3 CamPosition;
 flat varying vec3 CamRealPosition;
 varying vec3 TangentCameraPos;
 varying vec3 TangentFragPos;
- 
+
+uniform float uv_scale;
+
 void main(){
     mat4 ModelMatrix = Model;
     ModelMatrix[3][0] -= CameraRealPosition.x;
@@ -40,5 +42,5 @@ void main(){
     TangentCameraPos = TBN * CameraPosition;
     TangentFragPos = TBN * WorldPosition;
 
-    UV = uv;
+    UV = uv * uv_scale;
 }

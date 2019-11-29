@@ -844,7 +844,7 @@ void Ship::internal_update_player_you_logic(const double& dt, Map& map) {
 
 void Ship::internal_calculate_ship_destruction_time_max(ComponentModel& model) {
     auto rad = model.radius();
-    m_DestructionTimerMax = (rad * 5.0) + 2.5;
+    m_DestructionTimerMax = glm::min((rad * 5.0) + 2.5, 60.0);
 }
 
 const string& Ship::getMapKey() const {
@@ -956,12 +956,28 @@ const glm_vec3 Ship::getPosition() {
 const glm_quat Ship::getRotation() {
     return getComponent<ComponentBody>()->rotation();
 }
+const glm_vec3 Ship::getScale() {
+    return getComponent<ComponentBody>()->getScale();
+}
 const glm_vec3 Ship::getPosition(const EntityDataRequest& dataRequest) {
     return getComponent<ComponentBody>(dataRequest)->position();
 }
 const glm_quat Ship::getRotation(const EntityDataRequest& dataRequest) {
     return getComponent<ComponentBody>(dataRequest)->rotation();
 }
+void Ship::setPosition(const decimal& x, const decimal& y, const decimal& z) {
+    return getComponent<ComponentBody>()->setPosition(x, y, z);
+}
+void Ship::setPosition(const glm_vec3& position) {
+    return getComponent<ComponentBody>()->setPosition(position);
+}
+void Ship::setPosition(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& dataRequest) {
+    return getComponent<ComponentBody>(dataRequest)->setPosition(x, y, z);
+}
+void Ship::setPosition(const glm_vec3& position, const EntityDataRequest& dataRequest) {
+    return getComponent<ComponentBody>(dataRequest)->setPosition(position);
+}
+
 void Ship::updateAntiCloakScanFromPacket(const PacketMessage& packet) {
     auto* sensors = static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]);
     if (sensors) {
@@ -1347,5 +1363,13 @@ void Ship::update(const double& dt) {
         auto& map = static_cast<Map&>(entity().scene());
         auto& team = *m_Client.getGameplayMode()->getTeams().at(TeamNumber::Team_2);
         map.createShip(AIType::AI_Stationary, team, m_Client, "Federation Defense Platform", "Defense Platform " + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -20.0));
+    }
+    if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::RightAlt)) {
+        //setState(ShipState::UndergoingDestruction);
+
+
+        auto& map = static_cast<Map&>(entity().scene());
+        auto& team = *m_Client.getGameplayMode()->getTeams().at(TeamNumber::Team_2);
+        map.createShip(AIType::AI_Stationary, team, m_Client, "Federation Starbase Mushroom", "Starbase " + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -200.0));
     }
 }

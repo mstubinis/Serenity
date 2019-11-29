@@ -5,21 +5,17 @@
 #include <core/engine/networking/SocketTCP.h>
 #include <core/engine/networking/SocketUDP.h>
 
+#include "ClientMapSpecificData.h"
+
 #include <thread>
 #include <future>
 
-#define PACKET_HEALTH_UPDATE_FREQUENCY 0.5
-
 struct Packet;
-class  Client;
 class  Server;
 class  Menu;
-class  Map;
 class  Core;
 class  ShipSystemSensors;
 class  SensorStatusDisplay;
-class  GameplayMode;
-class  Team;
 class  FireAtWill;
 class Client{
     friend class  Server;
@@ -29,20 +25,17 @@ class Client{
     friend class  ShipSystemSensors;
     friend class  SensorStatusDisplay;
     friend class  FireAtWill;
+    friend class  ClientMapSpecificData;
     private:
-        GameplayMode*                         m_GameplayMode;
-        Team*                                 m_Team;
+        ClientMapSpecificData                 m_MapSpecificData;
         std::future<sf::Socket::Status>*      m_InitialConnectionThread;
         Engine::Networking::SocketTCP*        m_TcpSocket;
         Engine::Networking::SocketUDP*        m_UdpSocket;
         std::string                           m_Username;
-        std::string                           m_Mapname;
         std::string                           m_ServerIP;
         Core&                                 m_Core;
         bool                                  m_Validated;
         unsigned int                          m_ID;
-        double                                m_PingTime;
-        double                                m_PingTimeHealthUpdate;
         bool                                  m_IsCurrentlyConnecting;
         unsigned short                        m_Port;
 

@@ -37,18 +37,17 @@ unordered_set<TeamNumber::Enum>& Team::getEnemyTeams() {
     return m_EnemyTeams;
 }
 
-const bool Team::isPlayerOnTeam(const string& playerName) const {
-    if (m_TeamPlayers.count(playerName))
+const bool Team::isPlayerOnTeam(const string& playerMapKey) const {
+    if (m_TeamPlayers.count(playerMapKey))
         return true;
     return false;
 }
-const bool Team::addPlayerToTeam(const string& playerName) {
-    if (m_TeamPlayers.count(playerName))
+const bool Team::addPlayerToTeam(const string& playerMapKey) {
+    if (m_TeamPlayers.count(playerMapKey))
         return false;
-    m_TeamPlayers.emplace(playerName);
+    m_TeamPlayers.emplace(playerMapKey);
     return true;
 }
-
 const bool Team::addEnemyTeam(const TeamNumber::Enum& teamNumber) {
     if (teamNumber == m_TeamNumber || m_EnemyTeams.count(teamNumber)) {
         return false;
@@ -65,11 +64,15 @@ const bool Team::addAllyTeam(const TeamNumber::Enum& teamNumber) {
 }
 
 const bool Team::isEnemyTeam(const TeamNumber::Enum& otherTeamNumber) const {
+    if (m_TeamNumber == TeamNumber::Team_FFA || otherTeamNumber == TeamNumber::Team_FFA)
+        return true;
     if (m_TeamNumber == otherTeamNumber)
         return false;
     return (m_EnemyTeams.count(otherTeamNumber)) ? true : false;
 }
 const bool Team::isAllyTeam(const TeamNumber::Enum& otherTeamNumber) const {
+    if (m_TeamNumber == TeamNumber::Team_FFA || otherTeamNumber == TeamNumber::Team_FFA)
+        return false;
     if (m_TeamNumber == otherTeamNumber)
         return true;
     return (m_AllyTeams.count(otherTeamNumber)) ? true : false;
@@ -77,12 +80,7 @@ const bool Team::isAllyTeam(const TeamNumber::Enum& otherTeamNumber) const {
 const bool Team::isNeutralTeam(const TeamNumber::Enum& otherTeamNumber) const {
     return (!isEnemyTeam(otherTeamNumber) && !isAllyTeam(otherTeamNumber)) ? true : false;
 }
-const bool Team::isEnemyTeam(const Team& otherTeam) const {
-    return isEnemyTeam(otherTeam.getTeamNumber());
-}
-const bool Team::isAllyTeam(const Team& otherTeam) const {
-    return isAllyTeam(otherTeam.getTeamNumber());
-}
-const bool Team::isNeutralTeam(const Team& otherTeam) const {
-    return isNeutralTeam(otherTeam.getTeamNumber());
-}
+
+const bool Team::isEnemyTeam(const Team& otherTeam) const { return isEnemyTeam(otherTeam.getTeamNumber()); }
+const bool Team::isAllyTeam(const Team& otherTeam) const { return isAllyTeam(otherTeam.getTeamNumber()); }
+const bool Team::isNeutralTeam(const Team& otherTeam) const { return isNeutralTeam(otherTeam.getTeamNumber()); }

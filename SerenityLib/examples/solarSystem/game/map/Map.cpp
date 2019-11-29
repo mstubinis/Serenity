@@ -2,7 +2,7 @@
 #include "Anchor.h"
 #include "../Core.h"
 #include "../Menu.h"
-#include "../networking/Client.h"
+#include "../networking/client/Client.h"
 #include "../ResourceManifest.h"
 #include "../Planet.h"
 #include "../GameCamera.h"
@@ -44,6 +44,7 @@
 #include "../hud/SensorStatusDisplay.h"
 #include "../hud/ShipStatusDisplay.h"
 
+#include <core/engine/Engine.h>
 #include <iostream>
 
 using namespace Engine;
@@ -97,13 +98,13 @@ SecondaryWeaponTorpedoProjectile* Map::getTorpedoProjectile(const int index) {
 }
 void Map::removeCannonProjectile(const int index) {
     const bool success = m_ActiveCannonProjectiles.delete_data_index(index);
-    if (!success)
-        std::cout << "Error: removeCannonProjectile(const int index)\n";
+    //if (!success)
+    //    std::cout << "Error: removeCannonProjectile(const int index)\n";
 }
 void Map::removeTorpedoProjectile(const int index) {
     const bool success = m_ActiveTorpedoProjectiles.delete_data_index(index);
-    if (!success)
-        std::cout << "Error: removeTorpedoProjectile(const int index)\n";
+    //if (!success)
+    //    std::cout << "Error: removeTorpedoProjectile(const int index)\n";
 }
 const int Map::addCannonProjectile(PrimaryWeaponCannonProjectile* projectile, const int index) {
     int result_index = -1;
@@ -112,8 +113,8 @@ const int Map::addCannonProjectile(PrimaryWeaponCannonProjectile* projectile, co
     }else{
         result_index = m_ActiveCannonProjectiles.insert(projectile, index);
     }
-    if (result_index == -1)
-        std::cout << "Error: addCannonProjectile(PrimaryWeaponCannonProjectile* projectile, const int index)\n";
+    //if (result_index == -1)
+    //    std::cout << "Error: addCannonProjectile(PrimaryWeaponCannonProjectile* projectile, const int index)\n";
     return result_index;
 }
 const int Map::addTorpedoProjectile(SecondaryWeaponTorpedoProjectile* projectile, const int index) {
@@ -123,32 +124,32 @@ const int Map::addTorpedoProjectile(SecondaryWeaponTorpedoProjectile* projectile
     }else{
         result_index = m_ActiveTorpedoProjectiles.insert(projectile, index);
     }
-    if (result_index == -1)
-        std::cout << "Error: addTorpedoProjectile(SecondaryWeaponTorpedoProjectile* projectile, const int index)\n";
+    //if (result_index == -1)
+    //    std::cout << "Error: addTorpedoProjectile(SecondaryWeaponTorpedoProjectile* projectile, const int index)\n";
     return result_index;
 }
 const int Map::get_and_use_next_cannon_projectile_index() {
-    int used_next_available_index = m_ActiveCannonProjectiles.use_next_available_index();
-    if (used_next_available_index == -1)
-        std::cout << "Error: get_and_use_next_cannon_projectile_index()\n";
+    const int used_next_available_index = m_ActiveCannonProjectiles.use_next_available_index();
+    //if (used_next_available_index == -1)
+    //    std::cout << "Error: get_and_use_next_cannon_projectile_index()\n";
     return used_next_available_index;
 }
 const int Map::get_and_use_next_torpedo_projectile_index() {
-    int used_next_available_index = m_ActiveTorpedoProjectiles.use_next_available_index();
-    if (used_next_available_index == -1)
-        std::cout << "Error: get_and_use_next_torpedo_projectile_index()\n";
+    const int used_next_available_index = m_ActiveTorpedoProjectiles.use_next_available_index();
+    //if (used_next_available_index == -1)
+    //    std::cout << "Error: get_and_use_next_torpedo_projectile_index()\n";
     return used_next_available_index;
 }
 const bool Map::try_addCannonProjectile(const int requestedIndex) {
-    bool success = m_ActiveCannonProjectiles.can_push_at_index(requestedIndex);
-    if (!success)
-        std::cout << "Error: try_addCannonProjectile(const int requestedIndex)\n";
+    const bool success = m_ActiveCannonProjectiles.can_push_at_index(requestedIndex);
+    //if (!success)
+    //    std::cout << "Error: try_addCannonProjectile(const int requestedIndex)\n";
     return success;
 }
 const bool Map::try_addTorpedoProjectile(const int requestedIndex) {
-    bool success = m_ActiveTorpedoProjectiles.can_push_at_index(requestedIndex);
-    if (!success)
-        std::cout << "Error: try_addTorpedoProjectile(const int requestedIndex)\n";
+    const bool success = m_ActiveTorpedoProjectiles.can_push_at_index(requestedIndex);
+    //if (!success)
+    //    std::cout << "Error: try_addTorpedoProjectile(const int requestedIndex)\n";
     return success;
 }
 EntityWrapper* Map::getEntityFromName(const string& name) {
@@ -286,6 +287,8 @@ void Map::loadFromFile(const string& filename) {
 
     internalCreateAnchor("", "Root", loadedAnchors, static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
 
+    auto& gameplayMode = *m_Client.getGameplayMode();
+
     for (string line; getline(str, line, '\n');) {
         line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
         if (line[0] != '#') {//ignore commented lines
@@ -334,6 +337,9 @@ void Map::loadFromFile(const string& filename) {
                 string TEXTURE = ResourceManifest::BasePath + "data/Planets/Textures/";
                 string MATERIAL_NAME = "";
                 string MESH_NAME = "";
+                string CLASS = "";
+                unsigned int TEAM = 0;
+                unsigned int AI = 0;
 
                 float ORBIT_PERIOD = -1;
                 unsigned long long ORBIT_MAJOR_AXIS = -1;
@@ -396,18 +402,23 @@ void Map::loadFromFile(const string& filename) {
                     else if (key == "days")             ROTATIONAL_PERIOD = stof(value);
                     else if (key == "tilt")             ROTATIONAL_TILT = stof(value);
                     else if (key == "inclination")      INCLINATION = stof(value);
+                    else if (key == "team")             TEAM = stoi(value);
+                    else if (key == "ai")               AI = stoi(value);
+                    else if (key == "class") {
+                        CLASS = value;
+                        replace(CLASS.begin(), CLASS.end(), '_', ' ');
+                    }
                     //else if (key == "material") { //todo: implement this somehow
                     //    MATERIAL_NAME = value;
                     //    TEXTURE = ""; 
                     //}
                     else if (key == "texture") {
                         TEXTURE += value;
-                        auto ext = boost::filesystem::extension(value);
+                        const auto ext = boost::filesystem::extension(value);
                         MATERIAL_NAME = value.substr(0, value.size() - ext.size());
-                    }
-                    else if (key == "mesh") {
+                    }else if (key == "mesh") {
                         MESH += value;
-                        auto ext = boost::filesystem::extension(value);
+                        const auto ext = boost::filesystem::extension(value);
                         MESH_NAME = value.substr(0, value.size() - ext.size());
                     }
                 }
@@ -472,6 +483,16 @@ void Map::loadFromFile(const string& filename) {
                     }
                     m_Planets.emplace(NAME, planetoid);
                     internalCreateAnchor(PARENT, NAME, loadedAnchors, planetoid->getPosition());
+                }else if (line[0] == '+' /* && gameplayMode.getGameplayModeType() == GameplayModeType::HomelandSecurity */  ) {//ship / station
+
+                    //TODO: expand on this
+                    auto& team = *gameplayMode.getTeams().at(static_cast<TeamNumber::Enum>(TEAM));
+                    auto* ship = createShip(static_cast<AIType::Type>(AI), team, m_Client, CLASS, NAME, glm::vec3(x, y, z));
+                    if (!PARENT.empty()) {
+                        Planet* parent = m_Planets.at(PARENT);
+                        ship->setPosition(ship->getPosition() + parent->getPosition());
+                    }
+                    
                 }else if (line[0] == '?') {//Anchor (Primary Spawn) point
                     const auto& parentPos = m_Planets.at(PARENT)->getPosition();
                     auto spawnAnchor = internalCreateAnchor(PARENT, "Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
@@ -480,7 +501,6 @@ void Map::loadFromFile(const string& filename) {
                     const auto& parentPos = m_Planets.at(PARENT)->getPosition();
                     auto spawnAnchor = internalCreateAnchor(PARENT, PARENT + " Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
                     m_SpawnAnchors.push_back(std::make_tuple(PARENT + " Spawn Anchor", spawnAnchor));
-
                 }else if (line[0] == 'R') {//Rings
                     if (!PARENT.empty()) {
                         if (!planetRings.count(PARENT)) {
@@ -535,13 +555,12 @@ Ship* Map::createShip(AIType::Type ai_type, Team& team, Client& client, const st
         ship = new Sovereign(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Federation Defense Platform")
         ship = new FedDefPlatform(team, client, *this, shipName, position, glm::vec3(1.0f));
+    else if (shipClass == "Federation Starbase Mushroom")
+        ship = new FedStarbaseMushroom(team, client, *this, shipName, position, glm::vec3(1.0f));
     return ship;
 }
 Anchor* Map::getRootAnchor() {
     return std::get<1>(m_RootAnchor);
-}
-Anchor* Map::getSpawnAnchor() {
-    return std::get<1>(m_SpawnAnchors[0]);
 }
 const bool Map::hasShipPlayer(const string& shipName) const {
     return (m_ShipsPlayerControlled.size() > 0 && m_ShipsPlayerControlled.count(shipName)) ? true : false;
@@ -557,6 +576,8 @@ HUD& Map::getHUD() {
     return *m_HUD;
 }
 Anchor* Map::getSpawnAnchor(const string& spawn_anchor_name) {
+    if(spawn_anchor_name.empty())
+        return std::get<1>(m_SpawnAnchors[0]);
     for (auto& tuple : m_SpawnAnchors) {
         auto& name = std::get<0>(tuple);
         if (name == spawn_anchor_name)
@@ -564,10 +585,12 @@ Anchor* Map::getSpawnAnchor(const string& spawn_anchor_name) {
     }
     return nullptr;
 }
-const string Map::getClosestSpawnAnchor() {
+const string Map::getClosestSpawnAnchor(Ship* ship) {
+    if (!ship)
+        ship = m_Player;
     string ret = "";
     decimal minDist = static_cast<decimal>(-1.0);
-    auto playerPos = m_Player->getComponent<ComponentBody>()->position();
+    auto playerPos = ship->getComponent<ComponentBody>()->position();
     for (auto& spawn_anchor_tuple : m_SpawnAnchors) {
         auto& spawn_anchor = *std::get<1>(spawn_anchor_tuple);
         const auto dist = glm::distance(playerPos, spawn_anchor.getPosition());
@@ -611,10 +634,9 @@ void Map::onResize(const unsigned int& width, const unsigned int& height) {
     Scene::onResize(width, height);
 }
 void Map::update(const double& dt){
-    //torpedos
-    auto& torps = m_ActiveTorpedoProjectiles.data();
-    for (uint i = 0; i < torps.size(); ++i) {
-        auto* t = torps[i];
+    auto& torpProjectiles = m_ActiveTorpedoProjectiles.data();
+    for (size_t i = 0; i < torpProjectiles.size(); ++i) {
+        auto* t = torpProjectiles[i];
         if (t && t->active) {
             t->update(dt);
             if (!t->active) {
@@ -622,10 +644,9 @@ void Map::update(const double& dt){
             }
         }
     }
-    //cannons
-    auto& cannons = m_ActiveCannonProjectiles.data();
-    for (uint i = 0; i < cannons.size(); ++i) {
-        auto* c = cannons[i];
+    auto& cannonProjectiles = m_ActiveCannonProjectiles.data();
+    for (size_t i = 0; i < cannonProjectiles.size(); ++i) {
+        auto* c = cannonProjectiles[i];
         if (c && c->active) {
             c->update(dt);
             if (!c->active) {
@@ -640,6 +661,16 @@ void Map::update(const double& dt){
 
     m_HUD->update(dt);
     Scene::update(dt);
+    /*
+    Ship* my = getPlayer();
+    if (my) {
+        auto& mypos = my->getPosition();
+        auto& e = getPlanets().at("Earth")->getPosition();
+        epriv::Core::m_Engine->m_DebugManager.addDebugLine("earth: x: " + to_string(e.x) + ", y : " + to_string(e.y) + ", z: " + to_string(e.z));
+
+        epriv::Core::m_Engine->m_DebugManager.addDebugLine("my: x: " + to_string(mypos.x) + ", y : " + to_string(mypos.y) + ", z: " + to_string(mypos.z));
+    }
+    */
 }
 void Map::render() {
     m_HUD->render();

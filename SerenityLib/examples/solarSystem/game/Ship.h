@@ -8,7 +8,7 @@
 #include <glm/vec2.hpp>
 #include <core/engine/utils/Utils.h>
 #include <core/engine/events/Engine_EventObject.h>
-#include "networking/Client.h"
+#include "networking/client/Client.h"
 #include "teams/Team.h"
 #include "ai/AIIncludes.h"
 
@@ -16,7 +16,6 @@
 #include <ecs/EntityWrapper.h>
 
 #define WARP_PHYSICS_MODIFIER 1.333333333f
-#define PHYSICS_PACKET_TIMER_LIMIT 0.25
 
 class  GameCamera;
 class  Ship;
@@ -173,6 +172,7 @@ class Ship: public EntityWrapper, public EventObserver {
         const std::string getName();
         const glm_vec3 getWarpSpeedVector3();
         const glm_vec3 getPosition();
+        const glm_vec3 getScale();
         const glm::vec3 getAimPositionDefault();
         const glm::vec3 getAimPositionRandom();
         const glm::vec3 getAimPositionDefaultLocal();
@@ -182,6 +182,11 @@ class Ship: public EntityWrapper, public EventObserver {
         const glm_quat getRotation();
         const glm_vec3 getPosition(const EntityDataRequest& dataRequest);
         const glm_quat getRotation(const EntityDataRequest& dataRequest);
+
+        void setPosition(const decimal& x, const decimal& y, const decimal& z);
+        void setPosition(const glm_vec3& position);
+        void setPosition(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& dataRequest);
+        void setPosition(const glm_vec3& position, const EntityDataRequest& dataRequest);
 
         void updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, std::vector<std::string>& info);
         void updateCloakFromPacket(const PacketCloakUpdate& packet);

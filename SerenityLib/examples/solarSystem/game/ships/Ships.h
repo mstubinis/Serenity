@@ -15,6 +15,7 @@
 #include "nova/Nova.h"
 #include "sovereign/Sovereign.h"
 #include "fed_def_platform/FedDefPlatform.h"
+#include "fed_starbase_mushroom/FedStarbaseMushroom.h"
 
 #include "../factions/Faction.h"
 #include <core/engine/resources/Handle.h>

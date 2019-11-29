@@ -208,6 +208,36 @@
     <Filter Include="Source Files\Game\Ships\FedDefPlatform">
       <UniqueIdentifier>{e2b03480-e9bc-4ca5-8a6e-f3459cee9dab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Ships\FedStarbaseMushroom">
+      <UniqueIdentifier>{dc2c467a-8494-45d2-bf39-eebfe4caf577}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\FedStarbaseMushroom">
+      <UniqueIdentifier>{982ef486-7262-4fe1-aa2d-d113992d4045}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\FFALobby">
+      <UniqueIdentifier>{e61428f5-cef6-4271-87e5-48458eaf62ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\FFALobby">
+      <UniqueIdentifier>{7711606c-c848-46d6-af9e-318947e54399}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\CreatingGameplayMode">
+      <UniqueIdentifier>{9d2cccb0-a635-4024-8dc4-778d78b5b6de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\CreatingGameplayMode">
+      <UniqueIdentifier>{132a1b30-beb7-4c60-810f-434b4d413b39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Networking\Server">
+      <UniqueIdentifier>{bfb6d132-6461-48d1-8436-a846c4cc4620}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Networking\Server">
+      <UniqueIdentifier>{90e4d854-ac7a-45ab-82f3-367e1b799e31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Networking\Client">
+      <UniqueIdentifier>{7a709f03-ed6e-4250-b20e-5f93f5075178}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Networking\Client">
+      <UniqueIdentifier>{dd860982-cade-41ca-be7d-fe69cdee1682}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -420,13 +450,7 @@
     <ClInclude Include="game\teams\Team.h">
       <Filter>Header Files\Game\Teams</Filter>
     </ClInclude>
-    <ClInclude Include="game\networking\Client.h">
-      <Filter>Header Files\Game\Networking</Filter>
-    </ClInclude>
     <ClInclude Include="game\networking\Packet.h">
-      <Filter>Header Files\Game\Networking</Filter>
-    </ClInclude>
-    <ClInclude Include="game\networking\Server.h">
       <Filter>Header Files\Game\Networking</Filter>
     </ClInclude>
     <ClInclude Include="game\ai\AI.h">
@@ -476,6 +500,24 @@
     </ClInclude>
     <ClInclude Include="game\ships\fed_def_platform\FedDefPlatform.h">
       <Filter>Header Files\Game\Ships\FedDefPlatform</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\fed_starbase_mushroom\FedStarbaseMushroom.h">
+      <Filter>Header Files\Game\Ships\FedStarbaseMushroom</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\FFALobby.h">
+      <Filter>Header Files\Game\GUI\Specifics\FFALobby</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\server\Server.h">
+      <Filter>Header Files\Game\Networking\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\client\Client.h">
+      <Filter>Header Files\Game\Networking\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\server\ServerMapSpecificData.h">
+      <Filter>Header Files\Game\Networking\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\client\ClientMapSpecificData.h">
+      <Filter>Header Files\Game\Networking\Client</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -674,13 +716,7 @@
     <ClCompile Include="game\teams\Team.cpp">
       <Filter>Source Files\Game\Teams</Filter>
     </ClCompile>
-    <ClCompile Include="game\networking\Client.cpp">
-      <Filter>Source Files\Game\Networking</Filter>
-    </ClCompile>
     <ClCompile Include="game\networking\Packet.cpp">
-      <Filter>Source Files\Game\Networking</Filter>
-    </ClCompile>
-    <ClCompile Include="game\networking\Server.cpp">
       <Filter>Source Files\Game\Networking</Filter>
     </ClCompile>
     <ClCompile Include="game\ai\AI.cpp">
@@ -730,6 +766,24 @@
     </ClCompile>
     <ClCompile Include="game\ships\fed_def_platform\FedDefPlatform.cpp">
       <Filter>Source Files\Game\Ships\FedDefPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\fed_starbase_mushroom\FedStarbaseMushroom.cpp">
+      <Filter>Source Files\Game\Ships\FedStarbaseMushroom</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\FFALobby.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\FFALobby</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\client\Client.cpp">
+      <Filter>Source Files\Game\Networking\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\server\Server.cpp">
+      <Filter>Source Files\Game\Networking\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\server\ServerMapSpecificData.cpp">
+      <Filter>Source Files\Game\Networking\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\client\ClientMapSpecificData.cpp">
+      <Filter>Source Files\Game\Networking\Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

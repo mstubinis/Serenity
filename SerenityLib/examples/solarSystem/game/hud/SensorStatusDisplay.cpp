@@ -14,7 +14,7 @@
 #include "../map/Map.h"
 #include "../ResourceManifest.h"
 #include "../Core.h"
-#include "../networking/Client.h"
+#include "../networking/client/Client.h"
 #include "../Menu.h"
 #include "../Helper.h"
 #include "../hud/HUD.h"

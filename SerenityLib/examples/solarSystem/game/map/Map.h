@@ -48,12 +48,10 @@ class Map: public Scene{
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const glm_vec3& position);
     public:
         Anchor* internalCreateDeepspaceAnchor(const decimal& x, const decimal& y, const decimal& z, const std::string& name = "");
-        Anchor* getRootAnchor();
-        Anchor* getSpawnAnchor();
-
-        Anchor* getSpawnAnchor(const std::string& name);
+        Anchor*                        getRootAnchor();
+        Anchor*                        getSpawnAnchor(const std::string& name = "");
         const std::vector<std::string> getClosestAnchor(Anchor* currentAnchor = nullptr, Ship* ship = nullptr);
-        const std::string getClosestSpawnAnchor();
+        const std::string              getClosestSpawnAnchor(Ship* ship = nullptr);
     public:
         std::vector<EntityWrapper*> m_Objects;
 

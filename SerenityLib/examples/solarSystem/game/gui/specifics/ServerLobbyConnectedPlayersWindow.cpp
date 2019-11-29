@@ -7,7 +7,7 @@
 
 #include "../Text.h"
 
-#include "../../networking/Client.h"
+#include "../../networking/client/Client.h"
 #include "../../Core.h"
 #include "../../networking/Packet.h"
 

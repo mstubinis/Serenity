@@ -1,6 +1,7 @@
-#include "Sovereign.h"
+#include "FedStarbaseMushroom.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
+#include "../../weapons/PulsePhaser.h"
 #include "../../weapons/PhotonTorpedo.h"
 #include "../../weapons/PhaserBeam.h"
 
@@ -16,44 +17,44 @@
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
 #include "../../ai/AI.h"
+#include "../../ai/AIStationaryNPC.h"
 #include "../Ships.h"
 
-constexpr auto CLASS = "Sovereign";
+#include <iostream>
 
 using namespace std;
 
-Sovereign::Sovereign(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team, client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.0f, -1.58693f)) {
+constexpr auto CLASS = "Federation Starbase Mushroom";
 
+FedStarbaseMushroom::FedStarbaseMushroom(Team& team, Client& client, Map& map, const std::string& name, glm::vec3 position, glm::vec3 scale)
+:Ship(team, client, CLASS, map, AIType::AI_Stationary, name, position, scale, CollisionType::TriangleShapeStatic){
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
         if (i == 0)        system = new ShipSystemReactor(_this, 1000);
-        else if (i == 1)   system = new ShipSystemPitchThrusters(_this);
-        else if (i == 2)   system = new ShipSystemYawThrusters(_this);
-        else if (i == 3)   system = new ShipSystemRollThrusters(_this);
+        else if (i == 1)   system = nullptr; //no pitch thrusters
+        else if (i == 2)   system = nullptr; //no yaw thrusters
+        else if (i == 3)   system = nullptr; //no roll thrusters
         else if (i == 4)   system = nullptr; //no cloaking device
-        else if (i == 5)   system = new ShipSystemShields(_this, map, 150500.0f, 150500.0f, 150500.0f, 150500.0f, 200500.0f, 200500.0f, glm::vec3(0.0f), glm::vec3(1.05f, 1.25f, 1.05f));
-        else if (i == 6)   system = new ShipSystemMainThrusters(_this);
-        else if (i == 7)   system = new ShipSystemWarpDrive(_this);
+        else if (i == 5)   system = new ShipSystemShields(_this, map, 160000.0f, 160000.0f, 160000.0f, 160000.0f, 160000.0f, 160000.0f);
+        else if (i == 6)   system = nullptr; //no main thrusters
+        else if (i == 7)   system = nullptr; //no warp drive
         else if (i == 8)   system = new ShipSystemSensors(_this, map);
         else if (i == 9)   system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 175500.0f);
+        else if (i == 10)  system = new ShipSystemHull(_this, map, 200000.0f);
         m_ShipSystems.emplace(i, system);
     }
-    internal_finialize_init(ai_type);
-
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
         Ships::Database[CLASS].HullImpactPoints = {
-            glm::vec3(0.0f,0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
         };
     }
 
-    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
-    m_AI->installThreatTable(map);
+
+    internal_finialize_init(AIType::AI_Stationary);
 }
-Sovereign::~Sovereign() {
+FedStarbaseMushroom::~FedStarbaseMushroom() {
 
 }

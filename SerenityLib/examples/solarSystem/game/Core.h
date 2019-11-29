@@ -15,6 +15,7 @@ class  ShipSystemSensors;
 class  SensorStatusDisplay;
 class  Team;
 class  GameplayMode;
+class  ClientMapSpecificData;
 class Core final {
     friend class  Menu;
     friend class  Map;
@@ -22,6 +23,7 @@ class Core final {
     friend class  Server;
     friend class  ShipSystemSensors;
     friend class  SensorStatusDisplay;
+    friend class  ClientMapSpecificData;
     private:
         EntityWrapper*      m_ChosenShip;
         Menu*               m_Menu;
@@ -56,6 +58,4 @@ class Core final {
         void update(const double& dt);
         void render();
 };
-
-
 #endif

@@ -2,8 +2,8 @@
 #include "map/Map.h"
 #include "map/Anchor.h"
 #include "Core.h"
-#include "networking/Server.h"
-#include "networking/Client.h"
+#include "networking/server/Server.h"
+#include "networking/client/Client.h"
 #include "networking/Packet.h"
 #include "ResourceManifest.h"
 #include "GameCamera.h"
@@ -130,7 +130,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
                             mode->addTeam(*team2);
 
                             menu.m_Core.startClient(mode, nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
-                            menu.m_Core.getServer()->startupMap(*mode);
+                            menu.m_Core.getServer()->startupMap(map, *mode);
                             menu.m_ServerLobbyChatWindow->setUserPointer(menu.m_Core.getClient());
                         }else{
                             menu.setErrorText("The username must only contain letters");
@@ -279,19 +279,16 @@ Font& Menu::getFont() {
     return *m_Font;
 }
 void Menu::enter_the_game() {
-    /*
-    TODO: once a client wants to enter the game, he will ping the server that he entered the map. the server will then respond with the other connected players currently
-    ingame and give the client info about their positions. the server will then very rapidly and frequently update the client with all the other connected player positions
-    */
     if (!m_ServerLobbyShipSelectorWindow->m_ChosenShipName.empty()) {
         PacketMessage p;
         p.PacketType = PacketType::Client_To_Server_Request_Map_Entry;
         p.name = m_Core.m_Client->m_Username;
 
         p.data = m_ServerLobbyShipSelectorWindow->m_ChosenShipName;
-        p.data += "," + m_Core.m_Client->m_Mapname;
-        if (m_Core.m_Client->m_Team) {
-            p.data += "," + m_Core.m_Client->m_Team->getTeamNumberAsString();
+
+        p.data += "," + m_Core.m_Client->m_MapSpecificData.m_Map->name();
+        if (m_Core.m_Client->m_MapSpecificData.m_Team) {
+            p.data += "," + m_Core.m_Client->m_MapSpecificData.m_Team->getTeamNumberAsString();
         }else{
             p.data += ",-1"; //error, the client did not choose or was not assigned a team yet
         }

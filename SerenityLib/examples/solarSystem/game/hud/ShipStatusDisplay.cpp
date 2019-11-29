@@ -107,6 +107,23 @@ void ShipStatusDisplay::renderShipHullStatus(const glm::vec2& bottomLeftCorner) 
     //scissor
     const auto scissor = glm::vec4(pos.x - texture.width() / 2.0f, pos.y - texture.height() / 2.0f, texture.width(), texture.height() * percent);
     Renderer::renderTexture(texture, pos, getPercentColor(percent), 180, glm::vec2(1.0f), 0.16f, Alignment::Center, scissor); //hull
+
+    //render %
+    /*
+    if (percent < 0.15) {
+        string s = to_string(int(percent * 100.0f)) + "%";
+        Renderer::renderText(
+            s,
+            m_HUD.getFont(),
+            pos - glm::vec2(0, -m_HUD.getFont().getTextHeight(s) / 2.0),
+            glm::vec4(0.7f, 0.7f, 0.7f, 1.0f),
+            0,
+            glm::vec2(0.8f),
+            0.157f,
+            TextAlignment::Center
+        );
+    }
+    */
 }
 void ShipStatusDisplay::renderForwardShieldStatus(const glm::vec2& centerHullIcon, ShipSystemShields& shields, Texture& icon, Texture& iconBorder) {
     const auto percent = shields.getHealthPercentForward();

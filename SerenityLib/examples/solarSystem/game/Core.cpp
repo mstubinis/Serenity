@@ -1,8 +1,8 @@
 #include "Core.h"
 
 #include "Menu.h"
-#include "networking/Server.h"
-#include "networking/Client.h"
+#include "networking/server/Server.h"
+#include "networking/client/Client.h"
 #include "Ship.h"
 #include "map/Map.h"
 #include "networking/Packet.h"
@@ -68,7 +68,7 @@ void Core::startClient(GameplayMode* mode, Team* team, const unsigned short& por
         m_Client = new Client(team, *this, port, ip, 0);
     }
     auto& client = *m_Client;
-    client.m_GameplayMode = mode;
+    client.m_MapSpecificData.m_GameplayMode = mode;
     client.m_Username = name;
     if (!client.m_IsCurrentlyConnecting) {
         client.changeConnectionDestination(port, ip);
@@ -106,7 +106,7 @@ void Core::enterMap(Team& playerTeam, const string& mapFile, const string& playe
     auto& window = Resources::getWindow();
     Resources::setCurrentScene(mapFile);
 
-    Map& map = *static_cast<Map*>(Resources::getScene(mapFile));
+    auto& map = *m_Client->m_MapSpecificData.m_Map;
 
     Ship* playerShip = map.createShip(AIType::Player_You, playerTeam, *m_Client, playerShipClass, playername, glm::vec3(x, y, z));
     map.setPlayer(playerShip);

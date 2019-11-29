@@ -38,8 +38,8 @@ void GunneryBaseClass::internal_execute_beams(const double& dt) {
             auto& ship = *hostile_ship.ship;
             shipMapKey = ship.getMapKey();
             enemy_ship_pos = ship.getPosition();
-            dist_to_enemy = weapon_.getDistanceSquared(enemy_ship_pos);
             enemy_ship_rot = ship.getRotation();
+            dist_to_enemy = weapon_.getDistanceSquared(enemy_ship_pos);
 
             auto lamda_2 = [&]() {
                 if (!ship.isDestroyed()) {
@@ -82,6 +82,8 @@ void GunneryBaseClass::internal_execute_beams(const double& dt) {
                 for (auto& ships_with_threat : m_ThreatTable.getShipsWithThreat()) {
                     if (shipMapKey == ships_with_threat.first) {
                         const auto res1 = lamda_2();
+                        if (res1)
+                            break;
                     }
                 }
             }else{
@@ -148,6 +150,8 @@ void GunneryBaseClass::internal_execute_cannons(const double& dt) {
                 for (auto& ships_with_threat : m_ThreatTable.getShipsWithThreat()) {
                     if (shipMapKey == ships_with_threat.first) {
                         res1 = lamda_2();
+                        if (res1)
+                            break;
                     }
                 }
             }else{
@@ -237,13 +241,6 @@ void GunneryBaseClass::internal_execute_torpedos(const double& dt) {
 void GunneryBaseClass::update(const double& dt) {
     /*
     TODO: consider optimizations here
-
-    for each weapon that is available to fire:
-         - get a list of hostile ships in range
-             - find the greatest threat ship within this hostile list of ships and fire at it
-                 - if no greatest threat ship, fire at a random hostile ship (change to nearest hostile)
-
-
     */
     m_BeamTimer += dt;
     m_CannonTimer += dt;

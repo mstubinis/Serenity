@@ -6,7 +6,8 @@
 #include <core/engine/networking/SocketTCP.h>
 #include <core/engine/networking/SocketUDP.h>
 
-#include <unordered_map>
+#include "ServerMapSpecificData.h"
+
 #include <queue>
 #include <thread>
 #include <atomic>
@@ -14,49 +15,11 @@
 #include <mutex>
 
 struct Packet;
-class  Map;
-class  Server;
 class  ServerClient;
 class  ServerClientThread;
 class  Core;
 class  GameplayMode;
 struct PacketMessage;
-struct PacketCollisionEvent;
-
-#define SERVER_CLIENT_TIMEOUT 20.0f
-#define SERVER_CLIENT_RECOVERY_TIME 60.0f
-
-//a simple data structure to coordinate ship respawning
-class ShipRespawning final {
-    private:
-        std::unordered_map<std::string, std::tuple<std::string, std::string, double>> m_Ships; //key = shipkey, value = ship class,  closest spawn anchor, respawn time left
-        Server& m_Server;
-    public:
-        ShipRespawning(Server&);
-        ~ShipRespawning();
-
-        void processShip(const std::string& shipMapKey, const std::string& shipClass, const std::string& closest_spawn_anchor);
-
-        void cleanup();
-        void update(const double& dt);
-};
-
-
-//a simple data structure to coordinate ship on ship / station / whatever collisions
-class CollisionEntries final {
-    private:
-        std::unordered_map<std::string, double> m_CollisionPairs; //key = ship1.key + "|" + ship2.key, double is time left until another collision entry can be processed
-        Server& m_Server;
-    public:
-        CollisionEntries(Server&);
-        ~CollisionEntries();
-
-        void processCollision(const PacketCollisionEvent& packet, Map& map);
-
-        void cleanup();
-        void update(const double& dt);
-
-};
 
 class ServerClient final {
     friend class Server;
@@ -110,10 +73,9 @@ class ServerClientThread final {
 class Server {
     friend class ServerClient;
     friend class ServerClientThread;
+    friend class ServerMapSpecificData;
     private:
-        CollisionEntries                               m_CollisionEntries;
-        ShipRespawning                                 m_RespawningShips;
-
+        ServerMapSpecificData                          m_MapSpecificData;
         GameplayMode*                                  m_GameplayMode;
         Engine::Networking::SocketUDP*                 m_UdpSocket;
         std::mutex                                     m_Mutex;
@@ -123,12 +85,8 @@ class Server {
         unsigned short                                 m_port;
         std::atomic<unsigned int>                      m_Active;
         Core&                                          m_Core;
-        std::string                                    m_MapName;
-        double                                         m_DeepspaceAnchorTimer;
-        double                                         m_PingTime;
         ServerClient*                                  m_OwnerClient;
 
-        void update_server_entities(const double& dt);
         void assign_username_to_client(ServerClient&, const std::string& username);
         void completely_remove_client(ServerClient&);
         void assignRandomTeam(PacketMessage& packet_out, ServerClient& client);
@@ -139,7 +97,7 @@ class Server {
         ~Server();
 
         const bool startup(const std::string& mapname);
-        const bool startupMap(GameplayMode& mode);
+        const bool startupMap(const std::string& mapname, GameplayMode& mode);
         void shutdown(const bool destructor = false);
         const bool shutdownMap();
 

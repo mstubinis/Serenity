@@ -72,10 +72,6 @@ const bool ShipSystemShields::Pyramid::isInside(const glm::vec3& impactLocationM
 #pragma endregion
 
 
-struct ShipSystemShieldsFunctor final { void operator()(ComponentLogic& _component, const double& dt) const {
-
-}};
-
 struct ShieldInstanceBindFunctor {void operator()(EngineResource* r) const {
     Renderer::GLDisable(GL_CULL_FACE);
 
@@ -85,6 +81,8 @@ struct ShieldInstanceBindFunctor {void operator()(EngineResource* r) const {
     auto& body = *parent.getComponent<ComponentBody>();
     auto bodypos = glm::vec3(body.position());
     glm::mat4 parentModel = body.modelMatrixRendering();
+    auto& model = *parent.getComponent<ComponentModel>();
+    const float shipScale = Math::Max(glm::vec3(shields.m_Ship.getScale()));
 
     Renderer::sendUniform4Safe("Object_Color", i.color());
     glm::mat4 modelMatrix = parentModel * i.modelMatrix();
@@ -100,7 +98,7 @@ struct ShieldInstanceBindFunctor {void operator()(EngineResource* r) const {
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
 
 
-
+    Renderer::sendUniform1("uv_scale", glm::round((model.radius() *  shipScale) * 0.4f));
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
     int count = 0;
@@ -157,11 +155,9 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, con
     m_ShieldsOffset = offset;
     m_AdditionalShieldScale = additional_size_scale;
     auto& model = *m_ShieldEntity.addComponent<ComponentModel>(ResourceManifest::ShieldMesh, ResourceManifest::ShieldMaterial, ResourceManifest::shieldsShaderProgram, RenderStage::ForwardParticles);
-    auto& logic = *m_ShieldEntity.addComponent<ComponentLogic>(ShipSystemShieldsFunctor());
 
     //TODO: optimize collision hull if possible
     auto& shieldBody = *m_ShieldEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic);
-    logic.setUserPointer(&m_Ship);
     shieldBody.setUserPointer(this);
     shieldBody.setUserPointer1(&_ship);
     shieldBody.setUserPointer2(&_ship);

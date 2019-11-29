@@ -6,7 +6,7 @@
 #include "../map/Map.h"
 #include "../Ship.h"
 #include "../networking/Packet.h"
-#include "../networking/Client.h"
+#include "../networking/client/Client.h"
 #include "../ships/Ships.h"
 
 #include <algorithm>

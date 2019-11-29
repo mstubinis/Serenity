@@ -36,8 +36,8 @@ class Team {
         const bool isNeutralTeam(const Team& otherTeam) const;
 
 
-        const bool isPlayerOnTeam(const std::string& playerName) const;
-        const bool addPlayerToTeam(const std::string& playerName);
+        const bool isPlayerOnTeam(const std::string& playerMapKey) const;
+        const bool addPlayerToTeam(const std::string& playerMapKey);
 };
 
 

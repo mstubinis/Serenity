@@ -1,24 +1,25 @@
 #include "Server.h"
-#include "Packet.h"
-#include "Client.h"
-#include "../Core.h"
-#include "../Menu.h"
-#include "../Helper.h"
-#include "../ResourceManifest.h"
-#include "../gui/specifics/ServerLobbyChatWindow.h"
-#include "../gui/specifics/ServerLobbyConnectedPlayersWindow.h"
-#include "../modes/GameplayMode.h"
+#include "ServerMapSpecificData.h"
+#include "../Packet.h"
+#include "../client/Client.h"
+#include "../../Core.h"
+#include "../../Menu.h"
+#include "../../Helper.h"
+#include "../../ResourceManifest.h"
+#include "../../gui/specifics/ServerLobbyChatWindow.h"
+#include "../../gui/specifics/ServerLobbyConnectedPlayersWindow.h"
+#include "../../modes/GameplayMode.h"
 
-#include "../map/Map.h"
-#include "../map/Anchor.h"
-#include "../teams/Team.h"
-#include "../modes/GameplayMode.h"
-#include "../ships/Ships.h"
+#include "../../map/Map.h"
+#include "../../map/Anchor.h"
+#include "../../teams/Team.h"
+#include "../../modes/GameplayMode.h"
+#include "../../ships/Ships.h"
 
-#include "../ships/shipSystems/ShipSystemWeapons.h"
-#include "../ships/shipSystems/ShipSystemShields.h"
-#include "../ships/shipSystems/ShipSystemSensors.h"
-#include "../ships/shipSystems/ShipSystemHull.h"
+#include "../../ships/shipSystems/ShipSystemWeapons.h"
+#include "../../ships/shipSystems/ShipSystemShields.h"
+#include "../../ships/shipSystems/ShipSystemSensors.h"
+#include "../../ships/shipSystems/ShipSystemHull.h"
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/utils/Utils.h>
@@ -37,133 +38,6 @@ using namespace std;
 using namespace Engine;
 using namespace Engine::Networking;
 
-const double TIMER_DEEP_SPACE_ANCHOR_SPAM = 1.0;
-
-#pragma region RespawningShips
-ShipRespawning::ShipRespawning(Server& server):m_Server(server){
-
-}
-ShipRespawning::~ShipRespawning() {
-
-}
-void ShipRespawning::processShip(const string& shipMapKey, const string& shipClass, const string& closest_spawn_anchor) {
-    if (!m_Ships.count(shipMapKey)) {
-        m_Ships.emplace(shipMapKey, make_tuple(shipClass, closest_spawn_anchor, Ships::Database[shipClass].RespawnTime));
-    }else {
-        //this should really not happen if cleanup() is implemented, but just to be safe...
-        m_Ships.erase(shipMapKey);
-        m_Ships.emplace(shipMapKey, make_tuple(shipClass, closest_spawn_anchor, Ships::Database[shipClass].RespawnTime));
-    }
-    PacketMessage pOut;
-    pOut.PacketType = PacketType::Server_To_Client_Notify_Ship_Of_Impending_Respawn;
-    pOut.name = shipMapKey;
-    pOut.r = static_cast<float>(Ships::Database[shipClass].RespawnTime);
-    m_Server.send_to_client(*m_Server.getClientByMapKey(shipMapKey), pOut);
-
-    //std::cout << "Processing Ship: " << shipMapKey << " (" << shipClass << ") at closest anchor: " << closest_spawn_anchor << ", for duration: " << to_string(Ships::Database[shipClass].RespawnTime) << "\n";
-}
-void ShipRespawning::cleanup() {
-    for (auto it = m_Ships.begin(); it != m_Ships.end();) {
-        auto& tuple = it->second;
-        if (std::get<2>(tuple) <= 0.0) {
-            it = m_Ships.erase(it);
-        }else {
-            it++;
-        }
-    }
-}
-void ShipRespawning::update(const double& dt) {
-    for (auto& it : m_Ships) {
-        auto& tuple = it.second;
-        auto& respawn_time = std::get<2>(tuple);
-        if (respawn_time > 0.0) {
-            respawn_time -= dt;
-            if (respawn_time <= 0.0) {
-                respawn_time = 0.0;
-
-                //TODO: calculate respawn position based on proximity to other ships / stations etc
-                auto x = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
-                auto y = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
-                auto z = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
-                auto respawnPosition = glm::vec3(x, y, z);
-
-                PacketMessage pOut;
-                pOut.PacketType = PacketType::Server_To_Client_Notify_Ship_Of_Respawn;
-                pOut.name = it.first; //mapkey
-                pOut.r = respawnPosition.x;
-                pOut.g = respawnPosition.y;
-                pOut.b = respawnPosition.z;
-                pOut.data = std::get<1>(tuple); //closest_spawn_anchor
-                //pOut.data += "," + std::get<0>(tuple); //shipclass
-                m_Server.send_to_all(pOut);
-
-                //std::cout << "Processing Ship: " << it.first << " (" << std::get<0>(tuple) << ") may now respawn\n";
-            }
-        }
-    }
-    cleanup();
-}
-#pragma endregion
-
-#pragma region CollisionEntries
-CollisionEntries::CollisionEntries(Server& server):m_Server(server) {
-
-}
-CollisionEntries::~CollisionEntries() {
-
-}
-
-void CollisionEntries::processCollision(const PacketCollisionEvent& packet_in, Map& map) {
-    auto info = Helper::SeparateStringByCharacter(packet_in.data, ',');
-    string key1 = info[0] + "|" + info[1];
-    string key2 = info[1] + "|" + info[0];
-
-    const bool is_key_1 = m_CollisionPairs.count(key1);
-    const bool is_key_2 = m_CollisionPairs.count(key2);
-    
-    auto lambda_send = [&]() {
-        PacketCollisionEvent pOut(packet_in);
-        pOut.PacketType = PacketType::Server_To_Client_Collision_Event;
-        m_Server.send_to_all(pOut);
-    };
-
-    if (!is_key_1 && !is_key_2) {
-        m_CollisionPairs.emplace(key1, 2.0);
-        lambda_send();
-    }else{
-        if (is_key_1) {
-            if (m_CollisionPairs[key1] <= 0.0) {
-                m_CollisionPairs[key1] = 2.0;
-                lambda_send();
-            }
-        }else if (is_key_2) {
-            if (m_CollisionPairs[key2] <= 0.0) {
-                m_CollisionPairs[key2] = 2.0;
-                lambda_send();
-            }
-        }
-    }
-}
-void CollisionEntries::cleanup() {
-    for (auto it = m_CollisionPairs.begin(); it != m_CollisionPairs.end();) {
-        if (it->second <= 0.0) {
-            it = m_CollisionPairs.erase(it);
-        }else {
-            it++;
-        }
-    }
-}
-void CollisionEntries::update(const double& dt) {
-    for (auto& it : m_CollisionPairs) {
-        if (it.second > 0.0) {
-            it.second -= dt;
-            if (it.second <= 0.0) {
-                it.second = 0.0;
-            }
-        }
-    }
-}
-#pragma endregion
 
 #pragma region ServerClient
 
@@ -266,13 +140,12 @@ ServerClientThread::~ServerClientThread() {
 
 #pragma region Server
 
-Server::Server(Core& core, const unsigned int& port, const string& ipRestriction) :m_Core(core), m_CollisionEntries(*this), m_RespawningShips(*this) {
+Server::Server(Core& core, const unsigned int& port, const string& ipRestriction) : m_Core(core), m_MapSpecificData(*this){
     m_GameplayMode                     = nullptr;
     m_OwnerClient                      = nullptr;
     m_port                             = port;
     m_listener                         = new ListenerTCP(port, ipRestriction);
-    m_DeepspaceAnchorTimer             = 0.0;
-    m_PingTime                         = 0.0;
+    //m_PingTime                         = 0.0;
     m_UdpSocket                        = new SocketUDP(port, ipRestriction);
     m_UdpSocket->setBlocking(false);
     m_UdpSocket->bind();
@@ -301,11 +174,11 @@ void Server::shutdown(const bool destructor) {
     }
 }
 const bool Server::shutdownMap() {
-    const auto res = Resources::deleteScene(m_MapName);
-    if (res) {
+    const auto success = Resources::deleteScene(*m_MapSpecificData.m_Map);
+    if (success) {
         Resources::setCurrentScene("Menu");
     }
-    return res;
+    return success;
 }
 const unsigned int Server::numClients() const {
     unsigned int numClients = 0;
@@ -319,12 +192,10 @@ const unsigned int Server::numClients() const {
 
 const bool Server::startup(const string& mapname) {
     auto& listener = *m_listener;
-    m_MapName = mapname;
     const sf::Socket::Status status = listener.listen();
 
     for (unsigned int i = 0; i < std::thread::hardware_concurrency(); ++i) {
-        auto* thread = new ServerClientThread();
-        m_Threads.push_back(thread);
+        m_Threads.push_back(new ServerClientThread());
     }
 
     if (status == sf::Socket::Status::Done) {
@@ -334,82 +205,26 @@ const bool Server::startup(const string& mapname) {
     }
     return false;
 }
-const bool Server::startupMap(GameplayMode& mode) {
+const bool Server::startupMap(const string& mapname, GameplayMode& mode) {
     m_GameplayMode = &mode;
-    Map* map = static_cast<Map*>(Resources::getScene(m_MapName));
-    if (!map) {
-        map = new Map(mode , *m_Core.m_Client, m_MapName, ResourceManifest::BasePath + "data/Systems/" + m_MapName + ".txt");
-        map->m_IsServer = true;
+    m_MapSpecificData.m_Map = static_cast<Map*>(Resources::getScene(mapname));
+    if (!m_MapSpecificData.m_Map) {
+        Map* map = new Map(mode, *m_Core.m_Client, mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
+        m_MapSpecificData.m_Map = static_cast<Map*>(Resources::getScene(mapname));
+        m_MapSpecificData.m_Map->m_IsServer = true;
         return true;
     }
     return false;
 }
-void Server::update_server_entities(const double& dt) {
-    if (m_Core.gameState() != GameState::Game)
-        return;
 
-    m_PingTime += dt;
-    if (m_PingTime > PHYSICS_PACKET_TIMER_LIMIT) {
-        //keep pinging the server, sending your ship physics info
-        auto& map = *static_cast<Map*>(Resources::getScene(m_MapName));
-
-        Anchor* finalAnchor = nullptr;
-        vector<string> list;
-        for (auto& ship_ptr : map.getShipsNPCControlled()) {
-            Ship& ship = *ship_ptr.second;
-            finalAnchor = map.getRootAnchor();
-            list = map.getClosestAnchor(nullptr, &ship);
-            for (auto& closest : list) {
-                finalAnchor = finalAnchor->getChildren().at(closest);
-            }
-            PacketPhysicsUpdate p(ship, map, finalAnchor, list, ship.getName());
-            p.PacketType = PacketType::Server_To_Client_Ship_Physics_Update;
-            send_to_all_but_client_udp(*m_OwnerClient, p);
-        }
-        /*
-        auto playerPos = glm::vec3(playerShip.getPosition());
-        auto nearestAnchorPos = glm::vec3(finalAnchor->getPosition());
-        double distFromMeToNearestAnchor = static_cast<double>(glm::distance2(nearestAnchorPos, playerPos));
-
-        if (distFromMeToNearestAnchor > DISTANCE_CHECK_NEAREST_ANCHOR) {
-            for (auto& otherShips : map.getShips()) {
-                if (otherShips.first != playerShip.getName()) {
-                    auto otherPlayerPos = glm::vec3(otherShips.second->getPosition());
-                    auto distFromMeToOtherPlayerSq = glm::distance2(otherPlayerPos, playerPos);
-                    const auto calc = (distFromMeToNearestAnchor - DISTANCE_CHECK_NEAREST_ANCHOR) * 0.5f;
-                    if (distFromMeToOtherPlayerSq < glm::max(calc, DISTANCE_CHECK_NEAREST_OTHER_PLAYER)) {
-                        const glm::vec3 midpoint = Math::midpoint(otherPlayerPos, playerPos);
-
-                        PacketMessage pOut;
-                        pOut.PacketType = PacketType::Client_To_Server_Request_Anchor_Creation;
-                        pOut.r = midpoint.x - nearestAnchorPos.x;
-                        pOut.g = midpoint.y - nearestAnchorPos.y;
-                        pOut.b = midpoint.z - nearestAnchorPos.z;
-                        pOut.data = "";
-                        pOut.data += to_string(list.size());
-                        for (auto& closest : list) {
-                            pOut.data += "," + closest;
-                        }
-                        //we want to create an anchor at r,g,b (the midpoint between two nearby ships), we send the nearest valid anchor as a reference
-                        client.send(pOut);
-                        break;
-                    }
-                }
-            }
-        }
-        */
-        m_PingTime = 0.0;
-    }
-}
 void Server::update(Server* thisServer, const double& dt) {
     auto& server = *thisServer;
     const auto server_active = server.m_Active.load(std::memory_order_relaxed);
-    if (server_active == 1) {
-        server.m_DeepspaceAnchorTimer += dt;
+    if (server_active == 1) {      
         updateAcceptNewClients(server);
-        server.update_server_entities(dt);
-        server.m_CollisionEntries.update(dt);
-        server.m_RespawningShips.update(dt);
+
+        server.m_MapSpecificData.update(dt);
+
         server.updateClientsGameLoop(dt);
 
         //TODO: it works but it's kind of hacky, in the future create a standalone server exe ///////////////////////////////////////////////////
@@ -539,27 +354,27 @@ void Server::updateClientsGameLoop(const double& dt) {
     const auto active = m_Active.load(std::memory_order_relaxed);
     if (active == 1) {
         onReceiveUDP();
-        for (auto& clientThread : m_Threads) {
-            for (auto& _client : clientThread->m_Clients) {
-                auto& client = *_client.second;
-                if (client.disconnected()) {
-                    client.m_RecoveryTime += dt;
-                    if (client.m_RecoveryTime > SERVER_CLIENT_RECOVERY_TIME) {
-                        //notify the other players of his removal
-                        PacketMessage pOut;
-                        pOut.PacketType = PacketType::Server_To_Client_Client_Left_Map;
-                        pOut.name = client.m_MapKey;
-                        send_to_all_but_client(client, pOut);
 
-                        completely_remove_client(client);
-                        return;
-                    }
-                }else{
-                    client.m_Timeout += dt;
-                    if (client.m_Timeout > SERVER_CLIENT_TIMEOUT) {
-                        std::cout << "Client: " << client.m_Username << " has timed out, disconnecting..." << std::endl;
-                        client.disconnect();
-                        return;
+        if (m_Core.m_GameState == GameState::Game) {
+            for (auto& clientThread : m_Threads) {
+                for (auto& _client : clientThread->m_Clients) {
+                    auto& client = *_client.second;
+                    if (client.disconnected()) {
+                        client.m_RecoveryTime += dt;
+                        if (client.m_RecoveryTime > SERVER_CLIENT_RECOVERY_TIME) {
+                            //notify the other players of his removal
+                            PacketMessage pOut;
+                            pOut.PacketType = PacketType::Server_To_Client_Client_Left_Map;
+                            pOut.name = client.m_MapKey;
+                            send_to_all_but_client(client, pOut);
+                            completely_remove_client(client);
+                        }
+                    }else{
+                        client.m_Timeout += dt;
+                        if (client.m_Timeout > SERVER_CLIENT_TIMEOUT) {
+                            std::cout << "Client: " << client.m_Username << " has timed out, disconnecting..." << std::endl;
+                            client.disconnect();
+                        }
                     }
                 }
             }
@@ -585,11 +400,11 @@ void Server::updateClient(ServerClient& client) {
                     pOut.PacketType = PacketType::Server_To_Client_Ship_Was_Just_Destroyed;
                     server.send_to_all_but_client(client, pOut);
 
-                    auto& map = *static_cast<Map*>(Resources::getScene(server.m_MapName));
+                    auto& map = *server.m_MapSpecificData.m_Map;
                     auto list = Helper::SeparateStringByCharacter(pI.data, ',');
                     if (map.hasShipPlayer(pI.name)) {
                         //this is a player ship, give it permission to respawn, currently NPC's do not respawn
-                        server.m_RespawningShips.processShip(pI.name, list[0], map.getClosestSpawnAnchor());
+                        server.m_MapSpecificData.m_RespawningShips.processShip(pI.name, list[0], map.getClosestSpawnAnchor());
                     }
                     break;
                 }case PacketType::Client_To_Server_Request_Ship_Current_Info: {
@@ -604,7 +419,7 @@ void Server::updateClient(ServerClient& client) {
 
                     if (!c) {
                         //TODO: add ALOT more here
-                        auto& map = *static_cast<Map*>(Resources::getScene(server.m_MapName));
+                        auto& map = *server.m_MapSpecificData.m_Map;
                         auto& sourceMapKey = list[0];
                         auto* sourceClient = server.getClientByUsername(pI.name);
                         auto& ships = map.getShips();
@@ -637,8 +452,8 @@ void Server::updateClient(ServerClient& client) {
                     break;
                 }case PacketType::Client_To_Server_Collision_Event: {
                     PacketCollisionEvent& pI = *static_cast<PacketCollisionEvent*>(pp);
-                    auto& map = *static_cast<Map*>(Resources::getScene(server.m_MapName));
-                    server.m_CollisionEntries.processCollision(pI, map);
+                    auto& map = *server.m_MapSpecificData.m_Map;
+                    server.m_MapSpecificData.m_CollisionEntries.processCollision(pI, map);
                     break;
                 }case PacketType::Client_To_Server_Anti_Cloak_Status: {
                     //just forward it
@@ -723,14 +538,7 @@ void Server::updateClient(ServerClient& client) {
                     }
                     break;
                 }case PacketType::Client_To_Server_Request_Anchor_Creation: {
-                    if (server.m_DeepspaceAnchorTimer > TIMER_DEEP_SPACE_ANCHOR_SPAM) {
-                        //just forward it
-                        PacketMessage& pI = *static_cast<PacketMessage*>(pp);
-                        PacketMessage pOut(pI);
-                        pOut.PacketType = PacketType::Server_To_Client_Anchor_Creation;
-                        server.send_to_all(pOut);
-                        server.m_DeepspaceAnchorTimer = 0.0;
-                    }
+                    server.m_MapSpecificData.internal_process_deepspace_anchor(pp);
                     break;
                 }case PacketType::Client_To_Server_Ship_Health_Update: {
                     //just forward it
@@ -812,8 +620,8 @@ void Server::updateClient(ServerClient& client) {
                         server.send_to_all(pOut1);
 
                         PacketMessage pOut2;
-                        pOut2.name = server.m_MapName;
-                        Map* map = static_cast<Map*>(Resources::getScene(server.m_MapName));
+                        Map* map = server.m_MapSpecificData.m_Map;
+                        pOut2.name = map->name();
                         pOut2.data = map->allowedShipsSingleString();
                         pOut2.PacketType = PacketType::Server_To_Client_Map_Data;
                         server.send_to_client(client, pOut2);
@@ -849,6 +657,77 @@ void Server::updateClient(ServerClient& client) {
         SAFE_DELETE(pp);
     }
 }
+void Server::assignRandomTeam(PacketMessage& packet_out, ServerClient& client) {
+    //assign the player a team number
+    auto& teams = m_GameplayMode->getTeams();
+    Team* chosen = nullptr;
+    size_t minVal = -1;
+    for (auto& team : teams) {
+        const auto numberOfPlayers = team.second->getNumberOfPlayersOnTeam();
+        if (numberOfPlayers < minVal) {
+            minVal = numberOfPlayers;
+            chosen = team.second;
+        }
+    }
+    if (chosen) {
+        Team& team = *chosen;
+        boost::replace_all(packet_out.data, ",-1", "," + team.getTeamNumberAsString());
+        teams.at(team.getTeamNumber())->addPlayerToTeam(client.m_MapKey);
+    }
+}
+
+ServerClient* Server::getClientByUsername(const string& username) {
+    ServerClient* ret = nullptr;
+    for (auto& clientThread : m_Threads) {
+        for (auto& client : clientThread->m_Clients) {
+            if (client.second->m_Username == username) {
+                return client.second;
+            }
+        }
+    }
+    return ret;
+}
+ServerClient* Server::getClientByMapKey(const string& MapKey) {
+    ServerClient* ret = nullptr;
+    for (auto& clientThread : m_Threads) {
+        for (auto& client : clientThread->m_Clients) {
+            if (client.second->m_MapKey == MapKey) {
+                return client.second;
+            }
+        }
+    }
+    return ret;
+}
+
+const bool Server::isValidName(const string& name) const {
+    if (name.empty())
+        return false;
+    for (auto& clientThread : m_Threads) {
+        for (auto& client : clientThread->m_Clients) {
+            if (client.second->m_Username == name) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void Server::assign_username_to_client(ServerClient& client, const string& username) {
+    string final_username = username;
+    unsigned int count = 0;
+    for (auto& thread : m_Threads) {
+        for (auto& server_client_ptr : thread->m_Clients) {
+            if (server_client_ptr.second->m_Username == final_username) {
+                ++count;
+                final_username = username + "_" + to_string(count);
+            }
+        }
+    }
+    client.m_Username = final_username;
+    client.m_MapKey = final_username;
+}
+
+#pragma region sending / recieving
 const sf::Socket::Status Server::send_to_client(ServerClient& c, Packet& packet) {
     return c.send(packet);
 }
@@ -999,74 +878,6 @@ const sf::Socket::Status Server::receive_udp(void* data, size_t size, size_t& re
     const auto status = m_UdpSocket->receive(data, size, received);
     return status;
 }
-
-void Server::assignRandomTeam(PacketMessage& packet_out, ServerClient& client) {
-    //assign the player a team number
-    auto& teams = m_GameplayMode->getTeams();
-    Team* chosen = nullptr;
-    size_t minVal = -1;
-    for (auto& team : teams) {
-        const auto numberOfPlayers = team.second->getNumberOfPlayersOnTeam();
-        if (numberOfPlayers < minVal) {
-            minVal = numberOfPlayers;
-            chosen = team.second;
-        }
-    }
-    if (chosen) {
-        boost::replace_all(packet_out.data, ",-1", "," + chosen->getTeamNumberAsString());
-        teams.at(chosen->getTeamNumber())->addPlayerToTeam(client.m_Username);
-    }
-}
-
-ServerClient* Server::getClientByUsername(const string& username) {
-    ServerClient* ret = nullptr;
-    for (auto& clientThread : m_Threads) {
-        for (auto& client : clientThread->m_Clients) {
-            if (client.second->m_Username == username) {
-                return client.second;
-            }
-        }
-    }
-    return ret;
-}
-ServerClient* Server::getClientByMapKey(const string& MapKey) {
-    ServerClient* ret = nullptr;
-    for (auto& clientThread : m_Threads) {
-        for (auto& client : clientThread->m_Clients) {
-            if (client.second->m_MapKey == MapKey) {
-                return client.second;
-            }
-        }
-    }
-    return ret;
-}
-
-const bool Server::isValidName(const string& name) const {
-    if (name.empty())
-        return false;
-    for (auto& clientThread : m_Threads) {
-        for (auto& client : clientThread->m_Clients) {
-            if (client.second->m_Username == name) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-void Server::assign_username_to_client(ServerClient& client, const string& username) {
-    string final_username = username;
-    unsigned int count = 0;
-    for (auto& thread : m_Threads) {
-        for (auto& server_client_ptr : thread->m_Clients) {
-            if (server_client_ptr.second->m_Username == final_username) {
-                ++count;
-                final_username = username + "_" + to_string(count);
-            }
-        }
-    }
-    client.m_Username = final_username;
-    client.m_MapKey = final_username;
-}
+#pragma endregion
 
 #pragma endregion

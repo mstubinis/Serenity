@@ -1,8 +1,10 @@
 #include "GameplayMode.h"
 #include "../teams/Team.h"
 #include "../Helper.h"
-#include <string>
+#include "../ships/Ships.h"
+
 #include <iostream>
+
 
 using namespace std;
 
@@ -33,10 +35,20 @@ const bool GameplayMode::addTeam(Team& team) {
     m_Teams.emplace(team.getTeamNumber(), &team);
     return true;
 }
+
+const bool GameplayMode::addAllowedShipClass(const string& shipClass) {
+    if (!Ships::Database.count(shipClass))
+        return false;
+    if (m_AllowedShipClasses.count(shipClass))
+        return false;
+    m_AllowedShipClasses.insert(shipClass);
+    return true;
+}
+
 const string GameplayMode::serialize() const {
     string res = "";
 
-    res += to_string(m_GameplayModeType);          //[0]
+    res +=       to_string(m_GameplayModeType);    //[0]
     res += "," + to_string(m_MaxAmountOfPlayers);  //[1]
     res += "," + to_string(m_Teams.size());        //[2]
     for (auto& team_itr : m_Teams) {
@@ -53,20 +65,23 @@ const string GameplayMode::serialize() const {
         for (auto& enemy_team : team.getEnemyTeams()) {
             res += "," + to_string(static_cast<unsigned int>(enemy_team));
         }
-        for (auto& player : team.getPlayers()) {
-            res += "," + player;
+        for (auto& playerMapKey : team.getPlayers()) {
+            res += "," + playerMapKey;
         }
+    }
+    res += "," + to_string(m_AllowedShipClasses.size());
+    for (auto& ship_class : m_AllowedShipClasses) {
+        res += "," + ship_class;
     }
     return res;
 }
 void GameplayMode::deserialize(const string& input) {
-    auto list = Helper::SeparateStringByCharacter(input, ',');
-    m_GameplayModeType = static_cast<GameplayModeType::Mode>(stoi(list[0]));
-    m_MaxAmountOfPlayers = static_cast<unsigned int>(stoi(list[1]));
+    auto list                  = Helper::SeparateStringByCharacter(input, ',');
+    m_GameplayModeType         = static_cast<GameplayModeType::Mode>(stoi(list[0]));
+    m_MaxAmountOfPlayers       = static_cast<unsigned int>(stoi(list[1]));
 
-    unsigned int team_size = static_cast<unsigned int>(stoi(list[2]));
-
-    unsigned int start_index = 3;
+    unsigned int team_size     = static_cast<unsigned int>(stoi(list[2]));
+    unsigned int start_index   = 3;
 
     TeamNumber::Enum    ally_team;
     TeamNumber::Enum    enemy_team;
@@ -74,7 +89,7 @@ void GameplayMode::deserialize(const string& input) {
     unsigned int        num_ally_teams;
     unsigned int        num_enemy_teams;
     unsigned int        num_players_on_team;
-    string              player_name;
+    string              player_map_key;
     for (unsigned int i = 0; i < team_size; ++i) {
 
         unsigned int count = 0;
@@ -105,10 +120,18 @@ void GameplayMode::deserialize(const string& input) {
             ++count;
         }
         for (unsigned int j = 0; j < num_players_on_team; ++j) {
-            player_name = list[start_index + count];
-            newTeam->addPlayerToTeam(player_name);
+            player_map_key = list[start_index + count];
+            newTeam->addPlayerToTeam(player_map_key);
             ++count;
         }
         start_index += count;
+    }
+    int amount_of_ship_classes = stoi(list[start_index]);
+    if (amount_of_ship_classes > 0) {
+        for (int i = 0; i < amount_of_ship_classes; ++i) {
+            const auto ship_class = list[start_index + i];
+            addAllowedShipClass(ship_class);
+            ++start_index;
+        }
     }
 }

@@ -210,6 +210,7 @@
     <ClInclude Include="game\gui\Button.h" />
     <ClInclude Include="game\gui\ScrollBar.h" />
     <ClInclude Include="game\gui\ScrollWindow.h" />
+    <ClInclude Include="game\gui\specifics\FFALobby.h" />
     <ClInclude Include="game\gui\specifics\ServerHostingMapSelectorWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyChatWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.h" />
@@ -228,9 +229,11 @@
     <ClInclude Include="game\map\Freelist.h" />
     <ClInclude Include="game\map\Map.h" />
     <ClInclude Include="game\modes\GameplayMode.h" />
-    <ClInclude Include="game\networking\Client.h" />
+    <ClInclude Include="game\networking\client\Client.h" />
+    <ClInclude Include="game\networking\client\ClientMapSpecificData.h" />
     <ClInclude Include="game\networking\Packet.h" />
-    <ClInclude Include="game\networking\Server.h" />
+    <ClInclude Include="game\networking\server\Server.h" />
+    <ClInclude Include="game\networking\server\ServerMapSpecificData.h" />
     <ClInclude Include="game\particles\Fire.h" />
     <ClInclude Include="game\particles\Sparks.h" />
     <ClInclude Include="game\Planet.h" />
@@ -244,6 +247,7 @@
     <ClInclude Include="game\ships\diamond\Diamond.h" />
     <ClInclude Include="game\ships\excelsior\Excelsior.h" />
     <ClInclude Include="game\ships\fed_def_platform\FedDefPlatform.h" />
+    <ClInclude Include="game\ships\fed_starbase_mushroom\FedStarbaseMushroom.h" />
     <ClInclude Include="game\ships\intrepid\Intrepid.h" />
     <ClInclude Include="game\ships\miranda\Miranda.h" />
     <ClInclude Include="game\ships\norway\Norway.h" />
@@ -300,6 +304,7 @@
     <ClCompile Include="game\gui\Button.cpp" />
     <ClCompile Include="game\gui\ScrollBar.cpp" />
     <ClCompile Include="game\gui\ScrollWindow.cpp" />
+    <ClCompile Include="game\gui\specifics\FFALobby.cpp" />
     <ClCompile Include="game\gui\specifics\ServerHostingMapSelectorWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyChatWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.cpp" />
@@ -317,9 +322,11 @@
     <ClCompile Include="game\map\Anchor.cpp" />
     <ClCompile Include="game\map\Map.cpp" />
     <ClCompile Include="game\modes\GameplayMode.cpp" />
-    <ClCompile Include="game\networking\Client.cpp" />
+    <ClCompile Include="game\networking\client\Client.cpp" />
+    <ClCompile Include="game\networking\client\ClientMapSpecificData.cpp" />
     <ClCompile Include="game\networking\Packet.cpp" />
-    <ClCompile Include="game\networking\Server.cpp" />
+    <ClCompile Include="game\networking\server\Server.cpp" />
+    <ClCompile Include="game\networking\server\ServerMapSpecificData.cpp" />
     <ClCompile Include="game\particles\Fire.cpp" />
     <ClCompile Include="game\particles\Sparks.cpp" />
     <ClCompile Include="game\Planet.cpp" />
@@ -333,6 +340,7 @@
     <ClCompile Include="game\ships\diamond\Diamond.cpp" />
     <ClCompile Include="game\ships\excelsior\Excelsior.cpp" />
     <ClCompile Include="game\ships\fed_def_platform\FedDefPlatform.cpp" />
+    <ClCompile Include="game\ships\fed_starbase_mushroom\FedStarbaseMushroom.cpp" />
     <ClCompile Include="game\ships\intrepid\Intrepid.cpp" />
     <ClCompile Include="game\ships\miranda\Miranda.cpp" />
     <ClCompile Include="game\ships\norway\Norway.cpp" />

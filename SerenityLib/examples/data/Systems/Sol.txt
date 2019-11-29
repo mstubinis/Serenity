@@ -13,6 +13,7 @@ P name=Venus parent=Sun mesh=planet.objcc radius=6031 r=1 g=1 b=1 position=10820
 
 P name=Earth parent=Sun mesh=planet.objcc radius=6371 r=1 g=1 b=1 position=149600000 x=1135865730 y=0 z=-973563072 a=5.57457733 type=0 atmosphereHeight=0.025 texture=Earth.dds eccentricity=0.017 period=365.335 majorAxis=149598023 tilt=23.44 days=0.9972685 inclination=7.155
 M name=Moon parent=Earth mesh=planet.objcc radius=1737 r=1 g=1 b=1 position=384400 x=-26848 y=0 z=-3843906 a=4.70540428 type=3 atmosphereHeight=0 texture=Moon.dds eccentricity=0.054 period=27.322 majorAxis=384748 tilt=6.68 days=27.322 inclination=5.15
++ name=Starbase_1 class=Federation_Starbase_Mushroom parent=Earth x=-72377 y=51167 z=9240 team=1 ai=5
 
 P name=Mars parent=Sun mesh=planet.objcc radius=3390 r=1 g=1 b=1 position=227900000 x=2134672380 y=0 z=-798132160 a=5.92538834 type=0 atmosphereHeight=0 texture=Mars.dds eccentricity=0.0934 period=686.971 majorAxis=227939134 tilt=25.19 days=1.0259541666 inclination=5.65
 M name=Deimos mesh=deimos.objcc radius=6.20 r=1 g=1 b=1 parent=Mars x=220546 y=0 z=80272 position=23470 a=1.22173 atmosphereHeight=0 type=5 texture=Deimos.dds eccentricity=0.00033 period=1.263 majorAxis=23463.2 tilt=0.93 days=1.263 inclination=0.93

@@ -153,6 +153,7 @@ void Ships::init() {
     createShipEntry("Sovereign",        FactionEnum::Federation,   30,   1.35f);
     //createShipEntry("Liberty",        FactionEnum::Federation,   40,   1.5f);
     createShipEntry("Federation Defense Platform", FactionEnum::Federation,   60,    1.0f, false);
+    createShipEntry("Federation Starbase Mushroom", FactionEnum::Federation, 600, 1.0f, false);
 
     createShipEntry("B'rel",            FactionEnum::Klingon,      6,    1.0f);
     createShipEntry("Vor'cha",          FactionEnum::Klingon,      20,   1.2f);
