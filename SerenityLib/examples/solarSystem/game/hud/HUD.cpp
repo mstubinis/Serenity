@@ -4,6 +4,7 @@
 #include "../ResourceManifest.h"
 #include "../Ship.h"
 #include "../Planet.h"
+#include "../config/Keybinds.h"
 
 #include "../hud/SensorStatusDisplay.h"
 #include "../hud/ShipStatusDisplay.h"
@@ -87,7 +88,7 @@ void HUD::setTarget(Entity& entity) {
 }
 uint _countPlanets = 0;
 void HUD::update(const double& dt) {
-    if (Engine::isKeyDownOnce(KeyboardKey::LeftAlt, KeyboardKey::X) || Engine::isKeyDownOnce(KeyboardKey::RightAlt, KeyboardKey::X)) {
+    if(Keybinds::isPressedDownOnce(KeybindEnum::ToggleHUD)){
         toggle();
     }
     auto& player = *m_Map.getPlayer();

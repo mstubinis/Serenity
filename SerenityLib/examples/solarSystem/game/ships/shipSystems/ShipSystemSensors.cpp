@@ -8,6 +8,7 @@
 #include "../../hud/HUD.h"
 #include "../../GameCamera.h"
 #include "../../networking/Packet.h"
+#include "../../config/Keybinds.h"
 
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialComponent.h>
@@ -15,7 +16,9 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Camera.h>
-//#include <core/engine/sounds/Engine_Sounds.h>
+
+
+
 #include <core/engine/Engine.h>
 #include <glm/gtx/norm.hpp>
 
@@ -23,13 +26,16 @@ using namespace Engine;
 using namespace std;
 
 ShipSystemSensors::ShipSystemSensors(Ship& _ship, Map& map, const decimal& range, const double AntiCloakScanTimerMax) :ShipSystem(ShipSystemType::Sensors, _ship),m_Map(map){
-    m_RadarRange               = range;
-    m_Target                   = nullptr;
-    m_AntiCloakScanActive      = false;
-    m_AntiCloakScanTimer       = 0.0;
-    m_AntiCloakScanTimerMax    = AntiCloakScanTimerMax;
-    m_IsPingingForShips        = false;
-    m_IsPingingForShipsTimer   = 0.0;
+    m_RadarRange                  = range;
+    m_Target                      = nullptr;
+    m_AntiCloakScanActive         = false;
+    m_AntiCloakScanTimer          = 0.0;
+    m_AntiCloakScanTimerMax       = AntiCloakScanTimerMax;
+    m_IsPingingForShips           = false;
+    m_IsPingingForShipsTimer      = 0.0;
+    m_CurrentCycleEnemyIndex      = 0;
+    m_CurrentCycleFriendlyIndex   = 0;
+    m_CurrentCycleNeutralIndex    = 0;
 }
 ShipSystemSensors::~ShipSystemSensors() {
 
@@ -246,9 +252,18 @@ void ShipSystemSensors::internal_update_populate_detected_ships(const double& dt
     m_DetectedEnemyShips.clear();
     m_DetectedAlliedShips.clear();
     m_DetectedNeutralShips.clear();
+
     const auto& my_position = m_Ship.getPosition();
     const auto& my_key = m_Ship.getMapKey();
-    for (auto& shipItr : m_Map.getShips()) {
+    const auto& ships = m_Map.getShips();
+    const auto& ships_size = ships.size();
+
+    m_DetectedShips.reserve(ships_size);
+    m_DetectedEnemyShips.reserve(ships_size);
+    m_DetectedAlliedShips.reserve(ships_size);
+    m_DetectedNeutralShips.reserve(ships_size);
+
+    for (auto& shipItr : ships) {
         auto& ship = *shipItr.second;
         if (&ship != &m_Ship) {
             const auto& res = validateDetection(ship, my_position);
@@ -269,8 +284,7 @@ void ShipSystemSensors::internal_update_populate_detected_ships(const double& dt
         }
     }
 }
-void ShipSystemSensors::internal_update_clear_target_automatically_if_applicable(const double& dt) {
-    
+void ShipSystemSensors::internal_update_clear_target_automatically_if_applicable(const double& dt) {   
     if (!isOnline()) {
         m_Ship.setTarget(nullptr, true);
     }   
@@ -281,7 +295,10 @@ void ShipSystemSensors::internal_update_clear_target_automatically_if_applicable
             Ship& target = *target_ptr;
             if ((target.isFullyCloaked() && !target.isAlly(m_Ship) && !isShipDetectedByAntiCloak(target_ptr))
             || 
-            (target.m_State == ShipState::Destroyed || target.m_State == ShipState::JustFlaggedAsFullyDestroyed || target.m_State == ShipState::JustFlaggedToRespawn || target.m_State == ShipState::UndergoingRespawning) ){
+            (target.m_State == ShipState::Destroyed || 
+             target.m_State == ShipState::JustFlaggedAsFullyDestroyed || 
+             target.m_State == ShipState::JustFlaggedToRespawn || 
+             target.m_State == ShipState::UndergoingRespawning) ){
                 m_Ship.setTarget(nullptr, true);
             }
         }
@@ -290,18 +307,56 @@ void ShipSystemSensors::internal_update_clear_target_automatically_if_applicable
 void ShipSystemSensors::update(const double& dt) {
     if (!m_Ship.isDestroyed()) {
         if (m_Ship.IsPlayer() ){
-            if (Engine::isKeyDownOnce(KeyboardKey::I)) {
+            
+            if (Keybinds::isPressedDownOnce(KeybindEnum::ToggleAntiCloakScan)) {
                 toggleAntiCloakScan(true);
-            }else if (Engine::isKeyDownOnce(KeyboardKey::T)) {
+            }
+            if (Keybinds::isPressedDownOnce(KeybindEnum::TargetCycleEnemy)) {
+                #pragma region Cycle enemies
+                const int collection_size = m_DetectedEnemyShips.size();
+                if (collection_size > 0 && collection_size > m_CurrentCycleEnemyIndex) {
+                    auto* ship = m_DetectedEnemyShips[m_CurrentCycleEnemyIndex].ship;
+                    if (ship) {
+                        m_Ship.setTarget(ship, true);
+                    }
+
+                    ++m_CurrentCycleEnemyIndex;
+                    if (m_CurrentCycleEnemyIndex >= m_DetectedEnemyShips.size())
+                        m_CurrentCycleEnemyIndex = 0;
+                }
+                #pragma endregion
+            }
+            if (Keybinds::isPressedDownOnce(KeybindEnum::TargetNearestEnemy)) {
+                #pragma region Closest Enemy
                 auto* ship = getClosestEnemyShip().ship;
                 if (ship) {
-                    setTarget(ship, true);
+                    m_Ship.setTarget(ship, true);
                 }
-            }else if (Engine::isKeyDownOnce(KeyboardKey::G)) {
+                #pragma endregion
+            }
+            if (Keybinds::isPressedDownOnce(KeybindEnum::TargetNearestCloakedEnemy)) {
+                #pragma region Closest Cloaked Enemy
                 auto* ship = getClosestEnemyCloakedShip().ship;
                 if (ship) {
-                    setTarget(ship, true);
+                    m_Ship.setTarget(ship, true);
                 }
+                #pragma endregion
+            }
+            
+            if (Keybinds::isPressedDownOnce(KeybindEnum::TargetCycleFriendly)) {
+                #pragma region Cycle friendlies
+                const int collection_size = m_DetectedAlliedShips.size();
+                if (collection_size > 0 && collection_size > m_CurrentCycleFriendlyIndex) {
+                    auto* ship = m_DetectedAlliedShips[m_CurrentCycleFriendlyIndex].ship;
+                    if (ship) {
+                        m_Ship.setTarget(ship, true);
+                    }
+
+                    ++m_CurrentCycleFriendlyIndex;
+                    if (m_CurrentCycleFriendlyIndex >= m_DetectedAlliedShips.size())
+                        m_CurrentCycleFriendlyIndex = 0;
+                }
+                #pragma endregion
             }
         }
         internal_update_anti_cloak_scan_detected_ships(dt);

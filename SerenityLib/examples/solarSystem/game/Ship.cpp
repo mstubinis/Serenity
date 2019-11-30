@@ -11,6 +11,7 @@
 #include "ai/FireAtWill.h"
 #include "ai/ThreatTable.h"
 #include "modes/GameplayMode.h"
+#include "config/Keybinds.h"
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/Engine.h>
@@ -522,10 +523,8 @@ void Ship::internal_update_just_destroyed_fully(const double& dt, Map& map) {
         pOut.g = nearestAnchorPos.y;
         pOut.b = nearestAnchorPos.z;
 
-
         m_Client.send(pOut);
     }
-
     modelComponent.hide();
     for (auto& tuple : m_DamageDecals) {
         SAFE_DELETE(std::get<0>(tuple));
@@ -646,10 +645,6 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
             sound->setPosition(ship_position);
             sound->setAttenuation(0.3f);
         }
-
-
-
-
         auto& shipModelComponent = *getComponent<ComponentModel>();
         
         ParticleEmitter emitter_(*Sparks::ExplosionSparks, map, 0.01, this);
@@ -802,39 +797,16 @@ void Ship::internal_update_player_you_logic(const double& dt, Map& map) {
     }
     #pragma endregion
 
-
     auto& camera = *m_PlayerCamera;
-    if (Engine::isKeyDownOnce(KeyboardKey::F1)) {
+    if (Keybinds::isPressedDownOnce(KeybindEnum::CameraCockpit)){
         camera.setState(CameraState::Cockpit);
-    }else if (Engine::isKeyDownOnce(KeyboardKey::F3)) {
+    }
+    if (Keybinds::isPressedDownOnce(KeybindEnum::CameraOrbit)) {
         camera.setState(CameraState::Orbit);
-    }else if (Engine::isKeyDownOnce(KeyboardKey::F2)) {
+    }
+    if (Keybinds::isPressedDownOnce(KeybindEnum::CameraFollowTarget)) {
         camera.setState(CameraState::FollowTarget);
     }
-    //target whatever is in direct line of sight of the camera
-    /*
-    if (Engine::isKeyDownOnce(KeyboardKey::T) && map.name() != "Menu") {
-        vector<Entity> exclusions{ m_Entity, static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull))->getEntity(), camera.entity() };
-        auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
-        if (shields)
-            exclusions.push_back(shields->getEntity());
-        Entity scan = camera.getObjectInCenterRay(exclusions);
-        if (!scan.null()) {    
-            auto* componentName = scan.getComponent<ComponentName>();
-            if (componentName) {
-                EntityWrapper* scannedTarget = nullptr;
-                for (auto& obj : map.m_Objects) {
-                    auto* componentName1 = obj->getComponent<ComponentName>();
-                    if (componentName1 && componentName1->name() == componentName->name()) {
-                        scannedTarget = obj;
-                        break;
-                    }
-                }
-                setTarget(scannedTarget, true);
-            }
-        }
-    }
-    */
     for (auto& shipSystem : m_ShipSystems) {
         if (shipSystem.second) {
             shipSystem.second->render();
@@ -1363,13 +1335,5 @@ void Ship::update(const double& dt) {
         auto& map = static_cast<Map&>(entity().scene());
         auto& team = *m_Client.getGameplayMode()->getTeams().at(TeamNumber::Team_2);
         map.createShip(AIType::AI_Stationary, team, m_Client, "Federation Defense Platform", "Defense Platform " + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -20.0));
-    }
-    if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::RightAlt)) {
-        //setState(ShipState::UndergoingDestruction);
-
-
-        auto& map = static_cast<Map&>(entity().scene());
-        auto& team = *m_Client.getGameplayMode()->getTeams().at(TeamNumber::Team_2);
-        map.createShip(AIType::AI_Stationary, team, m_Client, "Federation Starbase Mushroom", "Starbase " + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -200.0));
     }
 }

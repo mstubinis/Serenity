@@ -18,7 +18,6 @@ using namespace std;
 int main(int argc, char* argv[]) {
     srand((unsigned)time(0));
 
-
     #ifdef _WIN32
         if (GetConsoleWindow() == NULL) { 
             AllocConsole(); 

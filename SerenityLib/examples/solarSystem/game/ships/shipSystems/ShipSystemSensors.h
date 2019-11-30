@@ -36,6 +36,10 @@ class ShipSystemSensors final : public ShipSystem {
         bool                       m_IsPingingForShips;
         double                     m_IsPingingForShipsTimer;
 
+        unsigned int               m_CurrentCycleEnemyIndex;
+        unsigned int               m_CurrentCycleFriendlyIndex;
+        unsigned int               m_CurrentCycleNeutralIndex;
+
         double                     m_AntiCloakScanTimerMax;
         double                     m_AntiCloakScanTimer;
         bool                       m_AntiCloakScanActive;

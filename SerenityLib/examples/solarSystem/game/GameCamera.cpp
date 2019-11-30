@@ -249,31 +249,37 @@ void GameCamera::setState(const CameraState::State& new_state){
     const auto old_state = m_State;
     m_State = new_state;
     Map& map = static_cast<Map&>(m_Entity.scene());
+
+    auto& playerEntity = m_Player->entity();
+
     if (new_state == CameraState::Orbit) {
         m_CameraMouseFactor = glm::dvec2(0.0);
 
         if (old_state == CameraState::Cockpit || old_state == CameraState::FollowTarget) {
             validateDistanceForOrbit(map);
-            map.centerSceneToObject(m_Player->entity());
-        }else{
+            map.centerSceneToObject(playerEntity);
+        }else{ //old state is camera orbit too
             if (!m_Target || (m_Target && m_Target == m_Player)) {
                 validateDistanceForOrbit(map);
             }else if(m_Player && m_Target && (m_Target != m_Player)){
-                map.centerSceneToObject(m_Player->entity());
+                //map.centerSceneToObject(playerEntity);
                 m_Target = m_Player;
             }
         }
 
     }else if (new_state == CameraState::Cockpit) {
-        map.centerSceneToObject(m_Player->entity());
+        if(old_state != CameraState::Cockpit)
+            map.centerSceneToObject(playerEntity);
     }else if (new_state == CameraState::FollowTarget) {
         auto* ship = dynamic_cast<Ship*>(m_Player);
         if (ship) {
             auto* sensors = static_cast<ShipSystemSensors*>(ship->getShipSystem(ShipSystemType::Sensors));
             auto* target = sensors->getTarget();
-            m_Target = target;
+            if (m_Target != target) {
+                map.centerSceneToObject(playerEntity);
+                m_Target = target;
+            }
         }
-        map.centerSceneToObject(m_Player->entity());
     }
 }
 void GameCamera::setTarget(EntityWrapper* target) {

@@ -76,6 +76,7 @@ class ComponentBody : public ComponentBaseClass {
             float                mass;
             unsigned short       group;
             unsigned short       mask;
+            bool                 forcedOut;
 
             PhysicsData();
             PhysicsData(const PhysicsData& other)            = delete;
@@ -129,8 +130,8 @@ class ComponentBody : public ComponentBaseClass {
 
         void rebuildRigidBody(const bool addBodyToPhysicsWorld = true);
 
-        void removePhysicsFromWorld();
-        void addPhysicsToWorld();
+        void removePhysicsFromWorld(const bool force = true);
+        void addPhysicsToWorld(const bool force = true);
 
         void setInternalPhysicsUserPointer(void* userPtr);
         void setUserPointer(void* userPtr);

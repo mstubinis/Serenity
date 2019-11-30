@@ -6,6 +6,7 @@
 #include "../../networking/Packet.h"
 #include "../../ResourceManifest.h"
 #include "../../map/Map.h"
+#include "../../config/Keybinds.h"
 
 #include <core/engine/Engine.h>
 
@@ -105,7 +106,7 @@ void ShipSystemCloakingDevice::update(const double& dt) {
     auto& model = *m_Ship.getComponent<ComponentModel>();
     if (isOnline()) {
         if (m_Ship.IsPlayer()) {
-            if (Engine::isKeyDownOnce(KeyboardKey::C)) {
+            if (Keybinds::isPressedDownOnce(KeybindEnum::ToggleCloak)){
                 if (!m_Active) {
                     ShipSystemCloakingDevice::cloak(model);
                 }else{

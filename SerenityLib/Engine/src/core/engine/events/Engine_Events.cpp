@@ -36,22 +36,26 @@ void EventManager::setMousePositionInternal(const float x, const float y, const 
 void EventManager::onEventKeyPressed(const unsigned int& key){
     m_previousKey    = m_currentKey;
     m_currentKey     = key;
-    m_KeyStatus[key] = true;
+
+    m_KeyStatus.insert(key);
 }
 void EventManager::onEventKeyReleased(const unsigned int& key){
     m_previousKey    = KeyboardKey::Unknown;
     m_currentKey     = KeyboardKey::Unknown;
-    m_KeyStatus[key] = false;
+
+    m_KeyStatus.erase(key);
 }
 void EventManager::onEventMouseButtonPressed(const unsigned int& mouseButton){
     m_previousButton           = m_currentButton;
     m_currentButton            = mouseButton;
-    m_MouseStatus[mouseButton] = true;
+
+    m_MouseStatus.insert(mouseButton);
 }
 void EventManager::onEventMouseButtonReleased(const unsigned int& mouseButton){
     m_previousButton           = MouseButton::Unknown;
     m_currentButton            = MouseButton::Unknown;
-    m_MouseStatus[mouseButton] = false;
+
+    m_MouseStatus.erase(mouseButton);
 }
 void EventManager::onEventMouseWheelMoved(const int& delta){
     m_Delta += (static_cast<double>(delta) * 10.0);
@@ -74,8 +78,8 @@ const KeyboardKey::Key Engine::getPressedKey() {
 const MouseButton::Button Engine::getPressedButton() {
     return static_cast<MouseButton::Button>(EventManager::m_EventManager->m_currentButton);
 }
-const bool Engine::isKeyDown(const KeyboardKey::Key key){
-    return (!EventManager::m_EventManager->m_KeyStatus[key]) ? false : true;
+const bool Engine::isKeyDown(const KeyboardKey::Key& key){
+    return EventManager::m_EventManager->m_KeyStatus.count(key);
 }
 const bool Engine::isKeyDownOnce() {
     auto& mgr = *EventManager::m_EventManager;
@@ -83,26 +87,37 @@ const bool Engine::isKeyDownOnce() {
 }
 
 
-const bool Engine::isKeyDownOnce(const KeyboardKey::Key key){
+
+const unsigned int Engine::getNumPressedKeys() {
+    auto& mgr = *EventManager::m_EventManager;
+    return mgr.m_KeyStatus.size();
+}
+const bool Engine::isKeyDownOnce(const KeyboardKey::Key& key){
     const bool res = Engine::isKeyDown(key);
     auto& mgr = *EventManager::m_EventManager;
     return (res && mgr.m_currentKey == key && (mgr.m_currentKey != mgr.m_previousKey)) ? true : false;
 }
 
-const bool Engine::isKeyDownOnce(const KeyboardKey::Key first, const KeyboardKey::Key second) {
-    const bool& resFirst = Engine::isKeyDown(first);
-    const bool& resSecond = Engine::isKeyDown(second);
+const bool Engine::isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second) {
+    const bool resFirst = Engine::isKeyDown(first);
+    const bool resSecond = Engine::isKeyDown(second);
     auto& mgr = *EventManager::m_EventManager;
-    return ( resFirst && resSecond && mgr.m_currentKey == second && (mgr.m_currentKey != mgr.m_previousKey)) ? true : false;
+    return ( resFirst && resSecond && mgr.m_currentKey == first && (mgr.m_currentKey != mgr.m_previousKey)) ? true : false;
 }
-
+const bool Engine::isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second, const KeyboardKey::Key& third) {
+    const bool resFirst = Engine::isKeyDown(first);
+    const bool resSecond = Engine::isKeyDown(second);
+    const bool resThird = Engine::isKeyDown(third);
+    auto& mgr = *EventManager::m_EventManager;
+    return (resFirst && resSecond && resThird && mgr.m_currentKey == first && (mgr.m_currentKey != mgr.m_previousKey)) ? true : false;
+}
 const bool Engine::isKeyUp(const KeyboardKey::Key key){ 
     return !Engine::isKeyDown(key); 
 }
-const bool Engine::isMouseButtonDown(const MouseButton::Button button){
-    return (!EventManager::m_EventManager->m_MouseStatus[button]) ? false : true;
+const bool Engine::isMouseButtonDown(const MouseButton::Button& button){
+    return EventManager::m_EventManager->m_MouseStatus.count(button);
 }
-const bool Engine::isMouseButtonDownOnce(const MouseButton::Button button){
+const bool Engine::isMouseButtonDownOnce(const MouseButton::Button& button){
     const bool res = Engine::isMouseButtonDown(button);
     auto& mgr = *EventManager::m_EventManager;
     return (res && mgr.m_currentButton == button && (mgr.m_currentButton != mgr.m_previousButton)) ? true : false;

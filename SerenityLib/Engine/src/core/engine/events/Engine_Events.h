@@ -7,7 +7,7 @@
 
 #include <string>
 #include <glm/vec2.hpp>
-#include <unordered_map>
+#include <unordered_set>
 
 namespace Engine{
     namespace epriv{
@@ -15,13 +15,12 @@ namespace Engine{
             public:
                 static EventManager*                     m_EventManager;
 
-                std::unordered_map<unsigned int, bool>   m_KeyStatus;
-                std::unordered_map<unsigned int, bool>   m_MouseStatus;
+                std::unordered_set<unsigned int>         m_KeyStatus;
+                std::unordered_set<unsigned int>         m_MouseStatus;
                 double                                   m_Delta;
                 glm::vec2                                m_Position;
                 glm::vec2                                m_Position_Previous;
                 glm::vec2                                m_Difference;
-
                 unsigned int                             m_currentKey;
                 unsigned int                             m_previousKey;
 
@@ -45,19 +44,22 @@ namespace Engine{
         };
     };
     //keyboard functions
-    const bool isKeyDown(const KeyboardKey::Key);
-    const bool isKeyDownOnce(const KeyboardKey::Key);
+    const unsigned int getNumPressedKeys();
+    const bool isKeyDown(const KeyboardKey::Key&);
+    const bool isKeyDownOnce(const KeyboardKey::Key&);
+    const bool isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second);
+    const bool isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second, const KeyboardKey::Key& third);
     const bool isKeyDownOnce();
+
     const bool isKeyUp(const KeyboardKey::Key);
 
-    const bool isKeyDownOnce(const KeyboardKey::Key first, const KeyboardKey::Key second);
 
     const KeyboardKey::Key getPressedKey();
     const MouseButton::Button getPressedButton();
 
     //mouse functions
-    const bool isMouseButtonDown(const MouseButton::Button);
-    const bool isMouseButtonDownOnce(const MouseButton::Button);
+    const bool isMouseButtonDown(const MouseButton::Button&);
+    const bool isMouseButtonDownOnce(const MouseButton::Button&);
 
     const glm::vec2& getMouseDifference();
     const glm::vec2& getMousePositionPrevious();

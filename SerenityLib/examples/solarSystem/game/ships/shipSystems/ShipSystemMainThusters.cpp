@@ -1,5 +1,7 @@
 #include "ShipSystemMainThrusters.h"
+
 #include "../../Ship.h"
+#include "../../config/Keybinds.h"
 
 #include <ecs/ComponentBody.h>
 #include <core/engine/events/Engine_Events.h>
@@ -19,27 +21,28 @@ void ShipSystemMainThrusters::update(const double& dt) {
                 if (!m_Ship.IsWarping()) {
                     const float& amount = 1.3f / ((rigidbody.mass() * 0.15f) + 1.0f);
                     const decimal final_amount = static_cast<decimal>(amount) * static_cast<decimal>(m_AdditionalForceStrength);
-                    if (Engine::isKeyDown(KeyboardKey::W)) {
+
+                    if (Keybinds::isPressedDown(KeybindEnum::MoveForward)){
                         rigidbody.applyForce(0, 0, -final_amount);
                         ismoving = true;
                     }
-                    if (Engine::isKeyDown(KeyboardKey::S)) {
+                    if (Keybinds::isPressedDown(KeybindEnum::MoveBackward)) {
                         rigidbody.applyForce(0, 0, final_amount);
                         ismoving = true;
                     }
-                    if (Engine::isKeyDown(KeyboardKey::A)) {
+                    if (Keybinds::isPressedDown(KeybindEnum::MoveLeft)) {
                         rigidbody.applyForce(-final_amount, 0, 0);
                         ismoving = true;
                     }
-                    if (Engine::isKeyDown(KeyboardKey::D)) {
+                    if (Keybinds::isPressedDown(KeybindEnum::MoveRight)) {
                         rigidbody.applyForce(final_amount, 0, 0);
                         ismoving = true;
                     }
-                    if (Engine::isKeyDown(KeyboardKey::F)) {
+                    if (Keybinds::isPressedDown(KeybindEnum::MoveDown)) {
                         rigidbody.applyForce(0, -final_amount, 0);
                         ismoving = true;
                     }
-                    if (Engine::isKeyDown(KeyboardKey::R)) {
+                    if (Keybinds::isPressedDown(KeybindEnum::MoveUp)) {
                         rigidbody.applyForce(0, final_amount, 0);
                         ismoving = true;
                     }

@@ -835,7 +835,7 @@ void ShipSystemWeapons::update(const double& dt) {
             for (size_t i = 0; i < m_PrimaryWeaponsBeams.size(); ++i) {
                 const int res = m_PrimaryWeaponsBeams[i].beam->acquire_index();
                 if (res >= 0) {
-                    if (mytarget) {
+                    if (mytarget && !ship || (ship && !ship->isAlly(m_Ship))) {
                         primaryWeaponsBeamsFired.push_back(std::make_tuple(i, mytarget));
                     }
                 }
@@ -844,7 +844,7 @@ void ShipSystemWeapons::update(const double& dt) {
 #pragma endregion
 #pragma region Cannons
             vector<std::tuple<uint, int, EntityWrapper*>> primaryWeaponsCannonsFired;
-            if (mytarget) {
+            if (mytarget && !ship || (ship && !ship->isAlly(m_Ship))) {
                 for (size_t i = 0; i < m_PrimaryWeaponsCannons.size(); ++i) {
                     auto* cannon = m_PrimaryWeaponsCannons[i].cannon;
                     if (cannon->isInControlledArc(mytarget)) {
@@ -859,7 +859,7 @@ void ShipSystemWeapons::update(const double& dt) {
                     auto& cannon = m_PrimaryWeaponsCannonsFwd[i];
                     const int resIndex = cannon.cannon->acquire_index();
                     if (resIndex >= 0) {
-                        primaryWeaponsCannonsFired.push_back(std::make_tuple(cannon.main_container_index, resIndex, mytarget));
+                        primaryWeaponsCannonsFired.push_back(std::make_tuple(cannon.main_container_index, resIndex, nullptr));
                     }
                 }
             }
@@ -955,7 +955,7 @@ void ShipSystemWeapons::update(const double& dt) {
 
             //first, get the arcs that are in range of the target if applicable
             vector<std::tuple<uint, int, EntityWrapper*>> secWeaponsTorpedosFiredInValidArc;
-            if (mytarget) {
+            if (mytarget && !ship || (ship && !ship->isAlly(m_Ship))) {
                 for (size_t i = 0; i < m_SecondaryWeaponsTorpedos.size(); ++i) {
                     auto torpedo = m_SecondaryWeaponsTorpedos[i].torpedo;
                     if (torpedo->isInControlledArc(mytarget)) {
@@ -970,7 +970,7 @@ void ShipSystemWeapons::update(const double& dt) {
                     auto torpedo = m_SecondaryWeaponsTorpedos[i].torpedo;
                     const int resIndex = torpedo->acquire_index();
                     if (resIndex >= 0) {
-                        secWeaponsTorpedosFiredInValidArc.push_back(std::make_tuple(i, resIndex, mytarget));
+                        secWeaponsTorpedosFiredInValidArc.push_back(std::make_tuple(i, resIndex, nullptr));
                     }
                 }
             }
@@ -978,18 +978,20 @@ void ShipSystemWeapons::update(const double& dt) {
             //now we have our valid torpedo launchers, pick the launcher with the most rounds
             uint maxRounds = 0;
             uint chosenIndex = 0;
+            EntityWrapper* chosen_torp_target = nullptr;
             for (auto& weapIndex : secWeaponsTorpedosFiredInValidArc) {
                 auto& launcher = m_SecondaryWeaponsTorpedos[std::get<0>(weapIndex)].torpedo;
                 if (launcher->numRounds > maxRounds) {
                     maxRounds = launcher->numRounds;
                     chosenIndex = std::get<0>(weapIndex);
+                    chosen_torp_target = std::get<2>(weapIndex);
                 }
             }
             //now fire this chosen launcher
             if (secWeaponsTorpedosFiredInValidArc.size() > 0) {
                 const int resIndex = m_SecondaryWeaponsTorpedos[chosenIndex].torpedo->acquire_index();
                 if (resIndex >= 0) {
-                    secWeaponsTorpedosFired.push_back(std::make_tuple(chosenIndex, resIndex, mytarget));
+                    secWeaponsTorpedosFired.push_back(std::make_tuple(chosenIndex, resIndex, chosen_torp_target));
                 }
             }
 #pragma endregion

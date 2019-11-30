@@ -238,6 +238,12 @@
     <Filter Include="Header Files\Game\Networking\Client">
       <UniqueIdentifier>{dd860982-cade-41ca-be7d-fe69cdee1682}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Config">
+      <UniqueIdentifier>{0748b440-adc2-4439-8525-3f288db25b46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Config">
+      <UniqueIdentifier>{16ac1320-127c-4652-990a-b74bb011adc7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -519,6 +525,9 @@
     <ClInclude Include="game\networking\client\ClientMapSpecificData.h">
       <Filter>Header Files\Game\Networking\Client</Filter>
     </ClInclude>
+    <ClInclude Include="game\config\Keybinds.h">
+      <Filter>Header Files\Game\Config</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -784,6 +793,9 @@
     </ClCompile>
     <ClCompile Include="game\networking\client\ClientMapSpecificData.cpp">
       <Filter>Source Files\Game\Networking\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="game\config\Keybinds.cpp">
+      <Filter>Source Files\Game\Config</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

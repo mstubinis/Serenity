@@ -1,6 +1,8 @@
 #include "ShipSystemRollThrusters.h"
+
 #include "../../Ship.h"
 #include "../../GameCamera.h"
+#include "../../config/Keybinds.h"
 
 #include <core/engine/events/Engine_Events.h>
 
@@ -16,10 +18,10 @@ void ShipSystemRollThrusters::update(const double& dt) {
             auto& rigidbody = *m_Ship.getComponent<ComponentBody>();
             if (m_Ship.IsPlayer()) {
                 float amount = 1.0f / rigidbody.mass();
-                if (Engine::isKeyDown(KeyboardKey::Q)) {
+                if (Keybinds::isPressedDown(KeybindEnum::RollLeft)){
                     rigidbody.applyTorque(0, 0, static_cast<decimal>(amount) * static_cast<decimal>(m_AdditionalStrength));
                 }
-                if (Engine::isKeyDown(KeyboardKey::E)) {
+                if (Keybinds::isPressedDown(KeybindEnum::RollRight)) {
                     rigidbody.applyTorque(0, 0, static_cast<decimal>(-amount) * static_cast<decimal>(m_AdditionalStrength));
                 }
             }
