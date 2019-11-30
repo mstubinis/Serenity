@@ -168,6 +168,8 @@ void EngineCore::on_event_close(){
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_lost_focus(){
+    Core::m_Engine->m_EventManager.m_KeyStatus.clear();
+    Core::m_Engine->m_EventManager.m_MouseStatus.clear();
     Game::onLostFocus();
 
     Event ev;
@@ -175,6 +177,8 @@ void EngineCore::on_event_lost_focus(){
     Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_gained_focus(){
+    Core::m_Engine->m_EventManager.m_KeyStatus.clear();
+    Core::m_Engine->m_EventManager.m_MouseStatus.clear();
     Game::onGainedFocus();
 
     Event ev;
@@ -362,9 +366,13 @@ void EngineCore::handle_events(){
     sf::Event e;
     while(Resources::getWindow().getSFMLHandle().pollEvent(e)){
         switch(e.type){
-            case sf::Event::Closed:{
+            case sf::Event::Closed: {
                 on_event_close(); break;
-            }case sf::Event::KeyReleased:{
+            }case sf::Event::LostFocus:{
+                on_event_lost_focus(); break;
+            }case sf::Event::GainedFocus: {
+                on_event_gained_focus(); break; 
+            }case sf::Event::KeyReleased: {
                 on_event_key_released(e.key.code); break;
             }case sf::Event::KeyPressed:{
                 on_event_key_pressed(e.key.code); break;

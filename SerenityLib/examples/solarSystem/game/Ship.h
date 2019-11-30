@@ -5,21 +5,18 @@
 #include <unordered_map>
 
 #include <ecs/Components.h>
-#include <glm/vec2.hpp>
 #include <core/engine/utils/Utils.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include "networking/client/Client.h"
 #include "teams/Team.h"
 #include "ai/AIIncludes.h"
 
-#include "ships/shipSystems/ShipSystemBaseClass.h"
+#include "ships/shipSystems/ShipSystemWeapons.h"
 #include <ecs/EntityWrapper.h>
 
 #define WARP_PHYSICS_MODIFIER 1.333333333f
 
 class  GameCamera;
-class  Ship;
-class  Map;
 class  Decal;
 struct PacketMessage;
 struct PacketPhysicsUpdate;
@@ -38,7 +35,6 @@ class  ShipSystemCloakingDevice;
 class  ShipSystemWarpDrive;
 class  ShipSystemSensors;
 class  ShipSystemShields;
-class  ShipSystemWeapons;
 class  ShipSystemHull;
 class  ShipSystem;
 class  SensorStatusDisplay;
@@ -206,8 +202,8 @@ class Ship: public EntityWrapper, public EventObserver {
         void translateWarp(const double& amount, const double& dt);
         void toggleWarp();
         const bool canSeeCloak(Ship* otherShip);
-        bool cloak(const bool sendPacket = true);
-        bool decloak(const bool sendPacket = true);
+        virtual bool cloak(const bool sendPacket = true);
+        virtual bool decloak(const bool sendPacket = true);
 
         const std::string& getClass() const;
         GameCamera* getPlayerCamera();
@@ -234,5 +230,9 @@ class Ship: public EntityWrapper, public EventObserver {
         PrimaryWeaponBeam& getPrimaryWeaponBeam(const uint index);
         PrimaryWeaponCannon& getPrimaryWeaponCannon(const uint index);
         SecondaryWeaponTorpedo& getSecondaryWeaponTorpedo(const uint index);
+
+        virtual void fireBeams(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship);
+        virtual void fireCannons(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship);
+        virtual void fireTorpedos(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship);
 };
 #endif

@@ -189,7 +189,7 @@ namespace Engine {
 };
 const bool epriv::InternalModelInstancePublicInterface::IsViewportValid(ModelInstance& modelInstance, Viewport& viewport) {
     const auto flags = modelInstance.getViewportFlags();
-    return (!((flags & (1 << viewport.id())) || flags == 0)) ? false : true;
+    return !(flags & (1 << viewport.id()) || flags == 0) ? false : true;
 }
 
 

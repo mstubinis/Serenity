@@ -15,10 +15,11 @@
 #include "../../ships/shipSystems/ShipSystemShields.h"
 #include "../../ships/shipSystems/ShipSystemWarpDrive.h"
 #include "../../ships/shipSystems/ShipSystemYawThrusters.h"
-#include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
 #include "../../ai/AI.h"
 #include "../Ships.h"
+
+#include "../../config/Keybinds.h"
 
 constexpr auto CLASS = "Defiant";
 
@@ -27,6 +28,9 @@ using namespace std;
 Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client, CLASS,map,ai_type,name,position,scale, collisionType){
 
+    m_Perks = Defiant::Perks::None;
+    m_UnlockedPerks = Defiant::Perks::None;
+
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
@@ -34,8 +38,7 @@ Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
         else if (i == 1)  system = new ShipSystemPitchThrusters(_this);
         else if (i == 2)  system = new ShipSystemYawThrusters(_this);
         else if (i == 3)  system = new ShipSystemRollThrusters(_this);
-        else if (i == 4)  system = nullptr; //no cloaking device
-        //else if (i == 4)  system = new ShipSystemCloakingDevice(_this);
+        else if (i == 4)  system = new ShipSystemCloakingDevice(_this);
         else if (i == 5)  system = new ShipSystemShields(_this, map, 9000.0f, 9000.0f, 9000.0f, 9000.0f, 12000.0f, 12000.0f, glm::vec3(0.0f), glm::vec3(1.15f, 2.1f, 1.15f));
         else if (i == 6)  system = new ShipSystemMainThrusters(_this);
         else if (i == 7)  system = new ShipSystemWarpDrive(_this);
@@ -48,20 +51,19 @@ Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
 
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
-    //blender 3d to game 3d: switch y and z, then negate z
-    auto* leftTop     = new PulsePhaser(_this, map, glm::vec3(-0.573355f, 0.072793f, -0.207088f), glm::vec3(0.0055f, 0, -1), 10.0f, 6,250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
-    auto* leftBottom  = new PulsePhaser(_this, map, glm::vec3(-0.434018f, -0.163775, -0.093399), glm::vec3(0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
-    auto* rightBottom = new PulsePhaser(_this, map, glm::vec3(0.434018f, -0.163775, -0.093399), glm::vec3(-0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
-    auto* rightTop    = new PulsePhaser(_this, map, glm::vec3(0.573355f, 0.072793f, -0.207088f), glm::vec3(-0.0055f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
+    auto* leftTopCannon     = new PulsePhaser(_this, map, glm::vec3(-0.573355f, 0.072793f, -0.207088f), glm::vec3(0.0055f, 0, -1), 10.0f, 6,250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
+    auto* leftBottomCannon = new PulsePhaser(_this, map, glm::vec3(-0.434018f, -0.163775, -0.093399), glm::vec3(0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
+    auto* rightBottomCannon = new PulsePhaser(_this, map, glm::vec3(0.434018f, -0.163775, -0.093399), glm::vec3(-0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
+    auto* rightTopCannon = new PulsePhaser(_this, map, glm::vec3(0.573355f, 0.072793f, -0.207088f), glm::vec3(-0.0055f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
 
     auto* leftTorp = new QuantumTorpedo(_this, map, glm::vec3(-0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
     auto* rightTorp = new QuantumTorpedo(_this, map, glm::vec3(0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
     auto* aftTorp = new PhotonTorpedo(_this, map, glm::vec3(0.0f, 0.019991f, 1.04274f), glm::vec3(0, 0, 1), 15.0f);
 
-    weapons.addPrimaryWeaponCannon(*leftTop, true);
-    weapons.addPrimaryWeaponCannon(*leftBottom, true);
-    weapons.addPrimaryWeaponCannon(*rightBottom, true);
-    weapons.addPrimaryWeaponCannon(*rightTop, true);
+    weapons.addPrimaryWeaponCannon(*leftTopCannon, true);
+    weapons.addPrimaryWeaponCannon(*leftBottomCannon, true);
+    weapons.addPrimaryWeaponCannon(*rightBottomCannon, true);
+    weapons.addPrimaryWeaponCannon(*rightTopCannon, true);
 
     weapons.addSecondaryWeaponTorpedo(*leftTorp, true);
     weapons.addSecondaryWeaponTorpedo(*rightTorp, true);
@@ -98,6 +100,33 @@ Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
     weapons.addPrimaryWeaponBeam(*ventralRightBeam);
     weapons.addPrimaryWeaponBeam(*ventralLeftBeam);
     
+
+
+    //bonus weapons only (perk 1)
+    {
+        vector<glm::vec3> _1_pts{
+            glm::vec3(-0.573355f, 0.072793f, -0.207088f),
+        };
+        vector<glm::vec3> _2_pts{
+            glm::vec3(-0.434018f, -0.163775, -0.093399),
+        };
+        vector<glm::vec3> _3_pts{
+            glm::vec3(0.434018f, -0.163775, -0.093399),
+        };
+        vector<glm::vec3> _4_pts{
+            glm::vec3(0.573355f, 0.072793f, -0.207088f),
+        };
+        auto* leftTopBeamPerk = new PhaserBeam(_this, map, _1_pts[0], glm::vec3(0.0055f, 0, -1), 18.0f, _1_pts);
+        auto* leftBottomBeamPerk = new PhaserBeam(_this, map, _2_pts[0], glm::vec3(0.005f, 0, -1), 18.0f, _2_pts);
+        auto* rightBottomBeamPerk = new PhaserBeam(_this, map, _3_pts[0], glm::vec3(-0.005f, 0, -1), 18.0f, _3_pts);
+        auto* rightTopBeamPerk = new PhaserBeam(_this, map, _4_pts[0], glm::vec3(-0.0055f, 0, -1), 18.0f, _4_pts);
+
+        weapons.addPrimaryWeaponBeam(*leftTopBeamPerk, true);
+        weapons.addPrimaryWeaponBeam(*leftBottomBeamPerk, true);
+        weapons.addPrimaryWeaponBeam(*rightBottomBeamPerk, true);
+        weapons.addPrimaryWeaponBeam(*rightTopBeamPerk, true);
+    }
+
     if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
         Ships::Database[CLASS].HullImpactPoints = {
             glm::vec3(0.001f,0.001f,-0.944632f),
@@ -143,4 +172,64 @@ Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
 }
 Defiant::~Defiant() {
 
+}
+void Defiant::fireBeams(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship) {
+    vector<ShipSystemWeapons::WeaponBeam> beams;
+    auto& weapon_beams = weapons.getBeams();
+    if (m_Perks & Defiant::Perks::DefiantPerk1BeamReplaceCannons) {
+        beams = weapon_beams;
+    }else{
+        for (int i = 0; i < weapon_beams.size() - 4; ++i) { //omit the 4 perk beams
+            beams.push_back(weapon_beams[i]);
+        }
+    }
+    weapons.fireBeamWeapons(target, target_as_ship, beams);
+}
+void Defiant::fireCannons(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship) {
+    if (m_Perks & Defiant::Perks::DefiantPerk1BeamReplaceCannons) {
+        return; //perk is active, cannons are now beams, so we cannot fire cannons
+    }
+    weapons.fireCannonWeapons(target, target_as_ship, weapons.getCannons());
+}
+bool Defiant::cloak(const bool sendPacket) {
+    if (m_UnlockedPerks & Defiant::Perks::DefiantPerk3CloakingDevice) {
+        return Ship::cloak(sendPacket);
+    }
+    return false;
+}
+bool Defiant::decloak(const bool sendPacket) {
+    //TODO: do we need a check here? ideally we WANT it to decloak if the perk is not active, because it shouldn't have been cloaked in the first place! :P
+    return Ship::decloak(sendPacket);
+}
+void Defiant::togglePerk1CannonsToBeams() {
+    if (m_UnlockedPerks & Defiant::Perks::DefiantPerk1BeamReplaceCannons) {
+        auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
+
+        if (m_Perks & Defiant::Perks::DefiantPerk1BeamReplaceCannons) {
+            m_Perks &= ~(Defiant::Perks::DefiantPerk1BeamReplaceCannons); //turn beams off, enable cannons
+
+            for (auto& cannon : weapons.getCannons()) {
+                cannon.cannon->numRounds = 0;
+                cannon.cannon->rechargeTimer = 0.0f;
+            }
+        }else {
+            m_Perks |= Defiant::Perks::DefiantPerk1BeamReplaceCannons; //turn beams on, disable cannons
+
+            auto& beams = weapons.getBeams();
+            for (int i = beams.size() - 4; i < beams.size(); ++i) {
+                auto& beam = *beams[i].beam;
+                beam.rechargeTimer = 0.0f;
+                beam.numRounds = 0;
+                beam.chargeTimer = 0.0f;
+                beam.state = BeamWeaponState::JustTurnedOff;
+            }
+        }
+    }
+}
+void Defiant::update(const double& dt) {
+    if (Keybinds::isPressedDownOnce(KeybindEnum::TogglePerk1)) {
+        if (IsPlayer() && !isDestroyed() && !isCloaked()) {
+            togglePerk1CannonsToBeams();
+        }
+    }
 }

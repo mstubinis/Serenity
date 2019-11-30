@@ -269,7 +269,9 @@ class ShipSystemWeapons final : public ShipSystem {
         struct WeaponBeam final {
             PrimaryWeaponBeam* beam;
             size_t main_container_index;
+            bool isForward;
             WeaponBeam() {
+                isForward = false;
                 beam = nullptr;
                 main_container_index = 0;
             }
@@ -277,7 +279,9 @@ class ShipSystemWeapons final : public ShipSystem {
         struct WeaponCannon final {
             PrimaryWeaponCannon* cannon;
             size_t main_container_index;
+            bool isForward;
             WeaponCannon() {
+                isForward = false;
                 cannon = nullptr;
                 main_container_index = 0;
             }
@@ -285,7 +289,9 @@ class ShipSystemWeapons final : public ShipSystem {
         struct WeaponTorpedo final {
             SecondaryWeaponTorpedo* torpedo;
             size_t main_container_index;
+            bool isForward;
             WeaponTorpedo() {
+                isForward = false;
                 torpedo = nullptr;
                 main_container_index = 0;
             }
@@ -294,18 +300,15 @@ class ShipSystemWeapons final : public ShipSystem {
         std::vector<WeaponCannon>      m_PrimaryWeaponsCannons;
         std::vector<WeaponBeam>        m_PrimaryWeaponsBeams;
         std::vector<WeaponTorpedo>     m_SecondaryWeaponsTorpedos;
-
-
-        std::vector<WeaponCannon>      m_PrimaryWeaponsCannonsFwd;
-        std::vector<WeaponBeam>        m_PrimaryWeaponsBeamsFwd;
-        std::vector<WeaponTorpedo>     m_SecondaryWeaponsTorpedosFwd;
-
-        std::vector<WeaponCannon>      m_PrimaryWeaponsCannonsNonFwd;
-        std::vector<WeaponBeam>        m_PrimaryWeaponsBeamsNonFwd;
-        std::vector<WeaponTorpedo>     m_SecondaryWeaponsTorpedosNonFwd;
     public:
         ShipSystemWeapons(Ship&);
         ~ShipSystemWeapons();
+
+
+        void fireBeamWeapons(EntityWrapper* target, Ship* target_as_ship, std::vector<ShipSystemWeapons::WeaponBeam>& beamWeapons);
+        void fireCannonWeapons(EntityWrapper* target, Ship* target_as_ship, std::vector<ShipSystemWeapons::WeaponCannon>& cannonWeapons);
+        void fireTorpedoWeapons(EntityWrapper* target, Ship* target_as_ship, std::vector<ShipSystemWeapons::WeaponTorpedo>& torpedoWeapons);
+
 
         static const decimal calculate_quadratic_time_till_hit(const glm_vec3& pos, const glm_vec3& vel, const decimal& s);
 
@@ -324,16 +327,6 @@ class ShipSystemWeapons final : public ShipSystem {
         std::vector<WeaponCannon>& getCannons();
         std::vector<WeaponBeam>& getBeams();
         std::vector<WeaponTorpedo>& getTorpedos();
-
-
-        std::vector<WeaponCannon>& getForwardCannons();
-        std::vector<WeaponBeam>& getForwardBeams();
-        std::vector<WeaponTorpedo>& getForwardTorpedos();
-
-        std::vector<WeaponCannon>& getNonForwardCannons();
-        std::vector<WeaponBeam>& getNonForwardBeams();
-        std::vector<WeaponTorpedo>& getNonForwardTorpedos();
-
 
         void update(const double& dt);
 };

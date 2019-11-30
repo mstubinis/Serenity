@@ -26,6 +26,10 @@ struct KeybindEnum final { enum Enum {
     ToggleAntiCloakScan,
     ToggleCloak,
     ToggleHUD,
+    ToggleWarpDrive,
+    TogglePerk1,
+    TogglePerk2,
+    TogglePerk3,
     _TOTAL,
 };};
 
@@ -50,6 +54,7 @@ class Keybind final {
         Keybind(const KeyboardKey::Key& key, const KeyboardKey::Key& first_mod, const KeyboardKey::Key& second_mod);
         ~Keybind();
 
+        void clearBind();
 
         void addBind(const KeyboardKey::Key& key);
         void addBind(const KeyboardKey::Key& key, const KeyboardKey::Key& first_mod);

@@ -9,31 +9,38 @@ vector<Keybind> Keybinds::keybinds = []() {
     vector<Keybind> ret;
     ret.resize(KeybindEnum::_TOTAL);
 
-    ret[KeybindEnum::TargetCycleEnemy] = Keybind(KeyboardKey::T);
+    ret[KeybindEnum::TargetCycleEnemy]          = Keybind(KeyboardKey::T);
 
-    ret[KeybindEnum::TargetCycleFriendly] = Keybind(KeyboardKey::LeftShift, KeyboardKey::T);
+    ret[KeybindEnum::TargetCycleFriendly]       = Keybind(KeyboardKey::LeftShift, KeyboardKey::T);
     ret[KeybindEnum::TargetCycleFriendly].addBind(KeyboardKey::RightShift, KeyboardKey::T);
 
-    ret[KeybindEnum::TargetNearestEnemy] = Keybind(KeyboardKey::Y);
+    ret[KeybindEnum::TargetNearestEnemy]        = Keybind(KeyboardKey::Y);
     ret[KeybindEnum::TargetNearestCloakedEnemy] = Keybind(KeyboardKey::G);
-    ret[KeybindEnum::MoveForward] = Keybind(KeyboardKey::W);
-    ret[KeybindEnum::MoveBackward] = Keybind(KeyboardKey::S);
-    ret[KeybindEnum::MoveLeft] = Keybind(KeyboardKey::A);
-    ret[KeybindEnum::MoveRight] = Keybind(KeyboardKey::D);
-    ret[KeybindEnum::MoveUp] = Keybind(KeyboardKey::R);
-    ret[KeybindEnum::MoveDown] = Keybind(KeyboardKey::F);
-    ret[KeybindEnum::RollLeft] = Keybind(KeyboardKey::Q);
-    ret[KeybindEnum::RollRight] = Keybind(KeyboardKey::E);
-    ret[KeybindEnum::CameraCockpit] = Keybind(KeyboardKey::F1);
-    ret[KeybindEnum::CameraFollowTarget] = Keybind(KeyboardKey::F2);
-    ret[KeybindEnum::CameraOrbit] = Keybind(KeyboardKey::F3);
-    ret[KeybindEnum::CameraFreeform] = Keybind(KeyboardKey::F4);
-    ret[KeybindEnum::ToggleFireAtWill] = Keybind(KeyboardKey::H);
-    ret[KeybindEnum::ToggleAntiCloakScan] = Keybind(KeyboardKey::I);
-    ret[KeybindEnum::ToggleCloak] = Keybind(KeyboardKey::C);
+    ret[KeybindEnum::MoveForward]               = Keybind(KeyboardKey::W);
+    ret[KeybindEnum::MoveBackward]              = Keybind(KeyboardKey::S);
+    ret[KeybindEnum::MoveLeft]                  = Keybind(KeyboardKey::A);
+    ret[KeybindEnum::MoveRight]                 = Keybind(KeyboardKey::D);
+    ret[KeybindEnum::MoveUp]                    = Keybind(KeyboardKey::R);
+    ret[KeybindEnum::MoveDown]                  = Keybind(KeyboardKey::F);
+    ret[KeybindEnum::RollLeft]                  = Keybind(KeyboardKey::Q);
+    ret[KeybindEnum::RollRight]                 = Keybind(KeyboardKey::E);
+    ret[KeybindEnum::CameraCockpit]             = Keybind(KeyboardKey::F1);
+    ret[KeybindEnum::CameraFollowTarget]        = Keybind(KeyboardKey::F2);
+    ret[KeybindEnum::CameraOrbit]               = Keybind(KeyboardKey::F3);
+    ret[KeybindEnum::CameraFreeform]            = Keybind(KeyboardKey::F4);
+    ret[KeybindEnum::ToggleFireAtWill]          = Keybind(KeyboardKey::H);
+    ret[KeybindEnum::ToggleAntiCloakScan]       = Keybind(KeyboardKey::I);
+    ret[KeybindEnum::ToggleCloak]               = Keybind(KeyboardKey::C);
 
-    ret[KeybindEnum::ToggleHUD] = Keybind(KeyboardKey::LeftAlt, KeyboardKey::X);
+    ret[KeybindEnum::ToggleHUD]                 = Keybind(KeyboardKey::LeftAlt, KeyboardKey::X);
     ret[KeybindEnum::ToggleHUD].addBind(KeyboardKey::RightAlt, KeyboardKey::X);
+
+    ret[KeybindEnum::ToggleWarpDrive]           = Keybind(KeyboardKey::L);
+
+    ret[KeybindEnum::TogglePerk1]               = Keybind(KeyboardKey::Num1);
+    ret[KeybindEnum::TogglePerk2]               = Keybind(KeyboardKey::Num2);
+    ret[KeybindEnum::TogglePerk3]               = Keybind(KeyboardKey::Num3);
+
     return ret;
 }();
 
@@ -53,6 +60,9 @@ Keybind::Keybind(const KeyboardKey::Key& key, const KeyboardKey::Key& first_mod)
 }
 Keybind::Keybind(const KeyboardKey::Key& key, const KeyboardKey::Key& first_mod, const KeyboardKey::Key& second_mod) {
     addBind(key, first_mod, second_mod);
+}
+void Keybind::clearBind() {
+    binds.clear();
 }
 void Keybind::addBind(const KeyboardKey::Key& key) {
     Keybind::Bind b;
@@ -92,16 +102,17 @@ const bool Keybind::isPressedDown() {
     }
     return false;
 }
+//TODO: handle current pressed keys better (without the commented logic, things like shift-T will trigger both shift-T AND T only
 const bool Keybind::isPressedDownOnce() {
     for (auto& b : binds) {
         if (b.m_SecondModifier != KeyboardKey::Unknown && b.m_FirstModifier != KeyboardKey::Unknown) {
-            if (Engine::isKeyDownOnce(b.m_SecondModifier, b.m_FirstModifier, b.m_Key) && Engine::getNumPressedKeys() == 3)
+            if (Engine::isKeyDownOnce(b.m_SecondModifier, b.m_FirstModifier, b.m_Key) /*&& Engine::getNumPressedKeys() == 3*/)
                 return true;
         }else if (b.m_FirstModifier != KeyboardKey::Unknown) {
-            if (Engine::isKeyDownOnce(b.m_FirstModifier, b.m_Key) && Engine::getNumPressedKeys() == 2)
+            if (Engine::isKeyDownOnce(b.m_FirstModifier, b.m_Key) /*&& Engine::getNumPressedKeys() == 2*/)
                 return true;
         }else {
-            if (Engine::isKeyDownOnce(b.m_Key) && Engine::getNumPressedKeys() == 1)
+            if (Engine::isKeyDownOnce(b.m_Key) /* && Engine::getNumPressedKeys() == 1*/)
                 return true;
         }
     }

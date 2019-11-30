@@ -108,9 +108,9 @@ void ShipSystemCloakingDevice::update(const double& dt) {
         if (m_Ship.IsPlayer()) {
             if (Keybinds::isPressedDownOnce(KeybindEnum::ToggleCloak)){
                 if (!m_Active) {
-                    ShipSystemCloakingDevice::cloak(model);
+                    m_Ship.cloak(true);
                 }else{
-                    ShipSystemCloakingDevice::decloak(model);
+                    m_Ship.decloak(true);
                 }
             }
         }

@@ -39,7 +39,6 @@
 #include "ships/shipSystems/ShipSystemShields.h"
 #include "ships/shipSystems/ShipSystemWarpDrive.h"
 #include "ships/shipSystems/ShipSystemYawThrusters.h"
-#include "ships/shipSystems/ShipSystemWeapons.h"
 #include "ships/shipSystems/ShipSystemHull.h"
 
 #include "hud/SensorStatusDisplay.h"
@@ -1336,4 +1335,13 @@ void Ship::update(const double& dt) {
         auto& team = *m_Client.getGameplayMode()->getTeams().at(TeamNumber::Team_2);
         map.createShip(AIType::AI_Stationary, team, m_Client, "Federation Defense Platform", "Defense Platform " + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -20.0));
     }
+}
+void Ship::fireBeams(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship) {
+    weapons.fireBeamWeapons(target, target_as_ship, weapons.m_PrimaryWeaponsBeams);
+}
+void Ship::fireCannons(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship) {
+    weapons.fireCannonWeapons(target, target_as_ship, weapons.m_PrimaryWeaponsCannons);
+}
+void Ship::fireTorpedos(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship) {
+    weapons.fireTorpedoWeapons(target, target_as_ship, weapons.m_SecondaryWeaponsTorpedos);
 }

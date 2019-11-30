@@ -77,26 +77,28 @@ void FireAtWill::internal_execute_beams() {
         }
         return false;
     };
-    auto lamda_execute = [&](vector<ShipSystemWeapons::WeaponBeam>& beams) {
+    auto lamda_execute = [&](vector<ShipSystemWeapons::WeaponBeam>& beams, const bool isForward) {
         PacketMessage pOut;
         for (auto& beam_ptr : beams) {
             auto& beam = *beam_ptr.beam;
-            for (auto& enemy : m_Sensors.getEnemyShips()) {
-                auto& enemyShip = *enemy.ship;
-                const auto res = lamda(enemyShip, beam, pOut);
-            }
-            for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
-                auto& enemyShip = *enemy.ship;
-                const auto res = lamda(enemyShip, beam, pOut);
+            if ((!isForward && !beam_ptr.isForward)   || isForward) {
+                for (auto& enemy : m_Sensors.getEnemyShips()) {
+                    auto& enemyShip = *enemy.ship;
+                    const auto res = lamda(enemyShip, beam, pOut);
+                }
+                for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
+                    auto& enemyShip = *enemy.ship;
+                    const auto res = lamda(enemyShip, beam, pOut);
+                }
             }
         }
         if (!pOut.data.empty())
             m_Ship.m_Client.send(pOut);
     };
     if (!m_IsUsingForwardWeapons) {
-        lamda_execute(m_Weapons.getNonForwardBeams());
+        lamda_execute(m_Weapons.getBeams(), false);
     }else{
-        lamda_execute(m_Weapons.getBeams());
+        lamda_execute(m_Weapons.getBeams(), true);
     }
 }
 void FireAtWill::internal_execute_cannons() {
@@ -144,26 +146,28 @@ void FireAtWill::internal_execute_cannons() {
         }
         return false;
     };
-    auto lamda_execute = [&](vector<ShipSystemWeapons::WeaponCannon>& cannons) {
+    auto lamda_execute = [&](vector<ShipSystemWeapons::WeaponCannon>& cannons, const bool isForward) {
         PacketMessage pOut;
         for (auto& ptr : cannons) {
             auto& weapon = *ptr.cannon;
-            for (auto& enemy : m_Sensors.getEnemyShips()) {
-                auto& enemyShip = *enemy.ship;
-                const auto res = lamda(enemyShip, weapon, pOut);
-            }
-            for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
-                auto& enemyShip = *enemy.ship;
-                const auto res = lamda(enemyShip, weapon, pOut);
+            if ((!isForward && !ptr.isForward) || isForward) {
+                for (auto& enemy : m_Sensors.getEnemyShips()) {
+                    auto& enemyShip = *enemy.ship;
+                    const auto res = lamda(enemyShip, weapon, pOut);
+                }
+                for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
+                    auto& enemyShip = *enemy.ship;
+                    const auto res = lamda(enemyShip, weapon, pOut);
+                }
             }
         }
         if(!pOut.data.empty())
             m_Ship.m_Client.send(pOut);
     };
     if (!m_IsUsingForwardWeapons) {
-        lamda_execute(m_Weapons.getNonForwardCannons());
+        lamda_execute(m_Weapons.getCannons(), false);
     }else{
-        lamda_execute(m_Weapons.getCannons());
+        lamda_execute(m_Weapons.getCannons(), true);
     }
 }
 void FireAtWill::internal_execute_torpedos() {
@@ -213,29 +217,31 @@ void FireAtWill::internal_execute_torpedos() {
         }
         return false;
     };
-    auto lamda_execute = [&](vector<ShipSystemWeapons::WeaponTorpedo>& torpedos) {
+    auto lamda_execute = [&](vector<ShipSystemWeapons::WeaponTorpedo>& torpedos, const bool isForward) {
         for (auto& ptr : torpedos) {
             auto& weapon = *ptr.torpedo;
-            for (auto& enemy : m_Sensors.getEnemyShips()) {
-                auto& enemyShip = *enemy.ship;
-                const auto res = lamda(enemyShip, weapon);
-                if (res) {
-                    return;
+            if ((!isForward && !ptr.isForward) || isForward) {
+                for (auto& enemy : m_Sensors.getEnemyShips()) {
+                    auto& enemyShip = *enemy.ship;
+                    const auto res = lamda(enemyShip, weapon);
+                    if (res) {
+                        return;
+                    }
                 }
-            }
-            for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
-                auto& enemyShip = *enemy.ship;
-                const auto res = lamda(enemyShip, weapon);
-                if (res) {
-                    return;
+                for (auto& enemy : m_Sensors.getAntiCloakDetectedShips()) {
+                    auto& enemyShip = *enemy.ship;
+                    const auto res = lamda(enemyShip, weapon);
+                    if (res) {
+                        return;
+                    }
                 }
             }
         }
     };
     if (!m_IsUsingForwardWeapons) {
-        lamda_execute(m_Weapons.getNonForwardTorpedos());
+        lamda_execute(m_Weapons.getTorpedos(), false);
     }else{
-        lamda_execute(m_Weapons.getTorpedos());
+        lamda_execute(m_Weapons.getTorpedos(), true);
     }
 }
 void FireAtWill::internal_reset_timers() {

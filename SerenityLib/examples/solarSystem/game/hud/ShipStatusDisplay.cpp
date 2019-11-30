@@ -275,7 +275,7 @@ void ShipStatusDisplay::render() {
 
             //finally, render planet name & type
             Renderer::renderText(
-                planet->getName() + " - " + planet->getTypeName(),
+                planet->getName() /* + " - " + planet->getTypeName() */,
                 m_HUD.getFont(),
                 bottomLeftCorner + glm::vec2(m_Size.x / 2, m_Size.y - 4),
                 m_Color,
