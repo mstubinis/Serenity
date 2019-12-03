@@ -1,9 +1,9 @@
 #include "Vorcha.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
-#include "../../weapons/DisruptorCannon.h"
-#include "../../weapons/KlingonPhotonTorpedo.h"
-#include "../../weapons/DisruptorBeam.h"
+#include "../../weapons/cannons/DisruptorCannon.h"
+#include "../../weapons/torpedos/KlingonPhotonTorpedo.h"
+#include "../../weapons/beams/DisruptorBeam.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"

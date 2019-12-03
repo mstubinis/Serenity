@@ -9,7 +9,6 @@
 
 #include "../../networking/client/Client.h"
 #include "../../Core.h"
-#include "../../networking/Packet.h"
 
 using namespace std;
 

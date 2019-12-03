@@ -47,6 +47,8 @@ class Keybind final {
             }
         };
         std::vector<Keybind::Bind> binds;
+
+        const bool isModifierPressedDown();
     public:
         Keybind();
         Keybind(const KeyboardKey::Key& key);
@@ -59,6 +61,7 @@ class Keybind final {
         void addBind(const KeyboardKey::Key& key);
         void addBind(const KeyboardKey::Key& key, const KeyboardKey::Key& first_mod);
         void addBind(const KeyboardKey::Key& key, const KeyboardKey::Key& first_mod, const KeyboardKey::Key& second_mod);
+
 
         const bool isPressedDown();
         const bool isPressedDownOnce();

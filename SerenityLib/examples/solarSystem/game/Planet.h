@@ -40,12 +40,12 @@ struct RotationInfo final{
     }
 };
 class OrbitInfo final{
-    private:
+    public:
         glm::vec4    info; //x = eccentricity, y = days, z = minorRadius, w = majorRadius
         decimal      inclination;
         decimal      angle;
-        Planet*      parent;
-    public:
+        Planet* parent;
+
         OrbitInfo(const float eccentricity, const float days, const float majorRadius, const decimal angle, Planet& parent, const decimal inclination = 0);
         ~OrbitInfo(){}
         void setOrbitalPosition(const decimal angle, Planet& planet);

@@ -1,9 +1,9 @@
 #include "Shrike.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
-#include "../../weapons/PlasmaCannon.h"
-#include "../../weapons/PlasmaBeam.h"
-#include "../../weapons/PlasmaTorpedo.h"
+#include "../../weapons/cannons/PlasmaCannon.h"
+#include "../../weapons/beams/PlasmaBeam.h"
+#include "../../weapons/torpedos/PlasmaTorpedo.h"
 
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"

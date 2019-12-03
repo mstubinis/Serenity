@@ -3,7 +3,7 @@
 #include "../ThreatTable.h"
 #include "../../Ship.h"
 #include "../../map/Map.h"
-#include "../../networking/Packet.h"
+#include "../../networking/packets/PacketMessage.h"
 #include "../../ships/Ships.h"
 #include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include "../../ships/shipSystems/ShipSystemSensors.h"

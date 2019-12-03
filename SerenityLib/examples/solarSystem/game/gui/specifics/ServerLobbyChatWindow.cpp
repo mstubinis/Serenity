@@ -10,7 +10,7 @@
 
 #include "../../networking/client/Client.h"
 #include "../../Core.h"
-#include "../../networking/Packet.h"
+#include "../../networking/packets/PacketMessage.h"
 
 using namespace std;
 

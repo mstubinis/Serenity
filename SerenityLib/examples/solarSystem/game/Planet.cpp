@@ -42,9 +42,12 @@ const glm_vec3 OrbitInfo::getOrbitalPosition(const decimal angle_, Planet& thisP
     glm_vec3 offset               = glm_vec3(0.0);
     const glm_vec3 currentPos     = thisPlanet.getPosition();
     if (parent) {
+        auto& majorRadius = info.w;
+        auto& minorRadius = info.z;
+
         const glm_vec3 parentPos  = parent->getPosition();
-        const auto newX           = parentPos.x - glm::cos(angle_) * info.w;
-        const auto newZ           = parentPos.z - glm::sin(angle_) * info.z;
+        const auto newX           = parentPos.x - glm::cos(angle_) * majorRadius;
+        const auto newZ           = parentPos.z - glm::sin(angle_) * minorRadius;
         offset                    = glm_vec3(newX - currentPos.x, 0.0f, newZ - currentPos.z);
     }
     return (currentPos + offset);
@@ -88,7 +91,8 @@ struct PlanetLogicFunctor final {void operator()(ComponentLogic& _component, con
         planet.m_Entity.getComponent<ComponentBody>()->rotate(0.0f, glm::radians(planet.m_RotationInfo->speed * static_cast<float>(dt)), 0.0f);
     }
     if (planet.m_OrbitInfo) {
-        //planet.m_OrbitInfo->setOrbitalPosition(((1.0f/(planet.m_OrbitInfo->info.y*86400.0f))*dt)*6.283188f, planet);
+        auto& days = planet.m_OrbitInfo->info.y;
+        //planet.m_OrbitInfo->setOrbitalPosition(((1.0f/(days*86400.0f))*dt)*6.283188f, planet);
     }
 }};
 

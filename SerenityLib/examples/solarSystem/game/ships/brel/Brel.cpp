@@ -1,8 +1,8 @@
 #include "Brel.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
-#include "../../weapons/DisruptorCannon.h"
-#include "../../weapons/KlingonPhotonTorpedo.h"
+#include "../../weapons/cannons/DisruptorCannon.h"
+#include "../../weapons/torpedos/KlingonPhotonTorpedo.h"
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/math/Engine_Math.h>

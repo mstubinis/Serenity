@@ -4,7 +4,7 @@
 #include "Core.h"
 #include "networking/server/Server.h"
 #include "networking/client/Client.h"
-#include "networking/Packet.h"
+#include "networking/packets/PacketMessage.h"
 #include "ResourceManifest.h"
 #include "GameCamera.h"
 

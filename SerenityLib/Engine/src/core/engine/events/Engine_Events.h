@@ -45,6 +45,9 @@ namespace Engine{
     };
     //keyboard functions
     const unsigned int getNumPressedKeys();
+    const std::unordered_set<unsigned int>& getPressedKeys();
+    const std::unordered_set<unsigned int>& getPressedMouseButtons();
+
     const bool isKeyDown(const KeyboardKey::Key&);
     const bool isKeyDownOnce(const KeyboardKey::Key&);
     const bool isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second);

@@ -1,8 +1,8 @@
 #include "Akira.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
-#include "../../weapons/PhotonTorpedo.h"
-#include "../../weapons/PhaserBeam.h"
+#include "../../weapons/torpedos/PhotonTorpedo.h"
+#include "../../weapons/beams/PhaserBeam.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"

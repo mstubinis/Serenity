@@ -5,7 +5,7 @@
 #include "networking/client/Client.h"
 #include "Ship.h"
 #include "map/Map.h"
-#include "networking/Packet.h"
+#include "networking/packets/PacketMessage.h"
 #include "Planet.h"
 #include "GameCamera.h"
 #include "GameSkybox.h"
@@ -70,21 +70,20 @@ void Core::startClient(GameplayMode* mode, Team* team, const unsigned short& por
     auto& client = *m_Client;
     client.m_MapSpecificData.m_GameplayMode = mode;
     client.m_Username = name;
-    if (!client.m_IsCurrentlyConnecting) {
+    //if (!client.m_IsCurrentlyConnecting) {
         client.changeConnectionDestination(port, ip);
         m_Client->connect(10);
-    }
+    //}
 }
 void Core::shutdownClient(const bool& serverShutdownFirst) {
     if (m_Client) {
         auto& client = *m_Client;
         if (!serverShutdownFirst) {
-            Packet p;
+            PacketMessage p;
             p.PacketType = PacketType::Client_To_Server_Request_Disconnection;
             const auto status = client.send(p);
         }
         client.m_TcpSocket->setBlocking(false);
-        client.m_IsCurrentlyConnecting = false;
         client.disconnect();
 
         Resources::setCurrentScene("Menu");
@@ -92,12 +91,12 @@ void Core::shutdownClient(const bool& serverShutdownFirst) {
     }
 }
 void Core::requestValidation(const string& name) {
-    Packet p;
+    PacketMessage p;
     p.PacketType = PacketType::Client_To_Server_Request_Connection;
     p.data = name;
     const auto& status = m_Client->send(p);
     if (status == sf::Socket::Status::Done) {
-        cout << "Client: requesting validation connection to the server..." << endl;
+        std::cout << "Client: requesting validation connection to the server..." << endl;
     }else{
         m_Menu->setErrorText("Connection timed out");
     }

@@ -140,6 +140,8 @@ void EngineCore::cleanup(const double& dt) {
     m_ResourceManager.onPostUpdate();
 }
 void EngineCore::on_event_resize(const unsigned int& w, const unsigned int& h, const bool& saveSize){
+    Core::m_Engine->m_EventManager.m_KeyStatus.clear();
+    Core::m_Engine->m_EventManager.m_MouseStatus.clear();
     Core::m_Engine->m_RenderManager._resize(w,h);
 
     if(saveSize) 

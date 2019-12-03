@@ -5,7 +5,7 @@
 #include "../ships/shipSystems/ShipSystemSensors.h"
 #include "../map/Map.h"
 #include "../Ship.h"
-#include "../networking/Packet.h"
+#include "../networking/packets/PacketMessage.h"
 #include "../networking/client/Client.h"
 #include "../ships/Ships.h"
 

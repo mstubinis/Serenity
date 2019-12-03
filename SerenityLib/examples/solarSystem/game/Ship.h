@@ -184,7 +184,7 @@ class Ship: public EntityWrapper, public EventObserver {
         void setPosition(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& dataRequest);
         void setPosition(const glm_vec3& position, const EntityDataRequest& dataRequest);
 
-        void updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, std::vector<std::string>& info);
+        void updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map);
         void updateCloakFromPacket(const PacketCloakUpdate& packet);
         void updateAntiCloakScanFromPacket(const PacketMessage& packet);
         void updateHealthFromPacket(const PacketHealthUpdate& packet);

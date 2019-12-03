@@ -7,7 +7,7 @@
 #include "../../Core.h"
 #include "../../hud/HUD.h"
 #include "../../GameCamera.h"
-#include "../../networking/Packet.h"
+#include "../../networking/packets/PacketMessage.h"
 #include "../../config/Keybinds.h"
 
 #include <core/engine/materials/Material.h>
@@ -313,7 +313,7 @@ void ShipSystemSensors::update(const double& dt) {
             }
             if (Keybinds::isPressedDownOnce(KeybindEnum::TargetCycleEnemy)) {
                 #pragma region Cycle enemies
-                const int collection_size = m_DetectedEnemyShips.size();
+                const int collection_size = static_cast<int>(m_DetectedEnemyShips.size());
                 if (collection_size > 0 && collection_size > m_CurrentCycleEnemyIndex) {
                     auto* ship = m_DetectedEnemyShips[m_CurrentCycleEnemyIndex].ship;
                     if (ship) {
@@ -345,7 +345,7 @@ void ShipSystemSensors::update(const double& dt) {
             
             if (Keybinds::isPressedDownOnce(KeybindEnum::TargetCycleFriendly)) {
                 #pragma region Cycle friendlies
-                const int collection_size = m_DetectedAlliedShips.size();
+                const int collection_size = static_cast<int>(m_DetectedAlliedShips.size());
                 if (collection_size > 0 && collection_size > m_CurrentCycleFriendlyIndex) {
                     auto* ship = m_DetectedAlliedShips[m_CurrentCycleFriendlyIndex].ship;
                     if (ship) {

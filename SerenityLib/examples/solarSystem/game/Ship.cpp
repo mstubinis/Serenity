@@ -1,7 +1,7 @@
 #include "Ship.h"
 #include "GameCamera.h"
 #include "map/Map.h"
-#include "networking/Packet.h"
+#include "networking/packets/Packets.h"
 #include "Helper.h"
 #include "map/Anchor.h"
 #include "ResourceManifest.h"
@@ -29,6 +29,8 @@
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
 #include <ecs/ComponentName.h>
+#include <ecs/ComponentBody.h>
+#include <BulletDynamics/Dynamics/btRigidBody.h>
 
 #include "ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "ships/shipSystems/ShipSystemMainThrusters.h"
@@ -269,8 +271,8 @@ struct HullCollisionFunctor final { void operator()(CollisionCallbackEventData& 
                         pOut.PacketType = PacketType::Client_To_Server_Collision_Event;
                         pOut.damage1 = glm::length(damageTotal2);
                         pOut.damage2 = glm::length(damageTotal1);
-                        pOut.data =        ownerShip->getMapKey();
-                        pOut.data += "," + otherShip->getMapKey();
+                        pOut.owner_key = ownerShip->getMapKey();
+                        pOut.other_key = otherShip->getMapKey();
                         
                         const auto owner_angular_velocity = glm::vec3(data.ownerBody.getAngularVelocity());
                         const auto other_angular_velocity = glm::vec3(data.otherBody.getAngularVelocity());
@@ -969,8 +971,6 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
     Map& map = static_cast<Map&>(entity().scene());
     WeaponProjectile* proj = nullptr;
 
-    auto list = Helper::SeparateStringByCharacter(packet.data, ',');
-
     bool forceHull = false;
     if (packet.PacketType == PacketType::Server_To_Client_Projectile_Cannon_Impact) {
         proj = map.getCannonProjectile(packet.projectile_index);
@@ -984,27 +984,28 @@ void Ship::updateProjectileImpact(const PacketProjectileImpact& packet) {
         auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
         if (shields) {
             const glm::vec3 impactModelSpacePosition = glm::vec3(packet.impactX, packet.impactY, packet.impactZ);
-            shields->receiveHit(list[1], normal, impactModelSpacePosition, rad, time, packet.damage, packet.shield_side, true);
+            shields->receiveHit(packet.source_ship_map_key, normal, impactModelSpacePosition, rad, time, packet.damage, packet.shield_side, true);
         }
     }else{
         auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
         if (hull) {
-            hull->receiveHit(list[1], normal, impactModelSpacePosition, rad, packet.damage, static_cast<size_t>(packet.model_index), forceHull, true);
+            hull->receiveHit(packet.source_ship_map_key, normal, impactModelSpacePosition, rad, packet.damage, static_cast<size_t>(packet.model_index), forceHull, true);
         }
     }
     if (proj) {
         proj->destroy();
     }
 }
-void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map, vector<string>& info) {
-    const unsigned int size = stoi(info[5]);
+void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map) {
+    const auto list = Helper::SeparateStringByCharacter(packet.data, ',');
+    const unsigned int size = stoi(list[0]);
     Anchor* closest = map.getRootAnchor();
-    for (unsigned int i = 6; i < 6 + size; ++i) {
+    for (unsigned int i = 1; i < 1 + size; ++i) {
         auto& children = closest->getChildren();
-        if (!children.count(info[i])) {
+        if (!children.count(list[i])) {
             return;
         }
-        closest = children.at(info[i]);
+        closest = children.at(list[i]);
     }
     const auto nearestAnchorPos = closest->getPosition();
     const auto x = packet.px + nearestAnchorPos.x;
@@ -1327,14 +1328,14 @@ SecondaryWeaponTorpedo& Ship::getSecondaryWeaponTorpedo(const uint index) {
     return *weapons.m_SecondaryWeaponsTorpedos[index].torpedo;
 }
 void Ship::update(const double& dt) {
-    if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
+    //if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
         //setState(ShipState::UndergoingDestruction);
 
 
-        auto& map = static_cast<Map&>(entity().scene());
-        auto& team = *m_Client.getGameplayMode()->getTeams().at(TeamNumber::Team_2);
-        map.createShip(AIType::AI_Stationary, team, m_Client, "Federation Defense Platform", "Defense Platform " + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -20.0));
-    }
+        //auto& map = static_cast<Map&>(entity().scene());
+        //auto& team = *m_Client.getGameplayMode()->getTeams().at(TeamNumber::Team_2);
+        //map.createShip(AIType::AI_Stationary, team, m_Client, "Federation Defense Platform", "Defense Platform " + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -20.0));
+    //}
 }
 void Ship::fireBeams(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship) {
     weapons.fireBeamWeapons(target, target_as_ship, weapons.m_PrimaryWeaponsBeams);

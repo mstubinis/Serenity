@@ -1,8 +1,8 @@
 #include "Miranda.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
-#include "../../weapons/PhotonTorpedoOld.h"
-#include "../../weapons/PhaserBeam.h"
+#include "../../weapons/torpedos/PhotonTorpedoOld.h"
+#include "../../weapons/beams/PhaserBeam.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"

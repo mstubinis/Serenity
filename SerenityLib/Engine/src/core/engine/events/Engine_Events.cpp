@@ -90,7 +90,15 @@ const bool Engine::isKeyDownOnce() {
 
 const unsigned int Engine::getNumPressedKeys() {
     auto& mgr = *EventManager::m_EventManager;
-    return mgr.m_KeyStatus.size();
+    return static_cast<unsigned int>(mgr.m_KeyStatus.size());
+}
+const unordered_set<unsigned int>& Engine::getPressedKeys() {
+    auto& mgr = *EventManager::m_EventManager;
+    return mgr.m_KeyStatus;
+}
+const unordered_set<unsigned int>& Engine::getPressedMouseButtons() {
+    auto& mgr = *EventManager::m_EventManager;
+    return mgr.m_MouseStatus;
 }
 const bool Engine::isKeyDownOnce(const KeyboardKey::Key& key){
     const bool res = Engine::isKeyDown(key);

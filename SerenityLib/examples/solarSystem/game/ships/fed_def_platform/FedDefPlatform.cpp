@@ -1,9 +1,9 @@
 #include "FedDefPlatform.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
-#include "../../weapons/PulsePhaser.h"
-#include "../../weapons/PhotonTorpedo.h"
-#include "../../weapons/PhaserBeam.h"
+#include "../../weapons/cannons/PulsePhaser.h"
+#include "../../weapons/torpedos/PhotonTorpedo.h"
+#include "../../weapons/beams/PhaserBeam.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"

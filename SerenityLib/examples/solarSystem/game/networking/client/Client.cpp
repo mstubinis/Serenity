@@ -1,5 +1,5 @@
 #include "Client.h"
-#include "../Packet.h"
+#include "../packets/Packets.h"
 #include "../../Core.h"
 #include "../../Menu.h"
 #include "../../Helper.h"
@@ -74,7 +74,7 @@ Client::Client(Team* team, Core& core, const unsigned short& server_port, const 
     m_MapSpecificData.m_Team = team;
     m_TcpSocket = new Networking::SocketTCP(server_port,          server_ipAddress);
     m_UdpSocket = new Networking::SocketUDP(server_port + 1 + id, server_ipAddress);
-    internalInit(server_port, server_ipAddress);
+    internal_init(server_port, server_ipAddress);
 }
 
 Client::~Client() {
@@ -82,16 +82,13 @@ Client::~Client() {
     SAFE_DELETE(m_TcpSocket);
     SAFE_DELETE(m_UdpSocket);
 }
-void Client::internalInit(const unsigned short& server_port, const string& server_ipAddress) {
+void Client::internal_init(const unsigned short& server_port, const string& server_ipAddress) {
     m_UdpSocket->setBlocking(false);
     m_UdpSocket->bind();
     m_Port                    = server_port;
     m_ServerIP                = server_ipAddress;
     m_Username                = "";
-    m_Validated               = false;
-    //m_PingTime                = 0.0;
     m_InitialConnectionThread = nullptr;
-    m_IsCurrentlyConnecting   = false;
 }
 void Client::setClientID(const unsigned int id) {
     SAFE_DELETE(m_UdpSocket);
@@ -99,32 +96,42 @@ void Client::setClientID(const unsigned int id) {
     m_UdpSocket->setBlocking(false);
     m_UdpSocket->bind();
 }
-
+const bool Client::isReadyForConnection() const {
+    if (m_InitialConnectionThread) {
+        if (!m_InitialConnectionThread->_Is_ready()) {
+            return false;
+        }
+    }
+    return true;
+}
 void Client::changeConnectionDestination(const unsigned short& port, const string& ipAddress) {
-    m_IsCurrentlyConnecting = false;
+    if (!isReadyForConnection())
+        return;
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     SAFE_DELETE(m_TcpSocket);
     m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
 }
 void Client::connect(const unsigned short& timeout) {
-    auto lambda_connect = [&](Client& client, const unsigned short timeout) {
-        client.m_IsCurrentlyConnecting = true;
+    auto lambda_connect = [&](const unsigned short timeout) {
         m_Core.m_Menu->setNormalText("Connecting...", static_cast<float>(timeout) + 3.2f);
-        const auto status = client.m_TcpSocket->connect(timeout);
+        const auto status = m_TcpSocket->connect(timeout);
         if (status == sf::Socket::Status::Done) {
             m_Core.m_Menu->setGoodText("Connected!", 2);
-            client.m_TcpSocket->setBlocking(false);
+            m_TcpSocket->setBlocking(false);
             m_Core.requestValidation(m_Username);
         }else if (status == sf::Socket::Status::Error) {
             m_Core.m_Menu->setErrorText("Connection to the server failed", 20);
         }else if (status == sf::Socket::Status::Disconnected) {
             m_Core.m_Menu->setErrorText("Disconnected from the server", 20);
+        }else {
+
         }
-        client.m_IsCurrentlyConnecting = false;
         return status;
     };
+    if (!isReadyForConnection())
+        return;
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
-    m_InitialConnectionThread = new std::future<sf::Socket::Status>(std::move(std::async(std::launch::async, lambda_connect, std::ref(*this), timeout)));
+    m_InitialConnectionThread = new std::future<sf::Socket::Status>(std::move(std::async(std::launch::async, lambda_connect, timeout)));
 }
 GameplayMode* Client::getGameplayMode() {
     return m_MapSpecificData.m_GameplayMode;
@@ -189,20 +196,6 @@ void Client::update(Client* _client, const double& dt) {
     if (!_client) 
         return;
     auto& client = *_client;
-    /*
-    client.m_PingTime += dt;
-    if (client.m_Core.gameState() != GameState::Game) {
-        if (client.m_PingTime > 3.0) {
-            //hacky way of not d/cing outside the game
-            Packet pOut;
-            pOut.PacketType = PacketType::Client_To_Server_Periodic_Ping;
-            client.send(pOut);
-            client.m_PingTime = 0.0;
-        }
-    }else{
-        client.m_MapSpecificData.update(dt);
-    }
-    */
 
     if (client.m_Core.gameState() == GameState::Game) {
         client.m_MapSpecificData.update(dt);
@@ -214,15 +207,13 @@ void Client::update(Client* _client, const double& dt) {
 void Client::on_receive_physics_update(Packet* basePacket, Map& map) {
     if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
         PacketPhysicsUpdate& pI     = *static_cast<PacketPhysicsUpdate*>(basePacket);
-        auto info                   = Helper::SeparateStringByCharacter(pI.data, ',');
-        auto& shipclass             = info[0];
-        auto& shipkey               = info[1];
-        auto& new_ship_playername   = info[2];
-        TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(info[3]));
-        AIType::Type aiType         = static_cast<AIType::Type>(stoi(info[4]));
+        TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(pI.team_number);
+        AIType::Type aiType         = static_cast<AIType::Type>(pI.ai_type);
         auto& ships                 = map.getShips();
         Ship* new_ship = nullptr;
-        if (ships.size() == 0 || !ships.count(shipkey)) {
+
+
+        if (ships.size() == 0 || !ships.count(pI.ship_map_key)) {
             auto spawnPosition = map.getSpawnAnchor()->getPosition();
             auto x = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
             auto y = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
@@ -235,21 +226,20 @@ void Client::on_receive_physics_update(Packet* basePacket, Map& map) {
             if (aiType == AIType::Player_You && player_you)
                 final_ai = AIType::Player_Other;
             //TODO: create proper AI for npc's
-
-            new_ship = map.createShip(final_ai, *m_MapSpecificData.m_GameplayMode->getTeams().at(teamNumber), *this, shipclass, new_ship_playername, spawnPosition + randOffsetForSafety);
+            new_ship = map.createShip(final_ai, *m_MapSpecificData.m_GameplayMode->getTeams().at(teamNumber), *this, pI.ship_class, pI.player_username, spawnPosition + randOffsetForSafety);
             if (new_ship) {
                 //hey a new ship entered my map, i want info about it!
                 PacketMessage pOut;
                 pOut.PacketType = PacketType::Client_To_Server_Request_Ship_Current_Info;
                 pOut.name       = player_you->getMapKey();
                 pOut.data       = new_ship->getMapKey();
-                pOut.data      += "," + new_ship_playername;
+                pOut.data      += "," + pI.player_username;
                 send(pOut);
             }
         }else{
-            new_ship = ships.at(shipkey);
+            new_ship = ships.at(pI.ship_map_key);
         }
-        new_ship->updatePhysicsFromPacket(pI, map, info);
+        new_ship->updatePhysicsFromPacket(pI, map);
     }
 }
 
@@ -266,37 +256,38 @@ void Client::on_receive_ship_was_just_destroyed(Packet* basePacket, Map& map) {
 }
 void Client::on_receive_ship_notified_of_impending_respawn(Packet* basePacket, Map& map) {
     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
-    auto* player = map.getPlayer();
-    if (player) {
-        player->setState(ShipState::JustFlaggedToRespawn);
-        player->m_RespawnTimerMax = pI.r;
+    auto* my_Ship = map.getPlayer();
+    if (my_Ship) {
+        my_Ship->setState(ShipState::JustFlaggedToRespawn);
+        my_Ship->m_RespawnTimerMax = pI.r;
     }
 }
 void Client::on_receive_client_wants_my_ship_info(Packet* basePacket, Map& map) {
     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
     auto list = Helper::SeparateStringByCharacter(pI.data, ',');
-    auto* player = map.getPlayer();
+    auto* my_Ship_ptr = map.getPlayer();
     //auto* source_ship = map.getShips().at(pI.name);
     //const auto& source_ship_mapkey = source_ship->getMapKey();
 
-    if (player) {
+    if (my_Ship_ptr) {
+        auto& my_ship = *my_Ship_ptr;
         //TODO: add ALOT more here
 
         //health status
-        PacketHealthUpdate pOut2(*player);
+        PacketHealthUpdate pOut2(my_ship);
         pOut2.PacketType = PacketType::Client_To_Server_Ship_Health_Update;
         send(pOut2);
 
         //cloak status
-        PacketCloakUpdate pOut1(*player);
+        PacketCloakUpdate pOut1(my_ship);
         pOut1.PacketType = PacketType::Client_To_Server_Ship_Cloak_Update;
         send(pOut1);
 
         //target status
-        player->setTarget(player->getTarget(), true); //sends target packet info to the new guy
+        my_ship.setTarget(my_ship.getTarget(), true); //sends target packet info to the new guy
 
         //anti cloak scan status
-        auto* sensors = static_cast<ShipSystemSensors*>(player->getShipSystem(ShipSystemType::Sensors));
+        auto* sensors = static_cast<ShipSystemSensors*>(my_ship.getShipSystem(ShipSystemType::Sensors));
         if (sensors) {
             sensors->sendAntiCloakScanStatusPacket();
         }
@@ -304,14 +295,13 @@ void Client::on_receive_client_wants_my_ship_info(Packet* basePacket, Map& map) 
 }
 void Client::on_receive_collision_event(Packet* basePacket, Map& map) {
     PacketCollisionEvent& pI = *static_cast<PacketCollisionEvent*>(basePacket);
-    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
-    Ship* ship1 = map.getShips().at(list[0]);
-    Ship* ship2 = map.getShips().at(list[1]);
+    Ship* ship1 = map.getShips().at(pI.owner_key);
+    Ship* ship2 = map.getShips().at(pI.other_key);
     if (ship1 && ship2) {
         auto* hull1 = static_cast<ShipSystemHull*>(ship1->getShipSystem(ShipSystemType::Hull));
         auto* hull2 = static_cast<ShipSystemHull*>(ship2->getShipSystem(ShipSystemType::Hull));
-        hull1->receiveCollisionDamage(list[1], pI.damage1);
-        hull2->receiveCollisionDamage(list[0], pI.damage2);
+        hull1->receiveCollisionDamage(pI.other_key, pI.damage1);
+        hull2->receiveCollisionDamage(pI.owner_key, pI.damage2);
 
         auto& body1 = *ship1->getComponent<ComponentBody>();
         auto& body2 = *ship2->getComponent<ComponentBody>();
@@ -360,47 +350,53 @@ void Client::on_receive_server_game_mode(Packet* basePacket) {
 }
 void Client::on_receive_cannon_impact(Packet* basePacket, Map& map) {
     PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(basePacket);
-    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
-    auto* targetShip = map.getShips().at(list[0]);
-    if (targetShip) {
-        targetShip->updateProjectileImpact(pI);
+    auto* impacted_ship = map.getShips().at(pI.impacted_ship_map_key);
+    if (impacted_ship) {
+        impacted_ship->updateProjectileImpact(pI);
     }
 }
 void Client::on_receive_torpedo_impact(Packet* basePacket, Map& map) {
     PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(basePacket);
-    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
-    auto* targetShip = map.getShips().at(list[0]);
-    if (targetShip) {
-        targetShip->updateProjectileImpact(pI);
+    auto* impacted_ship = map.getShips().at(pI.impacted_ship_map_key);
+    if (impacted_ship) {
+        impacted_ship->updateProjectileImpact(pI);
     }
 }
 void Client::on_receive_client_left_map(Packet* basePacket, Map& map) {
-    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
-    auto& ships = map.getShips();
-    if (map.hasShip(pI.name)) {
-        auto& myShip = *map.getPlayer();
-        auto* myTarget = myShip.getTarget();
-        if (myTarget && myTarget->getComponent<ComponentName>()->name() == pI.name) {
-            myShip.setTarget(nullptr, true); //detarget him
+    PacketMessage& pI        = *static_cast<PacketMessage*>(basePacket);
+    auto& ships              = map.getShips();
+    auto& destroyed_ship_key = pI.name;
+    if (map.hasShip(destroyed_ship_key)) {
+        auto& my_ship        = *map.getPlayer();
+        auto* my_target      = my_ship.getTarget();
+        auto* removed_entity = ships.at(destroyed_ship_key);
+        Ship* removed_ship   = dynamic_cast<Ship*>(removed_entity);
+        Ship* my_target_ship = dynamic_cast<Ship*>(my_target);
+
+        if (removed_ship && my_target_ship && removed_ship->getMapKey() == my_target_ship->getMapKey()) {
+            my_ship.setTarget(nullptr, true); //detarget him
+        }else{
+            if (my_target && my_target->getComponent<ComponentName>()->name() == destroyed_ship_key) {
+                my_ship.setTarget(nullptr, true); //detarget him
+            }
         }
-        auto* removedShip = ships.at(pI.name);
-        removedShip->destroy();
-        ships.erase(pI.name);
+        removed_entity->destroy();
+        ships.erase(destroyed_ship_key);
     }
 }
 void Client::on_receive_client_fired_cannons(Packet* basePacket, Map& map) {
     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
     auto& ships = map.getShips();
     if (map.hasShip(pI.name)) {
-        auto* ship = ships.at(pI.name);
+        Ship* ship_that_fired             = ships.at(pI.name);
         const auto chosen_target_position = glm::vec3(pI.r, pI.g, pI.b);
         auto info = Helper::SeparateStringByCharacter(pI.data, ',');
         for (size_t i = 0; i < info.size() / 3; ++i) {
-            auto& cannon                = ship->getPrimaryWeaponCannon(stoi(info[i * 3]));
-            const auto projectile_index = stoi(info[(i * 3) + 1]);
-            const auto target_name      = info[(i * 3) + 2];
-            auto* mytarget              = map.getEntityFromName(target_name);
-            const bool success          = cannon.forceFire(mytarget, projectile_index, chosen_target_position);
+            auto& cannon                  = ship_that_fired->getPrimaryWeaponCannon(stoi(info[i * 3]));
+            const auto projectile_index   = stoi(info[(i * 3) + 1]);
+            const auto target_name        = info[(i * 3) + 2];
+            auto* ship_that_fired_target  = map.getEntityFromName(target_name);
+            const bool success            = cannon.forceFire(ship_that_fired_target, projectile_index, chosen_target_position);
         }
     }
 }
@@ -408,10 +404,10 @@ void Client::on_receive_client_fired_beams(Packet* basePacket, Map& map) {
     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
     auto& ships = map.getShips();
     if (map.hasShip(pI.name)) {
-        auto* ship = ships.at(pI.name);
-        auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+        Ship* ship_that_fired  = ships.at(pI.name);
+        auto info              = Helper::SeparateStringByCharacter(pI.data, ',');
         for (size_t i = 0; i < info.size() / 2; ++i) {
-            auto& beam                    = ship->getPrimaryWeaponBeam(stoi(info[i * 2]));
+            auto& beam                    = ship_that_fired->getPrimaryWeaponBeam(stoi(info[i * 2]));
             const auto target_name        = info[(i * 2) + 1];
 
             beam.setTarget(map.getEntityFromName(target_name));
@@ -425,84 +421,79 @@ void Client::on_receive_client_fired_torpedos(Packet* basePacket, Map& map) {
     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
     if (map.hasShip(pI.name)) {
         auto& ships = map.getShips();
-        auto* ship = ships.at(pI.name);
-        auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+        Ship* ship_that_fired             = ships.at(pI.name);
+        auto info                         = Helper::SeparateStringByCharacter(pI.data, ',');
         const auto chosen_target_position = glm::vec3(pI.r, pI.g, pI.b);
         for (size_t i = 0; i < info.size() / 3; ++i) {
-            auto& torpedo               = ship->getSecondaryWeaponTorpedo(stoi(info[i * 3]));
-            const auto projectile_index = stoi(info[(i * 3) + 1]);
-            const auto target_name      = info[(i * 3) + 2];
-            auto* mytarget              = map.getEntityFromName(target_name);
-            const bool success          = torpedo.forceFire(mytarget, projectile_index, chosen_target_position);
+            auto& torpedo                 = ship_that_fired->getSecondaryWeaponTorpedo(stoi(info[i * 3]));
+            const auto projectile_index   = stoi(info[(i * 3) + 1]);
+            const auto target_name        = info[(i * 3) + 2];
+            auto* ship_that_fired_target  = map.getEntityFromName(target_name);
+            const bool success            = torpedo.forceFire(ship_that_fired_target, projectile_index, chosen_target_position);
         }
     }
 }
 void Client::on_receive_target_changed(Packet* basePacket, Map& map) {
     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
-    if (map.hasShip(pI.name)) {
-        auto& ships = map.getShips();
-        ships.at(pI.name)->setTarget(pI.data, false);
+    auto& ship_that_changed_target_key = pI.name;
+    if (map.hasShip(ship_that_changed_target_key)) {
+        Ship* ship_that_changed_target = map.getShips().at(ship_that_changed_target_key);
+        ship_that_changed_target->setTarget(pI.data, false);
     }
 }
 void Client::on_receive_create_deep_space_anchor_initial(Packet* basePacket, Map& map) {
-    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
-    auto& anchorPos = map.getSpawnAnchor()->getPosition();
-    map.internalCreateDeepspaceAnchor(pI.r + anchorPos.x, pI.g + anchorPos.y, pI.b + anchorPos.z, pI.data);
+    PacketMessage& pI          = *static_cast<PacketMessage*>(basePacket);
+    const auto anchor_position = map.getSpawnAnchor()->getPosition();
+    const auto x               = pI.r + anchor_position.x;
+    const auto y               = pI.g + anchor_position.y;
+    const auto z               = pI.b + anchor_position.z;
+    map.internalCreateDeepspaceAnchor(x, y, z, pI.data);
 }
 void Client::on_receive_create_deep_space_anchor(Packet* basePacket, Map& map) {
     PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
-    auto info = Helper::SeparateStringByCharacter(pI.data, ',');
+    const auto info   = Helper::SeparateStringByCharacter(pI.data, ',');
 
     const size_t size = stoi(info[0]);
-    Anchor* closest = map.getRootAnchor();
+    Anchor* closest   = map.getRootAnchor();
     for (size_t i = 1; i < 1 + size; ++i) {
         closest = closest->getChildren().at(info[i]);
     }
-    auto anchorPos = closest->getPosition();
-    const auto x = pI.r + anchorPos.x;
-    const auto y = pI.g + anchorPos.y;
-    const auto z = pI.b + anchorPos.z;
+    const auto anchorPos = closest->getPosition();
+    const auto x         = pI.r + anchorPos.x;
+    const auto y         = pI.g + anchorPos.y;
+    const auto z         = pI.b + anchorPos.z;
     map.internalCreateDeepspaceAnchor(x, y, z);
 }
 void Client::on_receive_health_update(Packet* basePacket, Map& map) {
     PacketHealthUpdate& pI = *static_cast<PacketHealthUpdate*>(basePacket);
-    auto  info      = Helper::SeparateStringByCharacter(pI.data, ',');
-    auto& shipkey   = info[1];
-    auto& shipclass = info[0];
-    if (map.hasShip(shipkey)) {
-        auto& ships = map.getShips();
-        Ship& ship = *ships.at(shipkey);
-        ship.updateHealthFromPacket(pI);
+    if (map.hasShip(pI.ship_map_key)) {
+        Ship& ship_that_changed_health = *map.getShips().at(pI.ship_map_key);
+        ship_that_changed_health.updateHealthFromPacket(pI);
     }
 }
 void Client::on_receive_cloak_update(Packet* basePacket, Map& map) {
     PacketCloakUpdate& pI = *static_cast<PacketCloakUpdate*>(basePacket);
-    auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-    auto& shipclass = info[0];
-    auto& shipkey   = info[1];
-    if (map.hasShip(shipkey) && map.getPlayer()) {
-        auto& ships = map.getShips();
-        Ship& ship = *ships.at(shipkey);
-        ship.updateCloakFromPacket(pI);
+    if (map.hasShip(pI.ship_map_key) && map.getPlayer()) {
+        Ship& ship_that_changed_cloaking = *map.getShips().at(pI.ship_map_key);
+        ship_that_changed_cloaking.updateCloakFromPacket(pI);
     }
 }
 void Client::on_receive_new_client_entered_map(Packet* basePacket) {
-    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
-    auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map,teamNumber
-    TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(info[2]));
-    Map& map = *static_cast<Map*>(Resources::getScene(info[1]));
-    auto spawn = map.getSpawnAnchor()->getPosition();
-    Ship* ship = map.createShip(AIType::Player_Other, *m_MapSpecificData.m_GameplayMode->getTeams().at(teamNumber), *this, info[0], pI.name, glm::vec3(pI.r + spawn.x, pI.g + spawn.y, pI.b + spawn.z));
+    PacketMessage& pI           = *static_cast<PacketMessage*>(basePacket);
+    const auto list             = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map,teamNumber
+    TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(list[2]));
+    Map& map                    = *static_cast<Map*>(Resources::getScene(list[1]));
+    const auto spawn_anchor_pos = map.getSpawnAnchor()->getPosition();
+    Ship* ship                  = map.createShip(AIType::Player_Other, *m_MapSpecificData.m_GameplayMode->getTeams().at(teamNumber), *this, list[0], pI.name, glm::vec3(pI.r + spawn_anchor_pos.x, pI.g + spawn_anchor_pos.y, pI.b + spawn_anchor_pos.z));
 }
 void Client::on_receive_server_approve_map_entry(Packet* basePacket, Menu& menu) {
     //ok the server let me in, let me tell the server i successfully went in
-    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
-
-    auto info = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map,teamNumber
-    TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(info[2]));
+    PacketMessage& pI           = *static_cast<PacketMessage*>(basePacket);
+    const auto list             = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map,teamNumber
+    TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(list[2]));
 
     menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
-    m_Core.enterMap(*m_MapSpecificData.m_GameplayMode->getTeams().at(teamNumber), info[1], info[0], pI.name, pI.r, pI.g, pI.b);
+    m_Core.enterMap(*m_MapSpecificData.m_GameplayMode->getTeams().at(teamNumber), list[1], list[0], pI.name, pI.r, pI.g, pI.b);
     menu.m_Next->setText("Next");
     menu.m_GameState = GameState::Game;//ok, ive entered the map
 
@@ -542,13 +533,12 @@ void Client::on_receive_server_approve_map_entry(Packet* basePacket, Menu& menu)
     map.addParticleEmitter(e);
     */
     
-
     PacketMessage pOut(pI);
     pOut.PacketType = PacketType::Client_To_Server_Successfully_Entered_Map;
-    pOut.name = map.getPlayer()->getMapKey();
-    pOut.r = modelMatrix[3][0] - static_cast<float>(spawn.x);
-    pOut.g = modelMatrix[3][1] - static_cast<float>(spawn.y);
-    pOut.b = modelMatrix[3][2] - static_cast<float>(spawn.z);
+    pOut.name       = map.getPlayer()->getMapKey();
+    pOut.r          = modelMatrix[3][0] - static_cast<float>(spawn.x);
+    pOut.g          = modelMatrix[3][1] - static_cast<float>(spawn.y);
+    pOut.b          = modelMatrix[3][2] - static_cast<float>(spawn.z);
     send(pOut);
 }
 void Client::on_receive_map_data(Packet* basePacket, Menu& menu) {
@@ -620,7 +610,7 @@ void Client::on_receive_client_just_left_server(Packet* basePacket, Menu& menu) 
     menu.m_ServerLobbyChatWindow->addContent(text1);
 }
 void Client::on_receive_connection_accepted_by_server(Packet* basePacket, Menu& menu) {
-    m_Validated = true;
+    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket);
     if (m_Core.m_GameState != GameState::Host_Server_Lobby_And_Ship && m_Core.m_GameState == GameState::Host_Server_Port_And_Name_And_Map) {
         m_Core.m_GameState = GameState::Host_Server_Lobby_And_Ship;
         menu.m_Next->setText("Enter Game");
@@ -631,7 +621,7 @@ void Client::on_receive_connection_accepted_by_server(Packet* basePacket, Menu& 
     menu.m_ServerLobbyConnectedPlayersWindow->clear();
     menu.m_ServerLobbyChatWindow->clear();
 
-    auto list = Helper::SeparateStringByCharacter(basePacket->data, ',');
+    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
     auto client_id = stoi(list.back());
     list.pop_back();
     //list is a vector of connected players
@@ -646,11 +636,9 @@ void Client::on_receive_connection_accepted_by_server(Packet* basePacket, Menu& 
     setClientID(client_id);
 }
 void Client::on_receive_connection_rejected_by_server(Packet* basePacket, Menu& menu) {
-    m_Validated = false;
     menu.setErrorText("Someone has already chosen that name");
 }
 void Client::on_receive_server_shutdown(Packet* basePacket, Menu& menu, Map& map) {
-    m_Validated = false;
     Resources::setCurrentScene("Menu");
     Resources::deleteScene(map);
     m_Core.shutdownClient(true);

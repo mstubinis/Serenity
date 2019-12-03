@@ -11,7 +11,6 @@
 
 #include "../../networking/client/Client.h"
 #include "../../Core.h"
-#include "../../networking/Packet.h"
 #include "../Button.h"
 #include "../ScrollWindow.h"
 #include "../../ResourceManifest.h"

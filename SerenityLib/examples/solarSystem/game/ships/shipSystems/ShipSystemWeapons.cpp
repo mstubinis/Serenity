@@ -3,7 +3,7 @@
 #include "../../weapons/Weapons.h"
 #include "../../Ship.h"
 #include "../../ResourceManifest.h"
-#include "../../networking/Packet.h"
+#include "../../networking/packets/Packets.h"
 #include "../../map/Map.h"
 #include <core/engine/lights/Lights.h>
 #include <core/engine/mesh/Mesh.h>
@@ -168,7 +168,8 @@ void WeaponProjectile::clientToServerImpactShields(Ship& sourceShip, const bool 
     packet.impactZ = impactModelSpacePosition.z;
     packet.shields = true;
     packet.shield_side = shield_face;
-    packet.data = shipHit.getMapKey() + "," + sourceShip.getMapKey();
+    packet.source_ship_map_key = sourceShip.getMapKey();
+    packet.impacted_ship_map_key = shipHit.getMapKey();
     packet.projectile_index = projectile_index;
     Math::Float16From32(&packet.time, time);
     Math::Float16From32(&packet.radius, impactRadius);
@@ -191,7 +192,8 @@ void WeaponProjectile::clientToServerImpactHull(Ship& sourceShip, const bool can
     packet.impactZ = impactModelSpacePosition.z;
     packet.shields = false;
     packet.shield_side = -1;
-    packet.data = shipHit.getMapKey() + "," + sourceShip.getMapKey();
+    packet.source_ship_map_key = sourceShip.getMapKey();
+    packet.impacted_ship_map_key = shipHit.getMapKey();
     packet.projectile_index = projectile_index;
     Math::Float16From32(&packet.time, time);
     Math::Float16From32(&packet.radius, impactRadius);
@@ -815,7 +817,7 @@ void ShipSystemWeapons::fireBeamWeapons(EntityWrapper* target, Ship* target_as_s
         const int res = beamWeapons[i].beam->acquire_index();
         if (res >= 0) {
             if (target && !target_as_ship || (target_as_ship && !target_as_ship->isAlly(m_Ship))) {
-                primaryWeaponsBeamsFired.push_back(std::make_tuple(i, target));
+                primaryWeaponsBeamsFired.push_back(std::make_tuple(static_cast<unsigned int>(i), target));
             }
         }
     }
@@ -872,7 +874,7 @@ void ShipSystemWeapons::fireCannonWeapons(EntityWrapper* target, Ship* target_as
             if (cannon->isInControlledArc(target)) {
                 const int resIndex = cannon->acquire_index();
                 if (resIndex >= 0) {
-                    primaryWeaponsCannonsFired.push_back(std::make_tuple(i, resIndex, target));
+                    primaryWeaponsCannonsFired.push_back(std::make_tuple(static_cast<unsigned int>(i), resIndex, target));
                 }
             }
         }
@@ -882,7 +884,7 @@ void ShipSystemWeapons::fireCannonWeapons(EntityWrapper* target, Ship* target_as
             if (cannon.isForward) {
                 const int resIndex = cannon.cannon->acquire_index();
                 if (resIndex >= 0) {
-                    primaryWeaponsCannonsFired.push_back(std::make_tuple(cannon.main_container_index, resIndex, nullptr));
+                    primaryWeaponsCannonsFired.push_back(std::make_tuple(static_cast<unsigned int>(cannon.main_container_index), resIndex, nullptr));
                 }
             }
         }
@@ -938,7 +940,7 @@ void ShipSystemWeapons::fireTorpedoWeapons(EntityWrapper* target, Ship* target_a
             if (torpedo->isInControlledArc(target)) {
                 const int resIndex = torpedo->acquire_index();
                 if (resIndex >= 0) {
-                    secWeaponsTorpedosFiredInValidArc.push_back(std::make_tuple(i, resIndex, target));
+                    secWeaponsTorpedosFiredInValidArc.push_back(std::make_tuple(static_cast<unsigned int>(i), resIndex, target));
                 }
             }
         }
@@ -947,7 +949,7 @@ void ShipSystemWeapons::fireTorpedoWeapons(EntityWrapper* target, Ship* target_a
             auto torpedo = torpedoWeapons[i].torpedo;
             const int resIndex = torpedo->acquire_index();
             if (resIndex >= 0) {
-                secWeaponsTorpedosFiredInValidArc.push_back(std::make_tuple(i, resIndex, nullptr));
+                secWeaponsTorpedosFiredInValidArc.push_back(std::make_tuple(static_cast<unsigned int>(i), resIndex, nullptr));
             }
         }
     }

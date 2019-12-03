@@ -34,12 +34,11 @@ class Client{
         std::string                           m_Username;
         std::string                           m_ServerIP;
         Core&                                 m_Core;
-        bool                                  m_Validated;
-        unsigned int                          m_ID;
-        bool                                  m_IsCurrentlyConnecting;
         unsigned short                        m_Port;
 
-        void internalInit(const unsigned short& server_port, const std::string& server_ipAddress);
+        const bool isReadyForConnection() const;
+
+        void internal_init(const unsigned short& server_port, const std::string& server_ipAddress);
 
         void on_receive_ship_notified_of_respawn(Packet*, Map& map);
         void on_receive_ship_notified_of_impending_respawn(Packet*, Map& map);

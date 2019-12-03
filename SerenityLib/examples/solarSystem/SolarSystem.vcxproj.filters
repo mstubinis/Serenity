@@ -244,6 +244,36 @@
     <Filter Include="Source Files\Game\Config">
       <UniqueIdentifier>{16ac1320-127c-4652-990a-b74bb011adc7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Weapons\Beams">
+      <UniqueIdentifier>{a2c254e3-f7c6-44e6-9d49-54fe8f011c02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Weapons\Cannons">
+      <UniqueIdentifier>{4f08b54c-022f-4a8a-9ae1-ac8c34a7736f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Weapons\Torpedos">
+      <UniqueIdentifier>{e10183f2-de46-49bc-8f8b-9f09cebe9ad5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Weapons\Other">
+      <UniqueIdentifier>{082f7dba-dd94-40f3-a2be-568216748e11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Weapons\Beams">
+      <UniqueIdentifier>{ec071fc6-b6e2-4a1a-b876-6120646720ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Weapons\Cannons">
+      <UniqueIdentifier>{6b7c5480-9533-4777-b021-c12c7e288f38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Weapons\Torpedos">
+      <UniqueIdentifier>{dc82b2df-af59-4101-a4f4-dc6399f5f6fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Weapons\Other">
+      <UniqueIdentifier>{46bd5aee-f9c7-4a20-bddd-23eb3f09cb90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Networking\Packets">
+      <UniqueIdentifier>{c2cb7993-e41e-48b6-9b21-b9496d5fecf2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Networking\Packets">
+      <UniqueIdentifier>{b4edf77a-58ce-4068-8a6b-8e3bdf6f3993}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -348,15 +378,6 @@
     <ClInclude Include="game\ships\shrike\Shrike.h">
       <Filter>Header Files\Game\Ships\Shrike</Filter>
     </ClInclude>
-    <ClInclude Include="game\weapons\PulsePhaser.h">
-      <Filter>Header Files\Game\Weapons</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\DisruptorCannon.h">
-      <Filter>Header Files\Game\Weapons</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\PlasmaCannon.h">
-      <Filter>Header Files\Game\Weapons</Filter>
-    </ClInclude>
     <ClInclude Include="game\ships\shipSystems\ShipSystemWeapons.h">
       <Filter>Header Files\Game\Ships\ShipSystems</Filter>
     </ClInclude>
@@ -389,27 +410,6 @@
     </ClInclude>
     <ClInclude Include="game\ships\sphere\Sphere.h">
       <Filter>Header Files\Game\Ships\Sphere</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\PhotonTorpedo.h">
-      <Filter>Header Files\Game\Weapons</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\KlingonPhotonTorpedo.h">
-      <Filter>Header Files\Game\Weapons</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\PlasmaTorpedo.h">
-      <Filter>Header Files\Game\Weapons</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\QuantumTorpedo.h">
-      <Filter>Header Files\Game\Weapons</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\PhotonTorpedoOld.h">
-      <Filter>Header Files\Game\Weapons</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\PhaserBeam.h">
-      <Filter>Header Files\Game\Weapons</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\PlasmaBeam.h">
-      <Filter>Header Files\Game\Weapons</Filter>
     </ClInclude>
     <ClInclude Include="game\ships\akira\Akira.h">
       <Filter>Header Files\Game\Ships\Akira</Filter>
@@ -456,17 +456,11 @@
     <ClInclude Include="game\teams\Team.h">
       <Filter>Header Files\Game\Teams</Filter>
     </ClInclude>
-    <ClInclude Include="game\networking\Packet.h">
-      <Filter>Header Files\Game\Networking</Filter>
-    </ClInclude>
     <ClInclude Include="game\ai\AI.h">
       <Filter>Header Files\Game\AI</Filter>
     </ClInclude>
     <ClInclude Include="game\ai\AIIncludes.h">
       <Filter>Header Files\Game\AI</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\DisruptorBeam.h">
-      <Filter>Header Files\Game\Weapons</Filter>
     </ClInclude>
     <ClInclude Include="game\ai\FireAtWill.h">
       <Filter>Header Files\Game\AI</Filter>
@@ -479,15 +473,6 @@
     </ClInclude>
     <ClInclude Include="game\particles\Sparks.h">
       <Filter>Header Files\Game\Particles</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\BorgBeam.h">
-      <Filter>Header Files\Game\Weapons</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\BorgCuttingBeam.h">
-      <Filter>Header Files\Game\Weapons</Filter>
-    </ClInclude>
-    <ClInclude Include="game\weapons\BorgTorpedo.h">
-      <Filter>Header Files\Game\Weapons</Filter>
     </ClInclude>
     <ClInclude Include="game\ships\sovereign\Sovereign.h">
       <Filter>Header Files\Game\Ships\Sovereign</Filter>
@@ -527,6 +512,75 @@
     </ClInclude>
     <ClInclude Include="game\config\Keybinds.h">
       <Filter>Header Files\Game\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\beams\BorgBeam.h">
+      <Filter>Header Files\Game\Weapons\Beams</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\beams\BorgCuttingBeam.h">
+      <Filter>Header Files\Game\Weapons\Beams</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\beams\DisruptorBeam.h">
+      <Filter>Header Files\Game\Weapons\Beams</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\beams\PhaserBeam.h">
+      <Filter>Header Files\Game\Weapons\Beams</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\beams\PlasmaBeam.h">
+      <Filter>Header Files\Game\Weapons\Beams</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\cannons\DisruptorCannon.h">
+      <Filter>Header Files\Game\Weapons\Cannons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\cannons\PlasmaCannon.h">
+      <Filter>Header Files\Game\Weapons\Cannons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\cannons\PulsePhaser.h">
+      <Filter>Header Files\Game\Weapons\Cannons</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\torpedos\BorgTorpedo.h">
+      <Filter>Header Files\Game\Weapons\Torpedos</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\torpedos\KlingonPhotonTorpedo.h">
+      <Filter>Header Files\Game\Weapons\Torpedos</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\torpedos\PhotonTorpedo.h">
+      <Filter>Header Files\Game\Weapons\Torpedos</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\torpedos\PhotonTorpedoOld.h">
+      <Filter>Header Files\Game\Weapons\Torpedos</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\torpedos\PlasmaTorpedo.h">
+      <Filter>Header Files\Game\Weapons\Torpedos</Filter>
+    </ClInclude>
+    <ClInclude Include="game\weapons\torpedos\QuantumTorpedo.h">
+      <Filter>Header Files\Game\Weapons\Torpedos</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\Packet.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\Packets.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketProjectileImpact.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketHealthUpdate.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketPhysicsUpdate.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketCloakUpdate.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketCollisionEvent.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketClientRequestConnectionToServer.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketMessage.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -629,15 +683,6 @@
     <ClCompile Include="game\ships\shrike\Shrike.cpp">
       <Filter>Source Files\Game\Ships\Shrike</Filter>
     </ClCompile>
-    <ClCompile Include="game\weapons\PulsePhaser.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\PlasmaCannon.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\DisruptorCannon.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
-    </ClCompile>
     <ClCompile Include="game\ships\shipSystems\ShipSystemWeapons.cpp">
       <Filter>Source Files\Game\Ships\ShipSystems</Filter>
     </ClCompile>
@@ -667,27 +712,6 @@
     </ClCompile>
     <ClCompile Include="game\ships\cube\Cube.cpp">
       <Filter>Source Files\Game\Ships\Cube</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\PhotonTorpedo.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\PhotonTorpedoOld.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\QuantumTorpedo.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\PlasmaTorpedo.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\KlingonPhotonTorpedo.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\PhaserBeam.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\PlasmaBeam.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
     </ClCompile>
     <ClCompile Include="game\ships\akira\Akira.cpp">
       <Filter>Source Files\Game\Ships\Akira</Filter>
@@ -725,14 +749,8 @@
     <ClCompile Include="game\teams\Team.cpp">
       <Filter>Source Files\Game\Teams</Filter>
     </ClCompile>
-    <ClCompile Include="game\networking\Packet.cpp">
-      <Filter>Source Files\Game\Networking</Filter>
-    </ClCompile>
     <ClCompile Include="game\ai\AI.cpp">
       <Filter>Source Files\Game\AI</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\DisruptorBeam.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
     </ClCompile>
     <ClCompile Include="game\ai\FireAtWill.cpp">
       <Filter>Source Files\Game\AI</Filter>
@@ -748,15 +766,6 @@
     </ClCompile>
     <ClCompile Include="game\Helper.cpp">
       <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\BorgBeam.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\BorgCuttingBeam.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="game\weapons\BorgTorpedo.cpp">
-      <Filter>Source Files\Game\Weapons</Filter>
     </ClCompile>
     <ClCompile Include="game\ships\sovereign\Sovereign.cpp">
       <Filter>Source Files\Game\Ships\Sovereign</Filter>
@@ -796,6 +805,72 @@
     </ClCompile>
     <ClCompile Include="game\config\Keybinds.cpp">
       <Filter>Source Files\Game\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\beams\BorgBeam.cpp">
+      <Filter>Source Files\Game\Weapons\Beams</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\beams\BorgCuttingBeam.cpp">
+      <Filter>Source Files\Game\Weapons\Beams</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\beams\DisruptorBeam.cpp">
+      <Filter>Source Files\Game\Weapons\Beams</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\beams\PhaserBeam.cpp">
+      <Filter>Source Files\Game\Weapons\Beams</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\beams\PlasmaBeam.cpp">
+      <Filter>Source Files\Game\Weapons\Beams</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\cannons\DisruptorCannon.cpp">
+      <Filter>Source Files\Game\Weapons\Cannons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\cannons\PlasmaCannon.cpp">
+      <Filter>Source Files\Game\Weapons\Cannons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\cannons\PulsePhaser.cpp">
+      <Filter>Source Files\Game\Weapons\Cannons</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\torpedos\BorgTorpedo.cpp">
+      <Filter>Source Files\Game\Weapons\Torpedos</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\torpedos\KlingonPhotonTorpedo.cpp">
+      <Filter>Source Files\Game\Weapons\Torpedos</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\torpedos\PhotonTorpedo.cpp">
+      <Filter>Source Files\Game\Weapons\Torpedos</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\torpedos\PhotonTorpedoOld.cpp">
+      <Filter>Source Files\Game\Weapons\Torpedos</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\torpedos\PlasmaTorpedo.cpp">
+      <Filter>Source Files\Game\Weapons\Torpedos</Filter>
+    </ClCompile>
+    <ClCompile Include="game\weapons\torpedos\QuantumTorpedo.cpp">
+      <Filter>Source Files\Game\Weapons\Torpedos</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\Packet.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketProjectileImpact.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketHealthUpdate.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketPhysicsUpdate.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketCloakUpdate.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketCollisionEvent.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketClientRequestConnectionToServer.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketMessage.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 #include "ShipSystemSensors.h"
 
 #include "../../Ship.h"
-#include "../../networking/Packet.h"
+#include "../../networking/packets/PacketCloakUpdate.h"
 #include "../../ResourceManifest.h"
 #include "../../map/Map.h"
 #include "../../config/Keybinds.h"

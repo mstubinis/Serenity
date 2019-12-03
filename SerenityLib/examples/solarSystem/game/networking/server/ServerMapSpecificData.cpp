@@ -1,7 +1,7 @@
 #include "ServerMapSpecificData.h"
 
 #include "../../ships/Ships.h"
-#include "../../networking/Packet.h"
+#include "../../networking/packets/Packets.h"
 #include "../../networking/server/Server.h"
 #include "../../Helper.h"
 #include "../../map/Map.h"
@@ -91,9 +91,8 @@ void CollisionEntries::internal_send_packet(const PacketCollisionEvent& packet_i
     m_Server.send_to_all(pOut);
 }
 void CollisionEntries::processCollision(const PacketCollisionEvent& packet_in, Map& map) {
-    const auto    info     = Helper::SeparateStringByCharacter(packet_in.data, ',');
-    const string  key1     = info[0] + "|" + info[1];
-    const string  key2     = info[1] + "|" + info[0];
+    const string  key1     = packet_in.owner_key + "|" + packet_in.other_key;
+    const string  key2     = packet_in.other_key + "|" + packet_in.owner_key;
     const bool    is_key_1 = m_CollisionPairs.count(key1);
     const bool    is_key_2 = m_CollisionPairs.count(key2);
 

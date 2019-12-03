@@ -98,10 +98,10 @@ struct OutwardDebrisFireColorFunctor final { glm::vec4 operator()(ParticleEmissi
     auto factor = particle_lifetime * 2.0;
     red -= static_cast<float>(factor);
     red = glm::clamp(red, lower_clamp, 1.0f);
-    green -= static_cast<float>(factor) * 1.1;
+    green -= static_cast<float>(factor) * 1.1f;
     green = glm::clamp(green, lower_clamp, 1.0f);
     blue -= static_cast<float>(factor);
-    blue = glm::clamp(blue, lower_clamp, 1.0f) * 1.2;
+    blue = glm::clamp(blue, lower_clamp, 1.0f) * 1.2f;
     return glm::vec4(red, green, blue, alpha);
 }};
 struct OutwardDebrisAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
@@ -155,10 +155,10 @@ struct OutwardFireballFireColorFunctor final { glm::vec4 operator()(ParticleEmis
     auto factor = particle_lifetime * 2.0;
     red -= static_cast<float>(factor);
     red = glm::clamp(red, lower_clamp, 1.0f);
-    green -= static_cast<float>(factor) * 1.1;
+    green -= static_cast<float>(factor) * 1.1f;
     green = glm::clamp(green, lower_clamp, 1.0f);
     blue -= static_cast<float>(factor);
-    blue = glm::clamp(blue, lower_clamp, 1.0f) * 1.2;
+    blue = glm::clamp(blue, lower_clamp, 1.0f) * 1.2f;
     return glm::vec4(red, green, blue, alpha);
 }};
 struct OutwardFireballAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {

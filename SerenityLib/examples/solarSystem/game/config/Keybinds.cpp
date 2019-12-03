@@ -87,6 +87,18 @@ void Keybind::addBind(const KeyboardKey::Key& key, const KeyboardKey::Key& first
 }
 Keybind::~Keybind() {
 }
+const bool Keybind::isModifierPressedDown() {
+    if (!Engine::isKeyDown(KeyboardKey::LeftShift) && !Engine::isKeyDown(KeyboardKey::RightShift)) {
+        if (!Engine::isKeyDown(KeyboardKey::LeftAlt) && !Engine::isKeyDown(KeyboardKey::RightAlt)) {
+            if (!Engine::isKeyDown(KeyboardKey::LeftControl) && !Engine::isKeyDown(KeyboardKey::RightControl)) {
+                if (!Engine::isKeyDown(KeyboardKey::LeftSystem) && !Engine::isKeyDown(KeyboardKey::RightSystem)) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
 const bool Keybind::isPressedDown() {
     for (auto& b : binds) {
         if (b.m_SecondModifier != KeyboardKey::Unknown && b.m_FirstModifier != KeyboardKey::Unknown) {
@@ -102,18 +114,20 @@ const bool Keybind::isPressedDown() {
     }
     return false;
 }
-//TODO: handle current pressed keys better (without the commented logic, things like shift-T will trigger both shift-T AND T only
 const bool Keybind::isPressedDownOnce() {
     for (auto& b : binds) {
         if (b.m_SecondModifier != KeyboardKey::Unknown && b.m_FirstModifier != KeyboardKey::Unknown) {
-            if (Engine::isKeyDownOnce(b.m_SecondModifier, b.m_FirstModifier, b.m_Key) /*&& Engine::getNumPressedKeys() == 3*/)
+            if (Engine::isKeyDownOnce(b.m_SecondModifier, b.m_FirstModifier, b.m_Key))
                 return true;
         }else if (b.m_FirstModifier != KeyboardKey::Unknown) {
-            if (Engine::isKeyDownOnce(b.m_FirstModifier, b.m_Key) /*&& Engine::getNumPressedKeys() == 2*/)
+            if (Engine::isKeyDownOnce(b.m_FirstModifier, b.m_Key))
                 return true;
         }else {
-            if (Engine::isKeyDownOnce(b.m_Key) /* && Engine::getNumPressedKeys() == 1*/)
-                return true;
+            if (Engine::isKeyDownOnce(b.m_Key)) {
+                if (!isModifierPressedDown()) { //kinda expensive...
+                    return true;
+                }
+            }
         }
     }
     return false;

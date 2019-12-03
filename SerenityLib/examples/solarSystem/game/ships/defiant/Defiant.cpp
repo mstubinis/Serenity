@@ -1,10 +1,10 @@
 #include "Defiant.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
-#include "../../weapons/PulsePhaser.h"
-#include "../../weapons/PhaserBeam.h"
-#include "../../weapons/QuantumTorpedo.h"
-#include "../../weapons/PhotonTorpedo.h"
+#include "../../weapons/cannons/PulsePhaser.h"
+#include "../../weapons/beams/PhaserBeam.h"
+#include "../../weapons/torpedos/QuantumTorpedo.h"
+#include "../../weapons/torpedos/PhotonTorpedo.h"
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"
@@ -216,7 +216,7 @@ void Defiant::togglePerk1CannonsToBeams() {
             m_Perks |= Defiant::Perks::DefiantPerk1BeamReplaceCannons; //turn beams on, disable cannons
 
             auto& beams = weapons.getBeams();
-            for (int i = beams.size() - 4; i < beams.size(); ++i) {
+            for (size_t i = beams.size() - 4; i < beams.size(); ++i) {
                 auto& beam = *beams[i].beam;
                 beam.rechargeTimer = 0.0f;
                 beam.numRounds = 0;

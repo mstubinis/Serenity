@@ -1,6 +1,6 @@
 #include "ClientMapSpecificData.h"
 #include "Client.h"
-#include "../Packet.h"
+#include "../packets/Packets.h"
 #include "../../map/Map.h"
 #include "../../map/Anchor.h"
 #include "../../Ship.h"
@@ -44,11 +44,11 @@ void ClientMapSpecificData::update(const double& dt) {
         auto& playerShip = *map.getPlayer();
 
         Anchor* finalAnchor = map.getRootAnchor();
-        const auto& list = map.getClosestAnchor();
-        for (auto& closest : list) {
+        const auto& anchor_list = map.getClosestAnchor();
+        for (auto& closest : anchor_list) {
             finalAnchor = finalAnchor->getChildren().at(closest);
         }
-        PacketPhysicsUpdate p(playerShip, map, finalAnchor, list, m_Client.m_Username);
+        PacketPhysicsUpdate p(playerShip, map, finalAnchor, anchor_list, m_Client.m_Username);
         p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;
         m_Client.send_udp(p);
 
@@ -70,9 +70,8 @@ void ClientMapSpecificData::update(const double& dt) {
                         pOut.r = midpoint.x - nearestAnchorPos.x;
                         pOut.g = midpoint.y - nearestAnchorPos.y;
                         pOut.b = midpoint.z - nearestAnchorPos.z;
-                        pOut.data = "";
-                        pOut.data += to_string(list.size());
-                        for (auto& closest : list) {
+                        pOut.data = to_string(anchor_list.size());
+                        for (auto& closest : anchor_list) {
                             pOut.data += "," + closest;
                         }
                         //we want to create an anchor at r,g,b (the midpoint between two nearby ships), we send the nearest valid anchor as a reference

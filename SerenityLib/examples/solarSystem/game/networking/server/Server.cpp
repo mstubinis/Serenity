@@ -1,6 +1,6 @@
 #include "Server.h"
 #include "ServerMapSpecificData.h"
-#include "../Packet.h"
+#include "../packets/Packets.h"
 #include "../client/Client.h"
 #include "../../Core.h"
 #include "../../Menu.h"
@@ -95,7 +95,6 @@ const sf::Socket::Status ServerClient::receive(void* data, size_t size, size_t& 
     const auto status = m_TcpSocket->receive(data, size, received);
     return status;
 }
-
 const string& ServerClient::username() const {
     return m_Username;
 }
@@ -145,7 +144,6 @@ Server::Server(Core& core, const unsigned int& port, const string& ipRestriction
     m_OwnerClient                      = nullptr;
     m_port                             = port;
     m_listener                         = new ListenerTCP(port, ipRestriction);
-    //m_PingTime                         = 0.0;
     m_UdpSocket                        = new SocketUDP(port, ipRestriction);
     m_UdpSocket->setBlocking(false);
     m_UdpSocket->bind();
@@ -157,7 +155,7 @@ Server::~Server() {
 }
 void Server::shutdown(const bool destructor) {
     //alert all the clients that the server is shutting down
-    Packet p;
+    PacketMessage p;
     p.PacketType = PacketType::Server_Shutdown;
     send_to_all(p);
     m_Core.m_Menu->m_ServerLobbyChatWindow->clear();
@@ -303,8 +301,8 @@ void Server::onReceiveUDP() {
 
                     //get the client who sent it
                     //TODO: this is sort of expensive
-                    const auto list = Helper::SeparateStringByCharacter(pI.data, ',');
-                    ServerClient* client = getClientByUsername(list[1]);
+
+                    ServerClient* client = getClientByUsername(pI.player_username);
                     if (client) { //this works...
                         client->m_Timeout = 0.0f;
                         send_to_all_but_client_udp(*client, pOut);
@@ -388,7 +386,7 @@ void Server::updateClient(ServerClient& client) {
     const auto status     = client.receive(sf_packet);
     if (status == sf::Socket::Done) {
         Packet* pp = Packet::getPacket(sf_packet);
-        auto& pIn = *pp;
+        Packet& pIn = *pp;
         if (pp && pIn.validate(sf_packet)) {
             client.m_Timeout = 0.0f;
             // Data extracted successfully...
@@ -410,9 +408,9 @@ void Server::updateClient(ServerClient& client) {
                 }case PacketType::Client_To_Server_Request_Ship_Current_Info: {
                     //just forward it
                     PacketMessage& pI = *static_cast<PacketMessage*>(pp);
-                    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
+                    auto list         = Helper::SeparateStringByCharacter(pI.data, ',');
                     PacketMessage pOut(pI);
-                    pOut.PacketType = PacketType::Server_To_Client_Request_Ship_Current_Info;
+                    pOut.PacketType   = PacketType::Server_To_Client_Request_Ship_Current_Info;
 
 
                     auto* c = server.getClientByUsername(list[1]);
@@ -581,9 +579,10 @@ void Server::updateClient(ServerClient& client) {
                     server.send_to_all(pOut);
                     break;
                 }case PacketType::Client_To_Server_Request_Connection: {
-                    const bool valid = server.isValidName(pIn.data);
-                    server.assign_username_to_client(client, pIn.data);
-                    Packet pOut;
+                    PacketMessage& pI = *static_cast<PacketMessage*>(pp);
+                    const bool valid = server.isValidName(pI.data);
+                    server.assign_username_to_client(client, pI.data);
+                    PacketMessage pOut;
                     if (valid) {
                         //a client wants to connect to the server
                         client.m_Validated = true;
@@ -600,7 +599,7 @@ void Server::updateClient(ServerClient& client) {
                         if (!pOut.data.empty())
                             pOut.data.pop_back();
                         server.send_to_client(client, pOut);
-                        std::cout << "Server: Approving: " + pIn.data + "'s connection" << std::endl;
+                        std::cout << "Server: Approving: " + pI.data + "'s connection" << std::endl;
 
                         //now send the client info about the gameplay mode, dont do this for the player client
                         if (client.m_Username != server.m_Core.m_Client->m_Username) {
@@ -627,7 +626,7 @@ void Server::updateClient(ServerClient& client) {
                         server.send_to_client(client, pOut2);
                     }else{
                         pOut.PacketType = PacketType::Server_To_Client_Reject_Connection;
-                        std::cout << "Server: Rejecting: " + pIn.data + "'s connection" << std::endl;
+                        std::cout << "Server: Rejecting: " + pI.data + "'s connection" << std::endl;
                         server.send_to_client(client, pOut);
                         server.completely_remove_client(client);
                     }

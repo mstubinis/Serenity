@@ -4,28 +4,27 @@
 
 #include "WeaponIncludes.h"
 #include "../Ship.h"
-#include "../networking/Packet.h"
 #include "../Helper.h"
 #include "../ResourceManifest.h"
 #include "../map/Map.h"
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/sounds/Engine_Sounds.h>
 
-#include "DisruptorCannon.h"
-#include "PlasmaCannon.h"
-#include "PulsePhaser.h"
+#include "cannons/DisruptorCannon.h"
+#include "cannons/PlasmaCannon.h"
+#include "cannons/PulsePhaser.h"
 
-#include "PhaserBeam.h"
-#include "PlasmaBeam.h"
-#include "BorgBeam.h"
-#include "BorgCuttingBeam.h"
+#include "beams/PhaserBeam.h"
+#include "beams/PlasmaBeam.h"
+#include "beams/BorgBeam.h"
+#include "beams/BorgCuttingBeam.h"
 
-#include "PhotonTorpedo.h"
-#include "PhotonTorpedoOld.h"
-#include "QuantumTorpedo.h"
-#include "KlingonPhotonTorpedo.h"
-#include "PlasmaTorpedo.h"
-#include "BorgTorpedo.h"
+#include "torpedos/PhotonTorpedo.h"
+#include "torpedos/PhotonTorpedoOld.h"
+#include "torpedos/QuantumTorpedo.h"
+#include "torpedos/KlingonPhotonTorpedo.h"
+#include "torpedos/PlasmaTorpedo.h"
+#include "torpedos/BorgTorpedo.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
