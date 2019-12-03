@@ -9,5 +9,7 @@
 #include "PacketCollisionEvent.h"
 #include "PacketClientRequestConnectionToServer.h"
 #include "PacketMessage.h"
+#include "PacketShipRespawned.h"
+#include "PacketGameplayModeInfo.h"
 
 #endif

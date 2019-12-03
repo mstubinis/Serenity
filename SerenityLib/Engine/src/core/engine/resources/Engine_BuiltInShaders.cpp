@@ -65,7 +65,6 @@ string epriv::EShaders::greyscale_frag;
 string epriv::EShaders::final_frag;
 string epriv::EShaders::depth_and_transparency_frag;
 string epriv::EShaders::lighting_frag;
-string epriv::EShaders::lighting_frag_optimized;
 string epriv::EShaders::lighting_frag_gi;
 #pragma endregion
 
@@ -1473,7 +1472,7 @@ epriv::EShaders::forward_frag =
     "        vec3 TotalIrradiance = (GIDiffuse + GISpecular) * ao;\n"
     "        TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
     "        lightTotal += TotalIrradiance * GIContribution.z * MaterialBasePropertiesTwo.x;\n"
-
+    "        lightTotal = max(lightTotal, inData.glow * inData.diffuse.rgb);\n"
     "        inData.diffuse.rgb = lightTotal;\n"
     "    }\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
@@ -1714,7 +1713,6 @@ epriv::EShaders::hdr_frag =
     "    vec3 diffuse = texture2D(gDiffuseMap,texcoords).rgb;\n"
     "    vec3 lighting = texture2D(lightingBuffer, texcoords).rgb;\n"
     "    vec3 normals = DecodeOctahedron(texture2D(gNormalMap,texcoords).rg);\n"
-    "\n"
     "    if(Has.y == 0 || distance(normals,ConstantOneVec3) < 0.01){\n" //if normals are damn near 1.0,1.0,1.0 or no lighting
     "        lighting = diffuse;\n"
     "    }\n"
@@ -1950,126 +1948,6 @@ epriv::EShaders::lighting_frag =
     "}";
 #pragma endregion
 
-#pragma region LightingFragOptimized
-epriv::EShaders::lighting_frag_optimized =
-    "#define MATERIAL_COUNT_LIMIT 255\n"
-    "\n"
-    "struct Light{\n"
-    "    vec4 DataA;\n" //x = ambient, y = diffuse, z = specular, w = LightDirection.x
-    "    vec4 DataB;\n" //x = LightDirection.y, y = LightDirection.z, z = const, w = linear
-    "    vec4 DataC;\n" //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
-    "    vec4 DataD;\n" //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
-    "    vec4 DataE;\n" //x = cutoff, y = outerCutoff, z = AttenuationModel, w = UNUSED
-    "};\n"
-    "\n"
-    "uniform Light light;\n"
-    "\n"
-    "uniform sampler2D gDiffuseMap;\n"
-    "uniform sampler2D gNormalMap;\n"
-    "uniform sampler2D gMiscMap;\n"
-    "uniform sampler2D gDepthMap;\n"
-    "uniform sampler2D gSSAOMap;\n"
-    "\n"
-    "uniform vec4 ScreenData;\n" //x = UNUSED, y = screenGamma, z = winSize.x, w = winSize.y
-    "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
-    "\n"
-    "varying vec2 texcoords;\n"
-    "flat varying vec3 CamRealPosition;\n"
-    "\n"
-    "vec3 CalcLightInternal(in Light currentLight, vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){\n"
-    "    float Glow = texture2D(gMiscMap,uv).r;\n"
-    "    float SpecularStrength = texture2D(gMiscMap,uv).g;\n"
-    "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
-    "    vec3 LightDiffuseColor  = currentLight.DataD.xyz;\n"
-    "    vec3 LightSpecularColor = currentLight.DataD.xyz * SpecularStrength;\n"
-    "    vec3 TotalLight         = ConstantZeroVec3;\n"
-    "    vec3 SpecularFactor     = ConstantZeroVec3;\n"
-    "\n"
-    "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
-    "    highp int matID = int(floor(matIDandAO));\n"
-    "    float ssaoValue = 1.0 - texture2D(gSSAOMap,uv).a;\n"
-    "    float ao = (fract(matIDandAO)+0.0001) * ssaoValue;\n"//the 0.0001 makes up for the clamp in material class
-    "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n"
-    "    float metalness = stuff.x;\n"
-    "    float smoothness = stuff.y;\n"
-    "\n"
-    "    vec3 MaterialF0 = Unpack3FloatsInto1FloatUnsigned(materials[matID].r);\n"
-    "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
-    "    vec3 Frensel = F0;\n"
-    //"\n"
-    //"    float roughness = 1.0 - smoothness;\n"
-    //"    float alpha = roughness * roughness;\n"
-    //"\n"
-    "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
-    "    vec3 Half = normalize(LightDir + ViewDir);\n"
-    "    float NdotL = clamp(dot(PxlNormal, LightDir),0.0,1.0);\n"
-    "    float NdotH = clamp(dot(PxlNormal, Half),0.0,1.0);\n"
-    //"    float VdotN = clamp(dot(ViewDir,PxlNormal),0.0,1.0);\n"
-    //"    float VdotH = clamp(dot(ViewDir,Half),0.0,1.0);\n"
-    //"\n"
-    //"    float MaterialTypeDiffuse = materials[matID].a;\n"
-    //"    float MaterialTypeSpecular = materials[matID].b;\n"
-    //"\n"
-    //"    if(MaterialTypeDiffuse == 2.0){\n"
-    //"        LightDiffuseColor *= DiffuseOrenNayar(ViewDir,LightDir,NdotL,VdotN,alpha);\n"
-    //"    }else if(MaterialTypeDiffuse == 3.0){\n"
-    //"        LightDiffuseColor *= DiffuseAshikhminShirley(smoothness,MaterialAlbedoTexture,NdotL,VdotN);\n"
-    //"    }else if(MaterialTypeDiffuse == 4.0){\n"//this is minneart
-    //"        LightDiffuseColor *= pow(VdotN*NdotL,smoothness);\n"
-    //"    }\n"
-    //"\n"
-    //"    if(MaterialTypeSpecular == 1.0){\n"
-    "        SpecularFactor = SpecularBlinnPhong(smoothness,NdotH);\n"
-    //"    }else if(MaterialTypeSpecular == 2.0){\n"
-    //"        SpecularFactor = SpecularPhong(smoothness,LightDir,PxlNormal,ViewDir);\n"
-    //"    }else if(MaterialTypeSpecular == 3.0){\n"
-    //"        SpecularFactor = SpecularGGX(Frensel,LightDir,Half,alpha,NdotH,F0,NdotL);\n"
-    //"    }else if(MaterialTypeSpecular == 4.0){\n"
-    //"        SpecularFactor = SpecularCookTorrance(Frensel,F0,VdotH,NdotH,alpha,VdotN,roughness,NdotL);\n"
-    //"    }else if(MaterialTypeSpecular == 5.0){\n"
-    //"        SpecularFactor = SpecularGaussian(NdotH,smoothness);\n"
-    //"    }else if(MaterialTypeSpecular == 6.0){\n"
-    //"        SpecularFactor = vec3(BeckmannDist(NdotH,alpha));\n"
-    //"    }else if(MaterialTypeSpecular == 7.0){\n"
-    //"        SpecularFactor = SpecularAshikhminShirley(PxlNormal,Half,NdotH,LightDir,NdotL,VdotN);\n"
-    //"    }\n"
-    "    LightDiffuseColor *= currentLight.DataA.y;\n"
-    "    LightSpecularColor *= (SpecularFactor * currentLight.DataA.z);\n"
-    "\n"
-    "    vec3 componentDiffuse = ConstantOneVec3 - Frensel;\n"
-    "    componentDiffuse *= 1.0 - metalness;\n"
-    "\n"
-    "    TotalLight = (componentDiffuse * ao) * MaterialAlbedoTexture;\n"
-    "    TotalLight /= KPI;\n"
-    "    TotalLight += LightSpecularColor;\n"
-    "    TotalLight *= LightDiffuseColor * NdotL;\n"
-    "\n"
-    "    return max(vec3(Glow) * MaterialAlbedoTexture,TotalLight);\n"
-    "}\n"
-    "void main(){\n"                      //windowX      //windowY
-    "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z, ScreenData.w);\n"
-    "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    "    vec3 PxlPosition = GetWorldPosition(uv,CameraNear,CameraFar);\n"
-    "\n"
-    "    vec3 lightCalculation = ConstantZeroVec3;\n"
-    "    vec3 LightPosition = vec3(light.DataC.yzw) - CamRealPosition;\n"
-    "    vec3 LightDirection = normalize(vec3(light.DataA.w,light.DataB.x,light.DataB.y));\n"
-    "\n"
-    "    if(light.DataD.w == 0.0){\n"
-    "        lightCalculation = CalcLightInternal(light, normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);\n"
-    "    }else if(light.DataD.w == 1.0){\n"
-    "        lightCalculation = CalcPointLight(light, LightPosition,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(light.DataD.w == 2.0){\n"
-    "        lightCalculation = CalcLightInternal(light, LightDirection,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(light.DataD.w == 3.0){\n"
-    "        lightCalculation = CalcSpotLight(light, LightDirection,LightPosition,PxlPosition,PxlNormal,uv);\n"
-    "    }else if(light.DataD.w == 4.0){\n"
-    "        lightCalculation = CalcRodLight(light, vec3(light.DataA.w,light.DataB.xy),light.DataC.yzw,PxlPosition,PxlNormal,uv);\n"
-    "    }\n"
-    "    gl_FragData[0].rgb = lightCalculation;\n"
-    "}";
-#pragma endregion
-
 #pragma region LightingFragGI
 epriv::EShaders::lighting_frag_gi =
     "#define MATERIAL_COUNT_LIMIT 255\n"
@@ -2080,6 +1958,7 @@ epriv::EShaders::lighting_frag_gi =
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gDepthMap;\n"
     "uniform sampler2D gSSAOMap;\n"
+    "uniform sampler2D gMiscMap;\n"
     "uniform samplerCube irradianceMap;\n"
     "uniform samplerCube prefilterMap;\n"
     "uniform sampler2D brdfLUT;\n"
@@ -2098,6 +1977,7 @@ epriv::EShaders::lighting_frag_gi =
     //"  //vec2 uv = texcoords;\n" //this cannot be used for non fullscreen quad meshes
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
+    "    float Glow = texture2D(gMiscMap, uv).r;\n"
     "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
     "    vec3 PxlWorldPos = GetWorldPosition(uv,CameraNear,CameraFar);\n"
     "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
@@ -2126,6 +2006,7 @@ epriv::EShaders::lighting_frag_gi =
     "    vec3 TotalIrradiance = (GIDiffuse + GISpecular) * ao;\n"
     "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
     "    gl_FragColor += (vec4(TotalIrradiance, 1.0) * vec4(vec3(GIContribution.z), 1.0)) * (materials[index].g);\n" //materials[index].g is material base alpha
+    "    gl_FragColor.rgb = max(gl_FragColor.rgb, Glow * MaterialAlbedoTexture);\n"
     "}";
 
 #pragma endregion

@@ -6,6 +6,8 @@
 #include "PacketProjectileImpact.h"
 #include "PacketCollisionEvent.h"
 #include "PacketMessage.h"
+#include "PacketShipRespawned.h"
+#include "PacketGameplayModeInfo.h"
 
 using namespace std;
 
@@ -25,7 +27,7 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
         }case PacketType::Client_To_Server_Request_Disconnection: {
             p = new PacketMessage(); break;
         }case PacketType::Server_Shutdown: {
-            p = new PacketMessage(); break;
+            p = new Packet(); break;
         }case PacketType::Client_To_Server_Ship_Physics_Update: {
             p = new PacketPhysicsUpdate(); break;
         }case PacketType::Server_To_Client_Ship_Physics_Update: {
@@ -93,9 +95,9 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
         }case PacketType::Server_To_Client_Projectile_Torpedo_Impact: {
             p = new PacketProjectileImpact(); break;
         }case PacketType::Client_To_Server_Request_GameplayMode: {
-            p = new PacketMessage(); break;
+            p = new PacketGameplayModeInfo(); break;
         }case PacketType::Server_To_Client_Request_GameplayMode: {
-            p = new PacketMessage(); break;
+            p = new PacketGameplayModeInfo(); break;
         }case PacketType::Client_To_Server_Anti_Cloak_Status: {
             p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Anti_Cloak_Status: {
@@ -113,9 +115,9 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
         }case PacketType::Server_To_Client_Ship_Was_Just_Destroyed: {
             p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Notify_Ship_Of_Impending_Respawn: {
-            p = new PacketMessage(); break;
+            p = new PacketShipRespawnNotification(); break;
         }case PacketType::Server_To_Client_Notify_Ship_Of_Respawn: {
-            p = new PacketMessage(); break;
+            p = new PacketShipRespawned(); break;
         }default: {
             break;
         }

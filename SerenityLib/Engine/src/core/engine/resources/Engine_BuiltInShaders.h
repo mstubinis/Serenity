@@ -67,7 +67,6 @@ namespace epriv{
             static std::string depth_and_transparency_frag;
 
             static std::string lighting_frag;
-            static std::string lighting_frag_optimized;
             static std::string lighting_frag_gi;
     };
 };

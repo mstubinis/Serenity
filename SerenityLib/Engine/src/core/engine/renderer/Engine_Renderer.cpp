@@ -88,7 +88,6 @@ namespace Engine{
             FinalFrag,
             DepthAndTransparencyFrag,
             LightingFrag,
-            LightingFragOptimized,
             LightingGIFrag,
             CubemapConvoludeFrag,
             CubemapPrefilterEnvFrag,
@@ -123,7 +122,6 @@ namespace Engine{
             DeferredSkybox,
             CopyDepth,
             DeferredLighting,
-            DeferredLightingOptimized,
             DeferredLightingGI,
             CubemapConvolude,
             CubemapPrefilterEnv,
@@ -273,23 +271,22 @@ class epriv::RenderManager::impl final{
             epriv::threading::addJob(emplaceShader, 24, boost::ref(EShaders::depth_and_transparency_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
 
             epriv::threading::addJob(emplaceShader, 25, boost::ref(EShaders::lighting_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 26, boost::ref(EShaders::lighting_frag_optimized), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 27, boost::ref(EShaders::lighting_frag_gi), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 28, boost::ref(EShaders::cubemap_convolude_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 29, boost::ref(EShaders::cubemap_prefilter_envmap_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 30, boost::ref(EShaders::brdf_precompute), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 31, boost::ref(EShaders::greyscale_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 32, boost::ref(EShaders::stencil_passover), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 33, boost::ref(EShaders::smaa_vertex_1), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            epriv::threading::addJob(emplaceShader, 34, boost::ref(EShaders::smaa_vertex_2), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            epriv::threading::addJob(emplaceShader, 35, boost::ref(EShaders::smaa_vertex_3), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            epriv::threading::addJob(emplaceShader, 36, boost::ref(EShaders::smaa_vertex_4), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            epriv::threading::addJob(emplaceShader, 37, boost::ref(EShaders::smaa_frag_1), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 38, boost::ref(EShaders::smaa_frag_2), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 39, boost::ref(EShaders::smaa_frag_3), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 40, boost::ref(EShaders::smaa_frag_4), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            epriv::threading::addJob(emplaceShader, 41, boost::ref(EShaders::particle_vertex), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            epriv::threading::addJob(emplaceShader, 42, boost::ref(EShaders::particle_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 26, boost::ref(EShaders::lighting_frag_gi), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 27, boost::ref(EShaders::cubemap_convolude_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 28, boost::ref(EShaders::cubemap_prefilter_envmap_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 29, boost::ref(EShaders::brdf_precompute), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 30, boost::ref(EShaders::greyscale_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 31, boost::ref(EShaders::stencil_passover), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 32, boost::ref(EShaders::smaa_vertex_1), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            epriv::threading::addJob(emplaceShader, 33, boost::ref(EShaders::smaa_vertex_2), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            epriv::threading::addJob(emplaceShader, 34, boost::ref(EShaders::smaa_vertex_3), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            epriv::threading::addJob(emplaceShader, 35, boost::ref(EShaders::smaa_vertex_4), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            epriv::threading::addJob(emplaceShader, 36, boost::ref(EShaders::smaa_frag_1), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 37, boost::ref(EShaders::smaa_frag_2), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 38, boost::ref(EShaders::smaa_frag_3), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 39, boost::ref(EShaders::smaa_frag_4), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            epriv::threading::addJob(emplaceShader, 40, boost::ref(EShaders::particle_vertex), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            epriv::threading::addJob(emplaceShader, 41, boost::ref(EShaders::particle_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
 
 
             epriv::threading::waitForAll();
@@ -314,7 +311,6 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox] = new ShaderProgram("Deferred_Skybox", *m_InternalShaders[EngineInternalShaders::VertexSkybox], *m_InternalShaders[EngineInternalShaders::DeferredFragSkybox]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth] = new ShaderProgram("Copy_Depth", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::CopyDepthFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting] = new ShaderProgram("Deferred_Light", *m_InternalShaders[EngineInternalShaders::LightingVertex], *m_InternalShaders[EngineInternalShaders::LightingFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingOptimized] = new ShaderProgram("Deferred_Light_Optimized", *m_InternalShaders[EngineInternalShaders::LightingVertex], *m_InternalShaders[EngineInternalShaders::LightingFragOptimized]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLightingGI] = new ShaderProgram("Deferred_Light_GI", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::LightingGIFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude] = new ShaderProgram("Cubemap_Convolude", *m_InternalShaders[EngineInternalShaders::VertexSkybox], *m_InternalShaders[EngineInternalShaders::CubemapConvoludeFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapPrefilterEnv] = new ShaderProgram("Cubemap_Prefilter_Env", *m_InternalShaders[EngineInternalShaders::VertexSkybox], *m_InternalShaders[EngineInternalShaders::CubemapPrefilterEnvFrag]);
@@ -1756,16 +1752,16 @@ class epriv::RenderManager::impl final{
                 sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 1);
                 sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 2);
                 sendTexture("gSSAOMap", gbuffer.getTexture(GBufferType::Bloom), 3);
-
+                sendTexture("gMiscMap", gbuffer.getTexture(GBufferType::Misc), 4);
                 Skybox* skybox = scene.skybox();
                 if(skybox && skybox->texture()->numAddresses() >= 3){
-                    sendTextureSafe("irradianceMap", skybox->texture()->address(1), 4, GL_TEXTURE_CUBE_MAP);
-                    sendTextureSafe("prefilterMap", skybox->texture()->address(2), 5, GL_TEXTURE_CUBE_MAP);
-                    sendTextureSafe("brdfLUT", *Texture::BRDF, 6);
+                    sendTextureSafe("irradianceMap", skybox->texture()->address(1), 5, GL_TEXTURE_CUBE_MAP);
+                    sendTextureSafe("prefilterMap", skybox->texture()->address(2), 6, GL_TEXTURE_CUBE_MAP);
+                    sendTextureSafe("brdfLUT", *Texture::BRDF, 7);
                 }else{
-                    sendTextureSafe("irradianceMap", Texture::Black->address(0), 4, GL_TEXTURE_2D);
-                    sendTextureSafe("prefilterMap", Texture::Black->address(0), 5, GL_TEXTURE_2D);
-                    sendTextureSafe("brdfLUT", *Texture::BRDF, 6);
+                    sendTextureSafe("irradianceMap", Texture::Black->address(0), 5, GL_TEXTURE_2D);
+                    sendTextureSafe("prefilterMap", Texture::Black->address(0), 6, GL_TEXTURE_2D);
+                    sendTextureSafe("brdfLUT", *Texture::BRDF, 7);
                 }
                 _renderFullscreenTriangle(fboWidth, fboHeight, 0, 0);
             }

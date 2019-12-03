@@ -582,6 +582,12 @@
     <ClInclude Include="game\networking\packets\PacketMessage.h">
       <Filter>Header Files\Game\Networking\Packets</Filter>
     </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketShipRespawned.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketGameplayModeInfo.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -870,6 +876,12 @@
       <Filter>Source Files\Game\Networking\Packets</Filter>
     </ClCompile>
     <ClCompile Include="game\networking\packets\PacketMessage.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketShipRespawned.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketGameplayModeInfo.cpp">
       <Filter>Source Files\Game\Networking\Packets</Filter>
     </ClCompile>
   </ItemGroup>

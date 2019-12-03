@@ -12,7 +12,8 @@ struct GameplayModeType final {enum Mode {
     HomelandSecurity,
 };};
 
-class Team;
+class  Team;
+struct PacketGameplayModeInfo;
 class GameplayMode {
     protected:
         GameplayModeType::Mode                           m_GameplayModeType;
@@ -31,8 +32,8 @@ class GameplayMode {
         const unsigned int& getMaxAmountOfPlayers() const;
         const bool addTeam(Team& team);
 
-        const std::string serialize() const;
-        void deserialize(const std::string& input);
+        const PacketGameplayModeInfo serialize() const;
+        void deserialize(const PacketGameplayModeInfo&);
 
 };
 

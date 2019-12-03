@@ -141,7 +141,7 @@ void main(){
         vec3 TotalIrradiance = (GIDiffuse + GISpecular) * ao;
         TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y)); //ScreenData.y is gamma
         lightTotal += TotalIrradiance * GIContribution.z * MaterialBasePropertiesTwo.x;
-
+        lightTotal = max(lightTotal, inData.glow * inData.diffuse.rgb);
         inData.diffuse.rgb = lightTotal;
     }
     gl_FragData[0] = inData.diffuse;

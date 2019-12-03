@@ -28,12 +28,10 @@ void ShipRespawning::processShip(const string& shipMapKey, const string& shipCla
     }
     auto& client = *m_Server.getClientByMapKey(shipMapKey);
 
-    PacketMessage pOut;
+    PacketShipRespawnNotification pOut;
     pOut.PacketType     = PacketType::Server_To_Client_Notify_Ship_Of_Impending_Respawn;
-    pOut.name           = shipMapKey;
-    pOut.r              = static_cast<float>(Ships::Database[shipClass].RespawnTime);
+    pOut.timer          = static_cast<float>(Ships::Database[shipClass].RespawnTime);
     m_Server.send_to_client(client, pOut);
-    //std::cout << "Processing Ship: " << shipMapKey << " (" << shipClass << ") at closest anchor: " << closest_spawn_anchor << ", for duration: " << to_string(Ships::Database[shipClass].RespawnTime) << "\n";
 }
 void ShipRespawning::cleanup() {
     for (auto it = m_Ships.begin(); it != m_Ships.end();) {
@@ -60,14 +58,13 @@ void ShipRespawning::update(const double& dt) {
                 const auto z = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
                 const auto respawnPosition = glm::vec3(x, y, z);
 
-                PacketMessage pOut;
+                PacketShipRespawned pOut;
                 pOut.PacketType = PacketType::Server_To_Client_Notify_Ship_Of_Respawn;
-                pOut.name = it.first; //mapkey
-                pOut.r = respawnPosition.x;
-                pOut.g = respawnPosition.y;
-                pOut.b = respawnPosition.z;
-                pOut.data = std::get<1>(tuple); //closest_spawn_anchor
-                //pOut.data += "," + std::get<0>(tuple); //shipclass
+                pOut.respawned_ship_map_key = it.first; //mapkey
+                pOut.x = respawnPosition.x;
+                pOut.y = respawnPosition.y;
+                pOut.z = respawnPosition.z;
+                pOut.nearest_spawn_anchor_name = std::get<1>(tuple); //closest_spawn_anchor
                 m_Server.send_to_all(pOut);
 
                 //std::cout << "Processing Ship: " << it.first << " (" << std::get<0>(tuple) << ") may now respawn\n";

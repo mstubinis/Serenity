@@ -411,22 +411,23 @@ Ship::~Ship(){
 	SAFE_DELETE_MAP(m_ShipSystems);
 }
 void Ship::respawn(const glm_vec3& newPosition, const string& nearest_spawn_anchor, Map& map) {
-    auto& bodyComponent = *getComponent<ComponentBody>();
+    auto& bodyComponent  = *getComponent<ComponentBody>();
     auto& modelComponent = *getComponent<ComponentModel>();
 
-    auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
-    auto* hull = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
-    if (shields) {
-        shields->restoreToFull();
-        shields->reset_all_impact_points();
-        shields->turnOnShields();
-        shields->getEntity().getComponent<ComponentBody>()->addPhysicsToWorld();
+    auto* shields_ptr = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
+    auto* hull_ptr = static_cast<ShipSystemHull*>(getShipSystem(ShipSystemType::Hull));
+    if (shields_ptr) {
+        auto& shields = *shields_ptr;
+        shields.restoreToFull();
+        shields.reset_all_impact_points();
+        shields.turnOnShields();
+        shields.getEntity().getComponent<ComponentBody>()->addPhysicsToWorld();
         bodyComponent.addPhysicsToWorld();
     }
-    if (hull) {
-        hull->restoreToFull();
-        hull->getEntity().getComponent<ComponentBody>()->addPhysicsToWorld();
-
+    if (hull_ptr) {
+        auto& hull = *hull_ptr;
+        hull.restoreToFull();
+        hull.getEntity().getComponent<ComponentBody>()->addPhysicsToWorld();
     }
     auto* playerCamera = getPlayerCamera();
     if (IsPlayer() && playerCamera) {

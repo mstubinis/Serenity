@@ -236,11 +236,13 @@
     <ClInclude Include="game\networking\packets\PacketClientRequestConnectionToServer.h" />
     <ClInclude Include="game\networking\packets\PacketCloakUpdate.h" />
     <ClInclude Include="game\networking\packets\PacketCollisionEvent.h" />
+    <ClInclude Include="game\networking\packets\PacketGameplayModeInfo.h" />
     <ClInclude Include="game\networking\packets\PacketHealthUpdate.h" />
     <ClInclude Include="game\networking\packets\PacketMessage.h" />
     <ClInclude Include="game\networking\packets\PacketPhysicsUpdate.h" />
     <ClInclude Include="game\networking\packets\PacketProjectileImpact.h" />
     <ClInclude Include="game\networking\packets\Packets.h" />
+    <ClInclude Include="game\networking\packets\PacketShipRespawned.h" />
     <ClInclude Include="game\networking\server\Server.h" />
     <ClInclude Include="game\networking\server\ServerMapSpecificData.h" />
     <ClInclude Include="game\particles\Fire.h" />
@@ -338,10 +340,12 @@
     <ClCompile Include="game\networking\packets\PacketClientRequestConnectionToServer.cpp" />
     <ClCompile Include="game\networking\packets\PacketCloakUpdate.cpp" />
     <ClCompile Include="game\networking\packets\PacketCollisionEvent.cpp" />
+    <ClCompile Include="game\networking\packets\PacketGameplayModeInfo.cpp" />
     <ClCompile Include="game\networking\packets\PacketHealthUpdate.cpp" />
     <ClCompile Include="game\networking\packets\PacketMessage.cpp" />
     <ClCompile Include="game\networking\packets\PacketPhysicsUpdate.cpp" />
     <ClCompile Include="game\networking\packets\PacketProjectileImpact.cpp" />
+    <ClCompile Include="game\networking\packets\PacketShipRespawned.cpp" />
     <ClCompile Include="game\networking\server\Server.cpp" />
     <ClCompile Include="game\networking\server\ServerMapSpecificData.cpp" />
     <ClCompile Include="game\particles\Fire.cpp" />

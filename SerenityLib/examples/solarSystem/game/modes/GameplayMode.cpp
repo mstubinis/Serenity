@@ -2,6 +2,7 @@
 #include "../teams/Team.h"
 #include "../Helper.h"
 #include "../ships/Ships.h"
+#include "../networking/packets/PacketGameplayModeInfo.h"
 
 #include <iostream>
 
@@ -45,43 +46,44 @@ const bool GameplayMode::addAllowedShipClass(const string& shipClass) {
     return true;
 }
 
-const string GameplayMode::serialize() const {
-    string res = "";
+const PacketGameplayModeInfo GameplayMode::serialize() const {
+    PacketGameplayModeInfo res;
 
-    res +=       to_string(m_GameplayModeType);    //[0]
-    res += "," + to_string(m_MaxAmountOfPlayers);  //[1]
-    res += "," + to_string(m_Teams.size());        //[2]
+    res.gameplay_mode_type                  = static_cast<unsigned int>(m_GameplayModeType);
+    res.gameplay_mode_team_sizes            = static_cast<unsigned int>(m_Teams.size());
+    res.gameplay_mode_max_number_of_players = static_cast<unsigned int>(m_MaxAmountOfPlayers);
+
     for (auto& team_itr : m_Teams) {
         auto& team = *team_itr.second;
-        res += "," + team.getTeamNumberAsString();
-        res += "," + to_string(team.getNumberOfPlayersOnTeam());
+        res.data += "," + team.getTeamNumberAsString();
+        res.data += "," + to_string(team.getNumberOfPlayersOnTeam());
 
-        res += "," + to_string(team.getAllyTeams().size());
-        res += "," + to_string(team.getEnemyTeams().size());
+        res.data += "," + to_string(team.getAllyTeams().size());
+        res.data += "," + to_string(team.getEnemyTeams().size());
 
         for (auto& ally_team : team.getAllyTeams()) {
-            res += "," + to_string(static_cast<unsigned int>(ally_team));
+            res.data += "," + to_string(static_cast<unsigned int>(ally_team));
         }
         for (auto& enemy_team : team.getEnemyTeams()) {
-            res += "," + to_string(static_cast<unsigned int>(enemy_team));
+            res.data += "," + to_string(static_cast<unsigned int>(enemy_team));
         }
         for (auto& playerMapKey : team.getPlayers()) {
-            res += "," + playerMapKey;
+            res.data += "," + playerMapKey;
         }
     }
-    res += "," + to_string(m_AllowedShipClasses.size());
+    res.data += "," + to_string(m_AllowedShipClasses.size());
     for (auto& ship_class : m_AllowedShipClasses) {
-        res += "," + ship_class;
+        res.data += "," + ship_class;
     }
+    res.data.erase(0, 1); //remove first ","
     return res;
 }
-void GameplayMode::deserialize(const string& input) {
-    auto list                  = Helper::SeparateStringByCharacter(input, ',');
-    m_GameplayModeType         = static_cast<GameplayModeType::Mode>(stoi(list[0]));
-    m_MaxAmountOfPlayers       = static_cast<unsigned int>(stoi(list[1]));
+void GameplayMode::deserialize(const PacketGameplayModeInfo& packet) {
 
-    unsigned int team_size     = static_cast<unsigned int>(stoi(list[2]));
-    unsigned int start_index   = 3;
+    const auto list            = Helper::SeparateStringByCharacter(packet.data, ',');
+    m_GameplayModeType         = static_cast<GameplayModeType::Mode>(packet.gameplay_mode_type);
+    m_MaxAmountOfPlayers       = static_cast<unsigned int>(packet.gameplay_mode_max_number_of_players);
+    size_t start_index         = 0;
 
     TeamNumber::Enum    ally_team;
     TeamNumber::Enum    enemy_team;
@@ -90,15 +92,14 @@ void GameplayMode::deserialize(const string& input) {
     unsigned int        num_enemy_teams;
     unsigned int        num_players_on_team;
     string              player_map_key;
-    for (unsigned int i = 0; i < team_size; ++i) {
+    for (unsigned int i = 0; i < packet.gameplay_mode_team_sizes; ++i) {
 
-        unsigned int count = 0;
-        team_number = static_cast<TeamNumber::Enum>(stoi(list[start_index]));
-        num_players_on_team = stoi(list[start_index + 1]);
-        num_ally_teams      = stoi(list[start_index + 2]);
-        num_enemy_teams     = stoi(list[start_index + 3]);
+        unsigned int count  = 0;
+        team_number         = static_cast<TeamNumber::Enum>(stoi(list[start_index + 0]));
+        num_players_on_team =                               stoi(list[start_index + 1]);
+        num_ally_teams      =                               stoi(list[start_index + 2]);
+        num_enemy_teams     =                               stoi(list[start_index + 3]);
         count += 4;
-
 
         //add team
         Team* newTeam = nullptr;
