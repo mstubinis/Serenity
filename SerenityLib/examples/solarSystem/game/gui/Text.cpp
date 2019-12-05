@@ -58,11 +58,15 @@ const glm::vec2& Text::textScale() const {
     return m_TextScale;
 }
 void Text::update(const double& dt) {
-
+    Widget::update(dt);
 }
 void Text::render(const glm::vec4& scissor) {
-    Renderer::renderText(m_Text, *m_Font, glm::vec2(m_Position.x + 5.0f, m_Position.y), m_Color, 0, m_TextScale, 0.004f, m_TextAlignment, scissor);
+    const auto pos = positionWorld();
+
+    Renderer::renderText(m_Text, *m_Font, glm::vec2(pos.x + 5.0f, pos.y), m_Color, 0, m_TextScale, 0.004f, m_TextAlignment, scissor);
+
+    Widget::render(scissor);
 }
 void Text::render() {
-    Renderer::renderText(m_Text, *m_Font, glm::vec2(m_Position.x + 5.0f, m_Position.y), m_Color, 0, m_TextScale, 0.004f, m_TextAlignment);
+    Text::render(glm::vec4(-1.0f));
 }

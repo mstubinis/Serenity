@@ -23,6 +23,7 @@ void ThreatTable::modify_threat(const string& key, const unsigned int& val, cons
     for (auto& pair_itr : m_ThreatSorted) {
         if (!found && pair_itr.first == key) {
             pair_itr.second += val;
+            found = true;
             break;
         }
     }

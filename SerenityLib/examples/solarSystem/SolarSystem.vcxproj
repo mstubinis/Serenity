@@ -216,6 +216,7 @@
     <ClInclude Include="game\gui\specifics\ServerLobbyChatWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyShipSelectorWindow.h" />
+    <ClInclude Include="game\gui\specifics\Ship3DViewer.h" />
     <ClInclude Include="game\gui\Text.h" />
     <ClInclude Include="game\gui\TextBox.h" />
     <ClInclude Include="game\gui\Widget.h" />
@@ -242,6 +243,7 @@
     <ClInclude Include="game\networking\packets\PacketPhysicsUpdate.h" />
     <ClInclude Include="game\networking\packets\PacketProjectileImpact.h" />
     <ClInclude Include="game\networking\packets\Packets.h" />
+    <ClInclude Include="game\networking\packets\PacketShipInfoRequest.h" />
     <ClInclude Include="game\networking\packets\PacketShipRespawned.h" />
     <ClInclude Include="game\networking\server\Server.h" />
     <ClInclude Include="game\networking\server\ServerMapSpecificData.h" />
@@ -321,6 +323,7 @@
     <ClCompile Include="game\gui\specifics\ServerLobbyChatWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyShipSelectorWindow.cpp" />
+    <ClCompile Include="game\gui\specifics\Ship3DViewer.cpp" />
     <ClCompile Include="game\gui\Text.cpp" />
     <ClCompile Include="game\gui\TextBox.cpp" />
     <ClCompile Include="game\gui\Widget.cpp" />
@@ -345,6 +348,7 @@
     <ClCompile Include="game\networking\packets\PacketMessage.cpp" />
     <ClCompile Include="game\networking\packets\PacketPhysicsUpdate.cpp" />
     <ClCompile Include="game\networking\packets\PacketProjectileImpact.cpp" />
+    <ClCompile Include="game\networking\packets\PacketShipInfoRequest.cpp" />
     <ClCompile Include="game\networking\packets\PacketShipRespawned.cpp" />
     <ClCompile Include="game\networking\server\Server.cpp" />
     <ClCompile Include="game\networking\server\ServerMapSpecificData.cpp" />

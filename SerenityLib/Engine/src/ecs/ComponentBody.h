@@ -153,7 +153,7 @@ class ComponentBody : public ComponentBaseClass {
         void translate(const decimal& t, const bool local = true);
 
         void rotate(const glm_vec3& rotation, const bool local = true);
-        void rotate(const decimal& pitch, const decimal& yaw, const decimal& roll, const bool local = true);
+        void rotate(const decimal& pitch_radians, const decimal& yaw_radians, const decimal& roll_radians, const bool local = true);
 
         void scale(const glm_vec3& amount);
         void scale(const decimal& x, const decimal& y, const decimal& z);
@@ -164,7 +164,7 @@ class ComponentBody : public ComponentBaseClass {
         void setPosition(const decimal& p);
 
         void setRotation(const glm_quat& newRotation);
-        void setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w);
+        void setRotation(const decimal& quat_x, const decimal& quat_y, const decimal& quat_z, const decimal& quat_w);
 
         void setScale(const glm_vec3& newScale);
         void setScale(const decimal& x, const decimal& y, const decimal& z);

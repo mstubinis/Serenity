@@ -8,6 +8,7 @@
 #include "PacketMessage.h"
 #include "PacketShipRespawned.h"
 #include "PacketGameplayModeInfo.h"
+#include "PacketShipInfoRequest.h"
 
 using namespace std;
 
@@ -78,8 +79,6 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Client_Fired_Torpedos: {
             p = new PacketMessage(); break;
-        }case PacketType::Client_To_Server_Periodic_Ping: {
-            p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Client_Left_Map: {
             p = new PacketMessage(); break;
         }case PacketType::Client_To_Server_Ship_Health_Update: {
@@ -107,9 +106,9 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
         }case PacketType::Server_To_Client_Collision_Event: {
             p = new PacketCollisionEvent(); break;
         }case PacketType::Client_To_Server_Request_Ship_Current_Info: {
-            p = new PacketMessage(); break;
+            p = new PacketShipInfoRequest(); break;
         }case PacketType::Server_To_Client_Request_Ship_Current_Info: {
-            p = new PacketMessage(); break;
+            p = new PacketShipInfoRequest(); break;
         }case PacketType::Client_To_Server_Ship_Was_Just_Destroyed: {
             p = new PacketMessage(); break;
         }case PacketType::Server_To_Client_Ship_Was_Just_Destroyed: {

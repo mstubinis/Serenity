@@ -31,6 +31,7 @@ struct MapSelectorButtonOnClick final{ void operator()(Button* button) const {
 
 
 ServerHostingMapSelectorWindow::ServerHostingMapSelectorWindow(const Font& font, const float x, const float y):m_Font(const_cast<Font&>(font)){
+    m_UserPointer = nullptr;
     m_Width = 600.0f;
     m_Height = 300.0f;
     m_MapFileWindow = new ScrollFrame(Resources::getWindowSize().x / 2.0f - (m_Width / 2.0f), 630.0f, m_Width, m_Height);

@@ -58,18 +58,8 @@ struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
         widget->setColor(0.5f, 0.5f, 0.5f, 0.0f);
     }
     button->setColor(0.5f, 0.5f, 0.5f, 1.0f);
-
-    auto& shipClass = button->text();
-    auto& shipData = Ships::Database.at(shipClass);
-    window.m_ChosenShipName = shipClass;
-    auto& entity = *static_cast<EntityWrapper*>(window.getUserPointer());
-    auto& model = *entity.entity().getComponent<ComponentModel>();
-    model.setModelMesh(shipData.MeshHandles[0], 0);
-    model.setModelMaterial(shipData.MaterialHandles[0], 0);
-    model.show();
-
-    auto& camera = const_cast<Camera&>(window.getShipDisplay().getCamera());
-    camera.entity().getComponent<ComponentLogic2>()->call(-0.0001);
+    const string& shipClass = button->text();
+    window.setShipClass(shipClass);
 }};
 
 Client::Client(Team* team, Core& core, const unsigned short& server_port, const string& server_ipAddress, const unsigned int& id) : m_Core(core), m_MapSpecificData(*this){
@@ -78,7 +68,6 @@ Client::Client(Team* team, Core& core, const unsigned short& server_port, const 
     m_UdpSocket = new Networking::SocketUDP(server_port + 1 + id, server_ipAddress);
     internal_init(server_port, server_ipAddress);
 }
-
 Client::~Client() {
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     SAFE_DELETE(m_TcpSocket);
@@ -193,7 +182,6 @@ const sf::Socket::Status Client::receive_udp(void* data, size_t size, size_t& re
 const string& Client::username() const {
     return m_Username;
 }
-
 void Client::update(Client* _client, const double& dt) {
     if (!_client) 
         return;
@@ -205,22 +193,20 @@ void Client::update(Client* _client, const double& dt) {
     client.onReceiveUDP();
     client.onReceiveTCP();
 }
-
 void Client::on_receive_physics_update(Packet& basePacket, Map& map) {
     if (m_Core.gameState() == GameState::Game) { //TODO: figure out a way for the server to only send phyiscs updates to clients in the map
-        PacketPhysicsUpdate& pI     = static_cast<PacketPhysicsUpdate&>(basePacket);
-        TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(pI.team_number);
-        AIType::Type aiType         = static_cast<AIType::Type>(pI.ai_type);
-        auto& ships                 = map.getShips();
-        Ship* new_ship = nullptr;
-
+        const PacketPhysicsUpdate& pI     = static_cast<PacketPhysicsUpdate&>(basePacket);
+        const TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(pI.team_number);
+        const AIType::Type aiType         = static_cast<AIType::Type>(pI.ai_type);
+        auto& ships                       = map.getShips();
+        Ship* new_client_ship             = nullptr;
 
         if (ships.size() == 0 || !ships.count(pI.ship_map_key)) {
-            auto spawnPosition = map.getSpawnAnchor()->getPosition();
-            auto x = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
-            auto y = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
-            auto z = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
-            auto randOffsetForSafety = glm_vec3(x, y, z);
+            const auto spawnPosition = map.getSpawnAnchor()->getPosition();
+            const auto x = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
+            const auto y = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
+            const auto z = Helper::GetRandomFloatFromTo(-400.0f, 400.0f);
+            const auto randOffsetForSafety = glm_vec3(x, y, z);
 
             Ship* player_you = map.getPlayer();
 
@@ -228,20 +214,20 @@ void Client::on_receive_physics_update(Packet& basePacket, Map& map) {
             if (aiType == AIType::Player_You && player_you)
                 final_ai = AIType::Player_Other;
             //TODO: create proper AI for npc's
-            new_ship = map.createShip(final_ai, *m_MapSpecificData.m_GameplayMode->getTeams().at(teamNumber), *this, pI.ship_class, pI.player_username, spawnPosition + randOffsetForSafety);
-            if (new_ship) {
+            new_client_ship = map.createShip(final_ai, *m_MapSpecificData.m_GameplayMode->getTeams().at(teamNumber), *this, pI.ship_class, pI.player_username, spawnPosition + randOffsetForSafety);
+            if (new_client_ship && player_you) {
                 //hey a new ship entered my map, i want info about it!
-                PacketMessage pOut;
-                pOut.PacketType = PacketType::Client_To_Server_Request_Ship_Current_Info;
-                pOut.name       = player_you->getMapKey();
-                pOut.data       = new_ship->getMapKey();
-                pOut.data      += "," + pI.player_username;
+                PacketShipInfoRequest pOut;
+                pOut.PacketType                = PacketType::Client_To_Server_Request_Ship_Current_Info;
+                pOut.ship_that_wants_info_key  = player_you->getMapKey();
+                pOut.requested_ship_key        = new_client_ship->getMapKey();
+                pOut.requested_ship_username   = pI.player_username;
                 send(pOut);
             }
         }else{
-            new_ship = ships.at(pI.ship_map_key);
+            new_client_ship = ships.at(pI.ship_map_key);
         }
-        new_ship->updatePhysicsFromPacket(pI, map);
+        new_client_ship->updatePhysicsFromPacket(pI, map);
     }
 }
 
@@ -266,11 +252,8 @@ void Client::on_receive_ship_notified_of_impending_respawn(Packet& basePacket, M
     }
 }
 void Client::on_receive_client_wants_my_ship_info(Packet& basePacket, Map& map) {
-    PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
-    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
+    PacketShipInfoRequest& pI = static_cast<PacketShipInfoRequest&>(basePacket);
     auto* my_Ship_ptr = map.getPlayer();
-    //auto* source_ship = map.getShips().at(pI.name);
-    //const auto& source_ship_mapkey = source_ship->getMapKey();
 
     if (my_Ship_ptr) {
         auto& my_ship = *my_Ship_ptr;

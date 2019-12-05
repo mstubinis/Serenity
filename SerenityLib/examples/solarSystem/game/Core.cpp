@@ -16,15 +16,12 @@
 #include <core/engine/Engine.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/lights/SunLight.h>
-#include <core/engine/mesh/Mesh.h>
-#include <core/engine/materials/Material.h>
 #include <ecs/Components.h>
 
 using namespace std;
 using namespace Engine;
 
 Core::Core() {
-    m_ChosenShip        = nullptr;
     m_Menu              = nullptr;
     m_Server            = nullptr;
     m_Client            = nullptr;
@@ -38,7 +35,6 @@ Core::Core() {
 }
 Core::~Core() {
     ResourceManifest::destruct();
-    SAFE_DELETE(m_ChosenShip);
     SAFE_DELETE(m_Client);
     SAFE_DELETE(m_Server);
     SAFE_DELETE(m_Menu);
@@ -70,10 +66,8 @@ void Core::startClient(GameplayMode* mode, Team* team, const unsigned short& por
     auto& client = *m_Client;
     client.m_MapSpecificData.m_GameplayMode = mode;
     client.m_Username = name;
-    //if (!client.m_IsCurrentlyConnecting) {
-        client.changeConnectionDestination(port, ip);
-        m_Client->connect(10);
-    //}
+    client.changeConnectionDestination(port, ip);
+    m_Client->connect(10);
 }
 void Core::shutdownClient(const bool& serverShutdownFirst) {
     if (m_Client) {
@@ -138,15 +132,6 @@ void Core::init() {
     SunLight* light = new SunLight(glm::vec3(0.0f), LightType::Sun, menuScene);
     light->setColor(1.55f, 1.55f, 1.3f);
     light->setPosition(0.0f, 3000.0f, -10000.0f);
-
-    m_ChosenShip = new EntityWrapper(*menuScene);
-
-    auto e = m_ChosenShip->entity();
-    ship_camera->setTarget(m_ChosenShip);
-    auto& body  = *e.addComponent<ComponentBody>();
-    body.setPosition(0, 0, 8500);
-    auto& model = *e.addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
-    model.hide();
 
     m_Menu = new Menu(*menuScene, *ship_camera, m_GameState, *this);
     m_Menu->go_to_main_menu();

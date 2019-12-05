@@ -588,6 +588,12 @@
     <ClInclude Include="game\networking\packets\PacketGameplayModeInfo.h">
       <Filter>Header Files\Game\Networking\Packets</Filter>
     </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketShipInfoRequest.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\Ship3DViewer.h">
+      <Filter>Header Files\Game\GUI\Specifics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -883,6 +889,12 @@
     </ClCompile>
     <ClCompile Include="game\networking\packets\PacketGameplayModeInfo.cpp">
       <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketShipInfoRequest.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\Ship3DViewer.cpp">
+      <Filter>Source Files\Game\GUI\Specifics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

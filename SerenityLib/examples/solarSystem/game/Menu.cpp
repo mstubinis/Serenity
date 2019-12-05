@@ -200,14 +200,17 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
 
     const auto& windowDimensions = Resources::getWindowSize();
 
-    m_ButtonHost = new Button(*m_Font, glm::vec2(windowDimensions.x / 2.0f, 275.0f), 150.0f, 50.0f);
+    m_ButtonHost = new Button(*m_Font, windowDimensions.x / 2.0f, 275.0f, 150.0f, 50.0f);
     m_ButtonHost->setText("Host");
     m_ButtonHost->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_ButtonHost->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
-    m_ButtonJoin = new Button(*m_Font, glm::vec2(windowDimensions.x / 2.0f, 155.0f), 150.0f, 50.0f);
+
+    m_ButtonJoin = new Button(*m_Font, 0.0f, -120.0f, 150.0f, 50.0f);
     m_ButtonJoin->setText("Join");
     m_ButtonJoin->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_ButtonJoin->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
+
+    m_ButtonHost->addChild(m_ButtonJoin);
     
     m_ButtonHost->setUserPointer(this);
     m_ButtonJoin->setUserPointer(this);
@@ -215,12 +218,11 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
     m_ButtonHost->setOnClickFunctor(ButtonHost_OnClick());
     m_ButtonJoin->setOnClickFunctor(ButtonJoin_OnClick());
 
-
-    m_Back = new Button(*m_Font, glm::vec2(100.0f, 50.0f), 150.0f, 50.0f);
+    m_Back = new Button(*m_Font, 100.0f, 50.0f, 150.0f, 50.0f);
     m_Back->setText("Back");
     m_Back->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_Back->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
-    m_Next = new Button(*m_Font, glm::vec2(windowDimensions.x - 100.0f, 50.0f), 150.0f, 50.0f);
+    m_Next = new Button(*m_Font, windowDimensions.x - 100.0f, 50.0f, 150.0f, 50.0f);
     m_Next->setText("Next");
     m_Next->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_Next->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
@@ -229,7 +231,6 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
 
     m_Back->setOnClickFunctor(ButtonBack_OnClick());
     m_Next->setOnClickFunctor(ButtonNext_OnClick());
-
 
     m_ServerIp = new TextBox("Server IP",*m_Font, 40, windowDimensions.x / 2.0f, 115.0f);
     m_ServerIp->setColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -245,10 +246,7 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
     m_InfoText = new Text(Resources::getWindowSize().x / 2.0f, 65.0f, *m_Font);
     m_InfoText->setTextAlignment(TextAlignment::Center);
 
-
     m_ServerHostMapSelector = new ServerHostingMapSelectorWindow(*m_Font, Resources::getWindowSize().x / 2.0f - 300.0f, 630.0f);
-
-
 
     m_ServerLobbyChatWindow = new ServerLobbyChatWindow(*m_Font, 50.0f, 140.0f + 300.0f);
     m_ServerLobbyChatWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
@@ -258,8 +256,6 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
 
     m_ServerLobbyShipSelectorWindow = new ServerLobbyShipSelectorWindow(core,scene, camera, *m_Font, 50.0f, windowDimensions.y - 50.0f);
     m_ServerLobbyShipSelectorWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
-    m_ServerLobbyShipSelectorWindow->setUserPointer(core.m_ChosenShip);
-
 }
 Menu::~Menu() {
     SAFE_DELETE(m_ButtonHost);
@@ -279,14 +275,14 @@ Font& Menu::getFont() {
     return *m_Font;
 }
 void Menu::enter_the_game() {
-    if (!m_ServerLobbyShipSelectorWindow->m_ChosenShipName.empty()) {
+    if (!m_ServerLobbyShipSelectorWindow->getShipClass().empty()) {
         PacketMessage p;
         p.PacketType = PacketType::Client_To_Server_Request_Map_Entry;
         p.name = m_Core.m_Client->m_Username;
 
-        p.data = m_ServerLobbyShipSelectorWindow->m_ChosenShipName;
+        p.data = m_ServerLobbyShipSelectorWindow->getShipClass(); //ship class [0]
 
-        p.data += "," + m_Core.m_Client->m_MapSpecificData.m_Map->name();
+        p.data += "," + m_Core.m_Client->m_MapSpecificData.m_Map->name(); //map name [1]
         if (m_Core.m_Client->m_MapSpecificData.m_Team) {
             p.data += "," + m_Core.m_Client->m_MapSpecificData.m_Team->getTeamNumberAsString();
         }else{
@@ -328,7 +324,6 @@ void Menu::setErrorText(const string& text, const float errorTime) {
 
 void Menu::onResize(const uint& width, const uint& height) {
     m_ButtonHost->setPosition(width / 2.0f, 275.0f);
-    m_ButtonJoin->setPosition(width / 2.0f, 155.0f);
 
     m_Back->setPosition(100.0f, 50.0f);
     m_Next->setPosition(width - 100.0f, 50.0f);
@@ -355,7 +350,6 @@ void Menu::update_main_menu(const double& dt) {
     m_Font->renderText(epriv::Core::m_Engine->m_DebugManager.reportDebug(), glm::vec2(50), glm::vec4(1.0), 0);
 
     m_ButtonHost->update(dt);
-    m_ButtonJoin->update(dt);
 }
 void Menu::update_host_server_lobby_and_ship(const double& dt) {
     m_ServerLobbyChatWindow->update(dt);
@@ -395,7 +389,6 @@ void Menu::render_game() {
 }
 void Menu::render_main_menu() {
     m_ButtonHost->render();
-    m_ButtonJoin->render();
 }
 void Menu::render_host_server_lobby_and_ship() {
     m_ServerLobbyChatWindow->render();

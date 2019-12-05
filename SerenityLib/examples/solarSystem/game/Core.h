@@ -10,7 +10,6 @@ class  Menu;
 class  Map;
 class  Server;
 class  Client;
-class  EntityWrapper;
 class  ShipSystemSensors;
 class  SensorStatusDisplay;
 class  Team;
@@ -25,7 +24,6 @@ class Core final {
     friend class  SensorStatusDisplay;
     friend class  ClientMapSpecificData;
     private:
-        EntityWrapper*      m_ChosenShip;
         Menu*               m_Menu;
         Server*             m_Server;
         Client*             m_Client;

@@ -3,6 +3,7 @@
 #define GAME_WIDGET_H
 
 #include "WidgetInterface.h"
+#include <vector>
 #include <glm/vec2.hpp>
 
 class Widget : public IWidget {
@@ -16,12 +17,25 @@ class Widget : public IWidget {
         bool                              m_MouseIsOver;
         Alignment::Type                   m_Alignment;
 
+        std::vector<Widget*>              m_Children;
+        Widget*                           m_Parent;
+
+        const glm::vec2 positionFromAlignmentWorld();
+        const glm::vec2 positionFromAlignmentWorld(const float width, const float height, const Alignment::Type& alignment);
         const glm::vec2 positionFromAlignment();
         const glm::vec2 positionFromAlignment(const float width, const float height, const Alignment::Type& alignment);
     public:
+        Widget(const glm::vec2& position, const glm::vec2& size);
         Widget(const glm::vec2& position, const float width, const float height);
         Widget(const float x, const float y, const float width, const float height);
+        Widget(const float x, const float y, const glm::vec2& size);
         virtual ~Widget();
+
+        const bool setParent(Widget* parent);
+        const bool clearParent();
+
+        const bool addChild(Widget* child);
+        const bool removeChild(Widget* child);
 
         virtual void setWidth(const float);
         virtual void setHeight(const float);
@@ -32,7 +46,9 @@ class Widget : public IWidget {
 
         virtual const bool isMouseOver() const;
 
-        const glm::vec2& position() const;
+        inline const glm::vec2& positionLocal() const;
+        const glm::vec2  positionWorld() const;
+        const glm::vec2& position(const bool local = true) const;
         const glm::vec4& color() const;
 
         void setAlignment(const Alignment::Type& alignment);

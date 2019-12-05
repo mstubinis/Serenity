@@ -583,6 +583,7 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
     }
     if (m_DestructionTimerDecalTimer > m_DestructionTimerDecalTimerMax) {
         const auto ship_position = getPosition();
+        const auto ship_rotation = getRotation();
         auto rand                = Helper::GetRandomIntFromTo(0, 100);
         auto rand2               = Helper::GetRandomFloatFromTo(0.15f, 0.4f) + 0.3f;
 
@@ -622,7 +623,7 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
 
         auto* sound = Sound::playEffect(randSmallSound);
         if (sound) {
-            sound->setPosition(ship_position);
+            sound->setPosition(ship_position + Math::rotate_vec3(ship_rotation, localPos));
             sound->setAttenuation(0.3f);
         }
         m_DestructionTimerDecalTimer = 0.0;

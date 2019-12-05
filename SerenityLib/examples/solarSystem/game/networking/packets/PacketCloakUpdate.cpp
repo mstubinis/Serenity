@@ -15,10 +15,11 @@ PacketCloakUpdate::PacketCloakUpdate() {
     justTurnedOff     = false;
     ship_map_key      = "";
 }
-PacketCloakUpdate::PacketCloakUpdate(Ship& ship) {
+PacketCloakUpdate::PacketCloakUpdate(Ship& ship) : PacketCloakUpdate(){
     ship_map_key = ship.getMapKey();
-    if (ship.getShipSystem(ShipSystemType::CloakingDevice)) {
-        auto& cloak       = *static_cast<ShipSystemCloakingDevice*>(ship.getShipSystem(ShipSystemType::CloakingDevice));
+    auto* cloak_ptr = static_cast<ShipSystemCloakingDevice*>(ship.getShipSystem(ShipSystemType::CloakingDevice));
+    if (cloak_ptr) {
+        auto& cloak       = *cloak_ptr;
         cloakSystemOnline = cloak.isOnline();
         cloakActive       = cloak.isCloakActive();
         Math::Float16From32(&cloakTimer, cloak.getCloakTimer());

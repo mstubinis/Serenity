@@ -40,8 +40,6 @@ struct PacketType {enum Type: unsigned int {
     Client_To_Server_Ship_Health_Update,
     Server_To_Client_Ship_Health_Update,
 
-    Client_To_Server_Periodic_Ping,
-
     Server_To_Client_Client_Left_Map,
 
     Client_To_Server_Client_Fired_Cannons,

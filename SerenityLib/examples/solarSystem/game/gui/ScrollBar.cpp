@@ -145,30 +145,31 @@ void ScrollBar::render(const glm::vec4& scissor) {
     const float& scrollBarY = m_ScrollBarStartAnchor - scrollBarHeight / 2.0f;
 
     //draw the actual scroll bar
+    const auto pos = positionWorld();
 
-    if (mouse.x < m_Position.x || mouse.x > m_Position.x + m_Width || mouse.y < scrollBarY || mouse.y > scrollBarY + scrollBarHeight) {
+    if (mouse.x < pos.x || mouse.x > pos.x + m_Width || mouse.y < scrollBarY || mouse.y > scrollBarY + scrollBarHeight) {
         mouseOver = false;
     }
     glm::vec4 color = m_ScrollBarColor;
     if (mouseOver && m_ScrollBarCurrentContentPercent < 1.0f)
         color += glm::vec4(0.15f);
-    Renderer::renderRectangle(glm::vec2(m_Position.x + 1.0f, m_ScrollBarStartAnchor), color, m_Width, scrollBarHeight, 0, 0.009f, Alignment::Left, scissor);
+    Renderer::renderRectangle(glm::vec2(pos.x + 1.0f, m_ScrollBarStartAnchor), color, m_Width, scrollBarHeight, 0, 0.009f, Alignment::Left, scissor);
 
     //scroll bar area background
-    Renderer::renderRectangle(glm::vec2(m_Position.x + 1.0f, m_Position.y - m_Width - halfBorderSize), glm::vec4(0.3f), m_Width, scrollHeightMax + 1, 0, 0.010f, m_Alignment, scissor);
+    Renderer::renderRectangle(glm::vec2(pos.x + 1.0f, pos.y - m_Width - halfBorderSize), glm::vec4(0.3f), m_Width, scrollHeightMax + 1, 0, 0.010f, m_Alignment, scissor);
 
     //border
-    Renderer::renderBorder(m_BorderSize, glm::vec2(m_Position.x + 2.0f, m_Position.y), m_Color, m_Width, m_Height, 0, 0.008f, m_Alignment, scissor);
+    Renderer::renderBorder(m_BorderSize, glm::vec2(pos.x + 2.0f, pos.y), m_Color, m_Width, m_Height, 0, 0.008f, m_Alignment, scissor);
 
     //inner borders
-    Renderer::renderRectangle(glm::vec2(m_Position.x + 2.0f, m_Position.y - m_Width), m_Color, m_Width, m_BorderSize, 0, 0.009f, Alignment::BottomLeft, scissor);
-    Renderer::renderRectangle(glm::vec2(m_Position.x + 2.0f, m_Position.y - m_Height + m_Width), m_Color, m_Width, m_BorderSize, 0, 0.009f, Alignment::TopLeft, scissor);
+    Renderer::renderRectangle(glm::vec2(pos.x + 2.0f, pos.y - m_Width), m_Color, m_Width, m_BorderSize, 0, 0.009f, Alignment::BottomLeft, scissor);
+    Renderer::renderRectangle(glm::vec2(pos.x + 2.0f, pos.y - m_Height + m_Width), m_Color, m_Width, m_BorderSize, 0, 0.009f, Alignment::TopLeft, scissor);
 
     //button triangles
-    if (mouse.x < m_Position.x || mouse.x > m_Position.x + m_Width || mouse.y < m_Position.y - m_Width || mouse.y > m_Position.y) {
+    if (mouse.x < pos.x || mouse.x > pos.x + m_Width || mouse.y < pos.y - m_Width || mouse.y > pos.y) {
         mouseOverTopTriangle = false;
     }
-    if (mouse.x < m_Position.x || mouse.x > m_Position.x + m_Width || mouse.y < (m_Position.y - m_Height) || mouse.y >(m_Position.y - m_Height) + m_Width) {
+    if (mouse.x < pos.x || mouse.x > pos.x + m_Width || mouse.y < (pos.y - m_Height) || mouse.y >(pos.y - m_Height) + m_Width) {
         mouseOverBottomTriangle = false;
     }
 
@@ -182,63 +183,11 @@ void ScrollBar::render(const glm::vec4& scissor) {
 
     const float& triSize = halfWidth - 4.0f;
 
-    Renderer::renderTriangle(glm::vec2(m_Position.x + halfWidth + 2.0f, m_Position.y - halfWidth), colorTop, 180, triSize, triSize, 0.007f, Alignment::Center, scissor);
-    Renderer::renderTriangle(glm::vec2(m_Position.x + halfWidth + 2.0f, m_Position.y - m_Height + halfWidth), colorBottom, 0, triSize, triSize, 0.007f, Alignment::Center, scissor);
+    Renderer::renderTriangle(glm::vec2(pos.x + halfWidth + 2.0f, pos.y - halfWidth), colorTop, 180, triSize, triSize, 0.007f, Alignment::Center, scissor);
+    Renderer::renderTriangle(glm::vec2(pos.x + halfWidth + 2.0f, pos.y - m_Height + halfWidth), colorBottom, 0, triSize, triSize, 0.007f, Alignment::Center, scissor);
+
+    Widget::render(scissor);
 }
 void ScrollBar::render() {
-    const auto& mouse = Engine::getMousePosition();
-    const float& halfWidth = m_Width / 2.0f;
-
-    const float& scrollHeightMax = m_Height - (m_Width * 2.0f);
-    const float& scrollBarHeight = getSliderHeight();
-
-    const float& gap = m_BorderSize + 4.0f;
-    const float& halfBorderSize = m_BorderSize / 2.0f;
-
-    bool mouseOverTopTriangle    = true;
-    bool mouseOverBottomTriangle = true;
-    bool mouseOver               = true;
-    const float& scrollBarY = m_ScrollBarStartAnchor - scrollBarHeight / 2.0f;
-
-    //draw the actual scroll bar
-
-    if (mouse.x < m_Position.x || mouse.x > m_Position.x + m_Width || mouse.y < scrollBarY || mouse.y > scrollBarY + scrollBarHeight) {
-        mouseOver = false;
-    }
-    glm::vec4 color = m_ScrollBarColor;
-    if (mouseOver && m_ScrollBarCurrentContentPercent < 1.0f)
-        color += glm::vec4(0.15f);
-    Renderer::renderRectangle(glm::vec2(m_Position.x + 1.0f, m_ScrollBarStartAnchor), color, m_Width, scrollBarHeight, 0, 0.009f, Alignment::Left);
-
-    //scroll bar area background
-    Renderer::renderRectangle(glm::vec2(m_Position.x + 1.0f, m_Position.y - m_Width - halfBorderSize), glm::vec4(0.3f), m_Width, scrollHeightMax + 1, 0, 0.010f, m_Alignment);
-
-    //border
-    Renderer::renderBorder(m_BorderSize, glm::vec2(m_Position.x + 2.0f, m_Position.y), m_Color, m_Width, m_Height, 0, 0.008f, m_Alignment);
-
-    //inner borders
-    Renderer::renderRectangle(glm::vec2(m_Position.x + 2.0f, m_Position.y - m_Width), m_Color, m_Width, m_BorderSize, 0, 0.009f, Alignment::BottomLeft);
-    Renderer::renderRectangle(glm::vec2(m_Position.x + 2.0f, m_Position.y - m_Height + m_Width), m_Color, m_Width, m_BorderSize, 0, 0.009f, Alignment::TopLeft);
-
-    //button triangles
-    if (mouse.x < m_Position.x || mouse.x > m_Position.x + m_Width || mouse.y < m_Position.y - m_Width || mouse.y > m_Position.y) {
-        mouseOverTopTriangle = false;
-    }
-    if (mouse.x < m_Position.x || mouse.x > m_Position.x + m_Width || mouse.y < (m_Position.y - m_Height) || mouse.y >(m_Position.y - m_Height) + m_Width) {
-        mouseOverBottomTriangle = false;
-    }
-
-    glm::vec4 colorTop = m_Color;
-    if (mouseOverTopTriangle)
-        colorTop += glm::vec4(0.55f);
-
-    glm::vec4 colorBottom = m_Color;
-    if (mouseOverBottomTriangle)
-        colorBottom += glm::vec4(0.55f);
-
-    const float& triSize = halfWidth - 4.0f;
-
-    Renderer::renderTriangle(glm::vec2(m_Position.x + halfWidth + 2.0f, m_Position.y - halfWidth), colorTop, 180, triSize, triSize, 0.007f,Alignment::Center);
-    Renderer::renderTriangle(glm::vec2(m_Position.x + halfWidth + 2.0f, m_Position.y - m_Height + halfWidth), colorBottom, 0, triSize, triSize, 0.007f, Alignment::Center);
-
+    ScrollBar::render(glm::vec4(-1.0f));
 }

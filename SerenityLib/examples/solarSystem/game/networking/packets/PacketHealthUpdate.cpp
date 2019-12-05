@@ -17,7 +17,7 @@ PacketHealthUpdate::PacketHealthUpdate() {
     flags                 = PacketHealthFlags::None;
     ship_class = ship_map_key = "";
 }
-PacketHealthUpdate::PacketHealthUpdate(Ship& ship) {
+PacketHealthUpdate::PacketHealthUpdate(Ship& ship) : PacketHealthUpdate(){
     auto* shields = static_cast<ShipSystemShields*>(ship.getShipSystem(ShipSystemType::Shields));
     auto* hull    = static_cast<ShipSystemHull*>(ship.getShipSystem(ShipSystemType::Hull));
     if (shields) {
