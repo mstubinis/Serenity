@@ -2,8 +2,8 @@
 #ifndef ENGINE_ECS_COMPONENT_POOL_H
 #define ENGINE_ECS_COMPONENT_POOL_H
 
-#include <ecs/SparseSet.h>
-#include <ecs/EntityDataRequest.h>
+#include <ecs/SparseSet.h> //ok
+#include <ecs/EntityDataRequest.h> //ok
 
 namespace Engine {
     namespace epriv {

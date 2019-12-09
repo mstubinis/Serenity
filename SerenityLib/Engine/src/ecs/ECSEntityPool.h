@@ -2,7 +2,6 @@
 #ifndef ENGINE_ECS_ENTITY_POOL_H
 #define ENGINE_ECS_ENTITY_POOL_H
 
-#include <ecs/SparseSet.h>
 #include <ecs/EntityDataRequest.h>
 #include <core/engine/scene/Scene.h>
 

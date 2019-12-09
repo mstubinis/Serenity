@@ -79,7 +79,7 @@ void Core::shutdownClient(const bool& serverShutdownFirst) {
         }
         client.m_TcpSocket->setBlocking(false);
         client.disconnect();
-
+        client.cleanup();
         Resources::setCurrentScene("Menu");
         m_Menu->go_to_main_menu();
     }

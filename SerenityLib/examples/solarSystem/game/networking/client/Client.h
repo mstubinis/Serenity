@@ -72,6 +72,8 @@ class Client{
         Client(Team* ,Core&, const unsigned short& server_port, const std::string& server_ipAddress, const unsigned int& id);
         ~Client();
 
+        void cleanup();
+
         GameplayMode* getGameplayMode();
 
         void setClientID(const unsigned int id);

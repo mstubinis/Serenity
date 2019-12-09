@@ -2,17 +2,16 @@
 #ifndef ENGINE_ECS_H
 #define ENGINE_ECS_H
 
-#include <ecs/ECSRegistry.h>
-#include <ecs/ECSEntityPool.h>
-#include <ecs/ECSComponentPool.h>
+#include <core/engine/utils/Utils.h> //ok
+#include <ecs/ECSRegistry.h> //ok
+#include <ecs/ECSEntityPool.h> //has scene.h in it
 #include <ecs/ECSSystem.h>
-#include <core/engine/utils/Utils.h>
 
 struct SceneOptions;
 
 namespace Engine {
     namespace epriv {
-
+        struct InternalScenePublicInterface;
         template<typename TEntity> class ECS{
             friend struct Engine::epriv::InternalScenePublicInterface;
             private:

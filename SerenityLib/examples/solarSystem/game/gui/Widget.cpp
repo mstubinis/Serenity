@@ -100,7 +100,6 @@ void* Widget::getUserPointer() const {
 void Widget::setUserPointer(void* ptr) {
     m_UserPointer = ptr;
 }
-
 const float Widget::width() const {
     return m_Width;
 }
@@ -128,6 +127,9 @@ void Widget::setColor(const glm::vec4& color) {
 }
 void Widget::setAlignment(const Alignment::Type& alignment) {
     m_Alignment = alignment;
+}
+const Alignment::Type& Widget::getAlignment() const {
+    return m_Alignment;
 }
 void Widget::show() {
     m_Hidden = true;

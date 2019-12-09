@@ -6,7 +6,9 @@
 #include <vector>
 #include <glm/vec2.hpp>
 
+class GUIRenderElement;
 class Widget : public IWidget {
+    friend class GUIRenderElement;
     protected:
         void*                             m_UserPointer;
         float                             m_Width;
@@ -52,6 +54,7 @@ class Widget : public IWidget {
         const glm::vec4& color() const;
 
         void setAlignment(const Alignment::Type& alignment);
+        const Alignment::Type& getAlignment() const;
 
         void* getUserPointer() const;
         void setUserPointer(void*);

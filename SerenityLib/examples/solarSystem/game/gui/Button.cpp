@@ -1,9 +1,13 @@
 #include "Button.h"
 
+
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/fonts/Font.h>
+#include <core/engine/textures/Texture.h>
+
+#include "../ResourceManifest.h"
 
 using namespace Engine;
 using namespace std;
@@ -15,10 +19,42 @@ namespace Engine {
 };
 
 void Button::internalSetSize() {
-    m_Height = getTextHeight() + m_Padding;
-    m_Width = getTextWidth() + m_Padding;
+    //m_Height = getTextHeight() + m_Padding;
+    //m_Width = getTextWidth() + m_Padding;
+
+    m_RenderElement.internal_calculate_sizes();
 }
-Button::Button(const Font& font, const float x, const float y, const float width, const float height) : Widget(x, y, width, height) {
+void Button::setTexture(Texture* texture) {
+    m_RenderElement.setTexture(texture);
+}
+void Button::setTextureCorner(Texture* texture) {
+    m_RenderElement.setTextureCorner(texture);
+}
+void Button::setTextureEdge(Texture* texture) {
+    m_RenderElement.setTextureEdge(texture);
+}
+void Button::setTexture(Handle& handle) {
+    m_RenderElement.setTexture(handle);
+}
+void Button::setTextureCorner(Handle& handle) {
+    m_RenderElement.setTextureCorner(handle);
+}
+void Button::setTextureEdge(Handle& handle) {
+    m_RenderElement.setTextureEdge(handle);
+}
+void Button::setWidth(const float w) {
+    Widget::setWidth(w);
+    m_RenderElement.internal_calculate_sizes();
+}
+void Button::setHeight(const float h) {
+    Widget::setHeight(h);
+    m_RenderElement.internal_calculate_sizes();
+}
+void Button::setSize(const float width, const float height) {
+    Widget::setSize(width, height);
+    m_RenderElement.internal_calculate_sizes();
+}
+Button::Button(const Font& font, const float x, const float y, const float width, const float height) : Widget(x, y, width, height), m_RenderElement(*this){
     setFont(font);
     setText("Button");
     setOnClickFunctor(epriv::emptyFunctor());
@@ -27,15 +63,24 @@ Button::Button(const Font& font, const float x, const float y, const float width
     setAlignment(Alignment::Center);
     setTextAlignment(TextAlignment::Center);
     internalSetSize();
+
+    setColor(m_Color);
+
+    m_RenderElement.setDepth(0.008f);
+
+    m_RenderElement.setTextureCorner(ResourceManifest::GUITextureCorner);
+    m_RenderElement.setTextureEdge(ResourceManifest::GUITextureSide);
 }
 Button::Button(const Font& font, const glm::vec2& position, const float width, const float height) : Button(font, position.x, position.y, width, height) {
 }
 Button::~Button() {
 
 }
+void Button::setTextScale(const float scale) {
+    Button::setTextScale(scale, scale);
+}
 void Button::setTextScale(const glm::vec2& scale) {
-    m_TextScale = scale;
-    internalSetSize();
+    Button::setTextScale(scale.x, scale.y);
 }
 void Button::setTextScale(const float x, const float y) {
     m_TextScale.x = x;
@@ -61,12 +106,27 @@ const float Button::getTextHeight() const {
 const float Button::getTextWidth() const {
     return (m_Font->getTextWidth(m_Text) * m_TextScale.x);
 }
-
+const float Button::getCornerWidth() {
+    return (m_RenderElement.getTextureCorner()) ? m_RenderElement.getTextureCorner()->width() : 0.0f;
+}
+const float Button::getCornerHeight() {
+    return (m_RenderElement.getTextureCorner()) ? m_RenderElement.getTextureCorner()->height() : 0.0f;
+}
 void Button::setTextColor(const float& r, const float& g, const float& b, const float& a) {
     Math::setColor(m_TextColor, r, g, b, a);
 }
 void Button::setTextColor(const glm::vec4& color) {
     Math::setColor(m_TextColor, color.r, color.g, color.b, color.a);
+}
+void Button::setColor(const float& r, const float& g, const float& b, const float& a) {
+    Widget::setColor(r, g, b, a);
+    m_RenderElement.setColor(glm::vec4(r, g, b, a));
+    m_RenderElement.setColorHighlight(glm::vec4(r, g, b, a) + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f));
+}
+void Button::setColor(const glm::vec4& color) {
+    Widget::setColor(color);
+    m_RenderElement.setColor(color);
+    m_RenderElement.setColorHighlight(color + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f));
 }
 void Button::setFont(const Font& font) {
     m_Font = &const_cast<Font&>(font);
@@ -86,33 +146,35 @@ void Button::update(const double& dt) {
     }
 }
 void Button::render(const glm::vec4& scissor) {
-    glm::vec4 color = m_Color;
-    if (m_MouseIsOver)
-        color += glm::vec4(0.15f);
-
     const auto pos = positionWorld();
 
-    Renderer::renderRectangle(pos, color, m_Width, m_Height, 0, 0.01f, m_Alignment, scissor);
+    m_RenderElement.render(scissor);
+
+    auto corner = m_RenderElement.getEdgeWidth() + (m_RenderElement.getCornerWidth() / 2.0f);
+    auto corner_width_half = corner / 2.0f;
+
+    auto txt_height = getTextHeight();
+
     glm::vec2 newPosTxt;
     switch (m_TextAlignment) {
         case TextAlignment::Left: {
-            newPosTxt = glm::vec2(pos.x - m_Width / 2.0f, pos.y + getTextHeight());
+            newPosTxt = glm::vec2(pos.x - corner_width_half, pos.y + txt_height);
             break;
         }case TextAlignment::Center: {
-            newPosTxt = glm::vec2(pos.x, pos.y + getTextHeight());
+            newPosTxt = glm::vec2(pos.x, pos.y + txt_height);
             break;
         }case TextAlignment::Right: {
-            newPosTxt = glm::vec2(pos.x + m_Width / 2.0f, pos.y + getTextHeight());
+            newPosTxt = glm::vec2(pos.x + corner_width_half, pos.y + txt_height);
             break;
         }default: {
-            newPosTxt = glm::vec2(pos.x, pos.y + getTextHeight());
+            newPosTxt = glm::vec2(pos.x, pos.y + txt_height);
             break;
         }
     }
     glm::vec2 f(0.0f);
-    Renderer::alignmentOffset(m_Alignment, f.x, f.y, m_Width, m_Height);
+    Renderer::alignmentOffset(m_Alignment, f.x, f.y, corner, m_Height);
 
-    m_Font->renderText(m_Text, glm::vec2(newPosTxt.x + f.x, newPosTxt.y + f.y), m_TextColor, 0, m_TextScale, 0.008f, m_TextAlignment, scissor);
+    m_Font->renderText(m_Text, glm::vec2(newPosTxt.x + f.x, newPosTxt.y + f.y), m_TextColor, 0, m_TextScale, 0.0077f, m_TextAlignment, scissor);
 
     Widget::render(scissor);
 }

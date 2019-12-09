@@ -58,6 +58,8 @@ class ServerMapSpecificData final {
         ServerMapSpecificData(Server&);
         ~ServerMapSpecificData();
 
+        void cleanup();
+
         void update(const double& dt);
 };
 

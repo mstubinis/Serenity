@@ -23,7 +23,7 @@ using namespace std;
 struct MapSelectorButtonOnClick final{ void operator()(Button* button) const {
     ServerHostingMapSelectorWindow& window = *static_cast<ServerHostingMapSelectorWindow*>(button->getUserPointer());
     for (auto& widget : window.getWindowFrame().content()) {
-        widget->setColor(0.5f, 0.5f, 0.5f, 0.0f);
+        widget->setColor(0.1f, 0.1f, 0.1f, 0.5f);
     }
     button->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     window.m_CurrentChoice->setText(button->text());
@@ -51,13 +51,15 @@ ServerHostingMapSelectorWindow::ServerHostingMapSelectorWindow(const Font& font,
             string copy = file;
             copy = copy.substr(0, copy.size() - ext.size());
             button->setText(copy);
-            button->setColor(0.5f, 0.5f, 0.5f, 0.0f);
+            button->setColor(0.1f, 0.1f, 0.1f, 0.5f);
             button->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
             button->setAlignment(Alignment::TopLeft);
             button->setWidth(600.0f);
             button->setTextAlignment(TextAlignment::Left);
             button->setUserPointer(this);
             button->setOnClickFunctor(MapSelectorButtonOnClick());
+            button->setTextureCorner(nullptr);
+            button->setTextureEdge(nullptr);
 
             m_MapFileWindow->addContent(button);
         }

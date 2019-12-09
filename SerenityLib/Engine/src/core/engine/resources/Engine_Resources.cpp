@@ -90,10 +90,9 @@ Material* epriv::ResourceManager::_hasMaterial(const string& n) {
 }
 void epriv::ResourceManager::onPostUpdate() {
     if (m_ScenesToBeDeleted.size() > 0) {
-        for (auto& scene : m_ScenesToBeDeleted) {
-            removeFromVector(resourceManager->m_Scenes, scene);
-            SAFE_DELETE(scene);
-            --InternalScenePublicInterface::NumScenes;
+        for (size_t i = 0; i < m_ScenesToBeDeleted.size(); ++i) {
+            SAFE_DELETE(m_ScenesToBeDeleted[i]);
+            m_ScenesToBeDeleted[i] = nullptr; //redundant?
         }
         vector_clear(m_ScenesToBeDeleted);
     }   
@@ -104,8 +103,15 @@ Handle epriv::ResourceManager::_addTexture(Texture* t) {
 Scene& epriv::ResourceManager::_getSceneByID(const uint& id) {
     return *m_Scenes[id - 1];
 }
-void epriv::ResourceManager::_addScene(Scene& s){
+const unsigned int epriv::ResourceManager::_addScene(Scene& s){
+    for (size_t i = 0; i < m_Scenes.size(); ++i) {
+        if (m_Scenes[i] == nullptr) {
+            m_Scenes[i] = &s;
+            return i + 1;
+        }
+    }
     m_Scenes.push_back(&s);
+    return m_Scenes.size();
 }
 const size_t epriv::ResourceManager::_numScenes(){
     return m_Scenes.size();
@@ -126,16 +132,16 @@ glm::uvec2 Resources::getWindowSize(){
 }
 
 const bool Resources::deleteScene(const string& sceneName) {
-    for (auto& scene : resourceManager->m_Scenes) {
-        if (scene->name() == sceneName) {
-            return Resources::deleteScene(*scene);
+    for (auto& scene_ptr : resourceManager->m_Scenes) {
+        if (scene_ptr->name() == sceneName) {
+            return Resources::deleteScene(*scene_ptr);
         }
     }
     return false;
 }
 const bool Resources::deleteScene(Scene& scene) {
-    for (auto& deleted_scene : resourceManager->m_ScenesToBeDeleted) {
-        if (&scene == deleted_scene) {
+    for (auto& deleted_scene_ptr : resourceManager->m_ScenesToBeDeleted) {
+        if (&scene == deleted_scene_ptr) {
             return false; //already flagged for deletion
         }
     }
@@ -145,9 +151,9 @@ const bool Resources::deleteScene(Scene& scene) {
 
 
 Scene* Resources::getScene(const string& sceneName){
-    for (auto& scene : resourceManager->m_Scenes) {
-        if (scene->name() == sceneName) {
-            return scene;
+    for (auto& scene_ptr : resourceManager->m_Scenes) {
+        if (scene_ptr->name() == sceneName) {
+            return scene_ptr;
         }
     }
     return nullptr;

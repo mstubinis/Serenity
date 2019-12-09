@@ -50,25 +50,32 @@ void Texture::render(const glm::vec2& position, const glm::vec4& color, const fl
     Renderer::renderTexture(*this, position, color, angle, scale, depth);
 }
 void Texture::setXWrapping(const TextureWrap::Wrap& wrap){
+    //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setXWrapping(m_Type, wrap);
 }
 void Texture::setYWrapping(const TextureWrap::Wrap& wrap){
+    //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setYWrapping(m_Type, wrap);
 }
 void Texture::setZWrapping(const TextureWrap::Wrap& wrap){
+    //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setZWrapping(m_Type, wrap);
 }
 void Texture::setWrapping(const TextureWrap::Wrap& wrap){
+    //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setWrapping(m_Type, wrap);
 }
 void Texture::setMinFilter(const TextureFilter::Filter& filter){
+    //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setMinFilter(m_Type, filter);
     m_MinFilter = filter;
 }
 void Texture::setMaxFilter(const TextureFilter::Filter& filter){
+    //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setMaxFilter(m_Type, filter);
 }
 void Texture::setFilter(const TextureFilter::Filter& filter){
+    //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setFilter(m_Type, filter);
 }
 void Texture::setXWrapping(const GLuint& type, const TextureWrap::Wrap& wrap){

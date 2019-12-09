@@ -594,6 +594,9 @@
     <ClInclude Include="game\gui\specifics\Ship3DViewer.h">
       <Filter>Header Files\Game\GUI\Specifics</Filter>
     </ClInclude>
+    <ClInclude Include="game\gui\GUIRenderElement.h">
+      <Filter>Header Files\Game\GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -894,6 +897,9 @@
       <Filter>Source Files\Game\Networking\Packets</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\specifics\Ship3DViewer.cpp">
+      <Filter>Source Files\Game\GUI\Specifics</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\GUIRenderElement.cpp">
       <Filter>Source Files\Game\GUI\Specifics</Filter>
     </ClCompile>
   </ItemGroup>

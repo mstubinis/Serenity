@@ -55,7 +55,7 @@ using namespace Engine;
 struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
     ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(button->getUserPointer());
     for (auto& widget : window.getWindowFrame().content()) {
-        widget->setColor(0.5f, 0.5f, 0.5f, 0.0f);
+        widget->setColor(0.1f, 0.1f, 0.1f, 0.5f);
     }
     button->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     const string& shipClass = button->text();
@@ -69,9 +69,13 @@ Client::Client(Team* team, Core& core, const unsigned short& server_port, const 
     internal_init(server_port, server_ipAddress);
 }
 Client::~Client() {
+    cleanup();
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     SAFE_DELETE(m_TcpSocket);
     SAFE_DELETE(m_UdpSocket);
+}
+void Client::cleanup() {
+    m_MapSpecificData.cleanup();
 }
 void Client::internal_init(const unsigned short& server_port, const string& server_ipAddress) {
     m_UdpSocket->setBlocking(false);
@@ -548,13 +552,15 @@ void Client::on_receive_map_data(Packet& basePacket, Menu& menu) {
         auto& textColor = Ships::Database.at(allowed_ship).FactionInformation.ColorText;
         Button* shipbutton = new Button(*menu.m_Font, 0, 0, 100, 40);
         shipbutton->setText(allowed_ship);
-        shipbutton->setColor(0.5f, 0.5f, 0.5f, 0.0f);
+        shipbutton->setColor(0.1f, 0.1f, 0.1f, 0.5f);
         shipbutton->setTextColor(textColor.r, textColor.g, textColor.b, 1.0f);
         shipbutton->setAlignment(Alignment::TopLeft);
         shipbutton->setWidth(600);
         shipbutton->setTextAlignment(TextAlignment::Left);
         shipbutton->setUserPointer(menu.m_ServerLobbyShipSelectorWindow);
         shipbutton->setOnClickFunctor(ShipSelectorButtonOnClick());
+        shipbutton->setTextureCorner(nullptr);
+        shipbutton->setTextureEdge(nullptr);
         menu.m_ServerLobbyShipSelectorWindow->addContent(shipbutton);
     }
     menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(true);
@@ -599,10 +605,10 @@ void Client::on_receive_connection_accepted_by_server(Packet& basePacket, Menu& 
     PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
     if (m_Core.m_GameState != GameState::Host_Server_Lobby_And_Ship && m_Core.m_GameState == GameState::Host_Server_Port_And_Name_And_Map) {
         m_Core.m_GameState = GameState::Host_Server_Lobby_And_Ship;
-        menu.m_Next->setText("Enter Game");
+        menu.m_Next->setText("Start");
     }else if (m_Core.m_GameState != GameState::Join_Server_Server_Lobby && m_Core.m_GameState == GameState::Join_Server_Port_And_Name_And_IP) {
         m_Core.m_GameState = GameState::Join_Server_Server_Lobby;
-        menu.m_Next->setText("Enter Game");
+        menu.m_Next->setText("Start");
     }
     menu.m_ServerLobbyConnectedPlayersWindow->clear();
     menu.m_ServerLobbyChatWindow->clear();

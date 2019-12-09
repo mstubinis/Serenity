@@ -94,7 +94,7 @@ const float Font::getTextHeight(const string& text) const {
             ++lineCount;
         }
     }
-    auto chosenChar = getGlyphData('X').height + 2;
+    auto chosenChar = getGlyphData('X').height;
     return lineCount * chosenChar;
 }
 const Texture& Font::getGlyphTexture() const {

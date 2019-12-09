@@ -33,6 +33,24 @@ struct ResourceManifest{
 
 	static Handle VenerexMaterial;
 
+    //gui
+    static Handle CrosshairMaterial;
+    static Handle CrosshairArrowMaterial;
+    static Handle RadarEdgeMaterial;
+    static Handle RadarTokenMaterial;
+    static Handle RadarMaterial;
+    static Handle RadarAntiCloakBarMaterial;
+    static Handle RadarAntiCloakBarBackgroundMaterial;
+    static Handle ShieldRingHUDTexture;
+    static Handle ShieldRingBorderHUDTexture;
+    static Handle ShieldRing2HUDTexture;
+    static Handle ShieldRingBorder2HUDTexture;
+    static Handle ShipStatusBackgroundHUDTexture;
+    static Handle ShipStatusBackgroundBorderHUDTexture;
+
+    static Handle GUITextureCorner;
+    static Handle GUITextureSide;
+
     //effects
     static Handle HullDamageOutline1Material;
     static Handle HullDamageMaterial1;
@@ -42,21 +60,8 @@ struct ResourceManifest{
     static Handle HullDamageMaterial3;
 
     static Handle EarthSkyMaterial;
-    static Handle CrosshairMaterial;
-    static Handle CrosshairArrowMaterial;
-    static Handle RadarEdgeMaterial;
-    static Handle RadarTokenMaterial;
-    static Handle RadarMaterial;
-    static Handle RadarAntiCloakBarMaterial;
-    static Handle RadarAntiCloakBarBackgroundMaterial;
     static Handle StarFlareMaterial;
     static Handle ShieldMaterial;
-    static Handle ShieldRingHUDTexture;
-    static Handle ShieldRingBorderHUDTexture;
-    static Handle ShieldRing2HUDTexture;
-    static Handle ShieldRingBorder2HUDTexture;
-    static Handle ShipStatusBackgroundHUDTexture;
-    static Handle ShipStatusBackgroundBorderHUDTexture;
 
     static Handle CannonOutlineMaterial;
     static Handle CannonTailMaterial;

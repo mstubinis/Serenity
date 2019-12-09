@@ -51,7 +51,7 @@ using namespace Engine;
 using namespace std;
 namespace boost_io = boost::iostreams;
 
-Map::Map(GameplayMode& mode, Client& client, const string& n, const string& file):Scene(n), m_Client(client), m_GameplayMode(mode){
+Map::Map(GameplayMode& mode, Client& client, const string& n, const string& file) : Scene(n), m_Client(client), m_GameplayMode(mode){
     m_Player      = nullptr;
     m_IsServer    = false;
 
@@ -78,6 +78,7 @@ void Map::cleanup() {
     m_ShipsNPCControlled.clear();
     m_ShipsPlayerControlled.clear();
     m_Ships.clear();
+    m_Player = nullptr;
     SAFE_DELETE_VECTOR(m_Objects);
 }
 
@@ -212,7 +213,7 @@ const string& Map::skyboxFile() const {
     return m_SkyboxFile;
 }
 vector<string> Map::allowedShips() {
-    uint                                             count = 0;
+    unsigned int                                     count = 0;
     boost_io::stream<boost_io::mapped_file_source>   str(m_Filename);
     for (string line; getline(str, line, '\n');) {
         line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line

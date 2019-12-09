@@ -48,7 +48,7 @@ namespace Engine{
                 std::vector<Scene*>& scenes();
 
                 const bool _hasScene(const std::string&);
-                void _addScene(Scene&);
+                const unsigned int _addScene(Scene&);
                 Texture* _hasTexture(const std::string&);
                 Material* _hasMaterial(const std::string&);
                 const size_t _numScenes();

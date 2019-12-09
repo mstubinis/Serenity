@@ -209,6 +209,7 @@
     <ClInclude Include="game\GameSkybox.h" />
     <ClInclude Include="game\GameState.h" />
     <ClInclude Include="game\gui\Button.h" />
+    <ClInclude Include="game\gui\GUIRenderElement.h" />
     <ClInclude Include="game\gui\ScrollBar.h" />
     <ClInclude Include="game\gui\ScrollWindow.h" />
     <ClInclude Include="game\gui\specifics\FFALobby.h" />
@@ -316,6 +317,7 @@
     <ClCompile Include="game\GameCamera.cpp" />
     <ClCompile Include="game\GameSkybox.cpp" />
     <ClCompile Include="game\gui\Button.cpp" />
+    <ClCompile Include="game\gui\GUIRenderElement.cpp" />
     <ClCompile Include="game\gui\ScrollBar.cpp" />
     <ClCompile Include="game\gui\ScrollWindow.cpp" />
     <ClCompile Include="game\gui\specifics\FFALobby.cpp" />

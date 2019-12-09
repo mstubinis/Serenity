@@ -49,8 +49,7 @@ Handle ResourceManifest::HullDamageMaterial2;
 Handle ResourceManifest::HullDamageOutline3Material;
 Handle ResourceManifest::HullDamageMaterial3;
 
-
-Handle ResourceManifest::EarthSkyMaterial;
+//gui
 Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
 Handle ResourceManifest::RadarEdgeMaterial;
@@ -58,14 +57,20 @@ Handle ResourceManifest::RadarTokenMaterial;
 Handle ResourceManifest::RadarMaterial;
 Handle ResourceManifest::RadarAntiCloakBarMaterial;
 Handle ResourceManifest::RadarAntiCloakBarBackgroundMaterial;
-Handle ResourceManifest::StarFlareMaterial;
-Handle ResourceManifest::ShieldMaterial;
 Handle ResourceManifest::ShieldRingHUDTexture;
 Handle ResourceManifest::ShieldRingBorderHUDTexture;
 Handle ResourceManifest::ShieldRing2HUDTexture;
 Handle ResourceManifest::ShieldRingBorder2HUDTexture;
 Handle ResourceManifest::ShipStatusBackgroundHUDTexture;
 Handle ResourceManifest::ShipStatusBackgroundBorderHUDTexture;
+
+Handle ResourceManifest::GUITextureCorner;
+Handle ResourceManifest::GUITextureSide;
+
+
+Handle ResourceManifest::EarthSkyMaterial;
+Handle ResourceManifest::StarFlareMaterial;
+Handle ResourceManifest::ShieldMaterial;
 
 Handle ResourceManifest::CannonOutlineMaterial;
 Handle ResourceManifest::CannonTailMaterial;
@@ -364,6 +369,9 @@ void ResourceManifest::init(){
     ShieldRingBorder2HUDTexture = Resources::loadTextureAsync(BasePath + "data/Textures/HUD/shield_Ring_2_Border.dds");
     ShipStatusBackgroundHUDTexture = Resources::loadTextureAsync(BasePath + "data/Textures/HUD/ShipStatusBackground.dds");
     ShipStatusBackgroundBorderHUDTexture = Resources::loadTextureAsync(BasePath + "data/Textures/HUD/ShipStatusBackgroundBorder.dds");
+
+    GUITextureCorner = Resources::loadTexture(BasePath + "data/Textures/HUD/GUI_Corner.dds");
+    GUITextureSide = Resources::loadTexture(BasePath + "data/Textures/HUD/GUI_Side.dds");
 
 
     //sounds

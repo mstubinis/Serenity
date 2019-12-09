@@ -23,6 +23,8 @@ class ClientMapSpecificData final {
         ClientMapSpecificData(Client&);
         ~ClientMapSpecificData();
 
+        void cleanup();
+
         void update(const double& dt);
 };
 

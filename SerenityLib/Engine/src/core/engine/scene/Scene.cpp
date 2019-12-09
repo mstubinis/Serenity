@@ -9,43 +9,33 @@
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/engine/renderer/particles/ParticleSystem.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
-
-
-#include <ecs/Components.h>
 
 using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-uint InternalScenePublicInterface::NumScenes = 0;
 
 struct EmptyOnUpdateFunctor final {void operator()(Scene* scene, const double& dt) const {
 
 }};
 
+
+epriv::SceneData::SceneData() {
+    m_ID = 0;
+    m_GI = glm::vec3(1.0f);
+    m_Sun = nullptr;
+    m_Skybox = nullptr;
+}
+epriv::SceneData::~SceneData() {
+    SAFE_DELETE(m_Skybox);
+}
+
 struct Scene::impl final {
-    glm::vec3                         m_GI;
-    unsigned int                      m_ID;
-
-    Skybox*                           m_Skybox;
-
-    Engine::epriv::ParticleSystem     m_ParticleSystem;
-
     ECS<Entity>                       m_ECS;
-    Entity*                           m_Sun;
 
 
     void _init(Scene& super, const string& _name, const SceneOptions& options) {
-        m_GI              = glm::vec3(1.0f);
-        m_Skybox          = nullptr;
-        m_Sun             = nullptr;
-
-        super.setName(_name);
-        Core::m_Engine->m_ResourceManager._addScene(super);
-        ++InternalScenePublicInterface::NumScenes;
-        m_ID = InternalScenePublicInterface::NumScenes;   
 
         m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI());
         m_ECS.assignSystem<ComponentBody>  (ComponentBody_System_CI());
@@ -56,8 +46,7 @@ struct Scene::impl final {
         m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System_CI());
         m_ECS.assignSystem<ComponentName>  (ComponentName_System_CI());
     }
-    void _destruct() {
-        SAFE_DELETE(m_Skybox);       
+    void _destruct() {      
     }
     void _centerToObject(Scene& super, const Entity& centerEntity) {
         //TODO: handle parent->child relationship
@@ -76,7 +65,7 @@ struct Scene::impl final {
                 }
             }
         }
-        for (auto& particle : m_ParticleSystem.getParticles()) {
+        for (auto& particle : super.m_Data.m_ParticleSystem.getParticles()) {
             particle.setPosition(particle.position() - glm::vec3(centerPos));
         }
 
@@ -180,7 +169,7 @@ struct Scene::impl final {
     }
 };
 vector<Particle>& InternalScenePublicInterface::GetParticles(Scene& scene) {
-    return scene.m_i->m_ParticleSystem.getParticles();
+    return scene.m_Data.m_ParticleSystem.getParticles();
 }
 vector<Viewport*>& InternalScenePublicInterface::GetViewports(Scene& scene) {
     return scene.m_Data.m_Viewports;
@@ -234,8 +223,7 @@ void InternalScenePublicInterface::UpdateMaterials(Scene& scene, const double& d
     }
 }
 void InternalScenePublicInterface::UpdateParticleSystem(Scene& scene, const double& dt) {
-    auto& i = *(scene.m_i);
-    i.m_ParticleSystem.update(dt);
+    scene.m_Data.m_ParticleSystem.update(dt);
 }
 
 void InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene, Viewport& viewport, Camera& camera, const bool useDefaultShaders) {
@@ -318,8 +306,7 @@ void InternalScenePublicInterface::RenderDecals(Scene& scene, Viewport& viewport
     }
 }
 void InternalScenePublicInterface::RenderParticles(Scene& scene, Viewport& viewport, Camera& camera, ShaderProgram& program, GBuffer& gBuffer) {
-    auto& i = *(scene.m_i);
-    i.m_ParticleSystem.render(camera, program, gBuffer);
+    scene.m_Data.m_ParticleSystem.render(camera, program, gBuffer);
 }
 
 
@@ -342,8 +329,11 @@ void InternalScenePublicInterface::RemoveModelInstanceFromPipeline(Scene& scene,
 }
 
 Scene::Scene(const string& name) : Scene(name, SceneOptions::DEFAULT_OPTIONS){
+
 }
 Scene::Scene(const string& name, const SceneOptions& options) : m_i(new impl), EngineResource(ResourceType::Scene, name) {
+    m_Data.m_ID = Core::m_Engine->m_ResourceManager._addScene(*this);
+    setName(name);
     m_i->_init(*this, name, options);
     m_Data.m_RenderGraphs.resize(RenderStage::_TOTAL);
     registerEvent(EventType::SceneChanged);
@@ -357,21 +347,21 @@ Scene::~Scene() {
     SAFE_DELETE_VECTOR(m_Data.m_Viewports);
 }
 void Scene::setGodRaysSun(Entity* sun) {
-    m_i->m_Sun = sun;
+    m_Data.m_Sun = sun;
 }
 Entity* Scene::getGodRaysSun() {
-    return m_i->m_Sun;
+    return m_Data.m_Sun;
 }
 const unsigned int Scene::numViewports() const {
     return static_cast<unsigned int>(m_Data.m_Viewports.size());
 }
 const uint Scene::id() const {
-    return m_i->m_ID;
+    return m_Data.m_ID;
 }
 
 ParticleEmitter* Scene::addParticleEmitter(ParticleEmitter& emitter) {
-    auto& i = *m_i;
-    return i.m_ParticleSystem.add_emitter(emitter);
+    //auto& i = *m_i;
+    return m_Data.m_ParticleSystem.add_emitter(emitter);
 }
 
 Viewport& Scene::addViewport(const float x, const float y, const float width, const float height, const Camera& camera) {
@@ -436,27 +426,25 @@ void Scene::setBackgroundColor(const glm::vec4& backgroundColor) {
     setBackgroundColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 }
 Skybox* Scene::skybox() const { 
-    return m_i->m_Skybox; 
+    return m_Data.m_Skybox; 
 }
 void Scene::setSkybox(Skybox* s){ 
-    m_i->m_Skybox = s; 
+    m_Data.m_Skybox = s; 
 }
 const glm::vec3& Scene::getGlobalIllumination() const {
-    return m_i->m_GI;
+    return m_Data.m_GI;
 }
 void Scene::setGlobalIllumination(const glm::vec3& globalIllumination) {
     setGlobalIllumination(globalIllumination.x, globalIllumination.y, globalIllumination.z);
 }
 void Scene::setGlobalIllumination(const float global, const float diffuse, const float specular) {
-    auto& i  = *m_i;
-    i.m_GI.x = global;
-    i.m_GI.y = diffuse;
-    i.m_GI.z = specular;
-    Renderer::Settings::Lighting::setGIContribution(i.m_GI.x, i.m_GI.y, i.m_GI.z);
+    m_Data.m_GI.x = global;
+    m_Data.m_GI.y = diffuse;
+    m_Data.m_GI.z = specular;
+    Renderer::Settings::Lighting::setGIContribution(m_Data.m_GI.x, m_Data.m_GI.y, m_Data.m_GI.z);
 }
 void Scene::onEvent(const Event& e) {
     if (e.type == EventType::SceneChanged && e.eventSceneChanged.newScene == this) {
-        auto& i = *m_i;
-        Renderer::Settings::Lighting::setGIContribution(i.m_GI.x, i.m_GI.y, i.m_GI.z);
+        Renderer::Settings::Lighting::setGIContribution(m_Data.m_GI.x, m_Data.m_GI.y, m_Data.m_GI.z);
     }
 }

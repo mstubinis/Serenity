@@ -132,12 +132,17 @@ void CollisionEntries::update(const double& dt) {
 #pragma endregion
 
 ServerMapSpecificData::ServerMapSpecificData(Server& server) : m_Server(server), m_CollisionEntries(server), m_RespawningShips(server){
+    cleanup();
+}
+ServerMapSpecificData::~ServerMapSpecificData() {
+    cleanup();
+}
+void ServerMapSpecificData::cleanup() {
+    m_CollisionEntries.cleanup();
+    m_RespawningShips.cleanup();
     m_DeepspaceAnchorTimer = 0.0;
     m_PhysicsUpdateTimer = 0.0;
     m_Map = nullptr;
-}
-ServerMapSpecificData::~ServerMapSpecificData() {
-
 }
 void ServerMapSpecificData::internal_process_deepspace_anchor(Packet* packet_in) {
     if (m_DeepspaceAnchorTimer > TIMER_DEEP_SPACE_ANCHOR_SPAM) {

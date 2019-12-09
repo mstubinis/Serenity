@@ -224,6 +224,10 @@ class epriv::RenderManager::impl final{
         }      
         void _postInit(const char* name, const uint& width, const uint& height) {
             glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &UniformBufferObject::MAX_UBO_BINDINGS);
+
+            float init_border_color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, init_border_color);
+
 #pragma region OpenGLExtensions
 
             renderManager->OpenGLExtensionsManager.INIT();
@@ -2478,11 +2482,9 @@ struct RenderingAPI2D final {
 
         if (alignType == TextAlignment::Left) {
             impl._renderTextLeft(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
-        }
-        else if (alignType == TextAlignment::Right) {
+        }else if (alignType == TextAlignment::Right) {
             impl._renderTextRight(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
-        }
-        else if (alignType == TextAlignment::Center) {
+        }else if (alignType == TextAlignment::Center) {
             impl._renderTextCenter(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
         }
         mesh.modifyVertices(0, impl.text_pts, MeshModifyFlags::Default); //prevent gpu upload until after all the data is collected
@@ -2509,8 +2511,7 @@ struct RenderingAPI2D final {
 
             sendTexture("DiffuseTexture", *texture, 0);
             sendUniform1("DiffuseTextureEnabled", 1);
-        }
-        else {
+        }else{
             sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
             sendUniform1("DiffuseTextureEnabled", 0);
         }

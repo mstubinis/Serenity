@@ -202,13 +202,15 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
 
     m_ButtonHost = new Button(*m_Font, windowDimensions.x / 2.0f, 275.0f, 150.0f, 50.0f);
     m_ButtonHost->setText("Host");
-    m_ButtonHost->setColor(0.5f, 0.5f, 0.5f, 1.0f);
-    m_ButtonHost->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
+    m_ButtonHost->setColor(0.5f, 0.78f, 0.94f, 1.0f);
+    m_ButtonHost->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
+    //m_ButtonHost->setTextScale(0.5f);
 
     m_ButtonJoin = new Button(*m_Font, 0.0f, -120.0f, 150.0f, 50.0f);
     m_ButtonJoin->setText("Join");
-    m_ButtonJoin->setColor(0.5f, 0.5f, 0.5f, 1.0f);
-    m_ButtonJoin->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
+    m_ButtonJoin->setColor(0.5f, 0.78f, 0.94f, 1.0f);
+    m_ButtonJoin->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
+    //m_ButtonJoin->setTextScale(0.5f);
 
     m_ButtonHost->addChild(m_ButtonJoin);
     

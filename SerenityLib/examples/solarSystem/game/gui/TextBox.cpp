@@ -22,13 +22,16 @@ TextBox::TextBox(const string& label, const Font& font, const unsigned short max
     m_Timer         = 0.0f;
     m_Label         = label;
     m_MaxCharacters = maxCharacters;
+    m_TextAlignment = TextAlignment::Left;
 
     internalUpdateSize();
 
     setOnClickFunctor(OnClick());
     setOnEnterFunctor(OnEnter());
-    m_TextAlignment = TextAlignment::Left;
     registerEvent(EventType::TextEntered);
+
+    m_RenderElement.setTextureCorner(nullptr);
+    m_RenderElement.setTextureEdge(nullptr);
 }
 TextBox::TextBox(const string& label, const Font& font, const unsigned short maxCharacters, const glm::vec2& position) : TextBox(label, font, maxCharacters, position.x, position.y) {
 
@@ -41,6 +44,7 @@ TextBox::~TextBox() {
 void TextBox::internalUpdateSize() {
     m_Width = ((m_Font->getTextWidth("X") * m_MaxCharacters) + 20.0f) * m_TextScale.x;
     m_Height = (m_Font->getTextHeight("X") + 20.0f) * m_TextScale.y;
+    m_RenderElement.internal_calculate_sizes();
 }
 
 const string& TextBox::getLabel() const {
