@@ -21,7 +21,7 @@ ThreadPoolFuture::ThreadPoolFuture(std::shared_future<void>&& future, std::funct
     m_Callback = callback;
 }
 ThreadPoolFuture::~ThreadPoolFuture() {
-
+    m_Future.get();
 }
 ThreadPoolFuture::ThreadPoolFuture(ThreadPoolFuture&& other) noexcept {
     using std::swap;
@@ -48,23 +48,29 @@ ThreadPool::ThreadPool(const unsigned int num_threads) {
     init(numberOfThreads);
 }
 ThreadPool::~ThreadPool() {
-    if (!m_Stopped)
+    if (!m_Stopped) {
         shutdown();
+    }
     SAFE_DELETE_VECTOR(m_Futures);
     SAFE_DELETE_VECTOR(m_WorkerThreads);
+}
+void ThreadPool::shutdown() {
+    std::lock_guard<std::mutex> lock(m_Mutex);
+    m_Terminated = true;
+    m_Condition.notify_all();// wake up all threads.
+    m_Stopped = true;
 }
 void ThreadPool::init(const unsigned int num_threads) {
     m_Terminated = false;
     m_Stopped = false;
     for (unsigned int i = 0; i < num_threads; ++i) {
-        m_WorkerThreads.push_back(new WorkerThread(*this));
+        m_WorkerThreads.push_back(ALLOC WorkerThread(*this));
     }
 }
 void ThreadPool::addJob(std::function<void()>&& job) {
     auto task = std::make_shared<std::packaged_task<void()>>(job);
-    ThreadPoolFuture* future = new ThreadPoolFuture(std::move(std::shared_future<void>(task->get_future())));
+    ThreadPoolFuture* future = NEW ThreadPoolFuture(std::move(std::shared_future<void>(task->get_future())));
     m_Futures.push_back(future);
-
     {
         std::lock_guard<std::mutex> lock(m_Mutex);
         m_Tasks.push(std::move(task));
@@ -73,7 +79,7 @@ void ThreadPool::addJob(std::function<void()>&& job) {
 }
 void ThreadPool::addJob(std::function<void()>&& job, std::function<void()>&& callback) {
     auto task = std::make_shared<std::packaged_task<void()>>(job);
-    ThreadPoolFuture* future = new ThreadPoolFuture(std::move(std::shared_future<void>(task->get_future())));
+    ThreadPoolFuture* future = NEW ThreadPoolFuture(std::move(std::shared_future<void>(task->get_future())));
     future->m_Callback = std::move(callback);
     m_Futures.push_back(future);
 
@@ -111,10 +117,4 @@ void ThreadPool::wait_for_all() {
         }
     }
     update();
-}
-void ThreadPool::shutdown() {
-    std::lock_guard<std::mutex> lock(m_Mutex);
-    m_Terminated = true;
-    m_Condition.notify_all();// wake up all threads.
-    m_Stopped = true;
 }

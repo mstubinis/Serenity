@@ -30,6 +30,8 @@ class ServerLobbyShipSelectorWindow final {
         ServerLobbyShipSelectorWindow(Core& core, Scene& scene,Camera& camera, const Font& font, const float x, const float y);
         ~ServerLobbyShipSelectorWindow();
 
+        void addShipButton(const std::string& shipClass);
+
         void setColor(const float& r, const float& g, const float& b, const float& a);
         void setPosition(const float x, const float y);
 

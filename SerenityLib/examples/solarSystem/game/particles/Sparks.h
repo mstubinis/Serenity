@@ -9,9 +9,9 @@ class Sparks {
     public:
         static Handle SparksMaterial1;
 
-        static ParticleEmissionProperties* Spray;
-        static ParticleEmissionProperties* Burst;
-        static ParticleEmissionProperties* ExplosionSparks;
+        static ParticleEmissionProperties Spray;
+        static ParticleEmissionProperties Burst;
+        static ParticleEmissionProperties ExplosionSparks;
 
         static void init();
         static void destruct();

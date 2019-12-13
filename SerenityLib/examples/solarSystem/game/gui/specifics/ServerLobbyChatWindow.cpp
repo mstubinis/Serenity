@@ -14,33 +14,31 @@
 
 using namespace std;
 
-struct OnEnterFunctor final {
-    void operator()(TextBox* textBox) const {
-        ServerLobbyChatWindow& window = *static_cast<ServerLobbyChatWindow*>(textBox->getUserPointer());
-        const auto message = textBox->text();
-        if (!message.empty()) {
-            textBox->setText("");
-            auto& scrollFrame = window.getWindowFrame();
-            Client& client = *static_cast<Client*>(window.getUserPointer());
-            PacketMessage p;
-            p.PacketType = PacketType::Client_To_Server_Chat_Message;
-            p.data = message;
-            p.name = client.username(); 
-            client.send(p);
-        }
+struct OnEnterFunctor final { void operator()(TextBox* textBox) const {
+    ServerLobbyChatWindow& window = *static_cast<ServerLobbyChatWindow*>(textBox->getUserPointer());
+    const auto message = textBox->text();
+    if (!message.empty()) {
+        textBox->setText("");
+        auto& scrollFrame = window.getWindowFrame();
+        Client& client    = *static_cast<Client*>(window.getUserPointer());
+        PacketMessage p;
+        p.PacketType      = PacketType::Client_To_Server_Chat_Message;
+        p.data            = message;
+        p.name            = client.username(); 
+        client.send(p);
     }
-};
+}};
 
 
-ServerLobbyChatWindow::ServerLobbyChatWindow(const Font& font, const float x, const float y):m_Font(const_cast<Font&>(font)){
+ServerLobbyChatWindow::ServerLobbyChatWindow(const Font& font, const float x, const float y) : m_Font(const_cast<Font&>(font)){
     m_UserPointer = nullptr;
-    m_Width = 630.0f;
-    m_Height = 300.0f;
+    m_Width       = 630.0f;
+    m_Height      = 300.0f;
 
-    m_ChatWindow = new ScrollFrame(x, y, m_Width, m_Height);
+    m_ChatWindow  = NEW ScrollFrame(x, y, m_Width, m_Height);
     m_ChatWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
 
-    m_ChatInput = new TextBox("Chat", font, 85, 0.0f , 0.0f);
+    m_ChatInput   = NEW TextBox("Chat", font, 85, 0.0f , 0.0f);
     m_ChatInput->setPosition(x + (m_Width / 2.0f) + 145.0f, y - m_Height - m_ChatInput->getTextHeight() / 2.0f - 15.0f);
     m_ChatInput->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_ChatInput->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
@@ -53,7 +51,9 @@ ServerLobbyChatWindow::~ServerLobbyChatWindow() {
     SAFE_DELETE(m_ChatWindow);
 }
 void ServerLobbyChatWindow::clear() {
-    vector_clear(m_ChatWindow->content());
+    auto& content = m_ChatWindow->content();
+    SAFE_DELETE_VECTOR(content);
+    content.clear();
 }
 void ServerLobbyChatWindow::setUserPointer(void* ptr) {
     m_UserPointer = ptr;

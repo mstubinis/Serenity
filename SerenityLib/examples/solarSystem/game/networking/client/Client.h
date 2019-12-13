@@ -74,7 +74,7 @@ class Client{
 
         void cleanup();
 
-        GameplayMode* getGameplayMode();
+        GameplayMode& getGameplayMode();
 
         void setClientID(const unsigned int id);
 

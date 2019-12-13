@@ -3,7 +3,7 @@
 #include "CapsuleSpace.h"
 #include "ResourceManifest.h"
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/lights/Lights.h>
 
 #include <ecs/ComponentName.h>

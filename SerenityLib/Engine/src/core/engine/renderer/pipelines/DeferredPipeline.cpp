@@ -1,7 +1,7 @@
 #include <core/engine/renderer/pipelines/DeferredPipeline.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/lights/Lights.h>
 #include <core/engine/resources/Engine_BuiltInResources.h>
 #include <core/engine/mesh/Mesh.h>
@@ -11,6 +11,7 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/renderer/particles/Particle.h>
+#include <core/engine/shaders/ShaderProgram.h>
 
 #include <core/engine/scene/Camera.h>
 
@@ -49,7 +50,7 @@ DeferredPipeline::~DeferredPipeline() {
 }
 
 void DeferredPipeline::init() {
-    m_UBOCamera = new UniformBufferObject("Camera", sizeof(UBOCameraDataStruct));
+    m_UBOCamera = NEW UniformBufferObject("Camera", sizeof(UBOCameraDataStruct));
     m_UBOCamera->updateData(&m_UBOCameraDataStruct);
 }
 
@@ -70,7 +71,7 @@ void DeferredPipeline::onFullscreen() {
     GLEnable(GL_DEPTH_CLAMP);
 
     const auto winSize = Resources::getWindowSize();
-    m_GBuffer = new GBuffer(winSize.x, winSize.y);
+    m_GBuffer = NEW GBuffer(winSize.x, winSize.y);
 }
 void DeferredPipeline::onResize(const unsigned int& newWidth, const unsigned int& newHeight) {
     m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(newWidth), 0.0f, static_cast<float>(newHeight), 0.005f, 3000.0f);
@@ -85,7 +86,7 @@ void DeferredPipeline::onOpenGLContextCreation() {
 
     GLEnable(GL_CULL_FACE);
     SAFE_DELETE(m_GBuffer);
-    m_GBuffer = new GBuffer(winSize.x, winSize.y);
+    m_GBuffer = NEW GBuffer(winSize.x, winSize.y);
 }
 
 void DeferredPipeline::renderSkybox(Skybox* skybox, ShaderProgram& shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) {

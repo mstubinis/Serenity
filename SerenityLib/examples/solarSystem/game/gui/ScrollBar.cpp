@@ -2,7 +2,7 @@
 
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/renderer/Engine_Renderer.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/utils/Engine_Debugging.h>
 
 using namespace Engine;
@@ -40,6 +40,9 @@ void ScrollBar::setBorderSize(const float border) {
 void ScrollBar::setSliderSize(const float percent) {
     m_ScrollBarCurrentContentPercent = glm::clamp(percent,0.01f,1.0f);
     internalUpdateScrollbarPosition();
+}
+const bool ScrollBar::isScrollable() const {
+    return (m_ScrollBarCurrentContentPercent < 1.0f) ? true : false;
 }
 const float ScrollBar::getSliderPosition() const {
     return m_ScrollBarCurrentPosition;

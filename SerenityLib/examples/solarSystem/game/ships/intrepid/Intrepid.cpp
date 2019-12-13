@@ -28,17 +28,17 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
-        if (i == 0)        system = new ShipSystemReactor(_this, 1000);
-        else if (i == 1)   system = new ShipSystemPitchThrusters(_this, 1.2f);
-        else if (i == 2)   system = new ShipSystemYawThrusters(_this, 1.2f);
-        else if (i == 3)   system = new ShipSystemRollThrusters(_this, 1.25f);
+        if (i == 0)        system = NEW ShipSystemReactor(_this, 1000);
+        else if (i == 1)   system = NEW ShipSystemPitchThrusters(_this, 1.2f);
+        else if (i == 2)   system = NEW ShipSystemYawThrusters(_this, 1.2f);
+        else if (i == 3)   system = NEW ShipSystemRollThrusters(_this, 1.25f);
         else if (i == 4)   system = nullptr; //no cloaking device
-        else if (i == 5)   system = new ShipSystemShields(_this, map, 11500.0f, 11500.0f, 11500.0f, 11500.0f, 15000.0f, 15000.0f, glm::vec3(0.0f), glm::vec3(1.35f, 1.5f, 1.0f));
-        else if (i == 6)   system = new ShipSystemMainThrusters(_this, 1.15f);
-        else if (i == 7)   system = new ShipSystemWarpDrive(_this);
-        else if (i == 8)   system = new ShipSystemSensors(_this, map);
-        else if (i == 9)   system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 26000.0f);
+        else if (i == 5)   system = NEW ShipSystemShields(_this, map, 11500.0f, 11500.0f, 11500.0f, 11500.0f, 15000.0f, 15000.0f, glm::vec3(0.0f), glm::vec3(1.35f, 1.5f, 1.0f));
+        else if (i == 6)   system = NEW ShipSystemMainThrusters(_this, 1.15f);
+        else if (i == 7)   system = NEW ShipSystemWarpDrive(_this);
+        else if (i == 8)   system = NEW ShipSystemSensors(_this, map);
+        else if (i == 9)   system = NEW ShipSystemWeapons(_this);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 26000.0f);
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);
@@ -46,13 +46,13 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     //torps
-    auto* front_right_torp_1 = new PhotonTorpedo(_this, map, glm::vec3(0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
-    auto* front_left_torp_1 = new PhotonTorpedo(_this, map, glm::vec3(-0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
-    auto* front_right_torp_2 = new PhotonTorpedo(_this, map, glm::vec3(0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
-    auto* front_left_torp_2 = new PhotonTorpedo(_this, map, glm::vec3(-0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* front_right_torp_1 = NEW PhotonTorpedo(_this, map, glm::vec3(0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* front_left_torp_1 = NEW PhotonTorpedo(_this, map, glm::vec3(-0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* front_right_torp_2 = NEW PhotonTorpedo(_this, map, glm::vec3(0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* front_left_torp_2 = NEW PhotonTorpedo(_this, map, glm::vec3(-0.199831f, -0.029398f, -0.718548f), glm::vec3(0, 0, -1), 20.0f, 1);
 
-    auto* aft_right_torp = new PhotonTorpedo(_this, map, glm::vec3(0.055742f, 0.289654f, 0.338158f), glm::vec3(0, 0, 1), 20.0f, 1);
-    auto* aft_left_torp = new PhotonTorpedo(_this, map, glm::vec3(-0.055742f, 0.289654f, 0.338158f), glm::vec3(0, 0, 1), 20.0f, 1);
+    auto* aft_right_torp = NEW PhotonTorpedo(_this, map, glm::vec3(0.055742f, 0.289654f, 0.338158f), glm::vec3(0, 0, 1), 20.0f, 1);
+    auto* aft_left_torp = NEW PhotonTorpedo(_this, map, glm::vec3(-0.055742f, 0.289654f, 0.338158f), glm::vec3(0, 0, 1), 20.0f, 1);
 
     weapons.addSecondaryWeaponTorpedo(*front_left_torp_1, true);
     weapons.addSecondaryWeaponTorpedo(*front_right_torp_1, true);
@@ -78,8 +78,8 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
         glm::vec3(0.514688f, 0.180227f, 0.107649f),
         glm::vec3(0.48983f, 0.18124f, 0.136995f),
     };
-    auto* top_left_left = new PhaserBeam(_this, map, top_left_left_pts[2], glm::vec3(-0.137638f, 0.171329f, 0.098313f), 40.0f, top_left_left_pts);
-    auto* top_right_right = new PhaserBeam(_this, map, top_right_right_pts[2], glm::vec3(0.137638f, 0.171329f, 0.098313f), 40.0f, top_right_right_pts);
+    auto* top_left_left = NEW PhaserBeam(_this, map, top_left_left_pts[2], glm::vec3(-0.137638f, 0.171329f, 0.098313f), 40.0f, top_left_left_pts);
+    auto* top_right_right = NEW PhaserBeam(_this, map, top_right_right_pts[2], glm::vec3(0.137638f, 0.171329f, 0.098313f), 40.0f, top_right_right_pts);
     weapons.addPrimaryWeaponBeam(*top_left_left);
     weapons.addPrimaryWeaponBeam(*top_right_right);
 
@@ -99,8 +99,8 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
         glm::vec3(0.570191f, 0.307515f, -1.07133f),
         glm::vec3(0.534068f, 0.307515f, -1.23435f),
     };
-    auto* top_front_left_left = new PhaserBeam(_this, map, top_front_left_left_pts[2], glm::vec3(-0.18991f, 0.137347f, -0.011459f), 55.0f, top_front_left_left_pts);
-    auto* top_front_right_right = new PhaserBeam(_this, map, top_front_right_right_pts[2], glm::vec3(0.18991f, 0.137347f, -0.011459f), 55.0f, top_front_right_right_pts);
+    auto* top_front_left_left = NEW PhaserBeam(_this, map, top_front_left_left_pts[2], glm::vec3(-0.18991f, 0.137347f, -0.011459f), 55.0f, top_front_left_left_pts);
+    auto* top_front_right_right = NEW PhaserBeam(_this, map, top_front_right_right_pts[2], glm::vec3(0.18991f, 0.137347f, -0.011459f), 55.0f, top_front_right_right_pts);
     weapons.addPrimaryWeaponBeam(*top_front_left_left, true);
     weapons.addPrimaryWeaponBeam(*top_front_right_right, true);
 
@@ -120,8 +120,8 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
         glm::vec3(0.271244f, 0.307515f, -1.79826f),
         glm::vec3(0.154572f, 0.307515f, -1.89611f),
     };
-    auto* top_front_left = new PhaserBeam(_this, map, top_front_left_pts[2], glm::vec3(-0.146001f, 0.137347f, -0.177685f), 55.0f, top_front_left_pts);
-    auto* top_front_right = new PhaserBeam(_this, map, top_front_right_pts[2], glm::vec3(0.146001f, 0.137347f, -0.177685f), 55.0f, top_front_right_pts);
+    auto* top_front_left = NEW PhaserBeam(_this, map, top_front_left_pts[2], glm::vec3(-0.146001f, 0.137347f, -0.177685f), 55.0f, top_front_left_pts);
+    auto* top_front_right = NEW PhaserBeam(_this, map, top_front_right_pts[2], glm::vec3(0.146001f, 0.137347f, -0.177685f), 55.0f, top_front_right_pts);
     weapons.addPrimaryWeaponBeam(*top_front_left);
     weapons.addPrimaryWeaponBeam(*top_front_right);
 
@@ -133,7 +133,7 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
         glm::vec3(0.132509f, -0.377703f, -0.161425f),
         glm::vec3(0.265627f, -0.326306f, -0.161425f),
     };
-    auto* ventral_center = new PhaserBeam(_this, map, ventral_center_pts[2], glm::vec3(0.0f, -1.0f, 0.0f), 40.0f, ventral_center_pts);
+    auto* ventral_center = NEW PhaserBeam(_this, map, ventral_center_pts[2], glm::vec3(0.0f, -1.0f, 0.0f), 40.0f, ventral_center_pts);
     weapons.addPrimaryWeaponBeam(*ventral_center);
 
     //ventral nacelle left
@@ -152,8 +152,8 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
         glm::vec3(-0.516639f, -0.175676f, 1.5383f),
         glm::vec3(-0.516639f, -0.175676f, 1.57416f),
     };
-    auto* ventral_nacelle_left = new PhaserBeam(_this, map, ventral_nacelle_left_pts[2], glm::vec3(0.037638f, -0.162941f, 0.045366f), 35.0f, ventral_nacelle_left_pts);
-    auto* ventral_nacelle_right = new PhaserBeam(_this, map, ventral_nacelle_right_pts[2], glm::vec3(-0.037638f, -0.162941f, 0.045366f), 35.0f, ventral_nacelle_right_pts);
+    auto* ventral_nacelle_left = NEW PhaserBeam(_this, map, ventral_nacelle_left_pts[2], glm::vec3(0.037638f, -0.162941f, 0.045366f), 35.0f, ventral_nacelle_left_pts);
+    auto* ventral_nacelle_right = NEW PhaserBeam(_this, map, ventral_nacelle_right_pts[2], glm::vec3(-0.037638f, -0.162941f, 0.045366f), 35.0f, ventral_nacelle_right_pts);
 
     weapons.addPrimaryWeaponBeam(*ventral_nacelle_left);
     weapons.addPrimaryWeaponBeam(*ventral_nacelle_right);
@@ -174,8 +174,8 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
         glm::vec3(-0.103505f, -0.175676f, 2.08125f),
         glm::vec3(-0.080054f, -0.175676f, 2.08506f),
     };
-    auto* ventral_btm_left = new PhaserBeam(_this, map, ventral_btm_left_pts[2], glm::vec3(0.038688f, -0.162941f, 0.127294f), 40.0f, ventral_btm_left_pts);
-    auto* ventral_btm_right = new PhaserBeam(_this, map, ventral_btm_right_pts[2], glm::vec3(-0.038688f, -0.162941f, 0.127294f), 40.0f, ventral_btm_right_pts);
+    auto* ventral_btm_left = NEW PhaserBeam(_this, map, ventral_btm_left_pts[2], glm::vec3(0.038688f, -0.162941f, 0.127294f), 40.0f, ventral_btm_left_pts);
+    auto* ventral_btm_right = NEW PhaserBeam(_this, map, ventral_btm_right_pts[2], glm::vec3(-0.038688f, -0.162941f, 0.127294f), 40.0f, ventral_btm_right_pts);
 
     weapons.addPrimaryWeaponBeam(*ventral_btm_left);
     weapons.addPrimaryWeaponBeam(*ventral_btm_right);
@@ -196,8 +196,8 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
         glm::vec3(-0.649928f, 0.03295f, -0.076909f),
         glm::vec3(-0.665464f, 0.03295f, -0.100653f),
     };
-    auto* ventral_left_left = new PhaserBeam(_this, map, ventral_left_left_pts[2], glm::vec3(0.10652f, -0.163131f, 0.12681f), 40.0f, ventral_left_left_pts);
-    auto* ventral_right_right = new PhaserBeam(_this, map, ventral_right_right_pts[2], glm::vec3(-0.10652f, -0.163131f, 0.12681f), 40.0f, ventral_right_right_pts);
+    auto* ventral_left_left = NEW PhaserBeam(_this, map, ventral_left_left_pts[2], glm::vec3(0.10652f, -0.163131f, 0.12681f), 40.0f, ventral_left_left_pts);
+    auto* ventral_right_right = NEW PhaserBeam(_this, map, ventral_right_right_pts[2], glm::vec3(-0.10652f, -0.163131f, 0.12681f), 40.0f, ventral_right_right_pts);
 
     weapons.addPrimaryWeaponBeam(*ventral_left_left);
     weapons.addPrimaryWeaponBeam(*ventral_right_right);
@@ -234,10 +234,10 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
         glm::vec3(-0.34334f, 0.031296f, -2.27714f),
         glm::vec3(-0.152503f, 0.031296f, -2.44268f),
     };
-    auto* ventral_top_left_left = new PhaserBeam(_this, map, ventral_top_left_left_pts[2], glm::vec3(0.267854f, -0.348184f, -0.044608f), 55.0f, ventral_top_left_left_pts);
-    auto* ventral_top_right_right = new PhaserBeam(_this, map, ventral_top_right_right_pts[2], glm::vec3(-0.267854f, -0.348184f, -0.044608f), 55.0f, ventral_top_right_right_pts);
-    auto* ventral_top_left = new PhaserBeam(_this, map, ventral_top_left_pts[2], glm::vec3(0.198403f, -0.348184f, -0.185397f), 55.0f, ventral_top_left_pts);
-    auto* ventral_top_right = new PhaserBeam(_this, map, ventral_top_right_pts[2], glm::vec3(-0.198403f, -0.348184f, -0.185397f), 55.0f, ventral_top_right_pts);
+    auto* ventral_top_left_left = NEW PhaserBeam(_this, map, ventral_top_left_left_pts[2], glm::vec3(0.267854f, -0.348184f, -0.044608f), 55.0f, ventral_top_left_left_pts);
+    auto* ventral_top_right_right = NEW PhaserBeam(_this, map, ventral_top_right_right_pts[2], glm::vec3(-0.267854f, -0.348184f, -0.044608f), 55.0f, ventral_top_right_right_pts);
+    auto* ventral_top_left = NEW PhaserBeam(_this, map, ventral_top_left_pts[2], glm::vec3(0.198403f, -0.348184f, -0.185397f), 55.0f, ventral_top_left_pts);
+    auto* ventral_top_right = NEW PhaserBeam(_this, map, ventral_top_right_pts[2], glm::vec3(-0.198403f, -0.348184f, -0.185397f), 55.0f, ventral_top_right_pts);
 
     weapons.addPrimaryWeaponBeam(*ventral_top_left_left);
     weapons.addPrimaryWeaponBeam(*ventral_top_right_right);

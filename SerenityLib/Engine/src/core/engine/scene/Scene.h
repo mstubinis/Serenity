@@ -2,18 +2,7 @@
 #ifndef ENGINE_SCENE_H_INCLUDE_GUARD
 #define ENGINE_SCENE_H_INCLUDE_GUARD
 
-#include <core/engine/renderer/RendererIncludes.h>
-#include <core/engine/resources/Engine_ResourceBasic.h>
-#include <core/engine/events/Engine_EventObject.h>
-#include <functional>
-#include <vector>
-
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-
-#include <core/engine/renderer/particles/ParticleSystem.h>
-
-
+class  Scene;
 class  Camera;
 class  SunLight;
 class  DirectionalLight;
@@ -29,46 +18,25 @@ struct SceneOptions;
 
 namespace Engine {
     namespace epriv {
-        class  GBuffer;
         class  RenderGraph;
         class  ResourceManager;
-        struct InternalScenePublicInterface;
         struct EntityPOD;
+        struct InternalScenePublicInterface;
         template<typename T> class ECS;
-
-        struct SceneData final {
-            std::vector<Viewport*>                 m_Viewports;
-            std::vector<Camera*>                   m_Cameras;
-            std::vector<std::vector<RenderGraph*>> m_RenderGraphs;
-
-            std::vector<SunLight*>                 m_Lights;
-            std::vector<SunLight*>                 m_SunLights;
-            std::vector<DirectionalLight*>         m_DirectionalLights;
-            std::vector<PointLight*>               m_PointLights;
-            std::vector<SpotLight*>                m_SpotLights;
-            std::vector<RodLight*>                 m_RodLights;
-
-            std::vector<unsigned int>              m_Entities;
-            unsigned int                           m_ID;
-            glm::vec3                              m_GI;
-
-            Entity*                                m_Sun;
-            Skybox*                                m_Skybox;
-
-            Engine::epriv::ParticleSystem          m_ParticleSystem;
-
-            //ECS<Entity>                            m_ECS;
-
-            SceneData();
-            ~SceneData();
-        };
+        class  GBuffer;
     };
 };
+
+#include <core/engine/renderer/RendererIncludes.h> //ok
+#include <core/engine/resources/Engine_ResourceBasic.h> //ok
+#include <core/engine/events/Engine_EventObject.h> //ok
+#include <core/engine/renderer/particles/ParticleSystem.h>
+#include <functional>
+
 class Scene: public EngineResource, public EventObserver{
     friend class  Engine::epriv::RenderGraph;
     friend class  Engine::epriv::ResourceManager;
     friend struct Engine::epriv::InternalScenePublicInterface;
-    friend struct Engine::epriv::SceneData;
     public:
         virtual void update(const double& dt);
         virtual void render();
@@ -79,10 +47,8 @@ class Scene: public EngineResource, public EventObserver{
             m_OnUpdateFunctor = std::bind<void>(functor, this, std::placeholders::_1);
         }
     private:
-        struct impl; std::unique_ptr<impl>   m_i;
-
-        Engine::epriv::SceneData             m_Data;
-        std::function<void(const double&)>   m_OnUpdateFunctor;
+        struct impl; std::unique_ptr<impl>     m_i;
+        std::function<void(const double&)>     m_OnUpdateFunctor;
     public:
         Scene(const std::string& name);
         Scene(const std::string& name, const SceneOptions& options);

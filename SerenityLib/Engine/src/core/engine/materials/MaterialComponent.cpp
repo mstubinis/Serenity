@@ -1,7 +1,7 @@
 #include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/textures/Texture.h>
@@ -27,19 +27,19 @@ MaterialLayer* MaterialComponent::addLayer(const string& textureFile, const stri
         return nullptr;
     Texture* texture, * mask, * cubemap;
     texture = mask = cubemap = nullptr;
-    texture = Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
-    mask = Core::m_Engine->m_ResourceManager._hasTexture(maskFile);
-    cubemap = Core::m_Engine->m_ResourceManager._hasTexture(cubemapFile);
+    texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(textureFile);
+    mask    = Core::m_Engine->m_ResourceManager.HasResource<Texture>(maskFile);
+    cubemap = Core::m_Engine->m_ResourceManager.HasResource<Texture>(cubemapFile);
     if (!texture) {
-        texture = new Texture(textureFile);
+        texture = NEW Texture(textureFile);
         Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
     if (!mask) {
-        mask = new Texture(maskFile, false, ImageInternalFormat::R8);
+        mask = NEW Texture(maskFile, false, ImageInternalFormat::R8);
         Core::m_Engine->m_ResourceManager._addTexture(mask);
     }
     if (!cubemap) {
-        cubemap = new Texture(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
+        cubemap = NEW Texture(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
         Core::m_Engine->m_ResourceManager._addTexture(cubemap);
     }
     return addLayer(texture, mask, cubemap);

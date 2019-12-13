@@ -28,6 +28,7 @@ class Text final: public Widget {
         void setTextScale(const float x, const float y);
 
         const float width() const;
+        const float singleLineHeight() const;
         const float height() const;
         const std::string& text() const;
         const Font& font() const;

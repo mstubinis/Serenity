@@ -409,4 +409,6 @@ void ResourceManifest::init(){
 void ResourceManifest::destruct() {
     Fire::destruct();
     Sparks::destruct();
+    Factions::destruct();
+    Ships::destruct();
 }

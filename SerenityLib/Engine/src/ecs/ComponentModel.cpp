@@ -95,7 +95,7 @@ ModelInstance& ComponentModel::addModel(Handle& mesh, Handle& material, ShaderPr
     return ComponentModel::addModel((Mesh*)mesh.get(), (Material*)material.get(), shaderProgram, stage);
 }
 ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
-    auto modelInstance = new ModelInstance(m_Owner, mesh, material, shaderProgram);
+    auto modelInstance = NEW ModelInstance(m_Owner, mesh, material, shaderProgram);
     const auto index = m_ModelInstances.size();
     modelInstance->m_Index = index;
     m_ModelInstances.push_back(modelInstance);

@@ -1,7 +1,7 @@
 #include "Terrain.h"
 
 #include <core/engine/mesh/Mesh.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/mesh/MeshRequest.h>
@@ -28,7 +28,7 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
     float maxH = 1.0f;
 
     ComponentBody& physics = *entity().addComponent<ComponentBody>(CollisionType::TriangleShape);
-    Collision* c = new Collision(
+    Collision* c = NEW Collision(
         *(new btHeightfieldTerrainShape(heightmapImage.getSize().x, heightmapImage.getSize().y, &m_Pixels[0], 1.0f, minH, maxH, 1, PHY_FLOAT, false)), 
         CollisionType::TriangleShape, 
         0.0f
@@ -37,7 +37,7 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
 
     MeshRequestPart part;
     part.name = name;
-    part.mesh = new Mesh(name, *static_cast<btHeightfieldTerrainShape*>(c->getBtShape()), 0.0005f);
+    part.mesh = NEW Mesh(name, *static_cast<btHeightfieldTerrainShape*>(c->getBtShape()), 0.0005f);
     part.mesh->setName(name);
     part.handle = epriv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
   

@@ -18,7 +18,8 @@ SpotLight::SpotLight(const glm::vec3 pos, const glm::vec3 direction, const float
     }
 
     if (m_Type == LightType::Spot) {
-        epriv::InternalScenePublicInterface::GetSpotLights(*scene).push_back(this);
+        auto& spotLights = epriv::InternalScenePublicInterface::GetSpotLights(*scene);
+        spotLights.push_back(this);
     }
 }
 SpotLight::~SpotLight() {

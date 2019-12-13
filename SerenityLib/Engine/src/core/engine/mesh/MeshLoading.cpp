@@ -5,7 +5,7 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/math/Engine_Math.h>
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/resources/Engine_Resources.h>
 
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -25,7 +25,7 @@ namespace boostm = boost::math;
 
 void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& _map) {
     if (!_map.count(node.mName.data)) {
-        BoneNode* bone_node = new BoneNode();
+        BoneNode* bone_node = NEW BoneNode();
         bone_node->Name = node.mName.data;
         bone_node->Transform = Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(node.mTransformation));
         _map.emplace(node.mName.data, bone_node);
@@ -42,7 +42,7 @@ void epriv::MeshLoader::LoadProcessNodeNames(const string& file,vector<MeshReque
         const aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
 
         MeshRequestPart part;
-        part.mesh = new Mesh();
+        part.mesh = NEW Mesh();
         part.name = file + " - " + /*string(scene.mRootNode->mName.C_Str()) +*/ string(aimesh.mName.C_Str());
         part.mesh->setName(part.name);
         part.handle = epriv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
@@ -113,7 +113,7 @@ void epriv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, con
 
         #pragma region Skeleton
         if (aimesh.mNumBones > 0) {
-            part.mesh->m_Skeleton = new MeshSkeleton();
+            part.mesh->m_Skeleton = NEW MeshSkeleton();
             auto& skeleton = *part.mesh->m_Skeleton;
 
             #pragma region IndividualBones
@@ -200,7 +200,7 @@ void epriv::MeshLoader::FinalizeData(Mesh& mesh, epriv::MeshImportedData& data, 
     InternalMeshPublicInterface::FinalizeVertexData(mesh, data);
     InternalMeshPublicInterface::CalculateRadius(mesh);
     SAFE_DELETE(mesh.m_CollisionFactory);
-    mesh.m_CollisionFactory = new MeshCollisionFactory(mesh);
+    mesh.m_CollisionFactory = NEW MeshCollisionFactory(mesh);
 }
 
 bool epriv::MeshLoader::IsNear(float& v1, float& v2, const float& threshold) {
@@ -349,9 +349,9 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
     }
     VertexData* returnData;
     if (sizes[2] == 1) {
-        returnData = new VertexData(VertexDataFormat::VertexDataAnimated);
+        returnData = NEW VertexData(VertexDataFormat::VertexDataAnimated);
     }else{
-        returnData = new VertexData(VertexDataFormat::VertexDataBasic);
+        returnData = NEW VertexData(VertexDataFormat::VertexDataBasic);
     }
     auto& data = *returnData;
     data.indices.reserve(sizes[1]);

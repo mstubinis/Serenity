@@ -2,15 +2,6 @@
 #ifndef ENGINE_ENGINE_RESOURCES_H
 #define ENGINE_ENGINE_RESOURCES_H
 
-#include <core/engine/physics/Engine_Physics.h>
-#include <core/engine/renderer/GLImageConstants.h>
-#include <core/engine/shaders/ShaderProgram.h>
-#include <core/engine/shaders/Shader.h>
-#include <core/engine/Engine_ObjectPool.h>
-#include <core/engine/utils/Utils.h>
-
-#include <glm/vec2.hpp>
-
 struct Handle;
 class  EngineResource;
 class  Engine_Window;
@@ -22,6 +13,15 @@ class  Mesh;
 class  Material;
 class  SunLight;
 class  SoundData;
+class  Shader;
+class  ShaderProgram;
+
+#include <core/engine/renderer/GLImageConstants.h>
+#include <core/engine/shaders/ShaderIncludes.h>
+#include <core/engine/Engine_ObjectPool.h>
+#include <core/engine/utils/Utils.h>
+
+#include <glm/vec2.hpp>
 
 namespace Engine{
     namespace epriv{
@@ -34,9 +34,12 @@ namespace Engine{
                 bool                                           m_DynamicMemory;
                 std::vector<Scene*>                            m_Scenes;
                 std::vector<Scene*>                            m_ScenesToBeDeleted;
+            public:
 
                 ResourceManager(const char* name, const uint& width, const uint& height);
                 ~ResourceManager();
+
+                void cleanup();
 
                 void onPostUpdate();
 
@@ -49,8 +52,20 @@ namespace Engine{
 
                 const bool _hasScene(const std::string&);
                 const unsigned int _addScene(Scene&);
-                Texture* _hasTexture(const std::string&);
-                Material* _hasMaterial(const std::string&);
+
+                template<typename T> T* HasResource(const std::string& resource_name) {
+                    auto& resourcePool = *m_Resources;
+                    for (unsigned int i = 0; i < resourcePool.maxEntries(); ++i) {
+                        EngineResource* r = resourcePool.getAsFast<EngineResource>(i + 1U);
+                        if (r) {
+                            T* resource = dynamic_cast<T*>(r);
+                            if (resource && resource->name() == resource_name) {
+                                return resource;
+                            }
+                        }
+                    }
+                    return nullptr;
+                }
                 const size_t _numScenes();
         };
     };
@@ -61,8 +76,8 @@ namespace Engine{
         }
 
         Scene* getCurrentScene();
-        void setCurrentScene(Scene* scene);
-        void setCurrentScene(const std::string& sceneName);
+        const bool setCurrentScene(Scene* scene);
+        const bool setCurrentScene(const std::string& sceneName);
 
         const double dt();
 
@@ -96,14 +111,8 @@ namespace Engine{
 
         Handle addFont(const std::string& filename);
 
-        std::vector<Handle> loadMesh(
-            const std::string& fileOrData,
-            const float& threshhold = 0.0005f
-        );
-        std::vector<Handle> loadMeshAsync(
-            const std::string& fileOrData,
-            const float& threshhold = 0.0005f
-        );
+        std::vector<Handle> loadMesh(const std::string& fileOrData, const float& threshhold = 0.0005f);
+        std::vector<Handle> loadMeshAsync(const std::string& fileOrData, const float& threshhold = 0.0005f);
 
         Handle loadTexture(
             const std::string& file,
@@ -145,10 +154,6 @@ namespace Engine{
             Texture* metalness = nullptr,
             Texture* smoothness = nullptr
         );
-
-
-
-
 
         Handle addShader(const std::string& shaderFileOrData, const ShaderType::Type& shaderType, const bool& fromFile = true);
         Handle addSoundData(const std::string& file);

@@ -1,5 +1,6 @@
 #include <core/engine/resources/Handle.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
+#include <core/engine/resources/ResourcesIncludes.h>
 
 using namespace Engine;
 using namespace std;

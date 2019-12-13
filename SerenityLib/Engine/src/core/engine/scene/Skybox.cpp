@@ -1,6 +1,6 @@
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/scene/Scene.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/textures/TextureLoader.h>
 
@@ -81,7 +81,7 @@ Skybox::Skybox(const string* files){
 
     string names[6] = { files[0],files[1],files[2],files[3],files[4],files[5] };
     //instead of using files[0] generate a proper name using the directory?
-    m_Texture = new Texture(names, files[0] + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
+    m_Texture = NEW Texture(names, files[0] + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
     epriv::TextureLoader::GeneratePBRData(*m_Texture, 32, m_Texture->width() / 4);
     epriv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
     registerEvent(EventType::WindowFullscreenChanged);
@@ -90,9 +90,9 @@ Skybox::Skybox(const string& filename){
     m_Texture = nullptr;
     Engine::epriv::SkyboxImplInterface::initMesh();
 
-    m_Texture = epriv::Core::m_Engine->m_ResourceManager._hasTexture(filename);
+    m_Texture = epriv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(filename);
     if (!m_Texture) {
-        m_Texture = new Texture(filename, false, ImageInternalFormat::SRGB8_ALPHA8);
+        m_Texture = NEW Texture(filename, false, ImageInternalFormat::SRGB8_ALPHA8);
         epriv::TextureLoader::GeneratePBRData(*m_Texture, 32, m_Texture->width() / 4);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
     }

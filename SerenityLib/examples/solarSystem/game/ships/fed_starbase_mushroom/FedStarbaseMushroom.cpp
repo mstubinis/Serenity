@@ -31,17 +31,17 @@ FedStarbaseMushroom::FedStarbaseMushroom(Team& team, Client& client, Map& map, c
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
-        if (i == 0)        system = new ShipSystemReactor(_this, 1000);
+        if (i == 0)        system = NEW ShipSystemReactor(_this, 1000);
         else if (i == 1)   system = nullptr; //no pitch thrusters
         else if (i == 2)   system = nullptr; //no yaw thrusters
         else if (i == 3)   system = nullptr; //no roll thrusters
         else if (i == 4)   system = nullptr; //no cloaking device
-        else if (i == 5)   system = new ShipSystemShields(_this, map, 160000.0f, 160000.0f, 160000.0f, 160000.0f, 160000.0f, 160000.0f);
+        else if (i == 5)   system = NEW ShipSystemShields(_this, map, 160000.0f, 160000.0f, 160000.0f, 160000.0f, 160000.0f, 160000.0f);
         else if (i == 6)   system = nullptr; //no main thrusters
         else if (i == 7)   system = nullptr; //no warp drive
-        else if (i == 8)   system = new ShipSystemSensors(_this, map);
-        else if (i == 9)   system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 200000.0f);
+        else if (i == 8)   system = NEW ShipSystemSensors(_this, map);
+        else if (i == 9)   system = NEW ShipSystemWeapons(_this);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 200000.0f);
         m_ShipSystems.emplace(i, system);
     }
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));

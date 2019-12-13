@@ -29,17 +29,17 @@ Norway::Norway(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
-        if (i == 0)        system = new ShipSystemReactor(_this, 1000);
-        else if (i == 1)   system = new ShipSystemPitchThrusters(_this);
-        else if (i == 2)   system = new ShipSystemYawThrusters(_this);
-        else if (i == 3)   system = new ShipSystemRollThrusters(_this);
+        if (i == 0)        system = NEW ShipSystemReactor(_this, 1000);
+        else if (i == 1)   system = NEW ShipSystemPitchThrusters(_this);
+        else if (i == 2)   system = NEW ShipSystemYawThrusters(_this);
+        else if (i == 3)   system = NEW ShipSystemRollThrusters(_this);
         else if (i == 4)   system = nullptr; //no cloaking device
-        else if (i == 5)   system = new ShipSystemShields(_this, map, 8500.0f, 8500.0f, 8500.0f, 8500.0f, 11500.0f, 11500.0f);
-        else if (i == 6)   system = new ShipSystemMainThrusters(_this);
-        else if (i == 7)   system = new ShipSystemWarpDrive(_this);
-        else if (i == 8)   system = new ShipSystemSensors(_this, map);
-        else if (i == 9)   system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 17800.0f);
+        else if (i == 5)   system = NEW ShipSystemShields(_this, map, 8500.0f, 8500.0f, 8500.0f, 8500.0f, 11500.0f, 11500.0f);
+        else if (i == 6)   system = NEW ShipSystemMainThrusters(_this);
+        else if (i == 7)   system = NEW ShipSystemWarpDrive(_this);
+        else if (i == 8)   system = NEW ShipSystemSensors(_this, map);
+        else if (i == 9)   system = NEW ShipSystemWeapons(_this);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 17800.0f);
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);

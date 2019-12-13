@@ -123,6 +123,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -152,6 +153,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -161,6 +163,7 @@
       <AdditionalLibraryDirectories>D:\dev\SFML\lib\64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Debug;D:\dev\assimp\lib\64\Debug;D:\dev\SFML\lib\64\Debug;D:\dev\lua\lib\64\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;lua.lib;assimp.lib;freeglut64.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug_d.lib;BulletDynamics_Debug_d.lib;BulletSoftBody_Debug_d.lib;LinearMath_Debug_d.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+      <Verbose>true</Verbose>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -178,6 +181,7 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -212,6 +216,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -228,9 +233,7 @@
   <ItemGroup>
     <ClInclude Include="Engine\src\core\Constraint.h" />
     <ClInclude Include="Engine\src\core\engine\BindableResource.h" />
-    <ClInclude Include="Engine\src\core\engine\Engine.h" />
     <ClInclude Include="Engine\src\core\engine\Engine_ObjectPool.h" />
-    <ClInclude Include="Engine\src\core\engine\Engine_Window.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventDispatcher.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventObject.h" />
@@ -335,6 +338,10 @@
     <ClInclude Include="Engine\src\core\engine\sounds\SoundMusic.h" />
     <ClInclude Include="Engine\src\core\engine\sounds\SoundQueue.h" />
     <ClInclude Include="Engine\src\core\engine\sounds\Sounds.h" />
+    <ClInclude Include="Engine\src\core\engine\system\Engine.h" />
+    <ClInclude Include="Engine\src\core\engine\system\EngineGameFunctions.h" />
+    <ClInclude Include="Engine\src\core\engine\system\EngineOptions.h" />
+    <ClInclude Include="Engine\src\core\engine\system\window\Engine_Window.h" />
     <ClInclude Include="Engine\src\core\engine\textures\DDS.h" />
     <ClInclude Include="Engine\src\core\engine\textures\Texture.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h" />
@@ -345,6 +352,7 @@
     <ClInclude Include="Engine\src\core\engine\threading\ThreadPool.h" />
     <ClInclude Include="Engine\src\core\engine\threading\WorkerThread.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h" />
+    <ClInclude Include="Engine\src\core\engine\utils\ForcedInclude.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Utils.h" />
     <ClInclude Include="Engine\src\core\Terrain.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h" />
@@ -371,8 +379,6 @@
   <ItemGroup>
     <ClCompile Include="Engine\src\core\Constraint.cpp" />
     <ClCompile Include="Engine\src\core\engine\BindableResource.cpp" />
-    <ClCompile Include="Engine\src\core\engine\Engine.cpp" />
-    <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventDispatcher.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_Events.cpp" />
@@ -455,6 +461,8 @@
     <ClCompile Include="Engine\src\core\engine\sounds\SoundEffect.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundMusic.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundQueue.cpp" />
+    <ClCompile Include="Engine\src\core\engine\system\Engine.cpp" />
+    <ClCompile Include="Engine\src\core\engine\system\window\Engine_Window.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureLoader.cpp" />

@@ -1,5 +1,6 @@
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/threading/ThreadPool.h>
+#include <core/engine/utils/Utils.h>
 
 using namespace Engine;
 using namespace std;
@@ -7,11 +8,15 @@ using namespace std;
 epriv::ThreadManager* threadManager;
 
 epriv::ThreadManager::ThreadManager(){ 
-    m_ThreadPool = new ThreadPool();
+    m_ThreadPool = NEW ThreadPool();
     threadManager = this;
 }
 epriv::ThreadManager::~ThreadManager(){ 
-    delete m_ThreadPool;
+    cleanup();
+}
+void epriv::ThreadManager::cleanup() {
+    epriv::threading::waitForAll();
+    SAFE_DELETE(m_ThreadPool);
 }
 void epriv::ThreadManager::_update(const double& dt){ 
     m_ThreadPool->update();

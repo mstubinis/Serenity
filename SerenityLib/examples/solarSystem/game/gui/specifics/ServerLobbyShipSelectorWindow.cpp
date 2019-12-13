@@ -1,5 +1,5 @@
 #include "ServerLobbyShipSelectorWindow.h"
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/fonts/Font.h>
 
 #include <core/engine/resources/Engine_Resources.h>
@@ -26,16 +26,41 @@
 using namespace Engine;
 using namespace std;
 
-ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& scene, Camera& camera, const Font& font, const float x, const float y):m_Core(core),m_Font(const_cast<Font&>(font)) {
+struct ShipSelectorButtonOnClick final { void operator()(Button* button) const {
+    ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(button->getUserPointer());
+    for (auto& widget : window.getWindowFrame().content()) {
+        widget->setColor(0.1f, 0.1f, 0.1f, 0.5f);
+    }
+    button->setColor(0.5f, 0.5f, 0.5f, 1.0f);
+    const string& shipClass = button->text();
+    window.setShipClass(shipClass);
+}};
+
+ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& scene, Camera& camera, const Font& font, const float x, const float y) : m_Core(core), m_Font(const_cast<Font&>(font)) {
     m_Width = 578.0f;
     m_Height = 270.0f;
-    m_ShipWindow = new ScrollFrame(x, y, m_Width, m_Height);
+    m_ShipWindow = NEW ScrollFrame(x, y, m_Width, m_Height);
     m_ShipWindow->setContentPadding(0.0f);  
-    m_3DViewer = new Ship3DViewer(core, scene, camera, x + m_ShipWindow->width() + 3.0f, y - m_Height, m_Height - 1.0f, m_Height);
+    m_3DViewer = NEW Ship3DViewer(core, scene, camera, x + m_ShipWindow->width() + 3.0f, y - m_Height, m_Height - 1.0f, m_Height);
 }
 ServerLobbyShipSelectorWindow::~ServerLobbyShipSelectorWindow() {
     SAFE_DELETE(m_ShipWindow);
     SAFE_DELETE(m_3DViewer);
+}
+void ServerLobbyShipSelectorWindow::addShipButton(const string& shipClass) {
+    auto& textColor = Ships::Database.at(shipClass).FactionInformation.ColorText;
+    Button& shipbutton = *(ALLOC Button(m_Font, 0, 0, 100, 40));
+    shipbutton.setText(shipClass);
+    shipbutton.setColor(0.1f, 0.1f, 0.1f, 0.5f);
+    shipbutton.setTextColor(textColor.r, textColor.g, textColor.b, 1.0f);
+    shipbutton.setAlignment(Alignment::TopLeft);
+    shipbutton.setWidth(600);
+    shipbutton.setTextAlignment(TextAlignment::Left);
+    shipbutton.setUserPointer(this);
+    shipbutton.setOnClickFunctor(ShipSelectorButtonOnClick());
+    shipbutton.setTextureCorner(nullptr);
+    shipbutton.setTextureEdge(nullptr);
+    addContent(&shipbutton);
 }
 void ServerLobbyShipSelectorWindow::setShipClass(const string& ship_class) {
     m_3DViewer->setShipClass(ship_class);
@@ -54,7 +79,9 @@ void ServerLobbyShipSelectorWindow::setShipViewportActive(const bool& active) {
     m_3DViewer->setShipViewportActive(active);
 }
 void ServerLobbyShipSelectorWindow::clear() {
-    vector_clear(m_ShipWindow->content());
+    auto& content = m_ShipWindow->content();
+    SAFE_DELETE_VECTOR(content);
+    content.clear();
 }
 void ServerLobbyShipSelectorWindow::addContent(Widget* widget) {
     m_ShipWindow->addContent(widget);

@@ -10,6 +10,9 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/scene/Camera.h>
+
+#include <core/engine/shaders/ShaderProgram.h>
+
 #include "../Ship.h"
 #include "../map/Map.h"
 #include "../ResourceManifest.h"
@@ -30,7 +33,7 @@ SensorStatusDisplay::SensorStatusDisplay(HUD& hud, Map& map, const glm::vec2& po
     m_Color     = color;
     m_Alignment = alignment;
 
-    m_Camera = new Camera(-1.0f, 1.0f, -1.0f, 1.0f, 0.0005f, 100.0f, &m_Map);
+    m_Camera = NEW Camera(-1.0f, 1.0f, -1.0f, 1.0f, 0.0005f, 100.0f, &m_Map);
 
     m_ViewportObject = &m_Map.addViewport(pos.x - (size.x / 2.0f), pos.y + (size.y - size.x), size.x, size.x, *m_Camera);
     m_Viewport = glm::vec4(pos.x - (size.x / 2.0f), pos.y + (size.y - size.x), size.x, size.x);

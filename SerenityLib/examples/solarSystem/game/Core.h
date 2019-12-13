@@ -37,7 +37,7 @@ class Core final {
         Server* getServer();
         Client* getClient();
 
-        void startClient(GameplayMode* mode, Team* team, const unsigned short& port, const std::string& name, const std::string& ip = "127.0.0.1");
+        void startClient(Team* team, const unsigned short& port, const std::string& name, const std::string& ip = "127.0.0.1");
         void shutdownClient(const bool& serverShutdownFirst = false);
 
         void requestValidation(const std::string& name);

@@ -112,161 +112,103 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
     return true;
 }
 
-class epriv::PhysicsManager::impl final{
-    public:
-        PhysicsWorld* data;
-        bool m_Paused;
+epriv::PhysicsManager* physicsManager;
 
-        void _init(){
-            m_Paused = false;      
-        }
-        void _postInit(const char* name, const unsigned int& w, const unsigned int& h, const unsigned int& numCores){
-            data = new epriv::PhysicsWorld(numCores);
-            data->debugDrawer->initRenderingContext();
-
-            gContactAddedCallback = CustomMaterialContactAddedCallback;
-        }
-        void _destructWorldObjectsOnly() {
-            auto& world = *data->world;
-            int collisionObjCount = world.getNumCollisionObjects();
-            for (int i = 0; i < collisionObjCount; ++i) {
-                btCollisionObject* obj = world.getCollisionObjectArray()[i];
-                if (obj) {
-                    //btRigidBody* body = btRigidBody::upcast(obj);
-                    //if (body) {
-                        //auto* motionState = body->getMotionState();
-                        //SAFE_DELETE(motionState);
-                    //}
-                    world.removeCollisionObject(obj);
-                    SAFE_DELETE(obj);
-                }
-            }
-        }
-        void _destruct(){
-            _destructWorldObjectsOnly();
-            SAFE_DELETE(data);
-        }
-        void _update(const double& dt, int& maxSteps, float& other){
-            if(m_Paused) 
-                return;
-            data->world->stepSimulation(static_cast<btScalar>(dt),maxSteps,other);
-            
-            auto& dispatcher = *data->dispatcher;
-            for (int i = 0; i < dispatcher.getNumManifolds(); ++i){
-                btPersistentManifold& contactManifold = *dispatcher.getManifoldByIndexInternal(i);
-
-                for (int j = 0; j < contactManifold.getNumContacts(); ++j){
-                    btManifoldPoint& cp = contactManifold.getContactPoint(j);
-                    if (cp.getDistance() < 0.0f){
-                        btCollisionObject* collisionObjectA = const_cast<btCollisionObject*>(contactManifold.getBody0());
-                        btCollisionObject* collisionObjectB = const_cast<btCollisionObject*>(contactManifold.getBody1());
-                        auto aPtr = collisionObjectA->getUserPointer();
-                        auto bPtr = collisionObjectB->getUserPointer();
-                        ComponentBody* _a = static_cast<ComponentBody*>(aPtr);
-                        ComponentBody* _b = static_cast<ComponentBody*>(bPtr);
-                        if (_a && _b) {
-                            ComponentBody& a = *_a;
-                            ComponentBody& b = *_b;
-
-                            glm::vec3 ptA = Math::btVectorToGLM(cp.getPositionWorldOnA());
-                            glm::vec3 ptB = Math::btVectorToGLM(cp.getPositionWorldOnB());
-                            glm::vec3 normalOnB = Math::btVectorToGLM(cp.m_normalWorldOnB);
-
-                            glm::vec3 localA = Math::btVectorToGLM(cp.m_localPointA);
-                            glm::vec3 localB = Math::btVectorToGLM(cp.m_localPointB);
-
-                            glm::vec3 normalA = glm::normalize(ptB - ptA);
-                            glm::vec3 normalB = glm::normalize(ptA - ptB);
-
-                            CollisionCallbackEventData dataA(a, b, ptA, ptB, normalOnB, localA, localB, normalA);
-                            dataA.ownerCollisionObj = collisionObjectA;
-                            dataA.otherCollisionObj = collisionObjectB;
-                            CollisionCallbackEventData dataB(b, a, ptB, ptA, normalOnB, localB, localA, normalB);
-                            dataB.ownerCollisionObj = collisionObjectB;
-                            dataB.otherCollisionObj = collisionObjectA;
-
-                            a.collisionResponse(dataA);
-                            b.collisionResponse(dataB);
-
-                            cp.setDistance((btScalar)9999999999999.0); //hacky way of saying "dont process this again"
-                        }
-                    }
-                }
-            }
-            
-        }
-        void _render(Camera& camera){
-            data->world->debugDrawWorld();
-            const glm::vec3 camPos = camera.getPosition();
-            const glm::mat4 model = glm::mat4(1.0f);
-            Renderer::sendUniformMatrix4("Model", model);
-            Renderer::sendUniformMatrix4("VP", camera.getViewProjection());
-            data->debugDrawer->drawAccumulatedLines();
-            data->debugDrawer->postRender();
-        }
-        void _addRigidBody(btRigidBody* _rigidBody) {
-            int collisionObjCount = data->world->getNumCollisionObjects();
-            for (int i = 0; i < collisionObjCount; ++i) {
-                btRigidBody* body = btRigidBody::upcast(data->world->getCollisionObjectArray()[i]);
-                if (body) {
-                    if (body == _rigidBody) {
-                        return;
-                    }
-                }
-            }
-            data->world->addRigidBody(_rigidBody);
-        }
-        void _addRigidBody(btRigidBody* _rigidBody, short group, short mask) {
-            int collisionObjCount = data->world->getNumCollisionObjects();
-            for (int i = 0; i < collisionObjCount; ++i) {
-                btRigidBody* body = btRigidBody::upcast(data->world->getCollisionObjectArray()[i]);
-                if (body) {
-                    if (body == _rigidBody) {
-                        return;
-                    }
-                }
-            }
-            data->world->addRigidBody(_rigidBody, group, mask);
-        }
-        void _removeRigidBody(btRigidBody* _rigidBody) {
-            int collisionObjCount = data->world->getNumCollisionObjects();
-            for (int i = 0; i < collisionObjCount; ++i) {
-                btRigidBody* body = btRigidBody::upcast(data->world->getCollisionObjectArray()[i]);
-                if (body) {
-                    if (body == _rigidBody) {
-                        for (int i = body->getNumConstraintRefs() - 1; i >= 0; i--){
-                            btTypedConstraint* con = body->getConstraintRef(i);
-                            data->world->removeConstraint(con);
-                        }
-                        data->world->removeRigidBody(_rigidBody);
-                        return;
-                    }
-                }
-            }
-        }
-        void _updateRigidBody(btRigidBody* rigidBody) {
-            data->world->updateSingleAabb(rigidBody);
-        }
-};
-epriv::PhysicsManager::impl* physicsManager;
-
-epriv::PhysicsManager::PhysicsManager():m_i(new impl){ 
-    m_i->_init();
-    physicsManager = m_i.get(); 
+epriv::PhysicsManager::PhysicsManager(){ 
+    m_Paused = false;
+    m_Data = nullptr;
+    physicsManager = this;
+    m_NumberOfStepsPerFrame = 1;
 }
 epriv::PhysicsManager::~PhysicsManager(){ 
-    m_i->_destruct(); 
+    cleanup();
+}
+void epriv::PhysicsManager::cleanup() {
+    auto& world = *m_Data->world;
+    int collisionObjCount = world.getNumCollisionObjects();
+    for (int i = 0; i < collisionObjCount; ++i) {
+        btCollisionObject* obj = world.getCollisionObjectArray()[i];
+        if (obj) {
+            //btRigidBody* body = btRigidBody::upcast(obj);
+            //if (body) {
+                //auto* motionState = body->getMotionState();
+                //SAFE_DELETE(motionState);
+            //}
+            world.removeCollisionObject(obj);
+            SAFE_DELETE(obj);
+        }
+    }
+    SAFE_DELETE(m_Data);
 }
 void epriv::PhysicsManager::_init(const char* name, const unsigned int& w, const unsigned int& h, const unsigned int& numCores){
-    m_i->_postInit(name,w,h,numCores); 
+    m_Data = NEW epriv::PhysicsWorld(numCores);
+    m_Data->debugDrawer->initRenderingContext();
+
+    gContactAddedCallback = CustomMaterialContactAddedCallback;
 }
-void epriv::PhysicsManager::_update(const double& dt,int maxsteps,float other){ 
-    m_i->_update(dt,maxsteps,other); 
+void epriv::PhysicsManager::_update(const double& dt,int maxsteps, float other){ 
+    if (m_Paused)
+        return;
+    m_Data->world->stepSimulation(static_cast<btScalar>(dt), maxsteps, static_cast<btScalar>(other));
+
+    auto& dispatcher = *m_Data->dispatcher;
+    for (int i = 0; i < dispatcher.getNumManifolds(); ++i) {
+        btPersistentManifold& contactManifold = *dispatcher.getManifoldByIndexInternal(i);
+
+        for (int j = 0; j < contactManifold.getNumContacts(); ++j) {
+            btManifoldPoint& cp = contactManifold.getContactPoint(j);
+            if (cp.getDistance() < 0.0f) {
+                btCollisionObject* collisionObjectA = const_cast<btCollisionObject*>(contactManifold.getBody0());
+                btCollisionObject* collisionObjectB = const_cast<btCollisionObject*>(contactManifold.getBody1());
+                auto aPtr = collisionObjectA->getUserPointer();
+                auto bPtr = collisionObjectB->getUserPointer();
+                ComponentBody* _a = static_cast<ComponentBody*>(aPtr);
+                ComponentBody* _b = static_cast<ComponentBody*>(bPtr);
+                if (_a && _b) {
+                    ComponentBody& a = *_a;
+                    ComponentBody& b = *_b;
+
+                    glm::vec3 ptA = Math::btVectorToGLM(cp.getPositionWorldOnA());
+                    glm::vec3 ptB = Math::btVectorToGLM(cp.getPositionWorldOnB());
+                    glm::vec3 normalOnB = Math::btVectorToGLM(cp.m_normalWorldOnB);
+
+                    glm::vec3 localA = Math::btVectorToGLM(cp.m_localPointA);
+                    glm::vec3 localB = Math::btVectorToGLM(cp.m_localPointB);
+
+                    glm::vec3 normalA = glm::normalize(ptB - ptA);
+                    glm::vec3 normalB = glm::normalize(ptA - ptB);
+
+                    CollisionCallbackEventData dataA(a, b, ptA, ptB, normalOnB, localA, localB, normalA);
+                    dataA.ownerCollisionObj = collisionObjectA;
+                    dataA.otherCollisionObj = collisionObjectB;
+                    CollisionCallbackEventData dataB(b, a, ptB, ptA, normalOnB, localB, localA, normalB);
+                    dataB.ownerCollisionObj = collisionObjectB;
+                    dataB.otherCollisionObj = collisionObjectA;
+
+                    a.collisionResponse(dataA);
+                    b.collisionResponse(dataB);
+
+                    cp.setDistance((btScalar)9999999999999.0); //hacky way of saying "dont process this again"
+                }
+            }
+        }
+    }
 }
 void epriv::PhysicsManager::_render(Camera& camera){
-    m_i->_render(camera);
+    m_Data->world->debugDrawWorld();
+    const glm::vec3 camPos = camera.getPosition();
+    const glm::mat4 model = glm::mat4(1.0f);
+    Renderer::sendUniformMatrix4("Model", model);
+    Renderer::sendUniformMatrix4("VP", camera.getViewProjection());
+    m_Data->debugDrawer->drawAccumulatedLines();
+    m_Data->debugDrawer->postRender();
 }
-
+void Physics::setNumberOfStepsPerFrame(const unsigned int numSteps) {
+    physicsManager->m_NumberOfStepsPerFrame = glm::max(1U, numSteps);
+}
+const unsigned int Physics::getNumberOfStepsPerFrame() {
+    return physicsManager->m_NumberOfStepsPerFrame;
+}
 void Physics::pause(bool b){ 
     physicsManager->m_Paused = b; 
 }
@@ -274,28 +216,62 @@ void Physics::unpause(){
     physicsManager->m_Paused = false; 
 }
 void Physics::setGravity(const float x, const float y, const float z){ 
-    physicsManager->data->world->setGravity(btVector3(x,y,z)); 
+    physicsManager->m_Data->world->setGravity(btVector3(x,y,z));
 }
 void Physics::setGravity(const glm::vec3& gravity){ 
     Physics::setGravity(gravity.x,gravity.y,gravity.z); 
 }
 void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ 
-    physicsManager->_addRigidBody(rigidBody,group,mask); 
+    auto& data = *physicsManager->m_Data;
+    int collisionObjCount = data.world->getNumCollisionObjects();
+    for (int i = 0; i < collisionObjCount; ++i) {
+        btRigidBody* body = btRigidBody::upcast(data.world->getCollisionObjectArray()[i]);
+        if (body) {
+            if (body == rigidBody) {
+                return;
+            }
+        }
+    }
+    data.world->addRigidBody(rigidBody, group, mask);
 }
 void Physics::addRigidBody(btRigidBody* rigidBody){ 
-    physicsManager->_addRigidBody(rigidBody); 
+    auto& data = *physicsManager->m_Data;
+    int collisionObjCount = data.world->getNumCollisionObjects();
+    for (int i = 0; i < collisionObjCount; ++i) {
+        btRigidBody* body = btRigidBody::upcast(data.world->getCollisionObjectArray()[i]);
+        if (body) {
+            if (body == rigidBody) {
+                return;
+            }
+        }
+    }
+    data.world->addRigidBody(rigidBody);
 }
 void Physics::removeRigidBody(btRigidBody* rigidBody){ 
-    physicsManager->_removeRigidBody(rigidBody); 
+    auto& data = *physicsManager->m_Data;
+    int collisionObjCount = data.world->getNumCollisionObjects();
+    for (int i = 0; i < collisionObjCount; ++i) {
+        btRigidBody* body = btRigidBody::upcast(data.world->getCollisionObjectArray()[i]);
+        if (body) {
+            if (body == rigidBody) {
+                for (int i = body->getNumConstraintRefs() - 1; i >= 0; i--) {
+                    btTypedConstraint* con = body->getConstraintRef(i);
+                    data.world->removeConstraint(con);
+                }
+                data.world->removeRigidBody(rigidBody);
+                return;
+            }
+        }
+    }
 }
 void Physics::updateRigidBody(btRigidBody* rigidBody){ 
-    physicsManager->_updateRigidBody(rigidBody); 
+    physicsManager->m_Data->world->updateSingleAabb(rigidBody);
 }
 void Physics::addRigidBody(ComponentBody& body) {
-    physicsManager->_addRigidBody(&const_cast<btRigidBody&>(body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
+    Physics::addRigidBody(&const_cast<btRigidBody&>(body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
 }
 void Physics::removeRigidBody(ComponentBody& body) {
-    physicsManager->_removeRigidBody(&const_cast<btRigidBody&>(body.getBtBody()));
+    Physics::removeRigidBody(&const_cast<btRigidBody&>(body.getBtBody()));
 }
 
 
@@ -304,8 +280,8 @@ RayCastResult _rayCastInternal_Nearest(const btVector3& start, const btVector3& 
     RayCallback.m_collisionFilterMask = mask;
     RayCallback.m_collisionFilterGroup = group;
 
-    physicsManager->data->world->rayTest(start, end, RayCallback);
-    //physicsManager->data->world->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
+    physicsManager->m_Data->world->rayTest(start, end, RayCallback);
+    //physicsManager->m_Data->world->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
 
     RayCastResult result;
     if (RayCallback.hasHit()) {
@@ -328,8 +304,8 @@ vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& 
     RayCallback.m_collisionFilterMask = mask;
     RayCallback.m_collisionFilterGroup = group;
 
-    physicsManager->data->world->rayTest(start, end, RayCallback);
-    //physicsManager->data->world->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
+    physicsManager->m_Data->world->rayTest(start, end, RayCallback);
+    //physicsManager->m_Data->world->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
 
     vector<RayCastResult> result;
     if (RayCallback.hasHit()) {

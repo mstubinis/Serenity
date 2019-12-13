@@ -2,12 +2,12 @@
 #ifndef ENGINE_ECS_H
 #define ENGINE_ECS_H
 
+struct SceneOptions;
+
 #include <core/engine/utils/Utils.h> //ok
 #include <ecs/ECSRegistry.h> //ok
 #include <ecs/ECSEntityPool.h> //has scene.h in it
 #include <ecs/ECSSystem.h>
-
-struct SceneOptions;
 
 namespace Engine {
     namespace epriv {
@@ -35,11 +35,11 @@ namespace Engine {
                         m_Systems.resize(type_slot + 1, nullptr);
                     }
                     if (!m_ComponentPools[type_slot]) {
-                        m_ComponentPools[type_slot] = new CPoolType();
+                        m_ComponentPools[type_slot] = ALLOC CPoolType();
                     }
                     if (!m_Systems[type_slot]) {
                         ECSSystemCI _ci;
-                        m_Systems[type_slot] = new CSystemType(_ci, *this);
+                        m_Systems[type_slot] = ALLOC CSystemType(_ci, *this);
                     }
                 }
             public:
@@ -66,40 +66,33 @@ namespace Engine {
                 }
                 void update(const double& dt, Scene& scene) {
                     for (size_t i = 0; i < m_Systems.size(); ++i) { 
-                        auto& system = *m_Systems[i];
-                        system.onUpdate(dt, scene); 
+                        m_Systems[i]->onUpdate(dt, scene);
                     }
                 }
                 void onComponentAddedToEntity(void* component, TEntity& entity, const unsigned int& type_slot) {
-                    auto& system = *m_Systems[type_slot];
-                    system.onComponentAddedToEntity(component, entity);
+                    m_Systems[type_slot]->onComponentAddedToEntity(component, entity);
                 }
                 void onSceneEntered(Scene& scene) { 
                     for (size_t i = 0; i < m_Systems.size(); ++i) { 
-                        auto& system = *m_Systems[i];
-                        system.onSceneEntered(scene); 
+                        m_Systems[i]->onSceneEntered(scene);
                     }
                 }
                 void onSceneLeft(Scene& scene) { 
                     for (size_t i = 0; i < m_Systems.size(); ++i) { 
-                        auto& system = *m_Systems[i];
-                        system.onSceneLeft(scene); 
+                        m_Systems[i]->onSceneLeft(scene);
                     }
                 }
                 //add newly created entities to the scene with their components as defined in their m_Systems, etc
                 void preUpdate(Scene& scene, const double& dt) {
                     if (m_JustAddedEntities.size() > 0) {
                         for (size_t i = 0; i < m_Systems.size(); ++i) {
-                            auto& system = *m_Systems[i];
-						    for (size_t j = 0; j < m_JustAddedEntities.size(); ++j) {
-                                system.onEntityAddedToScene(m_JustAddedEntities[j], scene);
+                            for (size_t j = 0; j < m_JustAddedEntities.size(); ++j) {
+                                m_Systems[i]->onEntityAddedToScene(m_JustAddedEntities[j], scene);
                             }
                         }
-                        vector_clear(m_JustAddedEntities);
+                        m_JustAddedEntities.clear();
                     }
-				
                 }
-
                 //destroy flagged entities & their components, if any
                 void postUpdate(Scene& scene, const double& dt) {
                     if (m_DestroyedEntities.size() > 0) {
@@ -111,7 +104,7 @@ namespace Engine {
                                 pool->_remove(entityID);
                             }
                         }
-                        vector_clear(m_DestroyedEntities);
+                        m_DestroyedEntities.clear();
                     }
                     for (auto& pool : m_ComponentPools) {
                         pool->reserveMore(1500);
@@ -131,7 +124,7 @@ namespace Engine {
                         m_ComponentPools.resize(type_slot + 1, nullptr);
                     }
                     if (!m_ComponentPools[type_slot]) {
-                        m_ComponentPools[type_slot] = new CPoolType();
+                        m_ComponentPools[type_slot] = ALLOC CPoolType();
                     }
                     if (type_slot >= m_Systems.size()) {
                         m_Systems.resize(type_slot + 1, nullptr);
@@ -139,7 +132,7 @@ namespace Engine {
                     if (m_Systems[type_slot]) {
                         SAFE_DELETE(m_Systems[type_slot]);
                     }
-                    m_Systems[type_slot] = new CSystemType(systemCI, *this);
+                    m_Systems[type_slot] = ALLOC CSystemType(systemCI, *this);
                 }
                 TEntity createEntity(Scene& scene) { 
                     const TEntity res = m_EntityPool.addEntity(scene);

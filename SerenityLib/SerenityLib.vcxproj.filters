@@ -202,6 +202,18 @@
     <Filter Include="Source Files\Engine\Core\Model">
       <UniqueIdentifier>{507f5eab-86ea-44d3-9262-24d581e2f567}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\System">
+      <UniqueIdentifier>{c725d1e6-d917-41c8-994b-b0818b041e40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\System">
+      <UniqueIdentifier>{a96cb37c-28b2-4c43-a44c-edd7a0a11f00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\System\Window">
+      <UniqueIdentifier>{7e13a31b-46d3-4742-bfca-a9177e4e0d4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\System\Window">
+      <UniqueIdentifier>{44a7dcc5-c461-4a07-9284-13c9e0686c33}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -360,13 +372,7 @@
     <ClInclude Include="Engine\src\core\engine\BindableResource.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\Engine_ObjectPool.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_Window.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\Constraint.h">
@@ -627,6 +633,21 @@
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventIncludes.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\system\window\Engine_Window.h">
+      <Filter>Header Files\Engine\Core\System\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\system\Engine.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\system\EngineOptions.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\system\EngineGameFunctions.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\utils\ForcedInclude.h">
+      <Filter>Header Files\Engine\Core\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -744,12 +765,6 @@
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\BindableResource.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\Engine_Window.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\EntityDataRequest.cpp">
@@ -952,6 +967,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\scene\SceneOptions.cpp">
       <Filter>Source Files\Engine\Core\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\system\window\Engine_Window.cpp">
+      <Filter>Source Files\Engine\Core\System\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\system\Engine.cpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

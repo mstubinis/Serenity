@@ -1,5 +1,5 @@
 #include <core/engine/utils/Engine_Debugging.h>
-#include <SFML/Window.hpp>
+
 #include <iomanip>
 #include <sstream>
 
@@ -23,6 +23,10 @@ epriv::DebugManager::DebugManager(){
     decimals = 4;
 }
 epriv::DebugManager::~DebugManager() {
+    cleanup();
+}
+void epriv::DebugManager::cleanup() {
+
 }
 void epriv::DebugManager::_init(const char* name, uint w, uint h) {
 	GLuint cast = static_cast<GLuint>(queryID);

@@ -4,7 +4,7 @@
 #include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/textures/Texture.h>
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 
 #include <boost/filesystem.hpp>
 
@@ -18,13 +18,13 @@ MaterialRequest::MaterialRequest() {
     async = false;
 }
 MaterialRequest::MaterialRequest(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) : MaterialRequest() { 
-    auto d  = new TextureRequest(diffuse,    false,  ImageInternalFormat::SRGB8_ALPHA8);
-    auto n  = new TextureRequest(normal,     false,  ImageInternalFormat::RGBA8);
-    auto g  = new TextureRequest(glow,       false,  ImageInternalFormat::R8);
-    auto s  = new TextureRequest(specular,   false, ImageInternalFormat::R8);
-    auto a  = new TextureRequest(ao,         false, ImageInternalFormat::R8);
-    auto m  = new TextureRequest(metalness,  false, ImageInternalFormat::R8);
-    auto sm = new TextureRequest(smoothness, false, ImageInternalFormat::R8);
+    auto d  = NEW TextureRequest(diffuse,    false,  ImageInternalFormat::SRGB8_ALPHA8);
+    auto n  = NEW TextureRequest(normal,     false,  ImageInternalFormat::RGBA8);
+    auto g  = NEW TextureRequest(glow,       false,  ImageInternalFormat::R8);
+    auto s  = NEW TextureRequest(specular,   false, ImageInternalFormat::R8);
+    auto a  = NEW TextureRequest(ao,         false, ImageInternalFormat::R8);
+    auto m  = NEW TextureRequest(metalness,  false, ImageInternalFormat::R8);
+    auto sm = NEW TextureRequest(smoothness, false, ImageInternalFormat::R8);
 
     part.textureRequests.push_back(d);
     part.textureRequests.push_back(n);
@@ -36,7 +36,7 @@ MaterialRequest::MaterialRequest(const string& name, const string& diffuse, cons
     part.name = name;
 }
 MaterialRequest::MaterialRequest(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
-    part.material = new Material(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
+    part.material = NEW Material(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
     part.handle = Core::m_Engine->m_ResourceManager.m_Resources->add(part.material, ResourceType::Material);
     part.name = name;
 }
@@ -57,7 +57,7 @@ void MaterialRequest::requestAsync() {
 }
 
 void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
-    request.part.material = new Material();
+    request.part.material = NEW Material();
     request.part.material->setName(request.part.name);
     request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources->add(request.part.material, ResourceType::Material);
 

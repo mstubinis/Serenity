@@ -3,7 +3,7 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 
 using namespace std;
 using namespace Engine;
@@ -70,10 +70,10 @@ void MaterialLayer::setData2(const float& x, const float& y, const float& z, con
     m_Data2.w = w;
 }
 void MaterialLayer::setTexture(const string& textureFile) {
-    Texture* _texture = Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
+    Texture* _texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(textureFile);
     if (!_texture) {
         if (!textureFile.empty()) {
-            _texture = new Texture(textureFile);
+            _texture = NEW Texture(textureFile);
             Core::m_Engine->m_ResourceManager._addTexture(_texture);
         }
     }

@@ -2,7 +2,7 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/textures/TextureLoader.h>
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 
 #include <boost/filesystem.hpp>
 
@@ -59,7 +59,7 @@ void InternalTextureRequestPublicInterface::Request(TextureRequest& request) {
         if (request.fileExists) {
 
             request.part.name = request.file;
-            request.part.texture = new Texture();
+            request.part.texture = NEW Texture();
             request.part.texture->m_TextureType = request.textureType;
             request.part.texture->setName(request.part.name);
             request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources->add(request.part.texture, ResourceType::Texture);

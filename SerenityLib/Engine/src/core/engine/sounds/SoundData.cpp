@@ -1,4 +1,5 @@
 #include <core/engine/sounds/SoundData.h>
+#include <core/engine/utils/Utils.h>
 
 #include <glm/glm.hpp>
 
@@ -7,7 +8,7 @@ using namespace std;
 SoundData::SoundData(const string& file) : EngineResource(ResourceType::SoundData, file){
     m_Buffer = nullptr;
     m_File   = file;
-    m_Volume = 100;
+    m_Volume = 100.0f;
     buildBuffer();
 }
 SoundData::~SoundData() {
@@ -15,7 +16,7 @@ SoundData::~SoundData() {
 }
 void SoundData::buildBuffer() {
     if (!m_Buffer) {
-        m_Buffer = new sf::SoundBuffer();
+        m_Buffer = NEW sf::SoundBuffer();
     }
     m_Buffer->loadFromFile(m_File);
 }

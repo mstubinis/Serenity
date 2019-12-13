@@ -156,6 +156,8 @@ void WeaponProjectile::destroy() {
     }
 }
 void WeaponProjectile::clientToServerImpactShields(Ship& sourceShip, const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactModelSpacePosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const unsigned int& shield_face) {
+    if (!active)
+        return;
     PacketProjectileImpact packet;
     if(cannon)
         packet.PacketType = PacketType::Client_To_Server_Projectile_Cannon_Impact;
@@ -180,6 +182,8 @@ void WeaponProjectile::clientToServerImpactShields(Ship& sourceShip, const bool 
     client.send(packet);
 }
 void WeaponProjectile::clientToServerImpactHull(Ship& sourceShip, const bool cannon, Client& client, Ship& shipHit, const glm::vec3& impactModelSpacePosition, const glm::vec3& impactNormal, const float& impactRadius, const float& damage, const float& time, const size_t modelIndex) {
+    if (!active)
+        return;
     PacketProjectileImpact packet;
     if (cannon)
         packet.PacketType = PacketType::Client_To_Server_Projectile_Cannon_Impact;
@@ -318,7 +322,7 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& m
     rangeInKMSquared            = range * range;
     launchSpeed                 = BeamLaunchSpeed;
 
-    beamLight = new RodLight(_pos, 2.0f, &map);
+    beamLight = NEW RodLight(_pos, 2.0f, &map);
     beamLight->setAttenuation(LightRange::_20);
     beamLight->deactivate();
 

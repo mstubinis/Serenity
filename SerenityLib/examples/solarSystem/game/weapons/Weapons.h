@@ -60,7 +60,7 @@ class Weapons {
             switch (weapon.type) {
                 case WeaponType::BorgTorpedo: {
                     auto& w = static_cast<BorgTorpedo&>(weapon);
-                    auto* projectile = new BorgTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = NEW BorgTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addTorpedoProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundBorgTorpedo);
@@ -84,7 +84,7 @@ class Weapons {
                 }
                 case WeaponType::DisruptorCannon: {
                     auto& w = static_cast<DisruptorCannon&>(weapon);
-                    auto* projectile = new DisruptorCannonProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = NEW DisruptorCannonProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addCannonProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundDisruptorCannon);
@@ -99,7 +99,7 @@ class Weapons {
                 }
                 case WeaponType::KlingonPhotonTorpedo: {
                     auto& w = static_cast<KlingonPhotonTorpedo&>(weapon);
-                    auto* projectile = new KlingonPhotonTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = NEW KlingonPhotonTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addTorpedoProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundKlingonTorpedo);
@@ -117,7 +117,7 @@ class Weapons {
                 }
                 case WeaponType::PhotonTorpedo: {
                     auto& w = static_cast<PhotonTorpedo&>(weapon);
-                    auto* projectile = new PhotonTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = NEW PhotonTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addTorpedoProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPhotonTorpedo);
@@ -132,7 +132,7 @@ class Weapons {
                 }
                 case WeaponType::PhotonTorpedoOld: {
                     auto& w = static_cast<PhotonTorpedoOld&>(weapon);
-                    auto* projectile = new PhotonTorpedoOldProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = NEW PhotonTorpedoOldProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addTorpedoProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPhotonTorpedoOld);
@@ -150,7 +150,7 @@ class Weapons {
                 }
                 case WeaponType::PlasmaCannon: {
                     auto& w = static_cast<PlasmaCannon&>(weapon);
-                    auto* projectile = new PlasmaCannonProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = NEW PlasmaCannonProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addCannonProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaCannon);
@@ -165,7 +165,7 @@ class Weapons {
                 }
                 case WeaponType::PlasmaTorpedo: {
                     auto& w = static_cast<PlasmaTorpedo&>(weapon);
-                    auto* projectile = new PlasmaTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = NEW PlasmaTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addTorpedoProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPlasmaTorpedo);
@@ -180,7 +180,7 @@ class Weapons {
                 }
                 case WeaponType::PulsePhaser: {
                     auto& w = static_cast<PulsePhaser&>(weapon);
-                    auto* projectile = new PulsePhaserProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = NEW PulsePhaserProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addCannonProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPulsePhaser);
@@ -195,7 +195,7 @@ class Weapons {
                 }
                 case WeaponType::QuantumTorpedo: {
                     auto& w = static_cast<QuantumTorpedo&>(weapon);
-                    auto* projectile = new QuantumTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
+                    auto* projectile = NEW QuantumTorpedoProjectile(target, w, map, final_world_position, forward, projectile_index, chosen_target_pos);
                     const auto res = map.addTorpedoProjectile(projectile, projectile_index);
                     if (res >= 0) {
                         w.soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundQuantumTorpedo);

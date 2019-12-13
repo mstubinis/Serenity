@@ -18,7 +18,7 @@ class ScrollFrame: public Widget {
         std::vector<Widget*>                      m_Content;
     public:
         ScrollFrame(const float x, const float y, const float w, const float h);
-        ~ScrollFrame();
+        virtual ~ScrollFrame();
 
         const float contentHeight() const;
 

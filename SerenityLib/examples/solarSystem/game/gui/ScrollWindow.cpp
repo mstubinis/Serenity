@@ -12,7 +12,7 @@ using namespace std;
 ScrollFrame::ScrollFrame(const float x, const float y, const float w, const float h) : Widget(x, y, w, h) {
     m_BorderSize = 1.0f;
 
-    m_ScrollBar = new ScrollBar(x + w, y, 20.0f, h);
+    m_ScrollBar = NEW ScrollBar(x + w, y, 20.0f, h);
 
     setContentPadding(10.0f);
     m_ContentHeight = 0.0f;
@@ -24,12 +24,18 @@ ScrollFrame::~ScrollFrame() {
 }
 void ScrollFrame::internalAddContent() {
     float height = 0;
-    for (auto& widget : m_Content) {
-        height += widget->height();
-        height += m_ContentPadding;
+    float width_accumulator = 0;
+    for (size_t i = 0; i < m_Content.size(); ++i) {
+        auto& widget = *m_Content[i];
+        const auto widget_width = widget.width();
+        width_accumulator += widget_width;
+        if (width_accumulator >= m_Width - 1) {
+            height += (widget.height() + m_ContentPadding);
+            width_accumulator = 0;
+        }
     }
     m_ContentHeight = height;
-    const float& percent = m_Height / m_ContentHeight;
+    const float percent = m_Height / m_ContentHeight;
     m_ScrollBar->setSliderSize(percent);
 }
 void ScrollFrame::setAlignment(const Alignment::Type& alignment) {
@@ -68,22 +74,24 @@ void ScrollFrame::addContent(Widget* widget) {
 
     //modify text if needed
     Text* textWidget = dynamic_cast<Text*>(widget);
+    const auto threshold = m_Width - 110.0f;
     if (textWidget) {
         float textwidth = 0;
-        unsigned int count = 0;
+        bool changed = false;
         auto text = textWidget->text();
         for (auto itr = text.begin(); itr != text.end(); ++itr) {
             auto character = (*itr);
             if (character != '\0' && character != '\n') {
                 textwidth += (textWidget->font().getGlyphData(character).width) * textWidget->textScale().x;
-                if (textwidth > m_Width - 110.0f) {
+                if (textwidth > threshold) {
                     itr = text.insert(itr, '\n');
                     textwidth = 0.0f;
+                    changed = true;
                 }
             }
-            ++count;
         }
-        textWidget->setText(text);
+        if(changed)
+            textWidget->setText(text);
     }
     m_Content.push_back(widget);
     internalAddContent();
@@ -127,7 +135,8 @@ void ScrollFrame::update(const double& dt) {
 
 }
 void ScrollFrame::render(const glm::vec4& scissor) {
-    m_ScrollBar->render(scissor);
+    if (m_ScrollBar->isScrollable())
+        m_ScrollBar->render(scissor);
 
     const auto pos = positionWorld();
 
@@ -144,7 +153,8 @@ void ScrollFrame::render(const glm::vec4& scissor) {
     Widget::render(scissor);
 }
 void ScrollFrame::render() {
-    m_ScrollBar->render();
+    if(m_ScrollBar->isScrollable())
+        m_ScrollBar->render();
 
     const auto pos = positionWorld();
 

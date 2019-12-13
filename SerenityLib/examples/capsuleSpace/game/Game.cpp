@@ -4,8 +4,8 @@
 #include "CapsuleSpace.h"
 #include "ResourceManifest.h"
 
-#include <core/engine/Engine.h>
-#include <core/engine/Engine_Window.h>
+#include <core/engine/system/Engine.h>
+#include <core/engine/system/window/Engine_Window.h>
 #include <core/engine/networking/Networking.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/mesh/Mesh.h>

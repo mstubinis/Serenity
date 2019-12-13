@@ -44,7 +44,7 @@
 #include "../hud/SensorStatusDisplay.h"
 #include "../hud/ShipStatusDisplay.h"
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <iostream>
 
 using namespace Engine;
@@ -58,20 +58,20 @@ Map::Map(GameplayMode& mode, Client& client, const string& n, const string& file
     m_ActiveCannonProjectiles.initialize(5500);
     m_ActiveTorpedoProjectiles.initialize(5500);
 
-    GameCamera* playerCamera = new GameCamera(0.35f,7000000000.0f,this);
+    GameCamera* playerCamera = NEW GameCamera(0.35f,7000000000.0f,this);
 
     setActiveCamera(*playerCamera);
-    m_Objects.push_back(playerCamera);
     m_Filename = file;
     m_SkyboxFile = "";
-    m_RootAnchor = std::tuple<std::string,Anchor*>("",nullptr);
+    m_RootAnchor = std::make_tuple("",nullptr);
     if(file != "NULL")
         Map::loadFromFile(file);
     Font& font = client.m_Core.m_Menu->getFont();
-    m_HUD = new HUD(*this, font);
+    m_HUD = NEW HUD(*this, font);
 }
 
 void Map::cleanup() {
+    SAFE_DELETE_VECTOR(m_Objects);
     m_ActiveCannonProjectiles.clear();
     m_ActiveTorpedoProjectiles.clear();
     m_Planets.clear();
@@ -79,7 +79,6 @@ void Map::cleanup() {
     m_ShipsPlayerControlled.clear();
     m_Ships.clear();
     m_Player = nullptr;
-    SAFE_DELETE_VECTOR(m_Objects);
 }
 
 Map::~Map(){
@@ -177,16 +176,17 @@ void Map::clear_source_of_all_threat(const string& source) {
 string Map::allowedShipsSingleString() {
     uint                                             count = 0;
     boost_io::stream<boost_io::mapped_file_source>   str(m_Filename);
-    for (string line; getline(str, line, '\n');) {
-        line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
-        if (line[0] != '#') {//ignore commented lines
+    string res = "";
+    for (res; getline(str, res, '\n');) {
+        res.erase(remove(res.begin(), res.end(), '\r'), res.end()); //remove \r from the line
+        if (res[0] != '#') {//ignore commented lines
             if (count == 5) {//this line has the allowed ships
-                return line;
+                return res;
             }
         }
         ++count;
     }
-    return "";
+    return res;
 }
 unordered_map<string, Planet*>& Map::getPlanets() { 
     return m_Planets; 
@@ -203,10 +203,17 @@ unordered_map<string, Ship*>& Map::getShips() {
 Ship* Map::getPlayer() { 
     return m_Player; 
 }
-void Map::setPlayer(Ship* p) { 
-    m_Player = p; 
-    m_HUD->getSensorDisplay().setShip(p);
-    m_HUD->getShipStatusDisplay().setTarget(p);
+void Map::setPlayer(Ship* player_ptr) { 
+    m_Player = player_ptr;
+    auto* cam = getActiveCamera();
+    if (cam) {
+        GameCamera* playerCamera = static_cast<GameCamera*>(cam);
+        playerCamera->setPlayer(player_ptr);
+        playerCamera->setTarget(player_ptr);
+        playerCamera->setState(CameraState::Cockpit);
+    }
+    m_HUD->getSensorDisplay().setShip(player_ptr);
+    m_HUD->getShipStatusDisplay().setTarget(player_ptr);
 }
 
 const string& Map::skyboxFile() const {
@@ -227,7 +234,7 @@ vector<string> Map::allowedShips() {
     return vector<string>();
 }
 Anchor* Map::internalCreateDeepspaceAnchor(const decimal& x, const decimal& y, const decimal& z, const string& name) {
-    Anchor* anchor = new Anchor(*this, x, y, z);
+    Anchor* anchor = NEW Anchor(*this, x, y, z);
     Anchor* root = std::get<1>(m_RootAnchor);
     m_Objects.push_back(anchor);
 
@@ -250,7 +257,7 @@ Anchor* Map::internalCreateDeepspaceAnchor(const decimal& x, const decimal& y, c
     return anchor;
 }
 Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const decimal& x, const decimal& y, const decimal& z) {
-    Anchor* anchor = new Anchor(*this, x, y, z);
+    Anchor* anchor = NEW Anchor(*this, x, y, z);
     m_Objects.push_back(anchor);
     const string key = thisName + " Anchor";
     if (parentAnchor.empty()) {
@@ -288,7 +295,7 @@ void Map::loadFromFile(const string& filename) {
 
     internalCreateAnchor("", "Root", loadedAnchors, static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
 
-    auto& gameplayMode = *m_Client.getGameplayMode();
+    auto& gameplayMode = m_Client.getGameplayMode();
 
     for (string line; getline(str, line, '\n');) {
         line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
@@ -298,7 +305,7 @@ void Map::loadFromFile(const string& filename) {
             }else if (count == 2) {//this line has the system's skybox
                 m_SkyboxFile = ResourceManifest::BasePath + line;
             }else if (count == 3) {//this line has the system's skybox's number of flares
-                GameSkybox* box = new GameSkybox(m_SkyboxFile, boost::lexical_cast<uint>(line));
+                GameSkybox* box = NEW GameSkybox(m_SkyboxFile, boost::lexical_cast<uint>(line));
                 setSkybox(box);
             }else if (count == 4) {//this line has the system's GI contribution
                 string token;
@@ -450,36 +457,36 @@ void Map::loadFromFile(const string& filename) {
 
 
                 if (line[0] == 'S') {//Star
-                    Star* star = new Star(loadedMeshes.at(MESH_NAME), loadedMaterials.at(MATERIAL_NAME), glm::vec3(R, G, B), glm::vec3(R1, G1, B1), glm::vec3(R2, G2, B2), glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, this);
+                    Star* star = NEW Star(loadedMeshes.at(MESH_NAME), loadedMaterials.at(MATERIAL_NAME), glm::vec3(R, G, B), glm::vec3(R1, G1, B1), glm::vec3(R2, G2, B2), glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, this);
                     if (!PARENT.empty()) {
                         star->setPosition(m_Planets.at(PARENT)->getPosition() + star->getPosition());
                     }
                     m_Planets.emplace(NAME, star);
                     internalCreateAnchor("Root", NAME, loadedAnchors, star->getPosition());
                 }else if (line[0] == 'P') {//Planet
-                    planetoid = new Planet(loadedMeshes.at(MESH_NAME), loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
+                    planetoid = NEW Planet(loadedMeshes.at(MESH_NAME), loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
                     if (!PARENT.empty()) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
                         if (ORBIT_PERIOD != -1.0f) {
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), Angle, *parent, INCLINATION));
+                            planetoid->setOrbit(ALLOC OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), Angle, *parent, INCLINATION));
                         }
                         if (ROTATIONAL_TILT != -1.0f) {
-                            planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
+                            planetoid->setRotation(ALLOC RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
                         }
                     }
                     m_Planets.emplace(NAME, planetoid);
                     internalCreateAnchor(PARENT, NAME, loadedAnchors, planetoid->getPosition());
                 }else if (line[0] == 'M') {//Moon
-                    planetoid = new Planet(loadedMeshes.at(MESH_NAME), loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
+                    planetoid = NEW Planet(loadedMeshes.at(MESH_NAME), loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
                     if (!PARENT.empty()) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
                         if (ORBIT_PERIOD != -1.0f) {
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), Angle, *parent, INCLINATION));
+                            planetoid->setOrbit(ALLOC OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), Angle, *parent, INCLINATION));
                         }
                         if (ROTATIONAL_TILT != -1.0f) {
-                            planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
+                            planetoid->setRotation(ALLOC RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
                         }
                     }
                     m_Planets.emplace(NAME, planetoid);
@@ -487,7 +494,7 @@ void Map::loadFromFile(const string& filename) {
                 }else if (line[0] == '+' /* && gameplayMode.getGameplayModeType() == GameplayModeType::HomelandSecurity */  ) {//ship / station
 
                     //TODO: expand on this
-                    auto& team = *gameplayMode.getTeams().at(static_cast<TeamNumber::Enum>(TEAM));
+                    auto& team = gameplayMode.getTeams().at(static_cast<TeamNumber::Enum>(TEAM));
                     auto* ship = createShip(static_cast<AIType::Type>(AI), team, m_Client, CLASS, NAME, glm::vec3(x, y, z));
                     if (!PARENT.empty()) {
                         Planet* parent = m_Planets.at(PARENT);
@@ -518,7 +525,7 @@ void Map::loadFromFile(const string& filename) {
     }
     //add planetary rings
     for (auto& rings : planetRings) {
-        new Ring(rings.second, m_Planets.at(rings.first));
+        NEW Ring(rings.second, m_Planets.at(rings.first));
     }
 
     centerSceneToObject(loadedAnchors.at("Spawn Anchor")->entity());
@@ -531,33 +538,33 @@ Ship* Map::createShip(AIType::Type ai_type, Team& team, Client& client, const st
     Ship* ship = nullptr;
 
     if     (shipClass == "Defiant")
-        ship = new Defiant(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Defiant(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Nova")
-        ship = new Nova(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Nova(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Shrike")
-        ship = new Shrike(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Shrike(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "B'rel")
-        ship = new Brel(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Brel(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Constitution")
-        ship = new Constitution(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Constitution(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Miranda")
-        ship = new Miranda(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Miranda(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if(shipClass == "Excelsior")
-        ship = new Excelsior(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Excelsior(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Akira")
-        ship = new Akira(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Akira(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Norway")
-        ship = new Norway(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Norway(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Intrepid")
-        ship = new Intrepid(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Intrepid(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Vor'cha")
-        ship = new Vorcha(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Vorcha(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Sovereign")
-        ship = new Sovereign(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+        ship = NEW Sovereign(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     else if (shipClass == "Federation Defense Platform")
-        ship = new FedDefPlatform(team, client, *this, shipName, position, glm::vec3(1.0f));
+        ship = NEW FedDefPlatform(team, client, *this, shipName, position, glm::vec3(1.0f));
     else if (shipClass == "Federation Starbase Mushroom")
-        ship = new FedStarbaseMushroom(team, client, *this, shipName, position, glm::vec3(1.0f));
+        ship = NEW FedStarbaseMushroom(team, client, *this, shipName, position, glm::vec3(1.0f));
     return ship;
 }
 Anchor* Map::getRootAnchor() {
@@ -662,16 +669,6 @@ void Map::update(const double& dt){
 
     m_HUD->update(dt);
     Scene::update(dt);
-    /*
-    Ship* my = getPlayer();
-    if (my) {
-        auto& mypos = my->getPosition();
-        auto& e = getPlanets().at("Earth")->getPosition();
-        epriv::Core::m_Engine->m_DebugManager.addDebugLine("earth: x: " + to_string(e.x) + ", y : " + to_string(e.y) + ", z: " + to_string(e.z));
-
-        epriv::Core::m_Engine->m_DebugManager.addDebugLine("my: x: " + to_string(mypos.x) + ", y : " + to_string(mypos.y) + ", z: " + to_string(mypos.z));
-    }
-    */
 }
 void Map::render() {
     m_HUD->render();

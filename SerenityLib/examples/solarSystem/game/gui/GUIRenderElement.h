@@ -69,8 +69,8 @@ class GUIRenderElement final {
 
         const float& getEdgeWidth() const;
         const float& getEdgeHeight() const;
-        const float& getCornerWidth() const;
-        const float& getCornerHeight() const;
+        const float  getCornerWidth() const;
+        const float  getCornerHeight() const;
 
 };
 

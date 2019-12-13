@@ -38,7 +38,8 @@ PointLight::PointLight(const LightType::Type type, const glm::vec3 pos, Scene* s
     m_CullingRadius = calculateCullingRadius();
 
     if (m_Type == LightType::Point) {
-        epriv::InternalScenePublicInterface::GetPointLights(*scene).push_back(this);
+        auto& ptLights = epriv::InternalScenePublicInterface::GetPointLights(*scene);
+        ptLights.push_back(this);
     }
 }
 PointLight::PointLight(const glm::vec3 pos, Scene* scene):PointLight(LightType::Point, pos, scene) {

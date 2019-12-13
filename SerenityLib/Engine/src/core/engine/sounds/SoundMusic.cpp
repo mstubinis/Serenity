@@ -2,7 +2,7 @@
 #include <core/engine/sounds/SoundData.h>
 #include <core/engine/resources/Engine_Resources.h>
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/events/Engine_EventDispatcher.h>
 #include <core/engine/events/Engine_EventObject.h>
 

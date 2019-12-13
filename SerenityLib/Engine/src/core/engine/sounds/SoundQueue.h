@@ -4,7 +4,8 @@
 
 #include <queue>
 
-struct Handle;
+#include <core/engine/resources/Handle.h>
+
 class  SoundBaseClass;
 namespace Engine {
     namespace epriv {

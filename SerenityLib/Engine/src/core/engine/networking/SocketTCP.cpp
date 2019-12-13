@@ -1,11 +1,12 @@
 #include <core/engine/networking/SocketTCP.h>
+#include <core/engine/utils/Utils.h>
 
 using namespace Engine;
 using namespace std;
 
 
 Networking::SocketTCP::SocketTCP(const unsigned short port, const std::string& ip) {  //client side socket
-    m_Socket    = new sf::TcpSocket();
+    m_Socket    = NEW sf::TcpSocket();
     m_IP        = ip;
     m_Port      = port;
 }
@@ -16,7 +17,7 @@ Networking::SocketTCP::SocketTCP(sf::TcpSocket* socket) { //server side client s
 }
 
 Networking::SocketTCP::~SocketTCP() { 
-    delete m_Socket;
+    SAFE_DELETE(m_Socket);
 }
 const sf::TcpSocket& Networking::SocketTCP::socket() {
     return *m_Socket;

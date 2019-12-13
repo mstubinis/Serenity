@@ -1,15 +1,16 @@
 #include <core/engine/networking/SocketUDP.h>
+#include <core/engine/utils/Utils.h>
 
 using namespace Engine;
 using namespace std;
 
 Networking::SocketUDP::SocketUDP(const unsigned short _port, const string& _ip){
-    m_Socket    = new sf::UdpSocket();
+    m_Socket    = NEW sf::UdpSocket();
     m_Port      = _port;
     m_IP        = sf::IpAddress(_ip);
 }
 Networking::SocketUDP::~SocketUDP() { 
-    delete m_Socket;
+    SAFE_DELETE(m_Socket);
 }
 const sf::UdpSocket& Networking::SocketUDP::socket() { 
     return *m_Socket; 

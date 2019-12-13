@@ -24,6 +24,8 @@ namespace Engine{
                 ThreadManager();
                 ~ThreadManager();
 
+                void cleanup();
+
                 void _update(const double& dt);
 
                 const size_t cores() const;

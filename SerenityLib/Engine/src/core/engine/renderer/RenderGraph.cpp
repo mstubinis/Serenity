@@ -5,7 +5,7 @@
 #include <core/engine/model/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Viewport.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
@@ -156,24 +156,28 @@ void RenderGraph::sort(Camera& camera, const SortingMode::Mode sortingMode) {
 #endif
 }
 void RenderGraph::clean(const uint entityData) {
-    vector<Engine::epriv::InstanceNode*> newNodesTotal;
+    vector<InstanceNode*> kept_nodes_total;
     for (auto& materialNode : materialNodes) {
         for (auto& meshNode : materialNode->meshNodes) {
-            auto& instances = meshNode->instanceNodes;
-            vector<Engine::epriv::InstanceNode*> newNodes;
+            vector<InstanceNode*>& instances = meshNode->instanceNodes;
+            vector<InstanceNode*> kept_nodes;
+            vector<InstanceNode*> removed_nodes;
             for (auto& instanceNode : instances) {
                 auto entity = instanceNode->instance->parent();
                 if (entity.data != entityData) {
-                    newNodes.push_back(instanceNode);
-                    newNodesTotal.push_back(instanceNode);
+                    kept_nodes.push_back(instanceNode);
+                    kept_nodes_total.push_back(instanceNode);
+                }else{
+                    removed_nodes.push_back(instanceNode);
                 }
             }
+            SAFE_DELETE_VECTOR(removed_nodes);
             instances.clear();
-            std::move(newNodes.begin(), newNodes.end(), std::back_inserter(instances));
+            std::move(kept_nodes.begin(), kept_nodes.end(), std::back_inserter(instances));
         }
     }
     instancesTotal.clear();
-    std::move(newNodesTotal.begin(), newNodesTotal.end(), std::back_inserter(instancesTotal));
+    std::move(kept_nodes_total.begin(), kept_nodes_total.end(), std::back_inserter(instancesTotal));
 }
 void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Camera& camera) {
     //sf::Clock c;

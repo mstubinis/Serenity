@@ -11,9 +11,11 @@
 #include <core/engine/lights/Lights.h>
 #include <core/engine/physics/Collision.h>
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/scene/Camera.h>
+
+#include <core/engine/shaders/ShaderProgram.h>
 
 #include "../../ships/shipSystems/ShipSystemShields.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
@@ -39,14 +41,14 @@ struct PulsePhaserCollisionFunctor final { void operator()(CollisionCallbackEven
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                     auto modelSpacePosition = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * data.otherBody.rotation());
 
-                    if (shields && data.otherBody.getUserPointer() == shields) {
+                    if (shields && data.otherBody.getUserPointer() == shields && cannonProjectile.active) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(modelSpacePosition));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
                             cannonProjectile.clientToServerImpactShields(*sourceShip, true, weapon.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, weapon.impactRadius, weapon.damage, weapon.impactTime, shieldSide);
                             return;
                         }
                     }
-                    if (hull && data.otherBody.getUserPointer() == hull) {
+                    if (hull && data.otherBody.getUserPointer() == hull && cannonProjectile.active) {
                         /*
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
@@ -198,7 +200,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(EntityWrapper* target, PulsePhaser&
     cannonBody.setDamping(static_cast<decimal>(0.0), static_cast<decimal>(0.0));
 
 
-    light = new PointLight(finalPosition, &map);
+    light = NEW PointLight(finalPosition, &map);
     light->setColor(1.0f, 0.62f, 0.0f, 1.0f);
     light->setAttenuation(LightRange::_32);
 }

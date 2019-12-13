@@ -34,7 +34,7 @@ ServerHostingMapSelectorWindow::ServerHostingMapSelectorWindow(const Font& font,
     m_UserPointer = nullptr;
     m_Width = 600.0f;
     m_Height = 300.0f;
-    m_MapFileWindow = new ScrollFrame(Resources::getWindowSize().x / 2.0f - (m_Width / 2.0f), 630.0f, m_Width, m_Height);
+    m_MapFileWindow = NEW ScrollFrame(Resources::getWindowSize().x / 2.0f - (m_Width / 2.0f), 630.0f, m_Width, m_Height);
     m_MapFileWindow->setColor(1, 1, 0, 1);
     m_MapFileWindow->setContentPadding(0.0f);
     //m_ServerHostMapSelector->setAlignment(Alignment::Center);
@@ -45,7 +45,7 @@ ServerHostingMapSelectorWindow::ServerHostingMapSelectorWindow(const Font& font,
         boost::filesystem::recursive_directory_iterator end;
         for (boost::filesystem::recursive_directory_iterator i(apk_path); i != end; ++i) {
             boost::filesystem::path cp = (*i);
-            Button* button = new Button(m_Font, 0.0f, 0.0f, 100.0f, 40.0f);
+            Button* button = NEW Button(m_Font, 0.0f, 0.0f, 100.0f, 40.0f);
             const string& file = (cp.filename().string());
             const string& ext = boost::filesystem::extension(file);
             string copy = file;
@@ -64,12 +64,12 @@ ServerHostingMapSelectorWindow::ServerHostingMapSelectorWindow(const Font& font,
             m_MapFileWindow->addContent(button);
         }
     }
-    m_Label = new Text(x, y, m_Font, "Choose Map");
+    m_Label = NEW Text(x, y, m_Font, "Choose Map");
     m_Label->setColor(1.0f, 1.0f, 0.0f, 1.0f);
     const auto lineHeight = m_Font.getTextHeight("X") * m_Label->textScale().y;
     m_Label->setPosition(x, y + 50.0f);
 
-    m_CurrentChoice = new Text(x + m_Width, y + 50.0f, m_Font);
+    m_CurrentChoice = NEW Text(x + m_Width, y + 50.0f, m_Font);
     m_CurrentChoice->setColor(0.0f, 1.0f, 0.0f, 1.0f);
     m_CurrentChoice->setTextAlignment(TextAlignment::Right);
 }
@@ -98,7 +98,9 @@ void* ServerHostingMapSelectorWindow::getUserPointer() {
     return m_UserPointer;
 }
 void ServerHostingMapSelectorWindow::clear() {
-    vector_clear(m_MapFileWindow->content());
+    auto& content = m_MapFileWindow->content();
+    SAFE_DELETE_VECTOR(content);
+    content.clear();
 }
 void ServerHostingMapSelectorWindow::addContent(Widget* widget) {
     m_MapFileWindow->addContent(widget);

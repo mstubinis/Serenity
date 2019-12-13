@@ -10,20 +10,30 @@
 using namespace std;
 
 GameplayMode::GameplayMode() {
-    m_GameplayModeType = GameplayModeType::FFA;
-    m_MaxAmountOfPlayers = 0;
+    setGameplayMode(GameplayModeType::FFA);
+    setMaxAmountOfPlayers(0);
 }
 GameplayMode::GameplayMode(const GameplayModeType::Mode& mode, const unsigned int MaxAmountOfPlayers) {
-    m_GameplayModeType = mode;
-    m_MaxAmountOfPlayers = MaxAmountOfPlayers;
+    setGameplayMode(mode);
+    setMaxAmountOfPlayers(MaxAmountOfPlayers);
 }
 GameplayMode::~GameplayMode() {
-
+    clear();
 }
-unordered_map<TeamNumber::Enum, Team*>& GameplayMode::getTeams() {
+void GameplayMode::clear() {
+    m_MaxAmountOfPlayers = 0;
+    m_AllowedShipClasses.clear();
+}
+unordered_map<TeamNumber::Enum, Team>& GameplayMode::getTeams() {
     return m_Teams;
 }
-const GameplayModeType::Mode& GameplayMode::getGameplayModeType() const {
+void GameplayMode::setMaxAmountOfPlayers(const unsigned int& maxPlayers) {
+    m_MaxAmountOfPlayers = maxPlayers;
+}
+void GameplayMode::setGameplayMode(const GameplayModeType::Mode& mode) {
+    m_GameplayModeType = mode;
+}
+const GameplayModeType::Mode& GameplayMode::getGameplayMode() const {
     return m_GameplayModeType;
 }
 const unsigned int& GameplayMode::getMaxAmountOfPlayers() const {
@@ -33,7 +43,7 @@ const bool GameplayMode::addTeam(Team& team) {
     if (m_Teams.count(team.getTeamNumber())) {
         return false;
     }
-    m_Teams.emplace(team.getTeamNumber(), &team);
+    m_Teams.emplace(team.getTeamNumber(), team);
     return true;
 }
 
@@ -45,7 +55,12 @@ const bool GameplayMode::addAllowedShipClass(const string& shipClass) {
     m_AllowedShipClasses.insert(shipClass);
     return true;
 }
-
+Team* GameplayMode::getTeam(const TeamNumber::Enum& teamNumberEnum) {
+    if (m_Teams.count(teamNumberEnum)) {
+        return &m_Teams.at(teamNumberEnum);
+    }
+    return nullptr;
+}
 const PacketGameplayModeInfo GameplayMode::serialize() const {
     PacketGameplayModeInfo res;
 
@@ -54,7 +69,7 @@ const PacketGameplayModeInfo GameplayMode::serialize() const {
     res.gameplay_mode_max_number_of_players = static_cast<unsigned int>(m_MaxAmountOfPlayers);
 
     for (auto& team_itr : m_Teams) {
-        auto& team = *team_itr.second;
+        Team& team = const_cast<Team&>(team_itr.second);
         res.data += "," + team.getTeamNumberAsString();
         res.data += "," + to_string(team.getNumberOfPlayersOnTeam());
 
@@ -104,10 +119,10 @@ void GameplayMode::deserialize(const PacketGameplayModeInfo& packet) {
         //add team
         Team* newTeam = nullptr;
         if (!m_Teams.count(team_number)) {
-            newTeam = new Team(team_number);
-            m_Teams.emplace(team_number, newTeam);
+            newTeam = &Team(team_number);
+            m_Teams.emplace(team_number, Team(team_number));
         }else{
-            newTeam = m_Teams.at(team_number);
+            newTeam = &m_Teams.at(team_number);
         }
 
         for (unsigned int j = 0; j < num_ally_teams; ++j) {

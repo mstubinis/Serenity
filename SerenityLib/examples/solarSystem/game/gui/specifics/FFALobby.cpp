@@ -20,18 +20,19 @@ FFALobby::FFALobby(Font& font, const bool isHost) {
         const auto width = font.getTextWidth(start_text) + 10;
         const auto height = font.getTextHeight(start_text) + 10;
         glm::vec2 position = glm::vec2(window_size.x - width,0); //bottom right
-        m_ForwardButton   = new Button(font, position, width, height);
+        m_ForwardButton   = NEW Button(font, position, width, height);
         m_ForwardButton->setText(start_text);
     }
     string back_text = "Back";
     const auto width = font.getTextWidth(back_text) + 10;
     const auto height = font.getTextHeight(back_text) + 10;
     glm::vec2 position = glm::vec2(0,0); //bottom left
-    m_BackButton     = new Button(font, position, width, height);
+    m_BackButton     = NEW Button(font, position, width, height);
     m_BackButton->setText(back_text);
 }
 FFALobby::~FFALobby() {
-
+    SAFE_DELETE(m_ForwardButton);
+    SAFE_DELETE(m_BackButton);
 }
 void FFALobby::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     m_BackButton->setPosition(0, 0);

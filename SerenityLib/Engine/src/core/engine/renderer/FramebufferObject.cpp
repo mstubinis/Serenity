@@ -137,11 +137,11 @@ epriv::FramebufferObject::FramebufferObject(const string& name, const uint& w, c
 epriv::FramebufferObject::FramebufferObject(const string& name, const uint& w, const uint& h, const ImageInternalFormat::Format& depthInternalFormat, const float& divisor, const uint& swapBufferCount):FramebufferObject(name,w,h,divisor,swapBufferCount){
     RenderbufferObject* rbo;
     if (depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8)
-        rbo = new RenderbufferObject(*this, FramebufferAttatchment::DepthAndStencil, depthInternalFormat);
+        rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::DepthAndStencil, depthInternalFormat);
     else if (depthInternalFormat == ImageInternalFormat::StencilIndex8)
-        rbo = new RenderbufferObject(*this, FramebufferAttatchment::Stencil, depthInternalFormat);
+        rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::Stencil, depthInternalFormat);
     else
-        rbo = new RenderbufferObject(*this, FramebufferAttatchment::Depth, depthInternalFormat);
+        rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::Depth, depthInternalFormat);
     attatchRenderBuffer(*rbo);
 }
 epriv::FramebufferObject::~FramebufferObject(){ 
@@ -163,7 +163,7 @@ void epriv::FramebufferObject::resize(const uint& w, const uint& h){
 epriv::FramebufferTexture* epriv::FramebufferObject::attatchTexture(Texture* texture, const FramebufferAttatchment::Attatchment attatchment){
     if (m_Attatchments.count(attatchment))
         return nullptr;
-    FramebufferTexture* framebufferTexture = new FramebufferTexture(*this, attatchment, *texture);
+    FramebufferTexture* framebufferTexture = NEW FramebufferTexture(*this, attatchment, *texture);
     for (uint i = 0; i < m_FBO.size(); ++i) {
         Renderer::bindFBO(m_FBO[i]);
         glFramebufferTexture2D(GL_FRAMEBUFFER, framebufferTexture->attatchment(), framebufferTexture->m_Texture->type(), framebufferTexture->m_Texture->address(), 0);

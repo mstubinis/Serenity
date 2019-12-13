@@ -1,5 +1,5 @@
 #include <core/engine/fonts/Font.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/textures/Texture.h>
 
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -17,7 +17,7 @@ Font::Font(const string& filename):EngineResource(ResourceType::Font, filename){
         rawname = filename.substr(0, lastindex);
         rawname += ".png";
     }
-    m_FontTexture = new Texture(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
+    m_FontTexture = NEW Texture(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
     Handle handle = epriv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
 
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);

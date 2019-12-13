@@ -21,7 +21,8 @@ epriv::ParticleSystem::ParticleSystem() {
     m_Particles.reserve(NUMBER_OF_PARTICLE_LIMIT);
 }
 epriv::ParticleSystem::~ParticleSystem() {
-
+    vector_clear(m_ParticleEmitters);
+    vector_clear(m_Particles);
 }
 
 
@@ -140,7 +141,7 @@ void epriv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuff
     Mesh::Plane->bind();
     for (auto& particle : seen) {
         //if (particle.m_PassedRenderCheck) { //TODO: using "seen" vector for now, do not need bool check, should profile using seen vector over using bool and full vector...
-        particle.render(gBuffer);
+            particle.render(gBuffer);
         //}
     }
 }

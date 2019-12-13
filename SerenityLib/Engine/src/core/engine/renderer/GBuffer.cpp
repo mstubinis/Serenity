@@ -20,7 +20,7 @@ GBuffer::GBuffer(const uint& width, const uint& height){
 
     m_Buffers.resize(GBufferType::_TOTAL);
 
-    m_FBO = new FramebufferObject("GBuffer_FBO", m_Width, m_Height, 1.0f, 2);
+    m_FBO = NEW FramebufferObject("GBuffer_FBO", m_Width, m_Height, 1.0f, 2);
     internalBuildTextureBuffer(m_FBO, GBufferType::Diffuse, m_Width, m_Height);
     internalBuildTextureBuffer(m_FBO, GBufferType::Normal, m_Width, m_Height);
     internalBuildTextureBuffer(m_FBO, GBufferType::Misc, m_Width, m_Height);
@@ -30,7 +30,7 @@ GBuffer::GBuffer(const uint& width, const uint& height){
     if (!m_FBO->check()) 
         return;
 
-    m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO", m_Width, m_Height, 0.5f, 2);
+    m_SmallFBO = NEW FramebufferObject("GBuffer_Small_FBO", m_Width, m_Height, 0.5f, 2);
     internalBuildTextureBuffer(m_SmallFBO, GBufferType::Bloom, m_Width, m_Height);
     internalBuildTextureBuffer(m_SmallFBO, GBufferType::GodRays, m_Width, m_Height);
 
@@ -85,7 +85,7 @@ void GBuffer::internalBuildTextureBuffer(FramebufferObject* fbo, const GBufferTy
    const auto i = GBUFFER_TYPE_DATA[gbufferType];
 
     const auto attatchment = i.get<3>();
-    Texture* texture = new Texture(w, h, i.get<2>(), i.get<1>(), i.get<0>(), fbo->divisor());
+    Texture* texture = NEW Texture(w, h, i.get<2>(), i.get<1>(), i.get<0>(), fbo->divisor());
     m_Buffers[static_cast<uint>(gbufferType)] = fbo->attatchTexture(texture, attatchment);
 }
 bool GBuffer::resize(const uint& width, const uint& height){

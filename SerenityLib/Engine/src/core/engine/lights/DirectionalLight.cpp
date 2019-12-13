@@ -8,7 +8,8 @@ DirectionalLight::DirectionalLight(const glm::vec3 dir, Scene* scene) :SunLight(
     m_Entity.getComponent<ComponentBody>()->alignTo(dir);
 
     if (m_Type == LightType::Directional) {
-        epriv::InternalScenePublicInterface::GetDirectionalLights(*scene).push_back(this);
+        auto& dirLights = epriv::InternalScenePublicInterface::GetDirectionalLights(*scene);
+        dirLights.push_back(this);
     }
 }
 DirectionalLight::~DirectionalLight() {

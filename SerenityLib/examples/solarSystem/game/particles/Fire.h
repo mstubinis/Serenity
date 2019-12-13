@@ -11,10 +11,10 @@ class Fire {
         static Handle SmokeMaterial2;
         static Handle SmokeMaterial3;
 
-        static ParticleEmissionProperties* Regular;
-        static ParticleEmissionProperties* ShortLived;
-        static ParticleEmissionProperties* OutwardFireballDebrisFire;
-        static ParticleEmissionProperties* OutwardFireball;
+        static ParticleEmissionProperties Regular;
+        static ParticleEmissionProperties ShortLived;
+        static ParticleEmissionProperties OutwardFireballDebrisFire;
+        static ParticleEmissionProperties OutwardFireball;
 
         static void init();
         static void destruct();

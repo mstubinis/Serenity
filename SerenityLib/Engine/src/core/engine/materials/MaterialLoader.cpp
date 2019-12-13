@@ -2,7 +2,7 @@
 #include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/materials/Material.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 
 #include <iostream>
 
@@ -70,9 +70,9 @@ void MaterialLoader::InternalInitBase(Material& material) {
 Texture* MaterialLoader::LoadTextureDiffuse(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
+        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
-            texture = new Texture(file, true, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D);
+            texture = NEW Texture(file, true, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D);
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
@@ -81,9 +81,9 @@ Texture* MaterialLoader::LoadTextureDiffuse(const string& file) {
 Texture* MaterialLoader::LoadTextureNormal(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
+        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
-            texture = new Texture(file, true, ImageInternalFormat::RGB8, GL_TEXTURE_2D);
+            texture = NEW Texture(file, true, ImageInternalFormat::RGB8, GL_TEXTURE_2D);
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
@@ -92,9 +92,9 @@ Texture* MaterialLoader::LoadTextureNormal(const string& file) {
 Texture* MaterialLoader::LoadTextureGlow(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
+        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
-            texture = new Texture(file, true, ImageInternalFormat::R8, GL_TEXTURE_2D);
+            texture = NEW Texture(file, true, ImageInternalFormat::R8, GL_TEXTURE_2D);
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
@@ -103,9 +103,9 @@ Texture* MaterialLoader::LoadTextureGlow(const string& file) {
 Texture* MaterialLoader::LoadTextureSpecular(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
+        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
-            texture = new Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+            texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
@@ -114,9 +114,9 @@ Texture* MaterialLoader::LoadTextureSpecular(const string& file) {
 Texture* MaterialLoader::LoadTextureAO(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
+        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
-            texture = new Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+            texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
@@ -125,9 +125,9 @@ Texture* MaterialLoader::LoadTextureAO(const string& file) {
 Texture* MaterialLoader::LoadTextureMetalness(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
+        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
-            texture = new Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+            texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
@@ -136,9 +136,9 @@ Texture* MaterialLoader::LoadTextureMetalness(const string& file) {
 Texture* MaterialLoader::LoadTextureSmoothness(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
+        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
-            texture = new Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+            texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
@@ -147,9 +147,9 @@ Texture* MaterialLoader::LoadTextureSmoothness(const string& file) {
 Texture* MaterialLoader::LoadTextureMask(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
+        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
-            texture = new Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+            texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
@@ -158,9 +158,9 @@ Texture* MaterialLoader::LoadTextureMask(const string& file) {
 Texture* MaterialLoader::LoadTextureCubemap(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager._hasTexture(file);
+        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
-            texture = new Texture(file, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
+            texture = NEW Texture(file, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }

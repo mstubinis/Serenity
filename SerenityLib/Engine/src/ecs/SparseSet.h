@@ -41,7 +41,9 @@ namespace Engine {
                 SparseSet& operator=(const SparseSet& other) noexcept = delete;
                 SparseSet(SparseSet&& other) noexcept                 = delete;
                 SparseSet& operator=(SparseSet&& other) noexcept      = delete;
-                virtual ~SparseSet()                                  = default;
+                virtual ~SparseSet() {
+                    dense.clear();
+                }
 
                 inline void reserveMore(const unsigned int amount) {
                     if (super::sparse.size() > super::sparse.capacity() - 1) {
@@ -53,17 +55,17 @@ namespace Engine {
                 }
 
                 template<typename... ARGS> inline T* _add(const unsigned int& entityID, ARGS&&... args) {
-                    const auto sparseIndex = entityID - 1;
+                    const auto sparseIndex     = entityID - 1;
                     if (sparseIndex >= super::sparse.size()) {
                         super::sparse.resize(static_cast<size_t>(sparseIndex) + 1, 0);
                     }
                     if (super::sparse[sparseIndex] != 0) {
                         return nullptr;
                     }
-                    dense.emplace_back(std::forward<ARGS>(args)...);
+                    dense.emplace_back(  std::forward<ARGS>(args)...  );
                     super::sparse[sparseIndex] = dense.size();
-                    super::maxLastIndex = sparseIndex;
-                    auto* ret = &dense[super::sparse[sparseIndex] - 1];
+                    super::maxLastIndex        = sparseIndex;
+                    auto* ret                  = &dense[super::sparse[sparseIndex] - 1];
                     return ret;
                 }
                 //TODO: this entire function needs a serious look at

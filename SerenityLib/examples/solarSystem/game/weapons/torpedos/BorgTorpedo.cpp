@@ -11,8 +11,10 @@
 #include <core/engine/lights/Lights.h>
 #include <core/engine/physics/Collision.h>
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/materials/Material.h>
+
+#include <core/engine/shaders/ShaderProgram.h>
 
 #include "../../ships/shipSystems/ShipSystemShields.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
@@ -43,14 +45,14 @@ struct BorgTorpedoCollisionFunctor final { void operator()(CollisionCallbackEven
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                     auto modelSpacePosition = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * data.otherBody.rotation());
 
-                    if (shields && data.otherBody.getUserPointer() == shields) {
+                    if (shields && data.otherBody.getUserPointer() == shields && torpedoProjectile.active) {
                         const uint shieldSide = static_cast<uint>(shields->getImpactSide(modelSpacePosition));
                         if (shields->getHealthCurrent(shieldSide) > 0) {
                             torpedoProjectile.clientToServerImpactShields(*sourceShip, false, torpedo.m_Map.getClient(), *otherShip, modelSpacePosition, data.normalOnB, torpedo.impactRadius, torpedo.damage, torpedo.impactTime, shieldSide);
                             return;
                         }
                     }
-                    if (hull && data.otherBody.getUserPointer() == hull) {
+                    if (hull && data.otherBody.getUserPointer() == hull && torpedoProjectile.active) {
                         /*
                         if (shields) {
                             const uint shieldSide = static_cast<uint>(shields->getImpactSide(local));
@@ -244,7 +246,7 @@ BorgTorpedoProjectile::BorgTorpedoProjectile(EntityWrapper* target, BorgTorpedo&
     body.setDamping(static_cast<decimal>(0.0), static_cast<decimal>(0.0));
     body.setRotation(q);
 
-    light = new PointLight(final_world_position, &map);
+    light = NEW PointLight(final_world_position, &map);
     light->setColor(borgGreen);
     light->setAttenuation(LightRange::_32);
 }

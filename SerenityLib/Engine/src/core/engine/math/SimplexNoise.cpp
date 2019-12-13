@@ -7,7 +7,6 @@ using namespace std;
 
 SimplexNoise noise;
 SimplexNoise::SimplexNoise(){
-    m_Constants = new double[9];
     m_Constants[0] = -0.211324865405187; //STRETCH_CONSTANT_2D
     m_Constants[1] = 0.366025403784439;  //SQUISH_CONSTANT_2D
     m_Constants[2] = 0.166666666666666;  //STRETCH_CONSTANT_3D
@@ -18,7 +17,6 @@ SimplexNoise::SimplexNoise(){
     m_Constants[7] = 103.0; //NORM_CONSTANT_3D
     m_Constants[8] = 30.0;  //NORM_CONSTANT_4D
 
-    m_Grad2 = new glm::ivec2[8];
     m_Grad2[0] = glm::ivec2(5, 2);
     m_Grad2[1] = glm::ivec2(2, 5);
     m_Grad2[2] = glm::ivec2(-5, 2);
@@ -28,7 +26,6 @@ SimplexNoise::SimplexNoise(){
     m_Grad2[6] = glm::ivec2(-5, -2);
     m_Grad2[7] = glm::ivec2(-2, -5);
 
-    m_Grad3 = new glm::ivec3[24];
     m_Grad3[0] = glm::ivec3(-11, 4, 4);
     m_Grad3[1] = glm::ivec3(-4, 11, 4);
     m_Grad3[2] = glm::ivec3(-4, 4, 11);
@@ -54,7 +51,6 @@ SimplexNoise::SimplexNoise(){
     m_Grad3[22] = glm::ivec3(4, -11, -4);
     m_Grad3[23] = glm::ivec3(4, -4, -11);
 
-    m_Grad4 = new glm::ivec4[64];
     m_Grad4[0] = glm::ivec4(3, 1, 1, 1);
     m_Grad4[1] = glm::ivec4(1, 3, 1, 1);
     m_Grad4[2] = glm::ivec4(1, 1, 3, 1);
@@ -122,15 +118,10 @@ SimplexNoise::SimplexNoise(){
 
     unsigned long long zero(time(0));
     internalInitFromSeed(zero);
-    //noise = *this;
 }
 SimplexNoise::~SimplexNoise(){
-    delete[] m_Constants;
-    delete[] m_Grad2;
-    delete[] m_Grad3;
-    delete[] m_Grad4;
-    vector_clear(m_Perm);
-    vector_clear(m_PermGradIndex3D);
+    m_Perm.clear();
+    m_PermGradIndex3D.clear();
 }
 void SimplexNoise::internalInitFromSeed(const unsigned long long& seed) {
     unsigned long long _seed = seed;

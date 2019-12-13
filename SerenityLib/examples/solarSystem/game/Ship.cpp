@@ -14,7 +14,7 @@
 #include "config/Keybinds.h"
 
 #include <core/engine/mesh/Mesh.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/lights/Lights.h>
 #include <core/engine/materials/Material.h>
@@ -375,7 +375,7 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
 void Ship::internal_finialize_init(const AIType::Type& type) {
     switch (type) {
         case AIType::AI_Stationary: {
-            m_AI = new AIStationaryNPC(*this);
+            m_AI = NEW AIStationaryNPC(*this);
             break;
         }case AIType::AI_Easy: {
             m_AI = nullptr;
@@ -390,13 +390,13 @@ void Ship::internal_finialize_init(const AIType::Type& type) {
             m_AI = nullptr;
             break;
         }case AIType::Player_You: {
-            m_AI = new AI(type);
+            m_AI = NEW AI(type);
             break;
         }case AIType::Player_Other: {
-            m_AI = new AI(type);
+            m_AI = NEW AI(type);
             break;
         }default: {
-            m_AI = new AI(type);
+            m_AI = NEW AI(type);
             break;
         }
     }
@@ -547,7 +547,7 @@ struct Test final { void operator()(ParticleEmitter* emitter_ptr, const double& 
         mutex_.lock();
         auto& emitter_entity = emitter.entity();
         auto& map_ = static_cast<Map&>(emitter_entity.scene());
-        ParticleEmitter emitter_3(*Fire::OutwardFireball, map_, 8.0, nullptr);
+        ParticleEmitter emitter_3(Fire::OutwardFireball, map_, 8.0, nullptr);
         auto request = EntityDataRequest(emitter_entity);
         auto request_3 = EntityDataRequest(emitter_3.entity());
         auto x = map_.addParticleEmitter(emitter_3);
@@ -650,7 +650,7 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
         }
         auto& shipModelComponent = *getComponent<ComponentModel>();
         
-        ParticleEmitter emitter_(*Sparks::ExplosionSparks, map, 0.01, this);
+        ParticleEmitter emitter_(Sparks::ExplosionSparks, map, 0.01, this);
         emitter_.setPosition(glm::vec3(0.0f));
 
         auto* emitter = map.addParticleEmitter(emitter_);
@@ -675,7 +675,7 @@ void Ship::internal_update_undergoing_destruction(const double& dt, Map& map) {
             auto factor = Helper::GetRandomFloatFromTo(0.45f, 0.55f);
             auto randScale = Helper::GetRandomFloatFromTo(1.0f, 1.6f);
 
-            ParticleEmitter emitter_2(*Fire::OutwardFireballDebrisFire, map, 6.0, nullptr);
+            ParticleEmitter emitter_2(Fire::OutwardFireballDebrisFire, map, 6.0, nullptr);
             glm_quat q1 = glm_quat(1.0, 0.0, 0.0, 0.0);
             Math::alignTo(q1, -norm);
             emitter_2.setPosition(ship_position + (Math::rotate_vec3(ship_rotation, localPos) * 0.3)); //0.5 just to make it closer to the explosion center, looks better that way
@@ -750,7 +750,7 @@ void Ship::internal_update_decals(const double& dt, Map& map) {
 
         const auto rand = Helper::GetRandomIntFromTo(0, 13000);
         if (rand < 2) {
-            ParticleEmitter emitter_(*Sparks::Spray, map, 3.0, this);
+            ParticleEmitter emitter_(Sparks::Spray, map, 3.0, this);
             auto* emitter = map.addParticleEmitter(emitter_);
             if (emitter) {
                 m_EmittersDestruction.push_back(make_tuple(emitter, modelIndex, decal.initialPosition(), decal.initialRotation()));

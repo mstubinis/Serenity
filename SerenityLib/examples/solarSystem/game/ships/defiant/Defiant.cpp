@@ -34,31 +34,31 @@ Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
-        if (i == 0)  system = new ShipSystemReactor(_this, 1000);
-        else if (i == 1)  system = new ShipSystemPitchThrusters(_this);
-        else if (i == 2)  system = new ShipSystemYawThrusters(_this);
-        else if (i == 3)  system = new ShipSystemRollThrusters(_this);
-        else if (i == 4)  system = new ShipSystemCloakingDevice(_this);
-        else if (i == 5)  system = new ShipSystemShields(_this, map, 9000.0f, 9000.0f, 9000.0f, 9000.0f, 12000.0f, 12000.0f, glm::vec3(0.0f), glm::vec3(1.15f, 2.1f, 1.15f));
-        else if (i == 6)  system = new ShipSystemMainThrusters(_this);
-        else if (i == 7)  system = new ShipSystemWarpDrive(_this);
-        else if (i == 8)  system = new ShipSystemSensors(_this, map);
-        else if (i == 9)  system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 17000.0f);
+        if (i == 0)  system = NEW ShipSystemReactor(_this, 1000);
+        else if (i == 1)  system = NEW ShipSystemPitchThrusters(_this);
+        else if (i == 2)  system = NEW ShipSystemYawThrusters(_this);
+        else if (i == 3)  system = NEW ShipSystemRollThrusters(_this);
+        else if (i == 4)  system = NEW ShipSystemCloakingDevice(_this);
+        else if (i == 5)  system = NEW ShipSystemShields(_this, map, 9000.0f, 9000.0f, 9000.0f, 9000.0f, 12000.0f, 12000.0f, glm::vec3(0.0f), glm::vec3(1.15f, 2.1f, 1.15f));
+        else if (i == 6)  system = NEW ShipSystemMainThrusters(_this);
+        else if (i == 7)  system = NEW ShipSystemWarpDrive(_this);
+        else if (i == 8)  system = NEW ShipSystemSensors(_this, map);
+        else if (i == 9)  system = NEW ShipSystemWeapons(_this);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 17000.0f);
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);
 
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
-    auto* leftTopCannon     = new PulsePhaser(_this, map, glm::vec3(-0.573355f, 0.072793f, -0.207088f), glm::vec3(0.0055f, 0, -1), 10.0f, 6,250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
-    auto* leftBottomCannon = new PulsePhaser(_this, map, glm::vec3(-0.434018f, -0.163775, -0.093399), glm::vec3(0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
-    auto* rightBottomCannon = new PulsePhaser(_this, map, glm::vec3(0.434018f, -0.163775, -0.093399), glm::vec3(-0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
-    auto* rightTopCannon = new PulsePhaser(_this, map, glm::vec3(0.573355f, 0.072793f, -0.207088f), glm::vec3(-0.0055f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
+    auto* leftTopCannon     = NEW PulsePhaser(_this, map, glm::vec3(-0.573355f, 0.072793f, -0.207088f), glm::vec3(0.0055f, 0, -1), 10.0f, 6,250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
+    auto* leftBottomCannon = NEW PulsePhaser(_this, map, glm::vec3(-0.434018f, -0.163775, -0.093399), glm::vec3(0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
+    auto* rightBottomCannon = NEW PulsePhaser(_this, map, glm::vec3(0.434018f, -0.163775, -0.093399), glm::vec3(-0.005f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
+    auto* rightTopCannon = NEW PulsePhaser(_this, map, glm::vec3(0.573355f, 0.072793f, -0.207088f), glm::vec3(-0.0055f, 0, -1), 10.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);
 
-    auto* leftTorp = new QuantumTorpedo(_this, map, glm::vec3(-0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
-    auto* rightTorp = new QuantumTorpedo(_this, map, glm::vec3(0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
-    auto* aftTorp = new PhotonTorpedo(_this, map, glm::vec3(0.0f, 0.019991f, 1.04274f), glm::vec3(0, 0, 1), 15.0f);
+    auto* leftTorp = NEW QuantumTorpedo(_this, map, glm::vec3(-0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
+    auto* rightTorp = NEW QuantumTorpedo(_this, map, glm::vec3(0.358887f, 0.023574f, -0.657542f), glm::vec3(0, 0, -1), 15.0f);
+    auto* aftTorp = NEW PhotonTorpedo(_this, map, glm::vec3(0.0f, 0.019991f, 1.04274f), glm::vec3(0, 0, 1), 15.0f);
 
     weapons.addPrimaryWeaponCannon(*leftTopCannon, true);
     weapons.addPrimaryWeaponCannon(*leftBottomCannon, true);
@@ -92,9 +92,9 @@ Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
         glm::vec3(0.633076f, -0.144912f, 0.135678f),
         glm::vec3(0.58733f, -0.157489f, 0.135678f),
     };
-    auto* topBeam = new PhaserBeam(_this, map, glm::vec3(0.0f, 0.150892f, 0.026531f), glm::vec3(0.0f, 1.0f, 0.0f), 65.0f, top_beam_pts);
-    auto* ventralLeftBeam = new PhaserBeam(_this, map, glm::vec3(-0.685293f, -0.129982f, 0.135678f), glm::vec3(-0.056611f, -0.228363f, 0.0f), 70.0f, ventral_left_beam_pts);
-    auto* ventralRightBeam = new PhaserBeam(_this, map, glm::vec3(0.685293f, -0.129982f, 0.135678f), glm::vec3(0.056611f, -0.228363f, 0.0f), 70.0f, ventral_right_beam_pts);
+    auto* topBeam = NEW PhaserBeam(_this, map, glm::vec3(0.0f, 0.150892f, 0.026531f), glm::vec3(0.0f, 1.0f, 0.0f), 65.0f, top_beam_pts);
+    auto* ventralLeftBeam = NEW PhaserBeam(_this, map, glm::vec3(-0.685293f, -0.129982f, 0.135678f), glm::vec3(-0.056611f, -0.228363f, 0.0f), 70.0f, ventral_left_beam_pts);
+    auto* ventralRightBeam = NEW PhaserBeam(_this, map, glm::vec3(0.685293f, -0.129982f, 0.135678f), glm::vec3(0.056611f, -0.228363f, 0.0f), 70.0f, ventral_right_beam_pts);
 
     weapons.addPrimaryWeaponBeam(*topBeam);
     weapons.addPrimaryWeaponBeam(*ventralRightBeam);
@@ -116,10 +116,10 @@ Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
         vector<glm::vec3> _4_pts{
             glm::vec3(0.573355f, 0.072793f, -0.207088f),
         };
-        auto* leftTopBeamPerk = new PhaserBeam(_this, map, _1_pts[0], glm::vec3(0.0055f, 0, -1), 18.0f, _1_pts);
-        auto* leftBottomBeamPerk = new PhaserBeam(_this, map, _2_pts[0], glm::vec3(0.005f, 0, -1), 18.0f, _2_pts);
-        auto* rightBottomBeamPerk = new PhaserBeam(_this, map, _3_pts[0], glm::vec3(-0.005f, 0, -1), 18.0f, _3_pts);
-        auto* rightTopBeamPerk = new PhaserBeam(_this, map, _4_pts[0], glm::vec3(-0.0055f, 0, -1), 18.0f, _4_pts);
+        auto* leftTopBeamPerk = NEW PhaserBeam(_this, map, _1_pts[0], glm::vec3(0.0055f, 0, -1), 18.0f, _1_pts);
+        auto* leftBottomBeamPerk = NEW PhaserBeam(_this, map, _2_pts[0], glm::vec3(0.005f, 0, -1), 18.0f, _2_pts);
+        auto* rightBottomBeamPerk = NEW PhaserBeam(_this, map, _3_pts[0], glm::vec3(-0.005f, 0, -1), 18.0f, _3_pts);
+        auto* rightTopBeamPerk = NEW PhaserBeam(_this, map, _4_pts[0], glm::vec3(-0.0055f, 0, -1), 18.0f, _4_pts);
 
         weapons.addPrimaryWeaponBeam(*leftTopBeamPerk, true);
         weapons.addPrimaryWeaponBeam(*leftBottomBeamPerk, true);

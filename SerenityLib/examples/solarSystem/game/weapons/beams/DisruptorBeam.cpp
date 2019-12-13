@@ -5,11 +5,13 @@
 #include <core/engine/sounds/Engine_Sounds.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/lights/Lights.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/renderer/Decal.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/scene/Camera.h>
+
+#include <core/engine/shaders/ShaderProgram.h>
 
 #include "../../map/Map.h"
 #include "../../ResourceManifest.h"
@@ -43,7 +45,7 @@ struct DisruptorBeamCollisionFunctor final { void operator()(CollisionCallbackEv
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                     auto modelSpacePosition = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * otherRotation);
                     auto finalDamage = static_cast<float>(Resources::dt()) * weapon.damage;
-
+                    float steps = static_cast<float>(Physics::getNumberOfStepsPerFrame() * 2);
 
                     glm::vec3 localNormal = data.normalOnB * glm::quat(otherRotation);
 
@@ -61,10 +63,10 @@ struct DisruptorBeamCollisionFunctor final { void operator()(CollisionCallbackEv
                     }
                     if (hull && data.otherBody.getUserPointer() == hull) {
                         if (weapon.firingTimeShieldGraphicPing > 1.0f) {
-                            hull->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, true, true);
+                            hull->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, finalDamage / steps, data.otherModelInstanceIndex, true, true);
 
                             Map& map = static_cast<Map&>(otherShip->entity().scene());
-                            ParticleEmitter emitter_(*Sparks::Spray, map, 0.1f, otherShip);
+                            ParticleEmitter emitter_(Sparks::Spray, map, 0.1f, otherShip);
                             glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
                             Engine::Math::alignTo(q, -localNormal);
                             emitter_.setPosition(data.otherHit);
@@ -76,7 +78,7 @@ struct DisruptorBeamCollisionFunctor final { void operator()(CollisionCallbackEv
 
                             weapon.firingTimeShieldGraphicPing = 0.0f;
                         }else{
-                            hull->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, false, false);
+                            hull->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, finalDamage / steps, data.otherModelInstanceIndex, false, false);
                         }
                     }
                 }
@@ -139,12 +141,12 @@ DisruptorBeam::DisruptorBeam(Ship& ship, Map& map, const glm_vec3& position, con
 
     const glm::vec3 finalPosition = shipBody.position() + Math::rotate_vec3(shipBody.rotation(), position);
 
-    firstWindupLight = new PointLight(finalPosition, &map);
+    firstWindupLight = NEW PointLight(finalPosition, &map);
     firstWindupLight->setColor(disruptorGreen);
     firstWindupLight->setAttenuation(LightRange::_20);
     firstWindupLight->deactivate();
 
-    secondWindupLight = new PointLight(finalPosition, &map);
+    secondWindupLight = NEW PointLight(finalPosition, &map);
     secondWindupLight->setColor(disruptorGreen);
     secondWindupLight->setAttenuation(LightRange::_20);
     secondWindupLight->deactivate();

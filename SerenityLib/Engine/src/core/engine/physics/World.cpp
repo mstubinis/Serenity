@@ -29,7 +29,7 @@ epriv::PhysicsWorld::PhysicsWorld(const unsigned int numCores) {
     //    solverMT         = new btSequentialImpulseConstraintSolverMt();
     //    world            = new btDiscreteDynamicsWorldMt(dispatcher,broadphase,(btConstraintSolverPoolMt*)solverMT, solver, collisionConfiguration);
     //}
-    debugDrawer = new GLDebugDrawer();
+    debugDrawer = NEW GLDebugDrawer();
     debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
     world->setDebugDrawer(debugDrawer);
     world->setGravity(btVector3(static_cast<btScalar>(0.0), static_cast<btScalar>(0.0), static_cast<btScalar>(0.0)));

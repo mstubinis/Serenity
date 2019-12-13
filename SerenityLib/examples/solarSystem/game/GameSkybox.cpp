@@ -3,7 +3,7 @@
 
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/renderer/Engine_Renderer.h>
-#include <core/engine/Engine_Window.h>
+#include <core/engine/system/window/Engine_Window.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/scene/Camera.h>
@@ -75,10 +75,10 @@ class GameSkybox::impl final{
             */
         }
 };
-GameSkybox::GameSkybox(const string& name, uint numFlares):Skybox(name),m_i(new impl){
+GameSkybox::GameSkybox(const string& name, uint numFlares) : Skybox(name), m_i(ALLOC impl){
     m_i->_init(numFlares); 
 }
-GameSkybox::GameSkybox(const string* names, uint numFlares):Skybox(names),m_i(new impl){
+GameSkybox::GameSkybox(const string* names, uint numFlares) : Skybox(names), m_i(ALLOC impl){
     m_i->_init(numFlares); 
 }
 

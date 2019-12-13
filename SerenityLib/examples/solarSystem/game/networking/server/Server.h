@@ -7,6 +7,7 @@
 #include <core/engine/networking/SocketUDP.h>
 
 #include "ServerMapSpecificData.h"
+#include "../../modes/GameplayMode.h"
 
 #include <queue>
 #include <thread>
@@ -18,7 +19,6 @@ struct Packet;
 class  ServerClient;
 class  ServerClientThread;
 class  Core;
-class  GameplayMode;
 struct PacketMessage;
 
 class ServerClient final {
@@ -76,12 +76,12 @@ class Server {
     friend class ServerMapSpecificData;
     private:
         ServerMapSpecificData                          m_MapSpecificData;
-        GameplayMode*                                  m_GameplayMode;
+        GameplayMode                                   m_GameplayMode;
         Engine::Networking::SocketUDP*                 m_UdpSocket;
         std::mutex                                     m_Mutex;
         std::vector<ServerClientThread*>               m_Threads;
         std::queue<std::string>                        m_ClientsToBeDisconnected;
-        Engine::Networking::ListenerTCP*               m_listener;
+        Engine::Networking::ListenerTCP*               m_TCPListener;
         unsigned short                                 m_port;
         std::atomic<unsigned int>                      m_Active;
         Core&                                          m_Core;
@@ -89,7 +89,7 @@ class Server {
 
         void assign_username_to_client(ServerClient&, const std::string& username);
         void completely_remove_client(ServerClient&);
-        void assignRandomTeam(PacketMessage& packet_out, ServerClient& client);
+        std::string assignRandomTeam(PacketMessage& packet_out, ServerClient& client);
         void updateClientsGameLoop(const double& dt);
         void onReceiveUDP();
     public:
@@ -97,12 +97,13 @@ class Server {
         ~Server();
 
         const bool startup(const std::string& mapname);
-        const bool startupMap(const std::string& mapname, GameplayMode& mode);
+        const bool startupMap(const std::string& mapname);
         void shutdown(const bool destructor = false);
         const bool shutdownMap();
 
         const bool isValidName(const std::string& name) const;
         const unsigned int numClients() const;
+        GameplayMode& getGameplayMode();
 
         const sf::Socket::Status send_to_client(ServerClient&, Packet& packet);
         const sf::Socket::Status send_to_client(ServerClient&, sf::Packet& packet);

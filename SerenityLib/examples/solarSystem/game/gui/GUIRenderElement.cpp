@@ -109,7 +109,7 @@ void GUIRenderElement::render(const glm::vec4& scissor) {
     }
 
     if (m_ColorBorder.a > 0.0f && m_BorderSize > 0) {
-        Renderer::renderBorder(m_BorderSize, pos + glm::vec2(corner_width, corner_height), m_ColorBorder, m_EdgeWidth, m_EdgeHeight, 0.0f, m_Depth - 0.001f, Alignment::BottomLeft, scissor);
+        Renderer::renderBorder(static_cast<float>(m_BorderSize), pos + glm::vec2(corner_width, corner_height), m_ColorBorder, m_EdgeWidth, m_EdgeHeight, 0.0f, m_Depth - 0.001f, Alignment::BottomLeft, scissor);
     }
 }
 const float& GUIRenderElement::getEdgeWidth() const {
@@ -118,10 +118,10 @@ const float& GUIRenderElement::getEdgeWidth() const {
 const float& GUIRenderElement::getEdgeHeight() const {
     return m_EdgeHeight;
 }
-const float& GUIRenderElement::getCornerWidth() const {
+const float GUIRenderElement::getCornerWidth() const {
     return (m_TextureCorner) ? m_TextureCorner->width() : 0.0f;
 }
-const float& GUIRenderElement::getCornerHeight() const {
+const float GUIRenderElement::getCornerHeight() const {
     return (m_TextureCorner) ? m_TextureCorner->height() : 0.0f;
 }
 Texture* GUIRenderElement::getTextureCenter() {

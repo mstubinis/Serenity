@@ -2,7 +2,7 @@
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/renderer/particles/ParticleEmissionProperties.h>
 #include <core/engine/renderer/particles/ParticleSystem.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/renderer/GBuffer.h>
 
 #include <core/engine/model/ModelInstance.h>

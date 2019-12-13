@@ -20,6 +20,9 @@ namespace Engine {
             ModelInstance* instance;
             InstanceNode(const ModelInstance& modelInstance) : instance(&const_cast<ModelInstance&>(modelInstance)) {
             }
+            ~InstanceNode() {
+
+            }
         };
         struct MeshNode final {
             Mesh* mesh;

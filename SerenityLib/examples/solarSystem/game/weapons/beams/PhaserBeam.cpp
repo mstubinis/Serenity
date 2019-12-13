@@ -14,9 +14,11 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/lights/Lights.h>
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/scene/Camera.h>
+
+#include <core/engine/shaders/ShaderProgram.h>
 
 #include "../../ships/shipSystems/ShipSystemShields.h"
 #include "../../ships/shipSystems/ShipSystemHull.h"
@@ -45,7 +47,7 @@ struct PhaserBeamCollisionFunctor final { void operator()(CollisionCallbackEvent
                     auto* hull = static_cast<ShipSystemHull*>(otherShip->getShipSystem(ShipSystemType::Hull));
                     auto modelSpacePosition = glm::vec3((glm_vec3(data.otherHit) - data.otherBody.position()) * otherRotation);
                     auto finalDamage = static_cast<float>(Resources::dt()) * weapon.damage;
-
+                    float steps = static_cast<float>(Physics::getNumberOfStepsPerFrame() * 2);
                     glm::vec3 localNormal = data.normalOnB * glm::quat(otherRotation);
 
                     if (shields && data.otherBody.getUserPointer() == shields) {
@@ -62,10 +64,10 @@ struct PhaserBeamCollisionFunctor final { void operator()(CollisionCallbackEvent
                     }
                     if (hull && data.otherBody.getUserPointer() == hull) {
                         if (weapon.firingTimeShieldGraphicPing > 1.0f) {
-                            hull->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, true, true);
+                            hull->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, finalDamage / steps, data.otherModelInstanceIndex, true, true);
 
                             Map& map = static_cast<Map&>(otherShip->entity().scene());
-                            ParticleEmitter emitter_(*Sparks::Spray, map, 0.1f, otherShip);
+                            ParticleEmitter emitter_(Sparks::Spray, map, 0.1f, otherShip);
                             glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
                             Engine::Math::alignTo(q, -localNormal);
                             emitter_.setPosition(data.otherHit);
@@ -74,11 +76,9 @@ struct PhaserBeamCollisionFunctor final { void operator()(CollisionCallbackEvent
                             if (emitter) {
                                 otherShip->m_EmittersDestruction.push_back(std::make_tuple(emitter, data.otherModelInstanceIndex, modelSpacePosition, q));
                             }
-
-
                             weapon.firingTimeShieldGraphicPing = 0.0f;
                         }else{
-                            hull->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, finalDamage, data.otherModelInstanceIndex, false, false);
+                            hull->receiveHit(source, localNormal, modelSpacePosition, weapon.impactRadius, finalDamage / steps, data.otherModelInstanceIndex, false, false);
                         }
                     }
                 }
@@ -141,12 +141,12 @@ PhaserBeam::PhaserBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
     auto& shipBody = *ship.getComponent<ComponentBody>();
     const glm::vec3 finalPosition = shipBody.position() + Math::rotate_vec3(shipBody.rotation(), position);
 
-    firstWindupLight = new PointLight(finalPosition, &map);
+    firstWindupLight = NEW PointLight(finalPosition, &map);
     firstWindupLight->setColor(photonOrange);
     firstWindupLight->setAttenuation(LightRange::_20);
     firstWindupLight->deactivate();
 
-    secondWindupLight = new PointLight(finalPosition, &map);
+    secondWindupLight = NEW PointLight(finalPosition, &map);
     secondWindupLight->setColor(photonOrange);
     secondWindupLight->setAttenuation(LightRange::_20);
     secondWindupLight->deactivate();

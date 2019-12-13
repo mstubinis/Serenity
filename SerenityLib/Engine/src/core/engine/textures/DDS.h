@@ -7,164 +7,160 @@
 namespace Engine {
 namespace epriv {
 namespace textures {
-    class DXGI_FORMAT {
-        public: enum Format {
-            DXGI_FORMAT_UNKNOWN,
-            DXGI_FORMAT_R32G32B32A32_TYPELESS,
-            DXGI_FORMAT_R32G32B32A32_FLOAT,
-            DXGI_FORMAT_R32G32B32A32_UINT,
-            DXGI_FORMAT_R32G32B32A32_SINT,
-            DXGI_FORMAT_R32G32B32_TYPELESS,
-            DXGI_FORMAT_R32G32B32_FLOAT,
-            DXGI_FORMAT_R32G32B32_UINT,
-            DXGI_FORMAT_R32G32B32_SINT,
-            DXGI_FORMAT_R16G16B16A16_TYPELESS,
-            DXGI_FORMAT_R16G16B16A16_FLOAT,
-            DXGI_FORMAT_R16G16B16A16_UNORM,
-            DXGI_FORMAT_R16G16B16A16_UINT,
-            DXGI_FORMAT_R16G16B16A16_SNORM,
-            DXGI_FORMAT_R16G16B16A16_SINT,
-            DXGI_FORMAT_R32G32_TYPELESS,
-            DXGI_FORMAT_R32G32_FLOAT,
-            DXGI_FORMAT_R32G32_UINT,
-            DXGI_FORMAT_R32G32_SINT,
-            DXGI_FORMAT_R32G8X24_TYPELESS,
-            DXGI_FORMAT_D32_FLOAT_S8X24_UINT,
-            DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS,
-            DXGI_FORMAT_X32_TYPELESS_G8X24_UINT,
-            DXGI_FORMAT_R10G10B10A2_TYPELESS,
-            DXGI_FORMAT_R10G10B10A2_UNORM,
-            DXGI_FORMAT_R10G10B10A2_UINT,
-            DXGI_FORMAT_R11G11B10_FLOAT,
-            DXGI_FORMAT_R8G8B8A8_TYPELESS,
-            DXGI_FORMAT_R8G8B8A8_UNORM,
-            DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-            DXGI_FORMAT_R8G8B8A8_UINT,
-            DXGI_FORMAT_R8G8B8A8_SNORM,
-            DXGI_FORMAT_R8G8B8A8_SINT,
-            DXGI_FORMAT_R16G16_TYPELESS,
-            DXGI_FORMAT_R16G16_FLOAT,
-            DXGI_FORMAT_R16G16_UNORM,
-            DXGI_FORMAT_R16G16_UINT,
-            DXGI_FORMAT_R16G16_SNORM,
-            DXGI_FORMAT_R16G16_SINT,
-            DXGI_FORMAT_R32_TYPELESS,
-            DXGI_FORMAT_D32_FLOAT,
-            DXGI_FORMAT_R32_FLOAT,
-            DXGI_FORMAT_R32_UINT,
-            DXGI_FORMAT_R32_SINT,
-            DXGI_FORMAT_R24G8_TYPELESS,
-            DXGI_FORMAT_D24_UNORM_S8_UINT,
-            DXGI_FORMAT_R24_UNORM_X8_TYPELESS,
-            DXGI_FORMAT_X24_TYPELESS_G8_UINT,
-            DXGI_FORMAT_R8G8_TYPELESS,
-            DXGI_FORMAT_R8G8_UNORM,
-            DXGI_FORMAT_R8G8_UINT,
-            DXGI_FORMAT_R8G8_SNORM,
-            DXGI_FORMAT_R8G8_SINT,
-            DXGI_FORMAT_R16_TYPELESS,
-            DXGI_FORMAT_R16_FLOAT,
-            DXGI_FORMAT_D16_UNORM,
-            DXGI_FORMAT_R16_UNORM,
-            DXGI_FORMAT_R16_UINT,
-            DXGI_FORMAT_R16_SNORM,
-            DXGI_FORMAT_R16_SINT,
-            DXGI_FORMAT_R8_TYPELESS,
-            DXGI_FORMAT_R8_UNORM,
-            DXGI_FORMAT_R8_UINT,
-            DXGI_FORMAT_R8_SNORM,
-            DXGI_FORMAT_R8_SINT,
-            DXGI_FORMAT_A8_UNORM,
-            DXGI_FORMAT_R1_UNORM,
-            DXGI_FORMAT_R9G9B9E5_SHAREDEXP,
-            DXGI_FORMAT_R8G8_B8G8_UNORM,
-            DXGI_FORMAT_G8R8_G8B8_UNORM,
-            DXGI_FORMAT_BC1_TYPELESS,
-            DXGI_FORMAT_BC1_UNORM,
-            DXGI_FORMAT_BC1_UNORM_SRGB,
-            DXGI_FORMAT_BC2_TYPELESS,
-            DXGI_FORMAT_BC2_UNORM,
-            DXGI_FORMAT_BC2_UNORM_SRGB,
-            DXGI_FORMAT_BC3_TYPELESS,
-            DXGI_FORMAT_BC3_UNORM,
-            DXGI_FORMAT_BC3_UNORM_SRGB,
-            DXGI_FORMAT_BC4_TYPELESS,
-            DXGI_FORMAT_BC4_UNORM,
-            DXGI_FORMAT_BC4_SNORM,
-            DXGI_FORMAT_BC5_TYPELESS,
-            DXGI_FORMAT_BC5_UNORM,
-            DXGI_FORMAT_BC5_SNORM,
-            DXGI_FORMAT_B5G6R5_UNORM,
-            DXGI_FORMAT_B5G5R5A1_UNORM,
-            DXGI_FORMAT_B8G8R8A8_UNORM,
-            DXGI_FORMAT_B8G8R8X8_UNORM,
-            DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM,
-            DXGI_FORMAT_B8G8R8A8_TYPELESS,
-            DXGI_FORMAT_B8G8R8A8_UNORM_SRGB,
-            DXGI_FORMAT_B8G8R8X8_TYPELESS,
-            DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,
-            DXGI_FORMAT_BC6H_TYPELESS,
-            DXGI_FORMAT_BC6H_UF16,
-            DXGI_FORMAT_BC6H_SF16,
-            DXGI_FORMAT_BC7_TYPELESS,
-            DXGI_FORMAT_BC7_UNORM,
-            DXGI_FORMAT_BC7_UNORM_SRGB,
-            DXGI_FORMAT_AYUV,
-            DXGI_FORMAT_Y410,
-            DXGI_FORMAT_Y416,
-            DXGI_FORMAT_NV12,
-            DXGI_FORMAT_P010,
-            DXGI_FORMAT_P016,
-            DXGI_FORMAT_420_OPAQUE,
-            DXGI_FORMAT_YUY2,
-            DXGI_FORMAT_Y210,
-            DXGI_FORMAT_Y216,
-            DXGI_FORMAT_NV11,
-            DXGI_FORMAT_AI44,
-            DXGI_FORMAT_IA44,
-            DXGI_FORMAT_P8,
-            DXGI_FORMAT_A8P8,
-            DXGI_FORMAT_B4G4R4A4_UNORM,
-            DXGI_FORMAT_P208,
-            DXGI_FORMAT_V208,
-            DXGI_FORMAT_V408,
-            DXGI_FORMAT_FORCE_UINT,
-            _TOTAL
-        };
-    };
-    class D3D_RESOURCE_DIMENSION {
-        public: enum Dimension {
-            D3D_RESOURCE_DIMENSION_UNKNOWN,
-            D3D_RESOURCE_DIMENSION_BUFFER,
-            D3D_RESOURCE_DIMENSION_TEXTURE1D,
-            D3D_RESOURCE_DIMENSION_TEXTURE2D,
-            D3D_RESOURCE_DIMENSION_TEXTURE3D,
-            _TOTAL
-        };
-    };
-    static const uint FourCC_DXT1 = 0x31545844;
-    static const uint FourCC_DXT2 = 0x32545844;
-    static const uint FourCC_DXT3 = 0x33545844;
-    static const uint FourCC_DXT4 = 0x34545844;
-    static const uint FourCC_DXT5 = 0x35545844;
-    static const uint FourCC_DX10 = 0x30315844;
-    static const uint FourCC_ATI1 = 0x31495441;
-    static const uint FourCC_ATI2 = 0x32495441;
-    static const uint FourCC_RXGB = 0x42475852;
-    static const uint FourCC_$    = 0x00000024;
-    static const uint FourCC_o    = 0x0000006f;
-    static const uint FourCC_p    = 0x00000070;
-    static const uint FourCC_q    = 0x00000071;
-    static const uint FourCC_r    = 0x00000072;
-    static const uint FourCC_s    = 0x00000073;
-    static const uint FourCC_t    = 0x00000074;
-    static const uint FourCC_BC4U = 0x55344342;
-    static const uint FourCC_BC4S = 0x53344342;
-    static const uint FourCC_BC5U = 0x55354342;
-    static const uint FourCC_BC5S = 0x53354342;
-    static const uint FourCC_RGBG = 0x47424752;
-    static const uint FourCC_GRGB = 0x42475247;
-    static const uint FourCC_YUY2 = 0x32595559;
+    class DXGI_FORMAT { public: enum Format {
+        DXGI_FORMAT_UNKNOWN,
+        DXGI_FORMAT_R32G32B32A32_TYPELESS,
+        DXGI_FORMAT_R32G32B32A32_FLOAT,
+        DXGI_FORMAT_R32G32B32A32_UINT,
+        DXGI_FORMAT_R32G32B32A32_SINT,
+        DXGI_FORMAT_R32G32B32_TYPELESS,
+        DXGI_FORMAT_R32G32B32_FLOAT,
+        DXGI_FORMAT_R32G32B32_UINT,
+        DXGI_FORMAT_R32G32B32_SINT,
+        DXGI_FORMAT_R16G16B16A16_TYPELESS,
+        DXGI_FORMAT_R16G16B16A16_FLOAT,
+        DXGI_FORMAT_R16G16B16A16_UNORM,
+        DXGI_FORMAT_R16G16B16A16_UINT,
+        DXGI_FORMAT_R16G16B16A16_SNORM,
+        DXGI_FORMAT_R16G16B16A16_SINT,
+        DXGI_FORMAT_R32G32_TYPELESS,
+        DXGI_FORMAT_R32G32_FLOAT,
+        DXGI_FORMAT_R32G32_UINT,
+        DXGI_FORMAT_R32G32_SINT,
+        DXGI_FORMAT_R32G8X24_TYPELESS,
+        DXGI_FORMAT_D32_FLOAT_S8X24_UINT,
+        DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS,
+        DXGI_FORMAT_X32_TYPELESS_G8X24_UINT,
+        DXGI_FORMAT_R10G10B10A2_TYPELESS,
+        DXGI_FORMAT_R10G10B10A2_UNORM,
+        DXGI_FORMAT_R10G10B10A2_UINT,
+        DXGI_FORMAT_R11G11B10_FLOAT,
+        DXGI_FORMAT_R8G8B8A8_TYPELESS,
+        DXGI_FORMAT_R8G8B8A8_UNORM,
+        DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+        DXGI_FORMAT_R8G8B8A8_UINT,
+        DXGI_FORMAT_R8G8B8A8_SNORM,
+        DXGI_FORMAT_R8G8B8A8_SINT,
+        DXGI_FORMAT_R16G16_TYPELESS,
+        DXGI_FORMAT_R16G16_FLOAT,
+        DXGI_FORMAT_R16G16_UNORM,
+        DXGI_FORMAT_R16G16_UINT,
+        DXGI_FORMAT_R16G16_SNORM,
+        DXGI_FORMAT_R16G16_SINT,
+        DXGI_FORMAT_R32_TYPELESS,
+        DXGI_FORMAT_D32_FLOAT,
+        DXGI_FORMAT_R32_FLOAT,
+        DXGI_FORMAT_R32_UINT,
+        DXGI_FORMAT_R32_SINT,
+        DXGI_FORMAT_R24G8_TYPELESS,
+        DXGI_FORMAT_D24_UNORM_S8_UINT,
+        DXGI_FORMAT_R24_UNORM_X8_TYPELESS,
+        DXGI_FORMAT_X24_TYPELESS_G8_UINT,
+        DXGI_FORMAT_R8G8_TYPELESS,
+        DXGI_FORMAT_R8G8_UNORM,
+        DXGI_FORMAT_R8G8_UINT,
+        DXGI_FORMAT_R8G8_SNORM,
+        DXGI_FORMAT_R8G8_SINT,
+        DXGI_FORMAT_R16_TYPELESS,
+        DXGI_FORMAT_R16_FLOAT,
+        DXGI_FORMAT_D16_UNORM,
+        DXGI_FORMAT_R16_UNORM,
+        DXGI_FORMAT_R16_UINT,
+        DXGI_FORMAT_R16_SNORM,
+        DXGI_FORMAT_R16_SINT,
+        DXGI_FORMAT_R8_TYPELESS,
+        DXGI_FORMAT_R8_UNORM,
+        DXGI_FORMAT_R8_UINT,
+        DXGI_FORMAT_R8_SNORM,
+        DXGI_FORMAT_R8_SINT,
+        DXGI_FORMAT_A8_UNORM,
+        DXGI_FORMAT_R1_UNORM,
+        DXGI_FORMAT_R9G9B9E5_SHAREDEXP,
+        DXGI_FORMAT_R8G8_B8G8_UNORM,
+        DXGI_FORMAT_G8R8_G8B8_UNORM,
+        DXGI_FORMAT_BC1_TYPELESS,
+        DXGI_FORMAT_BC1_UNORM,
+        DXGI_FORMAT_BC1_UNORM_SRGB,
+        DXGI_FORMAT_BC2_TYPELESS,
+        DXGI_FORMAT_BC2_UNORM,
+        DXGI_FORMAT_BC2_UNORM_SRGB,
+        DXGI_FORMAT_BC3_TYPELESS,
+        DXGI_FORMAT_BC3_UNORM,
+        DXGI_FORMAT_BC3_UNORM_SRGB,
+        DXGI_FORMAT_BC4_TYPELESS,
+        DXGI_FORMAT_BC4_UNORM,
+        DXGI_FORMAT_BC4_SNORM,
+        DXGI_FORMAT_BC5_TYPELESS,
+        DXGI_FORMAT_BC5_UNORM,
+        DXGI_FORMAT_BC5_SNORM,
+        DXGI_FORMAT_B5G6R5_UNORM,
+        DXGI_FORMAT_B5G5R5A1_UNORM,
+        DXGI_FORMAT_B8G8R8A8_UNORM,
+        DXGI_FORMAT_B8G8R8X8_UNORM,
+        DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM,
+        DXGI_FORMAT_B8G8R8A8_TYPELESS,
+        DXGI_FORMAT_B8G8R8A8_UNORM_SRGB,
+        DXGI_FORMAT_B8G8R8X8_TYPELESS,
+        DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,
+        DXGI_FORMAT_BC6H_TYPELESS,
+        DXGI_FORMAT_BC6H_UF16,
+        DXGI_FORMAT_BC6H_SF16,
+        DXGI_FORMAT_BC7_TYPELESS,
+        DXGI_FORMAT_BC7_UNORM,
+        DXGI_FORMAT_BC7_UNORM_SRGB,
+        DXGI_FORMAT_AYUV,
+        DXGI_FORMAT_Y410,
+        DXGI_FORMAT_Y416,
+        DXGI_FORMAT_NV12,
+        DXGI_FORMAT_P010,
+        DXGI_FORMAT_P016,
+        DXGI_FORMAT_420_OPAQUE,
+        DXGI_FORMAT_YUY2,
+        DXGI_FORMAT_Y210,
+        DXGI_FORMAT_Y216,
+        DXGI_FORMAT_NV11,
+        DXGI_FORMAT_AI44,
+        DXGI_FORMAT_IA44,
+        DXGI_FORMAT_P8,
+        DXGI_FORMAT_A8P8,
+        DXGI_FORMAT_B4G4R4A4_UNORM,
+        DXGI_FORMAT_P208,
+        DXGI_FORMAT_V208,
+        DXGI_FORMAT_V408,
+        DXGI_FORMAT_FORCE_UINT,
+        _TOTAL,
+    };};
+    class D3D_RESOURCE_DIMENSION { public: enum Dimension {
+        D3D_RESOURCE_DIMENSION_UNKNOWN,
+        D3D_RESOURCE_DIMENSION_BUFFER,
+        D3D_RESOURCE_DIMENSION_TEXTURE1D,
+        D3D_RESOURCE_DIMENSION_TEXTURE2D,
+        D3D_RESOURCE_DIMENSION_TEXTURE3D,
+        _TOTAL,
+    };};
+    static const uint32_t FourCC_DXT1 = 0x31545844;
+    static const uint32_t FourCC_DXT2 = 0x32545844;
+    static const uint32_t FourCC_DXT3 = 0x33545844;
+    static const uint32_t FourCC_DXT4 = 0x34545844;
+    static const uint32_t FourCC_DXT5 = 0x35545844;
+    static const uint32_t FourCC_DX10 = 0x30315844;
+    static const uint32_t FourCC_ATI1 = 0x31495441;
+    static const uint32_t FourCC_ATI2 = 0x32495441;
+    static const uint32_t FourCC_RXGB = 0x42475852;
+    static const uint32_t FourCC_$    = 0x00000024;
+    static const uint32_t FourCC_o    = 0x0000006f;
+    static const uint32_t FourCC_p    = 0x00000070;
+    static const uint32_t FourCC_q    = 0x00000071;
+    static const uint32_t FourCC_r    = 0x00000072;
+    static const uint32_t FourCC_s    = 0x00000073;
+    static const uint32_t FourCC_t    = 0x00000074;
+    static const uint32_t FourCC_BC4U = 0x55344342;
+    static const uint32_t FourCC_BC4S = 0x53344342;
+    static const uint32_t FourCC_BC5U = 0x55354342;
+    static const uint32_t FourCC_BC5S = 0x53354342;
+    static const uint32_t FourCC_RGBG = 0x47424752;
+    static const uint32_t FourCC_GRGB = 0x42475247;
+    static const uint32_t FourCC_YUY2 = 0x32595559;
 
 namespace DDS {
     struct DDS_PixelFormat final {
@@ -174,26 +170,26 @@ namespace DDS {
         uint32_t BitMaskR, BitMaskG, BitMaskB, BitMaskA;
         DDS_PixelFormat() {}
         DDS_PixelFormat(uint32_t _size, uint32_t _flags, uint32_t _fourCC, uint32_t _bitCRGB, uint32_t _mskR, uint32_t _mskG, uint32_t _mskB, uint32_t _mskA) {
-            pxl_size = _size;
-            pxl_flags = _flags;
-            fourCC = _fourCC;
+            pxl_size    = _size;
+            pxl_flags   = _flags;
+            fourCC      = _fourCC;
             BitCountRGB = _bitCRGB;
-            BitMaskR = _mskR;
-            BitMaskG = _mskG;
-            BitMaskB = _mskB;
-            BitMaskA = _mskA;
+            BitMaskR    = _mskR;
+            BitMaskG    = _mskG;
+            BitMaskB    = _mskB;
+            BitMaskA    = _mskA;
         }
-        void fill(uchar _header[128]) {
-            pxl_size = *(uint32_t*)&_header[76];
-            pxl_flags = *(uint32_t*)&_header[80];
-            fourCC = *(uint32_t*)&_header[84];
+        void fill(unsigned char _header[128]) {
+            pxl_size    = *(uint32_t*)&_header[76];
+            pxl_flags   = *(uint32_t*)&_header[80];
+            fourCC      = *(uint32_t*)&_header[84];
             BitCountRGB = *(uint32_t*)&_header[88];
-            BitMaskR = *(uint32_t*)&_header[92];
-            BitMaskG = *(uint32_t*)&_header[96];
-            BitMaskB = *(uint32_t*)&_header[100];
-            BitMaskA = *(uint32_t*)&_header[104];
+            BitMaskR    = *(uint32_t*)&_header[92];
+            BitMaskG    = *(uint32_t*)&_header[96];
+            BitMaskB    = *(uint32_t*)&_header[100];
+            BitMaskA    = *(uint32_t*)&_header[104];
         }
-        DDS_PixelFormat(uchar _header[128]) { fill(_header); }
+        DDS_PixelFormat(unsigned char _header[128]) { fill(_header); }
         ~DDS_PixelFormat() {}
     };
     struct DDS_Header_DX10 final {
@@ -201,12 +197,12 @@ namespace DDS {
         textures::D3D_RESOURCE_DIMENSION::Dimension resourceDimension;
         uint32_t miscFlag, arraySize, miscFlags2;
         DDS_Header_DX10() {}
-        void fill(uchar _headerDX10[20]) {
-            dxgiFormat = (textures::DXGI_FORMAT::Format)(*(uint32_t*)&_headerDX10[0]);
+        void fill(unsigned char _headerDX10[20]) {
+            dxgiFormat        = (textures::DXGI_FORMAT::Format)(*(uint32_t*)&_headerDX10[0]);
             resourceDimension = (textures::D3D_RESOURCE_DIMENSION::Dimension)(*(uint32_t*)&_headerDX10[4]);
-            miscFlag = *(uint32_t*)&_headerDX10[8];
-            arraySize = *(uint32_t*)&_headerDX10[12];
-            miscFlags2 = *(uint32_t*)&_headerDX10[16];
+            miscFlag          = *(uint32_t*)&_headerDX10[8];
+            arraySize         = *(uint32_t*)&_headerDX10[12];
+            miscFlags2        = *(uint32_t*)&_headerDX10[16];
         }
         ~DDS_Header_DX10() {}
     };
@@ -222,24 +218,24 @@ namespace DDS {
         uint32_t caps, caps2, caps3, caps4;
         uint32_t reserved2;
         DDS_Header() {}
-        DDS_Header(uchar _header[128]) {
-            magic = *(uint32_t*)&_header[0];
-            header_size = *(uint32_t*)&_header[4];
-            header_flags = *(uint32_t*)&_header[8];
-            h = *(uint32_t*)&_header[12];
-            w = *(uint32_t*)&_header[16];
+        DDS_Header(unsigned char _header[128]) {
+            magic             = *(uint32_t*)&_header[0];
+            header_size       = *(uint32_t*)&_header[4];
+            header_flags      = *(uint32_t*)&_header[8];
+            h                 = *(uint32_t*)&_header[12];
+            w                 = *(uint32_t*)&_header[16];
             pitchOrlinearSize = *(uint32_t*)&_header[20];
-            depth = *(uint32_t*)&_header[24];
-            mipMapCount = *(uint32_t*)&_header[28];
+            depth             = *(uint32_t*)&_header[24];
+            mipMapCount       = *(uint32_t*)&_header[28];
 
-            //reserved1[11]    = *(uint32_t*)&_header[32-72];
+            //reserved1[11]   = *(uint32_t*)&_header[32-72];
             format.fill(_header);
 
-            caps = *(uint32_t*)&_header[108];
-            caps2 = *(uint32_t*)&_header[112];
-            caps3 = *(uint32_t*)&_header[116];
-            caps4 = *(uint32_t*)&_header[120];
-            reserved2 = *(uint32_t*)&_header[124];
+            caps              = *(uint32_t*)&_header[108];
+            caps2             = *(uint32_t*)&_header[112];
+            caps3             = *(uint32_t*)&_header[116];
+            caps4             = *(uint32_t*)&_header[120];
+            reserved2         = *(uint32_t*)&_header[124];
         }
         ~DDS_Header() {}
     };

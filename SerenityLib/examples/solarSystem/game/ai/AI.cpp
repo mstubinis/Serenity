@@ -26,11 +26,11 @@ void AI::update(const double& dt) {
 }
 void AI::installFireAtWill(AIType::Type& type, Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) {
     SAFE_DELETE(m_FireAtWill);
-    m_FireAtWill = new FireAtWill(type, ship, map, sensors, weapons);
+    m_FireAtWill = NEW FireAtWill(type, ship, map, sensors, weapons);
 }
 void AI::installThreatTable(Map& map) {
     SAFE_DELETE(m_Threat);
-    m_Threat = new ThreatTable(map);
+    m_Threat = NEW ThreatTable(map);
 }
 FireAtWill* AI::getFireAtWill() {
     return m_FireAtWill;

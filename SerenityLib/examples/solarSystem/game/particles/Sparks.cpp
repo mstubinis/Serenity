@@ -19,9 +19,9 @@ using namespace Engine;
 
 Handle Sparks::SparksMaterial1;
 
-ParticleEmissionProperties* Sparks::Spray           = nullptr;
-ParticleEmissionProperties* Sparks::Burst           = nullptr;
-ParticleEmissionProperties* Sparks::ExplosionSparks = nullptr;
+ParticleEmissionProperties Sparks::Spray;
+ParticleEmissionProperties Sparks::Burst;
+ParticleEmissionProperties Sparks::ExplosionSparks;
 
 #pragma region SprayAndBurst
 
@@ -150,41 +150,40 @@ void Sparks::init() {
     ((Material*)SparksMaterial1.get())->setGlow(1.0f);
 
     {
-        Spray = new ParticleEmissionProperties(Sparks::SparksMaterial1, 0.4, 0.005, 1, 1.0f);
-        Spray->setColorFunctor(SprayColorFunctor());
-        Spray->setDepthFunctor(SprayDepthFunctor());
-        Spray->setChangeInScaleFunctor(SprayScaleFunctor());
-        Spray->setChangeInAngularVelocityFunctor(SprayAngularVelocityFunctor());
-        Spray->setChangeInVelocityFunctor(SprayVelocityFunctor());
-        Spray->setInitialVelocityFunctor(SprayInitialVelocityFunctor());
-        Spray->setInitialScaleFunctor(SprayInitialScaleFunctor());
-        Spray->setInitialAngularVelocityFunctor(SprayInitialAngularFunctor());
+        Spray = ParticleEmissionProperties(Sparks::SparksMaterial1, 0.4, 0.005, 1, 1.0f);
+        Spray.setColorFunctor(SprayColorFunctor());
+        Spray.setDepthFunctor(SprayDepthFunctor());
+        Spray.setChangeInScaleFunctor(SprayScaleFunctor());
+        Spray.setChangeInAngularVelocityFunctor(SprayAngularVelocityFunctor());
+        Spray.setChangeInVelocityFunctor(SprayVelocityFunctor());
+        Spray.setInitialVelocityFunctor(SprayInitialVelocityFunctor());
+        Spray.setInitialScaleFunctor(SprayInitialScaleFunctor());
+        Spray.setInitialAngularVelocityFunctor(SprayInitialAngularFunctor());
     }
 
     {
-        Burst = new ParticleEmissionProperties(Sparks::SparksMaterial1, 0.4, 1.005, 15, 0.01f);
-        Burst->setColorFunctor(SprayColorFunctor());
-        Burst->setDepthFunctor(SprayDepthFunctor());
-        Burst->setChangeInScaleFunctor(SprayScaleFunctor());
-        Burst->setChangeInAngularVelocityFunctor(SprayAngularVelocityFunctor());
-        Burst->setChangeInVelocityFunctor(SprayVelocityFunctor());
-        Burst->setInitialVelocityFunctor(SprayInitialVelocityFunctor());
-        Burst->setInitialScaleFunctor(SprayInitialScaleFunctor());
-        Burst->setInitialAngularVelocityFunctor(SprayInitialAngularFunctor());
+        Burst = ParticleEmissionProperties(Sparks::SparksMaterial1, 0.4, 1.005, 15, 0.01f);
+        Burst.setColorFunctor(SprayColorFunctor());
+        Burst.setDepthFunctor(SprayDepthFunctor());
+        Burst.setChangeInScaleFunctor(SprayScaleFunctor());
+        Burst.setChangeInAngularVelocityFunctor(SprayAngularVelocityFunctor());
+        Burst.setChangeInVelocityFunctor(SprayVelocityFunctor());
+        Burst.setInitialVelocityFunctor(SprayInitialVelocityFunctor());
+        Burst.setInitialScaleFunctor(SprayInitialScaleFunctor());
+        Burst.setInitialAngularVelocityFunctor(SprayInitialAngularFunctor());
     }
-
-    ExplosionSparks = new ParticleEmissionProperties(ResourceManifest::TorpedoCoreMaterial, 2.5, 0.01, 1200, 1.0f); 
-    ExplosionSparks->setColorFunctor(ExplosionSparksColorFunctor());
-    ExplosionSparks->setDepthFunctor(ExplosionSparksDepthFunctor());
-    ExplosionSparks->setChangeInScaleFunctor(ExplosionSparksScaleFunctor());
-    ExplosionSparks->setChangeInAngularVelocityFunctor(ExplosionSparksAngularVelocityFunctor());
-    ExplosionSparks->setChangeInVelocityFunctor(ExplosionSparksVelocityFunctor());
-    ExplosionSparks->setInitialVelocityFunctor(ExplosionSparksInitialVelocityFunctor());
-    ExplosionSparks->setInitialScaleFunctor(ExplosionSparksInitialScaleFunctor());
-    ExplosionSparks->setInitialAngularVelocityFunctor(ExplosionSparksInitialAngularFunctor());
+    {
+        ExplosionSparks = ParticleEmissionProperties(ResourceManifest::TorpedoCoreMaterial, 2.5, 0.01, 1200, 1.0f);
+        ExplosionSparks.setColorFunctor(ExplosionSparksColorFunctor());
+        ExplosionSparks.setDepthFunctor(ExplosionSparksDepthFunctor());
+        ExplosionSparks.setChangeInScaleFunctor(ExplosionSparksScaleFunctor());
+        ExplosionSparks.setChangeInAngularVelocityFunctor(ExplosionSparksAngularVelocityFunctor());
+        ExplosionSparks.setChangeInVelocityFunctor(ExplosionSparksVelocityFunctor());
+        ExplosionSparks.setInitialVelocityFunctor(ExplosionSparksInitialVelocityFunctor());
+        ExplosionSparks.setInitialScaleFunctor(ExplosionSparksInitialScaleFunctor());
+        ExplosionSparks.setInitialAngularVelocityFunctor(ExplosionSparksInitialAngularFunctor());
+    }
 }
 void Sparks::destruct() {
-    SAFE_DELETE(Spray);
-    SAFE_DELETE(Burst);
-    SAFE_DELETE(ExplosionSparks);
+
 }

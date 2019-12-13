@@ -1,5 +1,5 @@
 #include <boost/make_shared.hpp>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/resources/Engine_BuiltInResources.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/mesh/Mesh.h>
@@ -9,6 +9,10 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/fonts/Font.h>
 #include <core/engine/scene/Scene.h>
+#include <core/engine/system/window/Engine_Window.h>
+
+#include <core/engine/shaders/ShaderProgram.h>
+#include <core/engine/shaders/Shader.h>
 
 #include <core/engine/mesh/MeshRequest.h>
 #include <core/engine/textures/TextureRequest.h>
@@ -29,16 +33,19 @@ epriv::ResourceManager::ResourceManager(const char* name, const uint& width, con
     m_CurrentScene     = nullptr;
     m_Window           = nullptr;
     m_DynamicMemory    = false;
-    m_Resources        = new ObjectPool<EngineResource>(32768);
+    m_Resources        = NEW ObjectPool<EngineResource>(32768);
     resourceManager    = this;
 }
 epriv::ResourceManager::~ResourceManager(){ 
+    cleanup();
+}
+void epriv::ResourceManager::cleanup() {
     SAFE_DELETE(m_Resources);
     SAFE_DELETE(m_Window);
     SAFE_DELETE_VECTOR(m_Scenes);
 }
 void epriv::ResourceManager::_init(const char* name, const uint& width, const uint& height){
-    m_Window = new Engine_Window(name, width, height);
+    m_Window = NEW Engine_Window(name, width, height);
 }
 
 string Engine::Data::reportTime(){
@@ -62,39 +69,18 @@ const bool epriv::ResourceManager::_hasScene(const string& n){
     }
     return false;
 }
-Texture* epriv::ResourceManager::_hasTexture(const string& n){
-    auto& resourcePool = *m_Resources;
-    for(uint i = 0; i < resourcePool.maxEntries(); ++i){
-        EngineResource* r = resourcePool.getAsFast<EngineResource>(i+1);
-        if(r){ 
-            Texture* t = dynamic_cast<Texture*>(r); 
-            if(t && t->name() == n){ 
-                return t; 
-            } 
-        }
-    }
-    return nullptr;
-}
-Material* epriv::ResourceManager::_hasMaterial(const string& n) {
-    auto& resourcePool = *m_Resources;
-    for (uint i = 0; i < resourcePool.maxEntries(); ++i) {
-        EngineResource* r = resourcePool.getAsFast<EngineResource>(i + 1);
-        if (r) {
-            Material* m = dynamic_cast<Material*>(r);
-            if (m && m->name() == n) {
-                return m;
-            }
-        }
-    }
-    return nullptr;
-}
 void epriv::ResourceManager::onPostUpdate() {
     if (m_ScenesToBeDeleted.size() > 0) {
         for (size_t i = 0; i < m_ScenesToBeDeleted.size(); ++i) {
             SAFE_DELETE(m_ScenesToBeDeleted[i]);
             m_ScenesToBeDeleted[i] = nullptr; //redundant?
+            for (size_t j = 0; j < m_Scenes.size(); ++j) {
+                if (m_Scenes[j] == m_ScenesToBeDeleted[i]) {
+                    m_Scenes[j] = nullptr;
+                }
+            }
         }
-        vector_clear(m_ScenesToBeDeleted);
+        m_ScenesToBeDeleted.clear();
     }   
 }
 Handle epriv::ResourceManager::_addTexture(Texture* t) {
@@ -107,11 +93,12 @@ const unsigned int epriv::ResourceManager::_addScene(Scene& s){
     for (size_t i = 0; i < m_Scenes.size(); ++i) {
         if (m_Scenes[i] == nullptr) {
             m_Scenes[i] = &s;
-            return i + 1;
+            auto res = static_cast<unsigned int>(i) + 1U;
+            return res;
         }
     }
     m_Scenes.push_back(&s);
-    return m_Scenes.size();
+    return static_cast<unsigned int>(m_Scenes.size());
 }
 const size_t epriv::ResourceManager::_numScenes(){
     return m_Scenes.size();
@@ -181,10 +168,10 @@ Texture* Resources::getTexture(Handle& h) {
     return p; 
 }
 Texture* Resources::getTexture(const string& name) {
-    return resourceManager->_hasTexture(name); 
+    return resourceManager->HasResource<Texture>(name); 
 }
 Handle Resources::getTextureHandle(const string& name) {
-    auto* texture = resourceManager->_hasTexture(name);
+    auto* texture = resourceManager->HasResource<Texture>(name);
     if (texture) {
         return resourceManager->m_Resources->getHandle<Texture>(*texture);
     }
@@ -205,7 +192,7 @@ Material* Resources::getMaterial(Handle& h) {
     return p; 
 }
 Handle Resources::getMaterialHandle(const string& name) {
-    auto* material = resourceManager->_hasMaterial(name);
+    auto* material = resourceManager->HasResource<Material>(name);
     if (material) {
         return resourceManager->m_Resources->getHandle<Material>(*material);
     }
@@ -219,7 +206,7 @@ Handle Resources::getMaterialHandle(Material* material) {
 }
 
 Handle Resources::addFont(const string& filename){
-    return resourceManager->m_Resources->add(new Font(filename),ResourceType::Font);
+    return resourceManager->m_Resources->add(ALLOC Font(filename),ResourceType::Font);
 }
 
 
@@ -233,7 +220,7 @@ vector<Handle> Resources::loadMesh(const string& fileOrData, const float& thresh
     return handles;
 }
 vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float& threshhold) {
-    auto* request = new MeshRequest(fileOrData, threshhold); //to extend the lifetime to the threads, we manually delete later
+    auto* request = NEW MeshRequest(fileOrData, threshhold); //to extend the lifetime to the threads, we manually delete later
     request->requestAsync();
     vector<Handle> handles;
     for (auto& part : request->parts) {
@@ -242,7 +229,7 @@ vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float& t
     return handles;
 }
 Handle Resources::loadTexture(const string& file, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
-    auto* texture = resourceManager->_hasTexture(file);
+    auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {
         TextureRequest request(file, mipmaps, internalFormat);
         request.request();
@@ -251,9 +238,9 @@ Handle Resources::loadTexture(const string& file, const ImageInternalFormat::For
     return Resources::getTextureHandle(texture);
 }
 Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
-    auto* texture = resourceManager->_hasTexture(file);
+    auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {
-        auto* request = new TextureRequest(file, mipmaps, internalFormat); //to extend the lifetime to the threads, we manually delete later
+        auto* request = NEW TextureRequest(file, mipmaps, internalFormat); //to extend the lifetime to the threads, we manually delete later
         request->requestAsync();
         return request->part.handle;
     }
@@ -261,7 +248,7 @@ Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat
 }
 
 Handle Resources::loadMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {
-    auto* material = resourceManager->_hasMaterial(name);
+    auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
         MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
         request.request();
@@ -270,15 +257,15 @@ Handle Resources::loadMaterial(const string& name, const string& diffuse, const 
     return Resources::getMaterialHandle(material);
 }
 Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {
-    if (!resourceManager->_hasMaterial(name)) {
-        auto* request = new MaterialRequest(name, diffuse, normal, glow, specular, ao, metalness, smoothness); //to extend the lifetime to the threads, we manually delete later
+    if (!resourceManager->HasResource<Material>(name)) {
+        auto* request = NEW MaterialRequest(name, diffuse, normal, glow, specular, ao, metalness, smoothness); //to extend the lifetime to the threads, we manually delete later
         request->requestAsync();
         return request->part.handle;
     }
     return Handle();
 }
 Handle Resources::loadMaterial(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
-    auto* material = resourceManager->_hasMaterial(name);
+    auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
         MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
         return request.part.handle;
@@ -287,27 +274,27 @@ Handle Resources::loadMaterial(const string& name, Texture* diffuse, Texture* no
 }
 
 Handle Resources::addShader(const string& fileOrData, const ShaderType::Type& type, const bool& fromFile){
-    Shader* shader = new Shader(fileOrData, type, fromFile);
+    Shader* shader = NEW Shader(fileOrData, type, fromFile);
     return resourceManager->m_Resources->add(shader, ResourceType::Shader);
 }
 
 Handle Resources::addShaderProgram(const string& n, Shader& v, Shader& f){
-    ShaderProgram* program = new ShaderProgram(n, v, f);
+    ShaderProgram* program = NEW ShaderProgram(n, v, f);
     return resourceManager->m_Resources->add(program, ResourceType::ShaderProgram);
 }
 Handle Resources::addShaderProgram(const string& n, Handle& v, Handle& f){
     Shader* vertexShader = resourceManager->m_Resources->getAsFast<Shader>(v);
     Shader* fragmentShader = resourceManager->m_Resources->getAsFast<Shader>(f);
-    ShaderProgram* program = new ShaderProgram(n, *vertexShader, *fragmentShader);
+    ShaderProgram* program = NEW ShaderProgram(n, *vertexShader, *fragmentShader);
     return resourceManager->m_Resources->add(program, ResourceType::ShaderProgram);
 }
 
 Handle Resources::addSoundData(const string& file){
-    SoundData* soundData = new SoundData(file);
+    SoundData* soundData = NEW SoundData(file);
     return resourceManager->m_Resources->add(soundData,ResourceType::SoundData);
 }
 
-void Resources::setCurrentScene(Scene* newScene){
+const bool Resources::setCurrentScene(Scene* newScene){
     Scene* oldScene = resourceManager->m_CurrentScene;
 
     epriv::EventSceneChanged e(oldScene, newScene);
@@ -320,7 +307,7 @@ void Resources::setCurrentScene(Scene* newScene){
         cout << "---- Initial scene set to: " << newScene->name() << endl;
         resourceManager->m_CurrentScene = newScene; 
         epriv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
-        return;
+        return false;
     }
     if(oldScene != newScene){
         cout << "---- Scene Change started (" << oldScene->name() << ") to (" << newScene->name() << ") ----" << endl;
@@ -334,6 +321,8 @@ void Resources::setCurrentScene(Scene* newScene){
             //mark game object resources to add use count
         }
         cout << "-------- Scene Change ended --------" << endl;
+        return true;
     }
+    return false;
 }
-void Resources::setCurrentScene(const string& s){ Resources::setCurrentScene(Resources::getScene(s)); }
+const bool Resources::setCurrentScene(const string& s){ return Resources::setCurrentScene(Resources::getScene(s)); }

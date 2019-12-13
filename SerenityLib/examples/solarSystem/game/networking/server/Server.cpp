@@ -26,7 +26,7 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/resources/Engine_Resources.h>
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/utils/Engine_Debugging.h>
 
 #include <boost/algorithm/algorithm.hpp>
@@ -42,11 +42,11 @@ using namespace Engine::Networking;
 #pragma region ServerClient
 
 ServerClient::ServerClient(const string& hash, Server& server, Core& core, sf::TcpSocket* sfTCPSocket) : m_Core(core), m_Server(server) {
-    m_TcpSocket = new Networking::SocketTCP(sfTCPSocket);
+    m_TcpSocket = NEW Networking::SocketTCP(sfTCPSocket);
     internalInit(hash, server.numClients());
 }
 ServerClient::ServerClient(const string& hash, Server& server, Core& core, const unsigned short& port, const string& ipAddress) : m_Core(core), m_Server(server) {
-    m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
+    m_TcpSocket = NEW Networking::SocketTCP(port, ipAddress);
     internalInit(hash, server.numClients());
 }
 ServerClient::~ServerClient() {
@@ -125,7 +125,7 @@ ServerClientThread::ServerClientThread(){
         }
         return false;
     };
-    m_Thread = new std::future<bool>(std::move(std::async(std::launch::async, updateClientThread, std::ref(*this))));
+    m_Thread = NEW std::future<bool>(std::move(std::async(std::launch::async, updateClientThread, std::ref(*this))));
     */    
 }
 ServerClientThread::~ServerClientThread() {
@@ -140,17 +140,15 @@ ServerClientThread::~ServerClientThread() {
 #pragma region Server
 
 Server::Server(Core& core, const unsigned int& port, const string& ipRestriction) : m_Core(core), m_MapSpecificData(*this){
-    m_GameplayMode                     = nullptr;
     m_OwnerClient                      = nullptr;
     m_port                             = port;
-    m_listener                         = new ListenerTCP(port, ipRestriction);
-    m_UdpSocket                        = new SocketUDP(port, ipRestriction);
+    m_TCPListener                      = NEW ListenerTCP(port, ipRestriction);
+    m_UdpSocket                        = NEW SocketUDP(port, ipRestriction);
     m_UdpSocket->setBlocking(false);
     m_UdpSocket->bind();
     m_Active.store(0, std::memory_order_relaxed);
 }
 Server::~Server() {
-    m_UdpSocket->unbind();
     shutdown(true);
 }
 void Server::shutdown(const bool destructor) {
@@ -164,12 +162,12 @@ void Server::shutdown(const bool destructor) {
     m_Active.store(0, std::memory_order_relaxed);
     m_OwnerClient = nullptr;
     Sleep(1000); //messy
+    m_UdpSocket->unbind();
+    m_TCPListener->close();
     if (destructor) {
         SAFE_DELETE_VECTOR(m_Threads);
-        SAFE_DELETE(m_listener);
-        SAFE_DELETE(m_GameplayMode);
-    }else{
-        m_listener->close();
+        SAFE_DELETE(m_TCPListener);
+        SAFE_DELETE(m_UdpSocket);
     }
 }
 const bool Server::shutdownMap() {
@@ -190,12 +188,12 @@ const unsigned int Server::numClients() const {
 }
 
 const bool Server::startup(const string& mapname) {
-    auto& listener = *m_listener;
+    auto& listener = *m_TCPListener;
     const sf::Socket::Status status = listener.listen();
 
     if (m_Threads.size() == 0) {
         for (unsigned int i = 0; i < std::thread::hardware_concurrency(); ++i) {
-            m_Threads.push_back(new ServerClientThread());
+            m_Threads.push_back(ALLOC ServerClientThread());
         }
     }
     if (status == sf::Socket::Status::Done) {
@@ -205,11 +203,10 @@ const bool Server::startup(const string& mapname) {
     }
     return false;
 }
-const bool Server::startupMap(const string& mapname, GameplayMode& mode) {
-    m_GameplayMode = &mode;
+const bool Server::startupMap(const string& mapname) {
     m_MapSpecificData.m_Map = static_cast<Map*>(Resources::getScene(mapname));
     if (!m_MapSpecificData.m_Map) {
-        Map* map = new Map(mode, *m_Core.m_Client, mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
+        auto* map = NEW Map(m_GameplayMode, *m_Core.m_Client, mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
         m_MapSpecificData.m_Map = static_cast<Map*>(Resources::getScene(mapname));
         m_MapSpecificData.m_Map->m_IsServer = true;
         return true;
@@ -250,10 +247,10 @@ void Server::update(Server* thisServer, const double& dt) {
 }
 //Listener thread (NOT multithreaded)
 void Server::updateAcceptNewClients(Server& server) {
-    if (server.m_listener) {
-        sf::TcpSocket* sf_client = new sf::TcpSocket();
+    if (server.m_TCPListener) {
+        sf::TcpSocket* sf_client = NEW sf::TcpSocket();
         auto& sfClient = *sf_client;
-        const auto& status = server.m_listener->accept(sfClient);
+        const auto& status = server.m_TCPListener->accept(sfClient);
         if (status == sf::Socket::Status::Done) {
             const auto& client_ip      = sfClient.getRemoteAddress().toString();
             const auto& client_port    = sfClient.getRemotePort();
@@ -269,7 +266,7 @@ void Server::updateAcceptNewClients(Server& server) {
             if (leastThread) { //probably redundant        
                 if (!leastThread->m_Clients.count(client_address)) {
                     sfClient.setBlocking(false);
-                    ServerClient* client = new ServerClient(client_address, server, server.m_Core, sf_client);
+                    ServerClient* client = NEW ServerClient(client_address, server, server.m_Core, sf_client);
                     //server.m_Mutex.lock();
                     leastThread->m_Clients.emplace(client_address, client);
                     leastThread->m_Active.store(1, std::memory_order_relaxed);
@@ -291,13 +288,14 @@ void Server::onReceiveUDP() {
     sf::Packet sf_packet_udp;
     const auto status_udp = receive_udp(sf_packet_udp);
     if (status_udp == sf::Socket::Done) {
-        Packet* basePacket_Ptr = Packet::getPacket(sf_packet_udp);
-        auto& packet = *basePacket_Ptr;
-        if (basePacket_Ptr && packet.validate(sf_packet_udp)) {
-            switch (packet.PacketType) {
+        auto basePacket_Ptr = std::unique_ptr<Packet>(std::move(Packet::getPacket(sf_packet_udp)));
+        const auto valid = basePacket_Ptr->validate(sf_packet_udp);
+        if (basePacket_Ptr && valid) {
+            Packet& pIn = *basePacket_Ptr.get();
+            switch (basePacket_Ptr->PacketType) {
                 case PacketType::Client_To_Server_Ship_Physics_Update: {
                     //a client has sent the server it's physics information, lets forward it
-                    PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(basePacket_Ptr);
+                    PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Ship_Physics_Update;
 
                     //get the client who sent it. TODO: this is sort of expensive
@@ -313,7 +311,7 @@ void Server::onReceiveUDP() {
                 }
             }
         }
-        SAFE_DELETE(basePacket_Ptr);
+        //delete(basePacket_Ptr);
     }
 }
 
@@ -387,15 +385,16 @@ void Server::updateClient(ServerClient& client) {
     sf::Packet sf_packet;
     const auto status     = client.receive(sf_packet);
     if (status == sf::Socket::Done) {
-        Packet* basePacket_Ptr = Packet::getPacket(sf_packet);
-        if (basePacket_Ptr && basePacket_Ptr->validate(sf_packet)) {
+        auto basePacket_Ptr = std::unique_ptr<Packet>(std::move(Packet::getPacket(sf_packet)));
+        const auto valid = basePacket_Ptr->validate(sf_packet);
+        if (basePacket_Ptr && valid) {
             Packet& pIn = *basePacket_Ptr;
             client.m_Timeout = 0.0f;
             // Data extracted successfully...
             switch (pIn.PacketType) {
                 case PacketType::Client_To_Server_Ship_Was_Just_Destroyed: {
                     //just forward it
-                    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket_Ptr);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Ship_Was_Just_Destroyed;
                     server.send_to_all_but_client(client, pI);
 
@@ -407,7 +406,7 @@ void Server::updateClient(ServerClient& client) {
                     }
                     break;
                 }case PacketType::Client_To_Server_Request_Ship_Current_Info: {
-                    PacketShipInfoRequest& pI = *static_cast<PacketShipInfoRequest*>(basePacket_Ptr);
+                    PacketShipInfoRequest& pI = *static_cast<PacketShipInfoRequest*>(&pIn);
                     pI.PacketType   = PacketType::Server_To_Client_Request_Ship_Current_Info;
 
                     auto* requested_ship_client = server.getClientByUsername(pI.requested_ship_username);
@@ -445,49 +444,49 @@ void Server::updateClient(ServerClient& client) {
                     }
                     break;
                 }case PacketType::Client_To_Server_Collision_Event: {
-                    PacketCollisionEvent& pI = *static_cast<PacketCollisionEvent*>(basePacket_Ptr);
+                    PacketCollisionEvent& pI = *static_cast<PacketCollisionEvent*>(&pIn);
                     auto& map = *server.m_MapSpecificData.m_Map;
                     server.m_MapSpecificData.m_CollisionEntries.processCollision(pI, map);
                     break;
                 }case PacketType::Client_To_Server_Anti_Cloak_Status: {
                     //just forward it
-                    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket_Ptr);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Anti_Cloak_Status;
                     server.send_to_all_but_client(client, pI);
                     break;
                 }case PacketType::Client_To_Server_Projectile_Cannon_Impact: {
                     //just forward it
-                    PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(basePacket_Ptr);
+                    PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Projectile_Cannon_Impact;
                     server.send_to_all(pI);
                     break;
                 }case PacketType::Client_To_Server_Projectile_Torpedo_Impact: {
                     //just forward it
-                    PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(basePacket_Ptr);
+                    PacketProjectileImpact& pI = *static_cast<PacketProjectileImpact*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Projectile_Torpedo_Impact;
                     server.send_to_all(pI);
                     break;
                 }case PacketType::Client_To_Server_Client_Fired_Beams: {
                     //just forward it
-                    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket_Ptr);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Client_Fired_Beams;
                     server.send_to_all(pI);
                     break;
                 }case PacketType::Client_To_Server_Client_Fired_Cannons: {
                     //just forward it
-                    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket_Ptr);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Client_Fired_Cannons;
                     server.send_to_all(pI);
                     break;
                 }case PacketType::Client_To_Server_Client_Fired_Torpedos: {
                     //just forward it
-                    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket_Ptr);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Client_Fired_Torpedos;
                     server.send_to_all(pI);
                     break;
                 }case PacketType::Client_To_Server_Client_Changed_Target: {
                     //just forward it
-                    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket_Ptr);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Client_Changed_Target;
                     server.send_to_all_but_client(client, pI);
                     break;
@@ -496,7 +495,7 @@ void Server::updateClient(ServerClient& client) {
 
                     //when a client receives  PacketType::Server_To_Client_New_Client_Entered_Map, they add the new client ship to their map pool and send the server info about themselves
 
-                    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket_Ptr);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     client.m_MapKey = pI.name; //pI.name should be the right map key
                     pI.PacketType = PacketType::Server_To_Client_New_Client_Entered_Map;
                     server.send_to_all_but_client(client, pI);
@@ -519,45 +518,48 @@ void Server::updateClient(ServerClient& client) {
                     }
                     break;
                 }case PacketType::Client_To_Server_Request_Anchor_Creation: {
-                    server.m_MapSpecificData.internal_process_deepspace_anchor(basePacket_Ptr);
+                    server.m_MapSpecificData.internal_process_deepspace_anchor(&pIn);
                     break;
                 }case PacketType::Client_To_Server_Ship_Health_Update: {
                     //just forward it
-                    PacketHealthUpdate& pI = *static_cast<PacketHealthUpdate*>(basePacket_Ptr);
+                    PacketHealthUpdate& pI = *static_cast<PacketHealthUpdate*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Ship_Health_Update;
                     server.send_to_all_but_client(client, pI);
                     break;
                 }case PacketType::Client_To_Server_Ship_Cloak_Update: {
                     //a client has sent us it's cloaking information, forward it
-                    PacketCloakUpdate& pI = *static_cast<PacketCloakUpdate*>(basePacket_Ptr);
+                    PacketCloakUpdate& pI = *static_cast<PacketCloakUpdate*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Ship_Cloak_Update;
                     server.send_to_all_but_client(client, pI);
                     break;
                 }case PacketType::Client_To_Server_Ship_Physics_Update: {
                     //a client has sent the server it's physics information, lets forward it
-                    PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(basePacket_Ptr);
+                    PacketPhysicsUpdate& pI = *static_cast<PacketPhysicsUpdate*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Ship_Physics_Update;
                     server.send_to_all_but_client(client, pI);
                     break;
                 }case PacketType::Client_To_Server_Request_Map_Entry: {
                     //ok client, you told me you want in, lets approve you -> just bouncing
-                    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket_Ptr);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Approve_Map_Entry;
 
                     auto info = Helper::SeparateStringByCharacter(pI.data, ',');
-                    const int teamNumber = stoi(info[2]);
-                    if (teamNumber == -1) {
-                        server.assignRandomTeam(pI, client);
+                    const auto& teamNumber = info[2];
+                    string res = "-1";
+                    if (teamNumber == "-1") {
+                        res = server.assignRandomTeam(pI, client);
                     }
+                    info[2] = res;
+                    pI.data = Helper::Stringify(info, ',');
                     server.send_to_client(client, pI);
                     break;
                 }case PacketType::Client_To_Server_Chat_Message: {
-                    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket_Ptr);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Chat_Message;
                     server.send_to_all(pI);
                     break;
                 }case PacketType::Client_To_Server_Request_Connection: {
-                    PacketMessage& pI = *static_cast<PacketMessage*>(basePacket_Ptr);
+                    PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     const bool valid = server.isValidName(pI.data);
                     server.assign_username_to_client(client, pI.data);
                     PacketMessage pOut;
@@ -581,8 +583,7 @@ void Server::updateClient(ServerClient& client) {
 
                         //now send the client info about the gameplay mode, dont do this for the player client
                         if (client.m_Username != server.m_Core.m_Client->m_Username) {
-                            auto& mode = *server.m_GameplayMode;
-                            auto info = mode.serialize();
+                            auto info = server.m_GameplayMode.serialize();
                             info.PacketType = PacketType::Server_To_Client_Request_GameplayMode;
                             server.send_to_client(client, info);
                         }
@@ -626,26 +627,32 @@ void Server::updateClient(ServerClient& client) {
                 }
             }
         }
-        SAFE_DELETE(basePacket_Ptr);
+        //delete(basePacket_Ptr);
     }
 }
-void Server::assignRandomTeam(PacketMessage& packet_out, ServerClient& client) {
+GameplayMode& Server::getGameplayMode() {
+    return m_GameplayMode;
+}
+string Server::assignRandomTeam(PacketMessage& packet_out, ServerClient& client) {
     //assign the player a team number
-    auto& teams = m_GameplayMode->getTeams();
+    auto& teams = m_GameplayMode.getTeams();
     Team* chosen = nullptr;
     size_t minVal = -1;
     for (auto& team : teams) {
-        const auto numberOfPlayers = team.second->getNumberOfPlayersOnTeam();
+        const auto numberOfPlayers = team.second.getNumberOfPlayersOnTeam();
         if (numberOfPlayers < minVal) {
             minVal = numberOfPlayers;
-            chosen = team.second;
+            chosen = &team.second;
         }
     }
     if (chosen) {
         Team& team = *chosen;
-        boost::replace_all(packet_out.data, ",-1", "," + team.getTeamNumberAsString());
+        const auto& team_num_as_str = team.getTeamNumberAsString();
+        boost::replace_all(packet_out.data, ",-1", "," + team_num_as_str);
         team.addPlayerToTeam(client.m_MapKey);
+        return team_num_as_str;
     }
+    return "-1";
 }
 
 ServerClient* Server::getClientByUsername(const string& username) {

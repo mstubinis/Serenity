@@ -6,7 +6,7 @@
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/math/Engine_Math.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/physics/Collision.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
@@ -58,7 +58,7 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
     const auto mass = updateShipDimensions();
 
     auto& body = *getComponent<ComponentBody>();
-    auto* c = new Collision(&body, model, mass, CollisionType::ConvexHull);
+    auto* c = NEW Collision(&body, model, mass, CollisionType::ConvexHull);
     body.setCollision(c);
     //the body is using a convex hull for ship to ship ramming
 
@@ -74,17 +74,17 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
-        if (i == 0)  system = new ShipSystemReactor(_this, 1000);
-        else if (i == 1)  system = new ShipSystemPitchThrusters(_this, 1.22f);
-        else if (i == 2)  system = new ShipSystemYawThrusters(_this, 1.22f);
-        else if (i == 3)  system = new ShipSystemRollThrusters(_this, 1.2f);
-        else if (i == 4)  system = new ShipSystemCloakingDevice(_this);
-        else if (i == 5)  system = new ShipSystemShields(_this, map, 7700.0f, 7700.0f, 7700.0f, 7700.0f, 10700.0f, 10700.0f);
-        else if (i == 6)  system = new ShipSystemMainThrusters(_this);
-        else if (i == 7)  system = new ShipSystemWarpDrive(_this);
-        else if (i == 8)  system = new ShipSystemSensors(_this, map);
-        else if (i == 9)  system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 15100.0f);
+        if (i == 0)  system = NEW ShipSystemReactor(_this, 1000);
+        else if (i == 1)  system = NEW ShipSystemPitchThrusters(_this, 1.22f);
+        else if (i == 2)  system = NEW ShipSystemYawThrusters(_this, 1.22f);
+        else if (i == 3)  system = NEW ShipSystemRollThrusters(_this, 1.2f);
+        else if (i == 4)  system = NEW ShipSystemCloakingDevice(_this);
+        else if (i == 5)  system = NEW ShipSystemShields(_this, map, 7700.0f, 7700.0f, 7700.0f, 7700.0f, 10700.0f, 10700.0f, glm::vec3(0.0f),glm::vec3(1.0f,1.3f,1.0f));
+        else if (i == 6)  system = NEW ShipSystemMainThrusters(_this);
+        else if (i == 7)  system = NEW ShipSystemWarpDrive(_this);
+        else if (i == 8)  system = NEW ShipSystemSensors(_this, map);
+        else if (i == 9)  system = NEW ShipSystemWeapons(_this);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 15100.0f);
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);
@@ -102,15 +102,15 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     //blender 3d to game 3d: switch y and z, then negate z
-    auto* leftTop = new DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 2);
-    auto* rightTop = new DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 1);
+    auto* leftTop = NEW DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 2);
+    auto* rightTop = NEW DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 1);
 
     weapons.addPrimaryWeaponCannon(*leftTop, true);
     weapons.addPrimaryWeaponCannon(*rightTop, true);
 
-    auto* fwd_torp_1 = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 1);
-    auto* fwd_torp_2 = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 1);
-    auto* aft_torp = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.115291f, 0.511922f), glm::vec3(0.0f, 0.0f, 1.0f), 35.0f, 1);
+    auto* fwd_torp_1 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 1);
+    auto* fwd_torp_2 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 1);
+    auto* aft_torp = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.115291f, 0.511922f), glm::vec3(0.0f, 0.0f, 1.0f), 35.0f, 1);
 
     weapons.addSecondaryWeaponTorpedo(*fwd_torp_1, true);
     weapons.addSecondaryWeaponTorpedo(*fwd_torp_2, true);

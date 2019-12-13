@@ -10,26 +10,26 @@ epriv::EventDispatcher::EventDispatcher(){
 }
 epriv::EventDispatcher::~EventDispatcher(){ 
     for (auto& v : m_Observers) {
-        vector_clear(v);
+        v.clear();
     }
-    vector_clear(m_Observers);
+    m_Observers.clear();
 }
-void epriv::EventDispatcher::registerObject(EventObserver* obj, const EventType::Type& eventType){
-    auto& v = m_Observers[eventType];
-    for (auto& o : v) { 
-        if (o == obj) { 
+void epriv::EventDispatcher::registerObject(EventObserver* observerToRegister, const EventType::Type& eventType){
+    auto& observers_with_event_type = m_Observers[eventType];
+    for (auto& o : observers_with_event_type) {
+        if (o == observerToRegister) {
             return; 
         } 
     }
-    v.push_back(obj);
+    observers_with_event_type.push_back(observerToRegister);
 }
 void epriv::EventDispatcher::unregisterObject(EventObserver* obj, const EventType::Type& eventType){
-    auto& v = m_Observers[eventType];
-    removeFromVector(v, obj);
+    auto& observers_with_event_type = m_Observers[eventType];
+    removeFromVector(observers_with_event_type, obj);
 }
 void epriv::EventDispatcher::dispatchEvent(const Event& _event){ 
-    const auto& v = m_Observers[_event.type];
-    for (auto& obj : v) {
-        obj->onEvent(_event);
+    const auto& observers_with_event_type = m_Observers[_event.type];
+    for (size_t i = 0; i < observers_with_event_type.size(); ++i) {
+        observers_with_event_type[i]->onEvent(_event);
     }
 }

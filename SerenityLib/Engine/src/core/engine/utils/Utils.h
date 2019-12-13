@@ -103,12 +103,4 @@ template<typename T> const std::string convertNumToNumWithCommas(const T& n){
     return r;
 }
 
-#define SAFE_DELETE_FUTURE(x){ if (x) { if (x->_Is_ready() || x->_Is_ready_at_thread_exit()) { x->get(); } delete x; x = 0; } }
-#define SAFE_DELETE_THREAD(x){ if (x) {if (x->joinable()) {x->join();}delete x;x = 0;}}
-#define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
-#define SAFE_DELETE(x) { if(x){ delete x; x = 0;} } // Convenience macro for deleting a pointer
-#define SAFE_DELETE_VECTOR(x){ for(auto& it:x){ SAFE_DELETE(it); } vector_clear(x); } // Convenience macro for deleting the pointer elements of a vector
-#define SAFE_DELETE_QUEUE(x){ while (x.size() > 0) { auto& val = x.front(); SAFE_DELETE(val); x.pop(); } } // Convenience macro for deleting the pointer elements of a vector
-#define SAFE_DELETE_MAP(x){ for(auto& it:x){ SAFE_DELETE(it.second); } x.clear(); } // Convenience macro for deleting the pointer elements of a map
-
 #endif

@@ -29,17 +29,17 @@ Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
-        if (i == 0)        system = new ShipSystemReactor(_this, 1000);
-        else if (i == 1)   system = new ShipSystemPitchThrusters(_this, 1.25f);
-        else if (i == 2)   system = new ShipSystemYawThrusters(_this, 1.25f);
-        else if (i == 3)   system = new ShipSystemRollThrusters(_this, 1.17f);
-        else if (i == 4)   system = new ShipSystemCloakingDevice(_this);
-        else if (i == 5)   system = new ShipSystemShields(_this, map, 21500.0f, 21500.0f, 21500.0f, 21500.0f, 30000.0f, 30000.0f, glm::vec3(0.0f, -0.107706f, 0.279445f), glm::vec3(1.0f,1.3f,1.0f));
-        else if (i == 6)   system = new ShipSystemMainThrusters(_this, 1.15f);
-        else if (i == 7)   system = new ShipSystemWarpDrive(_this);
-        else if (i == 8)   system = new ShipSystemSensors(_this, map);
-        else if (i == 9)   system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 51500.0f);
+        if (i == 0)        system = NEW ShipSystemReactor(_this, 1000);
+        else if (i == 1)   system = NEW ShipSystemPitchThrusters(_this, 1.25f);
+        else if (i == 2)   system = NEW ShipSystemYawThrusters(_this, 1.25f);
+        else if (i == 3)   system = NEW ShipSystemRollThrusters(_this, 1.17f);
+        else if (i == 4)   system = NEW ShipSystemCloakingDevice(_this);
+        else if (i == 5)   system = NEW ShipSystemShields(_this, map, 21500.0f, 21500.0f, 21500.0f, 21500.0f, 30000.0f, 30000.0f, glm::vec3(0.0f, -0.107706f, 0.279445f), glm::vec3(1.0f,1.3f,1.0f));
+        else if (i == 6)   system = NEW ShipSystemMainThrusters(_this, 1.15f);
+        else if (i == 7)   system = NEW ShipSystemWarpDrive(_this);
+        else if (i == 8)   system = NEW ShipSystemSensors(_this, map);
+        else if (i == 9)   system = NEW ShipSystemWeapons(_this);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 51500.0f);
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);
@@ -49,20 +49,20 @@ Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
     vector<glm::vec3> forward_heavy_beam_windup{
         glm::vec3(0, 0.080577f, -2.27926f),
     };
-    auto* forward_heavy_beam = new DisruptorBeam(_this, map, glm::vec3(0, 0.080577f, -2.27926f), glm::vec3(0, 0, -1), 25.0f, forward_heavy_beam_windup, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 2.2f, 2.2f, 10.0f);
+    auto* forward_heavy_beam = NEW DisruptorBeam(_this, map, glm::vec3(0, 0.080577f, -2.27926f), glm::vec3(0, 0, -1), 25.0f, forward_heavy_beam_windup, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 2.2f, 2.2f, 10.0f);
 
-    auto* forward_front_right_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(0.159582f, 0.080577f, -2.47036f), glm::vec3(0, 0, -1), 25.0f, 4, 200.0f);
-    auto* forward_front_left_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(-0.159582f, 0.080577f, -2.47036f), glm::vec3(0, 0, -1), 25.0f, 4, 200.0f);
+    auto* forward_front_right_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(0.159582f, 0.080577f, -2.47036f), glm::vec3(0, 0, -1), 25.0f, 4, 200.0f);
+    auto* forward_front_left_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(-0.159582f, 0.080577f, -2.47036f), glm::vec3(0, 0, -1), 25.0f, 4, 200.0f);
 
     weapons.addPrimaryWeaponBeam(*forward_heavy_beam, true);
     weapons.addPrimaryWeaponCannon(*forward_front_right_dis_cannon, true);
     weapons.addPrimaryWeaponCannon(*forward_front_left_dis_cannon, true);
 
-    auto* forward_torp_1 = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, -0.093022f, -0.729978f), glm::vec3(0, 0, -1), 20.0f, 1);
-    auto* forward_torp_2 = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, -0.093022f, -0.729978f), glm::vec3(0, 0, -1), 20.0f, 1);
-    auto* forward_torp_3 = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, -0.093022f, -0.729978f), glm::vec3(0, 0, -1), 20.0f, 1);
-    auto* forward_torp_4 = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, -0.093022f, -0.729978f), glm::vec3(0, 0, -1), 20.0f, 1);
-    auto* forward_torp_5 = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, -0.093022f, -0.729978f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* forward_torp_1 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, -0.093022f, -0.729978f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* forward_torp_2 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, -0.093022f, -0.729978f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* forward_torp_3 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, -0.093022f, -0.729978f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* forward_torp_4 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, -0.093022f, -0.729978f), glm::vec3(0, 0, -1), 20.0f, 1);
+    auto* forward_torp_5 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, -0.093022f, -0.729978f), glm::vec3(0, 0, -1), 20.0f, 1);
     weapons.addSecondaryWeaponTorpedo(*forward_torp_1, true);
     weapons.addSecondaryWeaponTorpedo(*forward_torp_2, true);
     weapons.addSecondaryWeaponTorpedo(*forward_torp_3, true);
@@ -71,23 +71,23 @@ Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
 
 
 
-    auto* aft_left_torp_1 = new KlingonPhotonTorpedo(_this, map, glm::vec3(-0.072712f, 0.324057f, 1.16697f), glm::vec3(0, 0, 1), 20.0f, 1);
-    auto* aft_right_torp_1 = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.072712f, 0.324057f, 1.16697f), glm::vec3(0, 0, 1), 20.0f, 1);
-    auto* aft_left_torp_2 = new KlingonPhotonTorpedo(_this, map, glm::vec3(-0.072712f, 0.324057f, 1.16697f), glm::vec3(0, 0, 1), 20.0f, 1);
-    auto* aft_right_torp_2 = new KlingonPhotonTorpedo(_this, map, glm::vec3(0.072712f, 0.324057f, 1.16697f), glm::vec3(0, 0, 1), 20.0f, 1);
+    auto* aft_left_torp_1 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(-0.072712f, 0.324057f, 1.16697f), glm::vec3(0, 0, 1), 20.0f, 1);
+    auto* aft_right_torp_1 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.072712f, 0.324057f, 1.16697f), glm::vec3(0, 0, 1), 20.0f, 1);
+    auto* aft_left_torp_2 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(-0.072712f, 0.324057f, 1.16697f), glm::vec3(0, 0, 1), 20.0f, 1);
+    auto* aft_right_torp_2 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.072712f, 0.324057f, 1.16697f), glm::vec3(0, 0, 1), 20.0f, 1);
     weapons.addSecondaryWeaponTorpedo(*aft_left_torp_1);
     weapons.addSecondaryWeaponTorpedo(*aft_right_torp_1);
     weapons.addSecondaryWeaponTorpedo(*aft_left_torp_2);
     weapons.addSecondaryWeaponTorpedo(*aft_right_torp_2);
 
-    auto* front_port_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(-0.537247f, 0.074084f, 0.139261f), glm::vec3(-0.697538f, 0, -0.755028f), 32.0f, 3, 200.0f);
-    auto* front_star_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(0.537247f, 0.074084f, 0.139261f), glm::vec3(0.697538f, 0, -0.755028f), 32.0f, 3, 200.0f);
+    auto* front_port_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(-0.537247f, 0.074084f, 0.139261f), glm::vec3(-0.697538f, 0, -0.755028f), 32.0f, 3, 200.0f);
+    auto* front_star_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(0.537247f, 0.074084f, 0.139261f), glm::vec3(0.697538f, 0, -0.755028f), 32.0f, 3, 200.0f);
     weapons.addPrimaryWeaponCannon(*front_port_dis_cannon);
     weapons.addPrimaryWeaponCannon(*front_star_dis_cannon);
 
 
-    auto* port_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(-1.42054f, -0.014244f, 0.857809f), glm::vec3(-1, 0, 0), 32.0f, 3, 200.0f);
-    auto* star_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(1.42054f, -0.014244f, 0.857809f), glm::vec3(1, 0, 0), 32.0f, 3, 200.0f);
+    auto* port_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(-1.42054f, -0.014244f, 0.857809f), glm::vec3(-1, 0, 0), 32.0f, 3, 200.0f);
+    auto* star_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(1.42054f, -0.014244f, 0.857809f), glm::vec3(1, 0, 0), 32.0f, 3, 200.0f);
     weapons.addPrimaryWeaponCannon(*port_dis_cannon);
     weapons.addPrimaryWeaponCannon(*star_dis_cannon);
 
@@ -97,20 +97,20 @@ Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
     vector<glm::vec3> star_dis_beam_windup{
         glm::vec3(1.42054f, -0.014244f, 0.857809f),
     };
-    auto* port_dis_beam = new DisruptorBeam(_this, map, glm::vec3(-1.42054f, -0.014244f, 0.857809f), glm::vec3(-1, 0, 0), 38.0f, port_dis_beam_windup, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 1.0f, 1.0f, 10.0f);
-    auto* star_dis_beam = new DisruptorBeam(_this, map, glm::vec3(1.42054f, -0.014244f, 0.857809f), glm::vec3(1, 0, 0), 38.0f, star_dis_beam_windup, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 1.0f, 1.0f, 10.0f);
+    auto* port_dis_beam = NEW DisruptorBeam(_this, map, glm::vec3(-1.42054f, -0.014244f, 0.857809f), glm::vec3(-1, 0, 0), 38.0f, port_dis_beam_windup, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 1.0f, 1.0f, 10.0f);
+    auto* star_dis_beam = NEW DisruptorBeam(_this, map, glm::vec3(1.42054f, -0.014244f, 0.857809f), glm::vec3(1, 0, 0), 38.0f, star_dis_beam_windup, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 1.0f, 1.0f, 10.0f);
     weapons.addPrimaryWeaponBeam(*port_dis_beam);
     weapons.addPrimaryWeaponBeam(*star_dis_beam);
 
 
-    auto* aft_left_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(-0.693038f, 0.083061f, 1.38455f), glm::vec3(-0.058693f, 0, 0.736922f), 32.0f, 3, 200.0f);
-    auto* aft_right_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(0.693038f, 0.083061f, 1.38455f), glm::vec3(0.058693f, 0, 0.736922f), 32.0f, 3, 200.0f);
+    auto* aft_left_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(-0.693038f, 0.083061f, 1.38455f), glm::vec3(-0.058693f, 0, 0.736922f), 32.0f, 3, 200.0f);
+    auto* aft_right_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(0.693038f, 0.083061f, 1.38455f), glm::vec3(0.058693f, 0, 0.736922f), 32.0f, 3, 200.0f);
     weapons.addPrimaryWeaponCannon(*aft_left_dis_cannon);
     weapons.addPrimaryWeaponCannon(*aft_right_dis_cannon);
 
 
-    auto* dorsal_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(0.0f, 0.535206f, 1.0818f), glm::vec3(0.0f, 0.958169f, -0.169276f), 45.0f, 3, 200.0f);
-    auto* ventral_dis_cannon = new DisruptorCannon(_this, map, glm::vec3(0.0f, -0.080504f, -0.086177f), glm::vec3(0.0f, -1.0f, 0.0f), 45.0f, 3, 200.0f);
+    auto* dorsal_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(0.0f, 0.535206f, 1.0818f), glm::vec3(0.0f, 0.958169f, -0.169276f), 45.0f, 3, 200.0f);
+    auto* ventral_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(0.0f, -0.080504f, -0.086177f), glm::vec3(0.0f, -1.0f, 0.0f), 45.0f, 3, 200.0f);
     weapons.addPrimaryWeaponCannon(*dorsal_dis_cannon);
     weapons.addPrimaryWeaponCannon(*ventral_dis_cannon);
 

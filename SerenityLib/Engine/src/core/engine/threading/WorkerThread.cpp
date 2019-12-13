@@ -15,7 +15,7 @@ WorkerThread::WorkerThread() {
     m_Stopped = true;
 }
 WorkerThread::WorkerThread(ThreadPool& pool) {
-    m_Thread = new std::thread(&WorkerThread::Loop, std::ref(*this), std::ref(pool));
+    m_Thread = NEW std::thread(&WorkerThread::Loop, std::ref(*this), std::ref(pool));
     m_Stopped = false;
 }
 WorkerThread::~WorkerThread() {

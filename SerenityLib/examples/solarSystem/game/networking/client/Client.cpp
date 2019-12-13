@@ -46,26 +46,17 @@
 #include "../../particles/Fire.h"
 #include "../../particles/Sparks.h"
 #include <core/engine/physics/Collision.h>
+#include <memory>
 
 #include <iostream>
 
 using namespace std;
 using namespace Engine;
 
-struct ShipSelectorButtonOnClick final {void operator()(Button* button) const {
-    ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(button->getUserPointer());
-    for (auto& widget : window.getWindowFrame().content()) {
-        widget->setColor(0.1f, 0.1f, 0.1f, 0.5f);
-    }
-    button->setColor(0.5f, 0.5f, 0.5f, 1.0f);
-    const string& shipClass = button->text();
-    window.setShipClass(shipClass);
-}};
-
 Client::Client(Team* team, Core& core, const unsigned short& server_port, const string& server_ipAddress, const unsigned int& id) : m_Core(core), m_MapSpecificData(*this){
     m_MapSpecificData.m_Team = team;
-    m_TcpSocket = new Networking::SocketTCP(server_port,          server_ipAddress);
-    m_UdpSocket = new Networking::SocketUDP(server_port + 1 + id, server_ipAddress);
+    m_TcpSocket = NEW Networking::SocketTCP(server_port,          server_ipAddress);
+    m_UdpSocket = NEW Networking::SocketUDP(server_port + 1 + id, server_ipAddress);
     internal_init(server_port, server_ipAddress);
 }
 Client::~Client() {
@@ -87,7 +78,7 @@ void Client::internal_init(const unsigned short& server_port, const string& serv
 }
 void Client::setClientID(const unsigned int id) {
     SAFE_DELETE(m_UdpSocket);
-    m_UdpSocket = new Networking::SocketUDP(m_Port + 1 + id, m_ServerIP);
+    m_UdpSocket = NEW Networking::SocketUDP(m_Port + 1 + id, m_ServerIP);
     m_UdpSocket->setBlocking(false);
     m_UdpSocket->bind();
 }
@@ -104,7 +95,7 @@ void Client::changeConnectionDestination(const unsigned short& port, const strin
         return;
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     SAFE_DELETE(m_TcpSocket);
-    m_TcpSocket = new Networking::SocketTCP(port, ipAddress);
+    m_TcpSocket = NEW Networking::SocketTCP(port, ipAddress);
 }
 void Client::connect(const unsigned short& timeout) {
     auto lambda_connect = [&](const unsigned short timeout) {
@@ -126,9 +117,9 @@ void Client::connect(const unsigned short& timeout) {
     if (!isReadyForConnection())
         return;
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
-    m_InitialConnectionThread = new std::future<sf::Socket::Status>(std::move(std::async(std::launch::async, lambda_connect, timeout)));
+    m_InitialConnectionThread = NEW std::future<sf::Socket::Status>(std::move(std::async(std::launch::async, lambda_connect, timeout)));
 }
-GameplayMode* Client::getGameplayMode() {
+GameplayMode& Client::getGameplayMode() {
     return m_MapSpecificData.m_GameplayMode;
 }
 void Client::disconnect() {
@@ -218,7 +209,7 @@ void Client::on_receive_physics_update(Packet& basePacket, Map& map) {
             if (aiType == AIType::Player_You && player_you)
                 final_ai = AIType::Player_Other;
             //TODO: create proper AI for npc's
-            new_client_ship = map.createShip(final_ai, *m_MapSpecificData.m_GameplayMode->getTeams().at(teamNumber), *this, pI.ship_class, pI.player_username, spawnPosition + randOffsetForSafety);
+            new_client_ship = map.createShip(final_ai, m_MapSpecificData.m_GameplayMode.getTeams().at(teamNumber), *this, pI.ship_class, pI.player_username, spawnPosition + randOffsetForSafety);
             if (new_client_ship && player_you) {
                 //hey a new ship entered my map, i want info about it!
                 PacketShipInfoRequest pOut;
@@ -336,7 +327,7 @@ void Client::on_receive_anti_cloak_status(Packet& basePacket, Map& map) {
 
 void Client::on_receive_server_game_mode(Packet& basePacket) {
     PacketGameplayModeInfo& pI = static_cast<PacketGameplayModeInfo&>(basePacket);
-    m_MapSpecificData.m_GameplayMode->deserialize(pI);
+    m_MapSpecificData.m_GameplayMode.deserialize(pI);
 }
 void Client::on_receive_cannon_impact(Packet& basePacket, Map& map) {
     PacketProjectileImpact& pI = static_cast<PacketProjectileImpact&>(basePacket);
@@ -474,7 +465,7 @@ void Client::on_receive_new_client_entered_map(Packet& basePacket) {
     TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(list[2]));
     Map& map                    = *static_cast<Map*>(Resources::getScene(list[1]));
     const auto spawn_anchor_pos = map.getSpawnAnchor()->getPosition();
-    Ship* ship                  = map.createShip(AIType::Player_Other, *m_MapSpecificData.m_GameplayMode->getTeams().at(teamNumber), *this, list[0], pI.name, glm::vec3(pI.r + spawn_anchor_pos.x, pI.g + spawn_anchor_pos.y, pI.b + spawn_anchor_pos.z));
+    Ship* ship                  = map.createShip(AIType::Player_Other, *m_MapSpecificData.m_GameplayMode.getTeam(teamNumber), *this, list[0], pI.name, glm::vec3(pI.r + spawn_anchor_pos.x, pI.g + spawn_anchor_pos.y, pI.b + spawn_anchor_pos.z));
 }
 void Client::on_receive_server_approve_map_entry(Packet& basePacket, Menu& menu) {
     //ok the server let me in, let me tell the server i successfully went in
@@ -483,7 +474,7 @@ void Client::on_receive_server_approve_map_entry(Packet& basePacket, Menu& menu)
     TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(list[2]));
 
     menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
-    m_Core.enterMap(*m_MapSpecificData.m_GameplayMode->getTeams().at(teamNumber), list[1], list[0], pI.name, pI.r, pI.g, pI.b);
+    m_Core.enterMap(*m_MapSpecificData.m_GameplayMode.getTeam(teamNumber), list[1], list[0], pI.name, pI.r, pI.g, pI.b);
     menu.m_Next->setText("Next");
     menu.m_GameState = GameState::Game;//ok, ive entered the map
 
@@ -533,73 +524,67 @@ void Client::on_receive_server_approve_map_entry(Packet& basePacket, Menu& menu)
 }
 void Client::on_receive_map_data(Packet& basePacket, Menu& menu) {
     PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
+    Map* map_ptr_real = static_cast<Map*>(Resources::getScene(pI.name));
     if (!m_MapSpecificData.m_Map) {
-        new Map(*m_MapSpecificData.m_GameplayMode, *this, pI.name, ResourceManifest::BasePath + "data/Systems/" + pI.name + ".txt");
-        Map* map_ptr_real = static_cast<Map*>(Resources::getScene(pI.name));
+        if (!map_ptr_real) {
+            NEW Map(m_MapSpecificData.m_GameplayMode, *this, pI.name, ResourceManifest::BasePath + "data/Systems/" + pI.name + ".txt");
+            map_ptr_real = static_cast<Map*>(Resources::getScene(pI.name));
+        }
         m_MapSpecificData.m_Map = map_ptr_real;
     }
     auto& map = *m_MapSpecificData.m_Map;
     auto& menuScene = *const_cast<Scene*>(Resources::getScene("Menu"));
     auto* menuSkybox = menuScene.skybox();
     SAFE_DELETE(menuSkybox);
-    GameSkybox* newMenuSkybox = new GameSkybox(map.skyboxFile(), 0);
+    GameSkybox* newMenuSkybox = NEW GameSkybox(map.skyboxFile(), 0);
     menuScene.setSkybox(newMenuSkybox);
     menuScene.setGlobalIllumination(map.getGlobalIllumination());
 
     menu.m_ServerLobbyShipSelectorWindow->clear();
     auto allowed_ships = map.allowedShips();
-    for (auto& allowed_ship : allowed_ships) {
-        auto& textColor = Ships::Database.at(allowed_ship).FactionInformation.ColorText;
-        Button* shipbutton = new Button(*menu.m_Font, 0, 0, 100, 40);
-        shipbutton->setText(allowed_ship);
-        shipbutton->setColor(0.1f, 0.1f, 0.1f, 0.5f);
-        shipbutton->setTextColor(textColor.r, textColor.g, textColor.b, 1.0f);
-        shipbutton->setAlignment(Alignment::TopLeft);
-        shipbutton->setWidth(600);
-        shipbutton->setTextAlignment(TextAlignment::Left);
-        shipbutton->setUserPointer(menu.m_ServerLobbyShipSelectorWindow);
-        shipbutton->setOnClickFunctor(ShipSelectorButtonOnClick());
-        shipbutton->setTextureCorner(nullptr);
-        shipbutton->setTextureEdge(nullptr);
-        menu.m_ServerLobbyShipSelectorWindow->addContent(shipbutton);
+    for (auto& allowed_ship_class : allowed_ships) {
+        menu.m_ServerLobbyShipSelectorWindow->addShipButton(allowed_ship_class);
     }
     menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(true);
 }
 void Client::on_receive_chat_message(Packet& basePacket, Menu& menu) {
     PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
     const auto message = pI.name + ": " + pI.data;
-    Text* text = new Text(0, 0, *menu.m_Font, message);
-    text->setColor(1, 1, 0, 1);
-    text->setTextScale(0.62f, 0.62f);
-    menu.m_ServerLobbyChatWindow->addContent(text);
+    Text* text_message = NEW Text(0, 0, *menu.m_Font, message);
+    text_message->setColor(1, 1, 0, 1);
+    text_message->setTextScale(0.62f, 0.62f);
+    const auto window_width = menu.m_ServerLobbyChatWindow->getWindowFrame().width();
+    text_message->setWidth(window_width);
+    menu.m_ServerLobbyChatWindow->addContent(text_message);
 }
 void Client::on_receive_client_just_joined_server_lobby(Packet& basePacket, Menu& menu) {
     PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
     const auto message = pI.name + ": Has joined the server";
 
-    Text* text = new Text(0, 0, *menu.m_Font, pI.name);
-    text->setColor(1, 1, 0, 1);
-    text->setTextScale(0.62f, 0.62f);
-    menu.m_ServerLobbyConnectedPlayersWindow->addContent(text);
+    Text* text_player_name = NEW Text(0, 0, *menu.m_Font, pI.name);
+    text_player_name->setColor(1, 1, 0, 1);
+    text_player_name->setTextScale(0.62f, 0.62f);
+    auto window_width = menu.m_ServerLobbyConnectedPlayersWindow->getWindowFrame().width();
+    text_player_name->setWidth(window_width);
+    menu.m_ServerLobbyConnectedPlayersWindow->addContent(text_player_name);
 
-    Text* text1 = new Text(0, 0, *menu.m_Font, message);
-    text1->setColor(0.8f, 1, 0.2f, 1);
-    text1->setTextScale(0.62f, 0.62f);
-    menu.m_ServerLobbyChatWindow->addContent(text1);
+    Text* text_message = NEW Text(0, 0, *menu.m_Font, message);
+    text_message->setColor(0.8f, 1, 0.2f, 1);
+    text_message->setTextScale(0.62f, 0.62f);
+    window_width = menu.m_ServerLobbyChatWindow->getWindowFrame().width();
+    text_message->setWidth(window_width);
+    menu.m_ServerLobbyChatWindow->addContent(text_message);
 }
 void Client::on_receive_client_just_left_server(Packet& basePacket, Menu& menu) {
     PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
     const auto message = pI.name + ": Has left the server";
 
-    Text* text = new Text(0, 0, *menu.m_Font, pI.name);
-    text->setColor(1, 1, 0, 1);
-    text->setTextScale(0.62f, 0.62f);
     menu.m_ServerLobbyConnectedPlayersWindow->removeContent(pI.name);
 
-    Text* text1 = new Text(0, 0, *menu.m_Font, message);
-    text1->setColor(0.907f, 0.341f, 0.341f, 1.0f);
-    text1->setTextScale(0.62f, 0.62f);
-    menu.m_ServerLobbyChatWindow->addContent(text1);
+    Text* text_message = NEW Text(0, 0, *menu.m_Font, message);
+    text_message->setColor(0.907f, 0.341f, 0.341f, 1.0f);
+    text_message->setTextScale(0.62f, 0.62f);
+    menu.m_ServerLobbyChatWindow->addContent(text_message);
 }
 void Client::on_receive_connection_accepted_by_server(Packet& basePacket, Menu& menu) {
     PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
@@ -619,7 +604,7 @@ void Client::on_receive_connection_accepted_by_server(Packet& basePacket, Menu& 
     //list is a vector of connected players
     for (auto& _name : list) {
         if (!_name.empty()) { //trailing "," in data can lead to an empty string added into the list
-            Text* text = new Text(0, 0, *menu.m_Font, _name);
+            Text* text = NEW Text(0, 0, *menu.m_Font, _name);
             text->setColor(1, 1, 0, 1);
             text->setTextScale(0.62f, 0.62f);
             menu.m_ServerLobbyConnectedPlayersWindow->addContent(text);
@@ -645,8 +630,9 @@ void Client::onReceiveUDP() {
     sf::Packet sf_packet;
     const auto status = receive_udp(sf_packet);
     if (status == sf::Socket::Status::Done) {
-        Packet* basePacket_Ptr = Packet::getPacket(sf_packet);
-        if (basePacket_Ptr && basePacket_Ptr->validate(sf_packet)) {
+        auto basePacket_Ptr = std::unique_ptr<Packet>(std::move(Packet::getPacket(sf_packet)));
+        const auto valid = basePacket_Ptr->validate(sf_packet);
+        if (basePacket_Ptr && valid) {
             auto& basePacket = *basePacket_Ptr;
             Menu& menu = *m_Core.m_Menu;
             Map& map = *m_MapSpecificData.m_Map;
@@ -659,15 +645,16 @@ void Client::onReceiveUDP() {
                 }
             }
         }
-        SAFE_DELETE(basePacket_Ptr);
+        //delete(basePacket_Ptr);
     }
 }
 void Client::onReceiveTCP() {
     sf::Packet sf_packet;
     const auto status = receive(sf_packet);
     if (status == sf::Socket::Status::Done) {
-        Packet* basePacket_Ptr = Packet::getPacket(sf_packet);
-        if (basePacket_Ptr && basePacket_Ptr->validate(sf_packet)) {
+        auto basePacket_Ptr = std::unique_ptr<Packet>(std::move(Packet::getPacket(sf_packet)));
+        const auto valid = basePacket_Ptr->validate(sf_packet);
+        if (basePacket_Ptr && valid) {
             auto& basePacket = *basePacket_Ptr;
             Menu& menu = *m_Core.m_Menu;
             if (m_MapSpecificData.m_Map) {
@@ -767,6 +754,6 @@ void Client::onReceiveTCP() {
                 }
             }
         }
-        SAFE_DELETE(basePacket_Ptr);
+        //delete(basePacket_Ptr);
     }
 }

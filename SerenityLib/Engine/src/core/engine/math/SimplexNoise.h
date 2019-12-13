@@ -14,11 +14,11 @@ namespace Engine{
     namespace epriv{
         class SimplexNoise final{
             private:
-                double*              m_Constants;
+                double              m_Constants[9];
 
-                glm::ivec2*          m_Grad2;
-                glm::ivec3*          m_Grad3;
-                glm::ivec4*          m_Grad4;
+                glm::ivec2          m_Grad2[8];
+                glm::ivec3          m_Grad3[24];
+                glm::ivec4          m_Grad4[64];
 
                 std::vector<short>   m_Perm;
                 std::vector<short>   m_PermGradIndex3D;

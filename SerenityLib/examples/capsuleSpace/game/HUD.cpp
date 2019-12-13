@@ -5,7 +5,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/renderer/Engine_Renderer.h>
-#include <core/engine/Engine_Window.h>
+#include <core/engine/system/window/Engine_Window.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/fonts/Font.h>
 #include <core/engine/textures/Texture.h>

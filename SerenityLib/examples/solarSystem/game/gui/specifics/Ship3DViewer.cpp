@@ -62,7 +62,17 @@ Ship3DViewer::Ship3DViewer(Core& core, Scene& scene, Camera& camera, const float
     m_IsCurrentlyDragging         = false;
     m_IsCurrentlyOverShip3DWindow = false;
     m_ChosenShipClass             = "";
-    m_EntityWrapperShip           = nullptr;
+
+
+    m_EntityWrapperShip           = NEW EntityWrapper(scene);
+    GameCamera* menu_scene_camera = static_cast<GameCamera*>(scene.getActiveCamera());
+    menu_scene_camera->setTarget(m_EntityWrapperShip);
+    auto& body = *m_EntityWrapperShip->addComponent<ComponentBody>();
+    body.setPosition(0, 0, 8500);
+    auto& model = *m_EntityWrapperShip->addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
+    model.getModel(0).setViewportFlag(ViewportFlag::All);
+    model.hide();
+
 
     auto& logic                   = *camera.getComponent<ComponentLogic2>();
     logic.setUserPointer1(&core);
@@ -81,28 +91,18 @@ Ship3DViewer::Ship3DViewer(Core& core, Scene& scene, Camera& camera, const float
     thisBody.rotate(glm::radians(10.0f), 0.0f, 0.0f, true);
 }
 Ship3DViewer::~Ship3DViewer() {
-    SAFE_DELETE(m_EntityWrapperShip);
+    //SAFE_DELETE(m_EntityWrapperShip);
 }
 void Ship3DViewer::setPosition(const float x, const float y) {
     auto& dimensions = m_ShipDisplayViewport->getViewportDimensions();
     m_ShipDisplayViewport->setViewportDimensions(x, y, dimensions.z, dimensions.w);
 }
 void Ship3DViewer::setShipClass(const string& shipClass) {
+    if (m_ChosenShipClass == shipClass)
+        return;
+    assert(Ships::Database.count(shipClass));
     m_ChosenShipClass                 = shipClass;
-    if (!m_EntityWrapperShip) {
-        Scene& menu_scene             = *Resources::getScene("Menu");
-        m_EntityWrapperShip           = new EntityWrapper(menu_scene);
-        GameCamera* menu_scene_camera = static_cast<GameCamera*>(menu_scene.getActiveCamera());
-        menu_scene_camera->setTarget(m_EntityWrapperShip);
-
-        auto& body                    = *m_EntityWrapperShip->addComponent<ComponentBody>();
-        body.setPosition(0, 0, 8500);
-        auto& model                   = *m_EntityWrapperShip->addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
-        model.getModel(0).setViewportFlag(ViewportFlag::All);
-        model.hide();
-    }
-    assert(Ships::Database.count(m_ChosenShipClass));
-    auto& shipData                    = Ships::Database.at(m_ChosenShipClass);
+    auto& shipData                    = Ships::Database.at(shipClass);
     auto& model                       = *m_EntityWrapperShip->getComponent<ComponentModel>();
     model.setModelMesh(shipData.MeshHandles[0], 0);
     model.setModelMaterial(shipData.MaterialHandles[0], 0);

@@ -16,7 +16,9 @@ ShipInformation::ShipInformation() {
     Faction = FactionEnum::Unknown;
     Class   = "";
 }
+ShipInformation::~ShipInformation() {
 
+}
 
 const glm::vec4& Ships::getShieldsColor(const FactionEnum::Type& faction) {
     return Factions::Database[faction].ColorShield;
@@ -182,4 +184,7 @@ void Ships::init() {
     layer2->setTexture("../data/Textures/Effects/Buzzards.dds");
     layer2->setMask("../data/Ships/vorcha/vorcha_Mask_1.dds");
     layer2->addUVModificationSimpleTranslation(0.02f, 0.02f);
+}
+void Ships::destruct() {
+    Database.clear();
 }

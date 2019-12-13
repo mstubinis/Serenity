@@ -2,7 +2,7 @@
 #include <core/engine/textures/TextureLoader.h>
 #include <core/engine/textures/DDS.h>
 #include <core/engine/math/Engine_Math.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/renderer/FramebufferObject.h>
 
 #include <boost/filesystem.hpp>
@@ -93,15 +93,18 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
     ifstream stream(filename.c_str(), ios::binary);
     if (!stream) 
         return;
-    uchar header_buffer[128];
+    unsigned char header_buffer[128];
     stream.read((char*)header_buffer, sizeof(header_buffer));
 
     DDS::DDS_Header head(header_buffer);
-    if (head.magic != 0x20534444) { stream.close(); return; } //check if this is "DDS "
+    if (head.magic != 0x20534444) {  //check if this is "DDS "
+        stream.close(); 
+        return; 
+    }
     //DX10 header here
     DDS::DDS_Header_DX10 headDX10;
     if ((head.header_flags & DDS::DDPF_FOURCC) && head.format.fourCC == FourCC_DX10) {
-        uchar header_buffer_DX10[20];
+        unsigned char header_buffer_DX10[20];
         stream.read((char*)header_buffer_DX10, sizeof(header_buffer_DX10));
         headDX10.fill(header_buffer_DX10);
     }
@@ -183,7 +186,7 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
         }
     }
 
-    uint numberOfMainImages = 1;
+    unsigned int numberOfMainImages = 1;
     if (head.caps & DDS::DDS_CAPS_COMPLEX) {
         if (head.caps2 & DDS::DDS_CAPS2_CUBEMAP) {//cubemap
             //note: in skybox dds files, especially in gimp, layer order is as follows:
@@ -194,63 +197,69 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
             if (head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEY) { ++numberOfMainImages; }//bottom
             if (head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEZ) { ++numberOfMainImages; }//front
             if (head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEZ) { ++numberOfMainImages; }//back
-            texture.m_Type = GL_TEXTURE_CUBE_MAP;
-            texture.m_TextureType = TextureType::CubeMap;
+            texture.m_Type            = GL_TEXTURE_CUBE_MAP;
+            texture.m_TextureType     = TextureType::CubeMap;
             texture.m_IsToBeMipmapped = false;
             --numberOfMainImages;
         }
     }
 
-    const uint& bufferSize = (head.mipMapCount >= 2 ? head.pitchOrlinearSize * factor : head.pitchOrlinearSize);
-    uchar* pxls = (uchar*)malloc(bufferSize * numberOfMainImages);
-    stream.read((char*)pxls, bufferSize * numberOfMainImages);
+    const unsigned int bufferSize = (head.mipMapCount >= 2 ? head.pitchOrlinearSize * factor : head.pitchOrlinearSize);
+    char* pxls                    = NEW char[bufferSize * numberOfMainImages];
+    stream.read(pxls, bufferSize * numberOfMainImages);
     stream.close();
 
     image.pixelFormat = ImagePixelFormat::RGBA;
     image.pixelType = ImagePixelType::UNSIGNED_BYTE;
 
-    uint _width = head.w;
-    uint _height = head.h;
-    for (uint mainImageLevel = 0; mainImageLevel < numberOfMainImages; ++mainImageLevel) {
+    unsigned int _width = head.w;
+    unsigned int _height = head.h;
+    for (unsigned int mainImageLevel = 0; mainImageLevel < numberOfMainImages; ++mainImageLevel) {
 
         ImageLoadedStructure* imgPtr = nullptr;
         if (mainImageLevel == 0) {
             imgPtr = &image;
         }else if (texture.m_ImagesDatas.size() < mainImageLevel) {
-            imgPtr = new ImageLoadedStructure();
+            imgPtr = NEW ImageLoadedStructure();
             imgPtr->pixelFormat = image.pixelFormat;
             imgPtr->pixelType = image.pixelType;
             imgPtr->internalFormat = image.internalFormat;
-            texture.m_ImagesDatas.push_back(std::unique_ptr<ImageLoadedStructure>(imgPtr));
+            texture.m_ImagesDatas.emplace_back(imgPtr);
         }else{
             imgPtr = texture.m_ImagesDatas[mainImageLevel].get();
         }
 
         _width = head.w;
         _height = head.h;
-        for (uint level = 0; level < head.mipMapCount && (_width || _height); ++level) {
-            if (level > 0 && (_width < 64 || _height < 64)) break;
+        for (unsigned int level = 0; level < head.mipMapCount && (_width || _height); ++level) {
+            if (level > 0 && (_width < 64 || _height < 64)) 
+                break;
             ImageMipmap* mipmap = nullptr;
             ImageMipmap  mipMapCon = ImageMipmap();
-            if (level >= 1) { mipmap = &mipMapCon; }
-            else { mipmap = &imgPtr->mipmaps[0]; }
+            if (level >= 1) { 
+                mipmap = &mipMapCon; 
+            }else{ 
+                mipmap = &imgPtr->mipmaps[0]; 
+            }
             mipmap->level = level;
             mipmap->width = _width;
             mipmap->height = _height;
             mipmap->compressedSize = ((_width + 3) / 4) * ((_height + 3) / 4) * blockSize;
 
             mipmap->pixels.resize(mipmap->compressedSize);
-            for (uint t = 0; t < mipmap->pixels.size(); ++t) {
-                const uint& _index = offset + t;
-                mipmap->pixels[t] = pxls[_index];
+            for (unsigned int t = 0; t < mipmap->pixels.size(); ++t) {
+                const unsigned int _index = offset + t;
+                mipmap->pixels[t] = static_cast<unsigned char>(pxls[_index]);
             }
-            _width = Math::Max(uint(_width / 2), 1);
-            _height = Math::Max(uint(_height / 2), 1);
+            _width = Math::Max(unsigned int(_width / 2), 1);
+            _height = Math::Max(unsigned int(_height / 2), 1);
             offset += mipmap->compressedSize;
-            if (level >= 1) { imgPtr->mipmaps.push_back(*mipmap); }
+            if (level >= 1) { 
+                imgPtr->mipmaps.push_back(*mipmap); 
+            }
         }
     }
-    free(pxls);
+    delete[](pxls);
 }
 void TextureLoader::LoadTexture2DIntoOpenGL(Texture& texture) {
     Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);

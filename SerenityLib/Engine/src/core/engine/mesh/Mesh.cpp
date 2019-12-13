@@ -150,9 +150,9 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
     if (data.tangents.size() == 0)    data.tangents.resize(data.points.size());
     if (!mesh.m_VertexData) {
         if (mesh.m_Skeleton) {
-            mesh.m_VertexData = new VertexData(VertexDataFormat::VertexDataAnimated);
+            mesh.m_VertexData = NEW VertexData(VertexDataFormat::VertexDataAnimated);
         }else{
-            mesh.m_VertexData = new VertexData(VertexDataFormat::VertexDataBasic);
+            mesh.m_VertexData = NEW VertexData(VertexDataFormat::VertexDataBasic);
         }
     }
     auto& vertexData = *mesh.m_VertexData;
@@ -355,7 +355,7 @@ Mesh::Mesh(const string& name,float width, float height,float threshold):Bindabl
         data.points.emplace_back(quad[(i + 2) % 4].position);
         data.uvs.emplace_back(quad[(i + 2) % 4].uv);
     }
-    m_VertexData = new VertexData(VertexDataFormat::VertexDataNoLighting);
+    m_VertexData = NEW VertexData(VertexDataFormat::VertexDataNoLighting);
     MeshLoader::FinalizeData(*this, data, threshold);
 
     load();

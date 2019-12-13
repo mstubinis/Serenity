@@ -34,6 +34,7 @@ struct ShipInformation final {
     std::vector<glm::vec3>         HullImpactPoints;
 
     ShipInformation();
+    ~ShipInformation();
 };
 class Ships final{
     public:
@@ -49,6 +50,7 @@ class Ships final{
         static void createShipEntry(const std::string& shipClass, const FactionEnum::Type& faction, const double respawnTime, const float threatModifier, const bool printClassNameOnHUD = true);
 
         static void init();
+        static void destruct();
 };
 
 #endif

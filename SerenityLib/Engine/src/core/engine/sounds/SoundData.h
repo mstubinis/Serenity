@@ -2,11 +2,10 @@
 #ifndef ENGINE_SOUND_DATA_H
 #define ENGINE_SOUND_DATA_H
 
-#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/resources/Engine_ResourceBasic.h>
 #include <SFML/Audio.hpp>
 
 class SoundData final : public EngineResource {
-    //friend class ::Engine::epriv::SoundManager;
     private:
         sf::SoundBuffer*  m_Buffer;
         std::string       m_File;

@@ -1,6 +1,8 @@
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/Engine_Window.h>
+#include <core/engine/system/window/Engine_Window.h>
+
+#include <SFML/Window.hpp>
 
 using namespace Engine;
 using namespace Engine::epriv;
@@ -18,11 +20,12 @@ EventManager::EventManager(){
     m_EventManager = this;
 }
 EventManager::~EventManager(){
-    m_KeyStatus.clear();
-    m_MouseStatus.clear();
-    m_EventManager = nullptr;
+    cleanup();
 }
-
+void EventManager::cleanup() {
+    if(m_KeyStatus.size() > 0)   m_KeyStatus.clear();
+    if(m_MouseStatus.size() > 0) m_MouseStatus.clear();
+}
 void EventManager::setMousePositionInternal(const float x, const float y, const bool resetDifference, const bool resetPrevious) {
     const glm::vec2 newPos = glm::vec2(x, Resources::getWindowSize().y - y); //opengl flipping y axis
     resetPrevious ? m_Position_Previous = newPos : m_Position_Previous = m_Position;
@@ -37,25 +40,29 @@ void EventManager::onEventKeyPressed(const unsigned int& key){
     m_previousKey    = m_currentKey;
     m_currentKey     = key;
 
-    m_KeyStatus.insert(key);
+    if (!m_KeyStatus.count(key))
+        m_KeyStatus.insert(key);
 }
 void EventManager::onEventKeyReleased(const unsigned int& key){
     m_previousKey    = KeyboardKey::Unknown;
     m_currentKey     = KeyboardKey::Unknown;
 
-    m_KeyStatus.erase(key);
+    if (m_KeyStatus.count(key))
+        m_KeyStatus.erase(key);
 }
 void EventManager::onEventMouseButtonPressed(const unsigned int& mouseButton){
     m_previousButton           = m_currentButton;
     m_currentButton            = mouseButton;
 
-    m_MouseStatus.insert(mouseButton);
+    if (!m_MouseStatus.count(mouseButton))
+        m_MouseStatus.insert(mouseButton);
 }
 void EventManager::onEventMouseButtonReleased(const unsigned int& mouseButton){
     m_previousButton           = MouseButton::Unknown;
     m_currentButton            = MouseButton::Unknown;
 
-    m_MouseStatus.erase(mouseButton);
+    if(m_MouseStatus.count(mouseButton))
+        m_MouseStatus.erase(mouseButton);
 }
 void EventManager::onEventMouseWheelMoved(const int& delta){
     m_Delta += (static_cast<double>(delta) * 10.0);

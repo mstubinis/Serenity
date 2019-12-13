@@ -60,25 +60,25 @@ struct GameCameraLogicFunctor final { void operator()(ComponentLogic2& _componen
 #pragma region GameCamera
 
 
-GameCamera::GameCamera(float n, float f, Scene* scene):GameCamera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y),n,f,scene) {
+GameCamera::GameCamera(float n, float f, Scene* scene) : GameCamera(60, Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y), n, f, scene) {
 }
-GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a,r,n,f,scene){
-    m_State = CameraState::Freeform;
-    m_Target = nullptr;
-    m_Player = nullptr;
-    m_OrbitRadius = 0;
+GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene) : Camera(a, r, n, f, scene){
+    m_State             = CameraState::Freeform;
+    m_Target            = nullptr;
+    m_Player            = nullptr;
+    m_OrbitRadius       = 0;
     m_CameraMouseFactor = glm::dvec2(0.0);
-    auto& m_Logic = *getComponent<ComponentLogic2>();
+    auto& m_Logic       = *getComponent<ComponentLogic2>();
     m_Logic.setUserPointer(this);
     m_Logic.setFunctor(GameCameraLogicFunctor());
 }
-GameCamera::GameCamera(float l, float r, float b, float t, float n, float f, Scene* scene):Camera(l,r,b,t,n,f,scene){
-    m_State = CameraState::Freeform;
-    m_Target = nullptr;
-    m_Player = nullptr;
-    m_OrbitRadius = 0;
+GameCamera::GameCamera(float l, float r, float b, float t, float n, float f, Scene* scene) : Camera(l, r, b, t, n, f, scene){
+    m_State             = CameraState::Freeform;
+    m_Target            = nullptr;
+    m_Player            = nullptr;
+    m_OrbitRadius       = 0;
     m_CameraMouseFactor = glm::dvec2(0.0);
-    auto& m_Logic = *getComponent<ComponentLogic2>();
+    auto& m_Logic       = *getComponent<ComponentLogic2>();
     m_Logic.setUserPointer(this);
     m_Logic.setFunctor(GameCameraLogicFunctor());
 }

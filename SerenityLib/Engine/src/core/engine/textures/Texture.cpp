@@ -1,7 +1,7 @@
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/textures/DDS.h>
-#include <core/engine/Engine_Window.h>
+#include <core/engine/system/window/Engine_Window.h>
 #include <core/engine/math/Engine_Math.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
@@ -135,7 +135,7 @@ const bool Texture::mipmapped() const {
 }
 const bool Texture::compressed() const {
     const auto& img = m_ImagesDatas[0].get();
-    auto& mip = img->mipmaps[0];
+    auto& mip       = img->mipmaps[0];
     return (mip.compressedSize > 0) ? true : false;
 }
 const uchar* Texture::pixels(){

@@ -17,7 +17,8 @@ RodLight::RodLight(const glm::vec3 pos, const float rodLength, Scene* scene) : P
     }
 
     if (m_Type == LightType::Rod) {
-        epriv::InternalScenePublicInterface::GetRodLights(*scene).push_back(this);
+        auto& rodLights = epriv::InternalScenePublicInterface::GetRodLights(*scene);
+        rodLights.push_back(this);
     }
 }
 RodLight::~RodLight() {

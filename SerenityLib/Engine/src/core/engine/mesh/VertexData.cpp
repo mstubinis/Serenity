@@ -19,14 +19,17 @@ VertexData::VertexData(const VertexDataFormat& _format) : format(const_cast<Vert
 }
 VertexData::~VertexData() {
     Renderer::deleteVAO(vao);
+
     for (size_t i = 0; i < data.size(); ++i) {
-        free(data[i]);
+        delete[] (data[i]);
     }
-    vector_clear(data);
-    vector_clear(dataSizes);
-    vector_clear(dataSizesCapacity);
-    vector_clear(indices);
-    vector_clear(triangles);
+    /*
+    data.clear();
+    dataSizes.clear();
+    dataSizesCapacity.clear();
+    indices.clear();
+    triangles.clear();
+    */
 }
 
 void VertexData::finalize() {
@@ -112,53 +115,61 @@ void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
     auto& _vBuffer = *buffers[0];
     _vBuffer.generate(); _vBuffer.bind();
 
-    char* buffer = nullptr;
     size_t accumulator = 0;
     size_t size = 0;
     if (format.interleavingType == VertexAttributeLayout::Interleaved) {
         size = (format.attributes[0].stride * dataSizes[0]);
-        buffer = new char[size];
+        uint8_t* gpu_data_buffer = nullptr;
+        gpu_data_buffer = NEW uint8_t[size];
         for (size_t i = 0; i < dataSizes[0]; ++i) {
             for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
-                const auto& sizeofT = format.attributes[attribute_index].typeSize;
-                auto destination = &buffer[accumulator];
-                const auto& at = i * sizeofT;
-                auto source = &(data[attribute_index])[at];
-                std::memcpy(destination, source, sizeofT);
-                accumulator += sizeofT;
+                const auto& sizeofT     = format.attributes[attribute_index].typeSize;
+                auto* gpu_destination   = &gpu_data_buffer[accumulator];
+                const auto at           = i * sizeofT;
+                auto& src_data          = data[attribute_index];
+                auto* cpu_source        = &(src_data)[at];
+                std::memcpy(gpu_destination, cpu_source, sizeofT);
+                accumulator            += sizeofT;
             }
         }
-        !orphan ? _vBuffer.setData(size, buffer, BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(buffer);
+        (!orphan) ? _vBuffer.setData(size, gpu_data_buffer, BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(gpu_data_buffer);
+        delete[](gpu_data_buffer);
     }else{
         if (attributeIndex == -1) {
             for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index)
                 size += format.attributes[attribute_index].typeSize * dataSizes[attribute_index];
-            buffer = new char[size];
+            uint8_t* gpu_data_buffer = nullptr;
+            gpu_data_buffer = NEW uint8_t[size];
             for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
-                const auto& blockSize = dataSizes[attribute_index] * format.attributes[attribute_index].typeSize;
-                auto destination = &buffer[accumulator];
-                auto source = &(data[attribute_index])[0];
-                std::memcpy(destination, source, blockSize);
-                accumulator += blockSize;
+                const auto blockSize  = dataSizes[attribute_index] * format.attributes[attribute_index].typeSize;
+                auto* gpu_destination = &gpu_data_buffer[accumulator];
+                auto& src_data        = data[attribute_index];
+                auto* cpu_source      = &(src_data)[0];
+                std::memcpy(gpu_destination, cpu_source, blockSize);
+                accumulator          += blockSize;
             }
-            !orphan ? _vBuffer.setData(size, buffer, BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(buffer);
+            (!orphan) ? _vBuffer.setData(size, gpu_data_buffer, BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(gpu_data_buffer);
+            delete[](gpu_data_buffer);
         }else{
             size += (format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex]);
-            buffer = new char[size];
+            uint8_t* gpu_data_buffer = nullptr;
+            gpu_data_buffer = NEW uint8_t[size];
             for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
                 if (attribute_index != attributeIndex) {
                     accumulator += dataSizes[attribute_index] * format.attributes[attribute_index].typeSize;
                 }else{
-                    auto destination = &buffer[0];
-                    auto source = &(data[attribute_index])[0];
-                    std::memcpy(destination, source, size);
+                    auto* gpu_destination     = &gpu_data_buffer[0];
+                    auto& src_data            = data[attribute_index];
+                    auto* cpu_source          = &(src_data)[0];
+                    std::memcpy(gpu_destination, cpu_source, size);
                     break;
                 }
             }
-            _vBuffer.setData(size, accumulator, buffer);
+            _vBuffer.setData(size, accumulator, gpu_data_buffer);
+            delete[](gpu_data_buffer);
         }
     }
-    delete[] buffer;
+    //delete[] gpu_data_buffer;
     if (attributeIndex == -1) {
         auto& _iBuffer = *buffers[1];
         _iBuffer.generate();

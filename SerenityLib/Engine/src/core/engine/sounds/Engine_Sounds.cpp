@@ -1,11 +1,9 @@
 #include <core/engine/sounds/Engine_Sounds.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/events/Engine_EventDispatcher.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Camera.h>
 
 #include <core/engine/sounds/SoundData.h>
-#include <core/engine/sounds/SoundEffect.h>
 #include <core/engine/sounds/SoundQueue.h>
 
 using namespace Engine;
@@ -24,10 +22,13 @@ epriv::SoundManager::SoundManager(){
     }
 }
 epriv::SoundManager::~SoundManager(){ 
+    cleanup();
+}
+void epriv::SoundManager::cleanup() {
     SAFE_DELETE_VECTOR(m_SoundQueues);
 }
 void epriv::SoundManager::_setSoundInformation(Handle& handle, SoundEffect& sound) {
-    SoundData& data = *Engine::Resources::getSoundData(handle);
+    SoundData& data = *Resources::getSoundData(handle);
     auto buffer = data.getBuffer();
     if (!buffer) {
         data.buildBuffer();
@@ -47,9 +48,9 @@ void epriv::SoundManager::_setSoundInformation(Handle& handle, SoundMusic& sound
 }
 
 void epriv::SoundManager::_update(const double& dt){
-    auto scene = Resources::getCurrentScene();
+    auto* scene = Resources::getCurrentScene();
     if (scene) {
-        auto camera = scene->getActiveCamera();
+        auto* camera = scene->getActiveCamera();
         if (camera) {
             auto& cam             = *camera;
             const auto camPos     = glm::vec3(cam.getPosition());
@@ -109,8 +110,8 @@ SoundMusic* epriv::SoundManager::_getFreeMusic() {
 }
 
 
-SoundQueue* Engine::Sound::createQueue(const float& delay) {
-    SoundQueue* queue = new SoundQueue(*soundManager, delay);
+SoundQueue* Sound::createQueue(const float& delay) {
+    SoundQueue* queue = NEW SoundQueue(*soundManager, delay);
     return queue;
 }
 
@@ -135,7 +136,7 @@ void Sound::stop_all_music() {
         music.stop();
     }
 }
-void Sound::stop_all_effect() {
+void Sound::stop_all_effects() {
     for (auto& effect : soundManager->m_SoundEffects) {
         effect.stop();
     }

@@ -18,17 +18,23 @@ class GameplayMode {
     protected:
         GameplayModeType::Mode                           m_GameplayModeType;
         unsigned int                                     m_MaxAmountOfPlayers;
-        std::unordered_map<TeamNumber::Enum, Team*>      m_Teams;
+        std::unordered_map<TeamNumber::Enum, Team>       m_Teams;
         std::unordered_set<std::string>                  m_AllowedShipClasses;
     public:
         GameplayMode();
         GameplayMode(const GameplayModeType::Mode& mode, const unsigned int MaxAmountOfPlayers);
         virtual ~GameplayMode();
 
+        void clear();
+
+        void setGameplayMode(const GameplayModeType::Mode& mode);
+        void setMaxAmountOfPlayers(const unsigned int& maxPlayers);
+
         const bool addAllowedShipClass(const std::string& shipClass);
 
-        std::unordered_map<TeamNumber::Enum, Team*>& getTeams();
-        const GameplayModeType::Mode& getGameplayModeType() const;
+        std::unordered_map<TeamNumber::Enum, Team>& getTeams();
+        Team* getTeam(const TeamNumber::Enum& teamNumberEnum);
+        const GameplayModeType::Mode& getGameplayMode() const;
         const unsigned int& getMaxAmountOfPlayers() const;
         const bool addTeam(Team& team);
 

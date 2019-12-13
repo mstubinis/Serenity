@@ -84,12 +84,12 @@ const glm::vec2  Widget::positionWorld() const {
         parent = parent->m_Parent;
     }
     glm::vec2 worldPos = positionLocal();
-    for (int i = list.size() - 1; i >= 0; --i) {
+    for (int i = static_cast<int>(list.size()) - 1; i >= 0; --i) {
         worldPos += list[i]->positionLocal();
     }
     return worldPos;
 }
-const glm::vec2& Widget::position(const bool local) const {
+const glm::vec2 Widget::position(const bool local) const {
     if(local)
         return positionLocal();
     return positionWorld();

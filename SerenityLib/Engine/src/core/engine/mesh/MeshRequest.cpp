@@ -3,7 +3,7 @@
 #include <core/engine/mesh/MeshLoading.h>
 #include <core/engine/mesh/MeshCollisionFactory.h>
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 
 #include <boost/filesystem.hpp>
 
@@ -29,7 +29,7 @@ MeshRequest::MeshRequest(const string& _filenameOrData, float _threshold):MeshRe
     }
 }
 MeshRequest::~MeshRequest() {
-
+    SAFE_DELETE_MAP(map);
 }
 void MeshRequest::request() {
     async = false;
@@ -78,7 +78,7 @@ bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
     }else{
         MeshRequestPart part;
         part.name = meshRequest.fileOrData;
-        part.mesh = new Mesh();
+        part.mesh = NEW Mesh();
         part.mesh->setName(part.name);
         part.handle = Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
         meshRequest.parts.push_back(part);
@@ -98,7 +98,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         mesh.m_VertexData = vertexData;
         mesh.m_threshold = meshRequest.threshold;
         InternalMeshPublicInterface::CalculateRadius(mesh);
-        mesh.m_CollisionFactory = new MeshCollisionFactory(mesh);
+        mesh.m_CollisionFactory = NEW MeshCollisionFactory(mesh);
     }
 }
 void InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest) {

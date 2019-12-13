@@ -34,7 +34,7 @@ void epriv::ImageLoadedStructure::load(const uint _width, const uint _height, co
     if (mipmaps.size() > 0) {
         baseImage = &(mipmaps[0]);
     }else{
-        baseImage = new ImageMipmap();
+        baseImage = NEW ImageMipmap();
     }
     filename                  = "";
     pixelFormat               = _pixelFormat;
@@ -53,7 +53,7 @@ void epriv::ImageLoadedStructure::load(const sf::Image& i, const string& _filena
     if (mipmaps.size() > 0) {
         baseImage = &(mipmaps[0]);
     }else{
-        baseImage = new ImageMipmap();
+        baseImage = NEW ImageMipmap();
     }
     filename = _filename;
     const auto imgSize = i.getSize();

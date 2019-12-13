@@ -19,14 +19,17 @@ SunLight::SunLight(const glm_vec3 pos, const LightType::Type type, Scene* scene)
     m_SpecularIntensity = 1.0f;
 
     if (type == LightType::Sun) {
-        epriv::InternalScenePublicInterface::GetSunLights(*scene).push_back(this);
+        auto& sunLights = epriv::InternalScenePublicInterface::GetSunLights(*scene);
+        sunLights.push_back(this);
     }
-    epriv::InternalScenePublicInterface::GetLights(*scene).push_back(this);
+    auto& allLights = epriv::InternalScenePublicInterface::GetLights(*scene);
+    allLights.push_back(this);
 
     auto* body = addComponent<ComponentBody>();
     body->setPosition(pos);
 }
 SunLight::~SunLight() {
+
 }
 const glm_vec3 SunLight::position() {
     return getComponent<ComponentBody>()->position(); 

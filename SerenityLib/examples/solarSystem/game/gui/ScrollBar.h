@@ -27,6 +27,8 @@ class ScrollBar final : public Widget {
         ScrollBar(const float x, const float y, const float w, const float h, const ScrollBarType::Type& type = ScrollBarType::Type::Vertical);
         ~ScrollBar();
 
+        const bool isScrollable() const;
+
         void setBorderSize(const float borderSize);
 
         void scroll(const float amount);

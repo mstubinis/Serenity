@@ -3,7 +3,7 @@
 
 #include <core/engine/resources/Handle.h>
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/events/Engine_EventDispatcher.h>
 #include <core/engine/events/Engine_EventObject.h>
 

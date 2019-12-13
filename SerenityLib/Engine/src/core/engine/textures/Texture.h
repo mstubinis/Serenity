@@ -51,7 +51,7 @@ class Texture: public EngineResource{
         Texture(Texture&& other) noexcept            = delete;
         Texture& operator=(Texture&& other) noexcept = delete;
 
-        const uchar* pixels();
+        const unsigned char* pixels();
         const GLuint& address(const uint& index = 0) const;
         const GLuint type() const;
         const uint width() const;

@@ -16,7 +16,8 @@ namespace Engine {
                 ECSComponentPool& operator=(const ECSComponentPool& other) noexcept = delete;
                 ECSComponentPool(ECSComponentPool&& other) noexcept                 = delete;
                 ECSComponentPool& operator=(ECSComponentPool&& other) noexcept      = delete;
-                ~ECSComponentPool()                                                 = default;
+                ~ECSComponentPool() {
+                }
 
                 template<typename... ARGS> inline TComponent* addComponent(const TEntity& entity, ARGS&&... args) {
 				    const EntityDataRequest dataRequest(entity);

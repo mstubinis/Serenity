@@ -2,6 +2,7 @@
 #include <ecs/ComponentModel.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/model/ModelInstance.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/scene/Camera.h>
@@ -138,7 +139,7 @@ ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Enti
     m_UserPointer1            = nullptr;
     m_UserPointer2            = nullptr;
     data.p                    = nullptr;
-    data.n                    = new NormalData();
+    data.n                    = NEW NormalData();
     setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
     auto& normalData          = *data.n;
     normalData.position       = glm_vec3(static_cast<decimal>(0.0));
@@ -158,7 +159,7 @@ ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p
     m_UserPointer1          = nullptr;
     m_UserPointer2          = nullptr;
     data.n                  = nullptr;
-    data.p                  = new PhysicsData();
+    data.p                  = NEW PhysicsData();
     auto& physicsData       = *data.p;
     m_Forward               = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(-1.0));
 	m_Right                 = glm_vec3(static_cast<decimal>(1.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
@@ -345,12 +346,12 @@ void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, cons
         auto* modelComponent = m_Owner.getComponent<ComponentModel>();
         if (modelComponent) {
             if (p_CollisionType == CollisionType::Compound) {
-                physicsData.collision = new Collision(this, *modelComponent, p_Mass);
+                physicsData.collision = NEW Collision(this, *modelComponent, p_Mass);
             }else{
-                physicsData.collision = new Collision(p_CollisionType, &modelComponent->getModel(), p_Mass);
+                physicsData.collision = NEW Collision(p_CollisionType, &modelComponent->getModel(), p_Mass);
             }
         }else{
-            physicsData.collision = new Collision(p_CollisionType, nullptr, p_Mass);
+            physicsData.collision = NEW Collision(p_CollisionType, nullptr, p_Mass);
         }
     }
     physicsData.mass = p_Mass;

@@ -28,17 +28,17 @@ Akira::Akira(AIType::Type& ai_type, Team& team, Client& client, Map& map, const 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem*        system = nullptr;
-        if (i == 0)        system = new ShipSystemReactor(_this, 1000);
-        else if (i == 1)   system = new ShipSystemPitchThrusters(_this);
-        else if (i == 2)   system = new ShipSystemYawThrusters(_this);
-        else if (i == 3)   system = new ShipSystemRollThrusters(_this);
+        if (i == 0)        system = NEW ShipSystemReactor(_this, 1000);
+        else if (i == 1)   system = NEW ShipSystemPitchThrusters(_this);
+        else if (i == 2)   system = NEW ShipSystemYawThrusters(_this);
+        else if (i == 3)   system = NEW ShipSystemRollThrusters(_this);
         else if (i == 4)   system = nullptr; //no cloaking device
-        else if (i == 5)   system = new ShipSystemShields(_this, map, 25500.0f, 25500.0f, 25500.0f, 25500.0f, 32500.0f, 32500.0f);
-        else if (i == 6)   system = new ShipSystemMainThrusters(_this);
-        else if (i == 7)   system = new ShipSystemWarpDrive(_this);
-        else if (i == 8)   system = new ShipSystemSensors(_this, map);
-        else if (i == 9)   system = new ShipSystemWeapons(_this);
-        else if (i == 10)  system = new ShipSystemHull(_this, map, 55500.0f);
+        else if (i == 5)   system = NEW ShipSystemShields(_this, map, 25500.0f, 25500.0f, 25500.0f, 25500.0f, 32500.0f, 32500.0f);
+        else if (i == 6)   system = NEW ShipSystemMainThrusters(_this);
+        else if (i == 7)   system = NEW ShipSystemWarpDrive(_this);
+        else if (i == 8)   system = NEW ShipSystemSensors(_this, map);
+        else if (i == 9)   system = NEW ShipSystemWeapons(_this);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 55500.0f);
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);
@@ -46,28 +46,28 @@ Akira::Akira(AIType::Type& ai_type, Team& team, Client& client, Map& map, const 
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     //rack torpedos
-    auto* top_torp_1 = new PhotonTorpedo(_this, map, glm::vec3(-0.127431f, 0.497265f, 0.081451f), glm::vec3(0, 0, -1), 12.0f);
-    auto* top_torp_2 = new PhotonTorpedo(_this, map, glm::vec3(-0.041798f, 0.497265f, 0.081451f), glm::vec3(0, 0, -1), 12.0f);
-    auto* top_torp_3 = new PhotonTorpedo(_this, map, glm::vec3(0.041798f, 0.497265f, 0.081451f), glm::vec3(0, 0, -1), 12.0f);
-    auto* top_torp_4 = new PhotonTorpedo(_this, map, glm::vec3(0.127431f, 0.497265f, 0.081451f), glm::vec3(0, 0, -1), 12.0f);
-    auto* top_torp_5 = new PhotonTorpedo(_this, map, glm::vec3(-0.076881f, 0.370706f, 0.030954f), glm::vec3(0, 0, -1), 12.0f);
-    auto* top_torp_6 = new PhotonTorpedo(_this, map, glm::vec3(0.0f, 0.370706f, 0.030954f), glm::vec3(0, 0, -1), 12.0f);
-    auto* top_torp_7 = new PhotonTorpedo(_this, map, glm::vec3(0.076881f, 0.370706f, 0.030954f), glm::vec3(0, 0, -1), 12.0f);
+    auto* top_torp_1 = NEW PhotonTorpedo(_this, map, glm::vec3(-0.127431f, 0.497265f, 0.081451f), glm::vec3(0, 0, -1), 12.0f);
+    auto* top_torp_2 = NEW PhotonTorpedo(_this, map, glm::vec3(-0.041798f, 0.497265f, 0.081451f), glm::vec3(0, 0, -1), 12.0f);
+    auto* top_torp_3 = NEW PhotonTorpedo(_this, map, glm::vec3(0.041798f, 0.497265f, 0.081451f), glm::vec3(0, 0, -1), 12.0f);
+    auto* top_torp_4 = NEW PhotonTorpedo(_this, map, glm::vec3(0.127431f, 0.497265f, 0.081451f), glm::vec3(0, 0, -1), 12.0f);
+    auto* top_torp_5 = NEW PhotonTorpedo(_this, map, glm::vec3(-0.076881f, 0.370706f, 0.030954f), glm::vec3(0, 0, -1), 12.0f);
+    auto* top_torp_6 = NEW PhotonTorpedo(_this, map, glm::vec3(0.0f, 0.370706f, 0.030954f), glm::vec3(0, 0, -1), 12.0f);
+    auto* top_torp_7 = NEW PhotonTorpedo(_this, map, glm::vec3(0.076881f, 0.370706f, 0.030954f), glm::vec3(0, 0, -1), 12.0f);
     //ventral torp
-    auto* ventral_torp_8 = new PhotonTorpedo(_this, map, glm::vec3(0.0f, -0.078411f, -2.47198f), glm::vec3(0, 0, -1), 12.0f);
+    auto* ventral_torp_8 = NEW PhotonTorpedo(_this, map, glm::vec3(0.0f, -0.078411f, -2.47198f), glm::vec3(0, 0, -1), 12.0f);
     //left torps
-    auto* left_torp_1 = new PhotonTorpedo(_this, map, glm::vec3(-1.2734f, 0.038987f, -1.66943f), glm::vec3(-1, 0, 0), 12.0f);
-    auto* left_torp_2 = new PhotonTorpedo(_this, map, glm::vec3(-1.2734f, 0.038987f, -1.60432f), glm::vec3(-1, 0, 0), 12.0f);
+    auto* left_torp_1 = NEW PhotonTorpedo(_this, map, glm::vec3(-1.2734f, 0.038987f, -1.66943f), glm::vec3(-1, 0, 0), 12.0f);
+    auto* left_torp_2 = NEW PhotonTorpedo(_this, map, glm::vec3(-1.2734f, 0.038987f, -1.60432f), glm::vec3(-1, 0, 0), 12.0f);
     //right torps
-    auto* right_torp_1 = new PhotonTorpedo(_this, map, glm::vec3(1.2734f, 0.038987f, -1.66943f), glm::vec3(1, 0, 0), 12.0f);
-    auto* right_torp_2 = new PhotonTorpedo(_this, map, glm::vec3(1.2734f, 0.038987f, -1.60432f), glm::vec3(1, 0, 0), 12.0f);
+    auto* right_torp_1 = NEW PhotonTorpedo(_this, map, glm::vec3(1.2734f, 0.038987f, -1.66943f), glm::vec3(1, 0, 0), 12.0f);
+    auto* right_torp_2 = NEW PhotonTorpedo(_this, map, glm::vec3(1.2734f, 0.038987f, -1.60432f), glm::vec3(1, 0, 0), 12.0f);
     //aft rack torps
-    auto* aft_torp_1 = new PhotonTorpedo(_this, map, glm::vec3(-0.233761f, 0.503108f, 0.736298f), glm::vec3(-0.26491f, 0, 0.318563f), 20.0f);
-    auto* aft_torp_2 = new PhotonTorpedo(_this, map, glm::vec3(-0.177242f, 0.503108f, 0.797487f), glm::vec3(-0.26491f, 0, 0.318563f), 20.0f);
-    auto* aft_torp_3 = new PhotonTorpedo(_this, map, glm::vec3(-0.118947f, 0.503108f, 0.860294f), glm::vec3(-0.26491f, 0, 0.318563f), 20.0f);
-    auto* aft_torp_4 = new PhotonTorpedo(_this, map, glm::vec3(0.233761f, 0.503108f, 0.736298f), glm::vec3(0.26491f, 0, 0.318563f), 20.0f);
-    auto* aft_torp_5 = new PhotonTorpedo(_this, map, glm::vec3(0.177242f, 0.503108f, 0.797487f), glm::vec3(0.26491f, 0, 0.318563f), 20.0f);
-    auto* aft_torp_6 = new PhotonTorpedo(_this, map, glm::vec3(0.118947f, 0.503108f, 0.860294f), glm::vec3(0.26491f, 0, 0.318563f), 20.0f);
+    auto* aft_torp_1 = NEW PhotonTorpedo(_this, map, glm::vec3(-0.233761f, 0.503108f, 0.736298f), glm::vec3(-0.26491f, 0, 0.318563f), 20.0f);
+    auto* aft_torp_2 = NEW PhotonTorpedo(_this, map, glm::vec3(-0.177242f, 0.503108f, 0.797487f), glm::vec3(-0.26491f, 0, 0.318563f), 20.0f);
+    auto* aft_torp_3 = NEW PhotonTorpedo(_this, map, glm::vec3(-0.118947f, 0.503108f, 0.860294f), glm::vec3(-0.26491f, 0, 0.318563f), 20.0f);
+    auto* aft_torp_4 = NEW PhotonTorpedo(_this, map, glm::vec3(0.233761f, 0.503108f, 0.736298f), glm::vec3(0.26491f, 0, 0.318563f), 20.0f);
+    auto* aft_torp_5 = NEW PhotonTorpedo(_this, map, glm::vec3(0.177242f, 0.503108f, 0.797487f), glm::vec3(0.26491f, 0, 0.318563f), 20.0f);
+    auto* aft_torp_6 = NEW PhotonTorpedo(_this, map, glm::vec3(0.118947f, 0.503108f, 0.860294f), glm::vec3(0.26491f, 0, 0.318563f), 20.0f);
 
 
     weapons.addSecondaryWeaponTorpedo(*top_torp_1, true);
@@ -125,10 +125,10 @@ Akira::Akira(AIType::Type& ai_type, Team& team, Client& client, Map& map, const 
         glm::vec3(0.231736f, 0.083752f, -2.68758f),
         glm::vec3(0.0f, 0.082952f, -2.70664f),
     };
-    auto* top_left_left_beam = new PhaserBeam(_this, map, top_left_left[2], glm::vec3(-0.492934f, 0.249497f, -0.221317f), 40.0f, top_left_left);
-    auto* top_front_left_beam = new PhaserBeam(_this, map, top_front_left[2], glm::vec3(-0.24479f, 0.249497f, -0.342036f), 40.0f, top_front_left);
-    auto* top_right_right_beam = new PhaserBeam(_this, map, top_right_right[2], glm::vec3(0.492934f, 0.249497f, -0.221317f), 40.0f, top_right_right);
-    auto* top_front_right_beam = new PhaserBeam(_this, map, top_front_right[2], glm::vec3(0.24479f, 0.249497f, -0.342036f), 40.0f, top_front_right);
+    auto* top_left_left_beam = NEW PhaserBeam(_this, map, top_left_left[2], glm::vec3(-0.492934f, 0.249497f, -0.221317f), 40.0f, top_left_left);
+    auto* top_front_left_beam = NEW PhaserBeam(_this, map, top_front_left[2], glm::vec3(-0.24479f, 0.249497f, -0.342036f), 40.0f, top_front_left);
+    auto* top_right_right_beam = NEW PhaserBeam(_this, map, top_right_right[2], glm::vec3(0.492934f, 0.249497f, -0.221317f), 40.0f, top_right_right);
+    auto* top_front_right_beam = NEW PhaserBeam(_this, map, top_front_right[2], glm::vec3(0.24479f, 0.249497f, -0.342036f), 40.0f, top_front_right);
 
     weapons.addPrimaryWeaponBeam(*top_left_left_beam);
     weapons.addPrimaryWeaponBeam(*top_front_left_beam, true);
@@ -150,8 +150,8 @@ Akira::Akira(AIType::Type& ai_type, Team& team, Client& client, Map& map, const 
         glm::vec3(-0.714502f, -0.061473f, -2.40396f),
         glm::vec3(-0.419537f, -0.061473f, -2.57861f),
     };
-    auto* btm_left_left_beam = new PhaserBeam(_this, map, bottom_left[2], glm::vec3(0.301313f, -0.353465f, -0.197012f), 60.0f, bottom_left);
-    auto* btm_front_left_beam = new PhaserBeam(_this, map, bottom_right[2], glm::vec3(-0.301313f, -0.353465f, -0.197012f), 60.0f, bottom_right);
+    auto* btm_left_left_beam = NEW PhaserBeam(_this, map, bottom_left[2], glm::vec3(0.301313f, -0.353465f, -0.197012f), 60.0f, bottom_left);
+    auto* btm_front_left_beam = NEW PhaserBeam(_this, map, bottom_right[2], glm::vec3(-0.301313f, -0.353465f, -0.197012f), 60.0f, bottom_right);
     weapons.addPrimaryWeaponBeam(*btm_left_left_beam, true);
     weapons.addPrimaryWeaponBeam(*btm_front_left_beam, true);
 

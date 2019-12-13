@@ -18,10 +18,10 @@ Handle Fire::SmokeMaterial1;
 Handle Fire::SmokeMaterial2;
 Handle Fire::SmokeMaterial3;
 
-ParticleEmissionProperties* Fire::Regular = nullptr;
-ParticleEmissionProperties* Fire::ShortLived = nullptr;
-ParticleEmissionProperties* Fire::OutwardFireballDebrisFire = nullptr;
-ParticleEmissionProperties* Fire::OutwardFireball = nullptr;
+ParticleEmissionProperties Fire::Regular;
+ParticleEmissionProperties Fire::ShortLived;
+ParticleEmissionProperties Fire::OutwardFireballDebrisFire;
+ParticleEmissionProperties Fire::OutwardFireball;
 
 #define FIRE_COLOR_CUTOFF 0.4
 
@@ -209,63 +209,60 @@ void Fire::init() {
     ((Material*)SmokeMaterial3.get())->setGlow(1.0f);
 
     {
-        Regular = new ParticleEmissionProperties(Fire::SmokeMaterial1, 5.0, 0.02, 1, 1.0f);
-        //Regular->addMaterial(Fire::SmokeMaterial2);
-        //Regular->addMaterial(Fire::SmokeMaterial3);
-        Regular->setColorFunctor(FireColorFunctor());
-        Regular->setDepthFunctor(FireDepthFunctor());
-        Regular->setChangeInScaleFunctor(FireScaleFunctor());
-        Regular->setChangeInAngularVelocityFunctor(FireAngularVelocityFunctor());
-        Regular->setChangeInVelocityFunctor(FireVelocityFunctor());
-        Regular->setInitialVelocityFunctor(FireInitialVelocityFunctor());
-        Regular->setInitialScaleFunctor(FireInitialScaleFunctor());
-        Regular->setInitialAngularVelocityFunctor(FireInitialAngularFunctor());
+        Regular = ParticleEmissionProperties(Fire::SmokeMaterial1, 5.0, 0.02, 1, 1.0f);
+        //Regular.addMaterial(Fire::SmokeMaterial2);
+        //Regular.addMaterial(Fire::SmokeMaterial3);
+        Regular.setColorFunctor(FireColorFunctor());
+        Regular.setDepthFunctor(FireDepthFunctor());
+        Regular.setChangeInScaleFunctor(FireScaleFunctor());
+        Regular.setChangeInAngularVelocityFunctor(FireAngularVelocityFunctor());
+        Regular.setChangeInVelocityFunctor(FireVelocityFunctor());
+        Regular.setInitialVelocityFunctor(FireInitialVelocityFunctor());
+        Regular.setInitialScaleFunctor(FireInitialScaleFunctor());
+        Regular.setInitialAngularVelocityFunctor(FireInitialAngularFunctor());
     }
     {
-        ShortLived = new ParticleEmissionProperties(Fire::SmokeMaterial1, 3.2, 0.023, 1, 1.0f);
-        //ShortLived->addMaterial(Fire::SmokeMaterial2);
-        //ShortLived->addMaterial(Fire::SmokeMaterial3);
-        ShortLived->setColorFunctor(FireColorFunctor());
-        ShortLived->setDepthFunctor(FireDepthFunctor());
-        ShortLived->setChangeInScaleFunctor(FireScaleFunctor());
-        ShortLived->setChangeInAngularVelocityFunctor(FireAngularVelocityFunctor());
-        ShortLived->setChangeInVelocityFunctor(FireVelocityFunctor());
-        ShortLived->setInitialVelocityFunctor(FireInitialVelocityFunctor());
-        ShortLived->setInitialScaleFunctor(FireInitialScaleFunctor());
-        ShortLived->setInitialAngularVelocityFunctor(FireInitialAngularFunctor());
-    }
-
-    {
-        OutwardFireballDebrisFire = new ParticleEmissionProperties(Fire::SmokeMaterial1, 4.0f, 0.04, 1, 1.0f);
-        //OutwardFireballDebrisFire->addMaterial(Fire::SmokeMaterial2);
-        //OutwardFireballDebrisFire->addMaterial(Fire::SmokeMaterial3);
-        OutwardFireballDebrisFire->setColorFunctor(OutwardDebrisFireColorFunctor());
-        OutwardFireballDebrisFire->setDepthFunctor(OutwardDebrisDepthFunctor());
-        OutwardFireballDebrisFire->setChangeInScaleFunctor(OutwardDebrisScaleFunctor());
-        OutwardFireballDebrisFire->setChangeInAngularVelocityFunctor(OutwardDebrisAngularVelocityFunctor());
-        OutwardFireballDebrisFire->setChangeInVelocityFunctor(OutwardDebrisVelocityFunctor());
-        OutwardFireballDebrisFire->setInitialVelocityFunctor(OutwardDebrisInitialVelocityFunctor());
-        OutwardFireballDebrisFire->setInitialScaleFunctor(OutwardDebrisInitialScaleFunctor());
-        OutwardFireballDebrisFire->setInitialAngularVelocityFunctor(OutwardDebrisInitialAngularFunctor());
+        ShortLived = ParticleEmissionProperties(Fire::SmokeMaterial1, 3.2, 0.023, 1, 1.0f);
+        //ShortLived.addMaterial(Fire::SmokeMaterial2);
+        //ShortLived.addMaterial(Fire::SmokeMaterial3);
+        ShortLived.setColorFunctor(FireColorFunctor());
+        ShortLived.setDepthFunctor(FireDepthFunctor());
+        ShortLived.setChangeInScaleFunctor(FireScaleFunctor());
+        ShortLived.setChangeInAngularVelocityFunctor(FireAngularVelocityFunctor());
+        ShortLived.setChangeInVelocityFunctor(FireVelocityFunctor());
+        ShortLived.setInitialVelocityFunctor(FireInitialVelocityFunctor());
+        ShortLived.setInitialScaleFunctor(FireInitialScaleFunctor());
+        ShortLived.setInitialAngularVelocityFunctor(FireInitialAngularFunctor());
     }
 
     {
-        OutwardFireball = new ParticleEmissionProperties(Fire::SmokeMaterial1, 0.9f, 0.04, 1, 1.0f);
+        OutwardFireballDebrisFire = ParticleEmissionProperties(Fire::SmokeMaterial1, 4.0f, 0.04, 1, 1.0f);
+        //OutwardFireballDebrisFire.addMaterial(Fire::SmokeMaterial2);
+        //OutwardFireballDebrisFire.addMaterial(Fire::SmokeMaterial3);
+        OutwardFireballDebrisFire.setColorFunctor(OutwardDebrisFireColorFunctor());
+        OutwardFireballDebrisFire.setDepthFunctor(OutwardDebrisDepthFunctor());
+        OutwardFireballDebrisFire.setChangeInScaleFunctor(OutwardDebrisScaleFunctor());
+        OutwardFireballDebrisFire.setChangeInAngularVelocityFunctor(OutwardDebrisAngularVelocityFunctor());
+        OutwardFireballDebrisFire.setChangeInVelocityFunctor(OutwardDebrisVelocityFunctor());
+        OutwardFireballDebrisFire.setInitialVelocityFunctor(OutwardDebrisInitialVelocityFunctor());
+        OutwardFireballDebrisFire.setInitialScaleFunctor(OutwardDebrisInitialScaleFunctor());
+        OutwardFireballDebrisFire.setInitialAngularVelocityFunctor(OutwardDebrisInitialAngularFunctor());
+    }
+
+    {
+        OutwardFireball = ParticleEmissionProperties(Fire::SmokeMaterial1, 0.9f, 0.04, 1, 1.0f);
         //OutwardFireball->addMaterial(Fire::SmokeMaterial2);
         //OutwardFireball->addMaterial(Fire::SmokeMaterial3);
-        OutwardFireball->setColorFunctor(OutwardFireballFireColorFunctor());
-        OutwardFireball->setDepthFunctor(OutwardFireballDepthFunctor());
-        OutwardFireball->setChangeInScaleFunctor(OutwardFireballScaleFunctor());
-        OutwardFireball->setChangeInAngularVelocityFunctor(OutwardFireballAngularVelocityFunctor());
-        OutwardFireball->setChangeInVelocityFunctor(OutwardFireballVelocityFunctor());
-        OutwardFireball->setInitialVelocityFunctor(OutwardFireballInitialVelocityFunctor());
-        OutwardFireball->setInitialScaleFunctor(OutwardFireballInitialScaleFunctor());
-        OutwardFireball->setInitialAngularVelocityFunctor(OutwardFireballInitialAngularFunctor());
+        OutwardFireball.setColorFunctor(OutwardFireballFireColorFunctor());
+        OutwardFireball.setDepthFunctor(OutwardFireballDepthFunctor());
+        OutwardFireball.setChangeInScaleFunctor(OutwardFireballScaleFunctor());
+        OutwardFireball.setChangeInAngularVelocityFunctor(OutwardFireballAngularVelocityFunctor());
+        OutwardFireball.setChangeInVelocityFunctor(OutwardFireballVelocityFunctor());
+        OutwardFireball.setInitialVelocityFunctor(OutwardFireballInitialVelocityFunctor());
+        OutwardFireball.setInitialScaleFunctor(OutwardFireballInitialScaleFunctor());
+        OutwardFireball.setInitialAngularVelocityFunctor(OutwardFireballInitialAngularFunctor());
     }
 }
 void Fire::destruct() {
-    SAFE_DELETE(Regular);
-    SAFE_DELETE(ShortLived);
-    SAFE_DELETE(OutwardFireballDebrisFire);
-    SAFE_DELETE(OutwardFireball);
+
 }

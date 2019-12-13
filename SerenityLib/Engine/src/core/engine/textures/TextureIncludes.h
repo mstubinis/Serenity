@@ -11,7 +11,7 @@ struct TextureWrap final {enum Wrap {
     RepeatMirrored, 
     ClampToEdge, 
     ClampToBorder,
-    _TOTAL
+    _TOTAL,
 };};
 struct TextureFilter final {enum Filter {
     Linear,
@@ -20,7 +20,7 @@ struct TextureFilter final {enum Filter {
     Nearest_Mipmap_Linear,
     Linear_Mipmap_Nearest,
     Linear_Mipmap_Linear,
-    _TOTAL
+    _TOTAL,
 };};
 struct TextureType final {enum Type {
     Texture1D,
@@ -28,7 +28,7 @@ struct TextureType final {enum Type {
     Texture3D,
     CubeMap,
     RenderTarget,
-    _TOTAL
+    _TOTAL,
 };};
 
 class Texture;
@@ -39,11 +39,11 @@ namespace Engine {
 namespace epriv {
     class  FramebufferObject;
     struct ImageMipmap final {
-        uint width;
-        uint height;
-        uint compressedSize;
-        uint level;
-        std::vector<uchar> pixels;
+        uint32_t width;
+        uint32_t height;
+        uint32_t compressedSize;
+        uint32_t level;
+        std::vector<unsigned char> pixels;
         ImageMipmap();
         ~ImageMipmap();
     };

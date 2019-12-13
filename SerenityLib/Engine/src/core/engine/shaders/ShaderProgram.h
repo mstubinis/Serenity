@@ -2,6 +2,11 @@
 #ifndef ENGINE_SHADERPROGRAM_H
 #define ENGINE_SHADERPROGRAM_H
 
+struct Handle;
+class  Shader;
+class  ShaderProgram;
+class  UniformBufferObject;
+
 #include <core/engine/BindableResource.h>
 #include <string>
 #include <unordered_map>
@@ -12,20 +17,15 @@
 
 #include <core/engine/shaders/ShaderIncludes.h>
 
-struct Handle;
-class  Shader;
-class  ShaderProgram;
-class  UniformBufferObject;
-
 namespace Engine {
-namespace epriv {
-    struct InternalShaderProgramPublicInterface final {
-        static void LoadCPU(ShaderProgram&);
-        static void LoadGPU(ShaderProgram&);
-        static void UnloadCPU(ShaderProgram&);
-        static void UnloadGPU(ShaderProgram&);
+    namespace epriv {
+        struct InternalShaderProgramPublicInterface final {
+            static void LoadCPU(ShaderProgram&);
+            static void LoadGPU(ShaderProgram&);
+            static void UnloadCPU(ShaderProgram&);
+            static void UnloadGPU(ShaderProgram&);
+        };
     };
-};
 };
 class ShaderProgram final: public BindableResource{
     friend class  UniformBufferObject;

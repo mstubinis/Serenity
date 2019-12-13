@@ -2,7 +2,7 @@
 #include "map/Map.h"
 #include "ResourceManifest.h"
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/lights/Lights.h>
 #include <core/engine/shaders/ShaderProgram.h>
@@ -483,7 +483,7 @@ const float& Planet::getAtmosphereHeight() const {
 }
 
 Star::Star(Handle& meshHandle, Handle& materialHandle, const glm::vec3& starColor, const glm::vec3& lightColor, const glm::vec3& godRaysColor, const glm_vec3& pos, const decimal scl, const string& name, Map* scene, const string& type_name) : Planet(meshHandle, materialHandle, PlanetType::Star, pos, scl, name, 0.0f, scene, type_name) {
-    m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
+    m_Light = NEW SunLight(glm::vec3(0.0f),LightType::Sun, scene);
     m_Light->setColor(lightColor);
 
     auto& star_material = *((Material*)materialHandle.get());
@@ -501,12 +501,12 @@ Star::Star(Handle& meshHandle, Handle& materialHandle, const glm::vec3& starColo
     }
     //addChild(m_Light);
     m_Light->setPosition(pos);
-    scene->m_Objects.push_back(m_Light);
     if(!scene->getGodRaysSun()){
         scene->setGodRaysSun(&m_Entity);
     }
 }
 Star::~Star(){
+
 }
 Ring::Ring(vector<RingInfo>& ring_list, Planet* parent){
     m_Parent = parent;
@@ -564,7 +564,7 @@ void Ring::internal_make_ring_image(const vector<RingInfo>& ring_list){
     auto material_name = m_Parent->getName() + "RingMaterial_" + to_string(size);
     auto* texture = Resources::getTexture(texture_name);
     if (!texture) {
-        texture = new Texture(ringImage, texture_name, false, ImageInternalFormat::SRGB8_ALPHA8);
+        texture = NEW Texture(ringImage, texture_name, false, ImageInternalFormat::SRGB8_ALPHA8);
         texture->setAnisotropicFiltering(2.0f);
         epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
     }

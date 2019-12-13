@@ -8,11 +8,11 @@
 namespace Engine{
     namespace epriv{
         template<typename R> struct HandleEntry final{
-            std::uint32_t nextFreeIndex : 12; //
-            std::uint32_t version : 15;       // 29 bits
-            std::uint32_t active : 1;         //  total
-            std::uint32_t endOfList : 1;      //
-            R* resource;
+            std::uint32_t   nextFreeIndex : 12; //
+            std::uint32_t   version : 15;       // 29 bits
+            std::uint32_t   active : 1;         //  total
+            std::uint32_t   endOfList : 1;      //
+            R*              resource;
             HandleEntry(){
                 version = 1;
                 nextFreeIndex = 1;
@@ -29,42 +29,41 @@ namespace Engine{
 
         template<typename T> class ObjectPool final{
             private:
-                unsigned int              MAX_ENTRIES;
-                unsigned int              m_activeEntryCount;
-                unsigned int              m_firstFreeEntry;
-                HandleEntry<T>*           m_Pool;
+                unsigned int                  m_activeEntryCount;
+                unsigned int                  m_firstFreeEntry;
+                std::vector<HandleEntry<T>>   m_Pool;
             public:
                 ObjectPool(const unsigned int numEntries){
-                    MAX_ENTRIES = numEntries; 
-                    m_Pool = new HandleEntry<T>[MAX_ENTRIES]; 
+                    m_Pool.resize(numEntries, HandleEntry<T>());
                     reset(); 
                 }
-                ~ObjectPool(){ destruct(); }
-
-                void destruct(){
-                    for(unsigned int i = 0; i < MAX_ENTRIES; ++i){
+                ~ObjectPool(){
+                    for (size_t i = 0; i < m_Pool.size(); ++i) {
                         SAFE_DELETE(m_Pool[i].resource);
                     }
-                    delete[] m_Pool;
                 }
                 const unsigned int maxEntries(){
-                    return MAX_ENTRIES;
+                    return static_cast<unsigned int>(m_Pool.size());
                 }
                 const unsigned int size(){
-                    unsigned int c = 0; unsigned int i;
-                    for(i = 0; i < MAX_ENTRIES; ++i){
-                        if(m_Pool[i].resource){ c = i; }
+                    unsigned int c = 0;
+                    unsigned int i;
+                    for(i = 0; i < m_Pool.size(); ++i){
+                        if(m_Pool[i].resource){ 
+                            c = i; 
+                        }
                     }
                     return c;
                 } 
                 void reset(){
                     m_activeEntryCount = 0;
                     m_firstFreeEntry = 1;
-                    for (unsigned int i = 0; i < MAX_ENTRIES - 1; ++i){
+                    const auto lastIndex = m_Pool.size() - 1;
+                    for (unsigned int i = 0; i < lastIndex; ++i){
                         m_Pool[i] = HandleEntry<T>(i + 1);
                     }
-                    m_Pool[MAX_ENTRIES - 1] = HandleEntry<T>();
-                    m_Pool[MAX_ENTRIES - 1].endOfList = true;
+                    m_Pool[lastIndex] = HandleEntry<T>();
+                    m_Pool[lastIndex].endOfList = true;
                 }
                 void update(Handle& _handle, T* _ptr){
                     const unsigned int index = _handle.index - 1;
@@ -79,7 +78,7 @@ namespace Engine{
                     }
                 }
                 template<typename R> Handle getHandle(R& resource) {
-                    for (unsigned int i = 0; i < MAX_ENTRIES - 1; ++i) {
+                    for (unsigned int i = 0; i < m_Pool.size(); ++i) {
                         R* res = dynamic_cast<R*>(m_Pool[i].resource);
                         if (res) {
                             if (res->name() == resource.name()) {
@@ -91,7 +90,7 @@ namespace Engine{
                 }
                 Handle add(T* _ptr, const unsigned int _type){
                     const unsigned int newIndex = m_firstFreeEntry - 1;
-                    if(newIndex >= MAX_ENTRIES) 
+                    if(newIndex >= m_Pool.size())
                         return Handle(); //null handle
                     m_firstFreeEntry = m_Pool[newIndex].nextFreeIndex;
                     m_Pool[newIndex].nextFreeIndex = 0;
@@ -106,7 +105,7 @@ namespace Engine{
                 }
                 const unsigned int add(T* _ptr){
                     const unsigned int newIndex = m_firstFreeEntry - 1;
-                    if(newIndex >= MAX_ENTRIES) return 0; //null entity
+                    if(newIndex >= m_Pool.size()) return 0; //null entity
                     m_firstFreeEntry = m_Pool[newIndex].nextFreeIndex;
                     m_Pool[newIndex].nextFreeIndex = 0;
                     ++m_Pool[newIndex].version;

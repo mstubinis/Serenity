@@ -2,19 +2,10 @@
 #ifndef ENGINE_ENGINE_RENDERER_H
 #define ENGINE_ENGINE_RENDERER_H
 
-#include <core/engine/renderer/RenderGraph.h>
 #include <core/engine/renderer/RendererState.h>
 #include <core/engine/utils/Utils.h>
 
 #include <core/engine/renderer/RendererIncludes.h>
-#include <core/engine/renderer/postprocess/SSAO.h>
-#include <core/engine/renderer/postprocess/HDR.h>
-#include <core/engine/renderer/postprocess/DepthOfField.h>
-#include <core/engine/renderer/postprocess/Bloom.h>
-#include <core/engine/renderer/postprocess/FXAA.h>
-#include <core/engine/renderer/postprocess/SMAA.h>
-#include <core/engine/renderer/postprocess/GodRays.h>
-#include <core/engine/renderer/postprocess/Fog.h>
 
 #include <core/engine/renderer/opengl/State.h>
 #include <core/engine/renderer/opengl/Extensions.h>
@@ -50,6 +41,8 @@ namespace epriv{
 
             static uint GLSL_VERSION;
             static uint OPENGL_VERSION;
+
+            void cleanup();
 
             void _init(const char* name,uint w,uint h);
             void _resize(uint width, uint height);

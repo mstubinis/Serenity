@@ -14,6 +14,9 @@ FactionInformation::FactionInformation(const string& nameLong, const string& nam
     ColorText = colorText;
     ColorShield = colorShield;
 }
+FactionInformation::~FactionInformation() {
+
+}
 
 
 void Factions::init() {
@@ -49,4 +52,7 @@ void Factions::init() {
         glm::vec4(0, 1, 0, 1), //text color
         glm::vec4(0, 1, 0, 0.7f) //shields color
     );
+}
+void Factions::destruct() {
+    Database.clear();
 }

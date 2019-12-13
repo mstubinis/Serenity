@@ -17,7 +17,7 @@ ServerLobbyConnectedPlayersWindow::ServerLobbyConnectedPlayersWindow(const Font&
     m_Width = 200.0f;
     m_Height = 300.0f;
 
-    m_ChatWindow = new ScrollFrame(x, y, m_Width, m_Height);
+    m_ChatWindow = NEW ScrollFrame(x, y, m_Width, m_Height);
     m_ChatWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
 }
 ServerLobbyConnectedPlayersWindow::~ServerLobbyConnectedPlayersWindow() {
@@ -31,19 +31,22 @@ void ServerLobbyConnectedPlayersWindow::addContent(Widget* widget) {
 }
 
 void ServerLobbyConnectedPlayersWindow::removeContent(const string& key) {
-    auto& vec = m_ChatWindow->content();
-    for (auto& content : vec) {
-        Text* text = dynamic_cast<Text*>(content);
+    auto& content = m_ChatWindow->content();
+    for (auto& widget : content) {
+        Text* text = dynamic_cast<Text*>(widget);
         if (text) {
             if (text->text() == key) {
-                removeFromVector(vec, content);
+                SAFE_DELETE(widget);
+                removeFromVector(content, widget);
             }
         }
     }
     m_ChatWindow->internalAddContent();
 }
 void ServerLobbyConnectedPlayersWindow::clear() {
-    vector_clear(m_ChatWindow->content());
+    auto& content = m_ChatWindow->content();
+    SAFE_DELETE_VECTOR(content);
+    content.clear();
 }
 void* ServerLobbyConnectedPlayersWindow::getUserPointer() {
     return m_UserPointer;

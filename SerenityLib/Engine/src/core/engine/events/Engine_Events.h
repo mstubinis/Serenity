@@ -34,6 +34,8 @@ namespace Engine{
                 EventManager();
                 ~EventManager();
 
+                void cleanup();
+
                 void setMousePositionInternal(const float x, const float y, const bool resetDifference, const bool resetPrevious);
                 void onEventKeyPressed(const unsigned int& key);
                 void onEventKeyReleased(const unsigned int& key);

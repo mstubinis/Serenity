@@ -8,9 +8,9 @@
 #include "ResourceManifest.h"
 #include "GameCamera.h"
 
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/events/Engine_Events.h>
-#include <core/engine/Engine_Window.h>
+#include <core/engine/system/window/Engine_Window.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/fonts/Font.h>
 #include <core/engine/textures/Texture.h>
@@ -52,7 +52,6 @@ struct ButtonJoin_OnClick {void operator()(Button* button) const {
     menu.m_GameState = GameState::Join_Server_Port_And_Name_And_IP;
     menu.setErrorText("", 0.2f);
 }};
-
 
 struct ButtonBack_OnClick {void operator()(Button* button) const {
     Menu& menu = *static_cast<Menu*>(button->getUserPointer());
@@ -110,27 +109,22 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
                         if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) { //letters only please
                             const int port = stoi(portstring);
                             menu.m_Core.startServer(port, map);
+                            menu.m_Core.startClient(nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
+
 
                             //TODO: replace this hard coded test case with real input values
-                            GameplayMode* mode = new GameplayMode(GameplayModeType::TeamDeathmatch, 50);
                             vector<TeamNumber::Enum> nil;
-                            vector<TeamNumber::Enum> team1enemy{ TeamNumber::Team_2 };
-                            vector<TeamNumber::Enum> team2enemy{ TeamNumber::Team_1 };
-                            Team* team1 = new Team(
-                                TeamNumber::Team_1,
-                                nil,
-                                team1enemy
-                            );
-                            Team* team2 = new Team(
-                                TeamNumber::Team_2,
-                                nil,
-                                team2enemy
-                            );
-                            mode->addTeam(*team1);
-                            mode->addTeam(*team2);
+                            vector<TeamNumber::Enum> team1enemies{ TeamNumber::Team_2 };
+                            vector<TeamNumber::Enum> team2enemies{ TeamNumber::Team_1 };
+                            Team team1 = Team(TeamNumber::Team_1, nil, team1enemies);
+                            Team team2 = Team(TeamNumber::Team_2, nil, team2enemies);
+                            menu.m_Core.getServer()->getGameplayMode().setGameplayMode(GameplayModeType::TeamDeathmatch);
+                            menu.m_Core.getServer()->getGameplayMode().setMaxAmountOfPlayers(50);
+                            menu.m_Core.getServer()->getGameplayMode().addTeam(team1);
+                            menu.m_Core.getServer()->getGameplayMode().addTeam(team2);
+                            menu.m_Core.getClient()->getGameplayMode() = menu.m_Core.getServer()->getGameplayMode();
 
-                            menu.m_Core.startClient(mode, nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
-                            menu.m_Core.getServer()->startupMap(map, *mode);
+                            menu.m_Core.getServer()->startupMap(map);
                             menu.m_ServerLobbyChatWindow->setUserPointer(menu.m_Core.getClient());
                         }else{
                             menu.setErrorText("The username must only contain letters");
@@ -158,12 +152,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
                     if (username.find_first_not_of(' ') != std::string::npos) {
                         if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) {
                             const int port = stoi(portstring);
-
-
-                            GameplayMode* mode = new GameplayMode(); //get mode data via serialization later on
-
-
-                            menu.m_Core.startClient(mode, nullptr, port, username, ip); //the client will request validation at this stage
+                            menu.m_Core.startClient(nullptr, port, username, ip); //the client will request validation at this stage
 
                             menu.m_ServerLobbyChatWindow->setUserPointer(menu.m_Core.getClient());
                         }else {
@@ -190,7 +179,6 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
     }
 }};
 
-
 Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
     m_FontHandle = Resources::addFont(ResourceManifest::BasePath + "data/Fonts/consolas.fnt");
     m_Font = Resources::getFont(m_FontHandle);
@@ -200,13 +188,13 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
 
     const auto& windowDimensions = Resources::getWindowSize();
 
-    m_ButtonHost = new Button(*m_Font, windowDimensions.x / 2.0f, 275.0f, 150.0f, 50.0f);
+    m_ButtonHost = NEW Button(*m_Font, windowDimensions.x / 2.0f, 275.0f, 150.0f, 50.0f);
     m_ButtonHost->setText("Host");
     m_ButtonHost->setColor(0.5f, 0.78f, 0.94f, 1.0f);
     m_ButtonHost->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     //m_ButtonHost->setTextScale(0.5f);
 
-    m_ButtonJoin = new Button(*m_Font, 0.0f, -120.0f, 150.0f, 50.0f);
+    m_ButtonJoin = NEW Button(*m_Font, 0.0f, -120.0f, 150.0f, 50.0f);
     m_ButtonJoin->setText("Join");
     m_ButtonJoin->setColor(0.5f, 0.78f, 0.94f, 1.0f);
     m_ButtonJoin->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -220,11 +208,11 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
     m_ButtonHost->setOnClickFunctor(ButtonHost_OnClick());
     m_ButtonJoin->setOnClickFunctor(ButtonJoin_OnClick());
 
-    m_Back = new Button(*m_Font, 100.0f, 50.0f, 150.0f, 50.0f);
+    m_Back = NEW Button(*m_Font, 100.0f, 50.0f, 150.0f, 50.0f);
     m_Back->setText("Back");
     m_Back->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_Back->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
-    m_Next = new Button(*m_Font, windowDimensions.x - 100.0f, 50.0f, 150.0f, 50.0f);
+    m_Next = NEW Button(*m_Font, windowDimensions.x - 100.0f, 50.0f, 150.0f, 50.0f);
     m_Next->setText("Next");
     m_Next->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_Next->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
@@ -234,29 +222,29 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
     m_Back->setOnClickFunctor(ButtonBack_OnClick());
     m_Next->setOnClickFunctor(ButtonNext_OnClick());
 
-    m_ServerIp = new TextBox("Server IP",*m_Font, 40, windowDimensions.x / 2.0f, 115.0f);
+    m_ServerIp = NEW TextBox("Server IP",*m_Font, 40, windowDimensions.x / 2.0f, 115.0f);
     m_ServerIp->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_ServerIp->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
-    m_UserName = new TextBox("Your Name",*m_Font, 20, windowDimensions.x / 2.0f, 275.0f);
+    m_UserName = NEW TextBox("Your Name",*m_Font, 20, windowDimensions.x / 2.0f, 275.0f);
     m_UserName->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_UserName->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
-    m_ServerPort = new TextBox("Server Port",*m_Font, 7, windowDimensions.x / 2.0f, 195.0f);
+    m_ServerPort = NEW TextBox("Server Port",*m_Font, 7, windowDimensions.x / 2.0f, 195.0f);
     m_ServerPort->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_ServerPort->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
     m_ServerPort->setText("55000");
 
-    m_InfoText = new Text(Resources::getWindowSize().x / 2.0f, 65.0f, *m_Font);
+    m_InfoText = NEW Text(Resources::getWindowSize().x / 2.0f, 65.0f, *m_Font);
     m_InfoText->setTextAlignment(TextAlignment::Center);
 
-    m_ServerHostMapSelector = new ServerHostingMapSelectorWindow(*m_Font, Resources::getWindowSize().x / 2.0f - 300.0f, 630.0f);
+    m_ServerHostMapSelector = NEW ServerHostingMapSelectorWindow(*m_Font, Resources::getWindowSize().x / 2.0f - 300.0f, 630.0f);
 
-    m_ServerLobbyChatWindow = new ServerLobbyChatWindow(*m_Font, 50.0f, 140.0f + 300.0f);
+    m_ServerLobbyChatWindow = NEW ServerLobbyChatWindow(*m_Font, 50.0f, 140.0f + 300.0f);
     m_ServerLobbyChatWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
 
-    m_ServerLobbyConnectedPlayersWindow = new ServerLobbyConnectedPlayersWindow(*m_Font, 50.0f + m_ServerLobbyChatWindow->getWindowFrame().width(), 140.0f + 300.0f);
+    m_ServerLobbyConnectedPlayersWindow = NEW ServerLobbyConnectedPlayersWindow(*m_Font, 50.0f + m_ServerLobbyChatWindow->getWindowFrame().width(), 140.0f + 300.0f);
     m_ServerLobbyConnectedPlayersWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
 
-    m_ServerLobbyShipSelectorWindow = new ServerLobbyShipSelectorWindow(core,scene, camera, *m_Font, 50.0f, windowDimensions.y - 50.0f);
+    m_ServerLobbyShipSelectorWindow = NEW ServerLobbyShipSelectorWindow(core,scene, camera, *m_Font, 50.0f, windowDimensions.y - 50.0f);
     m_ServerLobbyShipSelectorWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
 }
 Menu::~Menu() {
@@ -269,8 +257,8 @@ Menu::~Menu() {
     SAFE_DELETE(m_ServerPort);
     SAFE_DELETE(m_InfoText);
     SAFE_DELETE(m_ServerHostMapSelector);
-    SAFE_DELETE(m_ServerLobbyConnectedPlayersWindow);
     SAFE_DELETE(m_ServerLobbyChatWindow);
+    SAFE_DELETE(m_ServerLobbyConnectedPlayersWindow);
     SAFE_DELETE(m_ServerLobbyShipSelectorWindow);
 }
 Font& Menu::getFont() {

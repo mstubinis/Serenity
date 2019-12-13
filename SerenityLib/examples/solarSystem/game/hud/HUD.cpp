@@ -15,7 +15,7 @@
 #include <core/engine/materials/MaterialLayer.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/fonts/Font.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 
 using namespace std;
 using namespace Engine;
@@ -31,10 +31,10 @@ HUD::HUD(Map& map, Font& font):m_Map(map), m_Font(font){
 
     Texture& background = *(Texture*)((ResourceManifest::ShipStatusBackgroundHUDTexture).get());
 
-    m_SensorDisplay = new SensorStatusDisplay(*this,map,glm::vec2(winSize.x / 2.0f, 0),glm::vec2(textureWidth, radarTexture.height()),glm::vec4(1, 1, 0, 1),Alignment::BottomCenter);
-    m_ShipStatusDisplay = new ShipStatusDisplay(*this, glm::vec2((winSize.x / 2.0f) - ((m_SensorDisplay->size().x / 2.0f) + 30), 0), background.size(), glm::vec4(1,1,0,1), Alignment::BottomRight);
-    m_ShipTargetStatusDisplay = new ShipStatusDisplay(*this, glm::vec2((winSize.x / 2.0f) + ((m_SensorDisplay->size().x / 2.0f) + 30), 0), background.size(), glm::vec4(1, 1, 0, 1), Alignment::BottomLeft);
-    m_TargetRedicule = new TargetRedicule(map, font);
+    m_SensorDisplay = NEW SensorStatusDisplay(*this,map,glm::vec2(winSize.x / 2.0f, 0),glm::vec2(textureWidth, radarTexture.height()),glm::vec4(1, 1, 0, 1),Alignment::BottomCenter);
+    m_ShipStatusDisplay = NEW ShipStatusDisplay(*this, glm::vec2((winSize.x / 2.0f) - ((m_SensorDisplay->size().x / 2.0f) + 30), 0), background.size(), glm::vec4(1,1,0,1), Alignment::BottomRight);
+    m_ShipTargetStatusDisplay = NEW ShipStatusDisplay(*this, glm::vec2((winSize.x / 2.0f) + ((m_SensorDisplay->size().x / 2.0f) + 30), 0), background.size(), glm::vec4(1, 1, 0, 1), Alignment::BottomLeft);
+    m_TargetRedicule = NEW TargetRedicule(map, font);
 }
 HUD::~HUD() {
     SAFE_DELETE(m_SensorDisplay);

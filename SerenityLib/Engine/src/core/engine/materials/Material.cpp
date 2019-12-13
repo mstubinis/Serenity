@@ -1,7 +1,7 @@
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialLoader.h>
 #include <core/engine/materials/MaterialComponent.h>
-#include <core/engine/Engine.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/shaders/ShaderProgram.h>
@@ -79,7 +79,7 @@ Material::~Material(){
     SAFE_DELETE_VECTOR(m_Components);
 }
 MaterialComponent* Material::internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture, Texture* mask, Texture* cubemap) {
-    MaterialComponent* newMaterialComponent = new MaterialComponent(type, texture, mask, cubemap);
+    MaterialComponent* newMaterialComponent = NEW MaterialComponent(type, texture, mask, cubemap);
     m_Components.push_back(newMaterialComponent);
     return newMaterialComponent;
 }
@@ -90,7 +90,7 @@ void Material::internalUpdateGlobalMaterialPool(const bool& addToDatabase) {
         data = &Material::m_MaterialProperities[m_ID];
     }else{
         m_ID = Material::m_MaterialProperities.size();
-        data = new glm::vec4(0.0f);
+        data = NEW glm::vec4(0.0f);
     }
     data->r = Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r, m_F0Color.g, m_F0Color.b);
     data->g = m_BaseAlpha;
@@ -104,13 +104,13 @@ void Material::internalUpdateGlobalMaterialPool(const bool& addToDatabase) {
 
 
 MaterialComponent& Material::addComponent(const MaterialComponentType::Type& type, const string& textureFile, const string& maskFile, const string& cubemapFile) {
-    Texture* texture = Core::m_Engine->m_ResourceManager._hasTexture(textureFile);
+    Texture* texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(textureFile);
     if (!texture) {
         if (!textureFile.empty() && textureFile != "DEFAULT") {
             if (type == MaterialComponentType::Normal || type == MaterialComponentType::ParallaxOcclusion) {
-                texture = new Texture(textureFile, true, ImageInternalFormat::RGB8);
+                texture = NEW Texture(textureFile, true, ImageInternalFormat::RGB8);
             }else{
-                texture = new Texture(textureFile, true, ImageInternalFormat::SRGB8_ALPHA8);
+                texture = NEW Texture(textureFile, true, ImageInternalFormat::SRGB8_ALPHA8);
             }
             Core::m_Engine->m_ResourceManager._addTexture(texture);
         }else if (textureFile == "DEFAULT") {

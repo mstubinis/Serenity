@@ -27,12 +27,14 @@ struct FactionInformation final {
 
     FactionInformation();
     FactionInformation(const std::string& nameLong, const std::string& nameShort, const glm::vec4& colorText, const glm::vec4& colorShield);
+    ~FactionInformation();
 };
 
 class Factions final {
     public:
         static std::vector<FactionInformation> Database;
         static void init();
+        static void destruct();
 };
 
 #endif

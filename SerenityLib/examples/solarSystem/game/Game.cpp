@@ -1,15 +1,12 @@
-#include "Core.h"
-#include <core/engine/Engine.h>
-#include <core/engine/lua/LuaScript.h>
+#include <core/engine/system/EngineGameFunctions.h>
+#include <core/engine/system/window/Engine_Window.h>
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/events/Engine_Events.h>
+#include <core/engine/physics/Engine_Physics.h>
 
-#include <core/engine/math/SimplexNoise.h>
-#include <core/engine/math/Engine_Math.h>
-#include <core/engine/model/ModelInstance.h>
-
-#include <unordered_map>
-#include <iostream>
-#include <cstring>
 #include <glm/vec2.hpp>
+
+#include "Core.h"
 
 using namespace Engine;
 using namespace std;
@@ -19,9 +16,10 @@ void Game::cleanup(){
     SAFE_DELETE(m_Core);
 }
 void Game::initResources(){
-    m_Core = new Core();
+    m_Core = NEW Core();
 }
 void Game::initLogic(){
+    //Physics::setNumberOfStepsPerFrame(3);
     m_Core->init();
 }
 void Game::update(const double& dt){
@@ -64,13 +62,13 @@ void Game::onMouseMoved(const float& mouseX, const float& mouseY){
 }
 void Game::onMouseEntered(){
     if (m_Core && m_Core->gameState() == GameState::Game) {
-        Engine::getWindow().requestFocus();
-        Engine::getWindow().keepMouseInWindow(true);
+        Resources::getWindow().requestFocus();
+        Resources::getWindow().keepMouseInWindow(true);
     }
 }
 void Game::onMouseLeft(){
     if (m_Core && m_Core->gameState() == GameState::Game) {
-        Engine::getWindow().keepMouseInWindow(false);
+        Resources::getWindow().keepMouseInWindow(false);
     }
 }
 void Game::onPreUpdate(const double& dt){

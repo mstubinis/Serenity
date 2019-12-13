@@ -28,7 +28,7 @@ namespace Engine {
                 TEntity addEntity(const Scene& scene) {
                     if (_freelist.empty()) {
                         _pool.emplace_back(0, 0);
-                        _freelist.emplace_back(_pool.size() - 1);
+                        _freelist.emplace_back(static_cast<unsigned int>(_pool.size()) - 1U);
                     }
                     const auto id = _freelist.back();
                     _freelist.pop_back();
