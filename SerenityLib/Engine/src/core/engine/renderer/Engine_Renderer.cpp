@@ -2147,7 +2147,7 @@ class epriv::RenderManager::impl final{
 };
 
 
-epriv::RenderManager::RenderManager(const char* name, uint windowWidth, uint windowHeight) : m_i(ALLOC impl){
+epriv::RenderManager::RenderManager(const char* name, uint windowWidth, uint windowHeight) : m_i(NEW impl){
     m_i->_init(name, windowWidth, windowHeight);
     renderManagerImpl = m_i.get();
     renderManager = this;

@@ -49,7 +49,7 @@ ServerLobbyShipSelectorWindow::~ServerLobbyShipSelectorWindow() {
 }
 void ServerLobbyShipSelectorWindow::addShipButton(const string& shipClass) {
     auto& textColor = Ships::Database.at(shipClass).FactionInformation.ColorText;
-    Button& shipbutton = *(ALLOC Button(m_Font, 0, 0, 100, 40));
+    Button& shipbutton = *(NEW Button(m_Font, 0, 0, 100, 40));
     shipbutton.setText(shipClass);
     shipbutton.setColor(0.1f, 0.1f, 0.1f, 0.5f);
     shipbutton.setTextColor(textColor.r, textColor.g, textColor.b, 1.0f);

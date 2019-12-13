@@ -119,11 +119,11 @@ void GameplayMode::deserialize(const PacketGameplayModeInfo& packet) {
         //add team
         Team* newTeam = nullptr;
         if (!m_Teams.count(team_number)) {
-            newTeam = &Team(team_number);
-            m_Teams.emplace(team_number, Team(team_number));
-        }else{
-            newTeam = &m_Teams.at(team_number);
+            newTeam = NEW Team(team_number);
+            m_Teams.emplace(team_number, *newTeam);
+            SAFE_DELETE(newTeam);
         }
+        newTeam = &(m_Teams.at(team_number));
 
         for (unsigned int j = 0; j < num_ally_teams; ++j) {
             ally_team = static_cast<TeamNumber::Enum>(stoi(list[start_index + count]));

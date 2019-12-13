@@ -193,7 +193,7 @@ const bool Server::startup(const string& mapname) {
 
     if (m_Threads.size() == 0) {
         for (unsigned int i = 0; i < std::thread::hardware_concurrency(); ++i) {
-            m_Threads.push_back(ALLOC ServerClientThread());
+            m_Threads.push_back(NEW ServerClientThread());
         }
     }
     if (status == sf::Socket::Status::Done) {

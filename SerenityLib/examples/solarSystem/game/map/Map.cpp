@@ -469,10 +469,10 @@ void Map::loadFromFile(const string& filename) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
                         if (ORBIT_PERIOD != -1.0f) {
-                            planetoid->setOrbit(ALLOC OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), Angle, *parent, INCLINATION));
+                            planetoid->setOrbit(NEW OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), Angle, *parent, INCLINATION));
                         }
                         if (ROTATIONAL_TILT != -1.0f) {
-                            planetoid->setRotation(ALLOC RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
+                            planetoid->setRotation(NEW RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
                         }
                     }
                     m_Planets.emplace(NAME, planetoid);
@@ -483,10 +483,10 @@ void Map::loadFromFile(const string& filename) {
                         Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
                         if (ORBIT_PERIOD != -1.0f) {
-                            planetoid->setOrbit(ALLOC OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), Angle, *parent, INCLINATION));
+                            planetoid->setOrbit(NEW OrbitInfo(ORBIT_ECCENTRICITY, ORBIT_PERIOD, static_cast<float>(ORBIT_MAJOR_AXIS), Angle, *parent, INCLINATION));
                         }
                         if (ROTATIONAL_TILT != -1.0f) {
-                            planetoid->setRotation(ALLOC RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
+                            planetoid->setRotation(NEW RotationInfo(ROTATIONAL_TILT, ROTATIONAL_PERIOD));
                         }
                     }
                     m_Planets.emplace(NAME, planetoid);

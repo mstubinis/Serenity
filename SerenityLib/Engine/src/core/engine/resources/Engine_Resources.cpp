@@ -206,7 +206,7 @@ Handle Resources::getMaterialHandle(Material* material) {
 }
 
 Handle Resources::addFont(const string& filename){
-    return resourceManager->m_Resources->add(ALLOC Font(filename),ResourceType::Font);
+    return resourceManager->m_Resources->add(NEW Font(filename),ResourceType::Font);
 }
 
 

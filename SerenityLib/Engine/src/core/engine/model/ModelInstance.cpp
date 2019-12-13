@@ -417,5 +417,5 @@ void ModelInstance::setMaterial(Material* material, ComponentModel& componentMod
     componentModel.setModel(m_Mesh, material, 0, m_ShaderProgram, m_Stage);
 }
 void ModelInstance::playAnimation(const string& animName, const float& start, const float& end, const unsigned int& reqLoops){
-    m_AnimationQueue.push_back(ALLOC epriv::ModelInstanceAnimation(*mesh(), animName, start, end, reqLoops));
+    m_AnimationQueue.push_back(NEW epriv::ModelInstanceAnimation(*mesh(), animName, start, end, reqLoops));
 }

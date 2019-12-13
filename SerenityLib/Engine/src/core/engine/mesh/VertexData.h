@@ -10,7 +10,7 @@
 
 struct VertexData final{
     VertexDataFormat&                              format;
-    std::vector<uint8_t*>                          data;
+    std::vector<std::vector<uint8_t>>              data;
     std::vector<size_t>                            dataSizes;
     std::vector<size_t>                            dataSizesCapacity;
     std::vector<unsigned short>                    indices;
@@ -28,7 +28,8 @@ struct VertexData final{
     ~VertexData();
 
     template<typename T> const std::vector<T> getData(const size_t& attributeIndex) {
-        const T* data_as_t_ptr = reinterpret_cast<T*>(data[attributeIndex]);
+        auto* buffer = (data[attributeIndex].data());
+        const T* data_as_t_ptr = reinterpret_cast<T*>((buffer));
         const std::vector<T> data_as_t(data_as_t_ptr, data_as_t_ptr + dataSizes[attributeIndex]);
         return data_as_t;
     }
@@ -41,12 +42,11 @@ struct VertexData final{
         auto& destination_data = data[attributeIndex];
         const auto sizeofT     = sizeof(T);
         const auto totalSize   = (source_new_data.size() * sizeofT);
-        if (dataSizesCapacity[attributeIndex] < source_new_data.size()) {
-            delete[] destination_data;
-            destination_data = NEW uint8_t[totalSize];
-            dataSizesCapacity[attributeIndex] = source_new_data.size();
-        }
-        std::memcpy(destination_data, source_new_data.data(), totalSize);
+        destination_data.clear();
+        dataSizesCapacity[attributeIndex] = source_new_data.size();
+        destination_data.reserve(totalSize);
+        auto* raw_src_data_uchar = reinterpret_cast<uint8_t*>(const_cast<T*>(source_new_data.data()));
+        std::copy(raw_src_data_uchar, raw_src_data_uchar + totalSize, std::back_inserter(destination_data));
         dataSizes[attributeIndex] = source_new_data.size();
         if (addToGPU) {
             if (format.interleavingType == VertexAttributeLayout::Interleaved) {

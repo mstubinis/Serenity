@@ -177,7 +177,7 @@ class Engine_Window::impl final{
         }
 };
 
-Engine_Window::Engine_Window(const char* name, const unsigned int& width, const unsigned int& height) : m_i(ALLOC impl){
+Engine_Window::Engine_Window(const char* name, const unsigned int& width, const unsigned int& height) : m_i(NEW impl){
     m_i->_init(name,width,height);
 }
 Engine_Window::~Engine_Window(){

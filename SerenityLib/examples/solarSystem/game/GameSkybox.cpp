@@ -75,10 +75,10 @@ class GameSkybox::impl final{
             */
         }
 };
-GameSkybox::GameSkybox(const string& name, uint numFlares) : Skybox(name), m_i(ALLOC impl){
+GameSkybox::GameSkybox(const string& name, uint numFlares) : Skybox(name), m_i(NEW impl){
     m_i->_init(numFlares); 
 }
-GameSkybox::GameSkybox(const string* names, uint numFlares) : Skybox(names), m_i(ALLOC impl){
+GameSkybox::GameSkybox(const string* names, uint numFlares) : Skybox(names), m_i(NEW impl){
     m_i->_init(numFlares); 
 }
 

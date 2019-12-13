@@ -7,14 +7,12 @@
 
 #ifdef _DEBUG
     #define _CRTDBG_MAP_ALLOC
-    #define ALLOC new( _CLIENT_BLOCK, __FILE__, __LINE__)
-    #define NEW ALLOC
+    #define NEW new( _CLIENT_BLOCK, __FILE__, __LINE__)
     #define MALLOC(size) _malloc_dbg(size, _CLIENT_BLOCK, __FILE__, __LINE__)
     #define FREE(block) _free_dbg(block, _CLIENT_BLOCK)
     #define DEL delete
 #else
-    #define ALLOC new
-    #define NEW ALLOC
+    #define NEW new
     #define MALLOC malloc
     #define FREE free
     #define DEL delete
@@ -57,6 +55,7 @@
         for (size_t i = 0; i < x.size(); ++i) { \
             SAFE_DELETE(x[i]); \
         } \
+        x.clear(); \
     } \
 }
 #define SAFE_DELETE_QUEUE(x){ \
@@ -71,5 +70,6 @@
         for(auto& it : x){ \
             SAFE_DELETE(it.second); \
         } \
+        x.clear(); \
     } \
 }

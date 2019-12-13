@@ -19,7 +19,7 @@ void Game::initResources(){
     m_Core = NEW Core();
 }
 void Game::initLogic(){
-    //Physics::setNumberOfStepsPerFrame(3);
+    Physics::setNumberOfStepsPerFrame(3);
     m_Core->init();
 }
 void Game::update(const double& dt){

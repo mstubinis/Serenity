@@ -349,7 +349,7 @@ void InternalScenePublicInterface::RemoveModelInstanceFromPipeline(Scene& scene,
 Scene::Scene(const string& name) : Scene(name, SceneOptions::DEFAULT_OPTIONS){
 
 }
-Scene::Scene(const string& name, const SceneOptions& options) : m_i(ALLOC impl), EngineResource(ResourceType::Scene, name) {
+Scene::Scene(const string& name, const SceneOptions& options) : m_i(NEW impl), EngineResource(ResourceType::Scene, name) {
     m_i->_init(*this, name, options);
     setName(name);
     setOnUpdateFunctor(EmptyOnUpdateFunctor());
@@ -377,12 +377,12 @@ ParticleEmitter* Scene::addParticleEmitter(ParticleEmitter& emitter) {
 }
 
 Viewport& Scene::addViewport(const float x, const float y, const float width, const float height, const Camera& camera) {
-    Viewport& viewport = *(ALLOC Viewport(*this, camera));
-    viewport.setViewportDimensions(x, y, width, height);
+    Viewport* viewport = (NEW Viewport(*this, camera));
+    viewport->setViewportDimensions(x, y, width, height);
     unsigned int id = numViewports();
-    viewport.m_ID = id;
-    m_i->m_Viewports.push_back(&viewport);
-    return viewport;
+    viewport->m_ID = id;
+    m_i->m_Viewports.push_back(viewport);
+    return *viewport;
 }
 Entity Scene::createEntity() { 
     return m_i->m_ECS.createEntity(*this); 
@@ -407,10 +407,10 @@ Camera* Scene::getActiveCamera() const {
 }
 void Scene::setActiveCamera(Camera& camera){
     if (m_i->m_Viewports.size() == 0) {
-        Viewport& viewport = *(ALLOC Viewport(*this, camera));
+        Viewport* viewport = (NEW Viewport(*this, camera));
         unsigned int id = numViewports();
-        viewport.m_ID = id;
-        m_i->m_Viewports.push_back(&viewport);
+        viewport->m_ID = id;
+        m_i->m_Viewports.push_back(viewport);
         return;
     }
     m_i->m_Viewports[0]->setCamera(camera);

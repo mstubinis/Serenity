@@ -38,28 +38,28 @@ unordered_set<TeamNumber::Enum>& Team::getEnemyTeams() {
 }
 
 const bool Team::isPlayerOnTeam(const string& playerMapKey) const {
-    if (m_TeamPlayers.count(playerMapKey))
+    if (m_TeamPlayers.size() > 0 && m_TeamPlayers.count(playerMapKey))
         return true;
     return false;
 }
 const bool Team::addPlayerToTeam(const string& playerMapKey) {
-    if (m_TeamPlayers.count(playerMapKey))
+    if (m_TeamPlayers.size() > 0 && m_TeamPlayers.count(playerMapKey))
         return false;
-    m_TeamPlayers.emplace(playerMapKey);
+    m_TeamPlayers.insert(playerMapKey);
     return true;
 }
 const bool Team::addEnemyTeam(const TeamNumber::Enum& teamNumber) {
-    if (teamNumber == m_TeamNumber || m_EnemyTeams.count(teamNumber)) {
+    if (m_EnemyTeams.size() > 0 && (teamNumber == m_TeamNumber || m_EnemyTeams.count(teamNumber))) {
         return false;
     }
-    m_EnemyTeams.emplace(teamNumber);
+    m_EnemyTeams.insert(teamNumber);
     return true;
 }
 const bool Team::addAllyTeam(const TeamNumber::Enum& teamNumber) {
-    if (teamNumber == m_TeamNumber || m_AllyTeams.count(teamNumber)) {
+    if (m_AllyTeams.size() > 0 && (teamNumber == m_TeamNumber || m_AllyTeams.count(teamNumber))) {
         return false;
     }
-    m_AllyTeams.emplace(teamNumber);
+    m_AllyTeams.insert(teamNumber);
     return true;
 }
 

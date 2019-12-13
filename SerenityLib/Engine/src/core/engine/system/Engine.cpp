@@ -132,9 +132,6 @@ void EngineCore::update(const double& dt){
     update_logic(dt);
     update_sounds(dt);
 }
-//0x00007FF8ACAB9269
-//0xC0000374
-//0x00007FF8ACB227F0
 void EngineCore::render(const double& dt){
     m_DebugManager.stop_clock();
     Game::render();

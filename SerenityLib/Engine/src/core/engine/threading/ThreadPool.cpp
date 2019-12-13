@@ -21,7 +21,7 @@ ThreadPoolFuture::ThreadPoolFuture(std::shared_future<void>&& future, std::funct
     m_Callback = callback;
 }
 ThreadPoolFuture::~ThreadPoolFuture() {
-    m_Future.get();
+
 }
 ThreadPoolFuture::ThreadPoolFuture(ThreadPoolFuture&& other) noexcept {
     using std::swap;
@@ -64,7 +64,7 @@ void ThreadPool::init(const unsigned int num_threads) {
     m_Terminated = false;
     m_Stopped = false;
     for (unsigned int i = 0; i < num_threads; ++i) {
-        m_WorkerThreads.push_back(ALLOC WorkerThread(*this));
+        m_WorkerThreads.push_back(NEW WorkerThread(*this));
     }
 }
 void ThreadPool::addJob(std::function<void()>&& job) {

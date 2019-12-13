@@ -21,8 +21,8 @@ epriv::ParticleSystem::ParticleSystem() {
     m_Particles.reserve(NUMBER_OF_PARTICLE_LIMIT);
 }
 epriv::ParticleSystem::~ParticleSystem() {
-    vector_clear(m_ParticleEmitters);
-    vector_clear(m_Particles);
+    (m_ParticleEmitters.clear());
+    (m_Particles.clear());
 }
 
 

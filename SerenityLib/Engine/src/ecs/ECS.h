@@ -35,11 +35,11 @@ namespace Engine {
                         m_Systems.resize(type_slot + 1, nullptr);
                     }
                     if (!m_ComponentPools[type_slot]) {
-                        m_ComponentPools[type_slot] = ALLOC CPoolType();
+                        m_ComponentPools[type_slot] = NEW CPoolType();
                     }
                     if (!m_Systems[type_slot]) {
                         ECSSystemCI _ci;
-                        m_Systems[type_slot] = ALLOC CSystemType(_ci, *this);
+                        m_Systems[type_slot] = NEW CSystemType(_ci, *this);
                     }
                 }
             public:
@@ -124,7 +124,7 @@ namespace Engine {
                         m_ComponentPools.resize(type_slot + 1, nullptr);
                     }
                     if (!m_ComponentPools[type_slot]) {
-                        m_ComponentPools[type_slot] = ALLOC CPoolType();
+                        m_ComponentPools[type_slot] = NEW CPoolType();
                     }
                     if (type_slot >= m_Systems.size()) {
                         m_Systems.resize(type_slot + 1, nullptr);
@@ -132,7 +132,7 @@ namespace Engine {
                     if (m_Systems[type_slot]) {
                         SAFE_DELETE(m_Systems[type_slot]);
                     }
-                    m_Systems[type_slot] = ALLOC CSystemType(systemCI, *this);
+                    m_Systems[type_slot] = NEW CSystemType(systemCI, *this);
                 }
                 TEntity createEntity(Scene& scene) { 
                     const TEntity res = m_EntityPool.addEntity(scene);
