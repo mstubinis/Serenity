@@ -251,7 +251,7 @@ Anchor* Map::internalCreateDeepspaceAnchor(const decimal& x, const decimal& y, c
             break;
         }else{
             ++count;
-            key = "Deepspace Anchor " + std::to_string(count);
+            key = "Deepspace Anchor " + to_string(count);
         }
     }
     return anchor;
@@ -262,7 +262,7 @@ Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& this
     const string key = thisName + " Anchor";
     if (parentAnchor.empty()) {
         if (std::get<0>(m_RootAnchor).empty()) {
-            m_RootAnchor = std::tuple<std::string, Anchor*>(key, anchor);
+            m_RootAnchor = tuple<string, Anchor*>(key, anchor);
         }
     }else{
         Anchor* parent = loadedAnchors.at(parentAnchor + " Anchor");
@@ -335,6 +335,7 @@ void Map::loadFromFile(const string& filename) {
                 istringstream stream(line);
 
                 string NAME;
+                string NAME_ORG;
                 string LAGRANGE_TYPE;
                 string LAGRANGE_PLANET_1, LAGRANGE_PLANET_2;
                 string PARENT = "";
@@ -391,7 +392,6 @@ void Map::loadFromFile(const string& filename) {
                     else if (key == "g2")               G2 = stof(value);
                     else if (key == "b2")               B2 = stof(value);
                     else if (key == "position")         POSITION = stoull(value) * 10;
-
                     else if (key == "x")                X = stoull(value);
                     else if (key == "y")                Y = stoull(value);
                     else if (key == "z")                Z = stoull(value);
@@ -399,8 +399,10 @@ void Map::loadFromFile(const string& filename) {
                     else if (key == "qy")               qy = stof(value);
                     else if (key == "qz")               qz = stof(value);
                     else if (key == "a")                Angle = stof(value);
-
-                    else if (key == "parent")           PARENT = value;
+                    else if (key == "parent") {
+                        PARENT = value;
+                        replace(PARENT.begin(), PARENT.end(), '_', ' ');
+                    }
                     else if (key == "type")             TYPE = static_cast<PlanetType::Type>(static_cast<unsigned int>(stoi(value)));
                     else if (key == "atmosphereHeight") ATMOSPHERE_HEIGHT = stof(value);
                     else if (key == "break")            BREAK = stoi(value);

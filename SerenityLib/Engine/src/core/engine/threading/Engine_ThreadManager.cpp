@@ -15,6 +15,7 @@ epriv::ThreadManager::~ThreadManager(){
     cleanup();
 }
 void epriv::ThreadManager::cleanup() {
+    m_ThreadPool->shutdown();
     SAFE_DELETE(m_ThreadPool);
 }
 void epriv::ThreadManager::_update(const double& dt){ 

@@ -7,7 +7,6 @@ using namespace std;
 VertexData::VertexData(const VertexDataFormat& _format) : format(const_cast<VertexDataFormat&>(_format)), vao(0) {
     data.reserve(_format.attributes.size());
     for (size_t i = 0; i < data.capacity(); ++i) { 
-		//data.emplace_back(nullptr); 
         data.emplace_back();
 	}
     dataSizes.reserve(_format.attributes.size());
@@ -20,17 +19,6 @@ VertexData::VertexData(const VertexDataFormat& _format) : format(const_cast<Vert
 }
 VertexData::~VertexData() {
     Renderer::deleteVAO(vao);
-
-    for (size_t i = 0; i < data.size(); ++i) {
-        //delete[] (data[i]);
-    }
-    /*
-    data.clear();
-    dataSizes.clear();
-    dataSizesCapacity.clear();
-    indices.clear();
-    triangles.clear();
-    */
 }
 
 void VertexData::finalize() {

@@ -45,6 +45,12 @@ ComponentBody::PhysicsData::PhysicsData(){
     collision        = nullptr;
     forcedOut        = false;
 }
+ComponentBody::PhysicsData::~PhysicsData() {
+    //destructor
+    SAFE_DELETE(collision);
+    Physics::removeRigidBody(bullet_rigidBody);
+    SAFE_DELETE(bullet_rigidBody);
+}
 ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& other) noexcept {
     //move constructor
     using std::swap;
@@ -81,12 +87,6 @@ ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody:
         bullet_rigidBody = nullptr;
     return *this;
 }
-ComponentBody::PhysicsData::~PhysicsData() {
-    //destructor
-    //SAFE_DELETE(collision);
-    Physics::removeRigidBody(bullet_rigidBody);
-    SAFE_DELETE(bullet_rigidBody);
-}
 
 #pragma endregion
 
@@ -104,6 +104,9 @@ ComponentBody::NormalData::NormalData(){
     );
     modelMatrix    = glm_mat4(static_cast<decimal>(1.0));
     linearVelocity = glm_vec3(static_cast<decimal>(0.0));
+}
+ComponentBody::NormalData::~NormalData() {
+    //destructor
 }
 ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcept {
     //move constructor
@@ -123,9 +126,6 @@ ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::N
     swap(modelMatrix, other.modelMatrix);
     swap(linearVelocity, other.linearVelocity);
     return *this;
-}
-ComponentBody::NormalData::~NormalData() {
-    //destructor
 }
 
 

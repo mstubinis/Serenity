@@ -20,7 +20,7 @@ MeshRequest::MeshRequest() {
 }
 MeshRequest::MeshRequest(const string& _filenameOrData, float _threshold):MeshRequest() {
     fileOrData = _filenameOrData;
-    threshold = _threshold;
+    threshold  = _threshold;
     if (!fileOrData.empty()) {
         fileExtension = boost::filesystem::extension(fileOrData);
         if (boost::filesystem::exists(fileOrData)) {
@@ -43,7 +43,7 @@ void MeshRequest::requestAsync() {
 void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
     if (!meshRequest.fileOrData.empty()) {
         if (meshRequest.fileExists) {
-            bool valid = InternalMeshRequestPublicInterface::Populate(meshRequest);
+            const bool valid = InternalMeshRequestPublicInterface::Populate(meshRequest);
             if (valid){
                 if (meshRequest.async){
                     const auto& reference = std::ref(meshRequest);
@@ -65,12 +65,12 @@ void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
 bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
     if (meshRequest.fileExtension != ".objcc") {
         meshRequest.importer.scene = const_cast<aiScene*>(meshRequest.importer.importer.ReadFile(meshRequest.fileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace));
-        meshRequest.importer.root = meshRequest.importer.scene->mRootNode;
+        meshRequest.importer.root  = meshRequest.importer.scene->mRootNode;
 
         auto& scene = *meshRequest.importer.scene;
-        auto& root = *meshRequest.importer.root;
+        auto& root  = *meshRequest.importer.root;
 
-        if (!&scene || scene.mFlags & AI_SCENE_FLAGS_INCOMPLETE || !&root) {
+        if (!&scene || (scene.mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !&root) {
             return false;
         }
         MeshLoader::LoadPopulateGlobalNodes(root, meshRequest.map);
@@ -87,18 +87,18 @@ bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
 }
 void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
     if (meshRequest.fileExtension != ".objcc") {
-        auto& root = *meshRequest.importer.root;
-        auto& scene = *meshRequest.importer.scene;
-        uint count = 0;
+        auto& root   = *meshRequest.importer.root;
+        auto& scene  = *meshRequest.importer.scene;
+        uint count   = 0;
         MeshLoader::LoadProcessNodeData(meshRequest.parts, scene, root, meshRequest.map, count);
         MeshLoader::SaveTo_OBJCC(*const_cast<VertexData*>(meshRequest.parts[0].mesh->m_VertexData), meshRequest.fileOrData + ".objcc");
     }else{ //objcc
-        VertexData* vertexData = MeshLoader::LoadFrom_OBJCC(meshRequest.fileOrData);
-        Mesh& mesh = *meshRequest.parts[0].mesh;
-        mesh.m_VertexData = vertexData;
-        mesh.m_threshold = meshRequest.threshold;
+        VertexData* vertexData   = MeshLoader::LoadFrom_OBJCC(meshRequest.fileOrData);
+        Mesh& mesh               = *meshRequest.parts[0].mesh;
+        mesh.m_VertexData        = vertexData;
+        mesh.m_threshold         = meshRequest.threshold;
         InternalMeshPublicInterface::CalculateRadius(mesh);
-        mesh.m_CollisionFactory = NEW MeshCollisionFactory(mesh);
+        mesh.m_CollisionFactory  = NEW MeshCollisionFactory(mesh);
     }
 }
 void InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest) {

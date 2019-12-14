@@ -111,39 +111,36 @@ void Core::enterMap(Team& playerTeam, const string& mapFile, const string& playe
     window.setMouseCursorVisible(false);
 }
 void Core::onResize(const uint& width, const uint& height) {
-    m_Menu->onResize(width, height);
+    if(m_Menu)  m_Menu->onResize(width, height);
 }
 void Core::init() {
     if (m_Initalized)
         return;
-
+    
     auto& window = Resources::getWindow();
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(60);
-
+    
     Scene* menuScene = NEW Scene("Menu");
     Resources::setCurrentScene(menuScene);
     Camera* main_camera = NEW Camera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y), 0.1f, 15000.0f, menuScene);
-    GameCamera* ship_camera = NEW GameCamera(0.1f, 50.0f, menuScene);
     menuScene->setActiveCamera(*main_camera);
     menuScene->getMainViewport().removeRenderFlag(ViewportRenderingFlag::Skybox);
-
+    
     SunLight* light = NEW SunLight(glm::vec3(0.0f), LightType::Sun, menuScene);
     light->setColor(1.55f, 1.55f, 1.3f);
     light->setPosition(0.0f, 3000.0f, -10000.0f);
-
+    
+    GameCamera* ship_camera = NEW GameCamera(0.1f, 50.0f, menuScene);
     m_Menu = NEW Menu(*menuScene, *ship_camera, m_GameState, *this);
     m_Menu->go_to_main_menu();
-
+    
     ModelInstance::setDefaultViewportFlag(ViewportFlag::_1); //for now on, all objects render in the first viewport only unless otherwise specified
-
+    
     m_Initalized = true;
 }
 void Core::update(const double& dt) {
     m_GameTime += dt;
-    if (Engine::isKeyDown(KeyboardKey::Escape)) {
-        Engine::stop();
-    }
     if (Engine::isKeyDownOnce(KeyboardKey::F6)) {
         Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen());
     }
@@ -153,10 +150,10 @@ void Core::update(const double& dt) {
 
     if(m_Client) m_Client->update(m_Client, dt);
     if(m_Server) m_Server->update(m_Server, dt);
-    m_Menu->update(dt);
+    if(m_Menu)   m_Menu->update(dt);
 }
 void Core::render() {
-    m_Menu->render();
+    if(m_Menu)   m_Menu->render();
 }
 
 const GameState::State& Core::gameState() const {

@@ -12,7 +12,7 @@ struct SceneOptions;
 namespace Engine {
     namespace epriv {
         struct InternalScenePublicInterface;
-        template<typename TEntity> class ECS{
+        template<typename TEntity> class ECS final{
             friend struct Engine::epriv::InternalScenePublicInterface;
             private:
                 ECSEntityPool<TEntity>              m_EntityPool;
@@ -45,7 +45,7 @@ namespace Engine {
             public:
                 ECS(/*const SceneOptions& options*/) {
                 }
-                virtual ~ECS() {
+                ~ECS() {
                     SAFE_DELETE_VECTOR(m_Systems);
                     SAFE_DELETE_VECTOR(m_ComponentPools);
                 }

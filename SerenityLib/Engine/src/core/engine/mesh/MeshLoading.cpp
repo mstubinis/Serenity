@@ -336,39 +336,54 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
     boost::iostreams::mapped_file_source stream(filename.c_str());
     //TODO: try possible optimizations
 
-    uint blockStart = 0;
-    const uint8_t* _data = (uint8_t*)stream.data();
+    uint32_t blockStart = 0;
+
+    const uint8_t* _x = (uint8_t*)stream.data();
+    vector<uint8_t> _data(_x, _x + stream.size());
 
     uint32_t sizes[3];
-    for (uint i = 0; i < 3; ++i) {
-        sizes[i] = static_cast<uint32_t>(_data[blockStart] << 24);
+    for (uint32_t i = 0; i < 3; ++i) {
+        sizes[i]  = static_cast<uint32_t>(_data[blockStart + 0] << 24);
         sizes[i] |= static_cast<uint32_t>(_data[blockStart + 1] << 16);
         sizes[i] |= static_cast<uint32_t>(_data[blockStart + 2] << 8);
         sizes[i] |= static_cast<uint32_t>(_data[blockStart + 3]);
         blockStart += 4;
     }
     VertexData* returnData;
-    if (sizes[2] == 1) {
+    const auto& sizes_attr     = sizes[0];
+    const auto& sizes_indices  = sizes[1];
+    const auto& sizes_skeleton = sizes[2];
+    if (sizes_skeleton == 1) {
         returnData = NEW VertexData(VertexDataFormat::VertexDataAnimated);
     }else{
         returnData = NEW VertexData(VertexDataFormat::VertexDataBasic);
     }
     auto& data = *returnData;
-    data.indices.reserve(sizes[1]);
-    vector<glm::vec3> temp_pos;     temp_pos.reserve(sizes[0]);
-    vector<glm::vec2> temp_uvs;     temp_uvs.reserve(sizes[0]);
-    vector<GLuint>    temp_norm;    temp_norm.reserve(sizes[0]);
-    vector<GLuint>    temp_binorm;  temp_binorm.reserve(sizes[0]);
-    vector<GLuint>    temp_tang;    temp_tang.reserve(sizes[0]);
-    vector<glm::vec4> temp_bID;     temp_bID.reserve(sizes[0]);
-    vector<glm::vec4> temp_bW;      temp_bW.reserve(sizes[0]);
+    data.indices.reserve(sizes_indices);
 
-    for (uint i = 0; i < sizes[0]; ++i) {
+    vector<glm::vec3> temp_pos;
+    vector<glm::vec2> temp_uvs;
+    vector<GLuint>    temp_norm;
+    vector<GLuint>    temp_binorm;
+    vector<GLuint>    temp_tang;
+    vector<glm::vec4> temp_bID;
+    vector<glm::vec4> temp_bW;
+
+    temp_pos.reserve(sizes_attr);
+    temp_uvs.reserve(sizes_attr);
+    temp_norm.reserve(sizes_attr);
+    temp_binorm.reserve(sizes_attr);
+    temp_tang.reserve(sizes_attr);
+    if (sizes_skeleton == 1) { //skeleton is present
+        temp_bID.reserve(sizes_attr);
+        temp_bW.reserve(sizes_attr);
+    }
+    for (uint32_t i = 0; i < sizes_attr; ++i) {
         //positions
         float    outPos[3];
         uint16_t inPos[3];
-        for (uint j = 0; j < 3; ++j) {
-            inPos[j]    = static_cast<uint32_t>(_data[blockStart] << 8);
+        for (uint32_t j = 0; j < 3; ++j) {
+            inPos[j]    = static_cast<uint32_t>(_data[blockStart + 0] << 8);
             inPos[j]   |= static_cast<uint32_t>(_data[blockStart + 1]);
             blockStart += 2;
         }
@@ -377,8 +392,8 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         //uvs
         float    outUV[2];
         uint16_t inUV[2];
-        for (uint j = 0; j < 2; ++j) {
-            inUV[j]     = static_cast<uint32_t>(_data[blockStart] << 8);
+        for (uint32_t j = 0; j < 2; ++j) {
+            inUV[j]     = static_cast<uint32_t>(_data[blockStart + 0] << 8);
             inUV[j]    |= static_cast<uint32_t>(_data[blockStart + 1]);
             blockStart += 2;
         }
@@ -386,8 +401,8 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         temp_uvs.emplace_back(outUV[0], outUV[1]);
         //normals (remember they are GLuints right now)
         uint32_t inn[3];
-        for (uint j = 0; j < 3; ++j) {
-            inn[j]      = static_cast<uint32_t>(_data[blockStart    ] << 24);
+        for (uint32_t j = 0; j < 3; ++j) {
+            inn[j]      = static_cast<uint32_t>(_data[blockStart + 0] << 24);
             inn[j]     |= static_cast<uint32_t>(_data[blockStart + 1] << 16);
             inn[j]     |= static_cast<uint32_t>(_data[blockStart + 2] << 8);
             inn[j]     |= static_cast<uint32_t>(_data[blockStart + 3]);
@@ -396,12 +411,12 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         temp_norm.emplace_back(inn[0]);
         temp_binorm.emplace_back(inn[1]);
         temp_tang.emplace_back(inn[2]);
-        if (sizes[2] == 1) { //skeleton is present
+        if (sizes_skeleton == 1) { //skeleton is present
             //boneID's
             float    outBI[4];
             uint16_t inbI[4];
-            for (uint k = 0; k < 4; ++k) {
-                inbI[k]     = static_cast<uint32_t>(_data[blockStart] << 8);
+            for (uint32_t k = 0; k < 4; ++k) {
+                inbI[k]     = static_cast<uint32_t>(_data[blockStart + 0] << 8);
                 inbI[k]    |= static_cast<uint32_t>(_data[blockStart + 1]);
                 blockStart += 2;
             }
@@ -410,8 +425,8 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
             //boneWeight's
             float    outBW[4];
             uint16_t inBW[4];
-            for (uint k = 0; k < 4; ++k) {
-                inBW[k]     = static_cast<uint32_t>(_data[blockStart] << 8);
+            for (uint32_t k = 0; k < 4; ++k) {
+                inBW[k]     = static_cast<uint32_t>(_data[blockStart + 0] << 8);
                 inBW[k]    |= static_cast<uint32_t>(_data[blockStart + 1]);
                 blockStart += 2;
             }
@@ -420,9 +435,9 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         }
     }
     //indices
-    for (uint i = 0; i < sizes[1]; ++i) {
+    for (uint32_t i = 0; i < sizes_indices; ++i) {
         uint16_t      inindices;
-        inindices   = static_cast<uint16_t>(_data[blockStart    ] << 8);
+        inindices   = static_cast<uint16_t>(_data[blockStart + 0] << 8);
         inindices  |= static_cast<uint16_t>(_data[blockStart + 1]);
         blockStart += 2;
         data.indices.push_back(static_cast<uint16_t>(inindices));

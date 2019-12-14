@@ -13,6 +13,9 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
+    #ifdef _DEBUG
+        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    #endif
         srand((unsigned)time(0));
 
     #ifdef _WIN32
@@ -26,8 +29,8 @@ int main(int argc, char* argv[]) {
         locale loc;
         for (int i = 0; i < argc; i++) {
             const string key = string(argv[i]);
-            string lowerKey = "";
-            for (unsigned int j = 0; j < key.length(); ++j)
+            string lowerKey  = "";
+            for (size_t j = 0; j < key.length(); ++j)
                 lowerKey += std::tolower(key[j], loc);
             args.insert(lowerKey);
         }
@@ -37,17 +40,17 @@ int main(int argc, char* argv[]) {
     #endif
 
         EngineOptions options;
-        options.window_title = "Solar System";
-        options.width = 1024;
-        options.height = 768;
-        options.fullscreen = false;
-        options.aa_algorithm = AntiAliasingAlgorithm::SMAA;
+        options.window_title   = "Solar System";
+        options.width          = 1024;
+        options.height         = 768;
+        options.fullscreen     = false;
+        options.aa_algorithm   = AntiAliasingAlgorithm::SMAA;
 
         Engine::epriv::Core::m_Engine = NEW Engine::epriv::EngineCore(options);
         Engine::epriv::Core::m_Engine->init(options);
         Engine::epriv::Core::m_Engine->run();
 
-
+        SAFE_DELETE(Engine::epriv::Core::m_Engine);
     #ifdef _WIN32
         if (GetConsoleWindow() != NULL) {
             //FreeConsole(); //erroring out for some reason

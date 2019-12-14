@@ -7,11 +7,12 @@
 #include <glm/vec2.hpp>
 
 #include "Core.h"
+#include <core/engine/system/Engine.h>
 
 using namespace Engine;
 using namespace std;
 
-Core* m_Core;
+Core* m_Core = nullptr;
 void Game::cleanup(){
     SAFE_DELETE(m_Core);
 }
@@ -23,6 +24,9 @@ void Game::initLogic(){
     m_Core->init();
 }
 void Game::update(const double& dt){
+    if (Engine::isKeyDown(KeyboardKey::Escape)) {
+        Engine::stop();
+    }
     m_Core->update(dt);
 }
 void Game::render(){
@@ -74,7 +78,7 @@ void Game::onMouseLeft(){
 void Game::onPreUpdate(const double& dt){
 }
 void Game::onPostUpdate(const double& dt){
-    if (m_Core->gameState() == GameState::Game) {
+    if (m_Core && m_Core->gameState() == GameState::Game) {
         auto& window = Resources::getWindow();
         const auto& size = window.getSize();
         const glm::vec2 halfRes(size.x / 2, size.y / 2);

@@ -58,18 +58,17 @@ void InternalTextureRequestPublicInterface::Request(TextureRequest& request) {
     if (!request.file.empty()) {
         if (request.fileExists) {
 
-            request.part.name = request.file;
+            request.part.name    = request.file;
             request.part.texture = NEW Texture();
             request.part.texture->m_TextureType = request.textureType;
             request.part.texture->setName(request.part.name);
-            request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources->add(request.part.texture, ResourceType::Texture);
+            request.part.handle  = Core::m_Engine->m_ResourceManager.m_Resources->add(request.part.texture, ResourceType::Texture);
 
             auto lambda_cpu = [&]() {
                 if (request.textureType == TextureType::Texture2D)
                     TextureLoader::InitFromFile(*request.part.texture, request.file, request.isToBeMipmapped, request.internalFormat, request.type);
                 InternalTextureRequestPublicInterface::LoadCPU(request);
             };
-
             if (request.async) {
                 const auto& reference = std::ref(request);
                 const auto& job = std::bind(lambda_cpu);

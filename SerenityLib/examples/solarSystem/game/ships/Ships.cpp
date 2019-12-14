@@ -167,6 +167,7 @@ void Ships::init() {
     //createShipEntry("D'deridex",      FactionEnum::Romulan,      30,   1.35f);
     //createShipEntry("Aeterna",        FactionEnum::Romulan,      40,   1.5f);
 
+    
     Material& defMat = *((Material*)Database["Defiant"].MaterialHandles[0].get());
     auto* layer = defMat.getComponent(0).addLayer();
     layer->setTexture("../data/Textures/Effects/Buzzards.dds");
@@ -184,6 +185,7 @@ void Ships::init() {
     layer2->setTexture("../data/Textures/Effects/Buzzards.dds");
     layer2->setMask("../data/Ships/vorcha/vorcha_Mask_1.dds");
     layer2->addUVModificationSimpleTranslation(0.02f, 0.02f);
+    
 }
 void Ships::destruct() {
     Database.clear();

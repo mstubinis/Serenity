@@ -6,16 +6,24 @@
 #include <stdint.h>
 
 #ifdef _DEBUG
+
+// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the allocations to be of _CLIENT_BLOCK type
+
     #define _CRTDBG_MAP_ALLOC
-    #define NEW new( _CLIENT_BLOCK, __FILE__, __LINE__)
-    #define MALLOC(size) _malloc_dbg(size, _CLIENT_BLOCK, __FILE__, __LINE__)
-    #define FREE(block) _free_dbg(block, _CLIENT_BLOCK)
-    #define DEL delete
+    #define NEW new( _NORMAL_BLOCK, __FILE__, __LINE__)
+    #define MALLOC(size) _malloc_dbg(size, _NORMAL_BLOCK, __FILE__, __LINE__)
+    #define FREE(block) _free_dbg(block, _NORMAL_BLOCK)
+  
+/*
+    #define NEW new
+    #define MALLOC malloc
+    #define FREE free
+    */
+
 #else
     #define NEW new
     #define MALLOC malloc
     #define FREE free
-    #define DEL delete
 #endif
 
 #endif
@@ -25,7 +33,7 @@
         if (x->_Is_ready() || x->_Is_ready_at_thread_exit()) { \
             x->get(); \
         } \
-        DEL x; \
+        delete x; \
         x = nullptr; \
     } \
 }
@@ -34,7 +42,7 @@
         if (x->joinable()) { \
             x->join(); \
         } \
-        DEL x; \
+        delete x; \
         x = nullptr; \
     } \
 }
@@ -46,7 +54,7 @@
 }
 #define SAFE_DELETE(x) { \
     if(x){ \
-        DEL x; \
+        delete x; \
         x = nullptr; \
     } \
 }

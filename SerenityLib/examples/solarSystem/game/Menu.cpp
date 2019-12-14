@@ -179,7 +179,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
     }
 }};
 
-Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
+Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
     m_FontHandle = Resources::addFont(ResourceManifest::BasePath + "data/Fonts/consolas.fnt");
     m_Font = Resources::getFont(m_FontHandle);
     Engine::Math::setColor(m_Color, 255.0f, 255.0f, 0.0f);
@@ -187,13 +187,13 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
     m_ErrorTimer = 0.0f;
 
     const auto& windowDimensions = Resources::getWindowSize();
-
+    
     m_ButtonHost = NEW Button(*m_Font, windowDimensions.x / 2.0f, 275.0f, 150.0f, 50.0f);
     m_ButtonHost->setText("Host");
     m_ButtonHost->setColor(0.5f, 0.78f, 0.94f, 1.0f);
     m_ButtonHost->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     //m_ButtonHost->setTextScale(0.5f);
-
+    
     m_ButtonJoin = NEW Button(*m_Font, 0.0f, -120.0f, 150.0f, 50.0f);
     m_ButtonJoin->setText("Join");
     m_ButtonJoin->setColor(0.5f, 0.78f, 0.94f, 1.0f);
@@ -221,7 +221,6 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
 
     m_Back->setOnClickFunctor(ButtonBack_OnClick());
     m_Next->setOnClickFunctor(ButtonNext_OnClick());
-
     m_ServerIp = NEW TextBox("Server IP",*m_Font, 40, windowDimensions.x / 2.0f, 115.0f);
     m_ServerIp->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_ServerIp->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
@@ -235,17 +234,18 @@ Menu::Menu(Scene& scene, Camera& camera, GameState::State& _state, Core& core):m
 
     m_InfoText = NEW Text(Resources::getWindowSize().x / 2.0f, 65.0f, *m_Font);
     m_InfoText->setTextAlignment(TextAlignment::Center);
-
+    
     m_ServerHostMapSelector = NEW ServerHostingMapSelectorWindow(*m_Font, Resources::getWindowSize().x / 2.0f - 300.0f, 630.0f);
-
+    
     m_ServerLobbyChatWindow = NEW ServerLobbyChatWindow(*m_Font, 50.0f, 140.0f + 300.0f);
     m_ServerLobbyChatWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
-
+    
     m_ServerLobbyConnectedPlayersWindow = NEW ServerLobbyConnectedPlayersWindow(*m_Font, 50.0f + m_ServerLobbyChatWindow->getWindowFrame().width(), 140.0f + 300.0f);
     m_ServerLobbyConnectedPlayersWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
-
-    m_ServerLobbyShipSelectorWindow = NEW ServerLobbyShipSelectorWindow(core,scene, camera, *m_Font, 50.0f, windowDimensions.y - 50.0f);
+    
+    m_ServerLobbyShipSelectorWindow = NEW ServerLobbyShipSelectorWindow(core, menu_scene, game_camera, *m_Font, 50.0f, windowDimensions.y - 50.0f);
     m_ServerLobbyShipSelectorWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
+    
 }
 Menu::~Menu() {
     SAFE_DELETE(m_ButtonHost);

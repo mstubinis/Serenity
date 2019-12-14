@@ -47,7 +47,25 @@ class Scene: public EngineResource, public EventObserver{
             m_OnUpdateFunctor = std::bind<void>(functor, this, std::placeholders::_1);
         }
     private:
-        struct impl; std::unique_ptr<impl>     m_i;
+        std::vector<Viewport*>                                m_Viewports;
+        std::vector<Camera*>                                  m_Cameras;
+        std::vector<std::vector<Engine::epriv::RenderGraph*>> m_RenderGraphs;
+
+        std::vector<SunLight*>                                m_Lights;
+        std::vector<SunLight*>                                m_SunLights;
+        std::vector<DirectionalLight*>                        m_DirectionalLights;
+        std::vector<PointLight*>                              m_PointLights;
+        std::vector<SpotLight*>                               m_SpotLights;
+        std::vector<RodLight*>                                m_RodLights;
+
+        std::vector<unsigned int>              m_Entities;
+        unsigned int                           m_ID;
+        glm::vec3                              m_GI;
+
+        Entity* m_Sun;
+        Skybox* m_Skybox;
+
+        class impl; impl*                      m_i;
         std::function<void(const double&)>     m_OnUpdateFunctor;
     public:
         Scene(const std::string& name);

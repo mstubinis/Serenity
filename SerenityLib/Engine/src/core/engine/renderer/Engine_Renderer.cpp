@@ -1215,14 +1215,15 @@ class epriv::RenderManager::impl final{
             view[3][2] = 0.0f;
 
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox]->bind();
-            if (skybox)
+            if (skybox) {
                 Renderer::sendUniform1("IsFake", 0);
-            else
+                Renderer::sendTextureSafe("Texture", skybox->texture()->address(0), 0, GL_TEXTURE_CUBE_MAP);
+            }else{
                 Renderer::sendUniform1("IsFake", 1);
+                const auto& bgColor = scene.getBackgroundColor();
+                Renderer::sendUniform4Safe("Color", bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+            }
             Renderer::sendUniformMatrix4("VP", camera.getProjection() * view);
-            const auto& bgColor = scene.getBackgroundColor();
-            Renderer::sendUniform4Safe("Color", bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-            Renderer::sendTextureSafe("Texture", skybox->texture()->address(0), 0, GL_TEXTURE_CUBE_MAP);
             Skybox::bindMesh();
 
             Renderer::sendTextureSafe("Texture", 0, 0, GL_TEXTURE_CUBE_MAP); //this is needed to render stuff in geometry transparent using the normal deferred shader. i do not know why just yet...

@@ -60,7 +60,7 @@ void epriv::ImageLoadedStructure::load(const sf::Image& i, const string& _filena
     baseImage->width = imgSize.x;
     baseImage->height = imgSize.y;
     baseImage->compressedSize = 0;
-    auto pxls = i.getPixelsPtr();
+    auto* pxls = i.getPixelsPtr();
     baseImage->pixels.assign(pxls, pxls + baseImage->width * baseImage->height * 4);
     if (mipmaps.size() == 0) {
         mipmaps.push_back(ImageMipmap(*baseImage));

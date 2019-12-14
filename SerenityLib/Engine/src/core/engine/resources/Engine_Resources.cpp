@@ -47,24 +47,13 @@ void epriv::ResourceManager::cleanup() {
 void epriv::ResourceManager::_init(const char* name, const uint& width, const uint& height){
     m_Window = NEW Engine_Window(name, width, height);
 }
-
-string Engine::Data::reportTime(){
-    return epriv::Core::m_Engine->m_DebugManager.reportTime();
-}
-const double Engine::Resources::dt(){ 
-    return epriv::Core::m_Engine->m_DebugManager.dt(); 
-}
-Scene* Engine::Resources::getCurrentScene(){ 
-    return resourceManager->m_CurrentScene; 
-}
-
 vector<Scene*>& epriv::ResourceManager::scenes() {
     return m_Scenes;
 }
 
 const bool epriv::ResourceManager::_hasScene(const string& n){
-    for (auto& scene : m_Scenes) {
-        if (scene->name() == n)
+    for (size_t i = 0; i < m_Scenes.size(); ++i) {
+        if (m_Scenes[i] && m_Scenes[i]->name() == n)
             return true;
     }
     return false;
@@ -72,19 +61,19 @@ const bool epriv::ResourceManager::_hasScene(const string& n){
 void epriv::ResourceManager::onPostUpdate() {
     if (m_ScenesToBeDeleted.size() > 0) {
         for (size_t i = 0; i < m_ScenesToBeDeleted.size(); ++i) {
-            SAFE_DELETE(m_ScenesToBeDeleted[i]);
-            m_ScenesToBeDeleted[i] = nullptr; //redundant?
             for (size_t j = 0; j < m_Scenes.size(); ++j) {
-                if (m_Scenes[j] == m_ScenesToBeDeleted[i]) {
+                if (m_Scenes[j] && m_Scenes[j]->name() == m_ScenesToBeDeleted[i]->name()) {
                     m_Scenes[j] = nullptr;
+                    break;
                 }
             }
+            SAFE_DELETE(m_ScenesToBeDeleted[i]);
         }
         m_ScenesToBeDeleted.clear();
     }   
 }
 Handle epriv::ResourceManager::_addTexture(Texture* t) {
-    return resourceManager->m_Resources->add(t, ResourceType::Texture);
+    return m_Resources->add(t, ResourceType::Texture);
 }
 Scene& epriv::ResourceManager::_getSceneByID(const uint& id) {
     return *m_Scenes[id - 1];
@@ -104,23 +93,30 @@ const size_t epriv::ResourceManager::_numScenes(){
     return m_Scenes.size();
 }
 
+string Engine::Data::reportTime() {
+    return epriv::Core::m_Engine->m_DebugManager.reportTime();
+}
+const double Resources::dt() {
+    return epriv::Core::m_Engine->m_DebugManager.dt();
+}
+Scene* Resources::getCurrentScene() {
+    return resourceManager->m_CurrentScene;
+}
 void Resources::Settings::enableDynamicMemory(const bool b){ 
     resourceManager->m_DynamicMemory = b; 
 }
 void Resources::Settings::disableDynamicMemory(){ 
     resourceManager->m_DynamicMemory = false; 
 }
-
 Engine_Window& Resources::getWindow(){ 
     return *resourceManager->m_Window; 
 }
 glm::uvec2 Resources::getWindowSize(){ 
     return resourceManager->m_Window->getSize(); 
 }
-
 const bool Resources::deleteScene(const string& sceneName) {
     for (auto& scene_ptr : resourceManager->m_Scenes) {
-        if (scene_ptr->name() == sceneName) {
+        if (scene_ptr && scene_ptr->name() == sceneName) {
             return Resources::deleteScene(*scene_ptr);
         }
     }
@@ -128,7 +124,7 @@ const bool Resources::deleteScene(const string& sceneName) {
 }
 const bool Resources::deleteScene(Scene& scene) {
     for (auto& deleted_scene_ptr : resourceManager->m_ScenesToBeDeleted) {
-        if (&scene == deleted_scene_ptr) {
+        if (scene.name() == deleted_scene_ptr->name()) {
             return false; //already flagged for deletion
         }
     }
@@ -139,7 +135,7 @@ const bool Resources::deleteScene(Scene& scene) {
 
 Scene* Resources::getScene(const string& sceneName){
     for (auto& scene_ptr : resourceManager->m_Scenes) {
-        if (scene_ptr->name() == sceneName) {
+        if (scene_ptr && scene_ptr->name() == sceneName) {
             return scene_ptr;
         }
     }
@@ -283,7 +279,7 @@ Handle Resources::addShaderProgram(const string& n, Shader& v, Shader& f){
     return resourceManager->m_Resources->add(program, ResourceType::ShaderProgram);
 }
 Handle Resources::addShaderProgram(const string& n, Handle& v, Handle& f){
-    Shader* vertexShader = resourceManager->m_Resources->getAsFast<Shader>(v);
+    Shader* vertexShader   = resourceManager->m_Resources->getAsFast<Shader>(v);
     Shader* fragmentShader = resourceManager->m_Resources->getAsFast<Shader>(f);
     ShaderProgram* program = NEW ShaderProgram(n, *vertexShader, *fragmentShader);
     return resourceManager->m_Resources->add(program, ResourceType::ShaderProgram);

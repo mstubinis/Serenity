@@ -5,9 +5,9 @@
 using namespace std;
 
 EngineResource::EngineResource(const ResourceType::Type& type, const string& name){
-    m_Name = name;
-    m_IsLoaded = false;
-    m_UsageCount = 0;
+    m_Name         = name;
+    m_IsLoaded     = false;
+    m_UsageCount   = 0;
     m_ResourceType = type;
 }
 EngineResource::~EngineResource(){
@@ -43,6 +43,7 @@ void EngineResource::incrementUseCount(){
     ++m_UsageCount; 
 }
 void EngineResource::decrementUseCount(){ 
-    if(m_UsageCount > 0) 
-        --m_UsageCount; 
+    if (m_UsageCount > 0) {
+        --m_UsageCount;
+    }
 }

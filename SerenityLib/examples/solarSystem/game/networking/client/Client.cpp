@@ -525,13 +525,11 @@ void Client::on_receive_server_approve_map_entry(Packet& basePacket, Menu& menu)
 void Client::on_receive_map_data(Packet& basePacket, Menu& menu) {
     PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
     Map* map_ptr_real = static_cast<Map*>(Resources::getScene(pI.name));
-    if (!m_MapSpecificData.m_Map) {
-        if (!map_ptr_real) {
-            NEW Map(m_MapSpecificData.m_GameplayMode, *this, pI.name, ResourceManifest::BasePath + "data/Systems/" + pI.name + ".txt");
-            map_ptr_real = static_cast<Map*>(Resources::getScene(pI.name));
-        }
-        m_MapSpecificData.m_Map = map_ptr_real;
+    if (!map_ptr_real) {
+        NEW Map(m_MapSpecificData.m_GameplayMode, *this, pI.name, ResourceManifest::BasePath + "data/Systems/" + pI.name + ".txt");
+        map_ptr_real = static_cast<Map*>(Resources::getScene(pI.name));
     }
+    m_MapSpecificData.m_Map = map_ptr_real;
     auto& map = *m_MapSpecificData.m_Map;
     auto& menuScene = *const_cast<Scene*>(Resources::getScene("Menu"));
     auto* menuSkybox = menuScene.skybox();

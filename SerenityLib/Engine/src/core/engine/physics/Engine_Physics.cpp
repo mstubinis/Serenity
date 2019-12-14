@@ -124,6 +124,8 @@ epriv::PhysicsManager::~PhysicsManager(){
     cleanup();
 }
 void epriv::PhysicsManager::cleanup() {
+    if (!m_Data)
+        return;
     auto& world = *m_Data->world;
     int collisionObjCount = world.getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {

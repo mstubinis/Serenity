@@ -21,7 +21,7 @@ class ShaderProgram;
 namespace Engine {
     namespace epriv {
         class GBuffer;
-        class ParticleSystem {
+        class ParticleSystem final{
             friend class ParticleEmitter;
             friend class Particle;
             private:

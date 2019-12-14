@@ -101,11 +101,12 @@ namespace Engine{
                     m_Pool[newIndex].active = true;
                     m_Pool[newIndex].resource = _ptr;
                     ++m_activeEntryCount;
-                    return Handle(newIndex+1, m_Pool[newIndex].version, _type);
+                    return Handle(newIndex + 1, m_Pool[newIndex].version, _type);
                 }
                 const unsigned int add(T* _ptr){
                     const unsigned int newIndex = m_firstFreeEntry - 1;
-                    if(newIndex >= m_Pool.size()) return 0; //null entity
+                    if(newIndex >= m_Pool.size()) 
+                        return 0; //null entity
                     m_firstFreeEntry = m_Pool[newIndex].nextFreeIndex;
                     m_Pool[newIndex].nextFreeIndex = 0;
                     ++m_Pool[newIndex].version;
@@ -140,12 +141,14 @@ namespace Engine{
                 }
                 T* get(Handle& _handle){
                     T* outPtr = nullptr;
-                    if (!get(_handle, outPtr)) return nullptr;
+                    if (!get(_handle, outPtr)) 
+                        return nullptr;
                     return outPtr;
                 }
                 T* get(const unsigned int& _id){
                     T* outPtr = nullptr;
-                    if (!get(_id, outPtr)) return nullptr;
+                    if (!get(_id, outPtr)) 
+                        return nullptr;
                     return outPtr;
                 }
                 const bool get(const Handle& _handle, T*& _outPtr){
