@@ -8,11 +8,6 @@
 #include <cstdlib>
 #include <random>
 
-#define PACKET_HEALTH_UPDATE_FREQUENCY 0.5
-#define PHYSICS_PACKET_TIMER_LIMIT 0.25
-#define SERVER_CLIENT_TIMEOUT 20.0f
-#define SERVER_CLIENT_RECOVERY_TIME 60.0f
-
 class Helper final {
     public:
         static std::default_random_engine GENERATOR;

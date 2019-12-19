@@ -81,6 +81,8 @@ namespace Math{
 
     float remainder(float,float);
 
+    const glm::vec3 getMatrixPosition(const glm::mat4& matrix);
+    const glm_vec3 getMatrixPosition(const glm_mat4& matrix);
     void removeMatrixPosition(glm::mat4&);
 
     void recalculateForwardRightUp(const glm_quat&,glm_vec3& forward,glm_vec3& right,glm_vec3& up);

@@ -597,6 +597,9 @@
     <ClInclude Include="game\gui\GUIRenderElement.h">
       <Filter>Header Files\Game\GUI</Filter>
     </ClInclude>
+    <ClInclude Include="game\ForcedGameInclude.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">

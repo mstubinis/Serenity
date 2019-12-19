@@ -240,11 +240,16 @@ const glm_vec3 Math::btVectorToGLM(const btVector3& btvector){
 btVector3 Math::btVectorFromGLM(const glm_vec3& vector){ 
 	return btVector3(vector.x, vector.y, vector.z);
 }
-
+const glm_vec3 Math::getMatrixPosition(const glm_mat4& matrix) {
+    return glm_vec3(matrix[3][0], matrix[3][1], matrix[3][2]);
+}
+const glm::vec3 Math::getMatrixPosition(const glm::mat4& matrix) {
+    return glm::vec3(matrix[3][0], matrix[3][1], matrix[3][2]);
+}
 void Math::removeMatrixPosition(glm::mat4& matrix){
-	matrix[3][0] = 0;
-	matrix[3][1] = 0;
-	matrix[3][2] = 0;
+	matrix[3][0] = 0.0f;
+	matrix[3][1] = 0.0f;
+	matrix[3][2] = 0.0f;
 }
 
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point,const float fovRadians){

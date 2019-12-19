@@ -12,32 +12,41 @@ using namespace Engine;
 using namespace Engine::epriv;
 using namespace std;
 
-float ComponentModel_Functions::CalculateRadius(ComponentModel& super) {
-    float maxLength = 0.0f;
-    glm::vec3 boundingBox = glm::vec3(0.0f);
-    for (uint i = 0; i < super.m_ModelInstances.size(); ++i) {
-        auto& modelInstance            = *super.m_ModelInstances[i];
-        const glm::mat4& modelMatrix   = modelInstance.modelMatrix();
-        const glm::vec3& localPosition = glm::vec3(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
-        const auto& modelInstanceScale = Math::Max(modelInstance.getScale());
-        const float length             = glm::length(localPosition) + modelInstance.mesh()->getRadius() * modelInstanceScale;
-        const glm::vec3 box            = localPosition + modelInstance.mesh()->getRadiusBox() * modelInstanceScale;
-        if (length > maxLength) { 
-            maxLength = length; 
-        }
-        if (box.x > boundingBox.x || box.y > boundingBox.y || box.z > boundingBox.z) { 
-            boundingBox = box; 
+float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) {
+    vector<glm::vec3> points_total; //TODO: vector.reserve for performance here?
+    for (size_t i = 0; i < modelComponent.m_ModelInstances.size(); ++i) {
+        auto& modelInstance            = *modelComponent.m_ModelInstances[i];
+        auto& mesh                     = *modelInstance.mesh();
+        const auto  modelInstanceScale = Math::Max(modelInstance.getScale());
+        const glm::vec3  localPosition = Math::getMatrixPosition(modelInstance.modelMatrix());
+        auto data = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(0);
+        for (size_t j = 0; j < data.size(); ++j) {
+            points_total.push_back(localPosition + (data[j] * modelInstanceScale));
         }
     }
-    super.m_Radius    = maxLength;
-    super.m_RadiusBox = boundingBox;
-    auto* body        = super.m_Owner.getComponent<ComponentBody>();
+    float maxRadius      = 0.0f;
+    auto  maxBoundingBox = glm::vec3(0.0f);
+    for (auto& point : points_total) {
+        const auto abs_point = glm::abs(point);
+        const float radius   = glm::length(abs_point);
+        if (radius > maxRadius)
+            maxRadius = radius;
+        if (abs_point.x > maxBoundingBox.x)
+            maxBoundingBox.x = abs_point.x;
+        if (abs_point.y > maxBoundingBox.y)
+            maxBoundingBox.y = abs_point.y;
+        if (abs_point.z > maxBoundingBox.z)
+            maxBoundingBox.z = abs_point.z;
+    }
+    modelComponent.m_Radius    = maxRadius;
+    modelComponent.m_RadiusBox = maxBoundingBox;
+    auto* body                 = modelComponent.m_Owner.getComponent<ComponentBody>();
     if (body) {
         const auto bodyScale =  Math::Max(glm::vec3(body->getScale()));
-        super.m_Radius       *= bodyScale;
-        super.m_RadiusBox    *= bodyScale;
+        modelComponent.m_Radius       *= bodyScale;
+        modelComponent.m_RadiusBox    *= bodyScale;
     }
-    return super.m_Radius; //now modified by the body scale
+    return modelComponent.m_Radius; //now modified by the body scale
 };
 
 

@@ -48,11 +48,11 @@ class Weapons {
                 glm_vec3 localPos = modelPos + part1;
                 auto shipMatrix = shipBody.modelMatrix();
                 shipMatrix = glm::translate(shipMatrix, localPos);
-                final_world_position = glm_vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+                final_world_position = Math::getMatrixPosition(shipMatrix);
             }else{
                 auto shipMatrix = shipBody.modelMatrix();
                 shipMatrix = glm::translate(shipMatrix, localPosition);
-                final_world_position = glm_vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+                final_world_position = Math::getMatrixPosition(shipMatrix);
             }
             if(target)
                 chosen_target_pos = target->getComponent<ComponentBody>()->position() + chosen_target_pos;
