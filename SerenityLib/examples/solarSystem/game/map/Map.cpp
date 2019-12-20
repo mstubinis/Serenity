@@ -534,39 +534,76 @@ void Map::loadFromFile(const string& filename) {
 
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
 }
+Ship* Map::createShipDull(const string& shipClass, const glm::vec3& position, Scene* scene) {
+    Ship* ship = nullptr;
+    if (shipClass == "Defiant") {
+        ship = NEW Defiant( *scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Nova") {
+        ship = NEW Nova( *scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Shrike") {
+        ship = NEW Shrike(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "B'rel") {
+        ship = NEW Brel(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Constitution") {
+        ship = NEW Constitution(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Miranda") {
+        ship = NEW Miranda(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Excelsior") {
+        ship = NEW Excelsior(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Akira") {
+        ship = NEW Akira(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Norway") {
+        ship = NEW Norway(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Intrepid") {
+        ship = NEW Intrepid(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Vor'cha") {
+        ship = NEW Vorcha(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Sovereign") {
+        ship = NEW Sovereign(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "D'deridex") {
+        ship = NEW Dderidex(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Federation Defense Platform") {
+        ship = NEW FedDefPlatform(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Federation Starbase Mushroom") {
+        ship = NEW FedStarbaseMushroom(*scene, position, glm::vec3(1.0f));
+    }
+    return ship;
+}
 Ship* Map::createShip(AIType::Type ai_type, Team& team, Client& client, const string& shipClass, const string& shipName, const glm::vec3& position) {
     if ((ai_type == AIType::Player_You || ai_type == AIType::Player_Other) && m_ShipsPlayerControlled.count(shipName))
         return nullptr;
     Ship* ship = nullptr;
-
-    if     (shipClass == "Defiant")
+    if (shipClass == "Defiant") {
         ship = NEW Defiant(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if(shipClass == "Nova")
+    }else if (shipClass == "Nova") {
         ship = NEW Nova(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if(shipClass == "Shrike")
+    }else if (shipClass == "Shrike") {
         ship = NEW Shrike(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if(shipClass == "B'rel")
+    }else if (shipClass == "B'rel") {
         ship = NEW Brel(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if(shipClass == "Constitution")
+    }else if (shipClass == "Constitution") {
         ship = NEW Constitution(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if(shipClass == "Miranda")
+    }else if (shipClass == "Miranda") {
         ship = NEW Miranda(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if(shipClass == "Excelsior")
+    }else if (shipClass == "Excelsior") {
         ship = NEW Excelsior(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if (shipClass == "Akira")
+    }else if (shipClass == "Akira") {
         ship = NEW Akira(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if (shipClass == "Norway")
+    }else if (shipClass == "Norway") {
         ship = NEW Norway(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if (shipClass == "Intrepid")
+    }else if (shipClass == "Intrepid") {
         ship = NEW Intrepid(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if (shipClass == "Vor'cha")
+    }else if (shipClass == "Vor'cha") {
         ship = NEW Vorcha(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if (shipClass == "Sovereign")
+    }else if (shipClass == "Sovereign") {
         ship = NEW Sovereign(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
-    else if (shipClass == "Federation Defense Platform")
+    }else if (shipClass == "D'deridex") {
+        ship = NEW Dderidex(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+    }else if (shipClass == "Federation Defense Platform") {
         ship = NEW FedDefPlatform(team, client, *this, shipName, position, glm::vec3(1.0f));
-    else if (shipClass == "Federation Starbase Mushroom")
+    }else if (shipClass == "Federation Starbase Mushroom") {
         ship = NEW FedStarbaseMushroom(team, client, *this, shipName, position, glm::vec3(1.0f));
+    }
     return ship;
 }
 Anchor* Map::getRootAnchor() {

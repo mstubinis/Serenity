@@ -22,6 +22,11 @@ constexpr auto CLASS = "Miranda";
 
 using namespace std;
 
+Miranda::Miranda(Scene& scene, glm::vec3 position, glm::vec3 scale)
+    :Ship(CLASS, scene, position, scale) {
+
+}
+
 Miranda::Miranda(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.1f, 0.1f)) {
 

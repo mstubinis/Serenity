@@ -26,6 +26,11 @@ using namespace std;
 
 constexpr auto CLASS = "Federation Defense Platform";
 
+FedDefPlatform::FedDefPlatform(Scene& scene, glm::vec3 position, glm::vec3 scale)
+    :Ship(CLASS, scene, position, scale) {
+
+}
+
 FedDefPlatform::FedDefPlatform(Team& team, Client& client, Map& map, const std::string& name, glm::vec3 position, glm::vec3 scale)
 :Ship(team, client, CLASS, map, AIType::AI_Stationary, name, position, scale, CollisionType::TriangleShapeStatic)
 {

@@ -1210,9 +1210,7 @@ class epriv::RenderManager::impl final{
         }
         void _renderSkybox(Skybox* skybox, Scene& scene, Viewport& viewport, Camera& camera){
             glm::mat4 view = camera.getView();
-            view[3][0] = 0.0f;
-            view[3][1] = 0.0f;
-            view[3][2] = 0.0f;
+            Math::removeMatrixPosition(view);
 
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox]->bind();
             if (skybox) {

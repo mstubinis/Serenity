@@ -511,8 +511,8 @@ void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat
         model1 = glm::translate(model1, lhs.midpoint);
         model2 = glm::translate(model2, rhs.midpoint);
 
-        auto model1Pos = glm::vec3(model1[3][0], model1[3][1], model1[3][2]);
-        auto model2Pos = glm::vec3(model2[3][0], model2[3][1], model2[3][2]);
+        auto model1Pos = Math::getMatrixPosition(model1);
+        auto model2Pos = Math::getMatrixPosition(model2);
 
         if (sortMode == SortingMode::FrontToBack)
             return glm::distance2(camPos, model1Pos) < glm::distance2(camPos, model2Pos);

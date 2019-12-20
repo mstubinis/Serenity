@@ -2,6 +2,7 @@
 #include "../../GameCamera.h"
 #include "../../ships/Ships.h"
 #include "../../Core.h"
+#include "../../map/Map.h"
 
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/scene/Camera.h>
@@ -13,6 +14,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/math/Engine_Math.h>
 
 using namespace std;
 using namespace Engine;
@@ -50,7 +52,7 @@ struct GameCameraShipSelectorLogicFunctor final { void operator()(ComponentLogic
             cameraModel          *= glm::mat4_cast(glm::quat(thisBody.rotation()));
             cameraModel           = glm::translate(cameraModel, pos);
 
-            const glm::vec3 eye(cameraModel[3][0], cameraModel[3][1], cameraModel[3][2]);
+            const glm::vec3 eye = Math::getMatrixPosition(cameraModel);
             thisBody.setPosition(eye);
             thisCamera.lookAt(eye, targetBody.position(), thisBody.up());
         }
@@ -62,18 +64,15 @@ Ship3DViewer::Ship3DViewer(Core& core, Scene& menu_scene, Camera& game_camera, c
     m_IsCurrentlyDragging         = false;
     m_IsCurrentlyOverShip3DWindow = false;
     m_ChosenShipClass             = "";
+    GameCamera& menu_scene_camera = static_cast<GameCamera&>(game_camera);
 
-    m_EntityWrapperShip           = NEW EntityWrapper(menu_scene);
-    
-    GameCamera& menu_scene_camera = static_cast<GameCamera&>(game_camera); 
+    m_EntityWrapperShip = Map::createShipDull("Defiant", glm::vec3(0.0f), &menu_scene);
     menu_scene_camera.setTarget(m_EntityWrapperShip);
-
-    auto& ship_body = *m_EntityWrapperShip->addComponent<ComponentBody>();
+    auto& ship_body = *m_EntityWrapperShip->getComponent<ComponentBody>();
     ship_body.setPosition(0, 0, 8500);
-    auto& ship_model = *m_EntityWrapperShip->addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
-    ship_model.getModel(0).setViewportFlag(ViewportFlag::All);
+    auto& ship_model = *m_EntityWrapperShip->getComponent<ComponentModel>();
+    ship_model.setViewportFlag(ViewportFlag::All);
     ship_model.hide();
-    
 
     auto& logic                   = *game_camera.getComponent<ComponentLogic2>();
     logic.setUserPointer1(&core);
@@ -101,14 +100,22 @@ void Ship3DViewer::setShipClass(const string& shipClass) {
     if (!m_EntityWrapperShip || m_ChosenShipClass == shipClass)
         return;
     assert(Ships::Database.count(shipClass));
+
+    auto& scene = m_EntityWrapperShip->entity().scene();
+    m_EntityWrapperShip->destroy();
+    SAFE_DELETE(m_EntityWrapperShip);
+    m_EntityWrapperShip = Map::createShipDull(shipClass, glm::vec3(0.0f), &scene);
+    GameCamera& menu_scene_camera = static_cast<GameCamera&>(const_cast<Camera&>(m_ShipDisplayViewport->getCamera()));
+    menu_scene_camera.setTarget(m_EntityWrapperShip);
+    auto& ship_body = *m_EntityWrapperShip->getComponent<ComponentBody>();
+    ship_body.setPosition(0, 0, 8500);
+    auto& model = *m_EntityWrapperShip->getComponent<ComponentModel>();
+    model.setViewportFlag(ViewportFlag::All);
+
     m_ChosenShipClass                 = shipClass;
     auto& shipData                    = Ships::Database.at(shipClass);
-    auto& model                       = *m_EntityWrapperShip->getComponent<ComponentModel>();
-    model.setModelMesh(shipData.MeshHandles[0], 0);
-    model.setModelMaterial(shipData.MaterialHandles[0], 0);
     model.show();
-    auto& camera                      = const_cast<Camera&>(m_ShipDisplayViewport->getCamera());
-    auto* logic = camera.getComponent<ComponentLogic2>();
+    auto* logic = menu_scene_camera.getComponent<ComponentLogic2>();
     if (logic)
         logic->call(-0.0001);
 }

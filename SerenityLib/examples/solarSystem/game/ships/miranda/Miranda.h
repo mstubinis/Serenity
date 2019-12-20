@@ -9,6 +9,11 @@ class Miranda final : public Ship {
 
     public:
         Miranda(
+            Scene& scene,
+            glm::vec3 = glm::vec3(0),             //Position
+            glm::vec3 = glm::vec3(1)             //Scale
+        );
+        Miranda(
             AIType::Type& ai_type,
             Team& team,
             Client& client,

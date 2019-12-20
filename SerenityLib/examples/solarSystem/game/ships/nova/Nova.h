@@ -9,6 +9,11 @@ class Nova final : public Ship {
 
     public:
         Nova(
+            Scene& scene,
+            glm::vec3 = glm::vec3(0),             //Position
+            glm::vec3 = glm::vec3(1)             //Scale
+        );
+        Nova(
             AIType::Type& ai_type,
             Team& team,
             Client& client,

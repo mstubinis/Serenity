@@ -56,6 +56,11 @@ class ComponentModel: public ComponentBaseClass {
 
         ~ComponentModel();
 
+        void setViewportFlag(const unsigned int flag);
+        void addViewportFlag(const unsigned int flag);
+        void setViewportFlag(const ViewportFlag::Flag flag);
+        void addViewportFlag(const ViewportFlag::Flag flag);
+
         const size_t getNumModels() const;
         const float& radius() const;
         const glm::vec3& boundingBox() const;

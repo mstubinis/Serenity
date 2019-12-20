@@ -116,7 +116,7 @@ struct PulsePhaserTailInstanceBindFunctor {void operator()(EngineResource* r) co
 
     auto parentModel = body.modelMatrixRendering();
     auto model = parentModel * i.modelMatrix();
-    auto worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
+    auto worldPos = Math::getMatrixPosition(model);
 
     auto translation = glm::translate(worldPos);
     auto rotationMatrix = glm::mat4_cast(camOrien);

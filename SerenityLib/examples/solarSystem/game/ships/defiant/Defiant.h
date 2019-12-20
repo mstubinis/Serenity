@@ -24,6 +24,11 @@ class Defiant final : public Ship {
         std::vector<ShipSystemWeapons::WeaponBeam>        m_BonusBeams;
     public:
         Defiant(
+            Scene& scene,
+            glm::vec3 = glm::vec3(0),             //Position
+            glm::vec3 = glm::vec3(1)             //Scale
+        );
+        Defiant(
             AIType::Type& ai_type,
             Team& team,
             Client& client,

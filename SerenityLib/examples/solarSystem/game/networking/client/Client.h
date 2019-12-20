@@ -69,11 +69,13 @@ class Client{
         void on_receive_connection_rejected_by_server(Packet&, Menu&);
         void on_receive_server_shutdown(Packet&, Menu&, Map& map);
     public:
+        Client(Core&);
         Client(Team* ,Core&, const unsigned short& server_port, const std::string& server_ipAddress, const unsigned int& id);
         ~Client();
 
         void cleanup();
 
+        Core& getCore();
         GameplayMode& getGameplayMode();
 
         void setClientID(const unsigned int id);

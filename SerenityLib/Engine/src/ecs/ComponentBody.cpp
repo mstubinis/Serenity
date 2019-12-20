@@ -632,7 +632,7 @@ const glm_vec3 ComponentBody::position() const { //theres prob a better way to d
         return Math::btVectorToGLM(tr.getOrigin());
     }
     const auto& modelMatrix_ = data.n->modelMatrix;
-    return glm_vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
+    return Math::getMatrixPosition(modelMatrix_);
 }
 const glm::vec3 ComponentBody::position_render() const { //theres prob a better way to do this
     if (m_Physics) {

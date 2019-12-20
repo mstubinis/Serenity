@@ -53,10 +53,15 @@
 using namespace std;
 using namespace Engine;
 
+Client::Client(Core& core) : m_Core(core), m_MapSpecificData(*this) {
+    m_TcpSocket = nullptr;
+    m_UdpSocket = nullptr;
+    internal_init(0, "");
+}
 Client::Client(Team* team, Core& core, const unsigned short& server_port, const string& server_ipAddress, const unsigned int& id) : m_Core(core), m_MapSpecificData(*this){
-    m_MapSpecificData.m_Team = team;
-    m_TcpSocket = NEW Networking::SocketTCP(server_port,          server_ipAddress);
-    m_UdpSocket = NEW Networking::SocketUDP(server_port + 1 + id, server_ipAddress);
+    m_MapSpecificData.m_Team  = team;
+    m_TcpSocket               = NEW Networking::SocketTCP(server_port,          server_ipAddress);
+    m_UdpSocket               = NEW Networking::SocketUDP(server_port + 1 + id, server_ipAddress);
     internal_init(server_port, server_ipAddress);
 }
 Client::~Client() {
@@ -69,8 +74,10 @@ void Client::cleanup() {
     m_MapSpecificData.cleanup();
 }
 void Client::internal_init(const unsigned short& server_port, const string& server_ipAddress) {
-    m_UdpSocket->setBlocking(false);
-    m_UdpSocket->bind();
+    if (m_UdpSocket) {
+        m_UdpSocket->setBlocking(false);
+        m_UdpSocket->bind();
+    }
     m_Port                    = server_port;
     m_ServerIP                = server_ipAddress;
     m_Username                = "";
@@ -118,6 +125,9 @@ void Client::connect(const unsigned short& timeout) {
         return;
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     m_InitialConnectionThread = NEW std::future<sf::Socket::Status>(std::move(std::async(std::launch::async, lambda_connect, timeout)));
+}
+Core& Client::getCore() {
+    return m_Core;
 }
 GameplayMode& Client::getGameplayMode() {
     return m_MapSpecificData.m_GameplayMode;
@@ -492,7 +502,7 @@ void Client::on_receive_server_approve_map_entry(Packet& basePacket, Menu& menu)
     modelMatrix = glm::mat4_cast(orientation) * glm::translate(position);
     auto& playerBody = *map.getPlayer()->getComponent<ComponentBody>();
     auto spawn = map.getSpawnAnchor()->getPosition();
-    playerBody.setPosition(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
+    playerBody.setPosition(Math::getMatrixPosition(modelMatrix));
 
     Math::alignTo(orientation, playerBody.position() - spawn);
     playerBody.setRotation(orientation);

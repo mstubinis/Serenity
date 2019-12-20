@@ -91,9 +91,7 @@ void DeferredPipeline::onOpenGLContextCreation() {
 
 void DeferredPipeline::renderSkybox(Skybox* skybox, ShaderProgram& shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) {
     glm::mat4 view = camera.getView();
-    view[3][0] = 0.0f;
-    view[3][1] = 0.0f;
-    view[3][2] = 0.0f;
+    Math::removeMatrixPosition(view);
 
     shaderProgram.bind();
     if(skybox)

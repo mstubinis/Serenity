@@ -202,7 +202,7 @@ const bool PhaserBeam::forceFire(const double& dt) {
         auto& shipBody = *ship.getComponent<ComponentBody>();
         auto shipMatrix = shipBody.modelMatrix();
         shipMatrix = glm::translate(shipMatrix, position);
-        const glm::vec3 finalPosition = glm::vec3(shipMatrix[3][0], shipMatrix[3][1], shipMatrix[3][2]);
+        const glm::vec3 finalPosition = Math::getMatrixPosition(shipMatrix);
         soundEffect = Engine::Sound::playEffect(ResourceManifest::SoundPhaserBeam);
         if (soundEffect) {
             soundEffect->setVolume(volume);

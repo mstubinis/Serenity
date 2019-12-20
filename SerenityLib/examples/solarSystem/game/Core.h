@@ -31,6 +31,8 @@ class Core final {
         double              m_GameTime;
         GameState::State    m_GameState;
     public:
+        static Core _DUMMY_VALUE;
+    public:
         Core();
         ~Core();
 

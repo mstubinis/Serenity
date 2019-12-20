@@ -3,6 +3,7 @@
 #include "../shipSystems/ShipSystemWeapons.h"
 #include "../../weapons/cannons/DisruptorCannon.h"
 #include "../../weapons/torpedos/KlingonPhotonTorpedo.h"
+#include "../../Core.h"
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/math/Engine_Math.h>
@@ -31,20 +32,39 @@ constexpr auto CLASS = "B'rel";
 using namespace std;
 using namespace Engine;
 
+Brel::Brel(Scene& scene, glm::vec3 position, glm::vec3 scale)
+:Ship(CLASS, scene, position, scale) {
+    //add wings
+    auto& model = *getComponent<ComponentModel>();
+
+    model.getModel(0).setMesh(Ships::Database.at(CLASS).MeshHandles[0], model); //brel head only
+
+    auto& wing1 = model.addModel(Ships::Database.at(CLASS).MeshHandles[1], Ships::Database.at(CLASS).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    wing1.setPosition(0.232951f, 0.316462f, 0.08058f);
+    auto& wing2 = model.addModel(Ships::Database.at(CLASS).MeshHandles[2], Ships::Database.at(CLASS).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    wing2.setPosition(-0.232951f, 0.316462f, 0.08058f);
+
+    model.setCustomBindFunctor(ShipModelInstanceBindFunctor(), 0);
+    model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(), 0);
+    model.setCustomBindFunctor(ShipModelInstanceBindFunctor(), 1);
+    model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(), 1);
+    model.setCustomBindFunctor(ShipModelInstanceBindFunctor(), 2);
+    model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(), 2);
+    model.setUserPointer(this);
+}
 Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f,0.7f,0.7f)) {
 
     m_InitialCamera = glm::vec3(0.0f, 0.7f, 0.7f);
-    const auto className = getClass();
 
     //add wings
     auto& model = *getComponent<ComponentModel>();
 
-    model.getModel(0).setMesh(Ships::Database.at(className).MeshHandles[1], model); //brel head only
+    model.getModel(0).setMesh(Ships::Database.at(CLASS).MeshHandles[0], model); //brel head only
 
-    auto& wing1 = model.addModel(ResourceManifest::BrelMeshWing, Ships::Database.at(className).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    auto& wing1 = model.addModel(Ships::Database.at(CLASS).MeshHandles[1], Ships::Database.at(CLASS).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
     wing1.setPosition(0.232951f, 0.316462f, 0.08058f);
-    auto& wing2 = model.addModel(ResourceManifest::BrelMeshWing2, Ships::Database.at(className).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    auto& wing2 = model.addModel(Ships::Database.at(CLASS).MeshHandles[2], Ships::Database.at(CLASS).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
     wing2.setPosition(-0.232951f, 0.316462f, 0.08058f);
 
     model.setCustomBindFunctor(ShipModelInstanceBindFunctor(),0);
@@ -91,7 +111,7 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
 
     //update shield size
     auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
-    auto shieldScale = ((Mesh*)Ships::Database.at(className).MeshHandles[0].get())->getRadiusBox() * SHIELD_SCALE_FACTOR;
+    auto shieldScale = ((Mesh*)Ships::Database.at(CLASS).MeshHandles[0].get())->getRadiusBox() * SHIELD_SCALE_FACTOR;
     shieldScale *= shields->getAdditionalShieldSizeScale();
 
 

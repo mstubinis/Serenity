@@ -9,19 +9,26 @@
 #include "Core.h"
 #include <core/engine/system/Engine.h>
 
+#include "ResourceManifest.h"
+
 using namespace Engine;
 using namespace std;
 
 Core* m_Core = nullptr;
-void Game::cleanup(){
-    SAFE_DELETE(m_Core);
-}
 void Game::initResources(){
     m_Core = NEW Core();
+
+    ResourceManifest::init();
+    //const std::string& iconPath = ResourceManifest::BasePath + "data/Textures/icon.png";
+    //Resources::getWindow().setIcon(iconPath);
 }
 void Game::initLogic(){
     Physics::setNumberOfStepsPerFrame(3);
     m_Core->init();
+}
+void Game::cleanup() {
+    SAFE_DELETE(m_Core);
+    ResourceManifest::destruct();
 }
 void Game::update(const double& dt){
     if (Engine::isKeyDown(KeyboardKey::Escape)) {

@@ -9,6 +9,11 @@ class FedDefPlatform final : public Ship {
 
     public:
         FedDefPlatform(
+            Scene& scene,
+            glm::vec3 = glm::vec3(0),             //Position
+            glm::vec3 = glm::vec3(1)             //Scale
+        );
+        FedDefPlatform(
             Team& team,
             Client& client,
             Map& map,

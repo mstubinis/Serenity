@@ -134,6 +134,14 @@ class Ship: public EntityWrapper, public EventObserver {
         std::string                                    m_MapKey;
         glm::vec3                                      m_CameraOffsetDefault;
     public:
+
+        Ship(
+            const std::string& shipClass,
+            Scene& scene,
+            const glm_vec3 = glm_vec3(0),         //Position
+            const glm_vec3 = glm_vec3(1),         //Scale
+            const glm::vec3 camOffsetDefault = glm::vec3(0.0f)
+        );
         Ship(
             Team& team,
             Client& client,

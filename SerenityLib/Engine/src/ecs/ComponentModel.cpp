@@ -80,6 +80,27 @@ ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(m_ModelInstances);
 }
 
+void ComponentModel::setViewportFlag(const unsigned int flag) {
+    for (auto& model_instance : m_ModelInstances) {
+        if(model_instance) model_instance->setViewportFlag(flag);
+    }
+}
+void ComponentModel::addViewportFlag(const unsigned int flag) {
+    for (auto& model_instance : m_ModelInstances) {
+        if (model_instance) model_instance->addViewportFlag(flag);
+    }
+}
+void ComponentModel::setViewportFlag(const ViewportFlag::Flag flag) {
+    for (auto& model_instance : m_ModelInstances) {
+        if (model_instance) model_instance->setViewportFlag(flag);
+    }
+}
+void ComponentModel::addViewportFlag(const ViewportFlag::Flag flag) {
+    for (auto& model_instance : m_ModelInstances) {
+        if (model_instance) model_instance->addViewportFlag(flag);
+    }
+}
+
 const size_t ComponentModel::getNumModels() const {
     return m_ModelInstances.size();
 }

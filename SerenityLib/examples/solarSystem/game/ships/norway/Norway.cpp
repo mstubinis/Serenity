@@ -23,6 +23,11 @@ constexpr auto CLASS = "Norway";
 
 using namespace std;
 
+Norway::Norway(Scene& scene, glm::vec3 position, glm::vec3 scale)
+    :Ship(CLASS, scene, position, scale) {
+
+}
+
 Norway::Norway(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType) {
 

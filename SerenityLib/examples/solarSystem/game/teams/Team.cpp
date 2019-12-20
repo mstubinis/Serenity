@@ -3,6 +3,8 @@
 
 using namespace std;
 
+Team Team::FFA = Team(TeamNumber::Team_FFA);
+
 Team::Team(const TeamNumber::Enum& thisTeamNumber) {
     m_TeamNumber = thisTeamNumber;
 }

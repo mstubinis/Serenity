@@ -274,6 +274,12 @@
     <Filter Include="Header Files\Game\Networking\Packets">
       <UniqueIdentifier>{b4edf77a-58ce-4068-8a6b-8e3bdf6f3993}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Ships\Dderidex">
+      <UniqueIdentifier>{31ae95f1-f97a-4133-a8ed-fe9bab3bc44b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Dderidex">
+      <UniqueIdentifier>{6e8ef897-ada0-4771-8316-1fa84105f371}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -383,9 +389,6 @@
     </ClInclude>
     <ClInclude Include="game\ships\Ships.h">
       <Filter>Header Files\Game\Ships</Filter>
-    </ClInclude>
-    <ClInclude Include="game\ships\excelsior\Excelsior.h">
-      <Filter>Header Files\Game\Ships\Excelsior</Filter>
     </ClInclude>
     <ClInclude Include="game\ships\constitution\Constitution.h">
       <Filter>Header Files\Game\Ships\Constitution</Filter>
@@ -599,6 +602,12 @@
     </ClInclude>
     <ClInclude Include="game\ForcedGameInclude.h">
       <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\dderidex\Dderidex.h">
+      <Filter>Header Files\Game\Ships\Dderidex</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\excelsior\Excelsior.h">
+      <Filter>Header Files\Game\Ships\Excelsior</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -904,6 +913,9 @@
     </ClCompile>
     <ClCompile Include="game\gui\GUIRenderElement.cpp">
       <Filter>Source Files\Game\GUI\Specifics</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\dderidex\Dderidex.cpp">
+      <Filter>Source Files\Game\Ships\Dderidex</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

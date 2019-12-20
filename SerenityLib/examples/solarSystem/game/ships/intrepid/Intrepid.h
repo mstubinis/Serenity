@@ -9,6 +9,11 @@ class Intrepid final : public Ship {
 
     public:
         Intrepid(
+            Scene& scene,
+            glm::vec3 = glm::vec3(0),             //Position
+            glm::vec3 = glm::vec3(1)             //Scale
+        );
+        Intrepid(
             AIType::Type& ai_type,
             Team& team,
             Client& client,

@@ -83,7 +83,7 @@ struct PhotonTorpedoOldInstanceCoreBindFunctor final { void operator()(EngineRes
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
 
-    auto worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
+    auto worldPos = Math::getMatrixPosition(model);
     modelMatrix = glm::translate(modelMatrix, worldPos);
     modelMatrix *= glm::mat4_cast(camOrien);
     modelMatrix = glm::scale(modelMatrix, glm::vec3(body.getScale()) * i.getScale());
@@ -133,7 +133,7 @@ struct PhotonTorpedoOldFlareInstanceBindFunctor final { void operator()(EngineRe
 
     glm::mat4 parentModel = body.modelMatrixRendering();
     glm::mat4 model = parentModel * i.modelMatrix();
-    glm::vec3 worldPos = glm::vec3(model[3][0], model[3][1], model[3][2]);
+    glm::vec3 worldPos = Math::getMatrixPosition(model);
 
     glm::mat4 translation = glm::translate(worldPos);
     glm::mat4 rotationMatrix = glm::mat4_cast(camOrien);

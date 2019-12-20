@@ -26,7 +26,12 @@ using namespace std;
 
 constexpr auto CLASS = "Federation Starbase Mushroom";
 
-FedStarbaseMushroom::FedStarbaseMushroom(Team& team, Client& client, Map& map, const std::string& name, glm::vec3 position, glm::vec3 scale)
+FedStarbaseMushroom::FedStarbaseMushroom(Scene& scene, glm::vec3 position, glm::vec3 scale)
+    :Ship(CLASS, scene, position, scale) {
+
+}
+
+FedStarbaseMushroom::FedStarbaseMushroom(Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale)
 :Ship(team, client, CLASS, map, AIType::AI_Stationary, name, position, scale, CollisionType::TriangleShapeStatic){
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {

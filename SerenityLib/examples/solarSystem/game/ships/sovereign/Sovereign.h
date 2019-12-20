@@ -9,6 +9,11 @@ class Sovereign final : public Ship {
 
     public:
         Sovereign(
+            Scene& scene,
+            glm::vec3 = glm::vec3(0),             //Position
+            glm::vec3 = glm::vec3(1)             //Scale
+        );
+        Sovereign(
             AIType::Type& ai_type,
             Team& team,
             Client& client,

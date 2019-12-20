@@ -269,6 +269,7 @@
     <ClInclude Include="game\ships\brel\Brel.h" />
     <ClInclude Include="game\ships\constitution\Constitution.h" />
     <ClInclude Include="game\ships\cube\Cube.h" />
+    <ClInclude Include="game\ships\dderidex\Dderidex.h" />
     <ClInclude Include="game\ships\defiant\Defiant.h" />
     <ClInclude Include="game\ships\diamond\Diamond.h" />
     <ClInclude Include="game\ships\excelsior\Excelsior.h" />
@@ -375,6 +376,7 @@
     <ClCompile Include="game\ships\brel\Brel.cpp" />
     <ClCompile Include="game\ships\constitution\Constitution.cpp" />
     <ClCompile Include="game\ships\cube\Cube.cpp" />
+    <ClCompile Include="game\ships\dderidex\Dderidex.cpp" />
     <ClCompile Include="game\ships\defiant\Defiant.cpp" />
     <ClCompile Include="game\ships\diamond\Diamond.cpp" />
     <ClCompile Include="game\ships\excelsior\Excelsior.cpp" />

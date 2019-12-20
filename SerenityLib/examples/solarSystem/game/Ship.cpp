@@ -1,4 +1,5 @@
 #include "Ship.h"
+#include "Core.h"
 #include "GameCamera.h"
 #include "map/Map.h"
 #include "networking/packets/Packets.h"
@@ -306,28 +307,61 @@ struct HullCollisionFunctor final { void operator()(CollisionCallbackEventData& 
     }
 }};
 
+Ship::Ship(const string& shipClass, Scene& scene, const glm_vec3 pos, const glm_vec3 scl, const glm::vec3 camOffsetDefault) : EntityWrapper(scene), m_Client(*Core::_DUMMY_VALUE.getClient()), m_Team(Team::FFA) {
+    m_WarpFactor                     = 0;
+    m_AI                             = nullptr;
+    m_State                          = ShipState::Nominal;
+    m_DestructionTimerCurrent        = 0.0;
+    m_DestructionTimerDecalTimer     = 0.0;
+    m_DestructionTimerDecalTimerMax  = 0.5;
+    m_RespawnTimer                   = 0.0;
+    m_RespawnTimerMax                = 120.0;
+    m_OfflineGlowFactor              = 1.0f;
+    m_OfflineGlowFactorTimer         = 0.0f;
+
+    m_ShipClass                      = shipClass;
+    m_IsWarping                      = false;
+    m_PlayerCamera                   = nullptr;
+    m_MouseFactor                    = glm::dvec2(0.0);
+    m_CameraOffsetDefault            = camOffsetDefault;
+
+    auto& shipInfo                   = Ships::Database[shipClass];
+    auto& modelComponent             = *addComponent<ComponentModel>(shipInfo.MeshHandles[0], shipInfo.MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    auto& bodyComponent              = *addComponent<ComponentBody>();
+
+    bodyComponent.setPosition(pos);
+    bodyComponent.setScale(scl);
+
+    registerEvent(EventType::WindowResized);
+
+    modelComponent.setCustomBindFunctor(ShipModelInstanceBindFunctor());
+    modelComponent.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor());
+    modelComponent.setUserPointer(this);
+}
+
 Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const AIType::Type ai_type, const string& name, const glm_vec3 pos, const glm_vec3 scl, CollisionType::Type collisionType, const glm::vec3 camOffsetDefault):EntityWrapper(map),m_Client(client),m_Team(team){
-    m_WarpFactor              = 0;
-    m_State                   = ShipState::Nominal;
-    m_DestructionTimerCurrent = 0.0;
-    m_DestructionTimerDecalTimer = 0.0;
-    m_DestructionTimerDecalTimerMax = 0.5;
-    m_RespawnTimer            = 0.0;
-    m_RespawnTimerMax         = 120.0;
-    m_OfflineGlowFactor       = 1.0f;
-    m_OfflineGlowFactorTimer  = 0.0f;
+    m_WarpFactor                     = 0;
+    m_AI                             = nullptr;
+    m_State                          = ShipState::Nominal;
+    m_DestructionTimerCurrent        = 0.0;
+    m_DestructionTimerDecalTimer     = 0.0;
+    m_DestructionTimerDecalTimerMax  = 0.5;
+    m_RespawnTimer                   = 0.0;
+    m_RespawnTimerMax                = 120.0;
+    m_OfflineGlowFactor              = 1.0f;
+    m_OfflineGlowFactorTimer         = 0.0f;
 
-    m_ShipClass               = shipClass;
-    m_IsWarping               = false;
-    m_PlayerCamera            = nullptr;
-    m_MouseFactor             = glm::dvec2(0.0);
-    m_CameraOffsetDefault     = camOffsetDefault;
+    m_ShipClass                      = shipClass;
+    m_IsWarping                      = false;
+    m_PlayerCamera                   = nullptr;
+    m_MouseFactor                    = glm::dvec2(0.0);
+    m_CameraOffsetDefault            = camOffsetDefault;
 
-    auto& shipInfo            = Ships::Database[shipClass];
-    auto& modelComponent      = *addComponent<ComponentModel>(shipInfo.MeshHandles[0], shipInfo.MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
-    auto& bodyComponent       = *addComponent<ComponentBody>(collisionType);
-    auto& nameComponent       = *addComponent<ComponentName>(name);
-    auto& logicComponent      = *addComponent<ComponentLogic>(ShipLogicFunctor(), this);
+    auto& shipInfo                   = Ships::Database[shipClass];
+    auto& modelComponent             = *addComponent<ComponentModel>(shipInfo.MeshHandles[0], shipInfo.MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    auto& bodyComponent              = *addComponent<ComponentBody>(collisionType);
+    auto& nameComponent              = *addComponent<ComponentName>(name);
+    auto& logicComponent             = *addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
     setModel(shipInfo.MeshHandles[0]);
 
@@ -443,6 +477,8 @@ void Ship::respawn(const glm_vec3& newPosition, const string& nearest_spawn_anch
     glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
     Engine::Math::alignTo(q, vec);
     bodyComponent.setRotation(q);
+    m_IsWarping = false;
+    m_WarpFactor = 0;
     setState(ShipState::Nominal);
 }
 

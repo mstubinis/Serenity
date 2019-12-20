@@ -14,6 +14,7 @@
 #include "excelsior/Excelsior.h"
 #include "nova/Nova.h"
 #include "sovereign/Sovereign.h"
+#include "dderidex/Dderidex.h"
 #include "fed_def_platform/FedDefPlatform.h"
 #include "fed_starbase_mushroom/FedStarbaseMushroom.h"
 

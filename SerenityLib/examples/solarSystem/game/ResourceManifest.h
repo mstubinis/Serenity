@@ -27,10 +27,6 @@ struct ResourceManifest{
 
 	/*extras*/
 	static Handle VenerexMesh;
-    static Handle BrelMeshHead;
-    static Handle BrelMeshWing;
-    static Handle BrelMeshWing2;
-
 	static Handle VenerexMaterial;
 
     //gui

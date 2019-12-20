@@ -35,9 +35,6 @@ Handle ResourceManifest::PhaserBeamMesh;
 
 /*extras*/
 Handle ResourceManifest::VenerexMesh;
-Handle ResourceManifest::BrelMeshHead;
-Handle ResourceManifest::BrelMeshWing;
-Handle ResourceManifest::BrelMeshWing2;
 
 Handle ResourceManifest::VenerexMaterial;
 
@@ -159,11 +156,6 @@ void ResourceManifest::init(){
     CannonTailMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_tail.objcc")[0];
     CannonEffectOutlineMesh = Resources::loadMeshAsync(BasePath + "data/Models/cannon_outline.objcc")[0];
     PhaserBeamMesh = Resources::loadMeshAsync(BasePath + "data/Models/phaser_beam.objcc")[0];
-
-	//extras
-    BrelMeshHead = Resources::loadMeshAsync(BasePath + "data/Ships/brel/brel_head.objcc")[0];
-    BrelMeshWing = Resources::loadMeshAsync(BasePath + "data/Ships/brel/brel_wing.objcc")[0];
-    BrelMeshWing2 = Resources::loadMeshAsync(BasePath + "data/Ships/brel/brel_wing2.objcc")[0];
 
     //torpedos
     TorpedoFlareMesh        = Resources::loadMeshAsync(BasePath + "data/Models/torpedo_flare.objcc")[0];

@@ -72,6 +72,8 @@ class Map: public Scene{
         Client& getClient();
 
         HUD& getHUD();
+
+        static Ship* createShipDull(const std::string& shipClass, const glm::vec3& position, Scene* scene);
         Ship* createShip(AIType::Type ai_type, Team& team, Client& client, const std::string& shipClass, const std::string& shipName, const glm::vec3& position);
 
 

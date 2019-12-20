@@ -102,7 +102,7 @@ struct ShieldInstanceBindFunctor {void operator()(EngineResource* r) const {
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
     int count = 0;
-    const auto finalModelPosition = glm::vec3(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
+    const glm::vec3 finalModelPosition = Math::getMatrixPosition(modelMatrix);
     for (uint i = 0; i < MAX_IMPACT_POINTS; ++i) {
         auto& impact = shields.m_ImpactPoints[i];
         if (impact.active) {

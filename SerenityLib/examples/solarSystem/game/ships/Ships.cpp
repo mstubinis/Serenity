@@ -164,7 +164,7 @@ void Ships::init() {
 
     createShipEntry("Shrike",           FactionEnum::Romulan,      6,    1.0f);
     //createShipEntry("Venerex",        FactionEnum::Romulan,      20,   1.2f);
-    //createShipEntry("D'deridex",      FactionEnum::Romulan,      30,   1.35f);
+    createShipEntry("D'deridex",        FactionEnum::Romulan,      30,   1.4f);
     //createShipEntry("Aeterna",        FactionEnum::Romulan,      40,   1.5f);
 
     

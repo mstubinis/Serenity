@@ -9,6 +9,11 @@ class FedStarbaseMushroom final : public Ship {
 
     public:
         FedStarbaseMushroom(
+            Scene& scene,
+            glm::vec3 = glm::vec3(0),             //Position
+            glm::vec3 = glm::vec3(1)             //Scale
+        );
+        FedStarbaseMushroom(
             Team& team,
             Client& client,
             Map& map,

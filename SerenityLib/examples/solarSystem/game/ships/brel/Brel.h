@@ -22,6 +22,11 @@ class Brel final : public Ship {
         float m_WingRotation;
     public:
         Brel(
+            Scene& scene,
+            glm::vec3 = glm::vec3(0),             //Position
+            glm::vec3 = glm::vec3(1)             //Scale
+        );
+        Brel(
             AIType::Type& ai_type,
             Team& team,
             Client& client,

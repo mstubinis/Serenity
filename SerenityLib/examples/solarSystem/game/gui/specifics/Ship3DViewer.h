@@ -10,13 +10,15 @@ class  Viewport;
 class  Core;
 class  Scene;
 class  Camera;
+class  Ship;
 struct GameCameraShipSelectorLogicFunctor;
 class Ship3DViewer final {
     friend struct GameCameraShipSelectorLogicFunctor;
     private:
         bool             m_IsCurrentlyDragging;
         bool             m_IsCurrentlyOverShip3DWindow;
-        EntityWrapper*   m_EntityWrapperShip;
+        Ship*            m_EntityWrapperShip;
+        //EntityWrapper* m_EntityWrapperShip;
         Viewport*        m_ShipDisplayViewport;
         void*            m_UserPointer;
         std::string      m_ChosenShipClass;

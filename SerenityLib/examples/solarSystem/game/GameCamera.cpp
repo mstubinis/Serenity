@@ -6,6 +6,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/scene/Scene.h>
+#include <core/engine/math/Engine_Math.h>
 
 #include "ships/shipSystems/ShipSystemSensors.h"
 
@@ -135,7 +136,7 @@ void GameCamera::internal_update_follow_target(EntityWrapper* target, const doub
         ((glm::normalize(glm::vec3(targetBody.position()) - glm::vec3(player.position())) * (playerModel.radius() * 2.7f) * (1.0f + m_OrbitRadius))
             - glm::vec3(player.up()) * glm::length(playerModel.radius()) * 0.55f));
 
-    glm::vec3 pos(model[3][0], model[3][1], model[3][2]);
+    glm::vec3 pos = Math::getMatrixPosition(model);
 
     thisBody.setPosition(pos);
 
@@ -174,7 +175,7 @@ void GameCamera::internal_update_orbit(EntityWrapper* target, const double& dt) 
     cameraModel *= glm::mat4_cast(glm::quat(thisBody.rotation()));
     cameraModel = glm::translate(cameraModel, pos);
 
-    const glm::vec3 eye(cameraModel[3][0], cameraModel[3][1], cameraModel[3][2]);
+    const glm::vec3 eye = Math::getMatrixPosition(cameraModel);
     thisBody.setPosition(eye);
 
     thisCamera.lookAt(eye, targetBody.position(), thisBody.up());

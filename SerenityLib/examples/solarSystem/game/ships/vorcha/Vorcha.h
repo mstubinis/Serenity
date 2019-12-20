@@ -9,6 +9,11 @@ class Vorcha final : public Ship {
 
     public:
         Vorcha(
+            Scene& scene,
+            glm::vec3 = glm::vec3(0),             //Position
+            glm::vec3 = glm::vec3(1)             //Scale
+        );
+        Vorcha(
             AIType::Type& ai_type,
             Team& team,
             Client& client,

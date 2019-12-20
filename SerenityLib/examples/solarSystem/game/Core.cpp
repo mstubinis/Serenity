@@ -22,6 +22,8 @@
 using namespace std;
 using namespace Engine;
 
+Core Core::_DUMMY_VALUE = Core();
+
 Core::Core() {
     m_Menu              = nullptr;
     m_Server            = nullptr;
@@ -29,16 +31,11 @@ Core::Core() {
     m_Initalized        = false;
     m_GameTime          = 0.0;
     m_GameState         = GameState::Main_Menu;
-
-    ResourceManifest::init();
-    //const std::string& iconPath = ResourceManifest::BasePath + "data/Textures/icon.png";
-    //Resources::getWindow().setIcon(iconPath);
 }
 Core::~Core() {
     SAFE_DELETE(m_Client);
     SAFE_DELETE(m_Server);
     SAFE_DELETE(m_Menu);
-    ResourceManifest::destruct();
 }
 Server* Core::getServer() {
     return m_Server;

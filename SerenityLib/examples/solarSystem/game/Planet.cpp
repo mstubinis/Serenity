@@ -58,7 +58,7 @@ void OrbitInfo::setOrbitalPosition(const decimal angle_, Planet& planet) {
     auto modelMatrix   = glm_mat4(1.0f);
     modelMatrix        = glm::rotate(modelMatrix, inclination, glm_vec3(0.0, 1.0, 0.0));
     modelMatrix        = glm::translate(modelMatrix, nextPos);
-    planet.setPosition(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
+    planet.setPosition(Math::getMatrixPosition(modelMatrix));
 }
 
 #pragma endregion

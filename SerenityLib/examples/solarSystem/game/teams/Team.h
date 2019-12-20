@@ -12,6 +12,8 @@ class Team {
         std::unordered_set<TeamNumber::Enum>   m_EnemyTeams;
         std::unordered_set<std::string>        m_TeamPlayers;
     public:
+        static Team FFA;
+    public:
         Team(const TeamNumber::Enum& thisTeamNumber);
         Team(const TeamNumber::Enum& thisTeamNumber, std::vector<TeamNumber::Enum>& allyTeams, std::vector<TeamNumber::Enum>& enemyTeams);
         ~Team();
