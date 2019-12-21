@@ -277,6 +277,7 @@
     <ClInclude Include="game\ships\fed_starbase_mushroom\FedStarbaseMushroom.h" />
     <ClInclude Include="game\ships\intrepid\Intrepid.h" />
     <ClInclude Include="game\ships\miranda\Miranda.h" />
+    <ClInclude Include="game\ships\neghvar\Neghvar.h" />
     <ClInclude Include="game\ships\norway\Norway.h" />
     <ClInclude Include="game\ships\nova\Nova.h" />
     <ClInclude Include="game\ships\probe\Probe.h" />
@@ -296,6 +297,7 @@
     <ClInclude Include="game\ships\shrike\Shrike.h" />
     <ClInclude Include="game\ships\sovereign\Sovereign.h" />
     <ClInclude Include="game\ships\sphere\Sphere.h" />
+    <ClInclude Include="game\ships\venerex\Venerex.h" />
     <ClInclude Include="game\ships\vorcha\Vorcha.h" />
     <ClInclude Include="game\teams\Team.h" />
     <ClInclude Include="game\teams\TeamIncludes.h" />
@@ -384,6 +386,7 @@
     <ClCompile Include="game\ships\fed_starbase_mushroom\FedStarbaseMushroom.cpp" />
     <ClCompile Include="game\ships\intrepid\Intrepid.cpp" />
     <ClCompile Include="game\ships\miranda\Miranda.cpp" />
+    <ClCompile Include="game\ships\neghvar\Neghvar.cpp" />
     <ClCompile Include="game\ships\norway\Norway.cpp" />
     <ClCompile Include="game\ships\nova\Nova.cpp" />
     <ClCompile Include="game\ships\probe\Probe.cpp" />
@@ -403,6 +406,7 @@
     <ClCompile Include="game\ships\shrike\Shrike.cpp" />
     <ClCompile Include="game\ships\sovereign\Sovereign.cpp" />
     <ClCompile Include="game\ships\sphere\Sphere.cpp" />
+    <ClCompile Include="game\ships\venerex\Venerex.cpp" />
     <ClCompile Include="game\ships\vorcha\Vorcha.cpp" />
     <ClCompile Include="game\teams\Team.cpp" />
     <ClCompile Include="game\weapons\beams\BorgBeam.cpp" />

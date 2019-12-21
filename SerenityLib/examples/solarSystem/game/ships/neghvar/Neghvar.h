@@ -1,29 +1,30 @@
 #pragma once
-#ifndef GAME_SHIP_BORG_SPHERE_H
-#define GAME_SHIP_BORG_SPHERE_H
+#ifndef GAME_SHIP_NEGHVAR_H
+#define GAME_SHIP_NEGHVAR_H
 
 #include "../../Ship.h"
 
-class Sphere final : public Ship {
+
+class Neghvar final : public Ship {
     private:
 
     public:
-        Sphere(
+        Neghvar(
             Scene& scene,
             glm::vec3 = glm::vec3(0),             //Position
             glm::vec3 = glm::vec3(1)             //Scale
         );
-        Sphere(
+        Neghvar(
             AIType::Type& ai_type,
             Team& team,
             Client& client,
             Map& map,
-            const std::string& name = "Borg Sphere",     //Name
+            const std::string& name = "Negh'var Class Ship",     //Name
             glm::vec3 = glm::vec3(0),             //Position
             glm::vec3 = glm::vec3(1),             //Scale
             CollisionType::Type = CollisionType::ConvexHull
         );
-        ~Sphere();
+        ~Neghvar();
 };
 
 #endif

@@ -2,7 +2,7 @@
 #ifndef GAME_WEAPON_BORG_TORPEDO_H
 #define GAME_WEAPON_BORG_TORPEDO_H
 
-#include "../ships/shipSystems/ShipSystemWeapons.h"
+#include "../../ships/shipSystems/ShipSystemWeapons.h"
 #include <vector>
 
 class  BorgTorpedo;

@@ -1,6 +1,7 @@
 #include "Vorcha.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
+
 #include "../../weapons/cannons/DisruptorCannon.h"
 #include "../../weapons/torpedos/KlingonPhotonTorpedo.h"
 #include "../../weapons/beams/DisruptorBeam.h"
@@ -204,7 +205,7 @@ Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
         };
     }
 
-    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
+    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), weapons);
     m_AI->installThreatTable(map);
 }
 Vorcha::~Vorcha() {

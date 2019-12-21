@@ -147,8 +147,7 @@ void ServerMapSpecificData::cleanup() {
 void ServerMapSpecificData::internal_process_deepspace_anchor(Packet* packet_in) {
     if (m_DeepspaceAnchorTimer > TIMER_DEEP_SPACE_ANCHOR_SPAM) {
         //just forward it
-        PacketMessage& pI = *static_cast<PacketMessage*>(packet_in);
-        PacketMessage pOut(pI);
+        PacketMessage& pOut = *static_cast<PacketMessage*>(packet_in);
         pOut.PacketType = PacketType::Server_To_Client_Anchor_Creation;
         m_Server.send_to_all(pOut);
         m_DeepspaceAnchorTimer = 0.0;

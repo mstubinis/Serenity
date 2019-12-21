@@ -286,8 +286,21 @@ void Client::on_receive_client_wants_my_ship_info(Packet& basePacket, Map& map) 
 }
 void Client::on_receive_collision_event(Packet& basePacket, Map& map) {
     PacketCollisionEvent& pI = static_cast<PacketCollisionEvent&>(basePacket);
-    Ship* ship1 = map.getShips().at(pI.owner_key);
-    Ship* ship2 = map.getShips().at(pI.other_key);
+    auto& ships = map.getShips();
+    Ship* ship1 = nullptr;
+    Ship* ship2 = nullptr;
+
+    if (ships.count(pI.owner_key)) {
+        ship1 = ships.at(pI.owner_key);
+    }else{
+        std::cout << "error, ship1 ("+pI.owner_key+") was not found\n";
+    }
+    if (ships.count(pI.other_key)) {
+        ship2 = ships.at(pI.other_key);
+    }else{
+        std::cout << "error, ship2 ("+pI.other_key+") was not found\n";
+    }
+
     if (ship1 && ship2) {
         auto* hull1 = static_cast<ShipSystemHull*>(ship1->getShipSystem(ShipSystemType::Hull));
         auto* hull2 = static_cast<ShipSystemHull*>(ship2->getShipSystem(ShipSystemType::Hull));

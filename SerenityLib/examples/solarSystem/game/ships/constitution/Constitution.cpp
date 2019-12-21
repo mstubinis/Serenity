@@ -117,7 +117,7 @@ Constitution::Constitution(AIType::Type& ai_type, Team& team, Client& client, Ma
         };
     }
 
-    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
+    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), weapons);
     m_AI->installThreatTable(map);
 }
 Constitution::~Constitution() {

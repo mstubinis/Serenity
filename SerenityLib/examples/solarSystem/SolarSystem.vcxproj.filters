@@ -280,6 +280,18 @@
     <Filter Include="Header Files\Game\Ships\Dderidex">
       <UniqueIdentifier>{6e8ef897-ada0-4771-8316-1fa84105f371}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Ships\Neghvar">
+      <UniqueIdentifier>{7018d508-f74e-4c4e-acb0-9e5d0803de8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Neghvar">
+      <UniqueIdentifier>{fc662e44-b3a8-4c21-9a04-801387319ff6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Ships\Venerex">
+      <UniqueIdentifier>{af604479-8386-40fd-b8cc-9e7702fbcd92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Ships\Venerex">
+      <UniqueIdentifier>{657dfcdc-5920-46de-91c5-4db29a099069}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -609,6 +621,12 @@
     <ClInclude Include="game\ships\excelsior\Excelsior.h">
       <Filter>Header Files\Game\Ships\Excelsior</Filter>
     </ClInclude>
+    <ClInclude Include="game\ships\neghvar\Neghvar.h">
+      <Filter>Header Files\Game\Ships\Neghvar</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ships\venerex\Venerex.h">
+      <Filter>Header Files\Game\Ships\Venerex</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -916,6 +934,12 @@
     </ClCompile>
     <ClCompile Include="game\ships\dderidex\Dderidex.cpp">
       <Filter>Source Files\Game\Ships\Dderidex</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\venerex\Venerex.cpp">
+      <Filter>Source Files\Game\Ships\Venerex</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ships\neghvar\Neghvar.cpp">
+      <Filter>Source Files\Game\Ships\Neghvar</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

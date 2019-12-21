@@ -1,10 +1,10 @@
 #include "Dderidex.h"
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
+
 #include "../../weapons/cannons/PlasmaCannon.h"
 #include "../../weapons/beams/PlasmaBeam.h"
 #include "../../weapons/torpedos/PlasmaTorpedo.h"
-
 
 #include "../../ships/shipSystems/ShipSystemCloakingDevice.h"
 #include "../../ships/shipSystems/ShipSystemMainThrusters.h"
@@ -159,7 +159,7 @@ Dderidex::Dderidex(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
         };
     }
 
-    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), *static_cast<ShipSystemWeapons*>(m_ShipSystems[ShipSystemType::Weapons]));
+    m_AI->installFireAtWill(ai_type, _this, map, *static_cast<ShipSystemSensors*>(m_ShipSystems[ShipSystemType::Sensors]), weapons);
     m_AI->installThreatTable(map);
 }
 Dderidex::~Dderidex() {
