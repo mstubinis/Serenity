@@ -199,7 +199,7 @@ class Ship: public EntityWrapper, public EventObserver {
         void updateCloakVisuals(const float& alpha, ComponentModel& model);
         void updateProjectileImpact(const PacketProjectileImpact& packet);
 
-        void setModel(Handle& handle);
+        void updateModelPhyscis();
         const float updateShipDimensions();
 
         const glm_vec3 getLinearVelocity();

@@ -37,11 +37,9 @@ Brel::Brel(Scene& scene, glm::vec3 position, glm::vec3 scale)
     //add wings
     auto& model = *getComponent<ComponentModel>();
 
-    model.getModel(0).setMesh(Ships::Database.at(CLASS).MeshHandles[0], model); //brel head only
-
-    auto& wing1 = model.addModel(Ships::Database.at(CLASS).MeshHandles[1], Ships::Database.at(CLASS).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    auto& wing1 = model.getModel(1);
     wing1.setPosition(0.232951f, 0.316462f, 0.08058f);
-    auto& wing2 = model.addModel(Ships::Database.at(CLASS).MeshHandles[2], Ships::Database.at(CLASS).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    auto& wing2 = model.getModel(2);
     wing2.setPosition(-0.232951f, 0.316462f, 0.08058f);
 
     model.setCustomBindFunctor(ShipModelInstanceBindFunctor(), 0);
@@ -60,11 +58,9 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
     //add wings
     auto& model = *getComponent<ComponentModel>();
 
-    model.getModel(0).setMesh(Ships::Database.at(CLASS).MeshHandles[0], model); //brel head only
-
-    auto& wing1 = model.addModel(Ships::Database.at(CLASS).MeshHandles[1], Ships::Database.at(CLASS).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    auto& wing1 = model.getModel(1);
     wing1.setPosition(0.232951f, 0.316462f, 0.08058f);
-    auto& wing2 = model.addModel(Ships::Database.at(CLASS).MeshHandles[2], Ships::Database.at(CLASS).MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    auto& wing2 = model.getModel(2);
     wing2.setPosition(-0.232951f, 0.316462f, 0.08058f);
 
     model.setCustomBindFunctor(ShipModelInstanceBindFunctor(),0);
@@ -99,7 +95,7 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
         else if (i == 2)  system = NEW ShipSystemYawThrusters(_this, 1.22f);
         else if (i == 3)  system = NEW ShipSystemRollThrusters(_this, 1.2f);
         else if (i == 4)  system = NEW ShipSystemCloakingDevice(_this);
-        else if (i == 5)  system = NEW ShipSystemShields(_this, map, 7700.0f, 7700.0f, 7700.0f, 7700.0f, 10700.0f, 10700.0f, glm::vec3(0.0f),glm::vec3(1.0f,1.3f,1.0f));
+        else if (i == 5)  system = NEW ShipSystemShields(_this, map, 7700.0f, 7700.0f, 7700.0f, 7700.0f, 10700.0f, 10700.0f, glm::vec3(0.0f),glm::vec3(1.0f,1.0f,1.0f));
         else if (i == 6)  system = NEW ShipSystemMainThrusters(_this);
         else if (i == 7)  system = NEW ShipSystemWarpDrive(_this);
         else if (i == 8)  system = NEW ShipSystemSensors(_this, map);
@@ -111,10 +107,7 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
 
     //update shield size
     auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
-    auto shieldScale = ((Mesh*)Ships::Database.at(CLASS).MeshHandles[0].get())->getRadiusBox() * SHIELD_SCALE_FACTOR;
-    shieldScale *= shields->getAdditionalShieldSizeScale();
-
-
+    auto shieldScale = (model.boundingBox() * SHIELD_SCALE_FACTOR) * shields->getAdditionalShieldSizeScale();
     auto& shieldsBody = *shields->getEntity().getComponent<ComponentBody>();
     shieldsBody.setScale(shieldScale);
     m_ShieldScale = shieldScale;

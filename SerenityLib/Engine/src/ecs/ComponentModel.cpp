@@ -79,7 +79,11 @@ ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Material* mater
 ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(m_ModelInstances);
 }
-
+void ComponentModel::removeModel(const size_t& index) {
+    auto* ptr = m_ModelInstances[index];
+    m_ModelInstances.erase(m_ModelInstances.begin() + index);
+    SAFE_DELETE(ptr);
+}
 void ComponentModel::setViewportFlag(const unsigned int flag) {
     for (auto& model_instance : m_ModelInstances) {
         if(model_instance) model_instance->setViewportFlag(flag);
@@ -125,16 +129,27 @@ ModelInstance& ComponentModel::addModel(Handle& mesh, Handle& material, ShaderPr
     return ComponentModel::addModel((Mesh*)mesh.get(), (Material*)material.get(), shaderProgram, stage);
 }
 ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
-    auto modelInstance = NEW ModelInstance(m_Owner, mesh, material, shaderProgram);
-    const auto index = m_ModelInstances.size();
-    modelInstance->m_Index = index;
-    m_ModelInstances.push_back(modelInstance);
-    auto& instance = *modelInstance;
-    auto& _scene = m_Owner.scene();
-    instance.m_Stage = stage;
-    InternalScenePublicInterface::AddModelInstanceToPipeline(_scene, instance, stage);
+    auto* modelInstance_ptr = NEW ModelInstance(m_Owner, mesh, material, shaderProgram);
+    auto& modelInstance     = *modelInstance_ptr;
+    auto& _scene            = m_Owner.scene();
+    modelInstance.m_Stage   = stage;
+    bool did_early = false;
+    for (size_t i = 0; i < m_ModelInstances.size(); ++i) {
+        if (m_ModelInstances[i] == nullptr) {
+            modelInstance.m_Index = i;
+            m_ModelInstances[i] = modelInstance_ptr;
+            did_early = true;
+            break;
+        }
+    }
+    if (!did_early) {
+        const auto index = m_ModelInstances.size();
+        modelInstance.m_Index = index;
+        m_ModelInstances.push_back(modelInstance_ptr);
+    }
+    InternalScenePublicInterface::AddModelInstanceToPipeline(_scene, modelInstance, stage);
     ComponentModel_Functions::CalculateRadius(*this);
-    return instance;
+    return modelInstance;
 }
 
 ModelInstance& ComponentModel::addModel(Handle& mesh, Handle& material, Handle& shaderProgram, const RenderStage::Stage& stage) {

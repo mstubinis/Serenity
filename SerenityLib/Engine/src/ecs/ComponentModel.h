@@ -68,6 +68,7 @@ class ComponentModel: public ComponentBaseClass {
         void hide();
 
         ModelInstance& getModel(const size_t& index = 0);
+        void removeModel(const size_t& index);
         ModelInstance& addModel(Handle& meshHandle, Handle& materialHandle, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
         ModelInstance& addModel(Mesh*,              Material*,              ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
         ModelInstance& addModel(Handle& meshHandle, Handle& materialHandle, Handle& shaderProgram, const RenderStage::Stage & = RenderStage::GeometryOpaque);

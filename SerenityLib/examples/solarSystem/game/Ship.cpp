@@ -327,6 +327,9 @@ Ship::Ship(const string& shipClass, Scene& scene, const glm_vec3 pos, const glm_
 
     auto& shipInfo                   = Ships::Database[shipClass];
     auto& modelComponent             = *addComponent<ComponentModel>(shipInfo.MeshHandles[0], shipInfo.MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    for (size_t i = 1; i < shipInfo.MeshHandles.size(); ++i) {
+        modelComponent.addModel(shipInfo.MeshHandles[i], shipInfo.MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    }
     auto& bodyComponent              = *addComponent<ComponentBody>();
 
     bodyComponent.setPosition(pos);
@@ -359,11 +362,14 @@ Ship::Ship(Team& team, Client& client, const string& shipClass, Map& map, const 
 
     auto& shipInfo                   = Ships::Database[shipClass];
     auto& modelComponent             = *addComponent<ComponentModel>(shipInfo.MeshHandles[0], shipInfo.MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    for (size_t i = 1; i < shipInfo.MeshHandles.size(); ++i) {
+        modelComponent.addModel(shipInfo.MeshHandles[i], shipInfo.MaterialHandles[0], ResourceManifest::ShipShaderProgramDeferred, RenderStage::GeometryOpaque);
+    }
     auto& bodyComponent              = *addComponent<ComponentBody>(collisionType);
     auto& nameComponent              = *addComponent<ComponentName>(name);
     auto& logicComponent             = *addComponent<ComponentLogic>(ShipLogicFunctor(), this);
 
-    setModel(shipInfo.MeshHandles[0]);
+    updateModelPhyscis();
 
     bodyComponent.setDamping(static_cast<decimal>(0.01), static_cast<decimal>(0.2));
     bodyComponent.getBtBody().setActivationState(DISABLE_DEACTIVATION);//this might be dangerous...
@@ -1189,10 +1195,9 @@ const float Ship::updateShipDimensions() {
     rigidBodyComponent.setMass(mass);
     return mass;
 }
-void Ship::setModel(Handle& modelHandle) {
+void Ship::updateModelPhyscis() {
     auto& rigidBodyComponent = *getComponent<ComponentBody>();
     auto& modelComponent     = *getComponent<ComponentModel>();
-    modelComponent.setModelMesh(modelHandle, 0);
     const auto& boundingBox  = modelComponent.boundingBox();
     const auto volume        = boundingBox.x * boundingBox.y * boundingBox.z;
 
