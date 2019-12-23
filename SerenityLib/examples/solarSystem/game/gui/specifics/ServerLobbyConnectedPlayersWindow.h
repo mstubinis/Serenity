@@ -23,7 +23,7 @@ class ServerLobbyConnectedPlayersWindow final {
         void* getUserPointer();
 
         void addContent(Widget* widget);
-        void removeContent(const std::string& content);
+        const bool removeContent(const std::string& content);
         void clear();
 
         Font& getFont();

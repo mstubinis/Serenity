@@ -150,5 +150,5 @@ void Ship3DViewer::update(const double& dt) {
 }
 void Ship3DViewer::render() {
     auto& dimensions = m_ShipDisplayViewport->getViewportDimensions();
-    Renderer::renderBorder(1.0f, glm::vec2(dimensions.x + 1.0f, dimensions.y), m_Color, dimensions.z + 1.0f, dimensions.w, 0, 0.01f, Alignment::BottomLeft);
+    Renderer::renderBorder(1.0f, glm::vec2(dimensions.x, dimensions.y), m_Color, dimensions.z + 1.0f, dimensions.w, 0, 0.01f, Alignment::BottomLeft);
 }

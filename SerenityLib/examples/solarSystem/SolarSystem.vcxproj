@@ -225,6 +225,8 @@
     <ClInclude Include="game\gui\ScrollBar.h" />
     <ClInclude Include="game\gui\ScrollWindow.h" />
     <ClInclude Include="game\gui\specifics\FFALobby.h" />
+    <ClInclude Include="game\gui\specifics\HostScreen.h" />
+    <ClInclude Include="game\gui\specifics\MainMenu.h" />
     <ClInclude Include="game\gui\specifics\ServerHostingMapSelectorWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyChatWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.h" />
@@ -336,6 +338,8 @@
     <ClCompile Include="game\gui\ScrollBar.cpp" />
     <ClCompile Include="game\gui\ScrollWindow.cpp" />
     <ClCompile Include="game\gui\specifics\FFALobby.cpp" />
+    <ClCompile Include="game\gui\specifics\HostScreen.cpp" />
+    <ClCompile Include="game\gui\specifics\MainMenu.cpp" />
     <ClCompile Include="game\gui\specifics\ServerHostingMapSelectorWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyChatWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.cpp" />

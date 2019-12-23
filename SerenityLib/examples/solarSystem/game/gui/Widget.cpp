@@ -13,6 +13,7 @@ Widget::Widget(const float x, const float y, const float width, const float heig
     m_Width       = width;
     m_Height      = height;
     m_MouseIsOver = false;
+    m_Hidden      = false;
     m_UserPointer = nullptr;
     m_Parent      = nullptr;
 }
@@ -132,10 +133,10 @@ const Alignment::Type& Widget::getAlignment() const {
     return m_Alignment;
 }
 void Widget::show() {
-    m_Hidden = true;
+    m_Hidden = false;
 }
 void Widget::hide() {
-    m_Hidden = false;
+    m_Hidden = true;
 }
 
 void Widget::update(const double& dt) {

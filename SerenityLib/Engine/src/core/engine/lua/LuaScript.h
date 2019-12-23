@@ -16,9 +16,9 @@
 
 class LuaScript final {
     private:
-        lua_State*   LUA;
-        std::string  fileName;
-        int          level;
+        lua_State*     LUA_STATE;
+        std::string    fileName;
+        int            level;
     public:
         LuaScript(const std::string& fileName);
         ~LuaScript();
@@ -28,87 +28,71 @@ class LuaScript final {
         void clean();
 
         template<typename T> T get(const std::string& variableName) {
-            if (!LUA) {
-                printError(variableName, "Script is not loaded");
+            if (!LUA_STATE) {
+                LuaScript::printError(variableName, "Script is not loaded");
                 return lua_getdefault<T>();
             }
             T result;
             if (lua_gettostack(variableName)) { // variable succesfully on top of stack
-                result = lua_get<T>(variableName);
+                result = LuaScript::lua_get<T>(variableName);
             }else{
-                result = lua_getdefault<T>();
+                result = LuaScript::lua_getdefault<T>();
             }
-            lua_pop(LUA, level + 1); // pop all existing elements from stack
+            lua_pop(LUA_STATE, level + 1); // pop all existing elements from stack
             return result;
         }
-        bool lua_gettostack(const std::string& variableName) {
-            level = 0;
-            std::string var = "";
-            for (unsigned int i = 0; i < variableName.size(); i++) {
-                if (variableName.at(i) == '.') {
-                    if (level == 0) {
-                        lua_getglobal(LUA, var.c_str());
-                    }else{
-                        lua_getfield(LUA, -1, var.c_str());
-                    }
-                    if (lua_isnil(LUA, -1)) {
-                        printError(variableName, var + " is not defined");
-                        return false;
-                    }else{
-                        var = "";
-                        level++;
-                    }
-                }else{
-                    var += variableName.at(i);
-                }
-            }
-            if (level == 0) {
-                lua_getglobal(LUA, var.c_str());
-            }else{
-                lua_getfield(LUA, -1, var.c_str());
-            }
-            if (lua_isnil(LUA, -1)) {
-                printError(variableName, var + " is not defined");
-                return false;
-            }
-            return true;
+        const bool lua_gettostack(const std::string& variableName);
+        template<typename T> T lua_get(const std::string& variableName) { 
+            return 0; 
         }
-        template<typename T> T lua_get(const std::string& variableName) { return 0; }
-        template<typename T> T lua_getdefault() { return 0; }
-        template<> inline std::string lua_getdefault<std::string>() { return "null"; }
+        template<typename T> T lua_getdefault() { 
+            return 0; 
+        }
 
+        //bools
         template<> inline bool lua_get<bool>(const std::string& variableName) {
-            return static_cast<bool>(lua_toboolean(LUA, -1));
+            return static_cast<bool>(lua_toboolean(LUA_STATE, -1));
         }
-        template<> inline float lua_get<float>(const std::string& variableName) {
-            if (!lua_isnumber(LUA, -1)) {
-                printError(variableName, "Not a number");
-            }
-            return static_cast<float>(lua_tonumber(LUA, -1));
-        }
-        template<> inline int lua_get<int>(const std::string& variableName) {
-            if (!lua_isnumber(LUA, -1)) {
-                printError(variableName, "Not a number");
-            }
-            return (int)lua_tonumber(LUA, -1);
-        }
+
+        //strings
         template<> inline std::string lua_get<std::string>(const std::string& variableName) {
             std::string s = "null";
-            if (lua_isstring(LUA, -1)) {
-                s = std::string(lua_tostring(LUA, -1));
-            }else{
-                printError(variableName, "Not a string");
+            if (lua_isstring(LUA_STATE, -1)) {
+                s = std::string(lua_tostring(LUA_STATE, -1));
+            }
+            else {
+                LuaScript::printError(variableName, "Not a string");
             }
             return s;
         }
+        template<> inline std::string lua_getdefault<std::string>() {
+            return "null";
+        }
+
+        //floats
+        template<> inline float lua_get<float>(const std::string& variableName) {
+            if (!lua_isnumber(LUA_STATE, -1)) {
+                LuaScript::printError(variableName, "Not a number");
+            }
+            return static_cast<float>(lua_tonumber(LUA_STATE, -1));
+        }
+        //ints
+        template<> inline int lua_get<int>(const std::string& variableName) {
+            if (!lua_isnumber(LUA_STATE, -1)) {
+                LuaScript::printError(variableName, "Not a number");
+            }
+            return (int)lua_tonumber(LUA_STATE, -1);
+        }
+
+
 
 
         //arrays
-        std::vector<int> getIntVector(const std::string& name);
-        std::vector<float> getFloatVector(const std::string& name);
-        std::vector<std::string> getStringVector(const std::string& name);
+        std::vector<int>           getIntVector(const std::string& name);
+        std::vector<float>         getFloatVector(const std::string& name);
+        std::vector<std::string>   getStringVector(const std::string& name);
 
         //table based functions
-        std::vector<std::string> getTableKeys(const std::string& name);
+        std::vector<std::string>   getTableKeys(const std::string& name);
 };
 #endif

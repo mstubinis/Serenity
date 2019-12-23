@@ -320,14 +320,12 @@ Scene::Scene(const string& name) : Scene(name, SceneOptions::DEFAULT_OPTIONS){
 
 }
 Scene::Scene(const string& name, const SceneOptions& options) : EngineResource(ResourceType::Scene, name) {
-    m_GI = glm::vec3(1.0f);
-    m_Sun = nullptr;
-    m_Skybox = nullptr;
     m_RenderGraphs.resize(RenderStage::_TOTAL);
-
-    m_ID = Core::m_Engine->m_ResourceManager._addScene(*this);
-
-    m_i = NEW impl();
+    m_GI      = glm::vec3(1.0f);
+    m_Sun     = nullptr;
+    m_Skybox  = nullptr;
+    m_ID      = Core::m_Engine->m_ResourceManager.AddScene(*this);
+    m_i       = NEW impl();
     m_i->_init(*this, name, options);
     setName(name);
     setOnUpdateFunctor(EmptyOnUpdateFunctor());

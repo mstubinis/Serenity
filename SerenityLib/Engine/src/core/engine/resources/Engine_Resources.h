@@ -26,6 +26,9 @@ class  ShaderProgram;
 namespace Engine{
     namespace epriv{
         class ResourceManager final{
+            friend class  Scene;
+            private:
+                const unsigned int AddScene(Scene&);
             public:
                 //http://gamesfromwithin.com/managing-data-relationships
                 ObjectPool<EngineResource>*                    m_Resources;
@@ -50,9 +53,6 @@ namespace Engine{
 
                 std::vector<Scene*>& scenes();
 
-                const bool _hasScene(const std::string&);
-                const unsigned int _addScene(Scene&);
-
                 template<typename T> T* HasResource(const std::string& resource_name) {
                     auto& resourcePool = *m_Resources;
                     for (unsigned int i = 0; i < resourcePool.maxEntries(); ++i) {
@@ -66,7 +66,6 @@ namespace Engine{
                     }
                     return nullptr;
                 }
-                const size_t _numScenes();
         };
     };
     namespace Resources{

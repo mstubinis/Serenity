@@ -50,6 +50,25 @@ Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
     }
     internal_finialize_init(ai_type);
 
+    /*
+    1x fwd heavy disruptor beam array
+    2x fwd disruptor cannons
+    1x port-fwd disruptor cannon
+    1x starboard-fwd disruptor cannon
+    1x port disruptor cannon
+    1x starboard disruptor cannon
+    1x port disruptor beam array
+    1x starboard disruptor beam array
+    1x dorsal disruptor cannon
+    1x ventral disrutpor cannon
+
+    2x aft disruptor cannons
+
+    5x fwd photon torpedos
+    4x aft photon torpedo
+    */
+
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     vector<glm::vec3> forward_heavy_beam_windup{

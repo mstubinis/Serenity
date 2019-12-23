@@ -28,9 +28,24 @@ GUIRenderElement::GUIRenderElement(Widget& owner) : m_Owner(owner) {
 
     m_EdgeHeight     = m_Owner.height();
     m_EdgeWidth      = m_Owner.width();
+
+    enableMouseover();
+    m_EnableCenterTexture = true;
 }
 GUIRenderElement::~GUIRenderElement() {
 
+}
+void GUIRenderElement::enableCenterTexture(const bool enabled) {
+    m_EnableCenterTexture = enabled;
+}
+void GUIRenderElement::disableCenterTexture() {
+    m_EnableCenterTexture = false;
+}
+void GUIRenderElement::enableMouseover(const bool enabled) {
+    m_EnableMouseover = enabled;
+}
+void GUIRenderElement::disableMouseover() {
+    m_EnableMouseover = false;
 }
 void GUIRenderElement::internal_calculate_sizes() {
     const auto total_width   = m_Owner.width();
@@ -62,7 +77,7 @@ void GUIRenderElement::render(const glm::vec4& scissor) {
     Texture* center = nullptr;
     Texture* edge   = nullptr;
     Texture* corner = nullptr;
-    if (m_Owner.isMouseOver()) {
+    if (m_Owner.isMouseOver() && m_EnableMouseover) {
         color  = m_ColorHighlight;
         center = (m_TextureCenterHighlight) ? m_TextureCenterHighlight : m_TextureCenter;
         edge   = (m_TextureEdgeHighlight)   ? m_TextureEdgeHighlight   : m_TextureEdge;
@@ -101,7 +116,8 @@ void GUIRenderElement::render(const glm::vec4& scissor) {
     }else if (center && (!corner || !edge)) {
         Renderer::renderTexture(*center, pos + glm::vec2(corner_width, corner_height), color, 0.0f, glm::vec2(1.0f), m_Depth, Alignment::BottomLeft, scissor);
     }else if(corner && edge){
-        Renderer::renderRectangle(pos + glm::vec2(corner_width, corner_height), color, m_EdgeWidth, m_EdgeHeight, 0.0f, m_Depth, Alignment::BottomLeft, scissor);
+        if(m_EnableCenterTexture)
+            Renderer::renderRectangle(pos + glm::vec2(corner_width, corner_height), color, m_EdgeWidth, m_EdgeHeight, 0.0f, m_Depth, Alignment::BottomLeft, scissor);
         render_edges();
         render_corners();
     }else {

@@ -12,19 +12,18 @@ class ServerHostingMapSelectorWindow final {
     friend struct MapSelectorButtonOnClick;
     friend class  Client;
     private:
-        Text*        m_Label;
-        Text*        m_CurrentChoice;
-        ScrollFrame* m_MapFileWindow;
+        std::string  m_CurrentChoice;
+        ScrollFrame* m_MapFileScrollFrame;
         Font&        m_Font;
-        float        m_Width;
-        float        m_Height;
         void*        m_UserPointer;
     public:
-        ServerHostingMapSelectorWindow(const Font& font, const float x, const float y);
+        ServerHostingMapSelectorWindow(const Font& font, const float x, const float y, const float w, const float h);
         ~ServerHostingMapSelectorWindow();
 
         void setColor(const float& r, const float& g, const float& b, const float& a);
         void setPosition(const float x, const float y);
+
+        void setSize(const float& w, const float& h);
 
         void setUserPointer(void*);
         void* getUserPointer();
@@ -32,7 +31,7 @@ class ServerHostingMapSelectorWindow final {
 
         void addContent(Widget* widget);
 
-        const Text& getCurrentChoice() const;
+        const std::string& getCurrentChoice() const;
         Font& getFont();
         ScrollFrame& getWindowFrame();
 

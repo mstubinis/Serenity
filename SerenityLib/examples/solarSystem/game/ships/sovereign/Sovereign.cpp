@@ -34,9 +34,9 @@ Sovereign::Sovereign(AIType::Type& ai_type, Team& team, Client& client, Map& map
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
         if (i == 0)        system = NEW ShipSystemReactor(_this, 1000);
-        else if (i == 1)   system = NEW ShipSystemPitchThrusters(_this);
-        else if (i == 2)   system = NEW ShipSystemYawThrusters(_this);
-        else if (i == 3)   system = NEW ShipSystemRollThrusters(_this);
+        else if (i == 1)   system = NEW ShipSystemPitchThrusters(_this, 0.5f);
+        else if (i == 2)   system = NEW ShipSystemYawThrusters(_this, 0.5f);
+        else if (i == 3)   system = NEW ShipSystemRollThrusters(_this, 0.45f);
         else if (i == 4)   system = nullptr; //no cloaking device
         else if (i == 5)   system = NEW ShipSystemShields(_this, map, 150500.0f, 150500.0f, 150500.0f, 150500.0f, 200500.0f, 200500.0f, glm::vec3(0.0f), glm::vec3(1.05f, 1.25f, 1.05f));
         else if (i == 6)   system = NEW ShipSystemMainThrusters(_this);

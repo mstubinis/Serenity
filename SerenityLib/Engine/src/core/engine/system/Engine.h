@@ -30,6 +30,10 @@ namespace Engine{
     namespace epriv{
         class EngineCore final {
             private:
+
+                void init_os_specific(const EngineOptions& options);
+                void init_window(const EngineOptions& options);
+
                 void on_event_close();
                 void on_event_lost_focus();
                 void on_event_gained_focus();

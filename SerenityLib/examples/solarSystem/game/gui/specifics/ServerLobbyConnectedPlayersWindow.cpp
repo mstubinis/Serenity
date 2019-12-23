@@ -30,18 +30,18 @@ void ServerLobbyConnectedPlayersWindow::addContent(Widget* widget) {
     m_ChatWindow->addContent(widget);
 }
 
-void ServerLobbyConnectedPlayersWindow::removeContent(const string& key) {
+const bool ServerLobbyConnectedPlayersWindow::removeContent(const string& key) {
     auto& content = m_ChatWindow->content();
     for (auto& widget : content) {
         Text* text = dynamic_cast<Text*>(widget);
         if (text) {
             if (text->text() == key) {
-                SAFE_DELETE(widget);
-                removeFromVector(content, widget);
+                m_ChatWindow->removeContent(widget);
+                return true;
             }
         }
     }
-    m_ChatWindow->internalAddContent();
+    return false;
 }
 void ServerLobbyConnectedPlayersWindow::clear() {
     auto& content = m_ChatWindow->content();

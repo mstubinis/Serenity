@@ -48,6 +48,12 @@ Intrepid::Intrepid(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
     }
     internal_finialize_init(ai_type);
 
+    /*
+    13 phaser banks spread over the hull
+    4x fwd photon torpedos
+    2x aft photon torpedo
+    */
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     //torps

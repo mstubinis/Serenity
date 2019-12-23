@@ -19,6 +19,8 @@ class GUIRenderElement final {
         float          m_Depth;
         unsigned int   m_BorderSize;
 
+        bool           m_EnableMouseover;
+        bool           m_EnableCenterTexture;
         float          m_EdgeHeight;
         float          m_EdgeWidth;
 
@@ -35,6 +37,12 @@ class GUIRenderElement final {
 
         GUIRenderElement(Widget& owner);
         ~GUIRenderElement();
+
+        void enableCenterTexture(const bool = true);
+        void disableCenterTexture();
+
+        void enableMouseover(const bool = true);
+        void disableMouseover();
 
         void update(const double& dt);
         void render();

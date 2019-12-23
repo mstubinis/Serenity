@@ -54,6 +54,17 @@ Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
     }
     internal_finialize_init(ai_type);
 
+    /*
+    1x dorsal phaser bank
+    1x port-ventral phaser bank
+    1x starboard-ventral phaser bank
+
+    4x fwd pulse phaser cannons
+
+    2x fwd quantum torpedos
+    1x aft photon torpedo
+    */
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     auto* leftTopCannon     = NEW PulsePhaser(_this, map, glm::vec3(-0.573355f, 0.072793f, -0.207088f), glm::vec3(0.0055f, 0, -1), 17.0f, 6,250, 0.7f, 2.5f, 1.8f, 40.5f, 25.0f);

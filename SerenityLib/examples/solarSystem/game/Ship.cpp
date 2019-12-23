@@ -485,6 +485,7 @@ void Ship::respawn(const glm_vec3& newPosition, const string& nearest_spawn_anch
     bodyComponent.setRotation(q);
     m_IsWarping = false;
     m_WarpFactor = 0;
+    map.centerSceneToObject(entity());
     setState(ShipState::Nominal);
 }
 

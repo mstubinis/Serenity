@@ -50,6 +50,14 @@ Shrike::Shrike(AIType::Type& ai_type, Team& team, Client& client, Map& map,  con
     }
     internal_finialize_init(ai_type);
 
+    /*
+    4x fwd plasma cannons
+    1x fwd plasma beam array
+
+    2x fwd plasma torpedos
+    1x aft plasma torpedo
+    */
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     auto* leftTop     = NEW PlasmaCannon(_this, map, glm::vec3(-0.934207f, 0.02951f, -0.224055f), glm::vec3(0.009f, 0, -1), 17.0f, 6, 250, 0.7f, 2.5f, 1.8f, 40.5f, 75.0f);

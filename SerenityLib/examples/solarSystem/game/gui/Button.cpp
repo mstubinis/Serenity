@@ -19,9 +19,6 @@ namespace Engine {
 };
 
 void Button::internalSetSize() {
-    //m_Height = getTextHeight() + m_Padding;
-    //m_Width = getTextWidth() + m_Padding;
-
     m_RenderElement.internal_calculate_sizes();
 }
 void Button::setTexture(Texture* texture) {
@@ -63,10 +60,11 @@ Button::Button(const Font& font, const float x, const float y, const float width
     setAlignment(Alignment::Center);
     setTextAlignment(TextAlignment::Center);
     internalSetSize();
+    enable();
 
     setColor(m_Color);
 
-    m_RenderElement.setDepth(0.008f);
+    setDepth(0.008f);
 
     m_RenderElement.setTextureCorner(ResourceManifest::GUITextureCorner);
     m_RenderElement.setTextureEdge(ResourceManifest::GUITextureSide);
@@ -75,6 +73,29 @@ Button::Button(const Font& font, const glm::vec2& position, const float width, c
 }
 Button::~Button() {
 
+}
+void Button::enableCenterTexture(const bool enable) {
+    m_RenderElement.enableCenterTexture(enable);
+}
+void Button::disableCenterTexture() {
+    m_RenderElement.disableCenterTexture();
+}
+void Button::setDepth(const float& depth) {
+    m_RenderElement.setDepth(depth);
+}
+void Button::enable() {
+    m_Enabled = true;
+    m_RenderElement.enableMouseover();
+}
+void Button::disable() {
+    m_Enabled = false;
+    m_RenderElement.disableMouseover();
+}
+const bool Button::enabled() {
+    return m_Enabled;
+}
+const bool Button::disabled() {
+    return !m_Enabled;
 }
 void Button::setTextScale(const float scale) {
     Button::setTextScale(scale, scale);
@@ -141,41 +162,46 @@ void Button::setText(const string& text) {
 }
 void Button::update(const double& dt) {
     Widget::update(dt);
-    if (m_MouseIsOver == true && Engine::isMouseButtonDownOnce(MouseButton::Left) == true) {
-        m_FunctorOnClick();
+    if (!m_Hidden) {
+        if (m_Enabled) {
+            if (m_MouseIsOver == true && Engine::isMouseButtonDownOnce(MouseButton::Left) == true) {
+                m_FunctorOnClick();
+            }
+        }
     }
 }
 void Button::render(const glm::vec4& scissor) {
-    const auto pos = positionWorld();
+    if (!m_Hidden) {
+        const auto pos = positionWorld();
 
-    m_RenderElement.render(scissor);
+        m_RenderElement.render(scissor);
 
-    auto corner = m_RenderElement.getEdgeWidth() + (m_RenderElement.getCornerWidth() / 2.0f);
-    auto corner_width_half = corner / 2.0f;
+        auto corner = m_RenderElement.getEdgeWidth() + (m_RenderElement.getCornerWidth() / 2.0f);
+        auto corner_width_half = corner / 2.0f;
 
-    auto txt_height = getTextHeight();
+        auto txt_height = getTextHeight();
 
-    glm::vec2 newPosTxt;
-    switch (m_TextAlignment) {
-        case TextAlignment::Left: {
-            newPosTxt = glm::vec2(pos.x - corner_width_half, pos.y + txt_height);
-            break;
-        }case TextAlignment::Center: {
-            newPosTxt = glm::vec2(pos.x, pos.y + txt_height);
-            break;
-        }case TextAlignment::Right: {
-            newPosTxt = glm::vec2(pos.x + corner_width_half, pos.y + txt_height);
-            break;
-        }default: {
-            newPosTxt = glm::vec2(pos.x, pos.y + txt_height);
-            break;
+        glm::vec2 newPosTxt;
+        switch (m_TextAlignment) {
+            case TextAlignment::Left: {
+                newPosTxt = glm::vec2(pos.x - corner_width_half, pos.y + txt_height);
+                break;
+            }case TextAlignment::Center: {
+                newPosTxt = glm::vec2(pos.x, pos.y + txt_height);
+                break;
+            }case TextAlignment::Right: {
+                newPosTxt = glm::vec2(pos.x + corner_width_half, pos.y + txt_height);
+                break;
+            }default: {
+                newPosTxt = glm::vec2(pos.x, pos.y + txt_height);
+                break;
+            }
         }
+        glm::vec2 f(0.0f);
+        Renderer::alignmentOffset(m_Alignment, f.x, f.y, corner, m_Height);
+
+        m_Font->renderText(m_Text, glm::vec2(newPosTxt.x + f.x, newPosTxt.y + f.y), m_TextColor, 0, m_TextScale, 0.0077f, m_TextAlignment, scissor);
     }
-    glm::vec2 f(0.0f);
-    Renderer::alignmentOffset(m_Alignment, f.x, f.y, corner, m_Height);
-
-    m_Font->renderText(m_Text, glm::vec2(newPosTxt.x + f.x, newPosTxt.y + f.y), m_TextColor, 0, m_TextScale, 0.0077f, m_TextAlignment, scissor);
-
     Widget::render(scissor);
 }
 void Button::render() {

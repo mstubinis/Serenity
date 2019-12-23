@@ -50,14 +50,6 @@ void epriv::ResourceManager::_init(const char* name, const uint& width, const ui
 vector<Scene*>& epriv::ResourceManager::scenes() {
     return m_Scenes;
 }
-
-const bool epriv::ResourceManager::_hasScene(const string& n){
-    for (size_t i = 0; i < m_Scenes.size(); ++i) {
-        if (m_Scenes[i] && m_Scenes[i]->name() == n)
-            return true;
-    }
-    return false;
-}
 void epriv::ResourceManager::onPostUpdate() {
     if (m_ScenesToBeDeleted.size() > 0) {
         for (size_t i = 0; i < m_ScenesToBeDeleted.size(); ++i) {
@@ -78,7 +70,7 @@ Handle epriv::ResourceManager::_addTexture(Texture* t) {
 Scene& epriv::ResourceManager::_getSceneByID(const uint& id) {
     return *m_Scenes[id - 1];
 }
-const unsigned int epriv::ResourceManager::_addScene(Scene& s){
+const unsigned int epriv::ResourceManager::AddScene(Scene& s){
     for (size_t i = 0; i < m_Scenes.size(); ++i) {
         if (m_Scenes[i] == nullptr) {
             m_Scenes[i] = &s;
@@ -89,10 +81,6 @@ const unsigned int epriv::ResourceManager::_addScene(Scene& s){
     m_Scenes.push_back(&s);
     return static_cast<unsigned int>(m_Scenes.size());
 }
-const size_t epriv::ResourceManager::_numScenes(){
-    return m_Scenes.size();
-}
-
 string Engine::Data::reportTime() {
     return epriv::Core::m_Engine->m_DebugManager.reportTime();
 }

@@ -31,6 +31,9 @@
 #include "gui/specifics/ServerLobbyShipSelectorWindow.h"
 #include "gui/specifics/ServerHostingMapSelectorWindow.h"
 
+#include "gui/specifics/MainMenu.h"
+#include "gui/specifics/HostScreen.h"
+
 #include "hud/HUD.h"
 #include "modes/GameplayMode.h"
 #include "teams/Team.h"
@@ -42,29 +45,12 @@ using namespace Engine;
 using namespace std;
 
 
-struct ButtonHost_OnClick { void operator()(Button* button) const {
-    Menu& menu = *static_cast<Menu*>(button->getUserPointer());
-    menu.m_GameState = GameState::Host_Server_Port_And_Name_And_Map;
-    menu.setErrorText("", 0.2f);
-}};
-struct ButtonJoin_OnClick {void operator()(Button* button) const {
-    Menu& menu = *static_cast<Menu*>(button->getUserPointer());
-    menu.m_GameState = GameState::Join_Server_Port_And_Name_And_IP;
-    menu.setErrorText("", 0.2f);
-}};
+
 
 struct ButtonBack_OnClick {void operator()(Button* button) const {
     Menu& menu = *static_cast<Menu*>(button->getUserPointer());
     switch (menu.m_GameState) {
-        case GameState::Host_Server_Port_And_Name_And_Map:{
-            menu.go_to_main_menu();
-
-            //force server to disconnect client
-            menu.m_Core.shutdownClient();
-            menu.m_Core.shutdownServer();
-
-            break;
-        }case GameState::Host_Server_Lobby_And_Ship: {
+        case GameState::Host_Server_Lobby_And_Ship: {
 
             //force server to disconnect client
             menu.m_Core.shutdownClient();
@@ -98,48 +84,7 @@ struct ButtonBack_OnClick {void operator()(Button* button) const {
 struct ButtonNext_OnClick {void operator()(Button* button) const {
     Menu& menu = *static_cast<Menu*>(button->getUserPointer());
     switch (menu.m_GameState) {
-        case GameState::Host_Server_Port_And_Name_And_Map: {
-            const string& username   = menu.m_UserName->text();
-            const string& portstring = menu.m_ServerPort->text();
-            const string& map        = menu.m_ServerHostMapSelector->getCurrentChoice().text();
-            if (!portstring.empty() && !username.empty() && !map.empty()) {
-                //TODO: prevent special characters in usename
-                if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) { //port must have numbers only
-                    if (username.find_first_not_of(' ') != std::string::npos) {
-                        if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) { //letters only please
-                            const int port = stoi(portstring);
-                            menu.m_Core.startServer(port, map);
-                            menu.m_Core.startClient(nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
-
-
-                            //TODO: replace this hard coded test case with real input values
-                            vector<TeamNumber::Enum> nil;
-                            vector<TeamNumber::Enum> team1enemies{ TeamNumber::Team_2 };
-                            vector<TeamNumber::Enum> team2enemies{ TeamNumber::Team_1 };
-                            Team team1 = Team(TeamNumber::Team_1, nil, team1enemies);
-                            Team team2 = Team(TeamNumber::Team_2, nil, team2enemies);
-                            menu.m_Core.getServer()->getGameplayMode().setGameplayMode(GameplayModeType::TeamDeathmatch);
-                            menu.m_Core.getServer()->getGameplayMode().setMaxAmountOfPlayers(50);
-                            menu.m_Core.getServer()->getGameplayMode().addTeam(team1);
-                            menu.m_Core.getServer()->getGameplayMode().addTeam(team2);
-                            menu.m_Core.getClient()->getGameplayMode() = menu.m_Core.getServer()->getGameplayMode();
-
-                            menu.m_Core.getServer()->startupMap(map);
-                            menu.m_ServerLobbyChatWindow->setUserPointer(menu.m_Core.getClient());
-                        }else{
-                            menu.setErrorText("The username must only contain letters");
-                        }
-                    }else{
-                        menu.setErrorText("The username must have some letters in it");
-                    }
-                }else{
-                    menu.setErrorText("Server port must contain numbers only");
-                }
-            }else{
-                menu.setErrorText("Do not leave any fields blank");
-            }
-            break;
-        }case GameState::Host_Server_Lobby_And_Ship: {
+        case GameState::Host_Server_Lobby_And_Ship: {
             menu.enter_the_game();
             break;
         }case GameState::Join_Server_Port_And_Name_And_IP: {
@@ -188,25 +133,10 @@ Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Cor
 
     const auto& windowDimensions = Resources::getWindowSize();
     
-    m_ButtonHost = NEW Button(*m_Font, windowDimensions.x / 2.0f, 275.0f, 150.0f, 50.0f);
-    m_ButtonHost->setText("Host");
-    m_ButtonHost->setColor(0.5f, 0.78f, 0.94f, 1.0f);
-    m_ButtonHost->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
-    //m_ButtonHost->setTextScale(0.5f);
-    
-    m_ButtonJoin = NEW Button(*m_Font, 0.0f, -120.0f, 150.0f, 50.0f);
-    m_ButtonJoin->setText("Join");
-    m_ButtonJoin->setColor(0.5f, 0.78f, 0.94f, 1.0f);
-    m_ButtonJoin->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
-    //m_ButtonJoin->setTextScale(0.5f);
+    m_MainMenuScreen = new MainMenu(*this, *m_Font);
+    m_HostScreen = new HostScreen(*this, *m_Font);
 
-    m_ButtonHost->addChild(m_ButtonJoin);
-    
-    m_ButtonHost->setUserPointer(this);
-    m_ButtonJoin->setUserPointer(this);
-
-    m_ButtonHost->setOnClickFunctor(ButtonHost_OnClick());
-    m_ButtonJoin->setOnClickFunctor(ButtonJoin_OnClick());
+    //todo: remove
 
     m_Back = NEW Button(*m_Font, 100.0f, 50.0f, 150.0f, 50.0f);
     m_Back->setText("Back");
@@ -235,34 +165,41 @@ Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Cor
     m_InfoText = NEW Text(Resources::getWindowSize().x / 2.0f, 65.0f, *m_Font);
     m_InfoText->setTextAlignment(TextAlignment::Center);
     
-    m_ServerHostMapSelector = NEW ServerHostingMapSelectorWindow(*m_Font, Resources::getWindowSize().x / 2.0f - 300.0f, 630.0f);
-    
     m_ServerLobbyChatWindow = NEW ServerLobbyChatWindow(*m_Font, 50.0f, 140.0f + 300.0f);
     m_ServerLobbyChatWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
     
     m_ServerLobbyConnectedPlayersWindow = NEW ServerLobbyConnectedPlayersWindow(*m_Font, 50.0f + m_ServerLobbyChatWindow->getWindowFrame().width(), 140.0f + 300.0f);
     m_ServerLobbyConnectedPlayersWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
     
-    m_ServerLobbyShipSelectorWindow = NEW ServerLobbyShipSelectorWindow(core, menu_scene, game_camera, *m_Font, 50.0f, windowDimensions.y - 50.0f);
+    m_ServerLobbyShipSelectorWindow = NEW ServerLobbyShipSelectorWindow(core, menu_scene, game_camera, *m_Font, 50.0f, windowDimensions.y - 50.0f, 578, 270);
     m_ServerLobbyShipSelectorWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
     
 }
 Menu::~Menu() {
-    SAFE_DELETE(m_ButtonHost);
-    SAFE_DELETE(m_ButtonJoin);
+    SAFE_DELETE(m_MainMenuScreen);
+    SAFE_DELETE(m_HostScreen);
+
     SAFE_DELETE(m_Back);
     SAFE_DELETE(m_Next);
     SAFE_DELETE(m_ServerIp);
     SAFE_DELETE(m_UserName);
     SAFE_DELETE(m_ServerPort);
     SAFE_DELETE(m_InfoText);
-    SAFE_DELETE(m_ServerHostMapSelector);
     SAFE_DELETE(m_ServerLobbyChatWindow);
     SAFE_DELETE(m_ServerLobbyConnectedPlayersWindow);
     SAFE_DELETE(m_ServerLobbyShipSelectorWindow);
 }
+void Menu::setGameState(const GameState::State& state) {
+    m_GameState = state;
+}
+const GameState::State& Menu::getGameState() const {
+    return m_GameState;
+}
 Font& Menu::getFont() {
     return *m_Font;
+}
+Core& Menu::getCore() {
+    return m_Core;
 }
 void Menu::enter_the_game() {
     if (!m_ServerLobbyShipSelectorWindow->getShipClass().empty()) {
@@ -313,7 +250,8 @@ void Menu::setErrorText(const string& text, const float errorTime) {
 }
 
 void Menu::onResize(const uint& width, const uint& height) {
-    m_ButtonHost->setPosition(width / 2.0f, 275.0f);
+    m_MainMenuScreen->onResize(width, height);
+    m_HostScreen->onResize(width, height);
 
     m_Back->setPosition(100.0f, 50.0f);
     m_Next->setPosition(width - 100.0f, 50.0f);
@@ -324,7 +262,7 @@ void Menu::onResize(const uint& width, const uint& height) {
 
     m_InfoText->setPosition(width / 2.0f, 65.0f);
 
-    m_ServerHostMapSelector->setPosition(Resources::getWindowSize().x / 2.0f - 300.0f, 630.0f);
+    
 
     m_ServerLobbyChatWindow->setPosition(50.0f, 140.0f + 300.0f);
     m_ServerLobbyConnectedPlayersWindow->setPosition(50.0f + m_ServerLobbyChatWindow->getWindowFrame().width(), 140.0f + 300.0f);
@@ -339,7 +277,8 @@ void Menu::update_game(const double& dt) {
 void Menu::update_main_menu(const double& dt) {
     m_Font->renderText(epriv::Core::m_Engine->m_DebugManager.reportDebug(), glm::vec2(50), glm::vec4(1.0), 0);
 
-    m_ButtonHost->update(dt);
+
+    m_MainMenuScreen->update(dt);
 }
 void Menu::update_host_server_lobby_and_ship(const double& dt) {
     m_ServerLobbyChatWindow->update(dt);
@@ -350,12 +289,7 @@ void Menu::update_host_server_lobby_and_ship(const double& dt) {
     m_Next->update(dt);
 }
 void Menu::update_host_server_port_and_name_and_map(const double& dt) {
-    m_Back->update(dt);
-    m_Next->update(dt);
-
-    m_ServerPort->update(dt);
-    m_UserName->update(dt);
-    m_ServerHostMapSelector->update(dt);
+    m_HostScreen->update(dt);
 }
 void Menu::update_join_server_port_and_name_and_ip(const double& dt) {
     m_Back->update(dt);
@@ -373,12 +307,18 @@ void Menu::update_join_server_server_lobby(const double& dt) {
     m_Back->update(dt);
     m_Next->update(dt);
 }
+void Menu::update_options(const double& dt) {
+
+}
+void Menu::update_encyclopedia(const double& dt) {
+
+}
 
 void Menu::render_game() {
 
 }
 void Menu::render_main_menu() {
-    m_ButtonHost->render();
+    m_MainMenuScreen->render();
 }
 void Menu::render_host_server_lobby_and_ship() {
     m_ServerLobbyChatWindow->render();
@@ -389,12 +329,7 @@ void Menu::render_host_server_lobby_and_ship() {
     m_Next->render();
 }
 void Menu::render_host_server_port_and_name_and_map() {
-    m_Back->render();
-    m_Next->render();
-
-    m_ServerPort->render();
-    m_UserName->render();
-    m_ServerHostMapSelector->render();
+    m_HostScreen->render();
 }
 void Menu::render_join_server_port_and_name_and_ip() {
     m_Back->render();
@@ -412,6 +347,12 @@ void Menu::render_join_server_server_lobby() {
     m_Back->render();
     m_Next->render();
 }
+void Menu::render_options() {
+
+}
+void Menu::render_encyclopedia() {
+
+}
 void Menu::update(const double& dt) {
     switch (m_GameState) {
         case GameState::Main_Menu: {
@@ -424,6 +365,10 @@ void Menu::update(const double& dt) {
             update_join_server_port_and_name_and_ip(dt); break;
         }case GameState::Join_Server_Server_Lobby: {
             update_join_server_server_lobby(dt); break;
+        }case GameState::Encyclopedia: {
+            update_encyclopedia(dt); break;
+        }case GameState::Options: {
+            update_options(dt); break;
         }case GameState::Game: {
             update_game(dt); break;
         }default: {
@@ -450,6 +395,10 @@ void Menu::render() {
             render_join_server_port_and_name_and_ip(); break;
         }case GameState::Join_Server_Server_Lobby: {
             render_join_server_server_lobby(); break;
+        }case GameState::Options: {
+            render_options(); break;
+        }case GameState::Encyclopedia: {
+            render_encyclopedia(); break;
         }case GameState::Game: {
             render_game(); break;
         }default: {

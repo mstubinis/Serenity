@@ -22,35 +22,28 @@ const string& getKeysCode =
 "end";
 
 LuaScript::LuaScript(const string& _fileName) {
-    level = 0;
-    fileName = _fileName;
-    LUA = luaL_newstate();
-    if (luaL_loadfile(LUA, fileName.c_str()) || lua_pcall(LUA, 0, 0, 0)) {
+    level      = 0;
+    fileName   = _fileName;
+    LUA_STATE  = luaL_newstate();
+    if (luaL_loadfile(LUA_STATE, fileName.c_str()) || lua_pcall(LUA_STATE, 0, 0, 0)) {
         cout << "LUA Error: script not loaded (" << fileName << ")" << endl;
     }
-    luaL_openlibs(LUA);
-
-
-    //scan the file line by line for anything?
-    //boost::iostreams::stream<boost::iostreams::mapped_file_source> str(fileName);
-    //for (string line; getline(str, line, '\n');) {
-    //    line.erase(std::remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
-    //}
+    luaL_openlibs(LUA_STATE);
 }
 LuaScript::~LuaScript() {
-    if (LUA) {
-        fileName = "";
-        level = 0;
-        lua_close(LUA);
+    if (LUA_STATE) {
+        fileName  = "";
+        level     = 0;
+        lua_close(LUA_STATE);
     }
 
 }
 void LuaScript::clean() {
-    int n = lua_gettop(LUA);
-    lua_pop(LUA, n);
+    int n = lua_gettop(LUA_STATE);
+    lua_pop(LUA_STATE, n);
 }
 void LuaScript::printError(const string& variableName, const string& reason) {
-    cout << "LUA Error: can't get variable name: [" << variableName << "]. " << reason << endl;
+    std::cout << "LUA Error: can't get variable name: [" << variableName << "]. " << reason << std::endl;
 }
 
 
@@ -90,60 +83,102 @@ int sum(int x, int y) {
     return result;
 }
 
+Any function registered with Lua must have this same prototype, defined as lua_CFunction in lua.h:
+typedef int (*lua_CFunction) (lua_State *L);
+
+
 */
+
+
+const bool LuaScript::lua_gettostack(const string& variableName) {
+    level        = 0;
+    string var   = "";
+    for (size_t i = 0; i < variableName.size(); i++) {
+        if (variableName.at(i) == '.') {
+            if (level == 0) {
+                lua_getglobal(LUA_STATE, var.c_str());
+            }else{
+                lua_getfield(LUA_STATE, -1, var.c_str());
+            }
+            if (lua_isnil(LUA_STATE, -1)) {
+                LuaScript::printError(variableName, var + " is not defined");
+                return false;
+            }else{
+                var = "";
+                level++;
+            }
+        }else{
+            var += variableName.at(i);
+        }
+    }
+    if (level == 0) {
+        lua_getglobal(LUA_STATE, var.c_str());
+    }else{
+        lua_getfield(LUA_STATE, -1, var.c_str());
+    }
+    if (lua_isnil(LUA_STATE, -1)) {
+        LuaScript::printError(variableName, var + " is not defined");
+        return false;
+    }
+    return true;
+}
 
 
 vector<int> LuaScript::getIntVector(const string& name) {
     vector<int> v;
-    lua_getglobal(LUA, name.c_str());
-    if (lua_isnil(LUA, -1)) {
+    lua_getglobal(LUA_STATE, name.c_str());
+    if (lua_isnil(LUA_STATE, -1)) {
         return v;
     }
-    lua_pushnil(LUA);
-    while (lua_next(LUA, -2)) {
-        v.push_back((int)lua_tonumber(LUA, -1));
-        lua_pop(LUA, 1);
+    lua_pushnil(LUA_STATE);
+    while (lua_next(LUA_STATE, -2)) {
+        const auto int_val = static_cast<int>(lua_tonumber(LUA_STATE, -1));
+        v.push_back(int_val);
+        lua_pop(LUA_STATE, 1);
     }
-    clean();
+    LuaScript::clean();
     return v;
 }
 vector<float> LuaScript::getFloatVector(const string& name) {
     vector<float> v;
-    lua_getglobal(LUA, name.c_str());
-    if (lua_isnil(LUA, -1)) {
+    lua_getglobal(LUA_STATE, name.c_str());
+    if (lua_isnil(LUA_STATE, -1)) {
         return v;
     }
-    lua_pushnil(LUA);
-    while (lua_next(LUA, -2)) {
-        v.push_back((float)lua_tonumber(LUA, -1));
-        lua_pop(LUA, 1);
+    lua_pushnil(LUA_STATE);
+    while (lua_next(LUA_STATE, -2)) {
+        const auto float_val = static_cast<float>(lua_tonumber(LUA_STATE, -1));
+        v.push_back(float_val);
+        lua_pop(LUA_STATE, 1);
     }
-    clean();
+    LuaScript::clean();
     return v;
 }
 vector<string> LuaScript::getStringVector(const string& name) {
     vector<string> v;
-    lua_getglobal(LUA, name.c_str());
-    if (lua_isnil(LUA, -1)) {
+    lua_getglobal(LUA_STATE, name.c_str());
+    if (lua_isnil(LUA_STATE, -1)) {
         return v;
     }
-    lua_pushnil(LUA);
-    while (lua_next(LUA, -2)) {
-        v.push_back((string)lua_tostring(LUA, -1));
-        lua_pop(LUA, 1);
+    lua_pushnil(LUA_STATE);
+    while (lua_next(LUA_STATE, -2)) {
+        const auto string_val = static_cast<string>(lua_tostring(LUA_STATE, -1));
+        v.push_back(string_val);
+        lua_pop(LUA_STATE, 1);
     }
-    clean();
+    LuaScript::clean();
     return v;
 }
 vector<string> LuaScript::getTableKeys(const string& name) {
-    luaL_loadstring(LUA, getKeysCode.c_str()); // execute code
-    lua_pcall(LUA, 0, 0, 0);
-    lua_getglobal(LUA, "getKeys");      // get function
-    lua_pushstring(LUA, name.c_str());
-    lua_pcall(LUA, 1, 1, 0);            // execute function
-
-    string test = lua_tostring(LUA, -1);
     vector<string> strings;
+
+    luaL_loadstring(LUA_STATE, getKeysCode.c_str()); // execute code
+    lua_pcall(LUA_STATE, 0, 0, 0);
+    lua_getglobal(LUA_STATE, "getKeys");      // get function
+    lua_pushstring(LUA_STATE, name.c_str());
+    lua_pcall(LUA_STATE, 1, 1, 0);            // execute function
+
+    string test = lua_tostring(LUA_STATE, -1);
     string temp = "";
     for (unsigned int i = 0; i < test.size(); i++) {
         if (test.at(i) != ',') {
@@ -153,6 +188,6 @@ vector<string> LuaScript::getTableKeys(const string& name) {
             temp = "";
         }
     }
-    clean();
+    LuaScript::clean();
     return strings;
 }

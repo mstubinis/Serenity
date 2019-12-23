@@ -19,6 +19,7 @@
 
 using namespace Engine;
 using namespace Engine::epriv;
+using namespace std;
 
 #define PHYSICS_MIN_STEP 0.016666666666666666
 
@@ -51,13 +52,73 @@ void Engine::unpause(){
     Engine::Physics::unpause();
     Core::m_Engine->m_Misc.m_Paused = false;
 }
+void EngineCore::init_os_specific(const EngineOptions& options) {
+    #ifdef _WIN32
 
-void EngineCore::init(const EngineOptions& options) {
-    m_ResourceManager._init(options.window_title, options.width, options.height);
+        //get args from shortcut, etc
+        unordered_set<string> args; std::locale loc;
+        for (int i = 0; i < options.argc; i++) {
+            const string key = string(options.argv[i]);
+            string lowerKey = "";
+            for (size_t j = 0; j < key.length(); ++j)
+                lowerKey += std::tolower(key[j], loc);
+            args.insert(lowerKey);
+        }
 
+        //show console if applicable
+        if (options.show_console) {
+            if (GetConsoleWindow() == NULL) {
+                AllocConsole();
+            }
+            freopen("CONIN$",  "r", stdin);
+            freopen("CONOUT$", "w", stdout);
+            freopen("CONOUT$", "w", stderr);
+        }else if (!args.count("console")) {
+            ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
+        }
+    #endif
+}
+void EngineCore::init_window(const EngineOptions& options) {
     auto& window = Resources::getWindow();
     window.setSize(options.width, options.height);
     window.setFullScreen(options.fullscreen);
+
+    //TODO: fix this crap... (position the window in the middle of the screen)
+    /*
+    float x_other = 0.0f;
+    float y_other = 0.0f;
+    #ifdef _WIN32
+        //attempt to get the dimensions of the desktop's bottom task bar
+        const auto os_handle = window.getSFMLHandle().getSystemHandle();
+        HMONITOR HMONITOR_ = ::MonitorFromWindow(os_handle, MONITOR_DEFAULTTOPRIMARY);
+        MONITORINFO mi;
+        mi.cbSize = sizeof(MONITORINFO);
+        GetMonitorInfo(HMONITOR_, &mi);
+
+        //x_other = mi.rcWork.right - mi.rcWork.left;
+        //y_other = mi.rcWork.bottom - mi.rcWork.top;
+    #endif
+
+    const auto winSize = window.getSize();
+    const auto desktopSize = sf::VideoMode::getDesktopMode();
+
+    float x_room = (static_cast<float>(desktopSize.width) - static_cast<float>(winSize.x)) / 2.0f;
+    float y_room = ((static_cast<float>(desktopSize.height) - static_cast<float>(winSize.y)) - y_other) / 2.0f;
+    */
+    //window.setPosition(0, 0);
+
+    if (options.maximized) {
+        window.maximize();
+    }
+    window.requestFocus();
+    window.display();
+}
+void EngineCore::init(const EngineOptions& options) {
+    init_os_specific(options);
+
+    m_ResourceManager._init(options.window_title, options.width, options.height);
+
+    init_window(options);
 
     m_DebugManager._init(options.window_title, options.width, options.height);
     m_RenderManager._init(options.window_title, options.width, options.height);
@@ -71,11 +132,11 @@ void EngineCore::init(const EngineOptions& options) {
     epriv::threading::waitForAll();
 
     //the scene is the root of all games. create the default scene if 1 does not exist already
-    if (m_ResourceManager._numScenes() == 0) {
+    if (m_ResourceManager.m_Scenes.size() == 0){
         Scene* defaultScene = NEW Scene("Default");
         Resources::setCurrentScene(defaultScene);
     }
-    Scene& scene = *Resources::getCurrentScene();
+    Scene& scene = *m_ResourceManager.m_CurrentScene;
     if (!scene.getActiveCamera()) {
         Camera* default_camera = NEW Camera(60, static_cast<float>(options.width) / static_cast<float>(options.height), 0.01f, 1000.0f, &scene);
         scene.setActiveCamera(*default_camera);
@@ -138,10 +199,11 @@ void EngineCore::render(const double& dt){
     auto& scene = *Resources::getCurrentScene();
     scene.render();
     m_RenderManager._sort2DAPICommands();
-    auto& viewports = InternalScenePublicInterface::GetViewports(scene);
-    for (auto& viewport : viewports) {
-        if (viewport->isActive()) {
-            m_RenderManager._render(dt, *viewport, true, 0, 0);
+    auto& scene_viewports = InternalScenePublicInterface::GetViewports(scene);
+    for (auto& viewport_ptr : scene_viewports) {
+        auto& viewport = *viewport_ptr;
+        if (viewport.isActive()) {
+            m_RenderManager._render(dt, viewport, true, 0, 0);
         }
     }
     Resources::getWindow().display();
@@ -163,9 +225,11 @@ void EngineCore::on_event_resize(const unsigned int& w, const unsigned int& h, c
     //resize cameras here
 
     for (auto& scene : m_ResourceManager.scenes()) {
-        scene->onResize(w, h);
-        InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(w, h);
-        InternalScenePublicInterface::GetViewports(*scene)[0]->setViewportDimensions(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h));
+        if (scene) {
+            scene->onResize(w, h);
+            InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(w, h);
+            InternalScenePublicInterface::GetViewports(*scene)[0]->setViewportDimensions(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h));
+        }
     }
 
     EventWindowResized e(w,h);

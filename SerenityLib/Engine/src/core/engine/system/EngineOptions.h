@@ -6,14 +6,18 @@
 
 struct EngineOptions final {
     AntiAliasingAlgorithm::Algorithm   aa_algorithm;
+    char**                             argv;
+    int                                argc;
     bool                               ssao_enabled;
     bool                               hdr_enabled;
     bool                               fullscreen;
     bool                               god_rays_enabled;
     bool                               fog_enabled;
+    bool                               show_console;
+    bool                               maximized;
     unsigned int                       width;
     unsigned int                       height;
-    const char* window_title;
+    const char*                        window_title;
     EngineOptions() {
         window_title      = "Engine";
         width             = 1024;
@@ -23,7 +27,10 @@ struct EngineOptions final {
         god_rays_enabled  = true;
         fullscreen        = false;
         fog_enabled       = false;
+        show_console      = false;
+        maximized         = false;
         aa_algorithm      = AntiAliasingAlgorithm::FXAA;
+        argc              = 0;
     }
 };
 

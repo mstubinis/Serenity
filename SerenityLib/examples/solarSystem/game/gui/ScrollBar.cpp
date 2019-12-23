@@ -88,9 +88,9 @@ void ScrollBar::update(const double& dt) {
 
     if (m_Hidden)
         return;
-    float scrollBarHeight = getSliderHeight();
+    float scrollBarHeight   = getSliderHeight();
     const float& scrollBarY = m_ScrollBarStartAnchor - scrollBarHeight / 2.0f;
-    const auto& mouse = Engine::getMousePosition();
+    const auto& mouse       = Engine::getMousePosition();
 
     bool mouseOver = true;
     bool mouseOverTopTriangle = true;

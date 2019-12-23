@@ -19,6 +19,7 @@ class Button : public Widget {
         glm::vec4                 m_TextColor;
         std::function<void()>     m_FunctorOnClick;
         float                     m_Padding;
+        bool                      m_Enabled;
         TextAlignment::Type       m_TextAlignment;
 
         GUIRenderElement          m_RenderElement;
@@ -34,6 +35,17 @@ class Button : public Widget {
         template<class T> void setOnClickFunctor(const T& functor) { 
             m_FunctorOnClick = std::bind<void>(functor, this); 
         }
+
+        void enable();
+        void disable();
+
+        void enableCenterTexture(const bool = true);
+        void disableCenterTexture();
+
+        void setDepth(const float& depth);
+
+        const bool enabled();
+        const bool disabled();
 
         const float getCornerWidth();
         const float getCornerHeight();

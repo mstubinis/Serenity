@@ -220,12 +220,6 @@
     <Filter Include="Source Files\Game\GUI\Specifics\FFALobby">
       <UniqueIdentifier>{7711606c-c848-46d6-af9e-318947e54399}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Game\GUI\Specifics\CreatingGameplayMode">
-      <UniqueIdentifier>{9d2cccb0-a635-4024-8dc4-778d78b5b6de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Game\GUI\Specifics\CreatingGameplayMode">
-      <UniqueIdentifier>{132a1b30-beb7-4c60-810f-434b4d413b39}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Game\Networking\Server">
       <UniqueIdentifier>{bfb6d132-6461-48d1-8436-a846c4cc4620}</UniqueIdentifier>
     </Filter>
@@ -291,6 +285,18 @@
     </Filter>
     <Filter Include="Source Files\Game\Ships\Venerex">
       <UniqueIdentifier>{657dfcdc-5920-46de-91c5-4db29a099069}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\MainMenu">
+      <UniqueIdentifier>{4f9a721b-a113-467c-88dc-7c5597e10a07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\MainMenu">
+      <UniqueIdentifier>{be8d1ca2-665c-4bf8-90a8-22c67ac26fc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\HostScreen">
+      <UniqueIdentifier>{9d2cccb0-a635-4024-8dc4-778d78b5b6de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\HostScreen">
+      <UniqueIdentifier>{132a1b30-beb7-4c60-810f-434b4d413b39}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -627,6 +633,12 @@
     <ClInclude Include="game\ships\venerex\Venerex.h">
       <Filter>Header Files\Game\Ships\Venerex</Filter>
     </ClInclude>
+    <ClInclude Include="game\gui\specifics\HostScreen.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\MainMenu.h">
+      <Filter>Header Files\Game\GUI\Specifics\MainMenu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -940,6 +952,12 @@
     </ClCompile>
     <ClCompile Include="game\ships\neghvar\Neghvar.cpp">
       <Filter>Source Files\Game\Ships\Neghvar</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\HostScreen.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\MainMenu.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\MainMenu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

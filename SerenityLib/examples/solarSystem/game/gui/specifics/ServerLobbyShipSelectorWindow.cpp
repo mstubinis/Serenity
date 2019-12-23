@@ -36,12 +36,10 @@ struct ShipSelectorButtonOnClick final { void operator()(Button* button) const {
     window.setShipClass(shipClass);
 }};
 
-ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& menu_scene, Camera& game_camera, const Font& font, const float x, const float y) : m_Core(core), m_Font(const_cast<Font&>(font)) {
-    m_Width = 578.0f;
-    m_Height = 270.0f;
-    m_ShipWindow = NEW ScrollFrame(x, y, m_Width, m_Height);
+ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& menu_scene, Camera& game_camera, const Font& font, const float x, const float y, const float w, const float h) : m_Core(core), m_Font(const_cast<Font&>(font)) {
+    m_ShipWindow = NEW ScrollFrame(x, y, w, h);
     m_ShipWindow->setContentPadding(0.0f);  
-    m_3DViewer = NEW Ship3DViewer(core, menu_scene, game_camera, x + m_ShipWindow->width() + 3.0f, y - m_Height, m_Height - 1.0f, m_Height);
+    m_3DViewer = NEW Ship3DViewer(core, menu_scene, game_camera, x + m_ShipWindow->width() + 3.0f, y - h, h - 1.0f, h);
 }
 ServerLobbyShipSelectorWindow::~ServerLobbyShipSelectorWindow() {
     SAFE_DELETE(m_ShipWindow);
@@ -54,12 +52,12 @@ void ServerLobbyShipSelectorWindow::addShipButton(const string& shipClass) {
     shipbutton.setColor(0.1f, 0.1f, 0.1f, 0.5f);
     shipbutton.setTextColor(textColor.r, textColor.g, textColor.b, 1.0f);
     shipbutton.setAlignment(Alignment::TopLeft);
-    shipbutton.setWidth(600);
     shipbutton.setTextAlignment(TextAlignment::Left);
     shipbutton.setUserPointer(this);
     shipbutton.setOnClickFunctor(ShipSelectorButtonOnClick());
     shipbutton.setTextureCorner(nullptr);
     shipbutton.setTextureEdge(nullptr);
+    shipbutton.setWidth(m_ShipWindow->width());
     addContent(&shipbutton);
 }
 void ServerLobbyShipSelectorWindow::setShipClass(const string& ship_class) {
@@ -70,7 +68,7 @@ void ServerLobbyShipSelectorWindow::setColor(const float& r, const float& g, con
 }
 void ServerLobbyShipSelectorWindow::setPosition(const float x, const float y) {
     m_ShipWindow->setPosition(x, y);
-    m_3DViewer->setPosition(x + m_ShipWindow->width() + 3.0f, y - m_Height);
+    m_3DViewer->setPosition(x + m_ShipWindow->width() + 3.0f, y - m_ShipWindow->height());
 }
 const string& ServerLobbyShipSelectorWindow::getShipClass() const {
     return m_3DViewer->getShipClass();

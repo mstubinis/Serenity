@@ -112,14 +112,20 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
     shieldsBody.setScale(shieldScale);
     m_ShieldScale = shieldScale;
 
+    /*
+    2x fwd heavy disruptor cannons
+
+    2x fwd photon torpedos
+    1x aft photon torpedo
+    */
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
-    //blender 3d to game 3d: switch y and z, then negate z
-    auto* leftTop = NEW DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 2);
-    auto* rightTop = NEW DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 1);
+    auto* left_cannon = NEW DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 2);
+    auto* right_cannon = NEW DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 1);
 
-    weapons.addPrimaryWeaponCannon(*leftTop, true);
-    weapons.addPrimaryWeaponCannon(*rightTop, true);
+    weapons.addPrimaryWeaponCannon(*left_cannon, true);
+    weapons.addPrimaryWeaponCannon(*right_cannon, true);
 
     auto* fwd_torp_1 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 1);
     auto* fwd_torp_2 = NEW KlingonPhotonTorpedo(_this, map, glm::vec3(0.0f, 0.148089f, -0.854614f), glm::vec3(0.0f, 0.0f, -1.0f), 35.0f, 1);

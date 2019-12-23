@@ -48,6 +48,12 @@ Nova::Nova(AIType::Type& ai_type, Team& team, Client& client, Map& map,  const s
     }
     internal_finialize_init(ai_type);
 
+    /*
+    11 phaser banks spread over the hull
+    2x fwd photon torpedos
+    1x aft photon torpedo
+    */
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     auto* leftTorp = NEW PhotonTorpedo(_this, map, glm::vec3(-0.223032f, -0.089813f, -1.82296f), glm::vec3(0, 0, -1), 15.0f);

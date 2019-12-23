@@ -28,23 +28,23 @@ class  ServerLobbyConnectedPlayersWindow;
 class  ServerLobbyShipSelectorWindow;
 class  ServerHostingMapSelectorWindow;
 
-
-struct ButtonHost_OnClick;
-struct ButtonJoin_OnClick;
 struct ButtonBack_OnClick;
 struct ButtonNext_OnClick;
 
-
+class  MainMenu;
+class  HostScreen;
 
 class Menu final{
-    friend struct ButtonHost_OnClick;
-    friend struct ButtonJoin_OnClick;
     friend struct ButtonBack_OnClick;
     friend struct ButtonNext_OnClick;
     friend class  Core;
     friend class  Map;
     friend class  Client;
     friend class  Server;
+    public:
+        ServerLobbyChatWindow* m_ServerLobbyChatWindow;
+        ServerLobbyConnectedPlayersWindow* m_ServerLobbyConnectedPlayersWindow;
+        ServerLobbyShipSelectorWindow* m_ServerLobbyShipSelectorWindow;
     private:
         glm::vec3                      m_Color;
         Handle                         m_FontHandle;
@@ -52,11 +52,11 @@ class Menu final{
         GameState::State&              m_GameState;
         Core&                          m_Core;
 
-        std::string                    m_MessageText;
-        float                          m_ErrorTimer;
+        std::string      m_MessageText;
+        float            m_ErrorTimer;
 
-        Button*                        m_ButtonHost;
-        Button*                        m_ButtonJoin;
+        MainMenu*        m_MainMenuScreen;
+        HostScreen*      m_HostScreen;
 
         Button*                        m_Back;
         Button*                        m_Next;
@@ -64,17 +64,9 @@ class Menu final{
         TextBox*                       m_ServerIp;
         TextBox*                       m_UserName;
         TextBox*                       m_ServerPort;
+
         Text*                          m_InfoText;
 
-        ServerHostingMapSelectorWindow*     m_ServerHostMapSelector;
-
-        ServerLobbyChatWindow*              m_ServerLobbyChatWindow;
-        ServerLobbyConnectedPlayersWindow*  m_ServerLobbyConnectedPlayersWindow;
-        ServerLobbyShipSelectorWindow*      m_ServerLobbyShipSelectorWindow;
-
-
-        void go_to_main_menu();
-        void enter_the_game();
 
         void update_game(const double& dt);
         void update_main_menu(const double& dt);
@@ -82,6 +74,8 @@ class Menu final{
         void update_host_server_port_and_name_and_map(const double& dt);
         void update_join_server_port_and_name_and_ip(const double& dt);
         void update_join_server_server_lobby(const double& dt);
+        void update_options(const double& dt);
+        void update_encyclopedia(const double& dt);
 
         void render_game();
         void render_main_menu();
@@ -89,14 +83,22 @@ class Menu final{
         void render_host_server_port_and_name_and_map();
         void render_join_server_port_and_name_and_ip();
         void render_join_server_server_lobby();
+        void render_options();
+        void render_encyclopedia();
 
     public:
         Menu(Scene& scene, Camera& camera, GameState::State& current, Core& core);
         ~Menu();
 
+        void go_to_main_menu();
+        void enter_the_game();
+
         void onResize(const uint& width, const uint& height);
 
+        const GameState::State& getGameState() const;
+        void setGameState(const GameState::State&);
         Font& getFont();
+        Core& getCore();
 
         void setGoodText(const std::string& error, const float errorTime = 3.0f);
         void setErrorText(const std::string& error, const float errorTime = 3.0f);

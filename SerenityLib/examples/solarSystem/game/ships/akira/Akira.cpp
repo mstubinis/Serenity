@@ -48,6 +48,20 @@ Akira::Akira(AIType::Type& ai_type, Team& team, Client& client, Map& map, const 
     }
     internal_finialize_init(ai_type);
 
+    /*
+    6x phaser beam arrays spread over the hull
+
+    8x fwd photon torpedos
+
+    2x port photon torpedos
+    2x starboard photon torpedos
+
+    3x port-aft photon torpedos
+    3x starboard-aft photon torpedos
+
+    */
+
+
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     //rack torpedos

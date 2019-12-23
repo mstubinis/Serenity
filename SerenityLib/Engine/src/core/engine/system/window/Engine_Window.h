@@ -9,22 +9,57 @@ class Texture;
 
 #include <memory>
 #include <string>
+#include <SFML/Window.hpp>
 #include <glm/vec2.hpp>
 
 class Engine_Window final{
+
+    class Engine_WindowData final {
+        friend class Engine_Window;
+        private:
+            unsigned int m_Style;
+            sf::VideoMode m_VideoMode;
+            const char* m_WindowName;
+            sf::Window m_SFMLWindow;
+            unsigned int m_FramerateLimit;
+            bool m_MouseCursorVisible;
+            bool m_Fullscreen;
+            bool m_Active;
+            bool m_Vsync;
+            bool m_MouseCursorGrabbed;
+            int m_OpenGLMajorVersion;
+            int m_OpenGLMinorVersion;
+            int m_GLSLVersion;
+            sf::ContextSettings m_SFContextSettings;
+
+            void restore_state();
+            const sf::ContextSettings create(const std::string& _name, const unsigned int& _width, const unsigned int& _height);
+        public:
+            Engine_WindowData();
+            ~Engine_WindowData();
+    };
+
     private:
-        class impl; std::unique_ptr<impl> m_i;
+        Engine_WindowData m_Data;
     public:
         Engine_Window(const char* name, const unsigned int& width, const unsigned int& height);
         ~Engine_Window();
+
         const char* name() const;
         const glm::uvec2 getSize();
+        const glm::uvec2 getPosition();
+
         void setName(const char* name);
         void setSize(const unsigned int& width, const unsigned int& height);
         void setIcon(const Texture& texture);
         void setIcon(const char* file);
         void setIcon(const std::string& file);
         void setMouseCursorVisible(const bool);
+        void setPosition(const unsigned int& x, const unsigned int& y);
+
+        //currently specific to windows os only
+        void maximize();
+        void minimize();
 
         //If key repeat is enabled, you will receive repeated KeyPressed events while keeping a key pressed.
         //If it is disabled, you will only get a single event when the key is pressed.
@@ -51,7 +86,7 @@ class Engine_Window final{
         //if you want to make it active on another thread you have to deactivate it on the previous thread first if it was active.
         //Only one window can be active on a thread at a time, thus the window previously active (if any) automatically gets deactivated.
         //This is not to be confused with requestFocus().
-        void setActive(const bool);
+        void setActive(const bool active = true);
 
         const unsigned int getStyle();
         const bool hasFocus();
