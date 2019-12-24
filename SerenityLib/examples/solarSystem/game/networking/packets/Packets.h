@@ -12,5 +12,6 @@
 #include "PacketShipRespawned.h"
 #include "PacketGameplayModeInfo.h"
 #include "PacketShipInfoRequest.h"
+#include "PacketMapData.h"
 
 #endif

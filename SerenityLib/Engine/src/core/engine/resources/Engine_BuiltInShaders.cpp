@@ -1614,12 +1614,14 @@ epriv::EShaders::deferred_frag_hud =
     "\n"
     "uniform sampler2D DiffuseTexture;\n"
     "uniform int DiffuseTextureEnabled;\n"
+    "uniform float ScreenGamma;\n"
     "uniform vec4 Object_Color;\n"
     "varying vec2 UV;\n"
     "void main(){\n"
     "    gl_FragColor = Object_Color;\n"
     "    if(DiffuseTextureEnabled == 1){\n"
     "        vec4 color = texture2D(DiffuseTexture, UV); \n"
+    "        color.rgb = pow(color.rgb, vec3(1.0 / ScreenGamma));\n" //ScreenGamma is gamma
     "        gl_FragColor *= color;\n"
     "    }\n"
     "}";

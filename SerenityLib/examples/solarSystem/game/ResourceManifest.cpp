@@ -1,6 +1,7 @@
 #include "ResourceManifest.h"
 #include "factions/Faction.h"
 #include "ships/Ships.h"
+#include "map/Map.h"
 #include "particles/Fire.h"
 #include "particles/Sparks.h"
 #include "Planet.h"
@@ -114,13 +115,16 @@ Handle ResourceManifest::TorpedoGlow2Material;
 std::string ResourceManifest::BasePath;
 
 void ResourceManifest::init(){
+    BasePath = "../";
+
+    Map::init_basic_map_data();
     Factions::init();
     Ships::init();
     Planets::init();
 
+
     epriv::threading::waitForAll();
 
-    BasePath = "../";
     
     Handle skyFromSpaceVert = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
     Handle skyFromSpaceFrag = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
@@ -364,7 +368,10 @@ void ResourceManifest::init(){
 
     GUITextureCorner = Resources::loadTexture(BasePath + "data/Textures/HUD/GUI_Corner.dds");
     GUITextureSide = Resources::loadTexture(BasePath + "data/Textures/HUD/GUI_Side.dds");
-
+    ((Texture*)GUITextureCorner.get())->setFilter(TextureFilter::Nearest);
+    ((Texture*)GUITextureSide.get())->setFilter(TextureFilter::Nearest);
+    ((Texture*)GUITextureCorner.get())->setWrapping(TextureWrap::ClampToEdge);
+    ((Texture*)GUITextureSide.get())->setWrapping(TextureWrap::ClampToEdge);
 
     //sounds
     SoundCloakingActivated = Resources::addSoundData(BasePath + "data/Sounds/effects/cloaking.ogg");

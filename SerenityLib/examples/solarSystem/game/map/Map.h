@@ -8,6 +8,7 @@
 #include "../ships/shipSystems/ShipSystemWeapons.h"
 #include "Freelist.h"
 #include "../ai/AIIncludes.h"
+#include "MapEntry.h"
 
 class Star;
 class Ship;
@@ -23,26 +24,29 @@ class Team;
 class Server;
 class Map: public Scene{
     friend class Server;
+    public:
+        static void init_basic_map_data();
+        static std::unordered_map<std::string, MapEntryData> DATABASE;
     private:
-        GameplayMode&                                  m_GameplayMode;
-        std::unordered_map<std::string, Planet*>       m_Planets;
-        std::unordered_map<std::string, Ship*>         m_Ships;
-        std::unordered_map<std::string, Ship*>         m_ShipsPlayerControlled;
-        std::unordered_map<std::string, Ship*>         m_ShipsNPCControlled;
-        std::string                                    m_Filename;
-        std::string                                    m_SkyboxFile;
-        Ship*                                          m_Player;
-        Client&                                        m_Client;
-        HUD*                                           m_HUD;
-        bool                                           m_IsServer;
+        GameplayMode&                                        m_GameplayMode;
+        std::unordered_map<std::string, Planet*>             m_Planets;
+        std::unordered_map<std::string, Ship*>               m_Ships;
+        std::unordered_map<std::string, Ship*>               m_ShipsPlayerControlled;
+        std::unordered_map<std::string, Ship*>               m_ShipsNPCControlled;
+        std::string                                          m_Filename;
+        std::string                                          m_SkyboxFile;
+        Ship*                                                m_Player;
+        Client&                                              m_Client;
+        HUD*                                                 m_HUD;
+        bool                                                 m_IsServer;
 
-        Freelist<PrimaryWeaponCannonProjectile*>       m_ActiveCannonProjectiles;
-        Freelist<SecondaryWeaponTorpedoProjectile*>    m_ActiveTorpedoProjectiles;
+        Freelist<PrimaryWeaponCannonProjectile*>             m_ActiveCannonProjectiles;
+        Freelist<SecondaryWeaponTorpedoProjectile*>          m_ActiveTorpedoProjectiles;
 
         void loadFromFile(const std::string& file);
     private:
-        std::tuple<std::string, Anchor*>               m_RootAnchor;
-        std::vector<std::tuple<std::string, Anchor*>>  m_SpawnAnchors;
+        std::tuple<std::string, Anchor*>                     m_RootAnchor;
+        std::vector<std::tuple<std::string, Anchor*>>        m_SpawnAnchors;
 
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const decimal& x = 0, const decimal& y = 0, const decimal& z = 0);
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const glm_vec3& position);

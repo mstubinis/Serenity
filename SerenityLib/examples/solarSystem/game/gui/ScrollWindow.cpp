@@ -48,22 +48,35 @@ void ScrollFrame::fit_widget_to_window(Widget* widget) {
 
 
     if (textWidget) {
-        const auto threshold = actual_content_width - 110.0f; //TODO: re-eval this hardcoded number
+        const auto threshold = actual_content_width - 240.0f; //TODO: re-eval this hardcoded number
         float text_width = 0.0f;
         bool changed = false;
         string text = textWidget->text();
         for (auto itr = text.begin(); itr != text.end(); ++itr) {
             auto character = (*itr);
-            if (character != '\0' && character != '\n') {
-                text_width += (textWidget->font().getGlyphData(character).width) * textWidget->textScale().x;
-                if (text_width > threshold) {
-                    itr = text.insert(itr, '\n');
-                    text_width = 0.0f;
-                    changed = true;
-                }
-            }
             if (character == '\n')
                 text_width = 0.0f;
+            else if (character != '\0' && character != '\n') {
+                text_width += (textWidget->font().getGlyphData(character).width) * textWidget->textScale().x;
+                if (text_width > threshold) {
+
+                    auto itr2 = itr;
+                    while (itr2 > text.begin()) {
+                        auto character2 = (*itr2);
+                        if (character2 == ' ') {
+                            text = text.replace(itr2, itr2+1,"\n");
+                            text_width = 0.0f;
+                            changed = true;
+                            break;
+                        }
+                        --itr2;
+                    }
+
+                    //itr = text.insert(itr, '\n');
+                    //text_width = 0.0f;
+                    //changed = true;
+                }
+            }
         }
         if (changed)
             textWidget->setText(text);

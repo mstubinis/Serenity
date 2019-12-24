@@ -10,7 +10,7 @@ struct GameplayModeType final {enum Mode {
     FFA,
     TeamDeathmatch,
     HomelandSecurity,
-};};
+_TOTAL};};
 
 class  Team;
 struct PacketGameplayModeInfo;
@@ -20,6 +20,8 @@ class GameplayMode {
         unsigned int                                     m_MaxAmountOfPlayers;
         std::unordered_map<TeamNumber::Enum, Team>       m_Teams;
         std::unordered_set<std::string>                  m_AllowedShipClasses;
+    public:
+        static std::vector<std::string>                  GAMEPLAY_TYPE_ENUM_NAMES;
     public:
         GameplayMode();
         GameplayMode(const GameplayModeType::Mode& mode, const unsigned int MaxAmountOfPlayers);

@@ -44,10 +44,10 @@ Client* Core::getClient() {
     return m_Client;
 }
 
-void Core::startServer(const unsigned short& port, const string& mapname) {
+void Core::startServer(const unsigned short& port) {
     if (!m_Server) {
         m_Server = NEW Server(*this, port);
-        m_Server->startup(mapname);
+        m_Server->startup();
     }
 }
 void Core::shutdownServer() {

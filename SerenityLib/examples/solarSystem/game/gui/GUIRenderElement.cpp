@@ -101,13 +101,13 @@ void GUIRenderElement::render(const glm::vec4& scissor) {
     };
     auto render_corners = [&]() {
         //top-left corner
-        Renderer::renderTexture(*corner, pos + glm::vec2(half_corner_width, (corner_height) + m_EdgeHeight + half_corner_height), color, 270.0f, glm::vec2(1.0f), m_Depth, Alignment::Center, scissor);
+        Renderer::renderTexture(*corner, pos + glm::vec2(half_corner_width, (corner_height) + m_EdgeHeight + half_corner_height), color, 0.0f, glm::vec2(1.0f), m_Depth, Alignment::Center, scissor);
         //bottom-left corner
-        Renderer::renderTexture(*corner, pos + glm::vec2(half_corner_width, half_corner_height), color, 0.0f, glm::vec2(1.0f), m_Depth, Alignment::Center, scissor);
+        Renderer::renderTexture(*corner, pos + glm::vec2(half_corner_width, half_corner_height), color, 90.0f, glm::vec2(1.0f), m_Depth, Alignment::Center, scissor);
         //top right corner
-        Renderer::renderTexture(*corner, pos + glm::vec2(half_corner_width + m_EdgeWidth + corner_width, half_corner_height), color, 90.0f, glm::vec2(1.0f), m_Depth, Alignment::Center, scissor);
+        Renderer::renderTexture(*corner, pos + glm::vec2(half_corner_width + m_EdgeWidth + corner_width, half_corner_height), color, 180.0f, glm::vec2(1.0f), m_Depth, Alignment::Center, scissor);
         //bottom right corner
-        Renderer::renderTexture(*corner, pos + glm::vec2(half_corner_width + m_EdgeWidth + corner_width, (corner_height) + m_EdgeHeight + half_corner_height), color, 180.0f, glm::vec2(1.0f), m_Depth, Alignment::Center, scissor);
+        Renderer::renderTexture(*corner, pos + glm::vec2(half_corner_width + m_EdgeWidth + corner_width, (corner_height) + m_EdgeHeight + half_corner_height), color, 270.0f, glm::vec2(1.0f), m_Depth, Alignment::Center, scissor);
     };
     if (center && corner && edge) {
         Renderer::renderTexture(*center, pos + glm::vec2(corner_width, corner_height), color, 0.0f, glm::vec2(1.0f), m_Depth, Alignment::BottomLeft, scissor);

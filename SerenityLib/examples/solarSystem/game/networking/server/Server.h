@@ -8,6 +8,7 @@
 
 #include "ServerMapSpecificData.h"
 #include "../../modes/GameplayMode.h"
+#include "../../map/MapEntry.h"
 
 #include <queue>
 #include <thread>
@@ -96,8 +97,8 @@ class Server {
         Server(Core& core, const unsigned int& port, const std::string& ipRestriction = "");
         ~Server();
 
-        const bool startup(const std::string& mapname);
-        const bool startupMap(const std::string& mapname);
+        const bool startup();
+        const bool startupMap(const MapEntryData& map_data);
         void shutdown(const bool destructor = false);
         const bool shutdownMap();
 

@@ -120,9 +120,9 @@ void SensorStatusDisplay::render() {
     const auto& radarEdgeTexture = *radarEdgeMat.getComponent(0).texture();
     const auto& radarTokenTexture = *radarTokenMat.getComponent(0).texture();
     //render radar 2d graphic
-    Renderer::renderTexture(radarTexture, m_Position, glm::vec4(1, 1, 1, 1), 180.0f, glm::vec2(1.0f), 0.2f, Alignment::BottomCenter);
+    Renderer::renderTexture(radarTexture, m_Position, glm::vec4(1, 1, 1, 1), 0.0f, glm::vec2(1.0f), 0.2f, Alignment::BottomCenter);
     //render radar edge
-    Renderer::renderTexture(radarEdgeTexture, m_Position, glm::vec4(0.11f, 0.16f, 0.19f, 1), 180.0f, glm::vec2(1.0f), 0.17f, Alignment::BottomCenter);
+    Renderer::renderTexture(radarEdgeTexture, m_Position, glm::vec4(0.11f, 0.16f, 0.19f, 1), 0.0f, glm::vec2(1.0f), 0.17f, Alignment::BottomCenter);
 
     const auto& radarBodyPosition = m_RadarRingEntity.getComponent<ComponentBody>()->position();
     const auto& myPos = ship.getComponent<ComponentBody>()->position();
@@ -135,10 +135,10 @@ void SensorStatusDisplay::render() {
     const auto& anti_cloak_bar_bg = *anti_cloak_bar_bg_mat.getComponent(0).texture();
     const auto& anti_cloak_bar = *anti_cloak_bar_mat.getComponent(0).texture();
     const auto height_above_bottom = 20;
-    Renderer::renderTexture(anti_cloak_bar_bg, glm::vec2(m_Position.x - (anti_cloak_bar_bg.size().x / 2), m_Position.y + height_above_bottom), glm::vec4(1, 1, 1, 1), 180.0f, glm::vec2(1.0f), 0.19f, Alignment::BottomLeft);
+    Renderer::renderTexture(anti_cloak_bar_bg, glm::vec2(m_Position.x - (anti_cloak_bar_bg.size().x / 2), m_Position.y + height_above_bottom), glm::vec4(1, 1, 1, 1), 0.0f, glm::vec2(1.0f), 0.19f, Alignment::BottomLeft);
     const auto anti_cloak_bar_width = (m_Sensors->getAntiCloakingScanTimer() / m_Sensors->getAntiCloakingScanTimerMax()) * anti_cloak_bar.width();
     glm::vec4 scissor = glm::vec4(m_Position.x - (anti_cloak_bar_bg.size().x / 2), m_Position.y + height_above_bottom, anti_cloak_bar_width, anti_cloak_bar.height());
-    Renderer::renderTexture(anti_cloak_bar, glm::vec2(m_Position.x - (anti_cloak_bar_bg.size().x / 2), m_Position.y + height_above_bottom), glm::vec4(1, 1, 1, 1), 180.0f, glm::vec2(1.0f), 0.19f, Alignment::BottomLeft, scissor);
+    Renderer::renderTexture(anti_cloak_bar, glm::vec2(m_Position.x - (anti_cloak_bar_bg.size().x / 2), m_Position.y + height_above_bottom), glm::vec4(1, 1, 1, 1), 0.0f, glm::vec2(1.0f), 0.19f, Alignment::BottomLeft, scissor);
 
     auto lambda = [&](Ship& other_ship) {
         glm::vec4 color;

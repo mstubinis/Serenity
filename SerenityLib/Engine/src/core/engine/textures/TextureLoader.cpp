@@ -53,12 +53,14 @@ void TextureLoader::InitFromFile(Texture& texture, const string& filename, const
     image->filename = filename;
     const string& extension = boost::filesystem::extension(filename);
     TextureLoader::InitCommon(texture, openglTextureType, genMipMaps);
+    image->pixelType = ImagePixelType::UNSIGNED_BYTE;
+    image->internalFormat = _internal;
     if (extension == ".dds") {
         TextureLoader::LoadDDSFile(texture, filename, *image);
-    }else{
+    }/*else{
         image->pixelType = ImagePixelType::UNSIGNED_BYTE;
         image->internalFormat = _internal;
-    }
+    }*/
     TextureLoader::ChoosePixelFormat(image->pixelFormat, image->internalFormat);
     texture.m_ImagesDatas.insert(texture.m_ImagesDatas.begin(), std::move(image)); //yes, this NEEDS to be pushed into the front, not the back
 

@@ -9,6 +9,7 @@
 #include "PacketShipRespawned.h"
 #include "PacketGameplayModeInfo.h"
 #include "PacketShipInfoRequest.h"
+#include "PacketMapData.h"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
         }case PacketType::Server_To_Client_Client_Left_Server: {
             return NEW PacketMessage();
         }case PacketType::Server_To_Client_Map_Data: {
-            return NEW PacketMessage();
+            return NEW PacketMapData();
         }case PacketType::Client_To_Server_Request_Map_Entry: {
             return NEW PacketMessage();
         }case PacketType::Server_To_Client_Approve_Map_Entry: {

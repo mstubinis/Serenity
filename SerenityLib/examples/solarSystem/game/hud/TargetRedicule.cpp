@@ -43,10 +43,10 @@ void TargetRedicule::render() {
             auto& crosshairTexture = *crosshair.getComponent(0).texture();
             const glm::vec4& color = glm::vec4(1, 1, 0, 1.0f);
 
-            crosshairTexture.render(boxPos.topLeft, color, 270.0f);
-            crosshairTexture.render(boxPos.topRight, color, 180.0f);
-            crosshairTexture.render(boxPos.bottomLeft, color, 0.0f);
-            crosshairTexture.render(boxPos.bottomRight, color, 90.0f);
+            crosshairTexture.render(boxPos.topLeft, color, 0.0f);
+            crosshairTexture.render(boxPos.topRight, color, 270.0f);
+            crosshairTexture.render(boxPos.bottomLeft, color, 90.0f);
+            crosshairTexture.render(boxPos.bottomRight, color, 180.0f);
 
             auto& targetBody = *target->getComponent<ComponentBody>();
             string name = "";
@@ -91,52 +91,44 @@ void TargetRedicule::render() {
                     Renderer::renderRectangle(glm::vec2(pos.x - (healthDisplayWidthMax / 2), pos.y - 27.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), hull.getHealthPercent() * healthDisplayWidthMax, 2, 0, 0.09f, Alignment::TopLeft);
                 }
             }
-        }
-        else { //behind
+        }else{ //behind
             float angle = 0.0f;
             Material& crosshairArrow = *(Material*)ResourceManifest::CrosshairArrowMaterial.get();
             auto& crosshairArrowTexture = *crosshairArrow.getComponent(0).texture();
             uint textureSizeOffset = (crosshairArrowTexture.width() / 2) + 4;
             if (pos.y > 2 && pos.y < winSize.y - 2) { //if y is within window bounds
                 if (pos.x < 2) {
-                    angle = -45.0f;
+                    angle = 45.0f;
                     pos.x += textureSizeOffset;
-                }
-                else {
-                    angle = 135.0f;
+                }else{
+                    angle = 225.0f;
                     pos.x -= textureSizeOffset;
                 }
-            }
-            else if (pos.y <= 1) { //if y is below the window bounds
+            }else if (pos.y <= 1) { //if y is below the window bounds
                 pos.y += textureSizeOffset;
                 if (pos.x <= 1) { //bottom left corner
-                    angle = 0.0f;
-                    pos.x += textureSizeOffset - 4;
-                    pos.y -= 4;
-                }
-                else if (pos.x > winSize.x - 2) { //bottom right corner
                     angle = 90.0f;
-                    pos.x -= textureSizeOffset - 4;
-                    pos.y -= 4;
-                }
-                else { //bottom normal
-                    angle = 45.0f;
-                }
-            }
-            else { //if y is above the window bounds
-                pos.y -= textureSizeOffset;
-                if (pos.x < 2) { //top left corner
-                    angle = -90.0f;
                     pos.x += textureSizeOffset - 4;
-                    pos.y += 4;
-                }
-                else if (pos.x > winSize.x - 2) { //top right corner
+                    pos.y -= 4;
+                }else if (pos.x > winSize.x - 2) { //bottom right corner
                     angle = 180.0f;
                     pos.x -= textureSizeOffset - 4;
-                    pos.y += 4;
+                    pos.y -= 4;
+                }else { //bottom normal
+                    angle = 135.0f;
                 }
-                else { //top normal
-                    angle = -135.0f;
+            }else { //if y is above the window bounds
+                pos.y -= textureSizeOffset;
+                if (pos.x < 2) { //top left corner
+                    angle = 0.0f;
+                    pos.x += textureSizeOffset - 4;
+                    pos.y += 4;
+                }else if (pos.x > winSize.x - 2) { //top right corner
+                    angle = 270.0f;
+                    pos.x -= textureSizeOffset - 4;
+                    pos.y += 4;
+                }else{ //top normal
+                    angle = -45.0f;
                 }
             }
             crosshairArrowTexture.render(glm::vec2(pos.x, pos.y), glm::vec4(1, 1, 0, 1.0f), angle);

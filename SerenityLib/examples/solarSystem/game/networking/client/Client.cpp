@@ -546,11 +546,11 @@ void Client::on_receive_server_approve_map_entry(Packet& basePacket, Menu& menu)
     send(pOut);
 }
 void Client::on_receive_map_data(Packet& basePacket, Menu& menu) {
-    PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
-    Map* map_ptr_real = static_cast<Map*>(Resources::getScene(pI.name));
+    PacketMapData& pI = static_cast<PacketMapData&>(basePacket);
+    Map* map_ptr_real = static_cast<Map*>(Resources::getScene(pI.map_name));
     if (!map_ptr_real) {
-        NEW Map(m_MapSpecificData.m_GameplayMode, *this, pI.name, ResourceManifest::BasePath + "data/Systems/" + pI.name + ".txt");
-        map_ptr_real = static_cast<Map*>(Resources::getScene(pI.name));
+        NEW Map(m_MapSpecificData.m_GameplayMode, *this, pI.map_name, pI.map_file_name);
+        map_ptr_real = static_cast<Map*>(Resources::getScene(pI.map_name));
     }
     m_MapSpecificData.m_Map = map_ptr_real;
     auto& map = *m_MapSpecificData.m_Map;
@@ -562,8 +562,8 @@ void Client::on_receive_map_data(Packet& basePacket, Menu& menu) {
     menuScene.setGlobalIllumination(map.getGlobalIllumination());
 
     menu.m_ServerLobbyShipSelectorWindow->clear();
-    auto allowed_ships = map.allowedShips();
-    for (auto& allowed_ship_class : allowed_ships) {
+    auto list = Helper::SeparateStringByCharacter(pI.map_allowed_ships, ',');
+    for (auto& allowed_ship_class : list) {
         menu.m_ServerLobbyShipSelectorWindow->addShipButton(allowed_ship_class);
     }
     menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(true);

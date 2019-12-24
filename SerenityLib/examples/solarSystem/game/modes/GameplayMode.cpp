@@ -9,6 +9,19 @@
 
 using namespace std;
 
+
+std::vector<std::string> GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES = []() {
+    std::vector<std::string> ret;
+    ret.resize(GameplayModeType::_TOTAL, "");
+
+    ret[GameplayModeType::FFA]              = "Free for All";
+    ret[GameplayModeType::TeamDeathmatch]   = "Team Deathmatch";
+    ret[GameplayModeType::HomelandSecurity] = "Homeland Security";
+
+    return ret;
+}();
+
+
 GameplayMode::GameplayMode() {
     setGameplayMode(GameplayModeType::FFA);
     setMaxAmountOfPlayers(0);

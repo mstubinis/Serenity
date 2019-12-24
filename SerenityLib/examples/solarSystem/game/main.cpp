@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     options.width          = sf::VideoMode::getDesktopMode().width - 30;
     options.height         = sf::VideoMode::getDesktopMode().height - 120;
     options.fullscreen     = false;
-    options.show_console   = false;
+    options.show_console   = true;
     options.maximized      = true;
     options.aa_algorithm   = AntiAliasingAlgorithm::SMAA;
     options.argv           = argv;

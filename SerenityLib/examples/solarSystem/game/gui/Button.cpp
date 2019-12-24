@@ -198,7 +198,7 @@ void Button::render(const glm::vec4& scissor) {
             }
         }
         glm::vec2 f(0.0f);
-        Renderer::alignmentOffset(m_Alignment, f.x, f.y, corner, m_Height);
+        Renderer::alignmentOffset(m_Alignment, f.x, f.y, m_Width, m_Height);
 
         m_Font->renderText(m_Text, glm::vec2(newPosTxt.x + f.x, newPosTxt.y + f.y), m_TextColor, 0, m_TextScale, 0.0077f, m_TextAlignment, scissor);
     }

@@ -2132,6 +2132,7 @@ class epriv::RenderManager::impl final{
                     Settings::clear(false,true,false); //clear depth only
                     m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI]->bind();
                     sendUniformMatrix4("VP", m_2DProjectionMatrix);
+                    sendUniform1Safe("ScreenGamma", gamma);
                     GLEnable(GL_SCISSOR_TEST);
                     for (auto& command : m_2DAPICommands) {
                         command.func();

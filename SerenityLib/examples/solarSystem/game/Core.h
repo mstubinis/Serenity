@@ -44,7 +44,7 @@ class Core final {
 
         void requestValidation(const std::string& name);
 
-        void startServer(const unsigned short& port, const std::string& mapname);
+        void startServer(const unsigned short& port);
         void shutdownServer();
 
         void onResize(const uint& width, const uint& height);

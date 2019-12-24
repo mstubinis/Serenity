@@ -16,6 +16,7 @@ Widget::Widget(const float x, const float y, const float width, const float heig
     m_Hidden      = false;
     m_UserPointer = nullptr;
     m_Parent      = nullptr;
+    m_Color       = glm::vec4(1.0f);
 }
 Widget::Widget(const glm::vec2& position, const glm::vec2& size) : Widget(position.x, position.y, size.x, size.y){
 

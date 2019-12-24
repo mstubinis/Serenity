@@ -639,6 +639,15 @@
     <ClInclude Include="game\gui\specifics\MainMenu.h">
       <Filter>Header Files\Game\GUI\Specifics\MainMenu</Filter>
     </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketMapData.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\MapDescriptionWindow.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="game\map\MapEntry.h">
+      <Filter>Header Files\Game\Map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -958,6 +967,12 @@
     </ClCompile>
     <ClCompile Include="game\gui\specifics\MainMenu.cpp">
       <Filter>Source Files\Game\GUI\Specifics\MainMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketMapData.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\MapDescriptionWindow.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -100,13 +100,13 @@ void ShipStatusDisplay::renderShipHullStatus(const glm::vec2& bottomLeftCorner) 
 
     const auto pos = bottomLeftCorner + glm::vec2((m_Size.y / 2.0f) - (27.0f / 2.0f));
 
-    Renderer::renderTexture(textureBorder, pos, m_Color, 180, glm::vec2(1.0f), 0.15f, Alignment::Center); //border
+    Renderer::renderTexture(textureBorder, pos, m_Color, 0, glm::vec2(1.0f), 0.15f, Alignment::Center); //border
 
     const auto percent = hull->getHealthPercent();
 
     //scissor
     const auto scissor = glm::vec4(pos.x - texture.width() / 2.0f, pos.y - texture.height() / 2.0f, texture.width(), texture.height() * percent);
-    Renderer::renderTexture(texture, pos, getPercentColor(percent), 180, glm::vec2(1.0f), 0.16f, Alignment::Center, scissor); //hull
+    Renderer::renderTexture(texture, pos, getPercentColor(percent), 0, glm::vec2(1.0f), 0.16f, Alignment::Center, scissor); //hull
 
     //render %
     /*
@@ -133,8 +133,8 @@ void ShipStatusDisplay::renderForwardShieldStatus(const glm::vec2& centerHullIco
     const auto width_with_percent = 74.0f * percent; //the graphic is 74.0f pixels wide
     const auto scissor = glm::vec4(pos.x - (width_with_percent / 2.0f), pos.y, width_with_percent, icon.height());
 
-    Renderer::renderTexture(iconBorder, pos, m_Color, 180, glm::vec2(1.0f), 0.15f, Alignment::BottomCenter); //border
-    Renderer::renderTexture(icon, pos, getPercentColor(percent), 180, glm::vec2(1.0f), 0.16f, Alignment::BottomCenter, scissor); //shield
+    Renderer::renderTexture(iconBorder, pos, m_Color, 0, glm::vec2(1.0f), 0.15f, Alignment::BottomCenter); //border
+    Renderer::renderTexture(icon, pos, getPercentColor(percent), 0, glm::vec2(1.0f), 0.16f, Alignment::BottomCenter, scissor); //shield
 }
 void ShipStatusDisplay::renderAftShieldStatus(const glm::vec2& centerHullIcon, ShipSystemShields& shields, Texture& icon, Texture& iconBorder) {
     const auto percent = shields.getHealthPercentAft();
@@ -145,8 +145,8 @@ void ShipStatusDisplay::renderAftShieldStatus(const glm::vec2& centerHullIcon, S
     const auto width_with_percent = 74.0f * percent; //the graphic is 74.0f pixels wide
     const auto scissor = glm::vec4(pos.x - (width_with_percent / 2.0f), pos.y - icon.height(), width_with_percent, icon.height());
 
-    Renderer::renderTexture(iconBorder, pos, m_Color, 0, glm::vec2(1.0f), 0.15f, Alignment::TopCenter); //border
-    Renderer::renderTexture(icon, pos, getPercentColor(percent), 0, glm::vec2(1.0f), 0.16f, Alignment::TopCenter, scissor); //shield
+    Renderer::renderTexture(iconBorder, pos, m_Color, 180, glm::vec2(1.0f), 0.15f, Alignment::TopCenter); //border
+    Renderer::renderTexture(icon, pos, getPercentColor(percent), 180, glm::vec2(1.0f), 0.16f, Alignment::TopCenter, scissor); //shield
 }
 void ShipStatusDisplay::renderPortShieldStatus(const glm::vec2& centerHullIcon, ShipSystemShields& shields, Texture& icon, Texture& iconBorder) {
     const auto percent = shields.getHealthPercentPort();
@@ -155,8 +155,8 @@ void ShipStatusDisplay::renderPortShieldStatus(const glm::vec2& centerHullIcon, 
     const auto width_with_percent = 74.0f * percent; //the graphic is 74.0f pixels wide
     const auto scissor = glm::vec4(pos.x - icon.height() / 2.0f, pos.y - (width_with_percent / 2.0f), icon.height(), width_with_percent);
 
-    Renderer::renderTexture(iconBorder, pos, m_Color, 270, glm::vec2(1.0f), 0.15f, Alignment::Center); //border
-    Renderer::renderTexture(icon, pos, getPercentColor(percent), 270, glm::vec2(1.0f), 0.16f, Alignment::Center, scissor); //shield
+    Renderer::renderTexture(iconBorder, pos, m_Color, 90, glm::vec2(1.0f), 0.15f, Alignment::Center); //border
+    Renderer::renderTexture(icon, pos, getPercentColor(percent), 90, glm::vec2(1.0f), 0.16f, Alignment::Center, scissor); //shield
 }
 void ShipStatusDisplay::renderStarboardShieldStatus(const glm::vec2& centerHullIcon, ShipSystemShields& shields, Texture& icon, Texture& iconBorder) {
     const auto percent = shields.getHealthPercentStarboard();
@@ -165,8 +165,8 @@ void ShipStatusDisplay::renderStarboardShieldStatus(const glm::vec2& centerHullI
     const auto width_with_percent = 74.0f * percent; //the graphic is 74.0f pixels wide
     const auto scissor = glm::vec4(pos.x - icon.height() / 2.0f, pos.y - (width_with_percent / 2.0f), icon.height(), width_with_percent);
 
-    Renderer::renderTexture(iconBorder, pos, m_Color, 90, glm::vec2(1.0f), 0.15f, Alignment::Center); //border
-    Renderer::renderTexture(icon, pos, getPercentColor(percent), 90, glm::vec2(1.0f), 0.16f, Alignment::Center, scissor); //shield
+    Renderer::renderTexture(iconBorder, pos, m_Color, 270, glm::vec2(1.0f), 0.15f, Alignment::Center); //border
+    Renderer::renderTexture(icon, pos, getPercentColor(percent), 270, glm::vec2(1.0f), 0.16f, Alignment::Center, scissor); //shield
 }
 void ShipStatusDisplay::renderDorsalShieldStatus(const glm::vec2& centerHullIcon, ShipSystemShields& shields, Texture& icon, Texture& iconBorder) {
     const auto percent = shields.getHealthPercentDorsal();
@@ -201,8 +201,8 @@ void ShipStatusDisplay::render() {
     }
     Texture& background = *(Texture*)((ResourceManifest::ShipStatusBackgroundHUDTexture).get());
     Texture& backgroundBorder = *(Texture*)((ResourceManifest::ShipStatusBackgroundBorderHUDTexture).get());
-    Renderer::renderTexture(background, bottomLeftCorner, glm::vec4(1.0f), 180, glm::vec2(1.0f), 0.17f, Alignment::BottomLeft);
-    Renderer::renderTexture(backgroundBorder, bottomLeftCorner, m_Color, 180, glm::vec2(1.0f), 0.169f, Alignment::BottomLeft);
+    Renderer::renderTexture(background, bottomLeftCorner, glm::vec4(1.0f), 0, glm::vec2(1.0f), 0.17f, Alignment::BottomLeft);
+    Renderer::renderTexture(backgroundBorder, bottomLeftCorner, m_Color, 0, glm::vec2(1.0f), 0.169f, Alignment::BottomLeft);
 
     const auto centerHullIcon = bottomLeftCorner + glm::vec2((m_Size.y / 2.0f) - (27.0f / 2.0f));
     if (m_TargetAsShip) {

@@ -8,6 +8,7 @@ class  Menu;
 class  TextBox;
 class  Text;
 class  ServerHostingMapSelectorWindow;
+class  MapDescriptionWindow;
 class HostScreen final {
     private:
         Menu& m_Menu;
@@ -18,10 +19,10 @@ class HostScreen final {
 
         TextBox* m_UserName_TextBox;
         TextBox* m_ServerPort_TextBox;
-        Text* m_Info_Text;
+        //Text* m_Info_Text;
 
         ServerHostingMapSelectorWindow* m_ServerHostMapSelector;
-
+        MapDescriptionWindow*           m_MapDescriptionWindow;
         /*
         CurrentSelectedMapDescription
         CurrentSelectedMapScreenshot
@@ -45,6 +46,7 @@ class HostScreen final {
         TextBox& getUserNameTextBox();
         TextBox& getServerPortTextBox();
         ServerHostingMapSelectorWindow& getMapSelectionWindow();
+        MapDescriptionWindow& getMapDescriptionWindow();
 
         void onResize(const unsigned int newWidth, const unsigned int newHeight);
 

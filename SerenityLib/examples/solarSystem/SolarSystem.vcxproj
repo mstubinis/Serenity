@@ -227,6 +227,7 @@
     <ClInclude Include="game\gui\specifics\FFALobby.h" />
     <ClInclude Include="game\gui\specifics\HostScreen.h" />
     <ClInclude Include="game\gui\specifics\MainMenu.h" />
+    <ClInclude Include="game\gui\specifics\MapDescriptionWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerHostingMapSelectorWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyChatWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.h" />
@@ -238,6 +239,7 @@
     <ClInclude Include="game\gui\WidgetInterface.h" />
     <ClInclude Include="game\Helper.h" />
     <ClInclude Include="game\hud\TargetRedicule.h" />
+    <ClInclude Include="game\map\MapEntry.h" />
     <ClInclude Include="game\Menu.h" />
     <ClInclude Include="game\hud\HUD.h" />
     <ClInclude Include="game\hud\SensorStatusDisplay.h" />
@@ -254,6 +256,7 @@
     <ClInclude Include="game\networking\packets\PacketCollisionEvent.h" />
     <ClInclude Include="game\networking\packets\PacketGameplayModeInfo.h" />
     <ClInclude Include="game\networking\packets\PacketHealthUpdate.h" />
+    <ClInclude Include="game\networking\packets\PacketMapData.h" />
     <ClInclude Include="game\networking\packets\PacketMessage.h" />
     <ClInclude Include="game\networking\packets\PacketPhysicsUpdate.h" />
     <ClInclude Include="game\networking\packets\PacketProjectileImpact.h" />
@@ -340,6 +343,7 @@
     <ClCompile Include="game\gui\specifics\FFALobby.cpp" />
     <ClCompile Include="game\gui\specifics\HostScreen.cpp" />
     <ClCompile Include="game\gui\specifics\MainMenu.cpp" />
+    <ClCompile Include="game\gui\specifics\MapDescriptionWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerHostingMapSelectorWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyChatWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.cpp" />
@@ -366,6 +370,7 @@
     <ClCompile Include="game\networking\packets\PacketCollisionEvent.cpp" />
     <ClCompile Include="game\networking\packets\PacketGameplayModeInfo.cpp" />
     <ClCompile Include="game\networking\packets\PacketHealthUpdate.cpp" />
+    <ClCompile Include="game\networking\packets\PacketMapData.cpp" />
     <ClCompile Include="game\networking\packets\PacketMessage.cpp" />
     <ClCompile Include="game\networking\packets\PacketPhysicsUpdate.cpp" />
     <ClCompile Include="game\networking\packets\PacketProjectileImpact.cpp" />

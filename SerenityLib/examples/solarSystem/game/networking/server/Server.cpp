@@ -187,7 +187,7 @@ const unsigned int Server::numClients() const {
     return numClients;
 }
 
-const bool Server::startup(const string& mapname) {
+const bool Server::startup() {
     auto& listener = *m_TCPListener;
     const sf::Socket::Status status = listener.listen();
 
@@ -203,11 +203,11 @@ const bool Server::startup(const string& mapname) {
     }
     return false;
 }
-const bool Server::startupMap(const string& mapname) {
-    m_MapSpecificData.m_Map = static_cast<Map*>(Resources::getScene(mapname));
+const bool Server::startupMap(const MapEntryData& map_data) {
+    m_MapSpecificData.m_Map  = static_cast<Map*>(Resources::getScene(map_data.map_name));
     if (!m_MapSpecificData.m_Map) {
-        auto* map = NEW Map(m_GameplayMode, *m_Core.m_Client, mapname, ResourceManifest::BasePath + "data/Systems/" + mapname + ".txt");
-        m_MapSpecificData.m_Map = static_cast<Map*>(Resources::getScene(mapname));
+        auto* map = NEW Map(m_GameplayMode, *m_Core.m_Client, map_data.map_name, map_data.map_file_path);
+        m_MapSpecificData.m_Map = static_cast<Map*>(Resources::getScene(map_data.map_name));
         m_MapSpecificData.m_Map->m_IsServer = true;
         return true;
     }
@@ -593,10 +593,11 @@ void Server::updateClient(ServerClient& client) {
                         packetClientJustJoined.PacketType = PacketType::Server_To_Client_Client_Joined_Server;
                         server.send_to_all(packetClientJustJoined);
 
-                        PacketMessage packetMapData;
+                        PacketMapData packetMapData;
                         Map* map = server.m_MapSpecificData.m_Map;
-                        packetMapData.name = map->name();
-                        packetMapData.data = map->allowedShipsSingleString();
+                        packetMapData.map_name = map->name();
+                        packetMapData.map_file_name = map->m_Filename;
+                        packetMapData.map_allowed_ships = map->allowedShipsSingleString();
                         packetMapData.PacketType = PacketType::Server_To_Client_Map_Data;
                         server.send_to_client(client, packetMapData);
                     }else{

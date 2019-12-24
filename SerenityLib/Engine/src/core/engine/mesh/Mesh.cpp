@@ -325,22 +325,23 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
 }
 
 
-Mesh::Mesh(VertexData* data, const string& name, float threshold) :BindableResource(ResourceType::Mesh, name) {
+Mesh::Mesh(VertexData* data, const string& name, float threshold) : BindableResource(ResourceType::Mesh, name) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_VertexData = data;
     m_threshold = threshold;
 }
-Mesh::Mesh(const string& name,float width, float height,float threshold):BindableResource(ResourceType::Mesh, name){
+Mesh::Mesh(const string& name,float width, float height,float threshold) : BindableResource(ResourceType::Mesh, name){
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_threshold = threshold;
 
     MeshImportedData data;
 
     vector<epriv::Vertex> quad; quad.resize(4);
-    quad[0].uv = glm::vec2(0.0f, 0.0f);
-    quad[1].uv = glm::vec2(width, 0.0f);
-    quad[2].uv = glm::vec2(width, height);
-    quad[3].uv = glm::vec2(0.0f, height);
+
+    quad[0].uv = glm::vec2(0.0f, height);
+    quad[1].uv = glm::vec2(width, height);
+    quad[2].uv = glm::vec2(width, 0.0f);
+    quad[3].uv = glm::vec2(0.0f, 0.0f);
 
     quad[0].position = glm::vec3(-width / 2.0f, -height / 2.0f, 0.0f);
     quad[1].position = glm::vec3(width / 2.0f, -height / 2.0f, 0.0f);
