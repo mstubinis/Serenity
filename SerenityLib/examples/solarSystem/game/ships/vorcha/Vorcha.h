@@ -24,6 +24,8 @@ class Vorcha final : public Ship {
             CollisionType::Type = CollisionType::ConvexHull
         );
         ~Vorcha();
+
+        void update(const double& dt);
 };
 
 #endif

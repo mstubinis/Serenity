@@ -14,6 +14,10 @@
 #include "../../teams/TeamIncludes.h"
 #include "../../teams/Team.h"
 
+#include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/textures/Texture.h>
+
 #include <regex>
 
 using namespace Engine;
@@ -87,13 +91,18 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu){
 
     const auto winSize = Resources::getWindowSize();
     const auto contentSize = glm::vec2(winSize) - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
+    const auto top_content_height = contentSize.y / 2.0f;
+    const auto first_2_boxes_width_top = contentSize.x - top_content_height;
+
+
 
     m_BackgroundEdgeGraphic = NEW Button(font, winSize.x/2.0f, winSize.y/2.0f, winSize.x - padding_x, winSize.y - padding_y);
     m_BackgroundEdgeGraphic->setTexture(nullptr);
+    m_BackgroundEdgeGraphic->setTextureHighlight(nullptr);
+    m_BackgroundEdgeGraphic->enableTexture(false);
     m_BackgroundEdgeGraphic->setColor(0.5f, 0.78f, 0.94f, 1.0f);
     m_BackgroundEdgeGraphic->setDepth(0.512f);
     m_BackgroundEdgeGraphic->disable();
-    m_BackgroundEdgeGraphic->disableCenterTexture();
 
     m_ServerHostMapSelector = NEW ServerHostingMapSelectorWindow(*this, font, padding_x, winSize.y - padding_y, contentSize.x / 3.0f, contentSize.y / 2.0f);
     m_MapDescriptionWindow = NEW MapDescriptionWindow(font, padding_x + contentSize.x / 3.0f, winSize.y - padding_y, contentSize.x / 3.0f, contentSize.y / 2.0f);
@@ -104,6 +113,10 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu){
     m_BackButton->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
     m_BackButton->setTextureCorner(nullptr);
     m_BackButton->setTextureEdge(nullptr);
+    m_BackButton->setTextureCornerHighlight(nullptr);
+    m_BackButton->setTextureEdgeHighlight(nullptr);
+    m_BackButton->enableTextureEdge(false);
+    m_BackButton->enableTextureCorner(false);
 
     m_ForwardButton = NEW Button(font, winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), padding_y + (bottom_bar_height / 2.0f), bottom_bar_button_width, bottom_bar_height);
     m_ForwardButton->setText("Next");
@@ -111,6 +124,10 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu){
     m_ForwardButton->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
     m_ForwardButton->setTextureCorner(nullptr);
     m_ForwardButton->setTextureEdge(nullptr);
+    m_ForwardButton->setTextureCornerHighlight(nullptr);
+    m_ForwardButton->setTextureEdgeHighlight(nullptr);
+    m_ForwardButton->enableTextureEdge(false);
+    m_ForwardButton->enableTextureCorner(false);
 
     m_BackButton->setUserPointer(this);
     m_ForwardButton->setUserPointer(this);
@@ -159,21 +176,21 @@ MapDescriptionWindow& HostScreen::getMapDescriptionWindow() {
 }
 void HostScreen::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     const auto winSize = glm::uvec2(newWidth, newHeight);
+    const auto contentSize = glm::vec2(winSize) - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
+    const auto top_content_height = contentSize.y / 2.0f;
+    const auto first_2_boxes_width_top = contentSize.x - top_content_height;
 
     m_BackButton->setPosition(padding_x + (bottom_bar_button_width / 2.0f), padding_y + (bottom_bar_height / 2.0f));
     m_ForwardButton->setPosition(winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), padding_y + (bottom_bar_height / 2.0f));
 
     m_ServerHostMapSelector->setPosition(padding_x - 4, winSize.y - (padding_y - 2));
-    const auto contentSize = winSize - glm::uvec2(padding_x * 2.0f, (padding_y * 2.0f) );
-    const auto map_selector_width = static_cast<float>(contentSize.x) / 3.0f;
-    const auto map_selector_height = static_cast<float>(contentSize.y) / 2.0f;
-    m_ServerHostMapSelector->setSize(map_selector_width, map_selector_height);
+    m_ServerHostMapSelector->setSize(first_2_boxes_width_top / 2.0f, top_content_height);
 
     m_BackgroundEdgeGraphic->setPosition(winSize.x / 2.0f, winSize.y / 2.0f);
     m_BackgroundEdgeGraphic->setSize(winSize.x - padding_x, winSize.y - padding_y);
 
     m_MapDescriptionWindow->setPosition(m_ServerHostMapSelector->getWindowFrame().positionWorld().x + m_ServerHostMapSelector->getWindowFrame().width() + 2, winSize.y - (padding_y - 2));
-    m_MapDescriptionWindow->setSize(map_selector_width, map_selector_height + 2);
+    m_MapDescriptionWindow->setSize(first_2_boxes_width_top / 2.0f, top_content_height + 2);
 }
 
 void HostScreen::update(const double& dt) {
@@ -195,4 +212,18 @@ void HostScreen::render() {
     m_ServerPort_TextBox->render();
     m_UserName_TextBox->render();
     m_BackgroundEdgeGraphic->render();
+
+    //render map screenshot
+    const auto& current_map_data = getMapSelectionWindow().getCurrentChoice();
+
+    auto& desc_frame = getMapDescriptionWindow().getWindowFrame();
+
+    const auto texture_frame_size = glm::vec2(desc_frame.height(), desc_frame.height());
+    const auto ss_pos = desc_frame.positionWorld() + glm::vec2(desc_frame.width(),0);
+    if (!current_map_data.map_name.empty()) {
+        Texture& texture = *(Texture*)current_map_data.map_screenshot_handle.get();
+        auto scl = texture_frame_size / glm::vec2(texture.size());
+        Renderer::renderTexture(texture, ss_pos + glm::vec2(4, 0), glm::vec4(1.0f), 0.0f, scl, 0.0141f, Alignment::TopLeft);
+    }
+    Renderer::renderBorder(1, ss_pos + glm::vec2(3, 0), glm::vec4(1, 1, 0, 1), texture_frame_size.x + 1, texture_frame_size.y, 0.0f, 0.014f, Alignment::TopLeft);
 }

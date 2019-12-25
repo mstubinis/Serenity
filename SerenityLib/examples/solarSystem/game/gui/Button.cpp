@@ -17,9 +17,23 @@ namespace Engine {
         struct emptyFunctor { template<class T> void operator()(T* r) const {} };
     };
 };
-
-void Button::internalSetSize() {
-    m_RenderElement.internal_calculate_sizes();
+void Button::setTextureHighlight(Texture* texture) {
+    m_RenderElement.setTextureHighlight(texture);
+}
+void Button::setTextureCornerHighlight(Texture* texture) {
+    m_RenderElement.setTextureCornerHighlight(texture);
+}
+void Button::setTextureEdgeHighlight(Texture* texture) {
+    m_RenderElement.setTextureEdgeHighlight(texture);
+}
+void Button::setTextureHighlight(Handle& handle) {
+    m_RenderElement.setTextureHighlight(handle);
+}
+void Button::setTextureCornerHighlight(Handle& handle) {
+    m_RenderElement.setTextureCornerHighlight(handle);
+}
+void Button::setTextureEdgeHighlight(Handle& handle) {
+    m_RenderElement.setTextureEdgeHighlight(handle);
 }
 void Button::setTexture(Texture* texture) {
     m_RenderElement.setTexture(texture);
@@ -41,15 +55,12 @@ void Button::setTextureEdge(Handle& handle) {
 }
 void Button::setWidth(const float w) {
     Widget::setWidth(w);
-    m_RenderElement.internal_calculate_sizes();
 }
 void Button::setHeight(const float h) {
     Widget::setHeight(h);
-    m_RenderElement.internal_calculate_sizes();
 }
 void Button::setSize(const float width, const float height) {
     Widget::setSize(width, height);
-    m_RenderElement.internal_calculate_sizes();
 }
 Button::Button(const Font& font, const float x, const float y, const float width, const float height) : Widget(x, y, width, height), m_RenderElement(*this){
     setFont(font);
@@ -59,26 +70,33 @@ Button::Button(const Font& font, const float x, const float y, const float width
     m_Padding = 20.0f;
     setAlignment(Alignment::Center);
     setTextAlignment(TextAlignment::Center);
-    internalSetSize();
+
     enable();
 
     setColor(m_Color);
 
     setDepth(0.008f);
-
+    m_PulseClicked = false;
+    m_RenderElement.enableTexture(true);
     m_RenderElement.setTextureCorner(ResourceManifest::GUITextureCorner);
     m_RenderElement.setTextureEdge(ResourceManifest::GUITextureSide);
+
+    m_RenderElement.setTextureCornerHighlight(ResourceManifest::GUITextureCorner);
+    m_RenderElement.setTextureEdgeHighlight(ResourceManifest::GUITextureSide);
 }
 Button::Button(const Font& font, const glm::vec2& position, const float width, const float height) : Button(font, position.x, position.y, width, height) {
 }
 Button::~Button() {
 
 }
-void Button::enableCenterTexture(const bool enable) {
-    m_RenderElement.enableCenterTexture(enable);
+void Button::enableTexture(const bool enabled) {
+    m_RenderElement.enableTexture(enabled);
 }
-void Button::disableCenterTexture() {
-    m_RenderElement.disableCenterTexture();
+void Button::enableTextureCorner(const bool enabled) {
+    m_RenderElement.enableTextureCorner(enabled);
+}
+void Button::enableTextureEdge(const bool enabled) {
+    m_RenderElement.enableTextureEdge(enabled);
 }
 void Button::setDepth(const float& depth) {
     m_RenderElement.setDepth(depth);
@@ -106,7 +124,6 @@ void Button::setTextScale(const glm::vec2& scale) {
 void Button::setTextScale(const float x, const float y) {
     m_TextScale.x = x;
     m_TextScale.y = y;
-    internalSetSize();
 }
 void Button::setTextAlignment(const TextAlignment::Type& textAlignment) {
     m_TextAlignment = textAlignment;
@@ -154,18 +171,25 @@ void Button::setFont(const Font& font) {
 }
 void Button::setText(const char* text) {
     m_Text = text;
-    internalSetSize();
 }
 void Button::setText(const string& text) {
     m_Text = text;
-    internalSetSize();
+}
+void Button::setOnClickToBePulsed(const bool pulsed) {
+    m_PulseClicked = pulsed;
 }
 void Button::update(const double& dt) {
     Widget::update(dt);
     if (!m_Hidden) {
         if (m_Enabled) {
-            if (m_MouseIsOver == true && Engine::isMouseButtonDownOnce(MouseButton::Left) == true) {
-                m_FunctorOnClick();
+            if (!m_PulseClicked) {
+                if (m_MouseIsOver == true && Engine::isMouseButtonDownOnce(MouseButton::Left)) {
+                    m_FunctorOnClick();
+                }
+            }else{
+                if (m_MouseIsOver == true && Engine::isMouseButtonDown(MouseButton::Left)) {
+                    m_FunctorOnClick();
+                }
             }
         }
     }
@@ -176,7 +200,7 @@ void Button::render(const glm::vec4& scissor) {
 
         m_RenderElement.render(scissor);
 
-        auto corner = m_RenderElement.getEdgeWidth() + (m_RenderElement.getCornerWidth() / 2.0f);
+        auto corner = m_RenderElement.getEdgeWidth(3) + (m_RenderElement.getCornerWidth() / 2.0f);
         auto corner_width_half = corner / 2.0f;
 
         auto txt_height = getTextHeight();

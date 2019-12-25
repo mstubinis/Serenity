@@ -20,9 +20,10 @@
 using namespace std;
 
 MapDescriptionWindow::MapDescriptionWindow(Font& font, const float& x, const float& y, const float& width, const float& height) : m_Font(font){
-    m_ScrollFrame = NEW ScrollFrame(x, y, width, height);
+    m_UserPointer = nullptr;
+    m_ScrollFrame = NEW ScrollFrame(font, x, y, width, height);
     m_ScrollFrame->setColor(1, 1, 0, 1);
-    m_ScrollFrame->setContentPadding(0.0f);
+    m_ScrollFrame->setContentPadding(30.0f);
 }
 MapDescriptionWindow::~MapDescriptionWindow() {
     SAFE_DELETE(m_ScrollFrame);
@@ -59,9 +60,7 @@ void* MapDescriptionWindow::getUserPointer() {
     return m_UserPointer;
 }
 void MapDescriptionWindow::clear() {
-    auto& content = m_ScrollFrame->content();
-    SAFE_DELETE_VECTOR(content);
-    content.clear();
+    m_ScrollFrame->clear();
 }
 
 void MapDescriptionWindow::addContent(Widget* widget) {

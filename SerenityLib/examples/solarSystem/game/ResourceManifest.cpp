@@ -218,6 +218,8 @@ void ResourceManifest::init(){
     RadarAntiCloakBarMaterial = Resources::loadMaterialAsync("RadarAntiCloakBar", BasePath + "data/Textures/HUD/RadarAntiCloakBar.dds");
     RadarAntiCloakBarBackgroundMaterial = Resources::loadMaterialAsync("RadarAntiCloakBarBackground", BasePath + "data/Textures/HUD/RadarAntiCloakBarBackground.dds");
     
+    ((Texture*)RadarMaterial.get())->setFilter(TextureFilter::Nearest);
+
     epriv::threading::waitForAll();
 
 
@@ -366,12 +368,14 @@ void ResourceManifest::init(){
     ShipStatusBackgroundHUDTexture = Resources::loadTextureAsync(BasePath + "data/Textures/HUD/ShipStatusBackground.dds");
     ShipStatusBackgroundBorderHUDTexture = Resources::loadTextureAsync(BasePath + "data/Textures/HUD/ShipStatusBackgroundBorder.dds");
 
+    ((Texture*)ShipStatusBackgroundHUDTexture.get())->setFilter(TextureFilter::Nearest);
+    ((Texture*)ShipStatusBackgroundBorderHUDTexture.get())->setFilter(TextureFilter::Nearest);
+
+
     GUITextureCorner = Resources::loadTexture(BasePath + "data/Textures/HUD/GUI_Corner.dds");
     GUITextureSide = Resources::loadTexture(BasePath + "data/Textures/HUD/GUI_Side.dds");
     ((Texture*)GUITextureCorner.get())->setFilter(TextureFilter::Nearest);
     ((Texture*)GUITextureSide.get())->setFilter(TextureFilter::Nearest);
-    ((Texture*)GUITextureCorner.get())->setWrapping(TextureWrap::ClampToEdge);
-    ((Texture*)GUITextureSide.get())->setWrapping(TextureWrap::ClampToEdge);
 
     //sounds
     SoundCloakingActivated = Resources::addSoundData(BasePath + "data/Sounds/effects/cloaking.ogg");

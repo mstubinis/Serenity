@@ -769,6 +769,7 @@ epriv::EShaders::depth_of_field =
     "    float factor = (depth - Data.z);\n"
     "    vec2 dofblur = vec2(clamp(factor * Data.y, -Data.x, Data.x));\n"
     //   vec4 col = DOFExecute(inTexture, texcoords, aspectcorrect, dofblur);
+    //TODO: use the above commented function only and test if it works.
     "    vec4 col = vec4(0.0);\n"
     "    col += texture2D(inTexture, texcoords);\n"
     "    col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur);\n"
@@ -800,6 +801,7 @@ epriv::EShaders::depth_of_field =
     "        col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur * DOFWeight[k]);\n"
     "    }\n"
     "    gl_FragColor.rgb = col.rgb * 0.02439; \n" //0.02439 = 1.0 / 41.0
+
     //"    gl_FragColor.a = 1.0; \n"
     "}\n"
     "\n";

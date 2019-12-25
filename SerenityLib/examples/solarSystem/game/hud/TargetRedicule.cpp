@@ -64,7 +64,6 @@ void TargetRedicule::render() {
             }
             m_Font.renderText(name + "\n" + stringRepresentation, glm::vec2(pos.x + 20, pos.y + 20), glm::vec4(1, 1, 0, 1), 0, glm::vec2(0.7f, 0.7f), 0.1f);
 
-
             const auto healthDisplayWidthMax = 100.0f;
             Ship* ship_target = dynamic_cast<Ship*>(target);
             if (ship_target) {
@@ -72,7 +71,6 @@ void TargetRedicule::render() {
                 auto* _hull = static_cast<ShipSystemHull*>(ship_target->getShipSystem(ShipSystemType::Hull));
                 if (shields) {
                     auto& shield = *shields;
-
                     auto startX = 0.0f;
                     auto incrX = (healthDisplayWidthMax / 6.0f) - 2.0f;
                     for (size_t i = 0; i < 6; ++i) {
@@ -80,10 +78,6 @@ void TargetRedicule::render() {
                         Renderer::renderRectangle(glm::vec2((pos.x - (healthDisplayWidthMax / 2)) + startX, pos.y - 26.0f), glm::vec4(0.0f, 0.674f, 1.0f, 1.0f), shield.getHealthPercent(i) * incrX, 2, 0, 0.09f, Alignment::BottomLeft);
                         startX += (incrX + 3.0f);
                     }
-
-
-
-
                 }
                 if (_hull) {
                     auto& hull = *_hull;

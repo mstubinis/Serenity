@@ -6,6 +6,7 @@
 #include <core/engine/renderer/Engine_Renderer.h>
 
 using namespace Engine;
+using namespace std;
 
 Widget::Widget(const float x, const float y, const float width, const float height) {
     m_Alignment   = Alignment::TopLeft;
@@ -78,8 +79,8 @@ const glm::vec4& Widget::color() const {
 const glm::vec2& Widget::positionLocal() const {
     return m_Position;
 }
-const glm::vec2  Widget::positionWorld() const {
-    std::vector<Widget*> list;
+const glm::vec2 Widget::positionWorld() const {
+    vector<Widget*> list;
     Widget* parent = m_Parent;
     while (parent) {
         list.push_back(parent);
@@ -114,11 +115,11 @@ const bool Widget::isMouseOver() const {
 }
 
 void Widget::setPosition(const float x, const float y) {
-    m_Position.x = x;
-    m_Position.y = y;
+    m_Position.x = static_cast<float>(static_cast<int>(x));
+    m_Position.y = static_cast<float>(static_cast<int>(y));
 }
 void Widget::setPosition(const glm::vec2& position) {
-    m_Position = position;
+    Widget::setPosition(position.x, position.y);
 }
 
 void Widget::setColor(const float& r, const float& g, const float& b, const float& a) {
@@ -189,7 +190,7 @@ const glm::vec2 Widget::positionFromAlignmentWorld(const float width, const floa
             break;
         }
     }
-    return positionWorld() + offset;
+    return glm::vec2(glm::ivec2(positionWorld() + offset));
 }
 const glm::vec2 Widget::positionFromAlignmentWorld() {
     return positionFromAlignmentWorld(m_Width, m_Height, m_Alignment);
@@ -231,7 +232,7 @@ const glm::vec2 Widget::positionFromAlignment(const float width, const float hei
             break;
         }
     }
-    return positionLocal() + offset;
+    return glm::vec2(glm::ivec2(positionLocal() + offset));
 }
 const glm::vec2 Widget::positionFromAlignment() {
     return positionFromAlignment(m_Width, m_Height, m_Alignment);

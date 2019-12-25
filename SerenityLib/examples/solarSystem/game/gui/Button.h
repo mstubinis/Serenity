@@ -20,11 +20,11 @@ class Button : public Widget {
         std::function<void()>     m_FunctorOnClick;
         float                     m_Padding;
         bool                      m_Enabled;
+        bool                      m_PulseClicked;
         TextAlignment::Type       m_TextAlignment;
 
         GUIRenderElement          m_RenderElement;
 
-        void internalSetSize();
     public:
         Button(const Font& font, const float x, const float y, const float width, const float height);
         Button(const Font& font, const glm::vec2& position, const float width, const float height);
@@ -32,15 +32,14 @@ class Button : public Widget {
 
         const std::string& text() const;
 
+        void setOnClickToBePulsed(const bool pulsed = true);
+
         template<class T> void setOnClickFunctor(const T& functor) { 
             m_FunctorOnClick = std::bind<void>(functor, this); 
         }
 
         void enable();
         void disable();
-
-        void enableCenterTexture(const bool = true);
-        void disableCenterTexture();
 
         void setDepth(const float& depth);
 
@@ -59,12 +58,23 @@ class Button : public Widget {
         virtual void setTextScale(const float x, const float y);
         virtual void setTextScale(const float scale);
 
+        void enableTexture(const bool);
+        void enableTextureCorner(const bool);
+        void enableTextureEdge(const bool);
+
+
         void setTexture(Texture*);
         void setTextureCorner(Texture*);
         void setTextureEdge(Texture*);
         void setTexture(Handle&);
         void setTextureCorner(Handle&);
         void setTextureEdge(Handle&);
+        void setTextureHighlight(Texture*);
+        void setTextureCornerHighlight(Texture*);
+        void setTextureEdgeHighlight(Texture*);
+        void setTextureHighlight(Handle&);
+        void setTextureCornerHighlight(Handle&);
+        void setTextureEdgeHighlight(Handle&);
 
         const glm::vec2& getTextScale() const;
 

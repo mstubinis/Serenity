@@ -43,8 +43,6 @@ struct MapSelectorButtonOnClick final{ void operator()(Button* button) const {
 
 struct CycleGameModeLeftButtonOnClick final { void operator()(Button* button) const {
     auto& window = *static_cast<ServerHostingMapSelectorWindow*>(button->getUserPointer());
-    window.clear_chosen_map();
-    window.clear();
     int num = static_cast<int>(window.m_CurrentGameMode);
     --num;
     if (num < 0) {
@@ -52,11 +50,10 @@ struct CycleGameModeLeftButtonOnClick final { void operator()(Button* button) co
     }
     window.m_CurrentGameMode = static_cast<GameplayModeType::Mode>(num);
     window.recalculate_maps();
+    window.m_HostScreen.getMapDescriptionWindow().clear();
 }};
 struct CycleGameModeRightButtonOnClick final { void operator()(Button* button) const {
     auto& window = *static_cast<ServerHostingMapSelectorWindow*>(button->getUserPointer());
-    window.clear_chosen_map();
-    window.clear();
     int num = static_cast<int>(window.m_CurrentGameMode);
     ++num;
     if (num >= GameplayModeType::_TOTAL) {
@@ -64,6 +61,7 @@ struct CycleGameModeRightButtonOnClick final { void operator()(Button* button) c
     }
     window.m_CurrentGameMode = static_cast<GameplayModeType::Mode>(num);
     window.recalculate_maps();
+    window.m_HostScreen.getMapDescriptionWindow().clear();
 }};
 
 
@@ -73,7 +71,7 @@ ServerHostingMapSelectorWindow::ServerHostingMapSelectorWindow(HostScreen& host,
     m_UserPointer        = nullptr;
     m_CurrentGameMode    = GameplayModeType::FFA;
 
-    m_MapFileScrollFrame = NEW ScrollFrame(x, y, content_window_size.x, content_window_size.y);
+    m_MapFileScrollFrame = NEW ScrollFrame(font, x, y, content_window_size.x, content_window_size.y);
     m_MapFileScrollFrame->setColor(1, 1, 0, 1);
     m_MapFileScrollFrame->setContentPadding(0.0f);
 
@@ -115,6 +113,7 @@ void ServerHostingMapSelectorWindow::clear_chosen_map() {
     }
 }
 void ServerHostingMapSelectorWindow::recalculate_maps() {
+    clear();
     for (auto& itr : Map::DATABASE) {     
         auto& data = itr.second;
         for (auto& game_mode_int : data.map_valid_game_modes) {
@@ -134,10 +133,15 @@ void ServerHostingMapSelectorWindow::recalculate_maps() {
                 button.setOnClickFunctor(MapSelectorButtonOnClick());
                 button.setTextureCorner(nullptr);
                 button.setTextureEdge(nullptr);
+                button.setTextureCornerHighlight(nullptr);
+                button.setTextureEdgeHighlight(nullptr);
+                button.enableTextureEdge(false);
+                button.enableTextureCorner(false);
+
                 const auto width_ = m_MapFileScrollFrame->width();
                 button.setWidth(width_);
 
-                m_MapFileScrollFrame->addContent(&button);
+                addContent(&button);
             }
         }
     }
@@ -148,10 +152,11 @@ const MapEntryData& ServerHostingMapSelectorWindow::getCurrentChoice() const {
 void ServerHostingMapSelectorWindow::setSize(const float& w, const float& h) {
     const auto content_window_size = glm::vec2(w, h) - glm::vec2(0, bottom_bar_height);
 
-    m_MapFileScrollFrame->setSize(content_window_size.x, content_window_size.y);
     for (auto& content : m_MapFileScrollFrame->content()) {
-        content->setWidth(m_MapFileScrollFrame->width());
+        content->setWidth(content_window_size.x);
     }
+    m_MapFileScrollFrame->setSize(content_window_size.x, content_window_size.y);
+
 
     const auto pos = m_MapFileScrollFrame->position();
     const auto frame_size = glm::vec2(m_MapFileScrollFrame->width(), m_MapFileScrollFrame->height());
@@ -181,13 +186,13 @@ void* ServerHostingMapSelectorWindow::getUserPointer() {
     return m_UserPointer;
 }
 void ServerHostingMapSelectorWindow::clear() {
+    clear_chosen_map();
     auto& content = m_MapFileScrollFrame->content();
     for (auto& widget : content) {
         auto* map_ptr_data = static_cast<ServerHostingMapSelectorWindow::ButtonPtr*>(widget->getUserPointer());
         SAFE_DELETE(map_ptr_data);
     }
-    SAFE_DELETE_VECTOR(content);
-    content.clear();
+    m_MapFileScrollFrame->clear();
 }
 void ServerHostingMapSelectorWindow::addContent(Widget* widget) {
     m_MapFileScrollFrame->addContent(widget);
@@ -222,16 +227,4 @@ void ServerHostingMapSelectorWindow::render() {
         0.0159f,
         TextAlignment::Center
     );
-
-    //render map screenshot
-
-    const auto& current_map_data = m_HostScreen.getMapSelectionWindow().getCurrentChoice();
-    const auto map_selector_size = glm::vec2(m_HostScreen.getMapDescriptionWindow().getWindowFrame().width(), m_HostScreen.getMapDescriptionWindow().getWindowFrame().height());
-    const auto ss_pos = pos + glm::vec2(m_MapFileScrollFrame->width() + m_HostScreen.getMapDescriptionWindow().getWindowFrame().width(), 0);
-    if (!current_map_data.map_name.empty()) {     
-        Texture& texture = *(Texture*)current_map_data.map_screenshot_handle.get();
-        auto scl = map_selector_size / glm::vec2(texture.size());
-        Renderer::renderTexture(texture, ss_pos + glm::vec2(6,0), glm::vec4(1.0f), 0.0f, scl, 0.0141f, Alignment::TopLeft);
-    }
-    Renderer::renderBorder(1, ss_pos + glm::vec2(5,0), glm::vec4(1, 1, 0, 1), map_selector_size.x + 2, map_selector_size.y, 0.0f, 0.014f, Alignment::TopLeft);
 }

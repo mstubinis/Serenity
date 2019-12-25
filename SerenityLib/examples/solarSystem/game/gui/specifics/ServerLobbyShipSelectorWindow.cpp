@@ -29,7 +29,7 @@ using namespace std;
 struct ShipSelectorButtonOnClick final { void operator()(Button* button) const {
     ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(button->getUserPointer());
     for (auto& widget : window.getWindowFrame().content()) {
-        widget->setColor(0.1f, 0.1f, 0.1f, 0.5f);
+        widget->setColor(0.1f, 0.1f, 0.1f, 0.0f);
     }
     button->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     const string& shipClass = button->text();
@@ -37,7 +37,7 @@ struct ShipSelectorButtonOnClick final { void operator()(Button* button) const {
 }};
 
 ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& menu_scene, Camera& game_camera, const Font& font, const float x, const float y, const float w, const float h) : m_Core(core), m_Font(const_cast<Font&>(font)) {
-    m_ShipWindow = NEW ScrollFrame(x, y, w, h);
+    m_ShipWindow = NEW ScrollFrame(font, x, y, w, h);
     m_ShipWindow->setContentPadding(0.0f);  
     m_3DViewer = NEW Ship3DViewer(core, menu_scene, game_camera, x + m_ShipWindow->width() + 3.0f, y - h, h - 1.0f, h);
 }
@@ -49,7 +49,7 @@ void ServerLobbyShipSelectorWindow::addShipButton(const string& shipClass) {
     auto& textColor = Ships::Database.at(shipClass).FactionInformation.ColorText;
     Button& shipbutton = *(NEW Button(m_Font, 0, 0, 100, 40));
     shipbutton.setText(shipClass);
-    shipbutton.setColor(0.1f, 0.1f, 0.1f, 0.5f);
+    shipbutton.setColor(0.1f, 0.1f, 0.1f, 0.0f);
     shipbutton.setTextColor(textColor.r, textColor.g, textColor.b, 1.0f);
     shipbutton.setAlignment(Alignment::TopLeft);
     shipbutton.setTextAlignment(TextAlignment::Left);
@@ -57,7 +57,12 @@ void ServerLobbyShipSelectorWindow::addShipButton(const string& shipClass) {
     shipbutton.setOnClickFunctor(ShipSelectorButtonOnClick());
     shipbutton.setTextureCorner(nullptr);
     shipbutton.setTextureEdge(nullptr);
-    shipbutton.setWidth(m_ShipWindow->width());
+    shipbutton.setTextureCornerHighlight(nullptr);
+    shipbutton.setTextureEdgeHighlight(nullptr);
+    shipbutton.enableTextureEdge(false);
+    shipbutton.enableTextureCorner(false);
+
+    shipbutton.setWidth(m_ShipWindow->width()/* - 15*/);
     addContent(&shipbutton);
 }
 void ServerLobbyShipSelectorWindow::setShipClass(const string& ship_class) {

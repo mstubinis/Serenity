@@ -1372,14 +1372,7 @@ SecondaryWeaponTorpedo& Ship::getSecondaryWeaponTorpedo(const uint index) {
     return *weapons.m_SecondaryWeaponsTorpedos[index].torpedo;
 }
 void Ship::update(const double& dt) {
-    //if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
-        //setState(ShipState::UndergoingDestruction);
 
-
-        //auto& map = static_cast<Map&>(entity().scene());
-        //auto& team = *m_Client.getGameplayMode()->getTeams().at(TeamNumber::Team_2);
-        //map.createShip(AIType::AI_Stationary, team, m_Client, "Federation Defense Platform", "Defense Platform " + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -20.0));
-    //}
 }
 void Ship::fireBeams(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship) {
     weapons.fireBeamWeapons(target, target_as_ship, weapons.m_PrimaryWeaponsBeams);

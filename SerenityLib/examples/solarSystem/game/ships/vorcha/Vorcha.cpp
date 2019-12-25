@@ -2,6 +2,9 @@
 #include "../../ResourceManifest.h"
 #include "../shipSystems/ShipSystemWeapons.h"
 
+#include <core/engine/materials/Material.h>
+#include <core/engine/events/Engine_Events.h>
+
 #include "../../weapons/cannons/DisruptorCannon.h"
 #include "../../weapons/torpedos/KlingonPhotonTorpedo.h"
 #include "../../weapons/beams/DisruptorBeam.h"
@@ -71,10 +74,8 @@ Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
 
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
-    vector<glm::vec3> forward_heavy_beam_windup{
-        glm::vec3(0, 0.080577f, -2.27926f),
-    };
-    auto* forward_heavy_beam = NEW DisruptorBeam(_this, map, glm::vec3(0, 0.080577f, -2.27926f), glm::vec3(0, 0, -1), 25.0f, forward_heavy_beam_windup, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 2.2f, 2.2f, 10.0f);
+    vector<glm::vec3> forward_heavy_beam_pts{ glm::vec3(0, 0.080577f, -2.27926f), };
+    auto* forward_heavy_beam = NEW DisruptorBeam(_this, map, forward_heavy_beam_pts[0], glm::vec3(0, 0, -1), 25.0f, forward_heavy_beam_pts, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 2.2f, 2.2f, 10.0f);
 
     auto* forward_front_right_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(0.159582f, 0.080577f, -2.47036f), glm::vec3(0, 0, -1), 25.0f, 4, 200.0f);
     auto* forward_front_left_dis_cannon = NEW DisruptorCannon(_this, map, glm::vec3(-0.159582f, 0.080577f, -2.47036f), glm::vec3(0, 0, -1), 25.0f, 4, 200.0f);
@@ -116,14 +117,10 @@ Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
     weapons.addPrimaryWeaponCannon(*port_dis_cannon);
     weapons.addPrimaryWeaponCannon(*star_dis_cannon);
 
-    vector<glm::vec3> port_dis_beam_windup{
-        glm::vec3(-1.42054f, -0.014244f, 0.857809f),
-    };
-    vector<glm::vec3> star_dis_beam_windup{
-        glm::vec3(1.42054f, -0.014244f, 0.857809f),
-    };
-    auto* port_dis_beam = NEW DisruptorBeam(_this, map, glm::vec3(-1.42054f, -0.014244f, 0.857809f), glm::vec3(-1, 0, 0), 38.0f, port_dis_beam_windup, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 1.0f, 1.0f, 10.0f);
-    auto* star_dis_beam = NEW DisruptorBeam(_this, map, glm::vec3(1.42054f, -0.014244f, 0.857809f), glm::vec3(1, 0, 0), 38.0f, star_dis_beam_windup, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 1.0f, 1.0f, 10.0f);
+    vector<glm::vec3> port_dis_beam_windup{ glm::vec3(-1.42054f, -0.014244f, 0.857809f), };
+    vector<glm::vec3> star_dis_beam_windup{ glm::vec3(1.42054f, -0.014244f, 0.857809f), };
+    auto* port_dis_beam = NEW DisruptorBeam(_this, map, port_dis_beam_windup[0], glm::vec3(-1, 0, 0), 38.0f, port_dis_beam_windup, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 1.0f, 1.0f, 10.0f);
+    auto* star_dis_beam = NEW DisruptorBeam(_this, map, star_dis_beam_windup[0], glm::vec3(1, 0, 0), 38.0f, star_dis_beam_windup, 1100.0f, 4.0f, 1.05f, 2.5f, 1.8f, 100.0f, 1, 5.0f, 0, 1.0f, 1.0f, 10.0f);
     weapons.addPrimaryWeaponBeam(*port_dis_beam);
     weapons.addPrimaryWeaponBeam(*star_dis_beam);
 
@@ -228,4 +225,8 @@ Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, cons
     m_AI->installThreatTable(map);
 }
 Vorcha::~Vorcha() {
+}
+void Vorcha::update(const double& dt) {
+
+    Ship::update(dt);
 }

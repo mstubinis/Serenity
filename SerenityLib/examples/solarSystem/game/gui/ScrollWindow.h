@@ -20,10 +20,12 @@ class ScrollFrame: public Widget {
         void internal_recalculate_content_sizes();
         void fit_widget_to_window(Widget* widget);
     public:
-        ScrollFrame(const float x, const float y, const float w, const float h);
+        ScrollFrame(const Font& font, const float x, const float y, const float w, const float h);
         virtual ~ScrollFrame();
 
         const float contentHeight() const;
+
+        void clear();
 
         void addContent(Widget* widget);
         void removeContent(Widget* widget);

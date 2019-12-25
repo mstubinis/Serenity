@@ -32,6 +32,10 @@ TextBox::TextBox(const string& label, const Font& font, const unsigned short max
 
     m_RenderElement.setTextureCorner(nullptr);
     m_RenderElement.setTextureEdge(nullptr);
+    m_RenderElement.setTextureCornerHighlight(nullptr);
+    m_RenderElement.setTextureEdgeHighlight(nullptr);
+    m_RenderElement.enableTextureEdge(false);
+    m_RenderElement.enableTextureCorner(false);
 }
 TextBox::TextBox(const string& label, const Font& font, const unsigned short maxCharacters, const glm::vec2& position) : TextBox(label, font, maxCharacters, position.x, position.y) {
 
@@ -44,7 +48,7 @@ TextBox::~TextBox() {
 void TextBox::internalUpdateSize() {
     m_Width = ((m_Font->getTextWidth("X") * m_MaxCharacters) + 20.0f) * m_TextScale.x;
     m_Height = (m_Font->getTextHeight("X") + 20.0f) * m_TextScale.y;
-    m_RenderElement.internal_calculate_sizes();
+    //m_RenderElement.internal_calculate_sizes();
 }
 
 const string& TextBox::getLabel() const {

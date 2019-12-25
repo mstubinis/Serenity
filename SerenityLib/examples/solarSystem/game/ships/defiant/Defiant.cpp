@@ -248,4 +248,5 @@ void Defiant::update(const double& dt) {
             togglePerk1CannonsToBeams();
         }
     }
+    Ship::update(dt);
 }
