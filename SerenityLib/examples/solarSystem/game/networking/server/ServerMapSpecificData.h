@@ -20,6 +20,8 @@ class ShipRespawning final {
 
         void processShip(const std::string& shipMapKey, const std::string& shipClass, const std::string& closest_spawn_anchor);
 
+        void removeShip(const std::string& shipMapKey);
+
         void cleanup();
         void update(const double& dt);
 };
@@ -34,6 +36,8 @@ class CollisionEntries final {
     public:
         CollisionEntries(Server&);
         ~CollisionEntries();
+
+        void removeShip(const std::string& shipMapKey);
 
         void processCollision(const PacketCollisionEvent& packet, Map& map);
 
@@ -58,6 +62,7 @@ class ServerMapSpecificData final {
         ServerMapSpecificData(Server&);
         ~ServerMapSpecificData();
 
+        void removeShip(const std::string& shipMapKey);
         void cleanup();
 
         void update(const double& dt);

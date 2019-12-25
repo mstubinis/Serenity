@@ -43,40 +43,56 @@ void GUIRenderElement::TextureData::render(const float& depth, const bool& mouse
     }
 }
 
-
-GUIRenderElement::GUIRenderElement(Widget& owner) : m_Owner(owner) {
+GUIRenderElement::GUIRenderElement() {
+    m_Owner = nullptr;
     m_Textures.resize(GUIRenderElement::TextureIndex::_TOTAL);
     m_BorderColors.resize(GUIRenderElement::BorderIndex::_TOTAL, glm::vec4(1.0f));
-
     m_PaddingSize = m_BorderSize = glm::ivec4(0);
-
-    m_Depth          = 0.05f;
-
+    m_Depth = 0.05f;
     enableMouseover();
+}
+GUIRenderElement::GUIRenderElement(Widget* owner) : GUIRenderElement(){
+    m_Owner = owner;
 }
 GUIRenderElement::~GUIRenderElement() {
 
 }
-unsigned int GUIRenderElement::get_corner_size(const glm::vec2& total_size) {
-    unsigned int ret = 0;
+int GUIRenderElement::get_corner_size(const glm::vec2& total_size) {
+    int ret = 0;
     if (m_Textures[TextureIndex::TopLeft].texture) {
-        ret = m_Textures[TextureIndex::TopLeft].texture->width();
+        ret = static_cast<int>(m_Textures[TextureIndex::TopLeft].texture->width());
     }
     return ret;
 }
-unsigned int GUIRenderElement::get_left_edge_size(const glm::vec2& total_size) {
-    unsigned int ret = 0;
+int GUIRenderElement::get_left_edge_size(const glm::vec2& total_size) {
+    int ret = 0;
     if (m_Textures[TextureIndex::Left].texture) {
-        ret = static_cast<unsigned int>(total_size.y) - (get_corner_size(total_size) * 2);
+        ret = static_cast<int>(total_size.y) - (get_corner_size(total_size) * 2) - m_BorderSize.z - m_BorderSize.w - m_PaddingSize.z - m_PaddingSize.w;
+    }else{
+        ret = static_cast<int>(m_Owner->height());
     }
     return ret;
 }
-unsigned int GUIRenderElement::get_top_edge_size(const glm::vec2& total_size) {
-    unsigned int ret = 0;
+int GUIRenderElement::get_top_edge_size(const glm::vec2& total_size) {
+    int ret = 0;
     if (m_Textures[TextureIndex::Top].texture) {
-        ret = static_cast<unsigned int>(total_size.x) - (get_corner_size(total_size) * 2);
+        ret = static_cast<int>(total_size.x) - (get_corner_size(total_size) * 2) - m_BorderSize.x - m_BorderSize.y - m_PaddingSize.x - m_PaddingSize.y;
+    }else {
+        ret = static_cast<int>(m_Owner->width());
     }
     return ret;
+}
+void GUIRenderElement::setBorderSize(const unsigned int& size) {
+    m_BorderSize = glm::ivec4(size);
+}
+void GUIRenderElement::setBorderSize(const unsigned int& size, const unsigned int& index) {
+    m_BorderSize[index] = size;
+}
+void GUIRenderElement::setPaddingSize(const unsigned int& size) {
+    m_PaddingSize = glm::ivec4(size);
+}
+void GUIRenderElement::setPaddingSize(const unsigned int& size, const unsigned int& index) {
+    m_PaddingSize[index] = size;
 }
 void GUIRenderElement::setBorderColor(const float& r, const float& g, const float& b, const float& a) {
     for (size_t i = 0; i < m_BorderColors.size(); ++i) {
@@ -108,89 +124,92 @@ void GUIRenderElement::render() {
 }
 void GUIRenderElement::render(const glm::vec4& scissor) {
     bool mouseOver = false;
-    if (m_Owner.isMouseOver() && m_EnableMouseover) {
+    if (m_Owner->isMouseOver() && m_EnableMouseover) {
         mouseOver = true;
     }
 
-    const glm::vec2 total_size = glm::vec2(m_Owner.width(), m_Owner.height());
+    const glm::vec2 total_size = glm::vec2(m_Owner->width(), m_Owner->height());
 
-
-    const auto pos = m_Owner.positionFromAlignmentWorld();
-
-    const auto corner_size = get_corner_size(total_size);
-    const auto left_edge_size = get_left_edge_size(total_size);
-    const auto top_edge_size = get_top_edge_size(total_size);
+    const auto pos             = m_Owner->positionFromAlignmentWorld();
+    const auto corner_size     = get_corner_size(total_size);
+    const auto left_edge_size  = get_left_edge_size(total_size);
+    const auto top_edge_size   = get_top_edge_size(total_size);
 
     m_Textures[TextureIndex::TopLeft].    render(m_Depth, mouseOver, pos + glm::vec2(
         m_BorderSize.x + m_PaddingSize.x + (corner_size / 2),
-        (m_BorderSize.y + m_PaddingSize.y + (corner_size / 2))
-    ), glm::vec2(1.0f), scissor, 90.0f, Alignment::Center);
+        (corner_size + left_edge_size + (corner_size / 2) + m_BorderSize.w + m_PaddingSize.w)
+    ), glm::vec2(1.0f), scissor, 0.0f, Alignment::Center);
     m_Textures[TextureIndex::BottomLeft]. render(m_Depth, mouseOver, pos + glm::vec2(
         m_BorderSize.x + m_PaddingSize.x + (corner_size / 2),
-        (m_BorderSize.y + m_PaddingSize.y + corner_size + left_edge_size + (corner_size / 2))
-    ), glm::vec2(1.0f), scissor, 0.0f, Alignment::Center);
+        (m_BorderSize.z + m_PaddingSize.z) + (corner_size / 2)
+    ), glm::vec2(1.0f), scissor, 90.0f, Alignment::Center);
     m_Textures[TextureIndex::TopRight].   render(m_Depth, mouseOver, pos + glm::vec2(
-        m_BorderSize.x + m_PaddingSize.x + corner_size + top_edge_size + (corner_size / 2),
+        (corner_size + top_edge_size + (corner_size / 2)) + m_BorderSize.y + m_PaddingSize.y,
+        (corner_size + left_edge_size + (corner_size / 2) + m_BorderSize.w + m_PaddingSize.w)
+    ), glm::vec2(1.0f), scissor, 270.0f, Alignment::Center);
+    m_Textures[TextureIndex::BottomRight].render(m_Depth, mouseOver, pos + glm::vec2(
+        (corner_size + top_edge_size + (corner_size / 2)) + m_BorderSize.y + m_PaddingSize.y,
         m_BorderSize.y + m_PaddingSize.y + (corner_size / 2)
     ), glm::vec2(1.0f), scissor, 180.0f, Alignment::Center);
-    m_Textures[TextureIndex::BottomRight].render(m_Depth, mouseOver, pos + glm::vec2(
-        m_BorderSize.x + m_PaddingSize.x + corner_size + top_edge_size + (corner_size / 2),
-        m_BorderSize.y + m_PaddingSize.y + corner_size + left_edge_size + (corner_size / 2)
-    ), glm::vec2(1.0f), scissor, 270.0f, Alignment::Center);
 
 
-
-    m_Textures[TextureIndex::Left].render(m_Depth, mouseOver, pos + glm::vec2(
-        m_BorderSize.x + m_PaddingSize.x,
-        (m_BorderSize.y + m_PaddingSize.y + corner_size)
-    ), glm::vec2(1.0f, left_edge_size), scissor, 0.0f, Alignment::BottomLeft);
-    
-    m_Textures[TextureIndex::Right].render(m_Depth, mouseOver, pos + glm::vec2(
-        m_BorderSize.x + m_PaddingSize.x + top_edge_size + corner_size,
-        (m_BorderSize.y + m_PaddingSize.y + corner_size)
-    ), glm::vec2(1.0f, left_edge_size), scissor, 180.0f, Alignment::BottomLeft);
-
-    m_Textures[TextureIndex::Top].render(m_Depth, mouseOver, pos + glm::vec2(
-        m_BorderSize.x + m_PaddingSize.x + (top_edge_size / 2) + corner_size,
-        (m_BorderSize.y + m_PaddingSize.y + left_edge_size + corner_size + (corner_size / 2))
-    ), glm::vec2(1.0f, top_edge_size), scissor, 270.0f, Alignment::Center);
-    
-    m_Textures[TextureIndex::Bottom].render(m_Depth, mouseOver, pos + glm::vec2(
-        m_BorderSize.x + m_PaddingSize.x + (top_edge_size / 2) + corner_size,
-        (m_BorderSize.y + m_PaddingSize.y + (corner_size / 2))
-    ), glm::vec2(1.0f, top_edge_size), scissor, 90.0f, Alignment::Center);
-    
-    m_Textures[TextureIndex::Center].render(m_Depth, mouseOver, pos + glm::vec2(
-        m_BorderSize.x + m_PaddingSize.x + corner_size,
-        m_BorderSize.y + m_PaddingSize.y + corner_size
-    ), glm::vec2(total_size.x - (corner_size * 2), total_size.y - (corner_size * 2)), scissor, 0.0f, Alignment::BottomLeft);
-
-    //TODO: left, right, top, bottom borders
-    if (m_BorderSize.x > 0) {
-
+    if (left_edge_size > 0) {
+        m_Textures[TextureIndex::Left].render(m_Depth, mouseOver, pos + glm::vec2(
+            m_BorderSize.x + m_PaddingSize.x,
+            (m_BorderSize.z + m_PaddingSize.z + corner_size)
+        ), glm::vec2(1.0f, left_edge_size - m_BorderSize.z - m_PaddingSize.z), scissor, 0.0f, Alignment::BottomLeft);
     }
-    if (m_BorderSize.y > 0) {
-
+    if (left_edge_size > 0) {
+        m_Textures[TextureIndex::Right].render(m_Depth, mouseOver, pos + glm::vec2(
+            (top_edge_size + corner_size) - m_BorderSize.y - m_PaddingSize.y,
+            (m_BorderSize.y + m_PaddingSize.y + corner_size)
+        ), glm::vec2(1.0f, left_edge_size - m_BorderSize.z - m_PaddingSize.z), scissor, 180.0f, Alignment::BottomLeft);
     }
-    if (m_BorderSize.z > 0) {
-
+    if (top_edge_size > 0) {
+        m_Textures[TextureIndex::Top].render(m_Depth, mouseOver, pos + glm::vec2(
+            (top_edge_size / 2) + corner_size + (m_BorderSize.x + m_PaddingSize.x),
+            (m_BorderSize.y + m_PaddingSize.y + left_edge_size + corner_size + (corner_size / 2))
+        ), glm::vec2(1.0f, top_edge_size), scissor, 270.0f, Alignment::Center);
     }
-    if (m_BorderSize.w > 0) {
-
+    if (top_edge_size > 0) {
+        m_Textures[TextureIndex::Bottom].render(m_Depth, mouseOver, pos + glm::vec2(
+            (top_edge_size / 2) + corner_size + (m_BorderSize.x + m_PaddingSize.x),
+            (m_BorderSize.y + m_PaddingSize.y + (corner_size / 2))
+        ), glm::vec2(1.0f, top_edge_size), scissor, 90.0f, Alignment::Center);
     }
+    if (top_edge_size > 0 && left_edge_size > 0) {
+        m_Textures[TextureIndex::Center].render(m_Depth, mouseOver, pos + glm::vec2(
+            corner_size - (m_BorderSize.x - m_BorderSize.y),
+            m_BorderSize.y + m_PaddingSize.y + corner_size
+        ), glm::vec2(top_edge_size, left_edge_size), scissor, 0.0f, Alignment::BottomLeft);
+    }
+    if (m_BorderSize.x > 0) {//left
+        Renderer::renderRectangle(pos + glm::vec2(0, total_size.y), m_BorderColors[0], m_BorderSize.x, total_size.y, 0.0f, m_Depth - 0.001f, Alignment::TopLeft);
+    }
+    if (m_BorderSize.y > 0) {//right
+        Renderer::renderRectangle(pos + glm::vec2(total_size.x - m_BorderSize.y, total_size.y), m_BorderColors[1], m_BorderSize.y, total_size.y, 0.0f, m_Depth - 0.001f, Alignment::TopLeft);
+    }
+    if (m_BorderSize.z > 0) {//top
+        Renderer::renderRectangle(pos + glm::vec2(m_BorderSize.x, total_size.y), m_BorderColors[2], total_size.x - m_BorderSize.x - m_BorderSize.y, m_BorderSize.z, 0.0f, m_Depth - 0.001f, Alignment::TopLeft);
+    }
+    if (m_BorderSize.w > 0) {//bottom
+        Renderer::renderRectangle(pos + glm::vec2(m_BorderSize.x, 0), m_BorderColors[3], total_size.x - m_BorderSize.x - m_BorderSize.y, m_BorderSize.w, 0.0f, m_Depth - 0.001f, Alignment::BottomLeft);
+    }
+    //testing purposes only
+    //Renderer::renderRectangle(pos, glm::vec4(0, 1, 0, 0.5f), total_size.x, total_size.y, 0.0f, m_Depth - 0.005f, Alignment::BottomLeft);
 }
 const float GUIRenderElement::getEdgeWidth(unsigned int index) const {
     index = glm::min(index, 4U);
     if (index == 0 || index == 1) {
         return getCornerWidth();
     }
-    const glm::vec2 total_size = glm::vec2(m_Owner.width(), m_Owner.height());
+    const glm::vec2 total_size = glm::vec2(m_Owner->width(), m_Owner->height());
     return total_size.x - (getCornerWidth() * 2);
 }
 const float GUIRenderElement::getEdgeHeight(unsigned int index) const {
     index = glm::min(index, 4U);
     if (index == 0 || index == 1) {
-        const glm::vec2 total_size = glm::vec2(m_Owner.width(), m_Owner.height());
+        const glm::vec2 total_size = glm::vec2(m_Owner->width(), m_Owner->height());
         return total_size.y - (getCornerHeight() * 2);
     }
     return getCornerHeight();
@@ -286,4 +305,11 @@ void GUIRenderElement::setColorHighlight(const glm::vec4& color) {
 }
 void GUIRenderElement::setDepth(const float& depth) {
     m_Depth = depth;
+}
+const float  GUIRenderElement::getBorderSize(unsigned int index) const {
+    return m_BorderSize[index];
+}
+
+const float  GUIRenderElement::getPaddingSize(unsigned int index) const {
+    return m_PaddingSize[index];
 }

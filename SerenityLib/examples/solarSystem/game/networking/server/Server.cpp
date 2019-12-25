@@ -242,7 +242,7 @@ void Server::update(Server* thisServer, const double& dt) {
         //epriv::threading::waitForAll();
         
         //////////////////////////////////////////////////////////////////////////////////////////////
-        updateRemoveDisconnectedClients(server);
+        //updateRemoveDisconnectedClients(server);
     }
 }
 //Listener thread (NOT multithreaded)
@@ -316,15 +316,15 @@ void Server::onReceiveUDP() {
 }
 
 //NOT multithreaded
-void Server::updateRemoveDisconnectedClients(Server& server) {
-    while (server.m_ClientsToBeDisconnected.size() > 0) {
+//void Server::updateRemoveDisconnectedClients(Server& server) {
+    //while (server.m_ClientsToBeDisconnected.size() > 0) {
         //std::lock_guard<std::mutex> lock_guard(m_Mutex);
-        for (auto& clientThread : server.m_Threads) {
-            clientThread->m_Clients.erase(server.m_ClientsToBeDisconnected.front());
-        }
-        server.m_ClientsToBeDisconnected.pop();
-    }
-}
+    //    for (auto& clientThread : server.m_Threads) {
+    //        clientThread->m_Clients.erase(server.m_ClientsToBeDisconnected.front());
+    //    }
+    //    server.m_ClientsToBeDisconnected.pop();
+    //}
+//}
 //NOT multithreaded
 void Server::completely_remove_client(ServerClient& client) {
     if (m_OwnerClient) {
@@ -332,6 +332,7 @@ void Server::completely_remove_client(ServerClient& client) {
             m_OwnerClient = nullptr;
         }
     }
+    m_MapSpecificData.removeShip(client.m_MapKey);
     for (auto& clientThread : m_Threads) {
         for (auto& _client : clientThread->m_Clients) {
             string username_cpy = _client.second->m_Username;
@@ -619,9 +620,10 @@ void Server::updateClient(ServerClient& client) {
                     server.send_to_all(packetClientLeftServer);
 
                     client.disconnect();
-                    server.m_Mutex.lock();
-                    server.m_ClientsToBeDisconnected.push(client_address);
-                    server.m_Mutex.unlock();
+                    server.completely_remove_client(client);
+                    //server.m_Mutex.lock();
+                    //server.m_ClientsToBeDisconnected.push(client_address);
+                    //server.m_Mutex.unlock();
                     break;
                 }default: {
                     break;

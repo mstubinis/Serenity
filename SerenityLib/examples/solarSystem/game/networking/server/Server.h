@@ -81,7 +81,7 @@ class Server {
         Engine::Networking::SocketUDP*                 m_UdpSocket;
         std::mutex                                     m_Mutex;
         std::vector<ServerClientThread*>               m_Threads;
-        std::queue<std::string>                        m_ClientsToBeDisconnected;
+        //std::queue<std::string>                        m_ClientsToBeDisconnected;
         Engine::Networking::ListenerTCP*               m_TCPListener;
         unsigned short                                 m_port;
         std::atomic<unsigned int>                      m_Active;
@@ -137,7 +137,7 @@ class Server {
         static void update(Server* thisServer, const double& dt);
         static void updateAcceptNewClients(Server& thisServer);
         static void updateClient(ServerClient& thisClient);
-        static void updateRemoveDisconnectedClients(Server& thisServer);
+        //static void updateRemoveDisconnectedClients(Server& thisServer);
 };
 
 #endif

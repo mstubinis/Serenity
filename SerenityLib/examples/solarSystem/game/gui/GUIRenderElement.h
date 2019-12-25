@@ -10,7 +10,7 @@
 class  Texture;
 class  Widget;
 struct Handle;
-class GUIRenderElement final {
+class GUIRenderElement {
     friend class Widget;
 
     public: class BorderIndex final { public: enum Index {
@@ -49,7 +49,7 @@ class GUIRenderElement final {
     };
 
     private:
-        Widget&                  m_Owner;
+        Widget*                  m_Owner;
 
         float                    m_Depth;
         bool                     m_EnableMouseover;
@@ -59,14 +59,26 @@ class GUIRenderElement final {
         glm::ivec4 m_BorderSize;
         std::vector<glm::vec4> m_BorderColors;
 
-        unsigned int get_corner_size(const glm::vec2& total_size);
-        unsigned int get_left_edge_size(const glm::vec2& total_size);
-        unsigned int get_top_edge_size(const glm::vec2& total_size);
+        int get_corner_size(const glm::vec2& total_size);
+        int get_left_edge_size(const glm::vec2& total_size);
+        int get_top_edge_size(const glm::vec2& total_size);
 
+        GUIRenderElement();
     public:
+        GUIRenderElement(Widget* owner);
 
-        GUIRenderElement(Widget& owner);
-        ~GUIRenderElement();
+        GUIRenderElement(const GUIRenderElement&)                      = delete;
+        GUIRenderElement& operator=(const GUIRenderElement&)           = delete;
+        GUIRenderElement(GUIRenderElement&& other) noexcept            = delete;
+        GUIRenderElement& operator=(GUIRenderElement&& other) noexcept = delete;
+
+        virtual ~GUIRenderElement();
+
+        void setBorderSize(const unsigned int& size);
+        void setBorderSize(const unsigned int& size, const unsigned int& index);
+
+        void setPaddingSize(const unsigned int& size);
+        void setPaddingSize(const unsigned int& size, const unsigned int& index);
 
         void setBorderColor(const glm::vec4& color);
         void setBorderColor(const glm::vec4& color, unsigned int index);
@@ -76,9 +88,9 @@ class GUIRenderElement final {
         void enableMouseover(const bool = true);
         void disableMouseover();
 
-        void update(const double& dt);
-        void render();
-        void render(const glm::vec4& scissor);
+        virtual void update(const double& dt);
+        virtual void render();
+        virtual void render(const glm::vec4& scissor);
 
         void enableTexture(const bool);
         void enableTextureCorner(const bool);
@@ -113,6 +125,9 @@ class GUIRenderElement final {
         const float  getEdgeHeight(unsigned int index = 0) const;
         const float  getCornerWidth(unsigned int index = 0) const;
         const float  getCornerHeight(unsigned int index = 0) const;
+
+        const float  getBorderSize(unsigned int index) const;
+        const float  getPaddingSize(unsigned int index) const;
 
 };
 

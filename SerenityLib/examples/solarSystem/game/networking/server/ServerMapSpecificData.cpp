@@ -1,5 +1,7 @@
 #include "ServerMapSpecificData.h"
 
+#include <boost/algorithm/string.hpp>
+
 #include "../../ships/Ships.h"
 #include "../../networking/packets/Packets.h"
 #include "../../networking/server/Server.h"
@@ -17,6 +19,12 @@ ShipRespawning::ShipRespawning(Server& server) :m_Server(server) {
 }
 ShipRespawning::~ShipRespawning() {
     cleanup();
+}
+void ShipRespawning::removeShip(const string& shipMapKey) {
+    if (!m_Ships.count(shipMapKey)) {
+        return;
+    }
+    m_Ships.erase(shipMapKey);
 }
 void ShipRespawning::processShip(const string& shipMapKey, const string& shipClass, const string& closest_spawn_anchor) {
     if (!m_Ships.count(shipMapKey)) {
@@ -82,6 +90,16 @@ CollisionEntries::CollisionEntries(Server& server) :m_Server(server) {
 CollisionEntries::~CollisionEntries() {
     cleanup();
 }
+void CollisionEntries::removeShip(const string& shipMapKey) {
+    auto itr = m_CollisionPairs.begin();
+    while (itr != m_CollisionPairs.end()) {
+        auto& key = (*itr).first;
+        if (boost::algorithm::contains(key, shipMapKey)) {
+            itr = m_CollisionPairs.erase(itr);
+        }else
+            itr++;
+    }
+}
 void CollisionEntries::internal_send_packet(const PacketCollisionEvent& packet_in) {
     PacketCollisionEvent pOut(packet_in);
     pOut.PacketType = PacketType::Server_To_Client_Collision_Event;
@@ -136,6 +154,10 @@ ServerMapSpecificData::ServerMapSpecificData(Server& server) : m_Server(server),
 }
 ServerMapSpecificData::~ServerMapSpecificData() {
     cleanup();
+}
+void ServerMapSpecificData::removeShip(const string& shipMapKey){
+    m_CollisionEntries.removeShip(shipMapKey);
+    m_RespawningShips.removeShip(shipMapKey);
 }
 void ServerMapSpecificData::cleanup() {
     m_CollisionEntries.cleanup();

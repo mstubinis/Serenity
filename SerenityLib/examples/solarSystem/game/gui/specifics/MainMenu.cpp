@@ -40,6 +40,10 @@ MainMenu::MainMenu(Menu& menu, Font& font) {
     m_ButtonHost->setColor(0.5f, 0.78f, 0.94f, 1.0f);
     m_ButtonHost->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+    m_ButtonHost->setBorderColor(1, 1, 0, 1);
+    m_ButtonHost->setBorderSize(5);
+    m_ButtonHost->setPaddingSize(5);
+
     m_ButtonJoin = NEW Button(font, 0.0f, padding_y, button_width, button_height);
     m_ButtonJoin->setText("Join");
     m_ButtonJoin->setColor(0.5f, 0.78f, 0.94f, 1.0f);
