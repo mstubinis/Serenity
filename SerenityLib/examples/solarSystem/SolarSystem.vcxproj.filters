@@ -298,6 +298,18 @@
     <Filter Include="Source Files\Game\GUI\Specifics\HostScreen">
       <UniqueIdentifier>{132a1b30-beb7-4c60-810f-434b4d413b39}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\Templates">
+      <UniqueIdentifier>{62e68024-5beb-4a36-8a93-3c57c3d12e5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\Templates">
+      <UniqueIdentifier>{ceefa009-b252-44bc-b3e1-d1b9691a46a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\HostScreen2">
+      <UniqueIdentifier>{3c158d33-8556-4f48-b57e-8813cc98464e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\HostScreen2">
+      <UniqueIdentifier>{416785f2-0d0b-491b-b9c8-4e8f049cafbc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -336,9 +348,6 @@
     <ClInclude Include="game\gui\ScrollBar.h">
       <Filter>Header Files\Game\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="game\gui\ScrollWindow.h">
-      <Filter>Header Files\Game\GUI</Filter>
-    </ClInclude>
     <ClInclude Include="game\gui\Text.h">
       <Filter>Header Files\Game\GUI</Filter>
     </ClInclude>
@@ -349,9 +358,6 @@
       <Filter>Header Files\Game\GUI\Specifics</Filter>
     </ClInclude>
     <ClInclude Include="game\gui\specifics\ServerLobbyShipSelectorWindow.h">
-      <Filter>Header Files\Game\GUI\Specifics</Filter>
-    </ClInclude>
-    <ClInclude Include="game\gui\specifics\ServerHostingMapSelectorWindow.h">
       <Filter>Header Files\Game\GUI\Specifics</Filter>
     </ClInclude>
     <ClInclude Include="game\Helper.h">
@@ -648,6 +654,18 @@
     <ClInclude Include="game\map\MapEntry.h">
       <Filter>Header Files\Game\Map</Filter>
     </ClInclude>
+    <ClInclude Include="game\gui\RoundedWindow.h">
+      <Filter>Header Files\Game\GUI\Specifics\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\HostScreen2.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen2</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\MapSelectionWindow.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\ScrollFrame.h">
+      <Filter>Header Files\Game\GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -686,9 +704,6 @@
     <ClCompile Include="game\gui\ScrollBar.cpp">
       <Filter>Source Files\Game\GUI</Filter>
     </ClCompile>
-    <ClCompile Include="game\gui\ScrollWindow.cpp">
-      <Filter>Source Files\Game\GUI</Filter>
-    </ClCompile>
     <ClCompile Include="game\gui\Text.cpp">
       <Filter>Source Files\Game\GUI</Filter>
     </ClCompile>
@@ -699,9 +714,6 @@
       <Filter>Source Files\Game\GUI\Specifics</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\specifics\ServerLobbyShipSelectorWindow.cpp">
-      <Filter>Source Files\Game\GUI\Specifics</Filter>
-    </ClCompile>
-    <ClCompile Include="game\gui\specifics\ServerHostingMapSelectorWindow.cpp">
       <Filter>Source Files\Game\GUI\Specifics</Filter>
     </ClCompile>
     <ClCompile Include="game\map\Map.cpp">
@@ -973,6 +985,18 @@
     </ClCompile>
     <ClCompile Include="game\gui\specifics\MapDescriptionWindow.cpp">
       <Filter>Source Files\Game\GUI\Specifics\HostScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\RoundedWindow.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\HostScreen2.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen2</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\MapSelectionWindow.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\ScrollFrame.cpp">
+      <Filter>Source Files\Game\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

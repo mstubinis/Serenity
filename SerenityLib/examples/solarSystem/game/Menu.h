@@ -34,6 +34,21 @@ struct ButtonNext_OnClick;
 class  MainMenu;
 class  HostScreen;
 
+struct MenuDefaultColors final {enum Color {
+    FederationBlue,
+    FederationBlueDark,
+    FederationBlueSlightlyDarker,
+    FederationBlueHighlight,
+    KlingonRed,
+    KlingonRedDark,
+    KlingonRedSlightlyDarker,
+    KlingonRedHighlight,
+    RomulanGreen,
+    RomulanGreenDark,
+    RomulanGreenSlightlyDarker,
+    RomulanGreenHighlight,
+_TOTAL};};
+
 class Menu final{
     friend struct ButtonBack_OnClick;
     friend struct ButtonNext_OnClick;
@@ -41,6 +56,10 @@ class Menu final{
     friend class  Map;
     friend class  Client;
     friend class  Server;
+
+    public:
+        static std::vector<glm::vec4> DEFAULT_COLORS;
+
     public:
         ServerLobbyChatWindow* m_ServerLobbyChatWindow;
         ServerLobbyConnectedPlayersWindow* m_ServerLobbyConnectedPlayersWindow;

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GAME_SCROLLWINDOW_H
-#define GAME_SCROLLWINDOW_H
+#ifndef GAME_GUI_SCROLL_FRAME_H
+#define GAME_GUI_SCROLL_FRAME_H
 
 #include "Widget.h"
 #include <unordered_map>
@@ -10,15 +10,30 @@ class ScrollBar;
 class Font;
 class Text;
 class ScrollFrame: public Widget {
+
+    struct WidgetEntry {
+        Widget* widget;
+        float original_width;
+        WidgetEntry() {
+            widget = nullptr;
+            original_width = 0.0f;
+        }
+        WidgetEntry(Widget* widget_) {
+            widget = widget_;
+            original_width = widget_->width();
+        }
+        ~WidgetEntry() {}
+    };
+
     private:
         ScrollBar*                                m_ScrollBar;
         float                                     m_BorderSize;
-        float                                     m_ContentPadding;
         float                                     m_ContentHeight;
-        std::vector<Widget*>                      m_Content;
+        std::vector<ScrollFrame::WidgetEntry>     m_Content;
 
+        void reposition_scroll_bar();
         void internal_recalculate_content_sizes();
-        void fit_widget_to_window(Widget* widget);
+        void fit_widget_to_window(WidgetEntry& widget);
     public:
         ScrollFrame(const Font& font, const float x, const float y, const float w, const float h);
         virtual ~ScrollFrame();
@@ -32,7 +47,6 @@ class ScrollFrame: public Widget {
         void setAlignment(const Alignment::Type& alignment);
 
         void setBorderSize(const float borderSize);
-        void setContentPadding(const float padding);
 
         void setWidth(const float);
         void setHeight(const float);
@@ -40,7 +54,7 @@ class ScrollFrame: public Widget {
 
         void onResize(const unsigned int newWidth, const unsigned int newHeight);
 
-        std::vector<Widget*>& content();
+        std::vector<ScrollFrame::WidgetEntry>& content();
 
         void setPosition(const float x, const float y);
         void setPosition(const glm::vec2& position);

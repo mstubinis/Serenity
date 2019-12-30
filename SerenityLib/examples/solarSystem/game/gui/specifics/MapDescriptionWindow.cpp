@@ -12,7 +12,7 @@
 #include "../../networking/client/Client.h"
 #include "../../Core.h"
 #include "../Button.h"
-#include "../ScrollWindow.h"
+#include "../ScrollFrame.h"
 #include "../../ResourceManifest.h"
 #include "../Widget.h"
 #include "../../Helper.h"
@@ -23,7 +23,6 @@ MapDescriptionWindow::MapDescriptionWindow(Font& font, const float& x, const flo
     m_UserPointer = nullptr;
     m_ScrollFrame = NEW ScrollFrame(font, x, y, width, height);
     m_ScrollFrame->setColor(1, 1, 0, 1);
-    m_ScrollFrame->setContentPadding(30.0f);
 }
 MapDescriptionWindow::~MapDescriptionWindow() {
     SAFE_DELETE(m_ScrollFrame);

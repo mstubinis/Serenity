@@ -24,12 +24,11 @@
 
 #include "gui/Button.h"
 #include "gui/TextBox.h"
-#include "gui/ScrollWindow.h"
+#include "gui/ScrollFrame.h"
 #include "gui/Text.h"
 #include "gui/specifics/ServerLobbyChatWindow.h"
 #include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
 #include "gui/specifics/ServerLobbyShipSelectorWindow.h"
-#include "gui/specifics/ServerHostingMapSelectorWindow.h"
 
 #include "gui/specifics/MainMenu.h"
 #include "gui/specifics/HostScreen.h"
@@ -44,7 +43,26 @@
 using namespace Engine;
 using namespace std;
 
+vector<glm::vec4> Menu::DEFAULT_COLORS = []() {
+    vector<glm::vec4> ret; ret.resize(MenuDefaultColors::_TOTAL, glm::vec4(1.0f));
 
+    ret[MenuDefaultColors::FederationBlue]               = glm::vec4(0.5f, 0.78f, 0.94f, 1.0f);
+    ret[MenuDefaultColors::FederationBlueDark]           = ret[MenuDefaultColors::FederationBlue] * glm::vec4(0.03f, 0.03f, 0.03f, 1.0f);
+    ret[MenuDefaultColors::FederationBlueSlightlyDarker] = ret[MenuDefaultColors::FederationBlue] * glm::vec4(0.07f, 0.07f, 0.07f, 1.0f);
+    ret[MenuDefaultColors::FederationBlueHighlight]      = ret[MenuDefaultColors::FederationBlue] + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f);
+
+    ret[MenuDefaultColors::KlingonRed]                   = glm::vec4(0.834f, 0.26f, 0.13f, 1.0f);
+    ret[MenuDefaultColors::KlingonRedDark]               = ret[MenuDefaultColors::KlingonRed] * glm::vec4(0.03f, 0.03f, 0.03f, 1.0f);
+    ret[MenuDefaultColors::KlingonRedSlightlyDarker]     = ret[MenuDefaultColors::KlingonRed] * glm::vec4(0.07f, 0.07f, 0.07f, 1.0f);
+    ret[MenuDefaultColors::KlingonRedHighlight]          = ret[MenuDefaultColors::KlingonRed] + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f);
+
+    ret[MenuDefaultColors::RomulanGreen]                 = glm::vec4(0.278f, 0.813f, 0.56f, 1.0f);
+    ret[MenuDefaultColors::RomulanGreenDark]             = ret[MenuDefaultColors::RomulanGreen] * glm::vec4(0.03f, 0.03f, 0.03f, 1.0f);
+    ret[MenuDefaultColors::RomulanGreenSlightlyDarker]   = ret[MenuDefaultColors::RomulanGreen] * glm::vec4(0.07f, 0.07f, 0.07f, 1.0f);
+    ret[MenuDefaultColors::RomulanGreenHighlight]        = ret[MenuDefaultColors::RomulanGreen] + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f);
+
+    return ret;
+}();
 
 
 struct ButtonBack_OnClick {void operator()(Button* button) const {

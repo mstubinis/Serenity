@@ -1,4 +1,4 @@
-#include "ScrollWindow.h"
+#include "ScrollFrame.h"
 #include "ScrollBar.h"
 #include "Text.h"
 
@@ -16,36 +16,36 @@ ScrollFrame::ScrollFrame(const Font& font, const float x, const float y, const f
 
     m_ScrollBar = NEW ScrollBar(font, x + w - scrollbar_width, y, scrollbar_width, h);
 
-    setContentPadding(10.0f);
     m_ContentHeight = 0.0f;
     setPosition(m_Position.x, m_Position.y);
 }
 ScrollFrame::~ScrollFrame() {
     SAFE_DELETE(m_ScrollBar);
-    SAFE_DELETE_VECTOR(m_Content);
+    for (auto& entry : m_Content) {
+        SAFE_DELETE(entry.widget);
+    }
 }
 void ScrollFrame::clear() {
-    SAFE_DELETE_VECTOR(m_Content);
+    for (auto& entry : m_Content) {
+        SAFE_DELETE(entry.widget);
+    }
     m_Content.clear();
     internal_recalculate_content_sizes();
 }
 void ScrollFrame::addContent(Widget* widget) {
-    if (m_Content.size() == 0) {
-        widget->setPosition(m_Position.x + 1.0f,  m_Position.y - (m_ContentPadding / 2.0f));
-    }else{
-        widget->setPosition(m_Position.x + 1.0f, (m_Position.y - (m_ContentPadding / 2.0f)) + (m_ContentHeight + m_ContentPadding));
-    }
-    m_Content.push_back(widget);
+    WidgetEntry entry(widget);
+    m_Content.push_back(std::move(widget));
     internal_recalculate_content_sizes();
 }
-void ScrollFrame::fit_widget_to_window(Widget* widget) {
-    if (!widget)
+void ScrollFrame::fit_widget_to_window(WidgetEntry& widgetEntry) {
+    if (!widgetEntry.widget)
         return;
     //goal: shrink the width of the widget to fit the window if it overflows. possibly increase the height of the widget if it is a text widget, etc
-    Text* textWidget = dynamic_cast<Text*>(widget);
+    Text* textWidget = dynamic_cast<Text*>(widgetEntry.widget);
 
     float actual_content_width = 0.0f;
-    if (m_ScrollBar->isScrollable()) {
+    bool scrollable = m_ScrollBar->isScrollable();
+    if (scrollable) {
         actual_content_width = m_Width - m_ScrollBar->width();
     }else{
         actual_content_width = m_Width;
@@ -83,12 +83,16 @@ void ScrollFrame::fit_widget_to_window(Widget* widget) {
     }else{
         //just shrink width if needed     
         float amount = 0.0f;
-        if ((widget->width() > actual_content_width - 1)) {
-            amount = actual_content_width;
+        if (scrollable) {
+            if ((widgetEntry.widget->width() > actual_content_width)) {
+                amount = actual_content_width;
+            }else{
+                amount = widgetEntry.widget->width();
+            }
         }else{
-            amount = widget->width();
-        }  
-        widget->setWidth(amount);
+            amount = widgetEntry.original_width;
+        }
+        widgetEntry.widget->setWidth(amount);
     }
 }
 void ScrollFrame::internal_recalculate_content_sizes() {
@@ -103,13 +107,19 @@ void ScrollFrame::internal_recalculate_content_sizes() {
         actual_content_width = m_Width;
     }
     if (m_Content.size() > 0) {
-        for (size_t i = 0; i < m_Content.size(); ++i) {       
-            auto& widget = *m_Content[i];
-            fit_widget_to_window(&widget);
-            width_accumulator += widget.width();
-            if (width_accumulator >= actual_content_width - 1) {
-                height += (widget.height() + m_ContentPadding);
-                width_accumulator = 0;
+        height = m_Content[0].widget->height();
+        for (size_t i = 0; i < m_Content.size(); ++i) {
+            float width_left = actual_content_width;
+            float max_height = 0;
+            for (size_t j = i; j < m_Content.size(); ++j) {
+                width_left -= m_Content[j].widget->width();
+                if (m_Content[j].widget->height() > max_height) {
+                    max_height = m_Content[j].widget->height();
+                }
+                if (width_left < 0) {
+                    height += max_height;
+                    break;
+                }
             }
         }
     }
@@ -117,8 +127,11 @@ void ScrollFrame::internal_recalculate_content_sizes() {
     const float percent = m_Height / m_ContentHeight;
     m_ScrollBar->setSliderSize(percent);
 
-    auto& pos = positionWorld();
-    m_ScrollBar->setPosition(pos.x + m_Width - scrollbar_width, pos.y);
+    if (m_Content.size() > 0) {
+        for (size_t i = 0; i < m_Content.size(); ++i) {
+            fit_widget_to_window(m_Content[i]);
+        }
+    }
     m_ScrollBar->resetScrollOffset();
 }
 void ScrollFrame::setAlignment(const Alignment::Type& alignment) {
@@ -126,7 +139,7 @@ void ScrollFrame::setAlignment(const Alignment::Type& alignment) {
     setPosition(m_Position.x, m_Position.y);
 }
 
-vector<Widget*>& ScrollFrame::content() {
+vector<ScrollFrame::WidgetEntry>& ScrollFrame::content() {
     return m_Content;
 }
 const float ScrollFrame::contentHeight() const {
@@ -137,17 +150,24 @@ void ScrollFrame::setBorderSize(const float border) {
     m_ScrollBar->setBorderSize(border);
     internal_recalculate_content_sizes();
 }
-
+void ScrollFrame::reposition_scroll_bar() {
+    const auto pos = positionFromAlignmentWorld();
+    m_ScrollBar->setPosition(pos.x + m_Width - m_ScrollBar->width(), pos.y + m_Height);
+    m_ScrollBar->setSize(m_ScrollBar->width(), m_Height);
+}
 void ScrollFrame::setWidth(const float w) {
     Widget::setWidth(w);
+    reposition_scroll_bar();
     internal_recalculate_content_sizes();
 }
 void ScrollFrame::setHeight(const float h) {
     Widget::setHeight(h);
+    reposition_scroll_bar();
     internal_recalculate_content_sizes();
 }
 void ScrollFrame::setSize(const float width, const float height) {
     Widget::setSize(width, height);
+    reposition_scroll_bar();
     internal_recalculate_content_sizes();
 }
 
@@ -157,16 +177,24 @@ void ScrollFrame::setColor(const float& r, const float& g, const float& b, const
 
 }
 void ScrollFrame::onResize(const unsigned int newWidth, const unsigned int newHeight) {
+    reposition_scroll_bar();
     internal_recalculate_content_sizes();
 }
 void ScrollFrame::removeContent(Widget* widget) {
+    size_t index = 0;
+    for (size_t i = 0; i < m_Content.size(); ++i) {
+        if (m_Content[i].widget == widget) {
+            index = i;
+            break;
+        }
+    }
+    m_Content.erase(m_Content.begin() + index);
     SAFE_DELETE(widget);
-    removeFromVector(m_Content, widget);
     internal_recalculate_content_sizes();
 }
 void ScrollFrame::setPosition(const float x, const float y) {
-    m_ScrollBar->setPosition(x + m_Width - m_ScrollBar->width(), y);
     Widget::setPosition(x, y);
+    reposition_scroll_bar();
 }
 void ScrollFrame::setPosition(const glm::vec2& position) {
     ScrollFrame::setPosition(position.x, position.y);
@@ -176,21 +204,19 @@ void ScrollFrame::setColor(const glm::vec4& color) {
     m_ScrollBar->setColor(color);
     Widget::setColor(color);
 }
-void ScrollFrame::setContentPadding(const float padding) {
-    m_ContentPadding = padding;
-    internal_recalculate_content_sizes();
-}
 void ScrollFrame::update(const double& dt) {
     Widget::update(dt);
     m_ScrollBar->update(dt);
 
     auto height = 0.0f;
     auto scrollOffset = m_ScrollBar->getSliderPosition() * (m_ContentHeight / (m_Height - (m_ScrollBar->width() * 2.0f)));
-    for (auto& widget : m_Content) {
-        widget->setPosition(m_Position.x + 1.0f, ((m_Position.y - (m_ContentPadding / 2.0f)) - height) - scrollOffset);
-        height += widget->height();
-        height += m_ContentPadding;
-        widget->update(dt);
+
+    auto pos = positionFromAlignmentWorld();
+
+    for (auto& widgetEntry : m_Content) {
+        widgetEntry.widget->setPosition(pos.x, ((pos.y+m_Height) - height) - scrollOffset);
+        height += widgetEntry.widget->height();
+        widgetEntry.widget->update(dt);
     }
 
     if (m_MouseIsOver || m_ScrollBar->isMouseOver()) {
@@ -207,10 +233,10 @@ void ScrollFrame::render(const glm::vec4& scissor) {
 
     const auto pos = positionWorld();
 
-    Renderer::renderBorder(m_BorderSize, glm::vec2(pos.x + 1.0f, pos.y), m_Color, m_Width + 1.0f, m_Height, 0, 0.02f, m_Alignment, scissor);
+    Renderer::renderBorder(m_BorderSize, pos, m_Color, m_Width, m_Height, 0, 0.02f, m_Alignment, scissor);
 
-    for (auto& widget : m_Content) {
-        widget->render(scissor);
+    for (auto& widgetEntry : m_Content) {
+        widgetEntry.widget->render(scissor);
     }
 
     Widget::render(scissor);
@@ -219,14 +245,13 @@ void ScrollFrame::render() {
     if(m_ScrollBar->isScrollable())
         m_ScrollBar->render();
 
-    const auto pos = positionWorld();
+    const auto pos  = positionWorld();
+    const auto pos2 = positionFromAlignmentWorld();
+    Renderer::renderBorder(m_BorderSize, pos, m_Color, m_Width, m_Height, 0, 0.02f, m_Alignment);
 
-    Renderer::renderBorder(m_BorderSize, glm::vec2(pos.x + 1.0f, pos.y), m_Color, m_Width + 1.0f, m_Height, 0, 0.02f, m_Alignment);
-
-    const auto scissor = glm::vec4(pos.x, pos.y - m_Height, m_Width + 1, m_Height);
-
-    for (auto& widget : m_Content) {
-        widget->render(scissor);
+    auto scissor = glm::vec4(pos2.x, pos2.y, m_Width, m_Height);
+    for (auto& widgetEntry : m_Content) {
+        widgetEntry.widget->render(scissor);
     }
     Widget::render(scissor);
 }

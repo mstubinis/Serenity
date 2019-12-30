@@ -29,7 +29,8 @@ Widget::Widget(const float x, const float y, const glm::vec2& size) : Widget(x, 
 
 }
 Widget::~Widget() {
-
+    for (auto& child : m_Children)
+        SAFE_DELETE(child);
 }
 const bool Widget::setParent(Widget* parent) {
     if (m_Parent) {
@@ -115,8 +116,8 @@ const bool Widget::isMouseOver() const {
 }
 
 void Widget::setPosition(const float x, const float y) {
-    m_Position.x = static_cast<float>(static_cast<int>(x));
-    m_Position.y = static_cast<float>(static_cast<int>(y));
+    m_Position.x = static_cast<float>(static_cast<int>(glm::round(x)));
+    m_Position.y = static_cast<float>(static_cast<int>(glm::round(y)));
 }
 void Widget::setPosition(const glm::vec2& position) {
     Widget::setPosition(position.x, position.y);
@@ -190,7 +191,7 @@ const glm::vec2 Widget::positionFromAlignmentWorld(const float width, const floa
             break;
         }
     }
-    return glm::vec2(glm::ivec2(positionWorld() + offset));
+    return glm::vec2(glm::ivec2(glm::round(positionWorld() + offset)));
 }
 const glm::vec2 Widget::positionFromAlignmentWorld() {
     return positionFromAlignmentWorld(m_Width, m_Height, m_Alignment);
@@ -232,7 +233,7 @@ const glm::vec2 Widget::positionFromAlignment(const float width, const float hei
             break;
         }
     }
-    return glm::vec2(glm::ivec2(positionLocal() + offset));
+    return glm::vec2(glm::ivec2(glm::round(positionLocal() + offset)));
 }
 const glm::vec2 Widget::positionFromAlignment() {
     return positionFromAlignment(m_Width, m_Height, m_Alignment);

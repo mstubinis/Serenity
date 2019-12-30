@@ -32,11 +32,11 @@ void ServerLobbyConnectedPlayersWindow::addContent(Widget* widget) {
 
 const bool ServerLobbyConnectedPlayersWindow::removeContent(const string& key) {
     auto& content = m_ChatWindow->content();
-    for (auto& widget : content) {
-        Text* text = dynamic_cast<Text*>(widget);
+    for (auto& widgetEntry : content) {
+        Text* text = dynamic_cast<Text*>(widgetEntry.widget);
         if (text) {
             if (text->text() == key) {
-                m_ChatWindow->removeContent(widget);
+                m_ChatWindow->removeContent(widgetEntry.widget);
                 return true;
             }
         }
@@ -45,7 +45,9 @@ const bool ServerLobbyConnectedPlayersWindow::removeContent(const string& key) {
 }
 void ServerLobbyConnectedPlayersWindow::clear() {
     auto& content = m_ChatWindow->content();
-    SAFE_DELETE_VECTOR(content);
+    for (auto& widgetEntry : content) {
+        SAFE_DELETE(widgetEntry.widget);
+    }
     content.clear();
 }
 void* ServerLobbyConnectedPlayersWindow::getUserPointer() {

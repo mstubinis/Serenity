@@ -51,6 +51,7 @@ using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
 
+Mesh* epriv::InternalMeshes::FontPlane           = nullptr;
 Mesh* epriv::InternalMeshes::PointLightBounds    = nullptr;
 Mesh* epriv::InternalMeshes::RodLightBounds      = nullptr;
 Mesh* epriv::InternalMeshes::SpotLightBounds     = nullptr;
@@ -1107,8 +1108,8 @@ class epriv::RenderManager::impl final{
             Mesh::Cube = NEW Mesh(cubeMesh, 0.0005f);
             Mesh::Triangle = NEW Mesh(triangleMesh, 0.0005f);
 
-            Mesh::FontPlane = NEW Mesh("FontPlane", 1.0f, 1.0f, 0.0005f);
-            auto& fontPlane = *Mesh::FontPlane;
+            epriv::InternalMeshes::FontPlane = NEW Mesh("FontPlane", 1.0f, 1.0f, 0.0005f);
+            auto& fontPlane = *epriv::InternalMeshes::FontPlane;
 
             text_pts.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 points per char, 4096 chars
             text_uvs.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 uvs per char
@@ -1188,7 +1189,7 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(epriv::InternalMeshes::PointLightBounds);
             SAFE_DELETE(epriv::InternalMeshes::RodLightBounds);
             SAFE_DELETE(epriv::InternalMeshes::SpotLightBounds);
-            SAFE_DELETE(Mesh::FontPlane);
+            SAFE_DELETE(epriv::InternalMeshes::FontPlane);
             SAFE_DELETE(Mesh::Plane);
             SAFE_DELETE(Mesh::Cube);
             SAFE_DELETE(Mesh::Triangle);
@@ -2476,7 +2477,7 @@ struct RenderingAPI2D final {
         impl.text_uvs.clear();
         impl.text_ind.clear();
 
-        auto& mesh = *Mesh::FontPlane;
+        auto& mesh = *epriv::InternalMeshes::FontPlane;
         mesh.bind();
         sendUniform1("DiffuseTextureEnabled", 1);
 

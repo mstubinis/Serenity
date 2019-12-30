@@ -123,8 +123,8 @@ const float ScrollBar::getSliderPosition() const {
     return m_ScrollBarCurrentPosition;
 }
 const float ScrollBar::getSliderHeight() const {
-    auto part2 = (m_Height - (m_Width * 2.0f));
-    auto res   = (m_ScrollBarCurrentContentPercent) * part2;
+    auto part1 = (m_Height - (m_Width * 2.0f));
+    auto res   = (m_ScrollBarCurrentContentPercent) * part1;
     return res;
 }
 

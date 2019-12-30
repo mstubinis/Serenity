@@ -10,6 +10,8 @@ namespace Engine{
             static Mesh* PointLightBounds;
             static Mesh* RodLightBounds;
             static Mesh* SpotLightBounds;
+
+            static Mesh* FontPlane;
         };
     };
 };

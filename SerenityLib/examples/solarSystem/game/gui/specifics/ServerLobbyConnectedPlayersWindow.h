@@ -2,7 +2,7 @@
 #ifndef GAME_SERVER_LOBBY_CONNECTED_PLAYERS_WINDOW_H
 #define GAME_SERVER_LOBBY_CONNECTED_PLAYERS_WINDOW_H
 
-#include "../ScrollWindow.h"
+#include "../ScrollFrame.h"
 #include "../TextBox.h"
 
 class ServerLobbyConnectedPlayersWindow final {

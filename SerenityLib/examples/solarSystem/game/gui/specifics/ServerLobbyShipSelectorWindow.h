@@ -2,7 +2,7 @@
 #ifndef GAME_SERVER_LOBBY_SHIP_SELECTOR_WINDOW_H
 #define GAME_SERVER_LOBBY_SHIP_SELECTOR_WINDOW_H
 
-#include "../ScrollWindow.h"
+#include "../ScrollFrame.h"
 #include "Ship3DViewer.h"
 #include "../Text.h"
 #include "../Button.h"

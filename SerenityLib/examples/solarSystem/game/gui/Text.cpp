@@ -67,7 +67,7 @@ void Text::update(const double& dt) {
 void Text::render(const glm::vec4& scissor) {
     const auto pos = positionWorld();
 
-    Renderer::renderText(m_Text, *m_Font, glm::vec2(pos.x + 5.0f, pos.y), m_Color, 0, m_TextScale, 0.004f, m_TextAlignment, scissor);
+    Renderer::renderText(m_Text, *m_Font, pos, m_Color, 0, m_TextScale, 0.004f, m_TextAlignment, scissor);
 
     Widget::render(scissor);
 }

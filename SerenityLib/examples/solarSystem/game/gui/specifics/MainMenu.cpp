@@ -37,36 +37,30 @@ MainMenu::MainMenu(Menu& menu, Font& font) {
 
     m_ButtonHost = NEW Button(font, windowDimensions.x / 2.0f, 345.0f, button_width, button_height);
     m_ButtonHost->setText("Host");
-    m_ButtonHost->setColor(0.5f, 0.78f, 0.94f, 1.0f);
+    m_ButtonHost->setColor(   Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]  );
     m_ButtonHost->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_ButtonHost->setBorderColor(1, 1, 0, 1);
-    m_ButtonHost->setBorderSize(5);
-    m_ButtonHost->setPaddingSize(5);
+
 
     m_ButtonJoin = NEW Button(font, 0.0f, padding_y, button_width, button_height);
     m_ButtonJoin->setText("Join");
-    m_ButtonJoin->setColor(0.5f, 0.78f, 0.94f, 1.0f);
+    m_ButtonJoin->setColor(  Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]  );
     m_ButtonJoin->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     m_ButtonOptions = NEW Button(font, 0.0f, padding_y * 2, button_width, button_height);
     m_ButtonOptions->setText("Options");
-    m_ButtonOptions->setColor(0.5f, 0.78f, 0.94f, 1.0f);
+    m_ButtonOptions->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
     m_ButtonOptions->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     m_ButtonEncyclopedia = NEW Button(font, 0.0f, padding_y * 3, button_width, button_height);
     m_ButtonEncyclopedia->setText("Encyclopedia");
-    m_ButtonEncyclopedia->setColor(0.5f, 0.78f, 0.94f, 1.0f);
+    m_ButtonEncyclopedia->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
     m_ButtonEncyclopedia->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 
     //TODO: get rid of these when these pages are implemented
     m_ButtonOptions->hide();
     m_ButtonEncyclopedia->hide();
-
-
-
-
 
     m_ButtonHost->addChild(m_ButtonJoin);
     m_ButtonHost->addChild(m_ButtonOptions);
@@ -84,9 +78,6 @@ MainMenu::MainMenu(Menu& menu, Font& font) {
 }
 MainMenu::~MainMenu() {
     SAFE_DELETE(m_ButtonHost);
-    SAFE_DELETE(m_ButtonJoin);
-    SAFE_DELETE(m_ButtonOptions);
-    SAFE_DELETE(m_ButtonEncyclopedia);
 }
 
 void MainMenu::onResize(const unsigned int newWidth, const unsigned int newHeight) {

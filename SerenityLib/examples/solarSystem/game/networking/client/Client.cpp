@@ -9,7 +9,6 @@
 #include "../../gui/specifics/ServerLobbyChatWindow.h"
 #include "../../gui/specifics/ServerLobbyConnectedPlayersWindow.h"
 #include "../../gui/specifics/ServerLobbyShipSelectorWindow.h"
-#include "../../gui/specifics/ServerHostingMapSelectorWindow.h"
 
 #include "../../map/Map.h"
 #include "../../map/Anchor.h"

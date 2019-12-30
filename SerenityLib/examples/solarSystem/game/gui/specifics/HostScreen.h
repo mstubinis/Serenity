@@ -8,50 +8,44 @@ class  Menu;
 class  TextBox;
 class  Text;
 class  ServerHostingMapSelectorWindow;
+class  RoundedWindow;
+class  MapSelectionWindow;
 class  MapDescriptionWindow;
-class HostScreen final {
-    private:
-        Menu& m_Menu;
+    class HostScreen final {
+        private:
+            Menu& m_Menu;
 
+            Button* m_BackgroundEdgeGraphicBottom;
 
-        Button* m_BackgroundEdgeGraphic;
+            //left window
+            MapSelectionWindow* m_LeftWindow;
 
+            //right window
+            RoundedWindow*   m_RightWindow;
 
-        TextBox* m_UserName_TextBox;
-        TextBox* m_ServerPort_TextBox;
-        //Text* m_Info_Text;
+            TextBox* m_UserName_TextBox;
+            TextBox* m_ServerPort_TextBox;
+ 
+            MapDescriptionWindow*           m_MapDescriptionWindow;
 
-        ServerHostingMapSelectorWindow* m_ServerHostMapSelector;
-        MapDescriptionWindow*           m_MapDescriptionWindow;
-        /*
-        CurrentSelectedMapDescription
-        CurrentSelectedMapScreenshot
+            Button* m_BackButton;
+            Button* m_ForwardButton;
 
-        ShipsAvailableToUseOnMap
-        ShipsCurrentlyAllowedOnMap
+        public:
+            HostScreen(Menu&, Font& font);
+            ~HostScreen();
 
-        Max#OfPlayers
-        */
+            Menu& getMenu();
 
+            TextBox& getUserNameTextBox();
+            TextBox& getServerPortTextBox();
+            MapSelectionWindow& getMapSelectionWindow();
+            MapDescriptionWindow& getMapDescriptionWindow();
 
-        Button* m_BackButton;
-        Button* m_ForwardButton;
+            void onResize(const unsigned int newWidth, const unsigned int newHeight);
 
-    public:
-        HostScreen(Menu&, Font& font);
-        ~HostScreen();
-
-        Menu& getMenu();
-
-        TextBox& getUserNameTextBox();
-        TextBox& getServerPortTextBox();
-        ServerHostingMapSelectorWindow& getMapSelectionWindow();
-        MapDescriptionWindow& getMapDescriptionWindow();
-
-        void onResize(const unsigned int newWidth, const unsigned int newHeight);
-
-        void update(const double& dt);
-        void render();
+            void update(const double& dt);
+            void render();
 };
 
 #endif

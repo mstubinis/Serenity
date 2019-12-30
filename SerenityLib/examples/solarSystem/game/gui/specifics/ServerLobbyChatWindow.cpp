@@ -52,7 +52,9 @@ ServerLobbyChatWindow::~ServerLobbyChatWindow() {
 }
 void ServerLobbyChatWindow::clear() {
     auto& content = m_ChatWindow->content();
-    SAFE_DELETE_VECTOR(content);
+    for (auto& widgetEntry : content) {
+        SAFE_DELETE(widgetEntry.widget);
+    }
     content.clear();
 }
 void ServerLobbyChatWindow::setUserPointer(void* ptr) {

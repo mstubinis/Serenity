@@ -2,7 +2,7 @@
 #ifndef GAME_SERVER_LOBBY_CHAT_WINDOW_H
 #define GAME_SERVER_LOBBY_CHAT_WINDOW_H
 
-#include "../ScrollWindow.h"
+#include "../ScrollFrame.h"
 #include "../TextBox.h"
 
 class ServerLobbyChatWindow final {

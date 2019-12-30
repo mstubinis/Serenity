@@ -35,7 +35,6 @@ using namespace Engine;
 using namespace Engine::epriv;
 namespace boostm = boost::math;
 
-Mesh* Mesh::FontPlane = nullptr;
 Mesh* Mesh::Plane     = nullptr;
 Mesh* Mesh::Cube      = nullptr;
 Mesh* Mesh::Triangle  = nullptr;

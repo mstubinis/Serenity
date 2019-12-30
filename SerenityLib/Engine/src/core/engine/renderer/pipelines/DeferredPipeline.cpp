@@ -402,7 +402,7 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     m_Text_UVs.clear();
     m_Text_Indices.clear();
 
-    auto& mesh = *Mesh::FontPlane;
+    auto& mesh = *epriv::InternalMeshes::FontPlane;
     mesh.bind();
     sendUniform1("DiffuseTextureEnabled", 1);
 

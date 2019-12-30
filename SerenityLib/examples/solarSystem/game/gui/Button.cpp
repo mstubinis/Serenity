@@ -14,7 +14,7 @@ using namespace std;
 
 namespace Engine {
     namespace epriv {
-        struct emptyFunctor { template<class T> void operator()(T* r) const {} };
+        struct emptyFunctor { template<class T> void operator()(T* t) const {} };
     };
 };
 
@@ -132,11 +132,11 @@ void Button::update(const double& dt) {
     if (!m_Hidden) {
         if (m_Enabled) {
             if (!m_PulseClicked) {
-                if (m_MouseIsOver == true && Engine::isMouseButtonDownOnce(MouseButton::Left)) {
+                if (m_MouseIsOver && Engine::isMouseButtonDownOnce(MouseButton::Left)) {
                     m_FunctorOnClick();
                 }
             }else{
-                if (m_MouseIsOver == true && Engine::isMouseButtonDown(MouseButton::Left)) {
+                if (m_MouseIsOver && Engine::isMouseButtonDown(MouseButton::Left)) {
                     m_FunctorOnClick();
                 }
             }
@@ -149,7 +149,7 @@ void Button::render(const glm::vec4& scissor) {
 
         GUIRenderElement::render(scissor);
 
-        auto corner = getEdgeWidth(3) + (getCornerWidth() / 2.0f) + getPaddingSize(0) + getBorderSize(0);
+        auto corner = getEdgeWidth(3);
         auto corner_width_half = corner / 2.0f;
 
         auto txt_height = getTextHeight();
@@ -173,7 +173,7 @@ void Button::render(const glm::vec4& scissor) {
         glm::vec2 f(0.0f);
         Renderer::alignmentOffset(m_Alignment, f.x, f.y, m_Width, m_Height);
 
-        m_Font->renderText(m_Text, glm::vec2(newPosTxt.x + f.x, newPosTxt.y + f.y), m_TextColor, 0, m_TextScale, 0.0077f, m_TextAlignment, scissor);
+        m_Font->renderText(m_Text, newPosTxt + f, m_TextColor, 0, m_TextScale, 0.0077f, m_TextAlignment, scissor);
     }
     Widget::render(scissor);
 }
