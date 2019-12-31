@@ -45,12 +45,70 @@ Cube::Cube(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
         else if (i == 7)   system = NEW ShipSystemWarpDrive(_this);
         else if (i == 8)   system = NEW ShipSystemSensors(_this, map);
         else if (i == 9)   system = NEW ShipSystemWeapons(_this);
-        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 1000000.0f);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 5000000.0f);
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);
 
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
+
+    const auto cutting_dmg = 2000.0f;
+    const auto cutting_impact_rad = 2.5f;
+    const auto cutting_impact_time = 1.8f;
+    const auto cutting_arc = 55.0f;
+    const auto cutting_end_scale = 7.0f;
+    const auto cutting_beam_scale = 3.0f;
+
+    //9 fwd cutting beam points
+    vector<glm::vec3> fwd_cutting_beams_nine{
+        glm::vec3(7.5f,7.5f,-15.075f),
+        glm::vec3(0.0f,7.5f,-15.075f),
+        glm::vec3(-7.5f,7.5f,-15.075f),
+        glm::vec3(7.5f,0.0f,-15.075f),
+        glm::vec3(0.0f,0.0f,-15.075f),
+        glm::vec3(-7.5f,0.0f,-15.075f),
+        glm::vec3(7.5f,-7.5f,-15.075f),
+        glm::vec3(0.0f,-7.5f,-15.075f),
+        glm::vec3(-7.5f,-7.5f,-15.075f),
+    };
+    //fwd cutting beams
+    for (auto& fwd_beam_pt : fwd_cutting_beams_nine) {
+        vector<glm::vec3> windup{ fwd_beam_pt, };
+        auto* beam = new BorgCuttingBeam(_this, map, windup[0], glm::vec3(0, 0, -1), cutting_arc, windup, cutting_dmg, 4.0f, 1.5f, cutting_impact_rad, cutting_impact_time, 100.0f, 1, 6.0f, 0, cutting_end_scale, cutting_beam_scale);
+        weapons.addPrimaryWeaponBeam(*beam, true);
+    }
+    //aft cutting beams
+    for (auto& fwd_beam_pt : fwd_cutting_beams_nine) {
+        vector<glm::vec3> windup{ glm::vec3(fwd_beam_pt.x,fwd_beam_pt.y,-fwd_beam_pt.z), };
+        auto* beam = new BorgCuttingBeam(_this, map, windup[0], glm::vec3(0, 0, 1), cutting_arc, windup, cutting_dmg, 4.0f, 1.5f, cutting_impact_rad, cutting_impact_time, 100.0f, 1, 6.0f, 0, cutting_end_scale, cutting_beam_scale);
+        weapons.addPrimaryWeaponBeam(*beam);
+    }
+    //left cutting beams
+    for (auto& fwd_beam_pt : fwd_cutting_beams_nine) {
+        vector<glm::vec3> windup{ glm::vec3(fwd_beam_pt.z,fwd_beam_pt.y,-fwd_beam_pt.x), };
+        auto* beam = new BorgCuttingBeam(_this, map, windup[0], glm::vec3(-1, 0, 0), cutting_arc, windup, cutting_dmg, 4.0f, 1.5f, cutting_impact_rad, cutting_impact_time, 100.0f, 1, 6.0f, 0, cutting_end_scale, cutting_beam_scale);
+        weapons.addPrimaryWeaponBeam(*beam);
+    }
+    //right cutting beams
+    for (auto& fwd_beam_pt : fwd_cutting_beams_nine) {
+        vector<glm::vec3> windup{ glm::vec3(-fwd_beam_pt.z,fwd_beam_pt.y,fwd_beam_pt.x), };
+        auto* beam = new BorgCuttingBeam(_this, map, windup[0], glm::vec3(1, 0, 0), cutting_arc, windup, cutting_dmg, 4.0f, 1.5f, cutting_impact_rad, cutting_impact_time, 100.0f, 1, 6.0f, 0, cutting_end_scale, cutting_beam_scale);
+        weapons.addPrimaryWeaponBeam(*beam);
+    }
+    //top cutting beams
+    for (auto& fwd_beam_pt : fwd_cutting_beams_nine) {
+        vector<glm::vec3> windup{ glm::vec3(-fwd_beam_pt.x, -fwd_beam_pt.z, -fwd_beam_pt.y), };
+        auto* beam = new BorgCuttingBeam(_this, map, windup[0], glm::vec3(0, 1, 0), cutting_arc, windup, cutting_dmg, 4.0f, 1.5f, cutting_impact_rad, cutting_impact_time, 100.0f, 1, 6.0f, 0, cutting_end_scale, cutting_beam_scale);
+        weapons.addPrimaryWeaponBeam(*beam);
+    }
+    //bottom cutting beams
+    for (auto& fwd_beam_pt : fwd_cutting_beams_nine) {
+        vector<glm::vec3> windup{ glm::vec3(-fwd_beam_pt.x, fwd_beam_pt.z, -fwd_beam_pt.y), };
+        auto* beam = new BorgCuttingBeam(_this, map, windup[0], glm::vec3(0, -1, 0), cutting_arc, windup, cutting_dmg, 4.0f, 1.5f, cutting_impact_rad, cutting_impact_time, 100.0f, 1, 6.0f, 0, cutting_end_scale, cutting_beam_scale);
+        weapons.addPrimaryWeaponBeam(*beam);
+    }
+
+
 
     if (Ships::Database[CLASS].HullImpactPoints.size() == 0) {
         Ships::Database[CLASS].HullImpactPoints = {

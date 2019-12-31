@@ -53,7 +53,7 @@ struct CycleGameModeRightButtonOnClick final { void operator()(Button* button) c
 MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const float borderSize, const string& labelText)
 :RoundedWindow(font,x,y,width,height,depth,borderSize,labelText), m_HostScreen(hostScreen),m_Font(font){
 
-    m_ChangeGameModeLeftButton = new Button(font, x - (width / 2.0f) - 29.0f, y + (height / 2.0f) - 7.0f, button_size, button_size);
+    m_ChangeGameModeLeftButton = new Button(font, x - (width / 2.0f) - 29.0f, y + (height / 2.0f) - 5.0f, button_size, button_size);
     m_ChangeGameModeLeftButton->setText("<");
     m_ChangeGameModeLeftButton->setAlignment(Alignment::TopLeft);
     m_ChangeGameModeLeftButton->setDepth(depth - 0.02f);
@@ -63,7 +63,7 @@ MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const
     m_ChangeGameModeLeftButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     
     
-    m_ChangeGameModeRightButton = new Button(font, x + (width / 2.0f) + 29.0f, y + (height / 2.0f) - 7.0f, button_size, button_size);
+    m_ChangeGameModeRightButton = new Button(font, x + (width / 2.0f) + 29.0f, y + (height / 2.0f) - 5.0f, button_size, button_size);
     m_ChangeGameModeRightButton->setText(">");
     m_ChangeGameModeRightButton->setAlignment(Alignment::TopRight);
     m_ChangeGameModeRightButton->setDepth(depth - 0.02f);
@@ -72,7 +72,7 @@ MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const
     m_ChangeGameModeRightButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
     m_ChangeGameModeRightButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_MapFileScrollFrame = new ScrollFrame(font, x, y - (height / 2.0f) + 30.0f, width - 60.0f, height - 110.0f);
+    m_MapFileScrollFrame = new ScrollFrame(font, x, y - (height / 2.0f) + 30.0f, width - 60.0f, height - 110.0f, depth - 0.001f);
     m_MapFileScrollFrame->setAlignment(Alignment::BottomCenter);
 
     setCurrentGameMode(GameplayModeType::FFA);
@@ -145,8 +145,8 @@ void MapSelectionWindow::onResize(const unsigned int& newWidth, const unsigned i
     m_MapFileScrollFrame->setPosition(pos.x, pos.y - (frame_size.y / 2.0f) + 30.0f);
     m_MapFileScrollFrame->setSize(frame_size.x - 60.0f, frame_size.y - 110.0f);
 
-    m_ChangeGameModeLeftButton->setPosition(pos.x - (frame_size.x / 2.0f) + 29.0f, pos.y + (frame_size.y / 2.0f) - 7.0f);
-    m_ChangeGameModeRightButton->setPosition(pos.x + (frame_size.x / 2.0f) - 29.0f, pos.y + (frame_size.y / 2.0f) - 7.0f);
+    m_ChangeGameModeLeftButton->setPosition(pos.x - (frame_size.x / 2.0f) + 29.0f, pos.y + (frame_size.y / 2.0f) - 5.0f);
+    m_ChangeGameModeRightButton->setPosition(pos.x + (frame_size.x / 2.0f) - 29.0f, pos.y + (frame_size.y / 2.0f) - 5.0f);
 }
 
 void MapSelectionWindow::update(const double& dt) {

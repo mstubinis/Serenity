@@ -3,6 +3,7 @@
 #define GAME_SCROLLBAR_H
 
 #include "Widget.h"
+#include "GUIRenderElement.h"
 
 class  Button;
 class  Font;
@@ -20,7 +21,7 @@ class ScrollBar final : public Widget {
     private:
         ScrollBarType::Type m_Type;
         bool                m_CurrentlyDragging;
-        float               m_BorderSize;
+
 
         float               m_ScrollBarCurrentContentPercent;
         float               m_ScrollBarCurrentPosition;
@@ -28,18 +29,18 @@ class ScrollBar final : public Widget {
         float               m_DragSnapshot;
         glm::vec4           m_ScrollBarColor;
 
+        Button*             m_ScrollAreaBackground;
+        Button*             m_ScrollArea;
         Button*             m_TopOrLeftButton;
         Button*             m_BottomOrRightButton;
 
         void internalUpdateScrollbarPosition();
     public:
-        ScrollBar(const Font& font, const float x, const float y, const float w, const float h, const ScrollBarType::Type& type = ScrollBarType::Type::Vertical);
+        ScrollBar(const Font& font, const float x, const float y, const float w, const float h, const float depth, const ScrollBarType::Type& type = ScrollBarType::Type::Vertical);
         ~ScrollBar();
 
         void resetScrollOffset();
         const bool isScrollable() const;
-
-        void setBorderSize(const float borderSize);
 
         void scroll(const float amount);
 

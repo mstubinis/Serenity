@@ -35,7 +35,7 @@ ServerLobbyChatWindow::ServerLobbyChatWindow(const Font& font, const float x, co
     m_Width       = 630.0f;
     m_Height      = 300.0f;
 
-    m_ChatWindow  = NEW ScrollFrame(font, x, y, m_Width, m_Height);
+    m_ChatWindow  = NEW ScrollFrame(font, x, y, m_Width, m_Height, 0.02f);
     m_ChatWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
 
     m_ChatInput   = NEW TextBox("Chat", font, 85, 0.0f , 0.0f);

@@ -8,10 +8,10 @@
 using namespace std;
 
 ThreatTable::ThreatTable(Map& map) : m_Map(map){
-
+    clear();
 }
 ThreatTable::~ThreatTable() {
-
+    clear();
 }
 
 void ThreatTable::modify_threat(const string& key, const unsigned int& val, const bool do_sort) {

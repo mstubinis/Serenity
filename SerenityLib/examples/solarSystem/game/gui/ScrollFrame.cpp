@@ -9,12 +9,10 @@
 using namespace Engine;
 using namespace std;
 
-const auto scrollbar_width = 20.0f;
+const auto scrollbar_width = 30.0f;
 
-ScrollFrame::ScrollFrame(const Font& font, const float x, const float y, const float w, const float h) : Widget(x, y, w, h) {
-    m_BorderSize = 1.0f;
-
-    m_ScrollBar = NEW ScrollBar(font, x + w - scrollbar_width, y, scrollbar_width, h);
+ScrollFrame::ScrollFrame(const Font& font, const float x, const float y, const float w, const float h, const float depth) : Widget(x, y, w, h) {
+    m_ScrollBar = NEW ScrollBar(font, x + w - scrollbar_width, y, scrollbar_width, h, depth - 0.001f);
 
     m_ContentHeight = 0.0f;
     setPosition(m_Position.x, m_Position.y);
@@ -145,11 +143,6 @@ vector<ScrollFrame::WidgetEntry>& ScrollFrame::content() {
 const float ScrollFrame::contentHeight() const {
     return m_ContentHeight;
 }
-void ScrollFrame::setBorderSize(const float border) {
-    m_BorderSize = border;
-    m_ScrollBar->setBorderSize(border);
-    internal_recalculate_content_sizes();
-}
 void ScrollFrame::reposition_scroll_bar() {
     const auto pos = positionFromAlignmentWorld();
     m_ScrollBar->setPosition(pos.x + m_Width - m_ScrollBar->width(), pos.y + m_Height);
@@ -233,7 +226,7 @@ void ScrollFrame::render(const glm::vec4& scissor) {
 
     const auto pos = positionWorld();
 
-    Renderer::renderBorder(m_BorderSize, pos, m_Color, m_Width, m_Height, 0, 0.02f, m_Alignment, scissor);
+    //Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.02f, m_Alignment, scissor);
 
     for (auto& widgetEntry : m_Content) {
         widgetEntry.widget->render(scissor);
@@ -247,7 +240,8 @@ void ScrollFrame::render() {
 
     const auto pos  = positionWorld();
     const auto pos2 = positionFromAlignmentWorld();
-    Renderer::renderBorder(m_BorderSize, pos, m_Color, m_Width, m_Height, 0, 0.02f, m_Alignment);
+
+    //Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.02f, m_Alignment);
 
     auto scissor = glm::vec4(pos2.x, pos2.y, m_Width, m_Height);
     for (auto& widgetEntry : m_Content) {

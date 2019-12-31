@@ -418,13 +418,13 @@ void Ship::internal_finialize_init(const AIType::Type& type) {
             m_AI = NEW AIStationaryNPC(*this);
             break;
         }case AIType::AI_Easy: {
-            m_AI = nullptr;
+            m_AI = NEW AI(type);
             break;
         }case AIType::AI_Medium: {
-            m_AI = nullptr;
+            m_AI = NEW AI(type);
             break;
         }case AIType::AI_Hard: {
-            m_AI = nullptr;
+            m_AI = NEW AI(type);
             break;
         }case AIType::AI_None: {
             m_AI = nullptr;
@@ -1372,7 +1372,14 @@ SecondaryWeaponTorpedo& Ship::getSecondaryWeaponTorpedo(const uint index) {
     return *weapons.m_SecondaryWeaponsTorpedos[index].torpedo;
 }
 void Ship::update(const double& dt) {
+    if (IsPlayer() && Engine::isKeyDownOnce(KeyboardKey::Space)) {
+        //setState(ShipState::UndergoingDestruction);
 
+
+        auto& map = static_cast<Map&>(entity().scene());
+        auto& team = m_Client.getGameplayMode().getTeams().at(TeamNumber::Team_2);
+        map.createShip(AIType::AI_Stationary, team, m_Client, "Cube", "Borg Cube" + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -90.0));
+    }
 }
 void Ship::fireBeams(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship) {
     weapons.fireBeamWeapons(target, target_as_ship, weapons.m_PrimaryWeaponsBeams);

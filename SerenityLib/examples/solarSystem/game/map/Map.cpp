@@ -664,6 +664,14 @@ Ship* Map::createShip(AIType::Type ai_type, Team& team, Client& client, const st
         ship = NEW FedDefPlatform(team, client, *this, shipName, position, glm::vec3(1.0f));
     }else if (shipClass == "Federation Starbase Mushroom") {
         ship = NEW FedStarbaseMushroom(team, client, *this, shipName, position, glm::vec3(1.0f));
+    }else if (shipClass == "Probe") {
+        ship = NEW Probe(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+    }else if (shipClass == "Sphere") {
+        ship = NEW Sphere(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+    }else if (shipClass == "Diamond") {
+        ship = NEW Diamond(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+    }else if (shipClass == "Cube") {
+        ship = NEW Cube(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::Box);
     }
     return ship;
 }

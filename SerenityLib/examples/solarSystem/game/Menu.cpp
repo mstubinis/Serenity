@@ -48,17 +48,17 @@ vector<glm::vec4> Menu::DEFAULT_COLORS = []() {
 
     ret[MenuDefaultColors::FederationBlue]               = glm::vec4(0.5f, 0.78f, 0.94f, 1.0f);
     ret[MenuDefaultColors::FederationBlueDark]           = ret[MenuDefaultColors::FederationBlue] * glm::vec4(0.03f, 0.03f, 0.03f, 1.0f);
-    ret[MenuDefaultColors::FederationBlueSlightlyDarker] = ret[MenuDefaultColors::FederationBlue] * glm::vec4(0.07f, 0.07f, 0.07f, 1.0f);
+    ret[MenuDefaultColors::FederationBlueSlightlyDarker] = ret[MenuDefaultColors::FederationBlue] * glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
     ret[MenuDefaultColors::FederationBlueHighlight]      = ret[MenuDefaultColors::FederationBlue] + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f);
 
     ret[MenuDefaultColors::KlingonRed]                   = glm::vec4(0.834f, 0.26f, 0.13f, 1.0f);
     ret[MenuDefaultColors::KlingonRedDark]               = ret[MenuDefaultColors::KlingonRed] * glm::vec4(0.03f, 0.03f, 0.03f, 1.0f);
-    ret[MenuDefaultColors::KlingonRedSlightlyDarker]     = ret[MenuDefaultColors::KlingonRed] * glm::vec4(0.07f, 0.07f, 0.07f, 1.0f);
+    ret[MenuDefaultColors::KlingonRedSlightlyDarker]     = ret[MenuDefaultColors::KlingonRed] * glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
     ret[MenuDefaultColors::KlingonRedHighlight]          = ret[MenuDefaultColors::KlingonRed] + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f);
 
     ret[MenuDefaultColors::RomulanGreen]                 = glm::vec4(0.278f, 0.813f, 0.56f, 1.0f);
     ret[MenuDefaultColors::RomulanGreenDark]             = ret[MenuDefaultColors::RomulanGreen] * glm::vec4(0.03f, 0.03f, 0.03f, 1.0f);
-    ret[MenuDefaultColors::RomulanGreenSlightlyDarker]   = ret[MenuDefaultColors::RomulanGreen] * glm::vec4(0.07f, 0.07f, 0.07f, 1.0f);
+    ret[MenuDefaultColors::RomulanGreenSlightlyDarker]   = ret[MenuDefaultColors::RomulanGreen] * glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
     ret[MenuDefaultColors::RomulanGreenHighlight]        = ret[MenuDefaultColors::RomulanGreen] + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f);
 
     return ret;
@@ -151,7 +151,7 @@ Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Cor
 
     const auto& windowDimensions = Resources::getWindowSize();
     
-    m_MainMenuScreen = new MainMenu(*this, *m_Font);
+    m_MainMenuScreen = new MainMenu(*this, *m_Font, 0.1f);
     m_HostScreen = new HostScreen(*this, *m_Font);
 
     //todo: remove

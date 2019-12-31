@@ -167,6 +167,12 @@ void Ships::init() {
     createShipEntry("D'deridex",        FactionEnum::Romulan,      30,   1.4f);
     //createShipEntry("Aeterna",        FactionEnum::Romulan,      40,   1.5f);
 
+
+    //createShipEntry("Probe",          FactionEnum::Borg,         6,    1.0f);
+    //createShipEntry("Sphere",         FactionEnum::Borg,         20,   1.2f);
+    //createShipEntry("Diamond",        FactionEnum::Borg,         30,   1.4f);
+    createShipEntry("Cube",             FactionEnum::Borg,         600,  2.5f);
+
     
     Material& defMat = *((Material*)Database["Defiant"].MaterialHandles[0].get());
     auto* layer = defMat.getComponent(0).addLayer();

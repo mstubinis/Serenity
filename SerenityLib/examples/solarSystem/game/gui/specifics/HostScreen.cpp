@@ -137,7 +137,7 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu){
         m_RightWindow->setPositionFunctor(RightPositionFunctor());
         m_RightWindow->setSizeFunctor(RightSizeFunctor());
     }
-    m_MapDescriptionWindow = NEW MapDescriptionWindow(font, padding_x + contentSize.x / 3.0f, winSize.y - padding_y, contentSize.x / 3.0f, contentSize.y / 2.0f);
+    m_MapDescriptionWindow = NEW MapDescriptionWindow(font, padding_x + contentSize.x / 3.0f, winSize.y - padding_y, contentSize.x / 3.0f, contentSize.y / 2.0f, 0.512f);
 
     m_BackButton = NEW Button(font, padding_x + (bottom_bar_button_width / 2.0f), padding_y + (bottom_bar_height / 2.0f), bottom_bar_button_width, bottom_bar_height);
     m_BackButton->setText("Back");

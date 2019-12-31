@@ -3,6 +3,8 @@
 #include "ThreatTable.h"
 #include <core/engine/utils/Utils.h>
 
+#include <iostream>
+
 AINPC::AINPC(const AIType::Type type) : AI(type) {
     m_Gunnery = nullptr;
 }
@@ -21,5 +23,7 @@ GunneryBaseClass* AINPC::getGunneryLogic() {
 void AINPC::installGunneryLogic(Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) {
     SAFE_DELETE(m_Gunnery);
     //TODO: switch(type) and install gunnery derived classes
+    if (!m_Threat)
+        std::cout << "error: no threat table installed\n";
     m_Gunnery = NEW GunneryBaseClass(m_Type, *this, *m_Threat, ship, map, sensors, weapons);
 }

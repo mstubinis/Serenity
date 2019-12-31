@@ -29,10 +29,7 @@ class AI {
 
         FireAtWill* getFireAtWill();
         ThreatTable* getThreatTable();
-        /*
-        const std::string serialize() const;
-        void deserialize(const std::string& input);
-        */
+
 };
 
 #endif

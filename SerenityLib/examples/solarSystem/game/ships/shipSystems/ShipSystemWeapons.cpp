@@ -536,7 +536,9 @@ void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
     auto* shipShields = static_cast<ShipSystemShields*>(ship.getShipSystem(ShipSystemType::Shields));
     auto* shipHull = static_cast<ShipSystemHull*>(ship.getShipSystem(ShipSystemType::Hull));
     vector<Entity> ignored; ignored.reserve(3);
-    ignored.push_back(shipShields->getEntity());
+    if (shipShields) {
+        ignored.push_back(shipShields->getEntity());
+    }
     ignored.push_back(shipHull->getEntity());
     ignored.push_back(ship.entity());
     auto target_central_position = glm::vec3(target->getComponent<ComponentBody>()->position());
@@ -577,10 +579,12 @@ void PrimaryWeaponBeam::internal_update_firing(const double& dt) {
     }
     if (targetShip) {
         auto* targetShields = static_cast<ShipSystemShields*>(targetShip->getShipSystem(ShipSystemType::Shields));
-        auto positionModelSpace = (closest->hitPosition - target_central_position) * glm::quat(targetShip->getRotation());
-        const auto side = targetShields->getImpactSide(positionModelSpace);
-        if (targetShields->getHealthCurrent(side) <= 0.0f) {
-            rayCastPoints.erase(rayCastPoints.begin() + closestIndex);
+        if (targetShields) {
+            auto positionModelSpace = (closest->hitPosition - target_central_position) * glm::quat(targetShip->getRotation());
+            const auto side = targetShields->getImpactSide(positionModelSpace);
+            if (targetShields->getHealthCurrent(side) <= 0.0f) {
+                rayCastPoints.erase(rayCastPoints.begin() + closestIndex);
+            }
         }
         minDist = 9999999999999.0f;
         closestIndex = 0;

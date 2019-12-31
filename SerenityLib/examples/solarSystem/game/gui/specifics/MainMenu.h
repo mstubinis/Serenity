@@ -11,14 +11,16 @@ class  Menu;
 class MainMenu final {
     private:
 
+        Button*          m_ButtonsBackground;
+        Button*          m_ButtonsBackgroundBorder;
 
         Button*          m_ButtonHost;
         Button*          m_ButtonJoin;
         Button*          m_ButtonOptions;
         Button*          m_ButtonEncyclopedia;
-
+        Button*          m_ButtonExit;
     public:
-        MainMenu(Menu&, Font& font);
+        MainMenu(Menu&, Font& font, const float& depth);
         ~MainMenu();
 
         void onResize(const unsigned int newWidth, const unsigned int newHeight);

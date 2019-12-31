@@ -169,13 +169,13 @@ void GUIRenderElement::render(const glm::vec4& scissor) {
         m_Textures[TextureIndex::Top].render(m_Depth, mouseOver, pos + glm::vec2(
             (top_edge_size / 2) + corner_size + (m_BorderSize.x + m_PaddingSize.x),
             (m_BorderSize.y + m_PaddingSize.y + left_edge_size + corner_size + (corner_size / 2))
-        ), glm::vec2(1.0f, top_edge_size), scissor, 270.0f, Alignment::Center);
+        ), glm::vec2(1.0f, top_edge_size+1), scissor, 270.0f, Alignment::Center);
     }
     if (top_edge_size > 0) {
         m_Textures[TextureIndex::Bottom].render(m_Depth, mouseOver, pos + glm::vec2(
             (top_edge_size / 2) + corner_size + (m_BorderSize.x + m_PaddingSize.x),
             (m_BorderSize.y + m_PaddingSize.y + (corner_size / 2))
-        ), glm::vec2(1.0f, top_edge_size), scissor, 90.0f, Alignment::Center);
+        ), glm::vec2(1.0f, top_edge_size+1), scissor, 90.0f, Alignment::Center);
     }
     
 
@@ -234,7 +234,7 @@ Texture* GUIRenderElement::getTextureCorner(unsigned int index) {
 }
 Texture* GUIRenderElement::getTextureEdge(unsigned int index) {
     index = glm::min(index, 4U);
-    return m_Textures[TextureIndex::Left + index].texture;
+    return m_Textures[(TextureIndex::Left) + index].texture;
 }
 const float& GUIRenderElement::getDepth() const {
     return m_Depth;
@@ -252,6 +252,13 @@ void GUIRenderElement::setTextureEdgeHighlight(Texture* texture) {
         m_Textures[i].textureHighlight = texture;
     }
 }
+void GUIRenderElement::setTextureCornerHighlight(Texture* texture, unsigned int index) {
+    m_Textures[index].textureHighlight = texture;
+}
+void GUIRenderElement::setTextureEdgeHighlight(Texture* texture, unsigned int index) {
+    m_Textures[TextureIndex::Left + index].textureHighlight = texture;
+}
+
 void GUIRenderElement::setTextureHighlight(Handle& handle) {
     GUIRenderElement::setTextureHighlight((Texture*)handle.get());
 }
@@ -261,6 +268,15 @@ void GUIRenderElement::setTextureCornerHighlight(Handle& handle) {
 void GUIRenderElement::setTextureEdgeHighlight(Handle& handle) {
     GUIRenderElement::setTextureEdgeHighlight((Texture*)handle.get());
 }
+void GUIRenderElement::setTextureCornerHighlight(Handle& handle, unsigned int index) {
+    GUIRenderElement::setTextureCornerHighlight((Texture*)handle.get(), index);
+}
+void GUIRenderElement::setTextureEdgeHighlight(Handle& handle, unsigned int index) {
+    GUIRenderElement::setTextureEdgeHighlight((Texture*)handle.get(), index);
+}
+
+
+
 void GUIRenderElement::enableTexture(const bool enabled) {
     m_Textures[TextureIndex::Center].drawSolidColor = enabled;
 }
@@ -274,6 +290,13 @@ void GUIRenderElement::enableTextureEdge(const bool enabled) {
         m_Textures[i].drawSolidColor = enabled;
     }
 }
+void GUIRenderElement::enableTextureCorner(const bool enabled, unsigned int index) {
+    m_Textures[index].drawSolidColor = enabled;
+}
+void GUIRenderElement::enableTextureEdge(const bool enabled, unsigned int index) {
+    m_Textures[TextureIndex::Left + index].drawSolidColor = enabled;
+}
+
 void GUIRenderElement::setTexture(Texture* texture) {
     m_Textures[TextureIndex::Center].texture = texture;
 }
@@ -287,6 +310,16 @@ void GUIRenderElement::setTextureEdge(Texture* texture) {
         m_Textures[i].texture = texture;
     }
 }
+
+
+void GUIRenderElement::setTextureCorner(Texture* texture, unsigned int index) {
+    m_Textures[index].texture = texture;
+}
+void GUIRenderElement::setTextureEdge(Texture* texture, unsigned int index) {
+    m_Textures[TextureIndex::Left + index].texture = texture;
+}
+
+
 void GUIRenderElement::setTexture(Handle& handle) {
     GUIRenderElement::setTexture((Texture*)handle.get());
 }
@@ -295,6 +328,12 @@ void GUIRenderElement::setTextureCorner(Handle& handle) {
 }
 void GUIRenderElement::setTextureEdge(Handle& handle) {
     GUIRenderElement::setTextureEdge((Texture*)handle.get());
+}
+void GUIRenderElement::setTextureCorner(Handle& handle, unsigned int index) {
+    GUIRenderElement::setTextureCorner((Texture*)handle.get(), index);
+}
+void GUIRenderElement::setTextureEdge(Handle& handle, unsigned int index) {
+    GUIRenderElement::setTextureEdge((Texture*)handle.get(), index);
 }
 void GUIRenderElement::setColor(const glm::vec4& color) {
     for (size_t i = 0; i < m_Textures.size(); ++i) {

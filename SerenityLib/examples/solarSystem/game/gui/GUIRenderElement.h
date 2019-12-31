@@ -95,20 +95,34 @@ class GUIRenderElement {
         void enableTexture(const bool);
         void enableTextureCorner(const bool);
         void enableTextureEdge(const bool);
+        void enableTextureCorner(const bool, unsigned int index);
+        void enableTextureEdge(const bool, unsigned int index);
+
         void setTexture(Texture*);
-        void setTextureCorner(Texture*);
-        void setTextureEdge(Texture*);
         void setTexture(Handle&);
+
+        void setTextureCorner(Texture*);
         void setTextureCorner(Handle&);
+        void setTextureCorner(Texture*, unsigned int index);
+        void setTextureCorner(Handle&, unsigned int index);
+
+        void setTextureEdge(Texture*);
         void setTextureEdge(Handle&);
+        void setTextureEdge(Texture*, unsigned int index);
+        void setTextureEdge(Handle&, unsigned int index);
 
         void setTextureHighlight(Texture*);
-        void setTextureCornerHighlight(Texture*);
-        void setTextureEdgeHighlight(Texture*);
         void setTextureHighlight(Handle&);
-        void setTextureCornerHighlight(Handle&);
-        void setTextureEdgeHighlight(Handle&);
 
+        void setTextureCornerHighlight(Texture*);
+        void setTextureCornerHighlight(Handle&);
+        void setTextureCornerHighlight(Texture*, unsigned int index);
+        void setTextureCornerHighlight(Handle&, unsigned int index);
+
+        void setTextureEdgeHighlight(Texture*);
+        void setTextureEdgeHighlight(Handle&);
+        void setTextureEdgeHighlight(Texture*, unsigned int index);
+        void setTextureEdgeHighlight(Handle&, unsigned int index);
 
         Texture* getTextureCenter();
         Texture* getTextureCorner(unsigned int index = 0);

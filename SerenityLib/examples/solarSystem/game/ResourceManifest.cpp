@@ -65,6 +65,9 @@ Handle ResourceManifest::ShipStatusBackgroundBorderHUDTexture;
 Handle ResourceManifest::GUITextureCorner;
 Handle ResourceManifest::GUITextureSide;
 
+Handle ResourceManifest::GUITextureCornerRoundSmall;
+Handle ResourceManifest::GUITextureCornerBoxSmall;
+Handle ResourceManifest::GUITextureSideSmall;
 
 Handle ResourceManifest::EarthSkyMaterial;
 Handle ResourceManifest::StarFlareMaterial;
@@ -79,8 +82,10 @@ Handle ResourceManifest::BorgBeamMaterial;
 Handle ResourceManifest::BorgCuttingBeamMaterial;
 
 //sounds
-Handle ResourceManifest::SoundCloakingActivated;
-Handle ResourceManifest::SoundCloakingDeactivated;
+Handle ResourceManifest::SoundRomulanCloakingActivated;
+Handle ResourceManifest::SoundRomulanCloakingDeactivated;
+Handle ResourceManifest::SoundKlingonCloakingActivated;
+Handle ResourceManifest::SoundKlingonCloakingDeactivated;
 Handle ResourceManifest::SoundPulsePhaser;
 Handle ResourceManifest::SoundPlasmaCannon;
 Handle ResourceManifest::SoundDisruptorCannon;
@@ -377,9 +382,20 @@ void ResourceManifest::init(){
     ((Texture*)GUITextureCorner.get())->setFilter(TextureFilter::Nearest);
     ((Texture*)GUITextureSide.get())->setFilter(TextureFilter::Nearest);
 
+
+    GUITextureCornerRoundSmall = Resources::loadTexture(BasePath + "data/Textures/HUD/GUI_Corner_Round_Small.dds");
+    GUITextureCornerBoxSmall = Resources::loadTexture(BasePath + "data/Textures/HUD/GUI_Corner_Box_Small.dds");
+    GUITextureSideSmall = Resources::loadTexture(BasePath + "data/Textures/HUD/GUI_Side_Small.dds");
+    ((Texture*)GUITextureCornerRoundSmall.get())->setFilter(TextureFilter::Nearest);
+    ((Texture*)GUITextureCornerBoxSmall.get())->setFilter(TextureFilter::Nearest);
+    ((Texture*)GUITextureSideSmall.get())->setFilter(TextureFilter::Nearest);
+
     //sounds
-    SoundCloakingActivated = Resources::addSoundData(BasePath + "data/Sounds/effects/cloaking.ogg");
-    SoundCloakingDeactivated = Resources::addSoundData(BasePath + "data/Sounds/effects/decloaking.ogg");
+    SoundRomulanCloakingActivated = Resources::addSoundData(BasePath + "data/Sounds/effects/romulan_cloaking.ogg");
+    SoundRomulanCloakingDeactivated = Resources::addSoundData(BasePath + "data/Sounds/effects/romulan_decloaking.ogg");
+    SoundKlingonCloakingActivated = Resources::addSoundData(BasePath + "data/Sounds/effects/klingon_cloaking.ogg");
+    SoundKlingonCloakingDeactivated = Resources::addSoundData(BasePath + "data/Sounds/effects/klingon_decloaking.ogg");
+
     SoundPulsePhaser = Resources::addSoundData(BasePath + "data/Sounds/effects/pulse_phaser.ogg");
     SoundPlasmaCannon = Resources::addSoundData(BasePath + "data/Sounds/effects/plasma_cannon.ogg");
     SoundDisruptorCannon = Resources::addSoundData(BasePath + "data/Sounds/effects/disruptor_cannon.ogg");

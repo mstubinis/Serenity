@@ -1,6 +1,9 @@
 #include "ScrollBar.h"
 #include "Button.h"
 
+#include "../Menu.h"
+#include "../ResourceManifest.h"
+
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/system/Engine.h>
@@ -17,12 +20,16 @@ struct ScrollBar_BottomButtonFunctor final { void operator()(Button* button) con
     auto* bar = static_cast<ScrollBar*>(button->getUserPointer());
     bar->scroll(-1.0f);
 }};
+struct ScrollBar_Functor final { void operator()(Button* button) const {
+    //this logic is handled in update() and render()
+    //auto* bar = static_cast<ScrollBar*>(button->getUserPointer());
+    //bar->scroll(-1.0f);
+}};
 
-ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float w, const float h, const ScrollBarType::Type& type) : Widget(x, y, w, h) {
+ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float w, const float h, const float depth, const ScrollBarType::Type& type) : Widget(x, y, w, h){
     m_Type                           = type;
     m_Alignment                      = Alignment::TopLeft;
     m_CurrentlyDragging              = false;
-    m_BorderSize                     = 1.0f;
     m_ScrollBarColor                 = glm::vec4(0.6f);
 
     m_ScrollBarCurrentContentPercent = 1.0f;
@@ -30,43 +37,78 @@ ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float
     m_DragSnapshot                   = 0.0f;
 
 
-    m_TopOrLeftButton     = NEW Button(font, glm::vec2(x, y), w, w);
-    m_TopOrLeftButton->setText("^");
+    m_ScrollArea = new Button(font, x, y, w, h - w - w);
+    m_ScrollArea->setDepth(depth - 0.002f);
+    m_ScrollArea->setPaddingSize(5);
+    m_ScrollArea->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+
+    m_ScrollArea->setTextureCorner(ResourceManifest::GUITextureCornerBoxSmall);
+    m_ScrollArea->setTextureEdge(ResourceManifest::GUITextureSideSmall);
+    m_ScrollArea->setTextureCornerHighlight(ResourceManifest::GUITextureCornerBoxSmall);
+    m_ScrollArea->setTextureEdgeHighlight(ResourceManifest::GUITextureSideSmall);
+
+    m_ScrollArea->setAlignment(Alignment::Right);
+    m_ScrollArea->setUserPointer(this);
+    m_ScrollArea->setOnClickFunctor(ScrollBar_Functor());
+
+    m_ScrollAreaBackground = new Button(font, x, y, w, h - w - w);
+    m_ScrollAreaBackground->setDepth(depth + 0.001f);
+    m_ScrollAreaBackground->setPaddingSize(5);
+    m_ScrollAreaBackground->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueSlightlyDarker]);
+    m_ScrollAreaBackground->setAlignment(Alignment::TopLeft);
+    m_ScrollAreaBackground->disableMouseover();
+    m_ScrollAreaBackground->setTextureCorner(ResourceManifest::GUITextureCornerBoxSmall);
+    m_ScrollAreaBackground->setTextureEdge(ResourceManifest::GUITextureSideSmall);
+    m_ScrollAreaBackground->setTextureCornerHighlight(ResourceManifest::GUITextureCornerBoxSmall);
+    m_ScrollAreaBackground->setTextureEdgeHighlight(ResourceManifest::GUITextureSideSmall);
+
+    m_TopOrLeftButton     = NEW Button(font, x,y, w, w);
+    m_TopOrLeftButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_TopOrLeftButton->setPaddingSize(5);
+    m_TopOrLeftButton->setDepth(depth - 0.001f);
+    m_TopOrLeftButton->setText("");
     m_TopOrLeftButton->setAlignment(Alignment::TopLeft);
-    m_TopOrLeftButton->setColor(m_Color);
     m_TopOrLeftButton->setTextColor(0, 0, 0, 1);
     m_TopOrLeftButton->setOnClickToBePulsed(true);
-
-    m_TopOrLeftButton->setTextureCorner(nullptr);
-    m_TopOrLeftButton->setTextureEdge(nullptr);
-    m_TopOrLeftButton->setTextureCornerHighlight(nullptr);
-    m_TopOrLeftButton->setTextureEdgeHighlight(nullptr);
-    m_TopOrLeftButton->enableTextureCorner(false);
-    m_TopOrLeftButton->enableTextureEdge(false);
-
     m_TopOrLeftButton->setUserPointer(this);
     m_TopOrLeftButton->setOnClickFunctor(ScrollBar_TopButtonFunctor());
 
-    m_BottomOrRightButton = NEW Button(font, glm::vec2(x, y - h), w, w);
-    m_BottomOrRightButton->setText("v");
+    m_TopOrLeftButton->setTextureEdge(ResourceManifest::GUITextureSideSmall);
+    m_TopOrLeftButton->setTextureCorner(ResourceManifest::GUITextureCornerRoundSmall);
+    m_TopOrLeftButton->setTextureEdgeHighlight(ResourceManifest::GUITextureSideSmall);
+    m_TopOrLeftButton->setTextureCornerHighlight(ResourceManifest::GUITextureCornerRoundSmall);
+
+    m_TopOrLeftButton->setTextureCorner(ResourceManifest::GUITextureCornerBoxSmall,1);
+    m_TopOrLeftButton->setTextureCorner(ResourceManifest::GUITextureCornerBoxSmall,3);
+    m_TopOrLeftButton->setTextureCornerHighlight(ResourceManifest::GUITextureCornerBoxSmall, 1);
+    m_TopOrLeftButton->setTextureCornerHighlight(ResourceManifest::GUITextureCornerBoxSmall, 3);
+
+    m_BottomOrRightButton = NEW Button(font, x, y - h, w, w);
+    m_BottomOrRightButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_BottomOrRightButton->setPaddingSize(5);
+    m_BottomOrRightButton->setDepth(depth - 0.001f);
+    m_BottomOrRightButton->setText("");
     m_BottomOrRightButton->setAlignment(Alignment::BottomLeft);
-    m_BottomOrRightButton->setColor(m_Color);
     m_BottomOrRightButton->setTextColor(0, 0, 0, 1);
     m_BottomOrRightButton->setOnClickToBePulsed(true);
-
-    m_BottomOrRightButton->setTextureCorner(nullptr);
-    m_BottomOrRightButton->setTextureEdge(nullptr);
-    m_BottomOrRightButton->setTextureCornerHighlight(nullptr);
-    m_BottomOrRightButton->setTextureEdgeHighlight(nullptr);
-    m_BottomOrRightButton->enableTextureCorner(false);
-    m_BottomOrRightButton->enableTextureEdge(false);
-
     m_BottomOrRightButton->setUserPointer(this);
     m_BottomOrRightButton->setOnClickFunctor(ScrollBar_BottomButtonFunctor());
+
+    m_BottomOrRightButton->setTextureEdge(ResourceManifest::GUITextureSideSmall);
+    m_BottomOrRightButton->setTextureCorner(ResourceManifest::GUITextureCornerRoundSmall);
+    m_BottomOrRightButton->setTextureEdgeHighlight(ResourceManifest::GUITextureSideSmall);
+    m_BottomOrRightButton->setTextureCornerHighlight(ResourceManifest::GUITextureCornerRoundSmall);
+
+    m_BottomOrRightButton->setTextureCorner(ResourceManifest::GUITextureCornerBoxSmall, 0);
+    m_BottomOrRightButton->setTextureCorner(ResourceManifest::GUITextureCornerBoxSmall, 2);
+    m_BottomOrRightButton->setTextureCornerHighlight(ResourceManifest::GUITextureCornerBoxSmall, 0);
+    m_BottomOrRightButton->setTextureCornerHighlight(ResourceManifest::GUITextureCornerBoxSmall, 2);
 
     internalUpdateScrollbarPosition();
 }
 ScrollBar::~ScrollBar() {
+    SAFE_DELETE(m_ScrollArea);
+    SAFE_DELETE(m_ScrollAreaBackground);
     SAFE_DELETE(m_TopOrLeftButton);
     SAFE_DELETE(m_BottomOrRightButton);
 }
@@ -84,11 +126,13 @@ void ScrollBar::setColor(const glm::vec4& color) {
 }
 void ScrollBar::setWidth(const float width) {
     Widget::setWidth(width);
+    m_ScrollAreaBackground->setSize(m_Width, m_ScrollAreaBackground->height());
     m_TopOrLeftButton->setSize(m_Width, m_Width);
     m_BottomOrRightButton->setSize(m_Width, m_Width);
 }
 void ScrollBar::setHeight(const float height) {
     Widget::setHeight(height);
+    m_ScrollAreaBackground->setSize(m_Width, height - m_Width - m_Width);
     m_TopOrLeftButton->setSize(m_Width, m_Width);
     m_BottomOrRightButton->setSize(m_Width, m_Width);
 }
@@ -101,15 +145,12 @@ void ScrollBar::setPosition(const float x, const float y) {
 
     m_TopOrLeftButton->setPosition(x, y);
     m_BottomOrRightButton->setPosition(x, y - height());
+    m_ScrollAreaBackground->setPosition(x,y - (m_Width));
 
     internalUpdateScrollbarPosition();
 }
 void ScrollBar::setPosition(const glm::vec2& position) {
     ScrollBar::setPosition(position.x, position.y);
-}
-
-void ScrollBar::setBorderSize(const float border) {
-    m_BorderSize = border;
 }
 
 void ScrollBar::setSliderSize(const float percent) {
@@ -162,6 +203,8 @@ void ScrollBar::update(const double& dt) {
     Widget::update(dt);
     m_TopOrLeftButton->update(dt);
     m_BottomOrRightButton->update(dt);
+    m_ScrollArea->update(dt);
+    m_ScrollAreaBackground->update(dt);
 
     if (m_Hidden)
         return;
@@ -170,28 +213,9 @@ void ScrollBar::update(const double& dt) {
     const auto& mouse       = Engine::getMousePosition();
 
     bool mouseOver = true;
-    bool mouseOverTopTriangle = true;
-    bool mouseOverBottomTriangle = true;
+
     if (mouse.x < m_Position.x || mouse.x > m_Position.x + m_Width || mouse.y < scrollBarY || mouse.y > scrollBarY + scrollBarHeight) {
         mouseOver = false;
-    }
-    if (m_ScrollBarCurrentContentPercent < 1.0f) {
-        if (mouse.x < m_Position.x || mouse.x > m_Position.x + m_Width || mouse.y < m_Position.y - m_Width || mouse.y > m_Position.y) {
-            mouseOverTopTriangle = false;
-        }
-        if (mouse.x < m_Position.x || mouse.x > m_Position.x + m_Width || mouse.y < (m_Position.y - m_Height) || mouse.y > (m_Position.y - m_Height) + m_Width) {
-            mouseOverBottomTriangle = false;
-        }
-        if (mouseOverTopTriangle) {
-            if (Engine::isMouseButtonDown(MouseButton::Left)) {
-                scroll(1.0f);
-            }
-        }
-        if (mouseOverBottomTriangle) {
-            if (Engine::isMouseButtonDown(MouseButton::Left)) {
-                scroll(-1.0f);
-            }
-        }
     }
     if (mouseOver) {
         if (Engine::isMouseButtonDownOnce(MouseButton::Left)) {
@@ -210,62 +234,21 @@ void ScrollBar::update(const double& dt) {
     }
 }
 void ScrollBar::render(const glm::vec4& scissor) {
-    const auto& mouse = Engine::getMousePosition();
-    const float& halfWidth = m_Width / 2.0f;
-
-    const float& scrollHeightMax = m_Height - (m_Width * 2.0f);
     const float& scrollBarHeight = getSliderHeight();
-
-    const float& gap = m_BorderSize + 4.0f;
-    const float& halfBorderSize = m_BorderSize / 2.0f;
-
-    bool mouseOverTopTriangle = true;
-    bool mouseOverBottomTriangle = true;
-    bool mouseOver = true;
-    const float& scrollBarY = m_ScrollBarStartAnchor - scrollBarHeight / 2.0f;
-
-    //draw the actual scroll bar
     const auto pos = positionWorld();
 
-    if (mouse.x < pos.x || mouse.x > pos.x + m_Width || mouse.y < scrollBarY || mouse.y > scrollBarY + scrollBarHeight) {
-        mouseOver = false;
+    if (m_CurrentlyDragging) {
+        m_ScrollArea->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueHighlight]);
+        m_ScrollArea->setColorHighlight(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueHighlight]);
+    }else{
+        m_ScrollArea->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+        m_ScrollArea->setColorHighlight(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueHighlight]);
     }
-    glm::vec4 color = m_ScrollBarColor;
-    if (mouseOver && m_ScrollBarCurrentContentPercent < 1.0f)
-        color += glm::vec4(0.15f);
-    Renderer::renderRectangle((glm::ivec2(pos.x , m_ScrollBarStartAnchor)), color, m_Width, scrollBarHeight, 0, 0.009f, Alignment::Left, scissor);
+    m_ScrollArea->setSize(m_Width, scrollBarHeight);
+    m_ScrollArea->setPosition(pos.x, m_ScrollBarStartAnchor);
 
-    //scroll bar area background
-    Renderer::renderRectangle((glm::ivec2(pos.x , pos.y - m_Width - halfBorderSize)), glm::vec4(0.3f), m_Width, scrollHeightMax + 1, 0, 0.010f, m_Alignment, scissor);
-
-    //border
-    //Renderer::renderBorder(m_BorderSize, glm::vec2(pos.x + 2.0f, pos.y), m_Color, m_Width, m_Height, 0, 0.008f, m_Alignment, scissor);
-
-    //inner borders
-    //Renderer::renderRectangle(glm::vec2(pos.x + 2.0f, pos.y - m_Width), m_Color, m_Width, m_BorderSize, 0, 0.009f, Alignment::BottomLeft, scissor);
-    //Renderer::renderRectangle(glm::vec2(pos.x + 2.0f, pos.y - m_Height + m_Width), m_Color, m_Width, m_BorderSize, 0, 0.009f, Alignment::TopLeft, scissor);
-
-    //button triangles
-    if (mouse.x < pos.x || mouse.x > pos.x + m_Width || mouse.y < pos.y - m_Width || mouse.y > pos.y) {
-        mouseOverTopTriangle = false;
-    }
-    if (mouse.x < pos.x || mouse.x > pos.x + m_Width || mouse.y < (pos.y - m_Height) || mouse.y >(pos.y - m_Height) + m_Width) {
-        mouseOverBottomTriangle = false;
-    }
-
-    glm::vec4 colorTop = m_Color;
-    if (mouseOverTopTriangle)
-        colorTop += glm::vec4(0.55f);
-
-    glm::vec4 colorBottom = m_Color;
-    if (mouseOverBottomTriangle)
-        colorBottom += glm::vec4(0.55f);
-
-    const float& triSize = halfWidth - 4.0f;
-
-    //Renderer::renderTriangle(glm::vec2(pos.x + halfWidth + 2.0f, pos.y - halfWidth), colorTop, 180, triSize, triSize, 0.007f, Alignment::Center, scissor);
-    //Renderer::renderTriangle(glm::vec2(pos.x + halfWidth + 2.0f, pos.y - m_Height + halfWidth), colorBottom, 0, triSize, triSize, 0.007f, Alignment::Center, scissor);
-
+    m_ScrollAreaBackground->render();
+    m_ScrollArea->render();
     m_TopOrLeftButton->render();
     m_BottomOrRightButton->render();
 

@@ -19,9 +19,9 @@
 
 using namespace std;
 
-MapDescriptionWindow::MapDescriptionWindow(Font& font, const float& x, const float& y, const float& width, const float& height) : m_Font(font){
+MapDescriptionWindow::MapDescriptionWindow(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth) : m_Font(font){
     m_UserPointer = nullptr;
-    m_ScrollFrame = NEW ScrollFrame(font, x, y, width, height);
+    m_ScrollFrame = NEW ScrollFrame(font, x, y, width, height, depth - 0.001f);
     m_ScrollFrame->setColor(1, 1, 0, 1);
 }
 MapDescriptionWindow::~MapDescriptionWindow() {

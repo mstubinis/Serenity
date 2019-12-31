@@ -14,7 +14,7 @@ class MapDescriptionWindow final {
         Font&         m_Font;
         void*         m_UserPointer;
     public:
-        MapDescriptionWindow(Font& font, const float& x, const float& y, const float& width, const float& height);
+        MapDescriptionWindow(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth);
         ~MapDescriptionWindow();
 
         void setCurrentMapChoice(const MapEntryData& choice);

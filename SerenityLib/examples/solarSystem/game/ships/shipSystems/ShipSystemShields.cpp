@@ -135,15 +135,21 @@ void ShipSystemShieldsImpactPoint::impact(const glm::vec3& _impactLocation, cons
     removeFromVector(freelist, indexInArray);
 }
 
-void ShipSystemShieldsImpactPoint::update(const float& dt, vector<uint>& freelist) {
+const bool ShipSystemShieldsImpactPoint::update(const float& dt, vector<uint>& freelist, size_t& maxIndex) {
     if (active) {
         currentTime += dt;
         if (currentTime >= maxTime) {
             active = false;
             currentTime = 0.0f;
             freelist.push_back(indexInArray);
+
+            if (indexInArray >= maxIndex) {
+                //this was the biggest index, we need a new one
+                return true;
+            }
         }
     }
+    return false;
 }
 #pragma endregion
 
@@ -210,6 +216,7 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, con
         m_ImpactPoints[i].indexInArray = i;
     }
     m_ImpactPointsFreelist.reserve(MAX_IMPACT_POINTS);
+    m_MaxIndex = 0;
     for (uint i = 0; i < MAX_IMPACT_POINTS; ++i) {
         m_ImpactPointsFreelist.push_back(i);
     }
@@ -274,22 +281,36 @@ void ShipSystemShields::reset_all_impact_points() {
     for (uint i = 0; i < MAX_IMPACT_POINTS; ++i) {
         m_ImpactPoints[i] = ShipSystemShieldsImpactPoint();
     }
+    m_MaxIndex = 0;
 }
 void ShipSystemShields::update(const double& dt) {
-    auto& shieldBody = *m_ShieldEntity.getComponent<ComponentBody>();
-    auto& shieldModel = *m_ShieldEntity.getComponent<ComponentModel>();
-    auto& shipBody = *m_Ship.getComponent<ComponentBody>();
-    auto shipBodyRot = shipBody.rotation();
+    const float fdt = static_cast<float>(dt);
+
+    auto& shieldBody        = *m_ShieldEntity.getComponent<ComponentBody>();
+    auto& shieldModel       = *m_ShieldEntity.getComponent<ComponentModel>();
+    auto& shipBody          = *m_Ship.getComponent<ComponentBody>();
+    const auto shipBodyRot  = shipBody.rotation();
 
     shieldBody.setRotation(shipBodyRot);
     shieldBody.setPosition(shipBody.position() + Math::rotate_vec3(shipBodyRot, shieldModel.getModel(0).position() + m_ShieldsOffset));
     
-    bool shown = false;
-    const float fdt = static_cast<float>(dt);
-    for (auto& impact : m_ImpactPoints) {
-        impact.update(fdt, m_ImpactPointsFreelist);
-        if (!shown && impact.active)
+    bool shown            = false;
+    bool recalc_max_index = false;
+    for (size_t i = 0; i <= m_MaxIndex; ++i) {
+        auto& impact = m_ImpactPoints[i];
+        recalc_max_index = impact.update(fdt, m_ImpactPointsFreelist, m_MaxIndex);
+        if (!shown && impact.active) {
             shown = true;
+        }
+    }
+    if (recalc_max_index) { //we need a new max index
+        for (int j = MAX_IMPACT_POINTS - 1; j >= 0; --j) {
+            auto& impact1 = m_ImpactPoints[j];
+            if (impact1.active) {
+                m_MaxIndex = j;
+                break;
+            }
+        }
     }
     !shown ? shieldModel.hide() : shieldModel.show();
 
@@ -357,6 +378,9 @@ void ShipSystemShields::addShieldImpact(const glm::vec3& impactModelSpacePositio
         auto nextIndex = m_ImpactPointsFreelist[0];
         auto& impactPointData = m_ImpactPoints[nextIndex];
         impactPointData.impact(impactModelSpacePosition, impactRadius, maxTime, m_ImpactPointsFreelist);
+        if (nextIndex > m_MaxIndex) {
+            m_MaxIndex = nextIndex;
+        }
     }
 }
 void ShipSystemShields::receiveHit(const string& source, const glm::vec3& impactNormal, const glm::vec3& impactModelSpacePosition, const float& impactRadius, const float& maxTime, const float damage, const uint shieldSide, const bool doImpactGraphic) {

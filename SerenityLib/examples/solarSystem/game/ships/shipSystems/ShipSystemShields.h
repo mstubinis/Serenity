@@ -9,7 +9,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <vector>
 
-#define MAX_IMPACT_POINTS 64
+#define MAX_IMPACT_POINTS 256
 #define SHIELD_SCALE_FACTOR 1.37f
 
 struct ShieldInstanceBindFunctor;
@@ -25,7 +25,7 @@ struct ShipSystemShieldsImpactPoint final {
     ShipSystemShieldsImpactPoint();
 
     void impact(const glm::vec3& _impactLocation, const float& _impactRadius, const float& _maxTime, std::vector<uint>& freelist);
-    void update(const float& dt, std::vector<uint>& freelist);
+    const bool update(const float& dt, std::vector<uint>& freelist, size_t& maxIndex);
 };
 
 
@@ -58,6 +58,8 @@ class ShipSystemShields final : public ShipSystem {
     private:
         ShipSystemShieldsImpactPoint  m_ImpactPoints[MAX_IMPACT_POINTS];
         std::vector<uint>             m_ImpactPointsFreelist;
+        size_t                        m_MaxIndex; //optimization for update()
+
         Entity                        m_ShieldEntity;
 
         std::vector<float>            m_HealthPointsCurrent;

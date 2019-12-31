@@ -34,9 +34,6 @@ RoundedWindow::RoundedWindow(Font& font, const float& x, const float& y, const f
     m_Background->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
     m_Background->setDepth(depth + 0.01f);
     m_Background->disable();
-    //m_Background->setTexture(nullptr);
-    //m_Background->setTextureHighlight(nullptr);
-    //m_Background->enableTexture(false);
 
     setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
     setDepth(depth);

@@ -25,11 +25,13 @@ void AI::update(const double& dt) {
     }
 }
 void AI::installFireAtWill(AIType::Type& type, Ship& ship, Map& map, ShipSystemSensors& sensors, ShipSystemWeapons& weapons) {
-    SAFE_DELETE(m_FireAtWill);
+    if (m_FireAtWill)
+        return;
     m_FireAtWill = NEW FireAtWill(type, ship, map, sensors, weapons);
 }
 void AI::installThreatTable(Map& map) {
-    SAFE_DELETE(m_Threat);
+    if (m_Threat)
+        return;
     m_Threat = NEW ThreatTable(map);
 }
 FireAtWill* AI::getFireAtWill() {
@@ -38,21 +40,3 @@ FireAtWill* AI::getFireAtWill() {
 ThreatTable* AI::getThreatTable() {
     return m_Threat;
 }
-
-/*
-const string AI::serialize() const {
-    string res = "";
-    
-    res += to_string(m_Type);
-
-    if (m_FireAtWill) {
-        res += "1";
-    }else{
-        res += "0";
-    }
-    return res;
-}
-void AI::deserialize(const string& input) {
-
-}
-*/

@@ -37,7 +37,7 @@ struct ShipSelectorButtonOnClick final { void operator()(Button* button) const {
 }};
 
 ServerLobbyShipSelectorWindow::ServerLobbyShipSelectorWindow(Core& core,Scene& menu_scene, Camera& game_camera, const Font& font, const float x, const float y, const float w, const float h) : m_Core(core), m_Font(const_cast<Font&>(font)) {
-    m_ShipWindow = NEW ScrollFrame(font, x, y, w, h);
+    m_ShipWindow = NEW ScrollFrame(font, x, y, w, h, 0.02f);
     m_3DViewer = NEW Ship3DViewer(core, menu_scene, game_camera, x + m_ShipWindow->width() + 3.0f, y - h, h - 1.0f, h);
 }
 ServerLobbyShipSelectorWindow::~ServerLobbyShipSelectorWindow() {

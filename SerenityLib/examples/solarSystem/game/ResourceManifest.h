@@ -47,6 +47,9 @@ struct ResourceManifest{
     static Handle GUITextureCorner;
     static Handle GUITextureSide;
 
+    static Handle GUITextureCornerRoundSmall;
+    static Handle GUITextureCornerBoxSmall;
+    static Handle GUITextureSideSmall;
     //effects
     static Handle HullDamageOutline1Material;
     static Handle HullDamageMaterial1;
@@ -68,8 +71,11 @@ struct ResourceManifest{
     static Handle BorgCuttingBeamMaterial;
 
     //sounds
-    static Handle SoundCloakingActivated;
-    static Handle SoundCloakingDeactivated;
+    static Handle SoundRomulanCloakingActivated;
+    static Handle SoundRomulanCloakingDeactivated;
+    static Handle SoundKlingonCloakingActivated;
+    static Handle SoundKlingonCloakingDeactivated;
+
     static Handle SoundPulsePhaser;
     static Handle SoundPlasmaCannon;
     static Handle SoundDisruptorCannon;

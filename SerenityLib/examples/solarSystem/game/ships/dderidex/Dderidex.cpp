@@ -36,12 +36,12 @@ Dderidex::Dderidex(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
         if (i == 0)  system = NEW ShipSystemReactor(_this, 1000);
-        else if (i == 1)  system = NEW ShipSystemPitchThrusters(_this, 2.7f);
-        else if (i == 2)  system = NEW ShipSystemYawThrusters(_this, 2.7f);
-        else if (i == 3)  system = NEW ShipSystemRollThrusters(_this, 1.8f);
+        else if (i == 1)  system = NEW ShipSystemPitchThrusters(_this, 3.0f);
+        else if (i == 2)  system = NEW ShipSystemYawThrusters(_this, 3.0f);
+        else if (i == 3)  system = NEW ShipSystemRollThrusters(_this, 2.1f);
         else if (i == 4)  system = NEW ShipSystemCloakingDevice(_this);
         else if (i == 5)  system = NEW ShipSystemShields(_this, map, 180500.0f, 180500.0f, 180500.0f, 180500.0f, 230500.0f, 230500.0f, glm::vec3(0.0f), glm::vec3(1.00f, 1.00f, 1.00f));
-        else if (i == 6)  system = NEW ShipSystemMainThrusters(_this, 2.2f);
+        else if (i == 6)  system = NEW ShipSystemMainThrusters(_this, 40.0f);
         else if (i == 7)  system = NEW ShipSystemWarpDrive(_this);
         else if (i == 8)  system = NEW ShipSystemSensors(_this, map);
         else if (i == 9)  system = NEW ShipSystemWeapons(_this);

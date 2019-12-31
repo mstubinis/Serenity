@@ -27,7 +27,6 @@ class ScrollFrame: public Widget {
 
     private:
         ScrollBar*                                m_ScrollBar;
-        float                                     m_BorderSize;
         float                                     m_ContentHeight;
         std::vector<ScrollFrame::WidgetEntry>     m_Content;
 
@@ -35,7 +34,7 @@ class ScrollFrame: public Widget {
         void internal_recalculate_content_sizes();
         void fit_widget_to_window(WidgetEntry& widget);
     public:
-        ScrollFrame(const Font& font, const float x, const float y, const float w, const float h);
+        ScrollFrame(const Font& font, const float x, const float y, const float w, const float h, const float depth);
         virtual ~ScrollFrame();
 
         const float contentHeight() const;
@@ -45,8 +44,6 @@ class ScrollFrame: public Widget {
         void addContent(Widget* widget);
         void removeContent(Widget* widget);
         void setAlignment(const Alignment::Type& alignment);
-
-        void setBorderSize(const float borderSize);
 
         void setWidth(const float);
         void setHeight(const float);

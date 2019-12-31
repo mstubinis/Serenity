@@ -2,21 +2,36 @@
 #ifndef GAME_SHIPS_H
 #define GAME_SHIPS_H
 
+//federation
+#include "defiant/Defiant.h"
 #include "akira/Akira.h"
+#include "sovereign/Sovereign.h"
+
 #include "norway/Norway.h"
 #include "intrepid/Intrepid.h"
-#include "shrike/Shrike.h"
-#include "brel/Brel.h"
-#include "vorcha/Vorcha.h"
-#include "defiant/Defiant.h"
 #include "miranda/Miranda.h"
 #include "constitution/Constitution.h"
 #include "excelsior/Excelsior.h"
 #include "nova/Nova.h"
-#include "sovereign/Sovereign.h"
-#include "dderidex/Dderidex.h"
 #include "fed_def_platform/FedDefPlatform.h"
 #include "fed_starbase_mushroom/FedStarbaseMushroom.h"
+
+//klingon
+#include "brel/Brel.h"
+#include "vorcha/Vorcha.h"
+#include "neghvar/Neghvar.h"
+
+//romulan
+#include "shrike/Shrike.h"
+#include "venerex/Venerex.h"
+#include "dderidex/Dderidex.h"
+
+//borg
+#include "probe/Probe.h"
+#include "sphere/Sphere.h"
+#include "diamond/Diamond.h"
+#include "cube/Cube.h"
+
 
 #include "../factions/Faction.h"
 #include <core/engine/resources/Handle.h>

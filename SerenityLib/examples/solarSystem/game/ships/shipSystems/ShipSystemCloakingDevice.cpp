@@ -3,6 +3,7 @@
 #include "ShipSystemSensors.h"
 
 #include "../../Ship.h"
+#include "../../ships/Ships.h"
 #include "../../networking/packets/PacketCloakUpdate.h"
 #include "../../ResourceManifest.h"
 #include "../../map/Map.h"
@@ -46,8 +47,12 @@ const bool ShipSystemCloakingDevice::cloak(ComponentModel& model, bool sendPacke
         if (shields) {
             shields->turnOffShields();
         }
-
-        auto effect = Sound::playEffect(ResourceManifest::SoundCloakingActivated);
+        SoundEffect* effect = nullptr;
+        if (Ships::Database[m_Ship.getClass()].Faction == FactionEnum::Klingon) {
+            effect = Sound::playEffect(ResourceManifest::SoundKlingonCloakingActivated);
+        }else{
+            effect = Sound::playEffect(ResourceManifest::SoundRomulanCloakingActivated);
+        }
         if (effect) {
             auto& body = *m_Ship.getComponent<ComponentBody>();
             effect->setPosition(body.position());
@@ -86,7 +91,12 @@ void ShipSystemCloakingDevice::forceCloakOff(ComponentModel& model, bool sendPac
         m_Active = false;
         m_CloakTimer = 0.0f;
         model.show();
-        auto effect = Sound::playEffect(ResourceManifest::SoundCloakingDeactivated);
+        SoundEffect* effect = nullptr;
+        if (Ships::Database[m_Ship.getClass()].Faction == FactionEnum::Klingon) {
+            effect = Sound::playEffect(ResourceManifest::SoundKlingonCloakingDeactivated);
+        }else{
+            effect = Sound::playEffect(ResourceManifest::SoundRomulanCloakingDeactivated);
+        }
         if (effect) {
             auto& body = *m_Ship.getComponent<ComponentBody>();
             effect->setPosition(body.position());
