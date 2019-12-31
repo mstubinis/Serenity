@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
 
 
     EngineOptions options;
-    options.window_title   = "Solar System";
+    options.window_title   = "Star Trek - Homeland Security";
     options.width          = sf::VideoMode::getDesktopMode().width - 30;
     options.height         = sf::VideoMode::getDesktopMode().height - 120;
     options.fullscreen     = false;

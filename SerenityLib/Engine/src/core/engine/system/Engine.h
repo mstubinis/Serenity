@@ -3,6 +3,7 @@
 #define ENGINE_ENGINE_H
 
 struct EngineOptions;
+class  Engine_Window;
 
 #include <core/engine/utils/Engine_Debugging.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -12,8 +13,9 @@ struct EngineOptions;
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/math/SimplexNoise.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/discord/Discord.h>
 
-class Engine_Window;
+
 namespace Engine{
     void pause(const bool& pause = true);
     bool paused();
@@ -61,9 +63,10 @@ namespace Engine{
 
             public:
                 struct Misc final {
-                    SimplexNoise      m_SimplexNoise;
-                    bool              m_Paused;
-                    bool              m_Destroyed;
+                    Engine::Discord::DiscordCore   m_DiscordCore;
+                    SimplexNoise                   m_SimplexNoise;
+                    bool                           m_Paused;
+                    bool                           m_Destroyed;
                 };
                 Misc                  m_Misc;
 

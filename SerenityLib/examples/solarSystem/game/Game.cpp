@@ -10,12 +10,29 @@
 #include <core/engine/system/Engine.h>
 
 #include "ResourceManifest.h"
+#include <core/engine/discord/Discord.h>
 
 using namespace Engine;
 using namespace std;
 
 Core* m_Core = nullptr;
+
 void Game::initResources(){
+    Discord::activate(661384805786845214);
+    
+    Discord::DiscordActivity activity;
+    activity.setDetail("At Main Menu");
+    activity.setType(discord::ActivityType::Playing);
+    activity.setInstance(false);
+    activity.setState("Playing Solo");
+    activity.setTimestampStart(0);
+    activity.setTimestampEnd(0);
+    activity.setImageLarge("large_icon");
+    activity.setImageLargeText("");
+    activity.setImageSmallText("");
+
+    Discord::update_activity(activity);
+
     m_Core = NEW Core();
 
     ResourceManifest::init();
@@ -25,6 +42,7 @@ void Game::initResources(){
 void Game::initLogic(){
     Physics::setNumberOfStepsPerFrame(3);
     m_Core->init();
+
 }
 void Game::cleanup() {
     SAFE_DELETE(m_Core);

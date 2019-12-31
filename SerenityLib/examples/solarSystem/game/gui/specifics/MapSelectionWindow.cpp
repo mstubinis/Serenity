@@ -104,7 +104,7 @@ void MapSelectionWindow::recalculate_maps() {
                 button.setUserPointer(ptr);
                 button.setOnClickFunctor(MapSelectorButtonOnClick());
 
-                button.setPaddingSize(40.0f);
+                button.setPaddingSize(40);
 
 
                 m_MapFileScrollFrame->addContent(&button);

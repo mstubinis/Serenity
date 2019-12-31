@@ -214,6 +214,18 @@
     <Filter Include="Source Files\Engine\Core\System\Window">
       <UniqueIdentifier>{44a7dcc5-c461-4a07-9284-13c9e0686c33}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Discord">
+      <UniqueIdentifier>{dd4bcebd-44b2-476b-8b3f-c0ec337cb914}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Discord">
+      <UniqueIdentifier>{02787749-3880-4b53-afc8-679966e23541}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Discord\src">
+      <UniqueIdentifier>{8ce5b911-9336-4b98-95c5-66c62a549048}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Discord\src">
+      <UniqueIdentifier>{5fbcc608-e9d1-41e6-8a71-1c9b3bdc25be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -648,6 +660,57 @@
     <ClInclude Include="Engine\src\core\engine\utils\ForcedInclude.h">
       <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\Discord.h">
+      <Filter>Header Files\Engine\Core\Discord</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\achievement_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\activity_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\application_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\core.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\discord.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\event.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\ffi.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\image_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\lobby_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\network_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\overlay_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\relationship_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\storage_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\types.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\user_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\src\voice_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -973,6 +1036,51 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\system\Engine.cpp">
       <Filter>Source Files\Engine\Core\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\Discord.cpp">
+      <Filter>Source Files\Engine\Core\Discord</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\achievement_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\activity_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\application_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\core.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\image_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\lobby_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\network_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\overlay_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\relationship_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\storage_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\store_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\types.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\user_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\src\voice_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

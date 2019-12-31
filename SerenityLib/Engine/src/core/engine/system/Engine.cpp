@@ -183,6 +183,7 @@ void EngineCore::update_logic(const double& dt){
     Game::onPostUpdate(dt);
     m_DebugManager.calculate_logic();
     m_EventManager.onResetEvents(dt);
+    m_Misc.m_DiscordCore.update();
 }
 void EngineCore::update_sounds(const double& dt){
     m_DebugManager.stop_clock();
